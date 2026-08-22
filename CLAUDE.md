@@ -280,7 +280,7 @@ npm run deploy:down  # parar el stack
 │   ├── project/              # Decisiones y estado de iniciativas
 │   └── reference/            # Patrones, soluciones, donde encontrar cosas
 │
-├── skills/                    # 15 skills especializados
+├── skills/                    # 20 skills especializados
 │   ├── new-app/              # Entrevista de negocio
 │   ├── add-login/            # Auth completo
 │   ├── website-3d/           # Landing pages cinematicas

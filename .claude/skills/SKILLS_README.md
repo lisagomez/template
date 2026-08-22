@@ -4,42 +4,37 @@
 
 ---
 
-## Inventario de Skills (25 total)
+## Inventario de Skills (20 total)
 
-### Invocables por el Usuario (/)
+> Esta tabla se valida contra el disco. Si anades o quitas un skill,
+> actualizala aqui **y** en `CLAUDE.md`. Comprobacion rapida:
+> `ls -d .claude/skills/*/ | xargs -n1 basename`
+
+Todos son invocables por el usuario con `/nombre` y activables por Claude
+segun el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
 |-------|---------|-------------|
 | `new-app` | `/new-app` | Entrevista de negocio → BUSINESS_LOGIC.md |
-| `landing` | `/landing` | Landing cinematica: scroll-driven video + copy AIDA/PAS + glass-morphism |
-| `primer` | `/primer` | Inicializar contexto del proyecto |
-| `add-login` | `/add-login` | Auth completo Supabase (login, signup, password reset, profiles, RLS) |
+| `add-login` | `/add-login` | Auth completo Supabase: login, signup, password reset, profiles, RLS |
 | `add-payments` | `/add-payments` | Pagos con Polar (MoR): checkout, webhooks, suscripciones, acceso |
 | `add-emails` | `/add-emails` | Emails transaccionales: Resend + React Email + batch + unsubscribe |
 | `add-mobile` | `/add-mobile` | PWA instalable + push notifications (iOS compatible) |
-| `eject-sf` | `/eject-sf` | Remover SaaS Factory del proyecto (DESTRUCTIVO) |
-| `update-sf` | `/update-sf` | Actualizar a ultima version |
-| `bucle-agentico` | `/bucle-agentico` | Bucle Agentico para sistemas complejos (por fases) |
-| `sprint` | `/sprint` | Bucle Agentico para tareas rapidas |
-| `prp` | `/prp [feature]` | Generar Product Requirements Proposal |
-| `ai` | `/ai [template]` | Implementar AI Templates (chat, RAG, vision, tools) |
-| `qa` | `/qa [descripcion]` | QA automatizado con Playwright CLI |
+| `website-3d` | `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS + glass-morphism |
+| `prp` | `/prp` | Generar Product Requirements Proposal |
+| `bucle-agentico` | `/bucle-agentico` | Features complejas por fases (DB + API + UI coordinados) |
+| `ai` | `/ai` | AI Templates: chat, RAG, vision, tools, web search |
+| `supabase` | `/supabase` | Todo BD: tablas, RLS, migraciones, queries, metricas, storage |
+| `playwright-cli` | `/playwright-cli` | Testing automatizado con browser real |
+| `primer` | `/primer` | Inicializar contexto del proyecto |
+| `goal-compiler` | `/goal-compiler` | Intencion vaga → prompt soberano para /goal (diagnostico loop vs grafo) |
+| `memory-manager` | `/memory-manager` | Memoria persistente por proyecto en .claude/memory/ |
+| `image-generation` | `/image-generation` | Generar y editar imagenes con OpenRouter + Gemini |
+| `video-visuals` | `/video-visuals` | Paquete visual narrativo estilo sketchnote para videos |
+| `autoresearch` | `/autoresearch` | Auto-optimizar skills con loop autonomo (patron Karpathy) |
 | `skill-creator` | `/skill-creator` | Crear nuevos skills |
-| `memory-manager` | `/memory-manager` | Memoria persistente por proyecto (reemplaza auto-memory) |
-| `image-generation` | `/image-generation` | Generar/editar imagenes con OpenRouter + Gemini |
-| `autoresearch` | `/autoresearch [skill]` | Auto-optimizar skills con loop autonomo (Karpathy) |
-
-### Invocables por Claude (automaticos)
-
-| Skill | Se activa cuando... |
-|-------|---------------------|
-| `backend` | Tareas de Server Actions, APIs, logica de negocio, validaciones |
-| `frontend` | UI/UX, componentes React, Tailwind, animaciones |
-| `supabase-admin` | Migraciones, RLS, queries SQL, auth config |
-| `codebase-analyst` | Analisis de patrones, convenciones, arquitectura |
-| `vercel-deployer` | Deploy, env vars, dominios, rollbacks |
-| `documentacion` | Actualizar docs despues de cambios en codigo |
-| `calidad` | Testing, quality gates, validacion |
+| `update-sf` | `/update-sf` | Actualizar SaaS Factory a la ultima version |
+| `eject-sf` | `/eject-sf` | Remover SaaS Factory del proyecto (DESTRUCTIVO) |
 
 ---
 

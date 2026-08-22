@@ -7,7 +7,7 @@ Template production-ready para crear aplicaciones SaaS con desarrollo asistido p
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS + shadcn/ui
-- 19 Skills de Claude Code (V4 Skills 2.0)
+- 20 Skills de Claude Code (V4 Skills 2.0)
 - Playwright CLI para QA automatizado
 - AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -82,28 +82,32 @@ src/
     └── types/
 ```
 
-## Skills (19 total)
+## Skills (20 total)
 
-### Para el usuario
+Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
 | Skill | Que hace |
 |-------|----------|
 | `/new-app` | Entrevista de negocio → BUSINESS_LOGIC.md |
-| `/landing` | Landing page de alta conversion |
 | `/add-login` | Auth completo (Email + Google OAuth + profiles + RLS) |
-| `/bucle-agentico` | Implementar features complejas por fases |
-| `/sprint` | Tareas rapidas sin planificacion |
+| `/add-payments` | Pagos con Polar (MoR): checkout, webhooks, suscripciones |
+| `/add-emails` | Emails transaccionales con Resend + React Email |
+| `/add-mobile` | PWA instalable + push notifications |
+| `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS |
 | `/prp` | Planificar features complejas antes de implementar |
-| `/ai [template]` | Agregar IA: chat, RAG, vision, tools |
-| `/qa` | QA automatizado con Playwright CLI |
+| `/bucle-agentico` | Implementar features complejas por fases |
+| `/ai` | Agregar IA: chat, RAG, vision, tools, web search |
+| `/supabase` | Todo BD: tablas, RLS, migraciones, queries, metricas |
+| `/playwright-cli` | QA automatizado con browser real |
 | `/primer` | Inicializar contexto del proyecto |
+| `/goal-compiler` | Intencion vaga → prompt soberano para /goal |
+| `/memory-manager` | Memoria persistente por proyecto |
+| `/image-generation` | Generar y editar imagenes (OpenRouter + Gemini) |
+| `/video-visuals` | Paquete visual sketchnote para videos |
+| `/autoresearch` | Auto-optimizar skills con loop autonomo |
+| `/skill-creator` | Crear nuevos skills |
 | `/update-sf` | Actualizar a ultima version |
 | `/eject-sf` | Remover SaaS Factory (destructivo) |
-| `/skill-creator` | Crear nuevos skills |
-
-### Automaticos (Claude los activa segun la tarea)
-
-backend, frontend, supabase-admin, codebase-analyst, vercel-deployer, documentacion, calidad
 
 ## AI Templates
 
@@ -173,10 +177,11 @@ Runbook completo (hardening, swap, DNS, TLS, gotchas): **[docs/DEPLOY-HETZNER.md
 
 ```
 .claude/
-├── skills/              # 19 Skills (V4 Skills 2.0)
+├── skills/              # 20 Skills (V4 Skills 2.0)
 ├── PRPs/                # Product Requirements Proposals
 │   │   └── references/  # AI Templates (11 bloques)
 ├── design-systems/      # 5 sistemas de diseno
+├── memory/              # Memoria persistente del proyecto
 ├── hooks/               # Scripts en eventos
 └── example.mcp.json     # Config de MCPs
 ```

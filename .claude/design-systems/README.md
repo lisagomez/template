@@ -29,7 +29,7 @@ design-systems/
 Estos documentos son **referencias para Claude**. Indica qué sistema usar:
 
 ```
-/landing con estilo liquid-glass
+/website-3d con estilo liquid-glass
 ```
 
 ```

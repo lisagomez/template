@@ -47,8 +47,12 @@ Usuario dice algo
     ├── "Revisa que funcione / testea / hay un bug"
     |       → QA automatizado con Playwright CLI
     |
+    ├── "Quiero convertir una idea vaga en un prompt para /goal"
+    |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
+    |
     ├── "Quiero hacer deploy"
-    |       → Deploy via Vercel
+    |       → Vercel CLI o git push
+    |       → Servidor propio (Hetzner cx33): `npm run deploy` + docs/DEPLOY-HETZNER.md
     |
     └── No encaja en nada
             → Usar tu juicio segun el tipo de tarea
@@ -101,6 +105,7 @@ Error ocurre → Se arregla → Se DOCUMENTA → NUNCA ocurre de nuevo
 | Validacion | Zod |
 | Estado | Zustand |
 | Testing | Playwright CLI + MCP |
+| Deploy | Vercel o Hetzner cx33 (Docker + Caddy) |
 
 ---
 
@@ -167,6 +172,11 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
+
+# Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
+npm run deploy       # build + up + ps (todo en uno)
+npm run deploy:logs  # logs en vivo
+npm run deploy:down  # parar el stack
 ```
 
 ---
@@ -192,6 +202,22 @@ Liquid Glass, Gradient Mesh, Neumorphism, Bento Grid, Neobrutalism
 ### 2025-01-09: Usar npm run dev, no next dev
 - **Error**: Puerto hardcodeado causa conflictos
 - **Fix**: Siempre usar `npm run dev` (auto-detecta puerto)
+
+### 2026-08-22: globals.css con sintaxis v4 sobre Tailwind v3 rompe el build
+- **Error**: `Module not found: Can't resolve 'v8'`. `@import 'tailwindcss'` es
+  sintaxis v4; con tailwindcss@3.4 resuelve al paquete JS y arrastra
+  jiti -> v8 al bundle del navegador. `npm run dev` no lo delata.
+- **Fix**: con v3 van las directivas `@tailwind base/components/utilities`.
+
+### 2026-08-22: createServerClient necesita anotar CookieMethodsServer
+- **Error**: `TS7006` en `src/lib/supabase/server.ts`, rompe `next build`.
+- **Fix**: declarar el objeto como `CookieMethodsServer` (lo exporta
+  `@supabase/ssr`). Nunca parchear con `any`.
+
+### 2026-08-22: NEXT_PUBLIC_* se inlinea en BUILD, no en runtime
+- **Error**: `supabaseUrl is required` en el navegador tras deploy con Docker.
+- **Fix**: pasarlas como build args. Solo los secretos server-side van en
+  `environment:` del compose.
 
 ---
 

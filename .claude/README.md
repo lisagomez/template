@@ -13,7 +13,7 @@ Template **production-ready** para crear aplicaciones SaaS modernas con desarrol
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth)
 - Tailwind CSS + shadcn/ui
-- 19 Skills de Claude Code (V4 Skills 2.0)
+- 20 Skills de Claude Code (V4 Skills 2.0)
 - Arquitectura Feature-First optimizada para IA
 - Auto port detection (3000-3006)
 - Testing, linting y type checking configurados
@@ -34,7 +34,7 @@ State: Zustand
 Validation: Zod
 Testing: Playwright CLI + MCP
 AI Engine: Vercel AI SDK v5 + OpenRouter
-Deploy: Vercel
+Deploy: Vercel o Hetzner cx33 (Docker + Caddy)
 ```
 
 **Por que Email/Password y no OAuth?**
@@ -131,34 +131,31 @@ npm run typecheck    # TypeScript check
 > V4 migra TODO a Skills 2.0. Hot reload, auto-discovery, zero config.
 > Cada skill es una carpeta con `SKILL.md` (frontmatter YAML + instrucciones).
 
-### Invocables por el Usuario (/)
+Los 20 skills son invocables con `/nombre` y activables por Claude segun
+el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
 |-------|---------|-------------|
 | `new-app` | `/new-app` | Entrevista de negocio → BUSINESS_LOGIC.md |
-| `landing` | `/landing` | Landing page de alta conversion (entrevista + ejecucion) |
+| `add-login` | `/add-login` | Auth completo Supabase: login, signup, password reset, profiles, RLS |
+| `add-payments` | `/add-payments` | Pagos con Polar (MoR): checkout, webhooks, suscripciones |
+| `add-emails` | `/add-emails` | Emails transaccionales: Resend + React Email |
+| `add-mobile` | `/add-mobile` | PWA instalable + push notifications (iOS compatible) |
+| `website-3d` | `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS |
+| `prp` | `/prp` | Generar Product Requirements Proposal |
+| `bucle-agentico` | `/bucle-agentico` | Features complejas por fases (DB + API + UI) |
+| `ai` | `/ai` | AI Templates: chat, RAG, vision, tools, web search |
+| `supabase` | `/supabase` | Todo BD: tablas, RLS, migraciones, queries, metricas |
+| `playwright-cli` | `/playwright-cli` | Testing automatizado con browser real |
 | `primer` | `/primer` | Inicializar contexto del proyecto |
-| `add-login` | `/add-login` | Auth completo Supabase (login, signup, password reset, profiles, RLS) |
-| `eject-sf` | `/eject-sf` | Remover SaaS Factory del proyecto (DESTRUCTIVO) |
-| `update-sf` | `/update-sf` | Actualizar a ultima version |
-| `bucle-agentico` | `/bucle-agentico` | Bucle Agentico para sistemas complejos (por fases) |
-| `sprint` | `/sprint` | Bucle Agentico para tareas rapidas |
-| `prp` | `/prp [feature]` | Generar Product Requirements Proposal |
-| `ai` | `/ai [template]` | Implementar AI Templates (chat, RAG, vision, tools) |
-| `qa` | `/qa [descripcion]` | QA automatizado con Playwright CLI |
+| `goal-compiler` | `/goal-compiler` | Intencion vaga → prompt soberano para /goal |
+| `memory-manager` | `/memory-manager` | Memoria persistente por proyecto |
+| `image-generation` | `/image-generation` | Generar y editar imagenes con OpenRouter + Gemini |
+| `video-visuals` | `/video-visuals` | Paquete visual sketchnote para videos |
+| `autoresearch` | `/autoresearch` | Auto-optimizar skills con loop autonomo |
 | `skill-creator` | `/skill-creator` | Crear nuevos skills |
-
-### Invocables por Claude (automaticos)
-
-| Skill | Se activa cuando... |
-|-------|---------------------|
-| `backend` | Tareas de Server Actions, APIs, logica de negocio, validaciones |
-| `frontend` | UI/UX, componentes React, Tailwind, animaciones |
-| `supabase-admin` | Migraciones, RLS, queries SQL, auth config |
-| `codebase-analyst` | Analisis de patrones, convenciones, arquitectura |
-| `vercel-deployer` | Deploy, env vars, dominios, rollbacks |
-| `documentacion` | Actualizar docs despues de cambios en codigo |
-| `calidad` | Testing, quality gates, validacion |
+| `update-sf` | `/update-sf` | Actualizar a ultima version |
+| `eject-sf` | `/eject-sf` | Remover SaaS Factory del proyecto (DESTRUCTIVO) |
 
 ### Crear un Nuevo Skill
 
@@ -242,26 +239,27 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 
 ```
 .claude/
-├── skills/                    # Skills 2.0 (V4) - 19 skills
-│   ├── new-app/              # Entrevista de negocio
-│   ├── landing/              # Landing pages
-│   ├── primer/               # Context initialization
-│   ├── add-login/            # Auth completo
-│   ├── eject-sf/             # Remover SF
-│   ├── update-sf/            # Actualizar SF
-│   ├── bucle-agentico/       # Bucle Agentico BLUEPRINT
-│   ├── sprint/               # Bucle Agentico SPRINT
-│   ├── prp/                  # Generar PRPs
-│   ├── ai/                   # AI Templates hub
-│   ├── qa/                   # Playwright CLI QA
-│   ├── backend/              # Agent: backend specialist
-│   ├── frontend/             # Agent: frontend specialist
-│   ├── supabase-admin/       # Agent: Supabase admin
-│   ├── codebase-analyst/     # Agent: pattern analysis
-│   ├── vercel-deployer/      # Agent: deployment
-│   ├── documentacion/        # Agent: documentation
-│   ├── calidad/              # Agent: testing & QA
-│   └── skill-creator/        # Crear nuevos skills
+├── skills/                    # Skills 2.0 (V4) - 20 skills
+│   ├── new-app/                 # Entrevista de negocio → BUSINESS_LOGIC.md
+│   ├── add-login/               # Auth completo Supabase: login, signup, password reset, profiles, RLS
+│   ├── add-payments/            # Pagos con Polar (MoR): checkout, webhooks, suscripciones
+│   ├── add-emails/              # Emails transaccionales: Resend + React Email
+│   ├── add-mobile/              # PWA instalable + push notifications (iOS compatible)
+│   ├── website-3d/              # Landing cinematica: scroll-driven video + copy AIDA/PAS
+│   ├── prp/                     # Generar Product Requirements Proposal
+│   ├── bucle-agentico/          # Features complejas por fases (DB + API + UI)
+│   ├── ai/                      # AI Templates: chat, RAG, vision, tools, web search
+│   ├── supabase/                # Todo BD: tablas, RLS, migraciones, queries, metricas
+│   ├── playwright-cli/          # Testing automatizado con browser real
+│   ├── primer/                  # Inicializar contexto del proyecto
+│   ├── goal-compiler/           # Intencion vaga → prompt soberano para /goal
+│   ├── memory-manager/          # Memoria persistente por proyecto
+│   ├── image-generation/        # Generar y editar imagenes con OpenRouter + Gemini
+│   ├── video-visuals/           # Paquete visual sketchnote para videos
+│   ├── autoresearch/            # Auto-optimizar skills con loop autonomo
+│   ├── skill-creator/           # Crear nuevos skills
+│   ├── update-sf/               # Actualizar a ultima version
+│   └── eject-sf/                # Remover SaaS Factory del proyecto (DESTRUCTIVO)
 │
 ├── PRPs/                      # Product Requirements Proposals
 │   └── prp-base.md           # Template base
@@ -334,23 +332,38 @@ npm install
 
 ## Deploy
 
-### Vercel (Recomendado)
+### Opcion A — Vercel
 
 ```bash
 npm install -g vercel
 vercel
 ```
 
-### Variables de Entorno
-
-En tu dashboard de Vercel:
+Variables en el dashboard de Vercel:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL`
+
+### Opcion B — Servidor propio (Hetzner Cloud cx33)
+
+Docker + Next.js standalone + Caddy con TLS automatico. Dimensionado para un
+**cx33 (4 vCPU / 8 GB)**; sirve en cualquier VPS con Docker.
+
+```bash
+# en el servidor
+cp .env.production.example .env.production   # rellenar y chmod 600
+npm run deploy                                # build + up + ps
+```
+
+Runbook completo: **`docs/DEPLOY-HETZNER.md`**
+
+> Las `NEXT_PUBLIC_*` se inlinean en **build**, no en runtime: viajan como
+> build args. Solo los secretos server-side van en `environment:`.
 
 ---
 
 **Template Version:** 4.0.0
-**Last Updated:** 2026-03-08
+**Last Updated:** 2026-08-22
 
 ---
 
