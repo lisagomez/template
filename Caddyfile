@@ -1,0 +1,28 @@
+# TLS automatico via Let's Encrypt. Caddy renueva solo.
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Cabeceras de seguridad basicas
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options    "nosniff"
+		X-Frame-Options           "SAMEORIGIN"
+		Referrer-Policy           "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Assets con hash: inmutables, cachea agresivo
+	@immutable path /_next/static/* /static/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	reverse_proxy app:3000 {
+		health_uri      /
+		health_interval 30s
+		health_timeout  5s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

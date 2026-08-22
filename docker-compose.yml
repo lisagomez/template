@@ -1,0 +1,80 @@
+# =============================================================================
+# Stack de produccion — Hetzner Cloud cx33 (4 vCPU / 8 GB / 80 GB NVMe)
+# Caddy termina TLS (certificado automatico) y hace proxy a Next.js.
+# Solo Caddy publica puertos; la app NO es alcanzable desde internet.
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Build args, no environment: NEXT_PUBLIC_* se inlinea en build.
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?falta en .env.production}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?falta en .env.production}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?falta en .env.production}
+    image: saas-factory-app:latest
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      # Secretos server-side (service_role, API keys) van aqui: se leen en
+      # runtime y NO se inlinean en el bundle del navegador.
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    deploy:
+      resources:
+        limits:
+          # 3 de 4 vCPU y 4 de 8 GB: deja aire al SO, Caddy y al build
+          cpus: "3.0"
+          memory: 4G
+        reservations:
+          memory: 1G
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - web
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?falta DOMAIN en .env.production}
+      TLS_EMAIL: ${TLS_EMAIL:?falta TLS_EMAIL en .env.production}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Persisten los certificados: sin esto Let's Encrypt te banea por
+      # rate limit tras unos cuantos redeploys.
+      - caddy_data:/data
+      - caddy_config:/config
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  web:
+    driver: bridge

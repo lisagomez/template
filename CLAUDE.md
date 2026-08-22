@@ -57,8 +57,12 @@ Usuario dice algo
     ├── "Necesito algo de la base de datos" / "tabla" / "query" / "metricas"
     |       → Ejecutar skill SUPABASE (estructura + datos + metricas)
     |
+    ├── "Quiero convertir una idea vaga en un prompt para /goal"
+    |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
+    |
     ├── "Quiero hacer deploy / publicar"
-    |       → Deploy directo con Vercel CLI o git push
+    |       → Vercel CLI o git push
+    |       → Servidor propio (Hetzner cx33): `npm run deploy` + docs/DEPLOY-HETZNER.md
     |
     ├── "Quiero remover SaaS Factory"
     |       → Ejecutar skill EJECT-SF (DESTRUCTIVO, confirmar antes)
@@ -78,7 +82,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 15 Herramientas Especializadas
+## Skills: 20 Herramientas Especializadas
 
 | # | Skill | Cuando usarlo |
 |---|-------|---------------|
@@ -86,20 +90,22 @@ Usuario dice algo
 | 2 | `add-login` | Auth completa: Email/Password + Google OAuth + profiles + RLS |
 | 3 | `add-payments` | Pagos con Polar (MoR): checkout, webhooks, suscripciones, acceso |
 | 4 | `add-emails` | Emails transaccionales: Resend + React Email + batch + unsubscribe |
-| 5 | `add-mobile` | PWA instalable + notificaciones push (iOS compatible, 14 commits de gotchas) |
+| 5 | `add-mobile` | PWA instalable + notificaciones push (iOS compatible) |
 | 6 | `website-3d` | Landing cinematica Apple-style: scroll-driven video + copy AIDA/PAS |
-| 4 | `prp` | Plan de feature compleja antes de implementar. Siempre antes de bucle-agentico |
-| 5 | `bucle-agentico` | Features complejas: multiples fases coordinadas (DB + API + UI) |
-| 6 | `ai` | Capacidades de IA: chat, RAG, vision, tools, web search |
-| 7 | `supabase` | Todo BD: crear tablas, RLS, migraciones, queries, metricas, CRUD |
-| 8 | `playwright-cli` | Testing automatizado con browser real |
-| 9 | `primer` | Cargar contexto completo del proyecto al inicio de sesion |
-| 10 | `update-sf` | Actualizar SaaS Factory a la ultima version |
-| 11 | `eject-sf` | Remover SaaS Factory del proyecto. DESTRUCTIVO. Confirmar siempre |
-| 12 | `memory-manager` | Memoria persistente POR PROYECTO en `.claude/memory/` (git-versioned) |
-| 13 | `image-generation` | Generar y editar imagenes con OpenRouter + Gemini |
-| 14 | `autoresearch` | Auto-optimizar skills con loop autonomo (patron Karpathy) |
-| 15 | `skill-creator` | Crear nuevos skills para extender la fabrica |
+| 7 | `prp` | Plan de feature compleja antes de implementar. Siempre antes de bucle-agentico |
+| 8 | `bucle-agentico` | Features complejas: multiples fases coordinadas (DB + API + UI) |
+| 9 | `ai` | Capacidades de IA: chat, RAG, vision, tools, web search |
+| 10 | `supabase` | Todo BD: crear tablas, RLS, migraciones, queries, metricas, CRUD |
+| 11 | `playwright-cli` | Testing automatizado con browser real |
+| 12 | `primer` | Cargar contexto completo del proyecto al inicio de sesion |
+| 13 | `update-sf` | Actualizar SaaS Factory a la ultima version |
+| 14 | `eject-sf` | Remover SaaS Factory del proyecto. DESTRUCTIVO. Confirmar siempre |
+| 15 | `memory-manager` | Memoria persistente POR PROYECTO en `.claude/memory/` (git-versioned) |
+| 16 | `image-generation` | Generar y editar imagenes con OpenRouter + Gemini |
+| 17 | `autoresearch` | Auto-optimizar skills con loop autonomo (patron Karpathy) |
+| 18 | `skill-creator` | Crear nuevos skills para extender la fabrica |
+| 19 | `goal-compiler` | Convertir una intencion vaga en un prompt soberano para `/goal` (loop vs grafo) |
+| 20 | `video-visuals` | Paquete visual narrativo estilo sketchnote para videos y presentaciones |
 
 ---
 
@@ -254,6 +260,11 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
+
+# Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
+npm run deploy       # build + up + ps (todo en uno)
+npm run deploy:logs  # logs en vivo
+npm run deploy:down  # parar el stack
 ```
 
 ---
@@ -284,6 +295,8 @@ npm run lint         # ESLint
 │   ├── memory-manager/       # Memoria persistente por proyecto
 │   ├── image-generation/     # Generacion de imagenes (OpenRouter + Gemini)
 │   ├── autoresearch/         # Auto-optimizacion de skills
+│   ├── goal-compiler/        # Intencion vaga -> prompt soberano para /goal
+│   ├── video-visuals/        # Paquetes visuales sketchnote
 │   └── skill-creator/        # Crear nuevos skills
 │
 ├── PRPs/                      # Product Requirements Proposals
@@ -305,6 +318,30 @@ npm run lint         # ESLint
 - **Error**: Puerto hardcodeado causa conflictos
 - **Fix**: Siempre usar `npm run dev` (auto-detecta puerto)
 - **Aplicar en**: Todos los proyectos
+
+### 2026-08-22: globals.css con sintaxis v4 sobre Tailwind v3 rompe el build
+- **Error**: `Module not found: Can't resolve 'v8'`. El boilerplate traia
+  `@import 'tailwindcss'` (sintaxis Tailwind **v4**) con `tailwindcss@3.4`
+  instalado. En v3 ese import resuelve al paquete **JS**, no al CSS, y arrastra
+  `tailwindcss/lib -> jiti -> v8/util` al bundle del navegador.
+- **Sintoma**: falla igual con Turbopack y con webpack. `npm run dev` no lo delata.
+- **Fix**: con Tailwind 3.4 van las directivas `@tailwind base/components/utilities`.
+  `@import 'tailwindcss'` solo si se migra a v4 + `@tailwindcss/postcss`.
+- **Aplicar en**: cualquier proyecto que mezcle Next 16 con Tailwind v3.
+
+### 2026-08-22: createServerClient necesita anotar CookieMethodsServer
+- **Error**: `TS7006/TS7031: Parameter 'cookiesToSet' implicitly has an 'any' type`
+  en `src/lib/supabase/server.ts`. Rompe `next build` (no `npm run dev`).
+- **Fix**: declarar el objeto como `CookieMethodsServer` (se exporta desde
+  `@supabase/ssr`) para dar tipado contextual a `setAll`. NUNCA parchear con `any`.
+- **Aplicar en**: todo helper SSR de Supabase.
+
+### 2026-08-22: NEXT_PUBLIC_* se inlinea en BUILD, no en runtime
+- **Error**: `supabaseUrl is required` en el navegador tras deploy con Docker,
+  aunque las variables estuvieran en `docker-compose environment:`.
+- **Fix**: las `NEXT_PUBLIC_*` viajan como `ARG`/`build.args`. Solo los secretos
+  server-side (service_role, API keys) van en `environment:`.
+- **Aplicar en**: todo deploy self-hosted (Hetzner, VPS, Docker).
 
 ---
 

@@ -1,0 +1,30 @@
+# Dependencias y build (se regeneran dentro de la imagen)
+node_modules
+.next
+out
+build
+dist
+
+# La fabrica no viaja al servidor
+.claude
+.git
+.gitignore
+GEMINI.md
+
+# Secretos: NUNCA dentro de la imagen
+.env
+.env*.local
+*.mcp.json
+
+# Ruido
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.swp
+coverage
+.vscode
+.idea
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml

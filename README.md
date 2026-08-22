@@ -55,7 +55,7 @@ State: Zustand
 Validation: Zod
 AI Engine: Vercel AI SDK v5 + OpenRouter
 Testing: Playwright CLI + MCP
-Deploy: Vercel
+Deploy: Vercel o Hetzner cx33 (Docker + Caddy)
 ```
 
 ## Arquitectura Feature-First
@@ -143,8 +143,9 @@ npm run lint         # ESLint
 
 ## Deploy
 
+### Opcion A — Vercel
+
 ```bash
-# Vercel (recomendado)
 npm install -g vercel
 vercel
 ```
@@ -152,6 +153,21 @@ vercel
 Variables en Vercel Dashboard:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL`
+
+### Opcion B — Servidor propio (Hetzner Cloud cx33)
+
+Docker + Next.js standalone + Caddy con TLS automatico. Pensado para un
+**cx33 (4 vCPU / 8 GB)**, pero sirve en cualquier VPS con Docker.
+
+```bash
+# en el servidor
+cp .env.production.example .env.production   # rellenar y chmod 600
+npm run deploy                                # build + up + ps
+npm run deploy:logs
+```
+
+Runbook completo (hardening, swap, DNS, TLS, gotchas): **[docs/DEPLOY-HETZNER.md](docs/DEPLOY-HETZNER.md)**
 
 ## Estructura .claude/
 

@@ -36,6 +36,14 @@ yarn-error.log*
 .env*.local
 !.env.example
 
+# TypeScript (los regenera next build en cada maquina)
+*.tsbuildinfo
+next-env.d.ts
+
+# Produccion self-hosted (Hetzner): contiene secretos reales
+.env.production
+!.env.production.example
+
 # Vercel
 .vercel
 
