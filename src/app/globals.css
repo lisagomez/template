@@ -1,4 +1,9 @@
-@import 'tailwindcss';
+/* Tailwind CSS 3.4 (Golden Path). Con v3 se usan las directivas @tailwind;
+ * `@import 'tailwindcss'` es sintaxis de v4 y en v3 resuelve al paquete JS,
+ * arrastrando jiti y modulos de Node al bundle del navegador (build roto). */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /*
  * Personaliza tu tema aquí
