@@ -63,27 +63,30 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
 
 ## Pendientes reales
 
-1. **Nada está provisionado.** El runbook es papel hasta que exista un servidor. No asumir
-   que hay agentes corriendo.
-2. **Los datos técnicos de Hermes NO se re-verificaron.** Tag `v2026.6.19`, subcomandos
+> **Ojo al ámbito.** Esto es un boilerplate: el runbook es un *entregable*, no una
+> instalación. "Nada está provisionado" y "GATE 3 no se ha corrido" **no son deuda del
+> template** — los cierra un proyecto derivado, si existe. Ver [[gobernanza-agentica]],
+> sección "Dos ámbitos que NO se mezclan".
+
+1. **Los datos técnicos de Hermes NO se re-verificaron.** Tag `v2026.6.19`, subcomandos
    (`setup`, `gateway run`, `dashboard`), ruta `/opt/data` y variables `DASH_*` vienen del
-   origen (verificados allí el 2026-06-26). Confirmar contra la doc oficial de Nous antes de
-   provisionar. El documento lo dice; no lo escondas si alguien pregunta.
-3. **GATE 3 nunca se ha corrido**, en ningún proyecto. RPO/RTO siguen siendo desconocidos y
-   **no deben declararse** hasta medirlos. Operar sin cerrarlo es riesgo aceptado → entrada
-   firmada en `REGISTRO-RIESGO.md` (C5), no un silencio.
-4. **La aserción 3 de GATE 3 está sin escribir a propósito.** Las dos primeras solo
+   origen (verificados allí el 2026-06-26). **Esta sí es deuda del template**: son
+   afirmaciones que hereda cada proyecto. El documento lo declara en un aviso; no lo
+   escondas si alguien pregunta.
+2. **La aserción 3 de GATE 3 se deja sin escribir a propósito.** Las dos primeras solo
    comprueban que existen archivos; la tercera comprueba que el *contenido* sirve, y depende
-   del proyecto. Un GATE 3 con solo las dos primeras es teatro.
-5. **El tag de la imagen del agente es un CDC (C1)**, igual que el modelo. Ya está en la
-   regla de Reglas de Código; falta la entrada real cuando se despliegue.
-6. **Las dos reglas nuevas siguen sin medición real.** Su instrumento existe en la rama
-   `golden-sets` (capa B en verde), pero **no se ha ejecutado en sesión fría**. Corpus
-   completo no es evidencia. **Qué mide cada caso no se escribe aquí** — ver la regla de
-   contaminación al final de este archivo. Para trabajar con ellos:
-   `npm run regresion -- --trampa`.
-7. **El verificador no vigila las reglas nuevas.** Si alguien las borra de `CLAUDE.md`, las
-   58 comprobaciones siguen en verde. Es el mismo tipo de hueco que el pineo aspiracional.
+   del proyecto. Un GATE 3 con solo las dos primeras es teatro. Es un hueco **por diseño**,
+   que cada proyecto rellena.
+3. **El tag de la imagen del agente es un CDC (C1)**, igual que el modelo. Ya está en la
+   regla de Reglas de Código; la entrada real la escribe quien despliegue.
+4. **Cerrado el 2026-08-23**: las dos reglas nuevas tienen medición real en frío, y el
+   verificador las vigila (se comprobó con control negativo que se pone en rojo al borrarlas).
+
+### Lo que un proyecto derivado tendrá que cerrar (no el template)
+
+Provisionar el servidor · llenar el inventario de §9.1 con sus activos · escribir la
+aserción 3 · cerrar GATE 3 y **entonces** declarar RPO/RTO. Operar sin cerrarlo es riesgo
+aceptado → entrada firmada en `REGISTRO-RIESGO.md` (C5), no un silencio.
 
 ## Decisiones que no son obvias del documento
 

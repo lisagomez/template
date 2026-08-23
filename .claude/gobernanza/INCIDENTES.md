@@ -48,4 +48,36 @@
   - Riesgo residual: ninguno una vez rotados los tokens. **Mientras no se roten, sigue
     abierto.**
 
+### 2026-08-23 — reclasificación del incidente anterior — nota, no incidente nuevo
+> No es un incidente: corrige **el ámbito** con el que se estaba siguiendo el anterior. Se
+> añade como entrada porque la de arriba no se edita.
+
+- **Qué estaba mal**: el incidente anterior se seguía como si su cierre dependiera de rotar
+  dos tokens. Pero **esas credenciales no son del template**: viven en
+  `~/.config/claude/secrets.env`, en la máquina de la dueña, fuera de todo repositorio. Este
+  proyecto es un **boilerplate**: lo que se versiona lo hereda cada proyecto que nazca de
+  aquí, y una tarea de la máquina de una persona no se hereda.
+- **Cómo se detectó**: la dueña lo señaló al revisar una lista de pendientes que ponía
+  "rotar los tokens" como deuda número uno del proyecto. Se auditó el template: **cero
+  credenciales reales**, y ahora hay un gate que lo vigila (ningún archivo versionado puede
+  llevar una credencial viva).
+
+- **Ámbitos separados**:
+
+  | Del template — cierra aquí | Del entorno — cierra en la máquina |
+  |---|---|
+  | La regla "secretos en pantalla" existe y el verificador la vigila ✅ | Rotar `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN` |
+  | El caso de regresión **T11** existe ✅ | Sustituirlos donde haya copias |
+  | **T11 ejecutado y verde** ❌ *(nunca se ha corrido)* | Revocar los antiguos **después** |
+
+- **Estado corregido**: el incidente **sigue abierto para el template**, pero por el motivo
+  correcto — **falta estrenar T11**. Ese es el hueco: hoy no hay evidencia de que la regla
+  dispare en frío. La rotación es una acción real y necesaria, pero de otro ámbito, y no
+  bloquea ni desbloquea nada de este repositorio.
+- **Aprendizaje** (el que vale más que el incidente): **un boilerplate y la máquina donde
+  vive son dos ámbitos distintos.** Mezclarlos produce listas de pendientes falsas — pone
+  como deuda del producto cosas que sólo puede cerrar un entorno, y deja el hueco real sin
+  nombrar. Regla: si un pendiente sólo puede cerrarlo la máquina o un proyecto derivado, no
+  es deuda del template.
+
 <!-- Añadir aquí los incidentes siguientes. NO editar los anteriores. -->
