@@ -842,4 +842,54 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 ("implementa el SDD de vigilancia"). Aprueba la capa A y su cableado; la
   capa B y el cron siguen **abiertos**.
 
+### 2026-08-23 — capa B corrida: el runbook afirmaba cuatro cosas falsas — radio: sistema
+> Cierra el pendiente *"los datos técnicos de Hermes no se re-verificaron"*, abierto desde
+> que el runbook nació. La capa B era el instrumento; esta es su primera corrida.
+
+- **Cambio**:
+  1. **`--capa-b` en `scripts/verifica-hermes.mjs`**: comprueba **lo que el runbook afirma**
+     (subcomandos, `HERMES_HOME`, variables del dashboard, puerto) contra dos evidencias —
+     el **blob de configuración de la imagen** leído del registro y la **documentación
+     oficial** de la release. Las afirmaciones se extraen del propio runbook, así que el
+     control sigue al documento en vez de a una copia. Sin Docker y sin descargar capas: no
+     hacían falta 1,2 GB ni un demonio.
+  2. **Cuatro correcciones en `docs/FASE0-INFRAESTRUCTURA.md`**, cada una medida:
+     - `DASH_USER` / `DASH_PASS` / `DASH_SECRET` **no existen**. Los nombres reales son
+       `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` / `_SECRET`. La imagen ignoraba
+       en silencio las tres: **el runbook creía configurar una autenticación que no
+       configuraba.**
+     - El servicio `hermes-dashboard` con `command: dashboard` **no arranca nada**: ese
+       subcomando no existe. El dashboard es un servicio supervisado por s6 dentro del
+       contenedor del gateway y se enciende con `HERMES_DASHBOARD=1`. Un servidor
+       provisionado con el compose anterior habría levantado dos agentes y **ningún**
+       dashboard.
+     - Dos verticales separadas ⇒ **dos dashboards** (`9119` y `9120` en el host). Un
+       backend sirve a los perfiles co-ubicados, y estas dos no lo están **a propósito**.
+     - Nota nueva: el gate de auth solo engancha con un proveedor registrado, y
+       `HERMES_DASHBOARD_INSECURE` es hoy un no-op deprecado.
+  3. **`.hermes-baseline.json`** deja de tener `null` en capa B: guarda lo verificado, cómo
+     se verificó y **qué sigue sin confirmarse con un arranque real**.
+- **Motivo**: las afirmaciones venían del material de origen, comprobadas allí en junio, y
+  el runbook lo declaraba en un aviso. Un aviso no es un control: envejecieron mal y nadie
+  lo habría sabido hasta el día de provisionar.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B del SDD
+  **ejecutada ☑ (8/8 en verde tras las correcciones; 4 rojos antes)** · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: verificador 83/83, capa A 92/92, capa B del corpus íntegra 14/14,
+  `typecheck` limpio, pre-vuelo limpio.
+- **Dos falsos verdes propios, cazados durante la corrida** (van aquí porque el control se
+  audita como lo que mide):
+  1. La primera versión de B1 buscaba la palabra suelta en la documentación y daba **verde a
+     `dashboard`** — que aparece cien veces en prosa sin ser un subcomando. Ahora exige ver
+     la CLI invocada (`hermes-agent <sub>` o `hermes <sub> --flag`).
+  2. La extracción de subcomandos usaba `\s`, saltaba de línea dentro del bloque de código
+     y **se inventó un subcomando** (`setup\ndone`). Ahora no cruza el fin de línea.
+- **Lo que NO cierra**: nada de esto se probó **arrancando un contenedor** — aquí no hay
+  Docker. La topología de dos dashboards se deduce de la documentación, no de un arranque, y
+  así queda marcado en el baseline y en el runbook. Sigue abierto el **cron semanal**, que es
+  del entorno.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("corre la capa B" + "genera PR, COMMIT, MERGE"). Aprueba la corrida, las
+  correcciones del runbook y el registro de lo verificado.
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

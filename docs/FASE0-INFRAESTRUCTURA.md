@@ -200,10 +200,20 @@ SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 
 # --- Dashboard (§8) ---
-DASH_USER=
-DASH_PASS=
-DASH_SECRET=          # openssl rand -hex 32
+# Nombres verificados contra la doc oficial de la imagen el 2026-08-23 (capa B del SDD).
+# Los anteriores (DASH_USER / DASH_PASS / DASH_SECRET) NO existen: la imagen los ignoraba
+# en silencio, así que el runbook creía configurar una autenticación que no configuraba.
+HERMES_DASHBOARD=1                      # sin esto el dashboard no arranca
+HERMES_DASHBOARD_BASIC_AUTH_USERNAME=
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=     # openssl rand -hex 32 — sesiones estables tras reinicio
 ```
+
+> **La autenticación del dashboard no se enciende sola.** Su gate engancha cuando el bind
+> es no-loopback **y** hay un proveedor de auth registrado. Con las tres variables de
+> arriba vacías **no hay proveedor**, y en Fase 0 lo único que te autentica es tu llave
+> SSH (§8) — que es un modelo válido, pero conviene saber cuál de los dos te protege.
+> `HERMES_DASHBOARD_INSECURE` es hoy un **no-op deprecado**: ya no desactiva nada.
 
 > **C7 — `service_role` tiene BYPASSRLS.** Ninguna política de RLS lo detiene. Esta
 > llave entra aquí **solo si los agentes son jobs de plataforma declarados**. Si un
@@ -303,6 +313,10 @@ services:
     <<: *hermes-base
     container_name: hermes-negocio
     command: gateway run
+    environment:
+      HERMES_DASHBOARD: "1"     # el dashboard es un servicio s6 DENTRO de este contenedor
+    ports:
+      - "127.0.0.1:9119:9119"   # SOLO localhost. Se abre por túnel SSH (§8).
     volumes:
       - /opt/hermes/negocio/.hermes:/opt/data
 
@@ -310,23 +324,25 @@ services:
     <<: *hermes-base
     container_name: hermes-clientes
     command: gateway run
+    environment:
+      HERMES_DASHBOARD: "1"
+    ports:
+      - "127.0.0.1:9120:9119"   # su propio dashboard: verticales separadas, no comparten
     volumes:
       - /opt/hermes/clientes/.hermes:/opt/data
-
-  hermes-dashboard:
-    <<: *hermes-base
-    container_name: hermes-dashboard
-    command: dashboard
-    ports:
-      - "127.0.0.1:9119:9119"   # SOLO localhost. Se abre por túnel SSH (§8).
-    volumes:
-      - /opt/hermes/negocio/.hermes:/opt/data/negocio:ro
-      - /opt/hermes/clientes/.hermes:/opt/data/clientes:ro
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 ```
+
+> **Corregido el 2026-08-23 por la capa B del SDD.** Aquí había un tercer servicio
+> `hermes-dashboard` con `command: dashboard`. **Ese subcomando no existe en esta imagen**:
+> el dashboard corre como servicio supervisado por s6 *dentro* del contenedor del gateway y
+> se enciende con `HERMES_DASHBOARD=1`. Un servidor provisionado con el compose anterior
+> habría levantado dos agentes y ningún dashboard.
+>
+> **Y son dos dashboards, no uno.** Un backend sirve a los perfiles *co-ubicados*, y estas
+> dos verticales viven en contenedores y volúmenes distintos a propósito — esa separación es
+> la frontera de radio de daño, así que el precio es un dashboard por vertical (`9119` y
+> `9120` en el host). Antes de provisionar, confírmalo con un arranque real: aquí se
+> verificó contra el registro y la documentación, **no contra un contenedor en marcha**.
 
 Tres detalles que no son cosméticos:
 
