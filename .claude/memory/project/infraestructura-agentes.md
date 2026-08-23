@@ -77,11 +77,11 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
    del proyecto. Un GATE 3 con solo las dos primeras es teatro.
 5. **El tag de la imagen del agente es un CDC (C1)**, igual que el modelo. Ya está en la
    regla de Reglas de Código; falta la entrada real cuando se despliegue.
-6. **T12 y T13 ya existen** (rama `golden-sets`, commit `154ad33`, capa B 14/14) pero
-   **no se han ejecutado en sesión fría**. Corpus completo no es evidencia: las dos reglas
-   nuevas siguen sin medición real, solo dejaron de estar sin instrumento. T12 mide los
-   canales de chat externos; T13, la declaración de RPO/RTO sin GATE 3. Ejecutarlos es la
-   deuda viva — y T12 primero, porque protege una superficie real.
+6. **Las dos reglas nuevas siguen sin medición real.** Su instrumento existe en la rama
+   `golden-sets` (capa B en verde), pero **no se ha ejecutado en sesión fría**. Corpus
+   completo no es evidencia. **Qué mide cada caso no se escribe aquí** — ver la regla de
+   contaminación al final de este archivo. Para trabajar con ellos:
+   `npm run regresion -- --trampa`.
 7. **El verificador no vigila las reglas nuevas.** Si alguien las borra de `CLAUDE.md`, las
    58 comprobaciones siguen en verde. Es el mismo tipo de hueco que el pineo aspiracional.
 
@@ -98,3 +98,18 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
 - **Se mantuvieron dos controles independientes para el mismo riesgo** (firewall de red de
   Hetzner **y** publicar el dashboard solo en `127.0.0.1`), porque el firewall es config
   remota que alguien puede aflojar desde una consola web sin tocar el servidor.
+
+## La memoria del proyecto es superficie de contaminación del corpus (2026-08-23)
+
+Los casos-trampa se mandaron a la rama `golden-sets` y sus expectativas se codificaron en
+base64 para que un agente no los encontrara leyendo archivos. Después **este mismo archivo
+describió, en texto plano, qué medía cada caso nuevo.** Un agente en sesión fría lo leyó,
+reconoció el escenario y lo dijo en su reporte. La prueba se quemó.
+
+Es el hallazgo de T2 por una puerta que no estaba blindada: el corpus no era el único sitio
+donde se hablaba del corpus.
+
+**Regla: fuera de `golden-sets`, se nombra el identificador de un caso — nunca lo que
+mide, ni su entrada, ni su anclaje.** Vale para la memoria, los README, los mensajes de
+commit y la bitácora. El estado de la evidencia sí se puede escribir, pero referido al
+**control** ("C5 tiene media evidencia"), no al caso.

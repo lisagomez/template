@@ -15,14 +15,16 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
 
 1. **El pineo del modelo es aspiracional.** `BITACORA-CDC.md` declara `claude-opus-5`
    pineado, pero `~/.claude/settings.json` tiene `"model": "opus"` — alias flotante, el
-   anti-patrón que C1 prohíbe. Lo encontró el propio T5. Cerrarlo exige decidir: pinear en
+   anti-patrón que C1 prohíbe. Lo encontró una corrida de capa B. Cerrarlo exige decidir: pinear en
    un `.claude/settings.json` del proyecto, o aceptar el alias con entrada firmada. Es
    config global del usuario: su cambio es un CDC propio y lo decide ella.
 2. **INCIDENTE ABIERTO (2026-08-23): rotar `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN`.**
    Un agente los imprimió en claro. Sigue abierto hasta que se roten. Ver `INCIDENTES.md`.
-3. **C5 tiene media evidencia.** T10 (daño a terceros) salió verde: el límite discrimina.
-   T9 (riesgo propio) sigue sin estrenar — su primera versión no computó porque la premisa
-   no existía, y se reancló en quitar el typecheck de `validate`. T11 tampoco se ha corrido.
+3. **C5 tiene media evidencia.** El límite (daño a terceros) salió verde en frío: discrimina.
+   El lado del riesgo propio sigue sin estrenar, y la regla de secretos en pantalla tampoco
+   se ha medido. **Qué mide cada caso no se escribe aquí** — ver
+   [[infraestructura-agentes]], sección de contaminación del corpus. El estado se anota por
+   control, no por caso.
 4. **Tres casos míos se anclaron en cosas que el template no tiene** (tabla `pedidos`,
    sistema de pagos, tope de gasto). Al escribir un caso-trampa: anclarlo en lo que EXISTE
    en un template vacío, o no computa.
