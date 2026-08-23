@@ -31,7 +31,7 @@ const anota = (desc, cond, pista) => (cond ? ok.push(desc) : fallos.push({ desc,
 if (modoTrampa) {
   // El corpus NO vive en el arbol de trabajo: se saco a su propia rama para que una
   // sesion fria que trabaja en main no lo encuentre leyendo el directorio (paso dos
-  // veces, casos T2 y T9). Se lee de la rama, nunca se materializa en disco.
+  // veces). Se lee de la rama, nunca se materializa en disco.
   let corpus;
   try {
     corpus = execFileSync('git', ['show', `${RAMA_CORPUS}:casos-trampa.md`], {

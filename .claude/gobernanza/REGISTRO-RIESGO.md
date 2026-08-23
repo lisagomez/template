@@ -103,7 +103,7 @@ justo lo que un auditor pregunta.
   repo, en vez de sacarlas del proyecto o cifrarlas.
 - **Riesgo aceptado**: **base64 no es cifrado.** Un agente que decida decodificarlo puede
   leer las respuestas esperadas y la prueba deja de ser ciega. Lo que se compra es que no
-  ocurra *por accidente*, que es como ocurrió el 2026-08-23 (caso T2).
+  ocurra *por accidente*, que es como ocurrió el 2026-08-23 (primera corrida).
 - **Mitigaciones vigentes**: decodificar es un acto deliberado y queda visible en el
   transcript — es señal de contaminación, no descuido; el verificador falla si alguna
   expectativa vuelve a texto plano; las entradas siguen verbatim, que es lo que la prueba
@@ -117,7 +117,7 @@ justo lo que un auditor pregunta.
   `golden-sets` y se lee con `git show`. Supersede la decisión de "ofuscar y dejarlo en el
   repo" tomada horas antes.
 - **Disparador**: la entrada anterior lo dejó escrito — *"si un caso vuelve a salir
-  contaminado, se saca el corpus del árbol de trabajo"*. Volvió a pasar (caso T9): el
+  contaminado, se saca el corpus del árbol de trabajo"*. Volvió a pasar en la corrida siguiente: el
   agente decodificó el base64 **antes de darse cuenta de qué era**, y lo declaró él mismo.
   La ofuscación evitaba el vistazo, no la exploración.
 - **Riesgo aceptado**: la capa B depende ahora de que la rama `golden-sets` exista y se

@@ -115,14 +115,15 @@ base64 para que un agente no los encontrara leyendo archivos. Después **este mi
 describió, en texto plano, qué medía cada caso nuevo.** Un agente en sesión fría lo leyó,
 reconoció el escenario y lo dijo en su reporte. La prueba se quemó.
 
-Es el hallazgo de T2 por una puerta que no estaba blindada: el corpus no era el único sitio
-donde se hablaba del corpus.
+Es el hallazgo de la primera corrida por una puerta que no estaba blindada: el corpus no
+era el único sitio donde se hablaba del corpus.
 
-**Regla (endurecida el 2026-08-23, tras fallar tres veces): fuera de `golden-sets` no se
-nombra el identificador de un caso en ningún contexto que revele qué mide.** No basta con
-omitir la entrada y la expectativa: si el identificador aparece dentro de una entrada
-titulada *"regla de X"*, el mapeo caso→X queda hecho por el contexto. En esos sitios se
-escribe *"su caso de regresión"*, sin identificador.
+**Regla (versión final, 2026-08-23, tras fallar cuatro veces): fuera de `golden-sets` NO
+aparece ningún identificador de caso. Ni uno.** Las versiones intermedias —"no se nombra si
+revela qué mide"— pedían un juicio en cada frase, y ese juicio falló las cuatro veces: basta
+que el identificador esté en una entrada y la regla medida en otra para que un lector
+paciente reconstruya el par. La traza hacia el caso es el **commit de `corridas.md`**, no el
+identificador. **Y ya no es criterio de nadie: el verificador falla si encuentra uno.**
 
 Vale para la memoria, los README, los mensajes de commit y **los propios documentos de
 gobernanza** — que son los que un agente lee primero. El estado de la evidencia sí se puede

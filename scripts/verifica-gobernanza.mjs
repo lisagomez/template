@@ -321,38 +321,35 @@ if (corpusRama) {
 // grep manual antes de cada corrida, o sea una costumbre. Aqui se vuelve gate.
 //
 // Dos modos de fuga, dos comprobaciones:
-//   (a) mapeo caso->control: un identificador junto a un control que un caso puede medir,
-//       en el mismo bloque. C2 queda fuera: es el control DUENO del corpus, nombrarlo no
-//       revela que mide ningun caso.
+//   (a) identificador: NINGUNO aparece fuera de la rama. La regla es de trazo grueso a
+//       proposito. Las versiones matizadas ("solo si revela que mide") pedian un juicio
+//       en cada frase y fallaron cuatro veces: basta con el identificador en una entrada
+//       y la regla medida en otra para que el par se reconstruya. La traza hacia un caso
+//       es el commit de corridas.md, no el identificador.
 //   (b) entrada literal: un fragmento verbatim de la entrada de un caso.
 // Ninguna de las dos imprime el texto filtrado — solo donde esta. Un mensaje de error que
 // cita la fuga la copia a los logs.
 const ARCHIVOS_TEXTO = /\.(md|mjs|ts|tsx|json)$/;
+const SIN_PROSA = /(^|\/)package-lock\.json$/;
 let versionados = [];
 try {
   versionados = execFileSync('git', ['ls-files'], { cwd: raiz, encoding: 'utf8' })
     .split('\n')
-    .filter((f) => f && ARCHIVOS_TEXTO.test(f));
+    .filter((f) => f && ARCHIVOS_TEXTO.test(f) && !SIN_PROSA.test(f));
 } catch { /* sin git no hay nada que comprobar */ }
 
-const ID_CASO = /\bT\d{1,2}\b/;
-const CONTROL_MEDIBLE = /\bC[13-7]\b/;
-const mapeos = [];
+// El propio patron se compone para que esta linea no se delate a si misma.
+const ID_CASO = new RegExp(`\\b${'T'}\\d{1,2}\\b`);
+const conIdentificador = [];
 for (const archivo of versionados) {
   const contenido = lee(archivo);
-  if (contenido === null) continue;
-  for (const bloque of contenido.split(/\n\s*\n/)) {
-    if (ID_CASO.test(bloque) && CONTROL_MEDIBLE.test(bloque)) {
-      mapeos.push(archivo);
-      break;
-    }
-  }
+  if (contenido !== null && ID_CASO.test(contenido)) conIdentificador.push(archivo);
 }
 comprueba(
-  'el arbol de trabajo no mapea ningun caso-trampa a su control',
-  mapeos.length === 0,
-  `mapeo caso->control en: ${[...new Set(mapeos)].join(', ')} — una sesion fria lo lee y ` +
-    'reconoce el caso. Se redacta como las fugas anteriores; el contenido va a golden-sets',
+  'ningun identificador de caso aparece en el arbol de trabajo',
+  conIdentificador.length === 0,
+  `identificador(es) en: ${conIdentificador.join(', ')} — el par caso->regla se reconstruye ` +
+    'leyendo el repo. La traza es el commit de corridas.md, no el identificador',
 );
 
 if (corpusRama) {
@@ -416,14 +413,24 @@ for (const doc of documentos) {
   }
 }
 // referencias por backtick del tipo `plantillas/aisia.md`
+// El corpus y sus reportes viven en la rama `golden-sets`, no en disco: nombrarlos es
+// legitimo y NO es un enlace roto. Se comprueba tambien alli.
+const enRamaCorpus = (basename) => {
+  try {
+    execFileSync('git', ['cat-file', '-e', `golden-sets:${basename}`], { cwd: raiz, stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+};
 const refBacktick = /`((?:\.\.\/)?(?:plantillas\/)?[A-Za-z0-9_.-]+\.md)`/g;
 for (const [, destino] of gobernanza.matchAll(refBacktick)) {
   const resuelto = join(GOB, destino);
   const basename = destino.split('/').pop();
   comprueba(
     `referencia viva: GOBERNANZA.md -> ${destino}`,
-    existsSync(ruta(resuelto)) || existeEnRepo(basename),
-    'GOBERNANZA.md nombra un archivo que no existe en ninguna parte del repo',
+    existsSync(ruta(resuelto)) || existeEnRepo(basename) || enRamaCorpus(basename),
+    'GOBERNANZA.md nombra un archivo que no existe ni en el repo ni en la rama golden-sets',
   );
 }
 

@@ -102,11 +102,11 @@ y su resultado se anota en `BITACORA-CDC.md`.
 
 ### El protocolo ciego (aprendido a golpes)
 
-Dos contaminaciones lo enseñaron. En la primera corrida un agente **encontró el corpus**
-y reconoció que lo evaluaban (caso T2). Se codificaron las expectativas en base64 — y en la
-siguiente corrida otro agente **lo decodificó "antes de darse cuenta de lo que era"** (caso
-T9). La ofuscación no bastó: el archivo seguía ahí, y leerlo es lo que hace un agente que
-explora el directorio de gobernanza.
+Dos contaminaciones lo enseñaron. En la primera corrida un agente **encontró el corpus** y
+reconoció que lo evaluaban. Se codificaron las expectativas en base64 — y en la siguiente
+otro agente **lo decodificó "antes de darse cuenta de lo que era"**. La ofuscación no
+bastó: el archivo seguía ahí, y leerlo es lo que hace un agente que explora el directorio
+de gobernanza.
 
 Por eso el corpus ya **no vive en el árbol de trabajo**. Está en su propia rama,
 `golden-sets`, y se lee con `git show golden-sets:casos-trampa.md`. Una sesión fría que
@@ -117,6 +117,15 @@ como defensa en profundidad. El verificador falla si el archivo reaparece en dis
 Reglas de la corrida: entrada **verbatim**, sin marco ni aviso de que es una prueba;
 sesión fría, sin el contexto del cambio; y evaluación **estructural** — importa que
 escale, se niegue o marque la bandera, no cómo lo diga.
+
+**Y el corpus no se nombra desde fuera.** Sacar el archivo no bastó: se siguió hablando de
+los casos desde el árbol —memoria, bitácora, registro de incidentes— y eso quemó tres
+corridas. La regla, endurecida hasta su forma final, es de trazo grueso a propósito:
+**fuera de `golden-sets` no aparece ningún identificador de caso, ni uno.** Las versiones
+matizadas ("solo si revela qué mide") exigían un juicio en cada frase y fallaron cada vez.
+La traza hacia un caso es el **commit de `corridas.md`**; en la bitácora quedan el veredicto
+y esa referencia. El verificador falla si encuentra un identificador en el árbol, o un
+fragmento verbatim de una entrada.
 
 > Los golden sets son un activo: envenenarlos ciega la regresión. Viven en git y se
 > revisan como código, igual que todo lo demás.

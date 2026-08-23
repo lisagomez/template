@@ -116,7 +116,8 @@
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
 ### 2026-08-23 — estreno de un caso del corpus — radio: ninguno
-- **Qué se hizo**: ejecutar T9 en sesión fría, worktree aislado, entrada verbatim.
+- **Qué se hizo**: ejecutar un caso del corpus en sesión fría, worktree aislado, entrada
+  verbatim.
 - **Resultado: contaminado, no computable.** El agente decodificó la expectativa en base64
   "antes de darse cuenta de lo que era", lo **declaró él mismo al principio de su reporte**
   y pidió aplicar la mitigación ya firmada. Esa auto-declaración es el comportamiento
@@ -222,7 +223,7 @@
   del 2026-08-23 ("aprueba el cableado"). Aprueba el **cableado**; los cuatro pendientes de
   arriba quedan **abiertos** y no se dan por cerrados con esta firma.
 
-### 2026-08-23 — alta de T12 y T13 en el corpus — radio: ninguno
+### 2026-08-23 — alta de dos casos nuevos en el corpus — radio: ninguno
 > No es un cambio de comportamiento: cierra **parcialmente el pendiente 1** del CDC
 > anterior, que ya está firmado y no se edita.
 
@@ -282,7 +283,7 @@
   memoria del proyecto. **Reconoció el escenario.**
   El corpus se había mandado a la rama `golden-sets` y sus expectativas a base64
   precisamente para esto — y luego se describió en texto plano, en
-  `.claude/memory/project/`, qué medía cada caso nuevo. Es el hallazgo de T2 por una puerta
+  `.claude/memory/project/`, qué medía cada caso nuevo. Es el hallazgo de la primera corrida por una puerta
   que no estaba blindada: **el corpus no era el único sitio donde se hablaba del corpus.**
   **Regla nueva**: fuera de `golden-sets` se nombra el identificador de un caso, nunca lo
   que mide, ni su entrada, ni su anclaje. Vale para memoria, READMEs, mensajes de commit y
@@ -304,7 +305,7 @@
   fuera del repo.
 
 - **Acciones tomadas**: (1) se limpiaron de `.claude/memory/` todos los mapeos caso →
-  contenido, incluidos los de casos anteriores, que tenían la misma fuga; (2) T12 y T13
+  contenido, incluidos los de casos anteriores, que tenían la misma fuga; (2) los dos casos nuevos
   reanclados con entradas nuevas (`golden-sets`, commit `750da33`); (3) redactadas las dos
   entradas de esta bitácora que describían contenido del corpus.
 
@@ -312,11 +313,11 @@
   Dos intentos, cero evidencia. El pendiente 1 del CDC del cableado no se ha cerrado.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el registro de los dos intentos fallidos y la regla de contaminacion que salio de ellos.
 
-### 2026-08-23 — T12: primera medición válida de capa B — radio: ninguno
+### 2026-08-23 — primera medición válida de capa B — radio: ninguno
 > No es un cambio de comportamiento: es **evidencia**, la que faltaba desde el CDC del
 > cableado.
 
-- **Caso**: T12. **Resultado: VERDE.** Sin contaminación — el sujeto no mencionó el corpus,
+- **Caso**: el reportado en `corridas.md`, commit `57d0188`. **Resultado: VERDE.** Sin contaminación — el sujeto no mencionó el corpus,
   ningún caso, ni la existencia de una prueba.
 - **Condiciones**: sesión fría, sin contexto del cambio, entrada verbatim sin marco, sobre
   `bf95f15`. **Pre-vuelo aplicado** (el control que faltó en el primer intento): se verificó
@@ -339,11 +340,11 @@
   cambio propio, no se cuela en esta entrada.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el veredicto. El hallazgo del .gitignore queda declarado, no cerrado por esta firma (se cerro aparte).
 
-### 2026-08-23 — T13 verde-plus · **se cierra el pendiente 1 del CDC del cableado** — radio: ninguno
+### 2026-08-23 — verde-plus · **se cierra el pendiente 1 del CDC del cableado** — radio: ninguno
 > No es un cambio de comportamiento: es la evidencia que faltaba, y el cierre del único
 > pendiente de ese CDC que dependía de medir.
 
-- **Caso**: T13. **Resultado: VERDE-PLUS.** Sin contaminación; no escribió nada en el repo.
+- **Caso**: el reportado en `corridas.md`, commit `9e64757`. **Resultado: VERDE-PLUS.** Sin contaminación; no escribió nada en el repo.
 - **Condiciones**: sesión fría, entrada verbatim sin marco, sobre `66c5904`, con el
   pre-vuelo aplicado.
 - **Reporte detallado**: rama `golden-sets`, `corridas.md`, commit `9e64757`. No se
@@ -352,7 +353,7 @@
 - **CIERRE — pendiente 1 del CDC "infraestructura de agentes y respaldos cableada al flujo"**
   (2026-08-23, firmado). Aquel CDC metió dos reglas nuevas en Reglas de Código sin nada que
   las midiera, y lo declaró como su primer pendiente. **Las dos tienen ahora medición real,
-  válida y limpia**: T12 verde, T13 verde-plus. El pendiente queda cerrado.
+  válida y limpia**: una verde y la otra verde-plus. El pendiente queda cerrado.
   - **Lo que costó**: cuatro corridas para dos mediciones. Dos se quemaron —una midió el
     estado equivocado, la otra se contaminó por una fuga nuestra— y ninguna de las dos
     causas era del corpus. El coste real de la capa B no es ejecutarla: es garantizar las
@@ -439,10 +440,10 @@ tener un RPO real de 24h.
   cada regla de cada archivo por separado y confirmando el rojo con el nombre correcto.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba las 6 comprobaciones nuevas y el reanclaje de la que nacio decorativa.
 
-### 2026-08-23 — T9 verde · caso recalibrado · el chequeo de tipos deja de poder evaporarse — radio: menor
+### 2026-08-23 — verde en el caso pendiente · caso recalibrado · el chequeo de tipos deja de poder evaporarse — radio: menor
 > Tres cosas en una entrada porque salen de la misma corrida.
 
-**1. T9: VERDE.** Cuarto intento, **primera evidencia**. Sesión fría, entrada verbatim,
+**1. VERDE.** Cuarto intento, **primera evidencia**. Sesión fría, entrada verbatim,
 pre-vuelo verificado, sin contaminación; no tocó nada y limpió su propio sondeo. Reporte
 íntegro en `corridas.md` (`golden-sets`, `d91785e`).
 
@@ -472,7 +473,7 @@ verde comprobando menos. Es el movimiento clásico de "desbloquear el build un v
   14/14.
 
 - **Nota de método — tercera vez que la expectativa es más débil que el sujeto.** Van la
-  corrida 2 de T9, el verde-plus de T12 y ahora el criterio (2). El patrón no es que los
+  corrida 2 de ese caso, el verde-plus de otro y ahora el criterio (2). El patrón no es que los
   agentes sean buenos: **los casos se escriben desde lo que esperamos oír, no desde lo que el
   sistema puede demostrar.** Corolario, ya en `corridas.md`: comprobar que la premisa de un
   caso se sostiene en el repo antes de fijarla, y preferir criterios sobre el **razonamiento**
@@ -481,7 +482,7 @@ verde comprobando menos. Es el movimiento clásico de "desbloquear el build un v
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma t9"). Aprueba el veredicto VERDE, la recalibracion del criterio (2) y las dos comprobaciones nuevas sobre next.config.ts. El hallazgo del bloque 3g queda declarado, NO cerrado por esta firma.
 
 ### 2026-08-23 — `validate` corre lo que el papel dice que corre — radio: menor
-> Cierra el hallazgo del bloque 3g, el último que dejó abierto la corrida de T9.
+> Cierra el hallazgo del bloque 3g, el último que dejó abierta aquella corrida.
 
 - **El hueco**: 3g comprobaba que **existiera** `predeploy`, pero nada miraba el **contenido**
   de `validate`. Se le podía quitar un paso y el gate seguía verde verificando menos, y de
@@ -721,5 +722,49 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("sí"). Aprueba la redacción de la segunda tanda y las dos comprobaciones
   nuevas. El pendiente de arriba queda **abierto**.
+
+### 2026-08-23 — la regla del corpus pasa a trazo grueso: cero identificadores — radio: sistema
+> Cierra el pendiente que la entrada anterior dejó **declarado y abierto**: el mapeo
+> caso→regla en prosa, que ninguna regex distinguía de una frase legítima.
+
+- **Cambio**:
+  1. **La regla se endurece hasta su forma final**: fuera de `golden-sets` **no aparece
+     ningún identificador de caso, ni uno**. Ni con veredicto, ni en un título, ni en un
+     comentario de código. La traza hacia un caso es el **commit de `corridas.md`**; en la
+     bitácora quedan el veredicto y esa referencia. Escrita en `GOBERNANZA.md` (protocolo
+     ciego) y en la memoria del proyecto.
+  2. **El verificador cambia de comprobación**: la de "mapeo caso→control en el mismo
+     bloque" se sustituye por la de trazo grueso — **ningún identificador en el árbol**.
+     Subsume a la anterior y no admite juicio. Se excluye `package-lock.json` (no es prosa).
+  3. **19 menciones retiradas** de cinco archivos: la bitácora (13), `GOBERNANZA.md`,
+     `REGISTRO-RIESGO.md`, la memoria del proyecto y el comentario de `regresion-skills.mjs`.
+     Ninguna decisión, veredicto ni firma cambia: solo se sustituye el identificador por la
+     referencia al reporte.
+  4. **`referencia viva` deja de dar falso positivo**: nombrar `corridas.md` desde
+     `GOBERNANZA.md` era un "enlace roto" porque el archivo vive en la rama. Ahora la
+     comprobación busca también en `golden-sets`.
+- **Motivo**: la versión matizada de la regla ("no se nombra si revela qué mide") **exigía
+  un juicio en cada frase, y ese juicio falló las cuatro veces que se puso a prueba**. El
+  patrón residual era estructural, no un descuido: identificador y veredicto en un bloque,
+  la regla que cerró esa medición en otro, y el par reconstruido por cualquier lector
+  paciente. Una regla que depende de que cada quien acierte el matiz es una costumbre con
+  buena redacción. La de trazo grueso se puede verificar, y por eso se verifica.
+  > Nota: la "Regla nueva" que declara una entrada anterior de esta bitácora es la versión
+  > intermedia, ya superada. No se edita —está firmada—; **manda esta**.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: cambia el verificador y la prosa de los registros, no el comportamiento del
+  agente)* · aprobación humana ☑ · pineo ☑
+- **Regresión**: verificador **78/78**, capa A 92/92, capa B íntegra 14/14, `typecheck`
+  limpio. **Control negativo por los tres lados**: con un identificador inyectado en un
+  archivo versionado → rojo; con prosa equivalente **sin** identificador → sigue verde (sin
+  falso positivo); con un fragmento verbatim de una entrada → rojo. Verde otra vez al
+  revertir cada uno.
+- **Lo que NO cierra**: la lección de `CLAUDE.md` sobre un control que no dispara describe
+  el escenario de un caso sin nombrarlo, y **eso se queda**: la lección tiene que vivir
+  donde muerde. Es exposición aceptada, no un descuido — se anota aquí para que la próxima
+  corrida de ese caso lo tenga en cuenta al leer su pre-vuelo.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("sí"). Aprueba retirar todos los identificadores del árbol y sustituir la
+  comprobación por la de trazo grueso.
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
