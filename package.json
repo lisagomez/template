@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "verify:gobernanza": "node scripts/verifica-gobernanza.mjs",
+    "validate": "npm run typecheck && npm run build && npm run verify:gobernanza",
     "deploy:build": "docker compose --env-file .env.production build",
     "deploy:up": "docker compose --env-file .env.production up -d",
     "deploy:down": "docker compose --env-file .env.production down",

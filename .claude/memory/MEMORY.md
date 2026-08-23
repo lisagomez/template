@@ -7,10 +7,10 @@
 (vacio)
 
 ## project/ — Proyectos y decisiones activas
-(vacio)
+- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada 2026-08-23; 3 firmas pendientes, C2 sin construir, C7 diferido al segundo tenant.
 
 ## feedback/ — Correcciones y preferencias
 (vacio)
 
 ## reference/ — Donde encontrar cosas
-(vacio)
+- [Material de origen de la gobernanza](reference/material-origen-gobernanza.md) — los 9 docs de Hermes OS en a2aboths: que se conservo, que se descarto y por que.

@@ -162,6 +162,21 @@ execute_sql, apply_migration, list_tables, get_advisors
 - Variables: `camelCase`, Components: `PascalCase`, Files: `kebab-case`
 - NUNCA `any` (usar `unknown`)
 - SIEMPRE validar con Zod, SIEMPRE RLS en Supabase
+- `service_role` tiene **BYPASSRLS**: las superficies de negocio NO lo usan (control C7)
+- `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
+- Toda accion irreversible pasa por gate humano
+
+---
+
+## Gobernanza (obligatoria)
+
+Antes de tocar skills, datos o produccion: **`.claude/gobernanza/GOBERNANZA.md`**
+(7 controles, C1-C7).
+
+- Cambiar modelo, skill, prompt o plantilla → **CDC** (C1) + entrada en `BITACORA-CDC.md`
+- Fuga, rotura o intento de inyeccion → `.claude/gobernanza/plantillas/incidente.md` (C6)
+- Aceptar un riesgo o saltarse un gate → entrada firmada en `REGISTRO-RIESGO.md` (C5)
+- Todo PRP responde: modelo de amenazas (C3) y evaluacion de impacto / AISIA (C4)
 
 ---
 
@@ -172,6 +187,7 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
+npm run validate     # typecheck + build + verificador de gobernanza (el gate completo)
 
 # Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
 npm run deploy       # build + up + ps (todo en uno)

@@ -13,9 +13,10 @@ Template **production-ready** para crear aplicaciones SaaS modernas con desarrol
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth)
 - Tailwind CSS + shadcn/ui
-- 20 Skills de Claude Code (V4 Skills 2.0)
+- 22 Skills de Claude Code (V4 Skills 2.0)
 - Arquitectura Feature-First optimizada para IA
 - Auto port detection (3000-3006)
+- Capa de gobernanza agentica: 7 controles cableados y auto-verificados
 - Testing, linting y type checking configurados
 - 5 Design Systems listos para usar
 - AI Templates (Vercel AI SDK v5 + OpenRouter)
@@ -122,6 +123,8 @@ npm run start        # Servidor produccion
 npm run lint         # ESLint
 npm run lint:fix     # Fix automatico
 npm run typecheck    # TypeScript check
+npm run verify:gobernanza  # Cableado de la capa de gobernanza
+npm run validate     # typecheck + build + gobernanza (el gate completo)
 ```
 
 ---
@@ -131,7 +134,7 @@ npm run typecheck    # TypeScript check
 > V4 migra TODO a Skills 2.0. Hot reload, auto-discovery, zero config.
 > Cada skill es una carpeta con `SKILL.md` (frontmatter YAML + instrucciones).
 
-Los 20 skills son invocables con `/nombre` y activables por Claude segun
+Los 22 skills son invocables con `/nombre` y activables por Claude segun
 el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
@@ -154,6 +157,8 @@ el `description` de su frontmatter.
 | `video-visuals` | `/video-visuals` | Paquete visual sketchnote para videos |
 | `autoresearch` | `/autoresearch` | Auto-optimizar skills con loop autonomo |
 | `skill-creator` | `/skill-creator` | Crear nuevos skills |
+| `knowledge-search` | `/knowledge-search` | Buscar en el knowledge base compilado de conversaciones |
+| `google-workspace` | `/google-workspace` | Gmail + Calendar via gog CLI |
 | `update-sf` | `/update-sf` | Actualizar a ultima version |
 | `eject-sf` | `/eject-sf` | Remover SaaS Factory del proyecto (DESTRUCTIVO) |
 
@@ -196,7 +201,53 @@ mkdir .claude/skills/mi-skill
 | **Que** | Comportamiento + criterios de exito |
 | **Contexto** | Docs, referencias, gotchas |
 | **Blueprint** | Fases de implementacion |
+| **Gobernanza** | Modelo de amenazas (C3) + evaluacion de impacto (C4) |
 | **Validacion** | Tests, linting, verificacion |
+
+---
+
+## Capa de Gobernanza
+
+> Siete controles que todo proyecto hereda. Documento nucleo:
+> `.claude/gobernanza/GOBERNANZA.md`.
+
+Cierra tres huecos que son invisibles porque no rompen nada el dia que se descuidan:
+**(1)** ningun gate para cambios de comportamiento — el codigo generado pasa por
+typecheck y revision, el prompt que lo genera no pasaba por nada; **(2)** nadie verifica
+a los skills, solo a los artefactos; **(3)** `service_role` tiene BYPASSRLS y anulaba la
+regla de RLS.
+
+| Control | Disparador | Donde vive |
+|---------|-----------|------------|
+| **C1** Cambio de Comportamiento (CDC) | Tocas modelo, skill, prompt o plantilla | `BITACORA-CDC.md` |
+| **C2** Regresion de skills | Cualquier CDC de radio ≥ skill | Declarado, PRP propio pendiente |
+| **C3** Modelo de amenazas | Cada PRP nuevo | `plantillas/modelo-amenazas.md` |
+| **C4** Evaluacion de impacto (AISIA) | Cada PRP y cada BUSINESS_LOGIC.md | `plantillas/aisia.md` |
+| **C5** Registro de decisiones de riesgo | Aceptas un riesgo en vez de mitigarlo | `REGISTRO-RIESGO.md` |
+| **C6** Procedimiento de incidente | Fuga, rotura o intento de inyeccion | `plantillas/incidente.md` |
+| **C7** Regla `service_role` / RLS | Cualquier acceso a dato de negocio | `GOBERNANZA.md` §8 |
+
+### Se verifica sola
+
+```bash
+npm run verify:gobernanza
+```
+
+Falla si falta un control, si `CLAUDE.md` o `GEMINI.md` dejan de referenciar la capa, si
+`prp-base.md` pierde sus secciones, o si una plantilla referenciada no existe. Probado
+con control negativo: se rompio un cable a proposito y se confirmo que falla. Un
+verificador que siempre pasa porque no verifica nada aprobaria igual.
+
+### Principios que arrastra
+
+- Verificar antes de confiar: las salidas del LLM no se confian por diseno.
+- Un control no probado no cuenta como control.
+- Si la garantia depende de que nadie se equivoque, es una costumbre, no una garantia.
+- El documento y el codigo son un solo cambio.
+
+Alineada a ISO/IEC 42001 en etapa **AIMS-lite**: sostenible por una persona sola. La
+certificacion se activa por disparador comercial (cliente enterprise, marca blanca,
+sector regulado), nunca por calendario.
 
 ---
 
@@ -239,7 +290,7 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 
 ```
 .claude/
-├── skills/                    # Skills 2.0 (V4) - 20 skills
+├── skills/                    # Skills 2.0 (V4) - 22 skills
 │   ├── new-app/                 # Entrevista de negocio → BUSINESS_LOGIC.md
 │   ├── add-login/               # Auth completo Supabase: login, signup, password reset, profiles, RLS
 │   ├── add-payments/            # Pagos con Polar (MoR): checkout, webhooks, suscripciones
@@ -261,8 +312,15 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 │   ├── update-sf/               # Actualizar a ultima version
 │   └── eject-sf/                # Remover SaaS Factory del proyecto (DESTRUCTIVO)
 │
+├── gobernanza/                # Capa de gobernanza agentica (C1-C7)
+│   ├── GOBERNANZA.md         # Documento nucleo: los 7 controles y los principios
+│   ├── REGISTRO-RIESGO.md    # Decisiones de riesgo firmadas (append-only)
+│   ├── BITACORA-CDC.md       # Cambios de comportamiento + modelo pineado (append-only)
+│   └── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
+│
 ├── PRPs/                      # Product Requirements Proposals
-│   └── prp-base.md           # Template base
+│   ├── prp-base.md           # Template base (incluye modelo de amenazas + AISIA)
+│   └── specs/                # Specs compiladas para /goal
 │
 │   │   └── references/       # AI Templates (11 bloques)
 │   ├── agents/               # Templates secuenciales
@@ -363,7 +421,7 @@ Runbook completo: **`docs/DEPLOY-HETZNER.md`**
 ---
 
 **Template Version:** 4.0.0
-**Last Updated:** 2026-08-22
+**Last Updated:** 2026-08-23
 
 ---
 

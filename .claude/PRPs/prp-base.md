@@ -15,6 +15,7 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 | **Qué** | Comportamiento + criterios de éxito | Humano + IA |
 | **Contexto** | Docs, referencias, código existente | IA investiga |
 | **Blueprint** | Fases de implementación (sin subtareas) | IA genera |
+| **Gobernanza** | Modelo de amenazas + evaluación de impacto (AISIA) | IA propone, humano firma |
 | **Aprendizajes** | Self-Annealing - errores y fixes | IA actualiza |
 
 ---
@@ -47,6 +48,9 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 > **Estado**: PENDIENTE
 > **Fecha**: YYYY-MM-DD
 > **Proyecto**: [nombre]
+> **CDC aplicable** (¿este PRP cambia comportamiento de agentes: modelo, skill, prompt
+> o plantilla?): **sí / no** → si es sí, aplica el control C1 de
+> `.claude/gobernanza/GOBERNANZA.md` §2 y deja entrada en `BITACORA-CDC.md`
 
 ---
 
@@ -104,6 +108,32 @@ ALTER TABLE [tabla] ENABLE ROW LEVEL SECURITY;
 
 ---
 
+## Gobernanza
+
+> Dos preguntas distintas. La primera protege al sistema de los atacantes; la segunda
+> protege a las personas del sistema. Plantillas completas en `.claude/gobernanza/plantillas/`.
+
+### Modelo de amenazas (control C3) — *¿quién nos ataca?*
+
+- **Activos que toca**: [qué se pierde si esto se compromete]
+- **Fronteras que cruza**: [de dónde entra dato no confiable a esta feature]
+- **Atacante relevante**: [O1 inyección de requerimientos · O2 evidencia falsa ·
+  O3 fatiga de aprobación · O4 denial-of-wallet · O5 cadena de suministro ·
+  O6 compromiso de servicio]
+- **Controles**: [qué reduce el riesgo — y qué brecha queda abierta a propósito]
+
+### Evaluación de impacto / AISIA (control C4) — *¿a quién dañamos sin atacante?*
+
+- **Partes afectadas**: [incluidos los que NO son usuarios]
+- **Daño posible con el sistema operando bien**: [decisión errónea sin nadie atacando]
+- **Reversibilidad**: [¿se puede deshacer? ¿hay vía de apelación humana?]
+- **Decisión**: aceptar / mitigar / rediseñar / no ofrecer
+
+> Si esta feature bloquea, cobra o rechaza a alguien, la **vía de apelación humana** es
+> criterio de éxito, no un extra. Si aceptas un riesgo, va firmado a `REGISTRO-RIESGO.md`.
+
+---
+
 ## Blueprint (Assembly Line)
 
 > IMPORTANTE: Solo definir FASES. Las subtareas se generan al entrar a cada fase
@@ -120,8 +150,7 @@ ALTER TABLE [tabla] ENABLE ROW LEVEL SECURITY;
 ### Fase N: Validación Final
 **Objetivo**: Sistema funcionando end-to-end
 **Validación**:
-- [ ] `npm run typecheck` pasa
-- [ ] `npm run build` exitoso
+- [ ] `npm run validate` pasa (typecheck + build + verificador de gobernanza)
 - [ ] Playwright screenshot confirma UI
 - [ ] Criterios de éxito cumplidos
 
@@ -152,6 +181,8 @@ ALTER TABLE [tabla] ENABLE ROW LEVEL SECURITY;
 - NO ignorar errores de TypeScript
 - NO hardcodear valores (usar constantes)
 - NO omitir validación Zod en inputs de usuario
+- NO usar `service_role` en superficies de negocio (control C7: tiene BYPASSRLS)
+- NO editar un skill o cambiar de modelo sin CDC (control C1)
 
 ---
 

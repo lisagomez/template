@@ -7,12 +7,13 @@ Template production-ready para crear aplicaciones SaaS con desarrollo asistido p
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS + shadcn/ui
-- 20 Skills de Claude Code (V4 Skills 2.0)
+- 22 Skills de Claude Code (V4 Skills 2.0)
 - Playwright CLI para QA automatizado
 - AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
 - Arquitectura Feature-First optimizada para IA
 - Auto-Blindaje: el sistema aprende de cada error
+- Capa de gobernanza agentica: 7 controles cableados y auto-verificados
 
 ## Quick Start
 
@@ -82,7 +83,7 @@ src/
     └── types/
 ```
 
-## Skills (20 total)
+## Skills (22 total)
 
 Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
@@ -106,6 +107,8 @@ Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 | `/video-visuals` | Paquete visual sketchnote para videos |
 | `/autoresearch` | Auto-optimizar skills con loop autonomo |
 | `/skill-creator` | Crear nuevos skills |
+| `/knowledge-search` | Buscar en el knowledge base compilado de conversaciones |
+| `/google-workspace` | Gmail + Calendar via gog CLI |
 | `/update-sf` | Actualizar a ultima version |
 | `/eject-sf` | Remover SaaS Factory (destructivo) |
 
@@ -143,7 +146,35 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
+npm run validate     # typecheck + build + gobernanza (el gate completo)
+npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 ```
+
+## Gobernanza
+
+Todo proyecto que nace de este template hereda una capa de gobernanza con **7 controles**
+(`.claude/gobernanza/GOBERNANZA.md`). No es papel decorativo: el flujo la obliga a
+consultarse y un verificador falla si el papel y el codigo divergen.
+
+| Control | Que exige |
+|---------|-----------|
+| **C1** CDC | Cambiar modelo, skill, prompt o plantilla exige diff, regresion y aprobacion. El modelo SIEMPRE pineado |
+| **C2** Regresion de skills | Golden sets con casos-trampa. Verde = promovible |
+| **C3** Modelo de amenazas | Seccion fija de todo PRP: *¿quien nos ataca?* |
+| **C4** AISIA | Seccion fija de todo PRP: *¿a quien dañamos sin atacante?* |
+| **C5** Registro de riesgo | Aceptar un riesgo es una decision firmada, append-only |
+| **C6** Incidente | Contener → clasificar → cerrar con caso de regresion |
+| **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
+
+```bash
+npm run verify:gobernanza   # falla si la capa quedo suelta
+```
+
+Alineada a ISO/IEC 42001 en su etapa AIMS-lite: sostenible por una persona sola, sin
+equipo de compliance. La certificacion se activa por disparador comercial, no por
+calendario (ver §10 del documento).
+
+---
 
 ## Deploy
 
@@ -177,7 +208,8 @@ Runbook completo (hardening, swap, DNS, TLS, gotchas): **[docs/DEPLOY-HETZNER.md
 
 ```
 .claude/
-├── skills/              # 20 Skills (V4 Skills 2.0)
+├── skills/              # 22 Skills (V4 Skills 2.0)
+├── gobernanza/          # Capa de gobernanza (7 controles + plantillas)
 ├── PRPs/                # Product Requirements Proposals
 │   │   └── references/  # AI Templates (11 bloques)
 ├── design-systems/      # 5 sistemas de diseno

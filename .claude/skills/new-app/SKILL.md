@@ -151,7 +151,20 @@ Una vez completada la entrevista, genera el archivo `BUSINESS_LOGIC.md` en la ra
 ## 5. KPI de Exito
 **Metrica principal:** [Respuesta pregunta 7]
 
-## 6. Especificacion Tecnica (Para el Agente)
+## 6. Gobernanza (controles C4 y C7)
+
+> Se llena SIEMPRE, aunque el proyecto sea chico. Plantilla completa en
+> `.claude/gobernanza/plantillas/aisia.md`.
+
+**Datos personales que toca:** [de quien, que tipo — o "ninguno"]
+**Partes afectadas:** [incluidos los que NO son usuarios de la app]
+**Dano posible con el sistema operando bien:** [decision erronea sin ningun atacante]
+**Acciones irreversibles:** [cobros, envios, borrados — cada una necesita gate humano]
+**Via de apelacion humana:** [como revierte un usuario una decision automatica]
+**Aislamiento de datos:** RLS en toda tabla. Las superficies NO usan `service_role`
+(tiene BYPASSRLS). Ver control C7.
+
+## 7. Especificacion Tecnica (Para el Agente)
 
 ### Features a Implementar (Feature-First)
 ```
@@ -176,7 +189,8 @@ src/features/
 4. [ ] Feature: [feature-1]
 5. [ ] Feature: [feature-2]
 6. [ ] Testing E2E
-7. [ ] Deploy Vercel
+7. [ ] `npm run validate` en verde (typecheck + build + gobernanza)
+8. [ ] Deploy Vercel
 ```
 
 ---
@@ -188,5 +202,8 @@ src/features/
 - **No asumas:** Valida cada suposicion con el usuario
 - **Traduce a tecnico:** El BUSINESS_LOGIC.md es para que TU (el agente) puedas ejecutar despues
 - **Auth default:** Siempre Email/Password (evita OAuth para testing)
+- **Gobernanza obligatoria:** la seccion 6 se llena en la entrevista, no despues. Si el
+  proyecto toca datos personales, dinero o decisiones automaticas, hay una pregunta mas:
+  *"si esto se equivoca operando bien, a quien perjudica y como lo deshace?"*
 
 *"Primero entiende el negocio. Despues escribe codigo."*

@@ -76,6 +76,16 @@ Usuario dice algo
     ├── "Optimiza este skill / mejora el skill / autoresearch"
     |       → Ejecutar skill AUTORESEARCH (loop autonomo de mejora)
     |
+    ├── "Voy a cambiar el modelo / editar un skill / tocar un prompt o plantilla"
+    |       → CDC OBLIGATORIO (control C1): `.claude/gobernanza/GOBERNANZA.md` §2
+    |         + entrada en `.claude/gobernanza/BITACORA-CDC.md`
+    |
+    ├── "Se rompio algo / se filtro un dato / alguien intento inyectar"
+    |       → Procedimiento de incidente (C6): `.claude/gobernanza/plantillas/incidente.md`
+    |
+    ├── "Quiero aceptar un riesgo / saltarme un gate / ampliar permisos"
+    |       → Entrada firmada en `.claude/gobernanza/REGISTRO-RIESGO.md` (C5)
+    |
     └── No encaja en nada
             → Usar tu juicio. Leer el codebase, entender patrones, ejecutar.
 ```
@@ -165,6 +175,11 @@ Error ocurre → Se arregla → Se DOCUMENTA → NUNCA ocurre de nuevo
 | Skill relevante | Errores que aplican a multiples features |
 | Este archivo (CLAUDE.md) | Errores criticos que aplican a TODO |
 
+Cuando el error fue un **incidente** (fuga, accion irreversible no autorizada, inyeccion),
+el Auto-Blindaje no basta: se sigue `.claude/gobernanza/plantillas/incidente.md`, y el
+cierre exige un **caso nuevo de regresion**. Un incidente cerrado sin caso de regresion
+no esta cerrado: esta olvidado.
+
 ---
 
 ## Golden Path (Un Solo Stack)
@@ -250,6 +265,11 @@ execute_sql, apply_migration, list_tables, get_advisors
 - SIEMPRE validar entradas de usuario con Zod
 - SIEMPRE habilitar RLS en tablas Supabase
 - NUNCA exponer secrets en codigo
+- `service_role` tiene **BYPASSRLS**: las superficies de negocio NO lo usan. Solo
+  migraciones, webhooks verificados y jobs de plataforma, cada uno declarado (control C7)
+- `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
+- Las salidas del LLM NO se confian por diseno: quien verifica re-ejecuta los gates de cero
+- Toda accion irreversible (migracion destructiva, envio, cobro) pasa por gate humano
 
 ---
 
@@ -260,6 +280,8 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
+npm run validate     # typecheck + build + verificador de gobernanza (el gate completo)
+npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 
 # Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
 npm run deploy       # build + up + ps (todo en uno)
@@ -273,6 +295,12 @@ npm run deploy:down  # parar el stack
 
 ```
 .claude/
+├── gobernanza/                # Capa de gobernanza agentica (7 controles, C1-C7)
+│   ├── GOBERNANZA.md         # Documento nucleo: los 7 controles y los principios
+│   ├── REGISTRO-RIESGO.md    # Decisiones de riesgo firmadas (append-only)
+│   ├── BITACORA-CDC.md       # Cambios de comportamiento + modelo pineado (append-only)
+│   └── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
+│
 ├── memory/                    # Memoria persistente del proyecto (git-versioned)
 │   ├── MEMORY.md             # Indice (max 200 lineas, se carga al inicio)
 │   ├── user/                 # Sobre el usuario/equipo
@@ -342,6 +370,35 @@ npm run deploy:down  # parar el stack
 - **Fix**: las `NEXT_PUBLIC_*` viajan como `ARG`/`build.args`. Solo los secretos
   server-side (service_role, API keys) van en `environment:`.
 - **Aplicar en**: todo deploy self-hosted (Hetzner, VPS, Docker).
+
+---
+
+### 2026-08-23: `service_role` anula RLS — la regla que faltaba
+- **Error**: "SIEMPRE habilitar RLS" era decorativo. En Supabase `service_role` tiene
+  `BYPASSRLS`: ninguna politica lo detiene. Con esa llave en las superficies, el
+  aislamiento entre usuarios vive SOLO en el codigo de la app.
+- **Fix**: control C7 de `.claude/gobernanza/GOBERNANZA.md`. RLS se habilita igual (el
+  dato queda etiquetado y las politicas probadas), pero las superficies de negocio no
+  usan `service_role`. Disparador de migracion: el alta del SEGUNDO tenant, no una fecha.
+- **Aplicar en**: todo proyecto con Supabase.
+
+### 2026-08-23: los prompts se revisan como codigo (CDC)
+- **Error**: el codigo generado (menos alcance) pasaba typecheck, build y revision; el
+  prompt que lo genera (TODO el alcance) no pasaba por nada.
+- **Fix**: control C1 — todo cambio de modelo, skill, prompt o plantilla exige diff,
+  regresion y aprobacion, con gate proporcional al radio. El modelo SIEMPRE pineado;
+  `latest` es anti-patron tambien aqui.
+- **Aplicar en**: toda edicion de `.claude/skills/` y de este archivo.
+
+---
+
+## Gobernanza (leer antes de tocar skills, datos o produccion)
+
+La capa vive en **`.claude/gobernanza/GOBERNANZA.md`**: siete controles (C1-C7) que
+cierran tres huecos invisibles — sin gate para cambios de comportamiento, sin verificacion
+de los skills, y `service_role` anulando RLS.
+
+Se verifica sola: `npm run verify:gobernanza` falla si el papel y el codigo divergen.
 
 ---
 
