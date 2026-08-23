@@ -92,7 +92,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 20 Herramientas Especializadas
+## Skills: 22 Herramientas Especializadas
 
 | # | Skill | Cuando usarlo |
 |---|-------|---------------|
@@ -116,6 +116,8 @@ Usuario dice algo
 | 18 | `skill-creator` | Crear nuevos skills para extender la fabrica |
 | 19 | `goal-compiler` | Convertir una intencion vaga en un prompt soberano para `/goal` (loop vs grafo) |
 | 20 | `video-visuals` | Paquete visual narrativo estilo sketchnote para videos y presentaciones |
+| 21 | `knowledge-search` | Buscar en el knowledge base compilado de conversaciones pasadas |
+| 22 | `google-workspace` | Gmail + Calendar de las cuentas del usuario via `gog` CLI |
 
 ---
 
@@ -308,7 +310,7 @@ npm run deploy:down  # parar el stack
 │   ├── project/              # Decisiones y estado de iniciativas
 │   └── reference/            # Patrones, soluciones, donde encontrar cosas
 │
-├── skills/                    # 20 skills especializados
+├── skills/                    # 22 skills especializados
 │   ├── new-app/              # Entrevista de negocio
 │   ├── add-login/            # Auth completo
 │   ├── website-3d/           # Landing pages cinematicas
@@ -325,6 +327,8 @@ npm run deploy:down  # parar el stack
 │   ├── autoresearch/         # Auto-optimizacion de skills
 │   ├── goal-compiler/        # Intencion vaga -> prompt soberano para /goal
 │   ├── video-visuals/        # Paquetes visuales sketchnote
+│   ├── knowledge-search/     # Busqueda en el knowledge base de conversaciones
+│   ├── google-workspace/     # Gmail + Calendar via gog CLI
 │   └── skill-creator/        # Crear nuevos skills
 │
 ├── PRPs/                      # Product Requirements Proposals

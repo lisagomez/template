@@ -138,6 +138,29 @@ if (businessLogic !== null) {
   );
 }
 
+// --- 3e. El conteo de skills declarado coincide con los directorios reales ---
+const dirSkills = join(raiz, '.claude/skills');
+if (existsSync(dirSkills)) {
+  const reales = readdirSync(dirSkills, { withFileTypes: true }).filter((e) => e.isDirectory()).length;
+  // \b evita capturar el "4" de "V4 Skills"
+  const patrones = [/\b(\d+)\s+[Ss]kills\b/g, /[Ss]kills\s*\((\d+)\s*total\)/g, /[Ss]kills:\s*(\d+)/g];
+  for (const doc of ['README.md', '.claude/README.md', 'CLAUDE.md']) {
+    const contenido = lee(doc);
+    if (contenido === null) continue;
+    const declarados = new Set();
+    for (const patron of patrones) {
+      for (const [, n] of contenido.matchAll(patron)) declarados.add(Number(n));
+    }
+    if (declarados.size === 0) continue; // el documento no declara conteo: nada que verificar
+    const malos = [...declarados].filter((n) => n !== reales);
+    comprueba(
+      `${doc} declara el numero real de skills (${reales})`,
+      malos.length === 0,
+      `declara ${malos.join(', ')} pero hay ${reales} directorios en .claude/skills/`,
+    );
+  }
+}
+
 // --- 4. prp-base.md gana sus secciones (el segundo cable) ------------------
 const prpBase = lee('.claude/PRPs/prp-base.md') ?? '';
 comprueba(
