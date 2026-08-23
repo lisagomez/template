@@ -323,8 +323,9 @@ npm run deploy:down  # parar el stack
 │   ├── GOBERNANZA.md         # Documento nucleo: los 7 controles y los principios
 │   ├── REGISTRO-RIESGO.md    # Decisiones de riesgo firmadas (append-only)
 │   ├── BITACORA-CDC.md       # Cambios de comportamiento + modelo pineado (append-only)
+│   ├── INCIDENTES.md         # Incidentes y su cierre (append-only)
 │   ├── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
-│   └── golden-sets/          # C2: contratos de skills + casos-trampa
+│   └── golden-sets/          # C2: contratos (el corpus vive en la rama golden-sets)
 │
 ├── memory/                    # Memoria persistente del proyecto (git-versioned)
 │   ├── MEMORY.md             # Indice (max 200 lineas, se carga al inicio)

@@ -226,13 +226,29 @@ regla de RLS.
 | **C3** Modelo de amenazas | Cada PRP nuevo | `plantillas/modelo-amenazas.md` |
 | **C4** Evaluacion de impacto (AISIA) | Cada PRP y cada BUSINESS_LOGIC.md | `plantillas/aisia.md` |
 | **C5** Registro de decisiones de riesgo | Aceptas un riesgo en vez de mitigarlo | `REGISTRO-RIESGO.md` |
-| **C6** Procedimiento de incidente | Fuga, rotura o intento de inyeccion | `plantillas/incidente.md` |
+| **C6** Procedimiento de incidente | Fuga, rotura o intento de inyeccion | `plantillas/incidente.md` + `INCIDENTES.md` |
 | **C7** Regla `service_role` / RLS | Cualquier acceso a dato de negocio | `GOBERNANZA.md` §8 |
+
+### El limite de C5
+
+El dueno firma riesgos **propios**. Cuando el dano recae sobre terceros que no firmaron
+—datos de clientes, dinero ajeno— **ninguna firma lo autoriza**: se redisena o no se hace.
+Se cruza con C4: si un riesgo necesita AISIA, probablemente no sea firmable.
+
+### El corpus de casos-trampa vive fuera del arbol
+
+`casos-trampa.md` esta en la rama **`golden-sets`**, no en el directorio de trabajo. Dos
+sesiones frias lo encontraron leyendo el repo y la prueba dejo de ser ciega. Se lee con
+`git show golden-sets:casos-trampa.md`, y el verificador falla si reaparece en disco.
+
+> Si clonas con `--single-branch` la capa B queda inaccesible. El verificador lo detecta.
 
 ### Se verifica sola
 
 ```bash
-npm run verify:gobernanza
+npm run verify:gobernanza   # 58 comprobaciones
+npm run regresion           # C2 capa A
+npm run regresion -- --trampa   # C2 capa B (para cada CDC)
 ```
 
 Falla si falta un control, si `CLAUDE.md` o `GEMINI.md` dejan de referenciar la capa, si

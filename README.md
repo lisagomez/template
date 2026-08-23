@@ -159,17 +159,29 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 
 | Control | Que exige |
 |---------|-----------|
-| **C1** CDC | Cambiar modelo, skill, prompt o plantilla exige diff, regresion y aprobacion. El modelo SIEMPRE pineado |
+| **C1** CDC | Cambiar modelo, skill, prompt, plantilla o `settings.json` exige diff, regresion y aprobacion. El modelo SIEMPRE pineado: `latest` se rechaza |
 | **C2** Regresion de skills | Contratos de skills en cada build + casos-trampa en cada CDC. Verde = promovible |
 | **C3** Modelo de amenazas | Seccion fija de todo PRP: *¿quien nos ataca?* |
 | **C4** AISIA | Seccion fija de todo PRP: *¿a quien dañamos sin atacante?* |
-| **C5** Registro de riesgo | Aceptar un riesgo es una decision firmada, append-only |
-| **C6** Incidente | Contener → clasificar → cerrar con caso de regresion |
+| **C5** Registro de riesgo | Aceptar un riesgo es una decision firmada, append-only. **Con limite**: el dano a terceros no es firmable |
+| **C6** Incidente | Contener → clasificar → cerrar con caso de regresion. Se registra en `INCIDENTES.md` |
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta
+npm run verify:gobernanza   # falla si la capa quedo suelta (58 comprobaciones)
+npm run regresion           # C2 capa A: contratos de los 22 skills
+npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
+
+El gate corre solo antes de desplegar (`predeploy`), no solo cuando alguien se acuerda.
+
+### La capa se audita a si misma
+
+Los casos-trampa se ejecutan en sesiones frias y han encontrado mas fallos en la propia
+gobernanza que en los agentes: un gate fuera de la ruta de deploy, dos controles escritos
+donde nadie los leia, un caso de prueba mal disenado y un incidente de credenciales. Todo
+ello esta registrado en `.claude/gobernanza/` — la capa no esconde sus propios fallos, los
+versiona.
 
 Alineada a ISO/IEC 42001 en su etapa AIMS-lite: sostenible por una persona sola, sin
 equipo de compliance. La certificacion se activa por disparador comercial, no por
@@ -210,7 +222,7 @@ Runbook completo (hardening, swap, DNS, TLS, gotchas): **[docs/DEPLOY-HETZNER.md
 ```
 .claude/
 ├── skills/              # 22 Skills (V4 Skills 2.0)
-├── gobernanza/          # Capa de gobernanza (7 controles + plantillas)
+├── gobernanza/          # Capa de gobernanza (7 controles, plantillas y registros)
 ├── PRPs/                # Product Requirements Proposals
 │   │   └── references/  # AI Templates (11 bloques)
 ├── design-systems/      # 5 sistemas de diseno
