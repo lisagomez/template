@@ -508,4 +508,48 @@ verde comprobando menos. Es el movimiento clásico de "desbloquear el build un v
 - **Regresión**: verificador 73/73, control negativo ejecutado en las dos direcciones.
 - **Aprobado por**: _pendiente de firma_
 
+### 2026-08-23 — un boilerplate no puede llevar credenciales · **corrección de un hecho** — radio: menor
+
+**1. CORRECCIÓN de la entrada "se cierran los dos huecos que encontró la capa B"** (ya
+firmada, por eso se corrige aquí y no allí). Aquella entrada afirma que `.mcp.json`
+**lleva credenciales vivas** y usa ese hecho para descartar versionarlo. **El hecho es
+falso.** El `.mcp.json` de este template contiene `YOUR_SUPABASE_ACCESS_TOKEN` y
+`YOUR_SUPABASE_PROJECT_REF`: placeholders. Se dio por real a partir de un volcado de
+estructura que sólo mostraba que la clave existía, sin mirar el valor.
+- **La conclusión sigue siendo correcta por otro motivo**: en un proyecto derivado de este
+  template ese archivo **sí** llevará el token, así que gitignorarlo es lo acertado. Lo que
+  estaba mal era la razón registrada, no la decisión.
+- **Cómo se descubrió**: la dueña señaló que un boilerplate no debería tener tokens reales.
+  Al auditarlo para confirmarlo, apareció que no los tiene — y que quien lo había afirmado
+  no lo había comprobado.
+
+**2. Auditoría completa del template**: **cero credenciales reales.** `.env.local.example`
+y `.env.production.example` llevan `tuapp.com`, `tu@email.com`, `eyJhbGci...` truncado y
+`your_*`. Los tokens reales del incidente abierto viven en `~/.config/claude/secrets.env`
+(máquina de la dueña, `600`, fuera de todo repo), cargado desde `.bashrc`. **No son del
+template**; lo son del entorno.
+
+**3. El principio pasa a ser un gate.** Que no haya credenciales no puede depender de que
+alguien mire bien — acaba de demostrarse que mirar mal es fácil. Comprobación nueva
+(**74/74**): ningún archivo **versionado** puede contener una credencial viva. Siete firmas
+de alta señal (Supabase `sbp_`, `sk-`, GitHub, Slack, AWS, clave privada PEM, JWT con sus
+tres partes). Reporta archivo y tipo, **nunca el valor**.
+- **Por qué sólo lo versionado**: `.env.production` y `.mcp.json` están ignorados y **deben**
+  llevar secretos — es su trabajo. La regla que vale igual en el template y en todo proyecto
+  derivado es que **lo que se versiona nunca los lleve**, porque se hereda y porque git lo
+  recuerda aunque después se borre.
+- **Límites declarados**: el propio verificador queda excluido del escaneo (contiene las
+  firmas y se delataría), igual que `package-lock.json`. Y las firmas son de alta señal: un
+  secreto sin formato reconocible no se caza.
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica)* · aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador 74/74. **Control negativo en dos formatos** (token `sbp_` en
+  `BUSINESS_LOGIC.md` y JWT completo en `.env.local.example`): ambos en rojo, nombrando
+  archivo y tipo sin filtrar el valor.
+- **Nota**: la primera versión de esta comprobación llevaba un byte NUL literal incrustado
+  en el fuente por un escape mal pasado. Pasaba `node --check` y funcionaba, pero rompía
+  `grep` sobre el propio script. Reescrita sin escapes.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

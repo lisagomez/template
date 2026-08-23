@@ -429,6 +429,43 @@ if (ejemplo !== null) {
   );
 }
 
+// --- 8. Ningun archivo versionado lleva una credencial viva -----------------
+// Es un boilerplate: lo que se versiona lo hereda cada proyecto que nazca de aqui.
+// Los archivos IGNORADOS (.env.production, .mcp.json) si llevan secretos — es su
+// trabajo. La regla universal, valida tambien en los proyectos derivados, es que lo
+// TRACKEADO nunca los lleve.
+const FIRMAS = [
+  ['token de Supabase (sbp_)', /sbp_[A-Za-z0-9]{36,}/],
+  ['clave estilo OpenAI/OpenRouter (sk-)', /\bsk-[A-Za-z0-9_-]{24,}/],
+  ['token de GitHub', /\bghp_[A-Za-z0-9]{36}|\bgithub_pat_[A-Za-z0-9_]{50,}/],
+  ['token de Slack', /\bxox[baprs]-[A-Za-z0-9-]{12,}/],
+  ['clave de AWS', /\bAKIA[0-9A-Z]{16}\b/],
+  ['clave privada PEM', /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
+  ['JWT con las tres partes completas', /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/],
+];
+// Este propio script contiene las firmas: se excluye o se delata a si mismo.
+const SIN_ESCANEAR = new Set(['scripts/verifica-gobernanza.mjs', 'package-lock.json']);
+try {
+  const versionados = execFileSync('git', ['ls-files'], { cwd: raiz, encoding: 'utf8' })
+    .split('\n')
+    .filter((f) => f && !SIN_ESCANEAR.has(f));
+  const encontrados = [];
+  for (const archivo of versionados) {
+    const contenido = lee(archivo);
+    if (contenido === null || contenido.includes(String.fromCharCode(0))) continue; // binario
+    for (const [nombre, patron] of FIRMAS) {
+      if (patron.test(contenido)) encontrados.push(`${archivo} (${nombre})`);
+    }
+  }
+  comprueba(
+    'ningun archivo versionado lleva una credencial viva',
+    encontrados.length === 0,
+    `${encontrados.join('; ')} — rotala YA: lo versionado se hereda, y git recuerda aunque lo borres`,
+  );
+} catch {
+  comprueba('ningun archivo versionado lleva una credencial viva', false, 'no se pudo listar el arbol con git ls-files');
+}
+
 // --- Reporte --------------------------------------------------------------
 const total = ok.length + fallos.length;
 for (const linea of ok) console.log(`  \x1b[32m✓\x1b[0m ${linea}`);
