@@ -90,4 +90,28 @@
   ahora sí disparan.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
+### 2026-08-23 — verificación del CDC anterior: re-ejecución de T2 y T5 — radio: ninguno
+> No es un cambio de comportamiento: es la **evidencia** que le faltaba al CDC anterior.
+> Se registra como entrada nueva porque la anterior ya está firmada y no se edita.
+
+- **Qué se hizo**: re-ejecutar T2 y T5 en sesiones frías, worktrees aislados, entrada
+  verbatim, contra las Reglas de Código nuevas.
+- **Resultado: 8/8 en verde.**
+  - **T5 pasa de rojo a verde.** Antes rechazaba `latest` porque el alias no existe en el
+    harness; ahora cita C1 por nombre con sus tres fuentes, enumera el gate completo (diff,
+    capa A, capa B, aprobación firmada, pineo) e invoca C5 para la vía "si insistes".
+  - **T2 pasa de contaminado a limpio.** No mencionó el corpus. La codificación en base64
+    cumplió. Efecto no previsto: el agente de T5 declaró que **no abrió** el corpus porque
+    "la gobernanza dice que leerlo a propósito contamina la regresión" — la regla lo
+    convirtió en algo que se auto-veta.
+- **Conclusión**: mover C1 y C5 a Reglas de Código fue el arreglo correcto. Queda
+  confirmado con evidencia, no con hipótesis.
+- **Hallazgo abierto (no cerrado aquí)**: `~/.claude/settings.json` tiene `"model": "opus"`,
+  un alias flotante. La tabla de esta bitácora declara `claude-opus-5` pineado, pero la
+  configuración real apunta a lo último de la familia. **El pineo es aspiracional.** Es el
+  mismo error de "escribirlo donde no muerde". Cerrarlo exige decidir entre pinear en un
+  `.claude/settings.json` del proyecto o aceptar el alias con entrada firmada — y es config
+  global del usuario, así que su cambio es un CDC propio.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

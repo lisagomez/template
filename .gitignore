@@ -70,3 +70,6 @@ Thumbs.db
 # Supabase
 supabase/.branches
 supabase/.temp
+
+# Worktrees de agentes (efimeros)
+.claude/worktrees/

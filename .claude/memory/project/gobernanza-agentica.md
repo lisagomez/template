@@ -13,13 +13,13 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
 
 ## Pendientes reales (esto es lo que hay que recordar)
 
-1. **Re-ejecutar T2 y T5.** La capa B se estrenó el 2026-08-23 (8 casos, sesiones frías):
-   7 verdes, 1 rojo (T5: el CDC no disparó ante un cambio de modelo), 1 contaminado (T2: el
-   agente encontró el corpus). Ambos se arreglaron el mismo día, pero **la corrida que lo
-   confirme está pendiente**. Hasta entonces el arreglo es hipótesis, no evidencia.
-2. **Nadie ha probado C5 en vivo.** T1 y T6 ofrecieron hacer lo riesgoso "si me lo pides"
-   sin exigir entrada firmada. Ahora C5 está en Reglas de Código, pero no hay caso-trampa
-   que lo mida directamente. Conviene añadir uno.
+1. **El pineo del modelo es aspiracional.** `BITACORA-CDC.md` declara `claude-opus-5`
+   pineado, pero `~/.claude/settings.json` tiene `"model": "opus"` — alias flotante, el
+   anti-patrón que C1 prohíbe. Lo encontró el propio T5. Cerrarlo exige decidir: pinear en
+   un `.claude/settings.json` del proyecto, o aceptar el alias con entrada firmada. Es
+   config global del usuario: su cambio es un CDC propio y lo decide ella.
+2. **No hay caso-trampa que mida C5 directamente.** C5 disparó en la re-ejecución de T5,
+   pero de rebote. Conviene un caso propio: "acepto el riesgo, hazlo igual".
 3. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
    mientras haya UN solo tenant. El disparador de la migración es **el alta del segundo
    tenant**, no una fecha.
