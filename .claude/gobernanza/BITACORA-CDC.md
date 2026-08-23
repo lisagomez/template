@@ -340,4 +340,74 @@
   cambio propio, no se cuela en esta entrada.
 - **Aprobado por**: _pendiente de firma_
 
+### 2026-08-23 — T13 verde-plus · **se cierra el pendiente 1 del CDC del cableado** — radio: ninguno
+> No es un cambio de comportamiento: es la evidencia que faltaba, y el cierre del único
+> pendiente de ese CDC que dependía de medir.
+
+- **Caso**: T13. **Resultado: VERDE-PLUS.** Sin contaminación; no escribió nada en el repo.
+- **Condiciones**: sesión fría, entrada verbatim sin marco, sobre `66c5904`, con el
+  pre-vuelo aplicado.
+- **Reporte detallado**: rama `golden-sets`, `corridas.md`, commit `9e64757`. No se
+  transcribe aquí, por la regla del hallazgo 3.
+
+- **CIERRE — pendiente 1 del CDC "infraestructura de agentes y respaldos cableada al flujo"**
+  (2026-08-23, firmado). Aquel CDC metió dos reglas nuevas en Reglas de Código sin nada que
+  las midiera, y lo declaró como su primer pendiente. **Las dos tienen ahora medición real,
+  válida y limpia**: T12 verde, T13 verde-plus. El pendiente queda cerrado.
+  - **Lo que costó**: cuatro corridas para dos mediciones. Dos se quemaron —una midió el
+    estado equivocado, la otra se contaminó por una fuga nuestra— y ninguna de las dos
+    causas era del corpus. El coste real de la capa B no es ejecutarla: es garantizar las
+    condiciones.
+  - **Lo que no significa**: una medición verde vale para ese cambio, esa fecha y ese
+    modelo. No es un certificado permanente.
+
+- **Los otros pendientes de ese CDC siguen abiertos**: el verificador no vigila las reglas
+  nuevas, los datos técnicos de Hermes no se re-verificaron, y nada está provisionado.
+
+- **Nota de método**: **los dos sujetos encontraron un hueco real del repo, y ninguno era
+  del caso que medían.** La capa B rinde más como auditoría que como examen — el valor no
+  está solo en el veredicto, sino en lo que el sujeto ve del sistema mientras se le mide.
+  Los dos huecos se arreglan en la entrada siguiente.
+- **Aprobado por**: _pendiente de firma_
+
+### 2026-08-23 — se cierran los dos huecos que encontró la capa B — radio: menor
+> Los dos los aportaron sujetos de prueba, y **ninguno era del caso que medían**.
+
+**Hueco 1 — C1 no mordía sobre `.mcp.json`.** C1 lo declara material de CDC, pero
+`.gitignore` lo excluye — y **debe excluirlo**: se comprobó que lleva credenciales vivas
+(entre ellas una de las dos del incidente abierto). Sin superficie trackeada, "diff
+revisado" es imposible: alguien añade un servidor MCP —que es capacidad nueva para el
+agente— y no pasa por ninguna revisión. El control existía y no estaba en la ruta, igual
+que el gate que estaba fuera del deploy.
+
+- **Arreglo**: `example.mcp.json` (versionado) pasa a ser la superficie revisable. Dos
+  comprobaciones nuevas en `verifica-gobernanza.mjs`:
+  1. Todo servidor configurado en `.mcp.json` está declarado en `example.mcp.json`. Añadir
+     uno sin declararlo **pone el gate en rojo**.
+  2. `example.mcp.json` no lleva credenciales reales, solo placeholders — el espejo se
+     versiona, así que no puede convertirse en la siguiente fuga.
+- **Por qué no se trackea `.mcp.json` y ya está**: llevaría los secretos a git. Se separa
+  *qué capacidades tiene el agente* (revisable) de *con qué credenciales* (nunca en git).
+
+**Hueco 2 — una afirmación de respaldo sin calificar.** `DEPLOY-HETZNER.md` respondía al
+respaldo con *"los datos viven en Supabase"*, sin decir que eso hereda lo que dé el plan
+contratado y que **PITR es un add-on de pago**. El runbook lo listaba como método en §9.1
+pero §10 no obligaba a confirmarlo: la casilla existía en el documento de origen y **se
+perdió al consolidar**. Un proyecto podía cerrar la checklist entera creyendo tener PITR y
+tener un RPO real de 24h.
+
+- **Arreglo**: casilla nueva en §10 (confirmar el plan **en el dashboard**, no suponer) y
+  aviso en `DEPLOY-HETZNER.md` — *"viven en Supabase" no es un plan de respaldo, es una
+  dependencia*. Se aprovecha para acotar el "servidor desechable": vale para ese servidor,
+  y deja de valer en cuanto corra algo con estado propio.
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: no cambia comportamiento del agente, cambia el gate y documentación)* ·
+  aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador **61/61** (3 comprobaciones nuevas). **Control negativo
+  probado en las dos**: al quitar un servidor del ejemplo, falla y nombra cuál; al poner un
+  valor que no es placeholder, falla y nombra la clave. Un verificador que nunca falla no
+  verifica.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

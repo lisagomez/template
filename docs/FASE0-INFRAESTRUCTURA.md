@@ -667,6 +667,10 @@ git), nunca el material privado.
 - [ ] Control negativo probado: el verificador **falla** con un archivo corrupto
 - [ ] `respaldo-vigilante.sh` en cron 09:00, probado con marca sintética
 - [ ] Si aplica N2: bucket con Object Lock y primera subida confirmada
+- [ ] **Plan de Supabase confirmado EN EL DASHBOARD, con PITR.** §9.1 lista "PITR del
+      proveedor" como método, pero PITR es un **add-on de pago**: en los planes bajos no
+      existe. Si no está contratado, el RPO real de los datos de negocio **es 24h**, no lo
+      que diga el plan de respaldo. Se comprueba mirando, no suponiendo
 
 Con todos en verde, la Fase 0 está cerrada.
 

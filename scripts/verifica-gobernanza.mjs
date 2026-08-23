@@ -291,6 +291,65 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 7. C1 muerde sobre .mcp.json -----------------------------------------
+// C1 declara `.mcp.json` material de CDC, pero `.gitignore` lo excluye (y debe: lleva
+// credenciales vivas). Sin superficie trackeada, "diff revisado" es imposible y el
+// control se vuelve papel. El espejo es `example.mcp.json`, que SI se versiona: todo
+// servidor configurado tiene que estar declarado ahi. Hallazgo de una corrida de capa B.
+const servidores = (texto) => {
+  try {
+    const j = JSON.parse(texto ?? '');
+    return Object.entries(j.mcpServers ?? {})
+      .filter(([, v]) => v && typeof v === 'object')
+      .map(([k]) => k);
+  } catch {
+    return null;
+  }
+};
+
+const ejemplo = lee('.claude/example.mcp.json');
+comprueba(
+  'existe .claude/example.mcp.json (superficie revisable de los MCP)',
+  ejemplo !== null && servidores(ejemplo) !== null,
+  'sin el ejemplo trackeado, un cambio de MCP no pasa por revision de codigo',
+);
+
+const real = lee('.mcp.json');
+if (real !== null && ejemplo !== null) {
+  const declarados = new Set(servidores(ejemplo) ?? []);
+  const configurados = servidores(real) ?? [];
+  const huerfanos = configurados.filter((s) => !declarados.has(s));
+  comprueba(
+    'todo servidor MCP configurado esta declarado en example.mcp.json',
+    huerfanos.length === 0,
+    `sin declarar: ${huerfanos.join(', ')} — anadir un MCP es un CDC (C1) y debe quedar revisable`,
+  );
+}
+
+// El espejo se versiona: no puede llevar credenciales reales.
+if (ejemplo !== null) {
+  let vivos = [];
+  try {
+    const j = JSON.parse(ejemplo);
+    for (const [nombre, cfg] of Object.entries(j.mcpServers ?? {})) {
+      if (!cfg || typeof cfg !== 'object') continue;
+      for (const [clave, valor] of Object.entries(cfg.env ?? {})) {
+        // Un placeholder es explicito. Cualquier otra cosa se trata como sospechosa.
+        if (typeof valor === 'string' && !/^(YOUR_|<|\$\{|)$|^YOUR_/.test(valor)) {
+          vivos.push(`${nombre}.${clave}`);
+        }
+      }
+    }
+  } catch {
+    vivos = ['(example.mcp.json no es JSON valido)'];
+  }
+  comprueba(
+    'example.mcp.json no lleva credenciales reales, solo placeholders',
+    vivos.length === 0,
+    `valores sospechosos en ${vivos.join(', ')} — el ejemplo se versiona: ahi solo van YOUR_*`,
+  );
+}
+
 // --- Reporte --------------------------------------------------------------
 const total = ok.length + fallos.length;
 for (const linea of ok) console.log(`  \x1b[32m✓\x1b[0m ${linea}`);

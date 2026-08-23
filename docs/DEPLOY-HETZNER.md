@@ -164,3 +164,13 @@ docker system prune -af --volumes   # liberar disco (cuidado: borra volumenes si
 **Backups:** los datos viven en Supabase, no en el cx33. Este servidor es
 desechable: si se pierde, se reconstruye con los pasos 1-6. Lo unico
 irrecuperable es `.env.production` — guardalo en tu gestor de contrasenas.
+
+> ⚠️ **"Viven en Supabase" no es un plan de respaldo, es una dependencia.** Lo que
+> recuperas es lo que dé **tu plan contratado**, y el PITR es un add-on de pago: en los
+> planes bajos no existe. Sin PITR confirmado en el dashboard, el RPO real de tus datos
+> **es 24h**. Compruebalo mirando, no suponiendo — y si el proyecto necesita mas, el
+> contrato de respaldo completo esta en
+> [FASE0-INFRAESTRUCTURA.md §9](FASE0-INFRAESTRUCTURA.md).
+>
+> Y "desechable" vale para **este** servidor. Si algun dia corre algo con estado propio
+> (agentes, colas, volumenes), deja de serlo: ver §0 de ese mismo documento.
