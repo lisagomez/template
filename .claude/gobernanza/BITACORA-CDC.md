@@ -598,4 +598,38 @@ diff, sin regresión y sin aprobación.
   destructiva borra también el trabajo legítimo del mismo archivo.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba el cierre del incidente del lado del template y el pineo de los MCP. NO cierra la rotacion de credenciales, que es del entorno.
 
+### 2026-08-23 — `INCIDENTES.md` sale del boilerplate (el contenido, no el registro) — radio: plantilla
+> Última pieza del encuadre que abrió la dueña al señalar que un boilerplate no debería
+> tener tokens reales. El mismo razonamiento se aplica al **relato** de un incidente.
+
+- **El problema**: `INCIDENTES.md` viajaba con tres entradas sobre un incidente de **una
+  máquina concreta**. Cualquier proyecto nacido de aquí heredaba el relato de una fuga que
+  no le ocurrió, con una contención ("rotar los tokens") que no puede ejecutar. Ruido que
+  además confunde: nadie sabe si eso le pasó a él.
+- **La distinción que resuelve**: **el registro viaja, las entradas no.**
+  - `INCIDENTES.md` **debe** heredarse: es C6, y sin él vuelve el hueco que lo creó — *el
+    procedimiento decía qué hacer y no tenía dónde escribirlo*.
+  - Sus entradas son del proyecto que sufre los incidentes.
+- **Qué se hizo**:
+  1. Las tres entradas se mueven a la rama `golden-sets`, `historial-incidentes.md`
+     (`2546650`). Se conservan por **trazabilidad**, no como herencia: son el origen de la
+     regla de secretos, de su caso y de la comprobación que la vigila.
+  2. `INCIDENTES.md` vuelve a ser el registro vacío, con una sección que explica **por qué**
+     nace vacío. Se refuerza la plantilla de cierre: el caso de regresión se referencia por
+     identificador, su contenido vive en `golden-sets`.
+  3. **`CLAUDE.md`**: la entrada de Auto-Blindaje narraba el mismo incidente nombrando las
+     credenciales reales del entorno y dando "rotar los tokens" como contención. Se
+     reescribe como **lección portable** — se quitan los nombres, se conserva el mecanismo
+     y se añade lo que faltaba: **que el caso se midió y salió verde**, que es la parte que
+     demuestra que la conducta ya no es azar.
+- **Lo que NO se toca y por qué**: la bitácora sigue narrando el incidente. Es distinto: la
+  bitácora documenta **cómo se construyó esta capa**, y ese relato sí es parte de lo que un
+  proyecto hereda con provecho. Si algún día se decide que tampoco viaja, es otra decisión.
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  cambia comportamiento: retira contenido instanciado)* · aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador **75/75** — el registro vacío sigue satisfaciendo la
+  comprobación de existencia y la marca append-only, que era la duda.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

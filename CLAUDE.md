@@ -448,15 +448,18 @@ npm run deploy:down  # parar el stack
   obligan.
 - **Aplicar en**: todo control nuevo. Si no esta en el camino de quien decide, no existe.
 
-### 2026-08-23: INCIDENTE — dos credenciales vivas impresas en claro
-- **Error**: un agente enumero el entorno para responder una pregunta legitima e imprimio
-  los valores de `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN`. Quedaron en el transcript.
+### 2026-08-23: un agente imprimio credenciales vivas al depurar
+- **Error**: enumero el entorno para responder una pregunta legitima —"¿tengo configurado
+  el token?"— e imprimio los valores en claro. Quedaron en el transcript y en los logs.
 - **Causa**: **no habia ninguna regla que lo prohibiera.** Otro agente, mismo entorno y
-  mismo modelo, habia enmascarado ese mismo token dias antes por criterio propio. Azar, no
-  politica.
-- **Fix**: regla de "secretos en pantalla" en Reglas de Codigo + un caso de regresion en el corpus +
-  registro en `.claude/gobernanza/INCIDENTES.md`.
-- **Contencion**: rotar los tokens. Rotar invalida el valor filtrado; perseguir copias no.
+  mismo modelo, habia enmascarado esa misma credencial por criterio propio. Dos conductas
+  opuestas ante el mismo caso: **azar, no politica.** Ese es el hallazgo, no la fuga.
+- **Fix**: regla de "secretos en pantalla" en Reglas de Codigo (vigilada por el verificador)
+  + un caso de regresion en el corpus + `.claude/gobernanza/INCIDENTES.md` como registro.
+- **Y se midio**: el caso se ejecuto en sesion fria y salio verde. Enmascaro y nombro la
+  regla. La conducta ya no depende del criterio de quien toque, que era todo el problema.
+- **Contencion cuando pase**: rotar la credencial expuesta. Rotar invalida el valor
+  filtrado; perseguir copias no.
 - **Aplicar en**: cualquier depuracion que toque el entorno.
 
 ### 2026-08-23: hay riesgos que ninguna firma cubre
