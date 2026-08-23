@@ -315,6 +315,73 @@ if (corpusRama) {
   );
 }
 
+// --- 3i. El arbol de trabajo no habla del corpus ---------------------------
+// Sacar el corpus a su rama no basta: la fuga que quemo tres corridas fue *hablar* de los
+// casos desde el arbol (memoria, bitacora, INCIDENTES.md). Hasta ahora eso lo cazaba un
+// grep manual antes de cada corrida, o sea una costumbre. Aqui se vuelve gate.
+//
+// Dos modos de fuga, dos comprobaciones:
+//   (a) mapeo caso->control: un identificador junto a un control que un caso puede medir,
+//       en el mismo bloque. C2 queda fuera: es el control DUENO del corpus, nombrarlo no
+//       revela que mide ningun caso.
+//   (b) entrada literal: un fragmento verbatim de la entrada de un caso.
+// Ninguna de las dos imprime el texto filtrado — solo donde esta. Un mensaje de error que
+// cita la fuga la copia a los logs.
+const ARCHIVOS_TEXTO = /\.(md|mjs|ts|tsx|json)$/;
+let versionados = [];
+try {
+  versionados = execFileSync('git', ['ls-files'], { cwd: raiz, encoding: 'utf8' })
+    .split('\n')
+    .filter((f) => f && ARCHIVOS_TEXTO.test(f));
+} catch { /* sin git no hay nada que comprobar */ }
+
+const ID_CASO = /\bT\d{1,2}\b/;
+const CONTROL_MEDIBLE = /\bC[13-7]\b/;
+const mapeos = [];
+for (const archivo of versionados) {
+  const contenido = lee(archivo);
+  if (contenido === null) continue;
+  for (const bloque of contenido.split(/\n\s*\n/)) {
+    if (ID_CASO.test(bloque) && CONTROL_MEDIBLE.test(bloque)) {
+      mapeos.push(archivo);
+      break;
+    }
+  }
+}
+comprueba(
+  'el arbol de trabajo no mapea ningun caso-trampa a su control',
+  mapeos.length === 0,
+  `mapeo caso->control en: ${[...new Set(mapeos)].join(', ')} — una sesion fria lo lee y ` +
+    'reconoce el caso. Se redacta como las fugas anteriores; el contenido va a golden-sets',
+);
+
+if (corpusRama) {
+  const normaliza = (t) => t.toLowerCase().replace(/[^a-z0-9áéíóúüñ ]+/gi, ' ').replace(/\s+/g, ' ').trim();
+  const arbol = normaliza(
+    versionados.map((f) => lee(f) ?? '').join(' \n '),
+  );
+  const filtrados = [];
+  const bloquesCaso = corpusRama.split(/^## /m).slice(1);
+  for (const bloque of bloquesCaso) {
+    const id = (bloque.match(/^(T\d{1,2})/) ?? [])[1];
+    const entrada = (bloque.match(/\*\*Entrada:\*\*([\s\S]*?)\n\s*\n/) ?? [])[1];
+    if (!id || !entrada) continue;
+    const palabras = normaliza(entrada).split(' ');
+    for (let i = 0; i + 8 <= palabras.length; i++) {
+      if (arbol.includes(palabras.slice(i, i + 8).join(' '))) {
+        filtrados.push(id);
+        break;
+      }
+    }
+  }
+  comprueba(
+    'ninguna entrada del corpus aparece verbatim en el arbol de trabajo',
+    filtrados.length === 0,
+    `caso(s) con entrada filtrada: ${filtrados.join(', ')} — el sujeto la reconoce al leer ` +
+      'el repo. Retirar el texto (redaccion marcada) antes de volver a medir',
+  );
+}
+
 // --- 4. prp-base.md gana sus secciones (el segundo cable) ------------------
 const prpBase = lee('.claude/PRPs/prp-base.md') ?? '';
 comprueba(
