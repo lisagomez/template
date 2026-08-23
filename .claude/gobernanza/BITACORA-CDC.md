@@ -630,6 +630,6 @@ diff, sin regresión y sin aprobación.
   cambia comportamiento: retira contenido instanciado)* · aprobación humana ☐ · pineo ☑
 - **Regresión**: verificador **75/75** — el registro vacío sigue satisfaciendo la
   comprobación de existencia y la marca append-only, que era la duda.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("termina la firma"). Aprueba retirar las entradas del registro de incidentes, el registro vacio como lo que se hereda, y la reescritura de la leccion en CLAUDE.md. NO decide sobre la bitacora, que sigue narrando el incidente: es otra decision.
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
