@@ -36,6 +36,23 @@
 **Storage (tablas Supabase sugeridas):**
 - `[tabla]`: [descripción] — RLS habilitada
 
+### Respaldo — qué pierde ESTE proyecto si arde el servidor
+
+> No hay respaldo implícito. **Lo que no esté en esta tabla, no se respalda.** El
+> inventario completo, la regla para decidir criticidad y los gates de verificación
+> están en **[`docs/FASE0-INFRAESTRUCTURA.md`](docs/FASE0-INFRAESTRUCTURA.md) §9**.
+
+Regla de criticidad, en una pregunta: **¿se puede reconstruir?**
+Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** → respaldo inmutable.
+
+| Activo del proyecto | ¿Reconstruible? | Criticidad | Destino |
+|---|---|---|---|
+| Datos en Supabase | [no / con trabajo] | [Crítica] | PITR + dump lógico |
+| `.env.production` | No — contiene secretos | Crítica | Cifrado con `age`, fuera del servidor |
+| [activo propio] | | | |
+
+**RPO / RTO:** [desconocidos hasta cerrar GATE 3 — no se declaran antes de medirlos]
+
 ## 5. KPI de Éxito
 
 **Métrica principal:** [Cómo se sabe que funcionó]
@@ -78,6 +95,9 @@ TypeScript + Tailwind 3.4, Supabase (Auth + DB + RLS), Zod, Zustand, Playwright.
 4. [ ] Testing E2E (`/playwright-cli`)
 5. [ ] `npm run validate` en verde (typecheck + build + gobernanza)
 6. [ ] Deploy
+7. [ ] Infraestructura de agentes, si aplica, y **respaldo con GATE 3 cerrado**
+   (`docs/FASE0-INFRAESTRUCTURA.md`). Un respaldo sin restauración probada no cuenta
+   como paso hecho
 
 ---
 

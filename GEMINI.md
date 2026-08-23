@@ -54,6 +54,11 @@ Usuario dice algo
     |       → Vercel CLI o git push
     |       → Servidor propio (Hetzner cx33): `npm run deploy` + docs/DEPLOY-HETZNER.md
     |
+    ├── "Levantar agentes" / "respaldos" / "backup" / "conecta el bot de Telegram/Slack"
+    |       → `docs/FASE0-INFRAESTRUCTURA.md` (2 verticales: negocio + clientes)
+    |         Que se respalda es POR PROYECTO: inventario en BUSINESS_LOGIC.md §4
+    |         Sin GATE 3 cerrado NO se declaran RPO/RTO. Chat externo: C3 + C4 primero
+    |
     └── No encaja en nada
             → Usar tu juicio segun el tipo de tarea
 ```
@@ -165,9 +170,17 @@ execute_sql, apply_migration, list_tables, get_advisors
 - `service_role` tiene **BYPASSRLS**: las superficies de negocio NO lo usan (control C7)
 - `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
 - Toda accion irreversible pasa por gate humano
-- **CDC (C1)**: cambiar modelo, skill, prompt, plantilla, `settings.json`, `model` o
-  `.mcp.json` exige diff + regresion + aprobacion + entrada en `BITACORA-CDC.md`. El modelo
-  va PINEADO: `latest` es anti-patron
+- **CDC (C1)**: cambiar modelo, skill, prompt, plantilla, `settings.json`, `model`,
+  `.mcp.json` o **el tag de una imagen de agente** exige diff + regresion + aprobacion +
+  entrada en `BITACORA-CDC.md`. PINEADO siempre: `latest` es anti-patron en el modelo y
+  en la imagen Docker
+- **Respaldo (contrato, no costumbre)**: no hay respaldo implicito. Lo que no este en el
+  inventario de `BUSINESS_LOGIC.md` §4 / `docs/FASE0-INFRAESTRUCTURA.md` §9.1 no se
+  respalda. Un respaldo sin restauracion probada no es un respaldo: **RPO/RTO no se
+  declaran hasta cerrar GATE 3**. Operar sin cerrarlo es riesgo aceptado (C5)
+- **Canales de chat externos** (Telegram, Slack, WhatsApp, cualquier bot): superficie de
+  entrada NO autenticada hacia un agente con llaves. No se conectan sin modelo de amenazas
+  (C3), AISIA (C4) y gate humano para toda accion irreversible disparada desde el chat
 - **Riesgo aceptado (C5)**: si insisten en romper una regla, exiges entrada firmada en
   `REGISTRO-RIESGO.md`. No lo haces "porque lo pidieron"
 - **Riesgos INFIRMABLES (limite de C5)**: si el dano recae sobre terceros que no firmaron

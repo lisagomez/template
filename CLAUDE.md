@@ -64,6 +64,13 @@ Usuario dice algo
     |       → Vercel CLI o git push
     |       → Servidor propio (Hetzner cx33): `npm run deploy` + docs/DEPLOY-HETZNER.md
     |
+    ├── "Quiero levantar los agentes" / "respaldos" / "backup" / "que no se pierda nada"
+    |   "conecta el bot de Telegram/Slack" / "notificame por chat"
+    |       → `docs/FASE0-INFRAESTRUCTURA.md` (2 verticales: negocio + clientes)
+    |         Que se respalda es POR PROYECTO: inventario en BUSINESS_LOGIC.md §4.
+    |         Sin GATE 3 cerrado NO se declaran RPO/RTO — se declara "desconocidos"
+    |         Canal de chat externo: NO se conecta sin C3 + C4 (ver Reglas de Codigo)
+    |
     ├── "Quiero remover SaaS Factory"
     |       → Ejecutar skill EJECT-SF (DESTRUCTIVO, confirmar antes)
     |
@@ -279,9 +286,20 @@ execute_sql, apply_migration, list_tables, get_advisors
 - Las salidas del LLM NO se confian por diseno: quien verifica re-ejecuta los gates de cero
 - Toda accion irreversible (migracion destructiva, envio, cobro) pasa por gate humano
 - **CDC (C1)**: cambiar el modelo, un skill, un prompt, una plantilla, `settings.json`,
-  el campo `model` o `.mcp.json` exige diff + regresion (`npm run regresion`) + aprobacion
-  humana + entrada en `.claude/gobernanza/BITACORA-CDC.md`. El modelo va PINEADO: `latest`
-  y cualquier alias auto-actualizable son anti-patron
+  el campo `model`, `.mcp.json` o **el tag de una imagen de agente** exige diff +
+  regresion (`npm run regresion`) + aprobacion humana + entrada en
+  `.claude/gobernanza/BITACORA-CDC.md`. El modelo va PINEADO: `latest` y cualquier alias
+  auto-actualizable son anti-patron — vale igual para el modelo y para la imagen Docker
+- **Respaldo (contrato, no costumbre)**: **no hay respaldo implicito**. Lo que no este en
+  el inventario de `BUSINESS_LOGIC.md` §4 / `docs/FASE0-INFRAESTRUCTURA.md` §9.1 no se
+  respalda, y el dia que arda el servidor no existe. Un respaldo sin restauracion probada
+  no es un respaldo: **RPO/RTO no se declaran hasta cerrar GATE 3** — antes son
+  "desconocidos", no una cifra bonita. Operar sin cerrarlo es riesgo aceptado (C5)
+- **Canales de chat externos** (Telegram, Slack, WhatsApp, cualquier bot): son superficie
+  de entrada **no autenticada** hacia un agente que tiene llaves. NO se conectan sin
+  modelo de amenazas de esa superficie (C3), AISIA de lo que el agente decide sobre
+  terceros (C4) y gate humano para toda accion irreversible que se dispare desde el chat.
+  "Solo conectalo rapido" es exactamente el atajo que esta regla existe para frenar
 - **Riesgo aceptado (C5)**: si el usuario insiste en algo que rompe una de estas reglas,
   NO lo haces "porque lo pidio". Exiges entrada firmada en
   `.claude/gobernanza/REGISTRO-RIESGO.md` con decision, riesgo, mitigaciones y firma.

@@ -217,6 +217,31 @@ npm run deploy:logs
 
 Runbook completo (hardening, swap, DNS, TLS, gotchas): **[docs/DEPLOY-HETZNER.md](docs/DEPLOY-HETZNER.md)**
 
+## Agentes e infraestructura (Fase 0)
+
+Los proyectos que corren **agentes Hermes** junto a la app tienen su propio runbook:
+dos contenedores (`negocio` y `clientes`), dashboard por tunel SSH y —lo que de verdad
+importa— un **contrato de respaldo con restauracion verificada**.
+
+```bash
+# en el servidor de agentes
+docker compose up -d          # 2 verticales + dashboard
+ssh -L 9119:localhost:9119 deploy@IP   # unico canal de acceso en Fase 0
+```
+
+Runbook completo: **[docs/FASE0-INFRAESTRUCTURA.md](docs/FASE0-INFRAESTRUCTURA.md)**
+
+| Decision | Como queda |
+|----------|-----------|
+| Dos verticales, no una | `negocio` (datos propios) y `clientes` (datos de terceros). La separacion es de **radio de dano**, no organizativa: una fuga en una no expone a la otra |
+| Canales de chat | **Fuera de Fase 0.** Telegram y Slack son superficie de entrada no autenticada: entran con su modelo de amenazas (C3) y su AISIA (C4), no antes |
+| Donde viven los agentes | **Servidor aparte** del de la app. El box de la app es desechable; la memoria del agente es irrecuperable — no se mezclan |
+| Que se respalda | Lo define el **inventario por proyecto** (§9.1 del runbook), con regla explicita de criticidad. Lo que no esta en la tabla, no existe cuando el servidor arda |
+| Que hace real el respaldo | **GATE 1** (el append-only falla de verdad al borrar) y **GATE 3** (restauracion verificada, RTO medido). Sin ellos el respaldo es una creencia |
+
+El tag de la imagen del agente va **pineado**, igual que el modelo: cambiarlo es un CDC
+(C1) con diff, regresion y aprobacion.
+
 ## Estructura .claude/
 
 ```
