@@ -251,7 +251,7 @@
 - **Lo que esto NO cierra**: el corpus completo **no es evidencia**. T12 y T13 siguen **sin
   ejecutar en sesión fría**, igual que T9 y T11. Las dos reglas nuevas siguen sin medición
   real — solo dejaron de estar sin instrumento.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el alta de los casos; su ejecucion en frio NO queda cerrada por esta firma.
 
 ### 2026-08-23 — dos corridas quemadas y lo que enseñaron — radio: ninguno
 > No es un cambio de comportamiento. Es el registro de **dos intentos fallidos** de medir
@@ -311,7 +311,7 @@
 
 - **Lo que sigue abierto**: **las dos reglas nuevas siguen sin una sola medición válida.**
   Dos intentos, cero evidencia. El pendiente 1 del CDC del cableado no se ha cerrado.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el registro de los dos intentos fallidos y la regla de contaminacion que salio de ellos.
 
 ### 2026-08-23 — T12: primera medición válida de capa B — radio: ninguno
 > No es un cambio de comportamiento: es **evidencia**, la que faltaba desde el CDC del
@@ -338,7 +338,7 @@
   Verificado de forma independiente. Mismo patrón que "el gate estaba fuera de la ruta de
   deploy": el control existía y no estaba en la ruta. **Pendiente de arreglo** — es un
   cambio propio, no se cuela en esta entrada.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el veredicto. El hallazgo del .gitignore queda declarado, no cerrado por esta firma (se cerro aparte).
 
 ### 2026-08-23 — T13 verde-plus · **se cierra el pendiente 1 del CDC del cableado** — radio: ninguno
 > No es un cambio de comportamiento: es la evidencia que faltaba, y el cierre del único
@@ -368,7 +368,7 @@
   del caso que medían.** La capa B rinde más como auditoría que como examen — el valor no
   está solo en el veredicto, sino en lo que el sujeto ve del sistema mientras se le mide.
   Los dos huecos se arreglan en la entrada siguiente.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el veredicto y el cierre del pendiente 1. Los demas pendientes de aquel CDC siguen abiertos.
 
 ### 2026-08-23 — se cierran los dos huecos que encontró la capa B — radio: menor
 > Los dos los aportaron sujetos de prueba, y **ninguno era del caso que medían**.
@@ -408,7 +408,7 @@ tener un RPO real de 24h.
   probado en las dos**: al quitar un servidor del ejemplo, falla y nombra cuál; al poner un
   valor que no es placeholder, falla y nombra la clave. Un verificador que nunca falla no
   verifica.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba los dos arreglos y sus comprobaciones nuevas, con control negativo probado.
 
 ### 2026-08-23 — el verificador vigila las reglas nuevas — radio: menor
 > Cierra el último pendiente del CDC del cableado que no dependía de provisionar nada.
@@ -438,6 +438,6 @@ tener un RPO real de 24h.
   aplica: cambia el gate, no el comportamiento del agente)* · aprobación humana ☐ · pineo ☑
 - **Regresión**: verificador 67/67. **Control negativo ejecutado en las seis**, borrando
   cada regla de cada archivo por separado y confirmando el rojo con el nombre correcto.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba las 6 comprobaciones nuevas y el reanclaje de la que nacio decorativa.
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
