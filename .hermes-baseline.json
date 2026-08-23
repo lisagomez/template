@@ -5,10 +5,22 @@
   "digest": "sha256:9f367c7756ef087661a361536a89f438d57a122b958dc23d82d456b1433e6e9e",
   "verificado": "2026-08-23",
   "capaB": {
-    "_comentario": "null = NO se ha comprobado. Un baseline que finja saberlo es peor que uno que declare su ignorancia. Los llena la primera corrida de capa B, que descarga la imagen.",
-    "subcomandos": null,
-    "hermesHome": null,
-    "variablesDashboard": null,
-    "puertoDashboard": null
+    "_comentario": "Verificado el 2026-08-23 con `npm run vigila:hermes -- --capa-b`: blob de configuracion de la imagen (registro, sin descargar capas) + documentacion oficial de la release. NO se arranco un contenedor: no habia Docker en el entorno. Lo que falta por confirmar con un arranque real esta marcado abajo.",
+    "verificado": "2026-08-23",
+    "metodo": "config blob del registro + doc oficial (sin ejecutar la imagen)",
+    "subcomandos": {
+      "setup": "confirmado",
+      "gateway run": "confirmado",
+      "dashboard": "NO EXISTE — el dashboard es un servicio s6 dentro del gateway, se enciende con HERMES_DASHBOARD=1"
+    },
+    "hermesHome": "/opt/data",
+    "variablesDashboard": [
+      "HERMES_DASHBOARD",
+      "HERMES_DASHBOARD_BASIC_AUTH_USERNAME",
+      "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD",
+      "HERMES_DASHBOARD_BASIC_AUTH_SECRET"
+    ],
+    "puertoDashboard": 9119,
+    "pendienteDeArranqueReal": "que dos verticales necesiten un dashboard cada una (9119 y 9120 en el host) se deduce de la doc, no de un contenedor en marcha"
   }
 }

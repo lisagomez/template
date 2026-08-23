@@ -72,8 +72,14 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
    - **Verificado el 2026-08-23** contra el registro público: el repositorio existe, el tag
      pineado `v2026.6.19` sigue publicado, y hay **11 releases más nuevas** (última
      `v2026.8.19`, del 2026-08-21). Digest del pineado guardado como ancla.
-   - **Sin verificar**: subcomandos, `HERMES_HOME` y variables `DASH_*`. Requiere descargar
-     la imagen — es la capa B del SDD, y es lo único que queda de este punto.
+   - **Capa B corrida el 2026-08-23, y el runbook mentía en cuatro puntos**: las tres
+     variables `DASH_*` no existen (son `HERMES_DASHBOARD_BASIC_AUTH_*`) y `command:
+     dashboard` no arranca nada — el dashboard es un servicio s6 dentro del gateway, con
+     `HERMES_DASHBOARD=1`. Un servidor provisionado con el compose viejo habría tenido dos
+     agentes y ningún dashboard, creyendo además que tenía autenticación. Corregido.
+   - **No hizo falta Docker**: el blob de configuración del registro da entorno y entrypoint;
+     la doc oficial, subcomandos y variables. Lo que sigue sin probarse es un **arranque
+     real**, y así está marcado en el baseline.
    - **El lazo está implementado** (2026-08-23, CDC firmado): `scripts/verifica-hermes.mjs`
      (capa A), ancla en `.hermes-baseline.json`, tres comprobaciones en el verificador y
      `npm run vigila:hermes`. **El cron semanal es del entorno**, no del template.

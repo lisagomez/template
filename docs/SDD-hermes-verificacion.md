@@ -1,8 +1,9 @@
 # SDD — Mantener Hermes al día y verificar sus datos técnicos
 
-**Estado:** **implementado el 2026-08-23** (CDC firmado) — capa A en
-`scripts/verifica-hermes.mjs`, ancla en `.hermes-baseline.json`, tres comprobaciones en el
-verificador. **Falta la capa B** (§3), que descarga la imagen, y el cron semanal.
+**Estado:** **implementado y corrido el 2026-08-23** (dos CDC firmados) — capa A y capa B
+en `scripts/verifica-hermes.mjs`, ancla en `.hermes-baseline.json`, tres comprobaciones en
+el verificador. La capa B destapó **cuatro afirmaciones falsas del runbook**, ya corregidas.
+**Falta**: el cron semanal (del entorno) y probar la topología con un contenedor real.
 **Ámbito:** el diseño y el script viajan con el template; **la ejecución semanal es del
 entorno** de cada proyecto (un cron, en la máquina o el servidor que lo corra).
 
@@ -87,13 +88,21 @@ pineo. Es lo que convierte "hay una versión nueva" en "la versión nueva sirve"
 
 | # | Afirmación del runbook | Cómo se comprueba |
 |---|---|---|
-| **B1** | Existen los subcomandos `setup`, `gateway run`, `dashboard` | Ejecutar la imagen con `--help` y buscarlos en la salida |
-| **B2** | `HERMES_HOME` es `/opt/data` | Inspeccionar el entorno de la imagen |
-| **B3** | El dashboard usa `DASH_USER` / `DASH_PASS` / `DASH_SECRET` | Documentación de la release + arranque en seco del dashboard |
-| **B4** | El dashboard escucha en `9119` | Puertos expuestos de la imagen |
+| # | Afirmación | Cómo se comprueba | Corrida 2026-08-23 |
+|---|---|---|---|
+| **B1** | Los subcomandos que el runbook usa existen | La doc oficial los muestra **invocados en la CLI** (verlos en prosa no cuenta) | ✅ `setup`, `gateway run` · ❌ **`dashboard` no existe**: es un servicio s6 con `HERMES_DASHBOARD=1` |
+| **B2** | `HERMES_HOME` es `/opt/data` | Entorno del **blob de configuración** de la imagen | ✅ |
+| **B3** | Las variables del dashboard existen | Documentación de la release | ❌ **`DASH_USER`/`DASH_PASS`/`DASH_SECRET` no existen** → `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/`_PASSWORD`/`_SECRET` |
+| **B4** | El dashboard escucha en `9119` | `HERMES_DASHBOARD_PORT` en la doc; `ExposedPorts` de la imagen | ✅ (la imagen no declara `EXPOSE`: es metadato, su ausencia no prueba nada) |
 
 **Cada B que falle es un cambio incompatible**, y su sitio es el CDC de la actualización —
-no una sorpresa el día que alguien provisione un servidor.
+no una sorpresa el día que alguien provisione un servidor. Las cuatro afirmaciones se leen
+**del propio runbook**, así que el control sigue al documento en vez de a una copia.
+
+**No hace falta descargar la imagen.** El diseño decía "cara, descarga imágenes"; la
+implementación descubrió que el blob de configuración del registro basta para el entorno y
+el entrypoint, y la documentación oficial para lo demás. Lo que sigue costando un contenedor
+real es la **topología**: que dos verticales necesiten dos dashboards se deduce, no se probó.
 
 ---
 
@@ -112,7 +121,7 @@ zona horaria configurada, no lo que crea quien lo escribió.
 
 ## 5. Escalada — cómo se decide actuar, y cómo se evita el sello de goma
 
-Un informe semanal que diga *"13 releases por detrás"* todas las semanas deja de leerse a
+Un informe semanal que diga *"11 releases por detrás"* todas las semanas deja de leerse a
 la tercera. Eso es **O3, la fatiga de aprobación**, y es el modo de falla más probable de
 este mecanismo: no que deje de correr, sino que corra y nadie lo mire.
 
@@ -244,8 +253,12 @@ Este documento especificaba; el 2026-08-23 se implementó la capa A. Estado real
 3. ✅ Tres comprobaciones en `verify:gobernanza`: que el ancla exista, que su imagen y tag
    **coincidan con el compose del runbook**, y que declare un digest con forma válida.
    Miran papel contra papel, sin red — el gate no depende de la red.
-4. ⬜ **Primera corrida de la capa B**, que cerraría el pendiente *"los datos técnicos de
-   Hermes no se re-verificaron"*. Requiere descargar la imagen.
+4. ✅ **Primera corrida de la capa B** (2026-08-23): `--capa-b` en el mismo script. **No
+   hizo falta descargar la imagen**: el blob de configuración del registro da entorno y
+   entrypoint, y la documentación oficial cubre subcomandos y variables. Resultado: **4
+   afirmaciones del runbook eran falsas** (los tres nombres de variables del dashboard y el
+   subcomando `dashboard`), corregidas en el CDC del mismo día. Lo que sigue sin probarse es
+   el **arranque real de un contenedor**: aquí no hay Docker.
 5. ⬜ El cron semanal — **en el entorno**, no en el template. `npm run vigila:hermes`.
 
 **Un hallazgo de la primera corrida**: `latest` y `main` no son releases, y contarlos como
