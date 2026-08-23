@@ -10,6 +10,7 @@
  * nada obliga a mantener se pudre en silencio.
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -47,7 +48,6 @@ function existeEnRepo(basename, desde = raiz) {
 const documentos = [
   `${GOB}/GOBERNANZA.md`,
   `${GOB}/golden-sets/contratos.json`,
-  `${GOB}/golden-sets/casos-trampa.md`,
   `${GOB}/REGISTRO-RIESGO.md`,
   `${GOB}/BITACORA-CDC.md`,
   `${GOB}/plantillas/aisia.md`,
@@ -200,13 +200,28 @@ if (pkg !== null) {
   );
 }
 
-// --- 3h. El corpus de casos-trampa no expone sus expectativas ---------------
-const corpus = lee(`${GOB}/golden-sets/casos-trampa.md`);
-if (corpus !== null) {
+// --- 3h. El corpus vive FUERA del arbol de trabajo, en su propia rama -------
+comprueba(
+  'el corpus de casos-trampa NO esta en el arbol de trabajo',
+  !existsSync(ruta(`${GOB}/golden-sets/casos-trampa.md`)),
+  'si esta en disco, una sesion fria lo encuentra leyendo el directorio (paso 2 veces)',
+);
+let corpusRama = null;
+try {
+  corpusRama = execFileSync('git', ['show', 'golden-sets:casos-trampa.md'], {
+    cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
+  });
+} catch { /* la rama no existe o no tiene el archivo */ }
+comprueba(
+  'el corpus es recuperable desde la rama golden-sets',
+  corpusRama !== null,
+  'sin la rama, C2 capa B queda inaccesible: git show golden-sets:casos-trampa.md',
+);
+if (corpusRama) {
   comprueba(
-    'las expectativas del corpus estan codificadas',
-    !/\*\*Expectativa:\*\*/.test(corpus) && /Expectativa \(b64\)/.test(corpus),
-    'en texto plano, un agente frio las lee y la prueba deja de ser ciega (paso el 2026-08-23)',
+    'las expectativas del corpus siguen codificadas',
+    !/\*\*Expectativa:\*\*/.test(corpusRama) && /Expectativa \(b64\)/.test(corpusRama),
+    'defensa en profundidad: si alguien saca la rama, que no las lea de un vistazo',
   );
 }
 

@@ -13,12 +13,14 @@
  * Verde = promovible. Rojo = el cambio de modelo/skill NO se promueve.
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR_SKILLS = join(raiz, '.claude/skills');
 const DIR_GOLDEN = join(raiz, '.claude/gobernanza/golden-sets');
+const RAMA_CORPUS = 'golden-sets';
 const modoTrampa = process.argv.includes('--trampa');
 
 const fallos = [];
@@ -27,12 +29,19 @@ const anota = (desc, cond, pista) => (cond ? ok.push(desc) : fallos.push({ desc,
 
 // ---------------------------------------------------------------- capa B
 if (modoTrampa) {
-  const ruta = join(DIR_GOLDEN, 'casos-trampa.md');
-  if (!existsSync(ruta)) {
-    console.error('No existe el corpus de casos-trampa. C2 capa B esta vacia.');
+  // El corpus NO vive en el arbol de trabajo: se saco a su propia rama para que una
+  // sesion fria que trabaja en main no lo encuentre leyendo el directorio (paso dos
+  // veces, casos T2 y T9). Se lee de la rama, nunca se materializa en disco.
+  let corpus;
+  try {
+    corpus = execFileSync('git', ['show', `${RAMA_CORPUS}:casos-trampa.md`], {
+      cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
+    });
+  } catch {
+    console.error(`No se pudo leer el corpus de la rama "${RAMA_CORPUS}".`);
+    console.error('C2 capa B esta inaccesible: git show ' + RAMA_CORPUS + ':casos-trampa.md');
     process.exit(1);
   }
-  const corpus = readFileSync(ruta, 'utf8');
   const casos = [...corpus.matchAll(/^##\s+(T\d+)\s*·\s*(.+)$/gm)];
   const esperado = new Map();
   anota(`el corpus declara casos (${casos.length})`, casos.length > 0, 'corpus vacio');

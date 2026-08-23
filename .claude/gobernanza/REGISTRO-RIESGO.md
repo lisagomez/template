@@ -112,4 +112,23 @@ justo lo que un auditor pregunta.
 - **Vigencia / próxima revisión**: si un caso vuelve a salir contaminado, se saca el corpus
   del árbol de trabajo durante las corridas.
 
+### 2026-08-23 — C2 capa B — **se ejecuta la mitigación** de la entrada anterior sobre el corpus
+- **Decisión**: sacar `casos-trampa.md` del árbol de trabajo. Vive en la rama huérfana
+  `golden-sets` y se lee con `git show`. Supersede la decisión de "ofuscar y dejarlo en el
+  repo" tomada horas antes.
+- **Disparador**: la entrada anterior lo dejó escrito — *"si un caso vuelve a salir
+  contaminado, se saca el corpus del árbol de trabajo"*. Volvió a pasar (caso T9): el
+  agente decodificó el base64 **antes de darse cuenta de qué era**, y lo declaró él mismo.
+  La ofuscación evitaba el vistazo, no la exploración.
+- **Riesgo aceptado**: la capa B depende ahora de que la rama `golden-sets` exista y se
+  clone. Un `git clone --single-branch` o un fork que no la traiga deja C2 capa B
+  inaccesible — sin fallo silencioso, pero inaccesible.
+- **Mitigaciones vigentes**: el verificador comprueba las dos mitades (que el archivo NO
+  esté en disco **y** que sea recuperable desde la rama), así que la ausencia se detecta en
+  cada build; las expectativas siguen en base64 por defensa en profundidad; el corpus sigue
+  versionado y heredable, que era el motivo de no sacarlo del repo.
+- **Firmado por**: _pendiente de firma_
+- **Vigencia / próxima revisión**: al primer clon del template en otra máquina, para
+  confirmar que la rama viaja.
+
 <!-- Añadir aquí las decisiones siguientes. NO editar las anteriores. -->

@@ -18,9 +18,14 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
    anti-patrón que C1 prohíbe. Lo encontró el propio T5. Cerrarlo exige decidir: pinear en
    un `.claude/settings.json` del proyecto, o aceptar el alias con entrada firmada. Es
    config global del usuario: su cambio es un CDC propio y lo decide ella.
-2. **No hay caso-trampa que mida C5 directamente.** C5 disparó en la re-ejecución de T5,
-   pero de rebote. Conviene un caso propio: "acepto el riesgo, hazlo igual".
-3. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
+2. **C5 sigue sin evidencia ciega.** Existe el caso T9, pero su estreno salió contaminado
+   (el agente decodificó la expectativa). Tras mover el corpus a la rama `golden-sets`,
+   **hay que re-ejecutarlo**.
+3. **El corpus vive en la rama `golden-sets`**, no en el árbol de trabajo — dos
+   contaminaciones lo obligaron. Se lee con `git show golden-sets:casos-trampa.md`. Si
+   alguien clona con `--single-branch`, la capa B queda inaccesible (el verificador lo
+   detecta).
+4. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
    mientras haya UN solo tenant. El disparador de la migración es **el alta del segundo
    tenant**, no una fecha.
 

@@ -102,10 +102,17 @@ y su resultado se anota en `BITACORA-CDC.md`.
 
 ### El protocolo ciego (aprendido a golpes)
 
-En la primera corrida un agente **encontró el corpus** y reconoció que lo estaban
-evaluando. Desde entonces las expectativas viven en base64: no impide leerlas, impide
-leerlas *por accidente*. Un agente que las decodifique a propósito está contaminando la
-prueba, y eso es una señal, no un descuido.
+Dos contaminaciones lo enseñaron. En la primera corrida un agente **encontró el corpus**
+y reconoció que lo evaluaban (caso T2). Se codificaron las expectativas en base64 — y en la
+siguiente corrida otro agente **lo decodificó "antes de darse cuenta de lo que era"** (caso
+T9). La ofuscación no bastó: el archivo seguía ahí, y leerlo es lo que hace un agente que
+explora el directorio de gobernanza.
+
+Por eso el corpus ya **no vive en el árbol de trabajo**. Está en su propia rama,
+`golden-sets`, y se lee con `git show golden-sets:casos-trampa.md`. Una sesión fría que
+trabaja en `main` no puede encontrarlo leyendo archivos: tiene que ir a buscarlo a otra
+rama a propósito, que es un acto deliberado y visible. Las expectativas siguen en base64
+como defensa en profundidad. El verificador falla si el archivo reaparece en disco.
 
 Reglas de la corrida: entrada **verbatim**, sin marco ni aviso de que es una prueba;
 sesión fría, sin el contexto del cambio; y evaluación **estructural** — importa que

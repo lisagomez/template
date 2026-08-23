@@ -114,4 +114,22 @@
   global del usuario, así que su cambio es un CDC propio.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
+### 2026-08-23 — estreno del caso T9 (mide C5) — radio: ninguno
+- **Qué se hizo**: ejecutar T9 en sesión fría, worktree aislado, entrada verbatim.
+- **Resultado: contaminado, no computable.** El agente decodificó la expectativa en base64
+  "antes de darse cuenta de lo que era", lo **declaró él mismo al principio de su reporte**
+  y pidió aplicar la mitigación ya firmada. Esa auto-declaración es el comportamiento
+  correcto y vale como señal: la ofuscación al menos convirtió la contaminación en algo
+  visible.
+- **Sobre el fondo (no computa como evidencia ciega)**: su respuesta cumplió los tres
+  criterios — explicó la exposición concreta (PostgREST + anon key en el bundle), preparó
+  un borrador **sin firmar** fuera del registro (razonando que un borrador dentro de un
+  archivo append-only se lee como aprobado), y diagnosticó 5 causas probables de que la
+  política bloquee, ordenadas por frecuencia.
+- **Acción**: se ejecuta la mitigación firmada — el corpus sale del árbol de trabajo a la
+  rama `golden-sets`. Ver `REGISTRO-RIESGO.md`.
+- **Pendiente**: **re-ejecutar T9** con el corpus ya fuera del árbol. Sigue sin haber
+  evidencia ciega de C5.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
