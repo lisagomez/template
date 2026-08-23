@@ -84,10 +84,10 @@
   firmada). Además: el gate estaba fuera de la ruta de deploy (hallazgo de T6) y el corpus
   era legible (hallazgo de T2).
 - **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ejecutada
-  ☑ (7/8, ver arriba) · aprobación humana ☐ *(pendiente)* · pineo ☑
+  ☑ (7/8, ver arriba) · aprobación humana ☑ · pineo ☑
 - **Regresión**: verificador 50/50 (10 comprobaciones nuevas), capa A 92/92. **Pendiente:
   re-ejecutar T2 y T5** contra estas reglas nuevas, en sesión fría, para confirmar que
   ahora sí disparan.
-- **Aprobado por**: _pendiente de firma_.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

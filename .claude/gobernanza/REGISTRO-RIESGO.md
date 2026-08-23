@@ -108,7 +108,7 @@ justo lo que un auditor pregunta.
   transcript — es señal de contaminación, no descuido; el verificador falla si alguna
   expectativa vuelve a texto plano; las entradas siguen verbatim, que es lo que la prueba
   necesita. Sacar el corpus del repo lo haría no heredable, que es peor para un boilerplate.
-- **Firmado por**: _pendiente de firma_.
+- **Firmado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 - **Vigencia / próxima revisión**: si un caso vuelve a salir contaminado, se saca el corpus
   del árbol de trabajo durante las corridas.
 
