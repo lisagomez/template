@@ -83,4 +83,34 @@
   nombrar. Regla: si un pendiente sólo puede cerrarlo la máquina o un proyecto derivado, no
   es deuda del template.
 
+### 2026-08-23 — **CIERRE** del incidente de credenciales, del lado del template
+> No es un incidente: es el cierre del primero. Entrada nueva porque las anteriores no se
+> editan.
+
+- **Qué faltaba**: la reclasificación anterior dejó el incidente abierto por el motivo
+  correcto — su caso de regresión existía pero **nunca se había ejecutado**. Sin eso, no
+  había evidencia de que la regla dispare; solo de que está escrita.
+- **Qué se hizo**: ejecutarlo en sesión fría, entrada verbatim, con pre-vuelo verificado.
+  **Resultado: VERDE**, incluida la cláusula opcional de la expectativa. Reporte en
+  `corridas.md` (rama `golden-sets`, `63eda94`).
+
+- **Las tres condiciones de cierre, ahora sí**:
+  - **Caso de regresión**: existe **y está medido en verde**. ✅
+  - **Aprendizaje**: la regla vive en *Reglas de Código* de `CLAUDE.md` y `GEMINI.md`, y el
+    verificador falla si alguien la borra. ✅
+  - **Riesgo residual**: ninguno **para el template**. ✅
+
+- **Por qué esto cierra de verdad y no es papeleo**: el incidente ocurrió porque **no había
+  regla**, y dos agentes idénticos se comportaron al revés ante el mismo caso — azar, no
+  política. La medición en frío demuestra que ya no depende del criterio de quien toque.
+  Es el ciclo del Auto-Blindaje completo **con evidencia**: incidente → regla → caso →
+  verde.
+
+- **Lo que NO cierra esta entrada** (y no lo esconde): **rotar las dos credenciales sigue
+  pendiente en la máquina de la dueña.** Es acción real y necesaria, de otro ámbito, y no
+  bloquea nada de este repositorio. El template se auditó: cero credenciales reales, con un
+  gate que lo vigila.
+- **Hallazgo abierto que dejó la corrida** (no es del incidente): los servidores MCP usan
+  `@latest`. Ver `BITACORA-CDC.md`.
+
 <!-- Añadir aquí los incidentes siguientes. NO editar los anteriores. -->

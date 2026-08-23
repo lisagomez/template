@@ -552,4 +552,50 @@ tres partes). Reporta archivo y tipo, **nunca el valor**.
   `grep` sobre el propio script. Reescrita sin escapes.
 - **Aprobado por**: _pendiente de firma_
 
+### 2026-08-23 — verde en el caso de la regla de secretos · **incidente cerrado** · los MCP se pinean — radio: plantilla
+
+**1. Corrida en frío: VERDE**, incluida la cláusula opcional de la expectativa. Sin
+contaminación, sin tocar el árbol. Reporte en `corridas.md` (`golden-sets`, `63eda94`).
+- **El pre-vuelo cazó su primera fuga**: la entrada literal del caso y su expectativa
+  estaban en `INCIDENTES.md`, en el árbol de trabajo, en la línea de cierre del incidente
+  que originó la regla. Sin ese paso, cuarta corrida quemada. La regla de contaminación se
+  endureció: fuera de `golden-sets` **no se nombra el identificador en ningún contexto que
+  revele qué mide** — no basta con omitir entrada y expectativa.
+
+**2. Incidente cerrado del lado del template** (ver `INCIDENTES.md`). Las tres condiciones
+se cumplen: caso de regresión existe **y medido en verde**, aprendizaje cableado y vigilado,
+riesgo residual ninguno para el template. **Lo que cierra de verdad**: el incidente ocurrió
+porque no había regla, y dos agentes idénticos se comportaron al revés — azar, no política.
+Ahora hay evidencia de que no depende del criterio de quien toque.
+Sigue pendiente, **en otro ámbito**: rotar las credenciales en la máquina de la dueña.
+
+**3. CDC — los servidores MCP se pinean.** Hallazgo del propio sujeto: `example.mcp.json`
+usaba `@latest` en todo. Es **el anti-patrón que C1 prohíbe para el modelo**, en el archivo
+que C1 ya declaraba material de CDC — y hoy mismo extendimos la regla al tag de la imagen del
+agente sin ver esto. Un MCP que se auto-actualiza cambia las capacidades del agente sin
+diff, sin regresión y sin aprobación.
+- **Qué se pinea** (versiones reales consultadas, no inventadas): `@playwright/mcp@0.0.79`,
+  `chrome-devtools-mcp@1.7.0`, `next-devtools-mcp@0.4.0`,
+  `@supabase/mcp-server-supabase@0.11.0`, `@modelcontextprotocol/server-brave-search@0.6.2`,
+  `firecrawl-mcp@3.24.0`, `@modelcontextprotocol/server-sequential-thinking@2026.7.4`,
+  `firebase-tools@15.28.1`, y la imagen `ghcr.io/czlonkowski/n8n-mcp:2.4.2`.
+- **Un servidor se retira**: `@anthropic-ai/google-workspace-mcp` **no existe en npm** — el
+  ejemplo referenciaba un paquete inexistente que habría fallado en runtime. El skill
+  `google-workspace` usa el CLI `gog`, no un MCP. Se retira con una nota que explica por qué,
+  en vez de borrarlo en silencio.
+- **Ámbito**: se pinea **`example.mcp.json`**, que es lo versionado y lo que hereda cada
+  proyecto. El `.mcp.json` de la máquina es entorno de la dueña y **no se toca**: aplicando
+  la regla de ámbito de hoy, y porque pinear su config viva podría romperle los MCP.
+- **Comprobación nueva**: el verificador falla si `example.mcp.json` recupera cualquier
+  alias auto-actualizable (`@latest`, `:latest`, `@next`, `:main`, `@canary`). **75/75.**
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☑ *(esta
+  entrada registra una corrida)* · aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador 75/75, control negativo probado (devolver un `@latest` pone el
+  gate en rojo nombrando cuál).
+- **Nota de proceso**: al probar el control negativo, un `git checkout` de restauración
+  deshizo el pineo entero. Se rehizo y se verificó. Restaurar con git durante una prueba
+  destructiva borra también el trabajo legítimo del mismo archivo.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

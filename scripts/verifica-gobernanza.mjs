@@ -405,6 +405,21 @@ if (real !== null && ejemplo !== null) {
   );
 }
 
+// Los MCP van PINEADOS, igual que el modelo y la imagen del agente (C1). Un servidor
+// que se auto-actualiza cambia las capacidades del agente sin diff, sin regresion y sin
+// aprobacion. Hallazgo de un sujeto de capa B sobre el archivo que C1 ya gobernaba.
+if (ejemplo !== null) {
+  const flotantes = [];
+  for (const linea of ejemplo.split('\n')) {
+    if (/@latest|:latest|@next\b|:main\b|@canary/.test(linea)) flotantes.push(linea.trim().slice(0, 60));
+  }
+  comprueba(
+    'example.mcp.json pinea sus servidores MCP (sin alias auto-actualizables)',
+    flotantes.length === 0,
+    `flotante(s): ${flotantes.join(' | ')} — es el anti-patron de C1, aqui tambien`,
+  );
+}
+
 // El espejo se versiona: no puede llevar credenciales reales.
 if (ejemplo !== null) {
   let vivos = [];
