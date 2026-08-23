@@ -7,7 +7,7 @@
 (vacio)
 
 ## project/ — Proyectos y decisiones activas
-- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada y firmada 2026-08-23; capa B con 5 mediciones validas en frio, todas verdes; verificador 78/78. Distingue deuda del template vs del entorno.
+- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada y firmada 2026-08-23; capa B con 5 mediciones validas en frio, todas verdes; verificador 80/80. Distingue deuda del template vs del entorno.
 - [Infraestructura de agentes y respaldos](project/infraestructura-agentes.md) — Fase 0 en `docs/FASE0-INFRAESTRUCTURA.md` (2 verticales, sin canales de chat) + SDD de vigilancia de versiones en `docs/SDD-hermes-verificacion.md` (diseñado, sin implementar); el tag pineado lleva 13 releases de rezago. Incluye la regla del corpus: cero identificadores fuera de `golden-sets`, ya con gate.
 
 ## feedback/ — Correcciones y preferencias

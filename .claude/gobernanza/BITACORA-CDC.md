@@ -767,4 +767,30 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 ("sí"). Aprueba retirar todos los identificadores del árbol y sustituir la
   comprobación por la de trazo grueso.
 
+### 2026-08-23 — una entrada sin firmar deja de pasar el gate — radio: menor
+> Sale de un repaso de pendientes, no de una corrida: la última entrada de
+> `REGISTRO-RIESGO.md` llevaba días con `_pendiente de firma_` y **ningún gate la miraba**.
+
+- **Cambio**: comprobación nueva en `verifica-gobernanza.mjs` (bloque 6b) — **toda entrada
+  de `REGISTRO-RIESGO.md` y de `BITACORA-CDC.md` termina con firma o aprobación**, con
+  valor real. Se rechazan los marcadores vacíos (`_pendiente`, `[...]`, `☐`, `TODO`). Solo
+  se miran las entradas reales (tras `## Entradas`): la plantilla del bloque `## Formato`
+  nace vacía a propósito y queda fuera.
+- **Motivo**: el verificador vigilaba que los registros conservaran su **marca**
+  append-only, pero no que sus entradas tuvieran **dueño**. Una decisión de riesgo sin
+  firmar no es una decisión: es un descuido con formato de decisión, y esa diferencia es
+  justo lo que pregunta un auditor. Es la misma forma de fallo de siempre —el control
+  existía, no estaba en la ruta— aplicada al último sitio donde quedaba: la firma.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: cambia el verificador, no el comportamiento del agente)* · aprobación humana ☑ ·
+  pineo ☑
+- **Regresión**: verificador **80/80** (2 comprobaciones nuevas, una por registro), capa A
+  92/92, pre-vuelo del corpus limpio. **Control negativo por los dos lados**: con una firma
+  sustituida por `_pendiente de firma_` → rojo, nombrando la entrada; con la línea de
+  aprobación borrada de una entrada real → rojo. Verde al revertir cada uno. Un tercer
+  intento **falló a propósito y confirmó el alcance**: al borrar la línea de la plantilla de
+  `## Formato`, el gate siguió verde — que es lo correcto.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("sí, agrega la comprobación").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

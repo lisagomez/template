@@ -444,6 +444,32 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6b. Ninguna entrada se queda sin firma -------------------------------
+// Una decision de riesgo sin firmar no es una decision: es un descuido con formato de
+// decision, y esa diferencia es justo lo que pregunta un auditor. Paso el gate una que
+// llevaba dias sin firma porque nada la miraba — la marca append-only si se vigilaba,
+// la firma no. Solo se miran las entradas reales (tras "## Entradas"), no la plantilla
+// del bloque "## Formato", que nace vacia a proposito.
+const FIRMA = /^[-*]\s+\*\*(?:Firmado|Aprobado) por\*\*(?:\s*\([^)]*\))?:\s*(.+)$/m;
+const SIN_VALOR = /^(_?pendiente|\[|☐|todo\b|—\s*$)/i;
+for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`]) {
+  const contenido = lee(registro) ?? '';
+  const cuerpo = contenido.split(/^##\s+Entradas\s*$/m)[1];
+  const sinFirma = [];
+  for (const entrada of (cuerpo ?? '').split(/^### /m).slice(1)) {
+    const titulo = entrada.split('\n')[0].trim();
+    const firma = entrada.match(FIRMA);
+    if (!firma || SIN_VALOR.test(firma[1].trim())) sinFirma.push(titulo.slice(0, 60));
+  }
+  comprueba(
+    `toda entrada de ${registro} esta firmada`,
+    cuerpo !== undefined && sinFirma.length === 0,
+    cuerpo === undefined
+      ? 'no se encontro la seccion "## Entradas": el registro cambio de forma'
+      : `sin firma: ${sinFirma.join(' | ')} — una decision sin dueno no es una decision`,
+  );
+}
+
 // --- 7. C1 muerde sobre .mcp.json -----------------------------------------
 // C1 declara `.mcp.json` material de CDC, pero `.gitignore` lo excluye (y debe: lleva
 // credenciales vivas). Sin superficie trackeada, "diff revisado" es imposible y el
