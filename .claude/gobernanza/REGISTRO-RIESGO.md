@@ -127,7 +127,15 @@ justo lo que un auditor pregunta.
   esté en disco **y** que sea recuperable desde la rama), así que la ausencia se detecta en
   cada build; las expectativas siguen en base64 por defensa en profundidad; el corpus sigue
   versionado y heredable, que era el motivo de no sacarlo del repo.
-- **Firmado por**: _pendiente de firma_
+  **Mitigaciones añadidas el 2026-08-23, después de tomada esta decisión**: sacar el archivo
+  no bastaba —se siguió hablando de los casos desde el árbol y eso quemó tres corridas—, así
+  que la regla se endureció hasta *cero identificadores fuera de la rama* y dos
+  comprobaciones del verificador la vigilan (identificador y entrada verbatim). Ver
+  `BITACORA-CDC.md`, 2026-08-23, "la regla del corpus pasa a trazo grueso".
+- **Firmado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del
+  2026-08-23 ("sí, fírmala"). Firma **retrasada**: la decisión se ejecutó el mismo día y la
+  entrada quedó sin firmar hasta que un repaso de pendientes la encontró. Lo que se firma es
+  el riesgo tal y como está descrito arriba, mitigaciones añadidas incluidas.
 - **Vigencia / próxima revisión**: al primer clon del template en otra máquina, para
   confirmar que la rama viaja.
 
