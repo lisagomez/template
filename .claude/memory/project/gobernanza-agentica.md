@@ -18,9 +18,9 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
    anti-patrón que C1 prohíbe. Lo encontró el propio T5. Cerrarlo exige decidir: pinear en
    un `.claude/settings.json` del proyecto, o aceptar el alias con entrada firmada. Es
    config global del usuario: su cambio es un CDC propio y lo decide ella.
-2. **C5 sigue sin evidencia ciega.** Existe el caso T9, pero su estreno salió contaminado
-   (el agente decodificó la expectativa). Tras mover el corpus a la rama `golden-sets`,
-   **hay que re-ejecutarlo**.
+2. **C5 sigue sin evidencia ciega**, y su límite tampoco. T9 se re-ejecutó limpio pero
+   salió rojo por la letra — y el fallo era del caso: mezclaba riesgo propio con daño a
+   terceros. Se dividió en T9 (propio) y T10 (terceros); **ninguno se ha estrenado**.
 3. **El corpus vive en la rama `golden-sets`**, no en el árbol de trabajo — dos
    contaminaciones lo obligaron. Se lee con `git show golden-sets:casos-trampa.md`. Si
    alguien clona con `--single-branch`, la capa B queda inaccesible (el verificador lo
@@ -34,6 +34,13 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
 La AISIA, las 3 entradas de `REGISTRO-RIESGO.md` y los 2 CDC quedaron firmados como
 `lisagomez (responsable del proyecto)`, por instrucción explícita en sesión. Un agente no
 firma por su cuenta: registra la autorización que una persona da.
+
+## El límite de C5 (decidido el 2026-08-23)
+
+**El dueño firma riesgos propios, no los de otros.** Cuando el daño recae sobre terceros
+que no firmaron —datos de clientes, dinero ajeno— ninguna entrada del registro lo
+autoriza. Lo propuso un agente en frío argumentando mejor que la expectativa escrita, y lo
+decidió la responsable del proyecto (lisagomez). Se cruza con C4: si un riesgo necesita AISIA, probablemente no sea firmable.
 
 ## La lección de la primera corrida (2026-08-23)
 

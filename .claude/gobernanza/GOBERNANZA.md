@@ -166,6 +166,20 @@ Aceptar un riesgo es una decisión con dueño, no una casilla de configuración.
 **quién** la tomó, **cuándo** y con **qué justificación**, en `REGISTRO-RIESGO.md`,
 **append-only**: se añade, nunca se edita una entrada pasada.
 
+### El límite: riesgos infirmables
+
+C5 no es una llave maestra. **El dueño acepta riesgos propios, no los de otros.** Cuando el
+daño recae sobre terceros que nunca firmaron —datos personales de clientes, dinero ajeno,
+seguridad de un usuario final— ninguna firma lo autoriza: se rediseña o no se hace.
+
+Ahí **no se ofrece la vía del registro**, porque ofrecerla sugiere que una firma bastaría.
+Pero sí se explica por qué esta clase es distinta: una negativa sin motivo se lee como
+capricho, y entonces se hace por fuera, que es el peor de los desenlaces.
+
+Se cruza con C4: la AISIA existe exactamente para ese daño — el que ocurre sin atacante,
+sobre gente que no eligió estar ahí. Si un riesgo necesita AISIA, probablemente no sea
+firmable con una entrada de C5.
+
 Siempre exigen entrada firmada:
 
 1. Poner algo en producción con un control conocido pendiente.

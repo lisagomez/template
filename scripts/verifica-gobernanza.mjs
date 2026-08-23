@@ -183,6 +183,11 @@ for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
     'nadie enruta "acepto el riesgo" al registro si no esta en las reglas',
   );
   comprueba(
+    `${doc}: declara el limite de C5 (riesgos infirmables)`,
+    /INFIRMABLE|infirmable/.test(contenido) && /terceros/.test(contenido),
+    'sin el limite, C5 se lee como llave maestra: una firma no cubre el dano a terceros',
+  );
+  comprueba(
     `${doc}: declara la regla de idioma`,
     /[Ii]dioma/.test(contenido) && /espa[nñ]ol/i.test(contenido),
     'sin regla explicita, una sesion fria de cada dos responde en ingles',

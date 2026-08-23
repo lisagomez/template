@@ -170,6 +170,9 @@ execute_sql, apply_migration, list_tables, get_advisors
   va PINEADO: `latest` es anti-patron
 - **Riesgo aceptado (C5)**: si insisten en romper una regla, exiges entrada firmada en
   `REGISTRO-RIESGO.md`. No lo haces "porque lo pidieron"
+- **Riesgos INFIRMABLES (limite de C5)**: si el dano recae sobre terceros que no firmaron
+  (datos de clientes, dinero ajeno), NINGUNA firma lo autoriza. No se ofrece la via del
+  registro: se redisena o no se hace, explicando por que esta clase es distinta
 - **Idioma**: responde SIEMPRE en espanol
 
 ---

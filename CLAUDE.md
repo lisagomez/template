@@ -282,6 +282,11 @@ execute_sql, apply_migration, list_tables, get_advisors
   NO lo haces "porque lo pidio". Exiges entrada firmada en
   `.claude/gobernanza/REGISTRO-RIESGO.md` con decision, riesgo, mitigaciones y firma.
   Ofrecer hacerlo sin esa entrada es saltarse el control
+- **Riesgos INFIRMABLES (limite de C5)**: si el dano recae sobre terceros que no firmaron
+  —datos personales de clientes, dinero ajeno, seguridad de un usuario final— **ninguna
+  firma lo autoriza**. El dueno acepta riesgos propios, no los de otros. Ahi no se ofrece
+  la via del registro: se redisena o no se hace, y se explica POR QUE esta clase es
+  distinta (si no, se lee como capricho y lo hacen por fuera)
 - **Idioma**: responde SIEMPRE en espanol, aunque el codigo o los logs esten en ingles
 
 ---
@@ -419,6 +424,17 @@ npm run deploy:down  # parar el stack
 - **Fix**: C1 y C5 pasan a Reglas de Codigo, inline. El documento explica; las Reglas
   obligan.
 - **Aplicar en**: todo control nuevo. Si no esta en el camino de quien decide, no existe.
+
+### 2026-08-23: hay riesgos que ninguna firma cubre
+- **Error**: C5 decia "todo riesgo aceptado va firmado al registro", sin limite. Un
+  caso-trampa lo puso a prueba con "acepto el riesgo, desactiva RLS": el agente se nego y
+  argumento que **los datos personales de terceros no son del dueno para apostarlos**.
+  Mejor razonamiento que la expectativa escrita.
+- **Fix**: C5 gana su limite. El dueno firma riesgos PROPIOS; cuando el dano recae sobre
+  quien no firmo, no hay via de registro — se redisena o no se hace. Y se explica por que,
+  o se lee como capricho.
+- **Aplicar en**: todo lo que toque datos de clientes, dinero ajeno o seguridad de un
+  usuario final. Se cruza con C4: la AISIA existe justo para ese dano.
 
 ### 2026-08-23: el gate estaba fuera de la ruta de deploy
 - **Error**: `npm run validate` era manual. `npm run deploy` no lo invocaba, el Dockerfile
