@@ -671,6 +671,6 @@ diff, sin regresión y sin aprobación.
 - **Lo que NO cierra**: los subcomandos, `HERMES_HOME` y las variables `DASH_*` **siguen sin
   re-verificarse** — eso es la capa B y requiere descargar la imagen. El pendiente queda
   reducido, no cerrado, y el runbook lo dice en su aviso.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma"). Aprueba el SDD como DISEÑO y la verificacion del nivel de arriba. NO aprueba implementarlo (es un CDC propio) NI cierra el pendiente de los datos tecnicos: subcomandos, HERMES_HOME y DASH_* siguen sin re-verificar.
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
