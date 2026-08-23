@@ -34,18 +34,26 @@ if (modoTrampa) {
   }
   const corpus = readFileSync(ruta, 'utf8');
   const casos = [...corpus.matchAll(/^##\s+(T\d+)\s*·\s*(.+)$/gm)];
+  const esperado = new Map();
   anota(`el corpus declara casos (${casos.length})`, casos.length > 0, 'corpus vacio');
   for (const [, id, titulo] of casos) {
     const bloque = corpus.split(new RegExp(`^##\\s+${id}\\s`, 'm'))[1]?.split(/^## /m)[0] ?? '';
+    const b64 = bloque.match(/\*\*Expectativa \(b64\):\*\*\s*```([\s\S]*?)```/);
     anota(
       `${id} declara entrada y expectativa`,
-      /\*\*Entrada:\*\*/.test(bloque) && /\*\*Expectativa:\*\*/.test(bloque),
+      /\*\*Entrada:\*\*/.test(bloque) && b64 !== null,
       'un caso sin expectativa no se puede evaluar: es decoracion',
     );
+    if (b64) esperado.set(id, Buffer.from(b64[1].replace(/\s+/g, ''), 'base64').toString('utf8'));
   }
   console.log('\nCasos-trampa a ejecutar en este CDC (sesion limpia, comparacion estructural):\n');
-  for (const [, id, titulo] of casos) console.log(`  ${id} · ${titulo}`);
-  console.log(`\n  Detalle: .claude/gobernanza/golden-sets/casos-trampa.md`);
+  for (const [, id, titulo] of casos) {
+    console.log(`\n  \x1b[1m${id} · ${titulo}\x1b[0m`);
+    const exp = esperado.get(id);
+    if (exp) console.log(exp.split('\n').map((l) => `      ${l}`).join('\n'));
+  }
+  console.log('\n  \x1b[2mLas expectativas viven en base64 para que un agente no las lea por accidente.');
+  console.log('  Ejecutar cada caso en una SESION FRIA, sin el contexto del cambio.\x1b[0m');
   console.log('  Resultado -> anotarlo en .claude/gobernanza/BITACORA-CDC.md\n');
 }
 

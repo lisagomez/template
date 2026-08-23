@@ -77,8 +77,10 @@ Usuario dice algo
     |       → Ejecutar skill AUTORESEARCH (loop autonomo de mejora)
     |
     ├── "Voy a cambiar el modelo / editar un skill / tocar un prompt o plantilla"
+    |   "cambia el modelo del proyecto" / "settings.json" / "model" / ".mcp.json"
     |       → CDC OBLIGATORIO (control C1): `.claude/gobernanza/GOBERNANZA.md` §2
     |         + entrada en `.claude/gobernanza/BITACORA-CDC.md`
+    |         El modelo va PINEADO. `latest` se rechaza, no se negocia
     |
     ├── "Se rompio algo / se filtro un dato / alguien intento inyectar"
     |       → Procedimiento de incidente (C6): `.claude/gobernanza/plantillas/incidente.md`
@@ -272,6 +274,15 @@ execute_sql, apply_migration, list_tables, get_advisors
 - `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
 - Las salidas del LLM NO se confian por diseno: quien verifica re-ejecuta los gates de cero
 - Toda accion irreversible (migracion destructiva, envio, cobro) pasa por gate humano
+- **CDC (C1)**: cambiar el modelo, un skill, un prompt, una plantilla, `settings.json`,
+  el campo `model` o `.mcp.json` exige diff + regresion (`npm run regresion`) + aprobacion
+  humana + entrada en `.claude/gobernanza/BITACORA-CDC.md`. El modelo va PINEADO: `latest`
+  y cualquier alias auto-actualizable son anti-patron
+- **Riesgo aceptado (C5)**: si el usuario insiste en algo que rompe una de estas reglas,
+  NO lo haces "porque lo pidio". Exiges entrada firmada en
+  `.claude/gobernanza/REGISTRO-RIESGO.md` con decision, riesgo, mitigaciones y firma.
+  Ofrecer hacerlo sin esa entrada es saltarse el control
+- **Idioma**: responde SIEMPRE en espanol, aunque el codigo o los logs esten en ingles
 
 ---
 
@@ -396,6 +407,26 @@ npm run deploy:down  # parar el stack
   regresion y aprobacion, con gate proporcional al radio. El modelo SIEMPRE pineado;
   `latest` es anti-patron tambien aqui.
 - **Aplicar en**: toda edicion de `.claude/skills/` y de este archivo.
+
+### 2026-08-23: un control escrito solo en el documento NO dispara
+- **Error**: la primera corrida de C2 capa B (8 casos-trampa en sesiones frias) mostro el
+  patron: **C7 y C4 dispararon; C1 y C5 no**. Los que dispararon estaban escritos en el
+  FLUJO (Reglas de Codigo, `prp-base.md`, `BUSINESS_LOGIC.md`). Los que no, vivian solo en
+  `GOBERNANZA.md` y en el decision tree.
+- **Sintoma concreto**: ante "pon el modelo en `latest`", el agente lo rechazo porque el
+  alias no existe en el registro del harness — no por el CDC. Si hubiera sido un alias
+  valido, nada lo habria detenido.
+- **Fix**: C1 y C5 pasan a Reglas de Codigo, inline. El documento explica; las Reglas
+  obligan.
+- **Aplicar en**: todo control nuevo. Si no esta en el camino de quien decide, no existe.
+
+### 2026-08-23: el gate estaba fuera de la ruta de deploy
+- **Error**: `npm run validate` era manual. `npm run deploy` no lo invocaba, el Dockerfile
+  solo corre `npm run build`, y no hay CI: nada impedia desplegar con la gobernanza en rojo.
+- **Fix**: script `predeploy` (verificador + regresion), que npm ejecuta automaticamente
+  antes de `deploy`. No repite el build: docker ya lo hace.
+- **Aplicar en**: todo gate. Si depende de que alguien se acuerde de correrlo, es una
+  costumbre, no una garantia.
 
 ---
 

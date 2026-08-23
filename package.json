@@ -16,6 +16,7 @@
     "deploy:down": "docker compose --env-file .env.production down",
     "deploy:logs": "docker compose --env-file .env.production logs -f --tail=100",
     "deploy:ps": "docker compose --env-file .env.production ps",
+    "predeploy": "npm run verify:gobernanza && npm run regresion",
     "deploy": "npm run deploy:build && npm run deploy:up && npm run deploy:ps"
   },
   "dependencies": {

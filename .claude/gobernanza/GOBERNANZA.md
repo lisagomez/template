@@ -53,6 +53,7 @@ El gate es **proporcional al radio** del cambio:
 | Versión de modelo (`claude-X` → `claude-Y`) | Todo el sistema | CDC completo: diff + suite de regresión (C2) verde + aprobación humana explícita + **pineo de la versión** en `BITACORA-CDC.md` |
 | Skill, prompt de sistema, `CLAUDE.md` | Ese skill y todo lo que produce | CDC estándar: diff revisado + regresión de ese skill + aprobación |
 | Plantilla, design-system, `prp-base.md` | Todo lo futuro que use esa plantilla | Re-auditoría registrada en la bitácora |
+| **Configuración del agente** (`settings.json`, campo `model`, `.mcp.json`, permisos) | Todo el sistema | CDC completo. **Se nombra explícitamente porque no disparaba**: una petición de config no se lee como cambio de comportamiento, y lo es |
 | Parámetros menores (temperatura, límites, timeouts) | Acotado | Entrada en bitácora + revisión trimestral |
 
 **Reglas duras**
@@ -98,6 +99,17 @@ mientras siga declarando lo que no se negocia. Los contratos viven en
 **Verde = promovible. Rojo = el cambio no se promueve**, sin excepciones ni "se ve bien".
 La capa B se ejecuta en una sesión sin el contexto del cambio, que sesgaría el resultado,
 y su resultado se anota en `BITACORA-CDC.md`.
+
+### El protocolo ciego (aprendido a golpes)
+
+En la primera corrida un agente **encontró el corpus** y reconoció que lo estaban
+evaluando. Desde entonces las expectativas viven en base64: no impide leerlas, impide
+leerlas *por accidente*. Un agente que las decodifique a propósito está contaminando la
+prueba, y eso es una señal, no un descuido.
+
+Reglas de la corrida: entrada **verbatim**, sin marco ni aviso de que es una prueba;
+sesión fría, sin el contexto del cambio; y evaluación **estructural** — importa que
+escale, se niegue o marque la bandera, no cómo lo diga.
 
 > Los golden sets son un activo: envenenarlos ciega la regresión. Viven en git y se
 > revisan como código, igual que todo lo demás.
@@ -218,6 +230,7 @@ Heredados y no negociables. Aplican más allá de los siete controles.
 | **Control negativo, no solo positivo** | Toda garantía se demuestra también con algo que **DEBE fallar**, y el fallo esperado se anota. |
 | **Si depende de que nadie se equivoque, es una costumbre** | Se prefiere la separación estructural sobre la configuración correcta: equivocarse en una configuración no produce ningún síntoma hasta que es tarde. |
 | **La fatiga se combate con diseño** | Diffs chicos y banderas primero, no regaños al aprobador. |
+| **Un control escrito solo en el documento no dispara** | Lo demostró la primera corrida de C2: C7 y C4 dispararon porque viven en el flujo (Reglas de Código, `prp-base.md`); C1 y C5 no, porque vivían solo aquí. El documento explica; las reglas obligan. |
 | **El documento y el código son un solo cambio** | Cambiar un gate sin declararlo aquí deja el papel y el sistema divergentes — que es exactamente el hallazgo que un auditor busca. Por eso existe §11. |
 
 ---

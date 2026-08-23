@@ -163,6 +163,53 @@ if (existsSync(dirSkills)) {
   }
 }
 
+// --- 3f. Los controles que NO disparaban: C1, C5 e idioma, inline en las reglas
+for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
+  const contenido = lee(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: el CDC (C1) nombra la configuracion (settings.json / model)`,
+    /settings\.json/.test(contenido) && /BITACORA-CDC/.test(contenido),
+    'sin nombrarla, un cambio de modelo se lee como tarea de config y el CDC no dispara',
+  );
+  comprueba(
+    `${doc}: rechaza \`latest\` explicitamente`,
+    /latest/.test(contenido) && /PINEADO|pineado/.test(contenido),
+    'el modelo en produccion va pineado; latest es anti-patron',
+  );
+  comprueba(
+    `${doc}: C5 esta en las reglas, no solo en el documento`,
+    /REGISTRO-RIESGO/.test(contenido),
+    'nadie enruta "acepto el riesgo" al registro si no esta en las reglas',
+  );
+  comprueba(
+    `${doc}: declara la regla de idioma`,
+    /[Ii]dioma/.test(contenido) && /espa[nñ]ol/i.test(contenido),
+    'sin regla explicita, una sesion fria de cada dos responde en ingles',
+  );
+}
+
+// --- 3g. El gate esta en la ruta de deploy, no solo en validate --------------
+const pkg = lee('package.json');
+if (pkg !== null) {
+  const scripts = JSON.parse(pkg).scripts ?? {};
+  comprueba(
+    'existe el gate predeploy (verificador + regresion)',
+    /verify:gobernanza/.test(scripts.predeploy ?? '') && /regresion/.test(scripts.predeploy ?? ''),
+    'sin predeploy se puede desplegar con la gobernanza en rojo: el gate seria decorativo',
+  );
+}
+
+// --- 3h. El corpus de casos-trampa no expone sus expectativas ---------------
+const corpus = lee(`${GOB}/golden-sets/casos-trampa.md`);
+if (corpus !== null) {
+  comprueba(
+    'las expectativas del corpus estan codificadas',
+    !/\*\*Expectativa:\*\*/.test(corpus) && /Expectativa \(b64\)/.test(corpus),
+    'en texto plano, un agente frio las lee y la prueba deja de ser ciega (paso el 2026-08-23)',
+  );
+}
+
 // --- 4. prp-base.md gana sus secciones (el segundo cable) ------------------
 const prpBase = lee('.claude/PRPs/prp-base.md') ?? '';
 comprueba(

@@ -98,4 +98,18 @@ justo lo que un auditor pregunta.
 - **Vigencia / próxima revisión**: al primer CDC de radio "sistema" (cambio de modelo),
   que es cuando la capa B se estrena de verdad.
 
+### 2026-08-23 — C2 capa B — el corpus se ofusca, no se cifra
+- **Decisión**: codificar en base64 las expectativas de los casos-trampa y dejarlas en el
+  repo, en vez de sacarlas del proyecto o cifrarlas.
+- **Riesgo aceptado**: **base64 no es cifrado.** Un agente que decida decodificarlo puede
+  leer las respuestas esperadas y la prueba deja de ser ciega. Lo que se compra es que no
+  ocurra *por accidente*, que es como ocurrió el 2026-08-23 (caso T2).
+- **Mitigaciones vigentes**: decodificar es un acto deliberado y queda visible en el
+  transcript — es señal de contaminación, no descuido; el verificador falla si alguna
+  expectativa vuelve a texto plano; las entradas siguen verbatim, que es lo que la prueba
+  necesita. Sacar el corpus del repo lo haría no heredable, que es peor para un boilerplate.
+- **Firmado por**: _pendiente de firma_.
+- **Vigencia / próxima revisión**: si un caso vuelve a salir contaminado, se saca el corpus
+  del árbol de trabajo durante las corridas.
+
 <!-- Añadir aquí las decisiones siguientes. NO editar las anteriores. -->

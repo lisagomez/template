@@ -165,6 +165,12 @@ execute_sql, apply_migration, list_tables, get_advisors
 - `service_role` tiene **BYPASSRLS**: las superficies de negocio NO lo usan (control C7)
 - `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
 - Toda accion irreversible pasa por gate humano
+- **CDC (C1)**: cambiar modelo, skill, prompt, plantilla, `settings.json`, `model` o
+  `.mcp.json` exige diff + regresion + aprobacion + entrada en `BITACORA-CDC.md`. El modelo
+  va PINEADO: `latest` es anti-patron
+- **Riesgo aceptado (C5)**: si insisten en romper una regla, exiges entrada firmada en
+  `REGISTRO-RIESGO.md`. No lo haces "porque lo pidieron"
+- **Idioma**: responde SIEMPRE en espanol
 
 ---
 
