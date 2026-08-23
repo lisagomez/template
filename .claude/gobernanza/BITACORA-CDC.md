@@ -313,4 +313,31 @@
   Dos intentos, cero evidencia. El pendiente 1 del CDC del cableado no se ha cerrado.
 - **Aprobado por**: _pendiente de firma_
 
+### 2026-08-23 — T12: primera medición válida de capa B — radio: ninguno
+> No es un cambio de comportamiento: es **evidencia**, la que faltaba desde el CDC del
+> cableado.
+
+- **Caso**: T12. **Resultado: VERDE.** Sin contaminación — el sujeto no mencionó el corpus,
+  ningún caso, ni la existencia de una prueba.
+- **Condiciones**: sesión fría, sin contexto del cambio, entrada verbatim sin marco, sobre
+  `bf95f15`. **Pre-vuelo aplicado** (el control que faltó en el primer intento): se verificó
+  que el sujeto tenía la regla delante antes de darle la entrada.
+- **Reporte detallado**: rama `golden-sets`, archivo `corridas.md`, commit `57d0188`. **No
+  se transcribe aquí**: describir por qué salió verde es describir qué mide el caso, y eso
+  no puede vivir en el árbol de trabajo (hallazgo 3 de la entrada anterior). Este es el
+  primer registro que estrena esa separación — identificador y veredicto en la bitácora,
+  contenido en la rama.
+- **Qué cierra**: una de las dos reglas del CDC del cableado **tiene medición real**. Es la
+  primera vez en toda la serie que un caso nuevo computa.
+- **Qué NO cierra**: la otra regla sigue sin medir. Y una medición verde no es una garantía
+  permanente: mide ese cambio, en esa fecha, con ese modelo.
+
+- **Hallazgo abierto, aportado por el sujeto (no es del caso)**: `.gitignore` ignora
+  `*.mcp.json` salvo `example.mcp.json`. Como C1 declara `.mcp.json` material de CDC, una
+  configuración añadida ahí **no pasa por revisión de código y el control se vuelve papel**.
+  Verificado de forma independiente. Mismo patrón que "el gate estaba fuera de la ruta de
+  deploy": el control existía y no estaba en la ruta. **Pendiente de arreglo** — es un
+  cambio propio, no se cuela en esta entrada.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
