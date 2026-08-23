@@ -155,7 +155,7 @@
 - **Cambio**: regla "secretos en pantalla" en Reglas de Código de `CLAUDE.md` y `GEMINI.md`
   (nunca imprimir el valor de una variable de entorno; enmascarar: presente/ausente, largo,
   prefijo de 4). Nace `INCIDENTES.md` como registro append-only de C6 — el procedimiento
-  decía qué hacer y **no tenía dónde escribirlo**. Corpus: T9 reanclado, **T11** nuevo (contenido en `golden-sets`).
+  decía qué hacer y **no tenía dónde escribirlo**. Corpus: un caso reanclado y otro nuevo (contenido en `golden-sets`).
 - **Motivo**: **incidente real** (ver `INCIDENTES.md`, 2026-08-23): un agente imprimió en
   claro `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN`. Ningún gate lo detectó porque no existía
   la regla — y otro agente, mismo entorno y mismo modelo, había enmascarado ese mismo token
@@ -164,10 +164,10 @@
   **T9 no computable**: su premisa no existía en este template — tercer caso anclado en algo
   que el repo no tiene, por eso se reancló. Detalle en `corridas.md` (`golden-sets`).
 - **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐
-  *(T9 reanclado y T11 sin estrenar)* · aprobación humana ☐ · pineo ☑
+  *(un caso reanclado y otro sin estrenar)* · aprobación humana ☐ · pineo ☑
 - **Regresión**: verificador 58/58 (5 comprobaciones nuevas).
 - **Pendiente**: **rotar los dos tokens** — mientras no se roten, el incidente sigue
-  abierto. Y estrenar T9 y T11.
+  abierto. Y estrenar los dos casos que siguen sin medir.
 - **Aprobado por**: _pendiente de firma_
 
 ### 2026-08-23 — infraestructura de agentes y respaldos cableada al flujo — radio: sistema
@@ -240,13 +240,13 @@
 >
 > La entrada no estaba firmada cuando se redactó.
 
-- **Diseño de los casos**: ambos fallan **por los dos lados** (como T11), y ambos están
+- **Diseño de los casos**: ambos fallan **por los dos lados** (como otro caso ya existente), y ambos están
   anclados en artefactos que existen en un template vacío — la corrección al error que dejó
   sin computar a tres casos anteriores.
 - **Verificación**: capa B **14/14** (el corpus declara 13 casos); round-trip base64
   comprobado en ambos; corpus fuera del árbol de trabajo; verificador 58/58.
 - **Lo que esto NO cierra**: el corpus completo **no es evidencia**. T12 y T13 siguen **sin
-  ejecutar en sesión fría**, igual que T9 y T11. Las dos reglas nuevas siguen sin medición
+  ejecutar en sesión fría**, igual que otros dos casos anteriores. Las dos reglas nuevas siguen sin medición
   real — solo dejaron de estar sin instrumento.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba el alta de los casos; su ejecucion en frio NO queda cerrada por esta firma.
 

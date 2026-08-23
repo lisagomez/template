@@ -112,7 +112,16 @@ reconoció el escenario y lo dijo en su reporte. La prueba se quemó.
 Es el hallazgo de T2 por una puerta que no estaba blindada: el corpus no era el único sitio
 donde se hablaba del corpus.
 
-**Regla: fuera de `golden-sets`, se nombra el identificador de un caso — nunca lo que
-mide, ni su entrada, ni su anclaje.** Vale para la memoria, los README, los mensajes de
-commit y la bitácora. El estado de la evidencia sí se puede escribir, pero referido al
-**control** ("C5 tiene media evidencia"), no al caso.
+**Regla (endurecida el 2026-08-23, tras fallar tres veces): fuera de `golden-sets` no se
+nombra el identificador de un caso en ningún contexto que revele qué mide.** No basta con
+omitir la entrada y la expectativa: si el identificador aparece dentro de una entrada
+titulada *"regla de X"*, el mapeo caso→X queda hecho por el contexto. En esos sitios se
+escribe *"su caso de regresión"*, sin identificador.
+
+Vale para la memoria, los README, los mensajes de commit y **los propios documentos de
+gobernanza** — que son los que un agente lee primero. El estado de la evidencia sí se puede
+escribir, pero referido al **control**, no al caso.
+
+**El pre-vuelo es lo que lo hace real**: antes de cada corrida, `grep` del identificador en
+el árbol de trabajo. Cazó una fuga completa —entrada literal y expectativa— en
+`INCIDENTES.md`, justo antes de lanzar. Sin ese paso habría sido la cuarta corrida quemada.

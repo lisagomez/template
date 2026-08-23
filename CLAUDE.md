@@ -454,7 +454,7 @@ npm run deploy:down  # parar el stack
 - **Causa**: **no habia ninguna regla que lo prohibiera.** Otro agente, mismo entorno y
   mismo modelo, habia enmascarado ese mismo token dias antes por criterio propio. Azar, no
   politica.
-- **Fix**: regla de "secretos en pantalla" en Reglas de Codigo + caso de regresion T11 +
+- **Fix**: regla de "secretos en pantalla" en Reglas de Codigo + un caso de regresion en el corpus +
   registro en `.claude/gobernanza/INCIDENTES.md`.
 - **Contencion**: rotar los tokens. Rotar invalida el valor filtrado; perseguir copias no.
 - **Aplicar en**: cualquier depuracion que toque el entorno.
