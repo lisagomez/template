@@ -476,6 +476,6 @@ verde comprobando menos. Es el movimiento clásico de "desbloquear el build un v
   caso se sostiene en el repo antes de fijarla, y preferir criterios sobre el **razonamiento**
   (¿verificó? ¿resolvió si el control aplica?) a criterios sobre la **salida** (¿produjo este
   artefacto?).
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma t9"). Aprueba el veredicto VERDE, la recalibracion del criterio (2) y las dos comprobaciones nuevas sobre next.config.ts. El hallazgo del bloque 3g queda declarado, NO cerrado por esta firma.
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
