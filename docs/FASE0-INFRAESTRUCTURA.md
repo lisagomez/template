@@ -36,6 +36,14 @@ añada un canal externo, se añade con su sección de amenazas — no antes.
 > dashboard vienen de los documentos de origen, verificados allí el 2026-06-26.
 > **Este documento no los re-verificó.** Confirma tag, subcomandos y variables
 > contra la doc oficial de Nous antes de provisionar.
+>
+> **Verificado el 2026-08-23** contra el registro público: el repositorio existe y el tag
+> pineado `v2026.6.19` sigue publicado — pero hay **13 releases más nuevas** (la última,
+> `v2026.8.19`). El pineo va dos meses por detrás **a propósito hasta que alguien decida
+> moverlo**, que es un CDC. Lo que faltaba no era el pineo: era el sensor que avisa.
+> El mecanismo para no volver a enterarse tarde está en
+> **[`SDD-hermes-verificacion.md`](SDD-hermes-verificacion.md)** — especificado, aún sin
+> implementar. Los subcomandos y las variables siguen **sin re-verificar**: eso es su capa B.
 
 ---
 

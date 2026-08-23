@@ -68,11 +68,17 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
 > template** — los cierra un proyecto derivado, si existe. Ver [[gobernanza-agentica]],
 > sección "Dos ámbitos que NO se mezclan".
 
-1. **Los datos técnicos de Hermes NO se re-verificaron.** Tag `v2026.6.19`, subcomandos
-   (`setup`, `gateway run`, `dashboard`), ruta `/opt/data` y variables `DASH_*` vienen del
-   origen (verificados allí el 2026-06-26). **Esta sí es deuda del template**: son
-   afirmaciones que hereda cada proyecto. El documento lo declara en un aviso; no lo
-   escondas si alguien pregunta.
+1. **Los datos técnicos de Hermes: verificado el nivel de arriba, pendiente el de abajo.**
+   - **Verificado el 2026-08-23** contra el registro público: el repositorio existe, el tag
+     pineado `v2026.6.19` sigue publicado, y hay **13 releases más nuevas** (última
+     `v2026.8.19`, del 2026-08-21). Digest del pineado guardado como ancla.
+   - **Sin verificar**: subcomandos, `HERMES_HOME` y variables `DASH_*`. Requiere descargar
+     la imagen — es la capa B del SDD.
+   - **El diseño del lazo existe**: `docs/SDD-hermes-verificacion.md`, especificado y **sin
+     implementar**. Implementarlo es un CDC propio.
+   - La lección: **pinear sin vigilar no es estabilidad, es rezago silencioso.** El pineo
+     hizo su trabajo; faltaba el sensor del otro extremo. Un homeostato necesita las dos
+     mitades.
 2. **La aserción 3 de GATE 3 se deja sin escribir a propósito.** Las dos primeras solo
    comprueban que existen archivos; la tercera comprueba que el *contenido* sirve, y depende
    del proyecto. Un GATE 3 con solo las dos primeras es teatro. Es un hueco **por diseño**,

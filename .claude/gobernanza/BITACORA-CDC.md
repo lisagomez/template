@@ -632,4 +632,45 @@ diff, sin regresión y sin aprobación.
   comprobación de existencia y la marca append-only, que era la duda.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("termina la firma"). Aprueba retirar las entradas del registro de incidentes, el registro vacio como lo que se hereda, y la reescritura de la leccion en CLAUDE.md. NO decide sobre la bitacora, que sigue narrando el incidente: es otra decision.
 
+### 2026-08-23 — SDD: mantener Hermes al día y verificar sus datos técnicos — radio: plantilla
+> Documento de diseño. **No implementa nada**: implementarlo es un CDC propio.
+
+- **Qué se añade**: `docs/SDD-hermes-verificacion.md` — el mecanismo que faltaba para que
+  las afirmaciones técnicas del runbook no envejezcan en silencio. Referenciado desde el
+  propio aviso de procedencia del runbook, que es donde vive la afirmación que vigila.
+- **Verificación real hecha al escribirlo** (no diseño en el vacío): se consultó el registro
+  público. El repositorio existe, el tag pineado `v2026.6.19` sigue publicado — y hay **13
+  releases más nuevas**, la última `v2026.8.19` del 2026-08-21. `latest` y `main` se
+  movieron **hoy** y comparten digest: el anti-patrón, confirmado con datos.
+- **El hallazgo que ordena todo el diseño**: el pineo no falló, hizo su trabajo. Lo que
+  faltaba era el otro extremo del lazo. **Pinear sin vigilar no es estabilidad, es rezago
+  silencioso.**
+
+- **Decisiones de diseño que no son obvias**:
+  1. **El job nunca cambia nada.** Detecta deriva y prepara la decisión. Un job que
+     actualizara solo sería el anti-patrón de C1 automatizado, y por tanto peor.
+  2. **Dos capas**, como C2: la mecánica (semanal, una llamada HTTP) y la de aserciones
+     sobre la imagen (cara, sólo en el CDC que mueva el pineo).
+  3. **Se vigila el digest del tag pineado.** Un tag **no es inmutable**: se puede
+     re-publicar. Si cambia, no es deriva — es **O5, cadena de suministro**, y abre
+     incidente. Pinear por tag protege del despiste, no de un upstream comprometido.
+  4. **Se reporta el cambio, no el estado.** Un informe semanal que diga "13 releases por
+     detrás" cada semana deja de leerse: eso es **O3** y es el modo de falla más probable de
+     este mecanismo. El silencio pasa a ser la señal de normalidad — y por eso hace falta el
+     heartbeat que distinga "mudo" de "muerto".
+  5. **Exit `2` para "no pude verificar"**, distinto de `0`. Sin red, sin API o sin
+     respuesta **no es "todo bien"**. Es el fallo que esta capa ha sufrido tres veces:
+     un control que parece funcionar y no mide nada.
+  6. **El script lee el tag del compose**, no lo lleva escrito. Un control anclado en una
+     copia del dato se desincroniza del dato.
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: añade un documento de diseño, no cambia comportamiento del agente)* · aprobación
+  humana ☐ · pineo ☑
+- **Regresión**: verificador 75/75.
+- **Lo que NO cierra**: los subcomandos, `HERMES_HOME` y las variables `DASH_*` **siguen sin
+  re-verificarse** — eso es la capa B y requiere descargar la imagen. El pendiente queda
+  reducido, no cerrado, y el runbook lo dice en su aviso.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
