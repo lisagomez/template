@@ -793,4 +793,53 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("sí, agrega la comprobación").
 
+### 2026-08-23 — el vigilante del pineo pasa de diseño a código (capa A) — radio: sistema
+> Implementa el SDD `docs/SDD-hermes-verificacion.md`, que se aprobó como **diseño** y dejó
+> la implementación declarada como CDC propio. Este es ese CDC.
+
+- **Cambio**:
+  1. **`scripts/verifica-hermes.mjs`** — capa A del SDD: A1 (el repositorio responde), A2
+     (el tag pineado sigue publicado), A3 (**el digest no ha cambiado**), A4 (cuántas
+     releases hay por delante) y A5 (control positivo: los tags móviles siguen moviéndose).
+     Sin dependencias, **sin LLM y sin credenciales** — consulta un registro público, así
+     que no puede filtrar lo que no lee. **Lee el tag del compose del runbook**, no lo lleva
+     escrito: si el compose cambia, el script sigue al compose.
+  2. **`.hermes-baseline.json`** — el ancla, versionada. La escribe una persona en un CDC:
+     **el script nunca actualiza su propia ancla**, o dejaría de vigilar. Los campos de
+     capa B siguen en `null` a propósito: nadie los ha comprobado todavía.
+  3. **Tres comprobaciones en `verify:gobernanza`** (bloque 3j): que el ancla exista, que su
+     imagen y su tag **coincidan con el compose del runbook**, y que declare un digest con
+     forma válida. Miran papel contra papel: **el gate no toca la red**.
+  4. **`npm run vigila:hermes`**, deliberadamente **fuera** de `validate` y de `predeploy`:
+     un gate que depende de la red se cae por causas que no son el código. La corrida
+     semanal es del entorno (cron), no del template.
+- **Motivo**: el pineo daba estabilidad y le faltaba el otro extremo del lazo — algo que
+  avise de que el mundo se movió. Pinear sin vigilar no es estabilidad, es rezago
+  silencioso.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: script de vigilancia, no cambia el comportamiento del agente)* · aprobación
+  humana ☑ · pineo ☑
+- **Regresión**: verificador **83/83** (3 comprobaciones nuevas), capa A 92/92, pre-vuelo
+  del corpus limpio. **Control negativo, seis veces**: tag inventado → rojo; nombre de
+  imagen inventado → rojo; API inalcanzable → **exit 2, nunca 0**; digest del ancla alterado
+  → rojo con procedimiento de incidente; ancla desincronizada del compose → verificador en
+  rojo; ancla sin digest → verificador en rojo.
+- **Hallazgo de la primera corrida — corrección de un hecho**: el rezago **no era de 13
+  releases, sino de 11**. Los otros dos "tags más nuevos" eran `latest` y `main`, que son
+  móviles y no releases. El script los separa porque el SDD se lo pedía (A4 cuenta
+  versiones, A5 mira los móviles), y al medirlo corrigió el dato que se había contado a ojo.
+  Corregido en el runbook, en el SDD, en el README y en la memoria; las entradas firmadas de
+  esta bitácora **no se editan** — la corrección vive aquí.
+  > La lección no es el número: un dato verificado "en un minuto" y el mismo dato **medido
+  > por un control** no son la misma clase de dato. El primero se escribe en un documento;
+  > el segundo se puede volver a comprobar mañana.
+- **Lo que NO cierra**: la **capa B** — subcomandos, `HERMES_HOME`, variables `DASH_*` y
+  puerto del dashboard siguen sin re-verificar, y requieren descargar la imagen. Y el **cron
+  semanal**, que es del entorno. Sin cron, esto es un script que alguien tiene que acordarse
+  de correr: exactamente la clase de control que esta capa lleva toda la sesión degradando
+  de costumbre a gate. Queda declarado, no disimulado.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("implementa el SDD de vigilancia"). Aprueba la capa A y su cableado; la
+  capa B y el cron siguen **abiertos**.
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

@@ -149,6 +149,7 @@ npm run lint         # ESLint
 npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2)
+npm run vigila:hermes  # deriva del pineo del agente (semanal, fuera del gate: usa red)
 ```
 
 ## Gobernanza
@@ -245,14 +246,20 @@ Runbook completo: **[docs/FASE0-INFRAESTRUCTURA.md](docs/FASE0-INFRAESTRUCTURA.m
 ### Mantenerlo al dia sin sorpresas
 
 La version del agente va **pineada**, y cambiarla es un CDC. Pero pinear y no mirar tiene su
-propio fallo: se descubrio al escribir el diseño de abajo que el tag pineado llevaba **13
+propio fallo: se descubrio al escribir el diseño de abajo que el tag pineado llevaba **11
 releases de rezago**, y nadie lo sabia.
 
 > **Pinear sin vigilar no es estabilidad, es rezago silencioso.**
 
+```bash
+npm run vigila:hermes    # capa A: una llamada HTTP, sin LLM y sin credenciales
+# exit 0 = sin novedades (silencio) · 1 = deriva o rojo · 2 = NO pude verificar
+```
+
 El mecanismo que cierra ese lazo esta en
-**[docs/SDD-hermes-verificacion.md](docs/SDD-hermes-verificacion.md)** — especificado, aun
-sin implementar. Lo que lo hace distinto de un "comprueba actualizaciones":
+**[docs/SDD-hermes-verificacion.md](docs/SDD-hermes-verificacion.md)** — capa A
+**implementada**; falta la capa B (descarga la imagen) y el cron semanal, que es del
+entorno. Lo que lo hace distinto de un "comprueba actualizaciones":
 
 | Decision | Por que |
 |----------|---------|

@@ -70,12 +70,17 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
 
 1. **Los datos técnicos de Hermes: verificado el nivel de arriba, pendiente el de abajo.**
    - **Verificado el 2026-08-23** contra el registro público: el repositorio existe, el tag
-     pineado `v2026.6.19` sigue publicado, y hay **13 releases más nuevas** (última
+     pineado `v2026.6.19` sigue publicado, y hay **11 releases más nuevas** (última
      `v2026.8.19`, del 2026-08-21). Digest del pineado guardado como ancla.
    - **Sin verificar**: subcomandos, `HERMES_HOME` y variables `DASH_*`. Requiere descargar
-     la imagen — es la capa B del SDD.
-   - **El diseño del lazo existe**: `docs/SDD-hermes-verificacion.md`, especificado y **sin
-     implementar**. Implementarlo es un CDC propio.
+     la imagen — es la capa B del SDD, y es lo único que queda de este punto.
+   - **El lazo está implementado** (2026-08-23, CDC firmado): `scripts/verifica-hermes.mjs`
+     (capa A), ancla en `.hermes-baseline.json`, tres comprobaciones en el verificador y
+     `npm run vigila:hermes`. **El cron semanal es del entorno**, no del template.
+   - **El "13" era un dato a ojo.** La primera corrida del script lo corrigió: son **11**
+     releases; los otros dos tags eran `latest` y `main`, que son móviles, no releases. El
+     script los separa porque el SDD se lo pedía. Un dato contado a mano y el mismo dato
+     medido difieren, y el medido es el que vale.
    - La lección: **pinear sin vigilar no es estabilidad, es rezago silencioso.** El pineo
      hizo su trabajo; faltaba el sensor del otro extremo. Un homeostato necesita las dos
      mitades.

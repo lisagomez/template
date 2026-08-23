@@ -379,6 +379,42 @@ if (corpusRama) {
   );
 }
 
+// --- 3j. El vigilante del pineo tiene ancla, y el ancla sigue al compose ----
+// El SDD (docs/SDD-hermes-verificacion.md) exige que el script LEA el tag del compose en
+// vez de llevarlo escrito. Aqui se vigila la otra mitad: que el ancla contra la que compara
+// no se desincronice del compose. Un control anclado en una copia del dato es la clase de
+// fallo que esta capa ya sufrio.
+// Esta comprobacion NO toca la red: mira papel contra papel. La corrida real es semanal y
+// vive en el entorno (`npm run vigila:hermes`), no en este gate.
+const baselineTexto = lee('.hermes-baseline.json');
+comprueba(
+  'existe el ancla del vigilante de Hermes (.hermes-baseline.json)',
+  baselineTexto !== null,
+  'sin ancla, la capa A del SDD no tiene contra que comparar el digest',
+);
+const runbookHermes = lee('docs/FASE0-INFRAESTRUCTURA.md') ?? '';
+const composeHermes = runbookHermes.match(/^\s*image:\s*([a-z0-9._\-/]+):([A-Za-z0-9._-]+)/m);
+if (baselineTexto !== null && composeHermes) {
+  let baselineJson = null;
+  try {
+    baselineJson = JSON.parse(baselineTexto);
+  } catch { /* JSON roto: lo dice la comprobacion de abajo */ }
+  comprueba(
+    'el ancla de Hermes coincide con la imagen pineada en el runbook',
+    baselineJson !== null &&
+      baselineJson.imagen === composeHermes[1] &&
+      baselineJson.tag === composeHermes[2],
+    `runbook: ${composeHermes[1]}:${composeHermes[2]} · ancla: ` +
+      `${baselineJson?.imagen}:${baselineJson?.tag} — si divergen, el vigilante compara ` +
+      'contra un digest que no es el de la imagen que se despliega',
+  );
+  comprueba(
+    'el ancla de Hermes declara el digest del tag pineado',
+    typeof baselineJson?.digest === 'string' && /^sha256:[0-9a-f]{64}$/.test(baselineJson.digest),
+    'sin digest no hay A3: un tag se puede re-publicar y nadie se enteraria',
+  );
+}
+
 // --- 4. prp-base.md gana sus secciones (el segundo cable) ------------------
 const prpBase = lee('.claude/PRPs/prp-base.md') ?? '';
 comprueba(

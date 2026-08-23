@@ -1,6 +1,8 @@
 # SDD — Mantener Hermes al día y verificar sus datos técnicos
 
-**Estado:** especificado, **no implementado**. Implementarlo es un CDC propio (C1).
+**Estado:** **implementado el 2026-08-23** (CDC firmado) — capa A en
+`scripts/verifica-hermes.mjs`, ancla en `.hermes-baseline.json`, tres comprobaciones en el
+verificador. **Falta la capa B** (§3), que descarga la imagen, y el cron semanal.
 **Ámbito:** el diseño y el script viajan con el template; **la ejecución semanal es del
 entorno** de cada proyecto (un cron, en la máquina o el servidor que lo corra).
 
@@ -24,7 +26,7 @@ Consultando el registro público, en un minuto:
 |---|---|
 | `nousresearch/hermes-agent` existe | ✅ verificado (HTTP 200) |
 | El tag pineado `v2026.6.19` existe | ✅ verificado |
-| **Releases publicadas desde entonces** | **13** — la última, `v2026.8.19` (2026-08-21) |
+| **Releases publicadas desde entonces** | **11** — la última, `v2026.8.19` (2026-08-21) |
 | `latest` y `main` | actualizados **hoy**, mismo digest entre sí |
 
 **El pineo está dos meses por detrás y nadie lo sabía.** No es un fallo del pineo — el pineo
@@ -230,16 +232,26 @@ regresión. Para eso está la capa B en el CDC, y el gate humano detrás.
 
 ## 11. Implementación — lo que falta
 
-Este documento **especifica**; no implementa. Lo que queda, en orden:
+Este documento especificaba; el 2026-08-23 se implementó la capa A. Estado real:
 
-1. `scripts/verifica-hermes.mjs` con el contrato de §8, **y su control negativo**: contra un
-   tag inventado debe dar rojo, y sin red debe dar exit `2`, no `0`.
-2. `.hermes-baseline.json` con los valores verificados hoy (§8).
-3. Comprobación en el verificador: que el baseline exista y que su `tag` coincida con el del
-   compose del runbook — si divergen, rojo.
-4. **Primera corrida de la capa B**, que cerraría por fin el pendiente *"los datos técnicos
-   de Hermes no se re-verificaron"*. Requiere descargar la imagen.
-5. El cron semanal — **en el entorno**, no en el template.
+1. ✅ `scripts/verifica-hermes.mjs` con el contrato de §8, **y su control negativo**: tag
+   inventado → rojo (exit 1); nombre de imagen inventado → rojo; API inalcanzable → exit
+   `2`; digest del ancla alterado → rojo con procedimiento de incidente. Los cuatro
+   probados.
+2. ✅ `.hermes-baseline.json` con el digest verificado contra el registro (§8). Lo escribe
+   una persona en un CDC: **el script nunca actualiza su propia ancla**, o dejaría de
+   vigilar.
+3. ✅ Tres comprobaciones en `verify:gobernanza`: que el ancla exista, que su imagen y tag
+   **coincidan con el compose del runbook**, y que declare un digest con forma válida.
+   Miran papel contra papel, sin red — el gate no depende de la red.
+4. ⬜ **Primera corrida de la capa B**, que cerraría el pendiente *"los datos técnicos de
+   Hermes no se re-verificaron"*. Requiere descargar la imagen.
+5. ⬜ El cron semanal — **en el entorno**, no en el template. `npm run vigila:hermes`.
+
+**Un hallazgo de la primera corrida**: `latest` y `main` no son releases, y contarlos como
+tales inflaba el rezago de 11 a 13. El script los separa (A4 cuenta versiones, A5 mira los
+móviles) porque el SDD lo pedía — y al medirlo, corrigió el dato que este mismo documento
+había escrito a ojo. Los tres documentos que repetían el "13" quedan corregidos.
 
 **Nada de esto se aplica sin CDC**: añadir un script al gate y un archivo de baseline cambia
 lo que el sistema comprueba, y eso es comportamiento.
@@ -253,4 +265,9 @@ que avisa de que el mundo se movió. Un homeostato necesita las dos mitades.
 
 **No cierra**: los datos técnicos siguen sin re-verificarse — eso lo hace la capa B, y
 requiere descargar la imagen. Lo que sí queda verificado hoy es el nivel de arriba: el
-repositorio existe, el tag pineado existe, y **hay 13 releases de rezago**.
+repositorio existe, el tag pineado existe, y **hay 11 releases de rezago**.
+
+**Corrección del 2026-08-23**: la primera verificación dijo "13". Eran 13 *tags* más
+recientes que el pineo, pero dos de ellos son `latest` y `main` — móviles, no releases. Lo
+destapó la primera corrida del script, que separa unos de otros porque el SDD se lo pedía
+(A4 cuenta versiones; A5 mira los móviles). Un dato a ojo y el mismo dato medido: 11.

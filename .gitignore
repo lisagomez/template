@@ -73,3 +73,7 @@ supabase/.temp
 
 # Worktrees de agentes (efimeros)
 .claude/worktrees/
+
+# Vigilante de Hermes: estado de ejecucion e informes (el baseline SI se versiona)
+.hermes-estado.json
+hermes-informe.md

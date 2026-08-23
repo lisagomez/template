@@ -1,0 +1,14 @@
+{
+  "_comentario": "Ancla del vigilante de Hermes (capa A del SDD, docs/SDD-hermes-verificacion.md). Versionado a proposito: es contra esto que se compara. Lo escribe una persona en un CDC, NUNCA el script — un vigilante que actualiza su propia ancla no vigila nada.",
+  "imagen": "nousresearch/hermes-agent",
+  "tag": "v2026.6.19",
+  "digest": "sha256:9f367c7756ef087661a361536a89f438d57a122b958dc23d82d456b1433e6e9e",
+  "verificado": "2026-08-23",
+  "capaB": {
+    "_comentario": "null = NO se ha comprobado. Un baseline que finja saberlo es peor que uno que declare su ignorancia. Los llena la primera corrida de capa B, que descarga la imagen.",
+    "subcomandos": null,
+    "hermesHome": null,
+    "variablesDashboard": null,
+    "puertoDashboard": null
+  }
+}

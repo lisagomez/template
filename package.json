@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "verify:gobernanza": "node scripts/verifica-gobernanza.mjs",
     "regresion": "node scripts/regresion-skills.mjs",
+    "vigila:hermes": "node scripts/verifica-hermes.mjs",
     "validate": "npm run typecheck && npm run build && npm run verify:gobernanza && npm run regresion",
     "deploy:build": "docker compose --env-file .env.production build",
     "deploy:up": "docker compose --env-file .env.production up -d",
