@@ -144,6 +144,11 @@ Siempre exigen entrada firmada:
 4. Desactivar o saltarse un gate, aunque sea "temporalmente".
 5. Subir límites de gasto o de cuota por encima de los defaults.
 
+> **Visibilidad**: el registro hereda la del repositorio que lo contiene, y describe
+> deuda de seguridad real. Revisarlo **antes** de publicar el repo o de entregar el
+> proyecto a un cliente. En un template genérico no expone nada; en un proyecto con
+> rutas, tenants y decisiones concretas, sí.
+
 ---
 
 ## 7. C6 · Procedimiento de incidente

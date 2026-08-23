@@ -31,6 +31,9 @@ justo lo que un auditor pregunta.
 5. Subir límites de gasto o de cuota por encima de los defaults.
 6. Habilitar cualquier acción irreversible sin gate humano.
 
+> Este archivo hereda la visibilidad del repositorio. Revísalo antes de publicarlo o de
+> entregar el proyecto a un cliente (control C5 de `GOBERNANZA.md`).
+
 ---
 
 ## Entradas
