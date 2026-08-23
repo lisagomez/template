@@ -410,4 +410,34 @@ tener un RPO real de 24h.
   verifica.
 - **Aprobado por**: _pendiente de firma_
 
+### 2026-08-23 — el verificador vigila las reglas nuevas — radio: menor
+> Cierra el último pendiente del CDC del cableado que no dependía de provisionar nada.
+
+- **El hueco**: las tres reglas que aquel CDC metió en *Reglas de Código* —respaldo como
+  contrato, canales de chat externos, y el pineo extendido a la imagen del agente— entraron
+  **sin vigilancia**. Cualquiera podía borrarlas de `CLAUDE.md` o `GEMINI.md` y las 61
+  comprobaciones seguían en verde. Una regla que nada obliga a mantener se pudre en
+  silencio: es la tesis del propio verificador, aplicada a él mismo.
+- **Arreglo**: 6 comprobaciones nuevas (3 reglas × 2 archivos de instrucciones), dentro del
+  mismo bucle que ya vigila C1, C5 e idioma. Verificador **67/67**.
+
+- **Hallazgo del control negativo (lo que hace que esto valga)**: la **primera versión de la
+  comprobación de respaldo estaba decorativa**. Anclaba en `GATE 3`, `RPO` y `RTO`, palabras
+  que también aparecen en el decision tree — así que al borrar la regla de *Reglas de
+  Código* el gate seguía **verde**. Medía que el término existiera en el archivo, no que la
+  regla siguiera ahí.
+  Se reancló en lo que **solo** afirma la regla (*"no hay respaldo implícito"*, *"entrada no
+  autenticada"*), y se re-probó: ahora las seis fallan al borrar cada regla, en ambos
+  archivos.
+  **La lección se repite y conviene no olvidarla: un control que nunca ha fallado no está
+  verificado, aunque lo haya escrito quien conoce el sistema.** Escribí ese check sabiendo
+  exactamente qué debía cazar, y aun así nació decorativo. Solo lo destapó ejecutar el
+  control negativo.
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: cambia el gate, no el comportamiento del agente)* · aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador 67/67. **Control negativo ejecutado en las seis**, borrando
+  cada regla de cada archivo por separado y confirmando el rojo con el nombre correcto.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

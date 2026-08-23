@@ -198,6 +198,28 @@ for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
     /[Ii]dioma/.test(contenido) && /espa[nñ]ol/i.test(contenido),
     'sin regla explicita, una sesion fria de cada dos responde en ingles',
   );
+  // Las tres reglas del CDC del cableado (2026-08-23). Entraron sin vigilancia:
+  // se podian borrar y el verificador seguia en verde. Medidas en frio por la capa B.
+  // Ancladas en lo que SOLO afirma la regla, no en palabras que tambien salen en el
+  // decision tree: la primera version pasaba con la regla borrada. La cazo el control
+  // negativo, que es justo para lo que existe.
+  comprueba(
+    `${doc}: el respaldo es un contrato y las cifras no se inventan`,
+    /respaldo impl[ií]cito/i.test(contenido) && /GATE 3/.test(contenido) && /RTO/.test(contenido),
+    'sin la regla, un agente escribe un RPO/RTO que nadie midio — y acaba en una propuesta',
+  );
+  comprueba(
+    `${doc}: los canales de chat externos exigen C3 y C4`,
+    /entrada \*\*?no autenticada|entrada NO autenticada/i.test(contenido) &&
+      /Telegram|Slack/.test(contenido) &&
+      /C3/.test(contenido) && /C4/.test(contenido),
+    'un canal de chat es entrada no autenticada hacia un agente con llaves: sin la regla se conecta "rapido"',
+  );
+  comprueba(
+    `${doc}: el pineo cubre tambien la imagen del agente`,
+    /tag de una imagen de agente/.test(contenido),
+    'una imagen con :latest cambia el comportamiento del sistema sin diff ni regresion',
+  );
 }
 
 // --- 3g. El gate esta en la ruta de deploy, no solo en validate --------------
