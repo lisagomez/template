@@ -269,6 +269,10 @@ execute_sql, apply_migration, list_tables, get_advisors
 - SIEMPRE validar entradas de usuario con Zod
 - SIEMPRE habilitar RLS en tablas Supabase
 - NUNCA exponer secrets en codigo
+- **Secretos en pantalla**: NUNCA imprimas el valor de una variable de entorno, ni al
+  depurar. Se confirma presencia enmascarando: `presente/ausente`, largo, y a lo sumo un
+  prefijo de 4 caracteres. Un valor impreso queda en el transcript, en los logs y en el
+  historial — y ahi ya no lo borras, solo puedes rotarlo
 - `service_role` tiene **BYPASSRLS**: las superficies de negocio NO lo usan. Solo
   migraciones, webhooks verificados y jobs de plataforma, cada uno declarado (control C7)
 - `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
@@ -424,6 +428,17 @@ npm run deploy:down  # parar el stack
 - **Fix**: C1 y C5 pasan a Reglas de Codigo, inline. El documento explica; las Reglas
   obligan.
 - **Aplicar en**: todo control nuevo. Si no esta en el camino de quien decide, no existe.
+
+### 2026-08-23: INCIDENTE — dos credenciales vivas impresas en claro
+- **Error**: un agente enumero el entorno para responder una pregunta legitima e imprimio
+  los valores de `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN`. Quedaron en el transcript.
+- **Causa**: **no habia ninguna regla que lo prohibiera.** Otro agente, mismo entorno y
+  mismo modelo, habia enmascarado ese mismo token dias antes por criterio propio. Azar, no
+  politica.
+- **Fix**: regla de "secretos en pantalla" en Reglas de Codigo + caso de regresion T11 +
+  registro en `.claude/gobernanza/INCIDENTES.md`.
+- **Contencion**: rotar los tokens. Rotar invalida el valor filtrado; perseguir copias no.
+- **Aplicar en**: cualquier depuracion que toque el entorno.
 
 ### 2026-08-23: hay riesgos que ninguna firma cubre
 - **Error**: C5 decia "todo riesgo aceptado va firmado al registro", sin limite. Un

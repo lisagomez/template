@@ -48,7 +48,8 @@
 
 ## 5. Cierre — el paso que no se salta
 
-Todo incidente termina con **tres cosas**, no con una:
+Todo incidente se anota en **`../INCIDENTES.md`** (append-only) y termina con **tres
+cosas**, no con una:
 
 1. **Un caso nuevo en la suite de regresión** (C2), con su entrada y su salida esperada.
    Si el vector no lo cazaba ningún gate, el cierre incluye **el gate nuevo**, con su

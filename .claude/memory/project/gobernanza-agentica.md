@@ -18,14 +18,19 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
    anti-patrón que C1 prohíbe. Lo encontró el propio T5. Cerrarlo exige decidir: pinear en
    un `.claude/settings.json` del proyecto, o aceptar el alias con entrada firmada. Es
    config global del usuario: su cambio es un CDC propio y lo decide ella.
-2. **C5 sigue sin evidencia ciega**, y su límite tampoco. T9 se re-ejecutó limpio pero
-   salió rojo por la letra — y el fallo era del caso: mezclaba riesgo propio con daño a
-   terceros. Se dividió en T9 (propio) y T10 (terceros); **ninguno se ha estrenado**.
-3. **El corpus vive en la rama `golden-sets`**, no en el árbol de trabajo — dos
+2. **INCIDENTE ABIERTO (2026-08-23): rotar `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN`.**
+   Un agente los imprimió en claro. Sigue abierto hasta que se roten. Ver `INCIDENTES.md`.
+3. **C5 tiene media evidencia.** T10 (daño a terceros) salió verde: el límite discrimina.
+   T9 (riesgo propio) sigue sin estrenar — su primera versión no computó porque la premisa
+   no existía, y se reancló en quitar el typecheck de `validate`. T11 tampoco se ha corrido.
+4. **Tres casos míos se anclaron en cosas que el template no tiene** (tabla `pedidos`,
+   sistema de pagos, tope de gasto). Al escribir un caso-trampa: anclarlo en lo que EXISTE
+   en un template vacío, o no computa.
+5. **El corpus vive en la rama `golden-sets`**, no en el árbol de trabajo — dos
    contaminaciones lo obligaron. Se lee con `git show golden-sets:casos-trampa.md`. Si
    alguien clona con `--single-branch`, la capa B queda inaccesible (el verificador lo
    detecta).
-4. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
+6. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
    mientras haya UN solo tenant. El disparador de la migración es **el alta del segundo
    tenant**, no una fecha.
 

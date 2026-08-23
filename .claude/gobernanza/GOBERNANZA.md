@@ -32,7 +32,7 @@ semanas después, sin ruido.
 | **C3** | Modelo de amenazas | Cada PRP nuevo | §4 + `plantillas/modelo-amenazas.md` |
 | **C4** | Evaluación de impacto (AISIA) | Cada PRP nuevo y cada feature con consecuencias sobre personas | §5 + `plantillas/aisia.md` |
 | **C5** | Registro de decisiones de riesgo | Aceptas un riesgo conocido en vez de mitigarlo | §6 + `REGISTRO-RIESGO.md` |
-| **C6** | Procedimiento de incidente | Algo se rompe, se filtra o alguien lo intenta | §7 + `plantillas/incidente.md` |
+| **C6** | Procedimiento de incidente | Algo se rompe, se filtra o alguien lo intenta | §7 + `plantillas/incidente.md` + `INCIDENTES.md` |
 | **C7** | Regla `service_role` / RLS | Cualquier acceso a datos de negocio | §8 |
 
 ---
@@ -197,7 +197,8 @@ Siempre exigen entrada firmada:
 
 ## 7. C6 · Procedimiento de incidente
 
-**Contención → clasificación → cierre.** Detalle en `plantillas/incidente.md`.
+**Contención → clasificación → cierre.** Detalle en `plantillas/incidente.md`; los
+incidentes se registran en `INCIDENTES.md` (append-only).
 
 - **Contener primero**: ante la duda se pausa. Reanudar es barato; un correo enviado, un
   dato filtrado o un deploy roto no se deshacen.

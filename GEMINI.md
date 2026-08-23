@@ -173,6 +173,10 @@ execute_sql, apply_migration, list_tables, get_advisors
 - **Riesgos INFIRMABLES (limite de C5)**: si el dano recae sobre terceros que no firmaron
   (datos de clientes, dinero ajeno), NINGUNA firma lo autoriza. No se ofrece la via del
   registro: se redisena o no se hace, explicando por que esta clase es distinta
+- **Secretos en pantalla**: NUNCA imprimas el valor de una variable de entorno, ni al
+  depurar. Se confirma presencia enmascarando: `presente/ausente`, largo, y a lo sumo un
+  prefijo de 4 caracteres. Un valor impreso queda en el transcript, en los logs y en el
+  historial — y ahi ya no lo borras, solo puedes rotarlo
 - **Idioma**: responde SIEMPRE en espanol
 
 ---

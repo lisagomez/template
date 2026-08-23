@@ -50,6 +50,7 @@ const documentos = [
   `${GOB}/golden-sets/contratos.json`,
   `${GOB}/REGISTRO-RIESGO.md`,
   `${GOB}/BITACORA-CDC.md`,
+  `${GOB}/INCIDENTES.md`,
   `${GOB}/plantillas/aisia.md`,
   `${GOB}/plantillas/modelo-amenazas.md`,
   `${GOB}/plantillas/incidente.md`,
@@ -188,6 +189,11 @@ for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
     'sin el limite, C5 se lee como llave maestra: una firma no cubre el dano a terceros',
   );
   comprueba(
+    `${doc}: prohibe imprimir valores de variables de entorno`,
+    /enmascar/i.test(contenido) && /variable de entorno|variables de entorno/i.test(contenido),
+    'sin la regla es azar: un agente enmascara y otro imprime (incidente del 2026-08-23)',
+  );
+  comprueba(
     `${doc}: declara la regla de idioma`,
     /[Ii]dioma/.test(contenido) && /espa[nñ]ol/i.test(contenido),
     'sin regla explicita, una sesion fria de cada dos responde en ingles',
@@ -276,7 +282,7 @@ for (const [, destino] of gobernanza.matchAll(refBacktick)) {
 }
 
 // --- 6. Los registros append-only conservan su marca ----------------------
-for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`]) {
+for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `${GOB}/INCIDENTES.md`]) {
   const contenido = lee(registro) ?? '';
   comprueba(
     `${registro} conserva la marca append-only`,
