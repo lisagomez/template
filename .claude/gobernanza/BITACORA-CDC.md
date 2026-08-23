@@ -40,9 +40,9 @@
 - **Motivo**: cerrar los tres huecos de §0 de `GOBERNANZA.md` antes de que el template
   sea la base de más proyectos.
 - **Gate aplicado**: diff revisado ☑ · regresión verde ☐ (no existe, riesgo registrado)
-  · aprobación humana ☐ *(pendiente)* · pineo ☑
+  · aprobación humana ☑ · pineo ☑
 - **Regresión**: `npm run validate` en verde + control negativo del verificador probado.
-- **Aprobado por**: _pendiente de firma de la dueña_.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
 ### 2026-08-23 — skill `new-app`: sección de gobernanza en BUSINESS_LOGIC.md — radio: skill
 - **Cambio**: el skill `new-app` ahora emite una sección "6. Gobernanza (controles C4 y
@@ -53,9 +53,9 @@
   `BUSINESS_LOGIC.md` sin ella deja la evaluación de impacto para "más tarde", que es
   nunca.
 - **Gate aplicado**: diff revisado ☑ · regresión verde ☐ (C2 no existe, riesgo
-  registrado) · aprobación humana ☐ *(pendiente)* · pineo ☑
+  registrado) · aprobación humana ☑ · pineo ☑
 - **Regresión**: `npm run validate` en verde; el verificador comprueba que el skill sigue
   emitiendo la sección.
-- **Aprobado por**: _pendiente de firma de la dueña_.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

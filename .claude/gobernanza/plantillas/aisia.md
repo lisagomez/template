@@ -39,7 +39,7 @@ Firmada por: ____________  Rol: ____________  Fecha: ____________
 
 ## Ejemplo lleno — el propio SaaS Factory
 
-> Fecha: 2026-08-23 · Estado: **borrador — pendiente de firma** · Revisión: al añadir
+> Fecha: 2026-08-23 · Estado: **firmada** · Revisión: al añadir
 > un skill que escriba a producción sin gate humano.
 
 ### 1. Partes afectadas
@@ -95,7 +95,7 @@ Firmada por: ____________  Rol: ____________  Fecha: ____________
 toda acción irreversible. Se **rediseña** (no se acepta) cualquier flujo donde un agente
 pueda escribir a producción o mover dinero sin firma humana.
 
-Firmada por: ______________________  Rol: responsable de la fábrica  Fecha: ____________
+Firmada por: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
-> Sin esa firma esta AISIA es un análisis, no una decisión. La firma la pone una
-> persona; ningún agente puede fabricarla.
+> La firma la pone una persona; ningún agente puede fabricarla. Esta quedó registrada por
+> el agente **por instrucción explícita** de quien firma, en la sesión de esa fecha.

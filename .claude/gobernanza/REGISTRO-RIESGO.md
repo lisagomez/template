@@ -22,6 +22,10 @@ justo lo que un auditor pregunta.
 - **Vigencia / próxima revisión**:
 ```
 
+> **Sobre el append-only**: completar la firma de una entrada **no** cuenta como editarla
+> — el campo existe para llenarse. Cambiar su decisión, su riesgo o sus mitigaciones sí:
+> eso exige una entrada nueva que supersede a la anterior.
+
 ## Decisiones que SIEMPRE requieren entrada firmada
 
 1. Poner algo en producción con un control conocido pendiente.
@@ -47,7 +51,7 @@ justo lo que un auditor pregunta.
 - **Mitigaciones vigentes**: el verificador falla si el papel y el código divergen, y se
   probó con control negativo; el CDC (C1) queda activo desde hoy para cualquier cambio
   de skill o de modelo.
-- **Firmado por**: _pendiente de firma de la dueña_.
+- **Firmado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 - **Vigencia / próxima revisión**: al cerrar el primer hueco (C2) o tras el primer
   incidente, lo que ocurra antes.
 
@@ -61,7 +65,7 @@ justo lo que un auditor pregunta.
 - **Mitigaciones vigentes**: el modelo en producción está pineado (nada cambia solo);
   todo CDC deja diff y entrada en `BITACORA-CDC.md`, así que el cambio es rastreable
   aunque no esté probado; `npm run validate` sigue cazando roturas de código.
-- **Firmado por**: _pendiente de firma de la dueña_.
+- **Firmado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 - **Vigencia / próxima revisión**: **antes de la primera migración forzada de modelo**
   (deprecación). Construir la suite durante una migración obligatoria es exactamente el
   peor momento.
@@ -74,7 +78,7 @@ justo lo que un auditor pregunta.
 - **Mitigaciones vigentes**: con un solo tenant no hay dato ajeno que filtrar; RLS se
   habilita igual en toda tabla (el dato queda etiquetado y las políticas quedan probadas
   para el día del cambio); `SUPABASE_SERVICE_ROLE_KEY` nunca lleva `NEXT_PUBLIC_`.
-- **Firmado por**: _pendiente de firma de la dueña_.
+- **Firmado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 - **Vigencia / próxima revisión**: al dar de alta el segundo tenant. `select count(*)
   from organizaciones where tipo='tenant'` mayor que 1 con superficies aún en
   `service_role` es el estado que esta decisión declara inaceptable.
