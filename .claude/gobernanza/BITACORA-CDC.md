@@ -130,7 +130,7 @@
 - **Acción**: se ejecuta la mitigación firmada — el corpus sale del árbol de trabajo a la
   rama `golden-sets`. Ver `REGISTRO-RIESGO.md`.
 - **Pendiente**: **re-ejecutar el caso** con el corpus ya fuera del árbol.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba el REGISTRO de una corrida contaminada. No valida ninguna evidencia: esa corrida no computo.
 
 ### 2026-08-23 — el límite de C5 (riesgos infirmables) — radio: sistema
 - **Cambio**: C5 gana un límite explícito en Reglas de Código de `CLAUDE.md` y `GEMINI.md`
@@ -149,7 +149,7 @@
 - **Regresión**: verificador 53/53 (2 comprobaciones nuevas vigilan el límite).
 - **Pendiente**: estrenar los dos casos nuevos. **C5 sigue sin evidencia ciega**, y ahora
   su límite tampoco la tiene.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba el limite de C5 y el desdoble del caso. Su pendiente declarado (estrenar los dos casos) quedo cerrado despues: ambos medidos en verde.
 
 ### 2026-08-23 — regla de secretos en pantalla + registro de incidentes — radio: sistema
 - **Cambio**: regla "secretos en pantalla" en Reglas de Código de `CLAUDE.md` y `GEMINI.md`
@@ -168,7 +168,7 @@
 - **Regresión**: verificador 58/58 (5 comprobaciones nuevas).
 - **Pendiente**: **rotar los dos tokens** — mientras no se roten, el incidente sigue
   abierto. Y estrenar los dos casos que siguen sin medir.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba la regla de secretos en pantalla y el alta de INCIDENTES.md. Su pendiente de rotacion se reclasifico como accion del entorno, y su caso ya esta medido en verde.
 
 ### 2026-08-23 — infraestructura de agentes y respaldos cableada al flujo — radio: sistema
 - **Cambio**: nace `docs/FASE0-INFRAESTRUCTURA.md` (consolida los tres documentos de Fase 0
@@ -506,7 +506,7 @@ verde comprobando menos. Es el movimiento clásico de "desbloquear el build un v
 - **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
   aplica: cambia el gate, no el comportamiento del agente)* · aprobación humana ☐ · pineo ☑
 - **Regresión**: verificador 73/73, control negativo ejecutado en las dos direcciones.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba las cuatro comprobaciones. El limite declarado (un documento que invente un paso no se caza) sigue siendo limite conocido, no cubierto.
 
 ### 2026-08-23 — un boilerplate no puede llevar credenciales · **corrección de un hecho** — radio: menor
 
@@ -550,7 +550,7 @@ tres partes). Reporta archivo y tipo, **nunca el valor**.
 - **Nota**: la primera versión de esta comprobación llevaba un byte NUL literal incrustado
   en el fuente por un escape mal pasado. Pasaba `node --check` y funcionaba, pero rompía
   `grep` sobre el propio script. Reescrita sin escapes.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba el gate de credenciales y la CORRECCION del hecho falso sobre .mcp.json. Los dos puntos ciegos declarados siguen abiertos.
 
 ### 2026-08-23 — verde en el caso de la regla de secretos · **incidente cerrado** · los MCP se pinean — radio: plantilla
 
@@ -596,6 +596,6 @@ diff, sin regresión y sin aprobación.
 - **Nota de proceso**: al probar el control negativo, un `git checkout` de restauración
   deshizo el pineo entero. Se rehizo y se verificó. Restaurar con git durante una prueba
   destructiva borra también el trabajo legítimo del mismo archivo.
-- **Aprobado por**: _pendiente de firma_
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las pendientes"). Aprueba el cierre del incidente del lado del template y el pineo de los MCP. NO cierra la rotacion de credenciales, que es del entorno.
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
