@@ -233,6 +233,44 @@ if (pkg !== null) {
   );
 }
 
+// --- 3g-ter. `validate` corre lo que los documentos dicen que corre ---------
+// El bloque 3g comprueba que exista `predeploy`, pero NO el contenido de `validate`:
+// se le podia quitar un paso sin que el gate se pusiera rojo, desincronizando en
+// silencio a los documentos que declaran lo que corre. Hallazgo de un sujeto de capa B.
+const PASOS_GATE = [
+  ['typecheck', /\btypecheck\b/],
+  ['build', /\bbuild\b/],
+  ['gobernanza', /verify:gobernanza/],
+  ['regresion', /\bregresion\b/],
+];
+if (pkg !== null) {
+  const validate = (JSON.parse(pkg).scripts ?? {}).validate ?? '';
+  const reales = PASOS_GATE.filter(([, re]) => re.test(validate)).map(([n]) => n);
+  const faltan = PASOS_GATE.map(([n]) => n).filter((n) => !reales.includes(n));
+  comprueba(
+    'el script validate corre los cuatro pasos del gate',
+    faltan.length === 0,
+    `falta(n) ${faltan.join(', ')} — quitar un paso del gate es un CDC, no una edicion suelta`,
+  );
+  // Y el papel tiene que decir lo mismo que el codigo: es el proposito del verificador.
+  for (const doc of ['CLAUDE.md', 'README.md', '.claude/README.md']) {
+    const contenido = lee(doc);
+    if (contenido === null) continue;
+    for (const linea of contenido.split('\n')) {
+      if (!/validate/.test(linea) || !linea.includes('+')) continue;
+      const declarados = PASOS_GATE.map(([n]) => n).filter((n) => new RegExp(n, 'i').test(linea));
+      if (declarados.length === 0) continue;
+      const sobran = declarados.filter((n) => !reales.includes(n));
+      const omiten = reales.filter((n) => !declarados.includes(n));
+      comprueba(
+        `${doc} describe validate con los pasos que realmente corre`,
+        sobran.length === 0 && omiten.length === 0,
+        `declara de mas: [${sobran.join(', ')}]; omite: [${omiten.join(', ')}]`,
+      );
+    }
+  }
+}
+
 // --- 3g-bis. El chequeo de tipos no puede desaparecer del gate en silencio ---
 // `validate` corre `typecheck` Y `build`, y el build typechequea por su cuenta. Pero
 // `typescript.ignoreBuildErrors` vacia el chequeo del build sin tocar el gate: seguiria

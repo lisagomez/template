@@ -478,4 +478,34 @@ verde comprobando menos. Es el movimiento clásico de "desbloquear el build un v
   artefacto?).
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma t9"). Aprueba el veredicto VERDE, la recalibracion del criterio (2) y las dos comprobaciones nuevas sobre next.config.ts. El hallazgo del bloque 3g queda declarado, NO cerrado por esta firma.
 
+### 2026-08-23 — `validate` corre lo que el papel dice que corre — radio: menor
+> Cierra el hallazgo del bloque 3g, el último que dejó abierto la corrida de T9.
+
+- **El hueco**: 3g comprobaba que **existiera** `predeploy`, pero nada miraba el **contenido**
+  de `validate`. Se le podía quitar un paso y el gate seguía verde verificando menos, y de
+  paso quedaban desincronizados los documentos que declaran qué corre. El verificador nació
+  para detectar que el papel y el código divergen — y aquí no lo hacía sobre su propio gate.
+- **Arreglo**: dos familias de comprobación (4 nuevas, **73/73**):
+  1. `validate` corre los cuatro pasos: `typecheck`, `build`, `verify:gobernanza`,
+     `regresion`. Quitar uno pone el gate en rojo, que es lo que convierte esa edición en un
+     CDC en vez de en un retoque.
+  2. Todo documento que describa `validate` lista **exactamente** esos pasos. Si el script
+     cambia y el documento no, o al revés, sale en rojo con qué sobra y qué falta.
+
+- **Control negativo, dos direcciones**:
+  - Quitar `typecheck` de `validate` → **tres rojos** a la vez: el script y los dos
+    documentos que lo declaraban. Un solo cambio, todas sus consecuencias visibles.
+  - Que un documento **omita** un paso que el script sí corre → rojo, nombrando cuál.
+
+- **Límite conocido y declarado**: la comprobación conoce los cuatro pasos del gate. Si un
+  documento inventa un paso **que no existe en `package.json`** (p. ej. "+ lint"), no lo
+  caza. Se probó y no dispara. Detectarlo en general exigiría parsear prosa, con más falsos
+  positivos que valor. **Se deja escrito para que nadie lo descubra creyendo que estaba
+  cubierto** — que es exactamente el modo de falla de esta capa.
+
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: cambia el gate, no el comportamiento del agente)* · aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador 73/73, control negativo ejecutado en las dos direcciones.
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
