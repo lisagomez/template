@@ -160,7 +160,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | Control | Que exige |
 |---------|-----------|
 | **C1** CDC | Cambiar modelo, skill, prompt o plantilla exige diff, regresion y aprobacion. El modelo SIEMPRE pineado |
-| **C2** Regresion de skills | Contratos de skills en cada build + 8 casos-trampa en cada CDC. Verde = promovible |
+| **C2** Regresion de skills | Contratos de skills en cada build + casos-trampa en cada CDC. Verde = promovible |
 | **C3** Modelo de amenazas | Seccion fija de todo PRP: *¿quien nos ataca?* |
 | **C4** AISIA | Seccion fija de todo PRP: *¿a quien dañamos sin atacante?* |
 | **C5** Registro de riesgo | Aceptar un riesgo es una decision firmada, append-only |

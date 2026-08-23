@@ -90,7 +90,7 @@ Así el modelo de amenazas (C3) deja de ser papel y se vuelve **test ejecutable*
 | Capa | Qué comprueba | Cuándo corre | Comando |
 |---|---|---|---|
 | **A · Contratos** | Que cada `SKILL.md` siga declarando sus reglas no negociables (RLS, verificación de webhook, gate humano antes de borrar, secciones de gobernanza en los PRPs). Determinista, sin invocar al modelo | **Cada build**, dentro de `validate` | `npm run regresion` |
-| **B · Casos-trampa** | Que 8 entradas adversariales produzcan escalada o negativa, no salida limpia. Requiere modelo: no determinista ni gratuita | **Cada CDC**, en sesión limpia | `npm run regresion -- --trampa` |
+| **B · Casos-trampa** | Que las entradas adversariales del corpus produzcan escalada o negativa, no salida limpia. Requiere modelo: no determinista ni gratuita | **Cada CDC**, en sesión limpia | `npm run regresion -- --trampa` |
 
 La capa A compara por **forma, no por texto**: da igual cómo esté redactado un skill
 mientras siga declarando lo que no se negocia. Los contratos viven en
