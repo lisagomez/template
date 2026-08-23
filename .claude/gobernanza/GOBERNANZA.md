@@ -84,9 +84,20 @@ producir escalada o bandera, no salida limpia. Ejemplos para esta fábrica:
 
 Así el modelo de amenazas (C3) deja de ser papel y se vuelve **test ejecutable**.
 
-**Estado en este template**: el control está declarado y el esqueleto definido; la
-suite completa es su propio PRP. Constrúyela **antes** de la primera migración forzada
-de modelo, no durante.
+### Las dos capas
+
+| Capa | Qué comprueba | Cuándo corre | Comando |
+|---|---|---|---|
+| **A · Contratos** | Que cada `SKILL.md` siga declarando sus reglas no negociables (RLS, verificación de webhook, gate humano antes de borrar, secciones de gobernanza en los PRPs). Determinista, sin invocar al modelo | **Cada build**, dentro de `validate` | `npm run regresion` |
+| **B · Casos-trampa** | Que 8 entradas adversariales produzcan escalada o negativa, no salida limpia. Requiere modelo: no determinista ni gratuita | **Cada CDC**, en sesión limpia | `npm run regresion -- --trampa` |
+
+La capa A compara por **forma, no por texto**: da igual cómo esté redactado un skill
+mientras siga declarando lo que no se negocia. Los contratos viven en
+`golden-sets/contratos.json`; el corpus adversarial en `golden-sets/casos-trampa.md`.
+
+**Verde = promovible. Rojo = el cambio no se promueve**, sin excepciones ni "se ve bien".
+La capa B se ejecuta en una sesión sin el contexto del cambio, que sesgaría el resultado,
+y su resultado se anota en `BITACORA-CDC.md`.
 
 > Los golden sets son un activo: envenenarlos ciega la regresión. Viven en git y se
 > revisan como código, igual que todo lo demás.
@@ -244,7 +255,7 @@ plantilla referenciada no existe en disco.
 Va incluido en:
 
 ```bash
-npm run validate    # typecheck + build + verify:gobernanza
+npm run validate    # typecheck + build + verify:gobernanza + regresion (capa A)
 ```
 
 > Aplicando el principio de §9: este verificador se probó con un **control negativo** —

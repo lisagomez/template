@@ -51,6 +51,8 @@ Antes de escribir el PRP, investiga el codebase:
 
 - **Grep/Glob**: Buscar codigo existente relacionado con la feature
 - **Read**: Leer archivos relevantes para entender patrones actuales
+- **Gobernanza**: leer `.claude/gobernanza/plantillas/modelo-amenazas.md` y `aisia.md`
+  antes de llenar esas dos secciones
 - **Supabase**: Si involucra BD, verificar tablas y estructura existente
 
 Esto alimenta las secciones de Contexto, Referencias, y Arquitectura del PRP.
@@ -69,6 +71,13 @@ Donde `{feature-name}` es el nombre de la feature en kebab-case.
 - Criterios de Exito (checkboxes medibles)
 - Comportamiento Esperado (happy path)
 - Contexto (referencias, arquitectura propuesta, modelo de datos)
+- **Gobernanza** — las dos preguntas son obligatorias, no opcionales:
+  - **Modelo de amenazas** (control C3): activos, fronteras, atacante relevante (O1-O6),
+    controles. *¿quien nos ataca?*
+  - **Evaluacion de impacto / AISIA** (control C4): partes afectadas, dano con el sistema
+    operando bien, reversibilidad, via de apelacion. *¿a quien dañamos sin atacante?*
+  - Si el PRP cambia modelo, skill, prompt o plantilla, declararlo en el encabezado:
+    **CDC aplicable** (control C1)
 - Blueprint (SOLO fases, sin subtareas)
 - Secciones vacias de Aprendizajes, Gotchas, y Anti-Patrones
 

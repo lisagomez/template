@@ -7,7 +7,7 @@
 (vacio)
 
 ## project/ — Proyectos y decisiones activas
-- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada y firmada 2026-08-23; queda C2 sin construir y C7 diferido al segundo tenant.
+- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada y firmada 2026-08-23; C2 construido (capa B sin ejecutar) y C7 diferido al segundo tenant.
 
 ## feedback/ — Correcciones y preferencias
 (vacio)

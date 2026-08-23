@@ -13,10 +13,10 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
 
 ## Pendientes reales (esto es lo que hay que recordar)
 
-1. **C2 no existe todavía.** La suite de regresión de skills está declarada, no
-   construida. Consecuencia: el CDC (C1) exige una regresión que no hay, así que hoy se
-   apoya solo en el diff y la aprobación humana. **Construirla antes de la primera
-   migración forzada de modelo**, no durante.
+1. **C2 capa B nunca se ha ejecutado.** La capa A (contratos) corre en cada build y está
+   verde. Los 8 casos-trampa están escritos y el corpus verificado, pero **ejecutarlos
+   requiere una sesión limpia** y todavía no ocurrió. Hasta entonces, C2 cubre "el skill
+   declara la regla", no "el skill la cumple".
 2. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
    mientras haya UN solo tenant. El disparador de la migración es **el alta del segundo
    tenant**, no una fecha.

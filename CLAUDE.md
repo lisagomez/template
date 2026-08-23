@@ -282,8 +282,10 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
-npm run validate     # typecheck + build + verificador de gobernanza (el gate completo)
+npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
+npm run regresion    # regresion de skills (C2 capa A)
+npm run regresion -- --trampa  # casos-trampa (C2 capa B, en cada CDC)
 
 # Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
 npm run deploy       # build + up + ps (todo en uno)
@@ -301,7 +303,8 @@ npm run deploy:down  # parar el stack
 │   ├── GOBERNANZA.md         # Documento nucleo: los 7 controles y los principios
 │   ├── REGISTRO-RIESGO.md    # Decisiones de riesgo firmadas (append-only)
 │   ├── BITACORA-CDC.md       # Cambios de comportamiento + modelo pineado (append-only)
-│   └── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
+│   ├── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
+│   └── golden-sets/          # C2: contratos de skills + casos-trampa
 │
 ├── memory/                    # Memoria persistente del proyecto (git-versioned)
 │   ├── MEMORY.md             # Indice (max 200 lineas, se carga al inicio)

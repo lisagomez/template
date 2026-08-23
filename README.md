@@ -146,8 +146,9 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # typecheck + build + gobernanza (el gate completo)
+npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
+npm run regresion    # regresion de skills (C2)
 ```
 
 ## Gobernanza
@@ -159,7 +160,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | Control | Que exige |
 |---------|-----------|
 | **C1** CDC | Cambiar modelo, skill, prompt o plantilla exige diff, regresion y aprobacion. El modelo SIEMPRE pineado |
-| **C2** Regresion de skills | Golden sets con casos-trampa. Verde = promovible |
+| **C2** Regresion de skills | Contratos de skills en cada build + 8 casos-trampa en cada CDC. Verde = promovible |
 | **C3** Modelo de amenazas | Seccion fija de todo PRP: *¿quien nos ataca?* |
 | **C4** AISIA | Seccion fija de todo PRP: *¿a quien dañamos sin atacante?* |
 | **C5** Registro de riesgo | Aceptar un riesgo es una decision firmada, append-only |

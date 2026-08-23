@@ -124,7 +124,9 @@ npm run lint         # ESLint
 npm run lint:fix     # Fix automatico
 npm run typecheck    # TypeScript check
 npm run verify:gobernanza  # Cableado de la capa de gobernanza
-npm run validate     # typecheck + build + gobernanza (el gate completo)
+npm run regresion    # Regresion de skills (C2 capa A)
+npm run regresion -- --trampa  # Casos-trampa (C2 capa B, para CDC)
+npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
 ```
 
 ---
@@ -220,7 +222,7 @@ regla de RLS.
 | Control | Disparador | Donde vive |
 |---------|-----------|------------|
 | **C1** Cambio de Comportamiento (CDC) | Tocas modelo, skill, prompt o plantilla | `BITACORA-CDC.md` |
-| **C2** Regresion de skills | Cualquier CDC de radio ≥ skill | Declarado, PRP propio pendiente |
+| **C2** Regresion de skills | Capa A en cada build; capa B en cada CDC | `golden-sets/` + `npm run regresion` |
 | **C3** Modelo de amenazas | Cada PRP nuevo | `plantillas/modelo-amenazas.md` |
 | **C4** Evaluacion de impacto (AISIA) | Cada PRP y cada BUSINESS_LOGIC.md | `plantillas/aisia.md` |
 | **C5** Registro de decisiones de riesgo | Aceptas un riesgo en vez de mitigarlo | `REGISTRO-RIESGO.md` |
@@ -316,7 +318,8 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 │   ├── GOBERNANZA.md         # Documento nucleo: los 7 controles y los principios
 │   ├── REGISTRO-RIESGO.md    # Decisiones de riesgo firmadas (append-only)
 │   ├── BITACORA-CDC.md       # Cambios de comportamiento + modelo pineado (append-only)
-│   └── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
+│   ├── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
+│   └── golden-sets/          # C2: contratos de skills + casos-trampa
 │
 ├── PRPs/                      # Product Requirements Proposals
 │   ├── prp-base.md           # Template base (incluye modelo de amenazas + AISIA)

@@ -58,4 +58,17 @@
   emitiendo la sección.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
 
+### 2026-08-23 — skill `prp`: exigir las secciones de gobernanza — radio: skill
+- **Cambio**: la lista de "Contenido obligatorio" del skill `prp` ahora incluye modelo de
+  amenazas (C3), evaluación de impacto (C4) y la declaración de CDC aplicable (C1), y el
+  paso de investigación manda leer las plantillas antes de llenarlas.
+- **Motivo**: lo cazó la capa A de C2 en su primera corrida. `prp-base.md` tenía las
+  secciones pero el skill no las pedía: un PRP generado podía saltárselas y nada fallaba.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐
+  *(pendiente: requiere sesión limpia)* · aprobación humana ☑ · pineo ☑
+- **Regresión**: `npm run regresion` 92/92, probado con control negativo (se le quitó RLS
+  al skill `supabase` y falla). Capa B verificada como corpus completo (8/8 casos con
+  entrada y expectativa), **no ejecutada todavía**.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

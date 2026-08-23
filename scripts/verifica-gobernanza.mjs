@@ -46,6 +46,8 @@ function existeEnRepo(basename, desde = raiz) {
 // --- 1. Los documentos de la capa existen -----------------------------------
 const documentos = [
   `${GOB}/GOBERNANZA.md`,
+  `${GOB}/golden-sets/contratos.json`,
+  `${GOB}/golden-sets/casos-trampa.md`,
   `${GOB}/REGISTRO-RIESGO.md`,
   `${GOB}/BITACORA-CDC.md`,
   `${GOB}/plantillas/aisia.md`,

@@ -1,0 +1,44 @@
+{
+  "_comentario": "Capa A del control C2: contratos estructurales de cada skill. Se comparan contra SKILL.md sin invocar al modelo, asi que son deterministas y corren en cada build. Un contrato roto = un skill que perdio una regla no negociable. Anadir un contrato es barato; quitarlo exige justificarlo en el CDC.",
+  "todos_los_skills": [
+    { "patron": "^---\\s*$", "porque": "frontmatter YAML presente" },
+    { "patron": "^name:\\s*\\S+", "porque": "el skill declara su nombre" },
+    { "patron": "^description:", "porque": "sin description el agente no sabe cuando activarlo" }
+  ],
+  "skills": {
+    "new-app": [
+      { "patron": "##\\s*6\\.\\s*Gobernanza", "porque": "C4: todo BUSINESS_LOGIC.md nace con su evaluacion de impacto" },
+      { "patron": "BUSINESS_LOGIC\\.md", "porque": "es el artefacto que este skill existe para producir" },
+      { "patron": "service_role", "porque": "C7: la regla de aislamiento se declara desde el contrato de negocio" }
+    ],
+    "prp": [
+      { "patron": "prp-base\\.md", "porque": "el PRP se genera desde el template, no de memoria" },
+      { "patron": "[Mm]odelo de [Aa]menazas", "porque": "C3: todo PRP responde quien nos ataca" },
+      { "patron": "[Ee]valuaci[oó]n de [Ii]mpacto", "porque": "C4: todo PRP responde a quien dañamos sin atacante" }
+    ],
+    "supabase": [
+      { "patron": "RLS|[Rr]ow [Ll]evel [Ss]ecurity", "porque": "ninguna tabla se crea sin RLS" }
+    ],
+    "add-login": [
+      { "patron": "RLS|[Rr]ow [Ll]evel [Ss]ecurity", "porque": "auth sin RLS es auth decorativa" }
+    ],
+    "add-payments": [
+      { "patron": "webhook", "porque": "el cobro se confirma por webhook, no por redireccion del cliente" },
+      { "patron": "[Ss]ignature|[Vv]erif|firma", "porque": "un webhook sin verificar su firma es un endpoint abierto" }
+    ],
+    "bucle-agentico": [
+      { "patron": "[Ff]ase", "porque": "la ejecucion es por fases, no de un tiron" },
+      { "patron": "[Vv]alidaci[oó]n", "porque": "cada fase cierra con validacion, no con buena voluntad" }
+    ],
+    "eject-sf": [
+      { "patron": "DESTRUCTIVO|destructiv", "porque": "una accion irreversible se anuncia como tal" },
+      { "patron": "[Cc]onfirmar|[Cc]onfirmacion", "porque": "gate humano antes de borrar" }
+    ],
+    "playwright-cli": [
+      { "patron": "screenshot", "porque": "la evidencia visual es el producto de este skill" }
+    ],
+    "ai": [
+      { "patron": "OpenRouter", "porque": "Golden Path: el proveedor no se improvisa por feature" }
+    ]
+  }
+}

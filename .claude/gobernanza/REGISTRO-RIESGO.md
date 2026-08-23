@@ -83,4 +83,19 @@ justo lo que un auditor pregunta.
   from organizaciones where tipo='tenant'` mayor que 1 con superficies aún en
   `service_role` es el estado que esta decisión declara inaceptable.
 
+### 2026-08-23 — C2 · suite de regresión — **supersede la entrada de C2 de esta misma fecha**
+- **Decisión**: construir C2 en dos capas en vez de dejarla como PRP futuro. Capa A
+  (contratos estructurales, determinista) entra a `npm run validate`; capa B (8 casos
+  adversariales) se ejecuta en cada CDC.
+- **Riesgo aceptado**: la capa A verifica que un skill **declare** sus reglas, no que las
+  **cumpla** al ejecutarse — eso solo lo prueba la capa B, que necesita modelo y criterio
+  humano. Un skill puede satisfacer el contrato y aun así comportarse mal.
+- **Mitigaciones vigentes**: la capa A caza el 100% de las regresiones por borrado o
+  reescritura de una regla (probado con control negativo sobre el skill `supabase`); la
+  capa B cubre el comportamiento en los 8 vectores más baratos (O1-O6); todo incidente
+  añade un caso al corpus (C6).
+- **Firmado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-08-23
+- **Vigencia / próxima revisión**: al primer CDC de radio "sistema" (cambio de modelo),
+  que es cuando la capa B se estrena de verdad.
+
 <!-- Añadir aquí las decisiones siguientes. NO editar las anteriores. -->
