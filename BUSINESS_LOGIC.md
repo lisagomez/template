@@ -98,6 +98,10 @@ TypeScript + Tailwind 3.4, Supabase (Auth + DB + RLS), Zod, Zustand, Playwright.
 7. [ ] Infraestructura de agentes, si aplica, y **respaldo con GATE 3 cerrado**
    (`docs/FASE0-INFRAESTRUCTURA.md`). Un respaldo sin restauración probada no cuenta
    como paso hecho
+8. [ ] **Vigilancia de las versiones pineadas** (`docs/SDD-hermes-verificacion.md`).
+   Todo lo que este proyecto pinea —modelo, imágenes, servidores MCP— gana estabilidad y
+   **pierde noticias**: sin algo que avise, el rezago no se nota hasta que duele. Decidir
+   quién mira y cada cuánto es parte de poner esto en producción, no un extra
 
 ---
 

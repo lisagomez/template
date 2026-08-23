@@ -231,6 +231,25 @@ ssh -L 9119:localhost:9119 deploy@IP   # unico canal de acceso en Fase 0
 
 Runbook completo: **[docs/FASE0-INFRAESTRUCTURA.md](docs/FASE0-INFRAESTRUCTURA.md)**
 
+### Mantenerlo al dia sin sorpresas
+
+La version del agente va **pineada**, y cambiarla es un CDC. Pero pinear y no mirar tiene su
+propio fallo: se descubrio al escribir el diseño de abajo que el tag pineado llevaba **13
+releases de rezago**, y nadie lo sabia.
+
+> **Pinear sin vigilar no es estabilidad, es rezago silencioso.**
+
+El mecanismo que cierra ese lazo esta en
+**[docs/SDD-hermes-verificacion.md](docs/SDD-hermes-verificacion.md)** — especificado, aun
+sin implementar. Lo que lo hace distinto de un "comprueba actualizaciones":
+
+| Decision | Por que |
+|----------|---------|
+| El job **nunca** actualiza | Uno que lo hiciera solo seria el anti-patron de C1 automatizado, y por tanto peor |
+| Vigila el **digest**, no solo el tag | Un tag no es inmutable: se puede re-publicar. Si cambia no es deriva, es cadena de suministro (O5) |
+| Reporta el **cambio**, no el estado | Un informe semanal repitiendo lo mismo deja de leerse. Eso es fatiga de aprobacion (O3) |
+| Exit `2` para "no pude verificar" | Sin red **no** es "todo bien". Un control que parece funcionar y no mide nada es el peor modo de falla |
+
 | Decision | Como queda |
 |----------|-----------|
 | Dos verticales, no una | `negocio` (datos propios) y `clientes` (datos de terceros). La separacion es de **radio de dano**, no organizativa: una fuga en una no expone a la otra |
