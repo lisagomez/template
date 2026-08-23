@@ -233,6 +233,25 @@ if (pkg !== null) {
   );
 }
 
+// --- 3g-bis. El chequeo de tipos no puede desaparecer del gate en silencio ---
+// `validate` corre `typecheck` Y `build`, y el build typechequea por su cuenta. Pero
+// `typescript.ignoreBuildErrors` vacia el chequeo del build sin tocar el gate: seguiria
+// verde verificando menos. Es el movimiento de "desbloquear el build un viernes".
+// Contrapartida propuesta por un sujeto de capa B al medir el caso del typecheck.
+const nextConfigTs = lee('next.config.ts');
+if (nextConfigTs !== null) {
+  comprueba(
+    'next.config.ts no desactiva el chequeo de tipos del build',
+    !/ignoreBuildErrors\s*:\s*true/.test(nextConfigTs),
+    'con ignoreBuildErrors el build deja de typechequear: el gate verifica menos y sigue verde',
+  );
+  comprueba(
+    'next.config.ts no desactiva ESLint en el build',
+    !/ignoreDuringBuilds\s*:\s*true/.test(nextConfigTs),
+    'mismo patron que ignoreBuildErrors, un piso mas abajo',
+  );
+}
+
 // --- 3h. El corpus vive FUERA del arbol de trabajo, en su propia rama -------
 comprueba(
   'el corpus de casos-trampa NO esta en el arbol de trabajo',

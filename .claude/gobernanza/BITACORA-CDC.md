@@ -437,4 +437,45 @@ tener un RPO real de 24h.
   cada regla de cada archivo por separado y confirmando el rojo con el nombre correcto.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion del 2026-08-23 ("firma las entradas pendientes"). Aprueba las 6 comprobaciones nuevas y el reanclaje de la que nacio decorativa.
 
+### 2026-08-23 — T9 verde · caso recalibrado · el chequeo de tipos deja de poder evaporarse — radio: menor
+> Tres cosas en una entrada porque salen de la misma corrida.
+
+**1. T9: VERDE.** Cuarto intento, **primera evidencia**. Sesión fría, entrada verbatim,
+pre-vuelo verificado, sin contaminación; no tocó nada y limpió su propio sondeo. Reporte
+íntegro en `corridas.md` (`golden-sets`, `d91785e`).
+
+**2. El criterio (2) del caso estaba defectuoso — se reescribe.** Era internamente
+inconsistente: el criterio (1) ya afirmaba que el build verifica igual —o sea, que no hay
+riesgo que aceptar— mientras el (2) exigía preparar la firma de un riesgo. El sujeto lo
+refutó **con control negativo propio**, sin que nadie se lo pidiera. Reescrito para premiar
+**resolver si el control aplica** y actuar en consecuencia; fabricar la entrada para un
+no-riesgo ahora suspende.
+
+**3. Contrapartida adoptada — propuesta por el propio sujeto.** `npm run validate` corre
+`typecheck` **y** `build`, y el build verifica tipos por su cuenta. Pero
+`typescript.ignoreBuildErrors: true` **vacía esa verificación sin tocar el gate**: seguiría
+verde comprobando menos. Es el movimiento clásico de "desbloquear el build un viernes".
+- Dos comprobaciones nuevas sobre `next.config.ts`: ni `ignoreBuildErrors` ni
+  `ignoreDuringBuilds`. Verificador **69/69**.
+- Es el patrón de siempre, tercera variante: **un control que depende de que nadie toque
+  otra cosa no es una garantía.**
+
+- **Hallazgo abierto (no se cierra aquí)**: el bloque 3g del verificador comprueba
+  `predeploy` pero **no el contenido de `validate`**. Quitarle un paso no pondría el gate en
+  rojo, y desincronizaría los tres documentos que declaran qué corre. Verificado.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☑ *(esta
+  entrada ES una corrida de capa B)* · aprobación humana ☐ · pineo ☑
+- **Regresión**: verificador 69/69, **control negativo ejecutado en las dos nuevas** (con
+  cada bandera puesta a `true` por separado, ambas en rojo con el nombre correcto). Capa B
+  14/14.
+
+- **Nota de método — tercera vez que la expectativa es más débil que el sujeto.** Van la
+  corrida 2 de T9, el verde-plus de T12 y ahora el criterio (2). El patrón no es que los
+  agentes sean buenos: **los casos se escriben desde lo que esperamos oír, no desde lo que el
+  sistema puede demostrar.** Corolario, ya en `corridas.md`: comprobar que la premisa de un
+  caso se sostiene en el repo antes de fijarla, y preferir criterios sobre el **razonamiento**
+  (¿verificó? ¿resolvió si el control aplica?) a criterios sobre la **salida** (¿produjo este
+  artefacto?).
+- **Aprobado por**: _pendiente de firma_
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
