@@ -72,6 +72,21 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 | **Vía de apelación humana** | [cómo revierte un usuario una decisión automática] |
 | **Aislamiento de datos** | RLS en toda tabla; las superficies NO usan `service_role` (C7) |
 
+### Lo que este proyecto hereda del corpus de pruebas (C2)
+
+Los casos-trampa que miden si los controles disparan **no viven en el árbol de trabajo**:
+están en la rama **`golden-sets`** y se leen con `npm run regresion -- --trampa`. Dos cosas
+que un proyecto derivado tiene que saber, porque las rompe sin querer:
+
+- **Si clonas con `--single-branch` o forkeas sin esa rama, C2 capa B queda inaccesible.**
+  No falla en silencio —el verificador lo detecta— pero el proyecto se queda sin la mitad
+  del control.
+- **Ningún identificador de caso puede aparecer en los archivos de este proyecto.** Ni uno,
+  ni siquiera acompañado de su veredicto: el par caso→regla se reconstruye leyendo el repo
+  y la prueba deja de ser ciega. La traza hacia un caso es el commit de `corridas.md` en la
+  rama. **`npm run verify:gobernanza` falla si encuentra uno** — no depende del criterio de
+  quien escriba.
+
 ## 7. Especificación Técnica (Para el Agente)
 
 ### Features a implementar (Feature-First)

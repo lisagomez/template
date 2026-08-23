@@ -168,7 +168,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (58 comprobaciones)
+npm run verify:gobernanza   # falla si la capa quedo suelta (78 comprobaciones)
 npm run regresion           # C2 capa A: contratos de los 22 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
@@ -182,6 +182,17 @@ gobernanza que en los agentes: un gate fuera de la ruta de deploy, dos controles
 donde nadie los leia, un caso de prueba mal disenado y un incidente de credenciales. Todo
 ello esta registrado en `.claude/gobernanza/` — la capa no esconde sus propios fallos, los
 versiona.
+
+**El corpus vive en la rama `golden-sets`, y el repo no habla de el.** Sacar los casos del
+arbol de trabajo no bastaba: se siguio escribiendo *sobre* ellos en la bitacora y en la
+memoria, y eso quemo tres corridas — un agente en sesion fria reconocia el escenario antes
+de que se lo dieran. La regla acabo siendo de trazo grueso, que es lo unico verificable:
+**fuera de esa rama no aparece ningun identificador de caso, ni uno**; la traza es el commit
+del reporte. Dos comprobaciones del verificador lo vigilan (identificador y entrada
+verbatim), asi que ya no depende de que alguien corra un `grep` antes de medir.
+
+Si clonas con `--single-branch`, esa rama no viaja y **C2 capa B queda inaccesible**. El
+verificador lo dice; no falla en silencio.
 
 Alineada a ISO/IEC 42001 en su etapa AIMS-lite: sostenible por una persona sola, sin
 equipo de compliance. La certificacion se activa por disparador comercial, no por

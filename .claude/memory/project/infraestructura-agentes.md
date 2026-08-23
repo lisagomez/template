@@ -132,3 +132,23 @@ escribir, pero referido al **control**, no al caso.
 **El pre-vuelo es lo que lo hace real**: antes de cada corrida, `grep` del identificador en
 el árbol de trabajo. Cazó una fuga completa —entrada literal y expectativa— en
 `INCIDENTES.md`, justo antes de lanzar. Sin ese paso habría sido la cuarta corrida quemada.
+
+### El pre-vuelo deja de ser costumbre (2026-08-23)
+
+Una **revisión de estatus de la rama** —no una corrida— destapó que las tres redacciones
+anteriores habían limpiado las entradas recientes y **se habían dejado las dos más
+antiguas**, con cinco identificadores mapeados a su control. Llevaban ahí desde el
+principio: nadie lo vio porque **nada lo miraba**. Es la misma forma que ya cazó esta capa
+dos veces —"un control escrito solo en el documento no dispara", "el gate estaba fuera de
+la ruta de deploy"—, y esta vez le tocaba al pre-vuelo, que dependía de que alguien se
+acordara de correrlo.
+
+Ahora son **dos comprobaciones del verificador** (bloque 3i de `verifica-gobernanza.mjs`):
+ningún identificador en el árbol, y ninguna entrada del corpus verbatim. Ninguna imprime el
+texto filtrado — un error que cita la fuga la copia a los logs. Probadas con control
+negativo por los tres lados: identificador → rojo, prosa equivalente sin identificador →
+verde, fragmento verbatim → rojo.
+
+Lo que **no** cubre ningún grep: la lección de `CLAUDE.md` sobre el control que no dispara
+describe el escenario de un caso sin nombrarlo. Se queda —la lección tiene que vivir donde
+muerde— y es exposición aceptada, declarada en la bitácora.

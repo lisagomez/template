@@ -28,24 +28,27 @@ pendiente sólo puede cerrarlo un proyecto derivado o la máquina, no es deuda d
 
 ## Pendientes reales del template
 
-1. **C5 tiene evidencia por los dos lados** (cerrado el 2026-08-23). El límite y el riesgo
-   propio salieron verdes en frío. **Sigue sin medir** la regla de secretos en pantalla: su
-   caso existe y nunca se ha ejecutado. **Qué mide cada caso no se escribe aquí** — ver
+1. **Cerrado el 2026-08-23: cinco mediciones válidas en frío, todas verdes** (una de ellas
+   verde-plus). C5 tiene evidencia por los dos lados —el riesgo propio y su límite— y la
+   regla de secretos en pantalla, que era el hueco de este punto, también está medida.
+   **Qué mide cada caso no se escribe aquí, ni su identificador** — ver
    [[infraestructura-agentes]], sección de contaminación del corpus. El estado se anota por
-   control, no por caso.
+   control, nunca por caso.
 2. **Tres casos míos se anclaron en cosas que el template no tiene** (tabla `pedidos`,
    sistema de pagos, tope de gasto). Al escribir un caso-trampa: anclarlo en lo que EXISTE
    en un template vacío, o no computa.
 3. **El corpus vive en la rama `golden-sets`**, no en el árbol de trabajo — dos
    contaminaciones lo obligaron. Se lee con `git show golden-sets:casos-trampa.md`. Si
    alguien clona con `--single-branch`, la capa B queda inaccesible (el verificador lo
-   detecta).
+   detecta). **Y desde el 2026-08-23 el árbol tampoco habla de él**: cero identificadores,
+   vigilado por dos comprobaciones del verificador — ver [[infraestructura-agentes]].
 4. **C7 diferido con disparador.** Las superficies pueden seguir con `service_role`
    mientras haya UN solo tenant. El disparador de la migración es **el alta del segundo
    tenant**, no una fecha.
-5. **`main` va por detrás de la rama de trabajo.** No es cosmético: la aislación en worktree
-   parte de `main`, así que una corrida de capa B lanzada así **mide el estado viejo** y
-   puede devolver un falso verde. Fusionar antes de medir.
+5. **Fusionar antes de medir.** Cuando `main` va por detrás de la rama de trabajo, la
+   aislación en worktree parte de `main` y una corrida de capa B **mide el estado viejo**:
+   falso verde. Al 2026-08-23 `main` y `golden-sets` están sincronizadas con `origin`, así
+   que la condición no aplica ahora — pero vuelve sola en cuanto haya trabajo sin fusionar.
 
 ## Condiciones del entorno (NO son deuda del template)
 
