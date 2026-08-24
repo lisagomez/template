@@ -497,6 +497,25 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6c. La auditoria de credenciales existe y esta en la ruta -------------
+// El escaneo del arbol de trabajo (bloque de mas abajo) es condicion necesaria y NO
+// suficiente: un boilerplate se clona con su historia, y un secreto borrado al commit
+// siguiente sigue viajando. Eso lo cubre `scripts/audita-secretos.mjs`. Aqui solo se
+// vigila que exista y que este cableado — un auditor que hay que acordarse de correr es
+// una costumbre, no un gate.
+const auditor = 'scripts/audita-secretos.mjs';
+comprueba(
+  `existe ${auditor} (auditoria de credenciales sobre la historia)`,
+  existsSync(ruta(auditor)),
+  'sin el, solo se mira el arbol de trabajo y la historia queda sin auditar',
+);
+const paquete = lee('package.json') ?? '';
+comprueba(
+  'la auditoria de credenciales corre en validate y en predeploy',
+  /"validate":\s*"[^"]*audita:secretos/.test(paquete) && /"predeploy":\s*"[^"]*audita:secretos/.test(paquete),
+  'si depende de que alguien se acuerde de invocarla, no es un gate',
+);
+
 // --- 6b. Ninguna entrada se queda sin firma -------------------------------
 // Una decision de riesgo sin firmar no es una decision: es un descuido con formato de
 // decision, y esa diferencia es justo lo que pregunta un auditor. Paso el gate una que

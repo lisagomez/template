@@ -71,6 +71,23 @@ de `REGISTRO-RIESGO.md` y `BITACORA-CDC.md`, ignorando la plantilla del bloque `
 decision.** Es la forma de fallo de siempre —el control existia, no estaba en la ruta—
 aplicada al ultimo sitio donde quedaba.
 
+## El arbol limpio no basta: la historia viaja (2026-08-23)
+
+Auditado el boilerplate entero: **cero credenciales vivas** en los 63 commits de todas las
+ramas; lo unico con forma de secreto son placeholders declarados. Lo que aparecio fue el
+hueco del control que lo afirmaba:
+
+1. El gate solo miraba el **arbol de trabajo**. Un boilerplate se clona **con su historia**:
+   un secreto commiteado y borrado al commit siguiente sigue viajando. Medido con control
+   negativo: con el archivo ya borrado del arbol, el verificador daba **verde** y el auditor
+   nuevo, **rojo**.
+2. El gate solo conocia **firmas con prefijo** (`ghp_`, `sk-`, ...). Un token sin prefijo
+   —64 hex de Hetzner, una password a pelo en un `.env.example`— pasaba entero.
+
+Lo cubre `scripts/audita-secretos.mjs`, en `validate` y `predeploy`. **Si alguna vez
+encuentra algo real: la contencion es ROTAR, no reescribir la historia.** Rotar invalida el
+valor filtrado; borrar el commit solo lo esconde de quien mire por el sitio obvio.
+
 ## Firmas (cerrado el 2026-08-23)
 
 La AISIA, **todas** las entradas de `REGISTRO-RIESGO.md` y **todos** los CDC están
