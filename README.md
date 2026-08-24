@@ -169,7 +169,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (80 comprobaciones)
+npm run verify:gobernanza   # falla si la capa quedo suelta (85 comprobaciones)
 npm run regresion           # C2 capa A: contratos de los 22 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
@@ -253,8 +253,14 @@ releases de rezago**, y nadie lo sabia.
 
 ```bash
 npm run vigila:hermes    # capa A: una llamada HTTP, sin LLM y sin credenciales
+npm run vigila:hermes -- --capa-b   # ¿lo que el runbook afirma sigue siendo cierto?
 # exit 0 = sin novedades (silencio) · 1 = deriva o rojo · 2 = NO pude verificar
 ```
+
+La imagen va **pineada por digest**, no solo por tag: un tag se puede re-publicar, un digest
+no. La primera corrida de la capa B encontro **cuatro afirmaciones falsas** en el runbook —
+entre ellas tres variables de entorno que la imagen ignoraba en silencio, asi que el
+documento creia configurar una autenticacion que no configuraba.
 
 El mecanismo que cierra ese lazo esta en
 **[docs/SDD-hermes-verificacion.md](docs/SDD-hermes-verificacion.md)** — capa A

@@ -3,7 +3,8 @@
 **Estado:** **implementado y corrido el 2026-08-23** (dos CDC firmados) — capa A y capa B
 en `scripts/verifica-hermes.mjs`, ancla en `.hermes-baseline.json`, tres comprobaciones en
 el verificador. La capa B destapó **cuatro afirmaciones falsas del runbook**, ya corregidas.
-**Falta**: el cron semanal (del entorno) y probar la topología con un contenedor real.
+**Falta**: instalar el cron (es del entorno; la receta está en §9.10 del runbook) y probar
+la topología con un contenedor real.
 **Ámbito:** el diseño y el script viajan con el template; **la ejecución semanal es del
 entorno** de cada proyecto (un cron, en la máquina o el servidor que lo corra).
 
@@ -77,9 +78,16 @@ corre cuando toca decidir.
 a publicar sobre el mismo nombre. Pinear por tag protege del despiste, no de un upstream
 comprometido. Por eso el digest se guarda y se compara.
 
-> **Mejora natural cuando se implemente:** pinear el compose **por digest**
-> (`imagen@sha256:…`) además del tag. Entonces A3 deja de ser una alarma y pasa a ser
-> imposible por construcción. Es un cambio de comportamiento: CDC propio.
+> **Hecho el 2026-08-23** (CDC propio, como estaba previsto): el compose pinea **por
+> digest** (`imagen:tag@sha256:…`). El tag se queda como etiqueta legible; quien manda es el
+> digest. A3 deja de proteger el despliegue —ya no hay nada que proteger, una re-publicación
+> no cambia lo que se baja— y pasa a ser lo que debía ser: **el sensor que avisa de que
+> alguien reescribió un nombre fijo**. El aviso lo dice así, porque un control que exagera
+> se deja de leer igual que uno que se queda corto.
+>
+> Aparece una comprobación nueva, **A0**: el digest del compose y el del ancla tienen que
+> coincidir. Si divergen, alguien movió el pineo sin pasar por el CDC y el vigilante estaría
+> comparando contra una imagen que ya no se despliega.
 
 ### Capa B — aserciones sobre la imagen, en cada CDC de actualización
 
@@ -259,7 +267,11 @@ Este documento especificaba; el 2026-08-23 se implementó la capa A. Estado real
    afirmaciones del runbook eran falsas** (los tres nombres de variables del dashboard y el
    subcomando `dashboard`), corregidas en el CDC del mismo día. Lo que sigue sin probarse es
    el **arranque real de un contenedor**: aquí no hay Docker.
-5. ⬜ El cron semanal — **en el entorno**, no en el template. `npm run vigila:hermes`.
+5. ⬜ El cron semanal — **en el entorno**, no en el template. La **receta** sí viaja:
+   §9.10 del runbook, con los tres códigos de salida y el aviso de que tratar el `2` como
+   un `0` es el fallo que esto existe para no tener.
+6. ✅ **Pineo por digest** (2026-08-23): el compose usa `imagen:tag@sha256:…` y el
+   verificador comprueba que el digest del compose y el del ancla coincidan (A0).
 
 **Un hallazgo de la primera corrida**: `latest` y `main` no son releases, y contarlos como
 tales inflaba el rezago de 11 a 13. El script los separa (A4 cuenta versiones, A5 mira los

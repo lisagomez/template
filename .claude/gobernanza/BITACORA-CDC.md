@@ -892,4 +892,39 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 ("corre la capa B" + "genera PR, COMMIT, MERGE"). Aprueba la corrida, las
   correcciones del runbook y el registro de lo verificado.
 
+### 2026-08-23 — pineo por digest + la receta del cron — radio: sistema
+> Ejecuta la "mejora natural" que el SDD dejó escrita como CDC propio, y cierra la mitad del
+> cron que **sí** es del template: la receta.
+
+- **Cambio**:
+  1. **El compose del runbook pinea por digest**: `imagen:tag@sha256:…`. El tag se queda
+     como etiqueta legible; quien manda es el digest. Los dos scripts aprenden la forma
+     nueva (aceptan ambas).
+  2. **A0, comprobación nueva** en el vigilante y en el verificador: el digest del compose y
+     el del ancla tienen que coincidir. Si divergen, alguien movió el pineo sin pasar por el
+     CDC — y el vigilante estaría comparando contra una imagen que ya no se despliega.
+  3. **A3 cambia de significado, y el aviso lo dice.** Con el compose pineado por digest,
+     una re-publicación del tag **ya no cambia lo que se despliega**. Sigue siendo incidente
+     (alguien reescribió un nombre fijo), pero sin exposición, y el texto del aviso lo
+     declara. Un control que exagera se deja de leer igual que uno que se queda corto.
+  4. **§9.10 del runbook — la receta del cron**: línea de crontab, y sobre todo la **tabla
+     de los tres códigos de salida** con el aviso de que tratar el `2` como un `0` es el
+     fallo que este mecanismo existe para no tener. Más las dos pruebas que hay que correr
+     antes de confiar en él, como GATE 1 y como el vigilante de respaldos.
+- **Motivo**: A3 era una alarma sobre algo que podía ocurrir y no se podía impedir. Por
+  digest, la re-publicación deja de tener efecto: **imposible por construcción es mejor que
+  vigilado**. Y el cron: el script existía, pero sin la receta cada proyecto se la
+  inventaría — y probablemente trataría el `2` como un `0`.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B del SDD
+  ☑ (8/8, re-corrida tras el cambio) · aprobación humana ☑ · pineo ☑ (**por digest**)
+- **Regresión**: verificador **85/85** (2 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, `typecheck` limpio, pre-vuelo limpio. **Control negativo por tres lados**:
+  digest del compose distinto del ancla → rojo en el verificador **y** A0 en rojo en el
+  vigilante; compose sin digest (solo tag) → rojo; ambos verdes al revertir.
+- **Lo que NO cierra**: **instalar** el cron sigue siendo del entorno — el template no puede
+  editar el crontab de un servidor que no existe. Y la topología de dos dashboards sigue sin
+  probarse con un contenedor real.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("continua"). Aprueba el pineo por digest, A0 y la receta del cron.
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
