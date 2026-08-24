@@ -83,9 +83,12 @@ async function texto(url) {
 function imagenDelRunbook() {
   const texto = existsSync(ruta(RUNBOOK)) ? readFileSync(ruta(RUNBOOK), 'utf8') : null;
   if (texto === null) throw new NoVerificable(`no existe ${RUNBOOK}: no hay de donde leer el pineo`);
-  const m = texto.match(/^\s*image:\s*([a-z0-9._\-/]+):([A-Za-z0-9._-]+)/m);
+  // Dos formas validas: `imagen:tag` y `imagen:tag@sha256:...` (pineo por digest, §3 del
+  // SDD). La segunda hace imposible por construccion que el compose traiga otra imagen: el
+  // tag se queda como etiqueta legible y quien manda es el digest.
+  const m = texto.match(/^\s*image:\s*([a-z0-9._\-/]+):([A-Za-z0-9._-]+)(@sha256:[0-9a-f]{64})?/m);
   if (!m) throw new NoVerificable(`no encuentro la linea "image:" en ${RUNBOOK}`);
-  return { imagen: m[1], tag: m[2] };
+  return { imagen: m[1], tag: m[2], digest: m[3] ? m[3].slice(1) : null };
 }
 
 const leeJson = (p) => (existsSync(ruta(p)) ? JSON.parse(readFileSync(ruta(p), 'utf8')) : null);
@@ -279,6 +282,16 @@ async function main() {
     return 1;
   }
 
+  // --- A0. El compose y el ancla dicen el mismo digest -----------------------
+  // Solo aplica si el compose pinea por digest. Si divergen, alguien movio el pineo sin
+  // pasar por el CDC — y entonces el ancla ya no describe lo que se despliega.
+  if (!esControlNegativo && compose.digest && baseline.digest && compose.digest !== baseline.digest) {
+    rojos.push(`A0 · el digest del compose y el del ancla no coinciden.\n` +
+      `  compose: ${compose.digest}\n  ancla:   ${baseline.digest}\n` +
+      '  Mover el pineo es un CDC (C1): se actualizan los dos a la vez, o el vigilante ' +
+      'compara contra una imagen que ya no es la que se despliega.');
+  }
+
   // --- A2/A3. El tag pineado sigue publicado, y con el mismo digest ----------
   const t = await pide(`${API}/repositories/${imagen}/tags/${tag}`);
   if (t.status === 404) {
@@ -288,13 +301,22 @@ async function main() {
     const digest = t.cuerpo?.digest;
     if (typeof digest !== 'string') throw new NoVerificable('la respuesta del tag no trae digest: la API cambio');
     if (baseline.digest && digest !== baseline.digest) {
+      // Con el compose pineado por digest, una re-publicacion del tag ya NO cambia lo que
+      // se despliega: docker baja el digest, no el nombre. Sigue siendo un incidente —
+      // alguien reescribio un nombre que este proyecto trata como fijo—, pero sin
+      // exposicion. Decirlo importa: un aviso que exagera se deja de leer igual que uno
+      // que se queda corto.
+      const blindado = Boolean(compose.digest);
       incidente =
         `A3 · **el digest del tag pineado cambio**. Alguien re-publico sobre un nombre que este ` +
         `proyecto trata como fijo.\n` +
         `  esperado: ${baseline.digest}\n  actual:   ${digest}\n` +
         '  Esto NO es deriva: es cadena de suministro (O5). Procedimiento de incidente ' +
         '(`.claude/gobernanza/plantillas/incidente.md`) y entrada en INCIDENTES.md.\n' +
-        '  NO se actualiza para "arreglarlo": se contiene fijando el compose al digest anterior.';
+        (blindado
+          ? '  **Tu despliegue no cambia**: el compose pinea por digest, asi que sigue bajando la ' +
+            'imagen de siempre. Investiga antes de mover nada.'
+          : '  NO se actualiza para "arreglarlo": se contiene fijando el compose al digest anterior.');
       rojos.push(incidente);
     }
   }

@@ -80,9 +80,13 @@ retuneados (app 3 GB, Hermes 1.5 GB c/u).
    - **No hizo falta Docker**: el blob de configuración del registro da entorno y entrypoint;
      la doc oficial, subcomandos y variables. Lo que sigue sin probarse es un **arranque
      real**, y así está marcado en el baseline.
-   - **El lazo está implementado** (2026-08-23, CDC firmado): `scripts/verifica-hermes.mjs`
-     (capa A), ancla en `.hermes-baseline.json`, tres comprobaciones en el verificador y
-     `npm run vigila:hermes`. **El cron semanal es del entorno**, no del template.
+   - **El lazo está implementado** (2026-08-23, tres CDC firmados): `scripts/verifica-hermes.mjs`
+     (capas A y B), ancla en `.hermes-baseline.json`, cinco comprobaciones en el verificador
+     y `npm run vigila:hermes`. La imagen va **pineada por digest**, no solo por tag: una
+     re-publicación ya no puede cambiar lo que se despliega — imposible por construcción es
+     mejor que vigilado. **Instalar el cron es del entorno**; la receta (con los tres códigos
+     de salida) vive en §9.10 del runbook, porque sin ella cada proyecto trataría el `2`
+     —"no pude verificar"— como un `0`.
    - **El "13" era un dato a ojo.** La primera corrida del script lo corrigió: son **11**
      releases; los otros dos tags eran `latest` y `main`, que son móviles, no releases. El
      script los separa porque el SDD se lo pedía. Un dato contado a mano y el mismo dato

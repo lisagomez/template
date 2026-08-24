@@ -393,7 +393,10 @@ comprueba(
   'sin ancla, la capa A del SDD no tiene contra que comparar el digest',
 );
 const runbookHermes = lee('docs/FASE0-INFRAESTRUCTURA.md') ?? '';
-const composeHermes = runbookHermes.match(/^\s*image:\s*([a-z0-9._\-/]+):([A-Za-z0-9._-]+)/m);
+// Dos formas validas: `imagen:tag` y `imagen:tag@sha256:...`. La segunda es el pineo por
+// digest de §3 del SDD: si esta, tiene que coincidir con el ancla, o el vigilante compara
+// contra una imagen distinta de la que se despliega.
+const composeHermes = runbookHermes.match(/^\s*image:\s*([a-z0-9._\-/]+):([A-Za-z0-9._-]+)(@sha256:[0-9a-f]{64})?/m);
 if (baselineTexto !== null && composeHermes) {
   let baselineJson = null;
   try {
@@ -413,6 +416,20 @@ if (baselineTexto !== null && composeHermes) {
     typeof baselineJson?.digest === 'string' && /^sha256:[0-9a-f]{64}$/.test(baselineJson.digest),
     'sin digest no hay A3: un tag se puede re-publicar y nadie se enteraria',
   );
+  comprueba(
+    'el runbook pinea la imagen del agente por digest',
+    typeof composeHermes[3] === 'string',
+    'con solo el tag, una re-publicacion cambia lo que se despliega. Por digest es imposible ' +
+      'por construccion (§3 del SDD)',
+  );
+  if (composeHermes[3]) {
+    comprueba(
+      'el digest del compose y el del ancla coinciden',
+      composeHermes[3].slice(1) === baselineJson?.digest,
+      'si divergen, alguien movio el pineo sin actualizar el ancla: el vigilante compararia ' +
+        'contra una imagen que ya no se despliega',
+    );
+  }
 }
 
 // --- 4. prp-base.md gana sus secciones (el segundo cable) ------------------

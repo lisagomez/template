@@ -295,7 +295,9 @@ done
 # =============================================================================
 
 x-hermes-base: &hermes-base
-  image: nousresearch/hermes-agent:v2026.6.19   # PINEADO — cambiarlo es un CDC (C1)
+  # PINEADO POR DIGEST — cambiarlo es un CDC (C1). El tag queda como etiqueta legible;
+  # quien manda es el `@sha256:`. Un tag se puede re-publicar; un digest, no.
+  image: nousresearch/hermes-agent:v2026.6.19@sha256:9f367c7756ef087661a361536a89f438d57a122b958dc23d82d456b1433e6e9e
   restart: unless-stopped                        # vuelve solo tras reboot
   env_file: /opt/hermes/.env
   deploy:
@@ -671,6 +673,49 @@ avisa. Igual que GATE 1: comprobado que dispara, no supuesto.
 
 Lo que sí se respalda de estos activos es su **configuración** (ya versionada en
 git), nunca el material privado.
+
+---
+
+## 9.10 Vigilancia del pineo — el otro extremo del lazo
+
+El respaldo tiene su vigilante (§9.8). El **pineo de la imagen** necesita el suyo, y por la
+misma razón: pinear da estabilidad y **quita noticias**. Sin sensor, el rezago no se nota
+hasta que duele — así se descubrió que este runbook iba dos meses por detrás.
+
+El script viaja con el repo (`scripts/verifica-hermes.mjs`, diseño en
+[`SDD-hermes-verificacion.md`](SDD-hermes-verificacion.md)); **el cron es del entorno**, y
+esta sección es lo que hay que instalar en el servidor que lo corra:
+
+```bash
+# crontab -e  (lunes 09:00, hora LOCAL del servidor: `timedatectl` primero)
+0 9 * * 1  cd /ruta/al/repo && /usr/bin/node scripts/verifica-hermes.mjs >> /var/log/hermes-vigilante.log 2>&1 || \
+           echo "vigilante del pineo: exit $? — revisar /var/log/hermes-vigilante.log" | <canal-de-aviso>
+```
+
+Los tres códigos de salida **no son intercambiables**, y el cron tiene que distinguirlos:
+
+| Exit | Significa | Qué hace el cron |
+|---|---|---|
+| `0` | Nada cambió | **Silencio.** No avisa: si avisara cada lunes, dejarías de leerlo |
+| `1` | Hay deriva o algo en rojo | Avisa. El informe queda en `hermes-informe.md` |
+| `2` | **No pude verificar** (sin red, API cambiada) | Avisa **igual que el 1**. Ausencia de respuesta no es ausencia de deriva |
+
+> Tratar el `2` como un `0` es exactamente el fallo que este mecanismo existe para no
+> tener: un control que parece funcionar y no mide nada. Si tu canal de aviso solo mira
+> "¿falló?", asegúrate de que `2` cuenta como fallo.
+
+**Pruébalo antes de confiar en él**, igual que GATE 1 y que el vigilante de respaldos:
+
+```bash
+node scripts/verifica-hermes.mjs --tag=v0000.0.0     # debe salir 1 (rojo)
+node scripts/verifica-hermes.mjs --api=https://127.0.0.1:9   # debe salir 2, nunca 0
+```
+
+Y en cada CDC que proponga mover el pineo, antes de firmarlo:
+
+```bash
+node scripts/verifica-hermes.mjs --capa-b   # ¿lo que este runbook afirma sigue siendo cierto?
+```
 
 ---
 
