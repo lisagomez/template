@@ -157,6 +157,18 @@ npm run vigila:versiones  # deriva de TODO lo pineado (stack + MCP). Usa red: fu
 npm run vigila:hermes  # deriva del pineo del agente (semanal, fuera del gate: usa red)
 ```
 
+## Portable entre arneses
+
+Las instrucciones de la fabrica viven en **`AGENTS.md`**, que es la fuente unica.
+`CLAUDE.md` la importa con `@AGENTS.md` —la via que documenta Claude Code, que lee
+`CLAUDE.md` y no `AGENTS.md`— y **opencode lee `AGENTS.md` directamente**: su documentacion
+dice que cuando existen los dos, solo usa `AGENTS.md`. Asi el mismo repo se conduce desde
+cualquiera de los dos arneses sin que las instrucciones puedan divergir, porque hay una sola
+copia.
+
+El verificador lee los archivos de instrucciones **expandiendo los imports**, igual que el
+arnes: si alguien rompe el import, 13 comprobaciones se ponen en rojo (probado).
+
 ## Dos caminos: una app, o una herramienta
 
 Este template sirve para las dos cosas, y el runbook cambia segun cual sea:

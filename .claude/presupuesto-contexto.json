@@ -12,7 +12,7 @@
   },
   "niveles": {
     "siempre": {
-      "_comentario": "Entra en CADA sesion, se use lo que se use. Es el unico coste que se paga siempre y por eso el que mas importa.",
+      "_comentario": "Entra en CADA sesion, se use lo que se use. `CLAUDE.md` se mide EXPANDIDO: importa `AGENTS.md` (la fuente unica, que es la que lee opencode) y ese import se carga igual que si estuviera pegado. Mover contenido a un archivo importado NO ahorra tokens; reportarlo como ahorro seria una cifra inventada.",
       "archivos": [
         "CLAUDE.md",
         ".claude/memory/MEMORY.md"

@@ -1159,4 +1159,48 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("continua").
 
+### 2026-08-23 — `AGENTS.md` como fuente única: el repo deja de ser de un arnés — radio: sistema
+> Tercer incremento del spec de eficiencia de tokens: la portabilidad. Si un gate solo pasa
+> desde Claude Code, no es un gate del repo — es una costumbre de un arnés.
+
+- **Cambio**:
+  1. `CLAUDE.md` pasa a ser **`AGENTS.md`** (fuente única, redacción neutra de arnés).
+  2. El nuevo `CLAUDE.md` son 17 líneas: `@AGENTS.md` más lo específico de este arnés.
+  3. **`scripts/lee-instrucciones.mjs`**: resuelve los imports `@ruta` como hace el arnés
+     (profundidad 4, saltando bloques de código). Lo usan el **verificador** y el **medidor
+     de contexto**.
+- **Los dos hechos que se verificaron antes de mover nada** (y que decidieron el diseño):
+  - **Claude Code lee `CLAUDE.md`, NO `AGENTS.md`.** Su documentación recomienda justo
+    esto: un `CLAUDE.md` que importe `@AGENTS.md`. Un symlink también vale, pero impide
+    añadir lo específico del arnés y en Windows pide permisos de administrador.
+  - **opencode lee `AGENTS.md` primero**, y su documentación dice que cuando existen los dos
+    *"only AGENTS.md is used"*. O sea: una sola copia sirve a los dos, y **la divergencia
+    entre `CLAUDE.md` y `GEMINI.md` deja de ser posible** en el lado de Claude.
+- **Por qué el verificador y el medidor tuvieron que aprender a expandir imports**: sin eso
+  mentirían los dos a la vez. El verificador buscaría las reglas en un archivo de 17 líneas
+  y las daría por desaparecidas; el medidor reportaría una **caída de ~6.700 tokens que no
+  existe**. Un import se expande y se carga igual que si estuviera pegado.
+- **Esto NO ahorra tokens, y el medidor lo demuestra**: el contexto base pasa de 9.924 a
+  **10.163** — sube 239 por la sección nueva específica del arnés. Lo que compra es
+  portabilidad y una sola copia. Presentarlo como ahorro habría sido exactamente la cifra
+  inventada que esta capa persigue.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: mueve instrucciones sin cambiar su contenido)* · aprobación humana ☑ · pineo ☑
+- **Regresión**: verificador **102/102**, capa A 92/92, capa B del corpus 14/14, auditoría
+  limpia, presupuesto de contexto en verde, `typecheck` limpio. **Control negativo
+  contundente**: al romper el import (`@NO-EXISTE.md`), **13 comprobaciones se ponen en
+  rojo** y el medidor cae a 243 tokens. La expansión no es decorativa: es lo que sostiene
+  todas las comprobaciones de reglas.
+- **Lo que NO cierra**: `GEMINI.md` sigue siendo una copia condensada aparte —Gemini lee su
+  propio archivo y no consta que soporte estos imports—, así que ahí la divergencia sigue
+  siendo posible y la vigilan las comprobaciones que ya existían. Y **opencode no se ha
+  ejecutado aquí**: la compatibilidad está verificada contra su documentación, no contra una
+  corrida. Quedan el routing por nivel de tarea y la contabilidad en runtime.
+- **Un hallazgo que abre el siguiente paso**: la documentación oficial pide **menos de 200
+  líneas** por archivo de instrucciones; `AGENTS.md` tiene **507**. Y documenta
+  `.claude/rules/` con `paths:` para que parte de eso cargue **solo al tocar los archivos
+  que le importan** — que es un ahorro real, medible, y el siguiente incremento natural.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("continua").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

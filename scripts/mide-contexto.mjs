@@ -23,6 +23,7 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { leeConImports } from './lee-instrucciones.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ruta = (p) => join(raiz, p);
@@ -65,7 +66,14 @@ try {
   metodo = `estimado: chars / ${ratio} — ${cfg.calibracion.margen ?? 'margen no declarado'}`;
 }
 
-const lee = (p) => (existsSync(ruta(p)) ? readFileSync(ruta(p), 'utf8') : null);
+// Los archivos de instrucciones se miden EXPANDIDOS: `CLAUDE.md` importa `AGENTS.md` y ese
+// import se carga en contexto igual que si estuviera pegado. Medir el archivo sin expandir
+// reportaria una caida de ~6700 tokens que NO existe — un ahorro inventado es peor que no
+// medir nada.
+const INSTRUCCIONES = new Set(['CLAUDE.md', 'GEMINI.md', 'AGENTS.md']);
+const lee = (p) => (INSTRUCCIONES.has(p)
+  ? leeConImports(ruta(p))
+  : existsSync(ruta(p)) ? readFileSync(ruta(p), 'utf8') : null);
 const filas = [];
 const excesos = [];
 
