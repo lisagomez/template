@@ -497,6 +497,21 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6g. El vigilante de frescura cubre TODO lo pineado --------------------
+// El pineo da estabilidad y quita noticias. Ya habia sensor para la imagen del agente;
+// esto lo generaliza al stack y a los MCP. Vive FUERA de validate a proposito: usa red.
+const vigilante = 'scripts/vigila-versiones.mjs';
+comprueba(
+  `existe ${vigilante} (frescura de lo pineado)`,
+  existsSync(ruta(vigilante)),
+  'sin el, el rezago del stack y de los MCP no se nota hasta que duele',
+);
+comprueba(
+  'el vigilante de versiones NO corre dentro de validate',
+  !/"validate":\s*"[^"]*vigila:versiones/.test(lee('package.json') ?? ''),
+  'usa red: dentro del gate lo pondria rojo por causas que no son el codigo',
+);
+
 // --- 6f. El presupuesto de contexto existe, esta calibrado y esta en la ruta
 // El contexto base se paga en CADA sesion y nadie lo habia medido nunca: crecia sin
 // sensor, igual que el rezago de versiones. Lo que se vigila aqui es que el sensor exista,

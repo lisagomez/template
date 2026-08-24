@@ -153,6 +153,7 @@ npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
+npm run vigila:versiones  # deriva de TODO lo pineado (stack + MCP). Usa red: fuera del gate
 npm run vigila:hermes  # deriva del pineo del agente (semanal, fuera del gate: usa red)
 ```
 
@@ -193,7 +194,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (100 comprobaciones)
+npm run verify:gobernanza   # falla si la capa quedo suelta (102 comprobaciones)
 npm run regresion           # C2 capa A: contratos de los 22 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```

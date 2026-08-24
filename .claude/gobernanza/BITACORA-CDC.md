@@ -1121,4 +1121,42 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("continua con eficienciatokens").
 
+### 2026-08-23 — vigilante de frescura generalizado a todo lo pineado — radio: sistema
+> Segundo incremento del spec de eficiencia de tokens. Generaliza el sensor que ya existía
+> para la imagen del agente al **stack y los MCP**.
+
+- **Cambio**: `scripts/vigila-versiones.mjs` (`npm run vigila:versiones`) vigila los 23
+  pineados del repo —14 dependencias y 9 servidores MCP— contra el registro npm. Dos
+  comprobaciones nuevas (bloque 6g): que exista, y que **NO** corra dentro de `validate`,
+  porque usa red y un gate que depende de la red se cae por causas que no son el código.
+- **Lo que encontró en su primera corrida**, y es el motivo de que exista:
+  - **4 saltos MAYORES**: `typescript` 5.9.3 → 7.0.2, `@types/node` 22 → 26, `tailwindcss`
+    3.4.19 → 4.3.3, `eslint` 9.39.5 → 10.9.0.
+  - 1 menor (`@supabase/ssr` 0.6.1 → 0.12.4) y 1 parche.
+  - **Los 9 MCP están al día** — se verificó a mano contra el registro, no se dio por bueno.
+  - El de Tailwind es un pineo **deliberado**: `CLAUDE.md` tiene la lección de que la
+    sintaxis v4 sobre v3 rompe el build. El vigilante no lo sabe y avisa una vez; a partir de
+    ahí calla. Que avise no significa que haya que actualizar.
+- **Un falso positivo propio, cazado antes de publicarlo**: la primera versión comparaba
+  contra el **suelo del rango** (`^16.0.0`), no contra lo que el lockfile resuelve (16.3.2).
+  Reportaba **14 derivas cuando había 6**. Un informe que exagera se deja de leer igual que
+  uno que se queda corto — que es exactamente el modo de falla que este vigilante existe para
+  no tener. Ahora compara contra el lockfile, y lo dice en la columna de origen.
+- **Lo que no puede verificar, y lo declara en vez de callarlo**: la imagen de contenedor de
+  un MCP (la vigila el de Hermes) y el **modelo pineado**, que no tiene registro público que
+  consultar sin credenciales — se revisa a mano en cada CDC de radio sistema.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: añade un vigilante, no cambia el comportamiento del agente)* · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: verificador **102/102** (2 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, auditoría limpia, presupuesto de contexto en verde. **Control negativo por
+  tres lados**: segunda corrida → silencio con exit 0 (reporta el cambio, no el estado);
+  registro inalcanzable → **exit 2**; vigilante metido dentro de `validate` → verificador en
+  rojo.
+- **Lo que NO cierra**: quedan el routing por nivel de tarea, la contabilidad de tokens en
+  runtime y la portabilidad a `AGENTS.md` con opencode. Y las 6 derivas encontradas **no se
+  tocan aquí**: moverlas es su propio CDC, con su regresión y su firma.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("continua").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
