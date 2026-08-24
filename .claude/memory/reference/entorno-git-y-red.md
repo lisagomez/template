@@ -1,7 +1,7 @@
 # Entorno: qué se puede y qué no desde una sesión aquí
 
 Hechos de **esta máquina**, no del template (ver [[gobernanza-agentica]], "Dos ámbitos que
-NO se mezclan"). Comprobados el 2026-08-23.
+NO se mezclan"). Comprobados el 2026-08-23; la sección de GitHub, actualizada el 2026-08-24.
 
 ## GitHub
 
@@ -10,12 +10,15 @@ NO se mezclan"). Comprobados el 2026-08-23.
   desde el tarball oficial **con checksum verificado**, sin `sudo` — no hay sudo sin
   contraseña en esta máquina, y para un binario de usuario tampoco hace falta. Actualizarlo
   es repetir el mismo paso con la release nueva; no hay apt que lo haga solo.
-- **La autenticación es del usuario**: `gh auth login` es interactivo y no se corre desde
-  una sesión de agente. Hasta que se haga, `gh` está instalado pero no puede abrir PRs.
-  Tampoco hay `GITHUB_TOKEN` ni `GH_TOKEN` en el entorno.
-- Sin `gh` autenticado, el camino que funciona es: rama → commit → `git push -u origin
-  <rama>` → **merge local `--no-ff`** → push de `main`. GitHub imprime en el push un enlace
-  `.../pull/new/<rama>` para abrir el PR a mano.
+- **Autenticado desde el 2026-08-24** (cuenta `lisagomez`, protocolo SSH). La sesión de
+  agente ya abre y fusiona PRs: `gh pr create` + `gh pr merge --merge --delete-branch`
+  funcionan — probado en el PR #10. El login en sí lo hizo la usuaria: `gh auth login` es
+  interactivo y sigue sin correrse desde una sesión.
+- El token vive en `~/.config/gh/hosts.yml`, **fuera del repo**, y `gh auth status` lo
+  imprime enmascarado. No hay `GITHUB_TOKEN` ni `GH_TOKEN` en el entorno, y no hacen falta.
+- Camino de respaldo si `gh` volviera a estar sin autenticar: rama → commit → `git push -u
+  origin <rama>` → **merge local `--no-ff`** → push de `main`. GitHub imprime en el push un
+  enlace `.../pull/new/<rama>` para abrir el PR a mano.
 
 ## Red: sí, y con eso basta para vigilar la imagen
 
