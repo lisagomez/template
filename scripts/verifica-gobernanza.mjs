@@ -497,6 +497,43 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6e. El camino de "herramienta empaquetada" existe y esta en el flujo ---
+// Este template servia solo para "una app que se despliega". El otro caso real es "una
+// herramienta que construyo una vez y reuso en mis proyectos", y ahi lo que falla no es el
+// codigo: es el contrato del paquete, que revienta en el proyecto de DESTINO.
+const empaquetador = 'scripts/empaqueta-herramienta.mjs';
+comprueba(
+  `existe ${empaquetador} (empaqueta y PRUEBA la integracion)`,
+  existsSync(ruta(empaquetador)),
+  'sin el, "es compatible" es una opinion en vez de una instalacion probada',
+);
+comprueba(
+  'existe el andamio tools/ejemplo-herramienta con su contrato',
+  existsSync(ruta('tools/ejemplo-herramienta/package.json')),
+  'el andamio es lo que se copia: sin el, cada herramienta inventa su package.json',
+);
+for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
+  const contenido = lee(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: el decision tree enruta "herramienta / libreria / paquete"`,
+    /EMPAQUETAR-HERRAMIENTA/.test(contenido),
+    'si no esta en el camino de quien decide, el agente tratara una libreria como una app',
+  );
+}
+const andamio = lee('tools/ejemplo-herramienta/package.json');
+if (andamio !== null) {
+  let json = null;
+  try {
+    json = JSON.parse(andamio);
+  } catch { /* lo dice la comprobacion */ }
+  comprueba(
+    'el andamio no mete React en dependencies (va como peer)',
+    json !== null && !Object.keys(json.dependencies ?? {}).some((d) => ['react', 'react-dom', 'next'].includes(d)),
+    'un andamio con React empaquetado ensena el bug de los dos Reacts a todo el que lo copie',
+  );
+}
+
 // --- 6d. El deploy no asume un servidor concreto ---------------------------
 // Un boilerplate se despliega en la maquina de otro. Un limite de memoria cableado a un
 // modelo de VPS es una afirmacion sobre hardware que no conocemos: en un servidor mas
