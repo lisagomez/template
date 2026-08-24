@@ -575,6 +575,28 @@ for (const doc of ['AGENTS.md', 'GEMINI.md']) {
   );
 }
 
+// --- 6j. Ningun gate depende de un arnes concreto --------------------------
+// "Si un gate solo pasa desde Claude Code, no es un gate del repo: es una costumbre de un
+// arnes." Medido el 2026-08-24 corriendo `validate` entero dentro de opencode
+// (docs/PORTABILIDAD-ARNESES.md). Lo que se vigila aqui es que siga siendo cierto: basta
+// que un script del gate llame al binario de un arnes para que el repo quede casado con el.
+const ARNESES = /(^|[^\w-])(claude|opencode|gemini|cursor|aider)([^\w-]|$)/i;
+if (pkg !== null) {
+  const scripts = JSON.parse(pkg).scripts ?? {};
+  const casados = Object.entries(scripts).filter(([, cmd]) => ARNESES.test(String(cmd)));
+  comprueba(
+    'ningun script de npm invoca el binario de un arnes',
+    casados.length === 0,
+    `${casados.map(([n]) => n).join(', ')} — un gate que necesita un arnes concreto no es del repo`,
+  );
+}
+const portabilidad = 'docs/PORTABILIDAD-ARNESES.md';
+comprueba(
+  `existe ${portabilidad} (la portabilidad, medida y no afirmada)`,
+  existsSync(ruta(portabilidad)),
+  'sin el informe, "corre en otro arnes" vuelve a ser una afirmacion sin corrida detras',
+);
+
 // --- 6g. El vigilante de frescura cubre TODO lo pineado --------------------
 // El pineo da estabilidad y quita noticias. Ya habia sensor para la imagen del agente;
 // esto lo generaliza al stack y a los MCP. Vive FUERA de validate a proposito: usa red.

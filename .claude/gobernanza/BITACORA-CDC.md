@@ -1370,3 +1370,49 @@ diff, sin regresión y sin aprobación.
     spec —`.claude/rules/` con `paths:`— deja de ser una mejora y empieza a ser necesario.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion
   del 2026-08-24 ("cierralo").
+
+### 2026-08-24 — portabilidad medida: el gate corre dentro de opencode — radio: menor
+> Cierra (casi) el punto 7 de la Definicion de Hecho del spec de eficiencia de tokens. Su
+> exigencia era explicita: *"no vale afirmar compatibilidad"*. Hasta hoy la compatibilidad
+> estaba verificada contra la **documentacion** de opencode; ahora lo esta contra **el
+> binario que se ejecuta** y contra una corrida.
+
+- **Que se midio** (opencode `1.18.21`, instalado **pineado**, sin `sudo`, fuera del repo):
+  1. **Resolucion de instrucciones, leida del binario**: busca hacia arriba `AGENTS.md` →
+     `CLAUDE.md` → `CONTEXT.md` y **para en el primero que encuentra**. En este arbol
+     `AGENTS.md` gana y `CLAUDE.md` **no se lee**: la fuente unica funciona como se diseño,
+     y ahora consta por que.
+  2. **22 de 22 skills** de `.claude/skills/` cargados (`opencode debug skill`: 23 en total,
+     22 del repo + el propio de opencode). El directorio no es convencion de un solo arnes.
+  3. **`npm run validate` entero, en verde, dentro de una PTY creada por el servidor de
+     opencode**, con el servidor como proceso padre (PID en el log). Exit 0.
+- **El hallazgo que no estaba en la doc**: **opencode NO expande los imports `@ruta`.** Hoy
+  da igual porque `AGENTS.md` es autocontenido. Deja de dar igual en cuanto alguien mueva una
+  regla a un archivo importado: existiria para Claude Code y **no existiria** para opencode —
+  mismo repo, dos comportamientos, y ninguna alarma. Queda escrito en el informe y en el
+  README porque es exactamente la clase de divergencia que esta capa persigue.
+- **Cambio en el codigo**: **bloque 6j del verificador** (2 comprobaciones, 113 → 115):
+  ningun script de npm invoca el binario de un arnes (`claude`, `opencode`, `gemini`,
+  `cursor`, `aider`), y existe `docs/PORTABILIDAD-ARNESES.md`. La primera es la que muerde:
+  basta un `"revisa": "claude -p ..."` en el gate para casar el repo con un arnes, y eso hoy
+  se pone rojo.
+- **Gate aplicado**: diff revisado ☑ · regresion capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: añade comprobaciones y un informe, no cambia instrucciones)* · aprobacion humana ☑
+  · pineo ☑ (`opencode-ai@1.18.21`, no `latest`)
+- **Regresion**: verificador **115/115**, capa A 92/92, auditoria limpia, presupuesto de
+  contexto en verde, `typecheck` y `build` limpios, `validate` entero en verde.
+- **Control negativo por dos lados**: un script `"revisa": "claude -p ..."` en `package.json`
+  → **rojo**; el informe borrado → **rojo**. Revertidos los dos.
+- **Lo que NO cierra, y es la mitad honesta del punto 7**: **no hay ninguna credencial de
+  proveedor en esta maquina** (0 credenciales en opencode, sin `OPENROUTER_API_KEY` ni
+  equivalentes, sin runtime local). Asi que esta medido que opencode **carga** las reglas y
+  **puede correr** el gate; **no** esta medido que un agente conducido por opencode las
+  **obedezca**. Cargar y obedecer no son lo mismo — es la distincion que ya costo dos
+  lecciones en esta bitacora.
+- **Lo que costaria cerrarlo**, calculado con el modulo del propio repo (`costeUsd`, nivel
+  `capaz`) sobre un suelo **medido** de **9.334 tokens** (`AGENTS.md` 6.826 + 22
+  descripciones 2.508), con supuestos declarados de 1.500 tokens de salida y 10 turnos:
+  **$0,19 la sesion** ($0,34 sin cache de prefijo). No falta presupuesto: falta una
+  credencial que decida poner una persona.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion
+  del 2026-08-24 ("punto 7").

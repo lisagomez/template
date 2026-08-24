@@ -170,6 +170,17 @@ copia.
 El verificador lee los archivos de instrucciones **expandiendo los imports**, igual que el
 arnes: si alguien rompe el import, 13 comprobaciones se ponen en rojo (probado).
 
+**Y desde el 2026-08-24 esto esta medido, no afirmado**: opencode instalado aqui, los **22
+skills** de `.claude/skills/` cargados, y `npm run validate` corrido **entero y en verde
+dentro de una PTY del propio opencode**. El orden de resolucion (`AGENTS.md` → `CLAUDE.md` →
+`CONTEXT.md`, para en el primero) se verifico contra el binario que se ejecuta, no contra la
+doc. Informe completo, con lo que **no** se pudo medir y lo que costaria:
+**[docs/PORTABILIDAD-ARNESES.md](docs/PORTABILIDAD-ARNESES.md)**.
+
+Un aviso que sale de ahi: **opencode no expande los imports `@ruta`**. Da igual mientras
+`AGENTS.md` sea autocontenido; deja de dar igual el dia que una regla se mueva a un archivo
+importado — existiria para un arnes y no para el otro.
+
 ## Dos caminos: una app, o una herramienta
 
 Este template sirve para las dos cosas, y el runbook cambia segun cual sea:
