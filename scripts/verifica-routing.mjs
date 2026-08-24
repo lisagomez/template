@@ -81,6 +81,41 @@ for (const clase of cat.no_se_abaratan?.clases ?? []) {
   }
 }
 
+// --- Alternativas de pesos abiertos ---------------------------------------
+// "Abierto" tiene que ser comprobable, no una etiqueta: se exige el id de los pesos
+// publicados. Y se exige el precio y los indices, porque elegir por precio sin mirar
+// calidad es recortar, que es justo lo que esta regla prohibe.
+for (const [nivel, cfg] of niveles) {
+  const alt = cfg.alternativa_abierta;
+  if (!alt) continue;
+  if (!alt.modelo) fallos.push(`la alternativa abierta de \`${nivel}\` no declara modelo`);
+  if (!alt.pesos) {
+    fallos.push(`la alternativa abierta de \`${nivel}\` no declara \`pesos\` (el id del repositorio de pesos): sin eso "abierto" es una etiqueta, no un hecho comprobable`);
+  }
+  if (typeof alt.precio?.entrada !== 'number' || typeof alt.precio?.salida !== 'number') {
+    fallos.push(`la alternativa abierta de \`${nivel}\` no declara precio completo`);
+  }
+  if (typeof alt.indices?.coding !== 'number') {
+    fallos.push(`la alternativa abierta de \`${nivel}\` no declara indices: elegir por precio sin mirar calidad es recortar, no repartir`);
+  }
+  if (alt.modelo && ALIAS_FLOTANTE.test(alt.modelo)) {
+    fallos.push(`la alternativa abierta de \`${nivel}\` usa un alias flotante (\`${alt.modelo}\`)`);
+  }
+}
+// La politica es la mitad de la decision: donde puede ir un modelo abierto y donde no.
+const pol = cat.politica_modelos_abiertos;
+if (niveles.some(([, c]) => c.alternativa_abierta)) {
+  if (!pol) fallos.push('hay alternativas abiertas pero no hay `politica_modelos_abiertos`: el precio no es la unica pregunta');
+  else {
+    if (!Array.isArray(pol.NO_se_permite) || pol.NO_se_permite.length === 0) {
+      fallos.push('la politica de modelos abiertos no declara donde NO se permiten');
+    }
+    if (!pol.pesos_abiertos_no_es_alojado_por_ti) {
+      fallos.push('la politica no declara que pesos abiertos NO significa alojado por ti: enrutar a un abierto via un proveedor sigue mandando el dato a un tercero (C4)');
+    }
+  }
+}
+
 // Precios caducados: no falla el gate, avisa. Un precio viejo sigue sirviendo para repartir;
 // lo que no sirve es creerselo para presupuestar.
 const consultado = cat.precios?.consultado;
@@ -111,7 +146,13 @@ console.log(gris(`Catalogo: ${niveles.length} niveles · ${tareas.length} clases
 console.log(gris(`Precios: ${cat.precios?.fuente ?? '?'} (consultados el ${consultado ?? '?'})\n`));
 for (const [nivel, cfg] of niveles) {
   const n = tareas.filter(([, v]) => v === nivel).length;
-  console.log(`  ${nivel.padEnd(14)} ${String(cfg.modelo).padEnd(30)} $${cfg.precio?.entrada}/M in · $${cfg.precio?.salida}/M out · $${cfg.precio?.lectura_cache}/M cache  ${gris(`${n} clase(s)`)}`);
+  const idx = cfg.indices ? gris(` cod ${cfg.indices.coding}/ag ${cfg.indices.agentic}`) : '';
+  console.log(`  ${nivel.padEnd(14)} ${String(cfg.modelo).padEnd(30)} $${cfg.precio?.entrada}/M in · $${cfg.precio?.salida}/M out · $${cfg.precio?.lectura_cache}/M cache  ${gris(`${n} clase(s)`)}${idx}`);
+  const alt = cfg.alternativa_abierta;
+  if (alt) {
+    const ai = alt.indices ? gris(` cod ${alt.indices.coding}/ag ${alt.indices.agentic}`) : '';
+    console.log(`  ${''.padEnd(14)} ${gris('abierto:')} ${String(alt.modelo).padEnd(21)} $${alt.precio?.entrada}/M in · $${alt.precio?.salida}/M out${ai}`);
+  }
 }
 if (cat.cache_de_prefijo) {
   console.log(gris(`\n  Cache de prefijo: ${cat.cache_de_prefijo.ahorro_si_el_prefijo_aguanta} si el prefijo aguanta.`));

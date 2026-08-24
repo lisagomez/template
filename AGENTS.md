@@ -324,6 +324,10 @@ execute_sql, apply_migration, list_tables, get_advisors
   paga precio de razonamiento, y lo que decide sobre riesgo —gobernanza, casos-trampa,
   incidentes, PRPs— **no se abarata nunca**. Una clase sin asignar hereda el default caro y
   el ahorro se pierde en silencio: el gate la rechaza. Los modelos van PINEADOS ahi tambien
+- **Modelos abiertos**: cada nivel declara su alternativa de pesos abiertos con precio e
+  **indices medidos**. Elegir por precio sin mirar calidad es recortar, no repartir. Y
+  **pesos abiertos NO es alojado por ti**: mientras corra en un proveedor ajeno, el dato sale
+  igual — es decision de flujo de datos (C4), no de precio
 - **Cache de prefijo**: leer del cache cuesta **la decima parte** del input. Por eso
   `AGENTS.md` y las reglas no se tocan en caliente: cada cambio invalida el prefijo y se
   paga entero. Lo estable arriba, lo volatil abajo

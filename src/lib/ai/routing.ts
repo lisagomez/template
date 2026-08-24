@@ -57,3 +57,25 @@ export function costeUsd(
 
 /** Las clases que NO se abaratan: deciden sobre riesgo, dinero o datos de terceros. */
 export const noSeAbaratan: readonly string[] = catalogo.no_se_abaratan.clases
+
+export interface EleccionAbierta extends Eleccion {
+  /** Id del repositorio de pesos publicados: lo que hace comprobable el "abierto". */
+  pesos: string
+  indices: { coding: number; agentic: number; intelligence: number }
+}
+
+/**
+ * La alternativa de pesos abiertos del nivel que le toca a la tarea, si la hay y si esa
+ * clase la admite.
+ *
+ * Devuelve `null` para las clases de `noSeAbaratan`. Y ojo con lo que NO significa un `null`
+ * ausente: **pesos abiertos no es alojado por ti**. Mientras el modelo corra en un
+ * proveedor de terceros, el dato sale igual — la decision es de flujo de datos (C4), no de
+ * precio. La politica completa esta en el catalogo.
+ */
+export function alternativaAbierta(tarea: ClaseDeTarea): EleccionAbierta | null {
+  if (noSeAbaratan.includes(tarea)) return null
+  const nivel = catalogo.tareas[tarea] as Nivel
+  const alt = catalogo.niveles[nivel].alternativa_abierta
+  return alt ? { modelo: alt.modelo, nivel, precio: alt.precio, pesos: alt.pesos, indices: alt.indices } : null
+}

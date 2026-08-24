@@ -1,65 +1,154 @@
 {
   "_comentario": "Routing por nivel de tarea. La regla es EFICIENCIA POR ROUTING, NO POR RECORTE: una tarea trivial no paga precio de razonamiento, y una decision de riesgo no se abarata. Lo vigila scripts/verifica-routing.mjs, dentro de npm run validate.",
-
   "precios": {
     "_comentario": "Verificados contra la API publica de OpenRouter. NO se inventan: si falta un precio, el gate falla. Se re-consultan cuando el vigilante de versiones o un CDC de modelo lo pidan.",
     "fuente": "https://openrouter.ai/api/v1/models",
     "consultado": "2026-08-23",
     "moneda": "USD por millon de tokens",
-    "vigencia_dias": 90
+    "vigencia_dias": 90,
+    "indices": {
+      "_comentario": "Los indices vienen de Artificial Analysis, expuestos en la metadata de OpenRouter. Son UNA fuente y miden benchmarks, no las tareas de este repo: sirven para descartar, no para coronar. La unica medicion que habla de NUESTRO comportamiento es la capa B de C2.",
+      "fuente": "campo `benchmarks.artificial_analysis` de https://openrouter.ai/api/v1/models",
+      "consultado": "2026-08-23",
+      "escala": "coding / agentic / intelligence, mayor es mejor"
+    }
   },
-
   "niveles": {
     "ligero": {
       "para": "tareas mecanicas y de alto volumen, donde el acierto se verifica de un vistazo",
       "modelo": "anthropic/claude-haiku-4.5",
-      "precio": { "entrada": 1.0, "salida": 5.0, "lectura_cache": 0.1 }
+      "precio": {
+        "entrada": 1.0,
+        "salida": 5.0,
+        "lectura_cache": 0.1
+      },
+      "alternativa_abierta": {
+        "modelo": "deepseek/deepseek-v4-flash-0731",
+        "pesos": "deepseek-ai/DeepSeek-V4-Flash-0731",
+        "precio": {
+          "entrada": 0.14,
+          "salida": 0.28,
+          "lectura_cache": 0.028
+        },
+        "indices": {
+          "coding": 69.1,
+          "agentic": 48.4,
+          "intelligence": 51.8
+        },
+        "nota": "MEJOR indice de codigo que el propietario de este nivel (69.1 vs 43.9) a 1/7 del precio de entrada. Es el caso mas claro de todo el catalogo."
+      },
+      "indices": {
+        "coding": 43.9,
+        "agentic": 16.5,
+        "intelligence": 29.9
+      }
     },
     "capaz": {
       "para": "el trabajo normal de construir: implementar, revisar, migrar, documentar",
       "modelo": "anthropic/claude-sonnet-5",
-      "precio": { "entrada": 2.0, "salida": 10.0, "lectura_cache": 0.2 }
+      "precio": {
+        "entrada": 2.0,
+        "salida": 10.0,
+        "lectura_cache": 0.2
+      },
+      "alternativa_abierta": {
+        "modelo": "qwen/qwen3.8-2.4t-a95b",
+        "pesos": "Qwen/Qwen3.8-2.4T-A95B",
+        "precio": {
+          "entrada": 2.0,
+          "salida": 6.0,
+          "lectura_cache": 0.25
+        },
+        "indices": {
+          "coding": 71.9,
+          "agentic": 57.1,
+          "intelligence": 57.7
+        },
+        "nota": "a la par en codigo (71.9 vs 71.5) y mejor en agentico (57.1 vs 49.7), con la salida a 6 en vez de 10."
+      },
+      "indices": {
+        "coding": 71.5,
+        "agentic": 49.7,
+        "intelligence": 55.3
+      }
     },
     "razonamiento": {
       "para": "decisiones que cuesta caro equivocar y baratas de mas: arquitectura, riesgo, incidentes",
       "modelo": "anthropic/claude-opus-5",
-      "precio": { "entrada": 5.0, "salida": 25.0, "lectura_cache": 0.5 }
+      "precio": {
+        "entrada": 5.0,
+        "salida": 25.0,
+        "lectura_cache": 0.5
+      },
+      "alternativa_abierta": {
+        "modelo": "moonshotai/kimi-k3",
+        "pesos": "moonshotai/Kimi-K3",
+        "precio": {
+          "entrada": 3.0,
+          "salida": 15.0,
+          "lectura_cache": 0.3
+        },
+        "indices": {
+          "coding": 76.2,
+          "agentic": 54.3,
+          "intelligence": 59.7
+        },
+        "nota": "cerca en codigo (76.2 vs 78) pero NOTABLEMENTE por debajo en agentico (54.3 vs 59.2), que es lo que mide trabajo largo con herramientas — justo lo de este nivel. Existe como alternativa; no se usa por defecto."
+      },
+      "indices": {
+        "coding": 78.0,
+        "agentic": 59.2,
+        "intelligence": 63.1
+      }
     }
   },
-
   "tareas": {
     "_comentario": "Toda clase de tarea del flujo tiene nivel. Ninguna queda sin asignar heredando el default por descuido: esa es la forma en que el ahorro se pierde en silencio, y el gate la rechaza.",
-
     "titulo-de-sesion": "ligero",
     "mensaje-de-commit": "ligero",
     "resumen-o-compresion": "ligero",
     "triage-de-peticion": "ligero",
     "busqueda-y-exploracion": "ligero",
     "formato-y-lint": "ligero",
-
     "implementar-feature": "capaz",
     "revision-de-codigo": "capaz",
     "migracion-o-sql": "capaz",
     "documentacion": "capaz",
     "pruebas": "capaz",
     "empaquetar-herramienta": "capaz",
-
     "diseno-de-arquitectura": "razonamiento",
     "prp-o-spec": "razonamiento",
     "decision-de-gobernanza": "razonamiento",
     "caso-trampa-capa-b": "razonamiento",
     "incidente": "razonamiento"
   },
-
   "no_se_abaratan": {
     "_comentario": "El limite de la regla. Bajar de nivel aqui no es ahorrar: es mover el riesgo a donde no se ve. Un caso-trampa evaluado por un modelo mas debil da un verde que no significa nada.",
-    "clases": ["decision-de-gobernanza", "caso-trampa-capa-b", "incidente", "prp-o-spec"],
+    "clases": [
+      "decision-de-gobernanza",
+      "caso-trampa-capa-b",
+      "incidente",
+      "prp-o-spec"
+    ],
     "motivo": "deciden sobre riesgo, dinero o datos de terceros; el error sale mas caro que el modelo"
   },
-
   "cache_de_prefijo": {
     "_comentario": "La otra palanca, y esta tiene numero: leer del cache cuesta la DECIMA PARTE del input (0.50 vs 5.00 por millon en opus-5). Un AGENTS.md que cambia cada turno invalida el prefijo y se paga entero cada vez.",
     "regla": "lo estable arriba, lo volatil abajo. AGENTS.md y las reglas no se tocan en caliente: se editan, pasan regresion y se aprueban (C1).",
     "ahorro_si_el_prefijo_aguanta": "90% del coste de entrada del contexto base"
+  },
+  "politica_modelos_abiertos": {
+    "_comentario": "Cuando SI y cuando NO usar la alternativa de pesos abiertos. La pregunta no es solo cuanto cuesta.",
+    "pesos_abiertos_no_es_alojado_por_ti": "Enrutar a un modelo abierto VIA OpenRouter sigue mandando el dato a un tercero. Los pesos publicados permiten alojarlo tu; mientras no lo hagas, el radio de daño es el mismo que con un propietario y la decision es de flujo de datos (C4), no de precio.",
+    "se_permite": [
+      "tareas del nivel ligero sin datos de terceros",
+      "tareas del nivel capaz sobre codigo propio del repo"
+    ],
+    "NO_se_permite": [
+      "cualquier clase de `no_se_abaratan`",
+      "tareas que toquen datos personales de clientes sin AISIA que lo contemple (C4)"
+    ],
+    "gotcha_operativo": "OpenRouter bloquea por defecto los proveedores que entrenan con tus prompts; con esa politica activa, DeepSeek y compania fallan con `No endpoints found for this model`. Se decide a proposito en https://openrouter.ai/settings/privacy, no a base de reintentos.",
+    "cache": "Varias alternativas abiertas tienen lectura de cache mucho mas barata o inexistente. Con un prefijo grande y estable, un propietario con cache puede salir MAS barato que un abierto sin el: el precio de lista no decide solo."
   }
 }
