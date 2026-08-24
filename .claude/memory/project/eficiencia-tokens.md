@@ -49,8 +49,25 @@ carencias eran el mismo fallo con distinta cara: **no habia sensor**.
 
 1. **`AGENTS.md` tiene 519 lineas; la doc oficial pide menos de 200.** `CLAUDE.md` va al
    **88 % de su presupuesto** de contexto (7.065 de 8.000). `.claude/rules/` con `paths:`
-   carga solo al tocar los archivos que importan — es el unico ahorro **real** que queda, y
-   ya no es una mejora opcional.
+   carga solo al tocar los archivos que importan.
+   **Pero no es un ahorro gratis, y esto se comprobo el 2026-08-24**: `.claude/rules` aparece
+   **0 veces** en el binario de opencode (lo unico parecido, `.cursor/rules/`, vive dentro de
+   un prompt que le dice al agente que los *lea*, no en su ruta de carga). Una regla
+   obligatoria movida ahi **deja de existir para opencode**: la misma divergencia que
+   documenta `docs/PORTABILIDAD-ARNESES.md`, pero provocada por nosotros. Mitigacion con su
+   propio precio: `opencode.json` con `instructions: [".claude/rules/*.md"]` las carga — pero
+   **siempre**, sin `paths:`, asi que la regla se conserva en los dos arneses y **el ahorro
+   solo se materializa en Claude Code**. Hay que medirlo y declararlo, no venderlo entero.
+   **Corte propuesto** (sin decidir): se quedan inline los **controles** (C1, C5, C7, C8,
+   secretos, respaldo, canales de chat) porque tienen que disparar en cualquier arnes; puede
+   bajar lo que **informa y no obliga** (catalogos, decision tree largo, ejemplos,
+   aprendizajes historicos). Con ese corte el ahorro real es **bastante menor** que "519 →
+   200 lineas", asi que se mide **antes** de comprometerlo.
+   **Y no se fusiona con la imprenta de CLIs** (`spec-imprenta-de-clis.md`), aunque tiente:
+   esto cambia **como cargan las reglas** —el modo de fallo #1 de este repo, un control que
+   deja de disparar en silencio, que solo destapa una sesion fria— y aquello solo **añade**
+   superficie, con controles negativos estructurales. Dos radios en un solo CDC, y un rojo en
+   la mitad peligrosa bloqueando la aditiva.
 2. **La regla de contabilidad no esta medida en frio.** El corpus no tiene caso que muerda
    sobre ella; darlo de alta es un CDC propio. Escrita donde dispara ≠ comprobado que
    dispara.
