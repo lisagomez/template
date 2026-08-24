@@ -1072,4 +1072,53 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 (objetivo: "también es posible que el usuario solo quiera desarrollar una
   herramienta, empaquetarla e integrarla después en proyectos que desarrolle").
 
+### 2026-08-23 — presupuesto de contexto: la fábrica mide lo que cuesta — radio: sistema
+> Primer incremento del spec de eficiencia de tokens
+> (`.claude/PRPs/spec-eficiencia-tokens.md`). Cubre el pilar 1 de cuatro.
+
+- **Lo que se midió, que no se había medido nunca**: el contexto base cuesta **9.959 tokens
+  en cada sesión**, se use lo que se use — `CLAUDE.md` 6.693, las descripciones de los 22
+  skills 2.809, el índice de memoria 457. Más 51.918 repartidos en los cuerpos de los
+  skills, que solo se pagan al invocarlos. Nadie lo sabía porque **no había sensor**: el
+  mismo modo de falla que el rezago de versiones y la pudrición de los documentos.
+- **Cambio**:
+  1. **`scripts/mide-contexto.mjs`** (`npm run mide:contexto`), dentro de `validate` y
+     `predeploy`: mide por niveles —lo que se paga siempre, el espejo de otro arnés, y el
+     coste por invocación de cada skill— contra presupuestos declarados.
+  2. **`.claude/presupuesto-contexto.json`**: los topes **y su procedencia**. Fijados sobre
+     la medición real con aire para crecer: un tope por debajo de lo actual sería rojo el
+     primer día, y uno muy por encima es teatro.
+  3. **Cuatro comprobaciones nuevas** (bloque 6f): que el medidor exista, que el presupuesto
+     exista, que **declare su calibración**, y que corra dentro del gate.
+- **La calibración, que es lo que separa esto de un número inventado**: el ratio
+  chars/token **se midió**, no se copió de un blog — 762.817 caracteres de todo el markdown
+  versionado contra el tokenizador BPE `o200k_base`: **3,644 chars/token**, p10 3,44 / p90
+  3,95. Y se midió también el error del estimador contra BPE real: **−0,36 % en el agregado**
+  y −3,9 % en el peor archivo suelto. Queda todo en el JSON con su fecha y su muestra.
+- **Decisión: el tokenizador NO es dependencia.** `gpt-tokenizer` son 27 MB que heredaría
+  cada proyecto derivado, y además **no es el tokenizador de Claude**, que no es público.
+  Así que el script usa BPE real **si está instalado** y el ratio calibrado si no, diciendo
+  siempre cuál usó. La cifra sirve para **controlar crecimiento**, que es para lo que existe
+  el gate, no para facturar. Está escrito en la salida y en el JSON.
+- **Lo que el gate NO mide, dicho en su propia salida**: el historial de la sesión, las
+  salidas de herramientas y lo que se pegue. Mide **el suelo**. Un gate que promete más de
+  lo que mide es peor que ninguno.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: añade un medidor, no cambia el comportamiento del agente)* · aprobación humana ☑ ·
+  pineo ☑
+- **Regresión**: verificador **100/100** (4 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, auditoría de credenciales limpia, medidor en verde. **Control negativo por
+  tres lados**: `CLAUDE.md` inflado → rojo al 146 % de su tope; presupuesto sin calibración →
+  **exit 2** ("no pude medir", que no es "todo bien") y verificador en rojo; medidor fuera de
+  `validate` → verificador en rojo.
+- **Un tropiezo propio, por si se repite**: deshice un control negativo con
+  `git checkout -- package.json` y me llevé por delante el cableado sin commitear. Para
+  revertir una prueba se usa una copia del archivo, **nunca** `git checkout` sobre trabajo
+  vivo.
+- **Lo que NO cierra**: quedan los otros tres pilares del spec — routing por nivel de tarea,
+  contabilidad de tokens en runtime con aviso de presupuesto, y el vigilante de frescura de
+  versiones generalizado — más la portabilidad a `AGENTS.md` con opencode.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("continua con eficienciatokens").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

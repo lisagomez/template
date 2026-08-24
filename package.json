@@ -13,14 +13,15 @@
     "audita:secretos": "node scripts/audita-secretos.mjs",
     "configura:deploy": "node scripts/configura-deploy.mjs",
     "empaqueta": "node scripts/empaqueta-herramienta.mjs",
+    "mide:contexto": "node scripts/mide-contexto.mjs",
     "vigila:hermes": "node scripts/verifica-hermes.mjs",
-    "validate": "npm run typecheck && npm run build && npm run verify:gobernanza && npm run regresion && npm run audita:secretos",
+    "validate": "npm run typecheck && npm run build && npm run verify:gobernanza && npm run regresion && npm run audita:secretos && npm run mide:contexto",
     "deploy:build": "docker compose --env-file .env.production build",
     "deploy:up": "docker compose --env-file .env.production up -d",
     "deploy:down": "docker compose --env-file .env.production down",
     "deploy:logs": "docker compose --env-file .env.production logs -f --tail=100",
     "deploy:ps": "docker compose --env-file .env.production ps",
-    "predeploy": "npm run verify:gobernanza && npm run regresion && npm run audita:secretos",
+    "predeploy": "npm run verify:gobernanza && npm run regresion && npm run audita:secretos && npm run mide:contexto",
     "deploy": "npm run deploy:build && npm run deploy:up && npm run deploy:ps"
   },
   "dependencies": {

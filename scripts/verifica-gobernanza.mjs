@@ -497,6 +497,45 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6f. El presupuesto de contexto existe, esta calibrado y esta en la ruta
+// El contexto base se paga en CADA sesion y nadie lo habia medido nunca: crecia sin
+// sensor, igual que el rezago de versiones. Lo que se vigila aqui es que el sensor exista,
+// que declare de donde sale su numero (un contador sin calibracion es un invento con
+// formato de medicion) y que corra dentro del gate.
+const medidor = 'scripts/mide-contexto.mjs';
+comprueba(
+  `existe ${medidor} (presupuesto de contexto)`,
+  existsSync(ruta(medidor)),
+  'sin el, el contexto base crece sin que nadie lo note',
+);
+const presupuestoTexto = lee('.claude/presupuesto-contexto.json');
+comprueba(
+  'existe .claude/presupuesto-contexto.json',
+  presupuestoTexto !== null,
+  'sin presupuesto declarado no hay contra que comparar la medicion',
+);
+if (presupuestoTexto !== null) {
+  let presupuesto = null;
+  try {
+    presupuesto = JSON.parse(presupuestoTexto);
+  } catch { /* lo dice la comprobacion */ }
+  comprueba(
+    'el presupuesto de contexto declara su calibracion (ratio, muestra y margen)',
+    typeof presupuesto?.calibracion?.ratio_chars_por_token === 'number' &&
+      Boolean(presupuesto?.calibracion?.muestra) &&
+      Boolean(presupuesto?.calibracion?.margen),
+    'un contador sin calibracion declarada da un numero que nadie puede auditar',
+  );
+}
+comprueba(
+  'la medicion de contexto corre en validate y en predeploy',
+  // `lee` directo y no la constante `paquete`: esa se declara mas abajo (bloque 6c) y
+  // usarla aqui cae en su zona muerta temporal — el verificador reventaba en vez de fallar.
+  /"validate":\s*"[^"]*mide:contexto/.test(lee('package.json') ?? '') &&
+    /"predeploy":\s*"[^"]*mide:contexto/.test(lee('package.json') ?? ''),
+  'si depende de que alguien lo invoque, es una costumbre y no un gate',
+);
+
 // --- 6e. El camino de "herramienta empaquetada" existe y esta en el flujo ---
 // Este template servia solo para "una app que se despliega". El otro caso real es "una
 // herramienta que construyo una vez y reuso en mis proyectos", y ahi lo que falla no es el
