@@ -319,6 +319,14 @@ execute_sql, apply_migration, list_tables, get_advisors
   firma lo autoriza**. El dueno acepta riesgos propios, no los de otros. Ahi no se ofrece
   la via del registro: se redisena o no se hace, y se explica POR QUE esta clase es
   distinta (si no, se lee como capricho y lo hacen por fuera)
+- **Routing por nivel (C8)**: cada clase de tarea tiene su modelo en
+  `.claude/routing-modelos.json`. **Eficiencia por reparto, no por recorte**: lo trivial no
+  paga precio de razonamiento, y lo que decide sobre riesgo —gobernanza, casos-trampa,
+  incidentes, PRPs— **no se abarata nunca**. Una clase sin asignar hereda el default caro y
+  el ahorro se pierde en silencio: el gate la rechaza. Los modelos van PINEADOS ahi tambien
+- **Cache de prefijo**: leer del cache cuesta **la decima parte** del input. Por eso
+  `AGENTS.md` y las reglas no se tocan en caliente: cada cambio invalida el prefijo y se
+  paga entero. Lo estable arriba, lo volatil abajo
 - **Idioma**: responde SIEMPRE en espanol, aunque el codigo o los logs esten en ingles
 
 ---

@@ -1203,4 +1203,56 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("continua").
 
+### 2026-08-23 — routing por nivel de tarea, con precios verificados — radio: sistema
+> Cuarto incremento del spec de eficiencia de tokens. La lección de PRP-001, traída a este
+> template: **eficiencia por reparto, no por recorte.**
+
+- **Cambio**:
+  1. **`.claude/routing-modelos.json`**: tres niveles con su modelo **pineado** y su precio,
+     y **17 clases de tarea** asignadas — ninguna sin nivel. Más la lista de las que **no se
+     abaratan** y la regla del caché de prefijo.
+  2. **`scripts/verifica-routing.mjs`** (`npm run verifica:routing`), dentro de `validate`:
+     comprueba sin tocar la red que cada nivel tenga modelo pineado y precio, que ninguna
+     clase apunte a un nivel inexistente, que lo que decide sobre riesgo esté en el nivel
+     caro, que los precios declaren fuente y fecha, y que el modelo pineado de la fábrica
+     aparezca en el catálogo.
+  3. **`src/lib/ai/routing.ts`**: el lado de la app lee **el mismo catálogo**, no una copia
+     —dos tablas de modelos en un repo divergen, siempre—. `modeloPara()` solo acepta clases
+     declaradas, así que una clase inventada **no compila**. `costeUsd()` separa los tokens
+     servidos desde caché, que es donde está el ahorro del prefijo.
+  4. La regla va **inline** en `AGENTS.md` y `GEMINI.md`: un routing que vive solo en un JSON
+     no dispara cuando alguien decide.
+- **Precios verificados, no supuestos** — consultados contra `https://openrouter.ai/api/v1/models`
+  el 2026-08-23, con la fecha guardada en el catálogo y vigencia declarada de 90 días:
+
+  | nivel | modelo | in /M | out /M | caché /M |
+  |---|---|---|---|---|
+  | ligero | `claude-haiku-4.5` | $1 | $5 | $0.10 |
+  | capaz | `claude-sonnet-5` | $2 | $10 | $0.20 |
+  | razonamiento | `claude-opus-5` | $5 | $25 | $0.50 |
+
+- **El dato que cambió el diseño**: **leer del caché de prefijo cuesta la décima parte del
+  input**. La disciplina de "no tocar `AGENTS.md` en caliente" deja de ser higiene y pasa a
+  tener número: **90 % del coste de entrada del contexto base** si el prefijo aguanta. Es la
+  palanca más grande de todo este trabajo, y no requiere cambiar de modelo.
+- **El límite explícito, que es la mitad de la regla**: gobernanza, casos-trampa, incidentes
+  y PRPs **no bajan de nivel**. Bajarlos no es ahorrar, es mover el riesgo a donde no se ve —
+  un caso-trampa evaluado por un modelo más débil da un verde que no significa nada. El gate
+  lo rechaza.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: añade un catálogo y su gate)* · aprobación humana ☑ · pineo ☑
+- **Regresión**: verificador **107/107** (5 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, auditoría limpia, presupuesto de contexto en verde, `typecheck` y `build`
+  limpios. **Control negativo por cuatro lados**: clase apuntando a un nivel inexistente →
+  rojo; `decision-de-gobernanza` bajada a `ligero` → rojo citando el motivo; modelo con alias
+  `latest` → rojo por C1; precios sin fuente → rojo.
+- **Lo que NO cierra, y conviene no confundir**: este catálogo **declara la política y la
+  hace verificable**; no reprograma el arnés. Claude Code corre con el modelo pineado en su
+  configuración, así que el routing muerde en tres sitios: la app (por código, tipado), la
+  elección de modelo al lanzar un subagente, y la decisión humana. Sigue pendiente la
+  **contabilidad en runtime** —registrar lo que de verdad se gastó y avisar al 80 %—, que es
+  lo que convertiría estas cifras en una factura comprobable.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("routing por nivel de tarea").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
