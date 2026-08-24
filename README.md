@@ -174,8 +174,12 @@ arnes: si alguien rompe el import, 13 comprobaciones se ponen en rojo (probado).
 skills** de `.claude/skills/` cargados, y `npm run validate` corrido **entero y en verde
 dentro de una PTY del propio opencode**. El orden de resolucion (`AGENTS.md` → `CLAUDE.md` →
 `CONTEXT.md`, para en el primero) se verifico contra el binario que se ejecuta, no contra la
-doc. Informe completo, con lo que **no** se pudo medir y lo que costaria:
-**[docs/PORTABILIDAD-ARNESES.md](docs/PORTABILIDAD-ARNESES.md)**.
+doc. Informe completo: **[docs/PORTABILIDAD-ARNESES.md](docs/PORTABILIDAD-ARNESES.md)**.
+
+Lo que ahi **no** se mide es si un agente conducido por opencode *obedece* estas reglas: eso
+pide una credencial de proveedor, y **un boilerplate no tiene credenciales** — no por
+descuido, por diseño. Lo cierra un proyecto derivado; el informe deja el coste calculado
+($0,19 una sesion) para quien lo haga.
 
 Un aviso que sale de ahi: **opencode no expande los imports `@ruta`**. Da igual mientras
 `AGENTS.md` sea autocontenido; deja de dar igual el dia que una regla se mueva a un archivo

@@ -56,16 +56,30 @@ Ningun paso del gate invoca a un arnes: son scripts de `npm` sobre Node. **El ve
 vigila** — si algun dia un script del gate llama a `claude`, `opencode` o similar, se pone
 en rojo.
 
-## 4. Lo que NO se pudo medir aqui, y lo que costaria
+## 4. Lo que este repo NO puede medir — y por que no es deuda suya
 
-**No hay ninguna credencial de proveedor en esta maquina** (`opencode providers list` → 0
-credenciales; ni `OPENROUTER_API_KEY` ni equivalentes en el entorno) **ni runtime de modelo
-local**. Sin eso no hay sesion conducida por un LLM, y por tanto **no esta medido** que un
-agente en opencode *obedezca* estas reglas — solo que las *carga*. Son dos cosas distintas y
-esta capa ya aprendio a no confundirlas.
+Aqui se acaba el ambito del template, y la frontera importa mas que el dato.
 
-Lo que costaria cerrarlo, con las cifras de este repo (calibracion de
-`.claude/presupuesto-contexto.json`, 3.644 chars/token, margen ~±8 % por archivo):
+Lo medido arriba es que opencode **carga** las reglas y **puede correr** el gate. Lo que no
+esta medido es que un agente conducido por opencode las **obedezca**, porque eso exige una
+sesion conducida por un LLM, y eso exige una **credencial de proveedor**.
+
+**Un boilerplate no tiene credenciales.** No las tiene por diseño, no por descuido: no esta
+provisionado, no corre gates de operacion y ninguno de sus gates puede depender de red ni de
+una llave (por eso el vigilante de frescura vive **fuera** de `validate`). Pedir una
+credencial para cerrar un pendiente *del template* seria mezclar dos ambitos que este repo
+mantiene separados a proposito — ver `.claude/memory/project/gobernanza-agentica.md`, "Dos
+ambitos que NO se mezclan".
+
+Asi que esto **no es deuda del template**: es de quien lo use. Un proyecto derivado —que si
+tiene llaves, proveedor y presupuesto— lo cierra en una tarde. Y el spec ya lo habia
+previsto: pedia *"opencode instalado si se puede, **o** un informe medido de que lo impide y
+que costaria"*. Esto es ese informe.
+
+### Lo que costaria, para quien lo cierre
+
+Con las cifras de este repo (calibracion de `.claude/presupuesto-contexto.json`, 3.644
+chars/token, margen ~±8 % por archivo):
 
 | Concepto | Medido |
 |---|---|
@@ -83,9 +97,14 @@ declarados**: 1.500 tokens de salida por turno y 10 turnos.
 | **Sesion de 10 turnos** | **$0,19** |
 | La misma sin cache de prefijo | $0,34 |
 
-O sea: **una sesion de evaluacion cuesta centimos**; lo que falta no es presupuesto, es una
-credencial que decida poner una persona. El 44 % de diferencia entre las dos ultimas filas
-es la misma leccion de siempre: el cache de prefijo es la palanca, no el modelo.
+Una sesion de evaluacion cuesta **centimos**: lo que falta nunca fue presupuesto. Y el 44 %
+entre las dos ultimas filas es la leccion de siempre — el cache de prefijo es la palanca, no
+el modelo.
+
+**Si lo cierras en tu proyecto**, la medicion que vale no es "¿arranca?", es **capa B con
+otro arnes al volante**: los casos-trampa del corpus, en sesion fria, midiendo si los
+controles disparan igual. Eso tiene su propio protocolo (el corpus vive en la rama
+`golden-sets`, nunca en el arbol) y merece su propia entrada en la bitacora.
 
 ## 5. Como conducir este repo desde opencode
 

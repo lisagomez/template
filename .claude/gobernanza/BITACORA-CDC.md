@@ -1416,3 +1416,32 @@ diff, sin regresión y sin aprobación.
   credencial que decida poner una persona.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion
   del 2026-08-24 ("punto 7").
+
+### 2026-08-24 — el punto 7 estaba cerrado; el ambito, mal leido — radio: ninguno
+> Correccion de alcance, sin cambio de codigo. La dueña la dio en una linea: *"es un
+> boilerplate, no deberia haber credenciales"*.
+
+- **Que pasaba**: tras medir la portabilidad (CDC anterior), el agente declaro el punto 7
+  "cerrado a medias" porque faltaba una sesion conducida por un LLM, y propuso que la
+  responsable **pusiera una credencial de proveedor** para completarlo.
+- **Por que estaba mal, y no es un matiz**: un boilerplate **no tiene credenciales por
+  diseño** — no esta provisionado, no corre gates de operacion y ninguno de sus gates puede
+  depender de red ni de una llave (por eso el vigilante de frescura vive fuera de
+  `validate`). Pedir una llave para cerrar un pendiente *del template* mezcla los dos ambitos
+  que este repo separa a proposito. Y el spec **ya lo habia previsto**: aceptaba *"opencode
+  instalado si se puede, **o** un informe medido de que lo impide y que costaria"*. El
+  informe existe desde el CDC anterior: **la rama del "o" estaba entregada**.
+- **Es la segunda vez, en la misma direccion**: la primera fue la lista de pendientes que
+  mezclaba deuda del template con condiciones de la maquina, y la corrigio la misma persona.
+  El sesgo del agente no es inventarse trabajo: es **querer provisionar el entorno** para
+  poder cerrar algo del template. Queda anotado en la memoria del proyecto por si vuelve.
+- **Que se cambio** (solo documentos): §4 de `docs/PORTABILIDAD-ARNESES.md` pasa de "lo que
+  NO se pudo medir aqui" a **"lo que este repo NO puede medir y por que no es deuda suya"**,
+  con el coste calculado dejado explicitamente *para quien lo cierre*; el README dice lo
+  mismo en dos lineas; y la memoria del proyecto reordena sus pendientes en **pendientes
+  reales del template** vs **lo que cierra un proyecto derivado**.
+- **Gate aplicado**: diff revisado ☑ · regresion capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: no cambia instrucciones ni codigo)* · aprobacion humana ☑ · pineo ☑
+- **Regresion**: verificador 115/115, `validate` entero en verde.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — correccion dada en sesion del
+  2026-08-24 ("es un boilerplate no deberia haber credenciales").
