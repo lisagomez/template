@@ -45,30 +45,44 @@ carencias eran el mismo fallo con distinta cara: **no habia sensor**.
 - **El vigilante devuelve exit `2` cuando no puede verificar.** "No pude mirar" no es "todo
   bien", y tratar el 2 como 0 es el fallo que la receta del cron existe para evitar.
 
-## Pendientes
+## Pendientes reales del template
 
 1. **`AGENTS.md` tiene 519 lineas; la doc oficial pide menos de 200.** `CLAUDE.md` va al
    **88 % de su presupuesto** de contexto (7.065 de 8.000). `.claude/rules/` con `paths:`
    carga solo al tocar los archivos que importan — es el unico ahorro **real** que queda, y
    ya no es una mejora opcional.
-2. **Punto 7, medido a medias el 2026-08-24** (`docs/PORTABILIDAD-ARNESES.md`): opencode
-   `1.18.21` instalado aqui, **22/22 skills** cargados, orden de resolucion leido **del
-   binario** (`AGENTS.md` → `CLAUDE.md` → `CONTEXT.md`, para en el primero) y `npm run
-   validate` corrido **entero y en verde dentro de una PTY de opencode**. Lo que falta es la
-   otra mitad: **no hay credencial de proveedor en esta maquina**, asi que esta medido que
-   opencode **carga** las reglas, no que un agente suyo las **obedezca**. Costaria **$0,19**
-   una sesion de 10 turnos (nivel `capaz`, suelo medido de 9.334 tokens) — falta una
-   credencial, no presupuesto.
-   **Y un hallazgo que no estaba en la doc: opencode NO expande los imports `@ruta`.** Da
-   igual mientras `AGENTS.md` sea autocontenido; el dia que una regla se mueva a un archivo
-   importado existiria para un arnes y no para el otro, sin ninguna alarma. El bloque 6j del
-   verificador vigila lo adyacente: que ningun script del gate invoque el binario de un
-   arnes.
-3. **La regla de contabilidad no esta medida en frio.** El corpus no tiene caso que muerda
+2. **La regla de contabilidad no esta medida en frio.** El corpus no tiene caso que muerda
    sobre ella; darlo de alta es un CDC propio. Escrita donde dispara ≠ comprobado que
    dispara.
-4. **Contabilidad sin proveedor real**: falta la tabla (con RLS) y leer `usage` de la
-   respuesta. La aritmetica, el aviso al 80 % y el hueco declarado si estan probados.
-5. **`GEMINI.md` sigue siendo copia condensada aparte** — no consta que Gemini soporte los
+3. **`GEMINI.md` sigue siendo copia condensada aparte** — no consta que Gemini soporte los
    imports, asi que ahi la divergencia sigue siendo posible y la vigilan comprobaciones
    propias.
+
+## Punto 7 (portabilidad): cerrado el 2026-08-24 — y donde acaba su ambito
+
+Medido y en `docs/PORTABILIDAD-ARNESES.md`: opencode `1.18.21`, **22/22 skills** cargados,
+orden de resolucion leido **del binario** (`AGENTS.md` → `CLAUDE.md` → `CONTEXT.md`, para en
+el primero) y `npm run validate` corrido **entero y en verde dentro de una PTY de opencode**.
+
+**Hallazgo que no estaba en la doc: opencode NO expande los imports `@ruta`.** Da igual
+mientras `AGENTS.md` sea autocontenido; el dia que una regla se mueva a un archivo importado
+existiria para un arnes y no para el otro, sin ninguna alarma. El bloque 6j del verificador
+vigila lo adyacente: que ningun script del gate invoque el binario de un arnes.
+
+**La correccion que dio la dueña el 2026-08-24, y que vale para todo lo que venga:** faltaba
+una sesion conducida por un LLM para medir si opencode *obedece* (no solo *carga*) las
+reglas, y se planteo pedir una credencial. **Un boilerplate no tiene credenciales** — no por
+descuido, por diseño. Eso lo cierra un proyecto derivado, no el template; el spec ya lo
+preveia al aceptar *"un informe medido de que lo impide y que costaria"* como alternativa. Es
+la misma frontera de [[gobernanza-agentica]], "Dos ambitos que NO se mezclan", y es la
+**segunda vez** que se cruza en la misma direccion: al agente le sale solo proponer que el
+entorno se provisione para cerrar un pendiente del template.
+
+## Lo que cierra un proyecto derivado (NO el template)
+
+- **Medir si otro arnes OBEDECE**: capa B con opencode al volante, casos-trampa en sesion
+  fria, corpus desde la rama `golden-sets`. Coste calculado: **$0,19** una sesion de 10
+  turnos (nivel `capaz`, suelo medido de 9.334 tokens). No falta presupuesto: falta un
+  proyecto con llaves.
+- **Contabilidad contra un proveedor real**: la tabla (con RLS) y leer `usage` de la
+  respuesta. La aritmetica, el aviso al 80 % y el hueco declarado ya estan probados aqui.
