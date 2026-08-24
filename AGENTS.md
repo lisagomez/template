@@ -331,6 +331,11 @@ execute_sql, apply_migration, list_tables, get_advisors
 - **Cache de prefijo**: leer del cache cuesta **la decima parte** del input. Por eso
   `AGENTS.md` y las reglas no se tocan en caliente: cada cambio invalida el prefijo y se
   paga entero. Lo estable arriba, lo volatil abajo
+- **Contabilidad de tokens**: lo que el routing decide se registra al gastarlo
+  (`src/lib/ai/contabilidad.ts`). Una llamada **sin datos de uso se guarda con coste
+  `null`**, nunca como cero: sumar huecos como ceros da una factura que parece completa y
+  no lo es. Aviso al 80 %; **cortar al 100 % lo decide la app**, no el modulo — negarle el
+  servicio a un usuario para proteger tu factura es una decision con victima (C4)
 - **Idioma**: responde SIEMPRE en espanol, aunque el codigo o los logs esten en ingles
 
 ---
@@ -342,7 +347,7 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
-npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
+npm run validate     # typecheck + build + gobernanza + regresion + contabilidad (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # casos-trampa (C2 capa B, en cada CDC)

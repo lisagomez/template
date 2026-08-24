@@ -146,7 +146,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
+npm run validate     # typecheck + build + gobernanza + regresion + contabilidad (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2)
 npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol

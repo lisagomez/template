@@ -1310,3 +1310,63 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 ("en las tareas considera otros LLM opensource").
 
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
+
+### 2026-08-24 — contabilidad de tokens: la factura deja de ser una estimacion — radio: sistema
+> Quinto y ultimo incremento del spec de eficiencia de tokens (punto 3 de la mision). El
+> routing decide lo que una tarea **deberia** costar; esto registra lo que **de verdad** se
+> gasto. Sin esta mitad, las tarifas del catalogo son una cifra bonita que nadie puede
+> desmentir.
+
+- **Cambio**:
+  1. **`src/lib/ai/contabilidad.ts`** (116 lineas): registra cada llamada relevante (tarea,
+     modelo, tokens, coste, fecha) y calcula el estado del presupuesto. El precio sale del
+     **mismo catalogo** que usa el routing —`costeUsd()`—, no de una tabla propia: dos
+     tablas de precios en un repo divergen, siempre.
+  2. El `Registrador` se **inyecta** (interfaz de dos metodos): la logica se prueba sin BD y
+     sin red, que es lo que permite que esto quepa en `validate`. Donde vive la persistencia
+     lo decide cada proyecto derivado.
+  3. **`scripts/prueba-contabilidad.ts`** (13 comprobaciones) entra a `validate` y a
+     `predeploy` como `npm run prueba:contabilidad`. Corre en TypeScript directo (type
+     stripping de Node), asi que prueba **el modulo real** que usa la app y no una copia en
+     JS que se desincronizaria al primer cambio.
+  4. **Bloque 6i del verificador** (6 comprobaciones nuevas) y la regla **inline** en
+     `AGENTS.md` y `GEMINI.md`.
+- **Las tres decisiones que no son de estilo**:
+  - **Una llamada sin datos de uso se guarda con coste `null`, nunca como cero.** El resumen
+     dice cuantas filas van sin costear y el mensaje avisa de que la cifra real es **MAYOR**.
+     Sumar huecos como ceros produce una factura que *parece* completa, y eso es peor que un
+     hueco declarado — misma leccion que RPO/RTO.
+  - **El aviso al 80 % avisa; el corte al 100 % lo decide la app.** El modulo devuelve
+     `recomiendaCortar`, no corta. Cortar una funcion de cara al usuario para proteger tu
+     factura puede ser correcto, pero es una decision **con victima** y se toma a proposito
+     (C4), no por defecto de un modulo importado.
+  - **Presupuesto cero revienta con `RangeError`** en vez de dividir en silencio.
+- **Un rojo que fue mio, y queda escrito**: la primera version de la prueba esperaba $1.18
+  para el caso con cache y el modulo daba $1.38. El equivocado era el **test** —habia contado
+  la salida a medias—. Se dejo el desglose en el comentario porque una prueba que se ajusta
+  al codigo sin entender por que no prueba nada; solo copia el bug con formato de verde.
+- **Gate aplicado**: diff revisado ☑ · regresion capa A verde ☑ (92/92) · capa B ☐ *(ver
+  "lo que NO cierra")* · aprobacion humana ☑ · pineo ☑
+- **Regresion**: verificador **113/113** (6 comprobaciones nuevas), capa A 92/92, auditoria
+  de credenciales limpia (353 blobs, 80 commits, todas las ramas), presupuesto de contexto en
+  verde, `typecheck` y `build` limpios, `npm run validate` entero en verde.
+- **Control negativo por tres lados** (cada uno probado y revertido):
+  - `prueba:contabilidad` fuera de `validate`/`predeploy` → **rojo** ("si depende de que
+    alguien la invoque, es una costumbre y no un gate").
+  - el modulo importando precios de otro sitio en vez del catalogo → **rojo**.
+  - la regla borrada de `AGENTS.md` → **rojo**.
+- **Lo que cuesta, medido**: la regla nueva sube el contexto base de **10.434 a 10.555
+  tokens** (+121 por sesion, 88 % del presupuesto declarado). Se dice porque el numero existe:
+  esta capa mide tambien lo que ella misma engorda.
+- **Lo que NO cierra**:
+  - **La regla no esta medida en frio.** El corpus no tiene ningun caso que muerda sobre
+    contabilidad, y darlo de alta es un CDC propio. Hasta entonces esta regla esta *escrita
+    donde dispara*, que no es lo mismo que *comprobado que dispara* — la distincion que esta
+    capa aprendio por las malas.
+  - **No hay proveedor real conectado.** El registrador es una interfaz; lo que falta para lo
+    real es una tabla (con RLS) y leer `usage` de la respuesta del proveedor. La aritmetica,
+    el aviso y el hueco declarado si estan probados.
+  - `CLAUDE.md` va al **88 % de su presupuesto** de contexto. El siguiente incremento del
+    spec —`.claude/rules/` con `paths:`— deja de ser una mejora y empieza a ser necesario.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorizacion dada en sesion
+  del 2026-08-24 ("cierralo").
