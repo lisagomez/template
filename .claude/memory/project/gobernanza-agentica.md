@@ -7,7 +7,7 @@
 Se destilaron 9 documentos de gobernanza del proyecto Hermes OS en 7 controles portables
 (C1-C7) que viven en `.claude/gobernanza/` y están cableados a `CLAUDE.md`, `GEMINI.md`,
 `prp-base.md` y al skill `new-app`. Se verifica con `npm run verify:gobernanza`
-(**113 comprobaciones** al 2026-08-24; nacio con 30), incluido en `npm run validate`.
+(**115 comprobaciones** al 2026-08-24; nacio con 30), incluido en `npm run validate`.
 
 Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**.
 

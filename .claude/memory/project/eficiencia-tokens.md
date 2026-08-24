@@ -51,10 +51,19 @@ carencias eran el mismo fallo con distinta cara: **no habia sensor**.
    **88 % de su presupuesto** de contexto (7.065 de 8.000). `.claude/rules/` con `paths:`
    carga solo al tocar los archivos que importan — es el unico ahorro **real** que queda, y
    ya no es una mejora opcional.
-2. **Punto 7 de la Definicion de Hecho sin cerrar: opencode nunca se ha ejecutado aqui.** La
-   compatibilidad esta verificada contra su documentacion, no contra una corrida. El spec
-   dice literalmente "no vale afirmar compatibilidad": falta la corrida o un informe
-   **medido** de que lo impide.
+2. **Punto 7, medido a medias el 2026-08-24** (`docs/PORTABILIDAD-ARNESES.md`): opencode
+   `1.18.21` instalado aqui, **22/22 skills** cargados, orden de resolucion leido **del
+   binario** (`AGENTS.md` → `CLAUDE.md` → `CONTEXT.md`, para en el primero) y `npm run
+   validate` corrido **entero y en verde dentro de una PTY de opencode**. Lo que falta es la
+   otra mitad: **no hay credencial de proveedor en esta maquina**, asi que esta medido que
+   opencode **carga** las reglas, no que un agente suyo las **obedezca**. Costaria **$0,19**
+   una sesion de 10 turnos (nivel `capaz`, suelo medido de 9.334 tokens) — falta una
+   credencial, no presupuesto.
+   **Y un hallazgo que no estaba en la doc: opencode NO expande los imports `@ruta`.** Da
+   igual mientras `AGENTS.md` sea autocontenido; el dia que una regla se mueva a un archivo
+   importado existiria para un arnes y no para el otro, sin ninguna alarma. El bloque 6j del
+   verificador vigila lo adyacente: que ningun script del gate invoque el binario de un
+   arnes.
 3. **La regla de contabilidad no esta medida en frio.** El corpus no tiene caso que muerda
    sobre ella; darlo de alta es un CDC propio. Escrita donde dispara ≠ comprobado que
    dispara.
