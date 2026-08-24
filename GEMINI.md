@@ -52,7 +52,8 @@ Usuario dice algo
     |
     ├── "Quiero hacer deploy"
     |       → Vercel CLI o git push
-    |       → Servidor propio (Hetzner cx33): `npm run deploy` + docs/DEPLOY-HETZNER.md
+    |       → Servidor propio (Hetzner u otro VPS): `npm run configura:deploy` (mide el
+    |         servidor y valida el .env) y luego `npm run deploy` + docs/DEPLOY-HETZNER.md
     |
     ├── "Levantar agentes" / "respaldos" / "backup" / "conecta el bot de Telegram/Slack"
     |       → `docs/FASE0-INFRAESTRUCTURA.md` (2 verticales: negocio + clientes)
@@ -110,7 +111,7 @@ Error ocurre → Se arregla → Se DOCUMENTA → NUNCA ocurre de nuevo
 | Validacion | Zod |
 | Estado | Zustand |
 | Testing | Playwright CLI + MCP |
-| Deploy | Vercel o Hetzner cx33 (Docker + Caddy) |
+| Deploy | Vercel o VPS propio (Docker + Caddy), dimensionado por script |
 
 ---
 
@@ -215,7 +216,8 @@ npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
 npm run validate     # typecheck + build + verificador de gobernanza (el gate completo)
 
-# Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
+# Deploy self-hosted (VPS propio) - se corren EN EL SERVIDOR
+npm run configura:deploy -- --escribir  # mide la maquina y valida .env.production
 npm run deploy       # build + up + ps (todo en uno)
 npm run deploy:logs  # logs en vivo
 npm run deploy:down  # parar el stack

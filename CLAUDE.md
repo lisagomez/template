@@ -62,7 +62,8 @@ Usuario dice algo
     |
     ├── "Quiero hacer deploy / publicar"
     |       → Vercel CLI o git push
-    |       → Servidor propio (Hetzner cx33): `npm run deploy` + docs/DEPLOY-HETZNER.md
+    |       → Servidor propio (Hetzner u otro VPS): `npm run configura:deploy` (mide el
+    |         servidor y valida el .env) y luego `npm run deploy` + docs/DEPLOY-HETZNER.md
     |
     ├── "Quiero levantar los agentes" / "respaldos" / "backup" / "que no se pierda nada"
     |   "conecta el bot de Telegram/Slack" / "notificame por chat"
@@ -325,7 +326,8 @@ npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # casos-trampa (C2 capa B, en cada CDC)
 
-# Deploy self-hosted (Hetzner cx33) - se corren EN EL SERVIDOR
+# Deploy self-hosted (VPS propio) - se corren EN EL SERVIDOR
+npm run configura:deploy -- --escribir  # mide la maquina y valida .env.production
 npm run deploy       # build + up + ps (todo en uno)
 npm run deploy:logs  # logs en vivo
 npm run deploy:down  # parar el stack

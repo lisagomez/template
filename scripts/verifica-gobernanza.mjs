@@ -497,6 +497,44 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6d. El deploy no asume un servidor concreto ---------------------------
+// Un boilerplate se despliega en la maquina de otro. Un limite de memoria cableado a un
+// modelo de VPS es una afirmacion sobre hardware que no conocemos: en un servidor mas
+// pequeño el OOM killer decide por nosotros. Los limites salen de `configura-deploy.mjs`,
+// que mide `nproc` y `/proc/meminfo` ahi donde corre.
+const configurador = 'scripts/configura-deploy.mjs';
+comprueba(
+  `existe ${configurador} (dimensiona el deploy contra la maquina real)`,
+  existsSync(ruta(configurador)),
+  'sin el, los limites del compose vuelven a ser una suposicion sobre el servidor de otro',
+);
+const compose = lee('docker-compose.yml') ?? '';
+const cableados = [];
+for (const linea of compose.split('\n')) {
+  if (/^\s*(?:cpus|memory):/.test(linea) && !/\$\{/.test(linea) && !/reservations/.test(linea)) {
+    // `reservations` puede ser un minimo fijo: lo que no puede ser fijo es el LIMITE.
+    const previas = compose.split('\n').slice(0, compose.split('\n').indexOf(linea));
+    const enLimits = previas.reverse().find((l) => /^\s*(limits|reservations):/.test(l));
+    if (/limits/.test(enLimits ?? '')) cableados.push(linea.trim());
+  }
+}
+comprueba(
+  'los limites del compose no estan cableados a un modelo de servidor',
+  cableados.length === 0,
+  `cableado(s): ${cableados.join(' | ')} — deben venir de .env.production (${'${APP_MEM}'}, ` +
+    `${'${APP_CPUS}'}), que escribe el configurador midiendo la maquina`,
+);
+comprueba(
+  'la imagen de la app lleva el nombre del proyecto, no el del template',
+  /image:\s*\$\{APP_NAME/.test(compose),
+  'un boilerplate que impone su nombre a la imagen de cada proyecto no es personalizable',
+);
+comprueba(
+  '.env.production.example documenta las variables de tamaño',
+  /APP_MEM|NODE_HEAP_MB/.test(lee('.env.production.example') ?? ''),
+  'si el ejemplo no las nombra, nadie sabe que existen ni de donde salen',
+);
+
 // --- 6c. La auditoria de credenciales existe y esta en la ruta -------------
 // El escaneo del arbol de trabajo (bloque de mas abajo) es condicion necesaria y NO
 // suficiente: un boilerplate se clona con su historia, y un secreto borrado al commit

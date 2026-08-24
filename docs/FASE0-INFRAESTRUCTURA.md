@@ -64,7 +64,7 @@ pierde.** No por un fallo técnico: por la costumbre de reconstruirlo sin pensar
 
 ### Los números, además, no dan
 
-En un cx33 (8 GB), sumando los límites del `docker-compose.yml` de la app:
+En un servidor de 8 GB, sumando los límites del `docker-compose.yml` de la app:
 
 | Componente | Límite |
 |---|---|
@@ -84,7 +84,7 @@ degrada**; en un box compartido, lo que se degrada es la latencia de los dos.
 | Topología | Cuándo | Qué provisionar |
 |---|---|---|
 | **Servidor aparte** ← recomendado | Default. Estado irrecuperable separado de la ruta de deploy | CX22 (2 vCPU / 4 GB) dedicado a agentes + swap 2 GB |
-| **Mismo servidor** | Presupuesto muy ajustado, o el proyecto aún no tiene app desplegada | cx33 **y** retunear límites: app a 3 GB, cada Hermes a 1.5 GB, swap 4 GB |
+| **Mismo servidor** | Presupuesto muy ajustado, o el proyecto aún no tiene app desplegada | 8 GB **y** retunear límites: app a 3 GB, cada Hermes a 1.5 GB, swap 4 GB — con `npm run configura:deploy` la app ya no se los queda todos |
 
 Con servidor aparte el respaldo también se simplifica: un solo box con estado, un
 solo inventario que mantener.
