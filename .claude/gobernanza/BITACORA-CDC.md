@@ -927,4 +927,49 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("continua"). Aprueba el pineo por digest, A0 y la receta del cron.
 
+### 2026-08-23 — auditoría de credenciales sobre la historia, no solo el árbol — radio: sistema
+> Sale de auditar el boilerplate para confirmar que no lleva credenciales vivas. **No lleva
+> ninguna** — lo que apareció fue el hueco del control que decía que no las llevaba.
+
+- **Resultado de la auditoría (lo primero, porque es lo que se preguntaba)**: **cero
+  credenciales vivas** en los **63 commits de todas las ramas**, 284 blobs de texto. Los
+  únicos valores con forma de secreto son placeholders declarados (`sk-or-v1-tu-api-key`,
+  `eyJ...tu-anon-key`, `polar_at_xxx`, `your_supabase_anon_key`) y una referencia de shell
+  en el `Dockerfile` (`$NEXT_PUBLIC_...`). Ningún `.env`, `.pem` ni `.key` estuvo versionado
+  jamás: solo los dos `.example`.
+- **Cambio**:
+  1. **`scripts/audita-secretos.mjs`** — audita **toda la historia alcanzable**, no el árbol
+     de trabajo. Nunca imprime el valor: tipo, archivo y prefijo de 4 caracteres.
+  2. **Dos comprobaciones en el verificador** (bloque 6c): que el auditor exista y que esté
+     **en `validate` y en `predeploy`**. Un auditor que hay que acordarse de correr es una
+     costumbre.
+- **Los dos huecos que la auditoría destapó, y que el gate anterior no cubría**:
+  1. **Solo miraba el árbol de trabajo.** Un boilerplate se clona **con su historia**: un
+     secreto commiteado y borrado al commit siguiente sigue viajando entero. Medido, no
+     supuesto: en el control negativo, con el archivo ya borrado del árbol, el verificador
+     daba **verde** y el auditor **rojo**.
+  2. **Solo conocía firmas con prefijo** (`ghp_`, `sk-`, `sbp_`…). Un token **sin prefijo**
+     —64 hex de Hetzner, una contraseña a pelo en un `.env.example`— pasaba entero. El
+     auditor añade familias nuevas y una heurística de asignación: variable que se llama
+     KEY/TOKEN/SECRET/PASSWORD con un valor que no parece placeholder.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: script de auditoría, no cambia el comportamiento del agente)* · aprobación humana
+  ☑ · pineo ☑
+- **Regresión**: verificador **87/87** (2 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, auditoría limpia, pre-vuelo limpio. **Control negativo por cuatro lados**:
+  token con prefijo en el árbol → rojo; **el mismo, borrado del árbol pero en la historia →
+  rojo (y el verificador, verde)**; token sin prefijo → rojo por dos vías; auditor
+  desconectado de `validate` → verificador en rojo. Verde al revertir cada uno.
+- **Un falso rojo propio, corregido en la corrida**: la primera versión escaneaba **todos**
+  los objetos del almacén, así que una rama de prueba borrada seguía dando rojo hasta pasar
+  el `gc`. Un objeto inalcanzable **no viaja en un clon**: se acotó a objetos alcanzables,
+  que es exactamente lo que hereda quien clona.
+- **Lo que NO cierra**: la heurística mira **forma**, no validez — no puede saber si una
+  cadena con pinta de token está activa. Y si algún día encuentra algo real, **la contención
+  es rotar, no reescribir la historia**: rotar invalida el valor filtrado; borrar el commit
+  solo lo esconde de quien mire por el sitio obvio. Está escrito en la salida del script.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 (objetivo: "es boilerplate y no debe tener credenciales vivas, solo
+  placeholders"). Aprueba el auditor y su cableado al gate.
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
