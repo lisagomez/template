@@ -88,6 +88,23 @@ Lo cubre `scripts/audita-secretos.mjs`, en `validate` y `predeploy`. **Si alguna
 encuentra algo real: la contencion es ROTAR, no reescribir la historia.** Rotar invalida el
 valor filtrado; borrar el commit solo lo esconde de quien mire por el sitio obvio.
 
+## AGENTS.md es la fuente unica (2026-08-23)
+
+Las instrucciones viven en `AGENTS.md`; `CLAUDE.md` son 17 lineas que la importan con
+`@AGENTS.md` mas lo especifico del arnes. Los dos hechos verificados antes de mover nada:
+**Claude Code lee `CLAUDE.md`, no `AGENTS.md`** (y su doc recomienda justo este import), y
+**opencode lee `AGENTS.md` primero** — cuando existen los dos, solo usa ese.
+
+El verificador y el medidor de contexto **expanden los imports** (`scripts/lee-instrucciones.mjs`).
+Sin eso mentirian los dos: el primero daria las reglas por desaparecidas, el segundo
+reportaria un ahorro de ~6700 tokens **que no existe**. Un import se carga igual que si
+estuviera pegado — mover contenido a otro archivo NO ahorra contexto, y medirlo asi lo
+demuestra: el suelo subio de 9924 a 10163.
+
+Pendiente que abre esto: la doc oficial pide **menos de 200 lineas** por archivo de
+instrucciones y `AGENTS.md` tiene 507. `.claude/rules/` con `paths:` carga solo al tocar los
+archivos que importan — ese si es ahorro real.
+
 ## Firmas (cerrado el 2026-08-23)
 
 La AISIA, **todas** las entradas de `REGISTRO-RIESGO.md` y **todos** los CDC están

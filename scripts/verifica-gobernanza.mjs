@@ -13,6 +13,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { leeConImports } from './lee-instrucciones.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
@@ -22,6 +23,11 @@ const ok = [];
 
 const ruta = (p) => join(raiz, p);
 const lee = (p) => (existsSync(ruta(p)) ? readFileSync(ruta(p), 'utf8') : null);
+/** Los archivos de instrucciones se leen EXPANDIDOS: `CLAUDE.md` importa `AGENTS.md`, que
+ *  es la fuente unica. Sin expandir, todas las comprobaciones de reglas darian falso rojo
+ *  sobre un archivo de 17 lineas. */
+const INSTRUCCIONES = new Set(['CLAUDE.md', 'GEMINI.md', 'AGENTS.md']);
+const leeDoc = (p) => (INSTRUCCIONES.has(p) ? leeConImports(ruta(p)) : lee(p));
 
 const vistas = new Set();
 function comprueba(descripcion, condicion, pista) {
@@ -79,7 +85,7 @@ for (const [id, titulo] of Object.entries(controles)) {
 }
 
 // --- 3. CLAUDE.md referencia la capa (el cable principal) -------------------
-const claudeMd = lee('CLAUDE.md') ?? '';
+const claudeMd = leeDoc('CLAUDE.md') ?? '';
 comprueba(
   'CLAUDE.md referencia .claude/gobernanza/',
   claudeMd.includes(`${GOB}/GOBERNANZA.md`) || claudeMd.includes('.claude/gobernanza'),
@@ -97,7 +103,7 @@ comprueba(
 );
 
 // --- 3b. GEMINI.md tambien, o una sesion con Gemini se salta la capa entera --
-const geminiMd = lee('GEMINI.md');
+const geminiMd = leeDoc('GEMINI.md');
 if (geminiMd !== null) {
   comprueba(
     'GEMINI.md referencia .claude/gobernanza/',
@@ -148,7 +154,7 @@ if (existsSync(dirSkills)) {
   // \b evita capturar el "4" de "V4 Skills"
   const patrones = [/\b(\d+)\s+[Ss]kills\b/g, /[Ss]kills\s*\((\d+)\s*total\)/g, /[Ss]kills:\s*(\d+)/g];
   for (const doc of ['README.md', '.claude/README.md', 'CLAUDE.md']) {
-    const contenido = lee(doc);
+    const contenido = leeDoc(doc);
     if (contenido === null) continue;
     const declarados = new Set();
     for (const patron of patrones) {
@@ -166,7 +172,7 @@ if (existsSync(dirSkills)) {
 
 // --- 3f. Los controles que NO disparaban: C1, C5 e idioma, inline en las reglas
 for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
-  const contenido = lee(doc);
+  const contenido = leeDoc(doc);
   if (contenido === null) continue;
   comprueba(
     `${doc}: el CDC (C1) nombra la configuracion (settings.json / model)`,
@@ -254,7 +260,7 @@ if (pkg !== null) {
   );
   // Y el papel tiene que decir lo mismo que el codigo: es el proposito del verificador.
   for (const doc of ['CLAUDE.md', 'README.md', '.claude/README.md']) {
-    const contenido = lee(doc);
+    const contenido = leeDoc(doc);
     if (contenido === null) continue;
     for (const linea of contenido.split('\n')) {
       if (!/validate/.test(linea) || !linea.includes('+')) continue;
@@ -567,7 +573,7 @@ comprueba(
   'el andamio es lo que se copia: sin el, cada herramienta inventa su package.json',
 );
 for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
-  const contenido = lee(doc);
+  const contenido = leeDoc(doc);
   if (contenido === null) continue;
   comprueba(
     `${doc}: el decision tree enruta "herramienta / libreria / paquete"`,
