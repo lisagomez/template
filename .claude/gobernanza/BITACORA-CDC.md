@@ -1022,4 +1022,54 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 (objetivo: "listo para la configuración del VPS Hetzner + Docker
   personalizado para el usuario").
 
+### 2026-08-23 — el template gana el camino de "herramienta empaquetada" — radio: sistema
+> Hasta hoy solo contemplaba **una app que se despliega**. El otro caso real es **una
+> herramienta que se construye una vez y se reusa** en los proyectos que vengan.
+
+- **Cambio**:
+  1. **Convención `tools/<nombre>/`** y un andamio real, `tools/ejemplo-herramienta/`, que
+     pasa el empaquetador en verde — no un ejemplo de mentira: es lo que se copia.
+  2. **`scripts/empaqueta-herramienta.mjs`** (`npm run empaqueta <nombre>`): valida el
+     **contrato del `package.json`**, construye, comprueba que `'use client'` sobrevive al
+     build, empaqueta con `npm pack` y **prueba la integración instalando el tarball en un
+     proyecto temporal limpio** e importándolo de verdad.
+  3. **`docs/EMPAQUETAR-HERRAMIENTA.md`**: la regla del núcleo sin dependencias, cómo
+     integrarla (tarball durante el desarrollo, registro después), qué declarar para que sea
+     compatible, y qué **no** hace el empaquetador.
+  4. **Cableado al flujo**: rama nueva en el decision tree de `CLAUDE.md` y `GEMINI.md`,
+     sección en el README y `tools/*/dist` fuera de `tsconfig` y de git.
+  5. **Cinco comprobaciones nuevas** (bloque 6e): empaquetador y andamio presentes, la rama
+     en ambos decision trees, y que el andamio **no meta React en `dependencies`**.
+- **Motivo**: en una herramienta lo que falla no es el código —eso lo cazan `typecheck` y
+  los tests—, es el **contrato del paquete**: `exports` sin `types`, `files` sin `dist`,
+  React en `dependencies` en vez de `peer`, la directiva `'use client'` perdida en el build.
+  Todo eso compila en verde y **revienta en el proyecto de destino**, que es el peor sitio
+  para enterarse. Por eso el paso que cierra es una instalación real, no una aserción.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: añade un camino de empaquetado, no cambia el comportamiento del agente)* ·
+  aprobación humana ☑ · pineo ☑
+- **Regresión**: verificador **96/96** (5 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, auditoría de credenciales limpia, `typecheck` y `build` limpios,
+  empaquetador en verde de punta a punta. **Control negativo por cinco lados**: React en
+  `dependencies` → rojo; `files` sin `dist` → rojo; `exports` sin `types` → rojo; versión
+  `latest` en vez de semver → rojo; rama fuera del decision tree → verificador en rojo.
+- **Decisiones que no son obvias**:
+  - **El núcleo no importa nada** (ni React, ni Next, ni Supabase). Si lo hace, no es una
+    herramienta: es un trozo de una app con otro nombre. Lo que necesite React va en un
+    entry point aparte con `peerDependency` **opcional**.
+  - **Tarball, no `npm link`**, durante el desarrollo. `npm link` resuelve por symlink y
+    hace funcionar cosas que en una instalación real fallan.
+  - **El empaquetador no publica.** Publicar es irreversible en la práctica —un `unpublish`
+    no borra lo ya descargado—, así que es gate humano, no un paso de script.
+  - **C1 aplica a los paquetes propios**: el consumidor pinea versión exacta. Un rango `^`
+    convierte una publicación tuya de un martes en un cambio de comportamiento simultáneo en
+    varios proyectos, sin diff y sin aprobación.
+- **Lo que NO cierra**: el empaquetador prueba el **contrato**, no la lógica de la
+  herramienta ni el encaje con el proyecto de destino — que se instale limpio no significa
+  que cuadre con la versión de React o Next que tenga ese proyecto. Y el template es **ESM**:
+  dar soporte a un consumidor CommonJS es un doble build y **un CDC propio**.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 (objetivo: "también es posible que el usuario solo quiera desarrollar una
+  herramienta, empaquetarla e integrarla después en proyectos que desarrolle").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

@@ -12,6 +12,7 @@
     "regresion": "node scripts/regresion-skills.mjs",
     "audita:secretos": "node scripts/audita-secretos.mjs",
     "configura:deploy": "node scripts/configura-deploy.mjs",
+    "empaqueta": "node scripts/empaqueta-herramienta.mjs",
     "vigila:hermes": "node scripts/verifica-hermes.mjs",
     "validate": "npm run typecheck && npm run build && npm run verify:gobernanza && npm run regresion && npm run audita:secretos",
     "deploy:build": "docker compose --env-file .env.production build",

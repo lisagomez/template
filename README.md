@@ -154,6 +154,26 @@ npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.produc
 npm run vigila:hermes  # deriva del pineo del agente (semanal, fuera del gate: usa red)
 ```
 
+## Dos caminos: una app, o una herramienta
+
+Este template sirve para las dos cosas, y el runbook cambia segun cual sea:
+
+| | **Una app** | **Una herramienta** |
+|---|---|---|
+| Produces | Un sitio que se despliega | Un paquete que se instala |
+| Acaba en | Un VPS con Docker y TLS | El `node_modules` de otros proyectos tuyos |
+| Runbook | [docs/DEPLOY-HETZNER.md](docs/DEPLOY-HETZNER.md) | [docs/EMPAQUETAR-HERRAMIENTA.md](docs/EMPAQUETAR-HERRAMIENTA.md) |
+| Comando | `npm run configura:deploy` + `npm run deploy` | `npm run empaqueta <nombre>` |
+
+Una herramienta vive en `tools/<nombre>/`, con la regla que decide si es reusable: **el
+nucleo no importa React, Next ni Supabase**. Lo que los necesite va en un entry point
+aparte, detras de un peerDependency opcional — dos Reacts en el mismo arbol es el bug de
+hooks que nadie encuentra.
+
+`npm run empaqueta` no se cree el resultado: valida el contrato del `package.json`,
+comprueba que `'use client'` sobrevive al build, y **instala el tarball en un proyecto
+limpio para importarlo de verdad**. Ahi "es compatible" deja de ser una opinion.
+
 ## Gobernanza
 
 Todo proyecto que nace de este template hereda una capa de gobernanza con **7 controles**
@@ -171,7 +191,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (91 comprobaciones)
+npm run verify:gobernanza   # falla si la capa quedo suelta (96 comprobaciones)
 npm run regresion           # C2 capa A: contratos de los 22 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```

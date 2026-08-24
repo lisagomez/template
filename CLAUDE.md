@@ -60,6 +60,15 @@ Usuario dice algo
     ├── "Quiero convertir una idea vaga en un prompt para /goal"
     |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
     |
+    ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
+    |   "quiero reusar esto en otros proyectos" / "publicar en npm"
+    |       → `docs/EMPAQUETAR-HERRAMIENTA.md` + `npm run empaqueta <nombre>`
+    |         El nucleo NO importa React/Next/Supabase: lo que los necesite va en un
+    |         entry point aparte, con peerDependency opcional.
+    |         El empaquetador PRUEBA la integracion instalando el tarball en un
+    |         proyecto limpio. Publicar es gate humano, no un paso de script.
+    |         Pinear la version en el consumidor: `latest` es anti-patron aqui igual (C1)
+    |
     ├── "Quiero hacer deploy / publicar"
     |       → Vercel CLI o git push
     |       → Servidor propio (Hetzner u otro VPS): `npm run configura:deploy` (mide el
