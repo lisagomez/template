@@ -7,7 +7,7 @@
 (vacio)
 
 ## project/ — Proyectos y decisiones activas
-- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada y firmada 2026-08-23; capa B con 5 mediciones validas en frio, todas verdes; verificador 102/102. Distingue deuda del template vs del entorno.
+- [Capa de gobernanza agentica](project/gobernanza-agentica.md) — adoptada y firmada 2026-08-23; capa B con 5 mediciones validas en frio, todas verdes; verificador 107/107. Distingue deuda del template vs del entorno.
 - [Infraestructura de agentes y respaldos](project/infraestructura-agentes.md) — Fase 0 en `docs/FASE0-INFRAESTRUCTURA.md` (2 verticales, sin canales de chat) + vigilante del pineo con capas A y B corridas y la imagen pineada **por digest**; la capa B destapo 4 afirmaciones falsas del runbook. Falta instalar el cron (entorno). Incluye la regla del corpus: cero identificadores fuera de `golden-sets`, ya con gate.
 
 - [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — ademas de apps, **herramientas empaquetadas** (`tools/`, `npm run empaqueta`): lo que falla es el contrato del paquete, y por eso la prueba final instala el tarball en un proyecto limpio.

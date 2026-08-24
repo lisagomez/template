@@ -1,0 +1,65 @@
+{
+  "_comentario": "Routing por nivel de tarea. La regla es EFICIENCIA POR ROUTING, NO POR RECORTE: una tarea trivial no paga precio de razonamiento, y una decision de riesgo no se abarata. Lo vigila scripts/verifica-routing.mjs, dentro de npm run validate.",
+
+  "precios": {
+    "_comentario": "Verificados contra la API publica de OpenRouter. NO se inventan: si falta un precio, el gate falla. Se re-consultan cuando el vigilante de versiones o un CDC de modelo lo pidan.",
+    "fuente": "https://openrouter.ai/api/v1/models",
+    "consultado": "2026-08-23",
+    "moneda": "USD por millon de tokens",
+    "vigencia_dias": 90
+  },
+
+  "niveles": {
+    "ligero": {
+      "para": "tareas mecanicas y de alto volumen, donde el acierto se verifica de un vistazo",
+      "modelo": "anthropic/claude-haiku-4.5",
+      "precio": { "entrada": 1.0, "salida": 5.0, "lectura_cache": 0.1 }
+    },
+    "capaz": {
+      "para": "el trabajo normal de construir: implementar, revisar, migrar, documentar",
+      "modelo": "anthropic/claude-sonnet-5",
+      "precio": { "entrada": 2.0, "salida": 10.0, "lectura_cache": 0.2 }
+    },
+    "razonamiento": {
+      "para": "decisiones que cuesta caro equivocar y baratas de mas: arquitectura, riesgo, incidentes",
+      "modelo": "anthropic/claude-opus-5",
+      "precio": { "entrada": 5.0, "salida": 25.0, "lectura_cache": 0.5 }
+    }
+  },
+
+  "tareas": {
+    "_comentario": "Toda clase de tarea del flujo tiene nivel. Ninguna queda sin asignar heredando el default por descuido: esa es la forma en que el ahorro se pierde en silencio, y el gate la rechaza.",
+
+    "titulo-de-sesion": "ligero",
+    "mensaje-de-commit": "ligero",
+    "resumen-o-compresion": "ligero",
+    "triage-de-peticion": "ligero",
+    "busqueda-y-exploracion": "ligero",
+    "formato-y-lint": "ligero",
+
+    "implementar-feature": "capaz",
+    "revision-de-codigo": "capaz",
+    "migracion-o-sql": "capaz",
+    "documentacion": "capaz",
+    "pruebas": "capaz",
+    "empaquetar-herramienta": "capaz",
+
+    "diseno-de-arquitectura": "razonamiento",
+    "prp-o-spec": "razonamiento",
+    "decision-de-gobernanza": "razonamiento",
+    "caso-trampa-capa-b": "razonamiento",
+    "incidente": "razonamiento"
+  },
+
+  "no_se_abaratan": {
+    "_comentario": "El limite de la regla. Bajar de nivel aqui no es ahorrar: es mover el riesgo a donde no se ve. Un caso-trampa evaluado por un modelo mas debil da un verde que no significa nada.",
+    "clases": ["decision-de-gobernanza", "caso-trampa-capa-b", "incidente", "prp-o-spec"],
+    "motivo": "deciden sobre riesgo, dinero o datos de terceros; el error sale mas caro que el modelo"
+  },
+
+  "cache_de_prefijo": {
+    "_comentario": "La otra palanca, y esta tiene numero: leer del cache cuesta la DECIMA PARTE del input (0.50 vs 5.00 por millon en opus-5). Un AGENTS.md que cambia cada turno invalida el prefijo y se paga entero cada vez.",
+    "regla": "lo estable arriba, lo volatil abajo. AGENTS.md y las reglas no se tocan en caliente: se editan, pasan regresion y se aprueban (C1).",
+    "ahorro_si_el_prefijo_aguanta": "90% del coste de entrada del contexto base"
+  }
+}

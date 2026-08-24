@@ -503,6 +503,36 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`, `
   );
 }
 
+// --- 6h. El routing por nivel existe, esta en el flujo y en las reglas ------
+// El ahorro por routing no se pierde de golpe: se pierde porque una clase de tarea que
+// nadie asigno hereda el default caro y nadie se entera. Aqui se vigila que el catalogo
+// exista, que su gate corra, y que la regla este INLINE en las instrucciones — si vive
+// solo en un JSON, no dispara cuando alguien decide.
+comprueba(
+  'existe .claude/routing-modelos.json (routing por nivel de tarea)',
+  existsSync(ruta('.claude/routing-modelos.json')),
+  'sin catalogo, cada tarea usa el modelo por defecto y el reparto no existe',
+);
+comprueba(
+  'existe scripts/verifica-routing.mjs',
+  existsSync(ruta('scripts/verifica-routing.mjs')),
+  'un catalogo que nada comprueba se desincroniza del dia a dia',
+);
+comprueba(
+  'el gate de routing corre en validate',
+  /"validate":\s*"[^"]*verifica:routing/.test(lee('package.json') ?? ''),
+  'si depende de que alguien lo invoque, es una costumbre',
+);
+for (const doc of ['AGENTS.md', 'GEMINI.md']) {
+  const contenido = leeDoc(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: declara el routing por nivel y el limite de lo que no se abarata`,
+    /routing-modelos\.json/.test(contenido) && /no se abarata/i.test(contenido),
+    'la regla tiene que estar donde decide el agente, no solo en el JSON',
+  );
+}
+
 // --- 6g. El vigilante de frescura cubre TODO lo pineado --------------------
 // El pineo da estabilidad y quita noticias. Ya habia sensor para la imagen del agente;
 // esto lo generaliza al stack y a los MCP. Vive FUERA de validate a proposito: usa red.
