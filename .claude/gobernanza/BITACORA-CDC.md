@@ -1255,4 +1255,58 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
   del 2026-08-23 ("routing por nivel de tarea").
 
+### 2026-08-23 — el routing considera modelos de pesos abiertos — radio: sistema
+> Amplía el catálogo del CDC anterior. Los datos vienen del mismo sitio y con la misma
+> disciplina: verificados y fechados, no recordados.
+
+- **Cambio**: cada nivel declara ahora su **alternativa de pesos abiertos** con precio,
+  **índices medidos** y el id del repositorio de pesos. Más un bloque de **política** de
+  cuándo se permite y cuándo no. Cuatro comprobaciones nuevas en el gate y
+  `alternativaAbierta()` en el helper de la app.
+- **De dónde salen los datos, que es lo que los hace utilizables**: el campo
+  `hugging_face_id` de la metadata de OpenRouter es lo que hace **comprobable** que los pesos
+  están publicados —"abierto" deja de ser una etiqueta—, y el campo
+  `benchmarks.artificial_analysis` da los índices de código, agéntico e inteligencia. Es el
+  *"ranking de desempeño"* que pedía PRP-001, y no hizo falta inventarlo: estaba en la misma
+  API que ya se consultaba para los precios. **147 de 422 modelos** del catálogo tienen pesos
+  publicados.
+- **El hallazgo que obliga a mirar el nivel ligero**:
+
+  | nivel | propietario | cod/ag | abierto | cod/ag |
+  |---|---|---|---|---|
+  | ligero | `claude-haiku-4.5` $1/$5 | 43.9 / 16.5 | `deepseek-v4-flash-0731` **$0.14/$0.28** | **69.1 / 48.4** |
+  | capaz | `claude-sonnet-5` $2/$10 | 71.5 / 49.7 | `qwen3.8-2.4t-a95b` $2/**$6** | **71.9 / 57.1** |
+  | razonamiento | `claude-opus-5` $5/$25 | **78 / 59.2** | `kimi-k3` $3/$15 | 76.2 / **54.3** |
+
+  En el nivel ligero el abierto sale **mejor en los tres índices y a ~1/7 del precio de
+  entrada**. En capaz, empata en código, gana en agéntico y baja la salida de $10 a $6. En
+  razonamiento el abierto se acerca en código pero cae claramente en **agéntico**, que es
+  justo lo que mide trabajo largo con herramientas — por eso ahí queda declarado como
+  alternativa y **no** como opción por defecto.
+- **Lo que NO se hizo, a propósito**: no se cambió ningún default. Los números invitan a
+  mover el nivel ligero, pero eso es un CDC con su medición —y la única que habla de nuestro
+  comportamiento es la capa B, no un benchmark de terceros. **Los índices sirven para
+  descartar, no para coronar.**
+- **Los tres límites que quedan escritos en la política**:
+  1. **Pesos abiertos NO es alojado por ti.** Enrutar a un abierto vía un proveedor sigue
+     mandando el dato a un tercero: el radio de daño es el mismo, y la decisión es de flujo
+     de datos (C4), no de precio.
+  2. **Ninguna clase de `no_se_abaratan` admite alternativa abierta** — el helper devuelve
+     `null` para ellas, no es solo documentación.
+  3. **La caché puede darle la vuelta al precio de lista**: varias alternativas abiertas
+     tienen lectura de caché mucho más barata o inexistente, así que con un prefijo grande y
+     estable un propietario con caché puede salir más barato. El precio por millón no decide
+     solo.
+  Y un gotcha operativo heredado de `prompt.md`: OpenRouter bloquea por defecto los
+  proveedores que entrenan con tus prompts, y con esa política activa DeepSeek falla con
+  `No endpoints found for this model`. Se decide a propósito, no a base de reintentos.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ · humana
+  ☑ · pineo ☑
+- **Regresión**: verificador 107/107, capa A 92/92, capa B del corpus 14/14, `typecheck`
+  limpio, contexto 10.434/12.000. **Control negativo por tres lados**: alternativa sin id de
+  pesos → rojo; sin índices → rojo ("elegir por precio sin mirar calidad es recortar");
+  catálogo con alternativas pero sin política → rojo.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 ("en las tareas considera otros LLM opensource").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->
