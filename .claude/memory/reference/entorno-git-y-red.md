@@ -3,16 +3,19 @@
 Hechos de **esta máquina**, no del template (ver [[gobernanza-agentica]], "Dos ámbitos que
 NO se mezclan"). Comprobados el 2026-08-23.
 
-## GitHub: hay push, no hay PR
+## GitHub
 
 - `git push` funciona: el remoto es **SSH** (`git@github.com:lisagomez/template.git`).
-- **No hay `gh`** instalado, y **no hay `GITHUB_TOKEN` ni `GH_TOKEN`** en el entorno. No se
-  puede abrir ni mergear un PR desde la sesión.
-- Lo que sí se puede, y es lo que se hizo: rama → commit → `git push -u origin <rama>` →
-  **merge local `--no-ff`** → push de `main`. GitHub imprime en el push un enlace
-  `.../pull/new/<rama>`: es lo que hay que darle al usuario si quiere el PR formal.
-- Si algún día hace falta PR de verdad: instalar `gh` o poner un token en el entorno. Es
-  decisión de la dueña, no del template.
+- **`gh` instalado el 2026-08-23**: v2.98.0 en `~/.local/bin/gh` (ya en PATH). Se instaló
+  desde el tarball oficial **con checksum verificado**, sin `sudo` — no hay sudo sin
+  contraseña en esta máquina, y para un binario de usuario tampoco hace falta. Actualizarlo
+  es repetir el mismo paso con la release nueva; no hay apt que lo haga solo.
+- **La autenticación es del usuario**: `gh auth login` es interactivo y no se corre desde
+  una sesión de agente. Hasta que se haga, `gh` está instalado pero no puede abrir PRs.
+  Tampoco hay `GITHUB_TOKEN` ni `GH_TOKEN` en el entorno.
+- Sin `gh` autenticado, el camino que funciona es: rama → commit → `git push -u origin
+  <rama>` → **merge local `--no-ff`** → push de `main`. GitHub imprime en el push un enlace
+  `.../pull/new/<rama>` para abrir el PR a mano.
 
 ## Red: sí, y con eso basta para vigilar la imagen
 

@@ -15,4 +15,4 @@
 
 ## reference/ — Donde encontrar cosas
 - [Material de origen de la gobernanza](reference/material-origen-gobernanza.md) — los 9 docs de Hermes OS en a2aboths: que se conservo, que se descarto y por que.
-- [Entorno: que se puede y que no](reference/entorno-git-y-red.md) — hay push por SSH pero **no `gh` ni token**: los PR no se abren desde la sesion (rama + merge local). Hay red, no hay Docker.
+- [Entorno: que se puede y que no](reference/entorno-git-y-red.md) — `gh` v2.98.0 instalado en `~/.local/bin` (2026-08-23) pero **sin autenticar**: `gh auth login` es interactivo. Hay red, no hay Docker.
