@@ -1445,3 +1445,37 @@ diff, sin regresión y sin aprobación.
 - **Regresion**: verificador 115/115, `validate` entero en verde.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — correccion dada en sesion del
   2026-08-24 ("es un boilerplate no deberia haber credenciales").
+
+### 2026-08-24 — el siguiente ahorro de contexto tiene un precio que no estaba anotado — radio: ninguno
+> Hallazgo, sin cambio de codigo. Salio de una pregunta —"¿se pueden fusionar?"— sobre juntar
+> el refactor de `.claude/rules/` con el spec de la imprenta de CLIs.
+
+- **Lo medido**: `.claude/rules` aparece **0 veces** en el binario de opencode `1.18.21`. Lo
+  unico parecido, `.cursor/rules/`, vive **dentro de un prompt** que le dice al agente que
+  *lea* esos archivos al escribir un `AGENTS.md`; no esta en su ruta de carga. La ruta real
+  sigue siendo la ya documentada: `AGENTS.md` → `CLAUDE.md` → `CONTEXT.md`, mas el array
+  `instructions` de `opencode.json`.
+- **Por que importa**: el pendiente #1 del spec de eficiencia de tokens decia que
+  `.claude/rules/` con `paths:` era *"el unico ahorro real que queda, y ya no es una mejora
+  opcional"*. Es verdad a medias. **Una regla obligatoria movida ahi deja de existir para
+  opencode** — la misma divergencia que el informe de portabilidad documenta como riesgo,
+  solo que provocada por nosotros. Mitigacion con precio propio: `instructions:
+  [".claude/rules/*.md"]` las carga, pero **siempre**, sin el `paths:` que es justo de donde
+  sale el ahorro. La regla se conserva en los dos arneses; **el ahorro, solo en uno**.
+- **Corte propuesto, sin decidir**: inline se quedan los **controles** (C1, C5, C7, C8,
+  secretos, respaldo, canales de chat), que tienen que disparar en cualquier arnes; puede
+  bajar lo que **informa y no obliga** (catalogos, decision tree largo, ejemplos,
+  aprendizajes historicos). Con ese corte el ahorro es **bastante menor** que "519 → 200
+  lineas": se mide antes de comprometerlo como pendiente.
+- **Y la respuesta a la pregunta: no se fusionan.** Tienta —la imprenta seria el primer
+  consumidor real del mecanismo, y un mecanismo sin consumidor no esta verificado— pero son
+  riesgos de clase distinta: `rules/` cambia **como cargan las reglas** (el modo de fallo #1
+  de este repo: un control que deja de disparar **en silencio**, que solo destapa una sesion
+  fria), y la imprenta solo **añade** superficie, verificable con controles negativos
+  estructurales. Fusionarlos mete dos radios en un CDC y deja que un rojo en la mitad
+  peligrosa bloquee la aditiva.
+- **Que se cambio** (solo documentos): §1 de `docs/PORTABILIDAD-ARNESES.md` gana el hallazgo
+  y la memoria del proyecto matiza su pendiente #1.
+- **Gate**: verificador 115/115, `validate` entero en verde. Sin control negativo: no hay
+  codigo nuevo que falsificar.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesion del 2026-08-24 ("si").

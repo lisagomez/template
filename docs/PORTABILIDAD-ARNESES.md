@@ -27,6 +27,15 @@ Consecuencias para este repo, que no son opinion:
   `AGENTS.md` es autocontenido; **dejaria de dar igual** el dia que alguien mueva una regla
   a un archivo importado. Si eso pasa, la regla existe para Claude Code y **no existe** para
   opencode: mismo repo, dos comportamientos.
+- **`.claude/rules/` NO existe para opencode.** Cero apariciones en su binario; lo unico
+  parecido, `.cursor/rules/`, vive dentro de un prompt que le dice al agente que los *lea*
+  al escribir un `AGENTS.md` — no en su ruta de carga. Importa porque el siguiente ahorro de
+  contexto que este repo tiene apuntado es justo mover parte de `AGENTS.md` ahi: **una regla
+  obligatoria movida a `rules/` deja de existir en este arnes.** Mitigacion con su propio
+  precio: `opencode.json` con `instructions: [".claude/rules/*.md"]` las carga, pero
+  **siempre** —sin el `paths:` que es de donde sale el ahorro—, asi que la regla se conserva
+  en los dos y **el ahorro solo se materializa en Claude Code**. Es un intercambio, no un
+  ahorro gratis, y se mide antes de comprometerlo.
 - Ademas lee `~/.claude/CLAUDE.md` (el global del usuario) salvo que se desactive con
   `disableClaudeCodePrompt`. Eso es del entorno de cada quien, no del repo.
 
