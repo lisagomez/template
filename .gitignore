@@ -81,3 +81,6 @@ hermes-informe.md
 # Herramientas empaquetadas: el build y el tarball se regeneran, no se versionan
 tools/*/dist/
 tools/*/*.tgz
+
+# Estado del vigilante de versiones (runtime, se regenera)
+.versiones-estado.json
