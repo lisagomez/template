@@ -7,7 +7,7 @@
 Se destilaron 9 documentos de gobernanza del proyecto Hermes OS en 7 controles portables
 (C1-C7) que viven en `.claude/gobernanza/` y están cableados a `CLAUDE.md`, `GEMINI.md`,
 `prp-base.md` y al skill `new-app`. Se verifica con `npm run verify:gobernanza`
-(30 comprobaciones), incluido en `npm run validate`.
+(**85 comprobaciones** al 2026-08-23; nacio con 30), incluido en `npm run validate`.
 
 Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**.
 
@@ -60,11 +60,23 @@ pendiente sólo puede cerrarlo un proyecto derivado o la máquina, no es deuda d
   `claude-opus-5` pineado; la config real usa un alias flotante. Es config global del
   usuario: su cambio es un CDC propio y lo decide ella.
 
+## Una entrada sin firmar ya no pasa el gate (2026-08-23)
+
+El verificador vigilaba que los registros conservaran su **marca** append-only, pero no que
+sus entradas tuvieran **dueno**. Una quedo dias con `_pendiente de firma` y la encontro un
+repaso manual, no un control. Ahora el bloque 6b exige firma con valor real en toda entrada
+de `REGISTRO-RIESGO.md` y `BITACORA-CDC.md`, ignorando la plantilla del bloque `## Formato`.
+
+**Una decision de riesgo sin firmar no es una decision: es un descuido con formato de
+decision.** Es la forma de fallo de siempre —el control existia, no estaba en la ruta—
+aplicada al ultimo sitio donde quedaba.
+
 ## Firmas (cerrado el 2026-08-23)
 
-La AISIA, las 3 entradas de `REGISTRO-RIESGO.md` y los 2 CDC quedaron firmados como
-`lisagomez (responsable del proyecto)`, por instrucción explícita en sesión. Un agente no
-firma por su cuenta: registra la autorización que una persona da.
+La AISIA, **todas** las entradas de `REGISTRO-RIESGO.md` y **todos** los CDC están
+firmados como `lisagomez (responsable del proyecto)`, por instrucción explícita en sesión.
+Un agente no firma por su cuenta: registra la autorización que una persona da. Que no quede
+ninguna coja ya no depende de mirar — lo comprueba el gate de arriba.
 
 ## El límite de C5 (decidido el 2026-08-23)
 
