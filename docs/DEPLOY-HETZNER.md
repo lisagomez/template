@@ -1,31 +1,39 @@
-# Deploy en Hetzner Cloud cx33
+# Deploy en un VPS (Hetzner Cloud u otro)
 
-Runbook completo para poner esta app en un **cx33 (4 vCPU / 8 GB RAM / 80 GB NVMe)**
-con TLS automatico. De servidor vacio a produccion.
+Runbook completo para poner esta app en un servidor propio con TLS automatico. De
+servidor vacio a produccion.
 
 **Stack:** Docker + Next.js standalone + Caddy (reverse proxy y certificados).
 
 ---
 
-## Por que cx33 y que aguanta
+## Que servidor necesitas
 
-| Recurso | cx33 | Uso real de este stack |
-|---------|------|------------------------|
-| vCPU | 4 | app 3.0 / Caddy 0.5 / SO 0.5 |
-| RAM | 8 GB | app 4 GB max / Caddy 512 MB / build ~3 GB pico |
-| Disco | 80 GB | imagen ~200 MB + capas + logs rotados |
+**Este runbook no te dice un modelo.** Los nombres y las specs de los planes cambian, y
+una tabla copiada envejece sin que nadie lo note. Lo que importa no es como se llame el
+plan, sino lo que hay dentro:
 
-El build de Next.js es lo mas pesado que corre aqui. Con 8 GB entra, pero **sin
-swap va justo** si la app anterior sigue viva durante el rebuild. El paso 3 lo resuelve.
+| Recurso | Minimo real | Por que |
+|---------|-------------|---------|
+| RAM | **2 GB duros**, 4 GB comodos | El pico de todo el deploy es el **build de Next.js**, no el runtime |
+| vCPU | 2 | Con 1 el build tarda, pero entra |
+| Disco | 40 GB | Imagen ~200 MB + capas + logs rotados |
+| Swap | **obligatorio** con 8 GB o menos | Sin el, el build muere por OOM sin avisar (paso 3) |
 
-Si el trafico crece, el primer cuello es CPU en SSR, no RAM. Sube a cx43 antes de optimizar codigo.
+Quien decide los limites exactos no es este documento: es
+**`npm run configura:deploy`**, que corre EN EL SERVIDOR, mide `nproc` y `/proc/meminfo`
+y deriva de ahi cuanta CPU y RAM se lleva la app, cuanta Caddy y cuanto heap usa el
+build. Si mañana mueves la app a una maquina mas grande, lo vuelves a correr y ya.
+
+Si el trafico crece, el primer cuello es **CPU en SSR**, no RAM: sube de plan antes de
+ponerte a optimizar codigo.
 
 ---
 
 ## 1. Crear el servidor
 
 En Hetzner Cloud Console:
-- **Tipo:** cx33
+- **Tipo:** el que cumpla la tabla de arriba (2 GB de RAM como minimo duro)
 - **Imagen:** Ubuntu 24.04 LTS
 - **SSH key:** subir la tuya (NO uses password)
 - **Firewall:** permitir solo `22`, `80`, `443`
@@ -90,12 +98,26 @@ docker --version && docker compose version
 ```bash
 git clone https://github.com/TU_USUARIO/TU_REPO.git app && cd app
 cp .env.production.example .env.production
-nano .env.production      # rellenar DOMAIN, TLS_EMAIL y las claves
+nano .env.production      # rellenar DOMAIN, TLS_EMAIL, claves y APP_NAME
 chmod 600 .env.production
+
+# Mide el servidor, valida el .env y escribe el bloque de tamaño:
+npm run configura:deploy -- --escribir
 ```
 
 > **`.env.production` esta en `.gitignore` a proposito.** Vive solo en el
 > servidor. Si alguna vez lo ves en un diff, para y revisa.
+
+El configurador **no es cosmetico**: caza tres fallos que de otro modo descubres tarde.
+
+| Lo que comprueba | Por que importa |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` apunta a `DOMAIN` | Si no, **los redirects de OAuth se rompen sin dar error**: el build pasa, el certificado pasa, y el usuario no vuelve del login |
+| Placeholders sin tocar (`tuapp.com`, `tu@email.com`) | Caddy pediria un certificado para un dominio que no es tuyo |
+| Swap y RAM reales | Sin swap en 8 GB o menos, el build muere por OOM a mitad |
+| `SUPABASE_SERVICE_ROLE_KEY` sin prefijo `NEXT_PUBLIC_` | Con el prefijo se inlinea en el bundle del navegador (C7) |
+
+De los secretos solo dice **presente/ausente y el largo**: nunca imprime el valor.
 
 ---
 
@@ -105,7 +127,8 @@ chmod 600 .env.production
 npm run deploy
 ```
 
-Equivale a `build` + `up -d` + `ps`. El primer build tarda **3-6 min** en cx33.
+Equivale a `build` + `up -d` + `ps`, y antes pasa el gate (`predeploy`: gobernanza,
+regresion y auditoria de credenciales). El primer build tarda **3-6 min** en 4 vCPU.
 Caddy pide el certificado solo; la app queda en `https://tuapp.com`.
 
 ```bash
@@ -161,7 +184,7 @@ docker stats            # CPU/RAM real
 docker system prune -af --volumes   # liberar disco (cuidado: borra volumenes sin uso)
 ```
 
-**Backups:** los datos viven en Supabase, no en el cx33. Este servidor es
+**Backups:** los datos viven en Supabase, no en el VPS. Este servidor es
 desechable: si se pierde, se reconstruye con los pasos 1-6. Lo unico
 irrecuperable es `.env.production` — guardalo en tu gestor de contrasenas.
 

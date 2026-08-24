@@ -1,7 +1,11 @@
 # =============================================================================
-# Stack de produccion — Hetzner Cloud cx33 (4 vCPU / 8 GB / 80 GB NVMe)
+# Stack de produccion self-hosted (Hetzner Cloud u otro VPS).
 # Caddy termina TLS (certificado automatico) y hace proxy a Next.js.
 # Solo Caddy publica puertos; la app NO es alcanzable desde internet.
+#
+# NADA de aqui asume un modelo de servidor concreto: el nombre de la imagen y los
+# limites salen de `.env.production`, y los calcula `npm run configura:deploy`
+# midiendo la maquina donde corre. Los defaults arrancan en un servidor pequeño.
 # =============================================================================
 
 services:
@@ -14,7 +18,9 @@ services:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?falta en .env.production}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?falta en .env.production}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?falta en .env.production}
-    image: saas-factory-app:latest
+        # Lo calcula scripts/configura-deploy.mjs midiendo el servidor real.
+        NODE_HEAP_MB: ${NODE_HEAP_MB:-2048}
+    image: ${APP_NAME:-saas-factory-app}:${APP_VERSION:-latest}
     restart: unless-stopped
     expose:
       - "3000"
@@ -27,11 +33,12 @@ services:
     deploy:
       resources:
         limits:
-          # 3 de 4 vCPU y 4 de 8 GB: deja aire al SO, Caddy y al build
-          cpus: "3.0"
-          memory: 4G
+          # Derivados del servidor real por scripts/configura-deploy.mjs. Los defaults
+          # son de servidor pequeño: mejor arrancar apretado que morir por OOM.
+          cpus: "${APP_CPUS:-1.5}"
+          memory: ${APP_MEM:-2G}
         reservations:
-          memory: 1G
+          memory: 512M
     logging:
       driver: json-file
       options:
@@ -61,8 +68,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "${CADDY_CPUS:-0.5}"
+          memory: ${CADDY_MEM:-512M}
     logging:
       driver: json-file
       options:

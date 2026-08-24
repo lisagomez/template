@@ -56,7 +56,7 @@ State: Zustand
 Validation: Zod
 AI Engine: Vercel AI SDK v5 + OpenRouter
 Testing: Playwright CLI + MCP
-Deploy: Vercel o Hetzner cx33 (Docker + Caddy)
+Deploy: Vercel o VPS propio (Docker + Caddy), dimensionado por script
 ```
 
 ## Arquitectura Feature-First
@@ -150,6 +150,7 @@ npm run validate     # typecheck + build + gobernanza + regresion (el gate compl
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2)
 npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
+npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run vigila:hermes  # deriva del pineo del agente (semanal, fuera del gate: usa red)
 ```
 
@@ -170,7 +171,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (87 comprobaciones)
+npm run verify:gobernanza   # falla si la capa quedo suelta (91 comprobaciones)
 npm run regresion           # C2 capa A: contratos de los 22 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
@@ -216,14 +217,16 @@ Variables en Vercel Dashboard:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_SITE_URL`
 
-### Opcion B — Servidor propio (Hetzner Cloud cx33)
+### Opcion B — Servidor propio (Hetzner Cloud u otro VPS)
 
-Docker + Next.js standalone + Caddy con TLS automatico. Pensado para un
-**cx33 (4 vCPU / 8 GB)**, pero sirve en cualquier VPS con Docker.
+Docker + Next.js standalone + Caddy con TLS automatico. **No asume un modelo de
+servidor**: `npm run configura:deploy` mide vCPU y RAM reales y deriva de ahi los
+limites, el heap del build y el nombre de tu imagen. Minimo duro: 2 GB de RAM y swap.
 
 ```bash
 # en el servidor
 cp .env.production.example .env.production   # rellenar y chmod 600
+npm run configura:deploy -- --escribir       # mide la maquina y valida el .env
 npm run deploy                                # build + up + ps
 npm run deploy:logs
 ```

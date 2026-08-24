@@ -61,6 +61,24 @@ Además los números no daban: app 4 GB + caddy 0.5 + dos Hermes a 2 GB + SO = *
 8** en un cx33. Recomendación: **servidor aparte** (CX22), o mismo box con límites
 retuneados (app 3 GB, Hermes 1.5 GB c/u).
 
+## El deploy no asume el servidor de nadie (2026-08-23)
+
+Un boilerplate se despliega en la maquina **de otro**. Los limites del `docker-compose.yml`
+estaban cableados a un modelo concreto: en un servidor menor, el OOM killer decide por ti;
+en uno mayor, se desperdicia la mitad. Ahora los deriva `npm run configura:deploy`
+midiendo `nproc` y `/proc/meminfo` **en el servidor**, y valida `.env.production` de paso
+—incluido el fallo silencioso de `NEXT_PUBLIC_SITE_URL` apuntando a otro dominio, que rompe
+OAuth sin dar ningun error.
+
+**El modelo `cx33` que el repo citaba en seis sitios no se pudo confirmar que exista**: las
+paginas de Hetzner se renderizan con JS y no entregan specs. En vez de repetirlo, se retiro
+de las afirmaciones vivas y el runbook pasa a pedir **requisitos reales** (2 GB de RAM como
+minimo duro, swap obligatorio con 8 GB o menos). `nproc` no envejece; una tabla de planes,
+si.
+
+**Sin probar**: aqui no hay Docker, asi que el compose nuevo no se ha construido ni
+levantado. La primera corrida real la hace quien despliegue.
+
 ## Pendientes reales
 
 > **Ojo al ámbito.** Esto es un boilerplate: el runbook es un *entregable*, no una

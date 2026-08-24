@@ -32,8 +32,12 @@ ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 ENV NEXT_TELEMETRY_DISABLED=1
-# cx33 tiene 8 GB; 3 GB de heap deja aire para Caddy y el SO durante el build
-ENV NODE_OPTIONS=--max-old-space-size=3072
+# El pico de memoria de todo el deploy es ESTE build, no el runtime. El valor sale de
+# `scripts/configura-deploy.mjs`, que lo deriva de la RAM real del servidor: cablearlo a
+# un modelo concreto envejece mal el dia que cambias de maquina. El default es
+# conservador a proposito — arranca en un servidor pequeño sin configurar nada.
+ARG NODE_HEAP_MB=2048
+ENV NODE_OPTIONS=--max-old-space-size=${NODE_HEAP_MB}
 
 RUN npm run build
 

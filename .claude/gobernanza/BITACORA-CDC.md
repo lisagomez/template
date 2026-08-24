@@ -972,4 +972,54 @@ diff, sin regresión y sin aprobación.
   del 2026-08-23 (objetivo: "es boilerplate y no debe tener credenciales vivas, solo
   placeholders"). Aprueba el auditor y su cableado al gate.
 
+### 2026-08-23 — el deploy deja de asumir un servidor concreto — radio: sistema
+> Objetivo: dejar el boilerplate listo para que **cada usuario** configure su VPS y su
+> Docker. Lo que había era un stack cableado a un modelo de servidor.
+
+- **Cambio**:
+  1. **`scripts/configura-deploy.mjs`** (`npm run configura:deploy`), que corre **en el
+     servidor**: mide `nproc` y `/proc/meminfo`, reparte RAM y CPU entre app, Caddy y SO,
+     deriva el heap del build, y **valida `.env.production`** antes de que falle el deploy.
+     De los secretos dice presencia y largo, nunca el valor.
+  2. **`docker-compose.yml` y `Dockerfile` parametrizados**: `APP_NAME`/`APP_VERSION` para
+     que la imagen se llame como la app del usuario y no como el template; `APP_CPUS`,
+     `APP_MEM`, `CADDY_MEM`, `CADDY_CPUS` y `NODE_HEAP_MB` desde `.env.production`, con
+     defaults de servidor pequeño — mejor arrancar apretado que morir por OOM.
+  3. **Cuatro comprobaciones nuevas** (bloque 6d): que el configurador exista, que **ningún
+     límite del compose esté cableado**, que la imagen lleve `APP_NAME` y que el `.example`
+     documente las variables de tamaño.
+  4. Retirado el modelo de servidor de `README.md`, `.claude/README.md`, `CLAUDE.md`,
+     `GEMINI.md` y los dos runbooks. En su lugar, **requisitos reales**: 2 GB de RAM como
+     mínimo duro, swap obligatorio con 8 GB o menos.
+- **Motivo**: un boilerplate se despliega en la máquina **de otro**. Un límite de 4 GB
+  cableado es una afirmación sobre hardware que no conocemos: en un servidor más pequeño el
+  OOM killer decide por nosotros, y en uno más grande se desperdicia la mitad. `nproc` y
+  `/proc/meminfo` no envejecen; una tabla de planes, sí.
+- **Lo que se intentó y no se pudo verificar**: quise construir la tabla de planes de
+  Hetzner contra su web. **No se pudo**: las páginas se renderizan con JS y no entregan ni
+  nombres ni specs. Así que **no se cableó ninguna tabla** — y de paso: el modelo `cx33` que
+  este repo citaba en seis sitios **no se pudo confirmar que exista**. Se retira de las
+  afirmaciones vivas en vez de repetirlo. Es el mismo hallazgo que la capa B de Hermes, en
+  otro documento.
+- **Gate aplicado**: diff revisado ☑ · regresión capa A verde ☑ (92/92) · capa B ☐ *(no
+  aplica: configuración de despliegue, no comportamiento del agente)* · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: verificador **91/91** (4 comprobaciones nuevas), capa A 92/92, capa B del
+  corpus 14/14, auditoría de credenciales limpia, `typecheck` limpio, pre-vuelo limpio.
+  **Control negativo por los cuatro lados**: límite cableado → rojo; imagen con el nombre
+  del template → rojo; `.example` sin las variables → rojo; configurador ausente → rojo.
+  Verde al revertir cada uno. Y el gate **cazó un cableado que se me había escapado**
+  (`cpus: "0.5"` de Caddy): se parametrizó en vez de debilitar la comprobación.
+- **Validación del configurador**: probado contra un `.env` de prueba por cuatro vías —
+  `NEXT_PUBLIC_SITE_URL` apuntando a otro dominio (el fallo **silencioso**: build y TLS
+  pasan, y el login no vuelve), placeholder sin tocar, `service_role` con prefijo
+  `NEXT_PUBLIC_` (C7), y el caso correcto en verde.
+- **Lo que NO cierra**: **aquí no hay Docker**, así que el compose y el Dockerfile nuevos
+  **no se han construido ni levantado** — solo se validó su forma. La primera corrida real
+  la hace quien despliegue. Y el configurador es Linux-only por diseño: en macOS o Windows
+  sale exit 2, "no pude medir", que no es lo mismo que "todo bien".
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión
+  del 2026-08-23 (objetivo: "listo para la configuración del VPS Hetzner + Docker
+  personalizado para el usuario").
+
 <!-- Añadir aquí los CDC siguientes. NO editar los anteriores. -->

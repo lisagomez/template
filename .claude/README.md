@@ -35,7 +35,7 @@ State: Zustand
 Validation: Zod
 Testing: Playwright CLI + MCP
 AI Engine: Vercel AI SDK v5 + OpenRouter
-Deploy: Vercel o Hetzner cx33 (Docker + Caddy)
+Deploy: Vercel o VPS propio (Docker + Caddy), dimensionado por script
 ```
 
 **Por que Email/Password y no OAuth?**
@@ -421,10 +421,10 @@ Variables en el dashboard de Vercel:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_SITE_URL`
 
-### Opcion B — Servidor propio (Hetzner Cloud cx33)
+### Opcion B — Servidor propio (Hetzner Cloud u otro VPS)
 
 Docker + Next.js standalone + Caddy con TLS automatico. Dimensionado para un
-**cx33 (4 vCPU / 8 GB)**; sirve en cualquier VPS con Docker.
+cualquier VPS con Docker: `npm run configura:deploy` dimensiona el stack midiendo la maquina.
 
 ```bash
 # en el servidor
