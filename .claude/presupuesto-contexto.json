@@ -1,0 +1,50 @@
+{
+  "_comentario": "Presupuesto de contexto de la fabrica (C8). Lo vigila scripts/mide-contexto.mjs, que corre dentro de npm run validate. Los presupuestos NO son aspiracionales: se fijaron sobre la medicion real del 2026-08-23 con aire para crecer. Un presupuesto por debajo de lo actual seria rojo el primer dia; uno muy por encima es teatro.",
+  "calibracion": {
+    "_comentario": "De donde sale el ratio. Sin esto el contador seria un numero inventado con formato de medicion.",
+    "metodo": "chars / ratio, calibrado contra el tokenizador BPE o200k_base sobre TODO el markdown versionado de este repo",
+    "medido": "2026-08-23",
+    "muestra": "762817 caracteres -> 209324 tokens reales (todos los .md versionados)",
+    "ratio_chars_por_token": 3.644,
+    "margen": "p10 3.44 / p90 3.95 sobre 100+ archivos: ~±8% por archivo, mucho menos en el agregado",
+    "advertencia": "o200k_base NO es el tokenizador de Claude, que no es publico. La cifra sirve para CONTROLAR CRECIMIENTO (que es para lo que existe el gate), no para facturar. Si necesitas exactitud, instala `gpt-tokenizer` y el script usa BPE real automaticamente.",
+    "error_medido_2026_08_23": "estimador vs BPE real: -0.36% en el total de nivel 1 (9923 vs 9959) y -3.9% en el peor archivo suelto (CLAUDE.md, 6434 vs 6693). El estimador subestima algo; para control de crecimiento sobra."
+  },
+  "niveles": {
+    "siempre": {
+      "_comentario": "Entra en CADA sesion, se use lo que se use. Es el unico coste que se paga siempre y por eso el que mas importa.",
+      "archivos": [
+        "CLAUDE.md",
+        ".claude/memory/MEMORY.md"
+      ],
+      "incluye_descripciones_de_skills": true,
+      "medido_2026_08_23": 9959,
+      "presupuesto": 12000,
+      "por_archivo": {
+        "CLAUDE.md": 8000,
+        ".claude/memory/MEMORY.md": 800
+      },
+      "presupuesto_descripciones": 3500
+    },
+    "espejo": {
+      "_comentario": "Mismo papel que CLAUDE.md para otro arnes. Se paga solo en sesiones de ese arnes.",
+      "archivos": [
+        "GEMINI.md"
+      ],
+      "medido_2026_08_23": 2784,
+      "por_archivo": {
+        "GEMINI.md": 3500
+      }
+    },
+    "por_invocacion": {
+      "_comentario": "El cuerpo de un SKILL.md solo se carga cuando ese skill se invoca. Por eso el tope es POR SKILL y no la suma: nadie los invoca todos en una sesion.",
+      "glob": ".claude/skills/*/SKILL.md",
+      "medido_2026_08_23": {
+        "total": 51918,
+        "mayor": 6490
+      },
+      "presupuesto_por_skill": 8000,
+      "presupuesto_suma": 65000
+    }
+  }
+}
