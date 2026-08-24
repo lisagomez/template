@@ -10,7 +10,7 @@
  * default caro y nadie se entera nunca. Por eso `modeloPara` no acepta una cadena
  * cualquiera: solo las clases declaradas, y TypeScript lo comprueba en el build.
  */
-import catalogo from '../../../.claude/routing-modelos.json'
+import catalogo from '../../../.claude/routing-modelos.json' with { type: 'json' }
 
 export type Nivel = 'ligero' | 'capaz' | 'razonamiento'
 export type ClaseDeTarea = Exclude<keyof typeof catalogo.tareas, `_${string}`>

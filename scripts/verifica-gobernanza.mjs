@@ -533,6 +533,48 @@ for (const doc of ['AGENTS.md', 'GEMINI.md']) {
   );
 }
 
+// --- 6i. La contabilidad de tokens existe, cuelga del catalogo y esta en la ruta
+// El routing decide lo que una tarea DEBERIA costar; sin esta mitad, las tarifas del
+// catalogo son una estimacion que nadie puede desmentir. Lo que se vigila aqui es que el
+// modulo saque el precio del catalogo (y no de una cifra pegada a mano, que es la forma
+// que toma "no inventar cifras" cuando se rompe), que su prueba corra dentro del gate, y
+// que la regla del hueco declarado viva INLINE donde decide el agente.
+const contabilidad = 'src/lib/ai/contabilidad.ts';
+const pruebaContabilidad = 'scripts/prueba-contabilidad.ts';
+comprueba(
+  `existe ${contabilidad} (contabilidad de tokens y presupuesto)`,
+  existsSync(ruta(contabilidad)),
+  'sin registro de lo gastado, el coste del catalogo no se puede contrastar con nada',
+);
+comprueba(
+  `existe ${pruebaContabilidad}`,
+  existsSync(ruta(pruebaContabilidad)),
+  'la aritmetica del coste y el aviso del 80 % se rompen en silencio si nada los prueba',
+);
+const contabilidadTexto = lee(contabilidad);
+if (contabilidadTexto !== null) {
+  comprueba(
+    'la contabilidad saca el precio del catalogo de routing, no de una cifra pegada',
+    /from '\.\/routing/.test(contabilidadTexto) && /costeUsd/.test(contabilidadTexto),
+    'un precio duplicado a mano se desincroniza del catalogo y nadie se entera hasta la factura',
+  );
+}
+comprueba(
+  'la prueba de contabilidad corre en validate y en predeploy',
+  /"validate":\s*"[^"]*prueba:contabilidad/.test(lee('package.json') ?? '') &&
+    /"predeploy":\s*"[^"]*prueba:contabilidad/.test(lee('package.json') ?? ''),
+  'si depende de que alguien la invoque, es una costumbre y no un gate',
+);
+for (const doc of ['AGENTS.md', 'GEMINI.md']) {
+  const contenido = leeDoc(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: declara que una llamada sin uso se guarda con coste null, no como cero`,
+    /Contabilidad de tokens/.test(contenido) && /`null`/.test(contenido) && /nunca como cero/.test(contenido),
+    'sumar huecos como ceros da una factura que parece completa: la regla tiene que estar donde decide el agente',
+  );
+}
+
 // --- 6g. El vigilante de frescura cubre TODO lo pineado --------------------
 // El pineo da estabilidad y quita noticias. Ya habia sensor para la imagen del agente;
 // esto lo generaliza al stack y a los MCP. Vive FUERA de validate a proposito: usa red.
