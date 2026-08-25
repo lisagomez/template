@@ -15,7 +15,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  normalizaSlug, casa, heredaGrados, escaneaLibreria, localizaLibreria, clasifica,
+  normalizaSlug, casa, heredaGrados, escaneaLibreria, localizaLibreria, clasifica, sinDeclarar,
+  normalizaGrado,
 } from './lib/imprenta.mjs';
 
 const verde = (s) => `\x1b[32m${s}\x1b[0m`;
@@ -143,6 +144,103 @@ try {
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }
+
+// --- 9. Los fallos que pago ESTE proyecto (2026-08-25, alineacion con la imprenta real) ---
+const tmp2 = mkdtempSync(join(tmpdir(), 'imprenta2-'));
+try {
+  // 9a. El lector de scorecards era una casualidad. El JSON real de la press envuelve todo
+  // en `scorecard` y el grado vive en `overall_grade`; la regex `\b[A-F]\b` sobre los
+  // primeros 2000 caracteres acertaba solo porque ninguna clave anterior tenia una letra
+  // suelta A-F. Este caso pone una delante a proposito.
+  mkdirSync(join(tmp2, 'press'));
+  writeFileSync(join(tmp2, 'press', 'scorecard.json'), JSON.stringify({
+    scorecard: {
+      region: 'E',
+      overall_grade: 'A',
+      steinberger: { total: 96 },
+      unscored_dimensions: ['auth_protocol', 'live_api_verification'],
+    },
+  }));
+  writeFileSync(join(tmp2, 'press', '.printing-press.json'), '{"printing_press_version":"4.27.0"}');
+  const leido2 = escaneaLibreria(tmp2);
+  comprueba('el scorecard de la press se PARSEA, no se adivina con una regex',
+    leido2.press.grade === 'A', `grade=${leido2.press.grade}`);
+  comprueba('una letra suelta anterior al grado ya no se cuela como grado',
+    leido2.press.grade !== 'E');
+  comprueba('las dimensiones sin puntuar viajan: un "A" parcial no se lee como completo',
+    leido2.press.sinPuntuar.length === 2);
+  comprueba('se lee la version de la press con la que se imprimio',
+    leido2.press.pressVersion === '4.27.0');
+
+  // 9b. Nombres de entorno upstream. Conocer solo `CLI_PRESS_LIBRARY` era no encontrar la
+  // libreria de una maquina configurada como manda la imprenta de verdad.
+  comprueba('se respeta PRESS_LIBRARY (el nombre de upstream)',
+    localizaLibreria({ PRESS_LIBRARY: tmp2, HOME: '/no/existe' }) === tmp2);
+  comprueba('CLI_PRESS_LIBRARY sigue mandando sobre PRESS_LIBRARY (compatibilidad)',
+    localizaLibreria({ CLI_PRESS_LIBRARY: tmp2, PRESS_LIBRARY: '/no/existe', HOME: '/no' }) === tmp2);
+} finally {
+  rmSync(tmp2, { recursive: true, force: true });
+}
+
+// 9c. El verde-en-vacio. `audita-imprenta` decia "todo CLI del manifiesto esta impreso"
+// con CERO declarados y cuatro en el disco: verdadero sobre el conjunto vacio e inutil.
+const enDisco = { hcloud: { grade: 'A' }, 'telegram-bot': { grade: 'A' } };
+comprueba('lo impreso que el manifiesto no declara se reporta, no se calla',
+  sinDeclarar([{ servicio: 'otro', slug: 'otro', estado: 'mcp' }], enDisco).length === 2);
+comprueba('lo que SI esta declarado no se reporta como sin declarar',
+  sinDeclarar([{ servicio: 'hetzner', slug: 'hcloud', estado: 'cli-impreso' }], enDisco)
+    .join() === 'telegram-bot');
+comprueba('con el disco vacio no inventa faltantes',
+  sinDeclarar([{ servicio: 'x', slug: 'x', estado: 'cli-impreso' }], {}).length === 0);
+
+// 9d. Deriva de version: el mismo riesgo que `@latest` en `.mcp.json`, un nivel mas abajo.
+const decl = [{ servicio: 'h', slug: 'h', estado: 'cli-impreso', press_version: '4.27.0' }];
+comprueba('declarar una version que el disco desmiente es FALLO, no matiz',
+  clasifica(decl, { h: { grade: 'A', pressVersion: '4.28.0' } }, 'A').divergentes.length === 1);
+comprueba('coincidir no genera ruido',
+  clasifica(decl, { h: { grade: 'A', pressVersion: '4.27.0' } }, 'A').divergentes.length === 0);
+// Sin dato en disco NO hay divergencia: "no se" nunca se pinta como "no coincide".
+comprueba('sin version en disco no se inventa una divergencia',
+  clasifica(decl, { h: { grade: 'A', pressVersion: null } }, 'A').divergentes.length === 0);
+
+// 9f. El grado dejo de ser una letra. La press 4.31.1 escribe
+// `"A (1 of 25 dimensions unverified: live_api_verification)"` en `overall_grade`, y la
+// comparacion contra `min_grade` es de cadenas: sin normalizar, un CLI recien impreso con
+// grado A salia como "REVISA: grado < minimo A". Detectado imprimiendo `polar`.
+comprueba('el grado se extrae aunque venga con el sufijo de dimensiones sin verificar',
+  normalizaGrado('A (1 of 25 dimensions unverified: live_api_verification)') === 'A');
+comprueba('una letra pelada sigue funcionando',
+  normalizaGrado('B') === 'B' && normalizaGrado('A+') === 'A+');
+comprueba('lo que no empieza por un grado da null, no una cadena rara',
+  normalizaGrado('sin datos') === null && normalizaGrado(null) === null);
+const svcG = [{ servicio: 'g', slug: 'g', estado: 'cli-impreso' }];
+comprueba('y por tanto un A con sufijo NO se reporta como desactualizado',
+  clasifica(svcG, { g: { grade: normalizaGrado('A (1 of 25 dimensions unverified: x)') } }, 'A')
+    .desactualizados.length === 0);
+
+// 9g. Dogfood en rojo. `verdict` se leia y no se usaba: un CLI medido Y FALLANDO pasaba como
+// conforme, que es peor que uno sin medir — el sin medir al menos se declara. Reconocerlo en
+// el manifiesto lo convierte en defecto conocido; callarlo lo deja en defecto escondido.
+const svcD = [{ servicio: 'd', slug: 'd', estado: 'cli-impreso' }];
+const rojoEscondido = clasifica(svcD, { d: { grade: 'A', verdict: 'FAIL' } }, 'A').dogfoodEnRojo;
+comprueba('un dogfood FAIL no declarado se reporta como ESCONDIDO',
+  rojoEscondido.length === 1 && rojoEscondido[0].reconocido === false);
+const svcDR = [{ servicio: 'd', slug: 'd', estado: 'cli-impreso', dogfood_conocido: 'FAIL' }];
+comprueba('reconocerlo en el manifiesto lo convierte en defecto CONOCIDO',
+  clasifica(svcDR, { d: { grade: 'A', verdict: 'FAIL' } }, 'A').dogfoodEnRojo[0].reconocido === true);
+comprueba('un dogfood PASS no genera ruido',
+  clasifica(svcD, { d: { grade: 'A', verdict: 'PASS' } }, 'A').dogfoodEnRojo.length === 0);
+// WARN no es FAIL: dos de los CLIs de la libreria real estan en WARN y convertirlos en
+// hallazgo seria ruido que se aprende a ignorar.
+comprueba('un WARN no se cuenta como rojo',
+  clasifica(svcD, { d: { grade: 'A', verdict: 'WARN' } }, 'A').dogfoodEnRojo.length === 0);
+
+// 9e. Grado parcial: suficiente en lo medido, con dimensiones sin puntuar.
+const svcP = [{ servicio: 'p', slug: 'p', estado: 'cli-impreso' }];
+comprueba('un grado A con dimensiones sin puntuar se marca PARCIAL',
+  clasifica(svcP, { p: { grade: 'A', sinPuntuar: ['auth_protocol'] } }, 'A').parciales.length === 1);
+comprueba('un grado A completo no se marca parcial',
+  clasifica(svcP, { p: { grade: 'A', sinPuntuar: [] } }, 'A').parciales.length === 0);
 
 if (fallos > 0) {
   console.log(rojo(`\n✗ ${fallos} caso(s) en rojo. Cada uno es un bug que el origen ya pago:`));

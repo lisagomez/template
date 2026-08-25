@@ -14,8 +14,28 @@ y reglas inline. Ver `docs/SDD-imprenta-de-clis.md`.
 - **La aportación propia**: el coste del MCP es **incondicional**, el del CLI **condicional**.
   Quien use una herramienta en 1 de cada 20 sesiones ahorra ~49x. Por eso la decisión de
   retirar un MCP es **por servidor y por frecuencia de uso**, nunca global.
-- **Aquí no se imprime.** No hay Go ni librería de binarios, y no debe haberlos: es un
-  boilerplate. Imprimir es acción de un proyecto derivado, y es un **CDC (C1)**.
+- ~~**Aquí no se imprime.**~~ **Corregido el 2026-08-25** (ver `docs/SDD-alineacion-imprenta.md`):
+  el *repositorio* no lleva librería de binarios y no debe llevarla — eso sigue —, pero **esta
+  máquina SÍ imprime**: binario `cli-printing-press` **4.28.0**, 11 skills `/printing-press*`
+  y **cuatro CLIs impresos** (`hcloud`, `supabase`, `telegram-bot`, `digitalocean`). Lo único
+  que faltaba era **Go**, instalado hoy (`go1.27.0` en `~/.local/go`; `apt` sólo daba 1.26.0 y
+  la press exige ≥1.26.6).
+- **El verde en vacío.** El auditor decía "Imprenta conforme: todo CLI del manifiesto está
+  impreso" con **cero** declarados: cierto sobre el conjunto vacío e inútil. Un control que se
+  aprueba a sí mismo cuando no hay nada que comprobar no es un control. Arreglado + caso.
+- **Los cuatro grados, medidos por primera vez**: todos A (96/87/85/84) pero **todos
+  parciales** — `auth_protocol` y `live_api_verification` sin puntuar en los cuatro, y
+  **anti-reimplementación `skipped` en tres**. Declarados, no aprobados para producción.
+- **`supabase-pp-cli` NO sustituye al MCP de Supabase**: es PostgREST sobre el schema público,
+  cero novel features. Retirar el MCP "porque ya hay CLI" sería perder capacidad, no ahorrar.
+- **Se imprimió `polar` el 2026-08-25** (5 CLIs en la librería). El escalón público funcionó
+  antes: Resend, el primer candidato, **ya estaba publicado** — 30-60 min ahorrados. Polar no
+  existía en ninguna parte y es con lo que cobra el golden path.
+- **Go 1.27.0 ROMPE la imprenta** (`enetx/http2` usa `http.Server.DisableClientPriority`, que
+  1.27.0 no expone). Usar **1.26.7**. Y **`generate --force` trunca archivos generados**:
+  reimprimir siempre en directorio limpio.
+- **Medido en rojo tampoco es aprobado.** `verdict` del dogfood se leía y no se usaba: un CLI
+  fallando pasaba como conforme. Ahora un FAIL sin reconocer en el manifiesto rompe el gate.
 
 ## Cómo se corre
 

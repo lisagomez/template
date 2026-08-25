@@ -108,6 +108,63 @@
       "vertical": "negocio (correo y calendario propios)",
       "gate": "humano-irreversible",
       "nota": "Precedente vivo de CLI-sobre-MCP en este repo: el MCP de google-workspace se RETIRO el 2026-08-23 porque el paquete no existia en npm. Nadie midio nunca cuanto ahorra. Enviar correo es irreversible: gate humano."
+    },
+
+    {
+      "servicio": "polar",
+      "slug": "polar",
+      "skill": "add-payments",
+      "estado": "cli-impreso",
+      "press_version": "4.31.1",
+      "dogfood_conocido": "FAIL",
+      "fuente_de_verdad": "polar-pp-cli (impreso el 2026-08-25 desde https://polar.sh/docs/openapi.json)",
+      "vertical": "clientes (dinero de terceros) — NO habilitado para produccion",
+      "gate": "humano-irreversible",
+      "nota": "Impreso porque el golden path cobra con Polar y NO existia CLI: ni en la libreria local, ni entre los ~455 de la libreria publica, ni como MCP. Hasta hoy esa clase de tarea se resolvia entera con el modelo, el escalon mas caro de la escalera. Medido: grade A, total 96, con TRES dimensiones sin puntuar — entre ellas `live_api_verification`, porque esta maquina no tiene credencial de Polar. **dogfood FAIL conocido**: `OAuth scope coverage missing for 126 endpoint(s)`; el spec declara scopes por operacion sobre un esquema http/bearer y el generador no los mapea. Reconocido aqui a proposito: un defecto medido y escondido es peor que uno sin medir. NO se usa contra produccion hasta cerrar ambas cosas — mueve dinero de terceros, y ese dano no es firmable (limite de C5)."
+    },
+    {
+      "servicio": "hetzner-cloud",
+      "slug": "hcloud",
+      "skill": null,
+      "estado": "cli-impreso",
+      "press_version": "4.27.0",
+      "fuente_de_verdad": "hcloud-pp-cli (impreso por lisagomez, libreria local)",
+      "vertical": "negocio (infraestructura: es donde despliega docs/DEPLOY-HETZNER.md)",
+      "gate": "humano-irreversible",
+      "nota": "El de mayor valor para este repo: el deploy self-hosted documentado es Hetzner. Medido el 2026-08-25: grade A, total 96, dogfood PASS, anti-reimplementacion COMPROBADA (5 llamadas, 3 exentas via store, 2 por dato calculado). Crear o destruir servidores cuesta dinero y es irreversible: gate humano, sin excepcion."
+    },
+    {
+      "servicio": "digitalocean",
+      "slug": "digitalocean",
+      "skill": null,
+      "estado": "cli-impreso",
+      "press_version": "4.27.0",
+      "fuente_de_verdad": "digitalocean-pp-cli (impreso por lisagomez, libreria local)",
+      "vertical": "negocio (infraestructura alternativa; fuera del golden path)",
+      "gate": "humano-irreversible",
+      "nota": "Medido el 2026-08-25: grade A, total 84, dogfood WARN (1 helper muerto). Anti-reimplementacion NO comprobada: el chequeo salio `skipped` (checked=0). Segun la regla inline, un CLI que inventa respuestas en vez de llamar a la API es el vector 1 del modelo de amenazas — aqui no esta descartado, esta sin mirar. No usar en produccion sin cerrarlo."
+    },
+    {
+      "servicio": "supabase-data-api",
+      "slug": "supabase",
+      "skill": null,
+      "estado": "cli-impreso",
+      "press_version": "4.27.0",
+      "fuente_de_verdad": "supabase-pp-cli (PostgREST sobre el schema publico, impreso por lisagomez)",
+      "vertical": "clientes (datos de terceros) — NO habilitado",
+      "gate": "humano-irreversible",
+      "nota": "NO sustituye al MCP `supabase`, que es otra superficie: el MCP hace list_tables/apply_migration (host/dev) y esto es el Data API de PostgREST sobre el schema publico de UN proyecto, con cero novel features. Medido: grade A, total 87, dogfood PASS, pero anti-reimplementacion `skipped`. Y es superficie de datos de clientes: C7 (RLS y service_role) manda sobre cualquier comodidad. Declarado para que exista en el mapa; habilitarlo es otra decision, con C4."
+    },
+    {
+      "servicio": "telegram-bot",
+      "slug": "telegram",
+      "skill": null,
+      "estado": "cli-impreso",
+      "press_version": "4.27.0",
+      "fuente_de_verdad": "telegram-bot-pp-cli (impreso por lisagomez, libreria local)",
+      "vertical": "canal de chat externo — NO conectado",
+      "gate": "humano-irreversible",
+      "nota": "DECLARAR NO ES CONECTAR. Que el CLI exista no autoriza el canal: sigue exigiendo modelo de amenazas de la superficie (C3), AISIA de lo que el agente decide sobre terceros (C4) y gate humano por cada accion irreversible. Es el vector que las Reglas de Codigo nombran literalmente ('solo conectalo rapido'). Medido: grade A, total 85, dogfood WARN (3 helpers muertos, sync solo con Upsert generico), anti-reimplementacion `skipped`."
     }
   ]
 }
