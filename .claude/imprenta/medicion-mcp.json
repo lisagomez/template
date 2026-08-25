@@ -1,0 +1,38 @@
+{
+  "_nota": "Generado por scripts/mide-mcp.mjs. Es la mitad IZQUIERDA de la comparacion MCP vs CLI: lo que cuesta tener el servidor cargado, se use o no. La mitad derecha (el coste de invocar un CLI) depende de cuantas veces el agente relea su --help, asi que no es un numero unico. Comparar ambas cifras sin declarar esto favorece a quien le caiga mejor a quien compara.",
+  "generado": "2026-08-25T04:56:11Z",
+  "metodo": "estimado: chars / 3.644 (calibrado en .claude/presupuesto-contexto.json)",
+  "advertencia_de_alcance": "Se cuentan los tokens del JSON de `tools/list`. El arnes puede serializar los esquemas con otro envoltorio, asi que la cifra sirve para COMPARAR y CONTROLAR CRECIMIENTO, no para facturar.",
+  "total_medido": 20363,
+  "servidores_medidos": 5,
+  "servidores_no_medidos": 4,
+  "el_total_real_es_mayor": true,
+  "medidos": {
+    "playwright": {
+      "tokens": 5077,
+      "herramientas": 24
+    },
+    "chrome-devtools": {
+      "tokens": 6382,
+      "herramientas": 29
+    },
+    "next-devtools": {
+      "tokens": 1562,
+      "herramientas": 4
+    },
+    "sequential-thinking": {
+      "tokens": 1259,
+      "herramientas": 1
+    },
+    "firebase": {
+      "tokens": 6083,
+      "herramientas": 19
+    }
+  },
+  "no_medidos": {
+    "supabase": "requiere credenciales (placeholders en el espejo): no se mide sin ellas",
+    "brave-search": "requiere credenciales (placeholders en el espejo): no se mide sin ellas",
+    "firecrawl-mcp@3.24.0": "requiere credenciales (placeholders en el espejo): no se mide sin ellas",
+    "n8n-mcp": "requiere credenciales (placeholders en el espejo): no se mide sin ellas"
+  }
+}

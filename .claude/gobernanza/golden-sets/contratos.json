@@ -35,7 +35,11 @@
       { "patron": "[Cc]onfirmar|[Cc]onfirmacion", "porque": "gate humano antes de borrar" }
     ],
     "playwright-cli": [
-      { "patron": "screenshot", "porque": "la evidencia visual es el producto de este skill" }
+      { "patron": "screenshot", "porque": "la evidencia visual es el producto de este skill" },
+      { "patron": "playwright cli -s=", "porque": "lo que lleva estado va bajo `playwright cli` con sesion con nombre: sin ella cada invocacion abre un navegador nuevo" },
+      { "patron": "--browser chromium", "porque": "sin esto `open` busca Chrome de marca en /opt/google/chrome y falla en una maquina que solo instalo chromium" },
+      { "prohibido": "npx playwright (navigate|click|fill|snapshot)\\b", "porque": "sintaxis deducida del MCP que nunca existio en el CLI (2026-08-25): esos verbos viven bajo `playwright cli`, y `navigate` se llama `goto`" },
+      { "prohibido": "screenshot [^\\n]*--output", "porque": "`npx playwright screenshot` toma el archivo POSICIONAL; bajo `playwright cli` es --filename. `--output` no existe en ninguno de los dos" }
     ],
     "ai": [
       { "patron": "OpenRouter", "porque": "Golden Path: el proveedor no se improvisa por feature" }

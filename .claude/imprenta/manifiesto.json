@@ -1,0 +1,113 @@
+{
+  "_comentario": "Contrato de que CLI corresponde a que servicio. Lo audita `scripts/audita-imprenta.mjs`, que corre dentro de `npm run validate`. Este archivo NO imprime nada: declara. Imprimir es una accion de un proyecto derivado en la maquina que tiene Go y la libreria de binarios — aqui no hay ni debe haberla. Ver docs/SDD-imprenta-de-clis.md.",
+  "_estados": "mcp = se resuelve por servidor MCP (se paga cada sesion) · cli-oficial = ya existe un CLI upstream, NO hay nada que imprimir y es el mejor caso · cli-impreso = producido por Printing Press, se audita contra la libreria o el indice · sin-asignar = nadie lo decidio, y se reporta como problema. La distincion cli-oficial/cli-impreso no estaba en el manifiesto de origen porque alli todo CLI era impreso; aqui `npx playwright` y `gog` existen upstream y auditarlos contra una libreria seria pedirles que estuvieran donde nunca van a estar.",
+  "_por_que_existe": "Sin un mapa servicio -> CLI, la escalera CLI-first del agente ('¿existe ya un CLI para esto?') no tiene donde mirar, y la pregunta se contesta de memoria. Un servicio que no aparece aqui es un servicio que nadie decidio: por eso `sin-asignar` es un estado valido y visible, no un hueco silencioso.",
+
+  "defaults": {
+    "min_grade": "A",
+    "_min_grade": "Grado minimo para usar un CLI en produccion. Un CLI impreso por debajo se reporta como 'desactualizado'; uno SIN grado medible no cuenta como aprobado: va al bucket `sin_grado`. No medido != aprobado."
+  },
+
+  "servicios": [
+    {
+      "servicio": "playwright",
+      "slug": "playwright",
+      "skill": "playwright-cli",
+      "estado": "cli-oficial",
+      "fuente_de_verdad": "npx playwright cli --help (CLI oficial, no impreso)",
+      "vertical": "ninguna (herramienta de desarrollo, no toca datos de negocio)",
+      "gate": "ninguno",
+      "nota": "Caso de estudio del SDD. El CLI oficial YA existe: no hay nada que imprimir. MCP mide 5077 tokens/sesion; el CLI se paga al invocarlo. Sintaxis verificada y probada el 2026-08-25."
+    },
+    {
+      "servicio": "next-devtools",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "next-devtools-mcp (servidor MCP pineado)",
+      "vertical": "ninguna (desarrollo)",
+      "gate": "ninguno",
+      "nota": "NO reemplazable por CLI: vive colgado del dev server (`/_next/mcp`) y lee errores de build/runtime en vivo. 1562 tokens/sesion es el precio de esa capacidad."
+    },
+    {
+      "servicio": "chrome-devtools",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "chrome-devtools-mcp (servidor MCP pineado)",
+      "vertical": "ninguna (desarrollo)",
+      "gate": "ninguno",
+      "nota": "El MAS caro de los medidos: 6382 tokens/sesion, 29 herramientas. Solapa en gran parte con playwright. Candidato numero uno a retirar si el proyecto no lo usa: ver SDD §2.3, la decision es por frecuencia de uso."
+    },
+    {
+      "servicio": "supabase",
+      "slug": "supabase",
+      "skill": "supabase",
+      "estado": "mcp",
+      "fuente_de_verdad": "https://supabase.com/docs — CLI oficial `supabase` para migraciones y local",
+      "vertical": "negocio + clientes (datos de terceros)",
+      "gate": "humano-irreversible",
+      "nota": "C7: herramienta de HOST/DEV, no superficie de negocio. `service_role` tiene BYPASSRLS y jamas llega al agente. Toda migracion destructiva pasa por gate humano. No medido aqui: requiere credenciales."
+    },
+    {
+      "servicio": "firebase",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "firebase-tools (CLI oficial, con subcomando `mcp`)",
+      "vertical": "negocio",
+      "gate": "humano-irreversible",
+      "nota": "6083 tokens/sesion. El binario `firebase-tools` YA es un CLI: se carga como MCP por conveniencia, no por necesidad. Fuera del golden path (el stack es Supabase) — si el proyecto no usa Firebase, retirarlo es ahorro puro."
+    },
+    {
+      "servicio": "brave-search",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "@modelcontextprotocol/server-brave-search",
+      "vertical": "ninguna",
+      "gate": "ninguno",
+      "nota": "No medido: requiere credenciales. Superficie pequena esperada (busqueda)."
+    },
+    {
+      "servicio": "firecrawl",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "firecrawl-mcp",
+      "vertical": "ninguna",
+      "gate": "ninguno",
+      "nota": "No medido: requiere credenciales."
+    },
+    {
+      "servicio": "n8n",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "ghcr.io/czlonkowski/n8n-mcp (imagen pineada)",
+      "vertical": "negocio",
+      "gate": "humano-irreversible",
+      "nota": "No medido: requiere credenciales Y docker. Automatiza flujos: lo que dispare acciones irreversibles pasa por gate humano."
+    },
+    {
+      "servicio": "sequential-thinking",
+      "slug": null,
+      "skill": null,
+      "estado": "mcp",
+      "fuente_de_verdad": "@modelcontextprotocol/server-sequential-thinking",
+      "vertical": "ninguna",
+      "gate": "ninguno",
+      "nota": "1259 tokens/sesion por UNA herramienta. Es el peor ratio coste/superficie de los medidos."
+    },
+    {
+      "servicio": "google-workspace",
+      "slug": "gog",
+      "skill": "google-workspace",
+      "estado": "cli-oficial",
+      "fuente_de_verdad": "gog CLI (instalado en la maquina del usuario)",
+      "vertical": "negocio (correo y calendario propios)",
+      "gate": "humano-irreversible",
+      "nota": "Precedente vivo de CLI-sobre-MCP en este repo: el MCP de google-workspace se RETIRO el 2026-08-23 porque el paquete no existia en npm. Nadie midio nunca cuanto ahorra. Enviar correo es irreversible: gate humano."
+    }
+  ]
+}

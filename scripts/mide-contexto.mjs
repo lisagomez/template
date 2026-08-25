@@ -137,7 +137,34 @@ if (existsSync(dirSkills)) {
     }
   }
   anota(`skill mas caro (${mayor.nombre})`, mayor.tokens, n3.presupuesto_por_skill, 'por invocacion');
-  anota('suma de los 22 skills', suma, n3.presupuesto_suma, 'por invocacion');
+  anota(`suma de los ${nSkills || '?'} skills`, suma, n3.presupuesto_suma, 'por invocacion');
+}
+
+// --- Nivel 4: los servidores MCP -------------------------------------------
+// Un MCP inyecta los esquemas de sus herramientas en CADA sesion, se usen o no. Es el gasto
+// que este medidor no veia (vigilaba solo markdown) y resulta ser el mayor de todos. La
+// medicion NO se hace aqui: necesita red y `npx`, y el gate corre sin red. Se hace con
+// `node scripts/mide-mcp.mjs`, que deja el artefacto; aqui solo se LEE.
+const n4 = cfg.niveles?.mcp ?? {};
+const artefactoMcp = ruta(n4.artefacto ?? '.claude/imprenta/medicion-mcp.json');
+if (n4.artefacto) {
+  if (!existsSync(artefactoMcp)) {
+    // No es rojo: un repo recien clonado no ha medido todavia. Pero se DICE, porque callar
+    // aqui se leeria como "los MCP no cuestan nada" — el modo de falla que esta capa
+    // persigue en el coste `null` y en el `fuente_impresos` del auditor.
+    filas.push({ etiqueta: 'servidores MCP — SIN MEDIR', tokens: null, tope: n4.presupuesto, nivel: 'mcp' });
+  } else {
+    try {
+      const m = JSON.parse(readFileSync(artefactoMcp, 'utf8'));
+      const etiqueta = m.el_total_real_es_mayor
+        ? `${m.servidores_medidos} servidores MCP (+${m.servidores_no_medidos} sin medir: el real es MAYOR)`
+        : `${m.servidores_medidos} servidores MCP`;
+      anota(etiqueta, m.total_medido, n4.presupuesto, 'mcp');
+    } catch (e) {
+      console.error(rojo(`✗ NO PUDE MEDIR: ${n4.artefacto} no es JSON valido (${e.message})`));
+      process.exit(2);
+    }
+  }
 }
 
 // --- Salida ----------------------------------------------------------------
@@ -148,6 +175,12 @@ for (const f of filas) {
   if (f.nivel !== nivelActual) {
     nivelActual = f.nivel;
     console.log(gris(`— ${nivelActual} —`));
+  }
+  // `tokens: null` = no medido. NO se pinta como 0 ni se cuenta contra el tope: se dice.
+  // Un hueco declarado es informacion; un cero inventado es una mentira con formato de dato.
+  if (f.tokens === null) {
+    console.log(`  ${gris('?')} ${f.etiqueta.padEnd(38)} ${gris('     — desconocido')}  ${gris('corre `node scripts/mide-mcp.mjs`')}`);
+    continue;
   }
   const pct = f.tope ? `${Math.round((f.tokens / f.tope) * 100)}% de ${f.tope}` : gris('sin tope');
   const marca = f.tope && f.tokens > f.tope ? rojo('✗') : verde('✓');

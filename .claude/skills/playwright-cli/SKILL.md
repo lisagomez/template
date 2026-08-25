@@ -36,22 +36,39 @@ npx playwright install chromium
 
 ## Comandos Core de Playwright CLI
 
+Hay **dos superficies distintas** y confundirlas es el error clasico:
+
+| Superficie | Estado | Para que |
+|---|---|---|
+| `npx playwright <cmd>` | sin estado, un tiro | `screenshot`, `pdf`, `codegen`, `test` |
+| `npx playwright cli -s=<sesion> <cmd>` | **sesion persistente** | `goto`, `click`, `fill`, `snapshot`... |
+
 ```bash
-# Navegar a una pagina
-npx playwright navigate http://localhost:3000
+# UN TIRO: el archivo es POSICIONAL. `--output` NO existe.
+npx playwright screenshot http://localhost:3000 captura.png
 
-# Tomar screenshot
-npx playwright screenshot http://localhost:3000 --output screenshot.png
-
-# Click en un elemento
-npx playwright click "text=Sign In"
-
-# Llenar un campo de formulario
-npx playwright fill "#email" "test@example.com"
-
-# Obtener snapshot de pagina (accessibility tree como YAML)
-npx playwright snapshot http://localhost:3000
+# CON ESTADO: la sesion sobrevive entre invocaciones (procesos distintos).
+npx playwright cli -s=qa open --browser chromium   # sin esto: "browser is not open"
+npx playwright cli -s=qa goto http://localhost:3000
+npx playwright cli -s=qa snapshot                  # -> refs: [ref=e3], [ref=e4]...
+npx playwright cli -s=qa fill "#email" "test@example.com"
+npx playwright cli -s=qa click "text=Sign In"
+npx playwright cli -s=qa screenshot --filename captura.png
+npx playwright cli -s=qa eval "() => document.title"
+npx playwright cli -s=qa close
 ```
+
+**Tres cosas que hay que saber o no funciona nada:**
+
+1. **El target admite ref del `snapshot` (`e4`) o selector** (`#email`, `text=Sign In`).
+   Lo que NO funciona es texto pelado: `click "Sign In"` devuelve *"does not match any
+   elements"*. Los refs son mas robustos cuando el DOM tiene varios candidatos.
+2. **`--browser chromium` es obligatorio en `open`.** Por defecto busca Chrome de marca en
+   `/opt/google/chrome`, que no viene con `npx playwright install chromium`.
+3. **`file://` esta bloqueado.** Para probar HTML local, sirvelo por http.
+
+Para autenticacion, `state-save` / `state-load` guardan y restauran la sesion en disco —
+mejor que repetir el login en cada corrida.
 
 ---
 
@@ -90,23 +107,29 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
 Abrir la app y navegar a las paginas relevantes.
 
 ```bash
-# Screenshot inicial de la pagina
-npx playwright screenshot http://localhost:3000/[ruta] --output .qa-reports/[fecha]-[nombre]/screenshots/01-inicio.png
+QA=".qa-reports/[fecha]-[nombre]"
+npx playwright cli -s=qa open --browser chromium
+npx playwright cli -s=qa goto http://localhost:3000/[ruta]
+npx playwright cli -s=qa screenshot --filename "$QA/screenshots/01-inicio.png"
 ```
 
 ### Fase 4: TEST
 
 Ejecutar los pasos del test. Llenar formularios, hacer clicks, verificar resultados.
+**La misma sesion `-s=qa` de la fase 3**: es lo que hace que el login persista entre pasos.
 
 ```bash
 # Ejemplo: test de login
-npx playwright screenshot http://localhost:3000/login --output .qa-reports/[fecha]-[nombre]/screenshots/02-login-page.png
-npx playwright fill "#email" "test@example.com"
-npx playwright fill "#password" "testpassword"
-npx playwright click "text=Sign In"
-npx playwright screenshot http://localhost:3000/dashboard --output .qa-reports/[fecha]-[nombre]/screenshots/03-after-login.png
+npx playwright cli -s=qa goto http://localhost:3000/login
+npx playwright cli -s=qa snapshot            # confirma que los campos existen
+npx playwright cli -s=qa fill "#email" "test@example.com"
+npx playwright cli -s=qa fill "#password" "testpassword"
+npx playwright cli -s=qa click "text=Sign In"
+npx playwright cli -s=qa eval "() => location.pathname"   # verificar, no suponer
 ```
 
+El `snapshot` va primero **para confirmar contra el DOM real** en vez de suponer los
+selectores. Si un selector casa con varios elementos, usar el ref (`e4`) que devuelve.
 Tomar screenshot ANTES y DESPUES de cada accion critica.
 
 ### Fase 5: DOCUMENT
@@ -114,9 +137,13 @@ Tomar screenshot ANTES y DESPUES de cada accion critica.
 Guardar snapshots de pagina solo cuando se necesite inspeccionar estructura.
 
 ```bash
-# Solo si necesitas ver la estructura del DOM
-npx playwright snapshot http://localhost:3000/[ruta] > .qa-reports/[fecha]-[nombre]/snapshot-[paso].yaml
+npx playwright cli -s=qa snapshot --filename "$QA/snapshot-[paso].md"
+npx playwright cli -s=qa close               # cerrar la sesion al terminar
 ```
+
+`--filename` guarda el snapshot **en vez de** devolverlo en la respuesta: es la forma de no
+pagarlo en el contexto. Redirigir con `>` no sirve — igual lo devuelve, y ademas envuelto
+en markdown.
 
 **Principio sticky-notes**: NO volcar snapshots completos al contexto. Leer el archivo YAML solo cuando se necesite inspeccionar algo especifico. Resumen primero, detalles on-demand.
 

@@ -117,6 +117,11 @@ TypeScript + Tailwind 3.4, Supabase (Auth + DB + RLS), Zod, Zustand, Playwright.
    Todo lo que este proyecto pinea —modelo, imágenes, servidores MCP— gana estabilidad y
    **pierde noticias**: sin algo que avise, el rezago no se nota hasta que duele. Decidir
    quién mira y cada cuánto es parte de poner esto en producción, no un extra
+9. [ ] **Decidir qué MCP se queda** (`docs/SDD-imprenta-de-clis.md`). Cada servidor MCP
+   configurado cuesta tokens en **cada sesión, se use o no**: cinco de los del ejemplo suman
+   20 363, casi el doble que todas las instrucciones juntas. La decisión es **por servidor y
+   según frecuencia de uso**, no global — corre `node scripts/mide-mcp.mjs` y decide con la
+   cifra delante, no con un factor heredado
 
 ---
 

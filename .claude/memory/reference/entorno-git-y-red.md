@@ -6,11 +6,13 @@ NO se mezclan"). Comprobados el 2026-08-23; la sección de GitHub, actualizada e
 ## GitHub
 
 - `git push` funciona: el remoto es **SSH** (`git@github.com:lisagomez/template.git`).
-- **`gh` instalado el 2026-08-23**: v2.98.0 en `~/.local/bin/gh` (ya en PATH). Se instaló
-  desde el tarball oficial **con checksum verificado**, sin `sudo` — no hay sudo sin
-  contraseña en esta máquina, y para un binario de usuario tampoco hace falta. Actualizarlo
-  es repetir el mismo paso con la release nueva; no hay apt que lo haga solo.
-- **Autenticado desde el 2026-08-24** (cuenta `lisagomez`, protocolo SSH). La sesión de
+- **`gh`, corregido el 2026-08-25**: el activo es **`/usr/bin/gh` v2.46.0** (paquete de
+  Ubuntu). El v2.98.0 que se instaló en `~/.local/bin/gh` desde el tarball **ya no existe**
+  en la máquina; esta nota decía lo contrario y era falsa. Ojo: 2.46 es bastante anterior,
+  así que una bandera nueva de `gh` puede no existir aquí — comprobar con `--help` antes de
+  usarla en vez de suponerla.
+- **Autenticado desde el 2026-08-24** (cuenta `lisagomez`, protocolo **HTTPS** según
+  `gh auth status`; esta nota decía SSH). La sesión de
   agente ya abre y fusiona PRs: `gh pr create` + `gh pr merge --merge --delete-branch`
   funcionan — probado en el PR #10. El login en sí lo hizo la usuaria: `gh auth login` es
   interactivo y sigue sin correrse desde una sesión.
