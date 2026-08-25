@@ -1573,3 +1573,79 @@ diff, sin regresión y sin aprobación.
 - **Riesgo residual**: sin ejecutar esos casos en frío, que la escalera CLI-first dispare
   sigue siendo expectativa. Declarado en el SDD §8, no dado por hecho.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25
+
+### 2026-08-25 — la imprenta del template se alinea con la imprenta real — radio: reglas + gate
+- **Cambio**: `AGENTS.md` y `GEMINI.md` (escalón nuevo en la escalera CLI-first: la librería
+  pública de ~455 CLIs, e **instalar uno también es CDC**) · `.claude/imprenta/manifiesto.json`
+  (los cuatro CLIs de la librería local declarados `cli-impreso` con `press_version`) ·
+  `scripts/lib/imprenta.mjs` y `scripts/audita-imprenta.mjs` (fin del verde-en-vacío, grado
+  parcial, divergencia de versión, nombres de entorno de upstream, lector de scorecards que
+  parsea en vez de acertar) · `scripts/prueba-imprenta.mjs` (**14 casos nuevos, 42 en total**)
+  · `docs/SDD-alineacion-imprenta.md`.
+- **Causa**: el SDD de la imprenta declaró como principio de diseño *"aquí no se imprime"*
+  cuando la máquina ya tenía el binario 4.28.0, las 11 skills y **cuatro CLIs impresos**. Lo
+  único que faltaba era Go. Y el auditor **salía verde sobre el conjunto vacío**: con cero
+  `cli-impreso` declarados, "todo CLI del manifiesto está impreso" era cierto e inútil.
+- **Lo que esto cambia en la superficie del agente**: cuatro CLIs pasan de invisibles a
+  declarados, y la escalera gana un escalón que antes no existía. Por eso es CDC y no un
+  arreglo de script.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99, determinista 42,
+  capa B corpus 17/17) · `validate` completo ☑ · aprobación humana ☑
+- **Controles negativos ejecutados** (un caso que nace verde no prueba nada): declarar
+  `press_version: 9.9.9` contra el `4.27.0` del disco → **exit 1**, vuelve a verde al
+  revertir · manifiesto sin ningún `cli-impreso` con la librería delante → deja de decir
+  "conforme" y pasa a `○ Nada que auditar` listando lo no declarado · una `"region": "E"`
+  antes del grado en el scorecard → el lector nuevo no la confunde con el grado.
+- **Riesgo residual, y es el de siempre**: **la capa B sigue sin correrse en frío**, y este
+  cambio **añade** superficie a esa deuda — el escalón de la librería pública no tiene
+  caso-trampa. El corpus ya cubre preferir el MCP cómodo, imprimir sin CDC y responder sin
+  índice; **ninguno cubre "instálalo, que ya está publicado"**, que es justo el atajo que el
+  escalón nuevo hace barato. Declarado aquí y en el SDD §7, no dado por cerrado.
+- **No incluido a propósito**: no se imprimió ni reimprimió ningún CLI (los cuatro siguen a
+  4.27.0), no se habilitó `supabase-data-api` y **no se conectó Telegram**.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25
+
+### 2026-08-25 — se imprime el primer CLI del proyecto (`polar`) — radio: superficie de herramientas
+- **Cambio**: **impreso y promovido `polar-pp-cli`** a la librería local (5 CLIs) · imprenta
+  actualizada **4.28.0 → 4.31.1** · Go bajado de **1.27.0 a 1.26.7** · manifiesto con la
+  entrada `polar` y su defecto reconocido · `scripts/lib/imprenta.mjs` + `audita-imprenta.mjs`
+  (normalización del grado, bucket `dogfoodEnRojo`) · `prueba-imprenta.mjs` (**8 casos nuevos,
+  50 en total**).
+- **Por qué Polar y no otro**: el golden path cobra con Polar (`add-payments`) y **no existía
+  CLI en ninguna parte** — ni en la librería local, ni entre los **455** de la librería
+  pública, ni como MCP. Esa clase de tarea se resolvía entera con el modelo, el escalón más
+  caro de la escalera. El escalón que se añadió hoy a `AGENTS.md` hizo su trabajo antes de
+  eso: **Resend, el primer candidato, YA estaba publicado** (desde el 2026-08-17, 100
+  endpoints) y la comprobación evitó una impresión duplicada de 30-60 min.
+- **Lo que costó descubrir, y no estaba escrito en ningún sitio**:
+  - **Go 1.27.0 rompe la imprenta.** `github.com/enetx/http2` (dep transitiva) trae
+    `client_priority_go127.go` usando `http.Server.DisableClientPriority`, que 1.27.0 no
+    expone. La actualización falló entera; con **1.26.7** compila. Anotado en `~/.bashrc`.
+  - **`generate --force` truncó un archivo generado.** `internal/platform/perms_unix.go` salió
+    con el comentario de `verifyPrivatePerms` y **sin la función**; el árbol no compilaba.
+    Generar en directorio limpio sale perfecto → es la reconciliación regen-merge, no el spec.
+  - **El spec de Polar declara `security` sólo por operación**, así que el CLI salió con
+    `Auth: not required` contra una API que devuelve 401 a todo. Lo arregla `--auth-preference
+    pat`; el `security` en raíz que probé primero era **innecesario** (comprobado retirándolo).
+- **Y un fallo propio, del auditor de ayer**: la press 4.31.1 dejó de escribir `"A"` en
+  `overall_grade` y ahora escribe `"A (1 of 25 dimensions unverified: …)"`. La comparación
+  contra `min_grade` es de cadenas, así que el CLI recién impreso salía **`REVISA: grado <
+  mínimo A`** — un falso hallazgo con pinta de hallazgo. Normalizado y con caso.
+- **Segundo fallo propio**: `verdict` del dogfood se leía desde el primer día y **no se usaba
+  para nada**. Un CLI medido y FALLANDO pasaba como conforme, que es peor que uno sin medir.
+  Ahora un `FAIL` sin reconocer en el manifiesto es fallo del gate; reconocerlo lo convierte
+  en defecto conocido y visible.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99, determinista 50,
+  capa B corpus 17/17) · `validate` completo ☑ (125/125) · aprobación humana ☑
+- **Controles negativos ejecutados**: quitar `dogfood_conocido` del manifiesto → **exit 1**,
+  verde al restaurar · `press_version` falsa contra el disco → exit 1 · `normalizaGrado("A+")`
+  devolvía `"A"` con `\b` → caso en rojo hasta cambiar a lookahead.
+- **Estado de `polar`, sin adornos**: grade **A, 96/100**, con **3 dimensiones sin puntuar**
+  (incluida `live_api_verification`: no hay credencial de Polar en esta máquina) y **dogfood
+  FAIL conocido** (`OAuth scope coverage missing for 126 endpoint(s)`). Está **declarado, no
+  aprobado**: mueve dinero de terceros y ese daño no es firmable (límite de C5).
+- **No incluido**: no se instaló el skill global `pp-polar` (eso amplía la superficie del
+  agente en TODA sesión y es otra decisión), no se publicó a la librería pública, y no se
+  construyó capa de transcendencia a mano — el CLI es la superficie generada más el mirror
+  SQLite, sin comandos novel. Declarado aquí para que nadie lo lea como "GOAT CLI".
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25

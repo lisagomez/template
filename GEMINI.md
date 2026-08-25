@@ -225,9 +225,12 @@ execute_sql, apply_migration, list_tables, get_advisors
   no lo es. Aviso al 80 %; **cortar al 100 % lo decide la app**, no el modulo — negarle el
   servicio a un usuario para proteger tu factura es una decision con victima (C4)
 - **CLI-first (orden de resolucion)**: para toda tarea contra una API o servicio externo:
-  **1)** ¿hay ya un CLI? (`.claude/imprenta/manifiesto.json`) — usalo; **2)** ¿conviene
-  imprimir uno? Solo si esa clase de tarea ya se repitio 3+ veces **y** el CLI existe de
-  verdad; **3)** resuelve con el modelo, por `routing-modelos.json`. "¿Que modelo uso?" es
+  **1)** ¿hay ya un CLI? (`.claude/imprenta/manifiesto.json`) — usalo; **2)** ¿existe ya
+  **publicado**? La libreria publica lleva ~455 CLIs
+  (`npx skills add mvanhorn/printing-press-library/cli-skills/pp-<slug> -g`): instalar es mas
+  barato que imprimir, y **tambien es CDC**; **3)** ¿conviene imprimir uno? Solo si esa clase
+  de tarea ya se repitio 3+ veces **y** el CLI existe de
+  verdad; **4)** resuelve con el modelo, por `routing-modelos.json`. "¿Que modelo uso?" es
   la ULTIMA pregunta. Un MCP se paga en **cada sesion, se use o no**; un CLI solo al
   invocarlo. **Imprimir un CLI es un CDC (C1)**, no una decision autonoma por presupuesto
 - **CLIs, cuatro reglas**: dry-run por defecto · lo que mueve dinero se marca destructivo

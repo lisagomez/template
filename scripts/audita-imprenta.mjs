@@ -25,7 +25,7 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { localizaLibreria, escaneaLibreria, heredaGrados, clasifica } from './lib/imprenta.mjs';
+import { localizaLibreria, escaneaLibreria, heredaGrados, clasifica, sinDeclarar } from './lib/imprenta.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ruta = (p) => join(raiz, p);
@@ -100,8 +100,13 @@ if (servicios.length === 0) {
 
 // La clasificacion vive en `lib/imprenta.mjs` y la prueba `prueba-imprenta.mjs`: cada regla
 // de ahi viene de un fallo con fecha del proyecto de origen.
-const { faltantes, desactualizados, sinGrado, sinAsignar, malformados } =
-  clasifica(servicios, impresos, minGrade);
+const {
+  faltantes, desactualizados, sinGrado, sinAsignar, malformados, parciales, divergentes,
+  dogfoodEnRojo,
+} = clasifica(servicios, impresos, minGrade);
+const dogfoodEscondido = dogfoodEnRojo.filter((d) => !d.reconocido);
+const auditados = servicios.filter((s) => s && s.estado === 'cli-impreso' && !s.deprecated).length;
+const noDeclarados = fuenteImpresos === 'libreria' ? sinDeclarar(servicios, impresos) : [];
 
 // --- Salida ----------------------------------------------------------------
 console.log(`Auditoria de la imprenta — ${servicios.length} servicios en el manifiesto`);
@@ -127,8 +132,23 @@ for (const f of faltantes) {
 }
 for (const d of desactualizados) console.log(rojo(`  REVISA       ${d.servicio} — grado ${d.grade} < minimo ${d.minGrade}`));
 for (const g of sinGrado) console.log(ambar(`  SIN GRADO    ${g.servicio} — medicion: ${g.medicion} (no medido != aprobado)`));
+for (const v of divergentes) {
+  console.log(rojo(`  DIVERGENCIA  ${v.servicio} — manifiesto dice press ${v.declarada}, el disco dice ${v.enDisco}`));
+}
+for (const p of parciales) {
+  console.log(ambar(`  GRADO PARCIAL ${p.servicio} — ${p.grade} con ${p.sinPuntuar.length} dimension(es) sin puntuar: ${p.sinPuntuar.join(', ')}`));
+}
+for (const n of noDeclarados) {
+  console.log(ambar(`  SIN DECLARAR ${n} — impreso en la libreria local, ausente del manifiesto`));
+}
+for (const d of dogfoodEnRojo) {
+  console.log(d.reconocido
+    ? ambar(`  DOGFOOD FAIL ${d.servicio} — defecto CONOCIDO, declarado en el manifiesto`)
+    : rojo(`  DOGFOOD FAIL ${d.servicio} — el disco dice FAIL y el manifiesto no lo reconoce`));
+}
 
-const problemas = faltantes.length + desactualizados.length + sinAsignar.length;
+const problemas = faltantes.length + desactualizados.length + sinAsignar.length
+  + divergentes.length + dogfoodEscondido.length;
 
 // Sin fuente de impresos, un "faltante" no significa "no esta impreso": significa "no se".
 // Reportarlo como fallo del gate seria rojo permanente en todo boilerplate recien clonado —
@@ -150,5 +170,28 @@ if (problemas > 0 || sinGrado.length > 0) {
   console.log(rojo(`\n✗ ${problemas} problema(s)` + (sinGrado.length ? ` · ${sinGrado.length} sin grado medible` : '')));
   process.exit(1);
 }
-console.log(verde('\n✓ Imprenta conforme: todo CLI del manifiesto esta impreso y con grado suficiente.'));
+
+// El verde-en-vacio (2026-08-25). Con la libreria delante y CERO servicios declarados
+// `cli-impreso`, este script decia "todo CLI del manifiesto esta impreso y con grado
+// suficiente" — verdadero sobre el conjunto vacio, y por eso mismo inutil: es la frase que
+// leyo un humano y entendio "la imprenta esta alineada" mientras el disco tenia cuatro CLIs
+// que el manifiesto no conocia. Un control que se aprueba a si mismo cuando no hay nada que
+// comprobar no es un control. No se convierte en rojo (un clon del boilerplate en una
+// maquina que imprime no tiene por que declarar la libreria ajena), pero deja de mentir.
+if (auditados === 0) {
+  console.log(ambar('\n○ Nada que auditar: el manifiesto no declara ningun `cli-impreso`.'));
+  if (noDeclarados.length > 0) {
+    console.log(ambar(`  Y hay ${noDeclarados.length} CLI(s) impresos en ${libreria} sin declarar.`));
+    console.log(gris('  Esto NO es "imprenta conforme": es un contrato que no habla de lo que hay.'));
+  }
+  process.exit(0);
+}
+
+console.log(verde(`\n✓ Imprenta conforme: ${auditados} CLI(s) declarados, impresos y con grado suficiente.`));
+if (parciales.length > 0) {
+  console.log(gris(`  (${parciales.length} con grado PARCIAL: suficiente en lo medido, con dimensiones sin puntuar arriba.)`));
+}
+if (noDeclarados.length > 0) {
+  console.log(gris(`  (${noDeclarados.length} impreso(s) en la libreria local fuera del manifiesto: ver SIN DECLARAR.)`));
+}
 process.exit(0);
