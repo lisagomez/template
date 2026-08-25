@@ -32,9 +32,19 @@
         "GEMINI.md"
       ],
       "medido_2026_08_23": 2784,
+      "medido_2026_08_25": 3401,
       "por_archivo": {
-        "GEMINI.md": 3500
-      }
+        "GEMINI.md": 4000
+      },
+      "_subida_2026_08_25": "3500 -> 4000. Decision consciente, no descuido: el crecimiento son REGLAS (escalera CLI-first + las cuatro de los CLIs), que es exactamente el contenido que este espejo existe para llevar — una sesion de Gemini sin ellas se salta la palanca entera. De los ~11900 chars del archivo, 4372 son Reglas de Codigo: recortar ahi seria desactivar controles para ganar tokens, que es el intercambio equivocado. Y este nivel NO entra en el total siempre-presente: se paga solo en sesiones de ese arnes."
+    },
+    "mcp": {
+      "_comentario": "Los servidores MCP inyectan los esquemas de sus herramientas en CADA sesion, se usen o no. Es el gasto que este presupuesto no veia: vigilaba markdown, y resulta que cinco servidores cuestan casi el DOBLE que todas las instrucciones juntas. La medicion no se hace en el gate (necesita red y `npx`, y `validate` corre sin red): se hace con `node scripts/mide-mcp.mjs`, que deja el artefacto fechado, y aqui solo se lee. Sin artefacto NO es rojo —un repo recien clonado no ha medido— pero se imprime 'desconocido', nunca cero.",
+      "artefacto": ".claude/imprenta/medicion-mcp.json",
+      "medido_2026_08_25": 20363,
+      "presupuesto": 24000,
+      "_sobre_el_presupuesto": "24000 = lo medido (20363, cinco servidores) mas aire para uno mas. NO cubre los cuatro que necesitan credenciales: el total real es mayor y esa parte sigue sin medir. Un tope por debajo de lo medido seria rojo el primer dia; uno muy por encima es teatro.",
+      "_como_bajarlo": "La decision es POR SERVIDOR y segun frecuencia de uso, no global: un MCP que se usa en 1 de cada 20 sesiones cuesta 20 veces mas que el CLI equivalente invocado una vez. Ver docs/SDD-imprenta-de-clis.md §2.3."
     },
     "por_invocacion": {
       "_comentario": "El cuerpo de un SKILL.md solo se carga cuando ese skill se invoca. Por eso el tope es POR SKILL y no la suma: nadie los invoca todos en una sesion.",

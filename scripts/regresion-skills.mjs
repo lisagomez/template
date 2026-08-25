@@ -84,7 +84,19 @@ if (!modoTrampa) {
     }
     const contenido = readFileSync(ruta, 'utf8');
     const aplicables = [...(contratos.todos_los_skills ?? []), ...(contratos.skills?.[skill] ?? [])];
-    for (const { patron, porque } of aplicables) {
+    for (const { patron, prohibido, porque } of aplicables) {
+      // `prohibido` es el contrato al reves: la forma que NO debe volver. Existe porque un
+      // contrato positivo no caza una regresion por ANADIDO — el skill puede seguir
+      // declarando lo correcto y traer de vuelta, al lado, la sintaxis inventada que ya
+      // costo una correccion (playwright, 2026-08-25).
+      if (prohibido !== undefined) {
+        anota(
+          `${skill}: ${porque}`,
+          !new RegExp(prohibido, 'm').test(contenido),
+          `reaparecio /${prohibido}/ en ${skill}/SKILL.md`,
+        );
+        continue;
+      }
       anota(
         `${skill}: ${porque}`,
         new RegExp(patron, 'm').test(contenido),

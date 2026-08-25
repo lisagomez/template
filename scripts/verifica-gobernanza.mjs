@@ -771,6 +771,45 @@ for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`]) 
   );
 }
 
+// --- 6k. La escalera CLI-first y las cuatro reglas, INLINE ------------------
+// La tercera palanca de eficiencia solo existe si esta donde el agente decide. Escrita solo
+// en el SDD seria un documento bonito: la leccion de que "un control escrito solo en el
+// documento NO dispara" ya se pago una vez (C1 y C5, 2026-08-23).
+for (const doc of ['AGENTS.md', 'GEMINI.md']) {
+  const contenido = leeDoc(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: declara la escalera CLI-first y que imprimir es un CDC`,
+    /CLI-first/.test(contenido) && /manifiesto\.json/.test(contenido) && /CDC \(C1\)/.test(contenido),
+    'sin la escalera inline, "¿que modelo uso?" vuelve a ser la primera pregunta en vez de la ultima',
+  );
+  comprueba(
+    `${doc}: declara la regla anti-reimplementacion de los CLIs`,
+    /anti-reimplementacion/i.test(contenido) && /jamas\s+inventa\s+una\s+respuesta/i.test(contenido),
+    'un CLI que inventa la respuesta en vez de llamar a la API es indistinguible de uno que funciona, hasta que decide algo',
+  );
+  comprueba(
+    `${doc}: sin grado no es aprobado`,
+    /sin\s+grado\s+no\s+es\s+aprobado/i.test(contenido),
+    'un CLI impreso sin grado medible contado como bueno es el mismo fallo que el coste `null` sumado como cero',
+  );
+}
+
+// El contrato y el auditor tienen que existir, o la escalera apunta a un archivo fantasma.
+for (const f of ['.claude/imprenta/manifiesto.json', 'scripts/audita-imprenta.mjs']) {
+  comprueba(
+    `existe ${f}`,
+    existsSync(ruta(f)),
+    'la regla CLI-first manda mirar aqui: si no existe, la regla enseña a mirar un hueco',
+  );
+}
+comprueba(
+  'el auditor de la imprenta corre en validate y en predeploy',
+  /"validate":\s*"[^"]*audita:imprenta/.test(lee('package.json') ?? '') &&
+    /"predeploy":\s*"[^"]*audita:imprenta/.test(lee('package.json') ?? ''),
+  'si depende de que alguien lo invoque, es una costumbre y no un gate',
+);
+
 // --- 7. C1 muerde sobre .mcp.json -----------------------------------------
 // C1 declara `.mcp.json` material de CDC, pero `.gitignore` lo excluye (y debe: lleva
 // credenciales vivas). Sin superficie trackeada, "diff revisado" es imposible y el
@@ -818,6 +857,24 @@ if (ejemplo !== null) {
     'example.mcp.json pinea sus servidores MCP (sin alias auto-actualizables)',
     flotantes.length === 0,
     `flotante(s): ${flotantes.join(' | ')} — es el anti-patron de C1, aqui tambien`,
+  );
+}
+
+// El espejo pineado no sirve de nada si el archivo VIVO flota: es el vivo el que carga los
+// esquemas de herramientas en cada sesion. Con `@latest`, esa superficie cambia de tamano y
+// de capacidades sin diff, sin regresion y sin aprobacion — justo lo que C1 existe para
+// impedir. Se comprueba solo si el archivo esta presente: una maquina sin `.mcp.json` no es
+// una maquina en falta, asi que ahi no hay nada que verificar (y decirlo importa: callar y
+// dar verde seria el mismo fallo que "0 faltantes" cuando la respuesta es "no se").
+if (real !== null) {
+  const flotantesVivos = [];
+  for (const linea of real.split('\n')) {
+    if (/@latest|:latest|@next\b|:main\b|@canary/.test(linea)) flotantesVivos.push(linea.trim().slice(0, 60));
+  }
+  comprueba(
+    '.mcp.json vivo pinea sus servidores MCP',
+    flotantesVivos.length === 0,
+    `flotante(s): ${flotantesVivos.join(' | ')} — los esquemas que se pagan en CADA sesion pueden cambiar sin gate. Copia las versiones de example.mcp.json`,
   );
 }
 

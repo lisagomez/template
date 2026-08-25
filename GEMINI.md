@@ -156,12 +156,19 @@ src/
 Conectado via `/_next/mcp`. Ve errores build/runtime en tiempo real.
 
 ### Playwright (CLI preferido)
+Lo que lleva estado va bajo `playwright cli`, con **sesión con nombre** entre invocaciones
+(verificado el 2026-08-25). El target admite ref del snapshot o selector:
 ```bash
-npx playwright navigate http://localhost:3000
-npx playwright screenshot http://localhost:3000 --output screenshot.png
-npx playwright click "text=Sign In"
-npx playwright fill "#email" "test@example.com"
+npx playwright screenshot http://localhost:3000 captura.png   # archivo POSICIONAL
+npx playwright cli -s=qa open --browser chromium
+npx playwright cli -s=qa goto http://localhost:3000
+npx playwright cli -s=qa snapshot          # devuelve refs: [ref=e3], [ref=e4]...
+npx playwright cli -s=qa fill "#email" "test@example.com"
+npx playwright cli -s=qa click "text=Sign In"
+npx playwright cli -s=qa close
 ```
+Sin `open` previo todo falla; sin `--browser chromium` busca Chrome de marca y no lo encuentra.
+Texto pelado (`"Sign In"`, sin `text=`) no casa con nada.
 
 ### Supabase MCP
 ```
@@ -217,6 +224,16 @@ execute_sql, apply_migration, list_tables, get_advisors
   `null`**, nunca como cero: sumar huecos como ceros da una factura que parece completa y
   no lo es. Aviso al 80 %; **cortar al 100 % lo decide la app**, no el modulo — negarle el
   servicio a un usuario para proteger tu factura es una decision con victima (C4)
+- **CLI-first (orden de resolucion)**: para toda tarea contra una API o servicio externo:
+  **1)** ¿hay ya un CLI? (`.claude/imprenta/manifiesto.json`) — usalo; **2)** ¿conviene
+  imprimir uno? Solo si esa clase de tarea ya se repitio 3+ veces **y** el CLI existe de
+  verdad; **3)** resuelve con el modelo, por `routing-modelos.json`. "¿Que modelo uso?" es
+  la ULTIMA pregunta. Un MCP se paga en **cada sesion, se use o no**; un CLI solo al
+  invocarlo. **Imprimir un CLI es un CDC (C1)**, no una decision autonoma por presupuesto
+- **CLIs, cuatro reglas**: dry-run por defecto · lo que mueve dinero se marca destructivo
+  (un `readOnly` falso ahi es un bug, y el dano a terceros **no es firmable**) ·
+  **anti-reimplementacion**: un CLI llama a la API real, **jamas inventa una respuesta** ·
+  grade A antes de produccion, y **sin grado no es aprobado**: es no medido
 - **Idioma**: responde SIEMPRE en espanol
 
 ---

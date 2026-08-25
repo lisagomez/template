@@ -1479,3 +1479,97 @@ diff, sin regresión y sin aprobación.
 - **Gate**: verificador 115/115, `validate` entero en verde. Sin control negativo: no hay
   codigo nuevo que falsificar.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — sesion del 2026-08-24 ("si").
+
+### 2026-08-25 — la imprenta de CLIs: tercera palanca de eficiencia — radio: sistema
+- **Cambio**: alta de `.claude/imprenta/` (manifiesto servicio→CLI + artefacto de
+  medición), `scripts/mide-mcp.mjs`, `scripts/audita-imprenta.mjs`, skill nº 23
+  `cli-audit`, nivel `mcp` en el presupuesto de contexto, `docs/SDD-imprenta-de-clis.md`,
+  y **reglas inline** en `AGENTS.md` y `GEMINI.md` (escalera CLI-first + las cuatro reglas
+  de los CLIs). Soporte de contratos `prohibido` en la regresión. Corrección de la sintaxis
+  de Playwright en instrucciones y skill. Pineo del `.mcp.json` vivo.
+- **Motivo**: el coste de los servidores MCP no lo veía **ningún gate** — `mide-contexto`
+  vigilaba markdown, y los MCP resultaron costar casi el doble que todas las instrucciones
+  juntas. Además, el `~100x` heredado del material de origen se estaba a punto de repetir
+  como hecho.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo ☑
+- **Regresión**: `npm run validate` en verde. Verificador **115 → 125** comprobaciones,
+  contratos **92 → 99**. Controles negativos ejecutados, todos rojos al romper y verdes al
+  revertir:
+  - reintroducir `npx playwright navigate` → contrato `prohibido` en rojo
+  - `@latest` en el `.mcp.json` vivo → rojo; archivo ausente → verde sin ruido
+  - borrar la regla anti-reimplementación de `AGENTS.md` → rojo
+  - índice de la imprenta ilegible → **exit 2**, no exit 0 (no se trata como vacío)
+  - índice con grado `null` → exit 1 (no medido ≠ aprobado); grado C < mínimo A → exit 1
+  - artefacto de medición ausente → imprime "desconocido", **nunca 0**
+- **Medido, no afirmado**: 5 servidores MCP = **20 363 tokens/sesión** (4 sin medir por
+  falta de credenciales; el total real es mayor y se declara así). El `~100x` del origen
+  queda **refutado**: el rango real medido va de 2.8x a 55.8x según patrón de uso.
+- **Desviación del plan, consciente**: el plan pedía exit 2 para `fuente_impresos: ninguna`.
+  Se dejó en exit 0 con declaración explícita, porque el auditor entra en `validate` y un
+  exit 2 permanente dejaría el gate en rojo en todo boilerplate recién clonado — ruido que
+  se aprende a ignorar. El exit 2 queda para lo genuinamente no verificable.
+- **Presupuesto**: `CLAUDE.md` 88% → 98% con las reglas nuevas; se recortó el árbol de
+  directorios (duplicaba `ls .claude/`) y quedó en **90%**. Tope de `GEMINI.md` subido
+  3500 → 4000, justificado en el JSON: su crecimiento son reglas, y es nivel espejo.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — plan aprobado en sesión del 2026-08-25
+
+### 2026-08-25 — auditor de imprenta: deteccion de libreria local — radio: menor
+- **Cambio**: `scripts/audita-imprenta.mjs` detecta la libreria real
+  (`CLI_PRESS_LIBRARY` o `~/printing-press/library`) como tercera fuente, con herencia de
+  grados desde el indice. Manifiesto: `estado: cli` se separa en **`cli-oficial`**
+  (existe upstream, nada que imprimir) y **`cli-impreso`** (se audita).
+- **Motivo**: se pidio verificar `cli-library-index.json` del material de origen. Al
+  hacerlo aparecio que **esta maquina SI tiene libreria** (4 CLIs en
+  `~/printing-press/library`), fuente que el auditor no sabia leer.
+- **Decision: el indice ajeno NO se instala.** Probado: instalarlo pone
+  `fuente_impresos: indice`, el auditor pasa a **afirmar** que sabe lo que hay impreso, y
+  reporta `FALTA` sobre `playwright` y `gog` — que existen. Gate en rojo permanente sobre
+  premisa falsa. Doctrina de `INCIDENTES.md`: un registro de otro proyecto confunde.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo ☑
+- **Regresión**: `npm run validate` en verde (125 comprobaciones, 99 contratos). Conductas
+  portadas verificadas **contra la librería real**, no en teoría:
+  - `hcloud` sin scorecard + dogfood FAIL → `sin_grado`, exit 1 (no medido ≠ aprobado)
+  - `telegram` casa con el directorio `telegram-bot` (tolerancia de sufijo)
+  - `telegram` hereda grade A del índice; **`hcloud` NO hereda** de una entrada con grade
+    `null` — el bug del `or` encadenado del origen no se reprodujo
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25
+
+### 2026-08-25 — corrección: el SDD de la imprenta declaraba como pendiente lo ya construido
+- **Cambio**: `docs/SDD-imprenta-de-clis.md` §cabecera y §8. Decían "Falta: manifiesto,
+  auditor y skill reportador" y "diseñados pero no construidos" — los tres existen, están en
+  `validate` y tienen controles negativos ejecutados.
+- **Causa**: el SDD se escribió ANTES de construir el resto y no se releyó al terminar. Es
+  la misma clase de fallo que este SDD documenta en §2.4 (una afirmación que nadie
+  reejecutó), cometida en el documento que la explica.
+- **Y lo que la relectura destapó**: la **capa B no se ha ejecutado** para este cambio y
+  **no hay caso-trampa de las reglas CLI nuevas**. `regresion -- --trampa` sale verde porque
+  solo verifica que el corpus esté completo (13 casos, ninguno sobre CLI-first); la
+  ejecución real exige sesiones frías, que quien escribió el cambio no puede correr sin
+  contaminarlas. Queda **declarado en §8**, no escondido.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A) · **capa B PENDIENTE** ☐
+  · aprobación humana ☑
+- **Riesgo residual**: que la escalera CLI-first no dispare. Precedente directo: la primera
+  corrida de capa B mostró que C7 y C4 disparaban y **C1 y C5 no**, estando todos igual de
+  bien escritos. Hasta correr capa B en frío, "el agente prefiere el CLI" es expectativa.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25
+
+### 2026-08-25 — el corpus crece: tres casos-trampa y 28 deterministas — radio: skill
+- **Cambio**: núcleo del auditor extraído a `scripts/lib/imprenta.mjs` (importable y
+  probado), `scripts/prueba-imprenta.mjs` con **28 casos** en `validate`/`predeploy`, y
+  **tres casos-trampa nuevos** en la rama `golden-sets` (commit `df120f6`).
+- **Motivo**: cerrar el hueco que destapó la relectura del SDD — las reglas nuevas no
+  tenían nada que las midiera, y los ocho fallos del origen estaban implementados pero
+  probados solo a mano.
+- **La separación, que es la decisión de diseño**: los ocho fallos del origen son de
+  **código** → prueba determinista, cada build. Las reglas CLI son de **conducta del
+  agente** → capa B, sesión fría, cada CDC. Mezclarlos habría hecho la capa B más lenta y
+  la prueba menos frecuente.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99, determinista 28,
+  capa B corpus 17/17) · **capa B en frío PENDIENTE** ☐ · aprobación humana ☑
+- **Controles negativos de la prueba nueva** (un caso que nace verde no prueba nada):
+  quitar el filtro de subdominios genéricos → rojo · restaurar el `or` encadenado de la
+  herencia → rojo · silenciar el bucket `sin_grado` → rojo · hacer que una entrada
+  malformada mate el job → rojo. Los cuatro vuelven a verde al revertir.
+- **Riesgo residual**: sin ejecutar esos casos en frío, que la escalera CLI-first dispare
+  sigue siendo expectativa. Declarado en el SDD §8, no dado por hecho.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25

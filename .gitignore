@@ -84,3 +84,6 @@ tools/*/*.tgz
 
 # Estado del vigilante de versiones (runtime, se regenera)
 .versiones-estado.json
+
+# Artefactos de `npx playwright cli` (snapshots, logs de consola): se regeneran por corrida
+.playwright-cli/

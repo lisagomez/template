@@ -7,7 +7,7 @@ Template production-ready para crear aplicaciones SaaS con desarrollo asistido p
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS + shadcn/ui
-- 22 Skills de Claude Code (V4 Skills 2.0)
+- 23 Skills de Claude Code (V4 Skills 2.0)
 - Playwright CLI para QA automatizado
 - AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -83,7 +83,7 @@ src/
     └── types/
 ```
 
-## Skills (22 total)
+## Skills (23 total)
 
 Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
@@ -109,6 +109,7 @@ Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 | `/skill-creator` | Crear nuevos skills |
 | `/knowledge-search` | Buscar en el knowledge base compilado de conversaciones |
 | `/google-workspace` | Gmail + Calendar via gog CLI |
+| `/cli-audit` | Estado de la imprenta de CLIs y coste en contexto de los MCP |
 | `/update-sf` | Actualizar a ultima version |
 | `/eject-sf` | Remover SaaS Factory (destructivo) |
 
@@ -170,8 +171,7 @@ copia.
 El verificador lee los archivos de instrucciones **expandiendo los imports**, igual que el
 arnes: si alguien rompe el import, 13 comprobaciones se ponen en rojo (probado).
 
-**Y desde el 2026-08-24 esto esta medido, no afirmado**: opencode instalado aqui, los **22
-skills** de `.claude/skills/` cargados, y `npm run validate` corrido **entero y en verde
+**Y desde el 2026-08-24 esto esta medido, no afirmado**: opencode instalado aqui, **todos los skills** de `.claude/skills/` cargados, y `npm run validate` corrido **entero y en verde
 dentro de una PTY del propio opencode**. El orden de resolucion (`AGENTS.md` → `CLAUDE.md` →
 `CONTEXT.md`, para en el primero) se verifico contra el binario que se ejecuta, no contra la
 doc. Informe completo: **[docs/PORTABILIDAD-ARNESES.md](docs/PORTABILIDAD-ARNESES.md)**.
@@ -223,7 +223,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 
 ```bash
 npm run verify:gobernanza   # falla si la capa quedo suelta (107 comprobaciones)
-npm run regresion           # C2 capa A: contratos de los 22 skills
+npm run regresion           # C2 capa A: contratos de los 23 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
 
@@ -340,11 +340,28 @@ entorno. Lo que lo hace distinto de un "comprueba actualizaciones":
 El tag de la imagen del agente va **pineado**, igual que el modelo: cambiarlo es un CDC
 (C1) con diff, regresion y aprobacion.
 
+### La tercera palanca: lo que cuestan los MCP
+
+**[docs/SDD-imprenta-de-clis.md](docs/SDD-imprenta-de-clis.md)** — hermana del routing y del
+cache de prefijo, y la unica que atacaba un coste que **ningun gate veia**: un servidor MCP
+inyecta los esquemas de sus herramientas en **cada sesion, se usen o no**.
+
+Medido el 2026-08-25 (`node scripts/mide-mcp.mjs`): cinco servidores cuestan **20 363
+tokens** por sesion — casi el **doble** que todas las instrucciones de la fabrica juntas
+(11 083). Otros cuatro no se pudieron medir sin credenciales, asi que el total real es mayor
+y se declara como tal.
+
+El material de origen afirmaba "~100x menos tokens" con un CLI. **Refutado**: el rango
+medido va de **2.8x** (releer el catalogo entero cada sesion) a **55.8x** (consultar un
+subcomando). La aportacion propia es otra: el coste del MCP es **incondicional** y el del
+CLI **condicional** — quien use una herramienta en 1 de cada 20 sesiones ahorra ~49x, y mas
+cuanto menos la use.
+
 ## Estructura .claude/
 
 ```
 .claude/
-├── skills/              # 22 Skills (V4 Skills 2.0)
+├── skills/              # 23 Skills (V4 Skills 2.0)
 ├── gobernanza/          # Capa de gobernanza (7 controles, plantillas y registros)
 ├── PRPs/                # Product Requirements Proposals
 │   │   └── references/  # AI Templates (11 bloques)

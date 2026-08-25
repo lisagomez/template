@@ -111,7 +111,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 22 Herramientas Especializadas
+## Skills: 23 Herramientas Especializadas
 
 | # | Skill | Cuando usarlo |
 |---|-------|---------------|
@@ -137,6 +137,7 @@ Usuario dice algo
 | 20 | `video-visuals` | Paquete visual narrativo estilo sketchnote para videos y presentaciones |
 | 21 | `knowledge-search` | Buscar en el knowledge base compilado de conversaciones pasadas |
 | 22 | `google-workspace` | Gmail + Calendar de las cuentas del usuario via `gog` CLI |
+| 23 | `cli-audit` | Estado de la imprenta de CLIs y coste en contexto de los MCP |
 
 ---
 
@@ -254,14 +255,18 @@ Conectado via `/_next/mcp`. Ve errores build/runtime en tiempo real.
 
 ### Playwright (Tus Ojos)
 
-**CLI** (preferido, menos tokens):
+**CLI** (preferido, menos tokens). Lo que lleva estado va bajo `playwright cli`, con sesión
+con nombre entre invocaciones — verificado el 2026-08-25:
 ```bash
-npx playwright navigate http://localhost:3000
-npx playwright screenshot http://localhost:3000 --output screenshot.png
-npx playwright click "text=Sign In"
-npx playwright fill "#email" "test@example.com"
-npx playwright snapshot http://localhost:3000
+npx playwright screenshot http://localhost:3000 captura.png   # un tiro, archivo POSICIONAL
+npx playwright cli -s=qa open --browser chromium              # sin esto, todo lo demas falla
+npx playwright cli -s=qa goto http://localhost:3000
+npx playwright cli -s=qa snapshot                             # -> refs [ref=e3]
+npx playwright cli -s=qa fill "#email" "x@y.com"; npx playwright cli -s=qa click "text=Entrar"
+npx playwright cli -s=qa close
 ```
+El detalle (targets, autenticación, límites) vive en el skill `playwright-cli`, que solo se
+paga al invocarlo. **`navigate` no existe: es `goto`; `--output` tampoco.**
 
 **MCP** (cuando necesitas explorar UI desconocida):
 ```
@@ -336,6 +341,19 @@ execute_sql, apply_migration, list_tables, get_advisors
   `null`**, nunca como cero: sumar huecos como ceros da una factura que parece completa y
   no lo es. Aviso al 80 %; **cortar al 100 % lo decide la app**, no el modulo — negarle el
   servicio a un usuario para proteger tu factura es una decision con victima (C4)
+- **CLI-first (orden de resolucion)**: para toda tarea contra una API o servicio externo,
+  antes de razonarla: **1)** ¿hay ya un CLI? (`.claude/imprenta/manifiesto.json`) — usalo;
+  **2)** ¿conviene imprimir uno? Solo si esa clase de tarea ya se repitio 3+ veces **y** el
+  CLI existe de verdad; **3)** resuelve con el modelo, por `routing-modelos.json`. La
+  pregunta "¿que modelo uso?" es la ULTIMA, no la primera. Un MCP se paga en **cada sesion,
+  se use o no**; un CLI solo al invocarlo (medido: `docs/SDD-imprenta-de-clis.md`).
+  **Imprimir un CLI cambia la superficie de herramientas del agente: es un CDC (C1)**, no
+  una decision autonoma por presupuesto
+- **CLIs, cuatro reglas**: dry-run por defecto · lo que mueve dinero se marca destructivo y
+  su `readOnly` falso es un bug, no un detalle (dano a terceros: **no firmable**, limite de
+  C5) · **anti-reimplementacion**: un CLI llama a la API real o lee del store local, **jamas
+  inventa una respuesta** · grade A antes de produccion, y **sin grado no es aprobado**: es
+  no medido
 - **Idioma**: responde SIEMPRE en espanol, aunque el codigo o los logs esten en ingles
 
 ---
@@ -363,54 +381,10 @@ npm run deploy:down  # parar el stack
 
 ## Estructura de la Fabrica
 
-```
-.claude/
-├── gobernanza/                # Capa de gobernanza agentica (7 controles, C1-C7)
-│   ├── GOBERNANZA.md         # Documento nucleo: los 7 controles y los principios
-│   ├── REGISTRO-RIESGO.md    # Decisiones de riesgo firmadas (append-only)
-│   ├── BITACORA-CDC.md       # Cambios de comportamiento + modelo pineado (append-only)
-│   ├── INCIDENTES.md         # Incidentes y su cierre (append-only)
-│   ├── plantillas/           # AISIA, modelo de amenazas, procedimiento de incidente
-│   └── golden-sets/          # C2: contratos (el corpus vive en la rama golden-sets)
-│
-├── memory/                    # Memoria persistente del proyecto (git-versioned)
-│   ├── MEMORY.md             # Indice (max 200 lineas, se carga al inicio)
-│   ├── user/                 # Sobre el usuario/equipo
-│   ├── feedback/             # Correcciones y preferencias
-│   ├── project/              # Decisiones y estado de iniciativas
-│   └── reference/            # Patrones, soluciones, donde encontrar cosas
-│
-├── skills/                    # 22 skills especializados
-│   ├── new-app/              # Entrevista de negocio
-│   ├── add-login/            # Auth completo
-│   ├── website-3d/           # Landing pages cinematicas
-│   ├── prp/                  # Generar PRPs
-│   ├── bucle-agentico/       # Bucle Agentico BLUEPRINT
-│   ├── ai/                   # AI Templates hub
-│   ├── supabase/             # BD completa: estructura + datos + metricas
-│   ├── playwright-cli/       # Testing automatizado
-│   ├── primer/               # Context initialization
-│   ├── update-sf/            # Actualizar SF
-│   ├── eject-sf/             # Remover SF
-│   ├── memory-manager/       # Memoria persistente por proyecto
-│   ├── image-generation/     # Generacion de imagenes (OpenRouter + Gemini)
-│   ├── autoresearch/         # Auto-optimizacion de skills
-│   ├── goal-compiler/        # Intencion vaga -> prompt soberano para /goal
-│   ├── video-visuals/        # Paquetes visuales sketchnote
-│   ├── knowledge-search/     # Busqueda en el knowledge base de conversaciones
-│   ├── google-workspace/     # Gmail + Calendar via gog CLI
-│   └── skill-creator/        # Crear nuevos skills
-│
-├── PRPs/                      # Product Requirements Proposals
-│   └── prp-base.md           # Template base
-│
-└── design-systems/            # 5 sistemas de diseno
-    ├── neobrutalism/
-    ├── liquid-glass/
-    ├── gradient-mesh/
-    ├── bento-grid/
-    └── neumorphism/
-```
+`.claude/` lleva `gobernanza/` (los 7 controles C1-C7, con sus registros append-only y
+plantillas), `imprenta/` (contrato CLI + medicion MCP), `memory/`, `skills/`, `PRPs/` y
+`design-systems/`. El arbol completo lo da `ls .claude/`, que nunca se desincroniza; el
+enrutado esta arriba, en el decision tree y en la tabla de skills.
 
 ---
 
@@ -508,6 +482,21 @@ npm run deploy:down  # parar el stack
   antes de `deploy`. No repite el build: docker ya lo hace.
 - **Aplicar en**: todo gate. Si depende de que alguien se acuerde de correrlo, es una
   costumbre, no una garantia.
+
+### 2026-08-25: el CLI que preferiamos nunca se habia ejecutado
+- **Error**: las instrucciones decian "CLI (preferido)" y el skill `playwright-cli` montaba
+  un flujo QA de 6 fases sobre `npx playwright navigate | click | fill | snapshot`. **Ninguno
+  existe en ese nivel**: los verbos con estado viven bajo `playwright cli`, `navigate` es
+  `goto`, y `--output` no existe. Playwright ni figuraba en `package.json`.
+- **Causa**: esos nombres coinciden **exactamente** con los del MCP (`playwright_navigate`...).
+  Se dedujo el CLI del MCP en vez de consultarlo, y nadie lo corrio nunca.
+- **Sintoma**: ninguno, y ese es el punto. Un bloque de instrucciones falso no rompe build,
+  typecheck ni regresion: **falla el dia que un agente lo obedece.**
+- **Fix**: sintaxis verificada contra `--help` y probada de punta a punta; dos contratos
+  `prohibido` en el corpus que cazan la forma inventada si vuelve.
+- **Aplicar en**: **todo comando que estas instrucciones prometan.** Documentado y nunca
+  ejecutado es una afirmacion, no una capacidad — y preferir un CLI que no existe cuesta
+  mas tokens que el MCP que reemplaza.
 
 ---
 
