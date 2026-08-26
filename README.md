@@ -357,6 +357,21 @@ subcomando). La aportacion propia es otra: el coste del MCP es **incondicional**
 CLI **condicional** — quien use una herramienta en 1 de cada 20 sesiones ahorra ~49x, y mas
 cuanto menos la use.
 
+### Instalar de la libreria publica es adoptar un CLI no medido
+
+El escalon 2 de la escalera dice que instalar es mas barato que imprimir, y es cierto. Lo
+que no se veia: **esa libreria no publica grados.** Verificado el 2026-08-26 sobre su
+registro — 465 entradas, y sus campos son `name, category, api, description, search_terms,
+path, release, printer, printer_name, creator, mcp, contributors`. Ni grade, ni scorecard,
+ni dogfood; el directorio del skill upstream trae solo `SKILL.md`.
+
+Chocaba con la cuarta regla de los CLIs —*sin grado no es aprobado*— y en una colision
+silenciosa gana el atajo: el escalon 2 era la unica via por la que un CLI entraba sin medir
+**y sin que nada lo dijera**. Desde el 2026-08-26 la regla lo nombra, y el verificador la
+vigila en los dos archivos de instrucciones: instalar de ahi es adoptar un CLI **no
+medido**, y el CDC lo puntua en local (`/printing-press-import` + `/printing-press-score`)
+o lo declara no medido y fuera de produccion.
+
 ## Estructura .claude/
 
 ```

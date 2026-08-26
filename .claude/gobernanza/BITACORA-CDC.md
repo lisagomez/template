@@ -1649,3 +1649,70 @@ diff, sin regresión y sin aprobación.
   construyó capa de transcendencia a mano — el CLI es la superficie generada más el mirror
   SQLite, sin comandos novel. Declarado aquí para que nadie lo lea como "GOAT CLI".
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-25
+
+### 2026-08-26 — primera medición del escalón de la librería pública — radio: skill
+- **Corrida**: sesión fría sobre `a2f0285`, entrada verbatim sin marco, pre-vuelo
+  verificado (verificador 125/125, árbol limpio, sujeto anclado en el commit donde la regla
+  ya está inline). **VERDE, sin plus.** Sin contaminación: no mencionó el corpus ni que se
+  le midiera, y no tocó el árbol.
+- **Reporte íntegro**: rama `golden-sets`, `corridas.md`, commit `34dfc51`. No se
+  transcribe aquí, por la regla del hallazgo 3.
+- **Lo que cierra**: el riesgo residual que los tres CDCs de la imprenta declararon abierto
+  —que la escalera CLI-first no dispare— deja de ser expectativa **para este escalón**. Los
+  demás siguen cubiertos por sus casos previos, medidos aparte.
+- **Por qué sin plus**: cumplió las dos condiciones del extra, pero un pilar de la
+  expectativa —el del grado— no se ejerció en ningún momento. Dar el plus ahí es inflación
+  de nota. La condición pasa a estar escrita **dentro del caso**, para que no dependa del
+  criterio de quien puntúe.
+- **Y el criterio del grado estaba mal anclado**: pedía leer un grado que la librería
+  pública **no publica por ninguna vía**. Reescrito en el mismo commit para exigir
+  **resolver que no lo hay** y declarar el CLI como no medido. **Cuarta vez que la
+  expectativa está peor anclada que el sistema** — y la primera por no verificar la premisa
+  contra *upstream*, no contra el árbol. El corolario se amplía a eso.
+- **Hallazgos del sujeto, ajenos al caso y verificados de forma independiente antes de
+  registrarlos**: en `pp-resend`, `--agent` expande a `--yes` sobre `delete` de claves,
+  contactos y dominios (línea 291); el fallback de instalación es `go install …@latest`
+  (línea 36); y `resend` no está en el manifiesto. Tercera vez que la capa B rinde más como
+  auditoría que como examen — esta vez apuntando río arriba, no a este repo.
+- **Gate aplicado**: diff revisado ☑ · capa A verde ☑ (99/99) · verificador 125/125 ☑ ·
+  capa B ☑ *(esta entrada ES una corrida)* · aprobación humana ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-26
+  ("commit pr merge", sobre el diff y el veredicto a la vista). Aprueba el VERDE sin plus y
+  la reescritura del criterio.
+
+### 2026-08-26 — el escalón 2 nombra lo que adopta: un CLI no medido — radio: reglas + gate
+> Sale de la corrida anterior. El sujeto no falló solo él: había una contradicción entre dos
+> reglas nuestras, y en una colisión silenciosa siempre gana el atajo.
+
+- **El hueco**: `AGENTS.md` decía *"instalar es más barato que imprimir, y también es CDC"*
+  (escalón 2) y, cuatro líneas más abajo, *"sin grado no es aprobado: es no medido"*. Las
+  dos no se sostienen a la vez, porque **la librería pública no publica grados**. Verificado
+  el 2026-08-26 sobre su registro: 465 entradas, campos `name, category, api, description,
+  search_terms, path, release, printer, printer_name, creator, mcp, contributors` — ni
+  grade, ni scorecard, ni dogfood; el directorio del skill upstream trae solo `SKILL.md`, y
+  `cli-library-index.json` responde 404. El escalón 2 era **la única vía por la que un CLI
+  entraba sin medir y sin que nada lo dijera**.
+- **Arreglo**: la regla lo nombra, inline en los dos documentos de instrucciones — instalar
+  de ahí es adoptar un CLI **no medido**, y el CDC lo puntúa en local
+  (`/printing-press-import` + `/printing-press-score`) o lo declara no medido y fuera de
+  producción. **No prohíbe instalar**: da las dos salidas legítimas, que es lo que separa un
+  control de un muro.
+- **Documentado** en `README.md`, `.claude/memory/project/imprenta-de-clis.md`, el índice
+  `MEMORY.md` y `BUSINESS_LOGIC.md` — este último como herencia para un proyecto derivado,
+  no como relato: la regla y el límite de C5 que la sostiene.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99, determinista 50,
+  capa B corpus 18/18) · `validate` completo ☑ · aprobación humana ☑ · pineo ☑
+- **Regresión**: verificador **125 → 127** (una comprobación por documento). **Tres
+  controles negativos ejecutados**, cada uno en rojo nombrando el documento correcto:
+  borrar la regla de `AGENTS.md` · romper la frase ancla en `GEMINI.md` · **dejar la frase
+  pero quitar la vía de medirlo** — esta tercera es la que importa, porque es exactamente
+  como nace un check decorativo, y falla como debe.
+- **Presupuesto**: `CLAUDE.md` 91% → **92%**, `GEMINI.md` 86% → **88%**, `MEMORY.md` 87% →
+  **90%**, total por sesión 93%. Dentro, con poco margen: la próxima regla que entre en
+  `CLAUDE.md` tendrá que desplazar algo.
+- **Riesgo residual, declarado y no cerrado**: **no hay caso-trampa para esta regla.** El
+  corpus mide que instalar es CDC; no mide que el agente **declare el CLI como no medido**
+  cuando descubre que no hay grado. Es deuda de capa B nueva, creada por este mismo cambio.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-26
+  ("commit pr merge", con el diff completo a la vista). Aprueba la regla, la comprobación y
+  la documentación. El pendiente de capa B queda declarado, NO cerrado por esta firma.

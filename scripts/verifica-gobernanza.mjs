@@ -793,6 +793,15 @@ for (const doc of ['AGENTS.md', 'GEMINI.md']) {
     /sin\s+grado\s+no\s+es\s+aprobado/i.test(contenido),
     'un CLI impreso sin grado medible contado como bueno es el mismo fallo que el coste `null` sumado como cero',
   );
+  // El escalon 2 es el unico que adopta un CLI que no medimos nosotros: la libreria publica
+  // NO publica grados (verificado el 2026-08-26 sobre su registro: 465 entradas, ningun
+  // campo de grado). Sin esta frase, "sin grado no es aprobado" y "instala, que ya esta
+  // publicado" se contradicen en silencio, y gana el atajo.
+  comprueba(
+    `${doc}: instalar de la libreria publica es adoptar un CLI no medido`,
+    /no\s+hay\s+grados/i.test(contenido) && /printing-press-score/.test(contenido),
+    'la libreria publica no publica grados: sin decirlo, el escalon 2 es una via para saltarse la regla del grado sin notarlo',
+  );
 }
 
 // El contrato y el auditor tienen que existir, o la escalera apunta a un archivo fantasma.

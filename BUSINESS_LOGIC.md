@@ -87,6 +87,17 @@ que un proyecto derivado tiene que saber, porque las rompe sin querer:
   rama. **`npm run verify:gobernanza` falla si encuentra uno** — no depende del criterio de
   quien escriba.
 
+### Lo que este proyecto hereda de la imprenta de CLIs
+
+- **Un CLI instalado de la librería pública entra SIN grado.** Esa librería no publica
+  ninguno (verificado el 2026-08-26). Instalar es más barato que imprimir, pero es adoptar
+  algo **no medido**: o se puntúa en local (`/printing-press-import` +
+  `/printing-press-score`), o se declara no medido y se deja fuera de producción. Instalar
+  es un CDC (C1), igual que imprimir.
+- **Lo que escribe a terceros no se instala "para probar".** Un flag de auto-confirmación en
+  un CLI ajeno convierte un envío a tus clientes en algo que el agente dispara solo. Se
+  revisa la superficie destructiva ANTES de adoptarlo: ese daño no es firmable (límite de C5).
+
 ## 7. Especificación Técnica (Para el Agente)
 
 ### Features a implementar (Feature-First)
