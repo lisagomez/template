@@ -34,6 +34,17 @@ y reglas inline. Ver `docs/SDD-imprenta-de-clis.md`.
 - **Go 1.27.0 ROMPE la imprenta** (`enetx/http2` usa `http.Server.DisableClientPriority`, que
   1.27.0 no expone). Usar **1.26.7**. Y **`generate --force` trunca archivos generados**:
   reimprimir siempre en directorio limpio.
+- **La librería pública NO publica grados** (verificado el 2026-08-26: `registry.json`, 465
+  entradas, sin campo de grade/scorecard/dogfood; el directorio del skill upstream solo trae
+  `SKILL.md`, y `cli-library-index.json` da 404). Chocaba con *sin grado no es aprobado*: el
+  escalón 2 era la única vía por la que un CLI entraba sin medir **y sin que nada lo dijera**.
+  Instalar de ahí = adoptar un CLI **no medido**; se puntúa con `/printing-press-import` +
+  `/printing-press-score`, o se declara y se deja fuera de producción. Regla inline en los dos
+  documentos + una comprobación por documento (verificador 127).
+- **Y lo que trae dentro se mira antes.** En `pp-resend`, `--agent` expande a `--yes` sobre
+  `delete` de claves, contactos y dominios, y el fallback de instalación es
+  `go install …@latest`. Un CLI ajeno puede traer auto-confirmación de acciones irreversibles
+  sobre terceros: el grado ausente no es el único hueco.
 - **Medido en rojo tampoco es aprobado.** `verdict` del dogfood se leía y no se usaba: un CLI
   fallando pasaba como conforme. Ahora un FAIL sin reconocer en el manifiesto rompe el gate.
 
