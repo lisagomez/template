@@ -56,7 +56,10 @@ carencias eran el mismo fallo con distinta cara: **no habia sensor**.
 >    por sesión **11313 → 8437 tokens**; `CLAUDE.md` expandido 7480 → 4604. `opencode.json`
 >    carga las rules siempre: ahí el ahorro es cero y `mide:contexto` lo mide aparte (nivel
 >    *condicional*, 3335 tokens). Riesgo residual declarado: una rule que no cargue por un
->    `paths:` que no empate — los errores críticos siguen en `AGENTS.md`.
+>    `paths:` que no empate — los errores críticos siguen en `AGENTS.md`. **Medido esa misma
+>    noche**: un caso en frío que toca `package.json` recibió la rule de aprendizajes y la citó
+>    con ruta y línea (reporte en `corridas.md` de `golden-sets`). Cubre el mecanismo, no
+>    cada `paths:`.
 > 2. **Contabilidad medida en frío**: caso en `golden-sets`, corrida real con `claude -p`
 >    (sesión fría, worktree desacoplado, **con `AGENTS.md` ya recortado**): verde-plus. Reporte
 >    en `corridas.md` de esa rama; el sujeto no se fusiona.
