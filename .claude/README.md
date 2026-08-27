@@ -380,8 +380,9 @@ export const supabase = createClient(
 ### 3. Migraciones
 
 ```bash
-# Guardar en supabase/migrations/
-# Ejemplo: supabase/migrations/001_create_users.sql
+# Guardar en supabase/migrations/ con timestamp (misma convencion que los skills
+# add-payments / add-emails / add-mobile y que PRP-002; NO numeracion 001_):
+# supabase/migrations/$(date +%Y%m%d%H%M%S)_create_users.sql
 ```
 
 ---

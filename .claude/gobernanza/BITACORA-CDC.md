@@ -1831,3 +1831,24 @@ diff, sin regresión y sin aprobación.
 - **Regresión**: capa A 99/99 · capa B verde-plus (este caso).
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-26 — PRP-002 ejecutado (tipo de proyecto en Supabase) y `zod` entra al arbol — radio: menor (dependencia del Golden Path; CDC no aplicable al PRP)
+- **Cambio**: `zod@^4.4.3` en `dependencies` — el Golden Path y las Reglas de Codigo lo exigian
+  ("SIEMPRE validar con Zod") y **no estaba instalado**; el verificador vigila el texto de la
+  regla, no la instalacion. PRP-002 completado en codigo: migracion
+  `supabase/migrations/20260826231500_create_project_settings.sql` (escrita, NO aplicada:
+  sin credenciales aqui), `src/types/database.ts`, `src/features/project-settings/`
+  (Zod espejo del CHECK, servicio con cliente autenticado — sin service_role, C7 —, selector),
+  `src/app/(main)/configuracion/page.tsx`. `.claude/README.md` pasa a la convencion de
+  timestamp para migraciones (contradecia a tres skills y al PRP).
+- **Motivo**: el PRP-002 era el unico ejecutable sin servidor externo; su CDC declarado es NO
+  (no toca skill, prompt, modelo ni settings) y se respeto. Esta entrada existe por la
+  dependencia nueva, no por el PRP.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99) · `validate` completo ☑ ·
+  aprobación humana ☑ · Zod 6/6 casos en Node · capturas Playwright de ambos estados (Docker,
+  imagen oficial; Playwright NO entra al template).
+- **Lo que queda para un proyecto derivado**: aplicar la migracion, `get_advisors`, y la prueba
+  del CHECK contra la base real.
+- **Regresión**: capa A 99/99.
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto

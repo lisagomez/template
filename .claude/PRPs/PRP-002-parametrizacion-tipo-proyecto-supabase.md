@@ -1,7 +1,10 @@
 # PRP-002: Parametrización de tipo de proyecto en Supabase (aplicación vs. herramienta)
 
-> **Estado**: PENDIENTE
-> **Fecha**: 2026-08-24
+> **Estado**: COMPLETADO EN CÓDIGO — **BD no aplicada** (2026-08-26). El boilerplate no tiene
+> credenciales de Supabase por diseño: la migración está escrita e idempotente, pero
+> `apply_migration`, `get_advisors` y la prueba manual del `CHECK` contra la base los cierra
+> el primer proyecto derivado que la aplique. Todo lo que se puede verificar sin BD, se verificó.
+> **Fecha**: 2026-08-24 · **Ejecutado**: 2026-08-26
 > **Proyecto**: SaaS Factory V4 (template)
 > **CDC aplicable** (¿este PRP cambia comportamiento de agentes: modelo, skill, prompt
 > o plantilla?): **NO** → no se edita ningún skill, prompt, modelo ni `settings.json` en
@@ -31,14 +34,14 @@ no depende de que nadie se acuerde de aplicarla a mano.
 ## Qué
 
 ### Criterios de Éxito
-- [ ] Tabla `project_settings` creada con RLS habilitado y las 3 policies (select/insert/update restringidas a `auth.uid() = owner_id`)
-- [ ] El `CHECK` de base impide guardar `project_type = 'herramienta'` con `deploy_provider`/`deploy_domain` no nulos, y `project_type = 'aplicacion'` con `package_scope`/`package_name` no nulos
-- [ ] Un índice de expresión (`unique ((true))`) impide que exista una segunda fila — es config de proyecto, no una fila por usuario
-- [ ] `get_advisors(type: "security")` no reporta `project_settings` sin RLS
-- [ ] El formulario/selector: elegir "Herramienta" oculta y no envía `deploy_provider`/`deploy_domain`; elegir "Aplicación" oculta y no envía `package_scope`/`package_name`
-- [ ] El esquema Zod (unión discriminada por `project_type`) espeja exactamente el `CHECK` de la base — cliente y servidor no pueden divergir en qué campos exige cada tipo
-- [ ] Ninguna llamada a esta tabla usa `service_role` (control C7) — solo el cliente autenticado del usuario
-- [ ] `npm run validate` pasa
+- [x] Tabla `project_settings` con RLS habilitado y las 3 policies (`supabase/migrations/20260826231500_create_project_settings.sql`) — **escrita; aplicarla es del proyecto derivado**
+- [x] El `CHECK project_settings_type_fields_chk` en la migración; **la prueba manual contra la base queda pendiente de aplicarla** (sin Supabase aquí)
+- [x] `unique ((true))` en la migración, con comentario SQL y `comment on constraint` explicando que es intencional
+- [ ] `get_advisors(type: "security")` — **requiere BD**: lo corre quien aplique la migración
+- [x] Selector: "Herramienta" oculta y **no envía** `deploy_*` (`aEntrada` los pone a `null` antes de validar — por construcción, no por CSS); "Aplicación" ídem con `package_*`. Verificado con Playwright (test ids `campos-aplicacion` / `campos-herramienta`)
+- [x] Zod (`src/features/project-settings/types/schema.ts`) es unión discriminada espejo del `CHECK`: 6/6 casos en Node — herramienta+`deploy_domain` rechaza, aplicación+`package_name` rechaza, herramienta sin `package_name` rechaza, ambas formas válidas aceptan, restos del otro tipo se anulan
+- [x] Ninguna llamada usa `service_role`: `project-settings-service.ts` usa `@/lib/supabase/client` (anon key + sesión) y RLS decide (C7)
+- [x] `npm run validate` pasa (2026-08-26)
 
 ### Comportamiento Esperado
 ```
@@ -212,7 +215,23 @@ patrón Feature-First del resto del repo.
 
 ## 🧠 Aprendizajes (Self-Annealing / Neural Network)
 
-*(vacío hasta la implementación)*
+- **`zod` no estaba instalado.** El Golden Path y las Reglas de Código lo exigen y el
+  verificador vigila el *texto* de la regla, no la instalación. Se añadió (`zod@^4`) en este
+  PRP; una regla que exige una librería ausente es decorativa hasta que alguien la importa.
+- **`unique((true))` no se puede usar como `on_conflict` de PostgREST**: es una constraint de
+  expresión, y `upsert({ onConflict })` solo acepta columnas. El "upsert" del servicio es
+  leer-y-decidir (update por `id` si existe, insert si no). Anotado en el servicio.
+- **La unión discriminada de Zod choca con el tipado de `insert()` de supabase-js**
+  (`RejectExcessProperties` no acepta una unión): a la base va la fila plana
+  (`ProjectSettingsInsert`), y la exclusión mutua ya la garantizó Zod un paso antes.
+- **Convención de migraciones**: tres skills y este PRP usan timestamp; `.claude/README.md`
+  decía `001_`. Corregido a timestamp en el mismo commit — nada en el gate lo cazaba.
+- **Sin Supabase el formulario lo dice y deshabilita Guardar** (`data-testid="sin-supabase"`):
+  el selector y la validación Zod funcionan igual; no se finge un guardado.
+- **Chromium de Playwright no arranca en esta máquina** (8 librerías del sistema ausentes, sin
+  sudo): las capturas se tomaron con la imagen oficial
+  `mcr.microsoft.com/playwright:v1.62.1-noble` en Docker, `--network host` contra `npm run dev`.
+  Playwright NO se añadió al template.
 
 ---
 
@@ -225,12 +244,11 @@ patrón Feature-First del resto del repo.
       una pantalla aparte) es deseable pero **editar un skill exige CDC (control C1)** —
       no se hace dentro de este PRP para no mezclar el gate de datos con el gate de
       comportamiento de agente.
-- [ ] `unique ((true))` es una técnica poco común para forzar fila única en toda la
-      tabla — dejar el comentario SQL explicando por qué, o el próximo que lea la
-      migración la borra pensando que es un error de copy-paste.
-- [ ] El Zod del cliente y el `CHECK` de la base **deben** decir exactamente lo mismo.
-      Si se toca uno sin el otro, queda un estado que el formulario nunca produce pero
-      que la base sí permitiría por otra vía (ej. un script directo).
+- [x] `unique ((true))` es una técnica poco común para forzar fila única en toda la
+      tabla — comentario SQL y `comment on constraint` puestos en la migración.
+- [x] El Zod del cliente y el `CHECK` de la base **deben** decir exactamente lo mismo —
+      ambos archivos se citan mutuamente en sus cabeceras; si se toca uno sin el otro,
+      queda un estado que el formulario nunca produce pero que la base sí permitiría.
 
 ## Anti-Patrones
 
@@ -243,4 +261,6 @@ patrón Feature-First del resto del repo.
 
 ---
 
-*PRP pendiente aprobación. No se ha modificado código.*
+*Ejecutado el 2026-08-26 (sesión en auto mode; aprobación a ratificar por la responsable del
+proyecto). Archivos: la migración, `src/types/database.ts`, `src/features/project-settings/`
+(types/services/components) y `src/app/(main)/configuracion/page.tsx`.*
