@@ -19,12 +19,21 @@
       ],
       "incluye_descripciones_de_skills": true,
       "medido_2026_08_23": 9959,
+      "medido_2026_08_26": 8379,
+      "_bajada_2026_08_26": "11313 -> 8379 al mover lo informativo de AGENTS.md a .claude/rules/ (nivel condicional). CLAUDE.md expandido: 7480 -> 4546. El presupuesto NO se baja todavia: se deja aire para las reglas nuevas que traiga cada CDC; bajarlo es otra decision.",
       "presupuesto": 12000,
       "por_archivo": {
         "CLAUDE.md": 8000,
         ".claude/memory/MEMORY.md": 800
       },
       "presupuesto_descripciones": 3500
+    },
+    "condicional": {
+      "_comentario": "`.claude/rules/*.md` cargan por `paths:` SOLO al tocar los archivos que declaran (Claude Code). NO entra en el total siempre-presente: es lo que salio de AGENTS.md el 2026-08-26 para bajar el suelo (7480 -> ver medido). En opencode cargan siempre via opencode.json, asi que en ese arnes el ahorro es cero y esta cifra se suma al suelo — se declara, no se vende. Tope por regla: una rule que se acerque al presupuesto de CLAUDE.md dejo de ser condicional en la practica.",
+      "glob": ".claude/rules/*.md",
+      "medido_2026_08_26": 3335,
+      "presupuesto_por_regla": 2000,
+      "presupuesto_suma": 6000
     },
     "espejo": {
       "_comentario": "Mismo papel que CLAUDE.md para otro arnes. Se paga solo en sesiones de ese arnes.",

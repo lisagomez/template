@@ -1,0 +1,5 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "_comentario": "opencode NO expande imports @ruta ni conoce .claude/rules/ (docs/PORTABILIDAD-ARNESES.md). Sin esta lista, lo que AGENTS.md traslado a rules/ el 2026-08-26 existiria para Claude Code y no para opencode. Aqui cargan SIEMPRE (sin paths:), asi que en este arnes no hay ahorro de contexto: la regla se conserva, y eso es lo que importa.",
+  "instructions": [".claude/rules/*.md"]
+}

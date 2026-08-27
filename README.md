@@ -189,6 +189,13 @@ Un aviso que sale de ahi: **opencode no expande los imports `@ruta`**. Da igual 
 `AGENTS.md` sea autocontenido; deja de dar igual el dia que una regla se mueva a un archivo
 importado — existiria para un arnes y no para el otro.
 
+**Desde el 2026-08-26 `AGENTS.md` lleva solo lo que obliga** (decision tree, reglas de codigo,
+comandos, gobernanza) y lo que informa —aprendizajes, arquitectura, flujos, sintaxis de QA—
+vive en **`.claude/rules/*.md`** con `paths:`, que Claude Code carga solo al tocar esos
+archivos. Medido: el suelo de cada sesion bajo de 11.3k a ~8.3k tokens. **En opencode no hay
+ahorro**: `opencode.json` le hace cargar las rules siempre, para que ninguna regla exista en un
+arnes y no en el otro. `npm run mide:contexto` las mide aparte, como nivel *condicional*.
+
 ## Dos caminos: una app, o una herramienta
 
 Este template sirve para las dos cosas, y el runbook cambia segun cual sea:

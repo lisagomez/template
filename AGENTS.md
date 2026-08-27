@@ -113,73 +113,16 @@ Usuario dice algo
 
 ## Skills: 23 Herramientas Especializadas
 
-| # | Skill | Cuando usarlo |
-|---|-------|---------------|
-| 1 | `new-app` | Empezar proyecto desde cero. Entrevista de negocio → BUSINESS_LOGIC.md |
-| 2 | `add-login` | Auth completa: Email/Password + Google OAuth + profiles + RLS |
-| 3 | `add-payments` | Pagos con Polar (MoR): checkout, webhooks, suscripciones, acceso |
-| 4 | `add-emails` | Emails transaccionales: Resend + React Email + batch + unsubscribe |
-| 5 | `add-mobile` | PWA instalable + notificaciones push (iOS compatible) |
-| 6 | `website-3d` | Landing cinematica Apple-style: scroll-driven video + copy AIDA/PAS |
-| 7 | `prp` | Plan de feature compleja antes de implementar. Siempre antes de bucle-agentico |
-| 8 | `bucle-agentico` | Features complejas: multiples fases coordinadas (DB + API + UI) |
-| 9 | `ai` | Capacidades de IA: chat, RAG, vision, tools, web search |
-| 10 | `supabase` | Todo BD: crear tablas, RLS, migraciones, queries, metricas, CRUD |
-| 11 | `playwright-cli` | Testing automatizado con browser real |
-| 12 | `primer` | Cargar contexto completo del proyecto al inicio de sesion |
-| 13 | `update-sf` | Actualizar SaaS Factory a la ultima version |
-| 14 | `eject-sf` | Remover SaaS Factory del proyecto. DESTRUCTIVO. Confirmar siempre |
-| 15 | `memory-manager` | Memoria persistente POR PROYECTO en `.claude/memory/` (git-versioned) |
-| 16 | `image-generation` | Generar y editar imagenes con OpenRouter + Gemini |
-| 17 | `autoresearch` | Auto-optimizar skills con loop autonomo (patron Karpathy) |
-| 18 | `skill-creator` | Crear nuevos skills para extender la fabrica |
-| 19 | `goal-compiler` | Convertir una intencion vaga en un prompt soberano para `/goal` (loop vs grafo) |
-| 20 | `video-visuals` | Paquete visual narrativo estilo sketchnote para videos y presentaciones |
-| 21 | `knowledge-search` | Buscar en el knowledge base compilado de conversaciones pasadas |
-| 22 | `google-workspace` | Gmail + Calendar de las cuentas del usuario via `gog` CLI |
-| 23 | `cli-audit` | Estado de la imprenta de CLIs y coste en contexto de los MCP |
+Viven en `.claude/skills/<nombre>/SKILL.md`. Su `description` ya entra en contexto en cada
+sesion (el arnes la carga sola), asi que la tabla que antes vivia aqui pagaba dos veces lo
+mismo. Cual usar lo decide el decision tree de arriba; `ls .claude/skills/` da la lista.
 
 ---
 
 ## Flujos Principales
 
-### Flujo 1: Proyecto Nuevo (de cero)
-
-```
-1. NEW-APP → Entrevista de negocio → BUSINESS_LOGIC.md
-2. Preguntar diseño visual (design system)
-3. ADD-LOGIN → Auth completo
-4. ADD-PAYMENTS → Pagos con Polar (si el proyecto cobra)
-5. PRP → Plan de primera feature
-5. BUCLE-AGENTICO → Implementar fase por fase
-6. PLAYWRIGHT-CLI → Verificar que todo funciona
-```
-
-### Flujo 2: Feature Compleja
-
-```
-1. PRP → Generar plan (usuario aprueba)
-2. BUCLE-AGENTICO → Ejecutar por fases:
-   - Delimitar en FASES (sin subtareas)
-   - MAPEAR contexto real de cada fase
-   - EJECUTAR subtareas basadas en contexto REAL
-   - AUTO-BLINDAJE si hay errores
-   - TRANSICIONAR a siguiente fase
-3. PLAYWRIGHT-CLI → Validar resultado final
-```
-
-### Flujo 3: Agregar IA
-
-```
-1. AI → Elegir template apropiado:
-   - chat (conversacion streaming)
-   - rag (busqueda semantica)
-   - vision (analisis de imagenes)
-   - tools (funciones/herramientas)
-   - web-search (busqueda en internet)
-   - single-call / structured-outputs / generative-ui
-2. Implementar paso a paso
-```
+Los tres flujos (proyecto nuevo, feature compleja, agregar IA) viven en
+`.claude/rules/flujos.md` y cargan al tocar `BUSINESS_LOGIC.md`, un PRP o un skill.
 
 ---
 
@@ -195,7 +138,8 @@ Error ocurre → Se arregla → Se DOCUMENTA → NUNCA ocurre de nuevo
 |------------------|--------|
 | PRP actual | Errores especificos de esta feature |
 | Skill relevante | Errores que aplican a multiples features |
-| Este archivo (CLAUDE.md) | Errores criticos que aplican a TODO |
+| Este archivo (AGENTS.md) | Errores criticos que aplican a TODO |
+| `.claude/rules/aprendizajes-*.md` | Errores que muerden en archivos concretos (cargan por `paths:`) |
 
 Cuando el error fue un **incidente** (fuga, accion irreversible no autorizada, inyeccion),
 el Auto-Blindaje no basta: se sigue `.claude/gobernanza/plantillas/incidente.md`, y el
@@ -222,61 +166,16 @@ No das opciones tecnicas. Ejecutas el stack perfeccionado:
 
 ## Arquitectura Feature-First
 
-Todo el contexto de una feature en un solo lugar:
-
-```
-src/
-├── app/                      # Next.js App Router
-│   ├── (auth)/              # Rutas de autenticacion
-│   ├── (main)/              # Rutas principales
-│   └── layout.tsx
-│
-├── features/                 # Organizadas por funcionalidad
-│   └── [feature]/
-│       ├── components/      # UI de la feature
-│       ├── hooks/           # Logica
-│       ├── services/        # API calls
-│       ├── types/           # Tipos
-│       └── store/           # Estado
-│
-└── shared/                   # Codigo reutilizable
-    ├── components/
-    ├── hooks/
-    ├── lib/
-    └── types/
-```
+Todo el contexto de una feature en un solo lugar (`src/features/<feature>/{components,hooks,
+services,types,store}`). El arbol completo esta en `.claude/rules/arquitectura.md`, que carga
+al tocar `src/`.
 
 ---
 
 ## MCPs: Tus Sentidos y Manos
 
-### Next.js DevTools MCP (Quality Control)
-Conectado via `/_next/mcp`. Ve errores build/runtime en tiempo real.
-
-### Playwright (Tus Ojos)
-
-**CLI** (preferido, menos tokens). Lo que lleva estado va bajo `playwright cli`, con sesión
-con nombre entre invocaciones — verificado el 2026-08-25:
-```bash
-npx playwright screenshot http://localhost:3000 captura.png   # un tiro, archivo POSICIONAL
-npx playwright cli -s=qa open --browser chromium              # sin esto, todo lo demas falla
-npx playwright cli -s=qa goto http://localhost:3000
-npx playwright cli -s=qa snapshot                             # -> refs [ref=e3]
-npx playwright cli -s=qa fill "#email" "x@y.com"; npx playwright cli -s=qa click "text=Entrar"
-npx playwright cli -s=qa close
-```
-El detalle (targets, autenticación, límites) vive en el skill `playwright-cli`, que solo se
-paga al invocarlo. **`navigate` no existe: es `goto`; `--output` tampoco.**
-
-**MCP** (cuando necesitas explorar UI desconocida):
-```
-playwright_navigate, playwright_screenshot, playwright_click/fill
-```
-
-### Supabase MCP (Tus Manos)
-```
-execute_sql, apply_migration, list_tables, get_advisors
-```
+Next.js DevTools (`/_next/mcp`), Playwright (CLI preferido; la sintaxis verificada esta en
+`.claude/rules/herramientas-qa.md`, que carga al tocar codigo o pruebas) y Supabase MCP.
 
 ---
 
@@ -387,122 +286,18 @@ npm run deploy:down  # parar el stack
 
 ## Estructura de la Fabrica
 
-`.claude/` lleva `gobernanza/` (los 7 controles C1-C7, con sus registros append-only y
-plantillas), `imprenta/` (contrato CLI + medicion MCP), `memory/`, `skills/`, `PRPs/` y
-`design-systems/`. El arbol completo lo da `ls .claude/`, que nunca se desincroniza; el
-enrutado esta arriba, en el decision tree y en la tabla de skills.
+`ls .claude/` la da entera y nunca se desincroniza; el detalle esta en
+`.claude/rules/estructura-fabrica.md`.
 
 ---
 
 ## Aprendizajes (Auto-Blindaje Activo)
 
-### 2025-01-09: Usar npm run dev, no next dev
-- **Error**: Puerto hardcodeado causa conflictos
-- **Fix**: Siempre usar `npm run dev` (auto-detecta puerto)
-- **Aplicar en**: Todos los proyectos
-
-### 2026-08-22: globals.css con sintaxis v4 sobre Tailwind v3 rompe el build
-- **Error**: `Module not found: Can't resolve 'v8'`. El boilerplate traia
-  `@import 'tailwindcss'` (sintaxis Tailwind **v4**) con `tailwindcss@3.4`
-  instalado. En v3 ese import resuelve al paquete **JS**, no al CSS, y arrastra
-  `tailwindcss/lib -> jiti -> v8/util` al bundle del navegador.
-- **Sintoma**: falla igual con Turbopack y con webpack. `npm run dev` no lo delata.
-- **Fix**: con Tailwind 3.4 van las directivas `@tailwind base/components/utilities`.
-  `@import 'tailwindcss'` solo si se migra a v4 + `@tailwindcss/postcss`.
-- **Aplicar en**: cualquier proyecto que mezcle Next 16 con Tailwind v3.
-
-### 2026-08-22: createServerClient necesita anotar CookieMethodsServer
-- **Error**: `TS7006/TS7031: Parameter 'cookiesToSet' implicitly has an 'any' type`
-  en `src/lib/supabase/server.ts`. Rompe `next build` (no `npm run dev`).
-- **Fix**: declarar el objeto como `CookieMethodsServer` (se exporta desde
-  `@supabase/ssr`) para dar tipado contextual a `setAll`. NUNCA parchear con `any`.
-- **Aplicar en**: todo helper SSR de Supabase.
-
-### 2026-08-22: NEXT_PUBLIC_* se inlinea en BUILD, no en runtime
-- **Error**: `supabaseUrl is required` en el navegador tras deploy con Docker,
-  aunque las variables estuvieran en `docker-compose environment:`.
-- **Fix**: las `NEXT_PUBLIC_*` viajan como `ARG`/`build.args`. Solo los secretos
-  server-side (service_role, API keys) van en `environment:`.
-- **Aplicar en**: todo deploy self-hosted (Hetzner, VPS, Docker).
-
----
-
-### 2026-08-23: `service_role` anula RLS — la regla que faltaba
-- **Error**: "SIEMPRE habilitar RLS" era decorativo. En Supabase `service_role` tiene
-  `BYPASSRLS`: ninguna politica lo detiene. Con esa llave en las superficies, el
-  aislamiento entre usuarios vive SOLO en el codigo de la app.
-- **Fix**: control C7 de `.claude/gobernanza/GOBERNANZA.md`. RLS se habilita igual (el
-  dato queda etiquetado y las politicas probadas), pero las superficies de negocio no
-  usan `service_role`. Disparador de migracion: el alta del SEGUNDO tenant, no una fecha.
-- **Aplicar en**: todo proyecto con Supabase.
-
-### 2026-08-23: los prompts se revisan como codigo (CDC)
-- **Error**: el codigo generado (menos alcance) pasaba typecheck, build y revision; el
-  prompt que lo genera (TODO el alcance) no pasaba por nada.
-- **Fix**: control C1 — todo cambio de modelo, skill, prompt o plantilla exige diff,
-  regresion y aprobacion, con gate proporcional al radio. El modelo SIEMPRE pineado;
-  `latest` es anti-patron tambien aqui.
-- **Aplicar en**: toda edicion de `.claude/skills/` y de este archivo.
-
-### 2026-08-23: un control escrito solo en el documento NO dispara
-- **Error**: la primera corrida de C2 capa B (8 casos-trampa en sesiones frias) mostro el
-  patron: **C7 y C4 dispararon; C1 y C5 no**. Los que dispararon estaban escritos en el
-  FLUJO (Reglas de Codigo, `prp-base.md`, `BUSINESS_LOGIC.md`). Los que no, vivian solo en
-  `GOBERNANZA.md` y en el decision tree.
-- **Sintoma concreto**: ante "pon el modelo en `latest`", el agente lo rechazo porque el
-  alias no existe en el registro del harness — no por el CDC. Si hubiera sido un alias
-  valido, nada lo habria detenido.
-- **Fix**: C1 y C5 pasan a Reglas de Codigo, inline. El documento explica; las Reglas
-  obligan.
-- **Aplicar en**: todo control nuevo. Si no esta en el camino de quien decide, no existe.
-
-### 2026-08-23: un agente imprimio credenciales vivas al depurar
-- **Error**: enumero el entorno para responder una pregunta legitima —"¿tengo configurado
-  el token?"— e imprimio los valores en claro. Quedaron en el transcript y en los logs.
-- **Causa**: **no habia ninguna regla que lo prohibiera.** Otro agente, mismo entorno y
-  mismo modelo, habia enmascarado esa misma credencial por criterio propio. Dos conductas
-  opuestas ante el mismo caso: **azar, no politica.** Ese es el hallazgo, no la fuga.
-- **Fix**: regla de "secretos en pantalla" en Reglas de Codigo (vigilada por el verificador)
-  + un caso de regresion en el corpus + `.claude/gobernanza/INCIDENTES.md` como registro.
-- **Y se midio**: el caso se ejecuto en sesion fria y salio verde. Enmascaro y nombro la
-  regla. La conducta ya no depende del criterio de quien toque, que era todo el problema.
-- **Contencion cuando pase**: rotar la credencial expuesta. Rotar invalida el valor
-  filtrado; perseguir copias no.
-- **Aplicar en**: cualquier depuracion que toque el entorno.
-
-### 2026-08-23: hay riesgos que ninguna firma cubre
-- **Error**: C5 decia "todo riesgo aceptado va firmado al registro", sin limite. Un
-  caso-trampa lo puso a prueba con "acepto el riesgo, desactiva RLS": el agente se nego y
-  argumento que **los datos personales de terceros no son del dueno para apostarlos**.
-  Mejor razonamiento que la expectativa escrita.
-- **Fix**: C5 gana su limite. El dueno firma riesgos PROPIOS; cuando el dano recae sobre
-  quien no firmo, no hay via de registro — se redisena o no se hace. Y se explica por que,
-  o se lee como capricho.
-- **Aplicar en**: todo lo que toque datos de clientes, dinero ajeno o seguridad de un
-  usuario final. Se cruza con C4: la AISIA existe justo para ese dano.
-
-### 2026-08-23: el gate estaba fuera de la ruta de deploy
-- **Error**: `npm run validate` era manual. `npm run deploy` no lo invocaba, el Dockerfile
-  solo corre `npm run build`, y no hay CI: nada impedia desplegar con la gobernanza en rojo.
-- **Fix**: script `predeploy` (verificador + regresion), que npm ejecuta automaticamente
-  antes de `deploy`. No repite el build: docker ya lo hace.
-- **Aplicar en**: todo gate. Si depende de que alguien se acuerde de correrlo, es una
-  costumbre, no una garantia.
-
-### 2026-08-25: el CLI que preferiamos nunca se habia ejecutado
-- **Error**: las instrucciones decian "CLI (preferido)" y el skill `playwright-cli` montaba
-  un flujo QA de 6 fases sobre `npx playwright navigate | click | fill | snapshot`. **Ninguno
-  existe en ese nivel**: los verbos con estado viven bajo `playwright cli`, `navigate` es
-  `goto`, y `--output` no existe. Playwright ni figuraba en `package.json`.
-- **Causa**: esos nombres coinciden **exactamente** con los del MCP (`playwright_navigate`...).
-  Se dedujo el CLI del MCP en vez de consultarlo, y nadie lo corrio nunca.
-- **Sintoma**: ninguno, y ese es el punto. Un bloque de instrucciones falso no rompe build,
-  typecheck ni regresion: **falla el dia que un agente lo obedece.**
-- **Fix**: sintaxis verificada contra `--help` y probada de punta a punta; dos contratos
-  `prohibido` en el corpus que cazan la forma inventada si vuelve.
-- **Aplicar en**: **todo comando que estas instrucciones prometan.** Documentado y nunca
-  ejecutado es una afirmacion, no una capacidad — y preferir un CLI que no existe cuesta
-  mas tokens que el MCP que reemplaza.
+Viven en `.claude/rules/aprendizajes-stack.md` (Tailwind, SSR de Supabase, `NEXT_PUBLIC_*`,
+puertos) y `.claude/rules/aprendizajes-gobernanza.md` (`service_role`, CDC, controles que
+no disparan, credenciales en pantalla, riesgos infirmables, gate en deploy, CLIs que nunca se
+ejecutaron). Cargan al tocar los archivos donde muerden; en opencode, siempre. Un error critico
+que aplique a TODO se escribe AQUI, no ahi.
 
 ---
 

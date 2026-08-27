@@ -114,6 +114,23 @@ if (n1.incluye_descripciones_de_skills && existsSync(dirSkills)) {
 }
 anota('TOTAL que se paga en cada sesion', totalSiempre, n1.presupuesto, 'siempre');
 
+// --- Nivel 1b: lo condicional (.claude/rules/, carga por `paths:`) ----------
+// Salio de AGENTS.md para bajar el suelo. En Claude Code se paga solo al tocar los archivos
+// que cada rule declara; en opencode se paga SIEMPRE (opencode.json). Por eso se mide aparte
+// y NO se suma al total siempre-presente — y por eso se imprime la suma: es lo que una sesion
+// de opencode paga de mas respecto a lo que este nivel 1 declara.
+const n1b = cfg.niveles?.condicional ?? {};
+const dirRules = ruta('.claude/rules');
+if (n1b.glob && existsSync(dirRules)) {
+  let sumaRules = 0;
+  for (const f of readdirSync(dirRules).filter((n) => n.endsWith('.md')).sort()) {
+    const t = cuenta(lee(`.claude/rules/${f}`) ?? '');
+    sumaRules += t;
+    anota(`rules/${f}`, t, n1b.presupuesto_por_regla, 'condicional (solo al tocar sus paths; en opencode, siempre)');
+  }
+  anota('suma de las rules (lo que opencode paga de mas)', sumaRules, n1b.presupuesto_suma, 'condicional (solo al tocar sus paths; en opencode, siempre)');
+}
+
 // --- Nivel 2: el espejo de otro arnes --------------------------------------
 for (const archivo of cfg.niveles?.espejo?.archivos ?? []) {
   const texto = lee(archivo);

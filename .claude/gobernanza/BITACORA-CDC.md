@@ -1741,3 +1741,38 @@ diff, sin regresión y sin aprobación.
   cambio de gate).
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-26 — AGENTS.md se queda con lo que obliga; lo que informa pasa a `.claude/rules/` — radio: sistema (instrucciones de todos los arneses)
+- **Cambio**: `AGENTS.md` 527 -> 321 lineas. Salen, con texto ORIGINAL (no reescrito), a
+  `.claude/rules/*.md` con `paths:`: los 11 aprendizajes (`aprendizajes-stack.md`,
+  `aprendizajes-gobernanza.md`), `flujos.md`, `arquitectura.md`, `herramientas-qa.md` (sintaxis
+  verificada de Playwright + MCPs) y `estructura-fabrica.md`. La tabla de 23 skills se
+  **borra** (no se mueve): su `description` ya entra en contexto desde cada `SKILL.md`, asi que
+  se pagaba dos veces. Se quedan inline: Filosofia, Decision Tree, Auto-Blindaje, Golden Path,
+  **Reglas de Codigo**, Comandos, Gobernanza. `opencode.json` nuevo con
+  `instructions: [".claude/rules/*.md"]`. `mide-contexto.mjs` + `presupuesto-contexto.json`
+  ganan el nivel **condicional** (mide las rules, NO las suma al suelo). `CLAUDE.md` y README
+  lo declaran.
+- **Motivo**: pendiente #1 de la memoria del proyecto. La doc oficial pide <200 lineas y
+  `CLAUDE.md` iba al 94 % de su presupuesto. La condicion que la memoria puso —**medir antes
+  de comprometer, y no fusionar con la imprenta**— se cumplio: se midio seccion por seccion con
+  la calibracion del repo y se corto solo lo que no lleva ninguna aserción del verificador.
+- **Cifras medidas (chars/3.644, misma calibracion del gate)**: `CLAUDE.md` expandido
+  **7480 -> 4546** tokens; suelo por sesion **11313 -> 8379** (-26 %). Rules: 3335 tokens en
+  total, la mayor 1583 (`aprendizajes-gobernanza.md`). **En opencode el ahorro es CERO**: carga
+  las rules siempre (8379 + 3335 = 11714, ~lo de antes). Se declara; no se vende.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99) · `validate` completo ☑
+  (verificador 123/123: las ~14 aserciones sobre `AGENTS.md`/`CLAUDE.md` siguen verdes porque
+  todas viven en Reglas de Codigo, Decision Tree y Comandos, que no se movieron) · aprobación
+  humana ☑
+- **Riesgo residual**: que Claude Code no cargue una rule cuando toca (los `paths:` son globs
+  declarados a mano — p. ej. una lección de Tailwind no carga si se edita un `.tsx` sin tocar
+  CSS). Mitigacion: los ERRORES CRITICOS que aplican a todo siguen en `AGENTS.md` (la tabla de
+  Auto-Blindaje lo dice), y las REGLAS derivadas de cada aprendizaje nunca salieron de Reglas de
+  Codigo. **No medido en frio**: si un agente sin la rule cargada repite uno de esos errores es
+  justo lo que un caso-trampa nuevo deberia cazar — deuda declarada, no cerrada.
+- **No incluido**: no se bajo el presupuesto de `CLAUDE.md` ni del total (se deja el aire);
+  `GEMINI.md` sigue igual (es el siguiente CDC).
+- **Regresión**: capa A 99/99 · capa B: corpus 17/17 legible; sin corrida en frio (ver riesgo).
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto
