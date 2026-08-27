@@ -1977,3 +1977,28 @@ diff, sin regresión y sin aprobación.
   versiona, se emite igual y lo dice; no desaparece.**
 - **Aprobado por**: lisagomez (usuaria de la sesion; autorizó con «si procede» tras el informe del
   hallazgo) — la firma cubre el arreglo, no la cifra 130 como objetivo
+### 2026-08-26 — puerta de entrada a la vertiente "herramienta" — radio: plantilla
+- **Cambio**: alta de `docs/CREAR-UNA-HERRAMIENTA.md` (puerta Agent-First: qué dice el
+  humano, qué decide el agente, los tres gates humanos y los tres riesgos de contrato);
+  la rama "herramienta / libreria / paquete reutilizable" del decision tree pasa a dos
+  escalones —PUERTA y CONTRATO— en `AGENTS.md` y `GEMINI.md`; y el verificador gana 6
+  comprobaciones (existencia de la puerta, delegación en `EMPAQUETAR-HERRAMIENTA.md`,
+  registro Agent-First, gate de publicación, y el enrutado desde los dos árboles).
+  `docs/EMPAQUETAR-HERRAMIENTA.md` **no se tocó**: sigue siendo la fuente única del
+  contrato técnico y la puerta lo enlaza en vez de duplicarlo.
+- **Motivo**: el template sirve para dos cosas, y la segunda —herramientas empaquetadas—
+  solo tenía runbook para quien ya sabe teclear. Sin una puerta en el registro que
+  `AGENTS.md` exige ("el humano NO necesita saber nada técnico"), media fábrica era
+  inaccesible para su propio usuario objetivo. La puerta añade además el "todavía no":
+  sin reúso real 3+ veces, empaquetar solo suma una versión que mantener.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+  · pineo ☑ (no toca modelos ni imágenes)
+- **Regresión**: `npm run verify:gobernanza` 133/133 en verde (era 127/127) ·
+  `npm run regresion` 99/99 en verde · `npm run empaqueta` verde de punta a punta sobre el
+  andamio y sobre una herramienta construida desde cero siguiendo solo la puerta, incluida
+  la prueba de integración real (tarball instalado en proyecto limpio).
+  **Control negativo corrido dos veces**: la primera destapó que al desaparecer la puerta
+  tres comprobaciones se *saltaban* en silencio (133 → 130, un solo fallo); se endurecieron
+  para que fallen en vez de saltarse, y la segunda corrida da 4 fallos sobre 133 constantes.
+- **Aprobado por**: **PENDIENTE** — redactado por el agente, sin firma. El agente no se
+  auto-aprueba un CDC (C1).
