@@ -43,8 +43,10 @@
       "medido_2026_08_23": 2784,
       "medido_2026_08_25": 3401,
       "por_archivo": {
-        "GEMINI.md": 4000
+        "GEMINI.md": 4500
       },
+      "medido_2026_08_26": 4067,
+      "_subida_2026_08_26": "4000 -> 4500. Desde hoy GEMINI.md se GENERA desde AGENTS.md (scripts/sincroniza-gemini.mjs) con las secciones que obligan VERBATIM: el decision tree entero (antes iba condensado a mano) es lo que sube 3459 -> 4067. Un espejo derivado no puede divergir; uno condensado a mano ya lo hacia. Aire de ~10 %: la siguiente regla nueva entra sin tocar esto, la tercera obliga a decidir.",
       "_subida_2026_08_25": "3500 -> 4000. Decision consciente, no descuido: el crecimiento son REGLAS (escalera CLI-first + las cuatro de los CLIs), que es exactamente el contenido que este espejo existe para llevar — una sesion de Gemini sin ellas se salta la palanca entera. De los ~11900 chars del archivo, 4372 son Reglas de Codigo: recortar ahi seria desactivar controles para ganar tokens, que es el intercambio equivocado. Y este nivel NO entra en el total siempre-presente: se paga solo en sesiones de ese arnes."
     },
     "mcp": {

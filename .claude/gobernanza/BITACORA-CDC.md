@@ -1776,3 +1776,32 @@ diff, sin regresión y sin aprobación.
 - **Regresión**: capa A 99/99 · capa B: corpus 17/17 legible; sin corrida en frio (ver riesgo).
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-26 — GEMINI.md se genera desde AGENTS.md; editarlo a mano pone el gate en rojo — radio: espejo de un arnes
+- **Cambio**: `scripts/sincroniza-gemini.mjs` nuevo (`npm run sincroniza:gemini` y `--check`):
+  proyecta VERBATIM las secciones de `AGENTS.md` que obligan (Filosofia, Decision Tree,
+  Auto-Blindaje, Golden Path, Reglas de Codigo, Comandos, Gobernanza) mas una seccion "Solo para
+  Gemini" (skills, rules que ese arnes no carga, memoria). Bloque **3b-bis** del verificador:
+  `GEMINI.md` tiene que coincidir con lo generado (124 comprobaciones). `AGENTS.md` (Comandos)
+  lo declara. Presupuesto del espejo **4000 -> 4500** con su razon en el JSON.
+- **Motivo**: pendiente #3 de la memoria. GEMINI.md era una copia condensada a mano: ~190 de 314
+  lineas duplicaban `AGENTS.md` sin que nadie las comparara, y ya divergian (Comandos omitia
+  `verify:gobernanza`/`regresion`; Gobernanza y Aprendizajes decian cosas distintas). Las 17
+  aserciones del verificador las satisfacia solo `Reglas de Codigo`: todo lo demas podia
+  pudrirse en verde. Un espejo derivado no puede divergir; se elimina la clase de fallo, no el
+  sintoma.
+- **Cifras**: GEMINI.md 3459 -> **4096 tokens** (el decision tree entra entero, antes iba
+  condensado); por eso sube el tope. `AGENTS.md` 4604 (CLAUDE.md expandido); suelo 8437.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99) · `validate` completo ☑ ·
+  aprobación humana ☑
+- **Controles negativos ejecutados**: una linea añadida a mano a `GEMINI.md` → `--check` **exit 1**
+  y verificador **1/124 en rojo**; regenerar lo devuelve a verde · renombrar una seccion de
+  `AGENTS.md` sin actualizar la lista → el generador **lanza** (no genera un espejo cojo en
+  silencio).
+- **Lo que pierde Gemini a proposito**: `AI Templates` y `Design Systems` (informativos, en
+  README) y los aprendizajes (en `.claude/rules/`, que ese arnes no carga: se le dice donde
+  estan). Si Gemini soporta imports de archivos no consta en ningun sitio; no se asume.
+- **Regresión**: capa A 99/99 · capa B: no aplica (cambia COMO se mantiene el espejo, no lo que
+  dice: el contenido es el de `AGENTS.md`, ya cubierto).
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto

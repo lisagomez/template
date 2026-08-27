@@ -270,10 +270,11 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
-npm run validate     # typecheck + build + gobernanza + regresion + contabilidad (el gate completo)
+npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # casos-trampa (C2 capa B, en cada CDC)
+npm run sincroniza:gemini  # GEMINI.md se GENERA de este archivo; a mano, el verificador lo rechaza
 
 # Deploy self-hosted (VPS propio) - se corren EN EL SERVIDOR
 npm run configura:deploy -- --escribir  # mide la maquina y valida .env.production

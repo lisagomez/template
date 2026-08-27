@@ -17,6 +17,7 @@
     "configura:deploy": "node scripts/configura-deploy.mjs",
     "empaqueta": "node scripts/empaqueta-herramienta.mjs",
     "mide:contexto": "node scripts/mide-contexto.mjs",
+    "sincroniza:gemini": "node scripts/sincroniza-gemini.mjs",
     "mide:mcp": "node scripts/mide-mcp.mjs",
     "audita:imprenta": "node scripts/audita-imprenta.mjs",
     "prueba:imprenta": "node scripts/prueba-imprenta.mjs",

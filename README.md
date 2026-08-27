@@ -170,7 +170,8 @@ Las instrucciones de la fabrica viven en **`AGENTS.md`**, que es la fuente unica
 `CLAUDE.md` y no `AGENTS.md`— y **opencode lee `AGENTS.md` directamente**: su documentacion
 dice que cuando existen los dos, solo usa `AGENTS.md`. Asi el mismo repo se conduce desde
 cualquiera de los dos arneses sin que las instrucciones puedan divergir, porque hay una sola
-copia.
+copia. **`GEMINI.md` tambien sale de ahi**: lo genera `npm run sincroniza:gemini` (solo las
+secciones que obligan, verbatim) y el verificador falla si alguien lo edita a mano.
 
 El verificador lee los archivos de instrucciones **expandiendo los imports**, igual que el
 arnes: si alguien rompe el import, 13 comprobaciones se ponen en rojo (probado).

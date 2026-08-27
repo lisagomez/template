@@ -14,6 +14,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { leeConImports } from './lee-instrucciones.mjs';
+import { geminiSincronizado } from './sincroniza-gemini.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
@@ -114,6 +115,15 @@ if (geminiMd !== null) {
     'GEMINI.md declara la regla service_role (C7)',
     geminiMd.includes('service_role'),
     'la regla C7 tiene que estar en AMBOS archivos de instrucciones',
+  );
+  // --- 3b-bis. GEMINI.md se GENERA desde AGENTS.md; a mano diverge en silencio -----
+  // Antes era una copia condensada mantenida a mano y nadie comparaba los dos: ya
+  // divergian en Comandos, Gobernanza y Aprendizajes sin que ningun gate lo viera.
+  const sincronizado = geminiSincronizado(raiz);
+  comprueba(
+    'GEMINI.md coincide con lo que genera sincroniza-gemini.mjs desde AGENTS.md',
+    sincronizado === true,
+    `${sincronizado === true ? '' : sincronizado + ' — '}regenerar con npm run sincroniza:gemini; editarlo a mano reintroduce la divergencia`,
   );
 }
 
