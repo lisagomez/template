@@ -79,6 +79,19 @@ npm install /ruta/a/este-repo/tools/mi-herramienta/mi-herramienta-0.1.0.tgz
 real fallan (dependencias hoisted que en el destino no existen, un React duplicado que el
 symlink oculta). El tarball es exactamente lo que instalará el consumidor.
 
+**Antes de instalarla a mano, deja que el empaquetador pruebe el encaje con TU proyecto:**
+
+```bash
+npm run empaqueta mi-herramienta -- --en /ruta/a/mi-otro-proyecto
+```
+
+El proyecto limpio del paso de integración no tiene React ni Next, así que no puede ver lo
+que más duele: un peer que tu proyecto tiene en otra *major*. Con `--en` el tarball se
+instala en ese proyecto **sin tocar su `package.json` ni su lockfile** (`--no-save`), npm
+dictamina los peers contra el árbol real (un React 18 frente a un peer `^19` sale como
+`ERESOLVE`, con la razón de npm delante), se importa desde ahí, y se retira. El destino
+queda como estaba. Lo que sigue sin probar es tu lógica en su runtime — eso es un test tuyo.
+
 **Ya en serio** — publicado en un registro:
 
 ```bash
@@ -133,5 +146,9 @@ instala; **solo tú sabes quién lo consume**.
   se descargó), así que es un gate humano, no un paso de script.
 - **No prueba tu lógica.** Prueba el *contrato*: que se instale, se importe y traiga tipos.
   Los tests de lo que hace tu herramienta son tuyos.
-- **No comprueba el proyecto de destino.** Que el paquete se instale limpio no significa que
-  encaje con la versión de React o de Next que tenga tu otro proyecto.
+- **No comprueba el proyecto de destino salvo que se lo pidas.** Que el paquete se instale
+  limpio no significa que encaje con la versión de React o de Next que tenga tu otro
+  proyecto; `--en <ruta>` (§4) lo instala ahí y deja que npm lo dictamine. Sin `--en`, el
+  veredicto es solo sobre el contrato.
+- **No hace doble build ESM/CJS.** El template es ESM-only (§5): un consumidor CommonJS es
+  una decisión aparte y un CDC, no un flag.

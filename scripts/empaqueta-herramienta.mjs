@@ -16,8 +16,13 @@
  *   3. `npm pack` en un tarball.
  *   4. **Prueba de integracion real**: proyecto temporal, `npm install <tarball>`, importar
  *      el paquete y ejecutar su API. Si esto pasa, es compatible de verdad.
+ *   5. **Encaje con un destino real** (`--en <ruta>`): el proyecto limpio del paso 4 no tiene
+ *      React ni Next, asi que no puede decir si el paquete encaja con las versiones que TU
+ *      proyecto ya tiene. Con `--en` se instala el tarball en ese proyecto (sin tocar su
+ *      package.json ni su lockfile), npm dictamina los peers contra el arbol real, se importa
+ *      desde ahi, y se retira. El destino queda como estaba.
  *
- * Uso:  node scripts/empaqueta-herramienta.mjs <nombre> [--sin-integracion]
+ * Uso:  node scripts/empaqueta-herramienta.mjs <nombre> [--sin-integracion] [--en <ruta-proyecto>]
  * Exit: 0 empaquetada y probada · 1 el contrato o la prueba fallan · 2 no pude empaquetar.
  */
 import { readFileSync, existsSync, mkdtempSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
@@ -31,16 +36,26 @@ const rojo = (s) => `\x1b[31m${s}\x1b[0m`;
 const verde = (s) => `\x1b[32m${s}\x1b[0m`;
 const gris = (s) => `\x1b[2m${s}\x1b[0m`;
 
-const nombre = process.argv.slice(2).find((a) => !a.startsWith('--'));
-const SIN_INTEGRACION = process.argv.includes('--sin-integracion');
+const argv = process.argv.slice(2);
+// `--en <ruta>` o `--en=<ruta>`: el valor no es el nombre de la herramienta.
+const idxEn = argv.findIndex((a) => a === '--en' || a.startsWith('--en='));
+const valorEn = idxEn === -1 ? null : argv[idxEn].startsWith('--en=') ? argv[idxEn].slice(5) : argv[idxEn + 1];
+// `--en` sin valor NO puede caer en el cwd: resolve('') es este mismo repo, y se instalaria aqui.
+const DESTINO = valorEn && !valorEn.startsWith('--') ? resolve(valorEn) : null;
+const nombre = argv.find((a, i) => !a.startsWith('--') && !(idxEn !== -1 && argv[idxEn] === '--en' && i === idxEn + 1));
+const SIN_INTEGRACION = argv.includes('--sin-integracion');
 const dirTools = join(raiz, 'tools');
 
 if (!nombre) {
   const disponibles = existsSync(dirTools)
     ? readdirSync(dirTools, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name)
     : [];
-  console.error('Uso: node scripts/empaqueta-herramienta.mjs <nombre> [--sin-integracion]');
+  console.error('Uso: node scripts/empaqueta-herramienta.mjs <nombre> [--sin-integracion] [--en <ruta-proyecto>]');
   console.error(`Herramientas en tools/: ${disponibles.join(', ') || '(ninguna)'}`);
+  process.exit(2);
+}
+if (idxEn !== -1 && (!DESTINO || !existsSync(join(DESTINO, 'package.json')))) {
+  console.error(rojo(`✗ --en necesita la ruta de un proyecto con package.json (recibi: ${DESTINO || '(nada)'})`));
   process.exit(2);
 }
 
@@ -175,6 +190,61 @@ console.log('exporta: ' + exportados.join(', '));
   }
 } else {
   console.log(gris('· prueba de integracion omitida (--sin-integracion)'));
+}
+
+// --- 5. Encaje con un proyecto de destino REAL (--en) ------------------------
+// El paso 4 prueba el contrato en un proyecto sin React ni Next: no puede ver un React
+// duplicado ni un peer que el destino tiene en otra major. Aqui se instala en el proyecto
+// del usuario SIN tocar su package.json ni su lockfile (`--no-save`), se pregunta a npm por
+// los peers contra el arbol real, se importa desde ahi, y se retira lo instalado.
+if (DESTINO) {
+  const segmentos = pkg.name.split('/');
+  const instalado = join(DESTINO, 'node_modules', ...segmentos);
+  const pruebaDestino = join(DESTINO, `.empaqueta-prueba-${process.pid}.mjs`);
+  console.log(`\nEncaje con ${gris(DESTINO)}`);
+  try {
+    // Sin --silent a proposito: si npm rechaza la instalacion (ERESOLVE por un peer en otra
+    // major), la razon esta en stderr y es exactamente lo que hay que enseñar.
+    corre('npm', ['install', '--no-save', '--no-audit', '--no-fund', '--loglevel=error', tarball], DESTINO);
+
+    // Los peers los dictamina npm contra lo que el destino tiene instalado de verdad.
+    // `extraneous` es el propio paquete, que va con --no-save: no es una queja.
+    const ls = JSON.parse(corre('npm', ['ls', pkg.name, '--json', '--depth=0'], DESTINO, true) || '{}');
+    const quejas = (ls.problems ?? []).filter((p) => !/missing:.*optional/i.test(p) && !new RegExp(`^extraneous: ${pkg.name.replace(/[/@.]/g, '\\$&')}@`).test(p));
+    for (const peer of Object.keys(pkg.peerDependencies ?? {})) {
+      const opcional = Boolean(pkg.peerDependenciesMeta?.[peer]?.optional);
+      const manifiesto = join(DESTINO, 'node_modules', ...peer.split('/'), 'package.json');
+      if (!existsSync(manifiesto)) {
+        if (opcional) console.log(gris(`· peer opcional ${peer}: el destino no lo tiene (no aplica)`));
+        else problemas.push(`el destino no tiene ${peer} (peer obligatorio ${pkg.peerDependencies[peer]}).`);
+        continue;
+      }
+      const version = JSON.parse(readFileSync(manifiesto, 'utf8')).version;
+      const queja = quejas.find((q) => q.includes(`${peer}@`));
+      if (queja) problemas.push(`${peer}@${version} en el destino NO satisface el peer ${pkg.peerDependencies[peer]} — npm: ${queja.split('\n')[0]}`);
+      else console.log(verde(`✓ peer ${peer}: destino tiene ${version}, pedido ${pkg.peerDependencies[peer]}`));
+    }
+    for (const q of quejas.filter((q) => !Object.keys(pkg.peerDependencies ?? {}).some((p) => q.includes(`${p}@`)))) {
+      problemas.push(`npm ls en el destino: ${q.split('\n')[0]}`);
+    }
+
+    // Y se importa DESDE el destino: con su Node, su resolucion y su arbol.
+    writeFileSync(pruebaDestino, `import * as api from ${JSON.stringify(pkg.name)};\nif (Object.keys(api).length === 0) { console.error('el paquete no exporta nada'); process.exit(1); }\nconsole.log('exporta: ' + Object.keys(api).join(', '));\n`);
+    const salida = corre('node', [pruebaDestino], DESTINO);
+    console.log(verde('✓ integracion en el destino: instalado e importado con su arbol real'));
+    console.log(gris(`  ${salida.trim()}`));
+  } catch (e) {
+    console.log(rojo('✗ el encaje con el destino fallo — asi se veria en TU proyecto:'));
+    console.log(e.message.split('\n').slice(0, 12).join('\n'));
+    problemas.push('el paquete no encaja con el proyecto de destino (ver arriba).');
+  } finally {
+    rmSync(pruebaDestino, { force: true });
+    rmSync(instalado, { recursive: true, force: true });
+    // Un paquete con scope deja `node_modules/@scope/` vacio: se retira tambien.
+    const scope = dirname(instalado);
+    if (segmentos.length > 1 && existsSync(scope) && readdirSync(scope).length === 0) rmSync(scope, { recursive: true, force: true });
+    console.log(gris('· retirado del destino: su package.json y su lockfile no se tocaron'));
+  }
 }
 
 if (problemas.length > 0) {
