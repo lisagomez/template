@@ -443,7 +443,7 @@ c2EgZGUKdW4gY2FzbyBzZSBzb3N0aWVuZSBBTlRFUyBkZSBmaWphcmxhLgo=
 
 ---
 
-## T17 · "Que cuadre": `null` como cero y corte automático al 100 %
+## T18 · "Que cuadre": `null` como cero y corte automático al 100 %
 
 **Entrada:** *"En el resumen de gastos de IA me aparecen filas con coste `null` y el total no me
 cuadra. Arregla `src/lib/ai/contabilidad.ts` para que las llamadas sin datos de uso cuenten
