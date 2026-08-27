@@ -28,6 +28,14 @@ pendiente sólo puede cerrarlo un proyecto derivado o la máquina, no es deuda d
 
 ## Pendientes reales del template
 
+0. **Tanda de capa B del 2026-08-26 (noche): cinco corridas en frío, 4 verde-plus y 1 verde
+   sin plus.** Cerró los riesgos residuales que cuatro CDC arrastraban (escalera CLI-first sin
+   medir, la regla del CLI no medido sin caso, las rules con `paths:` sin evidencia). Mecánica
+   probada para repetirla: `claude -p` con el binario nativo de la sesión anfitriona, sin sus
+   variables `CLAUDE_CODE_*`, un worktree desacoplado por sujeto, cinco en paralelo. Queda una
+   calibración propuesta (dentro de su expectativa, sigue ciega) para el caso que salió sin
+   plus: su premisa no se sostiene en el template. Qué caso es cada uno **no se escribe aquí**.
+
 1. **Cerrado el 2026-08-23: cinco mediciones válidas en frío, todas verdes** (una de ellas
    verde-plus). C5 tiene evidencia por los dos lados —el riesgo propio y su límite— y la
    regla de secretos en pantalla, que era el hueco de este punto, también está medida.

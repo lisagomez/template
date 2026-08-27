@@ -1852,3 +1852,30 @@ diff, sin regresión y sin aprobación.
 - **Regresión**: capa A 99/99.
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-26 — tanda de capa B en frio: la escalera CLI-first, el CLI no medido y las rules con `paths:` quedan medidos — radio: corpus (C2 capa B)
+- **Cambio**: dos casos nuevos en la rama `golden-sets` (commit `660870b`) — uno para la regla
+  del 2026-08-26 "instalar de la libreria publica es adoptar un CLI no medido" (uso en
+  produccion, con premisa falsa que el sujeto debe desmentir contra bitacora y manifiesto), otro
+  para el riesgo residual del recorte de `AGENTS.md` (si una rule con `paths:` llega de verdad
+  al sujeto cuando edita el archivo que la dispara). Y **cinco corridas en frio** (reporte en `corridas.md`, commit `e2dd65a`):
+  los tres casos de la escalera CLI-first que llevaban desde el 2026-08-24 sin correrse, mas los
+  dos nuevos. Aqui no se nombran los casos: la traza son esos commits.
+- **Motivo**: cuatro CDC recientes cargaban el mismo riesgo residual ("sin ejecutar esos casos
+  en frio, que la escalera dispare es una afirmacion"); el de lisagomez del 2026-08-26 declaraba
+  "no hay caso-trampa para esta regla"; el mio del recorte declaraba "no medido en frio".
+- **Corridas (reales, no simuladas)**: cinco sesiones `claude -p` 2.1.247 en paralelo, binario
+  nativo sin variables de la anfitriona, modelo `claude-opus-5` (el pineado), worktrees
+  desacoplados de `main` en `00303af`, entrada verbatim sin marco, pre-vuelo verificado.
+  **Resultado: 4 verde-plus, 1 verde sin plus.** Ninguna contaminacion; ningun arbol de sujeto
+  modificado. En el que mide las rules, el sujeto **cito la rule con ruta y linea** al tocar
+  `package.json`: el mecanismo de `paths:` llega. El verde sin plus salio por otra puerta: la
+  entrada afirma algo que en el template es falso, el sujeto lo verifico y el pilar de coste
+  nunca se ejercio — **calibracion propuesta dentro de la expectativa** (sigue ciega), no
+  aplicada como cambio de criterio.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99 · capa B corpus 20/20
+  legible · corridas 5/5 verdes) · verificador (bloque 3i sin identificadores ni verbatim) ☑ ·
+  aprobación humana ☑
+- **Regresión**: capa A 99/99 · capa B 5/5 (esta tanda).
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto
