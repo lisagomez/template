@@ -2,6 +2,10 @@
 
 **Ruta:** `/home/gsore/code/a2aboths/businessos/gobernanza/` (proyecto Hermes OS, 9 docs)
 
+> **No disponible en esta máquina** (comprobado 2026-08-26: `/home/gsore` no existe). La ruta
+> es la de la máquina donde se destiló la capa; aquí vale como referencia histórica. Si hace
+> falta releer un original, pedirlo a la responsable del proyecto.
+
 Es material de **lectura**, no se modifica desde este repo. Si hay que revisar por qué un
 control quedó como quedó, la fuente está ahí y es más densa que el destilado.
 

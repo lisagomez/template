@@ -44,6 +44,12 @@ un proyecto temporal limpio y lo importa. Ahí "es compatible" deja de ser una o
 ## Pendiente
 
 - **ESM only.** Dar soporte a un consumidor CommonJS es un doble build y **un CDC propio**.
-- El empaquetador prueba el contrato, **no el encaje con el proyecto de destino**: que se
-  instale limpio no significa que cuadre con la versión de React o Next que ese proyecto
-  tenga.
+  Declarado explícitamente en el runbook (§7) el 2026-08-26: no es un flag, es una decisión.
+- ~~El empaquetador prueba el contrato, **no el encaje con el proyecto de destino**.~~
+  **Cerrado el 2026-08-26**: `npm run empaqueta <nombre> -- --en <ruta>` instala el tarball en
+  el proyecto de destino con `--no-save` (sin tocar su `package.json` ni su lockfile), deja que
+  **npm dictamine los peers contra el árbol real** (React 18 frente a `^19` → `ERESOLVE` con la
+  razón de npm), importa desde ahí y lo retira. Probado con dos consumidores (React 19 encaja,
+  React 18 avisa). Gotcha que cazó: `--en` sin valor resolvía al cwd — este mismo repo — y se
+  instalaba aquí; ahora se rechaza. Lo que sigue sin probar es la lógica en el runtime del
+  destino: eso es un test del consumidor.

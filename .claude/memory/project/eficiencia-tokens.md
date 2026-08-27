@@ -47,6 +47,23 @@ carencias eran el mismo fallo con distinta cara: **no habia sensor**.
 
 ## Pendientes reales del template
 
+> **Los tres se cerraron el 2026-08-26** (bitácora CDC, tres entradas de esa fecha). Se deja
+> el texto original debajo como historia de por qué se hicieron así.
+>
+> 1. **Corte de `AGENTS.md` ejecutado, medido antes**: 527 → 321 líneas. Lo informativo
+>    (aprendizajes, flujos, arquitectura, QA, estructura) vive en `.claude/rules/*.md` con
+>    `paths:` y texto original; la tabla de skills se borró (sus `description` ya cargan). Suelo
+>    por sesión **11313 → 8437 tokens**; `CLAUDE.md` expandido 7480 → 4604. `opencode.json`
+>    carga las rules siempre: ahí el ahorro es cero y `mide:contexto` lo mide aparte (nivel
+>    *condicional*, 3335 tokens). Riesgo residual declarado: una rule que no cargue por un
+>    `paths:` que no empate — los errores críticos siguen en `AGENTS.md`.
+> 2. **Contabilidad medida en frío**: caso en `golden-sets`, corrida real con `claude -p`
+>    (sesión fría, worktree desacoplado, **con `AGENTS.md` ya recortado**): verde-plus. Reporte
+>    en `corridas.md` de esa rama; el sujeto no se fusiona.
+> 3. **`GEMINI.md` ya no es copia a mano**: `npm run sincroniza:gemini` lo genera desde
+>    `AGENTS.md` (solo lo que obliga, verbatim) y el verificador (3b-bis) falla si diverge.
+>    Presupuesto del espejo 4000 → 4500 con la razón en el JSON.
+
 1. **`AGENTS.md` tiene 519 lineas; la doc oficial pide menos de 200.** `CLAUDE.md` va al
    **88 % de su presupuesto** de contexto (7.065 de 8.000). `.claude/rules/` con `paths:`
    carga solo al tocar los archivos que importan.

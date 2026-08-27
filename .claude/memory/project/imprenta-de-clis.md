@@ -48,6 +48,14 @@ y reglas inline. Ver `docs/SDD-imprenta-de-clis.md`.
 - **Medido en rojo tampoco es aprobado.** `verdict` del dogfood se leía y no se usaba: un CLI
   fallando pasaba como conforme. Ahora un FAIL sin reconocer en el manifiesto rompe el gate.
 
+## Estado en la máquina actual (2026-08-26)
+
+**Aquí no se imprime, y no es deuda del template**: Go 1.24.6 (la press exige ≥1.26.6), sin
+librería ni índice, sin credenciales de ninguna API para `auth_protocol` /
+`live_api_verification`. El pendiente de "grados parciales → aprobados" solo se cierra en la
+máquina que imprime. El auditor lo declara como "no verificable" y el gate sigue verde — que es
+exactamente lo que debe hacer. Ver [[entorno-git-y-red]].
+
 ## Cómo se corre
 
 ```bash

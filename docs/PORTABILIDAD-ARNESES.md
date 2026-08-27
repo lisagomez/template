@@ -126,3 +126,16 @@ cd <el repo> && opencode             # lee AGENTS.md y ve los 22 skills
 Dentro de la sesion, el gate es el mismo de siempre: `npm run validate`. **El cambio de
 arnes no relaja ningun control** — el CDC (C1), el registro de riesgo (C5) y el resto siguen
 viviendo en `AGENTS.md`, que es justo lo que opencode lee primero.
+
+---
+
+## Actualizacion 2026-08-26 — `.claude/rules/` ya existe, y opencode las carga por `opencode.json`
+
+El ahorro apuntado arriba se ejecuto: `AGENTS.md` conserva solo lo que obliga y lo informativo
+vive en `.claude/rules/*.md` con `paths:`. La mitigacion descrita en esta pagina es ahora
+codigo: `opencode.json` con `instructions: [".claude/rules/*.md"]`, asi que **ninguna regla
+existe en un arnes y no en el otro**. El precio tambien se cumplio tal cual estaba previsto:
+en opencode las rules cargan siempre (3335 tokens medidos), el suelo ahi queda ~igual que
+antes; en Claude Code baja de 11313 a 8437. `npm run mide:contexto` lo separa como nivel
+*condicional*. Y `GEMINI.md` dejo de ser copia a mano: `npm run sincroniza:gemini` lo deriva de
+`AGENTS.md` y el verificador falla si diverge — Gemini no carga rules, y se le dice donde estan.
