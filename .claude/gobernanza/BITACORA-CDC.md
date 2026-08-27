@@ -1716,3 +1716,28 @@ diff, sin regresión y sin aprobación.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-26
   ("commit pr merge", con el diff completo a la vista). Aprueba la regla, la comprobación y
   la documentación. El pendiente de capa B queda declarado, NO cerrado por esta firma.
+
+### 2026-08-26 — el gate vuelve a ser ejecutable en un clon fresco (lint, rama del corpus, Node 22) — radio: gate
+- **Cambio**: `package.json` (`lint` pasa de `next lint` —retirado en Next 16— a `eslint .`, con
+  `eslint.config.mjs` flat nuevo; **`lint` entra en `validate`**; `engines.node >=22.18`) ·
+  `.nvmrc` (22) · `scripts/verifica-gobernanza.mjs` y `scripts/regresion-skills.mjs` (el corpus se
+  resuelve en la rama local `golden-sets` y, si no existe, en `origin/golden-sets`) · README,
+  `.claude/README.md` y `CLAUDE.md` describen el `validate` que corre de verdad · `AGENTS.md`
+  incorpora el bloque `nextjs-agent-rules` que `next dev` re-añade solo.
+- **Motivo**: en un clon fresco de esta maquina el gate salia **rojo por tres causas ajenas al
+  papel**: `next lint` ya no existe (exit 1 sin lintar nada), el verificador exigia una rama local
+  que un clon normal no crea (2/121 en rojo y capa B "inaccesible" con el corpus a un `origin/` de
+  distancia), y `prueba-contabilidad.ts` no corre en Node 20 (el Dockerfile ya era `node:22`, pero
+  nada lo declaraba al que clona). Un gate que no corre en la maquina de otro no es un gate.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99; capa B corpus 17/17
+  legible por fallback) · `validate` completo ☑ (123/123 gobernanza, lint 0 avisos, build) ·
+  aprobación humana ☑
+- **Controles negativos ejecutados**: clon normal sin rama local → verificador **123/123 verde** y
+  `--trampa` 17/17 (antes: 2 rojas y exit 1) · clon `--single-branch` → **2/121 rojas, exit 1**
+  (sigue siendo rojo cuando de verdad no hay corpus).
+- **No incluido**: no se subio el pineo de ESLint 9.39.5 (deprecado, avisa `npm`; cambiarlo es
+  otro CDC) · no se toco `predeploy` (no lintaba antes y no linta ahora: el lint es del build).
+- **Regresión**: capa A 99/99 · capa B corpus 17/17 (legible; corrida en frio no aplica a un
+  cambio de gate).
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto

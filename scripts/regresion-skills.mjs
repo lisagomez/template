@@ -32,20 +32,28 @@ if (modoTrampa) {
   // El corpus NO vive en el arbol de trabajo: se saco a su propia rama para que una
   // sesion fria que trabaja en main no lo encuentre leyendo el directorio (paso dos
   // veces). Se lee de la rama, nunca se materializa en disco.
+  // Un clon normal trae `origin/golden-sets` sin crear la rama local: se prueba la ref
+  // local y, si no existe, la remota (mismo criterio que verifica-gobernanza.mjs).
   let corpus;
-  try {
-    corpus = execFileSync('git', ['show', `${RAMA_CORPUS}:casos-trampa.md`], {
-      cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
-    });
-  } catch {
-    console.error(`No se pudo leer el corpus de la rama "${RAMA_CORPUS}".`);
-    console.error('C2 capa B esta inaccesible: git show ' + RAMA_CORPUS + ':casos-trampa.md');
+  let refUsada = null;
+  for (const ref of [RAMA_CORPUS, `origin/${RAMA_CORPUS}`]) {
+    try {
+      corpus = execFileSync('git', ['show', `${ref}:casos-trampa.md`], {
+        cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
+      });
+      refUsada = ref;
+      break;
+    } catch { /* siguiente candidata */ }
+  }
+  if (!refUsada) {
+    console.error(`No se pudo leer el corpus de la rama "${RAMA_CORPUS}" (ni local ni origin/).`);
+    console.error(`C2 capa B esta inaccesible. Traela: git fetch origin ${RAMA_CORPUS}:${RAMA_CORPUS}`);
     process.exit(1);
   }
   const casos = [...corpus.matchAll(/^##\s+(T\d+)\s*·\s*(.+)$/gm)];
   const esperado = new Map();
   anota(`el corpus declara casos (${casos.length})`, casos.length > 0, 'corpus vacio');
-  for (const [, id, titulo] of casos) {
+  for (const [, id] of casos) {
     const bloque = corpus.split(new RegExp(`^##\\s+${id}\\s`, 'm'))[1]?.split(/^## /m)[0] ?? '';
     const b64 = bloque.match(/\*\*Expectativa \(b64\):\*\*\s*```([\s\S]*?)```/);
     anota(

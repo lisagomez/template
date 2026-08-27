@@ -11,7 +11,7 @@ y esta capa ya se llevo esa leccion.
 Lo especifico de este arnes, y solo eso:
 
 - **Skills**: `.claude/skills/` (23). Se invocan con `/nombre` o los activa el modelo.
-- **Gobernanza**: `npm run validate` encadena typecheck, build, verificador, regresion,
+- **Gobernanza**: `npm run validate` encadena typecheck, lint, build, verificador, regresion,
   auditoria de credenciales y presupuesto de contexto.
 - **Memoria automatica**: vive fuera del repo, en `~/.claude/projects/<proyecto>/memory/`.
   La memoria **del proyecto**, la que viaja con el codigo, es `.claude/memory/`.

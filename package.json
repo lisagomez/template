@@ -2,11 +2,14 @@
   "name": "saas-factory-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "verify:gobernanza": "node scripts/verifica-gobernanza.mjs",
     "regresion": "node scripts/regresion-skills.mjs",
@@ -21,7 +24,7 @@
     "prueba:contabilidad": "node scripts/prueba-contabilidad.ts",
     "vigila:versiones": "node scripts/vigila-versiones.mjs",
     "vigila:hermes": "node scripts/verifica-hermes.mjs",
-    "validate": "npm run typecheck && npm run build && npm run verify:gobernanza && npm run regresion && npm run audita:secretos && npm run mide:contexto && npm run verifica:routing && npm run prueba:contabilidad && npm run prueba:imprenta && npm run audita:imprenta",
+    "validate": "npm run typecheck && npm run lint && npm run build && npm run verify:gobernanza && npm run regresion && npm run audita:secretos && npm run mide:contexto && npm run verifica:routing && npm run prueba:contabilidad && npm run prueba:imprenta && npm run audita:imprenta",
     "deploy:build": "docker compose --env-file .env.production build",
     "deploy:up": "docker compose --env-file .env.production up -d",
     "deploy:down": "docker compose --env-file .env.production down",

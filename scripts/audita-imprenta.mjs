@@ -22,7 +22,7 @@
  * Exit: 0 conforme · 1 falta algo declarado · 2 NO PUDE VERIFICAR (mismo contrato que
  *       vigila-versiones.mjs: "no pude mirar" no es "todo bien").
  */
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { localizaLibreria, escaneaLibreria, heredaGrados, clasifica, sinDeclarar } from './lib/imprenta.mjs';

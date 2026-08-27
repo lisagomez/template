@@ -126,7 +126,7 @@ npm run typecheck    # TypeScript check
 npm run verify:gobernanza  # Cableado de la capa de gobernanza
 npm run regresion    # Regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # Casos-trampa (C2 capa B, para CDC)
-npm run validate     # typecheck + build + gobernanza + regresion (el gate completo)
+npm run validate     # typecheck + lint + build + gobernanza + regresion (el gate completo)
 ```
 
 ---

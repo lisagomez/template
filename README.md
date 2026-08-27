@@ -19,7 +19,11 @@ Template production-ready para crear aplicaciones SaaS con desarrollo asistido p
 
 ### 1. Instalar
 
+Node **22** (declarado en `.nvmrc` y en `engines`; es el mismo `node:22` del `Dockerfile`, y
+`prueba-contabilidad.ts` corre TypeScript directo, que Node 20 no ejecuta).
+
 ```bash
+nvm use        # o cualquier Node >= 22.18
 npm install
 ```
 
@@ -147,7 +151,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # typecheck + build + gobernanza + regresion + contabilidad (el gate completo)
+npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run regresion    # regresion de skills (C2)
 npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
@@ -246,7 +250,9 @@ del reporte. Dos comprobaciones del verificador lo vigilan (identificador y entr
 verbatim), asi que ya no depende de que alguien corra un `grep` antes de medir.
 
 Si clonas con `--single-branch`, esa rama no viaja y **C2 capa B queda inaccesible**. El
-verificador lo dice; no falla en silencio.
+verificador lo dice; no falla en silencio. Un clon normal trae `origin/golden-sets` sin crear
+la rama local: el verificador y `npm run regresion -- --trampa` la resuelven igual (local
+primero, `origin/` despues); si prefieres tenerla local, `git fetch origin golden-sets:golden-sets`.
 
 Alineada a ISO/IEC 42001 en su etapa AIMS-lite: sostenible por una persona sola, sin
 equipo de compliance. La certificacion se activa por disparador comercial, no por

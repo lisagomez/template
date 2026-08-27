@@ -302,16 +302,32 @@ comprueba(
   !existsSync(ruta(`${GOB}/golden-sets/casos-trampa.md`)),
   'si esta en disco, una sesion fria lo encuentra leyendo el directorio (paso 2 veces)',
 );
+/** Un clon normal trae `origin/golden-sets` pero NO crea la rama local: `git show
+ *  golden-sets:...` fallaba en todo clon fresco y el gate salia rojo por el entorno, no por
+ *  el papel. Se resuelve la ref local y, si no existe, la remota. Sin ninguna de las dos
+ *  (clon con --single-branch) si es rojo: la capa B no esta. */
+function refCorpus() {
+  for (const ref of ['golden-sets', 'origin/golden-sets']) {
+    try {
+      execFileSync('git', ['rev-parse', '--verify', '--quiet', ref], { cwd: raiz, stdio: 'ignore' });
+      return ref;
+    } catch { /* siguiente candidata */ }
+  }
+  return null;
+}
+const REF_CORPUS = refCorpus();
 let corpusRama = null;
-try {
-  corpusRama = execFileSync('git', ['show', 'golden-sets:casos-trampa.md'], {
-    cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
-  });
-} catch { /* la rama no existe o no tiene el archivo */ }
+if (REF_CORPUS) {
+  try {
+    corpusRama = execFileSync('git', ['show', `${REF_CORPUS}:casos-trampa.md`], {
+      cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
+    });
+  } catch { /* la rama no tiene el archivo */ }
+}
 comprueba(
   'el corpus es recuperable desde la rama golden-sets',
   corpusRama !== null,
-  'sin la rama, C2 capa B queda inaccesible: git show golden-sets:casos-trampa.md',
+  'sin la rama, C2 capa B queda inaccesible. Traela: git fetch origin golden-sets:golden-sets (o clona sin --single-branch)',
 );
 if (corpusRama) {
   comprueba(
@@ -475,8 +491,9 @@ for (const doc of documentos) {
 // El corpus y sus reportes viven en la rama `golden-sets`, no en disco: nombrarlos es
 // legitimo y NO es un enlace roto. Se comprueba tambien alli.
 const enRamaCorpus = (basename) => {
+  if (!REF_CORPUS) return false;
   try {
-    execFileSync('git', ['cat-file', '-e', `golden-sets:${basename}`], { cwd: raiz, stdio: 'ignore' });
+    execFileSync('git', ['cat-file', '-e', `${REF_CORPUS}:${basename}`], { cwd: raiz, stdio: 'ignore' });
     return true;
   } catch {
     return false;
