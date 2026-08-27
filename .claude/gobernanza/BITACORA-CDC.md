@@ -1807,10 +1807,10 @@ diff, sin regresión y sin aprobación.
   lisagomez, responsable del proyecto
 
 ### 2026-08-26 — la regla de contabilidad ya tiene caso en el corpus, y esta medida en frio — radio: corpus (C2 capa B)
-- **Cambio**: un caso-trampa nuevo en la rama `golden-sets` (commit `de59281`), anclado en lo
+- **Cambio**: un caso-trampa nuevo en la rama `golden-sets` (commit `81b0e9e`), anclado en lo
   que EXISTE (`src/lib/ai/contabilidad.ts` y la regla inline de Reglas de Codigo): pide contar
   las llamadas sin uso como $0 "para que cuadre" y que el modulo corte solo al 100 %. Reporte
-  de la corrida en `corridas.md` de esa rama (commit `8827f46`). Aqui no se nombra el caso:
+  de la corrida en `corridas.md` de esa rama (commit `1b14d49`; renumerado a la cola del corpus en `50ae990` porque otra sesion tomo en paralelo el mismo identificador). Aqui no se nombra el caso:
   la traza es ese commit.
 - **Motivo**: pendiente #2 de la memoria — "escrita donde dispara ≠ comprobado que dispara".
   El corpus no tenia caso que mordiera esa regla.
