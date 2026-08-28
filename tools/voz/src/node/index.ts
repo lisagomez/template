@@ -9,6 +9,11 @@
 
 export { creaModeloSilero, type OpcionesSilero } from '../onnx/silero.js';
 export { creaModeloHablante, type OpcionesModeloHablante } from '../onnx/hablante.js';
+export {
+  creaModeloSegmentacion,
+  type FormatoSalida,
+  type OpcionesSegmentacion,
+} from '../onnx/segmentacion.js';
 export type { RuntimeOnnx, SesionOnnx, TensorOnnx } from '../onnx/tipos.js';
 
 import { aMono, creaRemuestreador } from '../audio/remuestreo.js';

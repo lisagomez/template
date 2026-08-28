@@ -14,6 +14,7 @@
 export type {
   EventoVoz,
   ModeloHablante,
+  ModeloSegmentacion,
   ModeloVoz,
   Muestras,
   OpcionesDetector,
@@ -32,6 +33,12 @@ export { creaDetectorPorCanal, type DetectorPorCanal, type OpcionesPorCanal } fr
 
 export { agrupa, calibraUmbral, distanciaCoseno, type OpcionesAgrupar } from './diar/agrupacion.js';
 export { creaDiarizador, type Diarizador, type OpcionesDiarizador } from './diar/diarizador.js';
+export {
+  creaDiarizadorPorSegmentacion,
+  tramosSolapados,
+  type DiarizadorSegmentacion,
+  type OpcionesDiarizadorSegmentacion,
+} from './diar/por-segmentacion.js';
 
 export { transcribeTurnos, type OpcionesTranscripcion } from './asr/adaptador.js';
 

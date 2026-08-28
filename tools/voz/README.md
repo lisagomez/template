@@ -13,7 +13,7 @@ y por eso se puede probar entero sin descargar un solo MB de modelos.
 |---|---|
 | Detectar donde empieza y acaba el habla | **Transcribir**. Define el enchufe (`Transcriptor`) y se aparta |
 | Repartir hablantes **por canal**, sin modelos | Diarizacion en **streaming** (llega en el tramo 2) |
-| Diarizar **por lotes** sobre turnos cerrados | Traer los pesos de los modelos: los configuras tu |
+| Diarizar **por lotes**, con o sin habla solapada | Traer los pesos de los modelos: los configuras tu |
 
 ## Instalar
 
@@ -66,6 +66,39 @@ el contexto de dos personas.
 
 ### 3. Reunion — diarizacion por lotes
 
+Hay **dos caminos**, y la diferencia no es de calidad sino de lo que pueden representar:
+
+| | `creaDiarizador` (VAD) | `creaDiarizadorPorSegmentacion` (PyanNet) |
+|---|---|---|
+| Modelos | VAD + embeddings | **Segmentacion** + embeddings |
+| Habla solapada | **No la ve.** Dos voces a la vez dan un turno con un embedding promedio y una etiqueta que no es de ninguno | La representa: los turnos se **pisan** |
+| Fronteras | Las del VAD | Por marco (~17 ms en pyannote 3.0) |
+| Cuando usarlo | Entrevista, dictado, cualquier audio con turnos limpios | Reunion real, mesa redonda, cualquier sitio donde la gente se interrumpe |
+
+
+**Camino PyanNet** (el que aguanta el solape):
+
+```ts
+import { creaDiarizadorPorSegmentacion, tramosSolapados } from '@tu-scope/voz';
+import { creaModeloHablante, creaModeloSegmentacion, leeWav, preparaParaModelo } from '@tu-scope/voz/node';
+
+const segmentacion = await creaModeloSegmentacion({ ort, modelo: '/modelos/segmentation-3.0.onnx' });
+const turnos = await creaDiarizadorPorSegmentacion({
+  segmentacion,
+  hablante: await creaModeloHablante({ ort, modelo: '/modelos/embedding.onnx' }),
+  hablantes: 3, // si lo sabes, dilo
+}).diariza(preparaParaModelo(leeWav(bytes), segmentacion.frecuenciaHz));
+
+// Donde se pisaron: es la pregunta que el camino por VAD no puede responder.
+for (const t of tramosSolapados(turnos)) console.log(t.inicioMs, t.finMs, t.hablantes);
+```
+
+El formato de salida (**powerset** de `segmentation-3.0` o **multietiqueta** de las 2.x) se
+deduce de la forma real del tensor con una inferencia de sonda al crear el modelo, no de la
+ficha. Un modelo con salida inesperada falla ahi, no en el marco 4000.
+
+**Camino VAD** (mas barato, sin solape):
+
 ```ts
 import { creaDetectorVoz, creaDiarizador, fusionaTurnos } from '@tu-scope/voz';
 import { creaModeloHablante, leeWav, preparaParaModelo } from '@tu-scope/voz/node';
@@ -117,7 +150,7 @@ esto el umbral es superstici­on heredada de un tutorial.
 ## Pruebas
 
 ```bash
-npm run build && npm run prueba   # 27 pruebas, sin red y sin modelos
+npm run build && npm run prueba   # 37 pruebas, sin red y sin modelos
 ```
 
 Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.

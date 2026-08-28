@@ -26,6 +26,31 @@ export interface ModeloVoz {
   cierra?(): Promise<void>;
 }
 
+/**
+ * Modelo de segmentacion por ventana (PyanNet / pyannote-segmentation).
+ *
+ * Se diferencia de `ModeloVoz` en lo que responde: el VAD dice "hay voz"; esto dice "en
+ * este marco hablan el local 0 y el local 2 **a la vez**". Es la unica via para el habla
+ * solapada: con VAD, dos personas hablando juntas producen un turno con las dos voces
+ * mezcladas y un embedding que no es de ninguna.
+ *
+ * "Local" es literal: las etiquetas valen SOLO dentro de la ventana. El hablante 0 de la
+ * ventana 3 no tiene por que ser el 0 de la ventana 4 — coserlos es trabajo del diarizador.
+ */
+export interface ModeloSegmentacion {
+  readonly frecuenciaHz: number;
+  /** Muestras que consume una ventana. En pyannote 3.0 son 10 s. */
+  readonly muestrasVentana: number;
+  /** Hablantes locales que distingue la ventana. */
+  readonly hablantesLocales: number;
+  /**
+   * Actividad por marco: `[marcos][hablantesLocales]`, cada valor en [0,1]. El numero de
+   * marcos lo fija el modelo, no quien llama.
+   */
+  ventana(muestras: Muestras): Promise<Float32Array[]>;
+  cierra?(): Promise<void>;
+}
+
 /** Modelo que convierte un fragmento de voz en un vector de hablante. */
 export interface ModeloHablante {
   readonly frecuenciaHz: number;
