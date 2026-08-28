@@ -71,6 +71,7 @@ Usuario dice algo
     |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
+    |       → Ejecutar skill CREAR-HERRAMIENTA
     |       → PUERTA (empieza aqui): `docs/CREAR-UNA-HERRAMIENTA.md` — que decide el
     |         humano y que decides tu, y el "todavia no": sin reuso real 3+ veces,
     |         empaquetar solo anade una version que mantener

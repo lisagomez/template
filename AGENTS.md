@@ -62,6 +62,7 @@ Usuario dice algo
     |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
+    |       → Ejecutar skill CREAR-HERRAMIENTA
     |       → PUERTA (empieza aqui): `docs/CREAR-UNA-HERRAMIENTA.md` — que decide el
     |         humano y que decides tu, y el "todavia no": sin reuso real 3+ veces,
     |         empaquetar solo anade una version que mantener
@@ -114,7 +115,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 23 Herramientas Especializadas
+## Skills: 24 Herramientas Especializadas
 
 Viven en `.claude/skills/<nombre>/SKILL.md`. Su `description` ya entra en contexto en cada
 sesion (el arnes la carga sola), asi que la tabla que antes vivia aqui pagaba dos veces lo

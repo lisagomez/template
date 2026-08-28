@@ -2007,3 +2007,33 @@ diff, sin regresión y sin aprobación.
   comprobacion que vigila la propia cifra (84c9aaf) hizo su trabajo.
 - **Aprobado por**: **PENDIENTE** — redactado por el agente, sin firma. El agente no se
   auto-aprueba un CDC (C1).
+
+### 2026-08-28 — la puerta gana comando: skill `crear-herramienta` — radio: skill
+- **Cambio**: alta de `.claude/skills/crear-herramienta/SKILL.md` (24º skill), invocable con
+  `/crear-herramienta`. La rama "herramienta" del decision tree gana un escalon previo
+  —**Ejecutar skill CREAR-HERRAMIENTA**— en `AGENTS.md` y `GEMINI.md` (regenerado, no
+  editado a mano). La cifra de skills declarada pasa de 23 a 24 en `README.md` (×4),
+  `.claude/README.md` (×3), `CLAUDE.md` y `AGENTS.md`.
+- **Motivo**: la puerta del CDC anterior es un **documento**, y para llegar a el habia que
+  saber que existe o describir la intencion con las palabras justas. Un skill lo pone en el
+  registro que el arnes ya ofrece al humano: se teclea `/crear-herramienta` y arranca por la
+  pregunta correcta. Sin esto, la puerta seguia siendo accesible sobre todo a quien ya sabia.
+- **El skill DELEGA, no duplica**: `docs/CREAR-UNA-HERRAMIENTA.md` sigue siendo la fuente de
+  la puerta y `docs/EMPAQUETAR-HERRAMIENTA.md` la del contrato tecnico. El skill es el orden
+  de ejecucion —el "todavia no" primero, los tres gates humanos, `--en <ruta>` contra el
+  proyecto real— y remite a los dos documentos en vez de copiarlos.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+  · pineo ☑ (no toca modelos ni imagenes)
+- **Regresión**: `verify:gobernanza` **136/136** verde (la comprobacion 3e, que vigila el
+  conteo de skills declarado, salio en rojo hasta actualizar los nueve sitios que decian 23:
+  el control funcionando) · capa A **102/102** (99 + los 3 contratos universales del skill
+  nuevo) · capa B **21/21** · `validate` completo verde.
+- **Presupuesto de contexto**: `descripciones de los skills` queda al **93 % de 3500** (3270
+  tokens). Es el sensor mas ajustado del repo: **caben una o dos descripciones mas antes de
+  que `mide:contexto` se ponga rojo**. Se declara aqui para que el proximo skill no lo
+  descubra por sorpresa. La `description` de este se recorto para no gastar de mas.
+- **No medido**: que un agente frio **obedezca** el "todavia no" —que diga *espera* a un
+  usuario decidido en vez de empaquetar— es capa B y **no tiene caso-trampa**. Es la misma
+  deuda declarada del CDC de la puerta, ahora con una superficie mas donde puede fallar.
+- **Aprobado por**: **PENDIENTE** — redactado por el agente, sin firma. El agente no se
+  auto-aprueba un CDC (C1).
