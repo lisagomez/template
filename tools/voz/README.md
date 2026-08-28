@@ -1,0 +1,123 @@
+# @tu-scope/voz
+
+Deteccion de voz (VAD) en tiempo real y diarizacion local por lotes.
+
+**El nucleo es TypeScript puro y no tiene dependencias.** No importa `onnxruntime`, ni React,
+ni nada del navegador: habla con dos interfaces (`ModeloVoz`, `ModeloHablante`) y cada punto
+de entrada le inyecta su runtime. Por eso el mismo algoritmo corre en el navegador y en Node,
+y por eso se puede probar entero sin descargar un solo MB de modelos.
+
+## Que hace y que no
+
+| Hace | No hace |
+|---|---|
+| Detectar donde empieza y acaba el habla | **Transcribir**. Define el enchufe (`Transcriptor`) y se aparta |
+| Repartir hablantes **por canal**, sin modelos | Diarizacion en **streaming** (llega en el tramo 2) |
+| Diarizar **por lotes** sobre turnos cerrados | Traer los pesos de los modelos: los configuras tu |
+
+## Instalar
+
+```bash
+npm install <ruta>/tools/voz/tu-scope-voz-0.1.0.tgz
+```
+
+El runtime de ONNX es **peerDependency opcional**: instala `onnxruntime-web` (navegador) u
+`onnxruntime-node` (servidor) solo si vas a usar Silero. Con `modeloEnergia()` no hace falta.
+
+## Los tres usos
+
+### 1. Barge-in — solo VAD, ~2 MB
+
+```ts
+import { creaDetectorVoz } from '@tu-scope/voz';
+import { capturaMicrofono, creaModeloSilero } from '@tu-scope/voz/browser';
+import * as ort from 'onnxruntime-web';
+
+const modelo = await creaModeloSilero({ ort, modelo: '/modelos/silero_vad.onnx' });
+const detector = creaDetectorVoz({ modelo, msSilencioParaCerrar: 300 });
+
+await capturaMicrofono({
+  frecuenciaHz: modelo.frecuenciaHz,
+  async alRecibir(muestras) {
+    for (const evento of await detector.procesa(muestras)) {
+      if (evento.tipo === 'inicioHabla') pararAlBot();
+    }
+  },
+});
+```
+
+Sin modelos: `creaDetectorVoz({ modelo: modeloEnergia() })`. Vale con auriculares y audio
+limpio; en una sala con ruido, falla — usa Silero.
+
+### 2. Dos canales — hablante sin diarizar
+
+```ts
+import { creaDetectorPorCanal } from '@tu-scope/voz';
+
+const d = creaDetectorPorCanal({
+  etiquetas: ['agente', 'cliente'],
+  modelos: [await creaModeloSilero({ ort, modelo: ruta }), await creaModeloSilero({ ort, modelo: ruta })],
+});
+for (const { canal, evento } of await d.procesa([izquierdo, derecho])) { /* ... */ }
+```
+
+Un modelo por canal, no uno compartido: Silero tiene estado recurrente y compartirlo mezcla
+el contexto de dos personas.
+
+### 3. Reunion — diarizacion por lotes
+
+```ts
+import { creaDetectorVoz, creaDiarizador, fusionaTurnos } from '@tu-scope/voz';
+import { creaModeloHablante, leeWav, preparaParaModelo } from '@tu-scope/voz/node';
+
+const audio = leeWav(bytes);
+const detector = creaDetectorVoz({ modelo: vad, conservaAudio: true });
+const eventos = [
+  ...(await detector.procesa(preparaParaModelo(audio, vad.frecuenciaHz))),
+  ...(await detector.cierra()),
+];
+const turnos = eventos.flatMap((e) => (e.tipo === 'finHabla' ? [e.turno] : []));
+
+const diarizador = creaDiarizador({
+  modelo: await creaModeloHablante({ ort, modelo: '/modelos/embedding.onnx' }),
+  hablantes: 3, // si lo sabes, dilo: es el dato mas util y mas barato
+});
+const acta = fusionaTurnos(await diarizador.asigna(turnos));
+```
+
+## Los mandos que de verdad importan
+
+| Opcion | Que pasa si te equivocas |
+|---|---|
+| `msRelleno` | Con 0, el turno empieza cortado y se pierde la primera consonante — la que el transcriptor necesita |
+| `msSilencioParaCerrar` | Corto: cortas a quien respira a mitad de frase. Largo: el bot tarda en contestar |
+| `umbralEntrada` / `umbralSalida` | Si los igualas pierdes la histeresis y una senal en el limite abre y cierra turnos sin parar |
+| `msMinimoHabla` | Bajo: cada tos es un turno, y en diarizacion, un hablante fantasma |
+| `umbral` (diarizacion) | Bajo parte a una persona en dos; alto funde a dos en una. **Calibralo con `calibraUmbral`** |
+
+## El umbral de diarizacion no se adivina
+
+```ts
+const { umbral, acierto } = calibraUmbral(vectores, ['ana', 'ana', 'luis']);
+```
+
+Se le da audio etiquetado a mano y devuelve el umbral que mas acierta, medido por pares. Sin
+esto el umbral es superstici­on heredada de un tutorial.
+
+## Avisos que ahorran una tarde
+
+- **Los modelos de embedding fallan en silencio.** Casi todos comen `fbank`, no forma de
+  onda. Si le das el formato equivocado no hay error: hay vectores malos y una diarizacion
+  que se equivoca sin decir por que. Contrasta la ficha del modelo.
+- **Los pesos no viajan en el paquete.** Un `.tgz` no es sitio para 55 MB. Se configuran por
+  ruta o URL, y se **pinean**: `latest` aqui es el mismo anti-patron que en todo lo demas.
+- **La diarizacion local no iguala a Deepgram o AssemblyAI.** Es el precio de que el audio no
+  salga de tu maquina. Mide con `calibraUmbral` sobre audio tuyo antes de prometer nada.
+
+## Pruebas
+
+```bash
+npm run build && npm run prueba   # 27 pruebas, sin red y sin modelos
+```
+
+Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.
