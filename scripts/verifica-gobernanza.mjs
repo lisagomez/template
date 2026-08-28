@@ -975,6 +975,28 @@ try {
   comprueba('ningun archivo versionado lleva una credencial viva', false, 'no se pudo listar el arbol con git ls-files');
 }
 
+// --- 9. La cifra de comprobaciones que declaran los README es la real ---------
+// README.md decia "107 comprobaciones" y .claude/README.md "58" cuando el verificador ya
+// hacia 126: cada bloque nuevo dejaba las dos cifras mas viejas y nada lo miraba. Misma
+// pudricion que el conteo de skills (3e), mismo remedio. Va al final porque necesita el
+// total, y se cuenta a si misma: una comprobacion por documento que declare cifra.
+const DECLARAN_CIFRA = ['README.md', '.claude/README.md']
+  .map((doc) => ({ doc, contenido: lee(doc) }))
+  .filter(({ contenido }) => contenido !== null)
+  .map(({ doc, contenido }) => {
+    const linea = contenido.split('\n').find((l) => /verify:gobernanza/.test(l) && /\d+\s+comprobaciones/.test(l));
+    return { doc, cifra: linea ? Number(linea.match(/(\d+)\s+comprobaciones/)[1]) : null };
+  })
+  .filter(({ cifra }) => cifra !== null);
+const totalEsperado = ok.length + fallos.length + DECLARAN_CIFRA.length;
+for (const { doc, cifra } of DECLARAN_CIFRA) {
+  comprueba(
+    `${doc} declara el numero real de comprobaciones del verificador (${totalEsperado})`,
+    cifra === totalEsperado,
+    `declara ${cifra} pero el verificador hace ${totalEsperado}: actualizar la linea de verify:gobernanza`,
+  );
+}
+
 // --- Reporte --------------------------------------------------------------
 const total = ok.length + fallos.length;
 for (const linea of ok) console.log(`  \x1b[32m✓\x1b[0m ${linea}`);
