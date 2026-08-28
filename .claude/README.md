@@ -246,7 +246,7 @@ sesiones frias lo encontraron leyendo el repo y la prueba dejo de ser ciega. Se 
 ### Se verifica sola
 
 ```bash
-npm run verify:gobernanza   # 130 comprobaciones (la cifra la vigila el propio verificador)
+npm run verify:gobernanza   # 136 comprobaciones (la cifra la vigila el propio verificador)
 npm run regresion           # C2 capa A
 npm run regresion -- --trampa   # C2 capa B (para cada CDC)
 ```

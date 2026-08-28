@@ -2000,5 +2000,10 @@ diff, sin regresión y sin aprobación.
   **Control negativo corrido dos veces**: la primera destapó que al desaparecer la puerta
   tres comprobaciones se *saltaban* en silencio (133 → 130, un solo fallo); se endurecieron
   para que fallen en vez de saltarse, y la segunda corrida da 4 fallos sobre 133 constantes.
+- **Re-medido tras rebase (2026-08-28)**: la rama se escribio sobre un `main` de 22 commits
+  atras. Las cifras de arriba son de esa base. Sobre `main` al dia: verificador **136/136**
+  (130 + las 6 de la puerta, no 133), capa A **99/99**, capa B **21/21**, `validate` completo
+  en verde y sellado. Los dos README declaraban 130 y salieron en rojo hasta corregirlos: la
+  comprobacion que vigila la propia cifra (84c9aaf) hizo su trabajo.
 - **Aprobado por**: **PENDIENTE** — redactado por el agente, sin firma. El agente no se
   auto-aprueba un CDC (C1).
