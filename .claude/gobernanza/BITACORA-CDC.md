@@ -1991,7 +1991,7 @@ diff, sin regresión y sin aprobación.
   `AGENTS.md` exige ("el humano NO necesita saber nada técnico"), media fábrica era
   inaccesible para su propio usuario objetivo. La puerta añade además el "todavía no":
   sin reúso real 3+ veces, empaquetar solo suma una versión que mantener.
-- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
   · pineo ☑ (no toca modelos ni imágenes)
 - **Regresión**: `npm run verify:gobernanza` 133/133 en verde (era 127/127) ·
   `npm run regresion` 99/99 en verde · `npm run empaqueta` verde de punta a punta sobre el
@@ -2005,8 +2005,11 @@ diff, sin regresión y sin aprobación.
   (130 + las 6 de la puerta, no 133), capa A **99/99**, capa B **21/21**, `validate` completo
   en verde y sellado. Los dos README declaraban 130 y salieron en rojo hasta corregirlos: la
   comprobacion que vigila la propia cifra (84c9aaf) hizo su trabajo.
-- **Aprobado por**: **PENDIENTE** — redactado por el agente, sin firma. El agente no se
-  auto-aprueba un CDC (C1).
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-28
+  ("apruebo las dos"), sobre el resumen de ambas entradas y las cifras de los gates
+  (verificador 136/136, capa A 102/102, capa B 21/21, `validate` verde). Se le ofreció el
+  diff completo (`gh pr diff 31`) y aprobó sin pedirlo: queda anotado por exactitud, no
+  como reparo. **El pendiente de capa B queda declarado, NO cerrado por esta firma.**
 
 ### 2026-08-28 — la puerta gana comando: skill `crear-herramienta` — radio: skill
 - **Cambio**: alta de `.claude/skills/crear-herramienta/SKILL.md` (24º skill), invocable con
@@ -2022,7 +2025,7 @@ diff, sin regresión y sin aprobación.
   la puerta y `docs/EMPAQUETAR-HERRAMIENTA.md` la del contrato tecnico. El skill es el orden
   de ejecucion —el "todavia no" primero, los tres gates humanos, `--en <ruta>` contra el
   proyecto real— y remite a los dos documentos en vez de copiarlos.
-- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
   · pineo ☑ (no toca modelos ni imagenes)
 - **Regresión**: `verify:gobernanza` **136/136** verde (la comprobacion 3e, que vigila el
   conteo de skills declarado, salio en rojo hasta actualizar los nueve sitios que decian 23:
@@ -2035,5 +2038,8 @@ diff, sin regresión y sin aprobación.
 - **No medido**: que un agente frio **obedezca** el "todavia no" —que diga *espera* a un
   usuario decidido en vez de empaquetar— es capa B y **no tiene caso-trampa**. Es la misma
   deuda declarada del CDC de la puerta, ahora con una superficie mas donde puede fallar.
-- **Aprobado por**: **PENDIENTE** — redactado por el agente, sin firma. El agente no se
-  auto-aprueba un CDC (C1).
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-28
+  ("apruebo las dos"), sobre el resumen de ambas entradas y las cifras de los gates
+  (verificador 136/136, capa A 102/102, capa B 21/21, `validate` verde). Se le ofreció el
+  diff completo (`gh pr diff 31`) y aprobó sin pedirlo: queda anotado por exactitud, no
+  como reparo. **El pendiente de capa B queda declarado, NO cerrado por esta firma.**
