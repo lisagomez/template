@@ -100,6 +100,13 @@ que un proyecto derivado tiene que saber, porque las rompe sin querer:
 
 ## 7. Especificación Técnica (Para el Agente)
 
+### Tipo de proyecto
+
+**Tipo:** [aplicacion | herramienta] — lo pregunta `/new-app` (pregunta 8); si no se decidió, "aplicacion por defecto"
+**Si aplicacion:** proveedor [hetzner | otro-vps] · dominio [host público] → `docs/DEPLOY-HETZNER.md`
+**Si herramienta:** paquete [@scope/nombre] · vive en `tools/[nombre]/` · sin VPS ni Docker → `docs/EMPAQUETAR-HERRAMIENTA.md`
+**Registro:** aquí y, cuando haya Supabase, en `project_settings` desde `/configuracion` (PRP-002: la base impide mezclar campos de VPS con campos de paquete)
+
 ### Features a implementar (Feature-First)
 
 ```
@@ -120,7 +127,8 @@ TypeScript + Tailwind 3.4, Supabase (Auth + DB + RLS), Zod, Zustand, Playwright.
 3. [ ] Feature principal
 4. [ ] Testing E2E (`/playwright-cli`)
 5. [ ] `npm run validate` en verde (typecheck + build + gobernanza)
-6. [ ] Deploy
+6. [ ] Entrega según el tipo: aplicación → `npm run configura:deploy` + `npm run deploy` ·
+   herramienta → `npm run empaqueta [nombre]` (y `-- --en <ruta>` contra el proyecto que la consume)
 7. [ ] Infraestructura de agentes, si aplica, y **respaldo con GATE 3 cerrado**
    (`docs/FASE0-INFRAESTRUCTURA.md`). Un respaldo sin restauración probada no cuenta
    como paso hecho

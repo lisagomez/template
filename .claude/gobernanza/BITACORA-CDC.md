@@ -1920,3 +1920,27 @@ diff, sin regresión y sin aprobación.
 - **Regresión**: capa B 1/1 verde (segunda corrida).
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-27 — `new-app` pregunta el tipo de proyecto (aplicacion | herramienta) — radio: skill
+- **Cambio**: `.claude/skills/new-app/SKILL.md` gana la **pregunta 8 "El Destino"**, la seccion
+  "Tipo de proyecto" en el §7 que genera, y "Entrega segun el tipo" en Proximos Pasos (antes
+  decia "Deploy Vercel", que ni siquiera era el runbook del template). `BUSINESS_LOGIC.md`
+  (plantilla) alineado. PRP-002 marca su gotcha como hecho. Memoria actualizada.
+- **Motivo**: gotcha abierto de PRP-002 — la entrevista asumia "aplicacion" en silencio y la
+  eleccion app/herramienta vivia solo en la cabeza de quien opera. Se hace como CDC aparte del
+  PRP, como el PRP pedia, para no mezclar el gate de datos con el de comportamiento de agente.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99: los tres contratos de
+  `new-app` — §6 Gobernanza, `BUSINESS_LOGIC.md`, `service_role` — siguen) · `validate`
+  completo ☑ (128/128) · presupuesto de skills dentro (55577/65000) · aprobación humana ☑
+- **Capa B (funcional, en frio)**: no hay caso-trampa que ejercite la entrevista; se corrio una
+  sesion fria real (`claude -p`, `claude-opus-5`, worktree desacoplado sobre el commit del
+  skill) con las respuestas de la entrevista dadas de golpe para una herramienta npm. El
+  `BUSINESS_LOGIC.md` que produjo: **Tipo: herramienta** como respuesta explicita a la
+  pregunta 8, sin VPS/Docker/dominio, entrega por `npm run empaqueta` y `-- --en <ruta>`
+  (verifico que ambos existen antes de escribirlos), registro en `project_settings`, §6
+  completa con el falso inválido como daño y el limite de C5 sobre datos de terceros. Aviso
+  correctamente que no corrio el gate y que ese relleno no debe mergearse a `main`. No se
+  fusiona: es el sujeto de una prueba. **Veredicto: verde.**
+- **Regresión**: capa A 99/99 · capa B funcional 1/1.
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto
