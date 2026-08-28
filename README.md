@@ -240,6 +240,11 @@ npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
 
 El gate corre solo antes de desplegar (`predeploy`), no solo cuando alguien se acuerda.
+Y no cobra dos veces: `validate` deja un **sello** con la huella del arbol
+(`.validate-sello.json`, de tu maquina, nunca del repo) y `predeploy` lo comprueba — arbol
+identico al que ya paso entero → pasa en milisegundos; cualquier archivo tocado, sello ausente
+o Node distinto → corre el gate completo, como siempre. Lo propuso un sujeto de capa B al
+negarse a quitar `predeploy` "porque ya corremos validate a mano".
 
 ### La capa se audita a si misma
 
