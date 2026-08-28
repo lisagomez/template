@@ -73,8 +73,9 @@ cuatro sobre 133 constantes. **Comprobación que se salta = comprobación que mi
   2026-08-27** (CDC de radio skill): la entrevista tiene pregunta 8 "El Destino"
   (aplicación | herramienta) y `BUSINESS_LOGIC.md` §7 nace con "Tipo de proyecto" y la entrega
   según el tipo (`deploy` vs `empaqueta`). PRP-002 lo guarda además en `project_settings`.
-- **El CDC sigue sin firmar** (el agente no se auto-aprueba, C1). Rama
-  `puerta-de-herramientas`, **rebasada sobre `main` el 2026-08-28** tras 22 commits de
+- **El CDC sigue sin firmar** (el agente no se auto-aprueba, C1). **PR #31 abierto el
+  2026-08-28** con los gates re-corridos de cero y en verde; falta la firma para fusionar.
+  Rama `puerta-de-herramientas`, **rebasada sobre `main` el 2026-08-28** tras 22 commits de
   distancia: los conflictos fueron los tres esperables de un log y un índice —`BITACORA-CDC.md`
   (unión: entradas de `main` + la de la puerta), `MEMORY.md` (se conserva el índice comprimido
   vivo, no el viejo de la rama) y el pendiente de `new-app`, ya cerrado en `main`.

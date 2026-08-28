@@ -11,7 +11,7 @@
 - [Infraestructura de agentes y respaldos](project/infraestructura-agentes.md) — Fase 0 (2 verticales, sin chat), imagen pineada por digest y vigilada; nada provisionado: lo cierra un derivado.
 - [Eficiencia de tokens y frescura](project/eficiencia-tokens.md) — 4 sensores en el gate; 2026-08-26: `AGENTS.md` solo obliga, lo informativo en `.claude/rules/`, `GEMINI.md` generado, contabilidad medida en frio.
 - [La imprenta de CLIs](project/imprenta-de-clis.md) — MCP cuestan 20363 tok/sesion (medido); "100x" refutado; la libreria publica no publica grados; esta maquina SI imprime (Go 1.26.7, 5 CLIs en libreria).
-- [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — apps y herramientas (`tools/`, `npm run empaqueta`, `--en <ruta>` contra tu proyecto real); puerta `docs/CREAR-UNA-HERRAMIENTA.md` en PR, CDC sin firmar; PRP-002 en codigo, BD sin aplicar.
+- [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — apps y herramientas (`tools/`, `npm run empaqueta`, `--en <ruta>` contra tu proyecto real); puerta `docs/CREAR-UNA-HERRAMIENTA.md` en PR #31, CDC sin firmar; PRP-002 en codigo, BD sin aplicar.
 
 ## feedback/ — Correcciones y preferencias
 (vacio)
