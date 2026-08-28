@@ -240,10 +240,10 @@ patrón Feature-First del resto del repo.
 - [ ] Esta tabla **no** conecta con `npm run deploy` / `npm run empaqueta` / `configura:deploy`
       en v1 — es solo registro. Conectarlos (gating real: que el script aborte si no
       coincide el tipo) es alcance futuro, deliberadamente fuera de este PRP.
-- [ ] Wire-in con la entrevista de `/new-app` (preguntar el tipo ahí mismo, en vez de en
-      una pantalla aparte) es deseable pero **editar un skill exige CDC (control C1)** —
-      no se hace dentro de este PRP para no mezclar el gate de datos con el gate de
-      comportamiento de agente.
+- [x] Wire-in con la entrevista de `/new-app` — **hecho el 2026-08-27 como CDC aparte**
+      (pregunta 8 "El Destino", sección "Tipo de proyecto" en el §7 que genera, y entrega según
+      el tipo en Próximos Pasos). Se hizo fuera de este PRP, como pedía, para no mezclar el gate
+      de datos con el de comportamiento de agente.
 - [x] `unique ((true))` es una técnica poco común para forzar fila única en toda la
       tabla — comentario SQL y `comment on constraint` puestos en la migración.
 - [x] El Zod del cliente y el `CHECK` de la base **deben** decir exactamente lo mismo —
