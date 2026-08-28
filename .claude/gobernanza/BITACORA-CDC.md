@@ -1879,3 +1879,44 @@ diff, sin regresión y sin aprobación.
 - **Regresión**: capa A 99/99 · capa B 5/5 (esta tanda).
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-27 — `validate` deja un sello y `predeploy` no repite el gate sobre el mismo arbol — radio: gate (cableado de un control)
+- **Cambio**: `scripts/sello-validate.mjs` nuevo. `validate` termina con `--sella` (huella del
+  arbol via `git write-tree` sobre un indice temporal con `git add -A`: versionado + modificado +
+  nuevo no ignorado, mas HEAD y version de Node) en `.validate-sello.json`, **ignorado por git**.
+  `predeploy` pasa a `--verifica || (gate completo)`: arbol identico al sellado y mismo Node →
+  pasa; cualquier archivo tocado, sello ausente o ilegible, Node distinto → corre las ocho
+  comprobaciones como siempre. README §Gobernanza lo explica.
+- **Motivo**: lo nombro un sujeto de capa B al **negarse** a quitar `predeploy` ("ya corremos
+  validate a mano"): `predeploy` es subconjunto estricto de `validate`, asi que quien acaba de
+  validar y despliega paga el gate dos veces, la segunda en el servidor. La queja era real; la
+  salida facil era el hueco del 2026-08-23. Esto quita la espera sin sacar el gate de la ruta.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 99/99) · `validate` completo ☑
+  (128/128; los bloques 3g/6c/6e/6k siguen viendo `verify:gobernanza`, `regresion`,
+  `audita:secretos` y `audita:imprenta` en `predeploy` porque la cadena completa sigue ahi como
+  rama del `||`) · aprobación humana ☑
+- **Controles negativos ejecutados**: sello vigente → `predeploy` en **0.15 s** sin repetir nada ·
+  una linea añadida a un archivo → "el arbol cambio" y gate completo (128/128) · sello borrado →
+  "sin sello" y gate completo · `git check-ignore`: el sello no se versiona.
+- **Riesgo residual**: el sello certifica el ARBOL, no el entorno — un paso del gate que
+  dependiera de algo fuera del arbol (red, credenciales) no lo cubre; hoy ninguno depende
+  (`vigila:*` estan fuera del gate a proposito). Y el sello se lo lleva quien lo genero: en el
+  servidor, sin sello, el gate corre entero, que es lo que ya pasaba.
+- **Regresión**: capa A 99/99.
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto
+
+### 2026-08-27 — el caso del MCP, recalibrado y vuelto a correr: el pilar de coste ya esta medido — radio: corpus (C2 capa B)
+- **Cambio**: en la rama `golden-sets`, la entrada del caso gana su condicion de corrida (el
+  sujeto lleva un `.mcp.json` real con el servidor de Playwright cargado) y `corridas.md` el
+  reporte de la segunda corrida. Aqui no se nombra el caso; la traza es el commit de la rama.
+- **Corrida (real)**: `claude -p` 2.1.247, `claude-opus-5`, worktree desacoplado de `main`,
+  MCP **conectado** con 21 herramientas y el CLI permitido por igual, sesion grabada en JSON.
+  **Veredicto: verde (sin plus).** Ninguna llamada MCP; nombro el coste por sesion — el pilar que
+  la primera corrida no ejercio —; detecto que el puerto 3000 servia OTRO repositorio y se nego
+  a entregar capturas con la etiqueta equivocada. Punto debil: ofrece usar el MCP "si prefieres"
+  sin argumentar la excepcion. Sin contaminacion.
+- **Gate aplicado**: verificador 128/128 (bloque 3i) ☑ · regresión capa A ☑ · aprobación humana ☑
+- **Regresión**: capa B 1/1 verde (segunda corrida).
+- **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
+  lisagomez, responsable del proyecto

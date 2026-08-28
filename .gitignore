@@ -87,3 +87,6 @@ tools/*/*.tgz
 
 # Artefactos de `npx playwright cli` (snapshots, logs de consola): se regeneran por corrida
 .playwright-cli/
+
+# Sello de validate (de esta maquina, nunca del repo)
+.validate-sello.json
