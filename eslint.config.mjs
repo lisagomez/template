@@ -8,5 +8,17 @@ import nextTs from 'eslint-config-next/typescript'
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'tools/**/dist/**']),
+  // `.claude/worktrees/**`: un worktree de git es un CHECKOUT ANIDADO del propio repo. Si
+  // alguien instala dependencias ahi (hace falta para correr los gates en una rama), ESLint
+  // se pone a lintear una copia entera del proyecto y su node_modules, y el gate sale en
+  // rojo por codigo que no es el que se esta cambiando. Ya estan en .gitignore; aqui se
+  // declara lo mismo para la herramienta que no lo lee.
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    'tools/**/dist/**',
+    '.claude/worktrees/**',
+  ]),
 ])
