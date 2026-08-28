@@ -43,6 +43,10 @@ un proyecto temporal limpio y lo importa. Ahí "es compatible" deja de ser una o
 
 ## Pendiente
 
+- ~~El tipo de proyecto no se preguntaba: `/new-app` asumía "aplicación".~~ **Cerrado el
+  2026-08-27** (CDC de radio skill): la entrevista tiene pregunta 8 "El Destino"
+  (aplicación | herramienta) y `BUSINESS_LOGIC.md` §7 nace con "Tipo de proyecto" y la entrega
+  según el tipo (`deploy` vs `empaqueta`). PRP-002 lo guarda además en `project_settings`.
 - **ESM only.** Dar soporte a un consumidor CommonJS es un doble build y **un CDC propio**.
   Declarado explícitamente en el runbook (§7) el 2026-08-26: no es un flag, es una decisión.
 - ~~El empaquetador prueba el contrato, **no el encaje con el proyecto de destino**.~~
