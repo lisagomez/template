@@ -870,16 +870,25 @@ comprueba(
 );
 
 const real = lee('.mcp.json');
-if (real !== null && ejemplo !== null) {
-  const declarados = new Set(servidores(ejemplo) ?? []);
-  const configurados = servidores(real) ?? [];
-  const huerfanos = configurados.filter((s) => !declarados.has(s));
-  comprueba(
-    'todo servidor MCP configurado esta declarado en example.mcp.json',
-    huerfanos.length === 0,
-    `sin declarar: ${huerfanos.join(', ')} — anadir un MCP es un CDC (C1) y debe quedar revisable`,
-  );
-}
+
+// Las dos comprobaciones sobre el `.mcp.json` VIVO se emiten SIEMPRE, exista o no el archivo.
+// Cuando eran condicionales, el TOTAL del verificador dependia de la maquina: 128 en un clon
+// recien hecho, 130 en cualquiera que trabaje con MCPs. El bloque 9 declara ese total en los
+// README, asi que salia rojo en toda maquina real por una divergencia que no existia — la peor
+// clase de gate, el que grita donde no hay nada. La cifra del papel solo significa algo si el
+// numero de comprobaciones depende de lo VERSIONADO y jamas del entorno. Ausente no se calla ni
+// se disfraza de verde a secas: la propia linea dice que aqui no hay `.mcp.json` vivo, que era
+// justo lo que la version condicional queria evitar.
+const SIN_VIVO = real === null ? ' (no hay .mcp.json vivo en esta maquina)' : '';
+
+const declarados = new Set(servidores(ejemplo ?? '') ?? []);
+const configurados = servidores(real ?? '') ?? [];
+const huerfanos = configurados.filter((s) => !declarados.has(s));
+comprueba(
+  `todo servidor MCP configurado esta declarado en example.mcp.json${SIN_VIVO}`,
+  huerfanos.length === 0,
+  `sin declarar: ${huerfanos.join(', ')} — anadir un MCP es un CDC (C1) y debe quedar revisable`,
+);
 
 // Los MCP van PINEADOS, igual que el modelo y la imagen del agente (C1). Un servidor
 // que se auto-actualiza cambia las capacidades del agente sin diff, sin regresion y sin
@@ -899,20 +908,18 @@ if (ejemplo !== null) {
 // El espejo pineado no sirve de nada si el archivo VIVO flota: es el vivo el que carga los
 // esquemas de herramientas en cada sesion. Con `@latest`, esa superficie cambia de tamano y
 // de capacidades sin diff, sin regresion y sin aprobacion — justo lo que C1 existe para
-// impedir. Se comprueba solo si el archivo esta presente: una maquina sin `.mcp.json` no es
-// una maquina en falta, asi que ahi no hay nada que verificar (y decirlo importa: callar y
-// dar verde seria el mismo fallo que "0 faltantes" cuando la respuesta es "no se").
-if (real !== null) {
-  const flotantesVivos = [];
-  for (const linea of real.split('\n')) {
-    if (/@latest|:latest|@next\b|:main\b|@canary/.test(linea)) flotantesVivos.push(linea.trim().slice(0, 60));
-  }
-  comprueba(
-    '.mcp.json vivo pinea sus servidores MCP',
-    flotantesVivos.length === 0,
-    `flotante(s): ${flotantesVivos.join(' | ')} — los esquemas que se pagan en CADA sesion pueden cambiar sin gate. Copia las versiones de example.mcp.json`,
-  );
+// impedir. Una maquina sin `.mcp.json` no es una maquina en falta: por eso la linea sale igual,
+// verde y diciendo que no hay archivo vivo. Callar y dar verde a secas seria el mismo fallo que
+// "0 faltantes" cuando la respuesta es "no se"; desaparecer de la lista, ademas, movia el total.
+const flotantesVivos = [];
+for (const linea of (real ?? '').split('\n')) {
+  if (/@latest|:latest|@next\b|:main\b|@canary/.test(linea)) flotantesVivos.push(linea.trim().slice(0, 60));
 }
+comprueba(
+  `.mcp.json vivo pinea sus servidores MCP${SIN_VIVO}`,
+  flotantesVivos.length === 0,
+  `flotante(s): ${flotantesVivos.join(' | ')} — los esquemas que se pagan en CADA sesion pueden cambiar sin gate. Copia las versiones de example.mcp.json`,
+);
 
 // El espejo se versiona: no puede llevar credenciales reales.
 if (ejemplo !== null) {

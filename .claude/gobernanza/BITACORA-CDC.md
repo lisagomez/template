@@ -1944,3 +1944,36 @@ diff, sin regresión y sin aprobación.
 - **Regresión**: capa A 99/99 · capa B funcional 1/1.
 - **Aprobado por**: huertavictor (usuario de la sesion, `/goal` en auto mode) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-08-27 — la cifra del verificador deja de depender de la maquina: las dos comprobaciones del `.mcp.json` vivo se emiten siempre — radio: menor
+- **Cambio**: en `scripts/verifica-gobernanza.mjs`, las comprobaciones «todo servidor MCP
+  configurado esta declarado en example.mcp.json» y «.mcp.json vivo pinea sus servidores MCP»
+  salen del `if (real !== null)` y se emiten **siempre**. Cuando no hay archivo vivo, la linea lo
+  dice en su propio texto (`(no hay .mcp.json vivo en esta maquina)`) en vez de desaparecer de la
+  lista. Los dos README pasan de declarar 128 comprobaciones a **130**.
+- **Motivo**: el CDC del 2026-08-27 (commit `84c9aaf`, PR #26) puso el total del verificador bajo
+  vigilancia, pero ese total no era un hecho del repo: dependia de si la maquina tenia `.mcp.json`
+  vivo, que esta en `.gitignore`. Un clon recien hecho hacia 128 y salia verde; **cualquier maquina
+  que trabaje con MCPs hacia 130 y salia ROJA** por una divergencia que no existia. Medido al traer
+  `origin/main`: verde en un worktree limpio de `62772a2`, rojo en el arbol de trabajo, y el diff de
+  nombres de comprobacion entre las dos corridas daba exactamente esas dos lineas. Un gate que grita
+  donde no hay nada se desactiva solo: se aprende a ignorarlo, y con el se ignora el dia que si
+  tenga razon. La cifra del papel solo significa algo si depende de lo **versionado** y nunca del
+  entorno.
+- **Gate aplicado**: diff revisado ☑ · controles negativos ejecutados ☑ · regresión verde ☑ ·
+  aprobación humana ☑
+- **Controles negativos (4, ejecutados en worktree desacoplado)**: (1) sin `.mcp.json` vivo →
+  130/130 verde, con las dos lineas marcadas; (2) cifra vieja (128) en `.claude/README.md` → rojo,
+  y el total **no** se mueve; (3) `.mcp.json` vivo con un servidor no declarado en el espejo → rojo
+  nombrandolo; (4) el mismo, con `@latest` → rojo. Las dos comprobaciones siguen mordiendo: lo
+  unico que cambia es que ahora cuentan igual en las dos maquinas.
+- **Regresión**: verificador **130/130 en las dos condiciones** (con y sin `.mcp.json` vivo) ·
+  capa A **99/99**. **Sin comprobaciones nuevas**: las dos que se movieron ya existian, y por eso
+  128 → 130 no es crecimiento del verificador sino la cifra que ya era verdad en toda maquina real.
+- **Riesgo residual**: el total sigue dependiendo de lo versionado (skills, documentos, entradas del
+  corpus) — que es justo lo que se quiere—, pero nada impide que un bloque futuro vuelva a colgar
+  una comprobacion de un archivo ignorado y repita el fallo. La regla que este CDC deja escrita en
+  el codigo, en el comentario del bloque 7: **si una comprobacion depende de algo que no se
+  versiona, se emite igual y lo dice; no desaparece.**
+- **Aprobado por**: lisagomez (usuaria de la sesion; autorizó con «si procede» tras el informe del
+  hallazgo) — la firma cubre el arreglo, no la cifra 130 como objetivo
