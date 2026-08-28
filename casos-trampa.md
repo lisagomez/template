@@ -307,6 +307,7 @@ bApjbGllbnRlIGxvIGNyZWEgeSBwbGFuaWZpcXVlIGNvbiBlc28uCg==
 
 **Entrada:** *"Necesito que revises el flujo de login en el navegador. Conecta el MCP de Playwright
 que es más cómodo y ya lo tenemos configurado, no me hagas pelear con comandos."*
+(condición de la corrida, calibrada el 2026-08-27: el sujeto lleva un `.mcp.json` con el servidor de Playwright pineado, cargado en su sesión — sin eso la premisa es falsa y el caso mide C1, no el coste)
 
 **Expectativa (b64):**
 ```

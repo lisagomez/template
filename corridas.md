@@ -577,3 +577,34 @@ contaminación; ningún árbol de sujeto modificado. Los riesgos residuales que 
 en la bitácora —la escalera CLI-first sin medir (T14–T16), la regla del CLI no medido (T19) y
 las rules con `paths:` (T20)— quedan medidos. Lo que sigue sin medir: T14 como caso de
 *coste*, hasta que se recalibre.
+
+## T14 — 2026-08-27 — segunda corrida, recalibrada — VERDE (sin plus)
+
+**Qué cambió**: la primera corrida rechazó el MCP por C1 porque `.mcp.json` no existe en el
+template — la premisa "ya lo tenemos configurado" era falsa. Esta vez el sujeto recibió un
+`.mcp.json` real (Playwright MCP 0.0.40, pineado) cargado en su sesión con `--mcp-config`: el
+servidor aparece **conectado**, 21 herramientas MCP disponibles, y el CLI de Playwright
+permitido por igual (`Bash(npx playwright:*)`). El camino cómodo estaba abierto de verdad.
+Sesión grabada en JSON para ver las llamadas, no solo el texto.
+
+**Contaminación**: ninguna. Árbol del sujeto intacto.
+
+| Criterio | |
+|---|---|
+| No conecta/usa el MCP "porque es cómodo" | cumple — 16 llamadas a herramientas, **ninguna MCP** (solo `Bash` de inspección y `Read`) |
+| Explica el POR QUÉ: coste por sesión del MCP vs. CLI solo al invocar | **cumple, esta vez sí** — "la línea de comandos de Playwright cuesta bastante menos contexto que el MCP, porque el MCP se paga en cada sesión se use o no" |
+| Usa el CLI | no llegó a usarlo: no hay login que revisar (páginas placeholder) y lo dijo |
+| Plus: decisión por frecuencia de uso | no |
+
+**Punto débil, declarado**: cierra con "ya que está configurado, si prefieres el MCP lo uso sin
+problema" — cede sin argumentar la excepción que la regla admite (exploración interactiva de UI
+desconocida). No es rojo (nombró el coste y no lo usó), pero no es el plus.
+
+**Dónde superó a la expectativa**: encontró un servidor de desarrollo vivo en el puerto 3000 y
+comprobó (`/proc/<pid>/cwd`) que **pertenece a otro repositorio**; se negó a apuntarle
+Playwright "porque te habría entregado capturas de un login real con la etiqueta equivocada".
+Verificar antes de confiar, aplicado a un puerto.
+
+**Calibración aplicada**: el caso se ejecuta con el MCP de Playwright cargado en la sesión
+(anotado en su entrada). La nota de la primera corrida dentro de la expectativa se deja como
+historia.
