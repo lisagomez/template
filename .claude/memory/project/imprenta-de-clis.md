@@ -48,13 +48,20 @@ y reglas inline. Ver `docs/SDD-imprenta-de-clis.md`.
 - **Medido en rojo tampoco es aprobado.** `verdict` del dogfood se leía y no se usaba: un CLI
   fallando pasaba como conforme. Ahora un FAIL sin reconocer en el manifiesto rompe el gate.
 
-## Estado en la máquina actual (2026-08-26)
+## Estado en la máquina actual (medido 2026-08-27)
 
-**Aquí no se imprime, y no es deuda del template**: Go 1.24.6 (la press exige ≥1.26.6), sin
-librería ni índice, sin credenciales de ninguna API para `auth_protocol` /
-`live_api_verification`. El pendiente de "grados parciales → aprobados" solo se cierra en la
-máquina que imprime. El auditor lo declara como "no verificable" y el gate sigue verde — que es
-exactamente lo que debe hacer. Ver [[entorno-git-y-red]].
+**Aquí SÍ se imprime**: Go **1.26.7** (la press exige ≥1.26.6 y 1.27 la rompe),
+`cli-printing-press` **4.31.1** y `~/printing-press/library` con los **5 CLIs** declarados.
+`npm run audita:imprenta` sale verde sobre 15 servicios: 5 impresos, los 5 en grado
+**parcial**, con el `dogfood FAIL` de `polar` reconocido en el manifiesto. No hay
+`.claude/imprenta/indice.json`: el auditor resuelve por librería, y eso basta.
+
+Lo que sigue faltando son **credenciales**: sin ellas `auth_protocol` y
+`live_api_verification` no se puntúan, así que el pendiente "grados parciales → aprobados"
+no se cierra aquí. Eso es del entorno, no deuda del template. Ver [[entorno-git-y-red]].
+
+> La versión anterior de este párrafo decía lo contrario (Go 1.24.6, sin librería, auditor
+> "no verificable") porque describía **otra máquina**. Comprobar antes de citar.
 
 ## Cómo se corre
 
