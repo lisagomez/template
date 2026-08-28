@@ -7,7 +7,7 @@ Template production-ready para crear aplicaciones SaaS con desarrollo asistido p
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS + shadcn/ui
-- 23 Skills de Claude Code (V4 Skills 2.0)
+- 24 Skills de Claude Code (V4 Skills 2.0)
 - Playwright CLI para QA automatizado
 - AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -87,7 +87,7 @@ src/
     └── types/
 ```
 
-## Skills (23 total)
+## Skills (24 total)
 
 Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
@@ -99,6 +99,7 @@ Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 | `/add-emails` | Emails transaccionales con Resend + React Email |
 | `/add-mobile` | PWA instalable + push notifications |
 | `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS |
+| `/crear-herramienta` | Convertir algo ya reusado en paquete instalable (`tools/`) |
 | `/prp` | Planificar features complejas antes de implementar |
 | `/bucle-agentico` | Implementar features complejas por fases |
 | `/ai` | Agregar IA: chat, RAG, vision, tools, web search |
@@ -234,8 +235,8 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (130 comprobaciones; el propio verificador vigila esta cifra)
-npm run regresion           # C2 capa A: contratos de los 23 skills
+npm run verify:gobernanza   # falla si la capa quedo suelta (136 comprobaciones; el propio verificador vigila esta cifra)
+npm run regresion           # C2 capa A: contratos de los 24 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
 
@@ -395,7 +396,7 @@ o lo declara no medido y fuera de produccion.
 
 ```
 .claude/
-├── skills/              # 23 Skills (V4 Skills 2.0)
+├── skills/              # 24 Skills (V4 Skills 2.0)
 ├── gobernanza/          # Capa de gobernanza (7 controles, plantillas y registros)
 ├── PRPs/                # Product Requirements Proposals
 │   │   └── references/  # AI Templates (11 bloques)

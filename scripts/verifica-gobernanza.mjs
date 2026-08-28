@@ -715,6 +715,45 @@ if (andamio !== null) {
   );
 }
 
+// --- 6e-bis. La PUERTA de entrada a la vertiente "herramienta" ---------------
+// El runbook tecnico (EMPAQUETAR-HERRAMIENTA.md) esta escrito para quien teclea. Pero la
+// filosofia de esta fabrica es que el humano HABLA y el agente construye: sin una puerta en
+// ese registro, la mitad "herramienta" del template solo es accesible a quien ya sabe.
+const puertaRuta = 'docs/CREAR-UNA-HERRAMIENTA.md';
+const puerta = lee(puertaRuta);
+comprueba(
+  `existe ${puertaRuta} (puerta de entrada Agent-First)`,
+  puerta !== null,
+  'sin puerta, quien no sabe empaquetar no sabe ni que este template puede hacerlo',
+);
+// Sin `if (puerta !== null)`: si el documento desaparece, estas tres tienen que FALLAR,
+// no saltarse. Una comprobacion que se salta baja el total en silencio y el gate sigue
+// pareciendo casi verde — exactamente el fallo que este verificador existe para evitar.
+comprueba(
+  'la puerta delega el contrato tecnico en EMPAQUETAR-HERRAMIENTA.md',
+  puerta !== null && /EMPAQUETAR-HERRAMIENTA\.md/.test(puerta),
+  'si lo duplica en vez de enlazarlo, los dos documentos divergen y uno miente',
+);
+comprueba(
+  'la puerta declara el registro Agent-First (el lector no teclea)',
+  puerta !== null && /no vas a teclear nada/i.test(puerta),
+  'un documento que le pide comandos al humano contradice AGENTS.md y devuelve el techo tecnico al lector',
+);
+comprueba(
+  'la puerta nombra el gate humano de publicacion (irreversible)',
+  puerta !== null && /nunca publica/i.test(puerta) && /irreversible/i.test(puerta),
+  'publicar no se deshace: un unpublish no borra lo que ya se descargo (C1 + accion irreversible)',
+);
+for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
+  const contenido = leeDoc(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: el decision tree enruta a la puerta CREAR-UNA-HERRAMIENTA`,
+    /CREAR-UNA-HERRAMIENTA/.test(contenido),
+    'una puerta a la que nada apunta es un archivo, no un camino (leccion del 2026-08-23)',
+  );
+}
+
 // --- 6d. El deploy no asume un servidor concreto ---------------------------
 // Un boilerplate se despliega en la maquina de otro. Un limite de memoria cableado a un
 // modelo de VPS es una afirmacion sobre hardware que no conocemos: en un servidor mas

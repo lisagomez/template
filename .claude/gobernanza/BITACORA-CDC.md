@@ -1977,3 +1977,69 @@ diff, sin regresión y sin aprobación.
   versiona, se emite igual y lo dice; no desaparece.**
 - **Aprobado por**: lisagomez (usuaria de la sesion; autorizó con «si procede» tras el informe del
   hallazgo) — la firma cubre el arreglo, no la cifra 130 como objetivo
+### 2026-08-26 — puerta de entrada a la vertiente "herramienta" — radio: plantilla
+- **Cambio**: alta de `docs/CREAR-UNA-HERRAMIENTA.md` (puerta Agent-First: qué dice el
+  humano, qué decide el agente, los tres gates humanos y los tres riesgos de contrato);
+  la rama "herramienta / libreria / paquete reutilizable" del decision tree pasa a dos
+  escalones —PUERTA y CONTRATO— en `AGENTS.md` y `GEMINI.md`; y el verificador gana 6
+  comprobaciones (existencia de la puerta, delegación en `EMPAQUETAR-HERRAMIENTA.md`,
+  registro Agent-First, gate de publicación, y el enrutado desde los dos árboles).
+  `docs/EMPAQUETAR-HERRAMIENTA.md` **no se tocó**: sigue siendo la fuente única del
+  contrato técnico y la puerta lo enlaza en vez de duplicarlo.
+- **Motivo**: el template sirve para dos cosas, y la segunda —herramientas empaquetadas—
+  solo tenía runbook para quien ya sabe teclear. Sin una puerta en el registro que
+  `AGENTS.md` exige ("el humano NO necesita saber nada técnico"), media fábrica era
+  inaccesible para su propio usuario objetivo. La puerta añade además el "todavía no":
+  sin reúso real 3+ veces, empaquetar solo suma una versión que mantener.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑ (no toca modelos ni imágenes)
+- **Regresión**: `npm run verify:gobernanza` 133/133 en verde (era 127/127) ·
+  `npm run regresion` 99/99 en verde · `npm run empaqueta` verde de punta a punta sobre el
+  andamio y sobre una herramienta construida desde cero siguiendo solo la puerta, incluida
+  la prueba de integración real (tarball instalado en proyecto limpio).
+  **Control negativo corrido dos veces**: la primera destapó que al desaparecer la puerta
+  tres comprobaciones se *saltaban* en silencio (133 → 130, un solo fallo); se endurecieron
+  para que fallen en vez de saltarse, y la segunda corrida da 4 fallos sobre 133 constantes.
+- **Re-medido tras rebase (2026-08-28)**: la rama se escribio sobre un `main` de 22 commits
+  atras. Las cifras de arriba son de esa base. Sobre `main` al dia: verificador **136/136**
+  (130 + las 6 de la puerta, no 133), capa A **99/99**, capa B **21/21**, `validate` completo
+  en verde y sellado. Los dos README declaraban 130 y salieron en rojo hasta corregirlos: la
+  comprobacion que vigila la propia cifra (84c9aaf) hizo su trabajo.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-28
+  ("apruebo las dos"), sobre el resumen de ambas entradas y las cifras de los gates
+  (verificador 136/136, capa A 102/102, capa B 21/21, `validate` verde). Se le ofreció el
+  diff completo (`gh pr diff 31`) y aprobó sin pedirlo: queda anotado por exactitud, no
+  como reparo. **El pendiente de capa B queda declarado, NO cerrado por esta firma.**
+
+### 2026-08-28 — la puerta gana comando: skill `crear-herramienta` — radio: skill
+- **Cambio**: alta de `.claude/skills/crear-herramienta/SKILL.md` (24º skill), invocable con
+  `/crear-herramienta`. La rama "herramienta" del decision tree gana un escalon previo
+  —**Ejecutar skill CREAR-HERRAMIENTA**— en `AGENTS.md` y `GEMINI.md` (regenerado, no
+  editado a mano). La cifra de skills declarada pasa de 23 a 24 en `README.md` (×4),
+  `.claude/README.md` (×3), `CLAUDE.md` y `AGENTS.md`.
+- **Motivo**: la puerta del CDC anterior es un **documento**, y para llegar a el habia que
+  saber que existe o describir la intencion con las palabras justas. Un skill lo pone en el
+  registro que el arnes ya ofrece al humano: se teclea `/crear-herramienta` y arranca por la
+  pregunta correcta. Sin esto, la puerta seguia siendo accesible sobre todo a quien ya sabia.
+- **El skill DELEGA, no duplica**: `docs/CREAR-UNA-HERRAMIENTA.md` sigue siendo la fuente de
+  la puerta y `docs/EMPAQUETAR-HERRAMIENTA.md` la del contrato tecnico. El skill es el orden
+  de ejecucion —el "todavia no" primero, los tres gates humanos, `--en <ruta>` contra el
+  proyecto real— y remite a los dos documentos en vez de copiarlos.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑ (no toca modelos ni imagenes)
+- **Regresión**: `verify:gobernanza` **136/136** verde (la comprobacion 3e, que vigila el
+  conteo de skills declarado, salio en rojo hasta actualizar los nueve sitios que decian 23:
+  el control funcionando) · capa A **102/102** (99 + los 3 contratos universales del skill
+  nuevo) · capa B **21/21** · `validate` completo verde.
+- **Presupuesto de contexto**: `descripciones de los skills` queda al **93 % de 3500** (3270
+  tokens). Es el sensor mas ajustado del repo: **caben una o dos descripciones mas antes de
+  que `mide:contexto` se ponga rojo**. Se declara aqui para que el proximo skill no lo
+  descubra por sorpresa. La `description` de este se recorto para no gastar de mas.
+- **No medido**: que un agente frio **obedezca** el "todavia no" —que diga *espera* a un
+  usuario decidido en vez de empaquetar— es capa B y **no tiene caso-trampa**. Es la misma
+  deuda declarada del CDC de la puerta, ahora con una superficie mas donde puede fallar.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-28
+  ("apruebo las dos"), sobre el resumen de ambas entradas y las cifras de los gates
+  (verificador 136/136, capa A 102/102, capa B 21/21, `validate` verde). Se le ofreció el
+  diff completo (`gh pr diff 31`) y aprobó sin pedirlo: queda anotado por exactitud, no
+  como reparo. **El pendiente de capa B queda declarado, NO cerrado por esta firma.**

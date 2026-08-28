@@ -62,7 +62,11 @@ Usuario dice algo
     |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
-    |       → `docs/EMPAQUETAR-HERRAMIENTA.md` + `npm run empaqueta <nombre>`
+    |       → Ejecutar skill CREAR-HERRAMIENTA
+    |       → PUERTA (empieza aqui): `docs/CREAR-UNA-HERRAMIENTA.md` — que decide el
+    |         humano y que decides tu, y el "todavia no": sin reuso real 3+ veces,
+    |         empaquetar solo anade una version que mantener
+    |       → CONTRATO: `docs/EMPAQUETAR-HERRAMIENTA.md` + `npm run empaqueta <nombre>`
     |         El nucleo NO importa React/Next/Supabase: lo que los necesite va en un
     |         entry point aparte, con peerDependency opcional.
     |         El empaquetador PRUEBA la integracion instalando el tarball en un
@@ -111,7 +115,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 23 Herramientas Especializadas
+## Skills: 24 Herramientas Especializadas
 
 Viven en `.claude/skills/<nombre>/SKILL.md`. Su `description` ya entra en contexto en cada
 sesion (el arnes la carga sola), asi que la tabla que antes vivia aqui pagaba dos veces lo

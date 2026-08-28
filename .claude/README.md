@@ -13,7 +13,7 @@ Template **production-ready** para crear aplicaciones SaaS modernas con desarrol
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth)
 - Tailwind CSS + shadcn/ui
-- 23 Skills de Claude Code (V4 Skills 2.0)
+- 24 Skills de Claude Code (V4 Skills 2.0)
 - Arquitectura Feature-First optimizada para IA
 - Auto port detection (3000-3006)
 - Capa de gobernanza agentica: 7 controles cableados y auto-verificados
@@ -136,7 +136,7 @@ npm run validate     # typecheck + lint + build + gobernanza + regresion (el gat
 > V4 migra TODO a Skills 2.0. Hot reload, auto-discovery, zero config.
 > Cada skill es una carpeta con `SKILL.md` (frontmatter YAML + instrucciones).
 
-Los 23 skills son invocables con `/nombre` y activables por Claude segun
+Los 24 skills son invocables con `/nombre` y activables por Claude segun
 el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
@@ -246,7 +246,7 @@ sesiones frias lo encontraron leyendo el repo y la prueba dejo de ser ciega. Se 
 ### Se verifica sola
 
 ```bash
-npm run verify:gobernanza   # 130 comprobaciones (la cifra la vigila el propio verificador)
+npm run verify:gobernanza   # 136 comprobaciones (la cifra la vigila el propio verificador)
 npm run regresion           # C2 capa A
 npm run regresion -- --trampa   # C2 capa B (para cada CDC)
 ```
@@ -308,7 +308,7 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 
 ```
 .claude/
-├── skills/                    # Skills 2.0 (V4) - 23 skills
+├── skills/                    # Skills 2.0 (V4) - 24 skills
 │   ├── new-app/                 # Entrevista de negocio → BUSINESS_LOGIC.md
 │   ├── add-login/               # Auth completo Supabase: login, signup, password reset, profiles, RLS
 │   ├── add-payments/            # Pagos con Polar (MoR): checkout, webhooks, suscripciones
