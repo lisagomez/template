@@ -40,6 +40,16 @@ export {
   type OpcionesDiarizadorSegmentacion,
 } from './diar/por-segmentacion.js';
 
+export {
+  creaDiarizadorEnVivo,
+  creaDiarizadorStreaming,
+  type DiarizadorEnVivo,
+  type DiarizadorStreaming,
+  type EventoDiarizacion,
+  type OpcionesDiarizadorEnVivo,
+  type OpcionesDiarizadorStreaming,
+} from './diar/streaming.js';
+
 export { transcribeTurnos, type OpcionesTranscripcion } from './asr/adaptador.js';
 
 /**
