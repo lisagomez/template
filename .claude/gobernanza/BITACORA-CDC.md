@@ -2714,3 +2714,79 @@ archivo**: 33 archivos sin comitear. Queda anotado por exactitud.
 - **Sobre qué se aprobó, con precisión**: sobre ese diff y sobre las cifras de los gates
   mostradas en sesión. **Lo que esta firma NO cierra**: el hueco de 3i ante paráfrasis, que
   queda declarado y demostrado, no arreglado.
+
+---
+
+### 2026-08-30 — el hueco de 3i no se cierra por el lado del arbol: se invierte el sujeto — radio: plantilla
+
+- **Encargo**: cerrar el hueco declarado esa misma manana — la comprobacion anti-fuga caza la
+  copia literal y no la parafrasis.
+- **Resultado, y va contra lo que este mismo documento recomendo**: la via propuesta
+  ("comparar terminos distintivos por parrafo") **esta medida y no funciona**. Queda
+  retractada. Lo que se midio, en dos pasadas contra el arbol donde la fuga SI estaba:
+  1. Tramos contiguos pesados por rareza: la fuga real puntua **4,60**, el suelo de ruido,
+     mientras ficheros inocentes llegan a **10,13**. El detector no es impreciso: esta
+     **invertido**. Causa: la contigüidad se rompe con dos palabras intercaladas, y la
+     parafrasis reordena por definicion.
+  2. Subsecuencia con huecos acotados (arregla lo anterior): **si** encuentra la fuga real
+     (peso 6,97), pero **cinco tramos legitimos pesan mas**. El mayor, con 10,18, vive en el
+     skill de emails y dice `correos transaccionales resend` — que es exactamente lo que ese
+     skill tiene que decir.
+- **Por que no hay umbral posible**: las entradas del corpus estan escritas con el vocabulario
+  del propio producto. Cualquier corte que cace la fuga cara tambien a la documentacion que
+  habla de lo mismo con razon. **No es un problema de afinado: es que el arbol es el sujeto
+  equivocado.**
+- **La inversion, que es el arreglo real**: el sujeto de la auditoria pasa a ser la ENTRADA.
+  Si una entrada hace eco del arbol, el caso mide lectura y no conducta —da igual quien copio
+  a quien— y lo barato es reescribir la entrada, que vive fuera del repo, en vez de mutilar
+  documentacion que tiene que decir lo que dice.
+- **Cambio**: `scripts/audita-fugas.mjs` + `npm run audita:fugas`. Informe ordenado por peso.
+  **Exit 0 siempre: es instrumento de medida, no gate**, y esto es deliberado — hoy **11 de 21
+  entradas hacen eco del arbol**, asi que cablearlo a `validate` lo dejaria en rojo el primer
+  dia y acabaria desactivado, que es el fallo que esta capa ya se comio.
+- **Lo que queda abierto, dicho sin adornos**: el hueco de 3i **sigue abierto**. Esto no lo
+  cierra: lo mide, y mueve el arreglo a donde es barato. La secuencia es reescribir las
+  entradas con eco alto, y cuando el informe baje, fijar el umbral con esos numeros y
+  promoverlo a comprobacion. Hasta entonces, **no medido no es aprobado** tambien aqui.
+- **Hallazgo lateral**: la limpieza de esa manana dejo un tercer sitio con la peticion dentro
+  (una entrada antigua de este documento). Lo encontro el instrumento, no la revision.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.
+
+---
+
+### 2026-08-30 — el auditor de fugas pasa de instrumento a GATE — radio: plantilla
+
+- **Contexto**: la entrada anterior lo dejo como instrumento de medida con exit 0 fijo,
+  porque **11 de 21 entradas hacian eco del arbol** y cablearlo habria dejado `validate` en
+  rojo el primer dia. Se ataco el corpus, y eso cambio lo que era posible.
+- **Lo que se hizo con las 11**: **no eran lo mismo**, y tratarlas igual habria estropeado
+  casos. Dos delataban y se **reescribieron**; nueve tienen eco **inherente** —la llave que
+  miden, el script que tocan, el modulo en el que estan ancladas— y se **declararon** con
+  `**Eco aceptado:** <razon>`. Un caso sobre una llave tiene que nombrar esa llave; que
+  aparezca en la documentacion no le revela a nadie que exista una prueba.
+- **La que no se arreglaba reescribiendo vocabulario**: una de las dos describia el mismo
+  canal, la misma motivacion y el mismo rodeo que un PRP del arbol — **que es el artefacto
+  que produjo el sujeto al medir ese caso**. Con la respuesta completa publicada (C3, C4 y el
+  CDC dentro), el caso medía lectura. Hubo que cambiar el canal del escenario, no las
+  palabras. Y su expectativa se realineo: argumentaba sobre un rodeo que la entrada nueva ya
+  no menciona.
+- **El corte deja de ser por peso y pasa a ser BINARIO**, que es lo que desbloquea el gate:
+  el umbral por peso **no se podia fijar** —cualquier corte que cazara la fuga caraba tambien
+  a la documentacion legitima, y ese fue el hallazgo de la manana—. La regla es "todo eco, o
+  no existe o esta declarado". **Sin juicio en tiempo de gate**: el juicio se ejerce UNA vez,
+  al escribir el caso, y queda escrito y revisable.
+- **Cambio**: `audita:fugas` sale con **exit 1** si hay eco sin declarar, y se cablea a
+  `validate` y a `predeploy`.
+- **Control negativo**: retirada una declaracion → **exit 1**, nombrando el caso y el tramo.
+  Restaurada → **exit 0**. Estado actual: **0 sin declarar · 9 declarados · 12 sin eco**.
+- **Lo que esto SI cierra y lo que no**: cierra el hueco por el lado que se podia cerrar —una
+  entrada reconocible desde el arbol ya no pasa en silencio, venga de una fuga en la
+  documentacion o de una entrada escrita con las palabras del repo. **No** convierte la
+  comprobacion 3i en detectora de parafrasis: eso sigue sin ser posible, y sigue documentado.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.

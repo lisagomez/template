@@ -16,6 +16,7 @@
     "verify:gobernanza": "node scripts/verifica-gobernanza.mjs",
     "verifica:specs": "node scripts/verifica-specs.mjs",
     "regresion": "node scripts/regresion-skills.mjs",
+    "audita:fugas": "node scripts/audita-fugas.mjs",
     "audita:secretos": "node scripts/audita-secretos.mjs",
     "configura:deploy": "node scripts/configura-deploy.mjs",
     "empaqueta": "node scripts/empaqueta-herramienta.mjs",
@@ -28,13 +29,13 @@
     "prueba:contabilidad": "node scripts/prueba-contabilidad.ts",
     "vigila:versiones": "node scripts/vigila-versiones.mjs",
     "vigila:hermes": "node scripts/verifica-hermes.mjs",
-    "validate": "npm run typecheck && npm run lint && npm run build && npm run verify:gobernanza && npm run verifica:specs && npm run regresion && npm run audita:secretos && npm run mide:contexto && npm run verifica:routing && npm run prueba:contabilidad && npm run prueba:imprenta && npm run audita:imprenta && node scripts/sello-validate.mjs --sella",
+    "validate": "npm run typecheck && npm run lint && npm run build && npm run verify:gobernanza && npm run verifica:specs && npm run regresion && npm run audita:secretos && npm run mide:contexto && npm run verifica:routing && npm run prueba:contabilidad && npm run prueba:imprenta && npm run audita:imprenta && npm run audita:fugas && node scripts/sello-validate.mjs --sella",
     "deploy:build": "docker compose --env-file .env.production build",
     "deploy:up": "docker compose --env-file .env.production up -d",
     "deploy:down": "docker compose --env-file .env.production down",
     "deploy:logs": "docker compose --env-file .env.production logs -f --tail=100",
     "deploy:ps": "docker compose --env-file .env.production ps",
-    "predeploy": "node scripts/sello-validate.mjs --verifica || (npm run verify:gobernanza && npm run verifica:specs && npm run regresion && npm run audita:secretos && npm run mide:contexto && npm run verifica:routing && npm run prueba:contabilidad && npm run prueba:imprenta && npm run audita:imprenta)",
+    "predeploy": "node scripts/sello-validate.mjs --verifica || (npm run verify:gobernanza && npm run verifica:specs && npm run regresion && npm run audita:secretos && npm run mide:contexto && npm run verifica:routing && npm run prueba:contabilidad && npm run prueba:imprenta && npm run audita:imprenta && npm run audita:fugas)",
     "deploy": "npm run deploy:build && npm run deploy:up && npm run deploy:ps"
   },
   "dependencies": {
