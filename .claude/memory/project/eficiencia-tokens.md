@@ -1,6 +1,6 @@
 # Eficiencia de tokens y frescura de versiones — estado
 
-**Spec:** `.claude/PRPs/specs/spec-eficiencia-tokens.md` (compilado por `/goal-compiler`,
+**Spec:** `.claude/specs/002-eficiencia-tokens/spec.md` (compilado por `/goal-compiler`,
 2026-08-23) · **Estado:** los cinco incrementos construidos y con CDC firmado; queda el
 punto 7 de su Definicion de Hecho
 
@@ -83,7 +83,7 @@ carencias eran el mismo fallo con distinta cara: **no habia sensor**.
    bajar lo que **informa y no obliga** (catalogos, decision tree largo, ejemplos,
    aprendizajes historicos). Con ese corte el ahorro real es **bastante menor** que "519 →
    200 lineas", asi que se mide **antes** de comprometerlo.
-   **Y no se fusiona con la imprenta de CLIs** (`spec-imprenta-de-clis.md`), aunque tiente:
+   **Y no se fusiona con la imprenta de CLIs** (`003-imprenta-de-clis.md`), aunque tiente:
    esto cambia **como cargan las reglas** —el modo de fallo #1 de este repo, un control que
    deja de disparar en silencio, que solo destapa una sesion fria— y aquello solo **añade**
    superficie, con controles negativos estructurales. Dos radios en un solo CDC, y un rojo en

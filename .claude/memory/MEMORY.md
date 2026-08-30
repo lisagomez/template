@@ -12,6 +12,7 @@
 - [Eficiencia de tokens y frescura](project/eficiencia-tokens.md) — 4 sensores en el gate; 2026-08-26: `AGENTS.md` solo obliga, lo informativo en `.claude/rules/`, `GEMINI.md` generado, contabilidad medida en frio.
 - [La imprenta de CLIs](project/imprenta-de-clis.md) — MCP cuestan 20363 tok/sesion (medido); "100x" refutado; la libreria publica no publica grados; esta maquina SI imprime (Go 1.26.7, 5 CLIs en libreria).
 - [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — apps y herramientas (`tools/`, `npm run empaqueta`, `--en <ruta>` contra tu proyecto real); puerta `docs/CREAR-UNA-HERRAMIENTA.md` + skill en PR #31, CDC firmado; PRP-002 en codigo, BD sin aplicar.
+- [Protocolo de specs (SDD)](project/protocolo-de-specs.md) — `/spec-generator` + `.claude/specs/NNN/{spec,plan,tareas}` + gate `verifica:specs`; C4 va en la spec y C3 en el plan; spec o PRP segun se sepa el QUE; caso-trampa 21 escrito y SIN correr en frio.
 
 ## feedback/ — Correcciones y preferencias
 (vacio)

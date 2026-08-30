@@ -36,9 +36,15 @@ Base: Ubuntu 26.04 LTS sobre **WSL2** (kernel `6.6.87.2-microsoft-standard-WSL2`
 
 ## Herramientas
 
-- **Node v22.23.0** en `~/.local/bin/node`, npm 10.9.8. **No hay nvm** (`~/.nvm` no existe):
-  un solo Node, sin versión que activar y sin el Node 20 que describía la nota anterior.
-  Cumple `.nvmrc` y `engines >=22.18`.
+- **Node v20.20.2**, servido por **nvm** (`~/.nvm/versions/node/v20.20.2`) — medido el
+  2026-08-30. **NO cumple `engines >=22.18`** del `package.json`, y por eso
+  `npm run prueba:contabilidad` revienta: ejecuta un `.ts` directo y Node 20 no sabe.
+  El resto del gate pasa entero.
+  El entorno **volvió a cambiar**: `~/.local/bin/node` (v22.23.0) ya **no existe**, y nvm
+  —que la nota anterior daba por ausente— sí está y gana en el `PATH`. Van dos notas
+  seguidas desmentidas por la siguiente medición: **este dato se verifica antes de usarlo,
+  no se recuerda.**
+  Para cerrar `validate` en esta máquina hace falta un Node ≥22.18 (`nvm install 22`).
 - **Go 1.26.7** en `~/.local/go/bin/go`. Es justo la versión buena: la press exige ≥1.26.6 y
   **1.27 la rompe** ([[imprenta-de-clis]]).
 - **La imprenta está completa y aquí SÍ se imprime**: `cli-printing-press` **4.31.1** en

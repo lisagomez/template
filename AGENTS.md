@@ -48,6 +48,13 @@ Usuario dice algo
     ├── "Quiero agregar [feature compleja]" (multiples fases, DB + UI + API)
     |       → Ejecutar skill PRP → humano aprueba → ejecutar BUCLE-AGENTICO
     |
+    ├── "Que tiene que hacer exactamente" / "escribe la spec" / "revisa esta spec"
+    |       → Ejecutar skill SPEC-GENERATOR (entrevista → `.claude/specs/NNN-<nombre>/`)
+    |         Cierra el QUE: requisitos EARS, fuera de alcance, impacto sobre terceros (C4).
+    |         Stack y arquitectura ahi NO van, y se lee contra `docs/constitution.md`
+    |       → CUAL DE LOS DOS: sin saber QUE construir, spec primero y PRP despues; con el
+    |         QUE acordado y solo el plan pendiente, PRP directo. Nunca las dos para lo mismo
+    |
     ├── "Quiero agregar IA / chat / vision / RAG"
     |       → Ejecutar skill AI con el template apropiado
     |
@@ -115,7 +122,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 24 Herramientas Especializadas
+## Skills: 25 Herramientas Especializadas
 
 Viven en `.claude/skills/<nombre>/SKILL.md`. Su `description` ya entra en contexto en cada
 sesion (el arnes la carga sola), asi que la tabla que antes vivia aqui pagaba dos veces lo
@@ -276,6 +283,8 @@ npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
 npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
+npm run verifica:specs     # integridad de `.claude/specs/`: secciones, EARS, numeracion
+npm run prepara:gate       # lo corre `pretypecheck` solo: engines.node + build de tools/
 npm run regresion    # regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # casos-trampa (C2 capa B, en cada CDC)
 npm run sincroniza:gemini  # GEMINI.md se GENERA de este archivo; a mano, el verificador lo rechaza

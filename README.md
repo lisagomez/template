@@ -7,7 +7,7 @@ Template production-ready para crear aplicaciones SaaS con desarrollo asistido p
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS + shadcn/ui
-- 24 Skills de Claude Code (V4 Skills 2.0)
+- 25 Skills de Claude Code (V4 Skills 2.0)
 - Playwright CLI para QA automatizado
 - AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -87,7 +87,7 @@ src/
     └── types/
 ```
 
-## Skills (24 total)
+## Skills (25 total)
 
 Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
@@ -100,6 +100,7 @@ Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 | `/add-mobile` | PWA instalable + push notifications |
 | `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS |
 | `/crear-herramienta` | Convertir algo ya reusado en paquete instalable (`tools/`) |
+| `/spec-generator` | Entrevista de requisitos → spec.md con RF en notacion EARS |
 | `/prp` | Planificar features complejas antes de implementar |
 | `/bucle-agentico` | Implementar features complejas por fases |
 | `/ai` | Agregar IA: chat, RAG, vision, tools, web search |
@@ -154,6 +155,8 @@ npm run typecheck    # TypeScript check
 npm run lint         # ESLint
 npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
+npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
+npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
 npm run regresion    # regresion de skills (C2)
 npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
@@ -235,12 +238,30 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (136 comprobaciones; el propio verificador vigila esta cifra)
-npm run regresion           # C2 capa A: contratos de los 24 skills
+npm run verify:gobernanza   # falla si la capa quedo suelta (150 comprobaciones; el propio verificador vigila esta cifra)
+npm run regresion           # C2 capa A: contratos de los 25 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
 
 El gate corre solo antes de desplegar (`predeploy`), no solo cuando alguien se acuerda.
+
+Los principios que **ninguna spec, plan ni tarea** puede contradecir viven en
+[`docs/constitution.md`](docs/constitution.md), y son lo primero que se lee al escribir o
+revisar una spec.
+
+## Specs: cerrar el QUE antes que el COMO
+
+`/spec-generator` entrevista y produce `.claude/specs/NNN-<nombre>/spec.md` con los
+requisitos en **notacion EARS**, su "Fuera de alcance" y su **impacto sobre terceros**
+(control C4). Despues llegan `plan.md` y `tareas.md`. Stack y arquitectura ahi **no** van:
+eso es del plan.
+
+**Cual de los dos**: si no se sabe QUE construir, la spec va primero y el PRP despues. Si el
+QUE ya esta acordado y solo falta el plan, PRP directo. Nunca las dos para lo mismo — el
+decision tree de `AGENTS.md` lo dice y el verificador comprueba que lo siga diciendo.
+
+`npm run verifica:specs` (55 comprobaciones, dentro de `validate`) vigila lo que ningun otro
+gate miraba: **que una spec no pierda un requisito al reformatearse**. Existe porque pasó.
 Y no cobra dos veces: `validate` deja un **sello** con la huella del arbol
 (`.validate-sello.json`, de tu maquina, nunca del repo) y `predeploy` lo comprueba — arbol
 identico al que ya paso entero → pasa en milisegundos; cualquier archivo tocado, sello ausente
@@ -396,7 +417,7 @@ o lo declara no medido y fuera de produccion.
 
 ```
 .claude/
-├── skills/              # 24 Skills (V4 Skills 2.0)
+├── skills/              # 25 Skills (V4 Skills 2.0)
 ├── gobernanza/          # Capa de gobernanza (7 controles, plantillas y registros)
 ├── PRPs/                # Product Requirements Proposals
 │   │   └── references/  # AI Templates (11 bloques)
