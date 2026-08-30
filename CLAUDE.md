@@ -10,7 +10,7 @@ y esta capa ya se llevo esa leccion.
 
 Lo especifico de este arnes, y solo eso:
 
-- **Skills**: `.claude/skills/` (24). Se invocan con `/nombre` o los activa el modelo.
+- **Skills**: `.claude/skills/` (25). Se invocan con `/nombre` o los activa el modelo.
 - **Rules**: `.claude/rules/*.md` cargan por `paths:` solo al tocar esos archivos (aprendizajes,
   arquitectura, flujos, QA). Lo que obliga sigue inline en `AGENTS.md`.
 - **Gobernanza**: `npm run validate` encadena typecheck, lint, build, verificador, regresion,

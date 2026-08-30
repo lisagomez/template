@@ -2043,3 +2043,631 @@ diff, sin regresión y sin aprobación.
   (verificador 136/136, capa A 102/102, capa B 21/21, `validate` verde). Se le ofreció el
   diff completo (`gh pr diff 31`) y aprobó sin pedirlo: queda anotado por exactitud, no
   como reparo. **El pendiente de capa B queda declarado, NO cerrado por esta firma.**
+
+### 2026-08-30 — alta del skill `spec-generator` — radio: skill
+- **Cambio**: alta de `.claude/skills/spec-generator/` con tres ficheros aportados por la
+  dueña (`SKILL.md`, `spec-template.md`, `README.md`), copiados **sin editar su contenido**.
+  El skill guía una entrevista de requisitos (preguntas de una en una, máx. 6) y redacta
+  `specs/NNN-<nombre>/spec.md` con requisitos funcionales en notación EARS. La cifra de
+  skills declarada pasa de 24 a 25 en `README.md` (×4, más la fila nueva de la tabla),
+  `.claude/README.md` (×3), `CLAUDE.md` y `AGENTS.md`; `GEMINI.md` regenerado con
+  `npm run sincroniza:gemini`, no editado a mano.
+- **Motivo**: la fábrica ya tenía `/prp` para planificar el CÓMO, pero no una superficie
+  que fuerce a cerrar el QUÉ antes. `spec-generator` separa las dos capas y prohíbe
+  explícitamente el stack dentro de la spec.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑ (no toca modelos ni imágenes)
+- **Regresión**: `verify:gobernanza` **136/136** verde (la comprobación 3e salió en rojo en
+  tres documentos hasta actualizar el conteo: el control funcionando) · capa A **105/105**
+  (102 + los 3 contratos universales del skill nuevo) · capa B **21/21** ·
+  `audita:secretos`, `mide:contexto`, `verifica:routing`, `prueba:imprenta` y
+  `audita:imprenta` en verde.
+- **`validate` completo NO se pudo correr**: esta máquina tiene `node_modules/` vacío, así
+  que `typecheck`, `lint`, `build` y `prueba:contabilidad` abortan por entorno
+  (`tsc: not found`, `.ts` sin loader), no por el cambio. El diff es sólo markdown y no
+  toca código TS, pero **el gate queda incompleto y se declara aquí en vez de darse por
+  bueno**: cerrarlo exige `npm install && npm run validate` antes de promover.
+- **Presupuesto de contexto**: `descripciones de los skills` sube al **95 % de 3500**
+  (3335 tokens) — el sensor más ajustado del repo, y el CDC anterior ya avisó de que cabían
+  "una o dos" descripciones más. Con ésta, **queda una como mucho**: el siguiente skill
+  probablemente tenga que recortar descripciones ajenas para entrar. `suma de los 25 skills`
+  al 89 % de 65000.
+- **Corregido en la misma sesión (era deuda (1))**: el `README.md` aportado llamaba
+  `plantilla-spec.md` a un fichero que se llama `spec-template.md`, y afirmaba que existía
+  un symlink `.opencode/skill/spec-generator` **inexistente en este repo**. Se copió tal cual
+  primero (el encargo era adjuntar) y se reescribió después a petición de la dueña: nombre
+  real del fichero, tres ficheros en vez de dos, y la vía real de opencode —lee
+  `.claude/skills/` directamente, medido en `docs/PORTABILIDAD-ARNESES.md` §2, por eso aquí
+  no hay `.opencode/`—. Se eliminó también una referencia a un "comando de Cursor" que no
+  existe en este repo, y se añadió que editar `SKILL.md` es un CDC. **`SKILL.md` y
+  `spec-template.md` siguen sin tocar**: la corrección es solo documentación de instalación,
+  no cambia comportamiento del agente.
+- **Enlace de opencode (añadido después, misma sesión)**: la dueña aportó el symlink que el
+  README original daba por existente —venía serializado como `spec-generator.txt` por la
+  descarga desde Windows— y pidió crearlo: `.opencode/skill/spec-generator` →
+  `../../.claude/skills/spec-generator`. Se creó como enlace, no como copia, para no abrir
+  una segunda fuente de verdad. **Es redundante y está sin medir**: opencode ya alcanza
+  `.claude/skills/` sin enlace (`PORTABILIDAD-ARNESES.md` §2), así que el skill queda
+  accesible por dos rutas y **no se ha comprobado si se carga una o dos veces** — opencode no
+  está instalado en esta máquina. Con el sensor de descripciones al 95 %, una doble carga
+  importaría; si `opencode debug skill` lo muestra duplicado, la corrección es borrar el
+  enlace. El README del skill lo declara en esos términos en vez de venderlo como necesario.
+- **Deuda declarada, no cerrada**: (2) El skill **no tiene rama en el decision tree**
+  de `AGENTS.md`: se activa por `description` o a mano con `/spec-generator`, no por la ruta
+  documentada. (3) Sin caso-trampa de capa B para "no escribir código durante la entrevista",
+  que es justo el fallo que este skill existe para evitar.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — specs numeradas, movidas a `.claude/specs/` y con plan y tareas — radio: plantilla
+- **Cambio**: las seis specs de `/goal-compiler` pasan de `.claude/PRPs/specs/spec-<nombre>.md`
+  a `.claude/specs/NNN-<nombre>/{spec,plan,tareas}.md`, numeradas **por su orden real de
+  creación en git** (001 gobernanza 08-23 03:59 · 002 eficiencia 08-23 22:00 · 003 imprenta
+  08-24 07:21 · 004 grafo 08-24 21:39 · 005 a2a 08-24 21:41 · 006 herramienta 08-27 00:09).
+  Movidas con `git mv`, así que conservan historial. Se añaden 12 archivos nuevos: un
+  `plan.md` y un `tareas.md` por spec. `.claude/README.md` actualiza el árbol; la referencia
+  viva de `.claude/memory/project/eficiencia-tokens.md` y la referencia cruzada de la spec
+  005 apuntan a las rutas nuevas.
+- **Motivo**: adoptar el protocolo del skill `spec-generator` sobre las specs que ya existían,
+  y darles la fase de plan y tareas que el protocolo SDD define y que nunca tuvieron.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑ (no toca modelos ni imágenes)
+- **Regresión**: `verify:gobernanza` **136/136** · capa A **105/105** · `mide:contexto` dentro
+  de presupuesto. Ningún verificador referenciaba las rutas viejas, así que el movimiento no
+  rompió comprobaciones. **`validate` completo sigue sin poder correr** en esta máquina
+  (`node_modules/` vacío) — mismo bloqueo declarado en la entrada anterior.
+- **Lo que estos planes SON, y lo que no**: para 001, 002, 003 y 006 —ya construidas— el plan
+  es **retrospectivo y está marcado como tal en su encabezado**: reconstruye la arquitectura
+  que resultó, verificada contra archivos que existen hoy en disco, y las tareas van con
+  casilla marcada **apuntando al artefacto real**, no a un recuerdo. No se fabricó un proceso
+  que no ocurrió: ningún plan afirma haber guiado una construcción que ya había terminado.
+  Lo que no pude re-verificar en esta pasada (controles negativos corridos en sus sesiones,
+  plantillas rellenas) va marcado ⚠️ en vez de ✅.
+- **Para 004 y 005 —no construidas— el plan es prospectivo y NO APROBADO**, y **no cierra la
+  LIBERTAD TECNICA** que ambas specs dejan abierta a propósito: las decisiones que la spec
+  deja al ejecutor se listan como abiertas, no se fijan. En 005 eso es crítico —el punto de
+  integración con `@a2a-js/sdk` solo se decide introspeccionando el paquete instalado, y sus
+  datos de protocolo son de un fetch del 2026-08-24 sobre un estándar joven—. En 004 la
+  propia spec declara que su alcance **es** el blueprint, no la implementación.
+- **Hallazgo con consecuencia**: la spec 005 avisaba de las descripciones de skills al 87 %
+  de 3500. **Hoy están al 95 %** por el alta de `spec-generator`. Queda anotado en su plan y
+  en su tarea TAR-5: `add-a2a` puede no caber sin recortar descripciones ajenas en el mismo
+  cambio. El presupuesto dejó de ser holgado y el próximo skill lo va a notar.
+- **El verificador disparó contra este mismo cambio, y tenía razón**: los `tareas.md` se
+  numeraron con la inicial de "tarea" seguida del número, que es **exactamente la forma de
+  los identificadores del corpus de casos-trampa**, y la comprobación "ningún identificador
+  de caso aparece en el árbol" se puso **roja (135/136)**. El corpus vive en la rama
+  `golden-sets` para que sus identificadores no se filtren al árbol de trabajo. Los de aquí
+  pasaron a `TAR-<n>` y el gate volvió a verde. Se anota sin transcribir el patrón —el
+  propio verificador compone el suyo para no delatarse—, porque es barato tropezar dos
+  veces: **numerar tareas con esa forma colisiona con el corpus**.
+- **Bitácora, entrada del 2026-08-30 anterior**: se editó su punto de deuda (1) para marcarlo
+  corregido, en vez de añadir entrada nueva, por ser el mismo CDC aún sin promover. Queda
+  dicho aquí por exactitud: si se prefiere append estricto, se revierte y se separa.
+- **No tocado a propósito**: `BITACORA-CDC.md:1077` cita `.claude/PRPs/spec-eficiencia-tokens.md`,
+  ruta que ya era incorrecta cuando se escribió. Es registro histórico append-only, no un
+  índice que deba resolver.
+- **Deuda**: el `SKILL.md` de `spec-generator` sigue apuntando a `specs/` en la raíz y
+  numerando desde 001. Con las specs en `.claude/specs/`, el skill crearía un árbol paralelo
+  y chocaría con 001. **Alinearlo es editar comportamiento del agente**, así que no se hizo
+  sin pedirlo: queda como CDC pendiente, no como olvido.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — las seis specs reexpresadas al protocolo, y el skill apuntado a ellas — radio: plantilla
+- **Cambio**: (a) `SKILL.md` de `spec-generator` corregido — los pasos 1 y 3 apuntaban a
+  `specs/` en la raíz; ahora apuntan a `.claude/specs/`, dicen que el siguiente libre es 007
+  y aclaran que la skill escribe `spec.md` y **no** `plan.md` ni `tareas.md`. (b) Las seis
+  specs reescritas al formato de `spec-template.md`: contexto y objetivo, actores, historias,
+  **requisitos funcionales numerados en notación EARS**, no funcionales, casos límite, fuera
+  de alcance, criterios de finalización y dudas abiertas. Diez secciones en las seis.
+- **Motivo**: petición explícita de la dueña, reafirmada tras exponerle los riesgos.
+- **Objeción planteada y decidida**: se advirtió que reformatear (i) destruiría
+  `LIBERTAD TECNICA`, núcleo del diseño de `/goal-compiler` (outcome claro, cómo libre);
+  (ii) alteraría cuatro documentos **aprobados con CDC firmado**; y (iii) chocaría con la
+  regla del propio `SKILL.md` —*"si el usuario pide revisar en vez de crear, no reescribas"*.
+  La dueña reafirmó ("alinea todos los specs ya"). **Es su decisión y se ejecutó completa.**
+- **Mitigaciones aplicadas sin que se pidieran** (para que la objeción no se convierta en daño):
+  1. **`LIBERTAD TECNICA` se conservó** como sección propia, marcada como tal, en las seis.
+     La plantilla exige no *saltarse* secciones; no prohíbe añadirlas. Reformatear no exigía
+     destruirla.
+  2. **El texto firmado sigue recuperable y el comando exacto está en el encabezado de cada
+     spec** (`git show 461803f:.claude/PRPs/specs/spec-<nombre>.md`). **Verificado, no
+     prometido**: los seis devuelven su contenido (247/128/137/165/235/187 líneas).
+  3. Cada encabezado declara si la spec está **construida** o **no construida**, y las dos
+     no construidas siguen marcadas como no autorizadas.
+- **Lo que se perdió y no se puede recuperar salvo desde git**: la prosa original tenía filo
+  deliberado —era destilado de documentos densos, y el propio material decía que el tono es
+  parte del valor—. Los RF en EARS son más verificables y menos afilados. Es un intercambio
+  real, no una mejora limpia: queda escrito aquí para que nadie lo lea como que la
+  reexpresión no costó nada.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑ (no toca modelos ni imágenes)
+- **Regresión**: `verify:gobernanza` **136/136** · capa A **105/105** · capa B **21/21** ·
+  contexto dentro de presupuesto. `validate` completo **sigue sin correr** aquí
+  (`node_modules/` vacío) — mismo bloqueo declarado en las dos entradas anteriores.
+- **Editar `SKILL.md` es cambio de comportamiento del agente** (C1), no documentación: a
+  partir de ahora la skill numera desde 007 y escribe en `.claude/specs/`. Sin esta
+  corrección habría creado un árbol paralelo en la raíz y chocado con 001.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — filo devuelto a las specs 004 y 005 — radio: plantilla
+- **Cambio**: se restaura en las dos specs **no construidas** el razonamiento que la
+  reexpresión a EARS había recortado, **sin desmontar la estructura**: los RF numerados se
+  mantienen intactos y el porqué vuelve como nota bajo el requisito que lo necesita.
+  004: 165 → 108 → **135** líneas. 005: 235 → 116 → **158**. Diez y once secciones.
+- **Motivo**: el filo de estas specs no era estilo, era mecanismo. Este repo ya midió que un
+  control escrito sin contundencia y fuera del camino de quien decide **no dispara**
+  (aprendizaje 2026-08-23, C1 y C5). Un RF verificable obliga; el porqué es lo que impide
+  que se racionalice como caso improbable.
+- **Criterio de selección — por qué solo dos de seis**: 001, 002, 003 y 006 están
+  construidas y su spec ya no guía a nadie; afilarlas es arqueología y el original está en
+  git. 004 y 005 **se van a ejecutar**: un agente las leerá antes de construir. El filo se
+  devuelve donde todavía hace trabajo.
+- **Lo recuperado, textual del original**: el bug del veredicto completo con el motor caído
+  —"nadie le prohibió expresamente improvisar el mismo formato de certeza"—; el caso de
+  colisión de keywords; que fusionar parser y motor "es exactamente el patrón que hace que
+  una respuesta con forma de certeza pueda estar inventada"; que un Agent Card mal formado
+  no interopera aunque el código compile; que un fail-safe probado solo con el camino feliz
+  no es un fail-safe; que un protocolo joven envejece rápido **en cualquier lenguaje**; y la
+  desconfianza declarada hacia el material de origen.
+- **Defecto corregido en el paso previo**: la reexpresión de 005 había **perdido un criterio
+  de finalización entero** —DoF-7, trazabilidad del destilado— junto con su tabla de ocho
+  filas de descartes. No era pérdida de tono: era un requisito que desapareció. Se restauró
+  como sección propia y se devolvió al criterio de finalización. **Lo encontró una
+  comparación contra el original, no una revisión de estilo**: conviene recordar que
+  reformatear puede tirar requisitos sin que ningún gate lo note.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: `verify:gobernanza` **136/136** · capa A **105/105** · capa B **21/21** ·
+  contexto dentro de presupuesto. `validate` completo sigue sin poder correr aquí.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — gate de integridad de specs — radio: plantilla
+- **Cambio**: alta de `scripts/verifica-specs.mjs` (**55 comprobaciones**) y del script
+  `verifica:specs`, cableado dentro de `validate` y de `predeploy` junto al verificador de
+  gobernanza. Node puro: corre sin red, sin credenciales y sin dependencias instaladas.
+  Comprueba estructura (los tres archivos por carpeta), numeración correlativa sin saltos,
+  las nueve secciones de la plantilla, notación EARS en cada requisito numerado, y que no
+  haya aclaraciones pendientes dentro de los requisitos.
+- **Motivo — un fallo observado, no imaginado**: al reexpresar la spec 005 se perdió un
+  criterio de finalización entero y su tabla de descartes, y **los 136 checks siguieron en
+  verde**. El verificador de gobernanza vigila el cableado ENTRE documentos; nadie miraba
+  DENTRO de una spec. Lo cazó una comparación contra git hecha a mano, que es justo la clase
+  de garantía que este repo no acepta: si depende de que alguien se acuerde, es costumbre.
+- **Se descartó imprimir un CLI**, y por qué: la escalera CLI-first acota su dominio a las
+  tareas **contra una API o servicio externo**, y redactar una spec no lo es. Además falla el
+  peldaño 3 por dos lados: con este protocolo se han creado **cero** specs nuevas (las seis
+  son reexpresiones), así que no hay repetición 3+ que lo justifique, y no existe un CLI
+  upstream — habría que imprimir uno, con su CDC, para una superficie ya movida cuatro veces
+  hoy. Es el mismo "todavía no" que la puerta de herramientas le dice a quien quiere
+  empaquetar.
+- **El gate encontró nueve fallos en el trabajo de esta misma sesión, y seis eran suyos**:
+  - **Falsos positivos (6)**: el parser no unía requisitos partidos en varias líneas y
+    marcaba en rojo requisitos correctos. Corregido pegando las continuaciones indentadas.
+    Un falso positivo entrena a ignorar el gate, así que esto no era cosmético.
+  - **Regla mal diseñada (4 rojos)**: prohibía `[NECESITA ACLARACIÓN]` en specs marcadas
+    construidas, y marcó cuatro dudas legítimas. **El gate estaba mal, no las specs**: un
+    hueco visible es información, y prohibirlo solo empuja a borrarlo para pasar. La regla
+    pasó a vigilar el **sitio** del hueco — libre en "Dudas abiertas", prohibido dentro de
+    los requisitos, donde significa un requisito no verificable.
+  - **Defectos reales (2)**: en la spec 006, RF-2 decía "ENTONCES estará mal escrito" y
+    RF-12 "ENTONCES el verificador fallará" — ninguno nombraba al sistema, que es lo que
+    hace verificable un requisito EARS. Corregidos.
+- **Control negativo, corrido en las dos direcciones**: (1) borrar una sección requerida de
+  la spec 004 → rojo, señalando "falta: Fuera de alcance"; (2) romper el patrón EARS de un
+  requisito → rojo, señalando RF-3; (3) restaurar → **55/55 verde**. Salidas en el
+  transcript de la sesión.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: `verifica:specs` **55/55** · `verify:gobernanza` **136/136** · capa A
+  **105/105** · capa B **21/21** · credenciales limpio · contexto dentro de presupuesto.
+  `validate` completo sigue sin poder correr aquí (`node_modules/` vacío).
+- **Deuda declarada**: `verifica-gobernanza.mjs` **no comprueba** que este gate nuevo exista
+  ni que siga cableado a `validate` — el patrón que el repo sí aplica al auditor de la
+  imprenta. Se dejó fuera para no arrastrar el conteo de 136 a nueve documentos que lo
+  declaran. **Mientras tanto, borrar `verifica:specs` de `package.json` no rompe nada**, que
+  es exactamente el modo de falla que esta capa persigue en otros sitios.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — el control C4 entra al protocolo de specs — radio: skill
+- **Cambio**: (a) `spec-template.md` gana la sección **"Impacto sobre terceros (control
+  C4)"**, con el límite de C5 escrito dentro; (b) `SKILL.md` gana el paso 3 —preguntar
+  siempre *"¿a quién puede dañar esto funcionando bien, sin ningún atacante?"*— y la
+  instrucción de **no ofrecer la vía del registro de riesgo** cuando el daño recae sobre
+  quien no firmó; (c) `verifica-specs.mjs` exige la sección: son diez, no nueve; (d) las
+  seis specs existentes la estrenan con contenido real, no plantilla vacía.
+- **Motivo — un hueco medido, no supuesto**: `prp-base.md` tiene §Gobernanza con C3 y C4, y
+  el skill `/prp` los nombra tres veces. El skill `spec-generator` los nombraba **cero**.
+  Con la ruta spec → plan → tareas creada hoy, había **dos caminos para planificar trabajo y
+  solo uno pasaba por los controles**. Un agente por la ruta nueva nunca veía C4.
+- **Reparto, no copia de los siete controles**: C4 va en la spec porque *"¿a quién dañamos?"*
+  es pregunta de **alcance** —decide qué baja a "Fuera de alcance"— y porque el límite de C5
+  puede matar un requisito **antes de que exista código**, que es cuando sale barato. C3
+  (modelo de amenazas) **no** entra: necesita fronteras y flujos, que son diseño, y el propio
+  skill prohíbe meter arquitectura en una spec. C1 ya aplica solo. Meter los siete habría
+  convertido la spec en papeleo, que es como mueren estos controles.
+- **Lo que la sección destapó al escribirla con contenido real**: la spec 004 es la que
+  tiene el daño a terceros como **riesgo principal, no lateral** —quien pregunta actúa sobre
+  la respuesta—, y eso convierte su fail-safe en no negociable con un argumento que antes no
+  estaba escrito en ninguna parte. La 002 quedó con el suyo explícito: cortar el servicio al
+  100 % es daño sobre quien no fijó el tope, y por eso el corte **no** se automatiza en el
+  módulo.
+- **Control negativo**: borrada la sección nueva de la spec 002 → rojo, señalando
+  "falta: Impacto sobre terceros"; restaurada → **55/55 verde**.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: `verifica:specs` **55/55** · `verify:gobernanza` **136/136** · capa A
+  **105/105** · capa B **21/21** · contexto dentro de presupuesto.
+- **Deuda declarada**: sigue sin haber **caso-trampa de capa B** que mida si un agente frío,
+  ante "acepto el riesgo, salta el fail-safe", **se niega** en vez de ofrecer el registro de
+  riesgo. Es exactamente la conducta que este cambio pretende producir, y **no está medida**:
+  escrita en el skill, sin evidencia de que dispare. La lección del 2026-08-23 dice que eso
+  no basta. Queda declarado, no cerrado.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — caso-trampa nuevo en el corpus de capa B — radio: plantilla
+- **Cambio**: el corpus de capa B pasa de **20 a 21 casos**. El nuevo mide la conducta que
+  el control C4 recién metido al protocolo de specs pretende producir: presionado para
+  degradar el fail-safe del grafo, con la dueña invocando su propia firma como vía, el
+  agente debe **negarse Y no ofrecer la vía del registro de riesgo**. La entrada exacta vive
+  solo en el corpus, y aquí no se transcribe a propósito. Commit `821fe12` en la rama
+  `golden-sets`.
+- **Motivo**: cerrar la deuda declarada tres entradas más arriba. La conducta estaba escrita
+  en un skill y **sin medir**, que es literalmente el fallo del 2026-08-23 (un control
+  escrito y no probado no se sabe si dispara). Escribirlo no es medirlo.
+- **Qué persigue, que no es lo obvio**: el fallo interesante **no** es aceptar el cambio —eso
+  lo caza cualquiera—. Es **ofrecer la vía del registro de riesgo**, que parece la respuesta
+  diligente y es exactamente saltarse el límite de C5: quien pregunta y actúa sobre la
+  respuesta no firmó nada, y el dueño acepta riesgos propios, no ajenos. La expectativa exige
+  además que **explique por qué esa clase es distinta**: sin la explicación se lee como
+  capricho y lo hacen por fuera.
+- **Cómo se añadió sin contaminar**: el caso se compuso **fuera del repo** y se comiteó a la
+  rama `golden-sets` con plumbing (`hash-object` + `mktree` + `commit-tree` + `update-ref`),
+  sin checkout y sin tocar el working tree de `main`. La expectativa va en base64 como el
+  resto. Commit final `7c469e2`.
+- **El verificador rechazó el caso dos veces antes de aceptarlo**, y las dos tenía razón:
+  1. La primera redacción usaba el vocabulario natural del dominio, que ya vive en la spec
+     004. El gate comprueba que **ninguna ventana de 8 palabras** de una entrada del corpus
+     exista en el árbol, justamente para que una sesión fría no reconozca el caso leyendo el
+     repo — el fallo que ya ocurrió el 2026-08-23, cuando un agente se dio cuenta de que
+     estaba siendo evaluado. Reescrita con léxico ajeno.
+  2. La nota de *qué mide* el caso iba pegada a la entrada, y la regex toma como entrada
+     **todo hasta la primera línea en blanco**: la nota contaba como texto que se le da al
+     sujeto, y encima colisionaba con esta bitácora. Ahora va separada por línea en blanco.
+     **Efecto secundario que conviene mirar**: los casos anteriores tienen sus notas pegadas
+     igual, así que hoy forman parte de la entrada que se les daría. No colisionan, pero el
+     formato es ambiguo — vale la pena separarlas todas en una pasada aparte.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: capa B **22/22** (21 casos + la comprobación de corpus no vacío) ·
+  `verify:gobernanza` **136/136** · capa A **105/105** · `verifica:specs` **55/55**.
+- **LA DEUDA NO ESTÁ CERRADA, y conviene no confundirlo**: `npm run regresion -- --trampa`
+  **solo verifica que el corpus esté completo y lo lista**. La capa B exige invocar al modelo
+  en **sesión limpia**, sin el contexto de esta conversación —que sesgaría el resultado por
+  completo, porque aquí se discutió la respuesta esperada—. Hasta esa corrida, este caso es
+  un caso **escrito, no medido**: la deuda pasa de "sin caso" a "caso listo, pendiente de
+  corrida en frío", que es un paso, no el cierre.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — la nota se separa de la entrada en los cinco casos que la tenían pegada — radio: plantilla
+- **Cambio**: cinco líneas en blanco en `casos-trampa.md` (commit `8d88b2c` en `golden-sets`),
+  más las dos convenciones documentadas en su sección "Cómo se añade un caso". **Ninguna
+  entrada ni expectativa se toca**: el diff son cinco líneas vacías y el bloque de
+  convenciones.
+- **Motivo — y no era cosmético**: la regex del verificador, y quien corre la prueba a mano,
+  toman como entrada *todo lo que va desde el marcador hasta el primer renglón vacío*. Con la
+  nota pegada, el metadato del caso acababa siendo **texto que se le da al sujeto**.
+- **En el caso de la premisa falsa era un defecto que anulaba la prueba**: su nota dice que la
+  premisa es falsa y que esa entrada no existe en la bitácora ni en el manifiesto. Dársela al
+  sujeto **le regala la respuesta**. El caso llevaba así desde que se escribió y habría dado
+  verde midiendo nada — el peor resultado posible en una suite de regresión, porque un falso
+  verde se confunde con una garantía.
+- **Cómo se encontró**: no por revisión, sino porque el mismo defecto apareció al añadir el
+  caso 21 y el verificador lo marcó en rojo. Al arreglarlo se miró si los demás lo tenían.
+  Es el patrón del Auto-Blindaje: el error nuevo destapó cinco viejos.
+- **Convenciones documentadas para que no vuelva**: (1) la nota va separada por línea en
+  blanco; (2) la entrada se redacta con vocabulario que no exista en el árbol, porque el gate
+  rechaza cualquier ventana de ocho palabras ya presente en el repo.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: capa B **22/22** · `verify:gobernanza` **136/136** · capa A **105/105** ·
+  `verifica:specs` **55/55** · credenciales limpio. Revalidado además con la lógica exacta
+  del verificador replicada aparte: 21 casos, **ninguna entrada filtrada al árbol** y ninguna
+  nota pegada.
+- **Sigue sin cerrarse**: ningún caso de capa B se ha corrido en frío en esta sesión — el
+  corpus está completo y limpio, que no es lo mismo que medido.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — corrida de `validate` con dependencias instaladas: dos hallazgos de entorno
+- **Contexto**: con `node_modules` ya instalado, se re-ejecutó `npm run validate` para cerrar
+  el bloqueo que las ocho entradas anteriores declaraban. **No se cierra**, pero cambia de
+  naturaleza y ahora se sabe exactamente por qué.
+- **Resultado real, paso a paso**: `typecheck` ✅ · `lint` ✅ · `build` ✅ (compilado en 5,8 s)
+  · `verify:gobernanza` **136/136** · `verifica:specs` **55/55** · capa A **105/105** ·
+  `audita:secretos` ✅ · `mide:contexto` ✅ · `verifica:routing` ✅ ·
+  **`prueba:contabilidad` ❌** · `prueba:imprenta` ✅ · `audita:imprenta` ✅. El sello no llega
+  a ponerse porque el encadenado corta antes.
+- **Hallazgo 1 — `validate` fallaba por un artefacto que no está en git y nada regenera**:
+  catorce errores de `typecheck`, todos en `tools/voz/pruebas/*.ts`, que importan
+  `../dist/index.js`. **`tools/voz/dist/` no existía.** El typecheck de la raíz incluye las
+  pruebas de la herramienta, y esas dependen de que la herramienta esté compilada. En un clon
+  limpio `validate` falla hasta que alguien corre el build de `voz`, **y nada lo dice**: el
+  error habla de módulos que no se encuentran, no de un build que falta. Corrido
+  `npm run build` en `tools/voz` → `typecheck` en verde. Ninguno de esos archivos estaba
+  entre los modificados de esta sesión: el fallo era **preexistente y latente**.
+- **Hallazgo 2 — el entorno dejó de cumplir el requisito del propio repo**: `package.json`
+  declara `engines: {"node": ">=22.18"}` y el Node en uso es **v20.20.2**, servido por nvm.
+  `prueba:contabilidad` ejecuta un `.ts` directo, que Node 20 no sabe cargar. **El requisito
+  está declarado y nada lo hace cumplir**: npm no falla por `engines` sin `engine-strict`, así
+  que el gate revienta con un error críptico de extensión de archivo en vez de decir "necesitas
+  Node 22". Un requisito que no se verifica es una nota, no un requisito.
+- **La memoria del entorno estaba desmentida, y se corrigió**:
+  `.claude/memory/reference/entorno-git-y-red.md` afirmaba "Node v22.23.0 en `~/.local/bin`,
+  **no hay nvm**". Hoy: ese binario **ya no existe**, nvm sí está y gana en el `PATH`. Van
+  **dos notas seguidas** desmentidas por la medición siguiente — queda escrito en la propia
+  memoria que este dato se verifica antes de usarlo, no se recuerda.
+- **Qué falta para cerrar el bloqueo**: un Node ≥22.18 en esta máquina (`nvm install 22`).
+  Con eso, `validate` debería pasar entero — el resto ya está verde y medido.
+- **Deuda que estos hallazgos destapan** (ninguna se arregla aquí, para no ampliar el cambio):
+  1. `validate` depende de `tools/voz/dist/`, que no está versionado y ningún script
+     construye. Un `pretypecheck` que compile las herramientas de `tools/` lo cerraría.
+  2. Nada comprueba `engines` antes de correr el gate. Una comprobación de versión de Node al
+     principio de `validate` convertiría un error críptico en un mensaje útil.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — `validate` completo EN VERDE: se cierra el bloqueo de las ocho entradas
+- **Cambio de entorno**: instalado **Node v22.23.2** con nvm, que cumple el
+  `engines >=22.18` del `package.json`. Es cambio de la máquina, no del repo.
+- **Resultado, con Node 22 y `tools/voz` construido**: `npm run validate` → **EXIT 0**,
+  sellado (`.validate-sello.json`, árbol `e71d1380`, `2026-08-30T18:03:12Z`, `node v22.23.2`).
+  Paso a paso: `typecheck` ✅ · `lint` ✅ · `build` ✅ (689 ms) ·
+  `verify:gobernanza` **136/136** · `verifica:specs` **55/55** · capa A **105/105** ·
+  `audita:secretos` ✅ · `mide:contexto` ✅ · `verifica:routing` ✅ ·
+  **`prueba:contabilidad` ✅** · `prueba:imprenta` ✅ · `audita:imprenta` ✅.
+- **Queda cerrado** el bloqueo que las ocho entradas de hoy declaraban como
+  "`validate` completo NO se pudo correr". Ya se corrió y pasó: el trabajo de esta sesión
+  está medido por el gate entero, no solo por los verificadores que corren sin dependencias.
+- **Lo que hizo falta, y no era del código**: construir `tools/voz` (su `dist/` no está
+  versionado y ningún script lo genera) y subir el Node a 22. Las **dos deudas siguen
+  abiertas** y son las que harían que esto no le vuelva a pasar a nadie:
+  1. un `pretypecheck` que compile las herramientas de `tools/`;
+  2. una comprobación de `engines` al inicio de `validate`, para que un Node viejo dé un
+     mensaje útil y no un error de extensión de archivo.
+- **El auditor de la imprenta dijo la verdad, como debe**: `fuente_impresos: ninguna` — sin
+  librería ni índice poblado en esta máquina. No reportó "0 faltantes".
+- **Nota sobre el sello**: registra `HEAD` = `461803f`, que es el último commit. Los 29
+  archivos de esta sesión **siguen sin comitear**, así que el sello cubre el árbol de trabajo
+  actual, no un commit. Al comitear habrá que re-sellar.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — cerradas las dos deudas del gate: `prepara-gate.mjs` — radio: plantilla
+- **Cambio**: alta de `scripts/prepara-gate.mjs`, cableado como **`pretypecheck`** (npm lo
+  ejecuta solo antes de `typecheck`, así que entra en `validate`, en `predeploy` y en
+  cualquier invocación suelta) y expuesto también como `prepara:gate` para correrlo a mano.
+  Hace dos cosas, las dos son deudas declaradas esta misma sesión:
+  1. **Comprueba `engines.node`** contra la versión en curso. Solo entiende la forma `>=X.Y`,
+     que es la que este repo usa; cualquier otra la declara **no comprobada** en vez de
+     fingir que la entiende — un comparador de rangos completo sería una dependencia, y este
+     gate no puede depender de `node_modules`.
+  2. **Construye las herramientas de `tools/`** que declaren script `build`, antes de que el
+     typecheck de la raíz mire sus pruebas.
+- **Motivo**: los dos fallos de la corrida de hoy tenían el mismo síntoma — **el gate moría
+  diciendo algo que no era el problema**. `dist/` sin construir daba 14 errores de "no se
+  encuentra el módulo", que suena a import mal escrito; Node 20 daba
+  `ERR_UNKNOWN_FILE_EXTENSION`, que no le dice a nadie que actualice Node. **Un gate que
+  falla por la razón equivocada cuesta más que uno que no existe**, porque manda a buscar
+  donde no es.
+- **`engines` estaba declarado y no vigilado**: npm no lo hace cumplir sin `engine-strict`.
+  Era una nota, no un requisito. Ahora falla con el arreglo escrito en el propio mensaje.
+- **Tres controles negativos, corridos**:
+  1. Node 20 → rojo con el mensaje útil y `nvm install 22` sugerido (salió gratis: el shell
+     por defecto de esta máquina sigue en Node 20).
+  2. Borrado `tools/voz/dist/` → `npm run typecheck` lo **reconstruyó solo** y pasó con
+     exit 0. Antes, esa misma situación daba 14 errores.
+  3. Roto a propósito `tools/ejemplo-herramienta/src/index.ts` → rojo señalando la
+     herramienta, con la nota de que el typecheck de la raíz iba a acusar a sus pruebas, que
+     es donde **no** está el problema. Restaurado → verde.
+- **Coste**: ~1,8 s por herramienta, dos herramientas. Se construye siempre en vez de
+  comparar marcas de tiempo: menos código y sin el modo de falla de un caché mal invalidado.
+  Si `tools/` crece hasta que moleste, ahí se optimiza — no antes.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Deuda que NO se cierra aquí** (y ya van tres gates así): `verifica-gobernanza.mjs` no
+  comprueba que existan ni que sigan cableados `verifica:specs`, `prepara:gate` ni el propio
+  `pretypecheck` — el patrón que sí aplica al auditor de la imprenta. Borrarlos de
+  `package.json` no rompe nada. Se deja fuera para no arrastrar el conteo de 136 a los nueve
+  documentos que lo declaran, pero **es exactamente el modo de falla que esta capa persigue**
+  y conviene cerrarlo en una pasada propia.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — el verificador vigila los gates nacidos hoy — radio: plantilla
+- **Cambio**: `verifica-gobernanza.mjs` gana el bloque **6b** con cinco comprobaciones, y el
+  conteo pasa de **136 a 141**. Actualizada la cifra declarada en `README.md` y
+  `.claude/README.md` (el propio verificador la vigila, y salió en rojo hasta hacerlo: el
+  control funcionando sobre sí mismo). De paso, la tabla de skills de `.claude/README.md`
+  incorpora los tres que le faltaban —`spec-generator`, `crear-herramienta`, `cli-audit`—;
+  el primero es deuda de esta sesión, los otros dos eran anteriores.
+- **Qué vigila ahora**: que existan `verifica-specs.mjs` y `prepara-gate.mjs`; que
+  `verifica:specs` siga enganchado a `validate` **y** a `predeploy`; que el preparador cuelgue
+  de **`pretypecheck`** —el hook que npm dispara solo, y que es la razón de que el gate viaje
+  a `validate`, a `predeploy` y a cualquier `typecheck` suelto—; y que `package.json` siga
+  declarando `engines.node`, que es contra lo que el preparador compara.
+- **Motivo**: tres gates nuevos en un día, **ninguno vigilado**. Borrarlos de `package.json`
+  no rompía nada — el mismo modo de falla que esta capa persigue en todos los demás sitios, y
+  que el auditor de la imprenta ya tenía cubierto desde su alta. La asimetría era la deuda.
+- **Cinco controles negativos, corridos uno a uno**:
+  1. `verifica:specs` fuera de `validate` → rojo en "corre en validate y en predeploy".
+  2. Borrado el hook `pretypecheck` → rojo en "cuelga de pretypecheck".
+  3. Movido `verifica-specs.mjs` fuera → rojo en "existe scripts/verifica-specs.mjs".
+  4. Node 20 → el preparador rechaza con el arreglo escrito (probado antes, en su entrada).
+  5. Herramienta que no compila → rojo señalando la herramienta (ídem).
+  Restaurado todo → **141/141**.
+- **Por qué el `engines` declarado entra al verificador**: el preparador lo hace cumplir, pero
+  si alguien borra el campo, el preparador deja de tener contra qué comparar **y sigue
+  saliendo verde**. Un gate que se desarma solo al quitarle su referencia no es un gate.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+### 2026-08-30 — alta de `docs/constitution.md`, alineada al repo — radio: plantilla
+- **Cambio**: alta de `docs/constitution.md` con ocho principios. Cierra la referencia
+  colgante del `SKILL.md` de `spec-generator`, cuyo paso 1 manda leerla "si existe" — hasta
+  hoy nunca existía, así que ese paso no hacía nada.
+- **Origen y qué se descartó**: la aportada por la dueña era la constitución de **otro
+  proyecto** (`habits-cli`: Python 3.12, solo biblioteca estándar, pytest, *"nada de bases de
+  datos ni de red"*). Copiarla en esa ruta no era neutral: el skill la lee como contexto
+  obligatorio de toda spec y la fase de clarificación busca conflictos **contra** ella, así
+  que habría puesto a cada spec futura a validarse contra principios que contradicen el
+  Golden Path. Reparto aplicado:
+  - **Conservados casi literales**: "la spec manda" (nada se implementa si no está en la spec
+    activa; si falta una decisión, se para y se pregunta) · "tests como puerta", traducido a
+    los gates reales de este repo · "lógica separada de interfaz", que aquí ya existía como
+    la regla del núcleo que no importa React/Next/Supabase · el principio de idioma.
+  - **Traducido**: "simplicidad primero / solo biblioteca estándar" → "un solo stack: el
+    Golden Path se ejecuta, no se debate". El principio aplica; su instanciación en Python no.
+  - **Descartado**: "persistencia en un único JSON, nada de bases de datos ni de red".
+    En su lugar entra lo que en este repo ocupa ese sitio: RLS siempre, `service_role` fuera
+    de las superficies de negocio, y que el daño sobre quien no firmó no se autoriza con una
+    firma.
+  - **Añadidos porque son de esta casa y no de la de origen**: nada se afirma sin medir, y
+    cambiar al agente es cambiar código (CDC + pineo).
+- **Cada principio está anclado en algo que ya se hace cumplir**, no en buenas intenciones:
+  el Golden Path vive en `AGENTS.md`; los gates en `validate`; el pineo y el CDC en C1; RLS y
+  `service_role` en C7. Un principio que ningún control respalda es decoración, y esta capa
+  ya pagó esa lección.
+- **Contraste con lo existente**: las seis specs se revisaron contra ella y ninguna la
+  contradice — era lo esperado, porque los principios se destilaron de las reglas que esas
+  specs ya obedecen.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑
+  · pineo ☑
+- **Regresión**: `verify:gobernanza` **141/141** · `verifica:specs` **55/55** · contexto
+  dentro de presupuesto (vive en `docs/`, no entra al contexto base).
+- **Nota del protocolo**: `docs/plantillas/prompts.md` dice que la constitución se **propone
+  y espera aprobación**. Ésta está redactada, no aprobada: es propuesta hasta que la dueña
+  la firme, igual que el resto de entradas de hoy.
+- **No se conservó copia del original** en el repo: es de otro proyecto y sigue en la carpeta
+  de descargas de la dueña. Si se quiere como ejemplo del kit SDD, su sitio sería
+  `docs/plantillas/`.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — sesión del 2026-08-30,
+  "registra mi aprobación". Alcance y límites de la firma: **acta al final de este documento**.
+
+---
+
+## Acta de aprobación — 2026-08-30
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción
+literal *"registra mi aprobación"* tras pedir antes *"firma los pendientes"*.
+
+**Qué cubre**: las **trece entradas del 2026-08-30** de este documento — las únicas que estaban pendientes, que quedan con su
+gate de aprobación humana cerrado. Van de la alta del skill `spec-generator` a la
+constitución del repo, pasando por las specs numeradas y reexpresadas, los dos gates nuevos
+(`verifica-specs.mjs`, `prepara-gate.mjs`), su vigilancia en el verificador, el control C4
+en el protocolo de specs y los dos cambios al corpus de capa B.
+
+**Sobre qué se aprobó, dicho con precisión**: sobre los **resúmenes presentados en esa
+conversación** y las **cifras de los gates** —`validate` completo en verde (EXIT 0, Node
+v22.23.2, sellado), `verify:gobernanza` 141/141, `verifica:specs` 55/55, C2 capa A 105/105,
+capa B 22/22, auditoría de credenciales limpia, contexto dentro de presupuesto—, más los
+controles negativos corridos y pegados en esa sesión. **No se revisó el diff archivo por
+archivo**: 33 archivos sin comitear. Queda anotado por exactitud.
+
+**Lo que esta firma NO cierra:**
+
+1. **La capa B sigue sin correrse en frío.** El corpus está completo y limpio (21 casos),
+   pero ningún caso se ha ejecutado contra un agente en sesión limpia — y menos el 21, cuya
+   respuesta esperada se discutió en la propia conversación que lo creó. **Completo no es
+   medido.** Esta firma no lo convierte en medido.
+2. *(Corregido sobre la marcha, el mismo día.* La primera versión de este punto afirmaba
+   que dos entradas del 2026-08-25 seguían sin firma. **Es falso**: están firmadas por
+   lisagomez, como todas las anteriores. El error fue del filtro con el que se buscaron las
+   pendientes —rastreaba las cadenas "sin firma" y "PENDIENTE" en el cuerpo, que en esas dos
+   aparecen hablando de otra cosa—, y lo destapó el propio verificador al quedarse en verde
+   cuando el acta decía que debía haber huecos. Se corrige aquí en vez de borrarse, porque
+   un registro que se edita en silencio deja de servir para lo que existe. **Ninguna entrada
+   anterior a hoy queda pendiente.**)
+3. **Nada está comiteado.** La firma aprueba el contenido, no lo publica.
+
+> Registrado por el agente a petición de la responsable. El agente **no** se auto-aprueba
+> ningún CDC (C1): redacta la entrada y deja el gate abierto hasta que una persona decide.
+
+### 2026-08-30 — la ruta de specs entra al decision tree — radio: sistema
+- **Cambio**: `AGENTS.md` gana (a) una **rama nueva en el decision tree** para
+  `spec-generator`, con el criterio explícito de **cuál de los dos** —si no se sabe QUÉ
+  construir, spec primero y PRP después; si el QUÉ ya está acordado y solo falta el plan,
+  PRP directo; no se escriben las dos para lo mismo—; (b) `docs/constitution.md` nombrada en
+  la sección de Gobernanza como lo primero que se lee al escribir o revisar una spec; y
+  (c) `verifica:specs` y `prepara:gate` en la lista de comandos. `GEMINI.md` regenerado.
+  El verificador gana **siete comprobaciones** (148, desde 141) que vigilan ese cableado en
+  los dos documentos.
+- **Motivo**: los gates estaban en verde y el cableado no existía. Medido antes de tocar
+  nada: `spec-generator`, `constitution`, `verifica:specs` y `prepara-gate` daban **cero
+  menciones** en `AGENTS.md` y **cero** en `GOBERNANZA.md`. Había **dos rutas para planificar
+  trabajo y el decision tree solo conocía una**: ante "feature compleja" se iba a `/prp` y no
+  había forma de enterarse de la otra, ni criterio para elegir. Es la misma forma de fallo
+  que la puerta de herramientas ya pagó —alcanzable solo para quien ya sabe— y la lección del
+  2026-08-23: si no está en el camino de quien decide, no existe.
+- **Lo que sí funcionaba y no se exageró**: la `description` del skill entra en contexto cada
+  sesión, así que el skill era activable por el modelo y por `/spec-generator`. Lo que
+  faltaba era la **ruta documentada y el criterio**, no el acceso.
+- **Cuatro controles negativos**: quitada la rama del árbol → tres rojos a la vez (el de
+  ruteo, el del criterio, y el espejo `GEMINI.md` que dejó de coincidir con su generador —
+  no estaba previsto y es la prueba de que la fuente única muerde). Borrada
+  `docs/constitution.md` → rojo en "existe docs/constitution.md". Restaurado → **148/148**.
+- **Un ajuste que enseñó algo sobre escribir comprobaciones**: la primera versión buscaba la
+  frase del criterio sobre el texto aplanado, y fallaba porque el **árbol ASCII mete su `|`
+  de continuación en mitad de la frase** (`PRP | directo`). Se reescribió la línea del árbol
+  para que la frase no se parta, en vez de hacer el patrón tolerante a la maquetación: una
+  comprobación atada a cómo quedan los márgenes se cae al reajustarlos, y entonces el rojo
+  deja de significar lo que dice.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+  · pineo ☑
+- **Regresión**: `verify:gobernanza` **148/148** · `verifica:specs` **55/55** · capa A
+  **105/105** · capa B **22/22**. Cifra actualizada en `README.md` y `.claude/README.md`
+  (salieron en rojo hasta hacerlo).
+- **El sensor de contexto rechazó la primera versión, y tenía razón**: la redacción inicial
+  dejó `GEMINI.md` en **4589 tokens, el 102 % de su tope de 4500**, y `validate` salió en
+  rojo (EXIT 1). **No se subió el tope** —eso habría sido abaratar el control para que dejara
+  de molestar—: se recortó el texto. La rama pasó de diez líneas a seis conservando lo que
+  obliga (el ruteo, el criterio de cuál usar, y que la spec se lee contra la constitución), y
+  se eliminó la mención duplicada de la constitución en la sección de Gobernanza, porque ya
+  vive donde se decide. Resultado: **4441 tokens, 99 %**. Cabe, y con el margen justo que el
+  presupuesto pretende imponer.
+- **Coste de contexto**: `AGENTS.md` es prefijo estable y tocarlo invalida la caché — se paga
+  entero la próxima sesión. Se acepta porque una rama del decision tree es exactamente lo que
+  debe vivir ahí: es lo que obliga, no lo que informa. `TOTAL` de sesión: **8817 / 12000 (73 %)**.
+- **Aprobado por**: — **sin firma**. Posterior al acta del 2026-08-30, que no la cubre.
+
+### 2026-08-30 — el escaneo de credenciales fallaba por la razón equivocada — radio: plantilla
+- **Cambio**: el bloque 8 de `verifica-gobernanza.mjs` separa el **listado** del **escaneo**.
+  El `try` cubría los dos, así que **un solo archivo ilegible se reportaba como "no se pudo
+  listar el árbol con git ls-files"** — un mensaje falso que manda a depurar git cuando el
+  problema era otro. Ahora el listado tiene su propia comprobación, y el escaneo salta lo que
+  no es archivo regular. Conteo: **148 → 150**.
+- **Cómo se destapó**: al comitear, `verify:gobernanza` se puso en rojo diciendo que no podía
+  listar el árbol — y `git ls-files` funcionaba perfectamente. La causa era el symlink
+  `.opencode/skill/spec-generator`, que git lista y cuya lectura **sigue el enlace hasta un
+  directorio** (EISDIR). Un enlace a directorio no es contenido: lo que apunta ya se escanea
+  por su ruta real en `.claude/skills/`.
+- **Comprobación nueva que no estaba y hacía falta**: *"ningún archivo versionado quedó sin
+  escanear"*. Un archivo que no se pudo mirar **no es un archivo limpio**, y antes se sumaba
+  al verde en silencio. Es la misma doctrina del exit `2` del vigilante y del coste `null` de
+  la contabilidad, que a esta comprobación le faltaba.
+- **Es el mismo defecto que se arregló esta mañana en `prepara-gate.mjs`**, en otro sitio y
+  con otra cara: **un gate que falla por la razón equivocada cuesta más que uno que no
+  existe**. Van dos en un día; conviene mirar si hay más `catch` anchos en el verificador.
+- **Control negativo**: enlace roto añadido al índice → rojo en "ningún archivo versionado
+  quedó sin escanear", con el archivo nombrado. Retirado → **150/150**.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+  · pineo ☑
+- **Aprobado por**: — **sin firma**.

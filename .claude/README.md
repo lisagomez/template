@@ -13,7 +13,7 @@ Template **production-ready** para crear aplicaciones SaaS modernas con desarrol
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth)
 - Tailwind CSS + shadcn/ui
-- 24 Skills de Claude Code (V4 Skills 2.0)
+- 25 Skills de Claude Code (V4 Skills 2.0)
 - Arquitectura Feature-First optimizada para IA
 - Auto port detection (3000-3006)
 - Capa de gobernanza agentica: 7 controles cableados y auto-verificados
@@ -124,6 +124,8 @@ npm run lint         # ESLint
 npm run lint:fix     # Fix automatico
 npm run typecheck    # TypeScript check
 npm run verify:gobernanza  # Cableado de la capa de gobernanza
+npm run verifica:specs     # Integridad de .claude/specs/ (secciones, EARS, numeracion)
+npm run prepara:gate       # Lo dispara pretypecheck: engines.node + build de tools/
 npm run regresion    # Regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # Casos-trampa (C2 capa B, para CDC)
 npm run validate     # typecheck + lint + build + gobernanza + regresion (el gate completo)
@@ -136,7 +138,7 @@ npm run validate     # typecheck + lint + build + gobernanza + regresion (el gat
 > V4 migra TODO a Skills 2.0. Hot reload, auto-discovery, zero config.
 > Cada skill es una carpeta con `SKILL.md` (frontmatter YAML + instrucciones).
 
-Los 24 skills son invocables con `/nombre` y activables por Claude segun
+Los 25 skills son invocables con `/nombre` y activables por Claude segun
 el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
@@ -147,6 +149,9 @@ el `description` de su frontmatter.
 | `add-emails` | `/add-emails` | Emails transaccionales: Resend + React Email |
 | `add-mobile` | `/add-mobile` | PWA instalable + push notifications (iOS compatible) |
 | `website-3d` | `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS |
+| `spec-generator` | `/spec-generator` | Entrevista de requisitos → `spec.md` con RF en notacion EARS |
+| `crear-herramienta` | `/crear-herramienta` | Convertir algo ya reusado en paquete instalable (`tools/`) |
+| `cli-audit` | `/cli-audit` | Estado de la imprenta de CLIs y coste en contexto de los MCP |
 | `prp` | `/prp` | Generar Product Requirements Proposal |
 | `bucle-agentico` | `/bucle-agentico` | Features complejas por fases (DB + API + UI) |
 | `ai` | `/ai` | AI Templates: chat, RAG, vision, tools, web search |
@@ -206,6 +211,32 @@ mkdir .claude/skills/mi-skill
 | **Gobernanza** | Modelo de amenazas (C3) + evaluacion de impacto (C4) |
 | **Validacion** | Tests, linting, verificacion |
 
+### La otra ruta: specs (cuando el QUE no esta claro)
+
+El PRP planifica el **COMO**. Cuando lo que falta es acordar el **QUE**, la ruta es
+`/spec-generator` → `.claude/specs/NNN-<nombre>/{spec,plan,tareas}.md`.
+
+```
+1. Humano: "no esta claro que tiene que hacer"
+2. /spec-generator → entrevista (una pregunta a la vez, max 6) → spec.md
+3. Humano aprueba la spec
+4. plan.md y tareas.md, y de ahi a implementar
+```
+
+| | Spec | PRP |
+|---|---|---|
+| Responde | QUE y POR QUE | COMO |
+| Requisitos | numerados en notacion EARS | criterios de exito |
+| Gobernanza | impacto sobre terceros (**C4**) | amenazas (**C3**) + impacto (C4) |
+| Prohibido | stack, arquitectura, esquemas | — |
+
+**Cual usar**: sin saber QUE construir, spec primero y PRP despues. Con el QUE acordado y
+solo el plan pendiente, PRP directo. **Nunca las dos para lo mismo.**
+
+Toda spec se lee contra `docs/constitution.md`. El gate propio es `npm run verifica:specs`
+(55 comprobaciones, dentro de `validate`): vigila secciones, notacion EARS y numeracion,
+porque **una spec puede perder un requisito al reformatearse sin que nada lo note**.
+
 ---
 
 ## Capa de Gobernanza
@@ -246,7 +277,7 @@ sesiones frias lo encontraron leyendo el repo y la prueba dejo de ser ciega. Se 
 ### Se verifica sola
 
 ```bash
-npm run verify:gobernanza   # 136 comprobaciones (la cifra la vigila el propio verificador)
+npm run verify:gobernanza   # 150 comprobaciones (la cifra la vigila el propio verificador)
 npm run regresion           # C2 capa A
 npm run regresion -- --trampa   # C2 capa B (para cada CDC)
 ```
@@ -308,7 +339,7 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 
 ```
 .claude/
-├── skills/                    # Skills 2.0 (V4) - 24 skills
+├── skills/                    # Skills 2.0 (V4) - 25 skills
 │   ├── new-app/                 # Entrevista de negocio → BUSINESS_LOGIC.md
 │   ├── add-login/               # Auth completo Supabase: login, signup, password reset, profiles, RLS
 │   ├── add-payments/            # Pagos con Polar (MoR): checkout, webhooks, suscripciones
@@ -338,8 +369,15 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 │   └── golden-sets/          # C2: contratos de skills + casos-trampa
 │
 ├── PRPs/                      # Product Requirements Proposals
-│   ├── prp-base.md           # Template base (incluye modelo de amenazas + AISIA)
-│   └── specs/                # Specs compiladas para /goal
+│   └── prp-base.md           # Template base (incluye modelo de amenazas + AISIA)
+│
+├── specs/                     # Specs numeradas: NNN-<nombre>/{spec,plan,tareas}.md
+│   ├── 001-gobernanza-agentica/     # construida
+│   ├── 002-eficiencia-tokens/       # construida
+│   ├── 003-imprenta-de-clis/        # construida
+│   ├── 004-grafo-de-conocimiento/   # blueprint, no construida
+│   ├── 005-a2a-interoperabilidad/   # no construida
+│   └── 006-crear-una-herramienta/   # construida
 │
 │   │   └── references/       # AI Templates (11 bloques)
 │   ├── agents/               # Templates secuenciales

@@ -9,7 +9,7 @@
  * Es el control C6/§9 de GOBERNANZA.md aplicado a la propia capa: un documento que
  * nada obliga a mantener se pudre en silencio.
  */
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -885,6 +885,72 @@ comprueba(
   'si depende de que alguien lo invoque, es una costumbre y no un gate',
 );
 
+// --- 6b. Los gates nacidos el 2026-08-30, vigilados como el de la imprenta ----
+// Se anadieron tres gates ese dia y ninguno estaba vigilado: borrarlos de `package.json`
+// no rompia nada, que es el modo de falla que esta capa persigue en todos los demas sitios.
+// El patron es el de arriba: existe el script Y sigue enganchado donde corre solo.
+const pkgJson = lee('package.json') ?? '';
+for (const f of ['scripts/verifica-specs.mjs', 'scripts/prepara-gate.mjs']) {
+  comprueba(
+    `existe ${f}`,
+    existsSync(ruta(f)),
+    'un gate que no existe no protege nada, y su entrada en package.json enseña a confiar en el',
+  );
+}
+comprueba(
+  'el verificador de specs corre en validate y en predeploy',
+  /"validate":\s*"[^"]*verifica:specs/.test(pkgJson) &&
+    /"predeploy":\s*"[^"]*verifica:specs/.test(pkgJson),
+  'vigila lo que ningun otro gate mira: que una spec no pierda un requisito al reformatearse',
+);
+// `pretypecheck` es el enganche que npm ejecuta SOLO: por eso el gate viaja a `validate`,
+// a `predeploy` y a cualquier `npm run typecheck` suelto sin que nadie lo recuerde. Si se
+// renombra a algo que npm no dispara, el preparador deja de correr en silencio.
+comprueba(
+  'el preparador del gate cuelga de pretypecheck (lo dispara npm, no una costumbre)',
+  /"pretypecheck":\s*"[^"]*prepara-gate\.mjs/.test(pkgJson),
+  'sin el hook, un clon limpio vuelve a fallar citando las pruebas de tools/ y la version de Node',
+);
+comprueba(
+  'package.json declara engines.node, que es lo que el preparador hace cumplir',
+  /"engines"\s*:\s*\{[^}]*"node"\s*:\s*"[^"]+"/.test(pkgJson),
+  'sin engines declarado el preparador no tiene contra que comparar y deja de proteger',
+);
+
+// --- 6c. La ruta spec -> plan -> tareas, enrutada y con constitucion ----------
+// El skill nacio con su `description` en contexto, que basta para que el modelo lo active,
+// pero NO estaba en el decision tree: un agente que leyera el arbol ante "feature compleja"
+// iba a `/prp` y no sabia que existe la otra ruta ni cuando toca cada una. Es la misma
+// forma de fallo que la puerta de herramientas ya pago: alcanzable solo para quien ya sabe.
+for (const doc of ['AGENTS.md', 'GEMINI.md']) {
+  const contenido = leeDoc(doc);
+  if (contenido === null) continue;
+  comprueba(
+    `${doc}: el decision tree rutea a spec-generator`,
+    /spec-generator/i.test(contenido),
+    'sin rama, la ruta spec -> plan -> tareas solo la encuentra quien ya sabe que existe',
+  );
+  // Se busca sobre el texto con los saltos aplanados: el decision tree es un arbol ASCII y
+  // parte las frases donde le cabe. Una comprobacion atada a la maquetacion se cae al
+  // reajustar un margen, y entonces el rojo no significa lo que dice.
+  const plano = contenido.replace(/\s+/g, ' ');
+  comprueba(
+    `${doc}: distingue cuando toca spec y cuando PRP`,
+    /spec-generator/i.test(plano) && /CUAL DE LOS DOS/i.test(plano) && /PRP directo/i.test(plano),
+    'dos rutas para planificar sin criterio de cual usar es peor que una sola',
+  );
+  comprueba(
+    `${doc}: nombra docs/constitution.md`,
+    /docs\/constitution\.md/.test(contenido),
+    'los principios que ninguna spec puede contradecir tienen que estar en el camino, no solo en disco',
+  );
+}
+comprueba(
+  'existe docs/constitution.md',
+  existsSync(ruta('docs/constitution.md')),
+  'el skill y el decision tree mandan leerla: si no existe, enseñan a mirar un hueco',
+);
+
 // --- 7. C1 muerde sobre .mcp.json -----------------------------------------
 // C1 declara `.mcp.json` material de CDC, pero `.gitignore` lo excluye (y debe: lleva
 // credenciales vivas). Sin superficie trackeada, "diff revisado" es imposible y el
@@ -1000,14 +1066,40 @@ const FIRMAS = [
 ];
 // Este propio script contiene las firmas: se excluye o se delata a si mismo.
 const SIN_ESCANEAR = new Set(['scripts/verifica-gobernanza.mjs', 'package-lock.json']);
+// El `try` cubre SOLO el listado. Antes envolvia tambien el bucle de lectura, y entonces un
+// unico archivo ilegible se reportaba como "no se pudo listar el arbol" — un gate rojo por
+// una razon que no era la suya, que manda a buscar donde no es. Lo destapo el symlink
+// `.opencode/skill/spec-generator`: git lo lista, y leerlo sigue el enlace hasta un
+// DIRECTORIO (EISDIR).
+let versionadosCred = null;
 try {
-  const versionados = execFileSync('git', ['ls-files'], { cwd: raiz, encoding: 'utf8' })
+  versionadosCred = execFileSync('git', ['ls-files'], { cwd: raiz, encoding: 'utf8' })
     .split('\n')
     .filter((f) => f && !SIN_ESCANEAR.has(f));
+} catch { /* sin listado no hay nada que escanear; se reporta abajo */ }
+
+comprueba(
+  'el arbol versionado se puede listar (requisito del escaneo de credenciales)',
+  versionadosCred !== null,
+  'git ls-files fallo: sin el listado, el escaneo de credenciales no prueba nada',
+);
+
+if (versionadosCred !== null) {
   const encontrados = [];
-  for (const archivo of versionados) {
+  const ilegibles = [];
+  for (const archivo of versionadosCred) {
+    // Un enlace a directorio no es contenido: lo que apunta ya se escanea por su ruta real.
+    let esArchivo = false;
+    try {
+      esArchivo = statSync(ruta(archivo)).isFile();
+    } catch { /* borrado o roto: cae a ilegibles */ }
+    if (!esArchivo) {
+      if (!existsSync(ruta(archivo))) ilegibles.push(archivo);
+      continue;
+    }
     const contenido = lee(archivo);
-    if (contenido === null || contenido.includes(String.fromCharCode(0))) continue; // binario
+    if (contenido === null) { ilegibles.push(archivo); continue; }
+    if (contenido.includes(String.fromCharCode(0))) continue; // binario
     for (const [nombre, patron] of FIRMAS) {
       if (patron.test(contenido)) encontrados.push(`${archivo} (${nombre})`);
     }
@@ -1017,8 +1109,13 @@ try {
     encontrados.length === 0,
     `${encontrados.join('; ')} — rotala YA: lo versionado se hereda, y git recuerda aunque lo borres`,
   );
-} catch {
-  comprueba('ningun archivo versionado lleva una credencial viva', false, 'no se pudo listar el arbol con git ls-files');
+  // Un archivo que no se pudo mirar NO es un archivo limpio. Se dice, en vez de sumarlo al
+  // verde: misma doctrina que el exit 2 del vigilante y el coste `null` de la contabilidad.
+  comprueba(
+    'ningun archivo versionado quedo sin escanear',
+    ilegibles.length === 0,
+    `sin mirar: ${ilegibles.join(', ')} — no se pudo leer, que no es lo mismo que estar limpio`,
+  );
 }
 
 // --- 9. La cifra de comprobaciones que declaran los README es la real ---------
