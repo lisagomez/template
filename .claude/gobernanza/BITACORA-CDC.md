@@ -2790,3 +2790,35 @@ archivo**: 33 archivos sin comitear. Queda anotado por exactitud.
   · pineo n/a
 - **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
 - **Aprobado por**: — **sin firma**.
+
+---
+
+## Acta de aprobación — 2026-08-30 (segunda): el auditor de fugas
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción
+literal *"mergea el PR"* sobre el PR del auditor de fugas, tras pedir antes *"arregla el
+hueco de 3i"* y *"ataca las 11 entradas con eco"*.
+
+**Qué cubre**: las **dos entradas del 2026-08-30** sobre el auditor de fugas — la que
+retracta la vía propuesta esa misma mañana y documenta por qué no hay umbral posible, y la
+que promueve el auditor a gate con corte binario.
+
+**Sobre qué se aprobó, dicho con precisión**: sobre los resúmenes presentados en esa
+conversación, el cuerpo de los dos PR y las cifras pegadas en sesión — `validate` completo en
+verde con Node v22.23.2 (EXIT 0), auditor con **0 sin declarar · 9 declarados · 12 sin eco**,
+y los controles negativos corridos (retirada una declaración → exit 1 nombrando el caso;
+restaurada → exit 0; y el auditor contra el corpus remoto → exit 0). **No se revisó el diff
+línea por línea.** Queda anotado por exactitud.
+
+**Lo que esta firma NO cierra:**
+
+1. **La comprobación de fuga por parafraseo sigue sin existir**, y está medido que no es
+   posible con un umbral léxico. Lo aprobado cierra el otro lado del problema, no éste.
+2. **Un caso del corpus se contamina al resolverlo bien**: su resolución correcta produce
+   documentación que delata la siguiente corrida. Está medido y reportado, y la decisión
+   —rotar la entrada en cada corrida, o mantener ese artefacto fuera del árbol versionado—
+   **sigue pendiente**. El artefacto producido hoy se dejó sin comitear a propósito.
+3. **Un caso quedó medido a medias**: sin credenciales cargadas en la máquina, uno de sus dos
+   modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
+4. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
+   y marcar el otro DESCARTADO es decisión de la responsable, y no se ha tomado.
