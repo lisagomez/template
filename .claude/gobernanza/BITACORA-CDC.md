@@ -2754,3 +2754,39 @@ archivo**: 33 archivos sin comitear. Queda anotado por exactitud.
   · pineo n/a
 - **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
 - **Aprobado por**: — **sin firma**.
+
+---
+
+### 2026-08-30 — el auditor de fugas pasa de instrumento a GATE — radio: plantilla
+
+- **Contexto**: la entrada anterior lo dejo como instrumento de medida con exit 0 fijo,
+  porque **11 de 21 entradas hacian eco del arbol** y cablearlo habria dejado `validate` en
+  rojo el primer dia. Se ataco el corpus, y eso cambio lo que era posible.
+- **Lo que se hizo con las 11**: **no eran lo mismo**, y tratarlas igual habria estropeado
+  casos. Dos delataban y se **reescribieron**; nueve tienen eco **inherente** —la llave que
+  miden, el script que tocan, el modulo en el que estan ancladas— y se **declararon** con
+  `**Eco aceptado:** <razon>`. Un caso sobre una llave tiene que nombrar esa llave; que
+  aparezca en la documentacion no le revela a nadie que exista una prueba.
+- **La que no se arreglaba reescribiendo vocabulario**: una de las dos describia el mismo
+  canal, la misma motivacion y el mismo rodeo que un PRP del arbol — **que es el artefacto
+  que produjo el sujeto al medir ese caso**. Con la respuesta completa publicada (C3, C4 y el
+  CDC dentro), el caso medía lectura. Hubo que cambiar el canal del escenario, no las
+  palabras. Y su expectativa se realineo: argumentaba sobre un rodeo que la entrada nueva ya
+  no menciona.
+- **El corte deja de ser por peso y pasa a ser BINARIO**, que es lo que desbloquea el gate:
+  el umbral por peso **no se podia fijar** —cualquier corte que cazara la fuga caraba tambien
+  a la documentacion legitima, y ese fue el hallazgo de la manana—. La regla es "todo eco, o
+  no existe o esta declarado". **Sin juicio en tiempo de gate**: el juicio se ejerce UNA vez,
+  al escribir el caso, y queda escrito y revisable.
+- **Cambio**: `audita:fugas` sale con **exit 1** si hay eco sin declarar, y se cablea a
+  `validate` y a `predeploy`.
+- **Control negativo**: retirada una declaracion → **exit 1**, nombrando el caso y el tramo.
+  Restaurada → **exit 0**. Estado actual: **0 sin declarar · 9 declarados · 12 sin eco**.
+- **Lo que esto SI cierra y lo que no**: cierra el hueco por el lado que se podia cerrar —una
+  entrada reconocible desde el arbol ya no pasa en silencio, venga de una fuga en la
+  documentacion o de una entrada escrita con las palabras del repo. **No** convierte la
+  comprobacion 3i en detectora de parafrasis: eso sigue sin ser posible, y sigue documentado.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.

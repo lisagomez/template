@@ -81,11 +81,17 @@ if (corpus === null) {
   process.exit(0);
 }
 
+// Un caso puede DECLARAR su eco: hay entradas cuyo vocabulario es el del propio producto y
+// no se pueden plantear de otra forma (la llave que miden, el script que tocan, el modulo en
+// el que estan ancladas). Ese eco no delata nada — lo que delata es la frase distintiva que
+// coincide con una narracion publicada. La declaracion se revisa UNA vez, al escribir el
+// caso, en vez de exigir juicio en cada corrida del gate.
 const casos = [];
 for (const bloque of corpus.split(/^## /m).slice(1)) {
   const id = (bloque.match(/^(T\d{1,2})/) ?? [])[1];
   const entrada = (bloque.match(/\*\*Entrada:\*\*([\s\S]*?)\n\s*\n/) ?? [])[1];
-  if (id && entrada) casos.push({ id, E: cont(entrada) });
+  const declarado = (bloque.match(/\*\*Eco aceptado:\*\*\s*([\s\S]*?)\n\s*\n/) ?? [])[1];
+  if (id && entrada) casos.push({ id, E: cont(entrada), declarado: declarado?.replace(/\s+/g, ' ').trim() ?? null });
 }
 
 /** ¿`tramo` aparece en orden dentro de `E`, saltando como mucho HUECO palabras? */
@@ -114,25 +120,45 @@ for (const c of casos) {
       if (peso > peor.peso) peor = { peso, texto: tramo.join(' '), archivo: f };
     }
   }
-  filas.push({ id: c.id, ...peor });
+  filas.push({ id: c.id, declarado: c.declarado, ...peor });
 }
 
 filas.sort((a, b) => b.peso - a.peso);
 const conEco = filas.filter((f) => f.peso > 0);
+const sinDeclarar = conEco.filter((f) => !f.declarado);
+const declarados = conEco.filter((f) => f.declarado);
+
+const linea = (f) => `  ${f.peso.toFixed(2).padStart(5)}  ${f.id.padEnd(4)}  ${f.texto.padEnd(42)}  ${f.archivo}`;
 
 console.log(`\nAuditoria de fugas del corpus — K=${K}, huecos<=${HUECO}, ${N} ficheros, ${casos.length} casos\n`);
-if (conEco.length === 0) {
-  console.log('  Ninguna entrada hace eco del arbol. Nada que reescribir.\n');
+
+console.log('SIN DECLARAR — cada una es trabajo pendiente:');
+if (sinDeclarar.length === 0) {
+  console.log('  ninguna.');
 } else {
   console.log('   peso  caso  tramo del arbol que la entrada repite       donde');
-  for (const f of conEco) {
-    console.log(
-      `  ${f.peso.toFixed(2).padStart(5)}  ${f.id.padEnd(4)}  ${f.texto.padEnd(42)}  ${f.archivo}`,
-    );
-  }
-  console.log(`\n  ${conEco.length} de ${casos.length} entradas hacen eco del arbol.`);
-  console.log('  Peso alto = el sujeto puede reconocer el caso leyendo el repo, y entonces');
-  console.log('  el caso mide lectura, no conducta. Se arregla REESCRIBIENDO LA ENTRADA en la');
-  console.log('  rama golden-sets — no retirando documentacion que tiene que decir lo que dice.');
+  for (const f of sinDeclarar) console.log(linea(f));
+  console.log('\n  Peso alto = el sujeto puede reconocer el caso leyendo el repo, y entonces el');
+  console.log('  caso mide lectura, no conducta. Se arregla REESCRIBIENDO LA ENTRADA en la rama');
+  console.log('  golden-sets, o DECLARANDO el eco si el vocabulario es inherente al caso — no');
+  console.log('  retirando documentacion que tiene que decir lo que dice.');
 }
-console.log(`  ${casos.length - conEco.length} entradas sin eco.\n`);
+
+if (declarados.length) {
+  console.log('\nDECLARADOS — eco inherente, revisado al escribir el caso:');
+  for (const f of declarados) console.log(linea(f));
+}
+
+console.log(`\n  ${sinDeclarar.length} sin declarar · ${declarados.length} declarados · ` +
+  `${casos.length - conEco.length} sin eco.`);
+
+// El corte NO es por peso — ese umbral no se pudo fijar, y ese fue el hallazgo del
+// 2026-08-30: cualquier corte que cace la fuga cara tambien a la documentacion legitima. El
+// corte es BINARIO: un eco o no existe, o esta declarado. Sin juicio en tiempo de gate.
+if (sinDeclarar.length > 0) {
+  console.log(`\n  ${sinDeclarar.length} entrada(s) hacen eco del arbol SIN declararlo.`);
+  console.log('  Reescribe la entrada, o declara el eco con "**Eco aceptado:** <razon>" si el');
+  console.log('  vocabulario es inherente al caso.\n');
+  process.exit(1);
+}
+console.log('  Todo eco esta declarado.\n');
