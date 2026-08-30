@@ -2851,3 +2851,32 @@ línea por línea.** Queda anotado por exactitud.
   · pineo n/a
 - **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
 - **Aprobado por**: — **sin firma**.
+
+---
+
+## Acta de aprobación — 2026-08-30 (tercera): el auditor mira lo no versionado
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción
+literal *"mergea el 38"*, precedida de la decisión *"que el artefacto se quede fuera del
+árbol"* que este cambio implementa.
+
+**Qué cubre**: la entrada del 2026-08-30 que amplía el auditor de fugas al árbol completo
+—versionado y sin seguimiento—.
+
+**Sobre qué se aprobó, dicho con precisión**: sobre el cuerpo del PR y las cifras pegadas en
+sesión — `validate` completo en verde con Node v22.23.2 (EXIT 0), auditor con **0 sin
+declarar**, y el control negativo corrido (artefacto en el árbol sin comitear → exit 1
+nombrando el caso; retirado → exit 0). **No se revisó el diff línea por línea.**
+
+**Lo que esta firma cierra**, y conviene que conste porque llevaba abierto desde la mañana:
+la decisión sobre el caso que se contamina al resolverlo bien. Ya no es una costumbre del
+operador — es un gate, y su contrapartida está escrita en el corpus para que el operador
+sepa qué se espera de él.
+
+**Lo que NO cierra**, que sigue igual que en las dos actas anteriores:
+
+1. La detección de fuga por parafraseo sigue sin ser posible con un umbral léxico. Medido.
+2. Un caso quedó **medido a medias**: sin credenciales cargadas en la máquina, uno de sus dos
+   modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
+3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
+   y marcar el otro DESCARTADO sigue sin decidirse.
