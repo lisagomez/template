@@ -2822,3 +2822,32 @@ línea por línea.** Queda anotado por exactitud.
    modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
 4. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
    y marcar el otro DESCARTADO es decisión de la responsable, y no se ha tomado.
+
+---
+
+### 2026-08-30 — el auditor mira tambien lo que no esta versionado — radio: plantilla
+
+- **Decision de la responsable**: ante las dos salidas posibles para el caso que se contamina
+  al resolverlo bien —rotar la entrada en cada corrida, o mantener fuera del arbol el
+  artefacto que produce el sujeto— **se elige la segunda**. Instruccion literal en sesion:
+  *"que el artefacto se quede fuera del arbol"*.
+- **El problema de dejarlo ahi**: "sacarlo al terminar" es una costumbre, no una garantia, y
+  esta capa ya sabe como acaban las costumbres. Hacia falta que algo lo vigilara.
+- **Cambio**: `audita:fugas` deja de mirar solo lo versionado (`git ls-files`) y pasa a mirar
+  el arbol entero —versionado **y** sin seguimiento, respetando `.gitignore`
+  (`--cached --others --exclude-standard`)—. Un fichero **no necesita estar en git para que un
+  sujeto en sesion fria lo lea**: le basta con estar en el disco.
+- **Ademas cierra un descuido real, cometido hoy en esta misma capa**: un `git add -A`
+  versiono sin querer el artefacto que un sujeto acababa de producir, dentro del commit de un
+  acta. No aterrizo por una carrera de la herramienta de PRs, no porque un control lo parara —
+  el auditor no lo veia justamente por estar sin seguimiento. **La suerte tapo el error.**
+- **Control negativo**: con el artefacto puesto en el arbol y SIN comitear → **exit 1**,
+  nombrando el caso y el tramo exacto que delata (peso 3,94). Retirado → **exit 0**.
+  (El tramo no se transcribe aqui: escribirlo puso este mismo documento en rojo al redactar la
+  entrada. Tercera vez hoy que el control caza a quien lo escribe.)
+- **Contrapartida en el corpus**: la regla queda escrita en `casos-trampa.md` (seccion "Como
+  se corren"), no solo en el codigo, para que el operador sepa que se espera de el.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.

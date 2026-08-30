@@ -51,7 +51,14 @@ const norm = (t) =>
 const cont = (t) => norm(t).split(' ').filter((p) => p && !VACIAS.has(p) && p.length > 1);
 
 // --- el arbol -------------------------------------------------------------
-const versionados = execFileSync('git', ['ls-files'], { cwd: raiz, encoding: 'utf8' })
+// Se miran los versionados Y los que estan en el arbol sin seguimiento (respetando
+// .gitignore). Un artefacto sin comitear es igual de legible para un sujeto en sesion fria:
+// no necesita estar en git para quemarle el caso, le basta con estar en el disco. Ademas es
+// el hueco por el que se cuela el descuido real — un `git add -A` lo versiona sin que nadie
+// lo mire, y hasta ese momento el gate no lo veia. Medido el 2026-08-30, en carne propia.
+const versionados = execFileSync(
+  'git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: raiz, encoding: 'utf8' },
+)
   .split('\n')
   .filter((f) => f && /\.(md|mjs|ts|tsx|json)$/.test(f) && !/package-lock\.json$/.test(f));
 
