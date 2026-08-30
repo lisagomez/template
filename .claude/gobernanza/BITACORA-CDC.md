@@ -2905,3 +2905,28 @@ sepa qué se espera de él.
   · pineo n/a
 - **Regresión**: `validate` completo en verde con Node v22.23.2, EXIT 0.
 - **Aprobado por**: — **sin firma**.
+
+---
+
+### 2026-08-30 — comprobacion 151: todo paso de `validate` esta declarado en la documentacion — radio: plantilla
+
+- **De donde sale**: al documentar el gate nuevo quedo una pregunta sin cerrar — los otros
+  pasos estaban nombrados **por costumbre, no por control**. Se midio antes de escribir nada.
+- **Lo que se encontro**: **cuatro de trece** pasos de `validate` no aparecian en ningun
+  documento (`prueba:contabilidad`, `prueba:imprenta`, `audita:imprenta`, y el gate nuevo). El
+  caso que disparo la pregunta **no era la excepcion: era el patron.**
+- **Por que importa**: un gate que el papel no nombra no lo conoce quien lee el README, y
+  quien lo quite no encuentra nada que actualizar — asi que el paso desaparece sin dejar
+  divergencia visible. Es media divergencia papel-codigo, que es justo lo que este verificador
+  existe para cazar, y no la cubria nadie.
+- **Cambio**: comprobacion nueva (bloque 3d-bis). Lee los pasos de `scripts.validate` en
+  `package.json` y exige que cada uno aparezca por nombre en `README.md`, `AGENTS.md` o
+  `.claude/README.md`. Se declaran ademas los tres pasos que faltaban. Conteo: **150 → 151**,
+  actualizado en los dos documentos que lo declaran (y vigilado por el propio verificador,
+  que fue quien exigio el cambio al ponerse en rojo).
+- **Control negativo**: retirado del README el nombre de un paso → **rojo**, nombrando el paso
+  que falta. Restaurado → **151/151**.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.
