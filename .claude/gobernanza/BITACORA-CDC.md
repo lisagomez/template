@@ -2880,3 +2880,28 @@ sepa qué se espera de él.
    modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
 3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
    y marcar el otro DESCARTADO sigue sin decidirse.
+
+---
+
+### 2026-08-30 — el papel no nombraba el gate nuevo, y la memoria recomendaba lo refutado — radio: plantilla
+
+- **Hallazgo, al preguntar "¿ya está documentado?"**: no. `audita:fugas` corría en `validate` y
+  en `predeploy` sin aparecer en **ninguno** de los cuatro documentos que enumeran los
+  comandos. Un gate que el papel no nombra es la mitad de la divergencia que el verificador
+  existe para cazar — y ninguna comprobación cubría ésta.
+- **Peor que faltar**: `.claude/memory/project/protocolo-de-specs.md` seguía recomendando la
+  vía **que se midió y se retractó** ese mismo día ("comparar términos distintivos por
+  párrafo"). Documentación obsoleta que no está en blanco: está **equivocada**, y manda a
+  repetir un experimento ya fallido. Es el modo de fallo más caro de los tres.
+- **Cambio**: el gate se nombra en `README.md` (lista de comandos) y en el resumen de
+  `validate` de `AGENTS.md`; `GEMINI.md` se regenera con `npm run sincroniza:gemini`, que es la
+  única vía admitida. La memoria pasa a contar lo que de verdad pasó: por qué no hay umbral
+  posible, con las cifras medidas; la inversión del sujeto y el corte binario; y que lo que el
+  sujeto produce se queda fuera del árbol.
+- **Contexto medido, porque tocar `AGENTS.md` obliga**: dentro de presupuesto tras el cambio.
+  Se toca `AGENTS.md` sabiendo que invalida el prefijo cacheado; el coste se acepta porque un
+  gate sin declarar es exactamente lo que esta capa cobra.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresión**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.

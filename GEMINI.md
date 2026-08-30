@@ -268,7 +268,7 @@ npm run dev          # Servidor (auto-detecta puerto 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
-npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad (el gate completo)
+npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad + fugas (el gate completo)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de `.claude/specs/`: secciones, EARS, numeracion
 npm run prepara:gate       # lo corre `pretypecheck` solo: engines.node + build de tools/

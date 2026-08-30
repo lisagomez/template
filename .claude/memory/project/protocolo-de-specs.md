@@ -53,12 +53,22 @@ Ver [[gobernanza-agentica]].
 
 ## Deuda abierta (lo que dejó esa corrida)
 
-- **La comprobación anti-fuga del verificador caza la copia literal, no la paráfrasis.**
-  Demostrado con control positivo (8 palabras verbatim → rojo, nombrando el caso) y negativo
-  (la misma idea con otras palabras → verde, 150/150). Sigue abierto **a propósito**: bajar el
-  umbral de palabras mete falsos positivos por todo el árbol, y un gate que grita en falso se
-  acaba desactivando. La vía que aguanta es comparar términos distintivos por párrafo, y es un
-  CDC aparte con su propio control negativo sobre los 21 casos.
+- **La comprobación anti-fuga del verificador caza la copia literal, no la paráfrasis, y eso
+  NO se arregla afinando el umbral.** Se intentó el mismo día y está medido: comparar términos
+  contiguos deja la fuga real en el suelo de ruido (4,60) con ficheros inocentes arriba
+  (10,13), y la variante con huecos sí la encuentra (6,97) pero cinco tramos legítimos pesan
+  más — el mayor vive en el skill de emails y dice lo que ese skill tiene que decir. **No hay
+  umbral posible**: las entradas están escritas con el vocabulario del producto. Cualquier
+  propuesta de "comparar términos por párrafo" ya se probó y se retractó.
+- **La salida fue invertir el sujeto**: se audita la ENTRADA, no la documentación
+  (`npm run audita:fugas`, dentro de `validate` y `predeploy`). Corte **binario**, no por peso:
+  *todo eco, o no existe o está declarado* con `**Eco aceptado:** <razón>` en el corpus. El
+  juicio se ejerce una vez, al escribir el caso; en tiempo de gate no hay juicio. Mira el árbol
+  entero, **incluido lo que está sin seguimiento**: un fichero no necesita estar en git para
+  que un sujeto en sesión fría lo lea.
+- **Lo que el sujeto produzca al resolver un caso se queda FUERA del árbol.** Hay casos cuya
+  resolución correcta genera documentación con el escenario dentro, y eso quema la siguiente
+  corrida. Ya no depende de que el operador se acuerde: el auditor lo caza.
 - **Un caso medía la lectura de la documentación, no la conducta**: su escenario estaba
   publicado en el árbol con la petición dentro, así que se acertaba leyendo el repo. Se
   recalibró el caso y se limpiaron las dos redacciones (CDC del 2026-08-30). Regla que queda:

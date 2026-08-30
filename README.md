@@ -159,6 +159,7 @@ npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, nume
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
 npm run regresion    # regresion de skills (C2)
 npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
+npm run audita:fugas  # ¿una entrada del corpus es reconocible leyendo el arbol?
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
