@@ -2880,3 +2880,83 @@ sepa qué se espera de él.
    modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
 3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
    y marcar el otro DESCARTADO sigue sin decidirse.
+
+---
+
+### 2026-08-30 — el papel no nombraba el gate nuevo, y la memoria recomendaba lo refutado — radio: plantilla
+
+- **Hallazgo, al preguntar "¿ya está documentado?"**: no. `audita:fugas` corría en `validate` y
+  en `predeploy` sin aparecer en **ninguno** de los cuatro documentos que enumeran los
+  comandos. Un gate que el papel no nombra es la mitad de la divergencia que el verificador
+  existe para cazar — y ninguna comprobación cubría ésta.
+- **Peor que faltar**: `.claude/memory/project/protocolo-de-specs.md` seguía recomendando la
+  vía **que se midió y se retractó** ese mismo día ("comparar términos distintivos por
+  párrafo"). Documentación obsoleta que no está en blanco: está **equivocada**, y manda a
+  repetir un experimento ya fallido. Es el modo de fallo más caro de los tres.
+- **Cambio**: el gate se nombra en `README.md` (lista de comandos) y en el resumen de
+  `validate` de `AGENTS.md`; `GEMINI.md` se regenera con `npm run sincroniza:gemini`, que es la
+  única vía admitida. La memoria pasa a contar lo que de verdad pasó: por qué no hay umbral
+  posible, con las cifras medidas; la inversión del sujeto y el corte binario; y que lo que el
+  sujeto produce se queda fuera del árbol.
+- **Contexto medido, porque tocar `AGENTS.md` obliga**: dentro de presupuesto tras el cambio.
+  Se toca `AGENTS.md` sabiendo que invalida el prefijo cacheado; el coste se acepta porque un
+  gate sin declarar es exactamente lo que esta capa cobra.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresión**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.
+
+---
+
+### 2026-08-30 — comprobacion 151: todo paso de `validate` esta declarado en la documentacion — radio: plantilla
+
+- **De donde sale**: al documentar el gate nuevo quedo una pregunta sin cerrar — los otros
+  pasos estaban nombrados **por costumbre, no por control**. Se midio antes de escribir nada.
+- **Lo que se encontro**: **cuatro de trece** pasos de `validate` no aparecian en ningun
+  documento (`prueba:contabilidad`, `prueba:imprenta`, `audita:imprenta`, y el gate nuevo). El
+  caso que disparo la pregunta **no era la excepcion: era el patron.**
+- **Por que importa**: un gate que el papel no nombra no lo conoce quien lee el README, y
+  quien lo quite no encuentra nada que actualizar — asi que el paso desaparece sin dejar
+  divergencia visible. Es media divergencia papel-codigo, que es justo lo que este verificador
+  existe para cazar, y no la cubria nadie.
+- **Cambio**: comprobacion nueva (bloque 3d-bis). Lee los pasos de `scripts.validate` en
+  `package.json` y exige que cada uno aparezca por nombre en `README.md`, `AGENTS.md` o
+  `.claude/README.md`. Se declaran ademas los tres pasos que faltaban. Conteo: **150 → 151**,
+  actualizado en los dos documentos que lo declaran (y vigilado por el propio verificador,
+  que fue quien exigio el cambio al ponerse en rojo).
+- **Control negativo**: retirado del README el nombre de un paso → **rojo**, nombrando el paso
+  que falta. Restaurado → **151/151**.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.
+
+---
+
+## Acta de aprobación — 2026-08-30 (cuarta): documentación del gate y comprobación 151
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción
+literal *"mergea el 39"*, precedida de *"¿ya está documentado?"* y *"añade la comprobación
+151"*.
+
+**Qué cubre**: las **dos entradas del 2026-08-30** de este PR — la que declara el gate nuevo
+en los documentos y corrige la memoria que recomendaba una vía ya refutada, y la que añade la
+comprobación 151.
+
+**Sobre qué se aprobó, dicho con precisión**: sobre el cuerpo del PR y las cifras pegadas en
+sesión — `verify:gobernanza` **151/151**, `validate` completo en verde con Node v22.23.2
+(EXIT 0), contexto dentro de presupuesto tras tocar `AGENTS.md`, y el control negativo corrido
+(retirado del README el nombre de un paso → rojo nombrando el paso; restaurado → 151/151).
+**No se revisó el diff línea por línea.**
+
+**Lo que esta firma cierra**: que un paso del gate pueda correr sin que ningún documento lo
+nombre. Estaba sin vigilar, y al medirlo resultó que **cuatro de trece** pasos lo
+aprovechaban. Ya no depende de la costumbre.
+
+**Lo que NO cierra**, igual que en las tres actas anteriores:
+
+1. La detección de fuga por parafraseo sigue sin ser posible con un umbral léxico. Medido.
+2. Un caso quedó **medido a medias**: le falta una condición de corrida con credencial de pega,
+   porque sin credenciales en la máquina uno de sus dos modos de fallo no era alcanzable.
+3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
+   y marcar el otro DESCARTADO sigue sin decidirse.

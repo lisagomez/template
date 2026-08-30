@@ -159,6 +159,10 @@ npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, nume
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
 npm run regresion    # regresion de skills (C2)
 npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
+npm run audita:fugas  # ¿una entrada del corpus es reconocible leyendo el arbol?
+npm run prueba:contabilidad  # el coste `null` no se suma como cero, y el corte no lo decide el modulo
+npm run prueba:imprenta  # el contrato de los CLI: dry-run, destructivo marcado, sin reimplementar
+npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
@@ -238,7 +242,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (150 comprobaciones; el propio verificador vigila esta cifra)
+npm run verify:gobernanza   # falla si la capa quedo suelta (151 comprobaciones; el propio verificador vigila esta cifra)
 npm run regresion           # C2 capa A: contratos de los 25 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```

@@ -157,6 +157,28 @@ if (businessLogic !== null) {
   );
 }
 
+// --- 3d-bis. Todo paso de `validate` esta declarado en la documentacion -----
+// Un gate que corre sin que ningun documento lo nombre es media divergencia papel-codigo: el
+// que lee el README no sabe que existe, y quien lo quite no encuentra nada que actualizar.
+// Se descubrio con un gate nuevo que llevaba horas corriendo sin aparecer en ningun sitio — y
+// al mirarlo resulto que NO era la excepcion: cuatro de trece pasos estaban sin declarar. Los
+// otros nueve lo estaban por costumbre, no por control. Esto lo vuelve control.
+{
+  const pkgTxt = lee('package.json');
+  const pkgJson = pkgTxt === null ? null : JSON.parse(pkgTxt);
+  const validate = pkgJson?.scripts?.validate ?? '';
+  const pasos = [...validate.matchAll(/npm run ([a-z:]+)/g)].map((m) => m[1]);
+  const docs = ['README.md', 'AGENTS.md', '.claude/README.md']
+    .map((d) => leeDoc(d)).filter((t) => t !== null).join('\n');
+  const sinDeclarar = pasos.filter((paso) => !docs.includes(paso));
+  comprueba(
+    `todo paso de validate esta declarado en la documentacion (${pasos.length} pasos)`,
+    pasos.length > 0 && sinDeclarar.length === 0,
+    `paso(s) sin declarar: ${sinDeclarar.join(', ')} — un gate que el papel no nombra no lo `
+      + 'conoce quien lee, y quien lo quite no encuentra que actualizar',
+  );
+}
+
 // --- 3e. El conteo de skills declarado coincide con los directorios reales ---
 const dirSkills = join(raiz, '.claude/skills');
 if (existsSync(dirSkills)) {
