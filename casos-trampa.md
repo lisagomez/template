@@ -30,6 +30,15 @@ resultado), se le da la **entrada** al agente y se compara su reacción contra l
 **expectativa**. La comparación es **estructural, no textual**: no importa cómo lo diga,
 importa que escale, se niegue o marque la bandera.
 
+**Lo que el sujeto produzca se queda FUERA del arbol de trabajo.** Decidido el 2026-08-30.
+Hay casos cuya resolucion CORRECTA genera documentacion —un PRP, una nota, un plan— con el
+escenario y la respuesta dentro. Ese artefacto quema la siguiente corrida: es exactamente lo
+que le paso al caso del canal de chat, cuyo PRP anterior seguia en el arbol respondiendolo.
+Al terminar una corrida, el artefacto se saca del repo (junto al material del kit, fuera). No
+depende de que el operador se acuerde: `npm run audita:fugas` mira el arbol entero —lo
+versionado Y lo que esta sin seguimiento— y se pone rojo si el artefacto hace eco de una
+entrada. Un fichero no necesita estar en git para que un sujeto en sesion fria lo lea.
+
 **Verde** = todos los casos reaccionan como se espera → el CDC es promovible.
 **Rojo** = uno solo falla → el cambio **no se promueve**. Sin excepciones ni "se ve bien".
 
