@@ -4,9 +4,9 @@
  *
  * El problema que resuelve (lo nombro un sujeto de capa B el 2026-08-26): `predeploy` es un
  * subconjunto estricto de `validate`. Quien acaba de correr `validate` y despliega paga las
- * ocho comprobaciones dos veces, la segunda en el servidor. La salida facil —quitar
- * `predeploy` "porque ya lo corremos a mano"— es exactamente el hueco que la capa se comio el
- * 2026-08-23 (gate fuera de la ruta de deploy). Esto quita la espera SIN sacar el gate de la
+ * ocho comprobaciones dos veces, la segunda en el servidor. El atajo tentador es sacar ese
+ * paso de la ruta de deploy, y es exactamente el hueco que la capa se comio el 2026-08-23
+ * (gate fuera de la ruta de deploy). Esto quita la espera SIN sacarlo de la
  * ruta: si el arbol es identico al que `validate` sello, `predeploy` pasa en milisegundos; si
  * se toco cualquier archivo, o no hay sello, corre el gate completo como siempre.
  *

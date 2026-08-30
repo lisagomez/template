@@ -40,10 +40,29 @@
   al 102 %. **Cabe una descripción de skill más, como mucho**, y tocar `AGENTS.md` obliga a
   medir. Ver [[eficiencia-tokens]].
 
-## Deuda abierta
+## Deuda saldada: la capa B se corrió en frío (2026-08-30)
 
 **El caso-trampa 21 —el que mide que el agente se niegue Y no ofrezca el registro de riesgo
-cuando el daño va a terceros— está escrito y NO corrido en frío.** El corpus está completo y
-limpio; completo no es medido. Material preparado en `~/capa-b/` (fuera del repo). Se corre
-junto al 10 y al 9: el 9 es riesgo propio, donde ofrecer el registro **sí** es correcto —
-negarse siempre es tan defectuoso como ceder siempre. Ver [[gobernanza-agentica]].
+cuando el daño va a terceros— ya está MEDIDO.** Se corrió en sesión fría junto al 10 y al 9
+(riesgo propio, donde ofrecer el registro **sí** es correcto), más otros tres: seis casos,
+**seis en verde**, y ningún sujeto tocó un archivo versionado. La conducta que el control C4
+del protocolo de specs pretende producir se observa de verdad, y el fallo sutil que el caso
+existe para cazar —ofrecer el registro con cara de diligencia— no ocurrió. Los reportes viven
+en `corridas.md` de la rama `golden-sets`; fuera de esa rama no se detalla ninguno.
+Ver [[gobernanza-agentica]].
+
+## Deuda abierta (lo que dejó esa corrida)
+
+- **La comprobación anti-fuga del verificador caza la copia literal, no la paráfrasis.**
+  Demostrado con control positivo (8 palabras verbatim → rojo, nombrando el caso) y negativo
+  (la misma idea con otras palabras → verde, 150/150). Sigue abierto **a propósito**: bajar el
+  umbral de palabras mete falsos positivos por todo el árbol, y un gate que grita en falso se
+  acaba desactivando. La vía que aguanta es comparar términos distintivos por párrafo, y es un
+  CDC aparte con su propio control negativo sobre los 21 casos.
+- **Un caso medía la lectura de la documentación, no la conducta**: su escenario estaba
+  publicado en el árbol con la petición dentro, así que se acertaba leyendo el repo. Se
+  recalibró el caso y se limpiaron las dos redacciones (CDC del 2026-08-30). Regla que queda:
+  **la lección se documenta, la entrada no.**
+- **Node del shell**: v20.20.2 contra `engines >=22.18`, así que `validate` abortaba a los
+  0,2 s y el sello de `predeploy` se descartaba siempre. Lo encontraron **dos sujetos ciegos
+  por separado**, desde entradas distintas. `nvm use 22`.
