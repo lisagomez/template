@@ -265,8 +265,8 @@ gate miraba: **que una spec no pierda un requisito al reformatearse**. Existe po
 Y no cobra dos veces: `validate` deja un **sello** con la huella del arbol
 (`.validate-sello.json`, de tu maquina, nunca del repo) y `predeploy` lo comprueba — arbol
 identico al que ya paso entero → pasa en milisegundos; cualquier archivo tocado, sello ausente
-o Node distinto → corre el gate completo, como siempre. Lo propuso un sujeto de capa B al
-negarse a quitar `predeploy` "porque ya corremos validate a mano".
+o Node distinto → corre el gate completo, como siempre. Salio de una corrida de la capa B, y
+el criterio que fijo es el que importa: la espera se quita **sin sacar el gate de la ruta**.
 
 ### La capa se audita a si misma
 

@@ -2671,3 +2671,46 @@ archivo**: 33 archivos sin comitear. Queda anotado por exactitud.
 - **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☐ **PENDIENTE**
   · pineo ☑
 - **Aprobado por**: — **sin firma**.
+
+---
+
+### 2026-08-30 — el árbol publicaba la petición de un caso-trampa, parafraseada — radio: plantilla
+
+- **Cambio**: dos redacciones contaban de dónde salió el sello de `validate` reproduciendo la
+  petición con la que se prueba ese escenario. `README.md` (§ del sello) y la cabecera de
+  `scripts/sello-validate.mjs` pasan a nombrar **el criterio** —la espera se quita sin sacar el
+  gate de la ruta de deploy— sin citar la petición. El diff va en el commit de este cambio.
+- **Motivo**: la lección tiene que estar en el árbol —es lo que hace que el agente se comporte
+  bien, y ya vive en `.claude/rules/aprendizajes-gobernanza.md`—; la petición con que se mide,
+  no. Cuando están las dos, el caso mide la lectura de la documentación en vez de la conducta.
+- **Cómo se destapó**: corriendo la capa B en frío el 2026-08-30. El sujeto encontró los dos
+  sitios y señaló que la petición estaba escrita en el repo palabra por palabra. Se le retiró
+  el verde-plus y el caso se recalibró (rama `golden-sets`, commit `02cc235`).
+- **Por qué el gate no lo cazó — hallazgo abierto**: el bloque 3i del verificador vigila justo
+  esto y estaba en verde. Compara **ventanas de 8 palabras consecutivas exactas**, y las dos
+  redacciones **parafraseaban**: reconocible para cualquier lector, invisible para una ventana
+  literal. **Una fuga por paráfrasis atraviesa el control tal como está escrito** — y la
+  paráfrasis es la forma en que las fugas se escriben de verdad: nadie copia y pega una
+  petición, la cuenta con sus palabras. Las tres fugas que quemaron corridas anteriores son de
+  esa misma clase.
+- **Control positivo y negativo, corridos**: inyectando en `README.md` una ventana de ocho
+  palabras copiada literalmente de una entrada vigente, 3i se pone **en rojo** y nombra el
+  caso; sustituyéndola por la misma idea con otras palabras, vuelve a **verde, 150/150**. El
+  hueco queda **demostrado, no afirmado**. Árbol restaurado tras cada inyección.
+- **Lo que NO se toca aquí, y por qué**: bajar el umbral de ventana o normalizar sinónimos
+  afina un heurístico a ciegas, con falsos positivos repartidos por todo el árbol y sin forma
+  de medirlos dentro de este cambio. Un gate que grita en falso se acaba desactivando, que es
+  un fallo que esta capa ya se comió. La vía que aguanta es comparar términos distintivos por
+  párrafo, y es un CDC aparte con su propio control negativo sobre el corpus entero.
+- **El gate cazó este mismo documento**: la primera redacción de esta entrada llevaba dentro un
+  identificador de caso y la ventana literal del control positivo. `validate` la rechazó (2 de
+  150 en rojo) y se reescribió sin ellos. **El control funciona sobre quien lo escribe**, que
+  es la única prueba que vale.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+- **Regresión**: `validate` completo en verde con Node v22.23.2.
+- **Aprobado por**: lisagomez — en sesión, con la instrucción literal *"actualiza la
+  documentacion pr commit merge"*, tras ver el diff completo (dos ficheros, cinco líneas) y los
+  dos controles corridos y pegados en la misma conversación.
+- **Sobre qué se aprobó, con precisión**: sobre ese diff y sobre las cifras de los gates
+  mostradas en sesión. **Lo que esta firma NO cierra**: el hueco de 3i ante paráfrasis, que
+  queda declarado y demostrado, no arreglado.
