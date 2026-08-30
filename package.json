@@ -16,6 +16,7 @@
     "verify:gobernanza": "node scripts/verifica-gobernanza.mjs",
     "verifica:specs": "node scripts/verifica-specs.mjs",
     "regresion": "node scripts/regresion-skills.mjs",
+    "audita:fugas": "node scripts/audita-fugas.mjs",
     "audita:secretos": "node scripts/audita-secretos.mjs",
     "configura:deploy": "node scripts/configura-deploy.mjs",
     "empaqueta": "node scripts/empaqueta-herramienta.mjs",

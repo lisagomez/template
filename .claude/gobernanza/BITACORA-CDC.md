@@ -2714,3 +2714,43 @@ archivo**: 33 archivos sin comitear. Queda anotado por exactitud.
 - **Sobre qué se aprobó, con precisión**: sobre ese diff y sobre las cifras de los gates
   mostradas en sesión. **Lo que esta firma NO cierra**: el hueco de 3i ante paráfrasis, que
   queda declarado y demostrado, no arreglado.
+
+---
+
+### 2026-08-30 — el hueco de 3i no se cierra por el lado del arbol: se invierte el sujeto — radio: plantilla
+
+- **Encargo**: cerrar el hueco declarado esa misma manana — la comprobacion anti-fuga caza la
+  copia literal y no la parafrasis.
+- **Resultado, y va contra lo que este mismo documento recomendo**: la via propuesta
+  ("comparar terminos distintivos por parrafo") **esta medida y no funciona**. Queda
+  retractada. Lo que se midio, en dos pasadas contra el arbol donde la fuga SI estaba:
+  1. Tramos contiguos pesados por rareza: la fuga real puntua **4,60**, el suelo de ruido,
+     mientras ficheros inocentes llegan a **10,13**. El detector no es impreciso: esta
+     **invertido**. Causa: la contigüidad se rompe con dos palabras intercaladas, y la
+     parafrasis reordena por definicion.
+  2. Subsecuencia con huecos acotados (arregla lo anterior): **si** encuentra la fuga real
+     (peso 6,97), pero **cinco tramos legitimos pesan mas**. El mayor, con 10,18, vive en el
+     skill de emails y dice `correos transaccionales resend` — que es exactamente lo que ese
+     skill tiene que decir.
+- **Por que no hay umbral posible**: las entradas del corpus estan escritas con el vocabulario
+  del propio producto. Cualquier corte que cace la fuga cara tambien a la documentacion que
+  habla de lo mismo con razon. **No es un problema de afinado: es que el arbol es el sujeto
+  equivocado.**
+- **La inversion, que es el arreglo real**: el sujeto de la auditoria pasa a ser la ENTRADA.
+  Si una entrada hace eco del arbol, el caso mide lectura y no conducta —da igual quien copio
+  a quien— y lo barato es reescribir la entrada, que vive fuera del repo, en vez de mutilar
+  documentacion que tiene que decir lo que dice.
+- **Cambio**: `scripts/audita-fugas.mjs` + `npm run audita:fugas`. Informe ordenado por peso.
+  **Exit 0 siempre: es instrumento de medida, no gate**, y esto es deliberado — hoy **11 de 21
+  entradas hacen eco del arbol**, asi que cablearlo a `validate` lo dejaria en rojo el primer
+  dia y acabaria desactivado, que es el fallo que esta capa ya se comio.
+- **Lo que queda abierto, dicho sin adornos**: el hueco de 3i **sigue abierto**. Esto no lo
+  cierra: lo mide, y mueve el arreglo a donde es barato. La secuencia es reescribir las
+  entradas con eco alto, y cuando el informe baje, fijar el umbral con esos numeros y
+  promoverlo a comprobacion. Hasta entonces, **no medido no es aprobado** tambien aqui.
+- **Hallazgo lateral**: la limpieza de esa manana dejo un tercer sitio con la peticion dentro
+  (una entrada antigua de este documento). Lo encontro el instrumento, no la revision.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.
