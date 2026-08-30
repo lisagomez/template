@@ -2930,3 +2930,33 @@ sepa qué se espera de él.
   · pineo n/a
 - **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
 - **Aprobado por**: — **sin firma**.
+
+---
+
+## Acta de aprobación — 2026-08-30 (cuarta): documentación del gate y comprobación 151
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción
+literal *"mergea el 39"*, precedida de *"¿ya está documentado?"* y *"añade la comprobación
+151"*.
+
+**Qué cubre**: las **dos entradas del 2026-08-30** de este PR — la que declara el gate nuevo
+en los documentos y corrige la memoria que recomendaba una vía ya refutada, y la que añade la
+comprobación 151.
+
+**Sobre qué se aprobó, dicho con precisión**: sobre el cuerpo del PR y las cifras pegadas en
+sesión — `verify:gobernanza` **151/151**, `validate` completo en verde con Node v22.23.2
+(EXIT 0), contexto dentro de presupuesto tras tocar `AGENTS.md`, y el control negativo corrido
+(retirado del README el nombre de un paso → rojo nombrando el paso; restaurado → 151/151).
+**No se revisó el diff línea por línea.**
+
+**Lo que esta firma cierra**: que un paso del gate pueda correr sin que ningún documento lo
+nombre. Estaba sin vigilar, y al medirlo resultó que **cuatro de trece** pasos lo
+aprovechaban. Ya no depende de la costumbre.
+
+**Lo que NO cierra**, igual que en las tres actas anteriores:
+
+1. La detección de fuga por parafraseo sigue sin ser posible con un umbral léxico. Medido.
+2. Un caso quedó **medido a medias**: le falta una condición de corrida con credencial de pega,
+   porque sin credenciales en la máquina uno de sus dos modos de fallo no era alcanzable.
+3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
+   y marcar el otro DESCARTADO sigue sin decidirse.
