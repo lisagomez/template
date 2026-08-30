@@ -2822,3 +2822,61 @@ línea por línea.** Queda anotado por exactitud.
    modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
 4. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
    y marcar el otro DESCARTADO es decisión de la responsable, y no se ha tomado.
+
+---
+
+### 2026-08-30 — el auditor mira tambien lo que no esta versionado — radio: plantilla
+
+- **Decision de la responsable**: ante las dos salidas posibles para el caso que se contamina
+  al resolverlo bien —rotar la entrada en cada corrida, o mantener fuera del arbol el
+  artefacto que produce el sujeto— **se elige la segunda**. Instruccion literal en sesion:
+  *"que el artefacto se quede fuera del arbol"*.
+- **El problema de dejarlo ahi**: "sacarlo al terminar" es una costumbre, no una garantia, y
+  esta capa ya sabe como acaban las costumbres. Hacia falta que algo lo vigilara.
+- **Cambio**: `audita:fugas` deja de mirar solo lo versionado (`git ls-files`) y pasa a mirar
+  el arbol entero —versionado **y** sin seguimiento, respetando `.gitignore`
+  (`--cached --others --exclude-standard`)—. Un fichero **no necesita estar en git para que un
+  sujeto en sesion fria lo lea**: le basta con estar en el disco.
+- **Ademas cierra un descuido real, cometido hoy en esta misma capa**: un `git add -A`
+  versiono sin querer el artefacto que un sujeto acababa de producir, dentro del commit de un
+  acta. No aterrizo por una carrera de la herramienta de PRs, no porque un control lo parara —
+  el auditor no lo veia justamente por estar sin seguimiento. **La suerte tapo el error.**
+- **Control negativo**: con el artefacto puesto en el arbol y SIN comitear → **exit 1**,
+  nombrando el caso y el tramo exacto que delata (peso 3,94). Retirado → **exit 0**.
+  (El tramo no se transcribe aqui: escribirlo puso este mismo documento en rojo al redactar la
+  entrada. Tercera vez hoy que el control caza a quien lo escribe.)
+- **Contrapartida en el corpus**: la regla queda escrita en `casos-trampa.md` (seccion "Como
+  se corren"), no solo en el codigo, para que el operador sepa que se espera de el.
+- **Gate aplicado**: diff revisado ☑ · regresion verde ☑ · aprobacion humana ☐ **PENDIENTE**
+  · pineo n/a
+- **Regresion**: `validate` completo en verde con Node v22.23.2, EXIT 0.
+- **Aprobado por**: — **sin firma**.
+
+---
+
+## Acta de aprobación — 2026-08-30 (tercera): el auditor mira lo no versionado
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción
+literal *"mergea el 38"*, precedida de la decisión *"que el artefacto se quede fuera del
+árbol"* que este cambio implementa.
+
+**Qué cubre**: la entrada del 2026-08-30 que amplía el auditor de fugas al árbol completo
+—versionado y sin seguimiento—.
+
+**Sobre qué se aprobó, dicho con precisión**: sobre el cuerpo del PR y las cifras pegadas en
+sesión — `validate` completo en verde con Node v22.23.2 (EXIT 0), auditor con **0 sin
+declarar**, y el control negativo corrido (artefacto en el árbol sin comitear → exit 1
+nombrando el caso; retirado → exit 0). **No se revisó el diff línea por línea.**
+
+**Lo que esta firma cierra**, y conviene que conste porque llevaba abierto desde la mañana:
+la decisión sobre el caso que se contamina al resolverlo bien. Ya no es una costumbre del
+operador — es un gate, y su contrapartida está escrita en el corpus para que el operador
+sepa qué se espera de él.
+
+**Lo que NO cierra**, que sigue igual que en las dos actas anteriores:
+
+1. La detección de fuga por parafraseo sigue sin ser posible con un umbral léxico. Medido.
+2. Un caso quedó **medido a medias**: sin credenciales cargadas en la máquina, uno de sus dos
+   modos de fallo no era alcanzable. Le falta una condición de corrida con credencial de pega.
+3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
+   y marcar el otro DESCARTADO sigue sin decidirse.
