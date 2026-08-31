@@ -32,6 +32,14 @@ export { modeloEnergia, type OpcionesEnergia } from './vad/energia.js';
 export { creaDetectorPorCanal, type DetectorPorCanal, type OpcionesPorCanal } from './canales/por-canal.js';
 
 export { agrupa, calibraUmbral, distanciaCoseno, type OpcionesAgrupar } from './diar/agrupacion.js';
+export {
+  creaSegmentadorStreaming,
+  creaDiarizadorSolapeEnVivo,
+  type SegmentadorStreaming,
+  type OpcionesSegmentadorStreaming,
+  type DiarizadorSolapeEnVivo,
+  type OpcionesDiarizadorSolapeEnVivo,
+} from './diar/segmentacion-streaming.js';
 export { creaDiarizador, type Diarizador, type OpcionesDiarizador } from './diar/diarizador.js';
 export {
   creaDiarizadorPorSegmentacion,

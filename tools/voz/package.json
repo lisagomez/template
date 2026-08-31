@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/voz",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Deteccion de voz (VAD) en tiempo real y diarizacion local, en vivo y por lotes. Nucleo en TypeScript puro: los modelos se inyectan, no se empaquetan.",
   "type": "module",
   "license": "UNLICENSED",

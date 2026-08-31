@@ -12,14 +12,15 @@ y por eso se puede probar entero sin descargar un solo MB de modelos.
 | Hace | No hace |
 |---|---|
 | Detectar donde empieza y acaba el habla | **Transcribir**. Define el enchufe (`Transcriptor`) y se aparta |
-| Repartir hablantes **por canal**, sin modelos | Representar **solape en vivo**: el streaming es el camino VAD |
-| Diarizar **por lotes**, con o sin habla solapada | Traer los pesos de los modelos: los configuras tu |
-| Diarizar **en vivo**, corrigiendose hacia atras | Decir quien habla ANTES de que el turno cierre |
+| Repartir hablantes **por canal**, sin modelos | Traer los pesos de los modelos: los configuras tu |
+| Diarizar **por lotes**, con o sin habla solapada | Decir quien habla ANTES de que el turno cierre |
+| Diarizar **en vivo**, corrigiendose hacia atras | Reaccionar al instante por el camino con solape: eso pide un VAD |
+| Diarizar **en vivo con solape**, turnos que se pisan | Transcribir, ya dicho arriba |
 
 ## Instalar
 
 ```bash
-npm install <ruta>/tools/voz/tu-scope-voz-0.2.0.tgz
+npm install <ruta>/tools/voz/tu-scope-voz-0.3.0.tgz
 ```
 
 El runtime de ONNX es **peerDependency opcional**: instala `onnxruntime-web` (navegador) u
@@ -161,12 +162,58 @@ devuelve los mismos eventos.
   una: `voz` sirve para reaccionar ya, `diarizacion` llega despues. Mezclarlas es prometer un
   hablante en tiempo real que nadie puede dar.
 - **No ve solape.** Es el camino VAD, con la misma limitacion que `creaDiarizador`: dos voces
-  a la vez dan un turno con un embedding promedio. Para solape, el camino PyanNet, por lotes.
+  a la vez dan un turno con un embedding promedio. Para solape en vivo, el punto 5.
 - **Una fusion puede llegar tarde.** Si los turnos del hablante absorbido ya salieron de la
   ventana, se quedan con la etiqueta vieja para siempre. El evento lo dice en `fuera` en vez
   de disimularlo; que hacer con eso —avisar, ignorar— lo decide tu app.
 - **Los numeros no se reciclan.** Tras una fusion, "Hablante 2" desaparece y el siguiente
   nuevo es el 3. Reutilizar un nombre que el usuario ya leyo confunde mas que un hueco.
+
+### 5. En vivo CON solape — segmentacion en streaming
+
+Lo mismo que el punto 4, pero la fuente de turnos es PyanNet en vez del VAD: dos personas
+hablando a la vez salen como **dos turnos que se pisan**, cada uno con su etiqueta.
+
+```ts
+import { creaDiarizadorSolapeEnVivo, tramosSolapados } from '@tu-scope/voz';
+
+const vivo = creaDiarizadorSolapeEnVivo({
+  segmentacion: await creaModeloSegmentacion({ ort, modelo: '/modelos/segmentation-3.0.onnx' }),
+  hablante: await creaModeloHablante({ ort, modelo: '/modelos/embedding.onnx' }),
+  hablantes: 3,
+});
+
+for (const e of await vivo.procesa(muestras)) {
+  if (e.tipo === 'turno') pinta(e.id, e.turno, { provisional: e.provisional });
+  if (e.tipo === 'correccion') for (const c of e.cambios) reetiqueta(c.id, c.hablante);
+  if (e.tipo === 'firme') for (const id of e.ids) confirma(id);
+}
+```
+
+Los tres eventos son **los mismos** del punto 4, y no por parecido: es la misma pieza. La
+identidad global —confianza, provisional, correccion, fusion, firme— nunca supo de donde
+venian los turnos, asi que el solape se resolvio cambiando la **fuente**, no la identidad.
+Si los turnos te llegan de otro sitio, `creaSegmentadorStreaming` entrega solo la corriente
+de turnos solapables y te dejas la identidad a ti.
+
+**El precio, que es real y no se ajusta:**
+
+| | Punto 4 (VAD) | Punto 5 (PyanNet) |
+|---|---|---|
+| Cierra un turno cuando | oye el silencio: ~300 ms | la ventana avanza: **~5 s** con 10 s y medio solape |
+| Solape | no lo ve | lo representa |
+| `inicioHabla` para barge-in | si | **no**: la actividad solo se sabe con la ventana vista |
+| Modelos | VAD + embeddings | segmentacion + embeddings |
+
+Quien necesite las dos cosas —parar al bot YA y ver el solape— corre un `creaDetectorVoz`
+en paralelo: son dos preguntas distintas y solo una de las dos es barata.
+
+**Dos capas de identidad, que no son la misma.** Las etiquetas de PyanNet son locales a la
+ventana, y coserlas pide identidad; es tentador pensar que es la misma que la global. No lo
+es. Una **pista** vive segundos y solo dice "esta voz viene sonando"; un **hablante** vive la
+reunion entera. La misma persona que calla treinta segundos y vuelve genera dos pistas, y es
+la capa de arriba la que las junta. Hacer que la pista dure toda la sesion es rehacer la capa
+de arriba, peor y por duplicado.
 
 ## Los mandos que de verdad importan
 
@@ -180,6 +227,8 @@ devuelve los mismos eventos.
 | `msVentanaCorreccion` (en vivo) | Con 0 nunca rectificas; muy alto, se reescribe lo que el usuario ya leyo |
 | `margenCorreccion` (en vivo) | Bajo: dos hablantes parecidos se roban turnos en cada empuje y la interfaz parpadea |
 | `umbralFusion` (en vivo) | Alto funde a dos personas distintas, y lo que salio de la ventana ya no se arregla |
+| `solape` (segmentacion) | Es la latencia: mas solape cierra antes, a cambio de correr el modelo mas veces |
+| `umbralPista` (solape en vivo) | Alto cose dos voces en un turno; bajo parte a una en trozos de ventana. Se equivoca barato: la capa global vuelve a unir |
 
 ## El umbral de diarizacion no se adivina
 
@@ -203,7 +252,7 @@ esto el umbral es superstici­on heredada de un tutorial.
 ## Pruebas
 
 ```bash
-npm run build && npm run prueba   # 50 pruebas, sin red y sin modelos
+npm run build && npm run prueba   # 62 pruebas, sin red y sin modelos
 ```
 
 Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.
