@@ -27,7 +27,8 @@ lo bastante como para sacarlo de ahi.
 
 - Next.js 16 (App Router) + React 19 + TypeScript
 - Supabase (Database + Auth + RLS)
-- Tailwind CSS 3.4 — shadcn/ui **preconfigurado** (`components.json` listo; los componentes se anaden a demanda)
+- Tailwind CSS 3.4 + shadcn/ui **cableado**: tokens en variables CSS, tema claro/oscuro, `cn()` y `Button`
+- Zustand para el estado que comparten los componentes de una feature
 - 25 Skills de Claude Code (V4 Skills 2.0)
 - Specs con requisitos en notacion EARS + `docs/constitution.md`
 - `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
@@ -78,14 +79,45 @@ Runtime: Node.js + TypeScript
 Framework: Next.js 16 (App Router)
 Database: PostgreSQL/Supabase
 Styling: Tailwind CSS 3.4
-Components: shadcn/ui (preconfigurado; los componentes se anaden con `npx shadcn add`)
-State: Zustand (convencion del golden path; entra en el proyecto al usarla)
+Components: shadcn/ui (cableado; se anaden mas con `npx shadcn add <componente>`)
+State: Zustand
 Validation: Zod
 AI Engine: Vercel AI SDK v5 + OpenRouter
 Testing: Playwright CLI + MCP
 Deploy: Vercel o VPS propio (Docker + Caddy), dimensionado por script
 Empaquetado: tools/ + npm run empaqueta (tarball probado en proyecto limpio)
 ```
+
+## UI y estado: que hace cada pieza
+
+**shadcn/ui** no es una libreria de componentes que instalas: es un generador que **copia el
+codigo del componente dentro de tu repo**. `npx shadcn add dialog` te deja un
+`dialog.tsx` que es tuyo — lo editas como cualquier archivo del proyecto, sin luchar contra
+los estilos de un paquete ni esperar a que su autor acepte un PR. Aqui esta cableado
+entero:
+
+| Pieza | Donde | Para que |
+|---|---|---|
+| Tokens de color | `src/app/globals.css` | `--primary`, `--background`… en HSL. Cambiar la marca es tocar el CSS, no los componentes |
+| Tema | `tailwind.config.ts` | Mapea los tokens a clases (`bg-primary`), con `darkMode: ['class']` |
+| `cn()` | `src/shared/utils/cn.ts` | Une clases resolviendo conflictos: `cn('p-2','p-4')` deja solo `p-4` |
+| Componentes | `src/shared/components/ui/` | Empieza con `Button`; el resto se anade a demanda |
+
+**Zustand** es el estado global mas pequeno que funciona: un hook, sin provider, sin
+boilerplate. Sirve para lo que **varios componentes comparten y no viene del servidor** —
+un panel abierto, un filtro, el paso de un asistente. Lo que vive en la base **no** se
+duplica ahi: eso lo traen los Server Components o `services/`, y tener la misma verdad en
+dos sitios es como se desincroniza una UI.
+
+El andamio esta en `src/features/.template/store/feature-store.ts`, que se copia con la
+feature. El estado global de toda la app, si hace falta, va en `src/shared/stores/`.
+
+```bash
+npx shadcn add dialog input card   # anade componentes a src/shared/components/ui/
+```
+
+`components.json` apunta a `src/shared/`, no a `src/components/`: la arquitectura declarada
+tiene un solo sitio para la UI compartida, y shadcn escribe ahi.
 
 ## Arquitectura Feature-First
 
