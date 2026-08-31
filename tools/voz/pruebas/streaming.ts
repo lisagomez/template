@@ -120,6 +120,57 @@ test('un hablante abierto de mas se funde y los turnos ya emitidos se corrigen',
   assert.equal(d.hablantes, 1);
 });
 
+/**
+ * La secuencia esta buscada, no elegida a ojo: en esta geometria casi cualquier pareja
+ * termina fundiendose antes de que a un turno le de tiempo a cambiar de dueno, y por eso
+ * este caso se quedo sin prueba cuando se escribio la reasignacion. Lo que hace que aqui si
+ * salte: los 50 grados nacen fronterizos entre los dos, el turno de -30 arrastra al primer
+ * hablante LEJOS de ellos, y 75/70/68 arrastran al segundo ENCIMA. Los centroides acaban a
+ * 0.8 de distancia — muy por encima del umbral de fusion — asi que no se funden: solo cambia
+ * de manos el turno que estaba en medio.
+ */
+test('un turno fronterizo cambia de hablante cuando el otro acumula la evidencia', async () => {
+  const d = creaDiarizadorStreaming({ modelo: modeloAngulo() });
+  const eventos: EventoDiarizacion[] = [];
+  for (const [i, grados] of [1, 50, 110, -30, 75, 70, 68].entries()) {
+    eventos.push(...(await d.empuja(turnoDe(grados, i * 1000))));
+  }
+
+  assert.equal(
+    turnos(eventos).find((t) => t.id === 't2')?.turno.hablante,
+    'Hablante 1',
+    'el turno de 50 grados NACE con el primero: es el mas cercano cuando llega',
+  );
+
+  const correccion = correcciones(eventos).at(-1);
+  assert.equal(correccion?.motivo, 'reasignacion', 'no es una fusion: los dos hablantes siguen vivos');
+  assert.deepEqual(correccion?.cambios, [{ id: 't2', hablante: 'Hablante 2' }]);
+  assert.equal(correccion?.fuera, 0, 'una reasignacion solo toca lo que sigue en la ventana');
+  assert.equal(d.hablantes, 2, 'nadie se fundio con nadie');
+});
+
+/**
+ * El complemento, que es la mitad que de verdad importa: la misma evidencia llegando tarde.
+ * La herramienta no finge que puede arreglarlo — ya declaro el turno `firme`, y firme
+ * significa que no lo toca. Prefiere un acta con un error conocido a una que se reescribe
+ * sola bajo el cursor.
+ */
+test('si el turno ya salio de la ventana, la evidencia llega tarde y no se corrige', async () => {
+  const d = creaDiarizadorStreaming({ modelo: modeloAngulo(), msVentanaCorreccion: 2_500 });
+  const eventos: EventoDiarizacion[] = [];
+  for (const [i, grados] of [1, 50, 110, -30, 75, 70, 68].entries()) {
+    eventos.push(...(await d.empuja(turnoDe(grados, i * 1000))));
+  }
+
+  assert.ok(firmes(eventos).includes('t2'), 't2 se declaro firme antes de que llegara la evidencia');
+  assert.deepEqual(correcciones(eventos), [], 'y firme se cumple: ninguna correccion lo toca');
+  assert.equal(
+    turnos(eventos).find((t) => t.id === 't2')?.turno.hablante,
+    'Hablante 1',
+    'se queda con la etiqueta vieja, que es el precio declarado de la ventana',
+  );
+});
+
 test('una fusion tardia dice cuantos turnos ya NO puede corregir', async () => {
   // Misma geometria, pero la evidencia llega cuando los dos primeros turnos ya salieron de
   // la ventana. La fusion se aplica igual —el modelo mejora— y lo que no puede arreglar se

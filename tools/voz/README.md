@@ -252,7 +252,7 @@ esto el umbral es superstici­on heredada de un tutorial.
 ## Pruebas
 
 ```bash
-npm run build && npm run prueba   # 62 pruebas, sin red y sin modelos
+npm run build && npm run prueba   # 64 pruebas, sin red y sin modelos
 ```
 
 Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.
