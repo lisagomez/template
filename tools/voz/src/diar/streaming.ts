@@ -18,12 +18,18 @@
  * absorbido ya salieron de la ventana, esos turnos se quedan con la etiqueta vieja y no hay
  * vuelta atras. No se disimula — se cuentan en `fuera`.
  *
+ * Con un `registro` de voces conocidas hay un cuarto caso, que se dice con los mismos tres
+ * eventos: un anonimo puede RESULTAR ser alguien con nombre cuando su centroide madura. Sale
+ * como `correccion` con motivo `identificacion` — para la interfaz es lo mismo de siempre,
+ * unos turnos ya pintados que cambian de etiqueta.
+ *
  * Lo que NO hace: solape. Esto es el camino VAD (un turno, un vector, un hablante), con la
  * misma limitacion que `creaDiarizador`. Representar solape en vivo pide segmentacion por
  * marco sobre una ventana movil, que es otra herramienta y otra factura de computo.
  */
 
 import { distanciaCoseno } from './agrupacion.js';
+import type { RegistroHablantes } from './registro.js';
 import type { DetectorVoz } from '../vad/detector.js';
 import type { EventoVoz, ModeloHablante, Muestras, Turno } from '../types.js';
 
@@ -59,6 +65,14 @@ export interface OpcionesDiarizadorStreaming {
    * centroides se juntan y hay que deshacer el error.
    */
   umbralFusion?: number;
+  /**
+   * Voces conocidas de otras sesiones. Con registro, quien se reconoce nace con su nombre en
+   * vez de con un numero, y un anonimo puede pasar a tenerlo mas tarde (ver `identificacion`).
+   *
+   * Cuando el registro reconoce una voz, su respuesta manda sobre la continuidad de la
+   * sesion. El porque esta en `asigna`, donde se decide.
+   */
+  registro?: RegistroHablantes;
 }
 
 export type EventoDiarizacion =
@@ -73,7 +87,7 @@ export type EventoDiarizacion =
     }
   | {
       tipo: 'correccion';
-      motivo: 'fusion' | 'reasignacion';
+      motivo: 'fusion' | 'reasignacion' | 'identificacion';
       cambios: Array<{ id: string; hablante: string }>;
       /** Turnos que llevaban la etiqueta corregida pero ya salieron de la ventana: se quedan mal. */
       fuera: number;
@@ -91,8 +105,10 @@ export interface DiarizadorStreaming {
 }
 
 interface Hablante {
-  /** Numero visible. NO se reutiliza tras una fusion: reciclar un nombre que el usuario ya
-   *  leyo es peor que dejar un hueco en la numeracion. */
+  /** Nombre del registro, si esta voz se reconocio. `null` mientras siga siendo un anonimo. */
+  nombre: string | null;
+  /** Numero visible cuando NO hay nombre. NO se reutiliza tras una fusion: reciclar un numero
+   *  que el usuario ya leyo es peor que dejar un hueco en la numeracion. */
   id: number;
   /** Suma de los vectores atribuidos. El centroide es esto normalizado. */
   suma: Float64Array;
@@ -110,7 +126,7 @@ interface Reciente {
 }
 
 export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): DiarizadorStreaming {
-  const { modelo } = opciones;
+  const { modelo, registro } = opciones;
   const umbral = opciones.umbral ?? 0.55;
   const msMinimo = opciones.msMinimo ?? 400;
   const msVentana = opciones.msVentanaCorreccion ?? 30_000;
@@ -130,7 +146,7 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
   let siguienteTurno = 1;
   let ahoraMs = 0;
 
-  const etiqueta = (h: Hablante) => `Hablante ${h.id}`;
+  const etiqueta = (h: Hablante) => h.nombre ?? `Hablante ${h.id}`;
 
   function centroide(h: Hablante): Float32Array {
     if (h.centroide) return h.centroide;
@@ -150,9 +166,12 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
     h.centroide = null;
   }
 
-  function abre(dimension: number): Hablante {
+  function abre(dimension: number, nombre: string | null = null): Hablante {
     const h: Hablante = {
-      id: siguienteHablante++,
+      nombre,
+      // Quien nace con nombre no gasta numero anonimo. El hueco en la numeracion solo
+      // significa algo cuando alguien llego a leerlo, y a Ana nadie la leyo como "Hablante 1".
+      id: nombre === null ? siguienteHablante++ : 0,
       suma: new Float64Array(dimension),
       cuenta: 0,
       etiquetados: 0,
@@ -173,6 +192,33 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
    * etiqueta que puede cambiar, y decir 0.9 de eso seria mentir.
    */
   function asigna(vector: Float32Array): { hablante: Hablante; confianza: number } {
+    // El registro va PRIMERO cuando tiene respuesta, y es una decision con motivo.
+    //
+    // `identifica` solo contesta cuando la voz cabe holgada y ademas le saca margen a la
+    // segunda candidata; cuando contesta, lo hace sobre un centroide que etiqueto un humano.
+    // La continuidad de la sesion es un liston mas bajo —basta caer dentro del umbral del
+    // hablante mas cercano, sin margen que valga— y por eso, con dos voces registradas que se
+    // parecen, decidir por continuidad las fundiria en el primer turno: la segunda persona no
+    // llegaria a abrirse nunca, y registrar a dos que suenan parecido es exactamente el caso
+    // para el que existe registrar.
+    //
+    // Lo que este orden NO arregla, y hay que saberlo: alguien que NO esta registrado pero
+    // cuya voz cae dentro del umbral de alguien que si lo esta se va a ir bajo su nombre. El
+    // mando contra eso son `umbral` y `margen` del registro, y se calibran con `calibraUmbral`
+    // sobre voces propias; heredarlos de un ejemplo es pedir que pase.
+    if (registro) {
+      const conocida = registro.identifica(vector);
+      if (conocida) {
+        const confianza = Math.min(1, Math.max(0, 1 - conocida.distancia / registro.umbral));
+        // Un nombre identifica a UNA persona. Abrir un segundo "Ana" seria afirmar que Ana
+        // estaba en dos sitios a la vez; si la atribucion resulta mala, `reasigna` tiene la
+        // ventana entera para moverla, que es el mecanismo que ya existe para eso.
+        const yaVivo = vivos.find((h) => h.nombre === conocida.nombre);
+        if (yaVivo) return { hablante: yaVivo, confianza };
+        if (vivos.length < techo) return { hablante: abre(vector.length, conocida.nombre), confianza };
+      }
+    }
+
     const orden = porDistancia(vector);
     const d1 = orden[0]?.d ?? Infinity;
     const d2 = orden[1]?.d ?? Infinity;
@@ -193,13 +239,28 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
     return { hablante: orden[0]!.h, confianza: 0 };
   }
 
+  /**
+   * El par vivo mas cercano, ya ordenado: `a` es quien sobrevive a la fusion.
+   *
+   * Dos voces con nombres DISTINTOS del registro no forman par, por muy juntos que acaben sus
+   * centroides. El registro es evidencia que puso un humano sobre audio que sabia de quien
+   * era; el centroide es evidencia que infirio la maquina con el audio de hoy. Cuando se
+   * contradicen, fundir dejaria que la inferida borre a la etiquetada, y el acta se quedaria
+   * con una persona donde habia dos sin que nadie lo pidiera. El precio de no fundir es
+   * visible y barato: dos filas parecidas que alguien puede juntar mirandolas.
+   */
   function parMasCercano(): { a: Hablante; b: Hablante; d: number } | null {
     let mejor: { a: Hablante; b: Hablante; d: number } | null = null;
     for (let i = 0; i < vivos.length; i++) {
       for (let j = i + 1; j < vivos.length; j++) {
-        const [a, b] = [vivos[i]!, vivos[j]!];
-        const d = distanciaCoseno(centroide(a), centroide(b));
-        if (!mejor || d < mejor.d) mejor = a.id < b.id ? { a, b, d } : { a: b, b: a, d };
+        const x = vivos[i]!;
+        const y = vivos[j]!;
+        if (x.nombre !== null && y.nombre !== null && x.nombre !== y.nombre) continue;
+        const d = distanciaCoseno(centroide(x), centroide(y));
+        if (mejor !== null && d >= mejor.d) continue;
+        // Sobrevive el que tiene nombre; entre dos anonimos, el que hablo primero.
+        const a = x.nombre !== null ? x : y.nombre !== null ? y : x.id < y.id ? x : y;
+        mejor = { a, b: a === x ? y : x, d };
       }
     }
     return mejor;
@@ -254,6 +315,42 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
     return cambios.length === 0 ? [] : [{ tipo: 'correccion', motivo: 'reasignacion', cambios, fuera: 0 }];
   }
 
+  /**
+   * Repasa a los anonimos contra el registro. Es la mitad que hace util el registro en vivo:
+   * al abrirse, un hablante tiene UN vector y puede no parecerse a nadie; tres turnos despues
+   * su centroide ya esta hecho, y entonces si.
+   *
+   * Sale como `correccion` y no como un evento nuevo a proposito. Para la interfaz esto es
+   * exactamente lo mismo que una fusion —unos turnos ya pintados cambian de etiqueta— y
+   * anadir un cuarto evento a la promesa obligaria a cada consumidor a tratar un caso mas
+   * para pintar lo mismo. Lo que cambia es el `motivo`, que es donde se mira el porque.
+   */
+  function identificaConocidos(): EventoDiarizacion[] {
+    if (!registro) return [];
+    const eventos: EventoDiarizacion[] = [];
+    for (const h of vivos) {
+      if (h.nombre !== null || h.cuenta <= 0) continue;
+      const conocida = registro.identifica(centroide(h));
+      if (!conocida) continue;
+      // Ese nombre ya tiene dueno vivo: dos "Ana" simultaneas son peor que un anonimo.
+      if (vivos.some((otro) => otro.nombre === conocida.nombre)) continue;
+
+      h.nombre = conocida.nombre;
+      const cambios: Array<{ id: string; hablante: string }> = [];
+      for (const r of recientes) if (r.hablante === h) cambios.push({ id: r.id, hablante: etiqueta(h) });
+      eventos.push({
+        tipo: 'correccion',
+        motivo: 'identificacion',
+        cambios,
+        // Los turnos que ya salieron de la ventana se quedan con el numero para siempre. No
+        // era una etiqueta falsa —solo anonima— pero el acta queda partida entre "Hablante 3"
+        // y "Ana" siendo la misma persona, y eso se cuenta en vez de disimularlo.
+        fuera: Math.max(0, h.etiquetados - cambios.length),
+      });
+    }
+    return eventos;
+  }
+
   /** Saca de la ventana lo que ya no se puede corregir y lo declara firme. */
   function poda(): EventoDiarizacion[] {
     const limite = ahoraMs - msVentana;
@@ -295,6 +392,9 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
         ...poda(),
         ...fusiona(),
         ...reasigna(),
+        // Al final: fundir y reasignar son justo lo que mueve los centroides, y preguntarle
+        // al registro antes seria preguntarle sobre una evidencia que estaba a punto de cambiar.
+        ...identificaConocidos(),
       ];
     },
 
@@ -304,6 +404,11 @@ export function creaDiarizadorStreaming(opciones: OpcionesDiarizadorStreaming): 
       return ids.length === 0 ? [] : [{ tipo: 'firme', ids }];
     },
 
+    /**
+     * Olvida la SESION, no las voces: el registro es de quien llama y sobrevive entero. Es
+     * justo lo que se quiere entre dos reuniones — la numeracion anonima vuelve a empezar y
+     * Ana sigue siendo Ana.
+     */
     reinicia() {
       vivos = [];
       recientes = [];

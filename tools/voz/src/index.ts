@@ -42,6 +42,14 @@ export {
 } from './diar/segmentacion-streaming.js';
 export { creaDiarizador, type Diarizador, type OpcionesDiarizador } from './diar/diarizador.js';
 export {
+  creaRegistroHablantes,
+  importaRegistro,
+  type OpcionesRegistro,
+  type RegistroHablantes,
+  type RegistroSerializado,
+  type VozConocida,
+} from './diar/registro.js';
+export {
   creaDiarizadorPorSegmentacion,
   tramosSolapados,
   type DiarizadorSegmentacion,
