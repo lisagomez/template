@@ -36,7 +36,12 @@ export function distanciaCoseno(a: Float32Array, b: Float32Array): number {
     nb += b[i]! * b[i]!;
   }
   const denom = Math.sqrt(na) * Math.sqrt(nb);
-  return denom === 0 ? 1 : 1 - punto / denom;
+  if (denom === 0) return 1;
+  // Se recorta al rango que promete la firma. Con dos vectores practicamente iguales el
+  // coseno sale 1 + 1e-8 por redondeo y la distancia, negativa: nada revienta, pero una
+  // `confianza` calculada a partir de ahi se va por encima de 1 y deja de valer lo que
+  // dice su documentacion. Visto el 2026-09-01 al comparar una voz consigo misma.
+  return Math.min(2, Math.max(0, 1 - punto / denom));
 }
 
 /**

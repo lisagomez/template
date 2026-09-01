@@ -1,0 +1,3 @@
+# `npm run demo` lo instala solo la primera vez.
+node_modules/
+package-lock.json

@@ -24,8 +24,7 @@ import {
 const HZ = 16_000;
 const MARCOS_VENTANA = 10;
 const MARCOS_SALTO = 5; // solape 0.5
-const MUESTRAS_MARCO = 1_600; // 100 ms
-const MS_MARCO = 1_000;
+const MUESTRAS_MARCO = 1_600; // 100 ms a 16 kHz
 
 /** Mismo truco que en `streaming.ts`: el audio lleva escrito quien habla, como angulo. */
 function modeloAngulo(): ModeloHablante {
