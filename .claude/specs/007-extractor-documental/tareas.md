@@ -1,42 +1,61 @@
 # Tareas 007 — Extractor documental como herramienta enchufable
 
-> **Todas abiertas.** Nada de esta spec está construido. Una casilla marcada apunta a un
-> artefacto que existe y se verificó; marcar por adelantado es exactamente cómo un plan deja de
-> significar algo.
+> Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
+> exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
+> (48 pruebas, sin red, sin base de datos y sin navegador). La UI, los adaptadores y el
+> empaquetado siguen abiertos.
+
+## Cerradas
+
+- [x] **TAR-2 · Núcleo: tipos y puertos.**
+      → `src/tipos.ts` · `src/puertos.ts` — los cuatro puertos (`MotorOcr`, `AlmacenDocumentos`,
+      `AlmacenPlantillas`, `EsquemaExistente`) son interfaces sin implementación, y
+      `pruebas/contrato.ts` verifica que el núcleo no importa React, Next, Supabase ni proveedor.
+
+- [x] **TAR-3 · Núcleo: máquina de estados y clasificación.**
+      → `src/estados.ts` · `src/archivos.ts` — transiciones declaradas como dato, `revision_humana`
+      probada como salida normal y no como fallo. Incluye `troceaPaginas` para el límite de 8
+      páginas de las anotaciones.
+
+- [x] **TAR-4 · Núcleo: identidad por contenido.**
+      → `src/identidad.ts` — SHA-256 por Web Crypto (mismo código en Node y navegador). Probado que
+      reprocesar no crea un segundo registro, y que una vista sobre un buffer mayor no cambia el hash.
+
+- [x] **TAR-6 · Reducer de la plantilla de revisión.**
+      → `src/plantilla.ts` — habilitar, deshabilitar, renombrar y reordenar son puras e inmutables;
+      deshabilitar registra quién y cuándo, y rehabilitar limpia la autoría anterior.
+
+- [x] **TAR-18 · Puerto de esquema y descriptor declarado.**
+      → `src/esquema.ts` — `esquemaDeclarado()` implementa el puerto **sin consultar nada** y valida
+      al construir. Ninguna ruta pide una credencial con privilegio de esquema.
+
+- [x] **TAR-19 · Los tres descriptores de ejemplo.**
+      → `pruebas/fixtures/` — y la prueba *«el descriptor vacío recorre el mismo código que el
+      poblado»* pasa ambos por las mismas funciones. La desalineación se detecta antes de proponer
+      mapeo alguno.
+
+- [x] **TAR-20 · Resolución de valores por similitud.**
+      → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
+      `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
+      default defendible sin medirlo.
 
 ## Abiertas
 
-- [ ] **TAR-1 · Andamio del paquete.**
-      Hecho cuando: existe `tools/extractor-documental/` copiado de `tools/ejemplo-herramienta/`,
-      con `package.json` declarando los seis subpaths de `exports`, `type: "module"`,
-      `sideEffects: false`, `engines.node` y todas las peer marcadas opcionales.
+- [ ] **TAR-1 · Andamio del paquete.** *(parcial)*
+      Hecho: existe `tools/extractor-documental/` con `type: "module"`, `sideEffects: false`,
+      `engines.node`, `files` y cero `dependencies` — vigilado por `pruebas/contrato.ts`.
+      **Falta**: `exports` solo declara `.` y `./plugin`. Los otros cuatro subpaths no se declaran
+      hasta que existan: un `exports` que apunta a un fichero inexistente pasa el build y revienta
+      en el proyecto de destino, que es justo el fallo que el empaquetador busca.
       → cubre DoF-1 · RF-22
 
-- [ ] **TAR-2 · Núcleo: tipos y puertos.**
-      Hecho cuando: `MotorOcr`, `AlmacenDocumentos` y `AlmacenPlantillas` existen como
-      interfaces, sin una sola implementación, y el núcleo no importa nada.
-      → cubre RF-9 · RF-21 · RF-22
-
-- [ ] **TAR-3 · Núcleo: máquina de estados y clasificación.**
-      Hecho cuando: las transiciones `pendiente → … → validado` y `clasificaArchivo` son
-      funciones puras con pruebas que corren sin red y sin claves, y `revision_humana` es una
-      salida normal, no un error.
-      → cubre DoF-3 · RF-6 · RF-12
-
-- [ ] **TAR-4 · Núcleo: identidad por contenido.**
-      Hecho cuando: el identificador de un documento sale del hash de su contenido, y una prueba
-      demuestra que reprocesar el mismo lote no crea un segundo registro.
-      → cubre RF-8
-
-- [ ] **TAR-5 · Manifiesto del plugin.**
-      Hecho cuando: `./plugin` exporta id, nombre, descripción, ruta, versión, capacidades e
-      icono SVG en línea, y se importa en un proyecto **sin React instalado**.
+- [ ] **TAR-5 · Manifiesto del plugin.** *(parcial)*
+      Hecho: `src/plugin.ts` exporta id, nombre, descripción, ruta, versión, capacidades e icono
+      SVG en línea con `currentColor`, y `pruebas/plugin.ts` verifica que el archivo **no importa
+      absolutamente nada**.
+      **Falta**: la prueba de que se importa en un proyecto sin React instalado, que es la
+      integración real de TAR-15.
       → cubre RF-1 · RF-2 · RF-3
-
-- [ ] **TAR-6 · Reducer de la plantilla de revisión.**
-      Hecho cuando: habilitar, deshabilitar, renombrar y reordenar campos son transiciones puras,
-      y deshabilitar registra quién y cuándo.
-      → cubre RF-13 · RF-20
 
 - [ ] **TAR-7 · Adaptador de OCR autohospedado.**
       Hecho cuando: `./motores/openai-compat` habla por `fetch` con un vLLM, valida la respuesta
@@ -89,24 +108,6 @@
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
       del adaptador tiene entrada en `BITACORA-CDC.md`, y `npm run validate` está en verde.
       → cubre DoF-6 · DoF-7
-
-- [ ] **TAR-18 · Puerto de esquema y descriptor declarado.**
-      Hecho cuando: `EsquemaExistente` existe como interfaz, su implementación por defecto devuelve
-      el descriptor declarado **sin consultar nada**, y no hay ninguna ruta que exija una credencial
-      con privilegio de esquema.
-      → cubre RF-25 · RF-26
-
-- [ ] **TAR-19 · Los tres descriptores de ejemplo.**
-      Hecho cuando: existen `descriptor-vacio.json`, `descriptor-con-catalogos.json` y
-      `descriptor-desalineado.json`, y una prueba demuestra que el vacío y el poblado **entran por
-      la misma función**, sin rama `sinCatalogos`. El desalineado se señala antes de proponer nada.
-      → cubre DoF-10 · RF-35 · RF-36
-
-- [ ] **TAR-20 · Resolución de valores por similitud.**
-      Hecho cuando: `resuelveValor` es pura, devuelve `resuelto | ambiguo | sin_resolver` con los
-      candidatos ordenados, y tiene pruebas que corren sin base de datos. El umbral es un
-      parámetro, no una constante.
-      → cubre RF-28
 
 - [ ] **TAR-21 · Mapeo campo → columna en la UI.**
       Hecho cuando: el revisor asocia un campo extraído a una columna de una tabla del descriptor, y
