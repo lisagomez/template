@@ -7,6 +7,9 @@
  */
 export type {
   EstadoDocumento,
+  Procedencia,
+  ClaseDeFuente,
+  FormatoDeCampo,
   Region,
   CampoExtraido,
   PaginaExtraida,
@@ -23,6 +26,7 @@ export type {
   AlmacenDocumentos,
   AlmacenPlantillas,
   EsquemaExistente,
+  LectorDeCodigos,
   OpcionesDeExtraccion,
 } from './puertos.js'
 
@@ -40,7 +44,31 @@ export {
 export { tipoDe, clasificaArchivo, clasificaLote, troceaPaginas } from './archivos.js'
 export type { ResultadoDeIngesta } from './archivos.js'
 
-export { identidadDe, esElMismoDocumento } from './identidad.js'
+export { identidadDe, esElMismoDocumento, identidadDeLectura } from './identidad.js'
+export type { LecturaDeCodigo } from './identidad.js'
+
+export {
+  analizaCarga,
+  parseaGs1,
+  validaModulo10,
+  validaGuiaFedexExpress,
+  validaDigitoDeControl,
+  esRafagaDeEscaner,
+} from './codigos.js'
+export type { TipoDeCarga, CargaAnalizada, OpcionesDeRafaga } from './codigos.js'
+
+export { corrobora, exigeRevision } from './corroboracion.js'
+export type { Cotejo, Acuerdo, Discrepancia } from './corroboracion.js'
+
+export {
+  encola,
+  marcaSincronizada,
+  marcaFallida,
+  esperaAntesDeReintentar,
+  desfaseDeReloj,
+  avisoDeCola,
+} from './cola.js'
+export type { EstadoEnCola, EntradaEnCola, AlmacenLocal, AvisoDeCola } from './cola.js'
 
 export { plantillaInicial, reducePlantilla, camposVisibles, camposDeshabilitados } from './plantilla.js'
 export type { CampoDePlantilla, PlantillaDeRevision, AccionDePlantilla } from './plantilla.js'
@@ -63,7 +91,7 @@ export type {
   Desalineacion,
 } from './esquema.js'
 
-export { normaliza, similitud, resuelveValor, proponeAlta } from './reconciliacion.js'
+export { normaliza, similitud, resuelveValor, resuelveIdentificador, proponeAlta } from './reconciliacion.js'
 export type {
   EstadoDeResolucion,
   FilaDeCatalogo,

@@ -16,6 +16,8 @@
 | `./motores/openai-compat` | Adaptador HTTP contra vLLM autohospedado, vía `fetch` | — | RF-9, RF-24 |
 | `./almacenes/supabase` | Adaptador de `AlmacenDocumentos` y `AlmacenPlantillas`, con RLS | `@supabase/supabase-js` (opcional) | RF-21 |
 | `./react/lienzo` | Lienzo de modelado: tarjeta por entidad, relación arrastrable, cardinalidad en los extremos | `@xyflow/react`, `react` (ambas opcionales) | RF-32..RF-34 |
+| `./react/camara` | Lectura con cámara: `BarcodeDetector` nativo, respaldo wasm donde no exista | `zxing-wasm`, `react` (ambas opcionales) | RF-37, RF-38 |
+| `./almacenes/indexeddb` | Adaptador de `AlmacenLocal` para la cola sin conexión | — | RF-50 |
 
 Andamio a copiar: `tools/ejemplo-herramienta/` (package.json, tsconfig, la separación
 núcleo/`react`). Referencia de una herramienta real con varios entry points: `tools/voz/`.
@@ -27,7 +29,13 @@ MotorOcr           extrae(documento, opciones) → PaginaExtraida[]
 AlmacenDocumentos  guarda / lee / lista documentos y extracciones
 AlmacenPlantillas  guarda / lee plantilla por defecto y catálogos
 EsquemaExistente   describe() → DescriptorDeEsquema  (tablas, columnas, tipos, claves)
+LectorDeCodigos    lee(imagen) → cargas crudas
+AlmacenLocal       cola de lecturas mientras no hay conexión
 ```
+
+Módulos puros nuevos del núcleo: `codigos.ts` (clasificación de la carga, AIs de GS1, dígitos de
+control, ráfaga del escáner), `corroboracion.ts` (cotejo OCR↔código) y `cola.ts` (cola sin conexión
+con el instante sellado al escanear).
 
 La implementación por defecto de `EsquemaExistente` **no consulta nada**: devuelve el descriptor
 declarado. La resolución por similitud (`resuelveValor`) es **función pura del núcleo** — recibe
@@ -81,6 +89,12 @@ toca uno, se toca el otro en el mismo commit.
 | Lienzo en `./react/lienzo` | Meterlo en `./react` | Quien solo revisa documentos no debería instalar la librería de grafos |
 | Nunca `ALTER` sobre lo preexistente | Proponer y aplicar migraciones al esquema ajeno | Alterar una tabla con datos dentro es irreversible y ajeno: lo decide el dueño de ese esquema |
 | Alta de catálogo solo con confirmación | Alta automática al no encontrar coincidencia | Es cómo acaban "ACME SA" y "ACME S.A. de C.V." como dos proveedores, con las facturas repartidas |
+| Identidad según la clase de fuente | Una sola regla de idempotencia por contenido | Escanear la misma guía dos veces son dos eventos. La regla única habría descartado el segundo en silencio, y perder un evento vuelve inútil la trazabilidad |
+| Identificadores por igualdad exacta, con barrera en el tipo | Comparar todo por similitud | Medido: dos GTIN a un dígito se parecen 0,87. Si el correcto no está en el catálogo, la vía difusa afirma `resuelto` sobre otro producto |
+| `LectorDeCodigos` separado de `MotorOcr` | Un solo puerto de extracción | Unificarlos obligaría a inventarle una confianza al código, que es el error que se quiere evitar |
+| Nunca navegar a la URL de un código | Abrirla, que es lo cómodo | Es el fraude entero: pegatina encima de la legítima, o QR insertado en el PDF del proveedor |
+| El instante se sella al escanear | Sellarlo al recibir en el servidor | Varios eventos sincronizados a la vez compartirían instante y se deduplicarían entre sí: se borraría la trazabilidad de toda una mañana |
+| La PWA la hace la app consumidora | Meter el service worker en el paquete | Una librería no instala un service worker; el paquete aporta la cola pura y su adaptador |
 | Empaquetar desde el día uno | Esperar al reuso 3+ de `CREAR-UNA-HERRAMIENTA.md` | Decisión explícita del usuario. Se acepta el coste: versionado semver y un `export` cambiado es major |
 
 ## Cobertura de la DEFINICIÓN DE HECHO
@@ -97,6 +111,9 @@ toca uno, se toca el otro en el mismo commit.
 | DoF-8 | Recorrido sobre `descriptor-con-catalogos.json`, con la clave anónima y nada más |
 | DoF-9 | Prueba que recorre la salida SQL del generador y falla si aparece `ALTER` sobre una tabla del descriptor |
 | DoF-10 | `node --test` sobre los tres fixtures; el vacío y el poblado entran por la misma función |
+| DoF-11 | `pruebas/trazabilidad.ts`: dos lecturas del mismo código como evento dan identidades distintas |
+| DoF-12 | `pruebas/trazabilidad.ts`: `resuelveValor` lanza sobre un identificador, y se demuestra el emparejamiento erróneo que produciría |
+| DoF-13 | `pruebas/cola.ts`: dos entradas sincronizadas en el mismo instante conservan instantes de dispositivo distintos |
 
 ## Estrategia de gates
 

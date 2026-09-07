@@ -2,8 +2,8 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (48 pruebas, sin red, sin base de datos y sin navegador). La UI, los adaptadores y el
-> empaquetado siguen abiertos.
+> (**84 pruebas**, sin red, sin base de datos y sin navegador). La UI, la cámara, los adaptadores y
+> el empaquetado siguen abiertos.
 
 ## Cerradas
 
@@ -33,6 +33,33 @@
       → `pruebas/fixtures/` — y la prueba *«el descriptor vacío recorre el mismo código que el
       poblado»* pasa ambos por las mismas funciones. La desalineación se detecta antes de proponer
       mapeo alguno.
+
+- [x] **TAR-26 · Identidad por clase de fuente.**
+      → `src/identidad.ts` · `identidadDeLectura()` aplica documento / etiqueta / evento.
+      `pruebas/trazabilidad.ts` demuestra que dos lecturas del mismo código como evento **no**
+      colapsan, y que un documento sí deduplica por contenido. Cubre DoF-11 · RF-41 · RF-42.
+
+- [x] **TAR-27 · Barrera de identificadores.**
+      → `src/reconciliacion.ts` · `resuelveValor` **lanza** sobre `formato: 'identificador'` y
+      `resuelveIdentificador()` va por igualdad exacta. La prueba mide el peligro real: un GTIN
+      ausente del catálogo se emparejaba con otro producto en estado `resuelto`.
+      Cubre DoF-12 · RF-43 · RF-44.
+
+- [x] **TAR-28 · Análisis de la carga de un código.**
+      → `src/codigos.ts` · clasifica URL, CFDI, GS1, FNSKU y guía; parsea los AIs de GS1; valida
+      módulo 10 (GTIN, SSCC) y módulo 11 de FedEx Express; `esRafagaDeEscaner()` como plan B.
+      Los dígitos de control de las pruebas están **calculados, no inventados**.
+      Cubre RF-38 · RF-45 · RF-46 · RF-47.
+
+- [x] **TAR-29 · Corroboración entre reconocimiento y código.**
+      → `src/corroboracion.ts` · una sola discrepancia exige revisión aunque ambas fuentes vengan
+      con confianza alta; los importes se comparan como números para no ahogar la cola en ruido.
+      Cubre RF-48 · RF-49.
+
+- [x] **TAR-30 · Cola sin conexión.**
+      → `src/cola.ts` · el instante se sella al escanear, se conservan los dos instantes, hay
+      retroceso acotado y aviso de riesgo de purga si la app no está instalada.
+      Cubre DoF-13 · RF-50 a RF-54.
 
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
@@ -131,12 +158,34 @@
       sentencia que altere una tabla presente en el descriptor.
       → cubre DoF-9 · RF-31
 
+- [ ] **TAR-31 · Lectura con cámara.**
+      Hecho cuando: `./react/camara` usa `BarcodeDetector` donde exista y cae a `zxing-wasm` donde
+      no, con las dos peer opcionales. Se verifica **antes** que el wasm no se descarga a quien no
+      abre la cámara.
+      → cubre RF-37 · RF-38
+
+- [ ] **TAR-32 · Escáner óptico en la UI.**
+      Hecho cuando: se detecta la lectura por prefijo/sufijo configurado —la vía determinista— y la
+      ráfaga por tiempos queda solo como respaldo declarado.
+      → cubre RF-39 · RF-40
+
+- [ ] **TAR-33 · Adaptador de IndexedDB para la cola.**
+      Hecho cuando: `./almacenes/indexeddb` implementa `AlmacenLocal`, y la app avisa del riesgo de
+      purga cuando hay cola pendiente sin estar instalada.
+      → cubre RF-50 · RF-53
+
 ## Bloqueadas por medición
 
 - [ ] **TAR-17 · Fijar el umbral de confianza.**
       Bloqueada hasta correr el piloto de `docs/INVESTIGACION-OCR-MISTRAL.md` §8: el umbral
       depende de la correlación entre la puntuación del motor y el error real, y a ojo falla en
       las dos direcciones — cola humana inútil, o errores que pasan con confianza alta.
+      → duda abierta de la spec
+
+- [ ] **TAR-34 · Fijar los parámetros de la ráfaga del escáner.**
+      Bloqueada: dependen del teclado y del lector concretos, y este contenedor no tiene ninguno.
+      Mientras tanto la vía buena no necesita medir nada — configurar prefijo y sufijo en el aparato
+      hace la detección determinista.
       → duda abierta de la spec
 
 - [ ] **TAR-25 · Fijar el umbral de similitud.**

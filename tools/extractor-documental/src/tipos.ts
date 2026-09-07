@@ -34,13 +34,58 @@ export interface Region {
   alto: number
 }
 
-/** Un dato extraido, con su confianza y su origen. Los tres campos son obligatorios a proposito. */
+/**
+ * De donde salio un dato. NO es metadato de adorno: decide como se trata.
+ *
+ * Un campo de `codigo` llega con confianza 1 porque un QR decodifica o no decodifica — no hay
+ * 0,87. Sin esta marca, un campo de codigo y uno de OCR con confianza alta son indistinguibles, y
+ * el campo de codigo **se saltaria la cola de revision** por el mero hecho de venir de un
+ * decodificador determinista. Que es justo lo contrario de lo que conviene: decodificar bien no
+ * dice nada sobre si el contenido es cierto (§2.11 del SDD).
+ */
+export type Procedencia = 'ocr' | 'codigo' | 'humano'
+
+/**
+ * Que clase de cosa es lo que se leyo. Cambia la IDENTIDAD, y por tanto si se deduplica.
+ *
+ *   documento → un fichero con campos. Dos veces el mismo fichero es el mismo documento.
+ *   etiqueta  → un item de inventario. Identidad por GTIN + lote + serie.
+ *   evento    → un HECHO con hora y lugar. Escanear la misma guia dos veces son DOS eventos.
+ *
+ * Meter las tres en la misma regla de idempotencia es como se pierden eventos de trazabilidad en
+ * silencio (§2.9 del SDD).
+ */
+export type ClaseDeFuente = 'documento' | 'etiqueta' | 'evento'
+
+/**
+ * Como se compara un valor contra un catalogo.
+ *
+ *   texto         → nombres de gente y de empresas: se resuelven por PARECIDO.
+ *   identificador → GTIN, SSCC, RFC, guia: se resuelven por IGUALDAD EXACTA, jamas por parecido.
+ *
+ * Dos GTIN que difieren en un digito son productos distintos y se parecen un 95%. Emparejar
+ * identificadores por similitud es como se mete stock en el SKU equivocado.
+ */
+export type FormatoDeCampo = 'texto' | 'identificador'
+
+/** Un dato extraido, con su confianza y su origen. */
 export interface CampoExtraido {
   clave: string
   valor: string
   /** 0 a 1. Quien la use tiene que comparar contra un umbral explicito, nunca contra un default. */
   confianza: number
-  region: Region
+  procedencia: Procedencia
+  /** Por defecto se trata como `texto`. Marcarlo `identificador` PROHIBE la comparacion difusa. */
+  formato?: FormatoDeCampo
+  /**
+   * Region del documento de la que salio.
+   *
+   * Opcional **solo** porque un escaner HID no produce ninguna: teclea una cadena y no hay imagen
+   * que recortar. Para todo lo que venga de una imagen sigue siendo obligatoria de hecho — un dato
+   * de OCR sin region no se puede auditar despues, que es la regla que sostiene la trazabilidad
+   * del dato.
+   */
+  region?: Region
 }
 
 export interface PaginaExtraida {

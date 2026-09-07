@@ -22,6 +22,20 @@ export interface MotorOcr {
   extrae(documento: Uint8Array, opciones?: OpcionesDeExtraccion): Promise<PaginaExtraida[]>
 }
 
+/**
+ * Lector de codigos: hermano de `MotorOcr` y deliberadamente SEPARADO de el.
+ *
+ * No comparten interfaz porque no comparten semantica: el OCR devuelve confianza y region; un
+ * decodificador devuelve una carga que decodifico o no. Meterlos en el mismo puerto obligaria a
+ * inventar una confianza para el codigo, que es justo el error que §2.11 del SDD evita.
+ */
+export interface LectorDeCodigos {
+  /** Formatos que este adaptador sabe leer: 'qr', 'code128', 'pdf417', 'datamatrix', 'ean13'... */
+  readonly formatos: readonly string[]
+  /** Devuelve las cargas crudas encontradas. Interpretarlas es de `analizaCarga`, no de aqui. */
+  lee(imagen: Uint8Array): Promise<readonly string[]>
+}
+
 export interface AlmacenDocumentos {
   guarda(id: string, paginas: readonly PaginaExtraida[]): Promise<void>
   lee(id: string): Promise<PaginaExtraida[] | null>

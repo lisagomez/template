@@ -140,6 +140,120 @@ De ahí dos cosas más:
   "funciona con catálogos existentes" sería una capacidad documentada y nunca ejecutada, que es
   precisamente lo que esta capa no acepta como verdad.
 
+### 2.9 La idempotencia por contenido descarta eventos de trazabilidad
+
+Entra una fuente nueva —un código leído con cámara o con escáner— y con ella tres **formas de
+dato** que no son lo mismo, aunque el usuario las nombre juntas:
+
+| Forma | Qué es | Ejemplo |
+|---|---|---|
+| **Documento** | Un fichero → una entidad con campos | Factura: el QR corrobora el OCR |
+| **Etiqueta** | Un código → un ítem con GTIN, lote, caducidad, serie | GS1-128; FNSKU de Amazon |
+| **Evento** | Un código **no es un documento: es un hecho con hora y lugar** | Guía de FedEx escaneada en cada punto |
+
+La tercera fila rompió código ya construido. `identidadDe()` hashea el contenido y deduplica —
+correcto para una factura, **catastrófico para trazabilidad**: escanear la misma guía dos veces son
+legítimamente dos eventos (salida de almacén y llegada), y la regla anterior **habría descartado el
+segundo en silencio**. Perder un evento es exactamente lo que vuelve inútil un sistema de
+trazabilidad, y no produce ningún error.
+
+La identidad depende ahora de la clase de fuente:
+
+| Clase | Identidad | ¿Deduplica? |
+|---|---|---|
+| `documento` | hash del contenido | Sí |
+| `etiqueta` | GTIN + lote + serie | Sí, dentro de un conteo |
+| `evento` | código + instante + puesto | **Nunca por el código solo** |
+
+### 2.10 Los identificadores no se parecen: son o no son
+
+El segundo defecto que encontró esta fuente. `resuelveValor()` compara por similitud de Dice, que
+es lo correcto para *"ACME S.A. de C.V."* y **peligroso para un GTIN**. Medido sobre el propio
+módulo, no supuesto:
+
+| Par | Similitud |
+|---|---|
+| Dos GTIN a un dígito | **0,87** |
+| Dos GTIN a dos dígitos | 0,80 |
+| Dos FNSKU a un carácter | 0,82 |
+| Dos RFC a un carácter | 0,85 |
+
+Todos por encima de cualquier umbral razonable. Y el escenario peligroso no es el empate —un empate
+al menos levanta sospecha— sino **que el identificador correcto no esté en el catálogo**: entonces
+el segundo mejor gana solo, y la herramienta afirma con estado `resuelto` que la caja es de otro
+producto. Eso mete stock en el SKU equivocado sin un solo error visible.
+
+Por eso la regla no es un consejo: **un campo marcado como identificador no puede entrar por la vía
+difusa**, y `resuelveValor` lanza si se intenta. Los identificadores van por igualdad exacta, y
+cuando no están, la respuesta es *no está* — nunca *"el más parecido"*.
+
+### 2.11 Decodificar bien no dice nada sobre si el contenido es cierto
+
+Un QR decodifica o no: Reed-Solomon corrige, y no existe una confianza de 0,87. La tentación es
+tratarlo como la fuente más fiable. **Es la menos fiable de todas**, porque es la más controlable
+por un atacante: cualquiera imprime una pegatina y la pega encima de la legítima.
+
+No es teórico. Microsoft reportó **7,6 millones de intentos de *quishing* en enero de 2026 y 18,7
+millones en marzo**; los dos patrones documentados son pegatinas sobre códigos legítimos y **QR
+dentro de PDF de factura de proveedor que desvía el pago a una cuenta mula** — que es literalmente
+este caso de uso. Una cadena minorista gastó 2,3 M USD en control de daños tras pegatinas falsas en
+200 tiendas.
+
+De ahí dos reglas duras:
+
+> **Nunca se navega a una URL que venga de un código.** Se muestra el destino y decide la persona.
+>
+> **Un campo de código lleva `procedencia: 'codigo'`.** Sin esa marca, un dato de código con
+> confianza 1 y uno de OCR con confianza alta son indistinguibles, y el de código **se saltaría la
+> cola de revisión** por el mero hecho de venir de un decodificador determinista.
+
+Lo que sí da el código gratis es **validación determinista sin red**: GTIN y SSCC llevan dígito de
+control módulo 10, la guía de FedEx Express módulo 11 con pesos 1‑3‑7. Una lectura mal hecha falla
+su dígito de control. Eso responde a *«¿esta lectura es buena?»* mucho mejor que una puntuación
+inventada — y no dice nada sobre si el contenido es verdad, que es otra pregunta.
+
+### 2.12 El escáner óptico no es un dispositivo: es un teclado
+
+Un lector de mano en modo *keyboard-wedge* teclea la carga y manda un terminador (CR), con prefijo
+configurable. No hay API que abrir ni permiso que pedir: se escuchan pulsaciones.
+
+Y de ahí sale la recomendación que evita la parte frágil: **configurar el escáner con prefijo y
+sufijo da desambiguación determinista**. La heurística de tiempos —¿ráfaga de máquina o persona
+tecleando?— existe para el escáner que llegó sin configurar, y es el plan B declarado, con sus dos
+parámetros obligatorios porque no hay valor por defecto defendible sin medir el teclado de quien la
+use.
+
+Ventaja lateral que decide dónde poner cada cosa: **en un puesto fijo el escáner es más fiable que
+la cámara**, porque no pide permiso. La cámara es para movilidad.
+
+### 2.13 La PWA instalada no es comodidad: es lo que impide perder la cola
+
+El trabajo de campo —almacén, reparto— ocurre sin cobertura, así que hace falta cola local. Tres
+hechos verificados, y el segundo cambia la categoría de la decisión:
+
+- **`BackgroundSync` no existe en Safari** («unlikely soon») ni en Firefox. La cola no puede
+  depender de él: vive en IndexedDB y se reproduce al recuperar conexión o al reabrir.
+- **iOS purga el almacenamiento a los 7 días de no usarse, y exime a las apps añadidas a la
+  pantalla de inicio.** Traducción: sin instalar, **una cola de escaneos sin sincronizar puede
+  borrarse sola y los eventos se pierden sin ningún error**. Instalar la PWA es el mecanismo que
+  protege la cola. De ahí un requisito que nadie pide: si hay cola pendiente y la app corre en
+  pestaña, **hay que avisarlo**, porque el usuario no puede saber que su navegador va a tirar sus
+  escaneos.
+- **La cámara funciona en PWA instalada en iOS, pero el permiso no se persiste**: Safari
+  re-pregunta de forma intermitente en modo standalone.
+
+Y el cruce con §2.9 que se escapa fácil: si un evento se encola sin conexión, **el instante que
+vale es el del escaneo en el dispositivo**. Sellarlo al llegar al servidor desplaza toda la
+trazabilidad y además hace colapsar la identidad `código + instante + puesto` — varios eventos
+sincronizados a la vez compartirían instante y se deduplicarían entre sí, borrando la trazabilidad
+de toda una mañana justo al recuperar la cobertura. Se guardan los dos instantes: el del
+dispositivo manda para el orden, el del servidor es auditoría de llegada, y un desfase grande entre
+ambos es señal de revisión porque el reloj del móvil puede estar mal.
+
+**Reparto de responsabilidades**: la PWA es de la app consumidora, no del paquete — una librería no
+instala un service worker. El paquete aporta la cola como núcleo puro sobre un puerto; la app se
+hace PWA con el skill `/add-mobile` que ya existe en la fábrica.
+
 ---
 
 ## 3. Principio de diseño
@@ -175,6 +289,8 @@ Tres corolarios que se aplican sin excepción:
 | `./motores/openai-compat` | Adaptador HTTP contra un vLLM autohospedado (PaddleOCR-VL, GLM-OCR) | — (`fetch`) |
 | `./almacenes/supabase` | Adaptador de `AlmacenDocumentos` y `AlmacenPlantillas` | `@supabase/supabase-js` (opcional) |
 | `./react/lienzo` | Lienzo de modelado: tarjetas por entidad, relaciones arrastrables, cardinalidad en los extremos | `@xyflow/react` y `react` (ambas opcionales) |
+| `./react/camara` | Lectura con cámara: `BarcodeDetector` nativo, respaldo wasm donde no exista | `zxing-wasm` y `react` (ambas opcionales) |
+| `./almacenes/indexeddb` | Adaptador de `AlmacenLocal` para la cola sin conexión | — (API del navegador) |
 
 Lo que el `package.json` debe declarar (§5 del runbook de empaquetado): `type: "module"`,
 `sideEffects: false`, `engines.node`, `files: ["dist"]`, y `peerDependenciesMeta.<dep>.optional`
@@ -189,7 +305,13 @@ MotorOcr           extrae(documento, opciones) → PaginaExtraida[]
 AlmacenDocumentos  guarda / lee / lista documentos y sus extracciones
 AlmacenPlantillas  guarda / lee la plantilla por defecto y los catálogos
 EsquemaExistente   describe() → DescriptorDeEsquema   (tablas, columnas, tipos, claves)
+LectorDeCodigos    lee(imagen) → cargas crudas
+AlmacenLocal       cola de lecturas mientras no hay conexión
 ```
+
+`LectorDeCodigos` está **deliberadamente separado** de `MotorOcr` y no comparten interfaz: el OCR
+devuelve confianza y región; un decodificador devuelve una carga que decodificó o no. Unificarlos
+obligaría a inventarle una confianza al código, que es justo el error de §2.11.
 
 `EsquemaExistente` es el puerto que hace posible mapear contra lo que el proyecto ya tiene. Su
 implementación por defecto **no consulta nada**: devuelve el descriptor que el integrador declaró
@@ -210,7 +332,7 @@ desaparece, y con ella el control.
 
 ---
 
-## 5. Las siete capacidades pedidas
+## 5. Las diez capacidades pedidas
 
 | # | Lo que se pidió | Dónde vive | Nota que decide el diseño |
 |---|---|---|---|
@@ -221,6 +343,9 @@ desaparece, y con ella el control.
 | 5 | Botones guardar/modificar/eliminar por dato, y uno de pantalla | `./react` | Por campo, más `guardarComoDefecto` para la disposición entera |
 | 6 | Al guardar: queda por defecto, prepara catálogos y el modelo E-R | núcleo | El ERD se **propone** en SQL **reconciliando con lo que ya existe**, no partiendo de cero; aplicarlo es gate humano (§2.3) |
 | 7 | Relacionar con catálogos y campos que el proyecto ya tiene | núcleo + `./react/lienzo` | Dos niveles: campo→columna, y **valor→fila**. El segundo es el trabajo de verdad (§5.1) |
+| 8 | Leer códigos con cámara o escáner óptico | núcleo + `./react/camara` | El escáner es un teclado (§2.12); la cámara necesita respaldo wasm fuera de Chrome |
+| 9 | Facturas, inventario y trazabilidad | núcleo | Tres formas de dato, no tres tipos de documento (§2.9). La identidad cambia con la clase |
+| 10 | Trabajar sin conexión | núcleo + `./almacenes/indexeddb` | La cola sella el instante al escanear, y la PWA instalada es lo que impide perderla (§2.13) |
 
 ### 5.1 La reconciliación de valores es el trabajo, no el lienzo
 
@@ -241,6 +366,30 @@ como dos proveedores distintos, con las facturas repartidas entre los dos y el s
 cuadrando. No falla ruidosamente: falla en silencio y se descubre meses después, cuando ya hay
 movimientos colgando de ambas filas y separarlas es un proyecto.
 
+### 5.2 La corroboración es lo que hace valiosa la segunda fuente
+
+El QR de un CFDI lleva UUID, RFC emisor, RFC receptor, total y ocho caracteres del sello de forma
+determinista. Si el OCR leyó un total de 11.600,00 y el código dice 1.160,00, **la discrepancia es
+detectable precisamente porque hay dos fuentes independientes**.
+
+Y ninguna gana por decreto. El código no es más fiable por decodificar limpio: una pegatina falsa
+decodifica igual de limpio que la legítima (§2.11). Lo que significa algo es la discrepancia, y
+**una sola manda a revisión humana aunque las dos fuentes vengan con confianza alta** — si dos
+fuentes independientes no dicen lo mismo, una está mal y ninguna máquina sabe cuál.
+
+Con un matiz que evita ahogar la cola en ruido: los importes se comparan como números, así que
+`1,160.00` y `1160.00` son acuerdo, no conflicto.
+
+### 5.3 Sin conexión, el instante manda
+
+Una lectura que no se puede enviar no puede perderse. La cola vive en el dispositivo y **sella el
+instante al escanear**, nunca al sincronizar — ver §2.13 para por qué lo contrario borraría la
+trazabilidad de toda una mañana justo al recuperar la cobertura.
+
+Qué se encola y qué no, acotado por los límites reales: los **escaneos** son texto diminuto y caben
+de sobra; las **imágenes y PDF capturados sin conexión** no, y esos se encolan con presupuesto
+declarado y aviso al usuario.
+
 ---
 
 ## 6. Modelo de amenazas (C3)
@@ -258,10 +407,16 @@ es la que se olvida:
 | **O4** Bots y externos | Denial-of-wallet: subir 10.000 páginas contra un motor que se paga por página | Límite de páginas por lote y presupuesto por periodo, con el aviso del 80% ya existente |
 | **O5** Cadena de suministro | El modelo de OCR sin pinear, o un adaptador que trae una dependencia comprometida | El modelo va pineado (C1): `mistral-ocr-4-1`, o el sha del commit de Hugging Face. `mistral-ocr-latest` se rechaza |
 | **O6** Compromiso de un servicio | El worker de ingesta con `service_role` convertido en palanca | C7: el worker es job de plataforma y se declara; la superficie de subida del usuario va con RLS y su sesión |
+| **O2** Contraparte deshonesta | **Código sustituido**: una pegatina encima del QR legítimo de una factura, o un QR insertado en el PDF de un proveedor, que desvía el pago. 7,6 M de intentos en enero de 2026, 18,7 M en marzo | Nunca se navega a la URL de un código: se muestra el destino. Ningún dato de pago se promueve sin confirmación, y la corroboración con el OCR delata el cambio |
 | **O2** Contraparte deshonesta | **Envenenamiento de catálogo**: un documento con un nombre elegido a propósito para forzar un alta espuria en un catálogo que comparte todo el proyecto | Ningún alta sin confirmación humana, y los candidatos parecidos se muestran al lado para que el duplicado salte a la vista |
 
 La frontera que se olvida: **la salida del propio motor**. No se confía por diseño. El `document
 annotation` llega como string y se valida contra el esquema antes de existir como dato.
+
+Y otra que la intuición coloca al revés: **la carga de un código**. Decodifica limpio siempre, y
+eso invita a confiarla; pero es el canal más barato de manipular que existe, porque no hace falta
+comprometer ningún sistema — basta una impresora de etiquetas. Se trata como dato, jamás como
+instrucción, y si alimenta a un modelo va saneada.
 
 Y una frontera que la comodidad quiere borrar: **leer el esquema del proyecto**. La vía cómoda
 exige clave secreta y ampliaría el privilegio de forma permanente en todo proyecto que instale la
@@ -289,6 +444,15 @@ pacientes, clientes, empleados, solicitantes — que nunca eligieron estar aquí
    en dos el historial de una persona o una empresa: la mitad de sus facturas cuelgan de una fila
    y la mitad de otra. Ocurre sin atacante, no da ningún error, y cuando se detecta ya hay
    movimientos en ambas — deshacerlo deja de ser un `UPDATE` y pasa a ser un proyecto.
+
+5. **El pago desviado por un código sustituido.** El daño no lo sufre quien escanea: lo sufre **el
+   proveedor legítimo**, que no cobra y tiene que reclamar algo que su cliente cree haber pagado.
+   Es un tercero que no participó en nada.
+6. **El evento de trazabilidad perdido en una purga de almacenamiento.** Ocurre sin atacante y sin
+   error visible, y quien lo paga es quien dependía de esa trazabilidad — el destinatario que no
+   puede probar dónde estuvo su envío, o el lote sanitario que no se puede reconstruir.
+7. **El número de guía es dato personal adyacente**: con él se consulta una dirección de entrega.
+   No es un secreto, pero tampoco es inocuo.
 
 **Mitigaciones**: ningún alta de catálogo sin confirmación humana, con los candidatos parecidos a la vista; bbox de origen obligatorio para todo dato promovido — un dato sin su
 coordenada no se puede auditar después; la plantilla registra **quién** apagó cada campo y
@@ -321,5 +485,11 @@ decide si se publica, con qué versión se pinea, y si el ERD propuesto se aplic
   de revisión de falsos ambiguos, o deja pasar duplicados. Se mide sobre catálogos reales.
 - **Cómo se mantiene el descriptor**: generado desde los tipos del proyecto en tiempo de build, o a
   mano. Lo primero no se desincroniza; lo segundo no ata la herramienta al tipado de nadie.
-- **La herramienta no se ha construido.** Nada de lo de aquí está ejecutado. Un documento y una
+- **Los parámetros de la ráfaga del escáner** (ms entre teclas, mínimo de caracteres): dependen del
+  teclado y del lector concretos. Se miden en el puesto, y mientras tanto la vía buena es
+  configurar prefijo y sufijo en el escáner, que no necesita medir nada.
+- **Qué se encola sin conexión además de los escaneos.** Un escaneo es texto y cabe siempre; una
+  foto de documento no. Falta decidir el presupuesto y qué se le dice al usuario cuando se agota.
+- **El núcleo está construido; la herramienta no.** Existen los módulos puros con 84 pruebas. No
+  existen los entry points de React, ni la cámara, ni los adaptadores de OCR y de persistencia. Un documento y una
   capacidad no son lo mismo, y esta capa ya se llevó esa lección.

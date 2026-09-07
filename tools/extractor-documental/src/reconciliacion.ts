@@ -11,6 +11,8 @@
  * de quien confirma.
  */
 
+import type { FormatoDeCampo } from './tipos.js'
+
 export type EstadoDeResolucion = 'resuelto' | 'ambiguo' | 'sin_resolver'
 
 export interface FilaDeCatalogo {
@@ -96,6 +98,11 @@ export interface OpcionesDeResolucion {
   margenDeAmbiguedad: number
   /** Cuantos candidatos devolver como maximo. La UI no puede pintar diez mil. */
   maximoCandidatos?: number
+  /**
+   * `texto` por defecto. Pasar `identificador` aqui es un ERROR y revienta: sirve para que quien
+   * enrute campos genericamente no cuele un GTIN por la via difusa sin enterarse.
+   */
+  formato?: FormatoDeCampo
 }
 
 /**
@@ -109,7 +116,16 @@ export function resuelveValor(
   filas: readonly FilaDeCatalogo[],
   opciones: OpcionesDeResolucion,
 ): Resolucion {
-  const { umbral, margenDeAmbiguedad, maximoCandidatos = 5 } = opciones
+  const { umbral, margenDeAmbiguedad, maximoCandidatos = 5, formato = 'texto' } = opciones
+  // No es un aviso: es una barrera. Un GTIN y otro que difiere en un digito se parecen un 95%, y
+  // emparejarlos por similitud mete stock en el SKU equivocado. Los identificadores van por
+  // `resuelveIdentificador`, por igualdad exacta.
+  if (formato === 'identificador') {
+    throw new TypeError(
+      'Un identificador no se resuelve por similitud: usa resuelveIdentificador(). ' +
+        'Dos identificadores que difieren en un digito se parecen muchisimo y son cosas distintas.',
+    )
+  }
   if (umbral < 0 || umbral > 1) throw new RangeError('el umbral va entre 0 y 1')
   if (margenDeAmbiguedad < 0 || margenDeAmbiguedad > 1) throw new RangeError('el margen va entre 0 y 1')
 
@@ -143,4 +159,35 @@ export function proponeAlta(catalogo: string, valor: string, resolucion: Resoluc
     throw new Error(`No se propone alta de "${valor}": ya se resolvio a una fila existente`)
   }
   return { catalogo, valor, candidatos: resolucion.candidatos }
+}
+
+/**
+ * Resuelve un IDENTIFICADOR (GTIN, SSCC, RFC, numero de guia) por igualdad exacta.
+ *
+ * Se normaliza solo lo que no cambia la identidad: espacios y mayusculas. NO se quitan
+ * diacriticos ni sufijos societarios como en `normaliza()` — en un identificador cada caracter
+ * significa algo, y "limpiarlo" es corromperlo.
+ *
+ * Nunca devuelve candidatos parecidos: o esta, o no esta. Ofrecer "el mas parecido" para un
+ * identificador es invitar a que alguien lo acepte.
+ */
+export function resuelveIdentificador(
+  valor: string,
+  filas: readonly FilaDeCatalogo[],
+): Resolucion {
+  const buscado = valor.trim().toUpperCase().replace(/\s+/g, '')
+  const exactas = filas.filter((f) => f.etiqueta.trim().toUpperCase().replace(/\s+/g, '') === buscado)
+  if (exactas.length === 1) {
+    return { estado: 'resuelto', candidatos: [{ fila: exactas[0], similitud: 1 }], elegida: exactas[0] }
+  }
+  if (exactas.length > 1) {
+    // El catalogo tiene el mismo identificador dos veces: es un problema del catalogo, no de la
+    // lectura, y lo decide una persona.
+    return {
+      estado: 'ambiguo',
+      candidatos: exactas.map((fila) => ({ fila, similitud: 1 })),
+      elegida: null,
+    }
+  }
+  return { estado: 'sin_resolver', candidatos: [], elegida: null }
 }

@@ -132,6 +132,40 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
   catálogos, recorriendo el mismo camino que uno poblado y sin una ruta de código distinta.
 - RF-36: SI el descriptor declarado nombra una tabla o una columna que la base ya no tiene,
   ENTONCES EL SISTEMA lo señalará antes de proponer ningún mapeo.
+- RF-37: EL SISTEMA aceptará como fuente un código leído con cámara o con escáner óptico, además
+  del documento subido.
+- RF-38: EL SISTEMA leerá códigos QR, códigos de barras lineales, PDF417 y DataMatrix.
+- RF-39: EL SISTEMA marcará la procedencia de cada dato como extraído por reconocimiento, leído de
+  un código, o introducido por una persona.
+- RF-40: EL SISTEMA no exigirá una región del documento en un dato leído con un escáner óptico,
+  porque ese dispositivo no produce imagen.
+- RF-41: EL SISTEMA distinguirá tres clases de fuente —documento, etiqueta de inventario y evento
+  de trazabilidad— y derivará la identidad de cada lectura según su clase.
+- RF-42: CUANDO se lea dos veces el mismo código como evento de trazabilidad, EL SISTEMA registrará
+  dos hechos distintos y no descartará el segundo.
+- RF-43: EL SISTEMA resolverá los campos marcados como identificador por igualdad exacta, y
+  rechazará compararlos por similitud.
+- RF-44: SI un identificador no aparece en el catálogo, ENTONCES EL SISTEMA responderá que no está
+  y no ofrecerá el más parecido.
+- RF-45: EL SISTEMA validará el dígito de control de los identificadores que lo lleven, y
+  distinguirá «no válido» de «no se sabe validar».
+- RF-46: EL SISTEMA extraerá los identificadores de aplicación de una carga GS1 como campos con
+  clave, sin necesidad de reconocimiento óptico ni de anotación.
+- RF-47: EL SISTEMA no abrirá ninguna dirección obtenida de un código: mostrará el destino para que
+  una persona decida.
+- RF-48: CUANDO un documento aporte datos por reconocimiento y por código a la vez, EL SISTEMA
+  cotejará ambas fuentes y señalará los desacuerdos.
+- RF-49: SI el cotejo entre reconocimiento y código arroja algún desacuerdo, ENTONCES EL SISTEMA
+  marcará el documento para revisión humana aunque ambas fuentes tengan confianza alta.
+- RF-50: MIENTRAS no haya conexión, EL SISTEMA conservará las lecturas en una cola local y las
+  enviará al recuperarla.
+- RF-51: EL SISTEMA sellará el instante de una lectura en el momento del escaneo y no en el de su
+  envío.
+- RF-52: EL SISTEMA conservará por separado el instante del dispositivo y el del servidor, y
+  señalará un desfase relevante entre ambos.
+- RF-53: SI hay lecturas pendientes de enviar y la aplicación no está instalada, ENTONCES EL
+  SISTEMA advertirá de que el navegador puede descartarlas.
+- RF-54: EL SISTEMA reintentará el envío de una lectura pendiente con esperas crecientes y acotadas.
 
 ## Requisitos no funcionales
 
@@ -169,6 +203,15 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
 - Descriptor declarado que ya no cuadra con la base real del proyecto.
 - Relación arrastrada en el lienzo que crearía un ciclo entre entidades.
 - Proyecto virgen: descriptor sin ninguna tabla.
+- La misma guía escaneada dos veces en el mismo puesto y el mismo segundo.
+- Un GTIN que no está en el catálogo y se parece un 0,87 a uno que sí está.
+- Un código cuya carga es una dirección web.
+- Una etiqueta leída con escáner óptico: no hay imagen y por tanto no hay región.
+- Un escáner mal configurado que no envía terminador.
+- Una carga GS1 con un identificador de aplicación desconocido a mitad.
+- Cola pendiente con la aplicación abierta en una pestaña y no instalada.
+- Reloj del dispositivo desfasado respecto al del servidor.
+- Cola que supera el presupuesto de almacenamiento local.
 
 ## Impacto sobre terceros (control C4)
 
@@ -183,6 +226,8 @@ eligieron estar aquí.
 | El documento sale del perímetro hacia un tercero | RF-9, RF-21: puerto y adaptadores, para que el proyecto decida |
 | Un alta que debió ser coincidencia parte en dos el historial de una persona o empresa | RF-28, RF-29, RF-30: candidatos a la vista y ninguna alta sin confirmación |
 | Una tabla ajena alterada por la herramienta rompe algo que ella no conoce | RF-31: no emite ninguna sentencia sobre lo preexistente |
+| Un código sustituido desvía un pago: no cobra **el proveedor legítimo**, que no participó en nada | RF-47, RF-48, RF-49: no se abre la dirección, y el cotejo con el reconocimiento delata el cambio |
+| Un evento de trazabilidad perdido deja sin prueba a quien dependía de ella | RF-42, RF-50, RF-51, RF-53: identidad por hecho, cola local y aviso de riesgo de borrado |
 
 **Límite de C5**: si los documentos llevan datos personales de terceros, sacarlos del perímetro
 **no es un riesgo firmable por el dueño del proyecto**. Se usa el adaptador autohospedado o se
@@ -196,7 +241,10 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
 - Publicar el paquete en un registro npm: es gate humano, no un paso de esta spec.
 - Flujo de trabajo con varios revisores, asignación de cola o notificaciones.
 - Soporte a consumidores CommonJS: el template es ESM, y el doble build sería un CDC aparte.
-- Formatos que no sean PDF ni imagen.
+- Formatos de fichero que no sean PDF ni imagen.
+- Convertir la aplicación consumidora en PWA: eso lo hace el proyecto con su propio flujo; la
+  herramienta solo aporta la cola y su adaptador de almacenamiento local.
+- Consultar servicios externos de seguimiento o de verificación fiscal a partir de un código.
 - Alterar el esquema preexistente del proyecto: la herramienta crea lo suyo y propone el resto.
 - Deduplicar catálogos que ya vienen sucios: evita añadir duplicados, no limpia los existentes.
 - Ser una herramienta de BI: no calcula medidas ni agregaciones, y no hay dirección de filtro
@@ -219,6 +267,11 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
   sin usar ninguna credencial con privilegio de esquema.
 - **DoF-9**: ninguna ruta del código emite una sentencia que altere una tabla preexistente, y hay
   una prueba que lo demuestra.
+- **DoF-11**: dos lecturas del mismo código como evento producen identidades distintas, con prueba.
+- **DoF-12**: ninguna ruta compara un identificador por similitud, y hay una prueba que demuestra
+  el emparejamiento erróneo que eso produciría.
+- **DoF-13**: varias lecturas encoladas y enviadas en el mismo instante conservan instantes
+  distintos y no se deduplican entre sí.
 - **DoF-10**: las pruebas corren sin base de datos, sobre los tres descriptores de ejemplo, y el
   vacío recorre el mismo código que el poblado.
 
@@ -231,6 +284,10 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
 - Cómo se identifica "el mismo tipo de documento" para reusar una plantilla: ¿lo elige el
   revisor, o se infiere? Afecta a RF-16.
 - Si la propuesta de modelo debe emitirse como migración con marca de tiempo o como SQL suelto.
+- Los parámetros de la ráfaga del escáner: dependen del teclado y del lector concretos, y la vía
+  buena mientras tanto es configurar prefijo y sufijo en el aparato.
+- Qué se encola sin conexión además de los escaneos, y qué se le dice al usuario cuando el
+  presupuesto de almacenamiento se agota.
 - El umbral de similitud que separa "candidato" de "coincidencia": a ojo, o llena la cola de
   falsos ambiguos, o deja pasar duplicados. Se mide sobre catálogos reales.
 - Si el descriptor se genera desde los tipos del proyecto en tiempo de build o se mantiene a mano:
