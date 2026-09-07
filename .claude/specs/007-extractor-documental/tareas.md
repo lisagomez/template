@@ -90,10 +90,56 @@
       del adaptador tiene entrada en `BITACORA-CDC.md`, y `npm run validate` está en verde.
       → cubre DoF-6 · DoF-7
 
+- [ ] **TAR-18 · Puerto de esquema y descriptor declarado.**
+      Hecho cuando: `EsquemaExistente` existe como interfaz, su implementación por defecto devuelve
+      el descriptor declarado **sin consultar nada**, y no hay ninguna ruta que exija una credencial
+      con privilegio de esquema.
+      → cubre RF-25 · RF-26
+
+- [ ] **TAR-19 · Los tres descriptores de ejemplo.**
+      Hecho cuando: existen `descriptor-vacio.json`, `descriptor-con-catalogos.json` y
+      `descriptor-desalineado.json`, y una prueba demuestra que el vacío y el poblado **entran por
+      la misma función**, sin rama `sinCatalogos`. El desalineado se señala antes de proponer nada.
+      → cubre DoF-10 · RF-35 · RF-36
+
+- [ ] **TAR-20 · Resolución de valores por similitud.**
+      Hecho cuando: `resuelveValor` es pura, devuelve `resuelto | ambiguo | sin_resolver` con los
+      candidatos ordenados, y tiene pruebas que corren sin base de datos. El umbral es un
+      parámetro, no una constante.
+      → cubre RF-28
+
+- [ ] **TAR-21 · Mapeo campo → columna en la UI.**
+      Hecho cuando: el revisor asocia un campo extraído a una columna de una tabla del descriptor, y
+      lo preexistente se distingue de lo propuesto.
+      → cubre RF-27 · DoF-8
+
+- [ ] **TAR-22 · Flujo del valor huérfano.**
+      Hecho cuando: sin coincidencia, el dato queda `sin_resolver`, se propone el alta con los
+      candidatos parecidos al lado, y **ninguna ruta la escribe** sin confirmación explícita.
+      → cubre RF-29 · RF-30
+
+- [ ] **TAR-23 · Lienzo de modelado.**
+      Hecho cuando: **primero** se verifica que `@xyflow/react` monta en React 19 (arrastra
+      `zustand`, y la incompatibilidad reportada venía de zustand 4); si no monta, se cae a SVG
+      propio. Luego: tarjeta por entidad, relación al arrastrar campo sobre columna con su detalle
+      antes de crearla, y cardinalidad en los extremos. Sin dirección de filtro cruzado.
+      → cubre RF-32 · RF-33 · RF-34
+
+- [ ] **TAR-24 · Barrera anti-ALTER.**
+      Hecho cuando: una prueba recorre la salida SQL del generador y **falla** si aparece cualquier
+      sentencia que altere una tabla presente en el descriptor.
+      → cubre DoF-9 · RF-31
+
 ## Bloqueadas por medición
 
 - [ ] **TAR-17 · Fijar el umbral de confianza.**
       Bloqueada hasta correr el piloto de `docs/INVESTIGACION-OCR-MISTRAL.md` §8: el umbral
       depende de la correlación entre la puntuación del motor y el error real, y a ojo falla en
       las dos direcciones — cola humana inútil, o errores que pasan con confianza alta.
+      → duda abierta de la spec
+
+- [ ] **TAR-25 · Fijar el umbral de similitud.**
+      Bloqueada hasta medir sobre catálogos reales: es el hermano del umbral de confianza y falla
+      igual en las dos direcciones — o llena la cola de falsos ambiguos, o deja pasar duplicados.
+      Este template no tiene catálogos que medir, y por eso no se fija aquí.
       → duda abierta de la spec

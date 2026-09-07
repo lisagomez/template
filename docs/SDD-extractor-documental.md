@@ -83,6 +83,63 @@ Existen `001`–`006`. Esta spec **tiene que ser la `007`** y su carpeta tiene q
 `007-extractor-documental`. Un número saltado pone el gate en rojo para todo el repo, no solo
 para la spec nueva.
 
+### 2.6 La introspección del esquema no tiene vía sin privilegio
+
+El camino obvio para "mapear contra los catálogos que el usuario ya tiene" es leer su esquema con
+la clave anónima. **No se puede**, y el descubrimiento reordena la arquitectura entera:
+
+- El **OpenAPI de PostgREST vía anon key está bloqueado desde marzo de 2026**. Supabase responde
+  literalmente *"Accessing the schema via the Data API is only allowed using a secret API key"*.
+- La **introspección GraphQL** de `pg_graphql` sí filtra por los permisos SQL del rol —que es lo
+  conceptualmente correcto, porque respeta los grants sin saltarse nada— pero está
+  **desactivada por defecto desde pg_graphql 1.6.0**, y Supabase dejó de exponer las tablas al
+  API automáticamente.
+- Lo que queda exige clave secreta. Y una herramienta que **exige `service_role` para funcionar**
+  choca de frente con C7: convierte un requisito de comodidad en una ampliación de privilegio
+  permanente, en todo proyecto que la instale.
+
+Consecuencia: **la introspección no puede ser el cimiento**. El puerto `EsquemaExistente` tiene
+dos vías, y la que manda es la primera:
+
+1. **Descriptor declarado** por el integrador: tablas, columnas, tipos y claves. Cero privilegio,
+   siempre funciona, y de regalo hace la herramienta portable a proyectos que no son Supabase.
+2. **Introspección asistida**, solo donde ese proyecto la tenga habilitada. Comodidad, no cimiento.
+
+### 2.7 Del modelo semántico de Power BI se copia la mitad
+
+La referencia que pidió el usuario es buena, pero copiarla entera sería cargo cult. **Se copia**:
+una tarjeta por tabla, arrastrar una columna sobre otra para crear la relación, los indicadores
+`1` y `*` en los extremos de la línea, y la distinción entre línea sólida y punteada.
+
+**No se copia la dirección de filtro cruzado.** En Power BI describe cómo se propagan los filtros
+para calcular agregaciones; es un concepto de BI, no de integridad relacional. Aquí lo que existe
+es la cardinalidad y el sentido de la clave foránea. Traer el control de filtro cruzado a esta
+pantalla sería ofrecer una perilla que no gobierna nada.
+
+### 2.8 El template no tiene bases, y por eso el descriptor vacío es el caso normal
+
+Este repo es un template: no hay catálogos, ni datos, ni un esquema real que introspeccionar. La
+tentación es tratar eso como una limitación del entorno de pruebas. Es al revés — **es lo que fija
+la arquitectura correcta**, y borra una rama de código antes de escribirla:
+
+> **Un proyecto virgen es `descriptor.tablas = []`.** No hay `if (tieneCatalogos)`. Hay un
+> descriptor que a veces viene vacío, y todo lo demás —mapeo, reconciliación, lienzo— opera igual.
+
+Lo que en un proyecto con catálogos es "engancha este campo a `proveedores.id`", en uno virgen es
+"propone una entidad nueva **porque no había ninguna a la que engancharse**". Mismo código, mismo
+recorrido, distinta entrada. Dos caminos separados divergen en cuanto alguien arregla un bug en
+uno solo, y el que se queda roto es siempre el que nadie mira.
+
+De ahí dos cosas más:
+
+- **El descriptor se declara y se versiona con el proyecto consumidor**, y puede generarse desde
+  los tipos que ese proyecto ya tenga — `src/types/database.ts` es la convención que este
+  template usa. Ese puente no necesita credencial ninguna.
+- **Se verifica sin base de datos**, con fixtures de descriptor commiteados: uno vacío, uno con
+  catálogos poblados y uno **desalineado** —declara una columna que ya no existe—. Sin ellos,
+  "funciona con catálogos existentes" sería una capacidad documentada y nunca ejecutada, que es
+  precisamente lo que esta capa no acepta como verdad.
+
 ---
 
 ## 3. Principio de diseño
@@ -117,6 +174,7 @@ Tres corolarios que se aplican sin excepción:
 | `./motores/mistral` | Adaptador de `MotorOcr` contra la API | `@mistralai/mistralai` (opcional) |
 | `./motores/openai-compat` | Adaptador HTTP contra un vLLM autohospedado (PaddleOCR-VL, GLM-OCR) | — (`fetch`) |
 | `./almacenes/supabase` | Adaptador de `AlmacenDocumentos` y `AlmacenPlantillas` | `@supabase/supabase-js` (opcional) |
+| `./react/lienzo` | Lienzo de modelado: tarjetas por entidad, relaciones arrastrables, cardinalidad en los extremos | `@xyflow/react` y `react` (ambas opcionales) |
 
 Lo que el `package.json` debe declarar (§5 del runbook de empaquetado): `type: "module"`,
 `sideEffects: false`, `engines.node`, `files: ["dist"]`, y `peerDependenciesMeta.<dep>.optional`
@@ -130,7 +188,13 @@ script.
 MotorOcr           extrae(documento, opciones) → PaginaExtraida[]
 AlmacenDocumentos  guarda / lee / lista documentos y sus extracciones
 AlmacenPlantillas  guarda / lee la plantilla por defecto y los catálogos
+EsquemaExistente   describe() → DescriptorDeEsquema   (tablas, columnas, tipos, claves)
 ```
+
+`EsquemaExistente` es el puerto que hace posible mapear contra lo que el proyecto ya tiene. Su
+implementación por defecto **no consulta nada**: devuelve el descriptor que el integrador declaró
+(§2.6). Un descriptor con `tablas: []` es un proyecto sin catálogos, y recorre exactamente el
+mismo código que uno poblado (§2.8).
 
 **Máquina de estados** del documento, en el núcleo y probada como función pura:
 
@@ -146,7 +210,7 @@ desaparece, y con ella el control.
 
 ---
 
-## 5. Las seis capacidades pedidas
+## 5. Las siete capacidades pedidas
 
 | # | Lo que se pidió | Dónde vive | Nota que decide el diseño |
 |---|---|---|---|
@@ -155,7 +219,27 @@ desaparece, y con ella el control.
 | 3 | Revisión de los datos | `./react` | La confianza por bloque se muestra siempre, no bajo un desplegable |
 | 4 | Vista configurable: habilitar/deshabilitar y editar cada campo | núcleo + `./react` | `PlantillaDeRevision`: `visible`, `editable`, `orden`, `etiqueta` por campo. El reducer es puro |
 | 5 | Botones guardar/modificar/eliminar por dato, y uno de pantalla | `./react` | Por campo, más `guardarComoDefecto` para la disposición entera |
-| 6 | Al guardar: queda por defecto, prepara catálogos y el modelo E-R | núcleo | El ERD se **propone** en SQL; aplicarlo es gate humano (§2.3) |
+| 6 | Al guardar: queda por defecto, prepara catálogos y el modelo E-R | núcleo | El ERD se **propone** en SQL **reconciliando con lo que ya existe**, no partiendo de cero; aplicarlo es gate humano (§2.3) |
+| 7 | Relacionar con catálogos y campos que el proyecto ya tiene | núcleo + `./react/lienzo` | Dos niveles: campo→columna, y **valor→fila**. El segundo es el trabajo de verdad (§5.1) |
+
+### 5.1 La reconciliación de valores es el trabajo, no el lienzo
+
+Mapear el campo *"Proveedor"* a la columna `facturas.proveedor_id` es la parte fácil: es una
+elección de una lista. Lo difícil, y donde se gana o se pierde la herramienta, es resolver que
+*"ACME S.A. de C.V."* **es la fila 1874** de `proveedores` y no una nueva.
+
+Tres estados, y ninguno es "listo":
+
+| Estado | Cuándo | Qué pasa |
+|---|---|---|
+| `resuelto` | Coincidencia exacta, o el humano confirmó un candidato | El dato puede promoverse |
+| `ambiguo` | Varios candidatos por encima del umbral de similitud | Va a revisión con los candidatos ordenados |
+| `sin_resolver` | Ningún candidato | Se **propone** el alta; nadie la escribe |
+
+El alta automática es exactamente cómo acaban conviviendo *"ACME SA"* y *"ACME S.A. de C.V."*
+como dos proveedores distintos, con las facturas repartidas entre los dos y el saldo de ninguno
+cuadrando. No falla ruidosamente: falla en silencio y se descubre meses después, cuando ya hay
+movimientos colgando de ambas filas y separarlas es un proyecto.
 
 ---
 
@@ -174,9 +258,14 @@ es la que se olvida:
 | **O4** Bots y externos | Denial-of-wallet: subir 10.000 páginas contra un motor que se paga por página | Límite de páginas por lote y presupuesto por periodo, con el aviso del 80% ya existente |
 | **O5** Cadena de suministro | El modelo de OCR sin pinear, o un adaptador que trae una dependencia comprometida | El modelo va pineado (C1): `mistral-ocr-4-1`, o el sha del commit de Hugging Face. `mistral-ocr-latest` se rechaza |
 | **O6** Compromiso de un servicio | El worker de ingesta con `service_role` convertido en palanca | C7: el worker es job de plataforma y se declara; la superficie de subida del usuario va con RLS y su sesión |
+| **O2** Contraparte deshonesta | **Envenenamiento de catálogo**: un documento con un nombre elegido a propósito para forzar un alta espuria en un catálogo que comparte todo el proyecto | Ningún alta sin confirmación humana, y los candidatos parecidos se muestran al lado para que el duplicado salte a la vista |
 
 La frontera que se olvida: **la salida del propio motor**. No se confía por diseño. El `document
 annotation` llega como string y se valida contra el esquema antes de existir como dato.
+
+Y una frontera que la comodidad quiere borrar: **leer el esquema del proyecto**. La vía cómoda
+exige clave secreta y ampliaría el privilegio de forma permanente en todo proyecto que instale la
+herramienta (§2.6). Por eso la vía por defecto no consulta nada: lee un descriptor declarado.
 
 ---
 
@@ -196,8 +285,12 @@ pacientes, clientes, empleados, solicitantes — que nunca eligieron estar aquí
    primer documento desaparece silenciosamente de los mil siguientes.
 3. **El documento fuera del perímetro.** Con el adaptador de API, el original sale hacia un
    tercero.
+4. **El duplicado silencioso en un catálogo ajeno.** Un alta que debió ser una coincidencia parte
+   en dos el historial de una persona o una empresa: la mitad de sus facturas cuelgan de una fila
+   y la mitad de otra. Ocurre sin atacante, no da ningún error, y cuando se detecta ya hay
+   movimientos en ambas — deshacerlo deja de ser un `UPDATE` y pasa a ser un proyecto.
 
-**Mitigaciones**: bbox de origen obligatorio para todo dato promovido — un dato sin su
+**Mitigaciones**: ningún alta de catálogo sin confirmación humana, con los candidatos parecidos a la vista; bbox de origen obligatorio para todo dato promovido — un dato sin su
 coordenada no se puede auditar después; la plantilla registra **quién** apagó cada campo y
 **cuándo**; y el ERD derivado nunca se aplica solo.
 
@@ -223,5 +316,10 @@ decide si se publica, con qué versión se pinea, y si el ERD propuesto se aplic
   defendible.
 - **Si el manuscrito del proyecto es de plantilla repetida.** De eso depende que haga falta un
   fine-tune, y es una pregunta empírica.
+- **El umbral de similitud** que separa "candidato" de "coincidencia" en la reconciliación de
+  valores. Es el hermano del umbral de confianza y tiene el mismo problema: a ojo, o llena la cola
+  de revisión de falsos ambiguos, o deja pasar duplicados. Se mide sobre catálogos reales.
+- **Cómo se mantiene el descriptor**: generado desde los tipos del proyecto en tiempo de build, o a
+  mano. Lo primero no se desincroniza; lo segundo no ata la herramienta al tipado de nadie.
 - **La herramienta no se ha construido.** Nada de lo de aquí está ejecutado. Un documento y una
   capacidad no son lo mismo, y esta capa ya se llevó esa lección.

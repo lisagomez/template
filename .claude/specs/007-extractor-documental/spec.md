@@ -24,6 +24,11 @@ entidad-relación.
 El objetivo **no** es elegir el motor de OCR: la herramienta define un puerto y los adaptadores
 se enchufan, para que la decisión de flujo de datos (C4) la tome cada proyecto y no la herramienta.
 
+Y el proyecto que la instala **normalmente ya tiene sus catálogos** —`proveedores`, `clientes`,
+`conceptos`— con datos dentro. Proponer ahí una tabla nueva no es útil: es el error. Por eso el
+revisor relaciona lo extraído con lo que ya existe, sobre un lienzo gráfico, y un proyecto virgen
+no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
+
 ## Usuarios / actores
 
 - **Revisor** — persona que sube documentos, corrige lo extraído y decide qué se guarda. No es
@@ -31,6 +36,8 @@ se enchufan, para que la decisión de flujo de datos (C4) la tome cada proyecto 
 - **Integrador** — quien instala el paquete en otro proyecto y le inyecta el motor y el almacén.
 - **Titular del documento** — la persona sobre la que trata el papel. **No usa el sistema y no
   eligió estar aquí.** Es a quien protege la sección de impacto.
+- **Dueño del esquema** — quien mantiene los catálogos del proyecto. **No usa la herramienta**,
+  pero es quien paga un duplicado mal dado de alta.
 - **Agente de la fábrica** — implementa, empaqueta y verifica.
 
 ## Historias de usuario
@@ -45,6 +52,12 @@ se enchufan, para que la decisión de flujo de datos (C4) la tome cada proyecto 
   lanzador de mi app, sin cablear nada a mano.
 - Como **integrador**, quiero elegir si el OCR corre contra una API o contra mi propio servidor,
   sin tocar el código de la herramienta.
+- Como **revisor**, quiero enganchar lo extraído a los catálogos que ya tengo en vez de que me
+  propongan tablas nuevas, para que los datos entren donde el resto del sistema los busca.
+- Como **revisor**, quiero ver el modelo como un diagrama y arrastrar un campo sobre una columna
+  para relacionarlos, en vez de describir la relación en un formulario.
+- Como **dueño del esquema**, quiero que nadie dé de alta un proveedor que ya existía escrito de
+  otra forma, para no acabar con el historial partido en dos.
 - Como **titular del documento**, quiero que un dato mal leído no acabe decidiendo algo sobre mí
   sin que nadie lo haya mirado.
 
@@ -96,6 +109,29 @@ se enchufan, para que la decisión de flujo de datos (C4) la tome cada proyecto 
   tipos.
 - RF-24: EL SISTEMA usará un identificador de modelo pineado, y rechazará cualquier alias
   autoactualizable.
+- RF-25: EL SISTEMA obtendrá el esquema de destino a través de un puerto, admitiendo tanto un
+  descriptor declarado por el integrador como una introspección asistida.
+- RF-26: EL SISTEMA operará con el descriptor declarado sin exigir ninguna credencial con
+  privilegio de esquema.
+- RF-27: EL SISTEMA permitirá asociar cada campo extraído a una columna de una tabla ya existente
+  en el proyecto que lo instala.
+- RF-28: CUANDO un campo se asocie a una columna de catálogo, EL SISTEMA resolverá el valor
+  extraído contra las filas existentes y mostrará los candidatos ordenados por similitud.
+- RF-29: SI ninguna fila del catálogo coincide con el valor extraído, ENTONCES EL SISTEMA marcará
+  el dato como sin resolver y propondrá el alta sin escribirla.
+- RF-30: EL SISTEMA no dará de alta ninguna entrada de catálogo sin confirmación humana explícita.
+- RF-31: EL SISTEMA no emitirá ninguna sentencia que altere una tabla preexistente del proyecto
+  que lo instala.
+- RF-32: EL SISTEMA presentará el modelo como un lienzo con una tarjeta por entidad y una línea
+  por relación, indicando la cardinalidad en los extremos.
+- RF-33: CUANDO se arrastre un campo sobre una columna del lienzo, EL SISTEMA abrirá el detalle de
+  la relación para confirmar cardinalidad y sentido antes de crearla.
+- RF-34: EL SISTEMA distinguirá visualmente en el lienzo las entidades preexistentes de las
+  propuestas nuevas.
+- RF-35: EL SISTEMA tratará un descriptor de esquema vacío como el caso de un proyecto sin
+  catálogos, recorriendo el mismo camino que uno poblado y sin una ruta de código distinta.
+- RF-36: SI el descriptor declarado nombra una tabla o una columna que la base ya no tiene,
+  ENTONCES EL SISTEMA lo señalará antes de proponer ningún mapeo.
 
 ## Requisitos no funcionales
 
@@ -109,6 +145,10 @@ se enchufan, para que la decisión de flujo de datos (C4) la tome cada proyecto 
 - **Seguridad de datos**: RLS activa en toda tabla que cree el adaptador de persistencia; sin
   `service_role` en la superficie de subida del usuario.
 - **Trazabilidad**: ningún dato se promueve a una tabla de negocio sin su región de origen.
+- **Privilegio mínimo**: la vía por defecto no pide más permiso que el que ya tiene la sesión del
+  usuario. Ninguna funcionalidad exige una credencial con privilegio de esquema.
+- **Comprobable sin base de datos**: el mapeo y la reconciliación se prueban sobre descriptores de
+  ejemplo versionados, no contra una base viva.
 - **Tamaño**: archivos por debajo de 500 líneas y funciones por debajo de 50.
 
 ## Casos límite
@@ -123,6 +163,12 @@ se enchufan, para que la decisión de flujo de datos (C4) la tome cada proyecto 
 - Propuesta de modelo que colisiona con una tabla que ya existe en el proyecto consumidor.
 - El motor configurado no responde, o responde con un error de cuota a mitad de un lote.
 - Proyecto consumidor sin React que solo importa el núcleo y el manifiesto.
+- Valor extraído que coincide con varias filas del catálogo por encima del umbral.
+- Catálogo de decenas de miles de filas: la resolución no puede traerlas todas al navegador.
+- Dos documentos del mismo lote que proponen exactamente la misma alta.
+- Descriptor declarado que ya no cuadra con la base real del proyecto.
+- Relación arrastrada en el lienzo que crearía un ciclo entre entidades.
+- Proyecto virgen: descriptor sin ninguna tabla.
 
 ## Impacto sobre terceros (control C4)
 
@@ -135,6 +181,8 @@ eligieron estar aquí.
 | Un campo apagado por comodidad que desaparece de mil documentos siguientes | RF-20: queda registrado quién lo apagó y cuándo |
 | Un modelo de datos generado a partir de una alucinación | RF-18, RF-19: se propone, no se aplica |
 | El documento sale del perímetro hacia un tercero | RF-9, RF-21: puerto y adaptadores, para que el proyecto decida |
+| Un alta que debió ser coincidencia parte en dos el historial de una persona o empresa | RF-28, RF-29, RF-30: candidatos a la vista y ninguna alta sin confirmación |
+| Una tabla ajena alterada por la herramienta rompe algo que ella no conoce | RF-31: no emite ninguna sentencia sobre lo preexistente |
 
 **Límite de C5**: si los documentos llevan datos personales de terceros, sacarlos del perímetro
 **no es un riesgo firmable por el dueño del proyecto**. Se usa el adaptador autohospedado o se
@@ -149,6 +197,10 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
 - Flujo de trabajo con varios revisores, asignación de cola o notificaciones.
 - Soporte a consumidores CommonJS: el template es ESM, y el doble build sería un CDC aparte.
 - Formatos que no sean PDF ni imagen.
+- Alterar el esquema preexistente del proyecto: la herramienta crea lo suyo y propone el resto.
+- Deduplicar catálogos que ya vienen sucios: evita añadir duplicados, no limpia los existentes.
+- Ser una herramienta de BI: no calcula medidas ni agregaciones, y no hay dirección de filtro
+  cruzado — el lienzo modela integridad relacional, no propagación de filtros.
 
 ## Criterios de finalización
 
@@ -163,6 +215,12 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
   aprobación humana.
 - **DoF-6**: `npm run validate` en verde, con `verifica:specs` incluyendo esta spec.
 - **DoF-7**: el modelo del adaptador que se use va pineado y con entrada en `BITACORA-CDC.md`.
+- **DoF-8**: un campo se mapea a una columna existente y su valor se resuelve a una fila concreta,
+  sin usar ninguna credencial con privilegio de esquema.
+- **DoF-9**: ninguna ruta del código emite una sentencia que altere una tabla preexistente, y hay
+  una prueba que lo demuestra.
+- **DoF-10**: las pruebas corren sin base de datos, sobre los tres descriptores de ejemplo, y el
+  vacío recorre el mismo código que el poblado.
 
 ## Dudas abiertas
 
@@ -173,5 +231,11 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
 - Cómo se identifica "el mismo tipo de documento" para reusar una plantilla: ¿lo elige el
   revisor, o se infiere? Afecta a RF-16.
 - Si la propuesta de modelo debe emitirse como migración con marca de tiempo o como SQL suelto.
+- El umbral de similitud que separa "candidato" de "coincidencia": a ojo, o llena la cola de
+  falsos ambiguos, o deja pasar duplicados. Se mide sobre catálogos reales.
+- Si el descriptor se genera desde los tipos del proyecto en tiempo de build o se mantiene a mano:
+  lo primero no se desincroniza, lo segundo no ata la herramienta al tipado de nadie.
+- Cómo se resuelve un catálogo demasiado grande para traerlo al navegador: ¿búsqueda contra el
+  almacén, o índice previo?
 - Qué hace el consumidor cuando la herramienta sube de major y su plantilla guardada usa un
   campo que desapareció.
