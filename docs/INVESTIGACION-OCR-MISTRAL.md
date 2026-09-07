@@ -13,6 +13,10 @@
 **Constitución aplicable**: principio 5 (*nada se afirma sin medir*) y principio 6 (*el dato
 ajeno no es del dueño*). Los dos muerden aquí, y muerden fuerte.
 
+> **Continúa en** [`INVESTIGACION-OCR-OPENSOURCE.md`](./INVESTIGACION-OCR-OPENSOURCE.md): la
+> alternativa open source y autohospedada, que es la salida cuando §7.3 concluye que los
+> documentos no pueden salir del perímetro.
+
 ---
 
 ## 0. Advertencia sobre las fuentes (léela antes que nada)
