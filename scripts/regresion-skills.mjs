@@ -16,11 +16,11 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { RAMA_CORPUS, estadoCorpus, avisoRezago } from './lib/corpus.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR_SKILLS = join(raiz, '.claude/skills');
 const DIR_GOLDEN = join(raiz, '.claude/gobernanza/golden-sets');
-const RAMA_CORPUS = 'golden-sets';
 const modoTrampa = process.argv.includes('--trampa');
 
 const fallos = [];
@@ -33,17 +33,27 @@ if (modoTrampa) {
   // sesion fria que trabaja en main no lo encuentre leyendo el directorio (paso dos
   // veces). Se lee de la rama, nunca se materializa en disco.
   // Un clon normal trae `origin/golden-sets` sin crear la rama local: se prueba la ref
-  // local y, si no existe, la remota (mismo criterio que verifica-gobernanza.mjs).
+  // local y, si no existe, la remota. La resolucion vive en `lib/corpus.mjs`, compartida
+  // con el verificador y el auditor de fugas: estaba copiada en los tres y el punto ciego
+  // del rezago estaba en los tres a la vez.
+  const { ref: refPreferida, detras } = estadoCorpus(raiz);
+  if (detras > 0) {
+    // Sin esto la capa B salia "21/21 en verde — promovible" habiendo dejado sin correr el
+    // caso mas nuevo, que en el corpus rezagado todavia no existe. Un CDC aprobable con un
+    // caso de menos, en silencio.
+    console.error(avisoRezago(detras));
+    process.exit(1);
+  }
   let corpus;
   let refUsada = null;
-  for (const ref of [RAMA_CORPUS, `origin/${RAMA_CORPUS}`]) {
+  for (const ref of refPreferida ? [refPreferida] : []) {
     try {
       corpus = execFileSync('git', ['show', `${ref}:casos-trampa.md`], {
         cwd: raiz, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
       });
       refUsada = ref;
       break;
-    } catch { /* siguiente candidata */ }
+    } catch { /* la rama existe pero no tiene el archivo */ }
   }
   if (!refUsada) {
     console.error(`No se pudo leer el corpus de la rama "${RAMA_CORPUS}" (ni local ni origin/).`);

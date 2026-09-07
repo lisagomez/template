@@ -11,6 +11,20 @@
  *   v4  → entradas `input`, `h`, `c`, `sr`  · salidas `output`, `hn`, `cn`
  * Se detecta por los nombres de entrada, no por un numero de version que el archivo no
  * lleva. Un modelo desconocido falla al crear la sesion y no en el marco 4000.
+ *
+ * ## El contexto de v5, que no esta en la firma y decide si esto funciona
+ *
+ * v5 no recibe el marco a secas: recibe las **64 ultimas muestras del marco anterior**
+ * (32 a 8 kHz) pegadas DELANTE del marco actual. Son 576 muestras por llamada, no 512.
+ *
+ * El grafo declara la entrada con dimensiones dinamicas (`["", ""]`), asi que darle 512 no
+ * es un error: la sesion corre, devuelve un numero y ese numero es basura. Medido contra
+ * `silero_vad.onnx` (v5) sobre 10,6 s de habla limpia: **con 512 la probabilidad maxima es
+ * 0,0013 y ningun marco pasa de 0,5** — el VAD entero se queda mudo y nada avisa. Con las
+ * 64 muestras de contexto, media 0,79 y 261 de 331 marcos con voz.
+ *
+ * Por eso el contexto se mantiene aqui y no se le pide a quien llama: es parte del convenio
+ * del modelo, no una opcion. v4 no lo lleva, y por eso depende de la firma detectada.
  */
 
 import type { ModeloVoz, Muestras } from '../types.js';
@@ -48,6 +62,10 @@ export async function creaModeloSilero(opciones: OpcionesSilero): Promise<Modelo
   let estadoC = nuevoEstado();
   const sr = new BigInt64Array([BigInt(frecuenciaHz)]);
 
+  /** Muestras del marco anterior que v5 exige por delante. v4 no las lleva: 0. */
+  const dimContexto = esV5 ? (frecuenciaHz === 16_000 ? 64 : 32) : 0;
+  let contexto = new Float32Array(dimContexto);
+
   return {
     tamMarco,
     frecuenciaHz,
@@ -55,8 +73,20 @@ export async function creaModeloSilero(opciones: OpcionesSilero): Promise<Modelo
       if (marco.length !== tamMarco) {
         throw new Error(`Silero espera marcos de ${tamMarco} muestras y recibio ${marco.length}`);
       }
+      // El marco que ve el modelo lleva el contexto delante. Y el contexto se COPIA del
+      // marco, no se referencia: el troceador reutiliza su buffer entre llamadas, y guardar
+      // una vista haria que el contexto de este marco cambiara al llegar el siguiente.
+      let entradaAudio = marco;
+      if (dimContexto > 0) {
+        const conContexto = new Float32Array(dimContexto + tamMarco);
+        conContexto.set(contexto, 0);
+        conContexto.set(marco, dimContexto);
+        entradaAudio = conContexto;
+        contexto = new Float32Array(marco.subarray(tamMarco - dimContexto));
+      }
+
       const entrada: Record<string, TensorOnnx> = {
-        input: new ort.Tensor('float32', marco, [1, tamMarco]),
+        input: new ort.Tensor('float32', entradaAudio, [1, entradaAudio.length]),
         sr: new ort.Tensor('int64', sr, [1]),
       };
       if (esV5) {
@@ -81,6 +111,9 @@ export async function creaModeloSilero(opciones: OpcionesSilero): Promise<Modelo
     reinicia() {
       estado = nuevoEstado();
       estadoC = nuevoEstado();
+      // El contexto es estado igual que `state`: arrastrarlo entre dos flujos distintos le
+      // mete a uno 64 muestras del otro justo en el arranque, que es donde mas pesan.
+      contexto = new Float32Array(dimContexto);
     },
     async cierra() {
       await sesion.release?.();

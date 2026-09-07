@@ -90,3 +90,20 @@ opencode cargan siempre (`opencode.json`).
 - **Aplicar en**: **todo comando que estas instrucciones prometan.** Documentado y nunca
   ejecutado es una afirmacion, no una capacidad — y preferir un CLI que no existe cuesta
   mas tokens que el MCP que reemplaza.
+
+### 2026-08-31: una rama local rezagada ganaba en silencio, y el gate medía otro corpus
+
+- **Error**: los tres scripts que leen el corpus de capa B (`audita-fugas`,
+  `verifica-gobernanza`, `regresion-skills`) resolvían la ref con el mismo bucle copiado:
+  local primero, `origin/` de respaldo. Correcto para un clon fresco, **ciego al rezago**.
+- **Síntoma doble, y el ruidoso era el inofensivo**: `audita:fugas` daba 13 entradas "sin
+  declarar" que en `origin/` ya lo estaban — trabajo inventado, visible. La señal era muda:
+  `regresion -- --trampa` decía **"21/21 en verde — promovible"** sin correr el caso más
+  nuevo, que en su vista no existía. Un CDC aprobable con un caso-trampa de menos.
+- **Fix**: la resolución vive una sola vez en `scripts/lib/corpus.mjs`. Si la local es
+  ancestro **estricto** de la remota, los tres cortan. Si ha divergido no: hay trabajo local
+  sin subir, que es el flujo normal de edición del corpus.
+- **La lección, más ancha que el bug**: el fallo no estaba en ningún control, sino en **de
+  dónde leían los tres**. Una entrada compartida y copiada propaga el mismo punto ciego, y
+  cada control sigue pasando su prueba. Preguntar qué mide un gate, no si está verde.
+- **Aplicar en**: todo gate que lea de una ref, un tag, un fichero externo o una caché.

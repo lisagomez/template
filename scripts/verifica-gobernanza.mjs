@@ -15,6 +15,7 @@ import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { leeConImports } from './lee-instrucciones.mjs';
 import { geminiSincronizado } from './sincroniza-gemini.mjs';
+import { estadoCorpus } from './lib/corpus.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
@@ -337,17 +338,20 @@ comprueba(
 /** Un clon normal trae `origin/golden-sets` pero NO crea la rama local: `git show
  *  golden-sets:...` fallaba en todo clon fresco y el gate salia rojo por el entorno, no por
  *  el papel. Se resuelve la ref local y, si no existe, la remota. Sin ninguna de las dos
- *  (clon con --single-branch) si es rojo: la capa B no esta. */
-function refCorpus() {
-  for (const ref of ['golden-sets', 'origin/golden-sets']) {
-    try {
-      execFileSync('git', ['rev-parse', '--verify', '--quiet', ref], { cwd: raiz, stdio: 'ignore' });
-      return ref;
-    } catch { /* siguiente candidata */ }
-  }
-  return null;
-}
-const REF_CORPUS = refCorpus();
+ *  (clon con --single-branch) si es rojo: la capa B no esta.
+ *
+ *  La resolucion vive en `lib/corpus.mjs` desde el 2026-08-31, compartida con
+ *  `audita-fugas.mjs` y `regresion-skills.mjs`: estaba copiada en los tres, y por eso el
+ *  punto ciego del rezago —una rama local por detras gana en silencio— estaba en los tres. */
+const { ref: REF_CORPUS, detras: CORPUS_DETRAS } = estadoCorpus(raiz);
+/** Se comprueba SIEMPRE, tambien cuando no hay par que comparar (`detras` es 0 y pasa): una
+ *  comprobacion que solo existe en algunos entornos descuadra el conteo del bloque 9. */
+comprueba(
+  'la rama local golden-sets no esta rezagada respecto a origin',
+  CORPUS_DETRAS === 0,
+  `va ${CORPUS_DETRAS} commit(s) por detras: el gate mediria un corpus que ya no es el vigente. ` +
+    'Ponla al dia: git branch -f golden-sets origin/golden-sets (o merge --ff-only en su worktree)',
+);
 let corpusRama = null;
 if (REF_CORPUS) {
   try {

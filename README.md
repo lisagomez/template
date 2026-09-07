@@ -1,15 +1,39 @@
 # SaaS Factory V4
 
-Template production-ready para crear aplicaciones SaaS con desarrollo asistido por IA. Filosofia Agent-First: el usuario dice que quiere, el agente construye todo.
+**Template base para crear proyectos y herramientas**, con desarrollo asistido por IA.
+Filosofia Agent-First: el humano dice QUE quiere, el agente decide COMO y lo construye.
+
+## Dos clases de cosa salen de aqui
+
+El template no asume que vas a construir una app. Salen **dos**, y el runbook cambia
+segun cual sea:
+
+| | **Un proyecto** (app) | **Una herramienta** (paquete) |
+|---|---|---|
+| Produces | Un sitio que se despliega | Un paquete que se instala |
+| Acaba en | Un VPS con Docker y TLS, o Vercel | El `node_modules` de tus otros proyectos |
+| Vive en | `src/app/` + `src/features/` | `tools/<nombre>/` |
+| Empieza en | `/new-app` → `BUSINESS_LOGIC.md` | [docs/CREAR-UNA-HERRAMIENTA.md](docs/CREAR-UNA-HERRAMIENTA.md) — la puerta, con su "todavia no" |
+| Runbook | [docs/DEPLOY-HETZNER.md](docs/DEPLOY-HETZNER.md) | [docs/EMPAQUETAR-HERRAMIENTA.md](docs/EMPAQUETAR-HERRAMIENTA.md) |
+| Comando | `npm run configura:deploy` + `npm run deploy` | `npm run empaqueta <nombre>` |
+
+Lo que **no** cambia entre las dos: la capa de gobernanza, el gate `npm run validate`, las
+specs y los 25 skills. Se hereda entero, construyas lo que construyas.
+
+Un mismo repo puede llevar las dos: la app en `src/`, y en `tools/` lo que ya reusaste
+lo bastante como para sacarlo de ahi.
 
 ## Que incluye
 
-- Next.js 16 (App Router) + TypeScript
+- Next.js 16 (App Router) + React 19 + TypeScript
 - Supabase (Database + Auth + RLS)
-- Tailwind CSS + shadcn/ui
+- Tailwind CSS 3.4 + shadcn/ui **cableado**: tokens en variables CSS, tema claro/oscuro, `cn()` y `Button`
+- Zustand para el estado que comparten los componentes de una feature
 - 25 Skills de Claude Code (V4 Skills 2.0)
+- Specs con requisitos en notacion EARS + `docs/constitution.md`
+- `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
 - Playwright CLI para QA automatizado
-- AI Templates (Vercel AI SDK v5 + OpenRouter)
+- 11 AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
 - Arquitectura Feature-First optimizada para IA
 - Auto-Blindaje: el sistema aprende de cada error
@@ -30,7 +54,7 @@ npm install
 ### 2. Variables de Entorno
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 # Editar con credenciales de Supabase
 ```
 
@@ -55,13 +79,45 @@ Runtime: Node.js + TypeScript
 Framework: Next.js 16 (App Router)
 Database: PostgreSQL/Supabase
 Styling: Tailwind CSS 3.4
-Components: shadcn/ui
+Components: shadcn/ui (cableado; se anaden mas con `npx shadcn add <componente>`)
 State: Zustand
 Validation: Zod
 AI Engine: Vercel AI SDK v5 + OpenRouter
 Testing: Playwright CLI + MCP
 Deploy: Vercel o VPS propio (Docker + Caddy), dimensionado por script
+Empaquetado: tools/ + npm run empaqueta (tarball probado en proyecto limpio)
 ```
+
+## UI y estado: que hace cada pieza
+
+**shadcn/ui** no es una libreria de componentes que instalas: es un generador que **copia el
+codigo del componente dentro de tu repo**. `npx shadcn add dialog` te deja un
+`dialog.tsx` que es tuyo — lo editas como cualquier archivo del proyecto, sin luchar contra
+los estilos de un paquete ni esperar a que su autor acepte un PR. Aqui esta cableado
+entero:
+
+| Pieza | Donde | Para que |
+|---|---|---|
+| Tokens de color | `src/app/globals.css` | `--primary`, `--background`… en HSL. Cambiar la marca es tocar el CSS, no los componentes |
+| Tema | `tailwind.config.ts` | Mapea los tokens a clases (`bg-primary`), con `darkMode: ['class']` |
+| `cn()` | `src/shared/utils/cn.ts` | Une clases resolviendo conflictos: `cn('p-2','p-4')` deja solo `p-4` |
+| Componentes | `src/shared/components/ui/` | Empieza con `Button`; el resto se anade a demanda |
+
+**Zustand** es el estado global mas pequeno que funciona: un hook, sin provider, sin
+boilerplate. Sirve para lo que **varios componentes comparten y no viene del servidor** —
+un panel abierto, un filtro, el paso de un asistente. Lo que vive en la base **no** se
+duplica ahi: eso lo traen los Server Components o `services/`, y tener la misma verdad en
+dos sitios es como se desincroniza una UI.
+
+El andamio esta en `src/features/.template/store/feature-store.ts`, que se copia con la
+feature. El estado global de toda la app, si hace falta, va en `src/shared/stores/`.
+
+```bash
+npx shadcn add dialog input card   # anade componentes a src/shared/components/ui/
+```
+
+`components.json` apunta a `src/shared/`, no a `src/components/`: la arquitectura declarada
+tiene un solo sitio para la UI compartida, y shadcn escribe ahi.
 
 ## Arquitectura Feature-First
 
@@ -123,10 +179,14 @@ Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
 Bloques LEGO para construir features de IA con Vercel AI SDK v5 + OpenRouter:
 
+Ocho son **secuenciales** (`references/agents/`, se construyen uno sobre otro) y tres
+**independientes**:
+
 | Template | Que hace |
 |----------|----------|
 | setup-base | Configuracion inicial |
-| chat | Chat streaming con useChat |
+| chat-streaming | Chat streaming con useChat |
+| alt-action-stream | Variante sin chat: accion que emite en streaming |
 | web-search | Busqueda con :online |
 | historial | Persistencia en Supabase |
 | vision | Analisis de imagenes |
@@ -153,7 +213,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad (el gate completo)
+npm run validate     # el gate completo (13 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + imprenta + fugas
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -205,16 +265,12 @@ archivos. Medido: el suelo de cada sesion bajo de 11.3k a ~8.3k tokens. **En ope
 ahorro**: `opencode.json` le hace cargar las rules siempre, para que ninguna regla exista en un
 arnes y no en el otro. `npm run mide:contexto` las mide aparte, como nivel *condicional*.
 
-## Dos caminos: una app, o una herramienta
+## El camino de la herramienta
 
-Este template sirve para las dos cosas, y el runbook cambia segun cual sea:
-
-| | **Una app** | **Una herramienta** |
-|---|---|---|
-| Produces | Un sitio que se despliega | Un paquete que se instala |
-| Acaba en | Un VPS con Docker y TLS | El `node_modules` de otros proyectos tuyos |
-| Runbook | [docs/DEPLOY-HETZNER.md](docs/DEPLOY-HETZNER.md) | [docs/EMPAQUETAR-HERRAMIENTA.md](docs/EMPAQUETAR-HERRAMIENTA.md) |
-| Comando | `npm run configura:deploy` + `npm run deploy` | `npm run empaqueta <nombre>` |
+Primero la puerta, no el codigo:
+**[docs/CREAR-UNA-HERRAMIENTA.md](docs/CREAR-UNA-HERRAMIENTA.md)** separa lo que decides tu
+de lo que decide el agente, y sobre todo dice cuando la respuesta es **"todavia no"**: sin
+reuso real 3+ veces, empaquetar solo anade una version mas que mantener.
 
 Una herramienta vive en `tools/<nombre>/`, con la regla que decide si es reusable: **el
 nucleo no importa React, Next ni Supabase**. Lo que los necesite va en un entry point
@@ -224,6 +280,10 @@ hooks que nadie encuentra.
 `npm run empaqueta` no se cree el resultado: valida el contrato del `package.json`,
 comprueba que `'use client'` sobrevive al build, y **instala el tarball en un proyecto
 limpio para importarlo de verdad**. Ahi "es compatible" deja de ser una opinion.
+
+En el arbol viven dos ejemplos: `tools/ejemplo-herramienta/` (el esqueleto minimo) y
+`tools/voz/` (`@tu-scope/voz` — VAD y diarizacion locales, nucleo en TypeScript puro con los
+modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node).
 
 ## Gobernanza
 
@@ -242,7 +302,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (151 comprobaciones; el propio verificador vigila esta cifra)
+npm run verify:gobernanza   # falla si la capa quedo suelta (152 comprobaciones; el propio verificador vigila esta cifra)
 npm run regresion           # C2 capa A: contratos de los 25 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
@@ -421,16 +481,21 @@ o lo declara no medido y fuera de produccion.
 
 ```
 .claude/
-├── skills/              # 25 Skills (V4 Skills 2.0)
-├── gobernanza/          # Capa de gobernanza (7 controles, plantillas y registros)
-├── PRPs/                # Product Requirements Proposals
-│   │   └── references/  # AI Templates (11 bloques)
-├── design-systems/      # 5 sistemas de diseno
-├── memory/              # Memoria persistente del proyecto
-├── hooks/               # Scripts en eventos
-└── example.mcp.json     # Config de MCPs
+├── skills/                    # 25 Skills (V4 Skills 2.0)
+│   └── ai/references/         # AI Templates (11 bloques)
+├── gobernanza/                # 7 controles, plantillas, registros y golden-sets
+├── specs/                     # spec.md (EARS) + plan.md + tareas.md, por feature
+├── rules/                     # Reglas que cargan por `paths:` (aprendizajes, arquitectura, QA)
+├── PRPs/                      # Product Requirements Proposals
+├── imprenta/                  # Manifiesto de CLIs y medicion del coste de los MCP
+├── design-systems/            # 5 sistemas de diseno
+├── memory/                    # Memoria persistente del proyecto
+├── hooks/                     # Scripts en eventos
+├── routing-modelos.json       # Que nivel de modelo atiende cada clase de tarea (C8)
+├── presupuesto-contexto.json  # Presupuesto de contexto declarado
+└── example.mcp.json           # Config de MCPs
 ```
 
 ---
 
-**SaaS Factory V4** | Agent-First. Todo es un Skill.
+**SaaS Factory V4** | Agent-First. Todo es un Skill. Proyectos y herramientas, mismo gate.

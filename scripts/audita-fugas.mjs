@@ -3,7 +3,7 @@
  * Auditor de fugas del corpus — mide si una entrada de caso-trampa es RECONOCIBLE leyendo
  * el arbol de trabajo.
  *
- * Por que existe, y por que NO esta en `validate` todavia (medido el 2026-08-30):
+ * Por que existe (medido el 2026-08-30):
  *
  * La comprobacion 3i del verificador caza la copia literal (ventanas de 8 palabras) y se le
  * escapa la parafrasis, que es como se escriben las fugas de verdad: nadie copia y pega una
@@ -24,8 +24,12 @@
  * "corremos npm run validate a mano", que es justo lo que rompia la contigüidad exacta), y se
  * pesan por rareza (idf) para que el vocabulario comun no dispare.
  *
- * Salida: informe ordenado. Exit 0 siempre — es un instrumento de medida, no un gate. Cuando
- * el corpus este limpio, el umbral se fija con estos numeros y se promueve a comprobacion.
+ * Nacio como instrumento de medida y desde el 2026-08-30 es un gate dentro de `validate`,
+ * con corte BINARIO: un eco o no existe, o esta declarado. El umbral por peso no se pudo
+ * fijar —cualquier corte que cace la fuga cara tambien a la documentacion legitima— y por eso
+ * no hay juicio en tiempo de gate.
+ *
+ * Exit 0 = todo eco declarado · 1 = hay eco sin declarar · 2 = no pude verificar.
  *
  * Uso:  node scripts/audita-fugas.mjs [--ref <git-ref del corpus>] [--k N] [--hueco N]
  */
@@ -33,6 +37,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { estadoCorpus, avisoRezago } from './lib/corpus.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (nombre, porDefecto) => {
@@ -78,6 +83,15 @@ const idf = (t) => Math.log(N / (1 + (df.get(t) ?? 0)));
 
 // --- el corpus, que vive fuera del arbol ----------------------------------
 const REF = arg('--ref', null);
+
+if (!REF) {
+  const { detras } = estadoCorpus(raiz);
+  if (detras > 0) {
+    console.error(avisoRezago(detras));
+    process.exit(2);
+  }
+}
+
 let corpus = null;
 for (const ref of REF ? [REF] : ['golden-sets:casos-trampa.md', 'origin/golden-sets:casos-trampa.md']) {
   try { corpus = execFileSync('git', ['show', ref], { cwd: raiz, encoding: 'utf8' }); break; } catch { /* siguiente */ }

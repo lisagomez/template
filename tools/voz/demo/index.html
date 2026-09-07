@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco de pruebas · @tu-scope/voz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%99%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fondo: #fbfbfa; --panel: #fff; --borde: #e3e1dc; --texto: #1a1917; --tenue: #6b6862;
+    --acento: #2f6f4e; --acento-suave: #e8f2ec; --alerta: #a13b2a; --alerta-suave: #fbeae6;
+    --aviso: #8a6d1f; --aviso-suave: #fdf4dd;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #17181a; --panel: #1f2124; --borde: #33363b; --texto: #e7e5e0; --tenue: #9a978f;
+      --acento: #7bbd97; --acento-suave: #1d2f26; --alerta: #e08a76; --alerta-suave: #33211c;
+      --aviso: #d9bb6a; --aviso-suave: #2e2716;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto);
+    font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .envoltura { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 18px; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h3 { font-size: 13px; margin: 20px 0 8px; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--tenue); font-weight: 600; }
+  p { margin: 0 0 12px; }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--acento-suave);
+    padding: 1px 5px; border-radius: 4px; }
+  a { color: var(--acento); }
+  .sub { color: var(--tenue); margin-bottom: 24px; }
+
+  .aviso { background: var(--aviso-suave); border: 1px solid var(--borde);
+    border-left: 3px solid var(--aviso); border-radius: 6px; padding: 12px 16px; margin-bottom: 24px; }
+  .aviso code { background: transparent; padding: 0; }
+
+  nav { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--borde);
+    margin-bottom: 24px; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer;
+    padding: 10px 14px; font: inherit; font-size: 14px; color: var(--tenue); }
+  nav button:hover { color: var(--texto); }
+  nav button[aria-selected="true"] { color: var(--acento); border-bottom-color: var(--acento); font-weight: 600; }
+
+  section[hidden] { display: none; }
+  .panel { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px;
+    padding: 20px 24px; margin-bottom: 16px; }
+
+  ol.pasos { margin: 0; padding-left: 22px; }
+  ol.pasos li { margin-bottom: 6px; }
+  .esperado { border-left: 3px solid var(--acento); background: var(--acento-suave);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 12px; font-size: 14px; }
+  .esperado b { color: var(--acento); }
+
+  .mandos { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 16px 0; }
+  label.campo { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--tenue); }
+  select, input[type=number], textarea { font: inherit; font-size: 14px; padding: 6px 8px;
+    background: var(--fondo); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; }
+  select[multiple] { min-width: 200px; min-height: 150px; font-family: var(--mono); font-size: 12px; }
+  textarea { width: 100%; font-family: var(--mono); font-size: 12px; min-height: 90px; }
+  button.accion { background: var(--acento); color: #fff; border: 0; border-radius: 6px;
+    padding: 8px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+  button.accion:disabled { opacity: 0.45; cursor: not-allowed; }
+  button.secundaria { background: transparent; color: var(--texto); border: 1px solid var(--borde); }
+
+  .medidor { height: 10px; background: var(--borde); border-radius: 5px; overflow: hidden; margin: 10px 0; }
+  .medidor > div { height: 100%; width: 0; background: var(--acento); transition: width 60ms linear; }
+
+  pre.registro { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--fondo);
+    border: 1px solid var(--borde); border-radius: 6px; padding: 12px; max-height: 300px;
+    overflow: auto; margin: 12px 0 0; white-space: pre-wrap; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--tenue); border-bottom: 1px solid var(--borde); padding: 6px 8px; }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--borde); font-family: var(--mono); font-size: 12px; }
+  tr.mal td { background: var(--alerta-suave); }
+  .marca-ok { color: var(--acento); font-weight: 700; }
+  .marca-mal { color: var(--alerta); font-weight: 700; }
+
+  .turnos { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .turno { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px;
+    border: 1px solid var(--borde); font-family: var(--mono); font-size: 12px;
+    transition: background 400ms ease, border-color 400ms ease; }
+  .turno.provisional { border-style: dashed; color: var(--tenue); }
+  .turno.cambiado { background: var(--aviso-suave); border-color: var(--aviso); }
+  .turno .etiqueta { font-weight: 700; min-width: 110px; }
+  .insignia { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 2px 6px; border-radius: 999px; border: 1px solid var(--borde); color: var(--tenue); }
+
+  .linea { position: relative; height: 46px; background: var(--fondo); border: 1px solid var(--borde);
+    border-radius: 6px; margin-top: 12px; overflow: hidden; }
+  .linea .barra { position: absolute; height: 18px; border-radius: 3px; opacity: 0.85;
+    font-size: 10px; color: #fff; padding-left: 4px; overflow: hidden; line-height: 18px; }
+
+  .estado { font-size: 13px; color: var(--tenue); margin-top: 10px; min-height: 20px; }
+  .estado.error { color: var(--alerta); }
+  .cuenta { display: inline-block; background: var(--acento-suave); color: var(--acento);
+    border-radius: 999px; padding: 1px 9px; font-size: 12px; font-weight: 600; margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="envoltura">
+  <h1>Banco de pruebas · <code>@tu-scope/voz</code></h1>
+  <p class="sub">Los seis casos, contra los modelos reales y con la verdad conocida al lado.
+     Corre el <code>dist/</code> recien construido: lo que se prueba aqui es lo que se instala.</p>
+
+  <div class="aviso">
+    <b>Antes de empezar.</b> Esta pagina no trae los pesos: los sirve desde
+    <code>medicion/banco/</code>, que llena <code>npm run mide</code>. Si algo dice
+    <i>404</i>, es que falta ese paso. El microfono solo funciona en <code>localhost</code>
+    — es la regla de origen seguro del navegador, no un fallo de la herramienta.
+  </div>
+
+  <nav id="pestanas"></nav>
+
+  <!-- ══════════════════════════════ 1 ══════════════════════════════ -->
+  <section id="caso-vad">
+    <div class="panel">
+      <h2>1 · Barge-in — solo VAD</h2>
+      <p>Lo mas barato que hace la herramienta: <b>donde empieza y donde acaba el habla</b>.
+         Sin diarizar, sin saber quien es. Es lo que se usa para callar a un bot cuando alguien
+         le interrumpe, y por eso lo unico que importa aqui es la latencia.</p>
+      <h3>Instrucciones</h3>
+      <ol class="pasos">
+        <li>Elige <b>Silero</b> y fuente <b>microfono</b>. Pulsa <i>Arrancar</i> y acepta el permiso.</li>
+        <li>Di una frase, <b>calla un segundo largo</b>, y di otra.</li>
+        <li>Repitelo con el modelo de <b>energia</b>, que no necesita pesos: mismo resultado con
+            auriculares, y falso positivo en cuanto haya ruido de fondo.</li>
+        <li>Sin microfono, elige fuente <b>archivo</b>: se procesa por trozos, como si entrara en vivo.</li>
+      </ol>
+      <div class="esperado">
+        <b>Que tiene que pasar:</b> un <code>inicioHabla</code> en cuanto arrancas a hablar y un
+        <code>finHabla</code> unos <b>300 ms despues de callar</b> — ese retardo es
+        <code>msSilencioParaCerrar</code>, y es deliberado: mas corto te corta cuando respiras.
+        Si sale <b>cero turnos</b> con Silero sobre habla clara, el convenio de llamada del
+        <code>.onnx</code> esta roto (le paso en su dia: v5 quiere 576 muestras, no 512).
+      </div>
+      <div class="mandos">
+        <label class="campo">Modelo
+          <select id="vad-modelo"><option value="silero">Silero (real, ~2 MB)</option>
+            <option value="energia">Energia (cero modelos)</option></select></label>
+        <label class="campo">Fuente
+          <select id="vad-fuente"><option value="mic">Microfono</option>
+            <option value="archivo">Archivo del banco</option></select></label>
+        <label class="campo">Toma
+          <select id="vad-archivo"></select></label>
+        <label class="campo">msSilencioParaCerrar
+          <input type="number" id="vad-silencio" value="300" step="50" min="50" style="width:90px"></label>
+        <button class="accion" id="vad-arranca">Arrancar</button>
+        <button class="accion secundaria" id="vad-para" disabled>Parar</button>
+      </div>
+      <div class="medidor"><div id="vad-barra"></div></div>
+      <div class="estado" id="vad-estado"></div>
+      <pre class="registro" id="vad-log">(sin eventos todavia)</pre>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 2 ══════════════════════════════ -->
+  <section id="caso-canales" hidden>
+    <div class="panel">
+      <h2>2 · Dos canales — hablante sin diarizar</h2>
+      <p>Cuando cada persona tiene su propio canal —una llamada de centralita, agente a la
+         izquierda y cliente a la derecha— <b>no hace falta diarizar nada</b>. El hablante ya
+         lo dice el canal, y basta con un VAD en cada uno.</p>
+      <h3>Instrucciones</h3>
+      <ol class="pasos">
+        <li>Elige dos tomas de <b>hablantes distintos</b>. Se montan como canal izquierdo y derecho.</li>
+        <li>Pulsa <i>Repartir</i>.</li>
+      </ol>
+      <div class="esperado">
+        <b>Que tiene que pasar:</b> los eventos salen ya etiquetados <code>agente</code> /
+        <code>cliente</code>, sin modelo de embeddings por ningun lado.
+        <b>El detalle que importa:</b> se crean <b>dos instancias</b> de Silero, una por canal.
+        Silero tiene estado recurrente, y compartir una sola mezcla el contexto de dos personas.
+      </div>
+      <div class="mandos">
+        <label class="campo">Canal izquierdo (agente)<select id="can-a"></select></label>
+        <label class="campo">Canal derecho (cliente)<select id="can-b"></select></label>
+        <button class="accion" id="can-corre">Repartir</button>
+      </div>
+      <div class="estado" id="can-estado"></div>
+      <pre class="registro" id="can-log">(sin eventos todavia)</pre>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 3 ══════════════════════════════ -->
+  <section id="caso-lote" hidden>
+    <div class="panel">
+      <h2>3 · Reunion — diarizacion por lotes</h2>
+      <p>Con todo el audio delante, el agrupamiento ve el conjunto y las etiquetas salen
+         estables de una. Es el camino mas preciso, y el que no sirve en vivo.</p>
+      <h3>Instrucciones</h3>
+      <ol class="pasos">
+        <li>Marca varias tomas de <b>2 o 3 hablantes</b> (Ctrl o Mayus para seleccion multiple).
+            Se concatenan con 0,8 s de silencio, como una reunion por turnos.</li>
+        <li>Si sabes cuantas personas hay, <b>dilo</b> en <i>hablantes</i>: es el dato mas barato
+            y el que mas ayuda. Dejalo en 0 para que lo decida el umbral.</li>
+        <li>Pulsa <i>Diarizar</i>. La tabla compara con el hablante real, que se sabe porque
+            el nombre del archivo lo lleva.</li>
+        <li>Baja el umbral a 0,30 y repite: veras a una persona partida en dos.</li>
+      </ol>
+      <div class="esperado">
+        <b>Que tiene que pasar:</b> con umbral 0,55 —el medido, no el heredado— tantos grupos
+        como personas y <b>100 % de aciertos</b>. Las etiquetas son <code>Hablante N</code> por
+        orden de aparicion: son anonimas a proposito, ponerles nombre es el caso 6.
+      </div>
+      <div class="mandos">
+        <label class="campo">Tomas<select id="lote-tomas" multiple></select></label>
+        <label class="campo">umbral<input type="number" id="lote-umbral" value="0.55" step="0.05" min="0.05" max="1.5" style="width:80px"></label>
+        <label class="campo">hablantes (0 = deducir)<input type="number" id="lote-n" value="0" min="0" max="10" style="width:80px"></label>
+        <button class="accion" id="lote-corre">Diarizar</button>
+      </div>
+      <div class="estado" id="lote-estado"></div>
+      <div id="lote-salida"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 4 ══════════════════════════════ -->
+  <section id="caso-vivo" hidden>
+    <div class="panel">
+      <h2>4 · En vivo — la etiqueta ya, y la correccion despues</h2>
+      <p>Aqui hay que decidir con lo que se lleva oido, y eso cambia la promesa. Son
+         <b>tres eventos</b>, y el tercero es el que falta en casi todas las implementaciones:
+         <code>turno</code> (pintalo ya, marcado provisional), <code>correccion</code>
+         (lo que dije antes estaba mal) y <code>firme</code> (esto ya no lo toco nunca mas).</p>
+      <h3>Instrucciones</h3>
+      <ol class="pasos">
+        <li>Marca tomas de <b>2 o 3 hablantes</b> y pulsa <i>Emitir en vivo</i>.</li>
+        <li>Mira la lista: los turnos entran <b>a rayas</b> (provisionales). Cuando llega una
+            correccion, la fila <b>parpadea en ambar</b> y cambia de etiqueta.</li>
+        <li>Baja <code>msVentanaCorreccion</code> a 3000 y repite: veras <code>firme</code>
+            enseguida, y las correcciones que lleguen tarde ya <b>no podran arreglar nada</b>.</li>
+      </ol>
+      <div class="esperado">
+        <b>Que tiene que pasar:</b> con una conversacion limpia, <b>cero correcciones</b> — las
+        etiquetas nacen bien y no hay nada que rectificar. El campo <code>fuera</code> de una
+        correccion cuenta los turnos que ya salieron de la ventana y se quedan mal para siempre:
+        es informacion, no un error que ocultar.
+      </div>
+      <div class="mandos">
+        <label class="campo">Tomas<select id="vivo-tomas" multiple></select></label>
+        <label class="campo">msVentanaCorreccion<input type="number" id="vivo-ventana" value="30000" step="1000" style="width:110px"></label>
+        <label class="campo">hablantes (0 = deducir)<input type="number" id="vivo-n" value="0" min="0" max="10" style="width:80px"></label>
+        <button class="accion" id="vivo-corre">Emitir en vivo</button>
+      </div>
+      <div class="estado" id="vivo-estado"></div>
+      <div class="turnos" id="vivo-turnos"></div>
+      <pre class="registro" id="vivo-log">(sin eventos todavia)</pre>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 5 ══════════════════════════════ -->
+  <section id="caso-solape" hidden>
+    <div class="panel">
+      <h2>5 · En vivo CON solape — cuando dos hablan a la vez</h2>
+      <p>El camino por VAD no puede representar esto: dos voces simultaneas dan
+         <b>un</b> turno con un embedding promedio que no es de ninguno. PyanNet ve actividad
+         por marco y por hablante, y de ahi salen <b>turnos que se pisan</b>.</p>
+      <h3>Instrucciones</h3>
+      <ol class="pasos">
+        <li>Elige dos tomas de <b>hablantes distintos</b> y cuanto se pisan.</li>
+        <li>Pulsa <i>Segmentar</i>. Se mezclan las dos senales con ese solape.</li>
+        <li>Compara las dos lineas de tiempo: arriba PyanNet, abajo el mismo audio por VAD.</li>
+      </ol>
+      <div class="esperado">
+        <b>Que tiene que pasar:</b> arriba, dos barras que <b>se superponen</b> en el tramo
+        compartido. Abajo, por VAD, <b>una sola barra continua</b>: el solape es invisible.
+        <b>El precio:</b> PyanNet no cierra un turno hasta ver la ventana entera — con 10 s y
+        medio solape, <b>~5 s de latencia</b>, frente a los 300 ms del VAD. No se ajusta:
+        es lo que cuesta ver el solape.
+      </div>
+      <div class="mandos">
+        <label class="campo">Voz A<select id="sol-a"></select></label>
+        <label class="campo">Voz B<select id="sol-b"></select></label>
+        <label class="campo">Se pisan (s)<input type="number" id="sol-pisa" value="2" step="0.5" min="0" max="6" style="width:80px"></label>
+        <button class="accion" id="sol-corre">Segmentar</button>
+      </div>
+      <div class="estado" id="sol-estado"></div>
+      <div id="sol-salida"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 6 ══════════════════════════════ -->
+  <section id="caso-registro" hidden>
+    <div class="panel">
+      <h2>6 · Registro — voces con nombre que sobreviven a la sesion</h2>
+      <p>Todo lo anterior es anonimo: <code>Hablante 1</code> es <i>quien hablo primero</i>, y
+         manana sera otra persona. El registro guarda un centroide con un nombre que pones tu,
+         y se exporta a JSON para volver a cargarlo la semana que viene.</p>
+      <h3>Instrucciones</h3>
+      <ol class="pasos">
+        <li><b>Enrola</b> a alguien: elige un hablante, ponle nombre y pulsa <i>Registrar</i>.
+            Se usan sus <b>3 primeras tomas</b>. Repite con 2 o 3 personas.</li>
+        <li><b>Deja a alguien sin registrar</b> a proposito: es el impostor, y es la mitad
+            importante de la prueba.</li>
+        <li>Pulsa <i>Pasar acta</i>: se monta una reunion con TODOS —enrolados e impostor— usando
+            tomas que <b>no</b> se enrolaron.</li>
+        <li>Sube el umbral a <b>0,70</b> y repite <b>por lotes</b>: no pasa nada, el impostor
+            aguanta anonimo. Ahora cambia el camino a <b>en vivo</b> y repite.</li>
+      </ol>
+      <div class="esperado">
+        <b>Que tiene que pasar:</b> con umbral 0,45 los enrolados salen con su nombre y quien no
+        esta registrado sigue siendo <code>Hablante N</code>. Fijate en los <b>huecos</b> de la
+        numeracion: los nombres no gastan numero anonimo.
+        <br><br>
+        <b>Y lo que ensena el paso 4:</b> a 0,70 el camino <b>en vivo</b> le pone un nombre ajeno
+        al impostor, y el de <b>lotes</b> no — ni siquiera a 0,90. Es el mismo registro y el mismo
+        umbral: lo que cambia es <b>cuanta evidencia hay debajo de cada decision</b>. Por lotes se
+        pregunta una vez por el centroide de TODO el grupo; en vivo se pregunta turno a turno, y un
+        turno suelto pudo salir ronco. Por eso el defecto es el conservador — la abstencion se ve
+        y se arregla, el nombre ajeno se queda en el acta.
+      </div>
+      <div class="mandos">
+        <label class="campo">Hablante<select id="reg-hablante"></select></label>
+        <label class="campo">Nombre<input type="text" id="reg-nombre" placeholder="ana" style="font:inherit;font-size:14px;padding:6px 8px;background:var(--fondo);color:var(--texto);border:1px solid var(--borde);border-radius:6px"></label>
+        <button class="accion" id="reg-anade">Registrar</button>
+        <button class="accion secundaria" id="reg-limpia">Vaciar registro</button>
+      </div>
+      <div class="estado" id="reg-estado">Registro vacio.</div>
+      <h3>Pasar acta con el registro puesto</h3>
+      <div class="mandos">
+        <label class="campo">umbral del registro<input type="number" id="reg-umbral" value="0.45" step="0.05" min="0.05" max="1.5" style="width:90px"></label>
+        <label class="campo">Camino<select id="reg-camino">
+          <option value="lote">Por lotes</option><option value="vivo">En vivo</option></select></label>
+        <button class="accion" id="reg-corre">Pasar acta</button>
+      </div>
+      <div id="reg-salida"></div>
+      <h3>Exportar / importar — esto es lo que hace que "persistente" signifique algo</h3>
+      <textarea id="reg-json" placeholder="Registra a alguien y pulsa Exportar."></textarea>
+      <div class="mandos">
+        <button class="accion secundaria" id="reg-exporta">Exportar</button>
+        <button class="accion secundaria" id="reg-importa">Importar</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import {
+  creaDetectorVoz, creaDetectorPorCanal, creaDiarizador, creaDiarizadorEnVivo,
+  creaDiarizadorPorSegmentacion, creaDiarizadorSolapeEnVivo, creaRegistroHablantes,
+  importaRegistro, modeloEnergia, tramosSolapados,
+} from '/voz/index.js';
+// `leeWav` y `preparaParaModelo` viven en la entrada de "node" y funcionan aqui tal cual:
+// ese entry point no importa un solo modulo de Node. Es la promesa del README, ejecutandose.
+import { leeWav, preparaParaModelo } from '/voz/node/index.js';
+import { capturaMicrofono, creaModeloSilero, creaModeloHablante, creaModeloSegmentacion } from '/voz/browser/index.js';
+import * as ort from '/ort/ort.bundle.min.mjs';
+
+ort.env.wasm.wasmPaths = '/ort/';
+ort.env.logLevel = 'error';
+
+const $ = (id) => document.getElementById(id);
+const HZ = 16000;
+const COLORES = ['#2f6f4e', '#7a4ea8', '#a1622a', '#2a6ba1', '#a13b2a'];
+
+// ─────────────────────────────── modelos, cargados solo cuando hacen falta
+const cache = {};
+async function modelo(cual, estado) {
+  if (cache[cual]) return cache[cual];
+  const nombres = { vad: 'Silero VAD (2 MB)', hablante: 'embeddings (26 MB)', seg: 'segmentacion (6 MB)' };
+  if (estado) estado.textContent = `Cargando ${nombres[cual]}…`;
+  if (cual === 'vad') cache.vad = await creaModeloSilero({ ort, modelo: '/modelos/silero_vad.onnx' });
+  if (cual === 'hablante') cache.hablante = await creaModeloHablante({ ort, modelo: '/modelos/embedding.onnx' });
+  if (cual === 'seg') cache.seg = await creaModeloSegmentacion({ ort, modelo: '/modelos/segmentation-3.0.onnx' });
+  if (estado) estado.textContent = '';
+  return cache[cual];
+}
+/** Silero guarda estado recurrente: dos canales a la vez necesitan dos instancias. */
+const vadNuevo = () => creaModeloSilero({ ort, modelo: '/modelos/silero_vad.onnx' });
+
+// ─────────────────────────────── catalogo de audio, con su verdad
+let catalogo = [];
+const audios = new Map();
+async function pista(archivo) {
+  if (audios.has(archivo)) return audios.get(archivo);
+  const bytes = await (await fetch(`/audio/${archivo}`)).arrayBuffer();
+  const muestras = preparaParaModelo(leeWav(bytes), HZ);
+  audios.set(archivo, muestras);
+  return muestras;
+}
+const hablantesDe = () => [...new Set(catalogo.map((a) => a.hablante))];
+
+/** Concatena tomas con silencio en medio y devuelve la verdad de cada tramo. */
+async function montaReunion(archivos, huecoS = 0.8) {
+  const trozos = [];
+  for (const a of archivos) trozos.push({ archivo: a, hablante: a.split('-')[0], audio: await pista(a) });
+  const hueco = Math.round(huecoS * HZ);
+  const total = trozos.reduce((s, t) => s + t.audio.length + hueco, 0);
+  const pistaTotal = new Float32Array(total);
+  const verdad = [];
+  let cursor = 0;
+  for (const t of trozos) {
+    verdad.push({ hablante: t.hablante, inicioMs: (cursor / HZ) * 1000, finMs: ((cursor + t.audio.length) / HZ) * 1000 });
+    pistaTotal.set(t.audio, cursor);
+    cursor += t.audio.length + hueco;
+  }
+  return { audio: pistaTotal, verdad };
+}
+/** Quien hablaba de verdad en ese tramo: el de mayor solape. */
+const realEn = (verdad, t) => {
+  let mejor = null, s = 0;
+  for (const v of verdad) {
+    const x = Math.min(t.finMs, v.finMs) - Math.max(t.inicioMs, v.inicioMs);
+    if (x > s) { s = x; mejor = v.hablante; }
+  }
+  return mejor;
+};
+const seg = (ms) => `${(ms / 1000).toFixed(2)}s`;
+
+// ─────────────────────────────── pestanas
+const CASOS = [
+  ['caso-vad', '1 · Barge-in'], ['caso-canales', '2 · Dos canales'], ['caso-lote', '3 · Por lotes'],
+  ['caso-vivo', '4 · En vivo'], ['caso-solape', '5 · Con solape'], ['caso-registro', '6 · Registro'],
+];
+const nav = $('pestanas');
+CASOS.forEach(([id, texto], i) => {
+  const b = document.createElement('button');
+  b.textContent = texto;
+  b.setAttribute('aria-selected', String(i === 0));
+  b.onclick = () => {
+    CASOS.forEach(([otro], j) => {
+      $(otro).hidden = otro !== id;
+      nav.children[j].setAttribute('aria-selected', String(otro === id));
+    });
+  };
+  nav.appendChild(b);
+});
+
+// ─────────────────────────────── 1 · VAD
+let captura = null;
+const logVad = (t) => { const el = $('vad-log'); if (el.textContent.startsWith('(')) el.textContent = ''; el.textContent += t + '\n'; el.scrollTop = el.scrollHeight; };
+
+$('vad-arranca').onclick = async () => {
+  const estado = $('vad-estado');
+  estado.className = 'estado';
+  $('vad-log').textContent = '';
+  try {
+    const m = $('vad-modelo').value === 'silero' ? await modelo('vad', estado) : modeloEnergia();
+    m.reinicia();
+    const detector = creaDetectorVoz({ modelo: m, conservaAudio: false, msSilencioParaCerrar: +$('vad-silencio').value });
+    const pinta = (eventos) => {
+      for (const e of eventos) {
+        if (e.tipo === 'probabilidad') { $('vad-barra').style.width = `${Math.round(e.valor * 100)}%`; continue; }
+        if (e.tipo === 'inicioHabla') logVad(`▶ inicioHabla    ${seg(e.ms)}`);
+        if (e.tipo === 'finHabla') logVad(`■ finHabla       ${seg(e.turno.inicioMs)} → ${seg(e.turno.finMs)}  (${((e.turno.finMs - e.turno.inicioMs) / 1000).toFixed(2)}s)`);
+      }
+    };
+    if ($('vad-fuente').value === 'mic') {
+      $('vad-arranca').disabled = true; $('vad-para').disabled = false;
+      estado.textContent = 'Escuchando. Di una frase, calla un segundo, y di otra.';
+      captura = await capturaMicrofono({
+        frecuenciaHz: m.frecuenciaHz,
+        async alRecibir(muestras) { pinta(await detector.procesa(muestras)); },
+      });
+      logVad(`micro abierto a ${captura.frecuenciaEntradaHz} Hz → remuestreado a ${m.frecuenciaHz}`);
+    } else {
+      const audio = await pista($('vad-archivo').value);
+      estado.textContent = 'Procesando por trozos de 100 ms, como si entrara en vivo…';
+      const paso = Math.round(HZ * 0.1);
+      for (let i = 0; i < audio.length; i += paso) pinta(await detector.procesa(audio.subarray(i, i + paso)));
+      pinta(await detector.cierra());
+      $('vad-barra').style.width = '0';
+      estado.textContent = `Listo: ${(audio.length / HZ).toFixed(1)}s de audio.`;
+    }
+  } catch (e) { estado.className = 'estado error'; estado.textContent = String(e.message ?? e); $('vad-arranca').disabled = false; }
+};
+$('vad-para').onclick = async () => {
+  await captura?.detiene(); captura = null;
+  $('vad-arranca').disabled = false; $('vad-para').disabled = true;
+  $('vad-barra').style.width = '0'; $('vad-estado').textContent = 'Microfono cerrado.';
+};
+
+// ─────────────────────────────── 2 · dos canales
+$('can-corre').onclick = async () => {
+  const estado = $('can-estado'); estado.className = 'estado'; $('can-log').textContent = '';
+  try {
+    estado.textContent = 'Creando DOS instancias de Silero, una por canal…';
+    const [ma, mb] = [await vadNuevo(), await vadNuevo()];
+    const d = creaDetectorPorCanal({ etiquetas: ['agente', 'cliente'], modelos: [ma, mb] });
+    const [a, b] = [await pista($('can-a').value), await pista($('can-b').value)];
+    const largo = Math.max(a.length, b.length);
+    const izq = new Float32Array(largo); izq.set(a);
+    const der = new Float32Array(largo); der.set(b);
+    const lineas = [];
+    const paso = Math.round(HZ * 0.5);
+    for (let i = 0; i < largo; i += paso) {
+      for (const { canal, evento } of await d.procesa([izq.subarray(i, i + paso), der.subarray(i, i + paso)])) {
+        if (evento.tipo === 'finHabla') lineas.push(`■ ${canal.padEnd(8)} ${seg(evento.turno.inicioMs)} → ${seg(evento.turno.finMs)}`);
+        if (evento.tipo === 'inicioHabla') lineas.push(`▶ ${canal.padEnd(8)} ${seg(evento.ms)}`);
+      }
+    }
+    for (const { canal, evento } of await d.cierra()) {
+      if (evento.tipo === 'finHabla') lineas.push(`■ ${canal.padEnd(8)} ${seg(evento.turno.inicioMs)} → ${seg(evento.turno.finMs)}`);
+    }
+    $('can-log').textContent = lineas.join('\n') || '(sin habla detectada)';
+    estado.textContent = `${lineas.length} eventos. El hablante NO lo decidio ningun modelo de embeddings: lo decide el canal.`;
+  } catch (e) { estado.className = 'estado error'; estado.textContent = String(e.message ?? e); }
+};
+
+// ─────────────────────────────── 3 · por lotes
+async function turnosDe(audio, estado) {
+  const vad = await modelo('vad', estado);
+  vad.reinicia();
+  const det = creaDetectorVoz({ modelo: vad, conservaAudio: true });
+  const ev = [...(await det.procesa(audio)), ...(await det.cierra())];
+  return ev.flatMap((e) => (e.tipo === 'finHabla' ? [e.turno] : []));
+}
+/** `veredicto(turno, hablanteReal)` devuelve true, false, o null si ahi no se juzga nada. */
+function tablaActa(turnos, verdad, veredicto) {
+  const filas = turnos.map((t) => {
+    const real = realEn(verdad, t);
+    const ok = veredicto ? veredicto(t, real) : null;
+    return `<tr class="${ok === false ? 'mal' : ''}"><td>${seg(t.inicioMs)} → ${seg(t.finMs)}</td>
+      <td><b>${t.hablante ?? '—'}</b></td><td>${real ?? '—'}</td>
+      <td>${ok === null ? '' : ok ? '<span class="marca-ok">✓</span>' : '<span class="marca-mal">✗</span>'}</td></tr>`;
+  });
+  return `<table><thead><tr><th>Tramo</th><th>Etiqueta puesta</th><th>Hablante real</th><th></th></tr></thead>
+    <tbody>${filas.join('')}</tbody></table>`;
+}
+$('lote-corre').onclick = async () => {
+  const estado = $('lote-estado'); estado.className = 'estado';
+  const elegidas = [...$('lote-tomas').selectedOptions].map((o) => o.value);
+  if (elegidas.length < 2) { estado.className = 'estado error'; estado.textContent = 'Marca al menos dos tomas.'; return; }
+  try {
+    const { audio, verdad } = await montaReunion(elegidas);
+    const turnos = await turnosDe(audio, estado);
+    estado.textContent = 'Diarizando…';
+    const n = +$('lote-n').value;
+    const acta = await creaDiarizador({
+      modelo: await modelo('hablante', estado), umbral: +$('lote-umbral').value,
+      ...(n > 0 ? { hablantes: n } : {}),
+    }).asigna(turnos);
+    // Con etiquetas anonimas la verdad se compara por MAYORIA: "Hablante 2" no tiene por que
+    // ser el hablante 2 de nadie, lo que importa es que sea siempre el mismo.
+    const mapa = new Map();
+    for (const t of acta) { const r = realEn(verdad, t); if (!t.hablante || !r) continue;
+      if (!mapa.has(t.hablante)) mapa.set(t.hablante, new Map());
+      const m = mapa.get(t.hablante); m.set(r, (m.get(r) ?? 0) + 1); }
+    const dominante = new Map([...mapa].map(([et, m]) => [et, [...m].sort((a, b) => b[1] - a[1])[0][0]]));
+    let ok = 0, total = 0;
+    for (const t of acta) { const r = realEn(verdad, t); if (!t.hablante || !r) continue; total++; if (dominante.get(t.hablante) === r) ok++; }
+    $('lote-salida').innerHTML = tablaActa(acta, verdad, (t, real) => dominante.get(t.hablante) === real);
+    const grupos = new Set(acta.map((t) => t.hablante)).size;
+    const personas = new Set(verdad.map((v) => v.hablante)).size;
+    // "Aciertos" se mide con el mapeo por mayoria, que es el estandar — y que NO castiga
+    // partir a una persona en dos. Sin decirlo, un 9/9 al lado de "4 grupos para 3 personas"
+    // se lee como que todo fue bien, y no fue: sobra un grupo.
+    let nota = '';
+    if (grupos > personas) nota = ` · ⚠ sobran ${grupos - personas}: alguien esta partido en dos. Dile cuantos son en "hablantes", o sube el umbral.`;
+    else if (grupos < personas) nota = ` · ⚠ faltan ${personas - grupos}: hay dos personas fundidas en una. Baja el umbral.`;
+    estado.textContent = `${grupos} grupos para ${personas} personas reales · aciertos por mapeo mayoritario ${ok}/${total}${nota}`;
+  } catch (e) { estado.className = 'estado error'; estado.textContent = String(e.message ?? e); }
+};
+
+// ─────────────────────────────── 4 · en vivo
+$('vivo-corre').onclick = async () => {
+  const estado = $('vivo-estado'); estado.className = 'estado';
+  const elegidas = [...$('vivo-tomas').selectedOptions].map((o) => o.value);
+  if (elegidas.length < 2) { estado.className = 'estado error'; estado.textContent = 'Marca al menos dos tomas.'; return; }
+  $('vivo-turnos').innerHTML = ''; $('vivo-log').textContent = '';
+  try {
+    const { audio, verdad } = await montaReunion(elegidas);
+    const vad = await modelo('vad', estado); vad.reinicia();
+    const hablante = await modelo('hablante', estado);
+    const n = +$('vivo-n').value;
+    const vivo = creaDiarizadorEnVivo({
+      detector: creaDetectorVoz({ modelo: vad, conservaAudio: true }),
+      modelo: hablante, msVentanaCorreccion: +$('vivo-ventana').value,
+      ...(n > 0 ? { hablantes: n } : {}),
+    });
+    const filas = new Map();
+    const log = (t) => { $('vivo-log').textContent += t + '\n'; };
+    const aplica = (eventos) => {
+      for (const e of eventos) {
+        if (e.tipo === 'turno') {
+          const div = document.createElement('div');
+          div.className = 'turno' + (e.provisional ? ' provisional' : '');
+          div.innerHTML = `<span class="etiqueta">${e.turno.hablante ?? '—'}</span>
+            <span>${seg(e.turno.inicioMs)} → ${seg(e.turno.finMs)}</span>
+            <span class="insignia">confianza ${e.confianza.toFixed(2)}</span>
+            <span class="insignia prov">${e.provisional ? 'provisional' : 'firme'}</span>`;
+          $('vivo-turnos').appendChild(div);
+          filas.set(e.id, div);
+          log(`turno       ${e.id}  ${e.turno.hablante}  confianza ${e.confianza.toFixed(2)}${e.provisional ? '  (provisional)' : ''}`);
+        }
+        if (e.tipo === 'correccion') {
+          log(`correccion  motivo=${e.motivo}  cambios=${e.cambios.length}  fuera=${e.fuera}`);
+          for (const c of e.cambios) {
+            const div = filas.get(c.id); if (!div) continue;
+            div.querySelector('.etiqueta').textContent = c.hablante;
+            div.classList.add('cambiado');
+            setTimeout(() => div.classList.remove('cambiado'), 1400);
+          }
+        }
+        if (e.tipo === 'firme') {
+          log(`firme       ${e.ids.join(', ')}`);
+          for (const id of e.ids) {
+            const div = filas.get(id); if (!div) continue;
+            div.classList.remove('provisional');
+            div.querySelector('.prov').textContent = 'firme';
+          }
+        }
+      }
+    };
+    estado.textContent = 'Emitiendo en tiempo real…';
+    const paso = Math.round(HZ * 0.5);
+    for (let i = 0; i < audio.length; i += paso) {
+      aplica((await vivo.procesa(audio.subarray(i, i + paso))).diarizacion);
+      await new Promise((r) => setTimeout(r, 0)); // deja pintar al navegador
+    }
+    aplica((await vivo.cierra()).diarizacion);
+    const corr = $('vivo-log').textContent.split('\n').filter((l) => l.startsWith('correccion')).length;
+    estado.textContent = `${filas.size} turnos · ${corr} correcciones · ${new Set(verdad.map((v) => v.hablante)).size} personas reales`;
+  } catch (e) { estado.className = 'estado error'; estado.textContent = String(e.message ?? e); }
+};
+
+// ─────────────────────────────── 5 · solape
+function lineaDeTiempo(turnos, largoMs, titulo) {
+  const etiquetas = [...new Set(turnos.map((t) => t.hablante ?? '—'))];
+  const carriles = new Map(etiquetas.map((e, i) => [e, i]));
+  const barras = turnos.map((t) => {
+    const i = carriles.get(t.hablante ?? '—');
+    return `<div class="barra" style="left:${(t.inicioMs / largoMs) * 100}%;width:${Math.max(0.6, ((t.finMs - t.inicioMs) / largoMs) * 100)}%;
+      top:${4 + i * 21}px;background:${COLORES[i % COLORES.length]}">${t.hablante ?? ''}</div>`;
+  });
+  return `<h3>${titulo}</h3><div class="linea">${barras.join('')}</div>`;
+}
+$('sol-corre').onclick = async () => {
+  const estado = $('sol-estado'); estado.className = 'estado';
+  try {
+    const [a, b] = [await pista($('sol-a').value), await pista($('sol-b').value)];
+    const pisa = Math.round(+$('sol-pisa').value * HZ);
+    const arranqueB = Math.max(0, a.length - pisa);
+    const largo = Math.max(a.length, arranqueB + b.length);
+    const mezcla = new Float32Array(largo);
+    for (let i = 0; i < a.length; i++) mezcla[i] += a[i] * 0.8;
+    for (let i = 0; i < b.length; i++) mezcla[arranqueB + i] += b[i] * 0.8;
+    const largoMs = (largo / HZ) * 1000;
+
+    estado.textContent = 'Segmentando con PyanNet (esto tarda: corre el modelo por ventanas)…';
+    const vivo = creaDiarizadorSolapeEnVivo({
+      segmentacion: await modelo('seg', estado), hablante: await modelo('hablante', estado), hablantes: 2,
+    });
+    const eventos = [];
+    const paso = Math.round(HZ * 5);
+    for (let i = 0; i < mezcla.length; i += paso) eventos.push(...(await vivo.procesa(mezcla.subarray(i, i + paso))));
+    eventos.push(...(await vivo.cierra()));
+    const conSolape = eventos.filter((e) => e.tipo === 'turno').map((e) => e.turno);
+
+    const porVad = await creaDiarizador({ modelo: await modelo('hablante', estado), hablantes: 2 })
+      .asigna(await turnosDe(mezcla, estado));
+
+    const pisados = tramosSolapados(conSolape);
+    $('sol-salida').innerHTML =
+      lineaDeTiempo(conSolape, largoMs, `PyanNet — ${conSolape.length} turnos, ${pisados.length} tramo(s) de solape`) +
+      lineaDeTiempo(porVad, largoMs, `El mismo audio por VAD — ${porVad.length} turnos, el solape no se ve`);
+    estado.textContent = pisados.length > 0
+      ? `Se pisan ${pisados.map((t) => `${seg(t.inicioMs)}–${seg(t.finMs)}`).join(', ')} — eso es lo que el camino por VAD no puede decir.`
+      : 'Sin solape detectado: sube el tiempo en que se pisan.';
+  } catch (e) { estado.className = 'estado error'; estado.textContent = String(e.message ?? e); }
+};
+
+// ─────────────────────────────── 6 · registro
+let registro = creaRegistroHablantes({ umbral: 0.45 });
+const enrolados = new Map(); // hablante real -> nombre puesto
+let confirmaRepetida = false; // segundo clic para enrolar una voz que ya suena registrada
+function pintaRegistro() {
+  const v = registro.voces;
+  $('reg-estado').textContent = v.length === 0
+    ? 'Registro vacio.'
+    : `${v.length} voz/voces: ` + v.map((x) => `${x.nombre} (${x.muestras} tomas)`).join(' · ');
+}
+$('reg-anade').onclick = async () => {
+  const estado = $('reg-estado');
+  const hablante = $('reg-hablante').value;
+  const nombre = $('reg-nombre').value.trim();
+  if (!nombre) { estado.textContent = 'Ponle un nombre.'; return; }
+  try {
+    estado.textContent = 'Calculando vectores de enrolamiento…';
+    const m = await modelo('hablante', estado);
+    const tomas = catalogo.filter((a) => a.hablante === hablante).slice(0, 3);
+    const vectores = [];
+    for (const t of tomas) vectores.push(await m.vector(await pista(t.archivo)));
+
+    // Enrolar dos veces a la misma persona con nombres distintos es un error facil y mudo:
+    // el registro no puede saber que son la misma, y a partir de ahi ninguno de los dos
+    // nombres gana nunca —se roban los turnos entre ellos— sin que nada lo delate. La
+    // comprobacion la hace el propio `identifica`, que es exactamente para esto.
+    const media = new Float32Array(vectores[0].length);
+    for (const v of vectores) for (let i = 0; i < v.length; i++) media[i] += v[i] / vectores.length;
+    const yaEsta = registro.identifica(media);
+    if (yaEsta && !confirmaRepetida) {
+      confirmaRepetida = true;
+      estado.textContent = `⚠ Esa voz ya esta registrada como "${yaEsta.nombre}" (distancia ${yaEsta.distancia.toFixed(3)}). ` +
+        'Dos nombres para una misma persona se roban los turnos entre ellos. Pulsa Registrar otra vez si aun asi lo quieres.';
+      return;
+    }
+    confirmaRepetida = false;
+
+    registro.registra(nombre, vectores);
+    enrolados.set(hablante, nombre);
+    $('reg-nombre').value = '';
+    pintaRegistro();
+  } catch (e) { estado.textContent = String(e.message ?? e); }
+};
+$('reg-limpia').onclick = () => {
+  registro = creaRegistroHablantes({ umbral: +$('reg-umbral').value });
+  enrolados.clear(); $('reg-salida').innerHTML = ''; pintaRegistro();
+};
+$('reg-corre').onclick = async () => {
+  const estado = $('reg-estado');
+  if (registro.voces.length === 0) { estado.textContent = 'Registra al menos una voz.'; return; }
+  try {
+    // El umbral se aplica reconstruyendo: es un mando de creacion, no un ajuste en caliente.
+    let identificaciones = 0;
+    const rehecho = importaRegistro(registro.exporta(), { umbral: +$('reg-umbral').value });
+    // La reunion usa tomas que NO se enrolaron (de la 3 en adelante), e incluye a todos los
+    // hablantes del banco: los enrolados y los que no, que hacen de impostor.
+    const archivos = hablantesDe().flatMap((h) => catalogo.filter((a) => a.hablante === h).slice(3, 5).map((a) => a.archivo));
+    const { audio, verdad } = await montaReunion(archivos);
+    const turnos = await turnosDe(audio, estado);
+    const m = await modelo('hablante', estado);
+    estado.textContent = 'Pasando acta…';
+    let acta;
+    if ($('reg-camino').value === 'lote') {
+      acta = await creaDiarizador({ modelo: m, registro: rehecho }).asigna(turnos);
+    } else {
+      const vad = await modelo('vad', estado); vad.reinicia();
+      const vivo = creaDiarizadorEnVivo({ detector: creaDetectorVoz({ modelo: vad, conservaAudio: true }), modelo: m, registro: rehecho });
+      const emitidos = new Map(); const eventos = [];
+      const paso = Math.round(HZ * 0.5);
+      for (let i = 0; i < audio.length; i += paso) eventos.push(...(await vivo.procesa(audio.subarray(i, i + paso))).diarizacion);
+      eventos.push(...(await vivo.cierra()).diarizacion);
+      for (const e of eventos) if (e.tipo === 'turno') emitidos.set(e.id, { ...e.turno });
+      for (const e of eventos) if (e.tipo === 'correccion') for (const c of e.cambios) { const t = emitidos.get(c.id); if (t) t.hablante = c.hablante; }
+      acta = [...emitidos.values()];
+      identificaciones = eventos.filter((e) => e.tipo === 'correccion' && e.motivo === 'identificacion').length;
+    }
+    let bien = 0, mal = 0, anonimos = 0, impostorConNombre = 0;
+    for (const t of acta) {
+      const real = realEn(verdad, t); if (!real || !t.hablante) continue;
+      const esperado = enrolados.get(real);
+      if (!esperado) { t.hablante.startsWith('Hablante') ? anonimos++ : impostorConNombre++; }
+      else if (t.hablante === esperado) bien++; else mal++;
+    }
+    $('reg-salida').innerHTML = tablaActa(acta, verdad, (t, real) => {
+      const esperado = enrolados.get(real);
+      // A quien no se enrolo no se le exige nombre: se le exige que NO le pongan uno ajeno.
+      if (!esperado) return t.hablante?.startsWith('Hablante') ?? null;
+      return t.hablante === esperado;
+    });
+    // El resumen va CON la tabla, no en `reg-estado`: ese lo repinta `pintaRegistro()` y se
+    // llevaba por delante el resultado de la corrida justo despues de escribirlo.
+    const resumen = `Enrolados: <b>${bien}</b> con su nombre, <b>${mal}</b> mal. ` +
+      `No registrados: <b>${anonimos}</b> siguen anonimos, <b>${impostorConNombre}</b> recibieron un nombre ajeno.` +
+      (identificaciones > 0 ? ` · ${identificaciones} correccion(es) <code>identificacion</code>: un anonimo resulto ser alguien conocido.` : '');
+    $('reg-salida').insertAdjacentHTML('afterbegin',
+      `<div class="esperado" style="${impostorConNombre > 0 ? 'border-left-color:var(--alerta);background:var(--alerta-suave)' : ''}">${
+        impostorConNombre > 0 ? '⚠ ' : ''}${resumen}</div>`);
+    pintaRegistro();
+  } catch (e) { estado.textContent = String(e.message ?? e); }
+};
+$('reg-exporta').onclick = () => { $('reg-json').value = JSON.stringify(registro.exporta(), null, 1); };
+$('reg-importa').onclick = () => {
+  try {
+    registro = importaRegistro(JSON.parse($('reg-json').value), { umbral: +$('reg-umbral').value });
+    pintaRegistro();
+    $('reg-estado').textContent += ' — importado desde JSON.';
+  } catch (e) { $('reg-estado').textContent = String(e.message ?? e); }
+};
+
+// ─────────────────────────────── arranque
+catalogo = await (await fetch('/api/catalogo')).json();
+const opcion = (a) => `<option value="${a.archivo}">${a.hablante} · toma ${a.toma} · ${a.segundos}s</option>`;
+for (const id of ['vad-archivo', 'can-a', 'can-b', 'sol-a', 'sol-b']) $(id).innerHTML = catalogo.map(opcion).join('');
+for (const id of ['lote-tomas', 'vivo-tomas']) $(id).innerHTML = catalogo.map(opcion).join('');
+$('reg-hablante').innerHTML = hablantesDe().map((h) => `<option value="${h}">${h}</option>`).join('');
+// Predefinidos utiles: dos hablantes distintos donde hace falta, tres tomas donde toca elegir.
+const distintos = hablantesDe();
+$('can-b').value = catalogo.find((a) => a.hablante === distintos[1])?.archivo ?? '';
+$('sol-b').value = catalogo.find((a) => a.hablante === distintos[1])?.archivo ?? '';
+for (const id of ['lote-tomas', 'vivo-tomas']) {
+  const sel = $(id);
+  const preseleccion = distintos.slice(0, 3).flatMap((h) => catalogo.filter((a) => a.hablante === h).slice(0, 2).map((a) => a.archivo));
+  for (const o of sel.options) o.selected = preseleccion.includes(o.value);
+}
+pintaRegistro();
+</script>
+</body>
+</html>

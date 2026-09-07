@@ -179,6 +179,17 @@ test('agrupa respeta el numero de hablantes cuando se conoce', () => {
   assert.equal(new Set(agrupa(v, { hablantes: 1 })).size, 1);
 });
 
+test('distanciaCoseno nunca sale del rango que promete, ni por redondeo', () => {
+  // Un vector contra si mismo da coseno 1 + epsilon en flotante, y sin recorte la distancia
+  // sale NEGATIVA. No rompe ninguna comparacion, pero una `confianza` derivada de ahi pasa
+  // de 1 y contradice su propia documentacion.
+  const v = Float32Array.from([0.3162277, 0.9486833, 0.0001, -0.5]);
+  const d = distanciaCoseno(v, v);
+  assert.ok(d >= 0, `distancia negativa: ${d}`);
+  assert.ok(d < 1e-6, 'un vector consigo mismo sigue estando a distancia cero');
+  assert.equal(distanciaCoseno(Float32Array.from([1, 0]), Float32Array.from([-1, 0])), 2, 'opuestos: 2');
+});
+
 test('distanciaCoseno: identicos 0, ortogonales 1', () => {
   assert.equal(distanciaCoseno(Float32Array.from([1, 0]), Float32Array.from([1, 0])), 0);
   assert.equal(distanciaCoseno(Float32Array.from([1, 0]), Float32Array.from([0, 1])), 1);
