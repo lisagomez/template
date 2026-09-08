@@ -2997,3 +2997,32 @@ aprovechaban. Ya no depende de la costumbre.
   casos-trampa no se relanzaron: el cambio no toca ningún control ni ningún caso del
   corpus, solo añade una referencia documental a la plantilla.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-09-08
+
+---
+
+### 2026-09-08 — plantilla `prp-base.md`: referencia a `BUSINESS_LOGIC.md` — radio: plantilla
+- **Cambio**: `.claude/PRPs/prp-base.md` gana la alineación con el contrato de negocio del
+  proyecto en tres puntos (10 inserciones, 0 supresiones):
+  1. Se extiende el blockquote **"Spec vs PRP"** con un párrafo: encima de spec y PRP está
+     `BUSINESS_LOGIC.md`; la feature del PRP sale de su §7 (Features), el stack de su §7
+     (Stack confirmado), las tablas nuevas encajan en su §4 (Datos + inventario de
+     respaldo) y la AISIA de proyecto vive en su §6. El PRP lo aterriza, no lo contradice.
+  2. **Contexto → Referencias**: `BUSINESS_LOGIC.md` §7 y §4 como primera entrada, encima
+     de la spec.
+  3. **Modelo de Datos (si aplica)**: nota de que las tablas nuevas encajan en el
+     inventario de `BUSINESS_LOGIC.md §4` y se declaran ahí para respaldo — contrato, no
+     costumbre: lo que no está en el inventario no se respalda.
+  - Sin cambios de stack, de arquitectura ni de los skills que la plantilla nombra. Cero
+    supresiones.
+- **Motivo**: continuación del CDC anterior (spec↔PRP). La plantilla enlazaba la spec pero
+  seguía sin mencionar `BUSINESS_LOGIC.md`, el contrato de negocio del que salen la feature,
+  el stack y el inventario de datos. Un PRP generado desde la plantilla no tenía en su ruta
+  de contexto el artefacto contra el que todo lo demás se valida.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo)
+- **Regresión**: `npm run regresion` — C2 capa A **105/105 en verde — promovible**.
+  `npm run regresion -- --trampa` — C2 capa B **22/22 en verde — promovible**.
+  `npm run verify:gobernanza` — **152/152**. Las corridas en sesión fría de los
+  casos-trampa no se relanzaron: el cambio no toca ningún control ni ningún caso del
+  corpus, solo añade una referencia documental a la plantilla.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-09-08
