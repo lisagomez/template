@@ -322,9 +322,16 @@ eso es del plan.
 
 **Cual de los dos**: si no se sabe QUE construir, la spec va primero y el PRP despues. Si el
 QUE ya esta acordado y solo falta el plan, PRP directo. Nunca las dos para lo mismo — el
-decision tree de `AGENTS.md` lo dice y el verificador comprueba que lo siga diciendo.
+decision tree de `AGENTS.md` lo dice y el verificador comprueba que lo siga diciendo. Cuando
+hay spec, el PRP **la referencia** en vez de reescribir el QUE: sus criterios de exito salen
+de los requisitos EARS y su "Fuera de alcance" es el de la spec.
 
-`npm run verifica:specs` (55 comprobaciones, dentro de `validate`) vigila lo que ningun otro
+**La cadena entera**: `BUSINESS_LOGIC.md` (el producto, de `/new-app`) → `spec.md` (el QUE de
+una feature) → PRP (el COMO: contexto, datos, fases) → `/bucle-agentico` (ejecucion). La
+plantilla `prp-base.md` apunta arriba a `BUSINESS_LOGIC.md` §7 (features + stack), §4 (datos)
+y §6 (AISIA de proyecto): el PRP lo aterriza en una pieza, no lo contradice.
+
+`npm run verifica:specs` (64 comprobaciones, dentro de `validate`) vigila lo que ningun otro
 gate miraba: **que una spec no pierda un requisito al reformatearse**. Existe porque pasó.
 Y no cobra dos veces: `validate` deja un **sello** con la huella del arbol
 (`.validate-sello.json`, de tu maquina, nunca del repo) y `predeploy` lo comprueba — arbol

@@ -3,7 +3,7 @@
 **Alta:** 2026-08-30, CDC firmado por lisagomez. **Skill:** `/spec-generator`
 (`.claude/skills/spec-generator/`, con `spec-template.md` propio y enlace vivo en
 `.opencode/skill/`). **Specs:** `.claude/specs/NNN-<nombre>/{spec,plan,tareas}.md`.
-**Gate:** `npm run verifica:specs` (55 comprobaciones, dentro de `validate`).
+**Gate:** `npm run verifica:specs` (64 comprobaciones, dentro de `validate`).
 **Principios:** `docs/constitution.md`.
 
 ## Lo que hay que saber antes de tocarlo
@@ -12,7 +12,9 @@
   si no se sabe QUÉ construir, spec primero y PRP después; si el QUÉ ya está acordado y solo
   falta el plan, PRP directo. **Nunca las dos para lo mismo.** El verificador vigila que ese
   criterio siga escrito (bloque 6c), porque nació sin él y era el hueco real: los gates en
-  verde y el árbol de decisión conociendo una sola ruta.
+  verde y el árbol de decisión conociendo una sola ruta. Desde 2026-09-08 ese criterio está
+  **también inline en `prp-base.md`** (blockquote "Spec vs PRP"), y la plantilla referencia
+  la spec en su sección Qué y en Contexto → Referencias en vez de re-litigar el QUÉ.
 - **El reparto de gobernanza no es simétrico**: **C4** (impacto sobre terceros) va **en la
   spec** —es pregunta de alcance y decide qué baja a "Fuera de alcance"—, y **C3** (modelo de
   amenazas) va **en el plan**, porque necesita fronteras y flujos, que son diseño. Meter los
@@ -23,6 +25,24 @@
   (`git show 461803f:.claude/PRPs/specs/spec-<nombre>.md`) y cada spec lleva ese comando en
   su encabezado. Cuatro están construidas; **004 y 005 no**, y sus planes son propuestas no
   aprobadas que no cierran la libertad técnica.
+
+## `prp-base.md` enlaza la cadena (CDCs 2026-09-08, firmados por lisagomez)
+
+Dos CDCs seguidos sobre la plantilla, PRs #43 y #44:
+
+- **spec↔PRP** (#43): paso condicional de `/spec-generator` en el flujo, blockquote "Spec vs
+  PRP", campo `> **Spec**:` en la cabecera y la spec como primera referencia de Contexto. La
+  sección Qué resume y enlaza la spec (criterios ← EARS, fuera de alcance ← spec) en vez de
+  reescribir el QUÉ. En la misma sesión se revirtió un cambio no aprobado que ponía
+  `/goal-compiler` en el paso de ejecución (ese paso es `/bucle-agentico`) y se limpió el
+  ruido de un auto-formateador.
+- **BUSINESS_LOGIC** (#44): la plantilla apunta arriba al contrato de negocio del proyecto —
+  feature ← §7, stack ← §7, tablas ← §4 (+ inventario de respaldo), AISIA de proyecto ← §6.
+- Regresión en los dos: capa A **105/105**, capa B **22/22**, `verify:gobernanza` **152/152**.
+  Sin corridas en frío nuevas: ninguno toca un control ni un caso del corpus, solo añaden
+  referencias documentales a la plantilla.
+- `README.md` §"Specs: cerrar el QUE antes que el COMO" recoge la cadena
+  `BUSINESS_LOGIC.md` → `spec.md` → PRP → `/bucle-agentico`.
 
 ## Trampas ya pagadas (no repetir)
 
