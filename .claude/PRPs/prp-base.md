@@ -35,6 +35,11 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 > **Spec vs PRP**: la spec cierra el QUÉ (requisitos EARS, fuera de alcance, impacto C4);
 > el PRP cierra el CÓMO (contexto, modelo de datos, fases, gobernanza). Sin saber QUÉ
 > construir → spec primero. Con el QUÉ acordado y solo el plan pendiente → PRP directo.
+>
+> **Encima de ambos está `BUSINESS_LOGIC.md`**, el contrato de negocio del proyecto: la
+> feature de este PRP sale de su §7 (Features), el stack de su §7 (Stack confirmado), las
+> tablas nuevas encajan en su §4 (Datos + inventario de respaldo) y la AISIA de proyecto
+> vive en su §6. El PRP no lo contradice: lo aterriza en una pieza.
 
 ---
 
@@ -92,6 +97,7 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 ## Contexto
 
 ### Referencias
+- `BUSINESS_LOGIC.md` §7 (Features + Stack confirmado), §4 (Arquitectura de Datos) - Contrato de negocio del proyecto
 - `.claude/specs/NNN-<nombre>/spec.md` - Spec acordada (el QUÉ, el POR QUÉ y el fuera de alcance)
 - `src/features/[existente]/` - Patrón a seguir
 - [URL de docs] - API reference
@@ -107,6 +113,10 @@ src/features/[nueva-feature]/
 ```
 
 ### Modelo de Datos (si aplica)
+
+> Las tablas nuevas encajan en el inventario de `BUSINESS_LOGIC.md §4` y se declaran ahí
+> para respaldo — contrato, no costumbre: lo que no está en el inventario no se respalda.
+
 ```sql
 CREATE TABLE [tabla] (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
