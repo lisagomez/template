@@ -2960,3 +2960,40 @@ aprovechaban. Ya no depende de la costumbre.
    porque sin credenciales en la máquina uno de sus dos modos de fallo no era alcanzable.
 3. **Dos artefactos pendientes cubren la misma necesidad con distinto transporte.** Elegir uno
    y marcar el otro DESCARTADO sigue sin decidirse.
+
+---
+
+### 2026-09-08 — plantilla `prp-base.md`: referencia a las specs — radio: plantilla
+- **Cambio**: `.claude/PRPs/prp-base.md` gana la relación spec↔PRP en cuatro puntos, sin
+  tocar nada más (17 inserciones, 5 supresiones):
+  1. **Flujo de Trabajo**: paso nuevo *"Si el QUÉ no está acordado: SPEC-GENERATOR →
+     `.claude/specs/NNN-<nombre>/spec.md`"* antes de generar el PRP; la lista se renumera a
+     7 pasos y el paso de ejecución sigue apuntando a `/bucle-agentico`.
+  2. Blockquote **"Spec vs PRP"** bajo el flujo: la spec cierra el QUÉ (EARS, fuera de
+     alcance, impacto C4), el PRP el CÓMO; sin QUÉ → spec primero, con QUÉ acordado → PRP
+     directo. Es el criterio ya vigente en el decision tree de `AGENTS.md`.
+  3. Cabecera del template: campo `> **Spec**:` junto a Estado/Fecha/Proyecto — la spec se
+     referencia, no se reescribe.
+  4. Sección **Qué**: nota de que, con spec, los criterios salen de sus requisitos EARS y
+     el "Fuera de alcance" es el de la spec; y `.claude/specs/NNN-<nombre>/spec.md` como
+     primera entrada de **Contexto → Referencias**.
+  - Las supresiones son solo el renumerado de la lista del flujo. No hay cambios de stack,
+    de arquitectura ni de los skills que la plantilla nombra.
+- **Motivo**: la plantilla no mencionaba las specs en ningún sitio, aunque el decision tree
+  de `AGENTS.md` ya define spec-generator como la fase que cierra el QUÉ antes del PRP. Un
+  PRP generado desde la plantilla re-litigaba el QUÉ en su sección "Qué" en vez de enlazar
+  la spec acordada. En la misma sesión se revirtió un cambio previo no aprobado que ponía
+  `/goal-compiler` en el paso de ejecución del flujo —incorrecto: ese paso ejecuta el
+  Blueprint fase por fase, que es `/bucle-agentico`; `/goal-compiler` no ejecuta nada— y se
+  limpió el ruido de un auto-formateador que había realineado tablas, insertado líneas en
+  blanco y dejado un fence de código sobrante antes de "## 🎯 Stack". El diff final solo
+  contiene las cuatro adiciones de specs.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo)
+- **Regresión**: `npm run regresion` — C2 capa A **105/105 en verde — promovible** (incluye
+  `prp: el PRP se genera desde el template, no de memoria` y `prp: C3/C4 en todo PRP`).
+  `npm run regresion -- --trampa` — C2 capa B **22/22 en verde — promovible** (corpus
+  íntegro, 21 casos con entrada y expectativa). Las corridas en sesión fría de los
+  casos-trampa no se relanzaron: el cambio no toca ningún control ni ningún caso del
+  corpus, solo añade una referencia documental a la plantilla.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-09-08
