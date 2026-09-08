@@ -12,6 +12,7 @@
  */
 
 import type { FormatoDeCampo } from './tipos.js'
+import { normalizaIdentificador } from './busqueda.js'
 
 export type EstadoDeResolucion = 'resuelto' | 'ambiguo' | 'sin_resolver'
 
@@ -175,8 +176,10 @@ export function resuelveIdentificador(
   valor: string,
   filas: readonly FilaDeCatalogo[],
 ): Resolucion {
-  const buscado = valor.trim().toUpperCase().replace(/\s+/g, '')
-  const exactas = filas.filter((f) => f.etiqueta.trim().toUpperCase().replace(/\s+/g, '') === buscado)
+  // La misma normalizacion que usa el indice de busqueda, importada y no copiada: si divergieran,
+  // la busqueda no encontraria lo que aqui si se resolvio, y el fallo seria invisible.
+  const buscado = normalizaIdentificador(valor)
+  const exactas = filas.filter((f) => normalizaIdentificador(f.etiqueta) === buscado)
   if (exactas.length === 1) {
     return { estado: 'resuelto', candidatos: [{ fila: exactas[0], similitud: 1 }], elegida: exactas[0] }
   }

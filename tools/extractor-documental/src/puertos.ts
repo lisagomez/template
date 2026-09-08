@@ -59,3 +59,28 @@ export interface AlmacenPlantillas {
 export interface EsquemaExistente {
   describe(): Promise<DescriptorDeEsquema>
 }
+
+/**
+ * Persistencia y recuperacion de lotes. El titulo es para el humano; los identificadores del
+ * indice son por lo que se busca de verdad.
+ */
+export interface RepositorioDeRegistros {
+  guardaLote(lote: unknown): Promise<void>
+  leeLote(id: string): Promise<unknown | null>
+  busca(criterios: unknown): Promise<readonly unknown[]>
+}
+
+/**
+ * El fichero original en un bucket PRIVADO. La lectura va siempre por URL firmada y caduca: un
+ * bucket publico con facturas es una fuga con enlace permanente.
+ *
+ * Ojo con el respaldo: los bytes viven fuera de Postgres, asi que `pg_dump` NO los incluye. Un
+ * respaldo de base en verde deja fuera todas las evidencias, y eso es peor que no tenerlas
+ * respaldadas — parece que estan.
+ */
+export interface AlmacenDeOriginales {
+  guarda(ruta: string, contenido: Uint8Array, tipoMime: string): Promise<void>
+  urlFirmada(ruta: string, segundos: number): Promise<string>
+  /** Irreversible: solo por llamada explicita, nunca por vencimiento automatico de retencion. */
+  borra(ruta: string): Promise<void>
+}

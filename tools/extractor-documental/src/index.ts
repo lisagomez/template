@@ -27,6 +27,8 @@ export type {
   AlmacenPlantillas,
   EsquemaExistente,
   LectorDeCodigos,
+  RepositorioDeRegistros,
+  AlmacenDeOriginales,
   OpcionesDeExtraccion,
 } from './puertos.js'
 
@@ -100,3 +102,31 @@ export type {
   OpcionesDeResolucion,
   AltaPropuesta,
 } from './reconciliacion.js'
+
+export { puede, accionesDe, exige } from './roles.js'
+export type { Rol, Accion } from './roles.js'
+
+export { abreLote, cierraLote, admiteAltas, exigeAbierto, tituloSugerido } from './registros.js'
+export type { Lote, EstadoLote, TipoDeTrabajo, DatosDeLote, ResumenParaTitulo } from './registros.js'
+
+export { versionInicial, corrige, vigente, historialLegible } from './versiones.js'
+export type { VersionDeCampo } from './versiones.js'
+
+export {
+  normalizaIdentificador,
+  extraeIdentificadoresIndexables,
+  normalizaCriterios,
+  estanVacios,
+} from './busqueda.js'
+export type { EntradaDeIndice, CriteriosDeBusqueda, CriteriosNormalizados } from './busqueda.js'
+
+export { rutaDeOriginal, extensionPermitida, organizacionDeRuta, venceRetencion } from './originales.js'
+
+export { suprime, esSuprimido } from './supresion.js'
+export type { Lapida, OrdenDeSupresion, RegistroASuprimir } from './supresion.js'
+
+export { estimaCoste, sumaEstimaciones } from './costes.js'
+export type { TarifaDelMotor, Estimacion, OpcionesDeEstimacion } from './costes.js'
+
+export { aCsv, neutralizaFormula, registraExportacion, BOM_UTF8 } from './csv.js'
+export type { ColumnaCsv, RegistroDeExportacion } from './csv.js'

@@ -2,8 +2,8 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**84 pruebas**, sin red, sin base de datos y sin navegador). La UI, la cámara, los adaptadores y
-> el empaquetado siguen abiertos.
+> (**119 pruebas**, sin red, sin base de datos y sin navegador). La UI, la cámara, los adaptadores
+> y el empaquetado siguen abiertos.
 
 ## Cerradas
 
@@ -60,6 +60,39 @@
       → `src/cola.ts` · el instante se sella al escanear, se conservan los dos instantes, hay
       retroceso acotado y aviso de riesgo de purga si la app no está instalada.
       Cubre DoF-13 · RF-50 a RF-54.
+
+- [x] **TAR-35 · Roles y matriz de permisos.**
+      → `src/roles.ts` · matriz declarada como dato; `pruebas/roles.ts` la recorre **entera**, así
+      ningún rol gana un permiso por descuido. Cubre DoF-18 · RF-71..RF-74.
+
+- [x] **TAR-36 · Lote con título y ciclo de vida.**
+      → `src/registros.ts` · título obligatorio y **no único**, `tituloSugerido()` derivado del
+      contenido, y un lote cerrado que rechaza altas. Cubre DoF-14 · RF-55..RF-58.
+
+- [x] **TAR-37 · Correcciones como versiones.**
+      → `src/versiones.ts` · append-only, motivo obligatorio, y `vigente()` por número de versión y
+      no por posición. Cubre DoF-16 · RF-64..RF-66.
+
+- [x] **TAR-38 · Índice de identificadores, con la normalización compartida.**
+      → `src/busqueda.ts` · `normalizaIdentificador()` **extraída** de `reconciliacion.ts` y usada
+      por los dos; la prueba ata ambos caminos al mismo resultado. Cubre DoF-17 · RF-67..RF-70.
+
+- [x] **TAR-39 · Ruta y retención de los originales.**
+      → `src/originales.ts` · organización como **primer segmento** (de eso depende que la RLS del
+      bucket sea expresable), sin dedupe entre organizaciones, y vencer no borra nada solo.
+      Cubre DoF-15 · RF-59..RF-63.
+
+- [x] **TAR-40 · Supresión con lápida.**
+      → `src/supresion.ts` · devuelve la orden (lápida + objetos a borrar); el borrado real es del
+      adaptador. `esSuprimido()` distingue borrado de inexistente. Cubre DoF-19 · RF-75..RF-77.
+
+- [x] **TAR-41 · Coste estimado antes de confirmar.**
+      → `src/costes.ts` · `null` sin tarifa declarada, **nunca cero**, y una suma con un hueco es un
+      total desconocido. Cubre RF-78 · RF-79.
+
+- [x] **TAR-42 · Exportación a CSV.**
+      → `src/csv.ts` · BOM UTF-8 y neutralización de celdas que Excel ejecutaría; la exportación
+      queda registrada. Cubre DoF-20 · RF-80..RF-82.
 
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
@@ -173,6 +206,39 @@
       Hecho cuando: `./almacenes/indexeddb` implementa `AlmacenLocal`, y la app avisa del riesgo de
       purga cuando hay cola pendiente sin estar instalada.
       → cubre RF-50 · RF-53
+
+- [ ] **TAR-43 · Adaptador de Supabase Storage.**
+      Hecho cuando: `./almacenes/supabase-storage` sube al bucket **privado**, lee por URL firmada
+      con caducidad, y la migración crea las policies sobre `storage.objects` acotadas por
+      `bucket_id` y por pertenencia a la organización. Sin `service_role` en la superficie del
+      usuario.
+      → cubre RF-60 · control C7
+
+- [ ] **TAR-44 · La segunda vía de respaldo del bucket.**
+      Hecho cuando: el inventario de `BUSINESS_LOGIC.md` §4 lleva los originales como **línea
+      propia**, no colgando de «la base de datos», y queda escrito que `pg_dump` no los incluye.
+      Montar la sincronización es operación del proyecto, no código de la herramienta.
+      → hallazgo §2.15 del SDD
+
+- [ ] **TAR-45 · Migraciones de organizaciones, lotes, versiones, índice y lápidas.**
+      Hecho cuando: existen con RLS por pertenencia a la organización y el esquema Zod es espejo
+      exacto de cada `CHECK`.
+      → cubre RF-71 · control C7
+
+- [ ] **TAR-46 · Pantalla de lotes: crear, titular, buscar y recuperar.**
+      Hecho cuando: se crea un lote con título sugerido editable, y se recupera por título o por un
+      identificador extraído.
+      → cubre RF-55 · RF-57 · RF-67 · RF-68
+
+- [ ] **TAR-47 · Confirmación de coste y exportación en la UI.**
+      Hecho cuando: el coste estimado se ve **antes** de lanzar el lote, y la exportación descarga
+      el CSV dejando registro.
+      → cubre RF-78 · RF-80
+
+- [ ] **TAR-48 · Flujo de supresión con gate humano.**
+      Hecho cuando: suprimir exige rol revisor, motivo y confirmación explícita, y ninguna ruta lo
+      dispara automáticamente al vencer la retención.
+      → cubre RF-75 · RF-63
 
 ## Bloqueadas por medición
 

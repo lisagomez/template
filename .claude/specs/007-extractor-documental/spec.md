@@ -36,6 +36,7 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
 - **Integrador** — quien instala el paquete en otro proyecto y le inyecta el motor y el almacén.
 - **Titular del documento** — la persona sobre la que trata el papel. **No usa el sistema y no
   eligió estar aquí.** Es a quien protege la sección de impacto.
+- **Operario** — escanea y sube documentos; **no valida lo que sube**.
 - **Dueño del esquema** — quien mantiene los catálogos del proyecto. **No usa la herramienta**,
   pero es quien paga un duplicado mal dado de alta.
 - **Agente de la fábrica** — implementa, empaqueta y verifica.
@@ -166,6 +167,52 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
 - RF-53: SI hay lecturas pendientes de enviar y la aplicación no está instalada, ENTONCES EL
   SISTEMA advertirá de que el navegador puede descartarlas.
 - RF-54: EL SISTEMA reintentará el envío de una lectura pendiente con esperas crecientes y acotadas.
+- RF-55: EL SISTEMA agrupará el trabajo en lotes, y cada lote llevará un título obligatorio dado
+  por una persona.
+- RF-56: EL SISTEMA admitirá que dos lotes distintos compartan el mismo título.
+- RF-57: CUANDO se vaya a titular un lote, EL SISTEMA propondrá un título derivado de su contenido
+  que la persona podrá aceptar o cambiar.
+- RF-58: SI un lote está cerrado, ENTONCES EL SISTEMA rechazará añadirle documentos o lecturas.
+- RF-59: EL SISTEMA conservará el fichero original de cada documento como evidencia, además de los
+  datos extraídos.
+- RF-60: EL SISTEMA guardará los originales en un almacén privado y los entregará mediante enlaces
+  temporales, nunca de acceso público permanente.
+- RF-61: EL SISTEMA compondrá la ubicación de cada original de modo que su primer segmento sea la
+  organización propietaria.
+- RF-62: EL SISTEMA no compartirá un mismo original entre organizaciones distintas, aunque su
+  contenido sea idéntico.
+- RF-63: EL SISTEMA declarará un plazo de retención para los originales, y su vencimiento no
+  borrará nada por sí solo.
+- RF-64: EL SISTEMA no modificará en el sitio un dato ya validado: una corrección añadirá una
+  versión nueva y conservará la anterior.
+- RF-65: EL SISTEMA exigirá un motivo en toda corrección, además de quién la hizo y cuándo.
+- RF-66: EL SISTEMA determinará el valor vigente de un campo por su número de versión.
+- RF-67: EL SISTEMA permitirá recuperar un lote por su título.
+- RF-68: EL SISTEMA indexará los identificadores extraídos de cada documento y permitirá recuperar
+  por ellos.
+- RF-69: EL SISTEMA normalizará un identificador de la misma manera al indexarlo y al resolverlo
+  contra un catálogo.
+- RF-70: EL SISTEMA no indexará el texto libre del documento como criterio de búsqueda.
+- RF-71: EL SISTEMA distinguirá los roles de operario, revisor y consulta dentro de una
+  organización.
+- RF-72: SI quien actúa no tiene el rol necesario para una operación, ENTONCES EL SISTEMA la
+  rechazará antes de ejecutarla.
+- RF-73: EL SISTEMA reservará al rol revisor la corrección, la validación, el cierre de lote y la
+  supresión.
+- RF-74: EL SISTEMA permitirá al rol de consulta leer y exportar sin poder alterar nada.
+- RF-75: CUANDO se suprima un registro a petición de su titular, EL SISTEMA borrará su contenido y
+  conservará constancia de que existió.
+- RF-76: EL SISTEMA registrará en cada supresión quién la pidió, quién la ejecutó, cuándo y por qué.
+- RF-77: EL SISTEMA distinguirá un registro suprimido de uno que nunca existió.
+- RF-78: CUANDO se vaya a lanzar un lote, EL SISTEMA mostrará el coste estimado antes de
+  confirmarlo.
+- RF-79: SI el motor no declara tarifa, ENTONCES EL SISTEMA presentará el coste como desconocido y
+  no como cero.
+- RF-80: EL SISTEMA exportará los datos validados de un lote a un fichero de valores separados por
+  comas.
+- RF-81: EL SISTEMA neutralizará en la exportación toda celda que una hoja de cálculo interpretaría
+  como fórmula.
+- RF-82: EL SISTEMA registrará cada exportación con quién la hizo, cuándo y cuántas filas salieron.
 
 ## Requisitos no funcionales
 
@@ -212,6 +259,18 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
 - Cola pendiente con la aplicación abierta en una pestaña y no instalada.
 - Reloj del dispositivo desfasado respecto al del servidor.
 - Cola que supera el presupuesto de almacenamiento local.
+- Dos lotes distintos con exactamente el mismo título.
+- Corrección sobre un campo de un lote ya cerrado.
+- Original que ya no está al abrir un registro antiguo.
+- Identificador buscado con espacios o en minúsculas.
+- Lote vacío que se intenta cerrar o exportar.
+- El mismo fichero subido por dos organizaciones distintas.
+- Fichero que supera el límite del almacén.
+- Enlace temporal ya caducado.
+- Operario que intenta validar o cerrar.
+- Supresión de un registro ya suprimido.
+- Valor extraído que empieza por `=` y acaba en una exportación.
+- Estimación de coste sin tarifa declarada por el motor.
 
 ## Impacto sobre terceros (control C4)
 
@@ -227,6 +286,8 @@ eligieron estar aquí.
 | Un alta que debió ser coincidencia parte en dos el historial de una persona o empresa | RF-28, RF-29, RF-30: candidatos a la vista y ninguna alta sin confirmación |
 | Una tabla ajena alterada por la herramienta rompe algo que ella no conoce | RF-31: no emite ninguna sentencia sobre lo preexistente |
 | Un código sustituido desvía un pago: no cobra **el proveedor legítimo**, que no participó en nada | RF-47, RF-48, RF-49: no se abre la dirección, y el cotejo con el reconocimiento delata el cambio |
+| La evidencia original se pierde porque el respaldo de la base no la incluía | RF-59, RF-60, RF-63: se guarda aparte, con retención declarada y línea propia en el inventario |
+| Un CSV con datos de terceros sale del sistema y deja de estar protegido | RF-82: queda registrado quién exportó qué y cuándo |
 | Un evento de trazabilidad perdido deja sin prueba a quien dependía de ella | RF-42, RF-50, RF-51, RF-53: identidad por hecho, cola local y aviso de riesgo de borrado |
 
 **Límite de C5**: si los documentos llevan datos personales de terceros, sacarlos del perímetro
@@ -272,6 +333,16 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
   el emparejamiento erróneo que eso produciría.
 - **DoF-13**: varias lecturas encoladas y enviadas en el mismo instante conservan instantes
   distintos y no se deduplican entre sí.
+- **DoF-14**: un lote cerrado rechaza altas, y dos lotes pueden compartir título.
+- **DoF-15**: la ruta de un original lleva la organización como primer segmento, y el mismo fichero
+  de dos organizaciones distintas produce rutas distintas.
+- **DoF-16**: una corrección conserva la versión anterior y exige motivo.
+- **DoF-17**: el índice y la resolución contra catálogo normalizan un identificador igual, con
+  prueba que ata ambos caminos.
+- **DoF-18**: un operario no puede validar, cerrar ni suprimir, comprobado sobre la matriz entera.
+- **DoF-19**: una supresión deja constancia y se distingue de un registro inexistente.
+- **DoF-20**: la estimación sin tarifa devuelve desconocido y no cero; el CSV neutraliza una celda
+  que empieza por `=` y escribe el BOM.
 - **DoF-10**: las pruebas corren sin base de datos, sobre los tres descriptores de ejemplo, y el
   vacío recorre el mismo código que el poblado.
 
@@ -284,6 +355,10 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
 - Cómo se identifica "el mismo tipo de documento" para reusar una plantilla: ¿lo elige el
   revisor, o se infiere? Afecta a RF-16.
 - Si la propuesta de modelo debe emitirse como migración con marca de tiempo o como SQL suelto.
+- El plazo de retención por defecto de los originales: depende del tipo de documento y de la
+  jurisdicción, así que se declara por proyecto y no se fija aquí.
+- Progreso y reanudación de un lote que tarda horas: importante en operación, pero no condiciona el
+  modelo de datos.
 - Los parámetros de la ráfaga del escáner: dependen del teclado y del lector concretos, y la vía
   buena mientras tanto es configurar prefijo y sufijo en el aparato.
 - Qué se encola sin conexión además de los escaneos, y qué se le dice al usuario cuando el
