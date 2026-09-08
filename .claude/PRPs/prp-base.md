@@ -24,12 +24,17 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 
 ```
 1. Humano: "Necesito [feature]"
-2. IA: Investiga contexto y viabilidad
-3. IA: Genera PRP-XXX-nombre.md usando este template
-4. Humano: Revisa y aprueba
-5. IA: Ejecuta Blueprint fase por fase (skill `/bucle-agentico`)
-6. IA: Documenta aprendizajes en el PRP (Self-Annealing)
+2. Si el QUÉ no está acordado: SPEC-GENERATOR → `.claude/specs/NNN-<nombre>/spec.md`
+3. IA: Investiga contexto y viabilidad
+4. IA: Genera PRP-XXX-nombre.md usando este template (si hay spec, la referencia; no re-litiga el QUÉ)
+5. Humano: Revisa y aprueba
+6. IA: Ejecuta Blueprint fase por fase (skill `/bucle-agentico`)
+7. IA: Documenta aprendizajes en el PRP (Self-Annealing)
 ```
+
+> **Spec vs PRP**: la spec cierra el QUÉ (requisitos EARS, fuera de alcance, impacto C4);
+> el PRP cierra el CÓMO (contexto, modelo de datos, fases, gobernanza). Sin saber QUÉ
+> construir → spec primero. Con el QUÉ acordado y solo el plan pendiente → PRP directo.
 
 ---
 
@@ -48,6 +53,8 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 > **Estado**: PENDIENTE
 > **Fecha**: YYYY-MM-DD
 > **Proyecto**: [nombre]
+> **Spec**: `.claude/specs/NNN-<nombre>/spec.md` si existe — cierra el QUÉ y el fuera de
+> alcance; este PRP la referencia, no la reescribe. Sin spec, el QUÉ se acuerda aquí.
 > **CDC aplicable** (¿este PRP cambia comportamiento de agentes: modelo, skill, prompt
 > o plantilla?): **sí / no** → si es sí, aplica el control C1 de
 > `.claude/gobernanza/GOBERNANZA.md` §2 y deja entrada en `BITACORA-CDC.md`
@@ -68,6 +75,10 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 
 ## Qué
 
+> Si hay spec (`.claude/specs/NNN-<nombre>/spec.md`), esta sección la resume y enlaza:
+> los criterios salen de sus requisitos EARS y el "Fuera de alcance" es el de la spec.
+> Sin spec, el QUÉ se cierra aquí.
+
 ### Criterios de Éxito
 - [ ] [Criterio medible 1]
 - [ ] [Criterio medible 2]
@@ -81,6 +92,7 @@ Un PRP es el **blueprint de una pieza de la fábrica**. Define QUÉ construir an
 ## Contexto
 
 ### Referencias
+- `.claude/specs/NNN-<nombre>/spec.md` - Spec acordada (el QUÉ, el POR QUÉ y el fuera de alcance)
 - `src/features/[existente]/` - Patrón a seguir
 - [URL de docs] - API reference
 
