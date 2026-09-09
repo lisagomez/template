@@ -573,7 +573,10 @@ bastaría.
 dónde vive cada una de las seis capacidades pedidas. Cierra también quién decide qué: el humano
 decide si se publica, con qué versión se pinea, y si el ERD propuesto se aplica.
 
-**No cierra, y hay que decirlo**:
+**No cierra, y hay que decirlo.** Todo lo de esta lista **sigue abierto hoy**, después de
+implementar la spec. Tres de ellas son exactamente las que mantienen bloqueadas TAR-17 (umbral de
+confianza), TAR-25 (umbral de similitud) y TAR-34 (parámetros de la ráfaga): se **miden**, no se
+eligen, y este entorno no tiene corpus, catálogos ni lector físico con que hacerlo.
 
 - **Qué motor gana.** Sigue siendo desconocido hasta correr el piloto. La herramienta está
   diseñada para no tener que saberlo todavía — ese es el motivo del puerto.
@@ -596,9 +599,37 @@ decide si se publica, con qué versión se pinea, y si el ERD propuesto se aplic
   importante, pero no condiciona el modelo de datos, así que se puede añadir sin migrar nada.
 - **El plazo de retención por defecto**: depende del tipo de documento y de la jurisdicción. No se
   fija aquí; se declara por proyecto.
-- **El núcleo está construido; la herramienta no.** Existen los módulos puros con **119 pruebas**.
-  No existen los entry points de React, ni la cámara, ni los adaptadores de OCR, de persistencia y
-  de storage.
+### Lo que este documento decía y ya no es cierto
+
+> Hasta el 2026-09-09 esta sección terminaba diciendo: *«El núcleo está construido; la herramienta
+> no. Existen los módulos puros con 119 pruebas. No existen los entry points de React, ni la
+> cámara, ni los adaptadores de OCR, de persistencia y de storage.»*
+>
+> **Ya no.** Se implementó la spec 007: **45 de 48 tareas, 353 pruebas** en verde sin red, sin base
+> de datos y sin navegador, y **ocho entry points** que se instalan e importan en un proyecto
+> limpio. Existen la capa 0, los dos motores de OCR, la propuesta de modelo E-R con su barrera
+> anti-`ALTER`, la persistencia con RLS por organización, el bucket privado, la cola en IndexedDB,
+> la ingesta con arrastre de carpetas, la vista de revisión, el mapeo campo→columna, las pantallas
+> de lotes, coste y supresión, la cámara, el escáner y el lienzo de modelado.
+>
+> Se deja el párrafo tachado en vez de borrarlo porque un SDD que se reescribe para parecer que
+> siempre tuvo razón deja de servir para lo que sirve un SDD: se lee para saber qué se pensaba
+> **antes** de construir. El detalle tarea a tarea está en
+> [`.claude/specs/007-extractor-documental/tareas.md`](../.claude/specs/007-extractor-documental/tareas.md).
+
+**Tres cosas que se aprendieron construyéndolo y que este documento no preveía:**
+
+1. **La propuesta de alta llegaba sin parecidos al lado.** `resuelveValor` filtra los candidatos
+   por umbral, así que cuando se propone un alta —que es precisamente cuando nadie alcanzó el
+   umbral— la lista venía vacía **por definición**. §5.1 daba por hecho que los parecidos estarían
+   ahí; no lo estaban. Son dos preguntas distintas —*«¿es esta fila?»* y *«¿te suena de algo?»*— y
+   el segundo no puede filtrarse por el umbral del primero.
+2. **La capa 0 no puede sustituir al motor cuando se piden anotaciones.** Da texto exacto, no
+   campos con confianza y región. Devolver campos vacíos «porque había texto» daría por extraída
+   una factura sin un solo dato.
+3. **Trocear mal no da error.** Parte el documento por donde no toca y **pierde la correspondencia
+   de página en silencio**: la página 9 vuelve como página 1 y la cita queda apuntando al sitio
+   equivocado. El troceo por páginas necesita remapear los índices al global, región incluida.
 
 ---
 

@@ -32,6 +32,8 @@ lo bastante como para sacarlo de ahi.
 - 25 Skills de Claude Code (V4 Skills 2.0)
 - Specs con requisitos en notacion EARS + `docs/constitution.md`
 - `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
+- **Extractor documental** listo para instalar (`tools/extractor-documental/`): OCR, codigos de
+  barras, revision humana y mapeo contra los catalogos que tu proyecto ya tiene
 - Playwright CLI para QA automatizado
 - 11 AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -281,9 +283,19 @@ hooks que nadie encuentra.
 comprueba que `'use client'` sobrevive al build, y **instala el tarball en un proyecto
 limpio para importarlo de verdad**. Ahi "es compatible" deja de ser una opinion.
 
-En el arbol viven dos ejemplos: `tools/ejemplo-herramienta/` (el esqueleto minimo) y
-`tools/voz/` (`@tu-scope/voz` — VAD y diarizacion locales, nucleo en TypeScript puro con los
-modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node).
+En el arbol viven tres:
+
+| Herramienta | Que es |
+|---|---|
+| `tools/ejemplo-herramienta/` | El esqueleto minimo, para copiar |
+| `tools/voz/` | `@tu-scope/voz` — VAD y diarizacion locales. Modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node |
+| `tools/extractor-documental/` | `@tu-scope/extractor-documental` — extraccion de datos de documentos con revision humana. **353 pruebas**, ocho entry points, y el motor de OCR y el almacen **inyectados**: si el documento sale del perimetro lo decide el proyecto, no la herramienta |
+
+El extractor es el ejemplo grande de que la regla aguanta: su nucleo hace OCR, codigos de barras,
+reconciliacion contra catalogos y propuesta de modelo E-R **con cero dependencias**. Lo que
+necesita React, Supabase o un proveedor vive en subpaths aparte, y `npm run empaqueta` importa
+**los ocho** en un proyecto limpio para comprobarlo. Su historia esta en
+`docs/SDD-extractor-documental.md` y `.claude/specs/007-extractor-documental/`.
 
 ## Gobernanza
 
