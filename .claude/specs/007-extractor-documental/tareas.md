@@ -409,26 +409,28 @@
       que traiga la herramienta que sube los ficheros.
       → hallazgo §2.15 del SDD
 
+- [x] **TAR-16 · Cerrar el cableado y los gates.**
+      → `npm run validate` en **verde** en cada aterrizaje, con `verifica:specs` incluyendo esta
+      spec (DoF-6). El pineado de modelo tiene su entrada en `BITACORA-CDC.md` (DoF-7): los
+      adaptadores **reciben** el identificador y la herramienta pone la barrera —
+      `exigeModeloPineado()` rechaza cinco familias de alias **al construir**, con prueba— y queda
+      declarado que en este repo **no hay ningún modelo en producción** que pinear.
+      Y la herramienta está enrutada desde el decision tree de `AGENTS.md`, con `GEMINI.md`
+      **regenerado** (a mano el verificador lo rechaza). Fue un **CDC estándar** con su aprobación
+      explícita y su entrada en bitácora — presentado, **descartado una primera vez**, y aprobado
+      después de ver el diff, las dos capas de regresión y el coste medido: el suelo por sesión
+      sube de 8908 a 9128 tokens.
+      La entrada dice, además de la ruta, que **los umbrales no vienen puestos y se miden**. Eso
+      está ahí y no solo en el README por el aprendizaje del 2026-08-23: *un control escrito solo
+      en un documento referenciado no dispara*.
+      → cubre DoF-6 · DoF-7
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
       default defendible sin medirlo.
 
 ## Abiertas
-
-- [ ] **TAR-16 · Cerrar el cableado y los gates.** *(2 de 3 · la tercera espera aprobación)*
-      **Hecho**: `npm run validate` en **verde** en cada aterrizaje (DoF-6), con `verifica:specs`
-      incluyendo esta spec. Y el pineado de modelo tiene su entrada en `BITACORA-CDC.md` (DoF-7):
-      los adaptadores **reciben** el identificador, y lo que la herramienta aporta es la barrera —
-      `exigeModeloPineado()` rechaza cinco familias de alias autoactualizables **al construir**, no
-      al usar, con prueba. En este repo no hay ningún modelo en producción que pinear, y eso queda
-      declarado en vez de inventar una fila.
-      **Falta**: enrutar la herramienta desde el decision tree de `AGENTS.md`. Es un **CDC estándar
-      (C1)** y está **pendiente de aprobación humana explícita**. El trabajo está hecho y medido —
-      diff de 10 líneas, capa A 105/105, capa B 22/22, `validate` EXIT 0, contexto en presupuesto
-      (total 76 % de 12000) — pero la aprobación no se sustituye por un «continúa»: sería
-      exactamente el fallo que C1 existe para cazar.
-      → cubre DoF-6 · DoF-7
 
 ## Bloqueadas por medición
 
