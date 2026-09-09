@@ -605,7 +605,7 @@ eligen, y este entorno no tiene corpus, catálogos ni lector físico con que hac
 > no. Existen los módulos puros con 119 pruebas. No existen los entry points de React, ni la
 > cámara, ni los adaptadores de OCR, de persistencia y de storage.»*
 >
-> **Ya no.** Se implementó la spec 007: **45 de 48 tareas, 353 pruebas** en verde sin red, sin base
+> **Ya no.** Se implementó la spec 007: **45 de 48 tareas, 372 pruebas** en verde sin red, sin base
 > de datos y sin navegador, y **ocho entry points** que se instalan e importan en un proyecto
 > limpio. Existen la capa 0, los dos motores de OCR, la propuesta de modelo E-R con su barrera
 > anti-`ALTER`, la persistencia con RLS por organización, el bucket privado, la cola en IndexedDB,

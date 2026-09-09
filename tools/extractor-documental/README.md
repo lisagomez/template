@@ -3,7 +3,7 @@
 Carga masiva de documentos (PDF, imagenes, carpetas), revision humana de lo extraido, y mapeo
 contra los catalogos que el proyecto **ya tiene**.
 
-> **Estado: 45 de 48 tareas, 353 pruebas en verde** sin red, sin base de datos y sin navegador.
+> **Estado: 45 de 48 tareas, 372 pruebas en verde** sin red, sin base de datos y sin navegador.
 > Los ocho entry points se instalan e importan en un proyecto limpio (`npm run empaqueta`).
 > **Lo que falta y por que**, en `.claude/specs/007-extractor-documental/tareas.md`: tres umbrales
 > que se MIDEN y no se inventan (TAR-17, TAR-25, TAR-34) y el enrutado desde `AGENTS.md`, que es
