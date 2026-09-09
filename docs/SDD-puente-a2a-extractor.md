@@ -28,7 +28,7 @@ Es público. Sus cinco agentes (`buzon-a2a`, `ventas-a2a`, `grafo-a2a`, `transcr
 
 | Ruta | Qué es |
 |---|---|
-| `/.well-known/agent-card.json` | la Agent Card |
+| `.well-known/agent-card.json` | la Agent Card — **la ruta la exporta el SDK**, ver §3.3 |
 | `/` | JSON-RPC A2A |
 | `/health` | liveness; *«no reporta nada del interior»* |
 
@@ -100,6 +100,40 @@ Consecuencias concretas:
 - **RF-11 (nunca `service_role`) se cumple por construcción**: el adaptador recibe el cliente, no lo
   fabrica.
 
+### 3.3 Lo que la introspección del SDK real corrigió — y por qué RF-4 existe
+
+`@a2a-js/sdk@1.1.0`, instalado e introspeccionado el 2026-09-09. RF-4 exige validar contra **los
+tipos del SDK instalado, no contra una lectura del proto**, y la primera corrida de esa regla ya
+cazó dos errores **de este mismo documento**:
+
+| Lo que decía este SDD | Lo que exporta el SDK |
+|---|---|
+| `/.well-known/agent-card.json` | `AGENT_CARD_PATH = ".well-known/agent-card.json"` — **sin barra inicial** |
+| Task en estado `failed` (RF-7) | `TaskState.TASK_STATE_FAILED` |
+
+Y una constante que no había mencionado y decide la interoperabilidad:
+`A2A_CONTENT_TYPE = "application/a2a+json"`. Responder `application/json` no interopera con nada,
+y **compila igual**.
+
+Constantes verificadas, que el bridge debe **importar y no reescribir**:
+
+```
+AGENT_CARD_PATH      ".well-known/agent-card.json"
+A2A_PROTOCOL_VERSION "1.0"
+A2A_CONTENT_TYPE     "application/a2a+json"
+A2A_VERSION_HEADER   "A2A-Version"
+```
+
+**La pieza que hace viable el punto de integración** (TAR-4): `@a2a-js/sdk/server` exporta
+`JsonRpcTransportHandler`, `DefaultRequestHandler` e `InMemoryTaskStore` — es decir, se puede
+atender JSON-RPC **sin Express**. Hay un `./server/express`, y no se usa: los Route Handlers de Next
+bastan, y meter Express en el template sería arrastrar un servidor dentro de otro.
+
+Dependencias que arrastra el SDK: **una**, `jose` — para firmar y verificar Agent Cards
+(`generateAgentCardSignature`, `verifyAgentCardSignature`).
+
+---
+
 ---
 
 ## 4. La Agent Card que expondría
@@ -157,8 +191,9 @@ Un endpoint A2A es **la misma clase**. Cambia el formato, no el riesgo.
 ```ts
 // Cuando exista el bridge (spec 005, TAR-9), esto va con él.
 test('la superficie A2A es EXACTAMENTE card, rpc y health', () => {
+  // AGENT_CARD_PATH viene del SDK: no se reescribe a mano, que es como se cuela la barra de mas.
   assert.deepEqual(rutasDelBridge().sort(), [
-    '/.well-known/agent-card.json', '/a2a', '/a2a/health',
+    `/${AGENT_CARD_PATH}`, '/a2a', '/a2a/health',
   ].sort())
 })
 test('/health no reporta nada del interior', async () => {

@@ -3172,3 +3172,46 @@ aprovechaban. Ya no depende de la costumbre.
 - **Regresión**: la de la entrada anterior, sobre el mismo árbol.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — implementación de la spec 007
   autorizada en sesión del 2026-09-09
+
+---
+
+### 2026-09-09 — skill nueva `/add-a2a` + enrutado en el decision tree — radio: sistema
+- **Cambio**: `.claude/skills/add-a2a/SKILL.md` (skill 26), su entrada en el decision tree de
+  `AGENTS.md`, `GEMINI.md` **regenerado**, cuatro contratos en `contratos.json`, y las cifras de
+  «25 skills» corregidas a 26 en cuatro documentos.
+- **Motivo**: spec 005, TAR-6. El template sabía consumir capacidades externas y no sabía
+  ofrecerse como una. La skill entrevista (RF-1/RF-2: sin las cuatro preguntas **no genera nada**)
+  y monta Agent Card, bridge JSON-RPC y health, **sin publicar la ruta**.
+- **Lo que la introspección del SDK real corrigió** (RF-4, `@a2a-js/sdk@1.1.0` instalado e
+  introspeccionado, no leído del proto). Cazó **dos errores del SDD que yo mismo había escrito**:
+  `AGENT_CARD_PATH` es `".well-known/agent-card.json"` **sin barra inicial** —concatenarla a ciegas
+  da `//well-known/…`— y el estado es `TASK_STATE_FAILED`, no `failed`. Más una constante que no
+  había mencionado: `A2A_CONTENT_TYPE = "application/a2a+json"`, no `application/json`. **Las tres
+  compilan igual**, y por eso RF-4 existe: el compilador no sabe nada del protocolo, valida tu
+  lectura de él.
+  Y una decisión de arquitectura que salió de ahí: `@a2a-js/sdk/server` exporta
+  `JsonRpcTransportHandler`, así que los Route Handlers de Next bastan y **no se mete Express**
+  (que sería un servidor dentro de otro).
+- **Lo que se portó de `hermes-os-a2a`**: la superficie de tres rutas, el health mudo
+  (`{"status":"ok"}` exacto), la frontera *«ningún componente que ejecuta un modelo tiene
+  credenciales»*, y sobre todo **la forma de la prueba de opacidad**: enumera las rutas y exige
+  igualdad, en vez de probar una lista de rutas internas. Una lista solo caza lo que alguien pensó
+  en ponerle; enumerar caza la ruta que nadie previó.
+- **Coste declarado**: el suelo por sesión sube de 9128 a **9455 tokens** (76 % → 79 % de 12000);
+  descripciones de skills al 50 %, suma de skills al 46 %. E invalida el caché de prefijo una vez.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo ☑
+  (`@a2a-js/sdk@1.1.0` sin rangos, y un contrato `prohibido` que caza un `^` o `~` si vuelve)
+- **Regresión**: `npm run regresion` — C2 capa A **113/113 — promovible** (105 antes: los 8 nuevos
+  son los del skill). `npm run regresion -- --trampa` — capa B **22/22**.
+  `npm run validate` **EXIT 0** · `verify:gobernanza` **152/152** · `verifica:specs` **64/64**.
+  **Control negativo, hecho y obligatorio**: quitando «gate humano» del `SKILL.md` la regresión da
+  **rojo nombrando el contrato** (exit 1); restaurándolo vuelve a 113/113. Un contrato que no se ha
+  visto fallar no está probado, está escrito.
+- **Lo que este CDC NO autoriza, y hay que decirlo**: exponer nada. La skill deja el endpoint
+  montado y **sin publicar**. Publicarlo sigue gateado por RF-12, y por dos huecos que **no son
+  teóricos**: (1) no hay cuota ni límite de tasa por partner, así que un consumidor puede vaciar el
+  presupuesto del motor; (2) la **AISIA (C4) sobre terceros está sin hacer** — si un partner manda
+  el documento de un cuarto, hay datos de alguien que no firmó nada, y `AGENTS.md` es explícito con
+  esa clase: ninguna firma la autoriza, se rediseña o no se hace.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aprueba CDC»)
+  en sesión del 2026-09-09.

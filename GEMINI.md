@@ -51,6 +51,13 @@ Usuario dice algo
     ├── "Necesito PWA / notificaciones push / instalar en telefono / mobile"
     |       → Ejecutar skill ADD-MOBILE (PWA + push notifications + iOS compatible)
     |
+    ├── "Expon esto como agente" / "agent to agent" / "A2A" / "agent card"
+    |   "que otro agente llame a mi app" / "ofrecer una capacidad"
+    |       → Ejecutar skill ADD-A2A (Agent Card + JSON-RPC + Tasks, SDK pineado)
+    |         A2A no es MCP: MCP da herramientas a TU agente, A2A te ofrece a OTRO.
+    |         Exponer a un partner o a internet es GATE HUMANO, y va con C3 + C4:
+    |         es la misma clase de superficie que un canal de chat externo
+    |
     ├── "Necesito una landing page" / "scroll animation" / "website 3d"
     |       → Ejecutar skill WEBSITE-3D (scroll-stop cinematico + copy de alta conversion)
     |
