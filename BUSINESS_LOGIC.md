@@ -48,8 +48,16 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 | Activo del proyecto | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|
 | Datos en Supabase | [no / con trabajo] | [Crítica] | PITR + dump lógico |
+| **Ficheros en Storage** (buckets) | **No — son la evidencia** | **Crítica** | **Sincronización propia del bucket. `pg_dump` NO los incluye** |
 | `.env.production` | No — contiene secretos | Crítica | Cifrado con `age`, fuera del servidor |
 | [activo propio] | | | |
+
+> **Los ficheros de Storage van en línea propia y no colgando de «la base de datos».** No es
+> pedantería de inventario: los bytes viven **fuera de Postgres**, así que un `pg_dump` en verde
+> deja fuera todas las evidencias — y eso es **peor** que no tenerlas respaldadas, porque parece
+> que están. Si este proyecto guarda originales (facturas escaneadas, fotos, adjuntos), montar esa
+> segunda vía es **operación del proyecto**, no algo que traiga la herramienta que los sube.
+> Borra esta fila solo si de verdad no usas Storage.
 
 **RPO / RTO:** [desconocidos hasta cerrar GATE 3 — no se declaran antes de medirlos]
 
