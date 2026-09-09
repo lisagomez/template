@@ -21,10 +21,19 @@
     "./motores/mistral": {
       "types": "./dist/motores/mistral.d.ts",
       "import": "./dist/motores/mistral.js"
+    },
+    "./almacenes/supabase": {
+      "types": "./dist/almacenes/supabase.d.ts",
+      "import": "./dist/almacenes/supabase.js"
+    },
+    "./almacenes/supabase-storage": {
+      "types": "./dist/almacenes/supabase-storage.d.ts",
+      "import": "./dist/almacenes/supabase-storage.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "migraciones"
   ],
   "sideEffects": false,
   "engines": {

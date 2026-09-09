@@ -2,10 +2,11 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**206 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**231 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
-> limpio e importa sus cuatro subpaths. Siguen abiertos la UI, la cámara y la persistencia.
+> limpio e importa sus **seis** subpaths. La persistencia (esquema, adaptadores y bucket privado)
+> también está cerrada. Siguen abiertos la UI, la cámara y el lienzo de modelado.
 
 ## Cerradas
 
@@ -191,6 +192,44 @@
       probar» en vez de pasar por probado.
       → cubre DoF-2 · RF-23
 
+- [x] **TAR-45 · Migraciones de organizaciones, lotes, versiones, índice y lápidas.**
+      → `migraciones/001-extractor-documental.sql`, que **viaja en el paquete**: un adaptador sin
+      su esquema no sirve de nada. Ocho tablas, RLS activa en todas —verificado recorriendo el
+      SQL, no de palabra— y aislamiento **por pertenencia a la organización**, no por `owner_id`
+      suelto: un extractor lo usa un equipo, y quien sube no es quien revisa (§2.16). Aislar por
+      usuario dejaría al revisor sin ver lo que subió el operario, que es justo el flujo.
+      Dos detalles que una prueba vigila porque son fáciles de perder: `versiones_de_campo` y
+      `lapidas` **no tienen policy de UPDATE ni de DELETE** —sin policy permisiva RLS deniega, así
+      que append-only deja de ser una costumbre y pasa a ser imposible de violar—, y la lápida
+      **no tiene clave foránea al documento**, porque un `cascade` se llevaría por delante justo la
+      constancia de que existió.
+      Y el espejo: una prueba extrae los `CHECK` de la migración y los compara con las uniones de
+      `tipos.ts` y `roles.ts`. **Cazó un error real en su primera corrida** — la migración había
+      inventado cuatro roles (`capturista`/`administrador`/`lector`) donde el núcleo declara tres.
+      Divergir ahí significa que la base acepta un rol que el código de permisos no sabe evaluar.
+      → cubre RF-71 · control C7
+
+- [x] **TAR-14 · Adaptador de persistencia.**
+      → `src/almacenes/supabase.ts` — **no importa `@supabase/supabase-js`**: el cliente entra
+      inyectado con la forma mínima declarada en el propio archivo. Además de mantener el paquete
+      sin dependencias, eso es lo que hace cumplible C7 por construcción: **el adaptador no puede
+      fabricarse un cliente con `service_role` aunque quisiera**, recibe el que le den. Una prueba
+      verifica que ni la migración ni los adaptadores lo *usan*, y que ninguna policy se abre a un
+      rol que no sea `authenticated`.
+      Lo leído de la base se valida antes de devolverlo: la columna es `jsonb`, así que la base
+      acepta cualquier forma, y lo que hay dentro lo escribió una versión anterior de la
+      herramienta.
+      → cubre RF-21 · control C7
+
+- [x] **TAR-43 · Adaptador de Supabase Storage.**
+      → `src/almacenes/supabase-storage.ts` — bucket **privado** (verificado sobre el SQL) y
+      lectura por URL firmada. La caducidad se **acota** en vez de obedecerse: quien pide treinta
+      días no ha pensado en que una URL firmada circula por correo y sobrevive al permiso que la
+      justificó. La policy del bucket se acota por el primer segmento de la ruta —de eso depende
+      que la RLS sea expresable— y `borra()` solo se llama explícitamente: vencer la retención no
+      borra nada por su cuenta.
+      → cubre RF-60 · control C7
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -213,12 +252,6 @@
       Hecho cuando: la acción de pantalla persiste la disposición completa y la siguiente tanda
       del mismo tipo llega ya con ella aplicada.
       → cubre DoF-4 · RF-15 · RF-16
-
-- [ ] **TAR-14 · Adaptador de persistencia.**
-      Hecho cuando: `./almacenes/supabase` crea sus tablas con RLS activa y policies por
-      `owner_id`, el esquema Zod es espejo exacto de los `CHECK`, y ninguna superficie de usuario
-      usa `service_role`.
-      → cubre RF-21 · control C7
 
 - [ ] **TAR-16 · Cerrar el cableado y los gates.**
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
@@ -258,23 +291,11 @@
       purga cuando hay cola pendiente sin estar instalada.
       → cubre RF-50 · RF-53
 
-- [ ] **TAR-43 · Adaptador de Supabase Storage.**
-      Hecho cuando: `./almacenes/supabase-storage` sube al bucket **privado**, lee por URL firmada
-      con caducidad, y la migración crea las policies sobre `storage.objects` acotadas por
-      `bucket_id` y por pertenencia a la organización. Sin `service_role` en la superficie del
-      usuario.
-      → cubre RF-60 · control C7
-
 - [ ] **TAR-44 · La segunda vía de respaldo del bucket.**
       Hecho cuando: el inventario de `BUSINESS_LOGIC.md` §4 lleva los originales como **línea
       propia**, no colgando de «la base de datos», y queda escrito que `pg_dump` no los incluye.
       Montar la sincronización es operación del proyecto, no código de la herramienta.
       → hallazgo §2.15 del SDD
-
-- [ ] **TAR-45 · Migraciones de organizaciones, lotes, versiones, índice y lápidas.**
-      Hecho cuando: existen con RLS por pertenencia a la organización y el esquema Zod es espejo
-      exacto de cada `CHECK`.
-      → cubre RF-71 · control C7
 
 - [ ] **TAR-46 · Pantalla de lotes: crear, titular, buscar y recuperar.**
       Hecho cuando: se crea un lote con título sugerido editable, y se recupera por título o por un
