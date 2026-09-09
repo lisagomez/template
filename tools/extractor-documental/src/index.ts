@@ -145,3 +145,12 @@ export type {
 
 export { cargaPlantilla, guardaPlantilla, comoPlantilla } from './plantilla-por-defecto.js'
 export type { PlantillaCargada } from './plantilla-por-defecto.js'
+
+export {
+  cer, wer, distanciaDeEdicion, aciertaCampo, precisionDeCampos,
+  correlacionConfianzaError, curvaDeUmbral, curvaDeSimilitud,
+} from './calibracion.js'
+export type {
+  MuestraDeCampo, MuestraDeSimilitud, CorrelacionConfianzaError,
+  PuntoDeLaCurva, PuntoDeSimilitud,
+} from './calibracion.js'

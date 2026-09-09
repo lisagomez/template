@@ -289,7 +289,7 @@ En el arbol viven tres:
 |---|---|
 | `tools/ejemplo-herramienta/` | El esqueleto minimo, para copiar |
 | `tools/voz/` | `@tu-scope/voz` — VAD y diarizacion locales. Modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node |
-| `tools/extractor-documental/` | `@tu-scope/extractor-documental` — extraccion de datos de documentos con revision humana. **353 pruebas**, ocho entry points, y el motor de OCR y el almacen **inyectados**: si el documento sale del perimetro lo decide el proyecto, no la herramienta |
+| `tools/extractor-documental/` | `@tu-scope/extractor-documental` — extraccion de datos de documentos con revision humana. **372 pruebas**, ocho entry points, y el motor de OCR y el almacen **inyectados**: si el documento sale del perimetro lo decide el proyecto, no la herramienta |
 
 El extractor es el ejemplo grande de que la regla aguanta: su nucleo hace OCR, codigos de barras,
 reconciliacion contra catalogos y propuesta de modelo E-R **con cero dependencias**. Lo que

@@ -2,7 +2,7 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**353 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**372 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
 > limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
@@ -433,6 +433,22 @@
 ## Abiertas
 
 ## Bloqueadas por medición
+
+> **La regla de medir ya existe; lo que falta es el corpus.** `src/calibracion.ts` implementa las
+> métricas de `docs/INVESTIGACION-OCR-MISTRAL.md` §8: CER, WER, precisión de campos, la
+> **correlación confianza↔error** —que §8 llama «la medición más valiosa de las cinco»— y las dos
+> curvas de umbral.
+>
+> **Lo que ese módulo deliberadamente NO hace es recomendar un umbral**, y hay una prueba que falla
+> si alguien añade una función que lo haga. Devuelve la tabla del intercambio: cuántos errores se
+> cuelan y cuánta revisión se gasta de más en cada corte. Elegir exige saber cuánto cuesta cada
+> columna en **este** negocio —una factura mal capturada no cuesta lo mismo en una gestoría que en
+> una tienda— y eso no está en los datos. Un «sugerido» fingiría que sí, y sería el número
+> inventado que estas tres tareas existen para impedir.
+>
+> Hay una salida que el módulo sí puede dar y conviene saber leer: si la correlación sale cerca de
+> cero, **ningún umbral va a funcionar** y el problema no es dónde cortar — es el motor. Esa
+> conclusión no se puede sacar a ojo.
 
 - [ ] **TAR-17 · Fijar el umbral de confianza.**
       Bloqueada hasta correr el piloto de `docs/INVESTIGACION-OCR-MISTRAL.md` §8: el umbral
