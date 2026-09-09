@@ -1,0 +1,4 @@
+# El corpus son DOCUMENTOS REALES de un negocio: nombres de proveedores, importes, folios.
+# Aqui el motivo es mas fuerte que en tools/voz, donde era el tamaño — un corpus commiteado
+# es una fuga con historial de git, y el historial no se borra: se reescribe, mal y tarde.
+corpus/
