@@ -51,13 +51,28 @@
       Hecho cuando: vive en su propio espacio de rutas y no importa código de features de
       negocio salvo la interfaz declarada. RF: MISION-2, "aislar no fundir".
 
-- [ ] **TAR-10 · Fail-safe probado apagando la capacidad.**
+- [ ] **TAR-10 · Fail-safe probado apagando la capacidad.** *(con media hecha)*
       Hecho cuando: capacidad caída y entrada corrupta producen `failed` con razón legible.
-      **Un fail-safe probado solo con el camino feliz no es un fail-safe.** RF: MISION-5, DoF-4.
+      **Un fail-safe probado solo con el camino feliz no es un fail-safe.**
+      **La mitad ya está**: los adaptadores del extractor no vuelcan ni la clave ni el cuerpo de la
+      respuesta en un mensaje de error, y hay pruebas que lo exigen. Falta la otra mitad — que el
+      bridge traduzca eso a una Task `failed` sin añadir un stack trace por el camino.
+      RF: MISION-5, DoF-4.
 
-- [ ] **TAR-11 · Opacidad demostrada.**
+- [ ] **TAR-11 · Opacidad demostrada.** *(abaratada el 2026-09-09)*
       Hecho cuando: se intenta llegar desde la superficie A2A a una ruta interna, stack
-      trace o nombre de tabla, y se evidencia que no se filtra. RF: MISION-4, DoF-5.
+      trace o nombre de tabla, y se evidencia que no se filtra.
+      **Se porta la prueba de Hermes, no se inventa una.** Y su forma importa: la suya **enumera las
+      rutas de la app y exige igualdad** con el conjunto de tres, en vez de probar una lista de
+      rutas internas. Una lista solo caza lo que alguien pensó en poner en ella; enumerar caza **la
+      ruta que nadie previó**, que es la que se filtra de verdad. Más una tercera que fija que
+      `/health` devuelve exactamente `{"status":"ok"}`: un health que reporta versiones o estado de
+      base de datos es reconocimiento gratis.
+      Se abarata porque la capacidad ofrecida **no tiene interior que filtrar**: el extractor no
+      conoce rutas, ni nombres de tabla, ni el motor que lo mueve — se lo dan.
+      **La prueba se escribe en el MISMO PR que el bridge (TAR-9), no antes**: un verificador sin
+      nada que verificar es código que parece capacidad y nunca ha corrido contra lo real.
+      El código listo para pegar está en `docs/SDD-puente-a2a-extractor.md` §6. RF: MISION-4, DoF-5.
 
 - [ ] **TAR-12 · Auth mínima, con lo que falta declarado residual.**
       Hecho cuando: API key o bearer funciona y OAuth2/OIDC/mTLS + multi-partner quedan
@@ -65,9 +80,15 @@
 
 ## Fase 4 — Cerrar
 
-- [ ] **TAR-13 · Prueba end-to-end con capacidad de juguete.**
-      Hecho cuando: corre en app descartable, nunca con datos de cliente, y su salida queda
-      pegada. RF: DoF-4, COMANDO DE VALIDACION.
+- [ ] **TAR-13 · Prueba end-to-end con una capacidad REAL.** *(cambiada el 2026-09-09)*
+      **Ya no hace falta inventar una capacidad de juguete**: `tools/extractor-documental/` es una
+      capacidad real, con 372 pruebas, y —lo que decide— **su núcleo no tiene credenciales**: el
+      motor de OCR y el almacén se inyectan. Eso, que se hizo para que el paquete fuera instalable,
+      resulta ser exactamente la frontera que Hermes exige de un componente que ejecuta un modelo:
+      *«ningún componente que ejecuta un modelo tiene credenciales»*.
+      Hecho cuando: el bridge expone `extraccion-documental`, corre contra un documento de prueba
+      **propio, nunca de cliente**, y su salida queda pegada. Diseño: `docs/SDD-puente-a2a-extractor.md`.
+      RF: DoF-4, COMANDO DE VALIDACION.
 
 - [ ] **TAR-14 · Control negativo del contrato.**
       Hecho cuando: se rompe una de las seis garantías → `regresion` en rojo; restaurar →
