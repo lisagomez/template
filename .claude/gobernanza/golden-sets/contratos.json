@@ -19,6 +19,12 @@
     "supabase": [
       { "patron": "RLS|[Rr]ow [Ll]evel [Ss]ecurity", "porque": "ninguna tabla se crea sin RLS" }
     ],
+    "add-a2a": [
+      { "patron": "gate humano|GATE HUMANO", "porque": "exponer un endpoint A2A sin gate es justo lo que RF-12 existe para impedir" },
+      { "patron": "service_role", "porque": "una capacidad A2A que toca Supabase sin nombrar C7 acaba usando la llave que anula RLS" },
+      { "patron": "AGENT_CARD_PATH", "porque": "la ruta la exporta el SDK; reescribirla a mano cuela la barra de mas, y compila igual" },
+      { "prohibido": "@a2a-js/sdk@?[\\^~]", "porque": "un rango en el SDK del protocolo es `latest` con otro nombre: RF-10 pide version exacta" }
+    ],
     "add-login": [
       { "patron": "RLS|[Rr]ow [Ll]evel [Ss]ecurity", "porque": "auth sin RLS es auth decorativa" }
     ],

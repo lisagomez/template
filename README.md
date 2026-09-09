@@ -18,7 +18,7 @@ segun cual sea:
 | Comando | `npm run configura:deploy` + `npm run deploy` | `npm run empaqueta <nombre>` |
 
 Lo que **no** cambia entre las dos: la capa de gobernanza, el gate `npm run validate`, las
-specs y los 25 skills. Se hereda entero, construyas lo que construyas.
+specs y los 26 skills. Se hereda entero, construyas lo que construyas.
 
 Un mismo repo puede llevar las dos: la app en `src/`, y en `tools/` lo que ya reusaste
 lo bastante como para sacarlo de ahi.
@@ -29,7 +29,7 @@ lo bastante como para sacarlo de ahi.
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS 3.4 + shadcn/ui **cableado**: tokens en variables CSS, tema claro/oscuro, `cn()` y `Button`
 - Zustand para el estado que comparten los componentes de una feature
-- 25 Skills de Claude Code (V4 Skills 2.0)
+- 26 Skills de Claude Code (V4 Skills 2.0)
 - Specs con requisitos en notacion EARS + `docs/constitution.md`
 - `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
 - **Extractor documental** listo para instalar (`tools/extractor-documental/`): OCR, codigos de
@@ -145,7 +145,7 @@ src/
     └── types/
 ```
 
-## Skills (25 total)
+## Skills (26 total)
 
 Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
@@ -315,7 +315,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 
 ```bash
 npm run verify:gobernanza   # falla si la capa quedo suelta (152 comprobaciones; el propio verificador vigila esta cifra)
-npm run regresion           # C2 capa A: contratos de los 25 skills
+npm run regresion           # C2 capa A: contratos de los 26 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
 
@@ -500,7 +500,7 @@ o lo declara no medido y fuera de produccion.
 
 ```
 .claude/
-├── skills/                    # 25 Skills (V4 Skills 2.0)
+├── skills/                    # 26 Skills (V4 Skills 2.0)
 │   └── ai/references/         # AI Templates (11 bloques)
 ├── gobernanza/                # 7 controles, plantillas, registros y golden-sets
 ├── specs/                     # spec.md (EARS) + plan.md + tareas.md, por feature
