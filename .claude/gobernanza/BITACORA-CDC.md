@@ -3072,3 +3072,24 @@ aprovechaban. Ya no depende de la costumbre.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — decisión tomada en sesión del
   2026-09-09, tras ver el alcance alternativo (tres topes / seis / los diez) y elegir los seis
   que iban al 85 % o más
+
+---
+
+### 2026-09-09 — plantilla `BUSINESS_LOGIC.md`: los ficheros de Storage, línea propia del inventario — radio: plantilla
+- **Cambio**: §4 del inventario de respaldo gana una fila **propia** para los ficheros de Storage
+  —«No — son la evidencia» · Crítica · «Sincronización propia del bucket. `pg_dump` NO los
+  incluye»— más un blockquote que explica por qué no puede colgar de «Datos en Supabase» y que
+  montar esa segunda vía es operación del proyecto, no de la herramienta que sube los ficheros.
+- **Motivo**: TAR-44 de la spec 007, hallazgo §2.15 del SDD. Los bytes de Storage viven **fuera de
+  Postgres**: un respaldo de base en verde deja fuera todas las evidencias, y eso es peor que no
+  tenerlas respaldadas porque **parece que están**. Se hace sobre la plantilla y no sobre un
+  proyecto concreto para que lo herede todo proyecto que la use, en vez de depender de que alguien
+  se acuerde — que es exactamente la diferencia entre un contrato y una costumbre.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo)
+- **Regresión**: `npm run validate` **EXIT 0**. `verify:gobernanza` **152/152** · C2 capa A
+  **105/105** · `audita:secretos` limpio · `mide:contexto` dentro de presupuesto. Las corridas en
+  sesión fría de los casos-trampa no se relanzaron: el cambio no toca ningún control, ningún skill
+  ni ningún caso del corpus — añade una fila y su explicación a una plantilla documental.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — implementación de la spec 007
+  autorizada en sesión del 2026-09-09

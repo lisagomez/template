@@ -397,6 +397,18 @@
       un lienzo SVG puro obligaría a reimplementar el arrastre a mano.
       → cubre RF-32 · RF-33 · RF-34
 
+- [x] **TAR-44 · La segunda vía de respaldo del bucket.**
+      → `BUSINESS_LOGIC.md` §4 — los ficheros de Storage entran como **línea propia** del
+      inventario, no colgando de «Datos en Supabase», con su criticidad y su destino, y con la
+      razón escrita al lado: los bytes viven **fuera de Postgres**, así que un `pg_dump` en verde
+      deja fuera todas las evidencias — y eso es **peor** que no tenerlas respaldadas, porque
+      parece que están.
+      Se hace sobre la **plantilla** del repo y no sobre un proyecto concreto, que es lo que
+      corresponde aquí: así lo hereda todo proyecto que la use, en vez de depender de que alguien
+      se acuerde. Y queda dicho que montar la sincronización es **operación del proyecto**, no algo
+      que traiga la herramienta que sube los ficheros.
+      → hallazgo §2.15 del SDD
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -408,12 +420,6 @@
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
       del adaptador tiene entrada en `BITACORA-CDC.md`, y `npm run validate` está en verde.
       → cubre DoF-6 · DoF-7
-
-- [ ] **TAR-44 · La segunda vía de respaldo del bucket.**
-      Hecho cuando: el inventario de `BUSINESS_LOGIC.md` §4 lleva los originales como **línea
-      propia**, no colgando de «la base de datos», y queda escrito que `pg_dump` no los incluye.
-      Montar la sincronización es operación del proyecto, no código de la herramienta.
-      → hallazgo §2.15 del SDD
 
 ## Bloqueadas por medición
 
