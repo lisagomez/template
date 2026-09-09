@@ -1,0 +1,37 @@
+{
+  "_comentario": "Proyecto real con catalogos ya cargados. Es contra esto que se mapean campos y se resuelven valores.",
+  "version": "1",
+  "tablas": [
+    {
+      "nombre": "proveedores",
+      "esCatalogo": true,
+      "columnas": [
+        { "nombre": "id", "tipo": "uuid", "nulable": false, "esClavePrimaria": true },
+        { "nombre": "razon_social", "tipo": "text", "nulable": false },
+        { "nombre": "rfc", "tipo": "text", "nulable": true }
+      ]
+    },
+    {
+      "nombre": "conceptos",
+      "esCatalogo": true,
+      "columnas": [
+        { "nombre": "id", "tipo": "uuid", "nulable": false, "esClavePrimaria": true },
+        { "nombre": "descripcion", "tipo": "text", "nulable": false }
+      ]
+    },
+    {
+      "nombre": "facturas",
+      "columnas": [
+        { "nombre": "id", "tipo": "uuid", "nulable": false, "esClavePrimaria": true },
+        { "nombre": "folio", "tipo": "text", "nulable": false },
+        { "nombre": "total", "tipo": "numeric", "nulable": false },
+        {
+          "nombre": "proveedor_id",
+          "tipo": "uuid",
+          "nulable": false,
+          "referencia": { "tabla": "proveedores", "columna": "id" }
+        }
+      ]
+    }
+  ]
+}

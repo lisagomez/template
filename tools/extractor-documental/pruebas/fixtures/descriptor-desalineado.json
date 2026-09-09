@@ -1,0 +1,21 @@
+{
+  "_comentario": "Declara una tabla que ya no existe y una columna que se renombro hace dos migraciones. Se compara contra descriptor-con-catalogos.json, que hace de base real. Detectarlo ANTES de proponer un mapeo es el punto: mapear contra una columna borrada produce una propuesta que parece correcta y revienta al aplicarse.",
+  "version": "1",
+  "tablas": [
+    {
+      "nombre": "proveedores",
+      "esCatalogo": true,
+      "columnas": [
+        { "nombre": "id", "tipo": "uuid", "nulable": false, "esClavePrimaria": true },
+        { "nombre": "nombre_comercial", "tipo": "text", "nulable": false },
+        { "nombre": "rfc", "tipo": "varchar", "nulable": true }
+      ]
+    },
+    {
+      "nombre": "almacenes",
+      "columnas": [
+        { "nombre": "id", "tipo": "uuid", "nulable": false, "esClavePrimaria": true }
+      ]
+    }
+  ]
+}

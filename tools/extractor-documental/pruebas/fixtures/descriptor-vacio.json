@@ -1,0 +1,5 @@
+{
+  "_comentario": "Proyecto virgen: ningun catalogo. NO es un caso especial ni una rama aparte — es este valor. Existe para demostrar en pruebas que recorre el MISMO codigo que un descriptor poblado.",
+  "version": "1",
+  "tablas": []
+}

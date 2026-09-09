@@ -164,17 +164,58 @@ if (!SIN_INTEGRACION) {
     writeFileSync(join(temporal, 'package.json'), JSON.stringify({ name: 'consumidor', version: '1.0.0', type: 'module', private: true }, null, 2));
     corre('npm', ['install', '--no-audit', '--no-fund', '--silent', tarball], temporal);
 
-    const principal = Object.keys(pkg.exports).includes('.') ? pkg.name : pkg.name;
+    // Se importa CADA subpath declarado, no solo el principal. Antes solo se probaba `.`, y ese
+    // era justo el hueco que este script dice existir para tapar: un `exports` que apunta a un
+    // fichero inexistente pasa el build, pasa el `npm pack`, y revienta en el proyecto de destino.
+    // Declarar un subpath y no importarlo nunca es prometer una puerta sin girar el pomo.
+    const subpaths = Object.keys(pkg.exports).map((s) => (s === '.' ? pkg.name : `${pkg.name}/${s.replace(/^\.\//, '')}`));
+    const peers = Object.keys(pkg.peerDependencies ?? {});
     const prueba = `
-import * as api from ${JSON.stringify(principal)};
-const exportados = Object.keys(api);
-if (exportados.length === 0) { console.error('el paquete no exporta nada'); process.exit(1); }
-console.log('exporta: ' + exportados.join(', '));
+const subpaths = ${JSON.stringify(subpaths)};
+const peers = ${JSON.stringify(peers)};
+const resultado = [];
+for (const s of subpaths) {
+  try {
+    const api = await import(s);
+    resultado.push({ subpath: s, ok: true, exporta: Object.keys(api) });
+  } catch (e) {
+    const msg = String(e && e.message);
+    // Un peer OPCIONAL ausente es lo esperado en un proyecto limpio: el subpath resuelve, su
+    // peer no esta. Cualquier otro fallo es del contrato del paquete y si es rojo.
+    const peerAusente = peers.find((p) => msg.includes("'" + p + "'") || msg.includes('"' + p + '"')) ?? null;
+    resultado.push({ subpath: s, ok: false, peerAusente, codigo: (e && e.code) || null, mensaje: msg.split('\\n')[0] });
+  }
+}
+console.log(JSON.stringify(resultado));
 `;
     writeFileSync(join(temporal, 'prueba.mjs'), prueba);
     const salida = corre('node', ['prueba.mjs'], temporal);
-    console.log(verde('✓ integracion: instalado e importado en un proyecto limpio'));
-    console.log(gris(`  ${salida.trim()}`));
+    const informe = JSON.parse(salida.trim().split('\n').pop());
+
+    const rotos = informe.filter((r) => !r.ok && r.peerAusente === null);
+    for (const roto of rotos) {
+      problemas.push(
+        `el subpath \`${roto.subpath}\` esta declarado en \`exports\` pero no se puede importar ` +
+          `(${roto.codigo ?? 'sin codigo'}): ${roto.mensaje}`,
+      );
+    }
+    const principal = informe.find((r) => r.subpath === pkg.name);
+    if (principal && principal.ok && principal.exporta.length === 0) {
+      problemas.push('el paquete no exporta nada por su entry principal.');
+    }
+    const conPeer = informe.filter((r) => !r.ok && r.peerAusente !== null);
+    console.log(
+      verde(`✓ integracion: ${informe.length} subpath(s) instalados e importados en un proyecto limpio`),
+    );
+    for (const r of informe.filter((x) => x.ok)) {
+      console.log(gris(`  ${r.subpath} → ${r.exporta.length} export(s)`));
+    }
+    for (const r of conPeer) {
+      // No es un fallo, pero se DICE: un peer opcional ausente significa que ese subpath no se
+      // probo de verdad, y callarlo lo haria pasar por probado.
+      console.log(gris(`  ${r.subpath} → sin probar: falta el peer opcional \`${r.peerAusente}\``));
+    }
+    if (principal && principal.ok) console.log(gris(`  exporta: ${principal.exporta.join(', ')}`));
 
     // Los tipos tienen que viajar: sin esto el consumidor pierde el typecheck en silencio.
     const dts = contenido.filter((f) => f.endsWith('.d.ts'));
