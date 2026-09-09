@@ -142,3 +142,6 @@ export type {
   RelacionPropuesta,
   OpcionesDeModelo,
 } from './modelo.js'
+
+export { cargaPlantilla, guardaPlantilla, comoPlantilla } from './plantilla-por-defecto.js'
+export type { PlantillaCargada } from './plantilla-por-defecto.js'
