@@ -29,6 +29,10 @@
     "./almacenes/supabase-storage": {
       "types": "./dist/almacenes/supabase-storage.d.ts",
       "import": "./dist/almacenes/supabase-storage.js"
+    },
+    "./almacenes/indexeddb": {
+      "types": "./dist/almacenes/indexeddb.d.ts",
+      "import": "./dist/almacenes/indexeddb.js"
     }
   },
   "files": [

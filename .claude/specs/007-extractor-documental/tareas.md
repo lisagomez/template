@@ -2,10 +2,10 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**231 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**246 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
-> limpio e importa sus **seis** subpaths. La persistencia (esquema, adaptadores y bucket privado)
+> limpio e importa sus **siete** subpaths. La persistencia (esquema, adaptadores y bucket privado)
 > también está cerrada. Siguen abiertos la UI, la cámara y el lienzo de modelado.
 
 ## Cerradas
@@ -230,6 +230,22 @@
       borra nada por su cuenta.
       → cubre RF-60 · control C7
 
+- [x] **TAR-33 · Adaptador de IndexedDB para la cola.**
+      → `src/almacenes/indexeddb.ts` — IndexedDB y no `localStorage` por dos razones que muerden
+      justo en este flujo: `localStorage` es **síncrono** y bloquea la UI mientras el operario
+      escanea en ráfaga, y su tope de ~5 MB se desborda en una jornada sin cobertura — y desbordar
+      lanza **al escribir**, así que se pierde la lectura recién hecha, la única que el operario
+      cree tener.
+      Lo que este adaptador **no puede arreglar, y por eso lo dice**: el navegador puede purgar el
+      almacenamiento de un sitio no instalado sin avisar. `estimaPurga()` existe para avisar
+      **antes** (RF-53), no para prevenirlo. Y cuando el navegador no sabe estimar —Safari viejo,
+      contexto no seguro— devuelve `null` y lo dice: un cero ahí se leería como «hay sitio de
+      sobra», que es la conclusión contraria a la verdadera.
+      Una entrada irreconocible se **descarta** de la lista en vez de devolverse a medias: la
+      escribió una versión anterior de la app, y enviarla a medias hace que el servidor la rechace
+      para siempre.
+      → cubre RF-50 · RF-53
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -285,11 +301,6 @@
       Hecho cuando: se detecta la lectura por prefijo/sufijo configurado —la vía determinista— y la
       ráfaga por tiempos queda solo como respaldo declarado.
       → cubre RF-39 · RF-40
-
-- [ ] **TAR-33 · Adaptador de IndexedDB para la cola.**
-      Hecho cuando: `./almacenes/indexeddb` implementa `AlmacenLocal`, y la app avisa del riesgo de
-      purga cuando hay cola pendiente sin estar instalada.
-      → cubre RF-50 · RF-53
 
 - [ ] **TAR-44 · La segunda vía de respaldo del bucket.**
       Hecho cuando: el inventario de `BUSINESS_LOGIC.md` §4 lleva los originales como **línea
