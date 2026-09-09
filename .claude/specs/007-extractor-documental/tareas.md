@@ -2,10 +2,10 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**246 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**258 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
-> limpio e importa sus **siete** subpaths. La persistencia (esquema, adaptadores y bucket privado)
+> limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
 > también está cerrada. Siguen abiertos la UI, la cámara y el lienzo de modelado.
 
 ## Cerradas
@@ -246,18 +246,29 @@
       para siempre.
       → cubre RF-50 · RF-53
 
+- [x] **TAR-10 · Ingesta en la UI.**
+      → `src/react/ZonaDeIngesta.tsx` + `src/react/aplana.ts` — las tres vías de RF-4/5/6, con el
+      reparto que hace esto verificable: **el recorrido del árbol vive fuera de React** y se prueba
+      sin navegador; la clasificación y el rechazo son del núcleo, ya probados; en el componente
+      queda solo el pegamento del DOM, que es justo lo que no lleva decisiones dentro.
+      §2.2 en código: elegir carpeta (`webkitdirectory`) entrega la lista **ya plana**; soltarla
+      (`webkitGetAsEntry`) entrega un **árbol que hay que recorrer**. `dataTransfer.files` viene
+      vacío con una carpeta, y por ahí es por donde se pierden 300 facturas sin un error en consola.
+      Tres cosas que un recorrido ingenuo se salta, cada una con su prueba: **`readEntries`
+      devuelve como mucho 100 por llamada** —quien la llama una vez pierde el resto en silencio, y
+      la prueba usa 250—; un árbol cíclico se corta por profundidad **y se dice**; y un archivo
+      ilegible se nombra sin abortar el lote, porque abortar perdería los otros 299.
+      El bucle del lector es **iterativo y no recursivo**: la versión recursiva reventaba la pila
+      con un lector que repitiera lote, y `Maximum call stack size exceeded` no dice nada de la
+      causa.
+      → cubre RF-4 · RF-5 · RF-6
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
       default defendible sin medirlo.
 
 ## Abiertas
-
-- [ ] **TAR-10 · Ingesta en la UI.**
-      Hecho cuando: `ZonaDeIngesta` acepta botón, arrastre y selección de carpeta; el arrastre de
-      un directorio recorre su árbol de forma recursiva; y lo no soportado se rechaza nombrando
-      archivo y motivo.
-      → cubre RF-4 · RF-5 · RF-6
 
 - [ ] **TAR-11 · Vista de revisión.**
       Hecho cuando: cada dato muestra su confianza y su región de origen sin desplegar nada, y

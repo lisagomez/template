@@ -21,7 +21,7 @@ function fuentesAnidadas(desde = join(raiz, 'src'), prefijo = ''): string[] {
   const salida: string[] = []
   for (const entrada of readdirSync(desde, { withFileTypes: true })) {
     if (entrada.isDirectory()) salida.push(...fuentesAnidadas(join(desde, entrada.name), `${prefijo}${entrada.name}/`))
-    else if (entrada.name.endsWith('.ts') && prefijo !== '') salida.push(`${prefijo}${entrada.name}`)
+    else if (/\.tsx?$/.test(entrada.name) && prefijo !== '') salida.push(`${prefijo}${entrada.name}`)
   }
   return salida
 }
@@ -104,5 +104,39 @@ test('todo subpath de `exports` apunta a un fichero que existe', () => {
       existsSync(join(raiz, 'src', relativa)),
       `exports["${subpath}"] apunta a ${destino.import}, y src/${relativa} no existe`,
     )
+  }
+})
+
+/**
+ * `'use client'` tiene que ser la PRIMERA linea de todo componente, y sobrevivir al build.
+ *
+ * Sin ella, Next intenta ejecutar el componente en el servidor y falla — pero no aqui: falla en el
+ * proyecto de destino, que es el peor sitio para descubrirlo. Se comprueba en la fuente Y en
+ * `dist/`, porque lo que se publica es `dist/` y un build que se la coma pasaria esta prueba
+ * mirando solo la fuente.
+ */
+test("todo componente lleva 'use client' en la primera linea, en fuente y en dist", () => {
+  const componentes = adaptadores.filter((f) => f.endsWith('.tsx'))
+  assert.ok(componentes.length > 0, 'no hay componentes: si se anaden, esta prueba los cubre')
+  for (const archivo of componentes) {
+    const fuente = readFileSync(join(raiz, 'src', archivo), 'utf8')
+    assert.match(fuente.split('\n')[0], /^'use client'$/, `src/${archivo} no empieza por 'use client'`)
+    const construido = join(raiz, 'dist', archivo.replace(/\.tsx$/, '.js'))
+    if (existsSync(construido)) {
+      assert.match(
+        readFileSync(construido, 'utf8').split('\n')[0],
+        /^['"]use client['"];?$/,
+        `el build se comio la directiva en ${archivo}: revienta en el proyecto de destino`,
+      )
+    }
+  }
+})
+
+/** El nucleo no puede importar React; `./react` es justo donde SI puede. */
+test('solo los archivos de src/react/ importan React', () => {
+  for (const archivo of adaptadores) {
+    const codigo = readFileSync(join(raiz, 'src', archivo), 'utf8')
+    if (archivo.startsWith('react/')) continue
+    assert.doesNotMatch(codigo, /from ['"]react/, `src/${archivo} importa React fuera de ./react`)
   }
 })
