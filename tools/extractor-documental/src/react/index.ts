@@ -30,3 +30,9 @@ export type {
   BorradorDeLote, ConfirmacionDeCoste, PeticionDeSupresion,
   ImpedimentoDeSupresion, CandidatoAVencer, MotivoSinBusqueda,
 } from './pantallas.js'
+
+export { detectaLectura, dependeDeLaHeuristica, avisoDeConfiguracion } from './escaner.js'
+export type { Pulsacion, ConfiguracionDelEscaner, LecturaDetectada, ViaDeDeteccion } from './escaner.js'
+
+export { lectorDeCamara, fabricaDelNavegador } from './camara.js'
+export type { OpcionesDeCamara, FabricaDeDetector, DetectorNativo, LectorConMotor, MotorDeCodigos } from './camara.js'

@@ -2,7 +2,7 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**320 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**338 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
 > limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
@@ -349,6 +349,31 @@
       prueba recorre los exports y falla si aparece una función que borre.
       → cubre RF-75 · RF-63
 
+- [x] **TAR-31 · Lectura con cámara.**
+      → `src/react/camara.ts` — `BarcodeDetector` nativo donde exista (Chrome, Android) y respaldo
+      `zxing-wasm` donde no (Safari, Firefox: **no es una excepción rara**, es buena parte de los
+      teléfonos que van a usar esto). Las dos como peer opcional.
+      **La garantía de la tarea, verificada contando llamadas**: construir el lector **no carga el
+      wasm**, y donde hay detector nativo no se carga nunca. El `import()` va dentro de la función,
+      no arriba del archivo — un import estático lo metería en el bundle de todo el que importe el
+      módulo, incluida la persona que solo sube PDF desde un escritorio y no abrirá una cámara en
+      su vida. Y no se notaría al probar: funcionaría igual, arrastrando medio mega por carga.
+      → cubre RF-37 · RF-38
+
+- [x] **TAR-32 · Escáner óptico en la UI.**
+      → `src/react/escaner.ts` — §2.12 en código: el escáner **no es un dispositivo, es un
+      teclado**, así que todo el problema es distinguir «lo tecleó un aparato» de «lo está
+      escribiendo una persona».
+      La vía **determinista** (prefijo y sufijo configurados en el aparato) es la principal, y la
+      ráfaga por tiempos queda como **respaldo declarado**: sin parámetros explícitos está
+      desactivada, que es lo correcto mientras TAR-34 siga sin medir. Y cuando sí se usa, la
+      lectura se marca **no fiable**.
+      El detalle que evita reintroducir el problema por la puerta de atrás: **estando configurado,
+      no se cae al respaldo**. Si el aparato pone su marca y esto no la lleva, lo escribió una
+      persona; probar la heurística después devolvería justo los falsos positivos que la vía 1
+      elimina — y un falso positivo se **come** lo que alguien estaba escribiendo.
+      → cubre RF-39 · RF-40
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -367,17 +392,6 @@
       propio. Luego: tarjeta por entidad, relación al arrastrar campo sobre columna con su detalle
       antes de crearla, y cardinalidad en los extremos. Sin dirección de filtro cruzado.
       → cubre RF-32 · RF-33 · RF-34
-
-- [ ] **TAR-31 · Lectura con cámara.**
-      Hecho cuando: `./react/camara` usa `BarcodeDetector` donde exista y cae a `zxing-wasm` donde
-      no, con las dos peer opcionales. Se verifica **antes** que el wasm no se descarga a quien no
-      abre la cámara.
-      → cubre RF-37 · RF-38
-
-- [ ] **TAR-32 · Escáner óptico en la UI.**
-      Hecho cuando: se detecta la lectura por prefijo/sufijo configurado —la vía determinista— y la
-      ráfaga por tiempos queda solo como respaldo declarado.
-      → cubre RF-39 · RF-40
 
 - [ ] **TAR-44 · La segunda vía de respaldo del bucket.**
       Hecho cuando: el inventario de `BUSINESS_LOGIC.md` §4 lleva los originales como **línea

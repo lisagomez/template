@@ -53,10 +53,14 @@
     "prueba": "node --test pruebas/*.ts"
   },
   "peerDependencies": {
-    "react": ">=18"
+    "react": ">=18",
+    "zxing-wasm": ">=2"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "zxing-wasm": {
       "optional": true
     }
   },
