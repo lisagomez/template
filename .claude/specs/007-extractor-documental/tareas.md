@@ -3,8 +3,9 @@
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
 > (**206 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
-> adaptadores de motor y la propuesta de modelo con su barrera anti-`ALTER`. Siguen abiertos la
-> UI, la cámara, la persistencia y el empaquetado.
+> adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
+> **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
+> limpio e importa sus cuatro subpaths. Siguen abiertos la UI, la cámara y la persistencia.
 
 ## Cerradas
 
@@ -163,32 +164,39 @@
       `execute(`, `query(`, `rpc(` o `.from(`**. No se aplica porque no hay con qué.
       → cubre DoF-9 · RF-31
 
+- [x] **TAR-1 · Andamio del paquete.**
+      → `tools/extractor-documental/package.json` — `type: "module"`, `sideEffects: false`,
+      `engines.node`, `files`, cero `dependencies`, y `exports` con los cuatro subpaths que ya
+      existen. La regla que lo sostiene dejó de depender de que alguien se acordara: hay una
+      prueba que **falla si un subpath declarado apunta a un fichero que no existe**.
+      → cubre DoF-1 · RF-22
+
+- [x] **TAR-5 · Manifiesto del plugin.**
+      → `src/plugin.ts` — id, nombre, descripción, ruta, versión, capacidades e icono SVG en línea
+      con `currentColor`, y `pruebas/plugin.ts` verifica que el archivo **no importa nada**.
+      Lo que faltaba —la prueba de que se importa en un proyecto sin React— ya está medida:
+      `npm run empaqueta` importa `@tu-scope/extractor-documental/plugin` en un proyecto temporal
+      con **cero dependencias** y obtiene sus 2 exports.
+      → cubre RF-1 · RF-2 · RF-3
+
+- [x] **TAR-15 · La prueba de fuego del empaquetado.**
+      → `npm run empaqueta extractor-documental` en verde: contrato del `package.json`, build (93
+      archivos), tarball (106), **los 4 subpaths instalados e importados en un proyecto limpio**, y
+      26 `.d.ts` viajando.
+      Y de paso se tapó un hueco del propio empaquetador: **solo importaba el entry principal**.
+      Declarar un subpath y no importarlo nunca es prometer una puerta sin girar el pomo — que es
+      exactamente el fallo que ese script dice existir para cazar («un `exports` mal puesto…
+      revienta en el proyecto de destino»). Ahora recorre todos, y distingue el fallo real del
+      **peer opcional ausente**, que en un proyecto limpio es lo esperado y se reporta como «sin
+      probar» en vez de pasar por probado.
+      → cubre DoF-2 · RF-23
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
       default defendible sin medirlo.
 
 ## Abiertas
-
-- [ ] **TAR-1 · Andamio del paquete.** *(parcial)*
-      Hecho: existe `tools/extractor-documental/` con `type: "module"`, `sideEffects: false`,
-      `engines.node`, `files` y cero `dependencies` — vigilado por `pruebas/contrato.ts`.
-      `exports` declara ya `.`, `./plugin`, `./motores/openai-compat` y `./motores/mistral`, y
-      **una prueba nueva verifica que todo subpath declarado apunta a un fichero que existe**: era
-      la comprobación que faltaba para que la regla de abajo dejara de depender de que alguien se
-      acordara.
-      **Falta**: los subpaths de `./react`, `./react/lienzo`, `./react/camara` y `./almacenes/*`,
-      que no se declaran hasta que existan — un `exports` que apunta a un fichero inexistente pasa
-      el build y revienta en el proyecto de destino, que es justo el fallo que el empaquetador busca.
-      → cubre DoF-1 · RF-22
-
-- [ ] **TAR-5 · Manifiesto del plugin.** *(parcial)*
-      Hecho: `src/plugin.ts` exporta id, nombre, descripción, ruta, versión, capacidades e icono
-      SVG en línea con `currentColor`, y `pruebas/plugin.ts` verifica que el archivo **no importa
-      absolutamente nada**.
-      **Falta**: la prueba de que se importa en un proyecto sin React instalado, que es la
-      integración real de TAR-15.
-      → cubre RF-1 · RF-2 · RF-3
 
 - [ ] **TAR-10 · Ingesta en la UI.**
       Hecho cuando: `ZonaDeIngesta` acepta botón, arrastre y selección de carpeta; el arrastre de
@@ -211,11 +219,6 @@
       `owner_id`, el esquema Zod es espejo exacto de los `CHECK`, y ninguna superficie de usuario
       usa `service_role`.
       → cubre RF-21 · control C7
-
-- [ ] **TAR-15 · La prueba de fuego del empaquetado.**
-      Hecho cuando: `npm run empaqueta extractor-documental` pasa en verde incluida la
-      integración real — proyecto limpio, `npm install <tarball>`, importar y ejecutar.
-      → cubre DoF-2 · RF-23
 
 - [ ] **TAR-16 · Cerrar el cableado y los gates.**
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
