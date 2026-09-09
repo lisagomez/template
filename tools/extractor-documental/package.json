@@ -50,7 +50,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "preprueba": "npm run build",
-    "prueba": "node --test pruebas/*.ts"
+    "prueba": "node --test pruebas/*.ts",
+    "demo": "node demo/servidor.mjs",
+    "mide": "node medicion/mide.mjs"
   },
   "peerDependencies": {
     "react": ">=18",

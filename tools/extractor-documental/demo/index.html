@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Banco de pruebas — extractor documental</title>
+<style>
+  :root { color-scheme: light dark; --borde: color-mix(in srgb, currentColor 25%, transparent); }
+  body { font: 15px/1.55 system-ui, sans-serif; margin: 0 auto; max-width: 60rem; padding: 1.5rem; }
+  h1 { font-size: 1.4rem; margin: 0 0 .3rem; }
+  h2 { font-size: 1.05rem; margin: 2rem 0 .5rem; }
+  .sub { opacity: .7; margin: 0 0 1.5rem; }
+  section { border: 1px solid var(--borde); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .zona { border: 2px dashed var(--borde); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; }
+  .zona[data-encima="si"] { border-style: solid; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { border-bottom: 1px solid var(--borde); padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  tr[data-bajo="si"] td { background: color-mix(in srgb, orange 14%, transparent); }
+  pre { background: color-mix(in srgb, currentColor 7%, transparent); padding: .7rem; border-radius: 6px; overflow-x: auto; font-size: .82rem; }
+  input, textarea, button, select { font: inherit; }
+  input[type=text], input[type=number], textarea { width: 100%; box-sizing: border-box; padding: .35rem; border: 1px solid var(--borde); border-radius: 4px; background: transparent; color: inherit; }
+  textarea { min-height: 6rem; font-family: ui-monospace, monospace; font-size: .82rem; }
+  button { padding: .35rem .7rem; border-radius: 5px; border: 1px solid var(--borde); background: transparent; color: inherit; cursor: pointer; }
+  button[disabled] { opacity: .45; cursor: not-allowed; }
+  .aviso { border-left: 3px solid orange; padding: .4rem .7rem; margin: .6rem 0; font-size: .9rem; }
+  .malo { border-left-color: crimson; }
+  .bien { border-left-color: seagreen; }
+  .fila { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+  .fila > label { flex: 1 1 12rem; }
+  .apunte { opacity: .65; font-size: .85rem; }
+  code { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+
+<h1>Banco de pruebas · extractor documental</h1>
+<p class="sub">
+  Sirve el <code>dist/</code> recién construido: lo que pruebas aquí es <strong>el mismo artefacto que
+  se instala</strong>. Lo que corrijas a mano se guarda como corpus, y <code>npm run mide</code> lo lee.
+</p>
+
+<div class="aviso" id="estado-corpus">corpus: cargando…</div>
+
+<!-- ─────────────────────────  CAPA 0  ───────────────────────── -->
+<h2>1 · Capa 0 — ¿hace falta el motor?</h2>
+<section>
+  <div class="zona" id="zona-capa0" tabindex="0">
+    Suelta aquí un PDF (o pulsa para elegirlo)
+    <input type="file" id="file-capa0" accept="application/pdf" hidden>
+  </div>
+  <div id="salida-capa0"></div>
+  <p class="apunte">
+    Un PDF generado por software trae su texto dentro y se resuelve <strong>sin llamar al motor</strong>.
+    Ante cualquier duda —cifrado, escaneo, texto ilegible— llama: un falso negativo cuesta una llamada,
+    un falso positivo mete datos corruptos con apariencia de exactos y sin pasar por la cola.
+  </p>
+</section>
+
+<!-- ─────────────────────────  INGESTA  ───────────────────────── -->
+<h2>2 · Ingesta — arrastra una carpeta entera</h2>
+<section>
+  <div class="zona" id="zona-ingesta" tabindex="0">
+    Suelta archivos o una carpeta
+    <input type="file" id="file-ingesta" multiple hidden>
+  </div>
+  <div id="salida-ingesta"></div>
+  <p class="apunte">
+    Soltar una carpeta y elegirla son <strong>dos mecanismos distintos del navegador</strong>. Lo que se
+    rechaza se nombra con su archivo y su motivo: el rechazo silencioso es como se pierden documentos.
+  </p>
+</section>
+
+<!-- ─────────────────────────  REVISIÓN  ───────────────────────── -->
+<h2>3 · Revisión — y aquí se fabrica el corpus de confianza</h2>
+<section>
+  <div class="fila">
+    <label>
+      Umbral de confianza <strong>(obligatorio, sin valor por defecto)</strong><br>
+      <input type="number" id="umbral" min="0" max="1" step="0.01" placeholder="p. ej. 0.80">
+    </label>
+  </div>
+  <p class="apunte">
+    No hay default a propósito. Ese número <strong>se mide</strong> (TAR-17), y ponerle uno aquí sería
+    exactamente el número inventado que esa tarea existe para impedir.
+  </p>
+
+  <p><strong>Campos extraídos</strong> — pega la salida de tu motor:</p>
+  <textarea id="campos-json">[]</textarea>
+  <div class="fila" style="margin-top:.5rem">
+    <button id="btn-ejemplo">Cargar un ejemplo</button>
+    <button id="btn-revisar">Revisar</button>
+    <span class="apunte" id="marca-ejemplo"></span>
+  </div>
+  <div id="salida-revision"></div>
+</section>
+
+<!-- ─────────────────────────  RECONCILIACIÓN  ───────────────────────── -->
+<h2>4 · Reconciliación — el corpus de similitud, sin ninguna clave</h2>
+<section>
+  <div class="fila">
+    <label>Valor extraído<br><input type="text" id="valor" value="ACME Servicios Industriales"></label>
+    <label>Umbral de similitud <strong>(obligatorio)</strong><br>
+      <input type="number" id="umbral-sim" min="0" max="1" step="0.01" placeholder="p. ej. 0.60"></label>
+  </div>
+  <p style="margin:.7rem 0 .2rem"><strong>Catálogo</strong> — una fila por línea, <code>id | etiqueta</code>:</p>
+  <textarea id="catalogo">1874 | ACME S.A. de C.V.
+2001 | Distribuidora del Norte
+3310 | Ferretería Zeta</textarea>
+  <div class="fila" style="margin-top:.5rem"><button id="btn-reconciliar">Reconciliar</button></div>
+  <div id="salida-reconciliacion"></div>
+  <p class="apunte">
+    Este corpus <strong>no necesita motor</strong>: solo tu catálogo y tu criterio. Es el que desbloquea
+    TAR-25.
+  </p>
+</section>
+
+<!-- ─────────────────────────  MODELO E-R  ───────────────────────── -->
+<h2>5 · Propuesta de modelo E-R</h2>
+<section>
+  <div class="fila"><button id="btn-modelo">Proponer modelo con los campos de arriba</button></div>
+  <div id="salida-modelo"></div>
+</section>
+
+<!-- ─────────────────────────  CÓDIGOS  ───────────────────────── -->
+<h2>6 · Códigos</h2>
+<section>
+  <div class="fila">
+    <label>Carga de un QR o código de barras<br>
+      <input type="text" id="carga" value="0107501234567890310300123456"></label>
+    <button id="btn-carga">Analizar</button>
+  </div>
+  <div id="salida-carga"></div>
+</section>
+
+<script type="module">
+import {
+  leeCapaCero, clasificaLote, proponeModelo, analizaCarga,
+  resuelveValor, parecidosA, plantillaInicial,
+} from '/extractor/index.js'
+import { aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision } from '/extractor/react/revision.js'
+import { aplanaEntradas, raicesDe, desdeInput } from '/extractor/react/aplana.js'
+
+const $ = (id) => document.getElementById(id)
+const esc = (t) => String(t).replace(/[<&>]/g, (c) => ({ '<': '&lt;', '&': '&amp;', '>': '&gt;' })[c])
+const pinta = (id, html) => { $(id).innerHTML = html }
+const aviso = (t, clase = '') => `<div class="aviso ${clase}">${t}</div>`
+
+// El ejemplo lleva confianzas INVENTADAS. Se marca, y el corpus lo rechaza: guardar una confianza
+// que no salio de un motor contaminaria la correlacion, que es justo la medicion que importa.
+let camposSonDeEjemplo = false
+
+async function refrescaCorpus() {
+  const r = await fetch('/api/corpus').then((x) => x.json())
+  $('estado-corpus').innerHTML =
+    `corpus: <strong>${r.campos}</strong> muestra(s) de campos · <strong>${r.similitud}</strong> de similitud` +
+    ` — se leen con <code>npm run mide</code>`
+}
+
+async function guarda(ruta, muestra) {
+  const r = await fetch(ruta, { method: 'POST', body: JSON.stringify(muestra) })
+  const cuerpo = await r.json()
+  if (!r.ok) return { ok: false, error: cuerpo.error }
+  await refrescaCorpus()
+  return { ok: true, guardadas: cuerpo.guardadas }
+}
+
+// ── 1. Capa 0 ────────────────────────────────────────────────────────────────
+function zonaDeArchivos(zonaId, inputId, alRecibir, { arbol = false } = {}) {
+  const zona = $(zonaId)
+  const input = $(inputId)
+  zona.onclick = () => input.click()
+  zona.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click() } }
+  zona.ondragover = (e) => { e.preventDefault(); zona.dataset.encima = 'si' }
+  zona.ondragleave = () => { zona.dataset.encima = 'no' }
+  zona.ondrop = async (e) => {
+    e.preventDefault()
+    zona.dataset.encima = 'no'
+    if (arbol) {
+      const { archivos, ilegibles, truncadoPorProfundidad } = await aplanaEntradas(raicesDe(e.dataTransfer))
+      alRecibir({ archivos, ilegibles, truncadoPorProfundidad })
+    } else {
+      alRecibir({ archivos: [...e.dataTransfer.files].map((f) => ({ archivo: f, ruta: f.name })), ilegibles: [] })
+    }
+  }
+  input.onchange = () => {
+    alRecibir({ archivos: desdeInput(input.files), ilegibles: [] })
+    input.value = ''
+  }
+}
+
+zonaDeArchivos('zona-capa0', 'file-capa0', async ({ archivos }) => {
+  if (archivos.length === 0) return
+  const { archivo, ruta } = archivos[0]
+  const bytes = new Uint8Array(await archivo.arrayBuffer())
+  const r = await leeCapaCero(bytes)
+  pinta('salida-capa0', r.hayTexto
+    ? aviso(`<strong>${esc(ruta)}</strong> se resuelve <strong>sin llamar al motor</strong> — ` +
+        `${r.paginas.length} bloque(s) de texto, 0 llamadas. Ahorro directo.`, 'bien') +
+      `<pre>${esc(r.paginas.join('\n\n').slice(0, 1200))}</pre>`
+    : aviso(`<strong>${esc(ruta)}</strong> necesita el motor. Motivo: <em>${esc(r.motivo)}</em>`, ''))
+})
+
+// ── 2. Ingesta ───────────────────────────────────────────────────────────────
+zonaDeArchivos('zona-ingesta', 'file-ingesta', ({ archivos, ilegibles, truncadoPorProfundidad }) => {
+  const entrantes = archivos.map((a) => ({
+    nombre: a.ruta, tipoMime: a.archivo.type || undefined, bytes: a.archivo.size,
+  }))
+  const { aceptados, rechazados } = clasificaLote(entrantes)
+  const filas = (lista) => lista.map((c) => `<tr><td>${esc(c.nombre)}</td><td>${
+    c.aceptado ? `aceptado (${c.tipo})` : `<strong>rechazado</strong>: ${esc(c.motivo)}`}</td></tr>`).join('')
+  pinta('salida-ingesta',
+    aviso(`${aceptados.length} aceptado(s) · ${rechazados.length} rechazado(s)` +
+      (ilegibles.length ? ` · ${ilegibles.length} ilegible(s)` : '') +
+      (truncadoPorProfundidad ? ' · <strong>se cortó por profundidad</strong>' : ''), 'bien') +
+    `<table><tbody>${filas(aceptados)}${filas(rechazados)}${
+      ilegibles.map((i) => `<tr><td>${esc(i.ruta)}</td><td>no se pudo leer: ${esc(i.motivo)}</td></tr>`).join('')
+    }</tbody></table>`)
+}, { arbol: true })
+
+// ── 3. Revisión y corpus de confianza ────────────────────────────────────────
+$('btn-ejemplo').onclick = () => {
+  $('campos-json').value = JSON.stringify([
+    { clave: 'folio', valor: 'A-1874', confianza: 0.96, procedencia: 'ocr', region: { pagina: 0, x: .1, y: .1, ancho: .2, alto: .04 } },
+    { clave: 'proveedor', valor: 'ACME Servicios Industriales', confianza: 0.71, procedencia: 'ocr', region: { pagina: 0, x: .1, y: .2, ancho: .4, alto: .04 } },
+    { clave: 'total', valor: '1234.66', confianza: 0.55, procedencia: 'ocr' },
+  ], null, 1)
+  camposSonDeEjemplo = true
+  $('marca-ejemplo').textContent = 'ejemplo cargado — sus confianzas son inventadas y el corpus las rechazará'
+}
+$('campos-json').oninput = () => { camposSonDeEjemplo = false; $('marca-ejemplo').textContent = '' }
+
+$('btn-revisar').onclick = () => {
+  const umbral = Number($('umbral').value)
+  if ($('umbral').value === '' || !Number.isFinite(umbral)) {
+    return pinta('salida-revision', aviso('Pon un umbral. No hay valor por defecto, y es deliberado.', 'malo'))
+  }
+  let campos
+  try { campos = JSON.parse($('campos-json').value) } catch (e) {
+    return pinta('salida-revision', aviso(`JSON ilegible: ${esc(e.message)}`, 'malo'))
+  }
+  let filas
+  try { filas = aplicaPlantilla(campos, null, umbral) } catch (e) {
+    return pinta('salida-revision', aviso(esc(e.message), 'malo'))
+  }
+  const bajo = cuentaBajoUmbral(filas)
+  const cuerpo = filas.map((f, i) => `
+    <tr data-bajo="${f.bajoUmbral ? 'si' : 'no'}">
+      <td>${esc(f.etiqueta)}</td>
+      <td>${esc(f.valor)}</td>
+      <td>${Math.round(f.confianza * 100)} %</td>
+      <td>${f.region ? `pág. ${f.region.pagina + 1}` : (f.procedencia === 'codigo' ? 'código' : '<em>sin región</em>')}</td>
+      <td><input type="text" data-correccion="${i}" placeholder="valor correcto…" style="min-width:9rem"></td>
+      <td><button data-guarda="${i}">Guardar al corpus</button></td>
+    </tr>`).join('')
+
+  pinta('salida-revision',
+    aviso(bajo === 0
+      ? 'Todos los campos superan el umbral.'
+      : `<strong>${bajo}</strong> campo(s) por debajo del umbral: los revisa una persona. No es un error — es la salida normal.`,
+      bajo === 0 ? 'bien' : '') +
+    (!puedeValidarseSinRevision(filas) && bajo === 0
+      ? aviso('Hay campos de OCR sin región de origen: no se podrán auditar después.', '') : '') +
+    `<table><thead><tr><th>Campo</th><th>Valor</th><th>Confianza</th><th>Origen</th><th>Corrección</th><th></th></tr></thead>
+     <tbody>${cuerpo}</tbody></table>` +
+    `<p class="apunte">Escribe el valor correcto y guarda: eso es una muestra de <code>campos.jsonl</code>.
+     Si el valor ya era correcto, cópialo igual — un acierto es tan necesario como un fallo para
+     correlacionar.</p>`)
+
+  document.querySelectorAll('[data-guarda]').forEach((boton) => {
+    boton.onclick = async () => {
+      const i = Number(boton.dataset.guarda)
+      const referencia = document.querySelector(`[data-correccion="${i}"]`).value.trim()
+      if (referencia === '') return alert('Escribe el valor correcto: sin la referencia no hay nada que medir.')
+      if (camposSonDeEjemplo) {
+        return alert('Estos campos son el ejemplo: sus confianzas están inventadas.\n\n' +
+          'Guardarlas contaminaría la correlación, que es la medición que decide el umbral. ' +
+          'Pega la salida de tu motor real.')
+      }
+      const r = await guarda('/api/corpus/campos', {
+        clave: filas[i].clave, obtenido: filas[i].valor, referencia, confianza: filas[i].confianza,
+      })
+      boton.textContent = r.ok ? `guardada (${r.guardadas})` : 'rechazada'
+      boton.disabled = r.ok
+      if (!r.ok) alert(r.error)
+    }
+  })
+}
+
+// ── 4. Reconciliación y corpus de similitud ──────────────────────────────────
+const leeCatalogo = () => $('catalogo').value.split('\n')
+  .map((l) => l.split('|').map((s) => s.trim()))
+  .filter((p) => p.length === 2 && p[0] && p[1])
+  .map(([id, etiqueta]) => ({ id, etiqueta }))
+
+$('btn-reconciliar').onclick = () => {
+  const umbral = Number($('umbral-sim').value)
+  if ($('umbral-sim').value === '' || !Number.isFinite(umbral)) {
+    return pinta('salida-reconciliacion', aviso('Pon un umbral de similitud. Tampoco tiene default.', 'malo'))
+  }
+  const valor = $('valor').value.trim()
+  const filas = leeCatalogo()
+  const r = resuelveValor(valor, filas, { umbral, margenDeAmbiguedad: 0.08 })
+  // Los parecidos NO salen de la resolucion: si se propone un alta es porque nadie llego al
+  // umbral, asi que esa lista viene vacia por definicion.
+  const cerca = r.estado === 'sin_resolver' ? parecidosA(valor, filas) : r.candidatos
+
+  pinta('salida-reconciliacion',
+    aviso(`Estado: <strong>${r.estado}</strong>` +
+      (r.elegida ? ` → fila <strong>${esc(r.elegida.id)}</strong> (${esc(r.elegida.etiqueta)})` : '') +
+      (r.estado === 'sin_resolver' ? ' — se <em>propone</em> el alta, nadie la escribe' : ''),
+      r.estado === 'resuelto' ? 'bien' : '') +
+    (cerca.length === 0 ? aviso('Sin parecidos en el catálogo.', '') :
+      `<table><thead><tr><th>Candidato</th><th>Similitud</th><th>¿Es la misma?</th></tr></thead><tbody>${
+        cerca.map((c, i) => `<tr>
+          <td>${esc(c.fila.etiqueta)} <span class="apunte">(${esc(c.fila.id)})</span></td>
+          <td>${c.similitud.toFixed(3)}</td>
+          <td><button data-sim="${i}" data-misma="true">sí</button>
+              <button data-sim="${i}" data-misma="false">no</button></td>
+        </tr>`).join('')}</tbody></table>` +
+      `<p class="apunte">Al proponer un alta los parecidos van <strong>al lado</strong>: sin ellos
+       darías de alta un duplicado sin verlo. Etiquetar aquí no necesita ninguna clave.</p>`))
+
+  document.querySelectorAll('[data-sim]').forEach((boton) => {
+    boton.onclick = async () => {
+      const c = cerca[Number(boton.dataset.sim)]
+      const r2 = await guarda('/api/corpus/similitud', {
+        valor, candidato: c.fila.etiqueta, similitud: c.similitud, esLaMisma: boton.dataset.misma === 'true',
+      })
+      boton.textContent = r2.ok ? `✓ (${r2.guardadas})` : '✗'
+      if (!r2.ok) alert(r2.error)
+    }
+  })
+}
+
+// ── 5. Modelo E-R ────────────────────────────────────────────────────────────
+$('btn-modelo').onclick = () => {
+  let campos
+  try { campos = JSON.parse($('campos-json').value) } catch { campos = [] }
+  if (campos.length === 0) return pinta('salida-modelo', aviso('Carga campos en el paso 3 primero.', 'malo'))
+  const plantilla = plantillaInicial('factura', campos.map((c) => c.clave))
+  const descriptor = { version: '1', tablas: [] }
+  const p = proponeModelo(plantilla, descriptor, {
+    muestras: Object.fromEntries(campos.map((c) => [c.clave, [c.valor]])),
+  })
+  pinta('salida-modelo',
+    aviso('Es una <strong>propuesta</strong>: aquí no hay cliente de base de datos ni forma de ejecutarla.', '') +
+    `<pre>${esc(p.sql)}</pre>` +
+    (p.avisos.length ? `<ul>${p.avisos.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>` : ''))
+}
+
+// ── 6. Códigos ───────────────────────────────────────────────────────────────
+$('btn-carga').onclick = () => {
+  const r = analizaCarga($('carga').value.trim())
+  pinta('salida-carga', `<pre>${esc(JSON.stringify(r, null, 2))}</pre>`)
+}
+
+refrescaCorpus()
+</script>
+</body>
+</html>

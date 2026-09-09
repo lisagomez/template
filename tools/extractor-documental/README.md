@@ -148,6 +148,38 @@ corpus real (TAR-17, TAR-25, TAR-34).
 Para el escaner hay una via que **no necesita medir nada**: configurar prefijo y sufijo en el
 aparato hace la deteccion determinista. La rafaga por tiempos es el plan B.
 
+## Probarla, y fabricar el corpus mientras la pruebas
+
+```bash
+npm run demo    # http://localhost:4321 — sirve el dist/ real, no una copia
+npm run mide    # la tabla de §8 sobre lo que hayas corregido
+```
+
+La demo no es solo para verla funcionar: **cada corrección que haces a mano se guarda como una
+muestra etiquetada**, y `mide` la lee. §8 de `INVESTIGACION-OCR-MISTRAL` llama a transcribir la
+referencia *«el trabajo aburrido, y el único que hace que el resto signifique algo»*; esto lo
+convierte en subproducto de probar la herramienta.
+
+**Los dos corpus no cuestan lo mismo, y conviene saberlo antes de empezar:**
+
+| Corpus | Qué hace falta | Desbloquea |
+|---|---|---|
+| **Similitud** | Solo tu catálogo y tu criterio. **Cero claves** | TAR-25 |
+| **Confianza** | Un **motor de OCR real** con su clave | TAR-17 |
+
+El de confianza necesita motor porque la capa 0 da texto exacto **sin confianza por campo**: no hay
+score que correlacionar. Sin clave puedes probar todo lo demás —capa 0, ingesta, revisión,
+reconciliación, modelo E-R, códigos— pero no produces las muestras que TAR-17 necesita. Por eso la
+página trae un ejemplo cargable **cuyas confianzas el corpus rechaza**: están inventadas, y
+guardarlas contaminaría justo la medición que decide el umbral.
+
+`demo/corpus/` está en `.gitignore`. Son documentos reales de un negocio: un corpus commiteado es
+una fuga con historial de git.
+
+`mide` **no es una prueba de regresión** y no devuelve exit 1 por un decimal — imprime números para
+que los lea una persona. Y **no recomienda ningún umbral**: elegir exige saber cuánto cuesta un
+error que se cuela frente a una hora de revisión, y eso no está en los datos.
+
 ## Pruebas
 
 ```bash
