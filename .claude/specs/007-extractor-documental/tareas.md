@@ -2,8 +2,9 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**185 pruebas**, sin red, sin base de datos y sin navegador), y con él la capa 0 y los dos
-> adaptadores de motor. La UI, la cámara, la persistencia y el empaquetado siguen abiertos.
+> (**206 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> adaptadores de motor y la propuesta de modelo con su barrera anti-`ALTER`. Siguen abiertos la
+> UI, la cámara, la persistencia y el empaquetado.
 
 ## Cerradas
 
@@ -136,6 +137,32 @@
       subpath — uno que importe un peer ausente revienta justo ahí.
       → cubre RF-7 · RF-24
 
+- [x] **TAR-13 · Catálogos y propuesta de modelo.**
+      → `src/modelo.ts` — `preparaCatalogos()` deriva de los campos **habilitados** (RF-17) y
+      `proponeModelo()` emite el SQL **como texto** (RF-18). Los tipos se eligen conservadores:
+      `text` salvo que todas las muestras coincidan, porque adivinar `numeric` por tres muestras
+      es como se acaba con una columna que rechaza el cuarto documento. La tabla nueva sale con
+      RLS activa y su policy por `owner_id` — una tabla nueva sin política es una tabla que
+      cualquiera lee. Un mapeo a una tabla que no está en el descriptor **avisa** en vez de
+      inventársela.
+      → cubre DoF-5 · RF-17 · RF-18 · RF-19
+
+- [x] **TAR-24 · Barrera anti-ALTER.**
+      → `src/modelo.ts` · `revisaSql()` — y el cambio de fondo respecto a como estaba planteada:
+      **la barrera vive en el código, no solo en la prueba**. `proponeModelo` la llama sobre el SQL
+      entero antes de devolverlo, así que una propuesta prohibida no sale de la función. Una
+      barrera que solo existe en el test protege al test; ésta protege al proyecto que instale la
+      herramienta.
+      El matiz que la hace correcta: `ALTER` **no** se prohíbe en bloque, porque una tabla nueva
+      necesita `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`. Se comprueba **a qué tabla apunta cada
+      `ALTER`**: si la crea esta misma propuesta es terminar de crearla; cualquier otra lanza.
+      Prohibir el verbo entero habría obligado a emitir tablas sin RLS — cambiar un riesgo por otro
+      peor. `DROP`, `TRUNCATE`, `DELETE`, `UPDATE`, `GRANT` y `REVOKE` sí están prohibidos en
+      bloque, con prueba por cada uno.
+      Y RF-19 se verifica por ausencia de ruta: una prueba lee el fuente y **falla si aparece
+      `execute(`, `query(`, `rpc(` o `.from(`**. No se aplica porque no hay con qué.
+      → cubre DoF-9 · RF-31
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -179,11 +206,6 @@
       del mismo tipo llega ya con ella aplicada.
       → cubre DoF-4 · RF-15 · RF-16
 
-- [ ] **TAR-13 · Catálogos y propuesta de modelo.**
-      Hecho cuando: al fijar la plantilla se preparan los catálogos y se emite el SQL del modelo
-      entidad-relación **como texto**, y ninguna ruta del código lo ejecuta.
-      → cubre DoF-5 · RF-17 · RF-18 · RF-19
-
 - [ ] **TAR-14 · Adaptador de persistencia.**
       Hecho cuando: `./almacenes/supabase` crea sus tablas con RLS activa y policies por
       `owner_id`, el esquema Zod es espejo exacto de los `CHECK`, y ninguna superficie de usuario
@@ -216,11 +238,6 @@
       propio. Luego: tarjeta por entidad, relación al arrastrar campo sobre columna con su detalle
       antes de crearla, y cardinalidad en los extremos. Sin dirección de filtro cruzado.
       → cubre RF-32 · RF-33 · RF-34
-
-- [ ] **TAR-24 · Barrera anti-ALTER.**
-      Hecho cuando: una prueba recorre la salida SQL del generador y **falla** si aparece cualquier
-      sentencia que altere una tabla presente en el descriptor.
-      → cubre DoF-9 · RF-31
 
 - [ ] **TAR-31 · Lectura con cámara.**
       Hecho cuando: `./react/camara` usa `BarcodeDetector` donde exista y cae a `zxing-wasm` donde

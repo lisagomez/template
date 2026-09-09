@@ -133,3 +133,12 @@ export type { ColumnaCsv, RegistroDeExportacion } from './csv.js'
 
 export { leeCapaCero, extraeConCapaCero, extraeTextoDeContenido, pareceTexto, cuentaPaginasPdf } from './capa-cero.js'
 export type { ResultadoCapaCero, ExtraccionConCapaCero } from './capa-cero.js'
+
+export { proponeModelo, preparaCatalogos, revisaSql, aNombreDeColumna, tipoSqlDe } from './modelo.js'
+export type {
+  PropuestaDeModelo,
+  EntidadPropuesta,
+  ColumnaPropuesta,
+  RelacionPropuesta,
+  OpcionesDeModelo,
+} from './modelo.js'
