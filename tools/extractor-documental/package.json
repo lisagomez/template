@@ -33,6 +33,10 @@
     "./almacenes/indexeddb": {
       "types": "./dist/almacenes/indexeddb.d.ts",
       "import": "./dist/almacenes/indexeddb.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
     }
   },
   "files": [
@@ -47,5 +51,16 @@
     "build": "tsc -p tsconfig.json",
     "preprueba": "npm run build",
     "prueba": "node --test pruebas/*.ts"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0"
   }
 }
