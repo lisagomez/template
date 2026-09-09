@@ -3093,3 +3093,32 @@ aprovechaban. Ya no depende de la costumbre.
   ni ningún caso del corpus — añade una fila y su explicación a una plantilla documental.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — implementación de la spec 007
   autorizada en sesión del 2026-09-09
+
+---
+
+### 2026-09-09 — extractor documental: pineado de modelos de los adaptadores de OCR — radio: menor
+- **Cambio**: ninguno de configuración. Se **registra** cómo queda el pineado de modelo en la
+  herramienta `tools/extractor-documental/`, que es lo que pide DoF-7 de la spec 007.
+- **Qué se pinea y quién**: los dos adaptadores (`./motores/openai-compat` y `./motores/mistral`)
+  **reciben** el identificador del modelo, no lo eligen. Lo que la herramienta aporta es la
+  **barrera**: `exigeModeloPineado()` rechaza al **construir** —no al usar— cualquier alias
+  autoactualizable (`latest`, `stable`, `current`, `default`, `head`, y con separador `-`, `:`,
+  `@` o `/`). Un modelo vacío tampoco pasa.
+- **Por qué al construir y no al usar**: un motor que cambia de versión sin diff cambia el
+  comportamiento de **todo lo que la herramienta extrae después**, y eso es un CDC sin gate.
+  Fallar en el arranque lo convierte en un error de configuración, que es cuando todavía es barato.
+- **Modelo en producción en ESTE repo: ninguno.** No hay `.env`, ni adaptador instanciado, ni
+  llamada real a un motor. Declararlo así es lo honesto: la tabla de modelos pineados de este
+  documento **no gana fila** porque no hay nada desplegado que pinear. El proyecto que instale la
+  herramienta y configure un motor **sí tiene que añadir la suya** — la barrera le impedirá usar un
+  alias, pero registrar la versión exacta que usa sigue siendo suyo.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo ☑ (por
+  construcción, con prueba: `pruebas/motor-compatible.ts` y `pruebas/motor-mistral.ts` recorren
+  cinco alias y verifican que los cinco lanzan)
+- **Regresión**: `npm run validate` **EXIT 0** · `verify:gobernanza` **152/152** · C2 capa A
+  **105/105** · C2 capa B **22/22** · 353 pruebas de la herramienta en verde.
+- **Pendiente, y se dice**: la tercera parte de TAR-16 —enrutar la herramienta desde el decision
+  tree de `AGENTS.md`— es un **CDC estándar sin aprobar**. El diff, la regresión y el gate están
+  hechos y en verde; falta la aprobación humana explícita, que no se sustituye por un «continúa».
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — implementación de la spec 007
+  autorizada en sesión del 2026-09-09

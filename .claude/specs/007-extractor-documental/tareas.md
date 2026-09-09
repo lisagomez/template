@@ -416,9 +416,18 @@
 
 ## Abiertas
 
-- [ ] **TAR-16 · Cerrar el cableado y los gates.**
-      Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
-      del adaptador tiene entrada en `BITACORA-CDC.md`, y `npm run validate` está en verde.
+- [ ] **TAR-16 · Cerrar el cableado y los gates.** *(2 de 3 · la tercera espera aprobación)*
+      **Hecho**: `npm run validate` en **verde** en cada aterrizaje (DoF-6), con `verifica:specs`
+      incluyendo esta spec. Y el pineado de modelo tiene su entrada en `BITACORA-CDC.md` (DoF-7):
+      los adaptadores **reciben** el identificador, y lo que la herramienta aporta es la barrera —
+      `exigeModeloPineado()` rechaza cinco familias de alias autoactualizables **al construir**, no
+      al usar, con prueba. En este repo no hay ningún modelo en producción que pinear, y eso queda
+      declarado en vez de inventar una fila.
+      **Falta**: enrutar la herramienta desde el decision tree de `AGENTS.md`. Es un **CDC estándar
+      (C1)** y está **pendiente de aprobación humana explícita**. El trabajo está hecho y medido —
+      diff de 10 líneas, capa A 105/105, capa B 22/22, `validate` EXIT 0, contexto en presupuesto
+      (total 76 % de 12000) — pero la aprobación no se sustituye por un «continúa»: sería
+      exactamente el fallo que C1 existe para cazar.
       → cubre DoF-6 · DoF-7
 
 ## Bloqueadas por medición
