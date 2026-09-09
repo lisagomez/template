@@ -76,6 +76,16 @@ Usuario dice algo
     ├── "Quiero convertir una idea vaga en un prompt para /goal"
     |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
     |
+    ├── "Extraer datos de facturas / documentos / PDF / escaneos / fotos"
+    |   "leer codigos de barras o QR" / "digitalizar papeles" / "capturar datos"
+    |       → Herramienta YA CONSTRUIDA: `tools/extractor-documental/`
+    |         Nucleo sin dependencias; el motor de OCR y el almacen se INYECTAN, asi que la
+    |         decision de si el documento sale del perimetro (C4) es del proyecto, no de ella.
+    |         Instalar: `npm run empaqueta extractor-documental` y el tarball que deja
+    |         Que hace: `docs/SDD-extractor-documental.md` · `.claude/specs/007-extractor-documental/`
+    |         OJO: los umbrales de confianza y similitud NO vienen puestos y son obligatorios.
+    |         Se MIDEN sobre el corpus real (TAR-17, TAR-25): a ojo fallan en las dos direcciones
+    |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
     |       → Ejecutar skill CREAR-HERRAMIENTA

@@ -3122,3 +3122,53 @@ aprovechaban. Ya no depende de la costumbre.
   hechos y en verde; falta la aprobación humana explícita, que no se sustituye por un «continúa».
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — implementación de la spec 007
   autorizada en sesión del 2026-09-09
+
+---
+
+### 2026-09-09 — `AGENTS.md`: el extractor documental entra en el decision tree — radio: sistema
+- **Cambio**: 10 líneas nuevas en el decision tree de `AGENTS.md`, más las 10 espejo en `GEMINI.md`
+  (**regeneradas** con `npm run sincroniza:gemini`, no escritas a mano — el verificador rechaza un
+  espejo editado a mano). Enrutan a `tools/extractor-documental/` ante «extraer datos de facturas /
+  documentos / PDF / escaneos», «leer códigos de barras o QR», «digitalizar papeles».
+  La entrada dice tres cosas además de la ruta: que el motor y el almacén se **inyectan** —así que
+  si el documento sale del perímetro lo decide el proyecto, no la herramienta (C4)—, cómo
+  instalarla, y que **los umbrales no vienen puestos y se miden**.
+- **Motivo**: TAR-16 de la spec 007 (DoF-6). Sin esta entrada la herramienta existe, se empaqueta y
+  se instala, pero el agente no la encuentra: habría que nombrársela. Una capacidad que solo
+  aparece si el humano ya sabe que está es media capacidad.
+- **Por qué la línea de los umbrales está en el decision tree y no solo en el README**: es el
+  aprendizaje del 2026-08-23 aplicado — *un control escrito solo en un documento referenciado no
+  dispara*. Quien enrute hacia esta herramienta tiene que leer ahí que TAR-17 y TAR-25 siguen sin
+  medir, o los fijará a ojo, que es exactamente lo que esas tareas están bloqueadas para impedir.
+- **Coste declarado**: invalida el caché de prefijo una vez, y el suelo por sesión sube de **8908 a
+  9128 tokens** (74 % → 76 % de 12000). `CLAUDE.md` queda al 65 % y `GEMINI.md` al 52 %.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo)
+- **Regresión**: `npm run regresion` — C2 capa A **105/105 — promovible**.
+  `npm run regresion -- --trampa` — C2 capa B **22/22 — promovible**.
+  `npm run validate` **EXIT 0** · `verify:gobernanza` **152/152** · `verifica:specs` **64/64** ·
+  `audita:secretos` limpio · `mide:contexto` dentro de presupuesto · 353 pruebas de la herramienta
+  en verde. Las corridas en sesión fría de los casos-trampa no se relanzaron: el cambio añade una
+  rama de enrutado y no toca ningún control ni ningún caso del corpus.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aprueba CDC»)
+  en sesión del 2026-09-09, tras ver el diff completo, las dos capas de regresión y la medición de
+  contexto. La propuesta se presentó y se **descartó una primera vez**; no se dio por aprobada con
+  un «continúa» intermedio.
+
+---
+
+### 2026-09-09 — cierre de la spec 007 (extractor documental) — radio: n/a (acta)
+- **Estado**: **45 de 48 tareas**. 353 pruebas en verde, sin red, sin base de datos y sin
+  navegador. Ocho subpaths que se instalan e importan en un proyecto limpio.
+- **Las tres que quedan abiertas, y por qué NO se cierran**: TAR-17 (umbral de confianza), TAR-25
+  (umbral de similitud) y TAR-34 (parámetros de la ráfaga del escáner) están **bloqueadas por
+  medición**. Este entorno no tiene corpus, ni catálogos reales, ni un lector físico. Fijarlos a
+  ojo falla en las dos direcciones —o llenan la cola de revisión de ruido, o dejan pasar errores
+  con confianza alta— y marcarlas sería **inventar el número**. Mientras tanto no bloquean nada:
+  los tres son parámetros **obligatorios y sin default**, así que el consumidor no puede olvidarse
+  de medirlos. Cerrarlas exige un piloto sobre documentos reales.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (es un acta de estado, no un cambio de comportamiento)
+- **Regresión**: la de la entrada anterior, sobre el mismo árbol.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — implementación de la spec 007
+  autorizada en sesión del 2026-09-09
