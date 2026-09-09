@@ -1,5 +1,6 @@
 {
   "_comentario": "Presupuesto de contexto de la fabrica (C8). Lo vigila scripts/mide-contexto.mjs, que corre dentro de npm run validate. Los presupuestos NO son aspiracionales: se fijaron sobre la medicion real del 2026-08-23 con aire para crecer. Un presupuesto por debajo de lo actual seria rojo el primer dia; uno muy por encima es teatro.",
+  "_excepcion_2026_09_09": "Seis de los diez topes se doblaron ese dia por decision de la duena (los que iban al 85 % o mas: descripciones, por_regla, GEMINI.md, por_skill, suma de skills y mcp). Cada uno lleva su `_subida_2026_09_09` al lado. Se anota aqui arriba porque, medidos contra la frase anterior, esos seis QUEDAN del lado del teatro: sus mediciones caen al 42-49 % y no volveran a avisar hasta duplicarse. Los cuatro que sujetan el suelo real de cada sesion —presupuesto total (12000), CLAUDE.md (8000), MEMORY.md (800) y suma de rules (6000)— se dejaron intactos a proposito: son los que siguen siendo sensor. Leer la CIFRA de cada corrida, no solo el verde.",
   "calibracion": {
     "_comentario": "De donde sale el ratio. Sin esto el contador seria un numero inventado con formato de medicion.",
     "metodo": "chars / ratio, calibrado contra el tokenizador BPE o200k_base sobre TODO el markdown versionado de este repo",
@@ -26,13 +27,17 @@
         "CLAUDE.md": 8000,
         ".claude/memory/MEMORY.md": 800
       },
-      "presupuesto_descripciones": 3500
+      "medido_2026_09_09": 8908,
+      "presupuesto_descripciones": 7000,
+      "_subida_2026_09_09": "3500 -> 7000. Decision de la duena: doblar el margen de los seis topes que iban al 85 % o mas, para que el gate deje de frenar el crecimiento. Aqui lo medido era 3335 (95 %) y pasa al 48 %. Se dice sin adornarlo: este tope deja de ser un sensor apretado y no volvera a avisar hasta que las descripciones se dupliquen. La senal util mientras tanto es la CIFRA MEDIDA de cada corrida, no el verde. El total siempre-presente (12000) NO se toca: ahi sigue habiendo margen real que vigilar, y es el techo que de verdad importa."
     },
     "condicional": {
       "_comentario": "`.claude/rules/*.md` cargan por `paths:` SOLO al tocar los archivos que declaran (Claude Code). NO entra en el total siempre-presente: es lo que salio de AGENTS.md el 2026-08-26 para bajar el suelo (7480 -> ver medido). En opencode cargan siempre via opencode.json, asi que en ese arnes el ahorro es cero y esta cifra se suma al suelo — se declara, no se vende. Tope por regla: una rule que se acerque al presupuesto de CLAUDE.md dejo de ser condicional en la practica.",
       "glob": ".claude/rules/*.md",
       "medido_2026_08_26": 3335,
-      "presupuesto_por_regla": 2000,
+      "medido_2026_09_09": 4079,
+      "presupuesto_por_regla": 4000,
+      "_subida_2026_09_09": "2000 -> 4000. `aprendizajes-gobernanza.md` estaba al 97 % (1938) y bloqueaba el proximo aprendizaje que se escribiera. Pasa al 48 %. Ojo con el efecto de lado, que es real: el tope por regla existia para que una rule que se acercara al presupuesto de CLAUDE.md (8000) dejara de ser condicional en la practica. Con 4000 una sola regla puede llegar a la mitad de ese peso; en opencode, donde las rules cargan SIEMPRE, eso se paga en cada sesion. Por eso `presupuesto_suma` (6000) se deja quieto: es el que ahora sujeta el nivel, y hoy va al 68 %.",
       "presupuesto_suma": 6000
     },
     "espejo": {
@@ -43,9 +48,11 @@
       "medido_2026_08_23": 2784,
       "medido_2026_08_25": 3401,
       "por_archivo": {
-        "GEMINI.md": 4500
+        "GEMINI.md": 9000
       },
       "medido_2026_08_26": 4067,
+      "medido_2026_09_09": 4443,
+      "_subida_2026_09_09": "4500 -> 9000. Era el mas apretado de todos: 4443 de 4500, el 99 %, y el 2026-09-05 ya se paso al 102 % y tumbo `validate` (ver BITACORA-CDC). Pasa al 49 %. La razon de fondo no ha cambiado desde la subida del 08-26: este espejo se GENERA de AGENTS.md con las secciones que obligan VERBATIM, asi que su tamano no es negociable por recorte — recortar aqui seria desactivar controles en las sesiones de ese arnes para ganar tokens, que es el intercambio equivocado. Lo que cambia es que ya no habra aviso temprano: el archivo es derivado, asi que el sensor real de su crecimiento es el de AGENTS.md/CLAUDE.md, que sigue apretado a proposito.",
       "_subida_2026_08_26": "4000 -> 4500. Desde hoy GEMINI.md se GENERA desde AGENTS.md (scripts/sincroniza-gemini.mjs) con las secciones que obligan VERBATIM: el decision tree entero (antes iba condensado a mano) es lo que sube 3459 -> 4067. Un espejo derivado no puede divergir; uno condensado a mano ya lo hacia. Aire de ~10 %: la siguiente regla nueva entra sin tocar esto, la tercera obliga a decidir.",
       "_subida_2026_08_25": "3500 -> 4000. Decision consciente, no descuido: el crecimiento son REGLAS (escalera CLI-first + las cuatro de los CLIs), que es exactamente el contenido que este espejo existe para llevar — una sesion de Gemini sin ellas se salta la palanca entera. De los ~11900 chars del archivo, 4372 son Reglas de Codigo: recortar ahi seria desactivar controles para ganar tokens, que es el intercambio equivocado. Y este nivel NO entra en el total siempre-presente: se paga solo en sesiones de ese arnes."
     },
@@ -53,8 +60,9 @@
       "_comentario": "Los servidores MCP inyectan los esquemas de sus herramientas en CADA sesion, se usen o no. Es el gasto que este presupuesto no veia: vigilaba markdown, y resulta que cinco servidores cuestan casi el DOBLE que todas las instrucciones juntas. La medicion no se hace en el gate (necesita red y `npx`, y `validate` corre sin red): se hace con `node scripts/mide-mcp.mjs`, que deja el artefacto fechado, y aqui solo se lee. Sin artefacto NO es rojo —un repo recien clonado no ha medido— pero se imprime 'desconocido', nunca cero.",
       "artefacto": ".claude/imprenta/medicion-mcp.json",
       "medido_2026_08_25": 20363,
-      "presupuesto": 24000,
-      "_sobre_el_presupuesto": "24000 = lo medido (20363, cinco servidores) mas aire para uno mas. NO cubre los cuatro que necesitan credenciales: el total real es mayor y esa parte sigue sin medir. Un tope por debajo de lo medido seria rojo el primer dia; uno muy por encima es teatro.",
+      "presupuesto": 48000,
+      "_sobre_el_presupuesto": "48000. Hasta el 2026-09-09 fueron 24000 = lo medido (20363, cinco servidores) mas aire para uno mas. NO cubre los cuatro que necesitan credenciales: el total real es mayor y esa parte sigue sin medir.",
+      "_subida_2026_09_09": "24000 -> 48000. Es la subida que peor se lleva con el criterio de este archivo ('uno muy por encima es teatro') y se registra como lo que es. Dos motivos por los que aqui duele mas que en los otros cinco topes: (1) lo medido son CINCO servidores y hay CUATRO sin medir por falta de credenciales, asi que el 20363 ya era un suelo, no el total — doblar el tope amplia el hueco entre lo que se vigila y lo que se paga; (2) este es el gasto MAYOR de todos, casi el doble que todas las instrucciones juntas, y era el unico freno automatico a enchufar un MCP mas. Lo que NO cambia: la palanca sigue siendo por servidor y por frecuencia de uso (un MCP usado en 1 de cada 20 sesiones cuesta 20 veces mas que el CLI equivalente), y esa decision ahora depende de que alguien la tome, no de que el gate la fuerce.",
       "_como_bajarlo": "La decision es POR SERVIDOR y segun frecuencia de uso, no global: un MCP que se usa en 1 de cada 20 sesiones cuesta 20 veces mas que el CLI equivalente invocado una vez. Ver docs/SDD-imprenta-de-clis.md §2.3."
     },
     "por_invocacion": {
@@ -64,8 +72,14 @@
         "total": 51918,
         "mayor": 6490
       },
-      "presupuesto_por_skill": 8000,
-      "presupuesto_suma": 65000
+      "medido_2026_09_09": {
+        "total": 57969,
+        "mayor": 6796,
+        "mayor_nombre": "add-login"
+      },
+      "presupuesto_por_skill": 16000,
+      "presupuesto_suma": 130000,
+      "_subida_2026_09_09": "por_skill 8000 -> 16000 (medido 6796, el 85 %, pasa al 42 %) y suma 65000 -> 130000 (medido 57969, el 89 %, pasa al 45 %). De los seis topes doblados estos son los mas defendibles: el cuerpo de un SKILL.md solo se carga al invocar ESE skill, asi que la suma nunca se paga entera en una sesion y es mas un indicador de inventario que un coste. El que si es coste real es `por_skill`, y ahi 16000 es mucho: un skill de ese tamano se come mas que todo el contexto base de una sesion (8908). Si algun dia un skill se acerca de verdad a 16000, el problema no sera el tope sino el skill."
     }
   }
 }
