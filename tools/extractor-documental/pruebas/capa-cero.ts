@@ -1,6 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { leeCapaCero, extraeConCapaCero, extraeTextoDeContenido, pareceTexto } from '../dist/capa-cero.js'
+import {
+  leeCapaCero,
+  extraeConCapaCero,
+  extraeTextoDeContenido,
+  pareceTexto,
+  cuentaPaginasPdf,
+} from '../dist/capa-cero.js'
 import type { MotorOcr } from '../dist/puertos.js'
 import type { PaginaExtraida } from '../dist/tipos.js'
 
@@ -152,6 +158,32 @@ test('el hexadecimal con BOM se lee como UTF-16BE', () => {
 
 test('los escapes de una cadena literal se respetan', () => {
   assert.match(extraeTextoDeContenido('(Total \\(IVA\\): 100) Tj'), /Total \(IVA\): 100/)
+})
+
+// --- Contar paginas: el `null` es la parte importante -------------------------------------------
+
+test('cuenta las paginas por /Count del arbol', () => {
+  const pdf = bytes('%PDF-1.7\n1 0 obj\n<< /Type /Pages /Count 12 >>\nendobj\n%%EOF')
+  assert.equal(cuentaPaginasPdf(pdf), 12)
+})
+
+test('si no hay /Count, cuenta los objetos /Type /Page', () => {
+  const pdf = bytes('%PDF-1.7\n2 0 obj\n<< /Type /Page >>\nendobj\n3 0 obj\n<< /Type /Page >>\nendobj\n%%EOF')
+  assert.equal(cuentaPaginasPdf(pdf), 2)
+})
+
+test('/Type /Pages no se confunde con /Type /Page', () => {
+  const pdf = bytes('%PDF-1.7\n1 0 obj\n<< /Type /Pages >>\nendobj\n2 0 obj\n<< /Type /Page >>\nendobj\n%%EOF')
+  assert.equal(cuentaPaginasPdf(pdf), 1)
+})
+
+test('si las dos vias discrepan devuelve null, y no un numero a medias', () => {
+  const pdf = bytes('%PDF-1.7\n1 0 obj\n<< /Type /Pages /Count 9 >>\nendobj\n2 0 obj\n<< /Type /Page >>\nendobj\n%%EOF')
+  assert.equal(cuentaPaginasPdf(pdf), null, 'adivinar mal parte el documento por donde no toca')
+})
+
+test('lo que no es PDF no tiene paginas que contar', () => {
+  assert.equal(cuentaPaginasPdf(bytes('hola')), null)
 })
 
 test('Td separa renglones, para que una factura no salga en una sola linea', () => {

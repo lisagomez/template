@@ -17,6 +17,10 @@
     "./motores/openai-compat": {
       "types": "./dist/motores/openai-compat.d.ts",
       "import": "./dist/motores/openai-compat.js"
+    },
+    "./motores/mistral": {
+      "types": "./dist/motores/mistral.d.ts",
+      "import": "./dist/motores/mistral.js"
     }
   },
   "files": [

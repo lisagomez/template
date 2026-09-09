@@ -2,8 +2,8 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**158 pruebas**, sin red, sin base de datos y sin navegador), y con él la capa 0 y el primer
-> adaptador de motor. La UI, la cámara, la persistencia y el empaquetado siguen abiertos.
+> (**185 pruebas**, sin red, sin base de datos y sin navegador), y con él la capa 0 y los dos
+> adaptadores de motor. La UI, la cámara, la persistencia y el empaquetado siguen abiertos.
 
 ## Cerradas
 
@@ -116,6 +116,26 @@
       la respuesta aparecen en ningún mensaje de error, y hay una prueba que lo exige.
       → cubre RF-10 · RF-24
 
+- [x] **TAR-8 · Adaptador de OCR por API.**
+      → `src/motores/mistral.ts` — mismo puerto, límites publicados declarados (50 MB, 1000
+      páginas, 8 por anotación). **Trocea por páginas**: `planificaEnvio()` es una función pura y
+      probada aparte, porque trocear mal no da error — parte el documento por donde no toca y
+      pierde la correspondencia de página en silencio. Por eso `traduceRespuesta()` **remapea los
+      índices locales de cada trozo al global**, región incluida: sin eso la página 9 vuelve como
+      página 1 y la cita apunta al sitio equivocado.
+      **Por tamaño NO trocea, y se dice en vez de fingirlo**: partir los bytes de un PDF exige
+      reescribirlo y eso no es de este paquete; lo que hace es rechazarlo antes de gastar la
+      llamada, con el peso y el límite en el mensaje.
+      Y el detalle que no se puede inventar: la anotación de Mistral **no trae confianza por
+      campo**, así que un campo sin ella sale con `confianza: 0` — que no es «seguro que está
+      mal» sino «el motor no dijo nada», y es el único valor que garantiza que pase por revisión
+      humana con cualquier umbral. Ponerle 1 se saltaría la cola entera, que es el control.
+      **Desviación declarada** de la tabla §4 del SDD: habla por `fetch`, no por
+      `@mistralai/mistralai`. El SDK no aporta nada en este flujo, sin dependencia no hay versión
+      que pinear, y sobre todo TAR-15 instala el tarball en un proyecto limpio e importa cada
+      subpath — uno que importe un peer ausente revienta justo ahí.
+      → cubre RF-7 · RF-24
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -126,10 +146,11 @@
 - [ ] **TAR-1 · Andamio del paquete.** *(parcial)*
       Hecho: existe `tools/extractor-documental/` con `type: "module"`, `sideEffects: false`,
       `engines.node`, `files` y cero `dependencies` — vigilado por `pruebas/contrato.ts`.
-      `exports` declara ya `.`, `./plugin` y `./motores/openai-compat`, y **una prueba nueva
-      verifica que todo subpath declarado apunta a un fichero que existe**: era la comprobación
-      que faltaba para que la regla de abajo dejara de depender de que alguien se acordara.
-      **Falta**: los subpaths de `./react`, `./motores/mistral`, `./almacenes/*` y `./react/*`,
+      `exports` declara ya `.`, `./plugin`, `./motores/openai-compat` y `./motores/mistral`, y
+      **una prueba nueva verifica que todo subpath declarado apunta a un fichero que existe**: era
+      la comprobación que faltaba para que la regla de abajo dejara de depender de que alguien se
+      acordara.
+      **Falta**: los subpaths de `./react`, `./react/lienzo`, `./react/camara` y `./almacenes/*`,
       que no se declaran hasta que existan — un `exports` que apunta a un fichero inexistente pasa
       el build y revienta en el proyecto de destino, que es justo el fallo que el empaquetador busca.
       → cubre DoF-1 · RF-22
@@ -141,11 +162,6 @@
       **Falta**: la prueba de que se importa en un proyecto sin React instalado, que es la
       integración real de TAR-15.
       → cubre RF-1 · RF-2 · RF-3
-
-- [ ] **TAR-8 · Adaptador de OCR por API.**
-      Hecho cuando: `./motores/mistral` implementa el mismo puerto, trocea por tamaño y por
-      páginas antes de enviar, y su peerDependency es opcional.
-      → cubre RF-7 · RF-24
 
 - [ ] **TAR-10 · Ingesta en la UI.**
       Hecho cuando: `ZonaDeIngesta` acepta botón, arrastre y selección de carpeta; el arrastre de

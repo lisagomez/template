@@ -131,5 +131,5 @@ export type { TarifaDelMotor, Estimacion, OpcionesDeEstimacion } from './costes.
 export { aCsv, neutralizaFormula, registraExportacion, BOM_UTF8 } from './csv.js'
 export type { ColumnaCsv, RegistroDeExportacion } from './csv.js'
 
-export { leeCapaCero, extraeConCapaCero, extraeTextoDeContenido, pareceTexto } from './capa-cero.js'
+export { leeCapaCero, extraeConCapaCero, extraeTextoDeContenido, pareceTexto, cuentaPaginasPdf } from './capa-cero.js'
 export type { ResultadoCapaCero, ExtraccionConCapaCero } from './capa-cero.js'

@@ -253,6 +253,29 @@ export async function leeCapaCero(pdf: Uint8Array): Promise<ResultadoCapaCero> {
   return { hayTexto: true, paginas, motivo: null }
 }
 
+/**
+ * Cuenta las paginas de un PDF, o devuelve `null` si no lo puede saber con certeza.
+ *
+ * El `null` es la parte importante y no un caso de borde: quien trocea por paginas necesita saber
+ * cuantas hay, y **adivinar mal el numero parte el documento por donde no toca**. Devolver un
+ * numero inventado convertiria un troceo en una perdida de paginas silenciosa; devolver `null`
+ * hace que quien llama mande el documento entero y deje decidir a la API, que es lo correcto
+ * cuando no se sabe.
+ *
+ * Se prefiere `/Count` del nodo raiz del arbol de paginas; si no aparece, se cuentan los objetos
+ * `/Type /Page`. Si las dos vias discrepan, tampoco se sabe: `null`.
+ */
+export function cuentaPaginasPdf(pdf: Uint8Array): number | null {
+  if (pdf.length < 5 || aLatin1(pdf.subarray(0, 5)) !== '%PDF-') return null
+  const texto = aLatin1(pdf)
+  const cuentas = [...texto.matchAll(/\/Type\s*\/Pages\b[^]{0,400}?\/Count\s+(\d+)/g)].map((m) => Number(m[1]))
+  const objetos = [...texto.matchAll(/\/Type\s*\/Page(?![sA-Za-z])/g)].length
+  const porCount = cuentas.length > 0 ? Math.max(...cuentas) : null
+  if (porCount !== null && objetos > 0 && porCount !== objetos) return null
+  if (porCount !== null) return porCount
+  return objetos > 0 ? objetos : null
+}
+
 export interface ExtraccionConCapaCero {
   paginas: PaginaExtraida[]
   /** `true` cuando se resolvio sin gastar una llamada al motor. */
