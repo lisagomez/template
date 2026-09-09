@@ -3026,3 +3026,49 @@ aprovechaban. Ya no depende de la costumbre.
   casos-trampa no se relanzaron: el cambio no toca ningún control ni ningún caso del
   corpus, solo añade una referencia documental a la plantilla.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización dada en sesión del 2026-09-08
+
+---
+
+### 2026-09-09 — presupuesto de contexto: seis topes al doble — radio: menor
+- **Cambio**: `.claude/presupuesto-contexto.json`. Se doblan los **seis** topes que la corrida
+  de hoy dejó al 85 % o más. Los otros cuatro **no se tocan**.
+
+  | Tope | Antes | Ahora | Medido hoy | Ocupación |
+  |---|---|---|---|---|
+  | `espejo.por_archivo["GEMINI.md"]` | 4500 | **9000** | 4443 | 99 % → 49 % |
+  | `condicional.presupuesto_por_regla` | 2000 | **4000** | 1938 (`aprendizajes-gobernanza.md`) | 97 % → 48 % |
+  | `siempre.presupuesto_descripciones` | 3500 | **7000** | 3335 (25 skills) | 95 % → 48 % |
+  | `por_invocacion.presupuesto_suma` | 65000 | **130000** | 57969 | 89 % → 45 % |
+  | `por_invocacion.presupuesto_por_skill` | 8000 | **16000** | 6796 (`add-login`) | 85 % → 42 % |
+  | `mcp.presupuesto` | 24000 | **48000** | 20363 (5 de 9 servidores) | 85 % → 42 % |
+
+  **Intactos a propósito**: `siempre.presupuesto` (12000, hoy al 74 %), `CLAUDE.md` (8000,
+  62 %), `MEMORY.md` (800, 78 %) y `condicional.presupuesto_suma` (6000, 68 %) — los cuatro
+  que sujetan el suelo que se paga en **cada** sesión. Cada tope movido lleva su
+  `_subida_2026_09_09` con la razón al lado, y el `_comentario` de cabecera gana un
+  `_excepcion_2026_09_09` para que el archivo no se contradiga: su propia regla dice que un
+  presupuesto "muy por encima es teatro", y estos seis quedan de ese lado.
+- **Motivo**: decisión de la dueña. Los seis topes frenaban el crecimiento con el gate en rojo
+  antes que con una decisión; el 2026-09-05 `GEMINI.md` ya tumbó `validate` al 102 %. Se
+  registra como lo que es —**un aflojamiento deliberado, no una necesidad técnica**— y con su
+  coste anotado: esos seis dejan de avisar hasta que su contenido se duplique. La señal útil
+  mientras tanto es la **cifra medida** de cada corrida, no el verde.
+  El que peor se lleva con el criterio del archivo es `mcp`: lo medido son 5 de 9 servidores
+  (los otros 4 piden credenciales), así que 20363 ya era un suelo y no el total — y era el
+  único freno automático a enchufar un MCP más. Esa palanca (por servidor y por frecuencia de
+  uso, `docs/SDD-imprenta-de-clis.md` §2.3) ahora depende de que alguien la tome.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo)
+- **Regresión**: `npm run validate` **entero en verde** con los topes nuevos (404 verdes,
+  0 rojos). `npm run regresion` — C2 capa A **105/105 — promovible**.
+  `npm run regresion -- --trampa` — C2 capa B **22/22 — promovible**.
+  `npm run verify:gobernanza` — **152/152**. `npm run mide:contexto` — dentro de presupuesto,
+  con las seis ocupaciones en 42-49 % y las cuatro no tocadas en 62-78 %. Las corridas en
+  sesión fría de los casos-trampa no se relanzaron: el cambio no toca ningún control, ningún
+  skill ni ningún caso del corpus — solo mueve umbrales numéricos de un gate.
+- **Revisión trimestral** (la exige la fila "parámetros menores" de `GOBERNANZA.md` §2):
+  **2026-12-09**. Qué mirar ese día: si alguna de las seis ocupaciones volvió a subir de 70 %,
+  y si `mcp` sigue midiendo solo 5 de 9 servidores.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — decisión tomada en sesión del
+  2026-09-09, tras ver el alcance alternativo (tres topes / seis / los diez) y elegir los seis
+  que iban al 85 % o más
