@@ -2,7 +2,7 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**279 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**298 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
 > limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
@@ -298,6 +298,32 @@
       le hace creer que quedó a salvo cuando no.
       → cubre DoF-4 · RF-15 · RF-16
 
+- [x] **TAR-21 · Mapeo campo → columna en la UI.**
+      → `src/react/mapeo.ts` · `columnasOfrecidas()` saca las columnas del **descriptor declarado**
+      y las marca `preexistente`, que es lo que RF-27 pide distinguir. No hay introspección ni
+      falta: §2.6 explica que la única vía exige clave secreta, y una herramienta que pide
+      `service_role` para arrancar amplía el privilegio en todo proyecto que la instale (C7). Un
+      descriptor vacío devuelve lista vacía, y eso es un estado **normal** (§2.8).
+      La bifurcación por `formato` no es una optimización: `resuelveValor` **lanza** ante un
+      identificador a propósito, y este módulo elige la vía correcta antes de llamar.
+      → cubre RF-27 · DoF-8
+
+- [x] **TAR-22 · Flujo del valor huérfano.**
+      → sin coincidencia el dato queda `sin_resolver` y el alta se **propone**, nunca se escribe:
+      `altasPendientes()` devuelve una lista, y una prueba verifica que en el módulo **no existe
+      ninguna función que escriba** (RF-30 no se cumple prometiéndolo, se cumple porque la ruta no
+      está).
+      **Y aquí apareció un hueco real del núcleo, que esta tarea destapó.** `resuelveValor` filtra
+      los candidatos por `>= umbral`, así que cuando se propone un alta —que es precisamente cuando
+      nada alcanzó el umbral— la propuesta llegaba con **cero parecidos**. El comentario del tipo
+      prometía que «los parecidos hacen saltar el duplicado» y en el único caso que importa no
+      había ninguno: el revisor daría de alta «ACME Servicios Industriales» sin ver que «ACME
+      S.A. de C.V.» ya existe, y el flujo que existe para evitar duplicados los estaría creando.
+      El arreglo separa dos preguntas que el código confundía: `resuelveValor` responde *«¿es esta
+      fila?»* —ahí el umbral manda— y `parecidosA()` responde *«¿te suena de algo?»*, sin filtrar,
+      que es lo que hay que enseñar al proponer un alta.
+      → cubre RF-29 · RF-30
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -309,16 +335,6 @@
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
       del adaptador tiene entrada en `BITACORA-CDC.md`, y `npm run validate` está en verde.
       → cubre DoF-6 · DoF-7
-
-- [ ] **TAR-21 · Mapeo campo → columna en la UI.**
-      Hecho cuando: el revisor asocia un campo extraído a una columna de una tabla del descriptor, y
-      lo preexistente se distingue de lo propuesto.
-      → cubre RF-27 · DoF-8
-
-- [ ] **TAR-22 · Flujo del valor huérfano.**
-      Hecho cuando: sin coincidencia, el dato queda `sin_resolver`, se propone el alta con los
-      candidatos parecidos al lado, y **ninguna ruta la escribe** sin confirmación explícita.
-      → cubre RF-29 · RF-30
 
 - [ ] **TAR-23 · Lienzo de modelado.**
       Hecho cuando: **primero** se verifica que `@xyflow/react` monta en React 19 (arrastra

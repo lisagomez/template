@@ -144,10 +144,44 @@ export function resuelveValor(
   return { estado: 'resuelto', candidatos, elegida: candidatos[0].fila }
 }
 
+/**
+ * Las filas mas parecidas a un valor, **sin filtrar por umbral**.
+ *
+ * Existe porque `resuelveValor` y esto responden a preguntas distintas, y confundirlas dejaba un
+ * hueco que se veia justo en el caso que mas importa:
+ *
+ *   - `resuelveValor` pregunta «¿es esta fila?». Ahi el umbral MANDA: por debajo, no lo es.
+ *   - esto pregunta «¿te suena de algo?», que es lo que hay que enseñar al proponer un alta. Ahi el
+ *     umbral estorba: si nada llega al umbral —que es EXACTAMENTE cuando se propone un alta— la
+ *     lista sale vacia, y el revisor da de alta «ACME Servicios Industriales» sin ver que «ACME
+ *     S.A. de C.V.» ya existe. El duplicado que §5.1 quiere evitar, creado por el propio flujo
+ *     que existe para evitarlo.
+ *
+ * Devuelve las mejores por similitud, en orden, con su puntuacion a la vista para que quien mire
+ * pueda juzgar cuanto se parecen de verdad.
+ */
+export function parecidosA(
+  valor: string,
+  filas: readonly FilaDeCatalogo[],
+  cuantos = 3,
+): readonly Candidato[] {
+  return filas
+    .map((fila) => ({ fila, similitud: similitud(valor, fila.etiqueta) }))
+    .filter((c) => c.similitud > 0)
+    .sort((a, b) => b.similitud - a.similitud)
+    .slice(0, Math.max(0, cuantos))
+}
+
 export interface AltaPropuesta {
   catalogo: string
   valor: string
-  /** Los parecidos van CON la propuesta: es lo que hace que el duplicado salte a la vista. */
+  /**
+   * Los parecidos van CON la propuesta: es lo que hace que el duplicado salte a la vista.
+   *
+   * OJO: NO son los candidatos de la resolucion. Cuando se propone un alta es porque ninguno
+   * alcanzo el umbral, asi que aquella lista viene vacia por definicion. Estos salen de
+   * `parecidosA()`, que no filtra por umbral — ver ahi por que.
+   */
   candidatos: readonly Candidato[]
 }
 
