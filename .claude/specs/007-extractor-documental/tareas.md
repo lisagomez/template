@@ -2,7 +2,7 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**298 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**320 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
 > limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
@@ -324,6 +324,31 @@
       que es lo que hay que enseñar al proponer un alta.
       → cubre RF-29 · RF-30
 
+- [x] **TAR-46 · Pantalla de lotes: crear, titular, buscar y recuperar.**
+      → `src/react/pantallas.ts` — el título se **sugiere** del contenido y es editable, con una
+      marca `esSugerido` que existe para un caso concreto: si llegan más documentos **después** de
+      que alguien escribiera su propio título, la sugerencia **no lo pisa**. Sin esa marca habría
+      que elegir entre no actualizar nunca o pisar lo que una persona escribió, que es peor.
+      Obligatorio pero **no único**: dos tandas pueden llamarse igual y eso no es un error (§2.14).
+      → cubre RF-55 · RF-57 · RF-67 · RF-68
+
+- [x] **TAR-47 · Confirmación de coste y exportación en la UI.**
+      → **ver la cifra no es aceptarla**: sin aceptación explícita no se lanza. Y un coste
+      desconocido **no bloquea pero se marca** — bloquear por no saber dejaría la herramienta
+      inservible en cuanto un motor no declare precio, y lanzar en silencio sería gastar sin
+      avisar. `null` se enseña como «desconocido», nunca como «0,00 USD»: misma regla que la
+      contabilidad de tokens y que la estimación de purga.
+      → cubre RF-78 · RF-80
+
+- [x] **TAR-48 · Flujo de supresión con gate humano.**
+      → las tres condiciones de RF-75 se comprueban **por separado** para poder decir cuál falta:
+      decir «no puedes» sin decir qué falta obliga a adivinar, y quien adivina prueba combinaciones
+      hasta que una funciona — lo último que quieres con un borrado.
+      Y RF-63 en código: la retención vencida produce una **lista de candidatos**, no un borrado.
+      Una fecha ilegible **no** se trata como vencida: ante la duda no se propone borrar nada. Una
+      prueba recorre los exports y falla si aparece una función que borre.
+      → cubre RF-75 · RF-63
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -359,21 +384,6 @@
       propia**, no colgando de «la base de datos», y queda escrito que `pg_dump` no los incluye.
       Montar la sincronización es operación del proyecto, no código de la herramienta.
       → hallazgo §2.15 del SDD
-
-- [ ] **TAR-46 · Pantalla de lotes: crear, titular, buscar y recuperar.**
-      Hecho cuando: se crea un lote con título sugerido editable, y se recupera por título o por un
-      identificador extraído.
-      → cubre RF-55 · RF-57 · RF-67 · RF-68
-
-- [ ] **TAR-47 · Confirmación de coste y exportación en la UI.**
-      Hecho cuando: el coste estimado se ve **antes** de lanzar el lote, y la exportación descarga
-      el CSV dejando registro.
-      → cubre RF-78 · RF-80
-
-- [ ] **TAR-48 · Flujo de supresión con gate humano.**
-      Hecho cuando: suprimir exige rol revisor, motivo y confirmación explícita, y ninguna ruta lo
-      dispara automáticamente al vencer la retención.
-      → cubre RF-75 · RF-63
 
 ## Bloqueadas por medición
 

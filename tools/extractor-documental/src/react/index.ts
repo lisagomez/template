@@ -20,3 +20,13 @@ export type { EntradaDeArchivo, ArchivoAplanado, ResultadoDelAplanado } from './
 
 export { columnasOfrecidas, mapeaCampo, altasPendientes, requiereDecisionHumana } from './mapeo.js'
 export type { ColumnaOfrecida, MapeoDeCampo, EstadoDelMapeo, OpcionesDeMapeo } from './mapeo.js'
+
+export {
+  borradorDeLote, editaTitulo, refrescaSugerencia, tituloValido, puedeBuscar,
+  puedeLanzar, totalDelLote, costeLegible,
+  impedimentosParaSuprimir, puedeSuprimir, candidatosPorRetencion, admiteMasDocumentos,
+} from './pantallas.js'
+export type {
+  BorradorDeLote, ConfirmacionDeCoste, PeticionDeSupresion,
+  ImpedimentoDeSupresion, CandidatoAVencer, MotivoSinBusqueda,
+} from './pantallas.js'

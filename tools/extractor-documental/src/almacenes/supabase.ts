@@ -59,8 +59,8 @@ export const ESTADOS_EN_BASE = [
 
 export const CLASES_EN_BASE = ['documento', 'etiqueta', 'evento'] as const
 export const ROLES_EN_BASE = ['operario', 'revisor', 'consulta'] as const
-export const TIPOS_DE_TRABAJO_EN_BASE = ['facturas', 'inventario', 'trazabilidad'] as const
-export const ESTADOS_DE_LOTE_EN_BASE = ['abierto', 'cerrado'] as const
+export const TIPOS_DE_TRABAJO_EN_BASE = ['facturas', 'inventario', 'trazabilidad', 'mixto'] as const
+export const ESTADOS_DE_LOTE_EN_BASE = ['abierto', 'en_revision', 'cerrado'] as const
 
 export interface OpcionesDelAlmacen {
   cliente: ClienteSupabase

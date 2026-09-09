@@ -55,8 +55,11 @@ create table if not exists public.lotes (
   organizacion_id uuid not null references public.organizaciones(id) on delete cascade,
   -- Obligatorio y NO unico: dos tandas pueden llamarse igual y eso no es un error del usuario.
   titulo text not null check (length(trim(titulo)) > 0),
-  tipo_de_trabajo text not null check (tipo_de_trabajo in ('facturas', 'inventario', 'trazabilidad')),
-  estado text not null default 'abierto' check (estado in ('abierto', 'cerrado')),
+  -- Espejo EXACTO de `TipoDeTrabajo` y `EstadoLote` de `src/registros.ts`. La primera version
+  -- dejaba fuera 'mixto' y 'en_revision', que el nucleo SI produce: un lote en revision no se
+  -- habria podido guardar, y el error habria aparecido en produccion como un CHECK violado.
+  tipo_de_trabajo text not null check (tipo_de_trabajo in ('facturas', 'inventario', 'trazabilidad', 'mixto')),
+  estado text not null default 'abierto' check (estado in ('abierto', 'en_revision', 'cerrado')),
   creado_por uuid not null references auth.users(id),
   creado_en timestamptz not null default now(),
   cerrado_en timestamptz
