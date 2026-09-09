@@ -2,11 +2,18 @@
  * Entry point de React. Todo lo de aqui necesita `react`, que es peerDependency OPCIONAL: quien
  * solo use el nucleo no lo instala, y por eso este subpath vive separado de `.`.
  *
- * `aplana` se re-exporta desde aqui aunque NO importe React: toca API del DOM, asi que no puede
- * vivir en el nucleo, pero se prueba sin navegador.
+ * `aplana` y `revision` se re-exportan desde aqui aunque NO importen React: tocan el DOM o son las
+ * decisiones de la vista, asi que no pueden vivir en el nucleo, pero se prueban sin navegador. Ese
+ * reparto es lo que hace que la UI de este paquete tenga pruebas de verdad y no capturas.
  */
 export { ZonaDeIngesta } from './ZonaDeIngesta.js'
 export type { PropiedadesDeIngesta, LoteIngresado } from './ZonaDeIngesta.js'
+
+export { TablaDeRevision } from './TablaDeRevision.js'
+export type { PropiedadesDeRevision } from './TablaDeRevision.js'
+
+export { aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision, disposicionDe } from './revision.js'
+export type { FilaDeRevision } from './revision.js'
 
 export { aplanaEntradas, raicesDe, desdeInput } from './aplana.js'
 export type { EntradaDeArchivo, ArchivoAplanado, ResultadoDelAplanado } from './aplana.js'

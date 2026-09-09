@@ -2,7 +2,7 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**258 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**279 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
 > limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
@@ -263,22 +263,47 @@
       causa.
       → cubre RF-4 · RF-5 · RF-6
 
+- [x] **TAR-11 · Vista de revisión.**
+      → `src/react/TablaDeRevision.tsx` + `src/react/revision.ts` — la confianza y la región se
+      pintan **siempre**, nunca tras un desplegable (RF-11): un dato cuya procedencia hay que ir a
+      buscar es un dato que nadie mira.
+      Y la decisión está **en la firma, no en la implementación**: `umbral` es prop **obligatoria y
+      sin default**. TAR-17 está bloqueada porque ese número se mide, y un valor por defecto aquí
+      sería justo la puerta por la que un número sin medir entraría igual, con apariencia de
+      decisión. Un umbral fuera de [0,1] lanza.
+      Dos reglas más, con prueba: un campo que la plantilla **no conoce se muestra igual**, al
+      final —esconderlo sería peor que el desorden, porque es justo lo que hay que revisar—, y un
+      campo de OCR **sin región** impide validar sin revisión, mientras que uno de código sin
+      región sí vale: un escáner no produce imagen.
+      La cola se enuncia sin adjetivos. `revision_humana` no es un error, y llamarlo fallo es lo
+      que empuja a subir el umbral hasta que la cola desaparece, y con ella el control.
+      → cubre RF-11 · RF-14
+
+- [x] **TAR-12 · Guardar como defecto.**
+      → `disposicionDe()` en `react/revision.ts` + `cargaPlantilla()`/`guardaPlantilla()` en
+      `src/plantilla-por-defecto.ts`. La acción de pantalla persiste **todos** los campos, también
+      los apagados: guardar solo lo visible perdería que alguien deshabilitó algo a propósito y la
+      siguiente tanda lo traería de vuelta — exactamente el trabajo que la plantilla existe para no
+      repetir. Hay una prueba de ida y vuelta que ata las dos mitades.
+      **Esto empezó siendo un hook y dejó de serlo, y el cambio mejoró el diseño.** `usePlantilla`
+      cargaba dentro de un `useEffect` llamando a `setState`; `react-hooks/set-state-in-effect` lo
+      rechazó en el gate. La regla estaba señalando el diseño: metía IO y una condición de carrera
+      —una carga lenta de un tipo pisando la del tipo actual— dentro del árbol de React, justo
+      donde no se puede probar sin navegador. Ahora son dos funciones `async` en el núcleo, sin
+      React ni DOM, probadas con `node --test`.
+      Y la asimetría entre las dos es deliberada: **cargar no lanza** —la revisión funciona sin
+      plantilla, y no poder leer una preferencia no justifica dejar al revisor sin pantalla, pero
+      el motivo se conserva para distinguir «no había» de «no se pudo leer»— mientras que
+      **guardar sí lanza**: fallar al guardar el trabajo de revisión de una persona y no decírselo
+      le hace creer que quedó a salvo cuando no.
+      → cubre DoF-4 · RF-15 · RF-16
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
       default defendible sin medirlo.
 
 ## Abiertas
-
-- [ ] **TAR-11 · Vista de revisión.**
-      Hecho cuando: cada dato muestra su confianza y su región de origen sin desplegar nada, y
-      ofrece guardar, modificar y eliminar.
-      → cubre RF-11 · RF-14
-
-- [ ] **TAR-12 · Guardar como defecto.**
-      Hecho cuando: la acción de pantalla persiste la disposición completa y la siguiente tanda
-      del mismo tipo llega ya con ella aplicada.
-      → cubre DoF-4 · RF-15 · RF-16
 
 - [ ] **TAR-16 · Cerrar el cableado y los gates.**
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
