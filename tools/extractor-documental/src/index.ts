@@ -93,7 +93,7 @@ export type {
   Desalineacion,
 } from './esquema.js'
 
-export { normaliza, similitud, resuelveValor, resuelveIdentificador, proponeAlta } from './reconciliacion.js'
+export { normaliza, similitud, resuelveValor, resuelveIdentificador, proponeAlta, parecidosA } from './reconciliacion.js'
 export type {
   EstadoDeResolucion,
   FilaDeCatalogo,

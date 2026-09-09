@@ -17,3 +17,6 @@ export type { FilaDeRevision } from './revision.js'
 
 export { aplanaEntradas, raicesDe, desdeInput } from './aplana.js'
 export type { EntradaDeArchivo, ArchivoAplanado, ResultadoDelAplanado } from './aplana.js'
+
+export { columnasOfrecidas, mapeaCampo, altasPendientes, requiereDecisionHumana } from './mapeo.js'
+export type { ColumnaOfrecida, MapeoDeCampo, EstadoDelMapeo, OpcionesDeMapeo } from './mapeo.js'
