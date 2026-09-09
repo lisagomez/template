@@ -2,8 +2,8 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**119 pruebas**, sin red, sin base de datos y sin navegador). La UI, la cámara, los adaptadores
-> y el empaquetado siguen abiertos.
+> (**158 pruebas**, sin red, sin base de datos y sin navegador), y con él la capa 0 y el primer
+> adaptador de motor. La UI, la cámara, la persistencia y el empaquetado siguen abiertos.
 
 ## Cerradas
 
@@ -94,6 +94,28 @@
       → `src/csv.ts` · BOM UTF-8 y neutralización de celdas que Excel ejecutaría; la exportación
       queda registrada. Cubre DoF-20 · RF-80..RF-82.
 
+- [x] **TAR-9 · Capa 0: PDF que ya trae texto.**
+      → `src/capa-cero.ts` — `leeCapaCero()` infla los flujos con `DecompressionStream` (API web,
+      cero dependencias) y lee los operadores `Tj`/`TJ`/`'`/`"`. `extraeConCapaCero()` es el
+      orquestador, y `pruebas/capa-cero.ts` **cuenta las llamadas**: 0 con un PDF que trae texto,
+      1 con un escaneo. El matiz que decide la corrección: **pedir anotaciones llama al motor
+      aunque haya texto**, porque la capa 0 da texto y no campos con confianza y región — devolver
+      campos vacíos «porque había texto» sería dar por extraída una factura sin un solo dato.
+      Toda duda (PDF cifrado, filtro no soportado, texto que no supera la prueba de
+      imprimibilidad) resuelve **llamando al motor**: un falso negativo cuesta dinero, un falso
+      positivo mete datos corruptos con apariencia de exactos y sin pasar por la cola.
+
+- [x] **TAR-7 · Adaptador de OCR autohospedado.**
+      → `src/motores/openai-compat.ts` — `fetch` y nada más, verificado por una prueba de contrato
+      nueva que **falla si el archivo importa cualquier módulo externo**. El modelo va pineado: los
+      alias autoactualizables (`latest`, `stable`, `current`, `default`, `head`) se rechazan **al
+      construir**, no al usar (C1). La respuesta se valida campo a campo: una `confianza: "alta"`
+      o un `95` en escala 0-100 descartan el campo en vez de romper la comparación contra el
+      umbral en silencio, y una región fuera de rango se descarta entera en lugar de recortarse
+      —recortarla citaría un sitio que no es de donde salió el dato—. Ni la clave ni el cuerpo de
+      la respuesta aparecen en ningún mensaje de error, y hay una prueba que lo exige.
+      → cubre RF-10 · RF-24
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -104,9 +126,12 @@
 - [ ] **TAR-1 · Andamio del paquete.** *(parcial)*
       Hecho: existe `tools/extractor-documental/` con `type: "module"`, `sideEffects: false`,
       `engines.node`, `files` y cero `dependencies` — vigilado por `pruebas/contrato.ts`.
-      **Falta**: `exports` solo declara `.` y `./plugin`. Los otros cuatro subpaths no se declaran
-      hasta que existan: un `exports` que apunta a un fichero inexistente pasa el build y revienta
-      en el proyecto de destino, que es justo el fallo que el empaquetador busca.
+      `exports` declara ya `.`, `./plugin` y `./motores/openai-compat`, y **una prueba nueva
+      verifica que todo subpath declarado apunta a un fichero que existe**: era la comprobación
+      que faltaba para que la regla de abajo dejara de depender de que alguien se acordara.
+      **Falta**: los subpaths de `./react`, `./motores/mistral`, `./almacenes/*` y `./react/*`,
+      que no se declaran hasta que existan — un `exports` que apunta a un fichero inexistente pasa
+      el build y revienta en el proyecto de destino, que es justo el fallo que el empaquetador busca.
       → cubre DoF-1 · RF-22
 
 - [ ] **TAR-5 · Manifiesto del plugin.** *(parcial)*
@@ -117,20 +142,10 @@
       integración real de TAR-15.
       → cubre RF-1 · RF-2 · RF-3
 
-- [ ] **TAR-7 · Adaptador de OCR autohospedado.**
-      Hecho cuando: `./motores/openai-compat` habla por `fetch` con un vLLM, valida la respuesta
-      contra un esquema antes de devolverla, y el identificador del modelo va pineado.
-      → cubre RF-10 · RF-24
-
 - [ ] **TAR-8 · Adaptador de OCR por API.**
       Hecho cuando: `./motores/mistral` implementa el mismo puerto, trocea por tamaño y por
       páginas antes de enviar, y su peerDependency es opcional.
       → cubre RF-7 · RF-24
-
-- [ ] **TAR-9 · Capa 0: PDF que ya trae texto.**
-      Hecho cuando: un PDF con capa de texto nativa se resuelve sin llamar al motor, y una prueba
-      lo demuestra contando las llamadas.
-      → decisión del plan · ahorra entre el 30 % y el 50 % del corpus
 
 - [ ] **TAR-10 · Ingesta en la UI.**
       Hecho cuando: `ZonaDeIngesta` acepta botón, arrastre y selección de carpeta; el arrastre de

@@ -13,6 +13,10 @@
     "./plugin": {
       "types": "./dist/plugin.d.ts",
       "import": "./dist/plugin.js"
+    },
+    "./motores/openai-compat": {
+      "types": "./dist/motores/openai-compat.d.ts",
+      "import": "./dist/motores/openai-compat.js"
     }
   },
   "files": [
