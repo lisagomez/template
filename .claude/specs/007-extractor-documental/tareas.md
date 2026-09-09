@@ -2,7 +2,7 @@
 
 > Una casilla marcada apunta a un artefacto que **existe y se verificó**; marcar por adelantado es
 > exactamente cómo un plan deja de significar algo. El núcleo puro está construido y probado
-> (**338 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
+> (**353 pruebas**, sin red, sin base de datos y sin navegador). Con él están la capa 0, los dos
 > adaptadores de motor, la propuesta de modelo con su barrera anti-`ALTER`, y el paquete
 > **empaquetado y probado de verdad**: `npm run empaqueta` instala el tarball en un proyecto
 > limpio e importa sus **ocho** subpaths. La persistencia (esquema, adaptadores y bucket privado)
@@ -374,6 +374,29 @@
       elimina — y un falso positivo se **come** lo que alguien estaba escribiendo.
       → cubre RF-39 · RF-40
 
+- [x] **TAR-23 · Lienzo de modelado.** *(con una salvedad declarada)*
+      → `src/react/lienzo.ts` + `LienzoDeModelado.tsx`.
+      **La salvedad, dicha tal cual**: la tarea pedía **verificar primero** que `@xyflow/react`
+      monta en React 19. Esa verificación **no se ha hecho** — no está instalado y este entorno no
+      tiene con qué montar un componente (ni jsdom, ni testing-library, ni navegador). Así que no
+      se afirma que falle: se afirma que **no se comprobó**, y se aplica el respaldo que la propia
+      tarea prevé. Si alguien lo verifica de verdad algún día, cambiarlo es sustituir la capa de
+      pintado, no las decisiones — que viven aparte y están probadas.
+      **Se copia de Power BI** (§2.7): tarjeta por entidad, relación al arrastrar columna sobre
+      columna con su detalle antes de crearla, cardinalidad en los extremos, y línea sólida frente
+      a punteada — punteada cuando apunta a una tabla que **ya existe**, porque ésa no se crea, se
+      referencia.
+      **No se copia la dirección de filtro cruzado**, y hay una prueba que verifica que no existe:
+      en Power BI describe cómo se propagan los filtros al calcular agregaciones, un concepto de
+      BI. Aquí lo que hay es cardinalidad y sentido de la clave foránea. Traer esa perilla sería
+      ofrecer un control que no gobierna nada — peor que no tenerlo, porque quien lo mueve cree
+      haber decidido algo.
+      Dos detalles del pintado: lo preexistente se distingue por **posición, borde y texto**, no
+      solo por color —quien no distinga esos colores, o use un lector de pantalla, lo necesita—; y
+      las tarjetas son HTML con las líneas en SVG porque `draggable` no es atributo de `<text>`, y
+      un lienzo SVG puro obligaría a reimplementar el arrastre a mano.
+      → cubre RF-32 · RF-33 · RF-34
+
 - [x] **TAR-20 · Resolución de valores por similitud.**
       → `src/reconciliacion.ts` — Dice sobre bigramas, `resuelto | ambiguo | sin_resolver`, y
       `elegida` es `null` salvo en `resuelto`. El umbral es parámetro **obligatorio**: no hay
@@ -385,13 +408,6 @@
       Hecho cuando: la herramienta está enrutada desde el decision tree de `AGENTS.md`, el modelo
       del adaptador tiene entrada en `BITACORA-CDC.md`, y `npm run validate` está en verde.
       → cubre DoF-6 · DoF-7
-
-- [ ] **TAR-23 · Lienzo de modelado.**
-      Hecho cuando: **primero** se verifica que `@xyflow/react` monta en React 19 (arrastra
-      `zustand`, y la incompatibilidad reportada venía de zustand 4); si no monta, se cae a SVG
-      propio. Luego: tarjeta por entidad, relación al arrastrar campo sobre columna con su detalle
-      antes de crearla, y cardinalidad en los extremos. Sin dirección de filtro cruzado.
-      → cubre RF-32 · RF-33 · RF-34
 
 - [ ] **TAR-44 · La segunda vía de respaldo del bucket.**
       Hecho cuando: el inventario de `BUSINESS_LOGIC.md` §4 lleva los originales como **línea

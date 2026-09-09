@@ -36,3 +36,9 @@ export type { Pulsacion, ConfiguracionDelEscaner, LecturaDetectada, ViaDeDetecci
 
 export { lectorDeCamara, fabricaDelNavegador } from './camara.js'
 export type { OpcionesDeCamara, FabricaDeDetector, DetectorNativo, LectorConMotor, MotorDeCodigos } from './camara.js'
+
+export { LienzoDeModelado } from './LienzoDeModelado.js'
+export type { PropiedadesDelLienzo } from './LienzoDeModelado.js'
+
+export { construyeLienzo, impedimentosDeRelacion, familiaDeTipo, altoDeTarjeta, anchoDeTarjeta } from './lienzo.js'
+export type { Lienzo, TarjetaDeEntidad, LineaDeRelacion, ImpedimentoDeRelacion } from './lienzo.js'
