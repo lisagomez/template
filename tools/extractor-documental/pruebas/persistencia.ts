@@ -71,13 +71,19 @@ test('los roles, igual entre migracion, adaptador y nucleo', () => {
   assert.deepEqual(unionDe('roles.ts', 'Rol').sort(), enSql)
 })
 
-test('los tipos de trabajo del lote son espejo', () => {
-  assert.deepEqual([...TIPOS_DE_TRABAJO_EN_BASE].sort(), valoresDelCheck('lotes', 'tipo_de_trabajo').sort())
+test('los tipos de trabajo: migracion, adaptador y NUCLEO', () => {
+  // La primera version de esta prueba comparaba solo migracion contra adaptador, y las dos
+  // coincidian... en una lista a la que le faltaba `mixto`. Comparar dos copias entre si no
+  // detecta que las dos estan mal: hace falta atarlas a la FUENTE, que es `registros.ts`.
+  const enSql = valoresDelCheck('lotes', 'tipo_de_trabajo').sort()
+  assert.deepEqual([...TIPOS_DE_TRABAJO_EN_BASE].sort(), enSql)
+  assert.deepEqual(unionDe('registros.ts', 'TipoDeTrabajo').sort(), enSql)
 })
 
-test('los estados del lote son espejo, y NO son los del documento', () => {
+test('los estados del lote: los tres del nucleo, y NO son los del documento', () => {
   const deLote = valoresDelCheck('lotes', 'estado').sort()
   assert.deepEqual([...ESTADOS_DE_LOTE_EN_BASE].sort(), deLote)
+  assert.deepEqual(unionDe('registros.ts', 'EstadoLote').sort(), deLote, 'faltaba `en_revision`: un lote en revision no se habria podido guardar')
   assert.notDeepEqual(deLote, valoresDelCheck('documentos', 'estado').sort())
 })
 
