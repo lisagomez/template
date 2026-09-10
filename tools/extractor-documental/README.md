@@ -176,6 +176,16 @@ que significan algo se guarda la lista entera, y del resto solo la cuenta, porqu
 nuevo es rutina y un codigo nuevo en uso de comprobante no lo es. El corte esta MEDIDO: esos doce
 tienen 25 codigos o menos y el siguiente ya es geografia con 66.
 
+Va **fechada por quien publica**, no por el dia en que miraste: el servidor declara su
+`last-modified` y su identificador de version, y los dos se guardan. Eso da dos cosas. La fecha que
+afirma la fuente, que es la unica que sirve para decir "esto valia entonces". Y una comprobacion
+barata: si el identificador no cambio, no se descarga nada — **una decima de segundo en vez de
+5,7 MB**, y una comprobacion cara es una que se deja de correr.
+
+Y la consecuencia que mas rendimiento da: **la serie historica no hay que construirla**. Cada
+sellado deja la referencia anterior en el historial de git, fechada por la fuente. `git log` sobre
+ese fichero ES el repositorio de versiones, sin una sola pieza nueva.
+
 Compara en **las dos direcciones**: lo que el esquema declara y el lector no mapea, y lo que el
 lector mapea y el esquema no declara — que es la peor senal, porque significa que se invento algo o
 que lo quitaron. Distingue los huecos de las **omisiones deliberadas**, para no pedir que arregles
