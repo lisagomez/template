@@ -1,9 +1,13 @@
 # SDD — Extractor documental como herramienta enchufable
 
-**Estado:** **especificado, no construido.** Este documento y la `spec 007` cierran el QUÉ; no
-existe ni una línea de `tools/extractor-documental/`. La calidad de cualquier motor de OCR sobre
-el corpus real sigue siendo **desconocida** — el piloto de medición
-([`INVESTIGACION-OCR-MISTRAL.md`](./INVESTIGACION-OCR-MISTRAL.md) §8) no se ha corrido.
+**Estado:** **construido y ejercitable.** `tools/extractor-documental/` existe: 45 de las 48
+tareas cerradas, 448 pruebas en verde sin red ni credenciales, y un banco de pruebas con base
+embebida que recorre el camino entero (§2.20). Las **tres** tareas abiertas son las de
+calibración —TAR-17, TAR-25 y TAR-34— y siguen bloqueadas a propósito: la calidad de cualquier
+motor de OCR sobre el corpus real sigue siendo **desconocida** porque el piloto de medición
+([`INVESTIGACION-OCR-MISTRAL.md`](./INVESTIGACION-OCR-MISTRAL.md) §8) no se ha corrido. El banco
+**no las acerca**: fabrica datos sintéticos, y un umbral medido sobre datos que uno mismo inventó
+no es una medición.
 **Ámbito:** una herramienta de `tools/` que se empaqueta, se instala en otros proyectos y se
 anuncia sola como plugin. El núcleo no importa React, Next ni Supabase; el contrato de
 empaquetado es el de [`EMPAQUETAR-HERRAMIENTA.md`](./EMPAQUETAR-HERRAMIENTA.md) y **no se
@@ -345,6 +349,41 @@ Además, una exportación **saca datos de terceros del sistema**, así que queda
 
 ---
 
+### 2.20 El banco de pruebas obligó a elegir motor de base, y el criterio obvio era falso
+
+§2.8 dejó dicho que este template no tiene bases. La consecuencia práctica tardó en verse: tres
+capacidades quedaban **documentadas y nunca ejecutadas**. La persistencia sólo existía contra
+Supabase o IndexedDB —ninguna vía de servidor sin cuenta—, y los tres estados del descriptor eran
+tres ficheros JSON que pueden afirmar lo que quieran, así que probaban el parser, no el circuito.
+
+De ahí el banco: un negocio ficticio en una base embebida, en `tools/extractor-documental/banco/`.
+
+**El criterio con el que se eligió motor era el equivocado, y conviene dejar por qué.** El
+argumento aparente favorecía a PGlite —Postgres compilado a WASM—: producción es Supabase, o sea
+Postgres, y SQLite diverge en tipos y dialecto. Al mirar el código resulta que ese argumento no
+aplica al camino que el banco ejercita:
+
+> **El adaptador de Supabase no escribe SQL.** Habla PostgREST (`.from().upsert().eq()`). El
+> dialecto de Postgres sólo vive en `migraciones/001-*.sql`, que es otro artefacto y otro objetivo.
+
+Elegir por fidelidad de dialecto habría pagado un precio real —varios MB de WASM y un
+`npm install` en un directorio que **hoy no tiene ningún `node_modules`**— a cambio de fidelidad
+en un sitio por el que el código no pasa. Se eligió `node:sqlite`, que viene dentro de Node 22.18+,
+y el banco hereda la propiedad de correr sin nada instalado.
+
+**Lo que el banco NO prueba, y no debe aparentar que prueba.** SQLite no tiene RLS. El aislamiento
+por organización lo impone aquí el código del adaptador, que es una garantía **más débil** que la
+de producción, donde la base niega la fila aunque el código se equivoque. Dicho de otro modo: las
+policies de esa migración **siguen sin haberse ejecutado nunca**, y ese hueco no lo cierra este
+trabajo — lo cerraría PGlite, que es el único motivo por el que sigue sobre la mesa.
+
+**Y una traducción a mano se pudre.** Por eso el esquema del banco declara su espejo y
+`pruebas/banco-espejo.ts` lo compara contra el SQL real, columna a columna y `CHECK` a `CHECK`: una
+tabla que cambie en producción y no en el banco pone el gate en rojo. Es el mismo mecanismo que
+`pruebas/persistencia.ts` usa para las listas de valores, y por la misma razón.
+
+---
+
 ## 3. Principio de diseño
 
 > **El humano no revisa lo que el sistema extrajo. El humano decide qué significa, y el sistema
@@ -593,6 +632,11 @@ eligen, y este entorno no tiene corpus, catálogos ni lector físico con que hac
 - **Los parámetros de la ráfaga del escáner** (ms entre teclas, mínimo de caracteres): dependen del
   teclado y del lector concretos. Se miden en el puesto, y mientras tanto la vía buena es
   configurar prefijo y sufijo en el escáner, que no necesita medir nada.
+- **Las policies de RLS de `migraciones/001-*.sql` no se han ejecutado nunca.** Están escritas y
+  revisadas, y eso no es lo mismo que probadas. El banco de pruebas (§2.20) no las alcanza porque
+  SQLite no tiene RLS; cerrarlo exige un Postgres real —PGlite embebido, o un proyecto de
+  Supabase—, y hasta entonces «el aislamiento está garantizado por la base» es una afirmación sin
+  ejecutar detrás.
 - **Qué se encola sin conexión además de los escaneos.** Un escaneo es texto y cabe siempre; una
   foto de documento no. Falta decidir el presupuesto y qué se le dice al usuario cuando se agota.
 - **Progreso y reanudación de un lote largo**: con un batch que tarda horas es operativamente
