@@ -14,8 +14,13 @@
  * norma publicada y ahora las respalda un documento que paso por aqui — que no es lo mismo, y por
  * eso se distingue, igual que `saneado.ts` distingue los numeros MEDIDOS de los supuestos.
  *
- * `PAGOS_20` sigue **SIN CONFIRMAR**: no ha pasado ningun recibo de pago real. El dia que llegue
- * uno, el paso cero es abrirlo y cotejar esta direccion antes que nada.
+ * `PAGOS_20` esta **CONFIRMADA contra su esquema oficial**, no contra un documento: el XSD publicado
+ * declara esa direccion como su `targetNamespace`. Es una confirmacion mas debil y conviene no
+ * confundirlas — la direccion es correcta, pero el MAPEO de campos de ese complemento sigue sin
+ * ejercitarse contra un recibo de pago real, y ahi es donde aparecen las sorpresas.
+ *
+ * Quien compara todo esto es `medicion/deriva.mjs`, que sale a la red a proposito y se ejecuta a
+ * mano. No esta en `npm run validate`: meter la red en el gate lo vuelve intermitente.
  *
  * El documento real dejo ademas un defecto al descubierto que ninguna prueba sintetica veia: el
  * bloque de impuestos se perdia entero y en silencio. Esta arreglado, y `pruebas/fixtures/
@@ -36,7 +41,7 @@ export const CFDI_40 = 'http://www.sat.gob.mx/cfd/4'
  */
 export const TIMBRE_11 = 'http://www.sat.gob.mx/TimbreFiscalDigital'
 
-/** Pagos 2.0, el que acompana a un comprobante de tipo "P". SIN CONFIRMAR: falta un REP real. */
+/** Pagos 2.0, el que acompana a un comprobante de tipo "P". Direccion confirmada contra el XSD. */
 export const PAGOS_20 = 'http://www.sat.gob.mx/Pagos20'
 
 /**

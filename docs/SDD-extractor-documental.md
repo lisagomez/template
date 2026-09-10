@@ -480,6 +480,21 @@ declaraba su `xmlns` **en sí mismo** y no en la raíz; y los importes del rengl
 decimales frente a dos en los totales. Los tres pasan, y hay un fixture que conserva esa forma con
 los datos cambiados.
 
+**Cómo se evita que esto envejezca en silencio.** Una traducción a mano diverge sola, así que hay
+tres mecanismos y cada uno cubre una cosa distinta. La versión pineada caza el cambio anunciado: un
+complemento de otra versión se reporta, no se lee mal. El `noLeido` caza el elemento o atributo
+nuevo que llega sin cambiar la versión. Y `medicion/deriva.mjs` compara el inventario del lector
+contra el esquema publicado, **en las dos direcciones** — porque mapear algo que el esquema no
+declara es peor señal que no mapear algo que sí.
+
+Ese script sale a la red a propósito, y por eso vive fuera del paquete, no toca el camino de
+lectura y **no está encadenado a `npm run validate`**: un gate que falla por falta de conexión es un
+gate que se aprende a ignorar. Su primera ejecución encontró cuatro atributos del esquema oficial
+que el lector no mapeaba, y uno más en el timbre. Los cinco están cerrados.
+
+Lo que **ningún** mecanismo caza es un cambio de significado sin cambio de estructura. Eso es
+lectura humana de la norma, y conviene decirlo en vez de dar a entender que está cubierto.
+
 **Lo que no se extrae a propósito**: el atributo `Certificado`, que lleva el X.509 entero y dentro
 el nombre completo, el correo y los identificadores fiscales de quien firma. Se extrae su **número**,
 que identifica sin exponer nada. Volcar el certificado sacaría datos personales a un campo que

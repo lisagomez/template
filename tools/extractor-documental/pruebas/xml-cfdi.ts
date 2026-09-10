@@ -17,8 +17,9 @@ import {
   avisoDelComprobante,
 } from '../dist/xml/cfdi/comprobante-40.js'
 import { registroDeEsquemas } from '../dist/xml/registro.js'
-import { lectorDeTimbre11 } from '../dist/xml/cfdi/timbre-11.js'
-import { lectorDePagos20 } from '../dist/xml/cfdi/pagos-20.js'
+import { lectorDeTimbre11, INVENTARIO_TIMBRE } from '../dist/xml/cfdi/timbre-11.js'
+import { lectorDePagos20, INVENTARIO_PAGOS } from '../dist/xml/cfdi/pagos-20.js'
+import { INVENTARIO, OMITIDOS } from '../dist/xml/cfdi/inventario.js'
 
 const aqui = dirname(fileURLToPath(import.meta.url))
 const fixture = (nombre: string): string =>
@@ -337,4 +338,84 @@ test('un elemento del tronco que el lector no traduce se DECLARA', () => {
 
 test('un comprobante que el lector traduce entero no declara nada sin leer', () => {
   assert.deepEqual(leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre).noLeido, [])
+})
+
+// --- Que la estructura no envejezca en silencio ---------------------------------------------------
+// El lector es una traduccion a mano del esquema del SAT, y una traduccion a mano diverge sola. Lo
+// que sigue es la mitad que se puede probar sin red; la otra mitad la compara `medicion/deriva.mjs`
+// contra el esquema publicado, a mano y fuera del gate.
+
+test('un ATRIBUTO que el lector no conoce se declara, no desaparece', () => {
+  // Costo un agujero propio: cuando un CFDI real destapo que los impuestos se perdian, se arreglo
+  // para los ELEMENTOS y quedo abierto para los atributos. Es la misma regla, y no vale a medias.
+  const conNuevo =
+    '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Total="1.00" ' +
+    'AtributoQueElSatAnadeManana="importa"><cfdi:Emisor Rfc="AAA010101AAA" Raro="x"/></cfdi:Comprobante>'
+  const lectura = leeCfdi40(conNuevo)
+  assert.deepEqual(lectura.noLeido, [
+    'Comprobante/@AtributoQueElSatAnadeManana',
+    'Emisor/@Raro',
+  ])
+})
+
+test('un atributo CON espacio de nombres no se declara: es fontaneria, no dato', () => {
+  // `xsi:schemaLocation` va en casi todos los CFDI del mundo. Declararlo seria gritar siempre, y
+  // un aviso que salta siempre es un aviso que nadie lee.
+  const lectura = leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre)
+  assert.deepEqual(lectura.noLeido, [])
+})
+
+test('de un elemento desconocido NO se listan tambien sus hijos', () => {
+  // Si el padre ya esta declarado, enumerar lo que lleva dentro es ruido que entierra la senal.
+  const conRelacionados =
+    '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0">' +
+    '<cfdi:CfdiRelacionados TipoRelacion="04"><cfdi:CfdiRelacionado UUID="x"/></cfdi:CfdiRelacionados>' +
+    '</cfdi:Comprobante>'
+  assert.deepEqual(leeCfdi40(conRelacionados).noLeido, ['CfdiRelacionados'])
+})
+
+test('el certificado esta declarado como omitido, no como deriva', () => {
+  // La diferencia importa para el comprobador: un hueco es trabajo pendiente, una omision es una
+  // decision ya tomada. Confundirlos hace que el informe pida arreglar lo que ya esta bien.
+  assert.equal(OMITIDOS['Comprobante']?.includes('Certificado'), true)
+  assert.equal(INVENTARIO['Comprobante'].includes('Certificado'), false)
+})
+
+test('el inventario declara lo que el lector mapea de verdad', () => {
+  // Si alguien anade un atributo a la tabla del lector y el inventario no se entera, el comprobador
+  // de deriva mentiria en las dos direcciones. Se construyen de la misma tabla justo para esto.
+  for (const atributoDelSat of ['Version', 'Total', 'Sello', 'NoCertificado', 'Confirmacion']) {
+    assert.ok(INVENTARIO['Comprobante'].includes(atributoDelSat), `falta ${atributoDelSat}`)
+  }
+  assert.ok(INVENTARIO_TIMBRE['TimbreFiscalDigital'].includes('UUID'))
+  assert.ok(INVENTARIO_PAGOS['Pago'].includes('Monto'))
+})
+
+test('los cuatro atributos que el esquema oficial delato ya se leen', () => {
+  // Los encontro `medicion/deriva.mjs` comparando contra el XSD publicado del SAT.
+  const completo =
+    '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Confirmacion="ECVH1">' +
+    '<cfdi:Emisor Rfc="AAA010101AAA" FacAtrAdquirente="1234567890"/>' +
+    '<cfdi:Receptor Rfc="XEXX010101000" ResidenciaFiscal="USA" NumRegIdTrib="123456789"/>' +
+    '</cfdi:Comprobante>'
+  const lectura = leeCfdi40(completo)
+  const campos = porClave(lectura.campos)
+  assert.equal(campos['confirmacion'], 'ECVH1')
+  assert.equal(campos['fac_atr_adquirente'], '1234567890')
+  assert.equal(campos['residencia_fiscal_receptor'], 'USA')
+  assert.equal(campos['num_reg_id_trib_receptor'], '123456789')
+  assert.deepEqual(lectura.noLeido, [], 'y ya no se declaran como sin traducir')
+})
+
+test('el lector de pagos tambien declara los atributos que no traduce', () => {
+  const conPagos =
+    '<Comprobante xmlns="http://www.sat.gob.mx/cfd/4" Version="4.0"><Complemento>' +
+    '<p:Pagos xmlns:p="http://www.sat.gob.mx/Pagos20" Version="2.0">' +
+    '<p:Totales MontoTotalPagos="100" TotalRetencionesIVA="16"/>' +
+    '<p:Pago Monto="100" SelloPago="xxx"/></p:Pagos></Complemento></Comprobante>'
+  const lectura = leeCfdi40(conPagos, registroDeEsquemas([lectorDePagos20]))
+  assert.deepEqual(lectura.complementos.leidos[0].noLeido, [
+    'Totales/@TotalRetencionesIVA',
+    'Pago/@SelloPago',
+  ])
 })

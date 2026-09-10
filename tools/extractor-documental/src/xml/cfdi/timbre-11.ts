@@ -31,6 +31,8 @@ const CAMPOS: readonly (readonly [string, string])[] = [
   ['FechaTimbrado', 'fecha_timbrado'],
   ['RfcProvCertif', 'rfc_proveedor_certificacion'],
   ['NoCertificadoSAT', 'no_certificado_sat'],
+  // Opcional, y la usa el SAT para poner un aviso legible sobre el propio comprobante.
+  ['Leyenda', 'leyenda_del_timbre'],
 ]
 
 /**
@@ -48,6 +50,19 @@ const SELLOS: readonly (readonly [string, string])[] = [
   ['SelloCFD', 'sello_cfd'],
   ['SelloSAT', 'sello_sat'],
 ]
+
+/**
+ * Lo que este lector mapea, para que `medicion/deriva.mjs` pueda compararlo contra el esquema
+ * publicado. Sin esto el comprobador de deriva se saltaba los complementos EN SILENCIO, que es
+ * justo la clase de hueco que ese comprobador existe para no tener.
+ */
+export const INVENTARIO_TIMBRE: Readonly<Record<string, readonly string[]>> = {
+  TimbreFiscalDigital: [
+    'Version',
+    ...CAMPOS.map(([delSat]) => delSat),
+    ...SELLOS.map(([delSat]) => delSat),
+  ],
+}
 
 const CONOCIDOS = new Set([
   'Version',

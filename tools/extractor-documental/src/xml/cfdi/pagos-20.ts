@@ -93,6 +93,20 @@ function recoge(
  */
 const NO_TRADUCIDOS = ['ImpuestosP', 'ImpuestosDR']
 
+/**
+ * Lo que este lector mapea, para el comprobador de deriva.
+ *
+ * Va a salir CORTO contra el esquema, y esta bien que se vea: de este complemento solo se traduce
+ * lo que dice cuanto se pago y contra que factura. El desglose de impuestos y los datos de banca
+ * quedan fuera a proposito, y el comprobador los listara uno a uno en vez de dejarlos invisibles.
+ */
+export const INVENTARIO_PAGOS: Readonly<Record<string, readonly string[]>> = {
+  Pagos: ['Version'],
+  Totales: ['MontoTotalPagos'],
+  Pago: DEL_PAGO.map(([delSat]) => delSat),
+  DoctoRelacionado: DEL_DOCUMENTO.map(([delSat]) => delSat),
+}
+
 export const lectorDePagos20: LectorDeComplemento = {
   clave: { espacio: PAGOS_20, nombreLocal: 'Pagos', version: '2.0' },
   nombre: 'Complemento de pagos 2.0',
@@ -101,10 +115,29 @@ export const lectorDePagos20: LectorDeComplemento = {
     const campos: CampoExtraido[] = []
     const noLeido = new Set<string>()
 
+    /**
+     * Lo que este lector VE en un nodo y no traduce.
+     *
+     * Sin esto, los diez desgloses de impuesto de `Totales` y los cinco datos de banca de `Pago`
+     * desaparecian en silencio, que es exactamente el agujero que el tronco ya se comio una vez.
+     * No se mapean a ciegas —este complemento aun no ha pasado por un recibo real— pero perderlos
+     * sin decirlo es otra cosa.
+     */
+    const declara = (elemento: Elemento, cuales: readonly string[]): void => {
+      const conocidos = new Set(cuales)
+      for (const atributo of elemento.atributos) {
+        if (atributo.espacio === null && !conocidos.has(atributo.nombreLocal)) {
+          noLeido.add(`${elemento.nombreLocal}/@${atributo.nombreLocal}`)
+        }
+      }
+    }
+    declara(nodo, INVENTARIO_PAGOS['Pagos'])
+
     // El monto total de los pagos: para un comprobante de tipo `P` este es EL importe, y el
     // `Total` del tronco vale cero.
     const totales = hijo(nodo, PAGOS_20, 'Totales')
     if (totales !== null) {
+      declara(totales, INVENTARIO_PAGOS['Totales'])
       const monto = atributo(totales, 'MontoTotalPagos')
       if (monto !== null) {
         campos.push({
@@ -127,9 +160,11 @@ export const lectorDePagos20: LectorDeComplemento = {
     pagos.forEach((pago, i) => {
       const dePago = `pago_${i + 1}`
       recoge(pago, DEL_PAGO, dePago, campos)
+      declara(pago, INVENTARIO_PAGOS['Pago'])
 
       hijos(pago, PAGOS_20, 'DoctoRelacionado').forEach((documento, j) => {
         recoge(documento, DEL_DOCUMENTO, `${dePago}_docto_${j + 1}`, campos)
+        declara(documento, INVENTARIO_PAGOS['DoctoRelacionado'])
         for (const nombre of NO_TRADUCIDOS) {
           if (hijo(documento, PAGOS_20, nombre) !== null) noLeido.add(nombre)
         }
