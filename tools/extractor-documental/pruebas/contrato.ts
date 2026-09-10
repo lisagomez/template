@@ -6,27 +6,68 @@ import { dirname, join } from 'node:path'
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..')
 
-/** El NUCLEO: solo lo de primer nivel. Es lo que se sirve por el subpath `.`. */
-const fuentes = readdirSync(join(raiz, 'src')).filter((f) => f.endsWith('.ts'))
-
 /**
- * Todo lo demas: los adaptadores, que viven en subcarpetas y SI pueden importar su peer.
+ * Las tres carpetas de ADAPTADOR: las unicas que pueden importar su peer, tocar el DOM o hablar
+ * con la red. Todo lo demas bajo `src/` es NUCLEO, este en el primer nivel o en una subcarpeta.
  *
- * Se enumeran aparte porque durante un tiempo no se enumeraban en absoluto: la prueba leia solo
- * el primer nivel, asi que un adaptador podia usar `any`, pasar de 500 lineas o tocar el DOM y
- * ningun gate se enteraba. Un contrato que solo cubre la mitad del paquete es justo la clase de
+ * La lista esta al reves A PROPOSITO, y esa inversion arregla un hueco real. Antes el nucleo se
+ * definia como "lo del primer nivel de src/", asi que una carpeta nueva quedaba clasificada como
+ * adaptador sin que nadie lo decidiera, y se libraba de las dos garantias que mas le importan: no
+ * importar proveedores y no tocar el sistema de archivos. Enumerando lo que SI es adaptador, lo
+ * nuevo cae del lado seguro por defecto — y si de verdad necesita un peer, falla ruidosamente y
+ * alguien tiene que venir a declararlo aqui, que es exactamente cuando conviene decidirlo.
+ *
+ * Es la segunda mitad de una leccion que este archivo ya se llevo una vez: la prueba leia solo el
+ * primer nivel, y un adaptador podia usar `any`, pasar de 500 lineas o tocar el DOM sin que
+ * ningun gate se enterara. Un contrato que solo cubre la mitad del paquete es justo la clase de
  * control que pasa su propia prueba mientras deja el hueco abierto.
  */
-function fuentesAnidadas(desde = join(raiz, 'src'), prefijo = ''): string[] {
+const CARPETAS_DE_ADAPTADOR = ['motores/', 'almacenes/', 'react/'] as const
+
+function fuentesBajo(desde: string, prefijo = ''): string[] {
   const salida: string[] = []
   for (const entrada of readdirSync(desde, { withFileTypes: true })) {
-    if (entrada.isDirectory()) salida.push(...fuentesAnidadas(join(desde, entrada.name), `${prefijo}${entrada.name}/`))
-    else if (/\.tsx?$/.test(entrada.name) && prefijo !== '') salida.push(`${prefijo}${entrada.name}`)
+    if (entrada.isDirectory()) salida.push(...fuentesBajo(join(desde, entrada.name), `${prefijo}${entrada.name}/`))
+    else if (/\.tsx?$/.test(entrada.name)) salida.push(`${prefijo}${entrada.name}`)
   }
   return salida
 }
-const adaptadores = fuentesAnidadas()
-const todas = [...fuentes, ...adaptadores]
+
+const esAdaptador = (archivo: string): boolean =>
+  CARPETAS_DE_ADAPTADOR.some((carpeta) => archivo.startsWith(carpeta))
+
+const todas = fuentesBajo(join(raiz, 'src'))
+/** El NUCLEO: lo que se sirve por `.` y por cualquier subpath que no arrastre un peer. */
+const fuentes = todas.filter((archivo) => !esAdaptador(archivo))
+const adaptadores = todas.filter(esAdaptador)
+
+/**
+ * Control sobre el propio control, y no es ceremonia: sin el, la inversion de arriba se puede
+ * romper sin que ninguna prueba se entere.
+ *
+ * Se comprueba sobre la FUNCION y con rutas inventadas, no sobre el arbol de hoy. Recorrer el
+ * arbol no demostraria nada mientras no exista ninguna carpeta de nucleo: la prueba pasaria en
+ * verde por no tener nada que clasificar, que es la peor clase de prueba que hay.
+ */
+test('una carpeta nueva bajo src/ se clasifica como nucleo, no como adaptador', () => {
+  assert.equal(esAdaptador('xml/lexico.ts'), false, 'una carpeta nueva tiene que caer en el nucleo')
+  assert.equal(esAdaptador('xml/cfdi/comprobante-40.ts'), false, 'y tambien si esta mas anidada')
+  assert.equal(esAdaptador('motores/mistral.ts'), true)
+  assert.equal(esAdaptador('almacenes/supabase.ts'), true)
+  assert.equal(esAdaptador('react/index.ts'), true)
+})
+
+test('toda carpeta declarada como adaptador existe de verdad', () => {
+  // Si alguien renombra una carpeta y no toca la lista, esa carpeta pasa a tratarse como nucleo.
+  // Es el lado seguro, pero un adaptador legitimo tratado como nucleo tampoco es correcto, y sin
+  // esto la lista se queda obsoleta en silencio.
+  for (const carpeta of CARPETAS_DE_ADAPTADOR) {
+    assert.ok(
+      existsSync(join(raiz, 'src', carpeta)),
+      `CARPETAS_DE_ADAPTADOR nombra src/${carpeta}, que no existe`,
+    )
+  }
+})
 
 /** Lo que convierte una herramienta en "un trozo de una app concreta con otro nombre". */
 const PROHIBIDO = [/from ['"]react/, /from ['"]next/, /from ['"]@supabase/, /from ['"]@mistralai/]
