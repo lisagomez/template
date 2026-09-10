@@ -26,6 +26,10 @@
   .malo { border-left-color: crimson; }
   .bien { border-left-color: seagreen; }
   .fila { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+  /* El atributo `hidden` vale `display:none` en la hoja del navegador, y CUALQUIER regla de clase
+     con `display` le gana por especificidad — `.fila { display:flex }` lo hacia, asi que el boton
+     de limpiar se veia siempre. Esto lo arregla para todo el documento, no solo para ese caso. */
+  [hidden] { display: none !important; }
   .fila > label { flex: 1 1 12rem; }
   .apunte { opacity: .65; font-size: .85rem; }
   code { font-family: ui-monospace, monospace; }
@@ -47,6 +51,13 @@
   <div class="zona" id="zona-capa0" tabindex="0">
     Suelta aquí un PDF (o pulsa para elegirlo)
     <input type="file" id="file-capa0" accept="application/pdf" hidden>
+  </div>
+  <div class="fila" id="acciones-capa0" hidden>
+    <button id="btn-limpiar-capa0" type="button">Limpiar resultado</button>
+    <button id="btn-json-capa0" type="button">Ver como JSON</button>
+    <span class="apunte">
+      Quita el texto de la pantalla. El archivo nunca salió de tu equipo: la capa 0 corre aquí.
+    </span>
   </div>
   <div id="salida-capa0"></div>
   <p class="apunte">
@@ -136,6 +147,7 @@
 import {
   leeCapaCero, clasificaLote, proponeModelo, analizaCarga,
   resuelveValor, parecidosA, plantillaInicial,
+  saneaTextoExtraido, resumenDeSaneado, capaCeroComoJson,
 } from '/extractor/index.js'
 import { aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision } from '/extractor/react/revision.js'
 import { aplanaEntradas, raicesDe, desdeInput } from '/extractor/react/aplana.js'
@@ -188,17 +200,80 @@ function zonaDeArchivos(zonaId, inputId, alRecibir, { arbol = false } = {}) {
   }
 }
 
+/**
+ * Lo ultimo que leyo la capa 0, para poder alternar texto/JSON sin volver a procesar el fichero.
+ * Se limpia con el boton de limpiar: si no, el JSON sobreviviria a la salida que lo produjo.
+ */
+let ultimaCapaCero = null
+let viendoJson = false
+
+/** Pinta la vista de texto o la de JSON, segun el interruptor. */
+function pintaCapaCero() {
+  if (ultimaCapaCero === null) return
+  const { ruta, r, limpio, seLimpio } = ultimaCapaCero
+  const cabecera = aviso(`<strong>${esc(ruta)}</strong> se resuelve <strong>sin llamar al motor</strong> — ` +
+    `${r.paginas.length} bloque(s) de texto, 0 llamadas. Ahorro directo.`, 'bien') +
+    (seLimpio === null ? '' : aviso(esc(seLimpio), limpio.invisibles > 0 ? 'malo' : ''))
+
+  if (viendoJson) {
+    // El JSON va ENTERO, sin recortar: si se trunca deja de ser JSON valido y no se puede pegar en
+    // ningun sitio, que es justo para lo que sirve.
+    pinta('salida-capa0', cabecera + `<pre>${esc(JSON.stringify(capaCeroComoJson(r), null, 2))}</pre>`)
+    return
+  }
+
+  pinta('salida-capa0', cabecera +
+    `<pre>${esc(limpio.texto.slice(0, 1200))}</pre>` +
+    (limpio.lineasDescartadas.length === 0 ? '' :
+      `<details><summary class="apunte">Ver las ${limpio.lineasDescartadas.length} linea(s) descartadas por no parecer texto</summary>` +
+      `<pre>${esc(limpio.lineasDescartadas.join('\n').slice(0, 800))}</pre></details>`))
+}
+
 zonaDeArchivos('zona-capa0', 'file-capa0', async ({ archivos }) => {
   if (archivos.length === 0) return
   const { archivo, ruta } = archivos[0]
   const bytes = new Uint8Array(await archivo.arrayBuffer())
   const r = await leeCapaCero(bytes)
-  pinta('salida-capa0', r.hayTexto
-    ? aviso(`<strong>${esc(ruta)}</strong> se resuelve <strong>sin llamar al motor</strong> — ` +
-        `${r.paginas.length} bloque(s) de texto, 0 llamadas. Ahorro directo.`, 'bien') +
-      `<pre>${esc(r.paginas.join('\n\n').slice(0, 1200))}</pre>`
-    : aviso(`<strong>${esc(ruta)}</strong> necesita el motor. Motivo: <em>${esc(r.motivo)}</em>`, ''))
+  if (!r.hayTexto) {
+    pinta('salida-capa0', aviso(`<strong>${esc(ruta)}</strong> necesita el motor. Motivo: <em>${esc(r.motivo)}</em>`, ''))
+    $('acciones-capa0').hidden = false
+    return
+  }
+  // Se sanea ANTES de pintar. `esc()` impide que el texto se ejecute como marcado, y no ve dos
+  // cosas: los controles que ensucian y los invisibles con los que se ESCONDE texto — un guion
+  // suave dentro de una palabra se lee igual y no coincide con ninguna busqueda, y un override
+  // bidi hace que lo mostrado no sea lo almacenado. El revisor aprueba lo que ve.
+  const limpio = saneaTextoExtraido(r.paginas.join('\n\n'))
+  ultimaCapaCero = { ruta, r, limpio, seLimpio: resumenDeSaneado(limpio) }
+  pintaCapaCero()
+  $('acciones-capa0').hidden = false
 })
+
+$('btn-json-capa0').onclick = () => {
+  viendoJson = !viendoJson
+  $('btn-json-capa0').textContent = viendoJson ? 'Ver como texto' : 'Ver como JSON'
+  pintaCapaCero()
+}
+
+/**
+ * Limpia lo que la capa 0 dejo en pantalla.
+ *
+ * Existe porque el texto extraido de un documento puede llevar datos personales de terceros, y
+ * dejarlo en pantalla hasta recargar es exactamente como se leen por encima del hombro. Lo que se
+ * borra es el DOM: el archivo nunca se subio a ningun sitio, asi que no hay nada mas que retirar.
+ *
+ * Tambien se resetea el input: sin eso, el navegador conserva el fichero elegido y volver a soltar
+ * el MISMO archivo no dispararia `onchange` — parece que el boton rompio la zona.
+ */
+$('btn-limpiar-capa0').onclick = () => {
+  pinta('salida-capa0', '')
+  ultimaCapaCero = null
+  viendoJson = false
+  $('btn-json-capa0').textContent = 'Ver como JSON'
+  $('acciones-capa0').hidden = true
+  $('file-capa0').value = ''
+  $('zona-capa0').focus()
+}
 
 // ── 2. Ingesta ───────────────────────────────────────────────────────────────
 zonaDeArchivos('zona-ingesta', 'file-ingesta', ({ archivos, ilegibles, truncadoPorProfundidad }) => {
