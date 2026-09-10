@@ -492,8 +492,42 @@ lectura y **no está encadenado a `npm run validate`**: un gate que falla por fa
 gate que se aprende a ignorar. Su primera ejecución encontró cuatro atributos del esquema oficial
 que el lector no mapeaba, y uno más en el timbre. Los cinco están cerrados.
 
-Lo que **ningún** mecanismo caza es un cambio de significado sin cambio de estructura. Eso es
-lectura humana de la norma, y conviene decirlo en vez de dar a entender que está cubierto.
+**Y el cuarto mecanismo, sobre los códigos.** `medicion/catalogos.mjs` vigila qué códigos son
+válidos. De los doce catálogos de los que depende una regla dice **qué código entró o salió, por su
+nombre**; del resto, solo la cuenta, porque un código postal nuevo es rutina y uno nuevo en uso de
+comprobante no lo es. El corte está medido —esos doce tienen 25 códigos o menos y el siguiente ya es
+geografía con 66— pero se dejó como **lista declarada y no como umbral**: un umbral ascendería en
+silencio un catálogo de referencia el día que encogiera.
+
+La referencia va **fechada por quien publica**, no por el día en que alguien miró: el servidor
+declara su `last-modified` y su identificador de versión. Eso da la única fecha que sirve para decir
+«esto valía entonces», y de paso una comprobación barata — si el identificador no cambió no se
+descarga nada, **una décima de segundo frente a 5,7 MB**, y una comprobación cara es una que se deja
+de correr.
+
+De ahí sale lo que más rendimiento da y no costó una sola pieza: **la serie histórica no hay que
+construirla**. Cada sellado deja la referencia anterior en el historial de git, ya fechada por la
+fuente, así que `git log` sobre ese fichero **es** el repositorio de versiones. Conviene mirarlo
+antes de inventar una tabla de histórico.
+
+**Una corrección que conviene dejar escrita, porque el error es fácil de repetir.** Al medir el
+catálogo publicado —5,8 MB, 162.233 códigos, **cero descripciones legibles**— se concluyó que el
+significado «no está disponible en forma comparable». Es un salto que no tocaba dar: lo medido era
+el XSD, que es el artefacto de **validación** y solo dice qué códigos son válidos. Las descripciones
+se publican aparte. Y hay un segundo sentido en el que la conclusión era peor: **desde el momento en
+que se guardan instantáneas, la serie ya es propia**, así que el hueco solo existe hacia atrás y se
+cierra solo con el tiempo. Estaba planteado como un límite permanente cuando era una condición
+inicial.
+
+Lo que **ningún** mecanismo caza, ya con el tamaño correcto: detectar que una descripción cambió es
+mecánico; decidir si ese cambio **afecta a una regla** no lo es. Una descripción se reescribe sin
+cambiar el fondo, y el fondo cambia con un retoque menor. El diff lo señala, una persona lo juzga.
+
+Y una consecuencia de todo esto para el grafo: si el significado no está en el artefacto que la
+máquina compara, tiene que vivir en un solo sitio, y ese sitio es el grafo del proyecto. Lo que
+convierte «emitir códigos y nunca etiquetas» en una decisión estructural y no en higiene. La spec
+004 lleva anotada la forma que eso pide: solo se añade, nunca se edita, y **la clave de búsqueda es
+`(código, fecha del hecho)`**, no el código a secas.
 
 **Lo que no se extrae a propósito**: el atributo `Certificado`, que lleva el X.509 entero y dentro
 el nombre completo, el correo y los identificadores fiscales de quien firma. Se extrae su **número**,

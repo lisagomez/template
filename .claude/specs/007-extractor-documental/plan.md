@@ -12,6 +12,7 @@
 | `.` | Núcleo TS puro, **cero dependencias**: tipos, puertos, máquina de estados, `clasificaArchivo`, reducer de `PlantillaDeRevision`, `derivaModelo` | — | RF-6..RF-10, RF-13, RF-16..RF-22 |
 | `./plugin` | Manifiesto autodescriptivo con icono SVG en línea. Importable sin React | — | RF-1..RF-3 |
 | `./react` | `ZonaDeIngesta`, `TablaDeRevision`, `EditorDeCampo`. `'use client'` en la primera línea | `react` (opcional) | RF-4, RF-5, RF-11, RF-14, RF-15 |
+| `./xml` | Lector de XML sin dependencias, con `DOCTYPE` rechazado por construcción, y **registro de esquemas**: el proyecto declara qué complementos lee sin tocar el paquete. CFDI 4.0, timbre y pagos | — | RF-83..RF-97 |
 | `./motores/mistral` | Adaptador de `MotorOcr` contra la API | `@mistralai/mistralai` (opcional) | RF-9, RF-24 |
 | `./motores/openai-compat` | Adaptador HTTP contra vLLM autohospedado, vía `fetch` | — | RF-9, RF-24 |
 | `./almacenes/supabase` | Adaptador de `AlmacenDocumentos` y `AlmacenPlantillas`, con RLS | `@supabase/supabase-js` (opcional) | RF-21 |
