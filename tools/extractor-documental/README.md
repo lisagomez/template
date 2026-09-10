@@ -159,14 +159,22 @@ Tres cosas pueden desalinearse, y cada una tiene su respuesta:
 |---|---|
 | El SAT publica una **version nueva** de un complemento | La version va pineada: el documento se reporta con las dos versiones nombradas, no se lee mal |
 | Aparece un **elemento o atributo nuevo** sin cambiar la version | `LecturaDeCfdi.noLeido` lo declara. Nada se pierde en silencio, ni en el tronco ni en los complementos |
-| Cambia el **significado** de un campo que ya existia | **Nada automatico.** Eso es leer la norma, o no es nada |
+| Aparece o desaparece un **codigo** de un catalogo | `npm run catalogos` lo dice, y para los doce catalogos de los que depende una regla dice QUE codigo entro o salio, por su nombre |
+| Cambia el **significado** de un codigo que sigue ahi | **Nada automatico.** Medido: el catalogo publicado son 5,8 MB con 162.233 codigos y CERO descripciones legibles. Dice que codigos valen, no que quieren decir |
 
 Y para cotejar contra el esquema publicado, a mano y fuera del gate:
 
 ```bash
-npm run deriva -- --documento factura.xml   # sigue el schemaLocation que declara el propio CFDI
+npm run deriva -- --documento factura.xml   # estructura: sigue el schemaLocation del propio CFDI
 npm run deriva -- ruta/o/url/del.xsd        # o un esquema concreto
+npm run catalogos                           # codigos: compara contra la ultima referencia
+npm run catalogos -- --sella                # acepta lo de ahora como nueva referencia
 ```
+
+La referencia de catalogos ocupa **4 KB** frente a los 5,8 MB de la fuente: de los doce catalogos
+que significan algo se guarda la lista entera, y del resto solo la cuenta, porque un codigo postal
+nuevo es rutina y un codigo nuevo en uso de comprobante no lo es. El corte esta MEDIDO: esos doce
+tienen 25 codigos o menos y el siguiente ya es geografia con 66.
 
 Compara en **las dos direcciones**: lo que el esquema declara y el lector no mapea, y lo que el
 lector mapea y el esquema no declara — que es la peor senal, porque significa que se invento algo o
@@ -179,6 +187,11 @@ falla porque alguien no tenia conexion es un gate que la gente aprende a ignorar
 
 Lo mas barato sigue siendo otra cosa: **tus propios documentos**. Cada cosa que un comprobante real
 trae y el lector no traduce ya se declara, y eso te dice que recibes de verdad, no que dice la norma.
+
+Y una consecuencia que conviene tener presente: **el significado de un codigo no vive aqui**. Vive
+en las tablas de tu proyecto, o en su grafo. Esta herramienta emite `03` y nunca "Transferencia
+electronica" justamente para que ese significado tenga un solo sitio donde envejecer, y para que
+el dia que cambie se pueda fechar. La spec 004 lleva anotado ese hueco.
 
 ### El cotejo a tres bandas sale gratis
 
