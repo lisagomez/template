@@ -467,3 +467,47 @@
       igual en las dos direcciones — o llena la cola de falsos ambiguos, o deja pasar duplicados.
       Este template no tiene catálogos que medir, y por eso no se fija aquí.
       → duda abierta de la spec
+
+---
+
+## Lectura de XML (TAR-49 a TAR-54)
+
+Añadidas el 2026-09-10, después de que un CFDI real destapara que la vía del PDF pelea contra la
+tipografía y de que el XML resultara ser el documento fiscal y el PDF su representación impresa.
+
+- [x] **TAR-49 · Analizador de XML sin dependencias.**
+      → `src/xml/lexico.ts` · `src/xml/arbol.ts` — `DOCTYPE` rechazado de plano, así que la entidad
+      externa es imposible **por construcción y no por una bandera**. Espacios de nombres resueltos
+      por dirección y nunca por prefijo; árbol con pila explícita, sin recursión, para no tener que
+      inventar un límite de profundidad.
+
+- [x] **TAR-50 · Registro de esquemas.**
+      → `src/xml/registro.ts` — el punto donde un proyecto declara qué complementos lee sin tocar
+      el paquete. Clave de tres partes (dirección, nombre, versión **pineada**), y lo que no se lee
+      se declara con su motivo, distinguiendo "no hay lector" de "hay lector de otra versión".
+      Probado con un esquema **inventado**, para demostrar que es un mecanismo y no cuatro casos.
+
+- [x] **TAR-51 · Comprobante 4.0, timbre y pagos.**
+      → `src/xml/cfdi/` — el tronco, el timbre (empezando por el caso de su **ausencia**) y pagos
+      como lector de referencia, porque un recibo de pago lleva total cero y sin él entra como una
+      factura de cero pesos con apariencia de exacta. El sello se declara **no verificado** con el
+      tipo, no con un comentario: es el literal `false`.
+
+- [x] **TAR-52 · Cotejo a tres bandas.**
+      → El lector emite las mismas claves que `camposCfdi`, así que `corrobora` cotea XML, código
+      impreso y OCR **sin una línea nueva**. El sello va aparte (`cotejaSelloConQr`) porque el
+      cotejo genérico pliega mayúsculas, que es correcto para un RFC y falso para base64.
+
+- [x] **TAR-53 · Vigilancia de la deriva contra la fuente publicada.**
+      → `medicion/deriva.mjs` · `medicion/catalogos.mjs` — comparan estructura y conjunto de
+      códigos contra lo que publica el SAT, en las dos direcciones. Salen a la red a propósito, y
+      por eso viven fuera del paquete y **fuera de `npm run validate`**. La referencia va fechada
+      por quien publica, así que el historial de git es la serie.
+
+- [ ] **TAR-54 · Lectores de nómina y carta porte.**
+      Bloqueada hasta tener un documento real de cada uno. Sin él solo se puede transcribir la
+      norma, y ahí un error no se ve hasta producción. Nómina además lleva datos de un empleado que
+      no eligió estar aquí, y eso pide su propio análisis de impacto (C4), no una fila añadida de
+      paso. Mientras tanto **se declaran, no desaparecen**: aparecen con su dirección y su versión.
+      → duda abierta de la spec
+
