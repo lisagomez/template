@@ -257,3 +257,84 @@ test('sin registro se lee el tronco y TODOS los complementos salen declarados', 
   assert.equal(lectura.complementos.leidos.length, 0)
   assert.equal(lectura.complementos.sinLector.length, 1)
 })
+
+// --- Lo que solo un documento REAL ensena --------------------------------------------------------
+// Estas pruebas salen de un CFDI 4.0 de honorarios que paso por la herramienta el 2026-09-10. El
+// fixture tiene los datos cambiados y la estructura intacta. Cada una fija algo que la suite
+// sintetica no veia, y la primera fija un defecto que estaba en verde.
+
+test('el bloque de impuestos se lee: sin el, la aritmetica del comprobante no cierra', () => {
+  // El defecto que este documento destapo. Los impuestos se perdian ENTEROS y en silencio, y el
+  // aviso decia que no habia nada que advertir. En una factura de honorarios el total no es el
+  // subtotal, y lo retenido es lo que alguien tiene que enterar al SAT.
+  const campos = porClave(leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre).campos)
+  assert.equal(campos['total_impuestos_trasladados'], '1537.23')
+  assert.equal(campos['total_impuestos_retenidos'], '1144.92')
+  const cierra =
+    Number(campos['subtotal']) +
+    Number(campos['total_impuestos_trasladados']) -
+    Number(campos['total_impuestos_retenidos'])
+  assert.equal(cierra.toFixed(2), campos['total'])
+})
+
+test('dos retenciones de impuestos distintos no se pisan', () => {
+  // Aplanarlas sin indice dejaria una sola, y cual sobrevive seria cosa del orden del fichero.
+  const campos = porClave(leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre).campos)
+  assert.equal(campos['retencion_1_impuesto'], '002')
+  assert.equal(campos['retencion_1_importe'], '1024.82')
+  assert.equal(campos['retencion_2_impuesto'], '001')
+  assert.equal(campos['retencion_2_importe'], '120.10')
+})
+
+test('el renglon trae sus propios impuestos, con los seis decimales del documento', () => {
+  const lectura = leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre)
+  const delRenglon = porClave(lectura.conceptos[0].campos)
+  assert.equal(delRenglon['importe'], '9607.690000', 'ni se redondea ni se reformatea')
+  assert.equal(delRenglon['traslado_1_tasa_o_cuota'], '0.160000')
+  assert.equal(delRenglon['retencion_2_importe'], '120.096125')
+})
+
+test('las declaraciones xmlns al FINAL de los atributos se resuelven igual', () => {
+  // El documento real declara `xsi:schemaLocation` antes que ningun `xmlns`, y pone las
+  // declaraciones al final. Resolver el nombre segun se leen los atributos, en vez de tras
+  // leerlos todos, fallaria aqui.
+  const lectura = leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre)
+  assert.equal(lectura.esCfdi, true)
+  assert.equal(lectura.motivo, null)
+})
+
+test('el timbre que declara su propio xmlns EN SI MISMO se lee igual', () => {
+  // En el documento real el `xmlns:tfd` no esta en la raiz: esta en el propio timbre.
+  const lectura = leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre)
+  assert.equal(lectura.timbrado, true)
+  assert.equal(porClave(camposParaCotejo(lectura))['uuid'], 'AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE')
+})
+
+test('el certificado NO se extrae, y su numero SI', () => {
+  // El atributo `Certificado` lleva el X.509 entero, con el nombre, el correo y los
+  // identificadores fiscales de quien firma. El numero identifica sin exponer nada.
+  const lectura = leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre)
+  const claves = camposParaCotejo(lectura).map((c) => c.clave)
+  assert.equal(claves.includes('no_certificado_emisor'), true)
+  assert.equal(
+    claves.some((k) => k === 'certificado'),
+    false,
+    'volcar el certificado sacaria datos personales a un campo que despues viaja a una base y a un CSV',
+  )
+})
+
+test('un elemento del tronco que el lector no traduce se DECLARA', () => {
+  // La regla de los complementos, aplicada al tronco — que es donde menos se nota y mas duele.
+  // `CfdiRelacionados` es real y este lector no lo trata todavia.
+  const conRelacionado = fixture('cfdi-40-ingreso').replace(
+    '<cfdi:Emisor',
+    '<cfdi:CfdiRelacionados TipoRelacion="04"><cfdi:CfdiRelacionado UUID="x"/></cfdi:CfdiRelacionados><cfdi:Emisor',
+  )
+  const lectura = leeCfdi40(conRelacionado, conTimbre)
+  assert.deepEqual(lectura.noLeido, ['CfdiRelacionados'])
+  assert.match(avisoDelComprobante(lectura) ?? '', /CfdiRelacionados/)
+})
+
+test('un comprobante que el lector traduce entero no declara nada sin leer', () => {
+  assert.deepEqual(leeCfdi40(fixture('cfdi-40-honorarios-retenciones'), conTimbre).noLeido, [])
+})

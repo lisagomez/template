@@ -6,33 +6,37 @@
  * indistinguible de un documento vacio. Tenerlas repartidas por cinco modulos convertiria ese
  * fallo en una caceria.
  *
- * ESTADO DE LA EVIDENCIA — leer antes de fiarse:
+ * ESTADO DE LA EVIDENCIA:
  *
- * Estas direcciones salen de la norma publicada, NO de un documento que haya pasado por este
- * sistema. Es una diferencia que en esta casa se marca siempre, igual que `saneado.ts` distingue
- * los numeros MEDIDOS de los supuestos.
+ * `CFDI_40` y `TIMBRE_11` estan **CONFIRMADAS** contra un CFDI 4.0 real de honorarios, timbrado,
+ * el 2026-09-10. Su raiz declara exactamente `http://www.sat.gob.mx/cfd/4` y su timbre exactamente
+ * `http://www.sat.gob.mx/TimbreFiscalDigital`, con las versiones "4.0" y "1.1". Nacieron de la
+ * norma publicada y ahora las respalda un documento que paso por aqui — que no es lo mismo, y por
+ * eso se distingue, igual que `saneado.ts` distingue los numeros MEDIDOS de los supuestos.
  *
- * Lo unico corroborado contra un CFDI real (el PDF de la factura que se uso para calibrar
- * `capa-cero.ts`) son las dos VERSIONES: su representacion impresa declara la 4.0, y la cadena
- * original de su timbre empieza por "||1.1|". Las direcciones en si no aparecen impresas en
- * ningun PDF, asi que siguen sin confirmar.
+ * `PAGOS_20` sigue **SIN CONFIRMAR**: no ha pasado ningun recibo de pago real. El dia que llegue
+ * uno, el paso cero es abrirlo y cotejar esta direccion antes que nada.
  *
- * QUE HACER EL DIA QUE LLEGUE EL PRIMER XML REAL, antes que nada: abrirlo, comparar cada direccion
- * con lo que declare su raiz, y cambiar esta nota. Cuesta minutos y cierra el hueco entero.
+ * El documento real dejo ademas un defecto al descubierto que ninguna prueba sintetica veia: el
+ * bloque de impuestos se perdia entero y en silencio. Esta arreglado, y `pruebas/fixtures/
+ * cfdi-40-honorarios-retenciones.xml` conserva su forma con los datos cambiados.
  */
 
-/** CFDI 4.0. Vigente desde 2022; la 3.3 no se lee y esta fuera de alcance. */
+/** CFDI 4.0. CONFIRMADA contra documento real. Vigente desde 2022; la 3.3 esta fuera de alcance. */
 export const CFDI_40 = 'http://www.sat.gob.mx/cfd/4'
 
 /**
  * Timbre fiscal digital 1.1.
  *
- * Ojo con esta: la 1.0 y la 1.1 COMPARTEN direccion y solo se distinguen por su atributo
- * `Version`. Es el caso que obliga a que la clave del registro tenga tres partes y no dos.
+ * CONFIRMADA contra documento real, donde ademas el timbre declara este `xmlns` EN SI MISMO y
+ * no en la raiz — de ahi que los ambitos tengan que resolverse por elemento.
+ *
+ * Ojo: la 1.0 y la 1.1 COMPARTEN direccion y solo se distinguen por su atributo `Version`. Es
+ * el caso que obliga a que la clave del registro tenga tres partes y no dos.
  */
 export const TIMBRE_11 = 'http://www.sat.gob.mx/TimbreFiscalDigital'
 
-/** Complemento de recepcion de pagos 2.0, el que acompana a un comprobante de tipo "P". */
+/** Pagos 2.0, el que acompana a un comprobante de tipo "P". SIN CONFIRMAR: falta un REP real. */
 export const PAGOS_20 = 'http://www.sat.gob.mx/Pagos20'
 
 /**

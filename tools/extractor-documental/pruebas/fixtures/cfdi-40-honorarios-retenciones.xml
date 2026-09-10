@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SINTETICO en los datos, FIEL en la estructura. Calcado de la forma de un CFDI 4.0 real de
+     honorarios que paso por la herramienta el 2026-09-10; RFC, nombres, sellos y UUID estan
+     inventados. Se conservan a proposito cuatro rasgos que un analizador ingenuo rompe:
+
+       1. `xsi:schemaLocation` aparece ANTES de las declaraciones `xmlns`, que van al final de
+          la lista de atributos. Resolver el nombre del elemento segun se leen los atributos,
+          en vez de tras leerlos todos, falla aqui.
+       2. El timbre declara su propio `xmlns:tfd` EN SI MISMO, no en la raiz.
+       3. Los importes traen seis decimales en el renglon y dos en los totales.
+       4. Hay DOS retenciones de impuestos distintos: aplanarlas sin indice pierde una.
+
+     Y el que hace falta para que la aritmetica signifique algo: el total NO es el subtotal.
+     9607.69 + 1537.23 - 1144.92 = 10000.00 -->
+<cfdi:Comprobante xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Fecha="2026-08-26T14:04:32" Sello="U0VMTE9ERUVKRU1QTE9RVUVOT0VTUkVBTHh4eHh4eHh4eEZJTkFMOA==" FormaPago="03" NoCertificado="00001000000701221208" SubTotal="9607.69" Moneda="MXN" Total="10000.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="91940" xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="PERSONA DE EJEMPLO" RegimenFiscal="626" />
+  <cfdi:Receptor Rfc="BBB020202BB2" Nombre="CLIENTE DE EJEMPLO" DomicilioFiscalReceptor="91778" RegimenFiscalReceptor="601" UsoCFDI="G03" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="80101703" Cantidad="1" ClaveUnidad="E48" Unidad="Unidad de servicio" Descripcion="HONORARIOS DEL PERIODO" ValorUnitario="9607.69" Importe="9607.690000" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="9607.690000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1537.230400" />
+        </cfdi:Traslados>
+        <cfdi:Retenciones>
+          <cfdi:Retencion Base="9607.690000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.106667" Importe="1024.823469" />
+          <cfdi:Retencion Base="9607.690000" Impuesto="001" TipoFactor="Tasa" TasaOCuota="0.012500" Importe="120.096125" />
+        </cfdi:Retenciones>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="1537.23" TotalImpuestosRetenidos="1144.92">
+    <cfdi:Retenciones>
+      <cfdi:Retencion Impuesto="002" Importe="1024.82" />
+      <cfdi:Retencion Impuesto="001" Importe="120.10" />
+    </cfdi:Retenciones>
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="9607.69" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1537.23" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE" FechaTimbrado="2026-08-26T14:05:29" RfcProvCertif="SAT970701NN3" SelloCFD="U0VMTE9ERUVKRU1QTE9RVUVOT0VTUkVBTHh4eHh4eHh4eEZJTkFMOA==" NoCertificadoSAT="00001000000705250068" SelloSAT="U0VMTE9TQVRERUVKRU1QTE9RVUVOT0VTUkVBTHh4eHh4eHg=" />
+  </cfdi:Complemento>
+</cfdi:Comprobante>

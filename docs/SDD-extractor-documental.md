@@ -456,12 +456,34 @@ no una fila añadida de paso. Pagos sí se construyó, y no por ser un buen ejem
 lleva `Total="0"` porque todo el dinero está en el complemento, así que sin lector entra al sistema
 como **una factura de cero pesos con apariencia de exacta**.
 
-**El estado de la evidencia, que es lo que más conviene recordar.** Las direcciones de los esquemas
-salen de la norma publicada, no de un documento que haya pasado por este sistema. Lo único
-corroborado contra un CFDI real son las dos versiones —la 4.0 y el timbre 1.1—, porque su
-representación impresa las declara. `src/xml/cfdi/espacios.ts` lo dice en su cabecera y marca qué
-está confirmado y qué no, igual que `saneado.ts` distingue los números medidos de los supuestos. El
-día que llegue el primer XML real, el paso cero es abrirlo y cotejar cada dirección.
+**El estado de la evidencia, y lo que cambió al llegar el primer XML real.** El 2026-09-10 pasó por
+la herramienta un CFDI 4.0 de honorarios, timbrado. Las direcciones de CFDI 4.0 y del timbre quedan
+**confirmadas**: son exactamente las que estaban pineadas. La de pagos sigue sin confirmar, porque
+no ha pasado ningún recibo de pago real, y `espacios.ts` distingue las tres en su cabecera.
+
+Pero lo que ese documento aportó de verdad no fue la confirmación: fue **un defecto que ninguna
+prueba sintética veía**. El bloque de impuestos se perdía entero y en silencio, y el aviso decía que
+no había nada que advertir. En una factura de honorarios eso no es un detalle: el total **no** es el
+subtotal, y lo retenido es lo que alguien tiene que enterar al SAT. Con los impuestos leídos la
+aritmética cierra exacta —`9607.69 + 1537.23 - 1144.92 = 10000.00`—; sin ellos quedaban 392,31 pesos
+sin explicar en la pantalla de quien revisa.
+
+La causa raíz no era el olvido de una tabla. Era que **la regla de los complementos —declarar, no
+descartar— no se estaba aplicando al tronco**, que es donde menos se nota y más duele. Por eso el
+arreglo no es solo leer impuestos: `LecturaDeCfdi` gana un `noLeido` que declara todo hijo del
+tronco que el lector no traduce, así que `CfdiRelacionados`, `InformacionGlobal` y lo que el SAT
+publique mañana aparecen en vez de desaparecer.
+
+Tres rasgos más que ese documento enseñó, y que un analizador ingenuo rompe: las declaraciones
+`xmlns` iban **al final** de la lista de atributos, con `xsi:schemaLocation` delante; el timbre
+declaraba su `xmlns` **en sí mismo** y no en la raíz; y los importes del renglón traían seis
+decimales frente a dos en los totales. Los tres pasan, y hay un fixture que conserva esa forma con
+los datos cambiados.
+
+**Lo que no se extrae a propósito**: el atributo `Certificado`, que lleva el X.509 entero y dentro
+el nombre completo, el correo y los identificadores fiscales de quien firma. Se extrae su **número**,
+que identifica sin exponer nada. Volcar el certificado sacaría datos personales a un campo que
+después viaja a una base, a un CSV y a la pantalla de cualquiera que revise.
 
 ---
 
