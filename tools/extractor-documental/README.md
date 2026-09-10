@@ -159,10 +159,13 @@ cotejaSelloConQr(lectura.sello.emisor, campoFeDelQr) // el sello va APARTE: base
 Y la regla del modulo cotejado vale igual: **ninguna fuente gana por decreto**. El XML no es mas
 fiable por venir estructurado, precisamente porque su sello no se verifica.
 
-> **Estado de la evidencia.** Las direcciones de los esquemas salen de la norma publicada, **no de
-> un documento que haya pasado por este sistema**. Lo unico corroborado contra un CFDI real son las
-> dos versiones. `src/xml/cfdi/espacios.ts` marca que esta confirmado y que no. El dia que tengas un
-> XML de verdad, el paso cero es abrirlo y cotejar cada direccion.
+> **Estado de la evidencia.** Las direcciones de CFDI 4.0 y del timbre estan **confirmadas** contra
+> un CFDI real de honorarios (2026-09-10). La de **pagos sigue sin confirmar**: no ha pasado ningun
+> recibo de pago real. `src/xml/cfdi/espacios.ts` distingue las tres.
+>
+> Ese documento real destapo un defecto que ninguna prueba sintetica veia: el bloque de impuestos se
+> perdia entero y en silencio. De ahi sale `LecturaDeCfdi.noLeido`, que declara todo hijo del tronco
+> que el lector no traduce — la regla de los complementos, aplicada donde menos se notaba.
 
 ## Motores
 

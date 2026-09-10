@@ -69,6 +69,15 @@ export interface LecturaDeCfdi {
   readonly conceptos: readonly ConceptoLeido[]
   readonly complementos: ComplementosLeidos
   readonly addenda: AddendaPresente | null
+  /**
+   * Elementos del tronco que este lector vio y NO tradujo.
+   *
+   * Existe por un defecto real: hasta que un CFDI de honorarios con retenciones paso por aqui, el
+   * bloque de impuestos se perdia entero y en silencio, y el aviso decia que no habia nada que
+   * advertir. La regla que gobierna los complementos —declarar, no descartar— no se estaba
+   * aplicando al tronco, que es donde menos se nota y mas duele.
+   */
+  readonly noLeido: readonly string[]
   readonly sello: SelloDelComprobante
   /** `false` cuando el comprobante no trae timbre. Es un HECHO, no un campo que falta. */
   readonly timbrado: boolean
@@ -86,6 +95,7 @@ function sinCfdi(motivo: string): LecturaDeCfdi {
     conceptos: [],
     complementos: { leidos: [], sinLector: [] },
     addenda: null,
+    noLeido: [],
     sello: SIN_SELLO,
     timbrado: false,
   }
@@ -117,6 +127,11 @@ const DEL_COMPROBANTE: readonly (readonly [string, string])[] = [
   ['Exportacion', 'exportacion'],
   ['LugarExpedicion', 'lugar_expedicion'],
   ['NoCertificado', 'no_certificado_emisor'],
+  // `Certificado` NO se lee, y no es un olvido. Ese atributo lleva el X.509 entero en base64, y
+  // dentro van el nombre completo, el correo y los identificadores fiscales de quien firma. Se
+  // extrae su NUMERO, que es lo que identifica sin exponer nada: para saber con que certificado
+  // se firmo basta el numero, y volcar el certificado seria sacar datos personales a un campo
+  // que despues viaja a una base, a un CSV y a la pantalla de cualquiera que revise.
 ]
 
 const DEL_EMISOR: readonly (readonly [string, string])[] = [
@@ -146,6 +161,14 @@ const DEL_CONCEPTO: readonly (readonly [string, string])[] = [
   ['ObjetoImp', 'objeto_imp'],
 ]
 
+const DEL_TRASLADO: readonly (readonly [string, string])[] = [
+  ['Base', 'base'],
+  ['Impuesto', 'impuesto'],
+  ['TipoFactor', 'tipo_factor'],
+  ['TasaOCuota', 'tasa_o_cuota'],
+  ['Importe', 'importe'],
+]
+
 /** Lo que se compara por igualdad exacta y NUNCA por parecido. */
 const SON_IDENTIFICADOR = new Set([
   'rfc_emisor',
@@ -163,16 +186,53 @@ function recoge(
   nodo: Elemento | null,
   tabla: readonly (readonly [string, string])[],
   destino: CampoExtraido[],
+  prefijo = '',
 ): void {
   if (nodo === null) return
-  for (const [delSat, clave] of tabla) {
+  for (const [delSat, sufijo] of tabla) {
     const valor = atributo(nodo, delSat)
     if (valor === null) continue
+    const clave = `${prefijo}${sufijo}`
     const campo: CampoExtraido = { clave, valor, confianza: 1, procedencia: 'xml' }
     if (SON_IDENTIFICADOR.has(clave)) campo.formato = 'identificador'
     destino.push(campo)
   }
 }
+
+/**
+ * El bloque de impuestos, que sirve igual para el tronco y para un renglon.
+ *
+ * Se lee porque sin el la aritmetica del comprobante no cierra. En una factura de honorarios con
+ * retenciones el total NO es el subtotal: es el subtotal mas lo trasladado menos lo retenido, y
+ * quien mire una extraccion sin esos dos numeros ve un hueco que no sabe explicar. Ademas lo
+ * retenido es lo que alguien tiene que enterar al SAT, asi que perderlo no es perder un detalle.
+ *
+ * Las claves van numeradas porque un comprobante puede llevar varias retenciones —esta factura
+ * real lleva dos, de dos impuestos distintos— y aplanarlas sin indice haria que la ultima pisara
+ * a la anterior.
+ */
+function recogeImpuestos(nodo: Elemento | null, destino: CampoExtraido[]): void {
+  if (nodo === null) return
+  const simple = (clave: string, valor: string | null): void => {
+    if (valor !== null) destino.push({ clave, valor, confianza: 1, procedencia: 'xml' })
+  }
+  simple('total_impuestos_trasladados', atributo(nodo, 'TotalImpuestosTrasladados'))
+  simple('total_impuestos_retenidos', atributo(nodo, 'TotalImpuestosRetenidos'))
+
+  for (const [contenedor, hoja, prefijo] of [
+    ['Traslados', 'Traslado', 'traslado'],
+    ['Retenciones', 'Retencion', 'retencion'],
+  ] as const) {
+    const grupo = hijo(nodo, CFDI_40, contenedor)
+    if (grupo === null) continue
+    hijos(grupo, CFDI_40, hoja).forEach((linea, i) => {
+      recoge(linea, DEL_TRASLADO, destino, `${prefijo}_${i + 1}_`)
+    })
+  }
+}
+
+/** Los hijos del tronco que este lector SI sabe tratar. Lo que no este aqui se declara. */
+const TRONCO_CONOCIDO = new Set(['Emisor', 'Receptor', 'Conceptos', 'Impuestos', 'Complemento', 'Addenda'])
 
 const DECLARACION = /<\?xml[^>]*encoding\s*=\s*["']([^"']+)["']/i
 
@@ -245,6 +305,7 @@ export function leeCfdi40(
   recoge(raiz, DEL_COMPROBANTE, campos)
   recoge(hijo(raiz, CFDI_40, 'Emisor'), DEL_EMISOR, campos)
   recoge(hijo(raiz, CFDI_40, 'Receptor'), DEL_RECEPTOR, campos)
+  recogeImpuestos(hijo(raiz, CFDI_40, 'Impuestos'), campos)
 
   const nodoConceptos = hijo(raiz, CFDI_40, 'Conceptos')
   const conceptos: ConceptoLeido[] =
@@ -253,6 +314,7 @@ export function leeCfdi40(
       : hijos(nodoConceptos, CFDI_40, 'Concepto').map((nodo, indice) => {
           const suyos: CampoExtraido[] = []
           recoge(nodo, DEL_CONCEPTO, suyos)
+          recogeImpuestos(hijo(nodo, CFDI_40, 'Impuestos'), suyos)
           return { indice, campos: suyos }
         })
 
@@ -271,6 +333,11 @@ export function leeCfdi40(
     delTimbre.some((c) => c.clave === 'uuid') ||
     complementos.sinLector.some((c) => c.nombreLocal === 'TimbreFiscalDigital')
 
+  // Lo que el lector vio en el tronco y no sabe tratar. `CfdiRelacionados` e `InformacionGlobal`
+  // caen aqui hoy, y cualquier elemento que el SAT anada manana tambien — declarado en vez de
+  // desaparecido, que es la unica forma de enterarse sin leer la norma cada trimestre.
+  const noLeido = [...new Set(raiz.hijos.filter((h) => !TRONCO_CONOCIDO.has(h.nombreLocal)).map((h) => h.nombreLocal))]
+
   return {
     esCfdi: true,
     motivo: null,
@@ -280,6 +347,7 @@ export function leeCfdi40(
     conceptos,
     complementos,
     addenda,
+    noLeido,
     sello: {
       emisor: atributo(raiz, 'Sello'),
       sat: delTimbre.find((c) => c.clave === 'sello_sat')?.valor ?? null,
@@ -341,6 +409,13 @@ export function avisoDelComprobante(lectura: LecturaDeCfdi): string | null {
       critico
         ? `Este comprobante es de tipo ${lectura.tipoDeComprobante} y sus importes viven en un complemento que NO se leyo: ${nombres}. Lo que aqui figura como total no es lo que se pago.`
         : `Trae ${sinLeer.length} complemento(s) que no se leyeron: ${nombres}. Sus datos NO estan en el resultado.`,
+    )
+  }
+
+  if (lectura.noLeido.length > 0) {
+    avisos.push(
+      `El comprobante trae ${lectura.noLeido.join(', ')} en su tronco, y este lector no lo traduce. ` +
+        'Sus datos NO estan en el resultado.',
     )
   }
 
