@@ -178,3 +178,27 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
   resuelve exactamente esto para las correcciones de un campo, con historial y valor vigente,
   y su lección es que **el histórico se diseña antes, porque después no se reconstruye**. Sin
   resolver.
+
+  **La forma que tendría, si se resuelve por la fecha del hecho.** Sale de discutirlo el
+  2026-09-10, y se anota aquí para que no haya que volver a derivarla:
+
+  - **Solo se añade, nunca se edita.** Un significado nuevo es una entrada nueva con su
+    vigencia. Editar en su sitio es exactamente lo que reescribe el pasado, y es el fallo que
+    esta duda existe para evitar.
+  - **La clave de búsqueda es `(código, fecha del hecho)`, no `código` a secas.** Es el cambio
+    que lo decide todo: con la clave corta, el mismo documento devuelve un veredicto distinto
+    según cuándo lo consultes.
+  - **La fecha la afirma quien publica, no quien mira.** Medido: el catálogo del SAT declara
+    su `last-modified` por HTTP, así que una instantánea puede fecharse contra la fuente. Un
+    "lo vi el martes" no sirve para decir qué valía entonces.
+  - **El extractor ya aporta las dos mitades** y no hace falta pedirle nada nuevo: emite el
+    código (nunca la etiqueta) y la fecha del comprobante.
+  - **La serie no hay que construirla.** `tools/extractor-documental/medicion/catalogos.mjs`
+    sella su referencia en un fichero versionado, así que el historial de git **es** el
+    repositorio de versiones. Vale la pena mirarlo antes de inventar una tabla de histórico:
+    puede que la mitad del problema ya esté resuelta por donde vive el dato.
+
+  Y el límite, que se estrecha pero no desaparece: detectar que una descripción cambió es
+  mecánico; decidir si ese cambio **afecta a una regla** no lo es. Una descripción se
+  reescribe sin cambiar el fondo, y el fondo cambia con un retoque menor. El diff lo señala,
+  una persona lo juzga.

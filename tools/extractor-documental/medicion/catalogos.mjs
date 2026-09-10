@@ -21,7 +21,20 @@
  * la sostiene, avisando cuando el conjunto se mueve.
  *
  * COMO FUNCIONA. Se declara lo ultimo visto en `catalogos-vistos.json` y se compara contra la
- * fuente, que es el mismo patron de `ESPEJO_DE_LA_MIGRACION`. Sellar es un acto deliberado:
+ * fuente, que es el mismo patron de `ESPEJO_DE_LA_MIGRACION`. Sellar es un acto deliberado.
+ *
+ * LA REFERENCIA VA FECHADA POR QUIEN PUBLICA, no por el dia en que a alguien se le ocurrio mirar.
+ * El servidor del SAT declara `last-modified` y un `etag`, y los dos se guardan. Eso da dos cosas:
+ *
+ *   - Una FECHA que afirma la fuente, que es la unica que sirve para decir "esto valia entonces".
+ *   - Una comprobacion BARATA: si el `etag` no ha cambiado, no hace falta bajar 5,8 MB.
+ *
+ * Y una consecuencia que conviene ver: **la serie historica no hay que construirla**. Cada sellado
+ * deja la referencia anterior en el historial de git, fechada por la fuente. `git log` sobre este
+ * fichero ES el repositorio de versiones, sin una sola pieza nueva.
+ *
+ * Lo que NO es: un repositorio de SIGNIFICADOS. Esto guarda que codigos existian y cuando. Que
+ * queria decir cada uno vive en el grafo del proyecto, y su spec (004) lleva anotada la forma.
  *
  *   node medicion/catalogos.mjs           # compara y reporta
  *   node medicion/catalogos.mjs --sella   # acepta lo que hay ahora como la nueva referencia
@@ -100,20 +113,61 @@ console.log(b('\nCodigos de catalogo del SAT'))
 console.log(g('  Sale a la red a proposito. No forma parte de `npm run validate`.'))
 console.log(g(`  Fuente: ${FUENTE}\n`))
 
+const previo = existsSync(REFERENCIA) ? JSON.parse(readFileSync(REFERENCIA, 'utf8')) : null
+const fuentePrevia = previo?.fuente ?? null
+
+/**
+ * Se pregunta antes de bajar. Si el `etag` es el mismo, la fuente no se ha movido y descargar 5,8
+ * MB no aporta nada — y una comprobacion cara es una comprobacion que se deja de correr.
+ */
+if (!sella && fuentePrevia?.etag != null) {
+  try {
+    const cabeza = await fetch(FUENTE, { method: 'HEAD' })
+    const etagAhora = cabeza.headers.get('etag')
+    if (cabeza.ok && etagAhora !== null && etagAhora === fuentePrevia.etag) {
+      console.log(`  ${verde('sin cambios')} la fuente no se ha movido desde la referencia.`)
+      console.log(g(`  Publicada: ${fuentePrevia.lastModified ?? '(sin fecha)'}`))
+      console.log(g('  No se descargo nada: el identificador de version es el mismo.\n'))
+      process.exit(0)
+    }
+  } catch {
+    // Si el servidor no responde a HEAD se sigue por la via larga. Nunca es motivo de fallo.
+  }
+}
+
 const respuesta = await fetch(FUENTE)
 if (!respuesta.ok) {
   console.error(rojo(`  No se pudo leer el catalogo: HTTP ${respuesta.status}`))
   process.exit(2)
 }
+const publicada = respuesta.headers.get('last-modified')
+const etag = respuesta.headers.get('etag')
 const texto = await respuesta.text()
 const ahora = catalogosDe(texto)
 console.log(
   `  ${verde('leido')} ${(texto.length / 1024 / 1024).toFixed(1)} MB · ${ahora.size} catalogo(s) · ` +
-    `${[...ahora.values()].reduce((n, c) => n + c.length, 0)} codigo(s)\n`,
+    `${[...ahora.values()].reduce((n, c) => n + c.length, 0)} codigo(s)`,
 )
+console.log(g(`  Publicada: ${publicada ?? '(la fuente no declara fecha)'}`))
+if (fuentePrevia?.lastModified != null && fuentePrevia.lastModified !== publicada) {
+  console.log(g(`  La referencia era de: ${fuentePrevia.lastModified}`))
+}
+console.log('')
 
-/** Lo que se guarda: la lista entera solo para los que significan algo; del resto, la cuenta. */
-const instantanea = {}
+/**
+ * Lo que se guarda: quien publico y cuando, mas la lista entera solo para los catalogos que
+ * significan algo. Del resto, la cuenta.
+ *
+ * `fuente` va primero a proposito: es lo que convierte esta foto en un punto de una serie.
+ */
+const instantanea = {
+  fuente: {
+    url: FUENTE,
+    lastModified: publicada,
+    etag,
+    selladoEn: new Date().toISOString().slice(0, 10),
+  },
+}
 for (const [nombre, codigos] of [...ahora].sort()) {
   instantanea[nombre] = CON_SIGNIFICADO.has(nombre)
     ? { codigos: [...codigos].sort() }
@@ -123,7 +177,9 @@ for (const [nombre, codigos] of [...ahora].sort()) {
 if (sella) {
   writeFileSync(REFERENCIA, `${JSON.stringify(instantanea, null, 2)}\n`, 'utf8')
   console.log(verde(`  Sellado: ${ahora.size} catalogo(s) aceptados como referencia.`))
-  console.log(g('  Commitea este fichero: es lo que permite ver el proximo movimiento.\n'))
+  console.log(g(`  Publicada por la fuente: ${publicada ?? '(sin fecha)'}`))
+  console.log(g('  Commitea este fichero. Con eso el historial de git pasa a ser la serie:'))
+  console.log(g('  cada sellado deja fechada la version anterior, sin una sola pieza nueva.\n'))
   process.exit(0)
 }
 
@@ -133,13 +189,14 @@ if (!existsSync(REFERENCIA)) {
   process.exit(2)
 }
 
-const antes = JSON.parse(readFileSync(REFERENCIA, 'utf8'))
+const antes = previo
 let movimientos = 0
 
 console.log(b('CATALOGOS CON SIGNIFICADO'))
 console.log(g('  De estos se dice QUE codigo entro o salio: una regla del negocio depende de ellos.'))
 let conCambio = 0
-for (const nombre of Object.keys(instantanea).filter((n) => CON_SIGNIFICADO.has(n))) {
+const catalogos = Object.keys(instantanea).filter((n) => n !== 'fuente')
+for (const nombre of catalogos.filter((n) => CON_SIGNIFICADO.has(n))) {
   const viejos = new Set(antes[nombre]?.codigos ?? [])
   const nuevos = new Set(instantanea[nombre].codigos)
   if (antes[nombre] === undefined) {
@@ -162,7 +219,7 @@ movimientos += conCambio
 console.log(b('\nCATALOGOS DE REFERENCIA'))
 console.log(g('  De estos solo la cuenta: un codigo postal o una clave de producto nueva son rutina.'))
 let conDelta = 0
-for (const nombre of Object.keys(instantanea).filter((n) => !CON_SIGNIFICADO.has(n))) {
+for (const nombre of catalogos.filter((n) => !CON_SIGNIFICADO.has(n))) {
   const antesCuenta = antes[nombre]?.cuenta
   const ahoraCuenta = instantanea[nombre].cuenta
   if (antesCuenta === undefined) {
@@ -178,7 +235,7 @@ for (const nombre of Object.keys(instantanea).filter((n) => !CON_SIGNIFICADO.has
 if (conDelta === 0) console.log(`  ${verde('sin movimiento')}`)
 movimientos += conDelta
 
-const desaparecidos = Object.keys(antes).filter((n) => instantanea[n] === undefined)
+const desaparecidos = Object.keys(antes).filter((n) => n !== 'fuente' && instantanea[n] === undefined)
 if (desaparecidos.length > 0) {
   console.log(b('\nCATALOGOS QUE YA NO ESTAN'))
   console.log(g('  La senal mas rara y la que mas conviene mirar: algo se retiro de la norma.'))

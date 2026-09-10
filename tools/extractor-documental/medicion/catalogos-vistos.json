@@ -1,4 +1,10 @@
 {
+  "fuente": {
+    "url": "http://www.sat.gob.mx/sitio_internet/cfd/catalogos/catCFDI.xsd",
+    "lastModified": "Fri, 13 Dec 2024 19:59:34 GMT",
+    "etag": "W/\"e29ac5164fd253d5734a4d931127ecd2\"",
+    "selladoEn": "2026-09-10"
+  },
   "c_ClaveProdServ": {
     "cuenta": 52747
   },
