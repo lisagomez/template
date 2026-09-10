@@ -32,6 +32,14 @@ import { analizaXml, atributo, hijo, hijos } from '../arbol.js'
 import type { ComplementosLeidos, RegistroDeEsquemas } from '../registro.js'
 import { registroDeEsquemas } from '../registro.js'
 import { CFDI_40 } from './espacios.js'
+import {
+  DEL_COMPROBANTE,
+  DEL_EMISOR,
+  DEL_RECEPTOR,
+  DEL_CONCEPTO,
+  DEL_TRASLADO,
+  sinTraducir,
+} from './inventario.js'
 
 /**
  * Los dos sellos, y la afirmacion de que nadie los comprobo.
@@ -110,65 +118,6 @@ function sinCfdi(motivo: string): LecturaDeCfdi {
  * una de las dos partes, el cotejo dejaria de encontrar nada y reportaria cero discrepancias, que
  * es indistinguible de que todo coincide.
  */
-const DEL_COMPROBANTE: readonly (readonly [string, string])[] = [
-  ['Version', 'version'],
-  ['Serie', 'serie'],
-  ['Folio', 'folio'],
-  ['Fecha', 'fecha'],
-  ['FormaPago', 'forma_pago'],
-  ['MetodoPago', 'metodo_pago'],
-  ['CondicionesDePago', 'condiciones_de_pago'],
-  ['Moneda', 'moneda'],
-  ['TipoCambio', 'tipo_cambio'],
-  ['SubTotal', 'subtotal'],
-  ['Descuento', 'descuento'],
-  ['Total', 'total'],
-  ['TipoDeComprobante', 'tipo_de_comprobante'],
-  ['Exportacion', 'exportacion'],
-  ['LugarExpedicion', 'lugar_expedicion'],
-  ['NoCertificado', 'no_certificado_emisor'],
-  // `Certificado` NO se lee, y no es un olvido. Ese atributo lleva el X.509 entero en base64, y
-  // dentro van el nombre completo, el correo y los identificadores fiscales de quien firma. Se
-  // extrae su NUMERO, que es lo que identifica sin exponer nada: para saber con que certificado
-  // se firmo basta el numero, y volcar el certificado seria sacar datos personales a un campo
-  // que despues viaja a una base, a un CSV y a la pantalla de cualquiera que revise.
-]
-
-const DEL_EMISOR: readonly (readonly [string, string])[] = [
-  ['Rfc', 'rfc_emisor'],
-  ['Nombre', 'nombre_emisor'],
-  ['RegimenFiscal', 'regimen_fiscal_emisor'],
-]
-
-const DEL_RECEPTOR: readonly (readonly [string, string])[] = [
-  ['Rfc', 'rfc_receptor'],
-  ['Nombre', 'nombre_receptor'],
-  ['DomicilioFiscalReceptor', 'domicilio_fiscal_receptor'],
-  ['RegimenFiscalReceptor', 'regimen_fiscal_receptor'],
-  ['UsoCFDI', 'uso_cfdi'],
-]
-
-const DEL_CONCEPTO: readonly (readonly [string, string])[] = [
-  ['ClaveProdServ', 'clave_prod_serv'],
-  ['NoIdentificacion', 'no_identificacion'],
-  ['Cantidad', 'cantidad'],
-  ['ClaveUnidad', 'clave_unidad'],
-  ['Unidad', 'unidad'],
-  ['Descripcion', 'descripcion'],
-  ['ValorUnitario', 'valor_unitario'],
-  ['Importe', 'importe'],
-  ['Descuento', 'descuento'],
-  ['ObjetoImp', 'objeto_imp'],
-]
-
-const DEL_TRASLADO: readonly (readonly [string, string])[] = [
-  ['Base', 'base'],
-  ['Impuesto', 'impuesto'],
-  ['TipoFactor', 'tipo_factor'],
-  ['TasaOCuota', 'tasa_o_cuota'],
-  ['Importe', 'importe'],
-]
-
 /** Lo que se compara por igualdad exacta y NUNCA por parecido. */
 const SON_IDENTIFICADOR = new Set([
   'rfc_emisor',
@@ -230,9 +179,6 @@ function recogeImpuestos(nodo: Elemento | null, destino: CampoExtraido[]): void 
     })
   }
 }
-
-/** Los hijos del tronco que este lector SI sabe tratar. Lo que no este aqui se declara. */
-const TRONCO_CONOCIDO = new Set(['Emisor', 'Receptor', 'Conceptos', 'Impuestos', 'Complemento', 'Addenda'])
 
 const DECLARACION = /<\?xml[^>]*encoding\s*=\s*["']([^"']+)["']/i
 
@@ -333,10 +279,10 @@ export function leeCfdi40(
     delTimbre.some((c) => c.clave === 'uuid') ||
     complementos.sinLector.some((c) => c.nombreLocal === 'TimbreFiscalDigital')
 
-  // Lo que el lector vio en el tronco y no sabe tratar. `CfdiRelacionados` e `InformacionGlobal`
-  // caen aqui hoy, y cualquier elemento que el SAT anada manana tambien — declarado en vez de
-  // desaparecido, que es la unica forma de enterarse sin leer la norma cada trimestre.
-  const noLeido = [...new Set(raiz.hijos.filter((h) => !TRONCO_CONOCIDO.has(h.nombreLocal)).map((h) => h.nombreLocal))]
+  // `CfdiRelacionados` e `InformacionGlobal` caen aqui hoy, y cualquier elemento o atributo que el
+  // SAT anada manana tambien: declarado en vez de desaparecido, que es la unica forma de enterarse
+  // sin leer la norma cada trimestre.
+  const noLeido = sinTraducir(raiz)
 
   return {
     esCfdi: true,

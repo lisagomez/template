@@ -146,6 +146,40 @@ Tres reglas, y ninguna es de estilo:
 | Convertir importes a numero | `1160.00` se conserva como cadena: pasar por `number` pierde el cero y abre la puerta al redondeo binario |
 | Leer CFDI 3.3, nomina o carta porte | La 3.3 esta fuera de alcance. Los otros dos se registran el dia que haya un documento real: escribir su mapeo a ciegas es inventarse el dato de otro |
 
+### Que la estructura no envejezca en silencio
+
+El lector es una traduccion a mano de un esquema oficial, y **una traduccion a mano diverge sola**.
+Es el mismo problema que `pruebas/banco-espejo.ts` resuelve para la migracion de la base, con una
+diferencia que decide el diseno: aquella fuente es un fichero del repositorio, y esta vive **fuera
+del perimetro**, en la red.
+
+Tres cosas pueden desalinearse, y cada una tiene su respuesta:
+
+| Que cambia | Que lo caza |
+|---|---|
+| El SAT publica una **version nueva** de un complemento | La version va pineada: el documento se reporta con las dos versiones nombradas, no se lee mal |
+| Aparece un **elemento o atributo nuevo** sin cambiar la version | `LecturaDeCfdi.noLeido` lo declara. Nada se pierde en silencio, ni en el tronco ni en los complementos |
+| Cambia el **significado** de un campo que ya existia | **Nada automatico.** Eso es leer la norma, o no es nada |
+
+Y para cotejar contra el esquema publicado, a mano y fuera del gate:
+
+```bash
+npm run deriva -- --documento factura.xml   # sigue el schemaLocation que declara el propio CFDI
+npm run deriva -- ruta/o/url/del.xsd        # o un esquema concreto
+```
+
+Compara en **las dos direcciones**: lo que el esquema declara y el lector no mapea, y lo que el
+lector mapea y el esquema no declara — que es la peor senal, porque significa que se invento algo o
+que lo quitaron. Distingue los huecos de las **omisiones deliberadas**, para no pedir que arregles
+lo que ya esta decidido.
+
+Sale a la red **a proposito**, y por eso vive en `medicion/` y no en el paquete, no corre en el
+camino de lectura de ningun documento, y **no esta encadenado a `npm run validate`**: un gate que
+falla porque alguien no tenia conexion es un gate que la gente aprende a ignorar.
+
+Lo mas barato sigue siendo otra cosa: **tus propios documentos**. Cada cosa que un comprobante real
+trae y el lector no traduce ya se declara, y eso te dice que recibes de verdad, no que dice la norma.
+
 ### El cotejo a tres bandas sale gratis
 
 El lector emite `uuid`, `rfc_emisor`, `rfc_receptor` y `total` con **las mismas claves** que

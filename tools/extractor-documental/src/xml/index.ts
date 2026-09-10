@@ -52,5 +52,6 @@ export type {
   SelloDelComprobante,
 } from './cfdi/comprobante-40.js'
 
-export { lectorDeTimbre11 } from './cfdi/timbre-11.js'
-export { lectorDePagos20 } from './cfdi/pagos-20.js'
+export { lectorDeTimbre11, INVENTARIO_TIMBRE } from './cfdi/timbre-11.js'
+export { lectorDePagos20, INVENTARIO_PAGOS } from './cfdi/pagos-20.js'
+export { INVENTARIO, OMITIDOS } from './cfdi/inventario.js'

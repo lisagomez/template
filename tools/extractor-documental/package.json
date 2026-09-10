@@ -57,6 +57,7 @@
     "prueba": "node --test pruebas/*.ts",
     "demo": "node demo/servidor.mjs",
     "mide": "node medicion/mide.mjs",
+    "deriva": "node medicion/deriva.mjs",
     "banco": "node banco/cli.mjs"
   },
   "peerDependencies": {
