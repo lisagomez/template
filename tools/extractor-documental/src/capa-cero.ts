@@ -24,6 +24,7 @@
  * navegador, que es la condicion para que el nucleo siga siendo instalable en cualquier proyecto.
  */
 import type { PaginaExtraida } from './tipos.js'
+import { saneaTextoExtraido } from './saneado.js'
 import type { MotorOcr, OpcionesDeExtraccion } from './puertos.js'
 
 /** Texto minimo para considerar que la capa existe. Menos que esto es ruido de metadatos. */
@@ -125,16 +126,69 @@ function leeHexadecimal(cuerpo: string): string {
 }
 
 /**
+ * Distancia vertical minima, en unidades del PDF, para considerar que empieza una linea nueva.
+ *
+ * MEDIDO sobre un CFDI real de 163 posiciones: los saltos verticales van de 0,02 a 235, con
+ * mediana 7,2, y solo DOS quedan por debajo de 0,5 — diferencias de redondeo dentro del mismo
+ * renglon. Por debajo de este valor los fragmentos son columnas de la misma linea y se separan con
+ * un espacio; por encima, son renglones distintos.
+ */
+const SALTO_DE_LINEA_MINIMO = 0.5
+
+/**
+ * Distancia horizontal minima, en la misma linea, para considerar que empieza otra COLUMNA.
+ *
+ * MEDIDO sobre el mismo CFDI, en los 51 pares que comparten altura: doce quedan entre 0 y 3
+ * —letras de una misma palabra que el PDF dibuja una a una, como el titulo de una seccion—, dos
+ * entre 3 y 6, **ninguno entre 6 y 10**, y de ahi para arriba son columnas de verdad ("Lugar de
+ * expedicion" -> "45609", a 72 unidades).
+ *
+ * Sin esta distincion, la primera version de este arreglo separaba TODOS los fragmentos de la misma
+ * linea y convertia un titulo en "S E C C I O N D E C O N C E P T O S". Arreglar el pegado vertical
+ * y romper la palabra en horizontal es cambiar un fallo por otro.
+ *
+ * Un desplazamiento NEGATIVO —el texto vuelve hacia atras— es siempre otra columna, nunca la
+ * continuacion de una palabra.
+ */
+const SALTO_DE_COLUMNA_MINIMO = 6
+
+/** Los seis numeros de un `Tm`: los dos ultimos son la traslacion (x, y). */
+function traslacionDe(numeros: readonly number[]): { x: number; y: number } | null {
+  if (numeros.length < 6) return null
+  return { x: numeros[numeros.length - 2], y: numeros[numeros.length - 1] }
+}
+
+/**
  * Saca el texto de un flujo de contenido ya descomprimido.
  *
  * Recorre los operadores de mostrado —`Tj`, `TJ`, `'` y `"`— y toma sus argumentos. Los
- * operadores de posicion (`Td`, `TD`, `T*`, `ET`) producen salto de linea: sin eso, una factura
- * entera sale como un unico renglon y deja de ser legible para quien la revise.
+ * operadores de posicion producen separacion: sin eso, una factura entera sale como un unico
+ * renglon y deja de ser legible para quien la revise.
+ *
+ * **`Tm` es de posicion y faltaba, y es el que mas se usa.** La primera version solo miraba `Td`,
+ * `TD`, `T*` y `ET`. En un CFDI real habia **164 `Tm` frente a 20 `Td`**: el 89 % de los
+ * posicionamientos era invisible para este codigo, asi que concatenaba fragmento tras fragmento y
+ * el resultado pegaba campos que en el papel estan en renglones distintos —el nombre del emisor
+ * con su RFC, "Factura" con su tipo—. No se veia como un fallo de extraccion, se veia como un dato
+ * raro, que es peor.
+ *
+ * Y `Tm` no siempre significa renglon nuevo: fija una posicion absoluta, asi que dos `Tm` con la
+ * MISMA altura son dos columnas de la misma linea. De ahi que se compare la Y y se separe con
+ * espacio o con salto segun el caso — pegar dos columnas es el mismo fallo en horizontal.
  */
 export function extraeTextoDeContenido(contenido: string): string {
   let salida = ''
   let pendiente: string[] = []
+  let numeros: number[] = []
+  let anterior: { x: number; y: number } | null = null
   let i = 0
+
+  /** Vuelca lo acumulado y añade el separador que toque. */
+  const vuelca = (separador: string): void => {
+    salida += pendiente.join('') + separador
+    pendiente = []
+  }
+
   while (i < contenido.length) {
     const c = contenido[i]
     if (c === '(') {
@@ -151,22 +205,43 @@ export function extraeTextoDeContenido(contenido: string): string {
       continue
     }
     if (c === "'" || c === '"') {
-      salida += pendiente.join('') + '\n'
-      pendiente = []
+      vuelca('\n')
+      numeros = []
       i++
+      continue
+    }
+    // Los numeros se acumulan porque son los argumentos del operador que viene detras.
+    const numero = /^-?\d+(?:\.\d+)?/.exec(contenido.slice(i))
+    if (numero !== null && /[-\d]/.test(c)) {
+      numeros.push(Number(numero[0]))
+      i += numero[0].length
       continue
     }
     if (/[A-Za-z*]/.test(c)) {
       const operador = contenido.slice(i).match(/^[A-Za-z][A-Za-z0-9*]*/)?.[0] ?? ''
       if (operador === 'Tj' || operador === 'TJ') {
-        salida += pendiente.join('')
-        pendiente = []
+        vuelca('')
+      } else if (operador === 'Tm') {
+        const posicion = traslacionDe(numeros)
+        // Misma altura: son columnas del mismo renglon y va un espacio. Altura distinta: renglon
+        // nuevo. Sin posicion anterior no hay con que comparar, y no se separa nada.
+        const separador =
+          posicion === null || anterior === null
+            ? ''
+            : Math.abs(posicion.y - anterior.y) >= SALTO_DE_LINEA_MINIMO
+              ? '\n'
+              : // Misma altura: o es la palabra que continua, o es la columna de al lado.
+                posicion.x - anterior.x >= 0 && posicion.x - anterior.x < SALTO_DE_COLUMNA_MINIMO
+                ? ''
+                : ' '
+        vuelca(separador)
+        if (posicion !== null) anterior = posicion
       } else if (operador === 'Td' || operador === 'TD' || operador === 'T*' || operador === 'ET') {
-        salida += pendiente.join('') + '\n'
-        pendiente = []
+        vuelca('\n')
       } else if (operador === 'BT') {
         pendiente = []
       }
+      numeros = []
       i += Math.max(operador.length, 1)
       continue
     }
@@ -240,16 +315,34 @@ export async function leeCapaCero(pdf: Uint8Array): Promise<ResultadoCapaCero> {
     posicion = fin + 'endstream'.length
   }
 
-  const paginas = flujos.map(extraeTextoDeContenido).filter((t) => t.trim().length > 0)
-  const todo = paginas.join('\n')
-  if (todo.trim().length === 0) {
+  const candidatos = flujos.map(extraeTextoDeContenido).filter((t) => t.trim().length > 0)
+  if (candidatos.length === 0) {
     return sinCapa(
       filtrosDesconocidos > 0
         ? `sin texto legible y ${filtrosDesconocidos} flujo(s) con filtro no soportado`
         : 'sin capa de texto: es un escaneo o una imagen',
     )
   }
-  if (!pareceTexto(todo)) return sinCapa('lo extraido no supera la prueba de imprimibilidad')
+
+  /**
+   * La prueba de imprimibilidad va POR FLUJO, nunca sobre el agregado.
+   *
+   * Juzgar el conjunto parecia equivalente y no lo es, y costo un falso negativo caro: un CFDI real
+   * traia CINCO flujos —el contenido de pagina legible al 94 %, mas una fuente embebida, un mapa
+   * ToUnicode y dos de glifos CID—. Como esos cuatro no son texto y nunca lo fueron, el promedio
+   * caia al 52 % y **se rechazaban los cinco, incluido el bueno**. La factura se resolvia sin motor
+   * y se mandaba al motor igual.
+   *
+   * No es un caso raro: CUALQUIER PDF con fuentes embebidas tiene flujos que como texto son ruido,
+   * o sea casi todas las facturas generadas por software — justo la clase que esta capa existe para
+   * ahorrar. Un flujo de fuente no es "texto malo" que baje la media: es que no es texto, y
+   * promediarlo con el bueno compara cosas distintas.
+   *
+   * La asimetria del modulo se respeta igual: lo que se descarta se descarta entero, asi que sigue
+   * sin colarse un solo caracter dudoso entre los buenos.
+   */
+  const paginas = candidatos.filter((t) => pareceTexto(t))
+  if (paginas.length === 0) return sinCapa('lo extraido no supera la prueba de imprimibilidad')
   return { hayTexto: true, paginas, motivo: null }
 }
 
@@ -316,4 +409,57 @@ export async function extraeConCapaCero(
   }
   const paginas = await motor.extrae(documento, opciones)
   return { paginas, porCapaCero: false, motivo: capa.motivo }
+}
+
+/**
+ * El resultado de la capa 0 en forma serializable, ya saneado.
+ *
+ * Existe porque "texto corrido en pantalla" y "dato que un sistema consume" no son lo mismo, y
+ * hasta ahora solo habia lo primero. Esto se copia, se guarda, se compara entre dos corridas y se
+ * mete en un script sin volver a parsear prosa.
+ *
+ * LO QUE DELIBERADAMENTE **NO** LLEVA: campos con `confianza`. La capa 0 no estima nada — su texto
+ * es exacto, asi que no hay score que poner, y un `0.99` inventado aqui seria justo el numero falso
+ * que TAR-17 existe para impedir. Lo que hay son LINEAS; convertirlas en campos con su confianza
+ * es trabajo del motor o de la persona que revisa, y ahi es donde se decide que significan.
+ */
+export interface CapaCeroEnJson {
+  /** `true` si se resolvio sin motor. */
+  hayTexto: boolean
+  /** Por que se descarto, o `null` si fue bien. */
+  motivo: string | null
+  /** Cuantos flujos de contenido aportaron texto. */
+  bloques: number
+  /** El texto, una entrada por linea, ya limpio. */
+  lineas: readonly string[]
+  /** Que se quito al sanear. Los invisibles son una senal sobre el documento, no ruido. */
+  saneado: {
+    controles: number
+    invisibles: number
+    lineasVacias: number
+    lineasDescartadas: readonly string[]
+  }
+}
+
+/**
+ * Convierte el resultado de `leeCapaCero` en un objeto serializable, saneando de paso.
+ *
+ * Sanea aqui dentro y no lo deja al que llama a proposito: si el saneado fuera opcional, la mitad
+ * de los consumidores acabaria serializando el texto crudo —con sus controles y sus invisibles— y
+ * el problema volveria por la puerta de atras.
+ */
+export function capaCeroComoJson(resultado: ResultadoCapaCero): CapaCeroEnJson {
+  const limpio = saneaTextoExtraido(resultado.paginas.join('\n'))
+  return {
+    hayTexto: resultado.hayTexto,
+    motivo: resultado.motivo,
+    bloques: resultado.paginas.length,
+    lineas: limpio.texto.length === 0 ? [] : limpio.texto.split('\n'),
+    saneado: {
+      controles: limpio.controles,
+      invisibles: limpio.invisibles,
+      lineasVacias: limpio.lineasVacias,
+      lineasDescartadas: limpio.lineasDescartadas,
+    },
+  }
 }

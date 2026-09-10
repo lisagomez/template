@@ -128,11 +128,17 @@ export type { Lapida, OrdenDeSupresion, RegistroASuprimir } from './supresion.js
 export { estimaCoste, sumaEstimaciones } from './costes.js'
 export type { TarifaDelMotor, Estimacion, OpcionesDeEstimacion } from './costes.js'
 
+export { saneaTextoExtraido, resumenDeSaneado, huboCambios } from './saneado.js'
+export type { TextoSaneado } from './saneado.js'
+
 export { aCsv, neutralizaFormula, registraExportacion, BOM_UTF8 } from './csv.js'
 export type { ColumnaCsv, RegistroDeExportacion } from './csv.js'
 
-export { leeCapaCero, extraeConCapaCero, extraeTextoDeContenido, pareceTexto, cuentaPaginasPdf } from './capa-cero.js'
-export type { ResultadoCapaCero, ExtraccionConCapaCero } from './capa-cero.js'
+export {
+  leeCapaCero, extraeConCapaCero, extraeTextoDeContenido, pareceTexto, cuentaPaginasPdf,
+  capaCeroComoJson,
+} from './capa-cero.js'
+export type { ResultadoCapaCero, ExtraccionConCapaCero, CapaCeroEnJson } from './capa-cero.js'
 
 export { proponeModelo, preparaCatalogos, revisaSql, aNombreDeColumna, tipoSqlDe } from './modelo.js'
 export type {
