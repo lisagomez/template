@@ -1,0 +1,4 @@
+# La base del banco se genera con `npm run banco siembra`. Reproducible: no se versiona.
+*.db
+*.db-journal
+*.db-wal

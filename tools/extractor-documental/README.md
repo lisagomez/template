@@ -180,14 +180,59 @@ una fuga con historial de git.
 que los lea una persona. Y **no recomienda ningún umbral**: elegir exige saber cuánto cuesta un
 error que se cuela frente a una hora de revisión, y eso no está en los datos.
 
+## El banco de pruebas: un negocio ficticio en una base embebida
+
+`npm run demo` prueba la herramienta en el navegador y fabrica corpus. El **banco** hace lo otro:
+ejercita el camino entero desde Node —ingesta, extracción, mapeo contra catálogos, cola de revisión,
+corrección, persistencia y recuperación— **sin Supabase, sin credenciales y sin red**.
+
+```bash
+npm run banco siembra        # crea el negocio ficticio  [--semilla X] [--facturas N]
+npm run banco corrida        # el camino completo, con REINICIO DE PROCESO real
+npm run banco determinismo   # dos siembras con la misma semilla → la misma huella
+npm run banco descriptores   # los tres estados, leídos de la base
+npm run banco peligroso      # el escenario de §2.10 y su barrera
+npm run banco destruye
+```
+
+**Por qué existe.** El SDD §2.8 dice que este template no tiene catálogos, ni datos, ni esquema que
+introspeccionar. Eso convertía tres capacidades en documentadas-y-nunca-ejecutadas: la persistencia
+sólo existía contra Supabase o IndexedDB, y los tres estados del descriptor eran tres ficheros JSON
+que podían afirmar cualquier cosa. Aquí el descriptor sale de `pragma table_info`: describe lo que
+la base **tiene**.
+
+**Qué motor de base, y por qué.** `node:sqlite`, que viene dentro de Node 22.18+. El paquete corre
+hoy sin ningún `node_modules` propio, y el banco hereda esa propiedad. La alternativa seria era
+PGlite —Postgres en WASM—, y su argumento parecía fuerte: producción es Supabase, o sea Postgres.
+No aplica a este camino: **el adaptador de Supabase no escribe SQL**, habla PostgREST. El dialecto
+sólo vive en la migración, que es otro artefacto.
+
+**Qué NO prueba el banco, dicho en voz alta:**
+
+| | |
+|---|---|
+| **Las policies de RLS** | SQLite no tiene RLS. En producción la base niega la fila aunque el código se equivoque; aquí el aislamiento por organización lo impone el código del adaptador, que es una garantía más débil. Las policies de `migraciones/001-*.sql` **siguen sin haberse ejecutado nunca** |
+| **Los umbrales** | Las confianzas las fabrica un motor de mentira. TAR-17, TAR-25 y TAR-34 siguen bloqueadas: los umbrales se miden sobre corpus real |
+| **El OCR** | Los documentos sintéticos son texto plano. Lo que se ejercita es el camino, no la extracción |
+
+`pruebas/banco-espejo.ts` compara el esquema del banco contra la migración real, columna a columna y
+CHECK a CHECK: una tabla que cambie en producción y no aquí pone el gate en rojo. Es el mismo
+mecanismo que `pruebas/persistencia.ts` usa para las listas de valores, y por la misma razón — una
+copia a mano diverge sola.
+
+El banco vive fuera de `exports` y de `files`: **no se publica**. La puerta de
+`CREAR-UNA-HERRAMIENTA.md` manda — sin reuso real 3+ veces, publicar sólo añade una versión que
+mantener. Promoverlo a `./almacenes/sqlite` sería un CDC aparte.
+
 ## Pruebas
 
 ```bash
-npm run prueba   # construye dist/ y prueba CONTRA EL, sin red, sin base de datos, sin navegador
+npm run prueba   # construye dist/ y prueba CONTRA EL, sin red y sin navegador
 ```
 
 Las pruebas importan de `../dist/`, no de `../src/`: se prueba lo que se publica, que es la
-convencion de `tools/voz`. Las fuentes importan con extension `.js` aunque los archivos sean `.ts`
+convencion de `tools/voz`. Las del banco (`pruebas/banco-*.ts`) usan una base SQLite embebida, que
+viene dentro de Node: siguen sin necesitar red, credenciales ni nada instalado. Las fuentes importan con extension `.js` aunque los archivos sean `.ts`
 — `tsc` las resuelve, y usar `.ts` ahi hace imposible emitir `dist/`.
 
 La UI tambien tiene pruebas de verdad, no capturas: las decisiones —que columna se ofrece, que

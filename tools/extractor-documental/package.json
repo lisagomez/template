@@ -52,7 +52,8 @@
     "preprueba": "npm run build",
     "prueba": "node --test pruebas/*.ts",
     "demo": "node demo/servidor.mjs",
-    "mide": "node medicion/mide.mjs"
+    "mide": "node medicion/mide.mjs",
+    "banco": "node banco/cli.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
