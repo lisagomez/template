@@ -3215,3 +3215,69 @@ aprovechaban. Ya no depende de la costumbre.
   esa clase: ninguna firma la autoriza, se rediseña o no se hace.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aprueba CDC»)
   en sesión del 2026-09-09.
+
+---
+
+### 2026-09-09 — derivas de dependencias, tanda 1: doce paquetes dentro de rango — radio: menor
+- **Cambio**: **solo `package-lock.json`**. `package.json` no se toca: los rangos `^` que ya
+  estaban declarados cubren las doce versiones nuevas, así que esto **no mueve ningún pineo**
+  — refresca el suelo real que el lockfile fijaba.
+
+  | Paquete | Antes → Ahora | Salto |
+  |---|---|---|
+  | `next` + `eslint-config-next` | 16.3.2 → **16.3.4** | parche (van juntos, misma familia) |
+  | `react` + `react-dom` | 19.2.8 → **19.3.0** | menor |
+  | `@types/react` · `@types/react-dom` | 19.2.18 / 19.2.4 → **19.3.0** | menor (con los de arriba) |
+  | `@supabase/supabase-js` | 2.112.3 → **2.116.0** | menor |
+  | `zod` | 4.4.3 → **4.6.1** | menor |
+  | `lucide-react` | 1.38.0 → **1.43.0** | menor |
+  | `@types/node` · `autoprefixer` · `postcss` | 22.20.2 · 10.5.5 · 8.5.28 | parche |
+- **Motivo**: primera corrida de `npm run vigila:versiones` desde el 2026-08-25. Reportó **22
+  derivas, 20 nuevas**. Esta tanda toma las doce de menor riesgo —las que caben en el rango ya
+  declarado— y deja las otras diez para decisiones separadas, que es como el vigilante está
+  pensado: propone, no aplica.
+- **Lo que esta entrada NO autoriza, y por qué cada uno se queda fuera**:
+  - **`tailwind-merge` 2.6.1 → 3.6.0 — se rechaza, no se pospone.** Es la trampa ya documentada
+    en `.claude/rules/aprendizajes-stack.md` (2026-08-31): el mayor de `tailwind-merge` sigue al
+    de Tailwind, no al calendario, y 3.x es para v4. Con `tailwindcss@3.4` rompe las clases.
+    **El vigilante no puede saber esto** — es exactamente el caso que justifica que un humano
+    lea el informe en vez de aplicarlo.
+  - **`tailwindcss` 4.3.3**: no es un bump, es migración de sintaxis (`@import 'tailwindcss'` +
+    `@tailwindcss/postcss`) y arrastra `tailwind-merge` y el cableado de shadcn. Trabajo propio.
+  - **`typescript` 7.0.2** y **`eslint` 9 → 10**: mayores. El peer de `eslint-config-next` dice
+    `>=9.0.0`, o sea que ESLint 10 *entra*, pero es un mayor con retiradas de API: CDC propio.
+  - **`@supabase/ssr` 0.6.1 → 0.12.7**: **fuera del rango** (`^0.6.0` no llega a 0.12) y en `0.x`
+    cada minor puede romper — son seis saltos sobre la ruta de auth entera. CDC propio, y con
+    login/signup probados de verdad, no solo `typecheck`.
+  - Los **MCP** (`@playwright/mcp` 0.0.80, `@supabase/mcp-server-supabase` 0.12.0 y los tres de
+    `example.mcp.json`): son C1 explícito por `.mcp.json`. Y mover `@playwright/mcp` obliga a
+    **re-verificar la sintaxis de `.claude/rules/herramientas-qa.md` en el mismo CDC**, porque un
+    `0.0.x` que cambia flags deja esa regla mintiendo — el modo de fallo del 2026-08-25.
+- **Vulnerabilidad preexistente, anotada para que no se cuele aquí**: `npm audit` reporta 1 alta
+  (`js-yaml@4.3.1`, CPU no acotada en merge keys). **No la trae esta tanda**: no aparece en el
+  diff del lockfile y viene de `eslint@9.39.5 → @eslint/eslintrc`. `npm audit fix` empujaría
+  justo al ESLint 10 que esta entrada deja fuera. Es argumento para abrir ese CDC, no para
+  ampliar este.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo ni `package.json`)
+- **Regresión**: `npm run validate` **EXIT 0**, sellado sobre el árbol `fee89fade0e4`.
+  `npm run regresion` — C2 capa A **113/113 — promovible**.
+  `npm run regresion -- --trampa` — capa B **22/22 — promovible**.
+  `npm run verify:gobernanza` — **152/152** · `npm run verifica:specs` — **64/64** ·
+  `npm run verifica:routing` — coherente.
+  Las corridas en sesión fría de los casos-trampa **no se relanzaron**: el cambio no toca ningún
+  control, ningún skill ni ningún caso del corpus — solo versiones de dependencias.
+- **Lo que este gate NO prueba, y se firma a sabiendas**: la app **no se ejecutó**. `build`
+  compila con React 19.3 y Next 16.3.4, pero nadie abrió `/login` ni `/dashboard` en un
+  navegador. La prueba de humo con `/playwright-cli` se ofreció antes de firmar y **no se
+  corrió**. Si algo se rompe en runtime con este salto, el sitio donde mirar es este párrafo.
+- **Nota de método, del propio CDC**: la primera versión de esta entrada se escribió **sin
+  firma**, como propuesta, y `verify:gobernanza` la tumbó (*«una decisión sin dueño no es una
+  decisión»*, 1 de 152 en rojo). Queda anotado porque es el control funcionando: la bitácora
+  registra decisiones tomadas, no propuestas — una entrada entra **con** su firma o no entra.
+- **Revisión trimestral** (fila "parámetros menores" de `GOBERNANZA.md` §2): **2026-12-09**. Qué
+  mirar ese día: si las diez derivas que quedan fuera siguen fuera **por decisión** y no por
+  inercia — sobre todo `@supabase/ssr`, que se aleja un minor cada pocas semanas.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («firma la
+  entrada y commitea pr merge») en sesión del 2026-09-09, tras ver el informe del vigilante con
+  las 22 derivas y elegir la tanda de doce.
