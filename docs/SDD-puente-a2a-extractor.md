@@ -144,15 +144,38 @@ Una sola skill. La entrada es un documento; la salida, campos con **confianza y 
 {
   "name": "extractor-documental",
   "description": "Extrae datos de documentos con revisión humana",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "skills": [{
     "id": "extraccion-documental",
     "name": "Extraer datos de un documento",
     "description": "PDF o imagen → campos con confianza y región de origen",
     "tags": ["ocr", "documentos", "facturas"]
+  }, {
+    "id": "lectura-de-comprobante-xml",
+    "name": "Leer un comprobante fiscal en XML",
+    "description": "XML de CFDI 4.0 → campos exactos, sin región. El sello NO se verifica: que el documento se lea bien no dice nada sobre si es auténtico",
+    "tags": ["cfdi", "xml", "facturas"]
   }]
 }
 ```
+
+### Por qué son DOS capacidades y no una descripción ampliada
+
+Es el mismo argumento que el SDD del extractor da (§4) para no unificar `MotorOcr` con
+`LectorDeCodigos`: **no comparten semántica**.
+
+La primera devuelve una **estimación** con confianza por campo y región de origen. La segunda
+devuelve una **transcripción** exacta, sin región, cuya confianza significa otra cosa — «el XML dice
+esto», no «esto es cierto». Meterlas bajo una sola descripción deja que un consumidor externo trate
+una transcripción como estimación, o al revés, y esta capa ya se llevó esa lección.
+
+Y la segunda **declara en su propia descripción que el sello no está verificado**. Un consumidor que
+reciba datos fiscales exactos y no vea esa marca concluirá que la factura es auténtica, que es
+justamente lo único que no podemos afirmar. Decirlo en la Card es más barato que decirlo en la
+respuesta: llega antes de que nadie llame.
+
+**Lo que la Card sigue sin decir, a propósito**: qué esquemas hay registrados. Es interior, y §2.1 es
+tajante con eso — enumerar los complementos que un proyecto sabe leer describe su negocio.
 
 **Lo que la Card NO dice, a propósito**: qué motor hay detrás, qué umbral usa el consumidor, ni si
 la capa 0 resolvió sin llamar a nadie. Son detalles del interior, y §2.1 es tajante con eso.
@@ -183,6 +206,8 @@ Un endpoint A2A es **la misma clase**. Cambia el formato, no el riesgo.
 | Filtración por mensajes de error | RF-6/RF-8. Los adaptadores ya no vuelcan clave ni cuerpo; el bridge no puede añadir stack traces |
 | Consumo de cuota ajena (el que llama gasta tu OCR) | **Hueco abierto**: sin cuota por partner, un consumidor puede vaciar tu presupuesto. Se declara, no se resuelve aquí |
 | Exfiltración por volumen (pedir muchos documentos) | **Hueco abierto**: sin límite de tasa por partner |
+| **XML hostil que lee ficheros del servidor** (entidad externa) | El lector rechaza `DOCTYPE` de plano, y **no existe el código** que resolvería una entidad. No hay bandera que reactivar (RF-89, RF-90). Es la amenaza que un endpoint A2A vuelve remota: hasta ahora el XML lo traía una persona; ahora lo manda otro agente |
+| Un consumidor toma por auténtica una factura porque el XML se leyó bien | La Card lo declara, y el resultado también (RF-92). Analizar no es validar, y validar no es autenticar |
 
 ## 6. La prueba de opacidad, portada — y por qué **todavía no se escribe**
 

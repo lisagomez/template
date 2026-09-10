@@ -1,0 +1,56 @@
+/**
+ * Lectura de XML, y el CFDI 4.0 como primer esquema. TypeScript puro, CERO dependencias.
+ *
+ * Va en su propio subpath y no en el nucleo por una razon de vocabulario, no de peso: "esto es un
+ * XML" es generico y vive en el nucleo, pero las direcciones del SAT no lo son. Un proyecto de
+ * otro pais que instale la herramienta no tiene por que encontrarse `http://www.sat.gob.mx/cfd/4`
+ * en su import raiz.
+ *
+ * Los lectores de complemento NO tienen un subpath cada uno, y eso es deliberado. Un subpath
+ * existe cuando importarlo COMPROMETE al consumidor a algo: una dependencia, una salida de red, un
+ * tiempo de ejecucion. Por eso lo tiene el motor de un proveedor. Un lector de complemento es puro
+ * y no compromete a nada, y lo que hace que un proyecto pague solo por lo que usa no es el subpath
+ * sino el registro: nada se registra por defecto.
+ *
+ * Como se usa:
+ *
+ *     import { leeCfdi40, registroDeEsquemas, lectorDeTimbre11 } from '@tu-scope/extractor-documental/xml'
+ *
+ *     const registro = registroDeEsquemas([lectorDeTimbre11])
+ *     const lectura = leeCfdi40(bytes, registro)
+ */
+
+export { analizaLexico, decodificaEntidades } from './lexico.js'
+export type { Pieza, AtributoCrudo } from './lexico.js'
+
+export { analizaXml, hijo, hijos, atributo, atributoConEspacio } from './arbol.js'
+export type { Elemento, Atributo, DocumentoXml } from './arbol.js'
+
+export { registroDeEsquemas, avisoDeComplementos } from './registro.js'
+export type {
+  ClaveDeEsquema,
+  LectorDeComplemento,
+  LecturaDeComplemento,
+  ComplementoLeido,
+  ComplementoSinLector,
+  ComplementosLeidos,
+  RegistroDeEsquemas,
+} from './registro.js'
+
+export { CFDI_40, TIMBRE_11, PAGOS_20, SIN_LECTOR, nombreDelEsquema } from './cfdi/espacios.js'
+
+export {
+  leeCfdi40,
+  camposParaCotejo,
+  cotejaSelloConQr,
+  avisoDelComprobante,
+} from './cfdi/comprobante-40.js'
+export type {
+  LecturaDeCfdi,
+  ConceptoLeido,
+  AddendaPresente,
+  SelloDelComprobante,
+} from './cfdi/comprobante-40.js'
+
+export { lectorDeTimbre11 } from './cfdi/timbre-11.js'
+export { lectorDePagos20 } from './cfdi/pagos-20.js'

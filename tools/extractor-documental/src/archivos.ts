@@ -16,6 +16,7 @@ const POR_EXTENSION: Readonly<Record<string, TipoDeArchivo>> = {
   tif: 'imagen',
   tiff: 'imagen',
   heic: 'imagen',
+  xml: 'xml',
 }
 
 const POR_MIME: Readonly<Record<string, TipoDeArchivo>> = {
@@ -25,7 +26,12 @@ const POR_MIME: Readonly<Record<string, TipoDeArchivo>> = {
   'image/webp': 'imagen',
   'image/tiff': 'imagen',
   'image/heic': 'imagen',
+  'application/xml': 'xml',
+  'text/xml': 'xml',
 }
+
+// No se admite `text/plain` aunque Windows reporte asi algunos .xml: meteria cualquier .txt en la
+// cola. El respaldo por extension de `tipoDe` ya cubre ese caso sin abrir la puerta.
 
 function extensionDe(nombre: string): string {
   const punto = nombre.lastIndexOf('.')
@@ -45,12 +51,15 @@ export function clasificaArchivo(archivo: ArchivoEntrante, limites?: LimitesDelM
   const tipo = tipoDe(archivo)
   if (tipo === null) {
     const ext = extensionDe(archivo.nombre)
-    return { ...archivo, aceptado: false, motivo: `Formato no soportado${ext ? ` (.${ext})` : ''}: solo PDF e imagenes` }
+    return { ...archivo, aceptado: false, motivo: `Formato no soportado${ext ? ` (.${ext})` : ''}: solo PDF, imagenes y XML` }
   }
   if (archivo.bytes <= 0) {
     return { ...archivo, aceptado: false, motivo: 'El archivo esta vacio' }
   }
-  if (limites && archivo.bytes > limites.bytesMaximos) {
+  // El limite es DEL MOTOR, y un XML no pasa por ningun motor: se lee entero, en local y sin
+  // coste. Rechazarlo por un tope que nunca se le va a aplicar seria rechazarlo por una razon
+  // que no existe.
+  if (limites && tipo !== 'xml' && archivo.bytes > limites.bytesMaximos) {
     const mb = (limites.bytesMaximos / 1_000_000).toFixed(0)
     return { ...archivo, aceptado: false, motivo: `Supera el limite del motor (${mb} MB)` }
   }

@@ -36,9 +36,9 @@ export const manifiesto: ManifiestoDePlugin = {
   descripcion:
     'Carga masiva de PDF, imagenes y carpetas, revision humana de lo extraido y mapeo contra los catalogos que el proyecto ya tiene.',
   ruta: '/extractor-documental',
-  version: '0.1.0',
+  version: '0.2.0',
   icono: ICONO,
-  capacidades: ['ingesta', 'revision', 'plantillas', 'mapeo-de-catalogos', 'modelado'],
+  capacidades: ['ingesta', 'revision', 'plantillas', 'mapeo-de-catalogos', 'modelado', 'lectura-de-xml'],
 }
 
 export default manifiesto

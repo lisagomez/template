@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Trae un complemento de un esquema que la herramienta no conoce. Tiene que
+     aparecer DECLARADO, y el tronco tiene que leerse igual de completo. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:raro="http://ejemplo.invalid/desconocido"
+                  Version="4.0" Serie="N" Folio="0036" Fecha="2025-07-02T10:00:00"
+                  FormaPago="03" MetodoPago="PUE" Moneda="MXN" SubTotal="1000.00"
+                  Total="1160.00" TipoDeComprobante="I" Exportacion="01"
+                  LugarExpedicion="91940" NoCertificado="30001000000500003416">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="OPERADORA DE EJEMPLO SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL"
+                 DomicilioFiscalReceptor="91940" RegimenFiscalReceptor="616" UsoCFDI="S01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="78101800" Cantidad="1" ClaveUnidad="E48"
+                   Descripcion="Servicio de transporte" ValorUnitario="1000.00"
+                   Importe="1000.00" ObjetoImp="02"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <raro:AlgoQueNadieRegistro Version="3.1" Dato="importa"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

@@ -25,7 +25,11 @@ export function rutaDeOriginal(organizacionId: string, sha256: string, extension
   return `${organizacionId}/${sha256}.${ext}`
 }
 
-const EXTENSIONES: readonly string[] = ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'tif', 'tiff', 'heic']
+/**
+ * Sin `xml` aqui, un CFDI se aceptaria en la ingesta y reventaria justo al guardar su evidencia
+ * — y para un comprobante fiscal el XML es MAS evidencia que el PDF: el PDF solo lo representa.
+ */
+const EXTENSIONES: readonly string[] = ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'tif', 'tiff', 'heic', 'xml']
 
 export function extensionPermitida(extension: string): boolean {
   return EXTENSIONES.includes(extension.replace(/^\./, '').toLowerCase())

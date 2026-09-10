@@ -64,6 +64,13 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
 
 ## Requisitos funcionales (criterios de aceptación en EARS)
 
+> **Enmienda del 2026-09-10 (RF-83 a RF-97).** RF-6 se amplía a XML. Antes decía: *«EL SISTEMA
+> aceptará PDF e imágenes, y rechazará cualquier otro tipo nombrando el archivo y el motivo»*. Se
+> **enmienda** en vez de añadirse un requisito que lo contradiga: una spec que se contradice a sí
+> misma es peor que una que cambia y lo dice. Queda anotado aquí a propósito, porque
+> `verifica:specs` solo comprueba la numeración y el formato EARS, y un requisito editado le pasa
+> invisible — exactamente el hueco que ese verificador existe para cerrar.
+
 - RF-1: EL SISTEMA expondrá un manifiesto de plugin importable sin React, con identificador,
   nombre, descripción, ruta, versión, capacidades e icono.
 - RF-2: EL SISTEMA entregará el icono del plugin como SVG en línea dentro del manifiesto, sin
@@ -74,8 +81,8 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
   selección de carpeta.
 - RF-5: CUANDO se arrastre una carpeta, EL SISTEMA recorrerá su árbol de forma recursiva y
   aplanará los archivos contenidos.
-- RF-6: EL SISTEMA aceptará PDF e imágenes, y rechazará cualquier otro tipo nombrando el archivo
-  y el motivo.
+- RF-6: EL SISTEMA aceptará PDF, imágenes y XML, y rechazará cualquier otro tipo nombrando el
+  archivo y el motivo.
 - RF-7: SI un archivo supera el límite de tamaño o de páginas del motor configurado, ENTONCES EL
   SISTEMA lo troceará antes de enviarlo, o lo rechazará explicando el límite.
 - RF-8: EL SISTEMA derivará el identificador de cada documento del hash de su contenido, de modo
@@ -213,6 +220,37 @@ no es un caso aparte: es el mismo camino con un descriptor de esquema vacío.
 - RF-81: EL SISTEMA neutralizará en la exportación toda celda que una hoja de cálculo interpretaría
   como fórmula.
 - RF-82: EL SISTEMA registrará cada exportación con quién la hizo, cuándo y cuántas filas salieron.
+- RF-83: EL SISTEMA leerá comprobantes fiscales en XML sin llamar a ningún motor de
+  reconocimiento, porque el XML es el documento fiscal y el PDF solo su representación impresa.
+- RF-84: EL SISTEMA resolverá cada elemento y cada complemento por la dirección de su espacio de
+  nombres y por su versión declarada, y nunca por el prefijo con el que venga escrito.
+- RF-85: SI un complemento presente en el documento no tiene lector registrado, ENTONCES EL
+  SISTEMA lo reportará con su espacio de nombres, su versión y el motivo, y leerá el resto del
+  comprobante igualmente.
+- RF-86: SI un complemento declara una versión distinta de la que admite el lector registrado,
+  ENTONCES EL SISTEMA lo reportará nombrando ambas versiones y no lo leerá con ese lector.
+- RF-87: EL SISTEMA permitirá al proyecto que lo instala registrar sus propios lectores de
+  complemento sin modificar el código de la herramienta.
+- RF-88: SI el registro recibe dos lectores para el mismo espacio de nombres, nombre y versión,
+  ENTONCES EL SISTEMA fallará al construirlo en vez de elegir uno en silencio.
+- RF-89: SI un XML declara un DOCTYPE, ENTONCES EL SISTEMA rechazará el documento nombrando el
+  motivo, sin resolver ninguna entidad.
+- RF-90: EL SISTEMA no resolverá entidades externas ni descargará ningún esquema por red para leer
+  un XML.
+- RF-91: EL SISTEMA marcará todo dato procedente de un XML con una procedencia propia, distinta de
+  la del reconocimiento óptico y de la del código.
+- RF-92: EL SISTEMA declarará en el resultado que el sello del emisor y el del SAT no han sido
+  verificados, y no ofrecerá ninguna ruta que los verifique.
+- RF-93: EL SISTEMA no consultará ningún servicio externo para comprobar el estatus de un
+  comprobante, ni a partir de un código ni a partir de un XML.
+- RF-94: CUANDO se disponga del XML y del PDF del mismo comprobante, EL SISTEMA cotejará sus datos
+  con los del código impreso, y tratará cualquier discrepancia como motivo de revisión humana.
+- RF-95: EL SISTEMA conservará los valores numéricos del XML tal como vienen, sin redondearlos ni
+  reformatearlos, y emitirá los códigos del catálogo fiscal sin traducirlos a etiquetas.
+- RF-96: SI el comprobante es de tipo pago o de tipo nómina y su complemento no se leyó, ENTONCES
+  EL SISTEMA lo advertirá en español antes de que sus importes se traten como definitivos.
+- RF-97: EL SISTEMA tratará la addenda como contenido sin esquema fiscal, reportando su presencia
+  y sin convertirla en campos salvo que el proyecto declare un lector propio.
 
 ## Requisitos no funcionales
 
@@ -289,6 +327,11 @@ eligieron estar aquí.
 | La evidencia original se pierde porque el respaldo de la base no la incluía | RF-59, RF-60, RF-63: se guarda aparte, con retención declarada y línea propia en el inventario |
 | Un CSV con datos de terceros sale del sistema y deja de estar protegido | RF-82: queda registrado quién exportó qué y cuándo |
 | Un evento de trazabilidad perdido deja sin prueba a quien dependía de ella | RF-42, RF-50, RF-51, RF-53: identidad por hecho, cola local y aviso de riesgo de borrado |
+| Una factura se da por auténtica porque su XML se leyó bien, y decide un pago | RF-92: el sello se declara no verificado, y el XML no gana por decreto sobre las otras fuentes |
+| El identificador y los registros fiscales de **dos** terceros salen hacia un servicio externo, revelando su relación comercial | RF-93: no se consulta ningún servicio de verificación fiscal |
+| Un XML enviado por un proveedor lee ficheros del servidor donde corre el lector | RF-89, RF-90: el DOCTYPE se rechaza por construcción, y no hay bandera que lo reactive |
+| Un recibo de pago entra como factura de cero pesos y descuadra la cuenta de **un proveedor** que no participó en el error | RF-85, RF-96: el complemento sin leer se reporta y se advierte antes de dar los importes por definitivos |
+| El recibo de nómina de un empleado, que no eligió estar aquí, se mapea a ciegas contra un esquema que nadie verificó | Nómina **no se implementa** hasta tener un documento real: RF-85 la declara sin leer en vez de adivinarla |
 
 **Límite de C5**: si los documentos llevan datos personales de terceros, sacarlos del perímetro
 **no es un riesgo firmable por el dueño del proyecto**. Se usa el adaptador autohospedado o se
@@ -302,7 +345,14 @@ rediseña. Esta spec no ofrece la vía del registro de riesgo para ese caso.
 - Publicar el paquete en un registro npm: es gate humano, no un paso de esta spec.
 - Flujo de trabajo con varios revisores, asignación de cola o notificaciones.
 - Soporte a consumidores CommonJS: el template es ESM, y el doble build sería un CDC aparte.
-- Formatos de fichero que no sean PDF ni imagen.
+- Formatos de fichero que no sean PDF, imagen ni XML — en particular ofimática, hojas de cálculo
+  y correo.
+- Leer CFDI 3.3: se lee la 4.0, y una versión anterior se rechaza nombrándola.
+- Validar el sello digital de un comprobante, o comprobar su estatus contra el SAT. Lo primero
+  exige criptografía y certificados; lo segundo mandaría los datos de dos terceros a un servicio
+  externo (RF-92, RF-93).
+- Embarcar los catálogos del SAT para traducir códigos a etiquetas: envejecen, y resolverlos
+  contra las tablas del proyecto ya es trabajo de la reconciliación (RF-95).
 - Convertir la aplicación consumidora en PWA: eso lo hace el proyecto con su propio flujo; la
   herramienta solo aporta la cola y su adaptador de almacenamiento local.
 - Consultar servicios externos de seguimiento o de verificación fiscal a partir de un código.
