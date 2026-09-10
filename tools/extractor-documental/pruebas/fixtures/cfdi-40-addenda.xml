@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Una addenda con hijos SIN espacio de nombres, que es como la meten muchos
+     emisores. No tiene esquema del SAT: se declara que esta, y no se convierte en campos. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  Version="4.0" Serie="N" Folio="0037" Fecha="2025-07-03T10:00:00"
+                  FormaPago="03" MetodoPago="PUE" Moneda="MXN" SubTotal="1000.00"
+                  Total="1160.00" TipoDeComprobante="I" Exportacion="01"
+                  LugarExpedicion="91940">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="OPERADORA DE EJEMPLO SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="CCC030303CCC" Nombre="CLIENTE DE EJEMPLO SA DE CV"
+                 DomicilioFiscalReceptor="06600" RegimenFiscalReceptor="601" UsoCFDI="G03"/>
+  <cfdi:Addenda>
+    <OrdenDeCompra numero="OC-4471"/>
+    <ContactoDeAlmacen nombre="quien sea"/>
+  </cfdi:Addenda>
+</cfdi:Comprobante>

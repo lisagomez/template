@@ -181,3 +181,37 @@ test('solo los archivos de src/react/ importan React', () => {
     assert.doesNotMatch(codigo, /from ['"]react/, `src/${archivo} importa React fuera de ./react`)
   }
 })
+
+/**
+ * Dos garantias del lector de XML que el sistema de tipos no puede dar solo.
+ *
+ * `node --test` sobre `pruebas/` usa el borrado de tipos de Node y NO comprueba tipos: `tsconfig`
+ * solo incluye `src`. Asi que el literal `false` de `SelloDelComprobante.verificado` protege a
+ * quien compile contra el paquete, pero no impide que alguien lo cambie aqui dentro. Este control
+ * es textual justo por eso.
+ */
+test('el lector de XML no habla por la red', () => {
+  // Validar contra un esquema descargado del SAT convertiria leer un fichero local en una llamada
+  // saliente por documento, y dejaria la herramienta inservible sin internet.
+  for (const archivo of todas.filter((f) => f.startsWith('xml/'))) {
+    const codigo = readFileSync(join(raiz, 'src', archivo), 'utf8')
+    // La palabra suelta, no `fetch(`: la llamada real de un adaptador es `globalThis.fetch`
+    // guardada en una variable con otro nombre, y un patron que exija el parentesis no la ve.
+    // Verificado contra `src/motores/mistral.ts`, que si sale a la red.
+    for (const patron of [/\bfetch\b/, /XMLHttpRequest/, /from ['"]node:https?/]) {
+      assert.doesNotMatch(codigo, patron, `src/${archivo} sale a la red`)
+    }
+  }
+})
+
+test('en ninguna parte se declara un sello como verificado', () => {
+  // Analizar no es validar, y validar no es autenticar. Verificar un sello exige criptografia y el
+  // certificado del emisor; poner esto a `true` sin eso convertiria una transcripcion en una
+  // afirmacion de autenticidad, que es la unica cosa que este lector no puede decir.
+  const archivos = todas.filter((f) => f.startsWith('xml/'))
+  assert.ok(archivos.length > 0, 'si el lector de XML se mueve de sitio, este control tiene que seguirlo')
+  for (const archivo of archivos) {
+    const codigo = readFileSync(join(raiz, 'src', archivo), 'utf8')
+    assert.doesNotMatch(codigo, /verificado:\s*true/, `src/${archivo} da un sello por verificado`)
+  }
+})

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Un complemento de pagos que declara una version distinta de la registrada.
+     NO se lee "porque se parece": leer 1.0 con las reglas de 2.0 da un dato distinto. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:pago20="http://www.sat.gob.mx/Pagos20"
+                  Version="4.0" Serie="P" Folio="0002" Fecha="2025-07-16T12:00:00"
+                  Moneda="XXX" SubTotal="0" Total="0" TipoDeComprobante="P"
+                  Exportacion="01" LugarExpedicion="91940">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="OPERADORA DE EJEMPLO SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="CCC030303CCC" Nombre="CLIENTE DE EJEMPLO SA DE CV"
+                 DomicilioFiscalReceptor="06600" RegimenFiscalReceptor="601" UsoCFDI="CP01"/>
+  <cfdi:Complemento>
+    <pago20:Pagos Version="1.0">
+      <pago20:Totales MontoTotalPagos="9999.99"/>
+    </pago20:Pagos>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

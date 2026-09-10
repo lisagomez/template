@@ -42,8 +42,16 @@ export interface Region {
  * el campo de codigo **se saltaria la cola de revision** por el mero hecho de venir de un
  * decodificador determinista. Que es justo lo contrario de lo que conviene: decodificar bien no
  * dice nada sobre si el contenido es cierto (§2.11 del SDD).
+ *
+ * `xml` existe por el mismo argumento, aplicado a la tercera fuente. Un XML analiza o no analiza,
+ * asi que sus campos llegan tambien con confianza 1 — y sin marca propia serian indistinguibles de
+ * un OCR que salio muy bien, con lo que se saltarian la cola igual.
+ *
+ * Que significa confianza 1 aqui: **el XML dice esto**. NO **esto es cierto**. Lo segundo depende
+ * del sello, que este lector declara SIEMPRE como no verificado. Un comprobante entero puede estar
+ * inventado y su XML analizar perfecto.
  */
-export type Procedencia = 'ocr' | 'codigo' | 'humano'
+export type Procedencia = 'ocr' | 'codigo' | 'humano' | 'xml'
 
 /**
  * Que clase de cosa es lo que se leyo. Cambia la IDENTIDAD, y por tanto si se deduplica.
@@ -94,7 +102,14 @@ export interface PaginaExtraida {
   campos: CampoExtraido[]
 }
 
-export type TipoDeArchivo = 'pdf' | 'imagen'
+/**
+ * Que clase de fichero entro.
+ *
+ * `xml` no es "otro formato de documento": es el documento FISCAL, mientras que el PDF de la misma
+ * factura es su representacion impresa. De ahi salen datos exactos sin motor de por medio, asi que
+ * el camino que sigue dentro de la herramienta no es el mismo.
+ */
+export type TipoDeArchivo = 'pdf' | 'imagen' | 'xml'
 
 export interface ArchivoEntrante {
   nombre: string

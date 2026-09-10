@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Es EL MISMO documento que cfdi-40-ingreso.xml con otros prefijos: el
+     comprobante usa el espacio por defecto y el timbre un prefijo cualquiera. Si el lector
+     resolviera por prefijo, este fichero daria cero campos. -->
+<Comprobante xmlns="http://www.sat.gob.mx/cfd/4"
+             xmlns:zz="http://www.sat.gob.mx/TimbreFiscalDigital"
+             Version="4.0" Serie="N" Folio="0035" Fecha="2025-07-01T09:39:32"
+             FormaPago="03" MetodoPago="PUE" Moneda="MXN" SubTotal="1000.00"
+             Total="1160.00" TipoDeComprobante="I" Exportacion="01"
+             LugarExpedicion="91940" NoCertificado="30001000000500003416"
+             Sello="One9Zb/iFZ2c4QV+y/HJZVeGzanA+aDc3LBeWg7EbaLPCQcQGUASc0zaMz887Ms6jnlUnVp8D5">
+  <Emisor Rfc="AAA010101AAA" Nombre="OPERADORA DE EJEMPLO SA DE CV" RegimenFiscal="601"/>
+  <Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL"
+            DomicilioFiscalReceptor="91940" RegimenFiscalReceptor="616" UsoCFDI="S01"/>
+  <Conceptos>
+    <Concepto ClaveProdServ="78101800" Cantidad="1" ClaveUnidad="E48"
+              Descripcion="Servicio de transporte" ValorUnitario="600.00"
+              Importe="600.00" ObjetoImp="02"/>
+    <Concepto ClaveProdServ="80141600" Cantidad="2" ClaveUnidad="E48"
+              Descripcion="Maniobras de carga" ValorUnitario="200.00"
+              Importe="400.00" ObjetoImp="02"/>
+  </Conceptos>
+  <Complemento>
+    <zz:TimbreFiscalDigital Version="1.1"
+        UUID="11111111-2222-3333-4444-555555555555"
+        FechaTimbrado="2025-07-01T09:40:10"
+        RfcProvCertif="BBB020202BBB"
+        NoCertificadoSAT="30001000000400002495"
+        SelloCFD="One9Zb/iFZ2c4QV+y/HJZVeGzanA+aDc3LBeWg7EbaLPCQcQGUASc0zaMz887Ms6jnlUnVp8D5"
+        SelloSAT="Jp7NnQxLmRvY3VtZW50byBkZSBwcnVlYmEgcXVlIG5vIGVzIHVuIHNlbGxvIHJlYWwrKys="/>
+  </Complemento>
+</Comprobante>

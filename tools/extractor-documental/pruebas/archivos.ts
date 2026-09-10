@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { clasificaArchivo, clasificaLote, tipoDe, troceaPaginas } from '../dist/archivos.js'
+import { extensionPermitida, rutaDeOriginal } from '../dist/originales.js'
 import type { LimitesDelMotor } from '../dist/tipos.js'
 
 const LIMITES: LimitesDelMotor = { bytesMaximos: 50_000_000, paginasMaximas: 1000, paginasPorAnotacion: 8 }
@@ -51,4 +52,45 @@ test('trocear el resto parcial y el caso vacio', () => {
   assert.deepEqual(troceaPaginas(9, 8)[1], [8])
   assert.deepEqual(troceaPaginas(0, 8), [])
   assert.throws(() => troceaPaginas(10, 0), RangeError)
+})
+
+// --- El XML, que no es "otro formato" sino el documento fiscal -----------------------------------
+
+test('acepta XML por MIME y por extension', () => {
+  assert.equal(tipoDe({ nombre: 'factura.xml', bytes: 1 }), 'xml')
+  assert.equal(tipoDe({ nombre: 'FACTURA.XML', bytes: 1 }), 'xml')
+  assert.equal(tipoDe({ nombre: 'sin-extension', tipoMime: 'application/xml', bytes: 1 }), 'xml')
+  assert.equal(tipoDe({ nombre: 'otra', tipoMime: 'text/xml', bytes: 1 }), 'xml')
+})
+
+test('un .txt sigue rechazandose aunque Windows llame text/plain a algunos xml', () => {
+  // Admitir `text/plain` meteria cualquier documento de texto en la cola. El respaldo por
+  // extension ya cubre el caso sin abrir esa puerta.
+  assert.equal(tipoDe({ nombre: 'notas.txt', tipoMime: 'text/plain', bytes: 1 }), null)
+  assert.equal(tipoDe({ nombre: 'factura.xml', tipoMime: 'text/plain', bytes: 1 }), 'xml')
+})
+
+test('lo que no es PDF, imagen ni XML se sigue rechazando, y el motivo lo dice', () => {
+  const r = clasificaArchivo({ nombre: 'hoja.xlsx', bytes: 10 })
+  assert.equal(r.aceptado, false)
+  assert.match(r.aceptado === false ? r.motivo : '', /solo PDF, imagenes y XML/)
+})
+
+test('el limite del motor NO se le aplica a un XML', () => {
+  // Ese tope es de la API del motor, y un XML no pasa por ningun motor: se lee entero, en local
+  // y sin coste. Rechazarlo por ahi seria rechazarlo por una razon que no existe.
+  const enorme = 60_000_000
+  assert.equal(clasificaArchivo({ nombre: 'grande.xml', bytes: enorme }, LIMITES).aceptado, true)
+  assert.equal(clasificaArchivo({ nombre: 'grande.pdf', bytes: enorme }, LIMITES).aceptado, false)
+})
+
+test('un XML vacio se rechaza igual que cualquier otro', () => {
+  assert.equal(clasificaArchivo({ nombre: 'vacio.xml', bytes: 0 }).aceptado, false)
+})
+
+test('el XML se puede guardar como evidencia: para un CFDI es MAS prueba que el PDF', () => {
+  // Sin esto, un XML se aceptaria en la ingesta y reventaria justo al ir a guardar el original.
+  const hash = 'a'.repeat(64)
+  assert.equal(extensionPermitida('xml'), true)
+  assert.equal(rutaDeOriginal('org-1', hash, 'xml'), `org-1/${hash}.xml`)
 })
