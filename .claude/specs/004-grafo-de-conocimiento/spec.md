@@ -149,3 +149,32 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
 - [NECESITA ACLARACIÓN] ¿Qué ocurre si el modelo del parser se cae? El motor tiene que
   fallar de forma **distinguible** de "no hay regla aplicable", o son dos fallos con la
   misma cara para el usuario. Sin resolver.
+
+- [NECESITA ACLARACIÓN] **El grafo modela qué significa algo, no qué significaba en una
+  fecha, y esa diferencia decide si sirve para una auditoría.** RF-9 vigila la deriva
+  *interna* —nadie cambia una regla sin declararlo— pero no la *externa*: el día que la
+  autoridad redefine un código que sigue existiendo, actualizar el grafo **reescribe en
+  silencio el significado de todo lo que ya se procesó**. La pregunta que importa después no
+  es qué quiere decir un código hoy, sino qué quería decir cuando se leyó aquel documento.
+
+  > **Por qué aparece aquí y no es teórico.** Lo destapó el lector de CFDI de
+  > `tools/extractor-documental/` el 2026-09-10. Al preguntarse cómo mantener la estructura
+  > al día resultó que hay tres clases de cambio, y las dos primeras ya tienen mecanismo:
+  > una versión nueva la caza el pineado, y un campo nuevo lo caza declarar en vez de
+  > descartar (`medicion/deriva.mjs` y `medicion/catalogos.mjs`). La tercera —**un cambio de
+  > significado sin cambio de estructura**— no la caza nada, y medido sobre el catálogo
+  > publicado se ve por qué: 5,8 MB, 162.233 códigos y **cero descripciones legibles**. El
+  > fichero dice qué códigos son válidos; qué quiere decir cada uno vive en un documento
+  > para leer, no para comparar.
+  >
+  > Por eso el extractor emite **códigos y nunca etiquetas**: para que el significado tenga
+  > un solo sitio donde vivir, que es este grafo. Lo que convierte esa decisión en una
+  > obligación para esta spec — si el significado vive aquí, aquí es donde tiene que poder
+  > fecharse.
+
+  Lo que hay que resolver antes de construirlo: si un veredicto se calcula contra las reglas
+  **vigentes hoy** o contra las **vigentes en la fecha del hecho**, y cuál de las dos pide de
+  verdad el caso de uso. Hay precedente dentro de la casa: `src/versiones.ts` del extractor ya
+  resuelve exactamente esto para las correcciones de un campo, con historial y valor vigente,
+  y su lección es que **el histórico se diseña antes, porque después no se reconstruye**. Sin
+  resolver.

@@ -58,6 +58,7 @@
     "demo": "node demo/servidor.mjs",
     "mide": "node medicion/mide.mjs",
     "deriva": "node medicion/deriva.mjs",
+    "catalogos": "node medicion/catalogos.mjs",
     "banco": "node banco/cli.mjs"
   },
   "peerDependencies": {
