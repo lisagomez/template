@@ -25,6 +25,7 @@ o declara en `exports` un subpath que no existe.
 |---|---|---|
 | `.` | Nucleo: tipos, puertos, estados, clasificacion, identidad, codigos, cola, plantilla, esquema, reconciliacion, versiones, busqueda, costes, CSV, supresion, **capa 0** y **propuesta de modelo E-R** | — |
 | `./plugin` | Manifiesto con icono SVG en linea. Importable **sin React** | — |
+| `./xml` | Lector de XML sin dependencias y **registro de esquemas**: CFDI 4.0, timbre y pagos. El vocabulario del SAT vive aqui, no en el nucleo | — |
 | `./motores/openai-compat` | `MotorOcr` contra un vLLM autohospedado. **Solo `fetch`**, cero dependencias | — |
 | `./motores/mistral` | `MotorOcr` contra la API de Mistral, con troceo por paginas | — |
 | `./almacenes/supabase` | `AlmacenDocumentos` + `AlmacenPlantillas`. Cliente inyectado | opcional |
@@ -79,6 +80,89 @@ un falso positivo mete datos corruptos con apariencia de exactos **y sin pasar p
 
 Y un matiz que decide su correccion: **pedir anotaciones llama al motor aunque el PDF traiga
 texto**. La capa 0 da texto, no campos con confianza y region.
+
+## Leer un XML: el esquema se registra, no se codifica
+
+Para una factura, el XML es el documento fiscal y el PDF solo su representacion impresa. De ahi
+salen los campos exactos, sin motor y sin estimar nada.
+
+Pero un CFDI **no es un formato**: es un tronco comun mas un conjunto **abierto** de complementos
+autorizados, cada uno con su esquema y su version. Si la herramienta llevara cada esquema escrito
+dentro, cada publicacion del SAT seria una version nueva de la herramienta. Aqui no: el paquete trae
+lo que todo CFDI tiene, y **cada proyecto registra lo que su caso necesita**.
+
+```ts
+import {
+  leeCfdi40, registroDeEsquemas, lectorDeTimbre11, lectorDePagos20, avisoDelComprobante,
+} from '@tu-scope/extractor-documental/xml'
+
+// Nada se registra por defecto. Lo que no registres, sale DECLARADO como no leido.
+const registro = registroDeEsquemas([lectorDeTimbre11, lectorDePagos20])
+
+const lectura = leeCfdi40(bytesDelXml, registro)
+if (!lectura.esCfdi) console.warn(lectura.motivo)   // nunca lanza: el fallo es un motivo
+
+lectura.campos              // el tronco: total, rfc_emisor, rfc_receptor, folio...
+lectura.conceptos           // los renglones, cada uno con sus campos
+lectura.complementos.leidos // lo que si se leyo
+lectura.complementos.sinLector  // lo que NO, con su direccion, su version y el motivo
+avisoDelComprobante(lectura)    // el aviso en espanol, o `null` si no hay nada que decir
+```
+
+### Registrar un esquema propio
+
+Es la razon de ser del modulo. No conoce el SAT: sirve para cualquier esquema, incluido uno tuyo.
+
+```ts
+const mio: LectorDeComplemento = {
+  clave: { espacio: 'http://mi-empresa/addenda', nombreLocal: 'OrdenDeCompra', version: '1.0' },
+  nombre: 'Orden de compra interna',
+  lee: (nodo) => ({
+    campos: [{ clave: 'orden', valor: atributo(nodo, 'Numero') ?? '', confianza: 1, procedencia: 'xml' }],
+    noLeido: [],
+  }),
+}
+const registro = registroDeEsquemas([lectorDeTimbre11, mio])
+```
+
+Tres reglas, y ninguna es de estilo:
+
+- **Se resuelve por la direccion del espacio de nombres, jamas por el prefijo.** `cfdi:` es
+  convencion del emisor: el mismo comprobante puede venir con otro prefijo y es el mismo esquema.
+- **La version va pineada, sin comodin**, y la direccion sola no basta: las dos versiones del timbre
+  comparten direccion y solo se distinguen por su atributo `Version`.
+- **Declarar, no descartar.** Lo que no se lee se reporta, y el motivo distingue "no hay lector" de
+  "hay lector de otra version" — que para quien integra son dos acciones distintas.
+
+### Que NO hace, y no es temporal
+
+| No hace | Por que |
+|---|---|
+| Verificar el sello del emisor ni el del SAT | Exige criptografia y certificados. **Analizar no es validar, y validar no es autenticar**: el campo `verificado` es el literal `false`, asi que ponerlo a `true` ni siquiera compila |
+| Aceptar un `DOCTYPE` | Es lo que permite que la factura de un proveedor lea ficheros de tu servidor. No hay bandera: **no existe el codigo** que resolveria la entidad |
+| Descargar esquemas por red | Una herramienta que necesita internet para leer un fichero local deja de servir donde estos documentos se procesan |
+| Consultar el estatus en el SAT | Mandaria el identificador y los registros fiscales de **dos terceros** a un servicio externo |
+| Traducir codigos a etiquetas | Emite `03`, nunca "Transferencia electronica". Un catalogo embarcado envejece; resolverlo contra **tus** tablas es trabajo de `resuelveIdentificador` |
+| Convertir importes a numero | `1160.00` se conserva como cadena: pasar por `number` pierde el cero y abre la puerta al redondeo binario |
+| Leer CFDI 3.3, nomina o carta porte | La 3.3 esta fuera de alcance. Los otros dos se registran el dia que haya un documento real: escribir su mapeo a ciegas es inventarse el dato de otro |
+
+### El cotejo a tres bandas sale gratis
+
+El lector emite `uuid`, `rfc_emisor`, `rfc_receptor` y `total` con **las mismas claves** que
+`analizaCarga` saca del QR impreso. Asi que `corrobora` cotea las tres fuentes sin una linea nueva:
+
+```ts
+corrobora(camposParaCotejo(lectura), camposDelQr)   // discrepancia -> revision humana
+cotejaSelloConQr(lectura.sello.emisor, campoFeDelQr) // el sello va APARTE: base64 distingue mayusculas
+```
+
+Y la regla del modulo cotejado vale igual: **ninguna fuente gana por decreto**. El XML no es mas
+fiable por venir estructurado, precisamente porque su sello no se verifica.
+
+> **Estado de la evidencia.** Las direcciones de los esquemas salen de la norma publicada, **no de
+> un documento que haya pasado por este sistema**. Lo unico corroborado contra un CFDI real son las
+> dos versiones. `src/xml/cfdi/espacios.ts` marca que esta confirmado y que no. El dia que tengas un
+> XML de verdad, el paso cero es abrirlo y cotejar cada direccion.
 
 ## Motores
 

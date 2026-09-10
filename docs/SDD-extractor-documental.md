@@ -384,6 +384,87 @@ tabla que cambie en producción y no en el banco pone el gate en rojo. Es el mis
 
 ---
 
+### 2.21 Un CFDI no es un formato, y por eso el esquema no se codifica: se registra
+
+La vía del PDF pelea contra la tipografía. Con la factura real que calibró `capa-cero.ts` salieron
+campos pegados sin separador, líneas de glifos ilegibles y un nombre de cliente que el extractor
+sigue sin encontrar aunque el documento lo lleve. Para un comprobante fiscal eso es trabajo
+desperdiciado, porque **el PDF no es el documento fiscal: es su representación impresa**. El dato
+exacto vive en el XML, y ahí no hay nada que estimar.
+
+Lo que no es obvio es lo que se descubre al querer leer ese XML. **Un CFDI no es un formato.** Es un
+tronco común más un conjunto **abierto** de complementos autorizados —pagos, nómina, carta porte, y
+los que el SAT publique después—, cada uno con su esquema y su versión. Escribir cada esquema dentro
+de la herramienta tiene una consecuencia que solo se ve más tarde: **cada publicación del SAT pasa a
+ser una versión nueva de la herramienta**, y cualquier proyecto que necesite un esquema que no
+anticipamos se queda esperando a que lo publiquemos nosotros. En un template que va a instalarse en
+casos de uso distintos, eso no es un inconveniente: es el fallo de diseño.
+
+Por eso el esquema deja de ser código y pasa a ser una **unidad registrable**. La herramienta trae
+lo que todo CFDI tiene —el tronco, y el timbre— y cada proyecto declara los complementos que su caso
+necesita, sin tocar este paquete. `src/xml/registro.ts` es ese punto, y no conoce el SAT: hay una
+prueba que lo ejercita con un esquema inventado, precisamente para demostrar que es un mecanismo y
+no cuatro casos particulares.
+
+**Tres reglas lo sostienen, y ninguna es de estilo.**
+
+*Se resuelve por dirección, jamás por prefijo.* `cfdi:` es convención de quien emitió el documento,
+no norma. El mismo comprobante puede venir con otro prefijo, o sin ninguno usando el espacio por
+defecto, y sigue siendo el mismo esquema. Un lector que busque la cadena `cfdi:Comprobante` funciona
+con los XML del emisor con el que se probó y falla con el siguiente — y falla dando **cero campos**,
+que es indistinguible de un documento vacío. La prueba que fija esto compara el mismo comprobante
+escrito de dos maneras y exige campos idénticos.
+
+*La versión va pineada, y la dirección sola no basta.* Las dos versiones del timbre fiscal comparten
+dirección y solo se distinguen por su atributo `Version`, así que la clave del registro tiene tres
+partes y no dos. Un comodín aquí significa leer con las reglas de una versión los datos de otra, y
+eso no produce un error visible: produce **un dato distinto con apariencia de correcto**, en la
+casilla de un importe. Es la misma disciplina que `exigeModeloPineado` aplica al modelo de OCR (C1).
+
+*Declarar, no descartar.* Un complemento sin lector se reporta con su dirección, su versión y el
+motivo — y el motivo distingue tres hechos que no son el mismo: no hay lector, hay lector de otra
+versión, o el complemento no declara versión. Confundir el segundo con el primero esconde una
+migración de esquema del SAT detrás de un «no lo soportamos», y para quien integra son dos acciones
+distintas. Es el precedente de `lineasDescartadas` en `saneado.ts`, aplicado a otra cosa.
+
+**El DOCTYPE se rechaza, y esa es la decisión de seguridad del módulo.** Un extractor documental lee
+ficheros que manda un tercero. La entidad externa es el ataque clásico contra eso: el XML declara
+una entidad que apunta a un fichero del servidor y su contenido acaba dentro de un campo de la
+factura. Aquí no hay bandera que desactivarlo **porque no existe el código que lo haría**: el lector
+no sabe resolver una entidad declarada. Una bandera se puede volver a encender; un código que no
+está escrito, no. Un CFDI válido no lleva DOCTYPE, así que el rechazo no cuesta ni un documento
+legítimo.
+
+**Lo que el lector se niega a afirmar.** No verifica el sello del emisor ni el del SAT, y el tipo lo
+garantiza: `verificado` es el literal `false`, no un booleano. Con un booleano alguien lo pondría a
+`true` «cuando implementemos la verificación»; con el literal, hacerlo no compila sin cambiar el
+contrato, y un contrato cambiado se ve en la revisión. **Analizar no es validar, y validar no es
+autenticar**: un comprobante entero puede estar inventado y su XML analizar perfecto. Por eso la
+regla de `corroboracion.ts` vale igual aquí — ninguna fuente gana por decreto, y el XML tampoco.
+
+**Y un hallazgo que salió de paso, sobre código que ya existía.** `comparable()` normaliza a
+mayúsculas antes de comparar. Es correcto para un registro fiscal y **falso para base64**: si el
+sello viajara bajo la misma clave que emite el código impreso, el cotejo podría reportar un
+**acuerdo falso sobre el único campo que existe para detectar una sustitución**. Se resolvió con
+clave propia y una función aparte, `cotejaSelloConQr`, y hay una prueba que fija el defecto para que
+nadie lo redescubra por las malas.
+
+**Qué NO se construyó, y por qué se dice.** Nómina y carta porte no tienen lector. Sin un documento
+real solo se puede transcribir la norma, y ahí un error no se ve hasta producción. Nómina además
+lleva datos de un empleado que no eligió estar aquí, y eso pide su propio análisis de impacto (C4),
+no una fila añadida de paso. Pagos sí se construyó, y no por ser un buen ejemplo: un recibo de pago
+lleva `Total="0"` porque todo el dinero está en el complemento, así que sin lector entra al sistema
+como **una factura de cero pesos con apariencia de exacta**.
+
+**El estado de la evidencia, que es lo que más conviene recordar.** Las direcciones de los esquemas
+salen de la norma publicada, no de un documento que haya pasado por este sistema. Lo único
+corroborado contra un CFDI real son las dos versiones —la 4.0 y el timbre 1.1—, porque su
+representación impresa las declara. `src/xml/cfdi/espacios.ts` lo dice en su cabecera y marca qué
+está confirmado y qué no, igual que `saneado.ts` distingue los números medidos de los supuestos. El
+día que llegue el primer XML real, el paso cero es abrirlo y cotejar cada dirección.
+
+---
+
 ## 3. Principio de diseño
 
 > **El humano no revisa lo que el sistema extrajo. El humano decide qué significa, y el sistema
@@ -691,6 +772,7 @@ resulta tener un consumidor esperando.
 |---|---|
 | Motor OCR autohospedado | **Encaja mejor que en el template**: ya es self-hosted con Docker Compose, así que C4 deja de ser decisión abierta y pasa a ser la premisa |
 | Mapeo contra catálogos existentes | Su grafo regulatorio es un Postgres **ya poblado**: el caso *brownfield* del descriptor. El template es el fixture vacío; hermes, el poblado |
+| Lectura de CFDI en XML (§2.21) | **Encaja con el grafo, y por eso el lector emite códigos y nunca etiquetas.** Un CFDI trae `601`, `S01`, `03`: darles significado es resolverlos contra las tablas del proyecto, que en hermes **son ese grafo ya poblado**. Embarcar los catálogos del SAT duplicaría el grafo dentro de la herramienta y lo dejaría envejecer por separado — el mismo error que esta tabla ya señala para el lienzo |
 | Ingesta por Telegram y WhatsApp | Superficie natural — con el aviso de abajo |
 | Coste por página | El mismo hueco **también está abierto allí**, y duele más porque ya está gastando |
 | PWA con cola sin conexión | **Se poda**: es infraestructura, no app de campo. Solo aplica si hay operarios en almacén |
