@@ -143,13 +143,47 @@
   <div id="salida-carga"></div>
 </section>
 
+<!-- ─────────────────────────  COTEJO  ───────────────────────── -->
+<h2>7 · Cotejo — dos fuentes de la misma factura</h2>
+<section>
+  <p class="apunte">
+    Un XML analiza o no analiza: sus campos llegan con confianza 1 y sin región que citar. Eso NO
+    los hace ciertos — el sello no se verifica, y un comprobante inventado analiza igual de limpio.
+    Lo que hace fiable a una fuente determinista es que <strong>otra fuente independiente diga lo
+    mismo</strong>. Aquí se ve esa comparación, y lo que decide.
+  </p>
+  <div class="fila">
+    <div class="zona" id="zona-xml" tabindex="0" role="button">
+      Suelta aquí el <strong>XML</strong> del CFDI, o pulsa para elegirlo
+    </div>
+    <input type="file" id="file-xml" accept=".xml,application/xml,text/xml" hidden>
+  </div>
+  <div class="fila">
+    <label>Carga del QR impreso en ese mismo comprobante<br>
+      <input type="text" id="carga-cotejo"
+             placeholder="https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=…&amp;re=…&amp;rr=…&amp;tt=…&amp;fe=…"></label>
+    <button id="btn-cotejar">Cotejar</button>
+  </div>
+  <div class="fila" id="acciones-cotejo" hidden>
+    <button id="btn-limpiar-cotejo">Limpiar cotejo</button>
+  </div>
+  <div id="salida-cotejo"></div>
+</section>
+
 <script type="module">
 import {
   leeCapaCero, clasificaLote, proponeModelo, analizaCarga,
   resuelveValor, parecidosA, plantillaInicial,
   saneaTextoExtraido, resumenDeSaneado, capaCeroComoJson,
 } from '/extractor/index.js'
-import { aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision } from '/extractor/react/revision.js'
+import {
+  aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision, exigeCotejo,
+} from '/extractor/react/revision.js'
+import { corrobora, exigeRevision } from '/extractor/corroboracion.js'
+import {
+  leeCfdi40, camposParaCotejo, cotejaSelloConQr, avisoDelComprobante,
+  registroDeEsquemas, lectorDeTimbre11, lectorDePagos20,
+} from '/extractor/xml/index.js'
 import { aplanaEntradas, raicesDe, desdeInput } from '/extractor/react/aplana.js'
 
 const $ = (id) => document.getElementById(id)
@@ -333,8 +367,10 @@ $('btn-revisar').onclick = () => {
       ? 'Todos los campos superan el umbral.'
       : `<strong>${bajo}</strong> campo(s) por debajo del umbral: los revisa una persona. No es un error — es la salida normal.`,
       bajo === 0 ? 'bien' : '') +
-    (!puedeValidarseSinRevision(filas) && bajo === 0
-      ? aviso('Hay campos de OCR sin región de origen: no se podrán auditar después.', '') : '') +
+    (!puedeValidarseSinRevision(filas, seCotejo()) && bajo === 0
+      ? aviso(exigeCotejo(filas) && !seCotejo()
+          ? 'Hay campos <strong>exactos que nadie cotejó</strong> contra una segunda fuente: leerlos bien no dice que el documento sea auténtico. Usa el cotejo de abajo.'
+          : 'Hay campos de OCR sin región de origen: no se podrán auditar después.', '') : '') +
     `<table><thead><tr><th>Campo</th><th>Valor</th><th>Confianza</th><th>Origen</th><th>Corrección</th><th></th></tr></thead>
      <tbody>${cuerpo}</tbody></table>` +
     `<p class="apunte">Escribe el valor correcto y guarda: eso es una muestra de <code>campos.jsonl</code>.
@@ -424,6 +460,106 @@ $('btn-modelo').onclick = () => {
 }
 
 // ── 6. Códigos ───────────────────────────────────────────────────────────────
+/**
+ * El cotejo. Es la seccion que cierra el argumento de todas las demas.
+ *
+ * Lo que se demuestra aqui: un XML da datos EXACTOS y eso no los hace CIERTOS. El sello no se
+ * verifica —y no va a verificarse: eso pide criptografia y certificados— asi que lo unico que
+ * convierte una lectura exacta en algo fiable es que otra fuente independiente diga lo mismo.
+ *
+ * `ultimoCotejo` es lo que la seccion 3 consulta para saber si puede promover sin revision. Vive
+ * aqui a proposito: el cotejo es un HECHO de la sesion, no una casilla que alguien marca.
+ */
+let ultimoCotejo = null
+
+/** Si hubo cotejo Y salio sin discrepancias. Una discrepancia NO cuenta como cotejado. */
+const seCotejo = () => ultimoCotejo !== null && ultimoCotejo.discrepancias.length === 0
+
+let xmlSoltado = null
+
+zonaDeArchivos('zona-xml', 'file-xml', async ({ archivos }) => {
+  if (archivos.length === 0) return
+  const { archivo, ruta } = archivos[0]
+  xmlSoltado = { ruta, bytes: new Uint8Array(await archivo.arrayBuffer()) }
+  pinta('salida-cotejo', aviso(`<strong>${esc(ruta)}</strong> cargado. Pega ahora la carga del QR y pulsa <em>Cotejar</em>.`, 'bien'))
+  $('acciones-cotejo').hidden = false
+})
+
+$('btn-cotejar').onclick = () => {
+  if (xmlSoltado === null) {
+    return pinta('salida-cotejo', aviso('Falta el XML: suéltalo arriba.', 'malo'))
+  }
+  // Se registran los dos complementos que el paquete trae. Lo que no este registrado NO se lee y
+  // se declara — que es justo lo que hay que poder ver aqui.
+  const registro = registroDeEsquemas([lectorDeTimbre11, lectorDePagos20])
+  const lectura = leeCfdi40(xmlSoltado.bytes, registro)
+  if (!lectura.esCfdi) {
+    return pinta('salida-cotejo', aviso(`Ese XML no es un CFDI 4.0 legible. Motivo: <em>${esc(lectura.motivo)}</em>`, 'malo'))
+  }
+
+  const delXml = camposParaCotejo(lectura)
+  const cruda = $('carga-cotejo').value.trim()
+  if (cruda === '') {
+    ultimoCotejo = null
+    return pinta('salida-cotejo',
+      aviso('XML leído, pero <strong>sin segunda fuente no hay cotejo</strong>. Sin cotejo el documento no se auto-valida, y esa es la respuesta correcta: nadie ha comparado lo que dice contra nada.', '') +
+      tablaDeCampos(delXml) + avisosDelXml(lectura))
+  }
+
+  const analizada = analizaCarga(cruda)
+  if (analizada.tipo !== 'cfdi') {
+    ultimoCotejo = null
+    return pinta('salida-cotejo', aviso(`Esa carga es de tipo <code>${esc(analizada.tipo)}</code>, no el QR de verificación de un CFDI. No hay con qué cotejar.`, 'malo'))
+  }
+
+  // Las claves coinciden porque el lector de XML emite las MISMAS que `camposCfdi`. Esa
+  // coincidencia es lo unico que sostiene el cotejo, y por eso hay una prueba que la fija.
+  const delCodigo = Object.entries(analizada.campos).map(([clave, valor]) => ({
+    clave, valor, confianza: 1, procedencia: 'codigo',
+  }))
+  const cotejo = corrobora(delXml, delCodigo)
+  ultimoCotejo = cotejo
+
+  // El sello va APARTE: el codigo trae solo sus ultimos caracteres, y `corrobora` pliega
+  // mayusculas —correcto para un RFC, falso para base64—.
+  const sello = cotejaSelloConQr(lectura.sello.emisor, analizada.campos.sello ?? null)
+
+  const fila = (c) => `<tr><td><code>${esc(c.clave)}</code></td><td>${esc(c.valor ?? c.segunOcr)}</td><td>${esc(c.segunCodigo ?? '—')}</td></tr>`
+  const acuerdos = cotejo.acuerdos.map((a) => `<tr><td><code>${esc(a.clave)}</code></td><td colspan="2">${esc(a.valor)}</td></tr>`).join('')
+  const discrepancias = cotejo.discrepancias.map(fila).join('')
+
+  pinta('salida-cotejo',
+    aviso(cotejo.discrepancias.length === 0
+      ? `<strong>Las dos fuentes coinciden</strong> en ${cotejo.acuerdos.length} campo(s). El documento puede validarse sin revisión.`
+      : `<strong>${cotejo.discrepancias.length} discrepancia(s)</strong>. Una sola basta para mandar a revisión: si dos fuentes independientes no dicen lo mismo, una está mal y ninguna máquina sabe cuál.`,
+      cotejo.discrepancias.length === 0 ? 'bien' : 'malo') +
+    (discrepancias === '' ? '' : `<p><strong>Discrepancias</strong></p><table><thead><tr><th>Campo</th><th>Según el XML</th><th>Según el código</th></tr></thead><tbody>${discrepancias}</tbody></table>`) +
+    (acuerdos === '' ? '' : `<p><strong>Acuerdos</strong></p><table><thead><tr><th>Campo</th><th colspan="2">Valor</th></tr></thead><tbody>${acuerdos}</tbody></table>`) +
+    aviso(`Sello: el código trae los últimos caracteres del sello del emisor. ${sello ? 'Coinciden.' : '<strong>No coinciden</strong>, o el código no los traía.'} Esto NO verifica el sello — <code>sello.verificado</code> es <code>${lectura.sello.verificado}</code> y lo será siempre.`, sello ? '' : 'malo') +
+    `<p class="apunte">Sólo una fuente: <code>${cotejo.soloOcr.map(esc).join('</code>, <code>') || '—'}</code> en el XML ·
+     <code>${cotejo.soloCodigo.map(esc).join('</code>, <code>') || '—'}</code> en el código. No es un problema: es cobertura distinta.</p>` +
+    avisosDelXml(lectura))
+}
+
+function tablaDeCampos(campos) {
+  const cuerpo = campos.map((c) => `<tr><td><code>${esc(c.clave)}</code></td><td>${esc(c.valor)}</td></tr>`).join('')
+  return `<table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody>${cuerpo}</tbody></table>`
+}
+
+/** Lo que el lector vio y NO tradujo. Se enseña: perderlo en silencio es el fallo que evita. */
+function avisosDelXml(lectura) {
+  const texto = avisoDelComprobante(lectura)
+  return texto === null ? '' : aviso(esc(texto), '')
+}
+
+$('btn-limpiar-cotejo').onclick = () => {
+  xmlSoltado = null
+  ultimoCotejo = null
+  $('carga-cotejo').value = ''
+  $('salida-cotejo').innerHTML = ''
+  $('acciones-cotejo').hidden = true
+}
+
 $('btn-carga').onclick = () => {
   const r = analizaCarga($('carga').value.trim())
   pinta('salida-carga', `<pre>${esc(JSON.stringify(r, null, 2))}</pre>`)
