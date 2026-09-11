@@ -102,13 +102,64 @@ export function validaPaginas(crudo: unknown): PaginaExtraida[] {
   })
 }
 
-/** La instruccion que fija el formato de salida. Compartida para que los motores sean comparables. */
+/**
+ * La instruccion que fija el formato de salida. Compartida para que los motores sean comparables.
+ *
+ * LOS HUECOS SE DESCRIBEN, NO SE DIBUJAN CON PUNTOS SUSPENSIVOS. Costo un fallo real, y de los
+ * que no se ven venir: la version anterior enseñaba la forma con `"markdown":"..."` y
+ * `"clave":"..."`, y un modelo pequeño devolvio EXACTAMENTE eso — un campo con clave `...`, valor
+ * `...` y confianza 0. Copio la plantilla en vez de rellenarla.
+ *
+ * Un modelo grande entiende que esos puntos son un hueco. Uno pequeno los toma por la respuesta, y
+ * el resultado no parece un fallo: parece un documento del que no se pudo sacar nada. Medido el
+ * 2026-09-10 contra un motor autohospedado leyendo un escaneo que SI era legible — el mismo
+ * modelo, preguntado sin esta plantilla, devolvio 1514 caracteres de texto correcto.
+ *
+ * Por eso cada hueco va entre `<>` y DESCRITO, con una linea final que dice que no se copien. Es
+ * mas largo de leer y funciona con motores que no son los caros.
+ */
 export const INSTRUCCION =
-  'Extrae el contenido del documento. Responde SOLO con JSON: ' +
-  '{"paginas":[{"indice":0,"markdown":"...","campos":[{"clave":"...","valor":"...",' +
-  '"confianza":0.0,"region":{"pagina":0,"x":0,"y":0,"ancho":0,"alto":0}}]}]}. ' +
-  'La confianza es un numero entre 0 y 1. Las coordenadas van normalizadas entre 0 y 1.'
+  'Extrae el contenido del documento. Responde SOLO con JSON con esta forma exacta: ' +
+  '{"paginas":[{"indice":0,"markdown":<todo el texto de la pagina, en markdown>,' +
+  '"campos":[{"clave":<nombre corto del dato>,"valor":<lo que dice el documento>,' +
+  '"confianza":<numero entre 0 y 1>,' +
+  '"region":{"pagina":0,"x":<0 a 1>,"y":<0 a 1>,"ancho":<0 a 1>,"alto":<0 a 1>}}]}]}. ' +
+  'Sustituye cada <...> por lo que veas en el documento. ' +
+  'NO copies los textos entre <>: son descripciones de que poner, no contenido. ' +
+  'Las coordenadas van normalizadas entre 0 y 1.'
 
 export function instruccionCon(esquema: unknown): string {
   return esquema === undefined ? INSTRUCCION : `${INSTRUCCION} Ajusta \`campos\` a este esquema: ${JSON.stringify(esquema)}`
+}
+
+/**
+ * Traduce el corte de Node a algo sobre lo que se pueda actuar.
+ *
+ * EL PROBLEMA, y no es teorico. `AbortSignal.timeout(...)` NO gobierna cuanto espera Node por la
+ * primera respuesta: undici tiene su propio `headersTimeout` de cinco minutos y corta la peticion
+ * aunque se le hayan pedido treinta. `milisegundosDeEspera` no lo puede subir.
+ *
+ * Muerde justo en el caso que esta herramienta existe para permitir: un motor AUTOHOSPEDADO sin
+ * GPU, que es la unica via cuando el documento lleva datos de terceros. Medido el 2026-09-10 sobre
+ * un escaneo de una pagina: 337 segundos, y creciendo con el tamano del documento. El error que
+ * sale de undici —`UND_ERR_HEADERS_TIMEOUT`— no menciona nada de esto, asi que quien lo ve
+ * concluye que su motor esta roto.
+ *
+ * En el NAVEGADOR no ocurre: ese tope es de Node. Por eso el arreglo no es un numero mas grande
+ * aqui, sino inyectar un `fetch` con dispatcher propio — que es justo lo que la opcion `fetch` de
+ * estos adaptadores ya permite, y por lo que existe.
+ */
+export function traduceElCorte(error: unknown, espera: number): Error {
+  const causa = (error as { cause?: { code?: unknown } } | null)?.cause
+  const codigo = typeof causa?.code === 'string' ? causa.code : ''
+  if (codigo === 'UND_ERR_HEADERS_TIMEOUT') {
+    return new Error(
+      'Node corto la peticion a los 5 minutos, aunque se pidieron ' +
+        `${Math.round(espera / 1000)} s. Ese tope es de Node (undici, headersTimeout) y NO lo ` +
+        'gobierna `milisegundosDeEspera`. Un motor autohospedado sin GPU lo pasa con facilidad: ' +
+        'inyecta un `fetch` con dispatcher propio por la opcion `fetch`, o pide streaming. ' +
+        'En el navegador esto no pasa.',
+    )
+  }
+  return error instanceof Error ? error : new Error(String(error))
 }

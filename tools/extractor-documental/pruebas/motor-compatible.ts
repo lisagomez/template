@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { motorCompatible, validaPaginas, tipoMimeDe } from '../dist/motores/openai-compat.js'
+import { INSTRUCCION, traduceElCorte } from '../dist/motores/comun.js'
 
 const bytes = (s: string): Uint8Array => Uint8Array.from(s, (c) => c.charCodeAt(0))
 const PDF = bytes('%PDF-1.7 documento de prueba')
@@ -198,4 +199,33 @@ test('el tipo sale de los bytes y no del nombre', () => {
   assert.equal(tipoMimeDe(Uint8Array.from([0x89, 0x50, 0x4e, 0x47])), 'image/png')
   assert.equal(tipoMimeDe(Uint8Array.from([0xff, 0xd8, 0xff])), 'image/jpeg')
   assert.equal(tipoMimeDe(bytes('cualquier cosa')), 'application/octet-stream')
+})
+
+// --- Lo que enseño encender un motor de verdad ---------------------------------------------------
+
+test('la instruccion NO enseña huecos con puntos suspensivos', () => {
+  // Costo un fallo real: un modelo pequeño devolvio un campo con clave `...`, valor `...` y
+  // confianza 0 — copio la plantilla en vez de rellenarla. Uno grande entiende que son huecos;
+  // uno pequeño los toma por la respuesta, y el resultado no parece un fallo sino un documento
+  // del que no se pudo sacar nada.
+  assert.doesNotMatch(INSTRUCCION, /"\.\.\."/, 'un hueco dibujado con puntos se copia literal')
+  assert.match(INSTRUCCION, /NO copies/i, 'y se dice expresamente que no se copien')
+  assert.match(INSTRUCCION, /<[^>]+>/, 'los huecos van descritos entre <>')
+})
+
+test('el corte de Node se traduce a algo accionable', () => {
+  // `AbortSignal.timeout(...)` no gobierna cuanto espera Node por la primera respuesta: undici
+  // corta a los 5 minutos. Muerde justo en el caso que la herramienta existe para permitir — un
+  // motor autohospedado sin GPU, donde una pagina tarda 337 segundos y sube con el documento.
+  const deUndici = Object.assign(new TypeError('fetch failed'), { cause: { code: 'UND_ERR_HEADERS_TIMEOUT' } })
+  const traducido = traduceElCorte(deUndici, 1_800_000)
+  assert.match(traducido.message, /5 minutos/)
+  assert.match(traducido.message, /1800 s/, 'dice cuanto se habia pedido, para que se vea la contradiccion')
+  assert.match(traducido.message, /dispatcher|streaming/, 'y por donde sale')
+  assert.doesNotMatch(traducido.message, /UND_ERR/, 'el codigo de undici no le dice nada a nadie')
+})
+
+test('cualquier otro error pasa tal cual, sin disfrazarse de lo que no es', () => {
+  const otro = new Error('la red se cayo')
+  assert.equal(traduceElCorte(otro, 1000), otro)
 })
