@@ -3125,6 +3125,49 @@ aprovechaban. Ya no depende de la costumbre.
 
 ---
 
+### 2026-09-10 — `AGENTS.md`: la lectura de XML entra en el decision tree — radio: sistema
+- **Cambio**: 4 líneas nuevas en la entrada del extractor documental del decision tree de
+  `AGENTS.md`, más las 4 espejo en `GEMINI.md` (**regeneradas** con `npm run sincroniza:gemini`,
+  no escritas a mano — el verificador rechaza un espejo editado a mano). Una amplía los
+  disparadores («factura en XML», «CFDI», «comprobante fiscal»); las otras tres dicen qué hacer
+  con ellos.
+- **Motivo**: la herramienta lee XML de CFDI desde el PR #67, y el decision tree seguía
+  describiéndola como de «PDF, escaneos y fotos». Quien pidiera leer una factura en XML no la
+  encontraría: habría que nombrársela. Es el mismo argumento que justificó la entrada original —
+  una capacidad que solo aparece si el humano ya sabe que está es media capacidad.
+- **Por qué esas tres líneas y no una ruta seca**: es el aprendizaje del 2026-08-23 aplicado otra
+  vez — *un control escrito solo en un documento referenciado no dispara*. Las tres dicen lo que
+  no puede quedarse en el README:
+  1. **Con XML se lee el XML.** Es el documento fiscal; el PDF es su representación impresa.
+     Quien enrute al OCR teniendo el XML delante paga tipografía por un dato que ya venía exacto.
+  2. **Los esquemas se registran, no se codifican.** Sin esa línea, el siguiente complemento del
+     SAT se escribe dentro del paquete, que es justo lo que el registro existe para evitar.
+  3. **El sello NO se verifica.** Es la línea de seguridad, de la misma clase que la de los
+     umbrales: analizar no es validar y validar no es autenticar. Un agente que reciba datos
+     fiscales exactos y no lea esto concluirá que la factura es auténtica, que es la única cosa
+     que esta herramienta no puede afirmar. Marcada (C4) porque el daño recae sobre terceros.
+- **Coste declarado**: invalida el caché de prefijo una vez, y el suelo por sesión sube de **9455
+  a 9547 tokens** (79 % → 80 % de 12000). `GEMINI.md` pasa de 4793 a 4884 (53 % → 54 %);
+  `CLAUDE.md` queda en 5392 (67 %). Son 92 tokens por sesión a cambio de que la capacidad sea
+  encontrable; se declara porque el presupuesto ya estaba al 79 % y el margen se está estrechando.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo n/a
+  (no cambia modelo)
+- **Regresión**: `npm run regresion` — C2 capa A **113/113 — promovible**.
+  `npm run regresion -- --trampa` — C2 capa B **22/22 — promovible**.
+  `npm run validate` **EXIT 0** · `verify:gobernanza` **152/152** · `verifica:specs` **64/64** ·
+  `audita:secretos` limpio · `mide:contexto` dentro de presupuesto · **608 pruebas** de la
+  herramienta en verde. Las corridas en sesión fría de los casos-trampa no se relanzaron: el
+  cambio amplía una rama de enrutado ya existente y no toca ningún control ni ningún caso del
+  corpus.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — autorización explícita («sí») en
+  sesión del 2026-09-10, a la propuesta de lanzar este CDC con el gate completo, tras habérsele
+  descrito el contenido del cambio. **Precisión que conviene dejar escrita**: la aprobación se dio
+  *antes* de ver el diff renderizado, no después como en el CDC del 2026-09-09. El diff completo y
+  las dos capas de regresión se presentaron en el PR #73, y el merge es el acto confirmatorio. Se
+  anota la diferencia en vez de igualar las dos situaciones.
+
+---
+
 ### 2026-09-09 — `AGENTS.md`: el extractor documental entra en el decision tree — radio: sistema
 - **Cambio**: 10 líneas nuevas en el decision tree de `AGENTS.md`, más las 10 espejo en `GEMINI.md`
   (**regeneradas** con `npm run sincroniza:gemini`, no escritas a mano — el verificador rechaza un

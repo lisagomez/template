@@ -85,6 +85,7 @@ Usuario dice algo
     |
     ├── "Extraer datos de facturas / documentos / PDF / escaneos / fotos"
     |   "leer codigos de barras o QR" / "digitalizar papeles" / "capturar datos"
+    |   "factura en XML" / "CFDI" / "comprobante fiscal"
     |       → Herramienta YA CONSTRUIDA: `tools/extractor-documental/`
     |         Nucleo sin dependencias; el motor de OCR y el almacen se INYECTAN, asi que la
     |         decision de si el documento sale del perimetro (C4) es del proyecto, no de ella.
@@ -92,6 +93,9 @@ Usuario dice algo
     |         Que hace: `docs/SDD-extractor-documental.md` · `.claude/specs/007-extractor-documental/`
     |         OJO: los umbrales de confianza y similitud NO vienen puestos y son obligatorios.
     |         Se MIDEN sobre el corpus real (TAR-17, TAR-25): a ojo fallan en las dos direcciones
+    |         Si hay XML, se lee el XML (`./xml`): es el documento fiscal y el PDF solo su
+    |         impresion. Los esquemas se REGISTRAN, no se codifican: el proyecto declara que
+    |         complementos lee. Y el sello NO se verifica — leer bien no es autenticar (C4)
     |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
