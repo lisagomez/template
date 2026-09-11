@@ -456,6 +456,23 @@
       las dos direcciones — cola humana inútil, o errores que pasan con confianza alta.
       → duda abierta de la spec
 
+      **Medición del 2026-09-10, y refuerza el bloqueo.** Primera corrida real contra un motor
+      autohospedado (`qwen2.5vl:7b` por Ollama, CPU, un escaneo de una página, 8 min). Devolvió
+      11 campos y **las 11 confianzas valían exactamente 0.90**.
+
+      Eso no es una medida: es una constante que el modelo escribió porque el formato se la pedía.
+      Contra cualquier umbral separa cero — o pasan todos los campos o no pasa ninguno — y la cola
+      de revisión queda vacía o llena, nunca poblada por el riesgo real.
+
+      Es el aviso que esta tarea ya llevaba, ahora con un número detrás: *«si la correlación sale
+      cerca de cero, ningún umbral va a funcionar y el problema no es dónde cortar — es el
+      motor»*. Con un motor así, el umbral no se puede fijar **aunque hubiera corpus**, y medir la
+      correlación antes de elegir motor deja de ser recomendable para ser obligatorio.
+
+      Segundo hallazgo de la misma corrida: sin esquema de anotación, las claves salieron
+      `fecha`, `subtotal1` … `subtotal10`. El modelo numera lo que ve. Sirve para leer, no para
+      alimentar una base: el esquema no es opcional en la práctica.
+
 - [ ] **TAR-34 · Fijar los parámetros de la ráfaga del escáner.**
       Bloqueada: dependen del teclado y del lector concretos, y este contenedor no tiene ninguno.
       Mientras tanto la vía buena no necesita medir nada — configurar prefijo y sufijo en el aparato
