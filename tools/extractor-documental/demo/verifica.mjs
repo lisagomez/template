@@ -169,11 +169,38 @@ try {
   await pagina.locator('#btn-extraer').click()
   comprueba('sin modelo pineado no manda nada', /pineado/i.test(await pagina.locator('#salida-motor').innerText()))
 
-  comprueba('ningun error de consola en toda la corrida', errores.length === 0, errores.join(' · '))
+  // Lo que motivo este diagnostico: "failed to fetch" no le dice nada a nadie.
+  await pagina.locator('#motor-base').fill('http://localhost:59999/v1')
+  await pagina.locator('#btn-probar-motor').click()
+  await pagina.locator('#salida-conexion').getByText(/No se pudo contactar|Nadie contest/i).waitFor({ timeout: 15000 })
+  const diagnostico = await pagina.locator('#salida-conexion').innerText()
+  comprueba('contra un puerto muerto NO repite "failed to fetch"', !/failed to fetch/i.test(diagnostico))
+  comprueba('enumera las tres causas posibles', /nadie escuchando/i.test(diagnostico) && /CORS|OLLAMA_ORIGINS/i.test(diagnostico) && /WSL/i.test(diagnostico))
+  comprueba('dice que el documento NO salio', /no salió/i.test(diagnostico))
+
+  // Y al extraer contra ese mismo puerto, tampoco se manda el documento a ciegas.
+  await pagina.locator('#motor-modelo').fill('modelo-pineado-1.0')
+  await pagina.locator('#btn-extraer').click()
+  await pagina.locator('#salida-motor').getByText(/No se pudo contactar|Nadie contest/i).waitFor({ timeout: 15000 })
+  comprueba('no manda el documento si el servidor no contesta', true)
+
+  /**
+   * Los errores que esta misma prueba PROVOCA no cuentan.
+   *
+   * Apuntar a un puerto muerto hace que el navegador escriba `ERR_CONNECTION_REFUSED` en la
+   * consola, y eso es la prueba funcionando, no la pagina rota. Se filtran por el puerto exacto
+   * que se uso — no por la palabra "connection", que taparia un fallo de verdad contra otro sitio.
+   */
+  const inesperados = errores.filter((e) => !e.includes('59999') && !/ERR_CONNECTION_REFUSED/.test(e))
+  comprueba('ningun error de consola no provocado', inesperados.length === 0, inesperados.join(' · '))
+  comprueba(
+    'y los provocados si aparecieron: la prueba del puerto muerto fue real',
+    errores.some((e) => /ERR_CONNECTION_REFUSED/.test(e)),
+  )
 } finally {
   await navegador.close()
   servidor.kill()
 }
 
-console.log(fallos === 0 ? '\n\x1b[32mLas 22 comprobaciones en verde.\x1b[0m\n' : `\n\x1b[31m${fallos} fallo(s).\x1b[0m\n`)
+console.log(fallos === 0 ? '\n\x1b[32mLas 27 comprobaciones en verde.\x1b[0m\n' : `\n\x1b[31m${fallos} fallo(s).\x1b[0m\n`)
 process.exit(fallos === 0 ? 0 : 1)
