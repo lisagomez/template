@@ -329,6 +329,40 @@ corpus real (TAR-17, TAR-25, TAR-34).
 Para el escaner hay una via que **no necesita medir nada**: configurar prefijo y sufijo en el
 aparato hace la deteccion determinista. La rafaga por tiempos es el plan B.
 
+### Y un motor real puede devolver la confianza como CONSTANTE
+
+Medido el 2026-09-10 contra un motor autohospedado: 25 campos extraidos, **las 25 confianzas
+valieron `0.90` exacto**. El campo que copio literal y el que recompuso, identicos.
+
+Eso no es una medida, es un numero que el modelo escribio porque el formato se lo pedia. Contra
+cualquier umbral separa CERO: o pasan todos o no pasa ninguno. TAR-17 dice desde el principio que
+«si la correlacion sale cerca de cero, ningun umbral va a funcionar y el problema no es donde
+cortar — es el motor». Ahora hay un numero detras.
+
+**Consecuencia practica**: medir la correlacion antes de elegir motor deja de ser recomendable y
+pasa a ser obligatorio. Con un motor asi, el umbral no se puede fijar aunque tengas corpus.
+
+## Que esperar de un motor autohospedado, medido
+
+Primera corrida real el 2026-09-10: Ollama en CPU, sin GPU, un escaneo de una pagina de 1280x1640.
+
+| Modelo | Peticion | Tiempo | Resultado |
+|---|---|---|---|
+| `qwen2.5vl:3b` | solo transcripcion | 2,7 min | completa |
+| `qwen2.5vl:3b` | JSON estructurado | 5,6 - 14,6 min | **nunca cierra el JSON** |
+| `qwen2.5vl:7b` | JSON estructurado | 8 min | completo y valido |
+| `qwen2.5vl:7b` | JSON con esquema de 25 campos | 11,9 min | 25 de 25, sin inventar claves |
+
+Tres cosas que conviene saber antes de elegir:
+
+- **Un modelo de 3.000 millones no cierra un JSON estructurado** sobre un documento denso, por
+  mucha ventana de contexto que se le de. Transcribe bien; estructurar ademas es demasiado.
+- **El esquema de anotacion no es opcional en la practica.** Sin el, el modelo numera lo que ve:
+  `fecha`, `subtotal1` … `subtotal10`. Sirve para leer, no para alimentar una base.
+- **Un escaneo no tiene segunda fuente**, asi que se le piden al motor DOS lecturas distintas —una
+  transcripcion y los campos— y se comprueba que cada valor extraido aparezca en la transcripcion.
+  En esa corrida: 24 de 25 presentes, 1 ausente. Ver §5.2.1 del SDD.
+
 ## Probarla, y fabricar el corpus mientras la pruebas
 
 ```bash

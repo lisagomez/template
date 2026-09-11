@@ -664,6 +664,41 @@ fuentes independientes no dicen lo mismo, una está mal y ninguna máquina sabe 
 Con un matiz que evita ahogar la cola en ruido: los importes se comparan como números, así que
 `1,160.00` y `1160.00` son acuerdo, no conflicto.
 
+**Y un formato real enseñó otro matiz, medido el 2026-09-10 sobre un CFDI de verdad:** hay emisores
+que escriben el total del QR relleno de ceros a la izquierda y con seis decimales. Compararlo como
+cadena daría una discrepancia **falsa en cada factura de esos emisores** — y una cola llena de
+falsos positivos deja de leerse, que es el fallo que el umbral tiene prohibido causar. La
+normalización numérica ya lo cubría; ahora hay prueba que lo fija.
+
+### 5.2.1 Y cuando NO hay segunda fuente: pedirle dos lecturas distintas al mismo motor
+
+Un CFDI trae tres fuentes —XML, código impreso y reconocimiento— y ahí la corroboración es directa.
+**Un escaneo no trae ninguna.** No hay código que decodificar ni XML que leer: solo la imagen, y un
+motor que dice lo que ve. Una fuente sola no se puede corroborar consigo misma.
+
+Salvo que se le pregunte **dos cosas distintas**. Medido el 2026-09-10 sobre un reporte de sucursal
+escaneado, con un motor autohospedado:
+
+1. Una pasada pidiendo **solo la transcripción**, que es lo que un motor de visión hace mejor.
+2. Otra pidiendo **los campos de un esquema**.
+3. Y se comprueba que cada valor extraído **aparezca en la transcripción**.
+
+Resultado: 25 campos devueltos, **24 presentes en la transcripción y 1 ausente**. El ausente era el
+nombre de la empresa, partido en dos líneas del encabezado y recompuesto por el modelo — no una
+alucinación, pero sí exactamente el campo que hay que mirar antes de fiarse.
+
+**Por qué importa más de lo que parece.** Un modelo al que se le piden 25 campos tiende a devolver
+25, existan o no: rellenar es más fácil que admitir un hueco. El resultado tiene la misma forma
+—completo, confianzas altas— tanto si leyó como si invento. Esta comprobación es lo único que los
+distingue sin un humano mirando el papel.
+
+Y es **lo único que los distingue, punto**: en esa misma corrida los 25 campos llegaron con
+confianza **0.90 exacta, los 25**. El que copió literal y el que recompuso, idénticos. Si uno
+hubiera sido inventado, habría llegado con la misma confianza que los correctos.
+
+La herramienta no impone este cotejo —es una decisión del proyecto, como todo lo que cuesta una
+llamada de más— pero cuando el documento no tiene segunda fuente, es la que hay.
+
 ### 5.3 Sin conexión, el instante manda
 
 Una lectura que no se puede enviar no puede perderse. La cola vive en el dispositivo y **sella el
