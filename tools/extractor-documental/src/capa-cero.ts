@@ -24,6 +24,7 @@
  * navegador, que es la condicion para que el nucleo siga siendo instalable en cualquier proyecto.
  */
 import type { PaginaExtraida } from './tipos.js'
+import { flujosDeContenido, aLatin1, indiceDe } from './pdf-flujos.js'
 import { saneaTextoExtraido } from './saneado.js'
 import type { MotorOcr, OpcionesDeExtraccion } from './puertos.js'
 
@@ -43,34 +44,6 @@ export interface ResultadoCapaCero {
 }
 
 const sinCapa = (motivo: string): ResultadoCapaCero => ({ hayTexto: false, paginas: [], motivo })
-
-/** Latin-1: cada byte es un punto de codigo. Es lo que asumen las fuentes simples de PDF. */
-function aLatin1(bytes: Uint8Array): string {
-  let salida = ''
-  for (const b of bytes) salida += String.fromCharCode(b)
-  return salida
-}
-
-function indiceDe(heno: Uint8Array, aguja: string, desde: number): number {
-  const patron = new Uint8Array(aguja.length)
-  for (let i = 0; i < aguja.length; i++) patron[i] = aguja.charCodeAt(i)
-  bucle: for (let i = desde; i <= heno.length - patron.length; i++) {
-    for (let j = 0; j < patron.length; j++) if (heno[i + j] !== patron[j]) continue bucle
-    return i
-  }
-  return -1
-}
-
-/** Inflado zlib por API web. PDF usa Flate CON cabecera zlib, que es el modo `deflate`. */
-async function inflar(datos: Uint8Array): Promise<Uint8Array | null> {
-  try {
-    const entrada = new Blob([datos as BlobPart]).stream()
-    const salida = entrada.pipeThrough(new DecompressionStream('deflate'))
-    return new Uint8Array(await new Response(salida).arrayBuffer())
-  } catch {
-    return null
-  }
-}
 
 /**
  * Decodifica una cadena literal de PDF: `(texto con \(escapes\))`.
@@ -276,46 +249,19 @@ export async function leeCapaCero(pdf: Uint8Array): Promise<ResultadoCapaCero> {
   // pasaria por texto si nadie mira, que es exactamente el falso positivo que no se admite.
   if (indiceDe(pdf, '/Encrypt', 0) >= 0) return sinCapa('PDF cifrado: la capa 0 no descifra')
 
-  const flujos: string[] = []
-  let posicion = 0
-  let filtrosDesconocidos = 0
-  while (true) {
-    const inicio = indiceDe(pdf, 'stream', posicion)
-    if (inicio < 0) break
-    const fin = indiceDe(pdf, 'endstream', inicio)
-    if (fin < 0) break
+  const { flujos, filtrosDesconocidos } = await flujosDeContenido(pdf)
 
-    // El diccionario del objeto va justo antes de `stream` y declara el filtro.
-    const cabecera = aLatin1(pdf.subarray(Math.max(0, inicio - 400), inicio))
-    let datos = pdf.subarray(inicio + 'stream'.length, fin)
-    // Tras `stream` va CRLF o LF, y no forma parte de los datos.
-    let recorte = 0
-    if (datos[0] === 0x0d && datos[1] === 0x0a) recorte = 2
-    else if (datos[0] === 0x0a || datos[0] === 0x0d) recorte = 1
-    datos = datos.subarray(recorte)
-    // Y el salto que precede a `endstream` tampoco. En texto plano sobra sin mas; en un flujo
-    // comprimido es un byte de mas al final que hace fallar el inflado entero — y el fallo se
-    // presenta como "este PDF no tiene texto", que es un falso negativo silencioso.
-    let cola = datos.length
-    if (cola >= 2 && datos[cola - 2] === 0x0d && datos[cola - 1] === 0x0a) cola -= 2
-    else if (cola >= 1 && (datos[cola - 1] === 0x0a || datos[cola - 1] === 0x0d)) cola -= 1
-    datos = datos.subarray(0, cola)
-
-    if (/\/Filter\s*\/FlateDecode/.test(cabecera)) {
-      const crudo = await inflar(datos)
-      if (crudo === null) filtrosDesconocidos++
-      else flujos.push(aLatin1(crudo))
-    } else if (/\/Filter/.test(cabecera)) {
-      // DCTDecode (un JPEG incrustado) es lo normal en un escaneo: no es texto y no cuenta como
-      // filtro fallido. Cualquier otro filtro si es un hueco que se declara.
-      if (!/\/DCTDecode|\/JPXDecode|\/CCITTFaxDecode|\/JBIG2Decode/.test(cabecera)) filtrosDesconocidos++
-    } else {
-      flujos.push(aLatin1(datos))
-    }
-    posicion = fin + 'endstream'.length
-  }
-
-  const candidatos = flujos.map(extraeTextoDeContenido).filter((t) => t.trim().length > 0)
+  /**
+   * Un candidato tiene que ser lo bastante largo para SER una capa de texto.
+   *
+   * Con `> 0` bastaban cuatro bytes de basura de un flujo que no era de contenido para que el
+   * documento dejara de parecer un escaneo, y el motivo pasaba de "es una imagen" —que es la
+   * verdad y dice que hacer— a "lo extraido no supera la prueba de imprimibilidad", que no le
+   * dice nada a nadie. El umbral ya existia en `pareceTexto`; solo se aplicaba tarde.
+   */
+  const candidatos = flujos
+    .map(extraeTextoDeContenido)
+    .filter((t) => t.replace(/\s/g, '').length >= TEXTO_MINIMO)
   if (candidatos.length === 0) {
     return sinCapa(
       filtrosDesconocidos > 0
