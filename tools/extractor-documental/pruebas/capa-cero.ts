@@ -347,3 +347,77 @@ test('los espacios que trae el propio literal se respetan', () => {
   const flujo = 'BT 1 0 0 -1 117 9 Tm [( S E C C I O N   D E   C O N C E P T O S)] TJ ET'
   assert.match(extraeTextoDeContenido(flujo), /S E C C I O N/)
 })
+
+// --- Lo que enseño un PDF escaneado de verdad ----------------------------------------------------
+// Los tres salieron de pasar un escaneo real por la demo el 2026-09-10. Su sintoma era un motivo
+// que no tenia nada que ver con el documento: decia que lo extraido no parecia texto cuando lo
+// cierto era que no habia texto ninguno.
+
+test('un flujo que declara /Type es fontaneria y NO se lee como contenido', async () => {
+  // La tabla de referencias, los flujos de objetos y los metadatos inflan a bytes que no son
+  // texto. Un flujo de CONTENIDO no declara tipo; estos si, y ahi se distinguen.
+  const conEstructura = await pdfCon('BT (Factura A-1874 del proveedor) Tj ET', {
+    // Lleva a proposito algo que SI se extraeria: con bytes que no producen texto, la prueba
+    // pasaria igual con el arreglo desactivado y no defenderia nada.
+    extra:
+      '9 0 obj\n<< /Type /ObjStm /N 1 /First 4 /Length 46 >>\n' +
+      'stream\nBT (ESTO SALE DE LA FONTANERIA Y NO DEBE) Tj ET\nendstream\nendobj\n',
+  })
+  const r = await leeCapaCero(conEstructura)
+  assert.equal(r.hayTexto, true)
+  assert.equal(r.paginas.length, 1, 'solo el contenido de pagina, no la estructura')
+  assert.match(r.paginas[0], /Factura A-1874/)
+  assert.doesNotMatch(r.paginas.join(''), /FONTANERIA/, 'ni un caracter de un flujo de estructura')
+})
+
+/**
+ * Bytes que imitan a un JPEG: altos de Latin-1 —que `pareceTexto` cuenta como imprimibles— con una
+ * secuencia que parece un operador de texto metida dentro.
+ *
+ * Esa secuencia no esta de adorno. Los bytes de una imagen real contienen de todo por pura
+ * estadistica, y el dia que dan con algo con forma de operador, el extractor saca "texto" de una
+ * foto. Sin ella, esta prueba pasaria con el arreglo desactivado y no defenderia nada.
+ */
+const ALTO =
+  '\u00c0\u00cd\u00ce\u00df\u00da\u00c1\u00c9\u00cd\u00d3\u00da\u00dc\u00d1'.repeat(3) +
+  'BT (basura de la imagen que jamas debe salir) Tj ET' +
+  '\u00c0\u00cd\u00ce\u00df\u00da\u00c1\u00c9\u00cd\u00d3\u00da\u00dc\u00d1'.repeat(3)
+
+test('un PDF sin capa de texto lo dice TAL CUAL: es un escaneo', async () => {
+  // El motivo importa tanto como el veredicto. "No supera la prueba de imprimibilidad" no le dice
+  // nada a nadie; "es un escaneo o una imagen" dice que hacer — llamar al motor.
+  const soloImagen = await pdfCon('q 612 0 0 792 0 0 cm /x2 Do Q', {
+    // SIN `/Filter` a proposito: con filtro, la version vieja tambien la saltaba y esto no
+    // distinguiria. Sin el se leia cruda, y sus bytes altos pasaban por imprimibles.
+    extra:
+      `2 0 obj\n<< /Type /XObject /Subtype /Image /Length ${ALTO.length} >>\n` +
+      `stream\n${ALTO}\nendstream\nendobj\n`,
+  })
+  const r = await leeCapaCero(soloImagen)
+  assert.equal(r.hayTexto, false)
+  assert.match(r.motivo ?? '', /escaneo o una imagen/)
+  assert.equal(r.paginas.length, 0, 'y ni un bloque salido de los bytes de la foto')
+})
+
+test('cuatro caracteres de basura no son una capa de texto', async () => {
+  // Con el filtro en `> 0`, cuatro bytes sueltos bastaban para que el documento dejara de parecer
+  // un escaneo y el motivo cambiara al equivocado. El minimo ya existia en `pareceTexto`; solo se
+  // aplicaba demasiado tarde.
+  const r = await leeCapaCero(await pdfCon('BT (abc) Tj ET'))
+  assert.equal(r.hayTexto, false)
+  assert.match(r.motivo ?? '', /escaneo o una imagen/, 'tres letras no son una capa de texto')
+})
+
+test('el diccionario se lee del PROPIO objeto, no del vecino', async () => {
+  // Una ventana de tamano fijo hacia atras cruza la frontera del objeto y lee el filtro del de al
+  // lado. Medido en un escaneo real: su bloque de metadatos, texto plano sin filtro, quedaba junto
+  // a un objeto que si declaraba compresion, se intentaba inflar y fallaba — y ese fallo se
+  // reportaba como "filtro no soportado" en un documento que no tenia ninguno.
+  const conVecino = await pdfCon('BT (Proveedor ACME S.A. de C.V.) Tj ET', {
+    extra: '7 0 obj\n<< /Length 40 /Filter /FlateDecode >>\nstream\nxxxx\nendstream\nendobj\n',
+  })
+  const r = await leeCapaCero(conVecino)
+  assert.equal(r.hayTexto, true)
+  assert.match(r.paginas.join(''), /Proveedor ACME/)
+})
+
