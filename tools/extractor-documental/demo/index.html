@@ -170,6 +170,40 @@
   <div id="salida-cotejo"></div>
 </section>
 
+<!-- ─────────────────────────  MOTOR  ───────────────────────── -->
+<h2>8 · Motor de OCR — para lo que la capa 0 no puede leer</h2>
+<section>
+  <div class="aviso malo">
+    <strong>Esto manda tu documento al servidor que pongas abajo.</strong> Pon uno tuyo.
+    «Autohospedado» describe quién corre el modelo, no por dónde viaja el byte: apuntar aquí a un
+    servidor ajeno saca el documento de tu perímetro igual que una API comercial.
+    <br><br>
+    Por eso no hay aquí un campo para una clave de API comercial. Si el documento lleva datos de
+    personas que no decidieron nada —clientes, empleados, menores— esa vía no se ofrece.
+  </div>
+  <div class="fila">
+    <label>Servidor compatible con OpenAI<br>
+      <input type="text" id="motor-base" placeholder="http://localhost:11434/v1"></label>
+    <label>Modelo <strong>(pineado, sin alias)</strong><br>
+      <input type="text" id="motor-modelo" placeholder="p. ej. qwen2.5vl:7b"></label>
+  </div>
+  <div class="zona" id="zona-motor" tabindex="0" role="button">
+    Suelta aquí el documento escaneado (PDF o imagen)
+    <input type="file" id="file-motor" accept="application/pdf,image/*" hidden>
+  </div>
+  <div class="fila" id="acciones-motor" hidden>
+    <button id="btn-extraer">Extraer con el motor</button>
+    <button id="btn-limpiar-motor">Limpiar</button>
+    <span class="apunte" id="listo-motor"></span>
+  </div>
+  <div id="salida-motor"></div>
+  <p class="apunte">
+    De un PDF escaneado se saca el <strong>JPEG que ya lleva dentro</strong> y se manda ese. No se
+    rasteriza: eso pediría una dependencia de render que el núcleo no tiene. Si el PDF trae capa de
+    texto, la capa 0 lo resuelve sin motor y sin coste — pruébalo arriba antes de gastar aquí.
+  </p>
+</section>
+
 <script type="module">
 import {
   leeCapaCero, clasificaLote, proponeModelo, analizaCarga,
@@ -180,6 +214,8 @@ import {
   aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision, exigeCotejo,
 } from '/extractor/react/revision.js'
 import { corrobora, exigeRevision } from '/extractor/corroboracion.js'
+import { imagenesDelPdf } from '/extractor/pdf-flujos.js'
+import { motorCompatible } from '/extractor/motores/openai-compat.js'
 import {
   leeCfdi40, camposParaCotejo, cotejaSelloConQr, avisoDelComprobante,
   registroDeEsquemas, lectorDeTimbre11, lectorDePagos20,
@@ -558,6 +594,94 @@ $('btn-limpiar-cotejo').onclick = () => {
   $('carga-cotejo').value = ''
   $('salida-cotejo').innerHTML = ''
   $('acciones-cotejo').hidden = true
+}
+
+/**
+ * El motor de OCR, y la frontera que decide cual se enchufa.
+ *
+ * El nucleo NO trae ningun motor puesto: se inyecta. Eso no es ceremonia de arquitectura — es lo
+ * que hace que la decision de si el documento sale del perimetro sea del proyecto y no de la
+ * herramienta. Aqui solo se ofrece el adaptador compatible, apuntando a un servidor que pones tu.
+ *
+ * Un escaneo no tiene capa de texto y un motor de vision espera una IMAGEN, asi que de un PDF se
+ * saca el JPEG que ya lleva dentro. Rasterizar pediria una dependencia de render.
+ */
+let documentoParaElMotor = null
+
+zonaDeArchivos('zona-motor', 'file-motor', async ({ archivos }) => {
+  if (archivos.length === 0) return
+  const { archivo, ruta } = archivos[0]
+  const bytes = new Uint8Array(await archivo.arrayBuffer())
+  documentoParaElMotor = { ruta, bytes }
+  $('acciones-motor').hidden = false
+
+  if (bytes[0] === 0x25 && bytes[1] === 0x50) {
+    const imagenes = await imagenesDelPdf(bytes)
+    if (imagenes.length === 0) {
+      $('listo-motor').textContent = `${ruta}: PDF sin imagen incrustada que sacar`
+      pinta('salida-motor', aviso('De este PDF no se puede sacar una imagen para el motor. Si trae capa de texto, resuélvelo con la capa 0 de arriba, que no cuesta nada.', ''))
+      return
+    }
+    documentoParaElMotor = { ruta, bytes: imagenes[0].bytes, imagen: imagenes[0] }
+    $('listo-motor').textContent = `${ruta}: imagen de ${imagenes[0].ancho}×${imagenes[0].alto} lista`
+    pinta('salida-motor', aviso(`Del PDF salió una imagen de <strong>${imagenes[0].ancho}×${imagenes[0].alto}</strong>. Es lo que se mandará al motor, no el PDF.`, 'bien'))
+    return
+  }
+  $('listo-motor').textContent = `${ruta}: imagen lista`
+  pinta('salida-motor', aviso(`<strong>${esc(ruta)}</strong> listo. Es lo que se mandará al motor.`, 'bien'))
+})
+
+$('btn-extraer').onclick = async () => {
+  if (documentoParaElMotor === null) return
+  const base = $('motor-base').value.trim()
+  const modelo = $('motor-modelo').value.trim()
+  if (base === '' || modelo === '') {
+    return pinta('salida-motor', aviso('Faltan el servidor y el modelo. El modelo va <strong>pineado</strong>: un alias que se actualiza solo cambia el comportamiento sin que nadie lo apruebe (C1).', 'malo'))
+  }
+
+  let motor
+  try {
+    // Se construye ANTES de mandar nada: `exigeModeloPineado` rechaza un alias aqui, no a mitad
+    // de la cola. Es la misma razon por la que el umbral se valida al entrar.
+    motor = motorCompatible({ base, modelo, milisegundosDeEspera: 180000 })
+  } catch (e) {
+    return pinta('salida-motor', aviso(esc(e.message), 'malo'))
+  }
+
+  pinta('salida-motor', aviso(`Enviando a <code>${esc(base)}</code>… puede tardar, sobre todo sin GPU.`, ''))
+  let paginas
+  try {
+    paginas = await motor.extrae(documentoParaElMotor.bytes)
+  } catch (e) {
+    // El mensaje del adaptador no incluye el cuerpo de la respuesta a proposito: podria repetir
+    // el documento entero, y esta pantalla se lee por encima del hombro.
+    return pinta('salida-motor',
+      aviso(`No se pudo extraer: ${esc(e.message)}`, 'malo') +
+      `<p class="apunte">Si es un fallo de red o de CORS, comprueba que el servidor esté levantado
+       y que acepte peticiones desde esta página. Nada salió de tu equipo si no llegó a responder.</p>`)
+  }
+
+  const campos = paginas.flatMap((p) => p.campos)
+  if (campos.length === 0) {
+    return pinta('salida-motor', aviso('El motor respondió, y no devolvió ningún campo. Eso no es un dato vacío: es que no extrajo nada.', 'malo'))
+  }
+  const cuerpo = campos.map((c) => `
+    <tr><td><code>${esc(c.clave)}</code></td><td>${esc(c.valor)}</td>
+    <td>${Math.round(c.confianza * 100)} %</td>
+    <td>${c.region ? `pág. ${c.region.pagina + 1}` : '<em>sin región</em>'}</td></tr>`).join('')
+
+  pinta('salida-motor',
+    aviso(`<strong>${campos.length}</strong> campo(s) en ${paginas.length} página(s). Sus confianzas vienen del motor: <strong>no se inventan</strong>.`, 'bien') +
+    `<table><thead><tr><th>Campo</th><th>Valor</th><th>Confianza</th><th>Origen</th></tr></thead><tbody>${cuerpo}</tbody></table>` +
+    `<p class="apunte">Pégalos en la sección 3 con tu umbral para ver cuáles van a revisión.
+     El umbral no tiene valor por defecto, y eso es deliberado: se mide (TAR-17).</p>`)
+}
+
+$('btn-limpiar-motor').onclick = () => {
+  documentoParaElMotor = null
+  $('listo-motor').textContent = ''
+  $('salida-motor').innerHTML = ''
+  $('acciones-motor').hidden = true
 }
 
 $('btn-carga').onclick = () => {

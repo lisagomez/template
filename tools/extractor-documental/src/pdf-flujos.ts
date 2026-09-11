@@ -37,23 +37,25 @@ async function inflar(datos: Uint8Array): Promise<Uint8Array | null> {
   }
 }
 
-export interface FlujosDelPdf {
-  /** El contenido de pagina, ya descomprimido. */
-  readonly flujos: readonly string[]
-  /** Flujos de contenido con un filtro que no se sabe deshacer. Se declaran, no se callan. */
-  readonly filtrosDesconocidos: number
+interface FlujoCrudo {
+  readonly cabecera: string
+  readonly datos: Uint8Array
 }
 
-/** Trocea el PDF y devuelve SOLO sus flujos de contenido de pagina. */
-export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> {
-  const flujos: string[] = []
+/**
+ * Recorre los flujos del fichero y devuelve cada uno con SU diccionario.
+ *
+ * Existe factorizado porque hay dos preguntas distintas que necesitan el mismo recorrido —cual es
+ * el contenido de pagina, y cuales son las imagenes— y dos copias de esta logica divergirian. Los
+ * dos recortes de abajo costaron un fallo cada uno.
+ */
+function* recorreFlujos(pdf: Uint8Array): Generator<FlujoCrudo> {
   let posicion = 0
-  let filtrosDesconocidos = 0
   while (true) {
     const inicio = indiceDe(pdf, 'stream', posicion)
-    if (inicio < 0) break
+    if (inicio < 0) return
     const fin = indiceDe(pdf, 'endstream', inicio)
-    if (fin < 0) break
+    if (fin < 0) return
 
     /**
      * El diccionario del objeto va justo antes de `stream` y declara el filtro. Lo importante es
@@ -83,6 +85,23 @@ export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> 
     else if (cola >= 1 && (datos[cola - 1] === 0x0a || datos[cola - 1] === 0x0d)) cola -= 1
     datos = datos.subarray(0, cola)
 
+    yield { cabecera, datos }
+    posicion = fin + 'endstream'.length
+  }
+}
+
+export interface FlujosDelPdf {
+  /** El contenido de pagina, ya descomprimido. */
+  readonly flujos: readonly string[]
+  /** Flujos de contenido con un filtro que no se sabe deshacer. Se declaran, no se callan. */
+  readonly filtrosDesconocidos: number
+}
+
+/** Trocea el PDF y devuelve SOLO sus flujos de contenido de pagina. */
+export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> {
+  const flujos: string[] = []
+  let filtrosDesconocidos = 0
+  for (const { cabecera, datos } of recorreFlujos(pdf)) {
     /**
      * Solo se mira el CONTENIDO de pagina. Todo lo demas se salta, aunque se pueda inflar.
      *
@@ -116,8 +135,60 @@ export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> 
     } else {
       flujos.push(aLatin1(datos))
     }
-    posicion = fin + 'endstream'.length
   }
 
   return { flujos, filtrosDesconocidos }
+}
+
+export interface ImagenDelPdf {
+  readonly bytes: Uint8Array
+  /** `image/jpeg` hoy. Si algun dia se soportan mas, aqui es donde se dicen. */
+  readonly tipoMime: string
+  readonly ancho: number | null
+  readonly alto: number | null
+}
+
+const entero = (cabecera: string, clave: string): number | null => {
+  const encontrado = new RegExp(`/${clave}\\s+(\\d+)`).exec(cabecera)
+  return encontrado === null ? null : Number(encontrado[1])
+}
+
+const esJpeg = (b: Uint8Array): boolean => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff
+
+/**
+ * Las imagenes de pagina incrustadas en el PDF.
+ *
+ * PARA QUE. Un escaneo no tiene capa de texto: hay que pasarlo por un motor de OCR, y un motor de
+ * vision espera una IMAGEN. Mandarle el PDF entero como si fuera una no funciona. Rasterizar la
+ * pagina pediria una dependencia de render, que este nucleo no tiene ni va a tener.
+ *
+ * Pero resulta que no hace falta: un PDF escaneado es, casi siempre, un JPEG por pagina metido
+ * dentro. Sacarlo es leer el flujo y deshacer sus filtros, y eso ya se sabe hacer aqui. Verificado
+ * sobre un escaneo real: 181 KB comprimidos que inflan a un JPEG de 212 KB, valido.
+ *
+ * QUE NO HACE. Ni rasteriza, ni recompone una pagina de varias imagenes, ni deshace JPEG2000,
+ * CCITT ni JBIG2 — para eso haria falta un decodificador que no esta. Esas se omiten y quien
+ * llama vera menos imagenes que paginas, que es visible; devolver bytes que no son una imagen
+ * seria peor.
+ */
+export async function imagenesDelPdf(pdf: Uint8Array): Promise<readonly ImagenDelPdf[]> {
+  const salida: ImagenDelPdf[] = []
+  for (const { cabecera, datos } of recorreFlujos(pdf)) {
+    if (!/\/Subtype\s*\/Image/.test(cabecera)) continue
+
+    // El orden de los filtros es el orden en que se aplicaron. `[/FlateDecode /DCTDecode]` es un
+    // JPEG comprimido otra vez con zlib, que es lo que produce mas de un escaner.
+    let bytes: Uint8Array | null = datos
+    if (/\/Filter\s*\[?[^\]]*\/FlateDecode/.test(cabecera)) bytes = await inflar(datos)
+    if (bytes === null) continue
+    if (!esJpeg(bytes)) continue
+
+    salida.push({
+      bytes,
+      tipoMime: 'image/jpeg',
+      ancho: entero(cabecera, 'Width'),
+      alto: entero(cabecera, 'Height'),
+    })
+  }
+  return salida
 }

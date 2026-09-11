@@ -63,6 +63,8 @@ const QR_MANIPULADO = `${SAT}?id=11111111-2222-3333-4444-555555555555&re=AAA0101
 
 /** El fixture sintetico del repo: datos inventados, estructura fiel. */
 const XML = join(RAIZ, 'pruebas', 'fixtures', 'cfdi-40-ingreso.xml')
+/** Un PDF escaneado SINTETICO: un JPEG minimo dentro, para no meter documentos reales aqui. */
+const ESCANEO = join(RAIZ, 'pruebas', 'fixtures', 'escaneo.pdf')
 
 let fallos = 0
 const comprueba = (que, condicion, detalle = '') => {
@@ -144,11 +146,34 @@ try {
   const trasLimpiar = await pagina.locator('#salida-revision').innerText()
   comprueba('y el cotejo deja de contar: vuelve el aviso', /nadie cotej/i.test(trasLimpiar))
 
+  console.log('\n\x1b[1mEl motor de OCR\x1b[0m')
+  comprueba('la seccion 8 esta', (await pagina.locator('h2', { hasText: '8 · Motor de OCR' }).count()) === 1)
+  comprueba('los botones arrancan OCULTOS', await pagina.locator('#acciones-motor').isHidden())
+  comprueba(
+    'avisa de que el documento sale hacia el servidor que se ponga',
+    /manda tu documento al servidor/i.test(await pagina.locator('section', { has: pagina.locator('#motor-base') }).innerText()),
+  )
+  comprueba(
+    'NO ofrece campo para una clave de API comercial',
+    (await pagina.locator('#motor-clave').count()) === 0,
+    'si algun dia aparece, esta prueba lo dice',
+  )
+
+  // Del PDF escaneado tiene que salir la imagen ANTES de mandar nada.
+  await pagina.locator('#file-motor').setInputFiles(ESCANEO)
+  await pagina.locator('#acciones-motor').waitFor({ state: 'visible' })
+  const listo = await pagina.locator('#salida-motor').innerText()
+  comprueba('saca la imagen del PDF escaneado', /salió una imagen/i.test(listo), listo.slice(0, 60))
+
+  // Y sin servidor ni modelo se niega a enviar, en vez de fallar contra la red.
+  await pagina.locator('#btn-extraer').click()
+  comprueba('sin modelo pineado no manda nada', /pineado/i.test(await pagina.locator('#salida-motor').innerText()))
+
   comprueba('ningun error de consola en toda la corrida', errores.length === 0, errores.join(' · '))
 } finally {
   await navegador.close()
   servidor.kill()
 }
 
-console.log(fallos === 0 ? '\n\x1b[32mLas 16 comprobaciones en verde.\x1b[0m\n' : `\n\x1b[31m${fallos} fallo(s).\x1b[0m\n`)
+console.log(fallos === 0 ? '\n\x1b[32mLas 22 comprobaciones en verde.\x1b[0m\n' : `\n\x1b[31m${fallos} fallo(s).\x1b[0m\n`)
 process.exit(fallos === 0 ? 0 : 1)
