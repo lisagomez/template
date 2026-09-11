@@ -19,6 +19,7 @@ export type {
   ArchivoRechazado,
   Clasificacion,
   LimitesDelMotor,
+  UsoDeTokens,
 } from './tipos.js'
 
 export type {

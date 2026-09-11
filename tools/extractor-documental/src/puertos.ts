@@ -5,7 +5,7 @@
  * que la decision de si el documento sale del perimetro (C4) la tome cada proyecto en vez de
  * venir cocida en la herramienta.
  */
-import type { PaginaExtraida, LimitesDelMotor } from './tipos.js'
+import type { PaginaExtraida, LimitesDelMotor, UsoDeTokens } from './tipos.js'
 import type { DescriptorDeEsquema } from './esquema.js'
 
 export interface OpcionesDeExtraccion {
@@ -13,6 +13,12 @@ export interface OpcionesDeExtraccion {
   paginas?: readonly number[]
   /** Esquema JSON de la anotacion pedida. Lo que vuelva se valida igual: no se confia. */
   esquemaDeAnotacion?: unknown
+  /**
+   * Se llama UNA vez por peticion, con lo que el servidor declaro consumir (`null` si no lo
+   * declara). Deliberadamente NO es parte del valor de retorno de `extrae()`: cambiar esa firma
+   * romperia a cada llamador existente, y esto es aditivo — quien no lo necesite no lo pasa.
+   */
+  alConsumirTokens?: (uso: UsoDeTokens | null) => void
 }
 
 export interface MotorOcr {

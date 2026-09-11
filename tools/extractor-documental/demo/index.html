@@ -5,12 +5,49 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Banco de pruebas — extractor documental</title>
 <style>
-  :root { color-scheme: light dark; --borde: color-mix(in srgb, currentColor 25%, transparent); }
-  body { font: 15px/1.55 system-ui, sans-serif; margin: 0 auto; max-width: 60rem; padding: 1.5rem; }
+  :root {
+    color-scheme: light dark;
+    --borde: color-mix(in srgb, currentColor 25%, transparent);
+    --tarjeta-fondo: color-mix(in srgb, currentColor 2.5%, transparent);
+    --tarjeta-fondo-hover: color-mix(in srgb, currentColor 4.5%, transparent);
+  }
+  body { font: 15px/1.55 system-ui, sans-serif; margin: 0 auto; max-width: 88rem; padding: 1.5rem; }
   h1 { font-size: 1.4rem; margin: 0 0 .3rem; }
-  h2 { font-size: 1.05rem; margin: 2rem 0 .5rem; }
-  .sub { opacity: .7; margin: 0 0 1.5rem; }
-  section { border: 1px solid var(--borde); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .sub { opacity: .7; margin: 0 0 1.5rem; max-width: 60rem; }
+  .apunte { opacity: .65; font-size: .85rem; }
+  code { font-family: ui-monospace, monospace; }
+
+  /* ── Bento grid ──────────────────────────────────────────────────────────
+     12 columnas; cada tarjeta declara cuanto ocupa con una clase `span-N`.
+     Bajo 760px TODO colapsa a una columna: `.tarjeta{grid-column:1/-1!important}`
+     gana por especificidad sobre cualquier `.span-N` sin necesitar tocar el HTML. */
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1rem; margin-top: 1.2rem; }
+  .tarjeta {
+    grid-column: span 12;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem 1.25rem;
+    background: var(--tarjeta-fondo);
+    display: flex; flex-direction: column; min-width: 0;
+    transition: background .15s ease;
+  }
+  .tarjeta:hover { background: var(--tarjeta-fondo-hover); }
+  .tarjeta.span-4 { grid-column: span 4; }
+  .tarjeta.span-5 { grid-column: span 5; }
+  .tarjeta.span-6 { grid-column: span 6; }
+  .tarjeta.span-7 { grid-column: span 7; }
+  @media (max-width: 760px) { .tarjeta { grid-column: 1 / -1 !important; } }
+
+  .tarjeta h2 {
+    font-size: 1rem; margin: 0 0 .7rem; display: flex; align-items: center; gap: .55rem;
+  }
+  .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.55rem; height: 1.55rem; border-radius: 50%; flex: 0 0 auto;
+    background: color-mix(in srgb, currentColor 12%, transparent);
+    font-size: .78rem; font-weight: 700;
+  }
+
   .zona { border: 2px dashed var(--borde); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; }
   .zona[data-encima="si"] { border-style: solid; }
   table { border-collapse: collapse; width: 100%; font-size: .9rem; }
@@ -18,7 +55,10 @@
   tr[data-bajo="si"] td { background: color-mix(in srgb, orange 14%, transparent); }
   pre { background: color-mix(in srgb, currentColor 7%, transparent); padding: .7rem; border-radius: 6px; overflow-x: auto; font-size: .82rem; }
   input, textarea, button, select { font: inherit; }
-  input[type=text], input[type=number], textarea { width: 100%; box-sizing: border-box; padding: .35rem; border: 1px solid var(--borde); border-radius: 4px; background: transparent; color: inherit; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; box-sizing: border-box; padding: .35rem; border: 1px solid var(--borde);
+    border-radius: 4px; background: transparent; color: inherit;
+  }
   textarea { min-height: 6rem; font-family: ui-monospace, monospace; font-size: .82rem; }
   button { padding: .35rem .7rem; border-radius: 5px; border: 1px solid var(--borde); background: transparent; color: inherit; cursor: pointer; }
   button[disabled] { opacity: .45; cursor: not-allowed; }
@@ -31,8 +71,7 @@
      de limpiar se veia siempre. Esto lo arregla para todo el documento, no solo para ese caso. */
   [hidden] { display: none !important; }
   .fila > label { flex: 1 1 12rem; }
-  .apunte { opacity: .65; font-size: .85rem; }
-  code { font-family: ui-monospace, monospace; }
+  .fila > input[type=text], .fila > button { flex: 0 1 auto; }
 </style>
 </head>
 <body>
@@ -41,13 +80,17 @@
 <p class="sub">
   Sirve el <code>dist/</code> recién construido: lo que pruebas aquí es <strong>el mismo artefacto que
   se instala</strong>. Lo que corrijas a mano se guarda como corpus, y <code>npm run mide</code> lo lee.
+  Los catálogos y el historial de tokens de más abajo viven <strong>solo en este navegador</strong>
+  (<code>localStorage</code>): nada de esto sale de tu equipo ni pasa por ningún servidor propio.
 </p>
 
 <div class="aviso" id="estado-corpus">corpus: cargando…</div>
 
+<div class="bento">
+
 <!-- ─────────────────────────  CAPA 0  ───────────────────────── -->
-<h2>1 · Capa 0 — ¿hace falta el motor?</h2>
-<section>
+<article class="tarjeta span-6">
+  <h2><span class="num">1</span> Capa 0 — ¿hace falta el motor?</h2>
   <div class="zona" id="zona-capa0" tabindex="0">
     Suelta aquí un PDF (o pulsa para elegirlo)
     <input type="file" id="file-capa0" accept="application/pdf" hidden>
@@ -65,11 +108,11 @@
     Ante cualquier duda —cifrado, escaneo, texto ilegible— llama: un falso negativo cuesta una llamada,
     un falso positivo mete datos corruptos con apariencia de exactos y sin pasar por la cola.
   </p>
-</section>
+</article>
 
 <!-- ─────────────────────────  INGESTA  ───────────────────────── -->
-<h2>2 · Ingesta — arrastra una carpeta entera</h2>
-<section>
+<article class="tarjeta span-6">
+  <h2><span class="num">2</span> Ingesta — arrastra una carpeta entera</h2>
   <div class="zona" id="zona-ingesta" tabindex="0">
     Suelta archivos o una carpeta
     <input type="file" id="file-ingesta" multiple hidden>
@@ -79,11 +122,11 @@
     Soltar una carpeta y elegirla son <strong>dos mecanismos distintos del navegador</strong>. Lo que se
     rechaza se nombra con su archivo y su motivo: el rechazo silencioso es como se pierden documentos.
   </p>
-</section>
+</article>
 
 <!-- ─────────────────────────  REVISIÓN  ───────────────────────── -->
-<h2>3 · Revisión — y aquí se fabrica el corpus de confianza</h2>
-<section>
+<article class="tarjeta span-12">
+  <h2><span class="num">3</span> Revisión — y aquí se fabrica el corpus de confianza</h2>
   <div class="fila">
     <label>
       Umbral de confianza <strong>(obligatorio, sin valor por defecto)</strong><br>
@@ -103,11 +146,39 @@
     <span class="apunte" id="marca-ejemplo"></span>
   </div>
   <div id="salida-revision"></div>
-</section>
+</article>
+
+<!-- ─────────────────────────  CATÁLOGOS  ───────────────────────── -->
+<article class="tarjeta span-6">
+  <h2><span class="num">4</span> Catálogos — listas que mantienes tú</h2>
+  <p class="apunte">
+    Guardados en este navegador, no en ningún servidor. Cada catálogo es una lista de
+    <code>id | etiqueta</code> contra la que reconciliar valores extraídos (paso 5). Darlos de alta
+    o corregirlos es tuyo: aquí no se inventa ninguna fila.
+  </p>
+  <div class="fila">
+    <label>Catálogo activo<br><select id="cat-selector"></select></label>
+    <label>Nombre de uno nuevo<br><input type="text" id="cat-nuevo-nombre" placeholder="p. ej. proveedores"></label>
+  </div>
+  <div class="fila" style="margin-top:.3rem">
+    <button id="btn-cat-crear" type="button">Crear catálogo</button>
+    <button id="btn-cat-eliminar" type="button">Eliminar el activo</button>
+  </div>
+  <div id="cat-tabla-cont" style="margin-top:.7rem"></div>
+  <div class="fila" style="margin-top:.5rem">
+    <input type="text" id="cat-fila-id" placeholder="id">
+    <input type="text" id="cat-fila-etiqueta" placeholder="etiqueta">
+    <button id="btn-cat-anadir-fila" type="button">Añadir fila</button>
+  </div>
+  <p class="apunte" style="margin-top:.6rem">
+    Úsalo en la reconciliación de al lado con el botón <strong>«Cargar catálogo activo»</strong>, o
+    guarda ahí el que ya tengas escrito con <strong>«Guardar como catálogo»</strong>.
+  </p>
+</article>
 
 <!-- ─────────────────────────  RECONCILIACIÓN  ───────────────────────── -->
-<h2>4 · Reconciliación — el corpus de similitud, sin ninguna clave</h2>
-<section>
+<article class="tarjeta span-6">
+  <h2><span class="num">5</span> Reconciliación — el corpus de similitud, sin ninguna clave</h2>
   <div class="fila">
     <label>Valor extraído<br><input type="text" id="valor" value="ACME Servicios Industriales"></label>
     <label>Umbral de similitud <strong>(obligatorio)</strong><br>
@@ -117,35 +188,39 @@
   <textarea id="catalogo">1874 | ACME S.A. de C.V.
 2001 | Distribuidora del Norte
 3310 | Ferretería Zeta</textarea>
-  <div class="fila" style="margin-top:.5rem"><button id="btn-reconciliar">Reconciliar</button></div>
+  <div class="fila" style="margin-top:.5rem">
+    <button id="btn-reconciliar">Reconciliar</button>
+    <button id="btn-cat-cargar-activo" type="button">Cargar catálogo activo</button>
+    <button id="btn-cat-guardar-desde-aqui" type="button">Guardar como catálogo</button>
+  </div>
   <div id="salida-reconciliacion"></div>
   <p class="apunte">
     Este corpus <strong>no necesita motor</strong>: solo tu catálogo y tu criterio. Es el que desbloquea
     TAR-25.
   </p>
-</section>
+</article>
 
 <!-- ─────────────────────────  MODELO E-R  ───────────────────────── -->
-<h2>5 · Propuesta de modelo E-R</h2>
-<section>
+<article class="tarjeta span-5">
+  <h2><span class="num">6</span> Propuesta de modelo E-R</h2>
   <div class="fila"><button id="btn-modelo">Proponer modelo con los campos de arriba</button></div>
   <div id="salida-modelo"></div>
-</section>
+</article>
 
 <!-- ─────────────────────────  CÓDIGOS  ───────────────────────── -->
-<h2>6 · Códigos</h2>
-<section>
+<article class="tarjeta span-7">
+  <h2><span class="num">7</span> Códigos</h2>
   <div class="fila">
     <label>Carga de un QR o código de barras<br>
       <input type="text" id="carga" value="0107501234567890310300123456"></label>
     <button id="btn-carga">Analizar</button>
   </div>
   <div id="salida-carga"></div>
-</section>
+</article>
 
 <!-- ─────────────────────────  COTEJO  ───────────────────────── -->
-<h2>7 · Cotejo — dos fuentes de la misma factura</h2>
-<section>
+<article class="tarjeta span-12">
+  <h2><span class="num">8</span> Cotejo — dos fuentes de la misma factura</h2>
   <p class="apunte">
     Un XML analiza o no analiza: sus campos llegan con confianza 1 y sin región que citar. Eso NO
     los hace ciertos — el sello no se verifica, y un comprobante inventado analiza igual de limpio.
@@ -168,11 +243,11 @@
     <button id="btn-limpiar-cotejo">Limpiar cotejo</button>
   </div>
   <div id="salida-cotejo"></div>
-</section>
+</article>
 
 <!-- ─────────────────────────  MOTOR  ───────────────────────── -->
-<h2>8 · Motor de OCR — para lo que la capa 0 no puede leer</h2>
-<section>
+<article class="tarjeta span-12">
+  <h2><span class="num">9</span> Motor de OCR — para lo que la capa 0 no puede leer</h2>
   <div class="aviso malo">
     <strong>Esto manda tu documento al servidor que pongas abajo.</strong> Pon uno tuyo.
     «Autohospedado» describe quién corre el modelo, no por dónde viaja el byte: apuntar aquí a un
@@ -207,7 +282,26 @@
     rasteriza: eso pediría una dependencia de render que el núcleo no tiene. Si el PDF trae capa de
     texto, la capa 0 lo resuelve sin motor y sin coste — pruébalo arriba antes de gastar aquí.
   </p>
-</section>
+</article>
+
+<!-- ─────────────────────────  USO DE TOKENS  ───────────────────────── -->
+<article class="tarjeta span-12">
+  <h2><span class="num">10</span> Uso de tokens — lo que el servidor declaró, nunca una estimación</h2>
+  <p class="apunte">
+    Cada vez que extraes con el motor (paso 9), si el servidor incluye <code>usage</code> en su
+    respuesta se registra aquí tal cual. Si NO lo incluye, la corrida queda marcada
+    <strong>«sin declarar»</strong> — nunca con un cero: un cero inventado haría parecer que esa
+    corrida no gastó nada, y eso contaminaría cualquier total. El historial vive solo en este
+    navegador.
+  </p>
+  <div class="fila">
+    <span class="apunte" id="tokens-resumen"></span>
+    <button id="btn-tokens-limpiar" type="button">Borrar historial</button>
+  </div>
+  <div id="tokens-tabla" style="margin-top:.6rem; overflow-x:auto"></div>
+</article>
+
+</div><!-- /.bento -->
 
 <script type="module">
 import {
@@ -231,6 +325,7 @@ const $ = (id) => document.getElementById(id)
 const esc = (t) => String(t).replace(/[<&>]/g, (c) => ({ '<': '&lt;', '&': '&amp;', '>': '&gt;' })[c])
 const pinta = (id, html) => { $(id).innerHTML = html }
 const aviso = (t, clase = '') => `<div class="aviso ${clase}">${t}</div>`
+const num = (n) => n.toLocaleString('es')
 
 // El ejemplo lleva confianzas INVENTADAS. Se marca, y el corpus lo rechaza: guardar una confianza
 // que no salio de un motor contaminaria la correlacion, que es justo la medicion que importa.
@@ -438,11 +533,130 @@ $('btn-revisar').onclick = () => {
   })
 }
 
-// ── 4. Reconciliación y corpus de similitud ──────────────────────────────────
-const leeCatalogo = () => $('catalogo').value.split('\n')
+// ── 4. Catálogos configurables por el usuario ────────────────────────────────
+/**
+ * Persistidos en `localStorage`, no en ningun servidor: este banco no tiene backend de negocio,
+ * y el catalogo de un usuario no tiene por que salir de su navegador para poder configurarlo.
+ *
+ * Forma: `{ [nombreDelCatalogo]: { id, etiqueta }[] }`. Un `localStorage` bloqueado (modo privado,
+ * cuota llena) no rompe la pantalla: se sigue funcionando en memoria para esa sesion, sin fingir
+ * que se guardo cuando no se guardo.
+ */
+const CLAVE_CATALOGOS = 'bdp:catalogos'
+
+function leeCatalogosGuardados() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_CATALOGOS)
+    return crudo ? JSON.parse(crudo) : {}
+  } catch { return {} }
+}
+
+let catalogosCache = leeCatalogosGuardados()
+let catalogoActivo = Object.keys(catalogosCache)[0] ?? null
+
+function guardaCatalogos() {
+  try { localStorage.setItem(CLAVE_CATALOGOS, JSON.stringify(catalogosCache)) } catch {
+    // Almacenamiento bloqueado o lleno: se sigue en memoria, sin fingir que persistio.
+  }
+}
+
+function refrescaSelectorCatalogos() {
+  const nombres = Object.keys(catalogosCache).sort()
+  $('cat-selector').innerHTML = nombres.length === 0
+    ? '<option value="">— ningún catálogo guardado todavía —</option>'
+    : nombres.map((n) => `<option value="${esc(n)}"${n === catalogoActivo ? ' selected' : ''}>${esc(n)} (${catalogosCache[n].length} fila(s))</option>`).join('')
+}
+
+function pintaTablaCatalogo() {
+  const filas = catalogoActivo ? (catalogosCache[catalogoActivo] ?? []) : []
+  if (catalogoActivo === null) {
+    pinta('cat-tabla-cont', '<p class="apunte">Crea un catálogo arriba para empezar.</p>')
+    return
+  }
+  pinta('cat-tabla-cont', filas.length === 0
+    ? '<p class="apunte">Este catálogo no tiene filas todavía. Añade una abajo.</p>'
+    : `<table><thead><tr><th>id</th><th>etiqueta</th><th></th></tr></thead><tbody>${
+        filas.map((f, i) => `<tr>
+          <td><code>${esc(f.id)}</code></td><td>${esc(f.etiqueta)}</td>
+          <td><button data-quita-fila="${i}" type="button">Quitar</button></td>
+        </tr>`).join('')
+      }</tbody></table>`)
+  document.querySelectorAll('[data-quita-fila]').forEach((b) => {
+    b.onclick = () => {
+      catalogosCache[catalogoActivo].splice(Number(b.dataset.quitaFila), 1)
+      guardaCatalogos()
+      pintaTablaCatalogo()
+      refrescaSelectorCatalogos()
+    }
+  })
+}
+
+$('cat-selector').onchange = () => {
+  catalogoActivo = $('cat-selector').value || null
+  pintaTablaCatalogo()
+}
+
+$('btn-cat-crear').onclick = () => {
+  const nombre = $('cat-nuevo-nombre').value.trim()
+  if (nombre === '') return alert('Ponle un nombre al catálogo.')
+  if (catalogosCache[nombre] !== undefined) return alert(`Ya existe un catálogo llamado «${nombre}».`)
+  catalogosCache[nombre] = []
+  catalogoActivo = nombre
+  guardaCatalogos()
+  $('cat-nuevo-nombre').value = ''
+  refrescaSelectorCatalogos()
+  pintaTablaCatalogo()
+}
+
+$('btn-cat-eliminar').onclick = () => {
+  if (catalogoActivo === null) return
+  if (!confirm(`¿Eliminar el catálogo «${catalogoActivo}»? No se puede deshacer.`)) return
+  delete catalogosCache[catalogoActivo]
+  guardaCatalogos()
+  catalogoActivo = Object.keys(catalogosCache)[0] ?? null
+  refrescaSelectorCatalogos()
+  pintaTablaCatalogo()
+}
+
+$('btn-cat-anadir-fila').onclick = () => {
+  if (catalogoActivo === null) return alert('Crea o elige un catálogo primero.')
+  const id = $('cat-fila-id').value.trim()
+  const etiqueta = $('cat-fila-etiqueta').value.trim()
+  if (id === '' || etiqueta === '') return alert('Hacen falta el id y la etiqueta.')
+  catalogosCache[catalogoActivo].push({ id, etiqueta })
+  guardaCatalogos()
+  $('cat-fila-id').value = ''
+  $('cat-fila-etiqueta').value = ''
+  pintaTablaCatalogo()
+  refrescaSelectorCatalogos()
+}
+
+refrescaSelectorCatalogos()
+pintaTablaCatalogo()
+
+// ── 5. Reconciliación y corpus de similitud (conectada a los catálogos) ──────
+const leeCatalogoDelTextarea = () => $('catalogo').value.split('\n')
   .map((l) => l.split('|').map((s) => s.trim()))
   .filter((p) => p.length === 2 && p[0] && p[1])
   .map(([id, etiqueta]) => ({ id, etiqueta }))
+
+$('btn-cat-cargar-activo').onclick = () => {
+  if (catalogoActivo === null) return alert('No hay ningún catálogo guardado: crea uno en la tarjeta de al lado.')
+  $('catalogo').value = (catalogosCache[catalogoActivo] ?? []).map((f) => `${f.id} | ${f.etiqueta}`).join('\n')
+}
+
+$('btn-cat-guardar-desde-aqui').onclick = () => {
+  const filas = leeCatalogoDelTextarea()
+  if (filas.length === 0) return alert('El catálogo de arriba está vacío o mal escrito: no hay nada que guardar.')
+  const nombre = prompt('Nombre para este catálogo:', catalogoActivo ?? '')
+  if (nombre === null || nombre.trim() === '') return
+  catalogosCache[nombre.trim()] = filas
+  catalogoActivo = nombre.trim()
+  guardaCatalogos()
+  refrescaSelectorCatalogos()
+  pintaTablaCatalogo()
+  alert(`Guardado como «${nombre.trim()}» (${filas.length} fila(s)).`)
+}
 
 $('btn-reconciliar').onclick = () => {
   const umbral = Number($('umbral-sim').value)
@@ -450,7 +664,7 @@ $('btn-reconciliar').onclick = () => {
     return pinta('salida-reconciliacion', aviso('Pon un umbral de similitud. Tampoco tiene default.', 'malo'))
   }
   const valor = $('valor').value.trim()
-  const filas = leeCatalogo()
+  const filas = leeCatalogoDelTextarea()
   const r = resuelveValor(valor, filas, { umbral, margenDeAmbiguedad: 0.08 })
   // Los parecidos NO salen de la resolucion: si se propone un alta es porque nadie llego al
   // umbral, asi que esa lista viene vacia por definicion.
@@ -484,7 +698,7 @@ $('btn-reconciliar').onclick = () => {
   })
 }
 
-// ── 5. Modelo E-R ────────────────────────────────────────────────────────────
+// ── 6. Modelo E-R ────────────────────────────────────────────────────────────
 $('btn-modelo').onclick = () => {
   let campos
   try { campos = JSON.parse($('campos-json').value) } catch { campos = [] }
@@ -500,7 +714,13 @@ $('btn-modelo').onclick = () => {
     (p.avisos.length ? `<ul>${p.avisos.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>` : ''))
 }
 
-// ── 6. Códigos ───────────────────────────────────────────────────────────────
+// ── 7. Códigos ───────────────────────────────────────────────────────────────
+$('btn-carga').onclick = () => {
+  const r = analizaCarga($('carga').value.trim())
+  pinta('salida-carga', `<pre>${esc(JSON.stringify(r, null, 2))}</pre>`)
+}
+
+// ── 8. Cotejo ────────────────────────────────────────────────────────────────
 /**
  * El cotejo. Es la seccion que cierra el argumento de todas las demas.
  *
@@ -601,6 +821,7 @@ $('btn-limpiar-cotejo').onclick = () => {
   $('acciones-cotejo').hidden = true
 }
 
+// ── 9. Motor de OCR ────────────────────────────────────────────────────────
 /**
  * El motor de OCR, y la frontera que decide cual se enchufa.
  *
@@ -712,17 +933,40 @@ $('btn-extraer').onclick = async () => {
 
   pinta('salida-motor', aviso(`Enviando a <code>${esc(base)}</code>… puede tardar, sobre todo sin GPU.`, ''))
   let paginas
+  let usoDeclarado = null
+  const arranque = performance.now()
   try {
-    paginas = await motor.extrae(documentoParaElMotor.bytes)
+    // `alConsumirTokens` es aditivo: nunca cambia lo que `extrae()` devuelve. Se lee UNA vez, con
+    // lo que el propio servidor declaro (o `null` si no declaro nada).
+    paginas = await motor.extrae(documentoParaElMotor.bytes, {
+      alConsumirTokens: (uso) => { usoDeclarado = uso },
+    })
   } catch (e) {
     // El mensaje del adaptador no incluye el cuerpo de la respuesta a proposito: podria repetir
     // el documento entero, y esta pantalla se lee por encima del hombro.
     return pinta('salida-motor', aviso(`No se pudo extraer: ${esc(e.message)}`, 'malo') + QUE_MIRAR)
   }
+  const ms = performance.now() - arranque
+
+  // Se registra el intento entero, no solo los exitos con campos: una corrida que devolvio 0
+  // campos igual gasto tokens (o no los declaro), y eso tambien es dato para el analisis.
+  registraUsoDeTokens({
+    fecha: new Date().toISOString(),
+    servidor: base,
+    modelo,
+    documento: documentoParaElMotor.ruta,
+    paginas: paginas.length,
+    ms,
+    uso: usoDeclarado,
+  })
 
   const campos = paginas.flatMap((p) => p.campos)
+  const notaDeUso = usoDeclarado
+    ? aviso(`El servidor declaró <strong>${num(usoDeclarado.tokensTotal)}</strong> tokens (${num(usoDeclarado.tokensDeEntrada)} entrada, ${num(usoDeclarado.tokensDeSalida)} salida). Registrado en la tarjeta de análisis de abajo.`, '')
+    : aviso('Este servidor <strong>no declaró</strong> <code>usage</code> en su respuesta: no hay tokens que registrar aquí. No se inventa un número.', '')
+
   if (campos.length === 0) {
-    return pinta('salida-motor', aviso('El motor respondió, y no devolvió ningún campo. Eso no es un dato vacío: es que no extrajo nada.', 'malo'))
+    return pinta('salida-motor', aviso('El motor respondió, y no devolvió ningún campo. Eso no es un dato vacío: es que no extrajo nada.', 'malo') + notaDeUso)
   }
   const cuerpo = campos.map((c) => `
     <tr><td><code>${esc(c.clave)}</code></td><td>${esc(c.valor)}</td>
@@ -731,6 +975,7 @@ $('btn-extraer').onclick = async () => {
 
   pinta('salida-motor',
     aviso(`<strong>${campos.length}</strong> campo(s) en ${paginas.length} página(s). Sus confianzas vienen del motor: <strong>no se inventan</strong>.`, 'bien') +
+    notaDeUso +
     `<table><thead><tr><th>Campo</th><th>Valor</th><th>Confianza</th><th>Origen</th></tr></thead><tbody>${cuerpo}</tbody></table>` +
     `<p class="apunte">Pégalos en la sección 3 con tu umbral para ver cuáles van a revisión.
      El umbral no tiene valor por defecto, y eso es deliberado: se mide (TAR-17).</p>`)
@@ -743,10 +988,83 @@ $('btn-limpiar-motor').onclick = () => {
   $('acciones-motor').hidden = true
 }
 
-$('btn-carga').onclick = () => {
-  const r = analizaCarga($('carga').value.trim())
-  pinta('salida-carga', `<pre>${esc(JSON.stringify(r, null, 2))}</pre>`)
+// ── 10. Uso de tokens ────────────────────────────────────────────────────────
+/**
+ * El historial vive en `localStorage`, un registro por cada llamada al motor de la seccion 9.
+ *
+ * `uso: null` es un valor de PRIMERA CLASE aqui, no un vacio que se rellena. Un servidor que no
+ * declara `usage` deja su corrida marcada «sin declarar», y esa corrida NUNCA entra en los totales
+ * como si hubiera gastado cero — eso inflaria la precision de un promedio que en realidad no cubre
+ * todas las corridas.
+ */
+const CLAVE_TOKENS = 'bdp:uso-tokens'
+
+function leeHistorialDeTokens() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_TOKENS)
+    return crudo ? JSON.parse(crudo) : []
+  } catch { return [] }
 }
+
+function registraUsoDeTokens(registro) {
+  const historial = leeHistorialDeTokens()
+  historial.push(registro)
+  try { localStorage.setItem(CLAVE_TOKENS, JSON.stringify(historial)) } catch {
+    // Sin persistencia (cuota o modo privado): se pinta igual con lo que hay en memoria.
+  }
+  pintaAnalisisDeTokens()
+}
+
+function pintaAnalisisDeTokens() {
+  const historial = leeHistorialDeTokens()
+  if (historial.length === 0) {
+    $('tokens-resumen').textContent = 'Sin corridas todavía.'
+    pinta('tokens-tabla', '<p class="apunte">Extrae un documento con el motor (sección 9) para que aparezca aquí.</p>')
+    return
+  }
+
+  const conUso = historial.filter((h) => h.uso !== null)
+  const sinUso = historial.length - conUso.length
+  const totalEntrada = conUso.reduce((s, h) => s + h.uso.tokensDeEntrada, 0)
+  const totalSalida = conUso.reduce((s, h) => s + h.uso.tokensDeSalida, 0)
+  const totalTokens = conUso.reduce((s, h) => s + h.uso.tokensTotal, 0)
+  const totalPaginasConUso = conUso.reduce((s, h) => s + h.paginas, 0)
+  const porPagina = totalPaginasConUso > 0 ? (totalTokens / totalPaginasConUso).toFixed(1) : null
+
+  $('tokens-resumen').innerHTML =
+    `<strong>${historial.length}</strong> corrida(s) · <strong>${conUso.length}</strong> con uso declarado` +
+    (sinUso > 0 ? ` · <strong>${sinUso}</strong> sin declarar <span class="apunte">(no cuentan como cero)</span>` : '') +
+    (conUso.length > 0
+      ? ` · <strong>${num(totalTokens)}</strong> tokens totales (${num(totalEntrada)} entrada, ${num(totalSalida)} salida)` +
+        (porPagina !== null ? ` · <strong>${porPagina}</strong> tokens/página` : '')
+      : '')
+
+  const filas = historial.slice().reverse().map((h) => `
+    <tr>
+      <td>${new Date(h.fecha).toLocaleString('es')}</td>
+      <td><code>${esc(h.modelo)}</code></td>
+      <td>${esc(h.documento)}</td>
+      <td>${h.paginas}</td>
+      <td>${h.uso ? num(h.uso.tokensDeEntrada) : '<em>sin declarar</em>'}</td>
+      <td>${h.uso ? num(h.uso.tokensDeSalida) : '<em>sin declarar</em>'}</td>
+      <td>${h.uso ? num(h.uso.tokensTotal) : '<em>sin declarar</em>'}</td>
+      <td>${h.uso && h.paginas > 0 ? (h.uso.tokensTotal / h.paginas).toFixed(1) : '—'}</td>
+      <td>${(h.ms / 1000).toFixed(1)} s</td>
+    </tr>`).join('')
+
+  pinta('tokens-tabla', `<table><thead><tr>
+      <th>Cuándo</th><th>Modelo</th><th>Documento</th><th>Págs.</th>
+      <th>Tokens entrada</th><th>Tokens salida</th><th>Tokens total</th><th>Tokens/pág.</th><th>Duración</th>
+    </tr></thead><tbody>${filas}</tbody></table>`)
+}
+
+$('btn-tokens-limpiar').onclick = () => {
+  if (!confirm('¿Borrar todo el historial de uso de tokens de este navegador? No se puede deshacer.')) return
+  try { localStorage.setItem(CLAVE_TOKENS, JSON.stringify([])) } catch { /* nada que hacer sin storage */ }
+  pintaAnalisisDeTokens()
+}
+
+pintaAnalisisDeTokens()
 
 refrescaCorpus()
 </script>

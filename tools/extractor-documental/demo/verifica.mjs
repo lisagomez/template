@@ -92,9 +92,32 @@ pagina.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()) }
 try {
   await pagina.goto(url, { waitUntil: 'networkidle' })
 
-  console.log('\n\x1b[1mLa pagina carga y la seccion existe\x1b[0m')
+  console.log('\n\x1b[1mLa pagina carga y el bento grid existe\x1b[0m')
   comprueba('sin errores de consola al cargar', errores.length === 0, errores.join(' · '))
-  comprueba('la seccion 7 esta', (await pagina.locator('h2', { hasText: '7 · Cotejo' }).count()) === 1)
+  comprueba('el contenedor .bento existe', (await pagina.locator('.bento').count()) === 1)
+  const tarjetas = pagina.locator('.tarjeta')
+  comprueba('hay diez tarjetas (ocho de siempre + catalogos + uso de tokens)', (await tarjetas.count()) === 10)
+
+  // Geometria real, no solo CSS declarado: en viewport ancho dos tarjetas de medio ancho quedan
+  // LADO A LADO; en uno angosto, la regla `@media` las apila. Es lo unico que demuestra que el
+  // grid funciona de verdad y no solo que la clase esta escrita.
+  await pagina.setViewportSize({ width: 1400, height: 1000 })
+  const cajaCapa0 = await pagina.locator('.tarjeta.span-6').first().boundingBox()
+  const cajaIngesta = await pagina.locator('.tarjeta.span-6').nth(1).boundingBox()
+  comprueba(
+    'en ancho, dos tarjetas span-6 quedan lado a lado',
+    cajaCapa0 !== null && cajaIngesta !== null && Math.abs(cajaCapa0.y - cajaIngesta.y) < 5 && cajaIngesta.x > cajaCapa0.x,
+  )
+  await pagina.setViewportSize({ width: 480, height: 1000 })
+  const cajaCapa0Angosta = await pagina.locator('.tarjeta.span-6').first().boundingBox()
+  const cajaIngestaAngosta = await pagina.locator('.tarjeta.span-6').nth(1).boundingBox()
+  comprueba(
+    'bajo 760px las mismas dos tarjetas se apilan (una columna)',
+    cajaCapa0Angosta !== null && cajaIngestaAngosta !== null && cajaIngestaAngosta.y > cajaCapa0Angosta.y + cajaCapa0Angosta.height - 5,
+  )
+  await pagina.setViewportSize({ width: 1400, height: 1000 })
+
+  comprueba('la seccion Cotejo esta (el bento reordeno: antes era la 7)', (await pagina.locator('h2', { hasText: 'Cotejo' }).count()) === 1)
   comprueba('el boton de limpiar arranca OCULTO', await pagina.locator('#acciones-cotejo').isHidden())
 
   console.log('\n\x1b[1mSin segunda fuente no hay cotejo\x1b[0m')
@@ -147,11 +170,11 @@ try {
   comprueba('y el cotejo deja de contar: vuelve el aviso', /nadie cotej/i.test(trasLimpiar))
 
   console.log('\n\x1b[1mEl motor de OCR\x1b[0m')
-  comprueba('la seccion 8 esta', (await pagina.locator('h2', { hasText: '8 · Motor de OCR' }).count()) === 1)
+  comprueba('la seccion Motor de OCR esta', (await pagina.locator('h2', { hasText: 'Motor de OCR' }).count()) === 1)
   comprueba('los botones arrancan OCULTOS', await pagina.locator('#acciones-motor').isHidden())
   comprueba(
     'avisa de que el documento sale hacia el servidor que se ponga',
-    /manda tu documento al servidor/i.test(await pagina.locator('section', { has: pagina.locator('#motor-base') }).innerText()),
+    /manda tu documento al servidor/i.test(await pagina.locator('.tarjeta', { has: pagina.locator('#motor-base') }).innerText()),
   )
   comprueba(
     'NO ofrece campo para una clave de API comercial',
@@ -197,10 +220,83 @@ try {
     'y los provocados si aparecieron: la prueba del puerto muerto fue real',
     errores.some((e) => /ERR_CONNECTION_REFUSED/.test(e)),
   )
+
+  console.log('\n\x1b[1mCatálogos configurables por el usuario\x1b[0m')
+  comprueba('la seccion Catalogos esta', (await pagina.locator('h2', { hasText: 'Catálogos' }).count()) === 1)
+  comprueba('sin nada guardado, el selector lo dice', /ningún catálogo guardado/i.test(await pagina.locator('#cat-selector').innerText()))
+
+  await pagina.locator('#cat-nuevo-nombre').fill('proveedores-prueba')
+  await pagina.locator('#btn-cat-crear').click()
+  comprueba('el catalogo nuevo queda seleccionado', await pagina.locator('#cat-selector').inputValue() === 'proveedores-prueba')
+  comprueba('vacio, la tabla lo dice en vez de aparecer en blanco', /no tiene filas todavía/i.test(await pagina.locator('#cat-tabla-cont').innerText()))
+
+  await pagina.locator('#cat-fila-id').fill('1874')
+  await pagina.locator('#cat-fila-etiqueta').fill('ACME S.A. de C.V.')
+  await pagina.locator('#btn-cat-anadir-fila').click()
+  const tablaCatalogo = await pagina.locator('#cat-tabla-cont').innerText()
+  comprueba('la fila añadida aparece en la tabla', /1874/.test(tablaCatalogo) && /ACME S\.A\. de C\.V\./.test(tablaCatalogo))
+  comprueba('el contador de filas del selector sube', /1 fila/.test(await pagina.locator('#cat-selector').innerText()))
+
+  await pagina.locator('#btn-cat-cargar-activo').click()
+  comprueba('«cargar catálogo activo» rellena el textarea de reconciliación', /1874 \| ACME S\.A\. de C\.V\./.test(await pagina.locator('#catalogo').inputValue()))
+
+  console.log('\n\x1b[1mLos catálogos persisten entre recargas (localStorage, no memoria)\x1b[0m')
+  await pagina.reload({ waitUntil: 'networkidle' })
+  comprueba('el catalogo sigue ahi tras recargar', /proveedores-prueba/.test(await pagina.locator('#cat-selector').innerText()))
+  comprueba('con su fila intacta', /1874/.test(await pagina.locator('#cat-tabla-cont').innerText()))
+
+  console.log('\n\x1b[1mEliminar un catálogo\x1b[0m')
+  pagina.once('dialog', (d) => d.accept())
+  await pagina.locator('#btn-cat-eliminar').click()
+  comprueba('desaparece del selector', !/proveedores-prueba/.test(await pagina.locator('#cat-selector').innerText()))
+
+  console.log('\n\x1b[1mUso de tokens: solo lo que el servidor declara, nunca un cero inventado\x1b[0m')
+  comprueba('la seccion Uso de tokens esta', (await pagina.locator('h2', { hasText: 'Uso de tokens' }).count()) === 1)
+  comprueba('sin corridas, lo dice', /Sin corridas todavía/i.test(await pagina.locator('#tokens-resumen').innerText()))
+
+  // Servidor de mentira: /models contesta para pasar `pruebaLaConexion`, y /chat/completions
+  // devuelve un `usage` real que la pagina tiene que leer y registrar — sin este intercept no hay
+  // forma de probar el flujo entero sin depender de un motor de verdad.
+  let cuerpoDeCompletions = { choices: [{ message: { content: JSON.stringify({ paginas: [{ indice: 0, markdown: 'FACTURA', campos: [{ clave: 'total', valor: '100.00', confianza: 0.9 }] }] }) } }], usage: { prompt_tokens: 1200, completion_tokens: 340, total_tokens: 1540 } }
+  await pagina.route('**/uso-tokens.test/v1/models', (ruta) => ruta.fulfill({ status: 200, body: '{}' }))
+  await pagina.route('**/uso-tokens.test/v1/chat/completions', (ruta) => ruta.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(cuerpoDeCompletions) }))
+
+  await pagina.locator('#motor-base').fill('http://uso-tokens.test/v1')
+  await pagina.locator('#motor-modelo').fill('modelo-pineado-1.0')
+  await pagina.locator('#file-motor').setInputFiles(ESCANEO)
+  await pagina.locator('#acciones-motor').waitFor({ state: 'visible' })
+  await pagina.locator('#btn-extraer').click()
+  await pagina.locator('#salida-motor').getByText(/campo\(s\) en/i).waitFor({ timeout: 15000 })
+  comprueba('con usage en la respuesta, avisa cuánto declaró el servidor', /declaró.*1,?540 tokens/i.test((await pagina.locator('#salida-motor').innerText()).replace(/ /g, ' ')))
+
+  const resumenTrasUna = await pagina.locator('#tokens-resumen').innerText()
+  comprueba('el analisis cuenta la corrida', /1 corrida/.test(resumenTrasUna) && /1.*con uso declarado/.test(resumenTrasUna))
+  comprueba('y suma el total real, no un estimado', /1,?540/.test(resumenTrasUna.replace(/ /g, ' ')))
+  const filaTokens = await pagina.locator('#tokens-tabla').innerText()
+  comprueba('la fila de la tabla trae el modelo y las paginas', /modelo-pineado-1\.0/.test(filaTokens) && /1[.,]?200/.test(filaTokens))
+
+  console.log('\n\x1b[1mSin `usage` en la respuesta, se declara "sin declarar" — nunca cero\x1b[0m')
+  cuerpoDeCompletions = { choices: [{ message: { content: JSON.stringify({ paginas: [{ indice: 0, markdown: 'FACTURA', campos: [{ clave: 'total', valor: '100.00', confianza: 0.9 }] }] }) } }] }
+  await pagina.locator('#btn-extraer').click()
+  await pagina.locator('#salida-motor').getByText(/no declaró/i).waitFor({ timeout: 15000 })
+  comprueba('la pantalla del motor dice que no declaró, sin inventar un numero', /no declaró/i.test(await pagina.locator('#salida-motor').innerText()))
+
+  const resumenTrasDos = await pagina.locator('#tokens-resumen').innerText()
+  comprueba('ahora hay 2 corridas y sigue habiendo solo 1 con uso declarado', /2 corrida/.test(resumenTrasDos) && /1.*con uso declarado/.test(resumenTrasDos))
+  comprueba('dice explicitamente que la sin declarar no cuenta como cero', /1.*sin declarar/.test(resumenTrasDos) && /no cuentan como cero/i.test(resumenTrasDos))
+  comprueba('el total de tokens NO cambio: la corrida sin usage no sumo cero', /1,?540/.test(resumenTrasDos.replace(/ /g, ' ')))
+
+  console.log('\n\x1b[1mBorrar el historial de tokens\x1b[0m')
+  pagina.once('dialog', (d) => d.accept())
+  await pagina.locator('#btn-tokens-limpiar').click()
+  comprueba('vuelve a decir que no hay corridas', /Sin corridas todavía/i.test(await pagina.locator('#tokens-resumen').innerText()))
+
+  const inesperadosFinal = errores.filter((e) => !e.includes('59999') && !/ERR_CONNECTION_REFUSED/.test(e))
+  comprueba('ningun error de consola no provocado en toda la corrida', inesperadosFinal.length === 0, inesperadosFinal.join(' · '))
 } finally {
   await navegador.close()
   servidor.kill()
 }
 
-console.log(fallos === 0 ? '\n\x1b[32mLas 27 comprobaciones en verde.\x1b[0m\n' : `\n\x1b[31m${fallos} fallo(s).\x1b[0m\n`)
+console.log(fallos === 0 ? '\n\x1b[32mTodas las comprobaciones en verde.\x1b[0m\n' : `\n\x1b[31m${fallos} fallo(s).\x1b[0m\n`)
 process.exit(fallos === 0 ? 0 : 1)

@@ -252,3 +252,59 @@ test('una transcripcion devuelta dos veces (la segunda en una valla markdown) se
   assert.equal(sinTranscripcionRepetida('abab'), 'ab')
   assert.equal(sinTranscripcionRepetida('quince dias\n\nquince días'), 'quince dias', 'un acento de diferencia sigue siendo repeticion; queda la primera')
 })
+
+// --- Uso de tokens: lo que el SERVIDOR declara, nunca una estimacion propia --------------------
+
+test('cuando el servidor declara `usage`, se reporta tal cual por el callback, sin cambiar el valor de retorno', async () => {
+  const { falso } = fetchFalso({
+    ...respuestaCon(UNA_PAGINA),
+    usage: { prompt_tokens: 1200, completion_tokens: 340, total_tokens: 1540 },
+  })
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: falso })
+  let capturado: unknown = 'no-se-llamo'
+  const paginas = await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
+  assert.deepEqual(capturado, { tokensDeEntrada: 1200, tokensDeSalida: 340, tokensTotal: 1540 })
+  assert.equal(paginas.length, 1, 'el uso viaja por el callback, no dentro de lo que ya devolvia extrae()')
+})
+
+test('si el servidor no declara `total_tokens`, se calcula sumando entrada y salida', async () => {
+  const { falso } = fetchFalso({ ...respuestaCon(UNA_PAGINA), usage: { prompt_tokens: 500, completion_tokens: 100 } })
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: falso })
+  let capturado: unknown
+  await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
+  assert.deepEqual(capturado, { tokensDeEntrada: 500, tokensDeSalida: 100, tokensTotal: 600 })
+})
+
+test('sin `usage` en la respuesta, el callback recibe null — nunca ceros inventados', async () => {
+  const { falso } = fetchFalso(respuestaCon(UNA_PAGINA))
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: falso })
+  let capturado: unknown = 'no-se-llamo'
+  await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
+  assert.equal(capturado, null)
+})
+
+test('un `usage` a medias (falta completion_tokens) se trata como ausente entero, no como parcial', async () => {
+  const { falso } = fetchFalso({ ...respuestaCon(UNA_PAGINA), usage: { prompt_tokens: 500 } })
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: falso })
+  let capturado: unknown = 'no-se-llamo'
+  await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
+  assert.equal(capturado, null, 'un total que mezcla lo real con lo desconocido es peor que declarar que no se sabe')
+})
+
+test('sin `alConsumirTokens`, no truena: el callback es opcional y nadie esta obligado a leerlo', async () => {
+  const { falso } = fetchFalso({ ...respuestaCon(UNA_PAGINA), usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 } })
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: falso })
+  const paginas = await motor.extrae(PDF)
+  assert.equal(paginas.length, 1)
+})
+
+test('en modo transcripcion tambien se reporta el uso: el callback no depende del modo', async () => {
+  const fetchFalso2 = (async () => new Response(JSON.stringify({
+    choices: [{ message: { content: 'FACTURA' } }],
+    usage: { prompt_tokens: 900, completion_tokens: 40, total_tokens: 940 },
+  }), { status: 200 })) as typeof fetch
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: fetchFalso2, modo: 'transcripcion' })
+  let capturado: unknown
+  await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
+  assert.deepEqual(capturado, { tokensDeEntrada: 900, tokensDeSalida: 40, tokensTotal: 940 })
+})

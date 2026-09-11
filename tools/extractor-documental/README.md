@@ -253,6 +253,27 @@ argumento cuando la funcion paso a exigir dos. Ninguna revision del codigo vio n
 como dependencia, porque su nucleo no tiene ninguna. Si no esta instalado lo dice y sale, en vez de
 fallar como si la demo estuviera rota.
 
+La demo esta en un **bento grid** de diez tarjetas (`.tarjeta.span-N` sobre `.bento`, doce
+columnas). `verifica:demo` lo comprueba con geometria real, no con la clase declarada: en un
+viewport ancho dos tarjetas de medio ancho quedan lado a lado; bajo 760px la misma pareja se apila,
+porque `.tarjeta{grid-column:1/-1!important}` gana por especificidad sin tocar el HTML.
+
+### Catalogos configurables por el usuario, y uso de tokens: solo en la demo
+
+Dos tarjetas nuevas viven **enteramente en el navegador**, sin backend propio:
+
+- **Catalogos** (`localStorage['bdp:catalogos']`, forma `{ [nombre]: {id,etiqueta}[] }`): crear,
+  añadir fila, quitar fila, eliminar el catalogo. La tarjeta de Reconciliacion los usa con
+  «Cargar catalogo activo» / «Guardar como catalogo» — sin duplicar la logica de `resuelveValor`.
+- **Uso de tokens** (`localStorage['bdp:uso-tokens']`): un registro por cada llamada al motor de
+  la seccion 9, con lo que el **servidor** declaro en `usage` — nunca una estimacion propia.
+
+Esto ultimo obligo un cambio en el nucleo, no solo en la demo: `OpcionesDeExtraccion` gano un
+callback opcional `alConsumirTokens?: (uso: UsoDeTokens | null) => void`, y `motorCompatible` lo
+llama con lo que lea de `respuesta.usage` (o `null` si el servidor no lo declara, o si lo declara
+a medias — un total que mezcla lo real con lo desconocido es peor que admitir que no se sabe). Es
+**aditivo**: la firma de `extrae()` no cambio, así que ningun llamador existente se rompe.
+
 > **Estado de la evidencia.** Las direcciones de CFDI 4.0 y del timbre estan **confirmadas** contra
 > un CFDI real de honorarios (2026-09-10). La de **pagos sigue sin confirmar**: no ha pasado ningun
 > recibo de pago real. `src/xml/cfdi/espacios.ts` distingue las tres.
