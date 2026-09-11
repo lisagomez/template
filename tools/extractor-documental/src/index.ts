@@ -160,3 +160,6 @@ export type {
   MuestraDeCampo, MuestraDeSimilitud, CorrelacionConfianzaError,
   PuntoDeLaCurva, PuntoDeSimilitud,
 } from './calibracion.js'
+
+export { imagenesDelPdf } from './pdf-flujos.js'
+export type { ImagenDelPdf } from './pdf-flujos.js'

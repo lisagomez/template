@@ -8,6 +8,7 @@ import {
   cuentaPaginasPdf,
   capaCeroComoJson,
 } from '../dist/capa-cero.js'
+import { imagenesDelPdf } from '../dist/pdf-flujos.js'
 import type { MotorOcr } from '../dist/puertos.js'
 import type { PaginaExtraida } from '../dist/tipos.js'
 
@@ -419,5 +420,53 @@ test('el diccionario se lee del PROPIO objeto, no del vecino', async () => {
   const r = await leeCapaCero(conVecino)
   assert.equal(r.hayTexto, true)
   assert.match(r.paginas.join(''), /Proveedor ACME/)
+})
+
+// --- La imagen de un escaneo, para poder mandarla al motor ---------------------------------------
+
+/** Un JPEG minimo de verdad: cabecera SOI + APP0, que es lo que mira `esJpeg`. */
+const JPEG = '\u00ff\u00d8\u00ff\u00e0\u0000\u0010JFIF\u0000\u0001\u0001\u0000\u0000\u0001\u0000\u0001\u0000\u0000'
+
+test('saca el JPEG incrustado de un PDF escaneado', async () => {
+  // Un escaneo no tiene capa de texto y hay que pasarlo por el motor, que espera una IMAGEN.
+  // Rasterizar pediria una dependencia de render; sacar el JPEG que ya esta dentro, no.
+  const pdf = await pdfCon('q 612 0 0 792 0 0 cm /x2 Do Q', {
+    extra: `2 0 obj\n<< /Type /XObject /Subtype /Image /Width 1280 /Height 1640 /Length ${JPEG.length} >>\nstream\n${JPEG}\nendstream\nendobj\n`,
+  })
+  const imagenes = await imagenesDelPdf(pdf)
+  assert.equal(imagenes.length, 1)
+  assert.equal(imagenes[0].tipoMime, 'image/jpeg')
+  assert.equal(imagenes[0].ancho, 1280)
+  assert.equal(imagenes[0].alto, 1640)
+})
+
+test('tambien cuando el JPEG viene ademas comprimido con zlib', async () => {
+  // `/Filter [/FlateDecode /DCTDecode]` es lo que produce mas de un escaner, y es el caso del
+  // escaneo real que motivo esto: 181 KB que inflan a un JPEG de 212 KB.
+  const comprimido = await desinfla(bytes(JPEG))
+  const pdf = une(
+    bytes('%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\n'),
+    bytes(`2 0 obj\n<< /Type /XObject /Subtype /Image /Filter [/FlateDecode /DCTDecode] /Width 8 /Height 9 /Length ${comprimido.length} >>\nstream\n`),
+    comprimido,
+    bytes('\nendstream\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n'),
+  )
+  const imagenes = await imagenesDelPdf(pdf)
+  assert.equal(imagenes.length, 1)
+  assert.equal(imagenes[0].ancho, 8)
+})
+
+test('un PDF con capa de texto y sin imagenes no devuelve ninguna', async () => {
+  // Lo importante es que no invente: quien llame decide entre capa 0 y motor con este dato.
+  assert.deepEqual(await imagenesDelPdf(await pdfCon('BT (Factura A-1874) Tj ET')), [])
+})
+
+test('lo que NO es un JPEG se omite en vez de devolverse como si lo fuera', async () => {
+  // JPEG2000, CCITT y JBIG2 piden un decodificador que aqui no esta. Devolver sus bytes crudos
+  // como si fueran una imagen le daria al motor algo que no puede leer, y el fallo aparecria
+  // lejos de su causa.
+  const pdf = await pdfCon('q /x2 Do Q', {
+    extra: '2 0 obj\n<< /Type /XObject /Subtype /Image /Filter /JPXDecode /Width 4 /Height 4 /Length 4 >>\nstream\nabcd\nendstream\nendobj\n',
+  })
+  assert.deepEqual(await imagenesDelPdf(pdf), [])
 })
 
