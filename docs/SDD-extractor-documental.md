@@ -536,6 +536,70 @@ después viaja a una base, a un CSV y a la pantalla de cualquiera que revise.
 
 ---
 
+### 2.22 El modelo no sale de un documento: sale del corpus, y la evidencia se cuenta
+
+`proponeModelo` (§2.9) proyecta una plantilla a una tabla y deja las relaciones al revisor. Es
+correcto para un documento y ciego para mil: nada veía que el mismo RFC aparecía en trescientas
+facturas. La spec 008 añade `infiereModelo`, y al escribirlo aparecieron tres decisiones que no
+son de gusto.
+
+**Qué funda una entidad.** Solo un campo marcado `identificador` cuyo valor se repite **exacto**
+en dos documentos distintos. La tentación era agrupar por parecido —«Acme SA» y «Acme, S.A. de
+C.V.» son la misma empresa— y es justo la que §2.10 ya prohibió para los identificadores: un
+parecido funda una entidad que no existe, o junta a dos terceros en una. El texto libre que se
+repite se declara como duda («márcalo identificador si lo es») y no funda nada. Y un valor sin
+letra ni dígito —el `...` que un modelo pequeño copia de la plantilla, §2.19— tampoco, por forma:
+es la única heurística del módulo y no lleva número.
+
+**Qué es atributo de la entidad.** Un campo que toma siempre el mismo valor dentro de cada grupo
+de documentos que comparten el identificador, en **todos** los grupos comprobables (dos o más
+documentos con el campo presente). Es una dependencia funcional, y se cuenta: el atributo lleva el
+número de grupos en que se comprobó. La alternativa —«en la mayoría»— es un umbral, y los umbrales
+se miden. Cuando la dependencia se cumple en unos grupos y en otros no, no se fuerza: se declara
+como duda con los documentos que la rompen, y el campo se queda en el documento. Una razón social
+que cambió tras una fusión aparece así, como lo que es, en vez de normalizarse al valor viejo.
+
+**Que las dudas son salida.** Cardinalidad no uniforme (un documento con dos RFC de emisor),
+identificador con un solo valor en todo el corpus (¿entidad de un miembro o constante del
+negocio?), campo constante en todos los documentos, documento sin campos. Todo vuelve con nombre y
+documentos. Es la regla de «declarar, no descartar» aplicada a la inferencia, y sin ella una duda
+callada reaparece a los seis meses como un dato mal normalizado que nadie sabe de dónde salió.
+
+La salida es una `PropuestaDeModelo` —entidades antes que documentos, clave foránea, RLS en todas,
+`revisaSql` antes de devolver— para que el lienzo (§2.12) y la barrera (§2.13) sirvan sin tocarse.
+Para no copiar la generación de SQL se exportaron `sqlDeEntidad` y `CABECERA`: una copia habría
+divergido de la barrera el día que alguien arreglara una sola.
+
+### 2.23 Un motor de OCR puro no sigue instrucciones, y eso cambia el diseño de la vía del motor
+
+Medido el 2026-09-11 con GLM-OCR (0,9 mil millones de parámetros, servido por Ollama en CPU) sobre
+un escaneo sintético: pedido el JSON de §2.19, devolvió una tabla HTML y `"markdown":=`, que no es
+JSON. Pedida la transcripción a secas, devolvió el texto del documento sin un carácter equivocado,
+en 74 s (65 s de ellos codificando la imagen, antes del primer token). El mismo tipo de página le
+cuesta a `qwen2.5vl:7b` unos 8 minutos, y `qwen2.5vl:3b` no cierra el JSON (§2.19).
+
+La consecuencia no es «GLM-OCR es peor»: es que un modelo especializado en OCR **transcribe** y un
+modelo generalista de visión **obedece**, y son dos capacidades distintas que cuestan distinto. La
+vía del motor tiene ahora dos formas:
+
+- `modo: 'campos'`: transcripción y campos en JSON, cotejados entre sí (§5.2.1).
+- `modo: 'transcripcion'`: solo texto; los campos salen por patrón sobre él, deterministas, con
+  `procedencia: 'ocr'` y **confianza 0**. El motor no declara confianza y no se inventa: 0 es la
+  mínima, y todo pasa por revisión hasta que una medición diga otra cosa. Es la misma postura de
+  §2.18 —la confianza constante de un motor generalista tampoco daba señal— llevada a su
+  consecuencia honesta: sin señal, sin umbral, todo a la cola.
+
+Y el segundo hallazgo de esa misma medición: los dos generalistas (Qwen2.5-VL 3b y 7b) devolvían
+«no es JSON válido» en 5 y 4 de 7 páginas. Parecía un límite del modelo; era el **contexto por
+defecto del servidor** (4096 en Ollama, con la imagen dentro). Con 8192 las mismas páginas
+cerraron. Consecuencia para C1: el límite de contexto del servidor **forma parte del motor
+pineado**, porque cambia lo que sale, y una comparación de motores que no lo fije compara
+configuraciones, no modelos.
+
+Y un techo que conviene tener delante: sin GPU, el cuello es la codificación de la imagen, no la
+generación. Ahí no ayuda un modelo más pequeño; ayuda no mandar al motor lo que no lo necesita
+(capa 0 y XML), que en el corpus de medición fue más de la mitad de los documentos.
+
 ## 3. Principio de diseño
 
 > **El humano no revisa lo que el sistema extrajo. El humano decide qué significa, y el sistema

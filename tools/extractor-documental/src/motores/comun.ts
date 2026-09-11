@@ -28,16 +28,9 @@ export function exigeModeloPineado(modelo: string): string {
   return modelo
 }
 
-/** Detecta el tipo por los bytes y no por el nombre: un `.pdf` renombrado sigue siendo lo que es. */
-export function tipoMimeDe(bytes: Uint8Array): string {
-  const empieza = (...b: number[]) => b.every((v, i) => bytes[i] === v)
-  if (empieza(0x25, 0x50, 0x44, 0x46)) return 'application/pdf'
-  if (empieza(0x89, 0x50, 0x4e, 0x47)) return 'image/png'
-  if (empieza(0xff, 0xd8, 0xff)) return 'image/jpeg'
-  if (empieza(0x47, 0x49, 0x46, 0x38)) return 'image/gif'
-  if (empieza(0x52, 0x49, 0x46, 0x46) && bytes[8] === 0x57) return 'image/webp'
-  return 'application/octet-stream'
-}
+// `tipoMimeDe` vive en el nucleo (archivos.ts): el lote de corpus lo necesita para enrutar por
+// bytes, y el nucleo no puede importar de un adaptador. Se re-exporta para no romper a nadie.
+export { tipoMimeDe } from '../archivos.js'
 
 export function aBase64(bytes: Uint8Array): string {
   let binario = ''
@@ -127,6 +120,18 @@ export const INSTRUCCION =
   'Sustituye cada <...> por lo que veas en el documento. ' +
   'NO copies los textos entre <>: son descripciones de que poner, no contenido. ' +
   'Las coordenadas van normalizadas entre 0 y 1.'
+
+/**
+ * La instruccion del modo TRANSCRIPCION: solo el texto, sin JSON.
+ *
+ * Existe porque un motor especializado en OCR no es un modelo que siga instrucciones. Medido el
+ * 2026-09-11 con GLM-OCR (0,9 mil millones de parametros) por Ollama: pedido el JSON de arriba,
+ * devolvio tablas HTML y un `"markdown":=` que no es JSON; pedida la transcripcion a secas,
+ * devolvio el texto del documento sin un solo caracter equivocado, en 81 s de CPU. Los campos, en
+ * ese modo, los saca el proyecto con patrones sobre el texto (`camposPorPatron`), y NO llevan
+ * confianza declarada: el motor no da ninguna, y no se inventa.
+ */
+export const INSTRUCCION_TRANSCRIPCION = 'Transcribe todo el texto del documento, tal cual aparece y en orden de lectura.'
 
 export function instruccionCon(esquema: unknown): string {
   return esquema === undefined ? INSTRUCCION : `${INSTRUCCION} Ajusta \`campos\` a este esquema: ${JSON.stringify(esquema)}`

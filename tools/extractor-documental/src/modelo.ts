@@ -156,7 +156,7 @@ export function revisaSql(sql: string, descriptor: DescriptorDeEsquema, tablasNu
   }
 }
 
-const CABECERA = [
+export const CABECERA = [
   '-- PROPUESTA. No la aplica nadie por ti: aplicarla es una accion irreversible y va por',
   '-- gate humano (RF-19). Revisala antes, sobre todo los tipos: se eligen conservadores',
   '-- (`text` salvo prueba en contra) porque adivinar estrecho rompe con el cuarto documento.',
@@ -165,7 +165,7 @@ const CABECERA = [
   '-- herramienta no sabe que depende de ellas, asi que no puede saber que rompe al tocarlas.',
 ]
 
-function sqlDeEntidad(entidad: EntidadPropuesta, catalogosExistentes: readonly TablaDescrita[]): string[] {
+export function sqlDeEntidad(entidad: EntidadPropuesta, catalogosExistentes: readonly TablaDescrita[]): string[] {
   const lineas = [`CREATE TABLE IF NOT EXISTS ${entidad.tabla} (`, '  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,']
   lineas.push('  owner_id uuid NOT NULL DEFAULT auth.uid(),')
   for (const columna of entidad.columnas) {

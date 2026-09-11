@@ -430,6 +430,14 @@ cerrar, como mínimo:
 Y en paralelo, sin esperar a la spec, dos cosas que ya se pueden hacer: el piloto de medición de
 §8 y el alta de `mistral-ocr` en el manifiesto de la imprenta.
 
+> **Cerrado el 2026-09-11.** El punto 3 se contestó: los documentos llevan datos de terceros y
+> **no salen del perímetro**, así que Mistral OCR queda fuera para este corpus, y no por
+> preferencia (límite de C5 en `AGENTS.md`). El resto vive en la spec 008
+> (`.claude/specs/008-corpus-a-modelo/`): motor autohospedado inyectado, medido en CPU sobre un
+> corpus sintético con verdad conocida —GLM-OCR en transcripción, Qwen2.5-VL 3b y 7b en campos—,
+> y la inferencia del modelo desde el corpus entero. Las cifras están en `tareas.md` de esa spec
+> y en el README de la herramienta.
+
 ---
 
 ## Fuentes

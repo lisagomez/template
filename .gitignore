@@ -90,3 +90,6 @@ tools/*/*.tgz
 
 # Sello de validate (de esta maquina, nunca del repo)
 .validate-sello.json
+
+# Corpus de medicion del extractor: documentos que NO entran al repositorio (datos de terceros o generados)
+tools/extractor-documental/corpus/
