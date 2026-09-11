@@ -61,6 +61,15 @@ El gate es **proporcional al radio** del cambio:
 - El modelo en producción **SIEMPRE está pineado**. `latest` es anti-patrón aquí igual
   que en las imágenes Docker.
 - Un CDC sin regresión verde **no se promueve**. Sin excepciones y sin "se ve bien".
+- **El diff se enseña ANTES de pedir la aprobación, nunca después.** Describir el cambio de
+  palabra y pedir el sí no es una aprobación: es un «continúa» con otro nombre, y esta bitácora
+  ya dice que un «continúa» no sustituye a la aprobación. Quien aprueba, aprueba lo que ve.
+  > **De dónde sale.** El CDC del 2026-09-10 —la lectura de XML entrando en el decision tree—
+  > se autorizó sobre una descripción y no sobre el diff. El del 2026-09-09, idéntico en radio,
+  > se había aprobado *«tras ver el diff completo»*. La diferencia se anotó en la entrada en vez
+  > de igualar las dos situaciones, y al señalarla la responsable del proyecto fijó la práctica.
+  > Se escribe aquí porque **una regla que solo vive en la memoria de una sesión no dispara en la
+  > siguiente**, que es la misma lección del 2026-08-23 aplicada a la capa de gobernanza.
 - Todo PRP responde en su encabezado: *¿este PRP cambia comportamiento de agentes?
   → CDC aplicable: sí/no*.
 

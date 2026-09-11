@@ -3125,6 +3125,27 @@ aprovechaban. Ya no depende de la costumbre.
 
 ---
 
+### 2026-09-10 — el diff se enseña antes de aprobar — radio: n/a (acta, endurece C1)
+- **Cambio**: una regla dura nueva en `GOBERNANZA.md` §2. El diff se presenta **antes** de pedir
+  la aprobación de un CDC, no después. No toca código ni configuración: fija cómo se aplica un
+  gate que ya existía.
+- **Motivo**: la entrada de arriba dejó anotado que su aprobación se dio sobre una descripción del
+  cambio y no sobre el diff renderizado, a diferencia del CDC equivalente del 2026-09-09. Al
+  señalarlo, la responsable del proyecto fijó la práctica: primero el diff, después el sí.
+- **Por qué se escribe aquí y no solo se recuerda**: es la lección del 2026-08-23 aplicada a la
+  propia capa de gobernanza — *una regla que solo vive en un sitio que nadie lee no dispara*. Una
+  preferencia guardada en la memoria de una sesión no obliga en la siguiente, ni en otro arnés.
+- **No es un CDC**: no cambia modelo, skill, prompt, plantilla ni configuración, y **endurece** un
+  control en vez de relajarlo. Se registra como acta para que el cambio de práctica tenga fecha y
+  motivo, que es lo que permite discutirlo si algún día estorba.
+- **Gate aplicado**: `verify:gobernanza` **152/152** · `validate` **EXIT 0**.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — decisión explícita («sí») en sesión
+  del 2026-09-10, a la pregunta de si prefiere ver el diff antes de dar el sí en un cambio de
+  radio sistema. La firma va aquí porque el verificador la exige en toda entrada, acta incluida:
+  una entrada sin firmar es papel, y esa comprobación cazó esta misma acta antes de mergearla.
+
+---
+
 ### 2026-09-10 — `AGENTS.md`: la lectura de XML entra en el decision tree — radio: sistema
 - **Cambio**: 4 líneas nuevas en la entrada del extractor documental del decision tree de
   `AGENTS.md`, más las 4 espejo en `GEMINI.md` (**regeneradas** con `npm run sincroniza:gemini`,
