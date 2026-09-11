@@ -191,6 +191,11 @@
     Suelta aquí el documento escaneado (PDF o imagen)
     <input type="file" id="file-motor" accept="application/pdf,image/*" hidden>
   </div>
+  <div class="fila">
+    <button id="btn-probar-motor">Probar conexión</button>
+    <span class="apunte">Pregunta al servidor sin mandarle el documento. Hazlo primero.</span>
+  </div>
+  <div id="salida-conexion"></div>
   <div class="fila" id="acciones-motor" hidden>
     <button id="btn-extraer">Extraer con el motor</button>
     <button id="btn-limpiar-motor">Limpiar</button>
@@ -608,6 +613,56 @@ $('btn-limpiar-cotejo').onclick = () => {
  */
 let documentoParaElMotor = null
 
+/**
+ * «Failed to fetch» no dice nada, y el navegador no da mas.
+ *
+ * `fetch` lanza el MISMO TypeError cuando no hay nadie escuchando, cuando el servidor rechaza el
+ * origen y cuando la red se cae. Desde JavaScript esas tres son indistinguibles a proposito — el
+ * navegador oculta la diferencia para que una pagina no pueda escanear puertos de tu maquina.
+ *
+ * Asi que no se adivina: se enumeran las tres causas con que mirar en cada una. Un mensaje que
+ * repite lo que dijo el navegador deja a quien lo lee exactamente donde estaba.
+ */
+const QUE_MIRAR = `
+  <p class="apunte">Tres causas posibles, y el navegador no distingue entre ellas:</p>
+  <ol class="apunte">
+    <li><strong>No hay nadie escuchando ahí.</strong> Comprueba que el servidor esté levantado y
+        que el puerto sea el de su API, no el de su interfaz web.</li>
+    <li><strong>El servidor no acepta peticiones desde esta página.</strong> Con Ollama se arregla
+        arrancándolo con <code>OLLAMA_ORIGINS=*</code>; otros servidores lo llaman CORS.</li>
+    <li><strong>Estás en WSL y el servidor corre en Windows</strong> (o al revés). No comparten
+        <code>localhost</code>: desde aquí el host se ve en <code>172.27.0.1</code>.</li>
+  </ol>
+  <p class="apunte">Tu documento <strong>no salió</strong>: la petición no llegó a establecerse.</p>`
+
+/** Pregunta al servidor por su lista de modelos. Es la ruta que todo compatible expone. */
+async function pruebaLaConexion(base) {
+  const donde = `${base.replace(/\/$/, '')}/models`
+  try {
+    const r = await fetch(donde, { signal: AbortSignal.timeout(8000) })
+    if (!r.ok) {
+      return { ok: false, explicacion: `El servidor contestó <strong>${r.status}</strong> en <code>/models</code>. Está levantado, pero esa ruta no es la que esperaba: revisa que la base termine en <code>/v1</code>.` }
+    }
+    return { ok: true, explicacion: 'El servidor contesta.' }
+  } catch (e) {
+    const porTiempo = e.name === 'TimeoutError'
+    return {
+      ok: false,
+      explicacion: porTiempo
+        ? `<strong>Nadie contestó en 8 segundos</strong> en <code>${esc(donde)}</code>.` + QUE_MIRAR
+        : `<strong>No se pudo contactar</strong> con <code>${esc(donde)}</code>.` + QUE_MIRAR,
+    }
+  }
+}
+
+$('btn-probar-motor').onclick = async () => {
+  const base = $('motor-base').value.trim()
+  if (base === '') return pinta('salida-conexion', aviso('Pon primero la dirección del servidor.', 'malo'))
+  pinta('salida-conexion', aviso('Preguntando…', ''))
+  const r = await pruebaLaConexion(base)
+  pinta('salida-conexion', aviso(r.explicacion, r.ok ? 'bien' : 'malo'))
+}
+
 zonaDeArchivos('zona-motor', 'file-motor', async ({ archivos }) => {
   if (archivos.length === 0) return
   const { archivo, ruta } = archivos[0]
@@ -648,6 +703,13 @@ $('btn-extraer').onclick = async () => {
     return pinta('salida-motor', aviso(esc(e.message), 'malo'))
   }
 
+  // Se pregunta ANTES de mandar el documento. Si no hay nadie escuchando, no tiene sentido
+  // enviarlo — y el fallo se explica mejor aqui que envuelto en el de la extraccion.
+  const alcanzable = await pruebaLaConexion(base)
+  if (!alcanzable.ok) {
+    return pinta('salida-motor', aviso(alcanzable.explicacion, 'malo'))
+  }
+
   pinta('salida-motor', aviso(`Enviando a <code>${esc(base)}</code>… puede tardar, sobre todo sin GPU.`, ''))
   let paginas
   try {
@@ -655,10 +717,7 @@ $('btn-extraer').onclick = async () => {
   } catch (e) {
     // El mensaje del adaptador no incluye el cuerpo de la respuesta a proposito: podria repetir
     // el documento entero, y esta pantalla se lee por encima del hombro.
-    return pinta('salida-motor',
-      aviso(`No se pudo extraer: ${esc(e.message)}`, 'malo') +
-      `<p class="apunte">Si es un fallo de red o de CORS, comprueba que el servidor esté levantado
-       y que acepte peticiones desde esta página. Nada salió de tu equipo si no llegó a responder.</p>`)
+    return pinta('salida-motor', aviso(`No se pudo extraer: ${esc(e.message)}`, 'malo') + QUE_MIRAR)
   }
 
   const campos = paginas.flatMap((p) => p.campos)
