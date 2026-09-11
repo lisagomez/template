@@ -106,3 +106,35 @@ test('el XML no gana por decreto: una discrepancia manda a revision venga de don
   const cotejo = corrobora(delXml, qrDelSat('999.00'))
   assert.equal(exigeRevision(cotejo), true)
 })
+
+// --- Formatos que enseño una factura REAL --------------------------------------------------------
+// Los dos salieron de pasar un CFDI de verdad por el cotejo el 2026-09-10. Ninguno lo cubrian los
+// fixtures sinteticos, porque un fixture se escribe con el formato que uno tiene en la cabeza y
+// estos son los que usan los emisores. Los valores de aqui siguen siendo inventados: lo que se
+// prueba es la FORMA, no el documento.
+
+test('el total del codigo con relleno de ceros coteja igual', () => {
+  // El QR del SAT no siempre trae el total "tal cual": hay emisores que lo rellenan con ceros a la
+  // izquierda y con seis decimales. Compararlo como CADENA daria una discrepancia falsa en cada
+  // factura de esos emisores, y una cola llena de discrepancias falsas deja de leerse — que es
+  // justo el fallo que el umbral tiene prohibido causar.
+  const conRelleno = qrDelSat('0000001160.000000')
+  const cotejo = corrobora(delXml, conRelleno)
+  assert.equal(cotejo.discrepancias.length, 0, '1160.00 y 0000001160.000000 son el mismo importe')
+  assert.ok(cotejo.acuerdos.some((a) => a.clave === 'total'))
+})
+
+test('el identificador en minusculas coteja igual', () => {
+  // El XML lo escribe en mayusculas y hay QR que lo traen en minusculas. Son el mismo comprobante.
+  const cotejo = corrobora(delXml, qrDelSat('1160.00', UUID.toLowerCase()))
+  assert.equal(cotejo.discrepancias.length, 0)
+})
+
+test('pero un total DISTINTO sigue siendo una discrepancia, por mucho relleno que lleve', () => {
+  // El reverso, y el que evita que lo de arriba se lea como "los numeros se comparan a la ligera".
+  const cotejo = corrobora(delXml, qrDelSat('0000000116.000000'))
+  assert.equal(cotejo.discrepancias.length, 1)
+  assert.equal(cotejo.discrepancias[0].clave, 'total')
+  assert.equal(exigeRevision(cotejo), true)
+})
+
