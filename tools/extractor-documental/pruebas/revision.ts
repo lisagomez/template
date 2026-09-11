@@ -4,6 +4,7 @@ import {
   aplicaPlantilla,
   cuentaBajoUmbral,
   puedeValidarseSinRevision,
+  exigeCotejo,
   disposicionDe,
 } from '../dist/react/revision.js'
 import { comoPlantilla, cargaPlantilla, guardaPlantilla } from '../dist/plantilla-por-defecto.js'
@@ -88,23 +89,29 @@ test('se cuenta cuantos caen bajo umbral, sin adjetivos', () => {
 
 test('un solo campo bajo umbral impide validar sin revision', () => {
   const filas = aplicaPlantilla([campo('a', 0.95), campo('b', 0.2)], null, 0.8)
-  assert.equal(puedeValidarseSinRevision(filas), false)
+  assert.equal(puedeValidarseSinRevision(filas, true), false, 'ni cotejado')
 })
 
 test('un campo de OCR SIN region tampoco se puede validar solo', () => {
   // Un dato de reconocimiento que no se puede citar no se puede auditar despues.
   const filas = aplicaPlantilla([campo('a', 0.99, { region: undefined })], null, 0.8)
-  assert.equal(puedeValidarseSinRevision(filas), false)
+  assert.equal(puedeValidarseSinRevision(filas, true), false, 'ni cotejado')
 })
 
-test('un campo de CODIGO sin region si vale: un escaner no produce imagen', () => {
+test('un campo de CODIGO sin region si vale, PERO exige cotejo', () => {
+  // La falta de region no es el problema: un escaner no produce imagen. Lo que si lo es, desde que
+  // existe la barrera del cotejo, es que nadie haya comparado ese codigo contra una segunda
+  // fuente. Una pegatina falsa decodifica igual de limpio que la legitima (§2.11 del SDD).
   const filas = aplicaPlantilla([campo('gtin', 1, { region: undefined, procedencia: 'codigo' })], null, 0.8)
-  assert.equal(puedeValidarseSinRevision(filas), true)
+  assert.equal(puedeValidarseSinRevision(filas, true), true, 'cotejado si')
+  assert.equal(puedeValidarseSinRevision(filas, false), false, 'sin cotejar no')
 })
 
 test('todo por encima del umbral y con region: se puede validar', () => {
+  // Solo OCR: no hay fuente determinista, asi que el cotejo no aplica y da igual lo que se pase.
   const filas = aplicaPlantilla([campo('a', 0.9), campo('b', 0.85)], null, 0.8)
-  assert.equal(puedeValidarseSinRevision(filas), true)
+  assert.equal(puedeValidarseSinRevision(filas, false), true)
+  assert.equal(exigeCotejo(filas), false)
 })
 
 // --- TAR-12: la disposicion que se persiste --------------------------------------------------------
@@ -181,3 +188,54 @@ test('guardaPlantilla SI lanza: al reves que la carga, y a proposito', async () 
   }
   await assert.rejects(() => guardaPlantilla(almacen, { tipoDocumento: 'factura', campos: [] }), /sin conexion/)
 })
+
+test('un XML COTEJADO se auto-valida; uno de OCR sin region no, cotejado o no', () => {
+  // Las dos razones para no promover son distintas y conviene no mezclarlas: al OCR le falta la
+  // region para poder auditarlo despues; al XML no le falta nada que citar, le falta que alguien
+  // haya comparado lo que dice contra otra fuente.
+  const campo = { clave: 'total', valor: '1160.00', confianza: 1, region: undefined }
+  const comoXml = aplicaPlantilla([{ ...campo, procedencia: 'xml' as const }], null, 0.85)
+  const comoOcr = aplicaPlantilla([{ ...campo, procedencia: 'ocr' as const }], null, 0.85)
+
+  assert.equal(puedeValidarseSinRevision(comoXml, true), true, 'un XML no tiene region que citar')
+  assert.equal(puedeValidarseSinRevision(comoXml, false), false, 'pero sin cotejo no se promueve')
+  assert.equal(puedeValidarseSinRevision(comoOcr, true), false, 'al OCR le falta la region')
+})
+
+test('el cotejo NO rescata a un campo de OCR sin region: son barreras distintas', () => {
+  // Si el cotejo sirviera para saltarse la region, un proyecto lo pondria a `true` para librarse
+  // de las dos cosas a la vez. Son problemas distintos con respuestas distintas.
+  const filas = aplicaPlantilla(
+    [{ clave: 'total', valor: '1', confianza: 1, procedencia: 'ocr' as const, region: undefined }],
+    null,
+    0.85,
+  )
+  assert.equal(puedeValidarseSinRevision(filas, true), false)
+})
+
+test('exigeCotejo distingue las fuentes deterministas de las demas', () => {
+  const deUnXml = aplicaPlantilla(
+    [{ clave: 'a', valor: '1', confianza: 1, procedencia: 'xml' as const }],
+    null,
+    0.85,
+  )
+  const deUnHumano = aplicaPlantilla(
+    [{ clave: 'a', valor: '1', confianza: 1, procedencia: 'humano' as const }],
+    null,
+    0.85,
+  )
+  assert.equal(exigeCotejo(deUnXml), true)
+  assert.equal(exigeCotejo(deUnHumano), false, 'a un dato tecleado por una persona ya lo miro una')
+})
+
+test('la marca de XML no exime del umbral, solo de la region', () => {
+  // Por si alguien lee lo de arriba como "el XML se salta todos los controles". No: si su
+  // confianza cayera por debajo del umbral, seguiria yendo a revision como cualquier otro.
+  const bajo = aplicaPlantilla(
+    [{ clave: 'total', valor: '1160.00', confianza: 0.5, procedencia: 'xml' as const }],
+    null,
+    0.85,
+  )
+  assert.equal(puedeValidarseSinRevision(bajo, true), false, 'ni cotejado')
+})
+

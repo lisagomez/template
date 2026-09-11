@@ -18,7 +18,13 @@ import { useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 import type { CampoExtraido } from '../tipos.js'
 import type { PlantillaDeRevision } from '../plantilla.js'
-import { aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision, disposicionDe } from './revision.js'
+import {
+  aplicaPlantilla,
+  cuentaBajoUmbral,
+  puedeValidarseSinRevision,
+  exigeCotejo,
+  disposicionDe,
+} from './revision.js'
 import type { FilaDeRevision } from './revision.js'
 
 export interface PropiedadesDeRevision {
@@ -26,6 +32,17 @@ export interface PropiedadesDeRevision {
   campos: readonly CampoExtraido[]
   /** Obligatorio y sin default: ver el punto 1 de la cabecera. */
   umbral: number
+  /**
+   * Si los campos deterministas de este documento se cotejaron contra una segunda fuente.
+   *
+   * Obligatorio y sin default, por el mismo motivo que `umbral`. Un dato de XML o de un codigo
+   * llega con confianza 1 y sin region, asi que sin esta prop se promoveria solo — y lo que lo
+   * hace fiable no es su confianza, es que otra fuente independiente diga lo mismo.
+   *
+   * Quien coteja es `corrobora()`. Si el documento no tiene con que cotejarse, va `false`: eso
+   * manda a revision, que es la respuesta correcta cuando no hay segunda fuente.
+   */
+  cotejado: boolean
   plantilla?: PlantillaDeRevision | null
   /** Guardar el valor corregido de un campo. El motivo es obligatorio aguas abajo (versiones). */
   onGuardaCampo?(clave: string, valor: string): void
@@ -52,6 +69,7 @@ export function TablaDeRevision({
   tipoDocumento,
   campos,
   umbral,
+  cotejado,
   plantilla = null,
   onGuardaCampo,
   onEliminaCampo,
@@ -77,8 +95,14 @@ export function TablaDeRevision({
             ? 'Todos los campos superan el umbral.'
             : `${pendientes} campo(s) por debajo del umbral (${porcentaje(umbral)}): los revisa una persona.`}
         </p>
-        {!puedeValidarseSinRevision(filas) && pendientes === 0 ? (
-          <p>Hay campos de reconocimiento sin region de origen: no se pueden auditar despues.</p>
+        {!puedeValidarseSinRevision(filas, cotejado) && pendientes === 0 ? (
+          /* Se dice CUAL de las dos barreras salto. "No se puede validar" a secas deja a la
+             persona sin saber que hacer, y lo que hay que hacer es distinto en cada caso. */
+          <p>
+            {exigeCotejo(filas) && !cotejado
+              ? 'Hay campos exactos que nadie coteje contra una segunda fuente: leerlos bien no dice que el documento sea autentico.'
+              : 'Hay campos de reconocimiento sin region de origen: no se pueden auditar despues.'}
+          </p>
         ) : null}
       </header>
 

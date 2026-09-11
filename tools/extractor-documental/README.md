@@ -216,6 +216,23 @@ cotejaSelloConQr(lectura.sello.emisor, campoFeDelQr) // el sello va APARTE: base
 Y la regla del modulo cotejado vale igual: **ninguna fuente gana por decreto**. El XML no es mas
 fiable por venir estructurado, precisamente porque su sello no se verifica.
 
+### Sin cotejo no se auto-valida
+
+`puedeValidarseSinRevision(filas, cotejado)` lleva un segundo argumento **obligatorio y sin valor
+por defecto**, igual que el umbral. Un campo de XML o de un codigo llega con confianza 1 y sin
+region que citar, asi que pasaria solo las otras dos barreras.
+
+Lo destapo el banco: `node banco/cli.mjs xml` promovia **doce comprobantes de doce sin que nadie
+los mirara**. Para el DATO estaba bien —es una transcripcion, no hay lectura que revisar— pero para
+el DOCUMENTO no decia nada: el sello no se verifica, y un CFDI inventado analiza igual de limpio.
+
+Lo que hace fiable a una fuente determinista no es su confianza: es que **otra fuente independiente
+diga lo mismo**. Si el documento no tiene con que cotejarse, va `false` y se manda a revision, que
+es la respuesta correcta cuando no hay segunda fuente.
+
+El argumento es obligatorio a proposito. Un default seria la puerta por la que un proyecto
+auto-validaria comprobantes sin cotejar nada, sin haberlo decidido nunca.
+
 > **Estado de la evidencia.** Las direcciones de CFDI 4.0 y del timbre estan **confirmadas** contra
 > un CFDI real de honorarios (2026-09-10). La de **pagos sigue sin confirmar**: no ha pasado ningun
 > recibo de pago real. `src/xml/cfdi/espacios.ts` distingue las tres.

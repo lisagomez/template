@@ -83,16 +83,47 @@ export function cuentaBajoUmbral(filas: readonly FilaDeRevision[]): number {
   return filas.filter((f) => f.bajoUmbral).length
 }
 
+/** Las fuentes que entregan el dato EXACTO o no lo entregan. No admiten media lectura. */
+const DETERMINISTAS: ReadonlySet<FilaDeRevision['procedencia']> = new Set(['xml', 'codigo'])
+
+/** Si el documento trae algun campo de una fuente determinista, que es la que exige cotejo. */
+export function exigeCotejo(filas: readonly FilaDeRevision[]): boolean {
+  return filas.some((f) => DETERMINISTAS.has(f.procedencia))
+}
+
 /**
  * Si el documento entero puede darse por validado sin que lo mire una persona.
  *
- * Un solo campo bajo umbral basta para que no. Y **cualquier campo sin region que venga de OCR**
- * tambien: un dato de reconocimiento que no se puede citar no se puede auditar despues, y a los
- * seis meses nadie sabra de donde salio. Lo de un escaner (`codigo`) no lleva region por
- * naturaleza y no cuenta.
+ * Tres barreras, y basta una para que no.
+ *
+ * 1. **Un campo bajo umbral.** La de siempre.
+ * 2. **Un campo de OCR sin region.** Un dato de reconocimiento que no se puede citar no se puede
+ *    auditar despues, y a los seis meses nadie sabra de donde salio.
+ * 3. **Una fuente determinista sin cotejar.** La nueva, y la que mas conviene entender.
+ *
+ * DE DONDE SALE LA TERCERA. Un campo de `xml` o de `codigo` llega con confianza 1 y sin region —
+ * porque no tiene coordenadas que citar— asi que pasaba las otras dos barreras sin tocarlas. El
+ * resultado, medido con `node banco/cli.mjs xml`: **doce comprobantes de doce se promovian sin que
+ * nadie los mirara**. Para el DATO eso es correcto: es una transcripcion, no hay lectura que
+ * revisar. Para el DOCUMENTO no dice nada — el sello no se verifica, y un CFDI inventado analiza
+ * igual de limpio, igual que una pegatina falsa decodifica igual de limpio que la legitima
+ * (§2.11 del SDD).
+ *
+ * Lo que convierte una fuente determinista en fiable no es su confianza: es que **otra fuente
+ * independiente diga lo mismo**. Por eso `cotejado` es OBLIGATORIO y no tiene valor por defecto,
+ * exactamente por el mismo motivo que `umbral`: un default aqui seria la puerta por la que un
+ * proyecto auto-validaria comprobantes sin cotejar nada, sin haberlo decidido nunca.
+ *
+ * Quien coteja es `corrobora()`; quien decide que hacer con la discrepancia, `exigeRevision()`.
+ * Esta funcion solo se niega a dar por bueno lo que nadie comparo.
  */
-export function puedeValidarseSinRevision(filas: readonly FilaDeRevision[]): boolean {
-  return filas.every((f) => !f.bajoUmbral && (f.procedencia !== 'ocr' || f.region !== undefined))
+export function puedeValidarseSinRevision(
+  filas: readonly FilaDeRevision[],
+  cotejado: boolean,
+): boolean {
+  if (filas.some((f) => f.bajoUmbral)) return false
+  if (exigeCotejo(filas) && !cotejado) return false
+  return filas.every((f) => f.procedencia !== 'ocr' || f.region !== undefined)
 }
 
 /**

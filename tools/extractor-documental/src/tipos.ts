@@ -43,13 +43,24 @@ export interface Region {
  * decodificador determinista. Que es justo lo contrario de lo que conviene: decodificar bien no
  * dice nada sobre si el contenido es cierto (§2.11 del SDD).
  *
- * `xml` existe por el mismo argumento, aplicado a la tercera fuente. Un XML analiza o no analiza,
- * asi que sus campos llegan tambien con confianza 1 — y sin marca propia serian indistinguibles de
- * un OCR que salio muy bien, con lo que se saltarian la cola igual.
+ * `xml` existe por el mismo argumento, aplicado a la tercera fuente: un XML analiza o no analiza,
+ * asi que sus campos llegan tambien con confianza 1.
  *
- * Que significa confianza 1 aqui: **el XML dice esto**. NO **esto es cierto**. Lo segundo depende
- * del sello, que este lector declara SIEMPRE como no verificado. Un comprobante entero puede estar
- * inventado y su XML analizar perfecto.
+ * QUE HACE LA MARCA, medido y no supuesto. Exime al campo de exigir region, porque un XML no tiene
+ * coordenadas que citar. Marcado `ocr` y sin region, ese mismo campo NO se auto-valida; marcado
+ * `xml`, si. O sea que la marca es lo que PERMITE promover un comprobante entero sin que nadie lo
+ * mire, no lo que lo impide. (Una version anterior de este comentario afirmaba lo contrario; lo
+ * desmintio la corrida `node banco/cli.mjs xml`, que es para lo que existe el banco.)
+ *
+ * Y esta bien que sea asi **para el dato**: no hay lectura que revisar, es una transcripcion.
+ * Exigirle region seria mandarlo a la cola por una razon que no existe, y una cola llena de cosas
+ * que no hay que decidir deja de leerse.
+ *
+ * Lo que la marca NO dice, y conviene tener presente: confianza 1 aqui significa **el XML dice
+ * esto**, jamas **esto es cierto**. Lo segundo depende del sello, que el lector declara SIEMPRE
+ * como no verificado — un comprobante inventado analiza igual de limpio. Lo que cierra ese hueco
+ * no es la marca: es cotejar contra una segunda fuente (`corroboracion.ts`), y eso lo cablea el
+ * proyecto porque depende de que segunda fuente tenga.
  */
 export type Procedencia = 'ocr' | 'codigo' | 'humano' | 'xml'
 
