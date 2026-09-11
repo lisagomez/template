@@ -251,11 +251,53 @@ async function main() {
     return;
   }
 
+  if (comando === 'xml') {
+    rmSync(RUTA, { force: true });
+    paso('Las mismas facturas, por la via del XML');
+    const { base, resumen } = siembra({ ruta: RUTA, semilla: 'corrida-demo' });
+    const { leeComoXml } = await import('./corrida-xml.ts');
+    const lecturas = leeComoXml(base, resumen.documentos, UMBRALES);
+
+    console.log(`  documentos     ${lecturas.length}`);
+    console.log(`  campos totales ${lecturas.reduce((n, l) => n + l.campos.length, 0)}`);
+    console.log(`  bajo umbral    ${lecturas.reduce((n, l) => n + l.bajoUmbral, 0)} ${gris('(un XML analiza o no analiza: no hay 0,87)')}`);
+
+    const primera = lecturas[0];
+    console.log(`\n  ${negrita('documento 1')} · folio ${primera.folio}`);
+    for (const campo of primera.campos.slice(0, 6)) {
+      console.log(`     ${campo.clave.padEnd(14)} ${String(campo.valor).slice(0, 32).padEnd(34)} ${campo.confianza.toFixed(3)} ${verde('✓')}`);
+    }
+    console.log(`     proveedor →  ${primera.proveedorEstado} ${primera.proveedorResuelto ? verde(primera.proveedorResuelto) : gris('—')}`);
+    console.log(`     gtin      →  ${primera.gtinEstado} ${primera.gtinResuelto ? verde(primera.gtinResuelto) : gris('sin resolver')}`);
+
+    const mismoQueElOcr = lecturas.filter((l) => l.proveedorResuelto !== null).length;
+    console.log(`\n  ${negrita('La reconciliacion funciona igual')}`);
+    console.log(`     proveedores resueltos  ${mismoQueElOcr} de ${lecturas.length} ${gris('(el XML trae la VARIANTE, no la forma del catalogo)')}`);
+
+    const sinCotejo = lecturas.filter((l) => l.seAutoValida).length;
+    const conCotejo = lecturas.filter((l) => l.seAutoValidaCotejado).length;
+    console.log(`\n  ${negrita('La barrera del cotejo, que es lo que esta corrida destapo')}`);
+    console.log(`     sin cotejar contra nada  se auto-validan ${sinCotejo === 0 ? verde('0') : rojo(String(sinCotejo))} de ${lecturas.length}`);
+    console.log(`     cotejadas                se auto-validan ${verde(String(conCotejo))} de ${lecturas.length}`);
+    console.log(`     sello verificado                         ${rojo(String(primera.selloVerificado))} ${gris('(y no va a cambiar)')}`);
+    console.log(gris('\n     Antes se promovian las doce sin que nadie las mirara. Los campos de un XML'));
+    console.log(gris('     llegan con confianza 1 y sin region que citar, asi que pasaban las dos'));
+    console.log(gris('     barreras que habia sin tocarlas.'));
+    console.log(gris('\n     Para el DATO estaba bien: es una transcripcion, no hay lectura que revisar.'));
+    console.log(gris('     Para el DOCUMENTO no decia nada — el sello no se verifica, y un CFDI'));
+    console.log(gris('     inventado analiza igual de limpio. Lo que lo hace fiable no es su'));
+    console.log(gris('     confianza: es que otra fuente independiente diga lo mismo.'));
+
+    base.cierra();
+    return;
+  }
+
   console.log(`
 ${negrita('Banco de pruebas del extractor documental')}
 
   ${verde('siembra')}        crea la base con el negocio ficticio    ${gris('[--semilla X] [--facturas N]')}
   ${verde('corrida')}        el camino completo, con reinicio de PROCESO real
+  ${verde('xml')}            las mismas facturas por la via del XML, y que cambia
   ${verde('determinismo')}   dos siembras con la misma semilla
   ${verde('descriptores')}   los tres estados, leidos de la base
   ${verde('peligroso')}      el escenario de §2.10 y su barrera

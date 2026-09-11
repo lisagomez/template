@@ -12,7 +12,13 @@ export type { PropiedadesDeIngesta, LoteIngresado } from './ZonaDeIngesta.js'
 export { TablaDeRevision } from './TablaDeRevision.js'
 export type { PropiedadesDeRevision } from './TablaDeRevision.js'
 
-export { aplicaPlantilla, cuentaBajoUmbral, puedeValidarseSinRevision, disposicionDe } from './revision.js'
+export {
+  aplicaPlantilla,
+  cuentaBajoUmbral,
+  puedeValidarseSinRevision,
+  exigeCotejo,
+  disposicionDe,
+} from './revision.js'
 export type { FilaDeRevision } from './revision.js'
 
 export { aplanaEntradas, raicesDe, desdeInput } from './aplana.js'
