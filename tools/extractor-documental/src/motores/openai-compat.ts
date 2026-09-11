@@ -20,7 +20,9 @@
  */
 import type { PaginaExtraida, LimitesDelMotor } from '../tipos.js'
 import type { MotorOcr, OpcionesDeExtraccion } from '../puertos.js'
-import { exigeModeloPineado, tipoMimeDe, aBase64, esObjeto, validaPaginas, instruccionCon } from './comun.js'
+import {
+  exigeModeloPineado, tipoMimeDe, aBase64, esObjeto, validaPaginas, instruccionCon, traduceElCorte,
+} from './comun.js'
 
 export { validaPaginas, tipoMimeDe } from './comun.js'
 
@@ -96,12 +98,19 @@ export function motorCompatible(opciones: OpcionesDelMotorCompatible): MotorOcr 
         response_format: { type: 'json_object' },
       }
 
-      const respuesta = await pedir(`${base.replace(/\/$/, '')}/chat/completions`, {
-        method: 'POST',
-        headers: cabeceras,
-        body: JSON.stringify(cuerpo),
-        signal: AbortSignal.timeout(espera),
-      })
+      let respuesta: Response
+      try {
+        respuesta = await pedir(`${base.replace(/\/$/, '')}/chat/completions`, {
+          method: 'POST',
+          headers: cabeceras,
+          body: JSON.stringify(cuerpo),
+          signal: AbortSignal.timeout(espera),
+        })
+      } catch (error) {
+        // Ver `traduceElCorte`: el tope de Node no lo gobierna `milisegundosDeEspera`, y su error
+        // no lo dice. Sin esto, quien lo ve concluye que su motor esta roto.
+        throw traduceElCorte(error, espera)
+      }
       if (!respuesta.ok) {
         // Solo el codigo: el cuerpo de un error puede repetir el documento enviado.
         throw new Error(`el motor respondio ${respuesta.status}`)

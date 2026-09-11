@@ -22,7 +22,7 @@
  */
 import type { PaginaExtraida, CampoExtraido, LimitesDelMotor } from '../tipos.js'
 import type { MotorOcr, OpcionesDeExtraccion } from '../puertos.js'
-import { exigeModeloPineado, tipoMimeDe, aBase64, esObjeto, validaCampo } from './comun.js'
+import { exigeModeloPineado, tipoMimeDe, aBase64, esObjeto, validaCampo, traduceElCorte } from './comun.js'
 import { troceaPaginas } from '../archivos.js'
 import { cuentaPaginasPdf } from '../capa-cero.js'
 
@@ -181,12 +181,19 @@ export function motorMistral(opciones: OpcionesDelMotorMistral): MotorOcr {
         if (trozo.length > 0) cuerpo.pages = trozo
         if (extra?.esquemaDeAnotacion !== undefined) cuerpo.document_annotation_format = extra.esquemaDeAnotacion
 
-        const respuesta = await pedir(`${base}/ocr`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', authorization: `Bearer ${opciones.clave}` },
-          body: JSON.stringify(cuerpo),
-          signal: AbortSignal.timeout(espera),
-        })
+        let respuesta: Response
+        try {
+          respuesta = await pedir(`${base}/ocr`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', authorization: `Bearer ${opciones.clave}` },
+            body: JSON.stringify(cuerpo),
+            signal: AbortSignal.timeout(espera),
+          })
+        } catch (error) {
+          // El mismo tope de Node que en el adaptador autohospedado. Aqui muerde menos —una API
+          // remota responde rapido— pero un documento grande troceado lo puede alcanzar.
+          throw traduceElCorte(error, espera)
+        }
         if (!respuesta.ok) {
           // Solo el codigo. El cuerpo de un error de esta API repite el documento enviado.
           throw new Error(`la API respondio ${respuesta.status}`)
