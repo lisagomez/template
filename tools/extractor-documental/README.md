@@ -233,6 +233,26 @@ es la respuesta correcta cuando no hay segunda fuente.
 El argumento es obligatorio a proposito. Un default seria la puerta por la que un proyecto
 auto-validaria comprobantes sin cotejar nada, sin haberlo decidido nunca.
 
+La demo lo tiene cableado entero en su seccion 7: sueltas el XML, pegas la carga del QR impreso en
+ese mismo comprobante, y ves el cotejo a tres bandas con sus acuerdos y sus discrepancias. Una sola
+discrepancia manda a revision, y **el cotejo solo cuenta si sale sin ninguna**.
+
+### Verificar la demo
+
+```bash
+npm run demo            # levanta la pagina
+npm run verifica:demo   # la recorre en un navegador de verdad
+```
+
+La demo es el unico artefacto del paquete SIN red de seguridad: `npm run prueba` no la ve, `tsc` no
+la typechequea y el gate no la toca. Ya se cobro dos piezas — un boton con `hidden` que se veia
+siempre porque una regla de clase le ganaba por especificidad, y una llamada que se quedo con un
+argumento cuando la funcion paso a exigir dos. Ninguna revision del codigo vio ninguna de las dos.
+
+`verifica:demo` necesita Playwright y por eso **no esta en el gate**: este paquete no lo declara
+como dependencia, porque su nucleo no tiene ninguna. Si no esta instalado lo dice y sale, en vez de
+fallar como si la demo estuviera rota.
+
 > **Estado de la evidencia.** Las direcciones de CFDI 4.0 y del timbre estan **confirmadas** contra
 > un CFDI real de honorarios (2026-09-10). La de **pagos sigue sin confirmar**: no ha pasado ningun
 > recibo de pago real. `src/xml/cfdi/espacios.ts` distingue las tres.

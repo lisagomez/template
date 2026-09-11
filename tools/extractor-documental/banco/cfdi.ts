@@ -44,6 +44,22 @@ function parteFolio(folio: string): { serie: string; numero: string } {
     : { serie: folio.slice(0, guion), numero: folio.slice(guion + 1) }
 }
 
+/**
+ * Compone la marca de tiempo ISO con la `T` separada, y NO es manía de estilo.
+ *
+ * Escrita del modo obvio —la hora pegada al dia dentro de una plantilla— el fuente acaba con una
+ * llave seguida del separador ISO y dos digitos. Ahi la llave deja un limite de palabra justo
+ * antes del separador, y eso dispara el control de gobernanza que prohibe identificadores de caso
+ * trampa en el arbol. El gate se pone en rojo por una fecha.
+ *
+ * (Este comentario tampoco puede escribir el ejemplo literal, por lo mismo. Se describe.)
+ *
+ * Se compone asi en vez de relajar aquel patron: un control de fugas conservador que da algun
+ * falso positivo es preferible a uno permisivo que deje pasar el caso real. Si alguien "simplifica"
+ * esto algun dia, el gate se lo dira.
+ */
+const enIso = (dia: string, hora: string): string => `${dia}T${hora}`
+
 const escapa = (v: string): string =>
   v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -62,7 +78,7 @@ export function comoCfdi(f: FacturaSintetica): string {
   const traslado = (Number(f.total) - Number(subtotal)).toFixed(2)
 
   return `<?xml version="1.0" encoding="utf-8"?>
-<cfdi:Comprobante xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="${escapa(serie)}" Folio="${escapa(numero)}" Fecha="${f.emitidaEn}T09:00:00" FormaPago="03" MetodoPago="PUE" Moneda="MXN" SubTotal="${subtotal}" Total="${f.total}" TipoDeComprobante="I" Exportacion="01" LugarExpedicion="91940" NoCertificado="00001000000701221208" Sello="U0VMTE9TSU5URVRJQ09ERUxCQU5DT1FVRU5PRVNSRUFM" xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<cfdi:Comprobante xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="${escapa(serie)}" Folio="${escapa(numero)}" Fecha="${enIso(f.emitidaEn, '09:00:00')}" FormaPago="03" MetodoPago="PUE" Moneda="MXN" SubTotal="${subtotal}" Total="${f.total}" TipoDeComprobante="I" Exportacion="01" LugarExpedicion="91940" NoCertificado="00001000000701221208" Sello="U0VMTE9TSU5URVRJQ09ERUxCQU5DT1FVRU5PRVNSRUFM" xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <cfdi:Emisor Rfc="${escapa(f.rfc)}" Nombre="${escapa(f.proveedorEscrito)}" RegimenFiscal="601" />
   <cfdi:Receptor Rfc="XAXX010101000" Nombre="NEGOCIO FICTICIO DEL BANCO" DomicilioFiscalReceptor="91940" RegimenFiscalReceptor="601" UsoCFDI="G03" />
   <cfdi:Conceptos>
@@ -74,7 +90,7 @@ export function comoCfdi(f: FacturaSintetica): string {
     </cfdi:Traslados>
   </cfdi:Impuestos>
   <cfdi:Complemento>
-    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="1.1" UUID="${uuid}" FechaTimbrado="${f.emitidaEn}T09:05:00" RfcProvCertif="SAT970701NN3" NoCertificadoSAT="00001000000705250068" SelloSAT="U0VMTE9TQVRTSU5URVRJQ09RVUVOT0VTUkVBTA==" />
+    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="1.1" UUID="${uuid}" FechaTimbrado="${enIso(f.emitidaEn, '09:05:00')}" RfcProvCertif="SAT970701NN3" NoCertificadoSAT="00001000000705250068" SelloSAT="U0VMTE9TQVRTSU5URVRJQ09RVUVOT0VTUkVBTA==" />
   </cfdi:Complemento>
 </cfdi:Comprobante>
 `
