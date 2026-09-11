@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { motorCompatible, validaPaginas, tipoMimeDe } from '../dist/motores/openai-compat.js'
+import { motorCompatible, validaPaginas, tipoMimeDe, sinTranscripcionRepetida } from '../dist/motores/openai-compat.js'
 import { INSTRUCCION, traduceElCorte } from '../dist/motores/comun.js'
 
 const bytes = (s: string): Uint8Array => Uint8Array.from(s, (c) => c.charCodeAt(0))
@@ -228,4 +228,27 @@ test('el corte de Node se traduce a algo accionable', () => {
 test('cualquier otro error pasa tal cual, sin disfrazarse de lo que no es', () => {
   const otro = new Error('la red se cayo')
   assert.equal(traduceElCorte(otro, 1000), otro)
+})
+
+test('en modo transcripcion pide solo texto, no exige JSON y devuelve una pagina con campos vacios', async () => {
+  let cuerpoEnviado: Record<string, unknown> = {}
+  const fetchFalso = (async (_url: string | URL | Request, init?: RequestInit) => {
+    cuerpoEnviado = JSON.parse(String(init?.body)) as Record<string, unknown>
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'FACTURA\nFolio: F-1' } }] }), { status: 200 })
+  }) as typeof fetch
+  const motor = motorCompatible({ base: 'http://motor.local/v1', modelo: 'glm-ocr:q8_0', fetch: fetchFalso, modo: 'transcripcion' })
+  const paginas = await motor.extrae(Uint8Array.from([0x89, 0x50, 0x4e, 0x47]))
+  assert.deepEqual(paginas, [{ indice: 0, markdown: 'FACTURA\nFolio: F-1', campos: [] }])
+  assert.equal(cuerpoEnviado.response_format, undefined, 'a un motor de OCR puro no se le exige JSON')
+  const mensajes = cuerpoEnviado.messages as { content: { type: string; text?: string }[] }[]
+  assert.match(mensajes[0].content[0].text ?? '', /^Transcribe todo el texto/)
+})
+
+test('una transcripcion devuelta dos veces (la segunda en una valla markdown) se queda en una; una que no se repite, intacta', () => {
+  const texto = 'MINUTA\nFecha: 2026-04-25\nAsistentes: 3'
+  assert.equal(sinTranscripcionRepetida(`${texto}\n\`\`\`markdown\n\n${texto}\n\`\`\``), texto)
+  assert.equal(sinTranscripcionRepetida(texto), texto)
+  assert.equal(sinTranscripcionRepetida('ab ac'), 'ab ac', 'solo se quita una copia EXACTA por mitades')
+  assert.equal(sinTranscripcionRepetida('abab'), 'ab')
+  assert.equal(sinTranscripcionRepetida('quince dias\n\nquince días'), 'quince dias', 'un acento de diferencia sigue siendo repeticion; queda la primera')
 })

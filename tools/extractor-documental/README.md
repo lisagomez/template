@@ -319,6 +319,121 @@ fuente y falla si aparece `execute(`, `query(`, `rpc(` o `.from(`. Sobre las tab
 en tu proyecto **no se emite una sola sentencia** (RF-31), y una barrera en el propio codigo lanza
 si alguna vez se emitiera.
 
+## Del corpus al modelo: leer miles de documentos y proponer las entidades
+
+Spec: `.claude/specs/008-corpus-a-modelo/`. Lo que 007 no tenia: nada miraba N documentos a la
+vez. `proponeModelo` proyecta UNA plantilla a UNA tabla; las relaciones las ponia un humano.
+
+```ts
+import { leeCorpus, infiereModelo, revisaSql } from '@tu-scope/extractor-documental'
+import { motorCompatible } from '@tu-scope/extractor-documental/motores/openai-compat'
+
+// 1. Cada documento por la via que le corresponde, decidida por sus BYTES.
+const { lecturas, porRuta } = await leeCorpus(archivos, {
+  motor: motorCompatible({ base: 'http://127.0.0.1:11434/v1', modelo: 'glm-ocr:q8_0', modo: 'transcripcion' }),
+  registro: registroDeEsquemas([lectorDeTimbre11, lectorDePagos20]),
+  patrones: [{ clave: 'rfc_emisor', expresion: /RFC emisor:\s*([A-Z0-9]{12,13})/, formato: 'identificador' }],
+  identificadores: new Set(['rfc_emisor', 'rfc_receptor', 'uuid', 'folio']),
+  enVuelo: 1, // se MIDE; ver abajo
+})
+// porRuta → { 'capa-cero': 6, xml: 8, motor: 7, ninguna: 1 }  — y la de `ninguna` trae su motivo
+
+// 2. La inferencia sobre el corpus entero. Pura, sin red.
+const { propuesta, entidades, dudas, documentos } = infiereModelo(
+  lecturas.map((l) => ({ documentoId: l.documentoId, tipoDocumento: l.tipoDocumento, campos: l.campos })),
+  descriptorDelProyecto,
+)
+// propuesta es una PropuestaDeModelo: el lienzo y revisaSql sirven sin tocarlos. NADIE la aplica.
+```
+
+Tres reglas gobiernan la inferencia, y ninguna lleva umbral:
+
+1. **Solo un campo `identificador` que se repite EXACTO en dos documentos funda una entidad.** Un
+   RFC en trescientas facturas es una entidad; un folio que nunca se repite es un atributo del
+   documento; un texto libre que se repite es una **duda** («marcalo identificador si lo es»),
+   no una entidad. Y un `...` copiado de la plantilla no funda nada, por forma.
+2. **Un campo es atributo de la entidad si depende de su identificador en TODOS los grupos
+   comprobables.** El nombre que siempre acompana al mismo RFC se muda a la entidad, con el
+   numero de grupos en que se comprobo. Si en un grupo cambia, es una duda con los documentos
+   que la rompen, y el campo se queda en el documento. La mayoria seria un umbral.
+3. **Se propone, nunca se aplica.** Entidades antes que documentos, clave foranea, RLS en todas,
+   `revisaSql` antes de devolver. Lo que ya existe en el descriptor se referencia por su clave
+   primaria real y no se crea.
+
+Las dudas son salida de primera clase: cardinalidad no uniforme (un documento con dos RFC de
+emisor), identificador de un solo valor (¿entidad de un miembro o constante?), dependencia rota,
+documento sin campos. Declarar, no descartar.
+
+### La via del motor tiene dos formas, y el motor decide cual
+
+- **`modo: 'campos'`** (por defecto): se piden transcripcion Y campos en JSON, y cada valor se
+  coteja contra la transcripcion del propio motor (`cotejaContraTranscripcion`). Un valor que no
+  esta en el papel no entra al resultado: va a `cotejo.noCoinciden`, que es la cola humana.
+- **`modo: 'transcripcion'`**: para motores de OCR puros, que NO siguen instrucciones de formato.
+  Se pide solo el texto y los campos salen por `camposPorPatron` sobre el, con `procedencia: 'ocr'`
+  y **confianza 0**: el motor no declara ninguna y no se inventa. Todo pasa por revision hasta que
+  una medicion diga otra cosa.
+
+Medido el 2026-09-11 con GLM-OCR (0,9 mil millones de parametros, `glm-ocr:q8_0` por Ollama):
+pedido el JSON, devolvio tablas HTML y un `"markdown":=` que no es JSON; pedida la transcripcion,
+devolvio el texto exacto de un escaneo sintetico en 74 s de CPU (65 s de ellos codificando la
+imagen antes del primer token). El mismo escaneo le cuesta a `qwen2.5vl:7b` unos 8 minutos.
+
+### Medido el 2026-09-11: tres motores autohospedados sobre el mismo corpus sintetico
+
+Hardware: 16 hilos de CPU, 15 GB de memoria, **sin GPU**. Ollama. Corpus: 7 escaneos sinteticos
+de una pagina (5 facturas, 2 minutas; 1240x1754) con verdad conocida, mas un escaneo real que solo
+aporta tiempo. Todos los motores van pineados (`glm-ocr:q8_0`, `qwen2.5vl:3b`, `qwen2.5vl:7b`).
+
+| Motor | Modo | Paginas leidas | Segundos/pagina | CER (espacio plegado) | Campos correctos | Confianza declarada |
+|---|---|---|---|---|---|---|
+| `glm-ocr:q8_0` (0,9B) | transcripcion + patrones | **8 de 8** | 103-128 (en frio) · 68-71 (sin reinicio) · **8-12 (imagen ya vista: cache)** | 0,0 % en 6 de 7; 100 % en 1 por transcripcion DUPLICADA (corregido) | **58 de 58** | ninguna (0) |
+| `qwen2.5vl:3b` | campos (JSON) | 2 de 7 (contexto 4096) · **1 de 1 con 8192** | 76-164 · 321 con 8192 | 0,4-1,6 % | 7 de 8 devueltos · con 8192: 8 de 10 | constante 1,00 (tambien en los 2 fallos) |
+| `qwen2.5vl:7b` | campos (JSON) | 3 de 7 (contexto 4096) · **2 de 2 con 8192** | 288-462 · 430-486 con 8192 | 2,0-14,3 % | **18 de 18** · con 8192: 19 de 20 | 0,90 y 0,95 (el fallo llevaba 0,90) |
+
+Lo que dicen los numeros, y no es lo que parecia:
+
+- **El motor especializado gana en las tres columnas a la vez**: lee todo, sin un caracter
+  equivocado, y a un tercio o un quinto del tiempo. Pero **no estructura**: los campos los saca
+  el proyecto por patron sobre su transcripcion, y no declara confianza. Por eso van con 0 y todo
+  pasa por revision.
+- **Los generalistas fallaban en cerrar el JSON por el CONTEXTO, no por leer**: 5 de 7 (3b) y
+  4 de 7 (7b) volvieron «el contenido del mensaje no es JSON valido» con el contexto por defecto
+  de Ollama (4096: la imagen ya se come una parte). Reiniciado con `OLLAMA_CONTEXT_LENGTH=8192`,
+  las mismas facturas cerraron: 7b 2 de 2 con 19 de 20 campos correctos, 3b 1 de 1 con 8 de 10.
+  La leccion no es «sube el contexto»: es que un fallo del motor que parece de calidad puede ser
+  de configuracion del servidor, y solo se distingue midiendo. **El limite del servidor es parte
+  del motor pineado**: cambiarlo cambia lo que sale.
+- **La confianza no da senal en ninguno**: 3b la devuelve constante (1,00, tambien en sus dos
+  campos equivocados), GLM-OCR no la tiene, y 7b solo toma dos valores: sobre 20 campos con
+  contexto amplio dio r = 0,23 con UN fallo (que llevaba 0,90, la misma cifra que 12 aciertos).
+  Con esa muestra **no se fija umbral** (TAR-17 sigue bloqueada, ahora con tres motores medidos y
+  no uno); lo que haria falta es un corpus con decenas de fallos, y ese no se fabrica.
+- **El cache de imagen de Ollama existe y es enorme**: la misma imagen vuelve a costar 8-12 s en
+  vez de 110. Para un corpus con duplicados importa; para uno sin ellos, no cuenta. Las cifras
+  «en frio» se midieron reiniciando el servidor antes.
+- **Dos peticiones en vuelo no ayudan en CPU**: con `OLLAMA_NUM_PARALLEL=2` y `enVuelo: 2`,
+  en frio, 0,60 paginas/min de reloj frente a 0,54 con una; cada peticion tardo casi el doble
+  (109-296 s). El lote continuo del que habla la literatura (20-26 veces con lote de 64) es de
+  GPU, y aqui no hay: se declara como techo, no se estima.
+- **Por ruta**: de 22 documentos, 6 fueron por capa 0 y 8 por XML en 0,0 s cada uno, y solo 8
+  pasaron por el motor. Enrutar fuera del motor ahorro 14 paginas de motor: a 110 s cada una,
+  **unos 26 minutos de los 41 que habria costado mandarlo todo**.
+
+### El corpus de medicion no entra al repositorio
+
+`corpus/` esta en el `.gitignore` de la raiz. `python3 medicion/genera-corpus.py` fabrica un corpus
+**sintetico con verdad conocida** —facturas y minutas escaneadas con rotacion, desenfoque y grano;
+facturas digitales con capa de texto real; semilla fija; todo inventado y asi declarado en cada
+`.json`— porque medir CER, campos correctos y correlacion confianza-error exige una referencia
+exacta, y esa referencia no puede salir de un documento real con datos de terceros.
+
+`node medicion/corpus.mjs --modelo glm-ocr:q8_0 --modo transcripcion [--en-vuelo 2] [--extra /ruta/real.pdf]`
+corre el lote, imprime la tabla por documento (via, campos, cotejo, segundos), las metricas contra
+la verdad, el modelo inferido y el SQL, y escribe un JSON por documento mas `propuesta.json`.
+**Imprime forma, nunca valores**: un documento real pasado por `--extra` aporta tiempo y conteos,
+nada mas. `pruebas/salida-json.ts` valida lo que dejo la corrida contra los tipos del extractor.
+
 ## Umbrales: los tres que NO vienen puestos
 
 `umbral` de confianza, `umbral` de similitud y los parametros de la rafaga del escaner son

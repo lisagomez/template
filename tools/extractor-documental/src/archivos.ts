@@ -99,3 +99,14 @@ export function troceaPaginas(totalPaginas: number, porPeticion: number): readon
   }
   return trozos
 }
+
+/** Detecta el tipo por los bytes y no por el nombre: un `.pdf` renombrado sigue siendo lo que es. */
+export function tipoMimeDe(bytes: Uint8Array): string {
+  const empieza = (...b: number[]) => b.every((v, i) => bytes[i] === v)
+  if (empieza(0x25, 0x50, 0x44, 0x46)) return 'application/pdf'
+  if (empieza(0x89, 0x50, 0x4e, 0x47)) return 'image/png'
+  if (empieza(0xff, 0xd8, 0xff)) return 'image/jpeg'
+  if (empieza(0x47, 0x49, 0x46, 0x38)) return 'image/gif'
+  if (empieza(0x52, 0x49, 0x46, 0x46) && bytes[8] === 0x57) return 'image/webp'
+  return 'application/octet-stream'
+}

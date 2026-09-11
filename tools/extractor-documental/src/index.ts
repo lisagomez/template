@@ -43,7 +43,7 @@ export {
   siguientes,
 } from './estados.js'
 
-export { tipoDe, clasificaArchivo, clasificaLote, troceaPaginas } from './archivos.js'
+export { tipoDe, tipoMimeDe, clasificaArchivo, clasificaLote, troceaPaginas } from './archivos.js'
 export type { ResultadoDeIngesta } from './archivos.js'
 
 export { identidadDe, esElMismoDocumento, identidadDeLectura } from './identidad.js'
@@ -160,6 +160,28 @@ export type {
   MuestraDeCampo, MuestraDeSimilitud, CorrelacionConfianzaError,
   PuntoDeLaCurva, PuntoDeSimilitud,
 } from './calibracion.js'
+
+export { cotejaContraTranscripcion, huella } from './transcripcion.js'
+export type { CotejoDeTranscripcion } from './transcripcion.js'
+
+export { camposPorPatron } from './patrones.js'
+export type { Patron } from './patrones.js'
+
+export { leeCorpus } from './lote-corpus.js'
+export type { RutaDeLectura, ArchivoDelCorpus, OpcionesDeCorpus, LecturaDeDocumento, ResultadoDeCorpus } from './lote-corpus.js'
+
+export { infiereModelo, nombreDeEntidad } from './corpus.js'
+export { fusionaCopias } from './corpus-copias.js'
+export type { Fusion, CorpusFusionado } from './corpus-copias.js'
+export type {
+  OpcionesDeInferencia,
+  DocumentoDelCorpus,
+  AtributoInferido,
+  EntidadInferida,
+  DudaDeInferencia,
+  DocumentoContado,
+  InferenciaDeCorpus,
+} from './corpus.js'
 
 export { imagenesDelPdf } from './pdf-flujos.js'
 export type { ImagenDelPdf } from './pdf-flujos.js'
