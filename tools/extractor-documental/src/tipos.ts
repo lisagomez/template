@@ -152,3 +152,17 @@ export interface LimitesDelMotor {
   /** Tope de paginas por peticion CUANDO se piden anotaciones. Obliga a trocear. */
   paginasPorAnotacion: number
 }
+
+/**
+ * Lo que el SERVIDOR declaro haber consumido en una peticion. Nunca una estimacion propia.
+ *
+ * No todo servidor compatible con OpenAI devuelve `usage` — algunos lo omiten, otros lo dan
+ * incompleto. Por eso quien lee esto recibe `null` y no un objeto con ceros: sumar huecos como
+ * cero da un total que parece completo y no lo es (la misma regla que gobierna
+ * `src/costes.ts` y `src/lib/ai/contabilidad.ts` en la app que consume esta herramienta).
+ */
+export interface UsoDeTokens {
+  tokensDeEntrada: number
+  tokensDeSalida: number
+  tokensTotal: number
+}

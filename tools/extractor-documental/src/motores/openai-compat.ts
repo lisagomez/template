@@ -18,7 +18,7 @@
  * quien corre los pesos, no por donde viaja el byte. La decision de flujo de datos es del
  * proyecto que lo configura, no de la herramienta.
  */
-import type { PaginaExtraida, LimitesDelMotor } from '../tipos.js'
+import type { PaginaExtraida, LimitesDelMotor, UsoDeTokens } from '../tipos.js'
 import type { MotorOcr, OpcionesDeExtraccion } from '../puertos.js'
 import {
   exigeModeloPineado, tipoMimeDe, aBase64, esObjeto, validaPaginas, instruccionCon, INSTRUCCION_TRANSCRIPCION, traduceElCorte,
@@ -62,6 +62,25 @@ function textoDe(respuesta: unknown): string {
   const contenido = esObjeto(mensaje) ? mensaje.content : undefined
   if (typeof contenido !== 'string') throw new Error('el mensaje no trae contenido de texto')
   return contenido
+}
+
+/**
+ * El `usage` que el servidor haya declarado, si lo declaro. `chat/completions` no es parte del
+ * `content` que se valida contra el documento: es un dato del propio servidor sobre si mismo, y
+ * por eso se lee aparte y nunca pasa por `validaPaginas`.
+ *
+ * Un `usage` a medias (falta `completion_tokens`, por ejemplo) se trata como ausente entero: un
+ * total parcial que se presenta como el total real es peor que declarar que no se sabe.
+ */
+function usoDe(respuesta: unknown): UsoDeTokens | null {
+  if (!esObjeto(respuesta) || !esObjeto(respuesta.usage)) return null
+  const { prompt_tokens: entrada, completion_tokens: salida, total_tokens: total } = respuesta.usage
+  if (typeof entrada !== 'number' || typeof salida !== 'number') return null
+  return {
+    tokensDeEntrada: entrada,
+    tokensDeSalida: salida,
+    tokensTotal: typeof total === 'number' ? total : entrada + salida,
+  }
 }
 
 /** Y el JSON de ese texto, cuando el modo lo pide. */
@@ -152,6 +171,7 @@ export function motorCompatible(opciones: OpcionesDelMotorCompatible): MotorOcr 
         throw new Error(`el motor respondio ${respuesta.status}`)
       }
       const cruda: unknown = await respuesta.json()
+      extra?.alConsumirTokens?.(usoDe(cruda))
       if (transcribe) return [{ indice: 0, markdown: sinTranscripcionRepetida(textoDe(cruda)), campos: [] }]
       return validaPaginas(contenidoDe(cruda))
     },
