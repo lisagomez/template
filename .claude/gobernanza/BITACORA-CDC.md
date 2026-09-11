@@ -3345,3 +3345,42 @@ aprovechaban. Ya no depende de la costumbre.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («firma la
   entrada y commitea pr merge») en sesión del 2026-09-09, tras ver el informe del vigilante con
   las 22 derivas y elegir la tanda de doce.
+
+## Entrada — 2026-09-11: `AGENTS.md`, la spec 008 entra al árbol de decisión del extractor
+
+**Qué cambia**: cinco líneas en la rama «Extraer datos de facturas / documentos» del árbol de
+decisión de `AGENTS.md`: corpus masivo y modelo E-R inferido de todos los documentos apuntan a
+`.claude/specs/008-corpus-a-modelo/`; se nombran `leeCorpus` (enruta por bytes) e
+`infiereModelo` (entidades solo por identificador que se repite exacto); se dice que la propuesta
+pasa por `revisaSql` y **nadie la aplica**; y se deja la cifra medida del motor autohospedado en
+CPU (~110 s por página) con la conclusión de que enrutar fuera del motor es el único ahorro.
+`GEMINI.md` regenerado con `npm run sincroniza:gemini`.
+
+**Por qué es CDC**: `AGENTS.md` decide qué hace el agente ante cada petición. Sin esta rama, una
+petición de «subir miles de documentos y sacar el modelo» no encontraba camino y caía en «usar
+tu juicio», con la spec 008 ya escrita y medida.
+
+**Diff enseñado ANTES de pedir la aprobación** (regla de GOBERNANZA.md, PR #74), junto con:
+regresión capa A **113/113**, casos-trampa **22/22**, presupuesto de contexto **dentro**.
+
+**Riesgo**: bajo. No cambia modelo, skill ni prompt; añade una rama informativa con una cifra
+medida y fechada que envejecerá (se dice «medido en CPU»; con GPU habrá que remedir).
+
+## Acta de aprobación — 2026-09-11: la spec 008 en el árbol de decisión
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción literal
+*"CDC de AGENTS.md: añadir la spec 008 al árbol de decisión del extractor"*, y la aprobación
+*"Sí, aprobado tal cual"* dada **con el diff delante** y la regresión pegada.
+
+**Sobre qué se aprobó**: el diff de cinco líneas de `AGENTS.md` mostrado en sesión, la
+regeneración de `GEMINI.md`, y las cifras: capa A 113/113, casos-trampa 22/22, contexto dentro
+de presupuesto.
+
+**Lo que esta firma cierra**: que la capacidad de corpus a modelo (PR #84) exista sin que el
+árbol de decisión la nombre.
+
+**Lo que NO cierra**: la cifra de 110 s por página es de CPU y de hoy; TAR-17 (umbral de
+confianza) sigue bloqueada con tres motores medidos, y aplicar cualquier propuesta de modelo
+sigue siendo gate humano.
+
+---

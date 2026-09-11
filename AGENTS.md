@@ -87,6 +87,11 @@ Usuario dice algo
     |         Si hay XML, se lee el XML (`./xml`): es el documento fiscal y el PDF solo su
     |         impresion. Los esquemas se REGISTRAN, no se codifican: el proyecto declara que
     |         complementos lee. Y el sello NO se verifica — leer bien no es autenticar (C4)
+    |         Corpus MASIVO (miles de archivos mezclados) y modelo E-R inferido de TODOS:
+    |         `.claude/specs/008-corpus-a-modelo/`. `leeCorpus` enruta por bytes (capa 0, XML
+    |         o motor) e `infiereModelo` funda entidades solo en identificadores que se repiten
+    |         exacto; la propuesta pasa por `revisaSql` y NADIE la aplica. Motor autohospedado
+    |         medido en CPU: ~110 s por pagina, y enrutar fuera del motor es el unico ahorro
     |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
