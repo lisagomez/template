@@ -43,13 +43,21 @@ OEM_ZONA = os.environ.get('EXTRACTOR_OEM_ZONA', '1')
 CONFIG_PAGINA = f'--psm 6 --oem 1 -l {IDIOMA} -c load_system_dawg=0 -c load_freq_dawg=0'
 
 ALFANUMERICO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&Ñ'
+# `plantillas`: una por largo admitido, con L (letra), D (digito) o A (cualquiera) en cada posicion.
+# Es la lista blanca que el motor LSTM ignora, aplicada por software Y por posicion: donde la forma
+# exige digito, una O leida es un 0; donde exige letra, un 0 leido es una O. `enTodaLaPagina`: si
+# la etiqueta no da valor, se busca la forma en todos los tokens de la pagina (la constancia de
+# RENAPO imprime la CURP grande y sola en su linea, sin etiqueta al lado; medido).
 ZONAS_MX = [
-    {'clave': 'rfc', 'etiqueta': r'\bR\.?\s?F\.?\s?C\.?', 'listaBlanca': ALFANUMERICO, 'forma': r'^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$'},
-    {'clave': 'curp', 'etiqueta': r'\bC\.?\s?U\.?\s?R\.?\s?P\.?', 'listaBlanca': ALFANUMERICO, 'forma': r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$'},
+    {'clave': 'rfc', 'etiqueta': r'\bR\.?\s?F\.?\s?C\.?', 'listaBlanca': ALFANUMERICO, 'forma': r'^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$',
+     'plantillas': ['LLLDDDDDDAAA', 'LLLLDDDDDDAAA']},
+    {'clave': 'curp', 'etiqueta': r'\bC\.?\s?U\.?\s?R\.?\s?P\b|CLAVE\s+[UÚ]NICA(?:\s+DE\s+REGISTRO(?:\s+DE\s+POBLACI[OÓ]N)?)?(?:\s*\(CURP\))?:?',
+     'listaBlanca': ALFANUMERICO, 'forma': r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$', 'plantillas': ['LLLLDDDDDDLLLLLLAD'], 'enTodaLaPagina': True},
     # El NSS vive en FORMULARIOS, no en prosa: como columna de una tabla («Tipo | NSS | Nombre», valor
     # en la linea de abajo) o bajo «No. de Afiliacion al Seguro Social». Por eso su etiqueta no incluye
     # el «Seguro Social» suelto (aparece en el texto legal) y por eso las zonas tambien miran DEBAJO.
-    {'clave': 'nss', 'etiqueta': r'\bN\.?\s?S\.?\s?S\b|(?:N[OÚU]M?(?:ERO)?\.?\s*(?:DE\s+)?)?(?:SEGURIDAD\s+SOCIAL|AFILIACI[OÓ]N:?(?:\s+AL\s+SEGURO\s+SOCIAL)?)', 'listaBlanca': '0123456789', 'forma': r'^\d{11}$'},
+    {'clave': 'nss', 'etiqueta': r'\bN\.?\s?S\.?\s?S\b|(?:N[OÚU]M?(?:ERO)?\.?\s*(?:DE\s+)?)?(?:SEGURIDAD\s+SOCIAL|AFILIACI[OÓ]N:?(?:\s+AL\s+SEGURO\s+SOCIAL)?)', 'listaBlanca': '0123456789', 'forma': r'^\d{11}$',
+     'plantillas': ['DDDDDDDDDDD']},
 ]
 
 
@@ -206,34 +214,105 @@ def lee_zona(img, caja, zona, origen='derecha'):
             continue
         if 'forma' not in zona:
             return ''.join(p for p, _ in palabras), min(c for _, c in palabras) / 100
-        encontrado = valor_con_forma(palabras, zona['forma'], solo_digitos=zona.get('listaBlanca', '').isdigit())
+        encontrado = valor_con_forma(palabras, zona['forma'], zona.get('plantillas', ()))
         if encontrado is not None:
             return encontrado
     return None
 
 
-A_DIGITO = str.maketrans({'O': '0', 'Q': '0', 'D': '0', 'I': '1', 'L': '1', '|': '1', 'Z': '2', 'S': '5', 'G': '6', 'B': '8'})
+A_DIGITO = {'O': '0', 'Q': '0', 'D': '0', 'I': '1', 'L': '1', '|': '1', 'Z': '2', 'E': '3', 'A': '4', 'S': '5', 'G': '6', 'T': '7', 'B': '8'}
+A_LETRA = {'0': 'O', '1': 'I', '2': 'Z', '3': 'E', '4': 'A', '5': 'S', '6': 'G', '7': 'T', '8': 'B'}
 
 
-def valor_con_forma(palabras, forma, solo_digitos=False):
+def segun_plantilla(valor, plantillas):
     """
-    El primer grupo de 1 a 4 tokens CONTIGUOS que, pegados, casan la forma entera. Asi la cola de la
-    etiqueta («EMISOR:») no estorba, un valor partido («34 407093409») se junta, y no se recorta un
-    identificador de en medio de otra cosa.
+    Deshace las confusiones letra/digito POSICION a posicion segun la plantilla del largo del valor.
+    Sin plantilla de ese largo, el valor va tal cual. Solo toca lo que la forma obliga: en una
+    posicion «A» no se cambia nada, porque ahi una O y un 0 son ambos legitimos.
     """
+    plantilla = next((p for p in plantillas if len(p) == len(valor)), None)
+    if plantilla is None:
+        return valor
+    salida = []
+    for ch, clase in zip(valor, plantilla):
+        if clase == 'D':
+            salida.append(A_DIGITO.get(ch, ch))
+        elif clase == 'L':
+            salida.append(A_LETRA.get(ch, ch))
+        else:
+            salida.append(ch)
+    return ''.join(salida)
+
+
+def clases_mal(valor, plantilla):
+    """Cuantas posiciones no son de la clase que la plantilla exige (L letra, D digito, A cualquiera)."""
+    mal = 0
+    for ch, clase in zip(valor, plantilla):
+        if clase == 'D' and not ch.isdigit():
+            mal += 1
+        elif clase == 'L' and not ch.isalpha():
+            mal += 1
+    return mal
+
+
+def valor_con_forma(palabras, forma, plantillas=()):
+    """
+    El primer grupo de 1 a 4 tokens CONTIGUOS que, pegados y pasados por la plantilla, casan la
+    forma entera. Asi la cola de la etiqueta («EMISOR:») no estorba, un valor partido
+    («34 407093409») se junta, y no se recorta un identificador de en medio de otra cosa.
+
+    Si ninguna casa entera, vale una del largo de alguna plantilla con UNA sola posicion de clase
+    equivocada (una letra donde va un digito que la tabla de confusiones no conoce). Sale tal cual:
+    la corrige o la rechaza el digito verificador aguas abajo, y si no puede, llega a revision con
+    su region en vez de perderse.
+    """
+    relajado = None
     for ancho in range(1, 5):
         for i in range(0, len(palabras) - ancho + 1):
             trozo = palabras[i:i + ancho]
-            valor = ''.join(p for p, _ in trozo)
-            if solo_digitos:
-                valor = valor.translate(A_DIGITO)
+            crudo = ''.join(p for p, _ in trozo)
+            valor = segun_plantilla(crudo, plantillas)
             if re.fullmatch(forma, valor):
                 return valor, min(c for _, c in trozo) / 100
-    return None
+            plantilla = next((pl for pl in plantillas if len(pl) == len(valor)), None)
+            if relajado is None and plantilla is not None and re.fullmatch(r'[A-ZÑ&0-9]+', valor) and clases_mal(valor, plantilla) == 1:
+                relajado = (valor, min(c for _, c in trozo) / 100)
+    return relajado
+
+
+def por_forma_en_la_pagina(img, lineas, zona, ya_vistos):
+    """
+    Cuando la etiqueta no dio valor: cada linea de la pagina, por ventanas de tokens y con la
+    plantilla. La CURP tiene 18 posiciones con clase fija y un digito verificador aguas abajo:
+    encontrar una por su forma sola es evidencia suficiente para proponerla, no para validarla.
+    """
+    campos = []
+    for linea in lineas:
+        palabras = [(t['texto'].upper(), t['conf']) for t in linea]
+        for ancho in range(1, 3):
+            for i in range(0, len(palabras) - ancho + 1):
+                trozo = linea[i:i + ancho]
+                valor = segun_plantilla(''.join(p for p, _ in palabras[i:i + ancho]), zona.get('plantillas', ()))
+                if re.fullmatch(zona['forma'], valor) and valor not in ya_vistos:
+                    ya_vistos.add(valor)
+                    # Se relee la zona ampliada, que es mas fiable que la pasada de pagina.
+                    releido = lee_zona(img, caja_de(trozo), zona, 'derecha')
+                    x0, y0, x1, y1 = caja_de(trozo)
+                    campos.append({
+                        'clave': zona['clave'], 'valor': releido[0] if releido else valor,
+                        'confianza': round(releido[1] if releido else min(c for _, c in palabras[i:i + ancho]) / 100, 3),
+                        'region': {'pagina': 0, 'x': x0 / img.width, 'y': y0 / img.height, 'ancho': (x1 - x0) / img.width, 'alto': (y1 - y0) / img.height},
+                    })
+    return campos
 
 
 def campos_por_zonas(img, lineas, zonas):
     campos, sin_valor = [], 0
+    for zona in zonas:
+        if not zona.get('enTodaLaPagina'):
+            continue
+        vistos = set()
+        campos.extend(por_forma_en_la_pagina(img, lineas, zona, vistos))
     for indice, linea in enumerate(lineas):
         texto = ' '.join(t['texto'] for t in linea).upper()
         for zona in zonas:
@@ -283,7 +362,14 @@ def principal():
     campos, sin_valor = campos_por_zonas(img, lineas, zonas)
     if sin_valor:
         aviso(f'{sin_valor} zona(s) con etiqueta pero sin valor con la forma esperada')
-    pagina = {'indice': 0, 'markdown': markdown_de(lineas), 'campos': campos}
+    # Las lecturas por zona van tambien al markdown, en una seccion marcada: son transcripciones
+    # del mismo motor sobre un recorte ampliado, y el cotejo contra la transcripcion (regla de la
+    # spec 008, pensada para modelos que inventan) debe verlas. Sin esto, una CURP que la zona leia
+    # bien y la pasada de pagina leia mal se descartaba antes de llegar al digito verificador (medido).
+    markdown = markdown_de(lineas)
+    if campos:
+        markdown += '\n\n[lecturas por zona]\n' + '\n'.join(f"{c['clave']}: {c['valor']}" for c in campos)
+    pagina = {'indice': 0, 'markdown': markdown, 'campos': campos}
     if tokens:
         pagina['confianza'] = round(sum(t['conf'] for t in tokens) / len(tokens) / 100, 3)
     sys.stdout.write(json.dumps({'paginas': [pagina]}, ensure_ascii=False))

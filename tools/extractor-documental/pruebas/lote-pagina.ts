@@ -98,6 +98,18 @@ test('un respaldo que solo transcribe da campos por patron y se coteja contra el
   assert.equal(l.cotejoDeRespaldo?.acuerdos.length, 1)
 })
 
+test('los patrones se aplican ADEMAS de los campos directos del motor, y un valor repetido queda con la confianza del motor', async () => {
+  const conZona = [pagina(`RFC: ${RFC_BUENO}\nCLAVE UNICA: GOAJ040229HDFNRNA6`, [campo('rfc', RFC_BUENO, { confianza: 0.6 })])]
+  const l = await leePagina(IMAGEN, 0, {
+    motor: motorFalso(conZona),
+    patrones: [
+      { clave: 'rfc', expresion: /RFC:\s*([A-Z0-9]{12,13})/, formato: 'identificador' },
+      { clave: 'curp', expresion: /\b([A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d)\b/, formato: 'identificador' },
+    ],
+  })
+  assert.deepEqual(l.campos.map((c) => [c.clave, c.confianza]), [['rfc', 0.6], ['curp', 0]], 'la CURP de la prosa entra aunque el motor ya diera el RFC por zona; el RFC no se duplica')
+})
+
 test('una clase omitida no aporta campos ni se deriva, pero conserva la lectura principal para auditar', async () => {
   const llamadas: Uint8Array[] = []
   const l = await leePagina(IMAGEN, 0, {
@@ -122,13 +134,19 @@ test('un RFC de OCR con digito mal sale de campos y va a invalidos con su motivo
   assert.equal(l.invalidos[0].procedencia, 'ocr')
 })
 
-test('una O por 0 en el OCR se corrige, se declara, y la confianza NO sube', async () => {
+test('una O por 0 en el OCR se corrige y se PROPONE en corregidos, pero NO entra a campos: lo confirma una persona o un codigo', async () => {
   const leido = 'SAT97O701NN3'
   const l = await leePagina(IMAGEN, 0, { motor: motorFalso(OCR_CON_RFC(leido)), validadores: { rfc: diagnosticaRfc } })
-  const rfc = l.campos.find((c) => c.clave === 'rfc')
-  assert.equal(rfc?.valor, RFC_BUENO)
-  assert.equal(rfc?.confianza, 0.7, 'corregir no es verificar')
+  assert.equal(l.campos.find((c) => c.clave === 'rfc'), undefined, 'medido: un checksum puede arreglar hacia el identificador de otra persona')
   assert.deepEqual(l.corregidos, [{ clave: 'rfc', original: leido, valor: RFC_BUENO, pagina: 0 }])
+  assert.deepEqual(l.invalidos, [], 'no es invalido: es una propuesta')
+})
+
+test('con QR en la pagina, un OCR que solo pasa corregido no discute con el QR: el QR entra y la correccion se propone', async () => {
+  const l = await leePagina(IMAGEN, 0, { motor: motorFalso(OCR_CON_RFC('SAT97O701NN3')), lectorDeCodigos: lectorFalso([CSF]), validadores: { rfc: diagnosticaRfc } })
+  assert.equal(l.cotejoDeCodigos, undefined, 'sin lectura de OCR valida no hay nada que cotejar')
+  assert.deepEqual(l.campos.filter((c) => c.clave === 'rfc').map((c) => c.procedencia), ['codigo'])
+  assert.equal(l.corregidos.length, 1)
 })
 
 test('un identificador que vino de un QR y no pasa NO se corrige: invalido con procedencia codigo', () => {

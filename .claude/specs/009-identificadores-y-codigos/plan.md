@@ -28,9 +28,11 @@
 2. **Validadores como lógica pura, con diagnóstico.** `diagnosticaRfc` devuelve el motivo, no
    solo un booleano, para que la cola humana sepa por qué. Descartado: consultar SAT/RENAPO
    (saca el dato) y un catálogo de subdelegaciones del IMSS (envejece).
-3. **Corrección de UNA posición, aceptada solo si es única.** Un checksum mod 10/11 detecta toda
-   sustitución simple; dos posiciones exigen medir falsos positivos, y eso queda para cuando haya
-   corpus con verdad. Y nunca sube la confianza: corregir no es verificar (C4).
+3. **Corrección de UNA posición, aceptada solo si es única, y SOLO como propuesta.** Un checksum
+   mod 10/11 detecta toda sustitución simple, pero deja pasar una de cada diez u once
+   sustituciones: medido sobre expedientes reales, de 4 correcciones el QR confirmó 1 y
+   contradijo 2. Por eso el valor corregido no entra a `campos`: se declara en `corregidos` y lo
+   confirma una persona o un código (C4).
 4. **Motor local por proceso, no por HTTP.** Tesseract es un binario; envolverlo en un servidor
    HTTP para hablar el dialecto de OpenAI habría sido ceremonia. El adaptador escribe la imagen
    en un temporal 0700, lee JSON por stdout y pasa por `validaPaginas`: la misma barrera que los

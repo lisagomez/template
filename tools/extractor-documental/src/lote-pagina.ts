@@ -134,6 +134,12 @@ export interface CamposValidados {
  * Pasa los validadores. Un campo `ocr` que no pasa intenta UNA correccion por checksum; uno que
  * vino de un codigo o de un XML no se corrige: si no pasa, es senal de sustitucion o de documento
  * inventado, y va a invalidos con su procedencia a la vista.
+ *
+ * UN CORREGIDO NO ENTRA A `validos`: se propone en `corregidos` y lo confirma una persona o un
+ * codigo. Medido el 2026-09-11 en un expediente real: la unica CURP corregida que se pudo cotejar
+ * contra el QR del mismo expediente era DISTINTA — el checksum habia «arreglado» hacia la clave de
+ * otra persona. Un digito verificador de modulo 10 deja pasar una de cada diez sustituciones, y
+ * eso no es una confianza con la que fundar un identificador (C4).
  */
 export function aplicaValidadores(campos: readonly CampoExtraido[], validadores: Readonly<Record<string, Diagnosticador>>, pagina: number): CamposValidados {
   const validos: CampoExtraido[] = []
@@ -150,8 +156,6 @@ export function aplicaValidadores(campos: readonly CampoExtraido[], validadores:
     }
     const correccion = corrigePorChecksum(campo.valor, (v) => diagnostica(v).valido)
     if (correccion.corregido) {
-      // La confianza se conserva tal cual: corregir no es verificar.
-      validos.push({ ...campo, valor: correccion.valor })
       corregidos.push({ clave: campo.clave, original: correccion.original, valor: correccion.valor, pagina })
     } else {
       invalidos.push({ clave: campo.clave, valor: campo.valor, procedencia: 'ocr', pagina, motivo: correccion.motivo === 'ambiguo' ? 'ambiguo' : (diagnostico.motivo ?? 'invalido') })
@@ -166,11 +170,16 @@ function conPagina(paginas: readonly PaginaExtraida[], indice: number): PaginaEx
   return { indice, markdown: paginas.map((p) => p.markdown).join('\n'), campos, ...(confianza === undefined ? {} : { confianza }) }
 }
 
-/** Campos de una lectura: los directos del motor (cotejados contra su propio texto) o, si no dio, por patron. */
+/**
+ * Campos de una lectura: los directos del motor (cotejados contra su propio texto) Y los que den
+ * los patrones sobre la transcripcion. Antes era «o»: con un motor por zonas que devuelve un RFC,
+ * la CURP que estaba limpia en la prosa se perdia (medido en constancias de RENAPO). Se funden
+ * por (clave, valor); un valor que sale por las dos vias queda con la confianza del motor.
+ */
 function camposDeLectura(pagina: PaginaExtraida, patrones: readonly Patron[] | undefined): readonly CampoExtraido[] {
-  if (pagina.campos.length > 0) return cotejaContraTranscripcion([pagina]).coinciden
-  if (patrones === undefined) return []
-  return camposPorPatron(pagina.markdown, patrones, { procedencia: 'ocr', confianza: 0 })
+  const directos = pagina.campos.length > 0 ? cotejaContraTranscripcion([pagina]).coinciden : []
+  const porPatron = patrones === undefined ? [] : camposPorPatron(pagina.markdown, patrones, { procedencia: 'ocr', confianza: 0 })
+  return fusionaCampos(directos, porPatron)
 }
 
 const clavesEnDiscrepancia = (cotejos: readonly (Cotejo | undefined)[]): Set<string> =>
@@ -203,32 +212,38 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
     return { ...base, omitida: true, campos: [] }
   }
 
-  // (d) Cotejo OCR contra codigo.
-  const deOcr = camposDeLectura(principal, opciones.patrones)
-  const cotejoDeCodigos = deCodigo.length > 0 && deOcr.length > 0 ? corrobora(emparejaPorClave(deOcr, deCodigo), deCodigo) : undefined
+  // (d) Validadores ANTES del cotejo: un valor de OCR que no pasa (y no se corrige) no es una
+  // lectura con la que discutir, es un descarte. Si entrara al cotejo, un RFC exacto del QR
+  // quedaria en «discrepancia» frente a una lectura que ya se sabia mala (medido).
+  const validadores = opciones.validadores ?? {}
+  const ocrValidado = aplicaValidadores(camposDeLectura(principal, opciones.patrones), validadores, indice)
+  const codigoValidado = aplicaValidadores(deCodigo, validadores, indice)
+  const deOcr = ocrValidado.validos
+  const cotejoDeCodigos = codigoValidado.validos.length > 0 && deOcr.length > 0 ? corrobora(emparejaPorClave(deOcr, codigoValidado.validos), codigoValidado.validos) : undefined
 
   // (e) Respaldo, solo por regla del proyecto.
   let respaldo: readonly PaginaExtraida[] | undefined
-  let deRespaldo: readonly CampoExtraido[] = []
+  let respaldoValidado: CamposValidados = { validos: [], invalidos: [], corregidos: [] }
   let cotejoDeRespaldo: Cotejo | undefined
   let milisegundosDeRespaldo = 0
-  if (opciones.motorDeRespaldo !== undefined && opciones.derivaAlRespaldo?.(principal, [...deCodigo, ...deOcr]) === true) {
+  if (opciones.motorDeRespaldo !== undefined && opciones.derivaAlRespaldo?.(principal, [...codigoValidado.validos, ...deOcr]) === true) {
     const inicio = ahora()
     try {
       respaldo = await opciones.motorDeRespaldo.extrae(imagen, { esquemaDeAnotacion: opciones.esquemaDeAnotacion })
-      deRespaldo = camposDeLectura(conPagina(respaldo, indice), opciones.patrones)
-      if (deOcr.length > 0 && deRespaldo.length > 0) cotejoDeRespaldo = corrobora(emparejaPorClave(deOcr, deRespaldo), deRespaldo)
+      respaldoValidado = aplicaValidadores(camposDeLectura(conPagina(respaldo, indice), opciones.patrones), validadores, indice)
+      if (deOcr.length > 0 && respaldoValidado.validos.length > 0) cotejoDeRespaldo = corrobora(emparejaPorClave(deOcr, respaldoValidado.validos), respaldoValidado.validos)
     } catch (error) {
       avisos.push(`motor de respaldo: ${error instanceof Error ? error.message : String(error)}`)
     }
     milisegundosDeRespaldo = ahora() - inicio
   }
 
-  // (f) Lo que entra: sin las claves en discrepancia (esas van a revision), fundido y validado.
+  // (f) Lo que entra: sin las claves en discrepancia (esas van a revision), fundido.
   const enDisputa = clavesEnDiscrepancia([cotejoDeCodigos, cotejoDeRespaldo])
   const sinDisputa = (campos: readonly CampoExtraido[]): CampoExtraido[] => campos.filter((c) => !enDisputa.has(c.clave))
-  const fundidos = fusionaCampos(sinDisputa(deCodigo), sinDisputa(deOcr), sinDisputa(deRespaldo))
-  const { validos, invalidos, corregidos } = aplicaValidadores(fundidos, opciones.validadores ?? {}, indice)
+  const validos = fusionaCampos(sinDisputa(codigoValidado.validos), sinDisputa(deOcr), sinDisputa(respaldoValidado.validos))
+  const invalidos = [...codigoValidado.invalidos, ...ocrValidado.invalidos, ...respaldoValidado.invalidos]
+  const corregidos = [...ocrValidado.corregidos, ...respaldoValidado.corregidos]
 
   return {
     ...base, omitida: false, campos: validos, invalidos, corregidos, milisegundosDeRespaldo,

@@ -489,11 +489,13 @@ sale con `procedencia: 'codigo'` y confianza 1—; **(b) motor principal**; **(c
 
 Tres reglas que no se negocian:
 
-- **Un identificador corregido por checksum nunca se auto-valida.** `corrigePorChecksum` cambia UNA
-  posicion entre confusiones de OCR (0/O, 1/I, 5/S, 8/B, 2/Z, 6/G) y acepta solo si exactamente una
-  variante pasa; el campo conserva la confianza del OCR y queda en `corregidos`. Medido: 2 RFC
-  corregidos en 4 expedientes, y ninguno de los dos lo confirmaba un QR del mismo expediente. Un
-  checksum puede «arreglar» hacia el RFC de otra persona; lo cierra el QR o una persona (C4).
+- **Un identificador corregido por checksum es una PROPUESTA, no un dato.** `corrigePorChecksum`
+  cambia UNA posicion entre confusiones de OCR (0/O, 1/I, 5/S, 8/B, 2/Z, 6/G, 3/E, 4/A, 7/T) y
+  acepta solo si exactamente una variante pasa; el valor va a `corregidos` con su original y NO
+  entra a `campos`. Medido sobre expedientes reales: de 4 correcciones, el QR del mismo expediente
+  confirmo 1 y contradijo 2. Un checksum de modulo 10 deja pasar una de cada diez sustituciones,
+  y «arreglar» hacia la clave de otra persona es exactamente el dano que C4 no admite. Lo cierra
+  el QR o una persona.
 - **Sin regla del proyecto no hay respaldo.** `derivaAlRespaldo` no tiene valor por defecto.
 - **Los QR de terceros no se parsean.** INE, CFE, SEP, vacunacion: se cuentan por tipo y largo, su
   contenido no se conserva y su destino no se abre.
@@ -508,6 +510,11 @@ Las zonas miran tambien DEBAJO de la etiqueta, en columna: en el alta del IMSS e
 derecha de «NSS» sino en la fila de abajo de una tabla, o bajo «No. de Afiliacion al Seguro
 Social» partido en dos. Medido tras el cambio: 4 de 5 hojas reales de alta con NSS valido (antes
 0 de 5) y 4 de 4 sinteticas exactas (`medicion/genera-alta-imss.py`), sin perder ningun RFC.
+Y cada identificador lleva una **plantilla de posiciones** (`LLLLDDDDDDLLLLLLAD` para la CURP):
+la lista blanca se aplica por software y por posicion, y una lectura con UNA posicion de clase
+equivocada no se pierde: llega al checksum, que la corrige (como propuesta) o la manda a revision.
+La constancia de RENAPO imprime la CURP grande y sola en su linea, sin etiqueta al lado: la zona
+`curp` la busca por forma en toda la pagina (`medicion/genera-constancias-curp.py`, 4 de 4).
 
 ## Umbrales: los tres que NO vienen puestos
 

@@ -616,11 +616,12 @@ consultar a nadie. Medido tras el cambio: los cuatro expedientes con RFC valido,
 corroborada por QR en tres de cuatro, 197 paginas por minuto.
 
 El limite es el que impone C4. Un checksum tambien permite **corregir**: probar las confusiones
-de OCR y quedarse con la variante que pasa. Se hace, pero con dos cerrojos que no se negocian: una
-sola posicion, y solo si exactamente una variante pasa. Y el valor corregido **nunca se
-auto-valida**: conserva la confianza del OCR y se declara. Medido: de 2 RFC corregidos, ninguno lo
-confirmaba un QR del mismo expediente. Corregir hacia el RFC de otra persona es un dano que recae
-sobre alguien que no firmo nada; por eso lo cierra el QR o una persona, nunca la aritmetica.
+de OCR y quedarse con la variante que pasa. Se hace, pero con tres cerrojos que no se negocian: una
+sola posicion, solo si exactamente una variante pasa, y **el resultado es una propuesta, no un
+dato**: va a `corregidos` y no entra a los campos. La medicion lo exigio: de 4 correcciones sobre
+expedientes reales, el QR del mismo expediente confirmo 1 y contradijo 2 — un digito de modulo 10
+deja pasar una de cada diez sustituciones. Corregir hacia la clave de otra persona es un dano que
+recae sobre alguien que no firmo nada; por eso lo cierra el QR o una persona, nunca la aritmetica.
 
 Lo que queda fuera por la misma razon: el QR de la INE y el de vacunacion se cuentan por tipo y
 largo, no se parsean ni se conservan; consultar RENAPO o al SAT saca el dato a un tercero.
