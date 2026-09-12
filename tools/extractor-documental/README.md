@@ -28,6 +28,8 @@ o declara en `exports` un subpath que no existe.
 | `./xml` | Lector de XML sin dependencias y **registro de esquemas**: CFDI 4.0, timbre y pagos. El vocabulario del SAT vive aqui, no en el nucleo | — |
 | `./motores/openai-compat` | `MotorOcr` contra un vLLM autohospedado. **Solo `fetch`**, cero dependencias | — |
 | `./motores/mistral` | `MotorOcr` contra la API de Mistral, con troceo por paginas | — |
+| `./motores/proceso-local` | `MotorOcr` que lanza un PROCESO local (Tesseract por zonas, `motores-locales/tesseract.py`) por el mismo puerto y la misma barrera de validacion. Node | — |
+| `./lectores/zxing` | `LectorDeCodigos` de SERVIDOR: los QR y codigos de barras que ya estan en la imagen de pagina. El wasm sale del paquete, nunca de un CDN. Node | `zxing-wasm` opcional |
 | `./almacenes/supabase` | `AlmacenDocumentos` + `AlmacenPlantillas`. Cliente inyectado | opcional |
 | `./almacenes/supabase-storage` | `AlmacenDeOriginales`: bucket privado, URL firmada | opcional |
 | `./almacenes/indexeddb` | `AlmacenLocal` para la cola sin conexion | — |
@@ -454,6 +456,53 @@ corre el lote, imprime la tabla por documento (via, campos, cotejo, segundos), l
 la verdad, el modelo inferido y el SQL, y escribe un JSON por documento mas `propuesta.json`.
 **Imprime forma, nunca valores**: un documento real pasado por `--extra` aporta tiempo y conteos,
 nada mas. `pruebas/salida-json.ts` valida lo que dejo la corrida contra los tipos del extractor.
+
+## Identificadores y codigos antes que OCR
+
+Lo que decide si un expediente se puede cargar son sus identificadores (RFC, CURP, NSS), y ahi es
+donde un OCR falla mas. Medido el 2026-09-11 sobre 84 paginas reales de 4 expedientes laborales:
+Tesseract leyo la prosa bien, y el RFC del empleado salio legible en 1 de 4. El preprocesado de
+imagen no lo arregla (mueve la confianza 0-3 puntos). Lo arregla cambiar el orden:
+
+```ts
+import { leeCorpus, declaraClases, diagnosticaRfc, diagnosticaCurp, diagnosticaNss } from '@tu-scope/extractor-documental'
+import { motorPorProceso } from '@tu-scope/extractor-documental/motores/proceso-local'
+import { lectorZxing } from '@tu-scope/extractor-documental/lectores/zxing'
+
+const resultado = await leeCorpus(paginas, {
+  lectorDeCodigos: lectorZxing(),                                  // (a) el QR va ANTES del OCR
+  motor: motorPorProceso({ comando: 'python3', argumentos: ['motores-locales/tesseract.py'], modelo: 'tesseract-5.5.0-spa-zonal-1', entorno }),
+  clases: declaraClases([{ clase: 'carta', titulo: /carta de recomendaci[oó]n/i }, /* ... */]),
+  omiteClases: new Set(['carta']),                                 // (c) lo que no aporta no gasta
+  validadores: { rfc: diagnosticaRfc, curp: diagnosticaCurp, nss: diagnosticaNss },  // (f) confianza externa al motor
+  motorDeRespaldo: motorCompatible({ base: 'http://127.0.0.1:11434/v1', modelo: 'glm-ocr:q8_0', modo: 'transcripcion' }),
+  derivaAlRespaldo: (pagina, campos) => /* TU regla; sin ella no se deriva nunca */ false,
+})
+```
+
+Por pagina, en este orden: **(a) codigos** —la constancia de situacion fiscal trae un QR con
+`D3=<idCIF>_<RFC>` y un Code128 con el RFC en claro; la de CURP, un QR de texto con la CURP; todo
+sale con `procedencia: 'codigo'` y confianza 1—; **(b) motor principal**; **(c) clase** por titulo;
+**(d) cotejo** OCR contra codigo con `corrobora`, y las claves en discrepancia van a revision;
+**(e) respaldo** solo por la regla del proyecto; **(f) validadores**: lo que no pasa no entra a
+`campos` y se declara en `identificadoresInvalidos`.
+
+Tres reglas que no se negocian:
+
+- **Un identificador corregido por checksum nunca se auto-valida.** `corrigePorChecksum` cambia UNA
+  posicion entre confusiones de OCR (0/O, 1/I, 5/S, 8/B, 2/Z, 6/G) y acepta solo si exactamente una
+  variante pasa; el campo conserva la confianza del OCR y queda en `corregidos`. Medido: 2 RFC
+  corregidos en 4 expedientes, y ninguno de los dos lo confirmaba un QR del mismo expediente. Un
+  checksum puede «arreglar» hacia el RFC de otra persona; lo cierra el QR o una persona (C4).
+- **Sin regla del proyecto no hay respaldo.** `derivaAlRespaldo` no tiene valor por defecto.
+- **Los QR de terceros no se parsean.** INE, CFE, SEP, vacunacion: se cuentan por tipo y largo, su
+  contenido no se conserva y su destino no se abre.
+
+Y lo que la medicion dejo escrito (`.claude/specs/009-identificadores-y-codigos/tareas.md`): las
+zonas de Tesseract se leen con `--psm 8` y escala 3 porque asi salieron 7 de 7 RFC exactos frente
+a 4 de 7 con `psm 7`; la lista blanca de caracteres la ignora el motor LSTM; y la confianza por
+palabra de Tesseract en esas zonas es 0, asi que la confianza real la ponen el digito verificador y
+el cotejo, no el motor.
 
 ## Umbrales: los tres que NO vienen puestos
 

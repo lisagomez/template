@@ -33,7 +33,11 @@ export type Diagnosticador = (valor: string) => DiagnosticoDeIdentificador
 export interface OpcionesDePagina {
   readonly motor: MotorOcr
   readonly motorDeRespaldo?: MotorOcr
-  /** SIN valor por defecto: sin regla del proyecto, la pagina no se deriva nunca. */
+  /**
+   * SIN valor por defecto: sin regla del proyecto, la pagina no se deriva nunca. `campos` trae lo
+   * que ya dieron los codigos Y el OCR: medido, una regla que solo miraba el OCR mando al motor
+   * caro una hoja cuya CURP ya habia dado el QR.
+   */
   readonly derivaAlRespaldo?: (pagina: PaginaExtraida, campos: readonly CampoExtraido[]) => boolean
   readonly lectorDeCodigos?: LectorDeCodigos
   readonly clases?: readonly ClaseDePagina[]
@@ -208,7 +212,7 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
   let deRespaldo: readonly CampoExtraido[] = []
   let cotejoDeRespaldo: Cotejo | undefined
   let milisegundosDeRespaldo = 0
-  if (opciones.motorDeRespaldo !== undefined && opciones.derivaAlRespaldo?.(principal, deOcr) === true) {
+  if (opciones.motorDeRespaldo !== undefined && opciones.derivaAlRespaldo?.(principal, [...deCodigo, ...deOcr]) === true) {
     const inicio = ahora()
     try {
       respaldo = await opciones.motorDeRespaldo.extrae(imagen, { esquemaDeAnotacion: opciones.esquemaDeAnotacion })
