@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Un CFDI de traslado con el complemento Carta Porte 3.1 por autotransporte: dos
+     ubicaciones (origen y destino) con domicilio, dos mercancias (una con documentacion aduanera,
+     guia y cantidad transportada), vehiculo, seguros, un remolque y un operador con domicilio.
+     Datos inventados; la estructura sigue el XSD publicado por el SAT. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:cartaporte31="http://www.sat.gob.mx/CartaPorte31"
+                  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+                  Version="4.0" Serie="CP" Folio="0007" Fecha="2026-04-02T08:00:00"
+                  Moneda="XXX" SubTotal="0" Total="0" TipoDeComprobante="T"
+                  Exportacion="01" LugarExpedicion="64000">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="TRANSPORTES SINTETICOS SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="AAA010101AAA" Nombre="TRANSPORTES SINTETICOS SA DE CV"
+                 DomicilioFiscalReceptor="64000" RegimenFiscalReceptor="601" UsoCFDI="S01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="78101800" Cantidad="1" ClaveUnidad="E48" Descripcion="Servicio de traslado"
+                   ValorUnitario="0" Importe="0" ObjetoImp="01"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <cartaporte31:CartaPorte Version="3.1" IdCCP="CCC0A1B2-3C4D-5E6F-7A8B-9C0D1E2F3A4B" TranspInternac="No" TotalDistRec="920.5">
+      <cartaporte31:Ubicaciones>
+        <cartaporte31:Ubicacion TipoUbicacion="Origen" IDUbicacion="OR000001" RFCRemitenteDestinatario="AAA010101AAA"
+                                NombreRemitenteDestinatario="ALMACEN SINTETICO NORTE" FechaHoraSalidaLlegada="2026-04-02T09:00:00">
+          <cartaporte31:Domicilio Calle="AV. DE LA INDUSTRIA" NumeroExterior="1000" Municipio="039" Estado="NLE" Pais="MEX" CodigoPostal="64000"/>
+        </cartaporte31:Ubicacion>
+        <cartaporte31:Ubicacion TipoUbicacion="Destino" IDUbicacion="DE000001" RFCRemitenteDestinatario="CCC030303CCC"
+                                NombreRemitenteDestinatario="CLIENTE SINTETICO CENTRO" FechaHoraSalidaLlegada="2026-04-03T06:00:00"
+                                DistanciaRecorrida="920.5">
+          <cartaporte31:Domicilio Calle="CALZADA SINTETICA" NumeroExterior="22" Colonia="0100" Municipio="015" Estado="CMX" Pais="MEX" CodigoPostal="06600"/>
+        </cartaporte31:Ubicacion>
+      </cartaporte31:Ubicaciones>
+      <cartaporte31:Mercancias PesoBrutoTotal="1250.00" UnidadPeso="KGM" NumTotalMercancias="2">
+        <cartaporte31:Mercancia BienesTransp="43211500" Descripcion="Tarjetas controladoras sinteticas" Cantidad="100"
+                                ClaveUnidad="H87" PesoEnKg="250.00" ValorMercancia="10000.00" Moneda="MXN" FraccionArancelaria="8473300201">
+          <cartaporte31:DocumentacionAduanera TipoDocumento="01" NumPedimento="26  07  1234  6000123" RFCImpo="AAA010101AAA"/>
+          <cartaporte31:GuiasIdentificacion NumeroGuiaIdentificacion="GUIA-000777" DescripGuiaIdentificacion="Caja master" PesoGuiaIdentificacion="250.00"/>
+          <cartaporte31:CantidadTransporta Cantidad="100" IDOrigen="OR000001" IDDestino="DE000001"/>
+        </cartaporte31:Mercancia>
+        <cartaporte31:Mercancia BienesTransp="43211500" Descripcion="Fuentes de poder sinteticas" Cantidad="50"
+                                ClaveUnidad="H87" PesoEnKg="1000.00" ValorMercancia="2500.00" Moneda="MXN"/>
+        <cartaporte31:Autotransporte PermSCT="TPAF01" NumPermisoSCT="PERM-SINT-001">
+          <cartaporte31:IdentificacionVehicular ConfigVehicular="C2" PesoBrutoVehicular="8.5" PlacaVM="ABC1234" AnioModeloVM="2020"/>
+          <cartaporte31:Seguros AseguraRespCivil="ASEGURADORA SINTETICA" PolizaRespCivil="POL-RC-1" AseguraCarga="ASEGURADORA SINTETICA" PolizaCarga="POL-CG-9" PrimaSeguro="120.00"/>
+          <cartaporte31:Remolques>
+            <cartaporte31:Remolque SubTipoRem="CTR004" Placa="REM9876"/>
+          </cartaporte31:Remolques>
+        </cartaporte31:Autotransporte>
+      </cartaporte31:Mercancias>
+      <cartaporte31:FiguraTransporte>
+        <cartaporte31:TiposFigura TipoFigura="01" RFCFigura="GOAJ040229AB1" NumLicencia="LIC-SINT-5555" NombreFigura="OPERADOR SINTETICO">
+          <cartaporte31:PartesTransporte ParteTransporte="PT01"/>
+          <cartaporte31:Domicilio Calle="PRIVADA SINTETICA" NumeroExterior="3" Estado="NLE" Pais="MEX" CodigoPostal="64100"/>
+        </cartaporte31:TiposFigura>
+      </cartaporte31:FiguraTransporte>
+    </cartaporte31:CartaPorte>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="77777777-8888-9999-0000-111111111111"
+                             FechaTimbrado="2026-04-02T08:01:00" RfcProvCertif="PAC010101PAC"
+                             SelloCFD="c2VsbG9TaW50ZXRpY28=" NoCertificadoSAT="00001000000500000001"
+                             SelloSAT="c2VsbG9TQVRTaW50ZXRpY28="/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
