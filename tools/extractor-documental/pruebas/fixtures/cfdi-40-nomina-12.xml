@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Un recibo de nomina 1.2: la persona, su relacion laboral, dos percepciones (una con
+     horas extra), dos deducciones, un otro pago con subsidio y una incapacidad. TODO INVENTADO: la
+     CURP lleva digito valido pero no corresponde a nadie; el NSS pasa Luhn y tampoco. La estructura
+     sigue el XSD publicado por el SAT. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:nomina12="http://www.sat.gob.mx/nomina12"
+                  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+                  Version="4.0" Serie="N" Folio="0301" Fecha="2026-05-15T10:00:00"
+                  Moneda="MXN" SubTotal="12000.00" Descuento="1800.00" Total="10200.00"
+                  TipoDeComprobante="N" MetodoPago="PUE" FormaPago="99"
+                  Exportacion="01" LugarExpedicion="64000">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="PATRON SINTETICO SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="GOAJ040229AB1" Nombre="JUAN PABLO SINTETICO"
+                 DomicilioFiscalReceptor="64100" RegimenFiscalReceptor="605" UsoCFDI="CN01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84111505" Cantidad="1" ClaveUnidad="ACT" Descripcion="Pago de nomina"
+                   ValorUnitario="12000.00" Importe="12000.00" Descuento="1800.00" ObjetoImp="01"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <nomina12:Nomina Version="1.2" TipoNomina="O" FechaPago="2026-05-15" FechaInicialPago="2026-05-01" FechaFinalPago="2026-05-15"
+                     NumDiasPagados="15" TotalPercepciones="12000.00" TotalDeducciones="1800.00" TotalOtrosPagos="0.00">
+      <nomina12:Emisor RegistroPatronal="Y1234567890"/>
+      <nomina12:Receptor Curp="GOAJ040229HDFNRNA4" NumSeguridadSocial="31611276697" FechaInicioRelLaboral="2024-03-01"
+                         Antigüedad="P114W" TipoContrato="01" Sindicalizado="No" TipoJornada="01" TipoRegimen="02"
+                         NumEmpleado="EMP-0042" Departamento="OPERACIONES" Puesto="TECNICO SINTETICO" RiesgoPuesto="2"
+                         PeriodicidadPago="04" Banco="012" CuentaBancaria="012345678901234567"
+                         SalarioBaseCotApor="800.00" SalarioDiarioIntegrado="836.50" ClaveEntFed="NLE"/>
+      <nomina12:Percepciones TotalSueldos="12000.00" TotalGravado="11500.00" TotalExento="500.00">
+        <nomina12:Percepcion TipoPercepcion="001" Clave="P001" Concepto="Sueldo" ImporteGravado="11000.00" ImporteExento="0.00"/>
+        <nomina12:Percepcion TipoPercepcion="019" Clave="P019" Concepto="Horas extra" ImporteGravado="500.00" ImporteExento="500.00">
+          <nomina12:HorasExtra Dias="2" TipoHoras="01" HorasExtra="4" ImportePagado="1000.00"/>
+        </nomina12:Percepcion>
+      </nomina12:Percepciones>
+      <nomina12:Deducciones TotalOtrasDeducciones="300.00" TotalImpuestosRetenidos="1500.00">
+        <nomina12:Deduccion TipoDeduccion="002" Clave="D002" Concepto="ISR" Importe="1500.00"/>
+        <nomina12:Deduccion TipoDeduccion="001" Clave="D001" Concepto="Seguridad social" Importe="300.00"/>
+      </nomina12:Deducciones>
+      <nomina12:OtrosPagos>
+        <nomina12:OtroPago TipoOtroPago="002" Clave="O002" Concepto="Subsidio para el empleo" Importe="0.00">
+          <nomina12:SubsidioAlEmpleo SubsidioCausado="0.00"/>
+        </nomina12:OtroPago>
+      </nomina12:OtrosPagos>
+      <nomina12:Incapacidades>
+        <nomina12:Incapacidad DiasIncapacidad="1" TipoIncapacidad="02" ImporteMonetario="0.00"/>
+      </nomina12:Incapacidades>
+    </nomina12:Nomina>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="88888888-9999-0000-1111-222222222222"
+                             FechaTimbrado="2026-05-15T10:01:00" RfcProvCertif="PAC010101PAC"
+                             SelloCFD="c2VsbG9TaW50ZXRpY28=" NoCertificadoSAT="00001000000500000001"
+                             SelloSAT="c2VsbG9TQVRTaW50ZXRpY28="/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

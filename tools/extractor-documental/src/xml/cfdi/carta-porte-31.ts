@@ -22,29 +22,13 @@
  */
 import type { CampoExtraido } from '../../tipos.js'
 import type { Elemento } from '../arbol.js'
-import { atributo, hijo, hijos } from '../arbol.js'
+import { hijo } from '../arbol.js'
 import type { LectorDeComplemento } from '../registro.js'
 import { CARTA_PORTE_31 } from './espacios.js'
+import { inventarioDe, lectorDeArbol } from './lector-de-arbol.js'
+import type { Rama } from './lector-de-arbol.js'
 
-/**
- * La clave de un atributo del SAT, en `snake_case` y con las siglas enteras:
- * `IdCCP` → `id_ccp`, `PlacaVM` → `placa_vm`, `RFCRemitenteDestinatario` → `rfc_remitente_destinatario`.
- */
-export function claveDeAtributo(nombre: string): string {
-  return nombre
-    .replace(/(?<=[a-z0-9])(?=[A-Z])/g, '_')
-    .replace(/(?<=[A-Z])(?=[A-Z][a-z])/g, '_')
-    .toLowerCase()
-}
-
-/** Una rama del esquema: que elemento, con que clave, si es lista, sus atributos y sus hijos. */
-interface Rama {
-  readonly nombre: string
-  readonly clave: string
-  readonly lista?: boolean
-  readonly atributos: readonly string[]
-  readonly hijos?: readonly Rama[]
-}
+export { claveDeAtributo } from './lector-de-arbol.js'
 
 const DOMICILIO = ['Calle', 'NumeroExterior', 'NumeroInterior', 'Colonia', 'Localidad', 'Referencia', 'Municipio', 'Estado', 'Pais', 'CodigoPostal']
 
@@ -129,73 +113,19 @@ const SON_IDENTIFICADOR = new Set([
 ])
 
 /** Lo que este lector mapea, por elemento, para el comprobador de deriva. Aqui se mapea el esquema entero. */
-export const INVENTARIO_CARTA_PORTE: Readonly<Record<string, readonly string[]>> = (() => {
-  const inventario: Record<string, string[]> = { CartaPorte: ['Version', ...DE_LA_RAIZ] }
-  const recorre = (ramas: readonly Rama[]): void => {
-    for (const rama of ramas) {
-      // El mismo nombre de elemento puede aparecer en dos sitios con atributos distintos
-      // (`Contenedor` en barco y en tren): el inventario los une, porque el XSD se lee por nombre.
-      inventario[rama.nombre] = [...new Set([...(inventario[rama.nombre] ?? []), ...rama.atributos])]
-      if (rama.hijos !== undefined) recorre(rama.hijos)
-    }
-  }
-  recorre(RAMAS)
-  return inventario
-})()
+export const INVENTARIO_CARTA_PORTE: Readonly<Record<string, readonly string[]>> = inventarioDe('CartaPorte', DE_LA_RAIZ, RAMAS)
 
-export const lectorDeCartaPorte31: LectorDeComplemento = {
+export const lectorDeCartaPorte31: LectorDeComplemento = lectorDeArbol({
   clave: { espacio: CARTA_PORTE_31, nombreLocal: 'CartaPorte', version: '3.1' },
   nombre: 'Complemento carta porte 3.1',
-
-  lee(nodo: Elemento) {
-    const campos: CampoExtraido[] = []
-    const noLeido = new Set<string>()
-
-    const recoge = (elemento: Elemento, atributos: readonly string[], prefijo: string): void => {
-      const conocidos = new Set(atributos)
-      for (const nombre of atributos) {
-        const valor = atributo(elemento, nombre)
-        if (valor === null) continue
-        const campo: CampoExtraido = { clave: prefijo === '' ? claveDeAtributo(nombre) : `${prefijo}_${claveDeAtributo(nombre)}`, valor, confianza: 1, procedencia: 'xml' }
-        if (SON_IDENTIFICADOR.has(nombre)) campo.formato = 'identificador'
-        campos.push(campo)
-      }
-      // Un atributo que el esquema no anticipa se declara: no se pierde en silencio.
-      for (const a of elemento.atributos) {
-        if (a.espacio === null && !conocidos.has(a.nombreLocal)) noLeido.add(`${elemento.nombreLocal}/@${a.nombreLocal}`)
-      }
-    }
-
-    const recorre = (padre: Elemento, ramas: readonly Rama[], prefijoPadre: string): void => {
-      for (const rama of ramas) {
-        const base = prefijoPadre === '' ? rama.clave : `${prefijoPadre}_${rama.clave}`
-        if (rama.lista === true) {
-          const elementos = hijos(padre, CARTA_PORTE_31, rama.nombre)
-          // El contador va aunque sea cero: "sin remolques" es un dato, no un hueco.
-          campos.push({ clave: `${base}s_total`, valor: String(elementos.length), confianza: 1, procedencia: 'xml' })
-          elementos.forEach((elemento, i) => {
-            const prefijo = `${base}_${i + 1}`
-            recoge(elemento, rama.atributos, prefijo)
-            if (rama.hijos !== undefined) recorre(elemento, rama.hijos, prefijo)
-          })
-        } else {
-          const elemento = hijo(padre, CARTA_PORTE_31, rama.nombre)
-          if (elemento === null) continue
-          recoge(elemento, rama.atributos, base)
-          if (rama.hijos !== undefined) recorre(elemento, rama.hijos, base)
-        }
-      }
-    }
-
-    recoge(nodo, ['Version', ...DE_LA_RAIZ], '')
-    recorre(nodo, RAMAS, '')
-
-    // Que medio lleva la carga, dicho una vez: es lo primero que alguien quiere saber.
+  atributosDeRaiz: DE_LA_RAIZ,
+  ramas: RAMAS,
+  identificadores: SON_IDENTIFICADOR,
+  // Que medio lleva la carga, dicho una vez: es lo primero que alguien quiere saber.
+  extra: (nodo: Elemento): readonly CampoExtraido[] => {
     const mercancias = hijo(nodo, CARTA_PORTE_31, 'Mercancias')
     const medios: readonly (readonly [string, string])[] = [['Autotransporte', 'autotransporte'], ['TransporteMaritimo', 'maritimo'], ['TransporteAereo', 'aereo'], ['TransporteFerroviario', 'ferroviario']]
     const presentes = mercancias === null ? [] : medios.filter(([nombre]) => hijo(mercancias, CARTA_PORTE_31, nombre) !== null).map(([, clave]) => clave)
-    campos.push({ clave: 'medio_de_transporte', valor: presentes.join(',') || 'ninguno', confianza: 1, procedencia: 'xml' })
-
-    return { campos: campos.filter((c) => c.clave !== 'version'), noLeido: [...noLeido] }
+    return [{ clave: 'medio_de_transporte', valor: presentes.join(',') || 'ninguno', confianza: 1, procedencia: 'xml' }]
   },
-}
+})

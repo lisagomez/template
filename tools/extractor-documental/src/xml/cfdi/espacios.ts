@@ -59,19 +59,25 @@ export const COMERCIO_EXTERIOR_20 = 'http://www.sat.gob.mx/ComercioExterior20'
 export const CARTA_PORTE_31 = 'http://www.sat.gob.mx/CartaPorte31'
 
 /**
+ * Nomina 1.2, el recibo de pago de un EMPLEADO. Direccion CONFIRMADA contra su esquema oficial
+ * (`nomina12.xsd`, leido el 2026-09-12), no contra un recibo real. Es el unico lector con un
+ * analisis de impacto (C4) escrito por delante: ver la cabecera de `nomina-12.ts`.
+ */
+export const NOMINA_12 = 'http://www.sat.gob.mx/nomina12'
+
+/**
  * Direcciones de complementos que este paquete NO lee todavia.
  *
- * La de nomina lleva datos de un empleado que no eligio estar aqui, y eso pide su propio analisis
- * de impacto (C4), no una fila anadida de paso. Comercio exterior y carta porte ya tienen lector,
- * escrito contra su XSD y cotejado con `medicion/deriva.mjs`; su mapeo espera un documento real.
+ * Hoy esta vacio: pagos, comercio exterior, carta porte y nomina tienen lector, escrito contra su
+ * XSD y cotejado con `medicion/deriva.mjs`, y su mapeo espera un documento real. La lista se queda
+ * porque es el mecanismo: el dia que el SAT publique otro complemento, se nombra aqui ANTES de
+ * tener lector, para que el aviso de «complemento sin lector» diga su nombre y no una direccion.
  *
  * Sirven para que el aviso de complemento sin lector pueda NOMBRARLOS en vez de soltar una
  * direccion cruda a la cara de quien revisa. Registrar el lector el dia que haya documento es una
  * version menor, no mayor.
  */
-export const SIN_LECTOR: Readonly<Record<string, string>> = {
-  'http://www.sat.gob.mx/nomina12': 'Nomina 1.2',
-}
+export const SIN_LECTOR: Readonly<Record<string, string>> = {}
 
 /** El nombre legible de una direccion conocida, o `null` si no la conocemos de nada. */
 export function nombreDelEsquema(espacio: string): string | null {
@@ -80,5 +86,6 @@ export function nombreDelEsquema(espacio: string): string | null {
   if (espacio === PAGOS_20) return 'Pagos 2.0'
   if (espacio === COMERCIO_EXTERIOR_20) return 'Comercio Exterior 2.0'
   if (espacio === CARTA_PORTE_31) return 'Carta Porte 3.1'
+  if (espacio === NOMINA_12) return 'Nomina 1.2'
   return SIN_LECTOR[espacio] ?? null
 }

@@ -95,11 +95,12 @@ lo que todo CFDI tiene, y **cada proyecto registra lo que su caso necesita**.
 
 ```ts
 import {
-  leeCfdi40, registroDeEsquemas, lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, avisoDelComprobante,
+  leeCfdi40, registroDeEsquemas, lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, lectorDeNomina12, avisoDelComprobante,
 } from '@tu-scope/extractor-documental/xml'
 
 // Nada se registra por defecto. Lo que no registres, sale DECLARADO como no leido.
-const registro = registroDeEsquemas([lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31])
+// Registrar nomina es una decision con analisis de impacto: lee la cabecera de su lector antes.
+const registro = registroDeEsquemas([lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, lectorDeNomina12])
 
 const lectura = leeCfdi40(bytesDelXml, registro)
 if (!lectura.esCfdi) console.warn(lectura.motivo)   // nunca lanza: el fallo es un motivo
@@ -111,19 +112,26 @@ lectura.complementos.sinLector  // lo que NO, con su direccion, su version y el 
 avisoDelComprobante(lectura)    // el aviso en espanol, o `null` si no hay nada que decir
 ```
 
-### Los cuatro lectores que trae el paquete
+### Los cinco lectores que trae el paquete
 
 | Lector | Que lee | Evidencia |
 |---|---|---|
 | `lectorDeTimbre11` | El timbre fiscal digital 1.1: UUID, fecha de timbrado, PAC, sellos | Confirmado contra un CFDI real |
 | `lectorDePagos20` | Pagos 2.0: totales, cada pago y cada documento relacionado, numerados | Direccion confirmada contra el XSD; mapeo sin recibo real |
 | `lectorDeComercioExterior20` | Comercio Exterior 2.0, el de una factura de EXPORTACION: clave de pedimento, INCOTERM, tipo de cambio y total en dolares, emisor, propietarios, receptor y destinatarios con sus domicilios, y cada mercancia con fraccion arancelaria, valor en dolares y descripciones especificas (marca, modelo, serie), todo numerado | Estructura cotejada contra el XSD oficial con `medicion/deriva.mjs` (2026-09-12: sin deriva); mapeo sin factura de exportacion real |
+| `lectorDeNomina12` | Nomina 1.2, el recibo de pago de un EMPLEADO: raiz (tipo, periodo, dias, totales), patron, la persona (CURP, NSS, antiguedad, contrato, puesto, salario, banco y cuenta), percepciones con horas extra, deducciones, otros pagos con subsidio y compensacion, e incapacidades, todo numerado y con `resumen_del_recibo`. Es el unico lector con **analisis de impacto (C4) escrito por delante**: expone `CLAVES_SENSIBLES_NOMINA` y `PREFIJOS_SENSIBLES_NOMINA` (cuenta bancaria, salario, sindicato, incapacidades) para que el proyecto decida quien las ve y cuanto se conservan | Estructura cotejada contra el XSD oficial (2026-09-12: sin deriva); mapeo sin recibo real |
 | `lectorDeCartaPorte31` | Carta Porte 3.1, el del traslado de mercancias: identificador CCP, regimenes aduaneros, ubicaciones de origen y destino con domicilio y fecha, mercancias con peso, valor, fraccion arancelaria, documentacion aduanera, guias y cantidades transportadas, el medio (autotransporte con vehiculo, seguros y remolques; maritimo con contenedores; aereo; ferroviario con carros) y las figuras de transporte con licencia, partes y domicilio. Los 25 elementos y ~150 atributos del esquema, con claves derivadas del nombre del SAT (`PlacaVM` → `..._placa_vm`) y un contador por lista | Estructura cotejada contra el XSD oficial con `medicion/deriva.mjs` (2026-09-12: sin deriva); mapeo sin carta porte real |
 
 Del comercio exterior se mapea el esquema **entero**, y los identificadores (registro fiscal
 extranjero, fraccion arancelaria, numero de serie, clave de pedimento, certificado de origen) van
 marcados para compararse exactos. Los codigos de catalogo (`FOB`, `A1`, `06`) se emiten tal cual:
 resolverlos es del proyecto, como siempre.
+
+Carta porte y nomina no llevan tablas a mano: declaran el **arbol** de su esquema una vez y
+`lectorDeArbol` lo recorre (claves derivadas del nombre del SAT con `claveDeAtributo`, listas
+numeradas con contador, `noLeido` para lo que el esquema no anticipa). El inventario que compara
+`medicion/deriva.mjs` sale del mismo arbol, asi que no puede divergir del lector. Sirve tambien
+para un esquema tuyo: `lectorDeArbol({ clave, nombre, atributosDeRaiz, ramas, identificadores })`.
 
 ### Registrar un esquema propio
 
@@ -160,7 +168,8 @@ Tres reglas, y ninguna es de estilo:
 | Consultar el estatus en el SAT | Mandaria el identificador y los registros fiscales de **dos terceros** a un servicio externo |
 | Traducir codigos a etiquetas | Emite `03`, nunca "Transferencia electronica". Un catalogo embarcado envejece; resolverlo contra **tus** tablas es trabajo de `resuelveIdentificador` |
 | Convertir importes a numero | `1160.00` se conserva como cadena: pasar por `number` pierde el cero y abre la puerta al redondeo binario |
-| Leer CFDI 3.3 o nomina | La 3.3 esta fuera de alcance. Nomina lleva datos de un empleado que no eligio estar aqui y pide su propio analisis de impacto (C4). Comercio exterior y carta porte si vienen, cotejados contra su XSD, y su mapeo espera igual un documento real |
+| Leer CFDI 3.3 | Esta fuera de alcance. Los cuatro complementos comunes (pagos, comercio exterior, carta porte, nomina) vienen cotejados contra su XSD, y su mapeo espera igual un documento real de cada uno |
+| Decidir por ti que hacer con los datos de un empleado | El lector de nomina lee el recibo entero (uno a medias es un recibo falso) y NOMBRA lo sensible; retencion, acceso y supresion son del proyecto, y cruzar recibos para perfilar a una persona es un dano que ninguna firma autoriza (limite de C5) |
 
 ### Que la estructura no envejezca en silencio
 
@@ -368,7 +377,7 @@ import { motorCompatible } from '@tu-scope/extractor-documental/motores/openai-c
 // 1. Cada documento por la via que le corresponde, decidida por sus BYTES.
 const { lecturas, porRuta } = await leeCorpus(archivos, {
   motor: motorCompatible({ base: 'http://127.0.0.1:11434/v1', modelo: 'glm-ocr:q8_0', modo: 'transcripcion' }),
-  registro: registroDeEsquemas([lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31]),
+  registro: registroDeEsquemas([lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, lectorDeNomina12]),
   patrones: [{ clave: 'rfc_emisor', expresion: /RFC emisor:\s*([A-Z0-9]{12,13})/, formato: 'identificador' }],
   identificadores: new Set(['rfc_emisor', 'rfc_receptor', 'uuid', 'folio']),
   enVuelo: 1, // se MIDE; ver abajo
