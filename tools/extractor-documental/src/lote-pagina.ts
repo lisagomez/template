@@ -30,15 +30,26 @@ import { cotejaContraTranscripcion } from './transcripcion.js'
 /** `diagnosticaRfc`, `diagnosticaCurp`, `diagnosticaNss`... o uno propio del proyecto. */
 export type Diagnosticador = (valor: string) => DiagnosticoDeIdentificador
 
+/** Lo que una regla de derivacion sabe de la pagina, ademas del texto y los campos validos. */
+export interface ContextoDeDerivacion {
+  readonly clase: ClasificacionDePagina | null
+  /** Identificadores que el OCR propuso y no pasaron (ni se corrigieron): el motor caro puede zanjarlos. */
+  readonly invalidos: readonly IdentificadorInvalido[]
+  readonly codigos: readonly CodigoLeido[]
+}
+
+export type ReglaDeDerivacion = (pagina: PaginaExtraida, campos: readonly CampoExtraido[], contexto: ContextoDeDerivacion) => boolean
+
 export interface OpcionesDePagina {
   readonly motor: MotorOcr
   readonly motorDeRespaldo?: MotorOcr
   /**
    * SIN valor por defecto: sin regla del proyecto, la pagina no se deriva nunca. `campos` trae lo
-   * que ya dieron los codigos Y el OCR: medido, una regla que solo miraba el OCR mando al motor
-   * caro una hoja cuya CURP ya habia dado el QR.
+   * que ya dieron los codigos Y el OCR, validado: medido, una regla que solo miraba el OCR mando al
+   * motor caro una hoja cuya CURP ya habia dado el QR. `reglaFaltaIdentificador` es la que la
+   * medicion respalda; el proyecto la instancia con SUS clases.
    */
-  readonly derivaAlRespaldo?: (pagina: PaginaExtraida, campos: readonly CampoExtraido[]) => boolean
+  readonly derivaAlRespaldo?: ReglaDeDerivacion
   readonly lectorDeCodigos?: LectorDeCodigos
   readonly clases?: readonly ClaseDePagina[]
   readonly omiteClases?: ReadonlySet<string>
@@ -226,7 +237,8 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
   let respaldoValidado: CamposValidados = { validos: [], invalidos: [], corregidos: [] }
   let cotejoDeRespaldo: Cotejo | undefined
   let milisegundosDeRespaldo = 0
-  if (opciones.motorDeRespaldo !== undefined && opciones.derivaAlRespaldo?.(principal, [...codigoValidado.validos, ...deOcr]) === true) {
+  const contexto: ContextoDeDerivacion = { clase, invalidos: [...codigoValidado.invalidos, ...ocrValidado.invalidos], codigos }
+  if (opciones.motorDeRespaldo !== undefined && opciones.derivaAlRespaldo?.(principal, [...codigoValidado.validos, ...deOcr], contexto) === true) {
     const inicio = ahora()
     try {
       respaldo = await opciones.motorDeRespaldo.extrae(imagen, { esquemaDeAnotacion: opciones.esquemaDeAnotacion })
@@ -250,5 +262,26 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
     ...(respaldo === undefined ? {} : { respaldo }),
     ...(cotejoDeCodigos === undefined ? {} : { cotejoDeCodigos }),
     ...(cotejoDeRespaldo === undefined ? {} : { cotejoDeRespaldo }),
+  }
+}
+
+/**
+ * La regla de derivacion que la medicion respalda (2026-09-11, 84 paginas reales): mandar al motor
+ * caro SOLO la pagina de la que se espera un identificador y no lo dio nadie, o la que propuso un
+ * identificador que no paso el checksum y no tiene otro valido de esa clave.
+ *
+ * Lo que NO hace, y por que: no deriva por confianza de pagina. Esa confianza no esta calibrada
+ * (el preprocesado la mueve 0-3 puntos) y una pagina de foto o sello con confianza baja no tiene
+ * ningun identificador que rescatar: cuesta 100-200 s y no devuelve nada. Sin umbral que ajustar.
+ *
+ * `esperados` lo declara el proyecto: que clase de pagina lleva que identificador. Sin clases no
+ * hay expectativa, y sin expectativa solo deriva lo que fallo la validacion.
+ */
+export function reglaFaltaIdentificador(esperados: Readonly<Record<string, readonly string[]>>): ReglaDeDerivacion {
+  return (_pagina, campos, contexto) => {
+    const tiene = (clave: string): boolean => campos.some((c) => c.clave === clave)
+    const esperadas = contexto.clase === null ? [] : (esperados[contexto.clase.clase] ?? [])
+    if (esperadas.length > 0 && !esperadas.some(tiene)) return true
+    return contexto.invalidos.some((i) => !tiene(i.clave))
   }
 }

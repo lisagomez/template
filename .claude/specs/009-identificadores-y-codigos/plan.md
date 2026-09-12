@@ -13,7 +13,7 @@
 | `src/lectores/zxing.ts` | nuevo (adaptador Node) | RF-1, RF-6..RF-8 |
 | `src/motores/proceso-local.ts` + `motores-locales/tesseract.py` | nuevos (adaptador + script) | RF-22..RF-27 |
 | `src/motores/openai-compat.ts` (`usage` en ceros) | modificado | RF-28 |
-| `src/lote-pagina.ts` | nuevo (núcleo) | RF-13..RF-17, RF-21, RF-29, RF-30 |
+| `src/lote-pagina.ts` (+ `reglaFaltaIdentificador`) | nuevo (núcleo) | RF-13..RF-17, RF-21, RF-29, RF-30, RF-36, RF-37 |
 | `src/lote-corpus.ts` (opciones y declaraciones nuevas, reutilización) | modificado | RF-31..RF-33 |
 | `src/tipos.ts` (`PaginaExtraida.confianza?`) | modificado | RF-27, RF-29 |
 | `medicion/sonda-qr.mjs`, `medicion/expedientes.mjs`, `medicion/genera-identificadores.py`, `medicion/genera-qr-fixtures.py` | nuevos | RF-34, RF-35 |
@@ -43,9 +43,13 @@
    LSTM la ignora (medido: mismos resultados con y sin ella) y el motor legacy que la respeta no
    viene en estos datos de idioma. Descartado: confiar en la confianza por palabra de Tesseract en
    las zonas (medido: 0).
-6. **Derivar al respaldo sin regla por defecto.** Dos reglas se comparan en la medición
-   («clase sin identificador esperado» y «confianza de página por debajo de n»); ninguna se
-   embarca. Sin regla, el respaldo no se llama nunca.
+6. **Derivar al respaldo sin regla por defecto, pero con una regla MEDIDA a mano.** Sin regla,
+   el respaldo no se llama nunca. La que la medición respalda es `reglaFaltaIdentificador`:
+   deriva la página cuya clase espera un identificador que nadie dio, o la que propuso uno que no
+   pasó el checksum sin otro válido. Sobre 84 páginas reales deriva 6 (unos 15 min) frente a 12
+   (unos 30 min) de «confianza < 0,6», con solo 2 de solape; y las 12 de confianza baja son casi
+   todas fotos y sellos sin identificador que rescatar. La confianza de página no está calibrada
+   y no lleva umbral: por eso la regla no la mira. El proyecto la instancia con SUS clases.
 7. **Reutilización de páginas idénticas dentro del lote**, por SHA-256 de la imagen, como ya se
    hacía por documento. Descartado: cache entre lotes (persistencia que hoy no existe).
 8. **El flujo por página vive en `src/lote-pagina.ts`**, no en `lote-corpus.ts`: el segundo

@@ -465,7 +465,7 @@ Tesseract leyo la prosa bien, y el RFC del empleado salio legible en 1 de 4. El 
 imagen no lo arregla (mueve la confianza 0-3 puntos). Lo arregla cambiar el orden:
 
 ```ts
-import { leeCorpus, declaraClases, diagnosticaRfc, diagnosticaCurp, diagnosticaNss } from '@tu-scope/extractor-documental'
+import { leeCorpus, declaraClases, diagnosticaRfc, diagnosticaCurp, diagnosticaNss, reglaFaltaIdentificador } from '@tu-scope/extractor-documental'
 import { motorPorProceso } from '@tu-scope/extractor-documental/motores/proceso-local'
 import { lectorZxing } from '@tu-scope/extractor-documental/lectores/zxing'
 
@@ -476,7 +476,7 @@ const resultado = await leeCorpus(paginas, {
   omiteClases: new Set(['carta']),                                 // (c) lo que no aporta no gasta
   validadores: { rfc: diagnosticaRfc, curp: diagnosticaCurp, nss: diagnosticaNss },  // (f) confianza externa al motor
   motorDeRespaldo: motorCompatible({ base: 'http://127.0.0.1:11434/v1', modelo: 'glm-ocr:q8_0', modo: 'transcripcion' }),
-  derivaAlRespaldo: (pagina, campos) => /* TU regla; sin ella no se deriva nunca */ false,
+  derivaAlRespaldo: reglaFaltaIdentificador({ curp: ['curp'], constancia_fiscal: ['rfc'], alta_imss: ['nss'] }),  // (e) sin regla no se deriva nunca
 })
 ```
 
@@ -496,7 +496,13 @@ Tres reglas que no se negocian:
   confirmo 1 y contradijo 2. Un checksum de modulo 10 deja pasar una de cada diez sustituciones,
   y «arreglar» hacia la clave de otra persona es exactamente el dano que C4 no admite. Lo cierra
   el QR o una persona.
-- **Sin regla del proyecto no hay respaldo.** `derivaAlRespaldo` no tiene valor por defecto.
+- **Sin regla del proyecto no hay respaldo.** `derivaAlRespaldo` no tiene valor por defecto. La
+  regla que la medicion respalda es `reglaFaltaIdentificador({ curp: ['curp'], constancia_fiscal:
+  ['rfc'], alta_imss: ['nss'], ine: ['curp'] })`: deriva la pagina cuya clase espera un
+  identificador que ni el QR ni el OCR dieron, o la que propuso uno que no paso el checksum sin
+  otro valido. NO deriva por confianza de pagina: no esta calibrada, y una foto o un sello con
+  confianza baja cuesta 100-200 s de motor y no devuelve nada. Medido: 6 paginas derivadas de 84
+  frente a 12 con «confianza < 0,6», con solo 2 en comun.
 - **Los QR de terceros no se parsean.** INE, CFE, SEP, vacunacion: se cuentan por tipo y largo, su
   contenido no se conserva y su destino no se abre.
 

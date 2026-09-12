@@ -16,7 +16,7 @@ import type { MotorOcr, LectorDeCodigos } from './puertos.js'
 import type { ClaseDePagina, ClasificacionDePagina } from './clasifica-pagina.js'
 import type { Cotejo } from './corroboracion.js'
 import { leePagina, aplicaValidadores } from './lote-pagina.js'
-import type { LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido } from './lote-pagina.js'
+import type { LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido, ReglaDeDerivacion } from './lote-pagina.js'
 import type { RegistroDeEsquemas } from './xml/registro.js'
 import { leeCapaCero } from './capa-cero.js'
 import { identidadDe } from './identidad.js'
@@ -61,7 +61,7 @@ export interface OpcionesDeCorpus {
   /** Un segundo motor, mas caro, al que solo se deriva por `derivaAlRespaldo`. */
   readonly motorDeRespaldo?: MotorOcr
   /** La regla del PROYECTO para derivar. Sin ella, el respaldo no se llama nunca. */
-  readonly derivaAlRespaldo?: (pagina: PaginaExtraida, campos: readonly CampoExtraido[]) => boolean
+  readonly derivaAlRespaldo?: ReglaDeDerivacion
   readonly clases?: readonly ClaseDePagina[]
   /** Clases cuyas paginas no aportan campos ni van al respaldo (una carta de recomendacion). */
   readonly omiteClases?: ReadonlySet<string>
