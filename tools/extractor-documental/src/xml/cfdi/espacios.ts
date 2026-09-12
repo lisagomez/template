@@ -45,6 +45,13 @@ export const TIMBRE_11 = 'http://www.sat.gob.mx/TimbreFiscalDigital'
 export const PAGOS_20 = 'http://www.sat.gob.mx/Pagos20'
 
 /**
+ * Comercio Exterior 2.0, el que acompana a una factura de EXPORTACION (`Exportacion="02"`).
+ * Direccion CONFIRMADA contra su esquema oficial (`ComercioExterior20.xsd`, leido el 2026-09-12),
+ * no contra un documento: el mapeo sigue sin ejercitarse contra una factura de exportacion real.
+ */
+export const COMERCIO_EXTERIOR_20 = 'http://www.sat.gob.mx/ComercioExterior20'
+
+/**
  * Direcciones de complementos que este paquete NO lee todavia.
  *
  * Estan declaradas y no implementadas a proposito, y no es un descuido: sin un documento real de
@@ -59,7 +66,6 @@ export const PAGOS_20 = 'http://www.sat.gob.mx/Pagos20'
 export const SIN_LECTOR: Readonly<Record<string, string>> = {
   'http://www.sat.gob.mx/nomina12': 'Nomina 1.2',
   'http://www.sat.gob.mx/CartaPorte31': 'Carta Porte 3.1',
-  'http://www.sat.gob.mx/ComercioExterior20': 'Comercio Exterior 2.0',
 }
 
 /** El nombre legible de una direccion conocida, o `null` si no la conocemos de nada. */
@@ -67,5 +73,6 @@ export function nombreDelEsquema(espacio: string): string | null {
   if (espacio === CFDI_40) return 'CFDI 4.0'
   if (espacio === TIMBRE_11) return 'Timbre fiscal digital'
   if (espacio === PAGOS_20) return 'Pagos 2.0'
+  if (espacio === COMERCIO_EXTERIOR_20) return 'Comercio Exterior 2.0'
   return SIN_LECTOR[espacio] ?? null
 }

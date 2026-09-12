@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Una factura de EXPORTACION con el complemento de comercio exterior 2.0: pedimento,
+     INCOTERM, tipo de cambio y total en dolares, receptor y destinatario en el extranjero, y dos
+     mercancias con fraccion arancelaria (una con descripciones especificas). Datos inventados;
+     la estructura sigue el XSD publicado por el SAT. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:cce20="http://www.sat.gob.mx/ComercioExterior20"
+                  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+                  Version="4.0" Serie="EXP" Folio="0042" Fecha="2026-03-10T09:30:00"
+                  Moneda="USD" TipoCambio="17.10" SubTotal="12500.00" Total="12500.00"
+                  TipoDeComprobante="I" MetodoPago="PUE" FormaPago="03"
+                  Exportacion="02" LugarExpedicion="22000">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="EXPORTADORA SINTETICA SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XEXX010101000" Nombre="IMPORTER SYNTHETIC LLC" ResidenciaFiscal="USA"
+                 NumRegIdTrib="12-3456789" DomicilioFiscalReceptor="22000" RegimenFiscalReceptor="616" UsoCFDI="S01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="43211500" NoIdentificacion="SKU-100" Cantidad="100" ClaveUnidad="H87"
+                   Descripcion="Tarjetas controladoras sinteticas" ValorUnitario="100.00" Importe="10000.00" ObjetoImp="01"/>
+    <cfdi:Concepto ClaveProdServ="43211500" NoIdentificacion="SKU-200" Cantidad="50" ClaveUnidad="H87"
+                   Descripcion="Fuentes de poder sinteticas" ValorUnitario="50.00" Importe="2500.00" ObjetoImp="01"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <cce20:ComercioExterior Version="2.0" ClaveDePedimento="A1" CertificadoOrigen="1"
+                            NumCertificadoOrigen="CO-2026-000123" NumeroExportadorConfiable="EXC-77"
+                            Incoterm="FOB" Observaciones="Embarque sintetico de prueba"
+                            TipoCambioUSD="17.10" TotalUSD="12500.00">
+      <cce20:Emisor Curp="GOAJ040229HDFNRNA6">
+        <cce20:Domicilio Calle="AV INDUSTRIA" NumeroExterior="100" Colonia="0001" Municipio="004"
+                         Estado="BCN" Pais="MEX" CodigoPostal="22000"/>
+      </cce20:Emisor>
+      <cce20:Propietario NumRegIdTrib="98-7654321" ResidenciaFiscal="USA"/>
+      <cce20:Receptor NumRegIdTrib="12-3456789">
+        <cce20:Domicilio Calle="MAIN STREET" NumeroExterior="500" Localidad="SAN DIEGO"
+                         Estado="CALIFORNIA" Pais="USA" CodigoPostal="92101"/>
+      </cce20:Receptor>
+      <cce20:Destinatario NumRegIdTrib="55-1122334" Nombre="WAREHOUSE SYNTHETIC INC">
+        <cce20:Domicilio Calle="HARBOR ROAD" NumeroExterior="7" Estado="CALIFORNIA" Pais="USA" CodigoPostal="90802"/>
+        <cce20:Domicilio Calle="DOCK 4" Estado="TEXAS" Pais="USA" CodigoPostal="77002"/>
+      </cce20:Destinatario>
+      <cce20:Mercancias>
+        <cce20:Mercancia NoIdentificacion="SKU-100" FraccionArancelaria="8473300201" CantidadAduana="100.000"
+                         UnidadAduana="06" ValorUnitarioAduana="100.000000" ValorDolares="10000.0000">
+          <cce20:DescripcionesEspecificas Marca="SINTEX" Modelo="CTRL-1" NumeroSerie="SN-0001"/>
+          <cce20:DescripcionesEspecificas Marca="SINTEX" Modelo="CTRL-1" SubModelo="B" NumeroSerie="SN-0002"/>
+        </cce20:Mercancia>
+        <cce20:Mercancia NoIdentificacion="SKU-200" FraccionArancelaria="8504409999" CantidadAduana="50.000"
+                         UnidadAduana="06" ValorUnitarioAduana="50.000000" ValorDolares="2500.0000"/>
+      </cce20:Mercancias>
+    </cce20:ComercioExterior>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="66666666-7777-8888-9999-000000000000"
+                             FechaTimbrado="2026-03-10T09:31:00" RfcProvCertif="PAC010101PAC"
+                             SelloCFD="c2VsbG9TaW50ZXRpY28=" NoCertificadoSAT="00001000000500000001"
+                             SelloSAT="c2VsbG9TQVRTaW50ZXRpY28="/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

@@ -37,7 +37,7 @@ export type {
   RegistroDeEsquemas,
 } from './registro.js'
 
-export { CFDI_40, TIMBRE_11, PAGOS_20, SIN_LECTOR, nombreDelEsquema } from './cfdi/espacios.js'
+export { CFDI_40, TIMBRE_11, PAGOS_20, COMERCIO_EXTERIOR_20, SIN_LECTOR, nombreDelEsquema } from './cfdi/espacios.js'
 
 export {
   leeCfdi40,
@@ -54,4 +54,5 @@ export type {
 
 export { lectorDeTimbre11, INVENTARIO_TIMBRE } from './cfdi/timbre-11.js'
 export { lectorDePagos20, INVENTARIO_PAGOS } from './cfdi/pagos-20.js'
+export { lectorDeComercioExterior20, INVENTARIO_COMERCIO_EXTERIOR } from './cfdi/comercio-exterior-20.js'
 export { INVENTARIO, OMITIDOS } from './cfdi/inventario.js'
