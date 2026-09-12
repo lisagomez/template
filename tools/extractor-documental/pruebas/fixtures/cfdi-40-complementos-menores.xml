@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SINTETICO. Una factura de hospedaje de una donataria con los tres complementos menores a la
+     vez: impuestos locales (dos retenciones y un traslado, que el esquema declara [0..1] pero los
+     comprobantes reales traen como hermanos), leyendas fiscales (dos) y donatarias. Los tres llevan
+     `version` en minuscula, como en el esquema. Datos inventados. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:implocal="http://www.sat.gob.mx/implocal"
+                  xmlns:leyendasFisc="http://www.sat.gob.mx/leyendasFiscales"
+                  xmlns:donat="http://www.sat.gob.mx/donat"
+                  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+                  Version="4.0" Serie="H" Folio="0088" Fecha="2026-06-20T18:00:00"
+                  Moneda="MXN" SubTotal="1000.00" Total="1130.00" TipoDeComprobante="I"
+                  MetodoPago="PUE" FormaPago="04" Exportacion="01" LugarExpedicion="77500">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="FUNDACION SINTETICA AC" RegimenFiscal="603"/>
+  <cfdi:Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL" DomicilioFiscalReceptor="77500" RegimenFiscalReceptor="616" UsoCFDI="S01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="90111500" Cantidad="1" ClaveUnidad="DAY" Descripcion="Hospedaje sintetico"
+                   ValorUnitario="1000.00" Importe="1000.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="1000.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="160.00"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="160.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="1000.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="160.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <implocal:ImpuestosLocales version="1.0" TotaldeRetenciones="50.00" TotaldeTraslados="30.00">
+      <implocal:RetencionesLocales ImpLocRetenido="ISR CEDULAR" TasadeRetencion="2.50" Importe="25.00"/>
+      <implocal:RetencionesLocales ImpLocRetenido="ISN" TasadeRetencion="2.50" Importe="25.00"/>
+      <implocal:TrasladosLocales ImpLocTrasladado="ISH" TasadeTraslado="3.00" Importe="30.00"/>
+    </implocal:ImpuestosLocales>
+    <leyendasFisc:LeyendasFiscales version="1.0">
+      <leyendasFisc:Leyenda disposicionFiscal="LISR" norma="Art. 93" textoLeyenda="Leyenda sintetica uno"/>
+      <leyendasFisc:Leyenda textoLeyenda="Leyenda sintetica dos, sin norma"/>
+    </leyendasFisc:LeyendasFiscales>
+    <donat:Donatarias version="1.1" noAutorizacion="700-29-00-00-00-2026-00123" fechaAutorizacion="2026-01-15"
+                      leyenda="Este comprobante ampara un donativo sintetico"/>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="99999999-0000-1111-2222-333333333333"
+                             FechaTimbrado="2026-06-20T18:01:00" RfcProvCertif="PAC010101PAC"
+                             SelloCFD="c2VsbG9TaW50ZXRpY28=" NoCertificadoSAT="00001000000500000001"
+                             SelloSAT="c2VsbG9TQVRTaW50ZXRpY28="/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
