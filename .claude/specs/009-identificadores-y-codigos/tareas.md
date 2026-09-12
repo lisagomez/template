@@ -80,10 +80,33 @@
 - [x] **TAR-11 · Documentación de cierre**: README (sección «Identificadores y códigos antes que
       OCR», subpaths nuevos), SDD §2.24, esta tabla.
 
+- [x] **TAR-12 · Zona del NSS en el alta del IMSS.** Medido sobre la forma (enmascarada) de las 5
+      hojas reales: el NSS no está a la derecha de su etiqueta sino **debajo**, como columna de una
+      tabla («Tipo | NSS | Nombre», valor en la línea siguiente) o bajo «No. de Afiliación al
+      Seguro Social» con el valor partido «99 999999999». Cambios en `motores-locales/tesseract.py`:
+      candidatos de zona en orden (derecha → columna por tokens debajo → columna geométrica bajo la
+      etiqueta hasta el siguiente encabezado → línea siguiente), márgenes según el origen de la
+      caja (una caja geométrica sin aire lateral: con 20 px se pegaba un «71» de la columna
+      vecina), la forma se busca por ventanas de 1 a 4 tokens contiguos que la casen entera (no
+      dentro de la fila pegada), lista blanca **por software** en zonas solo de dígitos (O→0, I→1,
+      S→5…; el LSTM ignora la de Tesseract), rayas horizontales de tabla quitadas del recorte, y
+      `psm 7` de respaldo tras `psm 8`. Hojas sintéticas de alta con NSS Luhn válido en las dos
+      formas: `medicion/genera-alta-imss.py`.
+
+      | | Antes | Ahora |
+      |---|---|---|
+      | Hojas de alta IMSS reales con NSS válido | 0 de 5 | **4 de 5** (la quinta es una copia que Tesseract lee como basura) |
+      | Expedientes con NSS válido | 3 de 4 | **4 de 4** |
+      | Hojas de alta sintéticas (verdad conocida) | — | 4 de 4 exactas |
+      | RFC exactos en facturas sintéticas (no regresión) | 7 de 7 | 7 de 7 |
+      | NSS inválidos (a revisión) | — | 0 |
+      | Páginas por minuto (4 en vuelo) | 197 | 123: cada etiqueta prueba hasta 4 zonas y 2 modos |
+
 ## Abiertas
 
-- Ninguna de esta spec. Lo que sigue es del proyecto: elegir la regla de derivación, añadir la
-  zona del NSS en el formato de alta del IMSS, y una muestra corregida a mano para calibrar.
+- Ninguna de esta spec. Lo que sigue es del proyecto: elegir la regla de derivación, la zona de
+  la CURP en la constancia de RENAPO (hoy 2 de 5 hojas sin QR la dan por OCR; el respaldo la lee),
+  y una muestra corregida a mano para calibrar.
 
 ## Bloqueadas o no medidas
 
