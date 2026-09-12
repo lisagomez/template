@@ -102,11 +102,44 @@
       | NSS inválidos (a revisión) | — | 0 |
       | Páginas por minuto (4 en vuelo) | 197 | 123: cada etiqueta prueba hasta 4 zonas y 2 modos |
 
+- [x] **TAR-13 · Zona de la CURP en la constancia de RENAPO, y el límite de la corrección.**
+      Forma (enmascarada) de las 5 hojas reales: la clave grande y **sola en su línea** bajo el
+      título (sin etiqueta al lado), en prosa tras «Clave Única de Registro de Población», o con
+      etiqueta y dos puntos. Cambios: (1) en el flujo por página los patrones se aplican **además**
+      de los campos por zona (antes era «o», y una CURP limpia en la prosa se perdía cuando la zona
+      ya daba un RFC); (2) plantillas de posiciones por identificador (`LLLLDDDDDDLLLLLLAD` para la
+      CURP): la lista blanca por software se aplica posición a posición, letra→dígito donde va
+      dígito y dígito→letra donde va letra; (3) búsqueda por forma en toda la página para las zonas
+      que lo declaran; (4) lectura **relajada** de una posición de clase equivocada, que llega al
+      checksum en vez de perderse; (5) las lecturas por zona van también al markdown de la página,
+      porque el cotejo contra la transcripción (regla de 008) las descartaba; (6) los validadores
+      corren **antes** del cotejo con el QR, para que una lectura mala no deje al QR «en
+      discrepancia». Sintéticas: `medicion/genera-constancias-curp.py`, tres formas.
+
+      | | Antes | Ahora |
+      |---|---|---|
+      | Hojas CURP reales con CURP (5) | 2 (ambas por QR) | **3** (la tercera por OCR, y coincide con el QR del expediente) |
+      | Constancias sintéticas exactas | — | 4 de 4 |
+      | Altas IMSS sintéticas / reales | 4 de 4 / 4 de 5 | 4 de 4 / 4 de 5 |
+      | RFC exactos en facturas sintéticas | 7 de 7 | 7 de 8 leídos |
+      | Acuerdos / discrepancias QR↔OCR | 3 / 0 | 5 / 0 |
+      | Inválidos a revisión (curp, nss, rfc) | 1 | 8: la lectura relajada propone más y el checksum los frena |
+
+      **El hallazgo que cambia la regla.** De 4 correcciones por checksum propuestas, el QR del
+      mismo expediente **confirmó 1 y contradijo 2** (la cuarta no tenía QR con que cotejar). Un
+      dígito verificador de módulo 10 deja pasar una de cada diez sustituciones, y con ocho
+      posiciones confundibles eso se nota. Desde este cambio, **un corregido no entra a `campos`**:
+      se propone en `corregidos` y lo confirma una persona o un código. Coste visible: un expediente
+      pierde el único RFC que tenía, porque solo salía corregido. Es lo correcto (C4).
+
+      Las dos hojas CURP que siguen sin dar la clave son copias de baja calidad (la pasada de
+      página confunde tres o más posiciones); ahí la vía es el respaldo con el modelo de visión,
+      que las leyó en la corrida de TAR-10.
+
 ## Abiertas
 
-- Ninguna de esta spec. Lo que sigue es del proyecto: elegir la regla de derivación, la zona de
-  la CURP en la constancia de RENAPO (hoy 2 de 5 hojas sin QR la dan por OCR; el respaldo la lee),
-  y una muestra corregida a mano para calibrar.
+- Ninguna de esta spec. Lo que sigue es del proyecto: elegir la regla de derivación y una muestra
+  corregida a mano para calibrar.
 
 ## Bloqueadas o no medidas
 

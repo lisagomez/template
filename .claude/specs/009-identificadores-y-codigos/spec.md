@@ -40,8 +40,9 @@ hoja. Todo declarado; ningún umbral inventado; ningún byte fuera de la máquin
    desde su QR, con procedencia `codigo`, para no depender del OCR en el dato que más importa.
 2. Como integrador, quiero validar RFC, CURP y NSS por su dígito verificador, para tener una
    confianza que no dependa de cómo se escaneó la hoja.
-3. Como revisor, quiero que un identificador corregido por checksum me llegue **marcado** y sin
-   auto-validarse, porque un checksum puede «arreglar» hacia el identificador de otra persona.
+3. Como revisor, quiero que un identificador corregido por checksum me llegue como **propuesta**
+   y nunca como dato, porque un checksum puede «arreglar» hacia el identificador de otra persona
+   (medido: de 4 correcciones, el QR confirmó 1 y contradijo 2).
 4. Como integrador, quiero clasificar páginas por su título y omitir las que no aportan (cartas de
    recomendación), para no pagar motor por ellas.
 5. Como integrador, quiero enchufar Tesseract como motor local por el mismo puerto que un modelo
@@ -90,8 +91,8 @@ hoja. Todo declarado; ningún umbral inventado; ningún byte fuera de la máquin
   exactamente una variante pasa.
 - RF-14: SI hay dos o más variantes que pasan, ENTONCES EL SISTEMA deberá declarar `ambiguo` y
   no deberá corregir.
-- RF-15: EL SISTEMA deberá conservar la confianza original de un campo corregido y deberá
-  declararlo en `corregidos` con su valor original.
+- RF-15: EL SISTEMA deberá declarar un campo corregido en `corregidos` con su valor original y
+  no deberá incluirlo en `campos`: es una propuesta que confirma una persona o un código.
 - RF-16: CUANDO un identificador de procedencia `codigo` o `xml` no pasa, EL SISTEMA deberá
   declararlo inválido con esa procedencia y no deberá intentar corregirlo.
 - RF-17: EL SISTEMA deberá excluir de `campos` todo identificador que no pasó y no se corrigió.

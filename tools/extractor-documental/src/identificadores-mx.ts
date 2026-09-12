@@ -165,6 +165,9 @@ export const validaNss = (valor: string): boolean => diagnosticaNss(valor).valid
 
 const PARES_CONFUNDIBLES: readonly (readonly [string, string])[] = [
   ['0', 'O'], ['1', 'I'], ['1', 'L'], ['I', 'L'], ['5', 'S'], ['8', 'B'], ['2', 'Z'], ['6', 'G'],
+  // Las tres que faltaban salieron de constancias reales de CURP (2026-09-11): una letra donde va
+  // el primer digito del anio. Siguen siendo pares de una posicion, sometidos al checksum.
+  ['3', 'E'], ['4', 'A'], ['7', 'T'],
 ]
 
 function tablaSimetrica(pares: readonly (readonly [string, string])[]): Readonly<Record<string, readonly string[]>> {
