@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  analizaCarga, parseaGs1, validaModulo10, validaGuiaFedexExpress, validaDigitoDeControl,
+  analizaCarga, camposDeCodigo, parseaGs1, validaModulo10, validaGuiaFedexExpress, validaDigitoDeControl,
   esRafagaDeEscaner,
 } from '../dist/codigos.js'
 
@@ -83,4 +83,65 @@ test('rafaga de escaner: la heuristica es el plan B y sus parametros son obligat
   assert.equal(esRafagaDeEscaner(humano, opc), false)
   assert.equal(esRafagaDeEscaner([0, 10], opc), false, 'demasiado corto para distinguirlo')
   assert.throws(() => esRafagaDeEscaner(maquina, { msEntreTeclas: 0, minimoCaracteres: 6 }), RangeError)
+})
+
+// --- Constancias: SAT (situacion fiscal) y RENAPO (CURP). Formas MEDIDAS, valores inventados -----
+
+const CSF_CORTA = 'https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=12345678901_SAT970701NN3'
+const CSF_LARGA = 'https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=1&D2=1&D3=||2026/01/15|SAT970701NN3|SERVICIO DE ADMINISTRACION TRIBUTARIA|_c2VsbG8='
+
+test('el QR corto de la constancia de situacion fiscal da rfc e id_cif, y el destino se muestra, no se abre', () => {
+  const a = analizaCarga(CSF_CORTA)
+  assert.equal(a.tipo, 'csf')
+  assert.deepEqual(a.campos, { id_cif: '12345678901', rfc: 'SAT970701NN3' })
+  assert.equal(a.destino, CSF_CORTA)
+})
+
+test('el QR largo da rfc, fecha de emision y nombre; el sello no se toca', () => {
+  const a = analizaCarga(CSF_LARGA)
+  assert.equal(a.tipo, 'csf')
+  assert.deepEqual(a.campos, { rfc: 'SAT970701NN3', fecha_emision: '2026/01/15', nombre: 'SERVICIO DE ADMINISTRACION TRIBUTARIA' })
+})
+
+test('un D3 sin forma de RFC no se adivina: queda como url', () => {
+  const a = analizaCarga('https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=12345678901_NOESRFC')
+  assert.equal(a.tipo, 'url')
+  assert.deepEqual(a.campos, {})
+})
+
+test('la constancia de CURP con campos por | da la curp y los datos impresos; la de etiquetas, curp, nombre y numero de validacion', () => {
+  const pipes = analizaCarga('GOAJ040229HDFNRNA6||GOMEZ|ALVAREZ|JUAN PABLO|HOMBRE|29/02/2004|DISTRITO FEDERAL|01|')
+  assert.equal(pipes.tipo, 'curp')
+  assert.deepEqual(pipes.campos, {
+    curp: 'GOAJ040229HDFNRNA6', apellido_paterno: 'GOMEZ', apellido_materno: 'ALVAREZ', nombres: 'JUAN PABLO',
+    sexo: 'HOMBRE', fecha_nacimiento: '29/02/2004', entidad_nacimiento: 'DISTRITO FEDERAL',
+  })
+  const etiquetas = analizaCarga('||Número de Validación Legal: 12345678901 |Nombre: JUAN PABLO GOMEZ ALVAREZ |CURP: GOAJ040229HDFNRNA6||')
+  assert.equal(etiquetas.tipo, 'curp')
+  assert.deepEqual(etiquetas.campos, { curp: 'GOAJ040229HDFNRNA6', nombre: 'JUAN PABLO GOMEZ ALVAREZ', numero_validacion: '12345678901' })
+})
+
+test('un Code128 con solo el RFC en claro es tipo rfc', () => {
+  const a = analizaCarga('SAT970701NN3')
+  assert.equal(a.tipo, 'rfc')
+  assert.deepEqual(a.campos, { rfc: 'SAT970701NN3' })
+})
+
+test('un QR de otro tipo (CFE, INE, vacunacion) NO trae rfc ni curp: es url y punto', () => {
+  for (const otra of ['https://app.cfe.mx/Aplicaciones/CCFE/Login.aspx', 'https://qr.ine.mx/004697', 'https://cvcovid.salud.gob.mx/compruebaVacuna?id1=x&id2=y']) {
+    const a = analizaCarga(otra)
+    assert.equal(a.tipo, 'url')
+    assert.deepEqual(a.campos, {})
+  }
+})
+
+test('camposDeCodigo: procedencia codigo, confianza 1, identificadores marcados, y de texto no sale nada', () => {
+  const campos = camposDeCodigo(analizaCarga(CSF_CORTA))
+  assert.deepEqual(campos, [
+    { clave: 'id_cif', valor: '12345678901', confianza: 1, procedencia: 'codigo', formato: 'identificador' },
+    { clave: 'rfc', valor: 'SAT970701NN3', confianza: 1, procedencia: 'codigo', formato: 'identificador' },
+  ])
+  const conNombre = camposDeCodigo(analizaCarga(CSF_LARGA))
+  assert.equal(conNombre.find((c) => c.clave === 'nombre')?.formato, undefined, 'un nombre no es identificador: se compara por parecido')
+  assert.deepEqual(camposDeCodigo(analizaCarga('hola')), [])
 })

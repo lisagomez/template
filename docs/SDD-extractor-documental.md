@@ -600,6 +600,31 @@ Y un techo que conviene tener delante: sin GPU, el cuello es la codificación de
 generación. Ahí no ayuda un modelo más pequeño; ayuda no mandar al motor lo que no lo necesita
 (capa 0 y XML), que en el corpus de medición fue más de la mitad de los documentos.
 
+### 2.24 Fuente determinista antes que estimada: los codigos, el digito verificador y el limite de la correccion
+
+Un OCR devuelve una confianza que nadie calibra, y un expediente laboral se decide por tres
+identificadores. Medido el 2026-09-11 sobre 84 paginas reales: el preprocesado de imagen movio la
+confianza de Tesseract entre 0 y 3 puntos; los modos que la «suben» leen la mitad de palabras; y el
+RFC del empleado salio legible en 1 de 4 expedientes. Mientras, la constancia de situacion fiscal
+llevaba el RFC exacto en un QR y en un Code128, y la constancia de CURP la CURP en un QR.
+
+La decision es de orden, no de motor: **primero lo determinista** (el codigo, con `procedencia:
+'codigo'` y confianza 1), **despues lo estimado** (el OCR, por zonas para los identificadores), y
+**entre los dos, el cotejo** (`corrobora`). Y una confianza que no viene del motor: el digito
+verificador de RFC, CURP y NSS (`identificadores-mx.ts`), que dice si el valor puede existir sin
+consultar a nadie. Medido tras el cambio: los cuatro expedientes con RFC valido, la CURP
+corroborada por QR en tres de cuatro, 197 paginas por minuto.
+
+El limite es el que impone C4. Un checksum tambien permite **corregir**: probar las confusiones
+de OCR y quedarse con la variante que pasa. Se hace, pero con dos cerrojos que no se negocian: una
+sola posicion, y solo si exactamente una variante pasa. Y el valor corregido **nunca se
+auto-valida**: conserva la confianza del OCR y se declara. Medido: de 2 RFC corregidos, ninguno lo
+confirmaba un QR del mismo expediente. Corregir hacia el RFC de otra persona es un dano que recae
+sobre alguien que no firmo nada; por eso lo cierra el QR o una persona, nunca la aritmetica.
+
+Lo que queda fuera por la misma razon: el QR de la INE y el de vacunacion se cuentan por tipo y
+largo, no se parsean ni se conservan; consultar RENAPO o al SAT saca el dato a un tercero.
+
 ## 3. Principio de diseño
 
 > **El humano no revisa lo que el sistema extrajo. El humano decide qué significa, y el sistema

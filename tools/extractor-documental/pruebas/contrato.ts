@@ -22,7 +22,7 @@ const raiz = join(dirname(fileURLToPath(import.meta.url)), '..')
  * ningun gate se enterara. Un contrato que solo cubre la mitad del paquete es justo la clase de
  * control que pasa su propia prueba mientras deja el hueco abierto.
  */
-const CARPETAS_DE_ADAPTADOR = ['motores/', 'almacenes/', 'react/'] as const
+const CARPETAS_DE_ADAPTADOR = ['motores/', 'almacenes/', 'react/', 'lectores/'] as const
 
 function fuentesBajo(desde: string, prefijo = ''): string[] {
   const salida: string[] = []
@@ -55,6 +55,7 @@ test('una carpeta nueva bajo src/ se clasifica como nucleo, no como adaptador', 
   assert.equal(esAdaptador('motores/mistral.ts'), true)
   assert.equal(esAdaptador('almacenes/supabase.ts'), true)
   assert.equal(esAdaptador('react/index.ts'), true)
+  assert.equal(esAdaptador('lectores/zxing.ts'), true)
 })
 
 test('toda carpeta declarada como adaptador existe de verdad', () => {
@@ -214,4 +215,10 @@ test('en ninguna parte se declara un sello como verificado', () => {
     const codigo = readFileSync(join(raiz, 'src', archivo), 'utf8')
     assert.doesNotMatch(codigo, /verificado:\s*true/, `src/${archivo} da un sello por verificado`)
   }
+})
+
+test('el lector de codigos de servidor NO sale a la red: el wasm sale del paquete instalado, nunca de un CDN', () => {
+  const fuente = readFileSync(new URL('../src/lectores/zxing.ts', import.meta.url), 'utf8')
+  assert.doesNotMatch(fuente, /\bfetch\b|jsdelivr|unpkg|https?:\/\//, 'zxing-wasm busca su .wasm en un CDN si no se le inyecta')
+  assert.match(fuente, /wasmBinary/, 'tiene que inyectar el binario')
 })

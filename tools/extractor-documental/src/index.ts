@@ -51,7 +51,7 @@ export { identidadDe, esElMismoDocumento, identidadDeLectura } from './identidad
 export type { LecturaDeCodigo } from './identidad.js'
 
 export {
-  analizaCarga,
+  analizaCarga, camposDeCodigo,
   parseaGs1,
   validaModulo10,
   validaGuiaFedexExpress,
@@ -186,3 +186,16 @@ export type {
 
 export { imagenesDelPdf } from './pdf-flujos.js'
 export type { ImagenDelPdf } from './pdf-flujos.js'
+
+// Identificadores mexicanos con digito verificador, y clasificacion de paginas por titulo (spec 009).
+export {
+  validaRfc, diagnosticaRfc, digitoVerificadorRfc, validaCurp, diagnosticaCurp, digitoVerificadorCurp,
+  validaNss, diagnosticaNss, validaLuhn, corrigePorChecksum, CONFUSIONES_OCR, RFC_GENERICOS, ENTIDADES_CURP,
+} from './identificadores-mx.js'
+export type { Validador, MotivoDeInvalidez, DiagnosticoDeIdentificador, OpcionesDeRfc, Correccion } from './identificadores-mx.js'
+export { declaraClases, clasePorTitulo, clasificaPaginas, SIN_CLASIFICAR } from './clasifica-pagina.js'
+export type { ClaseDePagina, ClasificacionDePagina } from './clasifica-pagina.js'
+export { leePagina, emparejaPorClave, fusionaCampos, aplicaValidadores } from './lote-pagina.js'
+export type {
+  OpcionesDePagina, LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido, CamposValidados,
+} from './lote-pagina.js'

@@ -76,6 +76,9 @@ function usoDe(respuesta: unknown): UsoDeTokens | null {
   if (!esObjeto(respuesta) || !esObjeto(respuesta.usage)) return null
   const { prompt_tokens: entrada, completion_tokens: salida, total_tokens: total } = respuesta.usage
   if (typeof entrada !== 'number' || typeof salida !== 'number') return null
+  // Medido el 2026-09-11 con Ollama y GLM-OCR sobre imagen: declara `usage` con todo ceros. Un cero
+  // declarado es tan poco dato como ninguno, y sumarlo haria parecer que la corrida no costo nada.
+  if (entrada === 0 && salida === 0) return null
   return {
     tokensDeEntrada: entrada,
     tokensDeSalida: salida,

@@ -9,8 +9,18 @@
  * una URL que venga de un codigo.
  */
 
-/** Lo que se reconoce en la carga. `desconocido` es una respuesta valida, no un fallo. */
-export type TipoDeCarga = 'url' | 'cfdi' | 'gs1' | 'fnsku' | 'guia' | 'texto'
+import type { CampoExtraido } from './tipos.js'
+
+/**
+ * Lo que se reconoce en la carga. `texto` es una respuesta valida, no un fallo.
+ *
+ * `csf`, `curp` y `rfc` salieron de medir expedientes reales el 2026-09-11 (solo la FORMA de sus
+ * codigos, nunca el contenido): la constancia de situacion fiscal del SAT lleva un QR con
+ * `D3=<idCIF>_<RFC>` (o `||fecha|RFC|nombre|sello` en su forma larga) y un Code128 con el RFC en
+ * claro; la constancia de CURP de RENAPO lleva un QR de texto con campos separados por `|`, o con
+ * etiquetas «Numero de Validacion Legal / Nombre / CURP».
+ */
+export type TipoDeCarga = 'url' | 'cfdi' | 'csf' | 'curp' | 'rfc' | 'gs1' | 'fnsku' | 'guia' | 'texto'
 
 export interface CargaAnalizada {
   tipo: TipoDeCarga
@@ -149,6 +159,78 @@ function camposCfdi(url: URL): Readonly<Record<string, string>> {
  *
  * Ojo con `url`: se devuelve el destino para MOSTRARLO. Abrirlo es el fraude entero.
  */
+// --- Constancias del SAT y de RENAPO ---------------------------------------------------------
+
+const FORMA_RFC = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/
+const CURP_EN_TEXTO = /\b[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d\b/
+const CSF = /(^|\.)siat\.sat\.gob\.mx$/i
+
+/**
+ * `D3` de la constancia de situacion fiscal. Dos formas medidas: `<idCIF>_<RFC>` y
+ * `||<yyyy/mm/dd>|<RFC>|<nombre>|<sello>`. Si el RFC no tiene forma de RFC, `null`: se declara
+ * como `url` en vez de adivinar.
+ */
+function camposCsf(url: URL): Readonly<Record<string, string>> | null {
+  if (!/validadorqr\.jsf$/i.test(url.pathname)) return null
+  const d3 = url.searchParams.get('D3') ?? ''
+  const conGuion = /^(\d+)_([A-ZÑ&0-9]{12,13})$/i.exec(d3)
+  if (conGuion !== null) {
+    const rfc = conGuion[2].toUpperCase()
+    return FORMA_RFC.test(rfc) ? { id_cif: conGuion[1], rfc } : null
+  }
+  const partes = d3.split('|')
+  if (partes.length < 5) return null
+  const rfc = partes[3].trim().toUpperCase()
+  if (!FORMA_RFC.test(rfc)) return null
+  const campos: Record<string, string> = { rfc }
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(partes[2].trim())) campos.fecha_emision = partes[2].trim()
+  if (partes[4].trim().length > 0) campos.nombre = partes[4].trim()
+  return campos
+}
+
+/** El QR de la constancia de CURP: campos por `|`, o etiquetas. Sin token con forma de CURP, `null`. */
+function camposCurp(texto: string): Readonly<Record<string, string>> | null {
+  const curp = CURP_EN_TEXTO.exec(texto.toUpperCase())?.[0]
+  if (curp === undefined) return null
+  const campos: Record<string, string> = { curp }
+  const partes = texto.split('|').map((p) => p.trim())
+  if (partes[0].toUpperCase() === curp && partes.length >= 8) {
+    const [, , apellidoPaterno, apellidoMaterno, nombres, sexo, fechaNacimiento, entidad] = partes
+    for (const [clave, valor] of [
+      ['apellido_paterno', apellidoPaterno], ['apellido_materno', apellidoMaterno], ['nombres', nombres],
+      ['sexo', sexo], ['fecha_nacimiento', fechaNacimiento], ['entidad_nacimiento', entidad],
+    ] as const) {
+      if (valor.length > 0) campos[clave] = valor
+    }
+    return campos
+  }
+  const nombre = /Nombre:\s*([^|]+)/i.exec(texto)?.[1].trim()
+  const validacion = /Validaci[oó]n\s+Legal:\s*(\d+)/i.exec(texto)?.[1]
+  if (nombre !== undefined && nombre.length > 0) campos.nombre = nombre
+  if (validacion !== undefined) campos.numero_validacion = validacion
+  return campos
+}
+
+/** Claves que son identificadores: se comparan por igualdad exacta, nunca por parecido. */
+const CLAVES_IDENTIFICADORAS: ReadonlySet<string> = new Set([
+  'uuid', 'rfc', 'rfc_emisor', 'rfc_receptor', 'curp', 'id_cif', 'numero_validacion', 'gtin', 'sscc', 'serie', 'lote', 'guia', 'fnsku',
+])
+
+/**
+ * Los campos de una carga como `CampoExtraido`: procedencia `codigo`, confianza 1 (decodificar es
+ * exacto) y sin region. NO valida nada: decir que forma tiene no es decir que sea cierto — para eso
+ * estan los validadores y el cotejo contra el OCR.
+ */
+export function camposDeCodigo(carga: CargaAnalizada): CampoExtraido[] {
+  return Object.entries(carga.campos).map(([clave, valor]) => ({
+    clave,
+    valor,
+    confianza: 1,
+    procedencia: 'codigo',
+    ...(CLAVES_IDENTIFICADORAS.has(clave) ? { formato: 'identificador' as const } : {}),
+  }))
+}
+
 export function analizaCarga(carga: string): CargaAnalizada {
   const limpia = carga.trim()
 
@@ -162,8 +244,17 @@ export function analizaCarga(carga: string): CargaAnalizada {
     if (CFDI.test(url.hostname)) {
       return { tipo: 'cfdi', cruda: carga, campos: camposCfdi(url), destino: url.href }
     }
+    if (CSF.test(url.hostname)) {
+      const campos = camposCsf(url)
+      if (campos !== null) return { tipo: 'csf', cruda: carga, campos, destino: url.href }
+    }
     return { tipo: 'url', cruda: carga, campos: {}, destino: url.href }
   }
+
+  if (FORMA_RFC.test(limpia.toUpperCase())) return { tipo: 'rfc', cruda: carga, campos: { rfc: limpia.toUpperCase() } }
+
+  const curp = camposCurp(limpia)
+  if (curp !== null) return { tipo: 'curp', cruda: carga, campos: curp }
 
   if (FNSKU.test(limpia)) return { tipo: 'fnsku', cruda: carga, campos: { fnsku: limpia.toUpperCase() } }
 

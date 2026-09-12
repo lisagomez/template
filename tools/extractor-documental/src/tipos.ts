@@ -111,6 +111,13 @@ export interface PaginaExtraida {
   indice: number
   markdown: string
   campos: CampoExtraido[]
+  /**
+   * Confianza de la pagina ENTERA, 0 a 1, tal como la declara el motor (Tesseract da una media
+   * por palabra; un modelo de vision no da ninguna). Opcional y aditiva. Sirve para que el
+   * proyecto decida si manda la pagina a un segundo motor — con SU regla, no con un umbral de aqui.
+   * No esta calibrada: medido el 2026-09-11, el preprocesado la mueve 0-3 puntos.
+   */
+  confianza?: number
 }
 
 /**

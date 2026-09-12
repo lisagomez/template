@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/extractor-documental",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Extraccion de datos de documentos (PDF, imagenes, manuscritos) con revision humana y mapeo contra catalogos existentes. Nucleo en TypeScript puro: el motor de OCR y el almacen se inyectan.",
   "type": "module",
   "license": "UNLICENSED",
@@ -41,11 +41,20 @@
     "./react": {
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.js"
+    },
+    "./lectores/zxing": {
+      "types": "./dist/lectores/zxing.d.ts",
+      "import": "./dist/lectores/zxing.js"
+    },
+    "./motores/proceso-local": {
+      "types": "./dist/motores/proceso-local.d.ts",
+      "import": "./dist/motores/proceso-local.js"
     }
   },
   "files": [
     "dist",
-    "migraciones"
+    "migraciones",
+    "motores-locales"
   ],
   "sideEffects": false,
   "engines": {
