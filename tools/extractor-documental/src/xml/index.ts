@@ -37,7 +37,7 @@ export type {
   RegistroDeEsquemas,
 } from './registro.js'
 
-export { CFDI_40, TIMBRE_11, PAGOS_20, COMERCIO_EXTERIOR_20, CARTA_PORTE_31, SIN_LECTOR, nombreDelEsquema } from './cfdi/espacios.js'
+export { CFDI_40, TIMBRE_11, PAGOS_20, COMERCIO_EXTERIOR_20, CARTA_PORTE_31, NOMINA_12, SIN_LECTOR, nombreDelEsquema } from './cfdi/espacios.js'
 
 export {
   leeCfdi40,
@@ -55,5 +55,8 @@ export type {
 export { lectorDeTimbre11, INVENTARIO_TIMBRE } from './cfdi/timbre-11.js'
 export { lectorDePagos20, INVENTARIO_PAGOS } from './cfdi/pagos-20.js'
 export { lectorDeComercioExterior20, INVENTARIO_COMERCIO_EXTERIOR } from './cfdi/comercio-exterior-20.js'
-export { lectorDeCartaPorte31, INVENTARIO_CARTA_PORTE, claveDeAtributo } from './cfdi/carta-porte-31.js'
+export { lectorDeCartaPorte31, INVENTARIO_CARTA_PORTE } from './cfdi/carta-porte-31.js'
+export { lectorDeNomina12, INVENTARIO_NOMINA, CLAVES_SENSIBLES_NOMINA, PREFIJOS_SENSIBLES_NOMINA } from './cfdi/nomina-12.js'
+export { lectorDeArbol, inventarioDe, claveDeAtributo } from './cfdi/lector-de-arbol.js'
+export type { Rama, OpcionesDeLectorDeArbol } from './cfdi/lector-de-arbol.js'
 export { INVENTARIO, OMITIDOS } from './cfdi/inventario.js'
