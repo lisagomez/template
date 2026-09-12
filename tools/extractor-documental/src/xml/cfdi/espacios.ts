@@ -52,12 +52,18 @@ export const PAGOS_20 = 'http://www.sat.gob.mx/Pagos20'
 export const COMERCIO_EXTERIOR_20 = 'http://www.sat.gob.mx/ComercioExterior20'
 
 /**
+ * Carta Porte 3.1, el del traslado de mercancias. Direccion CONFIRMADA contra su esquema oficial
+ * (`CartaPorte31.xsd`, leido el 2026-09-12), no contra un documento: el mapeo sigue sin
+ * ejercitarse contra una carta porte real.
+ */
+export const CARTA_PORTE_31 = 'http://www.sat.gob.mx/CartaPorte31'
+
+/**
  * Direcciones de complementos que este paquete NO lee todavia.
  *
- * Estan declaradas y no implementadas a proposito, y no es un descuido: sin un documento real de
- * cada uno, escribir su mapeo seria transcribir la norma a ciegas. La de nomina ademas lleva datos
- * de un empleado que no eligio estar aqui, y eso pide su propio analisis de impacto (C4), no una
- * fila anadida de paso.
+ * La de nomina lleva datos de un empleado que no eligio estar aqui, y eso pide su propio analisis
+ * de impacto (C4), no una fila anadida de paso. Comercio exterior y carta porte ya tienen lector,
+ * escrito contra su XSD y cotejado con `medicion/deriva.mjs`; su mapeo espera un documento real.
  *
  * Sirven para que el aviso de complemento sin lector pueda NOMBRARLOS en vez de soltar una
  * direccion cruda a la cara de quien revisa. Registrar el lector el dia que haya documento es una
@@ -65,7 +71,6 @@ export const COMERCIO_EXTERIOR_20 = 'http://www.sat.gob.mx/ComercioExterior20'
  */
 export const SIN_LECTOR: Readonly<Record<string, string>> = {
   'http://www.sat.gob.mx/nomina12': 'Nomina 1.2',
-  'http://www.sat.gob.mx/CartaPorte31': 'Carta Porte 3.1',
 }
 
 /** El nombre legible de una direccion conocida, o `null` si no la conocemos de nada. */
@@ -74,5 +79,6 @@ export function nombreDelEsquema(espacio: string): string | null {
   if (espacio === TIMBRE_11) return 'Timbre fiscal digital'
   if (espacio === PAGOS_20) return 'Pagos 2.0'
   if (espacio === COMERCIO_EXTERIOR_20) return 'Comercio Exterior 2.0'
+  if (espacio === CARTA_PORTE_31) return 'Carta Porte 3.1'
   return SIN_LECTOR[espacio] ?? null
 }
