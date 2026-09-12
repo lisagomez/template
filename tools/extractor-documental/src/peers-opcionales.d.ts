@@ -15,3 +15,7 @@ declare module 'zxing-wasm' {
     opciones?: unknown,
   ): Promise<readonly { text: string }[]>
 }
+
+// `zxing-wasm/reader`: el lector de servidor lo carga por `import()` dinamico y castea lo que usa
+// (`ModuloZxing` en `src/lectores/zxing.ts`); aqui solo se declara el subpath para que compile sin el peer.
+declare module 'zxing-wasm/reader'

@@ -308,3 +308,11 @@ test('en modo transcripcion tambien se reporta el uso: el callback no depende de
   await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
   assert.deepEqual(capturado, { tokensDeEntrada: 900, tokensDeSalida: 40, tokensTotal: 940 })
 })
+
+test('un `usage` con todo ceros es no declarar: el callback recibe null (medido con Ollama y GLM-OCR)', async () => {
+  const { falso } = fetchFalso({ ...respuestaCon(UNA_PAGINA), usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } })
+  const motor = motorCompatible({ base: 'http://x/v1', modelo: 'glm-ocr:q8_0', fetch: falso })
+  let capturado: unknown = 'no-se-llamo'
+  await motor.extrae(PDF, { alConsumirTokens: (uso) => { capturado = uso } })
+  assert.equal(capturado, null)
+})

@@ -82,15 +82,19 @@ export function validaPaginas(crudo: unknown): PaginaExtraida[] {
   }
   return crudo.paginas.map((pagina: unknown, posicion: number): PaginaExtraida => {
     if (!esObjeto(pagina)) throw new Error(`pagina ${posicion}: no es un objeto`)
-    const { indice, markdown, campos } = pagina
+    const { indice, markdown, campos, confianza } = pagina
     if (typeof markdown !== 'string') throw new Error(`pagina ${posicion}: \`markdown\` no es texto`)
     const camposValidos = Array.isArray(campos)
       ? campos.map(validaCampo).filter((c): c is CampoExtraido => c !== null)
       : []
+    // La confianza de pagina se acepta solo como numero en [0,1]; un "alta" o un 85 se descartan
+    // en silencio igual que en los campos: mejor sin dato que con un dato que no compara.
+    const confianzaValida = typeof confianza === 'number' && Number.isFinite(confianza) && confianza >= 0 && confianza <= 1
     return {
       indice: typeof indice === 'number' && Number.isInteger(indice) && indice >= 0 ? indice : posicion,
       markdown,
       campos: camposValidos,
+      ...(confianzaValida ? { confianza } : {}),
     }
   })
 }
