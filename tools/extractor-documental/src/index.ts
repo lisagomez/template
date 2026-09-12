@@ -195,7 +195,8 @@ export {
 export type { Validador, MotivoDeInvalidez, DiagnosticoDeIdentificador, OpcionesDeRfc, Correccion } from './identificadores-mx.js'
 export { declaraClases, clasePorTitulo, clasificaPaginas, SIN_CLASIFICAR } from './clasifica-pagina.js'
 export type { ClaseDePagina, ClasificacionDePagina } from './clasifica-pagina.js'
-export { leePagina, emparejaPorClave, fusionaCampos, aplicaValidadores } from './lote-pagina.js'
+export { leePagina, emparejaPorClave, fusionaCampos, aplicaValidadores, reglaFaltaIdentificador } from './lote-pagina.js'
 export type {
   OpcionesDePagina, LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido, CamposValidados,
+  ContextoDeDerivacion, ReglaDeDerivacion,
 } from './lote-pagina.js'

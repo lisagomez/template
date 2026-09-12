@@ -141,7 +141,17 @@ hoja. Todo declarado; ningún umbral inventado; ningún byte fuera de la máquin
 
 - RF-34: EL SISTEMA (script de medición) deberá imprimir conteos y nunca valores de identificadores,
   nombres ni cargas de códigos.
-- RF-35: EL SISTEMA deberá exigir que el corpus real de la medición quedar fuera del repositorio.
+- RF-35: EL SISTEMA deberá exigir que el corpus real de la medición quede fuera del repositorio.
+
+### Regla de derivación
+
+- RF-36: EL SISTEMA deberá ofrecer `reglaFaltaIdentificador(esperados)`, que deriva una página
+  al respaldo cuando su clase espera un identificador que ni el código ni el OCR dieron, o cuando
+  el OCR propuso un identificador que no pasó la validación y no hay otro válido de esa clave; y
+  no deberá derivar por confianza de página.
+- RF-37: CUANDO se pasa `reglaFaltaIdentificador`, EL SISTEMA deberá entregarle la clase de la
+  página, los identificadores inválidos y los códigos leídos, además del texto y los campos
+  válidos.
 
 ## Requisitos no funcionales
 
@@ -200,5 +210,5 @@ de riesgo no se firma en el registro: se diseña para que no exista.
 - Formato del QR de la CURP en constancias de otros años: medido sobre dos formas; una tercera
   caería en `texto` con el campo `curp` igual (el token se busca dentro de la carga).
 - Si conviene reutilizar lecturas entre lotes distintos (hoy solo dentro del lote).
-- Qué regla de derivación adoptar en producción: la medición compara «clase sin identificador»
-  con «confianza de página por debajo de n»; la elección queda para quien opera.
+- Ninguna sobre la regla de derivación: la medición la decidió (`reglaFaltaIdentificador`,
+  TAR-14). La de confianza queda en el script solo para poder medirla.

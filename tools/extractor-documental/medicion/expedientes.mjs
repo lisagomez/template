@@ -18,7 +18,7 @@ import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const { leeCorpus, declaraClases, diagnosticaRfc, diagnosticaCurp, diagnosticaNss } = await import(`${RAIZ}/dist/index.js`)
+const { leeCorpus, declaraClases, diagnosticaRfc, diagnosticaCurp, diagnosticaNss, reglaFaltaIdentificador } = await import(`${RAIZ}/dist/index.js`)
 const { motorPorProceso } = await import(`${RAIZ}/dist/motores/proceso-local.js`)
 const { motorCompatible } = await import(`${RAIZ}/dist/motores/openai-compat.js`)
 const { lectorZxing } = await import(`${RAIZ}/dist/lectores/zxing.js`)
@@ -87,15 +87,15 @@ const motor = motorPorProceso({
 const EN_VUELO = Number(arg('en-vuelo', '4'))
 const motorDeRespaldo = RESPALDO === null ? undefined : motorCompatible({ base: 'http://127.0.0.1:11434/v1', modelo: RESPALDO, modo: 'transcripcion', milisegundosDeEspera: 3_600_000, fetch: await fetchSinTope() })
 
-/** Las dos reglas de derivacion que se comparan. Ninguna viene puesta: las pasa el operador. */
+/**
+ * Las dos reglas de derivacion que se comparan. Ninguna viene puesta: las pasa el operador.
+ * `reglaFaltaIdentificador` es la que la medicion respalda (ver tareas.md, TAR-14); la de
+ * confianza queda para poder medirla, no porque se recomiende.
+ */
 const derivaAlRespaldo = DERIVA_BAJO !== null
   ? (pagina) => (pagina.confianza ?? 0) < Number(DERIVA_BAJO)
   : bandera('deriva-sin-identificador')
-    ? (pagina, campos) => {
-        const clase = CLASES.find((c) => c.titulo.test(pagina.markdown))?.clase
-        const esperadas = clase === undefined ? [] : (CLAVES_ESPERADAS[clase] ?? [])
-        return esperadas.length > 0 && !esperadas.some((k) => campos.some((c) => c.clave === k))
-      }
+    ? reglaFaltaIdentificador(CLAVES_ESPERADAS)
     : undefined
 
 const validadores = { rfc: diagnosticaRfc, curp: diagnosticaCurp, nss: diagnosticaNss }

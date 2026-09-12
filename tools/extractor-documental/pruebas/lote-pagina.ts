@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { leePagina, emparejaPorClave, fusionaCampos, aplicaValidadores } from '../dist/lote-pagina.js'
+import { leePagina, emparejaPorClave, fusionaCampos, aplicaValidadores, reglaFaltaIdentificador } from '../dist/lote-pagina.js'
 import { leeCorpus } from '../dist/lote-corpus.js'
 import { diagnosticaRfc, diagnosticaCurp } from '../dist/identificadores-mx.js'
 import { declaraClases } from '../dist/clasifica-pagina.js'
@@ -197,4 +197,28 @@ test('leeCorpus: un RFC invalido en un XML se declara invalido con procedencia x
   assert.equal(l.identificadoresInvalidos[0].procedencia, 'xml')
   assert.deepEqual(l.corregidos, [])
   assert.ok(!l.campos.some((c) => c.clave === 'rfc_emisor'))
+})
+
+// --- La regla de derivacion que la medicion respalda -----------------------------------------
+
+test('reglaFaltaIdentificador: deriva la clase que espera un identificador y no lo tiene; no deriva si ya lo dio el QR', async () => {
+  const llamadas: Uint8Array[] = []
+  const respaldo = motorFalso([pagina('nada')], llamadas)
+  const clases = declaraClases([{ clase: 'csf', titulo: /constancia de situaci[oó]n fiscal/i }])
+  const regla = reglaFaltaIdentificador({ csf: ['rfc'] })
+  const sinRfc = await leePagina(IMAGEN, 0, { motor: motorFalso([pagina('CONSTANCIA DE SITUACION FISCAL sin nada legible')]), motorDeRespaldo: respaldo, derivaAlRespaldo: regla, clases })
+  assert.equal(llamadas.length, 1, 'falta el RFC esperado: se deriva')
+  assert.deepEqual(sinRfc.respaldo, [pagina('nada')])
+  await leePagina(IMAGEN, 0, { motor: motorFalso([pagina('CONSTANCIA DE SITUACION FISCAL')]), motorDeRespaldo: respaldo, derivaAlRespaldo: regla, clases, lectorDeCodigos: lectorFalso([CSF]) })
+  assert.equal(llamadas.length, 1, 'el QR ya dio el RFC: no se gasta el respaldo')
+})
+
+test('reglaFaltaIdentificador: deriva la pagina con un identificador invalido sin otro valido, y no una pagina sin clase ni fallos', async () => {
+  const llamadas: Uint8Array[] = []
+  const respaldo = motorFalso([pagina('nada')], llamadas)
+  const regla = reglaFaltaIdentificador({})
+  await leePagina(IMAGEN, 0, { motor: motorFalso(OCR_CON_RFC('SAT970701NN2')), motorDeRespaldo: respaldo, derivaAlRespaldo: regla, validadores: { rfc: diagnosticaRfc } })
+  assert.equal(llamadas.length, 1, 'un RFC que no paso el checksum y nadie mas dio: al respaldo')
+  await leePagina(IMAGEN, 0, { motor: motorFalso([pagina('texto de una carta, confianza baja', [], 0.2)]), motorDeRespaldo: respaldo, derivaAlRespaldo: regla })
+  assert.equal(llamadas.length, 1, 'confianza baja sin expectativa ni fallo: no se deriva; la confianza no esta calibrada')
 })

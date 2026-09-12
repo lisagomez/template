@@ -136,10 +136,39 @@
       página confunde tres o más posiciones); ahí la vía es el respaldo con el modelo de visión,
       que las leyó en la corrida de TAR-10.
 
+- [x] **TAR-14 · La regla de derivación al respaldo, definida por medición.** Candidatas sobre
+      las 84 páginas de la última corrida base:
+
+      | Regla | Páginas que deriva | Coste estimado (150 s/pág) | Solape |
+      |---|---|---|---|
+      | A: clase con identificador esperado que ni QR ni OCR dieron | 3 | ~8 min | — |
+      | C: identificador que no pasó el checksum sin otro válido de esa clave | 3 | ~8 min | — |
+      | B: confianza de página < 0,6 | 12 | ~30 min | 2 con A∪C |
+
+      Las 12 de confianza baja son casi todas fotos, sellos y hojas de identificación sin
+      identificador que rescatar, y la confianza no está calibrada. La regla es **A ∪ C**:
+      `reglaFaltaIdentificador(esperados)`, exportada del núcleo; el proyecto la instancia con sus
+      clases y **no hay umbral**. Corrida real con GLM-OCR bajo esa regla (2 en vuelo, `fetch` sin
+      tope):
+
+      | Dato | Valor |
+      |---|---|
+      | Páginas derivadas | 6 de 72 no omitidas |
+      | Tiempo de respaldo | 1471 s (150 a 331 s por página, en frío) · lote 910 s frente a 42 s |
+      | Páginas que pasaron de nada a un identificador válido | **4 de 6** (3 CURP, 1 RFC) |
+      | Identificadores distintos NUEVOS por expediente | 1 RFC; las 3 CURP corroboran las ya conocidas por otra hoja |
+      | Páginas sin resultado | 2 (una hoja CURP y un alta IMSS de baja calidad; 1 inválido cada una, a revisión) |
+      | Discrepancias | 0 |
+
+      Lectura: la regla gasta el motor caro solo donde hay algo que rescatar (4 de 6 aciertos)
+      frente a la de confianza, que habría gastado el doble en hojas sin identificador. Su rendimiento
+      en identificadores NUEVOS es bajo porque los expedientes traen cada clave en varias hojas:
+      lo que compra es corroboración. Es la que va en el README.
+
 ## Abiertas
 
-- Ninguna de esta spec. Lo que sigue es del proyecto: elegir la regla de derivación y una muestra
-  corregida a mano para calibrar.
+- Ninguna de esta spec. Lo que sigue es del proyecto: una muestra corregida a mano para calibrar
+  la confianza, si algún día se quiere usar como señal.
 
 ## Bloqueadas o no medidas
 
