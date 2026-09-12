@@ -520,6 +520,14 @@ tipografía y de que el XML resultara ser el documento fiscal y el PDF su repres
       códigos contra lo que publica el SAT, en las dos direcciones. Salen a la red a propósito, y
       por eso viven fuera del paquete y **fuera de `npm run validate`**. La referencia va fechada
       por quien publica, así que el historial de git es la serie.
+      **Aprendizaje 2026-09-12**: `deriva.mjs` unía los inventarios de todos los lectores con
+      spread, por nombre de elemento. `Emisor`, `Receptor` y `Domicilio` existen en el tronco, en
+      comercio exterior y en nómina con atributos distintos, así que el último de la lista tapaba a
+      los demás: el cotejo de comercio exterior "derivó" sin haber cambiado nada, y el del tronco
+      habría salido igual. Ahora cada inventario va indexado por el `targetNamespace` del XSD, que
+      es lo único que decide contra qué se compara. Corrida completa contra los nueve XSD oficiales:
+      sin deriva en ocho; Pagos 2.0 lista sus 15 atributos no mapeados (desglose por tasa de IVA y
+      sellos del pago), que el lector deja fuera a propósito y declara en `noLeido`.
 
 - [x] **TAR-54 · Lectores de nómina y carta porte.**
       → `src/xml/cfdi/carta-porte-31.ts` · `nomina-12.ts` · `comercio-exterior-20.ts` ·
