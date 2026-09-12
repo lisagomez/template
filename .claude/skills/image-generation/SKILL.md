@@ -24,7 +24,7 @@ npx tsx .claude/skills/image-generation/scripts/generate-image.ts \
   [--image /path/to/input.png] \
   [--output /path/to/output.png] \
   [--aspect 16:9] \
-  [--model google/gemini-2.5-flash-preview-image-generation]
+  [--model google/gemini-3.1-flash-image | auto]
 ```
 
 ## Argumentos
@@ -35,14 +35,22 @@ npx tsx .claude/skills/image-generation/scripts/generate-image.ts \
 | `--image` | NO | Path a imagen de entrada (para editar/transformar una imagen existente) |
 | `--output` | NO | Path de salida personalizado. Default: `generated/img-{timestamp}.png` |
 | `--aspect` | NO | Aspect ratio: `1:1` (default), `16:9`, `9:16`, `4:3`, `3:2` |
-| `--model` | NO | Model ID de OpenRouter. Default: `google/gemini-2.5-flash-preview-image-generation` |
+| `--model` | NO | Id EXACTO de OpenRouter (default: `google/gemini-3.1-flash-image`) o `auto` |
 
-### Modelos Disponibles
+### Modelos (pineados — cambiarlos es CDC)
 
 | Modelo | Mejor para |
 |--------|-----------|
-| `google/gemini-2.5-flash-preview-image-generation` | Default. Rapido, buena calidad |
-| `google/gemini-2.5-pro-preview-image-generation` | Pro quality, mas detalle |
+| `google/gemini-3.1-flash-image` | Default. Rapido, buena calidad |
+| `google/gemini-3-pro-image` | Mas detalle cuando el flash no alcanza |
+| `auto` | OpenRouter elige, pero SOLO entre los candidatos pineados del script (fallback routing: prueba en orden y responde el primero disponible; la salida `MODEL:` dice cual fue) |
+
+**`openrouter/auto` y todo alias `:latest` se rechazan**: un alias auto-actualizable cambia el
+comportamiento sin diff ni aprobacion (C1) y no garantiza un modelo con salida de imagen. El
+`auto` de arriba es la version acotada: seleccion de OpenRouter dentro de una lista declarada.
+
+Si el modelo pineado deja de existir en OpenRouter (paso el 2026-09-10), el script **lista los
+modelos de imagen vigentes** en el error, para que la deriva salga con el arreglo en la mano.
 
 ---
 
@@ -67,7 +75,12 @@ npx tsx .claude/skills/image-generation/scripts/generate-image.ts \
 # Usando modelo Pro
 npx tsx .claude/skills/image-generation/scripts/generate-image.ts \
   --prompt "Detailed architectural blueprint of a SaaS platform" \
-  --model google/gemini-2.5-pro-preview-image-generation
+  --model google/gemini-3-pro-image
+
+# Dejando que OpenRouter elija entre los candidatos pineados
+npx tsx .claude/skills/image-generation/scripts/generate-image.ts \
+  --prompt "Hero image for a logistics dashboard" \
+  --model auto
 ```
 
 ---
