@@ -225,7 +225,8 @@ riesgo para ese caso; se rediseña o no se hace.
   medido, no se estima.
 - Reanudación de un corpus a medias y cola persistente: la orquestación es libre y vive fuera
   del núcleo; este trabajo entrega el lote en memoria con orden y tiempos.
-- Nómina y Carta Porte: siguen como en 007, declarados sin lector.
+- Nómina y Carta Porte: siguen como en 007, declarados sin lector. *(Construidos después y fuera
+  de esta spec, el 2026-09-12: ver 007 TAR-54.)*
 - Cambiar `AGENTS.md`, un skill o un prompt: es un CDC con su propio gate.
 
 ## Criterios de finalización

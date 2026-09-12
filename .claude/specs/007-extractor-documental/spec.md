@@ -331,7 +331,7 @@ eligieron estar aquí.
 | El identificador y los registros fiscales de **dos** terceros salen hacia un servicio externo, revelando su relación comercial | RF-93: no se consulta ningún servicio de verificación fiscal |
 | Un XML enviado por un proveedor lee ficheros del servidor donde corre el lector | RF-89, RF-90: el DOCTYPE se rechaza por construcción, y no hay bandera que lo reactive |
 | Un recibo de pago entra como factura de cero pesos y descuadra la cuenta de **un proveedor** que no participó en el error | RF-85, RF-96: el complemento sin leer se reporta y se advierte antes de dar los importes por definitivos |
-| El recibo de nómina de un empleado, que no eligió estar aquí, se mapea a ciegas contra un esquema que nadie verificó | Nómina **no se implementa** hasta tener un documento real: RF-85 la declara sin leer en vez de adivinarla |
+| El recibo de nómina de un empleado, que no eligió estar aquí, se mapea a ciegas contra un esquema que nadie verificó | Hasta el 2026-09-12 nómina no se implementó y RF-85 la declaraba sin leer. Desde entonces tiene lector, escrito contra el XSD oficial y con el análisis de impacto (C4) en su cabecera; sigue **sin verificar contra un recibo real**, lo dice, y nombra en `CLAVES_SENSIBLES_NOMINA` lo que el proyecto trata como categoría especial (TAR-54) |
 
 **Límite de C5**: si los documentos llevan datos personales de terceros, sacarlos del perímetro
 **no es un riesgo firmable por el dueño del proyecto**. Se usa el adaptador autohospedado o se
