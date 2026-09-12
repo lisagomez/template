@@ -40,9 +40,25 @@ import { INVENTARIO_COMERCIO_EXTERIOR } from '../dist/xml/cfdi/comercio-exterior
 import { INVENTARIO_CARTA_PORTE } from '../dist/xml/cfdi/carta-porte-31.js'
 import { INVENTARIO_NOMINA } from '../dist/xml/cfdi/nomina-12.js'
 import { INVENTARIO_IMPUESTOS_LOCALES, INVENTARIO_LEYENDAS_FISCALES, INVENTARIO_DONATARIAS } from '../dist/xml/cfdi/menores.js'
+import {
+  CFDI_40, TIMBRE_11, PAGOS_20, COMERCIO_EXTERIOR_20, CARTA_PORTE_31, NOMINA_12,
+  IMPUESTOS_LOCALES_10, LEYENDAS_FISCALES_10, DONATARIAS_11, nombreDelEsquema,
+} from '../dist/xml/cfdi/espacios.js'
 
-/** El tronco MAS los complementos. Sin unirlos, los complementos no se comparaban con nada. */
-const INVENTARIO = { ...DEL_TRONCO, ...INVENTARIO_TIMBRE, ...INVENTARIO_PAGOS, ...INVENTARIO_COMERCIO_EXTERIOR, ...INVENTARIO_CARTA_PORTE, ...INVENTARIO_NOMINA, ...INVENTARIO_IMPUESTOS_LOCALES, ...INVENTARIO_LEYENDAS_FISCALES, ...INVENTARIO_DONATARIAS }
+/**
+ * Un inventario POR ESPACIO DE NOMBRES, nunca unidos por nombre de elemento.
+ *
+ * Aprendido el 2026-09-12: la version anterior los unia con spread, y `Emisor`, `Receptor` y
+ * `Domicilio` existen en el tronco, en comercio exterior y en nomina con atributos distintos. El
+ * ultimo de la lista tapaba a los demas, asi que el cotejo de comercio exterior salia con "deriva"
+ * que no existia y el del tronco habria salido igual. Un XSD declara su `targetNamespace`, y es lo
+ * unico que decide contra que inventario se compara.
+ */
+const INVENTARIOS = new Map([
+  [CFDI_40, DEL_TRONCO], [TIMBRE_11, INVENTARIO_TIMBRE], [PAGOS_20, INVENTARIO_PAGOS],
+  [COMERCIO_EXTERIOR_20, INVENTARIO_COMERCIO_EXTERIOR], [CARTA_PORTE_31, INVENTARIO_CARTA_PORTE], [NOMINA_12, INVENTARIO_NOMINA],
+  [IMPUESTOS_LOCALES_10, INVENTARIO_IMPUESTOS_LOCALES], [LEYENDAS_FISCALES_10, INVENTARIO_LEYENDAS_FISCALES], [DONATARIAS_11, INVENTARIO_DONATARIAS],
+])
 
 const XSD = 'http://www.w3.org/2001/XMLSchema'
 const b = (s) => `\x1b[1m${s}\x1b[0m`
@@ -95,6 +111,7 @@ async function traeEsquema(donde) {
  */
 function elementosDelEsquema(texto) {
   const doc = analizaXml(texto)
+  const espacio = doc.raiz.atributos.find((a) => a.nombreLocal === 'targetNamespace')?.valor ?? ''
   const mapa = new Map()
   const importados = new Set()
 
@@ -119,7 +136,7 @@ function elementosDelEsquema(texto) {
   }
 
   recorre(doc.raiz, null)
-  return { mapa, importados }
+  return { espacio, mapa, importados }
 }
 
 const rutas = argumentos[0] === '--documento' ? urlsDelDocumento(argumentos[1]) : argumentos
@@ -131,18 +148,22 @@ if (rutas.length === 0) {
 console.log(b('\nDeriva del lector contra el esquema publicado'))
 console.log(g(`  Sale a la red a proposito. No forma parte de \`npm run validate\`.\n`))
 
+/** espacio -> (elemento -> atributos), tal como lo declaran los XSD leidos. */
 const delEsquema = new Map()
 const sinSeguir = new Set()
 for (const ruta of rutas) {
   try {
     const { texto } = await traeEsquema(ruta)
-    const { mapa, importados } = elementosDelEsquema(texto)
+    const { espacio, mapa, importados } = elementosDelEsquema(texto)
+    if (!delEsquema.has(espacio)) delEsquema.set(espacio, new Map())
+    const elementos = delEsquema.get(espacio)
     for (const [elemento, atributos] of mapa) {
-      if (!delEsquema.has(elemento)) delEsquema.set(elemento, new Set())
-      for (const a of atributos) delEsquema.get(elemento).add(a)
+      if (!elementos.has(elemento)) elementos.set(elemento, new Set())
+      for (const a of atributos) elementos.get(elemento).add(a)
     }
     for (const i of importados) if (!rutas.includes(i)) sinSeguir.add(i)
-    console.log(`  ${verde('leido')} ${ruta}  ${g(`(${mapa.size} elemento(s))`)}`)
+    const nombre = nombreDelEsquema(espacio) ?? (INVENTARIOS.has(espacio) ? espacio : 'SIN LECTOR AQUI')
+    console.log(`  ${verde('leido')} ${ruta}  ${g(`(${nombre}: ${mapa.size} elemento(s))`)}`)
   } catch (error) {
     console.log(`  ${rojo('FALLO')} ${ruta}: ${error.message}`)
     process.exitCode = 2
@@ -153,14 +174,18 @@ let derivas = 0
 console.log(b('\nEN EL ESQUEMA Y NO EN EL LECTOR'))
 console.log(g('  Lo que el SAT declara y aqui no se mapea. Anadirlo, o declararlo omitido a proposito.'))
 let huecos = 0
-for (const [elemento, atributos] of delEsquema) {
-  const conocidos = INVENTARIO[elemento]
-  if (conocidos === undefined) continue // Elemento entero que no tratamos: se ve en el resumen.
-  const omitidos = new Set(OMITIDOS[elemento] ?? [])
-  const faltan = [...atributos].filter((a) => !conocidos.includes(a) && !omitidos.has(a))
-  if (faltan.length === 0) continue
-  console.log(`  ${ambar(elemento)}: ${faltan.join(', ')}`)
-  huecos += faltan.length
+for (const [espacio, elementos] of delEsquema) {
+  const inventario = INVENTARIOS.get(espacio)
+  if (inventario === undefined) continue // Un esquema sin lector: se ve en el resumen.
+  for (const [elemento, atributos] of elementos) {
+    const conocidos = inventario[elemento]
+    if (conocidos === undefined) continue // Elemento entero que no tratamos: se ve en el resumen.
+    const omitidos = new Set(espacio === CFDI_40 ? OMITIDOS[elemento] ?? [] : [])
+    const faltan = [...atributos].filter((a) => !conocidos.includes(a) && !omitidos.has(a))
+    if (faltan.length === 0) continue
+    console.log(`  ${ambar(`${nombreDelEsquema(espacio)} · ${elemento}`)}: ${faltan.join(', ')}`)
+    huecos += faltan.length
+  }
 }
 if (huecos === 0) console.log(`  ${verde('ninguno')}`)
 derivas += huecos
@@ -168,28 +193,41 @@ derivas += huecos
 console.log(b('\nEN EL LECTOR Y NO EN EL ESQUEMA'))
 console.log(g('  Peor senal: mapeamos algo que el esquema no declara. O se invento, o lo quitaron.'))
 let inventados = 0
-for (const [elemento, atributos] of Object.entries(INVENTARIO)) {
-  const enEsquema = delEsquema.get(elemento)
-  if (enEsquema === undefined) continue // Ese elemento no estaba en los XSD leidos.
-  const sobran = atributos.filter((a) => !enEsquema.has(a))
-  if (sobran.length === 0) continue
-  console.log(`  ${rojo(elemento)}: ${sobran.join(', ')}`)
-  inventados += sobran.length
+for (const [espacio, inventario] of INVENTARIOS) {
+  const elementos = delEsquema.get(espacio)
+  if (elementos === undefined) continue // Ese esquema no se leyo.
+  for (const [elemento, atributos] of Object.entries(inventario)) {
+    const enEsquema = elementos.get(elemento)
+    if (enEsquema === undefined) continue // Ese elemento no estaba en el XSD leido.
+    const sobran = atributos.filter((a) => !enEsquema.has(a))
+    if (sobran.length === 0) continue
+    console.log(`  ${rojo(`${nombreDelEsquema(espacio)} · ${elemento}`)}: ${sobran.join(', ')}`)
+    inventados += sobran.length
+  }
 }
 if (inventados === 0) console.log(`  ${verde('ninguno')}`)
 derivas += inventados
 
-const omitidos = Object.entries(OMITIDOS).flatMap(([e, as]) => as.map((a) => `${e}/@${a}`))
-if (omitidos.length > 0) {
-  console.log(b('\nOMITIDOS A PROPOSITO'))
-  console.log(g('  Presentes en el esquema y NO leidos por decision. No son deriva.'))
-  console.log(`  ${omitidos.join(', ')}`)
+if (delEsquema.has(CFDI_40)) {
+  const omitidos = Object.entries(OMITIDOS).flatMap(([e, as]) => as.map((a) => `${e}/@${a}`))
+  if (omitidos.length > 0) {
+    console.log(b('\nOMITIDOS A PROPOSITO'))
+    console.log(g('  Presentes en el esquema y NO leidos por decision. No son deriva.'))
+    console.log(`  ${omitidos.join(', ')}`)
+  }
 }
 
-const noComparados = Object.keys(INVENTARIO).filter((e) => !delEsquema.has(e))
+const sinLector = [...delEsquema.keys()].filter((e) => !INVENTARIOS.has(e))
+if (sinLector.length > 0) {
+  console.log(b('\nESQUEMAS LEIDOS SIN LECTOR EN EL PAQUETE'))
+  console.log(g('  No hay nada con que compararlos. Registrar un lector es decision del proyecto.'))
+  console.log(`  ${sinLector.join(', ')}`)
+}
+
+const noComparados = [...INVENTARIOS.keys()].filter((e) => !delEsquema.has(e)).map((e) => nombreDelEsquema(e) ?? e)
 if (noComparados.length > 0) {
   console.log(b('\nSIN COMPARAR'))
-  console.log(g('  El lector los conoce y ningun XSD leido los declara. Falta el esquema que los trae.'))
+  console.log(g('  Lectores del paquete cuyo esquema no se leyo. Pasalo como argumento para cubrirlo.'))
   console.log(`  ${noComparados.join(', ')}`)
 }
 
