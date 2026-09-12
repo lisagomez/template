@@ -3384,3 +3384,34 @@ confianza) sigue bloqueada con tres motores medidos, y aplicar cualquier propues
 sigue siendo gate humano.
 
 ---
+
+### 2026-09-12 — el skill de imagenes deja de apuntar a un modelo retirado, y gana un modo auto ACOTADO — radio: skill
+- **Cambio**: `.claude/skills/image-generation/scripts/generate-image.ts` reescrito y
+  `SKILL.md` alineado. (1) Default pineado nuevo: `google/gemini-3.1-flash-image` (el
+  anterior, `gemini-2.5-flash-preview-image-generation`, ya no existe en OpenRouter). (2)
+  `--model auto`: **fallback routing de OpenRouter** sobre tres candidatos PINEADOS en orden
+  — OpenRouter ejecuta la seleccion, pero dentro de una lista declarada; la salida `MODEL:`
+  reporta cual respondio. (3) Guardia C1 en codigo: `openrouter/auto` y todo alias
+  `:latest` se rechazan con la explicacion. (4) Ante "modelo no valido", el error **lista los
+  modelos de imagen vigentes** del catalogo publico: la deriva sale accionable, no muda. (5)
+  Parseo del formato actual (`message.images` + `modalities`) ademas del legado, y la
+  respuesta completa **ya no se vuelca a logs** (lleva el contenido y el razonamiento dentro).
+  (6) Dos contratos nuevos de capa A: el id retirado no puede volver, y el veto al alias
+  flotante queda vigilado.
+- **Motivo**: hallazgo del 2026-09-10 generando los sketchnotes del artefacto del extractor:
+  el modelo cableado devolvia 400 y el script, ademas, no encontraba la imagen en el formato
+  actual y volcaba la respuesta entera (~60 KB con razonamiento) al log. Pedido explicito del
+  usuario: arreglo + "modo auto de OpenRouter" — el alias abierto contradice C1 y no
+  garantiza salida de imagen, asi que el modo auto se entrega ACOTADO a candidatos pineados.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A con los 2 contratos nuevos) ·
+  `validate` completo ☑ · aprobación humana ☑ (pedido explicito en sesion)
+- **Probado de verdad, no documentado** (leccion del CLI de Playwright): (1) default pineado →
+  imagen generada, respondio `google/gemini-3.1-flash-image`; (2) `--model auto` → imagen
+  generada con `MODEL:` reportado; (3) el id retirado → error 400 con la lista de 6 modelos
+  de imagen vigentes hoy; (4) `openrouter/auto` → rechazado nombrando C1 y la alternativa.
+- **Riesgo residual**: los tres candidatos pineados tambien caducaran algun dia — ese dia el
+  error ya trae la lista vigente y actualizar el pineo es un CDC de una linea. Y el catalogo
+  publico se consulta sin clave, solo en la ruta de error.
+- **Regresión**: capa A verde con contratos nuevos (ver validate).
+- **Aprobado por**: huertavictor (usuario de la sesion; pedido explicito) — a ratificar por
+  lisagomez, responsable del proyecto
