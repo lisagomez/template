@@ -46,8 +46,8 @@ export function claveDeAtributo(nombre: string): string {
  * elemento puede aparecer en dos ramas con atributos distintos (`Contenedor` en barco y en tren):
  * se unen, porque el XSD se lee por nombre.
  */
-export function inventarioDe(raiz: string, atributosDeRaiz: readonly string[], ramas: readonly Rama[]): Readonly<Record<string, readonly string[]>> {
-  const inventario: Record<string, string[]> = { [raiz]: ['Version', ...atributosDeRaiz] }
+export function inventarioDe(raiz: string, atributosDeRaiz: readonly string[], ramas: readonly Rama[], atributoDeVersion = 'Version'): Readonly<Record<string, readonly string[]>> {
+  const inventario: Record<string, string[]> = { [raiz]: [atributoDeVersion, ...atributosDeRaiz] }
   const recorre = (lista: readonly Rama[]): void => {
     for (const rama of lista) {
       inventario[rama.nombre] = [...new Set([...(inventario[rama.nombre] ?? []), ...rama.atributos])]
@@ -61,8 +61,10 @@ export function inventarioDe(raiz: string, atributosDeRaiz: readonly string[], r
 export interface OpcionesDeLectorDeArbol {
   readonly clave: ClaveDeEsquema
   readonly nombre: string
-  /** Atributos de la raiz, ademas de `Version` (que es la clave del registro, no un campo). */
+  /** Atributos de la raiz, ademas del de version (que es la clave del registro, no un campo). */
   readonly atributosDeRaiz: readonly string[]
+  /** `Version` en los complementos grandes; `version` en impuestos locales, leyendas y donatarias. */
+  readonly atributoDeVersion?: 'Version' | 'version'
   readonly ramas: readonly Rama[]
   /** Nombres de atributo del SAT que se comparan exactos, nunca por parecido. */
   readonly identificadores: ReadonlySet<string>
@@ -116,7 +118,7 @@ export function lectorDeArbol(opciones: OpcionesDeLectorDeArbol): LectorDeComple
         }
       }
 
-      recoge(nodo, ['Version', ...opciones.atributosDeRaiz], '')
+      recoge(nodo, [opciones.atributoDeVersion ?? 'Version', ...opciones.atributosDeRaiz], '')
       recorre(nodo, opciones.ramas, '')
       if (opciones.extra !== undefined) campos.push(...opciones.extra(nodo))
 

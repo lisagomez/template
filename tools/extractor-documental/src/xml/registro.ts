@@ -30,7 +30,8 @@ export interface ClaveDeEsquema {
   readonly espacio: string
   readonly nombreLocal: string
   /**
-   * El valor EXACTO del atributo `Version`. Pineado, como el modelo de un motor de OCR (C1).
+   * El valor EXACTO del atributo `Version` (o `version`: asi lo escriben impuestos locales,
+   * leyendas fiscales y donatarias). Pineado, como el modelo de un motor de OCR (C1).
    *
    * No hay comodin y no lo habra. Aplicado a un esquema fiscal, un comodin significa leer con las
    * reglas de una version los datos de otra, y el resultado no es un error visible: es un dato
@@ -144,7 +145,10 @@ export function registroDeEsquemas(lectores: readonly LectorDeComplemento[]): Re
 
       for (const nodo of complemento.hijos) {
         const espacio = nodo.espacio ?? ''
-        const version = atributo(nodo, 'Version')
+        // `Version` en el tronco y los complementos grandes; `version` en impuestos locales,
+        // leyendas fiscales y donatarias (asi lo declaran sus XSD). Se miran las dos: el registro
+        // se indexa por el valor, y el nombre del atributo es un accidente del esquema.
+        const version = atributo(nodo, 'Version') ?? atributo(nodo, 'version')
         const disponibles = versionesDe(espacio, nodo.nombreLocal)
         const hueco = `sin lector registrado para "${nodo.nombreLocal}" en ${espacio}`
 

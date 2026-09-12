@@ -318,6 +318,7 @@ import { motorCompatible } from '/extractor/motores/openai-compat.js'
 import {
   leeCfdi40, camposParaCotejo, cotejaSelloConQr, avisoDelComprobante,
   registroDeEsquemas, lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, lectorDeNomina12,
+  lectorDeImpuestosLocales10, lectorDeLeyendasFiscales10, lectorDeDonatarias11,
 } from '/extractor/xml/index.js'
 import { aplanaEntradas, raicesDe, desdeInput } from '/extractor/react/aplana.js'
 
@@ -750,9 +751,9 @@ $('btn-cotejar').onclick = () => {
   if (xmlSoltado === null) {
     return pinta('salida-cotejo', aviso('Falta el XML: suéltalo arriba.', 'malo'))
   }
-  // Se registran los cinco complementos que el paquete trae. Lo que no este registrado NO se lee y
+  // Se registran los ocho complementos que el paquete trae. Lo que no este registrado NO se lee y
   // se declara — que es justo lo que hay que poder ver aqui.
-  const registro = registroDeEsquemas([lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, lectorDeNomina12])
+  const registro = registroDeEsquemas([lectorDeTimbre11, lectorDePagos20, lectorDeComercioExterior20, lectorDeCartaPorte31, lectorDeNomina12, lectorDeImpuestosLocales10, lectorDeLeyendasFiscales10, lectorDeDonatarias11])
   const lectura = leeCfdi40(xmlSoltado.bytes, registro)
   if (!lectura.esCfdi) {
     return pinta('salida-cotejo', aviso(`Ese XML no es un CFDI 4.0 legible. Motivo: <em>${esc(lectura.motivo)}</em>`, 'malo'))

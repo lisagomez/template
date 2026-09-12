@@ -521,10 +521,13 @@ tipografía y de que el XML resultara ser el documento fiscal y el PDF su repres
       por eso viven fuera del paquete y **fuera de `npm run validate`**. La referencia va fechada
       por quien publica, así que el historial de git es la serie.
 
-- [ ] **TAR-54 · Lectores de nómina y carta porte.**
-      Bloqueada hasta tener un documento real de cada uno. Sin él solo se puede transcribir la
-      norma, y ahí un error no se ve hasta producción. Nómina además lleva datos de un empleado que
-      no eligió estar aquí, y eso pide su propio análisis de impacto (C4), no una fila añadida de
-      paso. Mientras tanto **se declaran, no desaparecen**: aparecen con su dirección y su versión.
-      → duda abierta de la spec
+- [x] **TAR-54 · Lectores de nómina y carta porte.**
+      → `src/xml/cfdi/carta-porte-31.ts` · `nomina-12.ts` · `comercio-exterior-20.ts` ·
+      `menores.ts` (impuestos locales 1.0, leyendas fiscales 1.0, donatarias 1.1), todos sobre
+      `lector-de-arbol.ts`. Nómina lleva su análisis de impacto (C4) escrito en la cabecera del
+      lector, con `CLAVES_SENSIBLES_NOMINA` para que el proyecto decida quién ve qué.
+      **Estado de la evidencia, sin maquillar**: la estructura está cotejada contra los XSD
+      oficiales con `medicion/deriva.mjs` (2026-09-12: sin deriva en ninguno), pero **ningún lector
+      se probó con un documento real**; el primero que llegue es la prueba que falta. Los menores
+      declaran `version` en minúscula y el registro mira las dos grafías.
 

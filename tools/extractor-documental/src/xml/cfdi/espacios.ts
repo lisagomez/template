@@ -66,6 +66,15 @@ export const CARTA_PORTE_31 = 'http://www.sat.gob.mx/CartaPorte31'
 export const NOMINA_12 = 'http://www.sat.gob.mx/nomina12'
 
 /**
+ * Los tres complementos MENORES mas comunes. Direcciones CONFIRMADAS contra sus XSD oficiales
+ * (leidos el 2026-09-12). Los tres declaran su version en MINUSCULA (`version="1.0"`), no
+ * `Version`: el registro mira las dos, y por eso lo hace.
+ */
+export const IMPUESTOS_LOCALES_10 = 'http://www.sat.gob.mx/implocal'
+export const LEYENDAS_FISCALES_10 = 'http://www.sat.gob.mx/leyendasFiscales'
+export const DONATARIAS_11 = 'http://www.sat.gob.mx/donat'
+
+/**
  * Direcciones de complementos que este paquete NO lee todavia.
  *
  * Hoy esta vacio: pagos, comercio exterior, carta porte y nomina tienen lector, escrito contra su
@@ -87,5 +96,8 @@ export function nombreDelEsquema(espacio: string): string | null {
   if (espacio === COMERCIO_EXTERIOR_20) return 'Comercio Exterior 2.0'
   if (espacio === CARTA_PORTE_31) return 'Carta Porte 3.1'
   if (espacio === NOMINA_12) return 'Nomina 1.2'
+  if (espacio === IMPUESTOS_LOCALES_10) return 'Impuestos Locales 1.0'
+  if (espacio === LEYENDAS_FISCALES_10) return 'Leyendas Fiscales 1.0'
+  if (espacio === DONATARIAS_11) return 'Donatarias 1.1'
   return SIN_LECTOR[espacio] ?? null
 }

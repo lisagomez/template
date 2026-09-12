@@ -39,9 +39,10 @@ import { INVENTARIO_PAGOS } from '../dist/xml/cfdi/pagos-20.js'
 import { INVENTARIO_COMERCIO_EXTERIOR } from '../dist/xml/cfdi/comercio-exterior-20.js'
 import { INVENTARIO_CARTA_PORTE } from '../dist/xml/cfdi/carta-porte-31.js'
 import { INVENTARIO_NOMINA } from '../dist/xml/cfdi/nomina-12.js'
+import { INVENTARIO_IMPUESTOS_LOCALES, INVENTARIO_LEYENDAS_FISCALES, INVENTARIO_DONATARIAS } from '../dist/xml/cfdi/menores.js'
 
 /** El tronco MAS los complementos. Sin unirlos, los complementos no se comparaban con nada. */
-const INVENTARIO = { ...DEL_TRONCO, ...INVENTARIO_TIMBRE, ...INVENTARIO_PAGOS, ...INVENTARIO_COMERCIO_EXTERIOR, ...INVENTARIO_CARTA_PORTE, ...INVENTARIO_NOMINA }
+const INVENTARIO = { ...DEL_TRONCO, ...INVENTARIO_TIMBRE, ...INVENTARIO_PAGOS, ...INVENTARIO_COMERCIO_EXTERIOR, ...INVENTARIO_CARTA_PORTE, ...INVENTARIO_NOMINA, ...INVENTARIO_IMPUESTOS_LOCALES, ...INVENTARIO_LEYENDAS_FISCALES, ...INVENTARIO_DONATARIAS }
 
 const XSD = 'http://www.w3.org/2001/XMLSchema'
 const b = (s) => `\x1b[1m${s}\x1b[0m`
