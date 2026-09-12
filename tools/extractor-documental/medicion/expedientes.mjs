@@ -76,7 +76,7 @@ const CLASES = declaraClases([
 const PATRONES = [
   { clave: 'rfc', expresion: /\b([A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})\b/g, formato: 'identificador' },
   { clave: 'curp', expresion: /\b([A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d)\b/g, formato: 'identificador' },
-  { clave: 'nss', expresion: /\b(?:NSS|Seguro\s+Social|IMSS|afiliaci[oó]n)[^\d]{0,40}(\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{4}[\s-]?\d)\b/gi, formato: 'identificador' },
+  { clave: 'nss', expresion: /\b(?:NSS|Seguro\s+Social|Seguridad\s+Social|IMSS|afiliaci[oó]n)[^\d]{0,40}(\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{4}[\s-]?\d)\b/gi, formato: 'identificador' },
 ]
 const CLAVES_ESPERADAS = { curp: ['curp'], constancia_fiscal: ['rfc'], alta_imss: ['nss'], ine: ['curp'] }
 

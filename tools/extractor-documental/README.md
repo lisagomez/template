@@ -500,9 +500,14 @@ Tres reglas que no se negocian:
 
 Y lo que la medicion dejo escrito (`.claude/specs/009-identificadores-y-codigos/tareas.md`): las
 zonas de Tesseract se leen con `--psm 8` y escala 3 porque asi salieron 7 de 7 RFC exactos frente
-a 4 de 7 con `psm 7`; la lista blanca de caracteres la ignora el motor LSTM; y la confianza por
-palabra de Tesseract en esas zonas es 0, asi que la confianza real la ponen el digito verificador y
-el cotejo, no el motor.
+a 4 de 7 con `psm 7`; la lista blanca de caracteres la ignora el motor LSTM (en zonas solo de
+digitos se aplica por software: O→0, I→1, S→5); y la confianza por palabra de Tesseract en esas
+zonas es 0, asi que la confianza real la ponen el digito verificador y el cotejo, no el motor.
+
+Las zonas miran tambien DEBAJO de la etiqueta, en columna: en el alta del IMSS el NSS no va a la
+derecha de «NSS» sino en la fila de abajo de una tabla, o bajo «No. de Afiliacion al Seguro
+Social» partido en dos. Medido tras el cambio: 4 de 5 hojas reales de alta con NSS valido (antes
+0 de 5) y 4 de 4 sinteticas exactas (`medicion/genera-alta-imss.py`), sin perder ningun RFC.
 
 ## Umbrales: los tres que NO vienen puestos
 

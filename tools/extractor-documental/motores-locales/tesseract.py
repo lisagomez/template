@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 
 import pytesseract
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageOps
 
 if os.environ.get('TESSERACT_CMD'):
     pytesseract.pytesseract.tesseract_cmd = os.environ['TESSERACT_CMD']
@@ -46,7 +46,10 @@ ALFANUMERICO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&Ñ'
 ZONAS_MX = [
     {'clave': 'rfc', 'etiqueta': r'\bR\.?\s?F\.?\s?C\.?', 'listaBlanca': ALFANUMERICO, 'forma': r'^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$'},
     {'clave': 'curp', 'etiqueta': r'\bC\.?\s?U\.?\s?R\.?\s?P\.?', 'listaBlanca': ALFANUMERICO, 'forma': r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$'},
-    {'clave': 'nss', 'etiqueta': r'\bN\.?\s?S\.?\s?S\.?|SEGURO\s+SOCIAL|AFILIACI[OÓ]N', 'listaBlanca': '0123456789', 'forma': r'^\d{11}$'},
+    # El NSS vive en FORMULARIOS, no en prosa: como columna de una tabla («Tipo | NSS | Nombre», valor
+    # en la linea de abajo) o bajo «No. de Afiliacion al Seguro Social». Por eso su etiqueta no incluye
+    # el «Seguro Social» suelto (aparece en el texto legal) y por eso las zonas tambien miran DEBAJO.
+    {'clave': 'nss', 'etiqueta': r'\bN\.?\s?S\.?\s?S\b|(?:N[OÚU]M?(?:ERO)?\.?\s*(?:DE\s+)?)?(?:SEGURIDAD\s+SOCIAL|AFILIACI[OÓ]N:?(?:\s+AL\s+SEGURO\s+SOCIAL)?)', 'listaBlanca': '0123456789', 'forma': r'^\d{11}$'},
 ]
 
 
@@ -84,7 +87,7 @@ def tokens_de(img, config):
         if conf < 0:
             continue
         salida.append({
-            'texto': texto, 'conf': conf,
+            'texto': texto.strip(), 'conf': conf,
             'bloque': d['block_num'][i], 'parrafo': d['par_num'][i], 'linea': d['line_num'][i],
             'x': d['left'][i], 'y': d['top'][i], 'w': d['width'][i], 'h': d['height'][i],
         })
@@ -118,37 +121,115 @@ def caja_de(tokens):
     return x0, y0, x1, y1
 
 
-def zona_tras_etiqueta(lineas, indice_linea, fin_etiqueta_x):
-    """Los tokens a la derecha de la etiqueta en su linea; si no hay, la linea siguiente entera."""
-    derecha = [t for t in lineas[indice_linea] if t['x'] >= fin_etiqueta_x]
+def candidatos_de_zona(img, lineas, indice_linea, inicio_x, fin_x):
+    """
+    Donde puede estar el valor de una etiqueta, como CAJAS y en orden: (1) a su derecha en la misma
+    linea; (2) DEBAJO, en la columna que va de la etiqueta al siguiente encabezado de esa linea
+    —geometrica, sin fiarse de que la pasada de pagina haya leido bien la fila: en una tabla del
+    IMSS la fila de valores salio como basura y el valor estaba ahi (medido)—; (3) la linea
+    siguiente entera. Gana el primero cuya lectura tiene la forma esperada.
+    """
+    linea = lineas[indice_linea]
+    etiqueta = [t for t in linea if t['x'] + t['w'] > inicio_x and t['x'] < fin_x] or linea
+    y_abajo = max(t['y'] + t['h'] for t in etiqueta)
+    alto = max(t['h'] for t in etiqueta)
+    candidatos = []
+    derecha = [t for t in linea if t['x'] >= fin_x]
     if derecha:
-        return derecha
+        candidatos.append((caja_de(derecha), 'derecha'))
+    margen = max(24, int(0.1 * (fin_x - inicio_x)))
+    x0 = max(0, inicio_x - margen)
+    a_la_derecha = [t['x'] for t in linea if t['x'] > fin_x + 8]
+    x1 = min(img.width, (min(a_la_derecha) - 8) if a_la_derecha else img.width)
+    y1 = min(img.height, y_abajo + int(2.4 * alto))
     if indice_linea + 1 < len(lineas):
-        return lineas[indice_linea + 1]
-    return []
+        siguiente = lineas[indice_linea + 1]
+        por_tokens = [t for t in siguiente if t['x'] + t['w'] >= inicio_x - margen and t['x'] <= fin_x + margen]
+        if por_tokens:
+            candidatos.append((caja_de(por_tokens), 'tokens_abajo'))
+        en_columna = [t for t in siguiente if t['x'] + t['w'] > x0 and t['x'] < x1]
+        if en_columna:
+            y1 = max(y1, min(img.height, max(t['y'] + t['h'] for t in en_columna) + 4))
+    if x1 > x0 + 10:
+        candidatos.append(((x0, y_abajo + 2, x1, y1), 'geometrica'))
+    if indice_linea + 1 < len(lineas):
+        candidatos.append((caja_de(lineas[indice_linea + 1]), 'linea'))
+    return candidatos
 
 
-def lee_zona(img, caja, zona):
+def sin_rayas(img_binaria):
+    """
+    Quita las lineas horizontales de un formulario (bordes de tabla, subrayados): una fila con mas
+    del 60 % de pixeles oscuros no es texto. Con la raya dentro del recorte, Tesseract no leia la
+    fila de valores de una tabla del IMSS (medido en sinteticas).
+    """
+    ancho, alto = img_binaria.size
+    medias = img_binaria.resize((1, alto), Image.BOX).load()
+    dibujo = ImageDraw.Draw(img_binaria)
+    for y in range(alto):
+        if medias[0, y] < 0.4 * 255:
+            dibujo.line((0, y, ancho, y), fill=255)
+    return img_binaria
+
+
+# Cuanto aire lleva el recorte, segun de donde salio la caja. Medido sobre facturas y altas
+# sinteticas y reales: una caja de tokens a la DERECHA de la etiqueta va ajustada a los glifos y
+# necesita un tercio del alto en todas direcciones (asi salieron 7 de 7 RFC); una caja de tokens
+# DEBAJO de la etiqueta no puede llevar aire arriba, porque mete la etiqueta; y una caja
+# GEOMETRICA ya trae sus bordes: cualquier aire lateral mete la columna vecina (con 20 px, el
+# NSS salia con un «71» pegado de la columna de al lado).
+MARGENES = {'derecha': (lambda h: max(6, h // 3), lambda h: max(4, h // 3)), 'tokens_abajo': (lambda h: max(6, h // 3), lambda h: 3),
+            'geometrica': (lambda h: 0, lambda h: 0), 'linea': (lambda h: max(6, h // 3), lambda h: 3)}
+
+
+def lee_zona(img, caja, zona, origen='derecha'):
     x0, y0, x1, y1 = caja
-    margen = max(4, (y1 - y0) // 3)
-    recorte = img.crop((max(0, x0 - margen), max(0, y0 - margen), min(img.width, x1 + margen), min(img.height, y1 + margen)))
+    mx, my = MARGENES[origen]
+    margen_x, margen_y = mx(y1 - y0), my(y1 - y0)
+    recorte = img.crop((max(0, x0 - margen_x), max(0, y0 - margen_y), min(img.width, x1 + margen_x), min(img.height, y1 + margen_y)))
+    if recorte.width < 12 or recorte.height < 12:
+        return None
     ampliado = recorte.resize((recorte.width * ZONA_ESCALA, recorte.height * ZONA_ESCALA), Image.LANCZOS)
     if ZONA_BINARIZA:
-        ampliado = otsu(ampliado)
+        ampliado = sin_rayas(otsu(ampliado))
     lista = '' if os.environ.get('EXTRACTOR_SIN_LISTA_BLANCA') else f" -c tessedit_char_whitelist={zona['listaBlanca']}"
-    config = f"--psm {ZONA_PSM} --oem {OEM_ZONA} -l {IDIOMA} -c load_system_dawg=0 -c load_freq_dawg=0{lista}"
-    palabras = [(t['texto'], t['conf']) for t in tokens_de(ampliado, config)]
-    if not palabras:
-        return None
-    valor = ''.join(p for p, _ in palabras).upper()
-    if 'forma' in zona:
-        # La zona puede arrastrar la cola de la etiqueta («EMISOR:») antes del valor: se busca la
-        # forma dentro de lo leido. Un valor que no la tiene en ningun sitio no es el identificador.
-        m = re.search(zona['forma'].strip('^$'), valor)
-        if m is None:
-            return None
-        valor = m.group(0)
-    return valor, min(c for _, c in palabras) / 100
+    # psm 8 (una palabra) lee mejor un identificador suelto (medido); si la zona trae varios
+    # tokens («34 407093409»), psm 7 (una linea) es el que los junta.
+    for psm in (ZONA_PSM, '7'):
+        config = f"--psm {psm} --oem {OEM_ZONA} -l {IDIOMA} -c load_system_dawg=0 -c load_freq_dawg=0{lista}"
+        try:
+            palabras = [(t['texto'].upper(), t['conf']) for t in tokens_de(ampliado, config)]
+        except pytesseract.TesseractError:
+            # Un recorte degenerado no tumba la pagina: esa zona queda sin valor y se declara.
+            continue
+        if not palabras:
+            continue
+        if 'forma' not in zona:
+            return ''.join(p for p, _ in palabras), min(c for _, c in palabras) / 100
+        encontrado = valor_con_forma(palabras, zona['forma'], solo_digitos=zona.get('listaBlanca', '').isdigit())
+        if encontrado is not None:
+            return encontrado
+    return None
+
+
+A_DIGITO = str.maketrans({'O': '0', 'Q': '0', 'D': '0', 'I': '1', 'L': '1', '|': '1', 'Z': '2', 'S': '5', 'G': '6', 'B': '8'})
+
+
+def valor_con_forma(palabras, forma, solo_digitos=False):
+    """
+    El primer grupo de 1 a 4 tokens CONTIGUOS que, pegados, casan la forma entera. Asi la cola de la
+    etiqueta («EMISOR:») no estorba, un valor partido («34 407093409») se junta, y no se recorta un
+    identificador de en medio de otra cosa.
+    """
+    for ancho in range(1, 5):
+        for i in range(0, len(palabras) - ancho + 1):
+            trozo = palabras[i:i + ancho]
+            valor = ''.join(p for p, _ in trozo)
+            if solo_digitos:
+                valor = valor.translate(A_DIGITO)
+            if re.fullmatch(forma, valor):
+                return valor, min(c for _, c in trozo) / 100
+    return None
 
 
 def campos_por_zonas(img, lineas, zonas):
@@ -159,22 +240,25 @@ def campos_por_zonas(img, lineas, zonas):
             m = re.search(zona['etiqueta'], texto)
             if m is None:
                 continue
-            # Que token cierra la etiqueta: se acumulan largos para mapear el offset a un token.
-            acumulado, fin_x = 0, linea[-1]['x'] + linea[-1]['w']
+            # Que tokens abren y cierran la etiqueta: se acumulan largos para mapear offsets a tokens.
+            acumulado, inicio_x, fin_x = 0, linea[0]['x'], linea[-1]['x'] + linea[-1]['w']
             for t in linea:
+                if acumulado <= m.start() < acumulado + len(t['texto']) + 1:
+                    inicio_x = t['x']
                 acumulado += len(t['texto']) + 1
                 if acumulado > m.end():
                     fin_x = t['x'] + t['w']
                     break
-            tokens_zona = zona_tras_etiqueta(lineas, indice, fin_x)
-            if not tokens_zona:
-                sin_valor += 1
-                continue
-            leido = lee_zona(img, caja_de(tokens_zona), zona)
+            leido, caja = None, None
+            for candidato, origen in candidatos_de_zona(img, lineas, indice, inicio_x, fin_x):
+                leido = lee_zona(img, candidato, zona, origen)
+                if leido is not None:
+                    caja = candidato
+                    break
             if leido is None:
                 sin_valor += 1
                 continue
-            x0, y0, x1, y1 = caja_de(tokens_zona)
+            x0, y0, x1, y1 = caja
             campos.append({
                 'clave': zona['clave'], 'valor': leido[0], 'confianza': round(leido[1], 3),
                 'region': {'pagina': 0, 'x': x0 / img.width, 'y': y0 / img.height, 'ancho': (x1 - x0) / img.width, 'alto': (y1 - y0) / img.height},
