@@ -181,7 +181,7 @@ Tres reglas, y ninguna es de estilo:
 | Consultar el estatus en el SAT | Mandaria el identificador y los registros fiscales de **dos terceros** a un servicio externo |
 | Traducir codigos a etiquetas | Emite `03`, nunca "Transferencia electronica". Un catalogo embarcado envejece; resolverlo contra **tus** tablas es trabajo de `resuelveIdentificador` |
 | Convertir importes a numero | `1160.00` se conserva como cadena: pasar por `number` pierde el cero y abre la puerta al redondeo binario |
-| Leer CFDI 3.3 | Esta fuera de alcance. Los cuatro complementos comunes (pagos, comercio exterior, carta porte, nomina) vienen cotejados contra su XSD, y su mapeo espera igual un documento real de cada uno |
+| Leer CFDI 3.3 | Esta fuera de alcance. Los siete complementos que trae (pagos, comercio exterior, carta porte, nomina, impuestos locales, leyendas fiscales, donatarias) vienen cotejados contra su XSD oficial, y su mapeo espera igual un documento real de cada uno |
 | Decidir por ti que hacer con los datos de un empleado | El lector de nomina lee el recibo entero (uno a medias es un recibo falso) y NOMBRA lo sensible; retencion, acceso y supresion son del proyecto, y cruzar recibos para perfilar a una persona es un dano que ninguna firma autoriza (limite de C5) |
 
 ### Que la estructura no envejezca en silencio
@@ -228,6 +228,15 @@ Compara en **las dos direcciones**: lo que el esquema declara y el lector no map
 lector mapea y el esquema no declara — que es la peor senal, porque significa que se invento algo o
 que lo quitaron. Distingue los huecos de las **omisiones deliberadas**, para no pedir que arregles
 lo que ya esta decidido.
+
+Y compara **por espacio de nombres del XSD**, nunca por nombre de elemento. Aprendido el 2026-09-12:
+`Emisor`, `Receptor` y `Domicilio` existen en el tronco, en comercio exterior y en nomina con
+atributos distintos, y una union por nombre hacia que el ultimo tapara a los demas — el cotejo de
+comercio exterior "derivo" sin que nada hubiera cambiado. Corrida completa de ese dia contra los
+**nueve XSD oficiales** (tronco, timbre, pagos, comercio exterior, carta porte, nomina, impuestos
+locales, leyendas fiscales, donatarias): sin deriva en ocho; Pagos 2.0 lista los 15 atributos que
+su lector deja fuera a proposito (desglose de `Totales` por tasa de IVA, sellos del `Pago`) y que
+en tiempo de lectura salen en `noLeido`.
 
 Sale a la red **a proposito**, y por eso vive en `medicion/` y no en el paquete, no corre en el
 camino de lectura de ningun documento, y **no esta encadenado a `npm run validate`**: un gate que

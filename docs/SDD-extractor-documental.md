@@ -420,6 +420,9 @@ dirección y solo se distinguen por su atributo `Version`, así que la clave del
 partes y no dos. Un comodín aquí significa leer con las reglas de una versión los datos de otra, y
 eso no produce un error visible: produce **un dato distinto con apariencia de correcto**, en la
 casilla de un importe. Es la misma disciplina que `exigeModeloPineado` aplica al modelo de OCR (C1).
+Un accidente del esquema que conviene saber: impuestos locales, leyendas fiscales y donatarias
+escriben el atributo en minúscula (`version="1.0"`); el registro mira las dos grafías y la clave
+sigue siendo el valor, pineado igual.
 
 *Declarar, no descartar.* Un complemento sin lector se reporta con su dirección, su versión y el
 motivo — y el motivo distingue tres hechos que no son el mismo: no hay lector, hay lector de otra
@@ -456,6 +459,19 @@ no una fila añadida de paso. Pagos sí se construyó, y no por ser un buen ejem
 lleva `Total="0"` porque todo el dinero está en el complemento, así que sin lector entra al sistema
 como **una factura de cero pesos con apariencia de exacta**.
 
+> **Corrección del 2026-09-12.** Nómina y carta porte **sí se construyeron**, y con ellos comercio
+> exterior 2.0, impuestos locales 1.0, leyendas fiscales 1.0 y donatarias 1.1: siete lectores de
+> complemento además del timbre. Lo que cambió no fue la objeción —sigue sin haber pasado un
+> documento real de ninguno, y el README lo dice en cada fila— sino la respuesta a ella: en vez de
+> esperar el documento, el lector se escribe contra el **árbol del XSD oficial** declarado una vez
+> (`lectorDeArbol`), el inventario que compara `medicion/deriva.mjs` sale de ese mismo árbol y no
+> puede divergir del lector, y `noLeido` declara lo que el esquema no anticipó. Nómina llevó su
+> análisis de impacto (C4) escrito en la cabecera del propio lector, con `CLAVES_SENSIBLES_NOMINA`
+> para que la decisión de quién ve qué no dependa de que alguien se acuerde. Se deja el párrafo
+> anterior porque lo que decía era cierto cuando se escribió, y porque la razón por la que se
+> esperaba —un error de mapeo no se ve hasta producción— sigue siendo verdad: solo se cambió qué
+> lo caza mientras no hay documento.
+
 **El estado de la evidencia, y lo que cambió al llegar el primer XML real.** El 2026-09-10 pasó por
 la herramienta un CFDI 4.0 de honorarios, timbrado. Las direcciones de CFDI 4.0 y del timbre quedan
 **confirmadas**: son exactamente las que estaban pineadas. La de pagos sigue sin confirmar, porque
@@ -491,6 +507,15 @@ Ese script sale a la red a propósito, y por eso vive fuera del paquete, no toca
 lectura y **no está encadenado a `npm run validate`**: un gate que falla por falta de conexión es un
 gate que se aprende a ignorar. Su primera ejecución encontró cuatro atributos del esquema oficial
 que el lector no mapeaba, y uno más en el timbre. Los cinco están cerrados.
+
+Ese script tuvo su propio defecto, y conviene dejarlo escrito porque es fácil de repetir: unía los
+inventarios de todos los lectores **por nombre de elemento**, y `Emisor`, `Receptor` y `Domicilio`
+existen en el tronco, en comercio exterior y en nómina con atributos distintos. El último de la
+lista tapaba a los demás, así que al recotejar comercio exterior el 2026-09-12 aparecieron dos
+«derivas» que eran las de nómina. Un XSD declara su `targetNamespace`, y eso es lo único que decide
+contra qué inventario se compara: así quedó. La corrida completa de ese día contra los nueve
+esquemas oficiales dio sin deriva en ocho, y en Pagos 2.0 los quince atributos que su lector deja
+fuera a propósito y declara en `noLeido`.
 
 **Y el cuarto mecanismo, sobre los códigos.** `medicion/catalogos.mjs` vigila qué códigos son
 válidos. De los doce catálogos de los que depende una regla dice **qué código entró o salió, por su
