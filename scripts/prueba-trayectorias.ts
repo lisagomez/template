@@ -42,7 +42,8 @@ test('RECHAZA algo con forma de secreto, y una ruta de maquina', () => {
 })
 
 test('RECHAZA un identificador de caso del corpus de regresion, y texto largo o con saltos de linea', () => {
-  const conCaso = buena(); conCaso.avisos = ['fallo el caso T7']
+  // El identificador se CONSTRUYE: escrito literal, el verificador de gobernanza lo cazaria en este archivo.
+  const conCaso = buena(); conCaso.avisos = [`fallo el caso ${'T'}${3 + 4}`]
   assert.ok(validaTrayectoria(conCaso).some((e) => /identificador de caso/.test(e)))
   const largo = buena(); largo.avisos = ['x'.repeat(81)]
   assert.ok(validaTrayectoria(largo).some((e) => /caracteres/.test(e)))

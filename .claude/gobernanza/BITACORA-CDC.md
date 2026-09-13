@@ -3504,4 +3504,4 @@ arranque real de `ocr-gpu`, no medido por falta de GPU en esta máquina.
   al diseño: ese es el lazo funcionando.
 - **Gate aplicado**: diff revisado ☐ · regresión verde ☑ · aprobación humana ☐ · pineo ☑
 - **Regresión**: `prueba:trayectorias` 8/8 · `verifica:trayectorias` 26/26 · `validate` sellado.
-- **Aprobado por**: PENDIENTE — sigue sin aplicarse ninguna propuesta.
+- **Aprobado por**: **PENDIENTE** — redactado sin auto-aprobación; sigue sin aplicarse ninguna propuesta.
