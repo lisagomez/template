@@ -222,3 +222,30 @@ test('reglaFaltaIdentificador: deriva la pagina con un identificador invalido si
   await leePagina(IMAGEN, 0, { motor: motorFalso([pagina('texto de una carta, confianza baja', [], 0.2)]), motorDeRespaldo: respaldo, derivaAlRespaldo: regla })
   assert.equal(llamadas.length, 1, 'confianza baja sin expectativa ni fallo: no se deriva; la confianza no esta calibrada')
 })
+
+// --- Tiempos por etapa (spec 010, RF-10) -------------------------------------------------------
+
+test('cada etapa mide su propio tiempo con el reloj inyectado, y el respaldo es cero si no se llamo', async () => {
+  let t = 0
+  const ahora = () => t
+  const lector: LectorDeCodigos = { formatos: ['QRCode'], async lee() { t += 5; return [] } }
+  const motor: MotorOcr = { ...motorFalso(OCR_CON_RFC(RFC_BUENO)), async extrae() { t += 40; return OCR_CON_RFC(RFC_BUENO) } }
+  const l = await leePagina(IMAGEN, 0, { motor, lectorDeCodigos: lector, ahora })
+  assert.deepEqual(l.tiempos, { codigos: 5, motor: 40, respaldo: 0 })
+  const respaldo: MotorOcr = { ...motorFalso([]), async extrae() { t += 300; return [pagina('nada')] } }
+  const conRespaldo = await leePagina(IMAGEN, 0, { motor, motorDeRespaldo: respaldo, derivaAlRespaldo: () => true, ahora })
+  assert.deepEqual(conRespaldo.tiempos, { codigos: 0, motor: 40, respaldo: 300 })
+  assert.equal(conRespaldo.milisegundosDeRespaldo, 300)
+})
+
+test('el corpus suma los tiempos por etapa de sus paginas y las vias exactas van a cero', async () => {
+  let t = 0
+  const ahora = () => t
+  const motor: MotorOcr = { ...motorFalso([]), async extrae() { t += 10; return OCR_CON_RFC(RFC_BUENO) } }
+  const r = await leeCorpus([
+    { documentoId: 'a', nombre: 'a.png', tipoDocumento: 'x', bytes: IMAGEN },
+    { documentoId: 'b', nombre: 'b.png', tipoDocumento: 'x', bytes: OTRA },
+  ], { motor, ahora })
+  assert.deepEqual(r.lecturas.map((l) => l.tiempos.motor), [10, 10])
+  assert.deepEqual(r.lecturas[0].tiempos, { codigos: 0, motor: 10, respaldo: 0 })
+})

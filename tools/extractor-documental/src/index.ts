@@ -198,5 +198,11 @@ export type { ClaseDePagina, ClasificacionDePagina } from './clasifica-pagina.js
 export { leePagina, emparejaPorClave, fusionaCampos, aplicaValidadores, reglaFaltaIdentificador } from './lote-pagina.js'
 export type {
   OpcionesDePagina, LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido, CamposValidados,
-  ContextoDeDerivacion, ReglaDeDerivacion,
+  ContextoDeDerivacion, ReglaDeDerivacion, TiemposDePagina,
 } from './lote-pagina.js'
+
+export { evidenciaDe, conEvidencia, resumenDeEvidencia } from './evidencia.js'
+export type { Evidencia, CampoConEvidencia, ContextoDeEvidencia } from './evidencia.js'
+
+export { declaraEsquemas, claseDeDocumento, estructuraPorClase } from './esquema-por-clase.js'
+export type { ClaveDeEsquema, EsquemaDeClase, DocumentoEstructurado } from './esquema-por-clase.js'

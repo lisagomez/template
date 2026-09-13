@@ -14,9 +14,10 @@
 import type { CampoExtraido, PaginaExtraida } from './tipos.js'
 import type { MotorOcr, LectorDeCodigos } from './puertos.js'
 import type { ClaseDePagina, ClasificacionDePagina } from './clasifica-pagina.js'
+import { clasificaPaginas } from './clasifica-pagina.js'
 import type { Cotejo } from './corroboracion.js'
 import { leePagina, aplicaValidadores } from './lote-pagina.js'
-import type { LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido, ReglaDeDerivacion } from './lote-pagina.js'
+import type { LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido, CodigoLeido, ReglaDeDerivacion, TiemposDePagina } from './lote-pagina.js'
 import type { RegistroDeEsquemas } from './xml/registro.js'
 import { leeCapaCero } from './capa-cero.js'
 import { identidadDe } from './identidad.js'
@@ -108,6 +109,8 @@ export interface LecturaDeDocumento {
   /** Corregidos por checksum en una posicion. Estan en `campos` con su confianza de OCR intacta. */
   readonly corregidos: readonly Corregido[]
   readonly milisegundosDeRespaldo: number
+  /** Suma por etapa de sus paginas (codigos, motor, respaldo). Cero en `xml` y `capa-cero`. */
+  readonly tiempos: TiemposDePagina
 }
 
 export interface ResultadoDeCorpus {
@@ -124,7 +127,7 @@ type Parcial = Omit<LecturaDeDocumento, 'documentoId' | 'nombre' | 'tipoDocument
 
 const SIN_PAGINAS = {
   clasesDePagina: [], codigos: [], paginasAlRespaldo: [], paginasOmitidas: [], paginasReutilizadas: [],
-  identificadoresInvalidos: [], corregidos: [], milisegundosDeRespaldo: 0,
+  identificadoresInvalidos: [], corregidos: [], milisegundosDeRespaldo: 0, tiempos: { codigos: 0, motor: 0, respaldo: 0 },
 } as const
 
 const nada = (ruta: RutaDeLectura, motivo: string): Parcial => ({ ruta, motivo, campos: [], paginas: [], ...SIN_PAGINAS })
@@ -222,6 +225,11 @@ async function leePorMotor(
     identificadoresInvalidos: lecturas.flatMap((l) => l.invalidos),
     corregidos: lecturas.flatMap((l) => l.corregidos),
     milisegundosDeRespaldo: lecturas.reduce((s, l) => s + l.milisegundosDeRespaldo, 0),
+    tiempos: {
+      codigos: lecturas.reduce((s, l) => s + l.tiempos.codigos, 0),
+      motor: lecturas.reduce((s, l) => s + l.tiempos.motor, 0),
+      respaldo: lecturas.reduce((s, l) => s + l.tiempos.respaldo, 0),
+    },
   }
 }
 
@@ -232,7 +240,10 @@ async function leePdf(bytes: Uint8Array, opciones: OpcionesDeCorpus, reutiliza: 
     const campos = camposPorPatron(texto, opciones.patrones ?? [])
     const paginas = capa.paginas.map((markdown, indice) => ({ indice, markdown, campos: [] }))
     const motivo = opciones.patrones === undefined ? 'PDF con capa de texto; sin patrones, texto y cero campos' : 'PDF con capa de texto, sin motor'
-    return { ruta: 'capa-cero', motivo, paginas, ...SIN_PAGINAS, ...validaExactos(campos, opciones) }
+    // La clase de pagina se decide por el texto, y la capa 0 lo tiene exacto: sin esto un PDF
+    // digital salia siempre «sin clasificar» y su esquema por clase no aplicaba (spec 010, RF-12).
+    const clasesDePagina = opciones.clases === undefined ? [] : clasificaPaginas(paginas, opciones.clases)
+    return { ruta: 'capa-cero', motivo, paginas, ...SIN_PAGINAS, clasesDePagina, ...validaExactos(campos, opciones) }
   }
   const imagenes = await imagenesDelPdf(bytes)
   if (imagenes.length === 0) return nada('ninguna', `PDF sin capa de texto (${capa.motivo ?? 'sin motivo'}) y sin imagen extraible`)

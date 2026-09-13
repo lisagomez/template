@@ -3415,3 +3415,55 @@ sigue siendo gate humano.
 - **Regresión**: capa A verde con contratos nuevos (ver validate).
 - **Aprobado por**: huertavictor (usuario de la sesion; pedido explicito) — a ratificar por
   lisagomez, responsable del proyecto
+
+### 2026-09-13 — el extractor documental en la infraestructura del cliente: puente A2A montado (sin publicar), servicio OCR, GPU como servicio del VPS y Hermes como consumidor — radio: sistema
+- **Cambio**: (1) puente A2A construido sobre `@a2a-js/sdk@1.1.0` pineado: `src/features/a2a/`
+  y tres Route Handlers (`/.well-known/agent-card.json`, `/a2a`, `/a2a/health`), con prueba de
+  opacidad que enumera y exige igualdad (`scripts/prueba-a2a.ts`, 10/10). El endpoint queda
+  **montado y sin publicar**: solo existe en la red `interna` del compose; Caddy no lo enruta.
+  (2) `tools/extractor-documental/servicio/`: el extractor como servicio contenedorizado, con
+  evidencia por campo, esquema por clase y tiempos por etapa en el núcleo (v0.7.0, 774 pruebas).
+  (3) `docker-compose.yml`: perfiles `ocr`, `ocr-gpu` (vLLM `v0.11.0` con reserva de dispositivo;
+  modelo en `OCR_GPU_MODELO`, pineado) y `hermes` (imagen por digest `9f367c…`, + puente MCP→A2A).
+  (4) `scripts/configura-deploy.mjs` mide la GPU como un recurso más. (5) Spec 010 nueva; spec 005
+  con TAR-1..4 y 8..13 cerradas con evidencia.
+- **Motivo**: `docs/GOAL-extractor-en-infra-del-cliente.md` (compilado con `/goal-compiler`); el
+  cliente despliega en su VPS sin que un byte salga del perímetro, y sus agentes consumen la
+  capacidad por A2A sin llaves.
+- **Lo que este CDC NO autoriza**: exponer la Card fuera de la red interna (spec 005 RF-12: gate
+  humano con C3 + C4), cuota por partner (no existe), AISIA de documentos de terceros mandados por
+  un partner (pendiente y declarada), y `OCR_RESPALDO=mistral` (exige decisión C4 firmada; con
+  datos de terceros, ninguna firma).
+- **Gate aplicado**: diff revisado ☐ · regresión verde ☐ · aprobación humana ☐ · pineo ☑
+  (`@a2a-js/sdk` 1.1.0 exacto; `node:22-bookworm-slim` por digest; `vllm/vllm-openai:v0.11.0`;
+  Hermes por digest; `undici` 8.10.2 y `zxing-wasm` 3.1.4 exactos en el servicio)
+- **Regresión**: `npm run validate` corrido en la sesión de la spec 010 (resultado en el reporte
+  de esa sesión); `cd tools/extractor-documental && npm run prueba` 774/774; `node --test
+  scripts/prueba-a2a.ts` 10/10; `npm run empaqueta extractor-documental` en verde.
+- **Aprobado por**: **PENDIENTE** — redactado por el agente sin auto-aprobación (spec 005 TAR-15).
+
+## Acta de aprobación — 2026-09-13: el extractor en la infraestructura del cliente (spec 010)
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción literal
+*"aprueba CDC"*, tras el reporte de cierre de la spec 010 con la evidencia pegada y con el
+resumen del diff delante: 17 archivos modificados (518 líneas añadidas, 27 quitadas) y 14 rutas
+nuevas (`src/features/a2a/`, `src/app/a2a/`, `src/app/.well-known/`, `scripts/prueba-a2a.ts`,
+`tools/extractor-documental/servicio/`, `src/evidencia.ts`, `src/esquema-por-clase.ts`,
+`medicion/servicio.mjs`, `hermes/`, `docs/GOAL-extractor-en-infra-del-cliente.md`, `docs/grafos/`,
+`.claude/specs/010-extractor-en-infra-del-cliente/`).
+
+**Sobre qué se aprobó**: la entrada de este mismo día en esta bitácora, y las cifras: `validate`
+sellado (árbol `7e08e480d6a8`), herramienta 774/774, puente A2A 15/15 tras la revisión de
+opacidad por un agente distinto del autor, `empaqueta` 0.7.0 en verde, `verifica:specs` 91/91.
+
+**Lo que esta firma cierra**: que el puente A2A exista **montado y sin publicar** en la red
+interna del compose, el servicio OCR contenedorizado, los perfiles `ocr`, `ocr-gpu` y `hermes`,
+y la GPU medida por `configura:deploy` como recurso del VPS.
+
+**Lo que NO cierra**: exponer la Card fuera de la red interna (sigue siendo gate humano con C3 +
+C4, sin cuota por partner y con la AISIA de documentos de terceros pendiente); activar
+`OCR_RESPALDO=mistral` (decisión C4 firmada aparte, y con datos de terceros ninguna firma); las
+cifras de rendimiento, que son de corpus sintético (33 páginas, no concluyentes) y de CPU; y el
+arranque real de `ocr-gpu`, no medido por falta de GPU en esta máquina.
+
+---

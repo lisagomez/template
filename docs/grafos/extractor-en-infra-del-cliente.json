@@ -1,0 +1,40 @@
+{
+  "slug": "extractor-en-infra-del-cliente",
+  "titulo": "Extractor documental en la infraestructura del cliente: OCR por capacidad, A2A y Hermes",
+  "nodos": [
+    {"id": "repo", "label": "Repo hoy: extractor 0.6.0 (motores mistral / openai-compat / proceso-local Tesseract), SDD-puente-a2a, spec 005 a 0/16, compose app+caddy", "estado": "morado"},
+    {"id": "corpus", "label": "Corpus del cliente: estratificado, >=100 paginas, fuera del repo; mas el sintetico con verdad conocida", "estado": "ambar"},
+    {"id": "spec-010", "label": "Spec 010 (spec/plan/tareas EARS) con impacto sobre terceros y modelo de amenazas de la superficie A2A", "estado": "gris"},
+    {"id": "servicio-ocr", "label": "Servicio OCR contenedorizado: capa 0 + XML + codigos + Tesseract por zonas (pytesseract/Pillow); VLM de cola (GLM-OCR o PaddleOCR-VL por vLLM) como perfil opcional", "estado": "gris"},
+    {"id": "puente-a2a", "label": "Puente A2A: Agent Card + JSON-RPC + Tasks en Route Handlers, SDK pineado, tres rutas, red interna", "estado": "gris"},
+    {"id": "medicion", "label": "Informe medido: pag/min, latencia p50/p95 por documento, CER, campos correctos, coste por pagina, con y sin GPU", "estado": "gris"},
+    {"id": "stack-cliente", "label": "docker-compose del template con servicios ocr, ocr-gpu (GPU como servicio del VPS: reserva de dispositivo, imagen pineada, limites, health), hermes y a2a interno; configura:deploy mide CPU, RAM y GPU", "estado": "gris"},
+    {"id": "calibracion", "label": "Umbrales medidos o declarados sin senal (TAR-17/25) + esquema JSON por clase de pagina validado con Zod en la frontera", "estado": "gris"},
+    {"id": "hermes", "label": "Hermes (nousresearch/hermes-agent pineado por digest) descubre la Card y consume la capacidad en la red interna", "estado": "gris"},
+    {"id": "demo", "label": "Corrida punta a punta: documento -> Hermes -> A2A -> extractor -> JSON validado, con tiempo por etapa", "estado": "gris"}
+  ],
+  "aristas": [
+    {"id": "a-spec", "label": "redactar spec 010 desde SDD-puente, spec 005/007/008/009 y este GOAL", "tipo": "agente", "from": "repo", "to": "spec-010"},
+    {"id": "a-corpus", "label": "estratificar el corpus por clase de documento y ruta esperada; ignorado por git", "tipo": "manual", "from": "repo", "to": "corpus"},
+    {"id": "a-ocr", "label": "empaquetar los motores existentes como servicio (imagen, health mudo, sin credenciales) y anadir el VLM de cola por perfil", "tipo": "mixta", "from": "spec-010", "to": "servicio-ocr"},
+    {"id": "a-a2a", "label": "implementar TAR-1..TAR-11 de la spec 005 con el extractor como capacidad real", "tipo": "mixta", "from": "spec-010", "to": "puente-a2a"},
+    {"id": "a-mide-corpus", "label": "correr el corpus por el servicio", "tipo": "script", "from": "corpus", "to": "medicion"},
+    {"id": "a-mide-ocr", "label": "medir pag/min, p50/p95, CER, campos correctos, coste; comparar con la base 197 pag/min", "tipo": "script", "from": "servicio-ocr", "to": "medicion"},
+    {"id": "a-stack-ocr", "label": "servicios ocr y ocr-gpu con la GPU contemplada como servicio del VPS; ningun puerto publicado al edge", "tipo": "mixta", "from": "servicio-ocr", "to": "stack-cliente"},
+    {"id": "a-stack-a2a", "label": "el puente escucha solo en la red interna de compose", "tipo": "mixta", "from": "puente-a2a", "to": "stack-cliente"},
+    {"id": "a-calibra", "label": "correlacionConfianzaError y curvaDeUmbral sobre el informe; esquema JSON por clase", "tipo": "mixta", "from": "medicion", "to": "calibracion"},
+    {"id": "a-hermes", "label": "configurar Hermes como consumidor A2A (sin llaves del extractor)", "tipo": "mixta", "from": "stack-cliente", "to": "hermes"},
+    {"id": "a-demo-hermes", "label": "lanzar la corrida desde Hermes", "tipo": "script", "from": "hermes", "to": "demo"},
+    {"id": "a-demo-cal", "label": "la respuesta lleva confianza por campo y revision_humana segun calibracion", "tipo": "script", "from": "calibracion", "to": "demo"}
+  ],
+  "lazos": [
+    {"id": "l-spec", "label": "npm run verifica:specs en verde", "sobre": "nodo:spec-010", "estado": "gris", "referencia": "diez secciones, EARS, numeracion"},
+    {"id": "l-ocr", "label": "npm run prueba + pruebas/contrato.ts (sin imports prohibidos) + la imagen arranca en una maquina SIN GPU", "sobre": "nodo:servicio-ocr", "estado": "gris", "referencia": "372 pruebas en verde hoy; 0 dependencias en el nucleo"},
+    {"id": "l-a2a", "label": "prueba de opacidad: rutas == {card, rpc, health}; health = {status:ok}; content-type application/a2a+json; SDK pineado", "sobre": "nodo:puente-a2a", "estado": "gris", "referencia": "SDD-puente §2.1 y §3.3"},
+    {"id": "l-medicion", "label": "toda cifra sale de una corrida real con hardware declarado; <100 paginas = no concluyente", "sobre": "nodo:medicion", "estado": "gris", "referencia": "base Tesseract 197 pag/min y respaldo GLM-OCR 150-331 s/pag en CPU (spec 009 TAR-9/14)"},
+    {"id": "l-stack", "label": "docker compose config valida con ocr-gpu declarado; arranque sin GPU (servicio de GPU declarado no disponible) y con GPU si hay donde; ningun puerto de OCR ni A2A expuesto por caddy", "sobre": "nodo:stack-cliente", "estado": "gris", "referencia": "compose actual: solo caddy publica puertos"},
+    {"id": "l-calibracion", "label": "si la correlacion confianza-error es ~0, NO se fija umbral y se declara", "sobre": "nodo:calibracion", "estado": "gris", "referencia": "calibracion.ts prohibe recomendar umbral; TAR-17/25 sin default"},
+    {"id": "l-demo", "label": "JSON validado contra los tipos del extractor; la confianza por campo sobrevive al protocolo; tiempos por etapa pegados", "sobre": "nodo:demo", "estado": "gris", "referencia": "pruebas/salida-json.ts; regla de oro de /add-a2a"},
+    {"id": "l-exposicion", "label": "GATE HUMANO: exponer la Card fuera de la red interna es un CDC con C3 + C4 (spec 005 RF-12). No es del agente", "sobre": "nodo:demo", "estado": "manual", "referencia": "AGENTS.md: canal externo hacia un agente con llaves"}
+  ]
+}

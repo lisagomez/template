@@ -1,0 +1,30 @@
+# =============================================================================
+# Fragmento de `config.yaml` de Hermes para consumir el extractor documental por A2A
+# (spec 010, RF-22 y RF-23). Se FUNDE en el config.yaml del HOME de Hermes
+# (`HERMES_HOME`, /opt/data dentro del contenedor), no lo sustituye.
+#
+# Hermes no habla A2A: consume servidores MCP. `puente-hermes` (servicio del compose,
+# perfil `hermes`) le ofrece dos herramientas por MCP y las traduce a JSON-RPC A2A contra
+# la Agent Card del template. Hermes ve `mcp_extractor_descubrir_agente` y
+# `mcp_extractor_extraer_documento`; nunca ve el servicio OCR ni tiene llave alguna.
+#
+# La URL es la del servicio en la red interna del compose. No hay puertos publicados.
+# =============================================================================
+mcp_servers:
+  extractor:
+    url: "http://puente-hermes:8090/mcp"
+
+# Verificado contra la documentacion de Hermes el 2026-09-13: `mcp_servers.<nombre>.url`
+# para servidores por HTTP; las herramientas se nombran `mcp_<servidor>_<herramienta>`.
+# Recarga en caliente: `/reload-mcp` en una sesion.
+
+# Si el modelo es LOCAL (Ollama o vLLM en la red interna, sin salida a internet), Hermes exige
+# 64K de contexto para usar herramientas y lo comprueba al arrancar (medido el 2026-09-13 con
+# `qwen2.5:3b`). Ademas de `model.provider: custom` y `model.base_url`, hace falta:
+#
+# model:
+#   context_length: 65536
+#   ollama_num_ctx: 65536
+#
+# y en el servidor de Ollama, OLLAMA_CONTEXT_LENGTH=65536. Un modelo de 3B con 64K de KV cache
+# ocupa ~2,5 GB mas en RAM: cuenta con ello en `configura:deploy`.

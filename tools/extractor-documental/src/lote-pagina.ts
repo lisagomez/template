@@ -82,6 +82,12 @@ export interface CodigoLeido {
   readonly caracteres: number
 }
 
+export interface TiemposDePagina {
+  readonly codigos: number
+  readonly motor: number
+  readonly respaldo: number
+}
+
 export interface LecturaDePagina {
   readonly indice: number
   readonly principal: PaginaExtraida
@@ -93,6 +99,11 @@ export interface LecturaDePagina {
   readonly cotejoDeCodigos?: Cotejo
   readonly cotejoDeRespaldo?: Cotejo
   readonly milisegundosDeRespaldo: number
+  /**
+   * Tiempo de cada etapa, en milisegundos. Es lo que separa la LATENCIA por documento del
+   * rendimiento de lote: sin esto solo se sabe cuanto tardo el lote entero (spec 010, RF-10).
+   */
+  readonly tiempos: TiemposDePagina
   /** Lo que ENTRA: codigos, OCR cotejado y respaldo, fundidos y validados. */
   readonly campos: readonly CampoExtraido[]
   readonly invalidos: readonly IdentificadorInvalido[]
@@ -203,6 +214,7 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
   // (a) Codigos, antes que nada.
   const codigos: CodigoLeido[] = []
   const deCodigo: CampoExtraido[] = []
+  const inicioCodigos = ahora()
   if (opciones.lectorDeCodigos !== undefined) {
     try {
       for (const cruda of await opciones.lectorDeCodigos.lee(imagen)) {
@@ -215,10 +227,15 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
     }
   }
 
+  const tiempoCodigos = ahora() - inicioCodigos
+
   // (b) Motor principal, y (c) clase.
+  const inicioMotor = ahora()
   const principal = conPagina(await opciones.motor.extrae(imagen, { esquemaDeAnotacion: opciones.esquemaDeAnotacion }), indice)
+  const tiempoMotor = ahora() - inicioMotor
   const clase = opciones.clases === undefined ? null : clasePorTitulo(principal.markdown, opciones.clases)
-  const base = { indice, principal, clase, codigos, camposDeCodigo: deCodigo, milisegundosDeRespaldo: 0, invalidos: [], corregidos: [], avisos }
+  const tiempos: TiemposDePagina = { codigos: tiempoCodigos, motor: tiempoMotor, respaldo: 0 }
+  const base = { indice, principal, clase, codigos, camposDeCodigo: deCodigo, milisegundosDeRespaldo: 0, tiempos, invalidos: [], corregidos: [], avisos }
   if (clase !== null && opciones.omiteClases?.has(clase.clase) === true) {
     return { ...base, omitida: true, campos: [] }
   }
@@ -259,6 +276,7 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
 
   return {
     ...base, omitida: false, campos: validos, invalidos, corregidos, milisegundosDeRespaldo,
+    tiempos: { ...tiempos, respaldo: milisegundosDeRespaldo },
     ...(respaldo === undefined ? {} : { respaldo }),
     ...(cotejoDeCodigos === undefined ? {} : { cotejoDeCodigos }),
     ...(cotejoDeRespaldo === undefined ? {} : { cotejoDeRespaldo }),

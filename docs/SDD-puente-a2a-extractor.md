@@ -1,5 +1,10 @@
 # SDD — El puente A2A, y por qué el extractor es su primera capacidad
 
+> **Construido el 2026-09-13** (spec 010): `src/features/a2a/` + tres Route Handlers, prueba de
+> opacidad en `scripts/prueba-a2a.ts` (enumera y exige igualdad), SDK `@a2a-js/sdk@1.1.0` pineado.
+> Lo que este documento decía «todavía no se escribe» (§6) ya está escrito, en el mismo cambio que
+> el bridge. Sigue vigente lo que **no** cierra (§7): cuota por partner y AISIA de terceros.
+
 > Diseño, no implementación. Cierra **cómo** se integra el protocolo agéntico de
 > [`hermes-os-a2a`](https://github.com/lisagomez/hermes-os-a2a) con este template y con
 > `tools/extractor-documental/`. No instala nada, no levanta ningún endpoint y no toma la decisión

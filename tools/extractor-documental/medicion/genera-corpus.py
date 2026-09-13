@@ -28,16 +28,32 @@ AZAR = random.Random(20260911)
 FUENTE = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 FUENTE_NEGRITA = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
+# Tabla del anexo del SAT, la misma que `src/identificadores-mx.ts`: un RFC sintetico con el digito
+# verificador MAL no mide nada contra un flujo que valida por checksum (spec 010, 2026-09-13: los
+# validadores rechazaban los tres RFC del corpus y el extractor los mandaba a revision, con razon).
+TABLA_RFC = '0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ'
+
+
+def con_digito(sin_digito):
+    relleno = sin_digito.rjust(12, ' ')
+    suma = sum(TABLA_RFC.index(c) * (13 - i) for i, c in enumerate(relleno))
+    resto = suma % 11
+    return sin_digito + ('0' if resto == 0 else 'A' if resto == 1 else str(11 - resto))
+
+
 EMISORES = [
-    ('AAA010101AAA', 'Ferreteria Sintetica SA de CV', '601'),
-    ('BBB020202BB2', 'Transportes Ficticios SC', '612'),
+    (con_digito('AAA010101AA'), 'Ferreteria Sintetica SA de CV', '601'),
+    (con_digito('BBB020202BB'), 'Transportes Ficticios SC', '612'),
 ]
+# El generico «publico en general» lleva el digito mal A PROPOSITO (es asi en el mundo real): el
+# proyecto que lee facturas lo admite con `admiteGenericos`.
 RECEPTOR = ('XAXX010101000', 'Publico en General')
 
 
 def rfc_falso():
     letras = ''.join(AZAR.choice('ABCDEFGHJKLMNPQRSTUVWXYZ') for _ in range(4))
-    return f"{letras}{AZAR.randint(10, 99):02d}{AZAR.randint(1, 12):02d}{AZAR.randint(1, 28):02d}{AZAR.choice('ABCDEFGHJKLMNPQRSTUVWXYZ0123456789')}{AZAR.randint(0, 9)}{AZAR.randint(0, 9)}"
+    cuerpo = f"{letras}{AZAR.randint(10, 99):02d}{AZAR.randint(1, 12):02d}{AZAR.randint(1, 28):02d}{AZAR.choice('ABCDEFGHJKLMNPQRSTUVWXYZ0123456789')}{AZAR.randint(0, 9)}"
+    return con_digito(cuerpo)
 
 
 def factura(n, emisor):

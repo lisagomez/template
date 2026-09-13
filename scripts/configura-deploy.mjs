@@ -9,7 +9,9 @@
  *      aqui a proposito: los nombres y las specs cambian, y una tabla copiada envejece sin
  *      que nadie lo note — este repo ya se llevo esa leccion con otra cosa. `nproc` y
  *      `/proc/meminfo` no envejecen. Si mañana mueves la app a un servidor mas grande, se
- *      vuelve a correr y ya.
+ *      vuelve a correr y ya. **La GPU se mide como un recurso mas del VPS** (spec 010):
+ *      `nvidia-smi` si existe, y si el runtime de contenedores la expone. Sin GPU no es un
+ *      error: es «ninguna», y el perfil `ocr-gpu` no se levanta.
  *   2. **Valida `.env.production` antes de que falle el deploy.** Variables ausentes, con
  *      placeholder sin tocar, o incoherentes entre si (el caso clasico: `NEXT_PUBLIC_SITE_URL`
  *      apuntando a un dominio distinto de `DOMAIN`, que rompe los redirects de OAuth **sin
@@ -72,7 +74,32 @@ const appMemMB = Math.max(1024, ramMB - RESERVA_SO_MB - CADDY_MEM_MB);
 const heapMB = Math.min(Math.floor(appMemMB * 0.75), 6144);
 const appCpus = Math.max(1, Math.round((vcpu - 0.5) * 10) / 10);
 
+// --- 1b. La GPU, como un recurso mas ---------------------------------------
+// Se mide, no se supone. Tres cosas distintas y se dicen por separado: hay driver, hay
+// tarjeta (nombre y memoria), y el runtime de Docker la expone a los contenedores. Con
+// las tres, `ocr-gpu` puede arrancar; con menos, se declara cual falta.
+function mideGpu() {
+  const gpu = { presente: false, nombre: null, vramMB: null, driver: null, runtimeDocker: false, motivo: '' };
+  if (!existsSync('/proc/driver/nvidia/version')) { gpu.motivo = 'sin driver NVIDIA cargado'; return gpu; }
+  gpu.driver = readFileSync('/proc/driver/nvidia/version', 'utf8').split('\n')[0].trim();
+  try {
+    const salida = execFileSync('nvidia-smi', ['--query-gpu=name,memory.total', '--format=csv,noheader,nounits'], { encoding: 'utf8' }).trim().split('\n')[0];
+    const [nombre, vram] = salida.split(',').map((t) => t.trim());
+    gpu.presente = true; gpu.nombre = nombre; gpu.vramMB = Number(vram) || null;
+  } catch { gpu.motivo = 'hay driver pero nvidia-smi no responde'; return gpu; }
+  try {
+    const runtimes = execFileSync('docker', ['info', '--format', '{{json .Runtimes}}'], { encoding: 'utf8' });
+    gpu.runtimeDocker = runtimes.includes('nvidia');
+    if (!gpu.runtimeDocker) gpu.motivo = 'la GPU existe pero Docker no la expone: instala el NVIDIA Container Toolkit';
+  } catch { gpu.motivo = 'no pude preguntar a Docker por sus runtimes'; }
+  return gpu;
+}
+const gpu = mideGpu();
+
 console.log(`Servidor: ${vcpu} vCPU · ${ramMB} MB RAM · ${swapMB} MB swap`);
+console.log(gpu.presente
+  ? `GPU: ${gpu.nombre} · ${gpu.vramMB} MB · ${gpu.runtimeDocker ? verde('expuesta a Docker') : rojo(gpu.motivo)}`
+  : gris(`GPU: ninguna (${gpu.motivo}). El perfil ocr-gpu no se levanta; la cola de OCR va en CPU.`));
 console.log(gris(`Reparto: SO ${RESERVA_SO_MB} MB · Caddy ${CADDY_MEM_MB} MB · app ${appMemMB} MB\n`));
 
 if (ramMB < 2048) {
@@ -116,8 +143,16 @@ if (!existsSync(ruta(ENV))) {
     problemas.push(`NEXT_PUBLIC_SITE_URL no apunta a DOMAIN (${dominio}). Los redirects de OAuth se rompen SIN dar error: ` +
       'el build pasa, el certificado pasa, y el usuario no vuelve del login.');
   }
+  // El extractor: Mistral solo con decision C4 escrita; ocr-gpu solo con modelo pineado y GPU expuesta.
+  if (valores.get('OCR_RESPALDO') === 'mistral') {
+    const decision = valores.get('OCR_DECISION_C4_ARCHIVO');
+    if (!decision || !existsSync(decision)) problemas.push('OCR_RESPALDO=mistral manda el documento a un tercero: exige OCR_DECISION_C4_ARCHIVO apuntando a la decision C4 firmada. Sin ella, el servicio lo deja apagado (y con datos de terceros ninguna firma lo autoriza).');
+  }
+  const modeloGpu = valores.get('OCR_GPU_MODELO');
+  if (modeloGpu && /(^|[-:@/])(latest|stable|current|default|head)$/i.test(modeloGpu)) problemas.push(`OCR_GPU_MODELO="${modeloGpu}" es un alias autoactualizable: el modelo va pineado (C1).`);
+  if (modeloGpu && !gpu.runtimeDocker) avisos.push(`OCR_GPU_MODELO esta puesto pero esta maquina no expone GPU a Docker (${gpu.motivo}): no levantes el perfil ocr-gpu aqui.`);
   // Secretos: solo presencia, nunca valor.
-  for (const clave of ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY']) {
+  for (const clave of ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY', 'A2A_API_KEY', 'MISTRAL_API_KEY']) {
     const v = valores.get(clave);
     console.log(`${clave}: ${v ? verde(`presente (${v.length} car.)`) : gris('ausente')}`);
   }
@@ -138,6 +173,12 @@ const bloque = [
   `CADDY_MEM=${CADDY_MEM_MB}M`,
   `CADDY_CPUS=${vcpu <= 2 ? 0.25 : caddyCpus}`,
   `NODE_HEAP_MB=${heapMB}`,
+  `# GPU medida: ${gpu.presente ? `${gpu.nombre}, ${gpu.vramMB} MB, ${gpu.runtimeDocker ? 'expuesta a Docker' : gpu.motivo}` : `ninguna (${gpu.motivo})`}`,
+  `OCR_GPU=${gpu.presente && gpu.runtimeDocker ? 'presente' : 'ninguna'}`,
+  `OCR_GPU_VRAM_MB=${gpu.vramMB ?? 0}`,
+  `OCR_CPUS=${Math.max(1, Math.min(4, vcpu - 1))}`,
+  `OCR_MEM=${Math.max(1024, Math.min(4096, Math.floor(appMemMB / 2)))}M`,
+  `OCR_EN_VUELO=${Math.max(1, Math.min(4, vcpu - 1))}`,
   '',
 ].join('\n');
 
@@ -145,7 +186,7 @@ console.log(`\n${gris('Bloque de tamaño derivado:')}\n${bloque.trim()}\n`);
 
 if (ESCRIBIR && existsSync(ruta(ENV))) {
   const actual = readFileSync(ruta(ENV), 'utf8');
-  const limpio = actual.replace(/\n?# --- Tamaño del stack[\s\S]*?NODE_HEAP_MB=\d+\n/, '\n');
+  const limpio = actual.replace(/\n?# --- Tamaño del stack[\s\S]*?OCR_EN_VUELO=\d+\n/, '\n').replace(/\n?# --- Tamaño del stack[\s\S]*?NODE_HEAP_MB=\d+\n/, '\n');
   writeFileSync(ruta(ENV), `${limpio.replace(/\n+$/, '')}\n${bloque}`);
   console.log(verde(`✓ Bloque escrito en ${ENV} (reemplaza el anterior si lo habia).`));
 } else if (ESCRIBIR) {
