@@ -32,7 +32,7 @@ const periodoDe = (t) => (t.cuando.inicio.slice(0, 10) < corte ? 'antes' : 'desp
 const estructural = evaluaEstructural(trayectorias)
 let juicio = null
 if (existsSync(EVAL)) {
-  const ultimo = readdirSync(EVAL).filter((n) => n.endsWith('-juicio.json')).sort().pop()
+  const ultimo = readdirSync(EVAL).filter((n) => /-juicio(-\d+)?\.json$/.test(n)).sort().pop()
   if (ultimo) juicio = JSON.parse(readFileSync(join(EVAL, ultimo), 'utf8'))
 }
 

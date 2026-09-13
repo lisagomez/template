@@ -22,7 +22,7 @@ const criterios = JSON.parse(readFileSync(join(raiz, 'trayectorias', 'criterios.
 const trayectorias = leeTrayectorias()
 const estructural = evaluaEstructural(trayectorias)
 let juicio = null
-if (existsSync(EVAL)) { const u = readdirSync(EVAL).filter((n) => n.endsWith('-juicio.json')).sort().pop(); if (u) juicio = JSON.parse(readFileSync(join(EVAL, u), 'utf8')) }
+if (existsSync(EVAL)) { const u = readdirSync(EVAL).filter((n) => /-juicio(-\d+)?\.json$/.test(n)).sort().pop(); if (u) juicio = JSON.parse(readFileSync(join(EVAL, u), 'utf8')) }
 const ultimoInforme = existsSync(INFORMES) ? readdirSync(INFORMES).filter((n) => n.endsWith('.json')).sort().pop() : null
 const informe = ultimoInforme ? JSON.parse(readFileSync(join(INFORMES, ultimoInforme), 'utf8')) : { hallazgos: [] }
 

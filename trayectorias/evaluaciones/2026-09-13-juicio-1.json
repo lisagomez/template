@@ -1,0 +1,114 @@
+{
+ "fecha": "2026-09-13",
+ "pasada": 1,
+ "evaluador": "subagente independiente (modelo pineado del arnés), 2026-09-13",
+ "vio": "solo para-evaluador/datos y para-evaluador/criterios.json; sin acceso al repo ni a la conversación",
+ "veredictos": {
+  "fabrica-0828c365": {
+   "proporcion_sana": true
+  },
+  "fabrica-0f06fe24": {
+   "proporcion_sana": true
+  },
+  "fabrica-12e8950e": {
+   "proporcion_sana": true
+  },
+  "fabrica-1e943fb0": {
+   "proporcion_sana": false
+  },
+  "fabrica-29065ee8": {
+   "proporcion_sana": false
+  },
+  "fabrica-2f605ddb": {
+   "proporcion_sana": false
+  },
+  "fabrica-30db46dc": {
+   "proporcion_sana": true
+  },
+  "fabrica-3c2abc60": {
+   "proporcion_sana": true
+  },
+  "fabrica-502a90f7": {
+   "proporcion_sana": true
+  },
+  "fabrica-64f42afe": {
+   "proporcion_sana": true
+  },
+  "fabrica-71923418": {
+   "proporcion_sana": true
+  },
+  "fabrica-a9ab6b58": {
+   "proporcion_sana": true
+  },
+  "fabrica-e99635ac": {
+   "proporcion_sana": true
+  },
+  "fabrica-ec81ad29": {
+   "proporcion_sana": true
+  },
+  "fabrica-f0bec979": {
+   "proporcion_sana": false
+  },
+  "fabrica-06d34ab6": {
+   "proporcion_sana": true
+  },
+  "fabrica-0873b25e": {
+   "proporcion_sana": true
+  },
+  "fabrica-2a59c3f1": {
+   "proporcion_sana": true
+  },
+  "fabrica-2de0f155": {
+   "proporcion_sana": false
+  },
+  "fabrica-c2fe3422": {
+   "proporcion_sana": true
+  },
+  "fabrica-cfae124e": {
+   "proporcion_sana": false
+  },
+  "fabrica-faf93e53": {
+   "proporcion_sana": true
+  },
+  "aplicacion-19c5ed3d": {
+   "clase_adecuada": true
+  },
+  "aplicacion-5e8795f7": {
+   "clase_adecuada": true
+  },
+  "aplicacion-84938f8a": {
+   "clase_adecuada": true
+  },
+  "herramientas-2b5c6198": {
+   "metricas_coherentes": true
+  }
+ },
+ "notas": {
+  "fabrica-0828c365": "Bash 82 de 84 con exit,update-config: cambio de config, Bash>0, no es plan",
+  "fabrica-0f06fe24": "Bash 112 de 128 (87.5%) con goal-compiler,model; Agent 14; bajo umbral 90",
+  "fabrica-12e8950e": "Bash 60 de 68 (88%) con goal,goal-compiler,primer; Read 2 Edit 3; bajo 90",
+  "fabrica-1e943fb0": "skills vacios: Bash 13 de 14 sin referencia contra la que juzgar; no decidible",
+  "fabrica-29065ee8": "skills vacios: Bash 10 de 10, 1 turno; sin referencia; no decidible",
+  "fabrica-2f605ddb": "skills vacios: Bash 127 de 130 con prueba 10 y build rojo; sin referencia",
+  "fabrica-30db46dc": "Bash 166 de 224 (74%) con plan; ExitPlanMode 5, Edit 42, Write 9: mezcla",
+  "fabrica-3c2abc60": "Bash 161 de 212 (76%) con 6 skills; Edit 31 Write 6 WebFetch 3: variada",
+  "fabrica-502a90f7": "Bash 36 de 36 con goal,primer: lectura+ejecucion, Bash>0; sin planificacion",
+  "fabrica-64f42afe": "Bash 150 de 150 con primer (lectura): coherente aunque monocultivo 2h",
+  "fabrica-71923418": "Bash 40 de 46 (87%) con update-config; WebSearch 2 WebFetch 2: mezcla sana",
+  "fabrica-a9ab6b58": "Bash 39 de 40 con primer, 3 turnos: carga de contexto por lectura, coherente",
+  "fabrica-e99635ac": "Bash 205 de 285 (72%) con goal,goal-compiler; Edit 63 Read 10 Agent 6",
+  "fabrica-ec81ad29": "Bash 92 de 93 con goal,update-sf: implementacion con Bash>0; sin planificacion",
+  "fabrica-f0bec979": "skills vacios: Bash 77 de 78 sin referencia; no decidible",
+  "fabrica-06d34ab6": "Bash 42 de 50 (84%) con clear,primer; Read 5 Edit 2: coherente",
+  "fabrica-0873b25e": "Bash 69 de 103 (67%) con login; Edit 18 Write 4 Read 9: implementacion",
+  "fabrica-2a59c3f1": "Bash 160 de 161 con exit,primer (lectura): coherente aunque monocultivo 2h",
+  "fabrica-2de0f155": "Bash 275 de 287 (96%) con goal-compiler,memory-manager: plan casi solo Bash",
+  "fabrica-c2fe3422": "Bash 955 de 1102 (87%) con goal-compiler,plan,goal; Write 54 Edit 17",
+  "fabrica-cfae124e": "skills vacios y 0 herramientas, 1 llamada: nada que juzgar; no decidible",
+  "fabrica-faf93e53": "Bash 250 de 372 (67%) con goal,plan,primer; Edit 54 Write 43 Read 14",
+  "aplicacion-19c5ed3d": "tarea implementar-feature con sonnet-5: nivel medio para tarea media",
+  "aplicacion-5e8795f7": "tarea resumir con haiku-4.5: tarea ligera en modelo ligero",
+  "aplicacion-84938f8a": "implementar-feature con sonnet-5 adecuado; fallo y uso null son estructurales",
+  "herramientas-2b5c6198": "CER 0.004 y correctos 93.6% concuerdan; 15+6+12=33 docs; 227.8ppm=15/3.95s"
+ }
+}

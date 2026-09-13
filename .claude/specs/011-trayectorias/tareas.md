@@ -45,7 +45,9 @@
       criterio no podía juzgar → se añadió `actor.tarea`. Segunda pasada (con `tarea`): 14 sí / 8 no
       en `proporcion_sana`, y el evaluador cazó que la tarea no veía las ediciones por Bash → se
       añadió `acciones.ediciones`. Cada pasada cambió el formato: el lazo de plasticidad funciona.
-      Una tercera pasada con el formato final queda lanzada; su veredicto entra como commit aparte.
+      Tercera pasada, con el formato final: **26 de 26 sí**, sin ningún caso indecidible. Las tres
+      pasadas se conservan en `trayectorias/evaluaciones/2026-09-13-juicio-{1,2,3}.json`: la
+      historia de veredictos es la prueba de que el formato mejoró.
 
 ## Fase 6 — Informe
 - [x] **TAR-8 · Informe** (`informe.mjs`, corte por mediana 2026-08-29): por línea y actor, con el

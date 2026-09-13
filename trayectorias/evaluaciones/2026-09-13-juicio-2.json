@@ -1,5 +1,6 @@
 {
  "fecha": "2026-09-13",
+ "pasada": 2,
  "evaluador": "subagente independiente (modelo pineado del arnés), 2026-09-13, segunda pasada",
  "vio": "solo para-evaluador/datos y para-evaluador/criterios.json; sin acceso al repo ni a la conversación",
  "veredictos": {

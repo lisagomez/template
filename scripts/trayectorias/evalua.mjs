@@ -79,8 +79,11 @@ if (esPrincipal) {
     const v = JSON.parse(readFileSync(process.argv[i + 1], 'utf8'))
     if (typeof v.evaluador !== 'string' || typeof v.vio !== 'string' || typeof v.veredictos !== 'object') { console.error('veredicto: {evaluador, vio, veredictos}'); process.exit(1) }
     const fecha = new Date().toISOString().slice(0, 10)
-    writeFileSync(join(EVAL, `${fecha}-juicio.json`), JSON.stringify({ fecha, ...v }, null, 1) + '\n')
-    console.log(`veredicto de juicio guardado: ${Object.keys(v.veredictos).length} trayectoria(s), evaluador ${v.evaluador}`)
+    // Cada pasada se conserva: la historia de veredictos es lo que muestra si el formato mejoro.
+    let n = 1
+    while (existsSync(join(EVAL, `${fecha}-juicio-${n}.json`))) n++
+    writeFileSync(join(EVAL, `${fecha}-juicio-${n}.json`), JSON.stringify({ fecha, pasada: n, ...v }, null, 1) + '\n')
+    console.log(`veredicto de juicio guardado (pasada ${n}): ${Object.keys(v.veredictos).length} trayectoria(s), evaluador ${v.evaluador}`)
     process.exit(0)
   }
   const trayectorias = leeTrayectorias()
