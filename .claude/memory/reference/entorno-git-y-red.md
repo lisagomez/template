@@ -53,11 +53,16 @@ Base: Ubuntu 26.04 LTS sobre **WSL2** (kernel `6.6.87.2-microsoft-standard-WSL2`
   `npm run audita:imprenta` sale verde sobre 15 servicios, los 5 en grado **parcial** y el
   `dogfood FAIL` de `polar` reconocido. No hay `.claude/imprenta/indice.json`: el auditor
   resuelve por librería.
-- **Docker 29.1.3** en `/usr/bin/docker`, daemon responde, **sin sudo**. Pero **`docker
-  compose` NO está**: el plugin no existe y el `docker-compose` del PATH es un shim de Docker
-  Desktop para Windows que no llega a esta distro. Los `npm run deploy:*` **no se pueden
-  ensayar aquí** — se corren en el servidor, así que no es deuda del template, pero tampoco
-  los des por probados.
+- **Docker 29.1.3** en `/usr/bin/docker`, daemon responde, **sin sudo**. **`docker compose`
+  v5.5.1 SÍ está desde el 2026-09-13**: instalado como plugin de usuario en
+  `~/.docker/cli-plugins/docker-compose` (el `docker-compose` del PATH sigue siendo un shim
+  de Docker Desktop para Windows que no corre aquí). `docker compose config` y
+  `--profile ocr up` se ensayaron en esta máquina; el stack completo con Caddy y dominio sigue
+  siendo cosa del servidor. Sin GPU: `ocr-gpu` no se puede probar aquí.
+- **Tesseract 5.5.0** en `~/.local/tesseract` (fuera del PATH): `LD_LIBRARY_PATH`,
+  `TESSDATA_PREFIX` y `TESSERACT_CMD` como los ponen los scripts de `medicion/`.
+- **El puerto 3000 lo ocupa otro `next-server`** de otro proyecto y redirige a
+  `/login?error=config`: arrancar este template con `PORT` libre (3007 sirvió, 2026-09-13).
 - `sudo` existe y **pide contraseña interactiva**: nada que necesite `apt` se instala desde
   una sesión.
 - Salida HTTPS confirmada (`registry.npmjs.org` → 200).
