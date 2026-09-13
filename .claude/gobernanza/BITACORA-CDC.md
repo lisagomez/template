@@ -3521,3 +3521,27 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 `SessionEnd` en `settings.json` del repo, que sigue pendiente como CDC aparte.
 
 ---
+
+### 2026-09-13 — «aplica las skills y el routing»: dos skills cableados a las trayectorias y el arnés entra al catálogo de routing — radio: skill + routing
+- **Cambio**: (1) `.claude/routing-modelos.json` gana el bloque `arnes`: los cuatro modelos que
+  usa Claude Code en las sesiones de la fábrica (`claude-opus-5`, `claude-fable-5-1`,
+  `claude-sonnet-5`, `claude-haiku-4-5-20251001`) con precio de entrada, salida, lectura y
+  escritura de caché **verificados contra OpenRouter el 2026-09-13**; con eso las 22 sesiones
+  históricas pasan de coste `null` a coste medido (777 USD en total, mediana 8,25, máximo 354,54
+  en la sesión de las specs 007 a 009). (2) `autoresearch/SKILL.md` gana la «Fase 0»: el baseline
+  y la confirmación de mejora salen de las trayectorias, nunca se copia un criterio al prompt, y
+  mutar un skill sigue siendo CDC. (3) `primer/SKILL.md` gana el paso «leer lo que la fábrica sabe
+  de sí misma»: hallazgos del último informe y propuestas pendientes, solo forma.
+- **Motivo**: instrucción de la dueña tras aplicar las propuestas; y la evidencia: sin precios del
+  arnés, la línea de la fábrica no podía comparar coste entre periodos.
+- **Lo que NO cambia**: los niveles del routing y sus modelos pineados; ninguna clase de tarea se
+  mueve de nivel; `AGENTS.md`, `settings.json` y `.mcp.json` intactos. El hook `SessionEnd` en
+  `settings.json` del repo sigue pendiente.
+- **Gate aplicado**: diff revisado ☑ (en sesión) · regresión verde ☑ · aprobación humana ☑
+  (instrucción literal «aplica las skills y el routing») · pineo ☑ (precios con fuente y fecha)
+- **Regresión**: `npm run regresion` capa A **116/116 — promovible**; `npm run regresion -- --trampa`
+  lista el corpus completo (22/22 declarados). **Capa B en sesión fría: PENDIENTE de correr por la
+  dueña**, como exige el protocolo ciego; se declara aquí y no se da por hecha. `verifica:routing`
+  coherente; `mide:contexto` dentro de presupuesto.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aplica las
+  skills y el routing»); capa B pendiente y declarada.

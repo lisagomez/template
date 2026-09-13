@@ -68,6 +68,11 @@
       P3/P6 eran errores reales de Bash (`pkill -f` sobre la propia shell, `gh pr edit`) y dieron dos
       aprendizajes más `resultado.erroresPor` en el formato. Resolución en
       `trayectorias/propuestas/2026-09-13-resolucion.md`.
+      **Skills y routing aplicados** («aplica las skills y el routing», acta en la bitácora): el
+      bloque `arnes` del routing da coste a las 22 sesiones históricas (precios verificados contra
+      OpenRouter: 777 USD en total, mediana 8,25); `autoresearch` toma su baseline de las
+      trayectorias y `primer` lee el último informe. Capa B de regresión en sesión fría: pendiente
+      de la dueña, y declarado.
       **Ninguna aplicada**: diff vacío en `AGENTS.md`, skills, routing, `settings.json` y `.mcp.json`;
       entrada en `BITACORA-CDC.md` con aprobación pendiente.
 - [x] **TAR-10 · Gates**: `npm run validate` sellado con los pasos nuevos; `verify:gobernanza` 152/152.

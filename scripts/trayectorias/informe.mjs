@@ -52,7 +52,8 @@ function metricasDe(t) {
   return {
     salidaPorLlamada: t.uso && llamadas > 0 ? t.uso.salida / llamadas : t.linea === 'aplicacion' ? (t.uso?.salida ?? null) : null,
     cacheRatio: t.uso && t.uso.salida > 0 ? (t.uso.cacheLectura ?? 0) / t.uso.salida : null,
-    costoUsd: t.costoUsd,
+    costoUsd: t.linea === 'fabrica' ? null : t.costoUsd,
+    costoPorLlamada: t.linea === 'fabrica' && t.costoUsd !== null && llamadas > 0 ? t.costoUsd / llamadas : null,
     msPorLlamada: t.tiempos.totalMs !== null && llamadas > 0 ? t.tiempos.totalMs / llamadas : t.linea !== 'fabrica' ? t.tiempos.totalMs : null,
     aciertoEvals: valores.length ? valores.filter(Boolean).length / valores.length : null,
     revisionHumana: t.resultado.campos ? (t.resultado.revisionHumana ?? 0) / t.resultado.campos : null,
@@ -61,7 +62,7 @@ function metricasDe(t) {
     pagMin: t.resultado.metricas?.paginasPorMinutoMotor ?? null,
   }
 }
-const MEJOR_SI_SUBE = { cacheRatio: true, aciertoEvals: true, pagMin: true, salidaPorLlamada: false, costoUsd: false, msPorLlamada: false, revisionHumana: false, gatesRojosPorGate: false, erroresPorHerramienta: false }
+const MEJOR_SI_SUBE = { cacheRatio: true, aciertoEvals: true, pagMin: true, salidaPorLlamada: false, costoUsd: false, costoPorLlamada: false, msPorLlamada: false, revisionHumana: false, gatesRojosPorGate: false, erroresPorHerramienta: false }
 
 // Dos niveles: la LINEA entera (donde de verdad hay base para comparar) y cada actor dentro de
 // ella (donde casi nunca la hay todavia, y se dice). Sin el agregado, 21 sesiones con skills
@@ -114,7 +115,7 @@ for (const [nombre, g] of Object.entries(grupos).sort()) {
       const delta = ma === 0 ? (md === 0 ? 0 : 1) : (md - ma) / Math.abs(ma)
       const mejora = MEJOR_SI_SUBE[metrica] ? delta > UMBRAL : delta < -UMBRAL
       const peor = MEJOR_SI_SUBE[metrica] ? delta < -UMBRAL : delta > UMBRAL
-      const porLlamada = metrica === 'salidaPorLlamada' || metrica === 'msPorLlamada' || metrica === 'costoUsd'
+      const porLlamada = metrica === 'salidaPorLlamada' || metrica === 'msPorLlamada' || metrica === 'costoUsd' || metrica === 'costoPorLlamada'
       const confundido = confusor !== null && porLlamada
       cambio = desigual ? `cobertura desigual (${a.length} vs ${d.length}): no se marca` : confundido ? `${(delta * 100).toFixed(0)} % · confundido por modelo, no se marca` : peor ? `▼ regresion ${(delta * 100).toFixed(0)} %` : mejora ? `▲ mejora ${(delta * 100).toFixed(0)} %` : `${(delta * 100).toFixed(0)} %`
       if (!desigual && !confundido && (peor || mejora)) hallazgos.push({ grupo: nombre, metrica, delta, peor, fuente: [...g.antes, ...g.despues].filter((x) => x.m[metrica] !== null).map((x) => x.id) })

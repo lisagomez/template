@@ -9,7 +9,7 @@
  },
  "cuando": {
   "inicio": "2026-09-13T13:06:36.024Z",
-  "fin": "2026-09-13T17:08:19.968Z"
+  "fin": "2026-09-13T18:03:56.951Z"
  },
  "actor": {
   "skills": [
@@ -19,11 +19,11 @@
   "tarea": "implementacion"
  },
  "modelos": {
-  "claude-fable-5-1": 545
+  "claude-fable-5-1": 562
  },
  "acciones": {
   "herramientas": {
-   "Bash": 326,
+   "Bash": 336,
    "ToolSearch": 2,
    "WebFetch": 4,
    "Agent": 4,
@@ -32,21 +32,21 @@
    "Skill": 1,
    "AskUserQuestion": 1
   },
-  "llamadasAlModelo": 183,
-  "turnos": 22,
+  "llamadasAlModelo": 190,
+  "turnos": 24,
   "subagentes": 4,
   "comandos": 2,
-  "ediciones": 113
+  "ediciones": 117
  },
  "uso": {
-  "entrada": 4578,
-  "salida": 383562,
-  "cacheCreacion": 739639,
-  "cacheLectura": 91386013
+  "entrada": 4740,
+  "salida": 398068,
+  "cacheCreacion": 762728,
+  "cacheLectura": 96070592
  },
- "costoUsd": null,
+ "costoUsd": 53.5025,
  "tiempos": {
-  "totalMs": 14503944
+  "totalMs": 17840927
  },
  "gates": [
   {
@@ -57,12 +57,12 @@
   {
    "nombre": "verifica:specs",
    "resultado": "verde",
-   "veces": 13
+   "veces": 14
   },
   {
    "nombre": "validate",
    "resultado": "verde",
-   "veces": 25
+   "veces": 26
   },
   {
    "nombre": "typecheck",
@@ -86,8 +86,8 @@
   },
   {
    "nombre": "regresion",
-   "resultado": "desconocido",
-   "veces": 1
+   "resultado": "verde",
+   "veces": 4
   }
  ],
  "resultado": {
@@ -97,9 +97,7 @@
   }
  },
  "cobertura": {
-  "completa": false,
-  "faltan": [
-   "costo"
-  ]
+  "completa": true,
+  "faltan": []
  }
 }

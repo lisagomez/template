@@ -31,7 +31,7 @@
   {
    "grupo": "fabrica · (todas)",
    "metrica": "erroresPorHerramienta",
-   "delta": 0.4757071588147888,
+   "delta": 0.47131219753303616,
    "peor": true,
    "fuente": [
     "fabrica-1e943fb0",
@@ -86,7 +86,7 @@
   {
    "grupo": "fabrica · implementacion",
    "metrica": "erroresPorHerramienta",
-   "delta": 0.3621912235213435,
+   "delta": 0.358134336184341,
    "peor": true,
    "fuente": [
     "fabrica-1e943fb0",

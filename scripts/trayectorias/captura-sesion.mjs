@@ -26,6 +26,33 @@ const DESTINO = join(raiz, 'trayectorias', 'datos', 'fabrica')
 const DIR_SKILLS = join(raiz, '.claude', 'skills')
 
 /**
+ * Precios de los modelos del ARNES, del bloque `arnes` de routing-modelos.json (USD por millon).
+ * Sin precio para alguno de los modelos de la sesion, el coste va null y la cobertura lo dice:
+ * no se estima con el precio de otro.
+ */
+function preciosDelArnes() {
+  try {
+    const catalogo = JSON.parse(readFileSync(join(raiz, '.claude', 'routing-modelos.json'), 'utf8'))
+    return catalogo.arnes?.modelos ?? {}
+  } catch { return {} }
+}
+const PRECIOS = preciosDelArnes()
+
+function costeDe(usoPorMensaje, modeloPorMensaje) {
+  let total = 0
+  for (const [id, u] of usoPorMensaje) {
+    const modelo = modeloPorMensaje.get(id) ?? ''
+    // `<synthetic>`: mensajes que fabrica el arnes sin llamar a ningun modelo. No cuestan.
+    if (modelo.startsWith('<')) continue
+    const precio = PRECIOS[modelo]?.precio
+    if (precio === undefined) return null
+    total += ((u.input_tokens ?? 0) * precio.entrada + (u.output_tokens ?? 0) * precio.salida
+      + (u.cache_read_input_tokens ?? 0) * precio.lectura_cache + (u.cache_creation_input_tokens ?? 0) * precio.escritura_cache) / 1e6
+  }
+  return Math.round(total * 10000) / 10000
+}
+
+/**
  * Un `<command-name>` es un skill solo si existe en `.claude/skills/`. Los demas (`compact`,
  * `model`, `clear`, `exit`, `effort`, `goal`, `plan`...) son comandos del arnes y van aparte:
  * el evaluador ciego los tomaba por skills y juzgaba una sesion de `/goal` como si fuera de un
@@ -91,6 +118,7 @@ export function trayectoriaDeTranscript(lineas, referencia) {
   const comandos = new Set()
   const gates = {}
   const usoPorMensaje = new Map()
+  const modeloPorMensaje = new Map()
   const resultados = new Map()
   const usos = new Map()
   const erroresPor = {}
@@ -108,7 +136,7 @@ export function trayectoriaDeTranscript(lineas, referencia) {
     if (!m || typeof m !== 'object') continue
     if (l.type === 'assistant') {
       if (m.model && !String(m.model).startsWith('<')) modelos[m.model] = (modelos[m.model] ?? 0) + 1
-      if (m.usage && m.id && !usoPorMensaje.has(m.id)) usoPorMensaje.set(m.id, m.usage)
+      if (m.usage && m.id && !usoPorMensaje.has(m.id)) { usoPorMensaje.set(m.id, m.usage); modeloPorMensaje.set(m.id, String(m.model ?? '')) }
       for (const b of Array.isArray(m.content) ? m.content : []) {
         if (b?.type !== 'tool_use') continue
         const nombre = String(b.name ?? 'desconocida').slice(0, 60)
@@ -158,8 +186,8 @@ export function trayectoriaDeTranscript(lineas, referencia) {
   }
   const faltan = []
   if (uso === null) faltan.push('uso')
-  // El catalogo de routing no cubre los modelos del arnes: el coste va null y se dice.
-  faltan.push('costo')
+  const costoUsd = uso === null ? null : costeDe(usoPorMensaje, modeloPorMensaje)
+  if (uso !== null && costoUsd === null) faltan.push('costo')
   const totalMs = inicio && fin ? Math.max(0, Date.parse(fin) - Date.parse(inicio)) : null
   if (totalMs === null) faltan.push('tiempos')
   const t = {
@@ -169,7 +197,7 @@ export function trayectoriaDeTranscript(lineas, referencia) {
     actor: { skills: [...skills].sort(), tarea: tareaDe(herramientas, skills, comandos, ediciones) },
     modelos,
     acciones: { herramientas, llamadasAlModelo: usoPorMensaje.size, turnos, subagentes, comandos: [...comandos].sort().length, ediciones },
-    uso, costoUsd: null,
+    uso, costoUsd,
     tiempos: { totalMs },
     gates: Object.values(gates),
     resultado: { errores, erroresPor },

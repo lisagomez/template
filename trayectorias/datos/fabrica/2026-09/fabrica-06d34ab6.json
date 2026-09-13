@@ -39,7 +39,7 @@
   "cacheCreacion": 98957,
   "cacheLectura": 4100118
  },
- "costoUsd": null,
+ "costoUsd": 3.6734,
  "tiempos": {
   "totalMs": 1403125
  },
@@ -72,9 +72,7 @@
   }
  },
  "cobertura": {
-  "completa": false,
-  "faltan": [
-   "costo"
-  ]
+  "completa": true,
+  "faltan": []
  }
 }
