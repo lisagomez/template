@@ -67,7 +67,10 @@
   }
  ],
  "resultado": {
-  "errores": 1
+  "errores": 1,
+  "erroresPor": {
+   "AskUserQuestion": 1
+  }
  },
  "cobertura": {
   "completa": false,

@@ -92,6 +92,8 @@ export function trayectoriaDeTranscript(lineas, referencia) {
   const gates = {}
   const usoPorMensaje = new Map()
   const resultados = new Map()
+  const usos = new Map()
+  const erroresPor = {}
   let turnos = 0
   let subagentes = 0
   let errores = 0
@@ -111,6 +113,7 @@ export function trayectoriaDeTranscript(lineas, referencia) {
         if (b?.type !== 'tool_use') continue
         const nombre = String(b.name ?? 'desconocida').slice(0, 60)
         herramientas[nombre] = (herramientas[nombre] ?? 0) + 1
+        if (b.id) usos.set(b.id, nombre)
         if (nombre === 'Agent') subagentes++
         if (nombre === 'Write' || nombre === 'Edit' || nombre === 'NotebookEdit') ediciones++
         if (nombre === 'Bash' && typeof b.input?.command === 'string' && escribe(b.input.command)) ediciones++
@@ -126,7 +129,12 @@ export function trayectoriaDeTranscript(lineas, referencia) {
       } else if (Array.isArray(m.content)) {
         let esResultado = false
         for (const b of m.content) {
-          if (b?.type === 'tool_result') { esResultado = true; resultados.set(b.tool_use_id, b); if (b.is_error === true) errores++ }
+          if (b?.type === 'tool_result') {
+            esResultado = true; resultados.set(b.tool_use_id, b)
+            // Por herramienta, no por comando: al aplicar las propuestas del 2026-09-13 hizo falta
+            // saber DE QUE eran los errores, y la trayectoria solo traia el total.
+            if (b.is_error === true) { errores++; const h = usos.get(b.tool_use_id) ?? 'desconocida'; erroresPor[h] = (erroresPor[h] ?? 0) + 1 }
+          }
         }
         if (!esResultado && l.isMeta !== true) turnos++
       }
@@ -164,7 +172,7 @@ export function trayectoriaDeTranscript(lineas, referencia) {
     uso, costoUsd: null,
     tiempos: { totalMs },
     gates: Object.values(gates),
-    resultado: { errores },
+    resultado: { errores, erroresPor },
     cobertura: cobertura(faltan),
   }
   return t

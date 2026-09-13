@@ -60,7 +60,11 @@
   }
  ],
  "resultado": {
-  "errores": 4
+  "errores": 4,
+  "erroresPor": {
+   "Bash": 3,
+   "Skill": 1
+  }
  },
  "cobertura": {
   "completa": false,

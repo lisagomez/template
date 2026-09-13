@@ -3505,3 +3505,19 @@ arranque real de `ocr-gpu`, no medido por falta de GPU en esta máquina.
 - **Gate aplicado**: diff revisado ☐ · regresión verde ☑ · aprobación humana ☐ · pineo ☑
 - **Regresión**: `prueba:trayectorias` 8/8 · `verifica:trayectorias` 26/26 · `validate` sellado.
 - **Aprobado por**: **PENDIENTE** — redactado sin auto-aprobación; sigue sin aplicarse ninguna propuesta.
+
+## Acta de aprobación — 2026-09-13: «aplica las propuestas» de trayectorias
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción literal
+*"aplica las propuestas"*, sobre `trayectorias/propuestas/2026-09-13.md` (seis propuestas).
+
+**Sobre qué se aprobó y qué se aplicó** (detalle en `trayectorias/propuestas/2026-09-13-resolucion.md`):
+la investigación de causas; el informe marca «confundido por modelo» cuando la mezcla de modelos
+cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos aprendizajes** en
+`.claude/rules/aprendizajes-stack.md` (`pkill -f` anclado o por puerto; `gh api` en vez de
+`gh pr edit`). Esos dos son los únicos cambios de prompt de esta acta, y son el CDC.
+
+**Lo que esta firma NO cierra**: ningún skill ni el routing (la evidencia no lo pedía); el hook
+`SessionEnd` en `settings.json` del repo, que sigue pendiente como CDC aparte.
+
+---

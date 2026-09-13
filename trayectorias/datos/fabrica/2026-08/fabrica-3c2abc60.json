@@ -75,7 +75,12 @@
   }
  ],
  "resultado": {
-  "errores": 5
+  "errores": 5,
+  "erroresPor": {
+   "AskUserQuestion": 1,
+   "ExitPlanMode": 1,
+   "Bash": 3
+  }
  },
  "cobertura": {
   "completa": false,

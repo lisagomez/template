@@ -100,7 +100,13 @@
   }
  ],
  "resultado": {
-  "errores": 38
+  "errores": 38,
+  "erroresPor": {
+   "Bash": 34,
+   "mcp__playwright__browser_navigate": 1,
+   "ExitPlanMode": 2,
+   "Monitor": 1
+  }
  },
  "cobertura": {
   "completa": false,

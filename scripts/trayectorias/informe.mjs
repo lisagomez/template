@@ -70,14 +70,38 @@ const grupos = {}
 for (const t of trayectorias) {
   for (const clave of [`${t.linea} · (todas)`, `${t.linea} · ${actorDe(t)}`]) {
     const g = (grupos[clave] ??= { linea: t.linea, antes: [], despues: [] })
-    g[periodoDe(t)].push({ id: t.id, m: metricasDe(t) })
+    g[periodoDe(t)].push({ id: t.id, m: metricasDe(t), modelos: t.modelos })
   }
+}
+
+/**
+ * La mezcla de modelos por periodo, y si cambio. Aplicar las propuestas del 2026-09-13 enseno
+ * que la «regresion» de tokens de salida por llamada era en buena parte un cambio de modelo
+ * (Fable 5.1 emite 2,4 veces mas por llamada que Opus 5, con el razonamiento dentro de la
+ * salida): sin esta fila, el informe culpaba a los skills de lo que hacia el modelo.
+ */
+function mezclaDeModelos(items) {
+  const cuenta = {}
+  for (const x of items) for (const [m, n] of Object.entries(x.modelos ?? {})) cuenta[m] = (cuenta[m] ?? 0) + n
+  const total = Object.values(cuenta).reduce((a, b) => a + b, 0)
+  const dominante = Object.entries(cuenta).sort((a, b) => b[1] - a[1])[0]
+  return { cuenta, total, dominante: dominante ? dominante[0] : null, cuota: dominante && total ? dominante[1] / total : null }
+}
+const confundidoPorModelo = (g) => {
+  const a = mezclaDeModelos(g.antes); const d = mezclaDeModelos(g.despues)
+  if (a.dominante === null || d.dominante === null) return null
+  const nuevos = Object.keys(d.cuenta).filter((m) => !(m in a.cuenta))
+  const cambio = a.dominante !== d.dominante || nuevos.length > 0 || Math.abs((a.cuota ?? 0) - (d.cuota ?? 0)) > 0.3
+  return cambio ? `mezcla de modelos distinta (antes ${a.dominante} ${Math.round((a.cuota ?? 0) * 100)} %; despues ${d.dominante} ${Math.round((d.cuota ?? 0) * 100)} %${nuevos.length ? `, nuevos: ${nuevos.join(', ')}` : ''})` : null
 }
 
 const lineas = [`# Informe de trayectorias — corte ${corte}`, '', `> ${trayectorias.length} trayectorias · antes: ${trayectorias.filter((t) => periodoDe(t) === 'antes').length} · despues: ${trayectorias.filter((t) => periodoDe(t) === 'despues').length} · evals de juicio: ${juicio ? `${Object.keys(juicio.veredictos).length} trayectorias por ${juicio.evaluador}` : 'ninguna todavia'}`, '', '> Los huecos no se suman como ceros: cada celda dice sobre cuantas trayectorias se calculo. Una regresion (▼) o mejora (▲) exige al menos 3 en cada periodo y un cambio de mas del 20 %; con cobertura desigual (menos de la mitad) se dice y no se marca. La fabrica se compara por intensidad (por llamada, por gate, por herramienta), no por totales de sesion, que crecen con la duracion.', '']
 const hallazgos = []
 for (const [nombre, g] of Object.entries(grupos).sort()) {
-  lineas.push(`## ${nombre}`, '', '| metrica | antes | despues | cambio |', '|---|---|---|---|')
+  const confusor = confundidoPorModelo(g)
+  lineas.push(`## ${nombre}`, '')
+  if (confusor) lineas.push(`> ⚠ ${confusor}: las metricas por llamada (salida, ms) NO se comparan como regresion; se marcan «confundido por modelo».`, '')
+  lineas.push('| metrica | antes | despues | cambio |', '|---|---|---|---|')
   for (const metrica of Object.keys(MEJOR_SI_SUBE)) {
     const a = g.antes.map((x) => x.m[metrica]).filter((v) => v !== null)
     const d = g.despues.map((x) => x.m[metrica]).filter((v) => v !== null)
@@ -90,8 +114,10 @@ for (const [nombre, g] of Object.entries(grupos).sort()) {
       const delta = ma === 0 ? (md === 0 ? 0 : 1) : (md - ma) / Math.abs(ma)
       const mejora = MEJOR_SI_SUBE[metrica] ? delta > UMBRAL : delta < -UMBRAL
       const peor = MEJOR_SI_SUBE[metrica] ? delta < -UMBRAL : delta > UMBRAL
-      cambio = desigual ? `cobertura desigual (${a.length} vs ${d.length}): no se marca` : peor ? `▼ regresion ${(delta * 100).toFixed(0)} %` : mejora ? `▲ mejora ${(delta * 100).toFixed(0)} %` : `${(delta * 100).toFixed(0)} %`
-      if (!desigual && (peor || mejora)) hallazgos.push({ grupo: nombre, metrica, delta, peor, fuente: [...g.antes, ...g.despues].filter((x) => x.m[metrica] !== null).map((x) => x.id) })
+      const porLlamada = metrica === 'salidaPorLlamada' || metrica === 'msPorLlamada' || metrica === 'costoUsd'
+      const confundido = confusor !== null && porLlamada
+      cambio = desigual ? `cobertura desigual (${a.length} vs ${d.length}): no se marca` : confundido ? `${(delta * 100).toFixed(0)} % · confundido por modelo, no se marca` : peor ? `▼ regresion ${(delta * 100).toFixed(0)} %` : mejora ? `▲ mejora ${(delta * 100).toFixed(0)} %` : `${(delta * 100).toFixed(0)} %`
+      if (!desigual && !confundido && (peor || mejora)) hallazgos.push({ grupo: nombre, metrica, delta, peor, fuente: [...g.antes, ...g.despues].filter((x) => x.m[metrica] !== null).map((x) => x.id) })
     } else if (ma !== null || md !== null) cambio = `sin base (min ${MINIMO} por periodo)`
     lineas.push(`| ${metrica} | ${f(ma, a.length, g.antes.length)} | ${f(md, d.length, g.despues.length)} | ${cambio} |`)
   }

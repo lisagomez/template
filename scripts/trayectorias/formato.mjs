@@ -30,7 +30,7 @@ const CLAVES = {
   uso: ['entrada', 'salida', 'cacheCreacion', 'cacheLectura'],
   tiempos: ['totalMs', 'porEtapaMs'],
   gate: ['nombre', 'resultado', 'veces'],
-  resultado: ['errores', 'revisionHumana', 'campos', 'veredicto', 'evals', 'metricas'],
+  resultado: ['errores', 'erroresPor', 'revisionHumana', 'campos', 'veredicto', 'evals', 'metricas'],
   cobertura: ['completa', 'faltan'],
 }
 
@@ -94,6 +94,7 @@ function validaResultado(r, errores) {
   if (!esObjeto(r)) { errores.push('resultado: tiene que ser objeto'); return }
   clavesAdmitidas(r, CLAVES.resultado, 'resultado', errores)
   for (const clave of ['errores', 'revisionHumana', 'campos']) if (r[clave] !== undefined && !esEnteroNoNegativo(r[clave])) errores.push(`resultado.${clave}: entero >= 0`)
+  if (r.erroresPor !== undefined) contadorPorNombre(r.erroresPor, 'resultado.erroresPor', errores)
   if (r.veredicto !== undefined && r.veredicto !== null) cadenaLimpia(r.veredicto, 'resultado.veredicto', errores)
   if (r.evals !== undefined) {
     if (!esObjeto(r.evals)) errores.push('resultado.evals: objeto criterio -> booleano')

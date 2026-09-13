@@ -91,7 +91,14 @@
   }
  ],
  "resultado": {
-  "errores": 7
+  "errores": 7,
+  "erroresPor": {
+   "mcp__supabase__list_tables": 1,
+   "Bash": 3,
+   "Edit": 1,
+   "AskUserQuestion": 1,
+   "ExitPlanMode": 1
+  }
  },
  "cobertura": {
   "completa": false,

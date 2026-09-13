@@ -40,7 +40,8 @@
  },
  "gates": [],
  "resultado": {
-  "errores": 0
+  "errores": 0,
+  "erroresPor": {}
  },
  "cobertura": {
   "completa": false,

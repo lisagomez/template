@@ -69,7 +69,10 @@
   }
  ],
  "resultado": {
-  "errores": 5
+  "errores": 5,
+  "erroresPor": {
+   "Bash": 5
+  }
  },
  "cobertura": {
   "completa": false,

@@ -63,6 +63,11 @@
       propuestas por regresiones de intensidad (salida por llamada, ms por llamada, errores por
       herramienta, gates rojos en lectura), cada una con destino, fuente y «exige CDC»; la lectura
       honesta es «buscar la causa entre periodos», no tocar un skill.
+      **Aplicadas por instrucción de la dueña** (acta en la bitácora): P1/P2/P4/P5 eran cambio de
+      modelo (Fable 5.1 emite 2,4× por llamada) y el informe ahora lo detecta y no las marca;
+      P3/P6 eran errores reales de Bash (`pkill -f` sobre la propia shell, `gh pr edit`) y dieron dos
+      aprendizajes más `resultado.erroresPor` en el formato. Resolución en
+      `trayectorias/propuestas/2026-09-13-resolucion.md`.
       **Ninguna aplicada**: diff vacío en `AGENTS.md`, skills, routing, `settings.json` y `.mcp.json`;
       entrada en `BITACORA-CDC.md` con aprobación pendiente.
 - [x] **TAR-10 · Gates**: `npm run validate` sellado con los pasos nuevos; `verify:gobernanza` 152/152.

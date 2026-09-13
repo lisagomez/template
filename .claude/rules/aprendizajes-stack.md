@@ -94,3 +94,18 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   (`npm install --no-save` en `/extractor`) y sondear con una lectura real, distinguiendo
   «no está el paquete» de «esta imagen de 8 bytes no es una imagen».
 - **Aplicar en**: toda imagen que copie un `dist/` y sus adaptadores con peers opcionales.
+
+### 2026-09-13: `pkill -f '<patrón>'` mata la shell que lo lanza (medido: 10 errores en 21 sesiones)
+- **Error**: `pkill -f 'node servidor.mjs'` desde Bash mata también el propio proceso de la
+  herramienta, porque su línea de comando contiene el patrón. La sesión ve exit 144 y pierde el
+  resto del comando. Las trayectorias lo destaparon: es el error de Bash más repetido.
+- **Fix**: matar por puerto (`fuser -k 8081/tcp`) o por PID guardado; si hay que usar `pkill`,
+  anclar el patrón al inicio (`pkill -f '^node servidor.mjs'`) para que la shell no case.
+- **Aplicar en**: toda limpieza de procesos lanzados desde una sesión.
+
+### 2026-09-13: `gh pr edit` falla por un aviso de GitHub ajeno al PR
+- **Error**: `gh pr edit N --body-file ...` devuelve `GraphQL: Projects (classic) is being
+  deprecated` y no edita nada, aunque el PR sea correcto.
+- **Fix**: `gh api -X PATCH repos/<dueña>/<repo>/pulls/N -F body=@archivo`. Crear y mezclar
+  con `gh pr create` / `gh pr merge` sigue funcionando.
+- **Aplicar en**: cualquier edición de la descripción de un PR desde una sesión.
