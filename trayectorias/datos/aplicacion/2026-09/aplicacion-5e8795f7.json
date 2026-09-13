@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "id": "aplicacion-5e8795f7",
+ "linea": "aplicacion",
+ "origen": {
+  "tipo": "llamada",
+  "referencia": "5e8795f7"
+ },
+ "cuando": {
+  "inicio": "2026-09-13T09:00:00.000Z"
+ },
+ "actor": {
+  "feature": "chat",
+  "tarea": "resumir"
+ },
+ "modelos": {
+  "anthropic/claude-haiku-4.5": 1
+ },
+ "acciones": {
+  "llamadasAlModelo": 1
+ },
+ "uso": {
+  "entrada": 2000,
+  "salida": 200
+ },
+ "costoUsd": 0.003,
+ "tiempos": {
+  "totalMs": 400
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

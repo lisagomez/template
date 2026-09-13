@@ -1,0 +1,39 @@
+{
+  "slug": "trayectorias",
+  "titulo": "Trayectorias: trazas de ejecucion de la fabrica, la linea de aplicacion y la linea de herramientas, cerrando el lazo de mejora bajo CDC",
+  "nodos": [
+    {"id": "repo", "label": "Repo hoy: 21 transcripts jsonl locales (58 MB), hook PostToolUse sin cablear, contabilidad.ts con Registrador inyectable, medicion/*.mjs con resumen.json por corrida, autoresearch con evals binarias, regresion C2 en dos capas", "estado": "morado"},
+    {"id": "spec-011", "label": "Spec 011: que es una trayectoria, que se guarda (solo forma), quien la evalua y que puede cambiar sin firma", "estado": "gris"},
+    {"id": "formato", "label": "Formato comun de trayectoria + verificador: esquema, solo forma (C4), sin identificadores de golden-sets, sin secretos, coste null si no hay uso", "estado": "gris"},
+    {"id": "captura-fabrica", "label": "Captura en la fabrica: transcripts y hooks del arnes -> trayectorias de sesion/skill (herramientas, modelo, tokens, cache, gates, veredicto)", "estado": "gris"},
+    {"id": "captura-app", "label": "Captura en la linea de aplicacion: cada llamada al modelo y cada feature con IA emite trayectoria via el Registrador de contabilidad", "estado": "gris"},
+    {"id": "captura-herramientas", "label": "Captura en la linea de herramientas: cada corrida de medicion (extractor, voz) emite trayectoria con el mismo formato", "estado": "gris"},
+    {"id": "almacen", "label": "Almacen: forma y metricas versionadas en el repo; lo crudo fuera de git y con caducidad; consulta por skill/feature/herramienta y periodo", "estado": "gris"},
+    {"id": "evaluador", "label": "Evaluador: evals binarias y estructurales sobre trayectorias, corrido por un agente distinto del que las produjo, protocolo ciego de C2", "estado": "gris"},
+    {"id": "informe", "label": "Informe y tendencias: tokens, cache, coste, latencia, aciertos, revision humana, gates rojos por skill/feature/herramienta y por periodo, con regresiones marcadas", "estado": "gris"},
+    {"id": "propuestas", "label": "Propuestas de mejora derivadas: mutacion de skill (autoresearch), aprendizaje nuevo, cambio de routing; cada una con evidencia y SIN aplicar", "estado": "gris"}
+  ],
+  "aristas": [
+    {"id": "a-spec", "label": "redactar spec 011 desde C2, autoresearch, contabilidad y las mediciones existentes", "tipo": "agente", "from": "repo", "to": "spec-011"},
+    {"id": "a-formato", "label": "definir el esquema y su verificador con pruebas que rechacen PII, secretos e identificadores del corpus", "tipo": "mixta", "from": "spec-011", "to": "formato"},
+    {"id": "a-fabrica", "label": "convertir transcripts historicos y cablear el hook para las sesiones nuevas", "tipo": "mixta", "from": "formato", "to": "captura-fabrica"},
+    {"id": "a-app", "label": "extender EventoDeUso a trayectoria sin romper la regla de coste null", "tipo": "mixta", "from": "formato", "to": "captura-app"},
+    {"id": "a-herr", "label": "hacer que medicion/*.mjs emita trayectoria ademas de resumen.json", "tipo": "mixta", "from": "formato", "to": "captura-herramientas"},
+    {"id": "a-alm-f", "label": "ingestar", "tipo": "script", "from": "captura-fabrica", "to": "almacen"},
+    {"id": "a-alm-a", "label": "ingestar", "tipo": "script", "from": "captura-app", "to": "almacen"},
+    {"id": "a-alm-h", "label": "ingestar", "tipo": "script", "from": "captura-herramientas", "to": "almacen"},
+    {"id": "a-eval", "label": "evaluar con criterios binarios declarados por skill/feature/herramienta, en sesion aparte", "tipo": "agente", "from": "almacen", "to": "evaluador"},
+    {"id": "a-informe", "label": "agregar y comparar contra el periodo anterior", "tipo": "script", "from": "evaluador", "to": "informe"},
+    {"id": "a-propuestas", "label": "derivar propuestas con su evidencia; autoresearch como motor de mutacion cuando la senal es de skill", "tipo": "agente", "from": "informe", "to": "propuestas"}
+  ],
+  "lazos": [
+    {"id": "l-spec", "label": "npm run verifica:specs en verde", "sobre": "nodo:spec-011", "estado": "gris", "referencia": "diez secciones, EARS"},
+    {"id": "l-formato", "label": "una trayectoria con un valor de documento, un secreto o un identificador de caso-trampa es RECHAZADA por el verificador; una llamada sin uso lleva coste null", "sobre": "nodo:formato", "estado": "gris", "referencia": "reglas de secretos en pantalla, solo forma (medicion/*.mjs), contabilidad.ts, protocolo ciego de C2"},
+    {"id": "l-fabrica", "label": "una sesion nueva produce su trayectoria sin intervencion; las historicas convertidas cuadran con sus transcripts (conteos)", "sobre": "nodo:captura-fabrica", "estado": "gris", "referencia": "21 transcripts locales"},
+    {"id": "l-app", "label": "prueba con Registrador falso: cada llamada emite una trayectoria y el resumen sigue declarando filas sin costo", "sobre": "nodo:captura-app", "estado": "gris", "referencia": "scripts/prueba-contabilidad.ts"},
+    {"id": "l-herr", "label": "una corrida real de medicion del extractor emite trayectoria valida", "sobre": "nodo:captura-herramientas", "estado": "gris", "referencia": "medicion/servicio.mjs, 33 paginas"},
+    {"id": "l-evaluador", "label": "el evaluador NO es el agente que produjo la trayectoria y no lee el contexto del cambio; los criterios son binarios y ortogonales", "sobre": "nodo:evaluador", "estado": "gris", "referencia": "autoresearch 1.2; C2 protocolo ciego"},
+    {"id": "l-informe", "label": "el informe compara dos periodos y marca regresiones; ninguna cifra sin fuente; gate verde no tapa la cifra", "sobre": "nodo:informe", "estado": "gris", "referencia": "presupuesto-contexto: leer la cifra, no solo el verde"},
+    {"id": "l-cdc", "label": "GATE HUMANO: ninguna propuesta toca AGENTS.md, un skill, un prompt, routing ni settings sin CDC (diff + regresion + firma). Automejorado no es autoaprobado", "sobre": "nodo:propuestas", "estado": "manual", "referencia": "C1; hipocampo: solo crea, nunca edita"}
+  ]
+}

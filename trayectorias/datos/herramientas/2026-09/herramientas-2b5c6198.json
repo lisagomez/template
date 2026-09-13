@@ -1,0 +1,66 @@
+{
+ "version": 1,
+ "id": "herramientas-2b5c6198",
+ "linea": "herramientas",
+ "origen": {
+  "tipo": "medicion",
+  "referencia": "salida-servicio-proceso-v4-2026-09-13"
+ },
+ "cuando": {
+  "inicio": "2026-09-13T16:31:58.611Z",
+  "fin": "2026-09-13T16:32:02.562Z"
+ },
+ "actor": {
+  "herramienta": "extractor-documental",
+  "tarea": "medicion en proceso"
+ },
+ "modelos": {
+  "tesseract-5.5.0-spa-zonal-1": 15
+ },
+ "acciones": {
+  "herramientas": {
+   "motor": 15,
+   "capa-cero": 6,
+   "xml": 12
+  },
+  "documentos": 33,
+  "paginas": 33
+ },
+ "uso": null,
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 3951,
+  "porEtapaMs": {
+   "codigos": 513,
+   "motor": 13225,
+   "respaldo": 0
+  }
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0,
+  "campos": 609,
+  "revisionHumana": 44,
+  "metricas": {
+   "paginasPorMinutoMotor": 227.8,
+   "p50Ms": 2,
+   "p95Ms": 1765,
+   "cerMedio": 0.004,
+   "camposCorrectos": 0.9365079365079365,
+   "correlacionPagina": -0.10867697747999612,
+   "hilos": 16,
+   "gpu": 0
+  }
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "uso",
+   "costo"
+  ]
+ },
+ "avisos": [
+  "no concluyente: 33 paginas de 100",
+  "sin gpu"
+ ]
+}

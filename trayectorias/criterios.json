@@ -1,0 +1,40 @@
+{
+  "_comentario": "Criterios BINARIOS y ortogonales por actor (spec 011, RF-10), 3 a 6 por actor como manda autoresearch. Los estructurales los calcula scripts/trayectorias/evalua.mjs sobre la trayectoria; los de juicio los responde un agente DISTINTO del ejecutor que recibe solo las trayectorias y estos criterios, nunca el diff ni la conversacion (C2, protocolo ciego). Un criterio no se copia a ningun prompt: seria un estudiante que memoriza el examen.",
+  "fabrica": {
+    "aplica": "toda sesion del arnes",
+    "estructurales": {
+      "gate_corrido": "la sesion corrio al menos un gate (validate, prueba, regresion, specs, gobernanza)",
+      "sin_gate_rojo_final": "ningun gate termino en rojo",
+      "errores_acotados": "los errores de herramienta no superan el 5 % de las llamadas a herramientas",
+      "cache_aprovechado": "la lectura de cache supera 20 veces la salida (el prefijo estable se esta reutilizando)",
+      "uso_declarado": "la trayectoria trae tokens; si no, la cobertura lo dice"
+    },
+    "de_juicio": {
+      "proporcion_sana": "la mezcla de herramientas es coherente con la TAREA de la sesion (actor.tarea: planificacion, implementacion, lectura, conversacion) y con los skills invocados: una planificacion no deberia ser 90 % Bash, una implementacion no deberia tener 0 ediciones (acciones.ediciones cuenta tambien las escrituras hechas desde Bash), una lectura no deberia editar"
+    }
+  },
+  "aplicacion": {
+    "aplica": "toda llamada al modelo desde una feature",
+    "estructurales": {
+      "coste_declarado": "hay uso y coste, o la cobertura declara el hueco; nunca coste sin uso",
+      "modelo_del_catalogo": "el modelo es uno de los pineados en routing-modelos.json",
+      "sin_fallo": "la llamada no fallo",
+      "latencia_medida": "la duracion esta medida"
+    },
+    "de_juicio": {
+      "clase_adecuada": "la clase de tarea declarada corresponde al nivel de modelo usado (una tarea ligera no paga razonamiento)"
+    }
+  },
+  "herramientas": {
+    "aplica": "toda corrida de medicion",
+    "estructurales": {
+      "sin_documentos_perdidos": "ningun documento salio por la via ninguna",
+      "concluyente_o_declarado": "el corpus alcanza el minimo o el aviso lo declara",
+      "rendimiento_sobre_base": "las paginas por minuto de la via motor no caen por debajo de la base medida (197)",
+      "revision_acotada": "los campos a revision humana no superan la mitad de los campos"
+    },
+    "de_juicio": {
+      "metricas_coherentes": "las metricas no se contradicen entre si (un CER bajo con campos correctos muy bajos exige explicacion)"
+    }
+  }
+}

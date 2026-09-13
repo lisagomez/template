@@ -163,4 +163,32 @@ const resumen = {
   conclusion: { porCampo: conclusion(c1), porPagina: conclusion(c2) },
 }
 writeFileSync(join(SALIDA, 'resumen.json'), JSON.stringify(resumen, null, 1))
+
+// --- Trayectoria de la linea de herramientas (spec 011, RF-8): solo forma ---------------------
+// Sin tokens (Tesseract no los tiene): uso null y coste null, declarados. Sin la URL del servicio
+// ni rutas: la referencia es el nombre de la salida. La ingesta la valida contra el formato.
+const porRutaHerramienta = {}
+for (const d of documentos) porRutaHerramienta[d.ruta] = (porRutaHerramienta[d.ruta] ?? 0) + 1
+const idDe = (referencia) => { let h = 2166136261; for (const c of `herramientas:${referencia}`) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0 }; return `herramientas-${h.toString(16).padStart(8, '0')}` }
+const referencia = `${SALIDA.split('/').pop()}-${resumen.fecha.slice(0, 10)}`
+const trayectoria = {
+  version: 1, id: idDe(referencia), linea: 'herramientas',
+  origen: { tipo: 'medicion', referencia },
+  cuando: { inicio: new Date(Date.now() - msReloj).toISOString(), fin: resumen.fecha },
+  actor: { herramienta: 'extractor-documental', tarea: VIA === null ? 'medicion en proceso' : 'medicion por http' },
+  modelos: { [hardware.motorPrincipal ?? 'motor-desconocido']: paginasMotor },
+  acciones: { herramientas: porRutaHerramienta, documentos: documentos.length, paginas: lote.paginas },
+  uso: null, costoUsd: null,
+  tiempos: { totalMs: msReloj, porEtapaMs: { codigos: documentos.reduce((s, d) => s + d.tiempos.codigos, 0), motor: msMotor, respaldo: documentos.reduce((s, d) => s + d.tiempos.respaldo, 0) } },
+  gates: [],
+  resultado: {
+    errores: documentos.filter((d) => d.ruta === 'ninguna').length, campos: totalCampos,
+    revisionHumana: documentos.reduce((s, d) => s + d.revisionHumana, 0),
+    metricas: { paginasPorMinutoMotor: Number((paginasMotor / (msReloj / 60000)).toFixed(1)), p50Ms: lote.latenciaPorDocumentoMs.p50, p95Ms: lote.latenciaPorDocumentoMs.p95, cerMedio: cers.length ? Number((cers.reduce((s, c) => s + c.cer, 0) / cers.length).toFixed(4)) : null, camposCorrectos: precision, correlacionPagina: c2.r, hilos: hardware.maquina.hilos, gpu: hardware.maquina.gpu === 'presente' ? 1 : 0 },
+  },
+  cobertura: { completa: false, faltan: ['uso', 'costo'] },
+  avisos: [concluyente ? 'corpus concluyente' : `no concluyente: ${lote.paginas} paginas de ${MINIMO_CONCLUYENTE}`, ...(hardware.maquina.gpu === 'presente' ? [] : ['sin gpu'])],
+}
+writeFileSync(join(SALIDA, 'trayectoria.json'), JSON.stringify(trayectoria, null, 1))
+console.log(`trayectoria de forma escrita en ${SALIDA.replace(RAIZ, '.')}/trayectoria.json (la ingesta la lleva al almacen)`)
 console.log(`\nescrito en ${SALIDA.replace(RAIZ, '.')} (fuera de git)${concluyente ? '' : ' · NO CONCLUYENTE: hacen falta 100 paginas y hay ' + lote.paginas}`)

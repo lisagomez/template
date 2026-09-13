@@ -1,0 +1,70 @@
+{
+ "version": 1,
+ "id": "fabrica-ec81ad29",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "824aba80-701b-4b74-96f1-b60480ad90e8",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-08-22T03:51:12.034Z",
+  "fin": "2026-08-22T13:27:41.505Z"
+ },
+ "actor": {
+  "skills": [
+   "update-sf"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5": 220
+ },
+ "acciones": {
+  "herramientas": {
+   "Skill": 1,
+   "Bash": 92
+  },
+  "llamadasAlModelo": 95,
+  "turnos": 9,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 22
+ },
+ "uso": {
+  "entrada": 190,
+  "salida": 70482,
+  "cacheCreacion": 200440,
+  "cacheLectura": 8862797
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 34589471
+ },
+ "gates": [
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 12
+  },
+  {
+   "nombre": "lint",
+   "resultado": "desconocido",
+   "veces": 2
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "desconocido",
+   "veces": 4
+  }
+ ],
+ "resultado": {
+  "errores": 3
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}

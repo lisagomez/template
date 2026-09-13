@@ -3467,3 +3467,41 @@ cifras de rendimiento, que son de corpus sintético (33 páginas, no concluyente
 arranque real de `ocr-gpu`, no medido por falta de GPU en esta máquina.
 
 ---
+
+### 2026-09-13 — trayectorias (spec 011): el lazo de mejora queda construido y CORTADO en el gate humano; primeras propuestas, sin aplicar — radio: sistema
+- **Cambio construido (no es CDC por sí mismo: no toca modelo, skill, prompt, `settings.json` ni
+  `.mcp.json`)**: formato común de trayectoria de FORMA con verificador dentro de `validate`
+  (`prueba:trayectorias`, `verifica:trayectorias`); captura de la fábrica por hook `SessionEnd`
+  (21 sesiones históricas convertidas + 1 nueva capturada sola), de la línea de aplicación por el
+  `Registrador` de contabilidad, y de la línea de herramientas por la medición del extractor;
+  almacén en `trayectorias/datos/` (26 trayectorias); evaluador estructural + veredicto de un
+  subagente ciego sobre las 26; informe por periodos; generador de propuestas.
+- **Lo que este registro deja PENDIENTE de aprobación (aquí sí es CDC)**:
+  1. **Cablear el hook en `.claude/settings.json` del repo** (`trayectorias/hooks.ejemplo.json`).
+     Hoy está solo en `settings.local.json` de esta máquina. Cambia el arnés: C1.
+  2. **Las cinco propuestas de `trayectorias/propuestas/2026-09-13.md`**: P1 (el criterio
+     «ningún gate en rojo» falla en 9 de 22 sesiones), P2-P5 (entre los periodos antes y después
+     del 2026-08-29, las sesiones de la fábrica gastan 237 % más tokens de salida, duran 287 % más,
+     terminan con 86 % más gates en rojo y 48 % más errores de herramienta). Ninguna se aplica: la
+     lectura honesta es que el segundo periodo trae sesiones mucho más largas (specs 007-010), y
+     la propuesta es **buscar la causa**, no tocar un skill.
+- **Hallazgo del evaluador ciego, que cambia el formato**: 5 de los 6 «no» en `proporcion_sana`
+  son sesiones sin skill invocado; el criterio no tiene contra qué juzgar. Queda como duda de la
+  spec 011: la trayectoria necesita una señal de tipo de tarea además del skill.
+- **Gate aplicado**: diff revisado ☐ · regresión verde ☑ (`validate` sellado con los pasos nuevos)
+  · aprobación humana ☐ · pineo ☑ (sin modelos nuevos; el evaluador de juicio es el del arnés)
+- **Regresión**: `npm run validate` sellado; `prueba:trayectorias` 8/8; `verifica:trayectorias`
+  26/26; `verify:gobernanza` 152/152; `verifica:specs` 100/100.
+- **Aprobado por**: **PENDIENTE** — redactado sin auto-aprobación. Automejorado no es autoaprobado.
+
+### 2026-09-13 — trayectorias: dos correcciones del formato dictadas por el evaluador ciego — radio: menor (no toca skill, prompt ni arnés)
+- **Cambio**: `actor.tarea` (planificacion | implementacion | lectura | conversacion) deducida de lo
+  que la sesión HIZO; comandos del arnés separados de los skills; `acciones.ediciones` cuenta las
+  escrituras hechas desde Bash; el informe compara la fábrica por intensidad y no por totales.
+- **Motivo**: la primera pasada ciega no podía juzgar sesiones sin skill; la segunda cazó que
+  «lectura» escondía sesiones que arreglaban código por Bash; y el primer informe marcó
+  regresiones que solo medían que las sesiones eran más largas. Tres veces la evidencia corrigió
+  al diseño: ese es el lazo funcionando.
+- **Gate aplicado**: diff revisado ☐ · regresión verde ☑ · aprobación humana ☐ · pineo ☑
+- **Regresión**: `prueba:trayectorias` 8/8 · `verifica:trayectorias` 26/26 · `validate` sellado.
+- **Aprobado por**: PENDIENTE — sigue sin aplicarse ninguna propuesta.

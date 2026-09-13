@@ -1,0 +1,49 @@
+{
+ "version": 1,
+ "id": "fabrica-cfae124e",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "66e93e6b-9129-4d42-b6e4-fc6022592eb9",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-13T16:32:56.900Z",
+  "fin": "2026-09-13T16:33:00.337Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "conversacion"
+ },
+ "modelos": {
+  "claude-haiku-4-5-20251001": 2
+ },
+ "acciones": {
+  "herramientas": {},
+  "llamadasAlModelo": 1,
+  "turnos": 1,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 0
+ },
+ "uso": {
+  "entrada": 10,
+  "salida": 52,
+  "cacheCreacion": 12889,
+  "cacheLectura": 6067
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 3437
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}

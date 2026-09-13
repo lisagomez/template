@@ -1,0 +1,51 @@
+{
+ "version": 1,
+ "id": "fabrica-29065ee8",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "e1afc62d-ffcf-44c7-93b3-caf2ed20da65",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-08-26T13:02:04.798Z",
+  "fin": "2026-08-26T13:03:31.010Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "lectura"
+ },
+ "modelos": {
+  "claude-opus-5": 17
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 10
+  },
+  "llamadasAlModelo": 6,
+  "turnos": 1,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 0
+ },
+ "uso": {
+  "entrada": 12,
+  "salida": 4279,
+  "cacheCreacion": 60245,
+  "cacheLectura": 274025
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 86212
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}

@@ -1,0 +1,39 @@
+{
+ "version": 1,
+ "id": "aplicacion-19c5ed3d",
+ "linea": "aplicacion",
+ "origen": {
+  "tipo": "llamada",
+  "referencia": "19c5ed3d"
+ },
+ "cuando": {
+  "inicio": "2026-09-12T15:00:00.000Z"
+ },
+ "actor": {
+  "feature": "chat",
+  "tarea": "implementar-feature"
+ },
+ "modelos": {
+  "anthropic/claude-sonnet-5": 1
+ },
+ "acciones": {
+  "llamadasAlModelo": 1
+ },
+ "uso": {
+  "entrada": 5400,
+  "salida": 900,
+  "cacheLectura": 4000
+ },
+ "costoUsd": 0.0128,
+ "tiempos": {
+  "totalMs": 850
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

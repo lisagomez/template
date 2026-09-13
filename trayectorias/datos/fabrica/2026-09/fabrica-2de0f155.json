@@ -1,0 +1,102 @@
+{
+ "version": 1,
+ "id": "fabrica-2de0f155",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "35c57839-b3f4-4477-a223-26fb4ff82e83",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-13T13:06:36.024Z",
+  "fin": "2026-09-13T16:47:14.965Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler",
+   "memory-manager"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-fable-5-1": 505
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 307,
+   "ToolSearch": 2,
+   "WebFetch": 4,
+   "Agent": 3,
+   "Write": 1,
+   "Monitor": 2,
+   "Skill": 1,
+   "AskUserQuestion": 1
+  },
+  "llamadasAlModelo": 166,
+  "turnos": 21,
+  "subagentes": 3,
+  "comandos": 2,
+  "ediciones": 104
+ },
+ "uso": {
+  "entrada": 4094,
+  "salida": 356502,
+  "cacheCreacion": 706512,
+  "cacheLectura": 78573715
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 13238941
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 29
+  },
+  {
+   "nombre": "verifica:specs",
+   "resultado": "verde",
+   "veces": 12
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 21
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "verde",
+   "veces": 9
+  },
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 6
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 11
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "verde",
+   "veces": 6
+  },
+  {
+   "nombre": "regresion",
+   "resultado": "desconocido",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 8
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}

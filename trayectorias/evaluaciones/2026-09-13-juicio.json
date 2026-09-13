@@ -1,0 +1,113 @@
+{
+ "fecha": "2026-09-13",
+ "evaluador": "subagente independiente (modelo pineado del arnés), 2026-09-13, segunda pasada",
+ "vio": "solo para-evaluador/datos y para-evaluador/criterios.json; sin acceso al repo ni a la conversación",
+ "veredictos": {
+  "fabrica-0828c365": {
+   "proporcion_sana": false
+  },
+  "fabrica-0f06fe24": {
+   "proporcion_sana": false
+  },
+  "fabrica-12e8950e": {
+   "proporcion_sana": true
+  },
+  "fabrica-1e943fb0": {
+   "proporcion_sana": true
+  },
+  "fabrica-29065ee8": {
+   "proporcion_sana": true
+  },
+  "fabrica-2f605ddb": {
+   "proporcion_sana": false
+  },
+  "fabrica-30db46dc": {
+   "proporcion_sana": true
+  },
+  "fabrica-3c2abc60": {
+   "proporcion_sana": true
+  },
+  "fabrica-502a90f7": {
+   "proporcion_sana": true
+  },
+  "fabrica-64f42afe": {
+   "proporcion_sana": false
+  },
+  "fabrica-71923418": {
+   "proporcion_sana": false
+  },
+  "fabrica-a9ab6b58": {
+   "proporcion_sana": true
+  },
+  "fabrica-e99635ac": {
+   "proporcion_sana": true
+  },
+  "fabrica-ec81ad29": {
+   "proporcion_sana": false
+  },
+  "fabrica-f0bec979": {
+   "proporcion_sana": false
+  },
+  "fabrica-06d34ab6": {
+   "proporcion_sana": true
+  },
+  "fabrica-0873b25e": {
+   "proporcion_sana": true
+  },
+  "fabrica-2a59c3f1": {
+   "proporcion_sana": false
+  },
+  "fabrica-2de0f155": {
+   "proporcion_sana": true
+  },
+  "fabrica-c2fe3422": {
+   "proporcion_sana": true
+  },
+  "fabrica-cfae124e": {
+   "proporcion_sana": true
+  },
+  "fabrica-faf93e53": {
+   "proporcion_sana": true
+  },
+  "aplicacion-19c5ed3d": {
+   "clase_adecuada": true
+  },
+  "aplicacion-5e8795f7": {
+   "clase_adecuada": true
+  },
+  "aplicacion-84938f8a": {
+   "clase_adecuada": true
+  },
+  "herramientas-2b5c6198": {
+   "metricas_coherentes": true
+  }
+ },
+ "notas": {
+  "fabrica-0828c365": "lectura con skill update-config (modifica config) y validate x4: no es lectura",
+  "fabrica-0f06fe24": "planificacion 88% Bash, validate x39 y typecheck rojo x8: ciclo de arreglo",
+  "fabrica-12e8950e": "implementacion con Edit 3 y Read 2; edita, aunque poco (Bash 88%)",
+  "fabrica-1e943fb0": "lectura: Bash 13 + 1 pregunta, sin ediciones ni gates, 4 min",
+  "fabrica-29065ee8": "lectura: solo Bash 10, sin ediciones ni gates, 1 turno",
+  "fabrica-2f605ddb": "lectura con build rojo x4 y prueba x10: ciclo editar-probar, no lectura",
+  "fabrica-30db46dc": "implementacion con Edit 42 y Write 9 sobre 224 llamadas",
+  "fabrica-3c2abc60": "implementacion con Edit 31, Write 6, Read 3; skills coherentes",
+  "fabrica-502a90f7": "lectura con primer: Bash 36, sin ediciones ni gates, 11 min",
+  "fabrica-64f42afe": "lectura con build rojo x13, gobernanza rojo x15, regresion rojo x6: arreglo",
+  "fabrica-71923418": "lectura con skill update-config y validate rojo x2: modifica config",
+  "fabrica-a9ab6b58": "lectura con primer: Bash 39 + Skill 1, un gate verde, sin ediciones",
+  "fabrica-e99635ac": "implementacion con Edit 63, Read 10, Agent 6; mezcla completa",
+  "fabrica-ec81ad29": "lectura con skill update-sf (escribe archivos) y build x12: no es lectura",
+  "fabrica-f0bec979": "lectura con gobernanza x10 y validate x5: reintentos de gate, no lectura",
+  "fabrica-06d34ab6": "implementacion con Edit 2 y Read 5; edita, aunque poco (Bash 84%)",
+  "fabrica-0873b25e": "implementacion con Edit 18, Write 4, Read 9; sonnet coherente",
+  "fabrica-2a59c3f1": "lectura con build x14 y prueba x14 en 2 h: ciclo editar-probar",
+  "fabrica-2de0f155": "implementacion: Write 1 y 0 Edit sobre 313 llamadas, Bash 96%; limite",
+  "fabrica-c2fe3422": "implementacion con Write 54, Edit 17, Read 19, 6 subagentes",
+  "fabrica-cfae124e": "conversacion sin herramientas y 1 turno: coherente por definicion",
+  "fabrica-faf93e53": "implementacion con Write 43, Edit 54, Read 14; mezcla completa",
+  "aplicacion-19c5ed3d": "implementar-feature con sonnet-5: nivel medio para tarea no ligera",
+  "aplicacion-5e8795f7": "resumir con haiku-4.5: tarea ligera en modelo barato",
+  "aplicacion-84938f8a": "implementar-feature con sonnet-5; el fallo y uso null son estructurales",
+  "herramientas-2b5c6198": "CER 0.004 y campos correctos 0.94 concuerdan; 227.8 ppm = 15 pag / 3.95 s"
+ }
+}

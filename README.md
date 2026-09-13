@@ -215,7 +215,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # el gate completo (13 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + imprenta + fugas
+npm run validate     # el gate completo (15 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:trayectorias + verifica:trayectorias + imprenta + fugas
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
