@@ -1,0 +1,16 @@
+{
+  "name": "@tu-scope/extractor-documental-servicio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Servicio HTTP del extractor documental para el VPS del cliente. Envuelve dist/ del paquete; el nucleo sigue sin dependencias.",
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "arranca": "node servidor.mjs",
+    "puente-hermes": "node mcp-para-hermes.mjs"
+  },
+  "dependencies": {
+    "undici": "8.10.2",
+    "zxing-wasm": "3.1.4"
+  }
+}

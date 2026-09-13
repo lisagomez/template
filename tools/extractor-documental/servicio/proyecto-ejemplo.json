@@ -1,0 +1,52 @@
+{
+  "_comentario": "Configuracion de PROYECTO del servicio: clases de pagina, patrones, esquemas por clase, identificadores esperados. Es un EJEMPLO (expediente laboral mexicano + el corpus sintetico de medicion). El cliente monta el suyo en EXTRACTOR_PROYECTO. Nada de aqui viene puesto en el nucleo.",
+  "idioma": "spa",
+  "clases": [
+    { "clase": "contrato", "titulo": "contrato\\s+individual\\s+de\\s+trabajo" },
+    { "clase": "alta_imss", "titulo": "aviso\\s+de\\s+inscripci[oó]n|alta\\s+(?:en\\s+el\\s+)?imss|afiliaci[oó]n" },
+    { "clase": "ine", "titulo": "instituto\\s+nacional\\s+electoral|credencial\\s+para\\s+votar" },
+    { "clase": "curp", "titulo": "clave\\s+[uú]nica\\s+de\\s+registro\\s+de\\s+poblaci[oó]n" },
+    { "clase": "constancia_fiscal", "titulo": "constancia\\s+de\\s+situaci[oó]n\\s+fiscal" },
+    { "clase": "carta_recomendacion", "titulo": "carta\\s+de\\s+recomendaci[oó]n" },
+    { "clase": "factura", "titulo": "^\\s*FACTURA\\b|\\bFolio fiscal:" },
+    { "clase": "minuta", "titulo": "MINUTA\\s+DE\\s+REUNI[OÓ]N" }
+  ],
+  "omiteClases": ["carta_recomendacion"],
+  "patrones": [
+    { "clave": "rfc", "expresion": "\\b([A-ZÑ&]{3,4}\\d{6}[A-Z0-9]{3})\\b", "flags": "g", "formato": "identificador" },
+    { "clave": "curp", "expresion": "\\b([A-Z]{4}\\d{6}[HM][A-Z]{5}[A-Z0-9]\\d)\\b", "flags": "g", "formato": "identificador" },
+    { "clave": "nss", "expresion": "\\b(?:NSS|Seguro\\s+Social|Seguridad\\s+Social|IMSS|afiliaci[oó]n)[^\\d]{0,40}(\\d{2}[\\s-]?\\d{2}[\\s-]?\\d{2}[\\s-]?\\d{4}[\\s-]?\\d)\\b", "flags": "gi", "formato": "identificador" },
+    { "clave": "folio", "expresion": "Folio:\\s*(F-\\d+)", "formato": "identificador" },
+    { "clave": "fecha", "expresion": "Fecha:\\s*(\\d{4}-\\d{2}-\\d{2})" },
+    { "clave": "nombre_emisor", "expresion": "Emisor:\\s*(.+)" },
+    { "clave": "rfc_emisor", "expresion": "RFC emisor:\\s*([A-Z0-9]{12,13})", "formato": "identificador" },
+    { "clave": "rfc_emisor", "expresion": "\\(RFC\\s+([A-Z0-9]{12,13})\\)", "formato": "identificador" },
+    { "clave": "regimen_fiscal", "expresion": "Regimen fiscal:\\s*(\\d{3})" },
+    { "clave": "rfc_receptor", "expresion": "RFC receptor:\\s*([A-Z0-9]{12,13})", "formato": "identificador" },
+    { "clave": "subtotal", "expresion": "Subtotal:\\s*([\\d.]+)" },
+    { "clave": "iva", "expresion": "IVA 16%:\\s*([\\d.]+)" },
+    { "clave": "total", "expresion": "Total:\\s*([\\d.]+)" },
+    { "clave": "uuid", "expresion": "Folio fiscal:\\s*([0-9a-f-]{36})", "formato": "identificador" },
+    { "clave": "asistentes", "expresion": "Asistentes:\\s*(\\d+)" },
+    { "clave": "responsable", "expresion": "Responsable:\\s*(.+)" }
+  ],
+  "esquemas": [
+    { "clase": "constancia_fiscal", "claves": [{ "clave": "rfc", "obligatoria": true }, { "clave": "curp" }] },
+    { "clase": "curp", "claves": [{ "clave": "curp", "obligatoria": true }] },
+    { "clase": "alta_imss", "claves": [{ "clave": "nss", "obligatoria": true }, { "clave": "curp" }, { "clave": "rfc" }] },
+    { "clase": "ine", "claves": [{ "clave": "curp", "obligatoria": true }] },
+    { "clase": "factura", "claves": [
+      { "clave": "folio", "obligatoria": true }, { "clave": "fecha", "obligatoria": true }, { "clave": "nombre_emisor" },
+      { "clave": "rfc_emisor", "obligatoria": true }, { "clave": "regimen_fiscal" }, { "clave": "rfc_receptor", "obligatoria": true },
+      { "clave": "subtotal" }, { "clave": "iva" }, { "clave": "total", "obligatoria": true }, { "clave": "uuid", "obligatoria": true }
+    ] },
+    { "clase": "minuta", "claves": [{ "clave": "fecha", "obligatoria": true }, { "clave": "asistentes" }, { "clave": "responsable" }, { "clave": "rfc_emisor" }] },
+    { "clase": "cfdi", "claves": [
+      { "clave": "uuid", "obligatoria": true }, { "clave": "rfc_emisor", "obligatoria": true }, { "clave": "rfc_receptor", "obligatoria": true },
+      { "clave": "total", "obligatoria": true }, { "clave": "fecha" }, { "clave": "folio" }
+    ] }
+  ],
+  "identificadoresEsperados": { "curp": ["curp"], "constancia_fiscal": ["rfc"], "alta_imss": ["nss"], "ine": ["curp"] },
+  "identificadores": ["rfc", "curp", "nss", "rfc_emisor", "rfc_receptor", "uuid", "folio"],
+  "validadores": { "rfc": { "tipo": "rfc", "admiteGenericos": true }, "curp": "curp", "nss": "nss", "rfc_emisor": "rfc", "rfc_receptor": { "tipo": "rfc", "admiteGenericos": true } }
+}

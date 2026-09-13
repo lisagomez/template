@@ -197,3 +197,15 @@ irrecuperable es `.env.production` — guardalo en tu gestor de contrasenas.
 >
 > Y "desechable" vale para **este** servidor. Si algun dia corre algo con estado propio
 > (agentes, colas, volumenes), deja de serlo: ver §0 de ese mismo documento.
+
+
+## Anexo (2026-09-13) — El extractor documental y la GPU como servicio del VPS
+
+El compose lleva tres perfiles opcionales (spec 010): `ocr` (Tesseract en CPU, red interna, sin
+puertos), `ocr-gpu` (vLLM con reserva de dispositivo; exige `OCR_GPU_MODELO` pineado y una GPU
+expuesta a Docker con el NVIDIA Container Toolkit) y `hermes` (Hermes por digest + el puente
+MCP→A2A). `npm run configura:deploy` mide la GPU y escribe `OCR_GPU`, `OCR_CPUS`, `OCR_MEM` y
+`OCR_EN_VUELO`. Sin GPU: `docker compose --profile ocr up -d`. Con GPU: añade `--profile ocr-gpu`.
+El puente A2A (`app:3000/a2a`) solo existe en la red `interna`; **Caddy no lo enruta, y exponerlo
+es gate humano** (C3 + C4). Detalle: `tools/extractor-documental/README.md`, sección «Desplegar
+en el VPS del cliente».

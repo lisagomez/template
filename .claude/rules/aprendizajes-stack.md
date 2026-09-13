@@ -61,3 +61,36 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: las `NEXT_PUBLIC_*` viajan como `ARG`/`build.args`. Solo los secretos
   server-side (service_role, API keys) van en `environment:`.
 - **Aplicar en**: todo deploy self-hosted (Hetzner, VPS, Docker).
+
+### 2026-09-13: Node en modo strip-only no admite «parameter properties»
+- **Error**: `constructor(private readonly x: T) {}` en un archivo `.ts` que se importa desde
+  `node --test` (sin transpilar) revienta con `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`. `tsc` lo
+  acepta, Next lo compila, y solo falla al ejecutar el `.ts` directo con Node.
+- **Fix**: campo explícito + asignación en el constructor. Vale para todo `.ts` que Node vaya
+  a correr sin build (`scripts/*.ts`, `src/features/**` importado desde una prueba).
+- **Aplicar en**: cualquier módulo que compartan Next y `node --test`.
+
+### 2026-09-13: Compose interpola TODOS los servicios, también los de perfiles inactivos
+- **Error**: `${VAR:?mensaje}` en un servicio de perfil `ocr-gpu` hacía fallar
+  `docker compose --profile ocr up` sin GPU, por una variable que ese arranque no necesita.
+  Y `env_file` con una ruta inexistente rompe hasta `docker compose config`.
+- **Fix**: defaults `${VAR:-}` y la exigencia real en `configura:deploy`; `env_file` con
+  `required: false` solo para validar, y el runbook exige el archivo en el servidor.
+- **Aplicar en**: todo servicio bajo `profiles:`.
+
+### 2026-09-13: otro `next-server` en el 3000 responde por ti, con redirect y todo
+- **Error**: `npm run start` falló con `EADDRINUSE` y la prueba siguió pegando a `:3000`, que
+  contestaba un Next de OTRO proyecto con `307 /login?error=config`. Parecía un middleware de
+  auth propio delante de `/a2a/health`; no existía.
+- **Fix**: antes de culpar a una ruta, `ss -ltnp | grep :PUERTO`. Y arrancar con `PORT` libre.
+- **Aplicar en**: toda prueba contra un servidor local.
+
+### 2026-09-13: un `import()` dinámico resuelve desde el archivo que lo hace, no desde el proceso
+- **Error**: la imagen del servicio OCR instalaba `zxing-wasm` en `servicio/node_modules`, pero
+  quien lo importa es `dist/lectores/zxing.js`, que busca hacia arriba desde `dist/`. Cada
+  página avisaba «Cannot find package 'zxing-wasm'» y el arranque decía «cargado» porque la
+  sonda solo comprobaba que el `import()` se había INTENTADO.
+- **Fix**: instalar las dependencias del servicio en la raíz del paquete dentro de la imagen
+  (`npm install --no-save` en `/extractor`) y sondear con una lectura real, distinguiendo
+  «no está el paquete» de «esta imagen de 8 bytes no es una imagen».
+- **Aplicar en**: toda imagen que copie un `dist/` y sus adaptadores con peers opcionales.

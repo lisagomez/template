@@ -1,29 +1,35 @@
 # Tareas 005 — Capa de interoperabilidad A2A
 
-> **Todas ABIERTAS y NO AUTORIZADAS.** Esta spec no está construida. Orden por dependencia.
+> **Actualizado el 2026-09-13 (spec 010)**: el bridge está construido con el extractor como capacidad
+> real. Lo que sigue abierto: TAR-14 (control negativo) y TAR-16 (autocrítica); el CDC (TAR-15)
+> quedó aprobado el 2026-09-13. Exponer el endpoint sigue siendo gate humano. Orden por dependencia.
 > La fase 1 no es opcional ni se puede saltar: sin ella, todo lo demás se escribe contra
 > un protocolo recordado en vez de contra el instalado.
 
 ## Fase 1 — Verificar el protocolo contra la fuente (bloquea todo lo demás)
 
-- [ ] **TAR-1 · Instalar `@a2a-js/sdk` e introspeccionar el paquete real.**
+- [x] **TAR-1 · Instalar `@a2a-js/sdk` e introspeccionar el paquete real.**
       Hecho cuando: están confirmados **contra los `.d.ts` o los exports**, no contra esta
       spec: la forma exacta de `AgentCard` (casing, campos opcionales), el tipo de
       `TaskState`, si el handler núcleo es extraíble sin Express, y si conviene la
       superficie proto/gRPC o la capa de compatibilidad JSON-RPC.
       RF: INVESTIGA-1, DoF-8.
+      → **Hecho (2026-09-13):** introspeccionado `@a2a-js/sdk@1.1.0` (2026-09-13): `AgentCard` con `supportedInterfaces[].protocolVersion`, `TaskState` enum numérico serializado como `TASK_STATE_*`, `JsonRpcTransportHandler` sin Express, método JSON-RPC `SendMessage`, partes `raw|text|data`.
 
-- [ ] **TAR-2 · Leer el repositorio oficial `a2aproject/A2A`.**
+- [x] **TAR-2 · Leer el repositorio oficial `a2aproject/A2A`.**
       Hecho cuando: están confirmadas las reglas de transición entre estados de Task y la
       forma exacta de `AgentSkill`. RF: INVESTIGA-2.
+      → **Hecho (2026-09-13):** estados de Task confirmados en el SDK (COMPLETED, FAILED, CANCELED terminales); `AgentSkill` con `examples`, `inputModes`, `outputModes`, `securityRequirements` obligatorios.
 
-- [ ] **TAR-3 · Pinear la versión resuelta.**
+- [x] **TAR-3 · Pinear la versión resuelta.**
       Hecho cuando: `package.json` declara la versión exacta y queda escrita su fuente.
       Sin rangos `^`. RF: DoF-3, C1.
+      → **Hecho (2026-09-13):** `"@a2a-js/sdk": "1.1.0"` en `package.json`, sin rango.
 
-- [ ] **TAR-4 · Decidir el punto de integración con Next.js.**
+- [x] **TAR-4 · Decidir el punto de integración con Next.js.**
       Hecho cuando: está decidido handler núcleo directo vs. adaptador Express, **con la
       evidencia de introspección pegada**. RF: DoF-8. Depende de TAR-1.
+      → **Hecho (2026-09-13):** handler núcleo directo en Route Handler (`src/features/a2a/puente.ts`), espejo del adaptador Express del SDK sin Express.
 
 ## Fase 2 — La skill
 
@@ -43,23 +49,26 @@
 
 ## Fase 3 — El bridge y su plantilla
 
-- [ ] **TAR-8 · Agent Card en `/.well-known/agent-card.json`.**
+- [x] **TAR-8 · Agent Card en `/.well-known/agent-card.json`.**
       Hecho cuando: se sirve JSON completo, **validado contra los tipos del SDK instalado**,
       no contra una lectura del proto. RF: MISION-3, DoF-4.
+      → **Hecho (2026-09-13):** `src/app/.well-known/agent-card.json/route.ts`, tipos del SDK, dos skills, versión 1.0 declarada.
 
-- [ ] **TAR-9 · Bridge como Route Handlers.**
+- [x] **TAR-9 · Bridge como Route Handlers.**
       Hecho cuando: vive en su propio espacio de rutas y no importa código de features de
       negocio salvo la interfaz declarada. RF: MISION-2, "aislar no fundir".
+      → **Hecho (2026-09-13):** `src/app/a2a/route.ts` + `src/features/a2a/` (tarjeta, esquema Zod, cliente del servicio, ejecutor, puente).
 
-- [ ] **TAR-10 · Fail-safe probado apagando la capacidad.** *(con media hecha)*
+- [x] **TAR-10 · Fail-safe probado apagando la capacidad.** *(con media hecha)*
       Hecho cuando: capacidad caída y entrada corrupta producen `failed` con razón legible.
       **Un fail-safe probado solo con el camino feliz no es un fail-safe.**
       **La mitad ya está**: los adaptadores del extractor no vuelcan ni la clave ni el cuerpo de la
       respuesta en un mensaje de error, y hay pruebas que lo exigen. Falta la otra mitad — que el
       bridge traduzca eso a una Task `failed` sin añadir un stack trace por el camino.
       RF: MISION-5, DoF-4.
+      → **Hecho (2026-09-13):** probado apagando la capacidad (URL a puerto cerrado) y con entrada corrupta: `TASK_STATE_FAILED` con razón en español, sin URL ni código de red (`scripts/prueba-a2a.ts`).
 
-- [ ] **TAR-11 · Opacidad demostrada.** *(abaratada el 2026-09-09)*
+- [x] **TAR-11 · Opacidad demostrada.** *(abaratada el 2026-09-09)*
       Hecho cuando: se intenta llegar desde la superficie A2A a una ruta interna, stack
       trace o nombre de tabla, y se evidencia que no se filtra.
       **Se porta la prueba de Hermes, no se inventa una.** Y su forma importa: la suya **enumera las
@@ -73,14 +82,16 @@
       **La prueba se escribe en el MISMO PR que el bridge (TAR-9), no antes**: un verificador sin
       nada que verificar es código que parece capacidad y nunca ha corrido contra lo real.
       El código listo para pegar está en `docs/SDD-puente-a2a-extractor.md` §6. RF: MISION-4, DoF-5.
+      → **Hecho (2026-09-13):** prueba que ENUMERA los `route.ts` de `src/app` y exige igualdad con las tres rutas; health exacto; Card sin nombres del interior. Revisión por agente distinto del autor en la sesión de la spec 010: cazó cinco fugas que las pruebas del autor no cubrían (motivo crudo del OCR, `-32603` del SDK con mensaje interno, `ListTasks` global con `history`, eco de la versión, razón engañosa por `mediaType`); las cinco corregidas con regresión (15/15).
 
-- [ ] **TAR-12 · Auth mínima, con lo que falta declarado residual.**
+- [x] **TAR-12 · Auth mínima, con lo que falta declarado residual.**
       Hecho cuando: API key o bearer funciona y OAuth2/OIDC/mTLS + multi-partner quedan
       escritos como residual explícito. RF: MISION-6.
+      → **Hecho (2026-09-13):** clave por cabecera `X-API-Key` cuando `A2A_API_KEY` está puesta (401 sin ella); OAuth2/OIDC/mTLS/multi-partner declarados residual en la Card.
 
 ## Fase 4 — Cerrar
 
-- [ ] **TAR-13 · Prueba end-to-end con una capacidad REAL.** *(cambiada el 2026-09-09)*
+- [x] **TAR-13 · Prueba end-to-end con una capacidad REAL.** *(cambiada el 2026-09-09)*
       **Ya no hace falta inventar una capacidad de juguete**: `tools/extractor-documental/` es una
       capacidad real, con 372 pruebas, y —lo que decide— **su núcleo no tiene credenciales**: el
       motor de OCR y el almacén se inyectan. Eso, que se hizo para que el paquete fuera instalable,
@@ -89,14 +100,16 @@
       Hecho cuando: el bridge expone `extraccion-documental`, corre contra un documento de prueba
       **propio, nunca de cliente**, y su salida queda pegada. Diseño: `docs/SDD-puente-a2a-extractor.md`.
       RF: DoF-4, COMANDO DE VALIDACION.
+      → **Hecho (2026-09-13):** corrida contra el servicio OCR real con un escaneo sintético: COMPLETED con confianza, evidencia y `revisionHumana` por campo; XML por la skill de comprobante con `selloVerificado=false`.
 
 - [ ] **TAR-14 · Control negativo del contrato.**
       Hecho cuando: se rompe una de las seis garantías → `regresion` en rojo; restaurar →
       verde. RF: DoF-6.
 
-- [ ] **TAR-15 · CDC redactado sin auto-aprobación.**
+- [x] **TAR-15 · CDC redactado sin auto-aprobación.**
       Hecho cuando: hay entrada en `BITACORA-CDC.md` (radio: skill nuevo) con la aprobación
       humana **pendiente**, y memoria del proyecto actualizada. RF: DoF-10, C1.
+      → **Hecho (2026-09-13):** entrada redactada por el agente con aprobación pendiente; **aprobada por lisagomez el 2026-09-13** («aprueba CDC»), acta en `BITACORA-CDC.md`. Exponer el endpoint sigue fuera de esta firma.
 
 - [ ] **TAR-16 · Autocrítica.**
       Hecho cuando: está respondido qué parte de la auth es teatro por no probarse contra un

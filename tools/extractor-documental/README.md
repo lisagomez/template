@@ -3,7 +3,7 @@
 Carga masiva de documentos (PDF, imagenes, carpetas), revision humana de lo extraido, y mapeo
 contra los catalogos que el proyecto **ya tiene**.
 
-> **Estado: 45 de 48 tareas, 372 pruebas en verde** sin red, sin base de datos y sin navegador.
+> **Estado: 774 pruebas en verde** sin red, sin base de datos y sin navegador (specs 007, 008, 009 y 010).
 > Los ocho entry points se instalan e importan en un proyecto limpio (`npm run empaqueta`).
 > **Lo que falta y por que**, en `.claude/specs/007-extractor-documental/tareas.md`: tres umbrales
 > que se MIDEN y no se inventan (TAR-17, TAR-25, TAR-34) y el enrutado desde `AGENTS.md`, que es
@@ -705,3 +705,55 @@ La UI tambien tiene pruebas de verdad, no capturas: las decisiones —que column
 campo cae bajo umbral, si se puede suprimir, como se recorre un arbol de carpetas— viven en modulos
 puros fuera de React. En los componentes queda el pegamento, que es justo lo que no lleva
 decisiones dentro.
+
+
+## Desplegar en el VPS del cliente (spec 010)
+
+La herramienta se ofrece como **servicio contenedorizado** en `servicio/`, para que un cliente la
+levante en su propio VPS —el proveedor lo elige el— con `docker compose up`. El nucleo sigue sin
+dependencias: el servicio lo envuelve, no lo reescribe. Lo que trae encima:
+
+| Pieza | Que hace | Donde |
+|---|---|---|
+| Servicio HTTP | `GET /health` (exactamente `{"status":"ok"}`), `POST /extraer` (un documento en crudo), `POST /lote` (varios en base64, con cifras del lote) | `servicio/servidor.mjs` |
+| Configuracion de proyecto | Clases de pagina, patrones, **esquemas por clase**, identificadores esperados y validadores, en un JSON que el cliente monta | `servicio/proyecto-ejemplo.json` |
+| Evidencia por campo | Cada campo dice de que evidencia sale su confianza: `codigo`, `exacto`, `corroboracion`, `checksum` o `motor`, y `revisionHumana` sale de eso, no de un umbral | `src/evidencia.ts` |
+| Esquema por clase | Presentes por clave, faltantes obligatorias declaradas, no previstas conservadas; sin clase declarada, campos crudos | `src/esquema-por-clase.ts` |
+| Tiempos por etapa | Codigos, motor y respaldo por pagina y por documento: latencia (p50/p95) separada del rendimiento de lote | `tiempos` en `leePagina` y `leeCorpus` |
+| Imagen | Tesseract + pytesseract + Pillow + zxing, base pineada por digest, usuario sin privilegios, health | `servicio/Dockerfile` |
+| Puente para Hermes | Dos herramientas MCP (`descubrir_agente`, `extraer_documento`) traducidas a A2A contra la Card del template | `servicio/mcp-para-hermes.mjs` |
+| Medicion | p50/p95 por etapa, pag/min, CER, campos correctos y correlacion confianza-error, en proceso o por HTTP | `medicion/servicio.mjs` |
+
+### La GPU como servicio del VPS
+
+El compose del template (raiz del repo) declara `ocr` (CPU) y `ocr-gpu` (vLLM con reserva de
+dispositivo, imagen y modelo pineados, health). `npm run configura:deploy` **mide** la GPU como un
+recurso mas: driver, tarjeta y si el runtime de Docker la expone. Sin GPU no es un error: el
+perfil `ocr-gpu` no se levanta y la cola va en CPU bajo la regla medida de la spec 009.
+
+```bash
+docker compose --profile ocr up -d                      # sin GPU
+docker compose --profile ocr --profile ocr-gpu up -d    # con GPU (OCR_GPU_MODELO pineado)
+docker compose --profile ocr --profile hermes up -d     # con Hermes consumiendo por A2A
+```
+
+### Mistral: apagado por defecto
+
+`EXTRACTOR_RESPALDO=mistral` manda el documento a un tercero. Solo entra si
+`EXTRACTOR_DECISION_C4` apunta a una decision de flujo de datos **firmada**; sin ella el servicio
+lo declara «no disponible: requiere decision C4» y no hay bandera que lo salte. Con datos de
+terceros, ninguna firma lo autoriza (limite de C5 en `AGENTS.md`).
+
+### Medido el 2026-09-13 (corpus sintetico de 33 paginas: NO CONCLUYENTE, hacen falta 100)
+
+| Cifra | En proceso | Por HTTP, en Docker |
+|---|---|---|
+| Via motor (Tesseract), 4 en vuelo, 16 hilos sin GPU | 251,7 pag/min de reloj | 254,7 pag/min de reloj |
+| Latencia solo via motor | p50 736 ms · p95 1993 ms | p50 729 ms · p95 1951 ms |
+| CER sobre 7 escaneos | 0,0040 | 0,0040 |
+| Campos correctos (126 muestras) | 93,7 % | 93,7 % |
+| Correlacion confianza-error (pagina de Tesseract) | r = -0,11: **sin senal, sin umbral** | igual |
+
+La base de la spec 009 sobre 84 paginas reales es 197 pag/min. Y la conclusion de la calibracion
+es la misma que entonces: la confianza del motor no predice el acierto, asi que **no se fija
+umbral** y `revisionHumana` sale de la evidencia. TAR-17 y TAR-25 quedan cerradas por esa via.

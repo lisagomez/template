@@ -3,9 +3,26 @@
 # Caddy termina TLS (certificado automatico) y hace proxy a Next.js.
 # Solo Caddy publica puertos; la app NO es alcanzable desde internet.
 #
-# NADA de aqui asume un modelo de servidor concreto: el nombre de la imagen y los
-# limites salen de `.env.production`, y los calcula `npm run configura:deploy`
-# midiendo la maquina donde corre. Los defaults arrancan en un servidor pequeño.
+# NADA de aqui asume un modelo de servidor concreto ni un proveedor: el nombre de la
+# imagen y los limites salen de `.env.production`, y los calcula
+# `npm run configura:deploy` midiendo la maquina donde corre (CPU, RAM y GPU).
+# Los defaults arrancan en un servidor pequeño sin GPU.
+#
+# PERFILES (spec 010 — el extractor documental en la infraestructura del cliente):
+#   (sin perfil)   app + caddy, lo de siempre
+#   ocr            servicio OCR en CPU (Tesseract por zonas). Red interna, sin puertos
+#   ocr-gpu        la GPU como servicio del VPS: vLLM con el modelo de vision de la cola.
+#                  Reserva de dispositivo, imagen pineada, limites y health. Si la maquina
+#                  no tiene GPU, NO se levanta este perfil y `ocr` sigue solo en CPU
+#   hermes         Hermes (imagen pineada por digest) + el puente MCP->A2A que consume
+#                  el extractor. Hermes no tiene ninguna llave del extractor
+#
+#   docker compose --profile ocr up -d                      # sin GPU
+#   docker compose --profile ocr --profile ocr-gpu up -d    # con GPU
+#   docker compose --profile ocr --profile hermes up -d     # con Hermes
+#
+# `interna` es una red SIN salida a internet: por ahi viajan los documentos. El puente
+# A2A (app:3000/a2a) solo existe en esa red; exponerlo por Caddy es gate humano (C3+C4).
 # =============================================================================
 
 services:
@@ -30,6 +47,10 @@ services:
       # runtime y NO se inlinean en el bundle del navegador.
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      # Puente A2A (solo red interna). La clave la comparte con `puente-hermes`; vacia = sin clave.
+      A2A_URL_BASE: http://app:3000
+      A2A_API_KEY: ${A2A_API_KEY:-}
+      EXTRACTOR_SERVICIO_URL: http://ocr:8080
     deploy:
       resources:
         limits:
@@ -46,6 +67,7 @@ services:
         max-file: "3"
     networks:
       - web
+      - interna
 
   caddy:
     image: caddy:2-alpine
@@ -78,10 +100,155 @@ services:
     networks:
       - web
 
+  # ---- Extractor documental: OCR en CPU ---------------------------------------
+  ocr:
+    profiles: ["ocr"]
+    build:
+      context: ./tools/extractor-documental
+      dockerfile: servicio/Dockerfile
+    image: ${APP_NAME:-saas-factory-app}-ocr:${APP_VERSION:-latest}
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      EXTRACTOR_EN_VUELO: ${OCR_EN_VUELO:-2}
+      EXTRACTOR_PROYECTO: ${OCR_PROYECTO:-/extractor/servicio/proyecto-ejemplo.json}
+      # La cola de vision: `ninguno` | `compatible` (apunta a ocr-gpu o a un servidor
+      # propio) | `mistral` (API externa: el documento SALE; exige decision C4 escrita).
+      EXTRACTOR_RESPALDO: ${OCR_RESPALDO:-ninguno}
+      EXTRACTOR_RESPALDO_BASE: ${OCR_RESPALDO_BASE:-http://ocr-gpu:8000/v1}
+      EXTRACTOR_RESPALDO_MODELO: ${OCR_GPU_MODELO:-}
+      EXTRACTOR_RESPALDO_MODO: ${OCR_RESPALDO_MODO:-transcripcion}
+      EXTRACTOR_DECISION_C4: ${OCR_DECISION_C4:-}
+      EXTRACTOR_MISTRAL_MODELO: ${OCR_MISTRAL_MODELO:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+    volumes:
+      # La decision C4 (si existe) se monta de solo lectura donde EXTRACTOR_DECISION_C4 la espera.
+      - ${OCR_DECISION_C4_ARCHIVO:-/dev/null}:${OCR_DECISION_C4:-/extractor/decision-c4.md}:ro
+    tmpfs:
+      # Los documentos en transito viven en memoria, con el uid del servicio, y mueren con el contenedor.
+      - /tmp/extractor:uid=1001,gid=1001,mode=700
+    deploy:
+      resources:
+        limits:
+          cpus: "${OCR_CPUS:-2}"
+          memory: ${OCR_MEM:-2G}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - interna
+
+  # ---- La GPU como servicio del VPS: vLLM con el modelo de vision de la cola ----
+  ocr-gpu:
+    profiles: ["ocr-gpu"]
+    # PINEADO por tag de release. Cambiarlo es un CDC (C1). El modelo va pineado en OCR_GPU_MODELO.
+    image: vllm/vllm-openai:v0.11.0
+    restart: unless-stopped
+    # OCR_GPU_MODELO es obligatorio con este perfil (pineado, sin alias). No se exige con `:?`
+    # porque Compose interpola TODOS los servicios aunque su perfil no este activo, y un
+    # `docker compose --profile ocr up` sin GPU moriria por una variable que no necesita.
+    # Vacio, vLLM falla al arrancar y lo dice; `configura:deploy` rechaza los alias.
+    command:
+      - "--model"
+      - "${OCR_GPU_MODELO:-}"
+      - "--served-model-name"
+      - "${OCR_GPU_MODELO}"
+      - "--max-model-len"
+      - "${OCR_GPU_CONTEXTO:-8192}"
+      - "--gpu-memory-utilization"
+      - "${OCR_GPU_MEMORIA:-0.85}"
+      - "--port"
+      - "8000"
+    expose:
+      - "8000"
+    environment:
+      HF_HOME: /modelos
+    volumes:
+      - ocr_modelos:/modelos
+    shm_size: "${OCR_GPU_SHM:-4gb}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${OCR_GPU_COUNT:-1}
+              capabilities: [gpu]
+        limits:
+          memory: ${OCR_GPU_MEM:-8G}
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).status==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      # `web` solo para bajar los pesos la primera vez. Los documentos llegan por `interna`.
+      - interna
+      - web
+
+  # ---- Hermes como consumidor, por un puente MCP -> A2A -------------------------
+  puente-hermes:
+    profiles: ["hermes"]
+    image: ${APP_NAME:-saas-factory-app}-ocr:${APP_VERSION:-latest}
+    restart: unless-stopped
+    command: ["node", "servicio/mcp-para-hermes.mjs"]
+    expose:
+      - "8090"
+    environment:
+      A2A_URL: http://app:3000
+      A2A_API_KEY: ${A2A_API_KEY:-}
+      PUENTE_CARPETA: /documentos
+    volumes:
+      # Carpeta de ENTRADA (solo lectura): Hermes pide un documento por nombre y el puente lo lee de
+      # aqui. Nunca sale de esta carpeta (guarda contra `..`) y Hermes no la ve directamente.
+      - ${OCR_ENTRADA:-./documentos-entrada}:/documentos:ro
+    networks:
+      - interna
+
+  hermes:
+    profiles: ["hermes"]
+    # PINEADO POR DIGEST — cambiarlo es un CDC (C1). Ver docs/FASE0-INFRAESTRUCTURA.md §7 y .hermes-baseline.json.
+    image: nousresearch/hermes-agent:v2026.6.19@sha256:9f367c7756ef087661a361536a89f438d57a122b958dc23d82d456b1433e6e9e
+    restart: unless-stopped
+    command: gateway run
+    env_file:
+      # Su .env (proveedor de modelo, credenciales de canales). `required: false` solo para que
+      # `docker compose config` valide sin el archivo: en el servidor tiene que existir.
+      - path: ${HERMES_ENV:-/opt/hermes/.env}
+        required: false
+    volumes:
+      # Su HOME (config.yaml con `mcp_servers` apuntando a puente-hermes, ver hermes/config.extractor.yaml).
+      - ${HERMES_HOME:-/opt/hermes/clientes/.hermes}:/opt/data
+    deploy:
+      resources:
+        limits:
+          memory: ${HERMES_MEM:-1536M}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      # `interna` para hablar con el puente; `web` para su proveedor de modelo. Sin puertos.
+      - interna
+      - web
+
 volumes:
   caddy_data:
   caddy_config:
+  ocr_modelos:
 
 networks:
   web:
     driver: bridge
+  interna:
+    driver: bridge
+    internal: true
