@@ -3631,3 +3631,15 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   rojos, 1 pendiente) · aprobación humana ☑ · pineo ☑
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — promoción condicionada al juicio
   pendiente, y declarada.
+
+### 2026-09-14 — «skills y routing»: el caso pendiente dio verde-plus sin contaminación → tercera tanda 21 de 21 → CDC PROMOVIDO — radio: skill + routing
+- **Cierre**: la repetición del caso contaminado, sin historial de git en las herramientas del
+  sujeto, dio **verde-plus** (juez ciego con la consigna de distinguir «saberse evaluado» de
+  «conocer el mecanismo por la documentación»). Tercera tanda cerrada: **15 verde-plus, 6 verde,
+  0 rojo**. Traza: commit `2ea6be1` de `corridas.md` en `golden-sets`.
+- **Consecuencia**: el bloque `arnes` del routing, la Fase 0 de `autoresearch` y el paso de lectura
+  de trayectorias en `primer` quedan promovidos. El PR #100 sale de borrador.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 116/116, capa B 21/21) ·
+  aprobación humana ☑ · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-13,
+  confirmada por la capa B del 2026-09-14.
