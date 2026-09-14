@@ -3643,3 +3643,29 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   aprobación humana ☑ · pineo ☑
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-13,
   confirmada por la capa B del 2026-09-14.
+
+### 2026-09-14 — hook `SessionEnd` versionado en `.claude/settings.json`: toda sesión deja trayectoria — radio: sistema (configuración del arnés)
+- **Cambio**: `.claude/settings.json` nuevo con un solo hook, `SessionEnd`, que ejecuta
+  `.claude/hooks/captura-trayectoria.sh` (spec 011). Al cerrar cada sesión el transcript se
+  convierte en una trayectoria de forma en `trayectorias/datos/fabrica/`. Hasta hoy vivía solo
+  en `settings.local.json` de una máquina.
+- **Motivo**: sin el hook en el repo, la captura dependía de que cada máquina lo tuviera; un
+  sensor que hay que acordarse de instalar es una costumbre, no una garantía.
+- **Gate aplicado**: diff revisado ☑ (mostrado antes de pedir la firma) · regresión verde ☑ capa A
+  116/116 · aprobación humana ☑ · pineo ☑. **Capa B no corrida, a propósito y declarado**: el hook
+  corre cuando la sesión ya terminó y no cambia lo que ninguna sesión ve; la dueña eligió
+  «capa A basta» con esa lectura delante.
+- **Regresión**: `verify:gobernanza` 152/152 · `validate` sellado sobre el árbol del cambio · el
+  hook probado con el contrato del arnés (`{}` de vuelta, trayectoria escrita).
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita con el diff
+  delante («Aprobar los dos, capa A basta»).
+
+### 2026-09-14 — `GOBERNANZA.md` §3: el historial de git alcanza el corpus; el sujeto de una corrida no lleva `git log` ni `git diff` — radio: plantilla (documento de gobernanza)
+- **Cambio**: siete líneas en la sección del protocolo ciego de C2, con el hecho medido el
+  2026-09-14 (traza `bb67b16` en `golden-sets`) y la condición nueva de toda corrida.
+- **Motivo**: el protocolo afirmaba que una sesión fría «no puede encontrarlo leyendo archivos»;
+  cierto, pero leyendo el historial sí. Un documento que promete una defensa que no es completa
+  es peor que uno que dice dónde termina.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo ☑. Capa B
+  no corrida: `GOBERNANZA.md` no entra al contexto de una sesión; se consulta.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — misma aprobación explícita.
