@@ -9,7 +9,7 @@
  },
  "cuando": {
   "inicio": "2026-09-13T13:06:36.024Z",
-  "fin": "2026-09-14T04:28:16.183Z"
+  "fin": "2026-09-14T05:39:52.545Z"
  },
  "actor": {
   "skills": [
@@ -19,34 +19,35 @@
   "tarea": "implementacion"
  },
  "modelos": {
-  "claude-fable-5-1": 623
+  "claude-fable-5-1": 667
  },
  "acciones": {
   "herramientas": {
-   "Bash": 353,
-   "ToolSearch": 2,
+   "Bash": 359,
+   "ToolSearch": 3,
    "WebFetch": 4,
-   "Agent": 5,
+   "Agent": 6,
    "Write": 1,
-   "Monitor": 3,
+   "Monitor": 5,
    "Skill": 1,
-   "AskUserQuestion": 2
+   "AskUserQuestion": 2,
+   "TaskStop": 1
   },
-  "llamadasAlModelo": 227,
-  "turnos": 46,
-  "subagentes": 5,
+  "llamadasAlModelo": 259,
+  "turnos": 70,
+  "subagentes": 6,
   "comandos": 2,
-  "ediciones": 123
+  "ediciones": 127
  },
  "uso": {
-  "entrada": 5272,
-  "salida": 423673,
-  "cacheCreacion": 807491,
-  "cacheLectura": 126392119
+  "entrada": 5562,
+  "salida": 440473,
+  "cacheCreacion": 1650102,
+  "cacheLectura": 153040475
  },
- "costoUsd": null,
+ "costoUsd": 80.9657,
  "tiempos": {
-  "totalMs": 55300159
+  "totalMs": 59596521
  },
  "gates": [
   {
@@ -62,7 +63,7 @@
   {
    "nombre": "validate",
    "resultado": "verde",
-   "veces": 27
+   "veces": 29
   },
   {
    "nombre": "typecheck",
@@ -87,7 +88,7 @@
   {
    "nombre": "regresion",
    "resultado": "verde",
-   "veces": 5
+   "veces": 7
   }
  ],
  "resultado": {
@@ -97,9 +98,7 @@
   }
  },
  "cobertura": {
-  "completa": false,
-  "faltan": [
-   "costo"
-  ]
+  "completa": true,
+  "faltan": []
  }
 }

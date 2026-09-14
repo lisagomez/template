@@ -25,6 +25,29 @@ Lo que importa no es la mejora individual (0.5%) sino la acumulacion (50 iteraci
 
 ---
 
+## Fase 0: La evidencia viene de las trayectorias (desde 2026-09-13)
+
+Antes de definir evals a ojo, mira lo que la fabrica ya sabe del skill:
+
+```bash
+npm run trayectorias:evalua      # acierto de los criterios por skill, sobre sesiones reales
+npm run trayectorias:informe     # tendencia entre periodos y regresiones marcadas
+```
+
+- Las trayectorias (`trayectorias/datos/fabrica/`) dicen en que sesiones se invoco el skill,
+  que herramientas uso, cuantos gates salieron en rojo y cuantos errores de herramienta hubo.
+  **Ese es el baseline real**, y es mejor que uno fabricado con tres inputs.
+- Los criterios que ya existen en `trayectorias/criterios.json` valen como punto de partida;
+  si anades otros, mantén 3 a 6 y binarios (seccion 1.2). **Nunca copies un criterio al
+  prompt del skill**: es el mismo gaming, con otro nombre.
+- Al terminar el loop, la mejora se confirma en sesiones REALES: `npm run trayectorias:informe`
+  tras unas sesiones con el skill mutado. Un score del loop que no se ve en las trayectorias
+  es un examen aprobado, no un skill mejor.
+- Mutar el skill es un CDC (C1): la rama `autoresearch/<skill>` NO se mezcla sin diff,
+  regresion y firma. Automejorado no es autoaprobado.
+
+---
+
 ## Fase 1: Setup (con el usuario)
 
 Antes de correr autonomamente, alinear con el usuario:

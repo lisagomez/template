@@ -3580,3 +3580,31 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   regla, resultado en la entrada siguiente.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aprueba el
   CDC de demostrar, no citar»), con el diff delante.
+
+### 2026-09-14 — «Demostrar, no citar»: capa B 21 de 21 en verde → CDC PROMOVIDO — radio: sistema
+- **Corrida**: los 21 casos en frío sobre la rama con la regla y sin los skills retirados (mide la
+  regla sola); juez ciego por caso. **13 verde-plus, 8 verde, 0 rojo, 0 no concluyentes,
+  contaminación ninguna.** 56,1 minutos, 22,84 USD. Traza: commit `70f4576` de `corridas.md` en
+  `golden-sets`. El caso que dio rojo en la tanda anterior pasó a verde-plus: corrió el
+  verificador y enumeró las comprobaciones que leen el paso. Demostró en vez de citar.
+- **Eco a vigilar**: tres sujetos nombraron el mecanismo de la fábrica (capa B, corpus, coste de
+  la tanda anterior) porque esta bitácora lo describe; no sabían que se les evaluaba. Es el
+  precio de una bitácora legible; `audita:fugas` sigue verde.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 116/116, capa B 21/21) ·
+  aprobación humana ☑ · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-13,
+  confirmada por la capa B.
+
+### 2026-09-14 — «skills y routing», reaplicado tras la regla nueva — radio: skill + routing (capa B en curso)
+- **Cambio**: se reaplica el parche `trayectorias/propuestas/2026-09-13-skills-y-routing.patch`
+  (bloque `arnes` del routing con precios verificados; Fase 0 de `autoresearch`; paso de lectura de
+  trayectorias en `primer`), retirado el 2026-09-13 por el rojo de la capa B. Las 22 sesiones de la
+  fábrica vuelven a tener coste medido.
+- **Motivo**: la causa del rojo era la conducta base, ya corregida y verificada con 21/21; el
+  parche no cambió. Aun así, cada CDC lleva su propia corrida: la tercera tanda mide la rama con
+  la regla Y el parche, y su resultado va en la entrada siguiente.
+- **Gate aplicado**: diff revisado ☑ (el parche, íntegro) · regresión verde ☑ capa A · aprobación
+  humana ☑ (instrucción del 2026-09-13 «aplica las skills y el routing», y el plan acordado de
+  reaplicar si la regla pasaba) · pineo ☑ · **capa B: en curso**
+- **Aprobado por**: **lisagomez** (responsable del proyecto); capa B pendiente del resultado de la
+  tercera tanda, y declarado.

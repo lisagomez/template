@@ -150,5 +150,48 @@
     ],
     "gotcha_operativo": "OpenRouter bloquea por defecto los proveedores que entrenan con tus prompts; con esa politica activa, DeepSeek y compania fallan con `No endpoints found for this model`. Se decide a proposito en https://openrouter.ai/settings/privacy, no a base de reintentos.",
     "cache": "Varias alternativas abiertas tienen lectura de cache mucho mas barata o inexistente. Con un prefijo grande y estable, un propietario con cache puede salir MAS barato que un abierto sin el: el precio de lista no decide solo."
+  },
+  "arnes": {
+    "_comentario": "Los modelos que USA EL ARNES (Claude Code) en las sesiones de la fabrica, con su precio, para que las trayectorias de la linea fabrica lleven coste en vez de null. Identificadores tal como aparecen en los transcripts. Precios verificados contra la misma fuente que `precios` (OpenRouter, USD por millon de tokens) el 2026-09-13; `escritura_cache` es lo que cuesta crear el prefijo. Anadido al aplicar las propuestas de trayectorias (spec 011): 22 sesiones sin coste porque el catalogo no los conocia.",
+    "fuente": "https://openrouter.ai/api/v1/models",
+    "consultado": "2026-09-13",
+    "modelos": {
+      "claude-opus-5": {
+        "catalogo": "anthropic/claude-opus-5",
+        "precio": {
+          "entrada": 5.0,
+          "salida": 25.0,
+          "lectura_cache": 0.5,
+          "escritura_cache": 6.25
+        }
+      },
+      "claude-fable-5-1": {
+        "catalogo": "anthropic/claude-fable-5.1",
+        "precio": {
+          "entrada": 10.0,
+          "salida": 50.0,
+          "lectura_cache": 0.25,
+          "escritura_cache": 12.5
+        }
+      },
+      "claude-sonnet-5": {
+        "catalogo": "anthropic/claude-sonnet-5",
+        "precio": {
+          "entrada": 2.0,
+          "salida": 10.0,
+          "lectura_cache": 0.2,
+          "escritura_cache": 2.5
+        }
+      },
+      "claude-haiku-4-5-20251001": {
+        "catalogo": "anthropic/claude-haiku-4.5",
+        "precio": {
+          "entrada": 1.0,
+          "salida": 5.0,
+          "lectura_cache": 0.1,
+          "escritura_cache": 1.25
+        }
+      }
+    }
   }
 }
