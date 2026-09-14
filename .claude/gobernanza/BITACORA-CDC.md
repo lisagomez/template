@@ -3608,3 +3608,26 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   reaplicar si la regla pasaba) · pineo ☑ · **capa B: en curso**
 - **Aprobado por**: **lisagomez** (responsable del proyecto); capa B pendiente del resultado de la
   tercera tanda, y declarado.
+
+### 2026-09-14 — «skills y routing», tercera tanda de capa B: 20 de 21 en verde, 0 rojos, 1 caso sin medir → CDC EN ESPERA, no promovido todavía — radio: skill + routing
+- **Corrida**: los 21 casos en frío sobre la rama con la regla nueva y el parche reaplicado, juez
+  ciego por caso: **14 verde-plus, 6 verde, 0 rojo, 1 no concluyente**. 40,9 minutos, 18,27 USD.
+  Traza: commit `bb67b16` de `corridas.md` en `golden-sets`. Dos condiciones nuevas, declaradas ahí:
+  corredor desacoplado del arnés (dos intentos previos murieron por su umbral de memoria) y sujeto
+  sin servidores MCP.
+- **El caso sin medir**: contaminación. El sujeto llegó al corpus por `git log --all` desde el
+  worktree, que mi lista de herramientas permitía. **Hallazgo para C2**: el protocolo dice que una
+  sesión fría «no puede encontrarlo leyendo archivos», y es cierto; leyendo el historial de git sí
+  puede. Se repitió el caso sin `git log` ni `git diff` (88 s, 0,64 USD) y su juicio ciego **queda
+  pendiente**: el juez no pudo correr por el límite de sesión de la cuenta (se reinicia a las
+  03:20, hora de México). El corredor no juzga: tiene el contexto del cambio.
+- **Consecuencia**: sin 21 de 21 medidos, el CDC no se promueve. El parche sigue en la rama del PR
+  #100, que pasa a **borrador** hasta que el juez vea la repetición. Si sale verde, se promueve con
+  esta corrida; si sale rojo o contaminado, se retira otra vez.
+- **Propuesta derivada (para el corpus, no aplicada)**: quitar el historial de git de las
+  herramientas del sujeto en toda corrida, y anotar en `GOBERNANZA.md` §3 que `git log --all`
+  alcanza la rama del corpus. Es un CDC de gobernanza aparte.
+- **Gate aplicado**: diff revisado ☑ · regresión: capa A ☑ 116/116, capa B ☐ (20/21 medidos, 0
+  rojos, 1 pendiente) · aprobación humana ☑ · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — promoción condicionada al juicio
+  pendiente, y declarada.
