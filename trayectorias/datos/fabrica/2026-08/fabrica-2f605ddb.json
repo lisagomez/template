@@ -1,0 +1,79 @@
+{
+ "version": 1,
+ "id": "fabrica-2f605ddb",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "53497628-51a8-4a87-9bd3-04c3bff794e4",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-08-28T12:11:25.435Z",
+  "fin": "2026-08-28T13:45:33.692Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5": 258
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 127,
+   "AskUserQuestion": 3
+  },
+  "llamadasAlModelo": 147,
+  "turnos": 17,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 41
+ },
+ "uso": {
+  "entrada": 294,
+  "salida": 161282,
+  "cacheCreacion": 251498,
+  "cacheLectura": 21933408
+ },
+ "costoUsd": 16.5721,
+ "tiempos": {
+  "totalMs": 5648257
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 6
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "verde",
+   "veces": 5
+  },
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 10
+  },
+  {
+   "nombre": "build",
+   "resultado": "rojo",
+   "veces": 4
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 5
+  }
+ ],
+ "resultado": {
+  "errores": 1,
+  "erroresPor": {
+   "AskUserQuestion": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

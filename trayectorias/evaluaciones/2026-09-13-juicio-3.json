@@ -1,0 +1,114 @@
+{
+ "fecha": "2026-09-13",
+ "pasada": 3,
+ "evaluador": "subagente independiente (modelo pineado del arnés), 2026-09-13, tercera pasada",
+ "vio": "solo para-evaluador/datos y para-evaluador/criterios.json; sin acceso al repo ni a la conversación",
+ "veredictos": {
+  "fabrica-0828c365": {
+   "proporcion_sana": true
+  },
+  "fabrica-0f06fe24": {
+   "proporcion_sana": true
+  },
+  "fabrica-12e8950e": {
+   "proporcion_sana": true
+  },
+  "fabrica-1e943fb0": {
+   "proporcion_sana": true
+  },
+  "fabrica-29065ee8": {
+   "proporcion_sana": true
+  },
+  "fabrica-2f605ddb": {
+   "proporcion_sana": true
+  },
+  "fabrica-30db46dc": {
+   "proporcion_sana": true
+  },
+  "fabrica-3c2abc60": {
+   "proporcion_sana": true
+  },
+  "fabrica-502a90f7": {
+   "proporcion_sana": true
+  },
+  "fabrica-64f42afe": {
+   "proporcion_sana": true
+  },
+  "fabrica-71923418": {
+   "proporcion_sana": true
+  },
+  "fabrica-a9ab6b58": {
+   "proporcion_sana": true
+  },
+  "fabrica-e99635ac": {
+   "proporcion_sana": true
+  },
+  "fabrica-ec81ad29": {
+   "proporcion_sana": true
+  },
+  "fabrica-f0bec979": {
+   "proporcion_sana": true
+  },
+  "fabrica-06d34ab6": {
+   "proporcion_sana": true
+  },
+  "fabrica-0873b25e": {
+   "proporcion_sana": true
+  },
+  "fabrica-2a59c3f1": {
+   "proporcion_sana": true
+  },
+  "fabrica-2de0f155": {
+   "proporcion_sana": true
+  },
+  "fabrica-c2fe3422": {
+   "proporcion_sana": true
+  },
+  "fabrica-cfae124e": {
+   "proporcion_sana": true
+  },
+  "fabrica-faf93e53": {
+   "proporcion_sana": true
+  },
+  "aplicacion-19c5ed3d": {
+   "clase_adecuada": true
+  },
+  "aplicacion-5e8795f7": {
+   "clase_adecuada": true
+  },
+  "aplicacion-84938f8a": {
+   "clase_adecuada": true
+  },
+  "herramientas-2b5c6198": {
+   "metricas_coherentes": true
+  }
+ },
+ "notas": {
+  "fabrica-0828c365": "implementacion con 20 ediciones, Bash 82, skill update-config: coherente",
+  "fabrica-0f06fe24": "implementacion, 36 ediciones, 14 subagentes: mezcla coherente",
+  "fabrica-12e8950e": "implementacion, 19 ediciones (Edit 3 + Bash): coherente",
+  "fabrica-1e943fb0": "implementacion corta, 3 ediciones desde Bash: coherente",
+  "fabrica-29065ee8": "lectura con 0 ediciones y solo Bash de lectura: coherente",
+  "fabrica-2f605ddb": "implementacion solo Bash pero 41 ediciones contadas: coherente",
+  "fabrica-30db46dc": "implementacion, 76 ediciones (Edit 42, Write 9): coherente",
+  "fabrica-3c2abc60": "implementacion con 4 skills y 56 ediciones: coherente",
+  "fabrica-502a90f7": "implementacion delgada: 1 edicion en 36 Bash, primer domina; pasa",
+  "fabrica-64f42afe": "implementacion solo Bash, 24 ediciones desde Bash: coherente",
+  "fabrica-71923418": "implementacion, 7 ediciones, WebSearch por update-config: coherente",
+  "fabrica-a9ab6b58": "implementacion delgada: 2 ediciones en 39 Bash, primer domina; pasa",
+  "fabrica-e99635ac": "implementacion, 127 ediciones, Edit 63: coherente",
+  "fabrica-ec81ad29": "implementacion update-sf, 22 ediciones desde Bash: coherente",
+  "fabrica-f0bec979": "implementacion, 12 ediciones desde Bash: coherente",
+  "fabrica-06d34ab6": "implementacion, 6 ediciones, Read 5: coherente",
+  "fabrica-0873b25e": "implementacion, 27 ediciones (Edit 18, Write 4): coherente",
+  "fabrica-2a59c3f1": "implementacion solo Bash, 46 ediciones desde Bash: coherente",
+  "fabrica-2de0f155": "implementacion, 104 ediciones, Bash 307: coherente",
+  "fabrica-c2fe3422": "implementacion larga, 429 ediciones, 4 modelos: coherente",
+  "fabrica-cfae124e": "conversacion sin herramientas ni ediciones: coherente por definicion",
+  "fabrica-faf93e53": "implementacion, 183 ediciones (Write 43, Edit 54): coherente",
+  "aplicacion-19c5ed3d": "implementar-feature con sonnet: nivel medio para tarea media",
+  "aplicacion-5e8795f7": "resumir con haiku: tarea ligera no paga razonamiento",
+  "aplicacion-84938f8a": "mismo patron que 19c5ed3d; el hueco de uso es estructural, no de clase",
+  "herramientas-2b5c6198": "CER 0.004 y 94 % correctos concuerdan; motor>total explicable por hilos"
+ }
+}

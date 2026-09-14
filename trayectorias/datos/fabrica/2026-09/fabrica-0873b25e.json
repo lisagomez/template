@@ -1,0 +1,80 @@
+{
+ "version": 1,
+ "id": "fabrica-0873b25e",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "6a308f5f-9bd6-4e72-8a56-d2c9087f6d8b",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-08T10:35:48.830Z",
+  "fin": "2026-09-08T12:11:58.209Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-sonnet-5": 225
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 69,
+   "Read": 9,
+   "Edit": 18,
+   "Write": 4,
+   "ToolSearch": 1,
+   "SendUserFile": 2
+  },
+  "llamadasAlModelo": 138,
+  "turnos": 37,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 27
+ },
+ "uso": {
+  "entrada": 276,
+  "salida": 105077,
+  "cacheCreacion": 186242,
+  "cacheLectura": 18642265
+ },
+ "costoUsd": 5.2454,
+ "tiempos": {
+  "totalMs": 5769379
+ },
+ "gates": [
+  {
+   "nombre": "regresion",
+   "resultado": "verde",
+   "veces": 5
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "verde",
+   "veces": 4
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 5
+  },
+  {
+   "nombre": "verifica:specs",
+   "resultado": "verde",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 6,
+  "erroresPor": {
+   "Bash": 3,
+   "Edit": 2,
+   "Write": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

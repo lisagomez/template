@@ -1,0 +1,12 @@
+{
+  "_comentario": "Fragmento para `.claude/settings.json` (CDC: cambia el arnes) o para `.claude/settings.local.json` (por maquina, sin CDC). Al cerrar cada sesion, el transcript se convierte en una trayectoria de forma en trayectorias/datos/fabrica/. Verificado el 2026-09-13.",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/captura-trayectoria.sh\"", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}

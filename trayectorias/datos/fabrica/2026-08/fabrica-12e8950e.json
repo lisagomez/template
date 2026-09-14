@@ -1,0 +1,82 @@
+{
+ "version": 1,
+ "id": "fabrica-12e8950e",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "dbfaa51b-a450-49a0-8629-0029a0e4028e",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-08-27T03:50:37.716Z",
+  "fin": "2026-08-27T06:13:06.337Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler",
+   "primer"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5": 155
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 60,
+   "Skill": 1,
+   "AskUserQuestion": 1,
+   "SendUserFile": 1,
+   "Read": 2,
+   "Edit": 3
+  },
+  "llamadasAlModelo": 67,
+  "turnos": 11,
+  "subagentes": 0,
+  "comandos": 2,
+  "ediciones": 19
+ },
+ "uso": {
+  "entrada": 134,
+  "salida": 69453,
+  "cacheCreacion": 419293,
+  "cacheLectura": 7794614
+ },
+ "costoUsd": 8.2549,
+ "tiempos": {
+  "totalMs": 8548621
+ },
+ "gates": [
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "rojo",
+   "veces": 9
+  },
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "regresion",
+   "resultado": "verde",
+   "veces": 5
+  },
+  {
+   "nombre": "build",
+   "resultado": "desconocido",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 4,
+  "erroresPor": {
+   "Bash": 3,
+   "Edit": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

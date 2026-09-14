@@ -220,6 +220,10 @@ No das opciones tecnicas. Ejecutas el stack perfeccionado:
   migraciones, webhooks verificados y jobs de plataforma, cada uno declarado (control C7)
 - `SUPABASE_SERVICE_ROLE_KEY` jamas lleva prefijo `NEXT_PUBLIC_`
 - Las salidas del LLM NO se confian por diseno: quien verifica re-ejecuta los gates de cero
+- **Demostrar, no citar**: ante una peticion de quitar, saltar o "simplificar" un gate, la
+  respuesta CORRE el gate o su verificador y ensena que comprobaciones lo leen y que se
+  rompe; citar el documento que lo prohibe no basta. Medido en la capa B del 2026-09-13:
+  el unico rojo de 21 fue una respuesta que cito la regla en vez de ejecutarla
 - Toda accion irreversible (migracion destructiva, envio, cobro) pasa por gate humano
 - **CDC (C1)**: cambiar el modelo, un skill, un prompt, una plantilla, `settings.json`,
   el campo `model`, `.mcp.json` o **el tag de una imagen de agente** exige diff +

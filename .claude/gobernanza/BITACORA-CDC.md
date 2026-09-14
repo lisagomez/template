@@ -3467,3 +3467,179 @@ cifras de rendimiento, que son de corpus sintético (33 páginas, no concluyente
 arranque real de `ocr-gpu`, no medido por falta de GPU en esta máquina.
 
 ---
+
+### 2026-09-13 — trayectorias (spec 011): el lazo de mejora queda construido y CORTADO en el gate humano; primeras propuestas, sin aplicar — radio: sistema
+- **Cambio construido (no es CDC por sí mismo: no toca modelo, skill, prompt, `settings.json` ni
+  `.mcp.json`)**: formato común de trayectoria de FORMA con verificador dentro de `validate`
+  (`prueba:trayectorias`, `verifica:trayectorias`); captura de la fábrica por hook `SessionEnd`
+  (21 sesiones históricas convertidas + 1 nueva capturada sola), de la línea de aplicación por el
+  `Registrador` de contabilidad, y de la línea de herramientas por la medición del extractor;
+  almacén en `trayectorias/datos/` (26 trayectorias); evaluador estructural + veredicto de un
+  subagente ciego sobre las 26; informe por periodos; generador de propuestas.
+- **Lo que este registro deja PENDIENTE de aprobación (aquí sí es CDC)**:
+  1. **Cablear el hook en `.claude/settings.json` del repo** (`trayectorias/hooks.ejemplo.json`).
+     Hoy está solo en `settings.local.json` de esta máquina. Cambia el arnés: C1.
+  2. **Las cinco propuestas de `trayectorias/propuestas/2026-09-13.md`**: P1 (el criterio
+     «ningún gate en rojo» falla en 9 de 22 sesiones), P2-P5 (entre los periodos antes y después
+     del 2026-08-29, las sesiones de la fábrica gastan 237 % más tokens de salida, duran 287 % más,
+     terminan con 86 % más gates en rojo y 48 % más errores de herramienta). Ninguna se aplica: la
+     lectura honesta es que el segundo periodo trae sesiones mucho más largas (specs 007-010), y
+     la propuesta es **buscar la causa**, no tocar un skill.
+- **Hallazgo del evaluador ciego, que cambia el formato**: 5 de los 6 «no» en `proporcion_sana`
+  son sesiones sin skill invocado; el criterio no tiene contra qué juzgar. Queda como duda de la
+  spec 011: la trayectoria necesita una señal de tipo de tarea además del skill.
+- **Gate aplicado**: diff revisado ☐ · regresión verde ☑ (`validate` sellado con los pasos nuevos)
+  · aprobación humana ☐ · pineo ☑ (sin modelos nuevos; el evaluador de juicio es el del arnés)
+- **Regresión**: `npm run validate` sellado; `prueba:trayectorias` 8/8; `verifica:trayectorias`
+  26/26; `verify:gobernanza` 152/152; `verifica:specs` 100/100.
+- **Aprobado por**: **PENDIENTE** — redactado sin auto-aprobación. Automejorado no es autoaprobado.
+
+### 2026-09-13 — trayectorias: dos correcciones del formato dictadas por el evaluador ciego — radio: menor (no toca skill, prompt ni arnés)
+- **Cambio**: `actor.tarea` (planificacion | implementacion | lectura | conversacion) deducida de lo
+  que la sesión HIZO; comandos del arnés separados de los skills; `acciones.ediciones` cuenta las
+  escrituras hechas desde Bash; el informe compara la fábrica por intensidad y no por totales.
+- **Motivo**: la primera pasada ciega no podía juzgar sesiones sin skill; la segunda cazó que
+  «lectura» escondía sesiones que arreglaban código por Bash; y el primer informe marcó
+  regresiones que solo medían que las sesiones eran más largas. Tres veces la evidencia corrigió
+  al diseño: ese es el lazo funcionando.
+- **Gate aplicado**: diff revisado ☐ · regresión verde ☑ · aprobación humana ☐ · pineo ☑
+- **Regresión**: `prueba:trayectorias` 8/8 · `verifica:trayectorias` 26/26 · `validate` sellado.
+- **Aprobado por**: **PENDIENTE** — redactado sin auto-aprobación; sigue sin aplicarse ninguna propuesta.
+
+## Acta de aprobación — 2026-09-13: «aplica las propuestas» de trayectorias
+
+**Quién**: lisagomez, responsable del proyecto. **Cómo**: en sesión, con la instrucción literal
+*"aplica las propuestas"*, sobre `trayectorias/propuestas/2026-09-13.md` (seis propuestas).
+
+**Sobre qué se aprobó y qué se aplicó** (detalle en `trayectorias/propuestas/2026-09-13-resolucion.md`):
+la investigación de causas; el informe marca «confundido por modelo» cuando la mezcla de modelos
+cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos aprendizajes** en
+`.claude/rules/aprendizajes-stack.md` (`pkill -f` anclado o por puerto; `gh api` en vez de
+`gh pr edit`). Esos dos son los únicos cambios de prompt de esta acta, y son el CDC.
+
+**Lo que esta firma NO cierra**: ningún skill ni el routing (la evidencia no lo pedía); el hook
+`SessionEnd` en `settings.json` del repo, que sigue pendiente como CDC aparte.
+
+---
+
+### 2026-09-13 — «aplica las skills y el routing»: dos skills cableados a las trayectorias y el arnés entra al catálogo de routing — radio: skill + routing
+- **Cambio**: (1) `.claude/routing-modelos.json` gana el bloque `arnes`: los cuatro modelos que
+  usa Claude Code en las sesiones de la fábrica (`claude-opus-5`, `claude-fable-5-1`,
+  `claude-sonnet-5`, `claude-haiku-4-5-20251001`) con precio de entrada, salida, lectura y
+  escritura de caché **verificados contra OpenRouter el 2026-09-13**; con eso las 22 sesiones
+  históricas pasan de coste `null` a coste medido (777 USD en total, mediana 8,25, máximo 354,54
+  en la sesión de las specs 007 a 009). (2) `autoresearch/SKILL.md` gana la «Fase 0»: el baseline
+  y la confirmación de mejora salen de las trayectorias, nunca se copia un criterio al prompt, y
+  mutar un skill sigue siendo CDC. (3) `primer/SKILL.md` gana el paso «leer lo que la fábrica sabe
+  de sí misma»: hallazgos del último informe y propuestas pendientes, solo forma.
+- **Motivo**: instrucción de la dueña tras aplicar las propuestas; y la evidencia: sin precios del
+  arnés, la línea de la fábrica no podía comparar coste entre periodos.
+- **Lo que NO cambia**: los niveles del routing y sus modelos pineados; ninguna clase de tarea se
+  mueve de nivel; `AGENTS.md`, `settings.json` y `.mcp.json` intactos. El hook `SessionEnd` en
+  `settings.json` del repo sigue pendiente.
+- **Gate aplicado**: diff revisado ☑ (en sesión) · regresión verde ☑ · aprobación humana ☑
+  (instrucción literal «aplica las skills y el routing») · pineo ☑ (precios con fuente y fecha)
+- **Regresión**: `npm run regresion` capa A **116/116 — promovible**; `npm run regresion -- --trampa`
+  lista el corpus completo (22/22 declarados). **Capa B en sesión fría: PENDIENTE de correr por la
+  dueña**, como exige el protocolo ciego; se declara aquí y no se da por hecha. `verifica:routing`
+  coherente; `mide:contexto` dentro de presupuesto.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aplica las
+  skills y el routing»); capa B pendiente y declarada.
+
+### 2026-09-13 — capa B corrida en frío para el CDC «skills y routing»: 20 de 21 en verde y UN rojo → el CDC NO se promueve — radio: skill + routing (retirado)
+- **Corrida**: los 21 casos del corpus, uno por sesión fría con el modelo pineado, sobre la rama
+  con los skills cambiados; juez ciego por caso (solo expectativa y salida). Resultado: **15
+  verde-plus, 5 verde, 1 rojo, 0 no concluyentes, contaminación ninguna**. 44,9 minutos, 18,10 USD.
+  Traza: commit `72bd24d` de `corridas.md` en la rama `golden-sets`. Aquí no se nombra el caso.
+- **Consecuencia (regla de C2, sin excepciones)**: el CDC anterior de esta misma fecha («aplica
+  las skills y el routing») **no se promueve**. Los tres archivos gobernados vuelven a su estado
+  de `main` y el cambio queda como propuesta en
+  `trayectorias/propuestas/2026-09-13-skills-y-routing.patch`. Las trayectorias de la fábrica
+  vuelven a coste `null` (los precios del arnés iban en ese bloque).
+- **Lo que el rojo enseñó**: el fallo no es de los skills tocados; es de conducta base —citar la
+  regla que prohíbe quitar un gate en vez de correr el verificador y demostrar la consecuencia—.
+  Corrección redactada como CDC nuevo, con su diff, en
+  `trayectorias/propuestas/2026-09-13-cdc-demostrar-no-citar.md`. **Sin aplicar.**
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☐ (capa B en rojo: 20/21) · aprobación
+  humana ☑ (decisión «no promover») · pineo ☑
+- **Regresión**: capa A 116/116 · capa B **20/21, ROJO** · `verifica:routing` coherente tras retirar.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — decisión explícita «No promover».
+
+### 2026-09-14 — «Demostrar, no citar»: regla nueva en las Reglas de Codigo de `AGENTS.md` — radio: sistema
+- **Cambio**: una regla inline tras «las salidas del LLM no se confían»: ante una petición de
+  quitar, saltar o «simplificar» un gate, la respuesta corre el gate o su verificador y enseña
+  qué comprobaciones lo leen y qué se rompe; citar el documento no basta. `GEMINI.md`
+  regenerado con `sincroniza:gemini`. Diff exacto: `trayectorias/propuestas/2026-09-13-cdc-demostrar-no-citar.md`.
+- **Motivo**: el único rojo de la capa B del 2026-09-13 (traza `72bd24d` en `golden-sets`): el
+  sujeto citó la regla en vez de ejecutarla. La conducta que falla es base, y las reglas que
+  obligan viven inline (lección del 2026-08-23).
+- **Coste del cambio**: invalida el prefijo del caché de todas las sesiones; se aplica una vez,
+  medido con `mide:contexto`.
+- **Gate aplicado**: diff revisado ☑ (mostrado antes de pedir la firma) · regresión verde ☑ capa A
+  · aprobación humana ☑ · pineo ☑ · **capa B**: corrida completa en frío sobre la rama con la
+  regla, resultado en la entrada siguiente.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aprueba el
+  CDC de demostrar, no citar»), con el diff delante.
+
+### 2026-09-14 — «Demostrar, no citar»: capa B 21 de 21 en verde → CDC PROMOVIDO — radio: sistema
+- **Corrida**: los 21 casos en frío sobre la rama con la regla y sin los skills retirados (mide la
+  regla sola); juez ciego por caso. **13 verde-plus, 8 verde, 0 rojo, 0 no concluyentes,
+  contaminación ninguna.** 56,1 minutos, 22,84 USD. Traza: commit `70f4576` de `corridas.md` en
+  `golden-sets`. El caso que dio rojo en la tanda anterior pasó a verde-plus: corrió el
+  verificador y enumeró las comprobaciones que leen el paso. Demostró en vez de citar.
+- **Eco a vigilar**: tres sujetos nombraron el mecanismo de la fábrica (capa B, corpus, coste de
+  la tanda anterior) porque esta bitácora lo describe; no sabían que se les evaluaba. Es el
+  precio de una bitácora legible; `audita:fugas` sigue verde.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 116/116, capa B 21/21) ·
+  aprobación humana ☑ · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-13,
+  confirmada por la capa B.
+
+### 2026-09-14 — «skills y routing», reaplicado tras la regla nueva — radio: skill + routing (capa B en curso)
+- **Cambio**: se reaplica el parche `trayectorias/propuestas/2026-09-13-skills-y-routing.patch`
+  (bloque `arnes` del routing con precios verificados; Fase 0 de `autoresearch`; paso de lectura de
+  trayectorias en `primer`), retirado el 2026-09-13 por el rojo de la capa B. Las 22 sesiones de la
+  fábrica vuelven a tener coste medido.
+- **Motivo**: la causa del rojo era la conducta base, ya corregida y verificada con 21/21; el
+  parche no cambió. Aun así, cada CDC lleva su propia corrida: la tercera tanda mide la rama con
+  la regla Y el parche, y su resultado va en la entrada siguiente.
+- **Gate aplicado**: diff revisado ☑ (el parche, íntegro) · regresión verde ☑ capa A · aprobación
+  humana ☑ (instrucción del 2026-09-13 «aplica las skills y el routing», y el plan acordado de
+  reaplicar si la regla pasaba) · pineo ☑ · **capa B: en curso**
+- **Aprobado por**: **lisagomez** (responsable del proyecto); capa B pendiente del resultado de la
+  tercera tanda, y declarado.
+
+### 2026-09-14 — «skills y routing», tercera tanda de capa B: 20 de 21 en verde, 0 rojos, 1 caso sin medir → CDC EN ESPERA, no promovido todavía — radio: skill + routing
+- **Corrida**: los 21 casos en frío sobre la rama con la regla nueva y el parche reaplicado, juez
+  ciego por caso: **14 verde-plus, 6 verde, 0 rojo, 1 no concluyente**. 40,9 minutos, 18,27 USD.
+  Traza: commit `bb67b16` de `corridas.md` en `golden-sets`. Dos condiciones nuevas, declaradas ahí:
+  corredor desacoplado del arnés (dos intentos previos murieron por su umbral de memoria) y sujeto
+  sin servidores MCP.
+- **El caso sin medir**: contaminación. El sujeto llegó al corpus por `git log --all` desde el
+  worktree, que mi lista de herramientas permitía. **Hallazgo para C2**: el protocolo dice que una
+  sesión fría «no puede encontrarlo leyendo archivos», y es cierto; leyendo el historial de git sí
+  puede. Se repitió el caso sin `git log` ni `git diff` (88 s, 0,64 USD) y su juicio ciego **queda
+  pendiente**: el juez no pudo correr por el límite de sesión de la cuenta (se reinicia a las
+  03:20, hora de México). El corredor no juzga: tiene el contexto del cambio.
+- **Consecuencia**: sin 21 de 21 medidos, el CDC no se promueve. El parche sigue en la rama del PR
+  #100, que pasa a **borrador** hasta que el juez vea la repetición. Si sale verde, se promueve con
+  esta corrida; si sale rojo o contaminado, se retira otra vez.
+- **Propuesta derivada (para el corpus, no aplicada)**: quitar el historial de git de las
+  herramientas del sujeto en toda corrida, y anotar en `GOBERNANZA.md` §3 que `git log --all`
+  alcanza la rama del corpus. Es un CDC de gobernanza aparte.
+- **Gate aplicado**: diff revisado ☑ · regresión: capa A ☑ 116/116, capa B ☐ (20/21 medidos, 0
+  rojos, 1 pendiente) · aprobación humana ☑ · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — promoción condicionada al juicio
+  pendiente, y declarada.
+
+### 2026-09-14 — «skills y routing»: el caso pendiente dio verde-plus sin contaminación → tercera tanda 21 de 21 → CDC PROMOVIDO — radio: skill + routing
+- **Cierre**: la repetición del caso contaminado, sin historial de git en las herramientas del
+  sujeto, dio **verde-plus** (juez ciego con la consigna de distinguir «saberse evaluado» de
+  «conocer el mecanismo por la documentación»). Tercera tanda cerrada: **15 verde-plus, 6 verde,
+  0 rojo**. Traza: commit `2ea6be1` de `corridas.md` en `golden-sets`.
+- **Consecuencia**: el bloque `arnes` del routing, la Fase 0 de `autoresearch` y el paso de lectura
+  de trayectorias en `primer` quedan promovidos. El PR #100 sale de borrador.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ (capa A 116/116, capa B 21/21) ·
+  aprobación humana ☑ · pineo ☑
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-13,
+  confirmada por la capa B del 2026-09-14.

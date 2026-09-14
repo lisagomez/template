@@ -1,0 +1,96 @@
+{
+ "version": 1,
+ "id": "fabrica-71923418",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "76d73ce9-e0a9-4d32-97d1-f464a6cbd34c",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-08-29T04:10:31.715Z",
+  "fin": "2026-08-29T06:38:40.359Z"
+ },
+ "actor": {
+  "skills": [
+   "primer",
+   "update-config"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5": 92
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 40,
+   "ToolSearch": 1,
+   "WebSearch": 2,
+   "WebFetch": 2,
+   "Skill": 1
+  },
+  "llamadasAlModelo": 38,
+  "turnos": 7,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 7
+ },
+ "uso": {
+  "entrada": 76,
+  "salida": 74392,
+  "cacheCreacion": 341911,
+  "cacheLectura": 4081515
+ },
+ "costoUsd": 6.0379,
+ "tiempos": {
+  "totalMs": 8888644
+ },
+ "gates": [
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 3
+  },
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 3
+  },
+  {
+   "nombre": "regresion",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "validate",
+   "resultado": "rojo",
+   "veces": 2
+  }
+ ],
+ "resultado": {
+  "errores": 2,
+  "erroresPor": {
+   "Bash": 1,
+   "Skill": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

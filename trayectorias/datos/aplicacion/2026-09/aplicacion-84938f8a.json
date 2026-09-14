@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "id": "aplicacion-84938f8a",
+ "linea": "aplicacion",
+ "origen": {
+  "tipo": "llamada",
+  "referencia": "84938f8a"
+ },
+ "cuando": {
+  "inicio": "2026-09-12T15:05:00.000Z"
+ },
+ "actor": {
+  "feature": "chat",
+  "tarea": "implementar-feature"
+ },
+ "modelos": {
+  "anthropic/claude-sonnet-5": 1
+ },
+ "acciones": {
+  "llamadasAlModelo": 1
+ },
+ "uso": null,
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": null
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 1
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "uso",
+   "tiempos"
+  ]
+ }
+}

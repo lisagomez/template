@@ -1,0 +1,54 @@
+{
+ "version": 1,
+ "id": "fabrica-502a90f7",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "e9dbff01-f553-4642-ab8b-349a762febd0",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-08-25T11:59:10.164Z",
+  "fin": "2026-08-25T12:10:37.865Z"
+ },
+ "actor": {
+  "skills": [
+   "primer"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5": 63
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 36
+  },
+  "llamadasAlModelo": 22,
+  "turnos": 4,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 1
+ },
+ "uso": {
+  "entrada": 44,
+  "salida": 19072,
+  "cacheCreacion": 111251,
+  "cacheLectura": 1618766
+ },
+ "costoUsd": 1.9817,
+ "tiempos": {
+  "totalMs": 687701
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 1,
+  "erroresPor": {
+   "Bash": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}
