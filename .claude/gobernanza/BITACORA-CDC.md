@@ -3564,3 +3564,19 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   humana ☑ (decisión «no promover») · pineo ☑
 - **Regresión**: capa A 116/116 · capa B **20/21, ROJO** · `verifica:routing` coherente tras retirar.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — decisión explícita «No promover».
+
+### 2026-09-14 — «Demostrar, no citar»: regla nueva en las Reglas de Codigo de `AGENTS.md` — radio: sistema
+- **Cambio**: una regla inline tras «las salidas del LLM no se confían»: ante una petición de
+  quitar, saltar o «simplificar» un gate, la respuesta corre el gate o su verificador y enseña
+  qué comprobaciones lo leen y qué se rompe; citar el documento no basta. `GEMINI.md`
+  regenerado con `sincroniza:gemini`. Diff exacto: `trayectorias/propuestas/2026-09-13-cdc-demostrar-no-citar.md`.
+- **Motivo**: el único rojo de la capa B del 2026-09-13 (traza `72bd24d` en `golden-sets`): el
+  sujeto citó la regla en vez de ejecutarla. La conducta que falla es base, y las reglas que
+  obligan viven inline (lección del 2026-08-23).
+- **Coste del cambio**: invalida el prefijo del caché de todas las sesiones; se aplica una vez,
+  medido con `mide:contexto`.
+- **Gate aplicado**: diff revisado ☑ (mostrado antes de pedir la firma) · regresión verde ☑ capa A
+  · aprobación humana ☑ · pineo ☑ · **capa B**: corrida completa en frío sobre la rama con la
+  regla, resultado en la entrada siguiente.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aprueba el
+  CDC de demostrar, no citar»), con el diff delante.
