@@ -1,9 +1,37 @@
-# Extractor documental — en qué quedamos (2026-09-13)
+# Extractor documental — en qué quedamos (2026-09-14)
 
 **Estado**: la spec 010 («el extractor en la infraestructura del cliente») está construida y
 mezclada en `main` por el PR #98 (merge `0281772`, 2026-09-13). Cierra el hilo que empezó en la
 spec 007 y siguió por la 008 (corpus a modelo) y la 009 (identificadores y códigos). El CDC está
 aprobado por lisagomez el 2026-09-13 (acta en `.claude/gobernanza/BITACORA-CDC.md`).
+
+## Banco de pruebas: cerrada la brecha con `leePagina` (PR #102, mezclado 2026-09-14)
+
+`banco/corrida.ts::corre()` llamaba a `motor.extrae()` directo y se saltaba `leePagina()`, el
+orquestador del núcleo — el banco nunca ejercitaba clasificación de página, tiempos por etapa,
+evidencia por campo ni los validadores de identificadores mexicanos. Alcance elegido por
+lisagomez vía `AskUserQuestion` en plan mode: cerrar la brecha real, sin cotejo por código QR, sin
+`calibracion.ts` contra verdad conocida, sin `infiereModelo`/`proponeModelo`.
+
+- **Bug encontrado y corregido**: los 8 RFC sintéticos de `PROVEEDORES` en `banco/negocio.ts` no
+  pasaban `diagnosticaRfc()` — mismo tipo de bug que ya se había corregido antes en
+  `medicion/genera-corpus.py`. Se cambió solo el último carácter de cada uno, verificado contra
+  `digitoVerificadorRfc`. Si vuelve a aparecer un RFC sintético a mano en cualquier corpus de
+  prueba de este repo, verificar el checksum antes de darlo por bueno — no es la primera vez.
+- **`banco/corrida.ts`**: `corre()` ahora pasa por `leePagina()`, declara una clase `factura` con
+  su esquema (`esquema-por-clase.ts`) y valida `rfc_emisor` por checksum. `DocumentoProcesado`
+  ganó `clase`, `estructura`, `tiempos`, `invalidos`, `corregidos` de forma aditiva.
+  `campos`/`enRevision` pasaron de `CampoExtraido[]` a `CampoConEvidencia[]` (superconjunto).
+- **`banco/cli.mjs`**: `npm run banco corrida` ahora imprime tiempos por etapa, clase, faltantes
+  del esquema y evidencia por campo (`checksum`/`motor`/etc.), marcando en rojo lo que va a
+  revisión.
+- **Sigue sin cablear a propósito**: `cotejoDeCodigos`/`cotejoDeRespaldo` quedan `undefined` — el
+  banco no puede producir evidencia `codigo` ni `corroboracion`, solo `motor` y `checksum`.
+- **Verificación**: 83/83 pruebas de `pruebas/banco-*.ts` en verde. La suite completa del paquete
+  (`npm run prueba`) dio 775/776 — el único fallo (`pruebas/salida-json.ts:120`, lee
+  `corpus/salida-*` local fuera de git de corridas reales de días anteriores) es preexistente y
+  ajeno: se reproduce igual en `main` sin este cambio (confirmado con `git stash`). Si vuelve a
+  aparecer, no es de este trabajo — es el corpus local desalineado de los tipos actuales.
 
 ## Decisiones que no se re-litigan sin números nuevos
 
