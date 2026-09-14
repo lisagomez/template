@@ -90,19 +90,22 @@ export const PROVEEDORES: readonly ProveedorSemilla[] = [
   {
     id: 'prv-001',
     razonSocial: 'ACME Distribuciones S.A. de C.V.',
-    rfc: 'ADI050214QX3',
+    // Digito verificador real (`digitoVerificadorRfc`): el valor original no pasaba
+    // `diagnosticaRfc` (mismo bug ya corregido antes en medicion/genera-corpus.py). Se cambia
+    // SOLO el ultimo caracter; los 11 primeros son los mismos.
+    rfc: 'ADI050214QX9',
     variantes: ['ACME Distribuciones SA de CV', 'Acme Distribuciones', 'ACME DISTRIBUCIONES S.A.'],
   },
   {
     id: 'prv-002',
     razonSocial: 'Molinos del Centro S.A.P.I. de C.V.',
-    rfc: 'MCE110930HH8',
+    rfc: 'MCE110930HH0',
     variantes: ['Molinos del Centro SAPI de CV', 'MOLINOS DEL CENTRO', 'Molinos Del Centro S.A.P.I.'],
   },
   {
     id: 'prv-003',
     razonSocial: 'Empaques Muñoz S. de R.L.',
-    rfc: 'EMU980612BC1',
+    rfc: 'EMU980612BC0',
     // "Munoz" sin tilde es la misma empresa escrita por otra persona: es el caso que `normaliza()`
     // resuelve quitando diacriticos, y sin el la prueba no lo demostraria.
     variantes: ['Empaques Munoz S de RL', 'EMPAQUES MUÑOZ', 'Empaques Munoz'],
@@ -110,32 +113,32 @@ export const PROVEEDORES: readonly ProveedorSemilla[] = [
   {
     id: 'prv-004',
     razonSocial: 'Grupo Cerealero del Norte S.A.',
-    rfc: 'GCN021118LM5',
+    rfc: 'GCN021118LM2',
     // El reordenamiento de palabras es justo lo que Dice tolera y la distancia de edicion no.
     variantes: ['Cerealero del Norte Grupo', 'GRUPO CEREALERO NORTE', 'Grupo Cerealero del Norte'],
   },
   {
     id: 'prv-005',
     razonSocial: 'Aceites y Grasas Peninsulares S.A. de C.V.',
-    rfc: 'AGP070425TR9',
+    rfc: 'AGP070425TR5',
     variantes: ['Aceites y Grasas Peninsulares', 'ACEITES Y GRASAS PENINSULARES SA DE CV'],
   },
   {
     id: 'prv-006',
     razonSocial: 'Conservas La Huerta S.A. de C.V.',
-    rfc: 'CLH960308ZK2',
+    rfc: 'CLH960308ZK0',
     variantes: ['Conservas La Huerta', 'CONSERVAS LA HUERTA SA DE CV', 'Conservas la huerta'],
   },
   {
     id: 'prv-007',
     razonSocial: 'Lacteos del Valle S.A. de C.V.',
-    rfc: 'LVA130722PN4',
+    rfc: 'LVA130722PN6',
     variantes: ['Lacteos del Valle', 'LACTEOS DEL VALLE SA DE CV'],
   },
   {
     id: 'prv-008',
     razonSocial: 'Lacteos del Bajio S.A. de C.V.',
-    rfc: 'LBA150904WD7',
+    rfc: 'LBA150904WD1',
     variantes: ['Lacteos del Bajio', 'LACTEOS DEL BAJIO SA DE CV'],
   },
 ]

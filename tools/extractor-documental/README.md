@@ -658,8 +658,17 @@ npm run banco corrida        # el camino completo, con REINICIO DE PROCESO real
 npm run banco determinismo   # dos siembras con la misma semilla → la misma huella
 npm run banco descriptores   # los tres estados, leídos de la base
 npm run banco peligroso      # el escenario de §2.10 y su barrera
+npm run banco xml            # las mismas facturas, leidas por la via del XML
 npm run banco destruye
 ```
+
+`corre()` ya no llama al motor directo: pasa cada factura por `leePagina()`, la misma función del
+núcleo que usa el servicio HTTP (spec 010). Por eso `npm run banco corrida` también enseña, del
+documento 1, el tiempo por etapa (`codigos`/`motor`/`respaldo`, en ms), la clase que le detectó y
+el esquema que le aplicó (`faltantes`/`noPrevistos`), y de qué **evidencia** sale la confianza de
+cada campo (`codigo`/`exacto`/`corroboracion`/`checksum`/`motor`) — incluido el validador de RFC
+mexicano (`diagnosticaRfc`), que ahora puede mandar un campo a `invalidos` por dígito verificador,
+una señal independiente de la confianza fabricada por el motor de mentira.
 
 **Por qué existe.** El SDD §2.8 dice que este template no tiene catálogos, ni datos, ni esquema que
 introspeccionar. Eso convertía tres capacidades en documentadas-y-nunca-ejecutadas: la persistencia
@@ -680,6 +689,7 @@ sólo vive en la migración, que es otro artefacto.
 | **Las policies de RLS** | SQLite no tiene RLS. En producción la base niega la fila aunque el código se equivoque; aquí el aislamiento por organización lo impone el código del adaptador, que es una garantía más débil. Las policies de `migraciones/001-*.sql` **siguen sin haberse ejecutado nunca** |
 | **Los umbrales** | Las confianzas las fabrica un motor de mentira. TAR-17, TAR-25 y TAR-34 siguen bloqueadas: los umbrales se miden sobre corpus real |
 | **El OCR** | Los documentos sintéticos son texto plano. Lo que se ejercita es el camino, no la extracción |
+| **La corroboración por códigos** | El banco no cablea ningún `LectorDeCodigos`: `cotejoDeCodigos`/`cotejoDeRespaldo` siempre son `undefined`, y ningún campo puede tener evidencia `codigo` ni `corroboracion`. Lo que sí se ejercita ahora: `leePagina`, clasificación de página, esquema por clase, tiempos por etapa y el validador de RFC — el cotejo contra una segunda fuente (QR, motor de respaldo) sigue sin recorrerse |
 
 `pruebas/banco-espejo.ts` compara el esquema del banco contra la migración real, columna a columna y
 CHECK a CHECK: una tabla que cambie en producción y no aquí pone el gate en rojo. Es el mismo
