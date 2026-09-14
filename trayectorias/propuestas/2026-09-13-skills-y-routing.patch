@@ -1,0 +1,107 @@
+diff --git a/.claude/routing-modelos.json b/.claude/routing-modelos.json
+index ea276a0..5ad1423 100644
+--- a/.claude/routing-modelos.json
++++ b/.claude/routing-modelos.json
+@@ -150,5 +150,48 @@
+     ],
+     "gotcha_operativo": "OpenRouter bloquea por defecto los proveedores que entrenan con tus prompts; con esa politica activa, DeepSeek y compania fallan con `No endpoints found for this model`. Se decide a proposito en https://openrouter.ai/settings/privacy, no a base de reintentos.",
+     "cache": "Varias alternativas abiertas tienen lectura de cache mucho mas barata o inexistente. Con un prefijo grande y estable, un propietario con cache puede salir MAS barato que un abierto sin el: el precio de lista no decide solo."
++  },
++  "arnes": {
++    "_comentario": "Los modelos que USA EL ARNES (Claude Code) en las sesiones de la fabrica, con su precio, para que las trayectorias de la linea fabrica lleven coste en vez de null. Identificadores tal como aparecen en los transcripts. Precios verificados contra la misma fuente que `precios` (OpenRouter, USD por millon de tokens) el 2026-09-13; `escritura_cache` es lo que cuesta crear el prefijo. Anadido al aplicar las propuestas de trayectorias (spec 011): 22 sesiones sin coste porque el catalogo no los conocia.",
++    "fuente": "https://openrouter.ai/api/v1/models",
++    "consultado": "2026-09-13",
++    "modelos": {
++      "claude-opus-5": {
++        "catalogo": "anthropic/claude-opus-5",
++        "precio": {
++          "entrada": 5.0,
++          "salida": 25.0,
++          "lectura_cache": 0.5,
++          "escritura_cache": 6.25
++        }
++      },
++      "claude-fable-5-1": {
++        "catalogo": "anthropic/claude-fable-5.1",
++        "precio": {
++          "entrada": 10.0,
++          "salida": 50.0,
++          "lectura_cache": 0.25,
++          "escritura_cache": 12.5
++        }
++      },
++      "claude-sonnet-5": {
++        "catalogo": "anthropic/claude-sonnet-5",
++        "precio": {
++          "entrada": 2.0,
++          "salida": 10.0,
++          "lectura_cache": 0.2,
++          "escritura_cache": 2.5
++        }
++      },
++      "claude-haiku-4-5-20251001": {
++        "catalogo": "anthropic/claude-haiku-4.5",
++        "precio": {
++          "entrada": 1.0,
++          "salida": 5.0,
++          "lectura_cache": 0.1,
++          "escritura_cache": 1.25
++        }
++      }
++    }
+   }
+ }
+diff --git a/.claude/skills/autoresearch/SKILL.md b/.claude/skills/autoresearch/SKILL.md
+index 92b1737..5ced415 100644
+--- a/.claude/skills/autoresearch/SKILL.md
++++ b/.claude/skills/autoresearch/SKILL.md
+@@ -25,6 +25,29 @@ Lo que importa no es la mejora individual (0.5%) sino la acumulacion (50 iteraci
+ 
+ ---
+ 
++## Fase 0: La evidencia viene de las trayectorias (desde 2026-09-13)
++
++Antes de definir evals a ojo, mira lo que la fabrica ya sabe del skill:
++
++```bash
++npm run trayectorias:evalua      # acierto de los criterios por skill, sobre sesiones reales
++npm run trayectorias:informe     # tendencia entre periodos y regresiones marcadas
++```
++
++- Las trayectorias (`trayectorias/datos/fabrica/`) dicen en que sesiones se invoco el skill,
++  que herramientas uso, cuantos gates salieron en rojo y cuantos errores de herramienta hubo.
++  **Ese es el baseline real**, y es mejor que uno fabricado con tres inputs.
++- Los criterios que ya existen en `trayectorias/criterios.json` valen como punto de partida;
++  si anades otros, mantén 3 a 6 y binarios (seccion 1.2). **Nunca copies un criterio al
++  prompt del skill**: es el mismo gaming, con otro nombre.
++- Al terminar el loop, la mejora se confirma en sesiones REALES: `npm run trayectorias:informe`
++  tras unas sesiones con el skill mutado. Un score del loop que no se ve en las trayectorias
++  es un examen aprobado, no un skill mejor.
++- Mutar el skill es un CDC (C1): la rama `autoresearch/<skill>` NO se mezcla sin diff,
++  regresion y firma. Automejorado no es autoaprobado.
++
++---
++
+ ## Fase 1: Setup (con el usuario)
+ 
+ Antes de correr autonomamente, alinear con el usuario:
+diff --git a/.claude/skills/primer/SKILL.md b/.claude/skills/primer/SKILL.md
+index dd3c871..c5ee713 100644
+--- a/.claude/skills/primer/SKILL.md
++++ b/.claude/skills/primer/SKILL.md
+@@ -97,7 +97,14 @@ Revisa `src/app/` y `src/features/` para entender:
+ - Que features estan construidas
+ - Que API endpoints hay
+ 
+-### 4. Entregar Resumen
++### 4. Leer lo que la fabrica sabe de si misma
++
++Si existe `trayectorias/informes/`, leer el informe mas reciente (solo la seccion
++**Hallazgos**) y `trayectorias/propuestas/` pendientes. Es forma, no contenido: regresiones
++marcadas, gates en rojo, propuestas sin aplicar. Entra en el resumen como una linea por
++hallazgo; si no hay carpeta, se dice «sin trayectorias» y se sigue.
++
++### 5. Entregar Resumen
+ 
+ ```markdown
+ # [Nombre del Proyecto]

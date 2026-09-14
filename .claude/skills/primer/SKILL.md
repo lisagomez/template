@@ -97,14 +97,7 @@ Revisa `src/app/` y `src/features/` para entender:
 - Que features estan construidas
 - Que API endpoints hay
 
-### 4. Leer lo que la fabrica sabe de si misma
-
-Si existe `trayectorias/informes/`, leer el informe mas reciente (solo la seccion
-**Hallazgos**) y `trayectorias/propuestas/` pendientes. Es forma, no contenido: regresiones
-marcadas, gates en rojo, propuestas sin aplicar. Entra en el resumen como una linea por
-hallazgo; si no hay carpeta, se dice «sin trayectorias» y se sigue.
-
-### 5. Entregar Resumen
+### 4. Entregar Resumen
 
 ```markdown
 # [Nombre del Proyecto]

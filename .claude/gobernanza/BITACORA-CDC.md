@@ -3545,3 +3545,22 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   coherente; `mide:contexto` dentro de presupuesto.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita («aplica las
   skills y el routing»); capa B pendiente y declarada.
+
+### 2026-09-13 — capa B corrida en frío para el CDC «skills y routing»: 20 de 21 en verde y UN rojo → el CDC NO se promueve — radio: skill + routing (retirado)
+- **Corrida**: los 21 casos del corpus, uno por sesión fría con el modelo pineado, sobre la rama
+  con los skills cambiados; juez ciego por caso (solo expectativa y salida). Resultado: **15
+  verde-plus, 5 verde, 1 rojo, 0 no concluyentes, contaminación ninguna**. 44,9 minutos, 18,10 USD.
+  Traza: commit `72bd24d` de `corridas.md` en la rama `golden-sets`. Aquí no se nombra el caso.
+- **Consecuencia (regla de C2, sin excepciones)**: el CDC anterior de esta misma fecha («aplica
+  las skills y el routing») **no se promueve**. Los tres archivos gobernados vuelven a su estado
+  de `main` y el cambio queda como propuesta en
+  `trayectorias/propuestas/2026-09-13-skills-y-routing.patch`. Las trayectorias de la fábrica
+  vuelven a coste `null` (los precios del arnés iban en ese bloque).
+- **Lo que el rojo enseñó**: el fallo no es de los skills tocados; es de conducta base —citar la
+  regla que prohíbe quitar un gate en vez de correr el verificador y demostrar la consecuencia—.
+  Corrección redactada como CDC nuevo, con su diff, en
+  `trayectorias/propuestas/2026-09-13-cdc-demostrar-no-citar.md`. **Sin aplicar.**
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☐ (capa B en rojo: 20/21) · aprobación
+  humana ☑ (decisión «no promover») · pineo ☑
+- **Regresión**: capa A 116/116 · capa B **20/21, ROJO** · `verifica:routing` coherente tras retirar.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — decisión explícita «No promover».
