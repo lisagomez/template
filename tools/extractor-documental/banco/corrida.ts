@@ -12,16 +12,49 @@
  * falla en las dos direcciones: o llena la cola de falsos dudosos, o deja pasar errores con
  * confianza alta. Este modulo APLICA el umbral que le den; no opina cual.
  */
-import type { CampoExtraido, PaginaExtraida, Lote, Resolucion, MotorOcr, VersionDeCampo } from '../dist/index.js'
+import type {
+  Lote, Resolucion, MotorOcr, VersionDeCampo,
+  CampoConEvidencia, TiemposDePagina, IdentificadorInvalido, Corregido,
+  ClasificacionDePagina, DocumentoEstructurado,
+} from '../dist/index.js'
 import {
   identidadDe, resuelveValor, resuelveIdentificador, extraeIdentificadoresIndexables,
   versionInicial, corrige, vigente, abreLote,
+  leePagina, declaraClases, declaraEsquemas, conEvidencia, estructuraPorClase, diagnosticaRfc,
 } from '../dist/index.js'
 import type { Base } from './base.ts'
 import { catalogoDe } from './descriptor.ts'
 import type { FacturaSintetica } from './documentos.ts'
 import { comoBytes } from './documentos.ts'
 import { ORGANIZACION, USUARIOS } from './negocio.ts'
+
+/**
+ * Una sola clase: todo lo que fabrica `banco/documentos.ts` es una factura, y su texto empieza
+ * SIEMPRE con la linea literal "FACTURA" (ver `componeTexto`). Declararla aqui, y no dejar el
+ * documento "sin_clasificar", es lo que hace que `estructuraPorClase` tenga contra que aplicar
+ * un esquema en vez de devolver todo como no previsto.
+ */
+const CLASES_DEL_BANCO = declaraClases([{ clase: 'factura', titulo: /^FACTURA$/m }])
+
+/**
+ * Las 6 claves que `motorDeBanco` puede producir (ver `banco/motor.ts::PATRONES`). `gtin` NO es
+ * obligatoria: su ausencia del catalogo (`gtinAusente`) es un escenario sembrado a proposito, y
+ * eso es "el valor no resuelve", no "el campo no vino" — tratarlo como obligatorio mezclaria las
+ * dos cosas en el mismo `faltantes`.
+ */
+const ESQUEMAS_DEL_BANCO = declaraEsquemas([
+  {
+    clase: 'factura',
+    claves: [
+      { clave: 'folio', obligatoria: true },
+      { clave: 'proveedor', obligatoria: true },
+      { clave: 'rfc_emisor', obligatoria: true },
+      { clave: 'fecha', obligatoria: true },
+      { clave: 'total', obligatoria: true },
+      { clave: 'gtin', obligatoria: false },
+    ],
+  },
+])
 
 export interface OpcionesDeCorrida {
   base: Base
@@ -40,13 +73,25 @@ export interface OpcionesDeCorrida {
 export interface DocumentoProcesado {
   identidad: string
   folio: string
-  campos: readonly CampoExtraido[]
+  /** `CampoConEvidencia` extiende `CampoExtraido`: `.clave`/`.valor`/`.confianza` siguen igual. */
+  campos: readonly CampoConEvidencia[]
   /** Los que quedaron por debajo del umbral: la cola de revision. */
-  enRevision: readonly CampoExtraido[]
+  enRevision: readonly CampoConEvidencia[]
   proveedor: Resolucion
   /** `null` cuando el documento no traia GTIN. */
   gtin: Resolucion | null
   gtinAusente: boolean
+  /** La clase que `leePagina` detecto para la unica pagina de este documento. */
+  clase: ClasificacionDePagina | null
+  /** El documento estructurado por el esquema de su clase: presentes/faltantes/no previstos. */
+  estructura: DocumentoEstructurado
+  /** Tiempo por etapa, en ms. `codigos` y `respaldo` son siempre 0: el banco no cablea lector de
+   *  codigos ni motor de respaldo (fuera de alcance de este trabajo). */
+  tiempos: TiemposDePagina
+  /** Identificadores que no pasaron el validador de RFC y no se pudieron corregir por checksum. */
+  invalidos: readonly IdentificadorInvalido[]
+  /** Identificadores corregidos por checksum, SIN auto-validar (regla C4 del nucleo). */
+  corregidos: readonly Corregido[]
 }
 
 export interface ResultadoDeCorrida {
@@ -98,8 +143,21 @@ export async function corre(
   for (const [i, factura] of facturas.entries()) {
     const bytes = comoBytes(factura)
     const identidad = await identidadDe(bytes)
-    const paginas = await motor.extrae(bytes)
-    const campos = paginas.flatMap((p: PaginaExtraida) => p.campos)
+
+    // Por leePagina(), no por motor.extrae() directo: es lo que orquesta clasificacion, tiempos
+    // por etapa y validadores. `ruta: 'motor'` porque el banco no tiene capa-cero ni XML.
+    const lectura = await leePagina(bytes, 0, {
+      motor, clases: CLASES_DEL_BANCO, validadores: { rfc_emisor: diagnosticaRfc },
+    })
+    const campos = conEvidencia(lectura.campos, {
+      ruta: 'motor',
+      conValidador: new Set(['rfc_emisor']),
+    })
+    const estructura = estructuraPorClase(
+      campos,
+      lectura.clase === null ? [] : [lectura.clase],
+      ESQUEMAS_DEL_BANCO,
+    )
 
     const enRevision = campos.filter((c) => c.confianza < umbralDeConfianza)
     camposEnRevision += enRevision.length
@@ -128,7 +186,11 @@ export async function corre(
       )
       .run(
         documentoId, ORGANIZACION.id, lote.id, identidad, estado,
-        JSON.stringify(paginas), new Date(Date.parse(instanteBase) + i * 60_000).toISOString(),
+        // Envuelto en array por el mismo contrato que espera `almacenDeDocumentos`
+        // (`PaginaExtraida[]`); la columna no tiene CHECK sobre su contenido y nada la relee en
+        // este camino, pero mantener la forma evita que la misma columna tenga dos formas segun
+        // quien escribio la fila.
+        JSON.stringify([lectura.principal]), new Date(Date.parse(instanteBase) + i * 60_000).toISOString(),
       )
 
     const altaIndice = base.db.prepare(
@@ -147,6 +209,11 @@ export async function corre(
       proveedor,
       gtin,
       gtinAusente: factura.gtinAusente,
+      clase: lectura.clase,
+      estructura,
+      tiempos: lectura.tiempos,
+      invalidos: lectura.invalidos,
+      corregidos: lectura.corregidos,
     })
   }
 

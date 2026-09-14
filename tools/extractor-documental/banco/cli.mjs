@@ -195,6 +195,18 @@ async function main() {
     console.log(`     proveedor →  ${primero.proveedor.estado} ${primero.proveedor.elegida ? verde(primero.proveedor.elegida.id) : gris('—')}`);
     console.log(`     gtin      →  ${primero.gtin?.estado ?? '—'} ${primero.gtin?.elegida ? verde(primero.gtin.elegida.id) : gris('sin resolver')}`);
 
+    console.log(`\n     ${negrita('tiempos (ms)')}   codigos=${primero.tiempos.codigos}  motor=${primero.tiempos.motor}  respaldo=${primero.tiempos.respaldo}`);
+    console.log(`     ${negrita('clase')}          ${primero.clase ? primero.clase.clase : gris('sin_clasificar')}`);
+    console.log(`     ${negrita('esquema')}        faltantes=[${primero.estructura.faltantes.join(', ')}]  noPrevistos=${primero.estructura.noPrevistos.length}`);
+    console.log(`     ${negrita('evidencia')}`);
+    for (const campo of primero.campos) {
+      const marca = campo.revisionHumana ? rojo(`▼ ${campo.evidencia}`) : verde(`✓ ${campo.evidencia}`);
+      console.log(`       ${campo.clave.padEnd(12)} ${marca}`);
+    }
+    if (primero.invalidos.length > 0) {
+      console.log(`     ${rojo('invalidos')}      ${primero.invalidos.map((i) => `${i.clave}(${i.motivo})`).join(', ')}`);
+    }
+
     const ausentes = resultado.procesados.filter((d) => d.gtinAusente);
     console.log(`\n  ${negrita('GTIN ausentes del catalogo')}: ${ausentes.length}`);
     for (const d of ausentes) {
