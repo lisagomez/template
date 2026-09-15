@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Manual de capacitacion del banco por caso de uso (seccion 11 de la demo). Copia del artefacto publicado el 2026-09-14;
+     las capturas se hicieron con demo/verifica.mjs-style Playwright contra el servicio real (Tesseract 5.3, CPU). -->
+<title>Manual de capacitación del extractor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --fondo: #F6F7FA; --superficie: #FFFFFF; --tinta: #1B1F2A; --tenue: #5B6270; --linea: #D9DEE6;
+    --acento: #5B2BB8; --acento-suave: #EFE9FB; --acento-tinta: #3E1C86;
+    --verde: #2E8B57; --verde-suave: #E6F4EC; --ambar: #B96E00; --ambar-suave: #FFF3DF;
+    --rojo: #B7312C; --rojo-suave: #FBE9E7; --teal: #0E7C7B; --teal-suave: #E3F3F3;
+    --codigo-fondo: #EEF0F4; --sombra: 0 1px 2px rgba(27,31,42,.06), 0 8px 24px -16px rgba(27,31,42,.25);
+    --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --texto: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo: #12141A; --superficie: #1A1D25; --tinta: #ECEEF3; --tenue: #A2A8B5; --linea: #2E3340;
+      --acento: #B79BFF; --acento-suave: #2A2242; --acento-tinta: #D6C6FF;
+      --verde: #62C88E; --verde-suave: #163024; --ambar: #F0B45C; --ambar-suave: #3A2A10;
+      --rojo: #F08A82; --rojo-suave: #3B1B19; --teal: #4FC3C1; --teal-suave: #113233;
+      --codigo-fondo: #232733; --sombra: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --fondo: #12141A; --superficie: #1A1D25; --tinta: #ECEEF3; --tenue: #A2A8B5; --linea: #2E3340;
+    --acento: #B79BFF; --acento-suave: #2A2242; --acento-tinta: #D6C6FF;
+    --verde: #62C88E; --verde-suave: #163024; --ambar: #F0B45C; --ambar-suave: #3A2A10;
+    --rojo: #F08A82; --rojo-suave: #3B1B19; --teal: #4FC3C1; --teal-suave: #113233;
+    --codigo-fondo: #232733; --sombra: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--tinta); font: 400 17px/1.55 var(--texto); padding-block: 0 4rem; padding-inline: clamp(16px, 4vw, 40px); }
+  a { color: var(--acento-tinta); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; border-radius: 4px; }
+  code, kbd, .mono { font-family: var(--mono); font-size: .88em; }
+  code { background: var(--codigo-fondo); padding: .08em .4em; border-radius: 4px; }
+  pre { background: var(--codigo-fondo); border: 1px solid var(--linea); border-radius: 8px; padding: .9rem 1.1rem; overflow-x: auto; font-size: .84rem; line-height: 1.5; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; line-height: 1.15; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); font-weight: 800; letter-spacing: -.01em; }
+  h2 { font-size: 1.65rem; margin-block: 3.2rem 1rem; padding-top: 1.2rem; border-top: 2px solid var(--tinta); }
+  h3 { font-size: 1.22rem; margin-block: 2rem .6rem; }
+  main > h2:first-child { margin-top: .4rem; }
+  h4 { font-size: 1rem; margin-block: 1.2rem .4rem; text-transform: uppercase; letter-spacing: .06em; color: var(--tenue); font-weight: 700; }
+  p, li { max-width: 68ch; }
+  /* Texto corrido justificado con silabeo en espanol; las tablas, el indice y los pies de figura van en bandera. */
+  main p, main li { max-width: none; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+  ul, ol { padding-inline-start: 1.3rem; }
+  li + li { margin-top: .3rem; }
+  strong { font-weight: 600; }
+  .eyebrow { font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; font-size: .78rem; color: var(--acento-tinta); }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; vertical-align: top; padding: .5rem .65rem; border-bottom: 1px solid var(--linea); }
+  th { font-family: var(--display); font-weight: 700; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--tenue); }
+  .tabla { overflow-x: auto; margin-block: .8rem 1.2rem; }
+
+  /* ── Marco ─────────────────────────────────────────────────────────── */
+  .marco { max-width: 1180px; margin-inline: auto; display: grid; grid-template-columns: 1fr; gap: 2.5rem; }
+  @media (min-width: 1000px) { .marco { grid-template-columns: 230px minmax(0, 1fr); } }
+  header.portada { grid-column: 1 / -1; padding-block: 3rem 1rem; border-bottom: 1px solid var(--linea); }
+  header.portada .sub { font-size: 1.2rem; color: var(--tenue); max-width: 60ch; margin-top: .9rem; }
+  header.portada .meta { margin-top: 1.4rem; display: flex; flex-wrap: wrap; gap: .6rem 1.6rem; font-size: .9rem; color: var(--tenue); }
+  header.portada .meta b { color: var(--tinta); font-weight: 600; }
+
+  nav.indice { position: sticky; top: 1.2rem; align-self: start; font-size: .92rem; display: none; }
+  @media (min-width: 1000px) { nav.indice { display: block; } }
+  nav.indice ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .15rem; }
+  nav.indice a { display: block; padding: .3rem .6rem; border-radius: 6px; text-decoration: none; color: var(--tenue); }
+  nav.indice a:hover { background: var(--acento-suave); color: var(--acento-tinta); }
+  nav.indice .grupo { margin-top: .9rem; font-family: var(--display); font-weight: 700; font-size: .74rem; text-transform: uppercase; letter-spacing: .1em; color: var(--tenue); padding-inline: .6rem; }
+  nav.indice ol ol { margin-inline-start: .6rem; border-inline-start: 1px solid var(--linea); }
+  main { min-width: 0; }
+
+  /* ── Piezas que repiten la pantalla ─────────────────────────────────── */
+  .chip { display: inline-block; font-family: var(--mono); font-size: .78rem; padding: .05rem .5rem; border-radius: 999px; border: 1px solid var(--linea); background: var(--superficie); white-space: nowrap; }
+  .chip.oblig { font-weight: 600; border-color: var(--tinta); }
+  .chip.valid { border-style: dotted; }
+  .chip.falta { color: var(--rojo); border-color: var(--rojo); }
+  .badge { display: inline-block; font-family: var(--mono); font-size: .76rem; padding: .04rem .45rem; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+  .badge.exacto, .badge.codigo { color: var(--verde); border-color: var(--verde); }
+  .badge.checksum, .badge.corroboracion { color: var(--teal); border-color: var(--teal); }
+  .badge.motor { color: var(--ambar); border-color: var(--ambar); }
+  .estado { display: inline-flex; align-items: center; gap: .45rem; font-weight: 600; }
+  .estado::before { content: ""; width: .8rem; height: .8rem; border-radius: 3px; border: 2px solid; }
+  .estado.bien::before { border-color: var(--verde); background: var(--verde-suave); }
+  .estado.malo::before { border-color: var(--rojo); background: var(--rojo-suave); }
+  .estado.aviso::before { border-color: var(--ambar); background: var(--ambar-suave); }
+
+  .nota { border-inline-start: 3px solid var(--acento); background: var(--acento-suave); padding: .7rem 1rem; border-radius: 0 8px 8px 0; margin-block: 1rem; }
+  .nota.ojo { border-color: var(--ambar); background: var(--ambar-suave); }
+  .nota.malo { border-color: var(--rojo); background: var(--rojo-suave); }
+  .nota p:last-child { margin-bottom: 0; }
+
+  figure { margin: 0; }
+  figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--linea); border-radius: 8px; background: var(--superficie); }
+  figcaption { font-size: .85rem; color: var(--tenue); margin-top: .45rem; }
+  .pantalla img { box-shadow: var(--sombra); }
+
+  /* ── Leyenda de la anatomía ─────────────────────────────────────────── */
+  .anatomia { display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: start; margin-block: 1rem; }
+  @media (min-width: 820px) { .anatomia { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); } }
+  .leyenda { list-style: none; padding: 0; margin: 0; counter-reset: zona; display: flex; flex-direction: column; gap: .55rem; }
+  .leyenda li { counter-increment: zona; display: grid; grid-template-columns: 2rem 1fr; gap: .6rem; align-items: start; max-width: none; }
+  .leyenda li::before { content: counter(zona); display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: #8C27F1; color: #fff; font-family: var(--display); font-weight: 800; font-size: .85rem; }
+  /* Titulo y descripcion son dos items de la rejilla: los dos van en la columna de texto, nunca en la del numero. */
+  .leyenda li > b, .leyenda li > span { grid-column: 2; }
+  .leyenda b { display: block; font-weight: 600; }
+  .leyenda span { color: var(--tenue); font-size: .94rem; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+
+  /* ── Ficha de caso de uso ───────────────────────────────────────────── */
+  .ficha { background: var(--superficie); border: 1px solid var(--linea); border-radius: 12px; padding: 1.4rem clamp(1rem, 2.5vw, 1.8rem) 1.6rem; margin-block: 1.4rem; box-shadow: var(--sombra); }
+  .ficha header { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1rem; margin-bottom: .3rem; }
+  .ficha header h3 { margin: 0; font-size: 1.35rem; }
+  .ficha header .clase { font-family: var(--mono); font-size: .9rem; color: var(--acento-tinta); background: var(--acento-suave); padding: .1rem .55rem; border-radius: 6px; }
+  .ficha .ruta { font-size: .9rem; color: var(--tenue); }
+  .ficha .objetivo { margin-top: .4rem; }
+  .cuerpo { display: grid; grid-template-columns: 1fr; gap: 1.4rem 2rem; margin-top: 1rem; }
+  @media (min-width: 900px) { .cuerpo { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
+  .cuerpo > div { min-width: 0; }
+  .entrada img { max-height: 520px; width: auto; max-width: 100%; }
+  .entrada pre { max-height: 520px; overflow: auto; }
+  .pasos { counter-reset: paso; list-style: none; padding: 0; margin: .3rem 0 0; display: flex; flex-direction: column; gap: .5rem; }
+  .pasos li { counter-increment: paso; display: grid; grid-template-columns: 1.6rem 1fr; gap: .55rem; max-width: none; }
+  .pasos li::before { content: counter(paso); font-family: var(--display); font-weight: 800; color: var(--acento-tinta); background: var(--acento-suave); width: 1.5rem; height: 1.5rem; border-radius: 6px; display: inline-grid; place-items: center; font-size: .82rem; margin-top: .1rem; }
+  .mirar { margin-top: 1rem; border-top: 1px dashed var(--linea); padding-top: .8rem; }
+  .mirar ul { margin: .3rem 0 0; }
+  .mirar li { max-width: none; }
+  details.json { margin-top: .6rem; font-size: .9rem; }
+  details.json summary { cursor: pointer; color: var(--tenue); }
+
+  /* ── Resumen de los nueve casos ─────────────────────────────────────── */
+  .resumen td:first-child { font-family: var(--mono); font-size: .86rem; white-space: nowrap; }
+  .dos { display: grid; grid-template-columns: 1fr; gap: 1.2rem; }
+  @media (min-width: 820px) { .dos { grid-template-columns: 1fr 1fr; } }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  @media print { nav.indice { display: none; } .ficha { break-inside: avoid; box-shadow: none; } body { padding-inline: 0; } }
+</style>
+</head>
+<body>
+<div class="marco" lang="es">
+<header class="portada">
+  <div class="eyebrow">Extractor documental · banco de pruebas · sección 11</div>
+  <h1>Manual de capacitación del extractor</h1>
+  <p class="sub">Cómo probar el servicio de extracción caso por caso: qué documento soltar, qué pasos seguir, qué resultado esperar y cómo leerlo.</p>
+  <div class="meta">
+    <span><b>Para</b> quien va a probar o a operar el extractor: capturistas, revisoras de facturas, quien lo instala.</span>
+    <span><b>Versión</b> del 14 de septiembre de 2026, medida contra Tesseract 5.3 en CPU.</span>
+    <span><b>Datos</b> todos sintéticos: ni una empresa ni una persona real.</span>
+  </div>
+</header>
+
+<nav class="indice" aria-label="Índice">
+  <ol>
+    <li><a href="#antes">Antes de empezar</a></li>
+    <li><a href="#leer">Cómo leer una tarjeta</a></li>
+    <li><a href="#colores">Colores y evidencia</a></li>
+    <li class="grupo">Casos de uso</li>
+    <li><ol>
+      <li><a href="#caso-contrato">Contrato</a></li>
+      <li><a href="#caso-alta_imss">Alta IMSS</a></li>
+      <li><a href="#caso-ine">INE</a></li>
+      <li><a href="#caso-curp">CURP</a></li>
+      <li><a href="#caso-constancia_fiscal">Constancia fiscal</a></li>
+      <li><a href="#caso-carta_recomendacion">Carta de recomendación</a></li>
+      <li><a href="#caso-factura-escaneada">Factura escaneada</a></li>
+      <li><a href="#caso-factura-digital">Factura en PDF digital</a></li>
+      <li><a href="#caso-minuta">Minuta</a></li>
+      <li><a href="#caso-cfdi">CFDI en XML</a></li>
+    </ol></li>
+    <li class="grupo">Y además</li>
+    <li><a href="#negativos">Cuando algo sale mal</a></li>
+    <li><a href="#documentos">Documentos de prueba</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<h2 id="antes">Antes de empezar</h2>
+<p>La prueba tiene dos piezas que corren en tu máquina. El <strong>servicio de extracción</strong> es el contenedor que lee los documentos: clasifica la página, pasa Tesseract por zonas, valida identificadores y arma la evidencia de cada campo. La <strong>página del banco de pruebas</strong> es donde sueltas los documentos y ves el resultado. La página no habla con el servicio directamente: se lo pasa a su propio servidor, que lo reenvía. Por eso el servicio no necesita abrir puertos ni permisos de navegador, igual que en producción.</p>
+
+<h3>Levantar las dos piezas</h3>
+<ol class="pasos">
+  <li><span>Desde la carpeta del paquete (<code>tools/extractor-documental</code>) construye y arranca el contenedor del servicio:</span></li>
+</ol>
+<pre><code>docker build -f servicio/Dockerfile -t extractor-ocr-local .
+docker run -d --name extractor-ocr-local -p 8080:8080 \
+  --tmpfs /tmp/extractor:uid=1001,gid=1001,mode=700 extractor-ocr-local</code></pre>
+<ol class="pasos" start="2" style="counter-reset: paso 1">
+  <li><span>Arranca la página del banco de pruebas con <code>npm run demo</code> y ábrela en <a href="http://localhost:4321">http://localhost:4321</a>.</span></li>
+  <li><span>Baja hasta la sección <strong>11 · Por caso de uso</strong>. Arriba de las tarjetas debe decir <strong>servicio: en línea</strong>. Si no, pulsa <em>Comprobar servicio</em>; el texto te dice qué falta.</span></li>
+</ol>
+<figure class="pantalla">
+  <img src="pantallas/00-servicio-en-linea.png" alt="Barra de estado: servicio en línea en http://127.0.0.1:8080, con el botón Comprobar servicio" width="915" height="56">
+  <figcaption>Lo que debes ver antes de soltar nada. Si el servicio no está, la barra lo dice en rojo y explica cómo levantarlo.</figcaption>
+</figure>
+<div class="nota ojo">
+  <p><strong>El <code>--tmpfs</code> no es opcional.</strong> Es la carpeta temporal donde el motor deja el documento mientras lo lee. Sin ella el contenedor arranca y contesta que está sano, pero cada extracción falla con <code>ENOENT</code>. Se midió el 14 de septiembre de 2026; con el <code>docker-compose.yml</code> del proyecto no pasa, porque el compose la monta solo.</p>
+</div>
+
+<h2 id="leer">Cómo leer una tarjeta</h2>
+<p>Cada clase de documento que el proyecto declara tiene su tarjeta. Todas tienen la misma forma, así que una vez que sabes leer una, sabes leer las nueve. La de abajo es la de <code>factura</code> después de soltarle una factura escaneada.</p>
+<div class="anatomia">
+  <figure class="pantalla">
+    <img src="pantallas/02-anatomia.png" alt="Tarjeta de factura con once zonas numeradas" width="915" height="1341">
+    <figcaption>La tarjeta de <code>factura</code> con sus once zonas numeradas.</figcaption>
+  </figure>
+  <ol class="leyenda">
+    <li><b>Clase y número de claves</b><span>El nombre técnico de la clase y cuántas claves tiene su esquema. «0 claves» significa que esa clase solo se clasifica, no tiene campos que exigir.</span></li>
+    <li><b>Cómo se detecta</b><span>El patrón de título que el servicio busca en la página. Si un documento tuyo no cae en la clase, aquí ves por qué: su título no dice eso.</span></li>
+    <li><b>Claves del esquema</b><span>Lo que esta clase espera encontrar. En <strong>negrita</strong> las obligatorias; con borde punteado las que llevan validador de dígito verificador (RFC, CURP, NSS).</span></li>
+    <li><b>Zona de carga</b><span>Arrastra aquí el documento o pulsa para elegirlo. Acepta PDF, imagen y XML; puedes soltar varios a la vez.</span></li>
+    <li><b>Veredicto</b><span>Verde: detectó la clase que esperabas. Rojo: detectó otra, o no pudo leer. Ámbar: ningún título casó. Entre comillas, el fragmento del documento que hizo casar la clase.</span></li>
+    <li><b>Resumen de la lectura</b><span>Nombre del archivo, la <em>ruta</em> por la que entró (motor, capa cero o XML), páginas, cuántos campos salieron, cuántos van a revisión y el conteo por tipo de evidencia.</span></li>
+    <li><b>Tiempos</b><span>Milisegundos por etapa dentro del servicio (códigos, motor, respaldo) y el total de ida y vuelta desde el navegador.</span></li>
+    <li><b>Tabla de campos</b><span>Cada campo con su valor, la confianza que declaró el motor, su evidencia y si va a revisión humana (▼ revisar) o no (✓). Las filas sombreadas son las que van a revisión.</span></li>
+    <li><b>Esquema</b><span>«Completo» si están todas las claves obligatorias; si no, cuáles <span class="chip falta">faltan</span>. «No previstos» son campos que salieron pero no están en el esquema de esa clase.</span></li>
+    <li><b>Identificadores inválidos y corregidos</b><span>Los que no pasaron el dígito verificador, con el valor leído y el motivo. Un identificador inválido <em>no</em> aparece en la tabla: se descarta y cuenta como faltante. Cuando una sola sustitución lo arregla, sale en otra línea, «Corregidos por checksum», con el valor leído y el propuesto.</span></li>
+    <li><b>JSON completo</b><span>La respuesta cruda del servicio, plegada. Es lo que recibiría una aplicación que lo consuma.</span></li>
+  </ol>
+</div>
+
+<h2 id="colores">Colores y evidencia</h2>
+<p>Dos cosas se leen de un vistazo: el color del borde de la tarjeta, que habla de la <strong>clase</strong>, y la etiqueta de evidencia de cada campo, que habla de <strong>cuánto fiarse del valor</strong>. Son independientes: una tarjeta verde puede tener campos que van a revisión.</p>
+<div class="dos">
+  <div>
+    <h4>Borde de la tarjeta</h4>
+    <div class="tabla"><table>
+      <tr><th>Color</th><th>Qué pasó</th><th>Qué haces</th></tr>
+      <tr><td><span class="estado bien">Verde</span></td><td>El servicio detectó la misma clase que esperabas.</td><td>Revisa los campos y los faltantes.</td></tr>
+      <tr><td><span class="estado malo">Rojo</span></td><td>Detectó otra clase, o no pudo leer el documento.</td><td>Confirma que el documento es lo que crees; si lo es, el patrón de título del proyecto está mal.</td></tr>
+      <tr><td><span class="estado aviso">Ámbar</span></td><td>Ningún título casó: sin clase no hay esquema que aplicar.</td><td>El documento está fuera del proyecto, o su título viene ilegible.</td></tr>
+    </table></div>
+  </div>
+  <div>
+    <h4>Evidencia de un campo</h4>
+    <div class="tabla"><table>
+      <tr><th>Etiqueta</th><th>De dónde sale el valor</th><th>Revisión</th></tr>
+      <tr><td><span class="badge codigo">codigo</span></td><td>Leído de un código QR o de barras. La fuente más fiable.</td><td>✓ no</td></tr>
+      <tr><td><span class="badge exacto">exacto</span></td><td>Del texto del propio PDF o del XML, letra por letra. Sin OCR.</td><td>✓ no</td></tr>
+      <tr><td><span class="badge corroboracion">corroboracion</span></td><td>Dos lecturas distintas coincidieron.</td><td>✓ no</td></tr>
+      <tr><td><span class="badge checksum">checksum</span></td><td>Lo leyó el motor, pero pasó el dígito verificador del identificador.</td><td>✓ no</td></tr>
+      <tr><td><span class="badge motor">motor</span></td><td>Solo lo dice el OCR. No hay segunda fuente que lo confirme.</td><td>▼ sí</td></tr>
+    </table></div>
+  </div>
+</div>
+<div class="nota">
+  <p><strong>La confianza no decide nada; la evidencia sí.</strong> Verás campos con confianza 0.00 o 0.47 marcados ✓, y campos con confianza alta marcados ▼. Es a propósito: sobre el corpus medido, la confianza del motor no se correlaciona con el error. Lo que manda a revisión es no tener una segunda fuente.</p>
+</div>
+
+<h2 id="casos">Los casos de uso</h2>
+<p>Nueve clases, diez pruebas: la factura entra por dos rutas distintas según venga escaneada o como PDF con texto, y el CFDI en XML es un caso aparte. Cada ficha trae el documento de prueba, los pasos, la pantalla del resultado y qué mirar en ella. Los documentos de prueba están en la carpeta <code>corpus/</code> del paquete y son todos sintéticos.</p>
+<div class="tabla resumen"><table>
+  <tr><th>Clase</th><th>Documento de prueba</th><th>Ruta</th><th>Resultado medido</th></tr>
+  <tr><td>contrato</td><td>contrato-1.png</td><td>motor</td><td>1 campo (RFC por checksum), 0 a revisión</td></tr>
+  <tr><td>alta_imss</td><td>alta-imss-1.png</td><td>motor</td><td>1 campo (NSS por checksum), 0 a revisión</td></tr>
+  <tr><td>ine</td><td>ine-1.png</td><td>motor</td><td>1 campo (CURP por checksum), 0 a revisión</td></tr>
+  <tr><td>curp</td><td>constancia-curp-1.png</td><td>motor</td><td>1 campo (CURP por checksum), 0 a revisión</td></tr>
+  <tr><td>constancia_fiscal</td><td>constancia-fiscal-1.png</td><td>motor</td><td>2 campos (RFC y CURP por checksum), 0 a revisión</td></tr>
+  <tr><td>carta_recomendacion</td><td>carta-recomendacion-1.png</td><td>motor</td><td>0 campos: solo clasifica</td></tr>
+  <tr><td>factura</td><td>factura-escaneada-1.png</td><td>motor</td><td>9 campos, 7 a revisión, 2 faltantes, 2 inválidos</td></tr>
+  <tr><td>factura</td><td>factura-digital-1.pdf</td><td>capa cero</td><td>12 campos exactos, 0 a revisión, esquema completo</td></tr>
+  <tr><td>minuta</td><td>minuta-escaneada-1.png</td><td>motor</td><td>4 campos, 3 a revisión, 1 RFC corregido por checksum</td></tr>
+  <tr><td>cfdi</td><td>cfdi-40-ingreso.xml</td><td>xml</td><td>26 campos exactos, 1 inválido a propósito</td></tr>
+</table></div>
+
+<!-- ── Contrato ─────────────────────────────────────────────────────── -->
+<section class="ficha" id="caso-contrato">
+  <header><span class="clase">contrato</span><h3>Contrato individual de trabajo</h3><span class="ruta">ruta: motor · sin esquema</span></header>
+  <p class="objetivo">Comprobar que una hoja de contrato se clasifica por su título y que el RFC que trae en la prosa sale validado. Esta clase no tiene esquema: la prueba es de clasificación.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/contrato-1.jpg" alt="Contrato individual de trabajo sintético, escaneado" width="900" height="1165"><figcaption><code>corpus/contrato-1.png</code> · generado por <code>medicion/genera-expediente.py</code>. Trae un RFC y una CURP dentro del primer párrafo.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>contrato</code>. Fíjate en que dice «0 claves — sin esquema: solo se clasifica».</span></li>
+        <li><span>Suelta <code>contrato-1.png</code> en su zona de carga.</span></li>
+        <li><span>Espera el borde de color. En CPU tarda entre 1 y 3 segundos.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-contrato.png" alt="Tarjeta contrato en verde: clase detectada, un campo rfc con evidencia checksum" width="915" height="771"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Veredicto verde: casó con «CONTRATO INDIVIDUAL DE TRABAJO».</li>
+          <li>Sale un solo campo, <code>rfc</code>, con evidencia <span class="badge checksum">checksum</span> y ✓: el motor lo leyó y pasó el dígito verificador.</li>
+          <li>La CURP que también está en el párrafo <em>no</em> salió. En la transcripción del motor se ve por qué: leyó un corchete donde iba la J (<code>SXAX831220MNLV]WI1</code>), y con eso ya no tiene forma de CURP. No es un fallo de la prueba, es lo que mide: un identificador en texto corrido y escaneado se lee peor que uno en su propia línea.</li>
+          <li>Como la clase no tiene esquema, no hay línea de «Esquema»: nada es obligatorio.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Alta IMSS ─────────────────────────────────────────────────────── -->
+<section class="ficha" id="caso-alta_imss">
+  <header><span class="clase">alta_imss</span><h3>Alta en el IMSS</h3><span class="ruta">ruta: motor · 3 claves</span></header>
+  <p class="objetivo">Comprobar que el comprobante de afiliación se clasifica y que el NSS sale de la tabla del documento con su dígito Luhn validado.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/alta-imss-1.jpg" alt="Comprobante de movimientos afiliatorios sintético" width="900" height="1165"><figcaption><code>corpus/alta-imss-1.png</code> · generado por <code>medicion/genera-alta-imss.py</code>. Forma «tabla»: el NSS va debajo del encabezado.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>alta_imss</code>. Sus claves son <span class="chip valid">nss</span> <span class="chip valid">curp</span> <span class="chip valid">rfc</span>, las tres con validador.</span></li>
+        <li><span>Suelta <code>alta-imss-1.png</code>.</span></li>
+        <li><span>Espera el borde verde.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-alta_imss.png" alt="Tarjeta alta_imss en verde con el campo nss validado por checksum" width="915" height="813"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Casó con «Afiliacion», una de las tres palabras del patrón.</li>
+          <li><code>nss</code> con evidencia <span class="badge checksum">checksum</span> aunque la confianza del motor sea 0.47: el dígito verificador manda.</li>
+          <li>Esquema «completo»: de las tres claves solo el NSS es obligatorio en este proyecto (va en negrita en la tarjeta), así que no falta nada aunque CURP y RFC no salieran.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INE ───────────────────────────────────────────────────────────── -->
+<section class="ficha" id="caso-ine">
+  <header><span class="clase">ine</span><h3>Credencial para votar</h3><span class="ruta">ruta: motor · 1 clave</span></header>
+  <p class="objetivo">Comprobar que una fotocopia de credencial se clasifica por «INSTITUTO NACIONAL ELECTORAL» y que la CURP impresa sale validada.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/ine-1.jpg" alt="Fotocopia sintética de una credencial para votar" width="900" height="1165"><figcaption><code>corpus/ine-1.png</code> · generado por <code>medicion/genera-expediente.py</code>. La credencial va centrada en la hoja, como una fotocopia.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>ine</code>.</span></li>
+        <li><span>Suelta <code>ine-1.png</code>.</span></li>
+        <li><span>Espera el borde verde.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-ine.png" alt="Tarjeta ine en verde con el campo curp validado" width="915" height="813"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Un campo, <code>curp</code>, con <span class="badge checksum">checksum</span>.</li>
+          <li>La clave de elector y el domicilio no salen: el proyecto no los declara. Lo que no está en los patrones del proyecto no se busca.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CURP ──────────────────────────────────────────────────────────── -->
+<section class="ficha" id="caso-curp">
+  <header><span class="clase">curp</span><h3>Constancia de CURP</h3><span class="ruta">ruta: motor · 1 clave</span></header>
+  <p class="objetivo">Comprobar que la constancia se clasifica por «Clave Única de Registro de Población» y que la CURP sale validada.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/constancia-curp-1.jpg" alt="Constancia de CURP sintética" width="900" height="1165"><figcaption><code>corpus/constancia-curp-1.png</code> · generado por <code>medicion/genera-constancias-curp.py</code>.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>curp</code>.</span></li>
+        <li><span>Suelta <code>constancia-curp-1.png</code>.</span></li>
+        <li><span>Espera el borde verde.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-curp.png" alt="Tarjeta curp en verde con el campo curp validado" width="915" height="815"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Un campo, <code>curp</code>, con <span class="badge checksum">checksum</span>.</li>
+          <li>Prueba útil de comparación: suelta el mismo archivo en la tarjeta <code>ine</code>. Saldrá en rojo con «detectó curp, esperabas ine»: el servicio clasifica por lo que dice la hoja, no por la tarjeta donde la sueltas.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Constancia fiscal ─────────────────────────────────────────────── -->
+<section class="ficha" id="caso-constancia_fiscal">
+  <header><span class="clase">constancia_fiscal</span><h3>Constancia de situación fiscal</h3><span class="ruta">ruta: motor · 2 claves</span></header>
+  <p class="objetivo">Comprobar que la constancia del SAT se clasifica y que salen los dos identificadores del contribuyente, RFC y CURP, validados.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/constancia-fiscal-1.jpg" alt="Constancia de situación fiscal sintética" width="900" height="1165"><figcaption><code>corpus/constancia-fiscal-1.png</code> · generado por <code>medicion/genera-expediente.py</code>. Cadena original y sello omitidos: es sintética.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>constancia_fiscal</code>. Claves: <span class="chip valid">rfc</span> <span class="chip valid">curp</span>.</span></li>
+        <li><span>Suelta <code>constancia-fiscal-1.png</code>.</span></li>
+        <li><span>Espera el borde verde.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-constancia_fiscal.png" alt="Tarjeta constancia_fiscal en verde con rfc y curp validados" width="915" height="866"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Dos campos, <code>curp</code> y <code>rfc</code>, ambos <span class="badge checksum">checksum</span>, ninguno a revisión.</li>
+          <li>Es el caso ideal del motor por zonas: cada identificador va en su propia línea con su etiqueta delante.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Carta de recomendación ────────────────────────────────────────── -->
+<section class="ficha" id="caso-carta_recomendacion">
+  <header><span class="clase">carta_recomendacion</span><h3>Carta de recomendación</h3><span class="ruta">ruta: motor · sin esquema</span></header>
+  <p class="objetivo">Comprobar que una carta en prosa se clasifica por su título aunque no traiga ningún identificador que extraer.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/carta-recomendacion-1.jpg" alt="Carta de recomendación sintética" width="900" height="1165"><figcaption><code>corpus/carta-recomendacion-1.png</code> · generado por <code>medicion/genera-expediente.py</code>.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>carta_recomendacion</code>, que dice «0 claves».</span></li>
+        <li><span>Suelta <code>carta-recomendacion-1.png</code>.</span></li>
+        <li><span>Espera el borde verde.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-carta_recomendacion.png" alt="Tarjeta carta_recomendacion en verde, sin campos" width="915" height="723"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Verde y «Ningún campo extraído». Las dos cosas a la vez son correctas: la clase casó y no había nada declarado que buscar.</li>
+          <li>El RFC de la empresa que firma, en la cabecera, no sale: el motor leyó la letra O donde iba el cero (<code>AAAO10101AA1</code>) y eso ya no tiene forma de RFC. Compara con la minuta, donde esa misma confusión sí se corrige porque el patrón la captura con su etiqueta.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Factura escaneada ─────────────────────────────────────────────── -->
+<section class="ficha" id="caso-factura-escaneada">
+  <header><span class="clase">factura</span><h3>Factura escaneada</h3><span class="ruta">ruta: motor · 10 claves</span></header>
+  <p class="objetivo">El caso más rico: una factura como imagen obliga al motor a leer diez campos, y aquí se ve qué pasa cuando el OCR lee mal un RFC.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/factura-escaneada-1.jpg" alt="Factura sintética escaneada" width="848" height="1200"><figcaption><code>corpus/factura-escaneada-1.png</code> · generado por <code>medicion/genera-corpus.py</code>, con rotación y ruido de escáner.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>factura</code>. Tiene diez claves; las obligatorias van en negrita.</span></li>
+        <li><span>Suelta <code>factura-escaneada-1.png</code>.</span></li>
+        <li><span>Espera el borde verde y lee la tabla entera: aquí hay filas de los dos tipos.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-factura-escaneada.png" alt="Tarjeta factura en verde: nueve campos, siete a revisión, faltan rfc_emisor y uuid, dos identificadores inválidos" width="915" height="1340"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Nueve campos, <strong>siete a revisión</strong>: folio, fecha, emisor, régimen, subtotal, IVA y total solo los dice el motor (<span class="badge motor">motor</span>), y sin segunda fuente van a revisión.</li>
+          <li><code>rfc_receptor</code> sale ✓ con <span class="badge checksum">checksum</span>: es el genérico <code>XAXX010101000</code>, que el proyecto admite.</li>
+          <li><strong>Faltan <span class="chip falta">rfc_emisor</span> y <span class="chip falta">uuid</span></strong>. Baja a «Identificadores inválidos»: el motor leyó <code>AAAO010101AA1</code>, con una letra O de más (trece caracteres; el bueno, <code>AAA010101AA1</code>, tiene doce). El dígito verificador no cuadra, no hay una sola sustitución que lo arregle, y el validador lo descarta: por eso cuenta como faltante. <em>Eso es el sistema funcionando</em>: un RFC mal leído no entró a la base.</li>
+          <li>El <code>uuid</code> falta porque el folio fiscal impreso no se leyó completo. En una factura real lo confirmarías con el QR (evidencia <span class="badge codigo">codigo</span>), que esta prueba no ejercita.</li>
+          <li>«No previstos: rfc»: el patrón genérico de RFC del expediente también casó; como no está en el esquema de factura, se lista aparte.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Factura digital ───────────────────────────────────────────────── -->
+<section class="ficha" id="caso-factura-digital">
+  <header><span class="clase">factura</span><h3>Factura en PDF con texto</h3><span class="ruta">ruta: capa cero · 10 claves</span></header>
+  <p class="objetivo">La misma clase por la otra puerta: un PDF generado por software trae su texto dentro y se lee sin motor, exacto y sin nada a revisión.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <pre><code>FACTURA
+Folio: F-1804
+Fecha: 2026-03-15
+
+Emisor: Ferreteria Sintetica SA de CV
+RFC emisor: AAA010101AA1
+Regimen fiscal: 601
+
+Receptor: Publico en General
+RFC receptor: XAXX010101000
+
+Cant.  Descripcion                 Importe
+2      Tornillo 1/4                     178.00
+11     Cable calibre 12                 979.00
+
+Subtotal: 1157.00
+IVA 16%: 185.12
+Total: 1342.12
+
+Folio fiscal: 70f56968-5797-433f-d484-95b3c7244277</code></pre>
+      <figcaption style="font-size:.85rem;color:var(--tenue)"><code>corpus/factura-digital-1.pdf</code> · el texto que lleva dentro, tal cual. Generado por <code>medicion/genera-corpus.py</code>.</figcaption>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>En la misma tarjeta <code>factura</code>, suelta <code>factura-digital-1.pdf</code>.</span></li>
+        <li><span>Fíjate en la velocidad: contesta en milisegundos, porque no pasa por Tesseract.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-factura-digital.png" alt="Tarjeta factura en verde: ruta capa-cero, doce campos exactos, cero a revisión, esquema completo" width="915" height="1436"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Ruta <strong>capa-cero</strong> («PDF con capa de texto, sin motor») y tiempos de motor en 0 ms.</li>
+          <li>Doce campos, todos <span class="badge exacto">exacto</span> con confianza 1.00, <strong>cero a revisión</strong>. Esquema completo, incluido el <code>uuid</code>.</li>
+          <li>Compara con la escaneada: mismo tipo de documento, mismos patrones, y la diferencia entera está en la ruta. Por eso la regla del proyecto es «si hay PDF digital o XML, no se escanea».</li>
+          <li>«No previstos: rfc rfc»: el patrón genérico casó con los dos RFC del texto.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Minuta ────────────────────────────────────────────────────────── -->
+<section class="ficha" id="caso-minuta">
+  <header><span class="clase">minuta</span><h3>Minuta de reunión</h3><span class="ruta">ruta: motor · 4 claves</span></header>
+  <p class="objetivo">Comprobar una hoja con campos de texto libre: fecha, número de asistentes y responsable, más el RFC del emisor.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <figure><img src="entradas/minuta-escaneada-1.jpg" alt="Minuta de reunión sintética escaneada" width="848" height="1200"><figcaption><code>corpus/minuta-escaneada-1.png</code> · generado por <code>medicion/genera-corpus.py</code>.</figcaption></figure>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>minuta</code>. Claves: fecha, asistentes, responsable, rfc_emisor.</span></li>
+        <li><span>Suelta <code>minuta-escaneada-1.png</code>.</span></li>
+        <li><span>Espera el borde verde.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-minuta.png" alt="Tarjeta minuta en verde: cuatro campos, tres a revisión" width="915" height="987"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Cuatro campos: el RFC con <span class="badge checksum">checksum</span> y ✓; fecha, asistentes y responsable con <span class="badge motor">motor</span> y ▼ revisar.</li>
+          <li>Es la regla general de un escaneo: lo que no lleva dígito verificador ni segunda fuente, va a revisión. No es que esté mal leído; es que nadie lo confirma.</li>
+          <li><strong>«Corregidos por checksum: rfc_emisor AAAO10101AA1 → AAA010101AA1»</strong>. El motor leyó una O por un cero; como solo había una sustitución que cuadrara con el dígito verificador, el validador la propuso. El valor corregido se reporta en su propia línea y <em>no</em> entra a la tabla de campos: decidir si se acepta es de quien revisa.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CFDI ──────────────────────────────────────────────────────────── -->
+<section class="ficha" id="caso-cfdi">
+  <header><span class="clase">cfdi</span><h3>CFDI en XML</h3><span class="ruta">ruta: xml · 6 claves</span></header>
+  <p class="objetivo">El documento fiscal de verdad es el XML; el PDF es solo su impresión. Esta tarjeta no se detecta por título: la ruta XML le asigna la clase <code>cfdi</code> directamente.</p>
+  <div class="cuerpo">
+    <div class="entrada">
+      <h4>Documento de entrada</h4>
+      <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!-- SINTETICO: escrito a mano, no proviene de ningun CFDI real. --&gt;
+&lt;cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+    Version="4.0" Serie="N" Folio="0035" Fecha="2025-07-01T09:39:32"
+    FormaPago="03" MetodoPago="PUE" Moneda="MXN" SubTotal="1000.00"
+    Total="1160.00" TipoDeComprobante="I" ...&gt;
+  &lt;cfdi:Emisor Rfc="AAA010101AAA" Nombre="OPERADORA DE EJEMPLO SA DE CV"
+               RegimenFiscal="601"/&gt;
+  &lt;cfdi:Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL" .../&gt;
+  ...</code></pre>
+      <figcaption style="font-size:.85rem;color:var(--tenue)"><code>pruebas/fixtures/cfdi-40-ingreso.xml</code> · fixture del paquete, versionado en el repositorio.</figcaption>
+      <h4>Pasos</h4>
+      <ol class="pasos">
+        <li><span>Localiza la tarjeta <code>cfdi</code>. Solo acepta archivos <code>.xml</code>.</span></li>
+        <li><span>Suelta <code>cfdi-40-ingreso.xml</code>.</span></li>
+        <li><span>Baja por la tabla: son 26 campos.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h4>Resultado esperado</h4>
+      <figure class="pantalla"><img src="pantallas/caso-cfdi.png" alt="Tarjeta cfdi en verde: ruta xml, 26 campos exactos, falta rfc_emisor por dígito verificador inválido" width="915" height="2663"></figure>
+      <div class="mirar"><strong>Qué mirar</strong>
+        <ul>
+          <li>Ruta <strong>xml</strong> («CFDI 4.0 leído exacto, sin motor»). 26 campos <span class="badge exacto">exacto</span>, cero a revisión: versión, serie, folio, UUID del timbre, sellos, certificados.</li>
+          <li><strong>Falta <span class="chip falta">rfc_emisor</span></strong> y aparece en inválidos: <code>AAA010101AAA</code> es el RFC de pruebas clásico y su dígito verificador no cuadra a propósito. Que el XML sea exacto no exime al identificador de validarse.</li>
+          <li>Nada de esto verifica el sello fiscal. Leer bien no es autenticar: eso lo decide el proyecto, fuera de esta herramienta.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<h2 id="negativos">Cuando algo sale mal</h2>
+<p>Tres situaciones que verás seguro. Ninguna es un error de la herramienta: son las respuestas correctas a un documento o a un entorno que no es lo que se esperaba.</p>
+
+<h3>Soltaste el documento en la tarjeta equivocada</h3>
+<div class="cuerpo">
+  <div>
+    <p>El servicio clasifica por lo que dice la hoja, no por dónde la sueltas. Aquí, el alta del IMSS cayó en la tarjeta <code>minuta</code>.</p>
+    <ol class="pasos">
+      <li><span>Suelta <code>alta-imss-1.png</code> en la tarjeta <code>minuta</code>.</span></li>
+      <li><span>Lee el veredicto rojo: nombra las dos clases y el fragmento que hizo casar la detectada.</span></li>
+    </ol>
+    <div class="nota malo"><p><strong>Qué hacer.</strong> Si el documento sí es lo que creías, el problema es el patrón de título del proyecto, no el documento. Si no lo es, ya sabes qué es: la clase detectada.</p></div>
+  </div>
+  <figure class="pantalla"><img src="pantallas/neg-clase-distinta.png" alt="Tarjeta minuta en rojo: detectó alta_imss, esperabas minuta" width="915" height="849"></figure>
+</div>
+
+<h3>Ningún título casó</h3>
+<div class="cuerpo">
+  <div>
+    <p>Un recibo de caja no es ninguna de las nueve clases. La tarjeta queda en ámbar: sin clase no hay esquema que aplicar, y los campos que salgan son los que los patrones encontraron sueltos.</p>
+    <figure><img src="entradas/recibo-sin-clase.jpg" alt="Recibo de caja sintético, ajeno al proyecto" width="900" height="1165" style="max-height:260px;width:auto"><figcaption>Cualquier hoja cuyo título no esté en el proyecto sirve para esta prueba.</figcaption></figure>
+    <div class="nota ojo"><p><strong>Qué hacer.</strong> Si el documento debería estar en el proyecto, hay que declararle una clase con su patrón de título. Si no debería, el ámbar es la respuesta correcta.</p></div>
+  </div>
+  <figure class="pantalla"><img src="pantallas/neg-sin-clasificar.png" alt="Tarjeta ine en ámbar: sin clasificar" width="915" height="759"></figure>
+</div>
+
+<h3>El servicio no está</h3>
+<div class="cuerpo">
+  <div>
+    <p>Si el contenedor no está arriba, la barra de estado lo dice antes de que sueltes nada, y explica dónde lo buscó y cómo levantarlo. Si aun así sueltas un documento, la tarjeta se pone en rojo con «no se pudo contactar con el servicio» en vez de quedarse esperando.</p>
+    <figure class="pantalla"><img src="pantallas/neg-servicio-caido-cabecera.png" alt="Barra de estado en rojo: servicio no disponible, no hay nadie escuchando" width="915" height="164"></figure>
+    <div class="nota malo"><p><strong>Qué hacer.</strong> Levanta el contenedor como en «Antes de empezar» y pulsa <em>Comprobar servicio</em>. Comprueba también que el puerto sea el <code>8080</code> del servicio, no el de otra cosa que tengas corriendo.</p></div>
+  </div>
+  <figure class="pantalla"><img src="pantallas/neg-servicio-caido-tarjeta.png" alt="Tarjeta factura en rojo: no se pudo contactar con el servicio" width="915" height="479"></figure>
+</div>
+
+<h2 id="documentos">Documentos de prueba</h2>
+<p>Todo el material es sintético y se genera con los scripts de <code>medicion/</code>. La carpeta <code>corpus/</code> está fuera de git a propósito: es el sitio donde un proyecto pone después sus documentos reales, y esos no se versionan nunca. Si la carpeta está vacía, se regenera con los tres comandos de abajo.</p>
+<div class="tabla"><table>
+  <tr><th>Archivo</th><th>Clase</th><th>Lo genera</th><th>Qué trae</th></tr>
+  <tr><td><code>contrato-1.png</code>, <code>-2</code></td><td>contrato</td><td rowspan="4"><code>python3 medicion/genera-expediente.py</code></td><td>Título, RFC y CURP dentro del primer párrafo, cláusulas, firmas.</td></tr>
+  <tr><td><code>ine-1.png</code>, <code>-2</code></td><td>ine</td><td>Credencial centrada en la hoja, con CURP y clave de elector.</td></tr>
+  <tr><td><code>constancia-fiscal-1.png</code>, <code>-2</code></td><td>constancia_fiscal</td><td>RFC y CURP en líneas etiquetadas, domicilio, régimen.</td></tr>
+  <tr><td><code>carta-recomendacion-1.png</code>, <code>-2</code></td><td>carta_recomendacion</td><td>Carta en prosa; el único RFC va entre paréntesis en la cabecera.</td></tr>
+  <tr><td><code>alta-imss-1.png</code> a <code>-4</code></td><td>alta_imss</td><td><code>python3 medicion/genera-alta-imss.py</code></td><td>Dos formas reales de la hoja: tabla y formulario. NSS con dígito Luhn válido.</td></tr>
+  <tr><td><code>constancia-curp-1.png</code> a <code>-4</code></td><td>curp</td><td><code>python3 medicion/genera-constancias-curp.py</code></td><td>Tres formas de constancia. CURP con dígito válido.</td></tr>
+  <tr><td><code>factura-escaneada-1.png</code> a <code>-4</code></td><td>factura</td><td rowspan="3"><code>python3 medicion/genera-corpus.py</code></td><td>Imagen con ruido y rotación de escáner.</td></tr>
+  <tr><td><code>factura-digital-1.pdf</code> a <code>-6</code></td><td>factura</td><td>PDF con capa de texto: entra por la capa cero.</td></tr>
+  <tr><td><code>minuta-escaneada-1.png</code>, <code>-2</code></td><td>minuta</td><td>Fecha, asistentes y responsable en líneas etiquetadas.</td></tr>
+  <tr><td><code>pruebas/fixtures/cfdi-40-ingreso.xml</code></td><td>cfdi</td><td>versionado en git</td><td>CFDI 4.0 sintético con timbre. El RFC del emisor lleva dígito inválido a propósito.</td></tr>
+</table></div>
+<p>Cada imagen va acompañada de un <code>.json</code> con los valores que se sembraron (la «verdad» del documento) y una marca de que es sintético. Todos los RFC, CURP y NSS sintéticos pasan el dígito verificador del propio núcleo, salvo los que lo fallan a propósito y así lo dicen.</p>
+
+<h2 id="faq">Preguntas frecuentes</h2>
+<h3>Abro el servicio en el navegador y dice «ruta desconocida»</h3>
+<p>Es correcto. El servicio de <code>8080</code> es una API sin página: en el navegador solo responde <code>/health</code>. Extraer exige un <code>POST</code> con el archivo en el cuerpo. Para probar con el ratón, la página es la del banco de pruebas en <code>4321</code>.</p>
+<h3>El contenedor dice que está sano pero toda extracción falla con ENOENT</h3>
+<p>Falta el <code>--tmpfs /tmp/extractor</code> al arrancarlo. Ver «Antes de empezar».</p>
+<h3>Todos los campos salen con confianza 0.00</h3>
+<p>El motor por zonas no declara confianza por campo en todos los documentos. No importa para la decisión: la revisión la decide la evidencia, no la confianza. Un campo <span class="badge checksum">checksum</span> con confianza 0.00 es un campo validado.</p>
+<h3>Un campo que se ve perfecto en la hoja va a revisión</h3>
+<p>Porque solo lo dice el motor. «Bien leído» y «confirmado» no son lo mismo: sin dígito verificador, código o segunda fuente, el sistema no puede saber que está bien, y lo marca para que lo mire una persona.</p>
+<h3>El PDF escaneado de prueba del paquete no se lee</h3>
+<p><code>pruebas/fixtures/escaneo.pdf</code> lleva un JPEG mínimo pensado para pruebas de estructura, no una página real; el motor sale con error y la tarjeta lo dice en rojo. Para un escaneo en PDF de verdad usa <code>corpus/factura-escaneada-1.pdf</code>, que sí se lee.</p>
+<h3>Estoy en WSL y el navegador está en Windows</h3>
+<p>La página del banco escucha solo en <code>127.0.0.1</code> de WSL. Ábrela desde un navegador dentro de WSL, o usa la dirección que Windows le da a WSL en vez de <code>localhost</code>.</p>
+
+</main>
+</div>
+</body>
+</html>

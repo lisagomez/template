@@ -43,6 +43,19 @@ const MIME = {
 /** Cada prefijo de URL apunta a una carpeta real. Nada se copia a la carpeta del demo. */
 const RUTAS = [['/extractor/', join(raiz, 'dist')]];
 
+/**
+ * El servicio OCR (spec 010), para la seccion «por caso de uso» de la pagina.
+ *
+ * La pagina NO le habla directo: el servicio vive en la red interna del compose, no publica
+ * CORS, y un navegador no puede mandarle un `POST` con cabeceras propias desde otro origen. Este
+ * servidor reenvia, y SOLO a la URL configurada — no es un proxy abierto: la pagina no elige el
+ * destino. Misma variable que usa `app` en el compose, para no inventar otra.
+ */
+const SERVICIO = (process.env.EXTRACTOR_SERVICIO_URL ?? 'http://127.0.0.1:8080').replace(/\/$/, '');
+const PROYECTO_DEL_SERVICIO = process.env.EXTRACTOR_PROYECTO ?? join(raiz, 'servicio', 'proyecto-ejemplo.json');
+/** El tope del servicio por defecto (EXTRACTOR_BYTES_MAXIMOS): aqui se corta igual, antes de reenviar. */
+const BYTES_MAXIMOS_SERVICIO = 20 * 1024 * 1024;
+
 /** Los dos ficheros del corpus. Son exactamente los tipos que `calibracion.ts` ya consume. */
 const DESTINOS = {
   '/api/corpus/campos': join(corpus, 'campos.jsonl'),
@@ -138,6 +151,81 @@ function estadoDelCorpus() {
   };
 }
 
+// ── El servicio OCR, por caso de uso ─────────────────────────────────────────
+
+const json = (respuesta, codigo, cuerpo) => {
+  respuesta.writeHead(codigo, { 'content-type': MIME['.json'] });
+  respuesta.end(JSON.stringify(cuerpo));
+};
+
+/**
+ * Lo que la pagina necesita para pintar una tarjeta por clase: las clases con su patron de
+ * titulo (para que quien prueba sepa POR QUE un documento cae en una), los esquemas con sus
+ * claves, y que identificadores llevan validador. Se lee del mismo JSON que monta el servicio.
+ */
+function proyectoDelServicio() {
+  const p = JSON.parse(readFileSync(PROYECTO_DEL_SERVICIO, 'utf8'));
+  return {
+    servicio: SERVICIO,
+    clases: (p.clases ?? []).map((c) => ({ clase: c.clase, titulo: c.titulo })),
+    esquemas: (p.esquemas ?? []).map((e) => ({ clase: e.clase, claves: e.claves })),
+    validadores: Object.keys(p.validadores ?? {}),
+  };
+}
+
+async function saludDelServicio() {
+  try {
+    const r = await fetch(`${SERVICIO}/health`, { signal: AbortSignal.timeout(4000) });
+    const cuerpo = await r.text();
+    if (r.ok && cuerpo.trim() === '{"status":"ok"}') return { ok: true, servicio: SERVICIO };
+    return { ok: false, servicio: SERVICIO, explicacion: `contesto ${r.status} en /health, pero no con {"status":"ok"}: hay algo escuchando que no es el servicio del extractor` };
+  } catch (e) {
+    const porTiempo = e?.name === 'TimeoutError';
+    return {
+      ok: false, servicio: SERVICIO,
+      explicacion: porTiempo ? 'nadie contesto en 4 segundos' : 'no se pudo conectar: no hay nadie escuchando ahi',
+    };
+  }
+}
+
+function leeCuerpoBinario(peticion, maximo) {
+  const declarado = Number(peticion.headers['content-length'] ?? 0);
+  if (Number.isFinite(declarado) && declarado > maximo) return Promise.reject(new Error('demasiado grande'));
+  return new Promise((resuelve, rechaza) => {
+    const trozos = [];
+    let bytes = 0;
+    peticion.on('data', (t) => {
+      bytes += t.length;
+      if (bytes > maximo) { rechaza(new Error('demasiado grande')); peticion.destroy(); return; }
+      trozos.push(t);
+    });
+    peticion.on('end', () => resuelve(Buffer.concat(trozos)));
+    peticion.on('error', rechaza);
+  });
+}
+
+/** Reenvia UN documento en crudo a `POST /extraer` del servicio, con sus dos cabeceras, tal cual. */
+async function extraeConElServicio(peticion, respuesta) {
+  let bytes;
+  try {
+    bytes = await leeCuerpoBinario(peticion, BYTES_MAXIMOS_SERVICIO);
+  } catch (e) {
+    return json(respuesta, e.message === 'demasiado grande' ? 413 : 400, { error: e.message === 'demasiado grande' ? 'el documento supera los 20 MB del servicio' : 'cuerpo ilegible' });
+  }
+  if (bytes.length === 0) return json(respuesta, 400, { error: 'el cuerpo esta vacio' });
+  const cabeceras = { 'content-type': 'application/octet-stream' };
+  for (const c of ['x-nombre', 'x-tipo-documento']) if (peticion.headers[c]) cabeceras[c] = String(peticion.headers[c]);
+  try {
+    // Sin tope corto: Tesseract sobre una pagina densa en CPU puede tardar decenas de segundos.
+    const r = await fetch(`${SERVICIO}/extraer`, { method: 'POST', headers: cabeceras, body: bytes, signal: AbortSignal.timeout(300000) });
+    const cuerpo = await r.text();
+    respuesta.writeHead(r.status, { 'content-type': MIME['.json'] });
+    return respuesta.end(cuerpo);
+  } catch (e) {
+    return json(respuesta, 502, { error: e?.name === 'TimeoutError' ? 'el servicio no contesto en 5 minutos' : 'no se pudo contactar con el servicio', servicio: SERVICIO });
+  }
+}
+
 async function sirve(peticion, respuesta) {
   const url = new URL(peticion.url, 'http://localhost');
   const ruta = decodeURIComponent(url.pathname);
@@ -152,6 +240,15 @@ async function sirve(peticion, respuesta) {
   }
   if (DESTINOS[ruta] !== undefined && peticion.method === 'POST') {
     return guardaMuestra(peticion, respuesta, DESTINOS[ruta]);
+  }
+  if (ruta === '/api/servicio/proyecto' && peticion.method === 'GET') {
+    try { return json(respuesta, 200, proyectoDelServicio()); } catch (e) { return json(respuesta, 500, { error: `no se pudo leer el proyecto del servicio: ${e.message}` }); }
+  }
+  if (ruta === '/api/servicio/salud' && peticion.method === 'GET') {
+    return json(respuesta, 200, await saludDelServicio());
+  }
+  if (ruta === '/api/servicio/extraer' && peticion.method === 'POST') {
+    return extraeConElServicio(peticion, respuesta);
   }
 
   for (const [prefijo, base] of RUTAS) {
