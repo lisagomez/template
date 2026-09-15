@@ -72,6 +72,33 @@
   [hidden] { display: none !important; }
   .fila > label { flex: 1 1 12rem; }
   .fila > input[type=text], .fila > button { flex: 0 1 auto; }
+
+  /* ── Por caso de uso: una tarjeta por clase de documento, con su zona de carga ── */
+  .casos { display: grid; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); gap: .9rem; margin-top: .8rem; }
+  .caso { border: 1px solid var(--borde); border-radius: 10px; padding: .85rem .95rem 1rem; display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+  .caso h3 { margin: 0; font-size: .95rem; display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+  .caso .zona { padding: 1.1rem .8rem; font-size: .88rem; }
+  .caso[data-estado="bien"] { border-color: seagreen; }
+  .caso[data-estado="malo"] { border-color: crimson; }
+  .caso[data-estado="aviso"] { border-color: orange; }
+  .caso[data-estado="cargando"] { border-style: dashed; }
+  .claves { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .chip { font-size: .74rem; padding: .08rem .45rem; border-radius: 999px; border: 1px solid var(--borde); font-family: ui-monospace, monospace; }
+  .chip.obligatoria { border-color: color-mix(in srgb, currentColor 55%, transparent); font-weight: 600; }
+  .chip.falta { border-color: crimson; color: crimson; }
+  .chip.validador { border-style: dotted; }
+  .badge { display: inline-block; font-size: .72rem; padding: .05rem .4rem; border-radius: 4px; border: 1px solid var(--borde); white-space: nowrap; }
+  .badge.codigo, .badge.exacto { border-color: seagreen; color: seagreen; }
+  .badge.corroboracion, .badge.checksum { border-color: teal; color: teal; }
+  .badge.motor { border-color: orange; color: darkorange; }
+  .caso code, .resultado td:nth-child(2) { overflow-wrap: anywhere; }
+  .resultado { font-size: .86rem; }
+  .resultado table { font-size: .82rem; }
+  .resultado td:nth-child(2) { min-width: 8rem; }
+  /* La clave y la marca de revision no se parten a media palabra: la tabla ya desplaza en horizontal. */
+  .resultado td:nth-child(1), .resultado td:nth-child(5) { white-space: nowrap; }
+  .resultado details summary { cursor: pointer; opacity: .7; font-size: .82rem; }
+  .veredicto { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -299,6 +326,25 @@
     <button id="btn-tokens-limpiar" type="button">Borrar historial</button>
   </div>
   <div id="tokens-tabla" style="margin-top:.6rem; overflow-x:auto"></div>
+</article>
+
+<!-- ─────────────────────────  POR CASO DE USO  ───────────────────────── -->
+<article class="tarjeta span-12">
+  <h2><span class="num">11</span> Por caso de uso — el servicio OCR completo, documento a documento</h2>
+  <p class="apunte">
+    Aquí no se prueba una pieza, sino <strong>el servicio entero</strong> tal como lo instala un
+    cliente (<code>servicio/</code>, spec 010): clasificación de página, Tesseract por zonas,
+    validadores de identificadores, evidencia por campo y esquema por clase. Una tarjeta por cada
+    clase que el proyecto del servicio declara. Arrastra un documento a la clase que
+    <em>esperas</em>: la tarjeta te dice si el servicio la detectó, qué campos sacó, con qué
+    evidencia, y qué le faltó del esquema. El documento va al servicio configurado (abajo), no a
+    ningún otro sitio.
+  </p>
+  <div class="fila">
+    <span id="servicio-estado" class="apunte">servicio: comprobando…</span>
+    <button id="btn-servicio-comprobar" type="button">Comprobar servicio</button>
+  </div>
+  <div class="casos" id="casos"></div>
 </article>
 
 </div><!-- /.bento -->
@@ -1066,6 +1112,167 @@ $('btn-tokens-limpiar').onclick = () => {
 }
 
 pintaAnalisisDeTokens()
+
+// ── 11. Por caso de uso: el servicio OCR completo ────────────────────────────
+/**
+ * Una tarjeta por clase del proyecto del servicio. El navegador NO habla con el servicio: manda
+ * el documento a `/api/servicio/extraer` de este mismo origen y el servidor de la demo lo
+ * reenvia. Asi el servicio sigue sin CORS y sin publicar puertos, que es como va en el compose.
+ */
+const EVIDENCIA_EXPLICADA = {
+  codigo: 'leído de un código (QR/barras): la fuente más fiable',
+  exacto: 'coincide letra por letra con una segunda fuente',
+  corroboracion: 'lo confirmó una segunda lectura',
+  checksum: 'pasó el dígito verificador del identificador',
+  motor: 'solo lo dice el motor: sin segunda fuente, va a revisión',
+}
+const badge = (evidencia) => `<span class="badge ${esc(evidencia)}" title="${esc(EVIDENCIA_EXPLICADA[evidencia] ?? '')}">${esc(evidencia)}</span>`
+const ms = (n) => (typeof n === 'number' ? `${num(Math.round(n))} ms` : '—')
+
+async function compruebaElServicio() {
+  const r = await fetch('/api/servicio/salud').then((x) => x.json()).catch(() => ({ ok: false, explicacion: 'la demo no pudo preguntar' }))
+  $('servicio-estado').innerHTML = r.ok
+    ? `servicio: <strong style="color:seagreen">en línea</strong> en <code>${esc(r.servicio)}</code>`
+    : `servicio: <strong style="color:crimson">no disponible</strong> en <code>${esc(r.servicio ?? '?')}</code> — ${esc(r.explicacion ?? '')}. ` +
+      `Levántalo con <code>docker compose --profile ocr up</code> o con el contenedor suelto, y vuelve a comprobar.`
+  return r.ok
+}
+$('btn-servicio-comprobar').onclick = compruebaElServicio
+
+/** Los casos de uso: las clases declaradas, mas los esquemas que solo aplican por ruta (cfdi va por XML). */
+function casosDeUso(proyecto) {
+  const esquemaDe = new Map(proyecto.esquemas.map((e) => [e.clase, e.claves]))
+  const casos = proyecto.clases.map((c) => ({ clase: c.clase, titulo: c.titulo, claves: esquemaDe.get(c.clase) ?? [], porTitulo: true }))
+  for (const e of proyecto.esquemas) {
+    if (!casos.some((c) => c.clase === e.clase)) casos.push({ clase: e.clase, titulo: null, claves: e.claves, porTitulo: false })
+  }
+  return casos
+}
+
+function pintaCasos(proyecto) {
+  const validadores = new Set(proyecto.validadores)
+  $('casos').innerHTML = casosDeUso(proyecto).map((caso) => {
+    const id = `caso-${caso.clase}`
+    const chips = caso.claves.map((k) =>
+      `<span class="chip ${k.obligatoria ? 'obligatoria' : ''} ${validadores.has(k.clave) ? 'validador' : ''}" title="${k.obligatoria ? 'obligatoria' : 'opcional'}${validadores.has(k.clave) ? ' · con validador de dígito verificador' : ''}">${esc(k.clave)}</span>`).join('')
+    const comoSeDetecta = caso.porTitulo
+      ? `<span class="apunte">se detecta por título: <code>${esc(caso.titulo)}</code></span>`
+      : `<span class="apunte">clase fija de la ruta XML: no se detecta por título, la asigna el propio documento fiscal</span>`
+    return `
+      <section class="caso" id="${id}" data-estado="">
+        <h3><code>${esc(caso.clase)}</code> <span class="apunte">${caso.claves.length} clave(s)${caso.claves.length === 0 ? ' — sin esquema: solo se clasifica' : ''}</span></h3>
+        ${comoSeDetecta}
+        <div class="claves">${chips || '<span class="apunte">sin claves declaradas</span>'}</div>
+        <div class="zona" id="zona-${id}" tabindex="0" role="button">arrastra aquí un <strong>${esc(caso.clase.replace(/_/g, ' '))}</strong><br><span class="apunte">PDF, imagen o XML · o pulsa para elegir</span></div>
+        <input type="file" id="file-${id}" accept="${caso.porTitulo ? 'application/pdf,image/*,.xml' : '.xml,application/xml,text/xml'}" multiple hidden>
+        <div class="resultado" id="salida-${id}"></div>
+      </section>`
+  }).join('')
+
+  for (const caso of casosDeUso(proyecto)) {
+    const id = `caso-${caso.clase}`
+    zonaDeArchivos(`zona-${id}`, `file-${id}`, async ({ archivos }) => {
+      if (archivos.length === 0) return
+      const tarjeta = $(id)
+      tarjeta.dataset.estado = 'cargando'
+      pinta(`salida-${id}`, aviso(`Enviando ${archivos.length} documento(s) al servicio… Tesseract en CPU puede tardar unos segundos por página.`, ''))
+      const bloques = []
+      for (const { archivo, ruta } of archivos) {
+        bloques.push(await extraeConElServicio(caso, archivo, ruta))
+        pinta(`salida-${id}`, bloques.map((b) => b.html).join('<hr>'))
+      }
+      // El estado de la tarjeta es el PEOR de sus documentos: una tarjeta verde con un rojo dentro mentiria.
+      const orden = ['bien', 'aviso', 'malo']
+      tarjeta.dataset.estado = bloques.reduce((peor, b) => (orden.indexOf(b.estado) > orden.indexOf(peor) ? b.estado : peor), 'bien')
+    })
+  }
+}
+
+async function extraeConElServicio(caso, archivo, ruta) {
+  const arranque = performance.now()
+  let r
+  try {
+    r = await fetch('/api/servicio/extraer', {
+      method: 'POST',
+      headers: { 'x-nombre': encodeURIComponent(ruta), 'x-tipo-documento': encodeURIComponent(caso.clase) },
+      body: await archivo.arrayBuffer(),
+    })
+  } catch (e) {
+    return { estado: 'malo', html: aviso(`<strong>${esc(ruta)}</strong>: no se pudo enviar (${esc(e.message)})`, 'malo') }
+  }
+  const cuerpo = await r.json().catch(() => ({ error: 'respuesta ilegible' }))
+  if (!r.ok || !cuerpo.documento) {
+    return { estado: 'malo', html: aviso(`<strong>${esc(ruta)}</strong>: el servicio contestó ${r.status} — ${esc(cuerpo.error ?? 'sin detalle')}`, 'malo') }
+  }
+  return pintaLectura(caso, ruta, cuerpo.documento, performance.now() - arranque)
+}
+
+function pintaLectura(caso, ruta, d, msIdaYVuelta) {
+  const detectada = d.estructura.clase
+  const acierta = detectada === caso.clase
+  const sinClase = d.estructura.sinClase
+  const estado = d.ruta === 'ninguna' ? 'malo' : acierta ? 'bien' : sinClase ? 'aviso' : 'malo'
+  const evidenciaDeClase = d.lectura?.clasesDePagina?.find((c) => c.clase === detectada)?.evidencia ?? null
+
+  const veredicto = d.ruta === 'ninguna'
+    ? aviso(`<span class="veredicto">No se pudo leer.</span> Motivo: <em>${esc(d.motivo)}</em>`, 'malo')
+    : acierta
+      ? aviso(`<span class="veredicto">Clase detectada: <code>${esc(detectada)}</code> ✓</span>${evidenciaDeClase ? ` — casó con «<em>${esc(evidenciaDeClase)}</em>»` : ''}`, 'bien')
+      : sinClase
+        ? aviso(`<span class="veredicto">Sin clasificar.</span> Esperabas <code>${esc(caso.clase)}</code> y ningún título casó. Sin clase no hay esquema que aplicar: los campos de abajo son los que los patrones encontraron sueltos.`, '')
+        : aviso(`<span class="veredicto">Clase distinta: detectó <code>${esc(detectada)}</code>, esperabas <code>${esc(caso.clase)}</code>.</span>${evidenciaDeClase ? ` Casó con «<em>${esc(evidenciaDeClase)}</em>».` : ''} O el documento no es lo que creías, o el patrón de título del proyecto está mal.`, 'malo')
+
+  const filas = d.campos.map((c) => `
+    <tr data-bajo="${c.revisionHumana ? 'si' : 'no'}">
+      <td><code>${esc(c.clave)}</code></td>
+      <td>${esc(c.valor)}</td>
+      <td>${typeof c.confianza === 'number' ? c.confianza.toFixed(2) : '—'}</td>
+      <td>${badge(c.evidencia)}</td>
+      <td>${c.revisionHumana ? '▼ revisar' : '✓'}</td>
+      <td><span class="apunte">${esc(c.procedencia)}</span></td>
+    </tr>`).join('')
+  const tabla = d.campos.length === 0
+    ? '<p class="apunte">Ningún campo extraído.</p>'
+    : `<div style="overflow-x:auto"><table><thead><tr><th>Clave</th><th>Valor</th><th>Conf.</th><th>Evidencia</th><th>Rev.</th><th>Fuente</th></tr></thead><tbody>${filas}</tbody></table></div>`
+
+  const faltantes = d.estructura.faltantes.map((k) => `<span class="chip falta">${esc(k)}</span>`).join('')
+  // `noPrevistos` son CAMPOS enteros (CampoConEvidencia), no claves: se pinta la clave de cada uno.
+  const noPrevistos = d.estructura.noPrevistos.map((c) => `<span class="chip" title="${esc(c.valor)}">${esc(c.clave)}</span>`).join('')
+  const esquema = sinClase ? '' : `
+    <p><strong>Esquema <code>${esc(detectada)}</code></strong>:
+      ${d.estructura.faltantes.length === 0 ? '<span style="color:seagreen">completo</span>' : `faltan ${faltantes}`}
+      ${d.estructura.noPrevistos.length > 0 ? ` · no previstos: ${noPrevistos}` : ''}</p>`
+
+  const invalidos = d.identificadoresInvalidos.length === 0 ? '' :
+    `<p style="color:crimson"><strong>Identificadores inválidos</strong>: ${d.identificadoresInvalidos.map((i) => `<code>${esc(i.clave)}</code> ${esc(i.valor)} (${esc(i.motivo)})`).join(' · ')}</p>`
+  const corregidos = d.corregidos.length === 0 ? '' :
+    `<p><strong>Corregidos por checksum</strong>: ${d.corregidos.map((c) => `<code>${esc(c.clave)}</code> ${esc(c.original)} → ${esc(c.valor)}`).join(' · ')}</p>`
+  const codigos = d.codigos.length === 0 ? '' :
+    `<p><strong>Códigos leídos</strong>: ${d.codigos.map((c) => `${esc(c.tipo)} (${c.caracteres} car.)`).join(' · ')}</p>`
+  const duplicado = d.duplicadoDe ? `<p class="apunte">Duplicado de <code>${esc(d.duplicadoDe)}</code>: mismos bytes que otro documento ya leído.</p>` : ''
+
+  const resumenEvidencia = Object.entries(d.evidencia).filter(([, n]) => n > 0).map(([e, n]) => `${badge(e)} ${n}`).join(' ')
+  const cabecera = `
+    <p><strong>${esc(ruta)}</strong> · ruta <code>${esc(d.ruta)}</code> <span class="apunte">(${esc(d.motivo)})</span> · ${d.paginas} pág.
+      · <strong>${d.campos.length}</strong> campo(s), <strong>${d.revisionHumana}</strong> a revisión ${resumenEvidencia ? '· ' + resumenEvidencia : ''}</p>
+    <p class="apunte">tiempos: códigos ${ms(d.tiempos.codigos)} · motor ${ms(d.tiempos.motor)} · respaldo ${ms(d.tiempos.respaldo)} · total en el servicio ${ms(d.tiempos.total)} · ida y vuelta ${ms(msIdaYVuelta)}</p>`
+
+  const crudo = `<details><summary>JSON completo de la respuesta</summary><pre>${esc(JSON.stringify(d, null, 2))}</pre></details>`
+  return { estado, html: veredicto + cabecera + tabla + esquema + invalidos + corregidos + codigos + duplicado + crudo }
+}
+
+async function arrancaCasosDeUso() {
+  let proyecto
+  try {
+    proyecto = await fetch('/api/servicio/proyecto').then((x) => x.json())
+    if (proyecto.error) throw new Error(proyecto.error)
+  } catch (e) {
+    return pinta('casos', aviso(`No se pudo leer el proyecto del servicio: ${esc(e.message)}`, 'malo'))
+  }
+  pintaCasos(proyecto)
+  await compruebaElServicio()
+}
+arrancaCasosDeUso()
 
 refrescaCorpus()
 </script>

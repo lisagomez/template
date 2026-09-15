@@ -72,7 +72,14 @@ const comprueba = (que, condicion, detalle = '') => {
   if (!condicion) fallos++
 }
 
-const servidor = spawn('node', ['demo/servidor.mjs'], { cwd: RAIZ, stdio: ['ignore', 'pipe', 'pipe'] })
+// El servicio OCR apunta a un puerto MUERTO a proposito: asi la seccion 11 se prueba sin Docker,
+// y lo que se comprueba es el diagnostico (que diga «no hay nadie») y el pintado con respuestas
+// simuladas. Contra el servicio real se prueba a mano, con `npm run demo` y el contenedor arriba.
+const PUERTO_MUERTO_DEL_SERVICIO = 59998
+const servidor = spawn('node', ['demo/servidor.mjs'], {
+  cwd: RAIZ, stdio: ['ignore', 'pipe', 'pipe'],
+  env: { ...process.env, EXTRACTOR_SERVICIO_URL: `http://127.0.0.1:${PUERTO_MUERTO_DEL_SERVICIO}` },
+})
 let url = null
 await new Promise((listo, falla) => {
   const tiempo = setTimeout(() => falla(new Error('el servidor no arranco en 60 s')), 60000)
@@ -96,7 +103,7 @@ try {
   comprueba('sin errores de consola al cargar', errores.length === 0, errores.join(' · '))
   comprueba('el contenedor .bento existe', (await pagina.locator('.bento').count()) === 1)
   const tarjetas = pagina.locator('.tarjeta')
-  comprueba('hay diez tarjetas (ocho de siempre + catalogos + uso de tokens)', (await tarjetas.count()) === 10)
+  comprueba('hay once tarjetas (ocho de siempre + catalogos + uso de tokens + por caso de uso)', (await tarjetas.count()) === 11)
 
   // Geometria real, no solo CSS declarado: en viewport ancho dos tarjetas de medio ancho quedan
   // LADO A LADO; en uno angosto, la regla `@media` las apila. Es lo unico que demuestra que el
@@ -291,7 +298,86 @@ try {
   await pagina.locator('#btn-tokens-limpiar').click()
   comprueba('vuelve a decir que no hay corridas', /Sin corridas todavía/i.test(await pagina.locator('#tokens-resumen').innerText()))
 
-  const inesperadosFinal = errores.filter((e) => !e.includes('59999') && !/ERR_CONNECTION_REFUSED/.test(e))
+  console.log('\n\x1b[1mPor caso de uso: el servicio OCR, una tarjeta por clase\x1b[0m')
+  comprueba('la seccion Por caso de uso esta', (await pagina.locator('h2', { hasText: 'Por caso de uso' }).count()) === 1)
+  await pagina.locator('.caso').first().waitFor({ timeout: 10000 })
+  const casos = await pagina.locator('.caso').evaluateAll((n) => n.map((x) => x.id.replace('caso-', '')))
+  comprueba(
+    'una tarjeta por clase del proyecto del servicio, mas cfdi (clase fija de la ruta XML)',
+    ['contrato', 'alta_imss', 'ine', 'curp', 'constancia_fiscal', 'carta_recomendacion', 'factura', 'minuta', 'cfdi'].every((c) => casos.includes(c)),
+    casos.join(', '),
+  )
+  comprueba('cada tarjeta ensena POR QUE se detecta (el patron de titulo)', /se detecta por título/.test(await pagina.locator('#caso-factura').innerText()))
+  comprueba('las claves del esquema se listan, y la obligatoria se distingue', (await pagina.locator('#caso-factura .chip.obligatoria').count()) > 0)
+  comprueba('el identificador con validador se marca', (await pagina.locator('#caso-alta_imss .chip.validador').count()) > 0)
+  comprueba('cfdi solo acepta XML', /xml/i.test(await pagina.locator('#file-caso-cfdi').getAttribute('accept')) && !/image/.test(await pagina.locator('#file-caso-cfdi').getAttribute('accept')))
+
+  // El diagnostico contra el puerto muerto, hecho por el SERVIDOR de la demo, no por el navegador.
+  await pagina.locator('#servicio-estado').getByText(/no disponible/i).waitFor({ timeout: 10000 })
+  const estadoServicio = await pagina.locator('#servicio-estado').innerText()
+  comprueba('dice que el servicio no esta disponible y donde lo busco', /no disponible/i.test(estadoServicio) && estadoServicio.includes(String(PUERTO_MUERTO_DEL_SERVICIO)))
+  comprueba('y explica que no hay nadie escuchando, no "failed to fetch"', /nadie escuchando/i.test(estadoServicio) && !/failed to fetch/i.test(estadoServicio))
+  comprueba('y dice como levantarlo', /docker compose --profile ocr/.test(estadoServicio))
+
+  // Soltar un documento con el servicio caido: la tarjeta lo dice en rojo, sin colgarse. El
+  // servidor de la demo contesta 502, y Chrome lo apunta en consola: es la prueba, no la pagina.
+  const erroresAntesDel502 = errores.length
+  await pagina.locator('#file-caso-factura').setInputFiles(ESCANEO)
+  await pagina.locator('#caso-factura[data-estado="malo"]').waitFor({ timeout: 15000 })
+  comprueba('con el servicio caido la tarjeta queda en rojo y nombra el fallo', /no se pudo contactar/i.test(await pagina.locator('#salida-caso-factura').innerText()))
+  comprueba('y el 502 del reenvio si llego a la consola: la prueba del servicio caido fue real', errores.slice(erroresAntesDel502).some((e) => /502/.test(e)))
+
+  // Respuestas SIMULADAS del servicio, con la forma exacta que devuelve `servicio/lectura.mjs`:
+  // es la unica manera de probar el pintado de aciertos, fallos y faltantes sin Tesseract.
+  const lecturaSimulada = (clase, campos, faltantes) => ({
+    documento: {
+      documentoId: 'x', nombre: 'x', tipoDocumento: clase, ruta: 'motor', motivo: 'imagen image/png al motor', paginas: 1,
+      campos, evidencia: { codigo: 0, exacto: 0, corroboracion: 0, checksum: campos.filter((c) => c.evidencia === 'checksum').length, motor: campos.filter((c) => c.evidencia === 'motor').length },
+      revisionHumana: campos.filter((c) => c.revisionHumana).length,
+      // `noPrevistos` lleva CAMPOS enteros, no claves: asi lo devuelve `estructuraPorClase`.
+      estructura: { clase, sinClase: false, campos: {}, faltantes, noPrevistos: campos.filter((c) => c.clave === 'rfc'), paginas: [0] },
+      identificadoresInvalidos: [{ clave: 'rfc_receptor', valor: 'XAXX010101ZZZ', procedencia: 'ocr', pagina: 0, motivo: 'digito verificador' }],
+      corregidos: [], codigos: [{ tipo: 'cfdi', caracteres: 120 }], paginasAlRespaldo: [], duplicadoDe: null,
+      tiempos: { codigos: 12, motor: 1500, respaldo: 0, total: 1530 },
+      lectura: { clasesDePagina: [{ clase, evidencia: 'FACTURA' }] },
+    },
+  })
+  let respuestaSimulada = lecturaSimulada('factura', [
+    { clave: 'rfc_emisor', valor: 'AAA010101AAA', confianza: 0.6, procedencia: 'ocr', evidencia: 'checksum', revisionHumana: false },
+    { clave: 'total', valor: '1160.00', confianza: 0.9, procedencia: 'ocr', evidencia: 'motor', revisionHumana: true },
+    { clave: 'rfc', valor: 'XAXX010101000', confianza: 0.5, procedencia: 'ocr', evidencia: 'checksum', revisionHumana: false },
+  ], ['uuid', 'fecha'])
+  await pagina.route('**/api/servicio/extraer', (ruta) => ruta.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(respuestaSimulada) }))
+
+  await pagina.locator('#file-caso-factura').setInputFiles(ESCANEO)
+  await pagina.locator('#caso-factura[data-estado="bien"]').waitFor({ timeout: 15000 })
+  const acierto = await pagina.locator('#salida-caso-factura').innerText()
+  comprueba('clase esperada = detectada: veredicto en verde con la evidencia del titulo', /Clase detectada: factura ✓/.test(acierto) && /FACTURA/.test(acierto))
+  comprueba('la tabla trae cada campo con su evidencia', /rfc_emisor/.test(acierto) && /checksum/.test(acierto) && /total/.test(acierto))
+  comprueba('el campo que solo dice el motor va a revision; el checksum no', (await pagina.locator('#salida-caso-factura tr[data-bajo="si"]').count()) === 1)
+  comprueba('los faltantes del esquema se nombran', (await pagina.locator('#salida-caso-factura .chip.falta').evaluateAll((n) => n.map((x) => x.textContent))).join(',') === 'uuid,fecha')
+  comprueba('un campo no previsto se pinta por su clave, no como [object Object]', /no previstos:\s*rfc\b/.test(acierto) && !/object Object/.test(acierto), 'cazado el 2026-09-14 en una captura del manual')
+  comprueba('la clave no se parte a media palabra', /nowrap/.test(await pagina.locator('#salida-caso-factura td').first().evaluate((n) => getComputedStyle(n).whiteSpace)))
+  comprueba('los identificadores invalidos se ensenan con su motivo', /rfc_receptor/.test(acierto) && /digito verificador/.test(acierto))
+  comprueba('los codigos leidos se cuentan sin ensenar la carga', /cfdi \(120 car\.\)/.test(acierto))
+  comprueba('los tiempos por etapa salen', /motor 1[.,]?500 ms/.test(acierto.replace(/ /g, ' ')))
+  comprueba('el JSON completo queda disponible, plegado', (await pagina.locator('#salida-caso-factura details').count()) === 1)
+
+  // El mismo documento en la tarjeta EQUIVOCADA: el servicio clasifica por contenido, no por la cabecera.
+  await pagina.locator('#file-caso-minuta').setInputFiles(ESCANEO)
+  await pagina.locator('#caso-minuta[data-estado="malo"]').waitFor({ timeout: 15000 })
+  comprueba('clase esperada ≠ detectada: veredicto en rojo que nombra las dos', /detectó factura, esperabas minuta/.test(await pagina.locator('#salida-caso-minuta').innerText()))
+
+  // Sin clase: ningun titulo caso. Es aviso, no fallo: puede ser un documento fuera del proyecto.
+  respuestaSimulada = lecturaSimulada('sin_clasificar', [], [])
+  respuestaSimulada.documento.estructura.sinClase = true
+  await pagina.locator('#file-caso-ine').setInputFiles(ESCANEO)
+  await pagina.locator('#caso-ine[data-estado="aviso"]').waitFor({ timeout: 15000 })
+  comprueba('sin clasificar: aviso en ambar, y explica que sin clase no hay esquema', /Sin clasificar/.test(await pagina.locator('#salida-caso-ine').innerText()))
+  await pagina.unroute('**/api/servicio/extraer')
+
+  // El 502 provocado se filtra por su texto exacto, no por "50x": otro codigo seria un fallo real.
+  const inesperadosFinal = errores.filter((e) => !e.includes('59999') && !/ERR_CONNECTION_REFUSED/.test(e) && !/status of 502 \(Bad Gateway\)/.test(e))
   comprueba('ningun error de consola no provocado en toda la corrida', inesperadosFinal.length === 0, inesperadosFinal.join(' · '))
 } finally {
   await navegador.close()

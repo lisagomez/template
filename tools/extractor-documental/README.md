@@ -300,7 +300,7 @@ argumento cuando la funcion paso a exigir dos. Ninguna revision del codigo vio n
 como dependencia, porque su nucleo no tiene ninguna. Si no esta instalado lo dice y sale, en vez de
 fallar como si la demo estuviera rota.
 
-La demo esta en un **bento grid** de diez tarjetas (`.tarjeta.span-N` sobre `.bento`, doce
+La demo esta en un **bento grid** de once tarjetas (`.tarjeta.span-N` sobre `.bento`, doce
 columnas). `verifica:demo` lo comprueba con geometria real, no con la clase declarada: en un
 viewport ancho dos tarjetas de medio ancho quedan lado a lado; bajo 760px la misma pareja se apila,
 porque `.tarjeta{grid-column:1/-1!important}` gana por especificidad sin tocar el HTML.
@@ -320,6 +320,36 @@ callback opcional `alConsumirTokens?: (uso: UsoDeTokens | null) => void`, y `mot
 llama con lo que lea de `respuesta.usage` (o `null` si el servidor no lo declara, o si lo declara
 a medias — un total que mezcla lo real con lo desconocido es peor que admitir que no se sabe). Es
 **aditivo**: la firma de `extrae()` no cambio, así que ningun llamador existente se rompe.
+
+### Por caso de uso: el servicio OCR entero, una tarjeta por clase (seccion 11)
+
+Las diez tarjetas anteriores prueban **piezas** del nucleo en el navegador. La once prueba **el
+servicio completo tal como lo instala un cliente** (`servicio/`, spec 010): clasificacion de
+pagina, Tesseract por zonas, validadores, evidencia por campo y esquema por clase. Lee
+`servicio/proyecto-ejemplo.json` (o `EXTRACTOR_PROYECTO`) y pinta una tarjeta por cada clase
+declarada —mas `cfdi`, que es clase fija de la ruta XML— con su patron de titulo, sus claves (la
+obligatoria en negrita, la que lleva validador punteada) y una zona de carga. Sueltas el documento
+en la clase que **esperas** y la tarjeta se pone en verde (la detecto), rojo (detecto otra, o no
+pudo leer) o ambar (ningun titulo caso), y debajo: campos con su evidencia, faltantes del esquema,
+identificadores invalidos con su motivo, codigos leidos, tiempos por etapa y el JSON completo.
+
+El navegador **no le habla al servicio**: manda el documento a `/api/servicio/extraer` de la propia
+demo, y `demo/servidor.mjs` lo reenvia a `EXTRACTOR_SERVICIO_URL` (por defecto
+`http://127.0.0.1:8080`, la misma variable que usa `app` en el compose). No es un proxy abierto: la
+pagina no elige el destino. Asi el servicio sigue sin CORS y sin publicar puertos, como va en
+produccion. Para probarlo en local sin el stack entero:
+
+```bash
+docker build -f servicio/Dockerfile -t extractor-ocr-local .
+docker run -d --name extractor-ocr-local -p 8080:8080 --tmpfs /tmp/extractor:uid=1001,gid=1001,mode=700 extractor-ocr-local
+npm run demo
+```
+
+El `--tmpfs` no es opcional: es el temporal donde el motor deja los documentos en transito, y el
+compose lo monta por su cuenta; sin el, el contenedor suelto arranca, contesta `/health` y falla
+en `/extraer` con `ENOENT` (medido el 2026-09-14). `verifica:demo` prueba esta seccion **sin
+Docker**: apunta el servicio a un puerto muerto para comprobar el diagnostico, y simula las
+respuestas para comprobar el pintado de aciertos, fallos, faltantes e invalidos.
 
 > **Estado de la evidencia.** Las direcciones de CFDI 4.0 y del timbre estan **confirmadas** contra
 > un CFDI real de honorarios (2026-09-10). La de **pagos sigue sin confirmar**: no ha pasado ningun
