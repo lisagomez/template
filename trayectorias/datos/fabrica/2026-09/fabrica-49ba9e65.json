@@ -1,0 +1,69 @@
+{
+ "version": 1,
+ "id": "fabrica-49ba9e65",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "ee9f9167-f4db-4a96-b919-d3db50300983",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-15T04:05:01.950Z",
+  "fin": "2026-09-15T05:56:04.709Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler",
+   "memory-manager"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5": 31,
+  "claude-fable-5-1": 174
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 108,
+   "AskUserQuestion": 7,
+   "Skill": 1
+  },
+  "llamadasAlModelo": 62,
+  "turnos": 12,
+  "subagentes": 0,
+  "comandos": 2,
+  "ediciones": 23
+ },
+ "uso": {
+  "entrada": 1328,
+  "salida": 197767,
+  "cacheCreacion": 355341,
+  "cacheLectura": 12338419
+ },
+ "costoUsd": 16.5258,
+ "tiempos": {
+  "totalMs": 6662759
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 4
+  },
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 3
+  }
+ ],
+ "resultado": {
+  "errores": 4,
+  "erroresPor": {
+   "Bash": 4
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}
