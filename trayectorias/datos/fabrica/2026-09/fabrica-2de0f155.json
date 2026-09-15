@@ -9,51 +9,61 @@
  },
  "cuando": {
   "inicio": "2026-09-13T13:06:36.024Z",
-  "fin": "2026-09-14T05:39:52.545Z"
+  "fin": "2026-09-14T15:18:09.623Z"
  },
  "actor": {
   "skills": [
+   "artifact-design",
    "goal-compiler",
-   "memory-manager"
+   "memory-manager",
+   "video-visuals"
   ],
   "tarea": "implementacion"
  },
  "modelos": {
-  "claude-fable-5-1": 667
+  "claude-fable-5-1": 756,
+  "claude-sonnet-5": 179,
+  "claude-opus-5": 199
  },
  "acciones": {
   "herramientas": {
-   "Bash": 359,
-   "ToolSearch": 3,
+   "Bash": 515,
+   "ToolSearch": 6,
    "WebFetch": 4,
-   "Agent": 6,
-   "Write": 1,
-   "Monitor": 5,
-   "Skill": 1,
-   "AskUserQuestion": 2,
-   "TaskStop": 1
+   "Agent": 11,
+   "Write": 8,
+   "Monitor": 8,
+   "Skill": 3,
+   "AskUserQuestion": 5,
+   "TaskStop": 3,
+   "Read": 22,
+   "ExitPlanMode": 1,
+   "Edit": 38,
+   "mcp__playwright__browser_navigate": 1,
+   "SendUserFile": 1,
+   "Artifact": 4
   },
-  "llamadasAlModelo": 259,
-  "turnos": 70,
-  "subagentes": 6,
-  "comandos": 2,
-  "ediciones": 127
+  "llamadasAlModelo": 527,
+  "turnos": 121,
+  "subagentes": 11,
+  "comandos": 3,
+  "ediciones": 196
  },
  "uso": {
-  "entrada": 5562,
-  "salida": 440473,
-  "cacheCreacion": 1650102,
-  "cacheLectura": 153040475
+  "entrada": 6924,
+  "salida": 668716,
+  "cacheCreacion": 4271710,
+  "cacheLectura": 272816116
  },
- "costoUsd": 80.9657,
+ "costoUsd": 138.9888,
  "tiempos": {
-  "totalMs": 59596521
+  "totalMs": 94293599
  },
  "gates": [
   {
    "nombre": "prueba",
    "resultado": "verde",
-   "veces": 31
+   "veces": 39
   },
   {
    "nombre": "verifica:specs",
@@ -63,17 +73,17 @@
   {
    "nombre": "validate",
    "resultado": "verde",
-   "veces": 29
+   "veces": 34
   },
   {
    "nombre": "typecheck",
    "resultado": "verde",
-   "veces": 9
+   "veces": 10
   },
   {
    "nombre": "build",
-   "resultado": "verde",
-   "veces": 6
+   "resultado": "rojo",
+   "veces": 10
   },
   {
    "nombre": "lint",
@@ -83,18 +93,19 @@
   {
    "nombre": "verify:gobernanza",
    "resultado": "verde",
-   "veces": 8
+   "veces": 10
   },
   {
    "nombre": "regresion",
    "resultado": "verde",
-   "veces": 7
+   "veces": 8
   }
  ],
  "resultado": {
-  "errores": 9,
+  "errores": 12,
   "erroresPor": {
-   "Bash": 9
+   "Bash": 11,
+   "mcp__playwright__browser_navigate": 1
   }
  },
  "cobertura": {
