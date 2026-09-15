@@ -77,7 +77,8 @@ RESTRICCIONES. Optimiza por el mejor dictado posible en esta máquina, no por el
   `snippets`, `command_mode`, `smart_commands`, `focus_mode`, `paste` (Quartz), SQLite, Flask :5678.
   **13 de ~20 módulos tocan AppKit/Quartz/MLX/pyobjc.** `sflow-next` (v3, Swift) es **404** en GitHub.
   Sus 20 wavs de `audio/` son tomas de ~2,4 s, 16 kHz, **sin transcripción de referencia**.
-  Clon de lectura en `/tmp/claude-1000/-home-gsore-code-template/ee9f9167-f4db-4a96-b919-d3db50300983/scratchpad/sflow`.
+  El clon de lectura del 2026-09-14 vivía en el scratchpad de aquella sesión y **ya no existe**: clónalo
+  de nuevo en el tuyo (`git clone --depth 1 https://github.com/daniel-carreon/sflow`) antes del mapa.
 - **`tools/voz`** v0.4.0: núcleo TS sin deps; `ModeloVoz` (Silero ONNX o `modeloEnergia`),
   diarización por lotes y en vivo, `Transcriptor { transcribe(audio, hz) → { texto } }` y
   `transcribeTurnos` en serie; entry points `./browser` y `./node` (`leeWav`, `preparaParaModelo`,
