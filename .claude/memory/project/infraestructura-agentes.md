@@ -112,6 +112,8 @@ levantado. La primera corrida real la hace quien despliegue.
    - La lección: **pinear sin vigilar no es estabilidad, es rezago silencioso.** El pineo
      hizo su trabajo; faltaba el sensor del otro extremo. Un homeostato necesita las dos
      mitades.
+   - El Hermes **local** de la máquina de desarrollo (git en `~/.hermes`, systemd de usuario) es
+     otro tema y otro actualizador: ver [[hermes-local-y-hermes-update]].
 2. **La aserción 3 de GATE 3 se deja sin escribir a propósito.** Las dos primeras solo
    comprueban que existen archivos; la tercera comprueba que el *contenido* sirve, y depende
    del proyecto. Un GATE 3 con solo las dos primeras es teatro. Es un hueco **por diseño**,
