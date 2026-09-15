@@ -9,6 +9,7 @@
 ## project/ — Proyectos y decisiones activas
 - [Capa de gobernanza agentica](project/gobernanza-agentica.md) — 7 controles firmados 2026-08-23; capa B medida en frio (ultima tanda 2026-08-26: 5 corridas, 4 verde-plus); deuda del template vs del entorno, no se mezclan.
 - [Infraestructura de agentes y respaldos](project/infraestructura-agentes.md) — Fase 0 (2 verticales, sin chat), imagen pineada por digest y vigilada; nada provisionado: lo cierra un derivado.
+- [Hermes local y /hermes-update](project/hermes-local-y-hermes-update.md) — el Hermes de ESTA máquina (git, systemd de usuario) no es el de producción; skill global fuera del repo (2026-09-14): v0.21.2→v0.21.3, config rota y token de Telegram revocado arreglados; "N commits detrás" recién actualizado es normal.
 - [Eficiencia de tokens y frescura](project/eficiencia-tokens.md) — 4 sensores en el gate; 2026-08-26: `AGENTS.md` solo obliga, lo informativo en `.claude/rules/`, `GEMINI.md` generado, contabilidad medida en frio.
 - [La imprenta de CLIs](project/imprenta-de-clis.md) — MCP cuestan 20363 tok/sesion (medido); "100x" refutado; la libreria publica no publica grados; esta maquina SI imprime (Go 1.26.7, 5 CLIs en libreria).
 - [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — apps y herramientas (`tools/`, `npm run empaqueta`, `--en <ruta>` contra tu proyecto real); puerta `docs/CREAR-UNA-HERRAMIENTA.md` + skill en PR #31, CDC firmado; PRP-002 en codigo, BD sin aplicar.
