@@ -34,6 +34,8 @@ lo bastante como para sacarlo de ahi.
 - `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
 - **Extractor documental** listo para instalar (`tools/extractor-documental/`): OCR, codigos de
   barras, revision humana y mapeo contra los catalogos que tu proyecto ya tiene
+- **Voz y dictado** listos para instalar (`tools/voz/`, `tools/dictado/`): VAD y diarizacion
+  locales, y dictado en WSL2 → Windows con el motor elegido por medicion (Parakeet, WER 3,3 %)
 - Playwright CLI para QA automatizado
 - 11 AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -283,19 +285,22 @@ hooks que nadie encuentra.
 comprueba que `'use client'` sobrevive al build, y **instala el tarball en un proyecto
 limpio para importarlo de verdad**. Ahi "es compatible" deja de ser una opinion.
 
-En el arbol viven tres:
+En el arbol viven cuatro:
 
 | Herramienta | Que es |
 |---|---|
 | `tools/ejemplo-herramienta/` | El esqueleto minimo, para copiar |
 | `tools/voz/` | `@tu-scope/voz` — VAD y diarizacion locales. Modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node |
-| `tools/extractor-documental/` | `@tu-scope/extractor-documental` — extraccion de datos de documentos con revision humana. **372 pruebas**, ocho entry points, y el motor de OCR y el almacen **inyectados**: si el documento sale del perimetro lo decide el proyecto, no la herramienta |
+| `tools/extractor-documental/` | `@tu-scope/extractor-documental` — extraccion de datos de documentos con revision humana. **776 pruebas**, once entry points, y el motor de OCR y el almacen **inyectados**: si el documento sale del perimetro lo decide el proyecto, no la herramienta |
+| `tools/dictado/` | `@tu-scope/dictado` — hablar y que el texto aparezca donde esta el cursor (WSL2 → Windows), sobre `voz`. Motor **elegido por medicion** (Parakeet TDT v3 int8: WER 3,3 % a 532 ms), diccionario, snippets, comandos de voz, lote con hablantes y servicio remoto con token. 29 pruebas; los pesos **no viajan** |
 
 El extractor es el ejemplo grande de que la regla aguanta: su nucleo hace OCR, codigos de barras,
 reconciliacion contra catalogos y propuesta de modelo E-R **con cero dependencias**. Lo que
 necesita React, Supabase o un proveedor vive en subpaths aparte, y `npm run empaqueta` importa
-**los ocho** en un proyecto limpio para comprobarlo. Su historia esta en
-`docs/SDD-extractor-documental.md` y `.claude/specs/007-extractor-documental/`.
+**los once** en un proyecto limpio para comprobarlo. Su historia esta en
+`docs/SDD-extractor-documental.md` y `.claude/specs/007-extractor-documental/`. El dictado es
+el ejemplo de que una herramienta se apoya en otra sin fundirse con ella: consume `voz` por
+tarball, con version exacta, y no le toca una linea (`docs/SDD-dictado.md`).
 
 ## Gobernanza
 
