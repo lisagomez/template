@@ -469,6 +469,23 @@ entorno. Lo que lo hace distinto de un "comprueba actualizaciones":
 El tag de la imagen del agente va **pineado**, igual que el modelo: cambiarlo es un CDC
 (C1) con diff, regresion y aprobacion.
 
+### Actualizar Hermes: son dos Hermes, y dos caminos
+
+`npm run vigila:hermes` **no actualiza nada**, a proposito (tabla de arriba). Y hay dos
+instalaciones distintas que se confunden:
+
+| | Hermes **local** (esta maquina) | Hermes de **produccion** (servidor de agentes) |
+|---|---|---|
+| Que es | clon git en `~/.hermes/hermes-agent` + gateway como servicio systemd de usuario | imagen `nousresearch/hermes-agent` pineada por tag **y digest** en `docker-compose.yml` y en `.hermes-baseline.json` |
+| Ver si hay novedades | `hermes update --check` (solo lectura) · `hermes update --plan` (que haria, sin tocar nada) | `npm run vigila:hermes` (capa A, semanal) |
+| Actualizar | `hermes update --backup --yes`: respaldo completo de `~/.hermes`, fetch, dependencias, migracion de config y reinicio del gateway; deja recibo en `~/.hermes/logs/update_receipts/` | **No hay comando: es un CDC (C1).** 1) `.hermes-baseline.json` y el `image:` del compose al tag y digest nuevos · 2) `npm run vigila:hermes -- --capa-b` (lo que el runbook afirma, comprobado contra la imagen nueva) · 3) `npm run regresion` · 4) entrada en `.claude/gobernanza/BITACORA-CDC.md` y aprobacion humana · 5) `npm run deploy` en el servidor |
+| Volver atras | el zip del respaldo (`hermes import <zip>`) o `git reset --hard <sha>` en `~/.hermes/hermes-agent` | el commit anterior del pin |
+
+En esta maquina el camino local esta envuelto en el skill global **`/hermes-update`** (vive en
+`~/.claude/skills/hermes-update/`, fuera de este repo): revisa, hace **una** pregunta, respalda,
+aplica con `hermes update` y verifica. `/hermes-update check` solo mira. Medido el 2026-09-14:
+v0.21.2 → v0.21.3, 533 commits, 94 s.
+
 ### La tercera palanca: lo que cuestan los MCP
 
 **[docs/SDD-imprenta-de-clis.md](docs/SDD-imprenta-de-clis.md)** — hermana del routing y del
