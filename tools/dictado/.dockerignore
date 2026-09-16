@@ -1,0 +1,5 @@
+node_modules
+dist
+medicion/banco
+*.tgz
+!voz.tgz

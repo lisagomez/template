@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1
+# =============================================================================
+# Servicio de transcripcion de @tu-scope/dictado — perfil CPU + GPU (NVIDIA).
+#
+# Mismo servidor, mismo protocolo, mismo cliente: cambia el motor. Aqui el motor es
+# faster-whisper (CTranslate2) en CUDA con float16: `DICTADO_DISPOSITIVO=auto` elige la GPU si
+# el contenedor la ve y, si no, cae a CPU int8 — el servicio arranca igual en una maquina sin GPU.
+#
+# SIN MEDIR: esta imagen se diseno el 2026-09-15 y no ha corrido en ninguna GPU. Las cifras del
+# README para GPU dicen «sin medir» hasta que `npm run mide -- --dispositivo cuda` corra en el VPS.
+#
+# PINEADO: base CUDA 12.6 + cuDNN 9 por tag de release (CTranslate2 4.x los exige), Node 22 por
+# NodeSource con version fija. Cambiar cualquiera es un CDC (C1).
+# =============================================================================
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-venv python3-pip ca-certificates curl gnupg \
+ && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs=22.23.0-1nodesource1 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /dictado
+COPY package.json tsconfig.json ./
+COPY src ./src
+COPY voz.tgz ./voz.tgz
+RUN npm install --no-save --no-audit --no-fund typescript@5.9.3 @types/node@22.20.2 ./voz.tgz \
+ && npx tsc -p tsconfig.json \
+ && rm -rf src tsconfig.json \
+ && npm install --no-save --no-package-lock --omit=dev --no-audit --no-fund sherpa-onnx-node@1.13.8 onnxruntime-node@1.30.0
+COPY motores-locales ./motores-locales
+COPY servicio/servidor.mjs servicio/configuracion.mjs ./servicio/
+RUN python3 -m venv /venv && /venv/bin/pip install --no-cache-dir faster-whisper==1.2.1
+
+RUN groupadd --system --gid 1002 dictado && useradd --system --uid 1002 --gid dictado --home /dictado dictado \
+ && chown -R dictado:dictado /dictado
+USER dictado
+
+ENV NODE_ENV=production \
+    DICTADO_PUERTO=8090 \
+    DICTADO_MODELOS=/modelos \
+    DICTADO_RUNTIME=/dictado \
+    DICTADO_PYTHON=/venv/bin/python \
+    DICTADO_DISPOSITIVO=auto \
+    DICTADO_MOTOR=faster-whisper:large-v3-turbo \
+    NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+EXPOSE 8090
+HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=5 \
+  CMD node -e "fetch('http://127.0.0.1:8090/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+CMD ["node", "servicio/servidor.mjs"]

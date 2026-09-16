@@ -1,0 +1,57 @@
+{
+  "name": "@tu-scope/dictado",
+  "version": "0.1.0",
+  "description": "Dictado local: hablar y que el texto aparezca donde esta el cursor. Nucleo en TypeScript puro; el VAD lo pone @tu-scope/voz y los motores de transcripcion, el pegado y el almacen se inyectan.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.js"
+    },
+    "./remoto": {
+      "types": "./dist/remoto/index.d.ts",
+      "import": "./dist/remoto/index.js"
+    }
+  },
+  "bin": {
+    "dictado": "./dist/node/cli.js"
+  },
+  "files": [
+    "dist",
+    "motores-locales",
+    "windows"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "peerDependencies": {
+    "@tu-scope/voz": "0.4.0",
+    "onnxruntime-node": ">=1.17.0",
+    "sherpa-onnx-node": ">=1.13.0"
+  },
+  "peerDependenciesMeta": {
+    "@tu-scope/voz": {
+      "optional": true
+    },
+    "onnxruntime-node": {
+      "optional": true
+    },
+    "sherpa-onnx-node": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "prebuild": "node scripts/prepara-voz.mjs",
+    "build": "tsc -p tsconfig.json",
+    "prueba": "node --test pruebas/*.ts",
+    "mide": "node medicion/mide.mjs",
+    "servicio": "node servicio/servidor.mjs"
+  }
+}
