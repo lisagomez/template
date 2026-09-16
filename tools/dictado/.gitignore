@@ -1,0 +1,3 @@
+# `npm run build` instala @tu-scope/voz desde su tarball (prepara-voz.mjs); nada de esto va al repo.
+node_modules/
+package-lock.json

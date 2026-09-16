@@ -1,0 +1,192 @@
+{
+ "fecha": "2026-09-15",
+ "maquina": {
+  "cpu": "AMD Ryzen 7 5700G with Radeon Graphics",
+  "nucleos": 16,
+  "ramGb": 16,
+  "node": "v22.23.0",
+  "dispositivo": "cpu",
+  "hilos": 8,
+  "kernel": "6.6.87.2-microsoft-standard-WSL2"
+ },
+ "corpus": {
+  "nombre": "FLEURS es_419 test",
+  "tomas": 150,
+  "minutos": 30.4,
+  "licencia": "CC-BY-4.0",
+  "fuente": "https://huggingface.co/datasets/google/fleurs/resolve/refs%2Fconvert%2Fparquet/es_419/test/0000.parquet"
+ },
+ "motores": [
+  {
+   "motor": "sherpa:nemo-parakeet-tdt-0.6b-v3-int8",
+   "tomas": 150,
+   "wer": 0.033221735771310844,
+   "cer": 0.03185302669838752,
+   "latenciaP50Ms": 531.8126179999999,
+   "latenciaP95Ms": 925.8709290000043,
+   "latenciaCortasP50Ms": 326.8101439999991,
+   "tomasCortas": 15,
+   "rtf": 0.04773095992296992,
+   "ramMb": 1531,
+   "cargaMs": 75.98535399999992,
+   "ejemplos": [
+    {
+     "referencia": "se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo de clima extremo en el área que visitan dado que ello puede afectar sus planes de viaje",
+     "hipotesis": "Se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo del clima extremo en el área que visitan, dado que ello pueda afectar sus planes de viaje."
+    },
+    {
+     "referencia": "el uso adecuado de los blogs «puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de internet pueden definir sus posturas en el contexto de los escritos de otros además de establecer sus perspectivas sobre temas específicos» oravec 2002",
+     "hipotesis": "El udecuado de los blogs puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de Internet. Pueden definir sus posturas en el contexto de los escritos de otros, además de establecer sus perspectivas sobre temas específicos. Ahora Vec 2002."
+    }
+   ]
+  },
+  {
+   "motor": "sherpa:whisper-turbo-int8",
+   "tomas": 150,
+   "wer": 0.11408704609837754,
+   "cer": 0.09626398801656534,
+   "latenciaP50Ms": 4469.804762999993,
+   "latenciaP95Ms": 7707.070519000059,
+   "latenciaCortasP50Ms": 2787.5281330000143,
+   "tomasCortas": 15,
+   "rtf": 0.405515084399483,
+   "ramMb": 2723,
+   "cargaMs": 1558.2349689999996,
+   "ejemplos": [
+    {
+     "referencia": "se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo de clima extremo en el área que visitan dado que ello puede afectar sus planes de viaje",
+     "hipotesis": "Se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo del clima extremo en el área que visitan, dado que ello puede afectar sus planes de viaje."
+    },
+    {
+     "referencia": "el uso adecuado de los blogs «puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de internet pueden definir sus posturas en el contexto de los escritos de otros además de establecer sus perspectivas sobre temas específicos» oravec 2002",
+     "hipotesis": "El uso adecuado de los blogs puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de Internet. Pueden definir sus posturas en el contexto de los blogs, además de establecer sus perspectivas sobre temas específicos."
+    }
+   ]
+  },
+  {
+   "motor": "sherpa:whisper-base-int8",
+   "tomas": 150,
+   "wer": 0.11795003862992531,
+   "cer": 0.0504449731253855,
+   "latenciaP50Ms": 1129.6605700000073,
+   "latenciaP95Ms": 2179.5998739999923,
+   "latenciaCortasP50Ms": 644.2776409999933,
+   "tomasCortas": 15,
+   "rtf": 0.10224506289295773,
+   "ramMb": 956,
+   "cargaMs": 149.02969500000006,
+   "ejemplos": [
+    {
+     "referencia": "se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo de clima extremo en el área que visitan dado que ello puede afectar sus planes de viaje",
+     "hipotesis": "Se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo del clima extremo en el área que visitan, dado que ellos puede afectar sus planes de viaje."
+    },
+    {
+     "referencia": "el uso adecuado de los blogs «puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de internet pueden definir sus posturas en el contexto de los escritos de otros además de establecer sus perspectivas sobre temas específicos» oravec 2002",
+     "hipotesis": "El uso adecuado de los blogs pueden poderar a los alumnos para que sean más analíticos y críticos a través de la respostativa a los contenidos de Internet, pueden definir sus posturas en el contexto de los escritos de otros, además de establecer sus perspectivos sobre temas específicos. Ahora ve, 2002."
+    }
+   ]
+  },
+  {
+   "motor": "faster-whisper-small-int8-cpu",
+   "tomas": 150,
+   "wer": 0.05768735513778007,
+   "cer": 0.03330689928628073,
+   "latenciaP50Ms": 1625.5882070000007,
+   "latenciaP95Ms": 1922.8871809999982,
+   "latenciaCortasP50Ms": 1463.0349289999867,
+   "tomasCortas": 15,
+   "rtf": 0.13824786717837462,
+   "ramMb": 521,
+   "cargaMs": 2673.603675,
+   "ejemplos": [
+    {
+     "referencia": "se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo de clima extremo en el área que visitan dado que ello puede afectar sus planes de viaje",
+     "hipotesis": "Se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo del clima extremo en el área que visitan, dado que ello puede afectar sus planes de viaje."
+    },
+    {
+     "referencia": "el uso adecuado de los blogs «puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de internet pueden definir sus posturas en el contexto de los escritos de otros además de establecer sus perspectivas sobre temas específicos» oravec 2002",
+     "hipotesis": "El uso adecuado de los blogs pueden poderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de internet, pueden definir sus posturas en el contexto de los escritos de otros, además de establecer sus perspectivas sobre temas específicos. Horabec 2002"
+    }
+   ]
+  },
+  {
+   "motor": "faster-whisper-large-v3-turbo-int8-cpu",
+   "tomas": 150,
+   "wer": 0.024723152201905744,
+   "cer": 0.025200458190148912,
+   "latenciaP50Ms": 6282.564330000001,
+   "latenciaP95Ms": 6545.7585940000135,
+   "latenciaCortasP50Ms": 6133.20061900001,
+   "tomasCortas": 15,
+   "rtf": 0.5211265738738587,
+   "ramMb": 1089,
+   "cargaMs": 9698.365370000001,
+   "ejemplos": [
+    {
+     "referencia": "se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo de clima extremo en el área que visitan dado que ello puede afectar sus planes de viaje",
+     "hipotesis": "Se recomienda enfáticamente a los viajeros que se informen sobre cualquier riesgo del clima extremo en el área que visitan, dado que ello puede afectar sus planes de viaje."
+    },
+    {
+     "referencia": "el uso adecuado de los blogs «puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de internet pueden definir sus posturas en el contexto de los escritos de otros además de establecer sus perspectivas sobre temas específicos» oravec 2002",
+     "hipotesis": "El uso adecuado de los blogs puede empoderar a los alumnos para que sean más analíticos y críticos a través de la respuesta activa a los contenidos de Internet. Pueden definir sus posturas en el contexto de los escritos de otros, además de establecer sus perspectivas sobre temas específicos. ORAVEC 2002"
+    }
+   ]
+  }
+ ],
+ "vad": [
+  {
+   "silencioMs": 300,
+   "tomasPartidas": 76,
+   "tomasSinVoz": 0,
+   "fraccionPartidas": 0.5066666666666667,
+   "fraccionHabla": 0.7722275182713696,
+   "rtf": 0.0037099186499457613
+  },
+  {
+   "silencioMs": 500,
+   "tomasPartidas": 26,
+   "tomasSinVoz": 0,
+   "fraccionPartidas": 0.17333333333333334,
+   "fraccionHabla": 0.7885627253103668,
+   "rtf": 0.0037373712320436544
+  },
+  {
+   "silencioMs": 700,
+   "tomasPartidas": 10,
+   "tomasSinVoz": 0,
+   "fraccionPartidas": 0.06666666666666667,
+   "fraccionHabla": 0.7973855779450599,
+   "rtf": 0.003820714012250309
+  },
+  {
+   "silencioMs": 1000,
+   "tomasPartidas": 1,
+   "tomasSinVoz": 0,
+   "fraccionPartidas": 0.006666666666666667,
+   "fraccionHabla": 0.8191600100807556,
+   "rtf": 0.003727736360299355
+  },
+  {
+   "silencioMs": 1500,
+   "tomasPartidas": 0,
+   "tomasSinVoz": 0,
+   "fraccionPartidas": 0,
+   "fraccionHabla": 0.8443695692668441,
+   "rtf": 0.0037349638741877864
+  }
+ ],
+ "hilos": [
+  {
+   "hilos": 4,
+   "latenciaP50Ms": 540.5563039999979
+  },
+  {
+   "hilos": 8,
+   "latenciaP50Ms": 506.36711099999957
+  },
+  {
+   "hilos": 16,
+   "latenciaP50Ms": 604.2540390000067
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+# Servicio de transcripcion de @tu-scope/dictado en el VPS propio. Dos perfiles, un cliente:
+#
+#   docker compose -f servicio/compose.yml --profile dictado up -d         # solo CPU (Parakeet int8)
+#   docker compose -f servicio/compose.yml --profile dictado-gpu up -d     # CPU + GPU NVIDIA (faster-whisper fp16)
+#
+# Se combina con el compose de la raiz para que Caddy termine TLS delante:
+#   docker compose -f docker-compose.yml -f tools/dictado/servicio/compose.yml --profile dictado up -d
+# y en el Caddyfile: `reverse_proxy /dictado/* dictado:8090`. El servicio NO publica puertos por si
+# mismo (`expose`, no `ports`): llegar a el desde fuera es decision humana (C3), no un defecto.
+#
+# DICTADO_TOKEN es obligatorio (≥ 32 caracteres, `openssl rand -hex 32`). Se pasa por entorno, nunca
+# se escribe aqui. Los pesos viven en el volumen `dictado_modelos`: se cargan UNA vez con
+# `npm run mide` en el servidor (o copiando la carpeta `modelos/` del banco).
+services:
+  dictado:
+    profiles: ["dictado"]
+    build:
+      context: ..
+      dockerfile: servicio/Dockerfile
+    image: ${APP_NAME:-saas-factory-app}-dictado:${DICTADO_VERSION:-0.1.0}
+    restart: unless-stopped
+    expose:
+      - "8090"
+    environment:
+      DICTADO_TOKEN: ${DICTADO_TOKEN:?DICTADO_TOKEN es obligatorio (openssl rand -hex 32)}
+      DICTADO_MOTOR: ${DICTADO_MOTOR:-parakeet}
+      DICTADO_HILOS: ${DICTADO_HILOS:-4}
+      DICTADO_EN_VUELO: ${DICTADO_EN_VUELO:-1}
+    volumes:
+      - dictado_modelos:/modelos:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "${DICTADO_CPUS:-4}"
+          memory: ${DICTADO_MEM:-3G}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - interna
+
+  dictado-gpu:
+    profiles: ["dictado-gpu"]
+    build:
+      context: ..
+      dockerfile: servicio/Dockerfile.gpu
+    image: ${APP_NAME:-saas-factory-app}-dictado-gpu:${DICTADO_VERSION:-0.1.0}
+    restart: unless-stopped
+    expose:
+      - "8090"
+    environment:
+      DICTADO_TOKEN: ${DICTADO_TOKEN:?DICTADO_TOKEN es obligatorio (openssl rand -hex 32)}
+      DICTADO_MOTOR: ${DICTADO_GPU_MOTOR:-faster-whisper:large-v3-turbo}
+      DICTADO_DISPOSITIVO: auto
+      DICTADO_HILOS: ${DICTADO_HILOS:-4}
+      DICTADO_EN_VUELO: ${DICTADO_GPU_EN_VUELO:-2}
+      HF_HOME: /modelos/faster-whisper
+    volumes:
+      - dictado_modelos:/modelos
+    shm_size: "${DICTADO_GPU_SHM:-2gb}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${DICTADO_GPU_COUNT:-1}
+              capabilities: [gpu]
+        limits:
+          memory: ${DICTADO_GPU_MEM:-8G}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - interna
+
+volumes:
+  dictado_modelos:
+
+networks:
+  interna:
