@@ -140,6 +140,32 @@
         "patron": "openrouter/auto.+se rechazan",
         "porque": "el alias flotante queda vetado por escrito: el modo auto es fallback entre candidatos PINEADOS (C1)"
       }
+    ],
+    "update-sf": [
+      {
+        "patron": "diff -rq",
+        "porque": "actualizar es comparar antes de copiar: el skill produce un diff, no un reemplazo"
+      },
+      {
+        "patron": "CDC",
+        "porque": "traer skills de fuera cambia comportamiento y el skill lo declara como CDC (C1)"
+      },
+      {
+        "patron": "[Aa]probaci[oó]n",
+        "porque": "gate humano: nada se escribe en .claude/ sin el si sobre el diff"
+      },
+      {
+        "patron": "BITACORA-CDC",
+        "porque": "lo que entra de fuera queda registrado con el commit upstream pineado"
+      },
+      {
+        "prohibido": "rm -rf\\s+\\.claude",
+        "porque": "borrar .claude/ entera destruia gobernanza, rules, specs y 7 skills propios (medido 2026-09-17: 21 elementos solo locales)"
+      },
+      {
+        "prohibido": "cp -r[^\\n]*\\.claude/?\\s+\\.?/?\\.claude/?\\s*$",
+        "porque": "copiar el directorio entero encima retrocedia 13 archivos mas nuevos en local; cada archivo entra por su nombre"
+      }
     ]
   }
 }
