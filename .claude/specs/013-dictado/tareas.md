@@ -46,9 +46,10 @@
       latencia 1 299 ms (1 058 del primer pegado). Lo aprendido ese día está en el código:
       ganancia, toques, respaldo en español, audio en vuelo, pegador sin esperar.
 
-## Abiertas
+- [x] **TAR-14b · Prueba en vivo, caso (b)** → 2026-09-16: con el cursor en el Bloc de notas, el
+      texto dictado apareció ahí (confirmado por la dueña). Además, la voz sintética se oyó en vivo.
 
-- [ ] **TAR-14b · Prueba en vivo, caso (b)**: la misma frase con el cursor en otra app de Windows.
+## Abiertas
 
 - [ ] **TAR-15 · Medir en GPU** en el VPS cuando exista: `npm run mide -- --dispositivo cuda` y
       quitar el «sin medir».

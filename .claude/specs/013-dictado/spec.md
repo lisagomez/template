@@ -176,14 +176,12 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   construcción (lote A-B-A, servicio con 401/413/WAV/PCM16, pegador leyendo el portapapeles).
 - `npm run prueba` 29/29; `npm run empaqueta dictado` en verde con `integracion`.
 - `npm run mide` con la tabla en README y SDD, JSON crudo versionado.
-- **Prueba en vivo con una persona** (casos a y b del GOAL): frase dicha, texto pegado donde
-  estaba el cursor, latencia y `Get-Clipboard` como evidencia. **Pendiente.**
+- **Prueba en vivo con una persona** (casos a y b del GOAL): hecha el 2026-09-16 — frases dictadas
+  a Claude Code y al Bloc de notas, confirmadas por la dueña, con latencias en el SDD §6.
 - `npm run validate` en verde, o el rojo ajeno demostrado como tal.
 
 ## Dudas abiertas
 
-- [NECESITA ACLARACIÓN] Prueba en vivo: ¿cuándo, y en qué dos apps (Windows Terminal con Claude
-  Code y cuál más)?
 - [NECESITA ACLARACIÓN] ¿Se mide la corrección por similitud del diccionario (hoy apagada) sobre
   un corpus con nombres propios, o se deja apagada?
 - [NECESITA ACLARACIÓN] Para el lote, ¿el defecto debe ser Parakeet (rápido, 3,3 %) o

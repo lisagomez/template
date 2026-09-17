@@ -52,6 +52,7 @@
     "build": "tsc -p tsconfig.json",
     "prueba": "node --test pruebas/*.ts",
     "mide": "node medicion/mide.mjs",
-    "servicio": "node servicio/servidor.mjs"
+    "servicio": "node servicio/servidor.mjs",
+    "en-vivo": "node scripts/en-vivo.mjs"
   }
 }
