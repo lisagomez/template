@@ -43,6 +43,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - Como **integrador**, quiero convertir una grabación de reunión en un acta con turnos por persona.
 - Como **operador**, quiero que el servicio no arranque sin token y no deje audio ni texto en logs.
 - Como **quien dicta**, quiero que por defecto nada de mi voz salga de la máquina.
+- Como **quien dicta**, quiero que el agente me conteste también en voz alta, con una voz local.
 
 ## Requisitos funcionales (criterios de aceptación en EARS)
 
@@ -113,6 +114,12 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   y su largo.
 - RF-32: EL SISTEMA se instalará por tarball con `exports` tipados para `.`, `./node` y `./remoto`,
   con `voz` como peer de versión exacta y los runtimes como peers opcionales.
+- RF-33: CUANDO reciba un texto para decir, EL SISTEMA lo sintetizará con una voz local en español
+  frase a frase y hará sonar cada frase en cuanto exista, sin esperar a la última.
+- RF-34: EL SISTEMA hará sonar la voz desde Windows (reproductor propio del sistema) y no por el
+  PulseAudio de WSLg, y borrará los archivos temporales de audio al terminar.
+- RF-35: SI la voz pedida no está en la carpeta de modelos, ENTONCES EL SISTEMA la descargará de su
+  URL pineada diciendo cuál y cuánto pesa, o rechazará un nombre que no conozca.
 
 ## Requisitos no funcionales
 
@@ -120,7 +127,10 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   motor en su proceso): Parakeet TDT 0.6B v3 int8 WER 3,3 % a 532 ms p50 (327 ms en tomas ≤ 8 s);
   faster-whisper large-v3-turbo 2,5 % a 6,3 s; Whisper turbo por sherpa 11,4 %. Cierre del VAD a
   1000 ms parte el 0,7 % de las frases (700 ms, el 6,7 %). 8 hilos.
-- **Pruebas sin red ni modelos**: 29 contra `dist/` en ~1 s.
+- **Voz sintética** (2026-09-16, Piper es_MX-claude-high por sherpa-onnx, 8 hilos): carga 635 ms,
+  primera frase lista en 33–58 ms, síntesis 294–343 ms para 5,6–6,9 s de audio (RTF 0,05); el
+  PulseAudio de WSLg reproduce a un cuarto de la velocidad (25–31 s por 6,9 s), Windows a tiempo real.
+- **Pruebas sin red ni modelos**: 32 contra `dist/` en ~1 s.
 - **Español primero**; comandos de voz también en inglés.
 - **Plataforma**: WSL2 (micrófono por el PulseAudio de WSLg, pegado y tecla global por
   `powershell.exe`); Node ≥ 22.18; Python 3.12 solo para el motor faster-whisper.
@@ -162,7 +172,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 
 ## Criterios de finalización
 
-- Los 32 RF con prueba en `tools/dictado/pruebas/` o demostrados en la conversación de
+- Los 35 RF con prueba en `tools/dictado/pruebas/` o demostrados en la conversación de
   construcción (lote A-B-A, servicio con 401/413/WAV/PCM16, pegador leyendo el portapapeles).
 - `npm run prueba` 29/29; `npm run empaqueta dictado` en verde con `integracion`.
 - `npm run mide` con la tabla en README y SDD, JSON crudo versionado.

@@ -37,11 +37,19 @@
       de la raíz en verde; `validate` con el rojo previo de `MEMORY.md` demostrado ajeno. (RF-1, RF-32)
 - [x] **TAR-13 · Documento de alineación.** → `docs/SDD-dictado.md`, `tools/dictado/README.md`.
 
+- [x] **TAR-17 · El agente habla.** → `src/node/habla.ts`, `src/node/cli-habla.ts`,
+      `windows/altavoz.ps1` — Piper es_MX por sherpa-onnx, frase a frase, altavoz de Windows
+      (PulseAudio de WSLg medido a un cuarto de velocidad). Prueba con voz y altavoz falsos.
+      Medido y oído en vivo el 2026-09-16. (RF-33..RF-35)
+- [x] **TAR-14 · Prueba en vivo, caso (a)** → 2026-09-16: «Puedes revisar si la herramienta de voz
+      te puede funcionar también.» dictado a Claude Code en Windows Terminal, 4,0 s, motor 231 ms,
+      latencia 1 299 ms (1 058 del primer pegado). Lo aprendido ese día está en el código:
+      ganancia, toques, respaldo en español, audio en vuelo, pegador sin esperar.
+
 ## Abiertas
 
-- [ ] **TAR-14 · Prueba en vivo con una persona** (casos a y b del GOAL): frase dicha con
-      `dictar --tecla`, texto donde estaba el cursor (Windows Terminal y otra app), latencia y
-      `Get-Clipboard`. Luego rellenar §6 del SDD y el README.
+- [ ] **TAR-14b · Prueba en vivo, caso (b)**: la misma frase con el cursor en otra app de Windows.
+
 - [ ] **TAR-15 · Medir en GPU** en el VPS cuando exista: `npm run mide -- --dispositivo cuda` y
       quitar el «sin medir».
 - [ ] **TAR-16 · Medir la corrección por similitud del diccionario** sobre un corpus con nombres

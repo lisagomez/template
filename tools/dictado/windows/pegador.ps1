@@ -38,8 +38,9 @@ while ($null -ne ($linea = [Console]::In.ReadLine())) {
         try { $previo = Get-Clipboard -Raw -ErrorAction SilentlyContinue } catch { }
         Set-Clipboard -Value $texto
         [System.Windows.Forms.SendKeys]::SendWait('^v')
-        if ($orden.restaura -and $null -ne $previo) { Start-Sleep -Milliseconds 250; Set-Clipboard -Value $previo }
+        # Se contesta ANTES de restaurar: el texto ya esta pegado y los 250 ms de espera no son latencia del dictado.
         Write-Output ('{"id":' + $orden.id + ',"ok":true}')
+        if ($orden.restaura -and $null -ne $previo) { Start-Sleep -Milliseconds 250; Set-Clipboard -Value $previo }
       }
       'teclea' {
         $texto = Desde-B64 $orden.b64

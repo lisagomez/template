@@ -9,7 +9,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { creaAlmacenJsonl, creaGestosDeTecla, creaMotorPorProceso, creaMotorSherpa, floatAPcm16, leeAudio } from '../dist/node/index.js';
+import { creaAlmacenJsonl, creaGestosDeTecla, creaMotorPorProceso, creaMotorSherpa, creaVozSintetica, floatAPcm16, habla, leeAudio, type Altavoz } from '../dist/node/index.js';
 import { creaTranscriptorRemoto } from '../dist/remoto/index.js';
 import { parseaArgumentos } from '../dist/node/cli-config.js';
 
@@ -154,4 +154,40 @@ test('argumentos del CLI: --clave valor, --clave=valor, banderas y posicionales'
   assert.deepEqual(a.posicionales, ['extra']);
   assert.deepEqual(a.opciones, { modo: 'manos-libres', tecla: true, pegar: 'teclear', n: '5' });
   assert.equal(parseaArgumentos([]).orden, 'ayuda');
+});
+
+test('habla: cada frase suena en cuanto sale, y el resultado mide el primer audio y el total', async () => {
+  const carpeta = mkdtempSync(join(tmpdir(), 'dictado-'));
+  writeFileSync(join(carpeta, 'voz.onnx'), '');
+  writeFileSync(join(carpeta, 'tokens.txt'), '');
+  const sherpaFalso = {
+    OfflineTts: class {
+      sampleRate = 22_050;
+      numSpeakers = 1;
+      async generateAsync(p: { text: string; onProgress?: (i: { samples: Float32Array; progress: number }) => void }) {
+        const frases = p.text.split('. ').filter(Boolean);
+        const todo: number[] = [];
+        for (const [i, f] of frases.entries()) {
+          const trozo = new Float32Array(f.length * 100).fill(0.1);
+          p.onProgress?.({ samples: trozo, progress: (i + 1) / frases.length });
+          todo.push(...trozo);
+        }
+        return { samples: Float32Array.from(todo), sampleRate: 22_050 };
+      }
+    },
+  };
+  const voz = creaVozSintetica({ sherpa: sherpaFalso, carpeta });
+  assert.equal(voz.id, 'sherpa-tts:' + carpeta.split('/').pop());
+  assert.equal(voz.frecuenciaHz, 22_050);
+  const sonado: number[] = [];
+  let terminado = false;
+  const altavoz: Altavoz = { escribe: (m) => sonado.push(m.length), termina: async () => { terminado = true; } };
+  const r = await habla(voz, 'Hola. Ya tengo voz', altavoz);
+  assert.deepEqual(sonado, [400, 1200]);
+  assert.equal(terminado, true);
+  assert.equal(r.muestras.length, 1600);
+  assert.ok(r.msPrimerAudio > 0 && r.msPrimerAudio <= r.msTotal);
+  assert.ok(Math.abs(r.segundosAudio - 1600 / 22_050) < 1e-9);
+  assert.throws(() => creaVozSintetica({ sherpa: sherpaFalso, carpeta: tmpdir() }), /ningun .onnx/);
+  rmSync(carpeta, { recursive: true, force: true });
 });

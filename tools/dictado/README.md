@@ -31,7 +31,7 @@ npm install <ruta>/tools/voz/tu-scope-voz-0.4.0.tgz <ruta>/tools/dictado/tu-scop
 **opcionales**: los instala quien use `./node`. El núcleo (`.`) y el cliente remoto (`./remoto`)
 no necesitan ninguno.
 
-## Los cinco usos
+## Los seis usos
 
 ### 1. Dictar (WSL2 → Windows)
 
@@ -120,7 +120,24 @@ se diseñó el 2026-09-15 y no ha corrido en ninguna GPU: no hay VPS. `npm run m
 cuda` corre igual allí; hasta que corra, aquí no hay cifras de GPU. El modelo de amenazas (C3) y
 la decisión de flujo de datos (C4) del servicio están en el SDD §7.
 
-### 5. Medir
+### 5. El agente habla
+
+```bash
+dictado di "Ya tengo voz. ¿Me oyes?"            # Piper es_MX «claude» por sherpa-onnx, local, 79 MB pineados
+dictado di --archivo nota.txt --velocidad 1.1
+echo "texto" | dictado di --guarda voz.wav --sin-sonido
+```
+
+Sintetiza frase a frase y **suena mientras sintetiza**: la primera frase se oye antes de que
+exista la última. El altavoz es **Windows** (`windows/altavoz.ps1`: PowerShell persistente +
+`SoundPlayer`, WAV por frase en el temporal de Windows, borrados al terminar), porque el camino
+obvio —ffmpeg al PulseAudio de WSLg— reproduce a **un cuarto de la velocidad** (medido el
+2026-09-16: 6,9 s de audio tardaron 25–31 s; `--altavoz pulse` lo conserva para volver a medir).
+
+Medido el 2026-09-16 (voz es_MX-claude-high, 8 hilos): carga 635 ms · primera frase lista en
+33 ms · síntesis 343 ms para 6,9 s de audio (RTF 0,050) · sonado completo 7,8 s.
+
+### 6. Medir
 
 ```bash
 npm run mide                                   # todo: modelos, runtimes, corpus, 5 motores, VAD, hilos
@@ -159,7 +176,7 @@ toma; RTF = tiempo de cómputo / duración del audio; RAM residente tras cargar.
 | 1500 ms | 0/150 (0,0 %) | 0 | 84 % |
 <!-- /TABLA_VAD -->
 
-**Hilos** (Parakeet, 20 tomas): <!-- HILOS -->4 hilos → p50 533 ms · 8 hilos → p50 512 ms · 16 hilos → p50 657 ms<!-- /HILOS -->
+**Hilos** (Parakeet, 20 tomas): <!-- HILOS -->4 hilos → p50 541 ms · 8 hilos → p50 506 ms · 16 hilos → p50 604 ms<!-- /HILOS -->
 
 ### Valores por defecto, y de dónde salen
 
@@ -179,9 +196,13 @@ micrófono de portátil en una sala con ruido dará más WER; lo honesto es volv
 Whisper turbo ~950 ms, WER 2,9 %): son otra máquina, otro runtime y otro corpus, y **no se
 comparan** con esta tabla.
 
-**Pendiente de medir en vivo:** la latencia fin-de-habla → texto pegado con una persona
-hablando (esperada: ~330 ms de motor para una frase corta + 2-6 ms de pegado). Hasta que una
-persona lo confirme en esta máquina, lo anterior es la medición sobre archivo, no sobre voz viva.
+**Medido en vivo (2026-09-16, dictando a Claude Code en Windows Terminal, manos libres, +12 dB):**
+frase de 4,0 s → motor 231 ms, latencia fin-de-habla → pegado 1 299 ms, de los que 1 058 ms
+fueron el **primer** pegado de la sesión (arranque del PowerShell persistente; los siguientes
+cuestan decenas de ms). Lo que se aprendió ese día y ya está en el código: el micrófono de WSLg
+entra flojo (`--ganancia-db 12`), `termina()` debe esperar al audio en vuelo, y Parakeet a veces
+oye inglés en frases cortas (`--respaldo faster-whisper:small` repite solo esas en español).
+Pendiente: la misma prueba con el cursor en otra app de Windows.
 
 ## Variables de entorno
 

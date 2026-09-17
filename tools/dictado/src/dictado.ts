@@ -92,6 +92,13 @@ export function creaDictado(opciones: OpcionesDictado): Dictado {
   let escuchando = false;
   let acumulados: Turno[] = [];
   let cola: Promise<void> = Promise.resolve();
+  /**
+   * El audio pasa por el detector EN ORDEN y `termina()` espera a que todo lo recibido haya
+   * pasado antes de cerrar. Sin esto, un toque que termina justo despues de la ultima palabra
+   * cerraba el detector con trozos aun en vuelo: el turno se perdia y salia «sin voz» con la
+   * frase entera grabada (medido en vivo el 2026-09-16).
+   */
+  let colaAudio: Promise<void> = Promise.resolve();
 
   const cambia = (nuevo: Estado) => {
     if (estado === nuevo) return;
@@ -171,12 +178,15 @@ export function creaDictado(opciones: OpcionesDictado): Dictado {
     },
     async alimenta(muestras) {
       if (!escuchando) return;
-      reparte(await detector.procesa(muestras));
+      const paso = colaAudio.then(async () => reparte(await detector.procesa(muestras)));
+      colaAudio = paso.catch(() => undefined);
+      return paso;
     },
     async termina() {
       if (!escuchando) return;
       escuchando = false;
       const finHablaMs = ahora();
+      await colaAudio;
       reparte(await detector.cierra());
       if (modo === 'manosLibres') {
         await cola;
