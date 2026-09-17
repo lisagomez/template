@@ -3669,3 +3669,29 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Gate aplicado**: diff revisado ☑ · regresión verde ☑ · aprobación humana ☑ · pineo ☑. Capa B
   no corrida: `GOBERNANZA.md` no entra al contexto de una sesión; se consulta.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — misma aprobación explícita.
+
+### 2026-09-17 — skill `update-sf`: de «borrar y copiar» a «diff, gate humano y archivo por archivo» — radio: skill
+- **Cambio**: el skill ya no borra `.claude/` ni copia el del upstream encima. Ahora localiza el
+  repo fuente por el alias, lo trae con `--ff-only` y anota su commit, compara con `diff -rq`,
+  clasifica en tres cubos (solo upstream · solo local · en ambos y distinto, mirando quién es más
+  nuevo), enseña el diff, pide aprobación sobre archivos concretos, copia solo lo aprobado, corre
+  `npm run regresion` + `verify:gobernanza` (rojo = se revierte), y deja entrada aquí con el commit
+  upstream pineado. Lo que solo existe en local no se toca ni se lista como «a borrar». Contrato
+  nuevo en `golden-sets/contratos.json` (capa A): cuatro positivos (diff, CDC, aprobación,
+  bitácora) y dos prohibidos (`rm -rf` sobre `.claude/` y `cp -r` del directorio entero); el
+  control negativo se probó: los dos prohibidos cazan la versión anterior del skill.
+- **Motivo**: al invocar `/update-sf` el 2026-09-17, su paso 3 habría borrado **21 elementos que
+  solo existen aquí** (gobernanza, imprenta, rules, specs, routing, presupuesto, settings y 7
+  skills propios) y retrocedido 13 archivos compartidos que en local son más nuevos (ago–sep
+  2026). El upstream (`saas-factory-setup`, `99f51b3`) no cambia desde el 2026-03-23. El skill
+  asumía que `.claude/` es una copia del upstream; en este repo es el upstream más lo aprendido.
+  Se paró antes del paso 3 y se adaptó el skill (Auto-Blindaje: el mismo error no ocurre dos veces).
+- **Gate aplicado**: diff revisado ☑ (el skill completo, el contrato y esta entrada, mostrados antes
+  de pedir la firma) · regresión verde ☑ capa A 123/123 (116 + 7 del contrato nuevo) · aprobación
+  humana ☑ · pineo ☑ (upstream `99f51b3`, 2026-03-23).
+- **Regresión**: capa A 123/123 · `verify:gobernanza` 152/152 · capa B: corpus 22/22 listado, **no
+  corrida** y declarado: el skill añade un gate, no quita ninguno, y su cuerpo solo entra al
+  contexto al invocarlo (la `description` sube ~37 tokens: descripciones al 51 % de 7000).
+  `mide:contexto` trae un rojo **previo y ajeno**: `.claude/memory/MEMORY.md` 891/800.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-17
+  con el diff completo delante (skill, contrato y esta entrada).
