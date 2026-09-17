@@ -81,6 +81,7 @@ def main() -> None:
                 n = int(len(audio) * 16000 / hz)
                 audio = np.interp(np.linspace(0, len(audio) - 1, n), np.arange(len(audio)), audio).astype(np.float32)
             t0 = time.perf_counter()
+            segundos = len(audio) / 16000.0
             segmentos, _info = modelo.transcribe(
                 audio,
                 language=peticion.get("idioma") or "es",
@@ -88,6 +89,10 @@ def main() -> None:
                 beam_size=args.haz,
                 vad_filter=False,
                 condition_on_previous_text=False,
+                # Tope de tokens proporcional al audio: sin el, un clip de 0,8 s de ruido tardo 13 s
+                # alucinando hasta el maximo del decodificador (vivo, 2026-09-16). Nadie dice mas de
+                # ~8 tokens por segundo; 16 de margen para la puntuacion.
+                max_new_tokens=int(16 + 8 * segundos),
             )
             partes = [s for s in segmentos]
             texto = " ".join(s.text.strip() for s in partes).strip()

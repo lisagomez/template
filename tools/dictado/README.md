@@ -38,7 +38,9 @@ no necesitan ninguno.
 ```bash
 dictado dictar                      # ESPACIO en la terminal: empieza/termina; q: salir
 dictado dictar --tecla              # mantén Ctrl DERECHO para hablar; dos toques = manos libres
-dictado dictar --modo manos-libres  # el VAD corta las frases y cada una se pega sola
+dictado dictar --tecla --tecla-alternar --modo manos-libres --motor faster-whisper:small --ganancia-db 12
+                                    # un toque enciende manos libres, otro lo apaga: lo que funcionó en vivo el 2026-09-16
+npm run en-vivo                     # lo anterior, desatendido y durante toda la sesión (--parar, --estado)
 ```
 
 `--tecla` lanza **a la vista** `powershell.exe` con `windows/tecla-global.ps1` (30 líneas:
@@ -202,7 +204,7 @@ fueron el **primer** pegado de la sesión (arranque del PowerShell persistente; 
 cuestan decenas de ms). Lo que se aprendió ese día y ya está en el código: el micrófono de WSLg
 entra flojo (`--ganancia-db 12`), `termina()` debe esperar al audio en vuelo, y Parakeet a veces
 oye inglés en frases cortas (`--respaldo faster-whisper:small` repite solo esas en español).
-Pendiente: la misma prueba con el cursor en otra app de Windows.
+La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (confirmado por la dueña ese día): el pegador escribe donde esté el foco de Windows.
 
 ## Variables de entorno
 
