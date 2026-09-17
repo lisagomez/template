@@ -20,6 +20,7 @@ import {
   formateaActa,
   formateaTiempo,
   normalizaParaComparar,
+  pareceOtroIdioma,
   percentil,
   quitaAcentos,
   regexDePalabra,
@@ -52,6 +53,17 @@ test('capitalizaInicio respeta los signos de apertura', () => {
   assert.equal(capitalizaInicio('hola'), 'Hola');
   assert.equal(capitalizaInicio('Hola'), 'Hola');
   assert.equal(capitalizaInicio('123 ok'), '123 ok');
+});
+
+test('pareceOtroIdioma: ingles colado por Parakeet se detecta; espanol y empates no', () => {
+  assert.equal(pareceOtroIdioma('Probably.', 'es'), true);
+  assert.equal(pareceOtroIdioma('No you can only gorda.', 'es'), true);
+  assert.equal(pareceOtroIdioma('Yeah, just go to', 'es'), true);
+  assert.equal(pareceOtroIdioma('Aún no me escuchas con claridad.', 'es'), false);
+  assert.equal(pareceOtroIdioma('Puedes revisarlo.', 'es'), false);
+  assert.equal(pareceOtroIdioma('Kubernetes', 'es'), false); // sin funcionales: se asume el pedido
+  assert.equal(pareceOtroIdioma('the deploy de la app', 'es'), false); // empate 1-1: no se repite por nada
+  assert.equal(pareceOtroIdioma('hola', 'xx'), false); // idioma sin lista: nunca repite
 });
 
 // --- WER -----------------------------------------------------------------------------------

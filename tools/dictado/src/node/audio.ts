@@ -16,6 +16,12 @@ export interface OpcionesCaptura {
   frecuenciaHz?: number;
   /** Dispositivo de PulseAudio; `default` es el microfono que Windows tenga elegido. */
   dispositivo?: string;
+  /**
+   * Ganancia en dB aplicada por ffmpeg. El microfono que llega por WSLg puede entrar flojo
+   * (picos de -35 a -47 dBFS hablando, medido el 2026-09-16, cuando la voz normal pica en -10/-25):
+   * con eso el VAD duda y Parakeet toma el espanol por ingles. 0 = tal cual.
+   */
+  gananciaDb?: number;
   ffmpeg?: string;
   alRecibir: (muestras: Muestras) => void | Promise<void>;
   alError?: (mensaje: string) => void;
@@ -33,7 +39,11 @@ export function capturaMicrofono(opciones: OpcionesCaptura): Captura {
   // `-use_wallclock_as_timestamps`: tras una suspension o un salto de PulseAudio, ffmpeg recibe
   // marcas de tiempo hacia atras y protesta en cada paquete («non monotonically increasing dts»,
   // 2 500 lineas en una noche, medido el 2026-09-16). El PCM crudo no lleva marcas: da igual.
-  const args = ['-hide_banner', '-loglevel', 'error', '-f', 'pulse', '-use_wallclock_as_timestamps', '1', '-i', opciones.dispositivo ?? 'default', '-ac', '1', '-ar', String(hz), '-f', 's16le', '-'];
+  // La ganancia se aplica AQUI y no con `-af volume`, y sin `-use_wallclock_as_timestamps`: la
+  // linea de ffmpeg que funciono en vivo el 2026-09-16 es esta, tal cual, y tocarla es sospechoso
+  // hasta que se mida con audio grabado (`--graba`).
+  const factor = 10 ** ((opciones.gananciaDb ?? 0) / 20);
+  const args = ['-hide_banner', '-loglevel', 'error', '-f', 'pulse', '-i', opciones.dispositivo ?? 'default', '-ac', '1', '-ar', String(hz), '-f', 's16le', '-'];
   const proceso = spawn(opciones.ffmpeg ?? 'ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
   let resto: Buffer<ArrayBufferLike> = Buffer.alloc(0);
   let detenida = false;
@@ -42,14 +52,18 @@ export function capturaMicrofono(opciones: OpcionesCaptura): Captura {
     const junto = resto.length ? Buffer.concat([resto, trozo]) : trozo;
     const pares = junto.length - (junto.length % 2);
     resto = junto.subarray(pares);
-    if (pares > 0) void opciones.alRecibir(pcm16aFloat(new Uint8Array(junto.buffer, junto.byteOffset, pares)));
+    if (pares === 0) return;
+    const muestras = pcm16aFloat(new Uint8Array(junto.buffer, junto.byteOffset, pares));
+    if (factor !== 1) for (let i = 0; i < muestras.length; i++) muestras[i] = Math.max(-1, Math.min(1, (muestras[i] ?? 0) * factor));
+    void opciones.alRecibir(muestras);
   });
   proceso.stderr.on('data', (d: Buffer) => {
     errores += d.toString('utf8');
     // Tras `detiene()` ffmpeg protesta por el corte que le pedimos, y las marcas de tiempo
     // desordenadas no afectan al PCM crudo: ninguna de las dos es un error para quien dicta.
     const texto = d.toString('utf8').trim();
-    if (!detenida && !/non monotonically increasing dts/.test(texto)) opciones.alError?.(texto);
+    const ruido = /non monotonically increasing dts|Last message repeated|^\[s16le @/.test(texto);
+    if (!detenida && !ruido) opciones.alError?.(texto);
   });
   const terminada = new Promise<void>((resuelve, rechaza) => {
     proceso.on('error', (e) => rechaza(new Error(`no se pudo lanzar ffmpeg: ${e.message}`)));
@@ -108,6 +122,20 @@ export function floatAPcm16(muestras: Muestras): Buffer {
     salida.writeInt16LE(Math.round(v < 0 ? v * 32768 : v * 32767), i * 2);
   }
   return salida;
+}
+
+/** Escribe un WAV PCM16 mono. Solo para diagnostico (`dictar --graba`): por defecto nada se graba. */
+export async function escribeWav(ruta: string, muestras: Muestras, frecuenciaHz: number): Promise<void> {
+  const pcm = floatAPcm16(muestras);
+  const cabecera = Buffer.alloc(44);
+  cabecera.write('RIFF', 0); cabecera.writeUInt32LE(36 + pcm.length, 4); cabecera.write('WAVE', 8);
+  cabecera.write('fmt ', 12); cabecera.writeUInt32LE(16, 16); cabecera.writeUInt16LE(1, 20); cabecera.writeUInt16LE(1, 22);
+  cabecera.writeUInt32LE(frecuenciaHz, 24); cabecera.writeUInt32LE(frecuenciaHz * 2, 28); cabecera.writeUInt16LE(2, 32); cabecera.writeUInt16LE(16, 34);
+  cabecera.write('data', 36); cabecera.writeUInt32LE(pcm.length, 40);
+  const { writeFile, mkdir } = await import('node:fs/promises');
+  const { dirname } = await import('node:path');
+  await mkdir(dirname(ruta), { recursive: true });
+  await writeFile(ruta, Buffer.concat([cabecera, pcm]));
 }
 
 /** RMS en dB relativo a plena escala. Para saber si el microfono esta vivo antes de dictar. */

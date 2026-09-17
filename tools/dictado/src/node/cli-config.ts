@@ -86,9 +86,10 @@ export function leeConfiguracion(opciones: Record<string, string | boolean>): Co
 export const AYUDA = `dictado — hablar y que el texto aparezca donde esta el cursor (WSL2 → Windows)
 
   dictado dictar [--modo alternar|manos-libres|pulsar] [--motor parakeet|whisper-turbo|whisper-base|faster-whisper:small|remoto]
-                 [--pegar portapapeles|teclear|ninguno] [--tecla [0xA3]] [--silencio-ms 700] [--idioma es]
+                 [--pegar portapapeles|teclear|ninguno] [--tecla [0xA3]] [--tecla-alternar] [--respaldo faster-whisper:small] [--ganancia-db 12] [--silencio-ms 1000] [--idioma es]
   dictado archivo <audio> [--motor ...]                        transcribe un archivo y mide (modo archivo)
   dictado lote <audio> [--hablantes N] [--motor ...]           reunion: turnos por voz + texto por dictado
+  dictado di "<texto>" [--voz es_MX-claude-high] [--velocidad 1.1] [--guarda voz.wav] [--altavoz windows|pulse] [--sin-sonido]   el agente habla (Piper local)
   dictado historial [--busca texto] [--n 20]
   dictado diccionario lista | agrega <termino...> | quita <termino>
   dictado snippets lista | agrega "<disparador>" "<expansion>" | quita "<disparador>"

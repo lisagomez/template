@@ -162,6 +162,22 @@ test('errores del motor salen como evento y el dictado vuelve a inactivo; el mod
   assert.equal(dictado.modo, 'manosLibres');
 });
 
+test('terminar espera al audio en vuelo: un detector lento no pierde la ultima frase', async () => {
+  const lento = detectorDeGuion();
+  const procesaRapido = lento.procesa.bind(lento);
+  lento.procesa = (entrada) => new Promise((r) => setTimeout(() => r(procesaRapido(entrada)), 30));
+  const transcriptor = transcriptorFalso((audio) => `oi ${audio.length}`);
+  const pegador = pegadorQueApunta();
+  const dictado = creaDictado({ detector: lento, transcriptor, frecuenciaHz: HZ, pegador });
+  dictado.empieza();
+  void dictado.alimenta(new Float32Array(300)); // sin await: como llega del microfono
+  void dictado.alimenta(new Float32Array(200));
+  await dictado.termina(); // llega antes de que el detector haya procesado nada
+  assert.deepEqual(pegador.pegado, ['oi 2900']); // 300 + 2400 de hueco (150 ms) + 200: los dos trozos entraron
+  await dictado.alimenta(new Float32Array(999)); // tras terminar se descarta
+  assert.equal(transcriptor.llamadas.length, 1);
+});
+
 test('la pista del diccionario se consulta en cada transcripcion', async () => {
   let pista = 'Levy';
   const recibidas: Array<string | undefined> = [];

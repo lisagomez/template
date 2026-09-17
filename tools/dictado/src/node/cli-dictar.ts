@@ -16,8 +16,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { creaDictado, type Dictado, type EventoDictado, type Modo } from '../dictado.js';
 import { creaPosproceso } from '../posproceso.js';
-import type { Pegador } from '../types.js';
-import { capturaMicrofono, nivelDb } from './audio.js';
+import { pareceOtroIdioma } from '../texto/idioma.js';
+import type { Motor, Pegador } from '../types.js';
+import { capturaMicrofono, escribeWav, nivelDb } from './audio.js';
 import type { Configuracion } from './cli-config.js';
 import { cargaDatos } from './cli-datos.js';
 import { creaDetector, creaMotor } from './cli-motores.js';
@@ -51,6 +52,34 @@ function pinta(evento: EventoDictado): void {
     default:
       break;
   }
+}
+
+/**
+ * Parakeet detecta el idioma solo y con audio corto o flojo toma el espanol por ingles («Probably.»,
+ * «No you can only gorda», vivo el 2026-09-16). Si el principal declara OTRO idioma que el pedido, se
+ * repite con el respaldo (faster-whisper con el idioma forzado): mas lento, pero solo cuando hizo falta.
+ */
+function conRespaldo(principal: Motor, respaldo: Motor, idioma: string): Motor {
+  return {
+    id: `${principal.id}+${respaldo.id}`,
+    admitePista: principal.admitePista || respaldo.admitePista,
+    async transcribe(muestras, hz, o) {
+      const r = await principal.transcribe(muestras, hz, o);
+      if (r.texto.length === 0) return r;
+      const otro = r.idioma ? r.idioma !== idioma : pareceOtroIdioma(r.texto, idioma);
+      if (!otro) return r;
+      console.log(gris(`  el motor principal sacó ${JSON.stringify(r.texto)} (${r.idioma ?? 'parece otro idioma'}): repito con ${respaldo.id} en ${idioma}`));
+      return respaldo.transcribe(muestras, hz, { ...o, idioma });
+    },
+    async calienta() {
+      await principal.calienta?.();
+      await respaldo.calienta?.();
+    },
+    async cierra() {
+      await principal.cierra?.();
+      await respaldo.cierra?.();
+    },
+  };
 }
 
 function pegadorDePantalla(): Pegador {
@@ -101,10 +130,10 @@ function teclasDeTerminal(alEspacio: () => void, alSalir: () => void): () => voi
  * El script viaja por `-EncodedCommand` con sus parametros ya puestos: PowerShell no siempre
  * acepta un `-File` en `\\wsl.localhost\...`. El archivo sigue ahi para leerlo; es el mismo.
  */
-function lanzaTeclaGlobal(puerto: number, vk: string): () => void {
+function lanzaTeclaGlobal(puerto: number, vk: string, alterna: boolean): () => void {
   console.log(`\nVoy a lanzar powershell.exe (del lado Windows, en esta misma terminal) con ${RUTA_TECLA}:`);
   console.log(`  sondea la tecla ${vk} (por defecto Ctrl DERECHO) y avisa a este proceso por 127.0.0.1:${puerto}. No lee otras teclas ni escribe nada.`);
-  console.log('  Mantenla para dictar; dos toques seguidos = manos libres (otro toque lo apaga). q aqui para parar.\n');
+  console.log(`  ${alterna ? 'Un toque EMPIEZA a escuchar y el siguiente TERMINA (no hace falta mantenerla).' : 'Mantenla para dictar; dos toques seguidos = manos libres (otro toque lo apaga).'} q aqui para parar.\n`);
   const cuerpo = readFileSync(RUTA_TECLA, 'utf8').replace(/param\([^)]*\)/, '');
   const script = `$Puerto = ${puerto}; $Tecla = ${Number(vk)}\n${cuerpo}`;
   const hijo = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { stdio: ['ignore', 'inherit', 'inherit'] });
@@ -117,15 +146,30 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   const idioma = typeof opciones['idioma'] === 'string' ? opciones['idioma'] : 'es';
   const pegar = String(opciones['pegar'] ?? 'portapapeles');
   const silencioMs = typeof opciones['silencio-ms'] === 'string' ? Number(opciones['silencio-ms']) : DEFECTOS_DICTADO.msSilencioParaCerrar;
+  const gananciaDb = typeof opciones['ganancia-db'] === 'string' ? Number(opciones['ganancia-db']) : 0;
+  /** Con `--tecla-alternar` la tecla no se mantiene: un toque empieza, el siguiente termina. */
+  const teclaAlterna = opciones['tecla-alternar'] === true;
+  /** `--graba <carpeta>`: guarda el audio de cada escucha como WAV. SOLO diagnostico; por defecto nada se graba. */
+  const graba = typeof opciones['graba'] === 'string' ? opciones['graba'] : undefined;
 
   console.log(gris(config.describe()));
   const datos = cargaDatos(config, { corrigePorSimilitud: opciones['corrige-similitud'] === true });
-  const motor = await creaMotor(String(opciones['motor'] ?? 'parakeet'), config, idioma);
+  const principal = await creaMotor(String(opciones['motor'] ?? 'parakeet'), config, idioma);
+  const respaldo = typeof opciones['respaldo'] === 'string' ? await creaMotor(opciones['respaldo'], config, idioma) : undefined;
+  const motor = respaldo ? conRespaldo(principal, respaldo, idioma) : principal;
   const detector = await creaDetector(config, { msSilencioParaCerrar: silencioMs });
-  const pegador = pegar === 'ninguno' ? pegadorDePantalla() : creaPegadorWindows({ metodo: pegar === 'teclear' ? 'teclear' : 'portapapeles' });
+  const pegadorBase = pegar === 'ninguno' ? pegadorDePantalla() : creaPegadorWindows({ metodo: pegar === 'teclear' ? 'teclear' : 'portapapeles' });
+  // En manos libres las frases se pegan una tras otra en la misma caja: sin separador se juntan.
+  let msPegado = 0;
+  const pegaMedido = async (t: string) => {
+    const t0 = performance.now();
+    await pegadorBase.pega(modo === 'manosLibres' ? t + ' ' : t);
+    msPegado = performance.now() - t0;
+  };
+  const pegador: Pegador = { ...pegadorBase, pega: pegaMedido };
   const t0 = performance.now();
   await motor.calienta?.();
-  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo}`));
+  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaDb} dB`));
 
   const dictado = creaDictado({
     detector,
@@ -138,20 +182,46 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     pegador,
     almacen: datos.historial,
     motorId: motor.id,
-    alEvento: pinta,
+    alEvento: (e) => {
+      if (e.tipo === 'estado' && e.estado === 'escuchando') {
+        picoEscucha = -Infinity;
+        trozosEscucha = [];
+      }
+      pinta(e);
+      if (e.tipo === 'texto') console.log(gris(`  pegado ${msPegado.toFixed(0)} ms`));
+      if (e.tipo === 'sinVoz' || e.tipo === 'texto') {
+        console.log(gris(`  pico durante la escucha: ${picoEscucha.toFixed(1)} dBFS${picoEscucha < -45 ? ' — el microfono apenas te oye: acercalo o sube su nivel en Windows' : ''}`));
+        if (graba && trozosEscucha.length > 0) {
+          const largo = trozosEscucha.reduce((n, t) => n + t.length, 0);
+          const todo = new Float32Array(largo);
+          let pos = 0;
+          for (const t of trozosEscucha) { todo.set(t, pos); pos += t.length; }
+          const ruta = `${graba}/escucha-${new Date().toISOString().replace(/[:.]/g, '-')}.wav`;
+          void escribeWav(ruta, todo, detector.frecuenciaHz).then(() => console.log(gris(`  grabado ${ruta} (${(largo / detector.frecuenciaHz).toFixed(1)} s)`)));
+        }
+      }
+    },
   });
   const control = controlador(dictado);
 
   let picoDb = -Infinity;
   let muestrasVistas = 0;
+  /** Pico durante cada escucha: cuando sale «sin voz», la primera sospecha es el micrófono. */
+  let picoEscucha = -Infinity;
+  let trozosEscucha: Float32Array[] = [];
   const captura = capturaMicrofono({
     frecuenciaHz: detector.frecuenciaHz,
+    gananciaDb,
     alRecibir: (m) => {
+      if (dictado.estado === 'escuchando') {
+        picoEscucha = Math.max(picoEscucha, nivelDb(m));
+        if (graba) trozosEscucha.push(m);
+      }
       if (muestrasVistas < detector.frecuenciaHz * 2) {
         picoDb = Math.max(picoDb, nivelDb(m));
         muestrasVistas += m.length;
         if (muestrasVistas >= detector.frecuenciaHz * 2) {
-          console.log(gris(`microfono vivo: pico ${picoDb.toFixed(1)} dBFS en los primeros 2 s${picoDb < -60 ? ' — MUY bajo: revisa el microfono de Windows' : ''}`));
+          console.log(gris(`microfono vivo: pico ${picoDb.toFixed(1)} dBFS en los primeros 2 s${picoDb < -75 ? ' — MUY bajo: revisa el microfono de Windows' : ''}`));
         }
       }
       void dictado.alimenta(m);
@@ -174,7 +244,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     await control.esperar();
     if (dictado.estado !== 'inactivo') await dictado.termina().catch(() => undefined);
     await motor.cierra?.();
-    if ('cierra' in pegador && typeof pegador.cierra === 'function') await (pegador as { cierra(): Promise<void> }).cierra();
+    if ('cierra' in pegadorBase && typeof pegadorBase.cierra === 'function') await (pegadorBase as { cierra(): Promise<void> }).cierra();
     datos.guardaSnippets();
     // Sin `process.exit` inmediato: con stdout en un pipe, lo ultimo escrito se perderia. Se
     // deja que el bucle se vacie, y si algo nativo lo mantiene vivo, se sale al segundo y medio.
@@ -185,16 +255,17 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   if (opciones['tecla'] !== undefined) {
     const vk = typeof opciones['tecla'] === 'string' ? opciones['tecla'] : '0xA3';
     tecla = await escuchaTecla({
-      alMantener: () => void control.empieza('pulsar'),
-      alSoltar: () => void control.termina(),
+      alMantener: () => (teclaAlterna ? undefined : void control.empieza('pulsar')),
+      alSoltar: () => (teclaAlterna ? void control.alterna('alternar') : void control.termina()),
       alManosLibres: (activo) => {
+        if (teclaAlterna) return; // con toques que alternan, el doble toque no es un gesto aparte
         console.log(activo ? verde('manos libres: ON (un toque lo apaga)') : gris('manos libres: OFF'));
         void (activo ? control.empieza('manosLibres') : control.termina());
       },
       alConectar: () => console.log(verde('tecla global conectada')),
       alDesconectar: () => console.log(gris('tecla global desconectada')),
     });
-    cierraTeclaGlobal = lanzaTeclaGlobal(tecla.puerto, vk);
+    cierraTeclaGlobal = lanzaTeclaGlobal(tecla.puerto, vk, teclaAlterna);
   }
   console.log(`\nESPACIO en esta terminal: ${modo === 'manosLibres' ? 'enciende/apaga manos libres' : 'empieza/termina el dictado'} · q: salir`);
   quitaTeclas = teclasDeTerminal(() => void control.alterna(modo), () => void salir());

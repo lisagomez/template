@@ -37,3 +37,4 @@ export {
 export { formateaActa, formateaTiempo, transcribeLote, type OpcionesLote, type ResultadoLote } from './lote.js';
 export { cer, distanciaEdicion, percentil, wer, werAcumulado, type ResultadoWer } from './texto/wer.js';
 export { capitalizaInicio, normalizaParaComparar, quitaAcentos, regexDePalabra, tokeniza } from './texto/normaliza.js';
+export { pareceOtroIdioma } from './texto/idioma.js';
