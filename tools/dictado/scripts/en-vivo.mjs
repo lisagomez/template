@@ -27,7 +27,7 @@ const utiles = () => (existsSync(log) ? limpio(readFileSync(log, 'utf8')).split(
 
 function vivo() {
   try {
-    const salida = execFileSync('pgrep', ['-f', '^node dist/node/cli.js dictar'], { encoding: 'utf8' }).trim();
+    const salida = execFileSync('pgrep', ['-f', '^[^ ]*node [^ ]*dist/node/cli.js dictar'], { encoding: 'utf8' }).trim();
     return salida ? Number(salida.split('\n')[0]) : null;
   } catch {
     return null;
@@ -36,7 +36,7 @@ function vivo() {
 
 /** Patrones ANCLADOS: `pkill -f` sin anclar mata la shell que lo lanza (aprendizaje del 2026-09-13). */
 function parar() {
-  for (const patron of ['^node dist/node/cli.js dictar', `^${banco}/venv/bin/python`, '^/init /mnt/c/WINDOWS/System32/WindowsPowerShell']) {
+  for (const patron of ['^[^ ]*node [^ ]*dist/node/cli.js dictar', `^${banco}/venv/bin/python`, '^/init /mnt/c/WINDOWS/System32/WindowsPowerShell']) {
     try { execFileSync('pkill', ['-9', '-f', patron], { stdio: 'ignore' }); } catch { /* no habia */ }
   }
   console.log('dictado parado');
