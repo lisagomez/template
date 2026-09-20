@@ -51,6 +51,20 @@ function autorizado(peticion: NextRequest): boolean | 'sin-token' {
   return dado.length === bueno.length && timingSafeEqual(dado, bueno);
 }
 
+/**
+ * Nivel pico del audio recibido, en dBFS, con ffmpeg (`volumedetect`). Sirve para que un
+ * «sin voz» diga POR QUE: grabacion muda (microfono equivocado o silenciado en el navegador)
+ * vs audio con sonido pero sin habla clara. -Infinity si no hay pista o ffmpeg no puede.
+ */
+function picoDbDelAudio(ruta: string): Promise<number> {
+  return new Promise((resuelve) => {
+    execFile('ffmpeg', ['-hide_banner', '-i', ruta, '-af', 'volumedetect', '-f', 'null', '-'], (_err, _stdout, stderr) => {
+      const m = /max_volume:\s*(-?\d+(?:\.\d+)?)\s*dB/.exec(stderr ?? '');
+      resuelve(m ? Number(m[1]) : -Infinity);
+    });
+  });
+}
+
 /** El texto viaja por stdin: comillas y saltos de linea no pelean con la shell. */
 function pegaEnPc(texto: string): Promise<void> {
   return new Promise((resuelve, rechaza) => {
@@ -89,10 +103,21 @@ export async function POST(peticion: NextRequest): Promise<NextResponse> {
     const { stdout } = await ejecuta(process.execPath, [CLI, 'archivo', ruta, '--motor', 'parakeet'], { env: entorno(), cwd: RAIZ_DICTADO, timeout: 60_000 });
     const ms = Math.round(performance.now() - t0);
     const texto = stdout.trim();
-    if (texto.length > 0 && (destino === 'pc' || destino === 'ambos')) {
+    if (texto.length === 0) {
+      // Diagnostico: distinguir grabacion muda de audio-sin-habla, para que el aviso sea util.
+      const pico = await picoDbDelAudio(ruta);
+      const razon =
+        audio.length < 2_000
+          ? 'no se grabo audio (revisa el permiso de microfono del navegador)'
+          : pico < -50
+            ? 'el microfono no capto voz: en Windows revisa QUE microfono usa el navegador y su nivel'
+            : 'sin voz clara en la toma (acercate al microfono y habla al terminar de tocar)';
+      return NextResponse.json({ texto: '', ms, destino, razon, bytes: audio.length, picoDb: Number.isFinite(pico) ? Math.round(pico) : null });
+    }
+    if (destino === 'pc' || destino === 'ambos') {
       await pegaEnPc(texto);
     }
-    return NextResponse.json({ texto, ms, destino });
+    return NextResponse.json({ texto, ms, destino, bytes: audio.length });
   } catch {
     return NextResponse.json({ error: 'no se pudo transcribir' }, { status: 500 });
   } finally {

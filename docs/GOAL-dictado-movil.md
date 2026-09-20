@@ -8,10 +8,25 @@
 > emparejamiento por token (`/api/dictado/movil`, C3), transcripción local (C4: audio a
 > temporal que se borra), destino conmutable PC/pantalla/ambos (`dictado pega` nueva orden de
 > la herramienta). Página `/dictar` con botón flotante móvil arrastrable. Probado de punta a
-> punta: audio → transcripción fiel; ambos destinos; screenshots en viewport iPhone. La demo
-> en el teléfono real de la dueña queda para su prueba (necesita el paso de red de Windows y
-> aceptar el certificado). Límite de plataforma declarado sin maquillar: no hay overlay del
-> sistema en PWA.
+> punta: audio → transcripción fiel; ambos destinos; screenshots en viewport iPhone. Límite de
+> plataforma declarado sin maquillar: no hay overlay del sistema en PWA.
+>
+> **La batalla del micrófono (2026-09-19), y lo que quedó en el código:** dictar desde el
+> navegador salía «sin voz» aunque el dictado de escritorio (PulseAudio) SÍ captaba. Cadena de
+> causas, cada una con su fix:
+> 1. **La supresión de ruido de Chromium** (ON por defecto) apagaba un micrófono flojo tratándolo
+>    como ruido → señal a -53 dBFS. Fix: `getUserMedia` para dictado va con `noiseSuppression:false`,
+>    `echoCancellation:false`, `autoGainControl:true` (`use-grabadora.ts` → `AUDIO`).
+> 2. **La «Mezcla estéreo»** (stereo mix) grababa los altavoces, no la voz → RMS PLANO sin
+>    estructura de habla. Fix: se excluye explícitamente (`NO_ES_MIC_DE_VOZ`).
+> 3. **El dispositivo por defecto era el equivocado**: en esta máquina el micrófono bueno era el
+>    de la **webcam**, no el jack «Realtek» (que daba puro ruido plano). Adivinar por etiqueta es
+>    frágil (la de stereo-mix también dice «Realtek»). Fix definitivo: **selector de micrófono en
+>    la UI** (`/dictar`), la elección se respeta EXACTA y se recuerda en `localStorage`.
+> **Diagnóstico que quedó**: el route mide el pico del audio recibido y distingue «no se grabó»
+> / «micrófono no captó voz» / «sin voz clara», y surfea el nivel en dBFS — un «sin voz» opaco
+> se volvió accionable. **La lección**: el peak solo no basta; la ESTRUCTURA temporal del RMS
+> (picos y valles) distingue voz de ruido plano, y esa fue la prueba que desempató.
 
 ## MISIÓN
 

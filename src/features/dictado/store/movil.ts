@@ -18,7 +18,7 @@ export interface Transcripcion {
   fecha: string;
 }
 
-const esquemaRespuesta = z.object({ texto: z.string(), ms: z.number(), destino: z.string() });
+const esquemaRespuesta = z.object({ texto: z.string(), ms: z.number(), destino: z.string(), razon: z.string().optional(), picoDb: z.number().nullable().optional() });
 
 const guarda = (clave: string, valor: string) => {
   try {
@@ -106,9 +106,10 @@ export const useDictadoMovil = create<DictadoMovil>((set, get) => ({
         set({ error: r.status === 401 ? 'el emparejamiento caduco: vuelve a teclear el token' : 'no se pudo transcribir' });
         return;
       }
-      const { texto, ms } = esquemaRespuesta.parse(await r.json());
+      const { texto, ms, razon, picoDb } = esquemaRespuesta.parse(await r.json());
       if (texto.length === 0) {
-        set({ error: 'sin voz en la toma' });
+        const nivel = typeof picoDb === 'number' ? ` (nivel ${picoDb} dBFS)` : '';
+        set({ error: (razon ?? 'sin voz en la toma') + nivel });
         return;
       }
       set((s) => ({

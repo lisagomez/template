@@ -23,11 +23,27 @@ export default function PaginaDictar() {
   const grabadora = useGrabadora();
   const [tokenTecleado, setTokenTecleado] = useState('');
   const [copiado, setCopiado] = useState<string | undefined>(undefined);
+  const [micElegido, setMicElegido] = useState<string>(() => {
+    try {
+      return localStorage.getItem('dictado.mic') ?? '';
+    } catch {
+      return '';
+    }
+  });
 
   useEffect(() => {
     movil.carga();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const eligeMic = (id: string) => {
+    setMicElegido(id);
+    try {
+      localStorage.setItem('dictado.mic', id);
+    } catch {
+      /* nada */
+    }
+  };
 
   const alTocarBoton = async () => {
     if (grabadora.grabando) {
@@ -35,7 +51,7 @@ export default function PaginaDictar() {
       if (audio) await movil.transcribe(audio);
       return;
     }
-    await grabadora.empieza();
+    await grabadora.empieza(micElegido || undefined);
   };
 
   const copia = async (texto: string, id: string) => {
@@ -56,14 +72,34 @@ export default function PaginaDictar() {
           Teclea el token de emparejamiento UNA vez (esta en el <code>.env.local</code> de tu PC como{' '}
           <code>DICTADO_MOVIL_TOKEN</code>). No se muestra ni viaja a ningun tercero.
         </p>
-        <input
-          type="password"
-          value={tokenTecleado}
-          onChange={(e) => setTokenTecleado(e.target.value)}
-          placeholder="token"
-          autoComplete="off"
-          className="rounded-lg border border-neutral-300 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900"
-        />
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={tokenTecleado}
+            onChange={(e) => setTokenTecleado(e.target.value.trim())}
+            placeholder="token"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 font-mono dark:border-neutral-700 dark:bg-neutral-900"
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                setTokenTecleado((await navigator.clipboard.readText()).trim());
+              } catch {
+                /* sin permiso de portapapeles: se pega a mano */
+              }
+            }}
+            className="rounded-lg border border-neutral-300 px-3 text-sm dark:border-neutral-700"
+          >
+            Pegar
+          </button>
+        </div>
+        <p className="text-xs text-neutral-500">
+          {tokenTecleado.length} caracteres {tokenTecleado.length === 32 ? '✓ (completo)' : '(deben ser 32)'}
+        </p>
         <button
           type="button"
           onClick={() => void movil.empareja(tokenTecleado.trim())}
@@ -98,6 +134,29 @@ export default function PaginaDictar() {
       </div>
       <p className="mb-4 text-center text-xs text-neutral-500">{DESTINOS.find((d) => d.valor === movil.destino)?.pista}</p>
 
+      <div className="mb-3 flex items-center gap-2">
+        <select
+          value={micElegido}
+          onChange={(e) => eligeMic(e.target.value)}
+          onFocus={() => void grabadora.listaMicrofonos()}
+          className="min-w-0 flex-1 truncate rounded-lg border border-neutral-300 px-2 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+        >
+          <option value="">Micrófono automático</option>
+          {grabadora.microfonos.map((m) => (
+            <option key={m.deviceId} value={m.deviceId}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={() => void grabadora.listaMicrofonos()}
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700"
+        >
+          Ver micrófonos
+        </button>
+      </div>
+      {grabadora.micUsado ? <p className="mb-2 text-xs text-neutral-400">grabando de: {grabadora.micUsado}</p> : null}
       {grabadora.error ? <p className="mb-2 text-sm text-red-500">{grabadora.error}</p> : null}
       {movil.error ? <p className="mb-2 text-sm text-amber-600">{movil.error}</p> : null}
 
