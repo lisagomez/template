@@ -15,6 +15,7 @@ import { analizaSentimiento } from '../services/sentimiento.ts';
 import { primerNumero } from '../services/texto.ts';
 import { escribeWavPcm16, leeWavPcm16, mezclaEstereo } from '../services/wav.ts';
 import type { Piezas } from '../types/index.ts';
+import { enlaceDeEmparejar } from '../../dictado/services/enlace-emparejar.ts';
 
 const TODO: Piezas = { parakeet: true, silero: true, embedding: true, piper: true, ffmpeg: true, runtime: true, tokenServidor: true, llaveLlm: false, supabase: false };
 
@@ -145,4 +146,10 @@ test('wav: escribir, leer y mezclar en estereo deja cada voz en su canal', () =>
   assert.equal(leido.canales, 2);
   assert.equal(leido.frecuenciaHz, 1000);
   assert.deepEqual([...leido.muestras], [...estereo]);
+});
+
+test('enlace de emparejar: el token va en el fragmento, codificado, y la ruta se normaliza', () => {
+  assert.equal(enlaceDeEmparejar('https://kyara.example/', 'laboratorio-voz', 'a b&c'), 'https://kyara.example/laboratorio-voz#t=a%20b%26c');
+  assert.equal(enlaceDeEmparejar('http://localhost:3000', '/dictar', 'x'), 'http://localhost:3000/dictar#t=x');
+  assert.ok(!enlaceDeEmparejar('http://localhost:3000', '/dictar', 'x').includes('?t='));
 });

@@ -126,3 +126,13 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   que la ruta invoca con `execFile`, igual que al CLI de dictado. Las rutas solo usan `fs` sobre
   temporales de `mkdtemp`, que el analizador no puede plegar.
 - **Aplicar en**: todo route handler o server component que mire carpetas del repo fuera de `src/`.
+
+### 2026-09-20: `npm install` poda lo que no está en `package.json` (Playwright desapareció)
+- **Error**: `npm install uqr` dijo «removed 2 packages»: eran `playwright` y `playwright-core`,
+  instalados a mano en algún momento y nunca declarados. El siguiente guion de capturas falló
+  con `Cannot find package 'playwright'`.
+- **Fix**: lo que un guion del repo importa se declara pineado (`playwright` es devDependency
+  exacta 1.63.0). Un paquete que solo vive en `node_modules` no existe: el próximo `npm install`
+  se lo lleva.
+- **Aplicar en**: cualquier herramienta que se use desde `scripts/` o desde una sesión.
+
