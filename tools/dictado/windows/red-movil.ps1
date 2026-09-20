@@ -26,6 +26,15 @@ netsh interface portproxy add v4tov4 listenport=$Puerto listenaddress=0.0.0.0 co
 if (-not (Get-NetFirewallRule -DisplayName $regla -ErrorAction SilentlyContinue)) {
   New-NetFirewallRule -DisplayName $regla -Direction Inbound -Action Allow -Protocol TCP -LocalPort $Puerto -Profile Private | Out-Null
 }
+# La regla es de perfil PRIVADO: si la wifi esta como PUBLICA, no aplica y el telefono no
+# llega aunque el portproxy este bien (vivido el 2026-09-20). Se avisa y se ofrece marcarla
+# privada — es lo correcto para una red de casa y deja el puerto cerrado en redes publicas de verdad.
+$publicas = Get-NetConnectionProfile | Where-Object { $_.NetworkCategory -eq 'Public' }
+foreach ($p in $publicas) {
+  Write-Warning "la red '$($p.Name)' esta como PUBLICA: la regla de firewall (privada) NO aplica y el telefono no llegara."
+  Write-Output "  para arreglarlo (red de casa): Set-NetConnectionProfile -Name '$($p.Name)' -NetworkCategory Private"
+}
+
 $ipLan = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch 'Loopback|vEthernet' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress
 Write-Output "camino abierto: Windows:$Puerto → WSL2 $ipWsl`:$Puerto (solo redes privadas)"
 Write-Output "en el telefono (misma wifi): https://$ipLan`:$Puerto/dictar"
