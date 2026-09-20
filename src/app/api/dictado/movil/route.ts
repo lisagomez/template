@@ -12,13 +12,13 @@
  * borra SIEMPRE, no se guarda ni sale de esta maquina; ningun error lleva texto ni rutas.
  */
 import { execFile, spawn } from 'node:child_process';
-import { timingSafeEqual } from 'node:crypto';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
+import { rechazoSinToken as conAuth } from '@/shared/lib/token-dictado';
 
 const ejecuta = promisify(execFile);
 /**
@@ -40,16 +40,6 @@ const entorno = () => ({
   DICTADO_RUNTIME: process.env['DICTADO_RUNTIME'] ?? BANCO,
   DICTADO_DATOS: process.env['DICTADO_DATOS'] ?? join(BANCO, 'datos'),
 });
-
-function autorizado(peticion: NextRequest): boolean | 'sin-token' {
-  const token = process.env['DICTADO_MOVIL_TOKEN'];
-  if (!token || token.length < 16) return 'sin-token';
-  const cabecera = peticion.headers.get('authorization') ?? '';
-  if (!cabecera.startsWith('Bearer ')) return false;
-  const dado = Buffer.from(cabecera.slice(7));
-  const bueno = Buffer.from(token);
-  return dado.length === bueno.length && timingSafeEqual(dado, bueno);
-}
 
 /**
  * Nivel pico del audio recibido, en dBFS, con ffmpeg (`volumedetect`). Sirve para que un
@@ -74,13 +64,6 @@ function pegaEnPc(texto: string): Promise<void> {
     hijo.stdin.write(texto);
     hijo.stdin.end();
   });
-}
-
-function conAuth(peticion: NextRequest): NextResponse | undefined {
-  const auth = autorizado(peticion);
-  if (auth === 'sin-token') return NextResponse.json({ error: 'el dictado movil no esta emparejado en el servidor (falta DICTADO_MOVIL_TOKEN)' }, { status: 503 });
-  if (!auth) return NextResponse.json({ error: 'token invalido' }, { status: 401 });
-  return undefined;
 }
 
 export function GET(peticion: NextRequest): NextResponse {
