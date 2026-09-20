@@ -102,9 +102,7 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: matar por puerto (`fuser -k 8081/tcp`) o por PID guardado; si hay que usar `pkill`,
   anclar el patrón al inicio (`pkill -f '^node servidor.mjs'`) para que la shell no case.
 - **Aplicar en**: toda limpieza de procesos lanzados desde una sesión.
-- **Reincidió el 2026-09-20** (`pkill -f "next start -H 0.0.0.0 -p 3000"`, exit 144) con esta
-  regla cargada en contexto: la regla se leyó y no se aplicó. Lo que sí funcionó después fue
-  no usar `pkill`: `ss -ltnp | grep :3000` → PID → `kill`.
+- **Reincidió el 2026-09-20** con la regla cargada (exit 144). Lo que sirvió: `ss -ltnp` → PID → `kill`.
 
 ### 2026-09-13: `gh pr edit` falla por un aviso de GitHub ajeno al PR
 - **Error**: `gh pr edit N --body-file ...` devuelve `GraphQL: Projects (classic) is being
@@ -114,27 +112,17 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Aplicar en**: cualquier edición de la descripción de un PR desde una sesión.
 
 ### 2026-09-20: Turbopack rastrea como assets el disco que el bundle toca con `fs`
-- **Error**: `next build` reventó con `Symlink [project]/tools/dictado/medicion/banco/venv/bin/python
-  is invalid, it points out of the filesystem root`. La causa no era el symlink: era un
-  `existsSync(join(modelos, ...))` / `readdirSync(modelos)` en un route handler, con rutas
-  derivadas de `process.cwd()` + literales. Turbopack las resuelve en build, sigue el árbol de
-  `banco/` como si fueran assets y tropieza con el venv. La ruta móvil ya lo había documentado
-  para `path.join` de literales; el disparador real es cualquier llamada a `fs` con una ruta
-  que el analizador pueda plegar.
-- **Fix**: el bundle NO toca el disco del banco. Todo sondeo (qué modelos hay, qué voces, leer o
-  escribir datos locales) vive en un script Node aparte (`scripts/laboratorio-voz/maquina.mjs`)
-  que la ruta invoca con `execFile`, igual que al CLI de dictado. Las rutas solo usan `fs` sobre
-  temporales de `mkdtemp`, que el analizador no puede plegar.
-- **Aplicar en**: todo route handler o server component que mire carpetas del repo fuera de `src/`.
+- **Error**: `existsSync`/`readdirSync` en un route handler sobre rutas de `process.cwd()` +
+  literales; el build siguió el árbol de `tools/dictado/medicion/banco/` y reventó con el symlink
+  del venv («points out of the filesystem root»). El disparador es cualquier `fs` con ruta plegable.
+- **Fix**: el bundle no toca el disco del banco: todo sondeo va en un script Node aparte
+  (`scripts/laboratorio-voz/maquina.mjs`) por `execFile`; `fs` solo sobre temporales de `mkdtemp`.
+- **Aplicar en**: todo route handler o server component que mire carpetas fuera de `src/`.
 
 ### 2026-09-20: `npm install` poda lo que no está en `package.json` (Playwright desapareció)
-- **Error**: `npm install uqr` dijo «removed 2 packages»: eran `playwright` y `playwright-core`,
-  instalados a mano en algún momento y nunca declarados. El siguiente guion de capturas falló
-  con `Cannot find package 'playwright'`.
-- **Fix**: lo que un guion del repo importa se declara pineado (`playwright` es devDependency
-  exacta 1.63.0). Un paquete que solo vive en `node_modules` no existe: el próximo `npm install`
-  se lo lleva.
-- **Aplicar en**: cualquier herramienta que se use desde `scripts/` o desde una sesión.
+- **Error**: `npm install uqr` quitó `playwright`, instalado a mano y nunca declarado.
+- **Fix**: lo que un guion del repo importa se declara pineado (`playwright` devDependency exacta).
+- **Aplicar en**: cualquier herramienta usada desde `scripts/` o desde una sesión.
 
 ### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type` declarado
 - **Error**: `node --test scripts/prueba-trayectorias.ts` y la suite del laboratorio de voz
@@ -146,3 +134,16 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   aviso. Next sí adapta el `server.js` del standalone al `type` de la raíz (`build/utils.js`),
   así que ese no es el motivo.
 - **Aplicar en**: cualquier `.ts` o `.js` nuevo que Node corra directo fuera de `tools/`.
+
+### 2026-09-20: el WAV que ffmpeg escribe a una tubería lleva tamaños «desconocidos»
+- **Error**: `-f wav pipe:1` pone `0xFFFFFFFF` en la cabecera; el servicio de dictado lo rechazaba
+  con 500 y la ruta caía al CLI en silencio: el demonio «vivo» no bajaba la latencia.
+- **Fix**: PCM crudo (`-f s16le`) con la frecuencia en cabecera; y la respuesta dice por dónde
+  pasó (`via`), o la caída al respaldo no se ve.
+- **Aplicar en**: toda tubería de audio entre procesos.
+
+### 2026-09-20: un proceso de Node sin handles sale en silencio, aunque espere una promesa
+- **Error**: con el micrófono cerrado en espera y el único intervalo con `.unref()`, `dictar` salió
+  con código 0 sin decir nada; `await` de una promesa pendiente no mantiene el proceso.
+- **Fix**: un latido con referencia hasta `salir()`; medir con la salida a archivo.
+- **Aplicar en**: todo demonio o CLI de larga vida que cierre recursos en reposo.

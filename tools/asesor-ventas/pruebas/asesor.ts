@@ -96,3 +96,13 @@ test('cada playbook por defecto suma exactamente 100 en pesos', () => {
     assert.equal(suma, 100, `el playbook ${pb.id} suma ${suma}, no 100`);
   }
 });
+
+test('cache: el mismo id con otra transcripcion NO devuelve el analisis anterior (la clave lleva huella del contenido)', () => {
+  const pb = playbookPorTipo('discovery');
+  const a = analizarReunion(reunion, transcripcion, pb);
+  const otra: Transcripcion = { ...transcripcion, segmentos: [{ inicioS: 0, finS: 5, hablante: 'Ana', texto: 'Le cuento lo que hacemos.', confianza: 0.95 }, { inicioS: 5, finS: 7, hablante: 'Luis', texto: 'Ajá.', confianza: 0.9 }] };
+  const b = analizarReunion(reunion, otra, pb);
+  assert.notEqual(a.score.total, b.score.total, 'mismo id, otro contenido: otro analisis');
+  assert.ok(b.insights.length < a.insights.length);
+  assert.equal(analizarReunion(reunion, transcripcion, pb), a, 'mismo contenido: misma referencia (cache)');
+});
