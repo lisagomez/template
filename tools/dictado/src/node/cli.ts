@@ -7,6 +7,7 @@ import { ordenDictar } from './cli-dictar.js';
 import { ordenArchivo, ordenLote } from './cli-lote.js';
 import { ordenDiccionario, ordenHistorial, ordenSnippets } from './cli-datos.js';
 import { ordenDi } from './cli-habla.js';
+import { ordenIcono } from './cli-icono.js';
 import { motoresDisponibles } from './cli-motores.js';
 
 async function principal(): Promise<void> {
@@ -27,6 +28,8 @@ async function principal(): Promise<void> {
       return ordenSnippets(config, posicionales);
     case 'di':
       return ordenDi(config, posicionales, opciones);
+    case 'icono':
+      return ordenIcono(posicionales);
     case 'motores':
       console.log(motoresDisponibles(config).join('\n') || `(ninguno en ${config.modelos})`);
       return;
