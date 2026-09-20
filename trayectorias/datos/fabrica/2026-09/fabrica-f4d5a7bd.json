@@ -1,0 +1,95 @@
+{
+ "version": 1,
+ "id": "fabrica-f4d5a7bd",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "24febba1-47ef-4b61-b96f-d9d4b5e456f5",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-20T00:52:24.203Z",
+  "fin": "2026-09-20T07:44:34.809Z"
+ },
+ "actor": {
+  "skills": [
+   "bucle-agentico",
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-fable-5": 543,
+  "claude-opus-4-8": 628
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 307,
+   "AskUserQuestion": 5,
+   "Write": 48,
+   "Read": 38,
+   "ToolSearch": 4,
+   "WebSearch": 1,
+   "Edit": 98,
+   "Monitor": 2,
+   "TaskStop": 1,
+   "SendUserFile": 4,
+   "Agent": 4,
+   "SendFeedback": 1,
+   "ExitPlanMode": 1
+  },
+  "llamadasAlModelo": 539,
+  "turnos": 98,
+  "subagentes": 4,
+  "comandos": 3,
+  "ediciones": 202
+ },
+ "uso": {
+  "entrada": 1078,
+  "salida": 525578,
+  "cacheCreacion": 1116792,
+  "cacheLectura": 205037427
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 24730606
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "rojo",
+   "veces": 17
+  },
+  {
+   "nombre": "build",
+   "resultado": "rojo",
+   "veces": 17
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 24
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "desconocido",
+   "veces": 11
+  }
+ ],
+ "resultado": {
+  "errores": 17,
+  "erroresPor": {
+   "Bash": 12,
+   "Edit": 1,
+   "Read": 2,
+   "ExitPlanMode": 1,
+   "Write": 1
+  }
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}
