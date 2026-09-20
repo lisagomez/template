@@ -94,6 +94,7 @@ export const AYUDA = `dictado — hablar y que el texto aparezca donde esta el c
   dictado historial [--busca texto] [--n 20]
   dictado diccionario lista | agrega <termino...> | quita <termino>
   dictado snippets lista | agrega "<disparador>" "<expansion>" | quita "<disparador>"
+  dictado pega "<texto>"                                       pega un texto donde este el cursor de Windows (o texto por stdin)
   dictado motores                                              que motores hay en la carpeta de modelos
   dictado config                                               que configuracion se esta usando (sin secretos)
 

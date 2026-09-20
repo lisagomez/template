@@ -1,0 +1,14 @@
+{
+  "name": "Dictado",
+  "short_name": "Dictado",
+  "description": "Dictar desde el celular: al cursor de la PC o a la pantalla",
+  "start_url": "/dictar",
+  "display": "standalone",
+  "background_color": "#1e1e22",
+  "theme_color": "#1e1e22",
+  "lang": "es",
+  "icons": [
+    { "src": "/icons/dictado-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/dictado-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
