@@ -107,3 +107,10 @@ opencode cargan siempre (`opencode.json`).
   dónde leían los tres**. Una entrada compartida y copiada propaga el mismo punto ciego, y
   cada control sigue pasando su prueba. Preguntar qué mide un gate, no si está verde.
 - **Aplicar en**: todo gate que lea de una ref, un tag, un fichero externo o una caché.
+
+### 2026-09-20: una entrada de bitácora sin firma tumba el gate — y está bien que lo haga
+- **Error**: el agente escribió en `BITACORA-CDC.md` una entrada medida con «Aprobado por:
+  pendiente»; `verify:gobernanza` la rechazó y el `validate` quedó en rojo.
+- **Fix**: el agente redacta la entrada como **propuesta fuera del registro** (junto al goal o
+  al PRP) y pide la firma; al firmar se pega y se borra la propuesta. Nunca «pendiente» dentro.
+- **Aplicar en**: toda entrada de bitácora, registro de riesgo o AISIA que prepare un agente.

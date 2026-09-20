@@ -405,8 +405,23 @@ export function mapearStakeholders(reunion: Reunion, insights: Insight[]): NodoS
 
 const cache = new Map<string, AnalisisReunion>();
 
+/**
+ * Huella del CONTENIDO (segmentos, participantes y lados): la clave del cache no puede depender
+ * solo del id, porque quien reutiliza un id con otra transcripcion recibia el analisis anterior
+ * (visto el 2026-09-20 en el laboratorio de voz, que analizaba todo con el mismo id). FNV-1a.
+ */
+function huella(reunion: Reunion, transcripcion: Transcripcion): string {
+  const texto = JSON.stringify([transcripcion.segmentos.map((s) => [s.inicioS, s.finS, s.hablante, s.texto, s.confianza]), reunion.participantes, reunion.asesor, reunion.tipoReunion]);
+  let h = 2166136261;
+  for (let i = 0; i < texto.length; i++) {
+    h ^= texto.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
 export function analizarReunion(reunion: Reunion, transcripcion: Transcripcion, playbook: Playbook): AnalisisReunion {
-  const clave = `${transcripcion.id}:${playbook.id}:${playbook.dimensiones.map((d) => `${d.dimension}${d.peso}`).join()}`;
+  const clave = `${transcripcion.id}:${huella(reunion, transcripcion)}:${playbook.id}:${playbook.dimensiones.map((d) => `${d.dimension}${d.peso}`).join()}`;
   const previo = cache.get(clave);
   if (previo) return previo;
 

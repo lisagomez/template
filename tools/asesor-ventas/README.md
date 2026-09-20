@@ -15,7 +15,9 @@ exactamente lo que producen `@tu-scope/voz` y `@tu-scope/dictado`). Sale un `Ana
 | `stakeholders[]` | mapa decisor / influenciador / usuario. |
 
 Regla de oro: **mismo input → mismo output → mismo porqué.** No adivina: un turno con confianza
-< 0.5 se ignora (marcado `[inaudible]` por el STT, nunca inventado).
+< 0.5 se ignora (marcado `[inaudible]` por el STT, nunca inventado). El resultado se cachea por
+**contenido** (huella de segmentos, participantes y playbook), no solo por id: reutilizar un id
+con otra transcripción da el análisis nuevo, no el anterior.
 
 ## Uso
 
