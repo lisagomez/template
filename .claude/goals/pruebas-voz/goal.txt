@@ -1,0 +1,12 @@
+/goal Construye lo descrito en el spec completo: /home/kyara/code/template/.claude/goals/pruebas-voz/spec.md. Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: una pagina de laboratorio de voz en la app donde una persona no tecnica entiende en un minuto que sabe hacer hoy la voz (20 casos en 4 salas), lo prueba con su voz o un audio y deja su veredicto guardado y exportable. Es tambien la auditoria honesta: cada caso lleva su estado real (LISTO / POR REGLAS / PUERTA HUMANA) y la razon.
+Libertad tecnica total sobre la pagina y la orquestacion; tools/voz, tools/dictado y tools/asesor-ventas (134 pruebas en verde) se consumen, no se reescriben. Investiga 2-3 referencias "try it" de productos de voz antes de codear.
+VALIDA: `npm run typecheck && npm run lint` tras cada cambio grande, output pegado. Para capturas: `npm run build && npx next start -H 0.0.0.0 -p 3000` (next dev no hidrata aqui).
+HECHO cuando (el evaluador solo ve esta conversacion, no corre comandos: surfea evidencia):
+- ultimo output del comando de validacion pegado, en verde
+- build de produccion sirviendo la pagina, sin errores de consola
+- screenshots con Playwright de: mapa de las 4 salas con semaforo; notas de voz a texto antes/despues con audio real (grabado o generado con `dictado di`, texto nunca inventado) y latencia; locucion con audio generado y duracion; call center/asesor con turnos → insights con evidencia y score desglosado; una tarjeta PUERTA HUMANA con razon y vista previa sin ejecutar; un veredicto guardado y el reporte exportado
+- tabla final de los 20 casos con su estado REAL tras construir
+- reporte de decisiones y lista de formas en que podria estar mal, resueltas
+RESTRICCIONES: audio y transcripciones no salen de la maquina (sin LLM alojado); ninguna accion irreversible, solo vista previa; nada se simula; secretos jamas en pantalla; no tocar settings, modelos, skills ni prompts; espanol sin jerga.
+RED DE SEGURIDAD: si tras 40 turnos no converges, detente y reporta el bloqueo.
