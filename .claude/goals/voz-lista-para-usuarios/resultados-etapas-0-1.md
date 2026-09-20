@@ -39,7 +39,7 @@ Sesión real de `dictar` con `--entrada` (archivo como micrófono, 5 frases sint
 
 VAD: 0/60 frases partidas con cierres de 500 a 1500 ms; 0 palabras comidas con relleno ≥ 250 ms;
 0 turnos fantasma con ruido rosa de −60 a −35 dBFS. Diccionario por similitud: 0 sustituciones en
-90 archivos. **Decisión: sin cambio de umbrales** (entrada de bitácora redactada en `propuesta-bitacora-calibracion.md`, pendiente de firma). Pendiente: la
+90 archivos. **Decisión: sin cambio de umbrales** (entrada firmada en `BITACORA-CDC.md` el 2026-09-20). Pendiente: la
 misma tabla con voz propia (`frases.txt`, tres condiciones, `calibra.mjs`).
 
 ## Reuniones de ventas simuladas (dos voces Piper, una pista)
@@ -67,13 +67,13 @@ veredicto humano.
 - Defecto cazado: la muestra mono con 500 ms de hueco salía como un solo turno con cierre de
   700 ms; ahora 1 s de hueco y cierre de 500 ms (el defecto del CLI).
 
-## Borradores para firma (no firmados por el agente)
+## Firmas (2026-09-20, por quien decide, en sesión)
 
-- `BUSINESS_LOGIC.md`: sin la marca de plantilla, con problema, solución, usuario, datos,
-  respaldo, KPI y gobernanza llenos desde las decisiones tomadas; marcado BORRADOR con firma al pie.
-- `.claude/gobernanza/AISIA-asesor-ventas-fase0.md`: partes afectadas, daños sin atacante,
-  severidad, mitigaciones y decisión; firma pendiente.
-- `propuesta-cdc-pyannet.md`: cómo se pinearía el modelo de solape y cómo se mediría; no aplicado.
+- `BUSINESS_LOGIC.md`: firmado como hipótesis del piloto; los [supuesto] se confirman con las
+  cifras del piloto y la entrevista `/new-app` antes de la Etapa 2.
+- `.claude/gobernanza/AISIA-asesor-ventas-fase0.md`: firmada, retención de 12 meses.
+- `BITACORA-CDC.md`: entrada de calibración y micrófono en espera, firmada.
+- `propuesta-cdc-pyannet.md`: NO firmable todavía; exige medir antes de aprobar.
 
 ## Lo que queda para la Etapa 2 (terceros)
 
