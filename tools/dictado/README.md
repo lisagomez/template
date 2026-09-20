@@ -85,6 +85,35 @@ dictado snippets agrega "mi correo" "l@ejemplo.mx"
 dictado historial --busca hermes
 ```
 
+### 1.b. Desde el celular (PWA, Android e iPhone)
+
+El teléfono es un **micrófono remoto** del mismo pipeline: hablas al cel y el texto va donde
+esté el cursor de tu PC (`--destino pc`), a la pantalla del cel, o a ambos. Vive en la app
+Next del template (`/dictar`), no en esta herramienta, pero usa sus piezas:
+`dictado pega "<texto>"` entrega texto al foco de Windows, y la ruta `POST /api/dictado/movil`
+transcribe el audio con `dictado archivo`.
+
+Puesta a punto (una vez):
+
+```bash
+# 1) token de emparejamiento en .env.local de la app (NO se imprime, se teclea 1 vez en el cel)
+echo "DICTADO_MOVIL_TOKEN=$(openssl rand -hex 16)" >> .env.local
+# 2) HTTPS + escuchar en la LAN (getUserMedia exige https fuera de localhost)
+npm run dev:movil
+# 3) EN WINDOWS, PowerShell como Admin: abrir el puerto de WSL2 al telefono (te da la URL)
+#    tools/dictado/windows/red-movil.ps1   (-Quitar lo deshace)
+```
+
+En el teléfono (misma wifi): abre `https://<ip-de-tu-pc>:3000/dictar`, acepta el certificado,
+teclea el token una vez, e **instálala** (Compartir → «Añadir a inicio»). Dentro hay un botón
+flotante arrastrable con el mismo lenguaje de color, y un selector A la PC / Aquí / Ambos.
+
+**Honestidad de plataforma**: ni iOS ni Android permiten a una PWA flotar por ENCIMA de otras
+apps (eso es solo para apps nativas). El botón flota dentro de la app instalada, que a pantalla
+completa se siente como una app. El micrófono web exige HTTPS; la transcripción corre en tu
+máquina (C4: el audio no sale a ningún tercero, va a un temporal que se borra siempre), y sin
+el token no se transcribe ni se pega nada (C3).
+
 ### 2. Programático
 
 ```ts
