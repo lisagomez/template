@@ -1,0 +1,56 @@
+{
+ "reunion": "r2-demo",
+ "hablantes": 2,
+ "gapMs": 800,
+ "turnos": [
+  {
+   "hablante": "Asesor",
+   "inicioMs": 800,
+   "finMs": 5920,
+   "texto": "Como ven, el flujo de cotización se arma en tres pasos y queda listo para enviar."
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 6720,
+   "finMs": 10693,
+   "texto": "Se ve bien, pero la verdad se me hace caro y no sé si tengamos presupuesto."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 11493,
+   "finMs": 16076,
+   "texto": "Entiendo. Sigamos con el módulo de reportes, que es donde se ve el ahorro."
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 16876,
+   "finMs": 21311,
+   "texto": "A nosotros nos duele mucho el retrabajo, eso sí, son horas y horas cada semana."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 22111,
+   "finMs": 25594,
+   "texto": "¿Quién más tendría que ver esta demo para tomar la decisión?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 26394,
+   "finMs": 29262,
+   "texto": "Tendría que verla el gerente, pero no sé cuándo pueda."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 30062,
+   "finMs": 33463,
+   "texto": "¿Le mando la grabación y una propuesta con dos opciones?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 34263,
+   "finMs": 37619,
+   "texto": "Sí, mándamela y lo revisamos con el gerente la próxima semana."
+  }
+ ],
+ "duracionMs": 38419
+}

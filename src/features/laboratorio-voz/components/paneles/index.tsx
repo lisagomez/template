@@ -21,13 +21,13 @@ export function PanelCaso({ caso, estado, contexto }: { caso: Caso; estado: Esta
   if (estado === 'puerta') return <PanelPuerta caso={caso} />;
   switch (caso.panel) {
     case 'transcribir':
-      return <PanelTranscribir token={token} muestra={{ texto: NOTA_MUESTRA, nombre: 'nota de muestra leída por la voz sintética' }} avisoRuido={caso.slug === 'manos-libres-epi'} />;
+      return <PanelTranscribir token={token} caso={caso.id} muestra={{ texto: NOTA_MUESTRA, nombre: 'nota de muestra leída por la voz sintética' }} avisoRuido={caso.slug === 'manos-libres-epi'} />;
     case 'segmentos':
-      return <PanelTranscribir token={token} conTiempos conCapitulos={caso.slug === 'lectura-de-clases'} muestra={{ texto: CLASE_MUESTRA, nombre: 'clase de muestra leída por la voz sintética' }} />;
+      return <PanelTranscribir token={token} caso={caso.id} conTiempos conCapitulos={caso.slug === 'lectura-de-clases'} muestra={{ texto: CLASE_MUESTRA, nombre: 'clase de muestra leída por la voz sintética' }} />;
     case 'comandos':
       return <PanelComandos token={token} muestra={caso.slug === 'recordatorios' ? RECORDATORIO_MUESTRA : COMANDOS_MUESTRA} modoRecordatorio={caso.slug === 'recordatorios'} />;
     case 'reunion':
-      return <PanelReunion token={token} entradaInicial={caso.slug === 'reunion-grupal' ? 'reunion' : 'llamada'} enfoque={caso.slug === 'feedback-asesor' ? 'score' : caso.slug === 'asesoria-especializada' ? 'playbook' : caso.slug === 'reunion-grupal' ? 'turnos' : 'insights'} />;
+      return <PanelReunion token={token} caso={caso.id} entradaInicial={caso.slug === 'reunion-grupal' ? 'reunion' : 'llamada'} enfoque={caso.slug === 'feedback-asesor' ? 'score' : caso.slug === 'asesoria-especializada' ? 'playbook' : caso.slug === 'reunion-grupal' ? 'turnos' : 'insights'} />;
     case 'sentimiento':
       return <PanelSentimiento token={token} />;
     case 'competencias':

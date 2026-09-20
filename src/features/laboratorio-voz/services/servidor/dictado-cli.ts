@@ -6,8 +6,11 @@
 import { execFile, spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { corre, entornoDictado, transcribeRapido as transcribeRapidoLocal } from '@/shared/lib/transcriptor-local';
 import type { MetricasSintesis, Piezas, RespuestaTranscripcion, Segmento } from '../../types/index.ts';
 import { metricasDeSintesis, metricasDeTranscripcion, parseaActa } from '../acta.ts';
+
+export { demonioVivo, picoDb, razonSinTexto } from '@/shared/lib/transcriptor-local';
 
 const ejecuta = promisify(execFile);
 
@@ -17,17 +20,8 @@ const ejecuta = promisify(execFile);
  * venv del banco (medido el 2026-09-20). Todo lo que mira el disco vive en
  * `scripts/laboratorio-voz/maquina.mjs` y corre como proceso aparte.
  */
-export const RAIZ_DICTADO = process.env['DICTADO_RAIZ'] ?? `${process.cwd()}/tools/dictado`;
-const CLI = `${RAIZ_DICTADO}/dist/node/cli.js`;
-const BANCO = `${RAIZ_DICTADO}/medicion/banco`;
 const MAQUINA = `${process.cwd()}/scripts/laboratorio-voz/maquina.mjs`;
-
-const entorno = () => ({
-  ...process.env,
-  DICTADO_MODELOS: process.env['DICTADO_MODELOS'] ?? `${BANCO}/modelos`,
-  DICTADO_RUNTIME: process.env['DICTADO_RUNTIME'] ?? BANCO,
-  DICTADO_DATOS: process.env['DICTADO_DATOS'] ?? `${BANCO}/datos`,
-});
+const entorno = entornoDictado;
 
 /** El sondeo de disco, como proceso: `orden` es una de las de `maquina.mjs`; `entrada` va por stdin. */
 export function maquina<T>(orden: string, entrada?: unknown): Promise<T> {
@@ -50,15 +44,8 @@ export function maquina<T>(orden: string, entrada?: unknown): Promise<T> {
   });
 }
 
-export async function corre(args: string[], timeoutMs: number): Promise<{ stdout: string; stderr: string }> {
-  return ejecuta(process.execPath, [CLI, ...args], { env: entorno(), cwd: RAIZ_DICTADO, timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024 });
-}
-
-export async function transcribeRapido(ruta: string): Promise<RespuestaTranscripcion> {
-  const t0 = performance.now();
-  const { stdout, stderr } = await corre(['archivo', ruta, '--motor', 'parakeet'], 180_000);
-  return { texto: stdout.trim(), ms: Math.round(performance.now() - t0), ...metricasDeTranscripcion(stderr) };
-}
+/** Rapido: el demonio residente si vive, el CLI si no (ver `transcriptor-local.ts`). */
+export const transcribeRapido = (ruta: string): Promise<RespuestaTranscripcion> => transcribeRapidoLocal(ruta);
 
 export interface OpcionesTiempos {
   hablantes?: number;
@@ -67,7 +54,8 @@ export interface OpcionesTiempos {
 
 export async function transcribeConTiempos(ruta: string, opciones: OpcionesTiempos = {}): Promise<RespuestaTranscripcion> {
   const t0 = performance.now();
-  const args = ['lote', ruta, '--motor', 'parakeet', '--silencio-ms', String(opciones.silencioMs ?? 700)];
+  // 500 ms: el defecto de `dictado lote` (entre dos personas el hueco suele ser mayor); 700 dejaba una reunion entera en un turno.
+  const args = ['lote', ruta, '--motor', 'parakeet', '--silencio-ms', String(opciones.silencioMs ?? 500)];
   if (opciones.hablantes) args.push('--hablantes', String(opciones.hablantes));
   const { stdout, stderr } = await corre(args, 900_000);
   const segmentos = parseaActa(stdout);
@@ -114,19 +102,3 @@ export async function estadoMaquina(): Promise<EstadoMaquina> {
 
 export const piezas = async (): Promise<Piezas> => (await estadoMaquina()).piezas;
 export const vocesDisponibles = async (): Promise<string[]> => (await estadoMaquina()).voces;
-
-/** Nivel pico en dBFS con ffmpeg, para decir POR QUE una toma salio sin texto. */
-export function picoDb(ruta: string): Promise<number> {
-  return new Promise((resuelve) => {
-    execFile('ffmpeg', ['-hide_banner', '-i', ruta, '-af', 'volumedetect', '-f', 'null', '-'], (_e, _o, stderr) => {
-      const m = /max_volume:\s*(-?\d+(?:\.\d+)?)\s*dB/.exec(stderr ?? '');
-      resuelve(m ? Number(m[1]) : -Infinity);
-    });
-  });
-}
-
-export function razonSinTexto(bytes: number, pico: number): string {
-  if (bytes < 2_000) return 'no se grabo audio (revisa el permiso de microfono del navegador)';
-  if (pico < -50) return 'el microfono no capto voz: revisa que microfono usa el navegador y su nivel';
-  return 'sin voz clara en la toma (acercate al microfono y habla al terminar de tocar)';
-}

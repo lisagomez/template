@@ -33,11 +33,14 @@ export function informeMarkdown(veredictos: readonly Veredicto[], piezas: Piezas
     ``,
   ];
   for (const sala of SALAS) {
-    lineas.push(`## ${sala.titulo}`, ``, `| # | Caso | Estado | Veredicto | Nota |`, `|---|---|---|---|---|`);
+    lineas.push(`## ${sala.titulo}`, ``, `| # | Caso | Estado | Veredicto | WER | Latencia | Quién · dónde | Nota |`, `|---|---|---|---|---|---|---|---|`);
     for (const c of CASOS.filter((x) => x.sala === sala.id)) {
       const e = calculaEstado(c, piezas);
       const v = ultimo.get(c.id);
-      lineas.push(`| ${c.id} | ${c.titulo} | ${ETIQUETA_ESTADO[e.estado]} | ${v ? RESULTADO[v.resultado] : 'sin probar'} | ${v?.nota.replace(/\|/g, '/') ?? ''} |`);
+      const wer = typeof v?.metricas?.['wer'] === 'number' ? `${(v.metricas['wer'] * 100).toFixed(1).replace('.', ',')} %` : '';
+      const ms = typeof v?.metricas?.['ms'] === 'number' ? `${v.metricas['ms']} ms` : '';
+      const quien = v ? [v.rol, v.dispositivo].filter(Boolean).join(' · ') : '';
+      lineas.push(`| ${c.id} | ${c.titulo} | ${ETIQUETA_ESTADO[e.estado]} | ${v ? RESULTADO[v.resultado] : 'sin probar'} | ${wer} | ${ms} | ${quien} | ${v?.nota.replace(/\|/g, '/') ?? ''} |`);
     }
     lineas.push(``);
   }

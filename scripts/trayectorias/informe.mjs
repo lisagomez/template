@@ -60,9 +60,11 @@ function metricasDe(t) {
     gatesRojosPorGate: gatesCorridos > 0 ? t.gates.filter((g) => g.resultado === 'rojo').length / gatesCorridos : null,
     erroresPorHerramienta: herr ? t.resultado.errores / herr : null,
     pagMin: t.resultado.metricas?.paginasPorMinutoMotor ?? null,
+    // Dictado (linea herramientas, actor `dictado`): la latencia que vive quien dicta, p50 por sesion.
+    latenciaP50Ms: t.resultado.metricas?.latenciaP50Ms ?? null,
   }
 }
-const MEJOR_SI_SUBE = { cacheRatio: true, aciertoEvals: true, pagMin: true, salidaPorLlamada: false, costoUsd: false, costoPorLlamada: false, msPorLlamada: false, revisionHumana: false, gatesRojosPorGate: false, erroresPorHerramienta: false }
+const MEJOR_SI_SUBE = { cacheRatio: true, aciertoEvals: true, pagMin: true, latenciaP50Ms: false, salidaPorLlamada: false, costoUsd: false, costoPorLlamada: false, msPorLlamada: false, revisionHumana: false, gatesRojosPorGate: false, erroresPorHerramienta: false }
 
 // Dos niveles: la LINEA entera (donde de verdad hay base para comparar) y cada actor dentro de
 // ella (donde casi nunca la hay todavia, y se dice). Sin el agregado, 21 sesiones con skills

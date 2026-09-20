@@ -11,9 +11,9 @@ const VARIANTES: Record<Variante, string> = {
   suave: 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-100',
 };
 
-export function Boton({ children, variante = 'secundario', onClick, disabled, title, type = 'button', className = '' }: { children: ReactNode; variante?: Variante; onClick?: () => void; disabled?: boolean; title?: string; type?: 'button' | 'submit'; className?: string }) {
+export function Boton({ children, variante = 'secundario', onClick, disabled, title, type = 'button', className = '', 'data-prueba': dataPrueba }: { children: ReactNode; variante?: Variante; onClick?: () => void; disabled?: boolean; title?: string; type?: 'button' | 'submit'; className?: string; 'data-prueba'?: string }) {
   return (
-    <button type={type} onClick={onClick} disabled={disabled} title={title} className={`rounded-lg px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${VARIANTES[variante]} ${className}`}>
+    <button type={type} onClick={onClick} disabled={disabled} title={title} data-prueba={dataPrueba} className={`rounded-lg px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${VARIANTES[variante]} ${className}`}>
       {children}
     </button>
   );

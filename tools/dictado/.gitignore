@@ -1,3 +1,6 @@
 # `npm run build` instala @tu-scope/voz desde su tarball (prepara-voz.mjs); nada de esto va al repo.
 node_modules/
 package-lock.json
+corpus/
+# Corpus de calibracion: los WAV se regeneran con medicion/fabrica-corpus.mjs; los propios no van al repo (voz de terceros con consentimiento, o propia)
+medicion/corpus-propio/**/*.wav

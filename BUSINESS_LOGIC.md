@@ -1,40 +1,64 @@
-# BUSINESS_LOGIC.md — [Nombre del Proyecto]
+# BUSINESS_LOGIC.md — Asesor de estrategia de ventas por voz
 
-> ⚠️ **PLANTILLA SIN LLENAR.** Este archivo es el contrato de negocio del proyecto y lo
-> genera el skill **`/new-app`** a partir de una entrevista. No lo edites a mano al
-> arrancar: di qué quieres construir y el agente lo llena.
->
-> Mientras diga "PLANTILLA SIN LLENAR", **este proyecto no tiene lógica de negocio
-> definida** y nada de lo que se construya encima tiene contra qué validarse.
+> ✍️ **BORRADOR PENDIENTE DE ENTREVISTA Y FIRMA.** Redactado el 2026-09-20 por el agente a
+> partir de las decisiones ya tomadas (plan del asesor, PRs #123-#127, laboratorio de voz).
+> Lo confirma la entrevista **`/new-app`** con quien decide; hasta que esa persona lo firme
+> (fecha y nombre al pie), es una hipótesis contra la que construir el piloto interno, no un
+> contrato. Lo que aquí es supuesto lleva la marca **[supuesto]**.
 
 ---
 
 ## 1. Problema de Negocio
 
-**Dolor:** [Qué proceso está roto, es lento o costoso hoy]
-**Costo actual:** [En tiempo, dinero o leads perdidos. Específico.]
+**Dolor:** después de una reunión o llamada de ventas, la estrategia se pierde: el vendedor
+no anota qué dolió al prospecto, qué objeción quedó sin responder ni quién decide. El acta se
+escribe tarde o no se escribe, y el seguimiento sale de memoria. Cuando sí se usa una
+herramienta de «inteligencia de reuniones», el audio del prospecto viaja a la nube de un
+tercero: en sectores regulados eso descarta la herramienta entera.
+**Costo actual:** [supuesto, a medir en el piloto] media hora por reunión escribiendo el acta,
+oportunidades sin siguiente paso claro y descubrimientos incompletos que se pagan en la
+negociación. La cifra real sale del piloto (trayectorias + veredictos del laboratorio).
 
 ## 2. Solución
 
-**Propuesta de valor:** [Un <tipo de herramienta> que <acción> para <usuario específico>]
+**Propuesta de valor:** un asesor de estrategia de ventas **por voz y local** que, a partir
+de lo que se dijo en la reunión (dictado, grabación o llamada), devuelve en segundos los
+hallazgos con su cita, el puntaje de descubrimiento con su desglose, la pregunta que faltó,
+las acciones con responsable y fecha, los riesgos del trato y el mapa de quién decide —
+**sin que ninguna palabra del prospecto salga de la máquina**.
 
 **Flujo principal (Happy Path):**
-1. [Paso 1]
-2. [Paso 2]
-3. [Paso 3]
+1. El vendedor dicta la reunión desde el celular (o sube la grabación, o la llamada entra a dos
+   canales); el motor local la transcribe y separa quién habla.
+2. El cerebro por reglas analiza los turnos y presenta el acta: hallazgos con evidencia,
+   puntaje 0-100 con desglose, huecos y siguiente mejor pregunta, acciones, riesgos, personas.
+3. El vendedor corrige lo que haga falta, exporta el acta y las acciones quedan en su
+   seguimiento (en la Fase 3, en el CRM local del producto).
 
 ## 3. Usuario Objetivo
 
-**Rol:** [Quién lo usa]
-**Contexto:** [Cuándo y dónde lo usa]
+**Rol:** vendedor o asesor comercial B2B en campo (persona del producto) y, en el piloto,
+quien decide el producto dictando y probando desde el laboratorio. **Tercero afectado, no
+usuario:** el prospecto, cuyas palabras se procesan.
+**Contexto:** justo después de la reunión, en el coche o en la oficina, con el celular o la PC;
+llamadas desde el escritorio; a veces con ruido. Sectores regulados [supuesto]: despachos,
+salud, finanzas, donde «la nube de un tercero» es un no.
 
 ## 4. Arquitectura de Datos
 
-**Input:** [Qué entra]
-**Output:** [Qué sale]
+**Input:** audio (micrófono de PC o celular, grabación, llamada a dos canales) que se
+transcribe en la máquina; o turnos ya diarizados. El audio va a un temporal y se borra.
+**Output:** transcripción por turnos, análisis (`AnalisisReunion`: insights con evidencia,
+score, acciones, riesgos, stakeholders) y acta exportable. Trayectorias de FORMA (sin
+contenido) para medir el piloto.
 
-**Storage (tablas Supabase sugeridas):**
-- `[tabla]`: [descripción] — RLS habilitada
+**Storage (Fase 3, pendiente de proyecto Supabase; hoy todo es local en `DICTADO_DATOS`):**
+- `reuniones`: reunión, cuenta, tipo, participantes — RLS habilitada
+- `transcripciones` y `segmentos`: turnos con hablante, texto y confianza — RLS habilitada
+- `analisis`: insights, score, acciones, riesgos por reunión — RLS habilitada
+- `leads`/`cuentas`: el CRM mínimo — RLS habilitada
+- **Retención [supuesto]:** el audio nunca se guarda; texto y análisis se borran a petición
+  del vendedor y por defecto a los 12 meses. Lo fija la AISIA de Fase 0.
 
 ### Respaldo — qué pierde ESTE proyecto si arde el servidor
 
@@ -47,10 +71,12 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 
 | Activo del proyecto | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|
-| Datos en Supabase | [no / con trabajo] | [Crítica] | PITR + dump lógico |
+| Datos en Supabase (Fase 3) | No — actas y análisis de reuniones | Crítica | PITR + dump lógico |
+| Datos locales del dictado (`DICTADO_DATOS`: historial, diccionario, snippets) | Con trabajo — se rehacen dictando | Normal | copia de la carpeta, fuera de la máquina |
+| Modelos y runtimes del banco (`tools/dictado/medicion/banco`) | Sí — se descargan pineados con `npm run mide` | Baja | no se respalda |
 | **Ficheros en Storage** (buckets) | **No — son la evidencia** | **Crítica** | **Sincronización propia del bucket. `pg_dump` NO los incluye** |
 | `.env.production` | No — contiene secretos | Crítica | Cifrado con `age`, fuera del servidor |
-| [activo propio] | | | |
+| Trayectorias (`trayectorias/datos`) | Sí — están en git | Baja | git |
 
 > **Los ficheros de Storage van en línea propia y no colgando de «la base de datos».** No es
 > pedantería de inventario: los bytes viven **fuera de Postgres**, así que un `pg_dump` en verde
@@ -63,7 +89,11 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 
 ## 5. KPI de Éxito
 
-**Métrica principal:** [Cómo se sabe que funcionó]
+**Métrica principal:** tiempo de reunión terminada a acta lista con puntaje y acciones,
+medido por las trayectorias del dictado y los veredictos del laboratorio. Umbrales del piloto
+(dos semanas): latencia fin-de-habla→texto p50 < 700 ms; WER con voz propia < 6 % en PC
+limpio y < 12 % con ruido o celular; puntaje del asesor dentro de ±10 del veredicto humano en
+4 de 5 reuniones; cero veces abrir una terminal desde el día 3.
 
 ## 6. Gobernanza (controles C4 y C7)
 
@@ -73,11 +103,11 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 
 | Punto | Respuesta |
 |---|---|
-| **Datos personales que toca** | [de quién, qué tipo — o "ninguno"] |
-| **Partes afectadas** | [incluidos los que NO son usuarios de la app] |
-| **Daño con el sistema operando bien** | [decisión errónea sin ningún atacante] |
-| **Acciones irreversibles** | [cobros, envíos, borrados — cada una con gate humano] |
-| **Vía de apelación humana** | [cómo revierte un usuario una decisión automática] |
+| **Datos personales que toca** | Del prospecto: nombre, cargo, empresa, lo que dijo (dolores, presupuesto, proceso de decisión). Del vendedor: su voz y sus dictados. |
+| **Partes afectadas** | El prospecto (no es usuario y no firmó nada); el vendedor; la empresa del prospecto. |
+| **Daño con el sistema operando bien** | Un insight mal atribuido o un riesgo inventado orienta mal la venta; un puntaje bajo desanima al vendedor por un error de transcripción; el acta filtra información del prospecto si se comparte sin cuidado. Mitigación: cada hallazgo cita su frase, el puntaje nunca sin desglose, turnos inaudibles nunca adivinados. |
+| **Acciones irreversibles** | Ninguna automática. Enviar correos, crear eventos o registrar en CRM: solo vista previa hasta un gate humano por acción. |
+| **Vía de apelación humana** | El vendedor edita el acta y las acciones; corrige la transcripción y sus palabras nuevas alimentan el diccionario. Un análisis se puede descartar entero. |
 | **Aislamiento de datos** | RLS en toda tabla; las superficies NO usan `service_role` (C7) |
 
 ### Lo que este proyecto hereda del corpus de pruebas (C2)
@@ -110,17 +140,20 @@ que un proyecto derivado tiene que saber, porque las rompe sin querer:
 
 ### Tipo de proyecto
 
-**Tipo:** [aplicacion | herramienta] — lo pregunta `/new-app` (pregunta 8); si no se decidió, "aplicacion por defecto"
-**Si aplicacion:** proveedor [hetzner | otro-vps] · dominio [host público] → `docs/DEPLOY-HETZNER.md`
-**Si herramienta:** paquete [@scope/nombre] · vive en `tools/[nombre]/` · sin VPS ni Docker → `docs/EMPAQUETAR-HERRAMIENTA.md`
+**Tipo:** herramienta + aplicación. Los núcleos son herramientas empaquetables (`@tu-scope/voz`,
+`@tu-scope/dictado`, `@tu-scope/asesor-ventas`, en `tools/`); la aplicación del template las
+consume (`/dictar`, `/laboratorio-voz`, y en la Fase 3 el CRM). Sin VPS mientras el piloto sea
+interno; el servicio remoto de dictado existe para cuando haga falta GPU.
 **Registro:** aquí y, cuando haya Supabase, en `project_settings` desde `/configuracion` (PRP-002: la base impide mezclar campos de VPS con campos de paquete)
 
 ### Features a implementar (Feature-First)
 
 ```
 src/features/
-├── auth/           # Autenticación Email/Password (Supabase)
-└── [feature]/      # [Descripción]
+├── auth/              # Autenticación Email/Password (Supabase) — Fase 3
+├── dictado/           # PWA del celular, emparejamiento, botón de dictado (hecho)
+├── laboratorio-voz/   # 20 casos con estado real, WER, veredictos, datos personales (hecho)
+└── asesor/            # [Fase 3] reuniones, actas, CRM mínimo sobre tools/asesor-ventas
 ```
 
 ### Stack confirmado
@@ -153,3 +186,7 @@ TypeScript + Tailwind 3.4, Supabase (Auth + DB + RLS), Zod, Zustand, Playwright.
 ---
 
 *Generado por SaaS Factory V4 · Fecha: [FECHA] · Llenar con `/new-app`*
+
+---
+
+**Firma:** pendiente · Quien decide: ________________ · Fecha: __________

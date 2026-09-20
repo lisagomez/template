@@ -1,0 +1,120 @@
+{
+ "r1-discovery": [
+  [
+   "Asesor",
+   "Buenas tardes, le habla Ana. ¿Qué es lo que más se les complica hoy en la operación?"
+  ],
+  [
+   "Cliente",
+   "Batallamos con las cotizaciones, porque cada quien lo hace a su manera y perdemos como veinte horas al mes en retrabajo."
+  ],
+  [
+   "Asesor",
+   "¿Y qué pasa si eso sigue así seis meses más?"
+  ],
+  [
+   "Cliente",
+   "Se nos van clientes por responder tarde. El impacto es directo en ventas."
+  ],
+  [
+   "Asesor",
+   "¿Para cuándo necesitan tenerlo resuelto?"
+  ],
+  [
+   "Cliente",
+   "Antes de fin de año, porque en enero arranca la temporada alta y es urgente."
+  ],
+  [
+   "Asesor",
+   "¿Cómo se decide una compra así en su empresa, quién autoriza?"
+  ],
+  [
+   "Cliente",
+   "Lo autoriza el director de operaciones, Pedro, y compras revisa el contrato."
+  ],
+  [
+   "Asesor",
+   "¿Tienen presupuesto contemplado?"
+  ],
+  [
+   "Cliente",
+   "Sí, tenemos unos cien mil pesos aprobados para este trimestre."
+  ],
+  [
+   "Asesor",
+   "¿Le parece si le mando la propuesta el jueves y agendamos la demo con Pedro?"
+  ],
+  [
+   "Cliente",
+   "Sí, quedamos en que me mandas la propuesta el jueves y la demo la semana que viene."
+  ]
+ ],
+ "r2-demo": [
+  [
+   "Asesor",
+   "Como ven, el flujo de cotización se arma en tres pasos y queda listo para enviar."
+  ],
+  [
+   "Cliente",
+   "Se ve bien, pero la verdad se me hace caro y no sé si tengamos presupuesto."
+  ],
+  [
+   "Asesor",
+   "Entiendo. Sigamos con el módulo de reportes, que es donde se ve el ahorro."
+  ],
+  [
+   "Cliente",
+   "A nosotros nos duele mucho el retrabajo, eso sí, son horas y horas cada semana."
+  ],
+  [
+   "Asesor",
+   "¿Quién más tendría que ver esta demo para tomar la decisión?"
+  ],
+  [
+   "Cliente",
+   "Tendría que verla el gerente, pero no sé cuándo pueda."
+  ],
+  [
+   "Asesor",
+   "¿Le mando la grabación y una propuesta con dos opciones?"
+  ],
+  [
+   "Cliente",
+   "Sí, mándamela y lo revisamos con el gerente la próxima semana."
+  ]
+ ],
+ "r3-negociacion": [
+  [
+   "Asesor",
+   "¿Quién firma finalmente el contrato de su lado?"
+  ],
+  [
+   "Cliente",
+   "Lo firma la directora financiera, Carla, y ya tiene el presupuesto de ochenta mil aprobado."
+  ],
+  [
+   "Asesor",
+   "¿Qué les preocupa de la propuesta?"
+  ],
+  [
+   "Cliente",
+   "El plazo de implementación. Necesitamos arrancar en noviembre, es urgente."
+  ],
+  [
+   "Asesor",
+   "Podemos arrancar el diez de noviembre. ¿Le parece si cerramos el viernes con Carla?"
+  ],
+  [
+   "Cliente",
+   "Quedamos en que revisamos el contrato el viernes y firmamos."
+  ],
+  [
+   "Asesor",
+   "Perfecto, le mando el contrato hoy mismo."
+  ],
+  [
+   "Cliente",
+   "Gracias, quedo pendiente."
+  ]
+ ]
+}

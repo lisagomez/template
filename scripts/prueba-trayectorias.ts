@@ -100,3 +100,12 @@ test('sin duracion medida, tiempos.totalMs es null y se declara; con fallo, erro
   assert.equal(t.resultado.errores, 1)
   assert.deepEqual(validaTrayectoria(t), [])
 })
+
+test('la trayectoria que emite `dictado dictar` pasa el validador del template (forma, sin contenido)', async () => {
+  const { construyeTrayectoria, creaContadores } = await import('../tools/dictado/dist/node/trayectoria.js')
+  const c = creaContadores()
+  c.turnos = 2; c.pegados = 2; c.latenciasMs.push(800, 950); c.msMotor.push(220, 260); c.msPegado.push(30, 28); c.duracionesMs.push(3000, 4200); c.picosDb.push(-15)
+  const t = construyeTrayectoria(c, { motorId: 'sherpa:nemo-parakeet-tdt-0.6b-v3-int8', modo: 'manosLibres', silencioMs: 1000, gananciaDb: 0, umbralVozDb: -45, inicio: new Date('2026-09-20T10:00:00Z'), fin: new Date('2026-09-20T10:01:00Z') })
+  assert.deepEqual(validaTrayectoria(t), [])
+  assert.equal((t as { linea: string }).linea, 'herramientas')
+})

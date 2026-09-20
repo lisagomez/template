@@ -10,6 +10,8 @@ import type { MetricasSintesis, Piezas, RespuestaTranscripcion, Veredicto, Vered
 export interface EstadoServidor {
   piezas: Piezas;
   voces: string[];
+  /** El demonio residente de transcripcion responde: las rutas pagan solo el motor. */
+  demonio?: boolean;
 }
 
 export type ModoTranscripcion = 'rapido' | 'tiempos' | 'canales';
@@ -83,4 +85,30 @@ export async function descargaInforme(token: string): Promise<Blob> {
   const r = await fetch('/api/laboratorio/veredictos?formato=md', { headers: cabeceras(token), cache: 'no-store' });
   if (!r.ok) throw new Error(await mensajeDe(r, 'no se pudo generar el informe'));
   return r.blob();
+}
+
+export interface DatosPersonales {
+  diccionario: string[];
+  snippets: Array<{ disparador: string; expansion: string; usos: number }>;
+  historial: Array<{ id: string; fecha: string; texto: string; motor: string; duracionMs: number; latenciaMs: number | null }>;
+  total: number;
+}
+
+export type OrdenDatos =
+  | { orden: 'diccionario-agrega'; terminos: string[] }
+  | { orden: 'diccionario-quita'; termino: string }
+  | { orden: 'snippets-agrega'; disparador: string; expansion: string }
+  | { orden: 'snippets-quita'; disparador: string }
+  | { orden: 'historial-corrige'; id: string; texto: string };
+
+export async function leeDatos(token: string): Promise<DatosPersonales> {
+  const r = await fetch('/api/laboratorio/datos', { headers: cabeceras(token), cache: 'no-store' });
+  if (!r.ok) throw new Error(await mensajeDe(r, 'no se pudieron leer tus datos'));
+  return (await r.json()) as DatosPersonales;
+}
+
+export async function ordenaDatos(token: string, orden: OrdenDatos): Promise<{ anadidos?: string[]; quitado?: boolean; candidatos?: string[]; corregida?: boolean }> {
+  const r = await fetch('/api/laboratorio/datos', { method: 'POST', headers: cabeceras(token, { 'content-type': 'application/json' }), body: JSON.stringify(orden) });
+  if (!r.ok) throw new Error(await mensajeDe(r, 'no se pudo aplicar'));
+  return (await r.json()) as { anadidos?: string[]; quitado?: boolean; candidatos?: string[]; corregida?: boolean };
 }

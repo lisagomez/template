@@ -20,7 +20,7 @@ const arg = (nombre, porDefecto) => {
 };
 const URL_BASE = arg('url', 'http://localhost:3000');
 const SALIDA = resolve(arg('salida', 'capturas-laboratorio'));
-const PASOS = arg('pasos', 'a,b,c,d,e,f,g').split(',');
+const PASOS = arg('pasos', 'a,b,c,d,e,f,g,h,i,j').split(',');
 const paso = (letra) => PASOS.includes(letra);
 mkdirSync(SALIDA, { recursive: true });
 
@@ -158,6 +158,71 @@ try {
 } catch (e) {
   resultados.casos.microfono = `no se pudo: ${String(e).slice(0, 200)}`;
 }
+}
+
+
+// (h) WER medido en el laboratorio con texto de referencia, y veredicto con metricas → informe con WER
+if (paso('h')) {
+console.log('h) caso 1: WER con referencia, veredicto con metricas e informe');
+await abre(1);
+await panel(1).getByRole('button', { name: 'Usar la muestra' }).click();
+await panel(1).locator('[data-prueba="texto"]').waitFor({ timeout: 180_000 });
+await panel(1).locator('summary', { hasText: 'Medir la precisión' }).click();
+await panel(1).getByRole('button', { name: 'usar el texto de la muestra como referencia' }).click();
+await panel(1).locator('[data-prueba="wer"]').waitFor({ timeout: 10_000 });
+resultados.casos.wer = await panel(1).locator('[data-prueba="wer"]').innerText();
+await captura('10-wer-con-referencia', '#caso-1');
+const v1 = pagina.locator('[data-prueba="veredicto-1"]');
+await v1.getByRole('button', { name: 'Funcionó', exact: true }).click();
+await v1.getByPlaceholder('Una nota (qué viste, qué falló)').fill('WER medido contra el texto de la muestra.');
+await v1.getByRole('button', { name: 'Guardar' }).click();
+await v1.getByText('Veredicto guardado en esta computadora.').waitFor({ timeout: 20_000 });
+const informe2 = await contexto.request.get(`${URL_BASE}/api/laboratorio/veredictos?formato=md`, { headers: { authorization: `Bearer ${token}` } });
+const md = await informe2.text();
+writeFileSync(join(SALIDA, 'informe.md'), md, 'utf8');
+resultados.casos.informeWer = md.split('\n').filter((l) => /^\| 1 \|/.test(l))[0] ?? '(sin fila)';
+await captura('11-veredicto-con-metricas', '#caso-1 [data-prueba="veredicto-1"]');
+}
+
+// (i) datos personales: anadir un termino, corregir un dictado del historial, aceptar un candidato
+if (paso('i')) {
+console.log('i) tus datos: diccionario, snippets e historial');
+await abre();
+await pagina.locator('[data-prueba="tus-datos"] summary').click();
+await pagina.locator('[data-prueba="datos-personales"] [data-prueba="diccionario"]').waitFor({ timeout: 20_000 });
+const dic = pagina.locator('[data-prueba="diccionario"]');
+await dic.getByPlaceholder('Nuevo término').fill('Aceros del Norte');
+await dic.getByRole('button', { name: 'Añadir' }).click();
+await dic.getByText('Aceros del Norte', { exact: true }).waitFor({ timeout: 15_000 });
+const sn = pagina.locator('[data-prueba="snippets"]');
+await sn.getByPlaceholder('Disparador: mi correo').fill('mi firma');
+await sn.getByPlaceholder('Expansión: ana@ejemplo.mx').fill('Ana, Soluciones Norte');
+await sn.getByRole('button', { name: 'Añadir' }).click();
+await sn.getByText('«mi firma»').waitFor({ timeout: 15_000 });
+const hist = pagina.locator('[data-prueba="historial"]');
+const primero = hist.locator('li').first();
+await primero.getByRole('button', { name: 'corregir' }).click();
+const area = primero.locator('textarea');
+await area.fill((await area.inputValue()) + ' Cotizapp');
+await primero.getByRole('button', { name: 'Guardar corrección' }).click();
+await hist.locator('[data-prueba="candidatos"]').waitFor({ timeout: 15_000 });
+resultados.casos.datos = { candidatos: await hist.locator('[data-prueba="candidatos"]').innerText() };
+await hist.locator('[data-prueba="candidatos"] button').first().click();
+await pagina.waitForTimeout(1500);
+await captura('12-datos-personales', '[data-prueba="tus-datos"]');
+}
+
+// (j) acta exportada de una reunion a dos voces
+if (paso('j')) {
+console.log('j) caso 9: reunion grupal (una pista, dos voces) y acta exportada');
+await abre(9);
+await panel(9).getByRole('button', { name: 'Usar la muestra' }).click();
+await panel(9).locator('[data-prueba="resultado-asesor"]').waitFor({ timeout: 600_000 });
+const [descarga] = await Promise.all([pagina.waitForEvent('download'), panel(9).locator('[data-prueba="descargar-acta"]').click()]);
+const rutaActa = join(SALIDA, 'acta.md');
+await descarga.saveAs(rutaActa);
+resultados.casos.acta = { archivo: descarga.suggestedFilename(), lineas: readFileSync(rutaActa, 'utf8').split('\n').length, turnos: await panel(9).locator('[data-prueba="segmentos"]').innerText() };
+await captura('13-reunion-y-acta', '#caso-9');
 }
 
 writeFileSync(join(SALIDA, 'resultados.json'), JSON.stringify(resultados, null, 2), 'utf8');

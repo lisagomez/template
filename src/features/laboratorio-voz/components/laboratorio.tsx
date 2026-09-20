@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { QrEmparejar } from '@/features/dictado/components/qr-emparejar';
 import { useLaboratorio } from '../hooks/use-laboratorio.ts';
+import { DatosPersonalesPanel } from './datos-personales.tsx';
 import { Emparejar } from './emparejar.tsx';
 import { MapaSalas } from './mapa-salas.tsx';
 import type { ContextoPanel } from './paneles/contexto.ts';
@@ -52,6 +53,10 @@ export function Laboratorio({ casoAbierto }: { casoAbierto?: number }) {
             {descargando ? 'Generando…' : 'Descargar informe de pruebas'}
           </Boton>
           <span className="text-xs text-neutral-500">{veredictos.veredictos.length} veredictos guardados en esta computadora</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-0.5 text-xs text-neutral-600 dark:border-neutral-800 dark:text-neutral-300" data-prueba="demonio" data-vivo={String(servidor?.demonio ?? false)} title={servidor?.demonio ? 'El modelo esta cargado en un proceso residente: cada frase paga solo el reconocimiento.' : 'Cada peticion arranca el motor (~3 s). Se enciende con «npm run demonio» en tools/dictado.'}>
+            <span className={`h-2 w-2 rounded-full ${servidor?.demonio ? 'bg-emerald-500' : 'bg-neutral-400'}`} />
+            {servidor === undefined ? 'motor: comprobando…' : servidor.demonio ? 'motor residente: listo' : 'motor por proceso (~3 s por frase)'}
+          </span>
           {token ? (
             <button type="button" onClick={() => movil.olvida()} className="text-xs text-neutral-400 underline">
               olvidar emparejamiento
@@ -74,6 +79,13 @@ export function Laboratorio({ casoAbierto }: { casoAbierto?: number }) {
         <div className="mb-6">
           <Emparejar empareja={movil.empareja} error={movil.error} />
         </div>
+      ) : null}
+      {token ? (
+        <details className="mb-6 rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800" data-prueba="tus-datos">
+          <summary className="cursor-pointer text-base font-semibold">Tus datos de dictado: diccionario, snippets e historial</summary>
+          <p className="mb-3 mt-1 text-sm text-neutral-500">Lo que el dictado sabe de ti. Se guarda en esta computadora y lo usa la próxima vez que dictes.</p>
+          <DatosPersonalesPanel token={token} />
+        </details>
       ) : null}
       <MapaSalas piezas={servidor?.piezas} contexto={contexto} veredictos={veredictos.veredictos} ocupadoVeredicto={veredictos.ocupado} casoAbierto={casoAbierto} />
     </main>

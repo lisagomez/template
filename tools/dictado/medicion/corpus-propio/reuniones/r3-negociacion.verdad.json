@@ -1,0 +1,56 @@
+{
+ "reunion": "r3-negociacion",
+ "hablantes": 2,
+ "gapMs": 800,
+ "turnos": [
+  {
+   "hablante": "Asesor",
+   "inicioMs": 800,
+   "finMs": 3749,
+   "texto": "¿Quién firma finalmente el contrato de su lado?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 4549,
+   "finMs": 9303,
+   "texto": "Lo firma la directora financiera, Carla, y ya tiene el presupuesto de ochenta mil aprobado."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 10103,
+   "finMs": 12042,
+   "texto": "¿Qué les preocupa de la propuesta?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 12842,
+   "finMs": 17323,
+   "texto": "El plazo de implementación. Necesitamos arrancar en noviembre, es urgente."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 18123,
+   "finMs": 23336,
+   "texto": "Podemos arrancar el diez de noviembre. ¿Le parece si cerramos el viernes con Carla?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 24136,
+   "finMs": 27190,
+   "texto": "Quedamos en que revisamos el contrato el viernes y firmamos."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 27990,
+   "finMs": 30678,
+   "texto": "Perfecto, le mando el contrato hoy mismo."
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 31478,
+   "finMs": 32843,
+   "texto": "Gracias, quedo pendiente."
+  }
+ ],
+ "duracionMs": 33643
+}

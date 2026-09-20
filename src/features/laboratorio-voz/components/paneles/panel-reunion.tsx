@@ -5,9 +5,10 @@
  * texto pegado), se separan las voces, se dice de que lado esta cada una y el cerebro de asesoria
  * (sin LLM) devuelve hallazgos con evidencia, puntaje con desglose, acciones y riesgos.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranscripcion } from '../../hooks/use-transcripcion.ts';
-import { analizaTurnos, hablantesDe, segmentosDesdeTexto, TIPOS_REUNION, type AnalisisReunion, type Lado, type TipoReunion } from '../../services/asesor.ts';
+import { actaMarkdown, analizaTurnos, hablantesDe, segmentosDesdeTexto, TIPOS_REUNION, type AnalisisReunion, type Lado, type TipoReunion } from '../../services/asesor.ts';
+import { useMetricasCaso } from '../../store/metricas.ts';
 import { LLAMADA_MUESTRA } from '../../services/muestras.ts';
 import type { Segmento } from '../../types/index.ts';
 import { EntradaAudio } from '../entrada-audio.tsx';
@@ -17,7 +18,8 @@ import { ListaSegmentos } from './segmentos-ui.tsx';
 
 type Entrada = 'llamada' | 'reunion' | 'texto';
 
-export function PanelReunion({ token, entradaInicial = 'llamada', enfoque = 'insights' }: { token: string | undefined; entradaInicial?: Entrada; enfoque?: 'insights' | 'score' | 'turnos' | 'playbook' }) {
+export function PanelReunion({ token, caso, entradaInicial = 'llamada', enfoque = 'insights' }: { token: string | undefined; caso: number; entradaInicial?: Entrada; enfoque?: 'insights' | 'score' | 'turnos' | 'playbook' }) {
+  const registra = useMetricasCaso((s) => s.registra);
   const [entrada, setEntrada] = useState<Entrada>(entradaInicial);
   const [hablantes, setHablantes] = useState(2);
   const [texto, setTexto] = useState(LLAMADA_MUESTRA.map((l) => `${l.lado === 'agente' ? 'Ana' : 'Luis'}: ${l.texto}`).join('\n'));
@@ -36,6 +38,20 @@ export function PanelReunion({ token, entradaInicial = 'llamada', enfoque = 'ins
   }, [segmentos, lados, tipo, nombres]);
 
   const guion = LLAMADA_MUESTRA.map((l) => ({ canal: l.lado === 'agente' ? ('izquierdo' as const) : ('derecho' as const), texto: l.texto }));
+  useEffect(() => {
+    if (!analisis || !segmentos) return;
+    registra(caso, { score: analisis.score.total, insights: analisis.insights.length, huecos: analisis.score.huecos.length, hablantes: nombres.length, turnos: segmentos.length, ...(stt.resultado?.ms !== undefined && entrada !== 'texto' ? { ms: stt.resultado.ms } : {}) });
+  }, [analisis, segmentos, nombres.length, caso, registra, stt.resultado?.ms, entrada]);
+
+  const descargaActa = () => {
+    if (!analisis || !segmentos) return;
+    const blob = new Blob([actaMarkdown(segmentos, analisis, tipo)], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `acta-${tipo}-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
   return (
     <div className="space-y-3" data-prueba="panel-reunion">
@@ -90,7 +106,15 @@ export function PanelReunion({ token, entradaInicial = 'llamada', enfoque = 'ins
             </label>
           </div>
           <ListaSegmentos segmentos={segmentos} />
-          {analisis ? <ResultadoAsesor analisis={analisis} segmentos={segmentos} enfoque={enfoque} /> : null}
+          {analisis ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <Boton variante="primario" onClick={descargaActa} data-prueba="descargar-acta">Descargar el acta (Markdown)</Boton>
+                <span className="text-xs text-neutral-500">Turnos, hallazgos con cita, puntaje con desglose, huecos, acciones y riesgos. Lleva aviso de confidencialidad.</span>
+              </div>
+              <ResultadoAsesor analisis={analisis} segmentos={segmentos} enfoque={enfoque} />
+            </>
+          ) : null}
         </>
       ) : null}
     </div>
