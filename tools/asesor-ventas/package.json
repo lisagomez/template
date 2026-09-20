@@ -1,0 +1,25 @@
+{
+  "name": "@tu-scope/asesor-ventas",
+  "version": "0.1.0",
+  "description": "Cerebro de asesoria de ventas: de una reunion diarizada (turnos por hablante) saca insights con evidencia, score de discovery, acciones, riesgos y mapa de stakeholders. TypeScript puro, determinista, CERO dependencias. Sin LLM: nada sale de la maquina (C4).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prueba": "node --test pruebas/*.ts"
+  }
+}
