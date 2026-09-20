@@ -19,7 +19,8 @@ import { creaPosproceso } from '../posproceso.js';
 import { pareceOtroIdioma } from '../texto/idioma.js';
 import { normalizaParaComparar } from '../texto/normaliza.js';
 import type { Motor, Pegador } from '../types.js';
-import { capturaMicrofono, escribeWav, nivelDb } from './audio.js';
+import { capturaMicrofono, escribeWav, nivelDb, type Captura } from './audio.js';
+import { ajustaGanancia, factorDe } from './ganancia.js';
 import type { Configuracion } from './cli-config.js';
 import { cargaDatos } from './cli-datos.js';
 import { creaDetector, creaMotor } from './cli-motores.js';
@@ -28,9 +29,12 @@ import { copiaIconoAWindows } from './cli-icono.js';
 import { escuchaIcono, PUERTO_ICONO, type EscuchaIcono } from './icono.js';
 import { escuchaTecla, type EscuchaTecla } from './tecla.js';
 import { DEFECTOS_DICTADO } from './vad.js';
+import { construyeTrayectoria, creaContadores, escribeTrayectoria, type ContadoresSesion } from './trayectoria.js';
 
 const RUTA_TECLA = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'windows', 'tecla-global.ps1');
 const RUTA_ICONO = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'windows', 'icono-barra.ps1');
+/** Donde queda la trayectoria de cada sesion (forma, sin contenido); `DICTADO_TRAYECTORIAS` la cambia. */
+const CARPETA_CORPUS = process.env['DICTADO_TRAYECTORIAS'] ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'corpus');
 const ESC = String.fromCharCode(27);
 const gris = (s: string) => `${ESC}[2m${s}${ESC}[0m`;
 const verde = (s: string) => `${ESC}[32m${s}${ESC}[0m`;
@@ -63,7 +67,7 @@ function pinta(evento: EventoDictado): void {
  * «No you can only gorda», vivo el 2026-09-16). Si el principal declara OTRO idioma que el pedido, se
  * repite con el respaldo (faster-whisper con el idioma forzado): mas lento, pero solo cuando hizo falta.
  */
-function conRespaldo(principal: Motor, respaldo: Motor, idioma: string): Motor {
+function conRespaldo(principal: Motor, respaldo: Motor, idioma: string, contadores: ContadoresSesion): Motor {
   return {
     id: `${principal.id}+${respaldo.id}`,
     admitePista: principal.admitePista || respaldo.admitePista,
@@ -73,6 +77,7 @@ function conRespaldo(principal: Motor, respaldo: Motor, idioma: string): Motor {
       const otro = r.idioma ? r.idioma !== idioma : pareceOtroIdioma(r.texto, idioma);
       if (!otro) return r;
       console.log(gris(`  el motor principal sacó ${JSON.stringify(r.texto)} (${r.idioma ?? 'parece otro idioma'}): repito con ${respaldo.id} en ${idioma}`));
+      contadores.respaldo += 1;
       return respaldo.transcribe(muestras, hz, { ...o, idioma });
     },
     async calienta() {
@@ -105,7 +110,7 @@ function avisoPico(picoDb: number): string {
  */
 const MULETILLAS = new Set(['uh', 'um', 'eh', 'ah', 'mm', 'mmm', 'hmm', 'aja', 'ajá']);
 
-function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbralDb: number): Motor {
+function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbralDb: number, contadores: ContadoresSesion): Motor {
   const ventana = Math.max(1, Math.round(frecuenciaHz * 0.03));
   const pico = (m: Float32Array) => {
     let max = -Infinity;
@@ -119,6 +124,7 @@ function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbralDb: number
       const db = pico(muestras);
       if (db < umbralDb) {
         console.log(gris(`  (turno descartado sin transcribir: pico ${db.toFixed(1)} dBFS < ${umbralDb} dBFS, no es voz)`));
+        contadores.descartadosEnergia += 1;
         return { texto: '' };
       }
       const r = await motor.transcribe(muestras, hz, o);
@@ -127,6 +133,7 @@ function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbralDb: number
       const palabras = normalizaParaComparar(r.texto).split(' ').filter(Boolean);
       if (palabras.length > 0 && palabras.length <= 2 && palabras.every((p) => MULETILLAS.has(p))) {
         console.log(gris(`  (muletilla descartada: ${JSON.stringify(r.texto)})`));
+        contadores.muletillas += 1;
         return { texto: '' };
       }
       return r;
@@ -224,21 +231,39 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   const idioma = typeof opciones['idioma'] === 'string' ? opciones['idioma'] : 'es';
   const pegar = String(opciones['pegar'] ?? 'portapapeles');
   const silencioMs = typeof opciones['silencio-ms'] === 'string' ? Number(opciones['silencio-ms']) : DEFECTOS_DICTADO.msSilencioParaCerrar;
-  const gananciaDb = typeof opciones['ganancia-db'] === 'string' ? Number(opciones['ganancia-db']) : 0;
+  /** `--ganancia-db auto`: se ajusta sola por el pico de cada escucha (ver ganancia.ts); un numero la fija. */
+  const gananciaAuto = opciones['ganancia-db'] === 'auto';
+  let gananciaDb = typeof opciones['ganancia-db'] === 'string' && !gananciaAuto ? Number(opciones['ganancia-db']) : 0;
+  if (!Number.isFinite(gananciaDb)) gananciaDb = 0;
+  /**
+   * `--mic-en-espera cerrado` (por defecto): en espera el microfono NO esta abierto; se abre al
+   * escuchar (~100 ms medidos por PulseAudio de WSLg) y se cierra 1,5 s despues de parar. Con
+   * `abierto` se queda capturando y descartando, como antes. Con `--entrada` siempre abierto.
+   */
+  const micEnEspera = String(opciones['mic-en-espera'] ?? 'cerrado');
+  /** `--alterna-cada <ms>`: SOLO pruebas; alterna escuchar/parar cada N ms como si alguien tocara la tecla. */
+  const alternaCadaMs = typeof opciones['alterna-cada'] === 'string' ? Number(opciones['alterna-cada']) : 0;
   /** Con `--tecla-alternar` la tecla no se mantiene: un toque empieza, el siguiente termina. */
   const teclaAlterna = opciones['tecla-alternar'] === true;
   /** `--graba <carpeta>`: guarda el audio de cada escucha como WAV. SOLO diagnostico; por defecto nada se graba. */
   const graba = typeof opciones['graba'] === 'string' ? opciones['graba'] : undefined;
+  /** `--entrada <audio>`: SOLO pruebas y calibracion; el archivo hace de microfono, a tiempo real. */
+  const entrada = typeof opciones['entrada'] === 'string' ? opciones['entrada'] : undefined;
+  /** `--empieza`: escucha desde el arranque (con `--entrada`, lo normal: nadie pulsa espacio). */
+  const empiezaYa = opciones['empieza'] === true || entrada !== undefined;
+  const conTrayectoria = opciones['sin-trayectoria'] !== true;
+  const contadores = creaContadores();
+  const inicioSesion = new Date();
 
   console.log(gris(config.describe()));
   const datos = cargaDatos(config, { corrigePorSimilitud: opciones['corrige-similitud'] === true });
   const principal = await creaMotor(String(opciones['motor'] ?? 'parakeet'), config, idioma);
   const respaldo = typeof opciones['respaldo'] === 'string' ? await creaMotor(opciones['respaldo'], config, idioma) : undefined;
-  const motor = respaldo ? conRespaldo(principal, respaldo, idioma) : principal;
+  const motor = respaldo ? conRespaldo(principal, respaldo, idioma, contadores) : principal;
   const detector = await creaDetector(config, { msSilencioParaCerrar: silencioMs });
   /** `--umbral-voz-db -45`: por debajo de este pico el turno se descarta sin motor. */
   const umbralVozDb = typeof opciones['umbral-voz-db'] === 'string' ? Number(opciones['umbral-voz-db']) : -45;
-  const transcriptor = conPuertaDeEnergia(motor, detector.frecuenciaHz, umbralVozDb);
+  const transcriptor = conPuertaDeEnergia(motor, detector.frecuenciaHz, umbralVozDb, contadores);
   const pegadorBase = pegar === 'ninguno' ? pegadorDePantalla() : creaPegadorWindows({ metodo: pegar === 'teclear' ? 'teclear' : 'portapapeles' });
   // En manos libres las frases se pegan una tras otra en la misma caja: sin separador se juntan.
   let msPegado = 0;
@@ -250,7 +275,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   const pegador: Pegador = { ...pegadorBase, pega: pegaMedido };
   const t0 = performance.now();
   await motor.calienta?.();
-  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaDb} dB`));
+  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaAuto ? 'auto' : `${gananciaDb} dB`} · mic en espera ${entrada ? 'abierto (entrada por archivo)' : micEnEspera}`));
 
   /** El icono de la barra, si esta puesto, se pinta con los mismos eventos que la TUI. */
   let publicaIcono: (estado: Estado) => void = () => undefined;
@@ -269,12 +294,39 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
       if (e.tipo === 'estado') publicaIcono(e.estado);
       if (e.tipo === 'estado' && e.estado === 'escuchando') {
         picoEscucha = -Infinity;
+        picoRawEscucha = -Infinity;
         trozosEscucha = [];
+        abreMic();
+      }
+      if (e.tipo === 'estado' && e.estado === 'inactivo' && micCerradoEnEspera) {
+        setTimeout(() => {
+          if (dictado.estado === 'inactivo') cierraMic();
+        }, 1_500).unref();
       }
       pinta(e);
-      if (e.tipo === 'texto') console.log(gris(`  pegado ${msPegado.toFixed(0)} ms`));
+      if (e.tipo === 'error') contadores.errores += 1;
+      if (e.tipo === 'texto') {
+        console.log(gris(`  pegado ${msPegado.toFixed(0)} ms`));
+        contadores.turnos += 1;
+        contadores.pegados += 1;
+        contadores.latenciasMs.push(e.latenciaMs);
+        contadores.msMotor.push(e.msMotor);
+        contadores.msPegado.push(msPegado);
+        contadores.duracionesMs.push(e.duracionMs);
+      }
+      if (e.tipo === 'sinVoz') contadores.sinVoz += 1;
       if (e.tipo === 'sinVoz' || e.tipo === 'texto') {
+        if (Number.isFinite(picoEscucha)) contadores.picosDb.push(picoEscucha);
         console.log(gris(`  pico durante la escucha: ${picoEscucha.toFixed(1)} dBFS${avisoPico(picoEscucha)}`));
+        if (gananciaAuto) {
+          const ajuste = ajustaGanancia({ actualDb: gananciaDb, picoRawDb: picoRawEscucha, picoConGananciaDb: picoEscucha, huboTexto: e.tipo === 'texto' });
+          if (ajuste.nuevaDb !== gananciaDb) {
+            gananciaDb = ajuste.nuevaDb;
+            console.log(gris(`  ganancia ajustada a ${gananciaDb > 0 ? '+' : ''}${gananciaDb} dB (${ajuste.motivo})`));
+          } else if (ajuste.motivo === 'microfono-satura-solo') {
+            console.log(gris('  el microfono satura por si solo: baja su nivel en Windows y quita sus «mejoras»'));
+          }
+        }
         if (graba && trozosEscucha.length > 0) {
           const largo = trozosEscucha.reduce((n, t) => n + t.length, 0);
           const todo = new Float32Array(largo);
@@ -292,27 +344,73 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   let muestrasVistas = 0;
   /** Pico durante cada escucha: cuando sale «sin voz», la primera sospecha es el micrófono. */
   let picoEscucha = -Infinity;
+  let picoRawEscucha = -Infinity;
   let trozosEscucha: Float32Array[] = [];
-  const captura = capturaMicrofono({
-    frecuenciaHz: detector.frecuenciaHz,
-    gananciaDb,
-    alRecibir: (m) => {
-      if (dictado.estado === 'escuchando') {
-        picoEscucha = Math.max(picoEscucha, nivelDb(m));
-        if (graba) trozosEscucha.push(m);
-      }
-      if (muestrasVistas < detector.frecuenciaHz * 2) {
-        picoDb = Math.max(picoDb, nivelDb(m));
-        muestrasVistas += m.length;
-        if (muestrasVistas >= detector.frecuenciaHz * 2) {
-          console.log(gris(`microfono vivo: pico ${picoDb.toFixed(1)} dBFS en los primeros 2 s${picoDb < -75 ? ' — MUY bajo: revisa el microfono de Windows' : ''}`));
-        }
-      }
-      void dictado.alimenta(m);
-    },
-    alError: (e) => console.error(`ffmpeg: ${e}`),
-  });
+  const micCerradoEnEspera = micEnEspera === 'cerrado' && entrada === undefined;
 
+  const alimenta = (crudo: Float32Array, msDesdeApertura: () => number, primera: { valor: boolean }) => {
+    if (primera.valor) {
+      primera.valor = false;
+      console.log(gris(`microfono abierto en ${msDesdeApertura().toFixed(0)} ms`));
+    }
+    const picoRaw = nivelDb(crudo);
+    const factor = factorDe(gananciaDb);
+    const m = factor === 1 ? crudo : crudo.map((x) => Math.max(-1, Math.min(1, x * factor)));
+    if (dictado.estado === 'escuchando') {
+      picoRawEscucha = Math.max(picoRawEscucha, picoRaw);
+      picoEscucha = Math.max(picoEscucha, factor === 1 ? picoRaw : nivelDb(m));
+      if (graba) trozosEscucha.push(m);
+    }
+    if (muestrasVistas < detector.frecuenciaHz * 2) {
+      picoDb = Math.max(picoDb, picoRaw);
+      muestrasVistas += m.length;
+      if (muestrasVistas >= detector.frecuenciaHz * 2) {
+        console.log(gris(`microfono vivo: pico ${picoDb.toFixed(1)} dBFS en los primeros 2 s${picoDb < -75 ? ' — MUY bajo: revisa el microfono de Windows' : ''}`));
+      }
+    }
+    void dictado.alimenta(m);
+  };
+
+  /**
+   * La captura se abre y se cierra con el estado: en espera no hay microfono abierto (salvo
+   * `--mic-en-espera abierto` o entrada por archivo). Si la captura muere por su cuenta (ffmpeg
+   * termino sin que lo pidieramos), el dictado se apaga entero: seguir «escuchando» seria mentir
+   * (vivido el 2026-09-19).
+   */
+  let captura: Captura | undefined;
+  let cierrePedido = false;
+  let resolverFin: (e?: Error) => void = () => undefined;
+  const finDeCaptura = new Promise<Error | undefined>((r) => (resolverFin = r));
+  const abreMic = () => {
+    if (captura) return;
+    cierrePedido = false;
+    const desde = performance.now();
+    const primera = { valor: true };
+    const c = capturaMicrofono({
+      frecuenciaHz: detector.frecuenciaHz,
+      gananciaDb: 0, // la ganancia se aplica aqui (puede cambiar en caliente), no en la captura
+      ...(entrada ? { entrada } : {}),
+      alRecibir: (m) => alimenta(m, () => performance.now() - desde, primera),
+      alError: (e) => console.error(`ffmpeg: ${e}`),
+    });
+    captura = c;
+    c.terminada.then(
+      () => { if (captura === c) captura = undefined; if (!cierrePedido) resolverFin(undefined); },
+      (e: Error) => { if (captura === c) captura = undefined; if (!cierrePedido) resolverFin(e); },
+    );
+  };
+  const cierraMic = () => {
+    if (!captura) return;
+    cierrePedido = true;
+    captura.detiene();
+    console.log(gris('microfono cerrado (en espera no se captura nada)'));
+  };
+  if (!micCerradoEnEspera) abreMic();
+  // Con el microfono cerrado en espera puede no quedar NINGUN handle vivo (sin tecla ni icono):
+  // Node saldria en silencio. Un latido con referencia mantiene el proceso hasta `salir()`.
+  const latido = setInterval(() => undefined, 60_000);
+
+  let alternador: ReturnType<typeof setInterval> | undefined;
   let tecla: EscuchaTecla | undefined;
   let icono: EscuchaIcono | undefined;
   let cierraTeclaGlobal: (() => void) | undefined;
@@ -323,15 +421,27 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     saliendo = true;
     console.log(gris('\ncerrando…'));
     quitaTeclas();
+    clearInterval(latido);
+    if (alternador) clearInterval(alternador);
     cierraTeclaGlobal?.();
     await tecla?.cierra();
     await icono?.cierra(); // el icono de la barra queda vivo y en gris: un click rearranca
-    captura.detiene();
+    cierrePedido = true;
+    captura?.detiene();
+    resolverFin(undefined);
     await control.esperar();
     if (dictado.estado !== 'inactivo') await dictado.termina().catch(() => undefined);
     await motor.cierra?.();
     if ('cierra' in pegadorBase && typeof pegadorBase.cierra === 'function') await (pegadorBase as { cierra(): Promise<void> }).cierra();
     datos.guardaSnippets();
+    if (conTrayectoria) {
+      try {
+        const ruta = escribeTrayectoria(CARPETA_CORPUS, construyeTrayectoria(contadores, { motorId: motor.id, modo, silencioMs, gananciaDb, umbralVozDb, inicio: inicioSesion, fin: new Date() }));
+        console.log(gris(`trayectoria de la sesion (forma, sin contenido): ${ruta}`));
+      } catch (e) {
+        console.error(`✗ no se pudo escribir la trayectoria: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
     // Sin `process.exit` inmediato: con stdout en un pipe, lo ultimo escrito se perderia. Se
     // deja que el bucle se vacie, y si algo nativo lo mantiene vivo, se sale al segundo y medio.
     process.exitCode = 0;
@@ -370,10 +480,22 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   console.log(`\nESPACIO en esta terminal: ${modo === 'manosLibres' ? 'enciende/apaga manos libres' : 'empieza/termina el dictado'} · q: salir`);
   quitaTeclas = teclasDeTerminal(() => void control.alterna(modo), () => void salir());
   process.on('SIGINT', () => void salir());
+  if (empiezaYa) {
+    console.log(gris(entrada ? `entrada por archivo (${modo}): escuchando desde ya` : 'escuchando desde ya (--empieza)'));
+    void control.empieza(modo);
+  }
+  if (alternaCadaMs > 0) {
+    console.log(gris(`(prueba) alterno escuchar/parar cada ${alternaCadaMs} ms`));
+    alternador = setInterval(() => void control.alterna(modo), alternaCadaMs);
+  }
   // Si la captura TERMINA —con o sin error—, el dictado esta sordo: seguir «escuchando» seria
   // mentir (vivido el 2026-09-19: ffmpeg murio con «Error during demuxing» del pulse de WSLg y
   // el proceso quedo vivo y sordo). Se sale: el icono pasa a gris y un click lo rearranca todo.
-  await captura.terminada.catch((e: Error) => console.error(e.message));
-  if (!saliendo) console.log(gris('el microfono se cerro (ffmpeg termino): apago el dictado — un click al icono lo rearranca'));
+  const muerte = await finDeCaptura;
+  if (muerte) {
+    contadores.muertesCaptura += 1;
+    console.error(muerte.message);
+  }
+  if (!saliendo) console.log(gris(entrada ? 'la entrada por archivo termino: apago el dictado' : 'el microfono se cerro (ffmpeg termino): apago el dictado — un click al icono lo rearranca'));
   await salir();
 }

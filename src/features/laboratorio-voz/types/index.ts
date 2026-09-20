@@ -77,6 +77,8 @@ export interface MetricasTranscripcion {
   /** Lo que tardo el motor en si (sin carga), si se pudo leer. */
   msMotor?: number;
   hablantes?: number;
+  /** Por donde paso el audio: el demonio residente o el CLI por proceso. */
+  via?: 'demonio' | 'cli';
 }
 
 export interface RespuestaTranscripcion extends MetricasTranscripcion {
@@ -96,19 +98,22 @@ export interface MetricasSintesis {
 
 export type ResultadoVeredicto = 'funciono' | 'a-medias' | 'no';
 
-export interface Veredicto {
-  id: string;
-  caso: number;
-  resultado: ResultadoVeredicto;
-  nota: string;
-  fecha: string;
-  /** El estado que la tarjeta mostraba cuando se juzgo. */
-  estado: EstadoCaso;
-}
+/** Numeros que el panel midio en la prueba que se juzga (ms, WER...). Nunca texto. */
+export type MetricasVeredicto = Record<string, number | null>;
 
 export interface VeredictoNuevo {
   caso: number;
   resultado: ResultadoVeredicto;
   nota: string;
   estado: EstadoCaso;
+  /** Quien prueba, por rol (no por nombre). */
+  rol?: string;
+  /** Tipo de dispositivo, deducido del navegador: PC, iPhone, Android. */
+  dispositivo?: string;
+  metricas?: MetricasVeredicto;
+}
+
+export interface Veredicto extends VeredictoNuevo {
+  id: string;
+  fecha: string;
 }

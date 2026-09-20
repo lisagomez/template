@@ -201,6 +201,59 @@ npm run mide                                   # todo: modelos, runtimes, corpus
 npm run mide -- --motores parakeet --tomas 30  # rápido
 ```
 
+### 7. El demonio local: el modelo cargado una vez
+
+```bash
+npm run demonio            # servicio/ en 127.0.0.1:47125, Bearer = DICTADO_MOVIL_TOKEN
+npm run demonio -- --estado
+npm run demonio -- --parar
+```
+
+`npm run en-vivo` lo levanta y lo para junto al dictado. Las rutas web del template
+(`/api/dictado/movil`, `/api/laboratorio/*`) lo usan si responde y caen al CLI por proceso si
+no. **Medido el 2026-09-20 con una frase de 3,9 s:** p50 de 2 940 ms por proceso → **319 ms**
+con el demonio (motor 197 ms); sin demonio, 2 935 ms y la ruta lo dice (`via: cli`). Solo
+loopback, sin token no arranca, no escribe audio ni texto.
+
+### 8. Ganancia automática y micrófono cerrado en espera
+
+```bash
+dictado dictar --ganancia-db auto      # se ajusta por el pico de cada escucha (ganancia.ts)
+dictado dictar --mic-en-espera abierto # como antes: capturar y descartar en espera (por defecto: cerrado)
+```
+
+Con `auto`, si una escucha con texto entra floja (< −30 dBFS) sube 6 dB; si satura (> −3 dBFS)
+baja 6 dB; si el micrófono satura sin ganancia, avisa que es el nivel de Windows. Topes −12/+18.
+Con el micrófono **cerrado en espera** no hay captura ninguna hasta escuchar: se abre en
+**~70–260 ms** (medido el 2026-09-20 por PulseAudio de WSLg; 545 ms la primera apertura en
+frío) y se cierra 1,5 s después de parar.
+
+### 9. Pruebas sin micrófono, trayectorias y calibración
+
+```bash
+dictado dictar --entrada sesion.wav --pegar ninguno   # el archivo hace de micrófono, a tiempo real
+dictado dictar --alterna-cada 5000                    # (prueba) alterna escuchar/parar cada 5 s
+node medicion/calibra.mjs                             # WER, VAD y diccionario sobre corpus propio
+```
+
+Cada sesión de `dictar` deja `corpus/salida-dictar-<fecha>/trayectoria.json`: **forma, nunca
+contenido** (turnos, sin voz, descartados, respaldo, latencia p50/p95, motor, pegado, pico del
+micrófono, muertes de la captura). `npm run trayectorias:ingesta` del template la recoge y el
+informe la compara por semana. `--sin-trayectoria` la apaga.
+
+`medicion/corpus-propio/` trae 30 frases (`frases.txt`) y un corpus **sintético** (dos voces
+Piper, en limpio, con ruido de oficina y como celular) para calibrar sin esperar grabaciones;
+las tuyas van en la misma carpeta con el mismo nombre (`limpio-NN.wav`…) y se miden igual.
+La tabla de calibración vive en `medicion/corpus-propio/calibracion-<fecha>.md`.
+
+**Calibración del 2026-09-20 sobre el corpus sintético** (30 frases × limpio / ruido de oficina /
+celular, dos voces Piper, Parakeet int8): WER 5,1 % · 4,5 % · 6,3 % con cifras igualadas (10,9 ·
+9,8 · 11,2 % crudo: el motor escribe «3412» donde la referencia dice «tres mil cuatrocientos
+doce»; el resto son nombres propios), p50 250 ms. El VAD no partió ninguna de 60 frases con cierres
+de 500 a 1500 ms, no se comió palabras con relleno ≥ 250 ms, y el ruido rosa hasta −35 dBFS no
+abrió ningún turno: los valores por defecto se quedan. La corrección del diccionario no sustituyó
+nada: sigue apagada. **Con voz propia está por medir**: graba las 30 frases y corre `calibra.mjs`.
+
 ## Medición (2026-09-15)
 
 **Máquina:** AMD Ryzen 7 5700G, 16 hilos, 15 GB, sin CUDA, WSL2 (kernel 6.6.87.2), Node 22.23,

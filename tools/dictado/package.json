@@ -53,6 +53,7 @@
     "prueba": "node --test pruebas/*.ts",
     "mide": "node medicion/mide.mjs",
     "servicio": "node servicio/servidor.mjs",
+    "demonio": "node scripts/demonio.mjs",
     "en-vivo": "node scripts/en-vivo.mjs"
   }
 }

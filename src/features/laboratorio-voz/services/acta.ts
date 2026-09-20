@@ -3,7 +3,7 @@
  * metricas que `archivo`, `lote` y `di` escriben por stderr. Puro y probado: si el formato
  * cambia, falla aqui y no en la pantalla.
  */
-import type { MetricasSintesis, Segmento } from '../types/index.ts';
+import type { Segmento } from '../types/index.ts';
 
 const LINEA = /^\[(\d+):(\d+):(\d+(?:\.\d+)?)\s*→\s*(\d+):(\d+):(\d+(?:\.\d+)?)\]\s*(.+?):\s*(.*)$/;
 
@@ -21,39 +21,4 @@ export function parseaActa(texto: string): Segmento[] {
   return salida;
 }
 
-/** `clave=valor` separados por espacios, como los escribe el CLI en su ultima linea de stderr. */
-export function parseaClaves(stderr: string): Record<string, string> {
-  const ultima = stderr.trim().split('\n').filter((l) => l.includes('=')).at(-1) ?? '';
-  const salida: Record<string, string> = {};
-  for (const m of ultima.matchAll(/(\S+?)=(\S+)/g)) salida[m[1] ?? ''] = m[2] ?? '';
-  return salida;
-}
-
-const numeroDe = (v: string | undefined): number | undefined => {
-  if (v === undefined) return undefined;
-  const n = Number(v.replace(/[a-z%]+$/i, ''));
-  return Number.isFinite(n) ? n : undefined;
-};
-
-export function metricasDeTranscripcion(stderr: string): { motor: string; segundosAudio: number; msMotor?: number; hablantes?: number } {
-  const c = parseaClaves(stderr);
-  const msMotor = numeroDe(c['transcribe']) ?? numeroDe(c['transcripcion']);
-  const hablantes = numeroDe(c['hablantes']);
-  return {
-    motor: c['motor'] ?? 'desconocido',
-    segundosAudio: numeroDe(c['audio']) ?? 0,
-    ...(msMotor !== undefined ? { msMotor } : {}),
-    ...(hablantes !== undefined ? { hablantes } : {}),
-  };
-}
-
-export function metricasDeSintesis(stderr: string, msTotal: number): MetricasSintesis {
-  const c = parseaClaves(stderr);
-  return {
-    voz: c['voz'] ?? 'desconocida',
-    segundosAudio: numeroDe(c['audio']) ?? 0,
-    msSintesis: numeroDe(c['sintesis']) ?? 0,
-    msPrimerAudio: numeroDe(c['primer-audio']) ?? 0,
-    ms: msTotal,
-  };
-}
+export { metricasDeSintesis, metricasDeTranscripcion, parseaClaves } from '../../../shared/lib/dictado-metricas.ts';

@@ -185,6 +185,16 @@ int8) y `dictado-gpu` (`Dockerfile.gpu`: CUDA 12.6 + cuDNN 9, faster-whisper lar
 float16, `DICTADO_DISPOSITIVO=auto` cae a CPU si no ve la GPU). `npm run mide -- --dispositivo
 cuda` corre igual en el VPS; hasta entonces el README dice **GPU: sin medir**.
 
+### 7.0 El mismo servicio, como demonio LOCAL (2026-09-20)
+
+`servicio/servidor.mjs` también corre en la propia máquina (`npm run demonio`, o levantado por
+`en-vivo.mjs`): escucha solo en `127.0.0.1:47125`, con el token del celular como Bearer y el
+modelo cargado una vez. Las rutas web del template lo usan si responde y caen al CLI por
+proceso si no. Medido con una frase de 3,9 s: p50 de 2 940 ms por proceso → 319 ms con el
+demonio. Amenazas que añade: ninguna nueva hacia fuera (loopback, no se publica); hacia dentro,
+cualquier proceso local con el token podría transcribir audio —el mismo perímetro que ya tiene
+el CLI—. Flujo de datos igual que el servicio: audio en memoria, nada a disco ni a log.
+
 ### 7.1 Modelo de amenazas (C3)
 
 Es una superficie de red por la que viaja **audio con la voz del dueño**.

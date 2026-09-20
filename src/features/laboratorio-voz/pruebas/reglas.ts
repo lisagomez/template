@@ -16,6 +16,7 @@ import { primerNumero } from '../services/texto.ts';
 import { escribeWavPcm16, leeWavPcm16, mezclaEstereo } from '../services/wav.ts';
 import type { Piezas } from '../types/index.ts';
 import { enlaceDeEmparejar } from '../../dictado/services/enlace-emparejar.ts';
+import { analizaTurnos, idDeAnalisis, segmentosDesdeTexto } from '../services/asesor.ts';
 
 const TODO: Piezas = { parakeet: true, silero: true, embedding: true, piper: true, ffmpeg: true, runtime: true, tokenServidor: true, llaveLlm: false, supabase: false };
 
@@ -152,4 +153,16 @@ test('enlace de emparejar: el token va en el fragmento, codificado, y la ruta se
   assert.equal(enlaceDeEmparejar('https://kyara.example/', 'laboratorio-voz', 'a b&c'), 'https://kyara.example/laboratorio-voz#t=a%20b%26c');
   assert.equal(enlaceDeEmparejar('http://localhost:3000', '/dictar', 'x'), 'http://localhost:3000/dictar#t=x');
   assert.ok(!enlaceDeEmparejar('http://localhost:3000', '/dictar', 'x').includes('?t='));
+});
+
+test('asesor en el laboratorio: dos transcripciones distintas dan analisis distintos (el motor cachea por id)', () => {
+  const completa = segmentosDesdeTexto('Ana: ¿Qué es lo que más se les complica hoy?\nLuis: Batallamos con las cotizaciones y perdemos veinte horas al mes.\nAna: ¿Para cuándo lo necesitan?\nLuis: Antes de fin de año, es urgente.\nLuis: Tenemos presupuesto aprobado de cien mil pesos.');
+  const pobre = segmentosDesdeTexto('Ana: Le cuento lo que hacemos.\nLuis: Ajá.');
+  const lados = { Ana: 'interno' as const, Luis: 'cliente' as const };
+  assert.notEqual(idDeAnalisis(completa, lados, 'discovery'), idDeAnalisis(pobre, lados, 'discovery'));
+  assert.notEqual(idDeAnalisis(completa, lados, 'discovery'), idDeAnalisis(completa, lados, 'demo'));
+  const a = analizaTurnos(completa, lados, 'discovery');
+  const b = analizaTurnos(pobre, lados, 'discovery');
+  assert.ok(a.score.total > b.score.total, `completa ${a.score.total} > pobre ${b.score.total}`);
+  assert.ok(a.insights.length > b.insights.length);
 });

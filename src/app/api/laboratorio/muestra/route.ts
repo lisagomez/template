@@ -41,7 +41,9 @@ export async function POST(peticion: NextRequest): Promise<NextResponse> {
     const frecuenciaHz = tramos[0]?.frecuenciaHz ?? 22_050;
     if (tramos.some((t) => t.frecuenciaHz !== frecuenciaHz)) return NextResponse.json({ error: 'las voces no comparten frecuencia' }, { status: 500 });
     const estereo = cuerpo.data.formato === 'estereo';
-    const muestras = estereo ? mezclaEstereo(tramos, frecuenciaHz, 500) : concatenaMono(tramos.map((t) => t.muestras), frecuenciaHz, 500);
+    // Mono: 1 s entre lineas, para que el detector de voz cierre cada turno (el lote cierra a 500 ms
+    // de silencio); con 500 ms de hueco toda la reunion salia como UN turno (visto el 2026-09-20).
+    const muestras = estereo ? mezclaEstereo(tramos, frecuenciaHz, 500) : concatenaMono(tramos.map((t) => t.muestras), frecuenciaHz, 1_000);
     const salida = escribeWavPcm16(muestras, frecuenciaHz, estereo ? 2 : 1);
     const segundos = Math.round((muestras.length / (estereo ? 2 : 1) / frecuenciaHz) * 10) / 10;
     return new NextResponse(new Uint8Array(salida), { headers: { 'content-type': 'audio/wav', 'x-metricas': encodeURIComponent(JSON.stringify({ segundosAudio: segundos, lineas: tramos.length, formato: cuerpo.data.formato })) } });

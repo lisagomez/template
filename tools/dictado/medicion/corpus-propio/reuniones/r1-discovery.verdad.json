@@ -1,0 +1,80 @@
+{
+ "reunion": "r1-discovery",
+ "hablantes": 2,
+ "gapMs": 800,
+ "turnos": [
+  {
+   "hablante": "Asesor",
+   "inicioMs": 800,
+   "finMs": 6328,
+   "texto": "Buenas tardes, le habla Ana. ¿Qué es lo que más se les complica hoy en la operación?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 7128,
+   "finMs": 12765,
+   "texto": "Batallamos con las cotizaciones, porque cada quien lo hace a su manera y perdemos como veinte horas al mes en retrabajo."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 13565,
+   "finMs": 16305,
+   "texto": "¿Y qué pasa si eso sigue así seis meses más?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 17105,
+   "finMs": 21302,
+   "texto": "Se nos van clientes por responder tarde. El impacto es directo en ventas."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 22102,
+   "finMs": 24459,
+   "texto": "¿Para cuándo necesitan tenerlo resuelto?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 25259,
+   "finMs": 29671,
+   "texto": "Antes de fin de año, porque en enero arranca la temporada alta y es urgente."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 30471,
+   "finMs": 34506,
+   "texto": "¿Cómo se decide una compra así en su empresa, quién autoriza?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 35306,
+   "finMs": 39787,
+   "texto": "Lo autoriza el director de operaciones, Pedro, y compras revisa el contrato."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 40587,
+   "finMs": 42526,
+   "texto": "¿Tienen presupuesto contemplado?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 43326,
+   "finMs": 46410,
+   "texto": "Sí, tenemos unos cien mil pesos aprobados para este trimestre."
+  },
+  {
+   "hablante": "Asesor",
+   "inicioMs": 47210,
+   "finMs": 51691,
+   "texto": "¿Le parece si le mando la propuesta el jueves y agendamos la demo con Pedro?"
+  },
+  {
+   "hablante": "Cliente",
+   "inicioMs": 52491,
+   "finMs": 56508,
+   "texto": "Sí, quedamos en que me mandas la propuesta el jueves y la demo la semana que viene."
+  }
+ ],
+ "duracionMs": 57308
+}

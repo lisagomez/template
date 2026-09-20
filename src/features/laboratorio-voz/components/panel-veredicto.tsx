@@ -2,8 +2,16 @@
 
 /** Lo que la persona deja tras probar: funciono / a medias / no, con una nota. Queda guardado en la maquina. */
 import { useState } from 'react';
-import type { EstadoCaso, ResultadoVeredicto, Veredicto } from '../types/index.ts';
+import { dispositivoActual, useMetricasCaso } from '../store/metricas.ts';
+import type { EstadoCaso, ResultadoVeredicto, Veredicto, VeredictoNuevo } from '../types/index.ts';
 import { Aviso, Boton, claseEntrada } from './ui.tsx';
+
+const ROLES: Array<{ valor: string; nombre: string }> = [
+  { valor: 'quien-prueba', nombre: 'Quien prueba' },
+  { valor: 'vendedor', nombre: 'Vendedor' },
+  { valor: 'atencion-cliente', nombre: 'Atención al cliente' },
+  { valor: 'otro', nombre: 'Otro rol' },
+];
 
 const OPCIONES: Array<{ valor: ResultadoVeredicto; nombre: string; activo: string }> = [
   { valor: 'funciono', nombre: 'Funcionó', activo: 'bg-emerald-600 text-white' },
@@ -11,15 +19,17 @@ const OPCIONES: Array<{ valor: ResultadoVeredicto; nombre: string; activo: strin
   { valor: 'no', nombre: 'No funcionó', activo: 'bg-red-600 text-white' },
 ];
 
-export function PanelVeredicto({ caso, estado, previos, token, ocupado, guarda }: { caso: number; estado: EstadoCaso; previos: Veredicto[]; token: string | undefined; ocupado: boolean; guarda: (v: { caso: number; resultado: ResultadoVeredicto; nota: string; estado: EstadoCaso }) => Promise<boolean> }) {
+export function PanelVeredicto({ caso, estado, previos, token, ocupado, guarda }: { caso: number; estado: EstadoCaso; previos: Veredicto[]; token: string | undefined; ocupado: boolean; guarda: (v: VeredictoNuevo) => Promise<boolean> }) {
   const [resultado, setResultado] = useState<ResultadoVeredicto | undefined>(undefined);
   const [nota, setNota] = useState('');
+  const [rol, setRol] = useState('quien-prueba');
   const [guardado, setGuardado] = useState(false);
+  const metricas = useMetricasCaso((s) => s.porCaso[caso]);
   const ultimo = previos.at(-1);
 
   const enviar = async () => {
     if (!resultado) return;
-    if (await guarda({ caso, resultado, nota: nota.trim(), estado })) {
+    if (await guarda({ caso, resultado, nota: nota.trim(), estado, rol, dispositivo: dispositivoActual(), ...(metricas ? { metricas } : {}) })) {
       setGuardado(true);
       setNota('');
       setResultado(undefined);
@@ -44,11 +54,17 @@ export function PanelVeredicto({ caso, estado, previos, token, ocupado, guarda }
         ))}
       </div>
       <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+        <select value={rol} onChange={(e) => setRol(e.target.value)} className={`${claseEntrada} sm:!w-44`} aria-label="Tu rol">
+          {ROLES.map((r) => (
+            <option key={r.valor} value={r.valor}>{r.nombre}</option>
+          ))}
+        </select>
         <input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Una nota (qué viste, qué falló)" className={claseEntrada} maxLength={1000} />
         <Boton variante="primario" onClick={() => void enviar()} disabled={!resultado || ocupado || !token} title={token ? undefined : 'Empareja el navegador para guardar'}>
           Guardar
         </Boton>
       </div>
+      {metricas ? <p className="mt-1 text-[11px] text-neutral-400">Se guarda con lo medido: {Object.entries(metricas).map(([k, v]) => `${k} ${v ?? '—'}`).join(' · ')}</p> : null}
       {guardado ? (
         <div className="mt-2">
           <Aviso tipo="ok">Veredicto guardado en esta computadora.</Aviso>

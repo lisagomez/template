@@ -16,6 +16,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { arrancaDemonio, paraDemonio } from './demonio.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const banco = join(raiz, 'medicion', 'banco');
@@ -52,7 +53,8 @@ function parar() {
   for (const patron of ['^[^ ]*node [^ ]*dist/node/cli.js dictar', `^${banco}/venv/bin/python`, '^/init /mnt/c/WINDOWS/System32/WindowsPowerShell']) {
     try { execFileSync('pkill', ['-9', '-f', patron], { stdio: 'ignore' }); } catch { /* no habia */ }
   }
-  console.log('dictado parado');
+  paraDemonio({ silencioso: true });
+  console.log('dictado parado (y el demonio de transcripcion)');
 }
 
 async function arranca() {
@@ -63,6 +65,9 @@ async function arranca() {
   }
   parar(); // por si quedo un ayudante huerfano ocupando el puerto
   mkdirSync(banco, { recursive: true });
+  // El demonio de transcripcion (servicio/ en 127.0.0.1) para las rutas web: un modelo cargado
+  // una vez en vez de ~3 s por peticion. Si no arranca (sin token), el dictado sigue igual.
+  await arrancaDemonio();
   const env = {
     ...process.env,
     DICTADO_MODELOS: process.env.DICTADO_MODELOS ?? join(banco, 'modelos'),

@@ -1,0 +1,66 @@
+{
+ "version": 1,
+ "id": "herramientas-44bb4690",
+ "linea": "herramientas",
+ "origen": {
+  "tipo": "medicion",
+  "referencia": "salida-dictar-2026-09-20T18-58-15"
+ },
+ "cuando": {
+  "inicio": "2026-09-20T18:58:15.746Z",
+  "fin": "2026-09-20T18:58:51.500Z"
+ },
+ "actor": {
+  "herramienta": "dictado",
+  "tarea": "dictar manosLibres"
+ },
+ "modelos": {
+  "sherpa:nemo-parakeet-tdt-0.6b-v3-int8+faster-whisper-small-int8-cpu": 5
+ },
+ "acciones": {
+  "herramientas": {
+   "turnos": 5,
+   "sinVoz": 0,
+   "descartadosEnergia": 0,
+   "muletillas": 0,
+   "respaldo": 0,
+   "pegados": 5
+  },
+  "turnos": 5
+ },
+ "uso": null,
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 35754,
+  "porEtapaMs": {
+   "motor": 1194,
+   "pegado": 3,
+   "audio": 20962
+  }
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0,
+  "metricas": {
+   "latenciaP50Ms": 237,
+   "latenciaP95Ms": 301,
+   "msMotorP50": 237,
+   "msPegadoP50": 0,
+   "segundosAudioPorTurno": 4.2,
+   "turnosPorMinuto": 8.4,
+   "picoDbMax": -15.5,
+   "picoDbMin": -17.3,
+   "silencioMs": 1000,
+   "gananciaDb": 0,
+   "umbralVozDb": -45,
+   "muertesCaptura": 0
+  }
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "uso",
+   "costo"
+  ]
+ }
+}

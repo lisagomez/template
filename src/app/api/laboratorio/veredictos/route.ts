@@ -12,6 +12,9 @@ const esquema = z.object({
   resultado: z.enum(['funciono', 'a-medias', 'no']),
   nota: z.string().trim().max(1_000),
   estado: z.enum(['listo', 'reglas', 'puerta']),
+  rol: z.enum(['quien-prueba', 'vendedor', 'atencion-cliente', 'otro']).optional(),
+  dispositivo: z.string().trim().max(40).optional(),
+  metricas: z.record(z.string().max(30), z.number().nullable()).refine((m) => Object.keys(m).length <= 12, 'demasiadas metricas').optional(),
 });
 
 export async function GET(peticion: NextRequest): Promise<NextResponse> {

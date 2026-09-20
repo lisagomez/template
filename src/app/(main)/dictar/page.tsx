@@ -24,6 +24,7 @@ export default function PaginaDictar() {
   const grabadora = useGrabadora();
   const [tokenTecleado, setTokenTecleado] = useState('');
   const [copiado, setCopiado] = useState<string | undefined>(undefined);
+  const [motorResidente, setMotorResidente] = useState<boolean | undefined>(undefined);
   const [micElegido, setMicElegido] = useState<string>(() => {
     try {
       return localStorage.getItem('dictado.mic') ?? '';
@@ -33,6 +34,11 @@ export default function PaginaDictar() {
   });
 
   useEffect(() => {
+    // El motor residente responde en ~300 ms por frase; sin el, cada frase arranca el motor (~3 s).
+    fetch('/api/laboratorio/estado', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((e: { demonio?: boolean }) => setMotorResidente(Boolean(e.demonio)))
+      .catch(() => setMotorResidente(false));
     movil.carga();
     // Emparejamiento por QR: el token viaja en la URL. Se prefiere el FRAGMENTO (#t=), que
     // nunca se manda al servidor; se acepta tambien el query (?t=) porque algun escaner de
@@ -142,7 +148,11 @@ export default function PaginaDictar() {
           </button>
         ))}
       </div>
-      <p className="mb-4 text-center text-xs text-neutral-500">{DESTINOS.find((d) => d.valor === movil.destino)?.pista}</p>
+      <p className="mb-2 text-center text-xs text-neutral-500">{DESTINOS.find((d) => d.valor === movil.destino)?.pista}</p>
+      <p className="mb-4 flex items-center justify-center gap-1 text-xs text-neutral-500" data-prueba="motor" data-vivo={String(motorResidente ?? false)}>
+        <span className={`h-2 w-2 rounded-full ${motorResidente ? 'bg-emerald-500' : motorResidente === false ? 'bg-neutral-400' : 'bg-amber-400 animate-pulse'}`} />
+        {motorResidente === undefined ? 'comprobando el motor…' : motorResidente ? 'motor listo: cada frase tarda menos de un segundo' : 'motor arrancando por frase: unos 3 segundos cada una'}
+      </p>
 
       <div className="mb-3 flex items-center gap-2">
         <select

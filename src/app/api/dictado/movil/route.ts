@@ -11,60 +11,17 @@
  * constante; sin token configurado, 503 y nada corre. C4: el audio va a un temporal que se
  * borra SIEMPRE, no se guarda ni sale de esta maquina; ningun error lleva texto ni rutas.
  */
-import { execFile, spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { promisify } from 'node:util';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { rechazoSinToken as conAuth } from '@/shared/lib/token-dictado';
+import { pegaEnPc, picoDb, razonSinTexto, transcribeRapido } from '@/shared/lib/transcriptor-local';
 
-const ejecuta = promisify(execFile);
-/**
- * La raíz de `tools/dictado` se arma con template strings, NO con `path.join` de literales:
- * Turbopack convierte un `join('...','tools','dictado')` en una referencia de directorio y
- * rastrea ese árbol como assets — tropieza con el symlink roto del venv de Python del banco.
- * El route invoca el CLI por ruta en runtime; no importa nada de ahí. DICTADO_RAIZ lo overridea.
- */
-const RAIZ_DICTADO = process.env['DICTADO_RAIZ'] ?? `${process.cwd()}/tools/dictado`;
-const CLI = `${RAIZ_DICTADO}/dist/node/cli.js`;
-const BANCO = `${RAIZ_DICTADO}/medicion/banco`;
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024; // ~15 MB: minutos de opus, de sobra para una frase
 
 const esquemaDestino = z.enum(['pc', 'pantalla', 'ambos']);
-
-const entorno = () => ({
-  ...process.env,
-  DICTADO_MODELOS: process.env['DICTADO_MODELOS'] ?? join(BANCO, 'modelos'),
-  DICTADO_RUNTIME: process.env['DICTADO_RUNTIME'] ?? BANCO,
-  DICTADO_DATOS: process.env['DICTADO_DATOS'] ?? join(BANCO, 'datos'),
-});
-
-/**
- * Nivel pico del audio recibido, en dBFS, con ffmpeg (`volumedetect`). Sirve para que un
- * «sin voz» diga POR QUE: grabacion muda (microfono equivocado o silenciado en el navegador)
- * vs audio con sonido pero sin habla clara. -Infinity si no hay pista o ffmpeg no puede.
- */
-function picoDbDelAudio(ruta: string): Promise<number> {
-  return new Promise((resuelve) => {
-    execFile('ffmpeg', ['-hide_banner', '-i', ruta, '-af', 'volumedetect', '-f', 'null', '-'], (_err, _stdout, stderr) => {
-      const m = /max_volume:\s*(-?\d+(?:\.\d+)?)\s*dB/.exec(stderr ?? '');
-      resuelve(m ? Number(m[1]) : -Infinity);
-    });
-  });
-}
-
-/** El texto viaja por stdin: comillas y saltos de linea no pelean con la shell. */
-function pegaEnPc(texto: string): Promise<void> {
-  return new Promise((resuelve, rechaza) => {
-    const hijo = spawn(process.execPath, [CLI, 'pega'], { env: entorno(), cwd: RAIZ_DICTADO, stdio: ['pipe', 'ignore', 'ignore'] });
-    hijo.on('error', rechaza);
-    hijo.on('close', (codigo) => (codigo === 0 ? resuelve() : rechaza(new Error('el pegado fallo'))));
-    hijo.stdin.write(texto);
-    hijo.stdin.end();
-  });
-}
 
 export function GET(peticion: NextRequest): NextResponse {
   return conAuth(peticion) ?? NextResponse.json({ emparejado: true });
@@ -82,25 +39,16 @@ export async function POST(peticion: NextRequest): Promise<NextResponse> {
   try {
     const ruta = join(carpeta, 'toma.audio');
     await writeFile(ruta, audio);
-    const t0 = performance.now();
-    const { stdout } = await ejecuta(process.execPath, [CLI, 'archivo', ruta, '--motor', 'parakeet'], { env: entorno(), cwd: RAIZ_DICTADO, timeout: 60_000 });
-    const ms = Math.round(performance.now() - t0);
-    const texto = stdout.trim();
-    if (texto.length === 0) {
+    const r = await transcribeRapido(ruta);
+    if (r.texto.length === 0) {
       // Diagnostico: distinguir grabacion muda de audio-sin-habla, para que el aviso sea util.
-      const pico = await picoDbDelAudio(ruta);
-      const razon =
-        audio.length < 2_000
-          ? 'no se grabo audio (revisa el permiso de microfono del navegador)'
-          : pico < -50
-            ? 'el microfono no capto voz: en Windows revisa QUE microfono usa el navegador y su nivel'
-            : 'sin voz clara en la toma (acercate al microfono y habla al terminar de tocar)';
-      return NextResponse.json({ texto: '', ms, destino, razon, bytes: audio.length, picoDb: Number.isFinite(pico) ? Math.round(pico) : null });
+      const pico = await picoDb(ruta);
+      return NextResponse.json({ texto: '', ms: r.ms, destino, via: r.via, razon: razonSinTexto(audio.length, pico), bytes: audio.length, picoDb: Number.isFinite(pico) ? Math.round(pico) : null });
     }
     if (destino === 'pc' || destino === 'ambos') {
-      await pegaEnPc(texto);
+      await pegaEnPc(r.texto);
     }
-    return NextResponse.json({ texto, ms, destino, bytes: audio.length });
+    return NextResponse.json({ texto: r.texto, ms: r.ms, msMotor: r.msMotor, via: r.via, motor: r.motor, destino, bytes: audio.length });
   } catch {
     return NextResponse.json({ error: 'no se pudo transcribir' }, { status: 500 });
   } finally {

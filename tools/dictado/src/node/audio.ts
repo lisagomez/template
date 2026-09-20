@@ -22,6 +22,12 @@ export interface OpcionesCaptura {
    * con eso el VAD duda y Parakeet toma el espanol por ingles. 0 = tal cual.
    */
   gananciaDb?: number;
+  /**
+   * SOLO pruebas y calibracion: en vez del microfono, ffmpeg lee este archivo a tiempo real
+   * (`-re`) y lo entrega como si fuera la captura. Mismo VAD, mismo motor, misma maquina de
+   * estados; al acabar el archivo la captura termina, como si el microfono se cerrara.
+   */
+  entrada?: string;
   ffmpeg?: string;
   alRecibir: (muestras: Muestras) => void | Promise<void>;
   alError?: (mensaje: string) => void;
@@ -43,7 +49,8 @@ export function capturaMicrofono(opciones: OpcionesCaptura): Captura {
   // linea de ffmpeg que funciono en vivo el 2026-09-16 es esta, tal cual, y tocarla es sospechoso
   // hasta que se mida con audio grabado (`--graba`).
   const factor = 10 ** ((opciones.gananciaDb ?? 0) / 20);
-  const args = ['-hide_banner', '-loglevel', 'error', '-f', 'pulse', '-i', opciones.dispositivo ?? 'default', '-ac', '1', '-ar', String(hz), '-f', 's16le', '-'];
+  const fuente = opciones.entrada ? ['-re', '-i', opciones.entrada] : ['-f', 'pulse', '-i', opciones.dispositivo ?? 'default'];
+  const args = ['-hide_banner', '-loglevel', 'error', ...fuente, '-ac', '1', '-ar', String(hz), '-f', 's16le', '-'];
   const proceso = spawn(opciones.ffmpeg ?? 'ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
   let resto: Buffer<ArrayBufferLike> = Buffer.alloc(0);
   let detenida = false;

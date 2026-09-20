@@ -1,0 +1,238 @@
+{
+ "fecha": "2026-09-20",
+ "corpus": "./medicion/corpus-propio/sintetico",
+ "motor": "sherpa:nemo-parakeet-tdt-0.6b-v3-int8",
+ "A": {
+  "celular": {
+   "n": 30,
+   "wer": 0.1124,
+   "werCifras": 0.0633,
+   "cer": 0.0749,
+   "p50Ms": 253,
+   "p95Ms": 297
+  },
+  "limpio": {
+   "n": 30,
+   "wer": 0.1095,
+   "werCifras": 0.0512,
+   "cer": 0.0795,
+   "p50Ms": 247,
+   "p95Ms": 312
+  },
+  "ruido": {
+   "n": 30,
+   "wer": 0.0976,
+   "werCifras": 0.0452,
+   "cer": 0.0718,
+   "p50Ms": 267,
+   "p95Ms": 316
+  }
+ },
+ "B": [
+  {
+   "silencioMs": 500,
+   "msRelleno": 100,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 1,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.017
+  },
+  {
+   "silencioMs": 500,
+   "msRelleno": 250,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 500,
+   "msRelleno": 400,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 700,
+   "msRelleno": 100,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 1,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.017
+  },
+  {
+   "silencioMs": 700,
+   "msRelleno": 250,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 700,
+   "msRelleno": 400,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 1000,
+   "msRelleno": 100,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 1,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.017
+  },
+  {
+   "silencioMs": 1000,
+   "msRelleno": 250,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 1000,
+   "msRelleno": 400,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 1500,
+   "msRelleno": 100,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 1,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.017
+  },
+  {
+   "silencioMs": 1500,
+   "msRelleno": 250,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  },
+  {
+   "silencioMs": 1500,
+   "msRelleno": 400,
+   "n": 60,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 0,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0
+  }
+ ],
+ "fantasmas": [
+  {
+   "ruidoDb": -60,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -50,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -45,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -40,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -35,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  }
+ ],
+ "C": {
+  "celular": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "limpio": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "ruido": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  }
+ },
+ "terminos": [
+  "Luis Fernando Ramírez",
+  "Aceros del Norte",
+  "Monterrey",
+  "Supabase",
+  "Hermes",
+  "SaaS Factory",
+  "Guadalajara",
+  "Ana Martínez",
+  "Pedro Aguilar",
+  "Carla",
+  "Cotizapp"
+ ]
+}
