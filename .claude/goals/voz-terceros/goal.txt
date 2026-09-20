@@ -1,0 +1,16 @@
+/goal Construye lo descrito en el spec completo: /home/kyara/code/template/.claude/goals/voz-terceros/spec.md. Leelo ENTERO antes de empezar (y resultados-etapas-0-1.md y post-mortem.md del goal anterior) y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: la voz pasa de «piloto interno medible» a «lista para terceros» (Etapa 2): instalador de un paso (comprueba, descarga solo pesos pineados, deja icono, token y direccion del celular, termina en un diagnostico sin secretos); icono que se actualiza solo; red del celular con dos caminos probados; retencion y borrado; lote de reuniones sobre el demonio. Todo medido; sin cifras del piloto se usan las del corpus sintetico y se dice.
+Libertad tecnica total sobre el como; tools/voz, tools/dictado, tools/asesor-ventas y /laboratorio-voz se extienden, no se reescriben.
+VALIDA: `npm run typecheck && npm run lint && (cd tools/dictado && npm run prueba) && npm run prueba:laboratorio` tras cada cambio grande, output pegado; `npm run validate` antes de cerrar.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- validacion en verde pegada, y `npm run validate` en verde al final
+- instalacion medida en un entorno limpio nombrado: tabla de pasos, quien los hace y su tiempo; <= 6 acciones humanas y < 20 min, o la cifra real y por que; lo que Windows hace a mano, listado
+- salida de `dictado diagnostico` pegada, comprobada sin secretos ni contenido
+- prueba de que el icono refresca su copia al cambiar la version, y la linea del log
+- documento de los dos caminos de red del celular y corrida de captura-movil contra Tailscale con el tiempo de emparejar
+- `historial --borra` y retencion configurable con prueba y salida; documento «que se guarda y donde»
+- tabla antes/despues de mide-reuniones: proceso/duracion (hoy 0,21-0,28x; meta < 0,15x)
+- `npm run empaqueta` de voz, dictado y asesor-ventas en verde, sin publicar
+- casos y piezas del laboratorio que cambiaron de estado; lo que queda para Etapa 3; decisiones; formas en que podria estar mal, resueltas
+RESTRICCIONES: no publicar (firma humana); nada fuera de LAN/Tailscale; solo pesos pineados, sin corpus de medicion; sin LLM ni modelo nuevo sin CDC; Windows+WSL2 es lo que se mide, sin macOS ni GPU; secretos jamas en pantalla; no tocar settings, skills ni prompts; cambio de defecto = propuesta de bitacora para firma; espanol sin jerga.
+RED DE SEGURIDAD: si tras 60 turnos no converges, detente y reporta el bloqueo.
