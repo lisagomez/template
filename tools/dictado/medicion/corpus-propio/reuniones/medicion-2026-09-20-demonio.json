@@ -1,0 +1,93 @@
+{
+ "fecha": "2026-09-20",
+ "motor": "remoto",
+ "umbrales": {
+  "etiquetado": 0.9,
+  "wer": 0.1,
+  "procesoSobreDuracion": 0.15
+ },
+ "filas": [
+  {
+   "reunion": "r1-discovery",
+   "tipo": "discovery",
+   "duracionS": 57.3,
+   "turnosDetectados": 12,
+   "turnosVerdad": 12,
+   "hablantesDetectados": 2,
+   "etiquetadoCorrecto": 1,
+   "wer": 0.027,
+   "procesoMs": 4245,
+   "procesoSobreDuracion": 0.07,
+   "score": 58,
+   "huecos": [
+    "impacto",
+    "proceso_decision",
+    "presupuesto",
+    "competencia"
+   ],
+   "insights": 7,
+   "riesgos": [
+    "proceso_desconocido",
+    "sin_presupuesto"
+   ],
+   "acciones": 2
+  },
+  {
+   "reunion": "r2-demo",
+   "tipo": "demo",
+   "duracionS": 38.4,
+   "turnosDetectados": 8,
+   "turnosVerdad": 8,
+   "hablantesDetectados": 2,
+   "etiquetadoCorrecto": 1,
+   "wer": 0.019,
+   "procesoMs": 2971,
+   "procesoSobreDuracion": 0.08,
+   "score": 30,
+   "huecos": [
+    "problema",
+    "impacto",
+    "proceso_decision",
+    "stakeholders",
+    "presupuesto",
+    "competencia",
+    "proximos_pasos"
+   ],
+   "insights": 4,
+   "riesgos": [
+    "proceso_desconocido",
+    "objecion_sin_respuesta",
+    "discovery_incompleto"
+   ],
+   "acciones": 0
+  },
+  {
+   "reunion": "r3-negociacion",
+   "tipo": "negociacion",
+   "duracionS": 33.6,
+   "turnosDetectados": 8,
+   "turnosVerdad": 8,
+   "hablantesDetectados": 2,
+   "etiquetadoCorrecto": 1,
+   "wer": 0.055,
+   "procesoMs": 2703,
+   "procesoSobreDuracion": 0.08,
+   "score": 45,
+   "huecos": [
+    "problema",
+    "impacto",
+    "urgencia",
+    "proceso_decision",
+    "stakeholders",
+    "presupuesto",
+    "competencia"
+   ],
+   "insights": 6,
+   "riesgos": [
+    "proceso_desconocido",
+    "discovery_incompleto"
+   ],
+   "acciones": 1
+  }
+ ]
+}

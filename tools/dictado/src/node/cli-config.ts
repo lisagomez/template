@@ -8,6 +8,7 @@
  *   DICTADO_PYTHON    python con faster-whisper instalado            (python3)
  *   DICTADO_REMOTO_URL / DICTADO_REMOTO_TOKEN   el servicio de `servicio/`
  */
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -65,7 +66,10 @@ export function leeConfiguracion(opciones: Record<string, string | boolean>): Co
   };
   const datos = texto('datos', 'DICTADO_DATOS', join(homedir(), '.dictado')) as string;
   const modelos = texto('modelos', 'DICTADO_MODELOS', join(datos, 'modelos')) as string;
-  const runtime = texto('runtime', 'DICTADO_RUNTIME');
+  // Sin DICTADO_RUNTIME, los runtimes que dejo `dictado instala` en <datos>/runtime valen: si no,
+  // una maquina recien instalada no encontraba sherpa-onnx (visto al medir en limpio el 2026-09-20).
+  const runtimeInstalado = join(datos, 'runtime');
+  const runtime = texto('runtime', 'DICTADO_RUNTIME') ?? (existsSync(join(runtimeInstalado, 'node_modules')) ? runtimeInstalado : undefined);
   const python = texto('python', 'DICTADO_PYTHON', 'python3') as string;
   const hilos = Number(opciones['hilos'] ?? entorno('DICTADO_HILOS') ?? 8);
   const remoto = { url: texto('url', 'DICTADO_REMOTO_URL'), token: entorno('DICTADO_REMOTO_TOKEN') };
@@ -87,11 +91,13 @@ export const AYUDA = `dictado — hablar y que el texto aparezca donde esta el c
 
   dictado dictar [--modo alternar|manos-libres|pulsar] [--motor parakeet|whisper-turbo|whisper-base|faster-whisper:small|remoto]
                  [--pegar portapapeles|teclear|ninguno] [--tecla [0xA3]] [--tecla-alternar] [--icono] [--icono-puerto 47124] [--respaldo faster-whisper:small] [--ganancia-db 12] [--silencio-ms 1000] [--idioma es]
+  dictado instala [--app <ruta-de-la-app>] [--sin-icono]      maquina nueva en un paso: comprueba, pesos pineados, runtimes, token, icono, diagnostico
+  dictado diagnostico [--json] [--sin-microfono]              version, piezas, microfono, demonio, log y sesiones — sin secretos ni texto dictado
   dictado icono instala | quita                                icono en la barra de Windows que arranca solo al iniciar sesion
   dictado archivo <audio> [--motor ...]                        transcribe un archivo y mide (modo archivo)
   dictado lote <audio> [--hablantes N] [--motor ...]           reunion: turnos por voz + texto por dictado
   dictado di "<texto>" [--voz es_MX-claude-high] [--velocidad 1.1] [--guarda voz.wav] [--altavoz windows|pulse] [--sin-sonido]   el agente habla (Piper local)
-  dictado historial [--busca texto] [--n 20]
+  dictado historial [--busca texto] [--n 20] | --borra [--antes YYYY-MM-DD] --si   (retencion por defecto: DICTADO_RETENCION_DIAS=365)
   dictado diccionario lista | agrega <termino...> | quita <termino>
   dictado snippets lista | agrega "<disparador>" "<expansion>" | quita "<disparador>"
   dictado pega "<texto>"                                       pega un texto donde este el cursor de Windows (o texto por stdin)

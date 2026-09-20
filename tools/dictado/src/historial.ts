@@ -29,6 +29,8 @@ export interface Almacen {
   busca(consulta: string, cuantas: number): Promise<EntradaHistorial[]>;
   actualiza(id: string, texto: string): Promise<EntradaHistorial | undefined>;
   cuenta(): Promise<number>;
+  /** Borra entradas (todas, o las anteriores a una fecha ISO) y devuelve cuantas se fueron. */
+  borra(opciones?: { antesDe?: string }): Promise<number>;
 }
 
 export interface Historial extends Almacen {
@@ -62,7 +64,19 @@ export function almacenEnMemoria(): Almacen {
     async cuenta() {
       return entradas.length;
     },
+    async borra(opciones = {}) {
+      const antes = entradas.length;
+      const quedan = opciones.antesDe ? entradas.filter((e) => e.fecha >= (opciones.antesDe as string)) : [];
+      entradas.length = 0;
+      entradas.push(...quedan);
+      return antes - quedan.length;
+    },
   };
+}
+
+/** Fecha ISO de hace `dias` dias: lo que una retencion por defecto borra al arrancar. */
+export function fechaHaceDias(dias: number, ahora = new Date()): string {
+  return new Date(ahora.getTime() - dias * 86_400_000).toISOString();
 }
 
 export function creaHistorial(almacen: Almacen, diccionario?: Diccionario): Historial {

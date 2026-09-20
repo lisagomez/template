@@ -25,7 +25,20 @@ módulo a módulo y el veredicto están en [`docs/SDD-dictado.md`](../../docs/SD
 
 ```bash
 npm install <ruta>/tools/voz/tu-scope-voz-0.4.0.tgz <ruta>/tools/dictado/tu-scope-dictado-0.1.0.tgz
+npx dictado instala [--app <ruta-de-la-app>] [--sin-icono]   # una máquina nueva, en un paso
+npx dictado diagnostico                                       # lo que se pega en un issue: sin secretos ni texto dictado
 ```
+
+`dictado instala` comprueba Node ≥ 22.18, ffmpeg, el micrófono de WSLg, Windows al alcance y
+el espacio libre; instala los runtimes pineados (`sherpa-onnx-node@1.13.8`,
+`onnxruntime-node@1.30.0`) en `~/.dictado/runtime`; descarga **solo** los pesos pineados que
+hacen falta (Parakeet int8, Silero, WeSpeaker, voz Piper es_MX: ~750 MB, sin el corpus de
+medición ni los Whisper de comparación) en `~/.dictado/modelos`; genera el token del celular
+(y lo deja en `.env.local` de la app con `--app`, sin imprimirlo); deja el icono de Windows; y
+termina con el diagnóstico. Imprime cada paso con quién lo hace y cuánto tardó, y la lista de lo
+que queda a mano (permitir el micrófono, anclar el icono, abrir la dirección en el teléfono, y
+solo por LAN el script de red como administrador). Medido en limpio: ver
+`medicion/corpus-propio/instalacion-<fecha>.md`. No pide administrador.
 
 `@tu-scope/voz` es peer **exacto** (0.4.0) y `onnxruntime-node` / `sherpa-onnx-node` son peers
 **opcionales**: los instala quien use `./node`. El núcleo (`.`) y el cliente remoto (`./remoto`)
@@ -66,8 +79,9 @@ internet. `dictado dictar --icono` lo usa desde una terminal (con `--icono-puert
 cambiar el puerto y `--icono-sin-ayudante` para escuchar sin lanzarlo); `npm run en-vivo` ya
 lo trae en sus flags por defecto. Ojo honesto: «en espera» significa que el audio capturado
 se descarta sin escucharse ni guardarse — igual que con la tecla—; apagar el micrófono del
-todo es «Apagar el dictado». Tras actualizar la herramienta, repite `dictado icono instala`
-(el script se copia a `%LOCALAPPDATA%\dictado\`).
+todo es «Apagar el dictado». Tras actualizar la herramienta no hay que repetir nada: el siguiente arranque del dictado con
+icono compara la versión del script (huella del `.ps1`) con la copia en `%LOCALAPPDATA%\dictado\`
+y la refresca si cambió («icono actualizado en Windows»).
 
 `--tecla` lanza **a la vista** `powershell.exe` con `windows/tecla-global.ps1` (30 líneas:
 sondea una tecla y avisa por `127.0.0.1`; no lee otras teclas ni escribe nada). Sin `--tecla`,
@@ -253,6 +267,20 @@ doce»; el resto son nombres propios), p50 250 ms. El VAD no partió ninguna de 
 de 500 a 1500 ms, no se comió palabras con relleno ≥ 250 ms, y el ruido rosa hasta −35 dBFS no
 abrió ningún turno: los valores por defecto se quedan. La corrección del diccionario no sustituyó
 nada: sigue apagada. **Con voz propia está por medir**: graba las 30 frases y corre `calibra.mjs`.
+
+### 10. Qué se guarda y dónde (y cómo se borra)
+
+| Qué | Dónde | Lleva contenido | Se borra con |
+|---|---|---|---|
+| Historial de dictados (texto, motor, duración, latencia) | `DICTADO_DATOS/historial.jsonl` | **sí** | `dictado historial --borra [--antes YYYY-MM-DD] --si`; retención automática `DICTADO_RETENCION_DIAS` (365 por defecto, 0 = nunca) |
+| Diccionario y snippets | `DICTADO_DATOS/diccionario.txt`, `snippets.json` | sí (nombres, expansiones) | `dictado diccionario quita`, `snippets quita`, o borrar el archivo |
+| Token del celular | `DICTADO_DATOS/movil.token` y `.env.local` de la app | secreto | borrar y volver a `instala` |
+| Trayectorias de sesión | `corpus/salida-dictar-*/trayectoria.json` | **no** (forma) | borrar la carpeta |
+| Audio | nunca, salvo `--graba <carpeta>` (diagnóstico) | sí | borrar la carpeta |
+| Modelos y runtimes | `DICTADO_MODELOS`, `DICTADO_RUNTIME` | no | borrar; `instala` los vuelve a bajar |
+| Logs de `en-vivo` y del demonio | `medicion/banco/*.log` | estado y latencias; las líneas `✓` llevan el texto | borrar; `diagnostico` solo enseña las de estado |
+
+Nada de esto sale de la máquina. El servicio remoto (VPS propio) no escribe audio ni texto.
 
 ## Medición (2026-09-15)
 

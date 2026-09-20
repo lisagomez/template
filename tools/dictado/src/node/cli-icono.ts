@@ -7,7 +7,8 @@
  * del humano: Windows no deja anclar por programa, y esta bien que asi sea.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PUERTO_ICONO } from './icono.js';
@@ -23,13 +24,34 @@ export function carpetaWindows(variable: string): { windows: string; wsl: string
   return { windows, wsl };
 }
 
-/** Copia `icono-barra.ps1` al lado Windows y devuelve su ruta ALLI (para `-File`). */
-export function copiaIconoAWindows(): { windows: string; wsl: string } {
+/** La version del icono es la huella de su script: cambia el .ps1, cambia la version. */
+export function versionDelIcono(rutaPs1 = RUTA_ICONO_PS1): string {
+  return createHash('sha256').update(readFileSync(rutaPs1)).digest('hex').slice(0, 12);
+}
+
+/** Puro: hay que refrescar la copia si no hay version instalada o si difiere de la actual. */
+export function hayQueRefrescarIcono(instalada: string | undefined, actual: string): boolean {
+  return instalada === undefined || instalada.trim() !== actual;
+}
+
+/**
+ * Copia `icono-barra.ps1` al lado Windows SOLO si su version cambio (o no estaba), y deja la
+ * version junto a la copia. Asi, tras actualizar la herramienta, el siguiente `dictar --icono`
+ * refresca el script sin repetir `dictado icono instala`. Devuelve la ruta ALLI (para `-File`).
+ */
+export function copiaIconoAWindows(): { windows: string; wsl: string; refrescado: boolean; version: string } {
   const local = carpetaWindows('LOCALAPPDATA');
   const carpeta = join(local.wsl, 'dictado');
   mkdirSync(carpeta, { recursive: true });
-  copyFileSync(RUTA_ICONO_PS1, join(carpeta, 'icono-barra.ps1'));
-  return { windows: `${local.windows}\\dictado\\icono-barra.ps1`, wsl: join(carpeta, 'icono-barra.ps1') };
+  const rutaVersion = join(carpeta, 'version.txt');
+  const actual = versionDelIcono();
+  const instalada = existsSync(rutaVersion) ? readFileSync(rutaVersion, 'utf8') : undefined;
+  const refrescado = hayQueRefrescarIcono(instalada, actual);
+  if (refrescado) {
+    copyFileSync(RUTA_ICONO_PS1, join(carpeta, 'icono-barra.ps1'));
+    writeFileSync(rutaVersion, actual + '\n');
+  }
+  return { windows: `${local.windows}\\dictado\\icono-barra.ps1`, wsl: join(carpeta, 'icono-barra.ps1'), refrescado, version: actual };
 }
 
 export function ordenIcono(posicionales: readonly string[]): void {
@@ -56,7 +78,7 @@ export function ordenIcono(posicionales: readonly string[]): void {
     console.log(`  un click lo enciende o lo apaga; si el dictado no corre, el click lo arranca.`);
     console.log(`Arrancara solo en cada inicio de sesion (${rutaCmd}).`);
     console.log(`Para tenerlo SIEMPRE visible: arrastra el icono desde la flecha ^ del area de notificacion a la barra.`);
-    console.log(`Tras actualizar la herramienta, repite: dictado icono instala`);
+    console.log(`Tras actualizar la herramienta no hace falta repetir esto: el siguiente arranque del dictado refresca la copia si cambio.`);
     return;
   }
   if (que === 'quita') {

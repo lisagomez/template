@@ -48,6 +48,12 @@ export async function ordenHistorial(config: Configuracion, posicionales: string
   const datos = cargaDatos(config);
   const n = Number(opciones['n'] ?? 20);
   const busca = typeof opciones['busca'] === 'string' ? opciones['busca'] : undefined;
+  if (opciones['borra'] === true) {
+    const antes = typeof opciones['antes'] === 'string' ? new Date(opciones['antes']).toISOString() : undefined;
+    if (opciones['si'] !== true) return console.log(`esto borraria ${antes ? `los dictados anteriores a ${antes.slice(0, 10)}` : 'TODO el historial'} (${await datos.historial.cuenta()} en total). Para hacerlo: dictado historial --borra${antes ? ` --antes ${antes.slice(0, 10)}` : ''} --si`);
+    const borrados = await datos.historial.borra(antes ? { antesDe: antes } : {});
+    return console.log(`borrados ${borrados} dictado(s); quedan ${await datos.historial.cuenta()}`);
+  }
   if (posicionales[0] === 'corrige' && posicionales[1] && posicionales[2]) {
     const r = await datos.historial.corrige(posicionales[1], posicionales.slice(2).join(' '));
     if (!r.entrada) return console.log('no existe esa entrada');
