@@ -28,6 +28,29 @@
 > se volvió accionable. **La lección**: el peak solo no basta; la ESTRUCTURA temporal del RMS
 > (picos y valles) distingue voz de ruido plano, y esa fue la prueba que desempató.
 
+> **La batalla del emparejamiento y el deploy al teléfono (2026-09-20):** llegar desde el
+> celular y emparejar resultó ser lo más difícil, con dos lecciones que valen para todo deploy
+> móvil de esta PWA:
+> 1. **`next dev` (Turbopack) NO hidrata en este entorno**: el WebSocket de HMR fallaba
+>    (`ERR_INVALID_HTTP_RESPONSE`), y sin hidratación NINGÚN efecto de cliente corre — el campo
+>    del token se borraba solo, los botones no respondían, el auto-emparejar no disparaba. El
+>    síntoma engaña porque el SSR pinta la página (parece viva) pero el cliente nunca toma el
+>    control. **Se diagnosticó headless con Playwright**: cero peticiones `/api`, cero
+>    `console.log` de efectos, "sin-react-global". Fix: **para el teléfono se sirve un build de
+>    PRODUCCIÓN** (`next build && next start`), que hidrata bien. Regla: si un efecto "no corre"
+>    y el SSR se ve, sospecha de la hidratación antes que del código.
+> 2. **Teclear 32 hex en iOS es imposible** (el campo se borra solo; Safari es agresivo con
+>    campos tipo credencial). Fix: **emparejamiento por QR** — el token viaja en la URL (`?t=` o
+>    `#t=`; el fragmento no llega al servidor, el query sí pero se acepta porque algún escáner de
+>    cámara no propaga el `#`), la página empareja sola y BORRA el token de la barra con
+>    `history.replaceState` (`src/app/(main)/dictar/page.tsx`).
+> **El deploy que quedó (sin nube, respeta C4):** el servidor corre en la PC; **Tailscale** (en
+> WSL2, con systemd) da al teléfono una URL con **HTTPS válido** (`tailscale serve` →
+> `https://<host>.ts.net/dictar`) desde cualquier lado, sin portproxy, sin abrir firewall, sin
+> certificado autofirmado. El audio sigue transcribiéndose en la PC y pegándose al cursor.
+> S3/Vercel NO sirven: la PWA no es estática, sus rutas transcriben y pegan donde está el mic y
+> el cursor (análisis en la conversación del 2026-09-20).
+
 ## MISIÓN
 
 Que el **celular sea una superficie de dictado de primera clase** de la fábrica, en Android y

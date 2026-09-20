@@ -33,6 +33,15 @@ export default function PaginaDictar() {
 
   useEffect(() => {
     movil.carga();
+    // Emparejamiento por QR: el token viaja en la URL. Se prefiere el FRAGMENTO (#t=), que
+    // nunca se manda al servidor; se acepta tambien el query (?t=) porque algun escaner de
+    // camara no propaga el fragmento. En ambos casos se empareja y se BORRA de la barra al
+    // instante. Evita teclear 32 caracteres en el telefono, donde el campo se borra solo (iOS).
+    const m = /[#?&]t=([^&]+)/.exec(window.location.hash + window.location.search);
+    if (m?.[1]) {
+      void movil.empareja(decodeURIComponent(m[1]));
+      history.replaceState(null, '', window.location.pathname);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
