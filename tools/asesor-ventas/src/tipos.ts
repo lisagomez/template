@@ -124,7 +124,7 @@ export interface ScoreDiscovery {
 }
 
 export interface Accion {
-  id: string; // 'T1', 'T2'... correlativo por reunion
+  id: string; // 'A1', 'A2'... correlativo por reunion (acción)
   reunionId: string;
   tarea: string;
   responsable: string | null;

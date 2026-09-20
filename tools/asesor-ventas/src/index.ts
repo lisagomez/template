@@ -14,6 +14,7 @@
  */
 export { analizarReunion, extraerInsights, calcularScore, extraerAcciones, evaluarRiesgos, mapearStakeholders } from './motor.js';
 export { PLAYBOOKS_DEFAULT, ORDEN_PRIORIDAD, playbookPorTipo } from './playbooks.js';
+export { transcripcionDesdeTurnos, participantesDesdeHablantes, type TurnoDiarizado, type OpcionesDesdeTurnos } from './desde-turnos.js';
 export { ETIQUETA_DIMENSION, UMBRAL_INAUDIBLE } from './tipos.js';
 export type {
   TipoReunion,

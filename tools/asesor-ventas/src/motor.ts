@@ -322,7 +322,7 @@ export function extraerAcciones(reunion: Reunion, transcripcion: Transcripcion):
     if (!LEX.proximoPaso.test(t)) continue;
     const fecha = t.match(LEX.fechaTexto);
     acciones.push({
-      id: `T${acciones.length + 1}`,
+      id: `A${acciones.length + 1}`,
       reunionId: reunion.id,
       tarea: s.texto,
       responsable: s.hablante,
