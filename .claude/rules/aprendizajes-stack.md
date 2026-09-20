@@ -136,3 +136,13 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   se lo lleva.
 - **Aplicar en**: cualquier herramienta que se use desde `scripts/` o desde una sesión.
 
+### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type` declarado
+- **Error**: `node --test scripts/prueba-trayectorias.ts` y la suite del laboratorio de voz
+  imprimían «Module type of file ... is not specified»: Node adivina ESM por la sintaxis. Sale
+  una vez por proceso y nombra el PRIMER archivo sin tipo, así que declararlo solo en `pruebas/`
+  lo movió al `services/*.ts` importado: hay que cubrir todo lo que Node carga.
+- **Fix**: `{ "type": "module" }` en `scripts/package.json` y en `src/package.json`, nada más.
+  En la raíz no: reinterpreta todo `.js` (`postcss.config.js` es CommonJS) y va más allá del
+  aviso. Next sí adapta el `server.js` del standalone al `type` de la raíz (`build/utils.js`),
+  así que ese no es el motivo.
+- **Aplicar en**: cualquier `.ts` o `.js` nuevo que Node corra directo fuera de `tools/`.
