@@ -42,9 +42,12 @@ export interface Transcrito {
   via: ViaTranscripcion;
 }
 
-export async function corre(args: string[], timeoutMs: number): Promise<{ stdout: string; stderr: string }> {
-  return ejecuta(process.execPath, [CLI_DICTADO, ...args], { env: entornoDictado(), cwd: RAIZ_DICTADO, timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024 });
+export async function corre(args: string[], timeoutMs: number, env: NodeJS.ProcessEnv = entornoDictado()): Promise<{ stdout: string; stderr: string }> {
+  return ejecuta(process.execPath, [CLI_DICTADO, ...args], { env, cwd: RAIZ_DICTADO, timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024 });
 }
+
+/** El entorno con el que el CLI usa el demonio como motor «remoto» (127.0.0.1, mismo token). */
+export const entornoRemotoDemonio = (): NodeJS.ProcessEnv => ({ ...entornoDictado(), DICTADO_REMOTO_URL: URL_DEMONIO, DICTADO_REMOTO_TOKEN: process.env['DICTADO_MOVIL_TOKEN'] ?? '' });
 
 let saludCache: { cuando: number; vivo: boolean } | undefined;
 

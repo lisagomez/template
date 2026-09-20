@@ -29,6 +29,7 @@ export { aplicaComandos, aplicaComandosDeTexto, extraeAcciones, type ResultadoCo
 export {
   almacenEnMemoria,
   creaHistorial,
+  fechaHaceDias,
   type Almacen,
   type EntradaHistorial,
   type EntradaNueva,

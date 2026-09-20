@@ -6,7 +6,7 @@
 import { execFile, spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { corre, entornoDictado, transcribeRapido as transcribeRapidoLocal } from '@/shared/lib/transcriptor-local';
+import { corre, entornoDictado, demonioVivo, entornoRemotoDemonio, transcribeRapido as transcribeRapidoLocal } from '@/shared/lib/transcriptor-local';
 import type { MetricasSintesis, Piezas, RespuestaTranscripcion, Segmento } from '../../types/index.ts';
 import { metricasDeSintesis, metricasDeTranscripcion, parseaActa } from '../acta.ts';
 
@@ -55,9 +55,12 @@ export interface OpcionesTiempos {
 export async function transcribeConTiempos(ruta: string, opciones: OpcionesTiempos = {}): Promise<RespuestaTranscripcion> {
   const t0 = performance.now();
   // 500 ms: el defecto de `dictado lote` (entre dos personas el hueco suele ser mayor); 700 dejaba una reunion entera en un turno.
-  const args = ['lote', ruta, '--motor', 'parakeet', '--silencio-ms', String(opciones.silencioMs ?? 500)];
+  // Con el demonio vivo, el lote le manda cada turno (`--motor remoto` en 127.0.0.1): medido el
+  // 2026-09-20, una reunion de 38 s baja de 6,4 s a 3,0 s (0,17× → 0,08× la duracion).
+  const conDemonio = await demonioVivo();
+  const args = ['lote', ruta, '--motor', conDemonio ? 'remoto' : 'parakeet', '--silencio-ms', String(opciones.silencioMs ?? 500)];
   if (opciones.hablantes) args.push('--hablantes', String(opciones.hablantes));
-  const { stdout, stderr } = await corre(args, 900_000);
+  const { stdout, stderr } = await corre(args, 900_000, conDemonio ? entornoRemotoDemonio() : undefined);
   const segmentos = parseaActa(stdout);
   return { texto: segmentos.map((s) => s.texto).filter(Boolean).join(' '), segmentos, ms: Math.round(performance.now() - t0), ...metricasDeTranscripcion(stderr) };
 }

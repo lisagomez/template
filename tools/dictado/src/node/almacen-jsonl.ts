@@ -55,5 +55,14 @@ export function creaAlmacenJsonl(ruta: string): Almacen {
     async cuenta() {
       return (await lee()).length;
     },
+    async borra(opciones = {}) {
+      const entradas = await lee();
+      const quedan = opciones.antesDe ? entradas.filter((e) => e.fecha >= (opciones.antesDe as string)) : [];
+      if (quedan.length !== entradas.length) {
+        await mkdir(dirname(ruta), { recursive: true });
+        await writeFile(ruta, quedan.map((e) => JSON.stringify(e)).join('\n') + (quedan.length ? '\n' : ''), 'utf8');
+      }
+      return entradas.length - quedan.length;
+    },
   };
 }

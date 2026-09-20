@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { creaDictado, type Dictado, type Estado, type EventoDictado, type Modo } from '../dictado.js';
+import { fechaHaceDias } from '../historial.js';
 import { creaPosproceso } from '../posproceso.js';
 import { pareceOtroIdioma } from '../texto/idioma.js';
 import { normalizaParaComparar } from '../texto/normaliza.js';
@@ -219,6 +220,7 @@ function lanzaIconoBarra(puerto: number): void {
   const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
   const distro = process.env['WSL_DISTRO_NAME'] ?? '';
   const copia = copiaIconoAWindows();
+  console.log(gris(copia.refrescado ? `  icono actualizado en Windows (version ${copia.version})` : `  icono al dia (version ${copia.version})`));
   const argumentos = ['/c', 'start', '/b', 'powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', copia.windows, '-Puerto', String(puerto), '-RaizWsl', raiz];
   if (distro) argumentos.push('-Distro', distro);
   const hijo = spawn('cmd.exe', argumentos, { cwd: '/mnt/c', stdio: 'ignore' });
@@ -257,6 +259,12 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
 
   console.log(gris(config.describe()));
   const datos = cargaDatos(config, { corrigePorSimilitud: opciones['corrige-similitud'] === true });
+  /** Retencion del historial: `DICTADO_RETENCION_DIAS` (365 por defecto, la AISIA de Fase 0); 0 = no borrar. */
+  const retencionDias = Number(process.env['DICTADO_RETENCION_DIAS'] ?? 365);
+  if (Number.isFinite(retencionDias) && retencionDias > 0) {
+    const borrados = await datos.historial.borra({ antesDe: fechaHaceDias(retencionDias) });
+    if (borrados > 0) console.log(gris(`historial: ${borrados} dictado(s) de hace mas de ${retencionDias} dias borrados (DICTADO_RETENCION_DIAS)`));
+  }
   const principal = await creaMotor(String(opciones['motor'] ?? 'parakeet'), config, idioma);
   const respaldo = typeof opciones['respaldo'] === 'string' ? await creaMotor(opciones['respaldo'], config, idioma) : undefined;
   const motor = respaldo ? conRespaldo(principal, respaldo, idioma, contadores) : principal;

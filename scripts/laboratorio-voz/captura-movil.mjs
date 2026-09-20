@@ -34,9 +34,10 @@ await captura('m1-sin-emparejar');
 // 2) emparejar por enlace (#t=), como el QR de /dictar: el token se borra de la barra
 // Carga FRESCA: cambiar solo el #hash sobre la misma pagina no vuelve a montar el efecto (como en un telefono, el enlace se abre nuevo).
 await pagina.goto('about:blank');
+const tEmparejar = performance.now();
 await pagina.goto(`${URL_BASE}/laboratorio-voz#t=${encodeURIComponent(token)}`, { waitUntil: 'networkidle' });
 await pagina.waitForFunction(() => !document.querySelector('[data-prueba="emparejar"]'), null, { timeout: 15_000 });
-r.pasos.emparejado = { urlLimpia: !pagina.url().includes('t='), guardado: await pagina.evaluate(() => !!localStorage.getItem('dictado.token')) };
+r.pasos.emparejado = { urlLimpia: !pagina.url().includes('t='), guardado: await pagina.evaluate(() => !!localStorage.getItem('dictado.token')), msEmparejar: Math.round(performance.now() - tEmparejar) };
 await captura('m2-emparejado');
 
 // 3) tocar la tarjeta 1 y usar la muestra
