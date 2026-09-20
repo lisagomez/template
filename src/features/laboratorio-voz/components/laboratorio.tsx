@@ -5,6 +5,7 @@
  * hace falta, el mapa de salas y la exportacion del informe.
  */
 import { useState } from 'react';
+import { QrEmparejar } from '@/features/dictado/components/qr-emparejar';
 import { useLaboratorio } from '../hooks/use-laboratorio.ts';
 import { Emparejar } from './emparejar.tsx';
 import { MapaSalas } from './mapa-salas.tsx';
@@ -57,6 +58,7 @@ export function Laboratorio({ casoAbierto }: { casoAbierto?: number }) {
             </button>
           ) : null}
         </div>
+        <QrEmparejar token={token} ruta="/laboratorio-voz" className="mt-2" />
         {errorServidor ? (
           <div className="mt-3">
             <Aviso tipo="error">{errorServidor}</Aviso>

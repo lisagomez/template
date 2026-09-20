@@ -1,10 +1,16 @@
 'use client';
 
 /** El celular como microfono remoto: la app /dictar, ya construida. Aqui solo se explica y se enlaza. */
+import { useSyncExternalStore } from 'react';
 import { Aviso, Metrica } from '../ui.tsx';
 
+const nada = () => () => {};
+/** La direccion completa solo existe en el navegador: en el servidor se pinta la relativa y se hidrata sin desajuste (React #418). */
+const direccionCompleta = () => `${window.location.origin}/dictar`;
+const direccionServidor = () => '/dictar';
+
 export function PanelCelular({ token }: { token: string | undefined }) {
-  const direccion = typeof window === 'undefined' ? '/dictar' : `${window.location.origin}/dictar`;
+  const direccion = useSyncExternalStore(nada, direccionCompleta, direccionServidor);
   return (
     <div className="space-y-3" data-prueba="panel-celular">
       <div className="grid gap-2 sm:grid-cols-3">

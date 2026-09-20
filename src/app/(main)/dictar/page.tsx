@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from 'react';
 import { BotonDictado } from '@/features/dictado/components/boton-dictado';
+import { QrEmparejar } from '@/features/dictado/components/qr-emparejar';
 import { BotonFlotanteMovil } from '@/features/dictado/components/boton-flotante-movil';
 import { useGrabadora } from '@/features/dictado/hooks/use-grabadora';
 import { useDictadoMovil, type Destino } from '@/features/dictado/store/movil';
@@ -188,7 +189,8 @@ export default function PaginaDictar() {
 
       <BotonFlotanteMovil grabando={grabadora.grabando} transcribiendo={movil.transcribiendo} alTocar={() => void alTocarBoton()} />
 
-      <footer className="mt-10 text-center">
+      <footer className="mt-10 flex flex-col items-center gap-2 text-center">
+        <QrEmparejar token={movil.token} ruta="/dictar" />
         <button type="button" onClick={() => movil.olvida()} className="text-xs text-neutral-400 underline">
           Olvidar emparejamiento
         </button>
