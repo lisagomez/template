@@ -38,10 +38,36 @@ no necesitan ninguno.
 ```bash
 dictado dictar                      # ESPACIO en la terminal: empieza/termina; q: salir
 dictado dictar --tecla              # mantén Ctrl DERECHO para hablar; dos toques = manos libres
-dictado dictar --tecla --tecla-alternar --modo manos-libres --motor faster-whisper:small --ganancia-db 12
-                                    # un toque enciende manos libres, otro lo apaga: lo que funcionó en vivo el 2026-09-16
-npm run en-vivo                     # lo anterior, desatendido y durante toda la sesión (--parar, --estado)
+dictado dictar --tecla --tecla-alternar --icono --modo manos-libres --motor parakeet --respaldo faster-whisper:small
+                                    # un toque (o un click al icono) enciende manos libres, otro lo apaga
+npm run en-vivo                     # lo anterior, desatendido y durante toda la sesión (--parar, --estado);
+                                    # sus flags por defecto son lo que funcionó en vivo el 2026-09-19 (ganancia 0, silencio 1000 ms)
+dictado icono instala               # icono en la barra de Windows: la puerta de entrada sin terminal (abajo)
 ```
+
+#### El icono de la barra (para no tocar una terminal nunca más)
+
+`dictado icono instala` deja un icono en el **área de notificación** de Windows (junto al
+reloj) **y un botón flotante** siempre encima de las ventanas, y ambos arrancan solos en cada
+inicio de sesión. Su color es el estado del dictado — **gris hueco** apagado · **gris** en
+espera · **rojo** ESCUCHANDO · **ámbar** transcribiendo — y un **click** en cualquiera lo
+alterna: uno enciende manos libres, otro lo apaga. Si el dictado no está corriendo, el mismo
+click lo arranca (`npm run en-vivo` por dentro; «arrancando…» mientras cargan los modelos).
+El botón flotante se **arrastra** a donde estorbe menos (recuerda su posición) y se oculta o
+vuelve desde el menú derecho; el icono de la barra se hace siempre-visible arrastrándolo desde
+la flecha `^`. `dictado icono quita` lo desinstala, y el menú derecho trae «Apagar el dictado»
+(para también el motor y el micrófono), «Mostrar/ocultar el botón flotante» y «Quitar este
+icono».
+
+Por dentro es el mismo patrón que la tecla: `windows/icono-barra.ps1` (legible en un minuto)
+manda la palabra `alternar` por TCP a `127.0.0.1:47124` y se colorea con las líneas
+`estado <nombre>` que el dictado le publica. No lee el teclado, no escribe nada y no sale a
+internet. `dictado dictar --icono` lo usa desde una terminal (con `--icono-puerto` para
+cambiar el puerto y `--icono-sin-ayudante` para escuchar sin lanzarlo); `npm run en-vivo` ya
+lo trae en sus flags por defecto. Ojo honesto: «en espera» significa que el audio capturado
+se descarta sin escucharse ni guardarse — igual que con la tecla—; apagar el micrófono del
+todo es «Apagar el dictado». Tras actualizar la herramienta, repite `dictado icono instala`
+(el script se copia a `%LOCALAPPDATA%\dictado\`).
 
 `--tecla` lanza **a la vista** `powershell.exe` con `windows/tecla-global.ps1` (30 líneas:
 sondea una tecla y avisa por `127.0.0.1`; no lee otras teclas ni escribe nada). Sin `--tecla`,

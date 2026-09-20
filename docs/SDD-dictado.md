@@ -72,7 +72,7 @@ existe en `dictado` 0.1, y se dice por qué.
 | `core/transform.py` (66) | Option+N: transformaciones fijas por LLM | **descartado** | misma razón |
 | `core/focus_mode.py` (116) | bloquear apps que distraen (NSWorkspace) | **descartado** | macOS-only, y no es dictado |
 | `core/relaunch.py` (54) | relanzar el `.app` | **descartado** | no hay app |
-| `ui/*` (1 866: píldora, hub, visualizador, ajustes, punto rojo) | PyQt6 + Cocoa | **descartado** | sin GUI: la terminal pinta estado, nivel del micrófono en dBFS y cada texto con su latencia |
+| `ui/*` (1 866: píldora, hub, visualizador, ajustes, punto rojo) | PyQt6 + Cocoa | **sustituido (mínimo), 2026-09-19** | `windows/icono-barra.ps1`: icono en el área de notificación + botón flotante arrastrable (la «píldora»), WinForms en un PowerShell legible — estado por color, un click alterna, protocolo TCP de una palabra (`icono.ts`). La TUI sigue para la terminal |
 | `web/server.py` (190) | hub Flask en `:5678` | **descartado** | `dictado historial [--busca]` cubre buscar y copiar |
 
 **Cuenta:** 8 portados, 8 sustituidos, 7 descartados (23 filas: `ui/` va junta). Lo portado literal (reglas de comandos,
@@ -211,8 +211,10 @@ de terceros es opción por defecto ni está escrita.
 - **Modo comando y transformaciones** (§2): piden un modelo de texto. El enchufe (`Limpiador`)
   existe; el proveedor no. Cuando haya uno local (o una decisión C4 escrita para uno remoto),
   es una tarde de trabajo.
-- **GUI**: píldora flotante, hub, visualizador. Una TUI en la terminal basta para el caso de
-  uso (dictar a Claude Code); una ventana de Windows sería otro ayudante PowerShell/WinForms.
+- **GUI** *(cerrado el 2026-09-19)*: la «ventana de Windows como otro ayudante
+  PowerShell/WinForms» que este punto anticipaba ya existe — `windows/icono-barra.ps1` (icono
+  de barra + botón flotante, sensor `--icono`). El hub y el visualizador siguen fuera: la TUI
+  y el historial (`dictado historial`) los cubren.
 - **Streaming parcial** (texto mientras hablas): Parakeet TDT en sherpa-onnx es *offline*; hay
   variantes streaming (Zipformer) sin español bueno. Con <!-- LAT_PARAKEET -->~350-600 ms<!-- /LAT_PARAKEET --> de latencia por frase
   no hizo falta.
@@ -233,3 +235,14 @@ de terceros es opción por defecto ni está escrita.
 | Un peer opcional ausente pasa por probado | el empaquetador lo dice («sin probar: falta el peer») y el README lo explica |
 | El helper de Windows hace más de lo que dice | es un archivo de 30 líneas, se lanza a la vista, sondea una tecla y no escribe nada |
 | El hijo Python muere y nadie se entera hasta el tope | el arranque falla al instante con las últimas líneas de stderr (prueba `node.ts`) |
+
+**Añadidos del 2026-09-19** (todos vividos en la sesión en vivo del icono, ninguno teórico):
+
+| Riesgo | Qué se hizo |
+|---|---|
+| El micrófono satura y las palabras salen rotas en cualquier motor | los +12 dB de ganancia eran de OTRA máquina: `en-vivo` baja a 0 dB, y el log avisa en las dos puntas (`avisoPico`: «SATURANDO» > -3 dBFS, «apenas te oye» < -45) |
+| El VAD abre turnos sobre ruido casi inaudible y el motor alucina («All means» a -86 dBFS) | puerta de energía (`conPuertaDeEnergia`): sin una ventana de 30 ms sobre -45 dBFS, el turno no llega al motor |
+| Una muletilla de 0,3 s se pega en medio del dictado | turnos que son SOLO muletilla («uh», «eh», «mmm»…) se descartan |
+| ffmpeg muere («Error during demuxing» del pulse de WSLg) y el dictado queda vivo y sordo | si la captura termina, el dictado **se apaga entero**: el icono pasa a gris y un click lo rearranca |
+| El icono no nota que el dictado murió (TCP no avisa: `DataAvailable` falso, `.Connected` miente) | EOF por `Poll(SelectRead) + Available == 0` y reintento cada 2 s: el icono sobrevive a la vida y muerte del pipeline |
+| El script entero por `-EncodedCommand` revienta el límite de 8 191 caracteres de cmd.exe | el icono va por `-File` sobre una copia en `%LOCALAPPDATA%\dictado\`, refrescada en cada lanzamiento |

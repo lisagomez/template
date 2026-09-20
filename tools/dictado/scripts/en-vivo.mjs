@@ -7,9 +7,10 @@
  *   npm run en-vivo -- --parar  para el dictado, su motor Python y el ayudante de Windows
  *   npm run en-vivo -- --estado  ultimas lineas utiles del log
  *
- * No pega nada hasta que se toque Ctrl derecho (un toque enciende manos libres, otro lo apaga).
- * Los flags se cambian con DICTADO_FLAGS; los modelos y runtimes salen del banco de medicion
- * salvo que DICTADO_MODELOS / DICTADO_RUNTIME / DICTADO_PYTHON digan otra cosa.
+ * No pega nada hasta que se toque Ctrl derecho o el icono de la barra (un toque/click enciende
+ * manos libres, otro lo apaga). Los flags se cambian con DICTADO_FLAGS; los modelos y runtimes
+ * salen del banco de medicion salvo que DICTADO_MODELOS / DICTADO_RUNTIME / DICTADO_PYTHON
+ * digan otra cosa.
  */
 import { spawn, execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
@@ -20,10 +21,22 @@ const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const banco = join(raiz, 'medicion', 'banco');
 const log = join(banco, 'en-vivo.log');
 const pidArchivo = join(banco, 'en-vivo.pid');
-const FLAGS = (process.env.DICTADO_FLAGS ?? '--modo manos-libres --silencio-ms 700 --tecla --tecla-alternar --motor faster-whisper:small --ganancia-db 12').split(/\s+/).filter(Boolean);
+/**
+ * Motor: parakeet manda (WER 3,3 %, p50 532 ms en la tabla del README; en vivo el 2026-09-19
+ * faster-whisper:small solo daba 1,4-6,9 s por frase y alucinaba «¡Suscríbete!» en turnos con
+ * ruido) y faster-whisper:small queda de RESPALDO para las frases cortas que Parakeet oye en
+ * ingles — la combinacion que el README ya documentaba.
+ *
+ * Ganancia 0 y silencio 1000: los +12 dB eran para el microfono flojo de la maquina del
+ * 2026-09-16; en la del 2026-09-19 el microfono entra fuerte y con ellos SATURABA (picos a
+ * -0,7 dBFS: palabras rotas en los dos motores). Y 700 ms de silencio parte el 6,7 % de las
+ * frases (tabla del VAD); 1000 ms, el 0,7 %. Si tu microfono entra flojo (pico < -45 dBFS en
+ * el log), devuelve la ganancia con DICTADO_FLAGS.
+ */
+const FLAGS = (process.env.DICTADO_FLAGS ?? '--modo manos-libres --silencio-ms 1000 --tecla --tecla-alternar --icono --motor parakeet --respaldo faster-whisper:small --ganancia-db 0').split(/\s+/).filter(Boolean);
 
 const limpio = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
-const utiles = () => (existsSync(log) ? limpio(readFileSync(log, 'utf8')).split('\n').filter((l) => /motor |microfono|conectada|desconectada|✓|✗|latencia|pegado |sin voz|pico durante|escuchando|en espera|EADDRINUSE/.test(l)) : []);
+const utiles = () => (existsSync(log) ? limpio(readFileSync(log, 'utf8')).split('\n').filter((l) => /motor |microfono|conectada|desconectada|icono|✓|✗|latencia|pegado |sin voz|pico durante|escuchando|en espera|EADDRINUSE/.test(l)) : []);
 
 function vivo() {
   try {
@@ -45,7 +58,7 @@ function parar() {
 async function arranca() {
   const previo = vivo();
   if (previo) {
-    console.log(`el dictado ya esta escuchando (pid ${previo}). Un toque de Ctrl derecho enciende manos libres; otro lo apaga.`);
+    console.log(`el dictado ya esta escuchando (pid ${previo}). Un toque de Ctrl derecho o un click al icono de la barra enciende manos libres; otro lo apaga.`);
     return;
   }
   parar(); // por si quedo un ayudante huerfano ocupando el puerto
@@ -65,9 +78,9 @@ async function arranca() {
   while (Date.now() - inicio < 40_000) {
     await new Promise((r) => setTimeout(r, 1000));
     const lineas = utiles();
-    if (lineas.some((l) => l.includes('tecla global conectada'))) {
-      for (const l of lineas.filter((x) => /motor |microfono|conectada/.test(x))) console.log(l.trim());
-      console.log(`escuchando (pid ${hijo.pid}). Un toque de Ctrl derecho enciende manos libres; otro lo apaga. Log: ${log}`);
+    if (lineas.some((l) => l.includes('tecla global conectada') || l.includes('icono conectado'))) {
+      for (const l of lineas.filter((x) => /motor |microfono|conectada|icono conectado/.test(x))) console.log(l.trim());
+      console.log(`escuchando (pid ${hijo.pid}). Un toque de Ctrl derecho o un click al icono de la barra enciende manos libres; otro lo apaga. Log: ${log}`);
       return;
     }
     if (lineas.some((l) => l.includes('✗') || l.includes('EADDRINUSE'))) break;

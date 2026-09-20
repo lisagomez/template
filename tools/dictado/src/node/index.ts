@@ -12,4 +12,5 @@ export { creaMotorPorProceso, type MotorPorProceso, type OpcionesMotorProceso } 
 export { creaPegadorWindows, type OpcionesPegadorWindows, type PegadorWindows } from './pegado-windows.js';
 export { creaAlmacenJsonl } from './almacen-jsonl.js';
 export { creaGestosDeTecla, escuchaTecla, type EscuchaTecla, type OpcionesTecla } from './tecla.js';
+export { escuchaIcono, PUERTO_ICONO, type EscuchaIcono, type OpcionesIcono } from './icono.js';
 export { abreAltavozPulse, abreAltavozWindows, creaVozSintetica, habla, type Altavoz, type ModuloSherpaTts, type OpcionesVozSintetica, type ResultadoHabla, type VozSintetica } from './habla.js';
