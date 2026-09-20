@@ -1,12 +1,12 @@
 # AISIA — Asesor de estrategia de ventas por voz (Fase 0: sin LLM)
-> Fecha: 2026-09-20 · Estado: **borrador, pendiente de firma** · Revisión: al añadir cualquier
+> Fecha: 2026-09-20 · Estado: **firmada** · Revisión: al añadir cualquier
 > modelo de lenguaje (Fase 4), al registrar voces de terceros, al conectar un CRM o un canal
 > externo (llamadas en vivo, Zoom/Meet), o tras un incidente.
 
 Control **C4** de `GOBERNANZA.md`. La pregunta: *¿a quién podemos dañar sin que nadie nos
 ataque?* El sistema procesa **las palabras de un tercero** (el prospecto) aunque no llame a
 ningún modelo alojado: por eso existe esta evaluación aunque la Fase 0 sea «solo reglas».
-La redactó el agente como borrador; **la firma es humana y ningún agente la fabrica.**
+La redactó el agente como borrador y la firmó quien decide, en sesión, el 2026-09-20; **la firma es humana y ningún agente la fabrica.**
 
 ## 1. Partes afectadas
 
@@ -55,7 +55,7 @@ La redactó el agente como borrador; **la firma es humana y ningún agente la fa
   remoto solo en VPS propio con token y TLS (C3). Un modelo de lenguaje exige AISIA propia,
   seudonimización o pesos auto-hospedados (Fase 4).
 - **Retención**: audio cero; texto y actas borrables por el vendedor y con caducidad por
-  defecto **[propuesta: 12 meses]**; `historial --borra` (Etapa 2).
+  defecto **12 meses**; `historial --borra` (Etapa 2).
 - **Vía de apelación**: el vendedor edita transcripción, acta y acciones; puede descartar un
   análisis; sus correcciones alimentan el diccionario y sirven para revisar reglas.
 - **Compartir con cuidado**: el acta exportada lleva encabezado de confidencialidad y no se
@@ -69,4 +69,4 @@ La redactó el agente como borrador; **la firma es humana y ningún agente la fa
 consentimiento escrito).** Pasar a Fase 3 (CRM con datos de prospectos reales) o Fase 4 (LLM)
 exige revisar este documento y firmarlo de nuevo.
 
-Firmada por: ____________  Rol: ____________  Fecha: ____________
+Firmada por: **lisagomez**  Rol: responsable del proyecto  Fecha: 2026-09-20

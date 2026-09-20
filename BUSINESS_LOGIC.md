@@ -1,10 +1,10 @@
 # BUSINESS_LOGIC.md — Asesor de estrategia de ventas por voz
 
-> ✍️ **BORRADOR PENDIENTE DE ENTREVISTA Y FIRMA.** Redactado el 2026-09-20 por el agente a
-> partir de las decisiones ya tomadas (plan del asesor, PRs #123-#127, laboratorio de voz).
-> Lo confirma la entrevista **`/new-app`** con quien decide; hasta que esa persona lo firme
-> (fecha y nombre al pie), es una hipótesis contra la que construir el piloto interno, no un
-> contrato. Lo que aquí es supuesto lleva la marca **[supuesto]**.
+> ✅ **Firmado como hipótesis del piloto el 2026-09-20** por quien decide (firma al pie).
+> Redactado por el agente a partir de las decisiones ya tomadas (plan del asesor, PRs
+> #123-#129, laboratorio de voz). Es el contrato contra el que se valida lo que se construya en
+> el piloto interno; lo marcado **[supuesto]** se confirma con las cifras del piloto y la
+> entrevista **`/new-app`** antes de la Etapa 2 (terceros), y entonces se vuelve a firmar.
 
 ---
 
@@ -189,4 +189,4 @@ TypeScript + Tailwind 3.4, Supabase (Auth + DB + RLS), Zod, Zustand, Playwright.
 
 ---
 
-**Firma:** pendiente · Quien decide: ________________ · Fecha: __________
+**Firma:** lisagomez (responsable del proyecto), como hipótesis del piloto · Fecha: 2026-09-20 · Se vuelve a firmar tras la entrevista `/new-app`, antes de la Etapa 2.
