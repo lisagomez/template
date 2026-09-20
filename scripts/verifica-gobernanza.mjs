@@ -168,7 +168,9 @@ if (businessLogic !== null) {
   const pkgTxt = lee('package.json');
   const pkgJson = pkgTxt === null ? null : JSON.parse(pkgTxt);
   const validate = pkgJson?.scripts?.validate ?? '';
-  const pasos = [...validate.matchAll(/npm run ([a-z:]+)/g)].map((m) => m[1]);
+  // `[a-z:-]`: un nombre con guion (`prueba:laboratorio-voz`) se leia truncado y el control
+  // pedia declarar un paso que no existia (medido el 2026-09-20).
+  const pasos = [...validate.matchAll(/npm run ([a-z:-]+)/g)].map((m) => m[1]);
   const docs = ['README.md', 'AGENTS.md', '.claude/README.md']
     .map((d) => leeDoc(d)).filter((t) => t !== null).join('\n');
   const sinDeclarar = pasos.filter((paso) => !docs.includes(paso));

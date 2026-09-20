@@ -102,6 +102,9 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: matar por puerto (`fuser -k 8081/tcp`) o por PID guardado; si hay que usar `pkill`,
   anclar el patrón al inicio (`pkill -f '^node servidor.mjs'`) para que la shell no case.
 - **Aplicar en**: toda limpieza de procesos lanzados desde una sesión.
+- **Reincidió el 2026-09-20** (`pkill -f "next start -H 0.0.0.0 -p 3000"`, exit 144) con esta
+  regla cargada en contexto: la regla se leyó y no se aplicó. Lo que sí funcionó después fue
+  no usar `pkill`: `ss -ltnp | grep :3000` → PID → `kill`.
 
 ### 2026-09-13: `gh pr edit` falla por un aviso de GitHub ajeno al PR
 - **Error**: `gh pr edit N --body-file ...` devuelve `GraphQL: Projects (classic) is being
@@ -109,3 +112,17 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: `gh api -X PATCH repos/<dueña>/<repo>/pulls/N -F body=@archivo`. Crear y mezclar
   con `gh pr create` / `gh pr merge` sigue funcionando.
 - **Aplicar en**: cualquier edición de la descripción de un PR desde una sesión.
+
+### 2026-09-20: Turbopack rastrea como assets el disco que el bundle toca con `fs`
+- **Error**: `next build` reventó con `Symlink [project]/tools/dictado/medicion/banco/venv/bin/python
+  is invalid, it points out of the filesystem root`. La causa no era el symlink: era un
+  `existsSync(join(modelos, ...))` / `readdirSync(modelos)` en un route handler, con rutas
+  derivadas de `process.cwd()` + literales. Turbopack las resuelve en build, sigue el árbol de
+  `banco/` como si fueran assets y tropieza con el venv. La ruta móvil ya lo había documentado
+  para `path.join` de literales; el disparador real es cualquier llamada a `fs` con una ruta
+  que el analizador pueda plegar.
+- **Fix**: el bundle NO toca el disco del banco. Todo sondeo (qué modelos hay, qué voces, leer o
+  escribir datos locales) vive en un script Node aparte (`scripts/laboratorio-voz/maquina.mjs`)
+  que la ruta invoca con `execFile`, igual que al CLI de dictado. Las rutas solo usan `fs` sobre
+  temporales de `mkdtemp`, que el analizador no puede plegar.
+- **Aplicar en**: todo route handler o server component que mire carpetas del repo fuera de `src/`.
