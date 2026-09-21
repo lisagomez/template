@@ -7,8 +7,14 @@
  *    identificador que se devuelve lleva version y cuantizacion.
  *  - **Flujo de datos (C4)**: el audio se procesa en memoria y no se escribe. Los logs no llevan texto.
  *  - **Ningun secreto se imprime**: `describe()` enmascara el token.
+ *  - **Respaldo por idioma, opcional**: `DICTADO_RESPALDO=faster-whisper:small` carga un segundo
+ *    motor (por proceso, con `DICTADO_PYTHON`) que el cliente pide con `x-motor: respaldo` cuando
+ *    el principal oyo ingles en una confirmacion corta («sí» → «Sir», medido el 2026-09-20).
+ *  - **Las voces ya descargadas, nunca bajadas**: `DICTADO_VOCES` (lista separada por comas, p. ej.
+ *    `es_MX-claude-high,es_ES-davefx-medium`) o, sin ella, toda carpeta `vits-piper-*` de
+ *    `DICTADO_MODELOS`. Si no hay ninguna, el servicio arranca sin `/sintetizar` y lo dice.
  */
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -53,6 +59,34 @@ export async function configura() {
     motor = nodo.creaMotorSherpa({ sherpa, carpeta: join(modelos, carpeta), hilos, idioma: env('DICTADO_IDIOMA', 'es') })
   }
 
+  const eleccionRespaldo = env('DICTADO_RESPALDO', null)
+  let respaldo = null
+  if (eleccionRespaldo && eleccionRespaldo.startsWith('faster-whisper')) {
+    const modelo = eleccionRespaldo.split(':')[1] ?? 'small'
+    respaldo = nodo.creaMotorPorProceso({
+      id: `faster-whisper-${modelo}-int8-cpu`,
+      comando: env('DICTADO_PYTHON', 'python3'),
+      argumentos: [join(RAIZ, 'motores-locales', 'motor-faster-whisper.py'), '--modelo', modelo, '--dispositivo', 'cpu', '--hilos', String(hilos), '--raiz-modelos', join(modelos, 'faster-whisper')],
+      admitePista: true,
+    })
+  } else if (eleccionRespaldo) {
+    console.error(`dictado-servicio: respaldo ${eleccionRespaldo} no reconocido (solo faster-whisper:<modelo>); se omite`)
+  }
+
+  // Voces Piper residentes (734 ms de carga cada una, medido el 2026-09-20), en el orden pedido:
+  // la primera es la de defecto. Solo carpetas que EXISTEN; una que falte se avisa y se salta.
+  const pedidas = env('DICTADO_VOCES', null)
+  const carpetasVoz = pedidas === null
+    ? (existsSync(modelos) ? readdirSync(modelos).filter((n) => n.startsWith('vits-piper-')).sort((a, b) => (a.includes('es_MX-claude') ? -1 : b.includes('es_MX-claude') ? 1 : a.localeCompare(b))) : [])
+    : pedidas.split(',').map((v) => v.trim()).filter(Boolean).map((v) => (v.startsWith('vits-piper-') ? v : `vits-piper-${v}`))
+  const voces = new Map()
+  for (const carpeta of carpetasVoz) {
+    if (!existsSync(join(modelos, carpeta))) { console.error(`dictado-servicio: la voz ${carpeta} no esta en ${modelos}; se omite (nunca se descarga desde aqui)`); continue }
+    const sherpa = await importaDesde(runtime, 'sherpa-onnx-node')
+    const voz = nodo.creaVozSintetica({ sherpa, carpeta: join(modelos, carpeta), hilos: Math.min(hilos, 4) })
+    voces.set(carpeta.replace('vits-piper-', ''), voz)
+  }
+
   const tls = env('DICTADO_TLS_CERT', null) && env('DICTADO_TLS_CLAVE', null)
     ? { cert: readFileSync(env('DICTADO_TLS_CERT')), key: readFileSync(env('DICTADO_TLS_CLAVE')) }
     : null
@@ -60,13 +94,16 @@ export async function configura() {
   return {
     token,
     motor,
+    respaldo,
+    voces,
     tls,
     puerto: Number(env('DICTADO_PUERTO', '8090')),
     escucha: env('DICTADO_ESCUCHA', '0.0.0.0'),
     bytesMaximos: Number(env('DICTADO_BYTES_MAXIMOS', String(10 * 1024 * 1024))), // ~5 min de PCM16 a 16 kHz
     enVuelo: Number(env('DICTADO_EN_VUELO', '1')),
+    caracteresMaximos: Number(env('DICTADO_CARACTERES_MAXIMOS', '2000')),
     describe() {
-      return { motor: motor.id, dispositivo, hilos, tls: tls !== null ? 'propio' : 'no (termina en el proxy)', token: `presente (largo ${token.length})`, bytesMaximos: this.bytesMaximos, enVuelo: this.enVuelo }
+      return { motor: motor.id, respaldo: respaldo?.id ?? 'ninguno', dispositivo, hilos, voces: [...voces.keys()], tls: tls !== null ? 'propio' : 'no (termina en el proxy)', token: `presente (largo ${token.length})`, bytesMaximos: this.bytesMaximos, enVuelo: this.enVuelo, caracteresMaximos: this.caracteresMaximos }
     },
   }
 }

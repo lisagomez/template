@@ -13,12 +13,15 @@ import { rechazoSinToken } from '@/shared/lib/token-dictado';
 
 const MAX_AUDIO_BYTES = 200 * 1024 * 1024;
 const esquemaModo = z.enum(['rapido', 'tiempos', 'canales']);
+/** Lista cerrada: el principal (Parakeet) o el respaldo (faster-whisper con idioma forzado), en modo rapido y con tiempos. */
+const esquemaMotor = z.enum(['principal', 'respaldo']);
 const esquemaHablantes = z.coerce.number().int().min(1).max(8);
 
 export async function POST(peticion: NextRequest): Promise<NextResponse> {
   const rechazo = rechazoSinToken(peticion);
   if (rechazo) return rechazo;
   const modo = esquemaModo.catch('rapido').parse(peticion.headers.get('x-modo'));
+  const motor = esquemaMotor.catch('principal').parse(peticion.headers.get('x-motor'));
   const hablantes = esquemaHablantes.safeParse(peticion.headers.get('x-hablantes'));
   const etiquetas = (peticion.headers.get('x-etiquetas') ?? 'Agente,Cliente').split(',').map((e) => e.trim().slice(0, 30) || 'Voz');
   const audio = Buffer.from(await peticion.arrayBuffer());
@@ -33,8 +36,8 @@ export async function POST(peticion: NextRequest): Promise<NextResponse> {
       modo === 'canales'
         ? await transcribePorCanales(ruta, carpeta, [etiquetas[0] ?? 'Agente', etiquetas[1] ?? 'Cliente'])
         : modo === 'tiempos'
-          ? await transcribeConTiempos(ruta, hablantes.success ? { hablantes: hablantes.data } : {})
-          : await transcribeRapido(ruta);
+          ? await transcribeConTiempos(ruta, { ...(hablantes.success ? { hablantes: hablantes.data } : {}), motor })
+          : await transcribeRapido(ruta, motor);
     if (r.texto.length === 0) return NextResponse.json({ ...r, razon: razonSinTexto(audio.length, await picoDb(ruta)) });
     return NextResponse.json(r);
   } catch {

@@ -33,33 +33,12 @@ const { wer: werCrudo, cer, percentil, creaDiccionario, normalizaParaComparar } 
 /**
  * El motor escribe cifras («3412», «12 %») y las referencias dictadas las llevan en palabras
  * («tres mil cuatrocientos doce»): sin igualarlas, el WER cuenta como error lo que un lector no
- * notaria. Se comparan las dos formas: crudo (como sale) y con numeros en cifras.
+ * notaria. La gramatica es la MISMA que usa el picking (`texto/numeros.ts`); aqui vivia una copia.
  */
-const UNIDADES = { cero: 0, un: 1, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15, dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20, veintiun: 21, veintiuno: 21, veintidos: 22, veintitres: 23, veinticuatro: 24, veinticinco: 25, veintiseis: 26, veintisiete: 27, veintiocho: 28, veintinueve: 29 };
-const DECENAS = { treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90 };
-const CENTENAS = { cien: 100, ciento: 100, doscientos: 200, trescientos: 300, cuatrocientos: 400, quinientos: 500, seiscientos: 600, setecientos: 700, ochocientos: 800, novecientos: 900 };
-const sinAcentos = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-function numerosACifras(texto) {
-  const tokens = sinAcentos(texto.toLowerCase()).replace(/[^a-z0-9ñ%\s]/g, ' ').split(/\s+/).filter(Boolean);
-  const salida = [];
-  let i = 0;
-  while (i < tokens.length) {
-    let j = i, total = 0, parcial = 0, visto = false;
-    while (j < tokens.length) {
-      const t = tokens[j];
-      if (t === 'mil' && (visto || j === i)) { total += (parcial || 1) * 1000; parcial = 0; visto = true; j++; continue; }
-      if (CENTENAS[t] !== undefined) { parcial += CENTENAS[t]; visto = true; j++; continue; }
-      if (DECENAS[t] !== undefined) { parcial += DECENAS[t]; visto = true; j++; if (tokens[j] === 'y' && UNIDADES[tokens[j + 1]] !== undefined) { parcial += UNIDADES[tokens[j + 1]]; j += 2; } continue; }
-      if (UNIDADES[t] !== undefined && !(t === 'un' || t === 'una' || t === 'uno')) { parcial += UNIDADES[t]; visto = true; j++; continue; }
-      break;
-    }
-    if (visto) { salida.push(String(total + parcial)); i = j; } else { salida.push(tokens[i]); i++; }
-  }
-  return salida.join(' ').replace(/(\d+) por ciento/g, '$1 %').replace(/(\d+)\s*%/g, '$1 %');
-}
+const { numerosACifras } = nucleo;
 const werCifras = (ref, hip) => werCrudo(numerosACifras(ref), numerosACifras(hip));
 
-const archivos = readdirSync(corpus).filter((n) => /^[a-z]+-\d+\.wav$/.test(n)).sort();
+const archivos = readdirSync(corpus).filter((n) => /^[a-z0-9]+-\d+\.wav$/.test(n)).sort(); // «snr10-01.wav» tambien es una condicion
 const condiciones = [...new Set(archivos.map((n) => n.split('-')[0]))];
 const referenciaDe = (nombre) => frases[Number(nombre.match(/-(\d+)\.wav$/)[1]) - 1];
 console.log(`corpus: ${archivos.length} archivos · condiciones: ${condiciones.join(', ')} · ${frases.length} frases de referencia`);
@@ -90,6 +69,7 @@ for (const c of condiciones) {
 }
 
 // ---------- B) VAD: cierre por silencio y relleno; puerta de energia ----------
+const CONDICIONES_VAD = ['limpio', 'ruido', 'snr10', 'snr00', 'almacen'];
 const ort = await motores.cargaOrt(config);
 const rutaVad = join(config.modelos, 'silero_vad.onnx');
 const B = [];
@@ -97,7 +77,8 @@ const picoDb = (m) => { let max = -Infinity; const v = Math.max(1, Math.round(16
 for (const silencioMs of [500, 700, 1000, 1500]) {
   for (const msRelleno of [100, 250, 400]) {
     let partidas = 0, sinVoz = 0, comidas = 0, total = 0;
-    for (const c of ['limpio', 'ruido']) {
+    // El barrido del VAD se acota a las condiciones que lo ponen a prueba (el resto solo repite la cifra de A).
+    for (const c of condiciones.filter((x) => CONDICIONES_VAD.includes(x))) {
       for (const n of archivos.filter((x) => x.startsWith(`${c}-`))) {
         const a = audios.get(n);
         const det = await nodo.creaDetectorSilero({ ort, rutaModelo: rutaVad, msSilencioParaCerrar: silencioMs, msRelleno });
@@ -133,6 +114,19 @@ for (const nivelDb of [-60, -50, -45, -40, -35]) {
   console.log(`B energia: ruido a ${nivelDb} dBFS → el VAD abre ${turnos.length} turno(s); pasan la puerta: ${JSON.stringify(porUmbral)}`);
 }
 
+// ruido de campo SIN voz (`<condicion>-sinvoz.wav`, de fabrica-corpus --campo): ¿abre turnos el VAD? ¿los pasa la puerta?
+for (const n of readdirSync(corpus).filter((x) => /^[a-z]+-sinvoz\.wav$/.test(x)).sort()) {
+  const a = await nodo.leeAudio(join(corpus, n));
+  const det = await nodo.creaDetectorSilero({ ort, rutaModelo: rutaVad, msSilencioParaCerrar: 1000 });
+  const eventos = [...(await det.procesa(a.muestras)), ...(await det.cierra())];
+  const turnos = eventos.filter((e) => e.tipo === 'finHabla').map((e) => e.turno);
+  const porUmbral = {};
+  for (const umbral of [-60, -50, -45, -40]) porUmbral[umbral] = turnos.filter((t) => picoDb(t.audio) >= umbral).length;
+  const etiqueta = `${n.replace('-sinvoz.wav', '')} sin voz (${picoDb(a.muestras).toFixed(0)} dBFS pico)`;
+  fantasmas.push({ ruidoDb: etiqueta, turnosVad: turnos.length, pasanPorUmbral: porUmbral });
+  console.log(`B energia: ${etiqueta} → el VAD abre ${turnos.length} turno(s); pasan la puerta: ${JSON.stringify(porUmbral)}`);
+}
+
 // ---------- C) correccion por similitud del diccionario ----------
 const terminos = ['Luis Fernando Ramírez', 'Aceros del Norte', 'Monterrey', 'Supabase', 'Hermes', 'SaaS Factory', 'Guadalajara', 'Ana Martínez', 'Pedro Aguilar', 'Carla', 'Cotizapp'];
 const C = {};
@@ -154,6 +148,6 @@ await motor.cierra?.();
 const fecha = new Date().toISOString().slice(0, 10);
 const resultado = { fecha, corpus: corpus.replace(raiz, '.'), motor: motor.id, A, B, fantasmas, C, terminos };
 writeFileSync(join(salida, `calibracion-${fecha}.json`), JSON.stringify(resultado, null, 1));
-const md = [`# Calibración sobre corpus propio — ${fecha}`, '', `Corpus: \`${resultado.corpus}\` (${archivos.length} archivos, ${condiciones.length} condiciones) · motor \`${motor.id}\``, '', '## A · Precisión y latencia por condición', '', '| condición | n | WER crudo | WER con cifras igualadas | CER | p50 | p95 |', '|---|---|---|---|---|---|---|', ...condiciones.map((c) => `| ${c} | ${A[c].n} | ${(A[c].wer * 100).toFixed(1)} % | ${(A[c].werCifras * 100).toFixed(1)} % | ${(A[c].cer * 100).toFixed(1)} % | ${A[c].p50Ms} ms | ${A[c].p95Ms} ms |`), '', 'WER crudo compara palabra a palabra tal como sale del motor; «con cifras igualadas» convierte los números en palabras de ambas partes a cifras («tres mil cuatrocientos doce» = «3412»), que es lo que un lector considera correcto. El resto de errores son nombres propios y jerga (los términos del diccionario).', '', '## B · VAD: cierre por silencio y relleno (limpio + ruido)', '', '| cierre | relleno | frases partidas | sin voz | con palabras comidas |', '|---|---|---|---|---|', ...B.map((b) => `| ${b.silencioMs} ms | ${b.msRelleno} ms | ${b.partidas}/${b.n} (${(b.fraccionPartidas * 100).toFixed(1)} %) | ${b.sinVoz} | ${b.comidas} (${(b.fraccionComidas * 100).toFixed(1)} %) |`), '', '### Puerta de energía: turnos fantasma sobre ruido sin voz (6 s de ruido rosa)', '', '| ruido | turnos que abre el VAD | pasan −60 | pasan −50 | pasan −45 | pasan −40 |', '|---|---|---|---|---|---|', ...fantasmas.map((f) => `| ${f.ruidoDb} dBFS | ${f.turnosVad} | ${f.pasanPorUmbral[-60]} | ${f.pasanPorUmbral[-50]} | ${f.pasanPorUmbral[-45]} | ${f.pasanPorUmbral[-40]} |`), '', '## C · Corrección por similitud del diccionario', '', `Términos: ${terminos.join(', ')}`, '', '| condición | archivos con sustitución | mejora | empeora | igual |', '|---|---|---|---|---|', ...condiciones.map((c) => `| ${c} | ${C[c].archivosConSustitucion} | ${C[c].mejora} | ${C[c].empeora} | ${C[c].igual} |`), ''].join('\n');
+const md = [`# Calibración sobre corpus propio — ${fecha}`, '', `Corpus: \`${resultado.corpus}\` (${archivos.length} archivos, ${condiciones.length} condiciones) · motor \`${motor.id}\``, '', '## A · Precisión y latencia por condición', '', '| condición | n | WER crudo | WER con cifras igualadas | CER | p50 | p95 |', '|---|---|---|---|---|---|---|', ...condiciones.map((c) => `| ${c} | ${A[c].n} | ${(A[c].wer * 100).toFixed(1)} % | ${(A[c].werCifras * 100).toFixed(1)} % | ${(A[c].cer * 100).toFixed(1)} % | ${A[c].p50Ms} ms | ${A[c].p95Ms} ms |`), '', 'WER crudo compara palabra a palabra tal como sale del motor; «con cifras igualadas» convierte los números en palabras de ambas partes a cifras («tres mil cuatrocientos doce» = «3412»), que es lo que un lector considera correcto. El resto de errores son nombres propios y jerga (los términos del diccionario).', '', `## B · VAD: cierre por silencio y relleno (${condiciones.filter((x) => CONDICIONES_VAD.includes(x)).join(' + ')})`, '', '| cierre | relleno | frases partidas | sin voz | con palabras comidas |', '|---|---|---|---|---|', ...B.map((b) => `| ${b.silencioMs} ms | ${b.msRelleno} ms | ${b.partidas}/${b.n} (${(b.fraccionPartidas * 100).toFixed(1)} %) | ${b.sinVoz} | ${b.comidas} (${(b.fraccionComidas * 100).toFixed(1)} %) |`), '', '### Puerta de energía: turnos fantasma sobre ruido sin voz (6 s de ruido rosa)', '', '| ruido | turnos que abre el VAD | pasan −60 | pasan −50 | pasan −45 | pasan −40 |', '|---|---|---|---|---|---|', ...fantasmas.map((f) => `| ${typeof f.ruidoDb === 'number' ? `${f.ruidoDb} dBFS` : f.ruidoDb} | ${f.turnosVad} | ${f.pasanPorUmbral[-60]} | ${f.pasanPorUmbral[-50]} | ${f.pasanPorUmbral[-45]} | ${f.pasanPorUmbral[-40]} |`), '', '## C · Corrección por similitud del diccionario', '', `Términos: ${terminos.join(', ')}`, '', '| condición | archivos con sustitución | mejora | empeora | igual |', '|---|---|---|---|---|', ...condiciones.map((c) => `| ${c} | ${C[c].archivosConSustitucion} | ${C[c].mejora} | ${C[c].empeora} | ${C[c].igual} |`), ''].join('\n');
 writeFileSync(join(salida, `calibracion-${fecha}.md`), md);
 console.log(`\nescrito ${join(salida, `calibracion-${fecha}.md`)}`);

@@ -50,7 +50,11 @@ await capturaMicrofono({
 ```
 
 Sin modelos: `creaDetectorVoz({ modelo: modeloEnergia() })`. Vale con auriculares y audio
-limpio; en una sala con ruido, falla — usa Silero.
+limpio; en una sala con ruido, falla — usa Silero. Con ruido de fondo CONTINUO (un ventilador,
+ruido rosa) pide `modeloEnergia({ marcosCalibracion: 9 })`: los primeros ~300 ms se toman como
+suelo y solo lo que lo supere por `margenDb` es voz. Sin eso el suelo es el primer marco, y si
+ese marco es silencio digital el ruido abre un turno que nunca cierra (medido en el navegador
+el 2026-09-20: 0/10 interrupciones; con calibración, 10/10 a SNR 8 y 18 dB).
 
 ### 2. Dos canales — hablante sin diarizar
 

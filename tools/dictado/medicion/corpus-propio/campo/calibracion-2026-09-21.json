@@ -1,0 +1,370 @@
+{
+ "fecha": "2026-09-21",
+ "corpus": "./medicion/corpus-propio/campo",
+ "motor": "sherpa:nemo-parakeet-tdt-0.6b-v3-int8",
+ "A": {
+  "almacen": {
+   "n": 30,
+   "wer": 0.0976,
+   "werCifras": 0.0424,
+   "cer": 0.0708,
+   "p50Ms": 234,
+   "p95Ms": 273
+  },
+  "calle": {
+   "n": 30,
+   "wer": 0.1006,
+   "werCifras": 0.0364,
+   "cer": 0.0785,
+   "p50Ms": 224,
+   "p95Ms": 271
+  },
+  "flojo": {
+   "n": 30,
+   "wer": 0.0888,
+   "werCifras": 0.0394,
+   "cer": 0.0621,
+   "p50Ms": 220,
+   "p95Ms": 268
+  },
+  "fuerte": {
+   "n": 30,
+   "wer": 0.1124,
+   "werCifras": 0.0485,
+   "cer": 0.0805,
+   "p50Ms": 224,
+   "p95Ms": 257
+  },
+  "limpio": {
+   "n": 30,
+   "wer": 0.1095,
+   "werCifras": 0.0455,
+   "cer": 0.0795,
+   "p50Ms": 224,
+   "p95Ms": 264
+  },
+  "reverb": {
+   "n": 30,
+   "wer": 0.1213,
+   "werCifras": 0.0606,
+   "cer": 0.081,
+   "p50Ms": 232,
+   "p95Ms": 275
+  },
+  "snr00": {
+   "n": 30,
+   "wer": 0.1805,
+   "werCifras": 0.1242,
+   "cer": 0.1108,
+   "p50Ms": 242,
+   "p95Ms": 277
+  },
+  "snr05": {
+   "n": 30,
+   "wer": 0.1391,
+   "werCifras": 0.0788,
+   "cer": 0.0887,
+   "p50Ms": 235,
+   "p95Ms": 281
+  },
+  "snr10": {
+   "n": 30,
+   "wer": 0.1213,
+   "werCifras": 0.0606,
+   "cer": 0.0805,
+   "p50Ms": 334,
+   "p95Ms": 480
+  },
+  "snr20": {
+   "n": 30,
+   "wer": 0.1124,
+   "werCifras": 0.0545,
+   "cer": 0.0759,
+   "p50Ms": 327,
+   "p95Ms": 421
+  },
+  "taller": {
+   "n": 30,
+   "wer": 0.1124,
+   "werCifras": 0.0515,
+   "cer": 0.0795,
+   "p50Ms": 350,
+   "p95Ms": 420
+  }
+ },
+ "B": [
+  {
+   "silencioMs": 500,
+   "msRelleno": 100,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 500,
+   "msRelleno": 250,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 500,
+   "msRelleno": 400,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 700,
+   "msRelleno": 100,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 700,
+   "msRelleno": 250,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 700,
+   "msRelleno": 400,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 1000,
+   "msRelleno": 100,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 1000,
+   "msRelleno": 250,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 1000,
+   "msRelleno": 400,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 1500,
+   "msRelleno": 100,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 1500,
+   "msRelleno": 250,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  },
+  {
+   "silencioMs": 1500,
+   "msRelleno": 400,
+   "n": 120,
+   "partidas": 0,
+   "sinVoz": 0,
+   "comidas": 6,
+   "fraccionPartidas": 0,
+   "fraccionComidas": 0.05
+  }
+ ],
+ "fantasmas": [
+  {
+   "ruidoDb": -60,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -50,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -45,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -40,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": -35,
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": "calle sin voz (-25 dBFS pico)",
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  },
+  {
+   "ruidoDb": "taller sin voz (-27 dBFS pico)",
+   "turnosVad": 0,
+   "pasanPorUmbral": {
+    "-60": 0,
+    "-50": 0,
+    "-45": 0,
+    "-40": 0
+   }
+  }
+ ],
+ "C": {
+  "almacen": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "calle": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "flojo": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "fuerte": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "limpio": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "reverb": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "snr00": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "snr05": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "snr10": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "snr20": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  },
+  "taller": {
+   "archivosConSustitucion": 0,
+   "mejora": 0,
+   "empeora": 0,
+   "igual": 30
+  }
+ },
+ "terminos": [
+  "Luis Fernando Ramírez",
+  "Aceros del Norte",
+  "Monterrey",
+  "Supabase",
+  "Hermes",
+  "SaaS Factory",
+  "Guadalajara",
+  "Ana Martínez",
+  "Pedro Aguilar",
+  "Carla",
+  "Cotizapp"
+ ]
+}

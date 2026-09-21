@@ -23,6 +23,14 @@ export interface OpcionesEnergia {
   margenDb?: number;
   /** Con que rapidez el suelo de ruido sigue al ambiente. 0 = congelado, 1 = sin memoria. */
   adaptacion?: number;
+  /**
+   * Marcos iniciales que se toman como ruido de fondo, sin decidir: el suelo sale de su nivel
+   * medio. Sin esto (0, el defecto) el suelo es el PRIMER marco, y si el primer marco es silencio
+   * digital y luego entra ruido continuo, el ruido abre un turno que nunca cierra (medido el
+   * 2026-09-20 en el navegador con ruido rosa: 0/10 interrupciones). Con la calibracion, el
+   * ruido es suelo y solo lo que lo supere por `margenDb` es voz.
+   */
+  marcosCalibracion?: number;
 }
 
 export function modeloEnergia(opciones: OpcionesEnergia = {}): ModeloVoz {
@@ -30,8 +38,12 @@ export function modeloEnergia(opciones: OpcionesEnergia = {}): ModeloVoz {
   const tamMarco = opciones.tamMarco ?? 512;
   const margenDb = opciones.margenDb ?? 9;
   const adaptacion = opciones.adaptacion ?? 0.02;
+  const marcosCalibracion = opciones.marcosCalibracion ?? 0;
   let sueloDb = -60;
   let visto = false;
+  let calibrados = 0;
+  /** Potencia media (lineal, no dB): un marco de silencio digital no arrastra la media a -180 dB. */
+  let sumaPotencia = 0;
 
   return {
     tamMarco,
@@ -41,6 +53,13 @@ export function modeloEnergia(opciones: OpcionesEnergia = {}): ModeloVoz {
       for (let i = 0; i < marco.length; i++) suma += marco[i]! * marco[i]!;
       const rms = Math.sqrt(suma / Math.max(1, marco.length));
       const db = 20 * Math.log10(rms + 1e-9);
+      if (calibrados < marcosCalibracion) {
+        calibrados++;
+        sumaPotencia += rms * rms;
+        sueloDb = 10 * Math.log10(sumaPotencia / calibrados + 1e-18);
+        visto = true;
+        return 0;
+      }
       if (!visto) {
         sueloDb = db;
         visto = true;
@@ -56,6 +75,8 @@ export function modeloEnergia(opciones: OpcionesEnergia = {}): ModeloVoz {
     reinicia() {
       sueloDb = -60;
       visto = false;
+      calibrados = 0;
+      sumaPotencia = 0;
     },
   };
 }

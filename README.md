@@ -226,7 +226,7 @@ npm run audita:secretos  # credenciales en TODA la historia, no solo en el arbol
 npm run audita:fugas  # ¿una entrada del corpus es reconocible leyendo el arbol?
 npm run prueba:contabilidad  # el coste `null` no se suma como cero, y el corte no lo decide el modulo
 npm run prueba:imprenta  # el contrato de los CLI: dry-run, destructivo marcado, sin reimplementar
-npm run prueba:laboratorio  # las reglas del laboratorio de voz (/laboratorio-voz): catalogo, estado real, intenciones, acta del CLI, WAV
+npm run prueba:laboratorio  # las reglas del laboratorio de voz (/laboratorio-voz): catalogo, estado real, intenciones, acta del CLI, WAV, PCM en flujo, interrupcion, sesion de picking
 npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre

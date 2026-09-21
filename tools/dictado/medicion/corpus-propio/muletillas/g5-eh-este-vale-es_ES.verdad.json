@@ -1,0 +1,36 @@
+{
+ "guion": "g5-eh-este-vale",
+ "voz": "es_ES-davefx-medium",
+ "duracionMs": 29904,
+ "texto": "Eh, buenas tardes. Vamos a hablar de la nutrición. Eh, el cuerpo necesita, este, tres tipos de nutrientes principales. Eh, los carbohidratos dan energía rápida, vale. Las proteínas, eh, construyen músculo y tejidos. Las grasas, eh, guardan energía y protegen los órganos, vale. Este, además están las vitaminas y los minerales, que, eh, son necesarios en cantidades pequeñas. Eh, el agua también cuenta, este, es más de la mitad del cuerpo. Vale, eh, con eso terminamos.",
+ "palabras": 76,
+ "tramos": [
+  {
+   "inicioMs": 500,
+   "finMs": 9342,
+   "texto": "Eh, buenas tardes. Vamos a hablar de la nutrición. Eh, el cuerpo necesita, este, tres tipos de nutrientes principales. Eh, los carbohidratos dan energía rápida, vale."
+  },
+  {
+   "inicioMs": 11142,
+   "finMs": 23275,
+   "texto": "Las proteínas, eh, construyen músculo y tejidos. Las grasas, eh, guardan energía y protegen los órganos, vale. Este, además están las vitaminas y los minerales, que, eh, son necesarios en cantidades pequeñas."
+  },
+  {
+   "inicioMs": 25075,
+   "finMs": 29904,
+   "texto": "Eh, el agua también cuenta, este, es más de la mitad del cuerpo. Vale, eh, con eso terminamos."
+  }
+ ],
+ "pausasLargas": [
+  {
+   "inicioMs": 9342,
+   "finMs": 11142,
+   "ms": 1800
+  },
+  {
+   "inicioMs": 23275,
+   "finMs": 25075,
+   "ms": 1800
+  }
+ ]
+}

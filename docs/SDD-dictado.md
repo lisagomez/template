@@ -195,6 +195,23 @@ demonio. Amenazas que añade: ninguna nueva hacia fuera (loopback, no se publica
 cualquier proceso local con el token podría transcribir audio —el mismo perímetro que ya tiene
 el CLI—. Flujo de datos igual que el servicio: audio en memoria, nada a disco ni a log.
 
+**Y habla en flujo (Etapa 3, 2026-09-20).** `GET /voces` y `POST /sintetizar` con el mismo
+Bearer y el mismo semáforo: el texto entra como JSON y el PCM16LE sale por trozos, una frase
+por trozo, con la frecuencia en cabecera. El navegador (`/laboratorio-voz`, casos 12 y 16)
+encadena cada trozo en un `AudioBufferSourceNode` sin hueco, así la primera frase suena
+mientras se sintetiza el resto; la ruta `/api/laboratorio/sintetizar-flujo` hace de puente y cae
+al CLI (PCM por ffmpeg, nunca WAV por tubería) si el demonio no responde, y lo dice (`x-via`).
+Cortar la petición cancela la síntesis en sherpa (el callback de progreso devuelve `false`):
+es lo que hace real la interrupción por voz, que va por un detector de energía en el navegador
+(`tools/voz`, sin modelo) con el suelo calibrado en los primeros 300 ms. Amenazas nuevas:
+ninguna hacia fuera (loopback); el texto que se sintetiza es del usuario y no se registra.
+Límite escrito: el detector por energía sirve con auriculares o micrófono cercano; con ruido
+continuo estacionario funciona si calibra el suelo 300 ms (medido 10/10 a SNR 8 y 18 dB), con
+voces de fondo no está medido, y Silero en el navegador es un CDC (peso + `onnxruntime-web`).
+El demonio también carga, si se le pide (`DICTADO_RESPALDO`), un segundo motor por proceso que
+el cliente elige con `x-motor: respaldo`: idioma forzado para audio corto que Parakeet oye en
+inglés. Es el mismo respaldo que `dictar` usa desde el 2026-09-16, ahora residente.
+
 ### 7.1 Modelo de amenazas (C3)
 
 Es una superficie de red por la que viaja **audio con la voz del dueño**.

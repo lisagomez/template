@@ -20,7 +20,7 @@ const arg = (nombre, porDefecto) => {
 };
 const URL_BASE = arg('url', 'http://localhost:3000');
 const SALIDA = resolve(arg('salida', 'capturas-laboratorio'));
-const PASOS = arg('pasos', 'a,b,c,d,e,f,g,h,i,j').split(',');
+const PASOS = arg('pasos', 'a,b,c,d,e,f,g,h,i,j,k').split(',');
 const paso = (letra) => PASOS.includes(letra);
 mkdirSync(SALIDA, { recursive: true });
 
@@ -223,6 +223,16 @@ const rutaActa = join(SALIDA, 'acta.md');
 await descarga.saveAs(rutaActa);
 resultados.casos.acta = { archivo: descarga.suggestedFilename(), lineas: readFileSync(rutaActa, 'utf8').split('\n').length, turnos: await panel(9).locator('[data-prueba="segmentos"]').innerText() };
 await captura('13-reunion-y-acta', '#caso-9');
+}
+
+// (k) caso 10: competencias con rubrica por franjas, muletillas «no medible» y aviso de menores
+if (paso('k')) {
+console.log('k) caso 10: rubrica orientativa y aviso de menores');
+await abre(10);
+await panel(10).getByRole('button', { name: 'Usar la muestra' }).click();
+await panel(10).locator('[data-prueba="rubrica"]').waitFor({ timeout: 300_000 });
+resultados.casos.competencias = { rubrica: JSON.parse((await panel(10).locator('[data-prueba="rubrica"]').getAttribute('data-json')) ?? 'null'), metricas: await panel(10).locator('[data-prueba="metricas"]').innerText(), avisoMenores: (await panel(10).innerText()).includes('menores') };
+await captura('12-competencias-rubrica', '#caso-10');
 }
 
 writeFileSync(join(SALIDA, 'resultados.json'), JSON.stringify(resultados, null, 2), 'utf8');

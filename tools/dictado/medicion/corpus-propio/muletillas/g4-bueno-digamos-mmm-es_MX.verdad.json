@@ -1,0 +1,36 @@
+{
+ "guion": "g4-bueno-digamos-mmm",
+ "voz": "es_MX-claude-high",
+ "duracionMs": 35615,
+ "texto": "Bueno, hoy toca matemáticas. Vamos a ver las fracciones, digamos, la parte de un todo. Mmm, si parto una pizza en cuatro y tomo una, tengo un cuarto. Bueno, dos cuartos son lo mismo que un medio, digamos, la mitad. Mmm, para sumar fracciones con el mismo denominador, bueno, se suman los numeradores. Un cuarto más un cuarto, digamos, es dos cuartos. Bueno, con distinto denominador hay que igualarlos primero. Mmm, eso lo vemos mañana. Bueno, digamos que hasta aquí por hoy.",
+ "palabras": 82,
+ "tramos": [
+  {
+   "inicioMs": 500,
+   "finMs": 10823,
+   "texto": "Bueno, hoy toca matemáticas. Vamos a ver las fracciones, digamos, la parte de un todo. Mmm, si parto una pizza en cuatro y tomo una, tengo un cuarto."
+  },
+  {
+   "inicioMs": 12623,
+   "finMs": 25590,
+   "texto": "Bueno, dos cuartos son lo mismo que un medio, digamos, la mitad. Mmm, para sumar fracciones con el mismo denominador, bueno, se suman los numeradores. Un cuarto más un cuarto, digamos, es dos cuartos."
+  },
+  {
+   "inicioMs": 27390,
+   "finMs": 35615,
+   "texto": "Bueno, con distinto denominador hay que igualarlos primero. Mmm, eso lo vemos mañana. Bueno, digamos que hasta aquí por hoy."
+  }
+ ],
+ "pausasLargas": [
+  {
+   "inicioMs": 10823,
+   "finMs": 12623,
+   "ms": 1800
+  },
+  {
+   "inicioMs": 25590,
+   "finMs": 27390,
+   "ms": 1800
+  }
+ ]
+}

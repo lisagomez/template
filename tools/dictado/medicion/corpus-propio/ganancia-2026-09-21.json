@@ -1,0 +1,110 @@
+{
+ "fecha": "2026-09-21",
+ "n": 10,
+ "regla": "auto se propone por defecto si mejora ≥ 3 puntos en flojo sin empeorar > 0,5 en el resto",
+ "mejoraFlojo": 0,
+ "empeoraResto": [
+  0,
+  0,
+  0
+ ],
+ "propone": false,
+ "filas": [
+  {
+   "condicion": "flojo",
+   "ganancia": "0",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.06,
+   "picoDb": -39.8,
+   "gananciaAplicadaDb": 0,
+   "segundos": 49,
+   "texto": "Recuérdame mandar la cotización a Luis el jueves por la mañana.  El pedido de tornillos de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  E"
+  },
+  {
+   "condicion": "flojo",
+   "ganancia": "auto",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.06,
+   "picoDb": -39.8,
+   "gananciaAplicadaDb": 12,
+   "segundos": 49,
+   "texto": "Recuérdame mandar la cotización a Luis el jueves por la mañana.  El pedido de tornillos de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  E"
+  },
+  {
+   "condicion": "fuerte",
+   "ganancia": "0",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.077,
+   "picoDb": -8.2,
+   "gananciaAplicadaDb": 0,
+   "segundos": 49,
+   "texto": "Recuérdame mandar la cotización a Luis el jueves por la mañana.  El pedido de tornillos de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  E"
+  },
+  {
+   "condicion": "fuerte",
+   "ganancia": "auto",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.077,
+   "picoDb": -8.2,
+   "gananciaAplicadaDb": null,
+   "segundos": 49,
+   "texto": "Recuérdame mandar la cotización a Luis el jueves por la mañana.  El pedido de tornillos de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  E"
+  },
+  {
+   "condicion": "limpio",
+   "ganancia": "0",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.068,
+   "picoDb": -15.8,
+   "gananciaAplicadaDb": 0,
+   "segundos": 49,
+   "texto": "Recuérdame mandar la cotización a Luis el jueves por la mañana.  El pedido de tornillos de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  E"
+  },
+  {
+   "condicion": "limpio",
+   "ganancia": "auto",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.068,
+   "picoDb": -15.8,
+   "gananciaAplicadaDb": null,
+   "segundos": 49,
+   "texto": "Recuérdame mandar la cotización a Luis el jueves por la mañana.  El pedido de tornillos de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  E"
+  },
+  {
+   "condicion": "snr10",
+   "ganancia": "0",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.103,
+   "picoDb": -15.7,
+   "gananciaAplicadaDb": 0,
+   "segundos": 49,
+   "texto": "Recuerda de mandar la cotización a Luis el jueves por la mañana.  El periodo de tornillo de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  "
+  },
+  {
+   "condicion": "snr10",
+   "ganancia": "auto",
+   "turnos": 10,
+   "sinVoz": 0,
+   "descartados": 0,
+   "wer": 0.103,
+   "picoDb": -15.7,
+   "gananciaAplicadaDb": null,
+   "segundos": 49,
+   "texto": "Recuerda de mandar la cotización a Luis el jueves por la mañana.  El periodo de tornillo de la planta de Monterrey va con urgencia.  Agenda una reunión con Ana Martínez el martes a las diez y media.  "
+  }
+ ]
+}

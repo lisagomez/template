@@ -1,10 +1,13 @@
 /**
  * Servicio HTTP de transcripcion de `@tu-scope/dictado`: el perfil «GPU en el VPS propio».
  *
- * DOS RUTAS. `GET /health` devuelve exactamente {"status":"ok"} y nada del interior. `POST
+ * CUATRO RUTAS. `GET /health` devuelve exactamente {"status":"ok"} y nada del interior. `POST
  * /transcribir` recibe PCM16LE mono en crudo (o un WAV) con la frecuencia en cabecera y devuelve
  * el texto. Es la MISMA interfaz que un motor local: el cliente esta en `./remoto` y el dictado
- * no distingue uno de otro.
+ * no distingue uno de otro. `GET /voces` lista las voces cargadas y `POST /sintetizar` (JSON
+ * `{texto, voz?, velocidad?}`) responde PCM16LE mono EN FLUJO: cada frase sale en cuanto
+ * existe (`x-frecuencia-hz`, `x-voz` en cabecera), y si el cliente corta la conexion, la sintesis
+ * que falta no se hace. Medido el 2026-09-20: primera frase a los ~110 ms.
  *
  * LO QUE EXIGE. `Authorization: Bearer <DICTADO_TOKEN>` en cada peticion, comparado en tiempo
  * constante; sin token no arranca (ver configuracion.mjs). TLS: propio si le dan certificado y
@@ -24,6 +27,7 @@ import { configura } from './configuracion.mjs'
 
 const configuracion = await configura()
 const { pcm16aFloat, leeWav, preparaParaModelo } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), '..', 'node_modules', '@tu-scope', 'voz', 'dist', 'node', 'index.js')).href)
+const { floatAPcm16 } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'node', 'index.js')).href)
 console.log(`dictado-servicio: ${JSON.stringify(configuracion.describe())}`)
 
 const json = (res, codigo, cuerpo) => {
@@ -65,6 +69,11 @@ async function transcribir(req, res) {
   const bytes = await leeCuerpo(req, configuracion.bytesMaximos)
   if (bytes.length < 320) return json(res, 400, { error: 'el cuerpo esta vacio o es demasiado corto: se esperaba PCM16LE mono o un WAV' })
   const idioma = String(req.headers['x-idioma'] ?? 'es').slice(0, 8)
+  // `x-motor: respaldo`: el segundo motor (idioma forzado), para cuando el principal oyo otro idioma en audio corto.
+  const eleccionMotor = String(req.headers['x-motor'] ?? 'principal')
+  if (eleccionMotor !== 'principal' && eleccionMotor !== 'respaldo') return json(res, 400, { error: 'x-motor debe ser principal o respaldo' })
+  if (eleccionMotor === 'respaldo' && !configuracion.respaldo) return json(res, 409, { error: 'este servicio no tiene motor de respaldo' })
+  const motor = eleccionMotor === 'respaldo' ? configuracion.respaldo : configuracion.motor
   const pista = req.headers['x-pista-base64'] ? Buffer.from(String(req.headers['x-pista-base64']), 'base64').toString('utf8').slice(0, 2000) : undefined
   let muestras
   let hz = Number(req.headers['x-frecuencia-hz'] ?? 16000)
@@ -79,8 +88,45 @@ async function transcribir(req, res) {
   await turno()
   try {
     const t0 = performance.now()
-    const r = await configuracion.motor.transcribe(muestras, hz, { idioma, pista })
-    return json(res, 200, { texto: r.texto, ...(r.confianza !== undefined ? { confianza: r.confianza } : {}), ...(r.idioma ? { idioma: r.idioma } : {}), ms: Math.round(performance.now() - t0), motor: configuracion.motor.id })
+    const r = await motor.transcribe(muestras, hz, { idioma, pista })
+    return json(res, 200, { texto: r.texto, ...(r.confianza !== undefined ? { confianza: r.confianza } : {}), ...(r.idioma ? { idioma: r.idioma } : {}), ms: Math.round(performance.now() - t0), motor: motor.id, ...(eleccionMotor === 'respaldo' ? { respaldo: true } : {}) })
+  } finally {
+    libera()
+  }
+}
+
+/**
+ * Texto → PCM16LE mono en flujo. La cabecera sale antes de sintetizar nada; cada frase se escribe
+ * al momento. Si el cliente cierra (interrupcion), el callback devuelve `false` y sherpa para.
+ */
+async function sintetizar(req, res) {
+  if (configuracion.voces.size === 0) return json(res, 503, { error: 'este servicio no tiene ninguna voz cargada' })
+  const bytes = await leeCuerpo(req, 64 * 1024)
+  let cuerpo
+  try { cuerpo = JSON.parse(bytes.toString('utf8')) } catch { return json(res, 400, { error: 'se esperaba JSON {texto, voz?, velocidad?}' }) }
+  const texto = typeof cuerpo?.texto === 'string' ? cuerpo.texto.trim() : ''
+  if (texto.length === 0 || texto.length > configuracion.caracteresMaximos) return json(res, 400, { error: `el texto esta vacio o pasa de ${configuracion.caracteresMaximos} caracteres` })
+  const nombreVoz = typeof cuerpo.voz === 'string' && cuerpo.voz.length > 0 ? cuerpo.voz : [...configuracion.voces.keys()][0]
+  const voz = configuracion.voces.get(nombreVoz)
+  if (!voz) return json(res, 404, { error: 'esa voz no esta cargada en este servicio' })
+  const velocidad = cuerpo.velocidad === undefined ? 1 : Number(cuerpo.velocidad)
+  if (!(velocidad >= 0.5 && velocidad <= 2)) return json(res, 400, { error: 'velocidad fuera de 0,5 a 2' })
+  let cortado = false
+  res.on('close', () => { if (!res.writableFinished) cortado = true })
+  await turno()
+  try {
+    res.writeHead(200, { 'content-type': 'application/octet-stream', 'x-frecuencia-hz': String(voz.frecuenciaHz), 'x-voz': nombreVoz, 'cache-control': 'no-store' })
+    res.flushHeaders()
+    const t0 = performance.now()
+    let trozos = 0
+    await voz.sintetiza(texto, (muestras) => {
+      if (cortado) return false
+      trozos++
+      res.write(floatAPcm16(muestras))
+      return true
+    }, { velocidad })
+    if (!cortado) res.end()
+    console.log(`dictado-servicio: sintetizar ${cortado ? 'cortado' : 'completo'} · ${trozos} frases · ${Math.round(performance.now() - t0)} ms`)
   } finally {
     libera()
   }
@@ -92,6 +138,8 @@ const manejador = async (req, res) => {
     if (req.method === 'GET' && ruta === '/health') return json(res, 200, { status: 'ok' })
     if (!autorizado(req)) return json(res, 401, { error: 'no autorizado' })
     if (req.method === 'POST' && ruta === '/transcribir') return await transcribir(req, res)
+    if (req.method === 'GET' && ruta === '/voces') return json(res, 200, { voces: [...configuracion.voces.keys()], porDefecto: [...configuracion.voces.keys()][0] ?? null })
+    if (req.method === 'POST' && ruta === '/sintetizar') return await sintetizar(req, res)
     return json(res, 404, { error: 'ruta desconocida' })
   } catch (error) {
     if (error instanceof Error && error.message === 'demasiado grande') {
@@ -99,13 +147,15 @@ const manejador = async (req, res) => {
       return res.end(JSON.stringify({ error: 'el audio supera el tamano maximo' }))
     }
     console.error(`dictado-servicio: fallo en ${ruta} (${error instanceof Error ? error.constructor.name : 'error'})`)
-    return json(res, 500, { error: 'fallo interno al transcribir' })
+    if (res.headersSent) return res.destroy()
+    return json(res, 500, { error: ruta === '/sintetizar' ? 'fallo interno al sintetizar' : 'fallo interno al transcribir' })
   }
 }
 
 await configuracion.motor.calienta?.()
+await configuracion.respaldo?.calienta?.()
 const servidor = configuracion.tls ? https(configuracion.tls, manejador) : http(manejador)
 servidor.listen(configuracion.puerto, configuracion.escucha, () => console.log(`dictado-servicio: escuchando en ${configuracion.tls ? 'https' : 'http'}://${configuracion.escucha}:${configuracion.puerto}`))
-const apaga = async () => { servidor.close(); await configuracion.motor.cierra?.(); process.exit(0) }
+const apaga = async () => { servidor.close(); await configuracion.motor.cierra?.(); await configuracion.respaldo?.cierra?.(); process.exit(0) }
 process.on('SIGTERM', () => void apaga())
 process.on('SIGINT', () => void apaga())

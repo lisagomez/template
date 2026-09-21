@@ -1,0 +1,36 @@
+{
+ "guion": "g2-este-eh",
+ "voz": "es_MX-claude-high",
+ "duracionMs": 39930,
+ "texto": "Buenos días. Este, hoy vamos a ver, eh, la fotosíntesis. Las plantas, este, toman luz, agua y dióxido de carbono, y producen azúcar y oxígeno. Ese proceso, eh, ocurre en los cloroplastos, que son, este, unas estructuras verdes dentro de la célula. Ahora, este, pasemos a la respiración celular. Es el proceso inverso: la célula, eh, quema el azúcar para obtener energía. Ocurre en las mitocondrias. Para cerrar, este, un repaso: fotosíntesis produce azúcar con luz; respiración, eh, consume azúcar para dar energía. Este, ambos procesos se necesitan.",
+ "palabras": 88,
+ "tramos": [
+  {
+   "inicioMs": 500,
+   "finMs": 10075,
+   "texto": "Buenos días. Este, hoy vamos a ver, eh, la fotosíntesis. Las plantas, este, toman luz, agua y dióxido de carbono, y producen azúcar y oxígeno."
+  },
+  {
+   "inicioMs": 11875,
+   "finMs": 26318,
+   "texto": "Ese proceso, eh, ocurre en los cloroplastos, que son, este, unas estructuras verdes dentro de la célula. Ahora, este, pasemos a la respiración celular. Es el proceso inverso: la célula, eh, quema el azúcar para obtener energía."
+  },
+  {
+   "inicioMs": 28118,
+   "finMs": 39930,
+   "texto": "Ocurre en las mitocondrias. Para cerrar, este, un repaso: fotosíntesis produce azúcar con luz; respiración, eh, consume azúcar para dar energía. Este, ambos procesos se necesitan."
+  }
+ ],
+ "pausasLargas": [
+  {
+   "inicioMs": 10075,
+   "finMs": 11875,
+   "ms": 1800
+  },
+  {
+   "inicioMs": 26318,
+   "finMs": 28118,
+   "ms": 1800
+  }
+ ]
+}

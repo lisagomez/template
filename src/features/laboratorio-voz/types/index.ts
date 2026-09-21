@@ -79,6 +79,8 @@ export interface MetricasTranscripcion {
   hablantes?: number;
   /** Por donde paso el audio: el demonio residente o el CLI por proceso. */
   via?: 'demonio' | 'cli';
+  /** Lo transcribio el motor de respaldo (segundo pase con el idioma forzado). */
+  respaldo?: boolean;
 }
 
 export interface RespuestaTranscripcion extends MetricasTranscripcion {
