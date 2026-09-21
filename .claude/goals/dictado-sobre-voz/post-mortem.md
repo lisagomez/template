@@ -72,6 +72,10 @@ medición baja algo de red, la DoF dice qué vale como evidencia sin red».
 
 ## 5. Lo que sigue
 
+- **El presupuesto de las rules quedó al límite (5 999 de 6 000 tokens)** tras condensar las
+  entradas del 20 y del 21: el próximo aprendizaje del stack no cabe sin mover alguno a un
+  documento bajo demanda (o subir el tope, decisión consciente en el JSON). No se subió el tope.
+
 - La app tiene su propia cabecera WAV (`laboratorio-voz/services/wav.ts`, estéreo): tercera
   copia, candidata a `codificaWav` cuando se toque el laboratorio.
 - Sembrar el README de dictado desde `ultima-medicion-cpu.json`, como ya hace voz.

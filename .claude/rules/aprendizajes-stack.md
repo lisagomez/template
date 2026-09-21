@@ -120,16 +120,11 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   `execFile`; `fs` solo sobre temporales de `mkdtemp`.
 - **Aplicar en**: todo route handler o server component que mire carpetas fuera de `src/`.
 
-### 2026-09-20: `npm install` poda lo que no está en `package.json` (Playwright desapareció)
-- **Error**: `npm install uqr` quitó `playwright`, instalado a mano y nunca declarado.
-- **Fix**: lo que un guion importa se declara pineado. **Aplicar en**: todo lo usado desde `scripts/`.
+### 2026-09-20: `npm install` poda lo no declarado (Playwright desapareció): lo que un guion importa se declara pineado.
 
-### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type` declarado
-- **Error**: «Module type of file ... is not specified» al correr `.ts` con `node --test`: sale una
-  vez por proceso y nombra el PRIMER archivo sin tipo, así que hay que cubrir todo lo que Node carga.
-- **Fix**: `{ "type": "module" }` en `scripts/package.json` y `src/package.json`, nada más. En la
-  raíz no: reinterpreta todo `.js` (`postcss.config.js` es CommonJS).
-- **Aplicar en**: cualquier `.ts` o `.js` nuevo que Node corra directo fuera de `tools/`.
+### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type`
+- **Fix**: `{ "type": "module" }` en `scripts/package.json` y `src/package.json`; en la raíz no
+  (reinterpretaría `postcss.config.js`, CommonJS). Nombra solo el PRIMER archivo sin tipo.
 
 ### 2026-09-20: el WAV que ffmpeg escribe a una tubería lleva tamaños «desconocidos»
 - **Error**: `-f wav pipe:1` pone `0xFFFFFFFF` en la cabecera; el servicio de dictado lo rechazaba
@@ -144,48 +139,21 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: un latido con referencia hasta `salir()`; medir con la salida a archivo.
 - **Aplicar en**: todo demonio o CLI de larga vida que cierre recursos en reposo.
 
-### 2026-09-20: una respuesta vieja pisa a la nueva si nadie numera las cargas
-- **Error**: en `/historial` la lista sin filtrar llegó después que la filtrada (sondeo «vivo» y
-  buscador a la vez): 188 donde debía haber 28. La captura esperaba «N de M» sin exigir N en la lista.
-- **Fix**: cada carga lleva número y solo se aplica la última; el sondeo no corre con una carga en
-  vuelo; la espera de la captura exige cuenta y lista iguales.
-- **Aplicar en**: todo hook con varias fuentes sobre el mismo estado.
+### 2026-09-20: dos de React en `/historial`
+- **Una respuesta vieja pisa a la nueva si nadie numera las cargas** (sondeo «vivo» + buscador:
+  188 donde debía haber 28): cada carga lleva número y solo se aplica la última; el sondeo no
+  corre con una carga en vuelo; la captura exige cuenta y lista iguales.
+- **`react-hooks/set-state-in-effect` no acepta un `await` como separación**: el efecto solo
+  dispara la promesa; el estado lo escribe la promesa al resolver.
 
-### 2026-09-20: `react-hooks/set-state-in-effect` no acepta un `await` como separación
-- **Error**: marca `setCargando(true)` en un efecto aunque vaya tras `await`: mira el texto, no el tiempo.
-- **Fix**: el efecto solo dispara la promesa; el estado lo escribe la promesa al resolver.
-- **Aplicar en**: todo `useEffect` que cargue datos en `src/`.
-
-### 2026-09-21: matar `npx` no mata a `next-server`
-- **Error**: un guion de capturas lanzaba `npx next start -p 3012`, lo mataba con `servidor.kill()`
-  y el `next-server` hijo seguía vivo; la corrida siguiente habló con el servidor viejo (otros
-  datos) durante 30 s antes de fallar.
-- **Fix**: `spawn(..., { detached: true })` y `process.kill(-pid, 'SIGTERM')` al salir y por señal.
-- **Aplicar en**: todo guion que levante un servidor propio para probar.
-
-### 2026-09-21: un control gobernado por el servidor rompe `check()` de Playwright
-- **Error**: un checkbox con `checked={valorDelServidor}` no cambia al click hasta que responde la
-  ruta; Playwright falla con «Clicking the checkbox did not change its state».
-- **Fix**: estado optimista local (cambia al click, vuelve si el servidor rechaza) y las cajas de
-  texto rearmadas por `key` cuando llega otro valor (sin `setState` en efectos, la regla del lint).
-- **Aplicar en**: todo formulario cuyo estado viva en el servidor.
-
-### 2026-09-21: una bandera a secas es presencia, no valor
-- **Error**: `--tecla` (sin valor) resolvía como `true` para un ajuste de texto y disparaba un aviso
-  falso «espera un código de tecla».
-- **Fix**: al resolver, un `true` de bandera en un campo no booleano se salta sin aviso.
-- **Aplicar en**: cualquier CLI donde una bandera sea a la vez interruptor y valor.
-
-### 2026-09-21: un peer obligatorio de la familia no está en ningún registro
-- **Error**: `dictado` pasó a exigir `@tu-scope/voz` y la integración del empaquetador murió en el
-  `npm install`: npm fue a buscar el peer a un registro donde no está publicado.
-- **Fix**: el empaquetador instala primero el tarball de cada peer `@tu-scope/<x>` obligatorio
-  desde `tools/<x>/`; el consumidor hace lo mismo (`npm install voz.tgz dictado.tgz`).
-- **Aplicar en**: toda herramienta que dependa de otra de `tools/`.
-
-### 2026-09-21: PCM16 con escala asimétrica pierde 1 LSB en la ida y vuelta
-- **Error**: `floatAPcm16` escalaba ×32767 en positivo y `pcm16aFloat` dividía ÷32768: dos
-  aritméticas para la misma conversión, en dos paquetes, sin prueba de ida y vuelta.
-- **Fix**: una sola en `voz/node` (×32768 con tope 32767) y prueba de ida y vuelta con error
-  ≤ ½ LSB; dictado la envuelve en `Buffer`.
-- **Aplicar en**: toda conversión de audio que tenga inversa: se prueban juntas.
+### 2026-09-21: cinco de los goals de ajustes y de voz (detalle en sus post-mortem)
+- **Matar `npx` no mata a `next-server`**: un servidor de pruebas quedó huérfano en su puerto.
+  `spawn` con `detached: true` y `process.kill(-pid)` al salir y por señal.
+- **Un control gobernado por el servidor rompe `check()` de Playwright**: estado optimista local
+  que vuelve si el servidor rechaza; cajas rearmadas por `key`.
+- **Una bandera a secas es presencia, no valor**: `--tecla` (`true`) en un campo de texto no es
+  un valor inválido; se salta esa capa sin aviso.
+- **Un peer obligatorio de la familia no está en ningún registro**: el empaquetador instala su
+  tarball desde `tools/<x>/`; el consumidor, los dos tarballs.
+- **PCM16 asimétrico (×32767 / ÷32768) pierde 1 LSB**: una conversión en `voz/node` (×32768 con
+  tope) y las inversas se prueban juntas.
