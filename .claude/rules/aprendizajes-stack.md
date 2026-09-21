@@ -1,6 +1,8 @@
 ---
 paths:
   - "src/**"
+  - "tools/**"
+  - "scripts/**"
   - "Dockerfile"
   - "docker-compose.yml"
   - ".env*"
@@ -153,3 +155,37 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Error**: marca `setCargando(true)` en un efecto aunque vaya tras `await`: mira el texto, no el tiempo.
 - **Fix**: el efecto solo dispara la promesa; el estado lo escribe la promesa al resolver.
 - **Aplicar en**: todo `useEffect` que cargue datos en `src/`.
+
+### 2026-09-21: matar `npx` no mata a `next-server`
+- **Error**: un guion de capturas lanzaba `npx next start -p 3012`, lo mataba con `servidor.kill()`
+  y el `next-server` hijo seguía vivo; la corrida siguiente habló con el servidor viejo (otros
+  datos) durante 30 s antes de fallar.
+- **Fix**: `spawn(..., { detached: true })` y `process.kill(-pid, 'SIGTERM')` al salir y por señal.
+- **Aplicar en**: todo guion que levante un servidor propio para probar.
+
+### 2026-09-21: un control gobernado por el servidor rompe `check()` de Playwright
+- **Error**: un checkbox con `checked={valorDelServidor}` no cambia al click hasta que responde la
+  ruta; Playwright falla con «Clicking the checkbox did not change its state».
+- **Fix**: estado optimista local (cambia al click, vuelve si el servidor rechaza) y las cajas de
+  texto rearmadas por `key` cuando llega otro valor (sin `setState` en efectos, la regla del lint).
+- **Aplicar en**: todo formulario cuyo estado viva en el servidor.
+
+### 2026-09-21: una bandera a secas es presencia, no valor
+- **Error**: `--tecla` (sin valor) resolvía como `true` para un ajuste de texto y disparaba un aviso
+  falso «espera un código de tecla».
+- **Fix**: al resolver, un `true` de bandera en un campo no booleano se salta sin aviso.
+- **Aplicar en**: cualquier CLI donde una bandera sea a la vez interruptor y valor.
+
+### 2026-09-21: un peer obligatorio de la familia no está en ningún registro
+- **Error**: `dictado` pasó a exigir `@tu-scope/voz` y la integración del empaquetador murió en el
+  `npm install`: npm fue a buscar el peer a un registro donde no está publicado.
+- **Fix**: el empaquetador instala primero el tarball de cada peer `@tu-scope/<x>` obligatorio
+  desde `tools/<x>/`; el consumidor hace lo mismo (`npm install voz.tgz dictado.tgz`).
+- **Aplicar en**: toda herramienta que dependa de otra de `tools/`.
+
+### 2026-09-21: PCM16 con escala asimétrica pierde 1 LSB en la ida y vuelta
+- **Error**: `floatAPcm16` escalaba ×32767 en positivo y `pcm16aFloat` dividía ÷32768: dos
+  aritméticas para la misma conversión, en dos paquetes, sin prueba de ida y vuelta.
+- **Fix**: una sola en `voz/node` (×32768 con tope 32767) y prueba de ida y vuelta con error
+  ≤ ½ LSB; dictado la envuelve en `Buffer`.
+- **Aplicar en**: toda conversión de audio que tenga inversa: se prueban juntas.
