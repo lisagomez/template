@@ -1,0 +1,106 @@
+{
+ "version": 1,
+ "fecha": "2026-09-21",
+ "maquina": {
+  "cpu": "AMD Ryzen 7 5700",
+  "nucleos": 16,
+  "ramGb": 16,
+  "node": "v24.14.0",
+  "dispositivo": "cpu"
+ },
+ "corpus": {
+  "nombre": "LibriSpeech dev-clean",
+  "hablantes": 5,
+  "tomasPorHablante": 12,
+  "tomas": 60
+ },
+ "silero": {
+  "turnos": 1,
+  "segundosHabla": 15.176,
+  "segundosAudio": 15.52
+ },
+ "distancias": {
+  "mismo": {
+   "p50": 0.15435665909360596,
+   "p95": 0.4627763192138564,
+   "max": 0.8268305365771668
+  },
+  "distinto": {
+   "min": 0.6255964859273091,
+   "p50": 0.9100899990698291
+  }
+ },
+ "calibracion": {
+  "umbral": 0.55,
+  "aciertoPct": 100
+ },
+ "registroMontaje": {
+  "enrolados": 4,
+  "tomasEnrol": 3
+ },
+ "registro": [
+  {
+   "umbral": 0.3,
+   "acierta": 33,
+   "equivoca": 0,
+   "abstiene": 3,
+   "impostorCalla": 12,
+   "impostorConNombre": 0,
+   "impostorTomas": 12
+  },
+  {
+   "umbral": 0.4,
+   "acierta": 35,
+   "equivoca": 0,
+   "abstiene": 1,
+   "impostorCalla": 12,
+   "impostorConNombre": 0,
+   "impostorTomas": 12
+  },
+  {
+   "umbral": 0.45,
+   "acierta": 35,
+   "equivoca": 0,
+   "abstiene": 1,
+   "impostorCalla": 12,
+   "impostorConNombre": 0,
+   "impostorTomas": 12
+  },
+  {
+   "umbral": 0.5,
+   "acierta": 35,
+   "equivoca": 0,
+   "abstiene": 1,
+   "impostorCalla": 12,
+   "impostorConNombre": 0,
+   "impostorTomas": 12
+  },
+  {
+   "umbral": 0.6,
+   "acierta": 36,
+   "equivoca": 0,
+   "abstiene": 0,
+   "impostorCalla": 12,
+   "impostorConNombre": 0,
+   "impostorTomas": 12
+  },
+  {
+   "umbral": 0.7,
+   "acierta": 36,
+   "equivoca": 0,
+   "abstiene": 0,
+   "impostorCalla": 8,
+   "impostorConNombre": 4,
+   "impostorTomas": 12
+  }
+ ],
+ "reunion": {
+  "intervenciones": 9,
+  "hablantes": 3,
+  "segundos": 68.87,
+  "turnosVad": 9,
+  "turnosVerdad": 9,
+  "nombresCorrectos": 9,
+  "nombresIncorrectos": 0
+ }
+}

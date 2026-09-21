@@ -11,7 +11,7 @@ y por eso se puede probar entero sin descargar un solo MB de modelos.
 
 | Hace | No hace |
 |---|---|
-| Detectar donde empieza y acaba el habla | **Transcribir**. Define el enchufe (`Transcriptor`) y se aparta |
+| Detectar donde empieza y acaba el habla, con perfiles medidos (`bargeIn`, `dictado`) | **Transcribir**. Define el enchufe (`Transcriptor`, con idioma y pista) y se aparta |
 | Repartir hablantes **por canal**, sin modelos | Traer los pesos de los modelos: los configuras tu |
 | Diarizar **por lotes**, con o sin habla solapada | Decir quien habla ANTES de que el turno cierre |
 | Diarizar **en vivo**, corrigiendose hacia atras | Reaccionar al instante por el camino con solape: eso pide un VAD |
@@ -21,7 +21,7 @@ y por eso se puede probar entero sin descargar un solo MB de modelos.
 ## Instalar
 
 ```bash
-npm install <ruta>/tools/voz/tu-scope-voz-0.4.0.tgz
+npm install <ruta>/tools/voz/tu-scope-voz-0.5.0.tgz
 ```
 
 El runtime de ONNX es **peerDependency opcional**: instala `onnxruntime-web` (navegador) u
@@ -317,10 +317,37 @@ mismos cinco minutos—; este responde "¿esta voz es la de quien registre, quiz
 otro cacharro?". El defecto es mas estricto a proposito, porque no reconocer a Ana cuesta un
 anonimo y llamar Ana a Luis cuesta el acta.
 
+## Dictar con el mismo detector: perfiles, transcriptor con opciones, nivel
+
+Desde 0.5.0, lo que `@tu-scope/dictado` tuvo que inventarse encima de este paquete vive aqui,
+con nombre y con su medicion, para que un consumidor no redeclare nada:
+
+```ts
+import { creaDetectorVoz, PERFILES_DETECTOR, nivelDb, picoDb, transcribeTurnos } from '@tu-scope/voz';
+import { codificaWav, floatAPcm16 } from '@tu-scope/voz/node';
+
+// Perfiles: `bargeIn` (500 ms, lo de siempre) o `dictado` (1000 ms: no parte frases). Lo explicito manda.
+const detector = creaDetectorVoz({ modelo, perfil: 'dictado', conservaAudio: true });
+PERFILES_DETECTOR.dictado; // { umbralEntrada: 0.5, umbralSalida: 0.35, msSilencioParaCerrar: 1000, msMinimoHabla: 200, msRelleno: 250 }
+
+// El transcriptor recibe idioma y pista (vocabulario a favorecer); uno escrito contra 0.4 sigue valiendo tal cual.
+const turnos = await transcribeTurnos(conAudio, miMotor, { frecuenciaHz: 16_000, idioma: 'es', pista: 'Luis, cotizacion' });
+
+// Nivel: una sola aritmetica para el medidor del microfono, la puerta de energia y `modeloEnergia`.
+nivelDb(muestras);        // RMS en dBFS (silencio digital: -180)
+picoDb(muestras, 480);    // el pico por ventanas de 30 ms: lo que un RMS global diluye
+codificaWav(muestras, 16_000); // la inversa de `leeWav`, en bytes, sin `fs`
+```
+
+`transcribe(muestras, hz, opciones?)` devuelve `{ texto, confianza?, idioma?, ms? }`: `texto` es
+lo unico obligatorio. Un transcriptor que ignore las opciones sigue siendo valido; uno de 0.4
+(dos parametros, solo `texto`) compila contra 0.5 sin tocarlo (probado en `pruebas/familia.ts`).
+
 ## Los mandos que de verdad importan
 
 | Opcion | Que pasa si te equivocas |
 |---|---|
+| `perfil` | `bargeIn` (el de siempre) cierra a los 500 ms para contestar; `dictado` espera 1000 ms para no partir frases (medido: 700 ms parte el 6,7 %, 1000 el 0,7 %). Dictar con `bargeIn` pega frases a medias; contestar con `dictado` tarda medio segundo mas |
 | `msRelleno` | Con 0, el turno empieza cortado y se pierde la primera consonante — la que el transcriptor necesita |
 | `msSilencioParaCerrar` | Corto: cortas a quien respira a mitad de frase. Largo: el bot tarda en contestar |
 | `umbralEntrada` / `umbralSalida` | Si los igualas pierdes la histeresis y una senal en el limite abre y cierra turnos sin parar |
@@ -358,6 +385,20 @@ defecto estaba bien — pero hasta el 2026-09-01 eso era una creencia, no un dat
 siendo de ESTE modelo con ESTE tipo de audio**: lectura limpia de estudio. Con voces por
 telefono o en una sala con ruido, se vuelve a medir.
 
+## Que se guarda y donde (y como se borra)
+
+El paquete no escribe nada por su cuenta. Lo que puede quedar en disco lo deja quien lo usa, y
+conviene saberlo porque una voz es un dato biometrico:
+
+| Que | Donde | Lleva contenido | Se borra con |
+|---|---|---|---|
+| Registro de voces (vectores de hablante con nombre) | donde el consumidor guarde lo que devuelve `registro.exporta()`; este paquete no lo persiste | **si** (identifica a una persona por su voz) | borrar ese archivo; `importaRegistro` con `modelo` distinto falla en vez de mentir |
+| Pesos de los modelos | `medicion/banco/modelos/` (solo `npm run mide` y `npm run demo`); en tu proyecto, donde tu los pongas | no | borrar la carpeta; `mide` los vuelve a bajar |
+| Audio de medicion (LibriSpeech dev-clean) | `medicion/banco/audio/` + `manifiesto.json` | voces publicas del corpus | borrar la carpeta |
+| Ultima medicion | `medicion/ultima-medicion.json` | no (cifras, maquina, fecha) | borrar; `mide` lo reescribe |
+| Runtime ONNX del banco | `medicion/banco/node_modules/` | no | borrar |
+| Audio del microfono | nunca: los turnos viven en memoria y se descartan; `conservaAudio` solo los entrega a quien llama | — | — |
+
 ## Avisos que ahorran una tarde
 
 - **Silero v5 quiere 576 muestras, no 512.** El modelo recibe las **64 ultimas del marco
@@ -378,7 +419,7 @@ telefono o en una sala con ruido, se vuelve a medir.
 ## Pruebas
 
 ```bash
-npm run build && npm run prueba   # 90 pruebas, sin red y sin modelos
+npm run build && npm run prueba   # 97 pruebas, sin red y sin modelos
 ```
 
 Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.
@@ -387,6 +428,38 @@ Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.
 
 ```bash
 npm run mide     # baja modelos y audio la primera vez (~35 MB + ~15 MB), luego mide
+```
+
+Deja `medicion/ultima-medicion.json` (fecha, máquina, corpus y cifras: la misma forma que el de
+`@tu-scope/dictado`) y escribe el bloque de abajo; el resto del README lo comenta. Los pesos y
+los runtimes que usa están pineados en `src/node/pesos.ts` (`PESOS`, `RUNTIMES`), la misma
+lista que leen la demo y `npm run diagnostico`.
+
+<!-- MEDICION -->
+**Ultima medicion en esta maquina** (`npm run mide`, 2026-09-21 · AMD Ryzen 7 5700, 16 nucleos, 16 GB, Node v24.14.0 · LibriSpeech dev-clean, 5 hablantes × 12 tomas). Este bloque lo escribe la medicion; el resto del README lo comenta.
+
+| Que | Medido |
+|---|---|
+| Silero sobre la primera toma | 1 turnos, 15,2 s de habla en 15,5 s |
+| Distancia coseno, mismo hablante | p50 0,154 · p95 0,463 · max 0,827 |
+| Distancia coseno, hablantes distintos | min 0,626 · p50 0,910 |
+| `calibraUmbral` | 0,55 con 100,0 % de acierto por pares (defecto de `agrupa()`: 0,55) |
+| Reunion sintetica | 9 intervenciones de 3 hablantes en 68,9 s · VAD 9 turnos (verdad 9) · nombres 9 bien, 0 mal |
+
+Registro (4 enrolados con 3 tomas, un impostor sin registrar):
+
+| umbral | acierta | se equivoca | se abstiene | al impostor le pone nombre |
+|---|---|---|---|---|
+| 0,30 | 33 | 0 | 3 | 0 / 12 |
+| 0,40 | 35 | 0 | 1 | 0 / 12 |
+| 0,45 | 35 | 0 | 1 | 0 / 12 |
+| 0,50 | 35 | 0 | 1 | 0 / 12 |
+| 0,60 | 36 | 0 | 0 | 0 / 12 |
+| 0,70 | 36 | 0 | 0 | 4 / 12 |
+<!-- /MEDICION -->
+
+```bash
+npm run diagnostico   # version, dist, pesos y runtimes presentes, ultima medicion: pegable en un issue, sin rutas de usuario
 ```
 
 **Y para probarlo a mano, con microfono:**
@@ -406,3 +479,14 @@ modelos falsos y corren en 200 ms sin red. `npm run mide` mide lo unico que un m
 puede tener: el convenio de llamada del `.onnx` de verdad, y los umbrales sobre voces de
 verdad. La primera vez que se corrio, el 2026-09-01, encontro que el VAD llevaba mudo desde el
 primer dia. **Lo que no ha pasado por ahi no esta aprobado: esta sin medir.**
+
+## Cambios
+
+- **0.5.0** (2026-09-21, sin publicar): `Transcriptor` con opciones (`idioma`, `pista`) y
+  respuesta `{ texto, confianza?, idioma?, ms? }`, compatible con 0.4; `transcribeTurnos` las
+  pasa; `PERFILES_DETECTOR` (`bargeIn` = los defectos de siempre, `dictado` = los medidos) y
+  `perfil` en `creaDetectorVoz`; `rms`, `nivelDb`, `picoDb`, `factorDeDb`; `floatAPcm16` y
+  `codificaWav` en `./node`; `PESOS` y `RUNTIMES` pineados en `./node`; `npm run mide` deja
+  `ultima-medicion.json` y siembra el README; `npm run diagnostico`. Ninguna firma de 0.4
+  cambia y los defectos de barge-in son los mismos.
+- **0.4.0**: diarizacion en vivo con solape, registro de voces, `modeloEnergia` con calibracion.

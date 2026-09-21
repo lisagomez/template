@@ -27,7 +27,7 @@
  */
 import { readFileSync, existsSync, mkdtempSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname, join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -162,7 +162,16 @@ if (!SIN_INTEGRACION) {
   const temporal = mkdtempSync(join(tmpdir(), 'integra-'));
   try {
     writeFileSync(join(temporal, 'package.json'), JSON.stringify({ name: 'consumidor', version: '1.0.0', type: 'module', private: true }, null, 2));
-    corre('npm', ['install', '--no-audit', '--no-fund', '--silent', tarball], temporal);
+    // Un peer OBLIGATORIO que sea otra herramienta de esta familia (`@tu-scope/<x>` pineado exacto,
+    // con su tarball en `tools/<x>/`) se instala desde ese tarball, como haria el consumidor: npm
+    // intentaria bajarlo de un registro donde no esta publicado y el `install` moriria ahi (vivido
+    // el 2026-09-21 cuando `dictado` paso a exigir `voz`). Los opcionales siguen sin instalarse.
+    const peersFamilia = Object.entries(pkg.peerDependencies ?? {})
+      .filter(([nombre]) => !(pkg.peerDependenciesMeta?.[nombre]?.optional) && /^@[^/]+\/[^/]+$/.test(nombre))
+      .map(([nombre, version]) => ({ nombre, version, tarball: join(dirTools, nombre.split('/')[1], `${nombre.replace('@', '').replace('/', '-')}-${version}.tgz`) }))
+      .filter((p) => existsSync(p.tarball));
+    for (const p of peersFamilia) console.log(gris(`  peer de la familia: ${p.nombre}@${p.version} desde ${relative(raiz, p.tarball)}`));
+    corre('npm', ['install', '--no-audit', '--no-fund', '--silent', ...peersFamilia.map((p) => p.tarball), tarball], temporal);
 
     // Se importa CADA subpath declarado, no solo el principal. Antes solo se probaba `.`, y ese
     // era justo el hueco que este script dice existir para tapar: un `exports` que apunta a un

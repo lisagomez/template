@@ -5,6 +5,7 @@
  * satura (> -3 dBFS), se baja 6 dB; si hubo texto pero entro flojo (< -30 dBFS), se sube 6 dB.
  * Pasos de 6 dB y topes: sin oscilar y sin amplificar ruido hasta el infinito. Puro y probado.
  */
+import { factorDeDb } from '@tu-scope/voz';
 export interface EntradaAjuste {
   actualDb: number;
   /** Pico de la escucha tal como entro del microfono, sin ganancia. */
@@ -37,4 +38,5 @@ export function ajustaGanancia(e: EntradaAjuste): Ajuste {
 }
 
 /** dB → factor lineal para multiplicar muestras. */
-export const factorDe = (db: number): number => 10 ** (db / 20);
+/** dB → factor lineal: el `factorDeDb` de `voz`, con el nombre que ya usaba este paquete. */
+export const factorDe = factorDeDb;

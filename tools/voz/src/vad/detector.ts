@@ -8,7 +8,29 @@
  */
 
 import { concatena, creaRelleno, creaTroceador } from '../audio/marcos.js';
-import type { EventoVoz, Muestras, OpcionesDetector, Turno } from '../types.js';
+import type { EventoVoz, Muestras, OpcionesDetector, PerfilDetector, Turno } from '../types.js';
+
+/** Los mandos de un perfil: todo lo del detector menos el modelo y si conserva el audio. */
+export type MandosDetector = Required<Pick<OpcionesDetector, 'umbralEntrada' | 'umbralSalida' | 'msSilencioParaCerrar' | 'msMinimoHabla' | 'msRelleno'>>;
+
+/**
+ * Los defectos con nombre, y de donde sale cada uno. Un perfil no es una opinion: es un juego
+ * de mandos medido para un uso, y el uso va en el nombre.
+ *
+ *  - `bargeIn`: cerrar rapido para que el agente conteste. Los umbrales (0,5 / 0,35) y el
+ *    relleno vienen de la medicion sobre LibriSpeech dev-clean (README, 2026-09-01); 500 ms de
+ *    silencio es el precio de contestar sin pisar a quien respira a mitad de frase. Es lo que
+ *    `creaDetectorVoz` usaba sin nombre hasta 0.4: no cambia nada para nadie.
+ *  - `dictado`: cerrar sin partir frases. Medido por `@tu-scope/dictado` el 2026-09-15 sobre 150
+ *    frases leidas de FLEURS es_419: con 700 ms el VAD parte el 6,7 % de las frases, con 1000 ms
+ *    el 0,7 %, con 1500 ms ninguna; se toma el minimo bajo el 1 %. El relleno sube a 250 ms
+ *    para no comerse la primera silaba, que es la que el motor necesita, y el minimo de habla
+ *    a 200 ms para que un chasquido no llegue al motor.
+ */
+export const PERFILES_DETECTOR: Readonly<Record<PerfilDetector, Readonly<MandosDetector>>> = Object.freeze({
+  bargeIn: Object.freeze({ umbralEntrada: 0.5, umbralSalida: 0.35, msSilencioParaCerrar: 500, msMinimoHabla: 120, msRelleno: 200 }),
+  dictado: Object.freeze({ umbralEntrada: 0.5, umbralSalida: 0.35, msSilencioParaCerrar: 1000, msMinimoHabla: 200, msRelleno: 250 }),
+});
 
 export interface DetectorVoz {
   /**
@@ -27,11 +49,12 @@ export interface DetectorVoz {
 
 export function creaDetectorVoz(opciones: OpcionesDetector): DetectorVoz {
   const { modelo } = opciones;
-  const umbralEntrada = opciones.umbralEntrada ?? 0.5;
-  const umbralSalida = opciones.umbralSalida ?? 0.35;
-  const msSilencioParaCerrar = opciones.msSilencioParaCerrar ?? 500;
-  const msMinimoHabla = opciones.msMinimoHabla ?? 120;
-  const msRelleno = opciones.msRelleno ?? 200;
+  const perfil = PERFILES_DETECTOR[opciones.perfil ?? 'bargeIn'];
+  const umbralEntrada = opciones.umbralEntrada ?? perfil.umbralEntrada;
+  const umbralSalida = opciones.umbralSalida ?? perfil.umbralSalida;
+  const msSilencioParaCerrar = opciones.msSilencioParaCerrar ?? perfil.msSilencioParaCerrar;
+  const msMinimoHabla = opciones.msMinimoHabla ?? perfil.msMinimoHabla;
+  const msRelleno = opciones.msRelleno ?? perfil.msRelleno;
   const conservaAudio = opciones.conservaAudio ?? false;
 
   if (umbralSalida > umbralEntrada) {

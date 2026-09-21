@@ -20,6 +20,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { picoDb } from '@tu-scope/voz';
 import { campo, valoresDe, type Ajustes, type AjustesResueltos, type Clave } from '../ajustes.js';
 import { creaDictado, type Dictado, type Estado, type EventoDictado, type Modo } from '../dictado.js';
 import { fechaHaceDias } from '../historial.js';
@@ -122,17 +123,13 @@ function avisoPico(picoDb: number): string {
 const MULETILLAS = new Set(['uh', 'um', 'eh', 'ah', 'mm', 'mmm', 'hmm', 'aja', 'ajá']);
 
 function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbral: () => number, contadores: ContadoresSesion): Motor {
+  // El pico por ventanas de 30 ms es el `picoDb` de `voz`: la misma aritmetica que el medidor del microfono.
   const ventana = Math.max(1, Math.round(frecuenciaHz * 0.03));
-  const pico = (m: Float32Array) => {
-    let max = -Infinity;
-    for (let i = 0; i < m.length; i += ventana) max = Math.max(max, nivelDb(m.subarray(i, i + ventana)));
-    return max;
-  };
   return {
     id: motor.id,
     admitePista: motor.admitePista,
     async transcribe(muestras, hz, o) {
-      const db = pico(muestras);
+      const db = picoDb(muestras, ventana);
       const umbralDb = umbral();
       if (db < umbralDb) {
         console.log(gris(`  (turno descartado sin transcribir: pico ${db.toFixed(1)} dBFS < ${umbralDb} dBFS, no es voz)`));

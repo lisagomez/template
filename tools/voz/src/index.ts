@@ -18,6 +18,9 @@ export type {
   ModeloVoz,
   Muestras,
   OpcionesDetector,
+  OpcionesTranscribe,
+  PerfilDetector,
+  Transcripcion,
   Transcriptor,
   Turno,
 } from './types.js';
@@ -25,8 +28,9 @@ export type {
 export { aMono, creaRemuestreador, type Remuestreador } from './audio/remuestreo.js';
 export { concatena, creaRelleno, creaTroceador } from './audio/marcos.js';
 export { fbank, type OpcionesFbank } from './audio/fbank.js';
+export { factorDeDb, nivelDb, picoDb, rms } from './audio/nivel.js';
 
-export { creaDetectorVoz, type DetectorVoz } from './vad/detector.js';
+export { creaDetectorVoz, PERFILES_DETECTOR, type DetectorVoz, type MandosDetector } from './vad/detector.js';
 export { modeloEnergia, type OpcionesEnergia } from './vad/energia.js';
 
 export { creaDetectorPorCanal, type DetectorPorCanal, type OpcionesPorCanal } from './canales/por-canal.js';

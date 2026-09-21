@@ -14,6 +14,7 @@
  * en produccion.
  */
 
+import { rms as valorEficaz } from '../audio/nivel.js';
 import type { ModeloVoz, Muestras } from '../types.js';
 
 export interface OpcionesEnergia {
@@ -49,9 +50,7 @@ export function modeloEnergia(opciones: OpcionesEnergia = {}): ModeloVoz {
     tamMarco,
     frecuenciaHz,
     async probabilidad(marco: Muestras): Promise<number> {
-      let suma = 0;
-      for (let i = 0; i < marco.length; i++) suma += marco[i]! * marco[i]!;
-      const rms = Math.sqrt(suma / Math.max(1, marco.length));
+      const rms = valorEficaz(marco);
       const db = 20 * Math.log10(rms + 1e-9);
       if (calibrados < marcosCalibracion) {
         calibrados++;

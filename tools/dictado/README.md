@@ -24,7 +24,7 @@ módulo a módulo y el veredicto están en [`docs/SDD-dictado.md`](../../docs/SD
 ## Instalar
 
 ```bash
-npm install <ruta>/tools/voz/tu-scope-voz-0.4.0.tgz <ruta>/tools/dictado/tu-scope-dictado-0.1.0.tgz
+npm install <ruta>/tools/voz/tu-scope-voz-0.5.0.tgz <ruta>/tools/dictado/tu-scope-dictado-0.1.0.tgz
 npx dictado instala [--app <ruta-de-la-app>] [--sin-icono]   # una máquina nueva, en un paso
 npx dictado diagnostico                                       # lo que se pega en un issue: sin secretos ni texto dictado
 ```
@@ -40,9 +40,13 @@ que queda a mano (permitir el micrófono, anclar el icono, abrir la dirección e
 solo por LAN el script de red como administrador). Medido en limpio: ver
 `medicion/corpus-propio/instalacion-<fecha>.md`. No pide administrador.
 
-`@tu-scope/voz` es peer **exacto** (0.4.0) y `onnxruntime-node` / `sherpa-onnx-node` son peers
-**opcionales**: los instala quien use `./node`. El núcleo (`.`) y el cliente remoto (`./remoto`)
-no necesitan ninguno.
+`@tu-scope/voz` es peer **exacto y obligatorio** (0.5.0): el contrato de este paquete
+(`Muestras`, `Turno`, `DetectorVoz`, `Transcriptor` con idioma y pista) **es** el de voz —desde
+0.5.0 se importan sus tipos en vez de redeclararlos, y `pruebas/contrato.ts` lo demuestra en
+tipos y en cifras—, el VAD usa su perfil `dictado`, y el nivel en dB, el pico por ventanas y el
+PCM/WAV son los suyos. `onnxruntime-node` / `sherpa-onnx-node` son peers **opcionales**: los
+instala quien use `./node`. El núcleo (`.`) no necesita ninguno en tiempo de ejecución (solo
+tipos), ni el cliente remoto (`./remoto`).
 
 ## Los seis usos
 
@@ -395,6 +399,49 @@ entra flojo (`--ganancia-db 12`), `termina()` debe esperar al audio en vuelo, y 
 oye inglés en frases cortas (`--respaldo faster-whisper:small` repite solo esas en español).
 La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (confirmado por la dueña ese día): el pegador escribe donde esté el foco de Windows.
 
+## Los mandos que de verdad importan
+
+| Ajuste (`dictado ajustes`) | Que pasa si te equivocas |
+|---|---|
+| `silencioMs` (1000) | Corto: el VAD parte la frase y en manos libres se pega a medias (700 ms parte el 6,7 %; 1000, el 0,7 %; medido sobre 150 frases). Largo: en manos libres cada frase espera ese silencio antes de pegarse; en `alternar`/`pulsar` no anade nada |
+| `gananciaDb` (0) | De mas sobre un microfono fuerte SATURA (picos a −0,7 dBFS con +12 dB, 2026-09-19): palabras rotas en cualquier motor. De menos (pico < −45 dBFS) el motor no te oye y Parakeet toma el espanol por ingles. `auto` sigue el pico de cada escucha; medido: no cambia el WER, solo ayuda si el microfono entra flojo |
+| `umbralVozDb` (−45) | Alto: frases flojas se descartan como «sin voz» antes del motor. Bajo: el motor alucina texto sobre la nada («All means» sobre un turno a −86,5 dBFS, 2026-09-19) |
+| `respaldo` (auto) | Sin respaldo, Parakeet oye ingles en frases cortas o flojas («Probably.», «No you can only gorda»). Con faster-whisper:small, +1,4 s al arrancar y ~1,6 s por cada repeticion; solo se repite cuando el idioma no cuadra |
+| `pegar` (portapapeles) | `portapapeles` restaura lo que habia, pero el primer pegado de la sesion cuesta ~1 s (arranca el PowerShell persistente; los siguientes, decenas de ms). `teclear` no toca el portapapeles. `ninguno` solo muestra |
+| `micEnEspera` (cerrado) | `cerrado` abre el microfono al escuchar (70–260 ms medidos) y lo cierra 1,5 s despues de parar; `abierto` captura y descarta siempre. Con `--entrada` siempre abierto |
+| `modo` (alternar) | `alternar`/`pulsar` juntan los turnos y transcriben una vez (mejor puntuacion); `manos-libres` pega cada turno que el VAD cierra y paga `silencioMs` en cada frase |
+| `hilos` (8) | Medido con Parakeet: 4 hilos 541 ms, 8 hilos 506 ms, 16 hilos 604 ms (p50). Mas hilos que nucleos fisicos es peor (SMT) |
+| `correccionPorSimilitud` (off) | Encendida corrige palabras parecidas a tus terminos: tambien las que no debia. Sustituir de mas es peor que no sustituir |
+| `retencionDias` (365) | 0 no borra nunca; menos de lo firmado en la AISIA de Fase 0 (365) es una decision que se firma, no que se teclea |
+
+## Avisos que ahorran una tarde
+
+- **El WAV que ffmpeg escribe a una tuberia lleva tamanos «desconocidos»** (`0xFFFFFFFF` en la
+  cabecera): el servicio lo rechazaba con 500 y la ruta caia al CLI en silencio. Entre procesos va
+  PCM crudo (`-f s16le`) con la frecuencia en cabecera, y la respuesta dice por donde paso (`via`).
+- **Un proceso de Node sin handles sale en silencio**, aunque espere una promesa. Con el microfono
+  cerrado en espera y el unico intervalo con `.unref()`, `dictar` salio con codigo 0 sin decir nada:
+  un latido con referencia hasta `salir()`.
+- **`pkill -f '<patron>'` mata la shell que lo lanza** si su linea de comando contiene el patron
+  (exit 144, y reincidio con la regla cargada). Matar por puerto (`ss -ltnp` → PID → `kill`) o con
+  el patron anclado al inicio.
+- **El microfono de WSLg satura solo** si Windows le pone «mejoras» o ganancia automatica: el
+  pico de la escucha se vigila en las dos puntas (sano entre −20 y −6 dBFS) y el aviso dice cual.
+- **Parakeet detecta el idioma solo, y con audio corto o flojo toma el espanol por ingles.** Los
+  monosilabos sinteticos aislados («si», «tres») los oyen en ingles los DOS motores, y rellenar
+  con silencio no ayuda: el panel pide cantidad + unidad. Las muletillas solo las conserva
+  faster-whisper (Parakeet: recall 76 %, «no medible»).
+- **PowerShell no siempre acepta `-File` en `\\wsl.localhost\…`**: los ayudantes viajan por
+  `-EncodedCommand`; y `cmd.exe` corta a 8 191 caracteres, asi que el icono va por `-File` sobre
+  una copia en `%LOCALAPPDATA%\dictado\`. Un icono viejo que ya corre no se entera del refresco
+  (mutex de instancia unica): se cierra y arranca el nuevo.
+- **Sin `DICTADO_RUNTIME`, el CLI busca `<datos>/runtime`**: es lo que deja `dictado instala` y en
+  una maquina recien instalada no lo encontraba (medido en HOME limpio, 2026-09-20).
+- **Matar `npx` no mata a `next-server`**: un guion de capturas dejo un servidor huerfano en su
+  puerto y la siguiente corrida hablo con el equivocado. Lanzar en grupo propio y matar el grupo.
+- **El motor del asesor cachea por id de transcripcion**; el laboratorio usa un id derivado del
+  contenido para no recibir la respuesta de otra frase.
+
 ## Variables de entorno
 
 | Variable | Qué | Por defecto |
@@ -415,8 +462,8 @@ El token nunca se imprime: `dictado config` dice `presente (largo N)`.
 ## Desarrollo
 
 ```bash
-npm run build      # prebuild instala @tu-scope/voz 0.4.0 desde su tarball (nunca npm link)
-npm run prueba     # 118 pruebas contra dist/, sin modelos ni red, ~2 s
+npm run build      # prebuild instala @tu-scope/voz 0.5.0 desde su tarball (nunca npm link)
+npm run prueba     # 121 pruebas contra dist/, sin modelos ni red, ~2 s
 npm run mide       # pesos reales; ~2,5 GB la primera vez
 npm run empaqueta dictado   # desde la raíz del repo: contrato + build + tarball + integración
 ```

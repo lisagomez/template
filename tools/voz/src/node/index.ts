@@ -15,6 +15,7 @@ export {
   type OpcionesSegmentacion,
 } from '../onnx/segmentacion.js';
 export type { RuntimeOnnx, SesionOnnx, TensorOnnx } from '../onnx/tipos.js';
+export { mbDe, PESOS, RUNTIMES, SEGMENTACION, SILERO, WESPEAKER, type Peso } from './pesos.js';
 
 import { aMono, creaRemuestreador } from '../audio/remuestreo.js';
 import type { Muestras } from '../types.js';
@@ -101,5 +102,44 @@ export function pcm16aFloat(bytes: Uint8Array): Muestras {
   const vista = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const salida = new Float32Array(Math.floor(bytes.byteLength / 2));
   for (let i = 0; i < salida.length; i++) salida[i] = vista.getInt16(i * 2, true) / 32768;
+  return salida;
+}
+
+/** La inversa de `pcm16aFloat`: flotante en [-1, 1] → PCM entero de 16 bits little-endian. Recorta lo que se pase. */
+export function floatAPcm16(muestras: Muestras): Uint8Array {
+  const salida = new Uint8Array(muestras.length * 2);
+  const vista = new DataView(salida.buffer);
+  for (let i = 0; i < muestras.length; i++) {
+    // Escala simetrica (×32768, tope en 32767): la inversa exacta de `pcm16aFloat` (÷32768).
+    vista.setInt16(i * 2, Math.max(-32768, Math.min(32767, Math.round(muestras[i]! * 32768))), true);
+  }
+  return salida;
+}
+
+/**
+ * La inversa de `leeWav`: un WAV PCM16 mono, en bytes, listo para escribir o mandar. Sin `fs`
+ * a proposito: los bytes valen igual en un archivo, en un Blob o en una respuesta HTTP.
+ */
+export function codificaWav(muestras: Muestras, frecuenciaHz: number): Uint8Array {
+  const pcm = floatAPcm16(muestras);
+  const salida = new Uint8Array(44 + pcm.length);
+  const vista = new DataView(salida.buffer);
+  const escribe = (offset: number, texto: string) => {
+    for (let i = 0; i < texto.length; i++) salida[offset + i] = texto.charCodeAt(i);
+  };
+  escribe(0, 'RIFF');
+  vista.setUint32(4, 36 + pcm.length, true);
+  escribe(8, 'WAVE');
+  escribe(12, 'fmt ');
+  vista.setUint32(16, 16, true);
+  vista.setUint16(20, 1, true); // PCM
+  vista.setUint16(22, 1, true); // mono
+  vista.setUint32(24, frecuenciaHz, true);
+  vista.setUint32(28, frecuenciaHz * 2, true);
+  vista.setUint16(32, 2, true);
+  vista.setUint16(34, 16, true);
+  escribe(36, 'data');
+  vista.setUint32(40, pcm.length, true);
+  salida.set(pcm, 44);
   return salida;
 }
