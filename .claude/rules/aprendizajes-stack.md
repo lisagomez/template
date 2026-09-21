@@ -112,27 +112,21 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Aplicar en**: cualquier edición de la descripción de un PR desde una sesión.
 
 ### 2026-09-20: Turbopack rastrea como assets el disco que el bundle toca con `fs`
-- **Error**: `existsSync`/`readdirSync` en un route handler sobre rutas de `process.cwd()` +
-  literales; el build siguió el árbol de `tools/dictado/medicion/banco/` y reventó con el symlink
-  del venv («points out of the filesystem root»). El disparador es cualquier `fs` con ruta plegable.
-- **Fix**: el bundle no toca el disco del banco: todo sondeo va en un script Node aparte
-  (`scripts/laboratorio-voz/maquina.mjs`) por `execFile`; `fs` solo sobre temporales de `mkdtemp`.
+- **Error**: `existsSync` en un route handler con ruta plegable; el build siguió `medicion/banco/` y
+  reventó con el symlink del venv («points out of the filesystem root»).
+- **Fix**: el bundle no toca ese disco: todo sondeo va en `scripts/laboratorio-voz/maquina.mjs` por
+  `execFile`; `fs` solo sobre temporales de `mkdtemp`.
 - **Aplicar en**: todo route handler o server component que mire carpetas fuera de `src/`.
 
 ### 2026-09-20: `npm install` poda lo que no está en `package.json` (Playwright desapareció)
 - **Error**: `npm install uqr` quitó `playwright`, instalado a mano y nunca declarado.
-- **Fix**: lo que un guion del repo importa se declara pineado (`playwright` devDependency exacta).
-- **Aplicar en**: cualquier herramienta usada desde `scripts/` o desde una sesión.
+- **Fix**: lo que un guion importa se declara pineado. **Aplicar en**: todo lo usado desde `scripts/`.
 
 ### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type` declarado
-- **Error**: `node --test scripts/prueba-trayectorias.ts` y la suite del laboratorio de voz
-  imprimían «Module type of file ... is not specified»: Node adivina ESM por la sintaxis. Sale
-  una vez por proceso y nombra el PRIMER archivo sin tipo, así que declararlo solo en `pruebas/`
-  lo movió al `services/*.ts` importado: hay que cubrir todo lo que Node carga.
-- **Fix**: `{ "type": "module" }` en `scripts/package.json` y en `src/package.json`, nada más.
-  En la raíz no: reinterpreta todo `.js` (`postcss.config.js` es CommonJS) y va más allá del
-  aviso. Next sí adapta el `server.js` del standalone al `type` de la raíz (`build/utils.js`),
-  así que ese no es el motivo.
+- **Error**: «Module type of file ... is not specified» al correr `.ts` con `node --test`: sale una
+  vez por proceso y nombra el PRIMER archivo sin tipo, así que hay que cubrir todo lo que Node carga.
+- **Fix**: `{ "type": "module" }` en `scripts/package.json` y `src/package.json`, nada más. En la
+  raíz no: reinterpreta todo `.js` (`postcss.config.js` es CommonJS).
 - **Aplicar en**: cualquier `.ts` o `.js` nuevo que Node corra directo fuera de `tools/`.
 
 ### 2026-09-20: el WAV que ffmpeg escribe a una tubería lleva tamaños «desconocidos»
@@ -147,3 +141,15 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   con código 0 sin decir nada; `await` de una promesa pendiente no mantiene el proceso.
 - **Fix**: un latido con referencia hasta `salir()`; medir con la salida a archivo.
 - **Aplicar en**: todo demonio o CLI de larga vida que cierre recursos en reposo.
+
+### 2026-09-20: una respuesta vieja pisa a la nueva si nadie numera las cargas
+- **Error**: en `/historial` la lista sin filtrar llegó después que la filtrada (sondeo «vivo» y
+  buscador a la vez): 188 donde debía haber 28. La captura esperaba «N de M» sin exigir N en la lista.
+- **Fix**: cada carga lleva número y solo se aplica la última; el sondeo no corre con una carga en
+  vuelo; la espera de la captura exige cuenta y lista iguales.
+- **Aplicar en**: todo hook con varias fuentes sobre el mismo estado.
+
+### 2026-09-20: `react-hooks/set-state-in-effect` no acepta un `await` como separación
+- **Error**: marca `setCargando(true)` en un efecto aunque vaya tras `await`: mira el texto, no el tiempo.
+- **Fix**: el efecto solo dispara la promesa; el estado lo escribe la promesa al resolver.
+- **Aplicar en**: todo `useEffect` que cargue datos en `src/`.
