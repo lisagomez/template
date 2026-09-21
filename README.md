@@ -217,7 +217,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # el gate completo (16 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:trayectorias + verifica:trayectorias + imprenta + fugas
+npm run validate     # el gate completo (17 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:trayectorias + verifica:trayectorias + imprenta + fugas
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -227,6 +227,7 @@ npm run audita:fugas  # ¿una entrada del corpus es reconocible leyendo el arbol
 npm run prueba:contabilidad  # el coste `null` no se suma como cero, y el corte no lo decide el modulo
 npm run prueba:imprenta  # el contrato de los CLI: dry-run, destructivo marcado, sin reimplementar
 npm run prueba:laboratorio  # las reglas del laboratorio de voz (/laboratorio-voz): catalogo, estado real, intenciones, acta del CLI, WAV, PCM en flujo, interrupcion, sesion de picking
+npm run prueba:historial    # la logica pura de /historial: busqueda con acentos, agrupacion por dia, estadisticas, exportadores
 npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre

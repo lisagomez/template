@@ -48,6 +48,8 @@ export function creaAlmacenJsonl(ruta: string): Almacen {
       const entradas = await lee();
       const entrada = entradas.find((e) => e.id === id);
       if (!entrada) return undefined;
+      // La primera correccion conserva lo que dijo el motor; las siguientes no lo pisan.
+      if (entrada.texto !== texto && !entrada.textoCrudo) entrada.textoCrudo = entrada.texto;
       entrada.texto = texto;
       await writeFile(ruta, entradas.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf8');
       return entrada;
@@ -62,6 +64,13 @@ export function creaAlmacenJsonl(ruta: string): Almacen {
         await mkdir(dirname(ruta), { recursive: true });
         await writeFile(ruta, quedan.map((e) => JSON.stringify(e)).join('\n') + (quedan.length ? '\n' : ''), 'utf8');
       }
+      return entradas.length - quedan.length;
+    },
+    async borraUno(id) {
+      const entradas = await lee();
+      const quedan = entradas.filter((e) => e.id !== id);
+      if (quedan.length === entradas.length) return 0;
+      await writeFile(ruta, quedan.map((e) => JSON.stringify(e)).join('\n') + (quedan.length ? '\n' : ''), 'utf8');
       return entradas.length - quedan.length;
     },
   };

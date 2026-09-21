@@ -68,7 +68,7 @@ export function ordenIcono(posicionales: readonly string[]): void {
     const distro = process.env['WSL_DISTRO_NAME'] ?? '';
     const cmd = [
       '@echo off',
-      `start "" powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%LOCALAPPDATA%\\dictado\\icono-barra.ps1" -Puerto ${PUERTO_ICONO} -RaizWsl "${RAIZ}" -Distro "${distro}"`,
+      `start "" powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%LOCALAPPDATA%\\dictado\\icono-barra.ps1" -Puerto ${PUERTO_ICONO} -RaizWsl "${RAIZ}" -Distro "${distro}" -Historial "http://localhost:3000/historial"`,
       '',
     ].join('\r\n');
     writeFileSync(rutaCmd, cmd);

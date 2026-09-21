@@ -237,6 +237,10 @@ function lanzaIconoBarra(puerto: number): void {
   }
   const argumentos = ['/c', 'start', '/b', 'powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', copia.windows, '-Puerto', String(puerto), '-RaizWsl', raiz];
   if (distro) argumentos.push('-Distro', distro);
+  // «Abrir historial» del menu: la pagina /historial de la app (DICTADO_HISTORIAL_URL si la app no esta en :3000).
+  const historial = process.env['DICTADO_HISTORIAL_URL'] ?? 'http://localhost:3000/historial';
+  argumentos.push('-Historial', historial);
+  console.log(gris(`  «Abrir historial» del icono → ${historial}`));
   // Solo para medir la pildora (fps, CPU, capturas de si misma): nunca por defecto.
   if (process.env['DICTADO_ICONO_MEDIR'] === '1') argumentos.push('-Medir');
   const hijo = spawn('cmd.exe', argumentos, { cwd: '/mnt/c', stdio: 'ignore' });

@@ -60,5 +60,9 @@ test('historial: borra todo o solo lo anterior a una fecha; fechaHaceDias resta 
   assert.equal(await h.cuenta(), 1);
   assert.equal(await h.borra(), 1);
   assert.equal(await h.cuenta(), 0);
+  const uno = await h.agrega({ texto: 'solo', motor: 'm', duracionMs: 1 });
+  assert.equal(await h.borraUno('otro'), 0);
+  assert.equal(await h.borraUno(uno.id), 1);
+  assert.equal(await h.cuenta(), 0);
   assert.equal(fechaHaceDias(365, new Date('2026-09-20T00:00:00.000Z')).slice(0, 10), '2025-09-20');
 });

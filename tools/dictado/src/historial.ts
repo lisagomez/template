@@ -31,6 +31,8 @@ export interface Almacen {
   cuenta(): Promise<number>;
   /** Borra entradas (todas, o las anteriores a una fecha ISO) y devuelve cuantas se fueron. */
   borra(opciones?: { antesDe?: string }): Promise<number>;
+  /** Borra un dictado por id. Devuelve cuantos borro (0 o 1). */
+  borraUno(id: string): Promise<number>;
 }
 
 export interface Historial extends Almacen {
@@ -58,6 +60,8 @@ export function almacenEnMemoria(): Almacen {
     async actualiza(id, texto) {
       const entrada = entradas.find((e) => e.id === id);
       if (!entrada) return undefined;
+      // La primera correccion conserva lo que dijo el motor; las siguientes no lo pisan.
+      if (entrada.texto !== texto && !entrada.textoCrudo) entrada.textoCrudo = entrada.texto;
       entrada.texto = texto;
       return { ...entrada };
     },
@@ -70,6 +74,12 @@ export function almacenEnMemoria(): Almacen {
       entradas.length = 0;
       entradas.push(...quedan);
       return antes - quedan.length;
+    },
+    async borraUno(id) {
+      const i = entradas.findIndex((e) => e.id === id);
+      if (i === -1) return 0;
+      entradas.splice(i, 1);
+      return 1;
     },
   };
 }

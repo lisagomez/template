@@ -82,6 +82,14 @@ test('almacen JSONL: anade, ordena por fecha, busca, actualiza y sobrevive a una
   assert.equal((await almacen.actualiza(a.id, 'uno editado'))?.texto, 'uno editado');
   assert.equal(await almacen.actualiza('nadie', 'x'), undefined);
   assert.equal((await almacen.recientes(10))[1]?.texto, 'uno editado');
+  assert.equal((await almacen.recientes(10))[1]?.textoCrudo, 'uno', 'la primera correccion guarda lo que dijo el motor');
+  await almacen.actualiza(a.id, 'uno editado dos veces');
+  assert.equal((await almacen.recientes(10))[1]?.textoCrudo, 'uno', 'la segunda no lo pisa');
+  // Borrar uno: solo ese; un id desconocido no toca nada; el archivo queda bien formado.
+  assert.equal(await almacen.borraUno('nadie'), 0);
+  assert.equal(await almacen.borraUno(a.id), 1);
+  assert.deepEqual((await almacen.recientes(10)).map((e) => e.texto), ['dos con Hermes']);
+  assert.equal(await almacen.cuenta(), 1);
   rmSync(carpeta, { recursive: true, force: true });
 });
 

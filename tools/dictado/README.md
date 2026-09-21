@@ -265,7 +265,7 @@ saturación, no el error, y el defecto sigue en 0.
 
 | Qué | Dónde | Lleva contenido | Se borra con |
 |---|---|---|---|
-| Historial de dictados (texto, motor, duración, latencia) | `DICTADO_DATOS/historial.jsonl` | **sí** | `dictado historial --borra [--antes YYYY-MM-DD] --si`; retención automática `DICTADO_RETENCION_DIAS` (365 por defecto, 0 = nunca) |
+| Historial de dictados (texto, motor, duración, latencia; y el texto original del motor si se corrigió) | `DICTADO_DATOS/historial.jsonl` | **sí** | `dictado historial --borra [--antes YYYY-MM-DD] --si`; retención automática `DICTADO_RETENCION_DIAS` (365 por defecto, 0 = nunca); o desde la página `/historial` de la app (uno a uno, o «lo anterior a un día», con doble confirmación) |
 | Diccionario y snippets | `DICTADO_DATOS/diccionario.txt`, `snippets.json` | sí (nombres, expansiones) | `dictado diccionario quita`, `snippets quita`, o borrar el archivo |
 | Token del celular | `DICTADO_DATOS/movil.token` y `.env.local` de la app | secreto | borrar y volver a `instala` |
 | Trayectorias de sesión | `corpus/salida-dictar-*/trayectoria.json` | **no** (forma) | borrar la carpeta |
@@ -274,6 +274,16 @@ saturación, no el error, y el defecto sigue en 0.
 | Logs de `en-vivo` y del demonio | `medicion/banco/*.log` | estado y latencias; las líneas `✓` llevan el texto | borrar; `diagnostico` solo enseña las de estado |
 
 Nada de esto sale de la máquina. El servicio remoto (VPS propio) no escribe audio ni texto.
+
+**La página `/historial` de la app** (2026-09-20) es la casa de todo lo dictado: busca sobre el
+JSONL entero con o sin acentos (y en el texto original del motor), por día, motor, corregidos y
+«lentos»; copia, corrige en línea (proponiendo palabras nuevas para el diccionario), pega en la
+PC, borra con confirmación; «cómo me va» (dictados y palabras por día y semana, racha, latencia
+p50/p95, y lo que saben las trayectorias: sin voz, respaldo, saturaciones); exporta a Markdown,
+CSV y JSON; y se actualiza sola cuando llega un dictado. Se abre desde la píldora («Abrir
+historial»), desde `/dictar` y desde el laboratorio. Exige el mismo emparejamiento que el
+celular. Medido: buscar sobre 20 000 dictados (3,9 MB) tarda 181 ms por la ruta (sin índice: el
+archivo se lee entero, y lo que manda es el arranque del proceso que lo lee, ~90 ms).
 
 ## Medición (2026-09-15)
 
