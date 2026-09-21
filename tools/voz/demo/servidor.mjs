@@ -17,7 +17,7 @@ import { createServer } from 'node:http';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, extname, join, normalize, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const aqui = dirname(fileURLToPath(import.meta.url));
 const raiz = resolve(aqui, '..');
@@ -46,19 +46,21 @@ const RUTAS = [
   ['/audio/', join(banco, 'audio')],
 ];
 
-function comprueba() {
+async function comprueba() {
   const faltan = [];
+  // Se prueba el paquete CONSTRUIDO: es lo que acaba en el proyecto de destino. Y de el salen
+  // los pesos y runtimes pineados (`src/node/pesos.ts`): una sola lista con la medicion.
+  execFileSync('npm', ['run', 'build'], { cwd: raiz, stdio: 'ignore' });
+  const { PESOS, RUNTIMES } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'pesos.js')).href);
   if (!existsSync(join(aqui, 'node_modules', 'onnxruntime-web'))) {
-    console.log(gris('  instalando onnxruntime-web (el peer opcional del navegador)'));
-    execFileSync('npm', ['install', '--no-audit', '--no-fund', 'onnxruntime-web@1.29.0'], {
+    console.log(gris(`  instalando onnxruntime-web@${RUNTIMES['onnxruntime-web']} (el peer opcional del navegador, pineado)`));
+    execFileSync('npm', ['install', '--no-audit', '--no-fund', `onnxruntime-web@${RUNTIMES['onnxruntime-web']}`], {
       cwd: aqui,
       stdio: 'inherit',
     });
   }
-  // Se prueba el paquete CONSTRUIDO: es lo que acaba en el proyecto de destino.
-  execFileSync('npm', ['run', 'build'], { cwd: raiz, stdio: 'ignore' });
-  for (const nombre of ['silero_vad.onnx', 'embedding.onnx', 'segmentation-3.0.onnx']) {
-    if (!existsSync(join(banco, 'modelos', nombre))) faltan.push(`modelos/${nombre}`);
+  for (const p of PESOS) {
+    if (!existsSync(join(banco, 'modelos', p.archivo))) faltan.push(`modelos/${p.archivo}`);
   }
   if (!existsSync(join(banco, 'manifiesto.json'))) faltan.push('audio de LibriSpeech');
   if (faltan.length > 0) {
@@ -109,7 +111,7 @@ function sirve(peticion, respuesta) {
   respuesta.end(`no encontrado: ${ruta}`);
 }
 
-comprueba();
+await comprueba();
 const puerto = Number(process.env.PUERTO ?? 4321);
 createServer(sirve).listen(puerto, () => {
   const n = catalogo();

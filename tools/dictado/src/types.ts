@@ -1,68 +1,22 @@
 /**
- * El contrato que ven los puntos de entrada. TypeScript puro, CERO dependencias.
+ * El contrato que ven los puntos de entrada. TypeScript puro, CERO dependencias en tiempo de
+ * ejecucion: lo unico que se importa de `@tu-scope/voz` son TIPOS, y un `import type` no deja
+ * rastro en el JavaScript compilado.
  *
  * El nucleo no sabe de microfonos, de Windows ni de ningun modelo: habla con cuatro
- * interfaces —`DetectorVoz` (lo pone `@tu-scope/voz`), `Transcriptor` (un motor local, un
- * proceso de Python o un servicio remoto), `Pegador` (donde acaba el texto) y `Almacen` (el
- * historial)— y cada entry point le inyecta las suyas. Por eso el dictado entero se prueba
- * sin descargar un solo MB de modelos, y por eso el mismo nucleo sirve en WSL2, en un VPS o
- * en una prueba.
+ * interfaces —`DetectorVoz` (lo pone `voz`), `Transcriptor` (un motor local, un proceso de
+ * Python o un servicio remoto), `Pegador` (donde acaba el texto) y `Almacen` (el historial)— y
+ * cada entry point le inyecta las suyas. Por eso el dictado entero se prueba sin descargar un
+ * solo MB de modelos, y por eso el mismo nucleo sirve en WSL2, en un VPS o en una prueba.
  *
- * `Muestras`, `Turno`, `EventoVoz` y `DetectorVoz` son ESTRUCTURALMENTE los de `@tu-scope/voz`:
- * se redeclaran aqui para que el nucleo no importe ese paquete ni en tipos. Un detector de
- * `voz` encaja sin adaptador.
+ * `Muestras`, `Turno`, `EventoVoz`, `DetectorVoz`, `Transcriptor`, `OpcionesTranscribe` y
+ * `Transcripcion` SON los de `@tu-scope/voz` 0.5.0 (hasta 0.1.0 se redeclaraban aqui
+ * «estructuralmente iguales», y nadie lo comprobaba). Una sola duena del contrato: si voz lo
+ * cambia, esto se entera al compilar, no en produccion.
  */
+import type { DetectorVoz, EventoVoz, Muestras, OpcionesTranscribe, Transcripcion, Transcriptor, Turno } from '@tu-scope/voz';
 
-/** Audio mono, punto flotante en [-1, 1]. Es el unico formato que cruza este nucleo. */
-export type Muestras = Float32Array;
-
-/** Un tramo de habla delimitado por el detector (mismo contrato que `voz`). */
-export interface Turno {
-  inicioMs: number;
-  finMs: number;
-  audio?: Muestras;
-  hablante?: string;
-  texto?: string;
-}
-
-export type EventoVoz =
-  | { tipo: 'inicioHabla'; ms: number }
-  | { tipo: 'finHabla'; turno: Turno }
-  | { tipo: 'probabilidad'; valor: number; ms: number };
-
-/** Lo que el dictado necesita de un VAD. `creaDetectorVoz` de `voz` lo cumple tal cual. */
-export interface DetectorVoz {
-  procesa(entrada: Muestras): Promise<EventoVoz[]>;
-  cierra(): Promise<EventoVoz[]>;
-  reinicia(): void;
-  readonly hablando: boolean;
-}
-
-export interface OpcionesTranscribe {
-  /** Codigo ISO del idioma (`es`). Sin el, el motor detecta o asume el suyo. */
-  idioma?: string;
-  /**
-   * Vocabulario que el motor debe favorecer (nombres, jerga). Solo lo honran los motores con
-   * `admitePista` (Whisper lo recibe como prompt inicial); los demas lo ignoran.
-   */
-  pista?: string;
-}
-
-export interface Transcripcion {
-  texto: string;
-  confianza?: number;
-  idioma?: string;
-  /** Lo que tardo el motor, si lo mide. */
-  ms?: number;
-}
-
-/**
- * El enchufe de transcripcion. Es un superconjunto del `Transcriptor` de `voz`: un motor de
- * este paquete se le puede pasar a `transcribeTurnos` de `voz` sin adaptar nada.
- */
-export interface Transcriptor {
-  transcribe(muestras: Muestras, frecuenciaHz: number, opciones?: OpcionesTranscribe): Promise<Transcripcion>;
-}
+export type { DetectorVoz, EventoVoz, Muestras, OpcionesTranscribe, Transcripcion, Transcriptor, Turno };
 
 /** Un motor con nombre: lo que se mide y lo que se escribe en el historial. */
 export interface Motor extends Transcriptor {

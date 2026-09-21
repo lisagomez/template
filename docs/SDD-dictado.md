@@ -7,7 +7,7 @@ reales sobre 30 minutos de español con referencia (§5). **Lo que falta es la v
 persona**: la prueba en vivo (§6, casos a y b) quedó pendiente al cerrar la rama; todo lo de
 máquina alrededor está demostrado. El perfil GPU está **diseñado y sin medir**: no hay VPS.
 **Ámbito:** una herramienta de `tools/` bajo el contrato de
-[`EMPAQUETAR-HERRAMIENTA.md`](./EMPAQUETAR-HERRAMIENTA.md). Consume `@tu-scope/voz` 0.4.0 por
+[`EMPAQUETAR-HERRAMIENTA.md`](./EMPAQUETAR-HERRAMIENTA.md). Consume `@tu-scope/voz` 0.5.0 por
 tarball, pineada; **no la modifica**.
 **Spec que la pidió:** [`GOAL-dictado-wsl2.md`](./GOAL-dictado-wsl2.md).
 
@@ -79,25 +79,36 @@ existe en `dictado` 0.1, y se dice por qué.
 heurísticas del diccionario, gestos de la tecla) viene de sflow, MIT, © Daniel Carreón; queda
 atribuido aquí y en el README.
 
-## 3. Qué aporta `voz` y qué le faltó
+## 3. Qué aporta `voz` y qué le faltó (y cómo se cerró el 2026-09-21)
 
 **Aporta, sin cambios:** el VAD Silero por `onnxruntime-node` con histéresis, relleno y cierre
 por silencio (`creaDetectorVoz`); el contrato `Turno`/`EventoVoz`/`Transcriptor`; `leeWav`,
 `pcm16aFloat`, `preparaParaModelo`; y para el lote, `creaDiarizador` + `creaModeloHablante`
-(WeSpeaker) y `fusionaTurnos`. El dictado no redeclara nada de eso en su núcleo salvo los
-**tipos**, estructuralmente idénticos, para que el núcleo no importe `voz` ni en tipos: un
-detector de `voz` encaja sin adaptador.
+(WeSpeaker) y `fusionaTurnos`.
 
-**Le faltó: nada que bloqueara.** `voz` 0.4.0 queda **sin tocar**. Dos cosas se anotan para una
-versión futura suya, porque se resolvieron del lado de `dictado`:
+**Le faltó, y hasta 0.4.0 se resolvió del lado de `dictado`:** (1) `Transcriptor.transcribe(audio, hz)`
+no llevaba opciones —ni idioma ni pista de vocabulario—, así que `dictado` definía un
+superconjunto (`OpcionesTranscribe`) y `transcribeTurnos` de voz no podía usar la pista; (2) los
+defectos del detector (500 ms) eran de barge-in, y los de dictar (1000 ms, medidos en §5.2) vivían
+en `DEFECTOS_DICTADO` de `dictado`; (3) `dictado` redeclaraba `Muestras`, `Turno`, `EventoVoz` y
+`DetectorVoz` «estructuralmente idénticos» para no importar voz ni en tipos, y nadie comprobaba
+que siguieran iguales; (4) el nivel en dB y la puerta de energía eran aritmética propia junto al
+`modeloEnergia` de voz; (5) `floatAPcm16`/`escribeWav` eran las inversas de `pcm16aFloat`/`leeWav`,
+en el otro paquete.
 
-1. `Transcriptor.transcribe(audio, hz)` no lleva opciones: no hay por dónde pasar el idioma ni
-   una pista de vocabulario. `dictado` define un superconjunto (`OpcionesTranscribe`) y sus
-   motores siguen siendo `Transcriptor` válidos para `transcribeTurnos`, pero **ese** camino no
-   puede usar la pista; `transcribeLote` de `dictado` sí.
-2. Los valores por defecto del detector (500 ms de silencio) están pensados para barge-in. Para
-   dictar, el mando que importa es cuánto silencio cierra una *frase* sin partirla, y eso se
-   midió aquí (§5.2): `DEFECTOS_DICTADO` en `src/node/vad.ts` los fija a partir de la tabla.
+**Cerrado con `voz` 0.5.0** (goal `.claude/goals/dictado-sobre-voz/`, compatible con 0.4.0, sin
+publicar): el `Transcriptor` con `OpcionesTranscribe` y `Transcripcion` vive en voz y
+`transcribeTurnos` pasa idioma y pista (un transcriptor de 0.4 sigue valiendo); `PERFILES_DETECTOR`
+(`bargeIn` = los defectos de siempre, `dictado` = los medidos aquí) y `perfil` en `creaDetectorVoz`;
+`rms`/`nivelDb`/`picoDb`/`factorDeDb`; `floatAPcm16`/`codificaWav` en `voz/node`. `dictado`
+**importa los tipos** de voz (peer exacto y obligatorio; `import type`, cero coste en tiempo de
+ejecución), `DEFECTOS_DICTADO` es `PERFILES_DETECTOR.dictado` (mismo objeto) y `pruebas/contrato.ts`
+demuestra la igualdad en tipos (la compila el `typecheck` de la raíz) y en cifras. En la otra
+dirección, voz tomó de dictado la forma de paquete: pesos y runtimes pineados en `src/node/pesos.ts`,
+`npm run mide` deja `ultima-medicion.json` y siembra el README, «qué se guarda y dónde» (el registro
+de voces es biométrico) y `npm run diagnostico`. Ninguna cifra se movió: latencia de `dictar` 216 →
+207 ms (p50 de 5, ruido), y la medición de voz del 2026-09-21 repite la del 2026-09-01 decimal a
+decimal.
 
 ## 4. Las restricciones de WSL2, medidas
 
@@ -270,7 +281,7 @@ de terceros es opción por defecto ni está escrita.
 | Se mide `src/` y se instala `dist/` | pruebas y medición contra `dist/`, como en `voz` |
 | El pegado va a la ventana equivocada | el pegador no elige ventana: es el foco de Windows. Con `--tecla` no hace falta cambiar de ventana; sin ella se avisa |
 | Un secreto en pantalla | el token nunca se imprime (cliente, servicio, CLI `config`); hay prueba |
-| `latest` en algún sitio | modelos por URL, runtimes por versión exacta, base por digest, `voz` por tarball 0.4.0 exacto (`prepara-voz.mjs` rechaza otra cosa) |
+| `latest` en algún sitio | modelos por URL, runtimes por versión exacta, base por digest, `voz` por tarball 0.5.0 exacto (`prepara-voz.mjs` rechaza otra cosa) |
 | Un peer opcional ausente pasa por probado | el empaquetador lo dice («sin probar: falta el peer») y el README lo explica |
 | El helper de Windows hace más de lo que dice | es un archivo de 30 líneas, se lanza a la vista, sondea una tecla y no escribe nada |
 | El hijo Python muere y nadie se entera hasta el tope | el arranque falla al instante con las últimas líneas de stderr (prueba `node.ts`) |

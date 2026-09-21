@@ -104,9 +104,47 @@ export interface OpcionesDetector {
   msRelleno?: number;
   /** Guardar el audio del turno. Necesario para diarizar o transcribir; cuesta memoria. */
   conservaAudio?: boolean;
+  /**
+   * Juego de valores por defecto con nombre y medicion (`PERFILES_DETECTOR`): `bargeIn` (el de
+   * siempre: cerrar rapido para contestar) o `dictado` (cerrar sin partir frases). Lo que se
+   * pase explicito manda sobre el perfil. Sin perfil, `bargeIn`.
+   */
+  perfil?: PerfilDetector;
 }
 
-/** Transcriptor externo. La herramienta NO transcribe: define el enchufe y se aparta. */
+/** Los perfiles del detector con nombre. Sus valores y su medicion viven en `vad/detector.ts`. */
+export type PerfilDetector = 'bargeIn' | 'dictado';
+
+/**
+ * Lo que un transcriptor puede recibir ademas del audio. Todo opcional: un transcriptor que
+ * no lo honre sigue siendo un `Transcriptor` valido, y uno escrito contra la version 0.4
+ * (sin este parametro) tambien.
+ */
+export interface OpcionesTranscribe {
+  /** Codigo ISO del idioma (`es`). Sin el, el motor detecta o asume el suyo. */
+  idioma?: string;
+  /**
+   * Vocabulario que el motor debe favorecer (nombres, jerga). Solo lo honran los motores que
+   * aceptan un prompt inicial (Whisper); los demas lo ignoran sin quejarse.
+   */
+  pista?: string;
+}
+
+/** Lo que devuelve un transcriptor. `texto` es lo unico obligatorio; el resto, si lo mide. */
+export interface Transcripcion {
+  texto: string;
+  confianza?: number;
+  /** Idioma que el motor cree haber oido, si lo declara. */
+  idioma?: string;
+  /** Lo que tardo el motor, si lo mide. */
+  ms?: number;
+}
+
+/**
+ * Transcriptor externo. La herramienta NO transcribe: define el enchufe y se aparta. Desde
+ * 0.5.0 lleva opciones (idioma, pista) y una respuesta mas rica; los transcriptores de 0.4
+ * (`transcribe(muestras, hz)` → `{ texto }`) encajan sin cambios.
+ */
 export interface Transcriptor {
-  transcribe(muestras: Muestras, frecuenciaHz: number): Promise<{ texto: string; confianza?: number }>;
+  transcribe(muestras: Muestras, frecuenciaHz: number, opciones?: OpcionesTranscribe): Promise<Transcripcion>;
 }

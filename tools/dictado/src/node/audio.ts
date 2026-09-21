@@ -9,8 +9,12 @@
  */
 import { spawn, execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
-import { leeWav, pcm16aFloat, preparaParaModelo } from '@tu-scope/voz/node';
+import { nivelDb } from '@tu-scope/voz';
+import { codificaWav, floatAPcm16 as aPcm16, leeWav, pcm16aFloat, preparaParaModelo } from '@tu-scope/voz/node';
 import type { Muestras } from '../types.js';
+
+/** El nivel en dBFS es el de `voz` (una sola aritmetica con `modeloEnergia` y `picoDb`); se reexporta por comodidad. */
+export { nivelDb };
 
 export interface OpcionesCaptura {
   frecuenciaHz?: number;
@@ -121,34 +125,16 @@ export async function leeAudio(ruta: string, frecuenciaHz = 16_000, ffmpeg = 'ff
   return { muestras, frecuenciaHz, duracionMs: (muestras.length / frecuenciaHz) * 1000 };
 }
 
-/** Mono flotante → PCM16LE, que es lo que viaja al servicio remoto y al motor por proceso. */
+/** Mono flotante → PCM16LE (el de `voz`, como `Buffer`: es lo que viaja al servicio remoto y al motor por proceso). */
 export function floatAPcm16(muestras: Muestras): Buffer {
-  const salida = Buffer.alloc(muestras.length * 2);
-  for (let i = 0; i < muestras.length; i++) {
-    const v = Math.max(-1, Math.min(1, muestras[i] ?? 0));
-    salida.writeInt16LE(Math.round(v < 0 ? v * 32768 : v * 32767), i * 2);
-  }
-  return salida;
+  const bytes = aPcm16(muestras);
+  return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
-/** Escribe un WAV PCM16 mono. Solo para diagnostico (`dictar --graba`): por defecto nada se graba. */
+/** Escribe un WAV PCM16 mono (`codificaWav` de `voz` + disco). Solo para diagnostico (`dictar --graba`): por defecto nada se graba. */
 export async function escribeWav(ruta: string, muestras: Muestras, frecuenciaHz: number): Promise<void> {
-  const pcm = floatAPcm16(muestras);
-  const cabecera = Buffer.alloc(44);
-  cabecera.write('RIFF', 0); cabecera.writeUInt32LE(36 + pcm.length, 4); cabecera.write('WAVE', 8);
-  cabecera.write('fmt ', 12); cabecera.writeUInt32LE(16, 16); cabecera.writeUInt16LE(1, 20); cabecera.writeUInt16LE(1, 22);
-  cabecera.writeUInt32LE(frecuenciaHz, 24); cabecera.writeUInt32LE(frecuenciaHz * 2, 28); cabecera.writeUInt16LE(2, 32); cabecera.writeUInt16LE(16, 34);
-  cabecera.write('data', 36); cabecera.writeUInt32LE(pcm.length, 40);
   const { writeFile, mkdir } = await import('node:fs/promises');
   const { dirname } = await import('node:path');
   await mkdir(dirname(ruta), { recursive: true });
-  await writeFile(ruta, Buffer.concat([cabecera, pcm]));
-}
-
-/** RMS en dB relativo a plena escala. Para saber si el microfono esta vivo antes de dictar. */
-export function nivelDb(muestras: Muestras): number {
-  if (muestras.length === 0) return -Infinity;
-  let suma = 0;
-  for (let i = 0; i < muestras.length; i++) suma += (muestras[i] ?? 0) ** 2;
-  return 20 * Math.log10(Math.sqrt(suma / muestras.length) + 1e-9);
+  await writeFile(ruta, codificaWav(muestras, frecuenciaHz));
 }

@@ -92,6 +92,12 @@ dictamina los peers contra el árbol real (un React 18 frente a un peer `^19` sa
 `ERESOLVE`, con la razón de npm delante), se importa desde ahí, y se retira. El destino
 queda como estaba. Lo que sigue sin probar es tu lógica en su runtime — eso es un test tuyo.
 
+**Una herramienta que exige a otra de la familia** (`@tu-scope/dictado` pide `@tu-scope/voz`
+como peer **obligatorio**, pineado exacto): el paso de integración instala primero el tarball
+de ese peer desde `tools/<x>/` (npm no lo encontraría en ningún registro, y el `install`
+moriría ahí; vivido el 2026-09-21). Los peers opcionales siguen sin instalarse, y se dice
+cuál faltó. El consumidor hace lo mismo: `npm install voz.tgz dictado.tgz`, los dos.
+
 **Ya en serio** — publicado en un registro:
 
 ```bash

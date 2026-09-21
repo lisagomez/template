@@ -10,9 +10,9 @@
  * herramienta se limita a entregar turnos limpios, que es lo que sabe hacer.
  */
 
-import type { Transcriptor, Turno } from '../types.js';
+import type { OpcionesTranscribe, Transcripcion, Transcriptor, Turno } from '../types.js';
 
-export interface OpcionesTranscripcion {
+export interface OpcionesTranscripcion extends OpcionesTranscribe {
   frecuenciaHz: number;
   /**
    * Que hacer si el transcriptor falla en un turno. Por defecto se sigue y ese turno queda
@@ -40,7 +40,9 @@ export async function transcribeTurnos(
     const copia = { ...turno };
     if (copia.audio) {
       try {
-        copia.texto = (await transcriptor.transcribe(copia.audio, opciones.frecuenciaHz)).texto;
+        // Idioma y pista viajan con cada turno; un transcriptor de 0.4 los ignora sin enterarse.
+        const pase: OpcionesTranscribe = { ...(opciones.idioma !== undefined ? { idioma: opciones.idioma } : {}), ...(opciones.pista !== undefined ? { pista: opciones.pista } : {}) };
+        copia.texto = (await transcriptor.transcribe(copia.audio, opciones.frecuenciaHz, pase)).texto;
       } catch (error) {
         if (!continuaSiFalla) throw error;
       }
@@ -50,4 +52,4 @@ export async function transcribeTurnos(
   return salida;
 }
 
-export type { Transcriptor };
+export type { OpcionesTranscribe, Transcripcion, Transcriptor };
