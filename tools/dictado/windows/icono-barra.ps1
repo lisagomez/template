@@ -13,7 +13,8 @@
 #   - lee del socket lineas `estado <nombre>`, `pildora <visual>` y `barras <20 enteros>`; lo
 #     que no entiende lo ignora;
 #   - la pildora se arrastra (posicion recordada en flotante.txt junto a este script) y se
-#     oculta o vuelve desde el menu derecho; «Abrir historial» abre la pagina de tus datos.
+#     oculta o vuelve desde el menu derecho; «Abrir historial» abre /historial (buscar, corregir,
+#     borrar, exportar) o, sin la app, `dictado historial` en una terminal.
 # No lee el teclado, no escribe nada (salvo su posicion y, con -Medir, un registro de cuadros y
 # capturas de si misma), no toca el portapapeles y no sale a internet.
 # Un Mutex con nombre garantiza UN icono aunque se lance dos veces. Menu derecho: salir.
@@ -21,7 +22,7 @@ param(
   [int]$Puerto = 47124,
   [string]$RaizWsl = '',
   [string]$Distro = '',
-  [string]$Historial = 'http://localhost:3000/laboratorio-voz',
+  [string]$Historial = 'http://localhost:3000/historial',
   [switch]$Medir
 )
 # Medidas de la pildora (las de sflow).
@@ -204,9 +205,9 @@ $menu = New-Object System.Windows.Forms.ContextMenuStrip
   Desconecta
 })
 [void]$menu.Items.Add('Abrir historial').add_Click({
-  # La pagina de tus datos (historial, diccionario, snippets) si la app responde; si no, el historial en una terminal.
+  # La pagina /historial (buscar, corregir, borrar, exportar) si la app responde; si no, el historial en una terminal.
   $responde = $false
-  try { $r = Invoke-WebRequest -Uri ($Historial -replace '/laboratorio-voz.*$', '/api/laboratorio/estado') -UseBasicParsing -TimeoutSec 2; $responde = ($r.StatusCode -eq 200) } catch { $responde = $false }
+  try { $r = Invoke-WebRequest -Uri ($Historial -replace '/historial.*$', '/api/laboratorio/estado') -UseBasicParsing -TimeoutSec 2; $responde = ($r.StatusCode -eq 200) } catch { $responde = $false }
   if ($responde) { Start-Process $Historial }
   elseif ($RaizWsl) {
     $argumentos = @(); if ($Distro) { $argumentos += @('-d', $Distro) }

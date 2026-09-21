@@ -13,6 +13,12 @@
  *   echo '{…}' | node scripts/laboratorio-voz/maquina.mjs veredictos-agrega → { … guardado }
  *   node scripts/laboratorio-voz/maquina.mjs datos-lee          → diccionario, snippets e historial
  *   echo '{…}' | … diccionario-agrega | diccionario-quita | snippets-agrega | snippets-quita | historial-corrige
+ *   echo '{filtros, desde, cuantos}' | … historial-lee   → la pagina /historial: filtrados, ordenados, paginados
+ *   echo '{id}' | … historial-borra-uno · echo '{antesDe}' | … historial-borra-rango · historial-trayectorias
+ *
+ * Medido el 2026-09-20: leer y buscar sobre 20 000 dictados (3,9 MB) cuesta ~56 ms en total, y sobre
+ * el historial real (188) menos de 1 ms. No hay indice: el archivo se lee entero en cada orden y lo
+ * que manda es el arranque de este proceso (~100 ms), el mismo precio que ya paga el laboratorio.
  *
  * Los datos personales se leen y escriben con las MISMAS piezas del CLI (`cargaDatos` de
  * tools/dictado): un termino anadido aqui lo ve el proximo `dictar`.
@@ -21,6 +27,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, appendFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { filtra, huellaDe } from '../../src/features/historial/services/busqueda.ts';
 
 const raiz = process.env.DICTADO_RAIZ ?? join(process.cwd(), 'tools', 'dictado');
 const banco = join(raiz, 'medicion', 'banco');
@@ -123,8 +130,74 @@ async function ordenDatos(orden) {
   throw new Error('orden de datos desconocida');
 }
 
+/** Un dictado tal como lo ve la pagina: `latenciaMs` siempre presente (null si no se midio). */
+const aDictado = (e) => ({ id: e.id, fecha: e.fecha, texto: e.texto, ...(e.textoCrudo ? { textoCrudo: e.textoCrudo } : {}), motor: e.motor, duracionMs: e.duracionMs, latenciaMs: e.latenciaMs ?? null });
+
+/** Todo el historial, filtrado y ordenado en el servidor (el JSONL se lee entero: ver la cabecera), y una ventana. */
+async function historialLee() {
+  const d = await cargaDatosPersonales();
+  const cuerpo = entradaJson();
+  const todas = (await d.historial.recientes(Number.MAX_SAFE_INTEGER)).map(aDictado);
+  const filtros = cuerpo.filtros ?? {};
+  const coinciden = filtra(todas, filtros);
+  const desde = Math.max(0, Number(cuerpo.desde ?? 0) || 0);
+  const cuantos = Math.min(500, Math.max(1, Number(cuerpo.cuantos ?? 100) || 100));
+  return { entradas: coinciden.slice(desde, desde + cuantos), coinciden: coinciden.length, total: todas.length, huella: huellaDe(todas), motores: [...new Set(todas.map((e) => e.motor))].sort() };
+}
+
+/** Todas las que coinciden (sin ventana), para exportar. */
+async function historialTodo() {
+  const d = await cargaDatosPersonales();
+  const cuerpo = entradaJson();
+  const todas = (await d.historial.recientes(Number.MAX_SAFE_INTEGER)).map(aDictado);
+  return { entradas: filtra(todas, cuerpo.filtros ?? {}) };
+}
+
+async function historialBorraUno() {
+  const d = await cargaDatosPersonales();
+  const id = limpia(entradaJson().id);
+  const borrados = await d.historial.borraUno(id);
+  return { borrados, quedan: await d.historial.cuenta() };
+}
+
+async function historialBorraRango() {
+  const d = await cargaDatosPersonales();
+  const antesDe = limpia(entradaJson().antesDe);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(antesDe)) throw new Error('antesDe debe ser YYYY-MM-DD');
+  // «Anterior al dia D» = todo lo que empezo antes de la medianoche local de D.
+  const [anio, mes, dia] = antesDe.split('-').map(Number);
+  const corte = new Date(anio, mes - 1, dia, 0, 0, 0).toISOString();
+  const borrados = await d.historial.borra({ antesDe: corte });
+  return { borrados, quedan: await d.historial.cuenta() };
+}
+
+/** Las trayectorias de forma de `dictar` (sin contenido): solo lo que la pagina de estadisticas necesita. */
+function historialTrayectorias() {
+  const carpeta = join(raiz, 'corpus');
+  if (!existsSync(carpeta)) return { trayectorias: [] };
+  const trayectorias = [];
+  for (const nombre of readdirSync(carpeta).filter((n) => n.startsWith('salida-dictar-')).sort()) {
+    const ruta = join(carpeta, nombre, 'trayectoria.json');
+    if (!existsSync(ruta)) continue;
+    try {
+      const t = JSON.parse(readFileSync(ruta, 'utf8'));
+      const h = t.acciones?.herramientas ?? {};
+      const m = t.resultado?.metricas ?? {};
+      trayectorias.push({ inicio: t.cuando?.inicio ?? '', fin: t.cuando?.fin ?? '', turnos: h.turnos ?? 0, sinVoz: h.sinVoz ?? 0, respaldo: h.respaldo ?? 0, muertesCaptura: m.muertesCaptura ?? 0, latenciaP50Ms: m.latenciaP50Ms ?? null, picoDbMax: m.picoDbMax ?? null, picoDbMin: m.picoDbMin ?? null });
+    } catch {
+      // una trayectoria rota no tumba la pagina
+    }
+  }
+  return { trayectorias };
+}
+
 const orden = process.argv[2];
 if (orden === 'datos-lee') process.stdout.write(JSON.stringify(await datosLee()));
+else if (orden === 'historial-lee') process.stdout.write(JSON.stringify(await historialLee()));
+else if (orden === 'historial-todo') process.stdout.write(JSON.stringify(await historialTodo()));
+else if (orden === 'historial-borra-uno') process.stdout.write(JSON.stringify(await historialBorraUno()));
+else if (orden === 'historial-borra-rango') process.stdout.write(JSON.stringify(await historialBorraRango()));
+else if (orden === 'historial-trayectorias') process.stdout.write(JSON.stringify(historialTrayectorias()));
 else if (['diccionario-agrega', 'diccionario-quita', 'snippets-agrega', 'snippets-quita', 'historial-corrige'].includes(orden)) process.stdout.write(JSON.stringify(await ordenDatos(orden)));
 else if (orden === 'piezas') process.stdout.write(JSON.stringify({ piezas: piezas(), voces: voces() }));
 else if (orden === 'veredictos-lee') process.stdout.write(JSON.stringify(leeVeredictos()));

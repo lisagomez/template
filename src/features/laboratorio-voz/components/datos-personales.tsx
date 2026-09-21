@@ -88,6 +88,7 @@ export function DatosPersonalesPanel({ token }: { token: string }) {
         </ul>
       </section>
       <section className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800" data-prueba="historial">
+        <a href="/historial" className="float-right text-xs underline" data-prueba="ir-historial">Ver todo el historial →</a>
         <h3 className="text-sm font-semibold">Historial <span className="text-xs font-normal text-neutral-500">({datos?.total ?? 0} dictados)</span></h3>
         <p className="text-xs text-neutral-500">Corrige un dictado y las palabras nuevas se proponen para el diccionario.</p>
         <ul className="mt-2 max-h-64 space-y-2 overflow-auto text-sm">
