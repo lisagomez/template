@@ -72,7 +72,7 @@ existe en `dictado` 0.1, y se dice por qué.
 | `core/transform.py` (66) | Option+N: transformaciones fijas por LLM | **descartado** | misma razón |
 | `core/focus_mode.py` (116) | bloquear apps que distraen (NSWorkspace) | **descartado** | macOS-only, y no es dictado |
 | `core/relaunch.py` (54) | relanzar el `.app` | **descartado** | no hay app |
-| `ui/*` (1 866: píldora, hub, visualizador, ajustes, punto rojo) | PyQt6 + Cocoa | **sustituido (mínimo), 2026-09-19** | `windows/icono-barra.ps1`: icono en el área de notificación + botón flotante arrastrable (la «píldora»), WinForms en un PowerShell legible — estado por color, un click alterna, protocolo TCP de una palabra (`icono.ts`). La TUI sigue para la terminal |
+| `ui/*` (1 866: píldora, hub, visualizador, ajustes, punto rojo) | PyQt6 + Cocoa | **sustituido, 2026-09-19 / píldora completa 2026-09-20** | `windows/icono-barra.ps1`: icono en el área de notificación + la **píldora** de sflow (mismas medidas y estados: logo, 20 barras en tiempo real, puntos, palomita, X con auto-cierre), WinForms en un PowerShell legible que solo pinta; las barras (`src/node/barras.ts`, bandas mel de `voz`) y la máquina de estados (`src/node/pildora.ts`) viven en TypeScript con pruebas y viajan por el socket local (`icono.ts`: `estado`, `pildora`, `barras`). El hub queda cubierto por «Abrir historial» → `/laboratorio-voz`; ajustes y punto rojo, fuera. La TUI sigue para la terminal |
 | `web/server.py` (190) | hub Flask en `:5678` | **descartado** | `dictado historial [--busca]` cubre buscar y copiar |
 
 **Cuenta:** 8 portados, 8 sustituidos, 7 descartados (23 filas: `ui/` va junta). Lo portado literal (reglas de comandos,
@@ -107,6 +107,17 @@ versión futura suya, porque se resolvieron del lado de `dictado`:
 | Tecla global | Sin `/dev/input` del teclado de Windows: solo Windows la oye | `windows/tecla-global.ps1` sondea una tecla (Ctrl derecho por defecto) cada 15 ms y avisa por TCP a `127.0.0.1` (Windows llega a los puertos de WSL2 por localhost). Se lanza **a la vista** y se dice antes qué hace |
 | Pegar en Windows | `clip.exe` + `^v` desde `powershell.exe` (interop) | Un PowerShell **persistente** (`windows/pegador.ps1`): arranque 1 312 ms **una vez**, luego 2 ms por orden (medido el 2026-09-15). Arrancar PowerShell por pegado habría costado 200-400 ms por frase |
 | GPU | `/dev/dxg` existe, **no hay CUDA** (iGPU Radeon) | todo se mide en CPU; el perfil GPU es para el VPS |
+| Pintar en Windows | WSL no dibuja sobre el escritorio: todo lo visual es un ayudante PowerShell/WinForms a la vista | `windows/icono-barra.ps1` (icono + píldora). Medido el 2026-09-20: el `Timer` de WinForms va a saltos de 15,6 ms (16 ms → ~39 cuadros/s, 25 → ~31, 33 → ~21); 20 barras a 32 cuadros/s cuestan 4,7 % de un núcleo si los pinceles se crean una vez (15,6 % creándolos por cuadro); el proceso debe declararse consciente del DPI o a 150 % se ve borroso y `CopyFromScreen` fotografía otra zona |
+
+Tres trampas del puente WSL2 ↔ Windows, medidas al hacer la píldora (2026-09-20):
+
+- `powershell.exe -Command "…"` desde WSL **pierde las comillas** al partir Windows la línea de
+  órdenes; toda orden con comillas va por `-EncodedCommand` (UTF-16LE en base64).
+- `TcpClient.Connect` desde Windows a un puerto de WSL2 **sin nadie escuchando** tarda segundos
+  (el relé de localhost acepta y luego cierra): un reintento cada 2 s congelaba la píldora. Se
+  conecta con `BeginConnect` y se remata en un tick posterior.
+- `cmd.exe /c start /b powershell …` lanzado desde Bash **cuelga la shell** (el hijo hereda la
+  consola). Desde Node va con `spawn` + `unref`; desde un script, `Start-Process`.
 
 ## 5. Medición (2026-09-15, Ryzen 7 5700G, 16 hilos, 15 GB, CPU, Node 22.23)
 
@@ -238,10 +249,11 @@ de terceros es opción por defecto ni está escrita.
 - **Modo comando y transformaciones** (§2): piden un modelo de texto. El enchufe (`Limpiador`)
   existe; el proveedor no. Cuando haya uno local (o una decisión C4 escrita para uno remoto),
   es una tarde de trabajo.
-- **GUI** *(cerrado el 2026-09-19)*: la «ventana de Windows como otro ayudante
-  PowerShell/WinForms» que este punto anticipaba ya existe — `windows/icono-barra.ps1` (icono
-  de barra + botón flotante, sensor `--icono`). El hub y el visualizador siguen fuera: la TUI
-  y el historial (`dictado historial`) los cubren.
+- **GUI** *(cerrado el 2026-09-19; píldora completa el 2026-09-20)*: la «ventana de Windows
+  como otro ayudante PowerShell/WinForms» que este punto anticipaba ya existe —
+  `windows/icono-barra.ps1` (icono de barra + píldora con visualizador, sensor `--icono`;
+  medido: 32 cuadros/s, 4,7 % de un núcleo, 21 ms de estado a pintado). El hub sigue fuera:
+  «Abrir historial» lleva a la página de tus datos, y `dictado historial` a la terminal.
 - **Streaming parcial** (texto mientras hablas): Parakeet TDT en sherpa-onnx es *offline*; hay
   variantes streaming (Zipformer) sin español bueno. Con <!-- LAT_PARAKEET -->~350-600 ms<!-- /LAT_PARAKEET --> de latencia por frase
   no hizo falta.
