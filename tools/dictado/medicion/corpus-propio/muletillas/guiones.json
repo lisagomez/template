@@ -1,0 +1,32 @@
+{
+ "g1-control": [
+  ["Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. Ese vapor sube, se enfría y forma las nubes.", "larga"],
+  ["Cuando las gotas pesan demasiado, caen como lluvia o como nieve. Parte del agua se filtra en la tierra y alimenta los ríos subterráneos. Otra parte corre por la superficie hasta volver al mar.", "larga"],
+  ["Así el ciclo empieza otra vez. Es un sistema cerrado: el agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte.", "fin"]
+ ],
+ "g2-este-eh": [
+  ["Buenos días. Este, hoy vamos a ver, eh, la fotosíntesis. Las plantas, este, toman luz, agua y dióxido de carbono, y producen azúcar y oxígeno.", "larga"],
+  ["Ese proceso, eh, ocurre en los cloroplastos, que son, este, unas estructuras verdes dentro de la célula. Ahora, este, pasemos a la respiración celular. Es el proceso inverso: la célula, eh, quema el azúcar para obtener energía.", "larga"],
+  ["Ocurre en las mitocondrias. Para cerrar, este, un repaso: fotosíntesis produce azúcar con luz; respiración, eh, consume azúcar para dar energía. Este, ambos procesos se necesitan.", "fin"]
+ ],
+ "g3-osea-pues": [
+  ["Vamos a repasar la Revolución Mexicana. Empezó en mil novecientos diez, o sea, hace más de un siglo. Pues, la causa principal fue la desigualdad en el campo.", "larga"],
+  ["Los campesinos, o sea, la mayoría del país, no tenían tierra propia. Pues, Madero convocó a las armas en noviembre. O sea, no fue un solo movimiento, fueron varios. Zapata en el sur, pues, y Villa en el norte.", "larga"],
+  ["La constitución de mil novecientos diecisiete, o sea, el resultado político, sigue vigente hoy. Pues, con eso cerramos el tema. O sea, hasta aquí la clase de hoy.", "fin"]
+ ],
+ "g4-bueno-digamos-mmm": [
+  ["Bueno, hoy toca matemáticas. Vamos a ver las fracciones, digamos, la parte de un todo. Mmm, si parto una pizza en cuatro y tomo una, tengo un cuarto.", "larga"],
+  ["Bueno, dos cuartos son lo mismo que un medio, digamos, la mitad. Mmm, para sumar fracciones con el mismo denominador, bueno, se suman los numeradores. Un cuarto más un cuarto, digamos, es dos cuartos.", "larga"],
+  ["Bueno, con distinto denominador hay que igualarlos primero. Mmm, eso lo vemos mañana. Bueno, digamos que hasta aquí por hoy.", "fin"]
+ ],
+ "g5-eh-este-vale": [
+  ["Eh, buenas tardes. Vamos a hablar de la nutrición. Eh, el cuerpo necesita, este, tres tipos de nutrientes principales. Eh, los carbohidratos dan energía rápida, vale.", "larga"],
+  ["Las proteínas, eh, construyen músculo y tejidos. Las grasas, eh, guardan energía y protegen los órganos, vale. Este, además están las vitaminas y los minerales, que, eh, son necesarios en cantidades pequeñas.", "larga"],
+  ["Eh, el agua también cuenta, este, es más de la mitad del cuerpo. Vale, eh, con eso terminamos.", "fin"]
+ ],
+ "g6-tipo-literal": [
+  ["Tipo, hoy vamos a hablar de redes sociales y salud mental. Básicamente, el problema es el tiempo de pantalla. Como que uno entra cinco minutos y, literal, se le va una hora.", "larga"],
+  ["Tipo, los estudios muestran que dormir menos, básicamente, empeora el ánimo. Como que el cerebro necesita descanso, literal. Tipo, la recomendación es fijar horarios.", "larga"],
+  ["Básicamente, apagar las notificaciones ayuda, como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí.", "fin"]
+ ]
+}

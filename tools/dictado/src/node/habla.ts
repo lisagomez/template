@@ -21,7 +21,7 @@ import { creaHijoPorLineas, type MensajeHijo } from './hijo-por-lineas.js';
 export interface GeneradorSherpa {
   readonly sampleRate: number;
   readonly numSpeakers: number;
-  generateAsync(peticion: { text: string; sid: number; speed: number; onProgress?: (info: { samples: Float32Array; progress: number }) => void }): Promise<{ samples: Float32Array; sampleRate: number }>;
+  generateAsync(peticion: { text: string; sid: number; speed: number; onProgress?: (info: { samples: Float32Array; progress: number }) => number | boolean | void }): Promise<{ samples: Float32Array; sampleRate: number }>;
 }
 
 /** Lo que este modulo usa de `sherpa-onnx-node`; se declara aqui para no depender de sus tipos. */
@@ -47,11 +47,20 @@ export interface AudioSintetizado {
   ms: number;
 }
 
+export interface OpcionesSintesis {
+  /** 1 = la velocidad del modelo; manda sobre la de la voz. */
+  velocidad?: number;
+}
+
 export interface VozSintetica {
   readonly id: string;
   readonly frecuenciaHz: number;
-  /** Sintetiza todo y lo devuelve. `alTrozo` recibe cada frase segun sale, para reproducirla ya. */
-  sintetiza(texto: string, alTrozo?: (muestras: Float32Array) => void): Promise<AudioSintetizado>;
+  /**
+   * Sintetiza todo y lo devuelve. `alTrozo` recibe cada frase segun sale, para reproducirla ya;
+   * si devuelve `false`, sherpa NO sintetiza las frases que faltan (medido el 2026-09-20: es lo
+   * que hace que una interrupcion corte de verdad y no solo deje de sonar).
+   */
+  sintetiza(texto: string, alTrozo?: (muestras: Float32Array) => boolean | void, opciones?: OpcionesSintesis): Promise<AudioSintetizado>;
 }
 
 export function creaVozSintetica(opciones: OpcionesVozSintetica): VozSintetica {
@@ -72,13 +81,13 @@ export function creaVozSintetica(opciones: OpcionesVozSintetica): VozSintetica {
   return {
     id: `sherpa-tts:${basename(carpeta).replace(/^vits-piper-/, '')}`,
     frecuenciaHz: tts.sampleRate,
-    async sintetiza(texto, alTrozo) {
+    async sintetiza(texto, alTrozo, ajustes) {
       const t0 = performance.now();
       const r = await tts.generateAsync({
         text: texto,
         sid: opciones.hablante ?? 0,
-        speed: opciones.velocidad ?? 1,
-        ...(alTrozo ? { onProgress: (info) => alTrozo(info.samples) } : {}),
+        speed: ajustes?.velocidad ?? opciones.velocidad ?? 1,
+        ...(alTrozo ? { onProgress: (info) => alTrozo(info.samples) !== false } : {}),
       });
       return { muestras: r.samples, frecuenciaHz: r.sampleRate, ms: performance.now() - t0 };
     },

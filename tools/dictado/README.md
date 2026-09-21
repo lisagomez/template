@@ -208,6 +208,10 @@ obvio —ffmpeg al PulseAudio de WSLg— reproduce a **un cuarto de la velocidad
 Medido el 2026-09-16 (voz es_MX-claude-high, 8 hilos): carga 635 ms · primera frase lista en
 33 ms · síntesis 343 ms para 6,9 s de audio (RTF 0,050) · sonado completo 7,8 s.
 
+Para una app (el laboratorio de voz del template), la misma voz sale **en flujo por HTTP** desde
+el demonio (`POST /sintetizar`, §7): el navegador encadena cada frase según llega y la corta si
+la persona habla encima.
+
 ### 6. Medir
 
 ```bash
@@ -229,6 +233,23 @@ no. **Medido el 2026-09-20 con una frase de 3,9 s:** p50 de 2 940 ms por proceso
 con el demonio (motor 197 ms); sin demonio, 2 935 ms y la ruta lo dice (`via: cli`). Solo
 loopback, sin token no arranca, no escribe audio ni texto.
 
+**El demonio también habla (2026-09-20).** `GET /voces` lista las voces Piper cargadas y
+`POST /sintetizar` (JSON `{texto, voz?, velocidad?}`, texto ≤ 2 000 caracteres) responde
+PCM16LE mono **en flujo**: cada frase sale en cuanto sherpa la termina (`x-frecuencia-hz`,
+`x-voz` en cabecera). Si el cliente corta la conexión, la síntesis que falta no se hace: es lo
+que permite que la máquina se calle de verdad cuando alguien le habla. Voces: `DICTADO_VOCES`
+(lista separada por comas) o, sin ella, toda carpeta `vits-piper-*` de `DICTADO_MODELOS`;
+jamás descarga. Medido: primera frase a los 42 ms si es corta («Buenas tardes.») y ~175 ms si
+dura 4 s; con 4 hilos (8 no mejora, 2 empeora); cada voz tarda ~0,7 s en cargar al arrancar.
+
+**Y tiene respaldo por idioma, a petición.** `DICTADO_RESPALDO=faster-whisper:small` (con
+`DICTADO_PYTHON`; `npm run demonio` lo pone solo si el banco tiene el venv) carga un segundo
+motor que el cliente pide con `x-motor: respaldo` en `/transcribir`. No es automático a propósito:
+el demonio no sabe cuándo un texto está mal; quien tiene la gramática (el picking, cuando no
+encuentra una cantidad) sí. Medido el 2026-09-20: Parakeet oye «sí» y «seis» sueltos como «Sir»
+o «Six»; el segundo pase (~1,3 s) baja los rechazos falsos de 22 % a 13 %, y las cantidades con
+unidad («tres unidades») fallan 0 %.
+
 ### 8. Ganancia automática y micrófono cerrado en espera
 
 ```bash
@@ -248,7 +269,15 @@ frío) y se cierra 1,5 s después de parar.
 dictado dictar --entrada sesion.wav --pegar ninguno   # el archivo hace de micrófono, a tiempo real
 dictado dictar --alterna-cada 5000                    # (prueba) alterna escuchar/parar cada 5 s
 node medicion/calibra.mjs                             # WER, VAD y diccionario sobre corpus propio
+node medicion/fabrica-corpus.mjs --campo              # calle, taller, almacén, reverb, snr20/10/05/00, flojo, fuerte
+node medicion/fabrica-corpus.mjs --muletillas         # guiones con muletillas y pausas conocidas, dos voces
+node medicion/calibra.mjs --corpus medicion/corpus-propio/campo --salida medicion/corpus-propio/campo
 ```
+
+Las mediciones de la Etapa 3 viven en el template (`scripts/laboratorio-voz/mide-picking.mjs`,
+`mide-competencias.mjs`, `mide-ganancia.mjs`, `mide-voz-en-flujo.mjs`, `spike-llamada.mjs`) y
+sus tablas en `medicion/corpus-propio/{picking,ganancia}-<fecha>.md`, `muletillas/medicion-*.md`,
+`campo/calibracion-*.md` y `reuniones/spike-llamada-*.md`.
 
 Cada sesión de `dictar` deja `corpus/salida-dictar-<fecha>/trayectoria.json`: **forma, nunca
 contenido** (turnos, sin voz, descartados, respaldo, latencia p50/p95, motor, pegado, pico del
@@ -267,6 +296,13 @@ doce»; el resto son nombres propios), p50 250 ms. El VAD no partió ninguna de 
 de 500 a 1500 ms, no se comió palabras con relleno ≥ 250 ms, y el ruido rosa hasta −35 dBFS no
 abrió ningún turno: los valores por defecto se quedan. La corrección del diccionario no sustituyó
 nada: sigue apagada. **Con voz propia está por medir**: graba las 30 frases y corre `calibra.mjs`.
+
+**Campo sintético (Etapa 3, 2026-09-20, `condiciones.mjs` con SNR declarado)**: WER con cifras
+igualadas 4,5 % limpio · 3,6 % calle · 5,1 % taller · 4,2 % almacén (voces de fondo + eco) ·
+6,1 % reverb · 5,5 / 6,1 / 7,9 / 12,4 % con ruido rosa a SNR 20 / 10 / 5 / 0 dB · 3,9 % flojo
+(−24 dB) · 4,9 % fuerte (+12 dB). Fantasmas 0 sobre calle y taller sin voz; 0 frases partidas en
+120. La ganancia automática no cambia el WER (Parakeet iguala el nivel solo): cuida la
+saturación, no el error, y el defecto sigue en 0.
 
 ### 10. Qué se guarda y dónde (y cómo se borra)
 
@@ -352,6 +388,9 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 | `DICTADO_PYTHON` | Python con `faster-whisper` (para `--motor faster-whisper:…`) | `python3` |
 | `DICTADO_HILOS` | hilos del motor | 8 |
 | `DICTADO_REMOTO_URL`, `DICTADO_REMOTO_TOKEN` | el servicio | — |
+| `DICTADO_VOCES` | voces Piper que carga el servicio/demonio para `/sintetizar` (separadas por comas) | todas las `vits-piper-*` de `DICTADO_MODELOS` |
+| `DICTADO_RESPALDO` | segundo motor del servicio/demonio (`faster-whisper:<modelo>`), pedido con `x-motor: respaldo` | ninguno (`npm run demonio`: `faster-whisper:small` si hay venv) |
+| `DICTADO_CARACTERES_MAXIMOS` | tope del texto de `/sintetizar` | 2000 |
 
 El token nunca se imprime: `dictado config` dice `presente (largo N)`.
 

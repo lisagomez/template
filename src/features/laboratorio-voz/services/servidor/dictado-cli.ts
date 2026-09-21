@@ -6,7 +6,7 @@
 import { execFile, spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { corre, entornoDictado, demonioVivo, entornoRemotoDemonio, transcribeRapido as transcribeRapidoLocal } from '@/shared/lib/transcriptor-local';
+import { corre, entornoDictado, demonioVivo, entornoRemotoDemonio, MOTOR_RESPALDO_CLI, transcribeRapido as transcribeRapidoLocal, type MotorTranscripcion } from '@/shared/lib/transcriptor-local';
 import type { MetricasSintesis, Piezas, RespuestaTranscripcion, Segmento } from '../../types/index.ts';
 import { metricasDeSintesis, metricasDeTranscripcion, parseaActa } from '../acta.ts';
 
@@ -44,12 +44,14 @@ export function maquina<T>(orden: string, entrada?: unknown): Promise<T> {
   });
 }
 
-/** Rapido: el demonio residente si vive, el CLI si no (ver `transcriptor-local.ts`). */
-export const transcribeRapido = (ruta: string): Promise<RespuestaTranscripcion> => transcribeRapidoLocal(ruta);
+/** Rapido: el demonio residente si vive, el CLI si no (ver `transcriptor-local.ts`). `motor: 'respaldo'` = segundo pase con el idioma forzado. */
+export const transcribeRapido = (ruta: string, motor: MotorTranscripcion = 'principal'): Promise<RespuestaTranscripcion> => transcribeRapidoLocal(ruta, { motor });
 
 export interface OpcionesTiempos {
   hablantes?: number;
   silencioMs?: number;
+  /** `respaldo`: el segundo motor (faster-whisper small, por proceso), el unico que conserva las muletillas (medido). Mas lento. */
+  motor?: MotorTranscripcion;
 }
 
 export async function transcribeConTiempos(ruta: string, opciones: OpcionesTiempos = {}): Promise<RespuestaTranscripcion> {
@@ -57,8 +59,9 @@ export async function transcribeConTiempos(ruta: string, opciones: OpcionesTiemp
   // 500 ms: el defecto de `dictado lote` (entre dos personas el hueco suele ser mayor); 700 dejaba una reunion entera en un turno.
   // Con el demonio vivo, el lote le manda cada turno (`--motor remoto` en 127.0.0.1): medido el
   // 2026-09-20, una reunion de 38 s baja de 6,4 s a 3,0 s (0,17× → 0,08× la duracion).
-  const conDemonio = await demonioVivo();
-  const args = ['lote', ruta, '--motor', conDemonio ? 'remoto' : 'parakeet', '--silencio-ms', String(opciones.silencioMs ?? 500)];
+  const conDemonio = opciones.motor !== 'respaldo' && (await demonioVivo());
+  const motor = opciones.motor === 'respaldo' ? MOTOR_RESPALDO_CLI : conDemonio ? 'remoto' : 'parakeet';
+  const args = ['lote', ruta, '--motor', motor, '--silencio-ms', String(opciones.silencioMs ?? 500)];
   if (opciones.hablantes) args.push('--hablantes', String(opciones.hablantes));
   const { stdout, stderr } = await corre(args, 900_000, conDemonio ? entornoRemotoDemonio() : undefined);
   const segmentos = parseaActa(stdout);

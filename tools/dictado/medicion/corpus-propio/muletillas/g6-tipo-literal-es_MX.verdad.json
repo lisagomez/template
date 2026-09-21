@@ -1,0 +1,36 @@
+{
+ "guion": "g6-tipo-literal",
+ "voz": "es_MX-claude-high",
+ "duracionMs": 34342,
+ "texto": "Tipo, hoy vamos a hablar de redes sociales y salud mental. Básicamente, el problema es el tiempo de pantalla. Como que uno entra cinco minutos y, literal, se le va una hora. Tipo, los estudios muestran que dormir menos, básicamente, empeora el ánimo. Como que el cerebro necesita descanso, literal. Tipo, la recomendación es fijar horarios. Básicamente, apagar las notificaciones ayuda, como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí.",
+ "palabras": 73,
+ "tramos": [
+  {
+   "inicioMs": 500,
+   "finMs": 12124,
+   "texto": "Tipo, hoy vamos a hablar de redes sociales y salud mental. Básicamente, el problema es el tiempo de pantalla. Como que uno entra cinco minutos y, literal, se le va una hora."
+  },
+  {
+   "inicioMs": 13924,
+   "finMs": 24706,
+   "texto": "Tipo, los estudios muestran que dormir menos, básicamente, empeora el ánimo. Como que el cerebro necesita descanso, literal. Tipo, la recomendación es fijar horarios."
+  },
+  {
+   "inicioMs": 26506,
+   "finMs": 34342,
+   "texto": "Básicamente, apagar las notificaciones ayuda, como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí."
+  }
+ ],
+ "pausasLargas": [
+  {
+   "inicioMs": 12124,
+   "finMs": 13924,
+   "ms": 1800
+  },
+  {
+   "inicioMs": 24706,
+   "finMs": 26506,
+   "ms": 1800
+  }
+ ]
+}

@@ -75,6 +75,8 @@ export async function arrancaDemonio({ silencioso = false } = {}) {
     DICTADO_PUERTO: String(PUERTO_DEMONIO),
     DICTADO_ESCUCHA: '127.0.0.1',
     DICTADO_EN_VUELO: process.env.DICTADO_EN_VUELO ?? '2',
+    // Respaldo por idioma (faster-whisper:small, ya en el banco) si hay Python con faster-whisper; se pide con x-motor.
+    ...(existsSync(join(banco, 'venv', 'bin', 'python')) ? { DICTADO_RESPALDO: process.env.DICTADO_DEMONIO_RESPALDO ?? 'faster-whisper:small', DICTADO_PYTHON: process.env.DICTADO_PYTHON ?? join(banco, 'venv', 'bin', 'python') } : {}),
   };
   const fd = openSync(log, 'w');
   const hijo = spawn(process.execPath, [join(raiz, 'servicio', 'servidor.mjs')], { cwd: raiz, env, detached: true, stdio: ['ignore', fd, fd] });

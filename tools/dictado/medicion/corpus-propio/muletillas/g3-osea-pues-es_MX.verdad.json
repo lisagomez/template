@@ -1,0 +1,36 @@
+{
+ "guion": "g3-osea-pues",
+ "voz": "es_MX-claude-high",
+ "duracionMs": 38912,
+ "texto": "Vamos a repasar la Revolución Mexicana. Empezó en mil novecientos diez, o sea, hace más de un siglo. Pues, la causa principal fue la desigualdad en el campo. Los campesinos, o sea, la mayoría del país, no tenían tierra propia. Pues, Madero convocó a las armas en noviembre. O sea, no fue un solo movimiento, fueron varios. Zapata en el sur, pues, y Villa en el norte. La constitución de mil novecientos diecisiete, o sea, el resultado político, sigue vigente hoy. Pues, con eso cerramos el tema. O sea, hasta aquí la clase de hoy.",
+ "palabras": 95,
+ "tramos": [
+  {
+   "inicioMs": 500,
+   "finMs": 10725,
+   "texto": "Vamos a repasar la Revolución Mexicana. Empezó en mil novecientos diez, o sea, hace más de un siglo. Pues, la causa principal fue la desigualdad en el campo."
+  },
+  {
+   "inicioMs": 12525,
+   "finMs": 26562,
+   "texto": "Los campesinos, o sea, la mayoría del país, no tenían tierra propia. Pues, Madero convocó a las armas en noviembre. O sea, no fue un solo movimiento, fueron varios. Zapata en el sur, pues, y Villa en el norte."
+  },
+  {
+   "inicioMs": 28362,
+   "finMs": 38912,
+   "texto": "La constitución de mil novecientos diecisiete, o sea, el resultado político, sigue vigente hoy. Pues, con eso cerramos el tema. O sea, hasta aquí la clase de hoy."
+  }
+ ],
+ "pausasLargas": [
+  {
+   "inicioMs": 10725,
+   "finMs": 12525,
+   "ms": 1800
+  },
+  {
+   "inicioMs": 26562,
+   "finMs": 28362,
+   "ms": 1800
+  }
+ ]
+}

@@ -10,7 +10,7 @@ import { cuentaMuletillas, evaluaCompetencias } from '../services/competencias.t
 import { calculaEstado, resumenEstados } from '../services/estado-casos.ts';
 import { parseaFaq, respondeFaq } from '../services/faq.ts';
 import { detectaIntencion, detectaIntenciones, fechaDe } from '../services/intenciones.ts';
-import { evaluaConfirmacion, PEDIDO_MUESTRA } from '../services/picking.ts';
+import { creaSesionPicking, evaluaConfirmacion, INTENTOS_POR_LINEA, PEDIDO_MUESTRA } from '../services/picking.ts';
 import { analizaSentimiento } from '../services/sentimiento.ts';
 import { primerNumero } from '../services/texto.ts';
 import { escribeWavPcm16, leeWavPcm16, mezclaEstereo } from '../services/wav.ts';
@@ -67,7 +67,8 @@ test('metricas del CLI: se leen de la ultima linea con claves', () => {
 test('numeros dichos: cifras y palabras, incluidas compuestas', () => {
   assert.equal(primerNumero('tres unidades'), 3);
   assert.equal(primerNumero('son treinta y cinco'), 35);
-  assert.equal(primerNumero('a las 10 y media'), 10);
+  assert.equal(primerNumero('a las 10 y media'), 10.5);
+  assert.equal(primerNumero('tres mil cuatrocientos doce'), 3412);
   assert.equal(primerNumero('ciento dos piezas'), 102);
   assert.equal(primerNumero('nada'), undefined);
 });
@@ -125,12 +126,71 @@ test('faq: gana la mas parecida y por debajo del umbral no responde', () => {
   assert.equal(respondeFaq('quiero comprar un elefante', entradas).mejor, undefined);
 });
 
-test('picking: confirma con la cantidad correcta, distingue otra cantidad y «repite»', () => {
-  const linea = PEDIDO_MUESTRA[0]!;
+test('picking: confirma con la cantidad correcta, distingue otra cantidad, unidad, «no» y «repite»', () => {
+  const linea = PEDIDO_MUESTRA[0]!; // 3 unidades
   assert.deepEqual(evaluaConfirmacion('tres', linea), { tipo: 'ok', oido: 3 });
+  assert.deepEqual(evaluaConfirmacion('sí', linea), { tipo: 'sin-cantidad' }); // «seis» se oye como «sí»: un si a secas no confirma
+  assert.deepEqual(evaluaConfirmacion('sí, tres', linea), { tipo: 'ok', oido: 3 });
+  assert.deepEqual(evaluaConfirmacion('son tres piezas', linea), { tipo: 'ok', oido: 3 });
   assert.deepEqual(evaluaConfirmacion('son cuatro', linea), { tipo: 'cantidad-distinta', oido: 4 });
+  assert.deepEqual(evaluaConfirmacion('no, faltan dos', linea), { tipo: 'no', oido: 2 });
+  assert.deepEqual(evaluaConfirmacion('no', linea), { tipo: 'no' });
+  assert.deepEqual(evaluaConfirmacion('tres cajas', linea), { tipo: 'unidad-distinta', oido: 3, unidad: 'caja' });
   assert.deepEqual(evaluaConfirmacion('repite por favor', linea), { tipo: 'repetir' });
   assert.deepEqual(evaluaConfirmacion('eh', linea), { tipo: 'no-entendi' });
+  const pares = PEDIDO_MUESTRA[2]!; // 25 pares
+  assert.deepEqual(evaluaConfirmacion('veinticinco pares', pares), { tipo: 'ok', oido: 25 });
+  assert.deepEqual(evaluaConfirmacion('veinticinco', pares), { tipo: 'ok', oido: 25 });
+  assert.deepEqual(evaluaConfirmacion('veinticinco cajas', pares), { tipo: 'unidad-distinta', oido: 25, unidad: 'caja' });
+  assert.equal(PEDIDO_MUESTRA.length, 20);
+});
+
+test('picking: la sesion avanza al confirmar, pasa a mano tras tres intentos y anota un «no»', () => {
+  const s = creaSesionPicking(PEDIDO_MUESTRA.slice(0, 3));
+  assert.match(s.lee(), /^Línea 1 de 3\./);
+  const p1 = s.confirma('tres');
+  assert.equal(p1.veredicto.tipo, 'ok');
+  assert.ok(p1.avanzo);
+  assert.match(p1.dice, /^Confirmado: 3 unidades\. Línea 2 de 3\./);
+  assert.equal(s.estado.indice, 1);
+  assert.equal(p1.estado.indice, 1, 'el estado devuelto ya avanzo (el panel pinta este, no el getter)');
+  for (let i = 1; i <= INTENTOS_POR_LINEA; i++) {
+    const p = s.confirma('siete');
+    assert.equal(p.veredicto.tipo, 'cantidad-distinta');
+    if (i < INTENTOS_POR_LINEA) {
+      assert.ok(!p.avanzo);
+      assert.match(p.dice, new RegExp(`Intento ${i} de ${INTENTOS_POR_LINEA}`));
+    } else {
+      assert.ok(p.avanzo);
+      assert.match(p.dice, /queda a mano/);
+    }
+  }
+  assert.deepEqual(s.estado.aMano, [2]);
+  assert.equal(s.estado.incidencias[0]?.motivo, 'a-mano');
+  const p3 = s.confirma('no, faltan diez');
+  assert.equal(p3.veredicto.tipo, 'no');
+  assert.ok(s.estado.terminado);
+  assert.deepEqual(s.estado.aMano, [2, 3]);
+  assert.equal(s.estado.confirmadas, 1);
+  assert.match(p3.dice, /Pedido completo: 1 de 3 confirmadas, 2 a mano/);
+  assert.equal(s.estado.historial.length, 5);
+  s.reinicia();
+  assert.equal(s.estado.indice, 0);
+  assert.ok(!s.estado.terminado);
+});
+
+test('picking: «repite» vuelve a leer sin gastar intento, y nunca se confirma con una cantidad distinta', () => {
+  const s = creaSesionPicking(PEDIDO_MUESTRA.slice(0, 1));
+  const r = s.confirma('repite');
+  assert.equal(r.veredicto.tipo, 'repetir');
+  assert.equal(s.estado.intentos, 0);
+  assert.match(r.dice, /^Línea 1 de 1/);
+  for (const dicho of ['dos', 'cuatro', '3 cajas', 'no', 'trece', 'sí', 'correcto']) {
+    const t = creaSesionPicking(PEDIDO_MUESTRA.slice(0, 1));
+    const p = t.confirma(dicho);
+    assert.notEqual(p.veredicto.tipo, 'ok', `«${dicho}» no confirma 3 unidades`);
+    assert.equal(t.estado.confirmadas, 0);
+  }
 });
 
 test('wav: escribir, leer y mezclar en estereo deja cada voz en su canal', () => {

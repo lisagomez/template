@@ -37,7 +37,7 @@ export function leeWavPcm16(bytes: Uint8Array): WavPcm16 {
   throw new Error('WAV sin bloque de datos');
 }
 
-export function escribeWavPcm16(muestras: Int16Array, frecuenciaHz: number, canales: number): Uint8Array {
+export function escribeWavPcm16(muestras: Int16Array, frecuenciaHz: number, canales: number): Uint8Array<ArrayBuffer> {
   const bytesDatos = muestras.length * 2;
   const salida = new Uint8Array(44 + bytesDatos);
   const v = new DataView(salida.buffer);

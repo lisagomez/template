@@ -343,3 +343,25 @@ test('preparaParaModelo mezcla a mono y remuestrea', () => {
   const centro = salida[8000]!;
   assert.ok(Math.abs(centro - 0.3) < 0.02, `la mezcla a mono deberia dar ~0.3, dio ${centro}`);
 });
+
+test('energia: con calibracion, el ruido continuo es suelo y solo la voz que lo supera cuenta', async () => {
+  const HZ = 16_000;
+  const TAM = 512;
+  const marco = (amplitud: number) => {
+    const m = new Float32Array(TAM);
+    for (let i = 0; i < TAM; i++) m[i] = amplitud * Math.sin((i * 2 * Math.PI * 440) / HZ);
+    return m;
+  };
+  // Sin calibracion: el primer marco (silencio digital) fija el suelo y el ruido a -34 dB abre.
+  const sinCalibrar = modeloEnergia({ frecuenciaHz: HZ, tamMarco: TAM });
+  await sinCalibrar.probabilidad(marco(0));
+  assert.ok((await sinCalibrar.probabilidad(marco(0.02))) >= 0.5, 'sin calibrar, el ruido parece voz');
+  // Con calibracion de 9 marcos: el ruido es suelo (prob 0 mientras calibra), y la voz 20 dB arriba supera.
+  const calibrado = modeloEnergia({ frecuenciaHz: HZ, tamMarco: TAM, marcosCalibracion: 9 });
+  await calibrado.probabilidad(marco(0));
+  for (let k = 0; k < 8; k++) assert.equal(await calibrado.probabilidad(marco(0.02)), 0);
+  assert.ok((await calibrado.probabilidad(marco(0.02))) < 0.5, 'tras calibrar, el ruido no es voz');
+  assert.ok((await calibrado.probabilidad(marco(0.2))) >= 0.5, 'la voz 20 dB sobre el ruido si');
+  calibrado.reinicia();
+  assert.equal(await calibrado.probabilidad(marco(0.5)), 0, 'tras reiniciar vuelve a calibrar');
+});

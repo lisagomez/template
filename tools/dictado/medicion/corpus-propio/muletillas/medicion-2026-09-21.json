@@ -1,0 +1,1092 @@
+{
+ "fecha": "2026-09-21",
+ "motores": [
+  "remoto",
+  "faster-whisper:small"
+ ],
+ "regla": "recall ≥ 0,80 y precisión ≥ 0,90 sobre los guiones con muletillas (g2–g6); el control g1 solo aporta falsos positivos",
+ "decision": {
+  "remoto": {
+   "recall": 0.758,
+   "precision": 1,
+   "conserva": false,
+   "pausas": "24/24",
+   "werMedio": 0.06,
+   "procesoSobreDuracion": 0.07
+  },
+  "faster-whisper:small": {
+   "recall": 0.817,
+   "precision": 1,
+   "conserva": true,
+   "pausas": "24/24",
+   "werMedio": 0.069,
+   "procesoSobreDuracion": 0.34
+  }
+ },
+ "filas": [
+  {
+   "motor": "remoto",
+   "guion": "g1-control-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 32.3,
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 1,
+   "obtenidas": 1,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "no?",
+     "esperadas": 1,
+     "obtenidas": 1,
+     "tp": 1,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 211,
+   "ppmVerdad": 215,
+   "wer": 0.02,
+   "procesoMs": 2428,
+   "texto": "Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. Ese vapor sube, se enfríe y forma las nubes. Cuando las gotas pesan demasiado, en como lluvia o como nieve. Parte del agua se filtra en la tierra y alimenta los ríos subterráneos. Otra parte corre por la superficie hasta volver al mar. Así el ciclo empieza otra vez. Es un sistema cerrado. El agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g1-control-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 37.5,
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 1,
+   "obtenidas": 1,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "no?",
+     "esperadas": 1,
+     "obtenidas": 1,
+     "tp": 1,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 182,
+   "ppmVerdad": 182,
+   "wer": 0.02,
+   "procesoMs": 2658,
+   "texto": "Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. Ese vapor sube, se enfría y forma las nubes. Cuando las potas pesan demasiado o caen como lluvia o como nieve, parte del agua se filtra en la tierra y alimenta los ríos subterráneos, otra parte corre por la superficie hasta volver al mar. Así el ciclo empieza, otra vez, es un sistema cerrado. El agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g2-este-eh-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 36.2,
+   "tp": 6,
+   "fn": 4,
+   "fp": 0,
+   "esperadas": 10,
+   "obtenidas": 6,
+   "recall": 0.6,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 6,
+     "obtenidas": 6,
+     "tp": 6,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 4,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 4,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 158,
+   "ppmVerdad": 165,
+   "wer": 0.091,
+   "procesoMs": 2559,
+   "texto": "Buenos días, este hoy vamos a ver la fotosíntesis. Las plantas. Este toman luz, agua y dióxido de carbono y producen azúcar y oxígeno. Ese proceso ocurre en los cloroplastos que son, este, unas estructuras verdes dentro de la célula. Ahora, este, pasemos a la respiración celular. Es el proceso inverso. La célula E quema el azúcar para obtener energía. Ocurren las mitocondrias. Para cerrar. Este, un de paso. Fotosíntesis produce azúcar con luz. Respiración. E. Consume azúcar para dar energía. Este, ambos procesos se necesitan."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g2-este-eh-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 39.9,
+   "tp": 6,
+   "fn": 4,
+   "fp": 0,
+   "esperadas": 10,
+   "obtenidas": 6,
+   "recall": 0.6,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 6,
+     "obtenidas": 6,
+     "tp": 6,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 4,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 4,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 142,
+   "ppmVerdad": 147,
+   "wer": 0.045,
+   "procesoMs": 2846,
+   "texto": "Buenos días, este, hoy vamos a ver la fotosíntesis. Las plantas este toman luz, agua y dióxido de carbono y producen azúcar y oxígeno. Ese proceso ocurre en los cloroplastos, que son este unas estructuras verdes dentro de la célula. Ahora, este pasemos a la respiración celular. Es el proceso inverso. La célula E quema el azúcar para obtener energía. Ocurre en las mitocondrias. Para cerrar este un repaso, fotosíntesis produce azúcar con luz, respiración y consume azúcar para dar energía. Este, ambos procesos se necesitan."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g3-osea-pues-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 33.8,
+   "tp": 11,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 11,
+   "obtenidas": 11,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "o sea",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "pues",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "no?",
+     "esperadas": 2,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 181,
+   "ppmVerdad": 192,
+   "wer": 0.063,
+   "procesoMs": 2436,
+   "texto": "Vamos a repasar la Revolución mexicana. Empezó en 1910, o sea, hace más de un siglo, pues la causa principal fue la desigualdad en el campo. Los campesinos, o sea, la mayoría del país no tenían tierra propia, pues Madero convocó a las armas en noviembre, o sea, no fue un solo movimiento, fueron varios, Zapata en el sur, pues, y Villa en el norte. La Constitución de 1917, o sea, el resultado político, sigue vigente hoy. Pues con eso cerramos el tema. O sea, hasta aquí la clase de hoy."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g3-osea-pues-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 38.9,
+   "tp": 11,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 11,
+   "obtenidas": 11,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "o sea",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "pues",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "no?",
+     "esperadas": 2,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 157,
+   "ppmVerdad": 164,
+   "wer": 0.084,
+   "procesoMs": 2619,
+   "texto": "Vamos a repasar la revolución mexicana. Empezó en 1910, o sea, hace más de un siglo, pues la causa principal fue la desigualdad en el campo. Los campesinos, o sea, la mayoría del país, no tenían tierra propia, pues Madero convocó a las armas en noviembre, o sea, no fue un solo movimiento, fueron varios: Zapata en el sur, pues y Villa en el norte. La constitución de 1917, o sea, el resultado político, sí de vigente hoy, pues, con eso cerramos el tema, o sea, hasta aquí la clase de hoy."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g4-bueno-digamos-mmm-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 28.7,
+   "tp": 9,
+   "fn": 3,
+   "fp": 0,
+   "esperadas": 12,
+   "obtenidas": 9,
+   "recall": 0.75,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "mmm",
+     "esperadas": 3,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 3,
+     "fp": 0
+    },
+    {
+     "palabra": "bueno",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "digamos",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 196,
+   "ppmVerdad": 200,
+   "wer": 0.085,
+   "procesoMs": 2141,
+   "texto": "Bueno, hoy toca matemáticas. Vamos a ver las fracciones. Digamos la parte de un todo. Msi, parto una pizza en cuatro y tom una. Tengo un cuarto. Bueno, dos cuartos son lo mismo que un medio, digamos, la mitad. M para sumar fracciones con el mismo denominador. Bueno, se suman los numeradores. Un cuarto más un cuarto, digamos, es dos cuartos. Bueno, con distinto denominador hay que igualar los primero. M. Eso lo vemos mañana. Bueno, digamos que hasta aquí por hoy."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g4-bueno-digamos-mmm-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 35.6,
+   "tp": 9,
+   "fn": 3,
+   "fp": 0,
+   "esperadas": 12,
+   "obtenidas": 9,
+   "recall": 0.75,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "mmm",
+     "esperadas": 3,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 3,
+     "fp": 0
+    },
+    {
+     "palabra": "bueno",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "digamos",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 156,
+   "ppmVerdad": 156,
+   "wer": 0.061,
+   "procesoMs": 2521,
+   "texto": "Bueno, hoy toca matemáticas. Vamos a ver las fracciones. Digamos la parte de un todo, en mm. Si parto una pizza en cuatro y tomo una, tengo, un cuarto. Bueno, dos cuartos son lo mismo que un medio, digamos la mitad, mm, para sumar fracciones con el mismo denominador. Bueno, se suman los numeradores, un cuarto más un cuarto, digamos, es dos cuartos. Bueno, con distinto denominador hay que igualarlos primero. M, eso lo vemos mañana. Bueno, digamos que hasta aquí por doy."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g5-eh-este-vale-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 29.9,
+   "tp": 6,
+   "fn": 8,
+   "fp": 0,
+   "esperadas": 14,
+   "obtenidas": 6,
+   "recall": 0.429,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 8,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 8,
+     "fp": 0
+    },
+    {
+     "palabra": "vale",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 169,
+   "ppmVerdad": 177,
+   "wer": 0.118,
+   "procesoMs": 2139,
+   "texto": "Buenas tardes. Vamos a hablar de la nutrición. El cuerpo necesita este tres tipos de nutrientes principales. Ey, los carbohidratos dan energía rápida, vale. Las proteínas E construyen músculo y tejidos. Las grasas E guardan energía y protegen los órganos. Vale. Este además están las vitaminas y los minerales que, E, son necesarios en cantidades pequeñas. Ey, del agua también cuenta. Este es más de la mitad del cuerpo. Vale, y con eso terminamos."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g5-eh-este-vale-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 35.1,
+   "tp": 7,
+   "fn": 7,
+   "fp": 0,
+   "esperadas": 14,
+   "obtenidas": 7,
+   "recall": 0.5,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 3,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 1,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 8,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 6,
+     "fp": 0
+    },
+    {
+     "palabra": "vale",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 140,
+   "ppmVerdad": 147,
+   "wer": 0.092,
+   "procesoMs": 2516,
+   "texto": "Buenas tardes. Vamos a hablar de la nutrición. E. El cuerpo necesita tres tipos de nutrientes principales. E. Los carbohidratos dan energía rápida. Vale. Las proteínas E construyen músculo y tejidos, las grasas E guardan energía y protegen los órganos. Vale, este, además están las vitaminas y los minerales que son necesarios en cantidades pequeñas. Eh, el agua también cuenta. Este es más de la mitad del cuerpo. Vale, eh, con eso terminamos."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g6-tipo-literal-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 27.8,
+   "tp": 13,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 13,
+   "obtenidas": 13,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "como que",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "basicamente",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "literal",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "tipo",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 183,
+   "ppmVerdad": 185,
+   "wer": 0.041,
+   "procesoMs": 2030,
+   "texto": "Tipo, hoy vamos a hablar de redes sociales y salud mental. Básicamente el problema es el tiempo de pantalla, como que uno entra cinco minutos y literal se le va una hora. Tipo, los estudios muestran que dormir menos, básicamente, empeora el ánimo. Como que el cerebro necesita descanso, literal. Tipo de recomendación es fijar horarios. Básicamente, a parar las notificaciones ayuda como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí."
+  },
+  {
+   "motor": "remoto",
+   "guion": "g6-tipo-literal-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 34.3,
+   "tp": 13,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 13,
+   "obtenidas": 13,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "como que",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "basicamente",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "literal",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "tipo",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 143,
+   "ppmVerdad": 145,
+   "wer": 0,
+   "procesoMs": 2484,
+   "texto": "Tipo, hoy vamos a hablar de redes sociales y salud mental. Básicamente, el problema es el tiempo de pantalla, como que uno entra cinco minutos y, literal, se le va una hora. Tipo, los estudios muestran que dormir menos básicamente empeora el ánimo, como que el cerebro necesita descanso, literal. Tipo, la recomendación es fijar horarios. Básicamente, apagar las notificaciones ayuda como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g1-control-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 32.3,
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 1,
+   "obtenidas": 1,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "no?",
+     "esperadas": 1,
+     "obtenidas": 1,
+     "tp": 1,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 215,
+   "ppmVerdad": 215,
+   "wer": 0.079,
+   "procesoMs": 13809,
+   "texto": "Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. Esa va por su vez en frío y forma las nubes. Cuando las gotas pesan demasiado, en como lluvia o como nieve. Parte del agua se filtra en la tierra y alimenta los ríos subterráneos. Otra parte corre por la superficie hasta volver al mar. Así el ciclo empieza otra vez. Es un sistema cerrado. El agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g1-control-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 37.5,
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 1,
+   "obtenidas": 1,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "no?",
+     "esperadas": 1,
+     "obtenidas": 1,
+     "tp": 1,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 182,
+   "ppmVerdad": 182,
+   "wer": 0.02,
+   "procesoMs": 12052,
+   "texto": "Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. ese vapor sube, se enfría y forma las nubes. Cuando las potas pesan demasiado, caen como lluvia o como nieve, parte del agua se filtra en la tierra y alimenta los ríos subterráneos. Otra parte corre por la superficie de hasta volver al mar. Así el ciclo empieza otra vez, es un sistema cerrado. El agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g2-este-eh-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 36.2,
+   "tp": 6,
+   "fn": 4,
+   "fp": 0,
+   "esperadas": 10,
+   "obtenidas": 6,
+   "recall": 0.6,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 6,
+     "obtenidas": 6,
+     "tp": 6,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 4,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 4,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 158,
+   "ppmVerdad": 165,
+   "wer": 0.102,
+   "procesoMs": 13527,
+   "texto": "Buenos días. Este, hoy vamos a ver la fotosíntesis. Las plantas, este, toman luz, agua y dióxido de carbono y producen azúcar y oxígeno. Ese proceso ocurre en los cloroplastos que son, este, unas estructuras verdes dentro de la célula. Ahora, este, pasemos a la respiración celular. Es el proceso inverso. La célula es quemar el azúcar para obtener energía. Ocurren las mitocondrias. Para cerrar este, un de paso, fotosíntesis produce azúcar con luz, respiración, e consume azúcar para dar energía. Este, ambos procesos se necesitan."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g2-este-eh-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 39.9,
+   "tp": 6,
+   "fn": 4,
+   "fp": 0,
+   "esperadas": 10,
+   "obtenidas": 6,
+   "recall": 0.6,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 6,
+     "obtenidas": 6,
+     "tp": 6,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 4,
+     "obtenidas": 0,
+     "tp": 0,
+     "fn": 4,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 142,
+   "ppmVerdad": 147,
+   "wer": 0.057,
+   "procesoMs": 11362,
+   "texto": "Buenos días. Este, hoy vamos a ver la fotosíntesis, las plantas. Este, toman luz agua y dióxido de carbono y producen azúcar y oxígeno. Ese proceso E ocurre en los cloroplastos que son este, unas estructuras verdes dentro de la célula. Ahora este, pasemos a la respiración celular. el proceso inverso, la célula E, quema el azúcar para obtener energía. ocurre en las mitocondrias para cerrar este un repaso fotosíntesis produce azúcar con luz respiración e consume azúcar para dar energía este ambos procesos se necesitan"
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g3-osea-pues-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 33.8,
+   "tp": 11,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 11,
+   "obtenidas": 11,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "o sea",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "pues",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "no?",
+     "esperadas": 2,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 181,
+   "ppmVerdad": 192,
+   "wer": 0.074,
+   "procesoMs": 10728,
+   "texto": "Vamos a repasar la revolución mexicana. Empezó en 1910, o sea, hace más de un siglo, pues la causa principal fue la desigualdad en el campo. Los campesinos, o sea, la mayoría del país, no tenían tierra propia, pues Madero convocó a las armas el noviembre, o sea, no fue un solo movimiento, fueron varios. Zapata en el sur pues y Villa en el norte. La Constitución de 1917, o sea, el resultado político, sigue vigente hoy. Pues con eso cerramos el tema. O sea, hasta aquí la clase de hoy."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g3-osea-pues-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 38.9,
+   "tp": 11,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 11,
+   "obtenidas": 11,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "o sea",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "pues",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "no?",
+     "esperadas": 2,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 156,
+   "ppmVerdad": 164,
+   "wer": 0.063,
+   "procesoMs": 11024,
+   "texto": "Vamos a repasar la revolución mexicana. Empezó en 1910, o sea, hace más de un siglo, pues la causa principal fue la desigualdad en el campo. Los campesinos, o sea, la mayoría del país, no tenían tierra propia, pues Madero convocó a las armas en noviembre, o sea, no fue un solo movimiento, fueron varios. Zapata en el sur, pues, y Villa en el norte. La Constitución de 1917, o sea, el resultado político, sigue vigente hoy. Pues, con eso cerramos el tema, o sea, hasta aquí la clase de hoy."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g4-bueno-digamos-mmm-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 28.7,
+   "tp": 11,
+   "fn": 1,
+   "fp": 0,
+   "esperadas": 12,
+   "obtenidas": 11,
+   "recall": 0.917,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "mmm",
+     "esperadas": 3,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 1,
+     "fp": 0
+    },
+    {
+     "palabra": "bueno",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "digamos",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 196,
+   "ppmVerdad": 200,
+   "wer": 0.061,
+   "procesoMs": 12274,
+   "texto": "Bueno, hoy toca matemáticas. Vamos a ver las fracciones, digamos la parte de un todo. MMM, si parto una pizza en cuatro de Tom una. ¡Tengo un cuarto! Bueno, los cuartos son lo mismo que un medio, digamos, la mitad. MM para sumar fracciones con el mismo denominador. Bueno, se suman los numeradores. Un cuarto más un cuarto, digamos, es dos cuartos. Bueno, con distinto denominadora hay que igualarlos primero. MMM, eso lo vemos mañana. Bueno, digamos que hasta aquí por hoy."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g4-bueno-digamos-mmm-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 35.6,
+   "tp": 12,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 12,
+   "obtenidas": 12,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "mmm",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "bueno",
+     "esperadas": 5,
+     "obtenidas": 5,
+     "tp": 5,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "digamos",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 154,
+   "ppmVerdad": 156,
+   "wer": 0.012,
+   "procesoMs": 10349,
+   "texto": "Bueno, hoy toca matemáticas, vamos a ver las fracciones, digamos, la parte de un todo. MMM, si parto una pizza en 4 y tomo una, tengo, un cuarto. Bueno, dos cuartos son lo mismo que un medio, digamos, la mitad. MMM para sumar fracciones con el mismo denominador. Bueno, se suman los numeradores. Un cuarto más un cuarto, digamos, es dos cuartos. Bueno, con distinto denominador hay que igualarlos primero. MMM, eso lo vemos mañana. Bueno, digamos que hasta aquí por hoy."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g5-eh-este-vale-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 29.9,
+   "tp": 8,
+   "fn": 6,
+   "fp": 0,
+   "esperadas": 14,
+   "obtenidas": 8,
+   "recall": 0.571,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 8,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 6,
+     "fp": 0
+    },
+    {
+     "palabra": "vale",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 179,
+   "ppmVerdad": 177,
+   "wer": 0.145,
+   "procesoMs": 11738,
+   "texto": "Eh, buenas tardes. Vamos a hablar de la nutrición. Que el cuerpo necesita este tres tipos de nutrientes principales. ¡Ey, Dios, que al buidratos dan energía rápida! Vale. Las proteínas, que construyen músculo y tejidos, las grasas, que guardan energía y protegen los órganos, vale. Este, además están las vitaminas y los minerales que, e, son necesarios en cantidades pequeñas. ¡Eh, del agua también cuenta! Este es más de la mitad del cuerpo. Vale, y con eso terminamos."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g5-eh-este-vale-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 35.1,
+   "tp": 8,
+   "fn": 6,
+   "fp": 0,
+   "esperadas": 14,
+   "obtenidas": 8,
+   "recall": 0.571,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "este",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "eh",
+     "esperadas": 8,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 6,
+     "fp": 0
+    },
+    {
+     "palabra": "vale",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 140,
+   "ppmVerdad": 147,
+   "wer": 0.105,
+   "procesoMs": 12535,
+   "texto": "¡Eh! ¡Buenas tardes! ¡Vamos a hablar de la nutición! ¡Eh! ¡El cuerpo necesita! ¡Este! ¡Tres tipos de nutrientes principales! Los carbohidratos dan energía rápida, vale. Las proteínas E construyen músculo y tejidos. Las grasas E guardan energía y protegen los órganos. Vale. Este. Además están las vitaminas y los minerales. ¿Qué? E. son necesarios en cantidades pequeñas. El agua también cuenta. Este es más de la mitad del cuerpo. Vale. Con eso terminamos."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g6-tipo-literal-es_ES",
+   "voz": "es_ES-davefx-medium",
+   "duracionS": 27.8,
+   "tp": 12,
+   "fn": 1,
+   "fp": 0,
+   "esperadas": 13,
+   "obtenidas": 12,
+   "recall": 0.923,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "como que",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "basicamente",
+     "esperadas": 3,
+     "obtenidas": 2,
+     "tp": 2,
+     "fn": 1,
+     "fp": 0
+    },
+    {
+     "palabra": "literal",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "tipo",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 181,
+   "ppmVerdad": 185,
+   "wer": 0.096,
+   "procesoMs": 11474,
+   "texto": "Tipo, hoy vamos a hablar de redes sociales y salud mental. Cásicamente, el problema es el tiempo de pantalla. como que uno entra 5 minutos y, literal, se le va una hora. Tipo a los estudios muestran que dormir menos básicamente empeora el ánimo, como que el cerebro necesita descanso líteral. tipo de recomendaciones fijar horarios. Básicamente, apagar las notificaciones ayuda como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí."
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g6-tipo-literal-es_MX",
+   "voz": "es_MX-claude-high",
+   "duracionS": 34.3,
+   "tp": 13,
+   "fn": 0,
+   "fp": 0,
+   "esperadas": 13,
+   "obtenidas": 13,
+   "recall": 1,
+   "precision": 1,
+   "porMuletilla": [
+    {
+     "palabra": "como que",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "basicamente",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "literal",
+     "esperadas": 3,
+     "obtenidas": 3,
+     "tp": 3,
+     "fn": 0,
+     "fp": 0
+    },
+    {
+     "palabra": "tipo",
+     "esperadas": 4,
+     "obtenidas": 4,
+     "tp": 4,
+     "fn": 0,
+     "fp": 0
+    }
+   ],
+   "pausasVerdad": 2,
+   "pausasDetectadas": 2,
+   "pausasBien": 2,
+   "ppm": 143,
+   "ppmVerdad": 145,
+   "wer": 0.014,
+   "procesoMs": 8807,
+   "texto": "Tipo, hoy vamos a hablar de redes sociales y salud mental. Básicamente, el problema es el tiempo de pantalla, como que uno entra 5 minutos y, literal, se le va una hora. Tipo, los estudios muestran que dormir menos, básicamente, empeora el ánimo, como que el cerebro necesita descanso, literal. Tipo, la recomendación es fijar horarios. Básicamente apagar las notificaciones ayuda como que quita la tentación. Tipo, con eso cerramos, literal, hasta aquí."
+  }
+ ]
+}

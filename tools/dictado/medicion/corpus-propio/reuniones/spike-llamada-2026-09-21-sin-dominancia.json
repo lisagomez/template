@@ -1,0 +1,414 @@
+{
+ "fecha": "2026-09-21",
+ "reunion": "r1-discovery",
+ "sangradoDb": -20,
+ "dominancia": false,
+ "descartadosPorSangrado": 0,
+ "duracionS": 57.3,
+ "turnosVerdad": 12,
+ "turnosDetectados": 24,
+ "etiquetado": 0.5,
+ "turnosCanalEquivocado": 12,
+ "wer": 1.007,
+ "insightP50Ms": 238,
+ "insightP95Ms": 316,
+ "cierreVadMs": 500,
+ "procesoMs": 6368,
+ "procesoSobreDuracion": 0.11,
+ "score": 63,
+ "insights": 10,
+ "huecos": [
+  "impacto",
+  "proceso_decision",
+  "presupuesto",
+  "competencia"
+ ],
+ "latencias": [
+  {
+   "turno": 1,
+   "canal": "asesor",
+   "msTranscripcion": 306,
+   "msAnalisis": 11,
+   "msTotal": 316,
+   "insights": 0,
+   "nuevos": 0,
+   "duracionTurnoMs": 5670
+  },
+  {
+   "turno": 2,
+   "canal": "cliente",
+   "msTranscripcion": 322,
+   "msAnalisis": 2,
+   "msTotal": 324,
+   "insights": 0,
+   "nuevos": 0,
+   "duracionTurnoMs": 5670
+  },
+  {
+   "turno": 3,
+   "canal": "asesor",
+   "msTranscripcion": 293,
+   "msAnalisis": 1,
+   "msTotal": 294,
+   "insights": 0,
+   "nuevos": 0,
+   "duracionTurnoMs": 5862
+  },
+  {
+   "turno": 4,
+   "canal": "cliente",
+   "msTranscripcion": 301,
+   "msAnalisis": 2,
+   "msTotal": 303,
+   "insights": 1,
+   "nuevos": 1,
+   "duracionTurnoMs": 5830
+  },
+  {
+   "turno": 5,
+   "canal": "asesor",
+   "msTranscripcion": 155,
+   "msAnalisis": 3,
+   "msTotal": 158,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 2886
+  },
+  {
+   "turno": 6,
+   "canal": "cliente",
+   "msTranscripcion": 176,
+   "msAnalisis": 0,
+   "msTotal": 177,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 2918
+  },
+  {
+   "turno": 7,
+   "canal": "asesor",
+   "msTranscripcion": 245,
+   "msAnalisis": 0,
+   "msTotal": 246,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 4294
+  },
+  {
+   "turno": 8,
+   "canal": "cliente",
+   "msTranscripcion": 243,
+   "msAnalisis": 0,
+   "msTotal": 244,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 4326
+  },
+  {
+   "turno": 9,
+   "canal": "asesor",
+   "msTranscripcion": 142,
+   "msAnalisis": 0,
+   "msTotal": 143,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 2534
+  },
+  {
+   "turno": 10,
+   "canal": "cliente",
+   "msTranscripcion": 155,
+   "msAnalisis": 0,
+   "msTotal": 155,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 2502
+  },
+  {
+   "turno": 11,
+   "canal": "asesor",
+   "msTranscripcion": 233,
+   "msAnalisis": 1,
+   "msTotal": 234,
+   "insights": 1,
+   "nuevos": 0,
+   "duracionTurnoMs": 4550
+  },
+  {
+   "turno": 12,
+   "canal": "cliente",
+   "msTranscripcion": 263,
+   "msAnalisis": 0,
+   "msTotal": 264,
+   "insights": 2,
+   "nuevos": 1,
+   "duracionTurnoMs": 4582
+  },
+  {
+   "turno": 13,
+   "canal": "asesor",
+   "msTranscripcion": 216,
+   "msAnalisis": 0,
+   "msTotal": 217,
+   "insights": 2,
+   "nuevos": 0,
+   "duracionTurnoMs": 4102
+  },
+  {
+   "turno": 14,
+   "canal": "cliente",
+   "msTranscripcion": 238,
+   "msAnalisis": 0,
+   "msTotal": 238,
+   "insights": 3,
+   "nuevos": 1,
+   "duracionTurnoMs": 4102
+  },
+  {
+   "turno": 15,
+   "canal": "asesor",
+   "msTranscripcion": 233,
+   "msAnalisis": 0,
+   "msTotal": 233,
+   "insights": 3,
+   "nuevos": 0,
+   "duracionTurnoMs": 4582
+  },
+  {
+   "turno": 16,
+   "canal": "cliente",
+   "msTranscripcion": 281,
+   "msAnalisis": 1,
+   "msTotal": 281,
+   "insights": 5,
+   "nuevos": 2,
+   "duracionTurnoMs": 4614
+  },
+  {
+   "turno": 17,
+   "canal": "asesor",
+   "msTranscripcion": 128,
+   "msAnalisis": 0,
+   "msTotal": 128,
+   "insights": 5,
+   "nuevos": 0,
+   "duracionTurnoMs": 2086
+  },
+  {
+   "turno": 18,
+   "canal": "cliente",
+   "msTranscripcion": 142,
+   "msAnalisis": 0,
+   "msTotal": 143,
+   "insights": 6,
+   "nuevos": 1,
+   "duracionTurnoMs": 2086
+  },
+  {
+   "turno": 19,
+   "canal": "asesor",
+   "msTranscripcion": 193,
+   "msAnalisis": 0,
+   "msTotal": 193,
+   "insights": 6,
+   "nuevos": 0,
+   "duracionTurnoMs": 3398
+  },
+  {
+   "turno": 20,
+   "canal": "cliente",
+   "msTranscripcion": 207,
+   "msAnalisis": 1,
+   "msTotal": 207,
+   "insights": 7,
+   "nuevos": 1,
+   "duracionTurnoMs": 3366
+  },
+  {
+   "turno": 21,
+   "canal": "asesor",
+   "msTranscripcion": 253,
+   "msAnalisis": 1,
+   "msTotal": 254,
+   "insights": 8,
+   "nuevos": 1,
+   "duracionTurnoMs": 4646
+  },
+  {
+   "turno": 22,
+   "canal": "cliente",
+   "msTranscripcion": 268,
+   "msAnalisis": 1,
+   "msTotal": 269,
+   "insights": 9,
+   "nuevos": 1,
+   "duracionTurnoMs": 4614
+  },
+  {
+   "turno": 23,
+   "canal": "asesor",
+   "msTranscripcion": 225,
+   "msAnalisis": 1,
+   "msTotal": 226,
+   "insights": 9,
+   "nuevos": 0,
+   "duracionTurnoMs": 4230
+  },
+  {
+   "turno": 24,
+   "canal": "cliente",
+   "msTranscripcion": 245,
+   "msAnalisis": 1,
+   "msTotal": 246,
+   "insights": 10,
+   "nuevos": 1,
+   "duracionTurnoMs": 4166
+  }
+ ],
+ "segmentos": [
+  {
+   "inicioMs": 678,
+   "finMs": 6348,
+   "hablante": "asesor",
+   "texto": "Buenas tardes, le habla Ana. ¿Qué es lo que más se les complica hoy en la operación?"
+  },
+  {
+   "inicioMs": 710,
+   "finMs": 6380,
+   "hablante": "cliente",
+   "texto": "Buenas tardes, le habla Ana. ¿Qué es lo que más se les complica hoy en la operación?"
+  },
+  {
+   "inicioMs": 6918,
+   "finMs": 12780,
+   "hablante": "asesor",
+   "texto": "Batallamos con las cotizaciones, porque cada quien lo hace a su manera y perdemos como 20 horas al mes en retrabajo."
+  },
+  {
+   "inicioMs": 6918,
+   "finMs": 12748,
+   "hablante": "cliente",
+   "texto": "Batallamos con las cotizaciones, porque cada quien lo hace a su manera y perdemos como 20 horas al mes en retrabajo."
+  },
+  {
+   "inicioMs": 13446,
+   "finMs": 16332,
+   "hablante": "asesor",
+   "texto": "¿Y qué pasa si eso sigue así seis meses más?"
+  },
+  {
+   "inicioMs": 13446,
+   "finMs": 16364,
+   "hablante": "cliente",
+   "texto": "¿Y qué pasa si eso sigue así seis meses más?"
+  },
+  {
+   "inicioMs": 16902,
+   "finMs": 21196,
+   "hablante": "asesor",
+   "texto": "Se nos van clientes por responder tarde. El impacto es directo en ventas."
+  },
+  {
+   "inicioMs": 16902,
+   "finMs": 21228,
+   "hablante": "cliente",
+   "texto": "Se nos van clientes por responder tarde. El impacto es directo en ventas."
+  },
+  {
+   "inicioMs": 21958,
+   "finMs": 24492,
+   "hablante": "asesor",
+   "texto": "Para cuando necesitan tenerlo resuelto."
+  },
+  {
+   "inicioMs": 21990,
+   "finMs": 24492,
+   "hablante": "cliente",
+   "texto": "para cuando necesitan tenerlo resuelto."
+  },
+  {
+   "inicioMs": 25062,
+   "finMs": 29612,
+   "hablante": "asesor",
+   "texto": "antes de fin de año porque en enero arranca la temporada alta y es urgente."
+  },
+  {
+   "inicioMs": 25030,
+   "finMs": 29612,
+   "hablante": "cliente",
+   "texto": "Antes de fin de año, porque en enero arranca la temporada alta y es urgente."
+  },
+  {
+   "inicioMs": 30374,
+   "finMs": 34476,
+   "hablante": "asesor",
+   "texto": "¿Cómo se decide una compra así en su empresa? ¿Quién autoriza?"
+  },
+  {
+   "inicioMs": 30374,
+   "finMs": 34476,
+   "hablante": "cliente",
+   "texto": "¿Cómo se decide una compra así en su empresa? ¿Quién autoriza?"
+  },
+  {
+   "inicioMs": 35110,
+   "finMs": 39692,
+   "hablante": "asesor",
+   "texto": "Lo autoriza el director de operaciones, Pedro, y compras revisa el contrato."
+  },
+  {
+   "inicioMs": 35078,
+   "finMs": 39692,
+   "hablante": "cliente",
+   "texto": "Lo autoriza el director de operaciones, Pedro, y compras revisa el contrato."
+  },
+  {
+   "inicioMs": 40454,
+   "finMs": 42540,
+   "hablante": "asesor",
+   "texto": "Tienen presupuesto contemplado."
+  },
+  {
+   "inicioMs": 40486,
+   "finMs": 42572,
+   "hablante": "cliente",
+   "texto": "Tienen presupuesto contemplado."
+  },
+  {
+   "inicioMs": 43110,
+   "finMs": 46508,
+   "hablante": "asesor",
+   "texto": "Sí, tenemos unos cien. Aprobados para este trimestre."
+  },
+  {
+   "inicioMs": 43110,
+   "finMs": 46476,
+   "hablante": "cliente",
+   "texto": "Sí, tenemos unos 100.000 pesos aprobados para este trimestre."
+  },
+  {
+   "inicioMs": 47078,
+   "finMs": 51724,
+   "hablante": "asesor",
+   "texto": "Le parece si le mando la propuesta el jueves y agendamos la demo con Pedro."
+  },
+  {
+   "inicioMs": 47110,
+   "finMs": 51724,
+   "hablante": "cliente",
+   "texto": "Le parece si le mando la propuesta el jueves y agendamos la demo con Pedro."
+  },
+  {
+   "inicioMs": 52294,
+   "finMs": 56524,
+   "hablante": "asesor",
+   "texto": "Sí, queramos en que me mandas la propuesta el jueves y la demo la semana que viene."
+  },
+  {
+   "inicioMs": 52326,
+   "finMs": 56492,
+   "hablante": "cliente",
+   "texto": "Sí, quedamos en que me mandas la propuesta el jueves y la demo la semana que viene."
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "guion": "g1-control",
+ "voz": "es_ES-davefx-medium",
+ "duracionMs": 32270,
+ "texto": "Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. Ese vapor sube, se enfría y forma las nubes. Cuando las gotas pesan demasiado, caen como lluvia o como nieve. Parte del agua se filtra en la tierra y alimenta los ríos subterráneos. Otra parte corre por la superficie hasta volver al mar. Así el ciclo empieza otra vez. Es un sistema cerrado: el agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte.",
+ "palabras": 101,
+ "tramos": [
+  {
+   "inicioMs": 500,
+   "finMs": 10076,
+   "texto": "Buenos días a todos. Hoy vamos a hablar del ciclo del agua. El agua se evapora de los mares y los ríos por el calor del sol. Ese vapor sube, se enfría y forma las nubes."
+  },
+  {
+   "inicioMs": 11876,
+   "finMs": 21658,
+   "texto": "Cuando las gotas pesan demasiado, caen como lluvia o como nieve. Parte del agua se filtra en la tierra y alimenta los ríos subterráneos. Otra parte corre por la superficie hasta volver al mar."
+  },
+  {
+   "inicioMs": 23458,
+   "finMs": 32270,
+   "texto": "Así el ciclo empieza otra vez. Es un sistema cerrado: el agua no se crea ni se destruye, solo cambia de lugar y de estado. Con esto terminamos la primera parte."
+  }
+ ],
+ "pausasLargas": [
+  {
+   "inicioMs": 10076,
+   "finMs": 11876,
+   "ms": 1800
+  },
+  {
+   "inicioMs": 21658,
+   "finMs": 23458,
+   "ms": 1800
+  }
+ ]
+}
