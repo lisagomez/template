@@ -201,6 +201,7 @@ export default function PaginaDictar() {
 
       <footer className="mt-10 flex flex-col items-center gap-2 text-center">
         <a href="/historial" className="text-sm underline" data-prueba="ir-historial">Ver todo lo dictado (historial)</a>
+        <a href="/ajustes" className="text-sm underline" data-prueba="ir-ajustes">Ajustes del dictado</a>
         <QrEmparejar token={movil.token} ruta="/dictar" />
         <button type="button" onClick={() => movil.olvida()} className="text-xs text-neutral-400 underline">
           Olvidar emparejamiento

@@ -23,18 +23,14 @@ const banco = join(raiz, 'medicion', 'banco');
 const log = join(banco, 'en-vivo.log');
 const pidArchivo = join(banco, 'en-vivo.pid');
 /**
- * Motor: parakeet manda (WER 3,3 %, p50 532 ms en la tabla del README; en vivo el 2026-09-19
- * faster-whisper:small solo daba 1,4-6,9 s por frase y alucinaba «¡Suscríbete!» en turnos con
- * ruido) y faster-whisper:small queda de RESPALDO para las frases cortas que Parakeet oye en
- * ingles — la combinacion que el README ya documentaba.
- *
- * Ganancia 0 y silencio 1000: los +12 dB eran para el microfono flojo de la maquina del
- * 2026-09-16; en la del 2026-09-19 el microfono entra fuerte y con ellos SATURABA (picos a
- * -0,7 dBFS: palabras rotas en los dos motores). Y 700 ms de silencio parte el 6,7 % de las
- * frases (tabla del VAD); 1000 ms, el 0,7 %. Si tu microfono entra flojo (pico < -45 dBFS en
- * el log), devuelve la ganancia con DICTADO_FLAGS.
+ * Lo que en-vivo FIJA es su forma: manos libres, la tecla que alterna y el icono. Todo lo demas
+ * (motor, respaldo, ganancia, silencio, pegado, sonidos…) sale de `ajustes.json`
+ * (`dictado ajustes` o la pagina /ajustes), cuyos defectos son los que funcionaron en vivo:
+ * parakeet (WER 3,3 %, p50 532 ms) con faster-whisper:small de respaldo si esta instalado
+ * (`respaldo: auto`), ganancia 0 y silencio 1000 ms (700 partia el 6,7 % de las frases).
+ * DICTADO_FLAGS sigue mandando sobre todo, para una sesion.
  */
-const FLAGS = (process.env.DICTADO_FLAGS ?? '--modo manos-libres --silencio-ms 1000 --tecla --tecla-alternar --icono --motor parakeet --respaldo faster-whisper:small --ganancia-db 0').split(/\s+/).filter(Boolean);
+const FLAGS = (process.env.DICTADO_FLAGS ?? '--modo manos-libres --tecla --tecla-alternar --icono').split(/\s+/).filter(Boolean);
 
 const limpio = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
 const utiles = () => (existsSync(log) ? limpio(readFileSync(log, 'utf8')).split('\n').filter((l) => /motor |microfono|conectada|desconectada|icono|✓|✗|latencia|pegado |sin voz|pico durante|escuchando|en espera|EADDRINUSE/.test(l)) : []);

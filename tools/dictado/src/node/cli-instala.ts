@@ -12,7 +12,8 @@ import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, statfsSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Configuracion } from './cli-config.js';
+import { escribeArchivoAjustes, rutaAjustes } from './ajustes-archivo.js';
+import { leeConfiguracion, type Configuracion } from './cli-config.js';
 import { ordenDiagnostico } from './cli-diagnostico.js';
 import { copiaIconoAWindows, ordenIcono } from './cli-icono.js';
 import { mbDe, NECESARIOS, rutaDe, RUNTIMES, type Peso } from './pesos.js';
@@ -147,6 +148,16 @@ export async function ordenInstala(config: Configuracion, opciones: Record<strin
     await mide(`${p.que} (~${p.mb} MB)`, 'script', () => (descargaPeso(config.modelos, p) === 'ya' ? 'ya estaba' : 'bajado'));
   }
   await mide('token del celular', 'script', () => preparaToken(config.datos, typeof opciones['app'] === 'string' ? opciones['app'] : undefined));
+  // Los ajustes de la persona: el archivo nace con los defectos (motor parakeet, el instalado) y
+  // desde ahi lo cambian `dictado ajustes` o la pagina /ajustes. Uno que ya exista no se toca.
+  await mide('ajustes (ajustes.json)', 'script', () => {
+    if (existsSync(rutaAjustes(config.datos))) return `ya existia: ${rutaAjustes(config.datos)} (no se toca)`;
+    try {
+      return `creado con los defectos (motor parakeet): ${escribeArchivoAjustes(config.datos, {})}`;
+    } catch (e) {
+      return `no se pudo crear (${e instanceof Error ? e.message : String(e)}); el dictado funciona igual con los defectos`;
+    }
+  });
 
   const interop = existsSync('/mnt/c/Windows/System32/cmd.exe');
   if (opciones['sin-icono'] !== true && interop) {
@@ -172,5 +183,6 @@ export async function ordenInstala(config: Configuracion, opciones: Record<strin
   console.log('     y emparejar una vez (QR desde un navegador ya emparejado, o teclear el token).');
   console.log('  4. Solo por LAN sin Tailscale: correr tools/dictado/windows/red-movil.ps1 como administrador.');
   console.log(gris('\nDiagnostico (se puede pegar en un issue: no lleva secretos ni lo dictado):\n'));
-  await ordenDiagnostico(config, {});
+  // Se vuelve a leer la configuracion: el ajustes.json recien creado tiene que verse en el diagnostico.
+  await ordenDiagnostico(leeConfiguracion(opciones), {});
 }

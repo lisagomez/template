@@ -215,6 +215,18 @@ $menu = New-Object System.Windows.Forms.ContextMenuStrip
     Start-Process 'wsl.exe' -ArgumentList $argumentos
   } else { $icono.ShowBalloonTip(4000, 'Dictado', 'La app no responde y no conozco la ruta del dictado.', 'Info') }
 })
+[void]$menu.Items.Add('Ajustes').add_Click({
+  # La pagina /ajustes (misma app que el historial): motor, tecla, pegado, audio, sonidos. Si la app no responde, la terminal.
+  $ajustes = $Historial -replace '/historial.*$', '/ajustes'
+  $responde = $false
+  try { $r = Invoke-WebRequest -Uri ($Historial -replace '/historial.*$', '/api/laboratorio/estado') -UseBasicParsing -TimeoutSec 2; $responde = ($r.StatusCode -eq 200) } catch { $responde = $false }
+  if ($responde) { Start-Process $ajustes }
+  elseif ($RaizWsl) {
+    $argumentos = @(); if ($Distro) { $argumentos += @('-d', $Distro) }
+    $argumentos += @('--', 'bash', '-lc', "cd '$RaizWsl' && node dist/node/cli.js ajustes; echo; read -p 'Enter para cerrar'")
+    Start-Process 'wsl.exe' -ArgumentList $argumentos
+  } else { $icono.ShowBalloonTip(4000, 'Dictado', 'La app no responde y no conozco la ruta del dictado.', 'Info') }
+})
 [void]$menu.Items.Add('Mostrar/ocultar la pildora').add_Click({
   if ($script:flotante.Visible) { $script:flotante.Hide() } else { $script:flotante.Show() }
 })

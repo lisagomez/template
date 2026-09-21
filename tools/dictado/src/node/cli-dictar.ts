@@ -9,19 +9,27 @@
  *  - **`--tecla`**: lanza A LA VISTA `windows/tecla-global.ps1` con `powershell.exe` (interop,
  *    en esta misma terminal; te lo dice antes). Mantener la tecla = hablar; dos toques = manos libres. Es lo que sflow
  *    hacia con Ctrl+Shift, hecho desde el unico lado que ve el teclado global en WSL2.
+ *
+ * Motor, modo, pegado, ganancia, silencio y el resto salen de `config.valores` (ajustes.json con
+ * precedencia argumento > entorno > ajustes > defecto). Mientras corre se vigila el archivo: lo
+ * que es seguro (pegado, comandos, snippets, diccionario, ganancia, umbral, sonidos, retencion)
+ * se toma en caliente y lo que exige recargar (motor, silencio, modo, tecla…) se avisa para la
+ * siguiente sesion. Lo que fija una bandera o el entorno no lo mueve el archivo, y se dice.
  */
 import { execFileSync, spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { campo, valoresDe, type Ajustes, type AjustesResueltos, type Clave } from '../ajustes.js';
 import { creaDictado, type Dictado, type Estado, type EventoDictado, type Modo } from '../dictado.js';
 import { fechaHaceDias } from '../historial.js';
-import { creaPosproceso } from '../posproceso.js';
+import { creaPosproceso, type Posproceso } from '../posproceso.js';
 import { pareceOtroIdioma } from '../texto/idioma.js';
 import { normalizaParaComparar } from '../texto/normaliza.js';
 import type { Motor, Pegador } from '../types.js';
 import { capturaMicrofono, escribeWav, nivelDb, type Captura } from './audio.js';
 import { ajustaGanancia, factorDe } from './ganancia.js';
+import { vigilaArchivoAjustes } from './ajustes-archivo.js';
 import type { Configuracion } from './cli-config.js';
 import { cargaDatos } from './cli-datos.js';
 import { creaDetector, creaMotor } from './cli-motores.js';
@@ -31,7 +39,7 @@ import { escuchaIcono, PUERTO_ICONO, type EscuchaIcono } from './icono.js';
 import { creaBarras } from './barras.js';
 import { creaPildora, type EntradaPildora } from './pildora.js';
 import { escuchaTecla, type EscuchaTecla } from './tecla.js';
-import { DEFECTOS_DICTADO } from './vad.js';
+import { creaSonidos } from './sonidos.js';
 import { construyeTrayectoria, creaContadores, escribeTrayectoria, type ContadoresSesion } from './trayectoria.js';
 
 const RUTA_TECLA = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'windows', 'tecla-global.ps1');
@@ -113,7 +121,7 @@ function avisoPico(picoDb: number): string {
  */
 const MULETILLAS = new Set(['uh', 'um', 'eh', 'ah', 'mm', 'mmm', 'hmm', 'aja', 'ajá']);
 
-function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbralDb: number, contadores: ContadoresSesion): Motor {
+function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbral: () => number, contadores: ContadoresSesion): Motor {
   const ventana = Math.max(1, Math.round(frecuenciaHz * 0.03));
   const pico = (m: Float32Array) => {
     let max = -Infinity;
@@ -125,6 +133,7 @@ function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbralDb: number
     admitePista: motor.admitePista,
     async transcribe(muestras, hz, o) {
       const db = pico(muestras);
+      const umbralDb = umbral();
       if (db < umbralDb) {
         console.log(gris(`  (turno descartado sin transcribir: pico ${db.toFixed(1)} dBFS < ${umbralDb} dBFS, no es voz)`));
         contadores.descartadosEnergia += 1;
@@ -247,26 +256,40 @@ function lanzaIconoBarra(puerto: number): void {
   hijo.unref();
 }
 
+/**
+ * Con `respaldo: auto`, faster-whisper:small si esta en la carpeta de modelos; si no, ninguno.
+ * Con el motor `remoto` no aplica: el demonio ya lleva su propio respaldo (`x-motor: respaldo`),
+ * y los guiones de medicion que dictan contra el no cambian de forma por este ajuste.
+ */
+function eleccionDeRespaldo(config: Configuracion): string | undefined {
+  const r = config.valores.respaldo;
+  if (r === 'ninguno') return undefined;
+  if (r !== 'auto') return r;
+  if (config.valores.motor === 'remoto') return undefined;
+  return existsSync(join(config.modelos, 'faster-whisper', 'models--Systran--faster-whisper-small')) ? 'faster-whisper:small' : undefined;
+}
+
 export async function ordenDictar(config: Configuracion, opciones: Record<string, string | boolean>): Promise<void> {
-  const modoPedido = String(opciones['modo'] ?? 'alternar');
-  const modo: Modo = modoPedido === 'manos-libres' ? 'manosLibres' : modoPedido === 'pulsar' ? 'pulsar' : 'alternar';
-  const idioma = typeof opciones['idioma'] === 'string' ? opciones['idioma'] : 'es';
-  const pegar = String(opciones['pegar'] ?? 'portapapeles');
-  const silencioMs = typeof opciones['silencio-ms'] === 'string' ? Number(opciones['silencio-ms']) : DEFECTOS_DICTADO.msSilencioParaCerrar;
-  /** `--ganancia-db auto`: se ajusta sola por el pico de cada escucha (ver ganancia.ts); un numero la fija. */
-  const gananciaAuto = opciones['ganancia-db'] === 'auto';
-  let gananciaDb = typeof opciones['ganancia-db'] === 'string' && !gananciaAuto ? Number(opciones['ganancia-db']) : 0;
-  if (!Number.isFinite(gananciaDb)) gananciaDb = 0;
+  /** Los ajustes ya resueltos (argumento > entorno > ajustes > defecto); `cambiaEnCaliente` los mueve mientras corre. */
+  let ajustes: AjustesResueltos = config.ajustes;
+  const v: Ajustes = valoresDe(ajustes);
+  const modo: Modo = v.modo === 'manos-libres' ? 'manosLibres' : v.modo === 'pulsar' ? 'pulsar' : 'alternar';
+  const idioma = v.idioma;
+  let pegar: Ajustes['pegar'] = v.pegar;
+  const silencioMs = v.silencioMs;
+  /** `gananciaDb: auto`: se ajusta sola por el pico de cada escucha (ver ganancia.ts); un numero la fija. */
+  let gananciaAuto = v.gananciaDb === 'auto';
+  let gananciaDb = gananciaAuto ? 0 : (v.gananciaDb as number);
   /**
-   * `--mic-en-espera cerrado` (por defecto): en espera el microfono NO esta abierto; se abre al
+   * `micEnEspera: cerrado` (por defecto): en espera el microfono NO esta abierto; se abre al
    * escuchar (~100 ms medidos por PulseAudio de WSLg) y se cierra 1,5 s despues de parar. Con
    * `abierto` se queda capturando y descartando, como antes. Con `--entrada` siempre abierto.
    */
-  const micEnEspera = String(opciones['mic-en-espera'] ?? 'cerrado');
+  const micEnEspera = v.micEnEspera;
   /** `--alterna-cada <ms>`: SOLO pruebas; alterna escuchar/parar cada N ms como si alguien tocara la tecla. */
   const alternaCadaMs = typeof opciones['alterna-cada'] === 'string' ? Number(opciones['alterna-cada']) : 0;
-  /** Con `--tecla-alternar` la tecla no se mantiene: un toque empieza, el siguiente termina. */
-  const teclaAlterna = opciones['tecla-alternar'] === true;
+  /** Con `teclaAlternar` la tecla no se mantiene: un toque empieza, el siguiente termina. */
+  const teclaAlterna = v.teclaAlternar;
   /** `--graba <carpeta>`: guarda el audio de cada escucha como WAV. SOLO diagnostico; por defecto nada se graba. */
   const graba = typeof opciones['graba'] === 'string' ? opciones['graba'] : undefined;
   /** `--entrada <audio>`: SOLO pruebas y calibracion; el archivo hace de microfono, a tiempo real. */
@@ -277,33 +300,64 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   const contadores = creaContadores();
   const inicioSesion = new Date();
 
-  console.log(gris(config.describe()));
-  const datos = cargaDatos(config, { corrigePorSimilitud: opciones['corrige-similitud'] === true });
-  /** Retencion del historial: `DICTADO_RETENCION_DIAS` (365 por defecto, la AISIA de Fase 0); 0 = no borrar. */
-  const retencionDias = Number(process.env['DICTADO_RETENCION_DIAS'] ?? 365);
-  if (Number.isFinite(retencionDias) && retencionDias > 0) {
-    const borrados = await datos.historial.borra({ antesDe: fechaHaceDias(retencionDias) });
-    if (borrados > 0) console.log(gris(`historial: ${borrados} dictado(s) de hace mas de ${retencionDias} dias borrados (DICTADO_RETENCION_DIAS)`));
+  console.log(gris(config.describeRutas()));
+  console.log(gris(config.describeCambiados()));
+  for (const a of config.avisosAjustes) console.log(gris(`ajustes: aviso: ${a}`));
+  const datos = cargaDatos(config, { corrigePorSimilitud: v.correccionPorSimilitud });
+  /** Retencion del historial (`retencionDias`, 365 por defecto: la AISIA de Fase 0); 0 = no borrar. Se repite si cambia en caliente. */
+  const purga = async (dias: number) => {
+    if (!(dias > 0)) return;
+    const borrados = await datos.historial.borra({ antesDe: fechaHaceDias(dias) });
+    if (borrados > 0) console.log(gris(`historial: ${borrados} dictado(s) de hace mas de ${dias} dias borrados (retencionDias)`));
+  };
+  await purga(v.retencionDias);
+  const principal = await creaMotor(v.motor, config, idioma);
+  const eleccionRespaldo = eleccionDeRespaldo(config);
+  let respaldo: Motor | undefined;
+  if (eleccionRespaldo) {
+    respaldo = await creaMotor(eleccionRespaldo, config, idioma);
+    // Con `auto` el respaldo es una comodidad, no una promesa: si no arranca (sin faster-whisper
+    // en ese Python), se sigue sin el y se dice. Pedido a mano, un fallo es un fallo.
+    if (v.respaldo === 'auto') {
+      try {
+        await respaldo.calienta?.();
+      } catch (e) {
+        console.log(gris(`respaldo auto: ${eleccionRespaldo} no arranca (${e instanceof Error ? e.message.split('\n')[0] : String(e)}); sigo sin respaldo`));
+        await respaldo.cierra?.().catch(() => undefined);
+        respaldo = undefined;
+      }
+    }
   }
-  const principal = await creaMotor(String(opciones['motor'] ?? 'parakeet'), config, idioma);
-  const respaldo = typeof opciones['respaldo'] === 'string' ? await creaMotor(opciones['respaldo'], config, idioma) : undefined;
   const motor = respaldo ? conRespaldo(principal, respaldo, idioma, contadores) : principal;
   const detector = await creaDetector(config, { msSilencioParaCerrar: silencioMs });
-  /** `--umbral-voz-db -45`: por debajo de este pico el turno se descarta sin motor. */
-  const umbralVozDb = typeof opciones['umbral-voz-db'] === 'string' ? Number(opciones['umbral-voz-db']) : -45;
-  const transcriptor = conPuertaDeEnergia(motor, detector.frecuenciaHz, umbralVozDb, contadores);
-  const pegadorBase = pegar === 'ninguno' ? pegadorDePantalla() : creaPegadorWindows({ metodo: pegar === 'teclear' ? 'teclear' : 'portapapeles' });
+  /** `umbralVozDb`: por debajo de este pico el turno se descarta sin motor. Cambia en caliente. */
+  let umbralVozDb = v.umbralVozDb;
+  const transcriptor = conPuertaDeEnergia(motor, detector.frecuenciaHz, () => umbralVozDb, contadores);
+  /** El pegador se cambia en caliente (ajuste `pegar`): el envoltorio delega en el actual. */
+  const creaPegador = (metodo: Ajustes['pegar']): Pegador => (metodo === 'ninguno' ? pegadorDePantalla() : creaPegadorWindows({ metodo: metodo === 'teclear' ? 'teclear' : 'portapapeles' }));
+  let pegadorBase = creaPegador(pegar);
+  const cierraPegador = async (p: Pegador) => {
+    if ('cierra' in p && typeof p.cierra === 'function') await (p as { cierra(): Promise<void> }).cierra();
+  };
   // En manos libres las frases se pegan una tras otra en la misma caja: sin separador se juntan.
   let msPegado = 0;
-  const pegaMedido = async (t: string) => {
-    const t0 = performance.now();
-    await pegadorBase.pega(modo === 'manosLibres' ? t + ' ' : t);
-    msPegado = performance.now() - t0;
+  const sonidos = creaSonidos({ alEmpezar: v.sonidoAlEmpezar, alTerminar: v.sonidoAlTerminar });
+  const pegador: Pegador = {
+    async pega(t) {
+      const t0 = performance.now();
+      await pegadorBase.pega(modo === 'manosLibres' ? t + ' ' : t);
+      msPegado = performance.now() - t0;
+      sonidos.termina();
+    },
+    ejecuta: (acciones) => pegadorBase.ejecuta?.(acciones) ?? Promise.resolve(),
   };
-  const pegador: Pegador = { ...pegadorBase, pega: pegaMedido };
+  /** El posproceso se rearma en caliente (comandos, snippets, diccionario): el envoltorio delega en el actual. */
+  const armaPosproceso = (a: Ajustes): Posproceso => creaPosproceso({ ...(a.snippets ? { snippets: datos.snippets } : {}), ...(a.diccionario ? { diccionario: datos.diccionario } : {}), comandos: a.comandos });
+  let posprocesoActual = armaPosproceso(v);
+  let conPista = v.diccionario;
   const t0 = performance.now();
   await motor.calienta?.();
-  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaAuto ? 'auto' : `${gananciaDb} dB`} · mic en espera ${entrada ? 'abierto (entrada por archivo)' : micEnEspera}`));
+  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaAuto ? 'auto' : `${gananciaDb} dB`} · mic en espera ${entrada ? 'abierto (entrada por archivo)' : micEnEspera}${respaldo ? ` · respaldo ${respaldo.id}` : ''}`));
 
   /** El icono de la barra, si esta puesto, se pinta con los mismos eventos que la TUI. */
   let publicaIcono: (estado: Estado) => void = () => undefined;
@@ -317,8 +371,8 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     frecuenciaHz: detector.frecuenciaHz,
     modo,
     idioma,
-    pista: () => datos.diccionario.comoPista() || undefined,
-    posproceso: creaPosproceso({ snippets: datos.snippets, diccionario: datos.diccionario }),
+    pista: () => (conPista ? datos.diccionario.comoPista() || undefined : undefined),
+    posproceso: { procesa: (t) => posprocesoActual.procesa(t) },
     pegador,
     almacen: datos.historial,
     motorId: motor.id,
@@ -328,6 +382,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
       if (e.tipo === 'texto') publicaPildora({ tipo: 'hecho' });
       if (e.tipo === 'sinVoz' || e.tipo === 'error') publicaPildora({ tipo: 'error' });
       if (e.tipo === 'estado' && e.estado === 'escuchando') {
+        sonidos.empieza();
         picoEscucha = -Infinity;
         picoRawEscucha = -Infinity;
         trozosEscucha = [];
@@ -374,6 +429,74 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     },
   });
   const control = controlador(dictado);
+
+  /**
+   * El archivo de ajustes cambio (la pagina /ajustes o `dictado ajustes pon`): se vuelve a resolver
+   * con la MISMA precedencia y se aplica lo que se puede. Lo que fija una bandera o el entorno no
+   * se mueve (el archivo esta por debajo); lo que exige recargar espera a la siguiente sesion.
+   */
+  const cambiaEnCaliente = (nuevos: AjustesResueltos, avisos: string[]) => {
+    for (const a of avisos) console.log(gris(`ajustes: aviso: ${a}`));
+    const previos = ajustes;
+    ajustes = nuevos;
+    const nv = valoresDe(nuevos);
+    for (const clave of Object.keys(nuevos) as Clave[]) {
+      if (nuevos[clave].valor === previos[clave].valor) continue;
+      const c = campo(clave);
+      const desde = `${String(previos[clave].valor)} → ${String(nuevos[clave].valor)}`;
+      if (nuevos[clave].origen !== 'ajustes' && previos[clave].origen !== 'ajustes') continue; // ni antes ni ahora venia del archivo
+      if (!c?.enCaliente) {
+        console.log(gris(`ajustes: ${clave} ${desde}: se aplica en la siguiente sesion (exige recargar)`));
+        continue;
+      }
+      switch (clave) {
+        case 'pegar': {
+          const viejo = pegadorBase;
+          pegar = nv.pegar;
+          pegadorBase = creaPegador(pegar);
+          void cierraPegador(viejo).catch(() => undefined);
+          break;
+        }
+        case 'gananciaDb':
+          gananciaAuto = nv.gananciaDb === 'auto';
+          gananciaDb = gananciaAuto ? 0 : (nv.gananciaDb as number);
+          break;
+        case 'umbralVozDb':
+          umbralVozDb = nv.umbralVozDb;
+          break;
+        case 'comandos':
+        case 'snippets':
+        case 'diccionario':
+          posprocesoActual = armaPosproceso(nv);
+          conPista = nv.diccionario;
+          break;
+        case 'sonidoAlEmpezar':
+        case 'sonidoAlTerminar':
+          sonidos.configura({ alEmpezar: nv.sonidoAlEmpezar, alTerminar: nv.sonidoAlTerminar });
+          break;
+        case 'retencionDias':
+          void purga(nv.retencionDias);
+          break;
+        default:
+          break;
+      }
+      console.log(verde(`ajustes: ${clave} ${desde}: aplicado en caliente`));
+    }
+  };
+  let archivoPrevio = config.archivoAjustes.valores;
+  const dejaDeVigilar = vigilaArchivoAjustes(config.datos, (archivo) => {
+    const r = config.resuelveCon(archivo);
+    // Lo que el archivo cambio pero una bandera o el entorno fijan por encima: no se mueve, y se dice.
+    for (const clave of Object.keys(r.ajustes) as Clave[]) {
+      const origen = r.ajustes[clave].origen;
+      if ((origen === 'argumento' || origen === 'entorno') && archivo.valores[clave] !== archivoPrevio[clave]) {
+        const c = campo(clave);
+        console.log(gris(`ajustes: ${clave} cambio en el archivo, pero en esta sesion lo fija ${origen === 'entorno' ? c?.variable : `--${c?.bandera}`} (${String(r.ajustes[clave].valor)}): el archivo no manda`));
+      }
+    }
+    archivoPrevio = archivo.valores;
+    cambiaEnCaliente(r.ajustes, r.avisos);
+  });
 
   let picoDb = -Infinity;
   let muestrasVistas = 0;
@@ -457,6 +580,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     saliendo = true;
     console.log(gris('\ncerrando…'));
     quitaTeclas();
+    dejaDeVigilar();
     clearInterval(latido);
     if (alternador) clearInterval(alternador);
     cierraTeclaGlobal?.();
@@ -468,7 +592,8 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     await control.esperar();
     if (dictado.estado !== 'inactivo') await dictado.termina().catch(() => undefined);
     await motor.cierra?.();
-    if ('cierra' in pegadorBase && typeof pegadorBase.cierra === 'function') await (pegadorBase as { cierra(): Promise<void> }).cierra();
+    await cierraPegador(pegadorBase);
+    await sonidos.cierra().catch(() => undefined);
     datos.guardaSnippets();
     if (conTrayectoria) {
       try {
@@ -485,7 +610,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   };
 
   if (opciones['tecla'] !== undefined) {
-    const vk = typeof opciones['tecla'] === 'string' ? opciones['tecla'] : '0xA3';
+    const vk = v.tecla;
     tecla = await escuchaTecla({
       alMantener: () => (teclaAlterna ? undefined : void control.empieza('pulsar')),
       alSoltar: () => (teclaAlterna ? void control.alterna('alternar') : void control.termina()),

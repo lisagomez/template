@@ -11,6 +11,7 @@ import { ordenIcono } from './cli-icono.js';
 import { ordenInstala } from './cli-instala.js';
 import { ordenDiagnostico } from './cli-diagnostico.js';
 import { ordenPega } from './cli-pega.js';
+import { ordenAjustes } from './cli-ajustes.js';
 import { motoresDisponibles } from './cli-motores.js';
 
 async function principal(): Promise<void> {
@@ -39,11 +40,14 @@ async function principal(): Promise<void> {
       return ordenDiagnostico(config, opciones);
     case 'pega':
       return ordenPega(posicionales);
+    case 'ajustes':
+      return ordenAjustes(config, posicionales, opciones);
     case 'motores':
       console.log(motoresDisponibles(config).join('\n') || `(ninguno en ${config.modelos})`);
       return;
     case 'config':
       console.log(config.describe());
+      for (const a of config.avisosAjustes) console.log(`  aviso: ${a}`);
       return;
     default:
       console.log(AYUDA);

@@ -15,6 +15,8 @@
  *   echo '{…}' | … diccionario-agrega | diccionario-quita | snippets-agrega | snippets-quita | historial-corrige
  *   echo '{filtros, desde, cuantos}' | … historial-lee   → la pagina /historial: filtrados, ordenados, paginados
  *   echo '{id}' | … historial-borra-uno · echo '{antesDe}' | … historial-borra-rango · historial-trayectorias
+ *   node scripts/laboratorio-voz/maquina.mjs ajustes-lee     → la pagina /ajustes: valores con origen, esquema, catalogo medido
+ *   echo '{clave, valor}' | … ajustes-pon · echo '{clave}' | … ajustes-quita · … ajustes-restablece
  *
  * Medido el 2026-09-20: leer y buscar sobre 20 000 dictados (3,9 MB) cuesta ~56 ms en total, y sobre
  * el historial real (188) menos de 1 ms. No hay indice: el archivo se lee entero en cada orden y lo
@@ -191,6 +193,27 @@ function historialTrayectorias() {
   return { trayectorias };
 }
 
+/**
+ * Los ajustes de la persona, por las MISMAS piezas del CLI (`leeConfiguracion` + `cli-ajustes`):
+ * un `pon` desde la pagina es identico a `dictado ajustes pon`. El entorno con el que corre este
+ * proceso (DICTADO_DATOS, DICTADO_MODELOS…) es el que la app le pasa, asi que resuelve igual.
+ */
+async function ajustes(orden) {
+  const { leeConfiguracion } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'cli-config.js')).href);
+  const { estadoAjustes, ponAjuste, quitaAjuste, restableceAjustes } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'cli-ajustes.js')).href);
+  const config = leeConfiguracion({});
+  if (orden === 'ajustes-lee') return estadoAjustes(config);
+  if (orden === 'ajustes-restablece') return { ruta: restableceAjustes(config), estado: estadoAjustes(config) };
+  const cuerpo = entradaJson();
+  const clave = limpia(cuerpo.clave);
+  if (orden === 'ajustes-quita') {
+    const r = quitaAjuste(config, clave);
+    return r.ok ? { ok: true, estado: estadoAjustes(config) } : { ok: false, error: r.error };
+  }
+  const r = ponAjuste(config, clave, cuerpo.valor);
+  return r.ok ? { ok: true, valor: r.valor, estado: estadoAjustes(config) } : { ok: false, error: r.error };
+}
+
 const orden = process.argv[2];
 if (orden === 'datos-lee') process.stdout.write(JSON.stringify(await datosLee()));
 else if (orden === 'historial-lee') process.stdout.write(JSON.stringify(await historialLee()));
@@ -199,6 +222,7 @@ else if (orden === 'historial-borra-uno') process.stdout.write(JSON.stringify(aw
 else if (orden === 'historial-borra-rango') process.stdout.write(JSON.stringify(await historialBorraRango()));
 else if (orden === 'historial-trayectorias') process.stdout.write(JSON.stringify(historialTrayectorias()));
 else if (['diccionario-agrega', 'diccionario-quita', 'snippets-agrega', 'snippets-quita', 'historial-corrige'].includes(orden)) process.stdout.write(JSON.stringify(await ordenDatos(orden)));
+else if (['ajustes-lee', 'ajustes-pon', 'ajustes-quita', 'ajustes-restablece'].includes(orden)) process.stdout.write(JSON.stringify(await ajustes(orden)));
 else if (orden === 'piezas') process.stdout.write(JSON.stringify({ piezas: piezas(), voces: voces() }));
 else if (orden === 'veredictos-lee') process.stdout.write(JSON.stringify(leeVeredictos()));
 else if (orden === 'veredictos-agrega') process.stdout.write(JSON.stringify(agregaVeredicto(JSON.parse(readFileSync(0, 'utf8')))));
