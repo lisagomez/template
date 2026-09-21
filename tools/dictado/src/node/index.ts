@@ -18,3 +18,6 @@ export { creaBarras, DEFECTOS_BARRAS, lineaDeBarras, type Barras, type OpcionesB
 export { abreAltavozPulse, abreAltavozWindows, creaVozSintetica, habla, type Altavoz, type ModuloSherpaTts, type OpcionesSintesis, type OpcionesVozSintetica, type ResultadoHabla, type VozSintetica } from './habla.js';
 export { construyeTrayectoria, creaContadores, escribeTrayectoria, idDeTrayectoria, type ContadoresSesion, type ContextoSesion } from './trayectoria.js';
 export { ajustaGanancia, factorDe, VENTANA_SANA_DB, type Ajuste, type EntradaAjuste } from './ganancia.js';
+export { escribeArchivoAjustes, leeArchivoAjustes, leeMedicion, rutaAjustes, vigilaArchivoAjustes, type ArchivoAjustes } from './ajustes-archivo.js';
+export { estadoAjustes, ponAjuste, quitaAjuste, restableceAjustes } from './cli-ajustes.js';
+export { describeAjustes, leeConfiguracion, parseaArgumentos, type Configuracion } from './cli-config.js';

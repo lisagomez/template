@@ -38,11 +38,21 @@ export const MOTORES_SHERPA: Record<string, string> = {
   'whisper-small': 'sherpa-onnx-whisper-small',
 };
 
-/** Que hay instalado: para `dictado motores` y para un error util cuando falta uno. */
-export function motoresDisponibles(config: Configuracion): string[] {
+/**
+ * Que hay instalado: para `dictado motores`, para validar `ajustes.motor` y para un error util
+ * cuando falta uno. Los faster-whisper salen con su modelo concreto (la carpeta que deja
+ * huggingface: `models--Systran--faster-whisper-<modelo>`), no como comodin.
+ */
+export function motoresDisponibles(config: Pick<Configuracion, 'modelos' | 'remoto'>): string[] {
   const carpetas = existsSync(config.modelos) ? readdirSync(config.modelos) : [];
   const salida = Object.entries(MOTORES_SHERPA).filter(([, carpeta]) => carpetas.includes(carpeta)).map(([nombre]) => nombre);
-  if (carpetas.includes('faster-whisper')) salida.push('faster-whisper:<small|large-v3-turbo|...>');
+  const fw = join(config.modelos, 'faster-whisper');
+  if (carpetas.includes('faster-whisper') && existsSync(fw)) {
+    for (const c of readdirSync(fw)) {
+      const m = /^models--Systran--faster-whisper-(.+)$/.exec(c);
+      if (m) salida.push(`faster-whisper:${m[1]}`);
+    }
+  }
   if (config.remoto.url) salida.push('remoto');
   return salida;
 }

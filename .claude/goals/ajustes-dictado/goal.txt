@@ -1,0 +1,16 @@
+/goal Construye lo descrito en el spec completo: /home/kyara/code/template/.claude/goals/ajustes-dictado/spec.md. Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: el dictado recuerda como lo quiere la persona: `~/.dictado/ajustes.json` con defectos en un solo sitio, version y migracion, precedencia argumento > entorno > ajustes > defecto visible en `dictado config`; `dictado ajustes` (lista, pon, quita, restablece) con validacion; catalogo de motores instalados con WER y latencia medidos en ESTA maquina; pantalla de Ajustes en la app (tras token, 390 px, oscuro) que guarda por la misma logica pura, lo en vuelo lo toma en caliente cuando es seguro y avisa cuando no; lo que exige LLM aparece «sin proveedor» y apagado.
+Libertad tecnica total sobre el como; la logica sin navegador va en TypeScript puro con pruebas y la pantalla se prueba con Playwright.
+VALIDA: `npm run typecheck && npm run lint && (cd tools/dictado && npm run build && npm run prueba)` tras cada cambio grande, output pegado (si anades otra suite, sumala); `npm run validate` antes de cerrar. Mediciones sin otra carga.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- validacion en verde pegada, y `npm run validate` en verde al final
+- pruebas puras en verde: defectos, precedencia (4 casos), migracion, archivo roto → defectos + aviso, escritura atomica, validacion de clave/valor, catalogo cruzado con una medicion fija
+- salida real de terminal: `dictado ajustes`, un `pon` aceptado y uno rechazado con la lista, `dictado config` con el origen de cada valor, `diagnostico` sin secretos
+- capturas Playwright de Ajustes a 1280 y 390 px y en oscuro: secciones, catalogo con cifras, cambio guardado, «sin proveedor», valor invalido rechazado
+- caliente demostrado con `dictar --entrada` corriendo (pegado/sonidos tomados sin reiniciar; aviso honesto al cambiar motor)
+- tabla medida: leer ajustes al arrancar (p50 de 20), carga de la pantalla, latencia de dictar antes/despues
+- `dictado instala` en DICTADO_DATOS limpio deja el archivo
+- reporte de decisiones y formas en que podria estar mal (archivo roto, clave desconocida, motor ausente, entorno vs ajustes, dos escrituras, carpeta de solo lectura, token caducado), resueltas
+- README de dictado y SDD §2 al dia (config.py: de «sustituido» a «portado», con que se tomo y que no)
+RESTRICCIONES: todo local y sin LLM; el audio no se guarda; ningun secreto en ajustes.json ni en pantalla; toda ruta nueva exige el token; el bundle no toca el disco con fs; el defecto de motor sigue siendo el medido; no tocar settings.json de Claude, skills, prompts, atajos ni la pildora salvo una entrada «Ajustes» en su menu; nombres en espanol.
+RED DE SEGURIDAD: si tras 50 turnos no converges, detente y reporta el bloqueo.

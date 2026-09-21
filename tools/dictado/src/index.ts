@@ -40,3 +40,4 @@ export { cer, distanciaEdicion, percentil, wer, werAcumulado, type ResultadoWer 
 export { cantidadEn, numerosACifras, parseaCantidad, parseaCantidades, primerNumero, tokenizaNumeros, type Cantidad } from './texto/numeros.js';
 export { capitalizaInicio, normalizaParaComparar, quitaAcentos, regexDePalabra, tokeniza } from './texto/normaliza.js';
 export { pareceOtroIdioma } from './texto/idioma.js';
+export { campo, catalogo, CLAVES, DEFECTOS, ESQUEMA, GRUPOS, ID_MEDIDO, migra, pon, quita, resuelve, serializa, valida, valoresDe, VERSION_AJUSTES, type Ajustes, type AjustesResueltos, type Campo, type Clave, type EntradaCatalogo, type Grupo, type Medicion, type Origen, type Resolucion, type ValorResuelto } from './ajustes.js';

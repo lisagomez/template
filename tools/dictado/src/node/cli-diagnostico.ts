@@ -8,6 +8,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ESQUEMA } from '../ajustes.js';
 import type { Configuracion } from './cli-config.js';
 import { NECESARIOS, rutaDe, RUNTIMES } from './pesos.js';
 
@@ -101,6 +102,10 @@ export async function ordenDiagnostico(config: Configuracion, opciones: Record<s
   const tr = trayectoriasRecientes();
   if (tr.length > 0) lineas.push('ultimas sesiones (trayectorias, solo forma):', ...tr.map((l) => '  ' + l));
   lineas.push(`datos en ${config.datos} · modelos en ${config.modelos}`);
+  // Los ajustes (nunca secretos: el token no vive ahi): solo los que no estan en su defecto, con su origen.
+  const cambiados = ESQUEMA.filter((c) => config.ajustes[c.clave].origen !== 'defecto').map((c) => `${c.clave}=${String(config.ajustes[c.clave].valor)} (${config.ajustes[c.clave].origen})`);
+  lineas.push(`ajustes: ${config.archivoAjustes.existe ? `${config.archivoAjustes.ruta} (version ${config.archivoAjustes.version})` : 'sin ajustes.json (todo por defecto)'}${cambiados.length > 0 ? ` · ${cambiados.join(' · ')}` : ' · todo por defecto'}`);
+  for (const a of config.avisosAjustes) lineas.push(`  aviso: ${a}`);
   const texto = limpiaParaCompartir(lineas.join('\n'));
   if (opciones['json'] === true) console.log(JSON.stringify({ version, lineas: texto.split('\n') }, null, 1));
   else console.log(texto);

@@ -80,6 +80,7 @@ export function Historial() {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 className="text-2xl font-bold">Historial</h1>
           <nav className="flex gap-3 text-sm">
+            <a href="/ajustes" className="underline" data-prueba="ir-ajustes">Ajustes</a>
             <a href="/dictar" className="underline">Dictar desde el celular</a>
             <a href="/laboratorio-voz" className="underline">Laboratorio de voz</a>
           </nav>

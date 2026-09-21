@@ -36,8 +36,9 @@ lo bastante como para sacarlo de ahi.
   barras, revision humana y mapeo contra los catalogos que tu proyecto ya tiene
 - **Voz y dictado** listos para instalar (`tools/voz/`, `tools/dictado/`, `tools/asesor-ventas/`):
   VAD y diarizacion locales, dictado en WSL2 → Windows con el motor elegido por medicion
-  (Parakeet, WER 3,3 %) y la pildora flotante, asesoria de ventas por reglas; y tres paginas
-  en la app: `/dictar` (celular), `/historial` (todo lo dictado) y `/laboratorio-voz` (20 casos)
+  (Parakeet, WER 3,3 %) y la pildora flotante, asesoria de ventas por reglas; y cuatro paginas
+  en la app: `/dictar` (celular), `/historial` (todo lo dictado), `/ajustes` (lo que decides
+  una vez) y `/laboratorio-voz` (20 casos)
 - Playwright CLI para QA automatizado
 - 11 AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -219,7 +220,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # el gate completo (17 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:trayectorias + verifica:trayectorias + imprenta + fugas
+npm run validate     # el gate completo (18 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:ajustes + prueba:trayectorias + verifica:trayectorias + imprenta + fugas
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -230,6 +231,7 @@ npm run prueba:contabilidad  # el coste `null` no se suma como cero, y el corte 
 npm run prueba:imprenta  # el contrato de los CLI: dry-run, destructivo marcado, sin reimplementar
 npm run prueba:laboratorio  # las reglas del laboratorio de voz (/laboratorio-voz): catalogo, estado real, intenciones, acta del CLI, WAV, PCM en flujo, interrupcion, sesion de picking
 npm run prueba:historial    # la logica pura de /historial: busqueda con acentos, agrupacion por dia, estadisticas, exportadores
+npm run prueba:ajustes      # la logica pura de /ajustes: agrupar, origen en palabras, cifras del catalogo
 npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre
@@ -307,12 +309,14 @@ necesita React, Supabase o un proveedor vive en subpaths aparte, y `npm run empa
 el ejemplo de que una herramienta se apoya en otra sin fundirse con ella: consume `voz` por
 tarball, con version exacta, y no le toca una linea (`docs/SDD-dictado.md`).
 
-Las tres se prueban desde la app, sin terminal: **`/dictar`** (el celular como microfono, PWA,
+Las cuatro se prueban desde la app, sin terminal: **`/dictar`** (el celular como microfono, PWA,
 emparejamiento por QR), **`/historial`** (todo lo dictado: buscar con o sin acentos, corregir,
-borrar, cifras, exportar; se abre desde la pildora) y **`/laboratorio-voz`** (veinte casos de uso
-con su estado real —LISTO, POR REGLAS o PUERTA HUMANA— y veredictos de quien prueba). Como se
-llego y que se midio en cada etapa: `.claude/goals/{pruebas-voz,voz-lista-para-usuarios,
-voz-terceros,voz-casos-ampliados,pildora-dictado,historial-dictado}/`.
+borrar, cifras, exportar; se abre desde la pildora), **`/ajustes`** (motor con el catalogo medido
+en esta maquina, tecla, pegado, audio, texto, sonidos e historial; `ajustes.json` con precedencia
+argumento > entorno > ajustes > defecto y cambio en caliente; lo mismo que `dictado ajustes`) y
+**`/laboratorio-voz`** (veinte casos de uso con su estado real —LISTO, POR REGLAS o PUERTA
+HUMANA— y veredictos de quien prueba). Como se llego y que se midio en cada etapa:
+`.claude/goals/{pruebas-voz,voz-lista-para-usuarios,voz-terceros,voz-casos-ampliados,pildora-dictado,historial-dictado,ajustes-dictado}/`.
 
 ## Gobernanza
 

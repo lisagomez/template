@@ -16,7 +16,7 @@
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, openSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const banco = join(raiz, 'medicion', 'banco');
@@ -53,6 +53,21 @@ function pidGuardado() {
   }
 }
 
+/**
+ * Los ajustes de la persona (`<datos>/ajustes.json`, mismo archivo que `dictar` y /ajustes),
+ * resueltos con el entorno por encima. Sin `dist/` compilado se sigue con los defectos de siempre.
+ * Un cambio de motor exige reiniciar el demonio: `npm run demonio -- --parar && npm run demonio`.
+ */
+async function ajustesDeLaPersona(datos) {
+  try {
+    const { leeArchivoAjustes } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'ajustes-archivo.js')).href);
+    const { resuelve, valoresDe } = await import(pathToFileURL(join(raiz, 'dist', 'ajustes.js')).href);
+    return valoresDe(resuelve({ entorno: process.env, archivo: leeArchivoAjustes(datos).valores }).ajustes);
+  } catch {
+    return undefined;
+  }
+}
+
 export async function arrancaDemonio({ silencioso = false } = {}) {
   const di = (m) => { if (!silencioso) console.log(m); };
   if (await saludDemonio()) {
@@ -65,18 +80,27 @@ export async function arrancaDemonio({ silencioso = false } = {}) {
     return false;
   }
   mkdirSync(banco, { recursive: true });
+  const datos = process.env.DICTADO_DATOS ?? join(banco, 'datos');
+  const ajustes = await ajustesDeLaPersona(datos);
+  // El motor del demonio sale de ajustes.json (salvo DICTADO_DEMONIO_MOTOR); «remoto» no tiene sentido aqui.
+  const motor = process.env.DICTADO_DEMONIO_MOTOR ?? (ajustes && ajustes.motor !== 'remoto' ? ajustes.motor : 'parakeet');
+  const hayVenv = existsSync(join(banco, 'venv', 'bin', 'python'));
+  // Respaldo por idioma (se pide con x-motor): el de ajustes; con «auto», faster-whisper:small si hay Python con faster-whisper.
+  const respaldoAjustes = ajustes?.respaldo ?? 'auto';
+  const respaldo = process.env.DICTADO_DEMONIO_RESPALDO ?? (respaldoAjustes === 'ninguno' ? undefined : respaldoAjustes === 'auto' ? (hayVenv ? 'faster-whisper:small' : undefined) : respaldoAjustes);
+  di(`ajustes: motor=${motor} · respaldo=${respaldo ?? 'ninguno'} · hilos=${process.env.DICTADO_HILOS ?? ajustes?.hilos ?? 8} (${ajustes ? `de ${join(datos, 'ajustes.json')} y el entorno` : 'defectos'})`);
   const env = {
     ...process.env,
     DICTADO_TOKEN: token,
     DICTADO_MODELOS: process.env.DICTADO_MODELOS ?? join(banco, 'modelos'),
     DICTADO_RUNTIME: process.env.DICTADO_RUNTIME ?? banco,
-    DICTADO_HILOS: process.env.DICTADO_HILOS ?? '8',
-    DICTADO_MOTOR: process.env.DICTADO_DEMONIO_MOTOR ?? 'parakeet',
+    DICTADO_HILOS: process.env.DICTADO_HILOS ?? String(ajustes?.hilos ?? 8),
+    DICTADO_IDIOMA: process.env.DICTADO_IDIOMA ?? ajustes?.idioma ?? 'es',
+    DICTADO_MOTOR: motor,
     DICTADO_PUERTO: String(PUERTO_DEMONIO),
     DICTADO_ESCUCHA: '127.0.0.1',
     DICTADO_EN_VUELO: process.env.DICTADO_EN_VUELO ?? '2',
-    // Respaldo por idioma (faster-whisper:small, ya en el banco) si hay Python con faster-whisper; se pide con x-motor.
-    ...(existsSync(join(banco, 'venv', 'bin', 'python')) ? { DICTADO_RESPALDO: process.env.DICTADO_DEMONIO_RESPALDO ?? 'faster-whisper:small', DICTADO_PYTHON: process.env.DICTADO_PYTHON ?? join(banco, 'venv', 'bin', 'python') } : {}),
+    ...(respaldo ? { DICTADO_RESPALDO: respaldo, DICTADO_PYTHON: process.env.DICTADO_PYTHON ?? (hayVenv ? join(banco, 'venv', 'bin', 'python') : 'python3') } : {}),
   };
   const fd = openSync(log, 'w');
   const hijo = spawn(process.execPath, [join(raiz, 'servicio', 'servidor.mjs')], { cwd: raiz, env, detached: true, stdio: ['ignore', fd, fd] });

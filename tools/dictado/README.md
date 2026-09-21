@@ -51,10 +51,10 @@ no necesitan ninguno.
 ```bash
 dictado dictar                      # ESPACIO en la terminal: empieza/termina; q: salir
 dictado dictar --tecla              # mantén Ctrl DERECHO para hablar; dos toques = manos libres
-dictado dictar --tecla --tecla-alternar --icono --modo manos-libres --motor parakeet --respaldo faster-whisper:small
+dictado dictar --tecla --tecla-alternar --icono --modo manos-libres
                                     # un toque (o un click al icono) enciende manos libres, otro lo apaga
 npm run en-vivo                     # lo anterior, desatendido y durante toda la sesión (--parar, --estado);
-                                    # sus flags por defecto son lo que funcionó en vivo el 2026-09-19 (ganancia 0, silencio 1000 ms)
+                                    # motor, respaldo, ganancia, silencio y el resto salen de ajustes.json (§11)
 dictado icono instala               # icono en la barra de Windows: la puerta de entrada sin terminal (abajo)
 ```
 
@@ -267,6 +267,7 @@ saturación, no el error, y el defecto sigue en 0.
 |---|---|---|---|
 | Historial de dictados (texto, motor, duración, latencia; y el texto original del motor si se corrigió) | `DICTADO_DATOS/historial.jsonl` | **sí** | `dictado historial --borra [--antes YYYY-MM-DD] --si`; retención automática `DICTADO_RETENCION_DIAS` (365 por defecto, 0 = nunca); o desde la página `/historial` de la app (uno a uno, o «lo anterior a un día», con doble confirmación) |
 | Diccionario y snippets | `DICTADO_DATOS/diccionario.txt`, `snippets.json` | sí (nombres, expansiones) | `dictado diccionario quita`, `snippets quita`, o borrar el archivo |
+| Ajustes | `DICTADO_DATOS/ajustes.json` | no (preferencias; nunca el token) | `dictado ajustes restablece --si`, o desde `/ajustes` |
 | Token del celular | `DICTADO_DATOS/movil.token` y `.env.local` de la app | secreto | borrar y volver a `instala` |
 | Trayectorias de sesión | `corpus/salida-dictar-*/trayectoria.json` | **no** (forma) | borrar la carpeta |
 | Audio | nunca, salvo `--graba <carpeta>` (diagnóstico) | sí | borrar la carpeta |
@@ -284,6 +285,55 @@ CSV y JSON; y se actualiza sola cuando llega un dictado. Se abre desde la píldo
 historial»), desde `/dictar` y desde el laboratorio. Exige el mismo emparejamiento que el
 celular. Medido: buscar sobre 20 000 dictados (3,9 MB) tarda 181 ms por la ruta (sin índice: el
 archivo se lee entero, y lo que manda es el arranque del proceso que lo lee, ~90 ms).
+
+### 11. Ajustes: lo que decides una vez y el dictado recuerda
+
+Toda bandera de `dictar` tiene su ajuste en **`DICTADO_DATOS/ajustes.json`**, con los defectos
+declarados en un solo sitio (`src/ajustes.ts`) y una precedencia explícita y **visible**:
+**argumento > entorno > ajustes > defecto**. `dictado config` y `dictado ajustes` dicen de dónde
+sale cada valor (`pegar = teclear (ajustes)`, `silencioMs = 700 (argumento)`).
+
+```bash
+dictado ajustes                          # cada ajuste con su valor y su origen, por grupos
+dictado ajustes pon pegar teclear        # valida y guarda (escritura atómica); un motor que no está instalado se rechaza con la lista
+dictado ajustes pon gananciaDb auto
+dictado ajustes quita pegar              # vuelve al defecto
+dictado ajustes restablece --si          # todo por defecto
+dictado ajustes catalogo                 # los motores instalados con WER y latencia medidos EN ESTA máquina
+```
+
+La **página `/ajustes`** de la app hace exactamente lo mismo por las mismas piezas (`maquina.mjs`
+→ `cli-ajustes`), tras el emparejamiento: grupos Motor (con el catálogo medido), Tecla y modo,
+Pegado, Audio, Texto, Sonidos, Historial y «Sin proveedor» (limpieza y transformaciones por
+modelo de lenguaje: en gris, no se pueden encender; no hay proveedor y lo dictado no sale de la
+máquina). Se abre desde `/historial`, `/dictar` y el menú del icono («Ajustes»).
+
+**En caliente.** Un `dictar` en marcha vigila el archivo (stat cada segundo) y toma sin reiniciar
+lo que es seguro: `pegar`, `gananciaDb`, `umbralVozDb`, `comandos`, `snippets`, `diccionario`,
+`sonidoAlEmpezar`, `sonidoAlTerminar`, `retencionDias`. Lo que exige recargar (`motor`,
+`respaldo`, `idioma`, `hilos`, `modo`, `tecla`, `silencioMs`, `micEnEspera`,
+`correccionPorSimilitud`) se anuncia para la siguiente sesión. Y lo que en esa sesión fija una
+bandera o el entorno **no lo mueve el archivo**, y el log lo dice
+(`silencioMs cambió en el archivo, pero en esta sesión lo fija --silencio-ms`). Medido el
+2026-09-21 con `dictar --entrada` corriendo: sonidos y comandos aplicados en caliente; motor
+avisado para la siguiente sesión.
+
+**Reglas del archivo.** Roto o ajeno → defectos + aviso, y **no se pisa**; claves de una versión
+más nueva se conservan al escribir; versión 0 (sin `version`) acepta los nombres de bandera
+(`silencio-ms`) y los renombra. **Ningún secreto**: el token sigue en `movil.token` / entorno.
+Las rutas (`DICTADO_DATOS`, `DICTADO_MODELOS`, `DICTADO_RUNTIME`, `DICTADO_PYTHON`) y el
+servicio remoto no son ajustes: son de la máquina, y siguen por entorno.
+
+**`respaldo: auto`** (el defecto) = `faster-whisper:small` si está en la carpeta de modelos, y
+nada con el motor `remoto` (el demonio trae el suyo). Si no arranca (Python sin faster-whisper),
+se sigue sin respaldo y se dice. `npm run en-vivo` ya solo fija su forma (manos libres, tecla que
+alterna, icono); el resto lo lee de aquí. El demonio también (motor, respaldo, idioma, hilos),
+y cambiar su motor exige reiniciarlo.
+
+**Medido (2026-09-21):** leer y resolver los ajustes al arrancar cuesta 0,01 ms (p50 de 20);
+`dictar --entrada` sin respaldo, antes/después: arranque → motor listo 2 597 / 2 522 ms (p50 de
+5), latencia fin de habla → pegado 215 / 216 ms. `GET /api/ajustes` p50 98 ms (el arranque del
+proceso que lee el disco); la página carga en ~800 ms sobre la build.
 
 ## Medición (2026-09-15)
 
@@ -349,11 +399,12 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 
 | Variable | Qué | Por defecto |
 |---|---|---|
-| `DICTADO_DATOS` | historial, diccionario, snippets | `~/.dictado` |
+| `DICTADO_DATOS` | historial, diccionario, snippets y `ajustes.json` (§11) | `~/.dictado` |
 | `DICTADO_MODELOS` | carpeta de modelos (los deja `npm run mide` en `medicion/banco/modelos`) | `~/.dictado/modelos` |
 | `DICTADO_RUNTIME` | carpeta cuyo `node_modules` trae `sherpa-onnx-node` y `onnxruntime-node` | el del paquete |
 | `DICTADO_PYTHON` | Python con `faster-whisper` (para `--motor faster-whisper:…`) | `python3` |
-| `DICTADO_HILOS` | hilos del motor | 8 |
+| `DICTADO_HILOS` | hilos del motor (por encima de `ajustes.json`) | 8 |
+| `DICTADO_RETENCION_DIAS` | retención del historial (por encima de `ajustes.json`) | 365 |
 | `DICTADO_REMOTO_URL`, `DICTADO_REMOTO_TOKEN` | el servicio | — |
 | `DICTADO_VOCES` | voces Piper que carga el servicio/demonio para `/sintetizar` (separadas por comas) | todas las `vits-piper-*` de `DICTADO_MODELOS` |
 | `DICTADO_RESPALDO` | segundo motor del servicio/demonio (`faster-whisper:<modelo>`), pedido con `x-motor: respaldo` | ninguno (`npm run demonio`: `faster-whisper:small` si hay venv) |
@@ -365,7 +416,7 @@ El token nunca se imprime: `dictado config` dice `presente (largo N)`.
 
 ```bash
 npm run build      # prebuild instala @tu-scope/voz 0.4.0 desde su tarball (nunca npm link)
-npm run prueba     # 29 pruebas contra dist/, sin modelos ni red, ~1 s
+npm run prueba     # 118 pruebas contra dist/, sin modelos ni red, ~2 s
 npm run mide       # pesos reales; ~2,5 GB la primera vez
 npm run empaqueta dictado   # desde la raíz del repo: contrato + build + tarball + integración
 ```
