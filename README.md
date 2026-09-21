@@ -34,8 +34,10 @@ lo bastante como para sacarlo de ahi.
 - `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
 - **Extractor documental** listo para instalar (`tools/extractor-documental/`): OCR, codigos de
   barras, revision humana y mapeo contra los catalogos que tu proyecto ya tiene
-- **Voz y dictado** listos para instalar (`tools/voz/`, `tools/dictado/`): VAD y diarizacion
-  locales, y dictado en WSL2 → Windows con el motor elegido por medicion (Parakeet, WER 3,3 %)
+- **Voz y dictado** listos para instalar (`tools/voz/`, `tools/dictado/`, `tools/asesor-ventas/`):
+  VAD y diarizacion locales, dictado en WSL2 → Windows con el motor elegido por medicion
+  (Parakeet, WER 3,3 %) y la pildora flotante, asesoria de ventas por reglas; y tres paginas
+  en la app: `/dictar` (celular), `/historial` (todo lo dictado) y `/laboratorio-voz` (20 casos)
 - Playwright CLI para QA automatizado
 - 11 AI Templates (Vercel AI SDK v5 + OpenRouter)
 - 5 Design Systems listos para usar
@@ -287,14 +289,15 @@ hooks que nadie encuentra.
 comprueba que `'use client'` sobrevive al build, y **instala el tarball en un proyecto
 limpio para importarlo de verdad**. Ahi "es compatible" deja de ser una opinion.
 
-En el arbol viven cuatro:
+En el arbol viven cinco:
 
 | Herramienta | Que es |
 |---|---|
 | `tools/ejemplo-herramienta/` | El esqueleto minimo, para copiar |
-| `tools/voz/` | `@tu-scope/voz` — VAD y diarizacion locales. Modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node |
+| `tools/voz/` | `@tu-scope/voz` — VAD y diarizacion locales. Modelos ONNX **inyectados, no empaquetados**, y entry points aparte para browser y node. 92 pruebas |
 | `tools/extractor-documental/` | `@tu-scope/extractor-documental` — extraccion de datos de documentos con revision humana. **776 pruebas**, once entry points, y el motor de OCR y el almacen **inyectados**: si el documento sale del perimetro lo decide el proyecto, no la herramienta |
-| `tools/dictado/` | `@tu-scope/dictado` — hablar y que el texto aparezca donde esta el cursor (WSL2 → Windows), sobre `voz`. Motor **elegido por medicion** (Parakeet TDT v3 int8: WER 3,3 % a 532 ms), diccionario, snippets, comandos de voz, lote con hablantes y servicio remoto con token. 29 pruebas; los pesos **no viajan** |
+| `tools/dictado/` | `@tu-scope/dictado` — hablar y que el texto aparezca donde esta el cursor (WSL2 → Windows), sobre `voz`. Motor **elegido por medicion** (Parakeet TDT v3 int8: WER 3,3 % a 532 ms), diccionario, snippets, comandos de voz, lote con hablantes, demonio local que tambien habla (TTS en flujo) y servicio remoto con token, instalador de maquina nueva y la pildora flotante de Windows. 108 pruebas; los pesos **no viajan** |
+| `tools/asesor-ventas/` | `@tu-scope/asesor-ventas` — de una reunion diarizada saca insights con evidencia, score, acciones, riesgos y stakeholders. Por reglas, determinista, **cero dependencias y sin LLM** (C4). 14 pruebas |
 
 El extractor es el ejemplo grande de que la regla aguanta: su nucleo hace OCR, codigos de barras,
 reconciliacion contra catalogos y propuesta de modelo E-R **con cero dependencias**. Lo que
@@ -303,6 +306,13 @@ necesita React, Supabase o un proveedor vive en subpaths aparte, y `npm run empa
 `docs/SDD-extractor-documental.md` y `.claude/specs/007-extractor-documental/`. El dictado es
 el ejemplo de que una herramienta se apoya en otra sin fundirse con ella: consume `voz` por
 tarball, con version exacta, y no le toca una linea (`docs/SDD-dictado.md`).
+
+Las tres se prueban desde la app, sin terminal: **`/dictar`** (el celular como microfono, PWA,
+emparejamiento por QR), **`/historial`** (todo lo dictado: buscar con o sin acentos, corregir,
+borrar, cifras, exportar; se abre desde la pildora) y **`/laboratorio-voz`** (veinte casos de uso
+con su estado real —LISTO, POR REGLAS o PUERTA HUMANA— y veredictos de quien prueba). Como se
+llego y que se midio en cada etapa: `.claude/goals/{pruebas-voz,voz-lista-para-usuarios,
+voz-terceros,voz-casos-ampliados,pildora-dictado,historial-dictado}/`.
 
 ## Gobernanza
 

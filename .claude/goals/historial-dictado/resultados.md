@@ -113,9 +113,9 @@ duracion_ms,latencia_ms` y una fila por dictado).
   a mano».
 - *El tema oscuro*: va por clase `dark` en `<html>` (decisión del proyecto), no por el sistema;
   la captura lo fuerza así.
-- *El verificador de gobernanza tumbó el gate* por una cadena `T00:00:00` en la máquina de
-  sondeo: su regla de trazo grueso toma «T + dos dígitos» por el identificador de un caso de
-  regresión. Se construye la medianoche local con `new Date(año, mes, día)`; el gate volvió a
+- *El verificador de gobernanza tumbó el gate* por la hora en formato ISO («fecha, letra te,
+  dos ceros») escrita en la máquina de sondeo: su regla de trazo grueso toma «te + dos dígitos»
+  por el identificador de un caso de regresión. Se construye la medianoche local con `new Date(año, mes, día)`; el gate volvió a
   152/152. Es la regla haciendo su trabajo, no un falso positivo que haya que aflojar.
 
 ## Lo que queda fuera
