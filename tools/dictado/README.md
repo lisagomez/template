@@ -58,75 +58,32 @@ npm run en-vivo                     # lo anterior, desatendido y durante toda la
 dictado icono instala               # icono en la barra de Windows: la puerta de entrada sin terminal (abajo)
 ```
 
-#### El icono de la barra (para no tocar una terminal nunca más)
+#### El icono de la barra y la píldora (para no tocar una terminal nunca más)
 
 `dictado icono instala` deja un icono en el **área de notificación** de Windows (junto al
-reloj) **y un botón flotante** siempre encima de las ventanas, y ambos arrancan solos en cada
-inicio de sesión. Su color es el estado del dictado — **gris hueco** apagado · **gris** en
-espera · **rojo** ESCUCHANDO · **ámbar** transcribiendo — y un **click** en cualquiera lo
-alterna: uno enciende manos libres, otro lo apaga. Si el dictado no está corriendo, el mismo
-click lo arranca (`npm run en-vivo` por dentro; «arrancando…» mientras cargan los modelos).
-El botón flotante se **arrastra** a donde estorbe menos (recuerda su posición) y se oculta o
-vuelve desde el menú derecho; el icono de la barra se hace siempre-visible arrastrándolo desde
-la flecha `^`. `dictado icono quita` lo desinstala, y el menú derecho trae «Apagar el dictado»
-(para también el motor y el micrófono), «Mostrar/ocultar el botón flotante» y «Quitar este
-icono».
+reloj) **y la píldora flotante** siempre encima de las ventanas, abajo al centro, y ambos
+arrancan solos en cada inicio de sesión. La píldora es la de sflow (mismas medidas: 34 × 34 en
+reposo con el logo, 100 × 34 escuchando, 52 × 34 en los avisos; opacidad 0,90, radio 17, 14 px
+sobre la barra de tareas): **en reposo** el logo del micrófono; **escuchando**, veinte barras
+que siguen tu voz en tiempo real; **transcribiendo**, tres puntos que giran; **pegado**, una
+palomita verde que se va sola a los 0,8 s; **sin voz o fallo**, una X roja que se va a los
+1,2 s. Un click en cualquiera de los dos enciende o apaga el dictado; si el dictado no corre,
+lo arranca. La píldora se **arrastra** a donde estorbe menos (recuerda su posición) y se oculta
+o vuelve desde el menú derecho; el menú trae además «Abrir historial» (la página de tus datos
+si la app responde, o `dictado historial` en una terminal), «Apagar el dictado» y «Quitar este
+icono». `dictado icono quita` lo desinstala.
 
-Por dentro es el mismo patrón que la tecla: `windows/icono-barra.ps1` (legible en un minuto)
-manda la palabra `alternar` por TCP a `127.0.0.1:47124` y se colorea con las líneas
-`estado <nombre>` que el dictado le publica. No lee el teclado, no escribe nada y no sale a
-internet. `dictado dictar --icono` lo usa desde una terminal (con `--icono-puerto` para
-cambiar el puerto y `--icono-sin-ayudante` para escuchar sin lanzarlo); `npm run en-vivo` ya
-lo trae en sus flags por defecto. Ojo honesto: «en espera» significa que el audio capturado
-se descarta sin escucharse ni guardarse — igual que con la tecla—; apagar el micrófono del
-todo es «Apagar el dictado». Tras actualizar la herramienta no hay que repetir nada: el siguiente arranque del dictado con
-icono compara la versión del script (huella del `.ps1`) con la copia en `%LOCALAPPDATA%\dictado\`
-y la refresca si cambió («icono actualizado en Windows»).
-
-`--tecla` lanza **a la vista** `powershell.exe` con `windows/tecla-global.ps1` (30 líneas:
-sondea una tecla y avisa por `127.0.0.1`; no lee otras teclas ni escribe nada). Sin `--tecla`,
-el texto se pega en la ventana de Windows que tenga el foco: cambia de ventana después de pulsar
-espacio. `--pegar teclear` escribe letra a letra sin tocar el portapapeles; `--pegar ninguno`
-solo imprime.
-
-Comandos de voz: «punto y aparte», «nueva línea», «coma», «dos puntos», «signo de
-interrogación»… y «dale enter» al final pulsa Enter después de pegar. Snippets: «mi correo» →
-lo que hayas definido. Diccionario: nombres y jerga que el motor no conoce.
-
-```bash
-dictado diccionario agrega Levy "SaaS Factory"
-dictado snippets agrega "mi correo" "l@ejemplo.mx"
-dictado historial --busca hermes
-```
-
-### 1.b. Desde el celular (PWA, Android e iPhone)
-
-El teléfono es un **micrófono remoto** del mismo pipeline: hablas al cel y el texto va donde
-esté el cursor de tu PC (`--destino pc`), a la pantalla del cel, o a ambos. Vive en la app
-Next del template (`/dictar`), no en esta herramienta, pero usa sus piezas:
-`dictado pega "<texto>"` entrega texto al foco de Windows, y la ruta `POST /api/dictado/movil`
-transcribe el audio con `dictado archivo`.
-
-Puesta a punto (una vez):
-
-```bash
-# 1) token de emparejamiento en .env.local de la app (NO se imprime, se teclea 1 vez en el cel)
-echo "DICTADO_MOVIL_TOKEN=$(openssl rand -hex 16)" >> .env.local
-# 2) HTTPS + escuchar en la LAN (getUserMedia exige https fuera de localhost)
-npm run dev:movil
-# 3) EN WINDOWS, PowerShell como Admin: abrir el puerto de WSL2 al telefono (te da la URL)
-#    tools/dictado/windows/red-movil.ps1   (-Quitar lo deshace)
-```
-
-En el teléfono (misma wifi): abre `https://<ip-de-tu-pc>:3000/dictar`, acepta el certificado,
-teclea el token una vez, e **instálala** (Compartir → «Añadir a inicio»). Dentro hay un botón
-flotante arrastrable con el mismo lenguaje de color, y un selector A la PC / Aquí / Ambos.
-
-**Honestidad de plataforma**: ni iOS ni Android permiten a una PWA flotar por ENCIMA de otras
-apps (eso es solo para apps nativas). El botón flota dentro de la app instalada, que a pantalla
-completa se siente como una app. El micrófono web exige HTTPS; la transcripción corre en tu
-máquina (C4: el audio no sale a ningún tercero, va a un temporal que se borra siempre), y sin
-el token no se transcribe ni se pega nada (C3).
+Cómo funciona, medido el 2026-09-20 (`medicion/mide-pildora.mjs`, sesión por archivo): las
+barras las calcula el dictado en WSL (`src/node/barras.ts`: 20 bandas mel sobre ventanas de 32
+ms, normalizadas contra un pico móvil, en dB con suelo −50, caída 0,85 por cuadro) y viajan por
+el mismo socket local del icono (`barras 20 enteros`, ~2,3 KB/s); qué se pinta lo decide la
+máquina de estados `src/node/pildora.ts` (`pildora <visual>`), probada sin Windows. PowerShell
+solo pinta: **32 cuadros/s** en régimen (el reloj de WinForms va a saltos de 15,6 ms; 25 ms →
+~31), **4,7 % de un núcleo** escuchando y 4,4 % en reposo (con el reloj relajado a 100 ms),
+**21 ms** de estado a pintado (p50; máximo 36). Consciente del DPI (a 150 % se ve nítida y las
+capturas salen de donde toca). Un icono de una versión anterior sigue funcionando con el
+dictado nuevo (ignora las líneas que no entiende); al actualizar, el siguiente `dictar --icono`
+refresca la copia por huella y reinicia el icono viejo.
 
 ### 2. Programático
 

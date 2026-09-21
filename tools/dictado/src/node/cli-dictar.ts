@@ -10,7 +10,7 @@
  *    en esta misma terminal; te lo dice antes). Mantener la tecla = hablar; dos toques = manos libres. Es lo que sflow
  *    hacia con Ctrl+Shift, hecho desde el unico lado que ve el teclado global en WSL2.
  */
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,6 +28,8 @@ import { creaDetector, creaMotor } from './cli-motores.js';
 import { creaPegadorWindows } from './pegado-windows.js';
 import { copiaIconoAWindows } from './cli-icono.js';
 import { escuchaIcono, PUERTO_ICONO, type EscuchaIcono } from './icono.js';
+import { creaBarras } from './barras.js';
+import { creaPildora, type EntradaPildora } from './pildora.js';
 import { escuchaTecla, type EscuchaTecla } from './tecla.js';
 import { DEFECTOS_DICTADO } from './vad.js';
 import { construyeTrayectoria, creaContadores, escribeTrayectoria, type ContadoresSesion } from './trayectoria.js';
@@ -221,8 +223,22 @@ function lanzaIconoBarra(puerto: number): void {
   const distro = process.env['WSL_DISTRO_NAME'] ?? '';
   const copia = copiaIconoAWindows();
   console.log(gris(copia.refrescado ? `  icono actualizado en Windows (version ${copia.version})` : `  icono al dia (version ${copia.version})`));
+  // Un icono viejo que ya corre no se entera del refresco (mutex de instancia unica): se cierra
+  // aqui y el nuevo arranca con la version nueva. Solo procesos cuya linea de comando es ESTE script.
+  if (copia.refrescado) {
+    const cierre = `Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like '*icono-barra.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }`;
+    try {
+      // -EncodedCommand: las comillas de -Command las come el propio Windows al partir la linea.
+      execFileSync('powershell.exe', ['-NoProfile', '-EncodedCommand', Buffer.from(cierre, 'utf16le').toString('base64')], { stdio: 'ignore', timeout: 15_000 });
+      console.log(gris('  el icono anterior se cerro para que arranque la version nueva'));
+    } catch {
+      console.log(gris('  no se pudo cerrar el icono anterior; cierralo desde su menu para ver la version nueva'));
+    }
+  }
   const argumentos = ['/c', 'start', '/b', 'powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', copia.windows, '-Puerto', String(puerto), '-RaizWsl', raiz];
   if (distro) argumentos.push('-Distro', distro);
+  // Solo para medir la pildora (fps, CPU, capturas de si misma): nunca por defecto.
+  if (process.env['DICTADO_ICONO_MEDIR'] === '1') argumentos.push('-Medir');
   const hijo = spawn('cmd.exe', argumentos, { cwd: '/mnt/c', stdio: 'ignore' });
   hijo.unref();
 }
@@ -287,6 +303,10 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
 
   /** El icono de la barra, si esta puesto, se pinta con los mismos eventos que la TUI. */
   let publicaIcono: (estado: Estado) => void = () => undefined;
+  /** La pildora flotante: la maquina decide que se ve; el reloj de sus avisos va con setTimeout. */
+  let publicaPildora: (entrada: EntradaPildora) => void = () => undefined;
+  /** Las barras del visualizador: solo se calculan si hay un icono conectado y se esta escuchando. */
+  let publicaBarras: (muestras: Float32Array) => void = () => undefined;
   const dictado = creaDictado({
     detector,
     transcriptor,
@@ -300,6 +320,9 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     motorId: motor.id,
     alEvento: (e) => {
       if (e.tipo === 'estado') publicaIcono(e.estado);
+      if (e.tipo === 'estado') publicaPildora({ tipo: 'estado', estado: e.estado });
+      if (e.tipo === 'texto') publicaPildora({ tipo: 'hecho' });
+      if (e.tipo === 'sinVoz' || e.tipo === 'error') publicaPildora({ tipo: 'error' });
       if (e.tipo === 'estado' && e.estado === 'escuchando') {
         picoEscucha = -Infinity;
         picoRawEscucha = -Infinity;
@@ -368,6 +391,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
       picoRawEscucha = Math.max(picoRawEscucha, picoRaw);
       picoEscucha = Math.max(picoEscucha, factor === 1 ? picoRaw : nivelDb(m));
       if (graba) trozosEscucha.push(m);
+      publicaBarras(m);
     }
     if (muestrasVistas < detector.frecuenciaHz * 2) {
       picoDb = Math.max(picoDb, picoRaw);
@@ -483,6 +507,21 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
       alDesconectar: () => console.log(gris('icono desconectado')),
     });
     publicaIcono = (estado) => icono?.publicaEstado(estado);
+    const pildora = creaPildora();
+    let temporizadorPildora: NodeJS.Timeout | undefined;
+    publicaPildora = (entrada) => {
+      const ahora = performance.now();
+      const nuevo = pildora.aplica(entrada, ahora);
+      if (nuevo) icono?.publicaPildora(nuevo);
+      if (temporizadorPildora) clearTimeout(temporizadorPildora);
+      const espera = pildora.vence(ahora);
+      if (espera !== undefined) temporizadorPildora = setTimeout(() => publicaPildora({ tipo: 'tick' }), espera + 5);
+    };
+    const barras = creaBarras({ frecuenciaHz: detector.frecuenciaHz });
+    publicaBarras = (muestras) => {
+      if (!icono || icono.conectados === 0) return;
+      for (const cuadro of barras.empuja(muestras)) icono.publicaBarras(cuadro);
+    };
     if (opciones['icono-sin-ayudante'] !== true) lanzaIconoBarra(icono.puerto);
   }
   console.log(`\nESPACIO en esta terminal: ${modo === 'manosLibres' ? 'enciende/apaga manos libres' : 'empieza/termina el dictado'} · q: salir`);
@@ -495,6 +534,12 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   if (alternaCadaMs > 0) {
     console.log(gris(`(prueba) alterno escuchar/parar cada ${alternaCadaMs} ms`));
     alternador = setInterval(() => void control.alterna(modo), alternaCadaMs);
+  }
+  /** `--prueba-error <ms>`: SOLO pruebas; a los N ms manda a la pildora un aviso de error, para verla sin provocar un fallo real. */
+  const pruebaErrorMs = typeof opciones['prueba-error'] === 'string' ? Number(opciones['prueba-error']) : 0;
+  if (pruebaErrorMs > 0) {
+    console.log(gris(`(prueba) a los ${pruebaErrorMs} ms la pildora mostrara un error simulado`));
+    setTimeout(() => { console.log(gris('(prueba) error simulado para la pildora')); publicaPildora({ tipo: 'error' }); }, pruebaErrorMs).unref();
   }
   // Si la captura TERMINA —con o sin error—, el dictado esta sordo: seguir «escuchando» seria
   // mentir (vivido el 2026-09-19: ffmpeg murio con «Error during demuxing» del pulse de WSLg y

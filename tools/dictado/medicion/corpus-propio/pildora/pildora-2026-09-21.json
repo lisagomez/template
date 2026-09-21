@@ -1,0 +1,182 @@
+{
+ "fecha": "2026-09-21",
+ "fpsEscuchando": 25.5,
+ "fpsEscuchandoSegundosCompletos": 32,
+ "cpuEscuchandoMedianaPct": 4.7,
+ "saludosExcluidos": 0,
+ "latenciaEstadoPintadoP50": 21,
+ "latenciaEstadoPintadoMax": 36,
+ "cpuEscuchandoPct": 9.5,
+ "cpuReposoPct": 4.4,
+ "bytesPorSegundoEscuchando": 2295,
+ "latencias": [
+  21,
+  13,
+  21,
+  26,
+  2,
+  31,
+  4,
+  13,
+  36
+ ],
+ "secuenciaVisual": [
+  "idle@1.8s",
+  "escuchando@2.0s",
+  "procesando@5.5s",
+  "hecho@5.8s",
+  "escuchando@6.6s",
+  "procesando@10.4s",
+  "hecho@10.6s",
+  "escuchando@11.4s",
+  "error@12.1s",
+  "escuchando@13.3s",
+  "procesando@15.6s",
+  "hecho@15.9s",
+  "escuchando@16.7s",
+  "apagado@17.3s"
+ ],
+ "capturas": [
+  "captura-error.png",
+  "captura-escuchando-1.png",
+  "captura-escuchando-2.png",
+  "captura-hecho.png",
+  "captura-idle.png",
+  "captura-menu.png",
+  "captura-procesando.png"
+ ],
+ "medidas": [
+  {
+   "visual": "escuchando",
+   "cuadros": "29",
+   "cpuMs": "359",
+   "bytes": "2757"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "33",
+   "cpuMs": "250",
+   "bytes": "2334"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "32",
+   "cpuMs": "47",
+   "bytes": "2476"
+  },
+  {
+   "visual": "hecho",
+   "cuadros": "26",
+   "cpuMs": "47",
+   "bytes": "1453"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "9",
+   "cpuMs": "31",
+   "bytes": "2100"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "32",
+   "cpuMs": "31",
+   "bytes": "2399"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "32",
+   "cpuMs": "16",
+   "bytes": "2431"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "32",
+   "cpuMs": "47",
+   "bytes": "2313"
+  },
+  {
+   "visual": "hecho",
+   "cuadros": "19",
+   "cpuMs": "62",
+   "bytes": "1504"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "17",
+   "cpuMs": "47",
+   "bytes": "2448"
+  },
+  {
+   "visual": "error",
+   "cuadros": "6",
+   "cpuMs": "62",
+   "bytes": "2419"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "22",
+   "cpuMs": "62",
+   "bytes": "2428"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "32",
+   "cpuMs": "94",
+   "bytes": "2036"
+  },
+  {
+   "visual": "hecho",
+   "cuadros": "25",
+   "cpuMs": "125",
+   "bytes": "1371"
+  },
+  {
+   "visual": "escuchando",
+   "cuadros": "10",
+   "cpuMs": "62",
+   "bytes": "1523"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "11",
+   "cpuMs": "62",
+   "bytes": "517"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "0",
+   "cpuMs": "16",
+   "bytes": "0"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "0",
+   "cpuMs": "47",
+   "bytes": "0"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "0",
+   "cpuMs": "125",
+   "bytes": "0"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "0",
+   "cpuMs": "31",
+   "bytes": "0"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "0",
+   "cpuMs": "0",
+   "bytes": "0"
+  },
+  {
+   "visual": "apagado",
+   "cuadros": "0",
+   "cpuMs": "16",
+   "bytes": "0"
+  }
+ ]
+}

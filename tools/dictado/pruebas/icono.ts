@@ -20,7 +20,9 @@ function iconoFalso(puerto: number) {
     resto += d;
     let corte = resto.indexOf('\n');
     while (corte !== -1) {
-      lineas.push(resto.slice(0, corte).trim());
+      // Como el icono de verdad: de cada linea solo cuenta `estado …`; `pildora …` y `barras …` se ignoran.
+      const linea = resto.slice(0, corte).trim();
+      if (linea.startsWith('estado ')) lineas.push(linea);
       resto = resto.slice(corte + 1);
       corte = resto.indexOf('\n');
       for (let i = esperas.length - 1; i >= 0; i--) {

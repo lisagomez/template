@@ -1,0 +1,14 @@
+/goal Construye lo descrito en el spec completo: /home/kyara/code/template/.claude/goals/pildora-dictado/spec.md. Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: el dictado tiene en Windows la pildora flotante de sflow: idle con logo (34x34), escuchando ensanchada (100x34) con 20 barras de audio en tiempo real, procesando con puntos girando, hecho con palomita verde y error con X roja que se van solas; opacidad 0,90, radio 17, abajo al centro; «Abrir historial» en el menu del icono. Reemplaza al boton redondo de icono-barra.ps1, alimentada desde WSL por el mismo socket local.
+Libertad tecnica total sobre el como; tools/dictado se extiende, no se reescribe; la logica probable sin Windows va en TypeScript con pruebas y PowerShell solo pinta.
+VALIDA: `npm run typecheck && npm run lint && (cd tools/dictado && npm run build && npm run prueba)` tras cada cambio grande, output pegado; `npm run validate` antes de cerrar. Mediciones sin otra carga.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- validacion en verde pegada, y `npm run validate` en verde al final
+- capturas de Windows (con PowerShell desde WSL, leidas y descritas) de los cinco estados, con dos cuadros distintos de las barras, y del menu con «Abrir historial»
+- tabla medida: fps escuchando, CPU del PowerShell en reposo y escuchando, latencia estado→repintado p50, bytes/s del socket
+- pruebas puras en verde: maquina de estados con reloj falso (auto-cierre), barras (decaimiento, ganancia, dB, 20 bandas), protocolo que ignora lineas desconocidas
+- el icono viejo instalado sigue funcionando y el nuevo se refresca por huella; `dictar --entrada <wav> --icono` recorre toda la secuencia
+- reporte de decisiones y formas en que podria estar mal (parpadeo, barra de tareas, dos monitores, DPI, dictado muerto, socket saturado), resueltas
+- README de dictado y SDD §2 y §8 al dia
+RESTRICCIONES: los atajos NO cambian (un toque de Ctrl derecho alterna; tecla-global.ps1 y creaGestosDeTecla intactos); sin binarios ni DLL (seria CDC); solo 127.0.0.1 y el puerto 47124, ninguna palabra nueva hacia dentro del dictado; nada sale a internet ni se escribe audio o texto en Windows; no tocar settings, skills ni prompts; espanol sin jerga.
+RED DE SEGURIDAD: si tras 50 turnos no converges, detente y reporta el bloqueo.

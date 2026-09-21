@@ -13,6 +13,8 @@ export { creaPegadorWindows, type OpcionesPegadorWindows, type PegadorWindows } 
 export { creaAlmacenJsonl } from './almacen-jsonl.js';
 export { creaGestosDeTecla, escuchaTecla, type EscuchaTecla, type OpcionesTecla } from './tecla.js';
 export { escuchaIcono, PUERTO_ICONO, type EscuchaIcono, type OpcionesIcono } from './icono.js';
+export { creaPildora, DEFECTOS_PILDORA, type EntradaPildora, type OpcionesPildora, type Pildora, type Visual } from './pildora.js';
+export { creaBarras, DEFECTOS_BARRAS, lineaDeBarras, type Barras, type OpcionesBarras } from './barras.js';
 export { abreAltavozPulse, abreAltavozWindows, creaVozSintetica, habla, type Altavoz, type ModuloSherpaTts, type OpcionesSintesis, type OpcionesVozSintetica, type ResultadoHabla, type VozSintetica } from './habla.js';
 export { construyeTrayectoria, creaContadores, escribeTrayectoria, idDeTrayectoria, type ContadoresSesion, type ContextoSesion } from './trayectoria.js';
 export { ajustaGanancia, factorDe, VENTANA_SANA_DB, type Ajuste, type EntradaAjuste } from './ganancia.js';
