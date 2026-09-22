@@ -20,6 +20,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { campo, valoresDe, type Ajustes, type AjustesResueltos, type Clave } from '../ajustes.js';
 import { creaDictado, type Estado, type Modo } from '../dictado.js';
+import { creaEnvioPorSilencio } from '../envio.js';
 import { fechaHaceDias } from '../historial.js';
 import { creaPosproceso, type Posproceso } from '../posproceso.js';
 import type { Motor, Pegador } from '../types.js';
@@ -32,6 +33,7 @@ import { creaDetector, creaMotor } from './cli-motores.js';
 import { creaPegadorWindows } from './pegado-windows.js';
 import { escuchaIcono, PUERTO_ICONO, type EscuchaIcono } from './icono.js';
 import { creaBarras } from './barras.js';
+import { creaConversacion } from './conversacion.js';
 import { creaPildora, type EntradaPildora } from './pildora.js';
 import { escuchaTecla, type EscuchaTecla } from './tecla.js';
 import { creaSonidos } from './sonidos.js';
@@ -128,7 +130,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   let conPista = v.diccionario;
   const t0 = performance.now();
   await motor.calienta?.();
-  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaAuto ? 'auto' : `${gananciaDb} dB`} · mic en espera ${entrada ? 'abierto (entrada por archivo)' : micEnEspera}${respaldo ? ` · respaldo ${respaldo.id}` : ''}`));
+  console.log(gris(`motor ${motor.id} listo en ${(performance.now() - t0).toFixed(0)} ms · VAD Silero, cierre a ${silencioMs} ms · pegar=${pegar} · modo=${modo} · ganancia ${gananciaAuto ? 'auto' : `${gananciaDb} dB`} · mic en espera ${entrada ? 'abierto (entrada por archivo)' : micEnEspera}${respaldo ? ` · respaldo ${respaldo.id}` : ''} · conversacion ${v.conversacion && modo === 'manosLibres' ? `ON (envio a ${v.envioMs} ms)` : 'off'}`));
 
   /** El icono de la barra, si esta puesto, se pinta con los mismos eventos que la TUI. */
   let publicaIcono: (estado: Estado) => void = () => undefined;
@@ -136,6 +138,19 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   let publicaPildora: (entrada: EntradaPildora) => void = () => undefined;
   /** Las barras del visualizador: solo se calculan si hay un icono conectado y se esta escuchando. */
   let publicaBarras: (muestras: Float32Array) => void = () => undefined;
+  /** Modo conversacion (PRP-003, RF-38): lo pegado se envia solo al callar `envioMs`. Exige manos libres. */
+  const conversacionPosible = modo === 'manosLibres';
+  if (v.conversacion && !conversacionPosible) console.log(gris('ajustes: conversacion exige modo manos-libres: se trata como apagada en esta sesion'));
+  const envio = creaEnvioPorSilencio({ msEnvio: v.envioMs });
+  const conversacion = creaConversacion({
+    envio,
+    alEnviar: async () => {
+      await pegador.ejecuta?.(['enter']);
+      contadores.enviosPorSilencio += 1;
+    },
+    estado: () => dictado.estado,
+    log: (l) => console.log(l.startsWith('✗') ? l : verde(l)),
+  });
   const dictado = creaDictado({
     detector,
     transcriptor,
@@ -165,6 +180,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
         }, 1_500).unref();
       }
       pinta(e);
+      conversacion.alEvento(e);
       if (e.tipo === 'error') contadores.errores += 1;
       if (e.tipo === 'texto') {
         console.log(gris(`  pegado ${msPegado.toFixed(0)} ms`));
@@ -201,6 +217,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     },
   });
   const control = controlador(dictado);
+  conversacion.activa = v.conversacion && conversacionPosible;
 
   /**
    * El archivo de ajustes cambio (la pagina /ajustes o `dictado ajustes pon`): se vuelve a resolver
@@ -249,6 +266,13 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
           break;
         case 'retencionDias':
           void purga(nv.retencionDias);
+          break;
+        case 'conversacion':
+          if (nv.conversacion && !conversacionPosible) console.log(gris('ajustes: conversacion exige modo manos-libres: sigue apagada'));
+          conversacion.activa = nv.conversacion && conversacionPosible;
+          break;
+        case 'envioMs':
+          envio.cambiaMs(nv.envioMs, performance.now());
           break;
         default:
           break;
@@ -353,6 +377,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     saliendo = true;
     console.log(gris('\ncerrando…'));
     quitaTeclas();
+    conversacion.cierra();
     dejaDeVigilar();
     clearInterval(latido);
     if (alternador) clearInterval(alternador);
@@ -370,7 +395,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     datos.guardaSnippets();
     if (conTrayectoria) {
       try {
-        const ruta = escribeTrayectoria(CARPETA_CORPUS, construyeTrayectoria(contadores, { motorId: motor.id, modo, silencioMs, gananciaDb, umbralVozDb, inicio: inicioSesion, fin: new Date() }));
+        const ruta = escribeTrayectoria(CARPETA_CORPUS, construyeTrayectoria(contadores, { motorId: motor.id, modo, silencioMs, gananciaDb, umbralVozDb, ...(conversacion.activa ? { envioMs: envio.msEnvio } : {}), inicio: inicioSesion, fin: new Date() }));
         console.log(gris(`trayectoria de la sesion (forma, sin contenido): ${ruta}`));
       } catch (e) {
         console.error(`✗ no se pudo escribir la trayectoria: ${e instanceof Error ? e.message : String(e)}`);

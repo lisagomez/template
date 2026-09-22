@@ -9,19 +9,10 @@ import { join } from 'node:path';
 import { escribeWav } from './audio.js';
 import type { Configuracion } from './cli-config.js';
 import { cargaRuntime } from './cli-motores.js';
+import { VELOCIDAD_POR_DEFECTO, VOCES, VOZ_POR_DEFECTO } from '../voces.js';
 import { abreAltavozPulse, abreAltavozWindows, creaVozSintetica, habla, type ModuloSherpaTts } from './habla.js';
 
-/** 0,9: elegida de oido por la dueña el 2026-09-22 (frente a 1, con frases cortas y puntuadas): se entiende mejor. */
-const VELOCIDAD_POR_DEFECTO = 0.9;
-
-/** Voces conocidas, pineadas por URL exacta (C1). La de defecto es la que se midio el 2026-09-16 y la que la dueña eligio de oido entre las tres el 2026-09-22. */
-export const VOCES: Record<string, { carpeta: string; url: string; que: string }> = {
-  'es_MX-claude-high': { carpeta: 'vits-piper-es_MX-claude-high', url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_MX-claude-high.tar.bz2', que: 'Piper es_MX «claude», calidad high, 79 MB' },
-  'es_ES-davefx-medium': { carpeta: 'vits-piper-es_ES-davefx-medium', url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_ES-davefx-medium.tar.bz2', que: 'Piper es_ES «davefx», calidad medium, 64 MB' },
-  'es_MX-ald-medium': { carpeta: 'vits-piper-es_MX-ald-medium', url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_MX-ald-medium.tar.bz2', que: 'Piper es_MX «ald», calidad medium, 64 MB' },
-};
-
-function preparaVoz(config: Configuracion, nombre: string): string {
+export function preparaVoz(config: Configuracion, nombre: string): string {
   const voz = VOCES[nombre];
   if (!voz) {
     if (existsSync(nombre)) return nombre; // una carpeta cualquiera con una voz de sherpa
@@ -47,7 +38,7 @@ function leeTexto(posicionales: string[], opciones: Record<string, string | bool
 export async function ordenDi(config: Configuracion, posicionales: string[], opciones: Record<string, string | boolean>): Promise<void> {
   const texto = leeTexto(posicionales, opciones).trim();
   if (texto.length === 0) throw new Error('uso: dictado di "<texto>"  |  dictado di --archivo nota.txt  |  echo texto | dictado di');
-  const nombre = typeof opciones['voz'] === 'string' ? opciones['voz'] : 'es_MX-claude-high';
+  const nombre = typeof opciones['voz'] === 'string' ? opciones['voz'] : VOZ_POR_DEFECTO;
   const carpeta = preparaVoz(config, nombre);
   const sherpa = await cargaRuntime<ModuloSherpaTts>('sherpa-onnx-node', config);
   const t0 = performance.now();

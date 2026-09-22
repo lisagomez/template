@@ -15,9 +15,12 @@
  * entorno y argumento, fuera de este archivo.
  */
 
+import { DEFECTOS_ENVIO } from './envio.js';
+import { VELOCIDAD_POR_DEFECTO, VOCES, VOZ_POR_DEFECTO } from './voces.js';
+
 export const VERSION_AJUSTES = 1;
 
-export type Grupo = 'motor' | 'tecla' | 'pegado' | 'audio' | 'texto' | 'sonidos' | 'historial' | 'sin-proveedor';
+export type Grupo = 'motor' | 'tecla' | 'pegado' | 'audio' | 'texto' | 'conversacion' | 'sonidos' | 'historial' | 'sin-proveedor';
 
 export const GRUPOS: ReadonlyArray<{ id: Grupo; titulo: string; nota?: string }> = [
   { id: 'motor', titulo: 'Motor', nota: 'Que motor transcribe. Las cifras son las medidas en esta maquina.' },
@@ -25,6 +28,7 @@ export const GRUPOS: ReadonlyArray<{ id: Grupo; titulo: string; nota?: string }>
   { id: 'pegado', titulo: 'Pegado' },
   { id: 'audio', titulo: 'Audio' },
   { id: 'texto', titulo: 'Texto' },
+  { id: 'conversacion', titulo: 'Conversar con el agente', nota: 'En manos libres: lo pegado se envia solo al callar, el agente contesta en voz y el microfono se calla mientras habla. Cifras de la medicion del PRP-003.' },
   { id: 'sonidos', titulo: 'Sonidos' },
   { id: 'historial', titulo: 'Historial' },
   { id: 'sin-proveedor', titulo: 'Sin proveedor', nota: 'Exigen un modelo de lenguaje. No hay ninguno local ni ninguno declarado: no se pueden encender. El texto dictado no sale de esta maquina.' },
@@ -54,6 +58,15 @@ export interface Ajustes {
   snippets: boolean;
   diccionario: boolean;
   correccionPorSimilitud: boolean;
+  /** Modo conversacion con el agente (exige manos libres). */
+  conversacion: boolean;
+  /** Milisegundos sin voz nueva desde el ultimo pegado para pulsar Enter. Lo fija la medicion A. */
+  envioMs: number;
+  /** Voz con la que el dictado dice las respuestas del agente (una de `VOCES`). */
+  vozAgente: string;
+  velocidadVoz: number;
+  /** Mientras suena la voz del agente: `cerrado` (half-duplex, por defecto) o `abierto` (barge-in con auriculares). */
+  micDuranteVoz: 'cerrado' | 'abierto';
   sonidoAlEmpezar: boolean;
   sonidoAlTerminar: boolean;
   retencionDias: number;
@@ -81,6 +94,11 @@ export const DEFECTOS: Readonly<Ajustes> = Object.freeze({
   snippets: true,
   diccionario: true,
   correccionPorSimilitud: false,
+  conversacion: false,
+  envioMs: DEFECTOS_ENVIO.msEnvio,
+  vozAgente: VOZ_POR_DEFECTO,
+  velocidadVoz: VELOCIDAD_POR_DEFECTO,
+  micDuranteVoz: 'cerrado',
   sonidoAlEmpezar: false,
   sonidoAlTerminar: false,
   retencionDias: 365,
@@ -128,6 +146,11 @@ export const ESQUEMA: ReadonlyArray<Campo> = [
   { clave: 'snippets', grupo: 'texto', etiqueta: 'Snippets', ayuda: 'Un disparador dicho se cambia por su expansion.', tipo: 'booleano', bandera: 'snippets', enCaliente: true },
   { clave: 'diccionario', grupo: 'texto', etiqueta: 'Diccionario personal', ayuda: 'Tus terminos como pista al motor y como correccion.', tipo: 'booleano', bandera: 'diccionario', enCaliente: true },
   { clave: 'correccionPorSimilitud', grupo: 'texto', etiqueta: 'Correccion por similitud', ayuda: 'Para motores sin pista (Parakeet): una palabra parecida a un termino tuyo se cambia por el termino. Apagado por defecto: puede corregir de mas.', tipo: 'booleano', bandera: 'corrige-similitud', enCaliente: false },
+  { clave: 'conversacion', grupo: 'conversacion', etiqueta: 'Conversar con el agente', ayuda: 'Encendido y en manos libres: lo pegado se envia solo al callar `envioMs`, y las respuestas del agente se oyen. Apagado: como siempre («dale enter» sigue valiendo).', tipo: 'booleano', bandera: 'conversacion', enCaliente: true },
+  { clave: 'envioMs', grupo: 'conversacion', etiqueta: 'Silencio que envia el turno', ayuda: 'Milisegundos sin volver a hablar desde el ultimo pegado para pulsar Enter. Si vuelves a hablar, el reloj se cancela. El defecto lo fija la medicion A del PRP-003.', tipo: 'entero', min: 500, max: 10000, bandera: 'envio-ms', enCaliente: true },
+  { clave: 'vozAgente', grupo: 'conversacion', etiqueta: 'Voz del agente', ayuda: 'Con que voz se dicen sus respuestas. Se descarga una vez, pineada por URL.', tipo: 'eleccion', opciones: Object.keys(VOCES), bandera: 'voz', enCaliente: false },
+  { clave: 'velocidadVoz', grupo: 'conversacion', etiqueta: 'Velocidad de la voz', ayuda: '1 es la del modelo; 0,9 se entiende mejor (elegida de oido el 2026-09-22).', tipo: 'numero', min: 0.5, max: 2, bandera: 'velocidad', enCaliente: true },
+  { clave: 'micDuranteVoz', grupo: 'conversacion', etiqueta: 'Microfono mientras habla el agente', ayuda: 'cerrado: se calla mientras suena la voz (sin cancelacion de eco en WSLg, con altavoces es lo unico seguro) · abierto: sigue escuchando y la voz se corta si hablas encima (solo con auriculares).', tipo: 'eleccion', opciones: ['cerrado', 'abierto'], bandera: 'mic-durante-voz', enCaliente: true },
   { clave: 'sonidoAlEmpezar', grupo: 'sonidos', etiqueta: 'Sonido al empezar a escuchar', ayuda: 'Un tono corto por el altavoz.', tipo: 'booleano', enCaliente: true },
   { clave: 'sonidoAlTerminar', grupo: 'sonidos', etiqueta: 'Sonido al pegar', ayuda: 'Un tono corto cuando el texto ya esta pegado.', tipo: 'booleano', enCaliente: true },
   { clave: 'retencionDias', grupo: 'historial', etiqueta: 'Retencion del historial (dias)', ayuda: 'Lo anterior se borra al arrancar. 0 = no borrar nunca. 365 es lo firmado en la AISIA de Fase 0.', tipo: 'entero', min: 0, max: 3650, variable: 'DICTADO_RETENCION_DIAS', enCaliente: true },

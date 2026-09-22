@@ -50,6 +50,17 @@ test('valida: tipos, rangos, elecciones, motor contra los instalados, y lo sin p
   assert.equal(sp.ok, false);
   assert.match(sp.ok ? '' : sp.error, /no se puede encender/);
   assert.deepEqual(valida('limpiezaLlm', false), { ok: true, valor: false });
+  // Conversacion (PRP-003): rangos y elecciones.
+  assert.deepEqual(valida('envioMs', '1500'), { ok: true, valor: 1500 });
+  assert.equal(valida('envioMs', 200).ok, false, 'por debajo de 500 ms el envio se dispararia a mitad de frase');
+  assert.deepEqual(valida('vozAgente', 'es_MX-claude-high'), { ok: true, valor: 'es_MX-claude-high' });
+  assert.equal(valida('vozAgente', 'robot').ok, false, 'una voz que no esta pineada se rechaza');
+  assert.deepEqual(valida('velocidadVoz', '0,9'), { ok: true, valor: 0.9 });
+  assert.equal(valida('velocidadVoz', 3).ok, false);
+  assert.deepEqual(valida('micDuranteVoz', 'abierto'), { ok: true, valor: 'abierto' });
+  assert.equal(valida('conversacion', 'si').ok, true);
+  assert.equal(DEFECTOS.conversacion, false, 'la conversacion arranca apagada');
+  assert.equal(DEFECTOS.micDuranteVoz, 'cerrado', 'sin cancelacion de eco, el microfono se calla mientras habla el agente');
   assert.match((valida('noExiste', 1) as { error: string }).error, /no existe el ajuste/);
 });
 
