@@ -1,0 +1,599 @@
+{
+ "fecha": "2026-09-22",
+ "regla": "0 falsos en control y WER no sube en ningun guion",
+ "resumen": [
+  {
+   "motor": "remoto",
+   "conservadas": 105,
+   "quitadas": 68,
+   "recall": 0.6476190476190476,
+   "falsos": 0,
+   "falsosEnControl": 0,
+   "werAntes": 0.16258351893095768,
+   "werDespues": 0.0957683741648107,
+   "sube": [],
+   "apto": true
+  },
+  {
+   "motor": "faster-whisper:small",
+   "conservadas": 111,
+   "quitadas": 77,
+   "recall": 0.6936936936936937,
+   "falsos": 0,
+   "falsosEnControl": 0,
+   "werAntes": 0.18262806236080179,
+   "werDespues": 0.10579064587973273,
+   "sube": [],
+   "apto": true
+  }
+ ],
+ "porPalabra": [
+  {
+   "motor": "remoto",
+   "palabra": "no?",
+   "presentes": 0,
+   "quitadas": 0
+  },
+  {
+   "motor": "remoto",
+   "palabra": "este",
+   "presentes": 17,
+   "quitadas": 7
+  },
+  {
+   "motor": "remoto",
+   "palabra": "eh",
+   "presentes": 2,
+   "quitadas": 2
+  },
+  {
+   "motor": "remoto",
+   "palabra": "o sea",
+   "presentes": 20,
+   "quitadas": 20
+  },
+  {
+   "motor": "remoto",
+   "palabra": "pues",
+   "presentes": 8,
+   "quitadas": 2
+  },
+  {
+   "motor": "remoto",
+   "palabra": "mmm",
+   "presentes": 2,
+   "quitadas": 2
+  },
+  {
+   "motor": "remoto",
+   "palabra": "bueno",
+   "presentes": 10,
+   "quitadas": 10
+  },
+  {
+   "motor": "remoto",
+   "palabra": "digamos",
+   "presentes": 8,
+   "quitadas": 3
+  },
+  {
+   "motor": "remoto",
+   "palabra": "vale",
+   "presentes": 6,
+   "quitadas": 6
+  },
+  {
+   "motor": "remoto",
+   "palabra": "como que",
+   "presentes": 12,
+   "quitadas": 0
+  },
+  {
+   "motor": "remoto",
+   "palabra": "basicamente",
+   "presentes": 6,
+   "quitadas": 4
+  },
+  {
+   "motor": "remoto",
+   "palabra": "literal",
+   "presentes": 6,
+   "quitadas": 5
+  },
+  {
+   "motor": "remoto",
+   "palabra": "tipo",
+   "presentes": 8,
+   "quitadas": 7
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "no?",
+   "presentes": 0,
+   "quitadas": 0
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "este",
+   "presentes": 18,
+   "quitadas": 10
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "eh",
+   "presentes": 4,
+   "quitadas": 4
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "o sea",
+   "presentes": 20,
+   "quitadas": 20
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "pues",
+   "presentes": 8,
+   "quitadas": 2
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "mmm",
+   "presentes": 6,
+   "quitadas": 6
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "bueno",
+   "presentes": 10,
+   "quitadas": 10
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "digamos",
+   "presentes": 8,
+   "quitadas": 5
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "vale",
+   "presentes": 6,
+   "quitadas": 6
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "como que",
+   "presentes": 12,
+   "quitadas": 0
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "basicamente",
+   "presentes": 5,
+   "quitadas": 3
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "literal",
+   "presentes": 6,
+   "quitadas": 5
+  },
+  {
+   "motor": "faster-whisper:small",
+   "palabra": "tipo",
+   "presentes": 8,
+   "quitadas": 6
+  }
+ ],
+ "filas": [
+  {
+   "motor": "remoto",
+   "guion": "g1-control-es_ES",
+   "conservadas": 0,
+   "quitadas": 0,
+   "quedan": 0,
+   "falsos": 0,
+   "quitadasTexto": [],
+   "werAntes": 0.019801980198019802,
+   "werDespues": 0.019801980198019802
+  },
+  {
+   "motor": "remoto",
+   "guion": "g1-control-es_MX",
+   "conservadas": 0,
+   "quitadas": 0,
+   "quedan": 0,
+   "falsos": 0,
+   "quitadasTexto": [],
+   "werAntes": 0.019801980198019802,
+   "werDespues": 0.019801980198019802
+  },
+  {
+   "motor": "remoto",
+   "guion": "g2-este-eh-es_ES",
+   "conservadas": 6,
+   "quitadas": 4,
+   "quedan": 2,
+   "falsos": 0,
+   "quitadasTexto": [
+    "este,",
+    "este,",
+    "Este,",
+    "Este,"
+   ],
+   "werAntes": 0.15384615384615385,
+   "werDespues": 0.10256410256410256
+  },
+  {
+   "motor": "remoto",
+   "guion": "g2-este-eh-es_MX",
+   "conservadas": 6,
+   "quitadas": 2,
+   "quedan": 4,
+   "falsos": 0,
+   "quitadasTexto": [
+    "este,",
+    "Este,"
+   ],
+   "werAntes": 0.10256410256410256,
+   "werDespues": 0.07692307692307693
+  },
+  {
+   "motor": "remoto",
+   "guion": "g3-osea-pues-es_ES",
+   "conservadas": 14,
+   "quitadas": 11,
+   "quedan": 3,
+   "falsos": 0,
+   "quitadasTexto": [
+    "o sea,",
+    "o sea,",
+    "o sea,",
+    "pues,",
+    "o sea,",
+    "O sea,"
+   ],
+   "werAntes": 0.19753086419753085,
+   "werDespues": 0.1111111111111111
+  },
+  {
+   "motor": "remoto",
+   "guion": "g3-osea-pues-es_MX",
+   "conservadas": 14,
+   "quitadas": 11,
+   "quedan": 3,
+   "falsos": 0,
+   "quitadasTexto": [
+    "o sea,",
+    "o sea,",
+    "o sea,",
+    "o sea,",
+    "pues,",
+    "o sea,"
+   ],
+   "werAntes": 0.2222222222222222,
+   "werDespues": 0.13580246913580246
+  },
+  {
+   "motor": "remoto",
+   "guion": "g4-bueno-digamos-mmm-es_ES",
+   "conservadas": 9,
+   "quitadas": 7,
+   "quedan": 2,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Bueno,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "Bueno,"
+   ],
+   "werAntes": 0.21428571428571427,
+   "werDespues": 0.11428571428571428
+  },
+  {
+   "motor": "remoto",
+   "guion": "g4-bueno-digamos-mmm-es_MX",
+   "conservadas": 11,
+   "quitadas": 8,
+   "quedan": 3,
+   "falsos": 0,
+   "quitadasTexto": [
+    "mm.",
+    "mm,",
+    "Bueno,",
+    "Bueno,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "Bueno,"
+   ],
+   "werAntes": 0.2,
+   "werDespues": 0.08571428571428572
+  },
+  {
+   "motor": "remoto",
+   "guion": "g5-eh-este-vale-es_ES",
+   "conservadas": 6,
+   "quitadas": 3,
+   "quedan": 3,
+   "falsos": 0,
+   "quitadasTexto": [
+    "vale.",
+    "Vale.",
+    "Vale,"
+   ],
+   "werAntes": 0.20967741935483872,
+   "werDespues": 0.16129032258064516
+  },
+  {
+   "motor": "remoto",
+   "guion": "g5-eh-este-vale-es_MX",
+   "conservadas": 7,
+   "quitadas": 6,
+   "quedan": 1,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Eh,",
+    "eh,",
+    "Vale.",
+    "Vale,",
+    "este,",
+    "Vale,"
+   ],
+   "werAntes": 0.1774193548387097,
+   "werDespues": 0.08064516129032258
+  },
+  {
+   "motor": "remoto",
+   "guion": "g6-tipo-literal-es_ES",
+   "conservadas": 16,
+   "quitadas": 7,
+   "quedan": 9,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Tipo,",
+    "Tipo,",
+    "básicamente,",
+    "literal.",
+    "Básicamente,",
+    "Tipo,",
+    "literal,"
+   ],
+   "werAntes": 0.3333333333333333,
+   "werDespues": 0.21052631578947367
+  },
+  {
+   "motor": "remoto",
+   "guion": "g6-tipo-literal-es_MX",
+   "conservadas": 16,
+   "quitadas": 9,
+   "quedan": 7,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Tipo,",
+    "Básicamente,",
+    "literal,",
+    "Tipo,",
+    "literal.",
+    "Tipo,",
+    "Básicamente,",
+    "Tipo,",
+    "literal,"
+   ],
+   "werAntes": 0.2807017543859649,
+   "werDespues": 0.12280701754385964
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g1-control-es_ES",
+   "conservadas": 0,
+   "quitadas": 0,
+   "quedan": 0,
+   "falsos": 0,
+   "quitadasTexto": [],
+   "werAntes": 0.07920792079207921,
+   "werDespues": 0.07920792079207921
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g1-control-es_MX",
+   "conservadas": 0,
+   "quitadas": 0,
+   "quedan": 0,
+   "falsos": 0,
+   "quitadasTexto": [],
+   "werAntes": 0.019801980198019802,
+   "werDespues": 0.019801980198019802
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g2-este-eh-es_ES",
+   "conservadas": 6,
+   "quitadas": 5,
+   "quedan": 1,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Este,",
+    "este,",
+    "este,",
+    "este,",
+    "Este,"
+   ],
+   "werAntes": 0.16666666666666666,
+   "werDespues": 0.10256410256410256
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g2-este-eh-es_MX",
+   "conservadas": 6,
+   "quitadas": 2,
+   "quedan": 4,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Este,",
+    "Este,"
+   ],
+   "werAntes": 0.1282051282051282,
+   "werDespues": 0.10256410256410256
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g3-osea-pues-es_ES",
+   "conservadas": 14,
+   "quitadas": 10,
+   "quedan": 4,
+   "falsos": 0,
+   "quitadasTexto": [
+    "o sea,",
+    "o sea,",
+    "o sea,",
+    "o sea,",
+    "O sea,"
+   ],
+   "werAntes": 0.20987654320987653,
+   "werDespues": 0.13580246913580246
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g3-osea-pues-es_MX",
+   "conservadas": 14,
+   "quitadas": 12,
+   "quedan": 2,
+   "falsos": 0,
+   "quitadasTexto": [
+    "o sea,",
+    "o sea,",
+    "o sea,",
+    "pues,",
+    "o sea,",
+    "Pues,",
+    "o sea,"
+   ],
+   "werAntes": 0.19753086419753085,
+   "werDespues": 0.09876543209876543
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g4-bueno-digamos-mmm-es_ES",
+   "conservadas": 12,
+   "quitadas": 10,
+   "quedan": 2,
+   "falsos": 0,
+   "quitadasTexto": [
+    "MMM,",
+    "MM",
+    "MMM,",
+    "Bueno,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "Bueno,"
+   ],
+   "werAntes": 0.22857142857142856,
+   "werDespues": 0.08571428571428572
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g4-bueno-digamos-mmm-es_MX",
+   "conservadas": 12,
+   "quitadas": 11,
+   "quedan": 1,
+   "falsos": 0,
+   "quitadasTexto": [
+    "MMM,",
+    "MMM",
+    "MMM,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "digamos,",
+    "Bueno,",
+    "Bueno,"
+   ],
+   "werAntes": 0.18571428571428572,
+   "werDespues": 0.02857142857142857
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g5-eh-este-vale-es_ES",
+   "conservadas": 8,
+   "quitadas": 6,
+   "quedan": 2,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Eh,",
+    "¡Eh,",
+    "Vale.",
+    "vale.",
+    "Este,",
+    "Vale,"
+   ],
+   "werAntes": 0.3064516129032258,
+   "werDespues": 0.20967741935483872
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g5-eh-este-vale-es_MX",
+   "conservadas": 8,
+   "quitadas": 7,
+   "quedan": 1,
+   "falsos": 0,
+   "quitadasTexto": [
+    "¡Eh!",
+    "¡Eh!",
+    "¡Este!",
+    "vale.",
+    "Vale.",
+    "Este.",
+    "Vale."
+   ],
+   "werAntes": 0.20967741935483872,
+   "werDespues": 0.0967741935483871
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g6-tipo-literal-es_ES",
+   "conservadas": 15,
+   "quitadas": 5,
+   "quedan": 10,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Tipo,",
+    "literal,",
+    "Básicamente,",
+    "Tipo,",
+    "literal,"
+   ],
+   "werAntes": 0.3508771929824561,
+   "werDespues": 0.2631578947368421
+  },
+  {
+   "motor": "faster-whisper:small",
+   "guion": "g6-tipo-literal-es_MX",
+   "conservadas": 16,
+   "quitadas": 9,
+   "quedan": 7,
+   "falsos": 0,
+   "quitadasTexto": [
+    "Tipo,",
+    "Básicamente,",
+    "literal,",
+    "Tipo,",
+    "básicamente,",
+    "literal.",
+    "Tipo,",
+    "Tipo,",
+    "literal,"
+   ],
+   "werAntes": 0.2982456140350877,
+   "werDespues": 0.14035087719298245
+  }
+ ]
+}

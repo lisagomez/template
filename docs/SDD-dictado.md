@@ -3,9 +3,16 @@
 **Estado:** **construido y medido en esta WSL2** (2026-09-15). `tools/dictado/` existe: núcleo
 TypeScript puro sin dependencias, tres entry points (`.`, `./node`, `./remoto`), 29 pruebas en
 verde sin modelos ni red, `npm run empaqueta dictado` en verde, y una medición con pesos
-reales sobre 30 minutos de español con referencia (§5). **Lo que falta es la voz de una
-persona**: la prueba en vivo (§6, casos a y b) quedó pendiente al cerrar la rama; todo lo de
-máquina alrededor está demostrado. El perfil GPU está **diseñado y sin medir**: no hay VPS.
+reales sobre 30 minutos de español con referencia (§5). La prueba en vivo con la dueña (§6,
+casos a y b) se hizo el 2026-09-16. El perfil GPU está **diseñado y sin medir**: no hay VPS.
+**2026-09-22, en uso real**: «dale enter» vale en cualquier punto de la frase y tantas veces como
+se diga (en manos libres la dueña lo decía y seguía hablando, y encadenaba dos envíos en un
+turno), con las variantes que ella usa («dale a enter»); las muletillas se quitan antes de pegar
+con un filtro medido sobre el corpus propio (`src/muletillas.ts`, 0 palabras buenas quitadas,
+WER 16,3 → 9,6 % con Parakeet); y la voz del agente es es_MX «claude» a 0,9, elegida de oído
+entre tres. **Pendiente**: calibrar con su voz (30 frases de `medicion/corpus-propio/frases.txt`
+grabadas por ella y `calibra.mjs`; falta un guía de grabación), y el PRP de conversación por voz
+(envío al terminar el turno, voz sin pedirla, micrófono callado mientras el agente habla).
 **Ámbito:** una herramienta de `tools/` bajo el contrato de
 [`EMPAQUETAR-HERRAMIENTA.md`](./EMPAQUETAR-HERRAMIENTA.md). Consume `@tu-scope/voz` 0.5.0 por
 tarball, pineada; **no la modifica**.
@@ -52,7 +59,7 @@ existe en `dictado` 0.1, y se dice por qué.
 | sflow (líneas) | Qué hacía | Destino | En `dictado` |
 |---|---|---|---|
 | `core/smart_commands.py` (44) | «punto y aparte», «coma»… → signos | **portado** | `src/comandos.ts`, con fronteras Unicode (`\b` de JS ignora la ñ) |
-| `core/dictation_actions.py` (56) | «… y dale enter» al final → acción tras pegar | **portado** | `extraeAcciones` en `src/comandos.ts` |
+| `core/dictation_actions.py` (56) | «… y dale enter» al final → acción tras pegar | **portado y ampliado** | `extraeAcciones` en `src/comandos.ts`: desde el 2026-09-22 vale en cualquier punto y tantas veces como se diga (cada uno envía lo que va delante; lo que queda es `siguientes`), y el filtro de muletillas (`src/muletillas.ts`, medido) va delante |
 | `core/dictionary.py` (52) | vocabulario como *prompt* de Whisper | **portado + ampliado** | `src/diccionario.ts`: `comoPista()` igual; `corrige()` por similitud para motores sin prompt (Parakeet), **apagado** por defecto |
 | `core/dictionary_learner.py` (96) | palabras nuevas al editar → candidatas | **portado** | `candidatos()` en `src/diccionario.ts`, mismas heurísticas |
 | `core/snippets_matcher.py` (51) + `db/snippets.py` (74) | disparador → expansión, el más largo gana | **portado** | `src/snippets.ts`; JSON en vez de SQLite |
