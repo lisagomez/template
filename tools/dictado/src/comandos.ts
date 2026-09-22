@@ -10,6 +10,7 @@
  *
  * Bilingue es/en, como el original, y con fronteras Unicode (ver `texto/normaliza.ts`).
  */
+import { capitalizaInicio } from './texto/normaliza.js';
 import type { Accion } from './types.js';
 
 interface Regla {
@@ -55,22 +56,50 @@ const LIMPIEZA: readonly Regla[] = [
   { regex: /([?!…])\./g, reemplazo: '$1' },
 ];
 
-/** «… y dale enter», «… presiona enter», «… press enter» al final; el conector «y»/«and» se va con el comando. */
-const ENTER_AL_FINAL = new RegExp(
-  `[\\s,;.:]*(?:${FRONTERA_INICIO}(?:y|and)\\s+)?${FRONTERA_INICIO}(?:press\\s+enter|presion[ae]r?\\s+enter|pulsa(?:r)?\\s+enter|enter\\s+final|da(?:le)?\\s+enter)${FRONTERA_FIN}[\\s.,!?]*$`,
+/**
+ * «… y dale enter», «dale a enter», «presiona (el) enter», «press enter», en CUALQUIER punto de la frase. Hasta el
+ * 2026-09-22 solo valia al final: en manos libres la dueña lo decia y seguia hablando sin callar
+ * el segundo que cierra la frase, y el comando quedaba pegado como texto en medio. El conector
+ * «y»/«and» se va con el comando. Lo de antes se pega y se envia; lo de despues empieza el
+ * mensaje siguiente. Cuentan TODAS las apariciones (`siguientes`).
+ */
+const ENTER = new RegExp(
+  `[\\s,;.:]*(?:${FRONTERA_INICIO}(?:y|and)\\s+)?${FRONTERA_INICIO}(?:press\\s+enter|presion[ae]r?\\s+(?:el\\s+)?enter|pulsa(?:r)?\\s+(?:el\\s+)?enter|enter\\s+final|da(?:le)?\\s+(?:a\\s+|al\\s+|un\\s+)?enter)${FRONTERA_FIN}[\\s.,!?]*`,
   'iu',
 );
 
-export interface ResultadoComandos {
+/** Un trozo de lo dicho y lo que se hace despues de pegarlo. */
+export interface Parte {
   texto: string;
   acciones: Accion[];
 }
 
-/** Recorta las acciones verbales del final y devuelve cuales eran. */
+export interface ResultadoComandos {
+  /** La primera parte: lo dicho antes del primer «dale enter» (o todo, si no lo hubo). */
+  texto: string;
+  acciones: Accion[];
+  /**
+   * Lo dicho despues, en orden: cada parte se pega y ejecuta sus acciones. La ultima, si no
+   * termina en comando, va sin accion y queda como mensaje empezado. En manos libres la dueña
+   * encadena dos envios en un solo turno («… dale enter … dale enter …», en vivo el 2026-09-22).
+   */
+  siguientes?: Parte[];
+}
+
+/** Recorta TODAS las acciones verbales y devuelve las partes en orden. */
 export function extraeAcciones(texto: string): ResultadoComandos {
-  const recortado = texto.replace(ENTER_AL_FINAL, '');
-  if (recortado === texto) return { texto, acciones: [] };
-  return { texto: recortado.replace(/[\s.,;:!?]+$/u, ''), acciones: ['enter'] };
+  const partes: Parte[] = [];
+  let resto = texto;
+  for (;;) {
+    const m = ENTER.exec(resto);
+    if (!m) break;
+    partes.push({ texto: resto.slice(0, m.index).replace(/[\s.,;:!?]+$/u, ''), acciones: ['enter'] });
+    resto = capitalizaInicio(resto.slice(m.index + m[0].length).trim());
+  }
+  const primera = partes.shift();
+  if (!primera) return { texto, acciones: [] };
+  if (resto.length > 0) partes.push({ texto: resto, acciones: [] });
+  return { texto: primera.texto, acciones: primera.acciones, ...(partes.length > 0 ? { siguientes: partes } : {}) };
 }
 
 /** Sustituye los comandos de texto por su signo y normaliza el espacio alrededor. */
@@ -81,9 +110,13 @@ export function aplicaComandosDeTexto(texto: string): string {
   return salida.trim();
 }
 
-/** Las dos familias, en el orden correcto: primero se recortan las acciones, luego los signos. */
+/** Las dos familias, en el orden correcto: primero se recortan las acciones, luego los signos (en cada parte). */
 export function aplicaComandos(texto: string): ResultadoComandos {
   if (texto.trim().length === 0) return { texto: '', acciones: [] };
-  const { texto: sinAcciones, acciones } = extraeAcciones(texto);
-  return { texto: aplicaComandosDeTexto(sinAcciones), acciones };
+  const { texto: sinAcciones, acciones, siguientes } = extraeAcciones(texto);
+  return {
+    texto: aplicaComandosDeTexto(sinAcciones),
+    acciones,
+    ...(siguientes ? { siguientes: siguientes.map((p) => ({ texto: aplicaComandosDeTexto(p.texto), acciones: p.acciones })) } : {}),
+  };
 }

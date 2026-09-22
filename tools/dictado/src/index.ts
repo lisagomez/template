@@ -25,7 +25,8 @@ export { creaDictado, juntaTurnos, type Dictado, type Estado, type EventoDictado
 export { creaPosproceso, type OpcionesPosproceso, type Posproceso, type ResultadoPosproceso } from './posproceso.js';
 export { creaDiccionario, type Diccionario, type OpcionesDiccionario } from './diccionario.js';
 export { creaSnippets, type Snippet, type Snippets } from './snippets.js';
-export { aplicaComandos, aplicaComandosDeTexto, extraeAcciones, type ResultadoComandos } from './comandos.js';
+export { aplicaComandos, aplicaComandosDeTexto, extraeAcciones, type Parte, type ResultadoComandos } from './comandos.js';
+export { esSoloMuletilla, MULETILLAS_LEXICAS, MULETILLAS_NO_LEXICAS, quitaMuletillas, type ResultadoMuletillas } from './muletillas.js';
 export {
   almacenEnMemoria,
   creaHistorial,

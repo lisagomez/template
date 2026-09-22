@@ -24,9 +24,9 @@ import { picoDb } from '@tu-scope/voz';
 import { campo, valoresDe, type Ajustes, type AjustesResueltos, type Clave } from '../ajustes.js';
 import { creaDictado, type Dictado, type Estado, type EventoDictado, type Modo } from '../dictado.js';
 import { fechaHaceDias } from '../historial.js';
+import { esSoloMuletilla } from '../muletillas.js';
 import { creaPosproceso, type Posproceso } from '../posproceso.js';
 import { pareceOtroIdioma } from '../texto/idioma.js';
-import { normalizaParaComparar } from '../texto/normaliza.js';
 import type { Motor, Pegador } from '../types.js';
 import { capturaMicrofono, escribeWav, nivelDb, type Captura } from './audio.js';
 import { ajustaGanancia, factorDe } from './ganancia.js';
@@ -60,11 +60,14 @@ function pinta(evento: EventoDictado): void {
       else if (evento.estado === 'inactivo') console.log(gris('■ en espera'));
       break;
     case 'texto':
-      console.log(`${verde('✓')} ${evento.texto}${evento.acciones.length ? gris(` [${evento.acciones.join(', ')}]`) : ''}`);
+      console.log(`${verde('✓')} ${[{ texto: evento.texto, acciones: evento.acciones }, ...(evento.siguientes ?? [])].map((p) => `${p.texto}${p.acciones.length ? gris(` [${p.acciones.join(', ')}]`) : ''}`).join(' ')}`);
       console.log(gris(`  latencia fin-de-habla→pegado ${evento.latenciaMs.toFixed(0)} ms · motor ${evento.msMotor.toFixed(0)} ms · audio ${(evento.duracionMs / 1000).toFixed(1)} s`));
       break;
     case 'sinVoz':
       console.log(gris('  (sin voz)'));
+      break;
+    case 'soloMuletillas':
+      console.log(gris(`  (solo muletillas, nada que pegar: ${JSON.stringify(evento.textoCrudo)})`));
       break;
     case 'error':
       console.error(`✗ ${evento.mensaje}`);
@@ -120,8 +123,6 @@ function avisoPico(picoDb: number): string {
  * turno con pico -86,5 dBFS). Si ninguna ventana de 30 ms del turno llega al umbral, no hay
  * voz que transcribir: se descarta antes del motor y sale como «sin voz».
  */
-const MULETILLAS = new Set(['uh', 'um', 'eh', 'ah', 'mm', 'mmm', 'hmm', 'aja', 'ajá']);
-
 function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbral: () => number, contadores: ContadoresSesion): Motor {
   // El pico por ventanas de 30 ms es el `picoDb` de `voz`: la misma aritmetica que el medidor del microfono.
   const ventana = Math.max(1, Math.round(frecuenciaHz * 0.03));
@@ -139,8 +140,7 @@ function conPuertaDeEnergia(motor: Motor, frecuenciaHz: number, umbral: () => nu
       const r = await motor.transcribe(muestras, hz, o);
       // Un turno que es SOLO muletilla no se pega: en sala se dictan ideas, no carraspeos
       // (medido en vivo el 2026-09-19: un «Uh» de 0,3 s pegado en medio de dos instrucciones).
-      const palabras = normalizaParaComparar(r.texto).split(' ').filter(Boolean);
-      if (palabras.length > 0 && palabras.length <= 2 && palabras.every((p) => MULETILLAS.has(p))) {
+      if (esSoloMuletilla(r.texto)) {
         console.log(gris(`  (muletilla descartada: ${JSON.stringify(r.texto)})`));
         contadores.muletillas += 1;
         return { texto: '' };
@@ -349,7 +349,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     ejecuta: (acciones) => pegadorBase.ejecuta?.(acciones) ?? Promise.resolve(),
   };
   /** El posproceso se rearma en caliente (comandos, snippets, diccionario): el envoltorio delega en el actual. */
-  const armaPosproceso = (a: Ajustes): Posproceso => creaPosproceso({ ...(a.snippets ? { snippets: datos.snippets } : {}), ...(a.diccionario ? { diccionario: datos.diccionario } : {}), comandos: a.comandos });
+  const armaPosproceso = (a: Ajustes): Posproceso => creaPosproceso({ ...(a.snippets ? { snippets: datos.snippets } : {}), ...(a.diccionario ? { diccionario: datos.diccionario } : {}), comandos: a.comandos, muletillas: a.muletillas });
   let posprocesoActual = armaPosproceso(v);
   let conPista = v.diccionario;
   const t0 = performance.now();
@@ -377,7 +377,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
       if (e.tipo === 'estado') publicaIcono(e.estado);
       if (e.tipo === 'estado') publicaPildora({ tipo: 'estado', estado: e.estado });
       if (e.tipo === 'texto') publicaPildora({ tipo: 'hecho' });
-      if (e.tipo === 'sinVoz' || e.tipo === 'error') publicaPildora({ tipo: 'error' });
+      if (e.tipo === 'sinVoz' || e.tipo === 'soloMuletillas' || e.tipo === 'error') publicaPildora({ tipo: 'error' });
       if (e.tipo === 'estado' && e.estado === 'escuchando') {
         sonidos.empieza();
         picoEscucha = -Infinity;
@@ -402,6 +402,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
         contadores.duracionesMs.push(e.duracionMs);
       }
       if (e.tipo === 'sinVoz') contadores.sinVoz += 1;
+      if (e.tipo === 'soloMuletillas') contadores.muletillas += 1;
       if (e.tipo === 'sinVoz' || e.tipo === 'texto') {
         if (Number.isFinite(picoEscucha)) contadores.picosDb.push(picoEscucha);
         console.log(gris(`  pico durante la escucha: ${picoEscucha.toFixed(1)} dBFS${avisoPico(picoEscucha)}`));
@@ -462,6 +463,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
           umbralVozDb = nv.umbralVozDb;
           break;
         case 'comandos':
+        case 'muletillas':
         case 'snippets':
         case 'diccionario':
           posprocesoActual = armaPosproceso(nv);

@@ -197,3 +197,48 @@ test('la pista del diccionario se consulta en cada transcripcion', async () => {
   await dictado.termina();
   assert.deepEqual(recibidas, ['Levy', 'Levy, Hermes']);
 });
+
+test('«dale enter» en medio: se pega lo de antes, Enter, y lo de despues queda como mensaje nuevo; solo «dale enter» tambien pulsa; solo muletillas no pega nada', async () => {
+  const detector = detectorDeGuion();
+  let respuesta = 'Mm. Podemos continuar con el PRP. Dale enter. No veo que estés ejecutando nada.';
+  const transcriptor = transcriptorFalso(() => respuesta);
+  const pegador = pegadorQueApunta();
+  const almacen = almacenEnMemoria();
+  const eventos: EventoDictado[] = [];
+  const dictado = creaDictado({ detector, transcriptor, frecuenciaHz: HZ, modo: 'alternar', pegador, almacen, motorId: 'falso', posproceso: creaPosproceso(), alEvento: (e) => eventos.push(e) });
+  dictado.empieza();
+  await dictado.alimenta(new Float32Array(16_000));
+  await dictado.termina();
+  assert.deepEqual(pegador.pegado, ['Podemos continuar con el PRP', 'No veo que estés ejecutando nada.']);
+  assert.deepEqual(pegador.acciones, ['enter']);
+  const texto = eventos.find((e): e is Extract<EventoDictado, { tipo: 'texto' }> => e.tipo === 'texto');
+  assert.deepEqual(texto?.siguientes, [{ texto: 'No veo que estés ejecutando nada.', acciones: [] }]);
+  assert.equal((await almacen.recientes(1))[0]?.texto, 'Podemos continuar con el PRP\nNo veo que estés ejecutando nada.');
+  assert.equal((await almacen.recientes(1))[0]?.textoCrudo, respuesta);
+
+  respuesta = 'Dale enter.';
+  dictado.empieza();
+  await dictado.alimenta(new Float32Array(16_000));
+  await dictado.termina();
+  assert.equal(pegador.pegado.length, 2, 'sin texto no se pega nada');
+  assert.deepEqual(pegador.acciones, ['enter', 'enter'], 'pero el Enter si se pulsa');
+  assert.equal((await almacen.recientes(10)).length, 1, 'un turno que es solo la accion no se guarda');
+
+  respuesta = 'Eh, mm.';
+  dictado.empieza();
+  await dictado.alimenta(new Float32Array(16_000));
+  await dictado.termina();
+  assert.equal(pegador.pegado.length, 2);
+  assert.deepEqual(pegador.acciones, ['enter', 'enter']);
+  assert.ok(eventos.some((e) => e.tipo === 'soloMuletillas'));
+  assert.equal((await almacen.recientes(10)).length, 1, 'solo muletillas no se guarda');
+  assert.equal(dictado.estado, 'inactivo');
+
+  respuesta = 'uno dale enter dos dale enter tres';
+  dictado.empieza();
+  await dictado.alimenta(new Float32Array(16_000));
+  await dictado.termina();
+  assert.deepEqual(pegador.pegado.slice(2), ['uno', 'Dos', 'Tres'], 'dos envios en un turno (cada mensaje nuevo empieza en mayuscula), y el tercero queda empezado');
+  assert.deepEqual(pegador.acciones, ['enter', 'enter', 'enter', 'enter']);
+  assert.equal((await almacen.recientes(1))[0]?.texto, 'uno\nDos\nTres');
+});

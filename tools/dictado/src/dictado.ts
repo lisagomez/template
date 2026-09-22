@@ -17,6 +17,7 @@
  */
 import type { Posproceso } from './posproceso.js';
 import type { Almacen } from './historial.js';
+import type { Parte } from './comandos.js';
 import type { Accion, DetectorVoz, Muestras, Pegador, Transcriptor, Turno } from './types.js';
 
 export type Modo = 'alternar' | 'pulsar' | 'manosLibres';
@@ -26,8 +27,10 @@ export type EventoDictado =
   | { tipo: 'estado'; estado: Estado }
   | { tipo: 'inicioHabla'; ms: number }
   | { tipo: 'finHabla'; duracionMs: number }
-  | { tipo: 'texto'; texto: string; textoCrudo: string; acciones: Accion[]; duracionMs: number; latenciaMs: number; msMotor: number }
+  | { tipo: 'texto'; texto: string; textoCrudo: string; acciones: Accion[]; siguientes?: Parte[]; duracionMs: number; latenciaMs: number; msMotor: number }
   | { tipo: 'sinVoz' }
+  /** El motor oyo algo, pero eran solo muletillas: no se pega ni se guarda. */
+  | { tipo: 'soloMuletillas'; textoCrudo: string }
   | { tipo: 'error'; mensaje: string };
 
 export interface OpcionesDictado {
@@ -118,17 +121,30 @@ export function creaDictado(opciones: OpcionesDictado): Dictado {
       emite({ tipo: 'sinVoz' });
       return;
     }
-    const procesado = opciones.posproceso ? await opciones.posproceso.procesa(textoCrudo) : { texto: textoCrudo, acciones: [] as Accion[] };
+    const procesado: { texto: string; acciones: Accion[]; siguientes?: Parte[] } = opciones.posproceso ? await opciones.posproceso.procesa(textoCrudo) : { texto: textoCrudo, acciones: [] };
+    const siguientes = procesado.siguientes ?? [];
+    if (procesado.texto.length === 0 && procesado.acciones.length === 0 && siguientes.length === 0) {
+      // El motor oyo algo, pero el posproceso lo dejo vacio (solo muletillas): nada que pegar ni que guardar.
+      emite({ tipo: 'soloMuletillas', textoCrudo });
+      return;
+    }
     cambia('pegando');
-    if (opciones.pegador && procesado.texto.length > 0) {
-      await opciones.pegador.pega(procesado.texto);
-      if (procesado.acciones.length > 0) await opciones.pegador.ejecuta?.(procesado.acciones);
+    if (opciones.pegador) {
+      // Cada parte se pega y ejecuta lo suyo. «Dale enter» solo, sin texto, tambien se ejecuta: es
+      // como se manda lo que ya estaba pegado.
+      for (const parte of [{ texto: procesado.texto, acciones: procesado.acciones }, ...siguientes]) {
+        if (parte.texto.length > 0) await opciones.pegador.pega(parte.texto);
+        if (parte.acciones.length > 0) await opciones.pegador.ejecuta?.(parte.acciones);
+      }
     }
     const latenciaMs = ahora() - finHablaMs;
-    emite({ tipo: 'texto', texto: procesado.texto, textoCrudo, acciones: procesado.acciones, duracionMs, latenciaMs, msMotor });
-    await opciones.almacen?.agrega({
-      texto: procesado.texto,
-      ...(procesado.texto !== textoCrudo ? { textoCrudo } : {}),
+    emite({ tipo: 'texto', texto: procesado.texto, textoCrudo, acciones: procesado.acciones, ...(siguientes.length > 0 ? { siguientes } : {}), duracionMs, latenciaMs, msMotor });
+    // En el historial, cada envio va separado por el salto que su Enter provoco.
+    const textoGuardado = [procesado.texto, ...siguientes.map((p) => p.texto)].join('\n');
+    // Un turno que fue solo «dale enter» no es un dictado: no se guarda.
+    if (textoGuardado.length > 0) await opciones.almacen?.agrega({
+      texto: textoGuardado,
+      ...(textoGuardado !== textoCrudo ? { textoCrudo } : {}),
       motor: opciones.motorId ?? 'desconocido',
       duracionMs: Math.round(duracionMs),
       latenciaMs: Math.round(latenciaMs),

@@ -62,6 +62,26 @@ npm run en-vivo                     # lo anterior, desatendido y durante toda la
 dictado icono instala               # icono en la barra de Windows: la puerta de entrada sin terminal (abajo)
 ```
 
+#### Comandos de voz y muletillas
+
+- **«dale enter»** (también «dale a enter», «dale un enter», «presiona el enter», «press enter») en
+  **cualquier punto** de la frase, y **tantas veces como se diga**: cada uno envía lo que va
+  delante, y lo que queda tras el último se pega como arranque del mensaje siguiente. Solo «dale
+  enter» pulsa Enter sin pegar nada. Hasta el 2026-09-22 valía solo al final, y en
+  manos libres la frase no acaba hasta callar `silencioMs`: dicho en medio, se pegaba como texto.
+- **Signos dichos**: «coma», «punto y aparte», «nueva línea», «dos puntos», «signo de
+  interrogación»… (`ajustes.comandos`).
+- **Muletillas** (`ajustes.muletillas`, encendido): «mm», «eh», «ah», «um» se van donde estén;
+  «este», «o sea», «bueno», «pues», «digamos», «tipo», «vale», «básicamente», «como que» y
+  «literal» solo cuando van aislados por puntuación a los dos lados («, este,», «Bueno, …»). Sin
+  esa señal no se tocan: «este documento» y «vale la pena» son palabras, y «5 mm» es una unidad.
+  Lo dicho tal cual queda en el historial como texto original. Medido el 2026-09-22 sobre las 24
+  transcripciones del corpus de muletillas (`node medicion/mide-filtro-muletillas.mjs` →
+  `corpus-propio/muletillas/filtro-2026-09-22.md`): WER contra el guion limpio 16,3 % → 9,6 %
+  (Parakeet) y 18,3 % → 10,6 % (faster-whisper), **0 palabras buenas quitadas**; quita el 65–69 %
+  de las muletillas que el motor conserva, y lo que queda son las léxicas que el motor escribe sin
+  coma («Buenos días, este hoy vamos a ver»), a propósito.
+
 #### El icono de la barra y la píldora (para no tocar una terminal nunca más)
 
 `dictado icono instala` deja un icono en el **área de notificación** de Windows (junto al
@@ -156,7 +176,7 @@ la decisión de flujo de datos (C4) del servicio están en el SDD §7.
 
 ```bash
 dictado di "Ya tengo voz. ¿Me oyes?"            # Piper es_MX «claude» por sherpa-onnx, local, 79 MB pineados
-dictado di --archivo nota.txt --velocidad 1.1
+dictado di --archivo nota.txt --velocidad 1.1   # por defecto 0,9: elegida de oído el 2026-09-22
 echo "texto" | dictado di --guarda voz.wav --sin-sonido
 ```
 
@@ -313,7 +333,7 @@ modelo de lenguaje: en gris, no se pueden encender; no hay proveedor y lo dictad
 máquina). Se abre desde `/historial`, `/dictar` y el menú del icono («Ajustes»).
 
 **En caliente.** Un `dictar` en marcha vigila el archivo (stat cada segundo) y toma sin reiniciar
-lo que es seguro: `pegar`, `gananciaDb`, `umbralVozDb`, `comandos`, `snippets`, `diccionario`,
+lo que es seguro: `pegar`, `gananciaDb`, `umbralVozDb`, `comandos`, `muletillas`, `snippets`, `diccionario`,
 `sonidoAlEmpezar`, `sonidoAlTerminar`, `retencionDias`. Lo que exige recargar (`motor`,
 `respaldo`, `idioma`, `hilos`, `modo`, `tecla`, `silencioMs`, `micEnEspera`,
 `correccionPorSimilitud`) se anuncia para la siguiente sesión. Y lo que en esa sesión fija una
@@ -412,6 +432,7 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 | `modo` (alternar) | `alternar`/`pulsar` juntan los turnos y transcriben una vez (mejor puntuacion); `manos-libres` pega cada turno que el VAD cierra y paga `silencioMs` en cada frase |
 | `hilos` (8) | Medido con Parakeet: 4 hilos 541 ms, 8 hilos 506 ms, 16 hilos 604 ms (p50). Mas hilos que nucleos fisicos es peor (SMT) |
 | `correccionPorSimilitud` (off) | Encendida corrige palabras parecidas a tus terminos: tambien las que no debia. Sustituir de mas es peor que no sustituir |
+| `muletillas` (on) | Apagado, «Mm.» y «, este,» se pegan tal cual. Encendido quita solo lo aislado por puntuacion: medido con 0 palabras buenas quitadas en 24 transcripciones; una lexica sin coma («este hoy vamos») se queda, y eso es a proposito |
 | `retencionDias` (365) | 0 no borra nunca; menos de lo firmado en la AISIA de Fase 0 (365) es una decision que se firma, no que se teclea |
 
 ## Avisos que ahorran una tarde
@@ -441,6 +462,11 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
   puerto y la siguiente corrida hablo con el equivocado. Lanzar en grupo propio y matar el grupo.
 - **El motor del asesor cachea por id de transcripcion**; el laboratorio usa un id derivado del
   contenido para no recibir la respuesta de otra frase.
+- **«Dale enter» en medio de la frase no hacia nada** (en vivo, 2026-09-22): en manos libres la
+  frase no cierra hasta callar `silencioMs`, y la dueña lo decia y seguia hablando; el comando
+  solo valia al final y quedo pegado como texto. Ahora vale en cualquier punto: lo de antes se
+  envia y lo de despues empieza el mensaje siguiente. Y «dale enter» solo, sin texto, pulsa Enter
+  (antes un texto vacio saltaba tambien la accion).
 
 ## Variables de entorno
 

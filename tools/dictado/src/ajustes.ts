@@ -49,6 +49,8 @@ export interface Ajustes {
   umbralVozDb: number;
   micEnEspera: 'cerrado' | 'abierto';
   comandos: boolean;
+  /** Quitar «mm», «eh» donde esten y «este», «o sea»… solo cuando van aislados por puntuacion. */
+  muletillas: boolean;
   snippets: boolean;
   diccionario: boolean;
   correccionPorSimilitud: boolean;
@@ -75,6 +77,7 @@ export const DEFECTOS: Readonly<Ajustes> = Object.freeze({
   umbralVozDb: -45,
   micEnEspera: 'cerrado',
   comandos: true,
+  muletillas: true,
   snippets: true,
   diccionario: true,
   correccionPorSimilitud: false,
@@ -121,6 +124,7 @@ export const ESQUEMA: ReadonlyArray<Campo> = [
   { clave: 'umbralVozDb', grupo: 'audio', etiqueta: 'Umbral de voz', ayuda: 'Por debajo de este pico (dBFS) el turno se descarta sin transcribir: no es voz.', tipo: 'numero', min: -90, max: 0, bandera: 'umbral-voz-db', enCaliente: true },
   { clave: 'micEnEspera', grupo: 'audio', etiqueta: 'Microfono en espera', ayuda: 'cerrado: solo se abre al escuchar (~100 ms) · abierto: se queda capturando y descartando.', tipo: 'eleccion', opciones: ['cerrado', 'abierto'], bandera: 'mic-en-espera', enCaliente: false },
   { clave: 'comandos', grupo: 'texto', etiqueta: 'Comandos de voz', ayuda: '«punto y aparte», «coma», «dale enter»…', tipo: 'booleano', bandera: 'comandos', enCaliente: true },
+  { clave: 'muletillas', grupo: 'texto', etiqueta: 'Quitar muletillas', ayuda: '«mm», «eh», «ah» donde esten; «este», «o sea», «bueno», «pues»… solo cuando van entre comas o abren la frase. Lo dicho tal cual queda en el historial como texto original.', tipo: 'booleano', bandera: 'muletillas', enCaliente: true },
   { clave: 'snippets', grupo: 'texto', etiqueta: 'Snippets', ayuda: 'Un disparador dicho se cambia por su expansion.', tipo: 'booleano', bandera: 'snippets', enCaliente: true },
   { clave: 'diccionario', grupo: 'texto', etiqueta: 'Diccionario personal', ayuda: 'Tus terminos como pista al motor y como correccion.', tipo: 'booleano', bandera: 'diccionario', enCaliente: true },
   { clave: 'correccionPorSimilitud', grupo: 'texto', etiqueta: 'Correccion por similitud', ayuda: 'Para motores sin pista (Parakeet): una palabra parecida a un termino tuyo se cambia por el termino. Apagado por defecto: puede corregir de mas.', tipo: 'booleano', bandera: 'corrige-similitud', enCaliente: false },

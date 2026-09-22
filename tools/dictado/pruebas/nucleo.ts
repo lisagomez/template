@@ -16,6 +16,7 @@ import {
   creaPosproceso,
   creaSnippets,
   distanciaEdicion,
+  esSoloMuletilla,
   extraeAcciones,
   formateaActa,
   formateaTiempo,
@@ -23,6 +24,7 @@ import {
   pareceOtroIdioma,
   percentil,
   quitaAcentos,
+  quitaMuletillas,
   regexDePalabra,
   tokeniza,
   transcribeLote,
@@ -154,13 +156,52 @@ test('comandos de texto: signos con palabra delante, saltos sin ella, limpieza d
   assert.equal(aplicaComandos('new line then new paragraph end').texto, 'then\n\nend');
 });
 
-test('acciones verbales: «dale enter» al final se recorta y vuelve como accion; en medio no', () => {
+test('acciones verbales: «dale enter» en cualquier punto y tantas veces como se diga; lo de despues son las siguientes partes', () => {
   assert.deepEqual(extraeAcciones('manda el mensaje y dale enter.'), { texto: 'manda el mensaje', acciones: ['enter'] });
   assert.deepEqual(extraeAcciones('press enter'), { texto: '', acciones: ['enter'] });
-  assert.deepEqual(extraeAcciones('dale enter a la cosa'), { texto: 'dale enter a la cosa', acciones: [] });
-  const r = aplicaComandos('hola coma mundo presiona enter');
+  assert.deepEqual(extraeAcciones('dale enter a la cosa'), { texto: '', acciones: ['enter'], siguientes: [{ texto: 'A la cosa', acciones: [] }] });
+  assert.deepEqual(extraeAcciones('entero sin comando'), { texto: 'entero sin comando', acciones: [] });
+  // El caso real del 2026-09-22: dicho en medio de la frase, sin callar, y seguia hablando.
+  assert.deepEqual(extraeAcciones('Podemos continuar con el PRP. Dale enter. No veo que estés ejecutando nada.'), {
+    texto: 'Podemos continuar con el PRP', acciones: ['enter'], siguientes: [{ texto: 'No veo que estés ejecutando nada.', acciones: [] }],
+  });
+  // Como lo dice la dueña de verdad (en vivo, 2026-09-22): «dale a enter», y siguio hablando.
+  assert.deepEqual(extraeAcciones('Haz la uno y la tres, dale a enter. ¿me puedes responder?'), { texto: 'Haz la uno y la tres', acciones: ['enter'], siguientes: [{ texto: '¿Me puedes responder?', acciones: [] }] });
+  // Dos envios en un solo turno (en vivo, 2026-09-22): cada «dale enter» manda lo que va delante.
+  assert.deepEqual(extraeAcciones('Escucho mejor la primera dale enter La 1, déjala por defecto. A 0,9. Dale Enter.'), {
+    texto: 'Escucho mejor la primera', acciones: ['enter'], siguientes: [{ texto: 'La 1, déjala por defecto. A 0,9', acciones: ['enter'] }],
+  });
+  assert.deepEqual(extraeAcciones('dale enter dale enter'), { texto: '', acciones: ['enter'], siguientes: [{ texto: '', acciones: ['enter'] }] });
+  assert.deepEqual(extraeAcciones('listo, presiona el enter'), { texto: 'listo', acciones: ['enter'] });
+  assert.deepEqual(extraeAcciones('dale un enter'), { texto: '', acciones: ['enter'] });
+  const r = aplicaComandos('hola coma mundo presiona enter y luego coma sigo');
   assert.equal(r.texto, 'hola, mundo');
   assert.deepEqual(r.acciones, ['enter']);
+  assert.deepEqual(r.siguientes, [{ texto: 'Y luego, sigo', acciones: [] }]);
+});
+
+// --- muletillas ----------------------------------------------------------------------------
+
+test('muletillas: las no lexicas se van donde esten; las lexicas solo aisladas por puntuacion', () => {
+  assert.deepEqual(quitaMuletillas('Mm. Podemos continuar con el PRP.'), { texto: 'Podemos continuar con el PRP.', quitadas: ['Mm.'] });
+  assert.equal(quitaMuletillas('vamos a ver, eh, la fotosíntesis').texto, 'vamos a ver, la fotosíntesis');
+  assert.equal(quitaMuletillas('Hola, eh. ¿Qué tal?').texto, 'Hola. ¿Qué tal?');
+  assert.equal(quitaMuletillas('dime eh cuándo').texto, 'dime cuándo');
+  assert.equal(quitaMuletillas('¡Ah! Ya entiendo.').texto, 'Ya entiendo.');
+  assert.equal(quitaMuletillas('Buenos días. Este, hoy vamos a ver, este, la fotosíntesis.').texto, 'Buenos días. Hoy vamos a ver, la fotosíntesis.');
+  assert.equal(quitaMuletillas('Bueno, pues, o sea, quiero decirte algo.').texto, 'Quiero decirte algo.');
+  assert.equal(quitaMuletillas('Mm. Este, hoy sí.').texto, 'Hoy sí.');
+  // Palabras de verdad: sin puntuacion a los dos lados no se tocan; una unidad tampoco.
+  assert.equal(quitaMuletillas('Este documento vale la pena, tipo de cambio.').texto, 'Este documento vale la pena, tipo de cambio.');
+  assert.equal(quitaMuletillas('Buenos días, este hoy vamos a ver').texto, 'Buenos días, este hoy vamos a ver');
+  assert.equal(quitaMuletillas('una lámina de 5 mm de grosor').texto, 'una lámina de 5 mm de grosor');
+  assert.deepEqual(quitaMuletillas('sin nada que quitar').quitadas, []);
+  assert.equal(quitaMuletillas('Mm.').texto, '');
+  assert.equal(esSoloMuletilla('Uh.'), true);
+  assert.equal(esSoloMuletilla('eh, mm'), true);
+  assert.equal(esSoloMuletilla('ajá'), true);
+  assert.equal(esSoloMuletilla('eh, sí'), false);
+  assert.equal(esSoloMuletilla(''), false);
 });
 
 // --- posproceso ----------------------------------------------------------------------------
@@ -177,7 +218,22 @@ test('posproceso: snippets → comandos → diccionario → limpiador, y dice qu
   const r = await p.procesa(' hola coma escribe a mi correo sobre hermas y dale enter ');
   assert.equal(r.texto, 'Hola, escribe a l@ejemplo.mx sobre Hermes');
   assert.deepEqual(r.acciones, ['enter']);
-  assert.deepEqual(r.pasos, { snippetsUsados: ['mi correo'], comandosAplicados: true, diccionarioCambio: true, limpiezaCambio: true });
+  assert.deepEqual(r.pasos, { muletillasQuitadas: [], snippetsUsados: ['mi correo'], comandosAplicados: true, diccionarioCambio: true, limpiezaCambio: true });
+});
+
+test('posproceso: muletillas antes que comandos, y lo que sigue a «dale enter» pasa por diccionario y mayuscula', async () => {
+  const p = creaPosproceso({ diccionario: creaDiccionario({ terminos: ['Hermes'], corrigePorSimilitud: true }), capitaliza: true });
+  const r = await p.procesa('Mm. podemos continuar con hermas. Dale enter. no veo que estés ejecutando nada, eh.');
+  assert.equal(r.texto, 'Podemos continuar con Hermes');
+  assert.deepEqual(r.acciones, ['enter']);
+  assert.deepEqual(r.siguientes, [{ texto: 'No veo que estés ejecutando nada.', acciones: [] }]);
+  assert.deepEqual(r.pasos.muletillasQuitadas, ['Mm.', 'eh.']);
+  const nada = await creaPosproceso().procesa('Eh, mm.');
+  assert.equal(nada.texto, '');
+  assert.deepEqual(nada.acciones, []);
+  assert.equal(nada.siguientes, undefined);
+  const apagado = await creaPosproceso({ muletillas: false }).procesa('Eh, mm.');
+  assert.equal(apagado.texto, 'Eh, mm.');
 });
 
 test('posproceso: un limpiador que devuelve vacio se ignora; sin opciones solo recorta', async () => {
