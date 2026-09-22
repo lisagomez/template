@@ -6,7 +6,9 @@
 > **Contrato de empaquetado**: [`docs/EMPAQUETAR-HERRAMIENTA.md`](../../../docs/EMPAQUETAR-HERRAMIENTA.md).
 > **Se apoya en**: [`012-voz`](../012-voz/spec.md) — el VAD y los turnos son de ahí; esto pone el texto.
 > **Estado**: spec **retroactiva** (2026-09-16). `tools/dictado/` 0.1.0 existe (PR #109) con 29 pruebas,
-> empaquetado en verde y medición del 2026-09-15; queda pendiente la prueba en vivo con una persona.
+> empaquetado en verde y medición del 2026-09-15; la prueba en vivo con una persona se hizo el 2026-09-16.
+> **Enmendada el 2026-09-22** (RF-8, RF-10, RF-36 a RF-45): comandos en cualquier punto, muletillas y
+> conversación por voz con el agente. PRP: [`PRP-003`](../../PRPs/PRP-003-conversacion-por-voz.md).
 
 ## Contexto y objetivo
 
@@ -47,6 +49,16 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 
 ## Requisitos funcionales (criterios de aceptación en EARS)
 
+> **Enmienda del 2026-09-22 (RF-8, RF-10 y RF-36 a RF-45).** Dos requisitos se **enmiendan** en vez
+> de añadir otros que los contradigan: una spec que se contradice a sí misma es peor que una que
+> cambia y lo dice. RF-8 antes decía: *«aplicará en este orden snippets, comandos de voz,
+> diccionario y limpieza opcional»*; ahora las muletillas van primero. RF-10 antes decía: *«CUANDO
+> el texto termine en una acción verbal […]; en medio del texto no la tratará como acción»*: en
+> uso real (2026-09-22) la dueña decía «dale enter» y seguía hablando sin callar el segundo que
+> cierra el turno, y encadenaba dos envíos en un turno; el PR #142 lo cambió y esta spec no lo
+> decía. RF-36 a RF-45 cierran el QUÉ de la conversación por voz con el agente, que
+> `docs/SDD-dictado.md` nombraba como pendiente sin requisito del que colgar.
+
 - RF-1: EL SISTEMA expondrá un núcleo TypeScript sin dependencias que no importará `voz`, ffmpeg,
   ONNX, Python ni nada de Windows; hablará con cuatro interfaces (detector de voz, transcriptor,
   pegador, almacén) que cada entry point inyecta.
@@ -62,13 +74,15 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   no pegará nada.
 - RF-7: SI el motor falla, ENTONCES EL SISTEMA emitirá el error con su mensaje y volverá a
   inactivo sin dejar el micrófono a medias.
-- RF-8: CUANDO reciba el texto crudo del motor, EL SISTEMA aplicará en este orden snippets,
-  comandos de voz, diccionario y limpieza opcional, y dirá qué hizo cada paso.
+- RF-8: CUANDO reciba el texto crudo del motor, EL SISTEMA aplicará en este orden muletillas,
+  snippets, comandos de voz, diccionario, limpieza opcional y mayúscula, y dirá qué hizo cada paso.
 - RF-9: CUANDO el texto contenga un comando de signo («coma», «dos puntos», «signo de
   interrogación»…) con una palabra delante, EL SISTEMA lo sustituirá por el signo; los saltos
   («nueva línea», «punto y aparte») no exigirán palabra delante.
-- RF-10: CUANDO el texto termine en una acción verbal («dale enter», «press enter»), EL SISTEMA la
-  recortará del texto y la ejecutará después de pegar; en medio del texto no la tratará como acción.
+- RF-10: CUANDO el texto contenga una acción verbal («dale enter», «dale a enter», «presiona el
+  enter», «press enter») en cualquier punto y cuantas veces aparezca, EL SISTEMA pegará lo anterior
+  a cada una, la ejecutará y pegará lo que quede tras la última como mensaje empezado; sin texto,
+  ejecutará la acción igual.
 - RF-11: CUANDO un disparador de snippet aparezca como palabra completa (fronteras Unicode, sin
   distinguir mayúsculas), EL SISTEMA lo sustituirá por su expansión, probando antes el disparador
   más largo, y contará el uso.
@@ -120,6 +134,30 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   PulseAudio de WSLg, y borrará los archivos temporales de audio al terminar.
 - RF-35: SI la voz pedida no está en la carpeta de modelos, ENTONCES EL SISTEMA la descargará de su
   URL pineada diciendo cuál y cuánto pesa, o rechazará un nombre que no conozca.
+- RF-36: CUANDO el texto contenga una muletilla no léxica («mm», «eh», «ah», «um»), EL SISTEMA la
+  quitará donde esté y guardará el texto crudo en el historial.
+- RF-37: CUANDO una muletilla léxica («este», «o sea», «bueno», «pues», «digamos», «tipo», «vale»,
+  «básicamente», «como que», «literal») vaya aislada por puntuación a los dos lados, EL SISTEMA la
+  quitará; en cualquier otro caso no la tocará.
+- RF-38: MIENTRAS el modo conversación esté encendido en manos libres, EL SISTEMA pulsará Enter
+  cuando pasen `envioMs` sin voz nueva desde el último pegado pendiente, y no lo hará si empieza
+  voz, si el último pegado ya llevó Enter, si no está escuchando o mientras suena la voz del agente.
+- RF-39: CUANDO reciba por su socket local un texto para decir, EL SISTEMA lo sintetizará con la voz
+  y velocidad de los ajustes, cerrará el micrófono (o su puerta lógica) antes del primer audio y lo
+  reabrirá reiniciando el detector al terminar, sin transcribir nada de lo que sonó.
+- RF-40: SI llega un texto para decir mientras la persona está a media frase, ENTONCES EL SISTEMA
+  esperará al cierre de ese turno (tope 5 s) antes de hablar.
+- RF-41: EL SISTEMA escuchará ese socket solo en 127.0.0.1, aceptará solo `di`, `calla` y `estado`
+  con texto acotado, y cerrará cualquier otra conexión.
+- RF-42: CUANDO termine una respuesta del agente con el modo conversación activo, EL SISTEMA (hook
+  `Stop`) mandará al socket el primer párrafo de prosa de la respuesta (≤ 350 caracteres, más la
+  pregunta final si es corta), sin código, tablas ni listas, y sin esperar a que suene.
+- RF-43: SI no hay dictado escuchando o el modo conversación está apagado, ENTONCES EL SISTEMA
+  (hook) no hará nada y terminará en menos de 100 ms.
+- RF-44: DONDE `micDuranteVoz` sea `abierto`, EL SISTEMA cortará su propia voz cuando la persona
+  hable encima con 150 ms de voz confirmada; por defecto (`cerrado`) no escuchará mientras habla.
+- RF-45: EL SISTEMA fijará `envioMs` por defecto a partir de una medición con pausas de 1 a 3 s
+  dentro de una frase (0 falsos envíos hasta 2 s), no de una opinión.
 
 ## Requisitos no funcionales
 
@@ -162,6 +200,12 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - **Operador del servicio**: un token filtrado convierte el servicio en un micrófono abierto a
   coste suyo; mitiga: rotación, sin puertos publicados, límites de tamaño y concurrencia.
 - **Terceros por la red**: ninguno por defecto; no hay nube de terceros escrita.
+- **Quien esté en la sala (conversación con el agente, 2026-09-22)**: el altavoz dice el primer
+  párrafo de cada respuesta del agente y quien esté cerca lo oye; el modo se enciende y se apaga a
+  mano. El micrófono en manos libres capta a cualquiera que hable en la sala, y ese texto entra en
+  la caja del agente como si fuera de la dueña: por eso el envío por silencio solo actúa con el
+  dictado escuchando, encendido por ella, y todo lo irreversible sigue pasando por gate humano en
+  el terminal. Nada sale de la máquina.
 
 ## Fuera de alcance
 
@@ -169,12 +213,16 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - Interfaz gráfica, streaming parcial del texto, cualquier nube de terceros, macOS.
 - Medir en GPU (no hay VPS): diseñado, declarado sin medir.
 - Publicar en npm (gate humano).
+- Un cerebro distinto del agente del terminal para la conversación (grafo regulatorio, Hermes):
+  PRP aparte con C3 y C4 propios. Cancelación de eco por software.
 
 ## Criterios de finalización
 
-- Los 35 RF con prueba en `tools/dictado/pruebas/` o demostrados en la conversación de
+- Los 45 RF con prueba en `tools/dictado/pruebas/` (RF-36 a RF-45 además con medición en
+  `medicion/corpus-propio/`) o demostrados en la conversación de
   construcción (lote A-B-A, servicio con 401/413/WAV/PCM16, pegador leyendo el portapapeles).
-- `npm run prueba` 29/29; `npm run empaqueta dictado` en verde con `integracion`.
+- `npm run prueba` 29/29 en el cierre retroactivo (124/124 el 2026-09-22); `npm run empaqueta dictado`
+  en verde con `integracion`.
 - `npm run mide` con la tabla en README y SDD, JSON crudo versionado.
 - **Prueba en vivo con una persona** (casos a y b del GOAL): hecha el 2026-09-16 — frases dictadas
   a Claude Code y al Bloc de notas, confirmadas por la dueña, con latencias en el SDD §6.
@@ -188,3 +236,5 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   faster-whisper large-v3-turbo (2,5 %, 12× más lento)?
 - [NECESITA ACLARACIÓN] ¿Hace falta el ayudante de Windows con ventana propia (píldora) o basta
   la terminal?
+- [NECESITA ACLARACIÓN] Margen de sala tras la voz del agente antes de reabrir el micrófono
+  (150 ms provisional): lo fija la medición B del PRP-003.

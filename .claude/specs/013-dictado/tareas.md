@@ -48,6 +48,10 @@
 
 - [x] **TAR-14b · Prueba en vivo, caso (b)** → 2026-09-16: con el cursor en el Bloc de notas, el
       texto dictado apareció ahí (confirmado por la dueña). Además, la voz sintética se oyó en vivo.
+- [x] **TAR-17b · «Dale enter» en cualquier punto y muletillas fuera.** → PR #142 (2026-09-22):
+      `src/comandos.ts` (todas las apariciones, `siguientes`), `src/muletillas.ts` (filtro medido
+      contra 24 transcripciones: 0 palabras buenas quitadas, WER 16,3 → 9,6 %). (RF-10 enmendado,
+      RF-36, RF-37)
 
 ## Abiertas
 
@@ -55,3 +59,14 @@
       quitar el «sin medir».
 - [ ] **TAR-16 · Medir la corrección por similitud del diccionario** sobre un corpus con nombres
       propios antes de encenderla por defecto.
+- [ ] **TAR-18 · Envío al terminar el turno.** `src/envio.ts` (máquina pura), ajustes
+      `conversacion` y `envioMs`, `src/node/conversacion.ts`; `envioMs` fijado por la medición A.
+      (RF-38, RF-45)
+- [ ] **TAR-19 · El dictado habla y calla el micrófono.** `src/node/hablante.ts`,
+      `src/node/conversacion-socket.ts` (127.0.0.1:47126), `di` delega en `dictar`; medición B.
+      (RF-39, RF-40, RF-41)
+- [ ] **TAR-20 · Hook `Stop` que habla, con CDC completo.** `src/respuesta.ts` (`paraVoz`),
+      `scripts/habla-respuesta.mjs`, `.claude/hooks/habla-respuesta.sh`, `settings.json` con diff
+      antes, regresión A y B, firma y bitácora. (RF-42, RF-43)
+- [ ] **TAR-21 · Barge-in con auriculares (opt-in).** `interrupcion.ts` al núcleo de dictado;
+      `micDuranteVoz: abierto`; medición B'. (RF-44)
