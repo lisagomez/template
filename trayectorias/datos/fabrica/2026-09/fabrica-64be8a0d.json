@@ -1,0 +1,59 @@
+{
+ "version": 1,
+ "id": "fabrica-64be8a0d",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "5fc740a0-6d94-43e7-b667-7053ff119504",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-22T11:27:00.319Z",
+  "fin": "2026-09-22T11:44:34.954Z"
+ },
+ "actor": {
+  "skills": [
+   "dictado"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-fable-5-1": 28
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 10,
+   "Skill": 1
+  },
+  "llamadasAlModelo": 15,
+  "turnos": 4,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 1
+ },
+ "uso": {
+  "entrada": 332,
+  "salida": 5786,
+  "cacheCreacion": 41241,
+  "cacheLectura": 841549
+ },
+ "costoUsd": 1.0185,
+ "tiempos": {
+  "totalMs": 1054635
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 0,
+  "erroresPor": {}
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

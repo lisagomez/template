@@ -1,0 +1,74 @@
+{
+ "version": 1,
+ "id": "fabrica-70d74f86",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "9956f048-0665-4213-91a2-e72bf8302999",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-17T12:58:33.264Z",
+  "fin": "2026-09-18T03:56:03.046Z"
+ },
+ "actor": {
+  "skills": [
+   "update-sf"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-fable-5-1": 102
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 41,
+   "Read": 2,
+   "Edit": 4
+  },
+  "llamadasAlModelo": 47,
+  "turnos": 10,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 13
+ },
+ "uso": {
+  "entrada": 1234,
+  "salida": 53879,
+  "cacheCreacion": 241636,
+  "cacheLectura": 4908375
+ },
+ "costoUsd": 6.9538,
+ "tiempos": {
+  "totalMs": 53849782
+ },
+ "gates": [
+  {
+   "nombre": "regresion",
+   "resultado": "rojo",
+   "veces": 6
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "rojo",
+   "veces": 3
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 4
+  }
+ ],
+ "resultado": {
+  "errores": 7,
+  "erroresPor": {
+   "Bash": 4,
+   "Read": 1,
+   "Edit": 2
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

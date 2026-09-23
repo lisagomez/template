@@ -1,0 +1,85 @@
+{
+ "version": 1,
+ "id": "fabrica-278ddefa",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "249ba136-cb5a-420a-9a0a-f16274bc8bd5",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-22T12:04:14.276Z",
+  "fin": "2026-09-22T16:22:18.930Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-fable-5-1": 276
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 110,
+   "ToolSearch": 2,
+   "Agent": 8,
+   "AskUserQuestion": 2,
+   "Write": 1,
+   "Edit": 3,
+   "ExitPlanMode": 2
+  },
+  "llamadasAlModelo": 105,
+  "turnos": 21,
+  "subagentes": 8,
+  "comandos": 0,
+  "ediciones": 36
+ },
+ "uso": {
+  "entrada": 2628,
+  "salida": 270827,
+  "cacheCreacion": 766735,
+  "cacheLectura": 27028165
+ },
+ "costoUsd": 29.9089,
+ "tiempos": {
+  "totalMs": 15484654
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 19
+  },
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 13
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 7
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 3
+  },
+  {
+   "nombre": "verifica:specs",
+   "resultado": "verde",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 2,
+  "erroresPor": {
+   "Bash": 1,
+   "ExitPlanMode": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}
