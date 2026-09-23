@@ -3776,3 +3776,21 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `npm run regresion` 123/123 · `tools/dictado` `npm run prueba` 148/148.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «apruebo, capa A basta», 2026-09-23,
   con el diff delante.
+
+### 2026-09-23 — regla `qr-seguros` (control de QR) + `presupuesto_suma` de las rules 6000 → 6500 → CDC PROMOVIDO — radio: sistema (regla del arnés)
+- **Cambio**: nueva `.claude/rules/qr-seguros.md` (276 tokens; carga por `paths:` al tocar código
+  de QR, `src/features/dictado/**` y `tools/extractor-documental/src/codigos.ts`; en opencode,
+  siempre). Resume y hace disparar la lista de `docs/SDD-qr-seguros.md` §6. Y en
+  `.claude/presupuesto-contexto.json`, `presupuesto_suma` de las rules pasa de 6000 a 6500 con su
+  motivo escrito (`_subida_2026_09_23`).
+- **Motivo**: la dueña pidió investigación + control de seguridad para QR (boletos, documentos,
+  emparejar/login, pagos). Un control que solo vive en un documento no dispara; las rules iban al
+  100 % (5984/6000) y la regla no cabía. Queda al 96 % (6260/6500), a propósito.
+- **Gate aplicado**: diff revisado ☑ (enseñado antes de pedir la firma) · regresión verde ☑ capa A
+  123/123 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva). **Capa B no corrida,
+  a propósito y declarado** («capa A basta»): la regla añade un control y no cambia ninguna
+  instrucción existente.
+- **Regresión**: `npm run regresion` 123/123 · `verify:gobernanza` 152/152 · `validate` verde y
+  sellado sobre el árbol del cambio.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «Apruebo, capa A basta»,
+  2026-09-23, con el diff delante.
