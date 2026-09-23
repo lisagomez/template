@@ -38,7 +38,8 @@
       "medido_2026_09_09": 4079,
       "presupuesto_por_regla": 4000,
       "_subida_2026_09_09": "2000 -> 4000. `aprendizajes-gobernanza.md` estaba al 97 % (1938) y bloqueaba el proximo aprendizaje que se escribiera. Pasa al 48 %. Ojo con el efecto de lado, que es real: el tope por regla existia para que una rule que se acercara al presupuesto de CLAUDE.md (8000) dejara de ser condicional en la practica. Con 4000 una sola regla puede llegar a la mitad de ese peso; en opencode, donde las rules cargan SIEMPRE, eso se paga en cada sesion. Por eso `presupuesto_suma` (6000) se deja quieto: es el que ahora sujeta el nivel, y hoy va al 68 %.",
-      "presupuesto_suma": 6000
+      "_subida_2026_09_23": "6000 -> 6500. Decision de la duena: entra `qr-seguros.md` (~275 tokens), el control de `docs/SDD-qr-seguros.md` §6, y la suma estaba al 100 % (5984). Se sube poco a proposito, no el doble: queda al 96 % y el proximo aprendizaje largo volvera a chocar, que es la senal que este tope existe para dar. Costo real: en opencode las rules cargan SIEMPRE, asi que ahi son ~275 tokens mas en cada sesion.",
+      "presupuesto_suma": 6500
     },
     "espejo": {
       "_comentario": "Mismo papel que CLAUDE.md para otro arnes. Se paga solo en sesiones de ese arnes.",
