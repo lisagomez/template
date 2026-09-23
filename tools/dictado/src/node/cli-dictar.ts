@@ -398,7 +398,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     const vk = v.tecla;
     tecla = await escuchaTecla({
       alMantener: () => (teclaAlterna ? undefined : void control.empieza('pulsar')),
-      alSoltar: () => (teclaAlterna ? void control.alterna('alternar') : void control.termina()),
+      alSoltar: () => (teclaAlterna ? void control.alterna(modo) : void control.termina()),
       alManosLibres: (activo) => {
         if (teclaAlterna) return; // con toques que alternan, el doble toque no es un gesto aparte
         console.log(activo ? verde('manos libres: ON (un toque lo apaga)') : gris('manos libres: OFF'));
