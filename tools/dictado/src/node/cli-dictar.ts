@@ -39,7 +39,7 @@ import { creaPildora, type EntradaPildora } from './pildora.js';
 import { escuchaTecla, type EscuchaTecla } from './tecla.js';
 import { creaSonidos } from './sonidos.js';
 import { construyeTrayectoria, creaContadores, escribeTrayectoria } from './trayectoria.js';
-import { avisoPico, conPuertaDeEnergia, conRespaldo, controlador, eleccionDeRespaldo, gris, lanzaIconoBarra, lanzaTeclaGlobal, pegadorDePantalla, pinta, teclasDeTerminal, verde } from './cli-dictar-piezas.js';
+import { avisoPico, conPuertaDeEnergia, conRespaldo, controlador, eleccionDeRespaldo, gestosDeTeclaGlobal, gris, lanzaIconoBarra, lanzaTeclaGlobal, pegadorDePantalla, pinta, teclasDeTerminal, verde } from './cli-dictar-piezas.js';
 
 /** Donde queda la trayectoria de cada sesion (forma, sin contenido); `DICTADO_TRAYECTORIAS` la cambia. */
 const CARPETA_CORPUS = process.env['DICTADO_TRAYECTORIAS'] ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'corpus');
@@ -397,13 +397,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   if (opciones['tecla'] !== undefined) {
     const vk = v.tecla;
     tecla = await escuchaTecla({
-      alMantener: () => (teclaAlterna ? undefined : void control.empieza('pulsar')),
-      alSoltar: () => (teclaAlterna ? void control.alterna('alternar') : void control.termina()),
-      alManosLibres: (activo) => {
-        if (teclaAlterna) return; // con toques que alternan, el doble toque no es un gesto aparte
-        console.log(activo ? verde('manos libres: ON (un toque lo apaga)') : gris('manos libres: OFF'));
-        void (activo ? control.empieza('manosLibres') : control.termina());
-      },
+      ...gestosDeTeclaGlobal(control, modo, teclaAlterna),
       alConectar: () => console.log(verde('tecla global conectada')),
       alDesconectar: () => console.log(gris('tecla global desconectada')),
     });

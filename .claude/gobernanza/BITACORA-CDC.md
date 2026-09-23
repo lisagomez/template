@@ -3763,3 +3763,16 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   salida a 51 ms) · `verify:gobernanza` 152/152 · `validate` sellado sobre el árbol del PR.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «aprobar los dos» y «capa A basta»,
   2026-09-23, con los dos diffs delante.
+
+### 2026-09-23 — skill `dictado`: error ya visto de Ctrl derecho → CDC PROMOVIDO — radio: skill (global)
+- **Cambio**: `~/.claude/skills/dictado/SKILL.md` (global, fuera del repo) gana una entrada en
+  «Errores ya vistos»: Ctrl derecho abría 'alternar' en vez del modo de la sesión, el segundo toque
+  dejaba el dictado inactivo, no se enviaba por silencio y el hook `Stop` callaba; cómo reconocerlo
+  en el log. Solo añade cuatro líneas; no cambia ninguna instrucción.
+- **Motivo**: auto-blindaje del arreglo del PR #146 (código y `pruebas/tecla-global.ts`).
+- **Gate aplicado**: diff revisado ☑ (mostrado antes de pedir la firma; un primer «apruebo» llegó
+  antes del diff y no se tomó) · regresión verde ☑ capa A 123/123 · aprobación humana ☑ · pineo ☑
+  (sin modelo nuevo). **Capa B no corrida, a propósito y declarado** («capa A basta»).
+- **Regresión**: `npm run regresion` 123/123 · `tools/dictado` `npm run prueba` 148/148.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «apruebo, capa A basta», 2026-09-23,
+  con el diff delante.

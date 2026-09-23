@@ -159,6 +159,24 @@ export function controlador(dictado: Dictado) {
   };
 }
 
+/**
+ * Lo que hace cada gesto de la tecla global. Con toques que alternan, el toque abre el MODO DE
+ * LA SESION, el mismo que el icono: si abriera 'alternar', en manos libres el segundo toque
+ * dejaria el dictado inactivo, el modo conversacion no enviaria y el hook `Stop` callaria
+ * (2026-09-23, PR #146).
+ */
+export function gestosDeTeclaGlobal(control: Pick<ReturnType<typeof controlador>, 'empieza' | 'termina' | 'alterna'>, modo: Modo, teclaAlterna: boolean) {
+  return {
+    alMantener: () => (teclaAlterna ? undefined : void control.empieza('pulsar')),
+    alSoltar: () => (teclaAlterna ? void control.alterna(modo) : void control.termina()),
+    alManosLibres: (activo: boolean) => {
+      if (teclaAlterna) return; // con toques que alternan, el doble toque no es un gesto aparte
+      console.log(activo ? verde('manos libres: ON (un toque lo apaga)') : gris('manos libres: OFF'));
+      void (activo ? control.empieza('manosLibres') : control.termina());
+    },
+  };
+}
+
 export function teclasDeTerminal(alEspacio: () => void, alSalir: () => void): () => void {
   if (!process.stdin.isTTY) return () => undefined;
   process.stdin.setRawMode(true);
