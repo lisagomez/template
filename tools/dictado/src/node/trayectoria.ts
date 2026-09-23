@@ -21,14 +21,19 @@ export interface ContadoresSesion {
   pegados: number;
   errores: number;
   muertesCaptura: number;
+  /** Modo conversacion (PRP-003): turnos enviados solos al callar y respuestas del agente dichas. */
+  enviosPorSilencio: number;
+  respuestasHabladas: number;
   latenciasMs: number[];
   msMotor: number[];
   msPegado: number[];
   duracionesMs: number[];
   picosDb: number[];
+  /** Desde que llega el texto del agente hasta que suena; desde que calla hasta que el microfono vuelve. */
+  msPrimerAudio: number[];
 }
 
-export const creaContadores = (): ContadoresSesion => ({ turnos: 0, sinVoz: 0, descartadosEnergia: 0, muletillas: 0, respaldo: 0, pegados: 0, errores: 0, muertesCaptura: 0, latenciasMs: [], msMotor: [], msPegado: [], duracionesMs: [], picosDb: [] });
+export const creaContadores = (): ContadoresSesion => ({ turnos: 0, sinVoz: 0, descartadosEnergia: 0, muletillas: 0, respaldo: 0, pegados: 0, errores: 0, muertesCaptura: 0, enviosPorSilencio: 0, respuestasHabladas: 0, latenciasMs: [], msMotor: [], msPegado: [], duracionesMs: [], picosDb: [], msPrimerAudio: [] });
 
 export interface ContextoSesion {
   motorId: string;
@@ -36,6 +41,8 @@ export interface ContextoSesion {
   silencioMs: number;
   gananciaDb: number;
   umbralVozDb: number;
+  /** Solo con el modo conversacion encendido. */
+  envioMs?: number;
   inicio: Date;
   fin: Date;
   /** Sin contenido: por defecto `salida-dictar-<fecha>`. */
@@ -83,7 +90,7 @@ export function construyeTrayectoria(c: ContadoresSesion, ctx: ContextoSesion): 
     actor: { herramienta: 'dictado', tarea: `dictar ${ctx.modo}` },
     modelos: { [corto(ctx.motorId)]: c.turnos },
     acciones: {
-      herramientas: { turnos: c.turnos, sinVoz: c.sinVoz, descartadosEnergia: c.descartadosEnergia, muletillas: c.muletillas, respaldo: c.respaldo, pegados: c.pegados },
+      herramientas: { turnos: c.turnos, sinVoz: c.sinVoz, descartadosEnergia: c.descartadosEnergia, muletillas: c.muletillas, respaldo: c.respaldo, pegados: c.pegados, enviosPorSilencio: c.enviosPorSilencio, respuestasHabladas: c.respuestasHabladas },
       turnos: c.turnos + c.sinVoz,
     },
     uso: null,
@@ -105,6 +112,8 @@ export function construyeTrayectoria(c: ContadoresSesion, ctx: ContextoSesion): 
         gananciaDb: ctx.gananciaDb,
         umbralVozDb: ctx.umbralVozDb,
         muertesCaptura: c.muertesCaptura,
+        envioMs: ctx.envioMs ?? null,
+        msPrimerAudioP50: percentil(c.msPrimerAudio, 0.5),
       },
     },
     cobertura: { completa: false, faltan: ['uso', 'costo'] },

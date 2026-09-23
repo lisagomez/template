@@ -11,8 +11,9 @@ turno), con las variantes que ella usa («dale a enter»); las muletillas se qui
 con un filtro medido sobre el corpus propio (`src/muletillas.ts`, 0 palabras buenas quitadas,
 WER 16,3 → 9,6 % con Parakeet); y la voz del agente es es_MX «claude» a 0,9, elegida de oído
 entre tres. **Pendiente**: calibrar con su voz (30 frases de `medicion/corpus-propio/frases.txt`
-grabadas por ella y `calibra.mjs`; falta un guía de grabación), y el PRP de conversación por voz
-(envío al terminar el turno, voz sin pedirla, micrófono callado mientras el agente habla).
+grabadas por ella y `calibra.mjs`; falta un guía de grabación), y la fase 3 del PRP-003 de
+conversación por voz (el hook que habla sin pedirlo, con CDC); el envío al terminar el turno y el
+micrófono callado mientras habla el agente están hechos y medidos el 2026-09-23 (§6 f).
 **Ámbito:** una herramienta de `tools/` bajo el contrato de
 [`EMPAQUETAR-HERRAMIENTA.md`](./EMPAQUETAR-HERRAMIENTA.md). Consume `@tu-scope/voz` 0.5.0 por
 tarball, pineada; **no la modifica**.
@@ -194,6 +195,8 @@ Cada toma de FLEURS es **una** frase leída; un cierre demasiado corto la parte 
 | Hilos | 8 | §5.3: 16 es peor (SMT) |
 | Umbrales del VAD, relleno (250 ms), mínimo de habla (200 ms) | de `voz`, relleno subido | **sin medir aquí** |
 | Corrección por similitud del diccionario | apagada | sin medir |
+| Silencio que envía el turno (`envioMs`) | 1500 ms | §6 (f), medición A del PRP-003: hueco máximo 994 ms con pausas de 2 s + 400 ms de margen del motor; 0 falsos envíos hasta 2 s |
+| Margen tras la voz del agente antes de reabrir la puerta del micrófono | 150 ms | §6 (f), medición B: 0 fugas de la voz y 0 aperturas del VAD tras reabrir en sala silenciosa; el barrido 0-150 ms del mismo día quedó contaminado por otra fuente en la sala y no separa la cola de la voz |
 <!-- /DEFECTOS -->
 
 ## 6. Los casos de uso, uno a uno
@@ -204,6 +207,7 @@ Cada toma de FLEURS es **una** frase leída; un cierre demasiado corto la parte 
 | (b) dictar en cualquier app de Windows | lo mismo: el pegador no sabe qué ventana es | <!-- CASO_B -->**hecho el 2026-09-16**: con el cursor en el Bloc de notas, la dueña dictó y confirmó que el texto apareció ahí («Gracias. De notas. Estoy en el log de notas.», 4,5 s, motor 1,5 s con faster-whisper small, pegado 92 ms). El pegador escribe donde esté el foco de Windows, sea la app que sea<!-- /CASO_B --> |
 | (c) reunión por lotes con hablantes | `dictado lote reunion.wav --hablantes 2`: VAD de `voz` → diarización de `voz` → texto de `dictado` → acta | <!-- CASO_C -->hecho: `reunion-2-hablantes.wav` (A-B-A, dos voces de FLEURS) → 3 turnos, 2 hablantes, texto correcto en los tres; VAD 271 ms, diarización 532 ms, transcripción 1,6 s<!-- /CASO_C --> |
 | (d) modo archivo para medir | `dictado archivo toma.wav [--motor …]` imprime texto y tiempos; `npm run mide` para el corpus entero | hecho |
+| (f) conversar con el agente: hablar, callar y que se envíe; oírle; que no se transcriba a sí mismo | ajuste `conversacion` en manos libres; `envioMs` medido; `dictar` dueño del altavoz por `127.0.0.1:47126` y puerta lógica del audio mientras suena | <!-- CASO_F -->**fases 1 y 2 hechas y medidas el 2026-09-23** (`medicion/corpus-propio/conversacion-2026-09-23.md`): `envioMs` = 1500 ms con 0 falsos envíos hasta 2 s; 0 fugas de la voz en 70 respuestas con micrófono y altavoz reales, primer audio p50 60 ms, puerta reabierta a 150 ms. Falta la fase 3 (hook `Stop`, CDC) y la prueba en vivo con la dueña<!-- /CASO_F --> |
 | (e) lo mismo contra el servicio remoto | `--motor remoto` con `DICTADO_REMOTO_URL/TOKEN`; el dictado no distingue | hecho contra el servicio en esta máquina, en CPU (§7); GPU sin medir |
 
 ## 7. El servicio remoto (perfil «GPU en el VPS propio»)

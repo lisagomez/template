@@ -48,6 +48,10 @@
 
 - [x] **TAR-14b · Prueba en vivo, caso (b)** → 2026-09-16: con el cursor en el Bloc de notas, el
       texto dictado apareció ahí (confirmado por la dueña). Además, la voz sintética se oyó en vivo.
+- [x] **TAR-17b · «Dale enter» en cualquier punto y muletillas fuera.** → PR #142 (2026-09-22):
+      `src/comandos.ts` (todas las apariciones, `siguientes`), `src/muletillas.ts` (filtro medido
+      contra 24 transcripciones: 0 palabras buenas quitadas, WER 16,3 → 9,6 %). (RF-10 enmendado,
+      RF-36, RF-37)
 
 ## Abiertas
 
@@ -55,3 +59,21 @@
       quitar el «sin medir».
 - [ ] **TAR-16 · Medir la corrección por similitud del diccionario** sobre un corpus con nombres
       propios antes de encenderla por defecto.
+- [x] **TAR-18 · Envío al terminar el turno.** → `src/envio.ts` (máquina pura), ajustes
+      `conversacion` y `envioMs`, `src/node/conversacion.ts`; `envioMs` = **1500 ms** fijado por la
+      medición A el 2026-09-23 (`medicion/mide-conversacion.mjs`, `corpus-propio/conversacion-2026-09-23.md`:
+      hueco máximo 994 ms con pausas de 2 s + 400 ms de margen; 0 falsos envíos hasta 2 s). La medición
+      destapó y cerró un fallo: un pegado que llegaba con la voz nueva ya en marcha armaba un Enter a
+      mitad de frase (pausas de 1 s: el motor pega ~100 ms DESPUÉS de que empiece la segunda mitad).
+      (RF-38, RF-45)
+- [x] **TAR-19 · El dictado habla y calla el micrófono.** → `src/node/hablante.ts`,
+      `src/node/conversacion-socket.ts` (127.0.0.1:47126), `src/node/cli-conversacion.ts`,
+      `src/node/microfono-sesion.ts`; `di` delega en `dictar` (`--local` lo evita). Medición B el
+      2026-09-23: 0 fugas de la voz en 70 respuestas con micrófono y altavoz reales, primer audio p50
+      60 ms, puerta reabierta a 150 ms; parar la captura no añadía seguridad y costaba 267/249 ms,
+      así que solo se cierra la puerta lógica. (RF-39, RF-40, RF-41)
+- [ ] **TAR-20 · Hook `Stop` que habla, con CDC completo.** `src/respuesta.ts` (`paraVoz`),
+      `scripts/habla-respuesta.mjs`, `.claude/hooks/habla-respuesta.sh`, `settings.json` con diff
+      antes, regresión A y B, firma y bitácora. (RF-42, RF-43)
+- [ ] **TAR-21 · Barge-in con auriculares (opt-in).** `interrupcion.ts` al núcleo de dictado;
+      `micDuranteVoz: abierto`; medición B'. (RF-44)

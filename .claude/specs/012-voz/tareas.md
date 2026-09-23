@@ -37,9 +37,11 @@
 
 - [ ] **TAR-12 · Medir el margen del registro** con dos voces parecidas registradas (LibriSpeech
       no las tiene). Hasta entonces el README lo dice: «sin respaldo».
-- [ ] **TAR-13 · Decidir si los defectos del VAD cambian** a la luz de lo medido en `013-dictado`
+- [x] **TAR-13 · Decidir si los defectos del VAD cambian** a la luz de lo medido en `013-dictado`
       (cierre a 1000 ms para frases dictadas en español) o siguen siendo de barge-in y cada
-      consumidor fija los suyos.
+      consumidor fija los suyos. → **Decidido el 2026-09-22 (PRP-003)**: los defectos de `voz` no
+      cambian; cada consumidor pone los suyos encima (dictado: `silencioMs` 1000 para pegar frase a
+      frase y `envioMs` medido para enviar el turno).
 - [ ] **TAR-14 · `docs/SDD-voz.md`** si se decide que el README no basta como documento de diseño.
 - [ ] **TAR-15 · Opciones en `Transcriptor`** (idioma, pista de vocabulario) para que
       `transcribeTurnos` pueda pasarlas: hoy lo cubre `transcribeLote` de `013-dictado`.

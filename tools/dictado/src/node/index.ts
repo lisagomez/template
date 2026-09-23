@@ -6,6 +6,10 @@
  * importa, porque el VAD es la razon de ser de este entry point.
  */
 export { creaDetectorSilero, DEFECTOS_DICTADO, type OpcionesDetectorSilero } from './vad.js';
+export { creaConversacion, DEFECTOS_CONVERSACION, type Conversacion, type OpcionesConversacion } from './conversacion.js';
+export { escuchaConversacion, MAX_CARACTERES_DI, pideDi, PUERTO_CONVERSACION, type EscuchaConversacion, type OpcionesSocketConversacion, type RespuestaDi, type ResultadoPideDi } from './conversacion-socket.js';
+export { creaHablante, type Hablante, type OpcionesHablante, type ResultadoDi } from './hablante.js';
+export { creaMicrofonoDeSesion, type MicrofonoSesion, type OpcionesMicrofonoSesion } from './microfono-sesion.js';
 export { capturaMicrofono, escribeWav, floatAPcm16, leeAudio, nivelDb, type AudioCargado, type Captura, type OpcionesCaptura } from './audio.js';
 export { creaMotorSherpa, type ModuloSherpa, type OpcionesMotorSherpa, type ReconocedorSherpa } from './motores/sherpa.js';
 export { creaMotorPorProceso, type MotorPorProceso, type OpcionesMotorProceso } from './motores/proceso.js';
