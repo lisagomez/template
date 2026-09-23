@@ -72,10 +72,10 @@
       2026-09-23: 0 fugas de la voz en 70 respuestas con micrófono y altavoz reales, primer audio p50
       60 ms, puerta reabierta a 150 ms; parar la captura no añadía seguridad y costaba 267/249 ms,
       así que solo se cierra la puerta lógica. (RF-39, RF-40, RF-41)
-- [ ] **TAR-20 · Hook `Stop` que habla, con CDC completo.** `src/respuesta.ts` (`paraVoz`),
-      `scripts/habla-respuesta.mjs`, `.claude/hooks/habla-respuesta.sh`, `settings.json` con diff
-      antes, regresión A y B, firma y bitácora. (RF-42, RF-43) — código, pruebas y medición C hechos
-      el 2026-09-23 (no-op p50 3 ms; encendida 10/10 textos y salida a 51 ms); el cableado en
-      `settings.json` y el skill esperan la firma del CDC.
+- [x] **TAR-20 · Hook `Stop` que habla, con CDC completo.** → `src/respuesta.ts` (`paraVoz`),
+      `scripts/habla-respuesta.{sh,mjs}`, `.claude/hooks/habla-respuesta.sh`, `settings.json` con el
+      diff enseñado antes de la firma; medición C el 2026-09-23 (no-op p50 3 ms; encendida 10/10
+      textos y salida a 51 ms). CDC aprobado y promovido con «capa A basta» (bitácora, PR #144).
+      (RF-42, RF-43)
 - [ ] **TAR-21 · Barge-in con auriculares (opt-in).** `interrupcion.ts` al núcleo de dictado;
       `micDuranteVoz: abierto`; medición B'. (RF-44)
