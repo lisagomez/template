@@ -29,6 +29,7 @@ export { aplicaComandos, aplicaComandosDeTexto, extraeAcciones, type Parte, type
 export { esSoloMuletilla, MULETILLAS_LEXICAS, MULETILLAS_NO_LEXICAS, quitaMuletillas, type ResultadoMuletillas } from './muletillas.js';
 export { creaEnvioPorSilencio, DEFECTOS_ENVIO, type EntradaEnvio, type EnvioPorSilencio, type OpcionesEnvio } from './envio.js';
 export { VELOCIDAD_POR_DEFECTO, VOCES, VOZ_POR_DEFECTO, type VozConocida } from './voces.js';
+export { DEFECTOS_PARA_VOZ, paraVoz, type OpcionesParaVoz } from './respuesta.js';
 export {
   almacenEnMemoria,
   creaHistorial,

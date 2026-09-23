@@ -194,6 +194,12 @@ test('socket 47126: saluda, di → ok → hecho, estado, calla, texto largo omit
 
   const apagado = await escuchaConversacion({ puerto: 0, saludo: () => 'off inactivo', alDi: async () => ({ tipo: 'cortado' }), alCalla: () => undefined });
   assert.deepEqual(await pideDi('x', { puerto: apagado.puerto, soloEncendido: true }), { modo: 'apagado', estado: 'off inactivo' });
+  const transcribiendo = await escuchaConversacion({ puerto: 0, saludo: () => 'on transcribiendo', alDi: async () => ({ tipo: 'cortado' }), alCalla: () => undefined });
+  assert.deepEqual(await pideDi('x', { puerto: transcribiendo.puerto, soloEncendido: true, sinEsperar: true }), { modo: 'dictar', tipo: 'enviado' }, 'a media frase sigue escuchando: se acepta y RF-40 espera');
+  await transcribiendo.cierra();
+  const inactivo = await escuchaConversacion({ puerto: 0, saludo: () => 'on inactivo', alDi: async () => ({ tipo: 'cortado' }), alCalla: () => undefined });
+  assert.deepEqual(await pideDi('x', { puerto: inactivo.puerto, soloEncendido: true }), { modo: 'apagado', estado: 'on inactivo' }, 'encendido pero sin escuchar: nada');
+  await inactivo.cierra();
   assert.deepEqual(await pideDi('x', { puerto: apagado.puerto }), { modo: 'dictar', tipo: 'cortado' }, 'sin soloEncendido, un dictado apagado tambien habla');
   await apagado.cierra();
 

@@ -36,7 +36,7 @@ Los criterios salen de la spec 013 (RF-38 a RF-45) y de la medición.
 - [x] Envío por silencio con 0 falsos envíos para pausas ≤ 2 s en la medición A; `envioMs` por defecto fijado por esa medición (RF-38, RF-45). **2026-09-23: `envioMs` = 1500 ms** (hueco máximo 994 ms con pausas de 2 s + 400 ms de margen del motor; 0 falsos hasta 2 s, 10/10 turnos enviados; `medicion/corpus-propio/conversacion-2026-09-23.md`).
 - [x] 0/10 fugas de la voz sintética al micrófono en la medición B; primer audio p50 < 300 ms; reapertura del micrófono p50 < 300 ms (RF-39, RF-40). **2026-09-23: 0 fugas de la voz en 70 respuestas** (micrófono y altavoz reales; el control sin puerta prueba que la sala oye), primer audio p50 **60 ms** desde que el hablante arranca, puerta reabierta a **150 ms**. La captura no se para: la puerta lógica basta, y parar ffmpeg costaba 267 ms de primer audio y 249 de reapertura.
 - [x] Socket 127.0.0.1:47126 que solo acepta `di`, `calla` y `estado` con texto acotado y cierra lo demás (RF-41). Probado en `pruebas/conversacion.ts` (texto > 4000 caracteres omitido, palabra rara cierra, cliente `pideDi` con `sin-dictar` en < 300 ms).
-- [ ] Hook: con `dictar` parado o modo apagado, `exit 0` sin salida en < 100 ms; con modo activo, llega al socket el primer párrafo de prosa ≤ 350 caracteres (RF-42, RF-43).
+- [x] Hook: con `dictar` parado o modo apagado, `exit 0` sin salida en < 100 ms; con modo activo, llega al socket el primer párrafo de prosa ≤ 350 caracteres (RF-42, RF-43). **Código, pruebas y medición C el 2026-09-23** (`src/respuesta.ts`, `scripts/habla-respuesta.{sh,mjs}`, `pruebas/respuesta.ts`, `pruebas/hook-habla.ts`; bloque C: sin dictado, apagada o inactivo p50 3 ms; encendida el texto llega 10/10 y el hook sale a los 51 ms sin esperar a la voz; a media frase también llega). El cableado en `settings.json` y el skill esperan el CDC.
 - [x] «dale enter», muletillas y el modo actual funcionan igual con la conversación apagada (las pruebas de posproceso y de `dictado.ts` no cambiaron; el envío solo actúa con `activa`).
 - [ ] `npm run prueba` en verde con las pruebas nuevas (sin Windows ni modelos) — **137/137 el 2026-09-23**; `npm run verifica:specs`; `npm run validate` sellado; `npm run empaqueta dictado` 0.2.0 (con la fase 3).
 - [ ] En vivo con la dueña: habla, calla, se envía; oye el primer párrafo; el micrófono no transcribe la voz; sigue hablando.
@@ -47,8 +47,9 @@ dictado escuchando en manos libres, ajuste conversacion=true
   → ella habla → 1 s de silencio → la frase se pega en la caja de Claude Code
   → envioMs sin voz nueva → Enter (si vuelve a hablar antes, el reloj se cancela)
   → Claude Code piensa y responde (segundos o minutos: pausas reales)
-  → hook Stop → primer párrafo → socket 47126 → dictar cierra el micrófono → habla
-  → termina → reinicia el detector → reabre el micrófono → ella sigue
+  → hook Stop → primer párrafo → socket 47126 → dictar cierra la puerta del micrófono → habla
+  → termina → 150 ms → reinicia el detector → reabre la puerta → ella sigue
+  (medido el 2026-09-23: la puerta lógica basta; la captura no se para)
 ```
 
 ---
@@ -77,7 +78,7 @@ medicion/mide-conversacion.mjs  bloques A, B, B', C
 ```
 
 ### Modelo de datos
-Sin tablas. Ajustes nuevos en `ajustes.json` (grupo «Conversar con el agente»): `conversacion` (false), `envioMs` (1500, medido el 2026-09-23), `vozAgente` (es_MX-claude-high), `velocidadVoz` (0,9), `micDuranteVoz` (cerrado). Protocolo del socket: `dictar <on|off> <estado>` al conectar; `di <base64>` | `calla` | `estado`; respuestas `ok` | `omitido <motivo>` | `hablando` | `hecho <ms> <ms>` | `cortado`.
+Sin tablas. Ajustes nuevos en `ajustes.json` (grupo «Conversar con el agente»): `conversacion` (false), `envioMs` (1500, medido el 2026-09-23), `vozAgente` (es_MX-claude-high), `velocidadVoz` (0,9), `micDuranteVoz` (cerrado). Protocolo del socket: `dictar <on|off> <estado>` al conectar; `di <base64>` | `calla` | `estado`; respuestas `ok` | `omitido <motivo>` | `hecho <ms> <ms>` | `cortado`.
 
 ---
 
@@ -115,9 +116,9 @@ Sin tablas. Ajustes nuevos en `ajustes.json` (grupo «Conversar con el agente»)
 **Objetivo**: `hablante.ts`, `conversacion-socket.ts` (47126), `di` delega en `dictar`, half-duplex con trazas.
 **Validación**: `pruebas/conversacion.ts`; medición B (0 fugas de la voz en 70 respuestas; primer audio 60 ms; puerta a 150 ms).
 
-### Fase 3: Hook `Stop` y CDC
+### Fase 3: Hook `Stop` y CDC — código hecho el 2026-09-23; CDC en espera de aprobación
 **Objetivo**: `paraVoz`, `habla-respuesta.mjs` + `.sh`, `settings.json` con el hook, skill actualizado.
-**Validación**: `pruebas/respuesta.ts`, `pruebas/hook-habla.ts`; no-op demostrado; regresión A y B (sesión limpia); firma; entrada en `BITACORA-CDC.md`.
+**Validación**: `pruebas/respuesta.ts`, `pruebas/hook-habla.ts` (144/144); medición C (no-op p50 3 ms; encendida 51 ms y 10/10 textos); regresión A 123/123 y corpus B 22/22 listado antes del cambio; el diff de `settings.json` y del skill enseñado antes de pedir la firma; capa B en sesión limpia y entrada en `BITACORA-CDC.md` tras la aprobación.
 
 ### Fase 4 (opcional, después): Barge-in con auriculares
 **Objetivo**: `interrupcion.ts` en el núcleo de dictado; `micDuranteVoz: abierto` corta la voz al hablar encima.

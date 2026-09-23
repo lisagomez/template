@@ -46,7 +46,7 @@ export async function ordenDi(config: Configuracion, posicionales: string[], opc
     const puerto = process.env['DICTADO_CONVERSACION_PUERTO'] ? Number(process.env['DICTADO_CONVERSACION_PUERTO']) : PUERTO_CONVERSACION;
     const r = await pideDi(texto, { puerto });
     if (r.modo === 'dictar') {
-      console.error(r.tipo === 'hecho' ? `voz=dictar primer-audio=${r.msPrimerAudio}ms total=${r.msTotal}ms (la dijo el dictado en marcha, con el microfono callado)` : r.tipo === 'cortado' ? 'voz=dictar cortado' : `voz=dictar omitido: ${r.motivo}`);
+      console.error(r.tipo === 'hecho' ? `voz=dictar primer-audio=${r.msPrimerAudio}ms total=${r.msTotal}ms (la dijo el dictado en marcha, con el microfono callado)` : r.tipo === 'omitido' ? `voz=dictar omitido: ${r.motivo}` : `voz=dictar ${r.tipo}`);
       return;
     }
   }

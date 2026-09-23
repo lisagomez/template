@@ -43,3 +43,17 @@ Hueco máximo con pausas ≤ 2 s: **994 ms**; margen 400 ms (p95 − p50 de la l
 **Corridas previas del mismo día (2026-09-23), con el código que aún paraba la captura:** micrófono `cerrado` (ffmpeg parado y rearrancado) frente a solo la puerta lógica, 10 respuestas cada uno, sala en silencio: fugas de la voz 0/10 y 0/10 (un texto ajeno, «Documental.»); primer audio p50 267 ms (esperando al cierre de ffmpeg; la síntesis ya se solapaba) frente a 56 ms; reapertura p50 249 ms frente a 151 ms; el VAD se abrió tras reabrir 1 vez frente a 0. Por eso la captura ya no se para.
 
 La «voz detectada tras reabrir» que no coincide con la frase del agente y llega a instantes sueltos del hueco de 4 s es la sala (otra fuente sonando), no la cola de la voz: cuenta igual, porque con la sala sonando el agente espera al cierre de ese «turno» (RF-40, tope 5 s) antes de hablar, y eso es lo que infla el «primer audio desde la petición». Subir `umbralVozDb` es el mando para una sala con ruido.
+
+## C · Hook `Stop`: el agente habla sin que se lo pidan
+
+`scripts/habla-respuesta.sh` con el JSON del arnés por stdin, 10 veces por situación, contra un socket falso que tarda 4 s en «sonar» (sin audio). RF-43 exige < 100 ms sin dictado o con la conversación apagada; RF-42, que el texto llegue y el hook no espere a la voz.
+
+| situación (saludo del dictado) | salida p50 / máx | textos recibidos | salidas ≠ 0 | con stdout |
+|---|---|---|---|---|
+| sin dictado | 3 / 5 ms | 0/10 | 0 | 0 |
+| conversación apagada (off escuchando) | 3 / 4 ms | 0/10 | 0 | 0 |
+| dictado inactivo (on inactivo) | 3 / 4 ms | 0/10 | 0 | 0 |
+| conversación encendida (on escuchando) | 51 / 52 ms | 10/10 | 0 | 0 |
+| encendida, a media frase (on transcribiendo) | 50 / 51 ms | 10/10 | 0 | 0 |
+
+Lo que llega al socket con la respuesta de prueba (lista y pregunta final incluidas en el markdown): «Listo. El envío por silencio ya está medido y el valor por defecto sale de la medición. ¿Sigo con la siguiente fase?».
