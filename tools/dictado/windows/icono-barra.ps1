@@ -227,8 +227,10 @@ $menu = New-Object System.Windows.Forms.ContextMenuStrip
     Start-Process 'wsl.exe' -ArgumentList $argumentos
   } else { $icono.ShowBalloonTip(4000, 'Dictado', 'La app no responde y no conozco la ruta del dictado.', 'Info') }
 })
+# Oculta se RECUERDA (pildora-oculta.txt junto a este script): sin eso volvia en cada arranque.
 [void]$menu.Items.Add('Mostrar/ocultar la pildora').add_Click({
-  if ($script:flotante.Visible) { $script:flotante.Hide() } else { $script:flotante.Show() }
+  if ($script:flotante.Visible) { $script:flotante.Hide(); Set-Content -Path $rutaOculta -Value 'oculta' }
+  else { $script:flotante.Show(); Remove-Item -Path $rutaOculta -ErrorAction SilentlyContinue }
 })
 [void]$menu.Items.Add('Quitar este icono').add_Click({ $icono.Visible = $false; [System.Windows.Forms.Application]::Exit() })
 $icono.ContextMenuStrip = $menu
@@ -236,6 +238,7 @@ $icono.ContextMenuStrip = $menu
 # ── La pildora: un ovalo siempre encima, abajo al centro (o donde la dejes), con el logo, las
 # barras, los puntos, la palomita o la X segun lo que diga el dictado. Un click = alternar. ──
 $rutaFlotante = Join-Path $PSScriptRoot 'flotante.txt'
+$rutaOculta = Join-Path $PSScriptRoot 'pildora-oculta.txt'
 $script:flotante = New-Object System.Windows.Forms.Form
 $flotante = $script:flotante
 $flotante.FormBorderStyle = 'None'
@@ -367,7 +370,7 @@ $flotante.add_MouseUp({
   $script:arrastre = $null
 })
 $flotante.ContextMenuStrip = $menu
-$flotante.Show()
+if (-not (Test-Path $rutaOculta)) { $flotante.Show() }
 
 # Cada 33 ms (un cuadro): leer lo pendiente del socket (estado, pildora, barras) y repintar si
 # algo cambio. Sin conexion, reintentar cada ~2 s: asi el icono sobrevive a la vida y muerte

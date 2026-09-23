@@ -93,7 +93,8 @@ que siguen tu voz en tiempo real; **transcribiendo**, tres puntos que giran; **p
 palomita verde que se va sola a los 0,8 s; **sin voz o fallo**, una X roja que se va a los
 1,2 s. Un click en cualquiera de los dos enciende o apaga el dictado; si el dictado no corre,
 lo arranca. La píldora se **arrastra** a donde estorbe menos (recuerda su posición) y se oculta
-o vuelve desde el menú derecho; el menú trae además «Abrir historial» (la página de tus datos
+o vuelve desde el menú derecho (oculta se recuerda entre arranques: `pildora-oculta.txt` junto
+al script en `%LOCALAPPDATA%\dictado\`); el menú trae además «Abrir historial» (la página de tus datos
 si la app responde, o `dictado historial` en una terminal), «Apagar el dictado» y «Quitar este
 icono». `dictado icono quita` lo desinstala.
 
