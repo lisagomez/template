@@ -145,7 +145,7 @@ export const AYUDA = `dictado — hablar y que el texto aparezca donde esta el c
   dictado icono instala | quita                                icono en la barra de Windows que arranca solo al iniciar sesion
   dictado archivo <audio> [--motor ...]                        transcribe un archivo y mide (modo archivo)
   dictado lote <audio> [--hablantes N] [--motor ...]           reunion: turnos por voz + texto por dictado
-  dictado di "<texto>" [--voz es_MX-claude-high] [--velocidad 1.1] [--guarda voz.wav] [--altavoz windows|pulse] [--sin-sonido]   el agente habla (Piper local)
+  dictado di "<texto>" [--voz es_MX-claude-high] [--velocidad 1.1] [--guarda voz.wav] [--altavoz windows|pulse] [--sin-sonido] [--local]   el agente habla (Piper local; con un dictar en marcha lo dice EL y calla el microfono, salvo --local)
   dictado historial [--busca texto] [--n 20] | --borra [--antes YYYY-MM-DD] --si   (retencion por defecto: DICTADO_RETENCION_DIAS=365)
   dictado diccionario lista | agrega <termino...> | quita <termino>
   dictado snippets lista | agrega "<disparador>" "<expansion>" | quita "<disparador>"

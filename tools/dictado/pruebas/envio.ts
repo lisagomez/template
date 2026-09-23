@@ -20,7 +20,7 @@ test('envio: un pegado pendiente arma el plazo; vence en escuchando → enviar, 
   assert.equal(e.pendiente, false);
   assert.equal(e.aplica({ tipo: 'tick' }, 3001), undefined, 'ya se envio');
   assert.equal(e.vence(3001), undefined);
-  assert.equal(DEFECTOS_ENVIO.msEnvio, 2000, 'provisional hasta la medicion A');
+  assert.equal(DEFECTOS_ENVIO.msEnvio, 1500, 'medido el 2026-09-23 (bloque A de mide-conversacion)');
 });
 
 test('envio: si vuelve la voz el reloj se quita pero el texto sigue pendiente; el siguiente pegado rearma', () => {
@@ -31,7 +31,8 @@ test('envio: si vuelve la voz el reloj se quita pero el texto sigue pendiente; e
   assert.equal(e.vence(1500), undefined);
   assert.equal(e.pendiente, true);
   assert.equal(e.aplica({ tipo: 'tick' }, 9000), undefined, 'sin plazo no envia aunque pase el tiempo');
-  // La frase nueva se pega: el plazo cuenta desde ESTE pegado.
+  // La frase nueva termina y se pega: el plazo cuenta desde ESTE pegado.
+  e.aplica({ tipo: 'finHabla' }, 2500);
   e.aplica({ tipo: 'estado', estado: 'pegando' }, 3000);
   e.aplica({ tipo: 'pegado', pendiente: true }, 3100);
   e.aplica({ tipo: 'estado', estado: 'escuchando' }, 3200);
@@ -52,6 +53,23 @@ test('envio: «dale enter» ya envio (pegado no pendiente) → no se arma; «sin
   e.aplica({ tipo: 'sinVoz' }, 900); // hubo ruido, no texto: lo pegado sigue esperando
   assert.equal(e.vence(900), 1000);
   assert.equal(e.aplica({ tipo: 'tick' }, 1900), 'enviar');
+});
+
+test('envio: un pegado que llega con la voz nueva ya en marcha NO arma (medicion A: con pausas de 1 s el motor pega despues de que empiece la segunda mitad); lo arma el pegado que viene', () => {
+  const e = creaEnvioPorSilencio({ msEnvio: 1000 });
+  e.aplica({ tipo: 'estado', estado: 'escuchando' }, 0);
+  e.aplica({ tipo: 'inicioHabla' }, 0);
+  e.aplica({ tipo: 'finHabla' }, 2000);
+  e.aplica({ tipo: 'inicioHabla' }, 3100); // la segunda mitad empieza antes de que el motor pegue la primera
+  e.aplica({ tipo: 'pegado', pendiente: true }, 3200);
+  assert.equal(e.pendiente, true);
+  assert.equal(e.vence(3200), undefined, 'con voz en marcha no hay plazo: seria un Enter a mitad de frase');
+  assert.equal(e.aplica({ tipo: 'tick' }, 9000), undefined);
+  e.aplica({ tipo: 'finHabla' }, 5500);
+  assert.equal(e.vence(5500), undefined, 'al callar tampoco: lo arma el pegado que viene');
+  e.aplica({ tipo: 'pegado', pendiente: true }, 5700);
+  assert.equal(e.vence(5700), 1000);
+  assert.equal(e.aplica({ tipo: 'tick' }, 6700), 'enviar');
 });
 
 test('envio: mientras habla el agente no se envia; al callar rearma; en transcribiendo/pegando tampoco', () => {
@@ -110,7 +128,8 @@ test('conversacion (node): traduce los eventos del dictado, programa el tick con
   ahora = 1500;
   c.alEvento({ tipo: 'inicioHabla', ms: 1500 });
   assert.equal(programados.length, 0);
-  // Segunda frase: nuevo plazo; el tick a tiempo envia.
+  // Segunda frase: termina, se pega, nuevo plazo; el tick a tiempo envia.
+  c.alEvento({ tipo: 'finHabla', duracionMs: 1000 });
   ahora = 3000;
   c.alEvento(texto('que tal'));
   assert.equal(programados.length, 1);

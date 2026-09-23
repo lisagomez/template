@@ -59,12 +59,19 @@
       quitar el «sin medir».
 - [ ] **TAR-16 · Medir la corrección por similitud del diccionario** sobre un corpus con nombres
       propios antes de encenderla por defecto.
-- [ ] **TAR-18 · Envío al terminar el turno.** `src/envio.ts` (máquina pura), ajustes
-      `conversacion` y `envioMs`, `src/node/conversacion.ts`; `envioMs` fijado por la medición A.
+- [x] **TAR-18 · Envío al terminar el turno.** → `src/envio.ts` (máquina pura), ajustes
+      `conversacion` y `envioMs`, `src/node/conversacion.ts`; `envioMs` = **1500 ms** fijado por la
+      medición A el 2026-09-23 (`medicion/mide-conversacion.mjs`, `corpus-propio/conversacion-2026-09-23.md`:
+      hueco máximo 994 ms con pausas de 2 s + 400 ms de margen; 0 falsos envíos hasta 2 s). La medición
+      destapó y cerró un fallo: un pegado que llegaba con la voz nueva ya en marcha armaba un Enter a
+      mitad de frase (pausas de 1 s: el motor pega ~100 ms DESPUÉS de que empiece la segunda mitad).
       (RF-38, RF-45)
-- [ ] **TAR-19 · El dictado habla y calla el micrófono.** `src/node/hablante.ts`,
-      `src/node/conversacion-socket.ts` (127.0.0.1:47126), `di` delega en `dictar`; medición B.
-      (RF-39, RF-40, RF-41)
+- [x] **TAR-19 · El dictado habla y calla el micrófono.** → `src/node/hablante.ts`,
+      `src/node/conversacion-socket.ts` (127.0.0.1:47126), `src/node/cli-conversacion.ts`,
+      `src/node/microfono-sesion.ts`; `di` delega en `dictar` (`--local` lo evita). Medición B el
+      2026-09-23: 0 fugas de la voz en 70 respuestas con micrófono y altavoz reales, primer audio p50
+      60 ms, puerta reabierta a 150 ms; parar la captura no añadía seguridad y costaba 267/249 ms,
+      así que solo se cierra la puerta lógica. (RF-39, RF-40, RF-41)
 - [ ] **TAR-20 · Hook `Stop` que habla, con CDC completo.** `src/respuesta.ts` (`paraVoz`),
       `scripts/habla-respuesta.mjs`, `.claude/hooks/habla-respuesta.sh`, `settings.json` con diff
       antes, regresión A y B, firma y bitácora. (RF-42, RF-43)

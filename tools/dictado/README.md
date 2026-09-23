@@ -178,6 +178,7 @@ la decisión de flujo de datos (C4) del servicio están en el SDD §7.
 dictado di "Ya tengo voz. ¿Me oyes?"            # Piper es_MX «claude» por sherpa-onnx, local, 79 MB pineados
 dictado di --archivo nota.txt --velocidad 1.1   # por defecto 0,9: elegida de oído el 2026-09-22
 echo "texto" | dictado di --guarda voz.wav --sin-sonido
+dictado di "texto" --local                       # sintetiza aquí aunque haya un dictar en marcha (por defecto lo dice ÉL, con el micrófono callado)
 ```
 
 Sintetiza frase a frase y **suena mientras sintetiza**: la primera frase se oye antes de que
@@ -192,6 +193,39 @@ Medido el 2026-09-16 (voz es_MX-claude-high, 8 hilos): carga 635 ms · primera f
 Para una app (el laboratorio de voz del template), la misma voz sale **en flujo por HTTP** desde
 el demonio (`POST /sintetizar`, §7): el navegador encadena cada frase según llega y la corta si
 la persona habla encima.
+
+### 5b. Conversar con el agente (PRP-003)
+
+```bash
+dictado ajustes pon conversacion true   # en manos libres: lo pegado se envía solo al callar, y el agente contesta en voz
+dictado ajustes pon envioMs 2000        # si haces pausas de 3 s para pensar (por defecto 1500, medido)
+```
+
+Con el ajuste encendido y en manos libres, cada frase se pega como siempre y, si pasan
+`envioMs` sin volver a hablar, `dictar` pulsa Enter por ti; si vuelves a hablar, el reloj se
+cancela (y un pegado que llega con la voz ya en marcha no lo arma). Con la conversación apagada
+nada cambia: «dale enter» sigue valiendo.
+
+`dictar` es además **dueño del altavoz**: escucha en `127.0.0.1:47126` (`di <base64>`, `calla`,
+`estado`; cualquier otra cosa cierra la conexión) y `dictado di` le delega el texto cuando hay un
+`dictar` en marcha (`--local` lo sintetiza aparte). Mientras suena la voz, el audio del micrófono
+**no entra al detector** (puerta lógica; la captura no se para) y la puerta se reabre 150 ms
+después de la última frase, con el detector reiniciado. Si llega un texto a media frase tuya,
+espera a que cierres el turno (tope 5 s). El hook `Stop` de Claude Code que manda cada respuesta
+por ese socket es la fase 3 del PRP y va con CDC.
+
+**Medido el 2026-09-23** (`medicion/corpus-propio/conversacion-2026-09-23.md`):
+- Envío por silencio: sesión sintética de 10 turnos con una pausa de pensamiento de 1 a 3 s dentro
+  de cada frase. El hueco entre pegar una mitad y la voz de la siguiente llega a 994 ms con pausas
+  de 2 s; `envioMs` = **1500** (hueco + 400 ms de margen del motor) da 0 falsos envíos hasta 2 s y
+  10/10 turnos enviados; fin de habla → Enter p50 1670 ms (los 1000 ms del VAD van antes).
+- Half-duplex: 70 respuestas por el socket con micrófono y altavoz reales, **0 fugas** de la voz
+  del agente al texto (el control sin puerta demuestra que la sala oye el altavoz); primer audio
+  p50 **60 ms** desde que el hablante arranca; puerta reabierta a los 150 ms. Parar la captura de
+  ffmpeg mientras sonaba no añadía seguridad y costaba 267 ms de primer audio y 249 de reapertura:
+  por eso solo se cierra la puerta lógica. En una sala con otra fuente sonando (un vídeo), el VAD
+  se abre con ella y el agente espera hasta 5 s a ese «turno» antes de hablar: `umbralVozDb` es el
+  mando.
 
 ### 6. Medir
 
@@ -250,6 +284,8 @@ frío) y se cierra 1,5 s después de parar.
 dictado dictar --entrada sesion.wav --pegar ninguno   # el archivo hace de micrófono, a tiempo real
 dictado dictar --alterna-cada 5000                    # (prueba) alterna escuchar/parar cada 5 s
 node medicion/calibra.mjs                             # WER, VAD y diccionario sobre corpus propio
+node medicion/mide-conversacion.mjs --bloque a        # envío por silencio: fija envioMs (WAV sintético con pausas de 1-3 s)
+node medicion/mide-conversacion.mjs --bloque b        # half-duplex con micrófono y altavoz REALES: fugas, primer audio, reapertura (suena)
 node medicion/fabrica-corpus.mjs --campo              # calle, taller, almacén, reverb, snr20/10/05/00, flojo, fuerte
 node medicion/fabrica-corpus.mjs --muletillas         # guiones con muletillas y pausas conocidas, dos voces
 node medicion/calibra.mjs --corpus medicion/corpus-propio/campo --salida medicion/corpus-propio/campo
@@ -328,15 +364,15 @@ dictado ajustes catalogo                 # los motores instalados con WER y late
 
 La **página `/ajustes`** de la app hace exactamente lo mismo por las mismas piezas (`maquina.mjs`
 → `cli-ajustes`), tras el emparejamiento: grupos Motor (con el catálogo medido), Tecla y modo,
-Pegado, Audio, Texto, Sonidos, Historial y «Sin proveedor» (limpieza y transformaciones por
+Pegado, Audio, Texto, **Conversar con el agente**, Sonidos, Historial y «Sin proveedor» (limpieza y transformaciones por
 modelo de lenguaje: en gris, no se pueden encender; no hay proveedor y lo dictado no sale de la
 máquina). Se abre desde `/historial`, `/dictar` y el menú del icono («Ajustes»).
 
 **En caliente.** Un `dictar` en marcha vigila el archivo (stat cada segundo) y toma sin reiniciar
 lo que es seguro: `pegar`, `gananciaDb`, `umbralVozDb`, `comandos`, `muletillas`, `snippets`, `diccionario`,
-`sonidoAlEmpezar`, `sonidoAlTerminar`, `retencionDias`. Lo que exige recargar (`motor`,
-`respaldo`, `idioma`, `hilos`, `modo`, `tecla`, `silencioMs`, `micEnEspera`,
-`correccionPorSimilitud`) se anuncia para la siguiente sesión. Y lo que en esa sesión fija una
+`sonidoAlEmpezar`, `sonidoAlTerminar`, `retencionDias`, `conversacion`, `envioMs`, `velocidadVoz`,
+`micDuranteVoz`. Lo que exige recargar (`motor`, `respaldo`, `idioma`, `hilos`, `modo`, `tecla`,
+`silencioMs`, `micEnEspera`, `correccionPorSimilitud`, `vozAgente`) se anuncia para la siguiente sesión. Y lo que en esa sesión fija una
 bandera o el entorno **no lo mueve el archivo**, y el log lo dice
 (`silencioMs cambió en el archivo, pero en esta sesión lo fija --silencio-ms`). Medido el
 2026-09-21 con `dictar --entrada` corriendo: sonidos y comandos aplicados en caliente; motor
@@ -403,6 +439,7 @@ toma; RTF = tiempo de cómputo / duración del audio; RAM residente tras cargar.
 | Hilos del motor | 8 | tabla de hilos: 16 es peor que 8 en esta CPU (SMT) |
 | Umbrales del VAD (0,5 / 0,35), relleno 250 ms, mínimo de habla 200 ms | los de `voz` con más relleno | **sin medir aquí**: `voz` los midió para barge-in sobre LibriSpeech; el relleno se subió para no comerse la primera sílaba |
 | Corrección por similitud del diccionario | apagada | sin medir en corpus: sustituir de más es peor que no sustituir |
+| Silencio que envía el turno (`envioMs`, modo conversación) | **1500 ms** | `medicion/corpus-propio/conversacion-2026-09-23.md` bloque A: con pausas de pensamiento de 2 s el hueco entre pegar una mitad y la voz de la siguiente llega a 994 ms; 1500 = ese hueco + 400 ms (p95 − p50 del motor); 0 falsos envíos hasta 2 s. 2000 aguanta 3 s y tarda medio segundo más |
 <!-- /DEFECTOS -->
 
 Todo lo anterior vale para **esta** máquina y **este** corpus (habla leída, limpia). Un
@@ -482,6 +519,8 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 | `DICTADO_VOCES` | voces Piper que carga el servicio/demonio para `/sintetizar` (separadas por comas) | todas las `vits-piper-*` de `DICTADO_MODELOS` |
 | `DICTADO_RESPALDO` | segundo motor del servicio/demonio (`faster-whisper:<modelo>`), pedido con `x-motor: respaldo` | ninguno (`npm run demonio`: `faster-whisper:small` si hay venv) |
 | `DICTADO_CARACTERES_MAXIMOS` | tope del texto de `/sintetizar` | 2000 |
+| `DICTADO_CONVERSACION_PUERTO` | puerto del socket por el que `dictado di` le pide al `dictar` en marcha que hable (`--conversacion-puerto` en `dictar`) | 47126 |
+| `DICTADO_CONVERSACION_TRAZA` | `1`: trazas con instante del modo conversación en el log (las lee `mide-conversacion.mjs`) | — |
 
 El token nunca se imprime: `dictado config` dice `presente (largo N)`.
 

@@ -24,16 +24,17 @@ import { creaEnvioPorSilencio } from '../envio.js';
 import { fechaHaceDias } from '../historial.js';
 import { creaPosproceso, type Posproceso } from '../posproceso.js';
 import type { Motor, Pegador } from '../types.js';
-import { capturaMicrofono, escribeWav, nivelDb, type Captura } from './audio.js';
+import { escribeWav, nivelDb } from './audio.js';
+import { creaMicrofonoDeSesion } from './microfono-sesion.js';
 import { ajustaGanancia, factorDe } from './ganancia.js';
 import { vigilaArchivoAjustes } from './ajustes-archivo.js';
 import type { Configuracion } from './cli-config.js';
 import { cargaDatos } from './cli-datos.js';
 import { creaDetector, creaMotor } from './cli-motores.js';
+import { escuchaSocketConversacion, montaConversacion } from './cli-conversacion.js';
 import { creaPegadorWindows } from './pegado-windows.js';
 import { escuchaIcono, PUERTO_ICONO, type EscuchaIcono } from './icono.js';
 import { creaBarras } from './barras.js';
-import { creaConversacion } from './conversacion.js';
 import { creaPildora, type EntradaPildora } from './pildora.js';
 import { escuchaTecla, type EscuchaTecla } from './tecla.js';
 import { creaSonidos } from './sonidos.js';
@@ -142,14 +143,14 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   const conversacionPosible = modo === 'manosLibres';
   if (v.conversacion && !conversacionPosible) console.log(gris('ajustes: conversacion exige modo manos-libres: se trata como apagada en esta sesion'));
   const envio = creaEnvioPorSilencio({ msEnvio: v.envioMs });
-  const conversacion = creaConversacion({
+  const { conversacion, cargaHablante } = montaConversacion({
+    config,
+    valores: v,
     envio,
-    alEnviar: async () => {
-      await pegador.ejecuta?.(['enter']);
-      contadores.enviosPorSilencio += 1;
-    },
+    contadores,
     estado: () => dictado.estado,
-    log: (l) => console.log(l.startsWith('✗') ? l : verde(l)),
+    detector,
+    alEnviar: () => pegador.ejecuta?.(['enter']) ?? Promise.resolve(),
   });
   const dictado = creaDictado({
     detector,
@@ -218,6 +219,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   });
   const control = controlador(dictado);
   conversacion.activa = v.conversacion && conversacionPosible;
+  if (conversacion.activa) void cargaHablante().catch((e: unknown) => console.log(gris(`voz del agente: no se pudo cargar (${e instanceof Error ? e.message : String(e)})`)));
 
   /**
    * El archivo de ajustes cambio (la pagina /ajustes o `dictado ajustes pon`): se vuelve a resolver
@@ -270,6 +272,13 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
         case 'conversacion':
           if (nv.conversacion && !conversacionPosible) console.log(gris('ajustes: conversacion exige modo manos-libres: sigue apagada'));
           conversacion.activa = nv.conversacion && conversacionPosible;
+          if (conversacion.activa) void cargaHablante().catch((e: unknown) => console.log(gris(`voz del agente: no se pudo cargar (${e instanceof Error ? e.message : String(e)})`)));
+          break;
+        case 'velocidadVoz':
+          conversacion.velocidad = nv.velocidadVoz;
+          break;
+        case 'micDuranteVoz':
+          conversacion.micDuranteVoz = nv.micDuranteVoz;
           break;
         case 'envioMs':
           envio.cambiaMs(nv.envioMs, performance.now());
@@ -308,6 +317,9 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
       primera.valor = false;
       console.log(gris(`microfono abierto en ${msDesdeApertura().toFixed(0)} ms`));
     }
+    // Mientras suena la voz del agente el audio no entra: sin cancelacion de eco, se oiria a si mismo
+    // (RF-39). La captura sigue: pararla no anadia seguridad y costaba latencia (medicion B).
+    if (!conversacion.admiteAudio()) return;
     const picoRaw = nivelDb(crudo);
     const factor = factorDe(gananciaDb);
     const m = factor === 1 ? crudo : crudo.map((x) => Math.max(-1, Math.min(1, x * factor)));
@@ -333,34 +345,9 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
    * termino sin que lo pidieramos), el dictado se apaga entero: seguir «escuchando» seria mentir
    * (vivido el 2026-09-19).
    */
-  let captura: Captura | undefined;
-  let cierrePedido = false;
-  let resolverFin: (e?: Error) => void = () => undefined;
-  const finDeCaptura = new Promise<Error | undefined>((r) => (resolverFin = r));
-  const abreMic = () => {
-    if (captura) return;
-    cierrePedido = false;
-    const desde = performance.now();
-    const primera = { valor: true };
-    const c = capturaMicrofono({
-      frecuenciaHz: detector.frecuenciaHz,
-      gananciaDb: 0, // la ganancia se aplica aqui (puede cambiar en caliente), no en la captura
-      ...(entrada ? { entrada } : {}),
-      alRecibir: (m) => alimenta(m, () => performance.now() - desde, primera),
-      alError: (e) => console.error(`ffmpeg: ${e}`),
-    });
-    captura = c;
-    c.terminada.then(
-      () => { if (captura === c) captura = undefined; if (!cierrePedido) resolverFin(undefined); },
-      (e: Error) => { if (captura === c) captura = undefined; if (!cierrePedido) resolverFin(e); },
-    );
-  };
-  const cierraMic = () => {
-    if (!captura) return;
-    cierrePedido = true;
-    captura.detiene();
-    console.log(gris('microfono cerrado (en espera no se captura nada)'));
-  };
+  const mic = creaMicrofonoDeSesion({ frecuenciaHz: detector.frecuenciaHz, ...(entrada ? { entrada } : {}), alRecibir: alimenta, log: (l) => console.log(gris(l)) });
+  const abreMic = () => mic.abre();
+  const cierraMic = (motivo?: string) => mic.cierra(motivo);
   if (!micCerradoEnEspera) abreMic();
   // Con el microfono cerrado en espera puede no quedar NINGUN handle vivo (sin tecla ni icono):
   // Node saldria en silencio. Un latido con referencia mantiene el proceso hasta `salir()`.
@@ -377,16 +364,15 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     saliendo = true;
     console.log(gris('\ncerrando…'));
     quitaTeclas();
-    conversacion.cierra();
+    await socketConversacion?.cierra();
+    await conversacion.cierra();
     dejaDeVigilar();
     clearInterval(latido);
     if (alternador) clearInterval(alternador);
     cierraTeclaGlobal?.();
     await tecla?.cierra();
     await icono?.cierra(); // el icono de la barra queda vivo y en gris: un click rearranca
-    cierrePedido = true;
-    captura?.detiene();
-    resolverFin(undefined);
+    mic.suelta();
     await control.esperar();
     if (dictado.estado !== 'inactivo') await dictado.termina().catch(() => undefined);
     await motor.cierra?.();
@@ -407,6 +393,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
     setTimeout(() => process.exit(0), 1_500).unref();
   };
 
+  const socketConversacion = await escuchaSocketConversacion(conversacion, typeof opciones['conversacion-puerto'] === 'string' ? Number(opciones['conversacion-puerto']) : undefined);
   if (opciones['tecla'] !== undefined) {
     const vk = v.tecla;
     tecla = await escuchaTecla({
@@ -471,7 +458,7 @@ export async function ordenDictar(config: Configuracion, opciones: Record<string
   // Si la captura TERMINA —con o sin error—, el dictado esta sordo: seguir «escuchando» seria
   // mentir (vivido el 2026-09-19: ffmpeg murio con «Error during demuxing» del pulse de WSLg y
   // el proceso quedo vivo y sordo). Se sale: el icono pasa a gris y un click lo rearranca todo.
-  const muerte = await finDeCaptura;
+  const muerte = await mic.finDeCaptura;
   if (muerte) {
     contadores.muertesCaptura += 1;
     console.error(muerte.message);

@@ -7,7 +7,10 @@
  *
  * Pura y con el reloj inyectado, como `node/pildora.ts`: se prueba sin esperar. Reglas:
  *  - un pegado PENDIENTE (sin «dale enter») arma el reloj; uno que ya llevo Enter lo desarma;
- *  - si empieza voz nueva, el reloj se quita pero el texto sigue pendiente;
+ *  - si empieza voz nueva, el reloj se quita pero el texto sigue pendiente; y un pegado que llega
+ *    con esa voz ya en marcha (el motor tardo mas que la pausa: medido el 2026-09-23, con pausas
+ *    de 1 s la segunda mitad empieza ~100 ms ANTES de que se pegue la primera) tampoco arma —
+ *    armaria un Enter a mitad de frase; lo arma el pegado que viene;
  *  - «sin voz» (o solo muletillas) rearma: hubo ruido, no texto, y lo pegado sigue esperando;
  *  - mientras suena la voz del agente no se envia nada; al callar, rearma;
  *  - el dictado en «inactivo» borra todo: si ella lo apago, nada se envia solo;
@@ -19,6 +22,7 @@ import type { Estado } from './dictado.js';
 export type EntradaEnvio =
   | { tipo: 'pegado'; pendiente: boolean }
   | { tipo: 'inicioHabla' }
+  | { tipo: 'finHabla' }
   | { tipo: 'sinVoz' }
   | { tipo: 'estado'; estado: Estado }
   | { tipo: 'vozAgente'; activa: boolean }
@@ -40,8 +44,14 @@ export interface EnvioPorSilencio {
   cambiaMs(msEnvio: number, ahoraMs: number): void;
 }
 
-/** Provisional hasta la medicion A (`medicion/mide-conversacion.mjs`). */
-export const DEFECTOS_ENVIO = { msEnvio: 2000 };
+/**
+ * Medido el 2026-09-23 (`medicion/mide-conversacion.mjs`, bloque A): con pausas de pensamiento de 1 a 3 s
+ * dentro de una frase, el hueco entre el pegado de una mitad y la voz de la siguiente llega a 994 ms
+ * con pausas de 2 s; 1500 = ese hueco + 400 ms de margen (p95 − p50 del motor), y da 0 falsos envios
+ * hasta 2 s (1000 tambien, pero a 6 ms del borde). 2000 aguanta pausas de 3 s a cambio de medio
+ * segundo mas por turno: `dictado ajustes pon envioMs 2000`.
+ */
+export const DEFECTOS_ENVIO = { msEnvio: 1500 };
 
 export function creaEnvioPorSilencio(opciones: OpcionesEnvio = {}): EnvioPorSilencio {
   let msEnvio = opciones.msEnvio ?? DEFECTOS_ENVIO.msEnvio;
@@ -49,9 +59,11 @@ export function creaEnvioPorSilencio(opciones: OpcionesEnvio = {}): EnvioPorSile
   let hasta: number | undefined;
   let estado: Estado = 'inactivo';
   let vozAgente = false;
+  /** La persona esta hablando (entre inicioHabla y finHabla): con voz en marcha no hay plazo. */
+  let hablando = false;
 
   const arma = (ahoraMs: number) => {
-    hasta = pendiente && !vozAgente ? ahoraMs + msEnvio : undefined;
+    hasta = pendiente && !vozAgente && !hablando ? ahoraMs + msEnvio : undefined;
   };
 
   return {
@@ -68,9 +80,15 @@ export function creaEnvioPorSilencio(opciones: OpcionesEnvio = {}): EnvioPorSile
           arma(ahoraMs);
           return undefined;
         case 'inicioHabla':
+          hablando = true;
           hasta = undefined;
           return undefined;
+        case 'finHabla':
+          // No arma: lo que sigue (pegado, sin voz, error) arma, y asi el plazo cuenta desde el pegado.
+          hablando = false;
+          return undefined;
         case 'sinVoz':
+          hablando = false; // el turno cerro sin texto
           arma(ahoraMs);
           return undefined;
         case 'estado':
@@ -78,6 +96,7 @@ export function creaEnvioPorSilencio(opciones: OpcionesEnvio = {}): EnvioPorSile
           if (estado === 'inactivo') {
             pendiente = false;
             hasta = undefined;
+            hablando = false;
           } else if (estado === 'escuchando') {
             // Al volver a escuchar (tras pegar, tras un error) el plazo cuenta desde AHORA: un plazo
             // que vencio mientras se transcribia no dispara un Enter al instante.
@@ -90,7 +109,7 @@ export function creaEnvioPorSilencio(opciones: OpcionesEnvio = {}): EnvioPorSile
           else arma(ahoraMs);
           return undefined;
         case 'tick':
-          if (!pendiente || hasta === undefined || ahoraMs < hasta || estado !== 'escuchando' || vozAgente) return undefined;
+          if (!pendiente || hasta === undefined || ahoraMs < hasta || estado !== 'escuchando' || vozAgente || hablando) return undefined;
           pendiente = false;
           hasta = undefined;
           return 'enviar';

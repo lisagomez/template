@@ -1,0 +1,1300 @@
+{
+ "fecha": "2026-09-23",
+ "voz": "es_MX-claude-high",
+ "velocidad": 0.9,
+ "a": {
+  "huecoMax2s": 994,
+  "margenMs": 400,
+  "elegido": 1500,
+  "huecos": [
+   {
+    "turno": 1,
+    "pausa": 1000,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "Recuérdame mandar la cotización a Luis.",
+     "El jueves por la mañana, antes de la junta."
+    ],
+    "hueco": -84,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 2,
+    "pausa": 1000,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "Agenda 1 reunión con Ana Martínez.",
+     "El martes diez y media."
+    ],
+    "hueco": 39,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 3,
+    "pausa": 1500,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "El cliente dijo que le parece caro.",
+     "Y que no sabe si tiene presupuesto este trimestre."
+    ],
+    "hueco": 494,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 4,
+    "pausa": 1500,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "Necesitamos 20 horas al mes menos de retrabajo.",
+     "En cotizaciones y en seguimiento."
+    ],
+    "hueco": 370,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 5,
+    "pausa": 2000,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "El pedido de tornillos de la planta de Monterrey.",
+     "Va con urgencia para el viernes."
+    ],
+    "hueco": 893,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 6,
+    "pausa": 2000,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "Recuérdame mandar la cotización a Luis.",
+     "El jueves por la mañana, antes de la junta."
+    ],
+    "hueco": 994,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 7,
+    "pausa": 2500,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "Agenda Una reunión con Ana Martínez.",
+     "El martes a las diez y media."
+    ],
+    "hueco": 1507,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 8,
+    "pausa": 2500,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "El cliente dijo, que le parece caro.",
+     "Y que no sabe si tiene presupuesto este trimestre."
+    ],
+    "hueco": 1458,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 9,
+    "pausa": 3000,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "Necesitamos 20 horas al mes menos de retrabajo.",
+     "En cotizaciones y en seguimiento."
+    ],
+    "hueco": 1885,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   },
+   {
+    "turno": 10,
+    "pausa": 3000,
+    "partida": true,
+    "pegados": 2,
+    "textos": [
+     "El pedido de tornillos de la planta de Monterrey.",
+     "Va con urgencia para el viernes."
+    ],
+    "hueco": 1878,
+    "falsos": 0,
+    "buenos": 0,
+    "finAEnvio": null
+   }
+  ],
+  "pases": [
+   {
+    "envioMs": 1000,
+    "falsosHasta2s": 0,
+    "falsosMasDe2s": 4,
+    "turnosEnviados": 10,
+    "finAEnvioP50": 1165
+   },
+   {
+    "envioMs": 1500,
+    "falsosHasta2s": 0,
+    "falsosMasDe2s": 2,
+    "turnosEnviados": 10,
+    "finAEnvioP50": 1670
+   },
+   {
+    "envioMs": 2000,
+    "falsosHasta2s": 0,
+    "falsosMasDe2s": 0,
+    "turnosEnviados": 10,
+    "finAEnvioP50": 2174
+   }
+  ],
+  "detalle": [
+   [
+    {
+     "turno": 1,
+     "pausa": 1000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Recuérdame mandar la cotización a Luis.",
+      "El jueves por la mañana, antes de la junta."
+     ],
+     "hueco": -86,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1234
+    },
+    {
+     "turno": 2,
+     "pausa": 1000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Agenda 1 reunión con Ana Martínez.",
+      "El martes diez y media."
+     ],
+     "hueco": 42,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1134
+    },
+    {
+     "turno": 3,
+     "pausa": 1500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El cliente dijo que le parece caro.",
+      "Y que no sabe si tiene presupuesto este trimestre."
+     ],
+     "hueco": 475,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1194
+    },
+    {
+     "turno": 4,
+     "pausa": 1500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Necesitamos 20 horas al mes menos de retrabajo.",
+      "En cotizaciones y en seguimiento."
+     ],
+     "hueco": 369,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1146
+    },
+    {
+     "turno": 5,
+     "pausa": 2000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El pedido de tornillos de la planta de Monterrey.",
+      "Va con urgencia para el viernes."
+     ],
+     "hueco": 911,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1165
+    },
+    {
+     "turno": 6,
+     "pausa": 2000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Recuérdame mandar la cotización a Luis.",
+      "El jueves por la mañana, antes de la junta."
+     ],
+     "hueco": 991,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1186
+    },
+    {
+     "turno": 7,
+     "pausa": 2500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Agenda Una reunión con Ana Martínez.",
+      "El martes a las diez y media."
+     ],
+     "hueco": 1507,
+     "falsos": 1,
+     "buenos": 1,
+     "finAEnvio": 1149
+    },
+    {
+     "turno": 8,
+     "pausa": 2500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El cliente dijo, que le parece caro.",
+      "Y que no sabe si tiene presupuesto este trimestre."
+     ],
+     "hueco": 1451,
+     "falsos": 1,
+     "buenos": 1,
+     "finAEnvio": 1217
+    },
+    {
+     "turno": 9,
+     "pausa": 3000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Necesitamos 20 horas al mes menos de retrabajo.",
+      "En cotizaciones y en seguimiento."
+     ],
+     "hueco": 1899,
+     "falsos": 1,
+     "buenos": 1,
+     "finAEnvio": 1162
+    },
+    {
+     "turno": 10,
+     "pausa": 3000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El pedido de tornillos de la planta de Monterrey.",
+      "Va con urgencia para el viernes."
+     ],
+     "hueco": 1867,
+     "falsos": 1,
+     "buenos": 1,
+     "finAEnvio": 1161
+    }
+   ],
+   [
+    {
+     "turno": 1,
+     "pausa": 1000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Recuérdame mandar la cotización a Luis.",
+      "El jueves por la mañana, antes de la junta."
+     ],
+     "hueco": -117,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1707
+    },
+    {
+     "turno": 2,
+     "pausa": 1000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Agenda 1 reunión con Ana Martínez.",
+      "El martes diez y media."
+     ],
+     "hueco": 32,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1645
+    },
+    {
+     "turno": 3,
+     "pausa": 1500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El cliente dijo que le parece caro.",
+      "Y que no sabe si tiene presupuesto este trimestre."
+     ],
+     "hueco": 463,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1706
+    },
+    {
+     "turno": 4,
+     "pausa": 1500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Necesitamos 20 horas al mes menos de retrabajo.",
+      "En cotizaciones y en seguimiento."
+     ],
+     "hueco": 372,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1665
+    },
+    {
+     "turno": 5,
+     "pausa": 2000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El pedido de tornillos de la planta de Monterrey.",
+      "Va con urgencia para el viernes."
+     ],
+     "hueco": 907,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1670
+    },
+    {
+     "turno": 6,
+     "pausa": 2000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Recuérdame mandar la cotización a Luis.",
+      "El jueves por la mañana, antes de la junta."
+     ],
+     "hueco": 995,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1681
+    },
+    {
+     "turno": 7,
+     "pausa": 2500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Agenda Una reunión con Ana Martínez.",
+      "El martes a las diez y media."
+     ],
+     "hueco": 1507,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1642
+    },
+    {
+     "turno": 8,
+     "pausa": 2500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El cliente dijo, que le parece caro.",
+      "Y que no sabe si tiene presupuesto este trimestre."
+     ],
+     "hueco": 1459,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 1706
+    },
+    {
+     "turno": 9,
+     "pausa": 3000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Necesitamos 20 horas al mes menos de retrabajo.",
+      "En cotizaciones y en seguimiento."
+     ],
+     "hueco": 1879,
+     "falsos": 1,
+     "buenos": 1,
+     "finAEnvio": 1654
+    },
+    {
+     "turno": 10,
+     "pausa": 3000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El pedido de tornillos de la planta de Monterrey.",
+      "Va con urgencia para el viernes."
+     ],
+     "hueco": 1872,
+     "falsos": 1,
+     "buenos": 1,
+     "finAEnvio": 1638
+    }
+   ],
+   [
+    {
+     "turno": 1,
+     "pausa": 1000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Recuérdame mandar la cotización a Luis.",
+      "El jueves por la mañana, antes de la junta."
+     ],
+     "hueco": -78,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2198
+    },
+    {
+     "turno": 2,
+     "pausa": 1000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Agenda 1 reunión con Ana Martínez.",
+      "El martes diez y media."
+     ],
+     "hueco": 33,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2130
+    },
+    {
+     "turno": 3,
+     "pausa": 1500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El cliente dijo que le parece caro.",
+      "Y que no sabe si tiene presupuesto este trimestre."
+     ],
+     "hueco": 495,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2201
+    },
+    {
+     "turno": 4,
+     "pausa": 1500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Necesitamos 20 horas al mes menos de retrabajo.",
+      "En cotizaciones y en seguimiento."
+     ],
+     "hueco": 379,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2174
+    },
+    {
+     "turno": 5,
+     "pausa": 2000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El pedido de tornillos de la planta de Monterrey.",
+      "Va con urgencia para el viernes."
+     ],
+     "hueco": 903,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2146
+    },
+    {
+     "turno": 6,
+     "pausa": 2000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Recuérdame mandar la cotización a Luis.",
+      "El jueves por la mañana, antes de la junta."
+     ],
+     "hueco": 999,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2178
+    },
+    {
+     "turno": 7,
+     "pausa": 2500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Agenda Una reunión con Ana Martínez.",
+      "El martes a las diez y media."
+     ],
+     "hueco": 1491,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2137
+    },
+    {
+     "turno": 8,
+     "pausa": 2500,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El cliente dijo, que le parece caro.",
+      "Y que no sabe si tiene presupuesto este trimestre."
+     ],
+     "hueco": 1447,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2257
+    },
+    {
+     "turno": 9,
+     "pausa": 3000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "Necesitamos 20 horas al mes menos de retrabajo.",
+      "En cotizaciones y en seguimiento."
+     ],
+     "hueco": 1891,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2146
+    },
+    {
+     "turno": 10,
+     "pausa": 3000,
+     "partida": true,
+     "pegados": 2,
+     "textos": [
+      "El pedido de tornillos de la planta de Monterrey.",
+      "Va con urgencia para el viernes."
+     ],
+     "hueco": 1865,
+     "falsos": 0,
+     "buenos": 1,
+     "finAEnvio": 2142
+    }
+   ]
+  ]
+ },
+ "b": {
+  "margenes": [
+   {
+    "margenMs": 0,
+    "respuestas": 10,
+    "porRespuesta": [
+     {
+      "n": 1,
+      "cierreMs": 2190,
+      "primerAudioDesdePeticionMs": 2283,
+      "primerAudioSintesisMs": 89,
+      "vozMs": 4538,
+      "reaperturaMs": 1,
+      "fugas": [],
+      "vozDetectadaTras": [
+       3728
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 2,
+      "cierreMs": 3256,
+      "primerAudioDesdePeticionMs": 3347,
+      "primerAudioSintesisMs": 91,
+      "vozMs": 4935,
+      "reaperturaMs": 2,
+      "fugas": [],
+      "vozDetectadaTras": [
+       601
+      ],
+      "picosTras": [
+       -41.6
+      ],
+      "sinVozTras": 1
+     },
+     {
+      "n": 3,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 28,
+      "primerAudioSintesisMs": 28,
+      "vozMs": 6535,
+      "reaperturaMs": 1,
+      "fugas": [],
+      "vozDetectadaTras": [
+       726
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 4,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5204,
+      "primerAudioSintesisMs": 204,
+      "vozMs": 4467,
+      "reaperturaMs": 2,
+      "fugas": [],
+      "vozDetectadaTras": [
+       169
+      ],
+      "picosTras": [
+       -36.2
+      ],
+      "sinVozTras": 1
+     },
+     {
+      "n": 5,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 57,
+      "primerAudioSintesisMs": 57,
+      "vozMs": 7440,
+      "reaperturaMs": 1,
+      "fugas": [],
+      "vozDetectadaTras": [
+       900
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 6,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5024,
+      "primerAudioSintesisMs": 23,
+      "vozMs": 5377,
+      "reaperturaMs": 1,
+      "fugas": [],
+      "vozDetectadaTras": [
+       3303
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 7,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5054,
+      "primerAudioSintesisMs": 53,
+      "vozMs": 5479,
+      "reaperturaMs": 2,
+      "fugas": [],
+      "vozDetectadaTras": [
+       8
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 8,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5065,
+      "primerAudioSintesisMs": 64,
+      "vozMs": 6776,
+      "reaperturaMs": 1,
+      "fugas": [],
+      "vozDetectadaTras": [
+       513
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 9,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5031,
+      "primerAudioSintesisMs": 30,
+      "vozMs": 762,
+      "reaperturaMs": 1,
+      "fugas": [
+       "No es importante."
+      ],
+      "vozDetectadaTras": [
+       373,
+       2724
+      ],
+      "picosTras": [
+       -34.4
+      ],
+      "sinVozTras": 0
+     },
+     {
+      "n": 10,
+      "cierreMs": 1113,
+      "primerAudioDesdePeticionMs": 1312,
+      "primerAudioSintesisMs": 199,
+      "vozMs": 7168,
+      "reaperturaMs": 1,
+      "fugas": [
+       "de los actores más importantes"
+      ],
+      "vozDetectadaTras": [
+       970
+      ],
+      "picosTras": [
+       -38.8
+      ],
+      "sinVozTras": 0
+     }
+    ],
+    "fugas": 2,
+    "cierreP50": 5000,
+    "primerAudioDesdePeticionP50": 5024,
+    "primerAudioSintesisP50": 64,
+    "reaperturaP50": 1,
+    "reaperturaMax": 2,
+    "socket": [
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho"
+    ]
+   },
+   {
+    "margenMs": 50,
+    "respuestas": 10,
+    "porRespuesta": [
+     {
+      "n": 1,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5036,
+      "primerAudioSintesisMs": 36,
+      "vozMs": 4378,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       415
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 2,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5046,
+      "primerAudioSintesisMs": 46,
+      "vozMs": 5060,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       2536
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 3,
+      "cierreMs": 761,
+      "primerAudioDesdePeticionMs": 830,
+      "primerAudioSintesisMs": 68,
+      "vozMs": 6683,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       269,
+       2468
+      ],
+      "picosTras": [
+       -50
+      ],
+      "sinVozTras": 1
+     },
+     {
+      "n": 4,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5219,
+      "primerAudioSintesisMs": 219,
+      "vozMs": 4559,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       909
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 5,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5068,
+      "primerAudioSintesisMs": 68,
+      "vozMs": 7811,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       406,
+       3546
+      ],
+      "picosTras": [
+       -34.7
+      ],
+      "sinVozTras": 1
+     },
+     {
+      "n": 6,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5023,
+      "primerAudioSintesisMs": 22,
+      "vozMs": 5225,
+      "reaperturaMs": 51,
+      "fugas": [],
+      "vozDetectadaTras": [
+       1916,
+       3806
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 7,
+      "cierreMs": 758,
+      "primerAudioDesdePeticionMs": 821,
+      "primerAudioSintesisMs": 64,
+      "vozMs": 5403,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       743
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 8,
+      "cierreMs": 4505,
+      "primerAudioDesdePeticionMs": 4612,
+      "primerAudioSintesisMs": 106,
+      "vozMs": 6874,
+      "reaperturaMs": 51,
+      "fugas": [],
+      "vozDetectadaTras": [],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 9,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 29,
+      "primerAudioSintesisMs": 29,
+      "vozMs": 802,
+      "reaperturaMs": 50,
+      "fugas": [],
+      "vozDetectadaTras": [
+       434
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 10,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5114,
+      "primerAudioSintesisMs": 114,
+      "vozMs": 7160,
+      "reaperturaMs": 50,
+      "fugas": [
+       "¡Suscríbete!"
+      ],
+      "vozDetectadaTras": [
+       3426
+      ],
+      "picosTras": [
+       -38.8
+      ],
+      "sinVozTras": 0
+     }
+    ],
+    "fugas": 1,
+    "cierreP50": 5000,
+    "primerAudioDesdePeticionP50": 5036,
+    "primerAudioSintesisP50": 68,
+    "reaperturaP50": 50,
+    "reaperturaMax": 51,
+    "socket": [
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho"
+    ]
+   },
+   {
+    "margenMs": 100,
+    "respuestas": 10,
+    "porRespuesta": [
+     {
+      "n": 1,
+      "cierreMs": 3967,
+      "primerAudioDesdePeticionMs": 4067,
+      "primerAudioSintesisMs": 96,
+      "vozMs": 4571,
+      "reaperturaMs": 101,
+      "fugas": [],
+      "vozDetectadaTras": [
+       398
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 2,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5043,
+      "primerAudioSintesisMs": 42,
+      "vozMs": 4804,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       1038
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 3,
+      "cierreMs": 3774,
+      "primerAudioDesdePeticionMs": 3829,
+      "primerAudioSintesisMs": 55,
+      "vozMs": 6680,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       695
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 4,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5214,
+      "primerAudioSintesisMs": 214,
+      "vozMs": 4781,
+      "reaperturaMs": 101,
+      "fugas": [],
+      "vozDetectadaTras": [],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 5,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 63,
+      "primerAudioSintesisMs": 63,
+      "vozMs": 7560,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 6,
+      "cierreMs": 1,
+      "primerAudioDesdePeticionMs": 22,
+      "primerAudioSintesisMs": 22,
+      "vozMs": 5392,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       301
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 7,
+      "cierreMs": 4999,
+      "primerAudioDesdePeticionMs": 5056,
+      "primerAudioSintesisMs": 57,
+      "vozMs": 5437,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       1282
+      ],
+      "picosTras": [
+       -37.5
+      ],
+      "sinVozTras": 1
+     },
+     {
+      "n": 8,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 63,
+      "primerAudioSintesisMs": 63,
+      "vozMs": 6747,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       670
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 9,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5026,
+      "primerAudioSintesisMs": 26,
+      "vozMs": 826,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       503
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 10,
+      "cierreMs": 497,
+      "primerAudioDesdePeticionMs": 678,
+      "primerAudioSintesisMs": 180,
+      "vozMs": 7199,
+      "reaperturaMs": 100,
+      "fugas": [],
+      "vozDetectadaTras": [
+       80
+      ],
+      "picosTras": [
+       -44
+      ],
+      "sinVozTras": 1
+     }
+    ],
+    "fugas": 0,
+    "cierreP50": 3967,
+    "primerAudioDesdePeticionP50": 4067,
+    "primerAudioSintesisP50": 63,
+    "reaperturaP50": 100,
+    "reaperturaMax": 101,
+    "socket": [
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho"
+    ]
+   },
+   {
+    "margenMs": 150,
+    "respuestas": 10,
+    "porRespuesta": [
+     {
+      "n": 1,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5039,
+      "primerAudioSintesisMs": 38,
+      "vozMs": 4424,
+      "reaperturaMs": 150,
+      "fugas": [],
+      "vozDetectadaTras": [
+       801
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 2,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5045,
+      "primerAudioSintesisMs": 44,
+      "vozMs": 4823,
+      "reaperturaMs": 150,
+      "fugas": [],
+      "vozDetectadaTras": [
+       1768
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 3,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 44,
+      "primerAudioSintesisMs": 44,
+      "vozMs": 6587,
+      "reaperturaMs": 150,
+      "fugas": [],
+      "vozDetectadaTras": [
+       3755
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 4,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5212,
+      "primerAudioSintesisMs": 211,
+      "vozMs": 4781,
+      "reaperturaMs": 150,
+      "fugas": [],
+      "vozDetectadaTras": [
+       530
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 5,
+      "cierreMs": 5001,
+      "primerAudioDesdePeticionMs": 5059,
+      "primerAudioSintesisMs": 58,
+      "vozMs": 7550,
+      "reaperturaMs": 151,
+      "fugas": [],
+      "vozDetectadaTras": [],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 6,
+      "cierreMs": 0,
+      "primerAudioDesdePeticionMs": 23,
+      "primerAudioSintesisMs": 23,
+      "vozMs": 5312,
+      "reaperturaMs": 151,
+      "fugas": [],
+      "vozDetectadaTras": [
+       419
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 7,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5062,
+      "primerAudioSintesisMs": 61,
+      "vozMs": 5489,
+      "reaperturaMs": 151,
+      "fugas": [],
+      "vozDetectadaTras": [
+       1149
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 8,
+      "cierreMs": 2477,
+      "primerAudioDesdePeticionMs": 2604,
+      "primerAudioSintesisMs": 127,
+      "vozMs": 6783,
+      "reaperturaMs": 150,
+      "fugas": [],
+      "vozDetectadaTras": [
+       721
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 9,
+      "cierreMs": 1228,
+      "primerAudioDesdePeticionMs": 1288,
+      "primerAudioSintesisMs": 60,
+      "vozMs": 809,
+      "reaperturaMs": 150,
+      "fugas": [],
+      "vozDetectadaTras": [
+       2870
+      ],
+      "picosTras": [],
+      "sinVozTras": 0
+     },
+     {
+      "n": 10,
+      "cierreMs": 5000,
+      "primerAudioDesdePeticionMs": 5115,
+      "primerAudioSintesisMs": 115,
+      "vozMs": 7181,
+      "reaperturaMs": 151,
+      "fugas": [],
+      "vozDetectadaTras": [
+       662
+      ],
+      "picosTras": [
+       -39.7
+      ],
+      "sinVozTras": 1
+     }
+    ],
+    "fugas": 0,
+    "cierreP50": 5000,
+    "primerAudioDesdePeticionP50": 5045,
+    "primerAudioSintesisP50": 60,
+    "reaperturaP50": 150,
+    "reaperturaMax": 151,
+    "socket": [
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho",
+     "hecho"
+    ]
+   }
+  ],
+  "control": {
+   "transcritos": 0,
+   "sinVoz": 7,
+   "textos": [],
+   "picoP50": -37.6,
+   "picos": [
+    -37.6,
+    -37.8,
+    -38.9,
+    -36.6,
+    -36.8,
+    -36.8,
+    -41.3
+   ]
+  }
+ }
+}

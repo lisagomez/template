@@ -49,13 +49,12 @@ test('trayectoria: contadores → percentiles, etapas y avisos, sin ninguna cade
 test('trayectoria: el modo conversacion deja envios, respuestas y sus latencias; apagado, envioMs es null', () => {
   const c = creaContadores();
   c.turnos = 2; c.pegados = 2; c.enviosPorSilencio = 2; c.respuestasHabladas = 1;
-  c.msPrimerAudio.push(180); c.msReaperturaMic.push(120, 140);
+  c.msPrimerAudio.push(180);
   const con = como(construyeTrayectoria(c, { ...contexto, envioMs: 2000 }));
   assert.equal(con.acciones.herramientas.enviosPorSilencio, 2);
   assert.equal(con.acciones.herramientas.respuestasHabladas, 1);
   assert.equal(con.resultado.metricas.envioMs, 2000);
   assert.equal(con.resultado.metricas.msPrimerAudioP50, 180);
-  assert.equal(con.resultado.metricas.msReaperturaMicP50, 140);
   const sin = como(construyeTrayectoria(creaContadores(), contexto));
   assert.equal(sin.resultado.metricas.envioMs, null);
   assert.equal(sin.resultado.metricas.msPrimerAudioP50, null);

@@ -99,6 +99,8 @@ export interface Altavoz {
   escribe(muestras: Float32Array): void;
   /** Espera a que todo lo encolado haya sonado y cierra. */
   termina(): Promise<void>;
+  /** Espera a que todo lo encolado haya sonado SIN cerrar: para un altavoz que vive toda la sesion. */
+  espera?(): Promise<void>;
 }
 
 const RUTA_ALTAVOZ_PS1 = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'windows', 'altavoz.ps1');
@@ -143,6 +145,9 @@ export function abreAltavozWindows(frecuenciaHz: number, opciones: { powershell?
           await hijo.pide({ op: 'suena', ruta: `${windows}\\${nombre}` });
         })
         .catch((e: unknown) => console.error(`altavoz: ${e instanceof Error ? e.message : String(e)}`));
+    },
+    async espera() {
+      await cola;
     },
     async termina() {
       await cola;

@@ -10,6 +10,7 @@ import { escribeWav } from './audio.js';
 import type { Configuracion } from './cli-config.js';
 import { cargaRuntime } from './cli-motores.js';
 import { VELOCIDAD_POR_DEFECTO, VOCES, VOZ_POR_DEFECTO } from '../voces.js';
+import { pideDi, PUERTO_CONVERSACION } from './conversacion-socket.js';
 import { abreAltavozPulse, abreAltavozWindows, creaVozSintetica, habla, type ModuloSherpaTts } from './habla.js';
 
 export function preparaVoz(config: Configuracion, nombre: string): string {
@@ -38,6 +39,17 @@ function leeTexto(posicionales: string[], opciones: Record<string, string | bool
 export async function ordenDi(config: Configuracion, posicionales: string[], opciones: Record<string, string | boolean>): Promise<void> {
   const texto = leeTexto(posicionales, opciones).trim();
   if (texto.length === 0) throw new Error('uso: dictado di "<texto>"  |  dictado di --archivo nota.txt  |  echo texto | dictado di');
+  // Con un `dictar` en marcha, es EL quien habla: asi calla el microfono mientras suena (RF-39).
+  // Se sintetiza aqui solo si no hay dictado, o si la orden pide algo que solo va en local.
+  const soloLocal = opciones['local'] === true || opciones['sin-sonido'] === true || typeof opciones['guarda'] === 'string' || opciones['altavoz'] !== undefined || typeof opciones['voz'] === 'string' || typeof opciones['velocidad'] === 'string';
+  if (!soloLocal) {
+    const puerto = process.env['DICTADO_CONVERSACION_PUERTO'] ? Number(process.env['DICTADO_CONVERSACION_PUERTO']) : PUERTO_CONVERSACION;
+    const r = await pideDi(texto, { puerto });
+    if (r.modo === 'dictar') {
+      console.error(r.tipo === 'hecho' ? `voz=dictar primer-audio=${r.msPrimerAudio}ms total=${r.msTotal}ms (la dijo el dictado en marcha, con el microfono callado)` : r.tipo === 'cortado' ? 'voz=dictar cortado' : `voz=dictar omitido: ${r.motivo}`);
+      return;
+    }
+  }
   const nombre = typeof opciones['voz'] === 'string' ? opciones['voz'] : VOZ_POR_DEFECTO;
   const carpeta = preparaVoz(config, nombre);
   const sherpa = await cargaRuntime<ModuloSherpaTts>('sherpa-onnx-node', config);

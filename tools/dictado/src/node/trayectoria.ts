@@ -31,10 +31,9 @@ export interface ContadoresSesion {
   picosDb: number[];
   /** Desde que llega el texto del agente hasta que suena; desde que calla hasta que el microfono vuelve. */
   msPrimerAudio: number[];
-  msReaperturaMic: number[];
 }
 
-export const creaContadores = (): ContadoresSesion => ({ turnos: 0, sinVoz: 0, descartadosEnergia: 0, muletillas: 0, respaldo: 0, pegados: 0, errores: 0, muertesCaptura: 0, enviosPorSilencio: 0, respuestasHabladas: 0, latenciasMs: [], msMotor: [], msPegado: [], duracionesMs: [], picosDb: [], msPrimerAudio: [], msReaperturaMic: [] });
+export const creaContadores = (): ContadoresSesion => ({ turnos: 0, sinVoz: 0, descartadosEnergia: 0, muletillas: 0, respaldo: 0, pegados: 0, errores: 0, muertesCaptura: 0, enviosPorSilencio: 0, respuestasHabladas: 0, latenciasMs: [], msMotor: [], msPegado: [], duracionesMs: [], picosDb: [], msPrimerAudio: [] });
 
 export interface ContextoSesion {
   motorId: string;
@@ -115,7 +114,6 @@ export function construyeTrayectoria(c: ContadoresSesion, ctx: ContextoSesion): 
         muertesCaptura: c.muertesCaptura,
         envioMs: ctx.envioMs ?? null,
         msPrimerAudioP50: percentil(c.msPrimerAudio, 0.5),
-        msReaperturaMicP50: percentil(c.msReaperturaMic, 0.5),
       },
     },
     cobertura: { completa: false, faltan: ['uso', 'costo'] },

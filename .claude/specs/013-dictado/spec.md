@@ -221,7 +221,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - Los 45 RF con prueba en `tools/dictado/pruebas/` (RF-36 a RF-45 además con medición en
   `medicion/corpus-propio/`) o demostrados en la conversación de
   construcción (lote A-B-A, servicio con 401/413/WAV/PCM16, pegador leyendo el portapapeles).
-- `npm run prueba` 29/29 en el cierre retroactivo (124/124 el 2026-09-22); `npm run empaqueta dictado`
+- `npm run prueba` 29/29 en el cierre retroactivo (124/124 el 2026-09-22; 137/137 el 2026-09-23); `npm run empaqueta dictado`
   en verde con `integracion`.
 - `npm run mide` con la tabla en README y SDD, JSON crudo versionado.
 - **Prueba en vivo con una persona** (casos a y b del GOAL): hecha el 2026-09-16 — frases dictadas
@@ -236,5 +236,6 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   faster-whisper large-v3-turbo (2,5 %, 12× más lento)?
 - [NECESITA ACLARACIÓN] ¿Hace falta el ayudante de Windows con ventana propia (píldora) o basta
   la terminal?
-- [NECESITA ACLARACIÓN] Margen de sala tras la voz del agente antes de reabrir el micrófono
-  (150 ms provisional): lo fija la medición B del PRP-003.
+- Margen de sala tras la voz del agente antes de reabrir la puerta del micrófono: **150 ms**,
+  medición B del 2026-09-23 (0 fugas de la voz y 0 aperturas del VAD tras reabrir en sala
+  silenciosa; el barrido 0-150 ms quedó contaminado por otra fuente en la sala). Resuelta.
