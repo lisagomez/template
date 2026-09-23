@@ -9,7 +9,7 @@
  *
  *   servidor → cliente al conectar   `dictar <on|off> <inactivo|escuchando|transcribiendo|pegando>`
  *   cliente → servidor               `di <base64 utf8>` | `calla` | `estado`
- *   servidor → cliente               `ok` | `omitido <motivo>` | `hablando` | `hecho <msPrimerAudio> <msTotal>` | `cortado`
+ *   servidor → cliente               `ok` | `omitido <motivo>` | `hecho <msPrimerAudio> <msTotal>` | `cortado`
  */
 import { connect, createServer, type Server, type Socket } from 'node:net';
 
@@ -52,10 +52,11 @@ export function escuchaConversacion(o: OpcionesSocketConversacion): Promise<Escu
         const texto = Buffer.from(linea.slice(3), 'base64').toString('utf8').trim();
         if (texto.length === 0 || texto.length > MAX_CARACTERES_DI) return socket.write(`omitido ${texto.length === 0 ? 'texto-vacio' : 'texto-demasiado-largo'}\n`);
         socket.write('ok\n');
+        // El cliente puede haberse ido tras el `ok` (el hook no espera a que suene): no se le escribe.
         void o
           .alDi(texto)
-          .then((r) => socket.write(`${formatea(r)}\n`))
-          .catch((e: unknown) => socket.write(`omitido ${(e instanceof Error ? e.message : String(e)).replace(/\s+/g, '-').slice(0, 80)}\n`));
+          .then((r) => { if (!socket.destroyed) socket.write(`${formatea(r)}\n`); })
+          .catch((e: unknown) => { if (!socket.destroyed) socket.write(`omitido ${(e instanceof Error ? e.message : String(e)).replace(/\s+/g, '-').slice(0, 80)}\n`); });
         return true;
       }
       socket.destroy(); // no es un cliente de este protocolo
@@ -93,15 +94,19 @@ export function escuchaConversacion(o: OpcionesSocketConversacion): Promise<Escu
 export type ResultadoPideDi =
   | { modo: 'sin-dictar' }
   | { modo: 'apagado'; estado: string }
+  | { modo: 'dictar'; tipo: 'enviado' }
   | ({ modo: 'dictar' } & RespuestaDi);
 
 /**
  * El cliente: conecta, lee el saludo y, si hay dictado, le manda el texto y espera a que termine
  * de sonar. Sin `dictar` (conexion rehusada o sin saludo en `msConexion`) devuelve `sin-dictar`
  * en ese plazo: el que llama sintetiza en local. Con `soloEncendido`, un dictado con la
- * conversacion apagada o sin escuchar devuelve `apagado` sin mandar nada (lo que exige el hook).
+ * conversacion apagada o inactivo (no escucha) devuelve `apagado` sin mandar nada —transcribiendo
+ * o pegando una frase sigue escuchando: el texto se acepta y RF-40 espera al cierre del turno—, y con `sinEsperar`
+ * vuelve `enviado` en cuanto el dictado acepta el texto, sin esperar a que suene (los dos, lo
+ * que exige el hook `Stop`: RF-42 y RF-43).
  */
-export function pideDi(texto: string, opciones: { puerto?: number; msConexion?: number; msRespuesta?: number; soloEncendido?: boolean } = {}): Promise<ResultadoPideDi> {
+export function pideDi(texto: string, opciones: { puerto?: number; msConexion?: number; msRespuesta?: number; soloEncendido?: boolean; sinEsperar?: boolean } = {}): Promise<ResultadoPideDi> {
   const puerto = opciones.puerto ?? PUERTO_CONVERSACION;
   return new Promise((resuelve) => {
     let resto = '';
@@ -133,12 +138,13 @@ export function pideDi(texto: string, opciones: { puerto?: number; msConexion?: 
           saludado = true;
           clearTimeout(plazoConexion);
           const [encendido, estado] = linea.slice(7).split(' ');
-          if (opciones.soloEncendido && (encendido !== 'on' || estado !== 'escuchando')) return acaba({ modo: 'apagado', estado: `${encendido ?? '?'} ${estado ?? '?'}` });
+          if (opciones.soloEncendido && (encendido !== 'on' || estado === undefined || estado === 'inactivo')) return acaba({ modo: 'apagado', estado: `${encendido ?? '?'} ${estado ?? '?'}` });
           socket.write(`di ${Buffer.from(texto, 'utf8').toString('base64')}\n`);
           plazoRespuesta = setTimeout(() => acaba({ modo: 'dictar', tipo: 'omitido', motivo: 'sin-respuesta' }), opciones.msRespuesta ?? 180_000);
           continue;
         }
-        if (linea === 'ok' || linea === 'hablando') continue;
+        if (linea === 'ok' && opciones.sinEsperar) return acaba({ modo: 'dictar', tipo: 'enviado' });
+        if (linea === 'ok') continue;
         if (linea.startsWith('hecho ')) {
           const [a, b] = linea.slice(6).split(' ').map(Number);
           return acaba({ modo: 'dictar', tipo: 'hecho', msPrimerAudio: a ?? 0, msTotal: b ?? 0 });

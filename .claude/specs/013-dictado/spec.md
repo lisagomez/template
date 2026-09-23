@@ -187,6 +187,9 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - Micrófono mudo: aviso al arrancar, y la red de seguridad del spec original.
 - Peer opcional ausente: el subpath `./node` no importa y el empaquetador lo dice, no lo tapa.
 - Audio de más de 10 MB al servicio: 413 antes de leer.
+- Otra fuente sonando en la sala (un vídeo, una llamada) con la conversación encendida: el VAD la
+  toma por voz, el turno tarda en enviarse y el agente espera hasta 5 s al cierre de ese «turno»
+  antes de hablar (RF-40); no es una fuga (medido el 2026-09-23). El mando es `umbralVozDb`.
 
 ## Impacto sobre terceros (control C4)
 
@@ -221,7 +224,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - Los 45 RF con prueba en `tools/dictado/pruebas/` (RF-36 a RF-45 además con medición en
   `medicion/corpus-propio/`) o demostrados en la conversación de
   construcción (lote A-B-A, servicio con 401/413/WAV/PCM16, pegador leyendo el portapapeles).
-- `npm run prueba` 29/29 en el cierre retroactivo (124/124 el 2026-09-22; 137/137 el 2026-09-23); `npm run empaqueta dictado`
+- `npm run prueba` 29/29 en el cierre retroactivo (124/124 el 2026-09-22; 144/144 el 2026-09-23); `npm run empaqueta dictado`
   en verde con `integracion`.
 - `npm run mide` con la tabla en README y SDD, JSON crudo versionado.
 - **Prueba en vivo con una persona** (casos a y b del GOAL): hecha el 2026-09-16 — frases dictadas

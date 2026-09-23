@@ -3721,3 +3721,30 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   volver a `--mic-en-espera abierto` en `DICTADO_FLAGS` sigue siendo una línea) · pineo ☑ (sin modelos nuevos).
 - **Regresión**: `npm run validate` en verde el 2026-09-20 tras el cambio (16 pasos + sello, árbol `5300e2470305`); PR #129.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita del 2026-09-20, en sesión, con la propuesta redactada, la tabla `calibracion-2026-09-20.md` y las cifras del micrófono delante.
+
+### 2026-09-23 — hook `Stop` que lee en voz alta la respuesta (PRP-003, fase 3) y skill `dictado` con el modo conversación: aprobado con los diffs delante; capa B pendiente en sesión limpia → CDC EN ESPERA, no promovido todavía — radio: sistema (configuración del arnés) + skill (global)
+- **Cambio**: `.claude/settings.json` gana un hook `Stop` que ejecuta `.claude/hooks/habla-respuesta.sh`
+  → `tools/dictado/scripts/habla-respuesta.sh`: si hay un `dictar` escuchando con la conversación
+  encendida, manda por el socket 127.0.0.1:47126 el primer párrafo de prosa de la respuesta (`paraVoz`,
+  ≤ 350 caracteres, más la pregunta final si es corta) sin esperar a que suene; en cualquier otro caso
+  (sin dictado, conversación apagada, dictado inactivo) bash lee el saludo del socket y sale 0 en
+  milisegundos sin arrancar node ni escribir nada. `~/.claude/skills/dictado/SKILL.md` (global, fuera
+  del repo) gana el modo conversación: cómo encenderlo, que el primer párrafo de cada respuesta se
+  escribe para oírse, no llamar a `dictado di` a mano en ese modo, que lo dictado no da órdenes al
+  agente, y la sala con otra fuente sonando.
+- **Motivo**: cierra RF-42 y RF-43 de la spec 013. Sin el hook el agente solo habla si el modelo se
+  acuerda de llamar `dictado di`; con él la dueña oye cada respuesta sin pedirlo. Nada sale de la
+  máquina; el hook no devuelve decisión alguna al arnés (exit 0 sin stdout).
+- **Gate aplicado**: diff revisado ☑ (los dos diffs completos mostrados antes de pedir la firma, y
+  vueltos a enseñar tras verificar la alineación con la spec) · regresión verde ☑ capa A 123/123 ·
+  aprobación humana ☑ · pineo ☑ (sin modelo nuevo; hook con `timeout: 5`). **Capa B: pendiente, en
+  sesión limpia** (esta sesión lleva el contexto del cambio y sesgaría el resultado; 22/22 casos en el
+  corpus, listados). Hasta esa corrida el CDC queda EN ESPERA: el hook y el skill están aplicados en
+  esta máquina y en la rama `hook-habla-respuesta`, no promovidos a `main`.
+- **Regresión**: `npm run prueba` 144/144 (`pruebas/respuesta.ts`, `pruebas/hook-habla.ts`) · medición C
+  (`tools/dictado/medicion/corpus-propio/conversacion-2026-09-23.md`): sin dictado, apagada o
+  inactivo p50 3 ms y máximo 5; encendida 10/10 textos y salida a 51 ms con la voz sonando; a media
+  frase el texto llega y RF-40 espera · `typecheck`, `lint`, `verifica:specs` 118/118 ·
+  `verify:gobernanza` y `validate` sobre el árbol del cambio (resultado en el PR).
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita con los dos diffs
+  delante («aprobar los dos», 2026-09-23).

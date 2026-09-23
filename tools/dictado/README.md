@@ -211,8 +211,17 @@ nada cambia: «dale enter» sigue valiendo.
 `dictar` en marcha (`--local` lo sintetiza aparte). Mientras suena la voz, el audio del micrófono
 **no entra al detector** (puerta lógica; la captura no se para) y la puerta se reabre 150 ms
 después de la última frase, con el detector reiniciado. Si llega un texto a media frase tuya,
-espera a que cierres el turno (tope 5 s). El hook `Stop` de Claude Code que manda cada respuesta
-por ese socket es la fase 3 del PRP y va con CDC.
+espera a que cierres el turno (tope 5 s).
+
+**El agente habla solo** (hook `Stop` de Claude Code): `scripts/habla-respuesta.sh` lee por stdin
+el JSON del arnés, saca con `paraVoz` el primer párrafo de prosa de la respuesta (≤ 350 caracteres
+cortando en fin de frase, más la pregunta final si es corta; nunca código, tablas ni listas) y se lo
+manda al `dictar` en marcha **sin esperar a que suene**. Sin dictado, con la conversación apagada
+o con el dictado inactivo, bash lee el saludo del socket y sale sin arrancar node ni escribir nada
+(medido el 2026-09-23, bloque C: p50 3 ms, máximo 5; la prueba exige < 100 ms); encendida, el texto
+llega y el hook sale a los 51 ms mientras la voz sigue sonando; a media frase tuya también llega, y
+`dictar` espera al cierre de tu turno. Cablearlo en `.claude/settings.json` es un CDC (C1) del
+template; el paquete solo trae el script.
 
 **Medido el 2026-09-23** (`medicion/corpus-propio/conversacion-2026-09-23.md`):
 - Envío por silencio: sesión sintética de 10 turnos con una pausa de pensamiento de 1 a 3 s dentro

@@ -1,10 +1,17 @@
 {
-  "_comentario": "Configuracion del arnes versionada. Cambiarla es un CDC (C1): diff + regresion + firma en BITACORA-CDC.md. El hook SessionEnd convierte el transcript de cada sesion en una trayectoria de FORMA (spec 011): conteos, nombres de herramientas y modelos, tokens, gates; nunca texto. Corre al cerrar, no por herramienta, y siempre devuelve {} para no bloquear el cierre.",
+  "_comentario": "Configuracion del arnes versionada. Cambiarla es un CDC (C1): diff + regresion + firma en BITACORA-CDC.md. El hook SessionEnd convierte el transcript de cada sesion en una trayectoria de FORMA (spec 011): conteos, nombres de herramientas y modelos, tokens, gates; nunca texto. Corre al cerrar, no por herramienta, y siempre devuelve {} para no bloquear el cierre. El hook Stop (PRP-003, RF-42/43) lee en voz alta el primer parrafo de cada respuesta SOLO si hay un dictado escuchando con la conversacion encendida: sin dictado sale en milisegundos, nunca escribe en stdout y nunca bloquea; el texto no sale de la maquina.",
   "hooks": {
     "SessionEnd": [
       {
         "hooks": [
           { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/captura-trayectoria.sh\"", "timeout": 30 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/habla-respuesta.sh\"", "timeout": 5 }
         ]
       }
     ]

@@ -18,9 +18,12 @@
  *      costaba ~210 ms mas de primer audio y ~100 ms mas de reapertura; queda solo la puerta logica.
  *      Un texto transcrito tras reabrir solo es FUGA si se parece a la frase del agente: la sala
  *      puede tener otra fuente (un video), y la medicion las separa por palabras en comun.
- *   B' (barge-in, fase 4) y C (hook, fase 3): todavia no.
+ *   C  Hook `Stop` (RF-42, RF-43): `scripts/habla-respuesta.sh` con el JSON del arnes por stdin,
+ *      10 veces en cada situacion, contra un socket falso (sin audio): sin dictado, con la
+ *      conversacion apagada, y encendida (el texto llega y el hook sale sin esperar a la voz).
+ *   B' (barge-in, fase 4): todavia no.
  *
- *   node medicion/mide-conversacion.mjs [--bloque a|b|ab|informe] [--candidatos 1000,1500,2000] [--margenes 0,50,100,150] [--respuestas 10]
+ *   node medicion/mide-conversacion.mjs [--bloque a|b|c|abc|informe] [--candidatos 1000,1500,2000] [--margenes 0,50,100,150] [--respuestas 10]
  *   (un bloque que no se corre se toma del JSON del dia, si existe; `informe` solo reescribe el .md)
  *
  * Deja `medicion/corpus-propio/conversacion-<fecha>.{json,md}`; los WAV van a `conversacion/` (ignorados).
@@ -272,6 +275,46 @@ async function bloqueB() {
   return r;
 }
 
+// ─── C · hook Stop ────────────────────────────────────────────────────────────────────────────
+
+const { escuchaConversacion } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'conversacion-socket.js')).href);
+const HOOK = join(raiz, 'scripts', 'habla-respuesta.sh');
+const ENTRADA_HOOK = JSON.stringify({ session_id: 'medicion', hook_event_name: 'Stop', last_assistant_message: 'Listo. El envío por silencio ya está medido y el valor por defecto sale de la medición.\n\n- detalle uno\n- detalle dos\n\n¿Sigo con la siguiente fase?' });
+
+function corrreHook(puerto) {
+  return new Promise((resuelve) => {
+    const t0 = performance.now();
+    const hijo = spawn('bash', [HOOK], { env: { ...process.env, DICTADO_CONVERSACION_PUERTO: String(puerto) }, stdio: ['pipe', 'pipe', 'ignore'] });
+    let stdout = '';
+    hijo.stdout.setEncoding('utf8'); hijo.stdout.on('data', (d) => (stdout += d));
+    hijo.on('close', (codigo) => resuelve({ codigo, stdout, ms: performance.now() - t0 }));
+    hijo.stdin.end(ENTRADA_HOOK);
+  });
+}
+
+async function situacionC(nombre, saludo, n = 10) {
+  const recibidos = [];
+  const servidor = saludo ? await escuchaConversacion({ puerto: 0, saludo: () => saludo, alDi: (t) => { recibidos.push(t); return new Promise((r) => setTimeout(() => r({ tipo: 'hecho', msPrimerAudio: 60, msTotal: 4000 }), 4000)); }, alCalla: () => undefined }) : null;
+  let puerto = servidor?.puerto;
+  if (!servidor) { const libre = await escuchaConversacion({ puerto: 0, saludo: () => 'off inactivo', alDi: async () => ({ tipo: 'cortado' }), alCalla: () => undefined }); puerto = libre.puerto; await libre.cierra(); }
+  const corridas = [];
+  for (let i = 0; i < n; i++) corridas.push(await corrreHook(puerto));
+  await servidor?.cierra();
+  const ms = corridas.map((c) => c.ms);
+  return { nombre, saludo: saludo ?? '(sin dictado)', n, msP50: p50(ms), msMax: Math.max(...ms), salidasNoCero: corridas.filter((c) => c.codigo !== 0).length, conStdout: corridas.filter((c) => c.stdout.length > 0).length, textosRecibidos: recibidos.length, textoEjemplo: recibidos[0] ?? null };
+}
+
+async function bloqueC() {
+  const r = [];
+  for (const [nombre, saludo] of [['sin dictado', null], ['conversación apagada', 'off escuchando'], ['dictado inactivo', 'on inactivo'], ['conversación encendida', 'on escuchando'], ['encendida, a media frase', 'on transcribiendo']]) {
+    console.log(`C · hook ×10 ${nombre}…`);
+    const s = await situacionC(nombre, saludo);
+    r.push(s);
+    console.log(`  p50 ${s.msP50.toFixed(0)} ms · máx ${s.msMax.toFixed(0)} ms · textos recibidos ${s.textosRecibidos}/10 · salidas ≠ 0: ${s.salidasNoCero} · con stdout: ${s.conStdout}`);
+  }
+  return r;
+}
+
 // ─── informe ──────────────────────────────────────────────────────────────────────────────────
 
 const palabras = (t) => new Set(t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zñ0-9 ]/g, ' ').split(/\s+/).filter((p) => p.length > 2));
@@ -287,7 +330,7 @@ function separaFugas(textos, frases) {
   return { voz, sala };
 }
 
-function informe(fecha, a, b) {
+function informe(fecha, a, b, c) {
   const md = [`# Conversación con el agente — medición ${fecha}`, ''];
   if (a) {
     md.push('## A · Envío por silencio (`envioMs`)', '', `Sesión sintética de 10 turnos por \`dictar --entrada\` a tiempo real: cada turno es una frase partida por una pausa de pensamiento (2 turnos por pausa), con ${COLA / 1000} s de cola. Voz ${VOZ} a ${VELOCIDAD}, motor y respaldo por defecto, VAD a 1000 ms.`, '', '| pausa | turno | ¿la partió el VAD? | hueco pegado → voz nueva |', '|---|---|---|---|');
@@ -302,6 +345,13 @@ function informe(fecha, a, b) {
     const fc = separaFugas(b.control.textos, RESPUESTAS_B);
     md.push('', `**Control** (misma voz por otro proceso, micrófono abierto, sin conversación): ${fc.voz.length}/${RESPUESTAS} respuestas transcritas como la frase del agente${fc.sala.length ? ` (+${fc.sala.length} textos ajenos)` : ''}, ${b.control.sinVoz} «sin voz» (el VAD abrió y el motor no sacó texto), pico p50 ${b.control.picoP50 ?? '—'} dBFS. ${fc.voz.length + b.control.sinVoz > 0 ? 'La sala **sí oye** el altavoz: los ceros de arriba son mérito del half-duplex.' : 'La sala **no oye** el altavoz (auriculares o micrófono mudo): los ceros de arriba no demuestran nada; repetir con altavoces.'}`, '', '**Corridas previas del mismo día (2026-09-23), con el código que aún paraba la captura:** micrófono `cerrado` (ffmpeg parado y rearrancado) frente a solo la puerta lógica, 10 respuestas cada uno, sala en silencio: fugas de la voz 0/10 y 0/10 (un texto ajeno, «Documental.»); primer audio p50 267 ms (esperando al cierre de ffmpeg; la síntesis ya se solapaba) frente a 56 ms; reapertura p50 249 ms frente a 151 ms; el VAD se abrió tras reabrir 1 vez frente a 0. Por eso la captura ya no se para.', '', 'La «voz detectada tras reabrir» que no coincide con la frase del agente y llega a instantes sueltos del hueco de 4 s es la sala (otra fuente sonando), no la cola de la voz: cuenta igual, porque con la sala sonando el agente espera al cierre de ese «turno» (RF-40, tope 5 s) antes de hablar, y eso es lo que infla el «primer audio desde la petición». Subir `umbralVozDb` es el mando para una sala con ruido.', '');
   }
+  if (c) {
+    md.push('## C · Hook `Stop`: el agente habla sin que se lo pidan', '', '`scripts/habla-respuesta.sh` con el JSON del arnés por stdin, 10 veces por situación, contra un socket falso que tarda 4 s en «sonar» (sin audio). RF-43 exige < 100 ms sin dictado o con la conversación apagada; RF-42, que el texto llegue y el hook no espere a la voz.', '', '| situación (saludo del dictado) | salida p50 / máx | textos recibidos | salidas ≠ 0 | con stdout |', '|---|---|---|---|---|');
+    for (const s of c) md.push(`| ${s.nombre}${s.saludo.startsWith('(') ? '' : ` (${s.saludo})`} | ${s.msP50.toFixed(0)} / ${s.msMax.toFixed(0)} ms | ${s.textosRecibidos}/${s.n} | ${s.salidasNoCero} | ${s.conStdout} |`);
+    const ejemplo = c.find((s) => s.textoEjemplo);
+    if (ejemplo) md.push('', `Lo que llega al socket con la respuesta de prueba (lista y pregunta final incluidas en el markdown): «${ejemplo.textoEjemplo}».`);
+    md.push('');
+  }
   return md.join('\n');
 }
 
@@ -310,7 +360,8 @@ const rutaJson = join(raiz, 'medicion', 'corpus-propio', `conversacion-${fecha}.
 const previo = existsSync(rutaJson) ? JSON.parse(readFileSync(rutaJson, 'utf8')) : {};
 const a = BLOQUE.includes('a') ? await bloqueA() : (previo.a ?? null);
 const b = BLOQUE.includes('b') ? await bloqueB() : (previo.b ?? null);
-const md = informe(fecha, a, b);
-writeFileSync(rutaJson, JSON.stringify({ fecha, voz: VOZ, velocidad: Number(VELOCIDAD), a, b }, null, 1));
+const c = BLOQUE.includes('c') ? await bloqueC() : (previo.c ?? null);
+const md = informe(fecha, a, b, c);
+writeFileSync(rutaJson, JSON.stringify({ fecha, voz: VOZ, velocidad: Number(VELOCIDAD), a, b, c }, null, 1));
 writeFileSync(join(raiz, 'medicion', 'corpus-propio', `conversacion-${fecha}.md`), md);
 console.log(`\n${md}`);
