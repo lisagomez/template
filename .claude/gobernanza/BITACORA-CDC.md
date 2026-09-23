@@ -3748,3 +3748,18 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `verify:gobernanza` y `validate` sobre el árbol del cambio (resultado en el PR).
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — aprobación explícita con los dos diffs
   delante («aprobar los dos», 2026-09-23).
+
+### 2026-09-23 — hook `Stop` y skill `dictado` con el modo conversación: «capa A basta» → CDC PROMOVIDO — radio: sistema (configuración del arnés) + skill (global)
+- **Cambio**: el de la entrada anterior, sin diferencias: `.claude/settings.json` con el hook `Stop`
+  (`.claude/hooks/habla-respuesta.sh` → `tools/dictado/scripts/habla-respuesta.sh`) y el skill global
+  `~/.claude/skills/dictado/SKILL.md` con el modo conversación. Se promueve a `main` (PR #144).
+- **Motivo**: la dueña eligió «capa A basta» con la lectura delante, como en el hook `SessionEnd` del
+  2026-09-14: el hook devuelve salida 0 sin texto y no cambia lo que la sesión ve; lo que cambia es la
+  forma del primer párrafo de cada respuesta, que el skill fija. La capa B no se corre, a propósito y
+  declarado.
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ capa A 123/123 · aprobación humana ☑ ·
+  pineo ☑. **Capa B no corrida, a propósito y declarado** («capa A basta»).
+- **Regresión**: `npm run prueba` 144/144 · medición C (no-op p50 3 ms; encendida 10/10 textos y
+  salida a 51 ms) · `verify:gobernanza` 152/152 · `validate` sellado sobre el árbol del PR.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «aprobar los dos» y «capa A basta»,
+  2026-09-23, con los dos diffs delante.
