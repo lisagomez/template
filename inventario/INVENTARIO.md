@@ -5,18 +5,18 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**24 activos** cubren **168 unidades** del repo.
+**24 activos** cubren **171 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
 | TPL-doctrina | Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto | CONOCIMIENTO | config_agentica | produccion | 17 | `AGENTS.md` |
-| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 48 | `.claude/specs` |
+| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 49 | `.claude/specs` |
 | TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 5 | `.claude/design-systems` |
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
 | TPL-empaquetador | Empaquetador de herramientas y su contrato | FABRICA | software | produccion | 3 | `scripts/empaqueta-herramienta.mjs` |
 | TPL-feature-laboratorio-voz | Laboratorio de voz: capturas y mediciones del motor | FABRICA | software | beta | 2 | `src/features/laboratorio-voz` |
-| TPL-gobernanza | Capa de gobernanza (controles C1-C8) y gates de validate | FABRICA | software | produccion | 14 | `.claude/gobernanza` |
+| TPL-gobernanza | Capa de gobernanza (controles C1-C8) y gates de validate | FABRICA | software | produccion | 16 | `.claude/gobernanza` |
 | TPL-imprenta | Imprenta de CLIs: manifiesto servicio a CLI y su auditoria | FABRICA | software | produccion | 4 | `.claude/imprenta` |
 | TPL-inventario | Inventario de activos: indice, detector, costeo y export al ERP | FABRICA | software | beta | 3 | `inventario` |
 | TPL-motor-ia | Motor de IA: routing por nivel, contabilidad de tokens y trayectorias de la app | FABRICA | software | produccion | 4 | `src/lib/ai` |
