@@ -67,7 +67,7 @@ async function main() {
   }
   if (estado === 200) {
     console.error(rojo(`✗ ${repo} es PUBLICO: el monorepo lleva el ERP y lo defendible no sale (§1.7).`));
-    console.error('  Hazlo privado: gh api -X PATCH repos/${repo} -F private=true  (tarda unos segundos en verse sin token)');
+    console.error(`  Hazlo privado: gh api -X PATCH repos/${repo} -F private=true  (tarda unos segundos en verse sin token)`);
     process.exit(1);
   }
   console.error(rojo(`Respuesta inesperada de GitHub (${estado}) para ${repo}: sin veredicto.`));
