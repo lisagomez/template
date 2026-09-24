@@ -125,3 +125,26 @@ npm run inventario:valida-erp -- --migracion <ruta a 005_activos.sql>
 
 Alta de un activo nuevo: añadir su fila en `inventario/activos.json`, `npm run inventario:vista`,
 y el gate vuelve a verde. La clasificación y el costo no se tocan a mano en ningún sitio.
+
+## 5. Límites conocidos (autocrítica del 2026-09-24)
+
+Resueltos en la misma sesión:
+- **Hash inestable entre máquinas**: incluía archivos no rastreados, así que el servidor vería un
+  CAMBIADO falso. Ahora el hash solo mira `git ls-files`; los no rastreados siguen contando para
+  descubrir un NUEVO.
+- **Deploy sin gate de inventario**: `predeploy` (sin sello) no lo corría, y desplegar es entregar.
+  Ahora lo corre.
+- **Operación sin dueño silenciosa**: las trayectorias de la app de la feature `chat` no las
+  reclama ningún activo; el reporte lo dice en vez de tirarlas.
+- **AMBIGUO ruidoso**: marcaba además HUÉRFANOS a sus dueños. Lo cazaron las pruebas.
+
+Declarados, sin arreglo desde aquí:
+- **La atribución es un proxy**: reparte por archivos tocados, así que favorece a los activos con
+  muchos archivos, y una sesión de otro repo en la misma ventana sumaría aquí (la trayectoria no
+  guarda el directorio). Cada fuente lo dice y marca PARCIAL.
+- **`git log --all`** cuenta también el trabajo de ramas sin mergear: fue costo real de construcción.
+- **El export es alta inicial**: con `ref_catalogo` ya dado de alta no inserta versiones ni costos
+  nuevos. El costo incremental y las versiones son del cosechador y de `swm-act` (CAMBIADO).
+- **`version_vigente` es `template@<fecha>`**, no la versión semver de cada herramienta.
+- **El árbol de decisiones de `AGENTS.md` no enruta al inventario**. Tocarlo es CDC (C1): el gate
+  y el empaquetador ya cubren el «sin asiento no hay entrega».

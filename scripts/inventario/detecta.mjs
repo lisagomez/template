@@ -25,7 +25,7 @@ const gris = (s) => `\x1b[2m${s}\x1b[0m`;
 
 /** Estado completo del inventario: activos con hash y todos los hallazgos. */
 export function detecta(repo) {
-  const { raiz, indice, porActivo, archivos, leeBytes, existe } = repo;
+  const { raiz, indice, porActivo, rastreados, leeBytes, existe } = repo;
   const errores = [
     ...camposProhibidos(indice).map((c) => `campo prohibido en ${RUTA_INDICE}: ${c} `
       + '(costo y clasificacion viajan al ERP, no a un repo publico)'),
@@ -38,7 +38,7 @@ export function detecta(repo) {
   const previo = leeUltimo(raiz);
   const activos = (indice.activos ?? []).map((a) => {
     const unidades = porActivo.get(a.id) ?? [];
-    const hash = hashDeActivo(unidades, archivos, leeBytes);
+    const hash = hashDeActivo(unidades, rastreados ?? repo.archivos, leeBytes);
     const antes = previo.get(a.id);
     return { ...a, unidades, hash, cambiado: Boolean(antes && hash && antes !== hash) };
   });

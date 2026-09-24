@@ -133,6 +133,17 @@ export function componenteOperacion(activo, aplicacion, herramientas) {
     fuente: `trayectorias aplicacion/herramientas: ${conCosto.length} de ${corridas.length} corridas con costo; mes ${ultimo}` };
 }
 
+/** Trayectorias de operacion que ningun activo reclama: se reportan, no se tiran. */
+export function operacionSinActivo(activos, aplicacion, herramientas) {
+  const slugs = new Set(activos.map((a) => a.ubicacion.split('/').pop()));
+  const huerfanas = new Map();
+  for (const t of [...aplicacion, ...herramientas]) {
+    const quien = t.actor?.feature ?? t.actor?.herramienta ?? '(sin actor)';
+    if (!slugs.has(quien)) huerfanas.set(quien, (huerfanas.get(quien) ?? 0) + 1);
+  }
+  return [...huerfanas].map(([quien, n]) => `${quien} (${n})`);
+}
+
 /** Clasificacion SIEMPRE propuesta (D-10: ratificar es humano). */
 export function clasificacionPropuesta(activo) {
   const conOrigen = [activo.origen ?? []].flat().length > 0;

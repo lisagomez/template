@@ -15,7 +15,8 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cargaRepo } from './repo.mjs';
 import { detecta, paraErp, RUTA_ULTIMO } from './detecta.mjs';
-import { construccion, leeCommits, leeTrayectorias, costeaActivo, clasificacionPropuesta } from './costeo.mjs';
+import { construccion, leeCommits, leeTrayectorias, costeaActivo, clasificacionPropuesta, operacionSinActivo }
+  from './costeo.mjs';
 import { sqlDeActivos } from './sql.mjs';
 
 export const DIR_SALIDA = 'inventario/salida';
@@ -43,7 +44,7 @@ export function lineaLedger(a, costo, clasificacion, fecha) {
 
 const usd = (v) => (v === null || v === undefined ? '—' : `$${v.toFixed(2)}`);
 
-function reporte(filas, fecha) {
+function reporte(filas, fecha, sinActivo) {
   const faltan = filas.filter((f) => f.costo_construccion.usd === null);
   const lineas = [
     `# Costeo del inventario — ${fecha}`, '',
@@ -56,7 +57,8 @@ function reporte(filas, fecha) {
     '', `## Lo que falta medir (${faltan.length} de ${filas.length} sin construccion en USD)`, '',
     ...faltan.map((f) => `- ${f.id}: ${f.costo_construccion.fuente}`),
     '- Replica y reposicion: `no_estimado` en todos (no hay dogfood medido).',
-    '- Horas humanas: se declaran en el ERP con `cosechar-activos.py ajustar`.', '',
+    '- Horas humanas: se declaran en el ERP con `cosechar-activos.py ajustar`.',
+    `- Trayectorias de operacion sin activo que las reclame: ${sinActivo.join(', ') || 'ninguna'}.`, '',
   ];
   return lineas.join('\n');
 }
@@ -77,7 +79,7 @@ export function exporta(repo, fecha = new Date().toISOString().slice(0, 10)) {
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'activos.jsonl'), filas.map((f) => JSON.stringify(f)).join('\n') + '\n');
   writeFileSync(join(dir, 'erp-act.sql'), sqlDeActivos(propios, filas, fecha));
-  writeFileSync(join(dir, 'costeo.md'), reporte(filas, fecha));
+  writeFileSync(join(dir, 'costeo.md'), reporte(filas, fecha, operacionSinActivo(propios, datos.aplicacion, datos.herramientas)));
   writeFileSync(join(repo.raiz, RUTA_ULTIMO), JSON.stringify(paraErp(estado), null, 1));
   return { ok: true, filas, externos: estado.activos.length - propios.length };
 }

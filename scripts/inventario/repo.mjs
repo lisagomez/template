@@ -39,5 +39,8 @@ export function cargaRepo(raiz = RAIZ) {
   const unidades = descubre(indice, archivos, clis);
   const { porActivo, hallazgos } = cruza(indice, unidades, existe);
   const leeBytes = (a) => (existsSync(join(raiz, a)) ? readFileSync(join(raiz, a)) : null);
-  return { raiz, indice, archivos, clis, existe, unidades, porActivo, hallazgos, leeBytes };
+  // El hash solo mira lo rastreado: con los no rastreados, el mismo activo daria otro hash en
+  // el servidor (checkout limpio) y swm-act veria un CAMBIADO falso.
+  const rastreados = git(raiz, ['ls-files']).filter((a) => existsSync(join(raiz, a)));
+  return { raiz, indice, archivos, rastreados, clis, existe, unidades, porActivo, hallazgos, leeBytes };
 }
