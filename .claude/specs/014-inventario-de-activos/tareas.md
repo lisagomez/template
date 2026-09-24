@@ -38,4 +38,5 @@
       1 CAMBIADO, 1 HUÉRFANO). PR hermes-os-a2a#316, sin merge.
 
 ## Fase 7 — Cierre
-- [ ] **TAR-13 · `npm run validate`** completo en verde + autocrítica.
+- [x] **TAR-13 · `npm run validate`** completo en verde (20 pasos + sello) + autocrítica: 4 defectos
+      resueltos y 5 límites declarados en el SDD §5.
