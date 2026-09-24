@@ -120,7 +120,7 @@ la cobertura en Python: una sola implementación. Se añade `--catalogo-json` pa
 npm run verifica:inventario            # gate (dentro de validate)
 npm run inventario:vista               # regenera INVENTARIO.md tras tocar el índice
 npm run inventario:exporta             # costeo + ledger + SQL en inventario/salida/
-npm run inventario:valida-erp -- --migracion <ruta a 005_activos.sql>
+npm run inventario:valida-erp -- --migraciones <dir businessos/erp/migrations>
 ```
 
 Alta de un activo nuevo: añadir su fila en `inventario/activos.json`, `npm run inventario:vista`,
