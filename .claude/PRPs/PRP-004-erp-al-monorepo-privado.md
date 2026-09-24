@@ -213,7 +213,9 @@ que cambia es de qué repo se restaura el DDL, y eso se anota ahí.
 
 > Solo fases. Las subtareas se generan al entrar a cada una (bucle agéntico).
 
-### Fase 0: Gate de visibilidad
+### Fase 0: Gate de visibilidad — ✅ CERRADA 2026-09-24
+> `gh api -X PATCH repos/lisagomez/template -F private=true` → `private: true`; `verifica:privado` en verde
+> (el primer intento dio 200 unos segundos: la API sin token tarda en reflejar el cambio).
 **Objetivo**: el template es privado y queda un chequeo que lo sostiene. Acción humana: la dueña
 cambia la visibilidad. El agente comprueba y añade `verifica-privado` a `predeploy` y al hook de push.
 **Validación**: `gh repo view --json isPrivate` → `true`, registrado; el chequeo falla en un
