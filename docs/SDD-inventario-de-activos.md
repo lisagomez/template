@@ -98,10 +98,14 @@ precie con su `token_usage`.
 `inventario/salida/` está en `.gitignore`. El SQL usa la variable psql `:'cliente_id'`, así el UUID
 del tenant de la casa no se escribe en este repo.
 
-### 2.11 Arista hacia `swm-act`
-El detector del ERP llama `node <template>/scripts/inventario/detecta.mjs --json` si
-`REPO_TEMPLATE` está definido, y compara `template/<ubicación>` con el catálogo. No reimplementa
-la cobertura en Python: una sola implementación. Se añade `--catalogo-json` para probarlo sin BD.
+### 2.11 `swm-act` y el ERP dentro del monorepo (PRP-004)
+El ERP vive en `erp/` y su detector en `erp/bin/detector-swm-act.py`, que llama
+`node scripts/inventario/detecta.mjs --json` del mismo repo y compara `template/<ubicación>` con el
+catálogo. No reimplementa la cobertura en Python: una sola implementación. `--catalogo-json` sirve
+para probarlo sin BD. Los archivos de `erp/` los cataloga `swm-act` uno por uno (`template/erp/…`);
+en el índice el ERP es un activo **externo** (`TPL-erp`): cubierto, no exportado, un escritor por
+origen. Las filas viejas `businessos/erp/…` salen como `REUBICAR` hasta la fase 4 del PRP-004.
+La arista original (PR #316 en `hermes-os-a2a`, con `REPO_TEMPLATE`) queda obsoleta.
 
 ## 3. Descartado
 
@@ -120,7 +124,7 @@ la cobertura en Python: una sola implementación. Se añade `--catalogo-json` pa
 npm run verifica:inventario            # gate (dentro de validate)
 npm run inventario:vista               # regenera INVENTARIO.md tras tocar el índice
 npm run inventario:exporta             # costeo + ledger + SQL en inventario/salida/
-npm run inventario:valida-erp -- --migraciones <dir businessos/erp/migrations>
+npm run inventario:valida-erp         # toma erp/migrations/ del propio repo (Docker)
 ```
 
 Alta de un activo nuevo: añadir su fila en `inventario/activos.json`, `npm run inventario:vista`,

@@ -29,6 +29,8 @@
   { "patron": "hermes/*" },
   { "patron": "trayectorias/" },
   { "patron": "inventario/" },
+  { "patron": "erp/*/" },
+  { "patron": "erp/*.md" },
   { "patron": "AGENTS.md" },
   { "patron": "CLAUDE.md" },
   { "patron": "GEMINI.md" },
@@ -215,6 +217,15 @@
    "tipo": "infraestructura", "clase": "INFRA", "estado": "produccion",
    "ubicacion": "docker-compose.yml", "responsable": "dep-sw",
    "cubre": ["Dockerfile", "docker-compose.yml", "Caddyfile", ".hermes-baseline.json", "hermes/.env.ejemplo", "scripts/configura-deploy.mjs", "scripts/verifica-hermes.mjs", "docs/DEPLOY-HETZNER.md", "docs/FASE0-INFRAESTRUCTURA.md", "docs/DICTADO-CELULAR-RED.md"]
+  },
+  {
+   "id": "TPL-erp",
+   "nombre": "ERP agentico: maestro, reglas, migraciones y modulo act",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "erp", "responsable": "dep-fin", "externo": true,
+   "origen": [".claude/PRPs/PRP-004-erp-al-monorepo-privado.md"],
+   "descripcion": "Lo cataloga archivo por archivo su propio detector (erp/bin/detector-swm-act.py, ubicaciones template/erp/...). Aqui cuenta como cubierto y no se exporta: un escritor por origen.",
+   "cubre": ["erp/*", "erp/*.md"]
   },
   {
    "id": "TPL-design-systems",

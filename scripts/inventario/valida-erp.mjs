@@ -7,8 +7,9 @@
  * quedo en las tablas coincide con el ledger. Al final el contenedor se destruye: no queda
  * nada escrito en ningun sitio.
  *
- * Vive fuera de `validate`: necesita Docker y las migraciones del repo privado del ERP.
- * Uso:  node scripts/inventario/valida-erp.mjs --migraciones <dir con 001..005_*.sql>
+ * Vive fuera de `validate`: necesita Docker. Las migraciones son las del propio monorepo
+ * (`erp/migrations/`, PRP-004); `--migraciones <dir>` solo para probar otras.
+ * Uso:  node scripts/inventario/valida-erp.mjs [--migraciones <dir con 001..005_*.sql>]
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -85,9 +86,9 @@ function comprueba(nombre, ledger, cliente) {
 }
 
 function main() {
-  const dir = arg('--migraciones') ?? process.env.ERP_MIGRACIONES;
+  const dir = arg('--migraciones') ?? process.env.ERP_MIGRACIONES ?? join(RAIZ, 'erp/migrations');
   if (!dir || !existsSync(dir)) {
-    console.error(rojo('Falta --migraciones <dir> (las de businessos/erp/migrations del repo del ERP).'));
+    console.error(rojo(`No existe el directorio de migraciones: ${dir}`));
     process.exit(2);
   }
   const salida = join(RAIZ, DIR_SALIDA);

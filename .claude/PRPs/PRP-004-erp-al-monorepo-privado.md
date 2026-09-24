@@ -243,7 +243,10 @@ rutas de `businessos/`. Sin tocar producción.
 hallazgos esperados (NUEVO/CAMBIADO/HUÉRFANO sembrados) y, con el catálogo real re-ubicado en la
 copia, **cero** hallazgos espurios por la ruta. `python3 -m py_compile` en verde.
 
-### Fase 3: El inventario cubre el ERP
+### Fase 3: El inventario cubre el ERP — ✅ CERRADA 2026-09-24
+> Fuentes `erp/*/` y `erp/*.md`; activo `TPL-erp` externo (lo cataloga swm-act archivo por
+> archivo). 176 unidades, 0 hallazgos. `inventario:valida-erp` sin argumentos sobre
+> `erp/migrations/`: 23 altas, 0 en la segunda carga, 7/7. Spec 014 (RF-14, RF-16) y SDD §2.11 al día.
 **Objetivo**: fuentes y activos `erp/…` en `inventario/activos.json`; `valida-erp` toma
 `erp/migrations/` por defecto; la vista `INVENTARIO.md` al día; la spec 014 y el SDD actualizados
 (el ERP es fuente interna, la arista externa se retira).

@@ -6,6 +6,9 @@
 > [`docs/SDD-inventario-de-activos.md`](../../../docs/SDD-inventario-de-activos.md).
 > Decisión del laboratorio: el inventario no es una lista nueva; es este repo convertido en
 > **fuente** del inventario que ya existe (`erp.act_activo`).
+> **Modificada por el PRP-004 (2026-09-24):** el ERP se mudó a `erp/` de este monorepo, ahora
+> privado. El detector `swm-act` vive aquí (`erp/bin/`) y el ERP es fuente interna: la arista
+> hacia `hermes-os-a2a` (PR #316) se retira.
 
 ## Contexto y objetivo
 
@@ -89,16 +92,18 @@ ERP acepta tal cual, y la arista para que `swm-act` lea este repo.
 - RF-13: CUANDO se exporte, EL SISTEMA escribirá fuera de git un ledger con el formato de
   `activos/activos.jsonl` y un SQL de filas para `erp.act_activo`, `erp.act_version` y
   `erp.act_costo` que respete sus columnas y restricciones.
-- RF-14: EL SISTEMA ofrecerá un validador que aplique `005_activos.sql` en un Postgres desechable,
-  cargue el SQL exportado y reporte el resultado sin dejar nada escrito.
+- RF-14: EL SISTEMA ofrecerá un validador que aplique las migraciones de `erp/migrations/` en un
+  Postgres desechable, cargue el SQL exportado y reporte el resultado sin dejar nada escrito.
 - RF-15: EL SISTEMA generará una vista legible del inventario (identidad, estado y cobertura, sin
   costos) y el gate fallará si está desactualizada respecto al índice; lo que falta medir irá en el
   reporte de costeo del export, fuera de git, porque cambia con cada sesión registrada.
 
 ### Arista al ERP
 
-- RF-16: EL SISTEMA expondrá el resultado del detector en JSON para que `swm-act` lea este repo
-  como fuente, con la ubicación de cada activo en el mismo espacio de nombres que usa el catálogo.
+- RF-16: EL SISTEMA expondrá el resultado del detector en JSON para que `swm-act`
+  (`erp/bin/detector-swm-act.py`) lo lea como fuente, con la ubicación de cada activo en el mismo
+  espacio de nombres que usa el catálogo, y cubrirá el ERP como activo externo que ese detector
+  cataloga archivo por archivo.
 
 ## Requisitos no funcionales
 

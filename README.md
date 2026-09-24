@@ -239,7 +239,7 @@ npm run verifica:inventario  # todo activo del repo con asiento en inventario/ac
 npm run prueba:inventario    # el detector, el costeo (nunca un cero inventado) y el SQL del export, sobre repos de juguete
 npm run inventario:vista     # regenera inventario/INVENTARIO.md tras tocar el indice
 npm run inventario:exporta   # costeo + ledger + SQL para el modulo act del ERP, en inventario/salida/ (fuera de git)
-npm run inventario:valida-erp -- --migraciones <dir>  # carga el export en un Postgres desechable con el esquema real del ERP (Docker)
+npm run inventario:valida-erp  # carga el export en un Postgres desechable con erp/migrations/ (Docker)
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
 npm run verifica:privado  # el repo NO es visible sin credenciales (lleva el ERP). Usa red: va en predeploy y en el hook pre-push si se empuja erp/
 npm run vigila:versiones  # deriva de TODO lo pineado (stack + MCP). Usa red: fuera del gate
