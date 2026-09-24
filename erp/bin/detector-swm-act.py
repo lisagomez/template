@@ -5,11 +5,16 @@ PROPONE, NO CATALOGA. Conecta a la BD con `set local role rol_swm` (solo SELECT 
 la prueba estructural de que no puede escribir es parte del gate de esta fase) y
 compara las FUENTES REALES contra `erp.act_activo`:
 
-  · archivos de `businessos/erp/{bin,reglas,packs,migrations}` (sha256)
+  · archivos de `erp/{bin,reglas,packs,migrations}` del monorepo (sha256), con ubicación
+    `template/erp/…` (PRP-004: el ERP vive en el template, no en businessos)
   · CLIs impresos según el ÍNDICE versionado `cli-library-index.json` (la librería
     de binarios solo existe en la máquina que imprime — doctrina cli-audit 2026-07-12:
     el índice viaja en el repo, que es donde este job corre)
   · activos catalogados con origen en ramas del trío (deriva de hash / rama borrada)
+  · el resto del monorepo: su propio detector (spec 014, `scripts/inventario/detecta.mjs
+    --json`) entrega identidad + hash por activo, con ubicación `template/<ruta>`. No se
+    reimplementa su cobertura aquí: una sola lógica. El ERP va como activo externo en ese
+    índice (lo cataloga escanear_erp_dirs archivo por archivo: un escritor por origen).
 
 Hallazgos (mismo vocabulario del maestro):
   NUEVO    — existe en la fuente y no está catalogado
@@ -23,7 +28,9 @@ defensibilidad por ubicación — D-12; hoy sin repos separados TODO se propone
 Salida: stdout + ~/state/hallazgos-swm-act.jsonl (append, una corrida por línea) +
 resumen a Slack. Cadencia: semanal + al cierre de fase (D-09).
 
-Uso:  cd ~/repo/businessos && set -a && . ./.env && set +a && python3 detector-swm-act.py [--dry-run]
+Uso:  set -a && . ~/businessos/.env && set +a && python3 <monorepo>/erp/bin/detector-swm-act.py [--dry-run]
+      [--catalogo-json RUTA]   catálogo desde un JSON {ubicacion: {folio, hash, estado}} en vez
+                               de la BD: prueba en frío, sin ERP_DB_URL (implica --dry-run)
 """
 import hashlib
 import json
@@ -38,11 +45,19 @@ from pathlib import Path
 ERP_DB_URL = os.environ.get("ERP_DB_URL", "")
 CASA = os.environ.get("ERP_CLIENTE_CASA", "")
 CANAL = os.environ.get("SLACK_DEV_CHANNEL", "C0BGL2DMNLB")
-REPO_BUSINESSOS = Path(os.environ.get("REPO_BUSINESSOS", "/home/hermes/repo/businessos"))
+# El monorepo es el repo de este script (erp/bin/ → raíz). businessos solo aporta el índice de
+# CLIs, que se escribe allí (cli-audit): sin REPO_BUSINESSOS esa fuente se omite con aviso.
+MONOREPO = Path(__file__).resolve().parents[2]
+REPO_BUSINESSOS = Path(os.environ["REPO_BUSINESSOS"]) if os.environ.get("REPO_BUSINESSOS") else None
 REPO_TRIO = os.environ.get("TRIO_REPO_DIR", "/home/hermes/trio/hermes-os-a2a")
 SALIDA = Path(os.environ.get("SWM_ACT_SALIDA", "/home/hermes/state/hallazgos-swm-act.jsonl"))
 ENV_NEGOCIO = "/home/hermes/businessos/negocio/.hermes/.env"
-DRY = "--dry-run" in sys.argv[1:]
+_ARGS = sys.argv[1:]
+_i = _ARGS.index("--catalogo-json") if "--catalogo-json" in _ARGS else -1
+if _i >= 0 and (_i + 1 >= len(_ARGS) or _ARGS[_i + 1].startswith("--")):
+    sys.exit("--catalogo-json necesita la ruta de un JSON {ubicacion: {folio, hash, estado}}")
+CATALOGO_JSON = _ARGS[_i + 1] if _i >= 0 else ""
+DRY = "--dry-run" in _ARGS or bool(CATALOGO_JSON)
 
 DIRS_ERP = ("erp/bin", "erp/reglas", "erp/packs", "erp/migrations")
 
@@ -68,6 +83,8 @@ def sha256(p: Path) -> str:
 
 def catalogo() -> dict[str, dict]:
     """{ubicacion: {folio, hash, estado}} de act_activo del tenant de la casa."""
+    if CATALOGO_JSON:
+        return json.loads(Path(CATALOGO_JSON).read_text())
     ok, filas = sql_lectura(
         "select folio || '|' || coalesce(hash_vigente,'') || '|' || estado || '|' || ubicacion "
         "from erp.act_activo;")
@@ -84,13 +101,13 @@ def escanear_erp_dirs(cat: dict[str, dict]) -> list[dict]:
     hallazgos = []
     vistos: set[str] = set()
     for d in DIRS_ERP:
-        base = REPO_BUSINESSOS / d
+        base = MONOREPO / d
         if not base.is_dir():
             continue
         for p in sorted(base.rglob("*")):
-            if not p.is_file() or p.name.startswith("."):
-                continue
-            ubic = f"businessos/{p.relative_to(REPO_BUSINESSOS)}"
+            if not p.is_file() or p.name.startswith(".") or "__pycache__" in p.parts:
+                continue  # compilados locales no son activos
+            ubic = f"template/{p.relative_to(MONOREPO)}"
             vistos.add(ubic)
             h = sha256(p)
             reg = cat.get(ubic)
@@ -110,13 +127,21 @@ def escanear_erp_dirs(cat: dict[str, dict]) -> list[dict]:
     for ubic, reg in cat.items():
         if reg["estado"] != "activo":
             continue
-        if any(ubic.startswith(f"businessos/{d}/") for d in DIRS_ERP) and ubic not in vistos:
+        if any(ubic.startswith(f"template/{d}/") for d in DIRS_ERP) and ubic not in vistos:
             hallazgos.append({"tipo": "HUERFANO", "ubicacion": ubic, "folio": reg["folio"]})
+        elif ubic.startswith("businessos/erp/"):
+            # Ruta de antes de la mudanza: no es baja ni alta, es una fila por re-ubicar (PRP-004
+            # fase 4) conservando folio y costo. Sin esto quedaria activa e ignorada en silencio.
+            hallazgos.append({"tipo": "REUBICAR", "ubicacion": ubic, "folio": reg["folio"],
+                              "nota": f"-> template/{ubic[len('businessos/'):]} (PRP-004 fase 4)"})
     return hallazgos
 
 
 def escanear_clis(cat: dict[str, dict]) -> list[dict]:
     """CLIs impresos según el índice del repo. Fuente declarada: índice, no librería."""
+    if REPO_BUSINESSOS is None:
+        print("AVISO: sin REPO_BUSINESSOS no hay índice de CLIs (vive en hermes-os-a2a) — se omite")
+        return []
     idx = REPO_BUSINESSOS / "cli-library-index.json"
     if not idx.is_file():
         return []
@@ -162,6 +187,56 @@ def escanear_ramas() -> list[dict]:
     return hallazgos
 
 
+def escanear_template(cat: dict[str, dict]) -> list[dict]:
+    """Activos del template según SU detector (índice de identidad; costo y clasificación
+    no viajan por aquí: salen del export del template, fuera de git — repo público)."""
+    script = MONOREPO / "scripts/inventario/detecta.mjs"
+    if not script.is_file():
+        print(f"AVISO: {MONOREPO} sin scripts/inventario/detecta.mjs — se omite")
+        return []
+    # Best-effort que IMPRIME: sin node o con el detector colgado se omite esta fuente,
+    # jamás se tumba la corrida semanal de las demás.
+    try:
+        r = subprocess.run(["node", str(script), "--json"], capture_output=True, text=True, timeout=120)
+    except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+        print(f"AVISO: no pude correr el detector del template ({type(e).__name__}) — se omite")
+        return []
+    try:
+        estado = json.loads(r.stdout)
+    except json.JSONDecodeError:
+        print(f"AVISO: el detector del template no devolvió JSON (rc={r.returncode}) — se omite")
+        return []
+    if estado.get("hallazgos") or estado.get("errores"):
+        # Un índice divergente no se cosecha: su propio gate ya está en rojo y lo dice.
+        return [{"tipo": "TEMPLATE-DIVERGENTE", "ubicacion": "template/inventario/activos.json",
+                 "nota": f"{len(estado.get('hallazgos', []))} hallazgo(s), "
+                         f"{len(estado.get('errores', []))} error(es): corre verifica:inventario allí"}]
+    hallazgos, vistos = [], set()
+    for a in estado.get("activos", []):
+        if a.get("externo"):
+            continue  # un escritor por origen: los CLIs los cataloga escanear_clis
+        ubic = a["ubicacion"]
+        vistos.add(ubic)
+        reg = cat.get(ubic)
+        if reg is None:
+            hallazgos.append({
+                "tipo": "NUEVO", "ubicacion": ubic, "hash": a.get("hash"), "ref_template": a["id"],
+                "propuesta": {"tipo_activo": a["tipo"], "clase": a["clase"], "estado": a["estado"],
+                              "defensibilidad": "reemplazable",
+                              "nota": "alta con inventario/salida/erp-act.sql del template "
+                                      "(eje D+I heredado del origen y costo con fuente); "
+                                      "repo público ⇒ reemplazable (D-12); ratificación humana"}})
+        elif reg["estado"] == "activo" and reg["hash"] and a.get("hash") and reg["hash"] != a["hash"]:
+            hallazgos.append({"tipo": "CAMBIADO", "ubicacion": ubic, "folio": reg["folio"],
+                              "hash_catalogo": reg["hash"], "hash_fuente": a["hash"]})
+    for ubic, reg in cat.items():
+        # template/erp/ es de escanear_erp_dirs (archivo por archivo): un escritor por origen
+        if (reg["estado"] == "activo" and ubic.startswith("template/")
+                and not ubic.startswith("template/erp/") and ubic not in vistos):
+            hallazgos.append({"tipo": "HUERFANO", "ubicacion": ubic, "folio": reg["folio"]})
+    return hallazgos
+
+
 def avisar(texto: str) -> None:
     if DRY:
         print("[dry-run] Slack:", texto.replace("\n", " | ")[:200])
@@ -189,7 +264,7 @@ def avisar(texto: str) -> None:
 
 def main() -> None:
     cat = catalogo()
-    hallazgos = escanear_erp_dirs(cat) + escanear_clis(cat) + escanear_ramas()
+    hallazgos = escanear_erp_dirs(cat) + escanear_clis(cat) + escanear_ramas() + escanear_template(cat)
     corrida = {"corrida": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                "catalogados": len(cat), "hallazgos": hallazgos}
     for h in hallazgos:

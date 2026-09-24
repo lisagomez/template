@@ -230,7 +230,12 @@ historial reescrito a la nueva ruta, desde `origin/master` de `hermes-os-a2a` en
 **Validación**: sha256 por archivo igual al del commit de origen; `audita:secretos` sobre el
 historial importado en verde; `git log --follow` muestra los commits de origen. Gate humano: merge.
 
-### Fase 2: Scripts en su nuevo sitio (en seco)
+### Fase 2: Scripts en su nuevo sitio (en seco) — ✅ CERRADA 2026-09-24
+> Detector: escanea `erp/` del monorepo (`template/erp/…`), usa el detector del template sin
+> `REPO_TEMPLATE`, índice de CLIs solo con `REPO_BUSINESSOS`; trae los arreglos de la revisión del
+> #316. Ensayo: catálogo de hoy → 9 NUEVO + 9 `REUBICAR` (tipo nuevo: la fila vieja ya no queda
+> ignorada en silencio); catálogo re-ubicado → **0** hallazgos del ERP. Cazados y corregidos:
+> `__pycache__` escaneado como activo, y la fuente template marcando HUÉRFANOS los `template/erp/…`.
 **Objetivo**: `detector-swm-act.py` escanea `erp/` del template y consume el `--json` del detector
 del template (lo que hacía el PR #316, sin cruzar repos); el cosechador lee su configuración sin
 rutas de `businessos/`. Sin tocar producción.

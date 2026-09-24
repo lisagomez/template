@@ -23,11 +23,11 @@ Invariantes que este job respeta A PROPÓSITO:
 
 Uso (en el servidor):
   source ~/businessos/.env
-  python3 ~/businessos/cosechar-activos.py detectar   [--dry-run]
-  python3 ~/businessos/cosechar-activos.py concretar  <task_id> | --auto [--dry-run]
-  python3 ~/businessos/cosechar-activos.py ratificar  ACT-0002 --defensibilidad defendible \
+  python3 <monorepo>/erp/bin/cosechar-activos.py detectar   [--dry-run]
+  python3 <monorepo>/erp/bin/cosechar-activos.py concretar  <task_id> | --auto [--dry-run]
+  python3 <monorepo>/erp/bin/cosechar-activos.py ratificar  ACT-0002 --defensibilidad defendible \
       [--actor elisa] --confirmar
-  python3 ~/businessos/cosechar-activos.py ajustar    ACT-0002 --componente horas_humanas \
+  python3 <monorepo>/erp/bin/cosechar-activos.py ajustar    ACT-0002 --componente horas_humanas \
       --monto 120 --fuente "8h de revision de Elisa a $15/h" --confirmar
 
 Cron: detectar cada 10 min; concretar --auto cada 10 min (tras el fetch del repo).
@@ -302,7 +302,7 @@ select folio from alta;"""
                f"Costo tokens: ${costo['monto']} ({costo['filas']} filas del ledger). "
                f"Defensibilidad: *propuesta* (reemplazable por default).\n"
                f"Ratificar: `ssh hetzner 'source ~/businessos/.env && python3 "
-               f"~/businessos/cosechar-activos.py ratificar {folio} "
+               f"<monorepo>/erp/bin/cosechar-activos.py ratificar {folio} "
                f"--defensibilidad defendible|reemplazable --confirmar'`\n"
                f"Al mergear el PR de `tarea/{tid}`, `concretar --auto` cierra el ciclo.")
     _guardar_memoria(visto)

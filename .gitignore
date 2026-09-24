@@ -100,3 +100,6 @@ capturas-laboratorio/
 
 # Inventario de activos (spec 014): el export lleva costo y clasificacion. Repo publico: nunca a git
 /inventario/salida/
+
+# Python
+__pycache__/
