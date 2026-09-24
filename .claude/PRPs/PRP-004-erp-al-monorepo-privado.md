@@ -222,7 +222,9 @@ cambia la visibilidad. El agente comprueba y añade `verifica-privado` a `predep
 simulacro (repo de prueba público o respuesta simulada) y pasa en el real. **Nada del ERP se ha
 subido todavía.**
 
-### Fase 1: Importación con historial y auditoría
+### Fase 1: Importación con historial y auditoría — ✅ CERRADA 2026-09-24
+> Corte `hermes-os-a2a@97d9f9e`; git-filter-repo 2.47.0; 11 archivos sha256 idénticos; 11 commits
+> de historia; `audita:secretos` limpio (2027 blobs, 449 commits). Merge aprobado por el laboratorio.
 **Objetivo**: rama con `erp/` (maestro, reglas, migraciones, `bin/` con los dos scripts) y su
 historial reescrito a la nueva ruta, desde `origin/master` de `hermes-os-a2a` en un commit fijo.
 **Validación**: sha256 por archivo igual al del commit de origen; `audita:secretos` sobre el
