@@ -52,14 +52,21 @@ export const IMPRESORAS_DEMO: PerfilImpresora[] = [
   perfil({ id: 'zebra-suc-poniente', nombre: 'ZD621 300 dpi 4×2', sitio: 'SUC-PONIENTE', dpi: 300 }),
 ];
 
+/** Las 8:00 UTC del dia dado, como marca de tiempo de la semilla. */
+function aLasOcho(dia: string): string {
+  const [a = 1970, m = 1, d = 1] = dia.split('-').map(Number);
+  return new Date(Date.UTC(a, m - 1, d, 8)).toISOString();
+}
+
 export function semillaFicticia(hoy: string): EstadoAlmacen {
+  const cuando = aLasOcho(hoy);
   const base = estadoVacio({ prefijoEmpresa: '9521234', prefijoInterno: '04', extensionSscc: 0, sitios: SITIOS_DEMO });
   const registros = F.map((f) => Object.fromEntries(C.map((c, i) => [c, f[i] ?? ''])));
   const { filas, errores } = leeFilas(registros, CATEGORIAS_EJEMPLO.map((c) => c.id));
   const plan = planificaImportacion(filas, errores, base);
-  const e = aplicaImportacion(base, plan, { id: 'semilla', archivo: 'semilla-ficticia', huella: 'sin-archivo', operador: 'semilla', fecha: `${hoy}T08:00:00.000Z` });
+  const e = aplicaImportacion(base, plan, { id: 'semilla', archivo: 'semilla-ficticia', huella: 'sin-archivo', operador: 'semilla', fecha: cuando });
   const existencias: Existencia[] = LOTES.map(([sitio, sku, lote, dias, cantidad], i) => ({
-    id: `semilla-${i + 1}`, sitio, sku, gtin: e.articulos[sku]?.gtinCaja ?? '', lote, caducidad: sumaDias(hoy, dias), cantidad, origen: 'semilla', actualizado: `${hoy}T08:00:00.000Z`,
+    id: `semilla-${i + 1}`, sitio, sku, gtin: e.articulos[sku]?.gtinCaja ?? '', lote, caducidad: sumaDias(hoy, dias), cantidad, origen: 'semilla', actualizado: cuando,
   }));
   return { ...e, existencias, impresoras: IMPRESORAS_DEMO };
 }
