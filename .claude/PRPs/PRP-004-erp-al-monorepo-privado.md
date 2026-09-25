@@ -284,7 +284,16 @@ de la casa en lo entregable = 0; instalación limpia con tenant ficticio + segun
 pruebas (a)(b)(c)(d) en verde; esquema instalado ≡ producción salvo lo documentado; `npm run validate`
 en verde. **Solo lectura contra producción**; sin credencial de solo lectura al catálogo, se detiene.
 
-### Fase 4: Re-ubicación en el catálogo de producción — 📦 PAQUETE LISTO, espera el sí (2026-09-25)
+### Fase 4: Re-ubicación en el catálogo de producción — ✅ CERRADA 2026-09-25
+> **Aplicada en producción** por lisagomez (el laboratorio) desde el SQL Editor de Supabase, con su
+> aprobación explícita («apruebo la fase 4: re-ubicar ACT-0012 en producción, con lisagomez (el
+> laboratorio) como aprobador»). Verificado con `erp_lector` (solo lectura): ACT-0012 `activo ·
+> template/erp/`; 1 sola fila de `act_activo` actualizada; 25 activos / 25 folios / costo total 36.32 /
+> 23 versiones / 23 costos iguales que antes; bitácora 24 → 25 con `act.reubicar ACT-0012 erp/ →
+> template/erp/`, `aprobado_por = lisagomez (el laboratorio)`, traza `b2b726c1…`; 0 filas activas en
+> `businessos/erp/`. Detector en seco **contra el catálogo real**: 0 HUÉRFANO, 0 REUBICAR (32 NUEVO que
+> el catálogo nunca tuvo uno por uno: catalogarlos es otro gate). El archivo corre igual en el SQL
+> Editor y en `psql`; el ensayo probó ida, segunda corrida rechazada sin rastro y reverso.
 > Medido (solo lectura): 25 activos, 1 sola fila con `businessos/erp/` (ACT-0002, en baja: historia,
 > no se toca) y el ERP es ACT-0012 con `erp/`. SQL con guardas, bitácora (`aprobado_por` obligatorio) y
 > reverso: `erp/casa/fase4-reubicacion.sql`. Ensayo (`erp/casa/ensayo-fase4.sh`, copia del catálogo en
@@ -365,6 +374,10 @@ entrada en `BITACORA-CDC.md`; `verify:gobernanza` en verde.
   una tabla temporal).
 - **2026-09-25 · `psql -c` no admite SQL y `\gexec` en la misma cadena**: falló en silencio con la salida
   redirigida; va por stdin.
+- **2026-09-25 · El SQL Editor de Supabase no corre comandos de `psql`** (`\set`, `\if`, `\gset`): el SQL de
+  un gate que va a producción se escribe sin ellos, con los parámetros leídos de la sesión
+  (`current_setting('fase4.x', true)`) y los valores aprobados por defecto. Así el ensayo y producción
+  corren **el mismo archivo**, no dos versiones.
 - **2026-09-25 · Un worktree con `node_modules` enlazado no compila**: Turbopack rechaza el enlace fuera
   de la raíz. Para ensayar un CDC de solo documentos, correr `validate` sin typecheck/lint/build.
 
@@ -434,7 +447,7 @@ entrada en `BITACORA-CDC.md`; `verify:gobernanza` en verde.
 | `erp/` importado con historial, byte a byte | ✅ | Fase 1: 11 sha256 idénticos, `audita:secretos` limpio |
 | `verifica:inventario` con el ERP cubierto | ✅ | 181 unidades, 0 NUEVO / HUÉRFANO / AMBIGUO |
 | `inventario:valida-erp` sin `--migraciones` | ✅ | 23 altas, 0 en la segunda carga, 7/7 (re-corrido con las migraciones de la 3B) |
-| Detector desde el template sin HUÉRFANO/NUEVO espurios por la ruta | 🟡 ensayado | 0 HUÉRFANO y 0 REUBICAR contra la copia re-ubicada. Los NUEVO que quedan (9 archivos de `erp/` + activos del template) no son espurios por la ruta: el catálogo de la casa nunca los tuvo uno por uno; darlos de alta es catalogación (gate humano aparte). Falta la corrida real: **gate Fase 4 + Fase 5** |
+| Detector desde el template sin HUÉRFANO/NUEVO espurios por la ruta | ✅ | Fase 4 aplicada; `detector-swm-act.py --dry-run` desde el template contra el catálogo **real** (con `erp_lector`/`rol_swm`): 0 HUÉRFANO, 0 REUBICAR. Los 32 NUEVO (9 de `erp/` + 23 del template) no son espurios por la ruta: el catálogo nunca los tuvo uno por uno; catalogarlos es otro gate |
 | Retiro en `hermes-os-a2a` y #316 cerrado | ⛔ | **Bloqueado por la duda 2** |
 | Jobs del servidor desde el template, llave de solo lectura, `rc=0` | ⏳ | **Gate Fase 5** (runbook listo) |
 | Fase 3B: esquema ≡ producción, marca blanca, instalable | ✅ | `npm run erp:prueba` en verde; `erp:control` 6/6; `verifica:marca-blanca` en `validate` |

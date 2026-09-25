@@ -68,9 +68,23 @@ foto() {
 foto antes
 
 echo "== 3. fase4-reubicacion.sql por el puente (rol_exe_fin + tenant de la casa)"
-docker exec -i "$ID" psql -U postgres -X -q -v aprobado_por=ensayo-efimero -v cliente="$CASA" -f - \
-  < "$DIR/fase4-reubicacion.sql"
+# Mismo archivo que se pega en el SQL Editor; aquí los parámetros entran por la sesión.
+fase4() {  # $1 = ida | vuelta
+  docker exec -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 \
+    -c "set fase4.cliente = '$CASA'" -c "set fase4.aprobado_por = 'ensayo-efimero'" \
+    -c "set fase4.sentido = '$1'" -f - < "$DIR/fase4-reubicacion.sql"
+}
+fase4 ida
 foto despues
+echo "== 3b. correrlo DOS veces: la guarda debe frenar la segunda sin dejar nada escrito"
+if fase4 ida > "$TMP/segunda.txt" 2>&1; then echo "  LA SEGUNDA CORRIDA PASÓ (la guarda no frena)"; exit 1; fi
+foto segunda
+grep -m1 -o "ACT-0012 no está como se midió[^;]*" "$TMP/segunda.txt" | sed 's/^/  rechazada: /'
+if diff -q "$TMP/totales-despues.txt" "$TMP/totales-segunda.txt" >/dev/null; then
+  echo "  nada escrito: totales y bitácora iguales a la primera corrida"
+else
+  echo "  LA CORRIDA FALLIDA DEJÓ RASTRO"; exit 1
+fi
 
 echo "== 4. diff de filas (antes → después) y totales"
 { diff "$TMP/filas-antes.txt" "$TMP/filas-despues.txt" || true; } | grep -E '^[<>]' | sed 's/^/  /'
@@ -84,9 +98,8 @@ q "select coalesce(json_object_agg(ubicacion, json_build_object('folio', folio, 
     python3 erp/bin/detector-swm-act.py --catalogo-json "$TMP/catalogo.json" ) > "$TMP/detector.txt" 2>&1 || true
 grep -E '^(NUEVO|CAMBIADO|HUERFANO|REUBICAR|AVISO|[0-9]+ hallazgo)' "$TMP/detector.txt" | sed 's/^/  /'
 echo "  HUERFANO: $(grep -c '^HUERFANO' "$TMP/detector.txt" || true) · REUBICAR: $(grep -c '^REUBICAR' "$TMP/detector.txt" || true)"
-echo "== 6. reverso (mismo archivo, -v reverso=1): vuelve exactamente a la foto de antes"
-docker exec -i "$ID" psql -U postgres -X -q -v aprobado_por=ensayo-efimero -v cliente="$CASA" -v reverso=1 -f - \
-  < "$DIR/fase4-reubicacion.sql"
+echo "== 6. reverso (mismo archivo, set fase4.sentido = 'vuelta'): vuelve exactamente a la foto de antes"
+fase4 vuelta
 foto revertida
 if diff -q "$TMP/filas-antes.txt" "$TMP/filas-revertida.txt" >/dev/null; then
   echo "  filas tras el reverso = filas antes ($(wc -l < "$TMP/filas-antes.txt")); bitácora: $(q "select count(*) from erp.sis_bitacora where verbo = 'reubicar'") asientos de reubicar (ida y vuelta)"

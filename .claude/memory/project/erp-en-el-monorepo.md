@@ -24,6 +24,6 @@ La base de la casa es producción compartida: se lee con un login de solo lectur
 (`rol_swm`); toda escritura es gate humano y entra por `set local role` + tenant, nunca con
 `service_role`.
 
-Pendientes con gate humano (PRP-004): Fase 4 (re-ubicar ACT-0012 en el catálogo,
-`erp/casa/fase4-reubicacion.sql`), Fase 5 (corte de jobs, `erp/casa/RUNBOOK-FASE5.md`),
-Fase 6 bloqueada por la duda 2, Fase 7 (CDC sin firmar).
+Fase 4 del PRP-004 aplicada el 2026-09-25: ACT-0012 dice `template/erp/` en el catálogo de la casa.
+Pendientes con gate humano: Fase 5 (corte de jobs, `erp/casa/RUNBOOK-FASE5.md`), Fase 6 bloqueada
+por la duda 2, Fase 7 (CDC sin firmar).

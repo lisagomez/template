@@ -18,9 +18,8 @@ el servidor necesita una credencial para clonarlo.
 
 ## 0 · Precondiciones
 
-- La Fase 4 aprobada y corrida (`erp/casa/fase4-reubicacion.sql`): el detector del template
-  espera `template/erp/…`. Sin ella no rompe nada (ACT-0012 no lo mira ningún detector), pero el
-  catálogo diría una ruta que ya no es verdad.
+- ✅ La Fase 4 corrida el 2026-09-25: ACT-0012 ya dice `template/erp/`, y el detector del template
+  contra el catálogo real da 0 HUÉRFANO y 0 REUBICAR.
 - El PR del template con la Fase 3B mergeado en `main`.
 
 ## 1 · Llave de despliegue de SOLO LECTURA (nunca un PAT de la cuenta)
