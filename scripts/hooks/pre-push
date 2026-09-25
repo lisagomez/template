@@ -1,0 +1,4 @@
+#!/bin/sh
+# PRP-004 Fase 0: nada de erp/ sale hacia un repo publico. Se instala con
+#   git config core.hooksPath scripts/hooks
+exec node "$(git rev-parse --show-toplevel)/scripts/verifica-privado.mjs" --push

@@ -66,6 +66,18 @@ if (!existsSync(join(dir, 'package.json'))) {
   process.exit(2);
 }
 
+// Sin asiento en el inventario no hay entrega (white-label §5, spec 014): empaquetar es
+// entregar, asi que una herramienta que el inventario no conoce no sale de aqui.
+{
+  const { cargaRepo } = await import('./inventario/repo.mjs');
+  const { hallazgos } = cargaRepo(raiz);
+  if (hallazgos.some((h) => h.tipo === 'NUEVO' && h.unidad === `tools/${nombre}`)) {
+    console.error(rojo(`✗ tools/${nombre} no tiene asiento en inventario/activos.json`));
+    console.error('  Dale de alta (una fila con su id TPL-, clase y estado) y `npm run inventario:vista`.');
+    process.exit(1);
+  }
+}
+
 const corre = (cmd, args, cwd, permisivo = false) => {
   try {
     return execFileSync(cmd, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });

@@ -1,0 +1,238 @@
+{
+ "_comentario": "Indice de activos del template: FUENTE del modulo act del ERP (spec 014, docs/SDD-inventario-de-activos.md). Solo IDENTIDAD: costo y clasificacion (D+I, defensibilidad) se calculan con `npm run inventario:exporta` y viajan al ERP; el gate rechaza esos campos aqui porque el repo es publico. Cada unidad que descubren las `fuentes` la cubre exactamente un activo; una unidad sin activo pone `npm run verifica:inventario` en rojo.",
+ "version": 1,
+ "fuentes": [
+  { "patron": "tools/*/" },
+  { "patron": "src/features/*/" },
+  { "patron": "src/lib/*/" },
+  { "patron": "src/app/" },
+  { "patron": "src/shared/" },
+  { "patron": "src/types/" },
+  { "patron": "public/" },
+  { "patron": ".claude/skills/*/" },
+  { "patron": ".claude/specs/*/" },
+  { "patron": ".claude/goals/*/" },
+  { "patron": ".claude/PRPs/*.md" },
+  { "patron": ".claude/design-systems/*/" },
+  { "patron": ".claude/hooks/*" },
+  { "patron": ".claude/rules/*.md" },
+  { "patron": ".claude/gobernanza/" },
+  { "patron": ".claude/imprenta/" },
+  { "patron": ".claude/memory/" },
+  { "patron": ".claude/*.json" },
+  { "patron": "docs/*.md" },
+  { "patron": "docs/*/" },
+  { "patron": "scripts/*.mjs" },
+  { "patron": "scripts/*.ts" },
+  { "patron": "scripts/*/" },
+  { "patron": "supabase/migrations/*.sql" },
+  { "patron": "hermes/*" },
+  { "patron": "trayectorias/" },
+  { "patron": "inventario/" },
+  { "patron": "erp/*/" },
+  { "patron": "erp/*.md" },
+  { "patron": "AGENTS.md" },
+  { "patron": "CLAUDE.md" },
+  { "patron": "GEMINI.md" },
+  { "patron": "Dockerfile" },
+  { "patron": "docker-compose.yml" },
+  { "patron": "Caddyfile" },
+  { "patron": ".hermes-baseline.json" },
+  { "patron": "opencode.json" },
+  { "patron": "cli-impreso" }
+ ],
+ "activos": [
+  {
+   "id": "TPL-extractor-documental",
+   "nombre": "Extractor documental (PDF, imagen, CFDI XML) con revision humana",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/extractor-documental", "responsable": "dep-sw",
+   "origen": [".claude/specs/007-extractor-documental", ".claude/specs/008-corpus-a-modelo", ".claude/specs/009-identificadores-y-codigos", ".claude/specs/010-extractor-en-infra-del-cliente"],
+   "cubre": ["tools/extractor-documental", "hermes/config.extractor.yaml"]
+  },
+  {
+   "id": "TPL-voz",
+   "nombre": "Voz: deteccion de voz (VAD) y diarizacion local",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/voz", "responsable": "dep-sw",
+   "origen": [".claude/specs/012-voz"],
+   "cubre": ["tools/voz"]
+  },
+  {
+   "id": "TPL-dictado",
+   "nombre": "Dictado local: hablar y que el texto aparezca donde esta el cursor",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/dictado", "responsable": "dep-sw",
+   "origen": [".claude/specs/013-dictado", ".claude/PRPs/PRP-003-conversacion-por-voz.md"],
+   "cubre": ["tools/dictado", ".claude/hooks/habla-respuesta.sh"]
+  },
+  {
+   "id": "TPL-asesor-ventas",
+   "nombre": "Asesor de ventas: insights con evidencia desde una reunion diarizada",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/asesor-ventas", "responsable": "dep-sw",
+   "cubre": ["tools/asesor-ventas"]
+  },
+  {
+   "id": "TPL-ejemplo-herramienta",
+   "nombre": "Andamio de herramienta empaquetable (el ejemplo a copiar)",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": "tools/ejemplo-herramienta", "responsable": "dep-sw",
+   "origen": [".claude/specs/006-crear-una-herramienta"],
+   "cubre": ["tools/ejemplo-herramienta"]
+  },
+  {
+   "id": "TPL-feature-a2a",
+   "nombre": "Puente A2A del extractor (Agent Card + JSON-RPC + Tasks)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/a2a", "responsable": "dep-sw",
+   "origen": [".claude/specs/005-a2a-interoperabilidad"],
+   "cubre": ["src/features/a2a", "scripts/prueba-a2a.ts"]
+  },
+  {
+   "id": "TPL-feature-auth",
+   "nombre": "Autenticacion Supabase (login, registro, perfiles)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "produccion",
+   "ubicacion": "src/features/auth", "responsable": "dep-sw",
+   "cubre": ["src/features/auth"]
+  },
+  {
+   "id": "TPL-feature-dashboard",
+   "nombre": "Dashboard de la app base",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/dashboard", "responsable": "dep-sw",
+   "cubre": ["src/features/dashboard"]
+  },
+  {
+   "id": "TPL-feature-project-settings",
+   "nombre": "Parametrizacion por tipo de proyecto (Supabase)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/project-settings", "responsable": "dep-sw",
+   "origen": [".claude/PRPs/PRP-002-parametrizacion-tipo-proyecto-supabase.md"],
+   "cubre": ["src/features/project-settings", "supabase/migrations/*project_settings*"]
+  },
+  {
+   "id": "TPL-feature-dictado",
+   "nombre": "Interfaz web del dictado (pildora, ajustes e historial)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/dictado", "responsable": "dep-sw",
+   "origen": [".claude/specs/013-dictado"],
+   "cubre": ["src/features/dictado", "src/features/ajustes", "src/features/historial"]
+  },
+  {
+   "id": "TPL-feature-laboratorio-voz",
+   "nombre": "Laboratorio de voz: capturas y mediciones del motor",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/laboratorio-voz", "responsable": "dep-sw",
+   "origen": [".claude/specs/012-voz"],
+   "cubre": ["src/features/laboratorio-voz", "scripts/laboratorio-voz"]
+  },
+  {
+   "id": "TPL-app-base",
+   "nombre": "App SaaS base (Next.js + Supabase, PWA)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "produccion",
+   "ubicacion": "src/app", "responsable": "dep-sw",
+   "cubre": ["src/app", "src/features/.template", "src/lib/supabase", "src/shared", "src/types", "public"]
+  },
+  {
+   "id": "TPL-motor-ia",
+   "nombre": "Motor de IA: routing por nivel, contabilidad de tokens y trayectorias de la app",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": "src/lib/ai", "responsable": "dep-sw",
+   "origen": [".claude/specs/002-eficiencia-tokens"],
+   "cubre": ["src/lib/ai", "scripts/prueba-contabilidad.ts", "scripts/verifica-routing.mjs", ".claude/routing-modelos.json"]
+  },
+  {
+   "id": "TPL-skills",
+   "nombre": "Catalogo de skills de la fabrica",
+   "tipo": "config_agentica", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": ".claude/skills", "responsable": "dep-sw",
+   "cubre": [".claude/skills/*", "scripts/regresion-skills.mjs"]
+  },
+  {
+   "id": "TPL-doctrina",
+   "nombre": "Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto",
+   "tipo": "config_agentica", "clase": "CONOCIMIENTO", "estado": "produccion",
+   "ubicacion": "AGENTS.md", "responsable": "dep-sw",
+   "cubre": ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "opencode.json", ".claude/rules/*", ".claude/memory", "docs/constitution.md", "docs/PORTABILIDAD-ARNESES.md", "docs/plantillas", "scripts/sincroniza-gemini.mjs", "scripts/lee-instrucciones.mjs"]
+  },
+  {
+   "id": "TPL-especificaciones",
+   "nombre": "Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones",
+   "tipo": "documento", "clase": "CONOCIMIENTO", "estado": "produccion",
+   "ubicacion": ".claude/specs", "responsable": "dep-sw",
+   "cubre": [".claude/specs/*", ".claude/PRPs/*", ".claude/goals/*", "docs/SDD-*", "docs/GOAL-*", "docs/INVESTIGACION-*", "docs/grafos", "scripts/verifica-specs.mjs"]
+  },
+  {
+   "id": "TPL-gobernanza",
+   "nombre": "Capa de gobernanza (controles C1-C8) y gates de validate",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": ".claude/gobernanza", "responsable": "dep-sw",
+   "origen": [".claude/specs/001-gobernanza-agentica"],
+   "cubre": [".claude/gobernanza", ".claude/settings.json", ".claude/example.mcp.json", ".claude/presupuesto-contexto.json", ".claude/hooks/log-tool-usage.sh", "docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md", "scripts/verifica-gobernanza.mjs", "scripts/audita-secretos.mjs", "scripts/audita-fugas.mjs", "scripts/sello-validate.mjs", "scripts/prepara-gate.mjs", "scripts/mide-contexto.mjs", "scripts/vigila-versiones.mjs", "scripts/lib", "scripts/verifica-privado.mjs", "scripts/hooks"]
+  },
+  {
+   "id": "TPL-imprenta",
+   "nombre": "Imprenta de CLIs: manifiesto servicio a CLI y su auditoria",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": ".claude/imprenta", "responsable": "dep-sw",
+   "origen": [".claude/specs/003-imprenta-de-clis"],
+   "cubre": [".claude/imprenta", "scripts/audita-imprenta.mjs", "scripts/prueba-imprenta.mjs", "scripts/mide-mcp.mjs"]
+  },
+  {
+   "id": "TPL-clis-impresos",
+   "nombre": "CLIs impresos del manifiesto",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": "cli:*", "responsable": "dep-sw", "externo": true,
+   "descripcion": "Los cataloga su propia fuente en el ERP (cli-library-index.json, ubicacion cli:<slug>). Aqui cuentan como cubiertos y no se exportan: un escritor por origen.",
+   "cubre": ["cli:*"]
+  },
+  {
+   "id": "TPL-trayectorias",
+   "nombre": "Trayectorias: trazas de ejecucion, evaluador, informe y propuestas",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": "scripts/trayectorias", "responsable": "dep-sw",
+   "origen": [".claude/specs/011-trayectorias"],
+   "cubre": ["scripts/trayectorias", "scripts/prueba-trayectorias.ts", "trayectorias", ".claude/hooks/captura-trayectoria.sh"]
+  },
+  {
+   "id": "TPL-inventario",
+   "nombre": "Inventario de activos: indice, detector, costeo y export al ERP",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "inventario", "responsable": "dep-sw",
+   "origen": [".claude/specs/014-inventario-de-activos"],
+   "cubre": ["inventario", "scripts/inventario", "scripts/prueba-inventario.ts"]
+  },
+  {
+   "id": "TPL-empaquetador",
+   "nombre": "Empaquetador de herramientas y su contrato",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": "scripts/empaqueta-herramienta.mjs", "responsable": "dep-sw",
+   "origen": [".claude/specs/006-crear-una-herramienta"],
+   "cubre": ["scripts/empaqueta-herramienta.mjs", "docs/CREAR-UNA-HERRAMIENTA.md", "docs/EMPAQUETAR-HERRAMIENTA.md"]
+  },
+  {
+   "id": "TPL-despliegue",
+   "nombre": "Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes)",
+   "tipo": "infraestructura", "clase": "INFRA", "estado": "produccion",
+   "ubicacion": "docker-compose.yml", "responsable": "dep-sw",
+   "cubre": ["Dockerfile", "docker-compose.yml", "Caddyfile", ".hermes-baseline.json", "hermes/.env.ejemplo", "scripts/configura-deploy.mjs", "scripts/verifica-hermes.mjs", "docs/DEPLOY-HETZNER.md", "docs/FASE0-INFRAESTRUCTURA.md", "docs/DICTADO-CELULAR-RED.md"]
+  },
+  {
+   "id": "TPL-erp",
+   "nombre": "ERP agentico: maestro, reglas, migraciones y modulo act",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "erp", "responsable": "dep-fin", "externo": true,
+   "origen": [".claude/PRPs/PRP-004-erp-al-monorepo-privado.md"],
+   "descripcion": "Lo cataloga archivo por archivo su propio detector (erp/bin/detector-swm-act.py, ubicaciones template/erp/...). Aqui cuenta como cubierto y no se exporta: un escritor por origen.",
+   "cubre": ["erp/*", "erp/*.md"]
+  },
+  {
+   "id": "TPL-design-systems",
+   "nombre": "Design systems de referencia (bento, glass, neobrutalismo...)",
+   "tipo": "documento", "clase": "DISEÑO", "estado": "produccion",
+   "ubicacion": ".claude/design-systems", "responsable": "dep-sw",
+   "cubre": [".claude/design-systems/*"]
+  }
+ ]
+}

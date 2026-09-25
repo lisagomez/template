@@ -97,3 +97,9 @@ tools/extractor-documental/corpus/
 certificates
 # Evidencia local de las mediciones del laboratorio de voz (PNG, WAV de microfono falso, JSON); las tablas van al informe y al corpus
 capturas-laboratorio/
+
+# Inventario de activos (spec 014): el export lleva costo y clasificacion. Repo publico: nunca a git
+/inventario/salida/
+
+# Python
+__pycache__/
