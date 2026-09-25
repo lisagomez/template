@@ -80,7 +80,7 @@ export function PantallaImpresoras({ e }: { e: Etiquetas }) {
                 <VistaMotorLocal auto zpl={etiquetaCalibracion(perfilParaVistaLocal(borrador), borrador)} perfil={borrador} etiqueta="Calibración con los desplazamientos editados" />
               </div>
             </div>
-            <div className={tarjeta}><PanelImpresion e={e} zpl={etiquetaCalibracion(borrador)} bloquea={false} sitio={borrador.sitio} impresora={guardada ? borrador.id : ''} copias={1} /></div>
+            <div className={tarjeta}><PanelImpresion e={e} zpl={etiquetaCalibracion(borrador)} bloquea={false} sitio={borrador.sitio} impresora={guardada ? borrador.id : ''} copias={1} origen="calibracion" /></div>
           </div>
         </div>
       ) : <p className="text-sm">No hay impresoras todavía.</p>}

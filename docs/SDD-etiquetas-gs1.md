@@ -94,3 +94,25 @@ se instala dos veces, 004 le pone RLS forzada, y pasa (a)…(f). **No se aplicó
 Una Zebra 203 dpi y una 300 dpi reales: modo D con `>8`, `^LS/^LT`, `~HS`, oscuridad y
 velocidad; Browser Print instalado (http y https); lectura con pistolas reales en teclado
 español; verificación de calidad de símbolo (ISO/IEC 15416, grado 1.5/10/660) con un verificador.
+
+## 8. Rollos: presupuesto contra gasto (`/etiquetas/rollos`)
+
+- **De dónde sale el gasto**: cada impresión exitosa (editor, lote, calibración) anota sus etiquetas
+  (`etiquetasDeZpl`: cada `^XA` por su `^PQ`) contra la impresora del perfil y el rollo que tiene
+  puesto EN ESE MOMENTO. Costo por etiqueta = precio del paquete / rollos / etiquetas por rollo.
+- **Sin precio no es cero**: lo impreso en una impresora sin rollo asignado queda «sin costo» y el
+  sitio sale **Incompleto: falta precio**, nunca «en rango» con $0 (misma regla que la contabilidad
+  de tokens del repo).
+- **Aviso, no bloqueo**: aviso al 80 % o si la proyección lineal a fin de mes pasa del presupuesto;
+  excedido al 100 %. Nunca bloquea imprimir: dejar una caja sin etiqueta de caducidad por un
+  presupuesto de papel es una decisión de operación.
+- **Precios de referencia** (`ROLLOS_REFERENCIA`) con fuente y fecha de consulta (2026-09-25); la
+  tienda no aclara IVA. Se sustituyen por los del proveedor.
+- **Ejemplo de dulcería** (`ESCENARIO_DULCERIA`, ficticio): CEDIS con 150 cajas/día hábil sin
+  GS1-128 del proveedor y 6 tarimas/día con etiqueta en dos caras; 3 sucursales con 80 bolsas de
+  granel/día; 3 % de merma → **10,432 etiquetas y $2,306.96 al mes (~$27,684 al año)**. Cajas y
+  bolsas en 2000D (Zebra lo califica para interior 1 año+, y el dulce caduca a 6-18 meses); con
+  1000D en bolsas, $1,940.74/mes pero con riesgo de que la etiqueta pierda legibilidad antes de la
+  caducidad. Sin IVA confirmado, desgaste de cabezal ni envío.
+- Propuesta ERP: el consumo y los presupuestos no están en `propuesta-pack-etiquetas.sql` todavía
+  (viven en el almacén JSON); se añadirían como otro ledger append-only si se integra.

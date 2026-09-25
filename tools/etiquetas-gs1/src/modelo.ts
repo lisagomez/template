@@ -3,6 +3,7 @@
  * bitacora de asignaciones (solo se anade), numeros emitidos (nunca se reusan), existencias por
  * lote y sitio, impresoras e importaciones.
  */
+import type { Consumibles } from './consumibles.js'
 import type { PerfilImpresora } from './etiqueta.js'
 import type { Categoria } from './semaforo.js'
 
@@ -115,4 +116,6 @@ export interface EstadoAlmacen {
   readonly existencias: readonly Existencia[]
   readonly impresoras: readonly PerfilImpresora[]
   readonly importaciones: readonly Importacion[]
+  /** Rollos, presupuestos y consumo. Opcional: los almacenes anteriores no lo traen. */
+  readonly consumibles?: Consumibles
 }

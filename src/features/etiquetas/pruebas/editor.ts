@@ -8,6 +8,7 @@ import { aManual, aplicaAlEditor, calcula, EDITOR_INICIAL, simbolosDelEditor, ty
 import { zplDeLote } from '../services/lote.ts';
 import { resumenLegible, gtinLegible } from '../services/presenta.ts';
 import { semillaFicticia, IMPRESORAS_DEMO } from '../services/servidor/semilla.ts';
+import { resumenPresupuesto } from '../services/nucleo.ts';
 import { CATEGORIAS_EJEMPLO, clasificaPrefijo, PERFIL_EJEMPLO, tableroSitio, type Arreglo } from '../services/nucleo.ts';
 
 const HOY = '2026-09-25';
@@ -69,4 +70,18 @@ test('presenta: resumen legible de una importacion y GTIN a ojo', () => {
   const r = resumenLegible({ nuevo: 3, 'asignado:propio': 2, 'registrado:fabricante': 4, conflicto: 0 });
   assert.deepEqual(r.map((x) => x.texto), ['nuevos', 'asignados · Marca propia: asignado con el prefijo de la casa', 'registrados · Del fabricante (se conserva)']);
   assert.equal(gtinLegible('09521234000020'), '0 9521234 00002 0');
+});
+
+test('rollos de la semilla: el ritmo del mes rebasa lo presupuestado en CEDIS, y Poniente se ve «sin costo», no en cero', () => {
+  const e = semillaFicticia(HOY);
+  const c = e.consumibles!;
+  const [cedis, centro, poniente, oriente] = resumenPresupuesto(c, ['CEDIS-NTE', 'SUC-CENTRO', 'SUC-PONIENTE', 'SUC-ORIENTE'], HOY.slice(0, 7), HOY);
+  assert.ok(cedis!.gasto > 0 && cedis!.proyeccion > cedis!.gasto);
+  assert.ok(['aviso', 'excedido'].includes(cedis!.estado), cedis!.estado);
+  assert.ok(centro!.gasto > 0);
+  assert.equal(poniente!.gasto, 0);
+  assert.ok(poniente!.etiquetasSinCosto > 0);
+  assert.equal(poniente!.estado, 'incompleto');
+  assert.equal(oriente!.estado, 'sin-presupuesto');
+  assert.equal(c.escenarios[0]!.id, 'dulceria-ejemplo');
 });

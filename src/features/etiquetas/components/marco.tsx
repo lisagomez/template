@@ -11,7 +11,7 @@ import { useEtiquetas, type Etiquetas } from '../hooks/use-etiquetas.ts';
 
 const RUTAS = [
   ['/etiquetas', 'Etiqueta'], ['/etiquetas/leer', 'Leer'], ['/etiquetas/caducidades', 'Caducidades'],
-  ['/etiquetas/catalogo', 'Catálogo'], ['/etiquetas/impresoras', 'Impresoras'], ['/etiquetas/ajustes', 'Ajustes'],
+  ['/etiquetas/catalogo', 'Catálogo'], ['/etiquetas/impresoras', 'Impresoras'], ['/etiquetas/rollos', 'Rollos'], ['/etiquetas/ajustes', 'Ajustes'],
 ] as const;
 
 export const boton = 'rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium hover:bg-neutral-100 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800';

@@ -39,6 +39,21 @@ export const esquemaSitio = z.object({
   agente: z.string().url().max(200).optional(),
 }).strict();
 
+export const esquemaRollo = z.object({
+  id: clave,
+  nombre: z.string().trim().min(1).max(80),
+  tecnologia: z.enum(['termica-directa', 'transferencia-termica']),
+  anchoMm: z.number().min(10).max(170),
+  altoMm: z.number().min(5).max(400),
+  etiquetasPorRollo: z.number().int().min(1).max(100_000),
+  costoPaquete: z.number().min(0).max(1_000_000),
+  rollosPorPaquete: z.number().int().min(1).max(1000),
+  fuente: z.string().url().max(400).optional(),
+  fechaPrecio: fechaIso.optional(),
+}).strict();
+
+const mes = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+
 export const esquemaAccion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('catalogo-plan'), archivo: z.string().min(1).max(200), huella: z.string().max(100), registros: z.array(z.record(z.string().max(80), z.string().max(500))).max(5000) }).strict(),
   z.object({ accion: z.literal('catalogo-aplica'), archivo: z.string().min(1).max(200), huella: z.string().max(100), registros: z.array(z.record(z.string().max(80), z.string().max(500))).max(5000) }).strict(),
@@ -58,6 +73,11 @@ export const esquemaAccion = z.discriminatedUnion('accion', [
     cantidad: z.number().int().min(1).max(100_000), sscc: z.string().regex(/^\d{18}$/).optional(),
   }).strict(),
   z.object({ accion: z.literal('recepcion'), sitio: clave, texto: z.string().min(1).max(200) }).strict(),
+  z.object({ accion: z.literal('consumo'), sitio: clave, impresora: clave, etiquetas: z.number().int().min(1).max(100_000), origen: z.enum(['impresion', 'lote', 'calibracion']) }).strict(),
+  z.object({ accion: z.literal('rollo'), rollo: esquemaRollo }).strict(),
+  z.object({ accion: z.literal('rollo-impresora'), impresora: clave, rollo: clave.or(z.literal('')) }).strict(),
+  z.object({ accion: z.literal('presupuesto'), sitio: clave, mes, monto: z.number().min(0).max(100_000_000) }).strict(),
+  z.object({ accion: z.literal('compra'), sitio: clave, rollo: clave, rollos: z.number().int().min(1).max(10_000), costoTotal: z.number().min(0).max(100_000_000) }).strict(),
   z.object({ accion: z.literal('ticket'), sitio: clave, impresora: clave, zpl: z.string().min(5).max(262_144), copias: z.number().int().min(1).max(500) }).strict(),
 ]);
 

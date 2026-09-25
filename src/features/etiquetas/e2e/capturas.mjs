@@ -270,6 +270,14 @@ const tablero = await porVista(async (p, v) => {
 });
 await compone('15', 'Tablero de caducidades en dos sitios (CEDIS Norte y Sucursal Centro)', [['escritorio', tablero.escritorio], ['celular', tablero.celular]]);
 
+const rollos = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/rollos');
+  await p.waitForSelector('[data-prueba="rollos-sitio"][data-sitio="SUC-PONIENTE"] [data-prueba="sin-costo"]');
+  await p.waitForSelector('[data-prueba="estimado-mes"]');
+  return [await foto(p, 'main > div', `rollos-presupuesto-${v}`)];
+});
+await compone('16', 'Rollos: presupuesto contra gasto por sitio y estimacion de una dulceria', [['escritorio', rollos.escritorio[0]], ['celular', rollos.celular[0]]]);
+
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
 console.log(JSON.stringify(informe.impresion, null, 1));
 await navegador.close();

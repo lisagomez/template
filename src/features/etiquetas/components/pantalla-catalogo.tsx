@@ -144,7 +144,7 @@ export function PantallaCatalogo({ e }: { e: Etiquetas }) {
           <label className="text-sm">Copias c/u<input className={campo} type="number" min={1} max={500} value={lote.copias} onChange={(x) => setLote({ ...lote, copias: Math.max(1, Number(x.target.value) || 1) })} /></label>
         </div>
         {loteZpl ? <ul className="text-xs">{loteZpl.etiquetas.map((x) => <li key={x.sku} className={x.bloquea ? 'text-red-700' : 'text-emerald-700'}>{x.sku}: {x.bloquea ? `no pasa — ${x.errores.join('; ')}` : 'lista'}</li>)}</ul> : <p className="text-xs text-neutral-500">Elige artículos en la tabla y escribe el lote.</p>}
-        <PanelImpresion e={e} zpl={loteZpl?.zpl || null} bloquea={!loteZpl || loteZpl.etiquetas.some((x) => x.bloquea)} sitio={lote.sitio} impresora={est.impresoras.find((p) => p.sitio === lote.sitio)?.id ?? ''} copias={lote.copias} />
+        <PanelImpresion e={e} zpl={loteZpl?.zpl || null} bloquea={!loteZpl || loteZpl.etiquetas.some((x) => x.bloquea)} sitio={lote.sitio} impresora={est.impresoras.find((p) => p.sitio === lote.sitio)?.id ?? ''} copias={lote.copias} origen="lote" />
       </section>
     </div>
   );

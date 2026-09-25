@@ -12,6 +12,7 @@ import {
   baseBrowserPrint, enviaAlAgente, enviaBrowserPrint, estadoEnAgente, impresorasBrowserPrint, type DispositivoZebra,
 } from '../../../../tools/etiquetas-gs1/dist/navegador/index.js';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
+import { etiquetasDeZpl, type OrigenConsumo } from '../services/nucleo.ts';
 import { boton, botonPrimario, campo } from './marco.tsx';
 
 interface Props {
@@ -22,9 +23,11 @@ interface Props {
   readonly impresora: string;
   readonly copias: number;
   readonly despues?: () => Promise<void>;
+  /** Para el control de rollos: de donde sale el consumo. */
+  readonly origen?: OrigenConsumo;
 }
 
-export function PanelImpresion({ e, zpl, bloquea, sitio, impresora, copias, despues }: Props) {
+export function PanelImpresion({ e, zpl, bloquea, sitio, impresora, copias, despues, origen = 'impresion' }: Props) {
   const cfgSitio = e.estado?.configuracion.sitios.find((s) => s.clave === sitio);
   const [baseBp, setBaseBp] = useState(() => (typeof window === 'undefined' ? 'http://127.0.0.1:9100' : baseBrowserPrint(window.location.protocol)));
   const [dispositivos, setDispositivos] = useState<DispositivoZebra[]>([]);
@@ -34,12 +37,20 @@ export function PanelImpresion({ e, zpl, bloquea, sitio, impresora, copias, desp
   const [ocupado, setOcupado] = useState(false);
   const puede = Boolean(zpl) && !bloquea && !ocupado;
 
+  // El consumo se anota contra la impresora del perfil (la de Browser Print puede ser otra
+  // fisica: sin perfil no se valora, y el control de rollos lo muestra como «sin costo»).
+  const anotaConsumo = async () => {
+    if (!zpl || !impresora) return;
+    await e.ejecuta({ accion: 'consumo', sitio, impresora, etiquetas: etiquetasDeZpl(zpl), origen }).catch(() => undefined);
+  };
+
   const corre = async (f: () => Promise<string>) => {
     setOcupado(true);
     setMensaje({ tipo: 'info', texto: 'Enviando…' });
     try {
       const texto = await f();
       setMensaje({ tipo: 'ok', texto });
+      await anotaConsumo();
       if (despues) await despues();
     } catch (err) {
       setMensaje({ tipo: 'error', texto: err instanceof Error ? err.message : String(err) });

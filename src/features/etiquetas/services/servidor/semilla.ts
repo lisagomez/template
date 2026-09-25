@@ -8,8 +8,8 @@
  * muestre los cuatro estados del semaforo.
  */
 import {
-  aplicaImportacion, CATEGORIAS_EJEMPLO, estadoVacio, leeFilas, planificaImportacion, sumaDias,
-  type EstadoAlmacen, type Existencia, type PerfilImpresora, type Sitio,
+  aplicaImportacion, CATEGORIAS_EJEMPLO, ESCENARIO_DULCERIA, estadoVacio, leeFilas, planificaImportacion, ROLLOS_REFERENCIA, sumaDias,
+  type Compra, type Consumibles, type Consumo, type EstadoAlmacen, type Existencia, type PerfilImpresora, type Sitio,
 } from '../nucleo.ts';
 
 export const SITIOS_DEMO: Sitio[] = [
@@ -47,7 +47,7 @@ const perfil = (p: Partial<PerfilImpresora> & Pick<PerfilImpresora, 'id' | 'nomb
 
 export const IMPRESORAS_DEMO: PerfilImpresora[] = [
   perfil({ id: 'zebra-cedis-rampa', nombre: 'ZT411 Rampa (tarimas 4×6)', sitio: 'CEDIS-NTE', altoMm: 152.4 }),
-  perfil({ id: 'zebra-cedis-cajas', nombre: 'ZT411 Cajas 4×3', sitio: 'CEDIS-NTE', altoMm: 76.2 }),
+  perfil({ id: 'zebra-cedis-cajas', nombre: 'ZT411 Cajas 4×2', sitio: 'CEDIS-NTE' }),
   perfil({ id: 'zebra-suc-centro', nombre: 'ZD421 Mostrador 4×2', sitio: 'SUC-CENTRO' }),
   perfil({ id: 'zebra-suc-poniente', nombre: 'ZD621 300 dpi 4×2', sitio: 'SUC-PONIENTE', dpi: 300 }),
 ];
@@ -56,6 +56,38 @@ export const IMPRESORAS_DEMO: PerfilImpresora[] = [
 function aLasOcho(dia: string): string {
   const [a = 1970, m = 1, d = 1] = dia.split('-').map(Number);
   return new Date(Date.UTC(a, m - 1, d, 8)).toISOString();
+}
+
+/**
+ * Consumo FICTICIO del mes en curso, hasta ayer: etiquetas por dia hábil por impresora. La
+ * ZD621 de Poniente queda SIN rollo asignado a proposito: su consumo se ve «sin costo», no cero.
+ */
+const RITMO: [string, string, number][] = [
+  ['CEDIS-NTE', 'zebra-cedis-cajas', 140], ['CEDIS-NTE', 'zebra-cedis-rampa', 14], ['SUC-CENTRO', 'zebra-suc-centro', 22], ['SUC-PONIENTE', 'zebra-suc-poniente', 18],
+];
+
+export function consumiblesFicticios(hoy: string): Consumibles {
+  const mes = hoy.slice(0, 7);
+  const [anio = 1970, numMes = 1] = mes.split('-').map(Number);
+  const a = (dia: number, hora: number) => new Date(Date.UTC(anio, numMes - 1, dia, hora));
+  const rolloPorImpresora: Record<string, string> = { 'zebra-cedis-rampa': 'zp1000d-4x6-430', 'zebra-cedis-cajas': 'zp2000d-4x2-1240', 'zebra-suc-centro': 'zp1000d-4x2-690' };
+  const consumos: Consumo[] = [];
+  for (let d = 1; d < Number(hoy.slice(8, 10)); d++) {
+    if (a(d, 12).getUTCDay() === 0) continue;
+    for (const [sitio, impresora, n] of RITMO) {
+      const etiquetas = n + ((d * 7) % 5);
+      const rollo = rolloPorImpresora[impresora];
+      consumos.push({ id: `sem-${impresora}-${d}`, fecha: a(d, 16).toISOString(), sitio, impresora, etiquetas, origen: 'impresion', operador: 'semilla', ...(rollo ? { rollo } : {}) });
+    }
+  }
+  const compra = (id: string, sitio: string, rollo: string, rollos: number, costoTotal: number): Compra => ({ id, fecha: a(2, 15).toISOString(), sitio, rollo, rollos, costoTotal, operador: 'semilla' });
+  return {
+    rollos: ROLLOS_REFERENCIA, rolloPorImpresora,
+    presupuestos: [{ sitio: 'CEDIS-NTE', mes, monto: 1500 }, { sitio: 'SUC-CENTRO', mes, monto: 250 }, { sitio: 'SUC-PONIENTE', mes, monto: 200 }],
+    consumos,
+    compras: [compra('sem-c1', 'CEDIS-NTE', 'zp2000d-4x2-1240', 6, 2569), compra('sem-c2', 'CEDIS-NTE', 'zp1000d-4x6-430', 2, 456), compra('sem-c3', 'SUC-CENTRO', 'zp1000d-4x2-690', 4, 1799)],
+    escenarios: [ESCENARIO_DULCERIA],
+  };
 }
 
 export function semillaFicticia(hoy: string): EstadoAlmacen {
@@ -68,5 +100,5 @@ export function semillaFicticia(hoy: string): EstadoAlmacen {
   const existencias: Existencia[] = LOTES.map(([sitio, sku, lote, dias, cantidad], i) => ({
     id: `semilla-${i + 1}`, sitio, sku, gtin: e.articulos[sku]?.gtinCaja ?? '', lote, caducidad: sumaDias(hoy, dias), cantidad, origen: 'semilla', actualizado: cuando,
   }));
-  return { ...e, existencias, impresoras: IMPRESORAS_DEMO };
+  return { ...e, existencias, impresoras: IMPRESORAS_DEMO, consumibles: consumiblesFicticios(hoy) };
 }
