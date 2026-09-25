@@ -23,6 +23,20 @@ specs y los 26 skills. Se hereda entero, construyas lo que construyas.
 Un mismo repo puede llevar las dos: la app en `src/`, y en `tools/` lo que ya reusaste
 lo bastante como para sacarlo de ahi.
 
+### Y el ERP, que no es ninguna de las dos
+
+Este repo es tambien el **boilerplate de produccion de marca blanca** del ERP: el
+laboratorio lo prueba aqui y de aqui sale lo que se licencia a clientes. Vive en `erp/`
+(no en `tools/`: es un sistema que se opera, no una libreria que se importa).
+
+| | |
+|---|---|
+| Esquema | `erp/migrations/` — identico al de produccion (medido 2026-09-25), multi-tenant con RLS `FORCE` |
+| Instalar en la base de un tenant | [erp/instalacion/INSTALAR.md](erp/instalacion/INSTALAR.md) — tenant, marca y accesos son **parametros**, no texto en los archivos |
+| Probar sin base | `npm run erp:prueba` (instala 2 veces en un Postgres desechable, pruebas (a)-(j), compara con produccion) |
+| Que sale al cliente y que no | [erp/FRONTERA-DE-ENTREGA.md](erp/FRONTERA-DE-ENTREGA.md) + `erp/entrega.json`, vigilado por `verifica:marca-blanca` en `validate` |
+| Lo que nunca sale | la doctrina (`ERP-MAESTRO.md`), las reglas auditadas (`reglas/`) y la operacion de la casa (`erp/casa/`, `erp/bin/`) |
+
 ## Que incluye
 
 - Next.js 16 (App Router) + React 19 + TypeScript

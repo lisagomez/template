@@ -326,11 +326,12 @@ Contexto y cierra el PR #316 sin merge con enlace a este PRP. Trío, CRM y verti
 salvo el puntero. Gate humano: merge en el otro repo.
 
 ### Fase 7: Declararlo en la fábrica (CDC) — 📦 PROPUESTA LISTA, espera la firma (2026-09-25)
-> Diff en `PRP-004-fase7-cdc.patch` (5 archivos, +47) y entrada de bitácora **fuera del registro** en
+> Diff en `PRP-004-fase7-cdc.patch` (`AGENTS.md`, `GEMINI.md`, `GOBERNANZA.md` §8) y entrada de bitácora **fuera del registro** en
 > `PRP-004-fase7-cdc-propuesta.md`. Medido sobre una copia con el diff aplicado: regresión 123/123,
-> `--trampa` 22/22, gobernanza 152/152, contexto en presupuesto (+211 tokens/sesión; la memoria pasaba
+> `--trampa` 22/22, gobernanza 152/152, contexto en presupuesto (+180 tokens/sesión sin contar la memoria, ya aplicada; la memoria pasaba
 > 807/800 y se acortó la línea, no se subió el tope), 18 pasos de `validate` sin build en verde.
-> **No aplicado.**
+> **No aplicado.** La parte de memoria del proyecto se aplicó aparte el 2026-09-25, a pedido del
+> laboratorio (no es C1): `.claude/memory/project/erp-en-el-monorepo.md`.
 **Objetivo**: una línea en el decision tree de `AGENTS.md` («el ERP vive en `erp/`; esquema,
 reglas y act») + `GEMINI.md` regenerado + declaración C7 del cosechador en `GOBERNANZA.md` §8 +
 memoria del proyecto actualizada (la regla «lo nuevo nace en `tools/`» gana su excepción: el ERP).

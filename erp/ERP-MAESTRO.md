@@ -5,8 +5,11 @@
 > decisión de la dueña; el módulo act OPERA (cosecha de features vendibles del
 > trío, detector swm-act semanal, cosecha inicial de 23 activos, política D-07 en
 > borrador con gate duro). El acceso interino es psql `cli_fin`+SET ROLE (D-03
-> sigue pendiente para el CLI formal). Detalle vivo: `migrations/README.md` y
-> `.claude/memory/project/erp-modulo-act.md`.
+> sigue pendiente para el CLI formal). **2026-09-25:** el esquema de producción es
+> idéntico a `migrations/` (medido en solo lectura) y se instala en la base de un
+> tenant de marca blanca con `instalacion/instalar.sh`. Detalle vivo:
+> `casa/ESTADO-PRODUCCION.md` (producción de la casa), `migrations/README.md`
+> (esquema), `instalacion/INSTALAR.md` (instalar) y `FRONTERA-DE-ENTREGA.md` (qué sale).
 
 Documento independiente y autocontenido. Todo lo necesario para implementar el
 ERP: arquitectura, nomenclatura, requisitos, instalación por fases con pasos y

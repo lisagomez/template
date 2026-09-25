@@ -13,6 +13,7 @@
 - [Eficiencia de tokens y frescura](project/eficiencia-tokens.md) — 4 sensores en el gate; 2026-08-26: `AGENTS.md` solo obliga, lo informativo en `.claude/rules/`, `GEMINI.md` generado, contabilidad medida en frio.
 - [La imprenta de CLIs](project/imprenta-de-clis.md) — MCP cuestan 20363 tok/sesion (medido); "100x" refutado; la libreria publica no publica grados; esta maquina SI imprime (Go 1.26.7, 5 CLIs en libreria).
 - [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — apps y herramientas (`tools/`, `npm run empaqueta`); puerta `docs/CREAR-UNA-HERRAMIENTA.md`; PRP-002 en codigo, BD sin aplicar.
+- [El ERP vive en erp/](project/erp-en-el-monorepo.md) — excepcion a `tools/`; marca blanca: `erp/instalacion/`.
 - [Extractor documental: en qué quedamos](project/extractor-documental.md) — spec 010 mezclada (PR #98): Tesseract + cola por regla, sin umbral; A2A montado y SIN publicar; banco de pruebas cerrado con `leePagina` (PR #102); falta corpus real y GPU.
 - [Trayectorias: en qué quedamos](project/trayectorias.md) — spec 011 en PR #100; dos CDC promovidos por capa B (21/21); el sujeto va sin `git log` porque el historial alcanza el corpus; una tanda cuesta ~20 USD.
 - [Protocolo de specs (SDD)](project/protocolo-de-specs.md) — `/spec-generator` + `.claude/specs/NNN/{spec,plan,tareas}` + gate `verifica:specs`; C4 en la spec, C3 en el plan; spec o PRP segun se sepa el QUE.
