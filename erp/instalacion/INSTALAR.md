@@ -98,6 +98,22 @@ hacer `SET ROLE`. Úsalo para las pruebas y para operar a mano mientras no haya 
 Ojo en Supabase: `postgres` tiene BYPASSRLS, así que **sin** `SET ROLE` ve todas las filas de
 todos los tenants. Por eso toda operación empieza con `set local role`.
 
+## Acceso de soporte (solo lectura, con vencimiento)
+
+Cuando pidas soporte, crea un login de **solo lectura** para esa incidencia, con fecha de
+vencimiento, y revócalo al cerrarla. Nunca des la conexión del dueño del esquema.
+
+```sql
+-- como dueño del esquema; la contraseña la generas tú y la entregas por un canal seguro
+create role soporte_incidencia login password '…' valid until '2026-12-31';
+grant rol_swm to soporte_incidencia;
+-- al cerrar la incidencia:
+drop role soporte_incidencia;
+```
+
+`rol_swm` solo lee, y la RLS sigue aplicando: quien entra con ese login ve las filas del tenant
+que fije en su sesión, no puede escribir, borrar ni asignar folios (prueba (c)).
+
 ## Varios tenants en la misma base
 
 El tenant de la instalación es solo el **inicial**. Otro tenant no necesita instalar nada: basta

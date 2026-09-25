@@ -8,6 +8,11 @@
  *   2. Todo lo listado en «entrega» existe, y nada defendible ni de la casa cae dentro.
  *   3. Ninguna huella de la casa (`erp/casa/huellas.txt`: tenant, ref de producción, IDs de
  *      Slack, sistemas, personas, correos) aparece en lo que se entrega.
+ *   4. Lo entregado no cita la doctrina (`referencias_doctrina`: el maestro, sus secciones, sus
+ *      decisiones D-NN, sus fases ERP-N). En SQL se ignoran las cadenas entre comillas: los
+ *      `COMMENT ON` viven en la base y cambiarlos rompería la igualdad con producción.
+ *   5. La ratificación deja rastro: `ratificada` exige quién, fecha y una decisión D-NN que
+ *      exista en `erp/ERP-MAESTRO.md` (lo mismo que la BD exige al ratificar un activo).
  *
  * Además vigila la lista de huellas: una huella que ya no aparece en NINGÚN archivo de la casa
  * se reporta como «muerta» (aviso, no error): o se retiró el dato, o la expresión se desfasó.
@@ -15,7 +20,8 @@
  * Sin red ni Docker: corre en `validate`.
  * Uso:  node scripts/verifica-marca-blanca.mjs            (el gate)
  *       node scripts/verifica-marca-blanca.mjs --prueba   (la prueba de la prueba: siembra una
- *       huella, un archivo sin clase y un defendible en la entrega, y exige que los tres caigan)
+ *       huella, un archivo sin clase, un defendible en la entrega, una cita de la doctrina y una
+ *       ratificación sin firma, y exige que las cinco caigan)
  *       node scripts/verifica-marca-blanca.mjs --lista    (solo los entregables, uno por línea, si el
  *       gate está en verde: `tar czf erp.tgz $(node scripts/verifica-marca-blanca.mjs --lista)`)
  * Exit: 0 en verde · 1 en rojo.
@@ -60,7 +66,37 @@ export function huellasEn(texto, huellas) {
   return hallazgos;
 }
 
-/** Aplica las tres reglas. `leer(ruta)` devuelve el texto de un archivo. */
+/** Quita las cadenas SQL entre comillas simples ('' escapa una comilla dentro). */
+export const sinCadenasSql = (linea) => linea.replace(/'(?:[^']|'')*'/g, "''");
+
+/** Líneas de `texto` que citan la doctrina. En SQL no mira dentro de las cadenas. */
+export function citasDoctrina(texto, patrones, esSql) {
+  const res = patrones.map((f) => new RegExp(f, 'u'));
+  const hallazgos = [];
+  texto.split('\n').forEach((l, i) => {
+    const mirada = esSql ? sinCadenasSql(l) : l;
+    const r = res.find((re) => re.test(mirada));
+    if (r) hallazgos.push({ linea: i + 1, fuente: r.source });
+  });
+  return hallazgos;
+}
+
+/** Regla 5: una ratificación sin quién, fecha o decisión existente no es ratificación. */
+export function faltasDeRatificacion(ratificacion, maestro) {
+  const r = ratificacion ?? {};
+  if (!['propuesta', 'ratificada'].includes(r.estado)) return [`estado de ratificación inválido: ${r.estado}`];
+  if (r.estado !== 'ratificada') return [];
+  const faltas = [];
+  if (!r.por) faltas.push('ratificada sin «por» (quién firma)');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(r.fecha ?? '')) faltas.push('ratificada sin «fecha» AAAA-MM-DD');
+  if (!/^D-\d{2}$/.test(r.decision ?? '')) faltas.push('ratificada sin «decision» D-NN');
+  else if (!new RegExp(`^${r.decision} · `, 'm').test(maestro)) {
+    faltas.push(`la decisión ${r.decision} no existe en erp/ERP-MAESTRO.md`);
+  }
+  return faltas;
+}
+
+/** Aplica las cinco reglas. `leer(ruta)` devuelve el texto de un archivo. */
 export function verifica({ archivos, manifiesto, huellas, leer }) {
   const errores = [];
   const avisos = [];
@@ -81,6 +117,13 @@ export function verifica({ archivos, manifiesto, huellas, leer }) {
       errores.push(`${a}:${h.linea}: huella de la casa en lo que se entrega (/${h.fuente}/)`);
     }
   }
+  for (const a of entregables) {
+    for (const h of citasDoctrina(leer(a), manifiesto.referencias_doctrina ?? [], a.endsWith('.sql'))) {
+      errores.push(`${a}:${h.linea}: cita la doctrina en lo que se entrega (/${h.fuente}/)`);
+    }
+  }
+  const maestro = archivos.includes('erp/ERP-MAESTRO.md') ? leer('erp/ERP-MAESTRO.md') : '';
+  for (const f of faltasDeRatificacion(manifiesto.ratificacion, maestro)) errores.push(`erp/entrega.json: ${f}`);
   const noEntregables = archivos.filter((a) => !entregables.includes(a) && a !== manifiesto.huellas);
   for (const h of huellas.filter((x) => !x.preventiva)) {
     if (!noEntregables.some((a) => h.re.test(leer(a)))) {
@@ -101,16 +144,26 @@ function prueba(manifiesto, huellas, archivos, leer) {
   const casos = [
     ['huella en la entrega', { archivos, leer: (a) => (a === uno ? `${leer(a)}\n-- ${siembra}` : leer(a)) }],
     ['archivo sin clase', { archivos: [...archivos, 'erp/nuevo-sin-clase.md'], leer: (a) => (a.endsWith('sin-clase.md') ? '' : leer(a)) }],
+    ['cita de la doctrina en un comentario entregable', {
+      archivos, leer: (a) => (a === uno ? `${leer(a)}\n-- ver ERP-MAESTRO §1.7 (D-10)` : leer(a)),
+    }],
+    ['ratificación sin firma', {
+      archivos, leer, manifiesto: { ...manifiesto, ratificacion: { estado: 'ratificada', decision: 'D-44' } },
+    }],
     ['defendible en la entrega', {
       archivos,
       leer,
       manifiesto: { ...manifiesto, clases: { ...manifiesto.clases, entrega: { rutas: [...manifiesto.clases.entrega.rutas, 'erp/ERP-MAESTRO.md'] } } },
     }],
   ];
+  // Cuenta solo errores NUEVOS frente a la línea base: si el árbol ya tuviera un error, cualquier
+  // siembra «caería» por él y la prueba no probaría nada (pasó el 2026-09-25).
+  const base = new Set(verifica({ archivos, manifiesto, huellas, leer }).errores);
+  if (base.size) console.log(ambar(`  aviso: la línea base ya tiene ${base.size} error(es); no cuentan como cazas`));
   let cazadas = 0;
   for (const [nombre, caso] of casos) {
-    const { errores } = verifica({ manifiesto, huellas, ...caso });
-    if (errores.length) { cazadas += 1; console.log(`CAZADA ${nombre} — ${errores[0]}`); }
+    const nuevos = verifica({ manifiesto, huellas, ...caso }).errores.filter((e) => !base.has(e));
+    if (nuevos.length) { cazadas += 1; console.log(`CAZADA ${nombre} — ${nuevos[0]}`); }
     else console.log(rojo(`VIVA   ${nombre} — el gate no la vio`));
   }
   console.log(`\nprueba de la prueba: ${cazadas} de ${casos.length} siembras cazadas`);

@@ -1,16 +1,16 @@
 -- ═══════════════════════════════════════════════════════════════════
--- ERP AGÉNTICO · ERP-4B · Migración 005 — Módulo act (activos digitales)
+-- ERP · Migración 005 — Módulo act (activos digitales)
 -- ═══════════════════════════════════════════════════════════════════
--- El proyecto se inventaría a sí mismo (ERP-MAESTRO §1.6-1.7, ERP-4B):
+-- Quien opera el ERP inventaría sus propios activos digitales:
 -- ciclo DETECTAR (swm-act, solo lectura) → CATALOGAR (proceso con compuertas)
 -- → REGISTRAR contablemente (política auditada + aprobación humana).
 --
--- act vive en el NÚCLEO (D-08): los activos de quien opera el ERP se catalogan
+-- act vive en el NÚCLEO: los activos de quien opera el ERP se catalogan
 -- bajo SU cliente_id, con las MISMAS tablas que inventarían los activos
 -- digitales de cada tenant de la marca blanca. Ningún tenant va escrito aquí:
 -- es un PARÁMETRO de instalación (ERP_TENANT_ID, ver erp/instalacion/).
 --
--- REGLAS DE DISEÑO (mismas de ERP-0):
+-- REGLAS DE DISEÑO (las mismas del núcleo):
 --   · cliente_id NOT NULL en toda tabla. La RLS de sus tablas la aplica ESTA
 --     migración (bloque de seguridad al final), con la misma política que 004:
 --     el módulo queda cerrado aunque se instale en una sola pasada 001→005.
@@ -21,7 +21,7 @@
 --     repite), así que ningún orden de instalación los deja abiertos.
 --   · Nombres estrictos: act_<entidad singular>. Folio humano ACT- (003 ya
 --     lo tiene en la whitelist).
---   · DOS decisiones son SIEMPRE humanas (ERP-MAESTRO §4B paso 4): marcar o
+--   · DOS decisiones son SIEMPRE humanas: marcar o
 --     degradar DEFENSIBILIDAD, y la capitalización/baja contable. Por eso
 --     defensibilidad_estado nace 'propuesta' y estatus_contable 'pendiente';
 --     los CHECK de coherencia impiden ratificar/capitalizar sin rastro.
@@ -54,12 +54,12 @@ create table if not exists erp.act_activo (
   responsable            text not null default 'dep-fin',-- dep-* que responde por el activo
   estado                 text not null default 'activo'
     check (estado in ('activo','baja')),
-  -- Clasificación estratégica en DOS EJES ortogonales (§1.7):
+  -- Clasificación estratégica en DOS EJES ortogonales:
   eje_dei                text not null
     check (eje_dei in ('investigacion','desarrollo')),
   defensibilidad         text not null default 'reemplazable'
     check (defensibilidad in ('defendible','reemplazable')),
-  -- Ratificar la defensibilidad es DECISIÓN HUMANA (D-10): los agentes solo
+  -- Ratificar la defensibilidad es DECISIÓN HUMANA: los agentes solo
   -- escriben 'propuesta'; 'ratificada' exige quién y cuándo (CHECK abajo).
   defensibilidad_estado  text not null default 'propuesta'
     check (defensibilidad_estado in ('propuesta','ratificada')),
@@ -70,7 +70,7 @@ create table if not exists erp.act_activo (
   ref_catalogo           text,                           -- id en un catálogo previo, si lo hubo
   origen_task_id         text,                           -- id de la tarea externa que lo produjo
   origen_encargo_id      uuid,                           -- erp.sis_encargo.id si nació de un encargo
-  -- Campos contables (la política vive en reglas/act-contable.md, D-07):
+  -- Campos contables (los rige la política contable del tenant):
   costo_acumulado        numeric(14,2) not null default 0 check (costo_acumulado >= 0),
   estatus_contable       text not null default 'pendiente'
     check (estatus_contable in ('pendiente','capitalizado','gasto')),
@@ -110,7 +110,7 @@ create table if not exists erp.act_version (
   activo_id       uuid not null references erp.act_activo(id),
   version         text not null,
   hash            text,                                  -- commit/sha256 según el tipo de activo
-  origen          text not null,                         -- 'tarea:<task_id>' | 'cosecha-inicial' | 'fase:ERP-4' | …
+  origen          text not null,                         -- 'tarea:<task_id>' | 'cosecha-inicial' | 'fase:<nombre>' | …
   origen_task_id  text,
   created_at      timestamptz not null default now()
 );
@@ -121,7 +121,7 @@ create index if not exists act_version_activo_idx on erp.act_version (activo_id,
 -- ============================================================
 -- ACTIVOS · act_proteccion — expediente de los DEFENDIBLES
 -- "La ley solo protege el secreto industrial con medidas razonables
--- DEMOSTRABLES — el expediente vive en act" (§1.7). Los vencimientos deben
+-- DEMOSTRABLES — el expediente vive en act". Los vencimientos deben
 -- alertar al canal de operación del tenant (como los CSD).
 -- ============================================================
 create table if not exists erp.act_proteccion (
@@ -147,9 +147,9 @@ create index if not exists act_proteccion_vence_idx  on erp.act_proteccion (venc
 -- ============================================================
 -- ACTIVOS · act_costo — acumulación de costo por activo (APPEND-ONLY)
 -- "El costo no se estima de memoria: se suma de datos que el sistema ya
--- mide" (§4B paso 1). Tres componentes; fuente OBLIGATORIA (regla del
+-- mide". Tres componentes; fuente OBLIGATORIA (regla del
 -- ledger del catálogo: nunca aparentar precisión que no hay).
--- Solo USD por ahora (multi-moneda llega con ctb/mon, ERP-5): mezclar
+-- Solo USD por ahora (multi-moneda llega con su propio módulo): mezclar
 -- monedas en costo_acumulado sería mentir con un número.
 -- ============================================================
 create table if not exists erp.act_costo (
@@ -160,7 +160,7 @@ create table if not exists erp.act_costo (
     ('tokens','horas_humanas','infraestructura')),
   monto              numeric(14,2) not null check (monto >= 0),
   moneda             text not null default 'USD' check (moneda = 'USD'),
-  -- Heredado del ORIGEN (encargo/tarea) — jamás se reconstruye después (§1.7):
+  -- Heredado del ORIGEN (encargo/tarea) — jamás se reconstruye después:
   eje_dei            text not null check (eje_dei in ('investigacion','desarrollo')),
   origen_task_id     text,                               -- suma de token_usage.task_id (tarea + sub-tareas)
   origen_encargo_id  uuid,

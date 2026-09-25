@@ -14,8 +14,8 @@
 #   ERP_MARCA                     obligatoria. Nombre comercial de la instalación.
 #   ERP_TENANT_ID                 uuid del tenant inicial. Si falta, se genera uno.
 #   ERP_PUENTE_POSTGRES=1         otorga los roles del ERP al usuario de ERP_DB_URL para que
-#                                 pueda hacer SET ROLE (puente interino hasta el CLI, D-03;
-#                                 lo necesitan también las pruebas de cierre).
+#                                 pueda hacer SET ROLE (operación manual mientras no haya un
+#                                 login dedicado; lo necesitan también las pruebas de cierre).
 #   ERP_LOGIN_EJECUTOR            nombre del login del ejecutor (rol_exe_fin + rol_swm).
 #   ERP_LOGIN_EJECUTOR_PASSWORD   su contraseña (solo al crearlo; si ya existe no se toca).
 #   ERP_LOGIN_LECTOR              nombre del login de solo lectura (rol_swm).
