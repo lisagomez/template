@@ -15,10 +15,11 @@
     "revision": "el primer cliente que quiera pagar por disponibilidad garantizada (tier dedicado, D-06), o el cierre de GATE 3 si la casa decide ofrecerlo antes"
   },
   "ratificacion": {
-    "estado": "propuesta",
-    "por": null,
-    "fecha": null,
-    "decision": "D-44"
+    "estado": "ratificada",
+    "por": "lisagomez (el laboratorio)",
+    "fecha": "2026-09-25",
+    "decision": "D-44",
+    "cita": "ratifico frontera"
   },
   "clases": {
     "entrega": {

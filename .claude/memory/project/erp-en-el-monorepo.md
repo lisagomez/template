@@ -16,7 +16,7 @@ y una versión npm que nadie consume (decisión del PRP-004).
 | Lo de la casa (no sale) | `erp/casa/`, `erp/bin/` |
 | Lo defendible (no sale) | `erp/ERP-MAESTRO.md`, `erp/reglas/`, `erp/integracion-arkham.md` |
 
-Modelo de entrega propuesto (D-44, pendiente de ratificar): **B**, licencia instalada en la base
+Modelo de entrega **ratificado** el 2026-09-25 (D-44, lisagomez): **B**, licencia instalada en la base
 del cliente + SLA de soporte (sin disponibilidad ni respaldos del cliente); anexo en
 `erp/contrato/ANEXO-TECNICO.md`. Se revisa con el primer cliente que pague por disponibilidad.
 

@@ -1,10 +1,11 @@
 # ERP · frontera de entrega (marca blanca)
 
-> PRP-004, Fase 3B · 2026-09-25 · **Modelo B propuesto (D-44), pendiente de ratificar por el
-> laboratorio.** Qué recibe un tenant de marca blanca, qué no sale nunca y qué es parámetro. Decide
+> PRP-004, Fase 3B · 2026-09-25 · **Modelo B (D-44), RATIFICADO por lisagomez (el laboratorio)
+> el 2026-09-25: «ratifico frontera».** Qué recibe un tenant de marca blanca, qué no sale nunca y qué es parámetro. Decide
 > la frontera técnica; **no** decide precio, cifras del SLA ni texto legal. Clasificar la
-> defensibilidad es decisión humana (ERP-MAESTRO §1.7, consecuencia 4): hasta que el laboratorio
-> ratifique, `erp/entrega.json` lleva `"ratificacion": { "estado": "propuesta" }`.
+> defensibilidad es decisión humana (ERP-MAESTRO §1.7, consecuencia 4): la firma vive en
+> `erp/entrega.json` (`"ratificacion"`), y el gate la exige completa. Cambiar la clasificación de un
+> archivo o el modelo es una ratificación nueva, con su propia firma.
 
 ## El modelo: B, licencia instalada + SLA de soporte (D-44)
 
@@ -121,7 +122,7 @@ casa, ni red hacia fuera. Con eso: `instalar.sh` → `pruebas.sh` → la aplicac
 
 ## Qué queda para el laboratorio
 
-1. **Ratificar** (o corregir) esta clasificación y el modelo B: ver «Cómo se ratifica».
+1. ~~Ratificar esta clasificación y el modelo B~~ — **hecho** el 2026-09-25 (D-44).
 2. Con el abogado, cuando llegue el primer cliente: los `[ABOGADO]` y los `[COMPLETAR]` del anexo
    técnico (licencia, cifras del SLA con su forma de medirlas, encargo del tratamiento).
 3. **Precio y empaque final** (ERP-6 paso 4: sin plan comercial no hay precios).

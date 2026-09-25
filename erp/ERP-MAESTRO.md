@@ -2456,8 +2456,8 @@ en colas raras, no en campanas — el techo estructural y las compuertas
 van antes que cualquier Cpk. Especificación operativa en 1.10.
 
 D-44 · Modelo de entrega de la marca blanca: licencia instalada + SLA de
-soporte (modelo B) — PROPUESTA, pendiente de firma del laboratorio
-(redactada 2026-09-25; se ratifica en erp/entrega.json). El tenant recibe
+soporte (modelo B) — DECIDIDO: ratificado por lisagomez (el laboratorio)
+el 2026-09-25, «ratifico frontera»; registro en erp/entrega.json. El tenant recibe
 el esquema y su instalador bajo LICENCIA DE USO y los instala en SU base;
 la casa no opera su infraestructura. El SLA solo compromete lo que la casa
 controla: tiempos de respuesta y resolución de soporte, cadencia de
