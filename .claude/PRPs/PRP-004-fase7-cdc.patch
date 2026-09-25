@@ -1,0 +1,97 @@
+diff --git a/.claude/gobernanza/GOBERNANZA.md b/.claude/gobernanza/GOBERNANZA.md
+index 6da9ca3..77e1b9b 100644
+--- a/.claude/gobernanza/GOBERNANZA.md
++++ b/.claude/gobernanza/GOBERNANZA.md
+@@ -264,6 +264,16 @@ día que la app cambie de rol, y la deuda no crece en silencio.
+ 5. La prueba vive **del lado de la aplicación**: la base no puede verificar quién se
+    conectó con qué llave.
+ 
++**Usos declarados** (regla 2: declarado, no heredado)
++
++| Job | Qué hace con `service_role` | Qué NO hace con él | Declarado |
++|---|---|---|---|
++| Cosechador del módulo act (`erp/bin/cosechar-activos.py`, cron del servidor) | **Lee** `tareas` y `token_usage` (el trío) y hace el CAS `aprobada → concretada` sobre `tareas`, estado terminal sin dueño | Escribir en el esquema `erp`: ahí entra con el login `cli_fin` + `set local role rol_exe_fin` + tenant, y la RLS aplica | PRP-004, fase 7 |
++
++El esquema `erp` no admite `service_role` en ningún caso: su modelo es RLS `FORCE` por
++`cliente_id` con roles dedicados (`erp/migrations/004_seguridad.sql`). El detector
++`erp/bin/detector-swm-act.py` no usa `service_role` (lee con `rol_swm`).
++
+ ---
+ 
+ ## 9. Principios rectores
+diff --git a/.claude/memory/MEMORY.md b/.claude/memory/MEMORY.md
+index a7a875b..bffbde0 100644
+--- a/.claude/memory/MEMORY.md
++++ b/.claude/memory/MEMORY.md
+@@ -13,6 +13,7 @@
+ - [Eficiencia de tokens y frescura](project/eficiencia-tokens.md) — 4 sensores en el gate; 2026-08-26: `AGENTS.md` solo obliga, lo informativo en `.claude/rules/`, `GEMINI.md` generado, contabilidad medida en frio.
+ - [La imprenta de CLIs](project/imprenta-de-clis.md) — MCP cuestan 20363 tok/sesion (medido); "100x" refutado; la libreria publica no publica grados; esta maquina SI imprime (Go 1.26.7, 5 CLIs en libreria).
+ - [El template sirve para dos cosas](project/herramientas-empaquetadas.md) — apps y herramientas (`tools/`, `npm run empaqueta`); puerta `docs/CREAR-UNA-HERRAMIENTA.md`; PRP-002 en codigo, BD sin aplicar.
++- [El ERP vive en erp/](project/erp-en-el-monorepo.md) — excepcion a `tools/`; marca blanca: `erp/instalacion/`.
+ - [Extractor documental: en qué quedamos](project/extractor-documental.md) — spec 010 mezclada (PR #98): Tesseract + cola por regla, sin umbral; A2A montado y SIN publicar; banco de pruebas cerrado con `leePagina` (PR #102); falta corpus real y GPU.
+ - [Trayectorias: en qué quedamos](project/trayectorias.md) — spec 011 en PR #100; dos CDC promovidos por capa B (21/21); el sujeto va sin `git log` porque el historial alcanza el corpus; una tanda cuesta ~20 USD.
+ - [Protocolo de specs (SDD)](project/protocolo-de-specs.md) — `/spec-generator` + `.claude/specs/NNN/{spec,plan,tareas}` + gate `verifica:specs`; C4 en la spec, C3 en el plan; spec o PRP segun se sepa el QUE.
+diff --git a/.claude/memory/project/erp-en-el-monorepo.md b/.claude/memory/project/erp-en-el-monorepo.md
+new file mode 100644
+index 0000000..9302b97
+--- /dev/null
++++ b/.claude/memory/project/erp-en-el-monorepo.md
+@@ -0,0 +1,20 @@
++# El ERP vive en `erp/`, no en `tools/`
++
++**Añadido:** 2026-09-25 (PRP-004, fase 7) · **Estado:** CDC propuesto
++
++La regla del template es que lo reutilizable nace en `tools/` y se empaqueta con
++`npm run empaqueta`. **El ERP es la excepción**: es un sistema que opera la casa, no una
++librería que otro proyecto importa. Meterlo en `tools/` le exigiría el contrato de empaquetado
++y una versión npm que nadie consume (decisión del PRP-004).
++
++| | Dónde |
++|---|---|
++| Esquema (fuente de verdad) | `erp/migrations/` — idéntico a producción (medido 2026-09-25) |
++| Instalar en la base de un tenant | `erp/instalacion/` (`instalar.sh`, `pruebas.sh`, `npm run erp:prueba`) |
++| Qué sale al cliente | `erp/entrega.json` + `erp/FRONTERA-DE-ENTREGA.md`, vigilado por `verifica:marca-blanca` |
++| Lo de la casa (no sale) | `erp/casa/`, `erp/bin/` |
++| Lo defendible (no sale) | `erp/ERP-MAESTRO.md`, `erp/reglas/`, `erp/integracion-arkham.md` |
++
++La base de la casa es producción compartida: se lee con un login de solo lectura
++(`rol_swm`); toda escritura es gate humano y entra por `set local role` + tenant, nunca con
++`service_role`.
+diff --git a/AGENTS.md b/AGENTS.md
+index 5d02041..918a7e4 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -71,6 +71,14 @@ Usuario dice algo
+     ├── "Necesito algo de la base de datos" / "tabla" / "query" / "metricas"
+     |       → Ejecutar skill SUPABASE (estructura + datos + metricas)
+     |
++    ├── "El ERP" / "facturas, cobros, folios, CFDI del ERP" / "catalogo de activos (act)"
++    |   "instala el ERP para un cliente" / "marca blanca del ERP"
++    |       → Vive en `erp/` (este monorepo, privado; NO en `tools/`): esquema `erp/migrations/`,
++    |         reglas `erp/reglas/`, jobs del modulo act `erp/bin/`. Doctrina: `erp/ERP-MAESTRO.md`
++    |         Instalar en la base de un tenant: `erp/instalacion/INSTALAR.md` + `npm run erp:prueba`
++    |         Que sale al cliente y que no: `erp/entrega.json` (gate `verifica:marca-blanca`)
++    |         La base de la casa es PRODUCCION: solo lectura salvo gate humano; nunca service_role (C7)
++    |
+     ├── "Quiero convertir una idea vaga en un prompt para /goal"
+     |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
+     |
+diff --git a/GEMINI.md b/GEMINI.md
+index f2820ed..f7b7097 100644
+--- a/GEMINI.md
++++ b/GEMINI.md
+@@ -80,6 +80,14 @@ Usuario dice algo
+     ├── "Necesito algo de la base de datos" / "tabla" / "query" / "metricas"
+     |       → Ejecutar skill SUPABASE (estructura + datos + metricas)
+     |
++    ├── "El ERP" / "facturas, cobros, folios, CFDI del ERP" / "catalogo de activos (act)"
++    |   "instala el ERP para un cliente" / "marca blanca del ERP"
++    |       → Vive en `erp/` (este monorepo, privado; NO en `tools/`): esquema `erp/migrations/`,
++    |         reglas `erp/reglas/`, jobs del modulo act `erp/bin/`. Doctrina: `erp/ERP-MAESTRO.md`
++    |         Instalar en la base de un tenant: `erp/instalacion/INSTALAR.md` + `npm run erp:prueba`
++    |         Que sale al cliente y que no: `erp/entrega.json` (gate `verifica:marca-blanca`)
++    |         La base de la casa es PRODUCCION: solo lectura salvo gate humano; nunca service_role (C7)
++    |
+     ├── "Quiero convertir una idea vaga en un prompt para /goal"
+     |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
+     |
