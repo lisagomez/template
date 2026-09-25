@@ -1,0 +1,6 @@
+grupo rol_admin login=false bypassrls=false super=false inherit=true
+grupo rol_exe_fin login=false bypassrls=false super=false inherit=true
+grupo rol_swm login=false bypassrls=false super=false inherit=true
+login ejecutor -> rol_exe_fin,rol_swm bypassrls=false super=false
+login lector -> rol_swm bypassrls=false super=false
+puente rol_admin,rol_exe_fin,rol_swm

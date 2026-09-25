@@ -2,9 +2,9 @@
 -- ERP AGÉNTICO · ERP-0 · Migración 001 — NÚCLEO de la cadena mínima
 -- ═══════════════════════════════════════════════════════════════════
 -- Tablas del núcleo universal que toca la cadena  ped → fac → cfd → cob.
--- Todo vive en el esquema `erp` (aislado de `public`, que es de las verticales
--- Hermes con service_role). Aquí el modelo es el OPUESTO: RLS con políticas por
--- cliente_id y roles dedicados — la seguridad la aplica 004_seguridad.sql.
+-- Todo vive en el esquema `erp` (aislado de `public`, donde otras apps del mismo
+-- proyecto pueden usar service_role). Aquí el modelo es el OPUESTO: RLS con
+-- políticas por cliente_id y roles dedicados — la seguridad la aplica 004_seguridad.sql.
 --
 -- REGLAS DE DISEÑO OBLIGATORIAS (Parte IV, ERP-0):
 --   · cliente_id NOT NULL en TODA tabla (multi-tenant desde el día uno).
@@ -226,7 +226,7 @@ create index if not exists cfd_timbre_estado_idx on erp.cfd_timbre (cliente_id, 
 -- ============================================================
 -- SISTEMA · sis_encargo — cola PERSISTENTE del orquestador
 -- Los encargos en curso viven aquí, NO en la memoria del contenedor: todo
--- reinicio de hermes-negocio retoma desde esta tabla.
+-- reinicio del orquestador retoma desde esta tabla.
 -- ============================================================
 create table if not exists erp.sis_encargo (
   id                 uuid primary key default gen_random_uuid(),
@@ -294,7 +294,7 @@ create index if not exists sis_bitacora_traza_idx   on erp.sis_bitacora (traza_i
 create table if not exists erp.sis_agente (
   id                 uuid primary key default gen_random_uuid(),
   cliente_id         uuid not null,
-  agente             text not null,                        -- hermes-negocio, exe-fin, sup-fin, swm-aud-erp…
+  agente             text not null,                        -- orquestador, exe-fin, sup-fin, swm-aud-erp…
   departamento       text not null,                        -- dep-fin, dep-aud, …
   proposito          text not null,
   clis_permitidos    jsonb not null default '[]'::jsonb,   -- ["fac","cfd",…]

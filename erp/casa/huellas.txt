@@ -1,0 +1,28 @@
+# Huellas de LA CASA: lo que identifica a quien opera este ERP y no debe viajar en
+# nada de lo que se entrega a un tenant de marca blanca (erp/entrega.json → "entrega").
+# Lo lee scripts/verifica-marca-blanca.mjs (en `npm run validate`).
+# Una expresión regular por línea (JavaScript, sin distinguir mayúsculas). `#` = comentario.
+# `?` al inicio = PREVENTIVA: vigila la entrega aunque hoy no aparezca en ningún archivo de la casa
+# (las demás deben seguir vivas en algún archivo que no se entrega, o el gate avisa «huella muerta»).
+# Este archivo vive en erp/casa/ y NO se entrega: la lista misma es dato de la casa.
+
+# identificadores de producción
+2de8835a-439c-461a-990c-a2b95d29f3a4
+hsejpktzcqwkwkwholkw
+a2abot
+# identificadores de Slack (canales, usuarios, grupos): C0…, U0…, G0…, W0…
+\b[CUGW]0[A-Z0-9]{8,10}\b
+# canales y departamentos internos por nombre
+#(ops|dep|prj)-[a-z]
+# sistemas, repos y máquinas de la casa
+\bhermes\b
+businessos
+\btr[ií]o\b
+hetzner
+/home/[a-z]
+?lisagomez
+# personas y socios (las relaciones son defendibles, ERP-MAESTRO §1.7)
+\belisa\b
+arkham
+# correos
+?[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}

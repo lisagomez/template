@@ -220,7 +220,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # el gate completo (20 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:ajustes + prueba:trayectorias + verifica:trayectorias + verifica:inventario + prueba:inventario + imprenta + fugas
+npm run validate     # el gate completo (21 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:ajustes + prueba:trayectorias + verifica:trayectorias + verifica:inventario + verifica:marca-blanca + prueba:inventario + imprenta + fugas
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -240,6 +240,9 @@ npm run prueba:inventario    # el detector, el costeo (nunca un cero inventado) 
 npm run inventario:vista     # regenera inventario/INVENTARIO.md tras tocar el indice
 npm run inventario:exporta   # costeo + ledger + SQL para el modulo act del ERP, en inventario/salida/ (fuera de git)
 npm run inventario:valida-erp  # carga el export en un Postgres desechable con erp/migrations/ (Docker)
+npm run verifica:marca-blanca  # todo archivo de erp/ clasificado (erp/entrega.json); ni defendibles ni huellas de la casa en lo que se entrega
+npm run erp:prueba   # instala el ERP 2 veces en un Postgres 17 desechable, pruebas de cierre (a)-(j) y esquema ≡ produccion (Docker)
+npm run erp:control  # la prueba de las pruebas del ERP: 6 mutaciones de las migraciones, todas deben caer en rojo (Docker)
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
 npm run verifica:privado  # el repo NO es visible sin credenciales (lleva el ERP). Usa red: va en predeploy y en el hook pre-push si se empuja erp/
 npm run vigila:versiones  # deriva de TODO lo pineado (stack + MCP). Usa red: fuera del gate

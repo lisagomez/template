@@ -1,0 +1,53 @@
+{
+  "$comentario": "Frontera de entrega del ERP (marca blanca). Todo archivo de erp/ cae en EXACTAMENTE una clase. Lo lee scripts/verifica-marca-blanca.mjs en `npm run validate`: un archivo sin clase, un defendible dentro de la entrega o una huella de la casa en lo entregado lo ponen en rojo. El porqué de cada clase: erp/FRONTERA-DE-ENTREGA.md. Clasificar la defensibilidad es DECISIÓN HUMANA (ERP-MAESTRO §1.7, consecuencia 4): esta lista es la PROPUESTA del 2026-09-25, pendiente de ratificar por el laboratorio.",
+  "ratificacion": { "estado": "propuesta", "por": null, "fecha": null },
+  "clases": {
+    "entrega": {
+      "descripcion": "Lo que recibe el tenant para instalar y verificar el ERP en su propia base.",
+      "rutas": [
+        "erp/migrations/001_nucleo.sql",
+        "erp/migrations/002_pack_retail.sql",
+        "erp/migrations/003_folios.sql",
+        "erp/migrations/004_seguridad.sql",
+        "erp/migrations/005_activos.sql",
+        "erp/instalacion/instalar.sh",
+        "erp/instalacion/lib.sh",
+        "erp/instalacion/pruebas.sh",
+        "erp/instalacion/pruebas.sql",
+        "erp/instalacion/prueba-efimera.sh",
+        "erp/instalacion/INSTALAR.md",
+        "erp/instalacion/referencia/esquema-erp.sql",
+        "erp/instalacion/referencia/roles.sql",
+        "erp/instalacion/referencia/roles.txt",
+        "erp/instalacion/referencia/servidor.txt"
+      ]
+    },
+    "defendible": {
+      "descripcion": "El foso (§1.7): doctrina, reglas auditadas, relaciones. El tenant recibe USO, jamás estas fuentes.",
+      "rutas": [
+        "erp/ERP-MAESTRO.md",
+        "erp/reglas/",
+        "erp/integracion-arkham.md"
+      ]
+    },
+    "casa": {
+      "descripcion": "Operación e identidad de quien opera el ERP: tenant propio, producción, adaptadores a sus sistemas.",
+      "rutas": [
+        "erp/casa/",
+        "erp/bin/"
+      ]
+    },
+    "fabrica": {
+      "descripcion": "Cómo se construye y se vigila el ERP aquí: specs, notas internas, captura de referencia y control de reversión.",
+      "rutas": [
+        "erp/entrega.json",
+        "erp/FRONTERA-DE-ENTREGA.md",
+        "erp/specs/",
+        "erp/migrations/README.md",
+        "erp/instalacion/captura-referencia.sh",
+        "erp/instalacion/control-reversion.sh"
+      ]
+    }
+  },
+  "huellas": "erp/casa/huellas.txt"
+}
