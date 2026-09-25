@@ -2,22 +2,23 @@
 -- ERP AGÉNTICO · ERP-4B · Migración 005 — Módulo act (activos digitales)
 -- ═══════════════════════════════════════════════════════════════════
 -- El proyecto se inventaría a sí mismo (ERP-MAESTRO §1.6-1.7, ERP-4B):
--- ciclo DETECTAR (swm-act, solo lectura) → CATALOGAR (trío con compuertas)
+-- ciclo DETECTAR (swm-act, solo lectura) → CATALOGAR (proceso con compuertas)
 -- → REGISTRAR contablemente (política auditada + aprobación humana).
 --
--- act vive en el NÚCLEO (D-08): los activos del propio proyecto se catalogan
--- bajo el cliente_id de la casa, con las MISMAS tablas que después
--- inventariarán los activos digitales de los clientes de la marca blanca.
---   ERP_CLIENTE_CASA = 2de8835a-439c-461a-990c-a2b95d29f3a4
---   (acuñado 2026-07-26; también en el .env del host y en la memoria del repo)
+-- act vive en el NÚCLEO (D-08): los activos de quien opera el ERP se catalogan
+-- bajo SU cliente_id, con las MISMAS tablas que inventarían los activos
+-- digitales de cada tenant de la marca blanca. Ningún tenant va escrito aquí:
+-- es un PARÁMETRO de instalación (ERP_TENANT_ID, ver erp/instalacion/).
 --
 -- REGLAS DE DISEÑO (mismas de ERP-0):
---   · cliente_id NOT NULL en toda tabla; RLS la aplica 004 (RE-CORRER 004
---     después de esta migración: la RLS va por bucle sobre pg_tables).
+--   · cliente_id NOT NULL en toda tabla. La RLS de sus tablas la aplica ESTA
+--     migración (bloque de seguridad al final), con la misma política que 004:
+--     el módulo queda cerrado aunque se instale en una sola pasada 001→005.
+--     Re-correr 004 después sigue siendo inocuo (idempotente).
 --   · Constraints en BD para toda regla determinista (línea 1 de defensa).
 --   · act_version y act_costo son APPEND-ONLY (mismo trato que sis_bitacora):
---     los REVOKE viven al final de este archivo y hay que re-correrlos
---     también después de cada re-corrida de 004.
+--     los REVOKE viven al final de este archivo y también en 004 (que los
+--     repite), así que ningún orden de instalación los deja abiertos.
 --   · Nombres estrictos: act_<entidad singular>. Folio humano ACT- (003 ya
 --     lo tiene en la whitelist).
 --   · DOS decisiones son SIEMPRE humanas (ERP-MAESTRO §4B paso 4): marcar o
@@ -37,7 +38,7 @@ create extension if not exists pgcrypto;   -- gen_random_uuid()
 -- Un activo = artefacto digital discreto con valor replicable (software,
 -- config agéntica, datos, documento, infraestructura, licencia). El eje_dei
 -- se HEREDA del origen (encargo/tarea, 2 valores: 'operacion' no fabrica
--- activos — esa regla vive en el contrato del trío y en el cosechador).
+-- activos — esa regla vive en el proceso de catalogación y en el cosechador).
 -- ============================================================
 create table if not exists erp.act_activo (
   id                     uuid primary key default gen_random_uuid(),
@@ -62,12 +63,12 @@ create table if not exists erp.act_activo (
   -- escriben 'propuesta'; 'ratificada' exige quién y cuándo (CHECK abajo).
   defensibilidad_estado  text not null default 'propuesta'
     check (defensibilidad_estado in ('propuesta','ratificada')),
-  ratificado_por         text,                           -- Slack user id / 'elisa(host)'
+  ratificado_por         text,                           -- id del humano que ratifica (p. ej. Slack user id)
   ratificado_at          timestamptz,
-  -- Enlaces de origen (FK lógicas, cross-esquema — mismo criterio que
-  -- tareas.parent_id: la integridad la garantiza el proceso, no la BD):
-  ref_catalogo           text,                           -- A2A-NNN del catálogo bootstrap (businessos/activos/)
-  origen_task_id         text,                           -- public.tareas.task_id que lo produjo
+  -- Enlaces de origen (FK lógicas, fuera del esquema: la integridad la
+  -- garantiza el proceso, no la BD):
+  ref_catalogo           text,                           -- id en un catálogo previo, si lo hubo
+  origen_task_id         text,                           -- id de la tarea externa que lo produjo
   origen_encargo_id      uuid,                           -- erp.sis_encargo.id si nació de un encargo
   -- Campos contables (la política vive en reglas/act-contable.md, D-07):
   costo_acumulado        numeric(14,2) not null default 0 check (costo_acumulado >= 0),
@@ -120,8 +121,8 @@ create index if not exists act_version_activo_idx on erp.act_version (activo_id,
 -- ============================================================
 -- ACTIVOS · act_proteccion — expediente de los DEFENDIBLES
 -- "La ley solo protege el secreto industrial con medidas razonables
--- DEMOSTRABLES — el expediente vive en act" (§1.7). Vencimientos alertan a
--- #ops-alertas (como los CSD).
+-- DEMOSTRABLES — el expediente vive en act" (§1.7). Los vencimientos deben
+-- alertar al canal de operación del tenant (como los CSD).
 -- ============================================================
 create table if not exists erp.act_proteccion (
   id              uuid primary key default gen_random_uuid(),
@@ -199,9 +200,28 @@ create trigger act_costo_acumula
   for each row execute function erp.act_actualiza_costo();
 
 -- ============================================================
--- SEGURIDAD DEL MÓDULO (complementa 004 — RE-CORRER ESTA SECCIÓN
--- después de cada re-corrida de 004, igual que el revoke de sis_bitacora)
+-- SEGURIDAD DEL MÓDULO — autocontenida: RLS + append-only de sus tablas.
+-- 004 hace lo mismo sobre TODO el esquema; aquí se repite para act_* para
+-- que ningún orden de instalación deje el módulo abierto (medido 2026-09-25:
+-- 001→005 en una sola pasada dejaba las 4 tablas act_* sin RLS).
 -- ============================================================
+-- RLS por cliente_id, misma política (mismo nombre y texto) que 004:
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['act_activo','act_version','act_proteccion','act_costo'] loop
+    execute format('alter table erp.%I enable row level security;', t);
+    execute format('alter table erp.%I force  row level security;', t);
+    execute format('drop policy if exists tenant_aislamiento on erp.%I;', t);
+    execute format($f$
+      create policy tenant_aislamiento on erp.%I
+        using      (cliente_id = nullif(current_setting('app.cliente_id', true), '')::uuid)
+        with check (cliente_id = nullif(current_setting('app.cliente_id', true), '')::uuid);
+    $f$, t);
+  end loop;
+end $$;
+
 -- El historial y el ledger de costo son APPEND-ONLY para el ejecutor.
 -- En DO block por si esta migración corre antes que 004 (roles aún sin crear):
 do $$

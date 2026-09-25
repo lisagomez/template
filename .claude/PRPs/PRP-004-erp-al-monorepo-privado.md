@@ -36,14 +36,14 @@ lo que se entrega a producción sale empaquetado desde aquí, con asiento en el 
 
 ### Criterios de Éxito
 
-- [ ] `gh repo view lisagomez/template --json isPrivate` devuelve `true` **antes** del primer
+- [x] `gh repo view lisagomez/template --json isPrivate` devuelve `true` **antes** del primer
       commit que contenga un archivo del ERP, y el commit de importación lo registra como evidencia.
-- [ ] `erp/` existe en el template con `ERP-MAESTRO.md`, `integracion-arkham.md`, `reglas/`,
+- [x] `erp/` existe en el template con `ERP-MAESTRO.md`, `integracion-arkham.md`, `reglas/`,
       `migrations/001..005` y `bin/{cosechar-activos,detector-swm-act}.py`, con su historial de git
       importado (no una copia plana), y **byte a byte iguales** al `origin/master` de `hermes-os-a2a`
       en el momento del corte (sha256 por archivo, registrado).
-- [ ] `npm run verifica:inventario` en verde con el ERP cubierto: cero NUEVO, HUÉRFANO o AMBIGUO.
-- [ ] `npm run inventario:valida-erp` corre **sin** `--migraciones`: toma `erp/migrations/` del propio
+- [x] `npm run verifica:inventario` en verde con el ERP cubierto: cero NUEVO, HUÉRFANO o AMBIGUO.
+- [x] `npm run inventario:valida-erp` corre **sin** `--migraciones`: toma `erp/migrations/` del propio
       árbol, y el SQL exportado carga sobre 001-005 en Postgres desechable.
 - [ ] `detector-swm-act.py --dry-run` corre desde el template y reporta el catálogo real **sin**
       HUÉRFANO/NUEVO espurios por el cambio de ruta (las ubicaciones `businessos/erp/…` se
@@ -53,10 +53,10 @@ lo que se entrega a producción sale empaquetado desde aquí, con asiento en el 
 - [ ] El servidor corre el detector semanal y el cosechador desde un clon del template con
       **llave de despliegue de solo lectura**, y la primera corrida post-corte está en `host-jobs.log`
       con `rc=0`.
-- [ ] **Fase 3B (añadida 2026-09-25)**: el esquema `erp` de producción está capturado en migraciones
+- [x] **Fase 3B (añadida 2026-09-25)**: el esquema `erp` de producción está capturado en migraciones
       idénticas a la BD viva, sin datos de la casa, con tenant y marca como parámetros, instalable
       desde cero en Postgres efímero, y con la frontera de entrega de marca blanca documentada.
-- [ ] `npm run validate` en verde.
+- [x] `npm run validate` en verde.
 
 ### Comportamiento Esperado
 
@@ -146,6 +146,12 @@ update erp.act_activo
 -- + fila en sis_bitacora con traza_id (NOT NULL): la re-ubicación queda auditada
 commit;
 ```
+
+> **Corregido en la Fase 4 (2026-09-25, medido en producción con `erp_lector`):** este `update` habría
+> movido **solo** ACT-0002 («dummy gate D», en **baja**, la prueba del cierre del 26/07) y dejado el
+> ERP donde estaba: el activo del ERP es **ACT-0012**, con `ubicacion = 'erp/'` (relativa al repo de
+> origen), que el `like 'businessos/erp/%'` no toca. El SQL vigente, con guardas, bitácora y reverso,
+> es `erp/casa/fase4-reubicacion.sql`.
 
 Se valida primero en el Postgres desechable de `inventario:valida-erp`. El inventario de respaldo
 (`FASE0-INFRAESTRUCTURA.md` §9.1) no cambia: el esquema `erp` ya está en el Supabase compartido; lo
@@ -256,7 +262,13 @@ copia, **cero** hallazgos espurios por la ruta. `python3 -m py_compile` en verde
 **Validación**: `verifica:inventario` y `prueba:inventario` en verde; `inventario:valida-erp` sin
 argumentos carga el export sobre 001-005; `verifica:specs` en verde.
 
-### Fase 3B: El esquema, de producción a boilerplate de marca blanca (añadida 2026-09-25)
+### Fase 3B: El esquema, de producción a boilerplate de marca blanca (añadida 2026-09-25) — ✅ CERRADA 2026-09-25
+> `pg_dump` de `erp` en producción (con `erp_lector`, solo lectura) **idéntico** a 001-005 en el orden
+> aplicado; nada que corregir en producción. Hueco cazado: 001→005 en una pasada dejaba `act_*` sin RLS
+> → 005 autocontenida y 004 cierre seguro en cualquier orden. `erp/instalacion/` (instalador con tenant,
+> marca, logins y puente como parámetros; pruebas (a)-(j) en transacción que se deshace; efímero ×2 ≡
+> producción en esquema y roles); control de reversión 6/6; datos de la casa a `erp/casa/`; frontera en
+> `erp/entrega.json` + `FRONTERA-DE-ENTREGA.md` con `verifica:marca-blanca` en `validate` (3/3 siembras).
 > Añadida por el laboratorio: este repo es el boilerplate de producción de marca blanca (laboratorio
 > de pruebas y base de lo que se empaqueta o licencia a clientes). Spec de la fase:
 > `erp/specs/esquema-marca-blanca.md`. Va antes de la 4 porque es solo lectura sobre producción y
@@ -272,13 +284,25 @@ de la casa en lo entregable = 0; instalación limpia con tenant ficticio + segun
 pruebas (a)(b)(c)(d) en verde; esquema instalado ≡ producción salvo lo documentado; `npm run validate`
 en verde. **Solo lectura contra producción**; sin credencial de solo lectura al catálogo, se detiene.
 
-### Fase 4: Re-ubicación en el catálogo de producción
+### Fase 4: Re-ubicación en el catálogo de producción — 📦 PAQUETE LISTO, espera el sí (2026-09-25)
+> Medido (solo lectura): 25 activos, 1 sola fila con `businessos/erp/` (ACT-0002, en baja: historia,
+> no se toca) y el ERP es ACT-0012 con `erp/`. SQL con guardas, bitácora (`aprobado_por` obligatorio) y
+> reverso: `erp/casa/fase4-reubicacion.sql`. Ensayo (`erp/casa/ensayo-fase4.sh`, copia del catálogo en
+> efímero): solo cambia ACT-0012 `erp/ → template/erp/`; 25 activos / 25 folios / mismo costo total
+> antes y después; +1 asiento `act.reubicar` con traza; detector en seco 0 HUÉRFANO, 0 REUBICAR; el
+> reverso vuelve a la foto de antes. **No se escribió en producción.**
 **Objetivo**: las filas `businessos/erp/…` de `erp.act_activo` pasan a `template/erp/…` con su
 traza en `sis_bitacora`. Gate humano: la dueña aprueba viendo el diff de filas (antes/después).
 **Validación**: ensayo en Postgres desechable con el catálogo copiado; en producción, mismo número
 de folios, mismo `costo_acumulado` total antes y después, y el detector en `--dry-run` sin HUÉRFANOS.
 
-### Fase 5: Corte de los jobs en el servidor
+### Fase 5: Corte de los jobs en el servidor — 📦 RUNBOOK LISTO, espera el sí (2026-09-25)
+> `erp/casa/RUNBOOK-FASE5.md`: llave de despliegue de solo lectura (y prueba de que no escribe), clon,
+> medir y respaldar el crontab, paralelo en seco, corte editando la MISMA línea (un solo escritor),
+> validación y reverso. Local: los dos scripts compilan; el detector corrió en seco desde `erp/bin/`
+> contra el catálogo re-ubicado (0 HUÉRFANO, 0 REUBICAR). El cosechador **no** puede correr en seco
+> aquí: lee `tareas` con `service_role`, que esta tarea no usa — su seco es el paso 4 del runbook, en el
+> servidor. **No se tocó el servidor.**
 **Objetivo**: clon del template en el servidor con llave de despliegue de solo lectura;
 `weekly-jobs.sh` y el cron del cosechador apuntan a `erp/bin/`. Una semana (o una corrida manual
 acordada) en paralelo: el nuevo en `--dry-run`, el viejo operando; luego se apaga el viejo.
@@ -286,14 +310,28 @@ Gate humano: el corte.
 **Validación**: primera corrida real en `host-jobs.log` con `rc=0` y mismos hallazgos que la
 corrida en paralelo; `.env` del servidor confirmado por presencia (enmascarado), nunca impreso.
 
-### Fase 6: Retiro en `hermes-os-a2a`
+### Fase 6: Retiro en `hermes-os-a2a` — ⛔ BLOQUEADA por la duda 2 (qué hacer con lo ya público)
+> Medido en el clon local (`97d9f9e`): el PR retiraría 11 archivos (`businessos/erp/` ×9 +
+> `cosechar-activos.py` + `detector-swm-act.py`) y dejaría puntero en 23 que los citan (memorias,
+> `CLAUDE.md`, `ROADMAP.md`, `weekly-jobs.sh`, `tenencia.yml`, `exportar-polizas.py`,
+> `ingest-token-usage.py`, `cosechar-prediscovery.py`, `trio-contrato/contrato.py`, `tenancy/orden.txt`,
+> `migrations/README.md` y 3 migraciones de hermes, `activos/{CATALOGO.md,activos.jsonl,ACT-buzon…}`,
+> `departamentos/white-label.md`, `BUSINESS_LOGIC.md`, `meeting-copilot/…/types.ts`). Ojo para la duda 2:
+> `businessos/erp/migrations/{README.md,005_activos.sql}` publican hoy el UUID del tenant de la casa y el
+> ref de producción. Sin rama ni PR hasta que se decida.
 **Objetivo**: PR que borra `businessos/erp/` y los dos scripts, deja `businessos/erp/README.md` como
 puntero («vive en el monorepo privado de la fábrica»), actualiza los acoplamientos listados en
 Contexto y cierra el PR #316 sin merge con enlace a este PRP. Trío, CRM y verticales intactos.
 **Validación**: su CI (`tenencia.yml`) en verde; `grep` de `businessos/erp/` sin referencias vivas
 salvo el puntero. Gate humano: merge en el otro repo.
 
-### Fase 7: Declararlo en la fábrica (CDC)
+### Fase 7: Declararlo en la fábrica (CDC) — 📦 PROPUESTA LISTA, espera la firma (2026-09-25)
+> Diff en `PRP-004-fase7-cdc.patch` (`AGENTS.md`, `GEMINI.md`, `GOBERNANZA.md` §8) y entrada de bitácora **fuera del registro** en
+> `PRP-004-fase7-cdc-propuesta.md`. Medido sobre una copia con el diff aplicado: regresión 123/123,
+> `--trampa` 22/22, gobernanza 152/152, contexto en presupuesto (+180 tokens/sesión sin contar la memoria, ya aplicada; la memoria pasaba
+> 807/800 y se acortó la línea, no se subió el tope), 18 pasos de `validate` sin build en verde.
+> **No aplicado.** La parte de memoria del proyecto se aplicó aparte el 2026-09-25, a pedido del
+> laboratorio (no es C1): `.claude/memory/project/erp-en-el-monorepo.md`.
 **Objetivo**: una línea en el decision tree de `AGENTS.md` («el ERP vive en `erp/`; esquema,
 reglas y act») + `GEMINI.md` regenerado + declaración C7 del cosechador en `GOBERNANZA.md` §8 +
 memoria del proyecto actualizada (la regla «lo nuevo nace en `tools/`» gana su excepción: el ERP).
@@ -312,6 +350,23 @@ entrada en `BITACORA-CDC.md`; `verify:gobernanza` en verde.
 ## 🧠 Aprendizajes (Self-Annealing / Neural Network)
 
 > Esta sección CRECE con cada error encontrado durante la implementación.
+
+- **2026-09-25 · Un esquema «idéntico a producción» puede serlo solo por el orden en que se aplicó.**
+  001→005 en una pasada dejaba las 4 tablas `act_*` sin RLS; la casa estaba bien porque alguien
+  re-corrió 004 y 005 a mano. Un tenant nuevo, siguiendo el README, habría quedado abierto. Fix: cada
+  módulo trae su seguridad y el cierre (004) repite los revokes append-only. Lo caza `npm run erp:control`.
+- **2026-09-25 · El SQL del PRP se escribió sin mirar las filas.** `like 'businessos/erp/%'` apuntaba a
+  un activo de prueba en baja; el ERP real estaba en `erp/`. Medir en solo lectura antes de escribir el
+  SQL de un gate es parte del gate.
+- **2026-09-25 · En Supabase `postgres` tiene BYPASSRLS**: `FORCE ROW LEVEL SECURITY` no lo somete. Todo
+  acceso a filas del ERP va tras `set local role`.
+- **2026-09-25 · El pooler de Supabase ignora `PGOPTIONS`**: `default_transaction_read_only` no llegó por
+  ahí; el acceso de solo lectura se fuerza con un `set` explícito en la sesión (probado: rechaza hasta
+  una tabla temporal).
+- **2026-09-25 · `psql -c` no admite SQL y `\gexec` en la misma cadena**: falló en silencio con la salida
+  redirigida; va por stdin.
+- **2026-09-25 · Un worktree con `node_modules` enlazado no compila**: Turbopack rechaza el enlace fuera
+  de la raíz. Para ensayar un CDC de solo documentos, correr `validate` sin typecheck/lint/build.
 
 ---
 
@@ -371,5 +426,20 @@ entrada en `BITACORA-CDC.md`; `verify:gobernanza` en verde.
 
 ---
 
-*PRP aprobado el 2026-09-24; Fase 3B añadida el 2026-09-25 por el laboratorio. Dudas 2 y 3 siguen
-abiertas: la 2 bloquea la Fase 6, la 3 no bloquea nada.*
+## Estado al 2026-09-25 (goal de la Fase 3B)
+
+| Criterio de éxito | Estado | Evidencia o gate pendiente |
+|---|---|---|
+| Repo privado antes del ERP | ✅ | Fase 0: `isPrivate: true`; `verifica:privado` en predeploy y pre-push |
+| `erp/` importado con historial, byte a byte | ✅ | Fase 1: 11 sha256 idénticos, `audita:secretos` limpio |
+| `verifica:inventario` con el ERP cubierto | ✅ | 181 unidades, 0 NUEVO / HUÉRFANO / AMBIGUO |
+| `inventario:valida-erp` sin `--migraciones` | ✅ | 23 altas, 0 en la segunda carga, 7/7 (re-corrido con las migraciones de la 3B) |
+| Detector desde el template sin HUÉRFANO/NUEVO espurios por la ruta | 🟡 ensayado | 0 HUÉRFANO y 0 REUBICAR contra la copia re-ubicada. Los NUEVO que quedan (9 archivos de `erp/` + activos del template) no son espurios por la ruta: el catálogo de la casa nunca los tuvo uno por uno; darlos de alta es catalogación (gate humano aparte). Falta la corrida real: **gate Fase 4 + Fase 5** |
+| Retiro en `hermes-os-a2a` y #316 cerrado | ⛔ | **Bloqueado por la duda 2** |
+| Jobs del servidor desde el template, llave de solo lectura, `rc=0` | ⏳ | **Gate Fase 5** (runbook listo) |
+| Fase 3B: esquema ≡ producción, marca blanca, instalable | ✅ | `npm run erp:prueba` en verde; `erp:control` 6/6; `verifica:marca-blanca` en `validate` |
+| `npm run validate` en verde | ✅ | sellado sobre el árbol de la 3B |
+| (Fase 7) CDC en `AGENTS.md` | ⏳ | **Firma**: `PRP-004-fase7-cdc-propuesta.md` |
+
+*PRP aprobado el 2026-09-24; Fase 3B añadida y cerrada el 2026-09-25. Dudas 2 y 3 siguen abiertas: la
+2 bloquea la Fase 6, la 3 no bloquea nada.*

@@ -23,28 +23,19 @@ Spec completa: [`../ERP-MAESTRO.md`](../ERP-MAESTRO.md) (Parte IV, ERP-0; §4B p
 > fiscales como datos versionados, doble compuerta aprobar≠dispersar, CFDI de nómina, doble firma
 > contador+laboral), y motor comercial (cot/prc/prm). Decisiones D-07…D-31.
 
-## Estado
+## Estado e instalación
 
-- **APLICADAS a producción el 2026-07-26** (decisión de la dueña): Supabase compartido
-  A2ABot (`hsejpktzcqwkwkwholkw`), esquema `erp`, vía management API. Orden aplicado:
-  `001 → 002 → 003 → 004 → 005 → 004 (re-corrida: RLS de act_*) → 005 (re-corrida:
-  revokes append-only)`. Pre-vuelo verificado antes de correr: esquema `erp`
-  inexistente, roles inexistentes, cero colisiones de funciones en `public` —
-  aplicación puramente aditiva; rollback documentado = `drop schema erp cascade` +
-  drop de los 3 roles.
-- Gate de cierre verificado contra producción (2026-07-26): 22 tablas con RLS
-  FORCE; `rol_swm` rechazado por permiso de TABLA; `siguiente_folio('ACT')` →
-  `ACT-0001`; 0 filas sin `app.cliente_id`; DELETE denegado; escritura válida bajo
-  `rol_exe_fin` + baja por `estado='baja'` (nunca delete).
-- **Puente interino (hasta el CLI de ERP-1, D-03):** las escrituras van por
-  management API envueltas en `begin; set local role rol_exe_fin; set local
-  app.cliente_id='<tenant>'; …; commit;` — ejercitan grants+RLS reales. Para que
-  el `SET ROLE` funcione se otorgó **membresía**: `grant rol_exe_fin, rol_swm,
-  rol_admin to postgres;` (estado de cluster, no vive en ningún .sql — si se
-  recrea la BD hay que re-otorgarla). El tenant de la casa es
-  `ERP_CLIENTE_CASA=2de8835a-439c-461a-990c-a2b95d29f3a4` (D-08).
-- Antes de la aplicación estuvieron **validadas** en Postgres 16 efímero; esa
-  receta sigue siendo el paso previo obligatorio para toda migración nueva.
+- **Producción de la casa**: aplicadas el 2026-07-26; historia, tenant, roles y estado de cluster en
+  [`../casa/ESTADO-PRODUCCION.md`](../casa/ESTADO-PRODUCCION.md) (no se entrega). El 2026-09-25 el
+  esquema de producción se comparó con estos archivos: **idéntico**.
+- **Instalar** (desde cero o encima, idempotente): [`../instalacion/instalar.sh`](../instalacion/instalar.sh)
+  aplica `NNN_*.sql` en orden y cierra con 004; el tenant, la marca, los logins y el puente son
+  **parámetros**, no texto en estos archivos. Guía para quien instala: [`../instalacion/INSTALAR.md`](../instalacion/INSTALAR.md).
+- **Orden**: desde el 2026-09-25 el resultado no depende del orden. 005 trae su propia RLS y sus
+  revokes append-only, y 004 repite los revokes de los ledgers (`act_version`, `act_costo`), así que
+  re-correr 004 al final —lo que se hace cuando un pack añade tablas— ya no reabre el UPDATE.
+  Antes, instalar 001→005 en una sola pasada dejaba las 4 tablas `act_*` **sin RLS** (medido); la
+  casa estaba bien solo porque se re-corrieron 004 y 005 a mano.
 
 Todo vive en un esquema **`erp` aislado** de `public` (donde las verticales Hermes usan
 `service_role`). Aquí el modelo es el opuesto: RLS con políticas por `cliente_id` + roles
@@ -57,23 +48,21 @@ dedicados; los CLIs/agentes **jamás** usan `service_role` (tiene BYPASSRLS y an
 | 001 | `001_nucleo.sql` | Núcleo (13 tablas): cob_cliente/saldo/cobro(+aplicacion), fac_factura/concepto/impuesto (impuestos POR concepto, CFDI 4.0), cfd_folio/timbre (estado intermedio + transiciones), sis_encargo (cola persistente + eje_dei + traza_id), sis_bitacora (append-only, traza_id NOT NULL), sis_agente(+_version) (tarjeta de agente A2A). Triggers de cuadre y de transición. |
 | 002 | `002_pack_retail.sql` | Pack retail: inv_articulo/precio, ped_pedido/partida. El pack referencia al núcleo, nunca al revés. |
 | 003 | `003_folios.sql` | Folios humanos por tenant (PED/FAC/CFD/COB/REP) con `erp.siguiente_folio()` atómico (anti-carrera). |
-| 004 | `004_seguridad.sql` | Roles `rol_exe_fin`/`rol_swm`/`rol_admin` + RLS `FORCE` con política por `cliente_id` en toda tabla. Re-correr si un pack añade tablas. |
-| 005 | `005_activos.sql` | Módulo `act` (ERP-4B): act_activo (dos ejes §1.7 + defensibilidad propuesta/ratificada + campos contables), act_version (append-only), act_proteccion (expediente defendibles), act_costo (append-only, fuente obligatoria, trigger que mantiene costo_acumulado). Re-correr su sección de revokes tras cada re-corrida de 004. |
+| 004 | `004_seguridad.sql` | Roles `rol_exe_fin`/`rol_swm`/`rol_admin` + RLS `FORCE` con política por `cliente_id` en toda tabla + revokes append-only. Es también el **cierre** de la instalación: re-correrlo si un pack añade tablas (seguro en cualquier orden). |
+| 005 | `005_activos.sql` | Módulo `act` (ERP-4B): act_activo (dos ejes §1.7 + defensibilidad propuesta/ratificada + campos contables), act_version (append-only), act_proteccion (expediente defendibles), act_costo (append-only, fuente obligatoria, trigger que mantiene costo_acumulado). Trae su propia RLS y sus revokes: queda cerrado aunque se instale en una sola pasada. |
 
-## Cómo validar (staging efímero, cero costo)
+## Cómo validar (efímero, cero costo)
 
 ```bash
-cd businessos
-docker run -d --name erp0-validate -e POSTGRES_PASSWORD=pw postgres:16-alpine
-docker exec erp0-validate bash -c 'until pg_isready -U postgres -q; do sleep 1; done'
-for f in 001_nucleo 002_pack_retail 003_folios 004_seguridad 005_activos 004_seguridad 005_activos; do
-  docker exec -i erp0-validate psql -U postgres -v ON_ERROR_STOP=1 < erp/migrations/$f.sql
-done   # las re-corridas de 004/005 son parte del orden real (RLS + revokes) y prueban idempotencia
-# pruebas de cierre (a/b/c/d) — ver el script usado en la sesión de construcción
-docker rm -f erp0-validate
+npm run erp:prueba     # Postgres 17 desechable: instala 2 veces, pruebas (a)…(j), ≡ producción
+npm run erp:control    # la prueba de las pruebas: 6 mutaciones, todas deben caer en rojo
 ```
 
-Validación de cierre ERP-0 que pasó (todas en verde):
+Toda migración nueva pasa primero por `npm run erp:prueba` (y su referencia de producción se
+recaptura, en solo lectura, con `erp/instalacion/captura-referencia.sh` después de aplicarla).
+
+Validación de cierre ERP-0 que pasó en 2026-07 (hoy son los casos (a)-(d) de `../instalacion/pruebas.sql`,
+que añade (e) DELETE, (f) append-only, (g) cerrado sin tenant, (h) RLS FORCE total, (i) act y (j) folios):
 - **(a)** cadena completa cuadra (subtotal+IVA = total = cobrado);
 - **(b)** la BD rechaza sola: descuadre de cabecera, total negativo, emitir sin conceptos,
   descuadre cabecera↔detalle, transición de timbre inválida;

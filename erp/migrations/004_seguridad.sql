@@ -18,8 +18,9 @@
 -- rol_swm. FORCE ROW LEVEL SECURITY somete incluso al dueño de la tabla.
 --
 -- Idempotente. STAGING primero. Correr DESPUÉS de 001/002/003.
--- Si en el futuro un pack añade tablas, RE-CORRER la sección de GRANTS + el
--- bloque de RLS (ambos son idempotentes y aplican "ON ALL TABLES IN SCHEMA").
+-- Es también el CIERRE de la instalación (erp/instalacion/instalar.sh lo corre
+-- al final): si un pack añade tablas, re-correrlo les pone grants + RLS. Es
+-- seguro en cualquier orden: repite los REVOKE de los ledgers append-only.
 -- ═══════════════════════════════════════════════════════════════════
 
 -- ------------------------------------------------------------
@@ -56,6 +57,20 @@ grant select, insert, update on all tables    in schema erp to rol_exe_fin;
 grant usage,  select         on all sequences in schema erp to rol_exe_fin;
 -- La bitácora es APPEND-ONLY: se puede insertar y leer, jamás modificar.
 revoke update on erp.sis_bitacora from rol_exe_fin;
+-- Mismo trato para los ledgers append-only de los módulos que ya existan (act,
+-- 005). Vive AQUÍ también porque el GRANT de arriba es "on all tables": si 004
+-- corre después de 005 re-abriría el UPDATE. Con esto, 004 es un cierre
+-- seguro en cualquier orden (to_regclass: el módulo puede no estar instalado).
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['act_version','act_costo'] loop
+    if to_regclass('erp.' || t) is not null then
+      execute format('revoke update on erp.%I from rol_exe_fin;', t);
+    end if;
+  end loop;
+end $$;
 
 -- rol_swm: SOLO lectura. Ni un verbo de escritura.
 grant select on all tables in schema erp to rol_swm;

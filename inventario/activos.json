@@ -169,7 +169,7 @@
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",
    "ubicacion": ".claude/gobernanza", "responsable": "dep-sw",
    "origen": [".claude/specs/001-gobernanza-agentica"],
-   "cubre": [".claude/gobernanza", ".claude/settings.json", ".claude/example.mcp.json", ".claude/presupuesto-contexto.json", ".claude/hooks/log-tool-usage.sh", "docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md", "scripts/verifica-gobernanza.mjs", "scripts/audita-secretos.mjs", "scripts/audita-fugas.mjs", "scripts/sello-validate.mjs", "scripts/prepara-gate.mjs", "scripts/mide-contexto.mjs", "scripts/vigila-versiones.mjs", "scripts/lib", "scripts/verifica-privado.mjs", "scripts/hooks"]
+   "cubre": [".claude/gobernanza", ".claude/settings.json", ".claude/example.mcp.json", ".claude/presupuesto-contexto.json", ".claude/hooks/log-tool-usage.sh", "docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md", "scripts/verifica-gobernanza.mjs", "scripts/audita-secretos.mjs", "scripts/audita-fugas.mjs", "scripts/sello-validate.mjs", "scripts/prepara-gate.mjs", "scripts/mide-contexto.mjs", "scripts/vigila-versiones.mjs", "scripts/lib", "scripts/verifica-privado.mjs", "scripts/verifica-marca-blanca.mjs", "scripts/hooks"]
   },
   {
    "id": "TPL-imprenta",
