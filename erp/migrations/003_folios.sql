@@ -1,9 +1,9 @@
 -- ═══════════════════════════════════════════════════════════════════
--- ERP AGÉNTICO · ERP-0 · Migración 003 — FOLIOS humanos (con prueba de carrera)
+-- ERP · Migración 003 — FOLIOS humanos (con prueba de carrera)
 -- ═══════════════════════════════════════════════════════════════════
 -- Folios humanos por tenant y prefijo: PED-, FAC-, CFD-, COB-, REP-.
 -- La asignación DEBE ser segura ante concurrencia: dos emisiones simultáneas
--- obtienen folios distintos y secuenciales (validación de ERP-1). Lo logramos
+-- obtienen folios distintos y secuenciales. Lo logramos
 -- con un UPDATE ... RETURNING atómico que bloquea la fila del contador.
 --
 -- Idempotente. STAGING primero.
@@ -14,14 +14,9 @@
 -- ============================================================
 create table if not exists erp.sis_folio (
   cliente_id  uuid   not null,
-  -- Whitelist COMPLETA de prefijos del doc (cerrada, "el sistema no inventa").
-  -- Núcleo/cadena: PED FAC CFD COB REP. Módulos posteriores (sus tablas llegan
-  -- en migraciones 005/006/007/ctb, pero el prefijo se incluye por forward-compat
-  -- para no retro-editar esta migración): ACT (activos, v3), HAL (hallazgo de
-  -- auditoría, v5), POL (póliza) y DOC (documento contable/fiscal, dep-ctb v6),
-  -- PRO (prospecto, dep-pln v8), CAS (caso CRM) y DIF (campaña) del pack CRM
-  -- conversacional (v10). NOM (recibo de nómina, dep-nom ERP-5C v11), COT
-  -- (cotización) y PRM (promoción) del pack motor comercial (v11).
+  -- Lista CERRADA de prefijos ("el sistema no inventa"): los de la cadena
+  -- (PED FAC CFD COB REP) y los de módulos que pueden instalarse después, que se
+  -- incluyen desde ya para no reeditar esta migración.
   prefijo     text   not null check (prefijo in
     ('PED','FAC','CFD','COB','REP','ACT','HAL','POL','DOC','PRO','CAS','DIF','NOM','COT','PRM')),
   ultimo      bigint not null default 0 check (ultimo >= 0),

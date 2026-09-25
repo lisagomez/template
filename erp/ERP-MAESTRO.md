@@ -2454,3 +2454,30 @@ con sabotaje; juicio = variación medida con cartas. Control se resuelve
 codificando la mejora. Y la advertencia permanente: los agentes fallan
 en colas raras, no en campanas — el techo estructural y las compuertas
 van antes que cualquier Cpk. Especificación operativa en 1.10.
+
+D-44 · Modelo de entrega de la marca blanca: licencia instalada + SLA de
+soporte (modelo B) — PROPUESTA, pendiente de firma del laboratorio
+(redactada 2026-09-25; se ratifica en erp/entrega.json). El tenant recibe
+el esquema y su instalador bajo LICENCIA DE USO y los instala en SU base;
+la casa no opera su infraestructura. El SLA solo compromete lo que la casa
+controla: tiempos de respuesta y resolución de soporte, cadencia de
+actualizaciones (instalador idempotente + evidencia de npm run erp:prueba)
+y avisos de seguridad. EXCLUYE disponibilidad y respaldos: son de la
+infraestructura del cliente, y la casa no promete RPO/RTO de lo que no
+opera (los suyos siguen «desconocidos» hasta GATE 3). Lo que sale es la
+frontera de erp/entrega.json (esquema reproducible: reemplazable, §1.7);
+lo defendible — este documento, reglas/, datos de costo, relaciones — no
+sale, y el gate verifica:marca-blanca lo impide. La protección del
+esquema entregado es CONTRACTUAL: licencia no exclusiva, confidencialidad,
+prohibición de redistribuir. Acceso de soporte a la base del cliente:
+solo con login de solo lectura (rol_swm), acotado en tiempo y registrado;
+es el único momento en que la casa toca datos de los clientes del tenant
+(encargado del tratamiento, LFPDPPP, acotado a ese acceso).
+Por qué ahora B y no A (servicio gestionado): sin clientes, operar con SLA
+de disponibilidad es costo fijo sin ingreso y exige GATE 3, guardia y ser
+encargado de todos los datos de terceros; B se entrega con lo ya
+construido (Fase 3B del PRP-004). DISPARADOR DE REVISIÓN (no una fecha,
+como C7): el primer cliente que quiera pagar por disponibilidad
+garantizada — entonces se diseña A como tier (BD dedicada, D-06) — o el
+cierre de GATE 3 si la casa decide ofrecerlo antes. Anexo del contrato:
+erp/contrato/ANEXO-TECNICO.md (cifras y texto legal: laboratorio + abogado).

@@ -1,10 +1,31 @@
 # ERP · frontera de entrega (marca blanca)
 
-> PRP-004, Fase 3B · 2026-09-25 · **Propuesta, pendiente de ratificar por el laboratorio.**
-> Qué recibe un tenant de marca blanca, qué no sale nunca y qué es parámetro. Es el **insumo**
-> para decidir licencia, precio y empaque; **no decide ninguno de los tres**. Clasificar la
+> PRP-004, Fase 3B · 2026-09-25 · **Modelo B propuesto (D-44), pendiente de ratificar por el
+> laboratorio.** Qué recibe un tenant de marca blanca, qué no sale nunca y qué es parámetro. Decide
+> la frontera técnica; **no** decide precio, cifras del SLA ni texto legal. Clasificar la
 > defensibilidad es decisión humana (ERP-MAESTRO §1.7, consecuencia 4): hasta que el laboratorio
 > ratifique, `erp/entrega.json` lleva `"ratificacion": { "estado": "propuesta" }`.
+
+## El modelo: B, licencia instalada + SLA de soporte (D-44)
+
+El tenant recibe el esquema y su instalador **bajo licencia** y los instala en **su** base; la casa
+no opera su infraestructura. El SLA compromete solo lo que la casa controla —respuesta y resolución
+de soporte, cadencia de actualizaciones, avisos de seguridad— y **excluye** disponibilidad y
+respaldos del cliente (la casa no promete RPO/RTO de lo que no opera; los suyos siguen
+«desconocidos» hasta GATE 3). El contrato lleva el anexo técnico `erp/contrato/ANEXO-TECNICO.md`.
+
+**Por qué B y no A (servicio gestionado):** sin clientes, operar con SLA de disponibilidad es costo
+fijo sin ingreso, exige GATE 3, guardia y ser encargado de todos los datos de terceros; B se entrega
+con lo que ya está construido. **Disparador de revisión** (no una fecha): el primer cliente que
+quiera pagar por disponibilidad garantizada —entonces se diseña A como tier dedicado (D-06)— o el
+cierre de GATE 3 si la casa decide ofrecerlo antes.
+
+## Cómo se ratifica
+
+Quien firma dice «ratifico la frontera, modelo B» y se escribe en `erp/entrega.json`:
+`"ratificacion": { "estado": "ratificada", "por": "<quien>", "fecha": "AAAA-MM-DD", "decision": "D-44" }`,
+y D-44 pasa de PROPUESTA a DECIDIDO en el maestro con la misma firma. El gate rechaza una
+ratificación sin quién, sin fecha o que apunte a una decisión que no existe.
 
 ## La regla que lo sostiene
 
@@ -13,16 +34,19 @@ a una sola clase, y `npm run verifica:marca-blanca` (dentro de `npm run validate
 
 1. un archivo de `erp/` no tiene clase (nadie decidió si sale);
 2. algo defendible o de la casa cae dentro de la entrega;
-3. una huella de la casa (`erp/casa/huellas.txt`) aparece en lo que se entrega.
+3. una huella de la casa (`erp/casa/huellas.txt`) aparece en lo que se entrega;
+4. lo entregado cita la doctrina (el maestro, sus secciones, decisiones o fases), salvo dentro de
+   cadenas SQL: los `COMMENT ON` viven en la base y cambiarlos rompería la igualdad con producción;
+5. la ratificación no deja rastro (ver arriba).
 
-`--prueba` siembra los tres fallos y exige que el gate los cace; `--lista` devuelve los
+`--prueba` siembra los cinco fallos y exige que el gate los cace; `--lista` devuelve los
 entregables para empaquetar: `tar czf erp.tgz $(node scripts/verifica-marca-blanca.mjs --lista)`.
 Es el control «fuga de defendibles» que pide ERP-6 (paso 6): *verificación automatizada de que
 ningún fuente defendible viaja en el artefacto del cliente*.
 
 ## Las cuatro clases
 
-### Entrega — lo que recibe el tenant (15 archivos)
+### Entrega — lo que recibe el tenant bajo licencia (16 archivos)
 
 | Pieza | Archivos | Para qué |
 |---|---|---|
@@ -30,7 +54,8 @@ ningún fuente defendible viaja en el artefacto del cliente*.
 | Instalador | `instalacion/instalar.sh`, `lib.sh` | instala desde cero o encima (idempotente), con la identidad como parámetro |
 | Pruebas | `instalacion/pruebas.sh`, `pruebas.sql`, `prueba-efimera.sh` | pruebas de cierre (a)…(j) en una transacción que se deshace; instalación completa en efímero |
 | Referencia | `instalacion/referencia/{esquema-erp.sql, roles.sql, roles.txt, servidor.txt}` | el esquema y los roles **tal como están en producción**, para comprobar que una instalación es equivalente |
-| Guía | `instalacion/INSTALAR.md` | lo único que necesita leer quien instala |
+| Guía | `instalacion/INSTALAR.md` | lo único que necesita leer quien instala (incluye el acceso de soporte, solo lectura y con vencimiento) |
+| Contrato | `contrato/ANEXO-TECNICO.md` | plantilla del anexo: qué se entrega, qué no, SLA de soporte en blanco, acceso de soporte |
 
 **Por qué el esquema sí sale.** El valor no está en la forma de las tablas: un equipo con un
 asistente de código reproduce tablas y checks en semanas (la prueba de §1.7). Lo que no se copia son
@@ -38,18 +63,18 @@ las reglas auditadas, los datos de costo y las relaciones, y nada de eso vive en
 el cliente instala en **su** base, el DDL es visible para su administrador de todos modos: no se
 puede entregar «uso» de un esquema que corre en infraestructura ajena sin entregar su forma.
 
-**Lo que el esquema sí deja ver**, y que el laboratorio debe dar por aceptado al ratificar:
+**Lo que el esquema todavía deja ver**, y que el laboratorio da por aceptado al ratificar:
 
-- los comentarios de las migraciones citan secciones y decisiones del maestro (§1.7, D-07, D-10,
-  ERP-4B) sin su contenido; explican por qué existe cada restricción;
-- la lista cerrada de prefijos de folio (`003_folios.sql`) anticipa módulos futuros (auditoría,
-  pólizas, documentos, prospectos, CRM, nómina, cotizaciones, promociones): es hoja de ruta
-  visible;
+- los comentarios `--` de las migraciones ya **no** citan el maestro (limpiados el 2026-09-25;
+  la regla 4 lo sostiene), pero **cinco `COMMENT ON` dentro de la base** conservan referencias
+  cortas (`D-01`, `D-14`, `ERP-4B`, `§1.7`): quitarlas es una migración que hay que aplicar a
+  producción con gate, y revelan etiquetas, no contenido;
+- la lista cerrada de prefijos de folio (`003_folios.sql`) sigue anticipando módulos futuros: es un
+  `CHECK` del esquema, y cambiarlo también es migración;
 - el diseño multi-tenant por RLS, las tarjetas de agente y la bitácora con traza.
 
-Si algo de eso no debe salir, la alternativa es **no entregar DDL**: el tenant usa el ERP en una
-base que opera la casa (tier dedicado o compartido) y recibe solo uso: API, resultados, exportación.
-Esa decisión cambia la clase de toda la entrega y es del laboratorio.
+Si algo de eso no debe salir, la alternativa es el modelo A (**no entregar DDL**: el tenant usa el
+ERP en una base que opera la casa). Es el disparador de revisión de D-44.
 
 ### Defendible — el foso, no sale nunca (3)
 
@@ -96,10 +121,10 @@ casa, ni red hacia fuera. Con eso: `instalar.sh` → `pruebas.sh` → la aplicac
 
 ## Qué queda para el laboratorio
 
-1. **Ratificar o corregir esta clasificación** (y poner `ratificacion` en `entrega.json`).
-2. Decidir el **modelo de entrega**: DDL a la base del cliente (esta propuesta) o solo uso sobre una
-   base que opera la casa.
-3. **Licencia, precio y empaque final** (ERP-6 paso 4: sin plan comercial no hay precios).
-4. Si se quiere, un endurecimiento con CDC de esquema: quitar `EXECUTE` a `PUBLIC` en las funciones
-   de `erp` (hoy no abre nada, ver `casa/ESTADO-PRODUCCION.md`) y limpiar de los comentarios de las
-   migraciones las referencias al maestro.
+1. **Ratificar** (o corregir) esta clasificación y el modelo B: ver «Cómo se ratifica».
+2. Con el abogado, cuando llegue el primer cliente: los `[ABOGADO]` y los `[COMPLETAR]` del anexo
+   técnico (licencia, cifras del SLA con su forma de medirlas, encargo del tratamiento).
+3. **Precio y empaque final** (ERP-6 paso 4: sin plan comercial no hay precios).
+4. Si se quiere, un endurecimiento con migración y gate sobre producción: quitar `EXECUTE` a
+   `PUBLIC` en las funciones de `erp` (hoy no abre nada, ver `casa/ESTADO-PRODUCCION.md`) y limpiar
+   las referencias de los cinco `COMMENT ON`.

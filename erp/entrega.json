@@ -1,9 +1,28 @@
 {
-  "$comentario": "Frontera de entrega del ERP (marca blanca). Todo archivo de erp/ cae en EXACTAMENTE una clase. Lo lee scripts/verifica-marca-blanca.mjs en `npm run validate`: un archivo sin clase, un defendible dentro de la entrega o una huella de la casa en lo entregado lo ponen en rojo. El porqué de cada clase: erp/FRONTERA-DE-ENTREGA.md. Clasificar la defensibilidad es DECISIÓN HUMANA (ERP-MAESTRO §1.7, consecuencia 4): esta lista es la PROPUESTA del 2026-09-25, pendiente de ratificar por el laboratorio.",
-  "ratificacion": { "estado": "propuesta", "por": null, "fecha": null },
+  "$comentario": "Frontera de entrega del ERP (marca blanca). Todo archivo de erp/ cae en EXACTAMENTE una clase. Lo lee scripts/verifica-marca-blanca.mjs en `npm run validate`: un archivo sin clase, un defendible dentro de la entrega, una huella de la casa o una cita de la doctrina en lo entregado, o una ratificación sin firma, lo ponen en rojo. El porqué de cada clase: erp/FRONTERA-DE-ENTREGA.md. Clasificar la defensibilidad es DECISIÓN HUMANA (ERP-MAESTRO §1.7, consecuencia 4).",
+  "modelo": {
+    "nombre": "B · licencia instalada en la base del cliente + SLA de soporte",
+    "decision": "D-44",
+    "sla_cubre": [
+      "tiempos de respuesta y resolución de soporte",
+      "cadencia de actualizaciones",
+      "avisos de seguridad"
+    ],
+    "sla_excluye": [
+      "disponibilidad de la infraestructura del cliente",
+      "respaldos y recuperación (RPO/RTO) del cliente"
+    ],
+    "revision": "el primer cliente que quiera pagar por disponibilidad garantizada (tier dedicado, D-06), o el cierre de GATE 3 si la casa decide ofrecerlo antes"
+  },
+  "ratificacion": {
+    "estado": "propuesta",
+    "por": null,
+    "fecha": null,
+    "decision": "D-44"
+  },
   "clases": {
     "entrega": {
-      "descripcion": "Lo que recibe el tenant para instalar y verificar el ERP en su propia base.",
+      "descripcion": "Lo que recibe el tenant bajo LICENCIA para instalar y verificar el ERP en su propia base (modelo B, D-44), más la plantilla del anexo técnico de su contrato.",
       "rutas": [
         "erp/migrations/001_nucleo.sql",
         "erp/migrations/002_pack_retail.sql",
@@ -19,7 +38,8 @@
         "erp/instalacion/referencia/esquema-erp.sql",
         "erp/instalacion/referencia/roles.sql",
         "erp/instalacion/referencia/roles.txt",
-        "erp/instalacion/referencia/servidor.txt"
+        "erp/instalacion/referencia/servidor.txt",
+        "erp/contrato/ANEXO-TECNICO.md"
       ]
     },
     "defendible": {
@@ -49,5 +69,14 @@
       ]
     }
   },
-  "huellas": "erp/casa/huellas.txt"
+  "huellas": "erp/casa/huellas.txt",
+  "referencias_doctrina": [
+    "ERP-MAESTRO",
+    "§\\s?\\d",
+    "\\bD-\\d{2}\\b",
+    "\\bERP-\\d",
+    "Parte IV",
+    "\\bPRP-\\d{3}\\b",
+    "\\bdep-(aud|ctb|nom|pln|leg|fin)\\b"
+  ]
 }

@@ -1,12 +1,12 @@
 -- ═══════════════════════════════════════════════════════════════════
--- ERP AGÉNTICO · ERP-0 · Migración 001 — NÚCLEO de la cadena mínima
+-- ERP · Migración 001 — NÚCLEO de la cadena mínima
 -- ═══════════════════════════════════════════════════════════════════
 -- Tablas del núcleo universal que toca la cadena  ped → fac → cfd → cob.
 -- Todo vive en el esquema `erp` (aislado de `public`, donde otras apps del mismo
 -- proyecto pueden usar service_role). Aquí el modelo es el OPUESTO: RLS con
 -- políticas por cliente_id y roles dedicados — la seguridad la aplica 004_seguridad.sql.
 --
--- REGLAS DE DISEÑO OBLIGATORIAS (Parte IV, ERP-0):
+-- REGLAS DE DISEÑO OBLIGATORIAS:
 --   · cliente_id NOT NULL en TODA tabla (multi-tenant desde el día uno).
 --   · El núcleo NO asume retail: fac_concepto es un "concepto facturable"
 --     genérico; la referencia a inv_articulo vive en el pack (002), no aquí.
@@ -68,7 +68,7 @@ create table if not exists erp.fac_factura (
   folio                  text not null,                 -- humano: FAC-0873 (folios en 003)
   cob_cliente_id         uuid not null references erp.cob_cliente(id),
   fecha                  date not null default current_date,
-  -- Realidad fiscal (D-01): PUE cierra al timbrar; PPD obliga a REP por cobro.
+  -- Realidad fiscal: PUE cierra al timbrar; PPD obliga a REP por cobro.
   metodo_pago            text not null check (metodo_pago in ('PUE','PPD')),
   forma_pago             text not null,                 -- catálogo SAT c_FormaPago (01,03,99…)
   moneda                 text not null default 'MXN',
@@ -192,7 +192,7 @@ comment on table erp.cfd_folio is 'Numeración fiscal (serie + consecutivo) del 
 -- CFDI · cfd_timbre — el acto de timbrado (estado + tipo)
 -- Admite el estado INTERMEDIO (clave del incidente real: timeout del PAC).
 -- Polimórfico: timbra una factura (ingreso/nota_credito) o un cobro (pago/REP).
--- Idempotencia por llave (ERP-1); aquí ya reservamos la columna y su unicidad.
+-- Idempotencia por llave: el esquema reserva la columna y su unicidad.
 -- ============================================================
 create table if not exists erp.cfd_timbre (
   id                uuid primary key default gen_random_uuid(),
@@ -209,10 +209,10 @@ create table if not exists erp.cfd_timbre (
   sello_sat         text,
   fecha_timbrado    timestamptz,
   motivo_cancelacion text,                                -- catálogo SAT (01-04) al cancelar
-  llave_idempotencia text,                                -- --llave (ERP-1)
+  llave_idempotencia text,                                -- llave de idempotencia del cliente
   xml               text,
   pac_respuesta     jsonb,
-  es_simulado       boolean not null default true,        -- MOCK hasta ERP-2 (PAC real)
+  es_simulado       boolean not null default true,        -- simulado hasta conectar un PAC real
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
   unique (cliente_id, uuid_fiscal),
@@ -234,19 +234,19 @@ create table if not exists erp.sis_encargo (
   encargo            text not null,                        -- lo que pidió el humano por Slack
   estado             text not null default 'recibido'
     check (estado in ('recibido','en_proceso','espera_aprobacion','completado','fallido','cancelado')),
-  -- EJE D+I (v4/1.7): la clasificación contable y la evidencia de I+D nacen en
+  -- EJE D+I: la clasificación contable y la evidencia de I+D nacen en
   -- el ORIGEN del encargo, no se reconstruyen después. investigacion→gasto,
   -- desarrollo→capitalizable (si NIF C-8), operacion→venta/operación normal.
   eje_dei            text not null default 'operacion'
     check (eje_dei in ('investigacion','desarrollo','operacion')),
-  -- TRAZA_ID (v5/1.8): el uuid que viaja por toda la operación (del Slack al
+  -- TRAZA_ID: el uuid que viaja por toda la operación (de la solicitud al
   -- asiento). Lo genera el encargo y se propaga a cada fila de sis_bitacora.
   traza_id           uuid not null default gen_random_uuid(),
   paso_actual        text,
   agente_asignado    text,                                 -- exe-fin, sup-fin, …
   slack_hilo_ref     text,                                 -- channel:ts del hilo
   dry_run_hash       text,                                 -- hash del dry-run pendiente de aprobar
-  aprobacion_vence_at timestamptz,                         -- caducidad del botón (D-04: 30 min)
+  aprobacion_vence_at timestamptz,                         -- caducidad de la aprobación pendiente
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now()
 );
@@ -263,9 +263,9 @@ create index if not exists sis_encargo_traza_idx  on erp.sis_encargo (traza_id);
 create table if not exists erp.sis_bitacora (
   id            bigint generated always as identity primary key,
   cliente_id    uuid not null,
-  -- TRAZA_ID NOT NULL (v5): una escritura sin traza NO debe poder existir.
+  -- TRAZA_ID NOT NULL: una escritura sin traza NO debe poder existir.
   -- Sin default a propósito: el CLI DEBE propagar la traza del encargo; forzar
-  -- un default disfrazaría escrituras sin origen. Es el eje de `aud trazar`.
+  -- un default disfrazaría escrituras sin origen. Es el eje de la trazabilidad.
   traza_id      uuid not null,
   actor         text not null,                             -- id de agente o de humano (Slack user id)
   actor_tipo    text not null check (actor_tipo in ('agente','humano','sistema')),
@@ -285,8 +285,8 @@ create index if not exists sis_bitacora_entidad_idx on erp.sis_bitacora (entidad
 create index if not exists sis_bitacora_traza_idx   on erp.sis_bitacora (traza_id);
 
 -- ============================================================
--- SISTEMA · sis_agente — TARJETA DE AGENTE (agent card A2A, v5)
--- Fuente de verdad de lo que cada agente DEBE poder hacer. dep-aud (ERP-4C)
+-- SISTEMA · sis_agente — TARJETA DE AGENTE (agent card A2A)
+-- Fuente de verdad de lo que cada agente DEBE poder hacer. La auditoría
 -- la compara contra lo que realmente PUEDE (grants reales, binarios montados,
 -- hash del AGENTS.md vivo). Sin tarjeta no hay operación; la deriva es hallazgo.
 -- El historial de versiones vive en sis_agente_version.
@@ -295,7 +295,7 @@ create table if not exists erp.sis_agente (
   id                 uuid primary key default gen_random_uuid(),
   cliente_id         uuid not null,
   agente             text not null,                        -- orquestador, exe-fin, sup-fin, swm-aud-erp…
-  departamento       text not null,                        -- dep-fin, dep-aud, …
+  departamento       text not null,                        -- área que responde (p. ej. finanzas, auditoría)
   proposito          text not null,
   clis_permitidos    jsonb not null default '[]'::jsonb,   -- ["fac","cfd",…]
   verbos_permitidos  jsonb not null default '{}'::jsonb,   -- {"fac":["emitir"],"cfd":["timbrar"]}
@@ -334,7 +334,7 @@ create index if not exists sis_agente_version_idx on erp.sis_agente_version (sis
 -- El CHECK de fila ya garantiza total = subtotal + traslados - retenciones.
 -- Este trigger garantiza que esos totales de cabecera IGUALAN la suma del
 -- detalle (conceptos + impuestos) cuando la factura pasa a 'emitida'.
--- Regla determinista obligatoria (Parte IV, ERP-0, paso 004 · diseño).
+-- Regla determinista obligatoria.
 -- ============================================================
 create or replace function erp.fac_verificar_cuadre() returns trigger
 language plpgsql as $$

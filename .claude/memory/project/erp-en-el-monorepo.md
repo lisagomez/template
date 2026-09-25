@@ -16,6 +16,10 @@ y una versión npm que nadie consume (decisión del PRP-004).
 | Lo de la casa (no sale) | `erp/casa/`, `erp/bin/` |
 | Lo defendible (no sale) | `erp/ERP-MAESTRO.md`, `erp/reglas/`, `erp/integracion-arkham.md` |
 
+Modelo de entrega propuesto (D-44, pendiente de ratificar): **B**, licencia instalada en la base
+del cliente + SLA de soporte (sin disponibilidad ni respaldos del cliente); anexo en
+`erp/contrato/ANEXO-TECNICO.md`. Se revisa con el primer cliente que pague por disponibilidad.
+
 La base de la casa es producción compartida: se lee con un login de solo lectura
 (`rol_swm`); toda escritura es gate humano y entra por `set local role` + tenant, nunca con
 `service_role`.

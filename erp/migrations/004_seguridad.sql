@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
--- ERP AGÉNTICO · ERP-0 · Migración 004 — SEGURIDAD estructural (roles + RLS)
+-- ERP · Migración 004 — SEGURIDAD estructural (roles + RLS)
 -- ═══════════════════════════════════════════════════════════════════
 -- El aislamiento es de la BASE DE DATOS, no de la disciplina de quien consulta.
 -- Dos mecanismos ESTRUCTURALES:
@@ -127,7 +127,7 @@ end
 $$;
 
 -- ------------------------------------------------------------
--- NOTA operativa (ERP-1/ERP-3):
+-- NOTA operativa:
 --   · El CLI abre su conexión y hace, por sesión/transacción:
 --         SET app.cliente_id = '<uuid-del-tenant>';
 --     antes de cualquier consulta. Sin eso, RLS devuelve cero filas.

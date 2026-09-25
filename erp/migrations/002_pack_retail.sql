@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
--- ERP AGÉNTICO · ERP-0 · Migración 002 — PACK RETAIL (el primer vertical)
+-- ERP · Migración 002 — PACK RETAIL (el primer vertical)
 -- ═══════════════════════════════════════════════════════════════════
 -- Tablas del pack retail que toca la cadena mínima: inventario y pedido.
 -- El pack DEPENDE del núcleo (001), nunca al revés. El enlace artículo→concepto
