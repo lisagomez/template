@@ -81,7 +81,7 @@ export function aZpl(diseno: Diseno, perfil: PerfilImpresora, opciones: Opciones
  * cada 10, cruz al centro y los desplazamientos vigentes impresos. Se imprime, se mide con una
  * regla contra el papel real y se corrige ^LH/^LS/^LT hasta que el recuadro toque los bordes.
  */
-export function etiquetaCalibracion(perfil: PerfilImpresora): string {
+export function etiquetaCalibracion(perfil: PerfilImpresora, rotulo: PerfilImpresora = perfil): string {
   const { dpi } = perfil
   const ancho = mmAPuntos(perfil.anchoMm, dpi)
   const alto = mmAPuntos(perfil.altoMm, dpi)
@@ -108,7 +108,7 @@ export function etiquetaCalibracion(perfil: PerfilImpresora): string {
   const t = mmAPuntos(3, dpi)
   const y0 = cy + brazo + mmAPuntos(2, dpi)
   l.push(`^FO${mmAPuntos(12, dpi)},${y0}^A0N,${t},${t}^FH\\^FDCALIBRACIÓN - ${escapaTexto(perfil.nombre)} (${dpi} dpi, ${perfil.anchoMm} x ${perfil.altoMm} mm)^FS`)
-  l.push(`^FO${mmAPuntos(12, dpi)},${y0 + t + 6}^A0N,${t},${t}^FDLH ${perfil.origenX},${perfil.origenY}  LS ${perfil.corrimientoIzq}  LT ${perfil.corrimientoSup}  MD ${perfil.oscuridad}  PR ${perfil.velocidad}^FS`)
+  l.push(`^FO${mmAPuntos(12, dpi)},${y0 + t + 6}^A0N,${t},${t}^FDLH ${rotulo.origenX},${rotulo.origenY}  LS ${rotulo.corrimientoIzq}  LT ${rotulo.corrimientoSup}  MD ${rotulo.oscuridad}  PR ${rotulo.velocidad}^FS`)
   l.push('^XZ')
   return l.join('\n') + '\n'
 }

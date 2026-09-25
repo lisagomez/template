@@ -73,11 +73,11 @@ export function PantallaImpresoras({ e }: { e: Etiquetas }) {
             <div className="grid gap-3 md:grid-cols-2">
               <div className={tarjeta} data-prueba="calibracion-antes">
                 <p className="mb-2 text-sm font-semibold">Antes: lo guardado</p>
-                {guardada ? <VistaMotorLocal auto zpl={etiquetaCalibracion(perfilParaVistaLocal(guardada))} perfil={guardada} etiqueta="Calibración con el perfil guardado" /> : <p className="text-sm text-neutral-500">Impresora nueva, sin perfil guardado.</p>}
+                {guardada ? <VistaMotorLocal auto zpl={etiquetaCalibracion(perfilParaVistaLocal(guardada), guardada)} perfil={guardada} etiqueta="Calibración con el perfil guardado" /> : <p className="text-sm text-neutral-500">Impresora nueva, sin perfil guardado.</p>}
               </div>
               <div className={tarjeta} data-prueba="calibracion-despues">
                 <p className="mb-2 text-sm font-semibold">Después: lo que estás editando</p>
-                <VistaMotorLocal auto zpl={etiquetaCalibracion(perfilParaVistaLocal(borrador))} perfil={borrador} etiqueta="Calibración con los desplazamientos editados" />
+                <VistaMotorLocal auto zpl={etiquetaCalibracion(perfilParaVistaLocal(borrador), borrador)} perfil={borrador} etiqueta="Calibración con los desplazamientos editados" />
               </div>
             </div>
             <div className={tarjeta}><PanelImpresion e={e} zpl={etiquetaCalibracion(borrador)} bloquea={false} sitio={borrador.sitio} impresora={guardada ? borrador.id : ''} copias={1} /></div>

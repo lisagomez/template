@@ -5,7 +5,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  altaDeLote, CATEGORIAS_EJEMPLO, estadoVacio, interpreta, parseaLectura, esErrorLectura, perfilParaVistaLocal, PERFIL_EJEMPLO, recibe,
+  altaDeLote, CATEGORIAS_EJEMPLO, etiquetaCalibracion, estadoVacio, interpreta, parseaLectura, esErrorLectura, perfilParaVistaLocal, PERFIL_EJEMPLO, recibe,
   type EstadoAlmacen,
 } from '../dist/index.js'
 
@@ -52,4 +52,8 @@ test('vista local: ^LS y ^LT se pliegan en ^LH (zebrash los ignora), sin bajar d
   assert.deepEqual([p.origenX, p.origenY, p.corrimientoIzq, p.corrimientoSup], [24, 24, 0, 0])
   const q = perfilParaVistaLocal({ ...PERFIL_EJEMPLO, corrimientoSup: -30 })
   assert.equal(q.origenY, 0)
+  const real = { ...PERFIL_EJEMPLO, origenX: 40, corrimientoSup: 24 }
+  const vista = etiquetaCalibracion(perfilParaVistaLocal(real), real)
+  assert.match(vista, /\^LH40,24/)
+  assert.match(vista, /LH 40,0 {2}LS 0 {2}LT 24/)
 })
