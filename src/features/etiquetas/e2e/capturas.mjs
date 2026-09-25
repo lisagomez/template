@@ -21,6 +21,7 @@ import bwipjs from 'bwip-js/node';
 import { simulaImpresora } from '../../../../tools/etiquetas-gs1/simuladores/impresora-9100.mjs';
 import { simulaBrowserPrint } from '../../../../tools/etiquetas-gs1/simuladores/browser-print.mjs';
 import { creaAgente, esquemaConfigAgente } from '../../../../tools/etiquetas-gs1/dist/agente/index.js';
+import { completaClave } from '../../../../tools/etiquetas-gs1/dist/index.js';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -277,6 +278,30 @@ const rollos = await porVista(async (p, v) => {
   return [await foto(p, 'main > div', `rollos-presupuesto-${v}`)];
 });
 await compone('16', 'Rollos: presupuesto contra gasto por sitio y estimacion de una dulceria', [['escritorio', rollos.escritorio[0]], ['celular', rollos.celular[0]]]);
+
+// Mover entre zonas: la zona se lee de su etiqueta de ubicacion y luego se leen las cajas.
+const estado = await (await fetch(`${BASE}/api/etiquetas`, { headers: { authorization: `Bearer ${TOKEN}`, 'x-operador': 'captura' } })).json();
+const cajaDe = (sku) => estado.articulos.find((a) => a.sku === sku).gtinCaja;
+const glnCentro = completaClave('952123490002');
+const mover = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/mover');
+  const lee = async (texto) => {
+    const antes = await p.locator('[data-prueba="bitacora-mover"] li').count();
+    await p.fill('[data-prueba="pistola"]', texto);
+    await p.press('[data-prueba="pistola"]', 'Enter');
+    await p.waitForFunction((n) => document.querySelectorAll('[data-prueba="bitacora-mover"] li').length > n, antes);
+  };
+  const caja = (sku, dias, lote) => `(01)${cajaDe(sku)}(17)${aammdd(dia(dias))}(10)${lote}`;
+  // Escritorio: resurtido con aviso FEFO, un rechazo (en retiro no sube a piso) y lo vencido a merma.
+  // Celular: otro recorrido sobre lo que dejo el escritorio (lo vencido no puede volver a piso).
+  const recorrido = v === 'escritorio'
+    ? [`(414)${glnCentro}(254)PISO`, caja('YOG-001', 35, 'L4471'), caja('YOG-001', 8, 'L4502'), caja('SAL-005', 20, 'S0012'), `(414)${glnCentro}(254)MERMA`, caja('QSO-006', -1, 'Q0009')]
+    : [`(414)${glnCentro}(254)PISO`, caja('YOG-001', 35, 'L4471'), caja('PAN-004', 4, 'P0078'), `(414)${glnCentro}(254)MERMA`, caja('PAN-004', 1, 'P0077')];
+  for (const t of recorrido) await lee(t);
+  return [await foto(p, 'main > div', `mover-${v}`), await foto(p, '[data-prueba="etiquetas-ubicacion"]', `ubicaciones-${v}`)];
+});
+await compone('17', 'Mover entre zonas: recibo, almacen, piso de venta y merma con la etiqueta de la caja', [['escritorio', mover.escritorio[0]], ['celular', mover.celular[0]]]);
+await compone('18', 'Etiquetas de ubicacion GS1-128: (414) GLN del sitio + (254) zona', [['escritorio', mover.escritorio[1]], ['celular', mover.celular[1]]]);
 
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
 console.log(JSON.stringify(informe.impresion, null, 1));

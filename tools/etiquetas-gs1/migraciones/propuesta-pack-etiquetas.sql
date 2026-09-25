@@ -53,7 +53,9 @@ create table if not exists erp.eti_sitio (
   nombre      text not null,
   tipo        text not null check (tipo in ('cedis', 'sucursal')),
   agente_url  text,
-  unique (cliente_id, clave)
+  gln         char(13) check (gln is null or erp.gs1_digito_ok(gln)),   -- (414) de sus etiquetas de ubicacion
+  unique (cliente_id, clave),
+  unique (cliente_id, gln)
 );
 
 create table if not exists erp.eti_categoria (
@@ -182,12 +184,30 @@ create table if not exists erp.eti_existencia (
   cantidad         numeric(14,4) not null check (cantidad >= 0),
   sscc             char(18) check (sscc is null or erp.gs1_digito_ok(sscc)),
   origen           text not null check (origen in ('etiquetado', 'recepcion', 'semilla')),
+  zona             text not null default 'recibo' check (zona in ('recibo', 'almacen', 'piso', 'merma')),
   updated_at       timestamptz not null default now()
 );
--- Sin SSCC, un lote en un sitio es UN renglón (el alta suma); con SSCC, la tarima no se repite.
-create unique index if not exists eti_existencia_lote_uidx on erp.eti_existencia (cliente_id, eti_sitio_id, gtin, lote, caducidad) where sscc is null;
+-- Sin SSCC, un lote en una zona de un sitio es UN renglón (el alta suma); con SSCC, la tarima no se repite.
+create unique index if not exists eti_existencia_lote_zona_uidx on erp.eti_existencia (cliente_id, eti_sitio_id, zona, gtin, lote, caducidad) where sscc is null;
 create unique index if not exists eti_existencia_sscc_uidx on erp.eti_existencia (cliente_id, eti_sitio_id, sscc) where sscc is not null;
 create index if not exists eti_existencia_fefo_idx on erp.eti_existencia (cliente_id, eti_sitio_id, caducidad);
+
+-- Movimientos entre zonas (recibo → almacén → piso → merma): bitácora append-only.
+create table if not exists erp.eti_movimiento (
+  id               uuid primary key default gen_random_uuid(),
+  cliente_id       uuid not null,
+  eti_sitio_id     uuid not null references erp.eti_sitio(id),
+  eti_articulo_id  uuid not null references erp.eti_articulo(id),
+  gtin             char(14) not null check (erp.gs1_digito_ok(gtin)),
+  lote             text not null check (erp.gs1_cset82(lote)),
+  caducidad        date not null,
+  cajas            numeric(14,4) not null check (cajas > 0),
+  de_zonas         text[] not null,
+  a_zona           text not null check (a_zona in ('recibo', 'almacen', 'piso', 'merma')),
+  sscc             char(18),
+  operador         text not null,
+  created_at       timestamptz not null default now()
+);
 
 -- ============================================================
 -- Append-only de los ledgers (como 005 hace con los suyos)
@@ -195,11 +215,11 @@ create index if not exists eti_existencia_fefo_idx on erp.eti_existencia (client
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'rol_exe_fin') then
-    revoke update, delete on erp.eti_asignacion, erp.eti_emitido, erp.eti_importacion from rol_exe_fin;
+    revoke update, delete on erp.eti_asignacion, erp.eti_emitido, erp.eti_importacion, erp.eti_movimiento from rol_exe_fin;
   end if;
 end $$;
 
 -- HALLAZGO para quien integre: 004_seguridad.sql re-concede UPDATE sobre TODAS las tablas de
 -- `erp` a rol_exe_fin y solo vuelve a quitarlo en sis_bitacora y act_*. Re-correr 004 después de
 -- este pack REABRE el UPDATE de sus ledgers (medido en prueba-efimera.sh, fase 2). Al integrar,
--- 004 debe listar también: eti_asignacion, eti_emitido, eti_importacion.
+-- 004 debe listar también: eti_asignacion, eti_emitido, eti_importacion, eti_movimiento.

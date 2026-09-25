@@ -212,6 +212,7 @@ export function codigosDe(d: Diseno): PiezaCodigo[] {
 }
 
 export function unidadDe(simbolos: readonly Simbolo[]): TipoUnidad {
+  if (simbolos.some((s) => valorDe(s, '414') !== undefined)) return 'ubicacion'
   return simbolos.some((s) => valorDe(s, '00') !== undefined || valorDe(s, '02') !== undefined) ? 'tarima' : 'caja'
 }
 

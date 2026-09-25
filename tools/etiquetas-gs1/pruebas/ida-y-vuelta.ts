@@ -62,6 +62,7 @@ const CASOS: { nombre: string; perfil: PerfilImpresora; datos?: DatosEtiqueta; s
   { nombre: 'caja 300 dpi, DD=00', perfil: p300, datos: { tipo: 'caja', producto: 'Atún en agua 140 g', gtin: '19521234000027', caducidad: '2028-02-01', diaCero: true, lote: 'AT-2291/B' } },
   { nombre: 'caja, lote numérico impar', perfil: p203, datos: { tipo: 'caja', producto: 'Pan de caja', gtin: '09520123456788', caducidad: '2026-10-02', lote: '123' } },
   { nombre: 'tarima (2 códigos)', perfil: tarima, datos: { tipo: 'tarima', producto: 'Yogurt natural 1 kg', sscc: '095212340005678903', gtinContenido: '09521234000020', cantidad: 50, caducidad: '2026-10-30', lote: 'L4471' } },
+  { nombre: 'ubicación (414) GLN + (254) zona', perfil: p203, simbolos: [[{ ai: '414', valor: '9521234900016' }, { ai: '254', valor: 'ALMACEN' }]] },
   { nombre: 'libre (01)(15)(10) signos', perfil: p203, simbolos: [[{ ai: '01', valor: '09524000059109' }, { ai: '15', valor: '270115' }, { ai: '10', valor: "X.1-2/3+4*5=6?_%&'" }]] },
 ]
 

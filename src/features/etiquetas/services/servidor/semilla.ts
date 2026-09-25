@@ -8,15 +8,18 @@
  * muestre los cuatro estados del semaforo.
  */
 import {
-  aplicaImportacion, CATEGORIAS_EJEMPLO, ESCENARIO_DULCERIA, estadoVacio, leeFilas, planificaImportacion, ROLLOS_REFERENCIA, sumaDias,
-  type Compra, type Consumibles, type Consumo, type EstadoAlmacen, type Existencia, type PerfilImpresora, type Sitio,
+  aplicaImportacion, CATEGORIAS_EJEMPLO, completaClave, ESCENARIO_DULCERIA, estadoVacio, leeFilas, planificaImportacion, ROLLOS_REFERENCIA, sumaDias,
+  type Compra, type Consumibles, type Consumo, type EstadoAlmacen, type Existencia, type PerfilImpresora, type Sitio, type Zona,
 } from '../nucleo.ts';
 
+/** GLN ficticios, numerados con el prefijo de demostracion 952 (referencias 90001-90004). */
+const gln = (ref: number) => completaClave(`9521234${ref}`);
+
 export const SITIOS_DEMO: Sitio[] = [
-  { clave: 'CEDIS-NTE', nombre: 'CEDIS Norte', tipo: 'cedis', agente: 'http://127.0.0.1:9180' },
-  { clave: 'SUC-CENTRO', nombre: 'Sucursal Centro', tipo: 'sucursal', agente: 'http://127.0.0.1:9181' },
-  { clave: 'SUC-PONIENTE', nombre: 'Sucursal Poniente', tipo: 'sucursal' },
-  { clave: 'SUC-ORIENTE', nombre: 'Sucursal Oriente', tipo: 'sucursal' },
+  { clave: 'CEDIS-NTE', nombre: 'CEDIS Norte', tipo: 'cedis', agente: 'http://127.0.0.1:9180', gln: gln(90001) },
+  { clave: 'SUC-CENTRO', nombre: 'Sucursal Centro', tipo: 'sucursal', agente: 'http://127.0.0.1:9181', gln: gln(90002) },
+  { clave: 'SUC-PONIENTE', nombre: 'Sucursal Poniente', tipo: 'sucursal', gln: gln(90003) },
+  { clave: 'SUC-ORIENTE', nombre: 'Sucursal Oriente', tipo: 'sucursal', gln: gln(90004) },
 ];
 
 const C = ['sku', 'descripcion', 'categoria', 'sitios', 'marca_propia', 'gtin', 'gtin_caja', 'unidades_por_caja', 'cajas_por_tarima', 'vida_util_dias'];
@@ -31,14 +34,15 @@ const F = [
   ['HLD-011', 'Helado de vainilla 1 L', 'congelados', 'CEDIS-NTE;SUC-CENTRO', 'SI', '9521234990017', '', '6', '40', '240'],
 ];
 
-/** [sitio, sku, lote, dias hasta caducar, cajas]. */
-const LOTES: [string, string, string, number, number][] = [
-  ['CEDIS-NTE', 'YOG-001', 'L4471', 35, 120], ['CEDIS-NTE', 'YOG-001', 'L4502', 8, 40], ['CEDIS-NTE', 'LEC-002', 'L0921', 2, 18],
-  ['CEDIS-NTE', 'LEC-002', 'L0899', -3, 6], ['CEDIS-NTE', 'ATU-003', 'A2291', 400, 80], ['CEDIS-NTE', 'REF-007', 'R551', 25, 64],
-  ['CEDIS-NTE', 'REF-007', 'R560', 110, 200], ['CEDIS-NTE', 'HLD-011', 'H0003', 190, 30],
-  ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 6], ['SUC-CENTRO', 'LEC-002', 'L0920', 6, 4], ['SUC-CENTRO', 'PAN-004', 'P0078', 4, 3],
-  ['SUC-CENTRO', 'PAN-004', 'P0077', 1, 2], ['SUC-CENTRO', 'SAL-005', 'S0012', 20, 10], ['SUC-CENTRO', 'QSO-006', 'Q0009', -1, 1],
-  ['SUC-CENTRO', 'HLD-011', 'H0003', 190, 5], ['SUC-PONIENTE', 'YOG-001', 'L4502', 8, 5], ['SUC-PONIENTE', 'QSO-006', 'Q0010', 9, 2],
+/** [sitio, sku, lote, dias hasta caducar, cajas, zona]. */
+const LOTES: [string, string, string, number, number, Zona][] = [
+  ['CEDIS-NTE', 'YOG-001', 'L4471', 35, 120, 'almacen'], ['CEDIS-NTE', 'YOG-001', 'L4502', 8, 40, 'almacen'], ['CEDIS-NTE', 'LEC-002', 'L0921', 2, 18, 'almacen'],
+  ['CEDIS-NTE', 'LEC-002', 'L0899', -3, 6, 'almacen'], ['CEDIS-NTE', 'ATU-003', 'A2291', 400, 80, 'almacen'], ['CEDIS-NTE', 'REF-007', 'R551', 25, 64, 'almacen'],
+  ['CEDIS-NTE', 'REF-007', 'R560', 110, 200, 'recibo'], ['CEDIS-NTE', 'HLD-011', 'H0003', 190, 30, 'almacen'],
+  ['SUC-CENTRO', 'YOG-001', 'L4502', 8, 3, 'almacen'], ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 4, 'almacen'], ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 2, 'piso'], ['SUC-CENTRO', 'LEC-002', 'L0920', 6, 4, 'piso'],
+  ['SUC-CENTRO', 'PAN-004', 'P0078', 4, 3, 'almacen'], ['SUC-CENTRO', 'PAN-004', 'P0077', 1, 2, 'piso'], ['SUC-CENTRO', 'SAL-005', 'S0012', 20, 10, 'almacen'],
+  ['SUC-CENTRO', 'QSO-006', 'Q0009', -1, 1, 'piso'], ['SUC-CENTRO', 'HLD-011', 'H0003', 190, 5, 'piso'],
+  ['SUC-PONIENTE', 'YOG-001', 'L4502', 8, 5, 'piso'], ['SUC-PONIENTE', 'QSO-006', 'Q0010', 9, 2, 'almacen'],
 ];
 
 const perfil = (p: Partial<PerfilImpresora> & Pick<PerfilImpresora, 'id' | 'nombre' | 'sitio'>): PerfilImpresora => ({
@@ -97,8 +101,8 @@ export function semillaFicticia(hoy: string): EstadoAlmacen {
   const { filas, errores } = leeFilas(registros, CATEGORIAS_EJEMPLO.map((c) => c.id));
   const plan = planificaImportacion(filas, errores, base);
   const e = aplicaImportacion(base, plan, { id: 'semilla', archivo: 'semilla-ficticia', huella: 'sin-archivo', operador: 'semilla', fecha: cuando });
-  const existencias: Existencia[] = LOTES.map(([sitio, sku, lote, dias, cantidad], i) => ({
-    id: `semilla-${i + 1}`, sitio, sku, gtin: e.articulos[sku]?.gtinCaja ?? '', lote, caducidad: sumaDias(hoy, dias), cantidad, origen: 'semilla', actualizado: cuando,
+  const existencias: Existencia[] = LOTES.map(([sitio, sku, lote, dias, cantidad, zona], i) => ({
+    id: `semilla-${i + 1}`, sitio, sku, gtin: e.articulos[sku]?.gtinCaja ?? '', lote, caducidad: sumaDias(hoy, dias), cantidad, origen: 'semilla', actualizado: cuando, zona,
   }));
   return { ...e, existencias, impresoras: IMPRESORAS_DEMO, consumibles: consumiblesFicticios(hoy) };
 }

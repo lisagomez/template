@@ -12,7 +12,7 @@ La app que lo usa: `src/features/etiquetas/` (rutas `/etiquetas/*`).
 
 | Entrada | Qué trae | Dependencias |
 |---|---|---|
-| `.` | núcleo: diccionario de AIs, parser (pistola/cámara), validación y combinaciones, fechas, medidas, diseño, ZPL, revisión, catálogo e importación, FEFO, rollos y presupuesto, almacén en memoria | ninguna |
+| `.` | núcleo: diccionario de AIs, parser (pistola/cámara), validación y combinaciones, fechas, medidas, diseño, ZPL, revisión, catálogo e importación, FEFO, zonas y movimientos (recibo, almacén, piso, merma), rollos y presupuesto, almacén en memoria | ninguna |
 | `./svg` | SVG de la etiqueta | `bwip-js` (peer opcional, **inyectado**) |
 | `./navegador` | clientes de Zebra Browser Print y del agente (solo `fetch`) | ninguna |
 | `./almacenes/archivo` | almacén en un archivo JSON con escritura atómica | Node |
@@ -24,7 +24,7 @@ El núcleo **no importa nada**; el almacén se inyecta (`AlmacenEtiquetas`), com
 ## Pruebas
 
 ```bash
-npm run prueba                         # build + node --test pruebas/*.ts (49 pruebas)
+npm run prueba                         # build + node --test pruebas/*.ts (55 pruebas)
 bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP, en Postgres 17 desechable
 ```
 

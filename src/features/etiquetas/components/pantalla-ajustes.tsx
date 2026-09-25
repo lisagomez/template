@@ -51,15 +51,16 @@ export function PantallaAjustes({ e }: { e: Etiquetas }) {
       <section className={`${tarjeta} space-y-3`}>
         <h2 className="text-base font-semibold">Sitios</h2>
         {sitios.map((s, i) => (
-          <div key={s.clave} className="grid grid-cols-[1fr_auto] gap-2 sm:grid-cols-[110px_1fr_110px_1fr]">
+          <div key={s.clave} className="grid grid-cols-[1fr_auto] gap-2 sm:grid-cols-[110px_1fr_110px_1fr_150px]">
             <span className="self-center font-mono text-xs">{s.clave}</span>
             <input className={campo} value={s.nombre} onChange={(x) => sit(i, { nombre: x.target.value })} aria-label={`Nombre de ${s.clave}`} />
             <select className={campo} value={s.tipo} onChange={(x) => sit(i, { tipo: x.target.value as Sitio['tipo'] })}><option value="cedis">CEDIS</option><option value="sucursal">Sucursal</option></select>
             <input className={campo} value={s.agente ?? ''} placeholder="agente: http://127.0.0.1:9180" onChange={(x) => { const v = x.target.value; sit(i, v ? { agente: v } : { agente: undefined }); }} aria-label={`Agente de ${s.clave}`} />
+            <input className={`${campo} font-mono`} value={s.gln ?? ''} placeholder="GLN (13 cifras)" maxLength={13} onChange={(x) => { const v = x.target.value.replace(/\D/g, ''); sit(i, v ? { gln: v } : { gln: undefined }); }} aria-label={`GLN de ${s.clave}`} />
           </div>
         ))}
         <button type="button" className={boton} onClick={() => setSitios((v) => [...v, { clave: `SITIO-${v.length + 1}`, nombre: 'Nuevo sitio', tipo: 'sucursal' }])}>+ Sitio</button>
-        <button type="button" className={`${botonPrimario} ml-2`} onClick={() => guarda({ accion: 'config', sitios: sitios.map((s) => (s.agente ? s : { clave: s.clave, nombre: s.nombre, tipo: s.tipo })) })}>Guardar sitios</button>
+        <button type="button" className={`${botonPrimario} ml-2`} onClick={() => guarda({ accion: 'config', sitios: sitios.map((s) => ({ clave: s.clave, nombre: s.nombre, tipo: s.tipo, ...(s.agente ? { agente: s.agente } : {}), ...(s.gln ? { gln: s.gln } : {}) })) })}>Guardar sitios</button>
       </section>
       <section className={`${tarjeta} space-y-3`}>
         <h2 className="text-base font-semibold">Labelary (servicio externo)</h2>

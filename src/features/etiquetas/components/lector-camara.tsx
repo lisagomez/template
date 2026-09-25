@@ -12,6 +12,10 @@ import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 export function LectorCamara({ alLeer }: { alLeer: (texto: string) => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const controles = useRef<IScannerControls | null>(null);
+  // La camara llama a la version MAS RECIENTE de alLeer: la pantalla de mover cambia de destino
+  // entre lecturas y un cierre viejo moveria al destino anterior.
+  const alLeerActual = useRef(alLeer);
+  useEffect(() => { alLeerActual.current = alLeer; });
   const ultimo = useRef<{ texto: string; t: number }>({ texto: '', t: 0 });
   const [encendida, setEncendida] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +36,7 @@ export function LectorCamara({ alLeer }: { alLeer: (texto: string) => void }) {
       const t = Date.now();
       if (texto === ultimo.current.texto && t - ultimo.current.t < 2500) return;
       ultimo.current = { texto, t };
-      alLeer(texto);
+      alLeerActual.current(texto);
     }).then((c) => { controles.current = c; setEncendida(true); }, (e: unknown) => setError(e instanceof Error ? `No se pudo abrir la cámara: ${e.message}` : 'No se pudo abrir la cámara'));
   };
 

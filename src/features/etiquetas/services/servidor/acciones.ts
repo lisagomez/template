@@ -5,7 +5,7 @@
  */
 import { emiteTicket, secretoValido } from '../../../../../tools/etiquetas-gs1/dist/agente/index.js';
 import {
-  altaDeLote, aplicaImportacion, CONSUMIBLES_VACIOS, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, parseaLectura, planificaImportacion, recibe, revisaPrefijoEmpresa,
+  altaDeLote, aplicaImportacion, CONSUMIBLES_VACIOS, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueve, parseaLectura, planificaImportacion, recibe, revisaPrefijoEmpresa,
   revisaZpl, type Consumibles, type EstadoAlmacen, type PlanImportacion,
 } from '../nucleo.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
@@ -19,7 +19,7 @@ export async function leeEstado(): Promise<Respuesta> {
   const e = await almacenDelServidor().lee();
   return ok({
     hoy: hoyIso(), version: e.version, configuracion: e.configuracion, articulos: Object.values(e.articulos), impresoras: e.impresoras,
-    existencias: e.existencias, importaciones: e.importaciones.slice(-10), asignaciones: e.asignaciones.slice(-50), contadores: e.contadores,
+    existencias: e.existencias, movimientos: (e.movimientos ?? []).slice(-30), importaciones: e.importaciones.slice(-10), asignaciones: e.asignaciones.slice(-50), contadores: e.contadores,
     agenteConSecreto: secretoValido(process.env['ETIQUETAS_AGENTE_SECRETO']),
     consumibles: e.consumibles ?? CONSUMIBLES_VACIOS,
   });
@@ -82,6 +82,14 @@ export async function ejecuta(a: AccionEtiquetas, operador: string): Promise<Res
       const lectura = parseaLectura(a.texto);
       if (esErrorLectura(lectura)) return mal(422, lectura.mensaje);
       return ok(await almacen.transaccion((e) => recibe(e, interpreta(lectura.elementos, e, hoyIso()), a.sitio, ahora, `rec-${Date.now()}`)));
+    }
+    case 'movimiento': {
+      const lectura = parseaLectura(a.texto);
+      if (esErrorLectura(lectura)) return mal(422, lectura.mensaje);
+      return ok(await almacen.transaccion((e) => {
+        if (leeUbicacion(lectura.elementos, e.configuracion.sitios)) return { estado: e, resultado: { ok: false as const, motivo: 'eso es una etiqueta de ubicación: sirve para elegir a dónde se mueve, no se mueve ella' } };
+        return mueve(e, { sitio: a.sitio, destino: a.destino, lectura: interpreta(lectura.elementos, e, hoyIso()), veces: a.veces, operador }, ahora, `mov-${Date.now()}`, hoyIso());
+      }));
     }
     case 'consumo':
       return ok(await almacen.transaccion<unknown>((e) => {

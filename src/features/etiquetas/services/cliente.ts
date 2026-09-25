@@ -2,7 +2,7 @@
  * Acceso a /api/etiquetas desde el navegador. El codigo del dispositivo y el nombre de quien
  * opera viven en localStorage (se emparejan una vez); todo lo demas vive en el servidor.
  */
-import type { Articulo, Asignacion, Configuracion, Consumibles, Contadores, Existencia, Importacion, PerfilImpresora } from './nucleo.ts';
+import type { Articulo, Asignacion, Configuracion, Consumibles, Contadores, Existencia, Importacion, Movimiento, PerfilImpresora } from './nucleo.ts';
 import type { AccionEtiquetas } from './esquemas.ts';
 
 export interface EstadoCliente {
@@ -12,6 +12,7 @@ export interface EstadoCliente {
   readonly articulos: Articulo[];
   readonly impresoras: PerfilImpresora[];
   readonly existencias: Existencia[];
+  readonly movimientos: Movimiento[];
   readonly importaciones: Importacion[];
   readonly asignaciones: Asignacion[];
   readonly contadores: Contadores;

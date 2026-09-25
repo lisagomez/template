@@ -7,9 +7,12 @@
  * - «Esta semana» = vence en los proximos 7 dias; «este mes» = en los proximos 30 (despues de
  *   la semana). Se dice asi en pantalla para que nadie lo lea como mes calendario.
  * - FEFO: por articulo, los lotes surtibles del que vence antes al que vence despues.
+ * - Por zona: lo que esta en PISO y vence esta semana o ya no se debe vender va a «retirar del
+ *   anaquel»; el RESURTIDO dice que lote bajar del almacen primero. Lo que esta en merma ya se
+ *   separo: no cuenta en ninguna lista, solo se dice cuantas cajas hay.
  */
 import { diasHasta, esFecha, parseaFechaGs1, aAammdd } from './fechas.js'
-import type { Articulo, EstadoAlmacen, Existencia } from './modelo.js'
+import type { Articulo, EstadoAlmacen, Existencia, Zona } from './modelo.js'
 import { categoriaPorId, estadoSemaforo, type EstadoSemaforo } from './semaforo.js'
 
 export interface FilaTablero {
@@ -17,6 +20,7 @@ export interface FilaTablero {
   readonly descripcion: string
   readonly dias: number
   readonly estado: EstadoSemaforo
+  readonly zona: Zona
 }
 
 export interface LoteFefo extends FilaTablero {
@@ -36,6 +40,11 @@ export interface TableroSitio {
   readonly semana: readonly FilaTablero[]
   readonly mes: readonly FilaTablero[]
   readonly fefo: readonly GrupoFefo[]
+  /** En piso de venta y vencido, en retiro o venciendo esta semana: quitar del anaquel. */
+  readonly anaquel: readonly FilaTablero[]
+  /** Del almacen (o recibo) a piso: por articulo, el lote que hay que bajar primero. */
+  readonly resurtido: readonly GrupoFefo[]
+  readonly cajasEnMerma: number
   readonly totales: Readonly<Record<EstadoSemaforo, number>>
 }
 
@@ -47,21 +56,27 @@ export function diasParaCaducar(caducidadIso: string, hoy: string): number {
 export function tableroSitio(estado: EstadoAlmacen, sitio: string, hoy: string): TableroSitio {
   const cats = estado.configuracion.categorias
   const filas: FilaTablero[] = estado.existencias
-    .filter((e) => e.sitio === sitio && e.cantidad > 0)
+    .filter((e) => e.sitio === sitio && e.cantidad > 0 && (e.zona ?? 'recibo') !== 'merma')
     .map((e) => {
       const art: Articulo | undefined = estado.articulos[e.sku]
       const dias = diasParaCaducar(e.caducidad, hoy)
-      return { existencia: e, descripcion: art?.descripcion ?? e.sku, dias, estado: estadoSemaforo(dias, categoriaPorId(cats, art?.categoria)) }
+      return { existencia: e, descripcion: art?.descripcion ?? e.sku, dias, estado: estadoSemaforo(dias, categoriaPorId(cats, art?.categoria)), zona: e.zona ?? 'recibo' }
     })
     .sort((a, b) => a.dias - b.dias || a.descripcion.localeCompare(b.descripcion))
   const totales: Record<EstadoSemaforo, number> = { vigente: 0, alerta: 0, retiro: 0, vencido: 0 }
   for (const f of filas) totales[f.estado]++
   const surtibles = filas.filter((f) => f.estado === 'vigente' || f.estado === 'alerta')
-  const grupos = new Map<string, FilaTablero[]>()
-  for (const f of surtibles) grupos.set(f.existencia.sku, [...(grupos.get(f.existencia.sku) ?? []), f])
-  const fefo: GrupoFefo[] = [...grupos.entries()]
-    .map(([sku, lotes]) => ({ sku, descripcion: lotes[0]!.descripcion, lotes: lotes.map((l, i) => ({ ...l, orden: i + 1 })) }))
-    .sort((a, b) => (a.lotes[0]?.dias ?? 0) - (b.lotes[0]?.dias ?? 0))
+  const agrupa = (lista: readonly FilaTablero[]): GrupoFefo[] => {
+    const grupos = new Map<string, FilaTablero[]>()
+    for (const f of lista) grupos.set(f.existencia.sku, [...(grupos.get(f.existencia.sku) ?? []), f])
+    return [...grupos.entries()]
+      .map(([sku, lotes]) => ({ sku, descripcion: lotes[0]!.descripcion, lotes: lotes.map((l, i) => ({ ...l, orden: i + 1 })) }))
+      .sort((a, b) => (a.lotes[0]?.dias ?? 0) - (b.lotes[0]?.dias ?? 0))
+  }
+  const fefo = agrupa(surtibles)
+  const resurtido = agrupa(surtibles.filter((f) => f.zona === 'almacen' || f.zona === 'recibo'))
+  const anaquel = filas.filter((f) => f.zona === 'piso' && (f.estado === 'vencido' || f.estado === 'retiro' || f.dias <= 7))
+  const cajasEnMerma = estado.existencias.filter((e) => e.sitio === sitio && (e.zona ?? 'recibo') === 'merma').reduce((s, e) => s + e.cantidad, 0)
   return {
     sitio,
     vencidos: filas.filter((f) => f.estado === 'vencido'),
@@ -69,6 +84,9 @@ export function tableroSitio(estado: EstadoAlmacen, sitio: string, hoy: string):
     semana: filas.filter((f) => f.dias >= 0 && f.dias <= 7),
     mes: filas.filter((f) => f.dias > 7 && f.dias <= 30),
     fefo,
+    anaquel,
+    resurtido,
+    cajasEnMerma,
     totales,
   }
 }

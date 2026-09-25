@@ -17,7 +17,8 @@ import { modulosGs1128, ZONA_BLANCA_MODULOS } from './code128.js'
 import type { Simbolo } from './elementos.js'
 
 export type PerfilLectura = 'automatico' | 'pistola'
-export type TipoUnidad = 'caja' | 'tarima'
+/** `ubicacion`: etiqueta de ubicacion (GLN, Tabla 9 de las GenSpecs). */
+export type TipoUnidad = 'caja' | 'tarima' | 'ubicacion'
 
 export const MM_POR_PULGADA = 25.4
 export const LARGO_MAXIMO_MM = 165.1
@@ -32,6 +33,9 @@ export interface LimitesGs1 {
 }
 
 export function limitesGs1(unidad: TipoUnidad): LimitesGs1 {
+  // Tabla 9 (GDTI, GRAI, GIAI y GLN): X 0.250 a 0.495 mm y 12.70 mm de alto; para marcar
+  // ubicaciones la nota de la tabla admite hasta 1.016 mm.
+  if (unidad === 'ubicacion') return { xMinimo: 0.25, xMaximo: 1.016, alturaMinima: 12.7, xMinimoReducido: 0.25, alturaMinimaReducida: 12.7, tabla: 'Tabla 9 (GLN, marcado de ubicaciones)' }
   return unidad === 'caja'
     ? { xMinimo: 0.495, xMaximo: 1.016, alturaMinima: 31.75, xMinimoReducido: 0.25, alturaMinimaReducida: 12.7, tabla: 'Tabla 2 (artículos en distribución general)' }
     : { xMinimo: 0.495, xMaximo: 0.94, alturaMinima: 31.75, xMinimoReducido: 0.25, alturaMinimaReducida: 12.7, tabla: 'Tabla 5 (unidades logísticas)' }

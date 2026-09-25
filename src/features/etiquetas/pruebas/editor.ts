@@ -85,3 +85,12 @@ test('rollos de la semilla: el ritmo del mes rebasa lo presupuestado en CEDIS, y
   assert.equal(oriente!.estado, 'sin-presupuesto');
   assert.equal(c.escenarios[0]!.id, 'dulceria-ejemplo');
 });
+
+test('zonas de la semilla: en Sucursal Centro se retira del anaquel lo vencido, lo de retiro y lo que vence esta semana', () => {
+  const e = semillaFicticia(HOY);
+  const t = tableroSitio(e, 'SUC-CENTRO', HOY);
+  assert.deepEqual(t.anaquel.map((f) => f.existencia.lote).sort(), ['L0920', 'P0077', 'Q0009']);
+  assert.ok(t.anaquel.every((f) => f.zona === 'piso'));
+  assert.ok(t.resurtido.every((g) => g.lotes.every((l) => l.zona === 'almacen' || l.zona === 'recibo')));
+  assert.ok(e.configuracion.sitios.every((s) => s.gln && clasificaPrefijo('0' + s.gln).clase === 'demostracion'));
+});

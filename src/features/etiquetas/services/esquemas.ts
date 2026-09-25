@@ -3,6 +3,7 @@
  * error, no un campo que se ignora.
  */
 import { z } from 'zod';
+import { digitoCorrecto } from './nucleo.ts';
 
 const clave = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/);
 const fechaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -37,6 +38,7 @@ export const esquemaSitio = z.object({
   nombre: z.string().trim().min(1).max(60),
   tipo: z.enum(['cedis', 'sucursal']),
   agente: z.string().url().max(200).optional(),
+  gln: z.string().regex(/^\d{13}$/, 'el GLN son 13 cifras').refine(digitoCorrecto, 'el dígito verificador del GLN no cuadra').optional(),
 }).strict();
 
 export const esquemaRollo = z.object({
@@ -73,6 +75,7 @@ export const esquemaAccion = z.discriminatedUnion('accion', [
     cantidad: z.number().int().min(1).max(100_000), sscc: z.string().regex(/^\d{18}$/).optional(),
   }).strict(),
   z.object({ accion: z.literal('recepcion'), sitio: clave, texto: z.string().min(1).max(200) }).strict(),
+  z.object({ accion: z.literal('movimiento'), sitio: clave, texto: z.string().min(1).max(200), destino: z.enum(['recibo', 'almacen', 'piso', 'merma']), veces: z.number().int().min(1).max(500) }).strict(),
   z.object({ accion: z.literal('consumo'), sitio: clave, impresora: clave, etiquetas: z.number().int().min(1).max(100_000), origen: z.enum(['impresion', 'lote', 'calibracion']) }).strict(),
   z.object({ accion: z.literal('rollo'), rollo: esquemaRollo }).strict(),
   z.object({ accion: z.literal('rollo-impresora'), impresora: clave, rollo: clave.or(z.literal('')) }).strict(),

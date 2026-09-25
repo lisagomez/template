@@ -15,7 +15,12 @@ export interface Sitio {
   readonly tipo: TipoSitio
   /** URL del agente local de impresion del sitio (p. ej. http://127.0.0.1:9180). */
   readonly agente?: string
+  /** GLN del sitio (13 cifras, numerado con el prefijo de la casa): va en (414) de sus etiquetas de ubicacion. */
+  readonly gln?: string
 }
+
+/** Zonas dentro de un sitio, en el orden en que viaja la mercancia. */
+export type Zona = 'recibo' | 'almacen' | 'piso' | 'merma'
 
 /** De donde salio cada codigo. Es la traza de la regla mixta. */
 export type Regla =
@@ -94,6 +99,24 @@ export interface Existencia {
   readonly sscc?: string
   readonly origen: OrigenExistencia
   readonly actualizado: string
+  /** Zona dentro del sitio. Sin zona (datos anteriores) cuenta como `recibo`. */
+  readonly zona?: Zona
+}
+
+/** Bitacora de movimientos entre zonas (solo se anade). */
+export interface Movimiento {
+  readonly id: string
+  readonly fecha: string
+  readonly sitio: string
+  readonly sku: string
+  readonly gtin: string
+  readonly lote: string
+  readonly caducidad: string
+  readonly cajas: number
+  readonly de: readonly Zona[]
+  readonly a: Zona
+  readonly sscc?: string
+  readonly operador: string
 }
 
 export interface Importacion {
@@ -118,4 +141,6 @@ export interface EstadoAlmacen {
   readonly importaciones: readonly Importacion[]
   /** Rollos, presupuestos y consumo. Opcional: los almacenes anteriores no lo traen. */
   readonly consumibles?: Consumibles
+  /** Movimientos entre zonas. Opcional por la misma razon. */
+  readonly movimientos?: readonly Movimiento[]
 }

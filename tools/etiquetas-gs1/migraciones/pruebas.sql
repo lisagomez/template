@@ -25,8 +25,8 @@ insert into erp.inv_articulo (id, cliente_id, sku, nombre) values
   ('aaaaaaaa-0000-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', 'PAN-004', 'Pan de caja 680 g'),
   ('bbbbbbbb-0000-4000-8000-000000000001', '22222222-2222-4222-8222-222222222222', 'YOG-001', 'Yogurt de otro tenant')
   on conflict do nothing;
-insert into erp.eti_sitio (id, cliente_id, clave, nombre, tipo) values
-  ('cccccccc-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'CEDIS-NTE', 'CEDIS Norte', 'cedis')
+insert into erp.eti_sitio (id, cliente_id, clave, nombre, tipo, gln) values
+  ('cccccccc-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'CEDIS-NTE', 'CEDIS Norte', 'cedis', '9521234900016')
   on conflict do nothing;
 insert into erp.eti_articulo (id, cliente_id, inv_articulo_id, gtin_unidad, regla_unidad, gtin_caja, regla_caja, unidades_por_caja) values
   ('dddddddd-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0000-4000-8000-000000000001', '09521111000013', 'fabricante', '19521111000010', 'fabricante', 12),
@@ -55,16 +55,30 @@ do $$ begin
   exception when check_violation then null; end;
   insert into erp.eti_existencia (cliente_id, eti_sitio_id, eti_articulo_id, gtin, lote, caducidad, cantidad, origen)
   values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000001', '19521111000010', 'L4471', '2026-10-30', 1, 'etiquetado')
-  on conflict (cliente_id, eti_sitio_id, gtin, lote, caducidad) where sscc is null do update set cantidad = erp.eti_existencia.cantidad + excluded.cantidad;
+  on conflict (cliente_id, eti_sitio_id, zona, gtin, lote, caducidad) where sscc is null do update set cantidad = erp.eti_existencia.cantidad + excluded.cantidad;
   insert into erp.eti_existencia (cliente_id, eti_sitio_id, eti_articulo_id, gtin, lote, caducidad, cantidad, origen)
   values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000001', '19521111000010', 'L4471', '2026-10-30', 1, 'etiquetado')
-  on conflict (cliente_id, eti_sitio_id, gtin, lote, caducidad) where sscc is null do update set cantidad = erp.eti_existencia.cantidad + excluded.cantidad;
+  on conflict (cliente_id, eti_sitio_id, zona, gtin, lote, caducidad) where sscc is null do update set cantidad = erp.eti_existencia.cantidad + excluded.cantidad;
   if (select count(*) from erp.eti_existencia where lote = 'L4471') <> 1 or (select cantidad from erp.eti_existencia where lote = 'L4471') < 2 then raise exception '(d) no sumó'; end if;
   raise notice '(d) OK CSET 82 en la base y alta de lote que suma';
 end $$;
 
 insert into erp.eti_emitido (cliente_id, clave, tipo) values ('11111111-1111-4111-8111-111111111111', '09521234000013', 'gtin') on conflict do nothing;
 insert into erp.eti_asignacion (cliente_id, eti_articulo_id, nivel, gtin, regla, operador) values ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'caja', '19521111000010', 'fabricante', 'prueba');
+insert into erp.eti_movimiento (cliente_id, eti_sitio_id, eti_articulo_id, gtin, lote, caducidad, cajas, de_zonas, a_zona, operador) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000001', '19521111000010', 'L4471', '2026-10-30', 2, array['almacen'], 'piso', 'prueba');
+
+-- (g) la zona solo admite las cuatro, y un GLN con dígito malo no entra como sitio
+do $$ begin
+  begin
+    insert into erp.eti_movimiento (cliente_id, eti_sitio_id, eti_articulo_id, gtin, lote, caducidad, cajas, de_zonas, a_zona, operador) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000001', '19521111000010', 'L4471', '2026-10-30', 1, array['piso'], 'bodega-2', 'prueba');
+    raise exception '(g) aceptó una zona inventada';
+  exception when check_violation then null; end;
+  begin
+    insert into erp.eti_sitio (cliente_id, clave, nombre, tipo, gln) values ('11111111-1111-4111-8111-111111111111', 'SUC-X', 'X', 'sucursal', '9521234900011');
+    raise exception '(g) aceptó un GLN con dígito malo';
+  exception when check_violation then null; end;
+  raise notice '(g) OK zonas cerradas a recibo/almacén/piso/merma y GLN del sitio con dígito verificador';
+end $$;
 
 -- (e) aislamiento entre tenants, como el rol de ejecución
 set role rol_exe_fin;
@@ -83,6 +97,8 @@ do $$ begin
   exception when insufficient_privilege then null; end;
   begin delete from erp.eti_emitido; raise exception '(f) pudo borrar eti_emitido';
   exception when insufficient_privilege then null; end;
-  raise notice '(f) OK eti_emitido y eti_asignacion son append-only para rol_exe_fin';
+  begin update erp.eti_movimiento set cajas = 99; raise exception '(f) pudo reescribir un movimiento';
+  exception when insufficient_privilege then null; end;
+  raise notice '(f) OK eti_emitido, eti_asignacion y eti_movimiento son append-only para rol_exe_fin';
 end $$;
 reset role;

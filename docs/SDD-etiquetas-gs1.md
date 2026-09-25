@@ -116,3 +116,26 @@ español; verificación de calidad de símbolo (ISO/IEC 15416, grado 1.5/10/660)
   caducidad. Sin IVA confirmado, desgaste de cabezal ni envío.
 - Propuesta ERP: el consumo y los presupuestos no están en `propuesta-pack-etiquetas.sql` todavía
   (viven en el almacén JSON); se añadirían como otro ledger append-only si se integra.
+
+## 9. Zonas dentro del sitio: recibo → almacén → piso de venta (`/etiquetas/mover`)
+
+- **Misma etiqueta**: la caja se mueve por su (01)(17)(10) —GTIN, lote y caducidad exactos— y la
+  tarima entera por su SSCC (00). La zona sale de una **etiqueta de ubicación** GS1-128:
+  (414) GLN del sitio + (254) componente de extensión con la zona (`RECIBO`, `ALMACEN`, `PISO`,
+  `MERMA`). GS1 reserva el (254) para ubicaciones internas por acuerdo (GenSpecs §3.5.12 y §1.1.1):
+  no viaja a terceros. Medidas por la Tabla 9 (GLN): X de 0.250 mm, 12.70 mm de alto, y hasta 1.016
+  mm para marcar ubicaciones. La etiqueta entra en la ida y vuelta SVG/ZPL.
+- **Reglas del movimiento**: lo vencido o en días de retiro no sube a piso (se manda a merma); al
+  resurtir piso, si en almacén o recibo hay un lote surtible que vence antes, **aviso FEFO**; las
+  cajas se toman de la zona anterior del flujo y primero de existencias sueltas que de una tarima;
+  sin existencias suficientes no se mueve nada. Cada movimiento queda en una bitácora.
+- **Tablero por zona**: «retirar del anaquel» = en piso y vencido, en retiro o venciendo en 7 días;
+  «resurtido» = qué lote bajar primero del almacén; lo que está en merma sale de todas las listas.
+- **Límite, dicho claro**: al abrir la caja en piso, su etiqueta ya no identifica cada pieza. Se
+  sabe qué lote está en el anaquel porque se movió su caja; el control pieza por pieza pediría
+  etiquetar la pieza con un código de caja de cobro (GS1 DataBar o DataMatrix), no con GS1-128.
+- **GLN del sitio**: se captura en Ajustes → Sitios (13 cifras con dígito verificador, numerado con
+  el prefijo de la casa). La semilla usa GLN ficticios del prefijo 952.
+- **ERP**: la propuesta añade `zona` a `eti_existencia`, `gln` a `eti_sitio` y la bitácora
+  append-only `eti_movimiento`; validada en Postgres 17 efímero, (a)…(g). 004 debe listar también
+  `eti_movimiento`.

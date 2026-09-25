@@ -10,7 +10,7 @@ import { empareja } from '../services/cliente.ts';
 import { useEtiquetas, type Etiquetas } from '../hooks/use-etiquetas.ts';
 
 const RUTAS = [
-  ['/etiquetas', 'Etiqueta'], ['/etiquetas/leer', 'Leer'], ['/etiquetas/caducidades', 'Caducidades'],
+  ['/etiquetas', 'Etiqueta'], ['/etiquetas/leer', 'Leer'], ['/etiquetas/mover', 'Mover'], ['/etiquetas/caducidades', 'Caducidades'],
   ['/etiquetas/catalogo', 'Catálogo'], ['/etiquetas/impresoras', 'Impresoras'], ['/etiquetas/rollos', 'Rollos'], ['/etiquetas/ajustes', 'Ajustes'],
 ] as const;
 
