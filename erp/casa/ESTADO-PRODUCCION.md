@@ -29,6 +29,13 @@
   instalación canónica es `erp/instalacion/instalar.sh`, que reproduce este esquema línea por línea
   (`referencia/esquema-erp.sql`, `npm run erp:prueba`). **Producción no necesitó ningún cambio.**
 
+- **2026-09-25 · Fase 4 del PRP-004 aplicada** (lisagomez, el laboratorio, desde el SQL Editor):
+  ACT-0012 «ERP agéntico (ERP-0)» re-ubicado `erp/ → template/erp/` con `erp/casa/fase4-reubicacion.sql`
+  (una transacción como `rol_exe_fin` + tenant; guardas de fila y de totales). Asiento en
+  `sis_bitacora` (`act.reubicar`, traza `b2b726c1-19e2-4d5e-8268-c8d96e4b68e0`). ACT-0002 (en baja)
+  conserva su ruta vieja a propósito: es historia. Reverso: el mismo archivo con
+  `set fase4.sentido = 'vuelta'`.
+
 ## Estado de cluster (no vive en ningún .sql de migración)
 
 Medido el 2026-09-25 con `erp_lector`. El instalador lo reproduce con parámetros
