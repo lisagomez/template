@@ -53,6 +53,9 @@ lo que se entrega a producción sale empaquetado desde aquí, con asiento en el 
 - [ ] El servidor corre el detector semanal y el cosechador desde un clon del template con
       **llave de despliegue de solo lectura**, y la primera corrida post-corte está en `host-jobs.log`
       con `rc=0`.
+- [ ] **Fase 3B (añadida 2026-09-25)**: el esquema `erp` de producción está capturado en migraciones
+      idénticas a la BD viva, sin datos de la casa, con tenant y marca como parámetros, instalable
+      desde cero en Postgres efímero, y con la frontera de entrega de marca blanca documentada.
 - [ ] `npm run validate` en verde.
 
 ### Comportamiento Esperado
@@ -253,6 +256,22 @@ copia, **cero** hallazgos espurios por la ruta. `python3 -m py_compile` en verde
 **Validación**: `verifica:inventario` y `prueba:inventario` en verde; `inventario:valida-erp` sin
 argumentos carga el export sobre 001-005; `verifica:specs` en verde.
 
+### Fase 3B: El esquema, de producción a boilerplate de marca blanca (añadida 2026-09-25)
+> Añadida por el laboratorio: este repo es el boilerplate de producción de marca blanca (laboratorio
+> de pruebas y base de lo que se empaqueta o licencia a clientes). Spec de la fase:
+> `erp/specs/esquema-marca-blanca.md`. Va antes de la 4 porque es solo lectura sobre producción y
+> el ensayo de la 4 se monta sobre la instalación limpia que deja esta fase.
+**Objetivo**: el esquema `erp` y lo que toca (roles, funciones, políticas, grants, objetos fuera de
+`erp` que referencia) capturado en migraciones idénticas a la BD viva; el estado de cluster que hoy
+no vive en ningún `.sql` (membresía de roles, orden de re-corridas) hecho explícito; cero datos de la
+casa en lo entregable (el UUID del tenant de `005_activos.sql` sale a parámetro o a un seed que no se
+empaqueta); y un documento de frontera de entrega (qué sale al cliente, qué es defendible, qué es
+parámetro). Licencia, precio y empaque final: decisión del laboratorio, fuera de la fase.
+**Validación**: inventario y diff BD viva ↔ archivos con cada diferencia resuelta; búsqueda de datos
+de la casa en lo entregable = 0; instalación limpia con tenant ficticio + segunda corrida idempotente +
+pruebas (a)(b)(c)(d) en verde; esquema instalado ≡ producción salvo lo documentado; `npm run validate`
+en verde. **Solo lectura contra producción**; sin credencial de solo lectura al catálogo, se detiene.
+
 ### Fase 4: Re-ubicación en el catálogo de producción
 **Objetivo**: las filas `businessos/erp/…` de `erp.act_activo` pasan a `template/erp/…` con su
 traza en `sis_bitacora`. Gate humano: la dueña aprueba viendo el diff de filas (antes/después).
@@ -352,4 +371,5 @@ entrada en `BITACORA-CDC.md`; `verify:gobernanza` en verde.
 
 ---
 
-*PRP aprobado el 2026-09-24. Dudas 2 y 3 siguen abiertas: la 2 bloquea la Fase 6, la 3 no bloquea nada.*
+*PRP aprobado el 2026-09-24; Fase 3B añadida el 2026-09-25 por el laboratorio. Dudas 2 y 3 siguen
+abiertas: la 2 bloquea la Fase 6, la 3 no bloquea nada.*
