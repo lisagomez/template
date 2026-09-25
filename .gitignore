@@ -97,3 +97,6 @@ tools/extractor-documental/corpus/
 certificates
 # Evidencia local de las mediciones del laboratorio de voz (PNG, WAV de microfono falso, JSON); las tablas van al informe y al corpus
 capturas-laboratorio/
+
+# Etiquetas GS1: almacen local de la app (datos de la instalacion, nunca al repo)
+.datos/
