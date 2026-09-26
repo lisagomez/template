@@ -21,7 +21,8 @@ import bwipjs from 'bwip-js/node';
 import { simulaImpresora } from '../../../../tools/etiquetas-gs1/simuladores/impresora-9100.mjs';
 import { simulaBrowserPrint } from '../../../../tools/etiquetas-gs1/simuladores/browser-print.mjs';
 import { creaAgente, esquemaConfigAgente } from '../../../../tools/etiquetas-gs1/dist/agente/index.js';
-import { completaClave } from '../../../../tools/etiquetas-gs1/dist/index.js';
+import { completaClave, nuevoEvento } from '../../../../tools/etiquetas-gs1/dist/index.js';
+import { generaLlaves } from '../../../../tools/etiquetas-gs1/dist/firma.js';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -58,8 +59,12 @@ const puertoBp = await bp.escucha();
 
 // --- La app construida ---------------------------------------------------------------------
 const datos = join(SALIDA, 'datos');
+// Una llave Ed25519 por sitio, generada aqui y pasada SOLO por el entorno del servidor: no se
+// escribe a disco ni se imprime (en una instalacion real cada una vive en el agente de su sitio).
+const SITIOS = ['CEDIS-NTE', 'SUC-CENTRO', 'SUC-PONIENTE', 'SUC-ORIENTE'];
+const llaves = Object.fromEntries(SITIOS.map((s) => [`ETIQUETAS_LLAVE_${s.replace(/-/g, '_')}`, generaLlaves().privada]));
 const app = spawn(process.execPath, [join(raiz, 'node_modules/next/dist/bin/next'), 'start', '-p', String(PUERTO)], {
-  cwd: raiz, env: { ...process.env, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
+  cwd: raiz, env: { ...process.env, ...llaves, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
 });
 for (let i = 0; i < 60; i++) {
   try { if ((await fetch(`${BASE}/etiquetas`)).ok) break; } catch { /* aun arrancando */ }
@@ -160,6 +165,7 @@ await compone('03', 'GTIN con digito malo y el mismo tras «Corregir digito»', 
 const LECTURAS = [
   ['vigente', `(01)19521111000010(17)${aammdd(dia(40))}(10)L5001`],
   ['alerta', `]C10119521111000010` + `17${aammdd(dia(8))}10L4502`],
+  ['promocion', `(01)19521111000010(17)${aammdd(dia(5))}(10)L4990`],
   ['retiro', `]C10219521111000010` + `3712<GS>17${aammdd(dia(2))}10L0921`],
   ['vencido', `0119521111000010|17${aammdd(dia(-3))}|10L0899`],
 ];
@@ -174,7 +180,7 @@ const semaforo = await porVista(async (p, v) => {
   }
   return fotos;
 });
-await compone('04', 'Semaforo en sus cuatro estados (lecturas de pistola: HRI, ]C1, GS sustituido)', [...semaforo.escritorio, ...semaforo.celular]);
+await compone('04', 'Semaforo en sus cinco estados (lecturas de pistola: HRI, ]C1, GS sustituido)', [...semaforo.escritorio, ...semaforo.celular]);
 
 async function revisionDe(nombre, prepara) {
   return porVista(async (p, v) => { await abre(p, '/etiquetas'); await prepara(p); await espera(150); return foto(p, REVISION, `${nombre}-${v}`); });
@@ -303,8 +309,96 @@ const mover = await porVista(async (p, v) => {
 await compone('17', 'Mover entre zonas: recibo, almacen, piso de venta y merma con la etiqueta de la caja', [['escritorio', mover.escritorio[0]], ['celular', mover.celular[0]]]);
 await compone('18', 'Etiquetas de ubicacion GS1-128: (414) GLN del sitio + (254) zona', [['escritorio', mover.escritorio[1]], ['celular', mover.celular[1]]]);
 
+// --- Expediente de lote, agente de riesgo e integridad ---------------------------------------
+const api = async (cuerpo) => (await fetch(`${BASE}/api/etiquetas`, { method: 'POST', headers: { authorization: `Bearer ${TOKEN}`, 'x-operador': 'Captura Playwright', 'content-type': 'application/json' }, body: JSON.stringify(cuerpo) })).json();
+const G_GOM = cajaDe('GOM-020');
+const LOTE_GOM = { gtin: G_GOM, lote: 'SUC03-L4471', caducidad: dia(50) };
+
+const expediente = await porVista(async (p, v) => {
+  await abre(p, `/etiquetas/expediente?gtin=${G_GOM}&lote=SUC03-L4471&cad=${dia(50)}`);
+  await p.waitForSelector('[data-prueba="veredicto-expediente"][data-ok="true"]');
+  return foto(p, '[data-prueba="expediente"]', `expediente-${v}`);
+});
+await compone('19', 'Expediente del lote SUC03-L4471: cadena de CEDIS y Poniente, raices ancladas y veredicto', [['escritorio', expediente.escritorio], ['celular', expediente.celular]]);
+
+const rechazo = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/leer');
+  await p.selectOption('[data-prueba="sitio-lector"]', 'SUC-CENTRO');
+  await p.fill('[data-prueba="pistola"]', `(02)${G_GOM}(37)24(17)${aammdd(dia(100))}(10)${v === 'escritorio' ? 'L6001' : 'L6002'}`);
+  await p.press('[data-prueba="pistola"]', 'Enter');
+  await p.waitForSelector('[data-prueba="recibir"]');
+  await p.click('[data-prueba="recibir"]');
+  await p.waitForSelector('[data-prueba="rechazo"]');
+  return foto(p, '[data-prueba="resultado"]', `rechazo-${v}`);
+});
+await compone('20', 'Recepcion rechazada por la regla de 2/3 y su devolucion al proveedor con evidencia', [['escritorio', rechazo.escritorio], ['celular', rechazo.celular]]);
+
+const acciones = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/caducidades');
+  const sel = '[data-prueba="tablero-sitio"][data-sitio="SUC-CENTRO"] [data-prueba="semaforo-acciones"]';
+  await p.waitForSelector(sel);
+  return foto(p, sel, `semaforo-acciones-${v}`);
+});
+await compone('21', 'Semaforo de cinco colores con la accion de cada uno (Sucursal Centro)', [['escritorio', acciones.escritorio], ['celular', acciones.celular]]);
+
+const riesgo = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/riesgo');
+  if (v === 'escritorio') {
+    await p.click('[data-prueba="correr-agente"]');
+    await p.waitForSelector('[data-prueba="recomendacion"][data-estado="pendiente"][data-lote="SUC03-L4471"]');
+    await p.waitForSelector('[data-prueba="recomendacion"][data-estado="pendiente"][data-lote="CH0310"]');
+    const antes = await foto(p, 'main > div', `riesgo-pendientes-${v}`);
+    await p.locator('[data-prueba="recomendacion"][data-lote="SUC03-L4471"] [data-prueba="ejecutar"]').click();
+    await p.waitForSelector('[data-prueba="recomendacion"][data-estado="ejecutada"]');
+    await p.locator('[data-prueba="recomendacion"][data-lote="CH0310"] [data-prueba="motivo-descarte"]').fill('la cabecera ya está ocupada por la temporada de dulces');
+    await p.locator('[data-prueba="recomendacion"][data-lote="CH0310"] [data-prueba="descartar"]').click();
+    await p.waitForSelector('[data-prueba="recomendacion"][data-estado="descartada"]');
+    return [antes, await foto(p, 'main > div', `riesgo-decididas-${v}`)];
+  }
+  await p.waitForSelector('[data-prueba="recomendacion"][data-estado="descartada"]');
+  return [await foto(p, 'main > div', `riesgo-decididas-${v}`)];
+});
+await compone('22', 'Agente de riesgo: lote verde en riesgo, una recomendacion ejecutada y otra descartada', [['escritorio · al correr el agente', riesgo.escritorio[0]], ['escritorio · decididas', riesgo.escritorio[1]], ['celular', riesgo.celular[0]]]);
+
+// Anclar lo de hoy (como haria el agente del sitio por la noche) y ver todo en verde.
+await api({ accion: 'ancla' });
+const integridadAntes = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/integridad');
+  await p.waitForSelector('[data-prueba="integridad-sitio"][data-sitio="SUC-PONIENTE"][data-ok="true"]');
+  return foto(p, 'main > div', `integridad-antes-${v}`);
+});
+
+/**
+ * La manipulacion: quien tiene escritura sobre el almacen de Poniente le alarga la caducidad al
+ * lote SUC03-L4471 (en eventos y existencias) y RECALCULA toda su cadena para que cuadre.
+ */
+function reescribeSucursal(ruta, sitio, lote, nueva) {
+  const e = JSON.parse(readFileSync(ruta, 'utf8'));
+  const original = e.eventos[sitio];
+  const propios = new Set(original.map((x) => x.hash));
+  const cambia = (l) => (l.gtin === lote.gtin && l.lote === lote.lote && l.caducidad === lote.caducidad ? { ...l, caducidad: nueva } : l);
+  const reescrita = [];
+  for (const ev of original) {
+    const externo = ev.anteriorLote && !propios.has(ev.anteriorLote) ? ev.anteriorLote : undefined;
+    reescrita.push(nuevoEvento(sitio, reescrita, { tipo: ev.tipo, lote: cambia(ev.lote), datos: ev.datos, operador: ev.operador, fecha: ev.fecha }, externo));
+  }
+  e.eventos[sitio] = reescrita;
+  e.existencias = e.existencias.map((x) => (x.sitio === sitio ? { ...x, caducidad: cambia(x).caducidad } : x));
+  writeFileSync(ruta, JSON.stringify(e));
+  return { eventos: reescrita.length };
+}
+informe.manipulacion = reescribeSucursal(join(datos, 'estado.json'), 'SUC-PONIENTE', LOTE_GOM, dia(140));
+informe.agenteTrasManipulacion = await api({ accion: 'agente' });
+const integridadDespues = await porVista(async (p, v) => {
+  await abre(p, '/etiquetas/integridad');
+  await p.waitForSelector('[data-prueba="integridad-sitio"][data-sitio="SUC-PONIENTE"][data-ok="false"]');
+  return foto(p, 'main > div', `integridad-despues-${v}`);
+});
+await compone('23', 'Integridad por sucursal: todas verifican contra sus anclas (antes de manipular)', [['escritorio', integridadAntes.escritorio], ['celular', integridadAntes.celular]]);
+await compone('24', 'Integridad tras reescribir Poniente: su cadena cuadra localmente pero el ancla la delata', [['escritorio', integridadDespues.escritorio], ['celular', integridadDespues.celular]]);
+
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
-console.log(JSON.stringify(informe.impresion, null, 1));
+console.log(JSON.stringify({ impresion: informe.impresion, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion }, null, 1));
 await navegador.close();
 await conCamara?.close();
 app.kill('SIGTERM');

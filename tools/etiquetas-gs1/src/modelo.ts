@@ -3,6 +3,7 @@
  * bitacora de asignaciones (solo se anade), numeros emitidos (nunca se reusan), existencias por
  * lote y sitio, impresoras e importaciones.
  */
+import type { Evento } from './cadena.js'
 import type { Consumibles } from './consumibles.js'
 import type { PerfilImpresora } from './etiqueta.js'
 import type { Categoria } from './semaforo.js'
@@ -101,6 +102,8 @@ export interface Existencia {
   readonly actualizado: string
   /** Zona dentro del sitio. Sin zona (datos anteriores) cuenta como `recibo`. */
   readonly zona?: Zona
+  /** Rack-nivel-posicion dentro del almacen (p. ej. `B-04-2`). */
+  readonly posicion?: string
 }
 
 /** Bitacora de movimientos entre zonas (solo se anade). */
@@ -143,4 +146,29 @@ export interface EstadoAlmacen {
   readonly consumibles?: Consumibles
   /** Movimientos entre zonas. Opcional por la misma razon. */
   readonly movimientos?: readonly Movimiento[]
+  /**
+   * La cadena de eventos de cada sitio (solo se agrega). Es la fuente: existencias, zonas y
+   * posiciones son su PROYECCION, y se comprueba que coincidan (`proyeccion.ts`).
+   */
+  readonly eventos?: Readonly<Record<string, readonly Evento[]>>
+  /** Devoluciones al proveedor por rechazo en recepcion, con la evidencia. */
+  readonly devoluciones?: readonly Devolucion[]
+}
+
+/** La devolucion que genera un rechazo en recepcion: lo leido, la regla y el evento que la prueba. */
+export interface Devolucion {
+  readonly folio: string
+  readonly fecha: string
+  readonly sitio: string
+  readonly sku: string
+  readonly gtin: string
+  readonly lote: string
+  readonly caducidad: string
+  readonly cajas: number
+  /** La lectura tal como se capturo (texto legible, con parentesis). */
+  readonly lectura: string
+  readonly diasRestantes: number
+  readonly minimoDias: number
+  readonly regla: string
+  readonly evento: { readonly seq: number; readonly hash: string }
 }

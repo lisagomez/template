@@ -6,7 +6,7 @@
  * (marcados como ejemplo hasta que alguien los fije), sitios con su agente, y Labelary.
  */
 import { useState } from 'react';
-import { capacidadGtin13, revisaPrefijoEmpresa, type Categoria, type Sitio } from '../services/nucleo.ts';
+import { capacidadGtin13, promocionDe, revisaPrefijoEmpresa, type Categoria, type Sitio } from '../services/nucleo.ts';
 import { olvida } from '../services/cliente.ts';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { boton, botonPrimario, campo, tarjeta } from './marco.tsx';
@@ -37,15 +37,18 @@ export function PantallaAjustes({ e }: { e: Etiquetas }) {
       </section>
       <section className={`${tarjeta} space-y-3`}>
         <h2 className="text-base font-semibold">Semáforo por categoría {cfg.categoriasDeEjemplo ? <span className="ml-1 rounded bg-amber-200 px-1.5 py-0.5 text-xs text-amber-900">valores de ejemplo</span> : null}</h2>
-        <p className="text-xs text-neutral-600 dark:text-neutral-300">Días de vida restante: «por vencer» con los de alerta o menos, «retirar» con los de retiro o menos. {cfg.categoriasDeEjemplo ? 'Son ejemplos para arrancar, no una regla: fíjalos con calidad.' : ''}</p>
-        <table className="w-full text-left text-xs">
-          <thead className="text-neutral-500"><tr><th>Categoría</th><th>Alerta</th><th>Retiro</th><th>Mín. recibir</th></tr></thead>
+        <p className="text-xs text-neutral-600 dark:text-neutral-300">Días de vida restante: amarillo con los de alerta o menos, naranja (promoción) con los de promoción, rojo (bloqueo de venta normal) con los de retiro. Al recibir: la fracción de la vida útil que debe quedarle (regla de 2/3 = 67 %) si el catálogo trae la vida útil; si no, el mínimo en días. {cfg.categoriasDeEjemplo ? 'Son ejemplos para arrancar, no una regla: fíjalos con calidad.' : ''}</p>
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[34rem] text-left text-xs">
+          <thead className="text-neutral-500"><tr><th>Categoría</th><th>Alerta</th><th>Promoción</th><th>Retiro</th><th>Mín. recibir</th><th>% vida útil</th></tr></thead>
           <tbody>{categorias.map((c, i) => (
             <tr key={c.id}><td className="py-1 pr-2">{c.nombre}</td>
-              {(['alertaDias', 'retiroDias', 'minimoRecepcionDias'] as const).map((k) => <td key={k} className="pr-1"><input className={campo} type="number" min={0} max={3650} value={c[k]} onChange={(x) => cat(i, { [k]: Math.max(0, Number(x.target.value) || 0) })} aria-label={`${c.nombre} ${k}`} /></td>)}
+              {(['alertaDias', 'promocionDias', 'retiroDias', 'minimoRecepcionDias'] as const).map((k) => <td key={k} className="pr-1"><input className={campo} type="number" min={0} max={3650} value={k === 'promocionDias' ? promocionDe(c) : c[k]} onChange={(x) => cat(i, { [k]: Math.max(0, Number(x.target.value) || 0) })} aria-label={`${c.nombre} ${k}`} /></td>)}
+              <td className="pr-1"><input className={campo} type="number" min={5} max={100} value={Math.round((c.fraccionRecepcion ?? 2 / 3) * 100)} onChange={(x) => cat(i, { fraccionRecepcion: Math.min(100, Math.max(5, Number(x.target.value) || 67)) / 100 })} aria-label={`${c.nombre} fracción de vida útil al recibir`} /></td>
             </tr>
           ))}</tbody>
         </table>
+        </div>
         <button type="button" className={botonPrimario} onClick={() => guarda({ accion: 'config', categorias })}>Guardar umbrales</button>
       </section>
       <section className={`${tarjeta} space-y-3`}>

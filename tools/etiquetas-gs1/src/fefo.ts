@@ -3,7 +3,8 @@
  *
  * - Vencidos: se listan aparte y NUNCA entran al orden de surtido (lo que EWM hace mal si nadie
  *   lo filtra).
- * - Retiro: dentro de los dias de retiro de su categoria; tampoco se surten, se ven aparte.
+ * - Retiro (rojo): dentro de los dias de retiro de su categoria: bloqueados para venta normal, se
+ *   ven aparte. Los naranjas (promocion) SI se surten: salen primero, con su exhibicion.
  * - «Esta semana» = vence en los proximos 7 dias; «este mes» = en los proximos 30 (despues de
  *   la semana). Se dice asi en pantalla para que nadie lo lea como mes calendario.
  * - FEFO: por articulo, los lotes surtibles del que vence antes al que vence despues.
@@ -13,7 +14,7 @@
  */
 import { diasHasta, esFecha, parseaFechaGs1, aAammdd } from './fechas.js'
 import type { Articulo, EstadoAlmacen, Existencia, Zona } from './modelo.js'
-import { categoriaPorId, estadoSemaforo, type EstadoSemaforo } from './semaforo.js'
+import { categoriaPorId, estadoSemaforo, vendible, type EstadoSemaforo } from './semaforo.js'
 
 export interface FilaTablero {
   readonly existencia: Existencia
@@ -46,6 +47,8 @@ export interface TableroSitio {
   readonly resurtido: readonly GrupoFefo[]
   readonly cajasEnMerma: number
   readonly totales: Readonly<Record<EstadoSemaforo, number>>
+  /** Los lotes de cada color, para listarlos con su accion. */
+  readonly porEstado: Readonly<Record<EstadoSemaforo, readonly FilaTablero[]>>
 }
 
 export function diasParaCaducar(caducidadIso: string, hoy: string): number {
@@ -63,9 +66,9 @@ export function tableroSitio(estado: EstadoAlmacen, sitio: string, hoy: string):
       return { existencia: e, descripcion: art?.descripcion ?? e.sku, dias, estado: estadoSemaforo(dias, categoriaPorId(cats, art?.categoria)), zona: e.zona ?? 'recibo' }
     })
     .sort((a, b) => a.dias - b.dias || a.descripcion.localeCompare(b.descripcion))
-  const totales: Record<EstadoSemaforo, number> = { vigente: 0, alerta: 0, retiro: 0, vencido: 0 }
+  const totales: Record<EstadoSemaforo, number> = { vigente: 0, alerta: 0, promocion: 0, retiro: 0, vencido: 0 }
   for (const f of filas) totales[f.estado]++
-  const surtibles = filas.filter((f) => f.estado === 'vigente' || f.estado === 'alerta')
+  const surtibles = filas.filter((f) => vendible(f.estado))
   const agrupa = (lista: readonly FilaTablero[]): GrupoFefo[] => {
     const grupos = new Map<string, FilaTablero[]>()
     for (const f of lista) grupos.set(f.existencia.sku, [...(grupos.get(f.existencia.sku) ?? []), f])
@@ -88,5 +91,9 @@ export function tableroSitio(estado: EstadoAlmacen, sitio: string, hoy: string):
     resurtido,
     cajasEnMerma,
     totales,
+    porEstado: {
+      vencido: filas.filter((f) => f.estado === 'vencido'), retiro: filas.filter((f) => f.estado === 'retiro'), promocion: filas.filter((f) => f.estado === 'promocion'),
+      alerta: filas.filter((f) => f.estado === 'alerta'), vigente: filas.filter((f) => f.estado === 'vigente'),
+    },
   }
 }

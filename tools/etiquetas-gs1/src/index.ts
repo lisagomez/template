@@ -6,6 +6,9 @@
  *   ./navegador           clientes de Zebra Browser Print y del agente local (fetch)
  *   ./almacenes/archivo   almacen en un archivo JSON (Node)
  *   ./agente              agente local de impresion (Node, TCP 9100)
+ *   ./firma               Ed25519 de node:crypto para firmar y verificar anclas (Node)
+ *   ./almacenes/central   el central de anclas en un archivo JSON (Node)
+ *   ./almacenes/seudonimos  seudonimos de operador, borrables (Node)
  */
 export * from './diccionario/index.js'
 export * from './digito.js'
@@ -31,3 +34,12 @@ export * from './existencias.js'
 export * from './consumibles.js'
 export * from './ubicaciones.js'
 export * from './ejemplos-consumibles.js'
+export * from './sha256.js'
+export * from './jcs.js'
+export * from './merkle.js'
+export * from './cadena.js'
+export * from './anclaje.js'
+export * from './expediente.js'
+export * from './proyeccion.js'
+export * from './central.js'
+export * from './riesgo.js'

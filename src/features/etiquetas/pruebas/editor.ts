@@ -7,9 +7,9 @@ import { test } from 'node:test';
 import { aManual, aplicaAlEditor, calcula, EDITOR_INICIAL, simbolosDelEditor, type EstadoEditor } from '../services/editor.ts';
 import { zplDeLote } from '../services/lote.ts';
 import { resumenLegible, gtinLegible } from '../services/presenta.ts';
-import { semillaFicticia, IMPRESORAS_DEMO } from '../services/servidor/semilla.ts';
+import { semillaFicticia, IMPRESORAS_DEMO, VENTAS_DEMO } from '../services/servidor/semilla.ts';
 import { resumenPresupuesto } from '../services/nucleo.ts';
-import { CATEGORIAS_EJEMPLO, clasificaPrefijo, PERFIL_EJEMPLO, tableroSitio, type Arreglo } from '../services/nucleo.ts';
+import { CATEGORIAS_EJEMPLO, clasificaPrefijo, evaluaRiesgo, integridadLocal, PERFIL_EJEMPLO, tableroSitio, ventasFicticias, verificaTransferencias, type Arreglo } from '../services/nucleo.ts';
 
 const HOY = '2026-09-25';
 const caja: EstadoEditor = { ...EDITOR_INICIAL, producto: 'Yogurt natural 1 kg', gtin: '09521234000021', lote: 'L4471', caducidad: '2026-10-30', categoria: 'lacteos', sitio: 'CEDIS-NTE' };
@@ -52,18 +52,29 @@ test('lote: una etiqueta por articulo; si una no pasa la revision, se dice cual'
   assert.match(r.zpl, /\^PQ2,0,1,Y/);
 });
 
-test('semilla: todo ficticio (prefijo 952) y el tablero de dos sitios trae los cuatro estados', () => {
+test('semilla: todo ficticio (prefijo 952), cinco colores en Centro y el FEFO sin vencidos ni rojos', () => {
   const e = semillaFicticia(HOY);
   for (const a of Object.values(e.articulos)) for (const g of [a.gtinUnidad, a.gtinCaja]) if (g && !g.startsWith('004')) assert.equal(clasificaPrefijo(g).clase, 'demostracion', `${a.sku} ${g}`);
   assert.ok(e.configuracion.prefijoEmpresa.startsWith('952'));
   const cedis = tableroSitio(e, 'CEDIS-NTE', HOY);
   const centro = tableroSitio(e, 'SUC-CENTRO', HOY);
+  assert.ok(Object.values(centro.totales).every((n) => n > 0), JSON.stringify(centro.totales));
   for (const t of [cedis, centro]) {
     assert.ok(t.totales.vencido > 0 && t.totales.retiro > 0 && t.totales.alerta > 0 && t.totales.vigente > 0, JSON.stringify(t.totales));
-    assert.ok(t.fefo.every((g) => g.lotes.every((l) => l.estado === 'vigente' || l.estado === 'alerta')), 'el FEFO no surte vencidos ni retiro');
+    assert.ok(t.fefo.every((g) => g.lotes.every((l) => l.estado !== 'vencido' && l.estado !== 'retiro')), 'el FEFO no surte vencidos ni rojos');
   }
   const yog = cedis.fefo.find((g) => g.sku === 'YOG-001')!;
   assert.deepEqual(yog.lotes.map((l) => l.existencia.lote), ['L4502', 'L4471']);
+});
+
+test('semilla: el inventario entra por la cadena (proyeccion = estado en cada sitio), con un rechazo 2/3 y un lote verde en riesgo', () => {
+  const e = semillaFicticia(HOY);
+  for (const s of e.configuracion.sitios) assert.deepEqual(integridadLocal(e, s.clave), { ok: true, diferencias: [] }, s.clave);
+  assert.deepEqual(verificaTransferencias(e.eventos!), []);
+  assert.match(e.devoluciones![0]!.regla, /regla de 2\/3: con 180 días de vida útil debe llegar con al menos 120/);
+  const r = evaluaRiesgo(e, 'SUC-PONIENTE', HOY, ventasFicticias(VENTAS_DEMO));
+  assert.deepEqual(r.map((x) => [x.lote.lote, x.semaforo, x.recomendacion.accion, x.recomendacion.destino]), [['SUC03-L4471', 'vigente', 'transferir', 'SUC-CENTRO']]);
+  assert.ok(Object.values(e.eventos!).flat().every((x) => /^(op-[0-9a-f]{8}|op-apertura|agente-riesgo)$/.test(x.operador)), 'la cadena no lleva nombres, solo seudonimos');
 });
 
 test('presenta: resumen legible de una importacion y GTIN a ojo', () => {

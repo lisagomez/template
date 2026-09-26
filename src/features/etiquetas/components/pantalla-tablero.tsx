@@ -1,12 +1,13 @@
 'use client';
 
 /**
- * /etiquetas/caducidades — por sitio: lo vencido, lo que hay que retirar, lo que vence esta
- * semana y este mes, y el orden FEFO para surtir (los vencidos y los de retiro NO entran).
+ * /etiquetas/caducidades — por sitio: el semaforo de cinco colores con la ACCION de cada uno, lo
+ * vencido, lo bloqueado, lo que vence esta semana y este mes, y el orden FEFO para surtir (los
+ * vencidos y los rojos NO entran).
  */
 import { useState } from 'react';
-import { nombreZona, tableroSitio, TEXTO_SEMAFORO, textoDias, type EstadoSemaforo, type FilaTablero, type GrupoFefo } from '../services/nucleo.ts';
-import { COLOR_SEMAFORO, fechaCorta } from '../services/presenta.ts';
+import { nombreZona, tableroSitio, TEXTO_SEMAFORO, textoDias, type FilaTablero, type GrupoFefo, type TableroSitio } from '../services/nucleo.ts';
+import { COLOR_SEMAFORO, fechaCorta, ORDEN_SEMAFORO } from '../services/presenta.ts';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { comoEstado } from './pantalla-lector.tsx';
 import { tarjeta } from './marco.tsx';
@@ -49,6 +50,24 @@ function Grupos({ titulo, grupos, vacio }: { titulo: string; grupos: readonly Gr
   );
 }
 
+/** Cada color con su ACCION y los lotes que la necesitan hoy. */
+function Acciones({ t }: { t: TableroSitio }) {
+  return (
+    <section className="space-y-1.5" data-prueba="semaforo-acciones">
+      <h3 className="text-sm font-semibold">Qué hacer, por color</h3>
+      {ORDEN_SEMAFORO.map((s) => (
+        <div key={s} className="flex gap-2 text-sm" data-estado={s}>
+          <span className={`h-fit shrink-0 rounded px-2 py-0.5 text-xs font-bold ${COLOR_SEMAFORO[s]}`}>{TEXTO_SEMAFORO[s].color} · {t.totales[s]}</span>
+          <div className="min-w-0">
+            <p>{TEXTO_SEMAFORO[s].accion}</p>
+            {s !== 'vigente' && t.porEstado[s].length ? <p className="text-xs text-neutral-500">{t.porEstado[s].map((f) => `${f.descripcion} ${f.existencia.lote} (${nombreZona(f.zona).toLowerCase()}, ${f.existencia.cantidad} cj)`).join(' · ')}</p> : null}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export function PantallaTablero({ e }: { e: Etiquetas }) {
   const est = e.estado!;
   const sitios = est.configuracion.sitios;
@@ -69,12 +88,13 @@ export function PantallaTablero({ e }: { e: Etiquetas }) {
             <article key={clave} className={`${tarjeta} space-y-4`} data-prueba="tablero-sitio" data-sitio={clave}>
               <header className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="text-lg font-bold">{sitio?.nombre ?? clave} <span className="text-xs font-normal uppercase text-neutral-500">{sitio?.tipo}</span></h2>
-                <div className="flex gap-1">
-                  {(['vencido', 'retiro', 'alerta', 'vigente'] as EstadoSemaforo[]).map((s) => <span key={s} className={`rounded px-2 py-0.5 text-xs font-semibold ${COLOR_SEMAFORO[s]}`} title={TEXTO_SEMAFORO[s].accion}>{t.totales[s]} {TEXTO_SEMAFORO[s].etiqueta.toLowerCase()}</span>)}
+                <div className="flex flex-wrap gap-1">
+                  {ORDEN_SEMAFORO.map((s) => <span key={s} className={`rounded px-2 py-0.5 text-xs font-semibold ${COLOR_SEMAFORO[s]}`} title={TEXTO_SEMAFORO[s].accion}>{t.totales[s]} {TEXTO_SEMAFORO[s].etiqueta.toLowerCase()}</span>)}
                 </div>
               </header>
-              <Lista titulo="Vencido: no surtir, dar de baja" filas={t.vencidos} vacio="Nada vencido." />
-              <Lista titulo="Retirar de venta" filas={t.retiro} vacio="Nada en días de retiro." />
+              <Acciones t={t} />
+              <Lista titulo="Vencido: no surtir, merma" filas={t.vencidos} vacio="Nada vencido." />
+              <Lista titulo="Bloqueado para venta normal (rojo): separar" filas={t.retiro} vacio="Nada en días de retiro." />
               <Lista titulo="Vence esta semana" filas={t.semana} vacio="Nada vence en los próximos 7 días." />
               <Lista titulo="Vence este mes" filas={t.mes} vacio="Nada vence de 8 a 30 días." />
               <Lista titulo="Retirar del anaquel (piso de venta)" filas={t.anaquel} vacio="Nada en piso que venza esta semana ni que ya no se deba vender." />

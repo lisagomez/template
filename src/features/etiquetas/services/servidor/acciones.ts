@@ -5,24 +5,35 @@
  */
 import { emiteTicket, secretoValido } from '../../../../../tools/etiquetas-gs1/dist/agente/index.js';
 import {
-  altaDeLote, aplicaImportacion, CONSUMIBLES_VACIOS, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueve, parseaLectura, planificaImportacion, recibe, revisaPrefijoEmpresa,
-  revisaZpl, type Consumibles, type EstadoAlmacen, type PlanImportacion,
+  altaConExpediente, aplicaImportacion, CONSUMIBLES_VACIOS, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueveConExpediente, parseaLectura, planificaImportacion,
+  recibeConExpediente, revisaPrefijoEmpresa, revisaZpl, type Consumibles, type EstadoAlmacen, type Paso, type PlanImportacion,
 } from '../nucleo.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
+import { aseguraExpediente, ejecutaExpediente } from './acciones-expediente.ts';
+import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 
 export type Respuesta = { status: number; cuerpo: unknown };
 const ok = (cuerpo: unknown): Respuesta => ({ status: 200, cuerpo });
 const mal = (status: number, error: string): Respuesta => ({ status, cuerpo: { error } });
 
 export async function leeEstado(): Promise<Respuesta> {
-  const e = await almacenDelServidor().lee();
+  const e = await aseguraExpediente();
   return ok({
     hoy: hoyIso(), version: e.version, configuracion: e.configuracion, articulos: Object.values(e.articulos), impresoras: e.impresoras,
     existencias: e.existencias, movimientos: (e.movimientos ?? []).slice(-30), importaciones: e.importaciones.slice(-10), asignaciones: e.asignaciones.slice(-50), contadores: e.contadores,
     agenteConSecreto: secretoValido(process.env['ETIQUETAS_AGENTE_SECRETO']),
     consumibles: e.consumibles ?? CONSUMIBLES_VACIOS,
+    devoluciones: (e.devoluciones ?? []).slice(-20),
   });
+}
+
+/** Una operacion de inventario con su evento: la transaccion, y la cabeza nueva al central. */
+async function conExpediente<T>(cambia: (e: EstadoAlmacen) => Paso<T>): Promise<Respuesta> {
+  const r = await almacenDelServidor().transaccion((e) => { const p = cambia(e); return { estado: p.estado, resultado: { paso: p.resultado, estado: p.estado } }; });
+  if (!r.paso.ok) return ok({ ok: false, motivo: r.paso.motivo });
+  await avisaCabezas(r.estado, r.paso.eventos.map((x) => x.sitio));
+  return ok({ ok: true, ...r.paso.valor, eventos: r.paso.eventos.map((x) => ({ sitio: x.sitio, seq: x.seq, tipo: x.tipo, hash: x.hash })) });
 }
 
 /** Cambio sobre los consumibles del estado (que un almacen anterior puede no traer). */
@@ -72,24 +83,28 @@ export async function ejecuta(a: AccionEtiquetas, operador: string): Promise<Res
         if (!esEmision(r)) return { estado: e, resultado: { error: r.error } };
         return { estado: { ...e, version: e.version + 1, contadores: { ...e.contadores, sscc: r.siguiente }, emitidos: [...e.emitidos, r.numero] }, resultado: { sscc: r.numero } };
       }));
-    case 'etiquetado':
-      return ok(await almacen.transaccion<unknown>((e) => {
+    case 'etiquetado': {
+      const op = await seudonimosDelServidor().de(operador);
+      return conExpediente((e) => {
         const art = e.articulos[a.sku];
-        if (!art?.gtinCaja) return { estado: e, resultado: { error: `el artículo ${a.sku} no tiene GTIN de caja` } };
-        return altaDeLote(e, { sitio: a.sitio, sku: a.sku, gtin: art.gtinCaja, lote: a.lote, caducidad: a.caducidad, cantidad: a.cantidad, ...(a.sscc ? { sscc: a.sscc } : {}) }, 'etiquetado', ahora, `eti-${Date.now()}`);
-      }));
+        if (!art?.gtinCaja) return { estado: e, resultado: { ok: false, motivo: `el artículo ${a.sku} no tiene GTIN de caja` } };
+        return altaConExpediente(e, { sitio: a.sitio, sku: a.sku, gtin: art.gtinCaja, lote: a.lote, caducidad: a.caducidad, cantidad: a.cantidad, ...(a.sscc ? { sscc: a.sscc } : {}) }, 'etiquetado', ahora, `eti-${Date.now()}`, op);
+      });
+    }
     case 'recepcion': {
       const lectura = parseaLectura(a.texto);
       if (esErrorLectura(lectura)) return mal(422, lectura.mensaje);
-      return ok(await almacen.transaccion((e) => recibe(e, interpreta(lectura.elementos, e, hoyIso()), a.sitio, ahora, `rec-${Date.now()}`)));
+      const op = await seudonimosDelServidor().de(operador);
+      return conExpediente((e) => recibeConExpediente(e, interpreta(lectura.elementos, e, hoyIso()), a.sitio, ahora, `rec-${Date.now()}`, op, a.texto));
     }
     case 'movimiento': {
       const lectura = parseaLectura(a.texto);
       if (esErrorLectura(lectura)) return mal(422, lectura.mensaje);
-      return ok(await almacen.transaccion((e) => {
-        if (leeUbicacion(lectura.elementos, e.configuracion.sitios)) return { estado: e, resultado: { ok: false as const, motivo: 'eso es una etiqueta de ubicación: sirve para elegir a dónde se mueve, no se mueve ella' } };
-        return mueve(e, { sitio: a.sitio, destino: a.destino, lectura: interpreta(lectura.elementos, e, hoyIso()), veces: a.veces, operador }, ahora, `mov-${Date.now()}`, hoyIso());
-      }));
+      const op = await seudonimosDelServidor().de(operador);
+      return conExpediente((e) => {
+        if (leeUbicacion(lectura.elementos, e.configuracion.sitios)) return { estado: e, resultado: { ok: false, motivo: 'eso es una etiqueta de ubicación: sirve para elegir a dónde se mueve, no se mueve ella' } };
+        return mueveConExpediente(e, { sitio: a.sitio, destino: a.destino, lectura: interpreta(lectura.elementos, e, hoyIso()), veces: a.veces, operador: op }, ahora, `mov-${Date.now()}`, hoyIso(), a.posicion);
+      });
     }
     case 'consumo':
       return ok(await almacen.transaccion<unknown>((e) => {
@@ -121,6 +136,8 @@ export async function ejecuta(a: AccionEtiquetas, operador: string): Promise<Res
         const compra = { id: `com-${Date.now()}`, fecha: ahora, sitio: a.sitio, rollo: a.rollo, rollos: a.rollos, costoTotal: a.costoTotal, operador };
         return { estado: conConsumibles(e, (c) => ({ ...c, compras: [...c.compras, compra] })), resultado: compra };
       }));
+    case 'lotes': case 'expediente': case 'integridad': case 'riesgo': case 'salida': case 'transferencia': case 'correccion': case 'agente': case 'decision': case 'ancla':
+      return ejecutaExpediente(a, operador);
     case 'ticket': {
       const secreto = process.env['ETIQUETAS_AGENTE_SECRETO'];
       if (!secretoValido(secreto)) return mal(503, 'no hay agente de impresión configurado en el servidor (falta ETIQUETAS_AGENTE_SECRETO)');

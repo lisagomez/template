@@ -12,7 +12,10 @@ La app que lo usa: `src/features/etiquetas/` (rutas `/etiquetas/*`).
 
 | Entrada | Qué trae | Dependencias |
 |---|---|---|
-| `.` | núcleo: diccionario de AIs, parser (pistola/cámara), validación y combinaciones, fechas, medidas, diseño, ZPL, revisión, catálogo e importación, FEFO, zonas y movimientos (recibo, almacén, piso, merma), rollos y presupuesto, almacén en memoria | ninguna |
+| `.` | núcleo: diccionario de AIs, parser (pistola/cámara), validación y combinaciones, fechas, medidas, diseño, ZPL, revisión, catálogo e importación, FEFO, zonas y movimientos (recibo, almacén, piso, merma), rollos y presupuesto, almacén en memoria; **expediente de lote**: SHA-256, JCS (RFC 8785), Merkle (RFC 6962), cadena por sitio, proyección, anclaje, central y agente de riesgo | ninguna |
+| `./firma` | Ed25519 para firmar y verificar anclas | Node (`node:crypto`) |
+| `./almacenes/central` | el central de anclas, testigos e incidentes en un archivo JSON | Node |
+| `./almacenes/seudonimos` | seudónimos de operador, borrables | Node |
 | `./svg` | SVG de la etiqueta | `bwip-js` (peer opcional, **inyectado**) |
 | `./navegador` | clientes de Zebra Browser Print y del agente (solo `fetch`) | ninguna |
 | `./almacenes/archivo` | almacén en un archivo JSON con escritura atómica | Node |
@@ -24,8 +27,9 @@ El núcleo **no importa nada**; el almacén se inyecta (`AlmacenEtiquetas`), com
 ## Pruebas
 
 ```bash
-npm run prueba                         # build + node --test pruebas/*.ts (55 pruebas)
-bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP, en Postgres 17 desechable
+npm run prueba                         # build + node --test pruebas/*.ts (77 pruebas)
+npm run demo:manipulacion              # cuatro manipulaciones sobre archivos reales, antes/después y veredicto
+bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP, en Postgres 17 desechable, (a)…(k)
 ```
 
 `pruebas/ida-y-vuelta.ts` rasteriza el SVG con el Chromium de Playwright y dibuja el ZPL con
@@ -51,9 +55,14 @@ zebrash (motor ZPL local, WebAssembly); los decodifica con zxing y compara contr
 6. **Celulares**: la cámara exige https (o localhost). Emparejar cada equipo con el código
    `ETIQUETAS_TOKEN` del servidor y el nombre de quien opera.
 
+7. **Expediente** (ver `docs/SDD-etiquetas-gs1.md` §10): una llave Ed25519 por sitio en
+   `ETIQUETAS_LLAVE_<SITIO>`, el central donde la sucursal no escriba, y un cron nocturno que pida
+   el ancla (`{"accion":"ancla"}`) y otro matutino para el agente (`{"accion":"agente"}`).
+
 Variables del servidor de la app: `ETIQUETAS_TOKEN` (≥16), `ETIQUETAS_AGENTE_SECRETO` (≥32),
 `ETIQUETAS_DATOS` (carpeta del almacén), `ETIQUETAS_ZONA` (por defecto America/Mexico_City),
-`ETIQUETAS_SEMILLA=ficticia` solo para demostración.
+`ETIQUETAS_LLAVE_<SITIO>` (llave privada Ed25519 del sitio; nunca se imprime),
+`ETIQUETAS_CENTRAL` (archivo del central), `ETIQUETAS_SEMILLA=ficticia` solo para demostración.
 
 ## Licencias de terceros
 

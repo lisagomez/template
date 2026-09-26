@@ -210,16 +210,140 @@ create table if not exists erp.eti_movimiento (
 );
 
 -- ============================================================
+-- Expediente de lote: cadena de eventos por sitio y raíces ancladas
+-- ============================================================
+-- Cada evento se encadena al anterior del sitio (seq y hash). El hash es SHA-256 sobre el
+-- registro COMPLETO canonicalizado con RFC 8785 (JCS); la base no puede recalcularlo (jsonb no
+-- ordena las claves como JCS), así que lo re-verifica el verificador del núcleo. La base SÍ exige
+-- el encadenado al insertar y que nada se reescriba. El operador es un SEUDÓNIMO: la cadena es
+-- inmutable y no puede guardar lo que alguien tenga derecho a cancelar.
+
+-- Génesis de la cadena de un sitio: SHA-256 de JCS({"genesis": <clave>, "v": 1}).
+create or replace function erp.eti_genesis(sitio text) returns text language sql immutable as $$
+  select 'sha256:' || encode(sha256(convert_to('{"genesis":' || to_json(sitio)::text || ',"v":1}', 'UTF8')), 'hex')
+$$;
+
+create table if not exists erp.eti_evento (
+  cliente_id     uuid not null,
+  eti_sitio_id   uuid not null references erp.eti_sitio(id),
+  sitio          text not null,
+  seq            bigint not null check (seq >= 1),
+  v              smallint not null default 1 check (v = 1),
+  fecha          text not null check (fecha ~ '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$'),
+  tipo           text not null check (tipo in ('RECIBIDO','RECHAZADO','UBICADO','MOVIDO','TRANSFERIDO','VENDIDO','DEVUELTO','DONADO','MERMA',
+                                               'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION')),
+  gtin           char(14) not null check (erp.gs1_digito_ok(gtin)),
+  lote           text not null check (length(lote) <= 20 and erp.gs1_cset82(lote)),
+  caducidad      date not null,
+  datos          jsonb not null,
+  operador       text not null check (operador ~ '^(op-[0-9a-f]{8}|op-apertura|agente-riesgo)$'),
+  anterior       text not null check (anterior ~ '^sha256:[0-9a-f]{64}$'),
+  anterior_lote  text check (anterior_lote is null or anterior_lote ~ '^sha256:[0-9a-f]{64}$'),
+  hash           text not null unique check (hash ~ '^sha256:[0-9a-f]{64}$'),
+  created_at     timestamptz not null default now(),
+  primary key (cliente_id, eti_sitio_id, seq)
+);
+comment on table erp.eti_evento is 'Cadena solo-agregar por sitio: cada evento enlaza con el anterior (seq + hash). El estado de existencias es su proyección.';
+create index if not exists eti_evento_lote_idx on erp.eti_evento (cliente_id, gtin, lote, caducidad);
+
+create or replace function erp.eti_evento_encadena() returns trigger language plpgsql as $$
+declare ult record; clave text;
+begin
+  select s.clave into clave from erp.eti_sitio s where s.id = new.eti_sitio_id and s.cliente_id = new.cliente_id;
+  if clave is distinct from new.sitio then raise exception 'el evento dice ser de % y el sitio es %', new.sitio, clave using errcode = 'check_violation'; end if;
+  perform pg_advisory_xact_lock(hashtext('eti_evento|' || new.cliente_id::text || '|' || new.eti_sitio_id::text));
+  select e.seq, e.hash into ult from erp.eti_evento e where e.cliente_id = new.cliente_id and e.eti_sitio_id = new.eti_sitio_id order by e.seq desc limit 1;
+  if not found then
+    if new.seq <> 1 or new.anterior <> erp.eti_genesis(new.sitio) then
+      raise exception 'el primer evento de % va con secuencia 1 y apunta al génesis del sitio', new.sitio using errcode = 'check_violation';
+    end if;
+  elsif new.seq <> ult.seq + 1 or new.anterior <> ult.hash then
+    raise exception 'el evento #% no continúa la cadena de % (la cabeza es #%)', new.seq, new.sitio, ult.seq using errcode = 'check_violation';
+  end if;
+  return new;
+end $$;
+create or replace trigger eti_evento_encadena before insert on erp.eti_evento for each row execute function erp.eti_evento_encadena();
+
+-- Anclas: la raíz de Merkle (RFC 6962) de los eventos del periodo, firmada con Ed25519 por la
+-- llave del sitio. La firma la verifica el central (Postgres no trae Ed25519); la base exige la
+-- continuidad: cada ancla empieza donde acabó la anterior y apunta a su hash.
+create table if not exists erp.eti_ancla (
+  cliente_id      uuid not null,
+  eti_sitio_id    uuid not null references erp.eti_sitio(id),
+  sitio           text not null,
+  periodo         text not null,
+  desde_seq       bigint not null check (desde_seq >= 1),
+  hasta_seq       bigint not null,
+  n               int not null,
+  raiz            text not null check (raiz ~ '^sha256:[0-9a-f]{64}$'),
+  cabeza          text not null check (cabeza ~ '^sha256:[0-9a-f]{64}$'),
+  ancla_anterior  text not null check (ancla_anterior ~ '^sha256:[0-9a-f]{64}$'),
+  creada          text not null,
+  firma           text not null,
+  llave           text not null check (llave ~ '^ed25519:[0-9a-f]{16}$'),
+  primary key (cliente_id, eti_sitio_id, desde_seq),
+  check (hasta_seq >= desde_seq and n = hasta_seq - desde_seq + 1)
+);
+comment on table erp.eti_ancla is 'Raíces diarias firmadas. Las escribe SOLO el job del central (declarado, C7); la sucursal no.';
+
+-- Hash del ancla: SHA-256 de su JCS (claves en orden UTF-16; aquí todas son ASCII fijas).
+create or replace function erp.eti_hash_ancla(a erp.eti_ancla) returns text language sql immutable as $$
+  select 'sha256:' || encode(sha256(convert_to(format(
+    '{"anclaAnterior":%s,"cabeza":%s,"creada":%s,"desdeSeq":%s,"hastaSeq":%s,"n":%s,"periodo":%s,"raiz":%s,"sitio":%s,"v":1}',
+    to_json(a.ancla_anterior), to_json(a.cabeza), to_json(a.creada), a.desde_seq, a.hasta_seq, a.n, to_json(a.periodo), to_json(a.raiz), to_json(a.sitio)), 'UTF8')), 'hex')
+$$;
+
+create or replace function erp.eti_ancla_continua() returns trigger language plpgsql as $$
+declare prev erp.eti_ancla;
+begin
+  perform pg_advisory_xact_lock(hashtext('eti_ancla|' || new.cliente_id::text || '|' || new.eti_sitio_id::text));
+  select * into prev from erp.eti_ancla a where a.cliente_id = new.cliente_id and a.eti_sitio_id = new.eti_sitio_id order by a.hasta_seq desc limit 1;
+  if not found then
+    if new.desde_seq <> 1 or new.ancla_anterior <> erp.eti_genesis(new.sitio) then raise exception 'la primera ancla de % empieza en #1 y apunta al génesis', new.sitio using errcode = 'check_violation'; end if;
+  elsif new.desde_seq <> prev.hasta_seq + 1 or new.ancla_anterior <> erp.eti_hash_ancla(prev) then
+    raise exception 'el ancla de % no continúa la anterior (#% y su hash)', new.sitio, prev.hasta_seq using errcode = 'check_violation';
+  end if;
+  if not exists (select 1 from erp.eti_evento e where e.cliente_id = new.cliente_id and e.eti_sitio_id = new.eti_sitio_id and e.seq = new.hasta_seq and e.hash = new.cabeza) then
+    raise exception 'la cabeza del ancla no es el evento #% de la cadena de %', new.hasta_seq, new.sitio using errcode = 'check_violation';
+  end if;
+  return new;
+end $$;
+create or replace trigger eti_ancla_continua before insert on erp.eti_ancla for each row execute function erp.eti_ancla_continua();
+
+-- Testigos de cabeza: el sitio avisa su cabeza al crecer la cadena; no puede retroceder.
+create table if not exists erp.eti_testigo (
+  cliente_id    uuid not null,
+  eti_sitio_id  uuid not null references erp.eti_sitio(id),
+  seq           bigint not null,
+  cabeza        text not null check (cabeza ~ '^sha256:[0-9a-f]{64}$'),
+  fecha         timestamptz not null default now(),
+  primary key (cliente_id, eti_sitio_id, seq)
+);
+
+-- Solo-agregar para TODOS (también el dueño, salvo que desactive triggers: por eso existe el ancla).
+create or replace function erp.eti_solo_agregar() returns trigger language plpgsql as $$
+begin
+  raise exception '% es solo-agregar: un error se corrige con un evento CORRECCION', tg_table_name using errcode = 'insufficient_privilege';
+end $$;
+create or replace trigger eti_evento_solo_agregar before update or delete on erp.eti_evento for each row execute function erp.eti_solo_agregar();
+create or replace trigger eti_ancla_solo_agregar before update or delete on erp.eti_ancla for each row execute function erp.eti_solo_agregar();
+create or replace trigger eti_testigo_solo_agregar before update or delete on erp.eti_testigo for each row execute function erp.eti_solo_agregar();
+
+-- ============================================================
 -- Append-only de los ledgers (como 005 hace con los suyos)
 -- ============================================================
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'rol_exe_fin') then
-    revoke update, delete on erp.eti_asignacion, erp.eti_emitido, erp.eti_importacion, erp.eti_movimiento from rol_exe_fin;
+    revoke update, delete on erp.eti_asignacion, erp.eti_emitido, erp.eti_importacion, erp.eti_movimiento, erp.eti_evento, erp.eti_testigo from rol_exe_fin;
+    -- Las anclas las escribe el central, no la operación de la sucursal.
+    revoke insert, update, delete on erp.eti_ancla from rol_exe_fin;
   end if;
 end $$;
 
 -- HALLAZGO para quien integre: 004_seguridad.sql re-concede UPDATE sobre TODAS las tablas de
 -- `erp` a rol_exe_fin y solo vuelve a quitarlo en sis_bitacora y act_*. Re-correr 004 después de
 -- este pack REABRE el UPDATE de sus ledgers (medido en prueba-efimera.sh, fase 2). Al integrar,
--- 004 debe listar también: eti_asignacion, eti_emitido, eti_importacion, eti_movimiento.
+-- 004 debe listar también: eti_asignacion, eti_emitido, eti_importacion, eti_movimiento,
+-- eti_evento, eti_testigo y eti_ancla (esta sin INSERT para rol_exe_fin). Los triggers de
+-- solo-agregar de las tres del expediente aguantan aunque 004 reabra el UPDATE.

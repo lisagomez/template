@@ -7,10 +7,11 @@
 import { useState } from 'react';
 import {
   esErrorLectura, interpreta, nombreAi, nombreZona, parseaLectura, TEXTO_SEMAFORO, textoDias, fechaLegible,
-  type EstadoAlmacen, type Interpretacion, type Lectura,
+  type Devolucion, type EstadoAlmacen, type Interpretacion, type Lectura,
 } from '../services/nucleo.ts';
 import type { EstadoCliente } from '../services/cliente.ts';
-import { COLOR_SEMAFORO, gtinLegible } from '../services/presenta.ts';
+import { COLOR_SEMAFORO, fechaCorta, gtinLegible, hashCorto } from '../services/presenta.ts';
+import { enlaceExpediente } from '../services/tipos-expediente.ts';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { EntradaPistola } from './entrada-pistola.tsx';
 import { LectorCamara } from './lector-camara.tsx';
@@ -26,16 +27,21 @@ export function PantallaLector({ e }: { e: Etiquetas }) {
   const [sitio, setSitio] = useState(est.configuracion.sitios[0]?.clave ?? '');
   const [texto, setTexto] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [devolucion, setDevolucion] = useState<Devolucion | null>(null);
 
   const r = texto === null ? null : parseaLectura(texto);
   const lectura: Lectura | null = r && !esErrorLectura(r) ? r : null;
   const inter: Interpretacion | null = lectura ? interpreta(lectura.elementos, comoEstado(est), est.hoy) : null;
 
-  const procesa = (t: string) => { setTexto(t); setAviso(null); };
+  const procesa = (t: string) => { setTexto(t); setAviso(null); setDevolucion(null); };
+  type Recepcion = { ok: boolean; motivo?: string; rechazada?: Devolucion; eventos?: { seq: number; hash: string }[] };
   const recibe = () => {
     if (!texto) return;
-    void e.ejecuta<{ ok: boolean; motivo?: string }>({ accion: 'recepcion', sitio, texto }).then(
-      (x) => setAviso(x.ok ? `Recibido en ${sitio}.` : x.motivo ?? 'no se pudo'),
+    void e.ejecuta<Recepcion>({ accion: 'recepcion', sitio, texto }).then(
+      (x) => {
+        if (x.rechazada) { setDevolucion(x.rechazada); setAviso(null); return; }
+        setAviso(x.ok ? `Recibido en ${sitio} · evento #${x.eventos?.[0]?.seq ?? '?'} (${hashCorto(x.eventos?.[0]?.hash)}) en la cadena del sitio.` : x.motivo ?? 'no se pudo');
+      },
       (err: unknown) => setAviso(err instanceof Error ? err.message : String(err)),
     );
   };
@@ -71,7 +77,16 @@ export function PantallaLector({ e }: { e: Etiquetas }) {
             </table>
             <p className="text-xs text-neutral-500" data-prueba="forma">Llegó {lectura.simbologia ? `con ${lectura.simbologia}` : 'sin identificador de simbología'}, {lectura.forma === 'hri' ? 'como texto con paréntesis' : 'en crudo'}{lectura.sustitutoGs ? `, con el GS sustituido por «${lectura.sustitutoGs}»` : ''}.</p>
             <button type="button" className={botonPrimario} onClick={recibe} disabled={!inter.articulo} data-prueba="recibir">Registrar recepción en {sitio}</button>
-            {aviso ? <p className="text-sm" role="status">{aviso}</p> : null}
+            {aviso ? <p className="text-sm" role="status" data-prueba="aviso-recepcion">{aviso}</p> : null}
+            {devolucion ? (
+              <div className="space-y-1 rounded-xl border-2 border-red-600 bg-red-50 p-3 text-sm text-red-950 dark:bg-red-950 dark:text-red-100" data-prueba="rechazo" role="alert">
+                <p className="text-xl font-black">RECHAZADO en recepción</p>
+                <p>{devolucion.regla}. Le quedan {devolucion.diasRestantes} días (caduca {fechaCorta(devolucion.caducidad)}).</p>
+                <p className="font-semibold">Devolución al proveedor {devolucion.folio}: {devolucion.cajas} caja(s) del lote {devolucion.lote}.</p>
+                <p className="text-xs">Evidencia: lectura «{devolucion.lectura}» · evento RECHAZADO #{devolucion.evento.seq} de {devolucion.sitio} · hash <span className="break-all font-mono">{devolucion.evento.hash}</span></p>
+                <a className="text-xs font-semibold underline" href={enlaceExpediente(devolucion)}>Ver el expediente del lote (cerrado por rechazo)</a>
+              </div>
+            ) : null}
           </>
         ) : null}
       </div>

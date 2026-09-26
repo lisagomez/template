@@ -37,11 +37,11 @@ export function interpreta(elementos: readonly Elemento[], estado: EstadoAlmacen
   const articulo = gtin ? buscaArticulo(estado, gtin) : undefined
   if (gtin && !articulo) avisos.push('Ese GTIN no está en el catálogo de la casa.')
   const cat = categoriaPorId(estado.configuracion.categorias, articulo?.categoria)
-  const vida = cad ? vidaRestante(cad, hoy, cat) : undefined
+  const vida = cad ? vidaRestante(cad, hoy, cat, articulo?.vidaUtilDias) : undefined
   const fecha = cad ? parseaFechaGs1(cad, Number(hoy.slice(0, 4))) : undefined
   const caducidadIso = fecha && esFecha(fecha) ? fechaIso(fecha) : undefined
   if (vida && vida.dias < 0) avisos.push('Está vencido: no se recibe ni se surte.')
-  else if (vida && !vida.aceptableEnRecepcion) avisos.push(`Le quedan ${vida.dias} días y la categoría «${vida.categoria.nombre}» pide al menos ${vida.categoria.minimoRecepcionDias} para recibirlo.`)
+  else if (vida && !vida.aceptableEnRecepcion) avisos.push(`Le quedan ${vida.dias} días; ${vida.minimo.texto}: no se recibe.`)
   if (sscc && !gtin) avisos.push('Solo se leyó el SSCC: lee también el código de contenido de la tarima.')
   const aqui = estado.existencias.filter((e) => ((sscc && e.sscc === sscc) || (gtin && e.gtin === gtin && (!lote || e.lote === lote))) && e.cantidad > 0)
   const sitios = [...new Set(aqui.map((e) => e.sitio))]
@@ -68,7 +68,7 @@ export function recibe(estado: EstadoAlmacen, lectura: Interpretacion, sitio: st
   if (lectura.sscc && estado.existencias.some((e) => e.sscc === lectura.sscc && e.sitio === sitio)) return no(`la tarima ${lectura.sscc} ya se recibió en ${sitio}`)
   // La leccion de los WMS: lo vencido no entra, y lo que no llega a la vida minima tampoco.
   if (lectura.vida && lectura.vida.dias < 0) return no('el lote está vencido: no se recibe')
-  if (lectura.vida && !lectura.vida.aceptableEnRecepcion) return no(`le quedan ${lectura.vida.dias} días y «${lectura.vida.categoria.nombre}» pide al menos ${lectura.vida.categoria.minimoRecepcionDias} para recibir`)
+  if (lectura.vida && !lectura.vida.aceptableEnRecepcion) return no(`le quedan ${lectura.vida.dias} días; ${lectura.vida.minimo.texto}`)
   return altaDeLote(estado, { sitio, sku: lectura.articulo.sku, gtin: lectura.gtin, lote: lectura.lote, caducidad: lectura.caducidadIso, cantidad: lectura.cajas, ...(lectura.sscc ? { sscc: lectura.sscc } : {}) }, 'recepcion', cuando, id)
 }
 

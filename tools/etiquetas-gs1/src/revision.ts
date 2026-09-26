@@ -12,7 +12,7 @@ import { caracteresDeDatos, MAXIMO_CARACTERES_GS1_128, valorDe, type Simbolo } f
 import { codigosDe, type Diseno, type PerfilImpresora } from './etiqueta.js'
 import { fechaLegible } from './fechas.js'
 import { evaluaMedidas, mejorGrosor, puntosAMm, type PerfilLectura } from './medidas.js'
-import { TEXTO_SEMAFORO, textoDias, vidaRestante, type Categoria, type EstadoSemaforo } from './semaforo.js'
+import { promocionDe, TEXTO_SEMAFORO, textoDias, vidaRestante, type Categoria, type EstadoSemaforo } from './semaforo.js'
 import { validaEtiqueta, type Arreglo, type Hallazgo } from './valida.js'
 import { problemasModoD } from './zpl.js'
 
@@ -76,9 +76,9 @@ export function revisa(e: EntradaRevision): ResultadoRevision {
   } else {
     const t = TEXTO_SEMAFORO[vida.estado]
     puntos.push({
-      id: 'vida', estado: vida.estado === 'vigente' ? 'ok' : vida.estado === 'alerta' ? 'aviso' : 'error', semaforo: vida.estado,
+      id: 'vida', estado: vida.estado === 'vigente' ? 'ok' : vida.estado === 'alerta' || vida.estado === 'promocion' ? 'aviso' : 'error', semaforo: vida.estado,
       titulo: `${t.etiqueta}: ${textoDias(vida.dias)} (caduca el ${fechaLegible(vida.fecha)})`,
-      explicacion: `${t.accion} Umbrales de «${vida.categoria.nombre}»: por vencer con ${vida.categoria.alertaDias} días o menos, retiro con ${vida.categoria.retiroDias} o menos.`,
+      explicacion: `${t.accion} Umbrales de «${vida.categoria.nombre}»: por vencer con ${vida.categoria.alertaDias} días o menos, promoción con ${promocionDe(vida.categoria)}, bloqueo con ${vida.categoria.retiroDias}.`,
     })
   }
 

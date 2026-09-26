@@ -2,7 +2,7 @@
 # Valida la PROPUESTA del pack de etiquetas encima del ERP, en un Postgres 17 DESECHABLE.
 # No toca ninguna base compartida: el contenedor nace y muere aquí.
 #   1. aplica erp/migrations/001..005 (de main, leídas con git) y el pack
-#   2. pruebas (a)…(g)
+#   2. pruebas (a)…(k) — (h)…(k) son el expediente: cadena, solo-agregar y anclas
 #   3. re-corre 004 TAL CUAL y comprueba el hallazgo: reabre el UPDATE de los ledgers del pack
 #   4. aplica 004 con los ledgers del pack en su lista + el pack otra vez (idempotencia) → verde
 # Uso: bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh [ref-de-git]   (por defecto origin/main)
@@ -26,7 +26,7 @@ docker run -d --name "$ID" -e POSTGRES_PASSWORD="$(openssl rand -hex 12)" "$IMAG
 for _ in $(seq 60); do docker exec "$ID" pg_isready -U postgres >/dev/null 2>&1 && break; sleep 1; done
 sleep 1
 sql() { docker exec -e PGOPTIONS='-c client_min_messages=warning' -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 "$@"; }
-prueba() { docker exec -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 < "$DIR/pruebas.sql" 2>&1 | sed -n 's/^.*NOTICE:  \(([a-g])\)/  \1/p'; }
+prueba() { docker exec -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 < "$DIR/pruebas.sql" 2>&1 | sed -n 's/^.*NOTICE:  \(([a-k])\)/  \1/p'; }
 
 echo "== 1. ERP 001..005 + pack"
 for f in "$TMP"/00[1-5]_*.sql; do sql < "$f" >/dev/null; done
@@ -47,11 +47,15 @@ else
 fi
 
 echo "== 4. 004 con los ledgers del pack en su lista + pack otra vez (idempotencia)"
-sed "s/array\['act_version','act_costo'\]/array['act_version','act_costo','eti_asignacion','eti_emitido','eti_importacion','eti_movimiento']/" "$TMP/004_seguridad.sql" > "$TMP/004_parcheado.sql"
+sed "s/array\['act_version','act_costo'\]/array['act_version','act_costo','eti_asignacion','eti_emitido','eti_importacion','eti_movimiento','eti_evento','eti_testigo','eti_ancla']/" "$TMP/004_seguridad.sql" > "$TMP/004_parcheado.sql"
 grep -q "eti_emitido" "$TMP/004_parcheado.sql" || { echo "no pude parchear 004"; exit 3; }
 sed -i "s/revoke update on erp.%I from rol_exe_fin;/revoke update, delete on erp.%I from rol_exe_fin;/" "$TMP/004_parcheado.sql"
 sql < "$DIR/propuesta-pack-etiquetas.sql" >/dev/null
 sql < "$TMP/004_parcheado.sql" >/dev/null
-sql -c "delete from erp.eti_movimiento; delete from erp.eti_existencia; delete from erp.eti_asignacion; delete from erp.eti_emitido; delete from erp.eti_articulo; delete from erp.eti_sitio; delete from erp.inv_articulo;" >/dev/null
+# 004 re-concede INSERT en todo erp: el pack vuelve a quitar el de eti_ancla (como 005 con lo suyo)
+sql < "$DIR/propuesta-pack-etiquetas.sql" >/dev/null
+# Vaciar para repetir las pruebas: la cadena es solo-agregar hasta para el dueño, que tiene que
+# apagar los triggers a propósito (session_replication_role). Justo por eso existe el ancla.
+sql -c "set session_replication_role = replica; delete from erp.eti_ancla; delete from erp.eti_testigo; delete from erp.eti_evento; set session_replication_role = origin; delete from erp.eti_movimiento; delete from erp.eti_existencia; delete from erp.eti_asignacion; delete from erp.eti_emitido; delete from erp.eti_articulo; delete from erp.eti_sitio; delete from erp.inv_articulo;" >/dev/null
 prueba
-echo "== OK: la propuesta se instala dos veces, cierra con 004 y pasa (a)…(g). No se aplicó a ninguna base real."
+echo "== OK: la propuesta se instala dos veces, cierra con 004 y pasa (a)…(k). No se aplicó a ninguna base real."

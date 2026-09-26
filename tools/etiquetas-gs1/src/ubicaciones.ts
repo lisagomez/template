@@ -35,12 +35,18 @@ export function nombreZona(z: Zona): string {
   return ZONAS.find((x) => x.id === z)?.nombre ?? z
 }
 
-/** Etiqueta de ubicacion: (414) GLN del sitio + (254) zona. */
-export function simboloUbicacion(gln: string, zona: Zona): Simbolo {
-  return [{ ai: '414', valor: gln }, { ai: '254', valor: ZONAS.find((x) => x.id === zona)!.codigo }]
+/**
+ * Etiqueta de ubicacion: (414) GLN del sitio + (254) zona, y en el almacen, la posicion
+ * rack-nivel-posicion: `ALMACEN-B-04-2` (14 de los 20 caracteres que admite (254)).
+ */
+export function simboloUbicacion(gln: string, zona: Zona, posicion?: string): Simbolo {
+  const codigo = ZONAS.find((x) => x.id === zona)!.codigo
+  return [{ ai: '414', valor: gln }, { ai: '254', valor: posicion && zona === 'almacen' ? `${codigo}-${posicion}` : codigo }]
 }
 
-export type LecturaUbicacion = { readonly sitio: Sitio; readonly zona: Zona } | { readonly error: string }
+const POSICION = /^[A-Z]{1,2}-\d{2}-\d{1,2}$/
+
+export type LecturaUbicacion = { readonly sitio: Sitio; readonly zona: Zona; readonly posicion?: string } | { readonly error: string }
 
 /** ¿La lectura es una etiqueta de ubicacion de la casa? `undefined` si no es de ubicacion. */
 export function leeUbicacion(elementos: readonly Elemento[], sitios: readonly Sitio[]): LecturaUbicacion | undefined {
@@ -49,6 +55,11 @@ export function leeUbicacion(elementos: readonly Elemento[], sitios: readonly Si
   const sitio = sitios.find((s) => s.gln === gln)
   if (!sitio) return { error: `el GLN ${gln} no es de ningún sitio de la casa` }
   const codigo = valorDe(elementos, '254')
+  const almacen = ZONAS.find((z) => z.id === 'almacen')!.codigo
+  if (codigo?.startsWith(`${almacen}-`)) {
+    const posicion = codigo.slice(almacen.length + 1)
+    return POSICION.test(posicion) ? { sitio, zona: 'almacen', posicion } : { error: `la posición «${posicion}» no es rack-nivel-posición (p. ej. B-04-2)` }
+  }
   const zona = ZONAS.find((z) => z.codigo === codigo)?.id
   if (!zona) return { error: codigo ? `la zona «${codigo}» no existe` : 'la etiqueta trae el sitio pero no la zona (254)' }
   return { sitio, zona }
@@ -142,8 +153,10 @@ export function porZona(existencias: readonly Existencia[], sitio: string): Reco
   return r
 }
 
-/** Etiqueta de ubicacion lista para imprimir: la zona en grande, el sitio y su GLN. */
-export function disenaUbicacion(sitio: Sitio, zona: Zona, perfil: PerfilImpresora): Diseno {
+/** Etiqueta de ubicacion lista para imprimir: la zona (o la posicion) en grande, el sitio y su GLN. */
+export function disenaUbicacion(sitio: Sitio, zona: Zona, perfil: PerfilImpresora, posicion?: string): Diseno {
   if (!sitio.gln) throw new Error(`el sitio ${sitio.clave} no tiene GLN`)
-  return disenaEtiqueta({ simbolos: [simboloUbicacion(sitio.gln, zona)], titulo: nombreZona(zona).toUpperCase(), lineas: [sitio.nombre, `GLN ${sitio.gln}`], unidad: 'ubicacion' }, perfil)
+  if (posicion !== undefined && (zona !== 'almacen' || !POSICION.test(posicion))) throw new Error(`la posición «${posicion}» no es rack-nivel-posición del almacén`)
+  const titulo = posicion ? `${nombreZona(zona).toUpperCase()} ${posicion}` : nombreZona(zona).toUpperCase()
+  return disenaEtiqueta({ simbolos: [simboloUbicacion(sitio.gln, zona, posicion)], titulo, lineas: [sitio.nombre, `GLN ${sitio.gln}`], unidad: 'ubicacion' }, perfil)
 }

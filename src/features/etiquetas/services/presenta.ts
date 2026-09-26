@@ -1,11 +1,12 @@
 /**
  * Presentacion pura: textos y colores de estados, reglas, semaforo. Sin React.
  */
-import type { EstadoFila, EstadoRevision, EstadoSemaforo, Regla } from './nucleo.ts';
+import type { EstadoFila, EstadoRevision, EstadoSemaforo, Evento, Regla, TipoEvento } from './nucleo.ts';
 
 export const COLOR_SEMAFORO: Record<EstadoSemaforo, string> = {
   vigente: 'bg-emerald-600 text-white',
   alerta: 'bg-amber-400 text-neutral-950',
+  promocion: 'bg-orange-500 text-white',
   retiro: 'bg-red-600 text-white',
   vencido: 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900',
 };
@@ -39,6 +40,22 @@ export const TEXTO_FILA: Record<EstadoFila, string> = {
   nuevo: 'Nuevo', cambiado: 'Cambia', 'sin-cambio': 'Sin cambio', conflicto: 'Conflicto', invalido: 'Inválido',
 };
 
+/** Del peor al mejor, para leyendas y totales. */
+export const ORDEN_SEMAFORO: readonly EstadoSemaforo[] = ['vencido', 'retiro', 'promocion', 'alerta', 'vigente'];
+
+/** «sha256:3f9a…c21e» para leer un hash a ojo sin perder las puntas. */
+export function hashCorto(h: string | undefined | null): string {
+  if (!h) return '—';
+  const x = h.replace(/^sha256:/, '');
+  return `${x.slice(0, 8)}…${x.slice(-4)}`;
+}
+
+/** «26/09 14:05» en la zona del navegador. */
+export function fechaHora(iso: string): string {
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(d);
+}
+
 /** «0 9521234 00002 0» para leer un GTIN-14 a ojo. */
 export function gtinLegible(g: string | undefined): string {
   if (!g) return '—';
@@ -65,4 +82,40 @@ export function resumenLegible(resumen: Readonly<Record<string, number>>): { cla
     const texto = regla ? `${tipo === 'asignado' ? 'asignados' : 'registrados'} · ${TEXTO_REGLA[regla] ?? regla}` : nombres[clave] ?? clave;
     return { clave, texto, n };
   });
+}
+
+export const TEXTO_EVENTO: Record<TipoEvento, string> = {
+  RECIBIDO: 'Recibido', RECHAZADO: 'Rechazado', UBICADO: 'Ubicado', MOVIDO: 'Movido', TRANSFERIDO: 'Transferido', VENDIDO: 'Vendido', DEVUELTO: 'Devuelto',
+  DONADO: 'Donado', MERMA: 'Merma', RECOMENDACION: 'Recomendación del agente', RECOMENDACION_EJECUTADA: 'Recomendación ejecutada',
+  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección',
+};
+
+export const COLOR_EVENTO: Partial<Record<TipoEvento, string>> = {
+  RECHAZADO: 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200', CORRECCION: 'bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200',
+  RECOMENDACION: 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200', RECOMENDACION_EJECUTADA: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200',
+  RECOMENDACION_DESCARTADA: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200', MERMA: 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900',
+};
+
+const ZONA_LEGIBLE: Record<string, string> = { recibo: 'recibo', almacen: 'almacén', piso: 'piso de venta', merma: 'merma' };
+
+/** Lo que dice un evento, en una linea, a partir de sus datos. */
+export function describeEvento(ev: Evento): string {
+  const d = ev.datos;
+  const n = (k: string) => (typeof d[k] === 'number' ? Number(d[k]) : undefined);
+  const t = (k: string) => (typeof d[k] === 'string' ? String(d[k]) : undefined);
+  const cajas = n('cajas') !== undefined ? `${n('cajas')} caja(s)` : '';
+  switch (ev.tipo) {
+    case 'RECIBIDO': return [`${cajas} en ${ZONA_LEGIBLE[t('zona') ?? ''] ?? t('zona')}`, t('desde') ? `transferidas desde ${t('desde')}` : '', d['apertura'] ? 'inventario inicial (apertura)' : '', n('diasRestantes') !== undefined ? `le quedaban ${n('diasRestantes')} días (mínimo ${n('minimoDias')})` : ''].filter(Boolean).join(' · ');
+    case 'RECHAZADO': return `${cajas} · ${t('regla')} · le quedaban ${n('diasRestantes')} días · devolución ${t('devolucion')}`;
+    case 'UBICADO': return `${cajas} en rack ${t('posicion')}`;
+    case 'MOVIDO': return `${cajas} a ${ZONA_LEGIBLE[t('a') ?? ''] ?? t('a')}${t('sscc') ? ` (tarima ${t('sscc')})` : ''}`;
+    case 'TRANSFERIDO': return `${cajas} a ${t('destino')}${t('recomendacion') ? ' (por recomendación del agente)' : ''}`;
+    case 'VENDIDO': return `${cajas}${t('canal') === 'liquidacion' ? ` en liquidación, autorizó ${t('autoriza')}` : ''}`;
+    case 'DONADO': return `${cajas} · autorizó ${t('autoriza')}`;
+    case 'DEVUELTO': case 'MERMA': return [cajas, t('motivo')].filter(Boolean).join(' · ');
+    case 'RECOMENDACION': return t('texto') ?? '';
+    case 'RECOMENDACION_EJECUTADA': return `ejecutó ${ev.operador}${t('nota') ? ` · ${t('nota')}` : ''}`;
+    case 'RECOMENDACION_DESCARTADA': return `descartó ${ev.operador} · ${t('motivo')}`;
+    case 'CORRECCION': return [`corrige el evento #${n('seqCorregido')}: ${t('motivo')}`, d['ajuste'] ? `ajuste de cajas` : '', t('caducidadNueva') ? `caducidad ${t('caducidadAnterior')} → ${t('caducidadNueva')}` : ''].filter(Boolean).join(' · ');
+  }
 }

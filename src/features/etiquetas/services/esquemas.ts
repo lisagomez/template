@@ -29,9 +29,13 @@ export const esquemaCategoria = z.object({
   id: clave,
   nombre: z.string().trim().min(1).max(60),
   alertaDias: z.number().int().min(0).max(3650),
+  promocionDias: z.number().int().min(0).max(3650).optional(),
   retiroDias: z.number().int().min(0).max(3650),
   minimoRecepcionDias: z.number().int().min(0).max(3650),
-}).strict().refine((c) => c.retiroDias <= c.alertaDias, { message: 'los días de retiro no pueden pasar a los de alerta' });
+  fraccionRecepcion: z.number().min(0.05).max(1).optional(),
+}).strict()
+  .refine((c) => c.retiroDias <= c.alertaDias, { message: 'los días de retiro no pueden pasar a los de alerta' })
+  .refine((c) => c.promocionDias === undefined || (c.promocionDias >= c.retiroDias && c.promocionDias <= c.alertaDias), { message: 'los días de promoción van entre los de retiro y los de alerta' });
 
 export const esquemaSitio = z.object({
   clave,
@@ -55,6 +59,12 @@ export const esquemaRollo = z.object({
 }).strict();
 
 const mes = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+const gtin = z.string().regex(/^\d{14}$/).refine(digitoCorrecto, 'el dígito verificador del GTIN no cuadra');
+const lote = z.string().min(1).max(20).regex(cset82);
+const claveLote = { gtin, lote, caducidad: fechaIso };
+const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/);
+const persona = z.string().trim().regex(/^[\p{L}\p{N} ._-]{2,60}$/u);
+const zona = z.enum(['recibo', 'almacen', 'piso', 'merma']);
 
 export const esquemaAccion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('catalogo-plan'), archivo: z.string().min(1).max(200), huella: z.string().max(100), registros: z.array(z.record(z.string().max(80), z.string().max(500))).max(5000) }).strict(),
@@ -75,7 +85,26 @@ export const esquemaAccion = z.discriminatedUnion('accion', [
     cantidad: z.number().int().min(1).max(100_000), sscc: z.string().regex(/^\d{18}$/).optional(),
   }).strict(),
   z.object({ accion: z.literal('recepcion'), sitio: clave, texto: z.string().min(1).max(200) }).strict(),
-  z.object({ accion: z.literal('movimiento'), sitio: clave, texto: z.string().min(1).max(200), destino: z.enum(['recibo', 'almacen', 'piso', 'merma']), veces: z.number().int().min(1).max(500) }).strict(),
+  z.object({
+    accion: z.literal('movimiento'), sitio: clave, texto: z.string().min(1).max(200), destino: zona, veces: z.number().int().min(1).max(500),
+    posicion: z.string().regex(/^[A-Z]{1,2}-\d{2}-\d{1,2}$/, 'rack-nivel-posición, p. ej. B-04-2').optional(),
+  }).strict(),
+  z.object({ accion: z.literal('lotes') }).strict(),
+  z.object({ accion: z.literal('expediente'), ...claveLote }).strict(),
+  z.object({ accion: z.literal('integridad') }).strict(),
+  z.object({ accion: z.literal('riesgo') }).strict(),
+  z.object({
+    accion: z.literal('salida'), sitio: clave, tipo: z.enum(['VENDIDO', 'DEVUELTO', 'DONADO', 'MERMA']), ...claveLote, cajas: z.number().int().min(1).max(100_000),
+    canal: z.enum(['normal', 'liquidacion']).optional(), autoriza: persona.optional(), motivo: z.string().trim().min(3).max(200).optional(),
+  }).strict(),
+  z.object({ accion: z.literal('transferencia'), origen: clave, destino: clave, ...claveLote, cajas: z.number().int().min(1).max(100_000) }).strict(),
+  z.object({
+    accion: z.literal('correccion'), sitio: clave, corrige: hash, motivo: z.string().trim().min(3).max(200),
+    ajuste: z.object({ zona, cajas: z.number().int().min(-100_000).max(100_000).refine((n) => n !== 0) }).strict().optional(), caducidad: fechaIso.optional(),
+  }).strict().refine((c) => c.ajuste || c.caducidad, { message: 'la corrección no cambia nada' }),
+  z.object({ accion: z.literal('agente'), sitio: clave.optional() }).strict(),
+  z.object({ accion: z.literal('decision'), sitio: clave, recomendacion: hash, decision: z.enum(['ejecutar', 'descartar']), motivo: z.string().trim().min(3).max(200).optional() }).strict(),
+  z.object({ accion: z.literal('ancla') }).strict(),
   z.object({ accion: z.literal('consumo'), sitio: clave, impresora: clave, etiquetas: z.number().int().min(1).max(100_000), origen: z.enum(['impresion', 'lote', 'calibracion']) }).strict(),
   z.object({ accion: z.literal('rollo'), rollo: esquemaRollo }).strict(),
   z.object({ accion: z.literal('rollo-impresora'), impresora: clave, rollo: clave.or(z.literal('')) }).strict(),

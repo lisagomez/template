@@ -139,3 +139,87 @@ español; verificación de calidad de símbolo (ISO/IEC 15416, grado 1.5/10/660)
 - **ERP**: la propuesta añade `zona` a `eti_existencia`, `gln` a `eti_sitio` y la bitácora
   append-only `eti_movimiento`; validada en Postgres 17 efímero, (a)…(g). 004 debe listar también
   `eti_movimiento`.
+
+## 10. Expediente de lote: cadena de hashes, anclaje y agente de riesgo
+
+Spec: `docs/goals/expediente-lote-cadena-hash.md`. Pantallas: `/etiquetas/expediente`,
+`/etiquetas/riesgo`, `/etiquetas/integridad`; el rechazo 2/3 vive en `/etiquetas/leer` y las
+acciones por color en `/etiquetas/caducidades`.
+
+**Lo que se investigó y cómo cambió el diseño**
+
+- **RFC 8785 (JCS)**: el hash cubre el registro COMPLETO canonicalizado (sitio, secuencia, fecha,
+  tipo, lote, datos, operador y los dos enlaces). Con `SHA-256(datos + hash_anterior)` se podría
+  cambiar el operador o la fecha sin romper nada. Se prueba con el ejemplo de §3.2.2 y el orden de
+  claves de §3.2.3.
+- **RFC 6962 / 9162** (Certificate Transparency, lo que usan Trillian y Rekor): hoja `0x00`, nodo
+  `0x01`, MTH, PATH y el algoritmo de verificación de §2.1.3.2. Probado contra los vectores
+  publicados de `transparency-dev/merkle` (raíces de 0 a 8 hojas y sus pruebas de inclusión).
+- **GS1 EPCIS 2.0**: su hash de evento (`ni:///sha-256`) canonicaliza el evento y advierte que el
+  hash solo no prueba autenticidad: hay que sumarle firma y sello de tiempo confiable. De ahí la
+  firma Ed25519 del ancla y el central que no controla la sucursal. Las transferencias se modelan
+  como en EPCIS (salida en origen, entrada en destino) y se enlazan por hash.
+- **Regla de 1/3 y 2/3**: en Japón el fabricante entrega dentro del primer tercio de vida (llega
+  con ≥ 2/3) y el ministerio (MAFF) empuja a relajarla; las cadenas piden entre 60 y 75 %. Por eso
+  la fracción es un parámetro por categoría (2/3 por defecto) y, sin vida útil en el catálogo, se
+  cae al mínimo absoluto de la categoría.
+
+**Decisiones**
+
+| Decisión | Por qué |
+|---|---|
+| Una cadena **por sitio**, el expediente es un índice por lote | Si la cadena fuera por lote, borrar un lote entero no dejaría rastro. `anteriorLote` enlaza cada evento con el anterior del mismo lote (o con el TRANSFERIDO del origen). |
+| El estado es una **proyección** de la cadena | Cada evento lleva su huella (`cambios`: cajas por zona y tarima). Reconstruir y comparar dice dónde tocaron el estado sin evento. |
+| **CORRECCION**, no edición | Referencia el evento corregido por hash; un cambio de caducidad re-etiqueta el lote y el expediente sigue las dos claves. |
+| **Anclaje**: raíz de Merkle diaria firmada (Ed25519 de `node:crypto`) en un central aparte | La cadena sola no detiene a quien puede recalcularla entera. El central acepta el ancla solo con la llave registrada del sitio y si continúa la anterior. |
+| **Testigos de cabeza** | Borrar el ÚLTIMO evento antes de anclar deja una cadena coherente. El sitio avisa su cabeza al crecer; el central la recuerda y el ancla siguiente (o la auditoría) no la encuentra. La ventana queda en segundos, no en un día. |
+| Semáforo de **cinco colores con acción** | Amarillo = prioridad FEFO y transferencia sugerida; naranja = promoción y exhibición (sí sube a piso); rojo = bloqueo de venta normal en el sistema (la caja no lee lote en EAN-13): solo liquidación, donación o merma, y liquidar o donar exige quién lo autoriza; vencido = merma. |
+| **Agente determinista** | Días de inventario acumulados en orden FEFO contra días VENDIBLES (hasta el rojo, no hasta la caducidad). Sin dato de venta no evalúa (no es lo mismo que vender cero). Recomienda transferir a la sucursal con más capacidad de venta, promoción escalonada o exhibición; no repite lo pendiente ni lo decidido en 7 días. Sin modelo de lenguaje: no pasa por C8. |
+| **Ventas ficticias detrás de `FuenteVentas`** | Leer ventas reales del ERP (solo lectura) es una propuesta con gate humano. Sin fuente configurada, el agente no evalúa nada. |
+| **Seudónimos** (`op-` + 8 hex aleatorios) | La cadena es inmutable: no puede guardar lo que alguien tenga derecho a cancelar. El mapeo vive en `operadores.json` y `olvida()` lo borra; la cadena sigue verificando. Aleatorio y no un hash del nombre, que se revierte probando nombres. |
+| Ubicación **rack-nivel-posición** en (254) | `ALMACEN-B-04-2` cabe en los 20 caracteres de (254); la etiqueta de ubicación sigue siendo (414)+(254). |
+
+**Instalación en un sitio**
+
+1. **Llave del sitio**: generar un par Ed25519 (`generaLlaves()` de `@tu-scope/etiquetas-gs1/firma`)
+   en la máquina del sitio y ponerla en `ETIQUETAS_LLAVE_<SITIO>` (PKCS#8 DER en base64, `-` → `_`).
+   Nunca se imprime: la pantalla de integridad muestra presente/ausente, su largo y la huella de la
+   llave PÚBLICA. La pública se registra sola en el central al primer anclaje; cambiarla queda
+   como incidente de rotación.
+2. **Central**: `ETIQUETAS_CENTRAL` apunta a su archivo (por defecto `central.json` junto al
+   estado). En producción debe vivir donde la sucursal no escriba: otra máquina o la tabla
+   `eti_ancla` del ERP, escrita solo por el job del central (C7).
+3. **Horario**: el ancla se pide cada noche (y, si se quiere acortar la ventana, cada hora) con
+   `POST /api/etiquetas {"accion":"ancla"}` desde un cron con el código del dispositivo; el agente
+   de riesgo, cada mañana, con `{"accion":"agente"}`. Los testigos de cabeza salen solos tras cada
+   operación.
+4. **Almacenes anteriores**: al primer arranque se abre la cadena de cada sitio con un RECIBIDO de
+   apertura por existencia. Lo anterior a la apertura no tiene prueba, y el expediente lo dice.
+
+En esta demostración un solo servidor hace de todos los sitios y del central (tiene todas las
+llaves). Separarlos —firma en el agente de cada sitio y envío al central por HTTP— usa las mismas
+funciones (`preparaAncla`, `firmaAncla`, `recibeAncla`) pero **no está construido**: es el
+siguiente paso si se instala con sitios en otras redes.
+
+**Evidencia**: `npm --prefix tools/etiquetas-gs1 run prueba` (cadena, anclaje, firma, Merkle,
+JCS, SHA-256, expediente y agente), `npm --prefix tools/etiquetas-gs1 run demo:manipulacion`
+(antes y después de cuatro manipulaciones sobre archivos reales, con veredicto),
+`npm run capturas:etiquetas` (flujos 19 a 24) y `bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh`
+((h) a (k): cadena, solo-agregar y anclas en Postgres, calculando en la base el génesis y el hash
+JCS del ancla y comparándolos con los del núcleo).
+
+**Formas en que esto podría estar mal o incompleto, y qué se hizo**
+
+| Riesgo | Qué se hizo |
+|---|---|
+| Quien escribe el almacén recalcula toda la cadena | La delata el ancla firmada (probado: «la raíz de Merkle recalculada no es la anclada»). |
+| Borrar el último evento antes del ancla | Testigo de cabeza: el central ya lo vio y rechaza el ancla que no lo contiene o que trae otro en su lugar (probado). La ventana que queda es entre el evento y su aviso. |
+| Tocar existencias sin evento | La proyección no cuadra y dice sitio, lote, zona y cajas (probado). |
+| Borrar un evento y devolver el estado a mano antes del aviso | Indetectable localmente en esa ventana de segundos. Lo reducen el testigo inmediato, los enlaces de transferencia (la otra mitad vive en otro sitio) y el ancla por hora. Se dice, no se esconde. |
+| Robo de la llave del sitio | Con la llave se firman anclas nuevas, pero no se reescriben las ya aceptadas: el central solo agrega y exige continuidad. Rotarla queda como incidente. |
+| El dueño de la base desactiva los triggers | `session_replication_role = replica` lo permite (la prueba efímera lo usa para vaciar). Por eso el ancla vive donde la sucursal no escribe. |
+| La base no recalcula el hash del evento | jsonb no ordena claves como JCS; el encadenado y el solo-agregar sí se exigen al insertar, y el hash lo re-verifica el núcleo. El hash del ANCLA sí se recalcula en SQL. |
+| Datos personales en lo inmutable | Solo seudónimos; la base rechaza un nombre como operador (prueba (h)). |
+| Ventas ficticias | Detrás de un adaptador; con la fuente real el agente no cambia. Conectar el ERP es gate humano. |
+| El agente actúa sobre una cadena rota | Verifica cadena, proyección, anclas y testigos antes de cada corrida y decisión; si falla, no actúa y abre incidente (probado y capturado). |
+| Un umbral mal puesto manda a promoción lo que no | Los umbrales siguen marcados como ejemplo hasta que calidad los fija; los porcentajes de la promoción escalonada (10/20/30 %) también son de ejemplo. |

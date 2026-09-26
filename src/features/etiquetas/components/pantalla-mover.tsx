@@ -29,6 +29,7 @@ export function PantallaMover({ e }: { e: Etiquetas }) {
   const [sitio, setSitio] = useState(sitios.find((s) => s.tipo === 'sucursal')?.clave ?? sitios[0]?.clave ?? '');
   const [destino, setDestino] = useState<Zona>('piso');
   const [veces, setVeces] = useState(1);
+  const [posicion, setPosicion] = useState('');
   const [bitacora, setBitacora] = useState<Registro[]>([]);
   const anota = (tipo: Registro['tipo'], texto: string, avisos: readonly string[] = []) => setBitacora((b) => [{ n: (b[0]?.n ?? 0) + 1, tipo, texto, avisos }, ...b].slice(0, 12));
   const sitioObj = sitios.find((s) => s.clave === sitio);
@@ -40,16 +41,17 @@ export function PantallaMover({ e }: { e: Etiquetas }) {
       if (u) {
         if ('error' in u) anota('error', u.error);
         else if (u.sitio.clave !== sitio) anota('error', `Esa ubicación es de ${u.sitio.nombre}; aquí estás en ${sitioObj?.nombre ?? sitio}.`);
-        else { setDestino(u.zona); anota('zona', `Destino: ${nombreZona(u.zona)}`); }
+        else { setDestino(u.zona); setPosicion(u.posicion ?? ''); anota('zona', `Destino: ${nombreZona(u.zona)}${u.posicion ? ` · rack ${u.posicion}` : ''}`); }
         return;
       }
     }
-    void e.ejecuta<ResultadoMovimiento>({ accion: 'movimiento', sitio, texto, destino, veces }).then(
+    const pos = destino === 'almacen' && posicion ? { posicion } : {};
+    void e.ejecuta<ResultadoMovimiento>({ accion: 'movimiento', sitio, texto, destino, veces, ...pos }).then(
       (x) => {
         if (!x.ok) return anota('error', x.motivo);
         const m = x.movimiento;
         const art = est.articulos.find((a) => a.sku === m.sku)?.descripcion ?? m.sku;
-        anota('ok', `${m.cajas} ${m.cajas === 1 ? 'caja' : 'cajas'} · ${art} · lote ${m.lote} · ${m.de.map(nombreZona).join(' + ')} → ${nombreZona(m.a)}`, x.avisos);
+        anota('ok', `${m.cajas} ${m.cajas === 1 ? 'caja' : 'cajas'} · ${art} · lote ${m.lote} · ${m.de.map(nombreZona).join(' + ')} → ${nombreZona(m.a)}${'posicion' in pos ? ` · rack ${pos.posicion}` : ''}`, x.avisos);
       },
       (err: unknown) => anota('error', err instanceof Error ? err.message : String(err)),
     );
@@ -74,9 +76,10 @@ export function PantallaMover({ e }: { e: Etiquetas }) {
           <div>
             <p className="mb-1 text-sm">Mover a <span className="text-xs text-neutral-500">(o lee la etiqueta de la zona)</span></p>
             <div className="grid grid-cols-2 gap-1 sm:grid-cols-4" role="radiogroup" aria-label="Zona de destino">
-              {ZONAS.map((z) => <button key={z.id} type="button" role="radio" aria-checked={destino === z.id} onClick={() => setDestino(z.id)} className={`rounded-md px-2 py-2 text-sm font-semibold ${destino === z.id ? 'bg-blue-700 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`} data-prueba={`zona-${z.id}`}>{z.nombre}</button>)}
+              {ZONAS.map((z) => <button key={z.id} type="button" role="radio" aria-checked={destino === z.id} onClick={() => { setDestino(z.id); setPosicion(''); }} className={`rounded-md px-2 py-2 text-sm font-semibold ${destino === z.id ? 'bg-blue-700 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`} data-prueba={`zona-${z.id}`}>{z.nombre}</button>)}
             </div>
           </div>
+          {destino === 'almacen' ? <label className="flex items-center gap-2 text-sm">Rack-nivel-posición <input className="w-28 rounded-lg border border-neutral-300 bg-white px-2 py-1 font-mono uppercase dark:border-neutral-700 dark:bg-neutral-900" value={posicion} placeholder="B-04-2" maxLength={8} onChange={(x) => setPosicion(x.target.value.toUpperCase())} data-prueba="posicion" /></label> : null}
           <label className="flex items-center gap-2 text-sm">Cajas por lectura <input className="w-20 rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900" type="number" min={1} max={500} value={veces} onChange={(x) => setVeces(Math.min(500, Math.max(1, Number(x.target.value) || 1)))} data-prueba="veces" /></label>
           <LectorCamara alLeer={alLeer} />
         </div>

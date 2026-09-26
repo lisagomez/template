@@ -28,6 +28,18 @@
     "./agente": {
       "types": "./dist/agente/index.d.ts",
       "import": "./dist/agente/index.js"
+    },
+    "./firma": {
+      "types": "./dist/firma.d.ts",
+      "import": "./dist/firma.js"
+    },
+    "./almacenes/central": {
+      "types": "./dist/almacenes/central.d.ts",
+      "import": "./dist/almacenes/central.js"
+    },
+    "./almacenes/seudonimos": {
+      "types": "./dist/almacenes/seudonimos.d.ts",
+      "import": "./dist/almacenes/seudonimos.js"
     }
   },
   "files": [
@@ -47,7 +59,8 @@
     "prueba": "node --test pruebas/*.ts",
     "agente": "node dist/agente/cli.js",
     "simula:impresora": "node simuladores/impresora-9100.mjs",
-    "simula:browser-print": "node simuladores/browser-print.mjs"
+    "simula:browser-print": "node simuladores/browser-print.mjs",
+    "demo:manipulacion": "node demos/manipulacion.mjs"
   },
   "dependencies": {
     "zod": "^4.4.3"
