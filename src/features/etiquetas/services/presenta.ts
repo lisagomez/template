@@ -87,13 +87,20 @@ export function resumenLegible(resumen: Readonly<Record<string, number>>): { cla
 export const TEXTO_EVENTO: Record<TipoEvento, string> = {
   RECIBIDO: 'Recibido', RECHAZADO: 'Rechazado', UBICADO: 'Ubicado', MOVIDO: 'Movido', TRANSFERIDO: 'Transferido', VENDIDO: 'Vendido', DEVUELTO: 'Devuelto',
   DONADO: 'Donado', MERMA: 'Merma', RECOMENDACION: 'Recomendación del agente', RECOMENDACION_EJECUTADA: 'Recomendación ejecutada',
-  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección',
+  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección', CONTEO: 'Conteo físico',
 };
 
 export const COLOR_EVENTO: Partial<Record<TipoEvento, string>> = {
   RECHAZADO: 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200', CORRECCION: 'bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200',
   RECOMENDACION: 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200', RECOMENDACION_EJECUTADA: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200',
   RECOMENDACION_DESCARTADA: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200', MERMA: 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900',
+  CONTEO: 'bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-200',
+};
+
+export const TEXTO_CLASE: Record<string, string> = { cuadra: 'Cuadra', faltante: 'Faltante', sobrante: 'Sobrante', desconocido: 'Lote desconocido' };
+export const COLOR_CLASE: Record<string, string> = {
+  cuadra: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200', faltante: 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200',
+  sobrante: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200', desconocido: 'bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200',
 };
 
 const ZONA_LEGIBLE: Record<string, string> = { recibo: 'recibo', almacen: 'almacén', piso: 'piso de venta', merma: 'merma' };
@@ -116,6 +123,11 @@ export function describeEvento(ev: Evento): string {
     case 'RECOMENDACION': return t('texto') ?? '';
     case 'RECOMENDACION_EJECUTADA': return `ejecutó ${ev.operador}${t('nota') ? ` · ${t('nota')}` : ''}`;
     case 'RECOMENDACION_DESCARTADA': return `descartó ${ev.operador} · ${t('motivo')}`;
+    case 'CONTEO': {
+      const rs = Array.isArray(d['renglones']) ? (d['renglones'] as { zona?: string; contado?: number; diferencia?: number }[]) : [];
+      const dif = rs.reduce((s, r) => s + (r.diferencia ?? 0), 0);
+      return `inventario físico ${t('folio')} · contadas ${rs.reduce((s, r) => s + (r.contado ?? 0), 0)} caja(s) · ${dif === 0 ? 'cuadra' : `diferencia ${dif > 0 ? '+' : ''}${dif}`}${t('autoriza') ? ` · autorizó ${t('autoriza')}` : ''}`;
+    }
     case 'CORRECCION': return [`corrige el evento #${n('seqCorregido')}: ${t('motivo')}`, d['ajuste'] ? `ajuste de cajas` : '', t('caducidadNueva') ? `caducidad ${t('caducidadAnterior')} → ${t('caducidadNueva')}` : ''].filter(Boolean).join(' · ');
   }
 }

@@ -65,6 +65,7 @@ const claveLote = { gtin, lote, caducidad: fechaIso };
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/);
 const persona = z.string().trim().regex(/^[\p{L}\p{N} ._-]{2,60}$/u);
 const zona = z.enum(['recibo', 'almacen', 'piso', 'merma']);
+const folio = z.string().regex(/^CNT-[A-Za-z0-9_-]{1,40}-\d{8,14}$/);
 
 export const esquemaAccion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('catalogo-plan'), archivo: z.string().min(1).max(200), huella: z.string().max(100), registros: z.array(z.record(z.string().max(80), z.string().max(500))).max(5000) }).strict(),
@@ -105,6 +106,15 @@ export const esquemaAccion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('agente'), sitio: clave.optional() }).strict(),
   z.object({ accion: z.literal('decision'), sitio: clave, recomendacion: hash, decision: z.enum(['ejecutar', 'descartar']), motivo: z.string().trim().min(3).max(200).optional() }).strict(),
   z.object({ accion: z.literal('ancla') }).strict(),
+  z.object({ accion: z.literal('conteos') }).strict(),
+  z.object({ accion: z.literal('conteo-abre'), sitio: clave, zonas: z.array(zona).min(1).max(4), tolerancia: z.number().int().min(0).max(10_000) }).strict(),
+  z.object({
+    accion: z.literal('conteo-lee'), folio, texto: z.string().min(1).max(200), zona, veces: z.number().int().min(1).max(500),
+    posicion: z.string().regex(/^[A-Z]{1,2}-\d{2}-\d{1,2}$/, 'rack-nivel-posición, p. ej. B-04-2').optional(),
+  }).strict(),
+  z.object({ accion: z.literal('conteo-cierra'), folio }).strict(),
+  z.object({ accion: z.literal('conteo-aplica'), folio, autoriza: persona.optional() }).strict(),
+  z.object({ accion: z.literal('conteo-cancela'), folio, motivo: z.string().trim().min(3).max(200) }).strict(),
   z.object({ accion: z.literal('consumo'), sitio: clave, impresora: clave, etiquetas: z.number().int().min(1).max(100_000), origen: z.enum(['impresion', 'lote', 'calibracion']) }).strict(),
   z.object({ accion: z.literal('rollo'), rollo: esquemaRollo }).strict(),
   z.object({ accion: z.literal('rollo-impresora'), impresora: clave, rollo: clave.or(z.literal('')) }).strict(),

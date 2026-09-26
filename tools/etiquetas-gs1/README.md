@@ -12,7 +12,7 @@ La app que lo usa: `src/features/etiquetas/` (rutas `/etiquetas/*`).
 
 | Entrada | Qué trae | Dependencias |
 |---|---|---|
-| `.` | núcleo: diccionario de AIs, parser (pistola/cámara), validación y combinaciones, fechas, medidas, diseño, ZPL, revisión, catálogo e importación, FEFO, zonas y movimientos (recibo, almacén, piso, merma), rollos y presupuesto, almacén en memoria; **expediente de lote**: SHA-256, JCS (RFC 8785), Merkle (RFC 6962), cadena por sitio, proyección, anclaje, central y agente de riesgo | ninguna |
+| `.` | núcleo: diccionario de AIs, parser (pistola/cámara), validación y combinaciones, fechas, medidas, diseño, ZPL, revisión, catálogo e importación, FEFO, zonas y movimientos (recibo, almacén, piso, merma), rollos y presupuesto, almacén en memoria; **expediente de lote**: SHA-256, JCS (RFC 8785), Merkle (RFC 6962), cadena por sitio, proyección, anclaje, central, agente de riesgo e inventario físico (conteo ciego conciliado contra la cadena) | ninguna |
 | `./firma` | Ed25519 para firmar y verificar anclas | Node (`node:crypto`) |
 | `./almacenes/central` | el central de anclas, testigos e incidentes en un archivo JSON | Node |
 | `./almacenes/seudonimos` | seudónimos de operador, borrables | Node |
@@ -27,9 +27,9 @@ El núcleo **no importa nada**; el almacén se inyecta (`AlmacenEtiquetas`), com
 ## Pruebas
 
 ```bash
-npm run prueba                         # build + node --test pruebas/*.ts (77 pruebas)
+npm run prueba                         # build + node --test pruebas/*.ts (82 pruebas)
 npm run demo:manipulacion              # cuatro manipulaciones sobre archivos reales, antes/después y veredicto
-bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP, en Postgres 17 desechable, (a)…(k)
+bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP, en Postgres 17 desechable, (a)…(l)
 ```
 
 `pruebas/ida-y-vuelta.ts` rasteriza el SVG con el Chromium de Playwright y dibuja el ZPL con

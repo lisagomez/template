@@ -11,6 +11,7 @@ import {
 import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { aseguraExpediente, ejecutaExpediente } from './acciones-expediente.ts';
+import { ejecutaConteo } from './acciones-conteo.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 
 export type Respuesta = { status: number; cuerpo: unknown };
@@ -138,6 +139,9 @@ export async function ejecuta(a: AccionEtiquetas, operador: string): Promise<Res
       }));
     case 'lotes': case 'expediente': case 'integridad': case 'riesgo': case 'salida': case 'transferencia': case 'correccion': case 'agente': case 'decision': case 'ancla':
       return ejecutaExpediente(a, operador);
+    case 'conteos': case 'conteo-abre': case 'conteo-lee': case 'conteo-cierra': case 'conteo-aplica': case 'conteo-cancela':
+      await aseguraExpediente();
+      return ejecutaConteo(a, operador);
     case 'ticket': {
       const secreto = process.env['ETIQUETAS_AGENTE_SECRETO'];
       if (!secretoValido(secreto)) return mal(503, 'no hay agente de impresión configurado en el servidor (falta ETIQUETAS_AGENTE_SECRETO)');

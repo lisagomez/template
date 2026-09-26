@@ -135,6 +135,16 @@ do $$ begin
   raise notice '(j) OK anclas encadenadas con el hash JCS calculado en la base; cabeza atada a la cadena';
 end $$;
 
+-- (l) inventario físico: el CONTEO entra a la cadena como cualquier evento (vector del núcleo)
+insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values
+  ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 4, '2026-09-22T15:00:00.000Z', 'CONTEO', '19521111000010', 'L4471', '2026-10-30',
+   '{"folio":"CNT-CEDIS-NTE-20260922090000","diferencia":-1}', 'op-5e1a0c03', 'sha256:eb3e728a708bdaa2b99d8db3049c4097397a79907b298cbd0ba29cf8a5155167',
+   'sha256:eb3e728a708bdaa2b99d8db3049c4097397a79907b298cbd0ba29cf8a5155167', 'sha256:396d3d8801be1b7728cd8f78b70f7f10a194709982f344d80ffc439efc523665');
+do $$ begin
+  if not exists (select 1 from erp.eti_evento where tipo = 'CONTEO' and seq = 4) then raise exception '(l) no entró el CONTEO'; end if;
+  raise notice '(l) OK el CONTEO se encadena tras la venta, como cualquier evento';
+end $$;
+
 -- (e) aislamiento entre tenants, como el rol de ejecución
 set role rol_exe_fin;
 set app.cliente_id = '22222222-2222-4222-8222-222222222222';
@@ -166,7 +176,7 @@ do $$ begin
   exception when insufficient_privilege then null; end;
   begin delete from erp.eti_evento; raise exception '(k) pudo borrar la cadena';
   exception when insufficient_privilege then null; end;
-  if (select count(*) from erp.eti_evento) <> 3 then raise exception '(k) no ve su cadena'; end if;
+  if (select count(*) from erp.eti_evento) <> 4 then raise exception '(k) no ve su cadena'; end if;
   raise notice '(k) OK rol_exe_fin lee su cadena, no la borra y no escribe anclas';
 end $$;
 reset role;

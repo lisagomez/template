@@ -5,6 +5,7 @@
  */
 import type { Evento } from './cadena.js'
 import type { Consumibles } from './consumibles.js'
+import type { Conteo } from './conteo.js'
 import type { PerfilImpresora } from './etiqueta.js'
 import type { Categoria } from './semaforo.js'
 
@@ -85,7 +86,7 @@ export interface Contadores {
   readonly sscc: number
 }
 
-export type OrigenExistencia = 'etiquetado' | 'recepcion' | 'semilla'
+export type OrigenExistencia = 'etiquetado' | 'recepcion' | 'semilla' | 'conteo'
 
 export interface Existencia {
   readonly id: string
@@ -153,6 +154,8 @@ export interface EstadoAlmacen {
   readonly eventos?: Readonly<Record<string, readonly Evento[]>>
   /** Devoluciones al proveedor por rechazo en recepcion, con la evidencia. */
   readonly devoluciones?: readonly Devolucion[]
+  /** Inventarios fisicos: sesiones de conteo ciego (el resultado entra a la cadena como CONTEO). */
+  readonly conteos?: readonly Conteo[]
 }
 
 /** La devolucion que genera un rechazo en recepcion: lo leido, la regla y el evento que la prueba. */

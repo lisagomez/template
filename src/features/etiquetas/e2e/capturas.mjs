@@ -87,9 +87,9 @@ const VISTAS = {
   celular: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Mobile Safari/537.36' },
 };
 
-async function contexto(nav, vista) {
+async function contexto(nav, vista, operador = 'Captura Playwright') {
   const c = await nav.newContext({ ...VISTAS[vista], permissions: ['camera', 'clipboard-read', 'clipboard-write'] });
-  await c.addInitScript(([t]) => { localStorage.setItem('etiquetas-token', t); localStorage.setItem('etiquetas-operador', 'Captura Playwright'); }, [TOKEN]);
+  await c.addInitScript(([t, o]) => { localStorage.setItem('etiquetas-token', t); localStorage.setItem('etiquetas-operador', o); }, [TOKEN, operador]);
   return c;
 }
 
@@ -360,6 +360,79 @@ const riesgo = await porVista(async (p, v) => {
 });
 await compone('22', 'Agente de riesgo: lote verde en riesgo, una recomendacion ejecutada y otra descartada', [['escritorio · al correr el agente', riesgo.escritorio[0]], ['escritorio · decididas', riesgo.escritorio[1]], ['celular', riesgo.celular[0]]]);
 
+// Inventario fisico en Sucursal Oriente: conteo ciego, reconteo por otra persona, conciliacion
+// contra la cadena, autorizacion de quien no conto y ajuste como evento CONTEO.
+const glnOriente = completaClave('952123490004');
+const cajaEn = (sku, dias, lote) => `(01)${cajaDe(sku)}(17)${aammdd(dia(dias))}(10)${lote}`;
+async function cuentaEn(p, texto, veces) {
+  if (veces) await p.fill('[data-prueba="veces-conteo"]', String(veces));
+  const antes = await p.locator('[data-prueba="lecturas-conteo"] li').count();
+  const aviso = await p.locator('[data-prueba="aviso-lectura-conteo"]').textContent().catch(() => '');
+  await p.fill('[data-prueba="pistola"]', texto);
+  await p.press('[data-prueba="pistola"]', 'Enter');
+  if (texto.startsWith('(414)')) await p.waitForFunction((a) => { const t = document.querySelector('[data-prueba="aviso-lectura-conteo"]')?.textContent ?? ''; return t.startsWith('Ubicación') && t !== a; }, aviso);
+  else await p.waitForFunction((n) => document.querySelectorAll('[data-prueba="lecturas-conteo"] li').length > n, antes);
+}
+async function abreConteoEn(p, zonas) {
+  await abre(p, '/etiquetas/conteo');
+  await p.selectOption('[data-prueba="sitio-conteo"]', 'SUC-ORIENTE');
+  for (const z of ['almacen', 'piso']) if (!zonas.includes(z)) await p.uncheck(`[data-prueba="zona-conteo-${z}"]`);
+  await p.click('[data-prueba="abrir-conteo"]');
+  await p.waitForSelector('[data-prueba="conteo-activo"][data-estado="contando"]');
+}
+const conteoEsc = {};
+{
+  const ca = await contexto(navegador, 'escritorio');
+  const a = await ca.newPage();
+  await abreConteoEn(a, ['almacen', 'piso']);
+  await cuentaEn(a, `(414)${glnOriente}(254)PISO`);
+  await cuentaEn(a, cajaEn('ATU-003', 400, 'A2291'), 10);
+  await cuentaEn(a, `(414)${glnOriente}(254)ALMACEN-B-01-1`);
+  await cuentaEn(a, cajaEn('REF-007', 25, 'R551'), 8);
+  await cuentaEn(a, cajaEn('REF-007', 60, 'R600'), 3);
+  conteoEsc.ronda1 = await foto(a, '[data-prueba="conteo-activo"]', 'conteo-ronda1-escritorio');
+  await a.click('[data-prueba="terminar-ronda"]');
+  await a.waitForSelector('[data-prueba="conteo-activo"][data-estado="reconteo"]');
+  const cb = await contexto(navegador, 'escritorio', 'Recontador Oriente');
+  const b = await cb.newPage();
+  await abre(b, '/etiquetas/conteo');
+  await b.waitForSelector('[data-prueba="recontar"]');
+  await cuentaEn(b, `(414)${glnOriente}(254)PISO`);
+  await cuentaEn(b, cajaEn('ATU-003', 400, 'A2291'), 10);
+  await cuentaEn(b, `(414)${glnOriente}(254)ALMACEN-B-01-1`);
+  await cuentaEn(b, cajaEn('REF-007', 60, 'R600'), 3);
+  conteoEsc.reconteo = await foto(b, '[data-prueba="conteo-activo"]', 'conteo-reconteo-escritorio');
+  await b.click('[data-prueba="terminar-ronda"]');
+  await b.waitForSelector('[data-prueba="conteo-activo"][data-estado="por-aplicar"]');
+  await cb.close();
+  await abre(a, '/etiquetas/conteo');
+  await a.waitForSelector('[data-prueba="conteo-activo"][data-estado="por-aplicar"]');
+  conteoEsc.conciliacion = await foto(a, '[data-prueba="conteo-activo"]', 'conteo-conciliacion-escritorio');
+  await a.fill('[data-prueba="autoriza-conteo"]', 'Gerente Oriente');
+  await a.click('[data-prueba="aplicar-conteo"]');
+  await a.waitForSelector('[data-prueba="aplicado"]');
+  conteoEsc.aplicado = await foto(a, '[data-prueba="conteo-activo"]', 'conteo-aplicado-escritorio');
+  await ca.close();
+}
+const conteoCel = {};
+{
+  const cc = await contexto(navegador, 'celular');
+  const m = await cc.newPage();
+  await abreConteoEn(m, ['piso']);
+  await cuentaEn(m, `(414)${glnOriente}(254)PISO`);
+  await cuentaEn(m, cajaEn('ATU-003', 400, 'A2291'), 10);
+  conteoCel.ronda1 = await foto(m, '[data-prueba="conteo-activo"]', 'conteo-ronda1-celular');
+  await m.click('[data-prueba="terminar-ronda"]');
+  await m.waitForSelector('[data-prueba="conteo-activo"][data-estado="por-aplicar"]');
+  await m.click('[data-prueba="aplicar-conteo"]');
+  await m.waitForSelector('[data-prueba="aplicado"]');
+  conteoCel.aplicado = await foto(m, '[data-prueba="conteo-activo"]', 'conteo-aplicado-celular');
+  await cc.close();
+}
+await compone('25', 'Inventario fisico: conteo ciego por ubicacion y reconteo por otra persona', [['escritorio · ronda 1, ciega', conteoEsc.ronda1], ['escritorio · reconteo (otra persona, sin ver la ronda 1)', conteoEsc.reconteo], ['celular · conteo ciego', conteoCel.ronda1]]);
+await compone('26', 'Inventario fisico: conciliacion contra la cadena, autorizacion y ajustes como eventos CONTEO', [['escritorio · conciliación', conteoEsc.conciliacion], ['escritorio · aplicado con autorización', conteoEsc.aplicado], ['celular · cuadra y se aplica', conteoCel.aplicado]]);
+informe.conteo = await api({ accion: 'conteos' }).then((r) => r.conteos.map((c) => ({ folio: c.folio, estado: c.estado, eventos: c.aplicado?.eventos, conciliacion: (c.conciliacion ?? []).map((x) => `${x.lote.lote}@${x.zona}${x.posicion ? ` ${x.posicion}` : ''}: cadena ${x.esperado}, contado ${x.contado}, ${x.clase}`) })));
+
 // Anclar lo de hoy (como haria el agente del sitio por la noche) y ver todo en verde.
 await api({ accion: 'ancla' });
 const integridadAntes = await porVista(async (p, v) => {
@@ -398,7 +471,7 @@ await compone('23', 'Integridad por sucursal: todas verifican contra sus anclas 
 await compone('24', 'Integridad tras reescribir Poniente: su cadena cuadra localmente pero el ancla la delata', [['escritorio', integridadDespues.escritorio], ['celular', integridadDespues.celular]]);
 
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
-console.log(JSON.stringify({ impresion: informe.impresion, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion }, null, 1));
+console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion }, null, 1));
 await navegador.close();
 await conCamara?.close();
 app.kill('SIGTERM');

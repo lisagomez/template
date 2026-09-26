@@ -223,3 +223,24 @@ JCS del ancla y comparándolos con los del núcleo).
 | Ventas ficticias | Detrás de un adaptador; con la fuente real el agente no cambia. Conectar el ERP es gate humano. |
 | El agente actúa sobre una cadena rota | Verifica cadena, proyección, anclas y testigos antes de cada corrida y decisión; si falla, no actúa y abre incidente (probado y capturado). |
 | Un umbral mal puesto manda a promoción lo que no | Los umbrales siguen marcados como ejemplo hasta que calidad los fija; los porcentajes de la promoción escalonada (10/20/30 %) también son de ejemplo. |
+
+### 10.1 Inventario físico (`/etiquetas/conteo`)
+
+Un conteo no corrige un evento: concilia lo que hay contra lo que dice la cadena. Por eso tiene su
+propio flujo y su propio evento, `CONTEO`, en lugar de la CORRECCION lote por lote.
+
+| Paso | Qué hace y por qué |
+|---|---|
+| **Abrir** (sitio, zonas, tolerancia en cajas) | Exige la integridad COMPLETA del sitio (cadena, proyección, anclas, testigos). Si el estado no es la proyección de la cadena, no se abre: se abre un incidente. Contar sobre un estado manipulado lo legalizaría. |
+| **Punto de corte** | Se guarda la cabeza de la cadena al abrir, y cada lectura guarda la cabeza del momento. Lo esperado de cada lote y ubicación es la proyección hasta su última lectura: lo que se vende o se mueve después se suma encima y no aparece como faltante. No hay que parar la tienda. |
+| **Conteo ciego** | Se lee la etiqueta de ubicación (zona o `ALMACEN-B-01-1`) y luego las cajas. El servidor no devuelve lo esperado mientras se cuenta; en la ronda 2 tampoco lo que contó la ronda 1. |
+| **Reconteo** | Lo que sale de la tolerancia se recuenta, sin cantidades, por OTRA persona (el núcleo rechaza al mismo seudónimo). |
+| **Conciliación** | Por lote, zona y tarima: lo que dice la cadena, lo contado, la diferencia y la clase (cuadra, faltante, sobrante, lote desconocido). Se ve hasta cerrar las rondas. |
+| **Autorizar y aplicar** | Si tras el reconteo algo sigue fuera de tolerancia, autoriza alguien que no contó. Se aplica un `CONTEO` por lote, también cuando cuadra, con el hash del acta (todas las lecturas y la conciliación) y la huella de cajas. La diferencia se aplica como delta, así que las ventas posteriores a la lectura se conservan. Lo que no aparece queda en cero y su expediente se cierra por conteo; si algo se encontró en otro rack, un `UBICADO`. |
+| **Patrones** | Faltantes que se repiten en la misma ubicación en dos conteos distintos abren un incidente en el central: un patrón no se arregla con otro ajuste. |
+
+Límites dichos claro: el conteo es ciego en su pantalla, pero la app no tiene roles; quien tenga el
+código del dispositivo puede abrir Caducidades y ver cantidades. Separar el rol de contador es el
+paso siguiente si se quiere ciego de verdad. Aplicar la diferencia a la contabilidad del ERP es una
+acción irreversible: sigue siendo gate humano. En el ERP, `eti_evento` admite `CONTEO` y
+`eti_existencia` el origen `conteo` (prueba efímera (l)).

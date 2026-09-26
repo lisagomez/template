@@ -19,7 +19,7 @@ import { comoHash, sha256, utf8 } from './sha256.js'
 export type TipoEvento =
   | 'RECIBIDO' | 'RECHAZADO' | 'UBICADO' | 'MOVIDO' | 'TRANSFERIDO'
   | 'VENDIDO' | 'DEVUELTO' | 'DONADO' | 'MERMA'
-  | 'RECOMENDACION' | 'RECOMENDACION_EJECUTADA' | 'RECOMENDACION_DESCARTADA' | 'CORRECCION'
+  | 'RECOMENDACION' | 'RECOMENDACION_EJECUTADA' | 'RECOMENDACION_DESCARTADA' | 'CORRECCION' | 'CONTEO'
 
 export interface ClaveLote {
   readonly gtin: string
@@ -166,7 +166,7 @@ export function cierreDe(eventos: readonly Evento[], cajasEnExistencia: number):
   const ultimo = eventos.at(-1)
   if (ultimo?.tipo === 'RECHAZADO') return { cerrado: true, por: 'RECHAZADO' }
   if (eventos.length > 0 && cajasEnExistencia === 0) {
-    const salida = [...eventos].reverse().find((e) => ['VENDIDO', 'DEVUELTO', 'DONADO', 'MERMA', 'TRANSFERIDO'].includes(e.tipo))
+    const salida = [...eventos].reverse().find((e) => ['VENDIDO', 'DEVUELTO', 'DONADO', 'MERMA', 'TRANSFERIDO', 'CONTEO'].includes(e.tipo))
     return salida ? { cerrado: true, por: salida.tipo } : { cerrado: false }
   }
   return { cerrado: false }

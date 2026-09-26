@@ -2,7 +2,8 @@
  * Lo que devuelve el servidor para las pantallas del expediente, el agente y la integridad.
  */
 import type {
-  ClaveLote, Devolucion, EstadoRecomendacion, EstadoSemaforo, Evento, Existencia, Incidente, InformeIntegridad, Riesgo, VerificacionCadena,
+  ClaveLote, Devolucion, EstadoConteo, EstadoRecomendacion, EstadoSemaforo, Evento, Existencia, Incidente, InformeIntegridad, LecturaConteo, RenglonConteo, Riesgo,
+  VerificacionCadena, Zona,
 } from './nucleo.ts';
 
 export interface LoteConExpediente {
@@ -58,4 +59,27 @@ export interface Integridad {
 /** Enlace a la pantalla del expediente de un lote. */
 export function enlaceExpediente(l: ClaveLote): string {
   return `/etiquetas/expediente?gtin=${l.gtin}&lote=${encodeURIComponent(l.lote)}&cad=${l.caducidad}`;
+}
+
+/** Un conteo como lo manda el servidor: ciego mientras se cuenta, con conciliacion al cerrar. */
+export interface VistaConteo {
+  readonly folio: string;
+  readonly sitio: string;
+  readonly zonas: Zona[];
+  readonly tolerancia: number;
+  readonly abierto: string;
+  readonly abre: string;
+  readonly corte: { seq: number; cabeza: string };
+  readonly ronda: 1 | 2;
+  readonly estado: EstadoConteo;
+  readonly lecturas: LecturaConteo[];
+  readonly recontar: { gtin: string; lote: string; caducidad: string; zona: string; sscc?: string }[];
+  readonly conciliacion?: RenglonConteo[];
+  readonly aplicado?: { fecha: string; autoriza?: string; acta: string; eventos: number; renglones: RenglonConteo[] };
+  readonly cancelado?: { fecha: string; motivo: string; operador: string };
+}
+
+export interface Conteos {
+  readonly conteos: VistaConteo[];
+  readonly patrones: { sitio: string; faltantes: { ubicacion: string; folios: string[]; cajas: number }[] }[];
 }

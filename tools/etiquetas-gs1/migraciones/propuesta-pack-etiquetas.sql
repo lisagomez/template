@@ -183,7 +183,7 @@ create table if not exists erp.eti_existencia (
   caducidad        date not null,
   cantidad         numeric(14,4) not null check (cantidad >= 0),
   sscc             char(18) check (sscc is null or erp.gs1_digito_ok(sscc)),
-  origen           text not null check (origen in ('etiquetado', 'recepcion', 'semilla')),
+  origen           text not null check (origen in ('etiquetado', 'recepcion', 'semilla', 'conteo')),
   zona             text not null default 'recibo' check (zona in ('recibo', 'almacen', 'piso', 'merma')),
   updated_at       timestamptz not null default now()
 );
@@ -231,7 +231,7 @@ create table if not exists erp.eti_evento (
   v              smallint not null default 1 check (v = 1),
   fecha          text not null check (fecha ~ '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$'),
   tipo           text not null check (tipo in ('RECIBIDO','RECHAZADO','UBICADO','MOVIDO','TRANSFERIDO','VENDIDO','DEVUELTO','DONADO','MERMA',
-                                               'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION')),
+                                               'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION','CONTEO')),
   gtin           char(14) not null check (erp.gs1_digito_ok(gtin)),
   lote           text not null check (length(lote) <= 20 and erp.gs1_cset82(lote)),
   caducidad      date not null,
@@ -245,6 +245,13 @@ create table if not exists erp.eti_evento (
 );
 comment on table erp.eti_evento is 'Cadena solo-agregar por sitio: cada evento enlaza con el anterior (seq + hash). El estado de existencias es su proyección.';
 create index if not exists eti_evento_lote_idx on erp.eti_evento (cliente_id, gtin, lote, caducidad);
+-- Inventario físico (CONTEO) y existencias que nacen de un conteo: una instalación anterior del
+-- pack trae los checks sin ellos, así que se reemplazan (idempotente).
+alter table erp.eti_evento drop constraint if exists eti_evento_tipo_check;
+alter table erp.eti_evento add constraint eti_evento_tipo_check check (tipo in ('RECIBIDO','RECHAZADO','UBICADO','MOVIDO','TRANSFERIDO','VENDIDO','DEVUELTO','DONADO','MERMA',
+  'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION','CONTEO'));
+alter table erp.eti_existencia drop constraint if exists eti_existencia_origen_check;
+alter table erp.eti_existencia add constraint eti_existencia_origen_check check (origen in ('etiquetado', 'recepcion', 'semilla', 'conteo'));
 
 create or replace function erp.eti_evento_encadena() returns trigger language plpgsql as $$
 declare ult record; clave text;

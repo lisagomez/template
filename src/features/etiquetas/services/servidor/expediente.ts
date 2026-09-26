@@ -162,13 +162,13 @@ export async function auditoria(estado: EstadoAlmacen): Promise<{ sitios: Integr
 }
 
 /** Integridad COMPLETA de un sitio (local + anclas + testigos) para el agente. Si falla, abre incidente. */
-export async function integridadParaActuar(estado: EstadoAlmacen, sitio: string, origen: 'agente' | 'auditoria' = 'agente'): Promise<{ ok: boolean; motivo?: string }> {
+export async function integridadParaActuar(estado: EstadoAlmacen, sitio: string, origen: 'agente' | 'auditoria' = 'agente', que = 'el agente no actuó'): Promise<{ ok: boolean; motivo?: string }> {
   const local = integridadLocal(estado, sitio);
   const c = await centralDelServidor().lee();
   const inf = verificaSitio(sitio, estado.eventos?.[sitio] ?? [], c.anclas[sitio] ?? [], c.llaves[sitio]?.id ?? '', verificaDelCentral(c), c.testigos?.[sitio] ?? []);
   const motivo = local.motivo ?? inf.primerFallo;
   if (!motivo) return { ok: true };
-  await centralDelServidor().transaccion((x) => ({ central: abreIncidente(x, { fecha: new Date().toISOString(), sitio, origen, motivo: `el agente no actuó: ${motivo}` }), resultado: null }));
+  await centralDelServidor().transaccion((x) => ({ central: abreIncidente(x, { fecha: new Date().toISOString(), sitio, origen, motivo: `${que}: ${motivo}` }), resultado: null }));
   return { ok: false, motivo };
 }
 
