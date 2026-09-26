@@ -23,6 +23,20 @@ specs y los 26 skills. Se hereda entero, construyas lo que construyas.
 Un mismo repo puede llevar las dos: la app en `src/`, y en `tools/` lo que ya reusaste
 lo bastante como para sacarlo de ahi.
 
+### Y el ERP, que no es ninguna de las dos
+
+Este repo es tambien el **boilerplate de produccion de marca blanca** del ERP: el
+laboratorio lo prueba aqui y de aqui sale lo que se licencia a clientes. Vive en `erp/`
+(no en `tools/`: es un sistema que se opera, no una libreria que se importa).
+
+| | |
+|---|---|
+| Esquema | `erp/migrations/` — identico al de produccion (medido 2026-09-25), multi-tenant con RLS `FORCE` |
+| Instalar en la base de un tenant | [erp/instalacion/INSTALAR.md](erp/instalacion/INSTALAR.md) — tenant, marca y accesos son **parametros**, no texto en los archivos |
+| Probar sin base | `npm run erp:prueba` (instala 2 veces en un Postgres desechable, pruebas (a)-(j), compara con produccion) |
+| Que sale al cliente y que no | [erp/FRONTERA-DE-ENTREGA.md](erp/FRONTERA-DE-ENTREGA.md) + `erp/entrega.json`, vigilado por `verifica:marca-blanca` en `validate` |
+| Lo que nunca sale | la doctrina (`ERP-MAESTRO.md`), las reglas auditadas (`reglas/`) y la operacion de la casa (`erp/casa/`, `erp/bin/`) |
+
 ## Que incluye
 
 - Next.js 16 (App Router) + React 19 + TypeScript
@@ -220,7 +234,7 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # el gate completo (19 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:ajustes + prueba:etiquetas + prueba:trayectorias + verifica:trayectorias + imprenta + fugas
+npm run validate     # el gate completo (22 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:ajustes + prueba:etiquetas + prueba:trayectorias + verifica:trayectorias + verifica:inventario + verifica:marca-blanca + prueba:inventario + imprenta + fugas
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -236,8 +250,17 @@ npm run prueba:etiquetas    # etiquetas GS1-128: nucleo contra la norma, ida y v
 npm run capturas:etiquetas  # tras build: capturas de escritorio y celular de /etiquetas (camara falsa, Zebras simuladas)
 npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
-npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre
+npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre (sin asiento en el inventario, no sale)
+npm run verifica:inventario  # todo activo del repo con asiento en inventario/activos.json: NUEVO/HUERFANO/AMBIGUO en rojo
+npm run prueba:inventario    # el detector, el costeo (nunca un cero inventado) y el SQL del export, sobre repos de juguete
+npm run inventario:vista     # regenera inventario/INVENTARIO.md tras tocar el indice
+npm run inventario:exporta   # costeo + ledger + SQL para el modulo act del ERP, en inventario/salida/ (fuera de git)
+npm run inventario:valida-erp  # carga el export en un Postgres desechable con erp/migrations/ (Docker)
+npm run verifica:marca-blanca  # todo archivo de erp/ clasificado (erp/entrega.json); ni defendibles ni huellas de la casa en lo que se entrega
+npm run erp:prueba   # instala el ERP 2 veces en un Postgres 17 desechable, pruebas de cierre (a)-(j) y esquema ≡ produccion (Docker)
+npm run erp:control  # la prueba de las pruebas del ERP: 6 mutaciones de las migraciones, todas deben caer en rojo (Docker)
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
+npm run verifica:privado  # el repo NO es visible sin credenciales (lleva el ERP). Usa red: va en predeploy y en el hook pre-push si se empuja erp/
 npm run vigila:versiones  # deriva de TODO lo pineado (stack + MCP). Usa red: fuera del gate
 npm run verifica:routing  # cada clase de tarea con su nivel de modelo y su precio
 npm run vigila:hermes  # deriva del pineo del agente (semanal, fuera del gate: usa red)

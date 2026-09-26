@@ -411,6 +411,7 @@ ahora, no después.
 | Supabase (tablas del proyecto) | Supabase gestionado | PITR del proveedor + dump lógico mensual | **Crítica** | Si el proyecto usa Supabase |
 | Certificados Caddy (`caddy_data`) | volumen docker | borg | Baja — se regeneran solos | Opcional |
 | Código y configuración | GitHub | ya versionado | Baja | Sí |
+| Esquema `erp` (DDL, roles, RLS) | `erp/migrations/` en el monorepo | git; se reconstruye con `erp/instalacion/instalar.sh` y se comprueba con `npm run erp:prueba` (≡ producción, medido) | Baja — el DDL; los **datos** del esquema `erp` van en la fila de Supabase (Crítica). Las contraseñas de los logins no se restauran: se recrean con el instalador | Si el proyecto lleva el ERP |
 | _[activo propio del proyecto]_ | | | | |
 
 **Regla de exclusión, sin excepciones:** ningún respaldo contiene secretos en claro.

@@ -1,6 +1,8 @@
 ---
 paths:
   - "src/**"
+  - "tools/**"
+  - "scripts/**"
   - "Dockerfile"
   - "docker-compose.yml"
   - ".env*"
@@ -118,16 +120,11 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
   `execFile`; `fs` solo sobre temporales de `mkdtemp`.
 - **Aplicar en**: todo route handler o server component que mire carpetas fuera de `src/`.
 
-### 2026-09-20: `npm install` poda lo que no está en `package.json` (Playwright desapareció)
-- **Error**: `npm install uqr` quitó `playwright`, instalado a mano y nunca declarado.
-- **Fix**: lo que un guion importa se declara pineado. **Aplicar en**: todo lo usado desde `scripts/`.
+### 2026-09-20: `npm install` poda lo no declarado (Playwright desapareció): lo que un guion importa se declara pineado.
 
-### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type` declarado
-- **Error**: «Module type of file ... is not specified» al correr `.ts` con `node --test`: sale una
-  vez por proceso y nombra el PRIMER archivo sin tipo, así que hay que cubrir todo lo que Node carga.
-- **Fix**: `{ "type": "module" }` en `scripts/package.json` y `src/package.json`, nada más. En la
-  raíz no: reinterpreta todo `.js` (`postcss.config.js` es CommonJS).
-- **Aplicar en**: cualquier `.ts` o `.js` nuevo que Node corra directo fuera de `tools/`.
+### 2026-09-20: Node avisa `MODULE_TYPELESS_PACKAGE_JSON` al correr un `.ts` sin `type`
+- **Fix**: `{ "type": "module" }` en `scripts/package.json` y `src/package.json`; en la raíz no
+  (reinterpretaría `postcss.config.js`, CommonJS). Nombra solo el PRIMER archivo sin tipo.
 
 ### 2026-09-20: el WAV que ffmpeg escribe a una tubería lleva tamaños «desconocidos»
 - **Error**: `-f wav pipe:1` pone `0xFFFFFFFF` en la cabecera; el servicio de dictado lo rechazaba
@@ -142,14 +139,21 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: un latido con referencia hasta `salir()`; medir con la salida a archivo.
 - **Aplicar en**: todo demonio o CLI de larga vida que cierre recursos en reposo.
 
-### 2026-09-20: una respuesta vieja pisa a la nueva si nadie numera las cargas
-- **Error**: en `/historial` la lista sin filtrar llegó después que la filtrada (sondeo «vivo» y
-  buscador a la vez): 188 donde debía haber 28. La captura esperaba «N de M» sin exigir N en la lista.
-- **Fix**: cada carga lleva número y solo se aplica la última; el sondeo no corre con una carga en
-  vuelo; la espera de la captura exige cuenta y lista iguales.
-- **Aplicar en**: todo hook con varias fuentes sobre el mismo estado.
+### 2026-09-20: dos de React en `/historial`
+- **Una respuesta vieja pisa a la nueva si nadie numera las cargas** (sondeo «vivo» + buscador:
+  188 donde debía haber 28): cada carga lleva número y solo se aplica la última; el sondeo no
+  corre con una carga en vuelo; la captura exige cuenta y lista iguales.
+- **`react-hooks/set-state-in-effect` no acepta un `await` como separación**: el efecto solo
+  dispara la promesa; el estado lo escribe la promesa al resolver.
 
-### 2026-09-20: `react-hooks/set-state-in-effect` no acepta un `await` como separación
-- **Error**: marca `setCargando(true)` en un efecto aunque vaya tras `await`: mira el texto, no el tiempo.
-- **Fix**: el efecto solo dispara la promesa; el estado lo escribe la promesa al resolver.
-- **Aplicar en**: todo `useEffect` que cargue datos en `src/`.
+### 2026-09-21: cinco de los goals de ajustes y de voz (detalle en sus post-mortem)
+- **Matar `npx` no mata a `next-server`**: un servidor de pruebas quedó huérfano en su puerto.
+  `spawn` con `detached: true` y `process.kill(-pid)` al salir y por señal.
+- **Un control gobernado por el servidor rompe `check()` de Playwright**: estado optimista local
+  que vuelve si el servidor rechaza; cajas rearmadas por `key`.
+- **Una bandera a secas es presencia, no valor**: `--tecla` (`true`) en un campo de texto no es
+  un valor inválido; se salta esa capa sin aviso.
+- **Un peer obligatorio de la familia no está en ningún registro**: el empaquetador instala su
+  tarball desde `tools/<x>/`; el consumidor, los dos tarballs.
+- **PCM16 asimétrico (×32767 / ÷32768) pierde 1 LSB**: una conversión en `voz/node` (×32768 con
+  tope) y las inversas se prueban juntas.

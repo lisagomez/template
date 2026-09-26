@@ -100,3 +100,9 @@ capturas-laboratorio/
 
 # Etiquetas GS1: almacen local de la app (datos de la instalacion, nunca al repo)
 .datos/
+
+# Inventario de activos (spec 014): el export lleva costo y clasificacion. Repo publico: nunca a git
+/inventario/salida/
+
+# Python
+__pycache__/

@@ -17,7 +17,7 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
-  altaConExpediente, audita, CATEGORIAS_EJEMPLO, estadoVacio, integridadLocal, mueveConExpediente, nuevoEvento, parseaLectura, interpreta, preparaAncla,
+  audita, CATEGORIAS_EJEMPLO, estadoVacio, integridadLocal, mueveConExpediente, nuevoEvento, parseaLectura, interpreta, preparaAncla,
   recibeAncla, recibeConExpediente, recibeTestigo, registraLlave, salida,
 } from '../dist/index.js'
 import { almacenEnArchivo } from '../dist/almacenes/archivo.js'
