@@ -36,6 +36,8 @@ export interface LecturaConteo {
   readonly fecha: string
   /** Cabeza de la cadena del sitio al leer: lo que se movio despues se suma encima. */
   readonly seq: number
+  /** Tarima leida solo por su SSCC: entra completa con la cantidad REGISTRADA (al contador no se le dice). */
+  readonly porRegistro?: true
 }
 
 export interface Conteo {
@@ -113,15 +115,16 @@ export function leeEnConteo(estado: EstadoAlmacen, folio: string, p: PedidoLectu
   let sku: string
   let cajas: number
   let sscc: string | undefined
+  let porRegistro = false
   if (l.sscc && !l.gtin) {
     const t = estado.existencias.find((e) => e.sitio === c.sitio && e.sscc === l.sscc)
     if (!t) return falla(estado, `la tarima ${l.sscc} no es de este sitio: lee también su código de contenido`)
-    sku = t.sku; lote = claveDe(t); cajas = t.cantidad; sscc = t.sscc
+    sku = t.sku; lote = claveDe(t); cajas = t.cantidad; sscc = t.sscc; porRegistro = true
   } else {
     if (!l.gtin || !l.lote || !l.caducidadIso || !l.articulo) return falla(estado, 'la lectura no trae GTIN, lote y caducidad de un artículo del catálogo')
     lote = { gtin: l.gtin, lote: l.lote, caducidad: l.caducidadIso }; sku = l.articulo.sku; cajas = l.cajas * Math.max(1, p.veces); sscc = l.sscc
   }
-  const x: LecturaConteo = { ronda: c.ronda, zona: p.zona, ...(p.posicion ? { posicion: p.posicion } : {}), sku, lote, ...(sscc ? { sscc } : {}), cajas, operador, fecha: cuando, seq: cabeza(estado, c.sitio)?.seq ?? 0 }
+  const x: LecturaConteo = { ronda: c.ronda, zona: p.zona, ...(p.posicion ? { posicion: p.posicion } : {}), sku, lote, ...(sscc ? { sscc } : {}), cajas, operador, fecha: cuando, seq: cabeza(estado, c.sitio)?.seq ?? 0, ...(porRegistro ? { porRegistro: true as const } : {}) }
   return { estado: cambia(estado, { ...c, lecturas: [...c.lecturas, x] }), resultado: { ok: true, valor: x, eventos: [] } }
 }
 

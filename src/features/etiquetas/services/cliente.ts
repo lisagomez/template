@@ -6,6 +6,8 @@ import type { Articulo, Asignacion, Configuracion, Consumibles, Contadores, Devo
 import type { AccionEtiquetas } from './esquemas.ts';
 
 export interface EstadoCliente {
+  /** Lo decide el servidor por el codigo del dispositivo. `conteo` no recibe cantidades. */
+  readonly rol: 'operacion' | 'conteo';
   readonly hoy: string;
   readonly version: number;
   readonly configuracion: Configuracion;

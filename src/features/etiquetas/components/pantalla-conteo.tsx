@@ -16,7 +16,7 @@ import { EntradaPistola } from './entrada-pistola.tsx';
 import { LectorCamara } from './lector-camara.tsx';
 import { boton, botonPrimario, campo, tarjeta } from './marco.tsx';
 
-type Resp = { ok: boolean; motivo?: string; ubicacion?: { sitio: string; zona: Zona; posicion?: string }; leido?: { lote: { lote: string }; sku: string; cajas: number; zona: Zona; posicion: string | null } };
+type Resp = { ok: boolean; motivo?: string; ubicacion?: { sitio: string; zona: Zona; posicion?: string }; leido?: { lote: { lote: string }; sku: string; cajas: number | null; zona: Zona; posicion: string | null; sscc: string | null } };
 const ESTADO: Record<string, string> = { contando: 'Contando', reconteo: 'Reconteo', 'por-aplicar': 'Por aplicar', aplicado: 'Aplicado', cancelado: 'Cancelado' };
 
 function Nuevo({ e, alAbrir }: { e: Etiquetas; alAbrir: (folio: string) => void }) {
@@ -54,7 +54,7 @@ function Contar({ c, alCambiar }: { c: VistaConteo; alCambiar: () => void }) {
       setZona(r.ubicacion.zona); setPosicion(r.ubicacion.posicion ?? '');
       return setAviso(`Ubicación: ${nombreZona(r.ubicacion.zona)}${r.ubicacion.posicion ? ` · rack ${r.ubicacion.posicion}` : ''}`);
     }
-    setAviso(r.ok && r.leido ? `Leído: ${r.leido.cajas} caja(s) del lote ${r.leido.lote.lote}` : r.motivo ?? 'no se pudo');
+    setAviso(r.ok && r.leido ? (r.leido.cajas === null ? `Leído: tarima ${r.leido.sscc ?? ''} completa, lote ${r.leido.lote.lote}` : `Leído: ${r.leido.cajas} caja(s) del lote ${r.leido.lote.lote}`) : r.motivo ?? 'no se pudo');
     if (r.ok) alCambiar();
   }, (err: unknown) => setAviso(String(err)));
   const cierra = () => void accion<{ ok: boolean; motivo?: string }>({ accion: 'conteo-cierra', folio: c.folio }).then((r) => (r.ok ? alCambiar() : setAviso(r.motivo ?? 'no se pudo')));
@@ -78,9 +78,9 @@ function Contar({ c, alCambiar }: { c: VistaConteo; alCambiar: () => void }) {
           {aviso ? <p className="text-sm" role="status" data-prueba="aviso-lectura-conteo">{aviso}</p> : null}
         </div>
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Lo que llevas contado en la ronda {c.ronda} ({c.lecturas.reduce((s, x) => s + x.cajas, 0)} cajas)</h3>
+          <h3 className="text-sm font-semibold">Lo que llevas contado en la ronda {c.ronda} ({c.lecturas.filter((x) => !x.porRegistro).reduce((s, x) => s + x.cajas, 0)} cajas{c.lecturas.some((x) => x.porRegistro) ? ' y tarimas completas' : ''})</h3>
           <ol className="max-h-72 divide-y divide-neutral-200 overflow-y-auto text-sm dark:divide-neutral-800" data-prueba="lecturas-conteo">
-            {[...c.lecturas].reverse().map((x, i) => <li key={`${x.fecha}${i}`} className="py-1">{x.cajas} caja(s) · lote <b>{x.lote.lote}</b> · {nombreZona(x.zona).toLowerCase()}{x.posicion ? ` ${x.posicion}` : ''} <span className="text-xs text-neutral-500">· {x.operador}</span></li>)}
+            {[...c.lecturas].reverse().map((x, i) => <li key={`${x.fecha}${i}`} className="py-1">{x.porRegistro ? `tarima ${x.sscc ?? ''} completa` : `${x.cajas} caja(s)`} · lote <b>{x.lote.lote}</b> · {nombreZona(x.zona).toLowerCase()}{x.posicion ? ` ${x.posicion}` : ''} <span className="text-xs text-neutral-500">· {x.operador}</span></li>)}
           </ol>
           <p className="text-xs text-neutral-500">Conteo ciego: aquí no aparece cuánto dice el sistema.</p>
           <button type="button" className={botonPrimario} onClick={cierra} data-prueba="terminar-ronda">Terminar ronda {c.ronda}</button>
@@ -137,6 +137,8 @@ function Cancelar({ c, alCambiar }: { c: VistaConteo; alCambiar: () => void }) {
 }
 
 function Activo({ e, c, alCambiar }: { e: Etiquetas; c: VistaConteo; alCambiar: () => void }) {
+  const contador = e.estado?.rol === 'conteo';
+  const cerrado = c.estado === 'por-aplicar' || c.estado === 'aplicado';
   return (
     <article className={`${tarjeta} space-y-3`} data-prueba="conteo-activo" data-estado={c.estado} data-ronda={c.ronda}>
       <header className="flex flex-wrap items-baseline justify-between gap-2">
@@ -145,10 +147,11 @@ function Activo({ e, c, alCambiar }: { e: Etiquetas; c: VistaConteo; alCambiar: 
       </header>
       <p className="text-xs text-neutral-500">{c.sitio} · {c.zonas.map(nombreZona).join(', ')} · tolerancia {c.tolerancia} caja(s) · abierto {fechaHora(c.abierto)} por {c.abre} · corte en la cadena: evento #{c.corte.seq} {hashCorto(c.corte.cabeza)} · cuentas como {credenciales().operador}</p>
       {c.estado === 'contando' || c.estado === 'reconteo' ? <Contar key={`${c.folio}${c.ronda}`} c={c} alCambiar={alCambiar} /> : null}
-      {c.estado === 'por-aplicar' || c.estado === 'aplicado' ? <Conciliacion e={e} c={c} alCambiar={alCambiar} /> : null}
-      {c.aplicado ? <p className="rounded bg-emerald-50 px-2 py-1 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200" data-prueba="aplicado">✓ Aplicado {fechaHora(c.aplicado.fecha)}: {c.aplicado.eventos} evento(s) en la cadena{c.aplicado.autoriza ? `, autorizó ${c.aplicado.autoriza}` : ''} · acta {hashCorto(c.aplicado.acta)}</p> : null}
+      {cerrado && contador ? <p className="rounded bg-neutral-100 px-2 py-1 text-sm dark:bg-neutral-800" data-prueba="conteo-terminado">Conteo terminado{c.estado === 'aplicado' ? ' y aplicado' : ''}. La conciliación contra el sistema la ve quien supervisa, no este dispositivo.</p> : null}
+      {cerrado && !contador ? <Conciliacion e={e} c={c} alCambiar={alCambiar} /> : null}
+      {c.aplicado?.acta ? <p className="rounded bg-emerald-50 px-2 py-1 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200" data-prueba="aplicado">✓ Aplicado {fechaHora(c.aplicado.fecha)}: {c.aplicado.eventos ?? 0} evento(s) en la cadena{c.aplicado.autoriza ? `, autorizó ${c.aplicado.autoriza}` : ''} · acta {hashCorto(c.aplicado.acta)}</p> : null}
       {c.cancelado ? <p className="text-sm text-neutral-500">Cancelado: {c.cancelado.motivo}</p> : null}
-      {c.estado !== 'aplicado' && c.estado !== 'cancelado' ? <Cancelar c={c} alCambiar={alCambiar} /> : null}
+      {c.estado !== 'aplicado' && c.estado !== 'cancelado' && !contador ? <Cancelar c={c} alCambiar={alCambiar} /> : null}
     </article>
   );
 }
@@ -164,7 +167,9 @@ export function PantallaConteo({ e }: { e: Etiquetas }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
       <div className="space-y-4">
-        <Nuevo e={e} alAbrir={(f) => { setFolio(f); recarga(); }} />
+        {e.estado?.rol === 'conteo'
+          ? <p className={`${tarjeta} text-sm`} data-prueba="nota-contador">Los conteos los abre quien supervisa. Aquí solo cuentas: lees la ubicación y las cajas, sin ver lo que dice el sistema.</p>
+          : <Nuevo e={e} alAbrir={(f) => { setFolio(f); recarga(); }} />}
         <section className={`${tarjeta} space-y-1 text-sm`}>
           <h2 className="text-base font-semibold">Conteos</h2>
           {conteos.length === 0 ? <p className="text-neutral-500">Ninguno todavía.</p> : null}

@@ -12,15 +12,25 @@ import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { aseguraExpediente, ejecutaExpediente } from './acciones-expediente.ts';
 import { ejecutaConteo } from './acciones-conteo.ts';
+import type { Rol } from './roles.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 
 export type Respuesta = { status: number; cuerpo: unknown };
 const ok = (cuerpo: unknown): Respuesta => ({ status: 200, cuerpo });
 const mal = (status: number, error: string): Respuesta => ({ status, cuerpo: { error } });
 
-export async function leeEstado(): Promise<Respuesta> {
+export async function leeEstado(rol: Rol = 'operacion'): Promise<Respuesta> {
   const e = await aseguraExpediente();
+  if (rol === 'conteo') {
+    // El contador recibe el catalogo y los sitios, pero NINGUNA cantidad: sin existencias,
+    // movimientos, consumo ni devoluciones.
+    return ok({
+      hoy: hoyIso(), version: e.version, rol, configuracion: e.configuracion, articulos: Object.values(e.articulos), impresoras: [], existencias: [], movimientos: [],
+      importaciones: [], asignaciones: [], contadores: e.contadores, agenteConSecreto: false, consumibles: CONSUMIBLES_VACIOS, devoluciones: [],
+    });
+  }
   return ok({
+    rol,
     hoy: hoyIso(), version: e.version, configuracion: e.configuracion, articulos: Object.values(e.articulos), impresoras: e.impresoras,
     existencias: e.existencias, movimientos: (e.movimientos ?? []).slice(-30), importaciones: e.importaciones.slice(-10), asignaciones: e.asignaciones.slice(-50), contadores: e.contadores,
     agenteConSecreto: secretoValido(process.env['ETIQUETAS_AGENTE_SECRETO']),
@@ -47,7 +57,7 @@ function planDe(e: EstadoAlmacen, registros: Record<string, string>[]): PlanImpo
   return planificaImportacion(filas, errores, e);
 }
 
-export async function ejecuta(a: AccionEtiquetas, operador: string): Promise<Respuesta> {
+export async function ejecuta(a: AccionEtiquetas, operador: string, rol: Rol = 'operacion'): Promise<Respuesta> {
   const almacen = almacenDelServidor();
   const ahora = new Date().toISOString();
   switch (a.accion) {
@@ -141,7 +151,7 @@ export async function ejecuta(a: AccionEtiquetas, operador: string): Promise<Res
       return ejecutaExpediente(a, operador);
     case 'conteos': case 'conteo-abre': case 'conteo-lee': case 'conteo-cierra': case 'conteo-aplica': case 'conteo-cancela':
       await aseguraExpediente();
-      return ejecutaConteo(a, operador);
+      return ejecutaConteo(a, operador, rol);
     case 'ticket': {
       const secreto = process.env['ETIQUETAS_AGENTE_SECRETO'];
       if (!secretoValido(secreto)) return mal(503, 'no hay agente de impresión configurado en el servidor (falta ETIQUETAS_AGENTE_SECRETO)');

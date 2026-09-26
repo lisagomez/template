@@ -59,7 +59,8 @@ zebrash (motor ZPL local, WebAssembly); los decodifica con zxing y compara contr
    `ETIQUETAS_LLAVE_<SITIO>`, el central donde la sucursal no escriba, y un cron nocturno que pida
    el ancla (`{"accion":"ancla"}`) y otro matutino para el agente (`{"accion":"agente"}`).
 
-Variables del servidor de la app: `ETIQUETAS_TOKEN` (≥16), `ETIQUETAS_AGENTE_SECRETO` (≥32),
+Variables del servidor de la app: `ETIQUETAS_TOKEN` (≥16, operación), `ETIQUETAS_TOKEN_CONTEO` (≥16,
+opcional: dispositivos que solo cuentan y no ven cantidades), `ETIQUETAS_AGENTE_SECRETO` (≥32),
 `ETIQUETAS_DATOS` (carpeta del almacén), `ETIQUETAS_ZONA` (por defecto America/Mexico_City),
 `ETIQUETAS_LLAVE_<SITIO>` (llave privada Ed25519 del sitio; nunca se imprime),
 `ETIQUETAS_CENTRAL` (archivo del central), `ETIQUETAS_SEMILLA=ficticia` solo para demostración.

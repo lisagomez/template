@@ -1,31 +1,22 @@
 /**
  * Acciones del inventario fisico. El servidor guarda el conteo CIEGO: mientras se cuenta no sale
  * lo esperado (en la ronda 2 tampoco lo que conto la ronda 1); la conciliacion se ve hasta cerrar
- * las rondas. Abrir y aplicar exigen la integridad COMPLETA del sitio (cadena, proyeccion, anclas
- * y testigos); si falla, se abre incidente y no se cuenta. Quien cuenta, recuenta y autoriza entra
+ * las rondas, y a un dispositivo de CONTEO no le llega nunca (`roles.ts`). Abrir y aplicar
+ * exigen la integridad COMPLETA del sitio (cadena, proyeccion, anclas y testigos); si falla, se
+ * abre incidente y no se cuenta. Quien cuenta, recuenta y autoriza entra
  * como seudonimo.
  */
 import {
-  abreConteo, aplicaConteo, cancelaConteo, cierraRonda, concilia, conteoDe, esErrorLectura, faltantesRepetidos, interpreta, leeEnConteo, leeUbicacion, parseaLectura,
-  abreIncidente, type Conteo, type EstadoAlmacen, type Paso,
+  abreConteo, aplicaConteo, cancelaConteo, cierraRonda, conteoDe, esErrorLectura, faltantesRepetidos, interpreta, leeEnConteo, leeUbicacion, parseaLectura,
+  abreIncidente, type EstadoAlmacen, type Paso,
 } from '../nucleo.ts';
+import { vistaConteo as vistaSegun, type Rol } from './roles.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { avisaCabezas, centralDelServidor, integridadParaActuar, seudonimosDelServidor } from './expediente.ts';
 
 type Respuesta = { status: number; cuerpo: unknown };
 const ok = (cuerpo: unknown): Respuesta => ({ status: 200, cuerpo });
-
-/** Lo que se muestra de un conteo segun su estado: ciego mientras se cuenta. */
-function vista(e: EstadoAlmacen, c: Conteo) {
-  const { lecturas, recontar, ...resto } = c;
-  const recontarLegible = recontar.map((k) => { const [gtin = '', lote = '', caducidad = '', zona = '', sscc = ''] = k.split('|'); return { gtin, lote, caducidad, zona, ...(sscc ? { sscc } : {}) }; });
-  if (c.estado === 'contando' || c.estado === 'reconteo') {
-    return { ...resto, recontar: recontarLegible, lecturas: lecturas.filter((x) => x.ronda === c.ronda) };
-  }
-  // Aplicado: la foto que se sello en el acta. Recalcularla veria ya el ajuste en la cadena.
-  return { ...resto, recontar: recontarLegible, lecturas, conciliacion: c.aplicado?.renglones ?? (c.estado === 'cancelado' ? [] : concilia(e, c)) };
-}
 
 async function escribe<T>(cambia: (e: EstadoAlmacen) => Paso<T>): Promise<{ ok: true; valor: T; estado: EstadoAlmacen } | { ok: false; motivo: string }> {
   const r = await almacenDelServidor().transaccion((e) => { const p = cambia(e); return { estado: p.estado, resultado: { paso: p.resultado, estado: p.estado } }; });
@@ -36,7 +27,8 @@ async function escribe<T>(cambia: (e: EstadoAlmacen) => Paso<T>): Promise<{ ok: 
 
 type AccionConteo = Extract<AccionEtiquetas, { accion: 'conteos' | 'conteo-abre' | 'conteo-lee' | 'conteo-cierra' | 'conteo-aplica' | 'conteo-cancela' }>;
 
-export async function ejecutaConteo(a: AccionConteo, operador: string): Promise<Respuesta> {
+export async function ejecutaConteo(a: AccionConteo, operador: string, rol: Rol): Promise<Respuesta> {
+  const vista = (e: EstadoAlmacen, c: Parameters<typeof vistaSegun>[1]) => vistaSegun(e, c, rol);
   const ahora = new Date().toISOString();
   const op = () => seudonimosDelServidor().de(operador);
   const e = await almacenDelServidor().lee();
@@ -44,7 +36,7 @@ export async function ejecutaConteo(a: AccionConteo, operador: string): Promise<
     case 'conteos':
       return ok({
         conteos: [...(e.conteos ?? [])].reverse().map((c) => vista(e, c)),
-        patrones: e.configuracion.sitios.map((s) => ({ sitio: s.clave, faltantes: faltantesRepetidos(e, s.clave) })).filter((x) => x.faltantes.length),
+        patrones: rol === 'conteo' ? [] : e.configuracion.sitios.map((s) => ({ sitio: s.clave, faltantes: faltantesRepetidos(e, s.clave) })).filter((x) => x.faltantes.length),
       });
     case 'conteo-abre': {
       const integridad = await integridadParaActuar(e, a.sitio, 'auditoria', 'no se abrió el conteo');
@@ -60,7 +52,9 @@ export async function ejecutaConteo(a: AccionConteo, operador: string): Promise<
       if (u) return ok('error' in u ? { ok: false, motivo: u.error } : { ok: true, ubicacion: { sitio: u.sitio.clave, zona: u.zona, ...(u.posicion ? { posicion: u.posicion } : {}) } });
       const quien = await op();
       const r = await escribe((x) => leeEnConteo(x, a.folio, { zona: a.zona, ...(a.posicion ? { posicion: a.posicion } : {}), lectura: interpreta(lectura.elementos, x, hoyIso()), veces: a.veces }, ahora, quien));
-      return ok(r.ok ? { ok: true, leido: { lote: r.valor.lote, sku: r.valor.sku, cajas: r.valor.cajas, zona: r.valor.zona, posicion: r.valor.posicion ?? null, sscc: r.valor.sscc ?? null } } : r);
+      // Una tarima leida solo por su SSCC toma la cantidad del registro: al contador no se le dice.
+      const cajas = rol === 'conteo' && r.ok && r.valor.porRegistro ? null : r.ok ? r.valor.cajas : null;
+      return ok(r.ok ? { ok: true, leido: { lote: r.valor.lote, sku: r.valor.sku, cajas, zona: r.valor.zona, posicion: r.valor.posicion ?? null, sscc: r.valor.sscc ?? null } } : r);
     }
     case 'conteo-cierra': {
       const r = await escribe((x) => cierraRonda(x, a.folio));

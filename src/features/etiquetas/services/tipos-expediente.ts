@@ -75,7 +75,8 @@ export interface VistaConteo {
   readonly lecturas: LecturaConteo[];
   readonly recontar: { gtin: string; lote: string; caducidad: string; zona: string; sscc?: string }[];
   readonly conciliacion?: RenglonConteo[];
-  readonly aplicado?: { fecha: string; autoriza?: string; acta: string; eventos: number; renglones: RenglonConteo[] };
+  /** Al rol de conteo solo le llega la fecha. */
+  readonly aplicado?: { fecha: string; autoriza?: string; acta?: string; eventos?: number; renglones?: RenglonConteo[] };
   readonly cancelado?: { fecha: string; motivo: string; operador: string };
 }
 

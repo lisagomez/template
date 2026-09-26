@@ -25,7 +25,7 @@ function Emparejar({ listo }: { listo: () => void }) {
   return (
     <form className={`${tarjeta} mx-auto mt-8 max-w-md space-y-3`} onSubmit={(e) => { e.preventDefault(); empareja(token, operador); listo(); }} data-prueba="emparejar">
       <h2 className="text-lg font-semibold">Emparejar este dispositivo</h2>
-      <p className="text-sm text-neutral-600 dark:text-neutral-300">Escribe el código del sistema (te lo da quien administra la instalación) y tu nombre: queda en la traza de lo que asignes, imprimas o recibas.</p>
+      <p className="text-sm text-neutral-600 dark:text-neutral-300">Escribe el código del sistema (te lo da quien administra la instalación) y tu nombre: queda en la traza de lo que asignes, imprimas o recibas. El código decide lo que este dispositivo puede hacer: con el de conteo solo se cuenta.</p>
       <label className="block text-sm">Código del sistema<input className={campo} type="password" value={token} onChange={(e) => setToken(e.target.value)} autoComplete="off" required minLength={16} /></label>
       <label className="block text-sm">Tu nombre<input className={campo} value={operador} onChange={(e) => setOperador(e.target.value)} required minLength={2} maxLength={60} /></label>
       <button className={botonPrimario} type="submit">Emparejar</button>
@@ -33,17 +33,23 @@ function Emparejar({ listo }: { listo: () => void }) {
   );
 }
 
+const SOLO_CONTEO = '/etiquetas/conteo';
+
 export function Marco({ titulo, descripcion, children }: { titulo: string; descripcion: string; children: (e: Etiquetas) => ReactNode }) {
   const e = useEtiquetas();
   const ruta = usePathname();
   const cfg = e.estado?.configuracion;
   const demo = cfg?.prefijoEmpresa.startsWith('952');
+  const contador = e.estado?.rol === 'conteo';
+  const rutas = contador ? RUTAS.filter(([href]) => href === SOLO_CONTEO) : RUTAS;
+  const bloqueada = contador && ruta !== SOLO_CONTEO;
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
       <nav className="sticky top-0 z-40 border-b border-neutral-200 bg-white/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/95">
         <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 pr-32 text-sm">
           <span className="mr-2 whitespace-nowrap font-bold">GS1 · Caducidades</span>
-          {RUTAS.map(([href, texto]) => (
+          {contador ? <span className="mr-1 whitespace-nowrap rounded bg-teal-700 px-2 py-0.5 text-xs font-bold text-white" data-prueba="rol">Dispositivo de conteo</span> : null}
+          {rutas.map(([href, texto]) => (
             <a key={href} href={href} className={`whitespace-nowrap rounded-md px-2.5 py-1 ${ruta === href ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}>{texto}</a>
           ))}
         </div>
@@ -57,7 +63,10 @@ export function Marco({ titulo, descripcion, children }: { titulo: string; descr
         {e.emparejado === false ? <Emparejar listo={e.alEmparejar} /> : null}
         {e.error ? <p className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200" role="alert">{e.error}</p> : null}
         {e.emparejado && !e.estado && !e.error ? <p className="text-sm text-neutral-500">Cargando…</p> : null}
-        {e.estado ? children(e) : null}
+        {e.estado && bloqueada ? (
+          <p className={`${tarjeta} text-sm`} data-prueba="solo-conteo">Este dispositivo es de <b>conteo</b>: solo puede contar, y no ve cantidades del sistema. <a className="font-semibold underline" href={SOLO_CONTEO}>Ir al conteo</a></p>
+        ) : null}
+        {e.estado && !bloqueada ? children(e) : null}
       </main>
     </div>
   );

@@ -239,8 +239,20 @@ propio flujo y su propio evento, `CONTEO`, en lugar de la CORRECCION lote por lo
 | **Autorizar y aplicar** | Si tras el reconteo algo sigue fuera de tolerancia, autoriza alguien que no contó. Se aplica un `CONTEO` por lote, también cuando cuadra, con el hash del acta (todas las lecturas y la conciliación) y la huella de cajas. La diferencia se aplica como delta, así que las ventas posteriores a la lectura se conservan. Lo que no aparece queda en cero y su expediente se cierra por conteo; si algo se encontró en otro rack, un `UBICADO`. |
 | **Patrones** | Faltantes que se repiten en la misma ubicación en dos conteos distintos abren un incidente en el central: un patrón no se arregla con otro ajuste. |
 
-Límites dichos claro: el conteo es ciego en su pantalla, pero la app no tiene roles; quien tenga el
-código del dispositivo puede abrir Caducidades y ver cantidades. Separar el rol de contador es el
-paso siguiente si se quiere ciego de verdad. Aplicar la diferencia a la contabilidad del ERP es una
-acción irreversible: sigue siendo gate humano. En el ERP, `eti_evento` admite `CONTEO` y
+**Rol de conteo.** El rol lo decide el SERVIDOR por el código con que se emparejó el dispositivo,
+nunca el navegador: `ETIQUETAS_TOKEN` es operación (todo) y `ETIQUETAS_TOKEN_CONTEO` es un
+dispositivo de conteo. Los dos se comparan en tiempo constante. Un dispositivo de conteo:
+
+- solo puede pedir `conteos`, `conteo-lee` y `conteo-cierra`; el resto responde 403 (abrir, aplicar,
+  cancelar, expediente, integridad, riesgo, recepción, movimientos…);
+- recibe el estado SIN cantidades: sin existencias, movimientos, consumo ni devoluciones;
+- nunca recibe lo esperado ni la conciliación, tampoco al cerrar ni aplicado, y en el reconteo no ve
+  la ronda 1; una tarima leída solo por su SSCC entra completa con la cantidad registrada, que no se
+  le dice;
+- ve en el menú solo «Conteo»; las demás pantallas muestran que es un dispositivo de conteo.
+
+La pantalla no es la frontera: el servidor sí (capturas: `informe.rolConteo` con los 403 y el
+estado vacío de cantidades). Quien supervisa abre, concilia, autoriza y aplica desde un dispositivo
+de operación. Aplicar la diferencia a la contabilidad del ERP es una acción irreversible: sigue
+siendo gate humano. En el ERP, `eti_evento` admite `CONTEO` y
 `eti_existencia` el origen `conteo` (prueba efímera (l)).
