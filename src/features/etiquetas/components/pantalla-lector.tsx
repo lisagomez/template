@@ -16,6 +16,7 @@ import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { EntradaPistola } from './entrada-pistola.tsx';
 import { LectorCamara } from './lector-camara.tsx';
 import { botonPrimario, campo, tarjeta } from './marco.tsx';
+import { FotoArticulo } from './foto.tsx';
 
 /** El estado del cliente con la forma que espera el nucleo (catalogo indexado por sku). */
 export function comoEstado(e: EstadoCliente): EstadoAlmacen {
@@ -65,17 +66,21 @@ export function PantallaLector({ e }: { e: Etiquetas }) {
                 <p className="text-sm opacity-90">{TEXTO_SEMAFORO[inter.vida.estado].accion}</p>
               </div>
             ) : <p className="rounded-lg bg-neutral-100 p-3 text-sm dark:bg-neutral-800">Sin fecha de caducidad (17) en este código.</p>}
-            <div>
+            <div className="flex gap-3">
+              {inter.articulo ? <FotoArticulo est={est} sku={inter.articulo.sku} className="h-20 w-20 rounded-lg" /> : null}
+              <div>
               <p className="text-xl font-bold" data-prueba="producto-leido">{inter.articulo?.descripcion ?? 'Artículo fuera del catálogo'}</p>
               <p className="font-mono text-sm">{inter.gtin ? `GTIN ${gtinLegible(inter.gtin)}` : inter.sscc ? `SSCC ${inter.sscc}` : ''}{inter.lote ? ` · Lote ${inter.lote}` : ''}{inter.cajas > 1 ? ` · ${inter.cajas} cajas` : ''}</p>
               <p className="text-sm" data-prueba="ubicaciones">Está en: {inter.ubicaciones.length ? inter.ubicaciones.map((u) => `${u.sitio} · ${nombreZona(u.zona).toLowerCase()} ${u.cajas} cj`).join(', ') : 'ningún sitio registrado'}</p>
+              {inter.nivel ? <p className="text-xs text-neutral-500">Leíste {inter.nivel === 'caja' ? 'la caja' : 'la pieza'}.{!inter.lote ? ' Sin lote ni caducidad en el código: recíbelo con foto en «Recibir».' : ''}</p> : null}
+              </div>
             </div>
             {inter.avisos.map((a) => <p key={a} className="rounded-lg bg-amber-50 px-3 py-1.5 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">{a}</p>)}
             <table className="w-full text-left text-xs">
               <thead><tr className="text-neutral-500"><th className="py-1">AI</th><th>Dato</th><th>Valor</th></tr></thead>
               <tbody>{lectura.elementos.map((x) => <tr key={x.ai + x.valor} className="border-t border-neutral-200 dark:border-neutral-800"><td className="py-1 font-mono">({x.ai})</td><td>{nombreAi(x.ai)}</td><td className="font-mono">{x.valor}</td></tr>)}</tbody>
             </table>
-            <p className="text-xs text-neutral-500" data-prueba="forma">Llegó {lectura.simbologia ? `con ${lectura.simbologia}` : 'sin identificador de simbología'}, {lectura.forma === 'hri' ? 'como texto con paréntesis' : 'en crudo'}{lectura.sustitutoGs ? `, con el GS sustituido por «${lectura.sustitutoGs}»` : ''}.</p>
+            <p className="text-xs text-neutral-500" data-prueba="forma">Llegó {lectura.simbologia ? `con ${lectura.simbologia}` : 'sin identificador de simbología'}, {lectura.forma === 'hri' ? 'como texto con paréntesis' : lectura.forma === 'gtin' ? `como código del proveedor (${lectura.formato ?? 'GTIN'})` : lectura.forma === 'digital-link' ? 'como GS1 Digital Link' : 'en crudo'}{lectura.sustitutoGs ? `, con el GS sustituido por «${lectura.sustitutoGs}»` : ''}.</p>
             <button type="button" className={botonPrimario} onClick={recibe} disabled={!inter.articulo} data-prueba="recibir">Registrar recepción en {sitio}</button>
             {aviso ? <p className="text-sm" role="status" data-prueba="aviso-recepcion">{aviso}</p> : null}
             {devolucion ? (

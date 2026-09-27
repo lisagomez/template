@@ -13,7 +13,7 @@
  */
 import { execFileSync, spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -24,6 +24,7 @@ import { creaAgente, esquemaConfigAgente } from '../../../../tools/etiquetas-gs1
 import { completaClave, nuevoEvento } from '../../../../tools/etiquetas-gs1/dist/index.js';
 import { generaLlaves } from '../../../../tools/etiquetas-gs1/dist/firma.js';
 import { flujosConteo } from './flujos-conteo.mjs';
+import { flujosRecibir } from './flujos-recibir.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -65,9 +66,16 @@ const datos = join(SALIDA, 'datos');
 // escribe a disco ni se imprime (en una instalacion real cada una vive en el agente de su sitio).
 const SITIOS = ['CEDIS-NTE', 'SUC-CENTRO', 'SUC-PONIENTE', 'SUC-ORIENTE'];
 const llaves = Object.fromEntries(SITIOS.map((s) => [`ETIQUETAS_LLAVE_${s.replace(/-/g, '_')}`, generaLlaves().privada]));
+// El motor LOCAL de lectura de fechas, si esta instalado (tools/etiquetas-gs1/motores/instala-rapidocr.sh).
+const motorPython = process.env.ETIQUETAS_MOTOR_PYTHON ?? join(raiz, '.datos/motores/rapidocr/bin/python');
+const motor = existsSync(motorPython) ? { ETIQUETAS_MOTOR_PYTHON: motorPython } : {};
+if (!motor.ETIQUETAS_MOTOR_PYTHON) console.log('  sin motor local de fechas: la recepción con foto se capturará sin propuesta');
 const app = spawn(process.execPath, [join(raiz, 'node_modules/next/dist/bin/next'), 'start', '-p', String(PUERTO)], {
-  cwd: raiz, env: { ...process.env, ...llaves, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_TOKEN_CONTEO: TOKEN_CONTEO, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
+  cwd: raiz, env: { ...process.env, ...llaves, ...motor, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_TOKEN_CONTEO: TOKEN_CONTEO, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
 });
+// Si el guion falla a medias, el servidor NO se queda huerfano en su puerto (la corrida siguiente
+// le pegaria a el, con los datos de esta ya borrados: aprendizaje del 2026-09-21).
+process.on('exit', () => { try { app.kill('SIGKILL'); } catch { /* ya salio */ } });
 for (let i = 0; i < 60; i++) {
   try { if ((await fetch(`${BASE}/etiquetas`)).ok) break; } catch { /* aun arrancando */ }
   await espera(500);
@@ -364,6 +372,7 @@ await compone('22', 'Agente de riesgo: lote verde en riesgo, una recomendacion e
 
 // Inventario fisico con roles: flujos 25, 26 y 27 (e2e/flujos-conteo.mjs).
 await flujosConteo({ navegador, contexto, abre, foto, compone, informe, BASE, TOKEN, TOKEN_CONTEO, cajaDe, dia, aammdd });
+await flujosRecibir({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, espera, BASE, TOKEN });
 informe.conteo = await api({ accion: 'conteos' }).then((r) => r.conteos.map((c) => ({ folio: c.folio, estado: c.estado, eventos: c.aplicado?.eventos, conciliacion: (c.conciliacion ?? []).map((x) => `${x.lote.lote}@${x.zona}${x.posicion ? ` ${x.posicion}` : ''}: cadena ${x.esperado}, contado ${x.contado}, ${x.clase}`) })));
 
 // Anclar lo de hoy (como haria el agente del sitio por la noche) y ver todo en verde.

@@ -16,7 +16,8 @@
  * no leyo · inventada (propuso algo en una foto SIN fecha). `por_confirmar` no cuenta.
  */
 import { execFile } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { request } from 'node:http'
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -59,12 +60,25 @@ function tesseract(puntos) {
   }
 }
 
+/** POST sin limite de espera: un modelo de vision en CPU puede tardar minutos (fetch corta a los 300 s). */
+function postJson(url, cuerpo) {
+  return new Promise((ok, mal) => {
+    const u = new URL(url)
+    const q = request({ hostname: u.hostname, port: u.port, path: u.pathname, method: 'POST', headers: { 'content-type': 'application/json' } }, (res) => {
+      let d = ''
+      res.on('data', (x) => { d += x })
+      res.on('end', () => { try { ok(JSON.parse(d)) } catch (e) { mal(e) } })
+    })
+    q.on('error', mal)
+    q.end(JSON.stringify(cuerpo))
+  })
+}
+
 const qwen = (digest) => ({
   modelo: `ollama/${QWEN}@${digest.slice(0, 12)}`,
   async lee(bytes) {
     const t0 = Date.now()
-    const r = await fetch(`${OLLAMA}/api/generate`, { method: 'POST', body: JSON.stringify({ model: QWEN, prompt: 'Transcribe exactly the printed text in this image, character by character. Output only the text. If there is no text, output nothing.', images: [Buffer.from(bytes).toString('base64')], stream: false, options: { temperature: 0, num_ctx: 8192 } }) })
-    const j = await r.json()
+    const j = await postJson(`${OLLAMA}/api/generate`, { model: QWEN, prompt: 'Transcribe exactly the printed text in this image, character by character. Output only the text. If there is no text, output nothing.', images: [Buffer.from(bytes).toString('base64')], stream: false, options: { temperature: 0, num_ctx: 8192 } })
     return { motor: this.modelo, ms: Date.now() - t0, lineas: String(j.response ?? '').split('\n').filter((l) => l.trim()).map((l) => ({ texto: l })) }
   },
 })
@@ -129,32 +143,39 @@ async function casosReales(carpeta, completa) {
 async function mide(nombre, motor, casos, dosTomas) {
   const filas = []
   for (const c of casos) {
-    const tomas = dosTomas ? c.tomas.slice(0, 2) : c.tomas.slice(0, 1)
-    const ctx = { hoy: HOY, ...(c.esperado.vidaUtilDias ? { vidaUtilDias: c.esperado.vidaUtilDias } : {}) }
-    const lecturas = []
-    let p
-    if (motor.producto) {
-      const t0 = Date.now()
-      p = await leeYPropone(motor.producto, tomas.map((t) => new Uint8Array(t)), ctx, c.entera)
-      lecturas.push({ ms: Date.now() - t0, lineas: [] })
-    } else {
-      for (const t of tomas) lecturas.push(await motor.lee(new Uint8Array(t)))
-      p = proponCaducidad(lecturas, ctx)
+    try { filas.push(await mideUno(nombre, motor, c, dosTomas)) } catch (e) {
+      // Una imagen que falla no tumba la corrida: queda como «error» y se dice.
+      filas.push({ motor: nombre, corpus: c.corpus, id: c.id, fondo: c.fondo, clase: 'error', lote: '-', estado: 'error', opciones: [], leido: [String(e?.message ?? e).slice(0, 120)], ms: 0 })
     }
-    const conf = lecturas[0].lineas?.find((l) => p.fecha && l.texto && p.textoLeido[0]?.includes(l.texto))?.confianza
-    filas.push({ motor: nombre, corpus: c.corpus, id: c.id, fondo: c.fondo, clase: clasifica(p, c.esperado), lote: claseLote(p, c.esperado), estado: p.estado, fecha: p.fecha, opciones: p.opciones.map((o) => o.iso), leido: p.textoLeido, ms: lecturas.reduce((s, l) => s + l.ms, 0), confianza: conf })
   }
   return filas
 }
 
-const CLASES = ['exacta', 'con-opcion', 'ambigua-marcada', 'equivocada', 'opciones-sin-la-correcta', 'no-leyo', 'inventada', 'sin-fecha-correcta']
+async function mideUno(nombre, motor, c, dosTomas) {
+  const tomas = dosTomas ? c.tomas.slice(0, 2) : c.tomas.slice(0, 1)
+  const ctx = { hoy: HOY, ...(c.esperado.vidaUtilDias ? { vidaUtilDias: c.esperado.vidaUtilDias } : {}) }
+  const lecturas = []
+  let p
+  if (motor.producto) {
+    const t0 = Date.now()
+    p = await leeYPropone(motor.producto, tomas.map((t) => new Uint8Array(t)), ctx, c.entera)
+    lecturas.push({ ms: Date.now() - t0, lineas: [] })
+  } else {
+    for (const t of tomas) lecturas.push(await motor.lee(new Uint8Array(t)))
+    p = proponCaducidad(lecturas, ctx)
+  }
+  const conf = lecturas[0].lineas?.find((l) => p.fecha && l.texto && p.textoLeido[0]?.includes(l.texto))?.confianza
+  return { motor: nombre, corpus: c.corpus, id: c.id, fondo: c.fondo, clase: clasifica(p, c.esperado), lote: claseLote(p, c.esperado), estado: p.estado, fecha: p.fecha, opciones: p.opciones.map((o) => o.iso), leido: p.textoLeido, ms: lecturas.reduce((s, l) => s + l.ms, 0), confianza: conf }
+}
+
+const CLASES = ['exacta', 'con-opcion', 'ambigua-marcada', 'equivocada', 'opciones-sin-la-correcta', 'no-leyo', 'inventada', 'sin-fecha-correcta', 'error']
 const mediana = (xs) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0 }
 
 function tabla(filas) {
   const grupos = new Map()
   for (const f of filas) { const k = `${f.motor}|${f.corpus}`; grupos.set(k, [...(grupos.get(k) ?? []), f]) }
-  const cab = '| motor | corpus | n | exacta | con opción correcta | ambigüedad marcada | **EQUIVOCADA** | opciones sin la correcta | no leyó | inventada (sin fecha) | sin fecha, correcto | lote exacto / equivocado | ms mediana |'
-  const lineas = [cab, `|${'---|'.repeat(13)}`]
+  const cab = '| motor | corpus | n | exacta | con opción correcta | ambigüedad marcada | **EQUIVOCADA** | opciones sin la correcta | no leyó | inventada (sin fecha) | sin fecha, correcto | error | lote exacto / equivocado | ms mediana |'
+  const lineas = [cab, `|${'---|'.repeat(14)}`]
   for (const [k, fs] of grupos) {
     const [motor, corpus] = k.split('|')
     const cuenta = (c) => fs.filter((f) => f.clase === c).length
@@ -169,20 +190,26 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const pedidos = (arg('motores', 'rapidocr,rapidocr-puntos,rapidocr-cascada,rapidocr-2tomas,rapidocr-producto,tesseract,tesseract-puntos,qwen,qwen-completa,rapidocr-completa')).split(',')
   const real = arg('real'), sint = arg('sintetico')
   const casos = { s: sint ? await casosSinteticos(sint) : [], r: real ? await casosReales(real, false) : [], rc: real ? await casosReales(real, true) : [] }
-  const filas = []
+  const salida = arg('salida')
+  const carpeta = salida ? salida.replace(/[^/]+$/, '') || '.' : undefined
   for (const p of pedidos) {
     const base = p.replace(/-(2tomas|completa)$/, '')
     const motor = motores[base]
     if (!motor) { console.log(`— ${p}: no instalado, se salta`); continue }
     const t0 = Date.now()
+    const filas = []
     if (p.endsWith('-completa')) filas.push(...await mide(p, motor, casos.rc, false))
     else if (p.endsWith('-2tomas')) filas.push(...await mide(p, motor, casos.s, true))
     else if (p === 'rapidocr-producto') filas.push(...await mide(p, motor, casos.s, true), ...await mide(p, motor, casos.r, false))
     else filas.push(...await mide(p, motor, casos.s, false), ...await mide(p, motor, casos.r, false))
+    // Cada motor se guarda al terminar: una corrida que se cae despues no pierde lo medido.
+    if (carpeta) await writeFile(`${carpeta}medicion-${p}.json`, JSON.stringify(filas, null, 1))
     console.log(`✓ ${p} (${Math.round((Date.now() - t0) / 1000)} s)`)
   }
+  // La tabla sale de TODO lo medido en la carpeta (tambien de corridas anteriores de otros motores).
+  const filas = []
+  if (carpeta) for (const f of (await readdir(carpeta)).filter((x) => /^medicion-.+\.json$/.test(x) && x !== 'medicion-rapido.json').sort()) filas.push(...JSON.parse(await readFile(`${carpeta}${f}`, 'utf8')))
   const md = `# Medición de lectura de caducidades (${HOY})\n\n${tabla(filas)}\n\n## Propuestas EQUIVOCADAS\n\n${filas.filter((f) => f.clase === 'equivocada').map((f) => `- ${f.motor} · ${f.corpus} · ${f.id}: propuso ${f.fecha}${f.confianza !== undefined ? ` (confianza del motor ${f.confianza})` : ''} · leyó «${f.leido.join(' ¦ ')}»`).join('\n') || '- ninguna'}\n\n## Inventadas (fotos sin fecha)\n\n${filas.filter((f) => f.clase === 'inventada').map((f) => `- ${f.motor} · ${f.id}: ${f.estado} ${f.opciones.join(', ')} · leyó «${f.leido.join(' ¦ ')}»`).join('\n') || '- ninguna'}\n`
-  const salida = arg('salida')
-  if (salida) { await writeFile(salida, md); await writeFile(salida.replace(/\.md$/, '.json'), JSON.stringify(filas, null, 1)) }
+  if (salida) await writeFile(salida, md)
   console.log(md)
 }

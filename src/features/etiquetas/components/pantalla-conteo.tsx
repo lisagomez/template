@@ -15,6 +15,8 @@ import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { EntradaPistola } from './entrada-pistola.tsx';
 import { LectorCamara } from './lector-camara.tsx';
 import { boton, botonPrimario, campo, tarjeta } from './marco.tsx';
+import { FotoArticulo } from './foto.tsx';
+import type { EstadoCliente } from '../services/cliente.ts';
 
 type Resp = { ok: boolean; motivo?: string; ubicacion?: { sitio: string; zona: Zona; posicion?: string }; leido?: { lote: { lote: string }; sku: string; cajas: number | null; zona: Zona; posicion: string | null; sscc: string | null } };
 const ESTADO: Record<string, string> = { contando: 'Contando', reconteo: 'Reconteo', 'por-aplicar': 'Por aplicar', aplicado: 'Aplicado', cancelado: 'Cancelado' };
@@ -42,18 +44,21 @@ function Nuevo({ e, alAbrir }: { e: Etiquetas; alAbrir: (folio: string) => void 
   );
 }
 
-function Contar({ c, alCambiar }: { c: VistaConteo; alCambiar: () => void }) {
+function Contar({ c, alCambiar, est }: { c: VistaConteo; alCambiar: () => void; est?: EstadoCliente | null }) {
   const [zona, setZona] = useState<Zona>(c.zonas[0]!);
   const [posicion, setPosicion] = useState('');
   const [veces, setVeces] = useState(1);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [skuLeido, setSkuLeido] = useState<string | null>(null);
   const alLeer = (texto: string) => void accion<Resp>({ accion: 'conteo-lee', folio: c.folio, texto, zona, veces, ...(zona === 'almacen' && posicion ? { posicion } : {}) }).then((r) => {
     if (r.ubicacion) {
+      setSkuLeido(null);
       if (r.ubicacion.sitio !== c.sitio) return setAviso(`esa ubicación es de ${r.ubicacion.sitio}; el conteo es de ${c.sitio}`);
       if (!c.zonas.includes(r.ubicacion.zona)) return setAviso(`${nombreZona(r.ubicacion.zona)} no está en este conteo`);
       setZona(r.ubicacion.zona); setPosicion(r.ubicacion.posicion ?? '');
       return setAviso(`Ubicación: ${nombreZona(r.ubicacion.zona)}${r.ubicacion.posicion ? ` · rack ${r.ubicacion.posicion}` : ''}`);
     }
+    setSkuLeido(r.ok && r.leido ? r.leido.sku : null);
     setAviso(r.ok && r.leido ? (r.leido.cajas === null ? `Leído: tarima ${r.leido.sscc ?? ''} completa, lote ${r.leido.lote.lote}` : `Leído: ${r.leido.cajas} caja(s) del lote ${r.leido.lote.lote}`) : r.motivo ?? 'no se pudo');
     if (r.ok) alCambiar();
   }, (err: unknown) => setAviso(String(err)));
@@ -75,7 +80,7 @@ function Contar({ c, alCambiar }: { c: VistaConteo; alCambiar: () => void }) {
           <label className="flex items-center gap-2 text-sm">Cajas por lectura<input className="w-20 rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900" type="number" min={1} max={500} value={veces} onChange={(v) => setVeces(Math.min(500, Math.max(1, Number(v.target.value) || 1)))} data-prueba="veces-conteo" /></label>
           <LectorCamara alLeer={alLeer} />
           <EntradaPistola alLeer={alLeer} />
-          {aviso ? <p className="text-sm" role="status" data-prueba="aviso-lectura-conteo">{aviso}</p> : null}
+          {aviso ? <div className="flex items-center gap-2">{skuLeido && est ? <FotoArticulo est={est} sku={skuLeido} className="h-10 w-10 rounded" /> : null}<p className="text-sm" role="status" data-prueba="aviso-lectura-conteo">{aviso}</p></div> : null}
         </div>
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">Lo que llevas contado en la ronda {c.ronda} ({c.lecturas.filter((x) => !x.porRegistro).reduce((s, x) => s + x.cajas, 0)} cajas{c.lecturas.some((x) => x.porRegistro) ? ' y tarimas completas' : ''})</h3>
@@ -146,7 +151,7 @@ function Activo({ e, c, alCambiar }: { e: Etiquetas; c: VistaConteo; alCambiar: 
         <span className="rounded bg-neutral-900 px-2 py-0.5 text-xs font-bold text-white dark:bg-white dark:text-neutral-900">{ESTADO[c.estado]}{c.estado === 'contando' || c.estado === 'reconteo' ? ` · ronda ${c.ronda}` : ''}</span>
       </header>
       <p className="text-xs text-neutral-500">{c.sitio} · {c.zonas.map(nombreZona).join(', ')} · tolerancia {c.tolerancia} caja(s) · abierto {fechaHora(c.abierto)} por {c.abre} · corte en la cadena: evento #{c.corte.seq} {hashCorto(c.corte.cabeza)} · cuentas como {credenciales().operador}</p>
-      {c.estado === 'contando' || c.estado === 'reconteo' ? <Contar key={`${c.folio}${c.ronda}`} c={c} alCambiar={alCambiar} /> : null}
+      {c.estado === 'contando' || c.estado === 'reconteo' ? <Contar key={`${c.folio}${c.ronda}`} c={c} alCambiar={alCambiar} est={e.estado} /> : null}
       {cerrado && contador ? <p className="rounded bg-neutral-100 px-2 py-1 text-sm dark:bg-neutral-800" data-prueba="conteo-terminado">Conteo terminado{c.estado === 'aplicado' ? ' y aplicado' : ''}. La conciliación contra el sistema la ve quien supervisa, no este dispositivo.</p> : null}
       {cerrado && !contador ? <Conciliacion e={e} c={c} alCambiar={alCambiar} /> : null}
       {c.aplicado?.acta ? <p className="rounded bg-emerald-50 px-2 py-1 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200" data-prueba="aplicado">✓ Aplicado {fechaHora(c.aplicado.fecha)}: {c.aplicado.eventos ?? 0} evento(s) en la cadena{c.aplicado.autoriza ? `, autorizó ${c.aplicado.autoriza}` : ''} · acta {hashCorto(c.aplicado.acta)}</p> : null}

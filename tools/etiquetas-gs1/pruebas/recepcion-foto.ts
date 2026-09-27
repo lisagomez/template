@@ -102,6 +102,14 @@ test('CORREGIR: lo calcula el servidor (no el navegador) y el formato elegido se
   assert.deepEqual(medicionEnUso(d.estado).map((x) => [x.formato, x.tal, x.corregidas]).sort(), [['DD/MM/AA', 0, 1], ['DDMMAA', 0, 1]])
 })
 
+test('el servidor no se fia del navegador: un codigo ajeno no abre revision, y un formato que no se leyo no se aprende', () => {
+  const ajeno = abreRevision(base(), { sitio: 'CEDIS-NTE', sku: 'REF-600', cajas: 1, codigo: { gtin: '04000000000013', nivel: 'caja' }, fotos: { completa: FOTO, recortes: [] }, propuesta: propuesta('CAD 30/05/27') }, t(10), 'REV-9', QUIEN)
+  assert.ok(!ajeno.resultado.ok && /no es de REF-600/.test(ajeno.resultado.motivo))
+  const r = abre(base(), 'CAD 30/05/27 L4471')
+  const c = ok(confirmaRevision(r.estado, { sitio: 'CEDIS-NTE', revision: r.eventos[0]!.hash, caducidad: '2027-05-30', lote: 'L4471', formato: 'MM/DD/AA', tipo: 'caducidad' }, HOY, t(11), 'c9', QUIEN))
+  assert.equal(formatoDe(c.estado, 'REF-600'), undefined, 'MM/DD/AA no estaba entre lo leído para esa fecha')
+})
+
 test('la regla de recepcion se aplica sobre la fecha CONFIRMADA: vencida → RECHAZADO con devolucion, y la revision se cierra', () => {
   const r = abre(base(), 'CAD 20/09/26 L1')
   const c = ok(confirmaRevision(r.estado, { sitio: 'CEDIS-NTE', revision: r.eventos[0]!.hash, caducidad: '2026-09-20', lote: 'L1' }, HOY, t(11), 'c4', QUIEN))

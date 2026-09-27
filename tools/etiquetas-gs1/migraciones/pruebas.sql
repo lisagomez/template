@@ -180,3 +180,77 @@ do $$ begin
   raise notice '(k) OK rol_exe_fin lee su cadena, no la borra y no escribe anclas';
 end $$;
 reset role;
+
+-- (m) recepción con foto: EN_REVISION sin caducidad y citando una foto que EXISTE; un RECIBIDO sin caducidad no entra
+insert into erp.eti_foto (cliente_id, huella, tipo, bytes, ancho, alto, ubicacion) values
+  ('11111111-1111-4111-8111-111111111111', 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'image/jpeg', 182340, 1280, 720, 'fotos/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg'),
+  ('11111111-1111-4111-8111-111111111111', 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'image/png', 40211, 1075, 202, 'fotos/bb/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.png')
+  on conflict do nothing;
+do $$ begin
+  begin
+    insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 5, '2026-09-27T15:00:00.000Z', 'EN_REVISION', '19521111000010', 'REV-MFK00001', null, '{"sku":"YOG-001","cajas":20,"zona":"recibo","fotos":{"completa":"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","recortes":["sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]},"propuesta":{"estado":"propuesta","fecha":"2027-05-30","lote":"L4471"},"cambios":[]}', 'op-5e1a0c04', 'sha256:396d3d8801be1b7728cd8f78b70f7f10a194709982f344d80ffc439efc523665', null, 'sha256:5555555555555555555555555555555555555555555555555555555555555555');
+    raise exception '(m) aceptó una revisión cuya foto no está en eti_foto';
+  exception when check_violation then null; end;
+  begin
+    insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 5, '2026-09-27T15:00:00.000Z', 'RECIBIDO', '19521111000010', 'L4471', null, '{"cajas":20}', 'op-5e1a0c04', 'sha256:396d3d8801be1b7728cd8f78b70f7f10a194709982f344d80ffc439efc523665', null, 'sha256:5555555555555555555555555555555555555555555555555555555555555555');
+    raise exception '(m) aceptó un RECIBIDO sin caducidad';
+  exception when check_violation then null; end;
+end $$;
+insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 5, '2026-09-27T15:00:00.000Z', 'EN_REVISION', '19521111000010', 'REV-MFK00001', null, '{"sku":"YOG-001","cajas":20,"zona":"recibo","fotos":{"completa":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recortes":["sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]},"propuesta":{"estado":"propuesta","fecha":"2027-05-30","lote":"L4471"},"cambios":[]}', 'op-5e1a0c04', 'sha256:396d3d8801be1b7728cd8f78b70f7f10a194709982f344d80ffc439efc523665', null, 'sha256:5555555555555555555555555555555555555555555555555555555555555555');
+do $$ begin
+  if (select count(*) from erp.eti_revision_abierta) <> 1 then raise exception '(m) la bandeja no ve la revisión abierta'; end if;
+  raise notice '(m) OK EN_REVISION sin caducidad y con su foto; un RECIBIDO sin caducidad no entra; la bandeja la ve';
+end $$;
+
+-- (n) la CONFIRMA quien la registró, y una sola vez
+do $$ begin
+  begin
+    insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 6, '2026-09-27T16:00:00.000Z', 'RECIBIDO', '19521111000010', 'L4471', '2027-05-30', '{"cajas":20,"zona":"recibo","revision":"sha256:5555555555555555555555555555555555555555555555555555555555555555"}', 'op-5e1a0c05', 'sha256:5555555555555555555555555555555555555555555555555555555555555555', null, 'sha256:6666666666666666666666666666666666666666666666666666666666666666');
+    raise exception '(n) otra persona pudo confirmar la revisión';
+  exception when check_violation then null; end;
+end $$;
+insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 6, '2026-09-27T16:00:00.000Z', 'RECIBIDO', '19521111000010', 'L4471', '2027-05-30', '{"cajas":20,"zona":"recibo","revision":"sha256:5555555555555555555555555555555555555555555555555555555555555555","lectura":{"propuesta":{"fecha":"2027-05-30"},"confirmada":{"caducidad":"2027-05-30","lote":"L4471"},"corregida":{"fecha":false,"lote":false}}}', 'op-5e1a0c04', 'sha256:5555555555555555555555555555555555555555555555555555555555555555', null, 'sha256:6666666666666666666666666666666666666666666666666666666666666666');
+do $$ begin
+  if exists (select 1 from erp.eti_revision_abierta) then raise exception '(n) la revisión sigue abierta tras confirmarla'; end if;
+  begin
+    insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 7, '2026-09-27T17:00:00.000Z', 'RECHAZADO', '19521111000010', 'REV-MFK00001', null, '{"revision":"sha256:5555555555555555555555555555555555555555555555555555555555555555","descartada":true,"motivo":"otra vez"}', 'op-5e1a0c05', 'sha256:6666666666666666666666666666666666666666666666666666666666666666', 'sha256:5555555555555555555555555555555555555555555555555555555555555555', 'sha256:7777777777777777777777777777777777777777777777777777777777777777');
+    raise exception '(n) se resolvió dos veces la misma revisión';
+  exception when check_violation then null; end;
+  raise notice '(n) OK la confirma quien la registró (otra persona no), una sola vez, y la bandeja queda vacía';
+end $$;
+
+-- (o) foto del artículo por huella existente; formato de fecha solo de la lista
+insert into erp.eti_articulo_foto (cliente_id, eti_articulo_id, vista, huella, nota, operador) values
+  ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'caducidad', 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'cuello, por encima del líquido', 'op-5e1a0c04');
+insert into erp.eti_formato_fecha (cliente_id, eti_articulo_id, formato, tipo, operador, evento) values
+  ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'DDMMAA', 'caducidad', 'op-5e1a0c04', 'sha256:6666666666666666666666666666666666666666666666666666666666666666');
+do $$ begin
+  begin
+    insert into erp.eti_articulo_foto (cliente_id, eti_articulo_id, vista, huella, operador) values ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'principal', 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd', 'op-5e1a0c04');
+    raise exception '(o) aceptó una foto que no está en eti_foto';
+  exception when foreign_key_violation then null; end;
+  begin
+    insert into erp.eti_formato_fecha (cliente_id, eti_articulo_id, formato, tipo, operador) values ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'latest', 'caducidad', 'op-5e1a0c04');
+    raise exception '(o) aceptó un formato fuera de la lista';
+  exception when check_violation then null; end;
+  begin
+    insert into erp.eti_articulo_foto (cliente_id, eti_articulo_id, vista, huella, operador) values ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'principal', 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Ana López');
+    raise exception '(o) aceptó un nombre como operador';
+  exception when check_violation then null; end;
+  raise notice '(o) OK fotos del artículo por huella existente, seudónimo y formato de fecha de la lista';
+end $$;
+
+-- (p) para la operación, fotos y formatos son solo-agregar
+set role rol_exe_fin;
+set app.cliente_id = '11111111-1111-4111-8111-111111111111';
+do $$ begin
+  begin update erp.eti_articulo_foto set nota = 'otra'; raise exception '(p) pudo reescribir una foto del artículo';
+  exception when insufficient_privilege then null; end;
+  begin delete from erp.eti_foto; raise exception '(p) pudo borrar una foto';
+  exception when insufficient_privilege then null; end;
+  begin update erp.eti_formato_fecha set formato = 'AAMMDD'; raise exception '(p) pudo cambiar un formato aprendido';
+  exception when insufficient_privilege then null; end;
+  if (select count(*) from erp.eti_foto) <> 2 then raise exception '(p) la operación no ve sus fotos'; end if;
+  raise notice '(p) OK para rol_exe_fin, eti_foto, eti_articulo_foto y eti_formato_fecha son solo-agregar';
+end $$;
+reset role;

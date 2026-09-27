@@ -5,13 +5,15 @@
  */
 import { emiteTicket, secretoValido } from '../../../../../tools/etiquetas-gs1/dist/agente/index.js';
 import {
-  altaConExpediente, aplicaImportacion, CONSUMIBLES_VACIOS, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueveConExpediente, parseaLectura, planificaImportacion,
+  altaConExpediente, aplicaImportacion, CONSUMIBLES_VACIOS, formatoDe, fotoVigente, revisionesAbiertas, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueveConExpediente, parseaLectura, planificaImportacion,
   recibeConExpediente, revisaPrefijoEmpresa, revisaZpl, type Consumibles, type EstadoAlmacen, type Paso, type PlanImportacion,
 } from '../nucleo.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { aseguraExpediente, ejecutaExpediente } from './acciones-expediente.ts';
 import { ejecutaConteo } from './acciones-conteo.ts';
+import { ejecutaRecepcion } from './acciones-recepcion.ts';
+import { motorDelServidor } from './fotos.ts';
 import type { Rol } from './roles.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 
@@ -27,6 +29,7 @@ export async function leeEstado(rol: Rol = 'operacion'): Promise<Respuesta> {
     return ok({
       hoy: hoyIso(), version: e.version, rol, configuracion: e.configuracion, articulos: Object.values(e.articulos), impresoras: [], existencias: [], movimientos: [],
       importaciones: [], asignaciones: [], contadores: e.contadores, agenteConSecreto: false, consumibles: CONSUMIBLES_VACIOS, devoluciones: [],
+      ...fichas(e), revisiones: [], motor: null,
     });
   }
   return ok({
@@ -36,8 +39,19 @@ export async function leeEstado(rol: Rol = 'operacion'): Promise<Respuesta> {
     agenteConSecreto: secretoValido(process.env['ETIQUETAS_AGENTE_SECRETO']),
     consumibles: e.consumibles ?? CONSUMIBLES_VACIOS,
     devoluciones: (e.devoluciones ?? []).slice(-20),
+    ...fichas(e),
+    revisiones: revisionesAbiertas(e).map((r) => ({ sitio: r.sitio, folio: r.folio, sku: r.sku, cajas: r.cajas, desde: r.desde, revision: r.evento.hash })),
+    motor: motorDelServidor()?.modelo ?? null,
   });
 }
+
+/** Las fotos VIGENTES de cada articulo y su formato de fecha aprendido (no el historial entero). */
+function fichas(e: EstadoAlmacen) {
+  const fotos = VISTAS.flatMap((v) => Object.keys(e.articulos).map((sku) => fotoVigente(e, sku, v)).filter((f) => f !== undefined));
+  const formatosFecha = Object.keys(e.articulos).map((sku) => formatoDe(e, sku)).filter((f) => f !== undefined);
+  return { fotos, formatosFecha };
+}
+const VISTAS = ['principal', 'frente', 'etiqueta', 'caja', 'caducidad'] as const;
 
 /** Una operacion de inventario con su evento: la transaccion, y la cabeza nueva al central. */
 async function conExpediente<T>(cambia: (e: EstadoAlmacen) => Paso<T>): Promise<Respuesta> {
@@ -152,6 +166,9 @@ export async function ejecuta(a: AccionEtiquetas, operador: string, rol: Rol = '
     case 'conteos': case 'conteo-abre': case 'conteo-lee': case 'conteo-cierra': case 'conteo-aplica': case 'conteo-cancela':
       await aseguraExpediente();
       return ejecutaConteo(a, operador, rol);
+    case 'lee-caducidad': case 'revision-confirma': case 'revision-descarta': case 'revisiones': case 'vincula-gtin': case 'foto-articulo':
+      await aseguraExpediente();
+      return ejecutaRecepcion(a, operador);
     case 'ticket': {
       const secreto = process.env['ETIQUETAS_AGENTE_SECRETO'];
       if (!secretoValido(secreto)) return mal(503, 'no hay agente de impresión configurado en el servidor (falta ETIQUETAS_AGENTE_SECRETO)');

@@ -280,3 +280,97 @@ Conectarlo en la app es otro paso: hace falta un cliente de Postgres pineado y d
 base del ERP, que es PRODUCCIÓN compartida, con datos reales (decisión de flujo de datos, C4). Hoy
 el ERP tampoco tiene los productos de prueba ni sucursales, así que el agente no encontraría ventas
 que cuadren con el laboratorio.
+
+## 11. Recepción con foto de la caducidad (`/etiquetas/recibir`)
+
+Spec: `docs/goals/foto-articulo-y-caducidad-leida.md`. Pantallas: `/etiquetas/recibir` (escanear →
+foto → revisión → etiqueta, y la bandeja «por confirmar»), la ficha del artículo en
+`/etiquetas/catalogo`, y la foto en el lector, mover, conteo, tablero y expediente.
+
+**Decisión del laboratorio**: la caducidad leída es una PROPUESTA. Cuenta para semáforo, FEFO y
+cadena solo cuando quien registra la confirma o la corrige; si la deja pendiente, las cajas se
+quedan en recibo y el servidor no deja moverlas, venderlas ni transferirlas.
+
+**Lo que se investigó y cómo cambió el diseño**
+
+| Fuente | Qué dice | Qué decidió aquí |
+|---|---|---|
+| ISO/IEC 15424 + GenSpecs (EAN/UPC, ITF-14) | La pistola manda `]E0` (EAN-13; UPC-A como EAN-13 con un 0), `]E3` (con suplemento), `]E4` (EAN-8), `]I1` (ITF). `]C0`, `]d1` y `]Q1` son Code 128, DataMatrix y QR **sin** GS1. | `codigos.ts` lee los cuatro, con y sin identificador; lo que no es GS1 se rechaza con su motivo («parece publicidad»), no se adivina un producto. La cámara les antepone el identificador según el formato que decodificó zxing. |
+| GS1 Digital Link 1.4 | La clave va en la ruta (`/01/…`), los calificadores también (`/10/`), los atributos en la consulta (`?17=`). Cualquier dominio. | Se lee la forma sin comprimir; con (17)(10) se recibe **sin foto**. La comprimida no se lee (se dice). |
+| NOM-051-SCFI/SSA1-2010 | En México la etiqueta declara «fecha de caducidad» o «consumo preferente», con día y mes (vida corta) o mes y año (vida larga), con abreviaturas (CAD, Cad., Cons. Pref.). | Los dos tipos se distinguen y se dicen en pantalla; mes y año vale hasta el último día del mes. |
+| Sistemas de visión en líneas de empaque y WMS con captura por cámara | Leen fechas con OCR especializado y **reglas de formato por SKU**; lo dudoso va a una persona. | El formato se APRENDE por artículo con la primera confirmación; la ambigüedad nunca se resuelve sola. |
+| Fotos reales del laboratorio (7) y corpus sintético (60 × 2 tomas) | Ver «Medición». | Motor, cascada, reglas del analizador. |
+
+**Medición (banco `tools/etiquetas-gs1/banco/`, 2026-09-27)** — `node banco/mide-caducidades.mjs`.
+Corpus sintético: 12 textos × 5 fondos (blanco, burbuja de aire, líquido oscuro, luz rasante, letra
+sólida), tinta de puntos 5×7 con el cero con diagonal, dos tomas por imagen; es **sintético** y
+sirve para comparar motores, no para fijar umbrales reales. Corpus real: 7 fotos del laboratorio
+(fuera de git; varias de catálogo web, baja resolución), 2 marcadas `por_confirmar` que no cuentan.
+
+<!-- TABLA-MEDICION -->
+
+**Decisiones**
+
+| Decisión | Por qué |
+|---|---|
+| **Motor: RapidOCR (PP-OCRv4 en ONNX Runtime, CPU) por proceso local**, versiones exactas en `motores/requirements-rapidocr.txt` | Es el único que medido lee la tinta de puntos (uniendo puntos) y las fotos reales **sin inventar**: 0 fechas en las fotos sin fecha. Tesseract no lee la tinta de puntos y, uniéndolos, propone fechas equivocadas; Qwen2.5-VL 3B lee bien recortado pero inventa en la foto entera y tarda 6-24 s. No es un modelo de lenguaje: no pasa por C8. |
+| **Cascada**: recorte tal cual → uniendo puntos si no vio fecha → foto entera si ninguna toma vio nada | Medido: los puntos unidos salvan la tinta de inyección y estropean la letra sólida; la foto entera ayuda con miniaturas que el motor detecta solo. `leeYPropone` es la misma función en la app y en el banco. |
+| **No se reusa `MotorOcr` del extractor**: se reusa su patrón | Aquel devuelve páginas con campos para documentos; esto, líneas con su caja de un recorte chico. Reusar el puerto obligaba a depender de otra herramienta para un contrato distinto. Sí se reusó: proceso por lectura, directorio temporal borrado siempre, modelo pineado, errores sin el texto leído, confianza que no decide nada. |
+| **El analizador decide, el motor transcribe** (`fechas-impresas.ts`) | Cifras sin rótulo no son fecha (la clave del proveedor también son cifras); el rótulo vale si no hay otras cifras entre él y la fecha; año fuera de ventana no se propone; un día imposible se marca y, si cambiando UNA cifra 8/9/6 por 0 sale una sola fecha, se sugiere (cero con diagonal). |
+| **Dos tomas se cotejan** | Si no dicen lo mismo, `discrepancia`: se enseñan las dos y no se propone ninguna. El lote se compara carácter por carácter. |
+| **`EN_REVISION` en la cadena, antes de que la persona decida** | La propuesta queda anclada: no se puede reescribir después para que parezca que la máquina acertó (probado: alterar la propuesta rompe el hash en esa secuencia). Su clave es el folio, sin caducidad; no mueve existencias. La resuelve un `RECIBIDO` (o `RECHAZADO`) con `revision` = su hash; «otra foto» abre un `EN_REVISION` que la `reemplaza`. |
+| **Confirma quien registró** | Lo exige el núcleo y la base (trigger). Si esa persona no puede, otra la descarta con motivo y se registra de nuevo. |
+| **`corregida` la calcula el servidor** | Compara lo confirmado con la propuesta guardada en la cadena; el navegador no puede decir «tal cual». |
+| **Pendiente = no es inventario** | No está en existencias, FEFO ni semáforo; mover, vender o transferir ese artículo en el sitio devuelve «caducidad por confirmar: N cajas… (hace X)». |
+| **Fotos por huella, fuera de la cadena** | Se normalizan en el servidor (sharp: orienta, reduce a 2000 px, **quita EXIF y GPS**) y se guardan en `ETIQUETAS_DATOS/fotos/` por su SHA-256; la cadena cita la huella. Un SVG, un HTML o lo que no tenga firma de imagen se rechaza por sus bytes; se sirven con `nosniff` y `sandbox`, pedidas con el código del dispositivo. |
+| **Carga masiva por nombre de archivo** (`SKU.jpg`, `SKU-caja.jpg`) | El servidor nunca descarga URLs (SSRF) y la foto no sale de la red de quien la sube. |
+| **Formato aprendido por artículo** | La primera confirmación que elige una lectura fija el formato (p. ej. DDMMAA); la siguiente sale sin ambigüedad, y se sigue confirmando. |
+| **Dónde viene la caducidad** | Una foto y una nota por artículo (vista `caducidad`); la primera persona que la encuentra la guarda al confirmar y las siguientes la ven antes de buscarla. |
+| **Motor externo: no existe** | La herramienta no trae ningún adaptador que saque la foto (C4). Conectar uno es decisión de flujo de datos y, si es un modelo de lenguaje, pasa por el routing (C8) y la contabilidad. |
+
+**Dónde viven y cuánto se retienen las fotos.** En `ETIQUETAS_DATOS/fotos/<2 cifras>/<huella>.jpg|png`,
+junto al estado (misma política de respaldo: inventario de BUSINESS_LOGIC.md §4). Las que cita la
+cadena (evidencia de una recepción o de una corrección) viven lo que el expediente: la cadena es
+solo-agregar, así que en la práctica se conservan; las de la ficha, mientras estén en el historial.
+Solo las que nadie cita (una subida que no se usó) pueden podarse con `poda(huellasReferidas(e), fecha)`;
+**no hay un job que lo haga solo**: borrar es irreversible y queda como gate humano (y como job de
+plataforma declarado, C7, en el ERP). Tamaño medido: ~150-300 KB por foto normalizada.
+
+**Instalación en un sitio**
+
+1. `bash tools/etiquetas-gs1/motores/instala-rapidocr.sh /opt/etiquetas/rapidocr` en el servidor de
+   la app (Python 3.11 aislado, versiones exactas, modelos dentro del paquete: nada se descarga al
+   leer) y `ETIQUETAS_MOTOR_PYTHON=/opt/etiquetas/rapidocr/bin/python`. Sin él, la recepción
+   funciona igual pero sin propuesta: se teclea y la foto queda como evidencia.
+2. La cámara del celular exige https (o localhost), como la del lector.
+3. Respaldar `ETIQUETAS_DATOS/fotos/` con `estado.json`.
+4. Documentar, artículo por artículo, dónde viene la caducidad (se hace solo al confirmar).
+
+**El andén.** La subida reintenta cuatro veces con espera creciente y dice en pantalla qué intento
+va («Subiendo foto 1 de 2 · intento 3…»); la foto sigue en el equipo mientras la página esté
+abierta. **No hay cola que sobreviva a recargar la página** (IndexedDB + reintento en segundo
+plano): queda pendiente, dicho aquí en lugar de a medias.
+
+**ERP (propuesta, no aplicada)**: `eti_foto` (metadatos por huella; los bytes en un almacenamiento
+de objetos privado), `eti_articulo_foto` y `eti_formato_fecha` (solo-agregar), `EN_REVISION` en
+`eti_evento` con caducidad nula solo para la revisión, un trigger que exige la foto, que la
+confirme quien registró y que se resuelva una vez, y la vista `eti_revision_abierta`. Validado en el
+Postgres 17 efímero, pruebas (m) a (p), dos instalaciones seguidas. 004 debe listar también las
+tres tablas nuevas.
+
+**Formas en que esto podría estar mal o incompleto, y qué se hizo**
+
+| Riesgo | Qué se hizo | Queda |
+|---|---|---|
+| La máquina propone una fecha equivocada con confianza alta | Nada cuenta sin confirmación humana (límite de C5: el daño sería de quien compra); ventana de años, calendario, cotejo de dos tomas, aviso de vida útil. | La tasa real de «equivocada» solo se sabe con fotos reales en uso: la bandeja mide confirmadas tal cual contra corregidas por motor y formato. |
+| El motor inventa en una foto sin fecha | Medido: RapidOCR 0 de 3; y el analizador no acepta cifras sin rótulo. | — |
+| Ambigüedad resuelta en silencio (03/04, 241123) | Se enseñan las opciones; el formato se aprende solo cuando una persona elige. | Un formato aprendido mal elegido se arrastra: se ve en la ficha y se cambia con la siguiente confirmación. |
+| El lote se lee mal (A/H, 2/3) | El lote se confirma igual que la fecha; las tomas se comparan carácter por carácter y se avisa. | El lote no tiene dígito verificador: solo la persona lo valida. |
+| Alguien confirma por otro | Núcleo y base exigen el mismo seudónimo. | La identidad sigue siendo «código del dispositivo + nombre declarado» (§5, riesgo 18). |
+| Se borra una revisión pendiente del almacén | Es un evento de la cadena: se delata como cualquier borrado (ancla y testigos). | — |
+| Esquivar la foto con el etiquetado manual (`etiquetado`) | Sigue existiendo: teclear la fecha es una confirmación humana. | No se bloquea el etiquetado de un artículo con revisión abierta: se podría registrar dos veces lo mismo. |
+| La foto completa captura a una persona | La guía encuadra la fecha; lo que se lee es el recorte. | La foto completa se guarda como evidencia: si capta a alguien, es dato personal dentro de lo inmutable (su huella en la cadena; la foto se puede quitar del almacén, y la cadena seguiría verificando). |
+| Tamaño de las fotos | 2000 px JPEG q85 (~150-300 KB). | Sin poda automática (gate humano). |
+| El motor falla o no está | La recepción sigue: sin propuesta, se teclea; el error se dice sin el texto leído. | — |
+| Corpus sintético optimista | Se dice en cada tabla; los umbrales no se fijan con él. | Medir con fotos de celular reales del andén (resolución normal, encuadradas). |
+| Tipos de código que no se leen | Digital Link comprimido, DataBar expandido con fechas, UPC-E se dicen «no se lee». | — |

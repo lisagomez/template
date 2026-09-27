@@ -18,6 +18,7 @@ import { LectorCamara } from './lector-camara.tsx';
 import { campo, tarjeta } from './marco.tsx';
 import { PanelImpresion } from './panel-impresion.tsx';
 import { svgDe } from './vista-etiqueta.tsx';
+import { FotoArticulo } from './foto.tsx';
 
 interface Registro { readonly n: number; readonly tipo: 'ok' | 'error' | 'zona'; readonly texto: string; readonly avisos: readonly string[] }
 
@@ -103,7 +104,7 @@ export function PantallaMover({ e }: { e: Etiquetas }) {
             <thead className="text-xs text-neutral-500"><tr><th className="py-1">Artículo</th><th>Lote</th><th>Caduca</th>{ZONAS.map((z) => <th key={z.id} className="text-right">{z.nombre}</th>)}</tr></thead>
             <tbody>{[...filas.values()].sort((a, b) => a.caducidad.localeCompare(b.caducidad)).map((f) => (
               <tr key={`${f.sku}${f.lote}${f.caducidad}`} className="border-t border-neutral-200 dark:border-neutral-800">
-                <td className="py-1 pr-2">{est.articulos.find((a) => a.sku === f.sku)?.descripcion ?? f.sku}</td>
+                <td className="py-1 pr-2"><span className="flex items-center gap-2"><FotoArticulo est={est} sku={f.sku} className="h-8 w-8 rounded" />{est.articulos.find((a) => a.sku === f.sku)?.descripcion ?? f.sku}</span></td>
                 <td className="font-mono text-xs">{f.lote}</td><td className="text-xs">{fecha(f.caducidad)}</td>
                 {ZONAS.map((z) => <td key={z.id} className="text-right tabular-nums">{f.zonas[z.id] || '·'}</td>)}
               </tr>

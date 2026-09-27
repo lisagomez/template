@@ -18,7 +18,7 @@ import { exigeModeloPineado, type LecturaDelMotor, type LineaLeida, type MotorFe
 
 export const MODELO_RAPIDOCR = 'rapidocr-onnxruntime-1.4.4/ppocrv4'
 /** El script que viaja con la herramienta (fuera de `dist/`, junto a su lista de versiones). */
-export const SCRIPT_RAPIDOCR = resolve(dirname(fileURLToPath(import.meta.url)), '../../motores/rapidocr-json.py')
+export const SCRIPT_RAPIDOCR = resolve(/*turbopackIgnore: true*/ dirname(fileURLToPath(import.meta.url)), '../../motores/rapidocr-json.py')
 
 export interface OpcionesMotorProceso {
   /** El Python del entorno de RapidOCR (`ETIQUETAS_MOTOR_PYTHON`). */
@@ -30,7 +30,10 @@ export interface OpcionesMotorProceso {
 
 function ejecuta(comando: string, argumentos: readonly string[], espera: number): Promise<{ codigo: number | null; stdout: string; stderr: string; cortado: boolean }> {
   return new Promise((ok) => {
-    const p = spawn(comando, argumentos, { stdio: ['ignore', 'pipe', 'pipe'], env: { PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '' } })
+    // El proceso no hereda el entorno (ahi viven los secretos del servidor): solo PATH y HOME.
+    // (Next declara NODE_ENV obligatorio en ProcessEnv; este entorno minimo no lo lleva a proposito.)
+    const entorno = { PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '' } as unknown as NodeJS.ProcessEnv
+    const p = spawn(comando, [...argumentos], { stdio: ['ignore', 'pipe', 'pipe'], env: entorno })
     let stdout = ''
     let stderr = ''
     let cortado = false
@@ -38,7 +41,7 @@ function ejecuta(comando: string, argumentos: readonly string[], espera: number)
     p.stdout.on('data', (d: Buffer) => { stdout += d.toString('utf8') })
     p.stderr.on('data', (d: Buffer) => { stderr += d.toString('utf8') })
     p.on('error', () => { clearTimeout(reloj); ok({ codigo: -1, stdout: '', stderr: 'motor: no se pudo lanzar el proceso', cortado }) })
-    p.on('close', (codigo) => { clearTimeout(reloj); ok({ codigo, stdout, stderr, cortado }) })
+    p.on('close', (codigo: number | null) => { clearTimeout(reloj); ok({ codigo, stdout, stderr, cortado }) })
   })
 }
 
@@ -65,18 +68,18 @@ export function motorPorProceso(op: OpcionesMotorProceso): MotorFechas {
     async lee(imagen, opciones) {
       const tipo = tipoDeImagen(imagen)
       if (!tipo) throw new Error('motor: no es una imagen')
-      const dir = await mkdtemp(join(tmpdir(), 'etiquetas-motor-'))
+      const dir = await mkdtemp(join(/*turbopackIgnore: true*/ tmpdir(), 'etiquetas-motor-'))
       const t0 = Date.now()
       try {
-        const ruta = join(dir, `recorte.${tipo === 'jpeg' ? 'jpg' : tipo}`)
-        await writeFile(ruta, imagen, { mode: 0o600 })
+        const ruta = join(/*turbopackIgnore: true*/ dir, `recorte.${tipo === 'jpeg' ? 'jpg' : tipo}`)
+        await writeFile(/*turbopackIgnore: true*/ ruta, imagen, { mode: 0o600 })
         const r = await ejecuta(op.comando, [...argumentos, ...(opciones?.variante === 'puntos' ? ['--puntos'] : []), ruta], op.milisegundosDeEspera ?? 30_000)
         if (r.cortado) throw new Error('motor: tardó demasiado y se detuvo')
         if (r.codigo !== 0) throw new Error(r.stderr.split('\n').find((x) => x.startsWith('motor:')) ?? `motor: salió con código ${r.codigo}`)
         const lectura: LecturaDelMotor = { motor: `${modelo}${opciones?.variante === 'puntos' ? '+puntos' : ''}`, ms: Date.now() - t0, lineas: validaSalida(r.stdout) }
         return lectura
       } finally {
-        await rm(dir, { recursive: true, force: true })
+        await rm(/*turbopackIgnore: true*/ dir, { recursive: true, force: true })
       }
     },
   }

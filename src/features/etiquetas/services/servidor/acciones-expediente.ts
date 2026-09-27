@@ -9,6 +9,7 @@ import {
   verificaCadena, verificaPruebaEvento, verificaTransferencias, type ClaveLote, type EstadoAlmacen, type Evento, type Paso,
 } from '../nucleo.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
+import { fotosDelServidor } from './fotos.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { anclaSitios, auditoria, avisaCabezas, centralDelServidor, integridadParaActuar, seudonimosDelServidor, siembraCentral, ventasDelServidor } from './expediente.ts';
 
@@ -42,6 +43,8 @@ const lote = (a: { gtin: string; lote: string; caducidad: string }): ClaveLote =
 function lotes(e: EstadoAlmacen) {
   const m = new Map<string, { lote: ClaveLote; sku: string; descripcion: string; sitios: Set<string>; eventos: number; ultimo: Evento }>();
   for (const ev of Object.values(e.eventos ?? {}).flat()) {
+    // Una revision por confirmar no es un lote todavia (su clave es el folio): vive en la bandeja.
+    if (ev.lote.caducidad === '') continue;
     const k = idLote(ev.lote);
     const sku = String(ev.datos['sku'] ?? m.get(k)?.sku ?? '');
     const g = m.get(k) ?? { lote: ev.lote, sku, descripcion: e.articulos[sku]?.descripcion ?? sku, sitios: new Set<string>(), eventos: 0, ultimo: ev };
@@ -107,7 +110,9 @@ export async function ejecutaExpediente(a: AccionExpediente, operador: string): 
     }
     case 'correccion': {
       const quien = await op();
-      return escribe((x) => corrige(x, { sitio: a.sitio, corrige: a.corrige, motivo: a.motivo, ...(a.ajuste ? { ajuste: a.ajuste } : {}), ...(a.caducidad ? { caducidad: a.caducidad } : {}) }, ahora, `cor-${Date.now()}`, quien));
+      if (a.foto && !(await fotosDelServidor().lee(a.foto))) return { status: 404, cuerpo: { error: 'la foto de la corrección no se subió a este servidor' } };
+      const evidencia = a.foto ? { evidencia: { fotos: { completa: a.foto, recortes: [] }, ...(a.textoFoto ? { texto: a.textoFoto } : {}) } } : {};
+      return escribe((x) => corrige(x, { sitio: a.sitio, corrige: a.corrige, motivo: a.motivo, ...(a.ajuste ? { ajuste: a.ajuste } : {}), ...(a.caducidad ? { caducidad: a.caducidad } : {}), ...evidencia }, ahora, `cor-${Date.now()}`, quien));
     }
     case 'agente': {
       const ventas = ventasDelServidor();

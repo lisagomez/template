@@ -62,6 +62,7 @@ function revisaPedido(estado: EstadoAlmacen, p: PedidoRevision, operador: string
   const art = estado.articulos[p.sku]
   if (!art) return `el artículo ${p.sku} no está en el catálogo`
   if (!art.gtinCaja) return `el artículo ${p.sku} no tiene GTIN de caja: sin él no se etiqueta la caja`
+  if (p.codigo.gtin !== art.gtinCaja && p.codigo.gtin !== art.gtinUnidad) return `el código leído (${p.codigo.gtin}) no es de ${p.sku}: vincúlalo primero`
   if (!Number.isInteger(p.cajas) || p.cajas < 1 || p.cajas > 100_000) return 'las cajas van en enteros positivos'
   if (!esHuella(p.fotos.completa) || !p.fotos.recortes.every(esHuella)) return 'falta la foto (o su huella no es SHA-256)'
   if (p.reemplaza) {
@@ -121,7 +122,7 @@ export function confirmaRevision(estado: EstadoAlmacen, c: Confirmacion, hoy: st
   const art = estado.articulos[abierta.sku]
   if (!art?.gtinCaja) return falla(estado, `el artículo ${abierta.sku} ya no tiene GTIN de caja`)
   const d = abierta.evento.datos
-  const prop = (d['propuesta'] ?? {}) as { fecha?: string; lote?: string; estado?: string; motor?: string }
+  const prop = (d['propuesta'] ?? {}) as { fecha?: string; lote?: string; estado?: string; motor?: string; opciones?: { iso?: string; formato?: string }[] }
   const corregida = fueCorregida({ ...(prop.fecha ? { fecha: prop.fecha } : {}), ...(prop.lote ? { lote: prop.lote } : {}) }, c)
   const lectura = json({ fotos: d['fotos'], propuesta: { estado: prop.estado, fecha: prop.fecha, lote: prop.lote }, confirmada: { caducidad: c.caducidad, lote: c.lote, tipo: c.tipo ?? 'caducidad' }, corregida, motor: prop.motor })
   const fotos = d['fotos'] as { completa?: string } | undefined
@@ -129,7 +130,10 @@ export function confirmaRevision(estado: EstadoAlmacen, c: Confirmacion, hoy: st
   if (!r.resultado.ok) return falla(estado, r.resultado.motivo)
   const evento = r.resultado.eventos[0]!
   const previo = formatoDe(r.estado, art.sku)
-  const aprende = c.formato && c.tipo && (previo?.formato !== c.formato || previo.tipo !== c.tipo)
+  // Se aprende solo un formato que ESTABA en la propuesta guardada en la cadena para esa fecha: el
+  // navegador no puede ensenarle al articulo un formato que la maquina nunca leyo.
+  const leido = (prop.opciones ?? []).some((o) => o.iso === c.caducidad && o.formato === c.formato)
+  const aprende = leido && c.formato && c.tipo && (previo?.formato !== c.formato || previo.tipo !== c.tipo)
   const estado2 = aprende ? { ...r.estado, formatosFecha: [...(r.estado.formatosFecha ?? []), { sku: art.sku, formato: c.formato!, tipo: c.tipo!, operador, fecha: cuando, evento: evento.hash }] } : r.estado
   return { estado: estado2, resultado: { ok: true, valor: { ...r.resultado.valor, corregida }, eventos: r.resultado.eventos } }
 }

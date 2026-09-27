@@ -12,6 +12,7 @@ import { diferencias, reglaDeExistente, validaCodigo, type ErrorFila, type FilaC
 import type { Articulo, Asignacion, EstadoAlmacen, Regla } from './modelo.js'
 import { derivaCaja, emiteInterno, emitePropio, esEmision } from './numeracion.js'
 import { clasificaPrefijo } from './prefijos.js'
+import { formatoDe, fotoVigente } from './recepcion-foto.js'
 
 const PROPIAS: readonly Regla[] = ['propio', 'propio-existente']
 const REEMPLAZABLES: readonly (Regla | undefined)[] = ['interno', 'interno-existente', undefined]
@@ -163,12 +164,17 @@ export function aplicaImportacion(estado: EstadoAlmacen, plan: PlanImportacion, 
 }
 
 /** Filas para exportar a CSV o Excel: el catalogo con sus codigos y la regla de cada uno. */
+/**
+ * El catalogo para exportar. Las tres ultimas columnas dicen que articulos tienen foto, donde viene
+ * su caducidad y con que formato se imprime; al reimportar se ignoran (no son del catalogo).
+ */
 export function filasDeExportacion(estado: EstadoAlmacen): string[][] {
-  const cab = ['sku', 'descripcion', 'categoria', 'sitios', 'marca_propia', 'gtin', 'regla_gtin', 'gtin_caja', 'regla_caja', 'circulacion', 'unidades_por_caja', 'cajas_por_tarima', 'vida_util_dias', 'notas']
+  const cab = ['sku', 'descripcion', 'categoria', 'sitios', 'marca_propia', 'gtin', 'regla_gtin', 'gtin_caja', 'regla_caja', 'circulacion', 'unidades_por_caja', 'cajas_por_tarima', 'vida_util_dias', 'notas', 'foto', 'donde_caducidad', 'formato_caducidad']
   const filas = Object.values(estado.articulos).sort((a, b) => a.sku.localeCompare(b.sku)).map((a) => [
     a.sku, a.descripcion, a.categoria, a.sitios.join(';'), a.marcaPropia ? 'SI' : 'NO', a.gtinUnidad ?? '', a.reglaUnidad ?? '', a.gtinCaja ?? '', a.reglaCaja ?? '',
     [a.gtinUnidad, a.gtinCaja].some((g) => g && clasificaPrefijo(g).clase.startsWith('restringido')) ? 'restringida (solo dentro de la cadena)' : 'global',
     String(a.unidadesPorCaja), a.cajasPorTarima ? String(a.cajasPorTarima) : '', a.vidaUtilDias ? String(a.vidaUtilDias) : '', a.notas.join(' '),
+    fotoVigente(estado, a.sku) ? 'SI' : 'NO', fotoVigente(estado, a.sku, 'caducidad')?.nota ?? '', formatoDe(estado, a.sku)?.formato ?? '',
   ])
   return [cab, ...filas]
 }

@@ -11,6 +11,7 @@ import { describeEvento, TEXTO_EVENTO } from '../services/presenta.ts';
 import type { Expediente } from '../services/tipos-expediente.ts';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { boton, botonPrimario, campo } from './marco.tsx';
+import { subeFoto } from '../services/cliente.ts';
 
 type Tipo = 'VENDIDO' | 'DEVUELTO' | 'DONADO' | 'MERMA';
 type Respuesta = { ok: boolean; motivo?: string };
@@ -28,6 +29,7 @@ export function AccionesLote({ e, x, sitios, alTerminar }: { e: Etiquetas; x: Ex
   const [corregido, setCorregido] = useState('');
   const [zona, setZona] = useState<'recibo' | 'almacen' | 'piso' | 'merma'>('almacen');
   const [caducidad, setCaducidad] = useState('');
+  const [foto, setFoto] = useState<{ huella: string; texto: string } | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const eventosSitio = x.eventos.filter((v) => v.evento.sitio === sitio).map((v) => v.evento);
 
@@ -39,7 +41,7 @@ export function AccionesLote({ e, x, sitios, alTerminar }: { e: Etiquetas; x: Ex
     const l = x.lote;
     if (modo === 'salida') corre(e.ejecuta<Respuesta>({ accion: 'salida', sitio, tipo, ...l, cajas, ...(tipo === 'VENDIDO' ? { canal } : {}), ...(autoriza.trim() ? { autoriza: autoriza.trim() } : {}), ...(motivo.trim() ? { motivo: motivo.trim() } : {}) }));
     if (modo === 'transferencia') corre(e.ejecuta<Respuesta>({ accion: 'transferencia', origen: sitio, destino, ...l, cajas }));
-    if (modo === 'correccion') corre(e.ejecuta<Respuesta>({ accion: 'correccion', sitio, corrige: corregido, motivo: motivo.trim(), ...(caducidad ? { caducidad } : { ajuste: { zona, cajas } }) }));
+    if (modo === 'correccion') corre(e.ejecuta<Respuesta>({ accion: 'correccion', sitio, corrige: corregido, motivo: motivo.trim(), ...(caducidad ? { caducidad } : { ajuste: { zona, cajas } }), ...(foto ? { foto: foto.huella } : {}) }));
   };
 
   return (
@@ -67,6 +69,11 @@ export function AccionesLote({ e, x, sitios, alTerminar }: { e: Etiquetas; x: Ex
               <label className="text-sm">Zona del ajuste<select className={campo} value={zona} onChange={(v) => setZona(v.target.value as typeof zona)}><option value="recibo">Recibo</option><option value="almacen">Almacén</option><option value="piso">Piso</option><option value="merma">Merma</option></select></label>
               <label className="text-sm">…o caducidad correcta<input className={campo} type="date" value={caducidad} onChange={(v) => setCaducidad(v.target.value)} /></label>
               <label className="text-sm sm:col-span-2">Motivo<input className={campo} value={motivo} onChange={(v) => setMotivo(v.target.value)} maxLength={200} required minLength={3} data-prueba="motivo-correccion" /></label>
+              <label className="text-sm sm:col-span-2">Foto de la caja como evidencia (se guarda sin EXIF ni GPS; en la cadena va su huella)
+                <input type="file" accept="image/*" capture="environment" className="block text-sm" data-prueba="foto-correccion"
+                  onChange={(v) => { const f = v.target.files?.[0]; if (f) void subeFoto(f).then((x) => setFoto({ huella: x.huella, texto: `foto ${x.huella.slice(7, 19)}${x.gpsQuitado ? ' · se quitó el GPS' : ''}` }), (err: unknown) => setAviso(err instanceof Error ? err.message : String(err))); }} />
+              </label>
+              {foto ? <p className="text-xs text-emerald-700 sm:col-span-2" data-prueba="foto-correccion-lista">Evidencia lista: {foto.texto}</p> : null}
             </>
           ) : null}
           {modo !== 'correccion' || !caducidad ? <label className="text-sm">{modo === 'correccion' ? 'Cajas (+/−)' : 'Cajas'}<input className={campo} type="number" value={cajas} min={modo === 'correccion' ? -100000 : 1} onChange={(v) => setCajas(Number(v.target.value) || 0)} data-prueba="cajas-accion" /></label> : null}

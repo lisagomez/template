@@ -14,6 +14,8 @@ import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { comoEstado } from './pantalla-lector.tsx';
 import { boton, botonPrimario, campo, tarjeta } from './marco.tsx';
 import { PanelImpresion } from './panel-impresion.tsx';
+import { FichaArticulo, FotosEnLote } from './ficha-articulo.tsx';
+import { FotoArticulo } from './foto.tsx';
 
 const EJEMPLOS = [
   ['YOG-001', 'Yogurt natural 1 kg', 'lacteos', 'CEDIS-NTE;SUC-CENTRO', 'NO', '9521111000013', '19521111000010', '12', '50', '35'],
@@ -71,6 +73,7 @@ export function PantallaCatalogo({ e }: { e: Etiquetas }) {
   const [aplicado, setAplicado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elegidos, setElegidos] = useState<string[]>([]);
+  const [ficha, setFicha] = useState<string | null>(null);
   const [lote, setLote] = useState({ sitio: est.configuracion.sitios[0]?.clave ?? '', lote: '', caducidad: sumaDias(est.hoy, 30), copias: 1 });
 
   const sube = async (f: File | undefined) => {
@@ -123,10 +126,11 @@ export function PantallaCatalogo({ e }: { e: Etiquetas }) {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-xs" data-prueba="catalogo">
-            <thead className="text-neutral-500"><tr><th /><th className="py-1">SKU</th><th>Descripción</th><th>Sitios</th><th>GTIN pieza</th><th>GTIN caja</th></tr></thead>
+            <thead className="text-neutral-500"><tr><th /><th>Foto</th><th className="py-1">SKU</th><th>Descripción</th><th>Sitios</th><th>GTIN pieza</th><th>GTIN caja</th></tr></thead>
             <tbody>{est.articulos.map((a) => (
               <tr key={a.sku} className="border-t border-neutral-200 align-top dark:border-neutral-800">
                 <td><input type="checkbox" aria-label={`Elegir ${a.sku}`} checked={elegidos.includes(a.sku)} onChange={() => setElegidos((v) => (v.includes(a.sku) ? v.filter((x) => x !== a.sku) : [...v, a.sku]))} /></td>
+                <td className="py-1"><button type="button" onClick={() => setFicha(a.sku)} aria-label={`Ficha de ${a.sku}`} data-prueba="abrir-ficha"><FotoArticulo est={est} sku={a.sku} className="h-12 w-12 rounded" /></button></td>
                 <td className="py-1 font-mono">{a.sku}</td><td>{a.descripcion}</td><td>{a.sitios.join(', ')}</td>
                 <td className="font-mono">{gtinLegible(a.gtinUnidad)}<br /><span className="font-sans text-neutral-500">{a.reglaUnidad ? TEXTO_REGLA[a.reglaUnidad] : ''}</span></td>
                 <td className="font-mono">{gtinLegible(a.gtinCaja)}<br /><span className="font-sans text-neutral-500">{a.reglaCaja ? TEXTO_REGLA[a.reglaCaja] : ''}</span></td>
@@ -134,7 +138,10 @@ export function PantallaCatalogo({ e }: { e: Etiquetas }) {
             ))}</tbody>
           </table>
         </div>
+        <p className="text-xs text-neutral-500">Toca la foto de un artículo para abrir su ficha: foto, otras vistas y dónde viene impresa su caducidad. {est.articulos.filter((a) => !est.fotos.some((f) => f.sku === a.sku && f.vista === 'principal')).length} artículo(s) sin foto (la exportación lo dice en la columna «foto»).</p>
+        <FotosEnLote e={e} />
       </section>
+      {ficha ? <FichaArticulo key={ficha} e={e} sku={ficha} alCerrar={() => setFicha(null)} /> : null}
       <section className={`${tarjeta} space-y-3`}>
         <h2 className="text-base font-semibold">4 · Imprimir etiquetas de un lote ({seleccion.length} artículo(s) elegidos)</h2>
         <div className="grid gap-2 sm:grid-cols-4">

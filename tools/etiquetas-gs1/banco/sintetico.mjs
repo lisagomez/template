@@ -56,6 +56,19 @@ export const FONDOS = {
 }
 
 const P = 9
+
+/** Circulos SVG de un texto en matriz de puntos 5×7 (tambien lo usan las capturas de la app). */
+export function circulosDePuntos(lineas, x0, y0, paso, color, azar = Math.random) {
+  let c = ''
+  lineas.forEach((linea, li) => [...linea].forEach((ch, ci) => (F[ch] ?? F[' ']).split(' ').forEach((fila, fi) => [...fila].forEach((b, co) => {
+    if (b !== '1') return
+    const x = x0 + (ci * 6 + co) * paso + (azar() - 0.5) * paso * 0.2
+    const y = y0 + (li * 10 + fi) * paso + (azar() - 0.5) * paso * 0.2
+    c += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(paso * 0.37).toFixed(1)}" fill="${color}"/>`
+  }))))
+  return c
+}
+
 function svgPuntos(lineas, { fondo, tinta }, azar) {
   const ancho = 40 + Math.max(...lineas.map((l) => l.length)) * 6 * P
   const alto = 40 + lineas.length * 10 * P
