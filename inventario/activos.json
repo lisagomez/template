@@ -82,6 +82,30 @@
    "cubre": ["tools/asesor-ventas"]
   },
   {
+   "id": "TPL-pymes-marketing",
+   "nombre": "Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/pymes-marketing", "responsable": "dep-sw",
+   "origen": [".claude/goals/pymes-marketing"],
+   "cubre": ["tools/pymes-marketing"]
+  },
+  {
+   "id": "TPL-feature-estudio-pymes",
+   "nombre": "Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/estudio-pymes", "responsable": "dep-sw",
+   "origen": [".claude/goals/pymes-marketing"],
+   "cubre": ["src/features/estudio-pymes"]
+  },
+  {
+   "id": "TPL-feature-laboratorio-pymes",
+   "nombre": "Laboratorio de las herramientas pymes: casos, estado real y veredictos",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/laboratorio-pymes", "responsable": "dep-sw",
+   "origen": [".claude/goals/pymes-marketing"],
+   "cubre": ["src/features/laboratorio-pymes", "scripts/laboratorio-pymes"]
+  },
+  {
    "id": "TPL-ejemplo-herramienta",
    "nombre": "Andamio de herramienta empaquetable (el ejemplo a copiar)",
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",

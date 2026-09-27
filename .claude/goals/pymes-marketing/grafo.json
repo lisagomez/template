@@ -20,82 +20,98 @@
     {
       "id": "triaje",
       "label": "Mapa de adaptacion: 9 skills del plugin + 2 de video + sfstudio; por fuente, que se conserva / reemplaza / descarta, riesgo y entrada local",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "triaje.md: 12/12 filas; huellas 64/64, plugin da38ec1, sfstudio 2a751fd verificados"
     },
     {
       "id": "perfil",
       "label": "Perfil de marca y voz del negocio (brand-style + voice-profile)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "./marca + voz: laboratorio 6/6 (marca-1..6); sin estreno con un cliente real"
     },
     {
       "id": "ventas",
       "label": "Ventas normalizadas (CFDI XML via extractor-documental, CSV de caja/tienda)",
-      "estado": "ambar"
+      "estado": "ambar",
+      "evidencia": "./ventas: 91 CFDI sintéticos por el lector real del extractor; laboratorio 7/7; sin estreno real"
     },
     {
       "id": "senales",
       "label": "Senales de clientes (resenas pegadas o exportadas, mensajes)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "reseñas pegadas/CSV con C3 y C4: laboratorio resenas-1..3; sin estreno real"
     },
     {
       "id": "estrategia",
       "label": "Brief de contenido a 30 dias (content-strategy)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "brief de 30 días con la estructura de la fuente (contenido-1, -4); sin estreno real"
     },
     {
       "id": "calendario",
       "label": "Calendario editorial + piezas en borrador (social-content-engine + canva-creator)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "calendario vivo + piezas SVG (contenido-2, -3, -5, -6); captura 4-calendario-pieza.png"
     },
     {
       "id": "resenas",
       "label": "Temas con citas + borradores de respuesta (review-reputation)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "temas, borradores una por una, retenidas/escaladas, callados (resenas-1..7); AISIA en borrador"
     },
     {
       "id": "pulso",
       "label": "Pulso de crecimiento (growth-pulse)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "pulso con umbrales de thresholds.md (pulso-4)"
     },
     {
       "id": "seo",
       "label": "Auditoria SEO + visibilidad en IA (seo-ai-visibility)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "auditoría solo lectura, archivos POR CONFIRMAR (visibilidad-1..6); lectura por URL pendiente (SSRF)"
     },
     {
       "id": "anuncios",
       "label": "Diagnostico de anuncios + copys (ad-manager, desde exportacion)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "veredicto contra promedio propio, impacto mensual MXN (pulso-1..3, -7)"
     },
     {
       "id": "lunes",
       "label": "Brief semanal de marketing (marketing-monday)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "fusión con hilo y fuentes sin datos (pulso-5, -6); captura 6-brief-lunes.png"
     },
     {
       "id": "propuesta-video",
       "label": "Propuesta de herramientas de video y animacion para pymes (analisis, sin construir)",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "propuesta-video.md: 14 preguntas para firma; sin construir"
     },
     {
       "id": "paquetes",
       "label": "Herramientas empaquetadas (tarballs en verde, sin publicar)",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "npm run empaqueta pymes-marketing: 8 subpaths instalados e importados en proyecto limpio"
     },
     {
       "id": "laboratorio",
       "label": "Laboratorio de pruebas por herramienta (casos, estado real, veredictos)",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "/laboratorio-pymes + npm run prueba:laboratorio-pymes en validate: 45 casos, 24 trampas"
     },
     {
       "id": "app",
       "label": "App para el cliente pyme que las usa",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "/estudio: usa solo lo aprobado (6 de 7); captura sin errores de consola; sin estreno con un cliente"
     },
     {
       "id": "firma",
       "label": "Gate humano: publicar, conectar un servicio, enviar a terceros",
-      "estado": "gris"
+      "estado": "gris",
+      "evidencia": "pendiente: publicar, conectar y enviar siguen siendo del dueño; nada se publicó"
     }
   ],
   "aristas": [
@@ -281,56 +297,64 @@
       "sobre": "nodo:triaje",
       "label": "cada una de las 12 fuentes tiene fila y veredicto",
       "referencia": "12/12 filas; ningun conector queda sin sustituto local o sin motivo de descarte; huellas de fuentes-video y commit de sfstudio verificados",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "triaje.md 12/12"
     },
     {
       "id": "L2",
       "sobre": "nodo:lunes",
       "label": "la fusion no tira fuentes en silencio",
       "referencia": "fuente ausente = 'sin datos', nunca cero ni omitida (shared/absent-is-not-zero.md)",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "pulso-5: 5 secciones, 2 sin datos, ninguna tirada"
     },
     {
       "id": "L3",
       "sobre": "nodo:resenas",
       "label": "C4: se escribe sobre terceros",
       "referencia": "nada se publica; datos personales minimizados; AISIA corta",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "resenas-2..7 + aisia-resenas.md (borrador)"
     },
     {
       "id": "L4",
       "sobre": "nodo:paquetes",
       "label": "contrato del paquete",
       "referencia": "npm run empaqueta <x> en verde por herramienta, nucleo sin React/Next/Supabase",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "empaqueta verde, 8 subpaths"
     },
     {
       "id": "L5",
       "sobre": "nodo:laboratorio",
       "label": "casos con estado real",
       "referencia": ">= 5 casos por herramienta incluidos casos-trampa; veredicto medido, no supuesto",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "45 casos, >=5 por herramienta, 24 trampas; suite en validate"
     },
     {
       "id": "L6",
       "sobre": "arista:a7",
       "label": "coste de generacion",
       "referencia": "modelo por routing-modelos.json, uso a contabilidad; sin datos = null",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "llm-2 US$0.002584/redacción simulada; llm-3 null; llm-6 US$0.00 medido"
     },
     {
       "id": "L7",
       "sobre": "nodo:firma",
       "label": "nada sale sin firma",
       "referencia": "cero envios, publicaciones o conexiones en todo el goal",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "0 publicaciones, 0 envíos, 0 conexiones; aprobar = 0 peticiones de red"
     },
     {
       "id": "L8",
       "sobre": "nodo:propuesta-video",
       "label": "lo que el paquete no dice, declarado",
       "referencia": "licencia (skills, sfstudio UNLICENSED, GSAP, fuentes), servicios de pago y su precio, datos que salen (voz y cara del dueno = C4), piezas ausentes (video-use, biblioteca), lo que publica (sfpublish) fuera; ninguna API llamada",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "propuesta-video.md: licencias, costos, datos que salen, piezas ausentes"
     }
   ]
 }
