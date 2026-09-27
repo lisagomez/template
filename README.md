@@ -250,6 +250,7 @@ npm run audita:fugas  # ¿una entrada del corpus es reconocible leyendo el arbol
 npm run prueba:contabilidad  # el coste `null` no se suma como cero, y el corte no lo decide el modulo
 npm run prueba:imprenta  # el contrato de los CLI: dry-run, destructivo marcado, sin reimplementar
 npm run prueba:laboratorio  # las reglas del laboratorio de voz (/laboratorio-voz): catalogo, estado real, intenciones, acta del CLI, WAV, PCM en flujo, interrupcion, sesion de picking
+npm run prueba:laboratorio-pymes  # el laboratorio de las herramientas pymes (/laboratorio-pymes): 45 casos corridos de verdad, cada uno da el estado que declara, >=5 por herramienta con trampas; decide que usa /estudio
 npm run prueba:historial    # la logica pura de /historial: busqueda con acentos, agrupacion por dia, estadisticas, exportadores
 npm run prueba:ajustes      # la logica pura de /ajustes: agrupar, origen en palabras, cifras del catalogo
 npm run prueba:etiquetas    # etiquetas GS1-128: nucleo contra la norma, ida y vuelta SVG/ZPL, agente de impresion, importacion de catalogo

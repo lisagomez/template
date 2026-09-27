@@ -24,8 +24,8 @@ Diseño completo: `docs/SDD-puente-a2a-extractor.md`. Spec: `.claude/specs/005-a
 
 ## Lo primero: la entrevista. Sin ella no se genera NADA
 
-**No hay default razonable para «cuál es tu negocio».** Igual que `/add-payments` pregunta qué se
-va a cobrar, ésta pregunta qué capacidad se expone. Si el usuario no contesta las cuatro, **para y
+**No hay default razonable para «cuál es tu negocio».** `/add-payments` no pregunta porque el
+producto y su precio ya viven en Polar; aquí no hay nada así, y ésta pregunta qué capacidad se expone. Si el usuario no contesta las cuatro, **para y
 no escribas ningún archivo** (RF-1, RF-2):
 
 1. **¿Qué capacidad expones?** Una frase. Una sola skill por Agent Card para empezar.

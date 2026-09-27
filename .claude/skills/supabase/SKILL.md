@@ -306,6 +306,8 @@ curl -s "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/analytics/en
 Adapta nombres de tabla y columnas a tu schema:
 
 ### MRR (Monthly Recurring Revenue)
+Supone la tabla `purchases` que crea `/add-payments` (Polar). La etiqueta USD supone precios en
+dolares: a verificar contra la moneda de tus productos en Polar.
 ```bash
 curl -s "$SUPABASE_URL/rest/v1/purchases?select=price_cents,billing_interval&status=eq.completed&cancel_at_period_end=eq.false" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
