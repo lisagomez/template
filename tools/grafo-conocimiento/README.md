@@ -5,9 +5,36 @@ Motor de reglas de la **spec 004**: responde una pregunta con un veredicto acota
 determinista. Cuando no hay regla, lo dice con una forma que no se puede confundir con una
 respuesta.
 
-> **Estado: Fase 1 de PRP-005.** Hay contrato y corpus de paridad; **no hay motor todavía**
-> (Fase 3). Plan: `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` · por qué así:
-> `docs/SDD-grafo-hermes-a-template.md`.
+> **Estado: Fase 3 de PRP-005.** Contrato, selección de dominios y **motor**, en paridad con el de
+> Hermes. Pendiente: el gate de siembra (Fase 4) y la capa de lenguaje natural (Fase 5). Plan:
+> `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`.
+
+```ts
+import conocimiento from '@tu-scope/conocimiento'
+import { evaluaSeguro, seleccionaDominios, validaConocimiento } from '@tu-scope/grafo-conocimiento'
+
+const mio = seleccionaDominios(validaConocimiento(conocimiento).conocimiento!, ['mx-drones-de-reparto'])
+const r = evaluaSeguro(mio, {
+  contexto: { jurisdiccion: 'MX', dimension: 'regulatorio', regimen: 'GENERAL', fecha: '2026-09-27' },
+  conceptos: [{ descripcion: 'reparto de paquetes con dron' }],
+})
+// r.conceptos[0].motivo: 'regla' | 'sin_regla' | 'conflicto' | 'tope_excedido'. Solo 'regla' trae veredicto.
+// Si el conocimiento o la pregunta no tienen forma: { tipo, detalle }, que no admite veredicto.
+```
+
+## El motor (`src/motor.ts`)
+
+Es el port del motor de Hermes (`evaluador.py`, corte `97d9f9e`): clasificación por la keyword
+más larga, sin acentos y con frontera de palabra; exclusiones; vigencia a la **fecha del hecho**;
+regla rectora; conflicto; tope. Lo que decide distinto, a propósito y declarado:
+
+- **fail-safe tipado**: sin regla, en conflicto o sobre el tope, `veredicto: null`;
+- **empates por clave**, no por el orden de llegada;
+- **régimen obligatorio**;
+- **`fecha_supuesta`** cuando el hecho no trae fecha.
+
+**Paridad**: sobre la fuente única da las mismas respuestas que el motor de Hermes en los 782
+casos del corpus, salvo las 12 firmadas en `@tu-scope/conocimiento` 0.2.0.
 
 ## El contrato (`src/contrato.ts`, `src/valida.ts`)
 

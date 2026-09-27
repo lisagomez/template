@@ -121,11 +121,24 @@ export type Categoria = z.infer<typeof Categoria>
 export type Dominio = z.infer<typeof Dominio>
 export type Dimension = z.infer<typeof Dimension>
 
-// --- El resultado de evaluar (lo que devolverá el motor de la Fase 3) --------------------------
+// --- La pregunta y el resultado de evaluar (el motor, Fase 3) -----------------------------------
+
+/** Lo que se le pregunta al motor. Ya estructurado: el parser de lenguaje natural es la Fase 5. */
+export const Pregunta = z.strictObject({
+  contexto: z.strictObject({
+    jurisdiccion: z.string().regex(/^[A-Z]{2}$/),
+    dimension: Clave,
+    /** Obligatorio: el `PM_TITULO_II` por defecto de Hermes es fiscal y no cabe en un motor genérico. */
+    regimen: TextoNoVacio,
+    /** Fecha del hecho (RF-13). Si falta, se juzga con la de la consulta y el resultado lo dice. */
+    fecha: Fecha.optional(),
+  }),
+  conceptos: z.array(z.strictObject({ descripcion: TextoNoVacio, importe: z.number().nonnegative().optional() })).min(1),
+})
 
 /**
- * Por qué salió este veredicto. RF-6: «sin regla», «conflicto» y «la regla dice dudoso» son
- * TIPOS distintos, no textos distintos del mismo `dudoso` como en Hermes.
+ * Por qué salió este veredicto. RF-6: «sin regla», «conflicto», «excede el tope» y «la regla dice
+ * dudoso» son TIPOS distintos, no textos distintos del mismo `dudoso` como en Hermes.
  */
 export const Motivo = z.enum(['regla', 'sin_regla', 'conflicto', 'tope_excedido'])
 
@@ -140,16 +153,28 @@ export const ConceptoEvaluado = z
   .strictObject({
     descripcion: TextoNoVacio,
     categoria: Clave.nullable(),
+    /** Dominio que respondió: de él salen la cita (RF-5) y la fecha de corte. */
+    dominio: Clave.nullable(),
     motivo: Motivo,
-    /** `null` solo cuando no hay regla: el sistema no afirma nada (fail-safe). */
+    /**
+     * Solo lo lleva `motivo: regla`. Sin regla, con reglas en conflicto o por encima del tope, el
+     * sistema NO afirma nada (fail-safe, RF-6 y RF-8): `null`, nunca un veredicto con otro nombre.
+     */
     veredicto: TextoVeredicto.nullable(),
+    /** Traza interna, con el formato del motor de Hermes. La frase para el usuario es del redactor. */
     razon: TextoNoVacio,
+    /** Regla rectora; `null` solo sin regla. */
     fuente: Fuente.nullable(),
+    /** Toda regla que aportó veredicto, requisitos o banderas. */
+    fuentes: z.array(Fuente),
     banderas: z.array(z.string()),
     checklist: z.array(z.string()),
   })
-  .refine((c) => (c.motivo === 'sin_regla') === (c.veredicto === null), {
-    message: 'sin_regla ⇔ sin veredicto: un fail-safe nunca lleva la forma de una respuesta real',
+  .refine((c) => (c.motivo === 'regla') === (c.veredicto !== null), {
+    message: 'solo una regla aplicable da veredicto: un fail-safe nunca lleva la forma de una respuesta real',
+  })
+  .refine((c) => (c.motivo === 'sin_regla') === (c.fuente === null), {
+    message: 'fuente null ⇔ sin regla',
   })
 
 export const Resultado = z.strictObject({
@@ -162,8 +187,10 @@ export const Resultado = z.strictObject({
     fecha_supuesta: z.boolean(),
   }),
   conceptos: z.array(ConceptoEvaluado).min(1),
-  /** Fecha de corte del conocimiento usado: siempre visible. */
-  corte: Fecha,
+  /** El veredicto de todos los conceptos si coinciden; si no, o si alguno no tiene, `null`. */
+  veredicto_global: TextoVeredicto.nullable(),
+  /** Fecha de corte más antigua de los dominios del ámbito; `null` = no hay conocimiento de ese ámbito. */
+  corte: Fecha.nullable(),
   disclaimer: TextoNoVacio,
 })
 
@@ -172,10 +199,12 @@ export const Resultado = z.strictObject({
  * respuesta, y por eso no puede confundirse con «no hay regla» (duda del parser, TAR-10).
  */
 export const FalloSinVeredicto = z.strictObject({
-  tipo: z.enum(['conocimiento_no_disponible', 'parser_no_disponible']),
+  tipo: z.enum(['conocimiento_no_disponible', 'pregunta_invalida', 'parser_no_disponible']),
   detalle: TextoNoVacio,
 })
 
+export type Pregunta = z.infer<typeof Pregunta>
+export type Fuente = z.infer<typeof Fuente>
 export type Resultado = z.infer<typeof Resultado>
 export type ConceptoEvaluado = z.infer<typeof ConceptoEvaluado>
 export type FalloSinVeredicto = z.infer<typeof FalloSinVeredicto>

@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Abiertas salvo TAR-1, TAR-2, TAR-3 y TAR-16** (TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; TAR-2
-> y TAR-16 el 2026-09-27, Fases 1 y 2 de PRP-005). Esta spec no
+> **Cerradas: TAR-1 a TAR-7, TAR-13 y TAR-16**. TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; el resto el
+> 2026-09-27, Fases 1 a 3 de PRP-005. Las demás siguen abiertas. Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -46,22 +46,25 @@
 
 ## Fase 2 — Motor determinista (sin LLM todavía)
 
-- [ ] **TAR-4 · Motor de evaluación.**
+- [x] **TAR-4 · Motor de evaluación.**
       Hecho cuando: dado un triple estructurado devuelve veredicto, sin modelo de por medio.
+      **Cerrada 2026-09-27 (PRP-005 Fase 3)**: `tools/grafo-conocimiento/src/motor.ts` (`evalua`, `evaluaSeguro`). Sin modelo ni red. Sobre la fuente única da las mismas 782 respuestas que el motor de Hermes, salvo las 12 firmadas (prueba de paridad en `tools/conocimiento/pruebas/motor.ts`).
 
-- [ ] **TAR-5 · Exclusiones por categoría.**
+- [x] **TAR-5 · Exclusiones por categoría.**
       Hecho cuando: una oración diseñada para colisionar dos categorías cae en la correcta.
       Evidencia: **antes/después** — sin la exclusión colisiona, con ella no. RF: DoF-5.
       *Del origen*: el caso real ya está medido. «quiero ser agente de seguros para drones
       delivery» cae en `DRONES_DELIVERY` sin exclusiones y en `AGENTES_SEGUROS` con ellas.
+      **Cerrada 2026-09-27 (PRP-005 Fase 3)**: Antes/después en `pruebas/motor.ts` (RF-7, control negativo). Además, desactivar las exclusiones en el motor pone roja la paridad (control medido).
 
-- [ ] **TAR-6 · Regla de conflicto.**
+- [x] **TAR-6 · Regla de conflicto.**
       Hecho cuando: dos reglas de la misma categoría con veredictos distintos degradan a
       fail-safe **con bandera**, y nunca eligen una. RF: DoF-6.
       *Del origen*: el seed de Hermes trae un conflicto **vivo y permanente**, fiscal
       `INTERESES` (27-VII `deducible` frente a 28-XXVII `dudoso`). Sirve de fixture real.
+      **Cerrada 2026-09-27 (PRP-005 Fase 3)**: `motivo: conflicto`, `veredicto: null` y la bandera con las reglas en pugna (RF-8, control negativo). El conflicto real de INTERESES se resolvió con firma en conocimiento 0.2.0.
 
-- [ ] **TAR-7 · Fail-safe.**
+- [x] **TAR-7 · Fail-safe.**
       Hecho cuando: sin regla aplicable la respuesta dice explícitamente que no hay
       información suficiente, con forma **distinguible** de una respuesta real. RF: DoF-4.
       *Del origen*: en Hermes, `dudoso` lo comparten cuatro motivos (sin regla, conflicto,
@@ -69,6 +72,7 @@
       Distinguible = **tipo propio**.
 
 ## Fase 3 — Capa de lenguaje natural
+      **Cerrada 2026-09-27 (PRP-005 Fase 3)**: Tipo propio: solo `motivo: regla` lleva veredicto, y el contrato rechaza un fail-safe con veredicto. `evaluaSeguro` devuelve `FalloSinVeredicto` si el conocimiento o la pregunta no tienen forma.
 
 - [ ] **TAR-8 · Parser oración → campos.**
       Hecho cuando: usa `structured-outputs` (Vercel AI SDK + Zod) y **no toca el veredicto**.
@@ -96,9 +100,10 @@
       Hecho cuando: pregunta en lenguaje natural → parser → motor → respuesta natural, sin
       payload armado a mano. RF: DoF-3.
 
-- [ ] **TAR-13 · Test que fija el conteo de reglas.**
+- [x] **TAR-13 · Test que fija el conteo de reglas.**
       Hecho cuando: agregar una regla **obliga** a tocar el test en el mismo cambio.
       RF: MISION-6, DoF-7.
+      **Cerrada 2026-09-27 (PRP-005 Fase 3)**: Prueba RF-9 de `tools/conocimiento/pruebas/conocimiento.ts`: 17 dominios, 61 categorías y 99 reglas. Sembrar o retirar obliga a tocarla (Fase 2).
 
 - [ ] **TAR-14 · Gate automático de colisiones.**
       Hecho cuando: detecta colisión/conflicto **antes de sembrar**, sin depender de que
