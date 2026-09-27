@@ -4016,3 +4016,22 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   routing y de los prompts delante. Al firmar se borró la propuesta `.claude/goals/pymes-marketing/propuesta-cdc.md`.
 - **Lo que activar el LLM exigiría después (otro CDC)**: llave en el entorno del servidor, una corrida real
   medida con su costo en la contabilidad, y que el caso llm-5 pase a «pasa».
+
+### 2026-09-27 — `prueba:laboratorio-pymes` ALTA en el padrón al mezclar `main` en `pymes-marketing-build` → CDC PROMOVIDO — radio: sistema (padrón de gates)
+- **Cambio**: en `.claude/gates.json` nace `prueba:laboratorio-pymes`, **activo en `validate`** después de
+  `prueba:laboratorio` (26 gates activos en `validate`). La `guarda` de `prueba:tools` suma
+  `pymes-marketing` a su lista (ya la recorría: descubre las herramientas por su script `prueba`).
+- **Motivo**: la rama traía `prueba:laboratorio-pymes` en la cadena `&&` de `validate`, y el #157 cambió
+  esa cadena por el padrón. Resolver el conflicto de `package.json` tomando `main` **sacaba la prueba del
+  gate en silencio**, igual que en el #154. Lo cazó `verifica:gates` con la resolución mecánica sola:
+  «sin declarar: prueba:laboratorio-pymes» y «nadie los corre:
+  src/features/laboratorio-pymes/pruebas/laboratorio.ts» (2 de 11 comprobaciones en rojo).
+- **Gate aplicado**: diff revisado ☑ (enseñado contra `main` antes de pedir la firma) · regresión verde ☑
+  capa A 123/123 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva). **Capa B no corrida, a
+  propósito y declarado** («capa A basta»): el cambio no toca skills, prompts, modelo ni instrucciones.
+- **Regresión**: `verifica:gates` 11/11 después del alta (control negativo: los 2 rojos de arriba, antes) ·
+  `npm run validate` sobre la mezcla, en un clon que solo trae esta rama, `main` y el corpus: **26/26
+  activos en verde, 8 inactivos declarados, 0 rojos** · `verify:gobernanza` 156/156 ·
+  `prueba:laboratorio-pymes` 3/3 · `prueba:a2a` en verde.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo, capa A basta», 2026-09-27, con el diff de
+  `gates.json` contra `main` y la evidencia delante.
