@@ -1,0 +1,17 @@
+/goal Haz lo descrito en el spec completo: /home/kyara/code/template-grafo-hermes/.claude/goals/grafo-hermes/spec.md. Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande. Trabaja SOLO en el worktree /home/kyara/code/template-grafo-hermes (rama goal-grafo-hermes).
+Outcome: un expediente de decision medido (docs/SDD-grafo-hermes-a-template.md) que contrasta el grafo en produccion de lisagomez/hermes-os-a2a con la spec 004 (grafo de conocimiento, no construido) de template, compara formas de integrarlo y recomienda una, con un PRP propuesto y la spec 004 al dia.
+Libertad total sobre el como; las opciones A-D del spec son punto de partida, no menu cerrado.
+VALIDA: `npm run verifica:specs && npm run verify:gobernanza` tras cada cambio en specs o PRPs, output pegado; `npm run validate` antes de cerrar.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- git worktree list y status pegados
+- salida real de los tests del grafo de Hermes corridos aqui (o el error exacto y su causa) y conteo de reglas por dimension medido sobre el seed
+- matriz RF-1..RF-12 de la spec 004 contra Hermes, con archivo:linea
+- los dos incidentes (drones, motor caido) con su referencia en la fuente, o «no consta»
+- las dos dudas abiertas de la spec 004 contestadas con evidencia o reafirmadas
+- tabla de opciones con recomendacion argumentada
+- PRP propuesto (ruta + encabezado NO APROBADO) y diff de la spec 004 pegados
+- validacion en verde pegada
+- formas en que el analisis podria estar mal, resueltas o declaradas
+- commit en la rama y PR abierto hacia main, sin mezclar
+RESTRICCIONES: Hermes solo lectura (clon en scratchpad; nada de push/PR/issue alli); nada de template hacia Hermes (template es privado, Hermes publico); no construir el grafo ni importar codigo (sin motor, tablas, migraciones, Supabase ni Docker); no tocar skills, prompts, settings.json, AGENTS.md, .mcp.json ni routing (C1: cambios propuestos van en el PRP); no leer ni imprimir secretos; todo en espanol.
+RED DE SEGURIDAD: si tras 40 turnos no converges, o los tests exigen infraestructura que no hay aqui, documenta lo medido y lo no medido y detente con el bloqueo reportado.
