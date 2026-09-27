@@ -136,9 +136,10 @@ bloqueada 9 para guardarla con cuentas).
 
 ### Fase 12: Documentación y validación final
 **Validación**:
-- [ ] `npm run validate` pasa con todo commiteado
-- [ ] Playwright confirma la UI (carrusel, PNG, video, aprobación en celular)
-- [ ] Criterios de éxito cumplidos; SDD §10 con lo medido
+- [x] `npm run validate` pasa con todo commiteado (en un clon con esta rama, `main` y el corpus; en el
+      repo de trabajo lo tumba `audita:secretos` por otra rama, ver `resultados.md`)
+- [x] Playwright confirma la UI (carrusel, PNG, video, aprobación en celular)
+- [x] Criterios de éxito cumplidos; SDD §10 con lo medido
 
 ---
 
@@ -148,6 +149,13 @@ bloqueada 9 para guardarla con cuentas).
 - **Error**: el escaneo de fugas e identificadores lee `git ls-files`; un archivo nuevo pasó el gate sin
   ser leído (goal `pymes-marketing`, arreglado en `b3e7656`).
 - **Fix**: correr `validate` **después** de commitear.
+- **Se cumplió aquí**: `validate` después del commit cazó `docs/GUIA-DUENO-CONTENIDO.md` sin asiento en el
+  inventario (`inventario:vista` regenera la vista, pero no verifica; `verifica:inventario` sí).
+
+### 2026-09-27: el número de PRP se toma de `origin/main`, no de la carpeta local
+- **Error**: se escribió como PRP-005 porque la rama local no lo tenía; `main` ya tenía otro PRP-005.
+- **Fix**: renumerado a PRP-006 antes del commit. Mirar `git ls-tree origin/main .claude/PRPs/` y las
+  demás ramas antes de numerar.
 
 ## Gotchas
 - [ ] Las fuentes del SVG dependen de lo instalado en quien rasteriza: se usan familias genéricas con

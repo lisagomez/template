@@ -61,6 +61,20 @@ en el nombre (`video-6`), nota vacía al pedir cambio (`aprobacion-3`).
 | 10 · Render en producción | Chromium y ffmpeg en la imagen: cambio de infraestructura | la dueña |
 | 11 · Publicar o programar | fuera siempre | el dueño de cada pyme, a mano |
 
+## `validate` después del commit
+
+- **En un clon limpio** (esta rama, `main`, `origin/main` y el corpus `golden-sets`): `npm run validate`
+  en verde completo, salida 0 — 152/152 gobernanza, 127/127 specs, 123/123 regresión, auditoría de
+  credenciales limpia, inventario al día.
+- **En el repo de trabajo** lo detiene `audita:secretos`, que lee **todas las ramas**: 3 hallazgos en
+  `tools/grafo-conocimiento/` de la rama `grafo-fase1-contrato` (otro worktree, ya en `origin`). No son
+  credenciales: son huellas de procedencia (`seed_sha256`, `motor_sha256`) sin el prefijo `sha256:`. Se
+  arreglan en esa rama poniéndoles el prefijo; esta rama no la toca. Los demás gates, corridos uno por
+  uno en el repo de trabajo, en verde.
+- Lo que el gate cazó de esta rama: la guía del dueño sin asiento en el inventario (arreglado en el
+  segundo commit). Y antes del commit, las huellas de las referencias sin prefijo y el PRP con un
+  número ya usado en `main` (renumerado a PRP-006).
+
 ## Lo que no se midió
 
 - El estreno con un cliente real: todo corrió con datos sintéticos.
