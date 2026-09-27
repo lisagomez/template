@@ -91,6 +91,30 @@
       ]
     },
     {
+      "clave": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Deber de confidencialidad (datos personales)",
+      "texto_resumen": "Quien trate datos personales debe guardar confidencialidad respecto de ellos; la obligacion subsiste aun despues de terminada la relacion con el titular o el responsable.",
+      "fuente_cita": "LFPDPPP Art. 21",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf",
+      "vigente_desde": "2010-07-06",
+      "vigente_hasta": "2025-03-20",
+      "impactos": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Informacion confidencial delimitada (que incluye y que no)",
+            "Plazo de la obligacion definido; si hay datos personales, la confidencialidad subsiste tras terminar la relacion (LFPDPPP 21)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
       "clave": "MX-LFPDPPP2025-20-CONFIDENCIALIDAD",
       "jurisdiccion": "MX",
       "dimension": "contractual",
@@ -100,6 +124,7 @@
       "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf",
       "vigente_desde": "2025-03-21",
       "vigente_hasta": null,
+      "reemplaza": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
       "impactos": [
         {
           "categoria": "CLAUSULA_CONFIDENCIALIDAD",

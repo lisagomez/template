@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Abiertas salvo TAR-1, TAR-2 y TAR-3** (TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; TAR-2 el
-> 2026-09-27, el contrato de la Fase 1 de PRP-005). Esta spec no
+> **Abiertas salvo TAR-1, TAR-2, TAR-3 y TAR-16** (TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; TAR-2
+> y TAR-16 el 2026-09-27, Fases 1 y 2 de PRP-005). Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -115,7 +115,10 @@
 
 > Dependen de TAR-2 y van **antes** de TAR-11. RF-13 a RF-16 nacen de las decisiones del laboratorio.
 
-- [ ] **TAR-16 · El conocimiento, traído una vez y dividido por dominio.**
+- [x] **TAR-16 · El conocimiento, traído una vez y dividido por dominio.**
+      **Cerrada 2026-09-27 (PRP-005 Fase 2)**: `tools/conocimiento`. Importado con su historial y
+      byte a byte idéntico; 17 dominios con cita, corte y procedencia; semver y `CAMBIOS.md`;
+      registrar dos dominios da solo esos (prueba RF-15 de `pruebas/conocimiento.ts`).
       Hecho cuando:
       - las reglas de `hermes-os-a2a` están en este repo **con su historial** (corte pineado,
         sha256, `audita:secretos` limpio, como el ERP en PRP-004), divididas por dominio, cada
@@ -132,6 +135,9 @@
         vuelve **cerrada** a 2025-03-20, recuperada de su historial, y un hecho de 2024 la
         encuentra. Restaurarla cambia un veredicto, así que va con firma.
       RF: RF-13, RF-14.
+      *Avance 2026-09-27*: restaurada, cerrada y firmada (conocimiento 0.2.0), y el hecho de 2024 la
+      encuentra (prueba RF-13/14). Falta que el **gate** rechace un borrado o una edición en su sitio
+      frente a la versión anterior: Fase 4.
 
 - [ ] **TAR-18 · Aviso de versión nueva, nunca actualización sola.**
       Hecho cuando: publicar una versión nueva hace que `vigila:versiones` del proyecto

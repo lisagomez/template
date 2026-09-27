@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/conocimiento",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fuente única del conocimiento del grafo (PRP-005): reglas con fuente citada, por dominio, versionadas. Se siembra aquí una vez y cada proyecto registra los dominios que usa y fija la versión. Se lee con @tu-scope/grafo-conocimiento.",
   "type": "module",
   "license": "UNLICENSED",

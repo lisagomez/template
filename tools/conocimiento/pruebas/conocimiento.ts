@@ -36,7 +36,7 @@ test('el contrato solo reporta lo declarado como pendiente, y nada más', () => 
 test('RF-9: el conteo queda fijado; sembrar o retirar obliga a tocar esta prueba', () => {
   assert.deepEqual(
     { dominios: c.dominios.length, categorias: c.categorias.length, reglas: c.reglas.length },
-    { dominios: 17, categorias: 61, reglas: 98 },
+    { dominios: 17, categorias: 61, reglas: 99 },
   )
 })
 
@@ -82,4 +82,23 @@ test('paridad con el motor de Hermes: medida para ESTA versión, y sin diferenci
   assert.equal(medida.corte, CORTE_HERMES.commit)
   assert.equal(medida.casos, 782)
   assert.deepEqual(medida.distintos_en_contenido.map((d) => d.id).sort(), esperadas.contenido.map((d) => d.id).sort())
+})
+
+test('RF-13/14: un hecho de 2024 encuentra la regla de 2010, cerrada y reemplazada, sin solaparse con la de 2025', () => {
+  const vieja = c.reglas.find((r) => r.clave === 'MX-LFPDPPP-21-CONFIDENCIALIDAD')!
+  const nueva = c.reglas.find((r) => r.clave === 'MX-LFPDPPP2025-20-CONFIDENCIALIDAD')!
+  assert.equal(vieja.vigente_hasta, '2025-03-20')
+  assert.equal(nueva.reemplaza, vieja.clave)
+  const vigentesEl = (fecha: string) =>
+    c.reglas
+      .filter((r) => r.impactos.some((i) => i.categoria === 'CLAUSULA_CONFIDENCIALIDAD'))
+      .filter((r) => r.vigente_desde <= fecha && (r.vigente_hasta === null || fecha <= r.vigente_hasta))
+      .map((r) => r.clave)
+  assert.deepEqual(vigentesEl('2024-06-01'), ['MX-LFPDPPP-21-CONFIDENCIALIDAD'])
+  assert.deepEqual(vigentesEl('2026-06-01'), ['MX-LFPDPPP2025-20-CONFIDENCIALIDAD'])
+})
+
+test('INTERESES: una sola regla rectora con veredicto (firmado 2026-09-27, variante A)', () => {
+  const conVeredicto = c.reglas.filter((r) => r.impactos.some((i) => i.categoria === 'INTERESES' && i.veredicto_base !== null))
+  assert.deepEqual(conVeredicto.map((r) => [r.clave, r.impactos[0]!.veredicto_base]), [['MX-LISR-28-XXVII', 'dudoso']])
 })

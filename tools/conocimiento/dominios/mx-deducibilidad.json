@@ -139,7 +139,7 @@
         {
           "categoria": "INTERESES",
           "regimen": "PM_TITULO_II",
-          "veredicto_base": "deducible",
+          "veredicto_base": null,
           "requisitos": [
             "El capital del prestamo se destino a los fines del negocio (documentar destino)",
             "CFDI o estado de cuenta que ampare los intereses"

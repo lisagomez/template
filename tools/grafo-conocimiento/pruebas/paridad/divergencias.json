@@ -6,14 +6,14 @@
       "clave": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
       "rf": "RF-14",
       "porque": "Hermes retiró la regla de la ley de 2010 (vigente_desde 2010-07-06) con `_bajas`, que la BORRA. Medido: «cláusula de confidencialidad» con un hecho del 2024-06-01 da `dudoso / sin regla aplicable`, porque el pasado perdió su regla (caso incidente del corpus).",
-      "se_resuelve_en": "Fase 2: se recupera del historial de Hermes y se cierra con vigente_hasta 2025-03-20. Cambia un veredicto, así que va con firma del laboratorio."
+      "se_resuelve_en": "RESUELTO en @tu-scope/conocimiento 0.2.0, firmado por el laboratorio el 2026-09-27. Esta divergencia sigue describiendo el seed de Hermes en el corte, que no cambia."
     },
     {
       "tipo": "conflicto_de_veredicto",
       "clave": "MX/fiscal/INTERESES",
       "rf": "RF-8, RF-12",
       "porque": "MX-LISR-27-VII (deducible) y MX-LISR-28-XXVII (dudoso) están vigentes a la vez sobre la misma categoría. El motor de Hermes lo degrada a `dudoso` con la bandera «Reglas vigentes en conflicto… requiere revisión» en CADA consulta de intereses, y su gate de siembra no lo ve.",
-      "se_resuelve_en": "Fase 2: una sola regla rectora `dudoso` y la otra con veredicto_base null, la convención que Hermes ya usa en otras categorías. Cambia un veredicto, así que va con firma del laboratorio."
+      "se_resuelve_en": "RESUELTO en @tu-scope/conocimiento 0.2.0, firmado por el laboratorio el 2026-09-27. Esta divergencia sigue describiendo el seed de Hermes en el corte, que no cambia."
     }
   ],
   "estructurales": [
