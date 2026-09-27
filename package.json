@@ -38,6 +38,8 @@
     "prueba:contabilidad": "node scripts/prueba-contabilidad.ts",
     "prueba:laboratorio": "node --test src/features/laboratorio-voz/pruebas/*.ts",
     "prueba:laboratorio-pymes": "node --test src/features/laboratorio-pymes/pruebas/*.ts",
+    "contenido:referencias": "node scripts/laboratorio-pymes/referencias.ts",
+    "contenido:video": "node scripts/laboratorio-pymes/video.ts",
     "prueba:historial": "node --test src/features/historial/pruebas/*.ts",
     "vigila:versiones": "node scripts/vigila-versiones.mjs",
     "vigila:hermes": "node scripts/verifica-hermes.mjs",

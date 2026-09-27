@@ -6,7 +6,7 @@
  */
 export type EstadoDeCaso = 'pasa' | 'falla' | 'no-medido';
 
-export type IdHerramienta = 'marca' | 'ventas' | 'contenido' | 'resenas' | 'visibilidad' | 'pulso' | 'redactor-llm';
+export type IdHerramienta = 'marca' | 'ventas' | 'contenido' | 'resenas' | 'visibilidad' | 'pulso' | 'piezas' | 'video' | 'aprobacion' | 'redactor-llm';
 
 export interface ResultadoDeCaso {
   readonly estado: EstadoDeCaso;
@@ -15,6 +15,10 @@ export interface ResultadoDeCaso {
   readonly veredicto: string;
   /** Pieza visual para enseñar (SVG), cuando el caso la produce. */
   readonly pieza?: string;
+  /** Imagen de REFERENCIA (ruta pública) contra la que se compara la pieza, a la vista. */
+  readonly referencia?: string;
+  /** Video renderizado y su hoja de cuadros (rutas públicas). */
+  readonly video?: { readonly mp4: string; readonly hoja: string };
 }
 
 export interface ContextoDeLaboratorio {

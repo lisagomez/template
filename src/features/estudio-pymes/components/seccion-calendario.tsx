@@ -7,6 +7,7 @@ import { fechaLarga } from '../../../../tools/pymes-marketing/dist/index.js';
 import { estadoDelCalendario, piezaComoDataUrl, type FilaDeCalendario } from '../../../../tools/pymes-marketing/dist/contenido/index.js';
 import { useEstudio } from '../store/estudio.ts';
 import { Copiar, Pastilla } from './ui-estudio.tsx';
+import { descargaPng } from './seccion-carruseles-video.tsx';
 
 const ANGULO: Record<FilaDeCalendario['angulo'], string> = { util: 'útil', prueba: 'prueba real', oferta: 'oferta', personas: 'personas' };
 const TONO = { borrador: 'neutro', 'falta-algo': 'revisar', aprobada: 'bien', descartada: 'sin' } as const;
@@ -23,7 +24,8 @@ function Fila({ f }: { f: FilaDeCalendario }) {
         <Boton onClick={() => decideFila(f.id, 'aprobada')} disabled={f.estado === 'aprobada' || f.estado === 'falta-algo'}>Aprobar</Boton>
         <Boton variante="suave" onClick={() => decideFila(f.id, 'descartada')}>Descartar</Boton>
         <Copiar texto={f.texto} etiqueta="Copiar texto" />
-        {f.pieza ? <a className="rounded-md border border-neutral-300 px-2 py-1 text-xs dark:border-neutral-700" href={piezaComoDataUrl(f.pieza)} download={`${f.id}.svg`}>Descargar imagen</a> : null}
+        {f.pieza ? <button type="button" data-prueba="descarga-png" className="rounded-md border border-neutral-300 px-2 py-1 text-xs dark:border-neutral-700" onClick={() => void descargaPng(f.pieza!, f.id)}>Descargar PNG</button> : null}
+        {f.pieza ? <a className="rounded-md border border-neutral-300 px-2 py-1 text-xs dark:border-neutral-700" href={piezaComoDataUrl(f.pieza)} download={`${f.id}.svg`}>SVG</a> : null}
       </div>
     </div>
   );

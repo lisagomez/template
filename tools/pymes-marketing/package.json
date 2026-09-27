@@ -1,7 +1,7 @@
 {
   "name": "@tu-scope/pymes-marketing",
-  "version": "0.1.0",
-  "description": "Estudio de marketing para pymes mexicanas: marca y voz, ventas desde CFDI y CSV, estrategia y calendario con piezas, resenas, visibilidad en buscadores y asistentes de IA, anuncios y el brief del lunes. TypeScript puro, CERO dependencias; el redactor (plantillas o LLM) se inyecta. Nada se publica ni se envia: todo sale en borrador. Adaptado de small-business@1.35.1 (Apache-2.0), ver NOTICE.",
+  "version": "0.2.0",
+  "description": "Estudio de marketing para pymes mexicanas: marca y voz, ventas desde CFDI y CSV, estrategia, calendario, piezas PNG, carruseles y video 9:16 por codigo sin personas, aprobacion con huella, resenas, visibilidad en buscadores y asistentes de IA, anuncios y el brief del lunes. TypeScript puro, CERO dependencias; el redactor (plantillas o LLM) se inyecta. Nada se publica ni se envia: todo sale en borrador. Adaptado de small-business@1.35.1 (Apache-2.0), ver NOTICE.",
   "type": "module",
   "license": "UNLICENSED",
   "private": false,
@@ -13,6 +13,9 @@
     "./resenas": { "types": "./dist/resenas/index.d.ts", "import": "./dist/resenas/index.js" },
     "./visibilidad": { "types": "./dist/visibilidad/index.d.ts", "import": "./dist/visibilidad/index.js" },
     "./pulso": { "types": "./dist/pulso/index.d.ts", "import": "./dist/pulso/index.js" },
+    "./video": { "types": "./dist/video/index.d.ts", "import": "./dist/video/index.js" },
+    "./rasterizar": { "types": "./dist/rasterizar.d.ts", "import": "./dist/rasterizar.js" },
+    "./aprobacion": { "types": "./dist/aprobacion/index.d.ts", "import": "./dist/aprobacion/index.js" },
     "./redactor-openai-compat": { "types": "./dist/redactor-openai-compat.d.ts", "import": "./dist/redactor-openai-compat.js" }
   },
   "files": ["dist", "NOTICE", "LICENSE-APACHE-2.0", "README.md"],

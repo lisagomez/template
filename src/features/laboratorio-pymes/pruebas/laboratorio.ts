@@ -26,7 +26,7 @@ test('cada caso da el estado que declara (corrido de verdad)', async () => {
   assert.equal(malos.length, 0, malos.map((m) => `${m.caso.id}: esperaba ${m.caso.esperado}, dio ${m.resultado.estado} — ${m.resultado.evidencia.filter((e) => e.startsWith('✗')).join('; ')}`).join('\n'));
 });
 
-test('la app solo usa lo aprobado: las 6 herramientas sí, el redactor con LLM no (no medido)', async () => {
+test('la app solo usa lo aprobado: las 9 herramientas sí, el redactor con LLM no (no medido)', async () => {
   const a = aprobadas(await correLaboratorio(ctx));
-  assert.deepEqual(a, ['marca', 'ventas', 'contenido', 'resenas', 'visibilidad', 'pulso']);
+  assert.deepEqual(a, ['marca', 'ventas', 'contenido', 'resenas', 'visibilidad', 'pulso', 'piezas', 'video', 'aprobacion']);
 });
