@@ -1,6 +1,6 @@
 # Dictado desde el celular (PWA) — Spec para `/goal`
 
-> Compilado con `/goal-compiler` el 2026-09-19. Forma: **LOOP**. Petición de la dueña: «quiero
+> Compilado con `/goal-compiler` el 2026-09-19. Forma: **LOOP**. Petición del laboratorio: «quiero
 > dictarte desde mi celular con PWA y habilitar el icono flotante para android y iphone».
 >
 > **CONSTRUIDO el 2026-09-19.** PWA instalable (`public/manifest.json`, `public/sw.js` sin fetch
@@ -106,7 +106,7 @@ el gesto de inicio en iOS, el audio en background, la latencia percibida) antes 
 1. Últimos outputs de los DOS comandos de validación pegados, en verde.
 2. UI móvil demostrada con Playwright en viewport móvil: screenshots del botón flotante móvil
    en sus estados, del flujo dictar → texto en pantalla, y del manifest instalable.
-3. Demo en vivo con la dueña: instala la PWA en su teléfono real, toca el botón, dicta, y
+3. Demo en vivo con el laboratorio: instala la PWA en su teléfono real, toca el botón, dicta, y
    **confirma en la conversación** que (a) el texto apareció en el cursor de su PC y (b) en la
    pantalla del cel; los logs pegados muestran la frase con su latencia.
 4. Reporte de decisiones: camino del audio elegido y por qué, cómo se resolvió HTTPS/LAN, qué

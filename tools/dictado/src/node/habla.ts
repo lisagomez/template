@@ -1,6 +1,6 @@
 /**
  * El camino de vuelta: texto → voz, local, por `sherpa-onnx-node` (Piper/VITS), y al altavoz de
- * Windows. Existe porque la duena pidio que el agente tambien hable (2026-09-16); nada sale de la
+ * Windows. Existe porque el laboratorio pidio que el agente tambien hable (2026-09-16); nada sale de la
  * maquina y la voz son 79 MB pineados por URL.
  *
  * Se reproduce MIENTRAS se sintetiza: sherpa entrega el audio frase a frase (`onProgress`) y cada

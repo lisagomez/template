@@ -3,10 +3,10 @@
 **Estado:** **construido y medido en esta WSL2** (2026-09-15). `tools/dictado/` existe: núcleo
 TypeScript puro sin dependencias, tres entry points (`.`, `./node`, `./remoto`), 29 pruebas en
 verde sin modelos ni red, `npm run empaqueta dictado` en verde, y una medición con pesos
-reales sobre 30 minutos de español con referencia (§5). La prueba en vivo con la dueña (§6,
+reales sobre 30 minutos de español con referencia (§5). La prueba en vivo con el laboratorio (§6,
 casos a y b) se hizo el 2026-09-16. El perfil GPU está **diseñado y sin medir**: no hay VPS.
 **2026-09-22, en uso real**: «dale enter» vale en cualquier punto de la frase y tantas veces como
-se diga (en manos libres la dueña lo decía y seguía hablando, y encadenaba dos envíos en un
+se diga (en manos libres el laboratorio lo decía y seguía hablando, y encadenaba dos envíos en un
 turno), con las variantes que ella usa («dale a enter»); las muletillas se quitan antes de pegar
 con un filtro medido sobre el corpus propio (`src/muletillas.ts`, 0 palabras buenas quitadas,
 WER 16,3 → 9,6 % con Parakeet); y la voz del agente es es_MX «claude» a 0,9, elegida de oído
@@ -203,11 +203,11 @@ Cada toma de FLEURS es **una** frase leída; un cierre demasiado corto la parte 
 
 | Caso | Cómo | Estado |
 |---|---|---|
-| (a) dictar a Claude Code en la terminal de WSL | `dictado dictar` (+ `--tecla` para mantener Ctrl derecho); el texto se pega con `^v` en la ventana con el foco | <!-- CASO_A -->**hecho el 2026-09-16** (18:5x, hora local): la dueña dictó «Puedes revisar si la herramienta de voz te puede funcionar también.» con el cursor en la caja de Claude Code (Windows Terminal), en manos libres con toque de Ctrl derecho; el texto apareció en la caja y llegó como mensaje a la conversación (esa es la confirmación). Audio 4,0 s · motor 231 ms · latencia fin-de-habla→pegado 1 299 ms, de los que 1 058 ms fueron el **primer** pegado (arranque del PowerShell persistente, una vez por sesión)<!-- /CASO_A --> |
-| (b) dictar en cualquier app de Windows | lo mismo: el pegador no sabe qué ventana es | <!-- CASO_B -->**hecho el 2026-09-16**: con el cursor en el Bloc de notas, la dueña dictó y confirmó que el texto apareció ahí («Gracias. De notas. Estoy en el log de notas.», 4,5 s, motor 1,5 s con faster-whisper small, pegado 92 ms). El pegador escribe donde esté el foco de Windows, sea la app que sea<!-- /CASO_B --> |
+| (a) dictar a Claude Code en la terminal de WSL | `dictado dictar` (+ `--tecla` para mantener Ctrl derecho); el texto se pega con `^v` en la ventana con el foco | <!-- CASO_A -->**hecho el 2026-09-16** (18:5x, hora local): el laboratorio dictó «Puedes revisar si la herramienta de voz te puede funcionar también.» con el cursor en la caja de Claude Code (Windows Terminal), en manos libres con toque de Ctrl derecho; el texto apareció en la caja y llegó como mensaje a la conversación (esa es la confirmación). Audio 4,0 s · motor 231 ms · latencia fin-de-habla→pegado 1 299 ms, de los que 1 058 ms fueron el **primer** pegado (arranque del PowerShell persistente, una vez por sesión)<!-- /CASO_A --> |
+| (b) dictar en cualquier app de Windows | lo mismo: el pegador no sabe qué ventana es | <!-- CASO_B -->**hecho el 2026-09-16**: con el cursor en el Bloc de notas, el laboratorio dictó y confirmó que el texto apareció ahí («Gracias. De notas. Estoy en el log de notas.», 4,5 s, motor 1,5 s con faster-whisper small, pegado 92 ms). El pegador escribe donde esté el foco de Windows, sea la app que sea<!-- /CASO_B --> |
 | (c) reunión por lotes con hablantes | `dictado lote reunion.wav --hablantes 2`: VAD de `voz` → diarización de `voz` → texto de `dictado` → acta | <!-- CASO_C -->hecho: `reunion-2-hablantes.wav` (A-B-A, dos voces de FLEURS) → 3 turnos, 2 hablantes, texto correcto en los tres; VAD 271 ms, diarización 532 ms, transcripción 1,6 s<!-- /CASO_C --> |
 | (d) modo archivo para medir | `dictado archivo toma.wav [--motor …]` imprime texto y tiempos; `npm run mide` para el corpus entero | hecho |
-| (f) conversar con el agente: hablar, callar y que se envíe; oírle; que no se transcriba a sí mismo | ajuste `conversacion` en manos libres; `envioMs` medido; `dictar` dueño del altavoz por `127.0.0.1:47126` y puerta lógica del audio mientras suena | <!-- CASO_F -->**fases 1 y 2 hechas y medidas el 2026-09-23** (`medicion/corpus-propio/conversacion-2026-09-23.md`): `envioMs` = 1500 ms con 0 falsos envíos hasta 2 s; 0 fugas de la voz en 70 respuestas con micrófono y altavoz reales, primer audio p50 60 ms, puerta reabierta a 150 ms. Falta la fase 3 (hook `Stop`, CDC) y la prueba en vivo con la dueña<!-- /CASO_F --> |
+| (f) conversar con el agente: hablar, callar y que se envíe; oírle; que no se transcriba a sí mismo | ajuste `conversacion` en manos libres; `envioMs` medido; `dictar` dueño del altavoz por `127.0.0.1:47126` y puerta lógica del audio mientras suena | <!-- CASO_F -->**fases 1 y 2 hechas y medidas el 2026-09-23** (`medicion/corpus-propio/conversacion-2026-09-23.md`): `envioMs` = 1500 ms con 0 falsos envíos hasta 2 s; 0 fugas de la voz en 70 respuestas con micrófono y altavoz reales, primer audio p50 60 ms, puerta reabierta a 150 ms. Falta la fase 3 (hook `Stop`, CDC) y la prueba en vivo con el laboratorio<!-- /CASO_F --> |
 | (e) lo mismo contra el servicio remoto | `--motor remoto` con `DICTADO_REMOTO_URL/TOKEN`; el dictado no distingue | hecho contra el servicio en esta máquina, en CPU (§7); GPU sin medir |
 
 ## 7. El servicio remoto (perfil «GPU en el VPS propio»)

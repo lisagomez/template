@@ -1,0 +1,14 @@
+sku,descripcion,categoria,sitios,marca_propia,gtin,gtin_caja,unidades_por_caja,cajas_por_tarima,vida_util_dias
+YOG-001,Yogurt natural 1 kg,lacteos,CEDIS-NTE;SUC-CENTRO;SUC-PONIENTE,NO,9521111000013,19521111000010,12,50,35
+LEC-002,Leche entera 1 L,lacteos,CEDIS-NTE;SUC-CENTRO;SUC-PONIENTE;SUC-ORIENTE,NO,9521111000020,,12,60,20
+ATU-003,Atún en agua 140 g,abarrotes,CEDIS-NTE;SUC-ORIENTE,NO,9521111000038,,48,40,720
+PAN-004,Pan de caja blanco 680 g,panaderia,SUC-CENTRO;SUC-PONIENTE,SI,,,10,,6
+SAL-005,Salsa casera 500 g,abarrotes,SUC-CENTRO,SI,,,1,120,180
+QSO-006,Queso fresco a granel,lacteos,SUC-PONIENTE,NO,,,1,,12
+REF-007,Refresco cola 600 ml,bebidas,CEDIS-NTE;SUC-CENTRO;SUC-ORIENTE,NO,9521111000044,19521111000041,24,80,120
+ARR-008,Arroz blanco 1 kg,abarrotes,CEDIS-NTE,NO,9.52111E+12,,20,60,365
+MPD-009,Galletas de la casa 200 g,abarrotes,SUC-ORIENTE,SI,9522222000015,,24,,90
+DUP-010,Yogurt natural 1 kg (repetido),lacteos,SUC-ORIENTE,NO,9521111000013,,12,,35
+HLD-011,Helado de vainilla 1 L,congelados,CEDIS-NTE;SUC-CENTRO,SI,9521234990017,,6,40,240
+CRT-012,Crema ácida 200 ml,lacteos,,NO,,,12,,20
+JUG-013,Jugo de naranja 1 L,bebidas,SUC-CENTRO,NO,9521111000068,9521111000068,6,,60

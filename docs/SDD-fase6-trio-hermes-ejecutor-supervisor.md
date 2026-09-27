@@ -150,17 +150,17 @@ Primer intento:
 
 | Punto | Respuesta preliminar |
 |---|---|
-| Partes afectadas | La dueña (confía en el veredicto "aprobado" para decidir si mergea) |
+| Partes afectadas | El laboratorio (confía en el veredicto "aprobado" para decidir si mergea) |
 | Daño con el sistema operando "bien" | Un gate **inactivo** (`codigo_review`, `security_review`) se lee, a simple vista, igual que uno que pasó — el invariante de "rechazo si no hay runner" lo evita en el veredicto, pero **no** en cómo se comunica el resultado a un humano apurado (fatiga de aprobación, O3) |
 | Reversibilidad | Alta dentro del worktree; el punto de no-retorno real (merge a `main`) ya está correctamente detrás de gate humano |
 | Vía de apelación | Implícita (el humano decide en el merge); no está descrita como tal |
 
-### C5 · Registro de riesgo — la "decisión de la dueña" debería quedar trazable
+### C5 · Registro de riesgo — la "decisión del laboratorio" debería quedar trazable
 
 El roadmap cierra la fase con: *"El dogfood real con tokens es el siguiente paso: decisión
-de la dueña"*, y documenta el ruteo de costo (GLM-5.2 vía z.ai, presupuesto $1) como
+del laboratorio"*, y documenta el ruteo de costo (GLM-5.2 vía z.ai, presupuesto $1) como
 "política versionada en `negocio/MEMORY.md`". Es exactamente un **riesgo propio y
-firmable** en los términos de C5 de este template — nadie más que la dueña carga ese
+firmable** en los términos de C5 de este template — nadie más que el laboratorio carga ese
 presupuesto ni esa decisión. La optimización: que viva en un registro **append-only**
 dedicado (equivalente a `REGISTRO-RIESGO.md`), no solo en la prosa del roadmap y un archivo
 de memoria de negocio — para que la decisión, su fecha y su alcance ($1, un motor, una
@@ -218,5 +218,5 @@ este template exige en sus propios PRPs de agentes.
 
 **No cierra**: nada de esto se implementa desde aquí — el trío vive en otro repositorio, y
 las decisiones (declarar `tareas` como plataforma, abrir un registro de riesgo, pinear el
-motor por versión exacta) las toma la dueña de ese proyecto. Este documento es la auditoría,
+motor por versión exacta) las toma el laboratorio en ese proyecto. Este documento es la auditoría,
 no el CDC.

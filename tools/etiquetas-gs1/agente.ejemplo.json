@@ -1,0 +1,15 @@
+{
+  "sitio": "CEDIS-NTE",
+  "escucha": { "host": "127.0.0.1", "puerto": 9180 },
+  "origenes": ["https://etiquetas.ejemplo.local"],
+  "impresoras": [
+    { "id": "zebra-cedis-rampa", "nombre": "ZT411 Rampa (tarimas 4x6)", "sitio": "CEDIS-NTE", "host": "192.0.2.21", "puerto": 9100 },
+    { "id": "zebra-cedis-cajas", "nombre": "ZT411 Cajas 4x3", "sitio": "CEDIS-NTE", "host": "192.0.2.22", "puerto": 9100 }
+  ],
+  "reintentos": { "maximo": 8, "baseMs": 2000, "topeMs": 120000 },
+  "timeoutMs": 10000,
+  "maxBytes": 262144,
+  "maxCopias": 500,
+  "consultaEstado": true,
+  "archivoCola": "/var/lib/etiquetas-agente/cola.json"
+}

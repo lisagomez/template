@@ -132,6 +132,7 @@ Usuario dice algo
     |
     ├── "Voy a cambiar el modelo / editar un skill / tocar un prompt o plantilla"
     |   "cambia el modelo del proyecto" / "settings.json" / "model" / ".mcp.json"
+    |   "apaga este gate" / "saca esto del validate" / "gates.json"
     |       → CDC OBLIGATORIO (control C1): `.claude/gobernanza/GOBERNANZA.md` §2
     |         + entrada en `.claude/gobernanza/BITACORA-CDC.md`
     |         El modelo va PINEADO. `latest` se rechaza, no se negocia
@@ -241,10 +242,15 @@ Next.js DevTools (`/_next/mcp`), Playwright (CLI preferido; la sintaxis verifica
   el unico rojo de 21 fue una respuesta que cito la regla en vez de ejecutarla
 - Toda accion irreversible (migracion destructiva, envio, cobro) pasa por gate humano
 - **CDC (C1)**: cambiar el modelo, un skill, un prompt, una plantilla, `settings.json`,
-  el campo `model`, `.mcp.json` o **el tag de una imagen de agente** exige diff +
-  regresion (`npm run regresion`) + aprobacion humana + entrada en
-  `.claude/gobernanza/BITACORA-CDC.md`. El modelo va PINEADO: `latest` y cualquier alias
-  auto-actualizable son anti-patron — vale igual para el modelo y para la imagen Docker
+  el campo `model`, `.mcp.json`, **el manifiesto de gates** (`.claude/gates.json`) o **el
+  tag de una imagen de agente** exige diff + regresion (`npm run regresion`) + aprobacion
+  humana + entrada en `.claude/gobernanza/BITACORA-CDC.md`. El modelo va PINEADO: `latest`
+  y cualquier alias auto-actualizable son anti-patron — vale igual para el modelo y para la
+  imagen Docker
+- **Los gates son un padron, no una cadena**: lo que corre `npm run validate` se DERIVA de
+  `.claude/gates.json` (`npm run gates` lo lista). Apagar un gate no es editar un JSON: es
+  un CDC. Lo inejecutable se declara `activo: false` **con `motivo` y `falta`** —
+  jamas se borra, y un inactivo **nunca** se cuenta como uno que paso
 - **Respaldo (contrato, no costumbre)**: **no hay respaldo implicito**. Lo que no este en
   el inventario de `BUSINESS_LOGIC.md` §4 / `docs/FASE0-INFRAESTRUCTURA.md` §9.1 no se
   respalda, y el dia que arda el servidor no existe. Un respaldo sin restauracion probada
@@ -312,6 +318,13 @@ npm run build        # Build produccion
 npm run typecheck    # Verificar tipos
 npm run lint         # ESLint
 npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad + fugas (el gate completo)
+                     # ya no es una cadena: DERIVA del perfil `validate` de .claude/gates.json
+npm run gates        # el padron entero: gates por perfil, y los inactivos con su motivo
+npm run verifica:gates     # que el padron y el codigo no divergan (--prueba tumba 6 siembras)
+npm run prueba:tools       # las suites propias de tools/ (alta 2026-09-26: nadie las corria)
+npm run prueba:a2a         # el puente A2A: opacidad del bridge, protocolo, Card, fail-safe
+                           # las dos `SERVICIO:` van aparte (prueba:a2a:servicio): exigen Tesseract
+npm run proyecta:gates     # emite reglas/software.toml para hermes-os-a2a (--diff compara)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de `.claude/specs/`: secciones, EARS, numeracion
 npm run prepara:gate       # lo corre `pretypecheck` solo: engines.node + build de tools/
