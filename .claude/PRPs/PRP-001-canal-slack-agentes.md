@@ -12,7 +12,7 @@
 
 ## Objetivo
 
-Habilitar un canal de Slack privado desde el que la dueña pueda **proponer** trabajo a
+Habilitar un canal de Slack privado desde el que el laboratorio pueda **proponer** trabajo a
 los agentes desde el móvil, sin abrir el túnel SSH — sin que la pertenencia al workspace
 se convierta, de hecho, en permiso de operación sobre agentes que tienen llaves.
 
@@ -93,7 +93,7 @@ eventos HTTP público) sí exigiría abrir puerto, y eso es una discusión disti
 
 **Fronteras que cruza** — aquí está el punto entero:
 
-El canal **no** es "el móvil de la dueña". Es todo lo que puede depositar texto en él:
+El canal **no** es "el móvil del laboratorio". Es todo lo que puede depositar texto en él:
 
 - Cualquier miembro del workspace que se una o sea añadido al canal
 - Cualquier integración ya instalada en el workspace que pueda postear
@@ -132,7 +132,7 @@ irreversible se ejecuta desde ahí, y `clientes` no es alcanzable).
 
 ### Evaluación de impacto / AISIA (control C4) — *¿a quién dañamos sin atacante?*
 
-**Partes afectadas**: la dueña; los **clientes** cuyos datos viven en el vertical
+**Partes afectadas**: el laboratorio; los **clientes** cuyos datos viven en el vertical
 `clientes`; los usuarios finales de las apps generadas; **el resto del workspace**, cuyos
 mensajes se vuelven entrada de un agente sin que nadie se lo haya dicho; y los terceros
 mencionados en cualquier texto que alguien pegue en el canal.
@@ -152,14 +152,14 @@ borrar el mensaje no lo devuelve. Las demás son reversibles con coste.
 **Decisión: REDISEÑAR** (no "aceptar y firmar").
 
 El primer daño es **infirmable** por el límite de C5: los datos personales de clientes no
-son de la dueña para apostarlos, así que ninguna firma en `REGISTRO-RIESGO.md` lo
+son del laboratorio para apostarlos, así que ninguna firma en `REGISTRO-RIESGO.md` lo
 autoriza. Por eso no se ofrece esa vía aquí. El rediseño que lo evita:
 
 - El vertical **`clientes` no se conecta a Slack**. Punto. Slack habla solo con `negocio`
 - Slack es canal de **propuesta y notificación**, nunca de ejecución de lo irreversible
 - La aprobación vive donde el diff es legible y la autenticación es una llave, no una app
 
-Con ese recorte, lo que queda **sí** es riesgo propio de la dueña y sí es firmable.
+Con ese recorte, lo que queda **sí** es riesgo propio del laboratorio y sí es firmable.
 
 ---
 
@@ -172,7 +172,7 @@ token no está ya comprometido.
 **se rota** — rotar invalida el valor filtrado, perseguir copias no.
 
 ### Fase 2: Firma de C3 y C4
-**Objetivo**: la dueña firma las dos secciones de arriba, o las corrige.
+**Objetivo**: el laboratorio firma las dos secciones de arriba, o las corrige.
 **Validación**: PRP en estado APROBADO.
 
 ### Fase 3: CDC (C1)

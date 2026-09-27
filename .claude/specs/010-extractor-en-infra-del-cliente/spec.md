@@ -26,7 +26,7 @@ VPS**: contemplada en el compose y medida por `configura:deploy`, sin ser requis
 
 ## Usuarios / actores
 
-- **La dueña del negocio** que despliega el template en su VPS: quiere `docker compose up` y que
+- **El laboratorio** que despliega el template en su VPS: quiere `docker compose up` y que
   funcione con o sin GPU.
 - **El operador** que mide y decide: necesita cifras por etapa y por hardware, no promesas.
 - **Hermes** (agente del cliente): consume la capacidad y no tiene ninguna llave del extractor.
@@ -35,16 +35,16 @@ VPS**: contemplada en el compose y medida por `configura:deploy`, sin ser requis
 
 ## Historias de usuario
 
-- H1: Como dueña quiero levantar el extractor en mi VPS con un comando y que use la GPU si la
+- H1: Como laboratorio quiero levantar el extractor en mi VPS con un comando y que use la GPU si la
   hay, para no depender de nadie ni pagar por página.
 - H2: Como operador quiero saber de qué evidencia sale la confianza de cada campo, para revisar
   solo lo que de verdad hay que revisar.
 - H3: Como operador quiero la latencia por documento y el rendimiento de lote medidos por
   separado en mi hardware, para dimensionar sin adivinar.
 - H4: Como integrador quiero un JSON con esquema por clase de página, para consumirlo sin traducir.
-- H5: Como dueña quiero que Hermes pida extracciones por A2A sin tener llaves del extractor, para
+- H5: Como laboratorio quiero que Hermes pida extracciones por A2A sin tener llaves del extractor, para
   que un agente convencido no pueda hacer daño.
-- H6: Como dueña quiero que exponer el puente fuera de mi red sea una decisión mía, no un efecto
+- H6: Como laboratorio quiero que exponer el puente fuera de mi red sea una decisión mía, no un efecto
   de desplegar.
 
 ## Requisitos funcionales (criterios de aceptación en EARS)
@@ -193,7 +193,7 @@ VPS**: contemplada en el compose y medida por `configura:deploy`, sin ser requis
 ## Dudas abiertas
 
 - [NECESITA ACLARACIÓN] Corpus real del cliente: no existe todavía en este entorno. Toda medición
-  sale del corpus sintético y se marca no concluyente hasta que la dueña aporte 100 páginas
+  sale del corpus sintético y se marca no concluyente hasta que el laboratorio aporte 100 páginas
   estratificadas, fuera del repositorio.
 - [NECESITA ACLARACIÓN] Máquina con GPU para demostrar el servicio `ocr-gpu`: este entorno no la
   tiene. Queda declarado como no medido, con el compose y la detección listos.

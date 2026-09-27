@@ -43,7 +43,7 @@ semanas después, sin ruido.
 altera el comportamiento de TODO lo que la fábrica produce después.
 
 Los prompts y skills ya viven en git y se despliegan como código. El CDC añade que se
-**revisan** como código: nadie edita un skill en caliente —ni la dueña— sin que quede
+**revisan** como código: nadie edita un skill en caliente —ni el laboratorio— sin que quede
 diff, regresión y aprobación.
 
 El gate es **proporcional al radio** del cambio:

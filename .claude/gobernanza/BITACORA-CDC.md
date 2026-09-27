@@ -3954,3 +3954,34 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   8/8 y la suite 3/3. Es de `main`, no del #154: va en su propio PR.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «Apruebo» y «capa A basta»,
   2026-09-27, con el diff de `gates.json` y `prueba-a2a.ts` y la evidencia delante.
+
+### 2026-09-27 — «el laboratorio» en lugar de «la dueña» en todo el repo, incluida la plantilla AISIA → CDC PROMOVIDO — radio: documentación (una plantilla de gobernanza; sin cambio de comportamiento de agentes ni de código)
+- **Cambio**: en 39 archivos, las referencias a quien decide, aprueba o firma dicen **«el laboratorio»**
+  donde decían «la dueña». Son specs, PRPs, SDD, goals, memorias del proyecto, comentarios de código,
+  notas de `presupuesto-contexto.json` y el texto que redacta `scripts/trayectorias/propuestas.mjs`.
+  Es material de CDC por un solo archivo, `.claude/gobernanza/plantillas/aisia.md` («La dueña de la
+  fábrica» → «El laboratorio», «Clientes de la dueña» → «Clientes del laboratorio»). En
+  `.claude/specs/011-trayectorias/spec.md` y en la plantilla se ajustó la concordancia de género.
+- **Lo que NO se cambia, y por qué**:
+  - **Este registro y las propuestas fechadas de `trayectorias/propuestas/`**. Son append-only y lo
+    ya firmado no se edita, así que sus entradas anteriores conservan «la dueña» tal como se
+    firmaron. **Esta entrada es la declaración**: desde hoy, «el laboratorio» designa a quien
+    antes se llamaba «la dueña».
+  - **Los usos con otro significado**:
+    - «dueña del contrato» es el paquete dueño de un tipo (voz/dictado, el manifiesto de gates);
+    - la frase literal «la duena» es la que detecta `tools/asesor-ventas/src/motor.ts` en una
+      conversación de venta;
+    - el owner de GitHub en `.claude/rules/aprendizajes-stack.md` (que además no se toca en
+      caliente por el cache de prefijo).
+  - **«Dueño» en masculino**: nombra a otra persona, el dueño del negocio de un proyecto derivado o
+    el que firma en C5, y la petición fue «dueña».
+- **Motivo**: pedido del laboratorio el 2026-09-27: «cambia todo lo que diga dueña por laboratorio».
+  PRP-004 ya usaba «el laboratorio».
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ capa A 123/123 y capa B 22/22 · aprobación
+  humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+  **Salvedad declarada**: el laboratorio aprobó el alcance, «Sí, salvo registros», cuya
+  descripción incluía este cambio de plantilla con su entrada. Pero **el diff de la plantilla, 3
+  líneas, se enseña después**, en el PR, no antes de la firma.
+- **Regresión**: `npm run regresion` 123/123 · `npm run regresion -- --trampa` 22/22 ·
+  `npm run validate` en verde (ver el PR).
+- **Aprobado por**: **lisagomez** (el laboratorio), «Sí, salvo registros», 2026-09-27.

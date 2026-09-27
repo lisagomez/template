@@ -111,7 +111,7 @@ QR), si se lee bien impreso a 2-3 cm, y la latencia de verificar en el punto de 
   cliente pueda escribirlo; la página de pago muestra el beneficiario y el monto antes de
   cobrar; QR impresos a prueba de calcomanía (dentro del material, no pegados); y revisión
   física de los lugares donde se imprimen.
-- **Límite de C5**: el dinero en riesgo es **de los clientes**. Ninguna firma de la dueña
+- **Límite de C5**: el dinero en riesgo es **de los clientes**. Ninguna firma del laboratorio
   acepta ese riesgo por ellos: si el diseño no lo mitiga, se rediseña o no se hace.
 - **Mover dinero es irreversible**: el QR nunca dispara un cobro solo; el cliente confirma.
 

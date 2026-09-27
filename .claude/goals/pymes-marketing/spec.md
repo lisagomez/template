@@ -40,7 +40,7 @@ Además, **una app para el cliente pyme** dentro del sitio que usa solo lo que e
 aprobó: subir datos, ver el brief, revisar y aprobar borradores. La app es la vitrina; las
 herramientas son lo que se instala en otros proyectos.
 
-**Análisis de dos skills de video** (pedido de la dueña el 2026-09-26): `god-animation`
+**Análisis de dos skills de video** (pedido del laboratorio el 2026-09-26): `god-animation`
 (animación creada por código: video, pieza viva en HTML o mixta con imágenes generadas) y
 `edicion-de-video` (editor de videos a cámara: corte, subtítulos, B-roll, sonido, sala de
 revisión). Entran al triaje con la misma tabla y **columnas extra**, y salen en una
@@ -147,7 +147,7 @@ local (C3) y el resultado de sus pruebas.
 - **Propuesta de video** (`propuesta-video.md` en la carpeta del goal): qué herramienta(s) serían
   para una pyme, arquitectura sugerida, qué se conserva, qué se sustituye por alternativa local o
   sin coste, licencias por resolver, coste estimado por pieza, AISIA corta de los datos de voz e
-  imagen, y las preguntas que la dueña tiene que firmar antes de construirla.
+  imagen, y las preguntas que el laboratorio tiene que firmar antes de construirla.
 - Por cada herramienta: `npm run empaqueta <nombre>` en verde (salida pegada), sin publicar.
 - Laboratorio: tabla por herramienta con ≥ 5 casos (incluidos casos-trampa: datos ausentes,
   reseña con inyección de instrucciones, CSV mal formado, moneda mezclada, dato personal),

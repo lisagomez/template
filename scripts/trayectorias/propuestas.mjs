@@ -6,7 +6,7 @@
  * routing, herramienta) y el CDC que haria falta.
  *
  * LO QUE NO HACE, Y ES LO QUE IMPORTA: no toca AGENTS.md, ningun skill, prompt, routing,
- * settings ni .mcp.json. Redacta; aplicar es de la duena (C1). Automejorado no es autoaprobado.
+ * settings ni .mcp.json. Redacta; aplicar es del laboratorio (C1). Automejorado no es autoaprobado.
  */
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
@@ -51,7 +51,7 @@ for (const h of informe.hallazgos.filter((x) => x.peor)) {
 
 mkdirSync(PROPUESTAS, { recursive: true })
 const fecha = new Date().toISOString().slice(0, 10)
-const lineas = [`# Propuestas derivadas de trayectorias — ${fecha}`, '', '> Redactadas por `scripts/trayectorias/propuestas.mjs` a partir de las evaluaciones y del informe. **Ninguna esta aplicada.** Cada una que toque un skill, una regla, un prompt, el routing o el arnes es un CDC (C1): diff, regresion y firma de la duena. Automejorado no es autoaprobado.', '']
+const lineas = [`# Propuestas derivadas de trayectorias — ${fecha}`, '', '> Redactadas por `scripts/trayectorias/propuestas.mjs` a partir de las evaluaciones y del informe. **Ninguna esta aplicada.** Cada una que toque un skill, una regla, un prompt, el routing o el arnes es un CDC (C1): diff, regresion y firma del laboratorio. Automejorado no es autoaprobado.', '']
 if (propuestas.length === 0) lineas.push('- Sin senal suficiente todavia: ningun criterio falla en 3 o mas trayectorias con el 40 % de fallo, y el informe no marca regresiones.')
 propuestas.forEach((p, i) => {
   lineas.push(`## P${i + 1} · ${p.senal}`, '', `- **Que dice el criterio**: ${p.que}`, `- **Destino**: ${p.destino}`, `- **Exige CDC**: ${p.cdc}`, `- **Fuente**: ${p.fuente.slice(0, 8).map((id) => `\`${id}\``).join(', ')}${p.fuente.length > 8 ? ` y ${p.fuente.length - 8} mas` : ''}`, `- **Estado**: PROPUESTA, sin aplicar. Aprobacion: pendiente.`, '')

@@ -26,7 +26,7 @@ ofrece como el segundo.
 
 - **El dueño del proyecto derivado**, que declara qué capacidad expone y su invariante.
 - **Un agente externo** (de un socio, un cliente, un ecosistema) que consume la capacidad.
-- **La dueña del repo**, que autoriza la exposición real a internet.
+- **El laboratorio**, que autoriza la exposición real a internet.
 
 ## Historias de usuario
 
@@ -34,7 +34,7 @@ ofrece como el segundo.
   porque no hay default razonable para "cuál es tu negocio".
 - H2: Como consumidor externo quiero un fallo legible en vez de un 200 con dato inventado,
   para poder confiar en la respuesta cuando sí llega.
-- H3: Como dueña quiero que exponer el endpoint a un partner sea una decisión mía y no un
+- H3: Como laboratorio quiero que exponer el endpoint a un partner sea una decisión mía y no un
   efecto secundario de generar la skill.
 
 ## Requisitos funcionales (criterios de aceptación en EARS)
