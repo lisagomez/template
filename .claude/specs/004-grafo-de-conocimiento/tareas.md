@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Cerradas: TAR-1 a TAR-7, TAR-13 y TAR-16**. TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; el resto el
-> 2026-09-27, Fases 1 a 3 de PRP-005. Las demás siguen abiertas. Esta spec no
+> **Cerradas: TAR-1 a TAR-7, TAR-13, TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y
+> decisión; el resto el 2026-09-27, Fases 1 a 4 de PRP-005. Las demás siguen abiertas. Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -105,12 +105,13 @@
       RF: MISION-6, DoF-7.
       **Cerrada 2026-09-27 (PRP-005 Fase 3)**: Prueba RF-9 de `tools/conocimiento/pruebas/conocimiento.ts`: 17 dominios, 61 categorías y 99 reglas. Sembrar o retirar obliga a tocarla (Fase 2).
 
-- [ ] **TAR-14 · Gate automático de colisiones.**
+- [x] **TAR-14 · Gate automático de colisiones.**
       Hecho cuando: detecta colisión/conflicto **antes de sembrar**, sin depender de que
       alguien revise cada regla nueva contra todas. Entra en `validate`. RF: RESTRICCIONES.
       *Del origen*: el gate de Hermes (`gen_seed_sql.py:76-92`) caza solo keywords
       **idénticas**, y el seed real pasa con el conflicto de INTERESES dentro. Control de
       reversión: ese seed tiene que poner **rojo** el gate nuevo.
+      **Cerrada 2026-09-27 (PRP-005 Fase 4)**: `tools/conocimiento/pruebas/gate.ts` con la entrada `./gate` de grafo-conocimiento (PRP-005 Fase 4). Conflictos y keywords idénticas los caza `validaConocimiento`; las **contenciones** entre categorías del mismo ámbito tienen que estar cubiertas por exclusión o aceptadas con su porqué. Corre en `validate` (`prueba:tools`). El seed de Hermes tal cual pone rojo (control de reversión).
 
 - [ ] **TAR-15 · Autocrítica y cierre.**
       Hecho cuando: está escrito qué parte puede fallar en producción y cómo quedó resuelto
@@ -132,7 +133,7 @@
       - un proyecto de prueba registra dos dominios y **solo recibe esos**.
       RF: RF-15.
 
-- [ ] **TAR-17 · Vigencia que no borra el pasado.**
+- [x] **TAR-17 · Vigencia que no borra el pasado.**
       Hecho cuando:
       - retirar una regla cierra su `vigente_hasta` y cambiar un significado añade una versión;
       - el gate **rechaza** un borrado o una edición en su sitio;
@@ -143,6 +144,7 @@
       *Avance 2026-09-27*: restaurada, cerrada y firmada (conocimiento 0.2.0), y el hecho de 2024 la
       encuentra (prueba RF-13/14). Falta que el **gate** rechace un borrado o una edición en su sitio
       frente a la versión anterior: Fase 4.
+      **Cerrada 2026-09-27 (PRP-005 Fase 4)**: el gate rechaza borrar y editar en su sitio sin firma frente a la versión anterior (`versiones.json`, `comparaVersiones`). Controles medidos: regla borrada, keyword quitada, vigencia reabierta y edición sin firma ponen rojo; cerrar una vigencia y añadir, no.
 
 - [ ] **TAR-18 · Aviso de versión nueva, nunca actualización sola.**
       Hecho cuando: publicar una versión nueva hace que `vigila:versiones` del proyecto

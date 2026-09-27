@@ -1,0 +1,110 @@
+{
+  "_que_es": "Contenciones entre keywords de categorías que compiten en un ámbito (RF-12): la corta cabe en la larga con frontera de palabra, así que todo texto que casa la larga casa también la corta. Gana la larga por longitud. Cada contención SIN exclusión que la cubra se acepta aquí, por escrito y con su porqué; el gate exige igualdad exacta con lo detectado. Una contención nueva sin declarar, o una declarada que ya no existe, pone rojo. Las 15 iniciales son las del corte de Hermes: en todas, la frase larga es la del dominio más específico.",
+  "aceptadas": [
+    {
+      "corta": "carta de porte",
+      "categoria_corta": "AUTOTRANSPORTE_CARGA",
+      "larga": "carta de porte aerea",
+      "categoria_larga": "CARGA_AEREA_EAWB",
+      "porque": "La carta de porte aérea es el documento del transporte aéreo (Art. 55 LAC); la terrestre queda para autotransporte."
+    },
+    {
+      "corta": "clasificacion arancelaria",
+      "categoria_corta": "CLASIFICACION_ARANCELARIA",
+      "larga": "cambio de clasificacion arancelaria",
+      "categoria_larga": "TMEC_REGLAS_ORIGEN",
+      "porque": "El «cambio de clasificación arancelaria» es un criterio de origen del T-MEC (Cap. 4), no la clasificación de la mercancía."
+    },
+    {
+      "corta": "arancel",
+      "categoria_corta": "CLASIFICACION_ARANCELARIA",
+      "larga": "arancel preferencial",
+      "categoria_larga": "TMEC_TRATO_PREFERENCIAL",
+      "porque": "El arancel preferencial es el trato del T-MEC (Cap. 5); el arancel a secas sigue en la clasificación arancelaria."
+    },
+    {
+      "corta": "inmobiliario",
+      "categoria_corta": "COMPRAVENTA_INMUEBLES",
+      "larga": "gravamen inmobiliario",
+      "categoria_larga": "REGISTRO_PROPIEDAD",
+      "porque": "Un gravamen es materia del registro de la propiedad (CCF 3007-3009), no de la compraventa."
+    },
+    {
+      "corta": "inmueble",
+      "categoria_corta": "COMPRAVENTA_INMUEBLES",
+      "larga": "extranjero comprar inmueble",
+      "categoria_larga": "FIDEICOMISO_ZONA_RESTRINGIDA",
+      "porque": "Que un extranjero compre un inmueble es el supuesto de la zona restringida (LIE Arts. 10-14)."
+    },
+    {
+      "corta": "aduana",
+      "categoria_corta": "DESPACHO_ADUANERO",
+      "larga": "valor en aduana",
+      "categoria_larga": "VALOR_ADUANA",
+      "porque": "El valor en aduana es la base gravable (LA Art. 64), una categoría propia frente al despacho."
+    },
+    {
+      "corta": "fideicomiso",
+      "categoria_corta": "FIDEICOMISO_CONSTITUCION",
+      "larga": "fideicomiso de zona restringida",
+      "categoria_larga": "FIDEICOMISO_ZONA_RESTRINGIDA",
+      "porque": "El fideicomiso de zona restringida tiene régimen propio (LIE, permiso SRE), además de la LGTOC."
+    },
+    {
+      "corta": "certificado de origen",
+      "categoria_corta": "ORIGEN_MERCANCIAS",
+      "larga": "certificado de origen t-mec",
+      "categoria_larga": "TMEC_CERTIFICACION_ORIGEN",
+      "porque": "La certificación de origen del T-MEC (Art. 5.2) sustituye al certificado genérico de la Ley Aduanera."
+    },
+    {
+      "corta": "reglas de origen",
+      "categoria_corta": "ORIGEN_MERCANCIAS",
+      "larga": "reglas de origen especificas por producto",
+      "categoria_larga": "TMEC_REGLAS_ORIGEN",
+      "porque": "Las reglas específicas por producto son del Anexo 4-B del T-MEC."
+    },
+    {
+      "corta": "patentes",
+      "categoria_corta": "PATENTES_INVENCIONES",
+      "larga": "marcas y patentes",
+      "categoria_larga": "MARCAS_REGISTRO",
+      "porque": "ACEPTADA CON RESERVA, tal como está en Hermes: una pregunta por «marcas y patentes» recibe solo las reglas de marcas (MARCAS_REGISTRO) y no las de patentes. Revisar al volver a sembrar propiedad industrial (¿exclusión en PATENTES_INVENCIONES, o una categoría transversal?). Cambiarlo cambia respuestas: va con firma."
+    },
+    {
+      "corta": "apoderado",
+      "categoria_corta": "PODERES_REPRESENTACION",
+      "larga": "apoderado aduanal",
+      "categoria_larga": "REPRESENTACION_ADUANAL",
+      "porque": "El apoderado aduanal es una figura de la Ley Aduanera, no un poder mercantil (LGSM)."
+    },
+    {
+      "corta": "representante legal",
+      "categoria_corta": "PODERES_REPRESENTACION",
+      "larga": "representante legal aduanero",
+      "categoria_larga": "REPRESENTACION_ADUANAL",
+      "porque": "La representación ante la aduana tiene su propia regla (LA, T-MEC Art. 7.20)."
+    },
+    {
+      "corta": "de minimis",
+      "categoria_corta": "TMEC_REGLAS_ORIGEN",
+      "larga": "de minimis aduanero",
+      "categoria_larga": "TMEC_ENVIOS_ENTREGA_RAPIDA",
+      "porque": "El de minimis aduanero es el umbral de envíos (Art. 7.8), no el de minimis de contenido de origen (Art. 4.12)."
+    },
+    {
+      "corta": "t-mec",
+      "categoria_corta": "TMEC_TRATO_PREFERENCIAL",
+      "larga": "certificacion de origen t-mec",
+      "categoria_larga": "TMEC_CERTIFICACION_ORIGEN",
+      "porque": "Con «certificación de origen», la pregunta es de certificación (Cap. 5); «T-MEC» a secas va al trato preferencial."
+    },
+    {
+      "corta": "t-mec",
+      "categoria_corta": "TMEC_TRATO_PREFERENCIAL",
+      "larga": "certificado de origen t-mec",
+      "categoria_larga": "TMEC_CERTIFICACION_ORIGEN",
+      "porque": "Igual que la anterior: el documento de certificación manda sobre la mención genérica del tratado."
+    }
+  ]
+}

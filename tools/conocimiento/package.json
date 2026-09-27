@@ -23,6 +23,7 @@
     "build": "node ensambla.mjs",
     "preprueba": "npm run build && npm --prefix ../grafo-conocimiento run build",
     "prueba": "node --test pruebas/*.ts",
-    "paridad:migracion": "npm run preprueba && node medicion/paridad-migracion.mjs"
+    "paridad:migracion": "npm run preprueba && node medicion/paridad-migracion.mjs",
+    "registra": "npm --prefix ../grafo-conocimiento run build && node medicion/registra-version.mjs"
   }
 }
