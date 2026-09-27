@@ -1,8 +1,8 @@
 # PRP-005: El grafo de conocimiento, portado al Golden Path con el conocimiento de Hermes como dato
 
-> **Estado**: APROBADO (2026-09-26, el laboratorio: «fase 0 con D»). La **Fase 0 está cerrada** con sus
-> decisiones escritas (ver la Fase 0 del Blueprint). Las fases 1+ se ejecutan por bucle agéntico,
-> cada una con su validación. **Hasta que empiece la Fase 1 no se ha escrito código ni importado nada.**
+> **Estado**: EJECUTADO (2026-09-27). Aprobado el 2026-09-26 por el laboratorio («fase 0 con D»); las 9 fases están
+> cerradas, en PR apilados #160 → #162 → #165 → #167 → #168 → #170 → #171 → #172 → Fase 9, **pendientes de
+> mezclar en ese orden**. Lo que queda abierto está en la **Autocrítica** de abajo.
 > **Fecha**: 2026-09-26
 > **Proyecto**: template (fábrica) · origen del conocimiento: `lisagomez/hermes-os-a2a@97d9f9e`
 > **Spec**: `.claude/specs/004-grafo-de-conocimiento/spec.md`. Cierra el QUÉ; este PRP no la reescribe.
@@ -41,29 +41,29 @@ responde en oraciones libres con un veredicto que **nunca finge certeza**.
 Resume la spec 004. Los criterios salen de sus RF en EARS y el «Fuera de alcance» es el de la spec.
 
 ### Criterios de Éxito
-- [ ] **Paridad**: sobre el corpus generado con el motor Python de Hermes, el motor TS da el mismo
+- [x] **Paridad**: sobre el corpus generado con el motor Python de Hermes, el motor TS da el mismo
       veredicto, razón, fuente y banderas. Cada diferencia es una **divergencia esperada** declarada con
-      su RF (p. ej. el conflicto de INTERESES rechazado en la siembra)
-- [ ] RF-1: el vocabulario de veredicto está acotado **por dimensión** en el contrato Zod. `deducible` en
-      una regla regulatoria **no siembra**
-- [ ] RF-6: «sin regla», «conflicto», «la regla dice dudoso» y «parser caído» son **tipos distintos**, no
-      textos distintos del mismo `dudoso`
-- [ ] RF-7: el caso real de «drones» se prueba **antes y después** de las exclusiones
-- [ ] RF-12: el gate de siembra rechaza el conflicto de veredictos (control negativo: el INTERESES de
+      su RF (p. ej. el conflicto de INTERESES rechazado en la siembra) → Fase 3: 574 idénticos + 196 solo orden + 12 firmadas, igual que el motor de Hermes sobre el mismo paquete
+- [x] RF-1: el vocabulario de veredicto está acotado **por dimensión** en el contrato Zod. `deducible` en
+      una regla regulatoria **no siembra** → Fase 1 (`veredicto_fuera_de_vocabulario`)
+- [x] RF-6: «sin regla», «conflicto», «la regla dice dudoso» y «parser caído» son **tipos distintos**, no
+      textos distintos del mismo `dudoso` → Fases 3 y 5 (`motivo`; `parser_no_disponible` es un fallo aparte)
+- [x] RF-7: el caso real de «drones» se prueba **antes y después** de las exclusiones → Fase 3 (fixtures, antes/después) y paridad (quitar exclusiones pone rojo)
+- [x] RF-12: el gate de siembra rechaza el conflicto de veredictos (control negativo: el INTERESES de
       Hermes **pone rojo** el gate), las keywords idénticas y las keywords contenidas en otra categoría
-      sin exclusión
-- [ ] RF-13/RF-14, vigencia: retirar una regla **cierra** su `vigente_hasta`, nunca la borra, y el gate
-      rechaza borrar o editar en su sitio. Control: un hecho de 2024 sigue encontrando la regla de 2010
-- [ ] RF-5: los dominios de fuente pública citan y los internos no, con prueba de los dos casos
-- [ ] RF-15, fuente única: un proyecto de prueba registra dos dominios y **solo recibe esos**. El
-      paquete lleva semver, fecha de corte por dominio y registro de cambios
-- [ ] RF-16, aviso: publicar una versión nueva del paquete hace que `vigila:versiones` del consumidor
-      la reporte, y **nada cambia** en él hasta que un humano sube el pin
-- [ ] Dos dominios de ejemplo, uno regulatorio y uno **no legal**; extremo a extremo con una oración real;
-      conteo de reglas fijado en prueba
-- [ ] `npm run empaqueta` del motor y del paquete de conocimiento: los dos instalan e importan en un
-      proyecto limpio
-- [ ] `npm run validate` en verde
+      sin exclusión → Fases 1 y 4 (conflictos, keywords idénticas, contenciones declaradas)
+- [x] RF-13/RF-14, vigencia: retirar una regla **cierra** su `vigente_hasta`, nunca la borra, y el gate
+      rechaza borrar o editar en su sitio. Control: un hecho de 2024 sigue encontrando la regla de 2010 → Fases 2 y 4 (0.2.0 firmada; `versiones.json`)
+- [x] RF-5: los dominios de fuente pública citan y los internos no, con prueba de los dos casos → Fase 5
+- [x] RF-15, fuente única: un proyecto de prueba registra dos dominios y **solo recibe esos**. El
+      paquete lleva semver, fecha de corte por dominio y registro de cambios → Fase 2
+- [x] RF-16, aviso: publicar una versión nueva del paquete hace que `vigila:versiones` del consumidor
+      la reporte, y **nada cambia** en él hasta que un humano sube el pin → Fase 7 (ensayo con registro falso)
+- [x] Dos dominios de ejemplo, uno regulatorio y uno **no legal**; extremo a extremo con una oración real;
+      conteo de reglas fijado en prueba → Fase 6
+- [x] `npm run empaqueta` del motor y del paquete de conocimiento: los dos instalan e importan en un
+      proyecto limpio → Fase 6
+- [x] `npm run validate` en verde → en cada fase; el último, 26 gates y 0 rojos
 
 ### Comportamiento Esperado
 Pregunta en lenguaje natural → **parser** (opcional, entry point aparte: solo estructura) → **motor
@@ -362,7 +362,9 @@ con la deriva, y su pin no se mueve.
 **Objetivo**: que el decision tree sepa que la herramienta y su fuente existen.
 **Validación**: diff, `npm run regresion`, aprobación humana y entrada en `BITACORA-CDC.md`.
 
-### Fase 9: Validación Final
+### Fase 9: Validación Final — ✅ CERRADA 2026-09-27
+> Criterios de éxito marcados arriba con su evidencia. 69 pruebas del motor y 27 del paquete; `validate` en
+> verde. La autocrítica (TAR-15) está en la sección siguiente.
 **Objetivo**: la herramienta y su fuente, funcionando de extremo a extremo.
 **Validación**:
 - [ ] `npm run validate` pasa
@@ -437,6 +439,50 @@ es una decisión humana, no un paso de script. Hasta ese PRP, su `reglas.json` q
 - **Aplicar en**: todo catálogo con vigencia (extractor, CFDI, ERP).
 
 ---
+
+## Autocrítica (TAR-15): qué puede fallar en producción, y cómo quedó
+
+Ordenado por daño a terceros, que es el riesgo principal de la spec 004.
+
+1. **El parser con un modelo real no está medido.** Cuando la pregunta no trae ninguna keyword (una
+   paráfrasis, como H1), el motor no tiene contra qué contrastar la categoría que propone el parser, y la
+   acepta. Un modelo que se equivoque de categoría da el veredicto real **de otra cosa**: la clase de fallo del
+   incidente de «drones». Las defensas estructurales (lista cerrada, fragmento literal, exclusiones,
+   contraste) acotan, pero no cierran, este caso. **Queda abierto.** Antes de exponerlo a terceros: medir el
+   parser con un modelo real sobre preguntas etiquetadas, y valorar exigir `clasificacion: 'keywords'` en lo
+   que se sirva a terceros.
+2. **El conocimiento envejece.** Cada dominio lleva su fecha de corte (del 2026-07-10 al 2026-09-03, visible
+   en cada respuesta), pero nadie avisa cuando una ley cambia. Además, **35 impactos llevan cifras por cotejar**
+   (`verificar: true`). Hermes tenía `/salud-conocimiento` (reglas vencidas y montos sin cotejo) y **no se
+   portó**. Queda abierto como mejora.
+3. **Un cambio de significado sin cambio de texto no se detecta** (la duda original de la vigencia).
+   Solo-añadir y el juicio a la fecha del hecho protegen el pasado, pero una reinterpretación de la autoridad
+   solo entra si alguien la siembra. Declarado.
+4. **Dos motores vivos hasta el PRP de Hermes.** Hermes sirve producción con su seed congelado, y según su
+   memoria producción ni siquiera tiene aplicadas las 98 reglas. Template responde con la 0.2.0, que difiere en
+   las 2 correcciones firmadas. Mientras Hermes no lea el paquete, una misma pregunta puede dar dos respuestas.
+   Queda en el PRP aparte de Hermes, con firma.
+5. **Sin publicar no hay aviso.** Hasta que el paquete se publique en un registro (gate humano), los proyectos
+   lo instalan desde el tarball y `vigila:versiones` no puede avisarles; lo dice, en vez de callar. El aviso nace
+   al publicar.
+6. **Contención aceptada con reserva**: «marcas y patentes» recibe solo las reglas de marcas. Corregirlo
+   cambia respuestas: va con firma al volver a sembrar propiedad industrial.
+7. **La `fuente_url` de la regla de 2010** apunta al PDF vigente de Diputados, que hoy sirve la ley nueva. La
+   cita es correcta; el enlace, no del todo. Declarado en `CAMBIOS.md`.
+8. **Dominios internos**: el redactor no añade la fuente, pero muestra literales los requisitos y banderas que
+   escribe el autor. Si el autor escribe la fuente ahí, se ve. Documentado en el README.
+9. **Keywords y variantes**: la frontera de palabra no casa plurales ni derivados que no estén sembrados
+   (la lección «inmueble / inmobiliario» de Hermes). Falla hacia «no hay información suficiente», que es la
+   dirección segura, pero responde menos de lo que podría.
+10. **El corpus de casos-trampa no incluye el O1 del parser.** La defensa se prueba de forma determinista en su
+    suite. Llevarla al corpus ciego (`golden-sets`) es un cambio de C2 aparte.
+
+Lo que **no** puede pasar por diseño, y está probado:
+- un veredicto que no salga del motor;
+- un fail-safe con forma de respuesta;
+- un parser caído que parezca «no hay regla»;
+- una regla borrada sin que el gate lo vea;
+- un proyecto que se actualice solo.
 
 ## Gotchas
 

@@ -1,6 +1,6 @@
 # El grafo de Hermes frente a la spec 004 — expediente de decisión
 
-> **Estado**: ANÁLISIS CERRADO · recomendación **firmada: D** (Fase 0 de PRP-005, 2026-09-26, ver §9) · **Fecha**: 2026-09-26
+> **Estado**: ANÁLISIS CERRADO · recomendación **firmada: D** (Fase 0 de PRP-005, 2026-09-26, ver §9) · **EJECUTADA** el 2026-09-27 (PRP-005, 9 fases; autocrítica en el PRP) · **Fecha**: 2026-09-26
 > **Ámbito**: el motor de reglas «grafo regulatorio» de `lisagomez/hermes-os-a2a`, medido contra la
 > spec `.claude/specs/004-grafo-de-conocimiento/` de este template.
 > **Corte medido**: `hermes-os-a2a@97d9f9e` (`master`, 2026-09-06), el mismo corte del que salió el ERP
