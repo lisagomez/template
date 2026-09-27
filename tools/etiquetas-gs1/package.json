@@ -40,13 +40,26 @@
     "./almacenes/seudonimos": {
       "types": "./dist/almacenes/seudonimos.d.ts",
       "import": "./dist/almacenes/seudonimos.js"
+    },
+    "./almacenes/fotos": {
+      "types": "./dist/almacenes/fotos.d.ts",
+      "import": "./dist/almacenes/fotos.js"
+    },
+    "./motores/proceso": {
+      "types": "./dist/motores/proceso.d.ts",
+      "import": "./dist/motores/proceso.js"
+    },
+    "./imagenes": {
+      "types": "./dist/imagenes.d.ts",
+      "import": "./dist/imagenes.js"
     }
   },
   "files": [
     "dist",
     "migraciones",
     "fuentes",
-    "agente.ejemplo.json"
+    "agente.ejemplo.json",
+    "motores"
   ],
   "sideEffects": false,
   "engines": {
@@ -66,10 +79,14 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "bwip-js": "4.11.4"
+    "bwip-js": "4.11.4",
+    "sharp": "0.35.4"
   },
   "peerDependenciesMeta": {
     "bwip-js": {
+      "optional": true
+    },
+    "sharp": {
       "optional": true
     }
   }

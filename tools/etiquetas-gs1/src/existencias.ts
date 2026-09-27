@@ -5,7 +5,7 @@
  */
 import { valorDe, type Elemento } from './elementos.js'
 import { esFecha, fechaIso, parseaFechaGs1 } from './fechas.js'
-import type { Articulo, EstadoAlmacen, Existencia, Zona } from './modelo.js'
+import type { Articulo, EstadoAlmacen, Existencia, Nivel, Zona } from './modelo.js'
 import { categoriaPorId, vidaRestante, type VidaRestante } from './semaforo.js'
 
 export interface Interpretacion {
@@ -15,6 +15,8 @@ export interface Interpretacion {
   readonly caducidadIso?: string
   readonly cajas: number
   readonly articulo?: Articulo
+  /** Que se leyo: la pieza o la caja (el GTIN de la pieza no es el de la caja). */
+  readonly nivel?: Nivel
   readonly vida?: VidaRestante
   /** Sitios donde hay existencia de ese GTIN y lote. */
   readonly sitios: readonly string[]
@@ -53,7 +55,7 @@ export function interpreta(elementos: readonly Elemento[], estado: EstadoAlmacen
   }
   return {
     ...(gtin ? { gtin } : {}), ...(sscc ? { sscc } : {}), ...(lote ? { lote } : {}), ...(caducidadIso ? { caducidadIso } : {}),
-    cajas: cuenta37 ? Number(cuenta37) : 1, ...(articulo ? { articulo } : {}), ...(vida ? { vida } : {}), sitios, ubicaciones: [...cuenta.values()], avisos,
+    cajas: cuenta37 ? Number(cuenta37) : 1, ...(articulo ? { articulo, nivel: articulo.gtinCaja === gtin ? 'caja' as const : 'unidad' as const } : {}), ...(vida ? { vida } : {}), sitios, ubicaciones: [...cuenta.values()], avisos,
   }
 }
 

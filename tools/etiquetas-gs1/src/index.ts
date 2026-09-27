@@ -9,11 +9,15 @@
  *   ./firma               Ed25519 de node:crypto para firmar y verificar anclas (Node)
  *   ./almacenes/central   el central de anclas en un archivo JSON (Node)
  *   ./almacenes/seudonimos  seudonimos de operador, borrables (Node)
+ *   ./almacenes/fotos     fotos por huella en una carpeta (Node)
+ *   ./imagenes            normalizar fotos (sin EXIF) y recortar la guia de encuadre (sharp inyectado)
+ *   ./motores/proceso     motor local de lectura de fechas (RapidOCR por proceso, Node)
  */
 export * from './diccionario/index.js'
 export * from './digito.js'
 export * from './fechas.js'
 export * from './elementos.js'
+export * from './codigos.js'
 export * from './linters.js'
 export * from './prefijos.js'
 export * from './valida.js'
@@ -45,3 +49,8 @@ export * from './central.js'
 export * from './riesgo.js'
 export * from './conteo.js'
 export * from './ventas-erp.js'
+export * from './fechas-impresas.js'
+export * from './lectura-caducidad.js'
+export * from './revisiones.js'
+export * from './recepcion-foto.js'
+export * from './fotos.js'

@@ -7,6 +7,7 @@ import type { Evento } from './cadena.js'
 import type { Consumibles } from './consumibles.js'
 import type { Conteo } from './conteo.js'
 import type { PerfilImpresora } from './etiqueta.js'
+import type { FormatoFecha, TipoFecha } from './fechas-impresas.js'
 import type { Categoria } from './semaforo.js'
 
 export type TipoSitio = 'cedis' | 'sucursal'
@@ -156,6 +157,43 @@ export interface EstadoAlmacen {
   readonly devoluciones?: readonly Devolucion[]
   /** Inventarios fisicos: sesiones de conteo ciego (el resultado entra a la cadena como CONTEO). */
   readonly conteos?: readonly Conteo[]
+  /**
+   * Fotos de los articulos (solo se agrega): la vigente de cada vista es la ultima. Cambiarla no
+   * borra la anterior; la foto vive fuera (almacen de fotos, por su huella SHA-256).
+   */
+  readonly fotos?: readonly FotoArticulo[]
+  /** Como imprime la fecha cada articulo, aprendido de la primera confirmacion (solo se agrega). */
+  readonly formatosFecha?: readonly FormatoFechaArticulo[]
+}
+
+/** Vistas de la ficha: `caducidad` es la foto de DONDE viene impresa la fecha, con su nota. */
+export type VistaFoto = 'principal' | 'frente' | 'etiqueta' | 'caja' | 'caducidad'
+
+export interface FotoArticulo {
+  readonly sku: string
+  readonly vista: VistaFoto
+  /** `sha256:<hex>` de la foto normalizada (sin EXIF). Vacia si `retirada`. */
+  readonly huella: string
+  readonly miniatura?: string
+  readonly ancho?: number
+  readonly alto?: number
+  /** Para `caducidad`: donde esta impresa y como se ve mejor («cuello, por encima del liquido»). */
+  readonly nota?: string
+  /** La vista se quito (la foto anterior sigue en el historial). */
+  readonly retirada?: boolean
+  /** Seudonimo de quien la puso. */
+  readonly operador: string
+  readonly fecha: string
+}
+
+export interface FormatoFechaArticulo {
+  readonly sku: string
+  readonly formato: FormatoFecha
+  readonly tipo: Exclude<TipoFecha, 'sin-rotulo'>
+  readonly operador: string
+  readonly fecha: string
+  /** El RECIBIDO cuya confirmacion lo fijo. */
+  readonly evento?: string
 }
 
 /** La devolucion que genera un rechazo en recepcion: lo leido, la regla y el evento que la prueba. */

@@ -15,6 +15,7 @@ import type { Json } from './jcs.js'
 import { altaDeLote, recibe, type AltaLote, type Interpretacion } from './existencias.js'
 import { diasParaCaducar } from './fefo.js'
 import type { Devolucion, EstadoAlmacen, Existencia, Zona } from './modelo.js'
+import { bloqueoPorRevision } from './revisiones.js'
 import { categoriaPorId, estadoSemaforo, vendible, type EstadoSemaforo } from './semaforo.js'
 import { mueve, zonaDe, type PedidoMovimiento, type ResultadoMovimiento } from './ubicaciones.js'
 
@@ -81,7 +82,7 @@ export type ValorRecepcion = { readonly existencia: Existencia; readonly rechaza
  * o esta vencido, queda RECHAZADO: el evento guarda lo leido y la regla, y se genera la
  * devolucion al proveedor con el hash del evento como evidencia. La cadena del lote se cierra ahi.
  */
-export function recibeConExpediente(estado: EstadoAlmacen, l: Interpretacion, sitio: string, cuando: string, id: string, operador: string, lectura: string): Paso<ValorRecepcion> {
+export function recibeConExpediente(estado: EstadoAlmacen, l: Interpretacion, sitio: string, cuando: string, id: string, operador: string, lectura: string, extra: Record<string, Json> = {}): Paso<ValorRecepcion> {
   const basico = !estado.configuracion.sitios.some((s) => s.clave === sitio) ? `el sitio ${sitio} no existe`
     : !l.articulo || !l.gtin ? 'el código no corresponde a un artículo del catálogo'
       : !l.lote || !l.caducidadIso ? 'la lectura no trae lote y caducidad' : undefined
@@ -91,7 +92,7 @@ export function recibeConExpediente(estado: EstadoAlmacen, l: Interpretacion, si
     const regla = l.vida.dias < 0 ? 'vencido: no se recibe' : l.vida.minimo.texto
     const r = registra(estado, sitio, {
       tipo: 'RECHAZADO', lote, operador, fecha: cuando,
-      datos: { cajas: l.cajas, sku: l.articulo.sku, lectura, diasRestantes: l.vida.dias, minimoDias: l.vida.minimo.dias, regla, devolucion: `DEV-${id}`, ...(l.sscc ? { sscc: l.sscc } : {}) },
+      datos: { cajas: l.cajas, sku: l.articulo.sku, lectura, diasRestantes: l.vida.dias, minimoDias: l.vida.minimo.dias, regla, devolucion: `DEV-${id}`, ...(l.sscc ? { sscc: l.sscc } : {}), ...extra },
     })
     const devolucion: Devolucion = {
       folio: `DEV-${id}`, fecha: cuando, sitio, sku: l.articulo.sku, ...lote, cajas: l.cajas, lectura, diasRestantes: l.vida.dias,
@@ -101,7 +102,7 @@ export function recibeConExpediente(estado: EstadoAlmacen, l: Interpretacion, si
   }
   const a = recibe(estado, l, sitio, cuando, id)
   if (!a.resultado.ok) return falla(estado, a.resultado.motivo)
-  const datos = { cajas: l.cajas, zona: 'recibo', sku: l.articulo.sku, origen: 'recepcion', ...(l.vida ? { diasRestantes: l.vida.dias, minimoDias: l.vida.minimo.dias } : {}), ...(l.sscc ? { sscc: l.sscc } : {}) }
+  const datos = { cajas: l.cajas, zona: 'recibo', sku: l.articulo.sku, origen: 'recepcion', ...(l.vida ? { diasRestantes: l.vida.dias, minimoDias: l.vida.minimo.dias } : {}), ...(l.sscc ? { sscc: l.sscc } : {}), ...extra }
   const r = conEvento(estado, a.estado, sitio, 'RECIBIDO', lote, datos, operador, cuando)
   return { estado: r.estado, resultado: { ok: true, valor: { existencia: a.resultado.existencia }, eventos: [r.evento] } }
 }
@@ -118,6 +119,11 @@ export function altaConExpediente(estado: EstadoAlmacen, a: AltaLote, origen: Ex
 /** Movimiento entre zonas (con la regla de no subir a piso lo bloqueado) y, al almacen, su posicion. */
 export function mueveConExpediente(estado: EstadoAlmacen, p: PedidoMovimiento, cuando: string, id: string, hoy: string, posicion?: string): Paso<Extract<ResultadoMovimiento, { ok: true }>> {
   if (posicion !== undefined && (p.destino !== 'almacen' || !esPosicion(posicion))) return falla(estado, posicion && p.destino !== 'almacen' ? 'la posición rack-nivel-posición solo existe en el almacén' : `la posición «${posicion}» no es rack-nivel-posición (p. ej. B-04-2)`)
+  // Cajas por confirmar (caducidad leida de una foto y sin confirmar): no se mueven, y se dice por que.
+  const l = p.lectura
+  const sinExistencia = !estado.existencias.some((e) => e.sitio === p.sitio && e.gtin === l.gtin && (!l.lote || e.lote === l.lote) && e.cantidad > 0)
+  const pendiente = l.gtin && !l.sscc && (!l.lote || sinExistencia) ? bloqueoPorRevision(estado, p.sitio, l.gtin, cuando) : undefined
+  if (pendiente) return falla(estado, pendiente)
   const m = mueve(estado, p, cuando, id, hoy)
   if (!m.resultado.ok) return falla(estado, m.resultado.motivo)
   const mov = m.resultado.movimiento
@@ -206,7 +212,7 @@ export function bloqueoDeSalida(p: PedidoSalida, semaforo: EstadoSemaforo): stri
 export function salida(estado: EstadoAlmacen, p: PedidoSalida, hoy: string, cuando: string, operador: string): Paso<{ cajas: number }> {
   if (!Number.isInteger(p.cajas) || p.cajas < 1) return falla(estado, 'las cajas van en enteros positivos')
   const fila = estado.existencias.find((e) => esDe(e, p.sitio, p.lote))
-  if (!fila) return falla(estado, `ese lote no está en ${p.sitio}`)
+  if (!fila) return falla(estado, bloqueoPorRevision(estado, p.sitio, p.lote.gtin, cuando) ?? `ese lote no está en ${p.sitio}`)
   const s = semaforoDe(estado, fila.sku, p.lote.caducidad, hoy)
   const bloqueo = bloqueoDeSalida(p, s.estado)
   if (bloqueo) return falla(estado, bloqueo)
@@ -235,7 +241,7 @@ export function transfiere(estado: EstadoAlmacen, p: PedidoTransferencia, hoy: s
   if (p.origen === p.destino) return falla(estado, 'origen y destino son el mismo sitio')
   if (!estado.configuracion.sitios.some((s) => s.clave === p.destino)) return falla(estado, `el sitio ${p.destino} no existe`)
   const fila = estado.existencias.find((e) => esDe(e, p.origen, p.lote))
-  if (!fila) return falla(estado, `ese lote no está en ${p.origen}`)
+  if (!fila) return falla(estado, bloqueoPorRevision(estado, p.origen, p.lote.gtin, cuando) ?? `ese lote no está en ${p.origen}`)
   const s = semaforoDe(estado, fila.sku, p.lote.caducidad, hoy)
   if (!vendible(s.estado)) return falla(estado, 'un lote bloqueado o vencido no se transfiere para venta')
   const despues = quita(estado, p.origen, p.lote, p.cajas, ['almacen', 'recibo', 'piso'], cuando)
@@ -255,6 +261,8 @@ export interface PedidoCorreccion {
   readonly ajuste?: { readonly zona: Zona; readonly cajas: number }
   /** Caducidad correcta, si la capturada estaba mal. */
   readonly caducidad?: string
+  /** La foto que prueba la correccion (huellas; las fotos viven fuera de la cadena). */
+  readonly evidencia?: { readonly fotos: { readonly completa: string; readonly recortes: readonly string[] }; readonly texto?: string }
 }
 
 /**
@@ -286,7 +294,9 @@ export function corrige(estado: EstadoAlmacen, p: PedidoCorreccion, cuando: stri
     existencias = existencias.map((e) => (esDe(e, p.sitio, l) ? { ...e, caducidad: p.caducidad!, actualizado: cuando } : e))
     cambios.push(...cambiosDe(antes, existencias, p.sitio, l), ...cambiosDe(antes, existencias, p.sitio, { ...l, caducidad: p.caducidad }).map((c) => ({ ...c, caducidad: p.caducidad! })))
   }
-  const datos = { corrige: p.corrige, seqCorregido: original.seq, motivo: p.motivo, ...(p.ajuste ? { ajuste: json(p.ajuste) } : {}), ...(p.caducidad ? { caducidadAnterior: l.caducidad, caducidadNueva: p.caducidad } : {}), cambios: json(cambios) }
+  if (p.evidencia && ![p.evidencia.fotos.completa, ...p.evidencia.fotos.recortes].every((h) => /^sha256:[0-9a-f]{64}$/.test(h))) return falla(estado, 'la foto de la corrección no tiene una huella SHA-256 válida')
+  const evidencia: Record<string, Json> = p.evidencia ? { evidencia: json({ fotos: { completa: p.evidencia.fotos.completa, recortes: [...p.evidencia.fotos.recortes] }, ...(p.evidencia.texto ? { texto: p.evidencia.texto } : {}) }) } : {}
+  const datos = { corrige: p.corrige, seqCorregido: original.seq, motivo: p.motivo, ...(p.ajuste ? { ajuste: json(p.ajuste) } : {}), ...(p.caducidad ? { caducidadAnterior: l.caducidad, caducidadNueva: p.caducidad } : {}), ...evidencia, cambios: json(cambios) }
   const r = registra({ ...estado, existencias }, p.sitio, { tipo: 'CORRECCION', lote: l, datos, operador, fecha: cuando })
   return { estado: r.estado, resultado: { ok: true, valor: r.evento, eventos: [r.evento] } }
 }
