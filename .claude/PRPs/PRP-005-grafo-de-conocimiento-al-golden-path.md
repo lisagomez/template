@@ -201,7 +201,19 @@ Hermes@97d9f9e: al repo solo entran sus salidas, como datos, con procedencia (co
 **Validación**: el contrato valida el seed de Hermes salvo las divergencias declaradas (INTERESES,
 vocabulario, la regla de 2010 borrada). `npm run verifica:specs` en verde.
 
-### Fase 2: La fuente única — el conocimiento traído una vez (TAR-16, TAR-17)
+### Fase 2: La fuente única — el conocimiento traído una vez (TAR-16, TAR-17) — ✅ CERRADA 2026-09-27
+> `tools/conocimiento` (`@tu-scope/conocimiento`):
+> - **Importación**: git-filter-repo 2.47.0 al corte `97d9f9e`, `reglas.json` y su predecesor `reglas_mx.json`
+>   (16 commits de historia), la plantilla y el dictamen. Byte a byte idénticos, y `audita:secretos` limpio
+>   sobre toda la historia.
+> - **Reparto**: 17 dominios y 4 archivos de generales. La procedencia se partió por dominio y se
+>   reconstruye exacta. Migración única en `origen/`.
+> - **0.1.0**, la migración: el motor REAL de Hermes sobre el paquete da 576 idénticos, 206 iguales salvo el
+>   orden y 0 diferencias de contenido. Hermes lo lee sin adaptador.
+> - **0.2.0**, firmada por el laboratorio: regla de 2010 restaurada y cerrada al 2025-03-20; INTERESES con una
+>   sola rectora `dudoso` (variante A). 12 respuestas cambian de razón y ningún estado cambia.
+> - **Registro**: drones de reparto + agentes de seguros dan solo esos 2 dominios (5 reglas) y validan limpio.
+> - 9 pruebas del paquete y 25 del motor; `validate` en verde.
 **Objetivo**: `reglas.json` y su método de investigación (`PLANTILLA-INVESTIGACION-SEED.md`) de Hermes,
 traídos **con su historial** con el mismo procedimiento que el ERP en PRP-004 Fase 1: corte pineado,
 sha256 y `audita:secretos` limpio. Después:
@@ -336,8 +348,8 @@ es una decisión humana, no un paso de script. Hasta ese PRP, su `reglas.json` q
       Hay que fijarlo explícito
 - [ ] La clasificación por keyword con frontera de palabra **sin acentos** es parte del contrato: en
       Hermes, «inmobiliario» no casaba «inmueble» y hubo que ampliar el vocabulario
-- [ ] Un conflicto «intencional» (INTERESES) no se expresa por el mecanismo de conflicto: se expresa
-      como una sola regla rectora `dudoso`
+- [x] Un conflicto «intencional» (INTERESES) no se expresa por el mecanismo de conflicto: se expresa
+      como una sola regla rectora `dudoso` (hecho en conocimiento 0.2.0, firmado)
 - [ ] **Dos fuentes vivas entre la Fase 2 y el PRP de Hermes.** Si Hermes siembra una regla nueva
       después del corte, nace una bifurcación. Resuelto: su `reglas.json` está **ya congelado** desde `97d9f9e` (hermes-os-a2a PR #317, 2026-09-27; `grafo-congelado` es check obligatorio de su `master`), y
       cualquier regla nueva se investiga y siembra **aquí**

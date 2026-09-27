@@ -1,0 +1,31 @@
+{
+  "jurisdiccion": "MX",
+  "dimension": "fiscal",
+  "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+  "reglas": [
+    {
+      "clave": "MX-CFF-29A",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Requisitos de los CFDI",
+      "texto_resumen": "Todo comprobante debe ser CFDI con los requisitos del 29-A (RFC emisor/receptor, uso de CFDI, forma y metodo de pago). Sin CFDI valido no hay deduccion.",
+      "fuente_cita": "CFF Arts. 29 y 29-A",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CFF.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": null,
+          "requisitos": [
+            "CFDI vigente (no cancelado) con requisitos del Art. 29-A CFF",
+            "Uso de CFDI congruente con el gasto"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}

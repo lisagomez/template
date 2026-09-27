@@ -114,6 +114,13 @@ políticas internas, clasificación de soporte) usa la misma estructura.
 - RF-16: SI existe una versión nueva del conocimiento, ENTONCES EL SISTEMA lo avisará sin
   aplicarla, y la actualización requerirá aprobación humana.
 
+  > **RF-14 y las correcciones de modelado (decidido el 2026-09-27 al firmar INTERESES).** RF-14
+  > habla de cambios de SIGNIFICADO en el tiempo: la ley cambia, y el pasado debe seguir encontrando
+  > la regla de entonces. Una **corrección de modelado** es otra cosa: la ley no cambió, el conocimiento
+  > la expresaba mal. Esa va como **versión nueva del paquete**, firmada y registrada en `CAMBIOS.md`,
+  > y no como vigencia. Lo que respondía la versión anterior lo conservan git y la versión que cada
+  > proyecto fija. Primer caso: INTERESES en `@tu-scope/conocimiento` 0.2.0.
+  >
   > **RF-13 a RF-16, decididos por el laboratorio el 2026-09-26** (Fase 0 de PRP-005).
   >
   > - **RF-13 y RF-14: juicio a la fecha del hecho.** Es la duda que la spec dejaba abierta. El

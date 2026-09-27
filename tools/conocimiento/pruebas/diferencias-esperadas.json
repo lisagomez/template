@@ -1,0 +1,56 @@
+{
+  "_que_es": "Lo que ESTA versión del paquete responde distinto del motor de Hermes sobre su propio seed (corpus de paridad), y lo que su validación todavía reporta. Declarado a mano: la prueba exige igualdad exacta con lo medido (paridad-migracion.json) y con validaConocimiento.",
+  "version": "0.2.0",
+  "orden": "Hermes arma checklist, banderas y fuentes en el orden de su seed; la fuente única ordena las reglas por clave, que es canónico y no depende de cómo se reparten los archivos. Una diferencia SOLO de orden no cambia ningún veredicto, razón ni fuente, y se acepta.",
+  "contenido": [
+    {
+      "id": "keyword-0324",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "keyword-0325",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "keyword-0326",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "keyword-0327",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "keyword-0328",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "keyword-0329",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "vigencia-0677",
+      "porque": "Firmado 2026-09-27: restaurada MX-LFPDPPP-21-CONFIDENCIALIDAD, cerrada al 2025-03-20. Un hecho anterior encuentra la ley de 2010 en vez de «sin regla aplicable». El estado sigue en dudoso."
+    },
+    {
+      "id": "vigencia-0738",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "vigencia-0743",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "vigencia-0744",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "incidente-0780",
+      "porque": "Firmado 2026-09-27 (variante A): 28-XXVII rectora dudoso y 27-VII sin veredicto. El estado sigue en dudoso; cambian la razón y la bandera de conflicto."
+    },
+    {
+      "id": "incidente-0781",
+      "porque": "Firmado 2026-09-27: restaurada MX-LFPDPPP-21-CONFIDENCIALIDAD, cerrada al 2025-03-20. Un hecho anterior encuentra la ley de 2010 en vez de «sin regla aplicable». El estado sigue en dudoso."
+    }
+  ],
+  "validacion_pendiente": []
+}

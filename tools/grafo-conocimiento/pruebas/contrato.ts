@@ -6,7 +6,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { ConceptoEvaluado, FalloSinVeredicto, desdeHermes, validaConocimiento, type TipoProblema } from '../dist/index.js'
+import { ConceptoEvaluado, FalloSinVeredicto, desdeHermes, seleccionaDominios, validaConocimiento, type TipoProblema } from '../dist/index.js'
 
 type Fixture = Record<string, unknown> & { reglas: Record<string, unknown>[] }
 
@@ -38,6 +38,7 @@ function base(): Fixture {
         dimension: 'regulatorio',
         cita: 'publica',
         corte: '2026-09-06',
+        procedencia: 'fixture sintético',
         categorias: ['DRONES', 'SEGUROS'],
       },
     ],
@@ -191,4 +192,21 @@ test('desdeHermes: una dimensión sin vocabulario declarado no pasa en silencio'
   const v = validaConocimiento(desdeHermes(seedHermes, { version: '0.0.0-fixture', corte: '2026-09-06' }))
   assert.equal(v.ok, false)
   assert.ok(v.problemas.some((p) => p.tipo === 'esquema' && p.clave.startsWith('dimensiones.0.vocabulario')))
+})
+
+test('RF-15: seleccionar un dominio trae solo sus categorías, sus reglas y las generales de su ámbito', () => {
+  const f = base()
+  ;(f.dominios as unknown[]).push({
+    clave: 'MX-seguros', nombre: 'Seguros', jurisdiccion: 'MX', dimension: 'regulatorio', cita: 'publica',
+    corte: '2026-09-06', procedencia: 'fixture', categorias: ['SEGUROS'],
+  })
+  ;(f.dominios as { categorias: string[] }[])[0]!.categorias = ['DRONES']
+  f.reglas.push(regla('MX-GEN-1', null, null))
+  const v = validaConocimiento(f)
+  assert.deepEqual(v.problemas, [])
+  const solo = seleccionaDominios(v.conocimiento!, ['MX-seguros'])
+  assert.deepEqual(solo.categorias.map((c) => c.clave), ['SEGUROS'])
+  assert.deepEqual(solo.reglas.map((r) => r.clave), ['MX-B-1', 'MX-GEN-1'])
+  assert.deepEqual(validaConocimiento(solo).problemas, [])
+  assert.throws(() => seleccionaDominios(v.conocimiento!, ['MX-no-existe']), /dominios desconocidos: MX-no-existe/)
 })

@@ -97,6 +97,8 @@ export const Dominio = z.strictObject({
   cita: z.enum(['publica', 'interna']),
   /** Fecha de corte del conocimiento de este dominio: va visible en la respuesta. */
   corte: Fecha,
+  /** De qué textos sale este dominio y cuándo se leyeron. Cada dominio lleva la suya. */
+  procedencia: TextoNoVacio,
   categorias: z.array(Clave).min(1),
 })
 

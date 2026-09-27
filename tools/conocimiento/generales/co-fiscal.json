@@ -1,0 +1,53 @@
+{
+  "jurisdiccion": "CO",
+  "dimension": "fiscal",
+  "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+  "reglas": [
+    {
+      "clave": "CO-ET-104-REALIZACION",
+      "jurisdiccion": "CO",
+      "dimension": "fiscal",
+      "titulo": "Realizacion de las deducciones",
+      "texto_resumen": "Las deducciones se entienden realizadas cuando se paguen efectivamente o, para obligados a llevar contabilidad, cuando se devenguen (causacion).",
+      "fuente_cita": "Estatuto Tributario (CO), Art. 104",
+      "fuente_url": "http://www.secretariasenado.gov.co/senado/basedoc/estatuto_tributario.html",
+      "vigente_desde": "1989-03-30",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Deduccion imputada al periodo correcto: pago efectivo o devengo si se lleva contabilidad (ET 104)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "CO-ET-771-2-FACTURA",
+      "jurisdiccion": "CO",
+      "dimension": "fiscal",
+      "titulo": "Procedencia de costos y deducciones: factura",
+      "texto_resumen": "Para la procedencia de costos, deducciones e impuestos descontables se requiere factura (electronica) o documento equivalente con los requisitos de los articulos 617 y 618 del ET.",
+      "fuente_cita": "Estatuto Tributario (CO), Art. 771-2",
+      "fuente_url": "http://www.secretariasenado.gov.co/senado/basedoc/estatuto_tributario.html",
+      "vigente_desde": "1997-07-14",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Factura electronica o documento equivalente con requisitos ET 617/618 (validada ante DIAN)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}

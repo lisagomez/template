@@ -114,6 +114,14 @@
    "cubre": ["tools/grafo-conocimiento"]
   },
   {
+   "id": "TPL-conocimiento",
+   "nombre": "Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes)",
+   "tipo": "datos", "clase": "CONOCIMIENTO", "estado": "beta",
+   "ubicacion": "tools/conocimiento", "responsable": "dep-sw",
+   "origen": [".claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md", ".claude/specs/004-grafo-de-conocimiento"],
+   "cubre": ["tools/conocimiento"]
+  },
+  {
    "id": "TPL-ejemplo-herramienta",
    "nombre": "Andamio de herramienta empaquetable (el ejemplo a copiar)",
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",

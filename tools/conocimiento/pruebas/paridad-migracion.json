@@ -1,0 +1,225 @@
+{
+  "version": "0.2.0",
+  "corte": "97d9f9e34274d84633e7d365b6aa3a4dce496849",
+  "casos": 782,
+  "identicos": 574,
+  "solo_orden": 196,
+  "distintos_en_contenido": [
+    {
+      "id": "keyword-0324",
+      "familia": "keyword",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "keyword-0325",
+      "familia": "keyword",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "keyword-0326",
+      "familia": "keyword",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "keyword-0327",
+      "familia": "keyword",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "keyword-0328",
+      "familia": "keyword",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "keyword-0329",
+      "familia": "keyword",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "vigencia-0677",
+      "familia": "vigencia",
+      "antes": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "estado": "dudoso",
+          "razon": "sin regla aplicable"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "estado": "dudoso",
+          "razon": "Deber de confidencialidad (datos personales) (LFPDPPP Art. 21)"
+        }
+      ]
+    },
+    {
+      "id": "vigencia-0738",
+      "familia": "vigencia",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "vigencia-0743",
+      "familia": "vigencia",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "vigencia-0744",
+      "familia": "vigencia",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "incidente-0780",
+      "familia": "incidente",
+      "antes": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "contradiccion entre reglas vigentes; rectora: LISR Art. 27, fraccion VII"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "INTERESES",
+          "estado": "dudoso",
+          "razon": "Capitalizacion delgada (partes relacionadas extranjeras) (LISR Art. 28, fraccion XXVII)"
+        }
+      ]
+    },
+    {
+      "id": "incidente-0781",
+      "familia": "incidente",
+      "antes": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "estado": "dudoso",
+          "razon": "sin regla aplicable"
+        }
+      ],
+      "despues": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "estado": "dudoso",
+          "razon": "Deber de confidencialidad (datos personales) (LFPDPPP Art. 21)"
+        }
+      ]
+    }
+  ]
+}

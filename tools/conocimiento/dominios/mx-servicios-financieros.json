@@ -1,0 +1,48 @@
+{
+  "dominio": {
+    "clave": "mx-servicios-financieros",
+    "nombre": "Asesoría en inversiones (frontera LMV)",
+    "jurisdiccion": "MX",
+    "dimension": "regulatorio",
+    "cita": "publica",
+    "corte": "2026-08-07",
+    "procedencia": "frontera financiera MX 2026-08-07 (dictamen Financial Consulting): LMV texto vigente (ultima reforma DOF 14-11-2025), Arts. 225 (definicion y registro CNBV; parrafo de personas morales reformado DOF 28-12-2023: SC/SA/S de RL con objeto y establecimientos exclusivos), 226 y 227 Bis, leidos del PDF de Diputados. La consultoria financiera general NO es reservada; el gatillo es habitual+profesional+valores+individualizada. Dictamen completo en grafo/DICTAMEN-FRONTERA-FINANCIAL-CONSULTING.md.",
+    "categorias": [
+      "ASESORIA_INVERSIONES"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "MX-LMV-225-ASESOR-INVERSIONES",
+      "jurisdiccion": "MX",
+      "dimension": "regulatorio",
+      "titulo": "Asesor en inversiones: la asesoria habitual e individualizada sobre valores exige registro ante la CNBV",
+      "texto_resumen": "Quien, sin ser intermediario del mercado de valores, proporciona de manera HABITUAL Y PROFESIONAL administracion de cartera de valores tomando decisiones de inversion por cuenta de terceros, o asesoria de inversion en valores con recomendaciones INDIVIDUALIZADAS, es asesor en inversiones y DEBE registrarse ante la CNBV (Art. 225). Personas morales: solo sociedad civil, SA o S de RL con objeto social especifico, establecimientos fisicos EXCLUSIVOS, revelacion de capital y manual de conflictos (parrafo reformado DOF 28-12-2023, fr. I-V); personas fisicas: honorabilidad, historial crediticio y certificacion ante organismo autorregulatorio. En el servicio aplican el mandato/autorizacion contractual y la documentacion por cliente (Art. 226); el registro es cancelable (Art. 227 Bis). La consultoria financiera GENERAL (finanzas corporativas, valuacion, planeacion, reestructura sin intermediar valores, analisis no individualizado) NO encuadra en el tipo del 225 mientras no cruce sus gatillos. Detalle: grafo/DICTAMEN-FRONTERA-FINANCIAL-CONSULTING.md.",
+      "fuente_cita": "LMV, Arts. 225 (parrafo reformado DOF 28-12-2023), 226 y 227 Bis (texto vigente, ultima reforma DOF 14-11-2025)",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LMV.pdf",
+      "vigente_desde": "2014-01-10",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "ASESORIA_INVERSIONES",
+          "regimen": "GENERAL",
+          "veredicto_base": "permitido",
+          "requisitos": [
+            "Test de frontera ANTES de vender el servicio: ¿recomendaciones de inversion individualizadas o manejo de portafolios por cuenta de terceros, de forma habitual y profesional? Si NO (finanzas corporativas, valuacion, planeacion), no es actividad reservada",
+            "Si SI: registrarse ante la CNBV como asesor en inversiones ANTES de operar (Art. 225)",
+            "El vehiculo debe ser dedicado: SC/SA/S de RL con objeto social especifico y establecimientos exclusivos — no se agrega esta actividad a una operativa multi-servicios del holding (Art. 225, fr. I-III)",
+            "Personas fisicas del equipo que asesoren: certificacion ante organismo autorregulatorio reconocido por la CNBV"
+          ],
+          "banderas": [
+            "Frontera VECINA mas dura: recibir dinero de clientes para gestionarlo = captacion (LIC), territorio de delito financiero sin autorizacion — dictamen aparte URGENTE si el servicio toca recursos de terceros",
+            "Intermediacion de valores (casa de bolsa) y fondos de inversion son autorizaciones DISTINTAS y mas pesadas que el registro de asesor",
+            "Fondeo colectivo y activos virtuales van por la Ley Fintech — regimen propio, no cubierto por esta regla"
+          ],
+          "parametros": {
+            "verificar": false
+          }
+        }
+      ]
+    }
+  ]
+}

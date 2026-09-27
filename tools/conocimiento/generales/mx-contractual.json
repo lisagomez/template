@@ -1,0 +1,55 @@
+{
+  "jurisdiccion": "MX",
+  "dimension": "contractual",
+  "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+  "reglas": [
+    {
+      "clave": "MX-CCF-1794-1796-ELEMENTOS",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Elementos y obligatoriedad del contrato",
+      "texto_resumen": "El contrato existe con consentimiento y objeto; es valido si hay capacidad, ausencia de vicios, objeto licito y la forma que la ley exija. Desde su perfeccionamiento obliga a lo expresamente pactado y a las consecuencias de la buena fe, el uso o la ley.",
+      "fuente_cita": "Codigo Civil Federal, Arts. 1794-1796",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CCF.pdf",
+      "vigente_desde": "1932-10-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Identificacion y capacidad de las partes acreditadas",
+            "Objeto del contrato licito y determinado (alcance del servicio/entregables)",
+            "Consentimiento documentado (firma de ambas partes)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-CCO-78-FORMA",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Libertad de forma en materia mercantil",
+      "texto_resumen": "En las convenciones mercantiles cada parte se obliga en la manera y terminos que aparezca que quiso obligarse, sin que la validez dependa de formalidades, salvo los casos en que la ley exija forma especifica.",
+      "fuente_cita": "Codigo de Comercio, Art. 78",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CCom.pdf",
+      "vigente_desde": "1890-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Terminos pactados por escrito aunque la ley no exija formalidad (evidencia mercantil, CCo 78)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}

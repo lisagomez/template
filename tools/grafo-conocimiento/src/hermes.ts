@@ -99,6 +99,7 @@ export function desdeHermes(seed: unknown, opciones: OpcionesAdaptador): Record<
         dimension,
         cita: 'publica',
         corte: opciones.corte,
+        procedencia: s._meta.source_version,
         categorias: [...cats].sort(),
       }
     })
