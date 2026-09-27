@@ -80,6 +80,7 @@ const rutasDelBridge = (): string[] => [
  */
 const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ajustes',
+  '/api/contenido/video',
   '/api/dictado',
   '/api/dictado/movil',
   '/api/etiquetas',

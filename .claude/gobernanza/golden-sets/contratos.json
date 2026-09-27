@@ -27,6 +27,10 @@
       {
         "patron": "service_role",
         "porque": "C7: la regla de aislamiento se declara desde el contrato de negocio"
+      },
+      {
+        "patron": "add-payments",
+        "porque": "el BUSINESS_LOGIC decide si la app cobra y por que camino, antes de construir"
       }
     ],
     "prp": [
@@ -47,6 +51,10 @@
       {
         "patron": "RLS|[Rr]ow [Ll]evel [Ss]ecurity",
         "porque": "ninguna tabla se crea sin RLS"
+      },
+      {
+        "patron": "add-payments",
+        "porque": "la metrica de MRR supone la tabla purchases que crea ese skill"
       }
     ],
     "add-a2a": [
@@ -65,6 +73,10 @@
       {
         "prohibido": "@a2a-js/sdk@?[\\^~]",
         "porque": "un rango en el SDK del protocolo es `latest` con otro nombre: RF-10 pide version exacta"
+      },
+      {
+        "prohibido": "Igual que `/add-payments` pregunta",
+        "porque": "add-payments NO pregunta (su golden path corre sin preguntas): la comparacion era falsa"
       }
     ],
     "add-login": [
@@ -81,6 +93,14 @@
       {
         "patron": "[Ss]ignature|[Vv]erif|firma",
         "porque": "un webhook sin verificar su firma es un endpoint abierto"
+      },
+      {
+        "patron": "productos fisicos|bienes fisicos",
+        "porque": "Polar no permite vender bienes fisicos: sin este limite, cualquier «quiero cobrar» de una pyme de mercancia termina aqui"
+      },
+      {
+        "patron": "SUSCRIPCION → acceso|subscription\\.active",
+        "porque": "el codigo da acceso por suscripcion; un pago unico no activa nada sin adaptar el webhook"
       }
     ],
     "bucle-agentico": [
@@ -91,6 +111,10 @@
       {
         "patron": "[Vv]alidaci[oó]n",
         "porque": "cada fase cierra con validacion, no con buena voluntad"
+      },
+      {
+        "prohibido": "facturacion con Stripe",
+        "porque": "el ejemplo empujaba a Stripe directo, que add-payments excluye"
       }
     ],
     "eject-sf": [
@@ -165,6 +189,12 @@
       {
         "prohibido": "cp -r[^\\n]*\\.claude/?\\s+\\.?/?\\.claude/?\\s*$",
         "porque": "copiar el directorio entero encima retrocedia 13 archivos mas nuevos en local; cada archivo entra por su nombre"
+      }
+    ],
+    "website-3d": [
+      {
+        "patron": "add-payments",
+        "porque": "el CTA de venta directa necesita decir con que se cobra (y cuando no es Polar)"
       }
     ]
   }

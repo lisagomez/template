@@ -1,0 +1,15 @@
+/goal Construye lo descrito en el spec: /home/kyara/code/template/.claude/goals/contenido-pymes/spec.md. Leelo ENTERO, con grafo.json y plan.md, y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: el contenido del mes de una pyme listo para aprobar desde su celular (piezas PNG, carruseles y video 9:16 por codigo sin personas), con su SDD, su PRP-005 con candado, las herramientas y la app derivadas, el laboratorio visual y la documentacion. Nada se publica.
+Libertad tecnica total sobre el como; sigue el plan.md y extiende lo existente, no lo reescribas.
+VALIDA: `npm run typecheck && npm run lint && npm run prueba:laboratorio-pymes` + `npm run empaqueta <x>` de lo que tocaste, tras cada cambio grande, output pegado; `npm run validate` al final con todo commiteado.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- SDD y PRP-005 escritos, con arquitectura y tabla de fases (autorizada / bloqueada: quien firma y por que) pegadas
+- empaqueta en verde por herramienta nueva o cambiada, sin publicar
+- video: ffprobe pegado (1080x1920, duracion, fps), hoja de cuadros vista y la misma huella en dos renders
+- laboratorio visual: tabla de casos (>=5 por herramienta, con trampas visuales), estado real y comparacion contra referencia; capturas de la galeria
+- app: capturas Playwright de carrusel, PNG exportado, video (cuadro inicial y final) y aprobacion en viewport de celular con la huella de lo aprobado; sin errores de consola ni peticiones al aprobar
+- guia del dueno y READMEs con su indice pegado
+- `npm run validate` en verde despues del commit; grafo.json con estados y evidencia
+- decisiones, formas en que podria estar mal (resueltas) y lo que queda bloqueado
+RESTRICCIONES: candado (nada bloqueado se construye: reel con voz o cara y LLM); video sin personas; nada se publica ni envia; sin servicios de pago, APIs externas ni MCP; nada copiado de god-animation, edicion-de-video, sfstudio ni GSAP; fuentes y recursos solo con licencia incluida; no tocar skills, reglas, AGENTS.md, settings ni .mcp.json; datos sinteticos; secretos jamas en pantalla; espanol de Mexico.
+RED DE SEGURIDAD: si tras 80 turnos no converges, detente y reporta el bloqueo y el estado del grafo.

@@ -206,6 +206,9 @@ src/features/
 - **Validacion:** Zod
 - **State:** Zustand (si necesario)
 - **MCPs:** Next.js DevTools + Playwright + Supabase
+- **Cobro en linea:** [no cobra | acceso o suscripcion a la app → `/add-payments` (Polar, despues
+  de `/add-login`) | bienes fisicos o servicios presenciales → `/add-payments` NO aplica (Polar no
+  los permite): pasarela por decidir]
 
 ### Proximos Pasos
 1. [ ] Setup proyecto base

@@ -153,6 +153,8 @@ ALTER TABLE [tabla] ENABLE ROW LEVEL SECURITY;
 
 > Si esta feature bloquea, cobra o rechaza a alguien, la **vía de apelación humana** es
 > criterio de éxito, no un extra. Si aceptas un riesgo, va firmado a `REGISTRO-RIESGO.md`.
+> Si cobra en línea por acceso o suscripción, el camino es `/add-payments` (Polar; el webhook es la
+> fuente de verdad). Bienes físicos o servicios presenciales: ese skill no aplica (ver sus Límites).
 
 ---
 
