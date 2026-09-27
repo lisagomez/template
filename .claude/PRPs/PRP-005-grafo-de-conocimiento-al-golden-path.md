@@ -354,7 +354,11 @@ cambie solo.
 **Validación**: publicar una versión nueva en un ensayo → `vigila:versiones` del consumidor da exit 1
 con la deriva, y su pin no se mueve.
 
-### Fase 8: Enrutado desde `AGENTS.md` — CDC (C1)
+### Fase 8: Enrutado desde `AGENTS.md` — CDC (C1) — ✅ CERRADA 2026-09-27 (firmada)
+> 13 líneas en el árbol de decisión de `AGENTS.md` (y en `GEMINI.md`, regenerado), después del extractor. Enrutan
+> «¿esto está permitido?», «sembrar una regla» y afines al motor y a la fuente única, con sus reglas duras. Antes de
+> la firma: diff enseñado, regresión A 131/131 y B 22/22, gobernanza 156/156, contexto total por sesión al 89 %.
+> Entrada en `BITACORA-CDC.md`, firmada por el laboratorio.
 **Objetivo**: que el decision tree sepa que la herramienta y su fuente existen.
 **Validación**: diff, `npm run regresion`, aprobación humana y entrada en `BITACORA-CDC.md`.
 
