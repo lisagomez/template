@@ -1,0 +1,17 @@
+{
+  "_comentario": "Huellas SHA-256 de las piezas de referencia. Se regeneran A PROPÓSITO con npm run contenido:referencias.",
+  "generadas": "2026-09-27",
+  "huellas": {
+    "pieza-vertical": "sha256:210b45f14f79b2df5222533357273b4bd4980d5a7a963401838b2cb6992aa91b",
+    "pieza-historia": "sha256:5b76bf72ae25dcf9c81e0982c3f2141669040f057daaba9635d5c610fe5fc159",
+    "pieza-horizontal": "sha256:e64bfbad1b6db3b9f9fcf5ad314d7817ebecc7c6072730da4c82d3b0f676b9cc",
+    "carrusel-lamina-1": "sha256:9fb383d422e5d05b83fa8af2ed176e3d6365c2ced7c18eaa707d658c1f259868",
+    "carrusel-lamina-2": "sha256:09b7a9d1b915380b89b70910a4cb874a0756be4c8bd451b320a604deb4246928",
+    "carrusel-lamina-3": "sha256:feec9f3fef6bfe4b70af94c458b6028eacb2fccf0c13de2345ac0b89f76a6619",
+    "carrusel-lamina-4": "sha256:dfb40484390f961c8e7f20663ccc5e30457da460eaa942d1905c324e00373553",
+    "video-cuadro-inicio": "sha256:e016128c8bfe6daf621cde6262390f045f1a94417c500571feea50dd7d138d31",
+    "video-cuadro-final": "sha256:cd9fb823d092bd13473d1d1ac86378d281e7653b38c806121a7c87dd86311237",
+    "video-hoja": "sha256:b69f26c509acb67abb1d2b1c4844190110030f1304b68d85f0d5b7febd3ab5bb",
+    "video-sonido": "sha256:d0f736511b7b6eb698e9e1deff6af0c922777f2046cf1e1a5c26309fd53ff01c"
+  }
+}

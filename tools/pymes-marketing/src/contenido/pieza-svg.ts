@@ -9,14 +9,9 @@ import { azarDe, escapaXml, recorta } from '../comun/texto.js';
 import { aclara, contraste } from '../marca/colores.js';
 import type { PerfilDeMarca } from '../marca/perfil.js';
 
-export type FormatoDePieza = 'cuadrado' | 'vertical' | 'historia' | 'horizontal';
+import { cajaSegura, FORMATOS, type CajaSegura, type FormatoDePieza } from './formatos.js';
 
-const MEDIDAS: Readonly<Record<FormatoDePieza, readonly [number, number]>> = {
-  cuadrado: [1080, 1080],
-  vertical: [1080, 1350],
-  historia: [1080, 1920],
-  horizontal: [1200, 630],
-};
+export type { FormatoDePieza } from './formatos.js';
 
 export interface DatosDePieza {
   readonly titular: string;
@@ -27,15 +22,47 @@ export interface DatosDePieza {
   readonly semilla: string;
 }
 
-function lineasDeTitular(texto: string, porLinea: number): string[] {
-  const palabras = recorta(texto, porLinea * 3).split(/\s+/);
+export function lineasDeTitular(texto: string, porLinea: number, maxLineas: number): string[] {
+  const palabras = recorta(texto, porLinea * maxLineas).split(/\s+/);
   const lineas: string[] = [];
   for (const p of palabras) {
     const ultima = lineas[lineas.length - 1];
     if (ultima !== undefined && `${ultima} ${p}`.length <= porLinea) lineas[lineas.length - 1] = `${ultima} ${p}`;
     else lineas.push(p);
   }
-  return lineas.slice(0, 3);
+  return lineas.slice(0, maxLineas);
+}
+
+/** Dónde va cada cosa, calculado DENTRO de la zona segura. Lo usan la pieza y la revisión visual. */
+export interface Disposicion {
+  readonly ancho: number;
+  readonly alto: number;
+  readonly caja: CajaSegura;
+  readonly escala: number;
+  readonly lineas: readonly string[];
+  readonly tamTitular: number;
+  readonly yTitular: number;
+  readonly yApoyo: number;
+  readonly precio: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number } | null;
+  readonly yEtiqueta: number;
+  readonly yFirma: number;
+  readonly recortado: boolean;
+}
+
+export function disposicion(d: DatosDePieza): Disposicion {
+  const f = FORMATOS[d.formato ?? 'vertical'];
+  const caja = cajaSegura(f), k = Math.min(f.ancho, f.alto) / 1080, horizontal = f.ancho > f.alto;
+  const px = (n: number) => Math.round(n * k);
+  const porLinea = horizontal ? 20 : 14, maxLineas = horizontal ? 2 : 3;
+  const lineas = lineasDeTitular(d.titular, porLinea, maxLineas);
+  const tam = px(lineas.some((l) => l.length > 11) ? 104 : 124);
+  const yEtiqueta = caja.y0 + px(40);
+  const yTitular = Math.max(caja.y0 + px(170), Math.round(caja.y0 + (caja.y1 - caja.y0) * 0.3));
+  const yApoyo = yTitular + Math.round(tam * 1.05) * (lineas.length - 1) + px(100);
+  const yFirma = caja.y1 - px(10);
+  const altoPrecio = px(130);
+  const precio = d.precio ? { x: caja.x0, y: yFirma - px(90) - altoPrecio, ancho: px(Math.max(300, d.precio.length * 46 + 80)), alto: altoPrecio } : null;
+  return { ancho: f.ancho, alto: f.alto, caja, escala: k, lineas, tamTitular: tam, yTitular, yApoyo, precio, yEtiqueta, yFirma, recortado: recorta(d.titular, porLinea * maxLineas) !== d.titular.trim() };
 }
 
 function fondo(m: PerfilDeMarca, w: number, h: number, semilla: string): string {
@@ -51,26 +78,20 @@ function fondo(m: PerfilDeMarca, w: number, h: number, semilla: string): string 
 
 /** SVG completo de la pieza. Todo texto se escapa: un nombre de producto nunca se vuelve marcado. */
 export function piezaSvg(m: PerfilDeMarca, d: DatosDePieza): string {
-  const [w, h] = MEDIDAS[d.formato ?? 'vertical'];
-  const k = Math.min(w, h) / 1080, horizontal = w > h;
-  const c = m.colores, margen = Math.round(96 * k);
-  const px = (n: number) => Math.round(n * k);
+  const L = disposicion(d), c = m.colores, x = L.caja.x0;
+  const px = (n: number) => Math.round(n * L.escala);
   const cuerpo = escapaXml(m.tipografia.cuerpo);
   const tinta = contraste(c.primario, c.fondo) >= 4.5 ? c.primario : c.texto;
-  const lineas = lineasDeTitular(d.titular, horizontal ? 20 : 14).slice(0, horizontal ? 2 : 3);
-  const tam = px(lineas.some((l) => l.length > 11) ? 104 : 124);
-  const yTitular = Math.round(h * (horizontal ? 0.3 : 0.34));
-  const titular = lineas.map((l, i) => `<tspan x="${margen}" dy="${i === 0 ? 0 : Math.round(tam * 1.05)}">${escapaXml(l)}</tspan>`).join('');
-  const yApoyo = yTitular + Math.round(tam * 1.05) * (lineas.length - 1) + px(100);
-  const apoyo = d.apoyo ? `<text x="${margen}" y="${yApoyo}" font-family="${cuerpo}" font-size="${px(44)}" fill="${c.texto}">${escapaXml(recorta(d.apoyo, 42))}</text>` : '';
-  const alto = px(130), yPrecio = h - px(150) - alto - px(60);
+  const titular = L.lineas.map((l, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : Math.round(L.tamTitular * 1.05)}">${escapaXml(l)}</tspan>`).join('');
+  const apoyo = d.apoyo ? `<text x="${x}" y="${L.yApoyo}" font-family="${cuerpo}" font-size="${px(44)}" fill="${c.texto}">${escapaXml(recorta(d.apoyo, 42))}</text>` : '';
   const blanco = contraste('#ffffff', c.primario) >= 3 ? '#ffffff' : c.texto;
-  const precio = d.precio ? `<g><rect x="${margen}" y="${yPrecio}" width="${px(Math.max(300, d.precio.length * 46 + 80))}" height="${alto}" rx="${alto / 2}" fill="${c.primario}"/><text x="${margen + px(40)}" y="${yPrecio + px(88)}" font-family="${cuerpo}" font-size="${px(72)}" font-weight="700" fill="${blanco}">${escapaXml(d.precio)}</text></g>` : '';
-  const etiqueta = d.etiqueta ? `<text x="${margen}" y="${margen + px(40)}" font-family="${cuerpo}" font-size="${px(36)}" letter-spacing="${px(6)}" fill="${c.texto}" opacity="0.75">${escapaXml(recorta(d.etiqueta.toUpperCase(), 32))}</text>` : '';
-  const firma = `<rect x="0" y="${h - px(150)}" width="${w}" height="${px(150)}" fill="${c.primario}" opacity="0.08"/><text x="${margen}" y="${h - px(60)}" font-family="${escapaXml(m.tipografia.titulos)}" font-size="${px(46)}" fill="${tinta}">${escapaXml(recorta(m.nombre, 36))}</text>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${escapaXml(d.titular)}">`
-    + `${fondo(m, w, h, d.semilla)}${etiqueta}`
-    + `<text x="${margen}" y="${yTitular}" font-family="${escapaXml(m.tipografia.titulos)}" font-size="${tam}" font-weight="700" fill="${tinta}">${titular}</text>`
+  const P = L.precio;
+  const precio = d.precio && P ? `<g><rect x="${P.x}" y="${P.y}" width="${P.ancho}" height="${P.alto}" rx="${P.alto / 2}" fill="${c.primario}"/><text x="${P.x + px(40)}" y="${P.y + px(88)}" font-family="${cuerpo}" font-size="${px(72)}" font-weight="700" fill="${blanco}">${escapaXml(d.precio)}</text></g>` : '';
+  const etiqueta = d.etiqueta ? `<text x="${x}" y="${L.yEtiqueta}" font-family="${cuerpo}" font-size="${px(36)}" letter-spacing="${px(6)}" fill="${c.texto}" opacity="0.75">${escapaXml(recorta(d.etiqueta.toUpperCase(), 32))}</text>` : '';
+  const firma = `<text x="${x}" y="${L.yFirma}" font-family="${escapaXml(m.tipografia.titulos)}" font-size="${px(46)}" fill="${tinta}">${escapaXml(recorta(m.nombre, 36))}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${L.ancho} ${L.alto}" width="${L.ancho}" height="${L.alto}" role="img" aria-label="${escapaXml(d.titular)}">`
+    + `${fondo(m, L.ancho, L.alto, d.semilla)}${etiqueta}`
+    + `<text x="${x}" y="${L.yTitular}" font-family="${escapaXml(m.tipografia.titulos)}" font-size="${L.tamTitular}" font-weight="700" fill="${tinta}">${titular}</text>`
     + `${apoyo}${precio}${firma}</svg>`;
 }
 
