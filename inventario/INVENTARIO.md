@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**28 activos** cubren **191 unidades** del repo.
+**28 activos** cubren **192 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -33,7 +33,7 @@
 | TPL-feature-auth | Autenticacion Supabase (login, registro, perfiles) | PRODUCTO | software | produccion | 1 | `src/features/auth` |
 | TPL-feature-dashboard | Dashboard de la app base | PRODUCTO | software | beta | 1 | `src/features/dashboard` |
 | TPL-feature-dictado | Interfaz web del dictado (pildora, ajustes e historial) | PRODUCTO | software | beta | 3 | `src/features/dictado` |
-| TPL-feature-estudio-pymes | Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo) | PRODUCTO | software | blueprint | 1 | `src/features/estudio-pymes` |
+| TPL-feature-estudio-pymes | Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo) | PRODUCTO | software | blueprint | 2 | `src/features/estudio-pymes` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
 | TPL-pymes-marketing | Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso | PRODUCTO | software | blueprint | 1 | `tools/pymes-marketing` |
 | TPL-voz | Voz: deteccion de voz (VAD) y diarizacion local | PRODUCTO | software | beta | 1 | `tools/voz` |

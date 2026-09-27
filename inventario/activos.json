@@ -78,7 +78,7 @@
    "nombre": "Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
    "ubicacion": "tools/pymes-marketing", "responsable": "dep-sw",
-   "origen": [".claude/goals/pymes-marketing"],
+   "origen": [".claude/goals/pymes-marketing", ".claude/goals/contenido-pymes"],
    "cubre": ["tools/pymes-marketing"]
   },
   {
@@ -86,15 +86,15 @@
    "nombre": "Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
    "ubicacion": "src/features/estudio-pymes", "responsable": "dep-sw",
-   "origen": [".claude/goals/pymes-marketing"],
-   "cubre": ["src/features/estudio-pymes"]
+   "origen": [".claude/goals/pymes-marketing", ".claude/goals/contenido-pymes"],
+   "cubre": ["src/features/estudio-pymes", "docs/GUIA-DUENO-CONTENIDO.md"]
   },
   {
    "id": "TPL-feature-laboratorio-pymes",
    "nombre": "Laboratorio de las herramientas pymes: casos, estado real y veredictos",
    "tipo": "software", "clase": "FABRICA", "estado": "beta",
    "ubicacion": "src/features/laboratorio-pymes", "responsable": "dep-sw",
-   "origen": [".claude/goals/pymes-marketing"],
+   "origen": [".claude/goals/pymes-marketing", ".claude/goals/contenido-pymes"],
    "cubre": ["src/features/laboratorio-pymes", "scripts/laboratorio-pymes"]
   },
   {
