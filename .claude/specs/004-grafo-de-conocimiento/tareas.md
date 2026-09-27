@@ -1,6 +1,6 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Abiertas salvo TAR-1** (cerrada el 2026-09-26: es lectura, no construcción). Esta spec no
+> **Abiertas salvo TAR-1 y TAR-3** (cerradas el 2026-09-26: lectura y decisión, no construcción). Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -30,9 +30,14 @@
       *Del origen (2026-09-26)*: Hermes usa un enum **global**, y su gate acepta `deducible`
       en una regla regulatoria (medido). Un enum global no cumple esta tarea.
 
-- [ ] **TAR-3 · Decidir dónde viven las reglas.**
+- [x] **TAR-3 · Decidir dónde viven las reglas.**
       Hecho cuando: la decisión está tomada **con su alternativa descartada escrita**. Si es
       Supabase: RLS habilitado y `service_role` fuera de la superficie de consulta (C7).
+      **Cerrada 2026-09-26 (Fase 0 de PRP-005, la dueña)**:
+      - la **fuente única** es un paquete de datos en este repo (RF-15);
+      - descartadas, por escrito en `plan.md` (decisión 8): que siga en Hermes y un repo propio;
+      - cómo carga cada proyecto sus dominios (archivo o Supabase, con C7 si es Supabase)
+        queda como elección del consumidor, bajo RF-11.
 
 ## Fase 2 — Motor determinista (sin LLM todavía)
 
@@ -65,8 +70,9 @@
       RF: MISION-2, LIBERTAD TECNICA.
 
 - [ ] **TAR-9 · Redactor de respuesta.**
-      Hecho cuando: devuelve una oración natural **sin exponer** de qué regla salió.
-      RF: MISION-3.
+      Hecho cuando: devuelve una oración natural que **cita la fuente solo si el dominio la
+      declara pública**, y en los dominios internos no expone de qué regla salió. Hay prueba
+      de los dos casos. RF: RF-5 (reescrito el 2026-09-26).
 
 - [ ] **TAR-10 · Resolver el modo de fallo del parser.**
       Hecho cuando: está decidido y probado qué pasa si el LLM del parser se cae — y que
@@ -78,6 +84,8 @@
 - [ ] **TAR-11 · Dos dominios de ejemplo poblados.**
       Hecho cuando: hay uno regulatorio y uno genérico de otro dominio, demostrando que el
       modelo no está atado a lo legal. RF: DoF-2.
+      *Decidido el 2026-09-26*: el regulatorio son **drones de reparto + agentes de seguros**
+      (llevan dentro el incidente real), registrados desde la fuente única (TAR-16).
 
 - [ ] **TAR-12 · Prueba end-to-end con oración real.**
       Hecho cuando: pregunta en lenguaje natural → parser → motor → respuesta natural, sin
@@ -97,3 +105,30 @@
 - [ ] **TAR-15 · Autocrítica y cierre.**
       Hecho cuando: está escrito qué parte puede fallar en producción y cómo quedó resuelto
       o declarado. RF: DoF-8.
+
+## Fase 5 — Fuente única del conocimiento (añadida en la Fase 0 de PRP-005, 2026-09-26)
+
+> Dependen de TAR-2 y van **antes** de TAR-11. RF-13 a RF-16 nacen de las decisiones de la dueña.
+
+- [ ] **TAR-16 · El conocimiento, traído una vez y dividido por dominio.**
+      Hecho cuando:
+      - las reglas de `hermes-os-a2a` están en este repo **con su historial** (corte pineado,
+        sha256, `audita:secretos` limpio, como el ERP en PRP-004), divididas por dominio, cada
+        uno con su fecha de corte y si cita o no (RF-5);
+      - el paquete tiene semver y registro de cambios (reglas añadidas y cerradas);
+      - un proyecto de prueba registra dos dominios y **solo recibe esos**.
+      RF: RF-15.
+
+- [ ] **TAR-17 · Vigencia que no borra el pasado.**
+      Hecho cuando:
+      - retirar una regla cierra su `vigente_hasta` y cambiar un significado añade una versión;
+      - el gate **rechaza** un borrado o una edición en su sitio;
+      - control: la regla de la ley de 2010 que Hermes borró (`MX-LFPDPPP-21-CONFIDENCIALIDAD`)
+        vuelve **cerrada** a 2025-03-20, recuperada de su historial, y un hecho de 2024 la
+        encuentra. Restaurarla cambia un veredicto, así que va con firma.
+      RF: RF-13, RF-14.
+
+- [ ] **TAR-18 · Aviso de versión nueva, nunca actualización sola.**
+      Hecho cuando: publicar una versión nueva hace que `vigila:versiones` del proyecto
+      consumidor la **reporte** (exit 1, deriva nueva), y nada cambia en él hasta que un humano
+      suba el pin con la paridad re-generada. RF: RF-16.

@@ -1,12 +1,12 @@
 # El grafo de Hermes frente a la spec 004 — expediente de decisión
 
-> **Estado**: ANÁLISIS CERRADO · recomendación **pendiente de firma humana** · **Fecha**: 2026-09-26
+> **Estado**: ANÁLISIS CERRADO · recomendación **firmada: D** (Fase 0 de PRP-005, 2026-09-26, ver §9) · **Fecha**: 2026-09-26
 > **Ámbito**: el motor de reglas «grafo regulatorio» de `lisagomez/hermes-os-a2a`, medido contra la
 > spec `.claude/specs/004-grafo-de-conocimiento/` de este template.
 > **Corte medido**: `hermes-os-a2a@97d9f9e` (`master`, 2026-09-06), el mismo corte del que salió el ERP
 > en PRP-004. Ninguna de las 9 ramas remotas de Hermes trae commits del grafo sin mezclar.
 > **Propuesta que sale de aquí**: `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`
-> (PROPUESTO — NO APROBADO).
+> (APROBADO el 2026-09-26, con la Fase 0 cerrada).
 
 ---
 
@@ -273,7 +273,7 @@ esta evidencia.
    Cada divergencia con Hermes se declara en el corpus de paridad **como diferencia esperada, con su
    porqué**, nunca en silencio.
 
-**Lo que D no resuelve y queda al humano**:
+**Lo que D no resolvía y quedaba al humano** (resuelto en la Fase 0, §9):
 - si un derivado debe traer **el seed completo** de Hermes: es decisión por proyecto, con pin y
   procedencia;
 - quién mantiene la paridad cuando Hermes cambia el motor: cada subida del pin **re-genera el corpus y
@@ -311,3 +311,20 @@ for d in grafo grafo-a2a grafo-gate; do (cd $S/hermes/businessos/$d && $S/venv/b
 ```
 
 **Hermes es de solo lectura**: nada de push, PR ni issue allí.
+
+---
+
+## 9. Decisiones de la Fase 0 (la dueña, 2026-09-26)
+
+| Pregunta | Decisión |
+|---|---|
+| Opción de integración | **D** |
+| ¿Se cita la fuente? (§5.3) | **Por dominio**: sí si la fuente es pública, no si la regla es interna. RF-5 reescrito |
+| ¿Reglas de hoy o de la fecha del hecho? (§5.2) | **Fecha del hecho, solo se añade**. RF-13 y RF-14 |
+| ¿Cómo se mantiene al día en varios proyectos? | **Fuente única en este repo**: un paquete de datos por dominio, versionado, separado del motor. Cada proyecto registra sus dominios y fija la versión. `vigila:versiones` avisa y nunca actualiza. RF-15 y RF-16 |
+| Dominio regulatorio de ejemplo | Drones de reparto + agentes de seguros, registrados desde la fuente única |
+| Hermes | Lee del paquete **después**, en un PRP aparte con firma. Hasta entonces congela su `reglas.json` desde el corte de la migración |
+
+**Descartadas para la fuente**:
+- **Que siga en Hermes**: los arreglos medidos (gate de conflictos, vigencia) quedarían fuera de esta gobernanza.
+- **Un repo propio**: sería un repo más, con su CI y su gobernanza.

@@ -22,11 +22,12 @@
 
 | Módulo | Responsabilidad | Grado de libertad |
 |---|---|---|
-| Almacén de reglas | `categoria (keywords + exclusiones) → regla → veredicto` | **Libre**: Supabase, archivo versionado, lo que convenga |
+| Fuente única del conocimiento | Las reglas, divididas por dominio, versionadas, con fecha de corte y registro de cambios. Se generan **una vez** | **Fijo desde la Fase 0**: vive en este repo como paquete de datos (RF-15). Solo se añade (RF-14). El gate corre aquí |
+| Almacén de reglas | Lo que cada proyecto carga de la fuente única: solo los dominios que declara | **Libre**: Supabase, archivo versionado, lo que convenga |
 | Contrato interno | Esquema tipado del triple categoría/regla/veredicto | **Fijo**: Zod, nunca `any` (RESTRICCIONES) |
 | Parser de lenguaje natural | Oración libre → campos estructurados | **Fijo**: solo estructura. **Jamás decide el veredicto** |
 | Motor de evaluación | Campos → veredicto | **Fijo**: determinista, sin modelo de por medio |
-| Redactor de respuesta | Veredicto → oración natural | **Fijo**: sin exhibir de qué regla salió |
+| Redactor de respuesta | Veredicto → oración natural | **Fijo**: cita la fuente solo si el dominio la declara pública (RF-5) |
 | Gate de validación | Detecta colisiones y conflictos antes de sembrar | **Fijo**: automático, no curación manual |
 
 ## La frontera que ordena todo el diseño
@@ -51,17 +52,31 @@ estar inventada. **No es una preferencia de diseño: es la razón de ser de la s
 3. **Conflicto degrada a fail-safe con bandera.** Dos reglas de la misma categoría con
    veredictos distintos **nunca** se resuelven eligiendo una.
 
-4. **Sin aparato de citación en la respuesta.** Desviación deliberada del original de
-   Hermes: la trazabilidad interna es para depurar, no para exhibir.
+4. **Cita por dominio** *(cambiada en la Fase 0 del 2026-09-26; antes: «sin aparato de
+   citación»)*. En los dominios de fuente pública la respuesta cita la fuente, porque es la
+   vía de verificación del tercero. En los de reglas internas la trazabilidad es para
+   depurar, no para exhibir.
 
 5. **Capacidad opt-in.** No entra al Golden Path por defecto.
 
 6. **C7 aplica.** Si vive en Supabase: RLS habilitado y `service_role` fuera de la
    superficie de consulta.
 
+7. **Juicio a la fecha del hecho, solo se añade** *(Fase 0, 2026-09-26)*. Retirar una regla
+   cierra su vigencia. Cambiar un significado añade una versión. Nada se borra ni se edita
+   en su sitio: tampoco categorías, keywords ni exclusiones.
+
+8. **Una sola fuente, en este repo** *(Fase 0, 2026-09-26)*. Las reglas de Hermes se traen
+   una vez, con su historial, y desde entonces se investigan y siembran aquí. Cada proyecto
+   fija una versión exacta y registra sus dominios. `vigila:versiones` avisa de la nueva
+   y nunca actualiza. Descartadas: que la fuente siga en Hermes (los arreglos quedarían
+   fuera de esta gobernanza) y un repo propio (uno más con su CI). Hermes pasa a leerla
+   después, en un paso aparte.
+
 ## Decisiones que quedan ABIERTAS para quien ejecute
 
-- Dónde viven las reglas (tabla vs archivo versionado) — depende del proyecto.
+- Cómo carga cada proyecto los dominios que registra (tabla o archivo versionado): depende
+  del proyecto. La **fuente** ya no está abierta (decisión 8).
 - Formato exacto del contrato categoría/regla/veredicto.
 - Cómo se implementa el parser (el Golden Path ya trae Vercel AI SDK + Zod para esto:
   template `structured-outputs` del skill `ai`).
@@ -96,5 +111,5 @@ Medidos en `hermes-os-a2a@97d9f9e`. El plan de módulos de arriba no los veía:
 - **Retirar una regla borra el pasado.** Allí las bajas son `DELETE`, y un hecho de 2024
   perdió su regla. El *Almacén de reglas* tiene que cerrar vigencia, no borrar (duda de la
   vigencia en la spec).
-- **La decisión 4 (sin cita) va contra el mecanismo de seguridad del origen.** Queda como duda
-  abierta nueva en la spec y no se reabre sin decisión humana.
+- **La decisión 4 (sin cita) iba contra el mecanismo de seguridad del origen.** Resuelto en
+  la Fase 0 del 2026-09-26: la cita es por dominio.

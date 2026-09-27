@@ -14,6 +14,14 @@
 > contradice 1 a propósito (RF-5) y 1 no le aplica (RF-11). Los dos incidentes constan en la
 > fuente. La forma de construirla está en `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`,
 > **PROPUESTO — NO APROBADO**: esta spec sigue sin autorizar código.
+>
+> **Fase 0 de PRP-005 cerrada el 2026-09-26** con las decisiones de la dueña:
+> - opción D;
+> - cita por dominio (RF-5);
+> - juicio a la fecha del hecho (RF-13 y RF-14);
+> - una sola fuente del conocimiento, en este repo, de la que cada proyecto elige dominios (RF-15 y RF-16).
+>
+> Las dudas de la cita y de la vigencia quedan resueltas; la del parser sigue abierta (TAR-10).
 
 ## Contexto y objetivo
 
@@ -49,8 +57,14 @@ políticas internas, clasificación de soporte) usa la misma estructura.
 - RF-4: SI el modelo de lenguaje interviene, ENTONCES EL SISTEMA limitará su papel a
   estructurar la pregunta y, opcionalmente, redactar la respuesta — nunca a decidir el
   veredicto.
-- RF-5: CUANDO se devuelva una respuesta, EL SISTEMA la entregará en lenguaje natural sin
-  exponer de qué regla, tabla o documento salió.
+- RF-5: CUANDO se devuelva una respuesta, EL SISTEMA la entregará en lenguaje natural y
+  citará la fuente **solo si el dominio la declara pública**. Si el dominio es de reglas
+  internas, no expondrá de qué regla, tabla o documento salió.
+
+  > **Decidido por la dueña el 2026-09-26** (Fase 0 de PRP-005). Antes decía «sin exponer» para
+  > todo dominio. En el origen, la cita es el mecanismo de seguridad del tercero, que puede
+  > comprobar el artículo. Ocultarla en un dominio de fuente pública le quita esa vía; exhibir
+  > una regla interna puede no convenir. Por eso cada dominio declara si cita.
 - RF-6: SI ninguna regla hace match, ENTONCES EL SISTEMA responderá explícitamente que no
   hay información suficiente, con una forma distinguible de una respuesta real.
 
@@ -90,6 +104,24 @@ políticas internas, clasificación de soporte) usa la misma estructura.
   `service_role` fuera de la superficie de consulta.
 - RF-12: EL SISTEMA detectará colisiones y conflictos **antes de sembrar**, sin depender de
   que alguien revise cada regla nueva contra todas las existentes.
+- RF-13: CUANDO se evalúe una pregunta, EL SISTEMA aplicará las reglas vigentes **en la fecha
+  del hecho**. Si el hecho no trae fecha, usará la de la consulta y lo dirá en la respuesta.
+- RF-14: CUANDO se retire una regla o cambie su significado, EL SISTEMA cerrará la vigencia de
+  la versión anterior y añadirá la nueva. Nunca borrará ni editará en su sitio una regla,
+  categoría, palabra clave o exclusión ya usada.
+- RF-15: EL SISTEMA tomará el conocimiento de **una única fuente versionada**, y cada proyecto
+  usará solo los dominios que declare.
+- RF-16: SI existe una versión nueva del conocimiento, ENTONCES EL SISTEMA lo avisará sin
+  aplicarla, y la actualización requerirá aprobación humana.
+
+  > **RF-13 a RF-16, decididos por la dueña el 2026-09-26** (Fase 0 de PRP-005).
+  >
+  > - **RF-13 y RF-14: juicio a la fecha del hecho.** Es la duda que la spec dejaba abierta. El
+  >   origen demostró por qué el motor solo no basta: allí retirar una regla la borraba, y un
+  >   hecho de 2024 se quedó sin regla.
+  > - **RF-15 y RF-16: una sola fuente.** El conocimiento se genera una vez, en este repo, y
+  >   cada proyecto elige sus dominios. Ningún proyecto se actualiza solo: subir de versión es
+  >   una decisión.
 
 ## Requisitos no funcionales
 
@@ -139,6 +171,7 @@ la fuente, no de memoria — son la evidencia de que el mecanismo hace falta.
 | Quien pregunta | Cae en la categoría equivocada por colisión de palabras clave y recibe la respuesta correcta **de otra cosa** | RF-7: exclusiones por categoría |
 | Quien pregunta | Dos reglas en conflicto y el motor elige una: la respuesta es arbitraria pero suena firme | RF-8: degrada a fail-safe con bandera, nunca elige |
 | Quien pregunta | El modelo decide el veredicto y lo inventa con formato de certeza | RF-3 y RF-4: el veredicto sale siempre del motor determinista |
+| Quien pregunta, **y el tercero sobre quien se decide** | El proyecto sigue con una versión vieja del conocimiento y responde con una ley que ya cambió, o juzga un hecho pasado con la ley de hoy | RF-13 y RF-14: juicio a la fecha del hecho, sin borrar el pasado. RF-16: el aviso de versión nueva. La fecha de corte de cada dominio va visible en la respuesta |
 
 **Límite de C5, y por eso el fail-safe no es negociable**: quien recibe la respuesta no firmó
 nada y actúa sobre ella. Ninguna firma del dueño autoriza a devolver certezas inventadas a
@@ -149,14 +182,25 @@ un tercero. Si un proyecto derivado quisiera saltarse el fail-safe "porque moles
 
 - **Crear tablas o escribir el motor en esta tarea.** Esta spec es planeación: es el
   blueprint para cuando un proyecto concreto lo necesite, vía `/prp` + `/bucle-agentico`.
-- Exigir cita de fuente en la respuesta al usuario final: desviación deliberada del
-  original. La trazabilidad interna es para depurar, no para exhibirse.
+- Citar la fuente en los dominios de **reglas internas**: ahí la trazabilidad es para
+  depurar, no para exhibirse. En los de fuente pública la cita sí se muestra (RF-5,
+  decidido el 2026-09-26).
+- Que **Hermes** lea del paquete central: es un paso aparte, con su propio gate y firma
+  (decidido el 2026-09-26). Hasta entonces, Hermes congela su `reglas.json` desde el corte
+  de la migración, para que no nazcan dos fuentes.
 
 ## Criterios de finalización
 
 Dos dominios de ejemplo poblados (uno regulatorio, uno genérico) · prueba end-to-end con una
 oración real, no un payload armado a mano · **tres controles negativos**: fail-safe,
 exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
+
+Desde la Fase 0 del 2026-09-26, se suman:
+- el dominio regulatorio de ejemplo son **drones de reparto + agentes de seguros**, registrados
+  desde la fuente única, y un proyecto de prueba demuestra que **solo** recibe los dominios que declara;
+- **control de vigencia**: un hecho de 2024 sigue encontrando la regla que regía entonces,
+  aunque ya esté retirada;
+- **control de aviso**: publicar una versión nueva del conocimiento avisa al proyecto y **no** lo actualiza.
 
 ## Dudas abiertas
 
@@ -179,7 +223,8 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
   > y un redactor que **no puede ejecutarse** sin un veredicto del motor. Sigue abierta porque hay
   > que decidirla y probarla (TAR-10).
 
-- [NECESITA ACLARACIÓN] **El grafo modela qué significa algo, no qué significaba en una
+- **[RESUELTA el 2026-09-26 → RF-13 y RF-14: a la fecha del hecho, solo se añade]** **El grafo
+  modela qué significa algo, no qué significaba en una
   fecha, y esa diferencia decide si sirve para una auditoría.** RF-9 vigila la deriva
   *interna* —nadie cambia una regla sin declararlo— pero no la *externa*: el día que la
   autoridad redefine un código que sigue existiendo, actualizar el grafo **reescribe en
@@ -247,10 +292,10 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
   >   auditoría de un contrato de 2024 **ya no tiene regla**.
   >
   > Resolverlo solo en el motor no basta: la forma de arriba («solo se añade») tiene que llegar
-  > hasta las bajas y hasta las keywords. Queda abierto **si el caso de uso lo exige**, que es
-  > decisión humana (Fase 0 de PRP-005).
+  > hasta las bajas y hasta las keywords. **Decidido el 2026-09-26**: el caso de uso lo exige
+  > (RF-13 y RF-14).
 
-- [NECESITA ACLARACIÓN] **¿La cita de la fuente protege o expone?** RF-5 y el segundo
+- **[RESUELTA el 2026-09-26 → RF-5: por dominio]** **¿La cita de la fuente protege o expone?** RF-5 y el segundo
   punto de "Fuera de alcance" dejan fuera exhibir la regla al usuario final. En el origen es
   al revés: la cita es su **mecanismo de seguridad** («cero afirmación sin fuente citada»). Quien recibe
   «permitido» puede comprobar el artículo por sí mismo, y la lectura de la fuente primaria
@@ -260,4 +305,5 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
   pública**, ocultar la cita le quita al tercero su única vía de verificación, y eso es un daño
   de la tabla de impacto (C4).
   Lo que hay que decidir: si la desviación se mantiene para todo dominio o se declara **por
-  dominio**. No se toca el requisito hasta decidirlo. Evidencia: `docs/SDD-grafo-hermes-a-template.md` §5.3.
+  dominio**. Evidencia: `docs/SDD-grafo-hermes-a-template.md` §5.3. **Decidido el
+  2026-09-26: por dominio**, y RF-5 queda reescrito.
