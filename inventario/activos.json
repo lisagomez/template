@@ -82,6 +82,14 @@
    "cubre": ["tools/asesor-ventas"]
   },
   {
+   "id": "TPL-grafo-conocimiento",
+   "nombre": "Grafo de conocimiento: reglas con veredicto acotado y fail-safe tipado (contrato y paridad con Hermes; motor pendiente)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/grafo-conocimiento", "responsable": "dep-sw",
+   "origen": [".claude/specs/004-grafo-de-conocimiento", ".claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md", "docs/SDD-grafo-hermes-a-template.md"],
+   "cubre": ["tools/grafo-conocimiento"]
+  },
+  {
    "id": "TPL-ejemplo-herramienta",
    "nombre": "Andamio de herramienta empaquetable (el ejemplo a copiar)",
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",

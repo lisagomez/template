@@ -1,6 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Abiertas salvo TAR-1 y TAR-3** (cerradas el 2026-09-26: lectura y decisión, no construcción). Esta spec no
+> **Abiertas salvo TAR-1, TAR-2 y TAR-3** (TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; TAR-2 el
+> 2026-09-27, el contrato de la Fase 1 de PRP-005). Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -24,9 +25,13 @@
 
       Evidencia completa en `docs/SDD-grafo-hermes-a-template.md` §3-§4.
 
-- [ ] **TAR-2 · Definir el contrato categoría/regla/veredicto en Zod.**
+- [x] **TAR-2 · Definir el contrato categoría/regla/veredicto en Zod.**
       Hecho cuando: el esquema existe, no usa `any`, y el vocabulario de veredicto está
       **acotado por dimensión** (no texto libre). RF: MISION-1, RESTRICCIONES.
+      **Cerrada 2026-09-27 (PRP-005 Fase 1)**: `tools/grafo-conocimiento/src/contrato.ts`, con
+      `Dimension.vocabulario`, sin `any`. Un veredicto ajeno a su dimensión sale como
+      `veredicto_fuera_de_vocabulario` (prueba «RF-1» de `pruebas/contrato.ts`), y el seed de Hermes
+      cabe entero en el vocabulario declarado.
       *Del origen (2026-09-26)*: Hermes usa un enum **global**, y su gate acepta `deducible`
       en una regla regulatoria (medido). Un enum global no cumple esta tarea.
 

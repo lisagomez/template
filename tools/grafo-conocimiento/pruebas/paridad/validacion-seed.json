@@ -1,0 +1,27 @@
+{
+  "procedencia": {
+    "commit": "97d9f9e34274d84633e7d365b6aa3a4dce496849",
+    "seed_sha256": "sha256:c068719e20c01f59da342ce731381382a4eae85dc4efdcfb1b99f4b50c8aa7a8"
+  },
+  "reglas": 98,
+  "dominios": [
+    "MX-fiscal",
+    "MX-contable",
+    "CO-fiscal",
+    "MX-contractual",
+    "MX-regulatorio",
+    "MX-datos-personales"
+  ],
+  "problemas": [
+    {
+      "tipo": "baja_por_borrado",
+      "clave": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
+      "detalle": "retirada borrándola: aquí se retira cerrando vigente_hasta, y el pasado la sigue encontrando"
+    },
+    {
+      "tipo": "conflicto_de_veredicto",
+      "clave": "MX/fiscal/INTERESES",
+      "detalle": "MX-LISR-27-VII=deducible y MX-LISR-28-XXVII=dudoso vigentes a la vez"
+    }
+  ]
+}

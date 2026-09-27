@@ -1,0 +1,30 @@
+{
+  "name": "@tu-scope/grafo-conocimiento",
+  "version": "0.1.0",
+  "description": "Motor de reglas de la spec 004: categoría (keywords + exclusiones) → regla → veredicto, determinista, con fail-safe tipado y juicio a la fecha del hecho. Fase 1 de PRP-005: el contrato del conocimiento (Zod) y el corpus de paridad contra el motor de Hermes.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts",
+    "paridad:genera": "npm run build && node medicion/genera-paridad.mjs"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}
