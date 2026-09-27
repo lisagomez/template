@@ -15,7 +15,7 @@ negocio, un PRP o un skill (Claude Code) o siempre (opencode).
 1. NEW-APP → Entrevista de negocio → BUSINESS_LOGIC.md
 2. Preguntar diseño visual (design system)
 3. ADD-LOGIN → Auth completo
-4. ADD-PAYMENTS → Pagos con Polar (si el proyecto cobra)
+4. ADD-PAYMENTS → Pagos con Polar (si cobra acceso o suscripción; bienes físicos: no aplica)
 5. PRP → Plan de primera feature
 5. BUCLE-AGENTICO → Implementar fase por fase
 6. PLAYWRIGHT-CLI → Verificar que todo funciona
