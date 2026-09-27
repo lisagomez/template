@@ -142,7 +142,7 @@ test('referencias rotas: categoría, dimensión y reemplazo que no existen', () 
 
 test('RF-6/8: solo una regla aplicable da veredicto; sin regla, en conflicto o sobre el tope no se afirma nada', () => {
   const fuente = { clave: 'MX-A-1', cita: 'Ley X, Art. 1', url: 'https://x', vigencia: { desde: '2020-01-01', hasta: null } }
-  const concepto = { descripcion: 'x', categoria: null, dominio: null, razon: 'r', fuentes: [], banderas: [], checklist: [] }
+  const concepto = { descripcion: 'x', categoria: null, clasificacion: null, dominio: null, razon: 'r', fuentes: [], banderas: [], checklist: [] }
   const ok = (c: object) => ConceptoEvaluado.safeParse({ ...concepto, ...c }).success
   assert.equal(ok({ motivo: 'sin_regla', veredicto: null, fuente: null }), true)
   assert.equal(ok({ motivo: 'sin_regla', veredicto: 'permitido', fuente: null }), false)
@@ -152,6 +152,8 @@ test('RF-6/8: solo una regla aplicable da veredicto; sin regla, en conflicto o s
   assert.equal(ok({ motivo: 'conflicto', veredicto: null, fuente }), true)
   assert.equal(ok({ motivo: 'tope_excedido', veredicto: null, fuente }), true)
   assert.equal(ok({ motivo: 'regla', veredicto: 'permitido', fuente: null }), false)
+  assert.equal(ok({ motivo: 'clasificacion_dudosa', veredicto: null, fuente: null }), true)
+  assert.equal(ok({ motivo: 'clasificacion_dudosa', veredicto: 'permitido', fuente: null }), false)
 })
 
 test('duda del parser: un fallo sin veredicto no admite nada con forma de veredicto', () => {

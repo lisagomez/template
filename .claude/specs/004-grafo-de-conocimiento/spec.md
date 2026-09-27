@@ -212,7 +212,7 @@ Desde la Fase 0 del 2026-09-26, se suman:
 
 ## Dudas abiertas
 
-- [NECESITA ACLARACIÓN] ¿Qué ocurre si el modelo del parser se cae? El motor tiene que
+- **[RESUELTA el 2026-09-27 → PRP-005 Fase 5: parser caído = `FalloSinVeredicto` `parser_no_disponible`]** ¿Qué ocurre si el modelo del parser se cae? El motor tiene que
   fallar de forma **distinguible** de "no hay regla aplicable", o son dos fallos con la
   misma cara para el usuario. Sin resolver.
 
@@ -230,6 +230,13 @@ Desde la Fase 0 del 2026-09-26, se suman:
   > Forma propuesta: parser caído = **error tipado sin objeto veredicto**, distinto de `sin_regla`,
   > y un redactor que **no puede ejecutarse** sin un veredicto del motor. Sigue abierta porque hay
   > que decidirla y probarla (TAR-10).
+  >
+  > **Hecho el 2026-09-27** (`tools/grafo-conocimiento/src/lenguaje/`). Si el modelo falla, no responde
+  > a tiempo o devuelve algo sin forma, sale un `FalloSinVeredicto` `parser_no_disponible`, que no admite
+  > veredicto. El redactor solo acepta un `Resultado`, y el fallo tiene su propia plantilla («No es que no
+  > haya una regla: es que no la llegué a buscar»), distinta de la de sin regla. Probado.
+  > **Y un motivo nuevo que el origen no tenía**: `clasificacion_dudosa`, cuando la categoría que propone el
+  > parser no cuadra con las keywords o las exclusiones del texto. Es la defensa contra un modelo secuestrado (O1).
 
 - **[RESUELTA el 2026-09-26 → RF-13 y RF-14: a la fecha del hecho, solo se añade]** **El grafo
   modela qué significa algo, no qué significaba en una
