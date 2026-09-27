@@ -51,6 +51,14 @@
    "cubre": ["tools/extractor-documental", "hermes/config.extractor.yaml"]
   },
   {
+   "id": "TPL-etiquetas-gs1",
+   "nombre": "Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo e inventario fisico",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/etiquetas-gs1", "responsable": "dep-sw",
+   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md", "docs/SDD-etiquetas-gs1.md"],
+   "cubre": ["tools/etiquetas-gs1"]
+  },
+  {
    "id": "TPL-voz",
    "nombre": "Voz: deteccion de voz (VAD) y diarizacion local",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
@@ -128,6 +136,14 @@
    "cubre": ["src/features/laboratorio-voz", "scripts/laboratorio-voz"]
   },
   {
+   "id": "TPL-feature-etiquetas",
+   "nombre": "Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, mover, caducidades, conteo, expediente, riesgo, integridad)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/etiquetas", "responsable": "dep-sw",
+   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md"],
+   "cubre": ["src/features/etiquetas"]
+  },
+  {
    "id": "TPL-app-base",
    "nombre": "App SaaS base (Next.js + Supabase, PWA)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "produccion",
@@ -161,7 +177,7 @@
    "nombre": "Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones",
    "tipo": "documento", "clase": "CONOCIMIENTO", "estado": "produccion",
    "ubicacion": ".claude/specs", "responsable": "dep-sw",
-   "cubre": [".claude/specs/*", ".claude/PRPs/*", ".claude/goals/*", "docs/SDD-*", "docs/GOAL-*", "docs/INVESTIGACION-*", "docs/grafos", "scripts/verifica-specs.mjs"]
+   "cubre": [".claude/specs/*", ".claude/PRPs/*", ".claude/goals/*", "docs/SDD-*", "docs/GOAL-*", "docs/goals", "docs/INVESTIGACION-*", "docs/grafos", "scripts/verifica-specs.mjs"]
   },
   {
    "id": "TPL-gobernanza",

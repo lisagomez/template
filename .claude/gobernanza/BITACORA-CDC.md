@@ -3923,6 +3923,38 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «si apruebo», 2026-09-26, con el
   diff de los cinco archivos y los controles negativos delante.
 
+### 2026-09-27 — `prueba:etiquetas` ALTA en el padrón al mezclar `main` en el PR #154, `prueba:etiquetas:efimera` declarado inactivo y `/api/etiquetas` declarada fuera del bridge → CDC PROMOVIDO — radio: sistema (padrón de gates + inventario de rutas de la prueba A2A)
+- **Cambio**: en `.claude/gates.json` nace `prueba:etiquetas`, **activo en `validate`** después de
+  `prueba:ajustes` (25 gates activos en `validate`), y `prueba:etiquetas:efimera`, **inactivo con
+  `motivo` y `falta`**, que `cubre` `tools/etiquetas-gs1/migraciones/prueba-ventas-erp.mjs`; la
+  `guarda` de `prueba:tools` suma `etiquetas-gs1` a su lista (ya la recorría). En
+  `scripts/prueba-a2a.ts`, `/api/etiquetas` entra en `RUTAS_FUERA_DEL_BRIDGE`.
+- **Motivo**: el PR #154 traía `prueba:etiquetas` en la cadena `&&` de `validate`, y el #157 cambió
+  esa cadena por el padrón. Resolver el conflicto de `package.json` tomando `main` **sacaba la
+  prueba del gate en silencio**. No se vio a ojo: con la resolución mecánica sola,
+  `verifica:gates` cayó con 3 archivos de pruebas huérfanos (`editor.ts`, `roles.ts`,
+  `prueba-ventas-erp.mjs`), y `prueba:a2a` cayó con `/api/etiquetas` como ruta de servidor no
+  declarada. El último necesita Docker y un Postgres desechable (lo corre `prueba-efimera.sh`, fase
+  5), igual que `erp:prueba`: se declara inactivo en vez de dejarlo huérfano. Medido: esta máquina
+  no tiene Docker. `/api/etiquetas` exige Bearer comparado en tiempo constante (503 sin
+  `ETIQUETAS_TOKEN`) y `x-operador`, el rol lo decide el servidor, y vive en la misma app y el
+  mismo puerto que las otras 11 rutas declaradas (RF-20).
+- **Gate aplicado**: diff revisado ☑ (enseñado completo antes de pedir la firma) · regresión verde ☑
+  capa A 123/123 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva). **Capa B no
+  corrida, a propósito y declarado** («capa A basta»): el cambio no toca skills, prompts, modelo ni
+  instrucciones.
+- **Regresión**: `npm run validate` **25/25 activos en verde, 8 inactivos declarados, 0 rojos**,
+  sellado · `verifica:gates` 11/11 y `--prueba` 6/6 siembras cazadas · `verify:gobernanza` 156/156 ·
+  `prueba:a2a` 14/0 · `verifica:inventario` 194 unidades, 0 nuevo, 0 huérfano. **Controles
+  negativos**: los dos rojos de arriba, medidos antes de cada arreglo.
+  **Hallazgo aparte, fuera de este CDC**: una de cuatro corridas de `validate` cayó en
+  `prueba:tools` por una prueba intermitente del extractor
+  (`banco-evidencia.ts`, «una corrida real clasifica, mide tiempos…»): `lote-pagina.ts` mide con
+  `Date.now()` el tiempo del lector de códigos aunque no haya lector, y la prueba exige 0. Sola pasa
+  8/8 y la suite 3/3. Es de `main`, no del #154: va en su propio PR.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «Apruebo» y «capa A basta»,
+  2026-09-27, con el diff de `gates.json` y `prueba-a2a.ts` y la evidencia delante.
+
 ### 2026-09-27 — «el laboratorio» en lugar de «la dueña» en todo el repo, incluida la plantilla AISIA → CDC PROMOVIDO — radio: documentación (una plantilla de gobernanza; sin cambio de comportamiento de agentes ni de código)
 - **Cambio**: en 39 archivos, las referencias a quien decide, aprueba o firma dicen **«el laboratorio»**
   donde decían «la dueña». Son specs, PRPs, SDD, goals, memorias del proyecto, comentarios de código,
