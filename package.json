@@ -18,6 +18,8 @@
     "verifica:specs": "node scripts/verifica-specs.mjs",
     "verifica:gates": "node scripts/verifica-gates.mjs",
     "prueba:tools": "node scripts/prueba-tools.mjs",
+    "prueba:a2a": "node --test --test-skip-pattern=^SERVICIO: scripts/prueba-a2a.ts",
+    "prueba:a2a:servicio": "node --test --test-name-pattern=^SERVICIO: scripts/prueba-a2a.ts",
     "gates": "node scripts/verifica-gates.mjs --lista",
     "proyecta:gates": "node scripts/proyecta-gates.mjs",
     "verifica:inventario": "node scripts/inventario/detecta.mjs",

@@ -285,13 +285,25 @@
     {
       "nombre": "prueba:a2a",
       "runner": "comando",
-      "comando": "node --test scripts/prueba-a2a.ts",
-      "guarda": "el puente A2A (spec 005 TAR-8..TAR-13, spec 010 RF-15..RF-21): la opacidad de la superficie de servidor (la ENUMERA y exige igualdad, en vez de listar prohibidas), el protocolo JSON-RPC, la Card sin nombres del interior, y el fail-safe probado apagando la capacidad",
-      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "comando": "npm run prueba:a2a",
+      "guarda": "el puente A2A (spec 005 TAR-8..TAR-13, spec 010 RF-15..RF-21): la opacidad del bridge —ENUMERA sus rutas y exige igualdad con card, rpc y health (RF-17)— y que ninguna ruta de servidor aparezca fuera del bridge sin estar DECLARADA, mas el protocolo JSON-RPC, la Card sin nombres del interior, la clave de API y el fail-safe probado apagando la capacidad",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas. 14 en verde al reactivarlo el 2026-09-26",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "REACTIVADO el 2026-09-26. Estuvo apagado desde que el padron destapo que era huerfano (ningun script lo corria y llevaba meses en rojo). Lo que se arreglo: la prueba de opacidad enumeraba `src/app` ENTERO —correcto cuando el bridge era lo unico que habia, falso al crecer la app— y ahora enumera las rutas DEL BRIDGE, que es el conjunto que RF-17 acota y el nombre que le puso el SDD (§6, `rutasDelBridge()`). Para no perder lo que la version vieja si cazaba, una segunda prueba enumera el resto y lo exige DECLARADO: una ruta nueva en cualquier sitio sigue cayendo (demostrado sembrando una en `/a2a/` y otra en `/api/`). Se excluyen las dos pruebas `SERVICIO:`, que viven en el gate de al lado: no se apagan en silencio."
+    },
+    {
+      "nombre": "prueba:a2a:servicio",
+      "runner": "comando",
+      "comando": "npm run prueba:a2a:servicio",
+      "guarda": "el camino feliz del puente contra el servicio REAL del extractor: un escaneo sintetico vuelve COMPLETADO con confianza por campo, evidencia y `revisionHumana`, y un XML como texto va por la skill de comprobante con `selloVerificado=false`. Es lo unico que prueba que la capacidad responde de verdad, en vez de que el fail-safe funcione",
+      "evidencia": "salida de `node --test`: las dos pruebas `SERVICIO:` pasadas o falladas",
       "perfiles": [],
       "activo": false,
-      "motivo": "HUERFANO: existia sin que NINGUN script lo corriera, asi que se podrio sin que nada lo viera. Medido el 2026-09-26: 12 verdes y 3 rojos. El rojo de opacidad es test viejo, NO fuga — asserta que la app tiene exactamente 3 rutas de servidor (card, rpc, health) y hoy tiene 14: crecieron 11 `/api/*` legitimas de dictado, laboratorio, historial y ajustes. Los otros 2 rojos son el camino feliz y la lectura de XML, que necesitan la capacidad de extraccion inyectada y no la tienen aqui.",
-      "falta": "Un CDC que decida las dos cosas: (a) reencuadrar el test de opacidad para que exija que ninguna ruta NUEVA se cuelgue del arbol A2A en vez de congelar la superficie entera de la app, y (b) inyectar la capacidad de extraccion o acotar los dos casos que la piden. Activarlo antes de eso pondria `validate` en rojo por deuda ajena a este manifiesto; dejarlo sin declarar es lo que ya costo que nadie vigile la opacidad A2A desde que la app crecio."
+      "timeout_s": 600,
+      "motivo": "Exigen el servicio del extractor corriendo en `EXTRACTOR_SERVICIO_URL`, y ese servicio no arranca sin el binario de Tesseract: `tools/extractor-documental/servicio/configuracion.mjs` lanza «no se pudo leer la version de Tesseract: el motor principal no arranca sin binario». Medido el 2026-09-26: Tesseract NO esta instalado en esta maquina y `servicio/node_modules` tampoco existe. Las dos FALLAN a proposito cuando el servicio no responde — su autor lo decidio asi porque «pasar en silencio seria afirmar una capacidad que nunca corrio», y esa decision se respeta en vez de convertirlas en un skip.",
+      "falta": "El mismo perfil con infraestructura que piden `inventario:valida-erp`, `erp:prueba` y `erp:control`: un nodo con Docker donde levantar el servicio del extractor (Tesseract, `npm install` en `servicio/`) y correr estas dos contra el. Hasta entonces se corren a mano con el servicio arriba. NO se activan aqui porque un gate activo que no puede correr es `no_ejecutable` = rechazo, que es lo correcto y tambien lo que dejaria el gate en rojo por falta de infraestructura, no por un defecto del codigo."
     },
     {
       "nombre": "inventario:valida-erp",

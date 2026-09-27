@@ -3855,3 +3855,46 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «continua con la firma del CDC»,
   2026-09-26, con el diff por archivo y toda la evidencia medida delante (ver la precisión sobre el
   orden del diff, arriba).
+
+### 2026-09-26 — `prueba:a2a` REACTIVADO: la opacidad del puente vuelve a vigilarse, y las dos pruebas que exigen el servicio del extractor pasan a su propio gate declarado → CDC PROMOVIDO — radio: sistema (padrón de gates + prueba de opacidad del puente A2A)
+- **Cambio**: en `.claude/gates.json`, `prueba:a2a` pasa de `activo: false` a **activo en el perfil
+  `validate`** (24 gates activos), y nace `prueba:a2a:servicio`, declarado **inactivo con `motivo` y
+  `falta`**. En `scripts/prueba-a2a.ts`: la prueba de opacidad deja de enumerar `src/app` ENTERO y
+  enumera las rutas **del bridge** (`rutasDelBridge()`), y se **añade** una segunda prueba que
+  enumera el resto de la superficie de servidor y la exige DECLARADA en `RUTAS_FUERA_DEL_BRIDGE`;
+  las dos pruebas que exigen el servicio del extractor se renombran con el prefijo `SERVICIO:` para
+  que el padrón pueda seleccionarlas. En `package.json`, dos scripts nuevos (`prueba:a2a`,
+  `prueba:a2a:servicio`); en `AGENTS.md`, los dos declarados (`GEMINI.md` regenerado).
+- **Motivo**: el padrón destapó que este archivo era HUÉRFANO —ningún script npm lo corría— y que
+  llevaba meses en rojo sin testigos: la opacidad del puente A2A no se vigilaba desde que la app
+  creció. De los 3 rojos, uno era test viejo y dos no eran defecto.
+  **El viejo**: el diseño ya decía cuál era el conjunto correcto —
+  `docs/SDD-puente-a2a-extractor.md` §6 nombra la función `rutasDelBridge()` y la prueba «la
+  superficie **A2A** es EXACTAMENTE card, rpc y health»— y la implementación derivó a enumerar la
+  app entera, que era el mismo conjunto el día que se escribió. RF-17 de la spec 010 habla del
+  sistema que se despliega en la infra del cliente, cuyo modelo es cada agente de `hermes-os-a2a`:
+  un servicio propio con tres rutas y nada más. Aquí el bridge vive dentro de la app de la fábrica,
+  así que el conjunto que RF-17 acota es el del bridge.
+  **Acotar sin más habría DEBILITADO la prueba**, porque dejaría de cazar una ruta nueva colgada en
+  cualquier otro sitio. De ahí la segunda prueba: el resto de la superficie va declarada una por
+  una, y una ruta nueva sigue cayendo — no como fallo, sino como decisión que alguien tiene que
+  tomar a la vista (RF-20: el puente no se publica fuera de la red interna del compose).
+  **Los dos que no eran defecto**: exigen el servicio del extractor corriendo, y ese servicio no
+  arranca sin el binario de Tesseract (`servicio/configuracion.mjs` lanza «el motor principal no
+  arranca sin binario»). Medido: Tesseract no está instalado en esta máquina ni existe
+  `servicio/node_modules`. Su autor decidió que **fallaran** en vez de saltarse — «pasar en silencio
+  sería afirmar una capacidad que nunca corrió» — y esa decisión se respeta: no se convierten en un
+  skip, se mueven a un gate propio que dice por qué está apagado y qué le falta.
+- **Gate aplicado**: diff revisado ☑ (**enseñado completo ANTES de pedir la firma**, esta vez sin la
+  salvedad de la entrada anterior) · regresión verde ☑ capa A 123/123 y capa B 22/22 · aprobación
+  humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `npm run validate` **24/24 activos en verde, 7 inactivos declarados, 0 rojos**,
+  sellado · `npm run prueba:a2a` **14 pruebas en verde** · `npm run verifica:gates` 11/11 ·
+  `verify:gobernanza` 156/156 · `npm run regresion` 123/123 · `regresion -- --trampa` 22/22.
+  **Controles negativos, sembrados y medidos** (la prueba de que el arreglo no la debilitó): una
+  ruta nueva en `/a2a/depuracion` tumba la prueba de la superficie A2A; una ruta nueva en
+  `/api/inventada` tumba la del inventario declarado, nombrándola en el diff; retiradas las dos,
+  vuelve a 14/0. Y `npm run prueba:a2a:servicio` corrido a mano **falla 2/2** con el servicio
+  ausente: es la evidencia de que ese gate no es un skip disfrazado.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «si apruebo», 2026-09-26, con el
+  diff de los cinco archivos y los controles negativos delante.

@@ -8,7 +8,7 @@ Ejecución del `/goal` de `spec.md`. Todo lo de aquí está **medido**, no estim
 
 | Pieza | Qué hace |
 |---|---|
-| `.claude/gates.json` | El padrón: 30 gates como dato (nombre, runner, `guarda`, `evidencia`, perfiles, activo/inactivo con `motivo` y `falta`, `timeout_s`) y 3 perfiles (`validate`, `predeploy`, `cdc`) |
+| `.claude/gates.json` | El padrón: 31 gates como dato (nombre, runner, `guarda`, `evidencia`, perfiles, activo/inactivo con `motivo` y `falta`, `timeout_s`) y 3 perfiles (`validate`, `predeploy`, `cdc`) |
 | `scripts/lib/gates.mjs` | El cargador fail-closed: valida el padrón **entero** antes de aceptar un solo gate |
 | `scripts/corre-gates.mjs` | El runner: deriva el perfil, corre, clasifica en `paso`/`fallo`/`no_ejecutable`, cuenta las tres poblaciones y sella |
 | `scripts/verifica-gates.mjs` | El gate del padrón (11 comprobaciones) + `--prueba` (6 siembras) + `--lista` |
@@ -22,9 +22,11 @@ predeploy`.
 ## Estado del gate
 
 ```
-pasaron: 23   inactivos declarados: 7   rojos: 0
-Gate validate en VERDE: 23/23 gates activos pasaron.
+pasaron: 24   inactivos declarados: 7   rojos: 0
+Gate validate en VERDE: 24/24 gates activos pasaron.
 ```
+
+(23 al cerrar el manifiesto; 24 desde que `prueba:a2a` se reactivo el mismo dia, ver mas abajo.)
 
 Tres poblaciones contadas aparte, y los 7 inactivos se imprimen con su motivo en **cada**
 corrida: un gate apagado nunca se lee como uno que pasó.
@@ -65,9 +67,29 @@ servidor (`/.well-known/agent-card.json`, `/a2a`, `/a2a/health`) y hoy tiene **1
 11 `/api/*` legítimas de dictado, laboratorio, historial y ajustes (PRs #129-#140). Los otros 2
 rojos (camino feliz y lectura de XML) necesitan la capacidad de extracción inyectada.
 
-**Consecuencia real:** nadie vigila la opacidad A2A desde que la app creció. Queda declarado
-`activo: false` con motivo y `falta`; reactivarlo es un CDC aparte porque exige decidir sobre el
-puente, no sobre el padrón.
+**Consecuencia real:** nadie vigiló la opacidad A2A desde que la app creció.
+
+**Cerrado el 2026-09-26, en un CDC aparte.** El diseño ya decía cuál era el conjunto correcto:
+`docs/SDD-puente-a2a-extractor.md` §6 llama a la función **`rutasDelBridge()`** y nombra la prueba
+*«la superficie **A2A** es EXACTAMENTE card, rpc y health»*. La implementación derivó a enumerar
+`src/app` entero, que era el mismo conjunto el día que se escribió. RF-17 de la spec 010 habla del
+sistema que se despliega en la infra del cliente, y su modelo es cada agente de `hermes-os-a2a`: un
+servicio propio cuya superficie entera son tres rutas. Aquí el bridge vive dentro de la app de la
+fábrica, así que el conjunto que RF-17 acota es el del bridge.
+
+Para **no debilitarla**, acotar no bastaba: se añadió una segunda prueba que enumera el resto de la
+superficie y la exige **declarada** en `RUTAS_FUERA_DEL_BRIDGE`. Demostrado sembrando dos rutas:
+una en `/a2a/depuracion` (cae la primera prueba) y una en `/api/inventada` (cae la segunda). Sigue
+cazando la ruta que nadie previó, en cualquier sitio.
+
+Los otros dos rojos **no eran un defecto**: exigen el servicio del extractor, y ese servicio no
+arranca sin el binario de Tesseract (`servicio/configuracion.mjs` lanza). Su autor decidió que
+fallaran en vez de saltarse, *«pasar en silencio sería afirmar una capacidad que nunca corrió»*, y
+esa decisión se respeta: se marcaron con el prefijo `SERVICIO:` en su nombre y viven en un gate
+propio, **`prueba:a2a:servicio`**, declarado inactivo con motivo hasta que exista el perfil con
+infraestructura. Corrido a mano falla 2/2, que es la prueba de que no es un skip disfrazado.
+
+`prueba:a2a` queda **activo en `validate`: 14 pruebas en verde**.
 
 ### 2. Las suites de `tools/` no las corría nadie
 
@@ -148,11 +170,10 @@ Dos correcciones que salieron al firmar, y que conviene no perder:
 
 ## Lo que queda a personas
 
-1. **Decidir sobre `prueba:a2a`**: reencuadrar la opacidad + inyectar o acotar la extracción.
-   Es un CDC aparte, sobre el puente A2A y no sobre el padrón.
-2. **Adoptar la proyección en `hermes-os-a2a`** (CDC de ese repo; aquí solo se emite).
-3. **Un perfil con Docker** para `inventario:valida-erp`, `erp:prueba` y `erp:control`.
-4. **Medir la conducta de los 21 casos-trampa en sesiones frías**, si se quiere la capa B
+1. **Adoptar la proyección en `hermes-os-a2a`** (CDC de ese repo; aquí solo se emite).
+2. **Un perfil con infraestructura** para `inventario:valida-erp`, `erp:prueba`, `erp:control` y
+   ahora tambien `prueba:a2a:servicio` (Docker + Tesseract + `npm install` en `servicio/`).
+3. **Medir la conducta de los 21 casos-trampa en sesiones frías**, si se quiere la capa B
    completa y no solo su gate.
 
 ## Nota de entorno
