@@ -464,7 +464,7 @@ fueron el **primer** pegado de la sesión (arranque del PowerShell persistente; 
 cuestan decenas de ms). Lo que se aprendió ese día y ya está en el código: el micrófono de WSLg
 entra flojo (`--ganancia-db 12`), `termina()` debe esperar al audio en vuelo, y Parakeet a veces
 oye inglés en frases cortas (`--respaldo faster-whisper:small` repite solo esas en español).
-La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (confirmado por la dueña ese día): el pegador escribe donde esté el foco de Windows.
+La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (confirmado por el laboratorio ese día): el pegador escribe donde esté el foco de Windows.
 
 ## Los mandos que de verdad importan
 
@@ -510,7 +510,7 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 - **El motor del asesor cachea por id de transcripcion**; el laboratorio usa un id derivado del
   contenido para no recibir la respuesta de otra frase.
 - **«Dale enter» en medio de la frase no hacia nada** (en vivo, 2026-09-22): en manos libres la
-  frase no cierra hasta callar `silencioMs`, y la dueña lo decia y seguia hablando; el comando
+  frase no cierra hasta callar `silencioMs`, y el laboratorio lo decia y seguia hablando; el comando
   solo valia al final y quedo pegado como texto. Ahora vale en cualquier punto: lo de antes se
   envia y lo de despues empieza el mensaje siguiente. Y «dale enter» solo, sin texto, pulsa Enter
   (antes un texto vacio saltaba tambien la accion).

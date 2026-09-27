@@ -4,7 +4,7 @@
 > `/goal` corto que se pega en la sesión apunta aquí por ruta absoluta. Grafo del sistema en
 > `docs/grafos/trayectorias.json`; el plan de §GRAFO lo derivó `grafo2plan.py`, no una persona.
 >
-> Decisión de la dueña (2026-09-13): «trayectorias» son **trazas de ejecución** —qué se pidió,
+> Decisión del laboratorio (2026-09-13): «trayectorias» son **trazas de ejecución** —qué se pidió,
 > qué hizo el agente o la herramienta, qué costó, qué salió y si acertó— registradas como dataset
 > versionado que cierra el lazo de mejora. No son rutas de producto ni recorridos de usuario.
 
@@ -53,7 +53,7 @@ sesión, y **ninguna de las tres se junta con las otras**. El resultado a constr
    un skill, con `autoresearch` como motor de mutación. Y **ninguna se aplica sola**:
    cambiar un skill, un prompt, el routing o `settings.json` es un CDC con diff, regresión
    y firma. **Automejorado no es autoaprobado.** El precedente es el hipocampo: crea y
-   propone; editar y aprobar es de la dueña.
+   propone; editar y aprobar es del laboratorio.
 
 Nivel de referencia: las plataformas de observabilidad de agentes que capturan trazas por
 llamada, las evalúan con jueces separados y alimentan loops de optimización de prompts.

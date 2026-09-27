@@ -47,7 +47,7 @@
       ganancia, toques, respaldo en español, audio en vuelo, pegador sin esperar.
 
 - [x] **TAR-14b · Prueba en vivo, caso (b)** → 2026-09-16: con el cursor en el Bloc de notas, el
-      texto dictado apareció ahí (confirmado por la dueña). Además, la voz sintética se oyó en vivo.
+      texto dictado apareció ahí (confirmado por el laboratorio). Además, la voz sintética se oyó en vivo.
 - [x] **TAR-17b · «Dale enter» en cualquier punto y muletillas fuera.** → PR #142 (2026-09-22):
       `src/comandos.ts` (todas las apariciones, `siguientes`), `src/muletillas.ts` (filtro medido
       contra 24 transcripciones: 0 palabras buenas quitadas, WER 16,3 → 9,6 %). (RF-10 enmendado,

@@ -30,7 +30,7 @@ flujo (CI, `CLAUDE.md`, `prp-base.md`, `package.json`), con un verificador que p
 rojo y una regresión de skills que corre en cada PR. No una copia del árbol de archivos de este
 template.
 
-### Decisiones de alcance, tomadas por la dueña
+### Decisiones de alcance, tomadas por el laboratorio
 
 1. **Por fases**: las fases 1–5 cablean la capa a la raíz y a `.claude/`. La fase 6 mete el
    corpus del buzón en CI como primer puente hacia `businessos/`. El resto —97 archivos de

@@ -18,7 +18,7 @@
  * QUE NO HACE. No escribe nada en `hermes-os-a2a`: es otro repositorio, fuera del alcance de
  * escritura, igual que declararon los dos SDD que auditaron sus Fases 6 y 7 («este documento
  * es la auditoria, no el CDC»). Emite el artefacto por stdout o a un archivo; adoptarlo alla
- * es un CDC de ese proyecto, y lo firma su duena.
+ * es un CDC de ese proyecto, y lo firma el laboratorio.
  *
  * Uso:  node scripts/proyecta-gates.mjs                 (el TOML por stdout)
  *       node scripts/proyecta-gates.mjs --salida <ruta>  (lo escribe)

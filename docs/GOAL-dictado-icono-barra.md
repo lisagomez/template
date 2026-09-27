@@ -4,7 +4,7 @@
 > (`src/node/icono.ts`, protocolo TCP de una palabra, 3 pruebas), `windows/icono-barra.ps1`
 > (tray + botón flotante arrastrable, Mutex de instancia única, reconexión con detección de
 > EOF), `dictado icono instala|quita` (arranque por sesión de Windows) y `--icono` en los
-> flags por defecto de `en-vivo`. La dueña dictó en vivo por el ícono y el botón flotante.
+> flags por defecto de `en-vivo`. El laboratorio dictó en vivo por el ícono y el botón flotante.
 > Post-mortem: los seis riesgos vividos y sus fixes quedaron en `docs/SDD-dictado.md` §9
 > («Añadidos del 2026-09-19»); la calibración (nivel 75 % por CoreAudio, ganancia 0, puerta
 > de energía, filtro de muletillas) salió de esa misma sesión.

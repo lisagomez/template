@@ -165,7 +165,7 @@ test('acciones verbales: «dale enter» en cualquier punto y tantas veces como s
   assert.deepEqual(extraeAcciones('Podemos continuar con el PRP. Dale enter. No veo que estés ejecutando nada.'), {
     texto: 'Podemos continuar con el PRP', acciones: ['enter'], siguientes: [{ texto: 'No veo que estés ejecutando nada.', acciones: [] }],
   });
-  // Como lo dice la dueña de verdad (en vivo, 2026-09-22): «dale a enter», y siguio hablando.
+  // Como lo dice el laboratorio de verdad (en vivo, 2026-09-22): «dale a enter», y siguio hablando.
   assert.deepEqual(extraeAcciones('Haz la uno y la tres, dale a enter. ¿me puedes responder?'), { texto: 'Haz la uno y la tres', acciones: ['enter'], siguientes: [{ texto: '¿Me puedes responder?', acciones: [] }] });
   // Dos envios en un solo turno (en vivo, 2026-09-22): cada «dale enter» manda lo que va delante.
   assert.deepEqual(extraeAcciones('Escucho mejor la primera dale enter La 1, déjala por defecto. A 0,9. Dale Enter.'), {

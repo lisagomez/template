@@ -17,7 +17,7 @@ Base: Ubuntu 26.04 LTS sobre **WSL2** (kernel `6.6.87.2-microsoft-standard-WSL2`
   **lisagomez <lisagomez967@gmail.com>**.
 - `gh` **2.46.0** en **`/usr/bin/gh`**, autenticado como **lisagomez** — la MISMA cuenta que
   el remoto, no una ajena. No existe `~/.local/bin/gh`. Scopes `gist, read:org, repo,
-  workflow`: **abre** PRs desde la sesión, a nombre de la dueña. **Fusionarlos, no**: el
+  workflow`: **abre** PRs desde la sesión, a nombre del laboratorio. **Fusionarlos, no**: el
   clasificador de auto mode bloqueó `gh pr merge` el 2026-08-27, y también un
   `git checkout main && git pull` compuesto (ese sí pasó partido en `checkout` +
   `merge --ff-only`). Los scopes dan el permiso, el arnés no: el merge lo teclea ella con `!`
