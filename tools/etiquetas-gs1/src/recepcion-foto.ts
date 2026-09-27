@@ -28,7 +28,10 @@ import { categoriaPorId, vidaRestante } from './semaforo.js'
 const json = (v: unknown): Json => JSON.parse(JSON.stringify(v)) as Json
 const falla = <T>(estado: EstadoAlmacen, motivo: string): Paso<T> => ({ estado, resultado: { ok: false, motivo } })
 export const esHuella = (h: string): boolean => /^sha256:[0-9a-f]{64}$/.test(h)
-export const esFechaIsoValida = (iso: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(iso) && new Date(`${iso}T00:00:00Z`).toISOString().slice(0, 10) === iso
+export function esFechaIsoValida(iso: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  return m !== null && new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))).toISOString().slice(0, 10) === iso
+}
 
 export interface FotosDeRevision {
   /** La foto completa, tal cual se tomo (normalizada, sin EXIF): la evidencia. */

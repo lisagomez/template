@@ -307,13 +307,58 @@ sólida), tinta de puntos 5×7 con el cero con diagonal, dos tomas por imagen; e
 sirve para comparar motores, no para fijar umbrales reales. Corpus real: 7 fotos del laboratorio
 (fuera de git; varias de catálogo web, baja resolución), 2 marcadas `por_confirmar` que no cuentan.
 
-<!-- TABLA-MEDICION -->
+| motor | corpus | n | exacta | con opción correcta | ambigüedad marcada | **EQUIVOCADA** | opciones sin la correcta | no leyó | inventada (sin fecha) | sin fecha, correcto | error | lote exacto / equivocado | ms mediana |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| qwen-completa | real (foto entera) | 5 | 1 | 0 | 0 | **1** | 0 | 0 | 0 | 3 | 0 | 1 / 0 | 17807 |
+| qwen | sintético | 60 | 20 | 2 | 6 | **0** | 1 | 21 | 0 | 10 | 0 | 12 / 20 | 9933 |
+| qwen | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 14292 |
+| rapidocr-2tomas | sintético | 60 | 6 | 3 | 5 | **0** | 0 | 36 | 0 | 10 | 0 | 7 / 3 | 3151 |
+| rapidocr-cascada | sintético | 60 | 25 | 4 | 15 | **0** | 2 | 4 | 0 | 10 | 0 | 26 / 9 | 1526 |
+| rapidocr-cascada | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 992 |
+| rapidocr-completa | real (foto entera) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 0 | 952 |
+| rapidocr-producto | sintético | 60 | 13 | 17 | 15 | **0** | 2 | 3 | 0 | 10 | 0 | 18 / 4 | 5691 |
+| rapidocr-producto | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 1674 |
+| rapidocr-puntos | sintético | 60 | 25 | 4 | 15 | **0** | 2 | 4 | 0 | 10 | 0 | 25 / 9 | 1484 |
+| rapidocr-puntos | real (recorte) | 5 | 0 | 0 | 0 | **0** | 0 | 2 | 0 | 3 | 0 | 0 / 0 | 831 |
+| rapidocr | sintético | 60 | 6 | 0 | 4 | **0** | 0 | 40 | 0 | 10 | 0 | 7 / 4 | 1625 |
+| rapidocr | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 1105 |
+| tesseract-puntos | sintético | 60 | 9 | 12 | 7 | **0** | 0 | 22 | 0 | 10 | 0 | 4 / 11 | 351 |
+| tesseract-puntos | real (recorte) | 5 | 0 | 0 | 0 | **0** | 0 | 2 | 0 | 3 | 0 | 0 / 0 | 348 |
+| tesseract | sintético | 60 | 5 | 0 | 3 | **0** | 1 | 41 | 0 | 10 | 0 | 5 / 0 | 438 |
+| tesseract | real (recorte) | 5 | 0 | 0 | 0 | **0** | 0 | 2 | 0 | 3 | 0 | 0 / 0 | 236 |
+
+Cómo se lee: «EQUIVOCADA» = se propuso UNA fecha y no era (la peligrosa); «con opción correcta» y
+«ambigüedad marcada» = la persona elige entre opciones y la buena está; «inventada» = propuso algo
+en una foto sin fecha. `rapidocr-producto` es la cascada que usa la app (`leeYPropone`) con DOS tomas
+en el sintético y una en el real. Latencia: mediana en CPU (WSL2, sin GPU), incluye lanzar el proceso.
+
+- **Ningún motor inventó una fecha** en las 13 fotos sin fecha (10 sintéticas, 3 reales). Qwen, con
+  la foto entera, sí devolvió números que no están en la foto («20240202») o la clave del
+  proveedor; el analizador no los aceptó (cifras sin rótulo no son fecha).
+- **La única propuesta equivocada es de Qwen con la foto entera**: la lata «14/06/26» leída
+  «14.06.28», fecha válida y plausible. Recortada, la leyó bien. Por eso se lee el recorte.
+- **Tesseract** no lee la tinta de puntos (41/60 sin leer) ni las fotos reales (0 de 2); uniendo
+  puntos lee 9. Antes de las reglas de rótulo y ventana de años, esa variante proponía **10 fechas
+  equivocadas** (medido en la primera corrida: años 2827, fechas armadas con el lote); con las
+  reglas, 0.
+- **RapidOCR** tal cual lee la letra sólida y las fotos reales (2 de 2); uniendo puntos lee la
+  tinta de inyección (25 exactas + 15 ambigüedades marcadas) pero estropea las fotos reales (0 de
+  2). La cascada se queda con lo mejor de las dos.
+- **El cotejo de dos tomas cuesta clics, no errores**: de 25 exactas con una toma pasa a 13 exactas +
+  17 con opción, porque la segunda toma (girada y con más ruido) lee distinto y entonces no se
+  propone una sola. Con una toma ya había 0 equivocadas en el sintético; se mantiene el cotejo porque
+  un clic cuesta menos que una fecha mal leída en el anaquel, y la medición en uso dirá si conviene
+  relajarlo.
+- **El lote falla más que la fecha** (Qwen 20 lotes equivocados en 60; RapidOCR 4 en la cascada,
+  la «A» de Abuelita como «H» en la real): se confirma igual que la fecha.
+- Lo que falta medir en real: fotos de celular del andén a resolución normal (las 7 reales son
+  miniaturas; 2 están `por_confirmar` y no cuentan). Los umbrales no se fijan con este corpus.
 
 **Decisiones**
 
 | Decisión | Por qué |
 |---|---|
-| **Motor: RapidOCR (PP-OCRv4 en ONNX Runtime, CPU) por proceso local**, versiones exactas en `motores/requirements-rapidocr.txt` | Es el único que medido lee la tinta de puntos (uniendo puntos) y las fotos reales **sin inventar**: 0 fechas en las fotos sin fecha. Tesseract no lee la tinta de puntos y, uniéndolos, propone fechas equivocadas; Qwen2.5-VL 3B lee bien recortado pero inventa en la foto entera y tarda 6-24 s. No es un modelo de lenguaje: no pasa por C8. |
+| **Motor: RapidOCR (PP-OCRv4 en ONNX Runtime, CPU) por proceso local**, versiones exactas en `motores/requirements-rapidocr.txt` | Medido: es el único que lee la tinta de puntos (uniendo puntos) Y las fotos reales, con 0 propuestas equivocadas y 0 inventadas, en 1-6 s. Tesseract casi no lee la tinta de puntos ni las fotos reales; Qwen2.5-VL 3B lee bien recortado, pero con la foto entera propuso una fecha equivocada y tarda 10-18 s por imagen en CPU (y sería C8: es un modelo de lenguaje). RapidOCR no es un modelo de lenguaje: no pasa por C8. |
 | **Cascada**: recorte tal cual → uniendo puntos si no vio fecha → foto entera si ninguna toma vio nada | Medido: los puntos unidos salvan la tinta de inyección y estropean la letra sólida; la foto entera ayuda con miniaturas que el motor detecta solo. `leeYPropone` es la misma función en la app y en el banco. |
 | **No se reusa `MotorOcr` del extractor**: se reusa su patrón | Aquel devuelve páginas con campos para documentos; esto, líneas con su caja de un recorte chico. Reusar el puerto obligaba a depender de otra herramienta para un contrato distinto. Sí se reusó: proceso por lectura, directorio temporal borrado siempre, modelo pineado, errores sin el texto leído, confianza que no decide nada. |
 | **El analizador decide, el motor transcribe** (`fechas-impresas.ts`) | Cifras sin rótulo no son fecha (la clave del proveedor también son cifras); el rótulo vale si no hay otras cifras entre él y la fecha; año fuera de ventana no se propone; un día imposible se marca y, si cambiando UNA cifra 8/9/6 por 0 sale una sola fecha, se sugiere (cero con diagonal). |
