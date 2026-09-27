@@ -164,10 +164,12 @@ async function contarAntes(h, a, sup) {
   await cierra(k.c, s.c);
 }
 
-/** Un faltante REAL (una caja menos de refresco en el anaquel), que recontara otra persona. */
+/** Un faltante REAL (una caja menos de refresco vigente en el anaquel), que recontara otra persona. */
 function eligeFalta(mapa) {
   const todos = [...mapa.entries()].flatMap(([u, xs]) => xs.map((x) => ({ u, x })));
-  const e = todos.find(({ x }) => x.sku === 'REF-007' && x.cantidad >= 2) ?? todos.find(({ x }) => x.cantidad >= 2);
+  // El de caducidad mas lejana: un lote vigente que ningun otro flujo retira entre el conteo y el reconteo.
+  const lejos = (xs) => [...xs].sort((a, b) => b.x.caducidad.localeCompare(a.x.caducidad))[0];
+  const e = lejos(todos.filter(({ x }) => x.sku === 'REF-007' && x.cantidad >= 2)) ?? lejos(todos.filter(({ x }) => x.cantidad >= 2));
   return e ? { u: e.u, gtin: e.x.gtin, lote: e.x.lote } : undefined;
 }
 

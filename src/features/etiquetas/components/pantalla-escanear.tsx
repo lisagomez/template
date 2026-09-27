@@ -56,7 +56,7 @@ function ElegirZona({ est, z, alFijar }: { est: EstadoCliente; z: ContextoZona |
 }
 
 /** La cola sin señal: cuantos faltan por subir y lo que el servidor dijo de los que ya subieron. */
-function useCola(alSubir: () => void) {
+function useCola(alSubir: (n: number) => void) {
   const [porSubir, setPorSubir] = useState(0);
   const [subidos, setSubidos] = useState<string[]>([]);
   const cuenta = useCallback(() => void pendientes().then((p) => setPorSubir(p.length), () => undefined), []);
@@ -66,7 +66,7 @@ function useCola(alSubir: () => void) {
     setPorSubir(r.quedan);
     if (r.hechos.length) {
       setSubidos(r.hechos.map((h) => (h.rechazo ? `✗ ${h.accion.texto.slice(0, 40)}: el servidor lo rechazó (${h.rechazo})` : `✓ ${(h.respuesta as RespEscanea).vista.titulo}${(h.respuesta as RespEscanea).repetido ? ' (ya había llegado)' : ''}`)));
-      alSubir();
+      alSubir(r.hechos.length);
     }
   }, [alSubir]);
   useEffect(() => {
@@ -133,7 +133,9 @@ function useEscaneo(e: Etiquetas, zona: ReturnType<typeof useZona>) {
   const [embebido, setEmbebido] = useState<Embebido | null>(null);
   const [version, setVersion] = useState(0);
   const refresca = useCallback(() => setVersion((v) => v + 1), []);
-  const cola = useCola(refresca);
+  // Al subir lo encolado, la tarjeta deja de decir «sin señal» (el detalle de cada uno va en la lista).
+  const alSubir = useCallback((n: number) => { setUltimo(vistaLocal('ok', `Con señal otra vez: se subieron ${n} escaneo(s)`, ['Abajo, lo que el servidor hizo con cada uno.'], 'ok')); refresca(); }, [refresca]);
+  const cola = useCola(alSubir);
   const muestra = (v: VistaEscaneo) => { setDestello(v); setUltimo(v); };
   const recepcion = (r: Omit<RecepcionInicial, 'alTerminar'>) => setEmbebido({ tipo: 'recepcion', r: { ...r, alTerminar: () => { setEmbebido(null); refresca(); } } });
   const responde = (p: Escanea, r: RespEscanea) => {

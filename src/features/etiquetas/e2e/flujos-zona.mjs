@@ -167,10 +167,12 @@ export async function flujosZona(h0) {
   const med = await mideAgilidad(h);
   h.informe.zona.agilidad = med.filas;
   h.informe.zona.tablaAgilidad = tablaAgilidad(med.filas);
+  // El reconteo y la conciliacion van JUSTO despues de contar: si otro flujo mueve un lote contado
+  // entre medio, la simulacion recontaria cajas que ya no estan.
+  await ciclico41(h, med);
   await recibo37(h, med);
   await almacen38(h);
   await piso39(h, med);
-  await ciclico41(h, med);
   await piezaSuelta(h);
   await sinSenal(h);
   await tablero42(h);

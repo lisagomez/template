@@ -102,7 +102,7 @@ function Conciliacion({ e, c, alCambiar }: { e: Etiquetas; c: VistaConteo; alCam
   const filas = c.conciliacion ?? [];
   const fuera = filas.filter((r) => !r.dentroTolerancia).length;
   const aplica = () => void e.ejecuta<{ ok: boolean; motivo?: string }>({ accion: 'conteo-aplica', folio: c.folio, ...(autoriza.trim() ? { autoriza: autoriza.trim() } : {}) }).then(
-    (r) => (r.ok ? alCambiar() : setAviso(r.motivo ?? 'no se pudo')), (err: unknown) => setAviso(err instanceof Error ? err.message : String(err)));
+    (r) => { setAviso(r.ok ? null : `No se aplicó: ${r.motivo ?? 'no se pudo'}`); if (r.ok) alCambiar(); }, (err: unknown) => setAviso(err instanceof Error ? err.message : String(err)));
   return (
     <div className="space-y-2" data-prueba="conciliacion">
       <div className="overflow-x-auto">
