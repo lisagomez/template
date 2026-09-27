@@ -7,7 +7,7 @@
 > Diseño: `docs/SDD-generacion-de-contenido.md`.
 > **CDC aplicable**: **no** — no cambia modelo, skill, prompt del arnés ni plantilla. Si una fase
 > bloqueada se desbloquea con LLM, ESA fase sí es CDC.
-> **Aprobación**: la dueña pidió construir en el mismo goal (2026-09-27). El **candado** de este PRP
+> **Aprobación**: el laboratorio pidió construir en el mismo goal (2026-09-27). El **candado** de este PRP
 > decide qué se construye: solo las fases *autorizadas*; las *bloqueadas* no se tocan.
 
 ---
@@ -28,7 +28,7 @@ código sin personas—, con constancia de qué aprobó, y sin que nada se publi
 | «Aprobado» sin constancia: nadie sabe qué versión se aprobó | Huella SHA-256 de lo aprobado; editar revoca; CSV del mes |
 
 **Valor de negocio**: un mes de contenido (≈27 piezas + carruseles + promos) por $0 de producción y
-sin diseñador; la dueña de la fábrica lo ofrece como parte del estudio a sus clientes pyme.
+sin diseñador; el laboratorio lo ofrece como parte del estudio a sus clientes pyme.
 
 ## Qué
 
@@ -111,10 +111,10 @@ bloqueada 9 para guardarla con cuentas).
 | 4 | Video por código sin personas (escena, cuadro, sonido, render MP4 local) | **autorizada · hecha** | local, $0, sin personas |
 | 5 | Aprobación con huella en el celular (sesión del navegador) | **autorizada · hecha** | local, sin cuentas |
 | 6 | Laboratorio visual y app derivada | **autorizada · hecha** | extiende lo existente |
-| 7 | Reel del celular con voz o cara | **BLOQUEADA** | la dueña: C4 con terceros; 14 preguntas de `propuesta-video.md` |
-| 8 | Foto de producto dentro del video | **BLOQUEADA** | la dueña: la foto puede traer personas; revisión C4 propia |
-| 9 | Redacción con LLM / aprobación con cuentas | **BLOQUEADA** | la dueña: CDC del redactor (`pymes-marketing/propuesta-cdc.md`) y `/add-login` (C4, C7) |
-| 10 | Render de video en producción | **BLOQUEADA** | la dueña: Chromium + ffmpeg en la imagen (infraestructura) |
+| 7 | Reel del celular con voz o cara | **BLOQUEADA** | el laboratorio: C4 con terceros; 14 preguntas de `propuesta-video.md` |
+| 8 | Foto de producto dentro del video | **BLOQUEADA** | el laboratorio: la foto puede traer personas; revisión C4 propia |
+| 9 | Redacción con LLM / aprobación con cuentas | **BLOQUEADA** | el laboratorio: CDC del redactor (`pymes-marketing/propuesta-cdc.md`) y `/add-login` (C4, C7) |
+| 10 | Render de video en producción | **BLOQUEADA** | el laboratorio: Chromium + ffmpeg en la imagen (infraestructura) |
 | 11 | Publicar o programar | **FUERA** | siempre el dueño de cada pyme, a mano |
 | 12 | Documentación y validación final | **autorizada · hecha** | — |
 

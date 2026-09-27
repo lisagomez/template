@@ -55,10 +55,10 @@ en el nombre (`video-6`), nota vacía al pedir cambio (`aprobacion-3`).
 
 | Fase | Por qué no se construyó | Firma |
 |---|---|---|
-| 7 · Reel con voz o cara | daño posible a terceros (C4); faltan las 14 preguntas de `pymes-marketing/propuesta-video.md` | la dueña |
-| 8 · Foto de producto en el video | la foto puede traer personas; pide su propia revisión C4 | la dueña |
-| 9 · Redacción con LLM y aprobación con cuentas | CDC del redactor (`pymes-marketing/propuesta-cdc.md`) y `/add-login` (C4, C7) | la dueña |
-| 10 · Render en producción | Chromium y ffmpeg en la imagen: cambio de infraestructura | la dueña |
+| 7 · Reel con voz o cara | daño posible a terceros (C4); faltan las 14 preguntas de `pymes-marketing/propuesta-video.md` | el laboratorio |
+| 8 · Foto de producto en el video | la foto puede traer personas; pide su propia revisión C4 | el laboratorio |
+| 9 · Redacción con LLM y aprobación con cuentas | CDC del redactor (`pymes-marketing/propuesta-cdc.md`) y `/add-login` (C4, C7) | el laboratorio |
+| 10 · Render en producción | Chromium y ffmpeg en la imagen: cambio de infraestructura | el laboratorio |
 | 11 · Publicar o programar | fuera siempre | el dueño de cada pyme, a mano |
 
 ## `validate` después del commit

@@ -5,7 +5,7 @@ imagen, video por código, laboratorio visual, app, documentación—; paralelis
 convergencia en el laboratorio). Lo que se pega en `/goal` es `goal.txt`, NO este archivo. Grafo:
 `grafo.json`; plan de orquestación compilado de él: `plan.md` (se sigue, no se improvisa).
 
-Decisiones de la dueña (2026-09-27): **video sin personas** entra (el reel con voz y cara queda
+Decisiones del laboratorio (2026-09-27): **video sin personas** entra (el reel con voz y cara queda
 bloqueado hasta firmar `propuesta-video.md`); **un solo goal con candado** (SDD y PRP primero; se
 construye solo lo que no requiere firma nueva; lo demás queda en el PRP como fase bloqueada); e
 **integrar el laboratorio de pruebas visual y la documentación**.
