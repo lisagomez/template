@@ -4064,3 +4064,30 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `scripts/regresion-skills.mjs` — «si una skill menciona checkout o pasarela de pagos, cita `add-payments`
   o declara por qué no aplica» — para cubrir skills que todavía no existen. Los contratos por skill de este
   cambio cubren los lugares conocidos.
+
+### 2026-09-27 — el grafo de conocimiento entra al árbol de decisión de `AGENTS.md` (PRP-005 Fase 8) → CDC PROMOVIDO — radio: sistema (instrucciones de todos los agentes)
+- **Cambio**: 13 líneas nuevas en el árbol de decisión de `AGENTS.md`, justo después del extractor documental.
+  `GEMINI.md` se regeneró con `npm run sincroniza:gemini`. Ante «¿esto está permitido?», «¿es deducible?»,
+  «responder con reglas citadas», «motor de reglas», «grafo de conocimiento», «sembrar una regla» o
+  «regulatorio», la entrada enruta a:
+  - `tools/grafo-conocimiento/`, el motor;
+  - `tools/conocimiento/`, la fuente única por dominio.
+
+  Y fija sus reglas duras:
+  - el proyecto registra sus dominios y fija la versión exacta; `vigila:versiones` avisa y no mueve;
+  - el veredicto lo da siempre el motor determinista, y el LLM solo estructura y se inyecta;
+  - sin regla, en conflicto o con la categoría en duda, no hay veredicto: una certeza inventada daña a
+    terceros y no es firmable (límite de C5);
+  - se siembra SOLO en `tools/conocimiento` (dominio, versión, `CAMBIOS`, `npm run registra`), y el gate
+    rechaza borrar o editar en su sitio sin firma;
+  - Hermes está congelado: allá no se siembra;
+  - lo que cambia un veredicto va firmado por el laboratorio.
+- **Motivo**: PRP-005, Fase 8. Las Fases 1 a 7 construyeron y probaron la herramienta (PR #160 → #171). Sin esta
+  entrada, un agente no la encuentra desde el árbol de decisión y podría responder «¿está permitido?» de memoria:
+  la certeza sin fuente que la spec 004 existe para impedir.
+- **Gate aplicado**: diff revisado ☑ (**enseñado completo ANTES de pedir la firma**) · regresión verde ☑ capa A
+  131/131 y capa B 22/22 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `npm run regresion` 131/131 · `npm run regresion -- --trampa` 22/22 · `verify:gobernanza`
+  156/156 · `mide:contexto`: `CLAUDE.md` 6236 tokens (78 % de 8000), total por sesión 10623 (89 % de 12000),
+  `GEMINI.md` 64 % · `npm run validate` en verde (ver el PR).
+- **Aprobado por**: **lisagomez** (el laboratorio), «Firmo», 2026-09-27, con el diff de las 13 líneas delante.

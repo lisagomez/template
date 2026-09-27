@@ -102,6 +102,19 @@ Usuario dice algo
     |         exacto; la propuesta pasa por `revisaSql` y NADIE la aplica. Motor autohospedado
     |         medido en CPU: ~110 s por pagina, y enrutar fuera del motor es el unico ahorro
     |
+    ├── "¿Esto esta permitido?" / "¿es deducible?" / "responder con reglas citadas"
+    |   "motor de reglas" / "grafo de conocimiento" / "sembrar una regla" / "regulatorio"
+    |       → Herramienta YA CONSTRUIDA: `tools/grafo-conocimiento/` (motor) + `tools/conocimiento/`
+    |         (la FUENTE UNICA de las reglas, por dominio). El proyecto registra sus dominios
+    |         (`seleccionaDominios`) y FIJA la version exacta: `vigila:versiones` avisa, no mueve
+    |         El veredicto lo da SIEMPRE el motor determinista; el LLM solo estructura (RF-4) y se
+    |         INYECTA. Sin regla, en conflicto o con la categoria en duda: sin veredicto. Una
+    |         certeza inventada dana a terceros: NO es firmable (limite de C5)
+    |         Sembrar: SOLO en `tools/conocimiento` (dominio + version + CAMBIOS + `npm run registra`);
+    |         el gate rechaza borrar o editar en su sitio sin firma. Hermes esta CONGELADO: alla
+    |         no se siembra. Lo que cambia un veredicto va firmado por el laboratorio
+    |         Que hace: `.claude/specs/004-grafo-de-conocimiento/` · PRP-005 · `docs/SDD-grafo-hermes-a-template.md`
+    |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
     |       → Ejecutar skill CREAR-HERRAMIENTA
