@@ -1,0 +1,51 @@
+{
+  "_que_es": "Lo que el conocimiento y el motor de Hermes (corte 97d9f9e) hacen distinto de lo que decidió la Fase 0 del PRP-005. Declarado a mano, con su porqué. La prueba exige que la validación del seed (validacion-seed.json) dé EXACTAMENTE las de `validacion`: una divergencia nueva sin declarar pone rojo, y una declarada que ya no aparece también.",
+  "validacion": [
+    {
+      "tipo": "baja_por_borrado",
+      "clave": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
+      "rf": "RF-14",
+      "porque": "Hermes retiró la regla de la ley de 2010 (vigente_desde 2010-07-06) con `_bajas`, que la BORRA. Medido: «cláusula de confidencialidad» con un hecho del 2024-06-01 da `dudoso / sin regla aplicable`, porque el pasado perdió su regla (caso incidente del corpus).",
+      "se_resuelve_en": "Fase 2: se recupera del historial de Hermes y se cierra con vigente_hasta 2025-03-20. Cambia un veredicto, así que va con firma del laboratorio."
+    },
+    {
+      "tipo": "conflicto_de_veredicto",
+      "clave": "MX/fiscal/INTERESES",
+      "rf": "RF-8, RF-12",
+      "porque": "MX-LISR-27-VII (deducible) y MX-LISR-28-XXVII (dudoso) están vigentes a la vez sobre la misma categoría. El motor de Hermes lo degrada a `dudoso` con la bandera «Reglas vigentes en conflicto… requiere revisión» en CADA consulta de intereses, y su gate de siembra no lo ve.",
+      "se_resuelve_en": "Fase 2: una sola regla rectora `dudoso` y la otra con veredicto_base null, la convención que Hermes ya usa en otras categorías. Cambia un veredicto, así que va con firma del laboratorio."
+    }
+  ],
+  "estructurales": [
+    {
+      "que": "vocabulario de veredicto global",
+      "rf": "RF-1",
+      "porque": "El seed de Hermes no declara vocabulario por dimensión y su gate aceptaba `deducible` en una regla regulatoria (medido en el expediente).",
+      "como_se_cierra": "`Dimension.vocabulario` en el contrato y `VOCABULARIO_HERMES` en el adaptador. Medido sobre el corte: ningún impacto se sale de esa tabla, así que no aparece como problema de validación."
+    },
+    {
+      "que": "`dudoso` mezcla cuatro motivos",
+      "rf": "RF-6",
+      "porque": "En Hermes, «sin regla», «conflicto», «la regla dice dudoso» y «el importe excede el tope» salen todos como `estado: dudoso` (y el agregado de una evaluación mixta también), y solo el texto de `razon` y `fuente: null` los separan.",
+      "como_se_cierra": "`Motivo` tipado en `ConceptoEvaluado` (regla · sin_regla · conflicto · tope_excedido) y `veredicto: null` solo con sin_regla. La paridad de la Fase 3 compara el veredicto de Hermes con el motivo, no los textos."
+    },
+    {
+      "que": "la respuesta siempre cita",
+      "rf": "RF-5",
+      "porque": "Hermes cita la fuente en toda respuesta. Aquí se cita por dominio.",
+      "como_se_cierra": "`Dominio.cita`. Todas las fuentes de Hermes son leyes o normas publicadas: sus dominios citan (`publica`), así que para este corpus no hay diferencia observable."
+    },
+    {
+      "que": "sin dominios",
+      "rf": "RF-15",
+      "porque": "El seed de Hermes no tiene dominios: todo el conocimiento va junto.",
+      "como_se_cierra": "`desdeHermes` agrupa provisionalmente por (jurisdicción, dimensión): 6 dominios. La Fase 2 los divide por dominio real (drones de reparto, agentes de seguros…)."
+    },
+    {
+      "que": "fecha supuesta sin avisar",
+      "rf": "RF-13",
+      "porque": "Si el contexto no trae fecha, Hermes usa la de hoy sin decirlo.",
+      "como_se_cierra": "`Resultado.contexto.fecha_supuesta`. En el corpus todos los casos llevan fecha, así que no hay diferencia observable."
+    }
+  ]
+}

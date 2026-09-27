@@ -184,7 +184,17 @@ es un archivo versionado, git **es** el historial.
 
 **Validación**: ✅ `npm run verifica:specs` en verde con los 16 RF en EARS; este PRP pasa a APROBADO.
 
-### Fase 1: Contrato y corpus de paridad
+### Fase 1: Contrato y corpus de paridad — ✅ CERRADA 2026-09-27
+> `tools/grafo-conocimiento/`:
+> - contrato Zod (`src/contrato.ts`) y `validaConocimiento` (`src/valida.ts`), que devuelve problemas tipados;
+>   conserva los nombres de campo de Hermes, para que Hermes pueda leer el paquete después;
+> - `desdeHermes`, que hace explícitos los ausentes que su motor leía con default y NO esconde `_bajas`;
+> - corpus de 782 casos con la salida exacta del motor Python en `97d9f9e`, leído con `git show` y huellas
+>   comprobadas: 2,98 MB → 387 KB sin pérdida, verificado caso por caso, y determinista;
+> - la validación del seed da **exactamente** las 2 divergencias declaradas (baja de 2010, conflicto
+>   INTERESES) más 5 estructurales documentadas;
+> - 24/24 pruebas; los controles negativos (quitar una divergencia, alterar la huella) ponen rojo;
+>   typecheck, lint y `validate` en verde.
 **Objetivo**: el contrato Zod, con el vocabulario por dimensión, la cita por dominio y la vigencia de
 solo-añadir. Además, un corpus de paridad **generado fuera del repo** con el motor Python de
 Hermes@97d9f9e: al repo solo entran sus salidas, como datos, con procedencia (commit y sha256 del seed).
@@ -272,6 +282,45 @@ es una decisión humana, no un paso de script. Hasta ese PRP, su `reglas.json` q
   código tiene 98 y 132.
 - **Fix**: medir sobre el corte, no sobre la memoria.
 - **Aplicar en**: cualquier traída desde otro repo. Citar el commit, no el recuerdo.
+
+### 2026-09-27: Un campo ausente en el origen no es un campo nulo en el contrato (Fase 1)
+- **Error**: la primera validación del seed de Hermes dio 2 errores de esquema. Dos impactos no traen
+  la clave `veredicto_base`, y su motor la lee con `.get()`, así que para él vale `None`.
+- **Fix**: el contrato exige el campo explícito, y `desdeHermes` hace explícitos los ausentes con el
+  mismo significado que les daba el motor de origen (`veredicto_base` y `categoria` → `null`,
+  `regimen` → `_meta.regimen_default`). Lo que cambia el significado (las `_bajas`) NO se normaliza:
+  sale como problema.
+- **Aplicar en**: la migración de la Fase 2 y cualquier importación. Normalizar solo lo que no cambia
+  el significado, y demostrarlo con el motor de origen.
+
+### 2026-09-27: Un corpus de paridad crudo es casi todo repetición (Fase 1)
+- **Error**: 782 salidas crudas pesaban 2,98 MB: el checklist general de un ámbito se repetía en
+  cada keyword.
+- **Fix**: salidas únicas más tablas de textos y fuentes (387 KB). El generador **demuestra** que la
+  compactación no pierde nada: expande cada caso y lo compara con la salida de Python antes de
+  escribir. Sin marca de tiempo, regenerar sin cambios da el mismo archivo.
+- **Aplicar en**: la re-generación del corpus al subir el pin, y la comparación de la Fase 3.
+
+### 2026-09-27: Una hora ISO literal tumba verify:gobernanza (Fase 1)
+- **Error**: `validate` en rojo, «ningún identificador de caso aparece en el árbol». El verificador busca
+  `\bT` + 1-2 dígitos (la forma de los identificadores de casos-trampa, protocolo ciego de C2), y
+  `medicion/casos.mjs` construía fechas con una hora ISO literal (la «T» seguida de dos ceros). El mismo
+  día le pasó a otra sesión (commit `b3e7656`, pymes).
+- **Fix**: `Date.UTC(a, m - 1, d)` en vez de parsear una hora ISO escrita a mano. El corpus salió idéntico.
+- **Aplicar en**: cualquier script o texto versionado. Dos sesiones en un día indican que falta documentarlo
+  donde muerde (una rule o el mensaje del verificador): queda propuesto como CDC aparte.
+
+### 2026-09-27: Una huella sha256 sin prefijo parece un token, y `validate` antes del commit no lo ve (Fase 1)
+- **Error**: la Fase 1 pasó `validate` y se subió. Al commitear la Fase 2, `audita:secretos` marcó tres
+  blobs con «hex de 64 sin prefijo (estilo HCLOUD)»: las huellas del corte. El auditor recorre objetos
+  **commiteados** de toda la historia, así que el `validate` corrido con los cambios solo en el índice
+  no los vio. Mezclado tal cual, `main` habría quedado en rojo para siempre, porque el blob vive en la
+  historia aunque luego se corrija el texto.
+- **Fix**: `sha256:<hex>`, el convenio del repo para anclas públicas (el patrón excluye lo precedido de
+  `:`). Se corrigió el commit de la rama sin mezclar (force-with-lease) para que el blob nunca llegue a
+  `main`.
+- **Aplicar en**: toda huella versionada. Y correr `audita:secretos` **después** del commit y antes del
+  push, no solo `validate` con el índice.
 
 ### 2026-09-26: Borrar una regla retirada reescribe el pasado
 - **Error medido en Hermes**: `_bajas` hace `DELETE`; un hecho de 2024 perdió su regla.
