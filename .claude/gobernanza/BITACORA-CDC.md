@@ -3985,3 +3985,82 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `npm run regresion` 123/123 · `npm run regresion -- --trampa` 22/22 ·
   `npm run validate` en verde (ver el PR).
 - **Aprobado por**: **lisagomez** (el laboratorio), «Sí, salvo registros», 2026-09-27.
+
+### 2026-09-27 — pymes, contenido y marketing: prompts de un redactor con LLM + 2 clases de tarea en el routing → CDC PROMOVIDO — radio: producto (paquete `@tu-scope/pymes-marketing`) y routing (C8)
+- **Cambio**:
+  1. **Prompts nuevos** en `tools/pymes-marketing/src/redactor-openai-compat.ts` (`INSTRUCCIONES` por tarea y
+     `sistema()`): lo que recibiría un LLM para redactar publicaciones, respuestas a reseñas y anuncios.
+     Llevan la voz del dueño, lo que nunca dice, «usa solo los hechos dados; no inventes precios, cifras,
+     premios ni promesas», y el texto de terceros **delimitado** con la orden de no obedecerlo. `promptsDe()`
+     los expone sin llamar al modelo, para revisarlos.
+  2. **Plantillas** del redactor de serie (`src/comun/redactor-plantillas.ts`): textos en español de México
+     para publicación, estado de WhatsApp, respuesta a reseña (<60 palabras) y anuncio.
+  3. **`.claude/routing-modelos.json`**: +2 clases de tarea, `redaccion-de-marketing` y `respuesta-a-resenas`,
+     ambas al nivel `capaz` ya pineado (`anthropic/claude-sonnet-5`). **Ningún modelo nuevo.**
+- **Motivo**: el goal `pymes-marketing` (primera familia del plugin `small-business`, CDC firmado el
+  2026-09-26). Sin clase asignada, la redacción heredaría el default caro en silencio (C8).
+- **Estado del LLM**: **no se usa en producción**. En esta máquina no hay `OPENROUTER_API_KEY`; el laboratorio
+  lo deja «no medido» (caso llm-5) y la app solo usa las plantillas. El cableado de costo se probó con un
+  proveedor SIMULADO: US$0.002584 por redacción (812 + 96 tokens) con el precio pineado; costo `null` cuando el
+  proveedor no reporta uso.
+- **Gate aplicado**: diff revisado ☑ (el del routing y los prompts, enseñado antes de pedir la firma) ·
+  regresión verde ☑ capa A 123/123 · `verifica:routing` ☑ · laboratorio ☑ 45 casos (44 pasan, 1 no medido
+  declarado) · aprobación humana ☑ · pineo ☑ (sin modelo nuevo). **Capa B no corrida, a propósito y
+  declarado** («capa A basta»): no cambia ningún skill, prompt ni instrucción del arnés, y el LLM queda
+  apagado.
+- **Regresión**: `npm run validate` sobre la mezcla con `main` (commit `b328bb5`), en un clon que solo trae
+  esta rama, `main` y el corpus: **26/26 gates activos en verde, 8 inactivos declarados, 0 rojos** ·
+  `verify:gobernanza` 156/156 · `verifica:gates` 11/11 · regresión capa A 123/123 · auditoría de
+  credenciales limpia · `prueba:laboratorio-pymes` 3/3 · `tools/pymes-marketing` 42 pruebas.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo, capa A basta», 2026-09-27, con el diff del
+  routing y de los prompts delante. Al firmar se borró la propuesta `.claude/goals/pymes-marketing/propuesta-cdc.md`.
+- **Lo que activar el LLM exigiría después (otro CDC)**: llave en el entorno del servidor, una corrida real
+  medida con su costo en la contabilidad, y que el caso llm-5 pase a «pasa».
+
+### 2026-09-27 — `prueba:laboratorio-pymes` ALTA en el padrón al mezclar `main` en `pymes-marketing-build` → CDC PROMOVIDO — radio: sistema (padrón de gates)
+- **Cambio**: en `.claude/gates.json` nace `prueba:laboratorio-pymes`, **activo en `validate`** después de
+  `prueba:laboratorio` (26 gates activos en `validate`). La `guarda` de `prueba:tools` suma
+  `pymes-marketing` a su lista (ya la recorría: descubre las herramientas por su script `prueba`).
+- **Motivo**: la rama traía `prueba:laboratorio-pymes` en la cadena `&&` de `validate`, y el #157 cambió
+  esa cadena por el padrón. Resolver el conflicto de `package.json` tomando `main` **sacaba la prueba del
+  gate en silencio**, igual que en el #154. Lo cazó `verifica:gates` con la resolución mecánica sola:
+  «sin declarar: prueba:laboratorio-pymes» y «nadie los corre:
+  src/features/laboratorio-pymes/pruebas/laboratorio.ts» (2 de 11 comprobaciones en rojo).
+- **Gate aplicado**: diff revisado ☑ (enseñado contra `main` antes de pedir la firma) · regresión verde ☑
+  capa A 123/123 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva). **Capa B no corrida, a
+  propósito y declarado** («capa A basta»): el cambio no toca skills, prompts, modelo ni instrucciones.
+- **Regresión**: `verifica:gates` 11/11 después del alta (control negativo: los 2 rojos de arriba, antes) ·
+  `npm run validate` sobre la mezcla, en un clon que solo trae esta rama, `main` y el corpus: **26/26
+  activos en verde, 8 inactivos declarados, 0 rojos** · `verify:gobernanza` 156/156 ·
+  `prueba:laboratorio-pymes` 3/3 · `prueba:a2a` en verde.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo, capa A basta», 2026-09-27, con el diff de
+  `gates.json` contra `main` y la evidencia delante.
+
+### 2026-09-27 — referencias a `add-payments` donde se cobra en línea, con sus límites → CDC PROMOVIDO — radio: skills (6), plantilla (1), regla (1), contratos C2 (1)
+- **Cambio** (rama `pagos-add-payments`, con `main` mezclado después de los PR #163 y #164):
+  - `add-payments`: `description` suma que NO sirve para bienes físicos, servicios presenciales ni
+    marketplaces; sección **Límites** con citas de la política de uso aceptable de Polar (consultada el
+    2026-09-27), el alcance real del código (suscripción → acceso) y lo «a verificar» (moneda de
+    liquidación, CFDI).
+  - `website-3d`, `new-app`, `supabase` (+ `references/schema-example.md`), `bucle-agentico`: referencia al
+    skill en el punto donde se decide o se usa el cobro, con su límite cuando hace falta.
+  - `add-a2a`: se corrige una comparación falsa («igual que `/add-payments` pregunta»).
+  - `prp-base.md` (plantilla) y `rules/flujos.md` (+10 tokens; reglas al 97 % de su presupuesto).
+  - `golden-sets/contratos.json`: +7 contratos (5 `patron`, 2 `prohibido`) para que las referencias no se
+    pudran. Regresión de 123 a 131 contratos.
+- **Motivo**: goal `pagos-add-payments`. Una referencia que manda a quien no debe es peor que ninguna: una
+  pyme de productos físicos no puede usar Polar.
+- **No se tocó `AGENTS.md`**: ya enruta «pagos / cobrar / checkout» a ADD-PAYMENTS, y el límite vive en el
+  skill al que lleva; tocarlo invalidaría el caché de prefijo sin ganar nada.
+- **Gate aplicado**: diff visible ☑ (en la conversación del goal) · regresión verde ☑ capa A 131/131 ·
+  `verify:gobernanza` ☑ 156/156 · `verifica:gates` ☑ 11/11 · reglas al 97 % de su presupuesto (6285/6500) ·
+  `validate` ☑ después del commit de la mezcla con `main` (`6cfc3fa`), en un clon que solo trae la
+  rama, `main` y el corpus: 26/26 activos en verde, 0 rojos (PR #166) · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia). **Capa B no corrida, a propósito y declarado** («capa A basta»): ninguna instrucción
+  cambia de sentido, solo se suman referencias y límites.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «firmo el CDC, capa A basta», 2026-09-27, con el PR
+  #166 delante. Al firmar se borró la propuesta `.claude/goals/pagos-add-payments/propuesta-cdc.md`.
+- **Propuesto para después (otro CDC, porque cambia el código del gate):** un contrato CONDICIONAL en
+  `scripts/regresion-skills.mjs` — «si una skill menciona checkout o pasarela de pagos, cita `add-payments`
+  o declara por qué no aplica» — para cubrir skills que todavía no existen. Los contratos por skill de este
+  cambio cubren los lugares conocidos.
