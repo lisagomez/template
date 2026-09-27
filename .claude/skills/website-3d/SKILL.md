@@ -43,6 +43,9 @@ C) Agendar Cita — Calendly / Cal.com embebido
 D) Venta Directa — Boton de compra / checkout
 
 (Elige UNA. Esto define toda la jerarquia visual y el CTA.)
+Si es D y vendes acceso o suscripcion a software o contenido digital, el cobro es
+`/add-payments` (Polar). Si vendes productos fisicos o servicios presenciales, Polar no
+los permite: el boton lleva a tu tienda o a tu WhatsApp, no a ese skill.
 ```
 
 ### Bloque 3: Psicologia de Ventas

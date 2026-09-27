@@ -9,7 +9,8 @@ description: |
   "add billing", "cobrar por mi app", "pasarela de pagos", "polar".
 
   Pre-requisito: /add-login (necesita auth + profiles en Supabase).
-  NO USAR para: Stripe directo, analytics de pagos, reportes de revenue.
+  NO USAR para: Stripe directo, analytics de pagos, reportes de revenue, vender bienes
+  fisicos o servicios presenciales, ni marketplaces (Polar no los permite): ver Limites.
 allowed-tools: Bash(npm *), Bash(npx *), Read, Write, Edit, Glob, Grep
 ---
 
@@ -36,6 +37,26 @@ Antes de crear archivos, verifica:
 - **subscription.active = acceso.** NO des acceso en checkout.updated.
 - **Idempotencia obligatoria.** El mismo webhook puede llegar multiples veces.
 - **SIEMPRE .trim() en secrets.** Espacios invisibles rompen la verificacion de firma.
+
+## Limites (que NO resuelve)
+
+Una referencia a este skill que mande a quien no debe es peor que ninguna. Antes de usarlo:
+
+- **Solo software, contenido digital o acceso.** La politica de uso aceptable de Polar
+  prohibe vender productos fisicos y marketplaces, y dice: *"If your company's primary
+  offering is human services or the sale of physical goods, the Services are not designed
+  for and should not be used by you."* (polar.sh/docs/merchant-of-record/acceptable-use,
+  consultada el 2026-09-27). Una pyme que vende pan, ropa o citas presenciales NO usa este
+  skill: su pasarela es otra decision, todavia sin skill en la fabrica.
+- **Lo que este codigo cablea es SUSCRIPCION → acceso** (`subscription.active` da
+  `has_access`; `checkout.updated` solo vincula). Un pago unico no da acceso sin adaptar
+  el webhook.
+- **Stripe directo, analytics o reportes de ingresos**: fuera (ver `description`). Leer
+  ventas de PayPal, Mercado Pago o CFDI para analizarlas tampoco es esto: eso es lectura.
+- **Mexico**: Polar lista a Mexico entre los paises con pagos al vendedor (Stripe Connect
+  Express; polar.sh/docs/merchant-of-record/supported-countries). **A verificar**: la moneda
+  en que liquida (la pagina no menciona MXN) y si el comprador recibe CFDI: Polar es el
+  vendedor legal y emite sus propios recibos electronicos, no esta documentado que emita CFDI.
 
 ## Archivos a Crear
 
