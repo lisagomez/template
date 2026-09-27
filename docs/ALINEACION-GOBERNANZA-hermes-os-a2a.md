@@ -110,6 +110,32 @@ son justo los que avisan cuando deje de serlo.
 - **No hay secretos commiteados** y ningún script vuelca variables de entorno — eso está bien,
   y conviene decirlo. Lo que falta es el escaneo automático que lo mantenga así.
 
+### 3-bis. La alineación que va en el otro sentido: los gates (medido el 2026-09-26)
+
+Este documento lleva la gobernanza **hacia** Hermes. Hay una pieza que viaja **desde** Hermes
+hacia aquí, y una divergencia que va **desde aquí hacia allá** — las dos se cerraron el
+2026-09-26 (ver `.claude/goals/manifiesto-de-gates/`):
+
+- **Lo que se trajo:** el diseño de `supervisor-a2a/gates.py` — gate como dato (runner +
+  criterio binario + evidencia) con invariante fail-closed al cargar. Vive aquí en
+  `.claude/gates.json`, y `validate`/`predeploy` lo **derivan** en vez de llevar la lista a
+  mano. Lo que se añadió y allá no existe: `motivo` y `falta` **obligatorios** en todo gate
+  apagado, porque `software.toml` apaga `code_review` y `security_review` sin decir por qué.
+- **Lo que divergía:** `reglas/software.toml` transcribe A MANO los gates de este repo. Medido
+  con `npm run proyecta:gates --diff`: **3 divergencias**. Dos son los inactivos sin motivo; la
+  tercera tiene consecuencia — declara ACTIVO un gate `tests` = `npx playwright test` que
+  **este repo no puede satisfacer** (hay `playwright@1.63.0` en dependencias pero no hay
+  `playwright.config.ts` ni tests: exit 1, «No tests found»). Un Supervisor que juzgue un
+  worktree de este template con el perfil `software` lo rechazaría **siempre**.
+- **El arreglo:** una sola dueña del contrato (mismo patrón que `voz`/`dictado`, PR #140). El
+  template **emite** la proyección (`npm run proyecta:gates`); adoptarla allá es un CDC de ese
+  proyecto. Este repo no escribe en él, igual que declaran los dos SDD de sus Fases 6 y 7.
+
+Y un hallazgo que no venía de Hermes sino del propio padrón: `scripts/prueba-a2a.ts` —las
+pruebas del puente A2A, incluida la de opacidad— **existía sin que ningún script lo corriera**,
+así que se podrió sin testigos. Igual que las suites de `tools/`: 87 archivos y 776 pruebas solo
+en `extractor-documental`, que `validate` construía pero nunca ejecutaba.
+
 ---
 
 ## 4. La mina del protocolo ciego
