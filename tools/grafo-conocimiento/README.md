@@ -5,10 +5,11 @@ Motor de reglas de la **spec 004**: responde una pregunta con un veredicto acota
 determinista. Cuando no hay regla, lo dice con una forma que no se puede confundir con una
 respuesta.
 
-> **Estado: Fase 6 de PRP-005.** Contrato, selección de dominios, motor en paridad con el de Hermes,
-> gate de siembra (`./gate`) y capa de lenguaje natural (`./lenguaje`). Empaquetado y probado en un proyecto
-> limpio. Aviso de versión probado (Fase 7). Pendiente: el enrutado desde `AGENTS.md` (Fase 8, CDC). Plan:
-> `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`.
+> **Estado: construido (PRP-005, las 9 fases, 2026-09-27).** Contrato, selección de dominios, motor en paridad
+> con el de Hermes, gate de siembra (`./gate`), capa de lenguaje natural (`./lenguaje`), empaquetado y aviso de
+> versión. **Qué puede fallar en producción**: la «Autocrítica (TAR-15)» de
+> `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`. El primer punto sigue abierto: el parser con un modelo
+> real no está medido.
 
 ```ts
 import conocimiento from '@tu-scope/conocimiento'

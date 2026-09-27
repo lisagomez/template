@@ -1,6 +1,6 @@
 # Plan 004 — Grafo de conocimiento
 
-> **Plan PROSPECTIVO y NO APROBADO.** Esta spec **no está construida**: `.claude/knowledge/`
+> **EJECUTADO por PRP-005 (2026-09-27).** Lo de abajo es el plan original, conservado. Antes decía: **Plan PROSPECTIVO y NO APROBADO.** Esta spec **no está construida**: `.claude/knowledge/`
 > no existe y no hay motor de reglas en el repo (verificado 2026-08-30). Su propia sección
 > RESTRICCIONES lo dice: *"Este spec es solo planeación. No se crean tablas ni se escribe el
 > motor en esta tarea — es el blueprint para cuando un proyecto concreto lo necesite."*

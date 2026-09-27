@@ -6,8 +6,9 @@
 >
 > Se conserva **Libertad técnica**, núcleo del diseño original.
 >
-> **Estado: NO CONSTRUIDA.** Su alcance declarado **es** el blueprint, no la
-> implementación. Ver `plan.md` y `tareas.md`.
+> **Estado: CONSTRUIDA (2026-09-27, PRP-005, las 9 fases).** Originalmente era solo el blueprint; se construyó con
+> la opción D: el motor en `tools/grafo-conocimiento` y la fuente única en `tools/conocimiento`. Lo que queda abierto
+> está en la Autocrítica del PRP-005 (el parser con un modelo real no está medido). Ver `plan.md` y `tareas.md`.
 >
 > **Contrastada con el origen el 2026-09-26** (`hermes-os-a2a@97d9f9e`, medido, no de memoria):
 > `docs/SDD-grafo-hermes-a-template.md`. De los 12 RF, Hermes cumple 6, cumple a medias 4,

@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Cerradas: TAR-1 a TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; el resto el
-> 2026-09-27, Fases 1 a 6 de PRP-005. Queda abierta TAR-15 (autocrítica, en el cierre). Esta spec no
+> **Todas cerradas (TAR-1 a TAR-18).** TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; el resto el 2026-09-27, en
+> las 9 fases de PRP-005. Lo que queda abierto está en la Autocrítica del PRP-005. Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -121,9 +121,10 @@
       reversión: ese seed tiene que poner **rojo** el gate nuevo.
       **Cerrada 2026-09-27 (PRP-005 Fase 4)**: `tools/conocimiento/pruebas/gate.ts` con la entrada `./gate` de grafo-conocimiento (PRP-005 Fase 4). Conflictos y keywords idénticas los caza `validaConocimiento`; las **contenciones** entre categorías del mismo ámbito tienen que estar cubiertas por exclusión o aceptadas con su porqué. Corre en `validate` (`prueba:tools`). El seed de Hermes tal cual pone rojo (control de reversión).
 
-- [ ] **TAR-15 · Autocrítica y cierre.**
+- [x] **TAR-15 · Autocrítica y cierre.**
       Hecho cuando: está escrito qué parte puede fallar en producción y cómo quedó resuelto
       o declarado. RF: DoF-8.
+      **Cerrada 2026-09-27 (PRP-005 Fase 9)**: sección «Autocrítica (TAR-15)» del PRP-005, con diez puntos ordenados por daño a terceros. El primero sigue abierto: la precisión del parser con un modelo real.
 
 ## Fase 5 — Fuente única del conocimiento (añadida en la Fase 0 de PRP-005, 2026-09-26)
 
