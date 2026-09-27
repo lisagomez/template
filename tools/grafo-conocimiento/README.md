@@ -7,7 +7,7 @@ respuesta.
 
 > **Estado: Fase 6 de PRP-005.** Contrato, selección de dominios, motor en paridad con el de Hermes,
 > gate de siembra (`./gate`) y capa de lenguaje natural (`./lenguaje`). Empaquetado y probado en un proyecto
-> limpio. Pendiente: el aviso de versión (Fase 7) y el enrutado desde `AGENTS.md` (Fase 8, CDC). Plan:
+> limpio. Aviso de versión probado (Fase 7). Pendiente: el enrutado desde `AGENTS.md` (Fase 8, CDC). Plan:
 > `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`.
 
 ```ts

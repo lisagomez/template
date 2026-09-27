@@ -62,7 +62,18 @@ if (!pkg) throw new NoVerificable('no encuentro package.json');
 // queda corto — que es justo el modo de falla que este vigilante existe para no tener.
 const lock = leeJson('package-lock.json');
 const resuelto = (nombre) => lock?.packages?.[`node_modules/${nombre}`]?.version ?? null;
+// Instalado desde un archivo (un tarball de `npm run empaqueta`, una ruta local): no viene de ningún
+// registro, así que no hay «última versión» que consultar. Antes caía en «no existe en el registro»,
+// que da exit 1 en CADA corrida: una falsa alarma permanente en todo proyecto que consuma una
+// herramienta de tools/ antes de publicarla (2026-09-27, PRP-005 Fase 7).
+const sinRegistro = [];
+const desdeArchivo = (nombre, rango) =>
+  /^(file:|\.{0,2}\/)/.test(String(rango)) || String(lock?.packages?.[`node_modules/${nombre}`]?.resolved ?? '').startsWith('file:');
 for (const [nombre, rango] of Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })) {
+  if (desdeArchivo(nombre, rango)) {
+    sinRegistro.push(`${nombre} (${resuelto(nombre) ?? rango}) se instaló desde un archivo: sin registro no hay aviso de versión nueva — nace al publicarlo (gate humano)`);
+    continue;
+  }
   const instalado = resuelto(nombre);
   objetivos.push({
     nombre,
@@ -127,6 +138,7 @@ try {
   }
   throw e;
 }
+sinVerificar.push(...sinRegistro);
 for (const o of objetivos.filter((x) => x.imagen)) {
   sinVerificar.push(`${o.nombre} (${o.origen}) es una imagen de contenedor: la vigila \`npm run vigila:hermes\`, no este script`);
 }
