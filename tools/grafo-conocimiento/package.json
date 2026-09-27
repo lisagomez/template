@@ -1,7 +1,7 @@
 {
   "name": "@tu-scope/grafo-conocimiento",
-  "version": "0.2.0",
-  "description": "Motor de reglas de la spec 004: categoría (keywords + exclusiones) → regla → veredicto, determinista, con fail-safe tipado y juicio a la fecha del hecho. Hasta ahora: el contrato del conocimiento (Zod), la selección de dominios y el corpus de paridad contra el motor de Hermes (PRP-005, Fases 1-2).",
+  "version": "0.3.0",
+  "description": "Motor de reglas de la spec 004: categoría (keywords + exclusiones) → regla → veredicto, determinista, con fail-safe tipado y juicio a la fecha del hecho. Motor determinista (Fase 3), contrato Zod del conocimiento, selección de dominios y paridad con el motor de Hermes (PRP-005).",
   "type": "module",
   "license": "UNLICENSED",
   "private": false,

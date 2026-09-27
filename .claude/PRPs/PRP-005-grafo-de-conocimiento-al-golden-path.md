@@ -231,7 +231,23 @@ Las dos últimas cambian veredictos: **van con firma**.
 
 **Corte de la migración = `97d9f9e`**: es el que Hermes ya tiene congelado desde el 2026-09-27 (PR #317), así que entre el corte y esta fase no puede nacer una regla en Hermes.
 
-### Fase 3: Motor determinista
+### Fase 3: Motor determinista — ✅ CERRADA 2026-09-27
+> `tools/grafo-conocimiento` 0.3.0, `src/motor.ts`:
+> - `evalua` es el port de `evaluador.py`; `evaluaSeguro` devuelve `FalloSinVeredicto` si el conocimiento o
+>   la pregunta no tienen forma.
+> - **Paridad**: sobre la fuente única da 574 idénticos, 196 iguales salvo el orden y 12 de contenido,
+>   exactamente las firmadas. Es la misma vara que el motor de Hermes sobre el mismo paquete: los dos motores
+>   dicen lo mismo. 782 casos en ~165 ms.
+> - **Decisiones explícitas**:
+>   - conflicto y tope excedido son fail-safe (`veredicto: null`);
+>   - los empates se deciden por clave;
+>   - el régimen es obligatorio;
+>   - el tope acota cualquier veredicto;
+>   - el disclaimer es genérico.
+>   Declaradas en `divergencias.json`.
+> - **Controles negativos**: fail-safe, exclusiones antes/después, conflicto y vigencia a ambos lados del
+>   cierre, más tope y fecha supuesta con fixtures. Desactivar las exclusiones pone roja la paridad.
+> - 40 pruebas del motor y 14 del paquete.
 **Objetivo**: el motor TS puro, sin datos propios. Da los mismos veredictos que Hermes sobre el
 corpus, más los tipos de fallo de la spec y el juicio a la fecha del hecho.
 **Validación**:

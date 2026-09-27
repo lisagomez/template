@@ -83,8 +83,8 @@
   },
   {
    "id": "TPL-grafo-conocimiento",
-   "nombre": "Grafo de conocimiento: reglas con veredicto acotado y fail-safe tipado (contrato y paridad con Hermes; motor pendiente)",
-   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "nombre": "Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
    "ubicacion": "tools/grafo-conocimiento", "responsable": "dep-sw",
    "origen": [".claude/specs/004-grafo-de-conocimiento", ".claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md", "docs/SDD-grafo-hermes-a-template.md"],
    "cubre": ["tools/grafo-conocimiento"]

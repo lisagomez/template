@@ -27,7 +27,7 @@
       "que": "`dudoso` mezcla cuatro motivos",
       "rf": "RF-6",
       "porque": "En Hermes, «sin regla», «conflicto», «la regla dice dudoso» y «el importe excede el tope» salen todos como `estado: dudoso` (y el agregado de una evaluación mixta también), y solo el texto de `razon` y `fuente: null` los separan.",
-      "como_se_cierra": "`Motivo` tipado en `ConceptoEvaluado` (regla · sin_regla · conflicto · tope_excedido) y `veredicto: null` solo con sin_regla. La paridad de la Fase 3 compara el veredicto de Hermes con el motivo, no los textos."
+      "como_se_cierra": "`Motivo` tipado en `ConceptoEvaluado`: solo `regla` lleva veredicto. `sin_regla`, `conflicto` y `tope_excedido` van con `veredicto: null`, porque son fail-safe. `aSalidaHermes` lo traduce a `dudoso` para comparar, y el motor TS da las mismas 782 respuestas que el de Hermes, salvo las firmadas (Fase 3)."
     },
     {
       "que": "la respuesta siempre cita",
@@ -46,6 +46,30 @@
       "rf": "RF-13",
       "porque": "Si el contexto no trae fecha, Hermes usa la de hoy sin decirlo.",
       "como_se_cierra": "`Resultado.contexto.fecha_supuesta`. En el corpus todos los casos llevan fecha, así que no hay diferencia observable."
+    },
+    {
+      "que": "empates decididos por el orden del seed",
+      "rf": "RF-3",
+      "porque": "En Hermes, a igual largo de keyword gana la categoría que aparece antes en el seed, y a igual vigente_desde la regla que aparece antes.",
+      "como_se_cierra": "El motor TS desempata por clave (categoría y regla), así que no depende de cómo llegue el conocimiento. Medido: en el corpus no cambia ninguna respuesta."
+    },
+    {
+      "que": "el tope solo acota `deducible`, y en MXN",
+      "rf": "RF-6",
+      "porque": "En Hermes, un importe sobre `tope_monto` degradaba solo `deducible`, con una bandera en MXN.",
+      "como_se_cierra": "En el motor TS el tope acota cualquier veredicto (`tope_excedido`, sin veredicto) y la bandera no lleva moneda. Ninguna regla del corte usa tope_monto: se prueba con fixtures."
+    },
+    {
+      "que": "régimen por defecto `PM_TITULO_II`",
+      "rf": "RF-2",
+      "porque": "Si la pregunta no trae régimen, Hermes supone el de las personas morales del Título II: un default fiscal.",
+      "como_se_cierra": "En el motor TS el régimen es obligatorio en `Pregunta`, y una pregunta sin él da `pregunta_invalida`. El parser de la Fase 5 lo estructura."
+    },
+    {
+      "que": "disclaimer fiscal",
+      "rf": "RF-5",
+      "porque": "El disclaimer de Hermes habla de asesoría fiscal y del contribuyente.",
+      "como_se_cierra": "El motor TS lleva uno genérico (`DISCLAIMER`). La paridad no compara el disclaimer."
     }
   ]
 }

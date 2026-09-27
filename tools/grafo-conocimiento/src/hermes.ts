@@ -9,6 +9,7 @@
  * (`regimen` → `_meta.regimen_default`; `categoria` y `veredicto_base` → `null`).
  */
 import { z } from 'zod'
+import type { Resultado } from './contrato.js'
 
 /**
  * El corte del que sale el conocimiento: el mismo que Hermes tiene congelado desde el 2026-09-27
@@ -158,3 +159,29 @@ export type SalidaHermes = z.infer<typeof SalidaHermes>
 
 /** El texto con el que el motor de Hermes marca el fail-safe (`evaluador.RAZON_SIN_REGLA`). */
 export const RAZON_SIN_REGLA_HERMES = 'sin regla aplicable'
+
+/**
+ * Un `Resultado` de este motor en la forma de la salida de Hermes, para compararlos en la paridad.
+ * Lo que aquí es fail-safe tipado (`veredicto: null`) allí era `estado: dudoso`. El disclaimer no
+ * se traduce: el de Hermes era fiscal y este es genérico (divergencia declarada).
+ */
+export function aSalidaHermes(r: Resultado, disclaimer: string): SalidaHermes {
+  const unicos = <T>(xs: T[]) => [...new Map(xs.map((x) => [JSON.stringify(x), x])).values()]
+  return {
+    contexto: { jurisdiccion: r.contexto.jurisdiccion, dimension: r.contexto.dimension, regimen: r.contexto.regimen, fecha: r.contexto.fecha },
+    estado: (r.veredicto_global ?? 'dudoso') as SalidaHermes['estado'],
+    conceptos: r.conceptos.map((c) => ({
+      descripcion: c.descripcion,
+      categoria: c.categoria,
+      estado: c.veredicto ?? 'dudoso',
+      razon: c.razon,
+      fuente: c.fuente,
+      banderas: c.banderas,
+      checklist: c.checklist,
+    })),
+    banderas_rojas: unicos(r.conceptos.flatMap((c) => c.banderas)),
+    checklist: unicos(r.conceptos.flatMap((c) => c.checklist)),
+    fuentes: unicos(r.conceptos.flatMap((c) => c.fuentes)),
+    disclaimer,
+  }
+}
