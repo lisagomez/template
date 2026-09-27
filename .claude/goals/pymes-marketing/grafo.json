@@ -1,0 +1,336 @@
+{
+  "slug": "pymes-marketing",
+  "titulo": "Pymes — familia de contenido y marketing (small-business@1.35.1 + analisis de god-animation, edicion-de-video y sfstudio)",
+  "nodos": [
+    {
+      "id": "plugin",
+      "label": "Fuente pineada: 9 skills de small-business @da38ec1 (Apache-2.0)",
+      "estado": "morado"
+    },
+    {
+      "id": "fuentes-video",
+      "label": "Skills de video fijadas por huella: god-animation + edicion-de-video (fuera del repo, no instaladas)",
+      "estado": "morado"
+    },
+    {
+      "id": "fuentes-sfstudio",
+      "label": "sfstudio (github.com/daniel-carreon/sfstudio) fijado en 2a751fd; clon fuera del repo, sin licencia (UNLICENSED)",
+      "estado": "morado"
+    },
+    {
+      "id": "triaje",
+      "label": "Mapa de adaptacion: 9 skills del plugin + 2 de video + sfstudio; por fuente, que se conserva / reemplaza / descarta, riesgo y entrada local",
+      "estado": "gris"
+    },
+    {
+      "id": "perfil",
+      "label": "Perfil de marca y voz del negocio (brand-style + voice-profile)",
+      "estado": "gris"
+    },
+    {
+      "id": "ventas",
+      "label": "Ventas normalizadas (CFDI XML via extractor-documental, CSV de caja/tienda)",
+      "estado": "ambar"
+    },
+    {
+      "id": "senales",
+      "label": "Senales de clientes (resenas pegadas o exportadas, mensajes)",
+      "estado": "gris"
+    },
+    {
+      "id": "estrategia",
+      "label": "Brief de contenido a 30 dias (content-strategy)",
+      "estado": "gris"
+    },
+    {
+      "id": "calendario",
+      "label": "Calendario editorial + piezas en borrador (social-content-engine + canva-creator)",
+      "estado": "gris"
+    },
+    {
+      "id": "resenas",
+      "label": "Temas con citas + borradores de respuesta (review-reputation)",
+      "estado": "gris"
+    },
+    {
+      "id": "pulso",
+      "label": "Pulso de crecimiento (growth-pulse)",
+      "estado": "gris"
+    },
+    {
+      "id": "seo",
+      "label": "Auditoria SEO + visibilidad en IA (seo-ai-visibility)",
+      "estado": "gris"
+    },
+    {
+      "id": "anuncios",
+      "label": "Diagnostico de anuncios + copys (ad-manager, desde exportacion)",
+      "estado": "gris"
+    },
+    {
+      "id": "lunes",
+      "label": "Brief semanal de marketing (marketing-monday)",
+      "estado": "gris"
+    },
+    {
+      "id": "propuesta-video",
+      "label": "Propuesta de herramientas de video y animacion para pymes (analisis, sin construir)",
+      "estado": "gris"
+    },
+    {
+      "id": "paquetes",
+      "label": "Herramientas empaquetadas (tarballs en verde, sin publicar)",
+      "estado": "gris"
+    },
+    {
+      "id": "laboratorio",
+      "label": "Laboratorio de pruebas por herramienta (casos, estado real, veredictos)",
+      "estado": "gris"
+    },
+    {
+      "id": "app",
+      "label": "App para el cliente pyme que las usa",
+      "estado": "gris"
+    },
+    {
+      "id": "firma",
+      "label": "Gate humano: publicar, conectar un servicio, enviar a terceros",
+      "estado": "gris"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a1",
+      "from": "plugin",
+      "to": "triaje",
+      "tipo": "agente",
+      "label": "leer las 9 skills + shared/ y clasificar"
+    },
+    {
+      "id": "a1b",
+      "from": "fuentes-video",
+      "to": "triaje",
+      "tipo": "agente",
+      "label": "leer las 2 skills de video y clasificarlas con columnas extra"
+    },
+    {
+      "id": "a1c",
+      "from": "fuentes-sfstudio",
+      "to": "triaje",
+      "tipo": "mixta",
+      "label": "leer sfstudio, correr sus pruebas de la etapa de edicion en un clon aislado y clasificarlo"
+    },
+    {
+      "id": "a2",
+      "from": "triaje",
+      "to": "perfil",
+      "tipo": "agente",
+      "label": "adaptar brand-style y voice-profile"
+    },
+    {
+      "id": "a3",
+      "from": "triaje",
+      "to": "ventas",
+      "tipo": "mixta",
+      "label": "sustituir PayPal/QuickBooks por CFDI y CSV"
+    },
+    {
+      "id": "a4",
+      "from": "triaje",
+      "to": "senales",
+      "tipo": "mixta",
+      "label": "sustituir Google/Yelp/HubSpot por entrada pegada o exportada"
+    },
+    {
+      "id": "a5",
+      "from": "ventas",
+      "to": "estrategia",
+      "tipo": "agente",
+      "label": "top y lentos + temporada MX -> brief"
+    },
+    {
+      "id": "a6",
+      "from": "perfil",
+      "to": "estrategia",
+      "tipo": "script",
+      "label": "inyectar marca y voz"
+    },
+    {
+      "id": "a7",
+      "from": "estrategia",
+      "to": "calendario",
+      "tipo": "agente",
+      "label": "brief -> calendario y piezas"
+    },
+    {
+      "id": "a8",
+      "from": "perfil",
+      "to": "calendario",
+      "tipo": "script",
+      "label": "inyectar marca y voz"
+    },
+    {
+      "id": "a9",
+      "from": "senales",
+      "to": "resenas",
+      "tipo": "agente",
+      "label": "temas + borradores en la voz del dueno"
+    },
+    {
+      "id": "a10",
+      "from": "perfil",
+      "to": "resenas",
+      "tipo": "script",
+      "label": "inyectar voz"
+    },
+    {
+      "id": "a11",
+      "from": "ventas",
+      "to": "pulso",
+      "tipo": "agente",
+      "label": "tendencia, canal, embudo"
+    },
+    {
+      "id": "a12",
+      "from": "triaje",
+      "to": "seo",
+      "tipo": "mixta",
+      "label": "auditar un sitio por URL (solo lectura)"
+    },
+    {
+      "id": "a13",
+      "from": "triaje",
+      "to": "anuncios",
+      "tipo": "mixta",
+      "label": "leer exportacion CSV de Meta/Google/TikTok"
+    },
+    {
+      "id": "a14",
+      "from": "pulso",
+      "to": "lunes",
+      "tipo": "agente",
+      "label": "fusion"
+    },
+    {
+      "id": "a15",
+      "from": "resenas",
+      "to": "lunes",
+      "tipo": "agente",
+      "label": "fusion"
+    },
+    {
+      "id": "a16",
+      "from": "seo",
+      "to": "lunes",
+      "tipo": "agente",
+      "label": "fusion"
+    },
+    {
+      "id": "a17",
+      "from": "anuncios",
+      "to": "lunes",
+      "tipo": "agente",
+      "label": "fusion"
+    },
+    {
+      "id": "a18",
+      "from": "calendario",
+      "to": "paquetes",
+      "tipo": "script",
+      "label": "npm run empaqueta"
+    },
+    {
+      "id": "a19",
+      "from": "lunes",
+      "to": "paquetes",
+      "tipo": "script",
+      "label": "npm run empaqueta"
+    },
+    {
+      "id": "a20",
+      "from": "paquetes",
+      "to": "laboratorio",
+      "tipo": "mixta",
+      "label": "casos por herramienta, corridos de verdad"
+    },
+    {
+      "id": "a21",
+      "from": "laboratorio",
+      "to": "app",
+      "tipo": "agente",
+      "label": "la app usa solo lo que el laboratorio aprobo"
+    },
+    {
+      "id": "a22",
+      "from": "app",
+      "to": "firma",
+      "tipo": "manual",
+      "label": "publicar / conectar / enviar"
+    },
+    {
+      "id": "a23",
+      "from": "triaje",
+      "to": "propuesta-video",
+      "tipo": "agente",
+      "label": "que herramienta seria para una pyme, que le falta y que cuesta"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "L1",
+      "sobre": "nodo:triaje",
+      "label": "cada una de las 12 fuentes tiene fila y veredicto",
+      "referencia": "12/12 filas; ningun conector queda sin sustituto local o sin motivo de descarte; huellas de fuentes-video y commit de sfstudio verificados",
+      "estado": "gris"
+    },
+    {
+      "id": "L2",
+      "sobre": "nodo:lunes",
+      "label": "la fusion no tira fuentes en silencio",
+      "referencia": "fuente ausente = 'sin datos', nunca cero ni omitida (shared/absent-is-not-zero.md)",
+      "estado": "gris"
+    },
+    {
+      "id": "L3",
+      "sobre": "nodo:resenas",
+      "label": "C4: se escribe sobre terceros",
+      "referencia": "nada se publica; datos personales minimizados; AISIA corta",
+      "estado": "gris"
+    },
+    {
+      "id": "L4",
+      "sobre": "nodo:paquetes",
+      "label": "contrato del paquete",
+      "referencia": "npm run empaqueta <x> en verde por herramienta, nucleo sin React/Next/Supabase",
+      "estado": "gris"
+    },
+    {
+      "id": "L5",
+      "sobre": "nodo:laboratorio",
+      "label": "casos con estado real",
+      "referencia": ">= 5 casos por herramienta incluidos casos-trampa; veredicto medido, no supuesto",
+      "estado": "gris"
+    },
+    {
+      "id": "L6",
+      "sobre": "arista:a7",
+      "label": "coste de generacion",
+      "referencia": "modelo por routing-modelos.json, uso a contabilidad; sin datos = null",
+      "estado": "gris"
+    },
+    {
+      "id": "L7",
+      "sobre": "nodo:firma",
+      "label": "nada sale sin firma",
+      "referencia": "cero envios, publicaciones o conexiones en todo el goal",
+      "estado": "gris"
+    },
+    {
+      "id": "L8",
+      "sobre": "nodo:propuesta-video",
+      "label": "lo que el paquete no dice, declarado",
+      "referencia": "licencia (skills, sfstudio UNLICENSED, GSAP, fuentes), servicios de pago y su precio, datos que salen (voz y cara del dueno = C4), piezas ausentes (video-use, biblioteca), lo que publica (sfpublish) fuera; ninguna API llamada",
+      "estado": "gris"
+    }
+  ]
+}
