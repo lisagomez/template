@@ -336,7 +336,19 @@ no legal, con el conteo fijado.
 **Validación**: una oración real → respuesta natural, sin payload armado a mano. `npm run empaqueta`
 del motor y del paquete en verde en un proyecto limpio.
 
-### Fase 7: Aviso de versión nueva (TAR-18)
+### Fase 7: Aviso de versión nueva (TAR-18) — ✅ CERRADA 2026-09-27
+> `vigila:versiones` ya vigilaba toda dependencia npm contra su registro. El ensayo lo demuestra para el
+> conocimiento. `tools/conocimiento/pruebas/aviso.ts` monta un consumidor temporal con el vigilante del template y
+> un registro npm falso en 127.0.0.1, sin red externa, así que corre en `validate`:
+> - publicar 0.3.0 → exit 1, «menor 0.2.0 → 0.3.0»;
+> - repetir → exit 0, «sin novedades»;
+> - publicar 1.0.0 → «MAYOR»;
+> - `package.json` y el lockfile, byte a byte, no se mueven.
+>
+> **Hueco cerrado**: una dependencia instalada desde un archivo (el tarball de `empaqueta`, `file:`) caía en «no
+> existe en el registro», que da exit 1 en cada corrida: una falsa alarma permanente para todo consumidor antes de
+> publicar. Ahora sale como «sin registro no hay aviso: nace al publicarlo». Contraprueba: con el vigilante original,
+> ese caso pone rojo.
 **Objetivo**: que los consumidores se enteren de una versión nueva del conocimiento sin que nada
 cambie solo.
 **Validación**: publicar una versión nueva en un ensayo → `vigila:versiones` del consumidor da exit 1

@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
 > **Cerradas: TAR-1 a TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; el resto el
-> 2026-09-27, Fases 1 a 6 de PRP-005. Quedan abiertas TAR-15 (autocrítica, en el cierre) y TAR-18 (aviso de versión, Fase 7). Esta spec no
+> 2026-09-27, Fases 1 a 6 de PRP-005. Queda abierta TAR-15 (autocrítica, en el cierre). Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -154,7 +154,9 @@
       frente a la versión anterior: Fase 4.
       **Cerrada 2026-09-27 (PRP-005 Fase 4)**: el gate rechaza borrar y editar en su sitio sin firma frente a la versión anterior (`versiones.json`, `comparaVersiones`). Controles medidos: regla borrada, keyword quitada, vigencia reabierta y edición sin firma ponen rojo; cerrar una vigencia y añadir, no.
 
-- [ ] **TAR-18 · Aviso de versión nueva, nunca actualización sola.**
+- [x] **TAR-18 · Aviso de versión nueva, nunca actualización sola.**
       Hecho cuando: publicar una versión nueva hace que `vigila:versiones` del proyecto
       consumidor la **reporte** (exit 1, deriva nueva), y nada cambia en él hasta que un humano
       suba el pin con la paridad re-generada. RF: RF-16.
+
+      **Cerrada 2026-09-27 (PRP-005 Fase 7)**: `tools/conocimiento/pruebas/aviso.ts`, un ensayo con un registro falso. Avisa con exit 1 y el salto, no repite el aviso y no mueve el pin. Además, instalar desde el tarball ya no da una falsa alarma permanente (arreglo en `scripts/vigila-versiones.mjs`).

@@ -28,6 +28,24 @@ corporativo-mercantil, fiduciario-inmobiliario-sucesorio, ambiental, cabildeo y 
 servicios financieros, propiedad industrial, servicios legales, deducibilidad (MX y CO), registro
 contable, cláusulas contractuales y datos personales en prospección.
 
+## Cómo lo consume un proyecto (y cómo se entera de una versión nueva)
+
+```bash
+npm install --save-exact @tu-scope/conocimiento@0.2.0   # desde el registro, versión EXACTA
+npm run vigila:versiones                                  # avisa si hay una nueva; no toca nada
+```
+
+- **Versión exacta, nunca un rango.** En `0.x`, `^0.2.0` deja entrar un parche sin que nadie lo decida.
+- `vigila:versiones`, el script del template que hereda todo proyecto derivado, **avisa** de una versión
+  nueva con exit 1 y el tamaño del salto, **una sola vez**, y no mueve el pin. Subirlo es una decisión, con
+  su diff, su regresión y su firma.
+- **Mientras no se publique** (publicar es gate humano), el paquete se instala desde el tarball de
+  `npm run empaqueta`. Sin registro no hay versión nueva que consultar: el vigilante lo dice («sin registro no
+  hay aviso») en vez de dar una falsa alarma. El aviso nace el día que se publique.
+
+Lo prueba `pruebas/aviso.ts`, un ensayo con un registro falso en 127.0.0.1: publica 0.3.0 y avisa; lo repite y
+calla; publica 1.0.0 y avisa como MAYOR; el pin no se mueve; el tarball no da falsa alarma.
+
 ## Reglas de la casa
 
 - **Solo se añade.** Retirar es cerrar `vigente_hasta`; un significado nuevo es una regla nueva con
