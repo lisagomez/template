@@ -3795,6 +3795,30 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «Apruebo, capa A basta»,
   2026-09-23, con el diff delante.
 
+### 2026-09-26 — plugin `small-business@knowledge-work-plugins` instalado (alcance local) → CDC PROMOVIDO — radio: sesión (superficie de herramientas del agente, solo este repo)
+- **Cambio**: `claude plugin marketplace add anthropics/knowledge-work-plugins` (en ajustes de
+  usuario) + `claude plugin install small-business@knowledge-work-plugins --scope local`
+  (`.claude/settings.local.json`, no versionado). Versión **1.35.1**, commit del marketplace
+  **`da38ec1`**, Apache-2.0. Trae **44 skills** y **35 MCP remotos** (entre ellos Stripe,
+  PayPal, QuickBooks, Ramp, Gusto, Gmail, Slack). Sin hooks ni agentes. Ningún MCP autenticado.
+- **Motivo**: la dueña quiere adaptar el plugin poco a poco en herramientas empaquetadas para
+  pymes, cada una con su laboratorio; primera familia: contenido y marketing
+  (`.claude/goals/pymes-marketing/`). Instalado, no desarrollado.
+- **Pineo**: el marketplace no tiene etiquetas y `ref` solo acepta rama o etiqueta, así que el
+  pineo es `autoUpdate: false` para `knowledge-work-plugins` en
+  `~/.claude/plugins/known_marketplaces.json` (fuera del repo) + el commit `da38ec1` que la
+  instalación registra en `installed_plugins.json` (`gitCommitSha`). Subir de versión es a mano
+  (`claude plugin marketplace update`) y es un CDC nuevo.
+- **Riesgos que siguen abiertos**: (1) ningún MCP del plugin se autentica sin C3 + C4, y los que
+  mueven dinero van con gate humano. (2) Las skills del plugin no pasan por la regresión de C2:
+  son fuente a adaptar, no comportamiento aprobado de la fábrica.
+- **Gate aplicado**: contenido revisado ☑ (manifiesto, `.mcp.json`, lista de skills, enseñado
+  antes de la firma) · regresión verde ☑ capa A 123/123 · aprobación humana ☑ · pineo ☑
+  (`autoUpdate: false` + `da38ec1`). **Capa B no corrida, a propósito y declarado**: el plugin no
+  cambia ningún skill, prompt ni ajuste versionado de la fábrica.
+- **Regresión**: `npm run regresion` 123/123 · `verify:gobernanza` 152/152.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «apruebo», 2026-09-26, con el
+  contenido del plugin y sus riesgos delante; el pineo se aplica por la regla de C1.
 ### 2026-09-26 — manifiesto de gates `.claude/gates.json`: `validate` y `predeploy` DERIVAN de un padrón fail-closed, y el padrón entra en el alcance de C1 → CDC PROMOVIDO — radio: sistema (instrucciones + capa de gobernanza + el gate entero)
 - **Cambio**: nace `.claude/gates.json` — los gates como dato (nombre, runner, `guarda`, `evidencia`,
   perfiles, `activo` con `motivo` y `falta` obligatorios en los apagados, `timeout_s`), con 3 perfiles
