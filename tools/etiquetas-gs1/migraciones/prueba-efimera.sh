@@ -5,6 +5,7 @@
 #   2. pruebas (a)…(l) — (h)…(l) son el expediente: cadena, solo-agregar, anclas y conteo
 #   3. re-corre 004 TAL CUAL y comprueba el hallazgo: reabre el UPDATE de los ledgers del pack
 #   4. aplica 004 con los ledgers del pack en su lista + el pack otra vez (idempotencia) → verde
+#   5. ventas de PRUEBA en el ERP y el adaptador del agente leyéndolas como erp_lector
 # Uso: bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh [ref-de-git]   (por defecto origin/main)
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -58,4 +59,7 @@ sql < "$DIR/propuesta-pack-etiquetas.sql" >/dev/null
 # apagar los triggers a propósito (session_replication_role). Justo por eso existe el ancla.
 sql -c "set session_replication_role = replica; delete from erp.eti_ancla; delete from erp.eti_testigo; delete from erp.eti_evento; set session_replication_role = origin; delete from erp.eti_movimiento; delete from erp.eti_existencia; delete from erp.eti_asignacion; delete from erp.eti_emitido; delete from erp.eti_articulo; delete from erp.eti_sitio; delete from erp.inv_articulo;" >/dev/null
 prueba
-echo "== OK: la propuesta se instala dos veces, cierra con 004 y pasa (a)…(l). No se aplicó a ninguna base real."
+echo "== 5. ventas del ERP para el agente de riesgo (adaptador del núcleo, leído como erp_lector: rol_swm + tenant)"
+(cd "$DIR/.." && npx tsc -p tsconfig.json)
+node "$DIR/prueba-ventas-erp.mjs" "$ID"
+echo "== OK: la propuesta se instala dos veces, cierra con 004 y pasa (a)…(l); el agente lee ventas de prueba del ERP en solo lectura. No se aplicó a ninguna base real."

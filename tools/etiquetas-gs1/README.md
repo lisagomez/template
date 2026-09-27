@@ -27,9 +27,9 @@ El núcleo **no importa nada**; el almacén se inyecta (`AlmacenEtiquetas`), com
 ## Pruebas
 
 ```bash
-npm run prueba                         # build + node --test pruebas/*.ts (82 pruebas)
+npm run prueba                         # build + node --test pruebas/*.ts (85 pruebas)
 npm run demo:manipulacion              # cuatro manipulaciones sobre archivos reales, antes/después y veredicto
-bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP, en Postgres 17 desechable, (a)…(l)
+bash migraciones/prueba-efimera.sh     # propuesta de tablas para el ERP en Postgres 17 desechable, (a)…(l), y ventas del ERP para el agente (fase 5)
 ```
 
 `pruebas/ida-y-vuelta.ts` rasteriza el SVG con el Chromium de Playwright y dibuja el ZPL con

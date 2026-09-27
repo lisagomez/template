@@ -256,3 +256,27 @@ estado vacío de cantidades). Quien supervisa abre, concilia, autoriza y aplica 
 de operación. Aplicar la diferencia a la contabilidad del ERP es una acción irreversible: sigue
 siendo gate humano. En el ERP, `eti_evento` admite `CONTEO` y
 `eti_existencia` el origen `conteo` (prueba efímera (l)).
+
+### 10.2 Ventas del ERP para el agente de riesgo (`ventas-erp.ts`)
+
+El agente puede leer las ventas del ERP en lugar de las ficticias, con el mismo contrato
+(`FuenteVentas`). Se probó contra el esquema REAL del ERP (001..005) en el Postgres desechable, con
+ventas de PRUEBA sembradas (`migraciones/prueba-ventas-erp.mjs`, fase 5 de `prueba-efimera.sh`).
+No se leyó producción.
+
+- **Solo lectura.** Un `select` con la RLS del tenant (`app.cliente_id`) y un rol que no escribe:
+  `rol_swm`, el que hereda `erp_lector`. La prueba intenta escribir con ese rol y comprueba el
+  `permission denied`. La conexión se inyecta (`ConsultaSql`): el núcleo sigue sin dependencias.
+- **Qué cuenta como venta.** Partidas de pedidos `confirmado` o `facturado`, en los 28 días
+  completos anteriores a hoy. No cuentan borrador, cancelado, fuera de ventana, el día en curso ni
+  otro tenant; la prueba siembra un caso de cada uno.
+- **Unidades.** Si la `clave_unidad` del SAT es caja (`XBX`), la cantidad ya son cajas; en pieza se
+  divide entre las unidades por caja del catálogo. Si el ERP tiene el artículo y no lo vendió, la
+  venta es cero; si no lo tiene, es `undefined` y el agente no lo evalúa.
+- **Sitio.** El ERP no tiene sucursal: el tenant corresponde a UN sitio, que se declara. Por eso,
+  con esta fuente, el agente no sugiere transferencias: no sabe cuánto vende otro sitio.
+
+Conectarlo en la app es otro paso: hace falta un cliente de Postgres pineado y decidir leer la
+base del ERP, que es PRODUCCIÓN compartida, con datos reales (decisión de flujo de datos, C4). Hoy
+el ERP tampoco tiene los productos de prueba ni sucursales, así que el agente no encontraría ventas
+que cuadren con el laboratorio.
