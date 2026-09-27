@@ -15,7 +15,7 @@
 > fuente. La forma de construirla está en `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`,
 > **PROPUESTO — NO APROBADO**: esta spec sigue sin autorizar código.
 >
-> **Fase 0 de PRP-005 cerrada el 2026-09-26** con las decisiones de la dueña:
+> **Fase 0 de PRP-005 cerrada el 2026-09-26** con las decisiones del laboratorio:
 > - opción D;
 > - cita por dominio (RF-5);
 > - juicio a la fecha del hecho (RF-13 y RF-14);
@@ -61,7 +61,7 @@ políticas internas, clasificación de soporte) usa la misma estructura.
   citará la fuente **solo si el dominio la declara pública**. Si el dominio es de reglas
   internas, no expondrá de qué regla, tabla o documento salió.
 
-  > **Decidido por la dueña el 2026-09-26** (Fase 0 de PRP-005). Antes decía «sin exponer» para
+  > **Decidido por el laboratorio el 2026-09-26** (Fase 0 de PRP-005). Antes decía «sin exponer» para
   > todo dominio. En el origen, la cita es el mecanismo de seguridad del tercero, que puede
   > comprobar el artículo. Ocultarla en un dominio de fuente pública le quita esa vía; exhibir
   > una regla interna puede no convenir. Por eso cada dominio declara si cita.
@@ -114,7 +114,7 @@ políticas internas, clasificación de soporte) usa la misma estructura.
 - RF-16: SI existe una versión nueva del conocimiento, ENTONCES EL SISTEMA lo avisará sin
   aplicarla, y la actualización requerirá aprobación humana.
 
-  > **RF-13 a RF-16, decididos por la dueña el 2026-09-26** (Fase 0 de PRP-005).
+  > **RF-13 a RF-16, decididos por el laboratorio el 2026-09-26** (Fase 0 de PRP-005).
   >
   > - **RF-13 y RF-14: juicio a la fecha del hecho.** Es la duda que la spec dejaba abierta. El
   >   origen demostró por qué el motor solo no basta: allí retirar una regla la borraba, y un

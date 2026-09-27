@@ -1,6 +1,6 @@
 # PRP-005: El grafo de conocimiento, portado al Golden Path con el conocimiento de Hermes como dato
 
-> **Estado**: APROBADO (2026-09-26, la dueña: «fase 0 con D»). La **Fase 0 está cerrada** con sus
+> **Estado**: APROBADO (2026-09-26, el laboratorio: «fase 0 con D»). La **Fase 0 está cerrada** con sus
 > decisiones escritas (ver la Fase 0 del Blueprint). Las fases 1+ se ejecutan por bucle agéntico,
 > cada una con su validación. **Hasta que empiece la Fase 1 no se ha escrito código ni importado nada.**
 > **Fecha**: 2026-09-26
@@ -169,7 +169,7 @@ es un archivo versionado, git **es** el historial.
 > Solo fases. Las subtareas se generan al entrar a cada una (bucle agéntico).
 
 ### Fase 0: Decisiones humanas — ✅ CERRADA 2026-09-26
-> La dueña: «fase 0 con D». Escrito en la spec 004 (RF-5 reescrito, RF-13 a RF-16 nuevos, dos dudas
+> El laboratorio: «fase 0 con D». Escrito en la spec 004 (RF-5 reescrito, RF-13 a RF-16 nuevos, dos dudas
 > resueltas) y en su `plan.md` (decisiones 4, 7 y 8).
 
 | Decisión | Resultado | Descartado |

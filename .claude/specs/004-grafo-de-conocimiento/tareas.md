@@ -33,7 +33,7 @@
 - [x] **TAR-3 · Decidir dónde viven las reglas.**
       Hecho cuando: la decisión está tomada **con su alternativa descartada escrita**. Si es
       Supabase: RLS habilitado y `service_role` fuera de la superficie de consulta (C7).
-      **Cerrada 2026-09-26 (Fase 0 de PRP-005, la dueña)**:
+      **Cerrada 2026-09-26 (Fase 0 de PRP-005, el laboratorio)**:
       - la **fuente única** es un paquete de datos en este repo (RF-15);
       - descartadas, por escrito en `plan.md` (decisión 8): que siga en Hermes y un repo propio;
       - cómo carga cada proyecto sus dominios (archivo o Supabase, con C7 si es Supabase)
@@ -108,7 +108,7 @@
 
 ## Fase 5 — Fuente única del conocimiento (añadida en la Fase 0 de PRP-005, 2026-09-26)
 
-> Dependen de TAR-2 y van **antes** de TAR-11. RF-13 a RF-16 nacen de las decisiones de la dueña.
+> Dependen de TAR-2 y van **antes** de TAR-11. RF-13 a RF-16 nacen de las decisiones del laboratorio.
 
 - [ ] **TAR-16 · El conocimiento, traído una vez y dividido por dominio.**
       Hecho cuando:

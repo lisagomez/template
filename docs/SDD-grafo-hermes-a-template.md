@@ -294,7 +294,7 @@ esta evidencia.
 | **Falso hallazgo propio** | **Cazado**. Un sondeo mío mostró «rectora: LISR Art. 27, fracción V» sobre la regla `27-VII`: era **mi** recorte de la cadena a 70 caracteres. La cita del JSON es «fracción VII». Verificado y descartado |
 | **Llamar «grafo» a otra cosa** | **Declarado** en §0: cuatro cosas con el mismo nombre en la casa |
 | **Que Hermes haya avanzado fuera de `master`** | **Resuelto**: ninguna de las 9 ramas remotas trae commits del grafo sin mezclar |
-| **El conflicto de INTERESES puede ser intencional** | **Declarado**. Puede que la dueña quiera que «intereses» salga siempre `dudoso`. Aun así, lo expresa **por el mecanismo de conflicto**, con una bandera de «requiere revisión» permanente, y el gate no lo distingue de un error. Lo que es hallazgo es el punto ciego, no la regla |
+| **El conflicto de INTERESES puede ser intencional** | **Declarado**. Puede que el laboratorio quiera que «intereses» salga siempre `dudoso`. Aun así, lo expresa **por el mecanismo de conflicto**, con una bandera de «requiere revisión» permanente, y el gate no lo distingue de un error. Lo que es hallazgo es el punto ciego, no la regla |
 | **El coste de las opciones** | **Declarado**: es un orden de magnitud por líneas, no una medición de esfuerzo |
 
 ---
@@ -314,7 +314,7 @@ for d in grafo grafo-a2a grafo-gate; do (cd $S/hermes/businessos/$d && $S/venv/b
 
 ---
 
-## 9. Decisiones de la Fase 0 (la dueña, 2026-09-26)
+## 9. Decisiones de la Fase 0 (el laboratorio, 2026-09-26)
 
 | Pregunta | Decisión |
 |---|---|
