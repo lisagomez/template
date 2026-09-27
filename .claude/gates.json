@@ -149,6 +149,17 @@
       "timeout_s": 300
     },
     {
+      "nombre": "prueba:laboratorio-pymes",
+      "runner": "comando",
+      "comando": "npm run prueba:laboratorio-pymes",
+      "guarda": "el laboratorio de las herramientas pymes (`/laboratorio-pymes`): corre TODOS los casos de verdad, cada uno da el estado que declara, >=5 por herramienta y con trampas, y la lista de herramientas que usa `/estudio` sale de los resultados, no de una lista a mano. Sin red; el caso con LLM queda `no-medido` sin llave",
+      "evidencia": "salida de `node --test`: la tabla de casos (id, estado, trampa) y pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA del 2026-09-27, al mezclar `main` en `pymes-marketing-build`: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo `verifica:gates` (script sin declarar y `src/features/laboratorio-pymes/pruebas/laboratorio.ts` huerfano), igual que en el PR #154"
+    },
+    {
       "nombre": "prueba:historial",
       "runner": "comando",
       "comando": "npm run prueba:historial",
@@ -233,7 +244,7 @@
       "nombre": "prueba:tools",
       "runner": "comando",
       "comando": "npm run prueba:tools",
-      "guarda": "las suites propias de las herramientas empaquetadas de `tools/` (extractor-documental, dictado, voz, asesor-ventas, etiquetas-gs1)",
+      "guarda": "las suites propias de las herramientas empaquetadas de `tools/` (extractor-documental, dictado, voz, asesor-ventas, etiquetas-gs1, pymes-marketing)",
       "evidencia": "herramienta por herramienta, pruebas pasadas o falladas; exit 1 si alguna suite cae",
       "cubre": ["tools/*/pruebas/*.ts"],
       "perfiles": ["validate"],

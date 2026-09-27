@@ -1,0 +1,52 @@
+{
+  "url": "http://localhost:3000",
+  "cuando": "2026-09-27T04:32:25.410Z",
+  "capturas": [
+    "1-laboratorio.png",
+    "1b-caso-trampa-inyeccion.png",
+    "2-marca.png",
+    "3-brief-30-dias.png",
+    "4-calendario-pieza.png",
+    "5-resenas-borradores.png",
+    "6-brief-lunes.png"
+  ],
+  "laboratorio": {
+    "casos": 45,
+    "pasa": 44,
+    "noMedido": 1,
+    "falla": 0,
+    "aprobadas": [
+      "aprobada-marca=aprobada",
+      "aprobada-ventas=aprobada",
+      "aprobada-contenido=aprobada",
+      "aprobada-resenas=aprobada",
+      "aprobada-visibilidad=aprobada",
+      "aprobada-pulso=aprobada",
+      "aprobada-redactor-llm=en laboratorio"
+    ]
+  },
+  "estudio": {
+    "diasDeCalendario": 9,
+    "piezasConImagen": 9,
+    "borradores": [
+      "ya-respondida",
+      "borrador",
+      "retenida",
+      "escalada",
+      "borrador",
+      "borrador",
+      "borrador",
+      "borrador"
+    ],
+    "lunes": [
+      "lunes-ventas=ok",
+      "lunes-resenas=ok",
+      "lunes-competencia=sin-datos",
+      "lunes-anuncios=ok",
+      "lunes-visibilidad=ok"
+    ],
+    "trasAprobar": 1,
+    "peticionesAlAprobar": 0
+  },
+  "erroresDeConsola": []
+}
