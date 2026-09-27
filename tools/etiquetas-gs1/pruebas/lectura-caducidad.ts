@@ -143,7 +143,9 @@ test('el cero con diagonal leido como 8: 38/10/26 se rechaza por calendario y se
   assert.match(p.mensaje, /el día 38 no existe/)
   assert.deepEqual(p.opciones.map((o) => [o.iso, o.sugerida]), [['2026-10-30', true]])
   assert.equal(p.fecha, undefined, 'una sugerencia no es una propuesta')
-  assert.equal(propon([toma('CAD 39/19/26')]).opciones.length, 0, 'si hay dos cifras imposibles, no se adivina')
+  assert.equal(propon([toma('CAD 39/19/26')]).opciones.length, 0, 'un 9 y un 1 imposibles: no se adivina')
+  const dos = propon([toma('CAO 38/85/27')])
+  assert.deepEqual([dos.estado, dos.opciones.map((o) => [o.iso, o.tipo, o.sugerida])], ['invalida', [['2027-05-30', 'caducidad', true]]], 'medido con el motor real: dos ceros con diagonal leídos como 8, y la D como O')
 })
 
 test('lo que NO es fecha: cifras sin rotulo (clave del proveedor, un numero inventado) y el texto que remite a otra cara', () => {

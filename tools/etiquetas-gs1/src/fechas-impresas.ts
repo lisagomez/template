@@ -8,8 +8,8 @@
  *   aprendido del articulo, si.
  * - La ambiguedad se ENSENA: 03/04/26 es 3 de abril o 4 de marzo; 241123 es 24/11/23 o 23/11/24.
  *   Nunca se elige en silencio.
- * - Un dia imposible (38/10/26) no se «arregla»: se dice, y si cambiando UNA cifra 8/9/6 por 0
- *   sale una fecha valida (el cero con diagonal de las impresoras de inyeccion), se sugiere.
+ * - Un dia imposible (38/10/26) no se «arregla»: se dice, y si devolviendo el cero (una cifra 8/9/6,
+ *   o dos 8: el cero con diagonal de las impresoras de inyeccion) sale UNA sola fecha valida, se sugiere.
  */
 export type TipoFecha = 'caducidad' | 'consumo-preferente' | 'fabricacion' | 'sin-rotulo'
 
@@ -72,7 +72,7 @@ const mesDe = (t: string): number => MESES.findIndex((ms) => ms.includes(t.repla
 
 const ROTULOS: readonly { readonly tipo: Exclude<TipoFecha, 'sin-rotulo'>; readonly re: RegExp }[] = [
   { tipo: 'consumo-preferente', re: /CONS(?:UMIR|UMO)?\.?\s*PREF(?:ERENTE(?:MENTE)?)?\.?(?:\s*ANTES\s*DE(?:L)?)?|BEST\s*BEF(?:ORE)?|BEST\s*BY|\bBBE?\b|\bC\.?P\.?(?=\s*\d)/g },
-  { tipo: 'caducidad', re: /FECHA\s*DE\s*CADUCIDAD|F(?:ECH)?\.?\s*CAD(?:UC)?\.?|CADUCIDAD|CADUCA|\bCAD\b\.?|(?<=[^A-Z]|^)CAD(?=\d)|\bEXP(?:IRA|IRY|\.)?\b|(?<=[^A-Z]|^)EXP(?=\d)|\bVENCE\b|\bVENC\.?|\bVTO\b|USE\s*BY/g },
+  { tipo: 'caducidad', re: /FECHA\s*DE\s*CADUCIDAD|F(?:ECH)?\.?\s*CAD(?:UC)?\.?|CADUCIDAD|CADUCA|\bCA[DO0]\b\.?|(?<=[^A-Z]|^)CAD(?=\d)|\bEXP(?:IRA|IRY|\.)?\b|(?<=[^A-Z]|^)EXP(?=\d)|\bVENCE\b|\bVENC\.?|\bVTO\b|USE\s*BY/g },
   { tipo: 'fabricacion', re: /ELAB(?:ORADO|ORACION)?\.?|\bFAB(?:RICACION|RICADO)?\b\.?|\bPROD(?:UCIDO|UCCION)?\b\.?|\bMFG\b|\bMFD\b|ENVASADO|\bPKD\b/g },
 ]
 
@@ -149,12 +149,22 @@ function aLectura(o: Opcion): LecturaDeFecha | { motivo: string } {
   return 'iso' in v ? { iso: v.iso, formato: o.formato } : v
 }
 
-/** Cambiando UNA cifra 8, 9 o 6 por 0, ¿sale una fecha valida? Solo si sale exactamente una. */
+/**
+ * Textos que resultan de devolverle al 0 lo que el motor leyo como otra cifra: UNA cifra 8, 9 o 6,
+ * o DOS 8 (medido con el motor real: «38/85/27» por 30/05/27, el cero con diagonal dos veces).
+ */
+function variantesDeCero(t: string): string[] {
+  const pos = (cs: string) => [...t].flatMap((ch, i) => (cs.includes(ch) ? [i] : []))
+  const cambia = (is: readonly number[]) => [...t].map((ch, i) => (is.includes(i) ? '0' : ch)).join('')
+  const ochos = pos('8')
+  const dobles = ochos.flatMap((a, i) => ochos.slice(i + 1).map((b) => cambia([a, b])))
+  return [...pos('869').map((i) => cambia([i])), ...dobles]
+}
+
+/** Si devolviendo los ceros sale EXACTAMENTE una fecha valida y plausible, se sugiere (nunca se propone). */
 function sugerenciasDe(c: Coincidencia, tipo: TipoFecha, hoy?: string): LecturaDeFecha[] {
   const variantes: LecturaDeFecha[] = []
-  for (let i = 0; i < c.texto.length; i++) {
-    if (!'869'.includes(c.texto[i]!)) continue
-    const texto = c.texto.slice(0, i) + '0' + c.texto.slice(i + 1)
+  for (const texto of variantesDeCero(c.texto)) {
     for (const m of coincidencias(texto)) for (const o of m.opciones) {
       const l = aLectura(o)
       if ('iso' in l && m.texto === texto && !plausible(l.iso, tipo, hoy) && !variantes.some((v) => v.iso === l.iso)) variantes.push(l)

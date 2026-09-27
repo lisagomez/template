@@ -161,7 +161,7 @@ function mensajeDe(estado: EstadoPropuesta, p: { fecha?: string; invalida?: Cand
     case 'propuesta': return `Leí ${p.tipo === 'consumo-preferente' ? 'consumo preferente' : 'caducidad'}: ${fechaLarga(p.fecha!)}. Confírmala o corrígela.`
     case 'ambigua': return p.tipo === 'sin-rotulo' ? 'Encontré una fecha sin rótulo: no sé si es caducidad o fabricación. Elige.' : 'La fecha se puede leer de dos maneras. Elige la que dice la caja.'
     case 'discrepancia': return 'Las dos tomas no dicen lo mismo. Elige la fecha correcta o tómala otra vez.'
-    case 'invalida': return `Se leyó «${p.invalida?.texto}»: ${p.invalida?.invalida}.${p.invalida?.sugerencias?.length ? ' ¿Es la fecha sugerida (un cero con diagonal leído como otra cifra)?' : ' Tecléala.'}`
+    case 'invalida': return `Se leyó «${p.invalida?.texto}»: ${p.invalida?.invalida}.${p.invalida?.sugerencias?.length ? ' ¿Es la fecha sugerida (un cero con diagonal leído como 8)?' : ' Tecléala.'}`
     case 'solo-fabricacion': return 'Solo encontré la fecha de fabricación y el artículo no tiene vida útil en el catálogo: no se puede calcular la caducidad. Tecléala.'
     case 'remite': return 'El empaque dice que la fecha no está en esta cara: búscala en el envase y toma otra foto.'
     case 'sin-fecha': return 'No encontré una fecha. Toma otra foto encuadrando solo la fecha, o tecléala.'

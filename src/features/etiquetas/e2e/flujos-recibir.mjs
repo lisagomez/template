@@ -185,7 +185,7 @@ async function lecturaAmbigua(r) {
   await compone('32', 'Lectura ambigua: «CAD 241128» es 24/11/28 o 28/11/24; se ensenan las dos, se elige, y la siguiente ya sale con el formato aprendido', [['escritorio · atún: dos lecturas', f.escritorio], ['celular · chocolate: dos lecturas', f.celular], ['escritorio · la siguiente recepción de atún: formato aprendido (DDMMAA)', f.aprendido]]);
 }
 
-/** 33 · Botella oscura en tinta de puntos: el motor lee «38/05/27», se marca imposible y la persona CORRIGE. */
+/** 33 · Botella oscura en tinta de puntos: el motor lee una fecha imposible (el cero como 8), se marca, y la persona CORRIGE. */
 async function correccionDelUsuario(r) {
   const { abre, foto, compone, espera } = r.h;
   const f = {};
@@ -199,6 +199,7 @@ async function correccionDelUsuario(r) {
     await tomaFoto(p);
     await espera(300);
     const antes = await foto(p, 'main', `correccion-antes-${vista}`);
+    r.informe.correccion = { ...(r.informe.correccion ?? {}), [vista]: { estado: await p.locator('[data-prueba="revision"]').getAttribute('data-estado'), leido: await p.locator('[data-prueba="texto-leido"]').textContent(), sugerencias: await p.locator('[data-prueba="opcion"]').count() } };
     if (await p.locator('[data-prueba="opcion"]').count()) await p.locator('[data-prueba="opcion"]').first().click();
     else await p.fill('[data-prueba="fecha-confirmar"]', '2027-05-30');
     await p.fill('[data-prueba="lote-confirmar"]', 'L7702');
@@ -208,7 +209,7 @@ async function correccionDelUsuario(r) {
     f[vista] = [antes, await foto(p, '[data-prueba="recibido"] > p', `correccion-despues-${vista}`)];
     await c.close();
   }
-  await compone('33', 'Correccion por la persona: el motor leyo «38/05/27» (cero con diagonal), se eligio 30/05/27 y el lote se tecleo', [['escritorio · antes', f.escritorio[0]], ['escritorio · después', f.escritorio[1]], ['celular · antes', f.celular[0]], ['celular · después', f.celular[1]]]);
+  await compone('33', 'Correccion por la persona: en tinta de puntos sobre fondo oscuro el motor lee una fecha imposible (el cero con diagonal como 8); se marca, se sugiere y la persona corrige', [['escritorio · antes', f.escritorio[0]], ['escritorio · después', f.escritorio[1]], ['celular · antes', f.celular[0]], ['celular · después', f.celular[1]]]);
 }
 
 async function mueve(r, p, sitio, texto) {

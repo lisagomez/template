@@ -45,9 +45,9 @@ export function BandejaRevisiones({ e, alRetomar, version }: { e: Etiquetas; alR
       {b.abiertas.length === 0 ? <p className="text-sm text-neutral-500">Nada pendiente.</p> : null}
       <ul className="space-y-2">
         {b.abiertas.map((p) => (
-          <li key={p.revision} className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-sm dark:border-amber-800 dark:bg-amber-950" data-prueba="pendiente" data-mia={p.mia}>
+          <li key={p.revision} className="flex flex-col gap-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-sm sm:flex-row sm:items-center dark:border-amber-800 dark:bg-amber-950" data-prueba="pendiente" data-mia={p.mia}>
             <Foto huella={p.fotos.recortes[0] ?? p.fotos.completa} alt={`Caducidad de ${p.descripcion}`} className="h-12 w-28 rounded bg-neutral-900" />
-            <span className="min-w-0 flex-1"><b>{p.descripcion}</b> · {p.cajas} caja(s) en recibo de {p.sitio} · <span data-prueba="antiguedad">{p.antiguedad}</span> · folio {p.folio}{p.propuesta.fecha ? ` · propuesta ${p.propuesta.fecha}` : ''}</span>
+            <span className="min-w-0 sm:flex-1"><b>{p.descripcion}</b> · {p.cajas} caja(s) en recibo de {p.sitio} · <span data-prueba="antiguedad">{p.antiguedad}</span> · folio {p.folio}{p.propuesta.fecha ? ` · propuesta ${p.propuesta.fecha}` : ''}</span>
             {p.mia ? <button type="button" className={boton} onClick={() => alRetomar(desdeCadena(p))} data-prueba="retomar">Confirmar</button> : (
               <span className="flex gap-1"><input className={`${campo} w-40`} placeholder="motivo para descartar" value={motivo[p.revision] ?? ''} onChange={(x) => setMotivo({ ...motivo, [p.revision]: x.target.value })} /><button type="button" className={boton} disabled={(motivo[p.revision] ?? '').trim().length < 3} onClick={() => descarta(p)}>Descartar</button></span>
             )}

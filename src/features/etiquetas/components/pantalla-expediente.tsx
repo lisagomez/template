@@ -83,7 +83,7 @@ function Linea({ x }: { x: Expediente }) {
           {fotosDelEvento(ev)?.completa ? (
             <div className="mt-1 flex flex-wrap gap-2" data-prueba="fotos-evento">
               <figure className="text-[11px] text-neutral-500"><Foto huella={fotosDelEvento(ev)!.completa!} alt="Foto completa" className="h-24 w-36 rounded bg-neutral-900" /><figcaption>foto {hashCorto(fotosDelEvento(ev)!.completa!)}</figcaption></figure>
-              {(fotosDelEvento(ev)!.recortes ?? []).slice(0, 2).map((h) => <figure key={h} className="text-[11px] text-neutral-500"><Foto huella={h} alt="Lo que leyó el motor" className="h-24 w-48 rounded bg-neutral-900" /><figcaption>recorte leído {hashCorto(h)}</figcaption></figure>)}
+              {[...new Set(fotosDelEvento(ev)!.recortes ?? [])].slice(0, 2).map((h) => <figure key={h} className="text-[11px] text-neutral-500"><Foto huella={h} alt="Lo que leyó el motor" className="h-24 w-48 rounded bg-neutral-900" /><figcaption>recorte leído {hashCorto(h)}</figcaption></figure>)}
             </div>
           ) : null}
           <p className="break-all font-mono text-[11px] text-neutral-500">

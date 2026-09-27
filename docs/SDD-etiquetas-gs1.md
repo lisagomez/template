@@ -373,4 +373,4 @@ tres tablas nuevas.
 | Tamaño de las fotos | 2000 px JPEG q85 (~150-300 KB). | Sin poda automática (gate humano). |
 | El motor falla o no está | La recepción sigue: sin propuesta, se teclea; el error se dice sin el texto leído. | — |
 | Corpus sintético optimista | Se dice en cada tabla; los umbrales no se fijan con él. | Medir con fotos de celular reales del andén (resolución normal, encuadradas). |
-| Tipos de código que no se leen | Digital Link comprimido, DataBar expandido con fechas, UPC-E se dicen «no se lee». | — |
+| Códigos que no se leen | Digital Link comprimido (se dice «no es GS1 Digital Link»); UPC-E sin expandir (da «el dígito no cuadra»: la pistola debe mandarlo expandido a UPC-A); la cámara no busca GS1 DataBar (por pistola con `]e0` sí se lee, es GS1). | Añadir DataBar a la cámara si un proveedor lo usa. |
