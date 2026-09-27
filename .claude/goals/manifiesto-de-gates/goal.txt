@@ -1,0 +1,14 @@
+/goal Construye lo descrito en el spec completo: /home/kyara/code/template/.claude/worktrees/manifiesto-de-gates/.claude/goals/manifiesto-de-gates/spec.md. Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: este template declara sus 22 gates como dato con invariante fail-closed, `validate` se deriva del manifiesto, y el template queda dueña unica del contrato de gates que hermes-os-a2a hoy copia a mano en `reglas/software.toml`.
+Libertad tecnica total: tu eliges formato del manifiesto, derivacion y cableado; lo nombrado en el spec son sugerencias descartables salvo su seccion RESTRICCIONES REALES. Investiga antes de codear: `software.toml`/`gates.py` de hermes, y `verifica-gobernanza.mjs` + `verifica-marca-blanca.mjs` (el patron `--prueba` de aqui).
+VALIDA: `npm run validate` — correlo tras cada cambio grande y surfea su output, no solo el exit code.
+HECHO cuando (el evaluador solo ve esta conversacion, no corre comandos: surfea evidencia):
+- el manifiesto pegado, con los 22 gates y sus campos, marcando activos vs inactivos con motivo
+- el ultimo output de `npm run validate` en verde, pegado, contando por separado pasaron / inactivos / rojos
+- la prueba de la prueba pegada: el verificador tumbando las 5 violaciones sembradas (runner inexistente en gate activo; typo de runner en gate inactivo; gate activo no ejecutable; manifiesto divergido de lo que `validate` corre; gate inactivo sin motivo)
+- la proyeccion para hermes emitida y pegada, con el diff contra su `software.toml` real y el conteo de que copiaba mal y que iba atras
+- `npm run verify:gobernanza` en rojo con el manifiesto fuera del alcance de C1 y en verde dentro — demostrar, no citar
+- reporte de decisiones (formato elegido y por que, que dejaste fuera)
+- lista las formas en que podria estar mal/incompleto y resuelvelas
+RESTRICCIONES: worktree `manifiesto-de-gates`, nunca main; NO se escribe nada en el repo de hermes; NO se crea padron de departamentos; ningun gate existente se retira ni se debilita (inejecutable = inactivo CON motivo, nunca borrado); sin `any`; secretos solo enmascarados; espanol.
+RED DE SEGURIDAD: si tras 12 turnos el manifiesto y `validate` no convergen en verde, detente y reporta el bloqueo con el output real del gate que no cierra.

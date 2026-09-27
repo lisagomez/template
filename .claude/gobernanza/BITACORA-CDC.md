@@ -3794,3 +3794,64 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   sellado sobre el árbol del cambio.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «Apruebo, capa A basta»,
   2026-09-23, con el diff delante.
+
+### 2026-09-26 — manifiesto de gates `.claude/gates.json`: `validate` y `predeploy` DERIVAN de un padrón fail-closed, y el padrón entra en el alcance de C1 → CDC PROMOVIDO — radio: sistema (instrucciones + capa de gobernanza + el gate entero)
+- **Cambio**: nace `.claude/gates.json` — los gates como dato (nombre, runner, `guarda`, `evidencia`,
+  perfiles, `activo` con `motivo` y `falta` obligatorios en los apagados, `timeout_s`), con 3 perfiles
+  (`validate` 23 activos · `predeploy` 14 · `cdc` 1) y 7 inactivos declarados. `package.json` deja de
+  llevar la lista: `validate` pasa de una cadena de 21 `&&` en 599 caracteres a
+  `node scripts/corre-gates.mjs validate`, y `predeploy` de un subconjunto copiado a mano a
+  `node scripts/corre-gates.mjs predeploy`. Nuevos `scripts/lib/gates.mjs` (cargador fail-closed),
+  `corre-gates.mjs` (runner, tres estados `paso`/`fallo`/`no_ejecutable`), `verifica-gates.mjs` (11
+  comprobaciones + `--prueba` + `--lista`), `proyecta-gates.mjs` y `prueba-tools.mjs`.
+  En `AGENTS.md`: `.claude/gates.json` entra en la regla de C1, regla nueva «los gates son un padrón,
+  no una cadena», tres disparadores en el decision tree y 4 comandos; `GEMINI.md` regenerado.
+  En `GOBERNANZA.md` §2: fila nueva en la tabla de C1 y regla dura «un gate apagado NO es un gate que
+  pasa». `verifica-gobernanza.mjs`: 8 comprobaciones migradas de regex sobre la cadena de
+  `package.json` a leer el perfil del padrón (criterio idéntico, más fuerte: el gate tiene que estar
+  declarado, ACTIVO y en el perfil) + 3 nuevas (el manifiesto existe; C1 lo nombra en las
+  instrucciones; C1 lo nombra en su propia tabla). Asiento `TPL-manifiesto-gates` en el inventario y
+  §3-bis en `docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md`.
+  **Ningún gate se retiró ni se debilitó**: los 21 siguen, en el mismo orden, y se AÑADEN dos
+  (`verifica:gates`, `prueba:tools`) — el gate verifica más que antes, no menos.
+- **Motivo**: el `validate` era una cadena de 21 `&&` en una línea de 599 caracteres que nadie difea
+  con sentido, más una SEGUNDA copia a mano del subconjunto de `predeploy`. Faltaba además la noción
+  de gate declarado-pero-inactivo, que es la trampa que
+  `docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md` §C4 midió sobre el gemelo de este manifiesto en
+  `hermes-os-a2a`: «un gate inactivo se lee, a simple vista, igual que uno que pasó» (fatiga de
+  aprobación, O3). El diseño fail-closed viene de su `supervisor-a2a/gates.py`; el `motivo`
+  obligatorio se añade aquí, porque allá `software.toml` apaga dos gates sin decir por qué.
+  El padrón destapó tres agujeros reales, los tres medidos, no supuestos: (1) `scripts/prueba-a2a.ts`
+  existía sin que NINGÚN script lo corriera y se había podrido — 12 verdes, 3 rojos, y el rojo de
+  opacidad es test viejo, no fuga (exige exactamente 3 rutas de servidor y la app tiene 14 desde los
+  PR #129-#140); (2) las suites de `tools/` no las corría nadie — 87 archivos y 776 pruebas solo en
+  `extractor-documental`, que `prepara-gate` construía y jamás ejecutaba; (3) siete gates vivían fuera
+  de `validate` sin que nada dijera por qué. Y hacia fuera: `reglas/software.toml` de `hermes-os-a2a`
+  transcribe a mano los gates de este repo con 3 divergencias, una con consecuencia (declara ACTIVO
+  `npx playwright test`, que aquí da exit 1 «No tests found»: su Supervisor rechazaría siempre).
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ capa A 123/123 y **capa B 22/22** ·
+  aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+  **Precisión sobre el orden del diff** (la regla de §2 exige enseñarlo ANTES): antes de la
+  aprobación estuvieron delante el diff **por archivo con sus cifras**, el padrón entero
+  (`npm run gates`), el `validate` en verde con las tres poblaciones, las 6 siembras de la prueba de
+  la prueba, la demostración de C1 en rojo y en verde, y el diff de la proyección contra el
+  `software.toml` real. El diff **línea a línea** de `AGENTS.md`, `GOBERNANZA.md` y `package.json` se
+  enseñó justo después de la aprobación y ANTES de escribir esta entrada. Se anota en vez de
+  igualarlo a los casos en que el diff completo precedió a la firma.
+  **Capa B corrida y verde**, no omitida: el gate del corpus da 22/22 (21 casos declarados,
+  «promovible»). Lo que NO se hizo es ejecutar los 21 casos en sesiones frías — eso es una medición
+  de conducta aparte, no el gate. **No se añadió ningún caso nuevo al corpus, y se explica por qué**:
+  el caso del corpus que mide la petición de saltarse un gate «temporalmente» ya cubre esta
+  superficie, y su expectativa dice literal que «inaceptable es que desaparezca del `validate` sin
+  dejar rastro» — este cambio la vuelve más exigible, porque ahora esa desaparición es detectable
+  estructuralmente (`verifica:gates` la caza). Sin identificador: el par caso→regla no se
+  reconstruye leyendo el repo (protocolo ciego), y la traza es el commit de `corridas.md`.
+- **Regresión**: `npm run validate` **23/23 activos en verde, 7 inactivos declarados, 0 rojos**,
+  sellado sobre el árbol del cambio · `verify:gobernanza` **156/156** · `verifica:gates --prueba`
+  **6/6 siembras cazadas** (runner sin implementación activo · typo de runner en un gate APAGADO ·
+  gate activo no ejecutable · `validate` con la cadena a mano de vuelta · inactivo sin motivo ·
+  archivo de pruebas huérfano), con línea base comprobada primero · `npm run regresion` 123/123 ·
+  `npm run regresion -- --trampa` 22/22 · `prueba:tools` 4 suites en verde.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «continua con la firma del CDC»,
+  2026-09-26, con el diff por archivo y toda la evidencia medida delante (ver la precisión sobre el
+  orden del diff, arriba).

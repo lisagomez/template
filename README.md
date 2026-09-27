@@ -234,7 +234,13 @@ npm run dev          # Desarrollo (auto-port 3000-3006)
 npm run build        # Build produccion
 npm run typecheck    # TypeScript check
 npm run lint         # ESLint
-npm run validate     # el gate completo (21 pasos + sello): typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + prueba:laboratorio + prueba:historial + prueba:ajustes + prueba:trayectorias + verifica:trayectorias + verifica:inventario + verifica:marca-blanca + prueba:inventario + imprenta + fugas
+npm run validate     # el gate completo: typecheck + lint + build + gobernanza + specs + regresion + secretos + contexto + routing + contabilidad + pruebas de feature + tools + inventario + marca-blanca + imprenta + fugas, y el sello al cerrar
+                     # ya NO es una cadena de `&&` en package.json: DERIVA del perfil `validate` de `.claude/gates.json`
+npm run gates        # el padron entero: los gates de cada perfil, y los inactivos con su motivo (que nunca cuentan como pasados)
+npm run prueba:trayectorias   # el formato de trayectoria y la captura (spec 011), dentro del gate
+npm run verifica:trayectorias # el almacen de trayectorias capturadas (spec 011 RF-4), dentro del gate
+npm run verifica:gates     # que el padron y el codigo no divergan (`--prueba` tumba 6 siembras)
+npm run proyecta:gates     # emite reglas/software.toml para hermes-os-a2a (`--diff` compara con su copia)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -358,7 +364,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (152 comprobaciones; el propio verificador vigila esta cifra)
+npm run verify:gobernanza   # falla si la capa quedo suelta (156 comprobaciones; el propio verificador vigila esta cifra)
 npm run regresion           # C2 capa A: contratos de los 26 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 ```
@@ -394,6 +400,34 @@ Y no cobra dos veces: `validate` deja un **sello** con la huella del arbol
 identico al que ya paso entero → pasa en milisegundos; cualquier archivo tocado, sello ausente
 o Node distinto → corre el gate completo, como siempre. Salio de una corrida de la capa B, y
 el criterio que fijo es el que importa: la espera se quita **sin sacar el gate de la ruta**.
+
+### El gate es un padron, no una cadena
+
+Lo que corre el gate vive en **`.claude/gates.json`**, no en una linea de `package.json`. Cada
+gate es un dato: que **runner** lo ejecuta, que **superficie guarda**, que **evidencia** deja, a
+que **perfiles** pertenece (`validate`, `predeploy`, `cdc`) y, si esta apagado, **por que** y
+**que le falta**. `validate` y `predeploy` lo **derivan**; antes cada uno llevaba su propia lista
+a mano, y la segunda era una copia de la primera que nada comparaba.
+
+Tres reglas lo sostienen, y las tres son fail-closed:
+
+- Un gate **activo** cuyo comando no existe deja el padron **invalido**: el runner **no arranca**.
+  Activar una regla incomprobable tiene que ser imposible por diseno, no una decision de quien edita.
+- Un runner con **typo** invalida el padron **aunque el gate este apagado**.
+- Un gate **inactivo NUNCA se cuenta como uno que paso**: se reporta como poblacion aparte, con su
+  motivo, en cada corrida. Sale del hallazgo §C4 de `docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md`:
+  *«un gate inactivo se lee, a simple vista, igual que uno que paso»*.
+
+`npm run gates` lo lista entero. `npm run verifica:gates` comprueba que el padron y el codigo no
+divergan —y que **ningun archivo de pruebas quede huerfano**, la comprobacion que destapo que
+`scripts/prueba-a2a.ts` existia sin que ningun script lo corriera, y que las suites de `tools/`
+(87 archivos, 776 pruebas solo en `extractor-documental`) se construian pero no se ejecutaban.
+`npm run verifica:gates -- --prueba` siembra seis violaciones y exige que caigan las seis.
+
+El diseno viene del motor del Supervisor de `hermes-os-a2a` (`supervisor-a2a/gates.py`); el
+`motivo` obligatorio se anadio aqui. Y va en el sentido inverso tambien: `npm run proyecta:gates`
+**emite** el `reglas/software.toml` que ese repo transcribia a mano, para que haya **una sola
+duena del contrato** (detalle en `docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md` §3-bis).
 
 ### La capa se audita a si misma
 
@@ -571,6 +605,7 @@ o lo declara no medido y fuera de produccion.
 ├── design-systems/            # 5 sistemas de diseno
 ├── memory/                    # Memoria persistente del proyecto
 ├── hooks/                     # Scripts en eventos
+├── gates.json                 # El padron de lo que corre el gate: `validate` y `predeploy` derivan de aqui (C1)
 ├── routing-modelos.json       # Que nivel de modelo atiende cada clase de tarea (C8)
 ├── presupuesto-contexto.json  # Presupuesto de contexto declarado
 └── example.mcp.json           # Config de MCPs
