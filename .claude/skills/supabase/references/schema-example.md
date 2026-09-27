@@ -11,7 +11,7 @@
 ### users (CRITICAL - Core)
 - id: uuid PK (references auth.users), email: text, full_name: text, avatar_url: text, role: text, status: text, created_at: timestamptz, updated_at: timestamptz
 
-### purchases (CRITICAL - Revenue)
+### purchases (CRITICAL - Revenue) — la crea `/add-payments` (Polar)
 - id: uuid PK, user_id: uuid FK(users), price_cents: integer, currency: text, billing_interval: text (month/year), status: text (completed/canceled/refunded), cancel_at_period_end: boolean, purchased_at: timestamptz, expires_at: timestamptz
 
 ### posts (CRITICAL - Content)

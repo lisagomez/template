@@ -25,7 +25,7 @@ El modo BLUEPRINT es para sistemas complejos que requieren construccion por fase
 "Sistema de autenticacion con roles y permisos"
 "Feature de notificaciones en tiempo real"
 "Dashboard con metricas y graficos"
-"Sistema de facturacion con Stripe"
+"Planes y cobro por uso sobre /add-payments (Polar)"
 "CRUD completo de productos con imagenes"
 "Migracion de arquitectura de componentes"
 ```
