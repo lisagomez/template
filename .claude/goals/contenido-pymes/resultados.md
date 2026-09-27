@@ -55,7 +55,7 @@ en el nombre (`video-6`), nota vacía al pedir cambio (`aprobacion-3`).
 
 | Fase | Por qué no se construyó | Firma |
 |---|---|---|
-| 7 · Reel con voz o cara | daño posible a terceros (C4); faltan las 14 preguntas de `pymes-marketing/propuesta-video.md` | el laboratorio |
+| 7 · Reel con voz o cara | **firmado el 2026-09-27** (las 14 preguntas de `pymes-marketing/propuesta-video.md`, con la respuesta recomendada); se construye en su propio goal, que empieza por las cuentas | firmado por el laboratorio |
 | 8 · Foto de producto en el video | la foto puede traer personas; pide su propia revisión C4 | el laboratorio |
 | 9 · Redacción con LLM y aprobación con cuentas | activar el LLM es otro CDC (llave y corrida real medida; los prompts del redactor ya se firmaron el 2026-09-27) y `/add-login` (C4, C7) | el laboratorio |
 | 10 · Render en producción | Chromium y ffmpeg en la imagen: cambio de infraestructura | el laboratorio |

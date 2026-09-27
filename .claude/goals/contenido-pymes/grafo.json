@@ -10,7 +10,8 @@
     {
       "id": "propuesta",
       "label": "propuesta-video.md y triaje-video.md (oficio, límites, 14 preguntas sin firmar)",
-      "estado": "ambar"
+      "estado": "ambar",
+      "evidencia": "14 preguntas firmadas por el laboratorio el 2026-09-27"
     },
     {
       "id": "sdd",
@@ -46,7 +47,7 @@
       "id": "reel",
       "label": "Reel del celular con voz y cara (BLOQUEADO hasta firmar la propuesta de video)",
       "estado": "gris",
-      "evidencia": "BLOQUEADO: firma de propuesta-video.md (C4)"
+      "evidencia": "FIRMADO el 2026-09-27 (14 preguntas); sin construir: su goal empieza por las cuentas (respuesta 8)"
     },
     {
       "id": "llm",
@@ -76,7 +77,7 @@
       "id": "firma",
       "label": "Gate humano: publicar, subir, desbloquear reel y LLM",
       "estado": "gris",
-      "evidencia": "pendiente: publicar, desbloquear reel, LLM, cuentas y render en producción"
+      "evidencia": "firmado: reel (2026-09-27). Pendiente: publicar, LLM, cuentas, foto en video y render en producción"
     }
   ],
   "aristas": [

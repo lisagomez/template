@@ -146,8 +146,9 @@ con al menos 5 casos y trampas. Lo visual se compara de dos maneras:
   renderiza el video corre **con la red bloqueada**; la ruta de render valida su entrada con Zod y no
   acepta más que una escena (sin URL, sin archivos).
 - **C4**: sin personas en pantalla; sin datos personales en las piezas (el WhatsApp es el del negocio).
-  El reel con voz y cara es la parte con riesgo sobre terceros y queda bloqueada hasta firmar la AISIA
-  de `propuesta-video.md`.
+  El reel con voz y cara es la parte con riesgo sobre terceros: el laboratorio firmó el 2026-09-27 las 14
+  preguntas de `propuesta-video.md` (consentimiento escrito, menores nunca, desenfoque por defecto); se
+  construye en su propio goal.
 
 ## 7. Costo
 
@@ -160,7 +161,7 @@ decisión de infraestructura (§8).
 
 | Fase | Por qué se bloquea | Quién firma |
 |---|---|---|
-| Reel del celular (voz y cara) | C4: personas y terceros en pantalla; 14 preguntas de `propuesta-video.md` | el laboratorio (lisagomez) |
+| Reel del celular (voz y cara) | **firmado el 2026-09-27** (14 preguntas de `propuesta-video.md`); falta construirlo en su goal, que empieza por las cuentas (respuesta 8) | el laboratorio (lisagomez) |
 | Foto de producto dentro del video | puede traer personas de fondo: revisión C4 propia | el laboratorio |
 | Redacción con LLM | sin llave medida; activar el LLM es otro CDC (los prompts del redactor se firmaron el 2026-09-27 en `BITACORA-CDC.md`) | el laboratorio |
 | Aprobación con cuentas o multiusuario | necesita `/add-login` y guardar decisiones (C4, C7) | el laboratorio |

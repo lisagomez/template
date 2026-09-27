@@ -1,6 +1,7 @@
 # Propuesta: herramientas de video para pymes mexicanas
 
-> Para firma del laboratorio (**lisagomez**). Es análisis: en este goal **no se construye, no se
+> **Firmada** por el laboratorio (**lisagomez**) el 2026-09-27: las 14 preguntas del §8, cada una con su
+> respuesta recomendada (firma al final del §8). Es análisis: en este goal **no se construye, no se
 > instala y no se llama a ninguna API**. Construir es el siguiente goal, con esta propuesta
 > firmada. La evidencia de cada afirmación está en `triaje-video.md` (misma carpeta).
 > Fecha: 2026-09-26. Pesos MXN con un **tipo de cambio supuesto de 18.50 MXN por dólar** (no es
@@ -249,6 +250,20 @@ Cada una lleva la opción recomendada.
 12. **Música.** → *Recomendado: sin música incrustada; el dueño la agrega en la app de la red al publicar. Efectos sintetizados propios, opcionales.*
 13. **Temporadas de las plantillas.** → *Recomendado: Día de las Madres, regreso a clases, Día de Muertos, Buen Fin, quincena, Navidad y Reyes. Confirmar o ajustar.*
 14. **Laboratorio del siguiente goal.** ¿Se exigen al menos 5 casos por herramienta, con casos trampa? → *Recomendado: sí. Mínimo: cliente al fondo sin consentimiento, ticket con teléfono en pantalla, precio que no coincide con el catálogo, clip horizontal, audio con música ajena, dos hablantes.*
+
+**Firmada por**: **lisagomez** · **Rol**: el laboratorio · **Fecha**: 2026-09-27 · «Sí, las 14 recomendadas»:
+las 14 respuestas quedan tal como están escritas arriba, sin ajustes (la 13 confirma la lista de temporadas).
+
+Lo que la firma **no** cambia:
+- Los **riesgos que no se pueden firmar** (§7) siguen fuera: se rediseñan (desenfoque, bloqueo), no se aceptan.
+- La **lectura legal** (LFPDPPP, art. 87 de la LFDA) sigue «por verificar con asesoría legal» (§10.5).
+- Las opciones que la firma deja para después (LLM sobre la transcripción, transcripción remota, video
+  generativo, GSAP) necesitan su propia firma y, si cambian prompts o modelo, su CDC.
+- **Tipo de cambio**: sigue el supuesto de 18.50 MXN por dólar. No afecta a la v1, que cuesta $0 en
+  servicios; se reemplaza por el del día cuando se firme una opción con costo en dólares.
+- **Pedir permiso** a Daniel Carreón (respuesta 9) es una acción del laboratorio: nadie lo envía por él.
+- La sala de aprobación exige **sesión autenticada** (respuesta 8): el goal del reel empieza por
+  `/add-login`, o esa parte espera a la fase 9 del PRP-006.
 
 ## 9. Qué queda fuera, siempre con decisión humana
 
