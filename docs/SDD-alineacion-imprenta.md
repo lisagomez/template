@@ -160,7 +160,7 @@ importa menos que lo que el intento midio.
 el golden path via `add-emails`). La comprobacion contra la libreria publica lo encontro
 **ya publicado desde el 2026-08-17**, con 100 endpoints. Sin ese escalon la sesion habria
 gastado 30-60 minutos reimprimiendo trabajo ajeno. El segundo candidato, **Polar**, no existia
-en ninguna parte: ni local, ni entre los 455 publicados, ni como MCP — y es con lo que cobra
+en ninguna parte: ni local, ni entre los 455 publicados, ni como MCP — y es con lo que cobra (skill `/add-payments`)
 el golden path. Ese si se imprimio.
 
 **Tres cosas que solo aparecen al ejecutar:**

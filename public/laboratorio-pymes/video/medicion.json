@@ -1,0 +1,39 @@
+{
+  "cuando": "2026-09-27T18:38:47.124Z",
+  "escena": {
+    "duracion": 6,
+    "fps": 30,
+    "capas": 5
+  },
+  "ffprobe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1080,
+        "height": 1920,
+        "r_frame_rate": "30/1"
+      },
+      {
+        "codec_name": "aac",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "6.000000"
+    }
+  },
+  "huellas": [
+    "sha256:c8878df43ca74b672f49fd99391c0677205db941f77059729462c870b3cc2f97",
+    "sha256:c8878df43ca74b672f49fd99391c0677205db941f77059729462c870b3cc2f97"
+  ],
+  "iguales": true,
+  "bytes": 249788,
+  "cuadros": 180,
+  "msRender": [
+    17738,
+    17407
+  ]
+}

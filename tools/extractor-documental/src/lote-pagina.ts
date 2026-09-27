@@ -211,11 +211,14 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
   const ahora = opciones.ahora ?? (() => Date.now())
   const avisos: string[] = []
 
-  // (a) Codigos, antes que nada.
+  // (a) Codigos, antes que nada. Sin lector la etapa no corre y su tiempo es cero, como el del
+  // respaldo que no se llamo: medirla con el reloj daba 1 ms cuando el milisegundo cambiaba justo
+  // entre las dos lecturas, y `prueba:tools` caia de vez en cuando bajo carga.
   const codigos: CodigoLeido[] = []
   const deCodigo: CampoExtraido[] = []
-  const inicioCodigos = ahora()
+  let tiempoCodigos = 0
   if (opciones.lectorDeCodigos !== undefined) {
+    const inicioCodigos = ahora()
     try {
       for (const cruda of await opciones.lectorDeCodigos.lee(imagen)) {
         const carga = analizaCarga(cruda)
@@ -225,9 +228,8 @@ export async function leePagina(imagen: Uint8Array, indice: number, opciones: Op
     } catch (error) {
       avisos.push(`lector de codigos: ${error instanceof Error ? error.message : String(error)}`)
     }
+    tiempoCodigos = ahora() - inicioCodigos
   }
-
-  const tiempoCodigos = ahora() - inicioCodigos
 
   // (b) Motor principal, y (c) clase.
   const inicioMotor = ahora()

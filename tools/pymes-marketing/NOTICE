@@ -1,0 +1,26 @@
+@tu-scope/pymes-marketing
+=========================
+
+Este paquete ADAPTA reglas, umbrales, estructuras de salida y criterios de la familia de
+marketing del plugin «small-business» de Anthropic:
+
+  Fuente:   https://github.com/anthropics/knowledge-work-plugins (carpeta small-business/)
+  Versión:  1.35.1, commit da38ec1ee89d41e5380e652a97382695003396e7
+  Licencia: Apache License 2.0 (copia íntegra en LICENSE-APACHE-2.0)
+  Autor:    Anthropic
+
+Skills adaptadas: brand-style, content-strategy, social-content-engine, canva-creator,
+review-reputation, seo-ai-visibility, growth-pulse, ad-manager, marketing-monday, y los
+documentos compartidos voice-profile, absent-is-not-zero, currency-and-locale, personal-data
+y untrusted-content.
+
+CAMBIOS respecto a la fuente (Apache-2.0 §4b):
+  - El original son instrucciones en Markdown para un agente; esto es código TypeScript
+    determinista escrito de nuevo. No se copia texto de las skills salvo reglas citadas.
+  - Contexto de EE. UU. sustituido por el de México: pesos MXN, facturas CFDI 4.0,
+    calendario comercial mexicano (Buen Fin, 10 de mayo, quincenas, aguinaldo...), reseñas de
+    Google Maps y Facebook en lugar de Yelp.
+  - Todos los conectores (Canva, HubSpot, PayPal, QuickBooks, TikTok, Google, Wix...) se
+    sustituyen por entrada local: XML, CSV exportados y texto pegado.
+  - Nada se publica ni se envía: toda salida queda en borrador para aprobación del dueño.
+  - El modelo de lenguaje es opcional y se inyecta (redactor); el de serie son plantillas.

@@ -1,0 +1,13 @@
+/goal Construye lo descrito en el spec: /home/kyara/code/template/.claude/goals/pagos-add-payments/spec.md. Leelo ENTERO y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: en cada lugar de la fabrica donde se necesite o sugiera una pasarela de pagos en linea (skills, reglas, plantillas, docs, specs, PRPs, goals) aparece la referencia a la skill add-payments, con lo que resuelve y, cuando haga falta, lo que NO resuelve; donde no aplica (Stripe directo, bienes fisicos si Polar no los cubre, solo leer ventas) se dice por que, sin mandar a la herramienta equivocada.
+Libertad tecnica: tu decides donde y con que palabras, y si conviene un contrato en la regresion que evite que se pudra; justificalo.
+VALIDA: `npm run regresion && npm run verify:gobernanza && npm run lint` tras cada cambio grande, output pegado; `npm run validate` antes de cerrar.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- inventario pegado: cada mencion de cobro o pasarela (archivo:linea), su veredicto (necesita / ya la tiene / no aplica y por que) y que se hizo
+- diff pegado de las ediciones (git diff --stat + hunks de skills y reglas)
+- al menos un caso donde la referencia no se puso o se puso con su limite, con la cita (add-payments o doc oficial de Polar) que lo justifica
+- validacion en verde pegada y `npm run validate` en verde al final
+- propuesta de entrada CDC para firma, FUERA de BITACORA-CDC.md, en la carpeta del goal
+- formas en que podria estar mal, resueltas
+RESTRICCIONES: tocar skills, reglas, plantillas o AGENTS.md es CDC: rama propia, diff visible, regresion verde, nada a main sin firma, sin push ni PR sin preguntar; AGENTS.md solo si de verdad falta (GEMINI.md se regenera); no se implementa ni instala nada de pagos; no tocar settings.json ni .mcp.json; lo no verificado de Polar se marca "a verificar"; secretos jamas en pantalla; espanol de Mexico.
+RED DE SEGURIDAD: si tras 30 turnos no converges, detente y reporta el bloqueo.
