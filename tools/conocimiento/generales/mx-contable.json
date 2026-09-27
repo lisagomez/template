@@ -1,0 +1,57 @@
+{
+  "jurisdiccion": "MX",
+  "dimension": "contable",
+  "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+  "reglas": [
+    {
+      "clave": "MX-CFF-28-CONTABILIDAD",
+      "jurisdiccion": "MX",
+      "dimension": "contable",
+      "titulo": "Integracion de la contabilidad y contabilidad electronica",
+      "texto_resumen": "La contabilidad se integra por libros, registros, papeles de trabajo, CFDI y demas documentacion; los registros deben cumplir los requisitos del reglamento y la contabilidad electronica se ingresa mensualmente a traves del portal del SAT.",
+      "fuente_cita": "CFF Art. 28",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CFF.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Registro contable del gasto con la documentacion soporte integrada (CFF 28)",
+            "Contabilidad electronica enviada al SAT en los plazos aplicables"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-CFF-30-CONSERVACION",
+      "jurisdiccion": "MX",
+      "dimension": "contable",
+      "titulo": "Conservacion de la contabilidad (5 anos)",
+      "texto_resumen": "La contabilidad y documentacion soporte deben conservarse durante 5 anos contados desde la fecha en que se presentaron o debieron presentarse las declaraciones relacionadas.",
+      "fuente_cita": "CFF Art. 30",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CFF.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Conservar el soporte documental del registro durante 5 anos (CFF 30)"
+          ],
+          "banderas": [],
+          "parametros": {
+            "plazo_conservacion_anios": 5,
+            "verificar": true
+          }
+        }
+      ]
+    }
+  ]
+}

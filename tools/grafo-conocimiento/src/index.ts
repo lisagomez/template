@@ -25,3 +25,4 @@ export {
   type OpcionesAdaptador,
 } from './hermes.js'
 export { CorpusParidad, CasoParidad, expandeSalida, compactaCorpus } from './paridad.js'
+export { seleccionaDominios } from './selecciona.js'

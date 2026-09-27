@@ -1,5 +1,18 @@
 # Plantilla de investigación → seed del grafo Hermes (logística / exportación)
 
+> ## En template (desde la Fase 2 de PRP-005, 2026-09-27)
+>
+> Esta plantilla vale **como método**. Lo que cambia es dónde se siembra y cómo se valida:
+> - su «Salida B» va a `tools/conocimiento/dominios/<dominio>.json` (o a `generales/` si la regla
+>   no dicta sobre una categoría), no a `seed/reglas.json`, y la categoría nueva a `catalogo.json`;
+> - el gate es `npm run prueba` en `tools/conocimiento` (`validaConocimiento`), no `gen_seed_sql.py`;
+> - **no existe `_bajas`**: retirar una regla es cerrar su `vigente_hasta`, y un significado nuevo es
+>   una regla nueva que declara `reemplaza`;
+> - el veredicto tiene que estar en el vocabulario de su dimensión, y el cambio sube la versión en
+>   `CAMBIOS.md`.
+>
+> El resto del texto describe cómo se hacía en Hermes y se conserva tal cual se importó.
+
 > Versión corregida del prompt de investigación logística para que su **salida
 > estructurada sea *drop-in* del grafo real** (`seed/reglas.json`, validado por
 > `gen_seed_sql.py --check`). Reemplaza las plantillas de esquema inventadas del

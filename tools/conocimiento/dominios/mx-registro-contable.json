@@ -1,0 +1,68 @@
+{
+  "dominio": {
+    "clave": "mx-registro-contable",
+    "nombre": "Registro contable (NIF)",
+    "jurisdiccion": "MX",
+    "dimension": "contable",
+    "cita": "publica",
+    "corte": "2026-07-30",
+    "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+    "categorias": [
+      "ARRENDAMIENTO",
+      "EQUIPO_DE_COMPUTO"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "MX-NIF-C6-ACTIVO-FIJO",
+      "jurisdiccion": "MX",
+      "dimension": "contable",
+      "titulo": "Propiedades, planta y equipo (NIF C-6)",
+      "texto_resumen": "El equipo (incluido el de computo) se reconoce como activo fijo y se deprecia contablemente segun su vida util estimada y valor residual; la tasa contable puede diferir de la fiscal (LISR 34).",
+      "fuente_cita": "NIF C-6 (CINIF), Propiedades, planta y equipo",
+      "fuente_url": "https://www.cinif.org.mx/",
+      "vigente_desde": "2011-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "EQUIPO_DE_COMPUTO",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Reconocer como propiedades, planta y equipo (activo), no como gasto",
+            "Depreciar segun vida util estimada y valor residual (NIF C-6)",
+            "Conciliar la depreciacion contable con la fiscal (LISR 34: 30%) en la conciliacion contable-fiscal"
+          ],
+          "banderas": [
+            "La depreciacion contable (NIF C-6, vida util) puede diferir de la fiscal (LISR 34): registrar la diferencia temporal"
+          ],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-NIF-D5-ARRENDAMIENTOS",
+      "jurisdiccion": "MX",
+      "dimension": "contable",
+      "titulo": "Arrendamientos (NIF D-5)",
+      "texto_resumen": "Los contratos de arrendamiento se reconocen con un activo por derecho de uso y un pasivo por arrendamiento, salvo plazo corto (<=12 meses) o bajo valor.",
+      "fuente_cita": "NIF D-5 (CINIF), Arrendamientos",
+      "fuente_url": "https://www.cinif.org.mx/",
+      "vigente_desde": "2019-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "ARRENDAMIENTO",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Evaluar si el contrato califica como arrendamiento bajo NIF D-5",
+            "Reconocer activo por derecho de uso y pasivo, salvo corto plazo o bajo valor"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}

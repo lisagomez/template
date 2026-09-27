@@ -1,0 +1,54 @@
+{
+  "dominio": {
+    "clave": "co-deducibilidad",
+    "nombre": "Deducibilidad de gastos (CO)",
+    "jurisdiccion": "CO",
+    "dimension": "fiscal",
+    "cita": "publica",
+    "corte": "2026-07-30",
+    "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+    "categorias": [
+      "SERVICIOS_PROFESIONALES"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "CO-ET-107-EXPENSAS",
+      "jurisdiccion": "CO",
+      "dimension": "fiscal",
+      "titulo": "Expensas necesarias: causalidad, necesidad y proporcionalidad",
+      "texto_resumen": "Son deducibles las expensas realizadas durante el ano gravable en desarrollo de la actividad productora de renta, siempre que tengan relacion de causalidad con ella y sean necesarias y proporcionadas.",
+      "fuente_cita": "Estatuto Tributario (CO), Art. 107",
+      "fuente_url": "http://www.secretariasenado.gov.co/senado/basedoc/estatuto_tributario.html",
+      "vigente_desde": "1989-03-30",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Relacion de causalidad con la actividad productora de renta",
+            "Gasto necesario y proporcionado segun criterio comercial (ET 107)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        },
+        {
+          "categoria": "SERVICIOS_PROFESIONALES",
+          "regimen": "GENERAL",
+          "veredicto_base": "deducible",
+          "requisitos": [
+            "Factura electronica valida del prestador",
+            "Retencion en la fuente por honorarios practicada y consignada (tarifa segun norma vigente)"
+          ],
+          "banderas": [],
+          "parametros": {
+            "retencion_honorarios_pct": 11,
+            "verificar": true
+          }
+        }
+      ]
+    }
+  ]
+}

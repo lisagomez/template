@@ -1,0 +1,321 @@
+{
+  "dominio": {
+    "clave": "mx-deducibilidad",
+    "nombre": "Deducibilidad de gastos (MX)",
+    "jurisdiccion": "MX",
+    "dimension": "fiscal",
+    "cita": "publica",
+    "corte": "2026-07-30",
+    "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;",
+    "categorias": [
+      "ARRENDAMIENTO",
+      "COMBUSTIBLES",
+      "DONATIVOS",
+      "EQUIPO_DE_COMPUTO",
+      "INTERESES",
+      "SERVICIOS_PROFESIONALES",
+      "VIATICOS"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "MX-LISR-27-I",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Estricta indispensabilidad y donativos",
+      "texto_resumen": "Las deducciones deben ser estrictamente indispensables para los fines de la actividad del contribuyente, salvo donativos no onerosos ni remunerativos a donatarias autorizadas, deducibles hasta el 7% de la utilidad fiscal del ejercicio anterior.",
+      "fuente_cita": "LISR Art. 27, fraccion I",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": null,
+          "requisitos": [
+            "El gasto es estrictamente indispensable para la actividad del negocio"
+          ],
+          "banderas": [],
+          "parametros": {}
+        },
+        {
+          "categoria": "DONATIVOS",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "dudoso",
+          "tope_pct": 7,
+          "requisitos": [
+            "La donataria esta en el listado de autorizadas del SAT vigente",
+            "CFDI de donativo",
+            "No excede 7% de la utilidad fiscal del ejercicio anterior"
+          ],
+          "banderas": [],
+          "parametros": {
+            "base_tope": "utilidad fiscal del ejercicio anterior",
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-27-III",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "CFDI y medios de pago electronicos",
+      "texto_resumen": "Deducciones amparadas con CFDI; pagos cuyo monto exceda $2,000 MXN deben efectuarse mediante transferencia, cheque nominativo, tarjeta o monedero electronico. Los combustibles para vehiculos deben pagarse con esos medios AUNQUE no excedan $2,000.",
+      "fuente_cita": "LISR Art. 27, fraccion III",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": null,
+          "requisitos": [
+            "Existe CFDI valido que ampara el gasto",
+            "Si el pago excede $2,000 MXN, se pago con medio electronico (transferencia/cheque/tarjeta/monedero)"
+          ],
+          "banderas": [],
+          "parametros": {
+            "umbral_pago_electronico_mxn": 2000,
+            "verificar": true
+          }
+        },
+        {
+          "categoria": "COMBUSTIBLES",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Pagado con medio electronico SIN importar el monto (efectivo = no deducible)",
+            "CFDI con complemento correspondiente"
+          ],
+          "banderas": [
+            "Combustible: si se pago en efectivo NO es deducible (LISR 27-III)"
+          ],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-27-V",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Retenciones a terceros (honorarios)",
+      "texto_resumen": "Cumplir obligaciones de retencion y entero de impuestos a cargo de terceros. Honorarios pagados a personas fisicas: retencion del 10% de ISR.",
+      "fuente_cita": "LISR Art. 27, fraccion V (y Art. 106 ultimo parrafo)",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "SERVICIOS_PROFESIONALES",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "deducible",
+          "requisitos": [
+            "CFDI de honorarios",
+            "Si el prestador es persona fisica: retencion de 10% ISR efectuada y enterada",
+            "Pago efectivamente erogado en el ejercicio (Art. 27 fracc. VIII)"
+          ],
+          "banderas": [],
+          "parametros": {
+            "retencion_isr_pf_pct": 10,
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-27-VII",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Intereses por capitales tomados en prestamo",
+      "texto_resumen": "Intereses deducibles cuando el capital tomado en prestamo se invierta en los fines del negocio.",
+      "fuente_cita": "LISR Art. 27, fraccion VII",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "INTERESES",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "deducible",
+          "requisitos": [
+            "El capital del prestamo se destino a los fines del negocio (documentar destino)",
+            "CFDI o estado de cuenta que ampare los intereses"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-28-V",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Viaticos: topes y faja de 50 km",
+      "texto_resumen": "Viaticos no deducibles salvo que se destinen a hospedaje, alimentacion, transporte, uso de automovil y kilometraje, aplicados fuera de una faja de 50 km del establecimiento, y el beneficiario tenga relacion de trabajo o preste servicios profesionales. Topes diarios: alimentacion $750 nacional / $1,500 extranjero; hospedaje extranjero $3,850; renta de autos $850.",
+      "fuente_cita": "LISR Art. 28, fraccion V",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "VIATICOS",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Erogado fuera de la faja de 50 km del establecimiento",
+            "Beneficiario con relacion laboral o de servicios profesionales",
+            "CFDI de cada erogacion",
+            "Dentro de los topes diarios por concepto"
+          ],
+          "banderas": [],
+          "parametros": {
+            "tope_alimentacion_nacional_dia": 750,
+            "tope_alimentacion_extranjero_dia": 1500,
+            "tope_hospedaje_extranjero_dia": 3850,
+            "tope_renta_auto_dia": 850,
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-28-XIII",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Renta de automoviles, aviones y casas habitacion",
+      "texto_resumen": "Renta de automoviles deducible hasta $200 diarios por unidad ($285 si es electrico/hibrido); renta de aviones/embarcaciones y casas habitacion solo con requisitos reglamentarios.",
+      "fuente_cita": "LISR Art. 28, fraccion XIII",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2017-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "ARRENDAMIENTO",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Si es renta de automovil: dentro del tope diario y el vehiculo es estrictamente indispensable",
+            "Si es inmueble de uso del negocio (oficina/local): CFDI de arrendamiento con retenciones aplicables",
+            "Si es casa habitacion/avion/embarcacion: cumplir requisitos del RLISR (alta probabilidad de NO deducible)"
+          ],
+          "banderas": [],
+          "parametros": {
+            "tope_renta_auto_dia": 200,
+            "tope_renta_auto_electrico_dia": 285,
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-28-XXVII",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Capitalizacion delgada (partes relacionadas extranjeras)",
+      "texto_resumen": "No deducibles los intereses de deudas con partes relacionadas residentes en el extranjero que excedan la proporcion deuda/capital de 3:1.",
+      "fuente_cita": "LISR Art. 28, fraccion XXVII",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "INTERESES",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Si el acreedor es parte relacionada extranjera: verificar que la deuda no excede 3 veces el capital contable"
+          ],
+          "banderas": [],
+          "parametros": {
+            "ratio_deuda_capital": "3:1",
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-28-XXXII",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Limitacion de intereses netos (30% utilidad fiscal ajustada)",
+      "texto_resumen": "Intereses netos del ejercicio que excedan el 30% de la utilidad fiscal ajustada no son deducibles; aplica cuando los intereses netos exceden $20,000,000.",
+      "fuente_cita": "LISR Art. 28, fraccion XXXII",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2020-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "INTERESES",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": null,
+          "tope_pct": 30,
+          "requisitos": [
+            "Si los intereses netos anuales exceden $20M MXN: revisar limite del 30% de utilidad fiscal ajustada"
+          ],
+          "banderas": [],
+          "parametros": {
+            "umbral_intereses_netos_mxn": 20000000,
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LISR-34-VII",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Equipo de computo: inversion con depreciacion 30%",
+      "texto_resumen": "El equipo de computo es INVERSION, no gasto: se deduce via depreciacion con tasa maxima anual del 30% (computadoras, servidores, impresoras).",
+      "fuente_cita": "LISR Arts. 31-34; Art. 34, fraccion VII",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "EQUIPO_DE_COMPUTO",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": "dudoso",
+          "tope_pct": 30,
+          "requisitos": [
+            "Registrar como inversion (activo fijo), no como gasto del ejercicio",
+            "Deducir via depreciacion: maximo 30% anual",
+            "CFDI a nombre del contribuyente"
+          ],
+          "banderas": [
+            "Equipo de computo: no es deducible al 100% como gasto directo; es inversion con depreciacion 30% anual (LISR 34-VII)"
+          ],
+          "parametros": {
+            "tasa_depreciacion_anual_pct": 30,
+            "verificar": true
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-SAT-CRIT-VIATICOS",
+      "jurisdiccion": "MX",
+      "dimension": "fiscal",
+      "titulo": "Criterio SAT: relacion laboral en viaticos",
+      "texto_resumen": "Para la deducibilidad, los viaticos deben corresponder a personas con relacion laboral o que presten servicios profesionales a la empresa.",
+      "fuente_cita": "Criterio Normativo SAT (viaticos)",
+      "fuente_url": "https://www.sat.gob.mx/normatividad/criterios-normativos#viaticos",
+      "vigente_desde": "2026-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "VIATICOS",
+          "regimen": "PM_TITULO_II",
+          "veredicto_base": null,
+          "requisitos": [
+            "Acreditar relacion laboral o de servicios del beneficiario del viatico (criterio SAT)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}
