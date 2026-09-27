@@ -74,6 +74,21 @@ const formatoFecha = z.enum(['DD/MM/AA', 'DD/MM/AAAA', 'MM/DD/AA', 'MM/DD/AAAA',
 const vista = z.enum(['principal', 'frente', 'etiqueta', 'caja', 'caducidad']);
 const sku = z.string().min(1).max(40);
 
+const posicionRack = z.string().regex(/^[A-Z]{1,2}-\d{2}-\d{1,2}$/);
+
+/** Escanear por zona, la ronda, el dia y la pieza suelta (ver `servidor/acciones-zona.ts`). */
+export const accionesZona = [
+  z.object({
+    accion: z.literal('escanea'), sitio: clave, zona, posicion: posicionRack.optional(), texto: z.string().min(1).max(300), veces: z.number().int().min(1).max(500).optional(),
+    todas: z.literal(true).optional(), motivo: z.string().trim().min(3).max(120).optional(), idCliente: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/),
+  }).strict(),
+  z.object({ accion: z.literal('deshaz'), sitio: clave, evento: hash }).strict(),
+  z.object({ accion: z.literal('ronda'), sitio: clave }).strict(),
+  z.object({ accion: z.literal('dia'), sitio: clave }).strict(),
+  z.object({ accion: z.literal('identifica-pieza'), sitio: clave, sku: z.string().min(1).max(40), foto: hash, tomas: z.array(hash).max(2), zona: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), ancho: z.number().min(0.01).max(1), alto: z.number().min(0.01).max(1) }).strict() }).strict(),
+  z.object({ accion: z.literal('registra-hallazgo'), sitio: clave, sku: z.string().min(1).max(40), foto: hash, recortes: z.array(hash).max(3), textoLeido: z.array(z.string().max(400)).max(3), motivo: z.string().trim().min(3).max(200).optional() }).strict(),
+] as const;
+
 /** Las acciones de la recepcion con foto (ver `servidor/acciones-recepcion.ts`). */
 export const accionesRecepcion = [
   z.object({
@@ -132,7 +147,7 @@ export const esquemaAccion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('decision'), sitio: clave, recomendacion: hash, decision: z.enum(['ejecutar', 'descartar']), motivo: z.string().trim().min(3).max(200).optional() }).strict(),
   z.object({ accion: z.literal('ancla') }).strict(),
   z.object({ accion: z.literal('conteos') }).strict(),
-  z.object({ accion: z.literal('conteo-abre'), sitio: clave, zonas: z.array(zona).min(1).max(4), tolerancia: z.number().int().min(0).max(10_000) }).strict(),
+  z.object({ accion: z.literal('conteo-abre'), sitio: clave, zonas: z.array(zona).min(1).max(4), tolerancia: z.number().int().min(0).max(10_000), ubicaciones: z.array(z.string().regex(/^(RECIBO|ALMACEN|PISO|MERMA)(-[A-Z]{1,2}-\d{2}-\d{1,2})?$/)).min(1).max(50).optional() }).strict(),
   z.object({
     accion: z.literal('conteo-lee'), folio, texto: z.string().min(1).max(200), zona, veces: z.number().int().min(1).max(500),
     posicion: z.string().regex(/^[A-Z]{1,2}-\d{2}-\d{1,2}$/, 'rack-nivel-posición, p. ej. B-04-2').optional(),
@@ -146,6 +161,7 @@ export const esquemaAccion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('presupuesto'), sitio: clave, mes, monto: z.number().min(0).max(100_000_000) }).strict(),
   z.object({ accion: z.literal('compra'), sitio: clave, rollo: clave, rollos: z.number().int().min(1).max(10_000), costoTotal: z.number().min(0).max(100_000_000) }).strict(),
   ...accionesRecepcion,
+  ...accionesZona,
   z.object({ accion: z.literal('ticket'), sitio: clave, impresora: clave, zpl: z.string().min(5).max(262_144), copias: z.number().int().min(1).max(500) }).strict(),
 ]);
 

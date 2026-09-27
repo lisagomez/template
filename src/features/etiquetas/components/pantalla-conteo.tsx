@@ -65,6 +65,7 @@ function Contar({ c, alCambiar, est }: { c: VistaConteo; alCambiar: () => void; 
   const cierra = () => void accion<{ ok: boolean; motivo?: string }>({ accion: 'conteo-cierra', folio: c.folio }).then((r) => (r.ok ? alCambiar() : setAviso(r.motivo ?? 'no se pudo')));
   return (
     <div className="space-y-3">
+      {c.ubicaciones ? <p className="rounded-lg bg-teal-50 p-2 text-sm text-teal-950 dark:bg-teal-950 dark:text-teal-100" data-prueba="ubicaciones-ciclico">Conteo cíclico: cuenta solo <b>{c.ubicaciones.join(', ')}</b>. Lee la etiqueta de la ubicación y luego las cajas.</p> : null}
       {c.ronda === 2 ? (
         <div className="rounded-lg border border-amber-400 bg-amber-50 p-2 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-100" data-prueba="recontar">
           <p className="font-semibold">Reconteo: lo cuenta otra persona, sin ver lo que se contó antes.</p>
@@ -142,7 +143,7 @@ function Cancelar({ c, alCambiar }: { c: VistaConteo; alCambiar: () => void }) {
 }
 
 function Activo({ e, c, alCambiar }: { e: Etiquetas; c: VistaConteo; alCambiar: () => void }) {
-  const contador = e.estado?.rol === 'conteo';
+  const contador = (e.estado?.rol === 'conteo' || e.estado?.rol === 'almacenista');
   const cerrado = c.estado === 'por-aplicar' || c.estado === 'aplicado';
   return (
     <article className={`${tarjeta} space-y-3`} data-prueba="conteo-activo" data-estado={c.estado} data-ronda={c.ronda}>
@@ -172,7 +173,7 @@ export function PantallaConteo({ e }: { e: Etiquetas }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
       <div className="space-y-4">
-        {e.estado?.rol === 'conteo'
+        {(e.estado?.rol === 'conteo' || e.estado?.rol === 'almacenista')
           ? <p className={`${tarjeta} text-sm`} data-prueba="nota-contador">Los conteos los abre quien supervisa. Aquí solo cuentas: lees la ubicación y las cajas, sin ver lo que dice el sistema.</p>
           : <Nuevo e={e} alAbrir={(f) => { setFolio(f); recarga(); }} />}
         <section className={`${tarjeta} space-y-1 text-sm`}>

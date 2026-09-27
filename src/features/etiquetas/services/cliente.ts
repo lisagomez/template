@@ -6,8 +6,8 @@ import type { Articulo, Asignacion, Configuracion, Consumibles, Contadores, Devo
 import type { AccionEtiquetas } from './esquemas.ts';
 
 export interface EstadoCliente {
-  /** Lo decide el servidor por el codigo del dispositivo. `conteo` no recibe cantidades. */
-  readonly rol: 'operacion' | 'conteo';
+  /** Lo decide el servidor por el codigo del dispositivo. `conteo` y `almacenista` no reciben cantidades. */
+  readonly rol: 'operacion' | 'recibo' | 'almacenista' | 'conteo';
   readonly hoy: string;
   readonly version: number;
   readonly configuracion: Configuracion;
@@ -28,6 +28,8 @@ export interface EstadoCliente {
   readonly revisiones: { sitio: string; folio: string; sku: string; cajas: number; desde: string; revision: string }[];
   /** El motor local de lectura de fechas, o null si no esta instalado. */
   readonly motor: string | null;
+  /** Solo al almacenista: los lotes con su ubicacion, SIN cantidades (sus existencias vienen vacias). */
+  readonly lotes?: { sitio: string; sku: string; gtin: string; lote: string; caducidad: string; zona: string; posicion?: string }[];
 }
 
 const CLAVE_TOKEN = 'etiquetas-token';

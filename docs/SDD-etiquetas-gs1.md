@@ -419,3 +419,114 @@ tres tablas nuevas.
 | El motor falla o no está | La recepción sigue: sin propuesta, se teclea; el error se dice sin el texto leído. | — |
 | Corpus sintético optimista | Se dice en cada tabla; los umbrales no se fijan con él. | Medir con fotos de celular reales del andén (resolución normal, encuadradas). |
 | Códigos que no se leen | Digital Link comprimido (se dice «no es GS1 Digital Link»); UPC-E sin expandir (da «el dígito no cuadra»: la pistola debe mandarlo expandido a UPC-A); la cámara no busca GS1 DataBar (por pistola con `]e0` sí se lee, es GS1). | Añadir DataBar a la cámara si un proveedor lo usa. |
+
+## 12. Escanear por zona, rondas del día y conteo cíclico (`/etiquetas/escanear`, `/etiquetas/dia`)
+
+Spec: `docs/goals/escaneo-por-zona-y-rondas.md`. Pantallas: `/etiquetas/escanear` (el día con el
+celular) y `/etiquetas/dia` (el supervisor); `/etiquetas/conteo` muestra las ubicaciones del cíclico.
+
+**Decisión del laboratorio**: cuenta el ALMACENISTA, a ciegas; el SUPERVISOR abre, concilia y
+autoriza. Nadie autoriza lo que contó. Consecuencia: el almacenista **no recibe cantidades del
+sistema en ninguna respuesta** (estado, escaneos, ronda, conteos, pieza suelta). Le basta el lote,
+dónde está y su semáforo.
+
+**Lo que se investigó y cómo cambió el diseño**
+
+| Fuente | Qué hace | Qué decidió aquí |
+|---|---|---|
+| SAP EWM (conteo cíclico por ubicación, intervalos por clase ABC) | Cuenta pocas ubicaciones al día según su clase, no el almacén entero. | `conteo-ciclico.ts`: 3 ubicaciones al día por **riesgo** (caducidad, diferencias previas, faltante repetido, volumen, días sin contar), con la razón escrita. A falta de precio, el volumen hace de «valor». |
+| Odoo (frecuencia de conteo por ubicación) | La ubicación lleva su frecuencia y su último conteo. | La vista `eti_ubicacion_conteo` del ERP da último conteo y conteos con diferencia por ubicación. |
+| Tareas dirigidas (Zebra Workcloud y WMS con «task interleaving») | Lista de tareas por recorrido, cerradas por escaneo, con escalamiento de lo atrasado. | `rondas.ts`: la ronda se genera una vez por sitio y día del estado, se congela, va en orden de recorrido (recibo → almacén → piso → merma) y cada tarea se cierra con el escaneo que la prueba (`TAREA_CERRADA`). Lo atrasado pasa a aviso alto del supervisor. |
+| UX de escaneo continuo en celular | Respuesta a pantalla completa por color, háptica y sonora; una mano. | Destello de 1,6 s con el color del semáforo o del resultado, vibración y tono distintos para bien, aviso y error; contador de la sesión; «deshacer». |
+| Offline-first en navegador | IndexedDB + reintento; llave de idempotencia para no aplicar dos veces. | `cola.ts`: el escaneo sin señal se guarda con su `idCliente` y su contexto de zona, se sube en orden al volver, y el servidor guarda la respuesta por `idCliente` (1000 últimas). |
+
+**Arquitectura**
+
+- Núcleo (`tools/etiquetas-gs1/src/`), puro y probado con `node --test`:
+  - `escaneo.ts`: `ejecutaEscaneo` (la acción de la zona según el rol), `vistaSinCantidades`, `deshazMovimiento`;
+  - `rondas.ts`: `generaRonda`, `estadoDeTareas`, `aseguraRonda`, `avanceDeRonda`;
+  - `conteo-ciclico.ts`: `eligeConteoCiclico`; `conteo.ts` gana `ubicaciones` y `vistaConteoSinCantidades`;
+  - `pieza-suelta.ts`: `identificaPieza` y `registraHallazgo` (evento `HALLAZGO`);
+  - `dia.ts`: `diaDelSitio` (tablero y avisos del supervisor).
+- App: `servidor/acciones-zona.ts` (escanea, deshaz, ronda, dia, identifica-pieza, registra-hallazgo),
+  `servidor/roles.ts` (cuatro roles), `services/cola.ts`, `hooks/use-zona.ts` y las pantallas.
+
+**Roles (los decide el servidor por el código del dispositivo)**
+
+| Rol | Variable | Zonas | Qué puede pedir |
+|---|---|---|---|
+| operación (supervisor) | `ETIQUETAS_TOKEN` | todas | todo: abre y concilia conteos, autoriza, ve el día |
+| recibo | `ETIQUETAS_TOKEN_RECIBO` | recibo | escanear, recibir (directo o con foto), confirmar, vincular códigos |
+| almacenista | `ETIQUETAS_TOKEN_ALMACEN` | almacén, piso, merma | escanear, deshacer, ronda, pieza suelta, hallazgo, contar a ciegas |
+| conteo | `ETIQUETAS_TOKEN_CONTEO` | — | solo contar |
+
+El menú de cada rol solo enseña lo suyo y recibo y almacenista entran directo a «Escanear»; pero la
+frontera es el servidor: fuera de la lista es 403, y una zona que no es del rol se rechaza aunque la
+pantalla la mande (probado en `pruebas/zonas-app.ts`).
+
+**Qué hace cada escaneo**
+
+| Zona | Lo escaneado | Resultado |
+|---|---|---|
+| cualquiera | etiqueta (414)(254) de zona o rack | fija el contexto (se olvida a los 30 min sin escanear) |
+| recibo | GS1-128 / DataMatrix / Digital Link con (17)(10) | recibido directo (regla 2/3 incluida) |
+| recibo | EAN/UPC/ITF del proveedor | la recepción con foto AHÍ MISMO (§11), sin cambiar de pantalla |
+| almacén | caja que viene de recibo | entra (y se ubica en el rack del contexto); cierra «ubicar» |
+| almacén | caja ya en almacén | lote, semáforo, rack y «baja primero ése» si otro vence antes |
+| piso | caja en rojo o vencida | RETIRA todas sus cajas de piso (rojo → almacén, vencido → merma); cierra «retirar» |
+| piso | caja de almacén | sube (aviso FEFO); cierra «resurtir» / «promover» |
+| piso | caja ya en piso | ¿se vende? con el color; naranja cierra «promover»; si la ronda pide resurtir ese lote y quedan cajas arriba, baja otra |
+| piso | EAN de una pieza suelta | foto de su fecha → lote identificado, o HALLAZGO |
+| merma | caja | baja con su motivo (vencido no lo pide) |
+
+**Medición de agilidad** — Playwright en celular (390×844), Sucursal Centro, semilla ficticia.
+Toque = click, elegir en una lista o escribir un valor; escaneo = una lectura; pantalla = una ruta
+abierta. Cada «después» empieza sin zona recordada (cuenta el escaneo de la etiqueta de la zona):
+es el peor caso.
+
+| Tarea | Antes (pantallas de hoy) | Después («Escanear» por zona) |
+|---|---|---|
+| Recibir una caja con (17)(10) | 2 toques · 1 escaneo · 1 pantalla | 0 toques · 2 escaneos · 1 pantalla |
+| Retirar de piso un lote en rojo | 3 toques · 1 escaneo · 2 pantallas | 0 toques · 2 escaneos · 1 pantalla |
+| Resurtir en orden FEFO | 2 toques · 1 escaneo · 2 pantallas | 0 toques · 2 escaneos · 1 pantalla |
+| Contar (inventario ciego) | 27 toques · 25 escaneos · 2 pantallas | 15 toques · 14 escaneos · 2 pantallas |
+
+Los escaneos de «después» incluyen la etiqueta de la zona (uno por cambio de zona, no por tarea).
+«Antes» de retirar hay que decir cuántas cajas hay en piso (se ve en el tablero): «después», el
+escaneo retira todas y el almacenista no necesita saber cuántas. En contar, casi todos los toques
+son «cajas por lectura»; el ahorro viene de contar solo las ubicaciones de riesgo del día (3) y no
+la zona entera, y de abrirlo con un toque desde el día.
+
+Lo que la tabla no dice: «antes» la persona además tenía que SABER qué retirar o resurtir (lo veía
+en el tablero y lo recordaba al ir a mover); «después» la ronda se lo dice y se cierra sola.
+
+**Formas en que esto podría estar mal o incompleto, y qué se hizo**
+
+| Riesgo | Qué se hizo | Queda |
+|---|---|---|
+| Una cantidad del sistema se cuela al almacenista (un texto de error, un campo nuevo) | Vistas por lista blanca (`vistaSinCantidades`, `vistaConteoSinCantidades`, `lotesSinCantidad`), textos pasados por `sinCantidades`, y una prueba de app con un lote CENTINELA de 137 cajas: ese número no aparece en ninguna respuesta del almacenista (estado, escaneos, deshacer, ronda, conteos) y el supervisor sí lo ve. | Un campo nuevo que alguien agregue sin pasar por la lista blanca: la prueba del centinela lo atrapa si lleva el número. |
+| El almacenista deduce cantidades («todas» sube 137 y ve cuánto bajó) | «Todas» no dice cuántas; lo que ve es lo que él mismo movió físicamente. | Contar con los ojos no se puede impedir: es lo que hace ciego el conteo del sistema, no la bodega. |
+| El rol lo decide el navegador | El rol sale del código del dispositivo en el servidor (comparación en tiempo constante; un código repetido vale solo el rol de más poder). | La identidad sigue siendo débil (§5, riesgo 18): código compartido por dispositivo + nombre declarado. |
+| Una tarea se da por hecha sin hacerla | No hay botón «hecho»: la cierra un `TAREA_CERRADA` con el escaneo del lote correcto en la zona correcta; en la base, el trigger exige que la tarea exista en la ronda, que el lote sea el suyo, que la acción esté en la cadena y que no se cierre dos veces. | Escanear el lote correcto sin haberlo movido de verdad (la etiqueta en la mano, la caja en su lugar): el conteo cíclico es el que lo destapa. |
+| Deshacer borra historia | Deshacer = `CORRECCION` con `deshace`, solo el propio movimiento y dentro de 15 min, sin nada posterior sobre ese lote; la tarea se reabre. | — |
+| La ronda cambia a media mañana | Se congela al generarse (con la cabeza de la cadena de ese momento); lo que ya no aplica se calcula con su motivo, no se reescribe. | Lo que aparece DESPUÉS de generarla (un lote que entra hoy a rojo) no entra a la ronda de hoy: lo avisa el tablero del día («entró hoy a rojo»). |
+| Selección del cíclico injusta u opaca | Regla determinista con sus razones escritas en la tarea y en la pantalla del contador. | Sin precio en el sistema de etiquetas, «valor» es volumen; con el ERP integrado, usar costo. |
+| Nadie autoriza lo que contó | Núcleo: el autorizador no puede ser quien contó ni recontó (capturado: autorizar con el almacenista que contó se rechaza). | — |
+| La cola sin señal aplica dos veces o fuera de orden | `idCliente` por escaneo y respuesta guardada en el servidor; subida en orden; lo que el servidor rechaza se dice y sale de la cola. | Solo se encolan escaneos: las fotos (pieza suelta, recepción) necesitan señal. La cola vive en el navegador de ese equipo; si se borra el almacenamiento antes de subir, se pierde (se ve «por subir»). Sin Service Worker: la página tiene que estar abierta para subir. |
+| La cola se queda con escaneos de alguien que ya no está | El contexto de zona caduca a los 30 min; la cola no caduca (se sube cuando haya señal). | Un escaneo viejo puede ya no aplicar: el servidor lo decide contra el estado de ese momento y lo dice. |
+| Una reimportación del catálogo cambia el GTIN de caja (medido en las capturas: la v2 del flujo 14 cambia el de la leche) | Los lotes guardados conservan su GTIN; las capturas de zona corren antes de la reimportación y toman el código de cada lote del estado, no del catálogo. | **Hueco real**: tras un cambio así, la etiqueta vieja de esos lotes ya no se reconoce en ningún escaneo ni conteo (saldría «fuera del catálogo»). Hace falta que el catálogo recuerde GTIN anteriores del artículo; decisión aparte. |
+| Pieza suelta con fecha mal leída | La identificación es una propuesta: se pide confirmarla con la pieza en la mano; si no cuadra es HALLAZGO (con la foto), no un ajuste. | El hallazgo no mueve inventario: lo resuelve el supervisor (recepción, corrección o merma). |
+| Avisos fuera de la app | No se hicieron: web push pasa por servidores ajenos (C4). Los avisos viven en `/etiquetas/dia`. | Web push solo con contenido sin datos del negocio y como decisión aparte. |
+| El escaneo del supervisor en piso retira sin querer | Retirar es el escaneo SOLO para rojo y vencido, y se puede deshacer. | — |
+
+**ERP (propuesta, no aplicada)**: `tools/etiquetas-gs1/migraciones/propuesta-pack-etiquetas-zona.sql`
+(va después del pack): `eti_ronda` y `eti_tarea` (solo-agregar; las instrucciones no aceptan
+«N cajas»), `eti_dispositivo` (rol de la lista y solo la HUELLA del código; se da de baja, no se
+borra), el trigger de `TAREA_CERRADA` y `HALLAZGO`, y las vistas `eti_ronda_avance` y
+`eti_ubicacion_conteo`. En el pack, los tipos `TAREA_CERRADA` y `HALLAZGO` entran a la lista única de
+`eti_evento` y un hallazgo sin fecha legible va sin caducidad. Validado en el Postgres 17 efímero,
+pruebas (q) a (t), dos instalaciones. 004 debe listar también `eti_ronda` y `eti_tarea`.
+
+**Evidencia**: `npm run prueba:etiquetas` (núcleo `pruebas/zonas.ts` + app `pruebas/zonas-app.ts`),
+`npm run capturas:etiquetas` (flujos 37 a 44 y la tabla de agilidad al final del output),
+`bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh`.

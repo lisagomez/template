@@ -209,7 +209,10 @@ function enPiso(estado: EstadoAlmacen, p: PedidoEscaneo, l: Interpretacion, rond
   const { semaforo } = semaforoDe(estado, l.articulo!.sku, l.caducidadIso!, p.hoy)
   const enPisoYa = filas.some((e) => zonaDe(e) === 'piso')
   if (enPisoYa && (semaforo === 'vencido' || semaforo === 'retiro')) return retira(estado, p, l, semaforo, ronda)
-  if (enPisoYa && !p.veces && !p.todas) {
+  // Si la ronda pide RESURTIR este lote y aun quedan cajas arriba, el escaneo en piso baja una (aunque
+  // ya haya del lote en piso): es la tarea que la persona esta haciendo, no una consulta.
+  const bajaDeRonda = Boolean(tareaQueCierra(estado, ronda, ['resurtir'], l, p.hora ?? '00:00')) && filas.some((e) => zonaDe(e) === 'almacen' || zonaDe(e) === 'recibo')
+  if (enPisoYa && !p.veces && !p.todas && !bajaDeRonda) {
     const r: ResultadoEscaneo = { estado, eventos: [], vista: { tipo: 'info', color: semaforo, titulo: TITULO_PISO[semaforo], detalle: [`${l.articulo!.descripcion} · lote ${l.lote}`], sonido: 'ok', articulo: articuloDe(l), lote: vistaLote(estado, l, p.hoy, 'PISO') } }
     return semaforo === 'promocion' ? conTarea(estado, r, p, ronda, ['promover'], l) : r
   }

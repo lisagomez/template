@@ -250,7 +250,7 @@ create index if not exists eti_evento_lote_idx on erp.eti_evento (cliente_id, gt
 -- ellos, así que se reemplazan (idempotente).
 alter table erp.eti_evento drop constraint if exists eti_evento_tipo_check;
 alter table erp.eti_evento add constraint eti_evento_tipo_check check (tipo in ('RECIBIDO','RECHAZADO','UBICADO','MOVIDO','TRANSFERIDO','VENDIDO','DEVUELTO','DONADO','MERMA',
-  'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION','CONTEO','EN_REVISION'));
+  'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION','CONTEO','EN_REVISION','TAREA_CERRADA','HALLAZGO'));
 alter table erp.eti_existencia drop constraint if exists eti_existencia_origen_check;
 alter table erp.eti_existencia add constraint eti_existencia_origen_check check (origen in ('etiquetado', 'recepcion', 'semilla', 'conteo'));
 
@@ -394,7 +394,9 @@ create table if not exists erp.eti_formato_fecha (
 -- la dejaria sin el y rechazaria las revisiones ya guardadas.)
 alter table erp.eti_evento alter column caducidad drop not null;
 alter table erp.eti_evento drop constraint if exists eti_evento_caducidad_check;
-alter table erp.eti_evento add constraint eti_evento_caducidad_check check ((caducidad is null) = (tipo = 'EN_REVISION' or (tipo = 'RECHAZADO' and datos ? 'descartada')));
+-- Un HALLAZGO (pieza de piso que no cuadra con ningún lote) va sin caducidad si la foto no la dejó leer.
+alter table erp.eti_evento add constraint eti_evento_caducidad_check check ((caducidad is null) = (tipo = 'EN_REVISION' or (tipo = 'RECHAZADO' and datos ? 'descartada')
+  or (tipo = 'HALLAZGO' and coalesce(datos->'leido'->>'fecha', '') = '')));
 
 -- La base también exige lo que exige el núcleo: la revisión cita una foto que existe, se resuelve
 -- una sola vez, y la CONFIRMA quien la registró (la pantalla no es la frontera; la base tampoco
@@ -450,6 +452,6 @@ end $$;
 -- `erp` a rol_exe_fin y solo vuelve a quitarlo en sis_bitacora y act_*. Re-correr 004 después de
 -- este pack REABRE el UPDATE de sus ledgers (medido en prueba-efimera.sh, fase 2). Al integrar,
 -- 004 debe listar también: eti_asignacion, eti_emitido, eti_importacion, eti_movimiento,
--- eti_evento, eti_testigo, eti_foto, eti_articulo_foto, eti_formato_fecha y eti_ancla (esta sin
--- INSERT para rol_exe_fin). Los triggers de
+-- eti_evento, eti_testigo, eti_foto, eti_articulo_foto, eti_formato_fecha, eti_ronda, eti_tarea y eti_ancla (esta sin
+-- INSERT para rol_exe_fin). Las rondas y tareas viven en propuesta-pack-etiquetas-zona.sql. Los triggers de
 -- solo-agregar de las tres del expediente aguantan aunque 004 reabra el UPDATE.

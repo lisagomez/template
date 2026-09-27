@@ -13,23 +13,35 @@ import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { aseguraExpediente, ejecutaExpediente } from './acciones-expediente.ts';
 import { ejecutaConteo } from './acciones-conteo.ts';
 import { ejecutaRecepcion } from './acciones-recepcion.ts';
+import { ejecutaZona } from './acciones-zona.ts';
 import { motorDelServidor } from './fotos.ts';
-import type { Rol } from './roles.ts';
+import { cuentaACiegas, type Rol } from './roles.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 
 export type Respuesta = { status: number; cuerpo: unknown };
 const ok = (cuerpo: unknown): Respuesta => ({ status: 200, cuerpo });
 const mal = (status: number, error: string): Respuesta => ({ status, cuerpo: { error } });
 
+/**
+ * Los lotes que hay, SIN cantidad: lo que necesita el almacenista (que lote, donde, cuando caduca)
+ * para trabajar sin saber cuantas cajas dice el sistema.
+ */
+function lotesSinCantidad(e: EstadoAlmacen) {
+  const vistos = new Set<string>();
+  return e.existencias.filter((x) => x.cantidad > 0).map((x) => ({ sitio: x.sitio, sku: x.sku, gtin: x.gtin, lote: x.lote, caducidad: x.caducidad, zona: x.zona ?? 'recibo', ...(x.posicion ? { posicion: x.posicion } : {}) }))
+    .filter((x) => { const k = JSON.stringify(x); if (vistos.has(k)) return false; vistos.add(k); return true; });
+}
+
 export async function leeEstado(rol: Rol = 'operacion'): Promise<Respuesta> {
   const e = await aseguraExpediente();
-  if (rol === 'conteo') {
-    // El contador recibe el catalogo y los sitios, pero NINGUNA cantidad: sin existencias,
-    // movimientos, consumo ni devoluciones.
+  if (cuentaACiegas(rol)) {
+    // Quien cuenta a ciegas (dispositivo de conteo o ALMACENISTA) recibe el catalogo, los sitios y
+    // los lotes, pero NINGUNA cantidad: sin existencias, movimientos, consumo, devoluciones ni la
+    // bandeja (que dice cuantas cajas esperan).
     return ok({
       hoy: hoyIso(), version: e.version, rol, configuracion: e.configuracion, articulos: Object.values(e.articulos), impresoras: [], existencias: [], movimientos: [],
       importaciones: [], asignaciones: [], contadores: e.contadores, agenteConSecreto: false, consumibles: CONSUMIBLES_VACIOS, devoluciones: [],
-      ...fichas(e), revisiones: [], motor: null,
+      ...fichas(e), revisiones: [], motor: rol === 'almacenista' ? motorDelServidor()?.modelo ?? null : null, ...(rol === 'almacenista' ? { lotes: lotesSinCantidad(e) } : {}),
     });
   }
   return ok({
@@ -166,6 +178,9 @@ export async function ejecuta(a: AccionEtiquetas, operador: string, rol: Rol = '
     case 'conteos': case 'conteo-abre': case 'conteo-lee': case 'conteo-cierra': case 'conteo-aplica': case 'conteo-cancela':
       await aseguraExpediente();
       return ejecutaConteo(a, operador, rol);
+    case 'escanea': case 'deshaz': case 'ronda': case 'dia': case 'identifica-pieza': case 'registra-hallazgo':
+      await aseguraExpediente();
+      return ejecutaZona(a, operador, rol);
     case 'lee-caducidad': case 'revision-confirma': case 'revision-descarta': case 'revisiones': case 'vincula-gtin': case 'foto-articulo':
       await aseguraExpediente();
       return ejecutaRecepcion(a, operador);

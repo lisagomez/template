@@ -62,7 +62,9 @@ export function CamaraFoto({ alCapturar, texto = 'Tomar la foto (ráfaga)', guia
 
   const rafaga = async () => {
     const v = video.current;
-    if (!v || !v.videoWidth) return;
+    // Tocar antes de que el video traiga imagen no puede quedar en silencio: se dice.
+    if (!v || !v.videoWidth) { setError('La cámara todavía no da imagen: espera un segundo y vuelve a tocar.'); return; }
+    setError(null);
     setTomando(true);
     try {
       const cuadros: { c: HTMLCanvasElement; n: number }[] = [];

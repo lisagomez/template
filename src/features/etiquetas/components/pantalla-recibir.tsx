@@ -102,13 +102,16 @@ function Identificado({ est, inter, lectura, cajas, setCajas, alSeguir, alRecibi
   );
 }
 
-export function PantallaRecibir({ e }: { e: Etiquetas }) {
+/** Dentro de «Escanear» (zona de recibo) llega con el codigo ya escaneado o con la revision retomada, sin su propia bandeja. */
+export type RecepcionInicial = { sitio: string; texto?: string; revision?: RevisionAbierta; alTerminar?: () => void };
+
+export function PantallaRecibir({ e, inicial }: { e: Etiquetas; inicial?: RecepcionInicial }) {
   const est = e.estado!;
-  const [sitio, setSitio] = useState(est.configuracion.sitios[0]?.clave ?? '');
-  const [texto, setTexto] = useState<string | null>(null);
+  const [sitio, setSitio] = useState(inicial?.sitio ?? est.configuracion.sitios[0]?.clave ?? '');
+  const [texto, setTexto] = useState<string | null>(inicial?.texto ?? null);
   const [cajas, setCajas] = useState(1);
-  const [paso, setPaso] = useState<'escanear' | 'foto' | 'revision' | 'hecho'>('escanear');
-  const [revision, setRevision] = useState<RevisionAbierta | null>(null);
+  const [paso, setPaso] = useState<'escanear' | 'foto' | 'revision' | 'hecho'>(inicial?.revision ? 'revision' : 'escanear');
+  const [revision, setRevision] = useState<RevisionAbierta | null>(inicial?.revision ?? null);
   const [reemplaza, setReemplaza] = useState<string | undefined>(undefined);
   const [subida, setSubida] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -120,7 +123,7 @@ export function PantallaRecibir({ e }: { e: Etiquetas }) {
   const lectura = r && !esErrorLectura(r) ? r : null;
   const inter = lectura ? interpreta(lectura.elementos, comoEstado(est), est.hoy) : null;
   const codigo: Codigo | null = inter?.gtin ? { gtin: inter.gtin, nivel: inter.nivel ?? 'unidad', ...(lectura?.formato ? { formato: lectura.formato } : {}) } : null;
-  const reinicia = () => { setTexto(null); setPaso('escanear'); setRevision(null); setReemplaza(undefined); setHecho(null); setSubida(null); setCajas(1); setVersion((v) => v + 1); void e.recarga(); };
+  const reinicia = () => { if (inicial?.alTerminar) { inicial.alTerminar(); return; } setTexto(null); setPaso('escanear'); setRevision(null); setReemplaza(undefined); setHecho(null); setSubida(null); setCajas(1); setVersion((v) => v + 1); void e.recarga(); };
   const falla = (x: unknown) => { setAviso(x instanceof Error ? x.message : String(x)); setOcupado(false); };
 
   const captura = async (c: Captura) => {
@@ -155,12 +158,12 @@ export function PantallaRecibir({ e }: { e: Etiquetas }) {
   return (
     <div className="space-y-4">
       <div className={`${tarjeta} space-y-3`}>
-        <div className="flex flex-wrap items-end gap-2">
+        <div className={`flex flex-wrap items-end gap-2 ${inicial ? 'hidden' : ''}`}>
           <label className="text-sm">Estoy en<select className={campo} value={sitio} onChange={(x) => setSitio(x.target.value)} data-prueba="sitio-recibir">{est.configuracion.sitios.map((s) => <option key={s.clave} value={s.clave}>{s.nombre}</option>)}</select></label>
           {paso !== 'escanear' ? <button type="button" className={boton} onClick={reinicia} data-prueba="nueva-recepcion">Nueva recepción</button> : null}
           <span className="text-xs text-neutral-500" data-prueba="motor">Lectura de fechas: {est.motor ? `motor local ${est.motor}` : 'sin motor instalado (se teclea)'}</span>
         </div>
-        {paso === 'escanear' ? (
+        {paso === 'escanear' && !inicial ? (
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2"><p className="text-sm font-medium">1 · Escanea el código que trae la caja</p><LectorCamara alLeer={(t) => { setTexto(t); setAviso(null); }} /></div>
             <EntradaPistola alLeer={(t) => { setTexto(t); setAviso(null); }} />
@@ -183,7 +186,7 @@ export function PantallaRecibir({ e }: { e: Etiquetas }) {
         {paso === 'hecho' && hecho ? <Resultado e={e} hecho={hecho} sitio={revision?.sitio ?? sitio} sku={revision?.sku ?? inter?.articulo?.sku ?? ''} cajas={revision?.cajas ?? inter?.cajas ?? cajas} /> : null}
         {aviso ? <p className="text-sm" role="status" data-prueba="aviso-recibir">{aviso}</p> : null}
       </div>
-      <BandejaRevisiones e={e} version={version} alRetomar={(x) => { setRevision(x); setSitio(x.sitio); setTexto(null); setPaso('revision'); }} />
+      {inicial ? null : <BandejaRevisiones e={e} version={version} alRetomar={(x) => { setRevision(x); setSitio(x.sitio); setTexto(null); setPaso('revision'); }} />}
     </div>
   );
 }

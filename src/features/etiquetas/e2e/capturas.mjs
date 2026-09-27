@@ -25,6 +25,7 @@ import { completaClave, nuevoEvento } from '../../../../tools/etiquetas-gs1/dist
 import { generaLlaves } from '../../../../tools/etiquetas-gs1/dist/firma.js';
 import { flujosConteo } from './flujos-conteo.mjs';
 import { flujosRecibir } from './flujos-recibir.mjs';
+import { flujosZona } from './flujos-zona.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -33,6 +34,8 @@ const PUERTO = Number(process.env.PUERTO_CAPTURAS ?? 3117);
 const BASE = `http://localhost:${PUERTO}`;
 const TOKEN = randomBytes(24).toString('base64url');
 const TOKEN_CONTEO = randomBytes(24).toString('base64url');
+const TOKEN_RECIBO = randomBytes(24).toString('base64url');
+const TOKEN_ALMACEN = randomBytes(24).toString('base64url');
 const SECRETO = randomBytes(32).toString('base64url');
 const informe = { flujos: [], impresion: [] };
 const dia = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
@@ -71,7 +74,7 @@ const motorPython = process.env.ETIQUETAS_MOTOR_PYTHON ?? join(raiz, '.datos/mot
 const motor = existsSync(motorPython) ? { ETIQUETAS_MOTOR_PYTHON: motorPython } : {};
 if (!motor.ETIQUETAS_MOTOR_PYTHON) console.log('  sin motor local de fechas: la recepción con foto se capturará sin propuesta');
 const app = spawn(process.execPath, [join(raiz, 'node_modules/next/dist/bin/next'), 'start', '-p', String(PUERTO)], {
-  cwd: raiz, env: { ...process.env, ...llaves, ...motor, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_TOKEN_CONTEO: TOKEN_CONTEO, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
+  cwd: raiz, env: { ...process.env, ...llaves, ...motor, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_TOKEN_CONTEO: TOKEN_CONTEO, ETIQUETAS_TOKEN_RECIBO: TOKEN_RECIBO, ETIQUETAS_TOKEN_ALMACEN: TOKEN_ALMACEN, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
 });
 // Si el guion falla a medias, el servidor NO se queda huerfano en su puerto (la corrida siguiente
 // le pegaria a el, con los datos de esta ya borrados: aprendizaje del 2026-09-21).
@@ -263,6 +266,11 @@ const impresion = await porVista(async (p, v) => {
 });
 await compone('12', 'Impresion de punta a punta: agente del CEDIS y Browser Print (Zebras simuladas)', [['escritorio · agente', impresion.escritorio[0]], ['escritorio · Browser Print', impresion.escritorio[1]], ['celular · agente', impresion.celular[0]], ['celular · Browser Print', impresion.celular[1]]]);
 
+// Escanear por zona y rol, la ronda del dia, el conteo ciclico y la medicion de agilidad: flujos 37
+// a 44. Van ANTES de reimportar el catalogo (13-14): la v2 cambia el GTIN de caja de la leche y sus
+// lotes sembrados dejarian de leerse (se anota en el SDD §12 como riesgo, no se esconde aqui).
+await flujosZona({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, BASE, TOKEN, TOKEN_CONTEO, TOKEN_RECIBO, TOKEN_ALMACEN, dia, aammdd });
+
 const catalogo = await porVista(async (p, v) => {
   await abre(p, '/etiquetas/catalogo');
   const seccion = 'section:has([data-prueba="archivo"])';
@@ -413,7 +421,8 @@ await compone('23', 'Integridad por sucursal: todas verifican contra sus anclas 
 await compone('24', 'Integridad tras reescribir Poniente: su cadena cuadra localmente pero el ancla la delata', [['escritorio', integridadDespues.escritorio], ['celular', integridadDespues.celular]]);
 
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
-console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion }, null, 1));
+console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion, zona: { ...informe.zona, tablaAgilidad: undefined } }, null, 1));
+if (informe.zona?.tablaAgilidad) console.log(`\nAgilidad (celular 390×844, medida con Playwright):\n${informe.zona.tablaAgilidad}`);
 await navegador.close();
 await conCamara?.close();
 app.kill('SIGTERM');

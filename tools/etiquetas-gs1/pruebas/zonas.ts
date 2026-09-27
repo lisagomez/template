@@ -151,6 +151,13 @@ test('una tarea se cierra SOLO con el escaneo correcto, con su TAREA_CERRADA y e
   assert.deepEqual([cajasEn(d.estado, 'C200', 'piso'), cajasEn(d.estado, 'C200', 'almacen')], [0, 20])
   assert.equal(estadoDeTareas(d.estado, ronda, '09:00').find((t) => t.id === resurtir.id)?.estado, 'pendiente', 'deshecho, la tarea se reabre')
   assert.ok(!deshazMovimiento(bien.estado, SITIO, bien.vista.deshacer!, OTRO, T(9, 5), 'x').resultado.ok, 'solo el propio')
+  // Con cajas del lote YA en piso, el escaneo en piso sigue bajando mientras la ronda pida resurtirlo…
+  const una = ejecutaEscaneo(e, pedido('piso', casa('CHO', 'C200', 60), { veces: 1 }), undefined)
+  const otraVez = ejecutaEscaneo(una.estado, pedido('piso', casa('CHO', 'C200', 60)), ronda)
+  assert.equal(otraVez.vista.tipo, 'movido', 'con la tarea pendiente, baja otra caja')
+  assert.equal(otraVez.vista.tarea?.id, resurtir.id)
+  // …y ya cerrada, el mismo escaneo es una consulta (se vende o no), no otro movimiento.
+  assert.equal(ejecutaEscaneo(otraVez.estado, pedido('piso', casa('CHO', 'C200', 60)), ronda).vista.tipo, 'info')
 })
 
 test('una tarea que YA NO APLICA se cierra sola con su motivo; lo pendiente se ATRASA pasada su hora', () => {

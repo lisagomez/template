@@ -87,7 +87,7 @@ export function resumenLegible(resumen: Readonly<Record<string, number>>): { cla
 export const TEXTO_EVENTO: Record<TipoEvento, string> = {
   RECIBIDO: 'Recibido', RECHAZADO: 'Rechazado', UBICADO: 'Ubicado', MOVIDO: 'Movido', TRANSFERIDO: 'Transferido', VENDIDO: 'Vendido', DEVUELTO: 'Devuelto',
   DONADO: 'Donado', MERMA: 'Merma', RECOMENDACION: 'Recomendación del agente', RECOMENDACION_EJECUTADA: 'Recomendación ejecutada',
-  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección', CONTEO: 'Conteo físico', EN_REVISION: 'Caducidad por confirmar (foto)',
+  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección', CONTEO: 'Conteo físico', EN_REVISION: 'Caducidad por confirmar (foto)', TAREA_CERRADA: 'Tarea de la ronda', HALLAZGO: 'Hallazgo en piso',
 };
 
 export const COLOR_EVENTO: Partial<Record<TipoEvento, string>> = {
@@ -95,6 +95,7 @@ export const COLOR_EVENTO: Partial<Record<TipoEvento, string>> = {
   RECOMENDACION: 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200', RECOMENDACION_EJECUTADA: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200',
   RECOMENDACION_DESCARTADA: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200', MERMA: 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900',
   CONTEO: 'bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-200', EN_REVISION: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200',
+  TAREA_CERRADA: 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200', HALLAZGO: 'bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-950 dark:text-fuchsia-200',
 };
 
 export const TEXTO_CLASE: Record<string, string> = { cuadra: 'Cuadra', faltante: 'Faltante', sobrante: 'Sobrante', desconocido: 'Lote desconocido' };
@@ -131,6 +132,11 @@ export function describeEvento(ev: Evento): string {
       const rs = Array.isArray(d['renglones']) ? (d['renglones'] as { zona?: string; contado?: number; diferencia?: number }[]) : [];
       const dif = rs.reduce((s, r) => s + (r.diferencia ?? 0), 0);
       return `inventario físico ${t('folio')} · contadas ${rs.reduce((s, r) => s + (r.contado ?? 0), 0)} caja(s) · ${dif === 0 ? 'cuadra' : `diferencia ${dif > 0 ? '+' : ''}${dif}`}${t('autoriza') ? ` · autorizó ${t('autoriza')}` : ''}`;
+    }
+    case 'TAREA_CERRADA': return `${t('tipoTarea')} cerrada con un escaneo en ${t('ubicacion')} (ronda ${t('ronda')})`;
+    case 'HALLAZGO': {
+      const l = (d['leido'] ?? {}) as { fecha?: string; lote?: string };
+      return `pieza en ${t('ubicacion')} que no cuadra con ningún lote del sitio · leído ${l.fecha ?? 'sin fecha'}${l.lote ? `, lote ${l.lote}` : ''} · ${t('motivo')}`;
     }
     case 'CORRECCION': return [`corrige el evento #${n('seqCorregido')}: ${t('motivo')}`, d['ajuste'] ? `ajuste de cajas` : '', t('caducidadNueva') ? `caducidad ${t('caducidadAnterior')} → ${t('caducidadNueva')}` : '', d['evidencia'] ? 'con foto de evidencia' : ''].filter(Boolean).join(' · ');
   }

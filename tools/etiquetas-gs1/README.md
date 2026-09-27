@@ -56,6 +56,17 @@ node banco/sintetico.mjs <carpeta>             # corpus sintético determinista 
 node banco/mide-caducidades.mjs --real <carpeta-real> --sintetico <carpeta> --salida medicion.md
 ```
 
+## Escanear por zona, rondas y conteo cíclico
+
+El día con el celular sin navegar menús (`/etiquetas/escanear`): se escanea la etiqueta de la zona
+y cada escaneo hace lo de esa zona para el rol del dispositivo (lo decide el servidor). La ronda
+del día sale del estado (`generaRonda`) y cada tarea se cierra con su escaneo (`TAREA_CERRADA`); el
+conteo cíclico elige pocas ubicaciones por riesgo (`eligeConteoCiclico`) y lo cuenta el
+almacenista a ciegas (`vistaSinCantidades`, `vistaConteoSinCantidades`). La pieza suelta de piso
+se identifica por la foto de su fecha (`identificaPieza`) o queda como `HALLAZGO`.
+
+Roles, decisiones, medición de agilidad y riesgos: [`docs/SDD-etiquetas-gs1.md` §12](../../docs/SDD-etiquetas-gs1.md).
+
 ## Instalar en un sitio nuevo
 
 1. **Prefijo de empresa**: en `/etiquetas/ajustes`, el GCP del certificado de GS1 México. Sin él
@@ -85,7 +96,9 @@ node banco/mide-caducidades.mjs --real <carpeta-real> --sintetico <carpeta> --sa
    el ancla (`{"accion":"ancla"}`) y otro matutino para el agente (`{"accion":"agente"}`).
 
 Variables del servidor de la app: `ETIQUETAS_TOKEN` (≥16, operación), `ETIQUETAS_TOKEN_CONTEO` (≥16,
-opcional: dispositivos que solo cuentan y no ven cantidades), `ETIQUETAS_AGENTE_SECRETO` (≥32),
+opcional: dispositivos que solo cuentan y no ven cantidades), `ETIQUETAS_TOKEN_RECIBO` y
+`ETIQUETAS_TOKEN_ALMACEN` (≥16, opcionales: recibo, y almacenista que no ve cantidades),
+`ETIQUETAS_AGENTE_SECRETO` (≥32),
 `ETIQUETAS_DATOS` (carpeta del almacén), `ETIQUETAS_ZONA` (por defecto America/Mexico_City),
 `ETIQUETAS_LLAVE_<SITIO>` (llave privada Ed25519 del sitio; nunca se imprime), `ETIQUETAS_MOTOR_PYTHON`
 (motor local de fechas, opcional),
