@@ -11,6 +11,12 @@
 > **No cierra la LIBERTAD TECNICA.** Dónde viven las reglas, el formato exacto del contrato
 > interno y cómo se implementa el parser son decisiones de quien ejecute, no de este
 > documento. Aquí se fija solo lo que la spec marca como no negociable.
+>
+> **Contrastado con el origen el 2026-09-26.** El PRP que este plan anunciaba existe como
+> propuesta: `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (**NO APROBADO**).
+> Recomienda portar el motor, que son 283 líneas puras en Hermes, traer el conocimiento de
+> Hermes como **dato pineado** y probar la paridad con un corpus generado desde el motor
+> Python. La medición y las alternativas descartadas están en `docs/SDD-grafo-hermes-a-template.md`.
 
 ## Módulos propuestos (forma, no implementación)
 
@@ -79,3 +85,16 @@ La propia spec lo pregunta en su punto 8 y sigue sin respuesta: **¿qué pasa si
 parser se cae?** ¿El motor deja de responder, o falla distinto que cuando no hay regla? Son
 dos modos de fallo con la misma cara para el usuario y respuestas distintas. Quien ejecute
 tiene que resolverlo o declararlo como límite conocido — no darlo por obvio.
+
+## Riesgos que el contraste con el origen añadió (2026-09-26)
+
+Medidos en `hermes-os-a2a@97d9f9e`. El plan de módulos de arriba no los veía:
+
+- **El gate de siembra no ve conflictos de veredicto.** El seed real pasa con uno vivo
+  (`INTERESES`). "Una regla rectora por categoría" allí es convención manual, y el módulo
+  *Gate de validación* tiene que cubrirlo, no heredarlo.
+- **Retirar una regla borra el pasado.** Allí las bajas son `DELETE`, y un hecho de 2024
+  perdió su regla. El *Almacén de reglas* tiene que cerrar vigencia, no borrar (duda de la
+  vigencia en la spec).
+- **La decisión 4 (sin cita) va contra el mecanismo de seguridad del origen.** Queda como duda
+  abierta nueva en la spec y no se reabre sin decisión humana.

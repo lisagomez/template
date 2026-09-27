@@ -8,6 +8,12 @@
 >
 > **Estado: NO CONSTRUIDA.** Su alcance declarado **es** el blueprint, no la
 > implementación. Ver `plan.md` y `tareas.md`.
+>
+> **Contrastada con el origen el 2026-09-26** (`hermes-os-a2a@97d9f9e`, medido, no de memoria):
+> `docs/SDD-grafo-hermes-a-template.md`. De los 12 RF, Hermes cumple 6, cumple a medias 4,
+> contradice 1 a propósito (RF-5) y 1 no le aplica (RF-11). Los dos incidentes constan en la
+> fuente. La forma de construirla está en `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`,
+> **PROPUESTO — NO APROBADO**: esta spec sigue sin autorizar código.
 
 ## Contexto y objetivo
 
@@ -66,8 +72,16 @@ políticas internas, clasificación de soporte) usa la misma estructura.
   SISTEMA degradará a fail-safe con bandera, y nunca elegirá una de las dos.
 
   > Anti-colisión y conflicto se resuelven **por diseño, no por suerte**. Son dos mecanismos
-  > que el sistema de origen tuvo que aprender con un incidente real cada uno; esta spec los
-  > trae incorporados desde el día uno para no pagarlos otra vez.
+  > que el sistema de origen tuvo que aprender; esta spec los trae incorporados desde el día
+  > uno para no pagarlos otra vez.
+  >
+  > **Corregido contra la fuente el 2026-09-26.** Aquí se decía que cada uno se aprendió «con
+  > un incidente real», y solo vale para las exclusiones: incidente en producción, commit
+  > `86ee4dc`. El conflicto → `dudoso` estaba en el motor **desde el primer commit** (`c321bee`,
+  > portado del motor viejo `inferenceEngine.js`). Lo que llegó después fue un *gotcha* cazado
+  > **en desarrollo** (Fase B, 2026-08-07): una regla de prohibiciones con `no_permitido` junto
+  > al `permitido` general degradaba toda la categoría. Desde entonces Hermes lo evita **a
+  > mano**, y su gate no lo detecta (RF-12).
 - RF-9: CUANDO se agregue, quite o modifique una regla, EL SISTEMA obligará a actualizar en
   el mismo cambio el test que fija el conteo total.
 - RF-10: EL SISTEMA validará la oración del usuario como entrada no confiable antes de
@@ -150,6 +164,21 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
   fallar de forma **distinguible** de "no hay regla aplicable", o son dos fallos con la
   misma cara para el usuario. Sin resolver.
 
+  > **Lo que el origen enseña, y lo que no (contraste del 2026-09-26).** Hermes **no tiene
+  > parser**: la oración se clasifica por keyword y quien la estructura es el agente de la
+  > vertical, que es un LLM. No puede contestar esta duda por nosotros. Sí demuestra dos cosas:
+  >
+  > - **En el servicio, «no puedo operar» y «no hay regla» ya fallan distinto.** Con la base caída,
+  >   la API devuelve HTTP 503 y no un `dudoso` (`businessos/grafo/app.py:36-43`). El puente A2A
+  >   termina en `failed` y nunca en un veredicto (`grafo-a2a/executor.py:109-111`).
+  > - **En el agente, prohibirlo por instrucción no bastó.** Es el incidente del motor caído
+  >   (`businessos/negocio/AGENTS.md:143-150`): un bot dijo «el grafo no está disponible» y en el
+  >   mismo mensaje dio un «Veredicto: PERMITIDO».
+  >
+  > Forma propuesta: parser caído = **error tipado sin objeto veredicto**, distinto de `sin_regla`,
+  > y un redactor que **no puede ejecutarse** sin un veredicto del motor. Sigue abierta porque hay
+  > que decidirla y probarla (TAR-10).
+
 - [NECESITA ACLARACIÓN] **El grafo modela qué significa algo, no qué significaba en una
   fecha, y esa diferencia decide si sirve para una auditoría.** RF-9 vigila la deriva
   *interna* —nadie cambia una regla sin declararlo— pero no la *externa*: el día que la
@@ -202,3 +231,33 @@ exclusiones (antes/después) y conflicto · test que fija el conteo de reglas.
   mecánico; decidir si ese cambio **afecta a una regla** no lo es. Una descripción se
   reescribe sin cambiar el fondo, y el fondo cambia con un retoque menor. El diff lo señala,
   una persona lo juzga.
+
+  > **El origen lo confirma con un caso medido (contraste del 2026-09-26).**
+  >
+  > - **El motor de Hermes ya evalúa a la fecha del hecho.** `contexto.fecha` es la fecha de la
+  >   operación, cada regla lleva `vigente_desde`/`vigente_hasta` y hay pruebas que lo fijan.
+  > - **El ciclo de vida de sus datos reescribe el pasado:**
+  >   - ninguna de sus 98 reglas usa `vigente_hasta`;
+  >   - retirar una regla es un `DELETE` (`_bajas`);
+  >   - editarla es un `upsert` sobre la misma clave;
+  >   - las keywords de las categorías no tienen historial.
+  > - **Efecto medido.** La regla de la ley de 2010 (`MX-LFPDPPP-21-CONFIDENCIALIDAD`,
+  >   `vigente_desde 2010-07-06`) **se borró** el 2026-07-30 en vez de cerrarse. Hoy, «cláusula de
+  >   confidencialidad» con un hecho del 2024-06-01 devuelve `dudoso / sin regla aplicable`: la
+  >   auditoría de un contrato de 2024 **ya no tiene regla**.
+  >
+  > Resolverlo solo en el motor no basta: la forma de arriba («solo se añade») tiene que llegar
+  > hasta las bajas y hasta las keywords. Queda abierto **si el caso de uso lo exige**, que es
+  > decisión humana (Fase 0 de PRP-005).
+
+- [NECESITA ACLARACIÓN] **¿La cita de la fuente protege o expone?** RF-5 y el segundo
+  punto de "Fuera de alcance" dejan fuera exhibir la regla al usuario final. En el origen es
+  al revés: la cita es su **mecanismo de seguridad** («cero afirmación sin fuente citada»). Quien recibe
+  «permitido» puede comprobar el artículo por sí mismo, y la lectura de la fuente primaria
+  cazó una numeración equivocada (Art. 72 frente a 74 de la Ley de Aviación Civil) que citar a
+  ciegas habría propagado.
+  Para reglas **internas** de negocio, exhibirlas puede no convenir. Para reglas de **fuente
+  pública**, ocultar la cita le quita al tercero su única vía de verificación, y eso es un daño
+  de la tabla de impacto (C4).
+  Lo que hay que decidir: si la desviación se mantiene para todo dominio o se declara **por
+  dominio**. No se toca el requisito hasta decidirlo. Evidencia: `docs/SDD-grafo-hermes-a-template.md` §5.3.
