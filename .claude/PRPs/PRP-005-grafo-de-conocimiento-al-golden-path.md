@@ -255,7 +255,24 @@ corpus, más los tipos de fallo de la spec y el juicio a la fecha del hecho.
 - controles negativos de fail-safe, exclusiones (antes/después) y conflicto;
 - vigencia de 2024 frente a 2026.
 
-### Fase 4: Gate de siembra, en la fuente
+### Fase 4: Gate de siembra, en la fuente — ✅ CERRADA 2026-09-27
+> `tools/grafo-conocimiento` 0.4.0, entrada `./gate` (`contenciones`, `huellas`, `comparaVersiones`), y en
+> `tools/conocimiento`:
+> - `versiones.json`: registro de solo añadir con las huellas de la 0.1.0, reconstruida desde su commit, y de la 0.2.0,
+>   con `MX-LISR-27-VII` firmada;
+> - `contenciones-aceptadas.json`: 15 contenciones aceptadas con su porqué, una con reserva (marcas y patentes);
+> - `pruebas/gate.ts`.
+>
+> El gate corre en `validate` a través de `prueba:tools`, **sin tocar `gates.json`**, así que no es CDC. Una entrada
+> propia en el padrón es opcional y sí lo sería.
+>
+> Controles medidos sobre el paquete real, cada uno pone rojo la prueba correcta:
+> - borrar una regla sin subir de versión;
+> - borrarla subiendo y registrando la versión (`regla_borrada`);
+> - una keyword que crea una contención sin declarar.
+>
+> Control de reversión: volver de la 0.2.0 a la foto de Hermes da `regla_borrada` + `regla_editada` + `reemplazo_editado`.
+> Suman 48 pruebas del motor y 19 del paquete.
 **Objetivo**: RF-1, RF-12 y RF-14 automáticos en `tools/conocimiento`, antes de sembrar: conflicto
 de veredictos, keywords idénticas o contenidas, vocabulario por dimensión, y ningún borrado ni edición
 en su sitio.

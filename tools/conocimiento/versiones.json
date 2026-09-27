@@ -1,0 +1,3004 @@
+{
+  "_que_es": "Registro de SOLO AÑADIR con las huellas de cada versión publicada del conocimiento (PRP-005 Fase 4). Una entrada no se reescribe nunca: se añade con `npm run registra`. El gate compara cada versión con la anterior, y exige que la versión actual del paquete esté registrada con las huellas de su contenido. `firmadas`: claves cambiadas EN SU SITIO con firma del laboratorio (correcciones de modelado, nota en RF-14).",
+  "versiones": [
+    {
+      "version": "0.1.0",
+      "firmadas": [],
+      "huellas": {
+        "reglas": {
+          "CO-ET-104-REALIZACION": {
+            "huella": "sha256:0bc33a20b88637d9b19a285a4be3676ae32d2929002b84251e440069fa84c547",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "CO-ET-107-EXPENSAS": {
+            "huella": "sha256:fb030503bebb677e70e96658c8527c60003bffdc64d9c0aebc1322465daddf73",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "CO-ET-771-2-FACTURA": {
+            "huella": "sha256:8eba78ac7a46595f2c131bddeb17112ae320df82faa5cfd488603642d750a537",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1295-1511-TESTAMENTO": {
+            "huella": "sha256:8e815ebd30e78822cd8a1bbb821779f62e7c8861fe41326c877930bc699353c0",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1599-1602-SUCESION-LEGITIMA": {
+            "huella": "sha256:dd825deaffe9530768bdd1402c250fa279ed05ab11ed821e60b2fb3607c84249",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1794-1796-ELEMENTOS": {
+            "huella": "sha256:2fc7361a2f73ccf2c336f001b353044f513beaab63ee715055f8047079a4425c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1797-TERMINACION": {
+            "huella": "sha256:8f7c62660b972058200093b67b845c64718a4239e0967558612c0ef8b17aef6b",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1843-PENA": {
+            "huella": "sha256:be4386512cad53a8fa152230f300b2aedc4bf7f729770a3d418f78f9eada96e8",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-2317-2320-FORMA-COMPRAVENTA": {
+            "huella": "sha256:e7599125993b66c9d81bf98196c467621100e7b89beb9ff988cb1a82eca12450",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-3007-3009-REGISTRO-EFECTOS": {
+            "huella": "sha256:e5c773774e4d65f951e66026477614aefc17526ace306af0a162d200fca0c9c6",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCO-78-FORMA": {
+            "huella": "sha256:953ecd8e1faa01e1f07095c843d306aa0fed64bb9bec23301cc1d9748fbd70b4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-28-CONTABILIDAD": {
+            "huella": "sha256:1a10f74abf8bd59b4766dd23c37980100dbc8c3566a9f055f2b1adb4aed1cc9c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-29A": {
+            "huella": "sha256:f1f2c91da808776fb8c00506cb7949bdbe53aeed09c7c1b4103c2bdeb5f23de4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-29A-CONTRACTUAL": {
+            "huella": "sha256:9309f031f2152b62e064665680bbfd1f25236d5f53ca7c5dd91f236128f19ba4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-30-CONSERVACION": {
+            "huella": "sha256:5dfc18f7451d562b72368bf6ecd814076e9a4c531119d60454d4ea8015bd2797",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-32BTER-BENEFICIARIO-CONTROLADOR": {
+            "huella": "sha256:8ed4736c97697b65372fedf528f74ae20f7e356286d8eb3b37692d1aa988e0e6",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LAC-30-REGISTRO-RPAS": {
+            "huella": "sha256:530e0d587076437dbcad9894ac149f68c3f4d893718380e056a61f80982c8141",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LAC-55-56-CARGA-AEREA": {
+            "huella": "sha256:d3a30abed3eed93c2d2e74df82da49e22c321fcd37ea50c51913da3db06d1971",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LAC-74-SEGURO-RPAS": {
+            "huella": "sha256:c0205250c84702f339b2a70aebe23b795a5d716179e4d9e05b0a2b4c3db1221d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-176-INFRACCIONES": {
+            "huella": "sha256:6018b763cdf304c8984b4ec1ac36036bd5c11a26319e845457836b450b66eff5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-36A-DESPACHO-ANEXOS": {
+            "huella": "sha256:a47a13982d2600389c4d848cb4803afda316f28b0d216a6ecf76586278552078",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-40-REPRESENTACION": {
+            "huella": "sha256:606a46de04a46982e3994fd027385d397456a15de83fa1ee2e6822349cdcf658",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-59-36A-ORIGEN": {
+            "huella": "sha256:9bbb4612ecdefb3299be0c0c9b024948d2a4da14e968b9d55f803b2a509c33a5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-59-PADRON-IMPORTADORES": {
+            "huella": "sha256:d4d05ba7423aeb2f5820ea46fb7d8f351819956d7566b9ff24ee8ae6ddb68c01",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-64-VALOR-ADUANA": {
+            "huella": "sha256:fc2735235667088a21a7506efef159a804ff2db834c46c98ce09b37b7c9aa175",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-90-REGIMENES": {
+            "huella": "sha256:7514b95b10fcafb1ddcafd8d192cefad113156e1e05a9feb7d8aac0be3214f63",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-15-16-RRNA-CASOS": {
+            "huella": "sha256:5b8f62bb10a65c18843ad2cc0f1686c73b5f17cc3fb52144a96a04a4e12756e9",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-17-21-RRNA-PERMISOS": {
+            "huella": "sha256:15cc69f19d25bbadd2edba700e7879bdeabb89b999ab7ad2259a1fea7319b686",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-23-24-CUPOS": {
+            "huella": "sha256:d7a0945ea9b882d489db1df09993e082dc5f3f6292f91bf0e049aca0ef23fe30",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-26-LADUA-36A-CLASIFICACION": {
+            "huella": "sha256:5126ed64a7087dee438f39c39d7f7e21fadf4430070503b5d14c823f68677074",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-26-NOM-IMPORTACION": {
+            "huella": "sha256:eac15fe95956987765b089948cf0e00a854102133e42c6e71288bcbfe2931037",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-28-62-63-PRACTICAS-DESLEALES": {
+            "huella": "sha256:afb3573884243546acb0b1c22533aec5cab023a7b25b5e17b0c279779f8b7436",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCPAF-8-50-66-68-AUTOTRANSPORTE": {
+            "huella": "sha256:45cac99bad4647d3eb097ae26b895048f5fe0e876ffb3d051c65dfdf7995da97",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFCE-86-90-CONCENTRACIONES": {
+            "huella": "sha256:4139779c93b49cab914d559fc873612f3843b49df39b8868d7bddd0378bee8ed",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-14-17-CONTACTO-PF": {
+            "huella": "sha256:84e08fe973889a5fb9e25f5a7a63bc51bddabcafabd9fc19e5422c02954973bc",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-20-CONFIDENCIALIDAD": {
+            "huella": "sha256:01c4c344af8230f4f039a61b6e5c1dc67a7669c4809b04d8af95ed56cacd9810",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-35-36-TRANSFERENCIA-INTL": {
+            "huella": "sha256:2d5856d12c3a2e1f95b113d7ba7cfce366a7d0fbf687741868c99d33e466abd9",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-6-14-CONTACTO-CORPORATIVO": {
+            "huella": "sha256:da502899a03cba480d7a9460ce36cab5879babb5801a9944326524e5d0dff816",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-9-II-FUENTE-PUBLICA": {
+            "huella": "sha256:92043ca46664daa6076607e562184c15c6c02776a5a6c3d635f15ef3752e6d75",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPIORPI-17-XI-ACTIVIDAD-VULNERABLE": {
+            "huella": "sha256:3a8e25caba4383df4494dc8e993f571d98500cceb634183be671455ce82bfe1d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPPI-170-178-MARCA-REGISTRO": {
+            "huella": "sha256:bf5245b15bafd59ce460179bc730edfd3b6f03d5d321258a1ec9ac1bdf388f70",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPPI-233-235-MARCA-USO-CADUCIDAD": {
+            "huella": "sha256:28b0a1c97b0f2a909171a883fba4ca88ff920d74afd613c9fd440a4578b077d4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPPI-53-62-78-PATENTES-VIGENCIA": {
+            "huella": "sha256:01dcb1e83f6103d33485be8e52280f7ac001ab31405f6a72262a6381751131c1",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFRA-1-10-RESPONSABILIDAD-AMBIENTAL": {
+            "huella": "sha256:59c63a2875849e20afb23de7077f08f86f32242d2e7ab96f0a5165258f6232d7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGEEPA-111BIS-EMISIONES-FUENTES-FIJAS": {
+            "huella": "sha256:bd614da2305103743a2c76f787b8cf0bae8e483d212793bb9de8a50d019973cd",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGEEPA-28-30-IMPACTO-AMBIENTAL": {
+            "huella": "sha256:28dae481cb893341afe2d613eb65afaa8e53db83747ab30492a3dd3c194e041c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGEEPA-38BIS-AUDITORIA-AMBIENTAL": {
+            "huella": "sha256:e6d018a43972a157d0505e2a27c0ab5b98f05d90cfc724b6220efe1eed6318ff",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGIPE-159-PROPAGANDA-TERCEROS": {
+            "huella": "sha256:90a268221c1be9538fd96e6dd79b619f4447fc48a1ef5ec50fefa7e9525c4971",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGPGIR-44-46-GENERADORES-RP": {
+            "huella": "sha256:45c0b835f29f4fc95347b3bed9c9c72763de26971ec962a3dec833512487ccd7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGPP-54-APORTACIONES-PROHIBIDAS": {
+            "huella": "sha256:58d68c57dcfc434dd4ce2cc67cad3aebb098b06cb5737b2a20380ea5ac78fdf2",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-10-REPRESENTACION-PODERES": {
+            "huella": "sha256:d5201622df62aa3f90c35f6a5c2398c30baeb5e37ae226bc89c643d96ccf7aa5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-128-129-REGISTRO-ACCIONES": {
+            "huella": "sha256:012d42f8b418adeae6d0e347fbc63a936f8ed5f257284d7143f9d7722be404fb",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-178-182-ASAMBLEAS": {
+            "huella": "sha256:e826d9a88e54e7f0370ec7c30f57b84fa40d5364bafc14859875055a62d78309",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-186-CONVOCATORIA-PSM": {
+            "huella": "sha256:9949825857886d57109ea77a3ee48533a430a50fe55fac64e57602cc6ecc2136",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-19-20-UTILIDADES-RESERVA": {
+            "huella": "sha256:aa4ab168380119dc26d95b1bd95b031771d422485623f422eb515915c9f1ca42",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-222-225-FUSION": {
+            "huella": "sha256:522a75806cb10b6eb895228cceaeec9217123650626292b785405e89112a7134",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-228BIS-ESCISION": {
+            "huella": "sha256:8f360f6d93ad2009fbcce5b0efeec29f29b20abcf85b495c06d84d07d225bcdc",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-260-263-SAS": {
+            "huella": "sha256:4520b2952049e12fbfcf129de44593334d6a4de36c04f19ff72f731980453d3c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-5-6-CONSTITUCION": {
+            "huella": "sha256:9d567f3948e10ad917ec7f692e832a931bfe15962f39ccd5bc931c5b29bb7b6a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-HOLDING-TENEDORA": {
+            "huella": "sha256:b8d1a1d24df8b8ca6b9eaead9f476d480e46c4dbb9c9574b99c7cd480c665f08",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGTOC-381-388-FIDEICOMISO": {
+            "huella": "sha256:cd07e03c1d0ac3b8926dbb3a5ebd4b61075876ba5b85a616ce0371828ec56d4a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGTOC-389-FIDEICOMISO-MUEBLES": {
+            "huella": "sha256:ec73ec1aa3a829a174f219fa82a584c8c55cd8bd9f05b1e7d24e9d4292a2468c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGTOC-394-FIDEICOMISOS-PROHIBIDOS": {
+            "huella": "sha256:9a74583f5bfaf489e028d18fa56ebd6172bd7994cc6fe723f70c523aff717da4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LIE-10-14-ZONA-RESTRINGIDA": {
+            "huella": "sha256:dd0d61c9611c5a47f685bcd7dcfe6a43a33fc88a46fd9997d63f03f964ea55f1",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISF-25-93-RAMOS-AGENTE": {
+            "huella": "sha256:30660d52826e03ef8f20466c6d2faa2ee17071351994cf8b93a5d387bd5a9851",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISF-93-AUTORIZACION-AGENTE": {
+            "huella": "sha256:d16131f94434ac516aa88408972bdf8d1115186a8e2c7ffd646bf2cd6a3027a7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISF-94-DEBER-INFORMACION-AGENTE": {
+            "huella": "sha256:07838a4b4bdc702fd7c859a77ddb83174e4917302c50dd94527d7af6a61fa51a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-I": {
+            "huella": "sha256:155b6316126585088cd438e85b415af40b3461a735215731239f755129694056",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-III": {
+            "huella": "sha256:5350fe054c08c6158de91d1b737a96b3e29b84d6cc6cc498f0ae2cbe6db30fa8",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-V": {
+            "huella": "sha256:0b8b923604ab830b957173ef8c32b066285fbd873f4ff63751d2c663b13997ac",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-VII": {
+            "huella": "sha256:0b0c674fb0269efae7ae3109f27e244af319fcc44e428046a69f882aa7db79fc",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-V": {
+            "huella": "sha256:beb968ede928e29ac751845f5e9303bc70f3fdfaaad94c9eae87514340ecde94",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-XIII": {
+            "huella": "sha256:bceee240dd7f529fe7f8d81a325d2fe3c35fa1ee8b717f73f321391189fb7d07",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-XXVII": {
+            "huella": "sha256:ceebc981f4f8b2dc96d2956447c93497da49bf519aadd55f9ff1b13195186ede",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-XXXII": {
+            "huella": "sha256:a23bf720bed6f1042e1ea0bfd75a83bfe9d00d179ee9c2cb7ee44ab707d53c4a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-34-VII": {
+            "huella": "sha256:69f987570e1e8f07f69e7196036ad761537801ba041302723a0ea0265dfcf14d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LMV-225-ASESOR-INVERSIONES": {
+            "huella": "sha256:d50b431e6fbb0970ca09bec544c888867e68eab06d47fa6ebee027a3d2f00ecb",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LRART5-24-26-EJERCICIO-PROFESIONAL": {
+            "huella": "sha256:a06343182bf825328e64cd8811b6f3d47cb08c3e0a87a0276f07eafcb7462d02",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-NIF-C6-ACTIVO-FIJO": {
+            "huella": "sha256:d0ad5fdaa8eeb1c93150ec2dcfb0a85fda270a5a385f055ce0b6e100f6c1f946",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-NIF-D5-ARRENDAMIENTOS": {
+            "huella": "sha256:a6ad35a72a52ddc025d7754593e2001b34cb6214eea5a0c64d7e0e97e93a7f04",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-REGDIP-263-268-CABILDEO": {
+            "huella": "sha256:7755e27b84162ce08dff17e9b6686afadd80b801ac5ab6355809c518ea265fb7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-REGSEN-298-299-CABILDEO": {
+            "huella": "sha256:fa9aa26850894a3068efb265872e970299a3214df1ec97cb4b75ad64994265ed",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-SAT-CRIT-VIATICOS": {
+            "huella": "sha256:d1b2cc2efedfb94b6b8cc0ab9f6e0eb0cdbe028ebda7ac9bd964b2992e887ae6",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-4.12-DE-MINIMIS": {
+            "huella": "sha256:71198bcd1283df9580861665b27e8aa18923b441eb576c819f6f12504e55b8b0",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-4.18-TRANSITO-TRANSBORDO": {
+            "huella": "sha256:db2c7a2a7121329601a7313563058d9de4e602dedd8b4665269386f015f7ffb9",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-4.2-MERCANCIA-ORIGINARIA": {
+            "huella": "sha256:309dbede5882656a8f064e9484c3be63400521c4888386968144d1f8cee0a879",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.11-DEVOLUCION-POSTERIOR": {
+            "huella": "sha256:49b2b65d6cdb002e6dfe95e78377ca62b4688fb6520c452fa2433a869921f314",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.2-SOLICITUD-BASE-CERTIFICACION": {
+            "huella": "sha256:84fe056237a68208b82a4046e0389f7b3e5ab0c32842ddfed170ee5d5825b8a1",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.3-BASES-COBERTURA-VIGENCIA": {
+            "huella": "sha256:6c35d8489ed9427d644d8023da29cb91e0975e14477bbc3d45177aceff8b05c2",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.4-OBLIGACIONES-IMPORTADOR": {
+            "huella": "sha256:a37cd2db153822e9e9cef804ebea5afee4704230c191170df7bff91de40dd94f",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.5-EXCEPCION-CERTIFICACION": {
+            "huella": "sha256:ccf9d33483a6d3b726b07e80e4b829cfe6e2986acdf4b50d6c7a7a744eb7a0c7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.7-ERRORES-DISCREPANCIAS": {
+            "huella": "sha256:bcf3a54224aec2b951b3ab5307c93f74d698374f3682c09f40632c5c606aeb2d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.8-CONSERVAR-REGISTROS": {
+            "huella": "sha256:1cd6b61aa7187ca762c4823364afcab92f04f412c8c586e3fba7ebe6da76f435",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.9-VERIFICACION-ORIGEN": {
+            "huella": "sha256:557887e11debd7c6c48e04c9e37270fb630438849e0fc76b1beff5d1b98662c5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5A-ELEMENTOS-MINIMOS": {
+            "huella": "sha256:bd1f8f0fd6b053213e4163ac28c29a7de47de2a7a46cfae68864a2a6e3dd869d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-7.20-AGENTES-ADUANALES": {
+            "huella": "sha256:507259e8034c065ab49ac5b5e173d8f8ec3e28e2980967527e26b64242ba70f7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-7.5-RESOLUCIONES-ANTICIPADAS": {
+            "huella": "sha256:fcf7728ed467d45dc74679fe3441a87548a289f2904971c11eede1284b7f7788",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-7.8-ENVIOS-ENTREGA-RAPIDA": {
+            "huella": "sha256:b9e6142bcceb098fc051910ab99213c471365c3faf30d61256c96ecdef99588f",
+            "vigente_hasta": null,
+            "reemplaza": null
+          }
+        },
+        "categorias": {
+          "AGENTES_SEGUROS": {
+            "keywords": [
+              "agente de seguros",
+              "agente de seguros y fianzas",
+              "cedula de agente",
+              "corredor de seguros",
+              "correduria de seguros",
+              "intermediacion de seguros",
+              "intermediario de seguros",
+              "vender seguros"
+            ],
+            "exclusiones": []
+          },
+          "APORTACIONES_POLITICAS": {
+            "keywords": [
+              "aportacion a campana",
+              "aportacion a partido",
+              "aportaciones a partidos",
+              "apoyar economicamente a un candidato",
+              "donar a un partido",
+              "donativo a partido",
+              "donativos a partidos",
+              "financiamiento de campana",
+              "financiamiento de campanas"
+            ],
+            "exclusiones": []
+          },
+          "ARRENDAMIENTO": {
+            "keywords": [
+              "alquiler",
+              "arrendamiento",
+              "leasing",
+              "renta",
+              "renta de auto",
+              "renta de local",
+              "renta de oficina"
+            ],
+            "exclusiones": []
+          },
+          "ASAMBLEAS_SOCIETARIAS": {
+            "keywords": [
+              "acta de asamblea",
+              "asamblea de accionistas",
+              "asamblea de socios",
+              "asamblea extraordinaria",
+              "asamblea ordinaria",
+              "comisario",
+              "consejo de administracion",
+              "convocatoria de asamblea"
+            ],
+            "exclusiones": []
+          },
+          "ASESORIA_INVERSIONES": {
+            "keywords": [
+              "administracion de cartera",
+              "asesor en inversiones",
+              "asesores en inversiones",
+              "asesoria de inversiones",
+              "asesoria financiera",
+              "cartera de valores",
+              "consultoria financiera",
+              "financial consulting",
+              "invertir en bolsa",
+              "portafolio de inversion",
+              "recomendaciones de inversion"
+            ],
+            "exclusiones": []
+          },
+          "AUDITORIA_AMBIENTAL": {
+            "keywords": [
+              "auditoria ambiental",
+              "autorregulacion ambiental",
+              "certificado ambiental",
+              "industria limpia"
+            ],
+            "exclusiones": []
+          },
+          "AUTOTRANSPORTE_CARGA": {
+            "keywords": [
+              "agencia de carga",
+              "autotransporte",
+              "autotransporte de carga",
+              "autotransporte federal",
+              "camion de carga",
+              "carta de porte",
+              "carta porte",
+              "complemento carta porte",
+              "flete terrestre",
+              "paqueteria y mensajeria",
+              "permiso sict",
+              "transporte terrestre de carga"
+            ],
+            "exclusiones": [
+              "air waybill",
+              "carga aerea",
+              "e-awb",
+              "eawb",
+              "guia aerea",
+              "guia de carga aerea",
+              "transporte aereo de carga"
+            ]
+          },
+          "CABILDEO_CONGRESO": {
+            "keywords": [
+              "cabildeo",
+              "cabildero",
+              "cabilderos",
+              "gestion de intereses",
+              "influir en una iniciativa",
+              "lobby",
+              "lobbying",
+              "registro de cabilderos"
+            ],
+            "exclusiones": []
+          },
+          "CARGA_AEREA_EAWB": {
+            "keywords": [
+              "air waybill",
+              "awb",
+              "carga aerea",
+              "carta de porte aerea",
+              "e-awb",
+              "eawb",
+              "guia aerea",
+              "guia de carga aerea",
+              "transporte aereo de carga"
+            ],
+            "exclusiones": [
+              "autotransporte",
+              "carta de porte terrestre"
+            ]
+          },
+          "CLASIFICACION_ARANCELARIA": {
+            "keywords": [
+              "arancel",
+              "aranceles",
+              "clasificacion arancelaria",
+              "fraccion arancelaria",
+              "fracciones arancelarias",
+              "nomenclatura arancelaria",
+              "tarifa arancelaria"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_CONFIDENCIALIDAD": {
+            "keywords": [
+              "confidencial",
+              "confidencialidad",
+              "nda",
+              "no divulgacion",
+              "secreto industrial"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_PAGO": {
+            "keywords": [
+              "anticipo",
+              "calendario de pagos",
+              "condiciones de pago",
+              "contraprestacion",
+              "forma de pago",
+              "precio pactado"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_PENAL": {
+            "keywords": [
+              "clausula penal",
+              "mora",
+              "pena convencional",
+              "penalizacion"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_TERMINACION": {
+            "keywords": [
+              "causales de terminacion",
+              "preaviso",
+              "renovacion automatica",
+              "rescision",
+              "terminacion",
+              "vigencia del contrato"
+            ],
+            "exclusiones": []
+          },
+          "COMBUSTIBLES": {
+            "keywords": [
+              "carga de combustible",
+              "combustible",
+              "diesel",
+              "gasolina",
+              "magna",
+              "premium"
+            ],
+            "exclusiones": []
+          },
+          "COMPRAVENTA_INMUEBLES": {
+            "keywords": [
+              "adquirir un inmueble",
+              "bien inmueble",
+              "bienes inmuebles",
+              "compra de inmueble",
+              "compraventa de inmueble",
+              "compraventa de inmuebles",
+              "derecho inmobiliario",
+              "enajenacion de inmueble",
+              "inmobiliaria",
+              "inmobiliario",
+              "inmueble",
+              "inmuebles",
+              "predio",
+              "property law",
+              "terreno",
+              "venta de inmueble"
+            ],
+            "exclusiones": [
+              "fideicomiso",
+              "zona restringida"
+            ]
+          },
+          "CONCENTRACIONES_COFECE": {
+            "keywords": [
+              "adquirir una sociedad",
+              "adquisicion de empresa",
+              "adquisicion de empresas",
+              "cofece",
+              "compra de empresa",
+              "comprar una empresa",
+              "concentracion economica",
+              "notificacion de concentracion",
+              "tomar control de una empresa"
+            ],
+            "exclusiones": []
+          },
+          "CONSTITUCION_SOCIEDADES": {
+            "keywords": [
+              "acta constitutiva",
+              "constitucion de sociedad",
+              "constituir una empresa",
+              "constituir una sociedad",
+              "escritura constitutiva",
+              "estatutos sociales",
+              "registro publico de comercio",
+              "sociedad anonima",
+              "sociedad de responsabilidad limitada"
+            ],
+            "exclusiones": [
+              "sociedad por acciones simplificada"
+            ]
+          },
+          "DATOS_CONTACTO_CORPORATIVO": {
+            "keywords": [
+              "contacto corporativo",
+              "correo corporativo",
+              "email corporativo",
+              "inferencia de correo",
+              "patron de correo de dominio"
+            ],
+            "exclusiones": []
+          },
+          "DATOS_CONTACTO_PERSONA_FISICA": {
+            "keywords": [
+              "correo personal de titular",
+              "dato de persona fisica",
+              "prospeccion a persona fisica",
+              "telefono personal de titular"
+            ],
+            "exclusiones": []
+          },
+          "DATOS_FUENTE_PUBLICA": {
+            "keywords": [
+              "consulta denue",
+              "fuente publica oficial",
+              "lista 69-b",
+              "padron publico oficial",
+              "rfc de fuente publica"
+            ],
+            "exclusiones": []
+          },
+          "DATOS_TRANSFERENCIA_INTL": {
+            "keywords": [
+              "encargado en el extranjero",
+              "proveedor extranjero de datos",
+              "transferencia internacional de datos"
+            ],
+            "exclusiones": []
+          },
+          "DESPACHO_ADUANERO": {
+            "keywords": [
+              "aduana",
+              "aduanas",
+              "anexos al pedimento",
+              "despacho aduanero",
+              "documento aduanero",
+              "pedimento",
+              "pedimentos",
+              "sistema electronico aduanero"
+            ],
+            "exclusiones": []
+          },
+          "DIVIDENDOS_UTILIDADES": {
+            "keywords": [
+              "distribucion de utilidades",
+              "dividendo",
+              "dividendos",
+              "pago de dividendos",
+              "reparto de utilidades",
+              "reserva legal"
+            ],
+            "exclusiones": []
+          },
+          "DONATIVOS": {
+            "keywords": [
+              "donacion",
+              "donaciones",
+              "donativo",
+              "donativos"
+            ],
+            "exclusiones": []
+          },
+          "DRONES_DELIVERY": {
+            "keywords": [
+              "aeronave no tripulada",
+              "delivery con dron",
+              "dron",
+              "dron de reparto",
+              "drone delivery",
+              "drones",
+              "entrega por dron",
+              "reparto con dron",
+              "rpas",
+              "vehiculo aereo no tripulado"
+            ],
+            "exclusiones": [
+              "agente de seguros",
+              "agente de seguros y fianzas",
+              "cedula de agente",
+              "corredor de seguros",
+              "correduria de seguros",
+              "intermediacion de seguros",
+              "intermediario de seguros",
+              "vender seguros"
+            ]
+          },
+          "EMISIONES_ATMOSFERA": {
+            "keywords": [
+              "contaminacion atmosferica",
+              "emision de gases",
+              "emisiones a la atmosfera",
+              "fuente fija",
+              "fuentes fijas",
+              "licencia ambiental",
+              "licencia ambiental unica"
+            ],
+            "exclusiones": []
+          },
+          "EQUIPO_DE_COMPUTO": {
+            "keywords": [
+              "computadora",
+              "disco duro",
+              "equipo de computo",
+              "impresora",
+              "laptop",
+              "macbook",
+              "memoria ram",
+              "monitor",
+              "pc de escritorio",
+              "servidor",
+              "teclado"
+            ],
+            "exclusiones": []
+          },
+          "FIDEICOMISO_CONSTITUCION": {
+            "keywords": [
+              "constituir un fideicomiso",
+              "contrato de fideicomiso",
+              "fideicomisario",
+              "fideicomiso",
+              "fideicomiso testamentario",
+              "fideicomisos",
+              "fideicomitente",
+              "fiduciaria",
+              "patrimonio fideicomitido"
+            ],
+            "exclusiones": []
+          },
+          "FIDEICOMISO_ZONA_RESTRINGIDA": {
+            "keywords": [
+              "adquisicion por extranjeros",
+              "extranjero comprar inmueble",
+              "extranjeros en zona restringida",
+              "fideicomiso de zona restringida",
+              "inmueble en zona restringida",
+              "zona restringida"
+            ],
+            "exclusiones": []
+          },
+          "FUSION_ESCISION": {
+            "keywords": [
+              "escindir",
+              "escision",
+              "escision de sociedades",
+              "fusion",
+              "fusion de sociedades",
+              "fusionar"
+            ],
+            "exclusiones": []
+          },
+          "GRUPOS_HOLDING": {
+            "keywords": [
+              "controladora",
+              "filial",
+              "filiales",
+              "grupo de sociedades",
+              "grupo empresarial",
+              "holding",
+              "sociedad controladora",
+              "subsidiaria",
+              "subsidiarias",
+              "tenedora de acciones"
+            ],
+            "exclusiones": []
+          },
+          "IMPACTO_AMBIENTAL": {
+            "keywords": [
+              "autorizacion de impacto ambiental",
+              "evaluacion de impacto ambiental",
+              "impacto ambiental",
+              "manifestacion de impacto ambiental",
+              "mia",
+              "semarnat"
+            ],
+            "exclusiones": []
+          },
+          "INFRACCIONES_ADUANERAS": {
+            "keywords": [
+              "exportacion prohibida",
+              "importacion prohibida",
+              "infraccion aduanera",
+              "infracciones aduaneras",
+              "mercancia prohibida"
+            ],
+            "exclusiones": []
+          },
+          "INTERESES": {
+            "keywords": [
+              "credito",
+              "financiamiento",
+              "interes",
+              "interes moratorio",
+              "intereses",
+              "prestamo"
+            ],
+            "exclusiones": []
+          },
+          "MARCAS_REGISTRO": {
+            "keywords": [
+              "aviso comercial",
+              "avisos comerciales",
+              "marca",
+              "marca registrada",
+              "marcas",
+              "marcas y patentes",
+              "registro de marca",
+              "registro de marcas",
+              "signo distintivo",
+              "signos distintivos",
+              "trademark"
+            ],
+            "exclusiones": [
+              "marca blanca",
+              "marca de agua",
+              "marca personal"
+            ]
+          },
+          "ORIGEN_MERCANCIAS": {
+            "keywords": [
+              "certificado de origen",
+              "marcado de pais de origen",
+              "pais de origen",
+              "preferencia arancelaria",
+              "preferencias arancelarias",
+              "prueba de origen",
+              "regla de origen",
+              "reglas de origen"
+            ],
+            "exclusiones": [
+              "origen de los fondos",
+              "origen de los recursos",
+              "origen licito"
+            ]
+          },
+          "PADRON_IMPORTADORES": {
+            "keywords": [
+              "expediente electronico",
+              "importador de registro",
+              "padron de exportadores",
+              "padron de importadores",
+              "padron de sectores especificos",
+              "padron sectorial"
+            ],
+            "exclusiones": []
+          },
+          "PATENTES_INVENCIONES": {
+            "keywords": [
+              "diseño industrial",
+              "diseños industriales",
+              "invencion",
+              "invenciones",
+              "modelo de utilidad",
+              "modelos de utilidad",
+              "patente",
+              "patentes",
+              "registro de patente"
+            ],
+            "exclusiones": []
+          },
+          "PODERES_REPRESENTACION": {
+            "keywords": [
+              "apoderado",
+              "apoderado legal",
+              "otorgamiento de poderes",
+              "otorgar poderes",
+              "poder notarial",
+              "poderes notariales",
+              "representante legal",
+              "revocacion de poderes"
+            ],
+            "exclusiones": []
+          },
+          "PRACTICAS_DESLEALES": {
+            "keywords": [
+              "antidumping",
+              "cuota compensatoria",
+              "cuotas compensatorias",
+              "discriminacion de precios",
+              "dumping",
+              "practica desleal",
+              "practicas desleales",
+              "subvencion",
+              "subvenciones"
+            ],
+            "exclusiones": []
+          },
+          "PROPAGANDA_ELECTORAL": {
+            "keywords": [
+              "anuncios de campana",
+              "contratar propaganda",
+              "propaganda electoral",
+              "propaganda politica",
+              "publicidad electoral",
+              "spots electorales"
+            ],
+            "exclusiones": []
+          },
+          "REGIMENES_ADUANEROS": {
+            "keywords": [
+              "deposito fiscal",
+              "exportacion definitiva",
+              "exportacion temporal",
+              "importacion definitiva",
+              "importacion temporal",
+              "maquila",
+              "programa de maquila",
+              "recinto fiscalizado",
+              "recinto fiscalizado estrategico",
+              "regimen aduanero",
+              "regimenes aduaneros",
+              "transito de mercancias",
+              "transito internacional",
+              "transito interno"
+            ],
+            "exclusiones": []
+          },
+          "REGISTRO_ACCIONES_BC": {
+            "keywords": [
+              "beneficiario controlador",
+              "beneficiarios controladores",
+              "cesion de acciones",
+              "libro de registro de acciones",
+              "registro de acciones",
+              "transmision de acciones"
+            ],
+            "exclusiones": []
+          },
+          "REGISTRO_PROPIEDAD": {
+            "keywords": [
+              "certificado de gravamenes",
+              "certificado de libertad de gravamen",
+              "folio real",
+              "gravamen inmobiliario",
+              "inscribir la escritura",
+              "inscripcion registral",
+              "registro publico de la propiedad"
+            ],
+            "exclusiones": []
+          },
+          "REGULACIONES_NO_ARANCELARIAS": {
+            "keywords": [
+              "cupo",
+              "cupo de exportacion",
+              "cupo de importacion",
+              "cupos",
+              "norma oficial mexicana",
+              "normas oficiales mexicanas",
+              "permiso previo",
+              "permisos previos",
+              "regulacion no arancelaria",
+              "regulaciones no arancelarias",
+              "restriccion no arancelaria",
+              "restricciones no arancelarias"
+            ],
+            "exclusiones": []
+          },
+          "REPRESENTACION_ADUANAL": {
+            "keywords": [
+              "agencia aduanal",
+              "agencias aduanales",
+              "agente aduanal",
+              "agentes aduanales",
+              "apoderado aduanal",
+              "mandatario aduanal",
+              "representante legal aduanero"
+            ],
+            "exclusiones": []
+          },
+          "RESIDUOS_PELIGROSOS": {
+            "keywords": [
+              "bitacora de residuos",
+              "generador de residuos",
+              "generadores de residuos",
+              "manejo de residuos",
+              "plan de manejo de residuos",
+              "residuo peligroso",
+              "residuos peligrosos"
+            ],
+            "exclusiones": []
+          },
+          "RESPONSABILIDAD_AMBIENTAL": {
+            "keywords": [
+              "compensacion ambiental",
+              "dano ambiental",
+              "danos ambientales",
+              "delito ambiental",
+              "delitos ambientales",
+              "profepa",
+              "reparacion del dano ambiental",
+              "responsabilidad ambiental"
+            ],
+            "exclusiones": []
+          },
+          "SAS_CONSTITUCION": {
+            "keywords": [
+              "acciones simplificada",
+              "sas",
+              "sociedad por acciones simplificada"
+            ],
+            "exclusiones": []
+          },
+          "SERVICIOS_LEGALES": {
+            "keywords": [
+              "abogacia",
+              "abogados",
+              "asesoria juridica",
+              "asesoria legal",
+              "attorney",
+              "attorneys",
+              "bufete",
+              "bufetes",
+              "de legal",
+              "despacho de abogados",
+              "despacho juridico",
+              "despacho legal",
+              "despachos de abogados",
+              "firma de abogados",
+              "firma legal",
+              "law firm",
+              "lawyer",
+              "lawyers",
+              "legal services",
+              "litigio",
+              "litigios",
+              "servicios juridicos",
+              "servicios legales"
+            ],
+            "exclusiones": [
+              "apoderado legal",
+              "fundamento legal",
+              "marco legal",
+              "representante legal",
+              "requisitos legales",
+              "reserva legal"
+            ]
+          },
+          "SERVICIOS_PROFESIONALES": {
+            "keywords": [
+              "abogado",
+              "asesoria",
+              "consultoria",
+              "contador",
+              "desarrollo de software",
+              "diseno",
+              "freelance",
+              "honorarios",
+              "notario",
+              "servicio profesional",
+              "servicios profesionales"
+            ],
+            "exclusiones": []
+          },
+          "TESTAMENTOS_SUCESIONES": {
+            "keywords": [
+              "albacea",
+              "derecho sucesorio",
+              "heredero",
+              "herederos",
+              "herencia",
+              "intestado",
+              "intestamentario",
+              "intestamentarios",
+              "juicio sucesorio",
+              "juicios sucesorios",
+              "legado",
+              "legatario",
+              "sucesion",
+              "sucesion legitima",
+              "sucesion testamentaria",
+              "sucesiones",
+              "sucesiones testamentarias",
+              "sucesorio",
+              "sucesorios",
+              "testamentario",
+              "testamento",
+              "testamentos"
+            ],
+            "exclusiones": [
+              "fideicomiso"
+            ]
+          },
+          "TMEC_CERTIFICACION_ORIGEN": {
+            "keywords": [
+              "anexo 5-a",
+              "autocertificacion de origen",
+              "certificacion de origen",
+              "certificacion de origen t-mec",
+              "certificado de origen t-mec",
+              "elementos minimos de informacion"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_ENVIOS_ENTREGA_RAPIDA": {
+            "keywords": [
+              "courier",
+              "de minimis aduanero",
+              "entrega rapida",
+              "envio de entrega rapida",
+              "envios de entrega rapida",
+              "mensajeria internacional"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_REGLAS_ORIGEN": {
+            "keywords": [
+              "acumulacion de origen",
+              "anexo 4-b",
+              "cambio de clasificacion arancelaria",
+              "de minimis",
+              "mercancia originaria",
+              "mercancias originarias",
+              "reglas de origen especificas por producto",
+              "transbordo",
+              "valor de contenido regional"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_RESOLUCIONES_ANTICIPADAS": {
+            "keywords": [
+              "criterio anticipado",
+              "resolucion anticipada",
+              "resoluciones anticipadas"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_TRATO_PREFERENCIAL": {
+            "keywords": [
+              "arancel preferencial",
+              "t-mec",
+              "tmec",
+              "tratado entre mexico estados unidos y canada",
+              "trato arancelario preferencial",
+              "trato preferencial",
+              "usmca"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_VERIFICACION_ORIGEN": {
+            "keywords": [
+              "conservacion de registros",
+              "conservar registros",
+              "cuestionario de verificacion",
+              "determinacion de origen",
+              "verificacion de origen",
+              "visita de verificacion"
+            ],
+            "exclusiones": []
+          },
+          "VALOR_ADUANA": {
+            "keywords": [
+              "base gravable",
+              "cuenta aduanera de garantia",
+              "precio estimado",
+              "valor de transaccion",
+              "valor en aduana",
+              "valoracion aduanera"
+            ],
+            "exclusiones": []
+          },
+          "VIATICOS": {
+            "keywords": [
+              "avion",
+              "boleto de avion",
+              "hospedaje",
+              "hotel",
+              "kilometraje",
+              "peaje",
+              "taxi",
+              "transporte foraneo",
+              "uber",
+              "viaje",
+              "viatico",
+              "viaticos",
+              "vuelo"
+            ],
+            "exclusiones": []
+          }
+        },
+        "dominios": {
+          "co-deducibilidad": {
+            "categorias": [
+              "SERVICIOS_PROFESIONALES"
+            ]
+          },
+          "mx-agentes-de-seguros": {
+            "categorias": [
+              "AGENTES_SEGUROS"
+            ]
+          },
+          "mx-ambiental": {
+            "categorias": [
+              "AUDITORIA_AMBIENTAL",
+              "EMISIONES_ATMOSFERA",
+              "IMPACTO_AMBIENTAL",
+              "RESIDUOS_PELIGROSOS",
+              "RESPONSABILIDAD_AMBIENTAL"
+            ]
+          },
+          "mx-cabildeo-y-politica": {
+            "categorias": [
+              "APORTACIONES_POLITICAS",
+              "CABILDEO_CONGRESO",
+              "PROPAGANDA_ELECTORAL"
+            ]
+          },
+          "mx-clausulas-contractuales": {
+            "categorias": [
+              "CLAUSULA_CONFIDENCIALIDAD",
+              "CLAUSULA_PAGO",
+              "CLAUSULA_PENAL",
+              "CLAUSULA_TERMINACION"
+            ]
+          },
+          "mx-comercio-exterior": {
+            "categorias": [
+              "CLASIFICACION_ARANCELARIA",
+              "DESPACHO_ADUANERO",
+              "INFRACCIONES_ADUANERAS",
+              "ORIGEN_MERCANCIAS",
+              "PADRON_IMPORTADORES",
+              "PRACTICAS_DESLEALES",
+              "REGIMENES_ADUANEROS",
+              "REGULACIONES_NO_ARANCELARIAS",
+              "REPRESENTACION_ADUANAL",
+              "VALOR_ADUANA"
+            ]
+          },
+          "mx-corporativo-mercantil": {
+            "categorias": [
+              "ASAMBLEAS_SOCIETARIAS",
+              "CONCENTRACIONES_COFECE",
+              "CONSTITUCION_SOCIEDADES",
+              "DIVIDENDOS_UTILIDADES",
+              "FUSION_ESCISION",
+              "GRUPOS_HOLDING",
+              "PODERES_REPRESENTACION",
+              "REGISTRO_ACCIONES_BC",
+              "SAS_CONSTITUCION"
+            ]
+          },
+          "mx-datos-personales-prospeccion": {
+            "categorias": [
+              "DATOS_CONTACTO_CORPORATIVO",
+              "DATOS_CONTACTO_PERSONA_FISICA",
+              "DATOS_FUENTE_PUBLICA",
+              "DATOS_TRANSFERENCIA_INTL"
+            ]
+          },
+          "mx-deducibilidad": {
+            "categorias": [
+              "ARRENDAMIENTO",
+              "COMBUSTIBLES",
+              "DONATIVOS",
+              "EQUIPO_DE_COMPUTO",
+              "INTERESES",
+              "SERVICIOS_PROFESIONALES",
+              "VIATICOS"
+            ]
+          },
+          "mx-drones-de-reparto": {
+            "categorias": [
+              "DRONES_DELIVERY"
+            ]
+          },
+          "mx-fiduciario-inmobiliario-sucesorio": {
+            "categorias": [
+              "COMPRAVENTA_INMUEBLES",
+              "FIDEICOMISO_CONSTITUCION",
+              "FIDEICOMISO_ZONA_RESTRINGIDA",
+              "REGISTRO_PROPIEDAD",
+              "TESTAMENTOS_SUCESIONES"
+            ]
+          },
+          "mx-logistica-carga": {
+            "categorias": [
+              "AUTOTRANSPORTE_CARGA",
+              "CARGA_AEREA_EAWB"
+            ]
+          },
+          "mx-propiedad-industrial": {
+            "categorias": [
+              "MARCAS_REGISTRO",
+              "PATENTES_INVENCIONES"
+            ]
+          },
+          "mx-registro-contable": {
+            "categorias": [
+              "ARRENDAMIENTO",
+              "EQUIPO_DE_COMPUTO"
+            ]
+          },
+          "mx-servicios-financieros": {
+            "categorias": [
+              "ASESORIA_INVERSIONES"
+            ]
+          },
+          "mx-servicios-legales": {
+            "categorias": [
+              "SERVICIOS_LEGALES"
+            ]
+          },
+          "mx-t-mec": {
+            "categorias": [
+              "TMEC_CERTIFICACION_ORIGEN",
+              "TMEC_ENVIOS_ENTREGA_RAPIDA",
+              "TMEC_REGLAS_ORIGEN",
+              "TMEC_RESOLUCIONES_ANTICIPADAS",
+              "TMEC_TRATO_PREFERENCIAL",
+              "TMEC_VERIFICACION_ORIGEN"
+            ]
+          }
+        },
+        "vocabulario": {
+          "fiscal": [
+            "deducible",
+            "dudoso",
+            "no_deducible"
+          ],
+          "contable": [
+            "deducible",
+            "dudoso",
+            "no_deducible"
+          ],
+          "contractual": [
+            "deducible",
+            "dudoso",
+            "no_deducible"
+          ],
+          "regulatorio": [
+            "dudoso",
+            "no_permitido",
+            "permitido"
+          ],
+          "datos-personales": [
+            "dudoso",
+            "no_permitido",
+            "permitido"
+          ]
+        }
+      }
+    },
+    {
+      "version": "0.2.0",
+      "firmadas": [
+        "MX-LISR-27-VII"
+      ],
+      "huellas": {
+        "reglas": {
+          "CO-ET-104-REALIZACION": {
+            "huella": "sha256:0bc33a20b88637d9b19a285a4be3676ae32d2929002b84251e440069fa84c547",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "CO-ET-107-EXPENSAS": {
+            "huella": "sha256:fb030503bebb677e70e96658c8527c60003bffdc64d9c0aebc1322465daddf73",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "CO-ET-771-2-FACTURA": {
+            "huella": "sha256:8eba78ac7a46595f2c131bddeb17112ae320df82faa5cfd488603642d750a537",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1295-1511-TESTAMENTO": {
+            "huella": "sha256:8e815ebd30e78822cd8a1bbb821779f62e7c8861fe41326c877930bc699353c0",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1599-1602-SUCESION-LEGITIMA": {
+            "huella": "sha256:dd825deaffe9530768bdd1402c250fa279ed05ab11ed821e60b2fb3607c84249",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1794-1796-ELEMENTOS": {
+            "huella": "sha256:2fc7361a2f73ccf2c336f001b353044f513beaab63ee715055f8047079a4425c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1797-TERMINACION": {
+            "huella": "sha256:8f7c62660b972058200093b67b845c64718a4239e0967558612c0ef8b17aef6b",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-1843-PENA": {
+            "huella": "sha256:be4386512cad53a8fa152230f300b2aedc4bf7f729770a3d418f78f9eada96e8",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-2317-2320-FORMA-COMPRAVENTA": {
+            "huella": "sha256:e7599125993b66c9d81bf98196c467621100e7b89beb9ff988cb1a82eca12450",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCF-3007-3009-REGISTRO-EFECTOS": {
+            "huella": "sha256:e5c773774e4d65f951e66026477614aefc17526ace306af0a162d200fca0c9c6",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CCO-78-FORMA": {
+            "huella": "sha256:953ecd8e1faa01e1f07095c843d306aa0fed64bb9bec23301cc1d9748fbd70b4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-28-CONTABILIDAD": {
+            "huella": "sha256:1a10f74abf8bd59b4766dd23c37980100dbc8c3566a9f055f2b1adb4aed1cc9c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-29A": {
+            "huella": "sha256:f1f2c91da808776fb8c00506cb7949bdbe53aeed09c7c1b4103c2bdeb5f23de4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-29A-CONTRACTUAL": {
+            "huella": "sha256:9309f031f2152b62e064665680bbfd1f25236d5f53ca7c5dd91f236128f19ba4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-30-CONSERVACION": {
+            "huella": "sha256:5dfc18f7451d562b72368bf6ecd814076e9a4c531119d60454d4ea8015bd2797",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-CFF-32BTER-BENEFICIARIO-CONTROLADOR": {
+            "huella": "sha256:8ed4736c97697b65372fedf528f74ae20f7e356286d8eb3b37692d1aa988e0e6",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LAC-30-REGISTRO-RPAS": {
+            "huella": "sha256:530e0d587076437dbcad9894ac149f68c3f4d893718380e056a61f80982c8141",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LAC-55-56-CARGA-AEREA": {
+            "huella": "sha256:d3a30abed3eed93c2d2e74df82da49e22c321fcd37ea50c51913da3db06d1971",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LAC-74-SEGURO-RPAS": {
+            "huella": "sha256:c0205250c84702f339b2a70aebe23b795a5d716179e4d9e05b0a2b4c3db1221d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-176-INFRACCIONES": {
+            "huella": "sha256:6018b763cdf304c8984b4ec1ac36036bd5c11a26319e845457836b450b66eff5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-36A-DESPACHO-ANEXOS": {
+            "huella": "sha256:a47a13982d2600389c4d848cb4803afda316f28b0d216a6ecf76586278552078",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-40-REPRESENTACION": {
+            "huella": "sha256:606a46de04a46982e3994fd027385d397456a15de83fa1ee2e6822349cdcf658",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-59-36A-ORIGEN": {
+            "huella": "sha256:9bbb4612ecdefb3299be0c0c9b024948d2a4da14e968b9d55f803b2a509c33a5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-59-PADRON-IMPORTADORES": {
+            "huella": "sha256:d4d05ba7423aeb2f5820ea46fb7d8f351819956d7566b9ff24ee8ae6ddb68c01",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-64-VALOR-ADUANA": {
+            "huella": "sha256:fc2735235667088a21a7506efef159a804ff2db834c46c98ce09b37b7c9aa175",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LADUA-90-REGIMENES": {
+            "huella": "sha256:7514b95b10fcafb1ddcafd8d192cefad113156e1e05a9feb7d8aac0be3214f63",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-15-16-RRNA-CASOS": {
+            "huella": "sha256:5b8f62bb10a65c18843ad2cc0f1686c73b5f17cc3fb52144a96a04a4e12756e9",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-17-21-RRNA-PERMISOS": {
+            "huella": "sha256:15cc69f19d25bbadd2edba700e7879bdeabb89b999ab7ad2259a1fea7319b686",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-23-24-CUPOS": {
+            "huella": "sha256:d7a0945ea9b882d489db1df09993e082dc5f3f6292f91bf0e049aca0ef23fe30",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-26-LADUA-36A-CLASIFICACION": {
+            "huella": "sha256:5126ed64a7087dee438f39c39d7f7e21fadf4430070503b5d14c823f68677074",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-26-NOM-IMPORTACION": {
+            "huella": "sha256:eac15fe95956987765b089948cf0e00a854102133e42c6e71288bcbfe2931037",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCE-28-62-63-PRACTICAS-DESLEALES": {
+            "huella": "sha256:afb3573884243546acb0b1c22533aec5cab023a7b25b5e17b0c279779f8b7436",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LCPAF-8-50-66-68-AUTOTRANSPORTE": {
+            "huella": "sha256:45cac99bad4647d3eb097ae26b895048f5fe0e876ffb3d051c65dfdf7995da97",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFCE-86-90-CONCENTRACIONES": {
+            "huella": "sha256:4139779c93b49cab914d559fc873612f3843b49df39b8868d7bddd0378bee8ed",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP-21-CONFIDENCIALIDAD": {
+            "huella": "sha256:8adfbd57623c2b7751c2f15833b0673f1c97b3090c74ef049bca55ddc1902236",
+            "vigente_hasta": "2025-03-20",
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-14-17-CONTACTO-PF": {
+            "huella": "sha256:84e08fe973889a5fb9e25f5a7a63bc51bddabcafabd9fc19e5422c02954973bc",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-20-CONFIDENCIALIDAD": {
+            "huella": "sha256:01c4c344af8230f4f039a61b6e5c1dc67a7669c4809b04d8af95ed56cacd9810",
+            "vigente_hasta": null,
+            "reemplaza": "MX-LFPDPPP-21-CONFIDENCIALIDAD"
+          },
+          "MX-LFPDPPP2025-35-36-TRANSFERENCIA-INTL": {
+            "huella": "sha256:2d5856d12c3a2e1f95b113d7ba7cfce366a7d0fbf687741868c99d33e466abd9",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-6-14-CONTACTO-CORPORATIVO": {
+            "huella": "sha256:da502899a03cba480d7a9460ce36cab5879babb5801a9944326524e5d0dff816",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPDPPP2025-9-II-FUENTE-PUBLICA": {
+            "huella": "sha256:92043ca46664daa6076607e562184c15c6c02776a5a6c3d635f15ef3752e6d75",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPIORPI-17-XI-ACTIVIDAD-VULNERABLE": {
+            "huella": "sha256:3a8e25caba4383df4494dc8e993f571d98500cceb634183be671455ce82bfe1d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPPI-170-178-MARCA-REGISTRO": {
+            "huella": "sha256:bf5245b15bafd59ce460179bc730edfd3b6f03d5d321258a1ec9ac1bdf388f70",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPPI-233-235-MARCA-USO-CADUCIDAD": {
+            "huella": "sha256:28b0a1c97b0f2a909171a883fba4ca88ff920d74afd613c9fd440a4578b077d4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFPPI-53-62-78-PATENTES-VIGENCIA": {
+            "huella": "sha256:01dcb1e83f6103d33485be8e52280f7ac001ab31405f6a72262a6381751131c1",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LFRA-1-10-RESPONSABILIDAD-AMBIENTAL": {
+            "huella": "sha256:59c63a2875849e20afb23de7077f08f86f32242d2e7ab96f0a5165258f6232d7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGEEPA-111BIS-EMISIONES-FUENTES-FIJAS": {
+            "huella": "sha256:bd614da2305103743a2c76f787b8cf0bae8e483d212793bb9de8a50d019973cd",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGEEPA-28-30-IMPACTO-AMBIENTAL": {
+            "huella": "sha256:28dae481cb893341afe2d613eb65afaa8e53db83747ab30492a3dd3c194e041c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGEEPA-38BIS-AUDITORIA-AMBIENTAL": {
+            "huella": "sha256:e6d018a43972a157d0505e2a27c0ab5b98f05d90cfc724b6220efe1eed6318ff",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGIPE-159-PROPAGANDA-TERCEROS": {
+            "huella": "sha256:90a268221c1be9538fd96e6dd79b619f4447fc48a1ef5ec50fefa7e9525c4971",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGPGIR-44-46-GENERADORES-RP": {
+            "huella": "sha256:45c0b835f29f4fc95347b3bed9c9c72763de26971ec962a3dec833512487ccd7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGPP-54-APORTACIONES-PROHIBIDAS": {
+            "huella": "sha256:58d68c57dcfc434dd4ce2cc67cad3aebb098b06cb5737b2a20380ea5ac78fdf2",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-10-REPRESENTACION-PODERES": {
+            "huella": "sha256:d5201622df62aa3f90c35f6a5c2398c30baeb5e37ae226bc89c643d96ccf7aa5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-128-129-REGISTRO-ACCIONES": {
+            "huella": "sha256:012d42f8b418adeae6d0e347fbc63a936f8ed5f257284d7143f9d7722be404fb",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-178-182-ASAMBLEAS": {
+            "huella": "sha256:e826d9a88e54e7f0370ec7c30f57b84fa40d5364bafc14859875055a62d78309",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-186-CONVOCATORIA-PSM": {
+            "huella": "sha256:9949825857886d57109ea77a3ee48533a430a50fe55fac64e57602cc6ecc2136",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-19-20-UTILIDADES-RESERVA": {
+            "huella": "sha256:aa4ab168380119dc26d95b1bd95b031771d422485623f422eb515915c9f1ca42",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-222-225-FUSION": {
+            "huella": "sha256:522a75806cb10b6eb895228cceaeec9217123650626292b785405e89112a7134",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-228BIS-ESCISION": {
+            "huella": "sha256:8f360f6d93ad2009fbcce5b0efeec29f29b20abcf85b495c06d84d07d225bcdc",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-260-263-SAS": {
+            "huella": "sha256:4520b2952049e12fbfcf129de44593334d6a4de36c04f19ff72f731980453d3c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-5-6-CONSTITUCION": {
+            "huella": "sha256:9d567f3948e10ad917ec7f692e832a931bfe15962f39ccd5bc931c5b29bb7b6a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGSM-HOLDING-TENEDORA": {
+            "huella": "sha256:b8d1a1d24df8b8ca6b9eaead9f476d480e46c4dbb9c9574b99c7cd480c665f08",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGTOC-381-388-FIDEICOMISO": {
+            "huella": "sha256:cd07e03c1d0ac3b8926dbb3a5ebd4b61075876ba5b85a616ce0371828ec56d4a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGTOC-389-FIDEICOMISO-MUEBLES": {
+            "huella": "sha256:ec73ec1aa3a829a174f219fa82a584c8c55cd8bd9f05b1e7d24e9d4292a2468c",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LGTOC-394-FIDEICOMISOS-PROHIBIDOS": {
+            "huella": "sha256:9a74583f5bfaf489e028d18fa56ebd6172bd7994cc6fe723f70c523aff717da4",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LIE-10-14-ZONA-RESTRINGIDA": {
+            "huella": "sha256:dd0d61c9611c5a47f685bcd7dcfe6a43a33fc88a46fd9997d63f03f964ea55f1",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISF-25-93-RAMOS-AGENTE": {
+            "huella": "sha256:30660d52826e03ef8f20466c6d2faa2ee17071351994cf8b93a5d387bd5a9851",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISF-93-AUTORIZACION-AGENTE": {
+            "huella": "sha256:d16131f94434ac516aa88408972bdf8d1115186a8e2c7ffd646bf2cd6a3027a7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISF-94-DEBER-INFORMACION-AGENTE": {
+            "huella": "sha256:07838a4b4bdc702fd7c859a77ddb83174e4917302c50dd94527d7af6a61fa51a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-I": {
+            "huella": "sha256:155b6316126585088cd438e85b415af40b3461a735215731239f755129694056",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-III": {
+            "huella": "sha256:5350fe054c08c6158de91d1b737a96b3e29b84d6cc6cc498f0ae2cbe6db30fa8",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-V": {
+            "huella": "sha256:0b8b923604ab830b957173ef8c32b066285fbd873f4ff63751d2c663b13997ac",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-27-VII": {
+            "huella": "sha256:70bbd79f35053d2edf0d66c2fd0e20e686cfae011d8f3b557cb4e8ce0774b445",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-V": {
+            "huella": "sha256:beb968ede928e29ac751845f5e9303bc70f3fdfaaad94c9eae87514340ecde94",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-XIII": {
+            "huella": "sha256:bceee240dd7f529fe7f8d81a325d2fe3c35fa1ee8b717f73f321391189fb7d07",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-XXVII": {
+            "huella": "sha256:ceebc981f4f8b2dc96d2956447c93497da49bf519aadd55f9ff1b13195186ede",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-28-XXXII": {
+            "huella": "sha256:a23bf720bed6f1042e1ea0bfd75a83bfe9d00d179ee9c2cb7ee44ab707d53c4a",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LISR-34-VII": {
+            "huella": "sha256:69f987570e1e8f07f69e7196036ad761537801ba041302723a0ea0265dfcf14d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LMV-225-ASESOR-INVERSIONES": {
+            "huella": "sha256:d50b431e6fbb0970ca09bec544c888867e68eab06d47fa6ebee027a3d2f00ecb",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-LRART5-24-26-EJERCICIO-PROFESIONAL": {
+            "huella": "sha256:a06343182bf825328e64cd8811b6f3d47cb08c3e0a87a0276f07eafcb7462d02",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-NIF-C6-ACTIVO-FIJO": {
+            "huella": "sha256:d0ad5fdaa8eeb1c93150ec2dcfb0a85fda270a5a385f055ce0b6e100f6c1f946",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-NIF-D5-ARRENDAMIENTOS": {
+            "huella": "sha256:a6ad35a72a52ddc025d7754593e2001b34cb6214eea5a0c64d7e0e97e93a7f04",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-REGDIP-263-268-CABILDEO": {
+            "huella": "sha256:7755e27b84162ce08dff17e9b6686afadd80b801ac5ab6355809c518ea265fb7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-REGSEN-298-299-CABILDEO": {
+            "huella": "sha256:fa9aa26850894a3068efb265872e970299a3214df1ec97cb4b75ad64994265ed",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-SAT-CRIT-VIATICOS": {
+            "huella": "sha256:d1b2cc2efedfb94b6b8cc0ab9f6e0eb0cdbe028ebda7ac9bd964b2992e887ae6",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-4.12-DE-MINIMIS": {
+            "huella": "sha256:71198bcd1283df9580861665b27e8aa18923b441eb576c819f6f12504e55b8b0",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-4.18-TRANSITO-TRANSBORDO": {
+            "huella": "sha256:db2c7a2a7121329601a7313563058d9de4e602dedd8b4665269386f015f7ffb9",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-4.2-MERCANCIA-ORIGINARIA": {
+            "huella": "sha256:309dbede5882656a8f064e9484c3be63400521c4888386968144d1f8cee0a879",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.11-DEVOLUCION-POSTERIOR": {
+            "huella": "sha256:49b2b65d6cdb002e6dfe95e78377ca62b4688fb6520c452fa2433a869921f314",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.2-SOLICITUD-BASE-CERTIFICACION": {
+            "huella": "sha256:84fe056237a68208b82a4046e0389f7b3e5ab0c32842ddfed170ee5d5825b8a1",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.3-BASES-COBERTURA-VIGENCIA": {
+            "huella": "sha256:6c35d8489ed9427d644d8023da29cb91e0975e14477bbc3d45177aceff8b05c2",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.4-OBLIGACIONES-IMPORTADOR": {
+            "huella": "sha256:a37cd2db153822e9e9cef804ebea5afee4704230c191170df7bff91de40dd94f",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.5-EXCEPCION-CERTIFICACION": {
+            "huella": "sha256:ccf9d33483a6d3b726b07e80e4b829cfe6e2986acdf4b50d6c7a7a744eb7a0c7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.7-ERRORES-DISCREPANCIAS": {
+            "huella": "sha256:bcf3a54224aec2b951b3ab5307c93f74d698374f3682c09f40632c5c606aeb2d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.8-CONSERVAR-REGISTROS": {
+            "huella": "sha256:1cd6b61aa7187ca762c4823364afcab92f04f412c8c586e3fba7ebe6da76f435",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5.9-VERIFICACION-ORIGEN": {
+            "huella": "sha256:557887e11debd7c6c48e04c9e37270fb630438849e0fc76b1beff5d1b98662c5",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-5A-ELEMENTOS-MINIMOS": {
+            "huella": "sha256:bd1f8f0fd6b053213e4163ac28c29a7de47de2a7a46cfae68864a2a6e3dd869d",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-7.20-AGENTES-ADUANALES": {
+            "huella": "sha256:507259e8034c065ab49ac5b5e173d8f8ec3e28e2980967527e26b64242ba70f7",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-7.5-RESOLUCIONES-ANTICIPADAS": {
+            "huella": "sha256:fcf7728ed467d45dc74679fe3441a87548a289f2904971c11eede1284b7f7788",
+            "vigente_hasta": null,
+            "reemplaza": null
+          },
+          "MX-TMEC-7.8-ENVIOS-ENTREGA-RAPIDA": {
+            "huella": "sha256:b9e6142bcceb098fc051910ab99213c471365c3faf30d61256c96ecdef99588f",
+            "vigente_hasta": null,
+            "reemplaza": null
+          }
+        },
+        "categorias": {
+          "AGENTES_SEGUROS": {
+            "keywords": [
+              "agente de seguros",
+              "agente de seguros y fianzas",
+              "cedula de agente",
+              "corredor de seguros",
+              "correduria de seguros",
+              "intermediacion de seguros",
+              "intermediario de seguros",
+              "vender seguros"
+            ],
+            "exclusiones": []
+          },
+          "APORTACIONES_POLITICAS": {
+            "keywords": [
+              "aportacion a campana",
+              "aportacion a partido",
+              "aportaciones a partidos",
+              "apoyar economicamente a un candidato",
+              "donar a un partido",
+              "donativo a partido",
+              "donativos a partidos",
+              "financiamiento de campana",
+              "financiamiento de campanas"
+            ],
+            "exclusiones": []
+          },
+          "ARRENDAMIENTO": {
+            "keywords": [
+              "alquiler",
+              "arrendamiento",
+              "leasing",
+              "renta",
+              "renta de auto",
+              "renta de local",
+              "renta de oficina"
+            ],
+            "exclusiones": []
+          },
+          "ASAMBLEAS_SOCIETARIAS": {
+            "keywords": [
+              "acta de asamblea",
+              "asamblea de accionistas",
+              "asamblea de socios",
+              "asamblea extraordinaria",
+              "asamblea ordinaria",
+              "comisario",
+              "consejo de administracion",
+              "convocatoria de asamblea"
+            ],
+            "exclusiones": []
+          },
+          "ASESORIA_INVERSIONES": {
+            "keywords": [
+              "administracion de cartera",
+              "asesor en inversiones",
+              "asesores en inversiones",
+              "asesoria de inversiones",
+              "asesoria financiera",
+              "cartera de valores",
+              "consultoria financiera",
+              "financial consulting",
+              "invertir en bolsa",
+              "portafolio de inversion",
+              "recomendaciones de inversion"
+            ],
+            "exclusiones": []
+          },
+          "AUDITORIA_AMBIENTAL": {
+            "keywords": [
+              "auditoria ambiental",
+              "autorregulacion ambiental",
+              "certificado ambiental",
+              "industria limpia"
+            ],
+            "exclusiones": []
+          },
+          "AUTOTRANSPORTE_CARGA": {
+            "keywords": [
+              "agencia de carga",
+              "autotransporte",
+              "autotransporte de carga",
+              "autotransporte federal",
+              "camion de carga",
+              "carta de porte",
+              "carta porte",
+              "complemento carta porte",
+              "flete terrestre",
+              "paqueteria y mensajeria",
+              "permiso sict",
+              "transporte terrestre de carga"
+            ],
+            "exclusiones": [
+              "air waybill",
+              "carga aerea",
+              "e-awb",
+              "eawb",
+              "guia aerea",
+              "guia de carga aerea",
+              "transporte aereo de carga"
+            ]
+          },
+          "CABILDEO_CONGRESO": {
+            "keywords": [
+              "cabildeo",
+              "cabildero",
+              "cabilderos",
+              "gestion de intereses",
+              "influir en una iniciativa",
+              "lobby",
+              "lobbying",
+              "registro de cabilderos"
+            ],
+            "exclusiones": []
+          },
+          "CARGA_AEREA_EAWB": {
+            "keywords": [
+              "air waybill",
+              "awb",
+              "carga aerea",
+              "carta de porte aerea",
+              "e-awb",
+              "eawb",
+              "guia aerea",
+              "guia de carga aerea",
+              "transporte aereo de carga"
+            ],
+            "exclusiones": [
+              "autotransporte",
+              "carta de porte terrestre"
+            ]
+          },
+          "CLASIFICACION_ARANCELARIA": {
+            "keywords": [
+              "arancel",
+              "aranceles",
+              "clasificacion arancelaria",
+              "fraccion arancelaria",
+              "fracciones arancelarias",
+              "nomenclatura arancelaria",
+              "tarifa arancelaria"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_CONFIDENCIALIDAD": {
+            "keywords": [
+              "confidencial",
+              "confidencialidad",
+              "nda",
+              "no divulgacion",
+              "secreto industrial"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_PAGO": {
+            "keywords": [
+              "anticipo",
+              "calendario de pagos",
+              "condiciones de pago",
+              "contraprestacion",
+              "forma de pago",
+              "precio pactado"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_PENAL": {
+            "keywords": [
+              "clausula penal",
+              "mora",
+              "pena convencional",
+              "penalizacion"
+            ],
+            "exclusiones": []
+          },
+          "CLAUSULA_TERMINACION": {
+            "keywords": [
+              "causales de terminacion",
+              "preaviso",
+              "renovacion automatica",
+              "rescision",
+              "terminacion",
+              "vigencia del contrato"
+            ],
+            "exclusiones": []
+          },
+          "COMBUSTIBLES": {
+            "keywords": [
+              "carga de combustible",
+              "combustible",
+              "diesel",
+              "gasolina",
+              "magna",
+              "premium"
+            ],
+            "exclusiones": []
+          },
+          "COMPRAVENTA_INMUEBLES": {
+            "keywords": [
+              "adquirir un inmueble",
+              "bien inmueble",
+              "bienes inmuebles",
+              "compra de inmueble",
+              "compraventa de inmueble",
+              "compraventa de inmuebles",
+              "derecho inmobiliario",
+              "enajenacion de inmueble",
+              "inmobiliaria",
+              "inmobiliario",
+              "inmueble",
+              "inmuebles",
+              "predio",
+              "property law",
+              "terreno",
+              "venta de inmueble"
+            ],
+            "exclusiones": [
+              "fideicomiso",
+              "zona restringida"
+            ]
+          },
+          "CONCENTRACIONES_COFECE": {
+            "keywords": [
+              "adquirir una sociedad",
+              "adquisicion de empresa",
+              "adquisicion de empresas",
+              "cofece",
+              "compra de empresa",
+              "comprar una empresa",
+              "concentracion economica",
+              "notificacion de concentracion",
+              "tomar control de una empresa"
+            ],
+            "exclusiones": []
+          },
+          "CONSTITUCION_SOCIEDADES": {
+            "keywords": [
+              "acta constitutiva",
+              "constitucion de sociedad",
+              "constituir una empresa",
+              "constituir una sociedad",
+              "escritura constitutiva",
+              "estatutos sociales",
+              "registro publico de comercio",
+              "sociedad anonima",
+              "sociedad de responsabilidad limitada"
+            ],
+            "exclusiones": [
+              "sociedad por acciones simplificada"
+            ]
+          },
+          "DATOS_CONTACTO_CORPORATIVO": {
+            "keywords": [
+              "contacto corporativo",
+              "correo corporativo",
+              "email corporativo",
+              "inferencia de correo",
+              "patron de correo de dominio"
+            ],
+            "exclusiones": []
+          },
+          "DATOS_CONTACTO_PERSONA_FISICA": {
+            "keywords": [
+              "correo personal de titular",
+              "dato de persona fisica",
+              "prospeccion a persona fisica",
+              "telefono personal de titular"
+            ],
+            "exclusiones": []
+          },
+          "DATOS_FUENTE_PUBLICA": {
+            "keywords": [
+              "consulta denue",
+              "fuente publica oficial",
+              "lista 69-b",
+              "padron publico oficial",
+              "rfc de fuente publica"
+            ],
+            "exclusiones": []
+          },
+          "DATOS_TRANSFERENCIA_INTL": {
+            "keywords": [
+              "encargado en el extranjero",
+              "proveedor extranjero de datos",
+              "transferencia internacional de datos"
+            ],
+            "exclusiones": []
+          },
+          "DESPACHO_ADUANERO": {
+            "keywords": [
+              "aduana",
+              "aduanas",
+              "anexos al pedimento",
+              "despacho aduanero",
+              "documento aduanero",
+              "pedimento",
+              "pedimentos",
+              "sistema electronico aduanero"
+            ],
+            "exclusiones": []
+          },
+          "DIVIDENDOS_UTILIDADES": {
+            "keywords": [
+              "distribucion de utilidades",
+              "dividendo",
+              "dividendos",
+              "pago de dividendos",
+              "reparto de utilidades",
+              "reserva legal"
+            ],
+            "exclusiones": []
+          },
+          "DONATIVOS": {
+            "keywords": [
+              "donacion",
+              "donaciones",
+              "donativo",
+              "donativos"
+            ],
+            "exclusiones": []
+          },
+          "DRONES_DELIVERY": {
+            "keywords": [
+              "aeronave no tripulada",
+              "delivery con dron",
+              "dron",
+              "dron de reparto",
+              "drone delivery",
+              "drones",
+              "entrega por dron",
+              "reparto con dron",
+              "rpas",
+              "vehiculo aereo no tripulado"
+            ],
+            "exclusiones": [
+              "agente de seguros",
+              "agente de seguros y fianzas",
+              "cedula de agente",
+              "corredor de seguros",
+              "correduria de seguros",
+              "intermediacion de seguros",
+              "intermediario de seguros",
+              "vender seguros"
+            ]
+          },
+          "EMISIONES_ATMOSFERA": {
+            "keywords": [
+              "contaminacion atmosferica",
+              "emision de gases",
+              "emisiones a la atmosfera",
+              "fuente fija",
+              "fuentes fijas",
+              "licencia ambiental",
+              "licencia ambiental unica"
+            ],
+            "exclusiones": []
+          },
+          "EQUIPO_DE_COMPUTO": {
+            "keywords": [
+              "computadora",
+              "disco duro",
+              "equipo de computo",
+              "impresora",
+              "laptop",
+              "macbook",
+              "memoria ram",
+              "monitor",
+              "pc de escritorio",
+              "servidor",
+              "teclado"
+            ],
+            "exclusiones": []
+          },
+          "FIDEICOMISO_CONSTITUCION": {
+            "keywords": [
+              "constituir un fideicomiso",
+              "contrato de fideicomiso",
+              "fideicomisario",
+              "fideicomiso",
+              "fideicomiso testamentario",
+              "fideicomisos",
+              "fideicomitente",
+              "fiduciaria",
+              "patrimonio fideicomitido"
+            ],
+            "exclusiones": []
+          },
+          "FIDEICOMISO_ZONA_RESTRINGIDA": {
+            "keywords": [
+              "adquisicion por extranjeros",
+              "extranjero comprar inmueble",
+              "extranjeros en zona restringida",
+              "fideicomiso de zona restringida",
+              "inmueble en zona restringida",
+              "zona restringida"
+            ],
+            "exclusiones": []
+          },
+          "FUSION_ESCISION": {
+            "keywords": [
+              "escindir",
+              "escision",
+              "escision de sociedades",
+              "fusion",
+              "fusion de sociedades",
+              "fusionar"
+            ],
+            "exclusiones": []
+          },
+          "GRUPOS_HOLDING": {
+            "keywords": [
+              "controladora",
+              "filial",
+              "filiales",
+              "grupo de sociedades",
+              "grupo empresarial",
+              "holding",
+              "sociedad controladora",
+              "subsidiaria",
+              "subsidiarias",
+              "tenedora de acciones"
+            ],
+            "exclusiones": []
+          },
+          "IMPACTO_AMBIENTAL": {
+            "keywords": [
+              "autorizacion de impacto ambiental",
+              "evaluacion de impacto ambiental",
+              "impacto ambiental",
+              "manifestacion de impacto ambiental",
+              "mia",
+              "semarnat"
+            ],
+            "exclusiones": []
+          },
+          "INFRACCIONES_ADUANERAS": {
+            "keywords": [
+              "exportacion prohibida",
+              "importacion prohibida",
+              "infraccion aduanera",
+              "infracciones aduaneras",
+              "mercancia prohibida"
+            ],
+            "exclusiones": []
+          },
+          "INTERESES": {
+            "keywords": [
+              "credito",
+              "financiamiento",
+              "interes",
+              "interes moratorio",
+              "intereses",
+              "prestamo"
+            ],
+            "exclusiones": []
+          },
+          "MARCAS_REGISTRO": {
+            "keywords": [
+              "aviso comercial",
+              "avisos comerciales",
+              "marca",
+              "marca registrada",
+              "marcas",
+              "marcas y patentes",
+              "registro de marca",
+              "registro de marcas",
+              "signo distintivo",
+              "signos distintivos",
+              "trademark"
+            ],
+            "exclusiones": [
+              "marca blanca",
+              "marca de agua",
+              "marca personal"
+            ]
+          },
+          "ORIGEN_MERCANCIAS": {
+            "keywords": [
+              "certificado de origen",
+              "marcado de pais de origen",
+              "pais de origen",
+              "preferencia arancelaria",
+              "preferencias arancelarias",
+              "prueba de origen",
+              "regla de origen",
+              "reglas de origen"
+            ],
+            "exclusiones": [
+              "origen de los fondos",
+              "origen de los recursos",
+              "origen licito"
+            ]
+          },
+          "PADRON_IMPORTADORES": {
+            "keywords": [
+              "expediente electronico",
+              "importador de registro",
+              "padron de exportadores",
+              "padron de importadores",
+              "padron de sectores especificos",
+              "padron sectorial"
+            ],
+            "exclusiones": []
+          },
+          "PATENTES_INVENCIONES": {
+            "keywords": [
+              "diseño industrial",
+              "diseños industriales",
+              "invencion",
+              "invenciones",
+              "modelo de utilidad",
+              "modelos de utilidad",
+              "patente",
+              "patentes",
+              "registro de patente"
+            ],
+            "exclusiones": []
+          },
+          "PODERES_REPRESENTACION": {
+            "keywords": [
+              "apoderado",
+              "apoderado legal",
+              "otorgamiento de poderes",
+              "otorgar poderes",
+              "poder notarial",
+              "poderes notariales",
+              "representante legal",
+              "revocacion de poderes"
+            ],
+            "exclusiones": []
+          },
+          "PRACTICAS_DESLEALES": {
+            "keywords": [
+              "antidumping",
+              "cuota compensatoria",
+              "cuotas compensatorias",
+              "discriminacion de precios",
+              "dumping",
+              "practica desleal",
+              "practicas desleales",
+              "subvencion",
+              "subvenciones"
+            ],
+            "exclusiones": []
+          },
+          "PROPAGANDA_ELECTORAL": {
+            "keywords": [
+              "anuncios de campana",
+              "contratar propaganda",
+              "propaganda electoral",
+              "propaganda politica",
+              "publicidad electoral",
+              "spots electorales"
+            ],
+            "exclusiones": []
+          },
+          "REGIMENES_ADUANEROS": {
+            "keywords": [
+              "deposito fiscal",
+              "exportacion definitiva",
+              "exportacion temporal",
+              "importacion definitiva",
+              "importacion temporal",
+              "maquila",
+              "programa de maquila",
+              "recinto fiscalizado",
+              "recinto fiscalizado estrategico",
+              "regimen aduanero",
+              "regimenes aduaneros",
+              "transito de mercancias",
+              "transito internacional",
+              "transito interno"
+            ],
+            "exclusiones": []
+          },
+          "REGISTRO_ACCIONES_BC": {
+            "keywords": [
+              "beneficiario controlador",
+              "beneficiarios controladores",
+              "cesion de acciones",
+              "libro de registro de acciones",
+              "registro de acciones",
+              "transmision de acciones"
+            ],
+            "exclusiones": []
+          },
+          "REGISTRO_PROPIEDAD": {
+            "keywords": [
+              "certificado de gravamenes",
+              "certificado de libertad de gravamen",
+              "folio real",
+              "gravamen inmobiliario",
+              "inscribir la escritura",
+              "inscripcion registral",
+              "registro publico de la propiedad"
+            ],
+            "exclusiones": []
+          },
+          "REGULACIONES_NO_ARANCELARIAS": {
+            "keywords": [
+              "cupo",
+              "cupo de exportacion",
+              "cupo de importacion",
+              "cupos",
+              "norma oficial mexicana",
+              "normas oficiales mexicanas",
+              "permiso previo",
+              "permisos previos",
+              "regulacion no arancelaria",
+              "regulaciones no arancelarias",
+              "restriccion no arancelaria",
+              "restricciones no arancelarias"
+            ],
+            "exclusiones": []
+          },
+          "REPRESENTACION_ADUANAL": {
+            "keywords": [
+              "agencia aduanal",
+              "agencias aduanales",
+              "agente aduanal",
+              "agentes aduanales",
+              "apoderado aduanal",
+              "mandatario aduanal",
+              "representante legal aduanero"
+            ],
+            "exclusiones": []
+          },
+          "RESIDUOS_PELIGROSOS": {
+            "keywords": [
+              "bitacora de residuos",
+              "generador de residuos",
+              "generadores de residuos",
+              "manejo de residuos",
+              "plan de manejo de residuos",
+              "residuo peligroso",
+              "residuos peligrosos"
+            ],
+            "exclusiones": []
+          },
+          "RESPONSABILIDAD_AMBIENTAL": {
+            "keywords": [
+              "compensacion ambiental",
+              "dano ambiental",
+              "danos ambientales",
+              "delito ambiental",
+              "delitos ambientales",
+              "profepa",
+              "reparacion del dano ambiental",
+              "responsabilidad ambiental"
+            ],
+            "exclusiones": []
+          },
+          "SAS_CONSTITUCION": {
+            "keywords": [
+              "acciones simplificada",
+              "sas",
+              "sociedad por acciones simplificada"
+            ],
+            "exclusiones": []
+          },
+          "SERVICIOS_LEGALES": {
+            "keywords": [
+              "abogacia",
+              "abogados",
+              "asesoria juridica",
+              "asesoria legal",
+              "attorney",
+              "attorneys",
+              "bufete",
+              "bufetes",
+              "de legal",
+              "despacho de abogados",
+              "despacho juridico",
+              "despacho legal",
+              "despachos de abogados",
+              "firma de abogados",
+              "firma legal",
+              "law firm",
+              "lawyer",
+              "lawyers",
+              "legal services",
+              "litigio",
+              "litigios",
+              "servicios juridicos",
+              "servicios legales"
+            ],
+            "exclusiones": [
+              "apoderado legal",
+              "fundamento legal",
+              "marco legal",
+              "representante legal",
+              "requisitos legales",
+              "reserva legal"
+            ]
+          },
+          "SERVICIOS_PROFESIONALES": {
+            "keywords": [
+              "abogado",
+              "asesoria",
+              "consultoria",
+              "contador",
+              "desarrollo de software",
+              "diseno",
+              "freelance",
+              "honorarios",
+              "notario",
+              "servicio profesional",
+              "servicios profesionales"
+            ],
+            "exclusiones": []
+          },
+          "TESTAMENTOS_SUCESIONES": {
+            "keywords": [
+              "albacea",
+              "derecho sucesorio",
+              "heredero",
+              "herederos",
+              "herencia",
+              "intestado",
+              "intestamentario",
+              "intestamentarios",
+              "juicio sucesorio",
+              "juicios sucesorios",
+              "legado",
+              "legatario",
+              "sucesion",
+              "sucesion legitima",
+              "sucesion testamentaria",
+              "sucesiones",
+              "sucesiones testamentarias",
+              "sucesorio",
+              "sucesorios",
+              "testamentario",
+              "testamento",
+              "testamentos"
+            ],
+            "exclusiones": [
+              "fideicomiso"
+            ]
+          },
+          "TMEC_CERTIFICACION_ORIGEN": {
+            "keywords": [
+              "anexo 5-a",
+              "autocertificacion de origen",
+              "certificacion de origen",
+              "certificacion de origen t-mec",
+              "certificado de origen t-mec",
+              "elementos minimos de informacion"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_ENVIOS_ENTREGA_RAPIDA": {
+            "keywords": [
+              "courier",
+              "de minimis aduanero",
+              "entrega rapida",
+              "envio de entrega rapida",
+              "envios de entrega rapida",
+              "mensajeria internacional"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_REGLAS_ORIGEN": {
+            "keywords": [
+              "acumulacion de origen",
+              "anexo 4-b",
+              "cambio de clasificacion arancelaria",
+              "de minimis",
+              "mercancia originaria",
+              "mercancias originarias",
+              "reglas de origen especificas por producto",
+              "transbordo",
+              "valor de contenido regional"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_RESOLUCIONES_ANTICIPADAS": {
+            "keywords": [
+              "criterio anticipado",
+              "resolucion anticipada",
+              "resoluciones anticipadas"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_TRATO_PREFERENCIAL": {
+            "keywords": [
+              "arancel preferencial",
+              "t-mec",
+              "tmec",
+              "tratado entre mexico estados unidos y canada",
+              "trato arancelario preferencial",
+              "trato preferencial",
+              "usmca"
+            ],
+            "exclusiones": []
+          },
+          "TMEC_VERIFICACION_ORIGEN": {
+            "keywords": [
+              "conservacion de registros",
+              "conservar registros",
+              "cuestionario de verificacion",
+              "determinacion de origen",
+              "verificacion de origen",
+              "visita de verificacion"
+            ],
+            "exclusiones": []
+          },
+          "VALOR_ADUANA": {
+            "keywords": [
+              "base gravable",
+              "cuenta aduanera de garantia",
+              "precio estimado",
+              "valor de transaccion",
+              "valor en aduana",
+              "valoracion aduanera"
+            ],
+            "exclusiones": []
+          },
+          "VIATICOS": {
+            "keywords": [
+              "avion",
+              "boleto de avion",
+              "hospedaje",
+              "hotel",
+              "kilometraje",
+              "peaje",
+              "taxi",
+              "transporte foraneo",
+              "uber",
+              "viaje",
+              "viatico",
+              "viaticos",
+              "vuelo"
+            ],
+            "exclusiones": []
+          }
+        },
+        "dominios": {
+          "co-deducibilidad": {
+            "categorias": [
+              "SERVICIOS_PROFESIONALES"
+            ]
+          },
+          "mx-agentes-de-seguros": {
+            "categorias": [
+              "AGENTES_SEGUROS"
+            ]
+          },
+          "mx-ambiental": {
+            "categorias": [
+              "AUDITORIA_AMBIENTAL",
+              "EMISIONES_ATMOSFERA",
+              "IMPACTO_AMBIENTAL",
+              "RESIDUOS_PELIGROSOS",
+              "RESPONSABILIDAD_AMBIENTAL"
+            ]
+          },
+          "mx-cabildeo-y-politica": {
+            "categorias": [
+              "APORTACIONES_POLITICAS",
+              "CABILDEO_CONGRESO",
+              "PROPAGANDA_ELECTORAL"
+            ]
+          },
+          "mx-clausulas-contractuales": {
+            "categorias": [
+              "CLAUSULA_CONFIDENCIALIDAD",
+              "CLAUSULA_PAGO",
+              "CLAUSULA_PENAL",
+              "CLAUSULA_TERMINACION"
+            ]
+          },
+          "mx-comercio-exterior": {
+            "categorias": [
+              "CLASIFICACION_ARANCELARIA",
+              "DESPACHO_ADUANERO",
+              "INFRACCIONES_ADUANERAS",
+              "ORIGEN_MERCANCIAS",
+              "PADRON_IMPORTADORES",
+              "PRACTICAS_DESLEALES",
+              "REGIMENES_ADUANEROS",
+              "REGULACIONES_NO_ARANCELARIAS",
+              "REPRESENTACION_ADUANAL",
+              "VALOR_ADUANA"
+            ]
+          },
+          "mx-corporativo-mercantil": {
+            "categorias": [
+              "ASAMBLEAS_SOCIETARIAS",
+              "CONCENTRACIONES_COFECE",
+              "CONSTITUCION_SOCIEDADES",
+              "DIVIDENDOS_UTILIDADES",
+              "FUSION_ESCISION",
+              "GRUPOS_HOLDING",
+              "PODERES_REPRESENTACION",
+              "REGISTRO_ACCIONES_BC",
+              "SAS_CONSTITUCION"
+            ]
+          },
+          "mx-datos-personales-prospeccion": {
+            "categorias": [
+              "DATOS_CONTACTO_CORPORATIVO",
+              "DATOS_CONTACTO_PERSONA_FISICA",
+              "DATOS_FUENTE_PUBLICA",
+              "DATOS_TRANSFERENCIA_INTL"
+            ]
+          },
+          "mx-deducibilidad": {
+            "categorias": [
+              "ARRENDAMIENTO",
+              "COMBUSTIBLES",
+              "DONATIVOS",
+              "EQUIPO_DE_COMPUTO",
+              "INTERESES",
+              "SERVICIOS_PROFESIONALES",
+              "VIATICOS"
+            ]
+          },
+          "mx-drones-de-reparto": {
+            "categorias": [
+              "DRONES_DELIVERY"
+            ]
+          },
+          "mx-fiduciario-inmobiliario-sucesorio": {
+            "categorias": [
+              "COMPRAVENTA_INMUEBLES",
+              "FIDEICOMISO_CONSTITUCION",
+              "FIDEICOMISO_ZONA_RESTRINGIDA",
+              "REGISTRO_PROPIEDAD",
+              "TESTAMENTOS_SUCESIONES"
+            ]
+          },
+          "mx-logistica-carga": {
+            "categorias": [
+              "AUTOTRANSPORTE_CARGA",
+              "CARGA_AEREA_EAWB"
+            ]
+          },
+          "mx-propiedad-industrial": {
+            "categorias": [
+              "MARCAS_REGISTRO",
+              "PATENTES_INVENCIONES"
+            ]
+          },
+          "mx-registro-contable": {
+            "categorias": [
+              "ARRENDAMIENTO",
+              "EQUIPO_DE_COMPUTO"
+            ]
+          },
+          "mx-servicios-financieros": {
+            "categorias": [
+              "ASESORIA_INVERSIONES"
+            ]
+          },
+          "mx-servicios-legales": {
+            "categorias": [
+              "SERVICIOS_LEGALES"
+            ]
+          },
+          "mx-t-mec": {
+            "categorias": [
+              "TMEC_CERTIFICACION_ORIGEN",
+              "TMEC_ENVIOS_ENTREGA_RAPIDA",
+              "TMEC_REGLAS_ORIGEN",
+              "TMEC_RESOLUCIONES_ANTICIPADAS",
+              "TMEC_TRATO_PREFERENCIAL",
+              "TMEC_VERIFICACION_ORIGEN"
+            ]
+          }
+        },
+        "vocabulario": {
+          "fiscal": [
+            "deducible",
+            "dudoso",
+            "no_deducible"
+          ],
+          "contable": [
+            "deducible",
+            "dudoso",
+            "no_deducible"
+          ],
+          "contractual": [
+            "deducible",
+            "dudoso",
+            "no_deducible"
+          ],
+          "regulatorio": [
+            "dudoso",
+            "no_permitido",
+            "permitido"
+          ],
+          "datos-personales": [
+            "dudoso",
+            "no_permitido",
+            "permitido"
+          ]
+        }
+      }
+    }
+  ]
+}
