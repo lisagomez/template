@@ -68,7 +68,7 @@ Muy caro para lo que es, y el bolillo llegó duro.`;
 /** Exportación diaria de 90 días del Administrador de anuncios de Meta (columnas en español). */
 export function anunciosDemo(hasta = '2026-10-18'): string {
   const filas = ['Día,Nombre de la campaña,Importe gastado (MXN),Impresiones,Clics en el enlace,Resultados,Tipo de resultado,Frecuencia'];
-  const fin = new Date(`${hasta}T00:00:00Z`).getTime();
+  const fin = new Date(hasta).getTime();
   for (let i = 0; i < 90; i++) {
     const dia = new Date(fin - (89 - i) * 86_400_000).toISOString().slice(0, 10);
     filas.push(`${dia},Pan de muerto - Puebla centro,"$120.00",1400,28,${i % 2 === 0 ? 1 : 0},Conversaciones por mensaje,1.9`);

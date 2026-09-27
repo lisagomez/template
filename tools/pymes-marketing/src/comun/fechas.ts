@@ -29,7 +29,8 @@ export function leeDia(texto: string, orden: 'dmy' | 'mdy' = 'dmy'): Dia | null 
 }
 
 function aFecha(dia: Dia): Date {
-  return new Date(`${dia}T00:00:00Z`);
+  // «AAAA-MM-DD» sin hora se interpreta como medianoche UTC (norma de ECMAScript).
+  return new Date(dia);
 }
 
 export function sumaDias(dia: Dia, n: number): Dia {

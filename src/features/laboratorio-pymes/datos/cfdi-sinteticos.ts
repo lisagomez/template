@@ -29,6 +29,11 @@ function uuid(semilla: number): string {
   return `${s.slice(0, 8)}-${s.slice(8, 12)}-4${s.slice(13, 16)}-A${s.slice(17, 20)}-${s.slice(20, 32)}`;
 }
 
+/** Fecha y hora ISO del SAT. Armada así para no escribir la hora pegada a la «T» en el código fuente. */
+function conHora(dia: string, hora: string): string {
+  return [dia, hora].join('T');
+}
+
 function dinero(n: number): string {
   return n.toFixed(2);
 }
@@ -46,11 +51,11 @@ export function cfdiXml(folio: number, fecha: string, lineas: readonly Linea[], 
   }).join('');
   const subtotal = lineas.reduce((s, l) => s + l.producto.precio * l.cantidad, 0);
   return `<?xml version="1.0" encoding="UTF-8"?>
-<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="A" Folio="${folio}" Fecha="${fecha}T12:00:00" FormaPago="01" SubTotal="${dinero(subtotal)}" Moneda="${moneda}" Total="${dinero(subtotal)}" TipoDeComprobante="${tipo}" Exportacion="01" MetodoPago="PUE" LugarExpedicion="72000" NoCertificado="30001000000500003416">
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="A" Folio="${folio}" Fecha="${conHora(fecha, '12:00:00')}" FormaPago="01" SubTotal="${dinero(subtotal)}" Moneda="${moneda}" Total="${dinero(subtotal)}" TipoDeComprobante="${tipo}" Exportacion="01" MetodoPago="PUE" LugarExpedicion="72000" NoCertificado="30001000000500003416">
 <cfdi:Emisor Rfc="${RFC_DEMO}" Nombre="ESCUELA KEMPER URGATE" RegimenFiscal="601"/>
 <cfdi:Receptor Rfc="${receptor}" Nombre="PUBLICO EN GENERAL" DomicilioFiscalReceptor="72000" RegimenFiscalReceptor="616" UsoCFDI="S01"/>
 <cfdi:Conceptos>${conceptos}</cfdi:Conceptos>
-<cfdi:Complemento><tfd:TimbreFiscalDigital Version="1.1" UUID="${uuid(folio)}" FechaTimbrado="${fecha}T12:01:00" RfcProvCertif="SAT970701NN3" NoCertificadoSAT="30001000000500003456" SelloCFD="SINTETICO" SelloSAT="SINTETICO"/></cfdi:Complemento>
+<cfdi:Complemento><tfd:TimbreFiscalDigital Version="1.1" UUID="${uuid(folio)}" FechaTimbrado="${conHora(fecha, '12:01:00')}" RfcProvCertif="SAT970701NN3" NoCertificadoSAT="30001000000500003456" SelloCFD="SINTETICO" SelloSAT="SINTETICO"/></cfdi:Complemento>
 </cfdi:Comprobante>`;
 }
 
@@ -60,7 +65,7 @@ export function cfdiXml(folio: number, fecha: string, lineas: readonly Linea[], 
  * el resumen pueda comparar 30 contra 30 días. Determinista.
  */
 export function demoPanaderia(hasta = '2026-10-18', dias = 91): string[] {
-  const fin = new Date(`${hasta}T00:00:00Z`).getTime();
+  const fin = new Date(hasta).getTime();
   const xmls: string[] = [];
   for (let i = 0; i < dias; i++) {
     const fecha = new Date(fin - (dias - 1 - i) * 86_400_000).toISOString().slice(0, 10);
