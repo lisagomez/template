@@ -129,6 +129,9 @@ npm run prepara:gate       # Lo dispara pretypecheck: engines.node + build de to
 npm run regresion    # Regresion de skills (C2 capa A)
 npm run regresion -- --trampa  # Casos-trampa (C2 capa B, para CDC)
 npm run validate     # typecheck + lint + build + gobernanza + regresion (el gate completo)
+                     # DERIVA de `.claude/gates.json`, no de una cadena en package.json
+npm run gates        # el padron: gates por perfil, e inactivos con su motivo
+npm run verifica:gates     # el padron y el codigo no divergen (`--prueba`: 6 siembras)
 ```
 
 ---
@@ -277,7 +280,7 @@ sesiones frias lo encontraron leyendo el repo y la prueba dejo de ser ciega. Se 
 ### Se verifica sola
 
 ```bash
-npm run verify:gobernanza   # 152 comprobaciones (la cifra la vigila el propio verificador)
+npm run verify:gobernanza   # 156 comprobaciones (la cifra la vigila el propio verificador)
 npm run regresion           # C2 capa A
 npm run regresion -- --trampa   # C2 capa B (para cada CDC)
 ```
@@ -391,6 +394,7 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 │   └── neumorphism/
 │
 ├── hooks/                     # Scripts en eventos
+├── gates.json                 # El padron de lo que corre el gate (C1)
 ├── example.mcp.json           # Config de MCPs
 └── README.md                  # Este archivo
 ```
