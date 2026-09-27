@@ -4035,3 +4035,32 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `prueba:laboratorio-pymes` 3/3 · `prueba:a2a` en verde.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo, capa A basta», 2026-09-27, con el diff de
   `gates.json` contra `main` y la evidencia delante.
+
+### 2026-09-27 — referencias a `add-payments` donde se cobra en línea, con sus límites → CDC PROMOVIDO — radio: skills (6), plantilla (1), regla (1), contratos C2 (1)
+- **Cambio** (rama `pagos-add-payments`, con `main` mezclado después de los PR #163 y #164):
+  - `add-payments`: `description` suma que NO sirve para bienes físicos, servicios presenciales ni
+    marketplaces; sección **Límites** con citas de la política de uso aceptable de Polar (consultada el
+    2026-09-27), el alcance real del código (suscripción → acceso) y lo «a verificar» (moneda de
+    liquidación, CFDI).
+  - `website-3d`, `new-app`, `supabase` (+ `references/schema-example.md`), `bucle-agentico`: referencia al
+    skill en el punto donde se decide o se usa el cobro, con su límite cuando hace falta.
+  - `add-a2a`: se corrige una comparación falsa («igual que `/add-payments` pregunta»).
+  - `prp-base.md` (plantilla) y `rules/flujos.md` (+10 tokens; reglas al 97 % de su presupuesto).
+  - `golden-sets/contratos.json`: +7 contratos (5 `patron`, 2 `prohibido`) para que las referencias no se
+    pudran. Regresión de 123 a 131 contratos.
+- **Motivo**: goal `pagos-add-payments`. Una referencia que manda a quien no debe es peor que ninguna: una
+  pyme de productos físicos no puede usar Polar.
+- **No se tocó `AGENTS.md`**: ya enruta «pagos / cobrar / checkout» a ADD-PAYMENTS, y el límite vive en el
+  skill al que lleva; tocarlo invalidaría el caché de prefijo sin ganar nada.
+- **Gate aplicado**: diff visible ☑ (en la conversación del goal) · regresión verde ☑ capa A 131/131 ·
+  `verify:gobernanza` ☑ 156/156 · `verifica:gates` ☑ 11/11 · reglas al 97 % de su presupuesto (6285/6500) ·
+  `validate` ☑ después del commit de la mezcla con `main` (`6cfc3fa`), en un clon que solo trae la
+  rama, `main` y el corpus: 26/26 activos en verde, 0 rojos (PR #166) · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia). **Capa B no corrida, a propósito y declarado** («capa A basta»): ninguna instrucción
+  cambia de sentido, solo se suman referencias y límites.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «firmo el CDC, capa A basta», 2026-09-27, con el PR
+  #166 delante. Al firmar se borró la propuesta `.claude/goals/pagos-add-payments/propuesta-cdc.md`.
+- **Propuesto para después (otro CDC, porque cambia el código del gate):** un contrato CONDICIONAL en
+  `scripts/regresion-skills.mjs` — «si una skill menciona checkout o pasarela de pagos, cita `add-payments`
+  o declara por qué no aplica» — para cubrir skills que todavía no existen. Los contratos por skill de este
+  cambio cubren los lugares conocidos.

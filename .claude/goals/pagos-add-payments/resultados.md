@@ -1,7 +1,8 @@
 # Resultados — referencias a `add-payments` (goal ejecutado el 2026-09-27)
 
-Rama `pagos-add-payments`, apilada sobre `pymes-marketing-build` (esa rama no está en `main`, así que sus
-documentos también contaban). Sin push ni PR. Detalle: `inventario.md` y `propuesta-cdc.md`.
+Rama `pagos-add-payments`, apilada sobre `pymes-marketing-build` (esa rama no estaba en `main`, así que sus
+documentos también contaban). PR #166; el CDC lo firmó el laboratorio el 2026-09-27 («capa A basta») y su
+entrada vive en `BITACORA-CDC.md`. Detalle: `inventario.md`.
 
 ## Qué quedó
 - 9 lugares ganaron la referencia en el punto donde se decide o se usa el cobro, 1 comparación falsa se
