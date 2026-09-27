@@ -133,14 +133,28 @@ export const Pregunta = z.strictObject({
     /** Fecha del hecho (RF-13). Si falta, se juzga con la de la consulta y el resultado lo dice. */
     fecha: Fecha.optional(),
   }),
-  conceptos: z.array(z.strictObject({ descripcion: TextoNoVacio, importe: z.number().nonnegative().optional() })).min(1),
+  conceptos: z
+    .array(
+      z.strictObject({
+        descripcion: TextoNoVacio,
+        importe: z.number().nonnegative().optional(),
+        /**
+         * Categoría PROPUESTA por el parser (Fase 5). El motor la contrasta con sus keywords y
+         * exclusiones: si no cuadran, `clasificacion_dudosa`, sin veredicto. Nunca se cree a ciegas.
+         */
+        categoria: Clave.optional(),
+      }),
+    )
+    .min(1),
 })
 
 /**
- * Por qué salió este veredicto. RF-6: «sin regla», «conflicto», «excede el tope» y «la regla dice
- * dudoso» son TIPOS distintos, no textos distintos del mismo `dudoso` como en Hermes.
+ * Por qué salió este veredicto. RF-6: «sin regla», «conflicto», «excede el tope», «no está claro de
+ * qué se pregunta» y «la regla dice dudoso» son TIPOS distintos, no textos del mismo `dudoso` como
+ * en Hermes. `clasificacion_dudosa`: la categoría que propuso el parser no cuadra con las keywords o
+ * las exclusiones del texto (Fase 5, defensa contra O1).
  */
-export const Motivo = z.enum(['regla', 'sin_regla', 'conflicto', 'tope_excedido'])
+export const Motivo = z.enum(['regla', 'sin_regla', 'conflicto', 'tope_excedido', 'clasificacion_dudosa'])
 
 export const Fuente = z.strictObject({
   clave: Clave,
@@ -153,6 +167,8 @@ export const ConceptoEvaluado = z
   .strictObject({
     descripcion: TextoNoVacio,
     categoria: Clave.nullable(),
+    /** Quién decidió la categoría: las keywords del motor o el parser (contrastado). */
+    clasificacion: z.enum(['keywords', 'parser']).nullable(),
     /** Dominio que respondió: de él salen la cita (RF-5) y la fecha de corte. */
     dominio: Clave.nullable(),
     motivo: Motivo,
@@ -163,7 +179,7 @@ export const ConceptoEvaluado = z
     veredicto: TextoVeredicto.nullable(),
     /** Traza interna, con el formato del motor de Hermes. La frase para el usuario es del redactor. */
     razon: TextoNoVacio,
-    /** Regla rectora; `null` solo sin regla. */
+    /** Regla rectora; `null` solo sin regla o con la clasificación en duda. */
     fuente: Fuente.nullable(),
     /** Toda regla que aportó veredicto, requisitos o banderas. */
     fuentes: z.array(Fuente),
@@ -173,8 +189,8 @@ export const ConceptoEvaluado = z
   .refine((c) => (c.motivo === 'regla') === (c.veredicto !== null), {
     message: 'solo una regla aplicable da veredicto: un fail-safe nunca lleva la forma de una respuesta real',
   })
-  .refine((c) => (c.motivo === 'sin_regla') === (c.fuente === null), {
-    message: 'fuente null ⇔ sin regla',
+  .refine((c) => (c.motivo === 'sin_regla' || c.motivo === 'clasificacion_dudosa') === (c.fuente === null), {
+    message: 'fuente null ⇔ sin regla o clasificación dudosa',
   })
 
 export const Resultado = z.strictObject({

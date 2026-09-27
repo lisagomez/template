@@ -113,8 +113,38 @@ interface Ambito {
   regimen: string
 }
 
+interface Clasificacion {
+  categoria: string | null
+  clasificacion: 'keywords' | 'parser' | null
+  /** Por qué no se puede fiar la categoría propuesta; `null` si se puede. */
+  duda: string | null
+}
+
+/**
+ * Sin propuesta, clasifican las keywords. Con una categoría propuesta por el parser, se CONTRASTA:
+ * tiene que existir en el ámbito, ninguna de sus exclusiones puede casar el texto, y si las keywords
+ * apuntan a otra categoría gana la duda. Un parser secuestrado solo consigue una clasificación
+ * dudosa, nunca el veredicto de otra categoría (O1).
+ */
+function decideCategoria(concepto: Pregunta['conceptos'][number], a: Ambito): Clasificacion {
+  const porKeywords = clasifica(concepto.descripcion, a.categorias)
+  const propuesta = concepto.categoria
+  if (propuesta === undefined) return { categoria: porKeywords, clasificacion: porKeywords === null ? null : 'keywords', duda: null }
+  const cat = a.categorias.find((c) => c.clave === propuesta)
+  const texto = normaliza(concepto.descripcion)
+  const duda =
+    cat === undefined
+      ? `la categoría propuesta ${propuesta} no existe en este ámbito`
+      : cat.exclusiones.some((x) => casa(texto, normaliza(x)))
+        ? `una exclusión de ${propuesta} casa la pregunta`
+        : porKeywords !== null && porKeywords !== propuesta
+          ? `las palabras de la pregunta apuntan a ${porKeywords} y el parser a ${propuesta}`
+          : null
+  return duda === null ? { categoria: propuesta, clasificacion: 'parser', duda } : { categoria: null, clasificacion: 'parser', duda }
+}
+
 function evaluaConcepto(concepto: Pregunta['conceptos'][number], a: Ambito): ConceptoEvaluado {
-  const categoria = clasifica(concepto.descripcion, a.categorias)
+  const { categoria, clasificacion, duda } = decideCategoria(concepto, a)
   const vivos = impactosVivos(a.reglas, a.fecha, a.regimen)
   const generales = vivos.filter((p) => p.impacto.categoria === null)
   const especificos = categoria === null ? [] : vivos.filter((p) => p.impacto.categoria === categoria)
@@ -122,9 +152,13 @@ function evaluaConcepto(concepto: Pregunta['conceptos'][number], a: Ambito): Con
   const base = {
     descripcion: concepto.descripcion,
     categoria,
+    clasificacion,
     dominio: categoria === null ? null : (a.dominioDe.get(categoria) ?? null),
     fuentes: unicos([...generales, ...especificos].map((p) => fuente(p.regla))),
     checklist: unicos([...generales, ...especificos].flatMap((p) => p.impacto.requisitos)),
+  }
+  if (duda !== null) {
+    return { ...base, motivo: 'clasificacion_dudosa', veredicto: null, razon: `clasificacion dudosa: ${duda}`, fuente: null, banderas: [] }
   }
   const conVeredicto = especificos.filter((p) => p.impacto.veredicto_base !== null)
   if (conVeredicto.length === 0) {

@@ -281,7 +281,30 @@ en su sitio.
 - ya migrado, verde;
 - entra a `npm run validate`.
 
-### Fase 5: Capa de lenguaje natural
+### Fase 5: Capa de lenguaje natural — ✅ CERRADA 2026-09-27 (con dos desviaciones declaradas)
+> `tools/grafo-conocimiento` 0.5.0, entrada `./lenguaje`:
+> - `estructura`: el parser, con el modelo inyectado;
+> - `redacta` y `redactaFallo`: plantillas deterministas;
+> - `responde`: la orquestación.
+>
+> Defensa contra O1, estructural y probada con fixtures:
+> - salida estricta sin campo de veredicto;
+> - categoría de lista cerrada;
+> - `descripcion` como fragmento literal de la pregunta;
+> - contraste en el motor: motivo nuevo `clasificacion_dudosa`, sin veredicto.
+>
+> Parser caído (error, tiempo o salida sin forma) = `parser_no_disponible`, redactado distinto de «sin regla».
+> RF-5: en un dominio interno no sale ni regla, ni cita, ni bandera del motor. Contrapruebas medidas: un motor
+> que cree a ciegas al parser, y un parser sin la comprobación literal, ponen rojas sus pruebas.
+> 62 pruebas del motor y 19 del paquete, y la paridad intacta.
+>
+> **Desviaciones declaradas**:
+> 1. La precisión del parser con un **modelo real NO está medida**: no hay clave en este entorno, y la raíz no trae
+>    el AI SDK. TAR-12 sigue abierta. La seguridad no depende de esa medición.
+> 2. No se añadieron casos a `npm run regresion -- --trampa`. Ese corpus (rama `golden-sets`, protocolo ciego)
+>    prueba cómo se comporta un **agente** en un CDC de skills, no una librería. La defensa del parser es
+>    estructural y se prueba de forma determinista en su suite. Llevar el O1 al corpus ciego es un cambio de C2
+>    aparte, con firma.
 **Objetivo**: parser y redactor en un entry point aparte. «Parser caído» se tipa y se prueba distinto
 de «sin regla». El redactor cita solo en los dominios públicos (RF-5).
 **Validación**:

@@ -5,8 +5,9 @@ Motor de reglas de la **spec 004**: responde una pregunta con un veredicto acota
 determinista. Cuando no hay regla, lo dice con una forma que no se puede confundir con una
 respuesta.
 
-> **Estado: Fase 3 de PRP-005.** Contrato, selección de dominios y **motor**, en paridad con el de
-> Hermes. Pendiente: el gate de siembra (Fase 4) y la capa de lenguaje natural (Fase 5). Plan:
+> **Estado: Fase 5 de PRP-005.** Contrato, selección de dominios, motor en paridad con el de Hermes,
+> gate de siembra (`./gate`) y capa de lenguaje natural (`./lenguaje`). Pendiente: dominios de ejemplo
+> y empaquetado (Fase 6) y el enrutado desde `AGENTS.md` (Fase 8, CDC). Plan:
 > `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`.
 
 ```ts
@@ -35,6 +36,32 @@ regla rectora; conflicto; tope. Lo que decide distinto, a propósito y declarado
 
 **Paridad**: sobre la fuente única da las mismas respuestas que el motor de Hermes en los 782
 casos del corpus, salvo las 12 firmadas en `@tu-scope/conocimiento` 0.2.0.
+
+## La capa de lenguaje natural (`./lenguaje`)
+
+```ts
+import { generateObject } from 'ai'                 // lo trae el proyecto, no este paquete
+import { responde } from '@tu-scope/grafo-conocimiento/lenguaje'
+
+const r = await responde('¿Puedo repartir paquetes con un dron?', {
+  conocimiento: mio, jurisdiccion: 'MX', regimen: 'GENERAL',
+  // El modelo se inyecta: nivel según routing-modelos.json, y el gasto a tu contabilidad.
+  estructurador: async ({ instrucciones, texto, esquema }) =>
+    (await generateObject({ model, schema: esquema, system: instrucciones, prompt: texto })).object,
+})
+// r.tipo === 'resultado' → r.texto: la respuesta redactada · r.tipo === 'fallo' → r.texto: por qué no hay respuesta
+```
+
+- **El parser solo estructura**: su salida es un esquema estricto **sin campo de veredicto**, y la
+  categoría sale de una lista cerrada. Cada `descripcion` tiene que ser un fragmento literal de la
+  pregunta, y el motor contrasta la categoría con sus keywords y exclusiones. Si no cuadran:
+  `clasificacion_dudosa`, sin veredicto.
+- **Parser caído** (error, tiempo o salida sin forma) es `parser_no_disponible`, que no se redacta como
+  «no hay regla».
+- **El redactor es determinista.** Cita la fuente solo si el dominio es `publica`. En uno `interna` no
+  dice de qué regla ni de qué fuente sale, **pero muestra los requisitos y banderas del autor tal cual**:
+  no escribas en ellos la fuente.
+- **No medido**: la precisión del parser con un modelo real.
 
 ## El contrato (`src/contrato.ts`, `src/valida.ts`)
 

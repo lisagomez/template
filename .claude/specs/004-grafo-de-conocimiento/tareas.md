@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Cerradas: TAR-1 a TAR-7, TAR-13, TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y
-> decisión; el resto el 2026-09-27, Fases 1 a 4 de PRP-005. Las demás siguen abiertas. Esta spec no
+> **Cerradas: TAR-1 a TAR-10, TAR-13, TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y
+> decisión; el resto el 2026-09-27, Fases 1 a 5 de PRP-005. Las demás siguen abiertas. Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -74,21 +74,24 @@
 ## Fase 3 — Capa de lenguaje natural
       **Cerrada 2026-09-27 (PRP-005 Fase 3)**: Tipo propio: solo `motivo: regla` lleva veredicto, y el contrato rechaza un fail-safe con veredicto. `evaluaSeguro` devuelve `FalloSinVeredicto` si el conocimiento o la pregunta no tienen forma.
 
-- [ ] **TAR-8 · Parser oración → campos.**
+- [x] **TAR-8 · Parser oración → campos.**
       Hecho cuando: usa `structured-outputs` (Vercel AI SDK + Zod) y **no toca el veredicto**.
       RF: MISION-2, LIBERTAD TECNICA.
+      **Cerrada 2026-09-27 (PRP-005 Fase 5)**: `src/lenguaje/parser.ts` con el modelo **inyectado**; el paquete no lleva dependencia de IA y `generateObject` del AI SDK acepta el esquema tal cual. Esquema de salida cerrado sobre lo registrado y **sin campo de veredicto**; la `descripcion` tiene que ser un fragmento literal de la pregunta; el motor contrasta la categoría propuesta. La pregunta H1 llega al motor estructurada (prueba H1).
 
-- [ ] **TAR-9 · Redactor de respuesta.**
+- [x] **TAR-9 · Redactor de respuesta.**
       Hecho cuando: devuelve una oración natural que **cita la fuente solo si el dominio la
       declara pública**, y en los dominios internos no expone de qué regla salió. Hay prueba
       de los dos casos. RF: RF-5 (reescrito el 2026-09-26).
+      **Cerrada 2026-09-27 (PRP-005 Fase 5)**: `src/lenguaje/redacta.ts`, determinista (plantillas, sin modelo). Cita la fuente solo en dominios públicos; en los internos no salen ni regla, ni cita, ni las banderas del motor que las nombran. Probado en los dos casos.
 
-- [ ] **TAR-10 · Resolver el modo de fallo del parser.**
+- [x] **TAR-10 · Resolver el modo de fallo del parser.**
       Hecho cuando: está decidido y probado qué pasa si el LLM del parser se cae — y que
       **falla distinto** que "no hay regla". O queda declarado como límite conocido.
       RF: DoF-8. **Es la pregunta abierta de la spec.**
 
 ## Fase 4 — Cerrar
+      **Cerrada 2026-09-27 (PRP-005 Fase 5)**: `FalloSinVeredicto` `parser_no_disponible` (por error, por tiempo o por salida sin forma), con su propia plantilla, distinta de sin regla. Duda de la spec resuelta.
 
 - [ ] **TAR-11 · Dos dominios de ejemplo poblados.**
       Hecho cuando: hay uno regulatorio y uno genérico de otro dominio, demostrando que el
@@ -99,6 +102,9 @@
 - [ ] **TAR-12 · Prueba end-to-end con oración real.**
       Hecho cuando: pregunta en lenguaje natural → parser → motor → respuesta natural, sin
       payload armado a mano. RF: DoF-3.
+      *Avance 2026-09-27 (Fase 5)*: el camino oración → parser → motor → respuesta existe y está probado de punta a
+      punta, pero con estructuradores deterministas. **Falta un modelo real**: no hay clave en este entorno, así que la
+      precisión del parser no está medida. No se da por cerrada.
 
 - [x] **TAR-13 · Test que fija el conteo de reglas.**
       Hecho cuando: agregar una regla **obliga** a tocar el test en el mismo cambio.
