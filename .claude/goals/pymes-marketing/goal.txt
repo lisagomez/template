@@ -1,0 +1,14 @@
+/goal Construye lo descrito en el spec: /home/kyara/code/template/.claude/goals/pymes-marketing/spec.md. Leelo ENTERO, con grafo.json y plan.md de la misma carpeta, y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: la familia de contenido y marketing del plugin small-business (v1.35.1, da38ec1) adaptada a pymes mexicanas: herramientas empaquetadas en tools/, cada una con su laboratorio de pruebas, y una app para el cliente que usa solo lo que el laboratorio aprobo. Nada se publica ni se envia.
+Libertad tecnica total sobre el como; sigue el plan.md (compilado del grafo) y extiende lo existente, no lo reescribas.
+VALIDA: `npm run typecheck && npm run lint && npm run prueba:laboratorio-pymes` (la suite la creas tu) + `npm run empaqueta <x>` de lo que tocaste, tras cada cambio grande, output pegado; `npm run validate` antes de cerrar.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- tabla de triaje de las 9 skills pegada (conserva / reemplaza / descarta / riesgo)
+- `npm run empaqueta` en verde por herramienta, sin publicar
+- tabla del laboratorio: >=5 casos por herramienta con casos-trampa, estado real y veredicto
+- screenshots de Playwright: perfil de marca, brief de 30 dias desde CFDI de prueba, calendario con pieza con imagen, respuestas a resenas en borrador, brief del lunes con una fuente marcada "sin datos"
+- coste por corrida desde la contabilidad (o null declarado)
+- grafo.json con estados actualizados y su evidencia
+- `npm run validate` en verde; reporte de decisiones; AISIA corta de resenas; propuesta de entrada CDC para firma; formas en que podria estar mal, resueltas
+RESTRICCIONES: cero publicaciones, envios o conexiones (todo en borrador); ningun MCP del plugin se conecta, entrada local (archivos, CSV, XML, texto); no modificar el plugin ni copiar sus skills a .claude/skills; atribucion Apache-2.0; LLM solo por routing-modelos.json con modelo pineado; datos de prueba sinteticos; secretos jamas en pantalla; no tocar settings, skills ni prompts del arnes; espanol de Mexico, pesos MXN.
+RED DE SEGURIDAD: si tras 80 turnos no converges, detente y reporta el bloqueo y el estado del grafo.
