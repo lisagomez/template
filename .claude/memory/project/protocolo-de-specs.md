@@ -20,7 +20,7 @@
   amenazas) va **en el plan**, porque necesita fronteras y flujos, que son diseño. Meter los
   siete controles en la spec la convierte en papeleo, y así es como mueren estos controles.
 - **Las seis specs existentes son reexpresiones**, no specs nuevas: venían de
-  `/goal-compiler` y se reformatearon a la plantilla el 2026-08-30 a petición de la dueña.
+  `/goal-compiler` y se reformatearon a la plantilla el 2026-08-30 a petición del laboratorio.
   Conservan `Libertad técnica` a propósito. **El texto original está en git**
   (`git show 461803f:.claude/PRPs/specs/spec-<nombre>.md`) y cada spec lleva ese comando en
   su encabezado. Cuatro están construidas; **004 y 005 no**, y sus planes son propuestas no

@@ -1,0 +1,247 @@
+{
+  "slug": "contenido-pymes",
+  "titulo": "Generación de contenido para pymes: SDD, PRP, herramientas, laboratorio visual, app y documentación",
+  "nodos": [
+    {
+      "id": "base",
+      "label": "Base existente: brief 30 días, calendario vivo y piezas SVG (tools/pymes-marketing/contenido) + /estudio",
+      "estado": "ambar"
+    },
+    {
+      "id": "propuesta",
+      "label": "propuesta-video.md y triaje-video.md (oficio, límites, 14 preguntas sin firmar)",
+      "estado": "ambar"
+    },
+    {
+      "id": "sdd",
+      "label": "SDD de generación de contenido (docs/SDD-generacion-de-contenido.md)",
+      "estado": "morado",
+      "evidencia": "docs/SDD-generacion-de-contenido.md con §10 medido"
+    },
+    {
+      "id": "prp",
+      "label": "PRP-006 con fases autorizadas y fases bloqueadas por firma",
+      "estado": "morado",
+      "evidencia": "PRP-006: tabla de fases con autorizada/bloqueada, quién firma y por qué"
+    },
+    {
+      "id": "piezas",
+      "label": "Piezas fijas exportables: PNG, carruseles, formatos por canal",
+      "estado": "ambar",
+      "evidencia": "formatos + zona segura, revisión visual, carruseles, PNG en navegador; laboratorio piezas-1..7; sin estreno real"
+    },
+    {
+      "id": "video",
+      "label": "Video por código sin personas: promos y tarjetas animadas 9:16 (MP4/WebM)",
+      "estado": "ambar",
+      "evidencia": "escena → cuadro → MP4 1080×1920 30 fps, misma huella en dos renders; laboratorio video-1..7; render solo local"
+    },
+    {
+      "id": "aprobacion",
+      "label": "Aprobación del dueño en su celular, con huella de lo aprobado",
+      "estado": "ambar",
+      "evidencia": "huella SHA-256, editar revoca, CSV del mes, 0 salidas al aprobar; laboratorio aprobacion-1..6"
+    },
+    {
+      "id": "reel",
+      "label": "Reel del celular con voz y cara (BLOQUEADO hasta firmar la propuesta de video)",
+      "estado": "gris",
+      "evidencia": "BLOQUEADO: firma de propuesta-video.md (C4)"
+    },
+    {
+      "id": "llm",
+      "label": "Redacción con LLM (BLOQUEADA: sin llave medida y sin CDC)",
+      "estado": "gris",
+      "evidencia": "BLOQUEADO: sin llave medida; activarlo es otro CDC (los prompts del redactor se firmaron el 2026-09-27)"
+    },
+    {
+      "id": "laboratorio",
+      "label": "Laboratorio visual: casos con imagen, hojas de cuadros, comparación contra referencias",
+      "estado": "morado",
+      "evidencia": "65 casos (64 pasa, 1 no medido), 35 trampas, referencias visuales; suite en validate"
+    },
+    {
+      "id": "app",
+      "label": "App de contenido para el cliente (derivada del estudio)",
+      "estado": "ambar",
+      "evidencia": "/estudio (carruseles, video, PNG) + /estudio/aprobar; Playwright sin errores; sin estreno con un cliente"
+    },
+    {
+      "id": "docs",
+      "label": "Documentación: guía del dueño, READMEs de herramientas, SDD y PRP al día",
+      "estado": "morado",
+      "evidencia": "GUIA-DUENO-CONTENIDO.md + READMEs del paquete, laboratorio y estudio"
+    },
+    {
+      "id": "firma",
+      "label": "Gate humano: publicar, subir, desbloquear reel y LLM",
+      "estado": "gris",
+      "evidencia": "pendiente: publicar, desbloquear reel, LLM, cuentas y render en producción"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a1",
+      "from": "base",
+      "to": "sdd",
+      "tipo": "agente",
+      "label": "lo que ya existe, medido"
+    },
+    {
+      "id": "a2",
+      "from": "propuesta",
+      "to": "sdd",
+      "tipo": "agente",
+      "label": "oficio y límites del video"
+    },
+    {
+      "id": "a3",
+      "from": "sdd",
+      "to": "prp",
+      "tipo": "agente",
+      "label": "del diseño a fases con estado"
+    },
+    {
+      "id": "a4",
+      "from": "prp",
+      "to": "piezas",
+      "tipo": "agente",
+      "label": "fase autorizada"
+    },
+    {
+      "id": "a5",
+      "from": "prp",
+      "to": "video",
+      "tipo": "mixta",
+      "label": "fase autorizada: render local"
+    },
+    {
+      "id": "a6",
+      "from": "prp",
+      "to": "aprobacion",
+      "tipo": "agente",
+      "label": "fase autorizada"
+    },
+    {
+      "id": "a7",
+      "from": "prp",
+      "to": "reel",
+      "tipo": "manual",
+      "label": "solo con la propuesta firmada"
+    },
+    {
+      "id": "a8",
+      "from": "prp",
+      "to": "llm",
+      "tipo": "manual",
+      "label": "solo con llave y CDC"
+    },
+    {
+      "id": "a9",
+      "from": "piezas",
+      "to": "laboratorio",
+      "tipo": "mixta",
+      "label": "casos visuales de piezas"
+    },
+    {
+      "id": "a10",
+      "from": "video",
+      "to": "laboratorio",
+      "tipo": "mixta",
+      "label": "casos visuales de video"
+    },
+    {
+      "id": "a11",
+      "from": "laboratorio",
+      "to": "app",
+      "tipo": "agente",
+      "label": "la app usa solo lo aprobado"
+    },
+    {
+      "id": "a12",
+      "from": "aprobacion",
+      "to": "app",
+      "tipo": "agente",
+      "label": "flujo de aprobación"
+    },
+    {
+      "id": "a13",
+      "from": "app",
+      "to": "docs",
+      "tipo": "agente",
+      "label": "guía del dueño"
+    },
+    {
+      "id": "a14",
+      "from": "laboratorio",
+      "to": "docs",
+      "tipo": "agente",
+      "label": "cómo leer el laboratorio"
+    },
+    {
+      "id": "a15",
+      "from": "app",
+      "to": "firma",
+      "tipo": "manual",
+      "label": "publicar lo aprobado"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "L1",
+      "sobre": "nodo:prp",
+      "label": "candado",
+      "referencia": "cada fase del PRP dice autorizada o bloqueada (con quién firma y por qué); nada bloqueado se construye",
+      "estado": "morado",
+      "evidencia": "fases 7-10 del PRP bloqueadas y no construidas"
+    },
+    {
+      "id": "L2",
+      "sobre": "nodo:video",
+      "label": "sin personas",
+      "referencia": "el video no usa cámara, voz ni rostro; solo producto, texto y marca",
+      "estado": "morado",
+      "evidencia": "tipos de capa cerrados; video-4 rechaza una capa de foto"
+    },
+    {
+      "id": "L3",
+      "sobre": "nodo:video",
+      "label": "determinismo",
+      "referencia": "misma entrada, mismo archivo (huella igual en dos renders)",
+      "estado": "morado",
+      "evidencia": "huella sha256:c8878df4… idéntica en dos renders (public/laboratorio-pymes/video/medicion.json)"
+    },
+    {
+      "id": "L4",
+      "sobre": "nodo:laboratorio",
+      "label": "referencia visual",
+      "referencia": "cada pieza y video se compara contra su imagen de referencia; un cambio visual se ve y se aprueba",
+      "estado": "morado",
+      "evidencia": "huellas en referencias.json + comparación visual 0.27–0.36 %"
+    },
+    {
+      "id": "L5",
+      "sobre": "nodo:piezas",
+      "label": "licencias",
+      "referencia": "ninguna fuente, script o recurso sin licencia compatible y su texto incluido; nada de GSAP ni código de sfstudio",
+      "estado": "morado",
+      "evidencia": "sin fuentes ni recursos empaquetados; nada de GSAP ni código de terceros"
+    },
+    {
+      "id": "L6",
+      "sobre": "nodo:aprobacion",
+      "label": "aprobar no es publicar",
+      "referencia": "cero publicaciones; lo aprobado guarda la huella de exactamente lo que se aprobó",
+      "estado": "morado",
+      "evidencia": "0 salidas por aprobar; aprobacion-2 y -6 revocan al editar"
+    },
+    {
+      "id": "L7",
+      "sobre": "nodo:docs",
+      "label": "validate después del commit",
+      "referencia": "npm run validate en verde con todo versionado",
+      "estado": "morado",
+      "evidencia": "npm run validate después del commit (ver resultados.md)"
+    }
+  ]
+}

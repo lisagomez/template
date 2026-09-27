@@ -238,6 +238,15 @@ test('cada etapa mide su propio tiempo con el reloj inyectado, y el respaldo es 
   assert.equal(conRespaldo.milisegundosDeRespaldo, 300)
 })
 
+test('sin lector de codigos su tiempo es cero aunque el reloj avance entre lecturas', async () => {
+  // Reproduce la intermitencia de banco-evidencia.ts: con Date.now() el milisegundo a veces
+  // cambiaba entre las dos lecturas y la etapa que no corrio salia con 1 ms.
+  let t = 0
+  const ahora = () => ++t
+  const l = await leePagina(IMAGEN, 0, { motor: motorFalso(OCR_CON_RFC(RFC_BUENO)), ahora })
+  assert.equal(l.tiempos.codigos, 0)
+})
+
 test('el corpus suma los tiempos por etapa de sus paginas y las vias exactas van a cero', async () => {
   let t = 0
   const ahora = () => t

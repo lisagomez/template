@@ -2,7 +2,7 @@
 
 > **ESTADO REAL (2026-07-26, no tocar la spec para saberlo):** ERP-0 (001-004) +
 > migración 005 del módulo `act` están **APLICADAS al Supabase compartido** por
-> decisión de la dueña; el módulo act OPERA (cosecha de features vendibles del
+> decisión del laboratorio; el módulo act OPERA (cosecha de features vendibles del
 > trío, detector swm-act semanal, cosecha inicial de 23 activos, política D-07 en
 > borrador con gate duro). El acceso interino es psql `cli_fin`+SET ROLE (D-03
 > sigue pendiente para el CLI formal). **2026-09-25:** el esquema de producción es

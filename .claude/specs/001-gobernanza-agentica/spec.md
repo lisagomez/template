@@ -24,14 +24,14 @@ código divergen.
 
 ## Usuarios / actores
 
-- **La dueña del repo**, que aprueba cambios y firma riesgos, sin equipo de compliance.
+- **El laboratorio**, que aprueba cambios y firma riesgos, sin equipo de compliance.
 - **El agente** que ejecuta y al que estos controles limitan.
 - **Un auditor o comprador enterprise** que necesita verificar la postura sin confiar.
 - **Todo proyecto derivado**, que hereda la capa el día uno.
 
 ## Historias de usuario
 
-- H1: Como dueña quiero que ningún skill se edite en caliente para que un cambio de
+- H1: Como laboratorio quiero que ningún skill se edite en caliente para que un cambio de
   comportamiento no llegue a producción sin diff ni aprobación.
 - H2: Como auditor quiero que el papel y el código no puedan divergir en silencio para
   poder verificar la postura con un comando.

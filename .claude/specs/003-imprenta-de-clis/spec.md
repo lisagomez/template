@@ -23,14 +23,14 @@ mide o se declara desconocida.
 ## Usuarios / actores
 
 - **El agente**, que decide entre MCP, CLI o modelo en cada tarea.
-- **La dueña**, que aprueba imprimir o adoptar un CLI (cambia la superficie de herramientas).
+- **El laboratorio**, que aprueba imprimir o adoptar un CLI (cambia la superficie de herramientas).
 - **Un proyecto derivado**, que sí imprime en su máquina.
 
 ## Historias de usuario
 
 - H1: Como agente quiero un orden de resolución explícito para no preguntar "¿qué modelo
   uso?" como primera pregunta cuando ya existe un CLI que lo resuelve.
-- H2: Como dueña quiero que el auditor me diga que **no sabe**, en vez de reportar cero
+- H2: Como laboratorio quiero que el auditor me diga que **no sabe**, en vez de reportar cero
   faltantes porque no encontró nada que mirar.
 - H3: Como responsable quiero que un CLI que mueve dinero nazca con dry-run, para que un
   `readOnly` mal puesto no sea un detalle.

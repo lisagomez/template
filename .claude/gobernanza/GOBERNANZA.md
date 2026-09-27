@@ -43,7 +43,7 @@ semanas después, sin ruido.
 altera el comportamiento de TODO lo que la fábrica produce después.
 
 Los prompts y skills ya viven en git y se despliegan como código. El CDC añade que se
-**revisan** como código: nadie edita un skill en caliente —ni la dueña— sin que quede
+**revisan** como código: nadie edita un skill en caliente —ni el laboratorio— sin que quede
 diff, regresión y aprobación.
 
 El gate es **proporcional al radio** del cambio:
@@ -54,6 +54,7 @@ El gate es **proporcional al radio** del cambio:
 | Skill, prompt de sistema, `CLAUDE.md` | Ese skill y todo lo que produce | CDC estándar: diff revisado + regresión de ese skill + aprobación |
 | Plantilla, design-system, `prp-base.md` | Todo lo futuro que use esa plantilla | Re-auditoría registrada en la bitácora |
 | **Configuración del agente** (`settings.json`, campo `model`, `.mcp.json`, permisos) | Todo el sistema | CDC completo. **Se nombra explícitamente porque no disparaba**: una petición de config no se lee como cambio de comportamiento, y lo es |
+| **Manifiesto de gates** (`.claude/gates.json`: apagar un gate, sacarlo de un perfil, cambiar su comando) | Todo lo que el gate deja pasar, para siempre | CDC completo: diff + regresión + aprobación + entrada. **Mismo motivo que la fila anterior**: se lee como editar un JSON de config y decide qué se verifica y qué no |
 | Parámetros menores (temperatura, límites, timeouts) | Acotado | Entrada en bitácora + revisión trimestral |
 
 **Reglas duras**
@@ -61,6 +62,16 @@ El gate es **proporcional al radio** del cambio:
 - El modelo en producción **SIEMPRE está pineado**. `latest` es anti-patrón aquí igual
   que en las imágenes Docker.
 - Un CDC sin regresión verde **no se promueve**. Sin excepciones y sin "se ve bien".
+- **Un gate apagado NO es un gate que pasa.** Lo que no se puede ejecutar se declara
+  `activo: false` en `.claude/gates.json` **con `motivo` y `falta`**, nunca se borra, y el
+  runner lo cuenta como población aparte en cada corrida. Un gate activo cuyo comando no
+  existe deja el manifiesto **inválido**: el runner no arranca, porque activar una regla
+  incomprobable tiene que ser imposible por diseño y no una decisión de quien edita.
+  > **De dónde sale.** `docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md` §C4 midió el
+  > agujero sobre el gemelo de este manifiesto en `hermes-os-a2a`: *«un gate inactivo se
+  > lee, a simple vista, igual que uno que pasó»* — fatiga de aprobación, O3. La invariante
+  > fail-closed viene de su motor (`supervisor-a2a/gates.py`); el `motivo` obligatorio se
+  > añadió **aquí**, porque allá `software.toml` apaga dos gates sin decir por qué.
 - **El diff se enseña ANTES de pedir la aprobación, nunca después.** Describir el cambio de
   palabra y pedir el sí no es una aprobación: es un «continúa» con otro nombre, y esta bitácora
   ya dice que un «continúa» no sustituye a la aprobación. Quien aprueba, aprueba lo que ve.

@@ -1,5 +1,5 @@
 # AISIA — Reseñas y reputación (`@tu-scope/pymes-marketing/resenas`)
-> Fecha: 2026-09-26 · Estado: **borrador, para firma** · Revisión: al conectar una plataforma de reseñas, al
+> Fecha: 2026-09-26 · Estado: **firmada** (2026-09-27, el laboratorio) · Revisión: al conectar una plataforma de reseñas, al
 > activar el redactor con LLM para respuestas, al guardar reseñas fuera de la memoria del navegador, o tras
 > un incidente.
 
@@ -49,4 +49,4 @@
 aparece: publicar respuestas automáticamente o enviar mensajes a clientes callados sin revisión — el daño
 recae sobre terceros que no firmaron (límite de C5); no se ofrece por la vía del registro de riesgo.
 
-Firmada por: ____________  Rol: ____________  Fecha: ____________
+Firmada por: **lisagomez**  Rol: el laboratorio  Fecha: 2026-09-27 («Firmo la AISIA»)

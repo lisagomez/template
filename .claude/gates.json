@@ -1,0 +1,409 @@
+{
+  "_comentario": "Manifiesto de gates de la fabrica: la UNICA lista de lo que el gate corre. Antes vivia como una cadena de 21 `&&` en el campo `validate` de package.json (599 caracteres, indiferenciable en un diff) mas una SEGUNDA copia a mano del subconjunto de `predeploy`. Aqui cada gate es un dato con runner, que superficie guarda y que evidencia deja. Lo derivan `scripts/corre-gates.mjs` (lo corre) y `scripts/verifica-gates.mjs` (lo valida, dentro de `npm run validate`). Cambiarlo es un CDC (C1): decide que pasa y que no, para todo el repo, hasta el proximo cambio.",
+  "_doctrina": [
+    "RE-EJECUTA, no confia: el runner corre el comando el mismo y surfea su salida.",
+    "Gate que no puede correr NUNCA se marca pasado: es `no_ejecutable` = rechazo con evidencia.",
+    "Un gate activo cuyo runner no existe = manifiesto INVALIDO: el runner no arranca. Es imposible por diseno activar una regla incomprobable.",
+    "Runner desconocido (un typo) = manifiesto INVALIDO aunque el gate este inactivo.",
+    "Un gate inactivo JAMAS se lee como uno que paso: se cuenta y se reporta aparte, con motivo. Un gate sin motivo declarado es manifiesto invalido (anti-sello-de-goma).",
+    "Retirar un gate no es editar este archivo: es un CDC. Lo inejecutable se declara inactivo CON motivo, nunca se borra."
+  ],
+  "runners": {
+    "comando": "Ejecuta un comando de shell sobre la raiz del repo. exit 0 = paso; exit != 0 = fallo; binario ausente o timeout = no_ejecutable.",
+    "modelo": "Gate juzgado por un modelo. DECLARADO sin implementacion: no puede estar activo (si lo esta, el manifiesto es invalido). Existe para que la ausencia de revision por modelo sea visible en el padron en vez de ser un hueco silencioso."
+  },
+  "perfiles": {
+    "validate": {
+      "descripcion": "El gate completo. `npm run validate`: lo que tiene que estar en verde antes de integrar.",
+      "cierre": "sella"
+    },
+    "predeploy": {
+      "descripcion": "Lo que corre EN EL SERVIDOR antes de desplegar. Subconjunto estricto de validate: sin build ni pruebas de feature (el build lo hace la imagen), con las auditorias y la gobernanza completas. El gate vive DENTRO de la ruta de deploy a proposito: sacarlo de ahi fue el hueco del 2026-08-23.",
+      "siempre": ["verifica:privado"],
+      "atajo": "sello"
+    },
+    "cdc": {
+      "descripcion": "Lo que exige un CDC (C1) y NO se paga en cada validate. Se corre al cambiar comportamiento: modelo, skill, prompt, plantilla, configuracion del agente o este mismo manifiesto."
+    }
+  },
+  "gates": [
+    {
+      "nombre": "typecheck",
+      "runner": "comando",
+      "comando": "npm run typecheck",
+      "guarda": "los tipos de todo el repo (`tsc --noEmit`). Su hook `pretypecheck` corre antes `prepara-gate.mjs`: engines.node y el build de `tools/`, que el gate daba por hecho y no lo estaba",
+      "evidencia": "errores de tipo con archivo y linea; exit 0 = ninguno",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 900
+    },
+    {
+      "nombre": "lint",
+      "runner": "comando",
+      "comando": "npm run lint",
+      "guarda": "las reglas de ESLint sobre todo el arbol",
+      "evidencia": "hallazgos por archivo y regla; exit 0 = limpio",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 600
+    },
+    {
+      "nombre": "build",
+      "runner": "comando",
+      "comando": "npm run build",
+      "guarda": "que la app de produccion compile entera (Next). `next.config.ts` no puede desactivar el chequeo de tipos ni ESLint del build: eso lo vigila aparte `verify:gobernanza`, porque vaciaria este gate sin ponerlo rojo",
+      "evidencia": "salida del build con rutas y tamanos; exit 0 = compila",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 1800
+    },
+    {
+      "nombre": "verify:gobernanza",
+      "runner": "comando",
+      "comando": "npm run verify:gobernanza",
+      "guarda": "que el papel y el codigo de la capa de gobernanza digan lo mismo (C1-C7): documentos, controles declarados, cables en las instrucciones, plantillas en disco, y este manifiesto dentro del alcance de C1",
+      "evidencia": "una linea por comprobacion, verde o roja con su pista; exit 1 si alguna divergio",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 600
+    },
+    {
+      "nombre": "verifica:gates",
+      "runner": "comando",
+      "comando": "npm run verifica:gates",
+      "guarda": "este mismo manifiesto: que cargue fail-closed, que `validate` y `predeploy` sigan derivando de el y no vuelvan a llevar la lista a mano, que todo script con forma de gate este en el padron, y que ningun archivo de pruebas quede huerfano",
+      "evidencia": "una linea por comprobacion con su pista; exit 1 si el padron y el codigo divergen",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "Se vigila a si mismo a proposito: un padron que nada obliga a mantener se pudre en silencio, y este padron decide que corre el gate."
+    },
+    {
+      "nombre": "verifica:specs",
+      "runner": "comando",
+      "comando": "npm run verifica:specs",
+      "guarda": "la integridad de `.claude/specs/`: secciones obligatorias, requisitos en EARS y numeracion — lo que ningun otro gate mira",
+      "evidencia": "spec por spec, que seccion o requisito falta; exit 1 si alguna esta incompleta",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "regresion",
+      "runner": "comando",
+      "comando": "npm run regresion",
+      "guarda": "la conducta de los skills contra sus golden sets — control C2, capa A (mecanica y determinista)",
+      "evidencia": "caso por caso, esperado contra obtenido; exit 1 si alguno cambio de conducta",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 900
+    },
+    {
+      "nombre": "audita:secretos",
+      "runner": "comando",
+      "comando": "npm run audita:secretos",
+      "guarda": "credenciales en TODA la historia del repositorio, no solo en el arbol actual: un secreto commiteado y luego borrado sigue ahi",
+      "evidencia": "hallazgos con archivo y commit, SIN reimprimir el secreto; exit 1 si hay alguno",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 600
+    },
+    {
+      "nombre": "mide:contexto",
+      "runner": "comando",
+      "comando": "npm run mide:contexto",
+      "guarda": "el presupuesto de contexto de las instrucciones: lo que se paga en CADA sesion por el prefijo (`AGENTS.md`, reglas, descripciones de skills)",
+      "evidencia": "tokens medidos por documento contra el presupuesto declarado; exit 1 si lo excede",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "verifica:routing",
+      "runner": "comando",
+      "comando": "npm run verifica:routing",
+      "guarda": "el routing por nivel de tarea (C8): que toda clase tenga modelo asignado, que los modelos vayan pineados y que los precios e indices esten vigentes. Una clase sin asignar hereda el default caro y el ahorro se pierde en silencio",
+      "evidencia": "clase por clase con su modelo y precio; exit 1 si falta una o el precio caduco",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:contabilidad",
+      "runner": "comando",
+      "comando": "npm run prueba:contabilidad",
+      "guarda": "la contabilidad de tokens: que una llamada sin datos de uso se guarde con coste `null` y nunca como cero, y que el aviso al 80 % no decida cortar por la app",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:laboratorio",
+      "runner": "comando",
+      "comando": "npm run prueba:laboratorio",
+      "guarda": "la logica pura del laboratorio de voz: reglas y la voz en flujo (decodificador PCM y maquina de estados de la interrupcion). Sin red, sin modelos, sin navegador",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:laboratorio-pymes",
+      "runner": "comando",
+      "comando": "npm run prueba:laboratorio-pymes",
+      "guarda": "el laboratorio de las herramientas pymes (`/laboratorio-pymes`): corre TODOS los casos de verdad, cada uno da el estado que declara, >=5 por herramienta y con trampas, y la lista de herramientas que usa `/estudio` sale de los resultados, no de una lista a mano. Sin red; el caso con LLM queda `no-medido` sin llave",
+      "evidencia": "salida de `node --test`: la tabla de casos (id, estado, trampa) y pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA del 2026-09-27, al mezclar `main` en `pymes-marketing-build`: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo `verifica:gates` (script sin declarar y `src/features/laboratorio-pymes/pruebas/laboratorio.ts` huerfano), igual que en el PR #154"
+    },
+    {
+      "nombre": "prueba:historial",
+      "runner": "comando",
+      "comando": "npm run prueba:historial",
+      "guarda": "la logica pura del historial del dictado: buscar sin acentos, corregir, borrar y las cifras. Sin navegador, sin disco",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:ajustes",
+      "runner": "comando",
+      "comando": "npm run prueba:ajustes",
+      "guarda": "la logica pura de `/ajustes` y la precedencia visible de `ajustes.json`. Sin navegador, sin disco",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:etiquetas",
+      "runner": "comando",
+      "comando": "npm run prueba:etiquetas",
+      "guarda": "la logica pura de `/etiquetas` (editor, lotes, semilla ficticia, tablero) y los roles del dispositivo: el de conteo solo cuenta y su vista no lleva ninguna cantidad del sistema. Repite la suite del nucleo `tools/etiquetas-gs1`, que tambien corre en `prueba:tools`",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA del 2026-09-27, al mezclar `main` en el PR #154: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo la comprobacion de huerfanos de verifica-gates.mjs."
+    },
+    {
+      "nombre": "prueba:trayectorias",
+      "runner": "comando",
+      "comando": "npm run prueba:trayectorias",
+      "guarda": "el formato de trayectoria y la captura en la linea de aplicacion (spec 011). Sin red, sin disco, sin base de datos",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "verifica:trayectorias",
+      "runner": "comando",
+      "comando": "npm run verifica:trayectorias",
+      "guarda": "el almacen de trayectorias capturadas (spec 011, RF-4): que lo guardado sea legible y coherente",
+      "evidencia": "trayectoria por trayectoria, que campo falta o no valida; exit 1 si alguna esta rota",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "verifica:inventario",
+      "runner": "comando",
+      "comando": "npm run verifica:inventario",
+      "guarda": "el inventario de activos (spec 014): todo activo detectado esta catalogado. Solo lectura — PROPONE, no cataloga",
+      "evidencia": "activos detectados contra catalogados, y los que faltan; exit 1 si hay alguno sin clasificar",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 600
+    },
+    {
+      "nombre": "verifica:marca-blanca",
+      "runner": "comando",
+      "comando": "npm run verifica:marca-blanca",
+      "guarda": "la frontera de entrega del ERP: que todo archivo de `erp/` este clasificado, que nada defendible ni de la casa caiga en lo que se entrega, y que ninguna huella de la casa (tenant, IDs, personas, correos) viaje en la entrega",
+      "evidencia": "conteo por clase, huellas encontradas y huellas muertas; exit 1 si la frontera esta rota",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 600
+    },
+    {
+      "nombre": "prueba:inventario",
+      "runner": "comando",
+      "comando": "npm run prueba:inventario",
+      "guarda": "el detector del inventario sobre repos de juguete en memoria: sin red, sin disco, sin git, sin base de datos",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:tools",
+      "runner": "comando",
+      "comando": "npm run prueba:tools",
+      "guarda": "las suites propias de las herramientas empaquetadas de `tools/` (extractor-documental, dictado, voz, asesor-ventas, etiquetas-gs1, pymes-marketing)",
+      "evidencia": "herramienta por herramienta, pruebas pasadas o falladas; exit 1 si alguna suite cae",
+      "cubre": ["tools/*/pruebas/*.ts"],
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 1200,
+      "_nota": "ALTA del 2026-09-26, al cablear este manifiesto. `prepara-gate.mjs` CONSTRUIA las herramientas para que el typecheck de la raiz no fallara, pero nadie corria sus pruebas: 87 archivos y 776 pruebas solo en extractor-documental, fuera del gate. Pasaban las cuatro, pero por suerte, no por gate. Lo cazo la comprobacion de huerfanos de verifica-gates.mjs, no un ojo humano."
+    },
+    {
+      "nombre": "prueba:imprenta",
+      "runner": "comando",
+      "comando": "npm run prueba:imprenta",
+      "guarda": "el nucleo de la imprenta de CLIs",
+      "evidencia": "salida de las pruebas del nucleo",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "audita:imprenta",
+      "runner": "comando",
+      "comando": "npm run audita:imprenta",
+      "guarda": "el estado de la imprenta: que CLI falta, cual esta sin grado y por tanto fuera de produccion. NUNCA aparenta saber lo que no sabe",
+      "evidencia": "CLI por CLI con su grado o su ausencia de grado; exit 1 si uno sin grado esta en produccion",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "audita:fugas",
+      "runner": "comando",
+      "comando": "npm run audita:fugas",
+      "guarda": "fugas del corpus de casos-trampa: mide si una entrada es RECONOCIBLE leyendo el arbol de trabajo. Un caso-trampa que se puede encontrar leyendo el repo ya no mide nada",
+      "evidencia": "entradas reconocibles con su via de fuga; exit 1 si alguna lo es",
+      "perfiles": ["validate", "predeploy"],
+      "activo": true,
+      "timeout_s": 600
+    },
+    {
+      "nombre": "verifica:privado",
+      "runner": "comando",
+      "comando": "node scripts/verifica-privado.mjs",
+      "guarda": "la visibilidad del repo (PRP-004): el monorepo lleva el ERP y lo defendible no puede vivir en un repo publico. Pregunta a la API de GitHub SIN token, que es lo que ve un extrano",
+      "evidencia": "codigo de respuesta de la API para `origin`; exit 1 si el repo responde 200 sin credenciales",
+      "perfiles": ["predeploy"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "Fuera de `validate` a proposito: necesita red. Corre SIEMPRE en predeploy, incluso con sello vigente, porque la visibilidad del repo puede cambiar sin que cambie el arbol."
+    },
+    {
+      "nombre": "regresion:trampa",
+      "runner": "comando",
+      "comando": "npm run regresion -- --trampa",
+      "guarda": "los casos-trampa: control C2 capa B, la capa adversarial. Mide la conducta en frio ante peticiones de saltarse un gate, imprimir un secreto o aceptar un riesgo infirmable",
+      "evidencia": "caso por caso con su veredicto; el unico rojo de 21 del 2026-09-13 fue una respuesta que cito la regla en vez de ejecutarla",
+      "perfiles": ["cdc"],
+      "activo": true,
+      "timeout_s": 3600,
+      "_nota": "Fuera de `validate` a proposito: cuesta llamadas a modelo. Se paga por CDC, no por integracion. Antes esto solo vivia en la prosa de AGENTS.md; aqui queda en el padron."
+    },
+    {
+      "nombre": "prueba:a2a",
+      "runner": "comando",
+      "comando": "npm run prueba:a2a",
+      "guarda": "el puente A2A (spec 005 TAR-8..TAR-13, spec 010 RF-15..RF-21): la opacidad del bridge —ENUMERA sus rutas y exige igualdad con card, rpc y health (RF-17)— y que ninguna ruta de servidor aparezca fuera del bridge sin estar DECLARADA, mas el protocolo JSON-RPC, la Card sin nombres del interior, la clave de API y el fail-safe probado apagando la capacidad",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas. 14 en verde al reactivarlo el 2026-09-26",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "REACTIVADO el 2026-09-26. Estuvo apagado desde que el padron destapo que era huerfano (ningun script lo corria y llevaba meses en rojo). Lo que se arreglo: la prueba de opacidad enumeraba `src/app` ENTERO —correcto cuando el bridge era lo unico que habia, falso al crecer la app— y ahora enumera las rutas DEL BRIDGE, que es el conjunto que RF-17 acota y el nombre que le puso el SDD (§6, `rutasDelBridge()`). Para no perder lo que la version vieja si cazaba, una segunda prueba enumera el resto y lo exige DECLARADO: una ruta nueva en cualquier sitio sigue cayendo (demostrado sembrando una en `/a2a/` y otra en `/api/`). Se excluyen las dos pruebas `SERVICIO:`, que viven en el gate de al lado: no se apagan en silencio."
+    },
+    {
+      "nombre": "prueba:a2a:servicio",
+      "runner": "comando",
+      "comando": "npm run prueba:a2a:servicio",
+      "guarda": "el camino feliz del puente contra el servicio REAL del extractor: un escaneo sintetico vuelve COMPLETADO con confianza por campo, evidencia y `revisionHumana`, y un XML como texto va por la skill de comprobante con `selloVerificado=false`. Es lo unico que prueba que la capacidad responde de verdad, en vez de que el fail-safe funcione",
+      "evidencia": "salida de `node --test`: las dos pruebas `SERVICIO:` pasadas o falladas",
+      "perfiles": [],
+      "activo": false,
+      "timeout_s": 600,
+      "motivo": "Exigen el servicio del extractor corriendo en `EXTRACTOR_SERVICIO_URL`, y ese servicio no arranca sin el binario de Tesseract: `tools/extractor-documental/servicio/configuracion.mjs` lanza «no se pudo leer la version de Tesseract: el motor principal no arranca sin binario». Medido el 2026-09-26: Tesseract NO esta instalado en esta maquina y `servicio/node_modules` tampoco existe. Las dos FALLAN a proposito cuando el servicio no responde — su autor lo decidio asi porque «pasar en silencio seria afirmar una capacidad que nunca corrio», y esa decision se respeta en vez de convertirlas en un skip.",
+      "falta": "El mismo perfil con infraestructura que piden `inventario:valida-erp`, `erp:prueba` y `erp:control`: un nodo con Docker donde levantar el servicio del extractor (Tesseract, `npm install` en `servicio/`) y correr estas dos contra el. Hasta entonces se corren a mano con el servicio arriba. NO se activan aqui porque un gate activo que no puede correr es `no_ejecutable` = rechazo, que es lo correcto y tambien lo que dejaria el gate en rojo por falta de infraestructura, no por un defecto del codigo."
+    },
+    {
+      "nombre": "inventario:valida-erp",
+      "runner": "comando",
+      "comando": "npm run inventario:valida-erp",
+      "guarda": "el export del inventario contra el esquema REAL del ERP (spec 014, RF-14): levanta un Postgres desechable, aplica las migraciones en orden, carga el ledger con el rol del ejecutor (con RLS y grants reales, sin superusuario ni `service_role`), lo carga otra vez para probar idempotencia y compara con el ledger",
+      "evidencia": "diferencias entre lo cargado y el ledger; exit 1 si divergen",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker, y el gate corre en maquinas sin Docker (su propia cabecera ya lo declara: «Vive fuera de validate: necesita Docker»).",
+      "falta": "Un perfil de gate con Docker (nodo de integracion) donde este y los dos de `erp:` corran juntos. Hasta entonces se corre a mano al tocar el ERP."
+    },
+    {
+      "nombre": "erp:prueba",
+      "runner": "comando",
+      "comando": "npm run erp:prueba",
+      "guarda": "la instalacion del ERP desde cero en un Postgres efimero: instala con tenant y marca ficticios, corre las pruebas de cierre, reinstala para probar idempotencia, compara esquema y roles contra la referencia de produccion, y destruye todo",
+      "evidencia": "salida por paso y el diff contra la referencia; exit 1 si el esquema o los roles divergen",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker y levanta un Postgres desechable: no cabe en el gate de cada integracion.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp`."
+    },
+    {
+      "nombre": "erp:control",
+      "runner": "comando",
+      "comando": "npm run erp:control",
+      "guarda": "el control de reversion del ERP: que lo instalado se pueda deshacer",
+      "evidencia": "salida del control de reversion; exit 1 si la reversion no deja el esquema como estaba",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker, igual que `erp:prueba`.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp`."
+    },
+    {
+      "nombre": "prueba:etiquetas:efimera",
+      "runner": "comando",
+      "comando": "bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh",
+      "guarda": "la propuesta del pack de etiquetas para el ERP (`eti_evento`, `eti_ancla`, `eti_testigo`: solo-agregar y encadenado al insertar) en un Postgres 17 desechable, pruebas (a)…(l) dos veces, y en su fase 5 el adaptador de ventas del agente de riesgo contra el esquema REAL del ERP leyendo como `erp_lector`. No aplica nada a ninguna base",
+      "evidencia": "las pruebas (a)…(l) por corrida y la salida de `prueba-ventas-erp.mjs`; exit 1 si alguna cae",
+      "cubre": ["tools/etiquetas-gs1/migraciones/prueba-ventas-erp.mjs"],
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker y levanta un Postgres desechable, igual que `erp:prueba`.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp`. Hasta entonces se corre a mano al tocar la propuesta o el adaptador de ventas."
+    },
+    {
+      "nombre": "vigila:versiones",
+      "runner": "comando",
+      "comando": "npm run vigila:versiones",
+      "guarda": "la frescura de TODO lo pineado: detecta rezago entre lo que el repo fija y lo que existe fuera. El pineo da estabilidad y QUITA noticias; sin sensor el rezago no se nota hasta que duele",
+      "evidencia": "pin por pin, version fijada contra la ultima publicada",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita red, y PROPONE: mover un pineo es un CDC (C1), nunca una consecuencia automatica de un gate. Un gate que actualizara solo seria el anti-patron que C1 existe para impedir.",
+      "falta": "Nada por arreglar: es un vigilante periodico, no un gate de integracion. Queda declarado aqui para que su ausencia de `validate` sea una decision visible y no un olvido."
+    },
+    {
+      "nombre": "vigila:hermes",
+      "runner": "comando",
+      "comando": "npm run vigila:hermes",
+      "guarda": "el pineo de la imagen del agente Hermes (capa A del SDD): compara el digest del compose contra el ancla verificada y demuestra que los tags moviles apuntan a otra cosa",
+      "evidencia": "digest del compose contra el del ancla, y el control positivo de los tags moviles",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita red. NUNCA cambia nada: detecta deriva y prepara la decision, que es un CDC completo.",
+      "falta": "Nada por arreglar, misma razon que `vigila:versiones`. Su informe vivo esta en `hermes-informe.md`, hoy en rojo: el digest del compose y el del ancla no coinciden."
+    },
+    {
+      "nombre": "mide:mcp",
+      "runner": "comando",
+      "comando": "npm run mide:mcp",
+      "guarda": "lo que cuestan EN CONTEXTO los servidores MCP declarados en `example.mcp.json`: la mitad izquierda de la palanca CLI-first, que nadie habia medido",
+      "evidencia": "tokens por servidor MCP y el total que se paga en cada sesion",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Es una medicion, no un criterio: no tiene umbral binario que pueda ponerse rojo. Meterlo en `validate` daria un gate que nunca falla, que es peor que no tenerlo (se lee como cobertura y no cubre).",
+      "falta": "Un umbral declarado de coste de contexto por MCP para que pueda ser un gate de verdad. Mientras no exista, se corre a mano al evaluar un MCP."
+    }
+  ]
+}

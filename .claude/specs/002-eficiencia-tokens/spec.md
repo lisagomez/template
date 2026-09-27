@@ -20,16 +20,16 @@ El objetivo es que ambas cosas dejen de depender de que alguien se acuerde de mi
 
 ## Usuarios / actores
 
-- **La dueña**, que paga la factura y decide cuándo mover un pineo.
+- **El laboratorio**, que paga la factura y decide cuándo mover un pineo.
 - **El agente**, cuyo routing determina el coste de cada clase de tarea.
 - **La app derivada**, que registra su propio gasto en runtime.
 - **Otro arnés** (opencode), que debe poder conducir el mismo repo con los mismos gates.
 
 ## Historias de usuario
 
-- H1: Como dueña quiero que engordar un skill un 40 % ponga el gate en rojo antes del merge,
+- H1: Como laboratorio quiero que engordar un skill un 40 % ponga el gate en rojo antes del merge,
   para no descubrir el coste en la factura.
-- H2: Como dueña quiero saber cuánto llevamos gastando con cifra real y desglosada, para no
+- H2: Como laboratorio quiero saber cuánto llevamos gastando con cifra real y desglosada, para no
   decidir sobre estimaciones.
 - H3: Como responsable quiero que el vigilante me avise del desfase pero **no actualice
   nada**, porque mover un pineo es una decisión con firma.

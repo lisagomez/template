@@ -10,8 +10,8 @@ Rama `pymes-marketing-build`. Nada se publicó, se envió ni se conectó; ningú
 | App del cliente | `/estudio`, `src/features/estudio-pymes/` | Usa solo lo aprobado (6 de 7); recorrido con Playwright sin errores de consola; aprobar hizo 0 peticiones de red |
 | Triaje 12/12 | `triaje.md` (+ `triaje-plugin.md`, `triaje-video.md`) | pineos verificados; sfstudio 7/9 sin red, rojos diagnosticados |
 | Propuesta de video | `propuesta-video.md` | 14 preguntas para firma; sin construir |
-| AISIA de reseñas | `aisia-resenas.md` | borrador para firma |
-| Propuesta CDC | `propuesta-cdc.md` | fuera de la bitácora, para firma |
+| AISIA de reseñas | `aisia-resenas.md` | firmada por el laboratorio (2026-09-27) |
+| CDC del redactor | `BITACORA-CDC.md`, entrada del 2026-09-27 | firmado por el laboratorio; la propuesta se borró al firmar |
 | Capturas | `capturas/` | laboratorio, caso-trampa, marca, brief 30 días, calendario con pieza, reseñas, brief del lunes |
 
 ## Decisiones (y por qué)
@@ -56,7 +56,7 @@ Rama `pymes-marketing-build`. Nada se publicó, se envió ni se conectó; ningú
 | SVG depende de las fuentes instaladas del que lo abre | **Abierto**: exportar PNG queda para el siguiente goal |
 
 ## Lo que queda para el siguiente goal
-- Firmas: `propuesta-cdc.md`, `aisia-resenas.md`, las 14 preguntas de `propuesta-video.md`.
+- Firmas: las 14 preguntas de `propuesta-video.md` (el CDC del redactor y la AISIA se firmaron el 2026-09-27).
 - Piloto con datos reales de un negocio (con su permiso) y ajuste de sinónimos de exportaciones.
 - Lectura del sitio por URL con protección SSRF; exportar piezas a PNG; lista guardada de competidores.
 - Medir el redactor con LLM (llave + corrida real) antes de ofrecerlo.

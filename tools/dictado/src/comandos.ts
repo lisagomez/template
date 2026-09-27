@@ -58,7 +58,7 @@ const LIMPIEZA: readonly Regla[] = [
 
 /**
  * «… y dale enter», «dale a enter», «presiona (el) enter», «press enter», en CUALQUIER punto de la frase. Hasta el
- * 2026-09-22 solo valia al final: en manos libres la dueña lo decia y seguia hablando sin callar
+ * 2026-09-22 solo valia al final: en manos libres el laboratorio lo decia y seguia hablando sin callar
  * el segundo que cierra la frase, y el comando quedaba pegado como texto en medio. El conector
  * «y»/«and» se va con el comando. Lo de antes se pega y se envia; lo de despues empieza el
  * mensaje siguiente. Cuentan TODAS las apariciones (`siguientes`).
@@ -80,7 +80,7 @@ export interface ResultadoComandos {
   acciones: Accion[];
   /**
    * Lo dicho despues, en orden: cada parte se pega y ejecuta sus acciones. La ultima, si no
-   * termina en comando, va sin accion y queda como mensaje empezado. En manos libres la dueña
+   * termina en comando, va sin accion y queda como mensaje empezado. En manos libres el laboratorio
    * encadena dos envios en un solo turno («… dale enter … dale enter …», en vivo el 2026-09-22).
    */
   siguientes?: Parte[];

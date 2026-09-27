@@ -15,7 +15,7 @@ Las reglas están en el propio `GOBERNANZA.md`; aquí solo vive **lo que falta**
 
 Esto es un **boilerplate**: lo que se versiona lo hereda cada proyecto que nazca de aquí.
 Hay cosas que parecen deuda del template y son del **entorno de la máquina** donde vive.
-Mezclarlas produce listas de pendientes falsas — pasó, y lo corrigió la dueña.
+Mezclarlas produce listas de pendientes falsas — pasó, y lo corrigió el laboratorio.
 
 | Del template (viaja a los proyectos) | Del entorno (de esta máquina) |
 |---|---|
@@ -63,7 +63,7 @@ pendiente sólo puede cerrarlo un proyecto derivado o la máquina, no es deuda d
 - **Rotar `SUPABASE_ACCESS_TOKEN` y `HCLOUD_TOKEN`.** Un agente los imprimió en claro
   (`INCIDENTES.md`). Viven en `~/.config/claude/secrets.env`, en la máquina, fuera de todo
   repo. El template **no los contiene** — se auditó: cero credenciales reales, y hay un gate
-  que lo vigila. Rotar es acción de la dueña sobre su entorno.
+  que lo vigila. Rotar es acción del laboratorio sobre su entorno.
 - **El alias `opus` en `~/.claude/settings.json`.** `BITACORA-CDC.md` declara
   `claude-opus-5` pineado; la config real usa un alias flotante. Es config global del
   usuario: su cambio es un CDC propio y lo decide ella.

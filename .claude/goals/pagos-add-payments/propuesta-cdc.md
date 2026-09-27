@@ -3,7 +3,7 @@
 > Redactada FUERA del registro. Al firmar, se pega en la bitácora y este archivo se borra.
 
 ### 2026-09-27 — referencias a `add-payments` donde se cobra en línea, con sus límites → CDC PROPUESTO — radio: skills (6), plantilla (1), regla (1), contratos C2 (1)
-- **Cambio** (rama `pagos-add-payments`, apilada sobre `pymes-marketing-build`):
+- **Cambio** (rama `pagos-add-payments`, con `main` mezclado después de los PR #163 y #164):
   - `add-payments`: `description` suma que NO sirve para bienes físicos, servicios presenciales ni
     marketplaces; sección **Límites** con citas de la política de uso aceptable de Polar (consultada el
     2026-09-27), el alcance real del código (suscripción → acceso) y lo «a verificar» (moneda de
@@ -19,7 +19,8 @@
 - **No se tocó `AGENTS.md`**: ya enruta «pagos / cobrar / checkout» a ADD-PAYMENTS, y el límite vive en el
   skill al que lleva; tocarlo invalidaría el caché de prefijo sin ganar nada.
 - **Gate aplicado**: diff visible ☑ (en la conversación del goal) · regresión verde ☑ capa A 131/131 ·
-  `verify:gobernanza` ☑ 152/152 · `validate` ☑ · aprobación humana ☐ · pineo ☑ (sin modelo ni
+  `verify:gobernanza` ☑ 156/156 · `verifica:gates` ☑ 11/11 · reglas al 97 % de su presupuesto (6285/6500) ·
+  `validate` ☑ (medido otra vez después de mezclar `main`: ver el PR) · aprobación humana ☐ · pineo ☑ (sin modelo ni
   dependencia). **Capa B no corrida**: propuesta «capa A basta» — ninguna instrucción cambia de
   sentido, solo se suman referencias y límites; decide quien firma.
 - **Aprobado por**: _(firma)_

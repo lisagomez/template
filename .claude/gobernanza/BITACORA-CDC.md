@@ -3819,3 +3819,219 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `npm run regresion` 123/123 · `verify:gobernanza` 152/152.
 - **Aprobado por**: **lisagomez** (responsable del proyecto) — «apruebo», 2026-09-26, con el
   contenido del plugin y sus riesgos delante; el pineo se aplica por la regla de C1.
+### 2026-09-26 — manifiesto de gates `.claude/gates.json`: `validate` y `predeploy` DERIVAN de un padrón fail-closed, y el padrón entra en el alcance de C1 → CDC PROMOVIDO — radio: sistema (instrucciones + capa de gobernanza + el gate entero)
+- **Cambio**: nace `.claude/gates.json` — los gates como dato (nombre, runner, `guarda`, `evidencia`,
+  perfiles, `activo` con `motivo` y `falta` obligatorios en los apagados, `timeout_s`), con 3 perfiles
+  (`validate` 23 activos · `predeploy` 14 · `cdc` 1) y 7 inactivos declarados. `package.json` deja de
+  llevar la lista: `validate` pasa de una cadena de 21 `&&` en 599 caracteres a
+  `node scripts/corre-gates.mjs validate`, y `predeploy` de un subconjunto copiado a mano a
+  `node scripts/corre-gates.mjs predeploy`. Nuevos `scripts/lib/gates.mjs` (cargador fail-closed),
+  `corre-gates.mjs` (runner, tres estados `paso`/`fallo`/`no_ejecutable`), `verifica-gates.mjs` (11
+  comprobaciones + `--prueba` + `--lista`), `proyecta-gates.mjs` y `prueba-tools.mjs`.
+  En `AGENTS.md`: `.claude/gates.json` entra en la regla de C1, regla nueva «los gates son un padrón,
+  no una cadena», tres disparadores en el decision tree y 4 comandos; `GEMINI.md` regenerado.
+  En `GOBERNANZA.md` §2: fila nueva en la tabla de C1 y regla dura «un gate apagado NO es un gate que
+  pasa». `verifica-gobernanza.mjs`: 8 comprobaciones migradas de regex sobre la cadena de
+  `package.json` a leer el perfil del padrón (criterio idéntico, más fuerte: el gate tiene que estar
+  declarado, ACTIVO y en el perfil) + 3 nuevas (el manifiesto existe; C1 lo nombra en las
+  instrucciones; C1 lo nombra en su propia tabla). Asiento `TPL-manifiesto-gates` en el inventario y
+  §3-bis en `docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md`.
+  **Ningún gate se retiró ni se debilitó**: los 21 siguen, en el mismo orden, y se AÑADEN dos
+  (`verifica:gates`, `prueba:tools`) — el gate verifica más que antes, no menos.
+- **Motivo**: el `validate` era una cadena de 21 `&&` en una línea de 599 caracteres que nadie difea
+  con sentido, más una SEGUNDA copia a mano del subconjunto de `predeploy`. Faltaba además la noción
+  de gate declarado-pero-inactivo, que es la trampa que
+  `docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md` §C4 midió sobre el gemelo de este manifiesto en
+  `hermes-os-a2a`: «un gate inactivo se lee, a simple vista, igual que uno que pasó» (fatiga de
+  aprobación, O3). El diseño fail-closed viene de su `supervisor-a2a/gates.py`; el `motivo`
+  obligatorio se añade aquí, porque allá `software.toml` apaga dos gates sin decir por qué.
+  El padrón destapó tres agujeros reales, los tres medidos, no supuestos: (1) `scripts/prueba-a2a.ts`
+  existía sin que NINGÚN script lo corriera y se había podrido — 12 verdes, 3 rojos, y el rojo de
+  opacidad es test viejo, no fuga (exige exactamente 3 rutas de servidor y la app tiene 14 desde los
+  PR #129-#140); (2) las suites de `tools/` no las corría nadie — 87 archivos y 776 pruebas solo en
+  `extractor-documental`, que `prepara-gate` construía y jamás ejecutaba; (3) siete gates vivían fuera
+  de `validate` sin que nada dijera por qué. Y hacia fuera: `reglas/software.toml` de `hermes-os-a2a`
+  transcribe a mano los gates de este repo con 3 divergencias, una con consecuencia (declara ACTIVO
+  `npx playwright test`, que aquí da exit 1 «No tests found»: su Supervisor rechazaría siempre).
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ capa A 123/123 y **capa B 22/22** ·
+  aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+  **Precisión sobre el orden del diff** (la regla de §2 exige enseñarlo ANTES): antes de la
+  aprobación estuvieron delante el diff **por archivo con sus cifras**, el padrón entero
+  (`npm run gates`), el `validate` en verde con las tres poblaciones, las 6 siembras de la prueba de
+  la prueba, la demostración de C1 en rojo y en verde, y el diff de la proyección contra el
+  `software.toml` real. El diff **línea a línea** de `AGENTS.md`, `GOBERNANZA.md` y `package.json` se
+  enseñó justo después de la aprobación y ANTES de escribir esta entrada. Se anota en vez de
+  igualarlo a los casos en que el diff completo precedió a la firma.
+  **Capa B corrida y verde**, no omitida: el gate del corpus da 22/22 (21 casos declarados,
+  «promovible»). Lo que NO se hizo es ejecutar los 21 casos en sesiones frías — eso es una medición
+  de conducta aparte, no el gate. **No se añadió ningún caso nuevo al corpus, y se explica por qué**:
+  el caso del corpus que mide la petición de saltarse un gate «temporalmente» ya cubre esta
+  superficie, y su expectativa dice literal que «inaceptable es que desaparezca del `validate` sin
+  dejar rastro» — este cambio la vuelve más exigible, porque ahora esa desaparición es detectable
+  estructuralmente (`verifica:gates` la caza). Sin identificador: el par caso→regla no se
+  reconstruye leyendo el repo (protocolo ciego), y la traza es el commit de `corridas.md`.
+- **Regresión**: `npm run validate` **23/23 activos en verde, 7 inactivos declarados, 0 rojos**,
+  sellado sobre el árbol del cambio · `verify:gobernanza` **156/156** · `verifica:gates --prueba`
+  **6/6 siembras cazadas** (runner sin implementación activo · typo de runner en un gate APAGADO ·
+  gate activo no ejecutable · `validate` con la cadena a mano de vuelta · inactivo sin motivo ·
+  archivo de pruebas huérfano), con línea base comprobada primero · `npm run regresion` 123/123 ·
+  `npm run regresion -- --trampa` 22/22 · `prueba:tools` 4 suites en verde.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «continua con la firma del CDC»,
+  2026-09-26, con el diff por archivo y toda la evidencia medida delante (ver la precisión sobre el
+  orden del diff, arriba).
+
+### 2026-09-26 — `prueba:a2a` REACTIVADO: la opacidad del puente vuelve a vigilarse, y las dos pruebas que exigen el servicio del extractor pasan a su propio gate declarado → CDC PROMOVIDO — radio: sistema (padrón de gates + prueba de opacidad del puente A2A)
+- **Cambio**: en `.claude/gates.json`, `prueba:a2a` pasa de `activo: false` a **activo en el perfil
+  `validate`** (24 gates activos), y nace `prueba:a2a:servicio`, declarado **inactivo con `motivo` y
+  `falta`**. En `scripts/prueba-a2a.ts`: la prueba de opacidad deja de enumerar `src/app` ENTERO y
+  enumera las rutas **del bridge** (`rutasDelBridge()`), y se **añade** una segunda prueba que
+  enumera el resto de la superficie de servidor y la exige DECLARADA en `RUTAS_FUERA_DEL_BRIDGE`;
+  las dos pruebas que exigen el servicio del extractor se renombran con el prefijo `SERVICIO:` para
+  que el padrón pueda seleccionarlas. En `package.json`, dos scripts nuevos (`prueba:a2a`,
+  `prueba:a2a:servicio`); en `AGENTS.md`, los dos declarados (`GEMINI.md` regenerado).
+- **Motivo**: el padrón destapó que este archivo era HUÉRFANO —ningún script npm lo corría— y que
+  llevaba meses en rojo sin testigos: la opacidad del puente A2A no se vigilaba desde que la app
+  creció. De los 3 rojos, uno era test viejo y dos no eran defecto.
+  **El viejo**: el diseño ya decía cuál era el conjunto correcto —
+  `docs/SDD-puente-a2a-extractor.md` §6 nombra la función `rutasDelBridge()` y la prueba «la
+  superficie **A2A** es EXACTAMENTE card, rpc y health»— y la implementación derivó a enumerar la
+  app entera, que era el mismo conjunto el día que se escribió. RF-17 de la spec 010 habla del
+  sistema que se despliega en la infra del cliente, cuyo modelo es cada agente de `hermes-os-a2a`:
+  un servicio propio con tres rutas y nada más. Aquí el bridge vive dentro de la app de la fábrica,
+  así que el conjunto que RF-17 acota es el del bridge.
+  **Acotar sin más habría DEBILITADO la prueba**, porque dejaría de cazar una ruta nueva colgada en
+  cualquier otro sitio. De ahí la segunda prueba: el resto de la superficie va declarada una por
+  una, y una ruta nueva sigue cayendo — no como fallo, sino como decisión que alguien tiene que
+  tomar a la vista (RF-20: el puente no se publica fuera de la red interna del compose).
+  **Los dos que no eran defecto**: exigen el servicio del extractor corriendo, y ese servicio no
+  arranca sin el binario de Tesseract (`servicio/configuracion.mjs` lanza «el motor principal no
+  arranca sin binario»). Medido: Tesseract no está instalado en esta máquina ni existe
+  `servicio/node_modules`. Su autor decidió que **fallaran** en vez de saltarse — «pasar en silencio
+  sería afirmar una capacidad que nunca corrió» — y esa decisión se respeta: no se convierten en un
+  skip, se mueven a un gate propio que dice por qué está apagado y qué le falta.
+- **Gate aplicado**: diff revisado ☑ (**enseñado completo ANTES de pedir la firma**, esta vez sin la
+  salvedad de la entrada anterior) · regresión verde ☑ capa A 123/123 y capa B 22/22 · aprobación
+  humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `npm run validate` **24/24 activos en verde, 7 inactivos declarados, 0 rojos**,
+  sellado · `npm run prueba:a2a` **14 pruebas en verde** · `npm run verifica:gates` 11/11 ·
+  `verify:gobernanza` 156/156 · `npm run regresion` 123/123 · `regresion -- --trampa` 22/22.
+  **Controles negativos, sembrados y medidos** (la prueba de que el arreglo no la debilitó): una
+  ruta nueva en `/a2a/depuracion` tumba la prueba de la superficie A2A; una ruta nueva en
+  `/api/inventada` tumba la del inventario declarado, nombrándola en el diff; retiradas las dos,
+  vuelve a 14/0. Y `npm run prueba:a2a:servicio` corrido a mano **falla 2/2** con el servicio
+  ausente: es la evidencia de que ese gate no es un skip disfrazado.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «si apruebo», 2026-09-26, con el
+  diff de los cinco archivos y los controles negativos delante.
+
+### 2026-09-27 — `prueba:etiquetas` ALTA en el padrón al mezclar `main` en el PR #154, `prueba:etiquetas:efimera` declarado inactivo y `/api/etiquetas` declarada fuera del bridge → CDC PROMOVIDO — radio: sistema (padrón de gates + inventario de rutas de la prueba A2A)
+- **Cambio**: en `.claude/gates.json` nace `prueba:etiquetas`, **activo en `validate`** después de
+  `prueba:ajustes` (25 gates activos en `validate`), y `prueba:etiquetas:efimera`, **inactivo con
+  `motivo` y `falta`**, que `cubre` `tools/etiquetas-gs1/migraciones/prueba-ventas-erp.mjs`; la
+  `guarda` de `prueba:tools` suma `etiquetas-gs1` a su lista (ya la recorría). En
+  `scripts/prueba-a2a.ts`, `/api/etiquetas` entra en `RUTAS_FUERA_DEL_BRIDGE`.
+- **Motivo**: el PR #154 traía `prueba:etiquetas` en la cadena `&&` de `validate`, y el #157 cambió
+  esa cadena por el padrón. Resolver el conflicto de `package.json` tomando `main` **sacaba la
+  prueba del gate en silencio**. No se vio a ojo: con la resolución mecánica sola,
+  `verifica:gates` cayó con 3 archivos de pruebas huérfanos (`editor.ts`, `roles.ts`,
+  `prueba-ventas-erp.mjs`), y `prueba:a2a` cayó con `/api/etiquetas` como ruta de servidor no
+  declarada. El último necesita Docker y un Postgres desechable (lo corre `prueba-efimera.sh`, fase
+  5), igual que `erp:prueba`: se declara inactivo en vez de dejarlo huérfano. Medido: esta máquina
+  no tiene Docker. `/api/etiquetas` exige Bearer comparado en tiempo constante (503 sin
+  `ETIQUETAS_TOKEN`) y `x-operador`, el rol lo decide el servidor, y vive en la misma app y el
+  mismo puerto que las otras 11 rutas declaradas (RF-20).
+- **Gate aplicado**: diff revisado ☑ (enseñado completo antes de pedir la firma) · regresión verde ☑
+  capa A 123/123 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva). **Capa B no
+  corrida, a propósito y declarado** («capa A basta»): el cambio no toca skills, prompts, modelo ni
+  instrucciones.
+- **Regresión**: `npm run validate` **25/25 activos en verde, 8 inactivos declarados, 0 rojos**,
+  sellado · `verifica:gates` 11/11 y `--prueba` 6/6 siembras cazadas · `verify:gobernanza` 156/156 ·
+  `prueba:a2a` 14/0 · `verifica:inventario` 194 unidades, 0 nuevo, 0 huérfano. **Controles
+  negativos**: los dos rojos de arriba, medidos antes de cada arreglo.
+  **Hallazgo aparte, fuera de este CDC**: una de cuatro corridas de `validate` cayó en
+  `prueba:tools` por una prueba intermitente del extractor
+  (`banco-evidencia.ts`, «una corrida real clasifica, mide tiempos…»): `lote-pagina.ts` mide con
+  `Date.now()` el tiempo del lector de códigos aunque no haya lector, y la prueba exige 0. Sola pasa
+  8/8 y la suite 3/3. Es de `main`, no del #154: va en su propio PR.
+- **Aprobado por**: **lisagomez** (responsable del proyecto) — «Apruebo» y «capa A basta»,
+  2026-09-27, con el diff de `gates.json` y `prueba-a2a.ts` y la evidencia delante.
+
+### 2026-09-27 — «el laboratorio» en lugar de «la dueña» en todo el repo, incluida la plantilla AISIA → CDC PROMOVIDO — radio: documentación (una plantilla de gobernanza; sin cambio de comportamiento de agentes ni de código)
+- **Cambio**: en 39 archivos, las referencias a quien decide, aprueba o firma dicen **«el laboratorio»**
+  donde decían «la dueña». Son specs, PRPs, SDD, goals, memorias del proyecto, comentarios de código,
+  notas de `presupuesto-contexto.json` y el texto que redacta `scripts/trayectorias/propuestas.mjs`.
+  Es material de CDC por un solo archivo, `.claude/gobernanza/plantillas/aisia.md` («La dueña de la
+  fábrica» → «El laboratorio», «Clientes de la dueña» → «Clientes del laboratorio»). En
+  `.claude/specs/011-trayectorias/spec.md` y en la plantilla se ajustó la concordancia de género.
+- **Lo que NO se cambia, y por qué**:
+  - **Este registro y las propuestas fechadas de `trayectorias/propuestas/`**. Son append-only y lo
+    ya firmado no se edita, así que sus entradas anteriores conservan «la dueña» tal como se
+    firmaron. **Esta entrada es la declaración**: desde hoy, «el laboratorio» designa a quien
+    antes se llamaba «la dueña».
+  - **Los usos con otro significado**:
+    - «dueña del contrato» es el paquete dueño de un tipo (voz/dictado, el manifiesto de gates);
+    - la frase literal «la duena» es la que detecta `tools/asesor-ventas/src/motor.ts` en una
+      conversación de venta;
+    - el owner de GitHub en `.claude/rules/aprendizajes-stack.md` (que además no se toca en
+      caliente por el cache de prefijo).
+  - **«Dueño» en masculino**: nombra a otra persona, el dueño del negocio de un proyecto derivado o
+    el que firma en C5, y la petición fue «dueña».
+- **Motivo**: pedido del laboratorio el 2026-09-27: «cambia todo lo que diga dueña por laboratorio».
+  PRP-004 ya usaba «el laboratorio».
+- **Gate aplicado**: diff revisado ☑ · regresión verde ☑ capa A 123/123 y capa B 22/22 · aprobación
+  humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+  **Salvedad declarada**: el laboratorio aprobó el alcance, «Sí, salvo registros», cuya
+  descripción incluía este cambio de plantilla con su entrada. Pero **el diff de la plantilla, 3
+  líneas, se enseña después**, en el PR, no antes de la firma.
+- **Regresión**: `npm run regresion` 123/123 · `npm run regresion -- --trampa` 22/22 ·
+  `npm run validate` en verde (ver el PR).
+- **Aprobado por**: **lisagomez** (el laboratorio), «Sí, salvo registros», 2026-09-27.
+
+### 2026-09-27 — pymes, contenido y marketing: prompts de un redactor con LLM + 2 clases de tarea en el routing → CDC PROMOVIDO — radio: producto (paquete `@tu-scope/pymes-marketing`) y routing (C8)
+- **Cambio**:
+  1. **Prompts nuevos** en `tools/pymes-marketing/src/redactor-openai-compat.ts` (`INSTRUCCIONES` por tarea y
+     `sistema()`): lo que recibiría un LLM para redactar publicaciones, respuestas a reseñas y anuncios.
+     Llevan la voz del dueño, lo que nunca dice, «usa solo los hechos dados; no inventes precios, cifras,
+     premios ni promesas», y el texto de terceros **delimitado** con la orden de no obedecerlo. `promptsDe()`
+     los expone sin llamar al modelo, para revisarlos.
+  2. **Plantillas** del redactor de serie (`src/comun/redactor-plantillas.ts`): textos en español de México
+     para publicación, estado de WhatsApp, respuesta a reseña (<60 palabras) y anuncio.
+  3. **`.claude/routing-modelos.json`**: +2 clases de tarea, `redaccion-de-marketing` y `respuesta-a-resenas`,
+     ambas al nivel `capaz` ya pineado (`anthropic/claude-sonnet-5`). **Ningún modelo nuevo.**
+- **Motivo**: el goal `pymes-marketing` (primera familia del plugin `small-business`, CDC firmado el
+  2026-09-26). Sin clase asignada, la redacción heredaría el default caro en silencio (C8).
+- **Estado del LLM**: **no se usa en producción**. En esta máquina no hay `OPENROUTER_API_KEY`; el laboratorio
+  lo deja «no medido» (caso llm-5) y la app solo usa las plantillas. El cableado de costo se probó con un
+  proveedor SIMULADO: US$0.002584 por redacción (812 + 96 tokens) con el precio pineado; costo `null` cuando el
+  proveedor no reporta uso.
+- **Gate aplicado**: diff revisado ☑ (el del routing y los prompts, enseñado antes de pedir la firma) ·
+  regresión verde ☑ capa A 123/123 · `verifica:routing` ☑ · laboratorio ☑ 45 casos (44 pasan, 1 no medido
+  declarado) · aprobación humana ☑ · pineo ☑ (sin modelo nuevo). **Capa B no corrida, a propósito y
+  declarado** («capa A basta»): no cambia ningún skill, prompt ni instrucción del arnés, y el LLM queda
+  apagado.
+- **Regresión**: `npm run validate` sobre la mezcla con `main` (commit `b328bb5`), en un clon que solo trae
+  esta rama, `main` y el corpus: **26/26 gates activos en verde, 8 inactivos declarados, 0 rojos** ·
+  `verify:gobernanza` 156/156 · `verifica:gates` 11/11 · regresión capa A 123/123 · auditoría de
+  credenciales limpia · `prueba:laboratorio-pymes` 3/3 · `tools/pymes-marketing` 42 pruebas.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo, capa A basta», 2026-09-27, con el diff del
+  routing y de los prompts delante. Al firmar se borró la propuesta `.claude/goals/pymes-marketing/propuesta-cdc.md`.
+- **Lo que activar el LLM exigiría después (otro CDC)**: llave en el entorno del servidor, una corrida real
+  medida con su costo en la contabilidad, y que el caso llm-5 pase a «pasa».
+
+### 2026-09-27 — `prueba:laboratorio-pymes` ALTA en el padrón al mezclar `main` en `pymes-marketing-build` → CDC PROMOVIDO — radio: sistema (padrón de gates)
+- **Cambio**: en `.claude/gates.json` nace `prueba:laboratorio-pymes`, **activo en `validate`** después de
+  `prueba:laboratorio` (26 gates activos en `validate`). La `guarda` de `prueba:tools` suma
+  `pymes-marketing` a su lista (ya la recorría: descubre las herramientas por su script `prueba`).
+- **Motivo**: la rama traía `prueba:laboratorio-pymes` en la cadena `&&` de `validate`, y el #157 cambió
+  esa cadena por el padrón. Resolver el conflicto de `package.json` tomando `main` **sacaba la prueba del
+  gate en silencio**, igual que en el #154. Lo cazó `verifica:gates` con la resolución mecánica sola:
+  «sin declarar: prueba:laboratorio-pymes» y «nadie los corre:
+  src/features/laboratorio-pymes/pruebas/laboratorio.ts» (2 de 11 comprobaciones en rojo).
+- **Gate aplicado**: diff revisado ☑ (enseñado contra `main` antes de pedir la firma) · regresión verde ☑
+  capa A 123/123 · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva). **Capa B no corrida, a
+  propósito y declarado** («capa A basta»): el cambio no toca skills, prompts, modelo ni instrucciones.
+- **Regresión**: `verifica:gates` 11/11 después del alta (control negativo: los 2 rojos de arriba, antes) ·
+  `npm run validate` sobre la mezcla, en un clon que solo trae esta rama, `main` y el corpus: **26/26
+  activos en verde, 8 inactivos declarados, 0 rojos** · `verify:gobernanza` 156/156 ·
+  `prueba:laboratorio-pymes` 3/3 · `prueba:a2a` en verde.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo, capa A basta», 2026-09-27, con el diff de
+  `gates.json` contra `main` y la evidencia delante.

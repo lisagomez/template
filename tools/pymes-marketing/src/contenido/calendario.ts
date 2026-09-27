@@ -18,7 +18,9 @@ import { VOZ_NEUTRA, type PerfilDeVoz } from '../comun/voz.js';
 import type { Redactor } from '../comun/redactor.js';
 import type { PerfilDeMarca } from '../marca/perfil.js';
 import type { EstrategiaDe30Dias } from './estrategia.js';
-import { piezaSvg, type FormatoDePieza } from './pieza-svg.js';
+import { piezaSvg, type DatosDePieza } from './pieza-svg.js';
+import type { FormatoDePieza } from './formatos.js';
+import { revisaPieza } from './revision-visual.js';
 
 export type Canal = 'instagram' | 'facebook' | 'whatsapp';
 export type Angulo = 'util' | 'prueba' | 'oferta' | 'personas';
@@ -60,7 +62,7 @@ export const DIAS_POR_CADENCIA: Readonly<Record<Cadencia, readonly number[]>> = 
 const MEZCLA: readonly Angulo[] = ['oferta', 'util', 'prueba', 'util', 'oferta', 'prueba', 'util', 'personas', 'prueba', 'util'];
 
 const REUSO: Readonly<Record<Canal, readonly [FilaDeCalendario['formato'], FormatoDePieza]>> = {
-  instagram: ['publicacion', 'cuadrado'], facebook: ['publicacion', 'horizontal'], whatsapp: ['estado', 'historia'],
+  instagram: ['publicacion', 'vertical'], facebook: ['publicacion', 'horizontal'], whatsapp: ['estado', 'historia'],
 };
 
 const FALTA: Readonly<Record<Exclude<Angulo, 'oferta'>, string>> = {
@@ -118,10 +120,12 @@ async function filasDelDia(dia: Dia, h: Hueco, marca: PerfilDeMarca, redactor: R
     if (etiquetas) hechos['etiquetas'] = etiquetas;
     const r = await redactor.redacta({ tarea: 'caption', voz: o.voz ?? VOZ_NEUTRA, hechos, limite: canal === 'whatsapp' ? 140 : canal === 'facebook' ? 500 : 2200 });
     const avisos = [...r.avisos, ...conflictos(dia, h, e), ...(h.oferta ? ['paquete: valida que te deje margen antes de publicarlo'] : []), ...(h.producto && precio === undefined && h.angulo === 'oferta' ? ['sin precio confirmado: no se escribió precio (confírmalo con impuestos)'] : []), ...(marca.confirmado ? [] : ['la marca aún no está confirmada: dile «sí» a la vista previa'])];
+    const datos: DatosDePieza = { titular: h.ocasion ?? h.producto ?? marca.nombre, apoyo: h.ocasion ? h.producto ?? undefined : marca.lema ?? undefined, precio: hechos['precio'], etiqueta: h.oferta ? 'Paquete de la semana' : h.ocasion ? 'Temporada' : undefined, formato: formatoPieza, semilla: origenId };
+    const vistas = revisaPieza(marca, datos, { canal, precioConfirmado: precio !== undefined }).map((x) => `imagen: ${x.detalle}`);
     filas.push({
       id: `${dia}-${canal}`, dia, canal, ruta: 'imagen', formato, angulo: h.angulo, tema: h.tema, producto: h.producto,
-      origen: i === 0 ? null : origenId, texto: r.texto, redactor: r.redactor, avisos, falta, estado: falta ? 'falta-algo' : 'borrador',
-      pieza: piezaSvg(marca, { titular: h.ocasion ?? h.producto ?? marca.nombre, apoyo: h.ocasion ? h.producto ?? undefined : marca.lema ?? undefined, precio: hechos['precio'], etiqueta: h.oferta ? 'Paquete de la semana' : h.ocasion ? 'Temporada' : undefined, formato: formatoPieza, semilla: origenId }),
+      origen: i === 0 ? null : origenId, texto: r.texto, redactor: r.redactor, avisos: [...avisos, ...vistas], falta, estado: falta ? 'falta-algo' : 'borrador',
+      pieza: piezaSvg(marca, datos),
     });
   }
   return filas;
