@@ -8,6 +8,7 @@ import type { Consumibles } from './consumibles.js'
 import type { Conteo } from './conteo.js'
 import type { PerfilImpresora } from './etiqueta.js'
 import type { FormatoFecha, TipoFecha } from './fechas-impresas.js'
+import type { RondaDia } from './rondas.js'
 import type { Categoria } from './semaforo.js'
 
 export type TipoSitio = 'cedis' | 'sucursal'
@@ -164,6 +165,13 @@ export interface EstadoAlmacen {
   readonly fotos?: readonly FotoArticulo[]
   /** Como imprime la fecha cada articulo, aprendido de la primera confirmacion (solo se agrega). */
   readonly formatosFecha?: readonly FormatoFechaArticulo[]
+  /** Las rondas del dia por sitio: una foto de lo que habia que hacer cuando se genero. */
+  readonly rondas?: readonly RondaDia[]
+  /**
+   * Respuestas ya dadas a escaneos con su id de cliente: un escaneo que llega dos veces (la cola
+   * sin señal reintenta) no se aplica dos veces. Se guardan las ultimas; las viejas se olvidan.
+   */
+  readonly idempotencia?: Readonly<Record<string, { readonly fecha: string; readonly respuesta: unknown }>>
 }
 
 /** Vistas de la ficha: `caducidad` es la foto de DONDE viene impresa la fecha, con su nota. */

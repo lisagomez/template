@@ -31,6 +31,12 @@ export function zonaDe(e: Existencia): Zona {
   return e.zona ?? 'recibo'
 }
 
+/** Nombre canonico de una ubicacion: `ALMACEN-B-04-2` en un rack, o el codigo de la zona (`PISO`). */
+export function ubicacionDe(zona: Zona, posicion?: string): string {
+  const codigo = ZONAS.find((x) => x.id === zona)!.codigo
+  return posicion && zona === 'almacen' ? `${codigo}-${posicion}` : codigo
+}
+
 export function nombreZona(z: Zona): string {
   return ZONAS.find((x) => x.id === z)?.nombre ?? z
 }

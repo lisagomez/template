@@ -22,6 +22,10 @@ export type TipoEvento =
   | 'RECOMENDACION' | 'RECOMENDACION_EJECUTADA' | 'RECOMENDACION_DESCARTADA' | 'CORRECCION' | 'CONTEO'
   /** Llego mercancia cuya caducidad se leyo de una foto y aun no se confirma: no mueve existencias. */
   | 'EN_REVISION'
+  /** Una tarea de la ronda del dia se cerro con el escaneo que la prueba. */
+  | 'TAREA_CERRADA'
+  /** Una pieza en piso que no cuadra con ningun lote conocido del sitio: se registra, no se ignora. */
+  | 'HALLAZGO'
 
 export interface ClaveLote {
   readonly gtin: string

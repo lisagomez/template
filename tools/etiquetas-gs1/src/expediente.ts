@@ -117,7 +117,7 @@ export function altaConExpediente(estado: EstadoAlmacen, a: AltaLote, origen: Ex
 }
 
 /** Movimiento entre zonas (con la regla de no subir a piso lo bloqueado) y, al almacen, su posicion. */
-export function mueveConExpediente(estado: EstadoAlmacen, p: PedidoMovimiento, cuando: string, id: string, hoy: string, posicion?: string): Paso<Extract<ResultadoMovimiento, { ok: true }>> {
+export function mueveConExpediente(estado: EstadoAlmacen, p: PedidoMovimiento, cuando: string, id: string, hoy: string, posicion?: string, extra: Record<string, Json> = {}): Paso<Extract<ResultadoMovimiento, { ok: true }>> {
   if (posicion !== undefined && (p.destino !== 'almacen' || !esPosicion(posicion))) return falla(estado, posicion && p.destino !== 'almacen' ? 'la posición rack-nivel-posición solo existe en el almacén' : `la posición «${posicion}» no es rack-nivel-posición (p. ej. B-04-2)`)
   // Cajas por confirmar (caducidad leida de una foto y sin confirmar): no se mueven, y se dice por que.
   const l = p.lectura
@@ -130,7 +130,7 @@ export function mueveConExpediente(estado: EstadoAlmacen, p: PedidoMovimiento, c
   const lote = claveDe(mov)
   // La posicion es del almacen: lo que sale de el (una tarima entera) ya no la lleva.
   const sinPosicion = { ...m.estado, existencias: m.estado.existencias.map(({ posicion, ...e }) => (posicion && zonaDe(e) !== 'almacen' ? e : { ...e, ...(posicion ? { posicion } : {}) })) }
-  const r = conEvento(estado, sinPosicion, p.sitio, 'MOVIDO', lote, { cajas: mov.cajas, a: mov.a, de: [...mov.de], ...(mov.sscc ? { sscc: mov.sscc } : {}) }, p.operador, cuando)
+  const r = conEvento(estado, sinPosicion, p.sitio, 'MOVIDO', lote, { cajas: mov.cajas, a: mov.a, de: [...mov.de], ...(mov.sscc ? { sscc: mov.sscc } : {}), ...extra }, p.operador, cuando)
   if (posicion === undefined) return { estado: r.estado, resultado: { ok: true, valor: m.resultado, eventos: [r.evento] } }
   const u = ubica(r.estado, p.sitio, lote, posicion, cuando, p.operador, mov.sscc)
   if (!u.resultado.ok) return falla(estado, u.resultado.motivo)
