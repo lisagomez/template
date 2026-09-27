@@ -61,3 +61,7 @@ Rama `pymes-marketing-build`. Nada se publicó, se envió ni se conectó; ningú
 - Lectura del sitio por URL con protección SSRF; exportar piezas a PNG; lista guardada de competidores.
 - Medir el redactor con LLM (llave + corrida real) antes de ofrecerlo.
 - Las demás familias del plugin (finanzas, ventas, operación), cada una con su goal.
+- **Cobro en línea de la pyme** (ligas de pago de `invoice-chase`, tienda en línea): `/add-payments`
+  **no aplica** — Polar prohíbe vender productos físicos y no está hecho para servicios presenciales
+  (política de uso aceptable, consultada el 2026-09-27; ver los Límites de ese skill). La pasarela para
+  comercio físico en México, con su CFDI, es una decisión pendiente, no un skill que ya exista.
