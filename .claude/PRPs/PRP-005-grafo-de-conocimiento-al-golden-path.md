@@ -180,7 +180,7 @@ es un archivo versionado, git **es** el historial.
 | Dominio regulatorio de ejemplo | **Drones de reparto + agentes de seguros**, registrados desde la fuente única | Seed completo o solo fiscal *como ejemplo*: el paquete trae las 98 reglas y cada proyecto elige |
 | De dónde sale el conocimiento (RF-15) | **Fuente única en este repo**: paquete de datos, separado del motor | Seguir en Hermes; repo propio |
 | Versión fijada (RF-16) | **Versión exacta por proyecto**; `vigila:versiones` avisa y **nunca actualiza**; subirla es firma humana con la paridad re-generada | Revisión periódica automática |
-| Hermes | **Lee del paquete después, en un paso aparte** con su propio gate y firma. Mientras tanto congela su `reglas.json` desde el corte de la Fase 2 | Incluirlo en este PRP |
+| Hermes | **Lee del paquete después, en un paso aparte** con su propio gate y firma. Mientras tanto su `reglas.json` está **ya congelado** desde `97d9f9e` (hermes-os-a2a PR #317, 2026-09-27; `grafo-congelado` es check obligatorio de su `master`) | Incluirlo en este PRP |
 
 **Validación**: ✅ `npm run verifica:specs` en verde con los 16 RF en EARS; este PRP pasa a APROBADO.
 
@@ -207,7 +207,7 @@ Las dos últimas cambian veredictos: **van con firma**.
 - un proyecto de prueba registra dos dominios y solo recibe esos;
 - un hecho de 2024 encuentra la regla de 2010.
 
-**Gate humano al cerrarla**: a partir de este corte, Hermes congela su `reglas.json`.
+**Corte de la migración = `97d9f9e`**: es el que Hermes ya tiene congelado desde el 2026-09-27 (PR #317), así que entre el corte y esta fase no puede nacer una regla en Hermes.
 
 ### Fase 3: Motor determinista
 **Objetivo**: el motor TS puro, sin datos propios. Da los mismos veredictos que Hermes sobre el
@@ -261,8 +261,7 @@ con la deriva, y su pin no se mueve.
 ### Fuera de este PRP — Hermes lee del paquete
 Un PRP propio, en el repo de Hermes y con su gate y firma: su `gen_seed_sql.py` lee el paquete
 versionado en vez de su `reglas.json`. Hermes es público, así que publicar el paquete hacia allí
-es una decisión humana, no un paso de script. Hasta ese PRP, su `reglas.json` queda congelado desde
-el corte de la Fase 2.
+es una decisión humana, no un paso de script. Hasta ese PRP, su `reglas.json` queda **ya congelado** desde `97d9f9e` (hermes-os-a2a PR #317, 2026-09-27; `grafo-congelado` es check obligatorio de su `master`).
 
 ---
 
@@ -291,7 +290,7 @@ el corte de la Fase 2.
 - [ ] Un conflicto «intencional» (INTERESES) no se expresa por el mecanismo de conflicto: se expresa
       como una sola regla rectora `dudoso`
 - [ ] **Dos fuentes vivas entre la Fase 2 y el PRP de Hermes.** Si Hermes siembra una regla nueva
-      después del corte, nace una bifurcación. Su `reglas.json` queda congelado desde el corte, y
+      después del corte, nace una bifurcación. Resuelto: su `reglas.json` está **ya congelado** desde `97d9f9e` (hermes-os-a2a PR #317, 2026-09-27; `grafo-congelado` es check obligatorio de su `master`), y
       cualquier regla nueva se investiga y siembra **aquí**
 - [ ] El `_meta.source_version` de Hermes es un solo texto gigante con la procedencia de todo. Al
       dividir por dominio, cada dominio se queda **su** parte de procedencia; no se pierde ninguna

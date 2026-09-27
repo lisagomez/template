@@ -323,7 +323,7 @@ for d in grafo grafo-a2a grafo-gate; do (cd $S/hermes/businessos/$d && $S/venv/b
 | ¿Reglas de hoy o de la fecha del hecho? (§5.2) | **Fecha del hecho, solo se añade**. RF-13 y RF-14 |
 | ¿Cómo se mantiene al día en varios proyectos? | **Fuente única en este repo**: un paquete de datos por dominio, versionado, separado del motor. Cada proyecto registra sus dominios y fija la versión. `vigila:versiones` avisa y nunca actualiza. RF-15 y RF-16 |
 | Dominio regulatorio de ejemplo | Drones de reparto + agentes de seguros, registrados desde la fuente única |
-| Hermes | Lee del paquete **después**, en un PRP aparte con firma. Hasta entonces congela su `reglas.json` desde el corte de la migración |
+| Hermes | Lee del paquete **después**, en un PRP aparte con firma. Hasta entonces su `reglas.json` está **ya congelado** desde `97d9f9e` (hermes-os-a2a PR #317, 2026-09-27; `grafo-congelado` es check obligatorio de su `master`) |
 
 **Descartadas para la fuente**:
 - **Que siga en Hermes**: los arreglos medidos (gate de conflictos, vigencia) quedarían fuera de esta gobernanza.

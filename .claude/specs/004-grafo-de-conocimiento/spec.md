@@ -186,8 +186,9 @@ un tercero. Si un proyecto derivado quisiera saltarse el fail-safe "porque moles
   depurar, no para exhibirse. En los de fuente pública la cita sí se muestra (RF-5,
   decidido el 2026-09-26).
 - Que **Hermes** lea del paquete central: es un paso aparte, con su propio gate y firma
-  (decidido el 2026-09-26). Hasta entonces, Hermes congela su `reglas.json` desde el corte
-  de la migración, para que no nazcan dos fuentes.
+  (decidido el 2026-09-26). Hasta entonces su `reglas.json` queda
+  **ya congelado** desde `97d9f9e` (hermes-os-a2a PR #317, 2026-09-27; `grafo-congelado` es check obligatorio de su `master`),
+  el mismo corte que traerá la migración, para que no nazcan dos fuentes.
 
 ## Criterios de finalización
 
