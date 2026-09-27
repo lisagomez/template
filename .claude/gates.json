@@ -169,6 +169,17 @@
       "timeout_s": 300
     },
     {
+      "nombre": "prueba:etiquetas",
+      "runner": "comando",
+      "comando": "npm run prueba:etiquetas",
+      "guarda": "la logica pura de `/etiquetas` (editor, lotes, semilla ficticia, tablero) y los roles del dispositivo: el de conteo solo cuenta y su vista no lleva ninguna cantidad del sistema. Repite la suite del nucleo `tools/etiquetas-gs1`, que tambien corre en `prueba:tools`",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA del 2026-09-27, al mezclar `main` en el PR #154: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo la comprobacion de huerfanos de verifica-gates.mjs."
+    },
+    {
       "nombre": "prueba:trayectorias",
       "runner": "comando",
       "comando": "npm run prueba:trayectorias",
@@ -222,7 +233,7 @@
       "nombre": "prueba:tools",
       "runner": "comando",
       "comando": "npm run prueba:tools",
-      "guarda": "las suites propias de las herramientas empaquetadas de `tools/` (extractor-documental, dictado, voz, asesor-ventas)",
+      "guarda": "las suites propias de las herramientas empaquetadas de `tools/` (extractor-documental, dictado, voz, asesor-ventas, etiquetas-gs1)",
       "evidencia": "herramienta por herramienta, pruebas pasadas o falladas; exit 1 si alguna suite cae",
       "cubre": ["tools/*/pruebas/*.ts"],
       "perfiles": ["validate"],
@@ -337,6 +348,18 @@
       "activo": false,
       "motivo": "Necesita Docker, igual que `erp:prueba`.",
       "falta": "El mismo perfil con Docker que `inventario:valida-erp`."
+    },
+    {
+      "nombre": "prueba:etiquetas:efimera",
+      "runner": "comando",
+      "comando": "bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh",
+      "guarda": "la propuesta del pack de etiquetas para el ERP (`eti_evento`, `eti_ancla`, `eti_testigo`: solo-agregar y encadenado al insertar) en un Postgres 17 desechable, pruebas (a)…(l) dos veces, y en su fase 5 el adaptador de ventas del agente de riesgo contra el esquema REAL del ERP leyendo como `erp_lector`. No aplica nada a ninguna base",
+      "evidencia": "las pruebas (a)…(l) por corrida y la salida de `prueba-ventas-erp.mjs`; exit 1 si alguna cae",
+      "cubre": ["tools/etiquetas-gs1/migraciones/prueba-ventas-erp.mjs"],
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker y levanta un Postgres desechable, igual que `erp:prueba`.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp`. Hasta entonces se corre a mano al tocar la propuesta o el adaptador de ventas."
     },
     {
       "nombre": "vigila:versiones",

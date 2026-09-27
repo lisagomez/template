@@ -82,6 +82,7 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ajustes',
   '/api/dictado',
   '/api/dictado/movil',
+  '/api/etiquetas',
   '/api/historial',
   '/api/laboratorio/datos',
   '/api/laboratorio/estado',

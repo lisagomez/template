@@ -252,6 +252,8 @@ npm run prueba:imprenta  # el contrato de los CLI: dry-run, destructivo marcado,
 npm run prueba:laboratorio  # las reglas del laboratorio de voz (/laboratorio-voz): catalogo, estado real, intenciones, acta del CLI, WAV, PCM en flujo, interrupcion, sesion de picking
 npm run prueba:historial    # la logica pura de /historial: busqueda con acentos, agrupacion por dia, estadisticas, exportadores
 npm run prueba:ajustes      # la logica pura de /ajustes: agrupar, origen en palabras, cifras del catalogo
+npm run prueba:etiquetas    # etiquetas GS1-128: nucleo contra la norma, ida y vuelta SVG/ZPL, agente de impresion, importacion de catalogo
+npm run capturas:etiquetas  # tras build: capturas de escritorio y celular de /etiquetas (camara falsa, Zebras simuladas)
 npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
 npm run empaqueta <nombre>  # empaqueta una herramienta de tools/ y PRUEBA que se integre (sin asiento en el inventario, no sale)
