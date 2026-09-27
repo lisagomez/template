@@ -184,7 +184,7 @@ aprobación, aplicado no a un gate sino a una cifra).
 
 | Punto | Respuesta preliminar |
 |---|---|
-| Partes afectadas | La dueña de `hermes-os-a2a` (decide si confía en el presupuesto reportado por fila) |
+| Partes afectadas | El laboratorio, que opera `hermes-os-a2a` (decide si confía en el presupuesto reportado por fila) |
 | Daño con el sistema operando "bien" | Lectura errónea de `gasto_usd` en la fila padre; herencia incompleta de `modelo_pref` padre→hijo, ya detectada y corregida como gotcha — pero es la clase de bug que este mismo control (AISIA) habría anticipado antes de construir, no después |
 | Reversibilidad | Alta — el `VEREDICTO` sigue detrás de gate humano para lo irreversible, sin cambios respecto a Fase 6 |
 | Vía de apelación | Implícita, igual que en Fase 6: no está descrita como tal |
@@ -256,5 +256,5 @@ producción, no solo en simulación.
 y las decisiones (declarar `tareas` como plataforma con su regla de escritura por fila,
 abrir un registro de riesgo para el gasto real ya ejecutado dos veces, CDC sobre el Planner,
 capa B de regresión para el paralelismo, y la pregunta de radio-de-daño antes de replicar a
-un segundo departamento) las toma la dueña de `hermes-os-a2a`. Este documento es la
+un segundo departamento) las toma el laboratorio, que opera `hermes-os-a2a`. Este documento es la
 auditoría, no el CDC.

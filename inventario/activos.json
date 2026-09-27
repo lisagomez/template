@@ -51,6 +51,14 @@
    "cubre": ["tools/extractor-documental", "hermes/config.extractor.yaml"]
   },
   {
+   "id": "TPL-etiquetas-gs1",
+   "nombre": "Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo e inventario fisico",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/etiquetas-gs1", "responsable": "dep-sw",
+   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md", "docs/SDD-etiquetas-gs1.md"],
+   "cubre": ["tools/etiquetas-gs1"]
+  },
+  {
    "id": "TPL-voz",
    "nombre": "Voz: deteccion de voz (VAD) y diarizacion local",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
@@ -152,6 +160,14 @@
    "cubre": ["src/features/laboratorio-voz", "scripts/laboratorio-voz"]
   },
   {
+   "id": "TPL-feature-etiquetas",
+   "nombre": "Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, mover, caducidades, conteo, expediente, riesgo, integridad)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/etiquetas", "responsable": "dep-sw",
+   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md"],
+   "cubre": ["src/features/etiquetas"]
+  },
+  {
    "id": "TPL-app-base",
    "nombre": "App SaaS base (Next.js + Supabase, PWA)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "produccion",
@@ -185,7 +201,7 @@
    "nombre": "Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones",
    "tipo": "documento", "clase": "CONOCIMIENTO", "estado": "produccion",
    "ubicacion": ".claude/specs", "responsable": "dep-sw",
-   "cubre": [".claude/specs/*", ".claude/PRPs/*", ".claude/goals/*", "docs/SDD-*", "docs/GOAL-*", "docs/INVESTIGACION-*", "docs/grafos", "scripts/verifica-specs.mjs"]
+   "cubre": [".claude/specs/*", ".claude/PRPs/*", ".claude/goals/*", "docs/SDD-*", "docs/GOAL-*", "docs/goals", "docs/INVESTIGACION-*", "docs/grafos", "scripts/verifica-specs.mjs"]
   },
   {
    "id": "TPL-gobernanza",
@@ -194,6 +210,15 @@
    "ubicacion": ".claude/gobernanza", "responsable": "dep-sw",
    "origen": [".claude/specs/001-gobernanza-agentica"],
    "cubre": [".claude/gobernanza", ".claude/settings.json", ".claude/example.mcp.json", ".claude/presupuesto-contexto.json", ".claude/hooks/log-tool-usage.sh", "docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md", "scripts/verifica-gobernanza.mjs", "scripts/audita-secretos.mjs", "scripts/audita-fugas.mjs", "scripts/sello-validate.mjs", "scripts/prepara-gate.mjs", "scripts/mide-contexto.mjs", "scripts/vigila-versiones.mjs", "scripts/lib", "scripts/verifica-privado.mjs", "scripts/verifica-marca-blanca.mjs", "scripts/hooks"]
+  },
+  {
+   "id": "TPL-manifiesto-gates",
+   "nombre": "Manifiesto de gates: el padron de lo que el gate corre",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": ".claude/gates.json", "responsable": "dep-sw",
+   "origen": [".claude/goals/manifiesto-de-gates/spec.md", "docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md"],
+   "descripcion": "Los gates de validate, predeploy y cdc como dato declarado (runner, que guarda, que evidencia deja, activo/inactivo con motivo y falta), con invariante fail-closed al cargar. `validate` y `predeploy` DERIVAN de aqui en vez de llevar la lista a mano en package.json. Emite tambien la proyeccion que consume reglas/software.toml de hermes-os-a2a, que hoy la transcribe a mano. Cambiarlo es un CDC (C1).",
+   "cubre": [".claude/gates.json", "scripts/corre-gates.mjs", "scripts/verifica-gates.mjs", "scripts/proyecta-gates.mjs", "scripts/prueba-tools.mjs"]
   },
   {
    "id": "TPL-imprenta",

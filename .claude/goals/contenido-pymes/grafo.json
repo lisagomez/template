@@ -52,7 +52,7 @@
       "id": "llm",
       "label": "Redacción con LLM (BLOQUEADA: sin llave medida y sin CDC)",
       "estado": "gris",
-      "evidencia": "BLOQUEADO: sin llave medida y sin CDC"
+      "evidencia": "BLOQUEADO: sin llave medida; activarlo es otro CDC (los prompts del redactor se firmaron el 2026-09-27)"
     },
     {
       "id": "laboratorio",

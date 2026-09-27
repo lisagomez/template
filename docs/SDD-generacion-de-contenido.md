@@ -162,7 +162,7 @@ decisión de infraestructura (§8).
 |---|---|---|
 | Reel del celular (voz y cara) | C4: personas y terceros en pantalla; 14 preguntas de `propuesta-video.md` | el laboratorio (lisagomez) |
 | Foto de producto dentro del video | puede traer personas de fondo: revisión C4 propia | el laboratorio |
-| Redacción con LLM | sin llave medida y sin CDC firmado (`pymes-marketing/propuesta-cdc.md`) | el laboratorio |
+| Redacción con LLM | sin llave medida; activar el LLM es otro CDC (los prompts del redactor se firmaron el 2026-09-27 en `BITACORA-CDC.md`) | el laboratorio |
 | Aprobación con cuentas o multiusuario | necesita `/add-login` y guardar decisiones (C4, C7) | el laboratorio |
 | Render de video en producción | Chromium + ffmpeg en la imagen: cambio de infraestructura | el laboratorio |
 | Publicar o programar | nunca automático | el dueño de cada pyme |

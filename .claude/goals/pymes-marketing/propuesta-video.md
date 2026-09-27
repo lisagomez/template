@@ -1,6 +1,6 @@
 # Propuesta: herramientas de video para pymes mexicanas
 
-> Para firma de la dueña (**lisagomez**). Es análisis: en este goal **no se construye, no se
+> Para firma del laboratorio (**lisagomez**). Es análisis: en este goal **no se construye, no se
 > instala y no se llama a ninguna API**. Construir es el siguiente goal, con esta propuesta
 > firmada. La evidencia de cada afirmación está en `triaje-video.md` (misma carpeta).
 > Fecha: 2026-09-26. Pesos MXN con un **tipo de cambio supuesto de 18.50 MXN por dólar** (no es
@@ -223,7 +223,7 @@ Además: el audio con voces de otros, y la ubicación del negocio, en el fondo y
 
 **Marco (por verificar con asesoría legal).** Imagen y voz son datos personales (LFPDPPP); usarlas para identificar a alguien las vuelve biométricas y sensibles. El retrato de una persona requiere su consentimiento (Ley Federal del Derecho de Autor, art. 87).
 
-**Riesgos que no se pueden firmar** (el daño cae en terceros que no firmaron). Ninguna firma de la dueña o del cliente los autoriza; obligan a **rediseñar**:
+**Riesgos que no se pueden firmar** (el daño cae en terceros que no firmaron). Ninguna firma del laboratorio o del cliente los autoriza; obligan a **rediseñar**:
 
 1. **Clientes, transeúntes o menores identificables sin consentimiento.** Por defecto se desenfocan todas las caras menos la de la persona que el dueño marca como sujeto con consentimiento, o se descarta el clip. La sala no deja aprobar mientras haya caras sin cubrir.
 2. **Datos de clientes en pantalla** (tickets, chats, RFC, teléfonos). El OCR local bloquea hasta cubrirlos, y reporta enmascarado a 4 caracteres.
@@ -231,7 +231,7 @@ Además: el audio con voces de otros, y la ubicación del negocio, en el fondo y
 4. **Generar o alterar con IA a personas reales**: animar la foto de un empleado, clonar la voz del dueño, avatares. Prohibido; lo generativo solo toca producto sin personas.
 5. **Cortes que cambian el sentido de lo que dijo un tercero** (testimonios). Un corte dentro del habla de otra persona se marca para revisión explícita, y la transcripción íntegra se guarda con el consentimiento.
 
-## 8. Preguntas que la dueña tiene que firmar antes de construir
+## 8. Preguntas que el laboratorio tiene que firmar antes de construir
 
 Cada una lleva la opción recomendada.
 

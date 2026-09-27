@@ -106,7 +106,7 @@ mientras `AGENTS.md` sea autocontenido; el dia que una regla se mueva a un archi
 existiria para un arnes y no para el otro, sin ninguna alarma. El bloque 6j del verificador
 vigila lo adyacente: que ningun script del gate invoque el binario de un arnes.
 
-**La correccion que dio la dueña el 2026-08-24, y que vale para todo lo que venga:** faltaba
+**La correccion que dio el laboratorio el 2026-08-24, y que vale para todo lo que venga:** faltaba
 una sesion conducida por un LLM para medir si opencode *obedece* (no solo *carga*) las
 reglas, y se planteo pedir una credencial. **Un boilerplate no tiene credenciales** — no por
 descuido, por diseño. Eso lo cierra un proyecto derivado, no el template; el spec ya lo

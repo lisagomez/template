@@ -113,7 +113,7 @@ bloqueada 9 para guardarla con cuentas).
 | 6 | Laboratorio visual y app derivada | **autorizada · hecha** | extiende lo existente |
 | 7 | Reel del celular con voz o cara | **BLOQUEADA** | el laboratorio: C4 con terceros; 14 preguntas de `propuesta-video.md` |
 | 8 | Foto de producto dentro del video | **BLOQUEADA** | el laboratorio: la foto puede traer personas; revisión C4 propia |
-| 9 | Redacción con LLM / aprobación con cuentas | **BLOQUEADA** | el laboratorio: CDC del redactor (`pymes-marketing/propuesta-cdc.md`) y `/add-login` (C4, C7) |
+| 9 | Redacción con LLM / aprobación con cuentas | **BLOQUEADA** | el laboratorio: activar el LLM es otro CDC (llave, corrida real medida con su costo; el de los prompts se firmó el 2026-09-27) y `/add-login` (C4, C7) |
 | 10 | Render de video en producción | **BLOQUEADA** | el laboratorio: Chromium + ffmpeg en la imagen (infraestructura) |
 | 11 | Publicar o programar | **FUERA** | siempre el dueño de cada pyme, a mano |
 | 12 | Documentación y validación final | **autorizada · hecha** | — |

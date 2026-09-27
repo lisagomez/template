@@ -1,0 +1,76 @@
+{
+  "name": "@tu-scope/etiquetas-gs1",
+  "version": "0.1.0",
+  "description": "Etiquetas GS1-128 para control de caducidades: arma, parsea y valida cadenas GS1 segun las GS1 General Specifications, genera SVG y ZPL equivalentes, asigna GTIN (regla mixta) y calcula el tablero FEFO. Nucleo sin dependencias; el almacen se inyecta.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "bin": {
+    "etiquetas-agente": "./dist/agente/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./svg": {
+      "types": "./dist/svg.d.ts",
+      "import": "./dist/svg.js"
+    },
+    "./navegador": {
+      "types": "./dist/navegador/index.d.ts",
+      "import": "./dist/navegador/index.js"
+    },
+    "./almacenes/archivo": {
+      "types": "./dist/almacenes/archivo.d.ts",
+      "import": "./dist/almacenes/archivo.js"
+    },
+    "./agente": {
+      "types": "./dist/agente/index.d.ts",
+      "import": "./dist/agente/index.js"
+    },
+    "./firma": {
+      "types": "./dist/firma.d.ts",
+      "import": "./dist/firma.js"
+    },
+    "./almacenes/central": {
+      "types": "./dist/almacenes/central.d.ts",
+      "import": "./dist/almacenes/central.js"
+    },
+    "./almacenes/seudonimos": {
+      "types": "./dist/almacenes/seudonimos.d.ts",
+      "import": "./dist/almacenes/seudonimos.js"
+    }
+  },
+  "files": [
+    "dist",
+    "migraciones",
+    "fuentes",
+    "agente.ejemplo.json"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "genera:diccionario": "node generador/genera-diccionario.mjs",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts",
+    "agente": "node dist/agente/cli.js",
+    "simula:impresora": "node simuladores/impresora-9100.mjs",
+    "simula:browser-print": "node simuladores/browser-print.mjs",
+    "demo:manipulacion": "node demos/manipulacion.mjs"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "bwip-js": "4.11.4"
+  },
+  "peerDependenciesMeta": {
+    "bwip-js": {
+      "optional": true
+    }
+  }
+}

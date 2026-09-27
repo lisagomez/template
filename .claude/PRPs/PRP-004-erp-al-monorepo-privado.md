@@ -60,7 +60,7 @@ lo que se entrega a producción sale empaquetado desde aquí, con asiento en el 
 
 ### Comportamiento Esperado
 
-1. La dueña cambia la visibilidad del template a privado. El agente lo comprueba con `gh` y no
+1. El laboratorio cambia la visibilidad del template a privado. El agente lo comprueba con `gh` y no
    avanza si no ve `isPrivate: true`.
 2. Se importan las rutas del ERP de `hermes-os-a2a` con su historial a `erp/`, en una rama.
    Antes de mergear se audita ese historial importado en busca de secretos.
@@ -196,7 +196,7 @@ que cambia es de qué repo se restaura el DDL, y eso se anota ahí.
 
 ### Evaluación de impacto / AISIA (control C4) — *¿a quién dañamos sin atacante?*
 
-- **Partes afectadas**: la dueña y el laboratorio (operan el ERP); el contador, que consume la
+- **Partes afectadas**: el laboratorio (opera el ERP); el contador, que consume la
   clasificación D+I y la política contable desde el ERP; el cliente de la casa y los tenants futuros
   del esquema `erp` (el ERP guarda facturas, cobros y clientes); quien lea `hermes-os-a2a` esperando
   encontrar ahí el ERP.
@@ -225,7 +225,7 @@ que cambia es de qué repo se restaura el DDL, y eso se anota ahí.
 ### Fase 0: Gate de visibilidad — ✅ CERRADA 2026-09-24
 > `gh api -X PATCH repos/lisagomez/template -F private=true` → `private: true`; `verifica:privado` en verde
 > (el primer intento dio 200 unos segundos: la API sin token tarda en reflejar el cambio).
-**Objetivo**: el template es privado y queda un chequeo que lo sostiene. Acción humana: la dueña
+**Objetivo**: el template es privado y queda un chequeo que lo sostiene. Acción humana: el laboratorio
 cambia la visibilidad. El agente comprueba y añade `verifica-privado` a `predeploy` y al hook de push.
 **Validación**: `gh repo view --json isPrivate` → `true`, registrado; el chequeo falla en un
 simulacro (repo de prueba público o respuesta simulada) y pasa en el real. **Nada del ERP se ha
@@ -301,7 +301,7 @@ en verde. **Solo lectura contra producción**; sin credencial de solo lectura al
 > antes y después; +1 asiento `act.reubicar` con traza; detector en seco 0 HUÉRFANO, 0 REUBICAR; el
 > reverso vuelve a la foto de antes. **No se escribió en producción.**
 **Objetivo**: las filas `businessos/erp/…` de `erp.act_activo` pasan a `template/erp/…` con su
-traza en `sis_bitacora`. Gate humano: la dueña aprueba viendo el diff de filas (antes/después).
+traza en `sis_bitacora`. Gate humano: el laboratorio aprueba viendo el diff de filas (antes/después).
 **Validación**: ensayo en Postgres desechable con el catálogo copiado; en producción, mismo número
 de folios, mismo `costo_acumulado` total antes y después, y el detector en `--dry-run` sin HUÉRFANOS.
 

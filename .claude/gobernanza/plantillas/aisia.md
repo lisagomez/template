@@ -44,13 +44,13 @@ Firmada por: ____________  Rol: ____________  Fecha: ____________
 
 ### 1. Partes afectadas
 
-- **La dueña de la fábrica**: opera un sistema que genera código que ella no escribió
+- **El laboratorio**: opera un sistema que genera código que no escribió
   y que puede no entender por completo.
 - **Los usuarios finales de las apps generadas**: nunca hablaron con la fábrica, no
   saben que existe, y sus datos viven en un esquema que decidió un agente.
 - **Terceros mencionados en los datos**: personas cuyos datos entran a una app generada
   sin haber sido parte de ninguna conversación.
-- **Clientes de la dueña**, cuando la app se les entrega o se les revende.
+- **Clientes del laboratorio**, cuando la app se les entrega o se les revende.
 
 ### 2. Daños posibles SIN atacante
 
