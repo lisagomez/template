@@ -1,0 +1,204 @@
+{
+  "version": "0.1.0",
+  "procedencia": "EJEMPLO FICTICIO (PRP-005 Fase 6, TAR-11): la política de devoluciones de una tienda inventada, para demostrar que el motor no está atado a lo legal. No describe ninguna tienda real ni se distribuye como conocimiento.",
+  "jurisdicciones": [
+    {
+      "codigo": "MX",
+      "nombre": "México"
+    }
+  ],
+  "dimensiones": [
+    {
+      "codigo": "devoluciones",
+      "nombre": "Devoluciones de clientes",
+      "vocabulario": [
+        "procede",
+        "no_procede",
+        "requiere_revision"
+      ],
+      "frases": {
+        "procede": "procede la devolución",
+        "no_procede": "no procede la devolución",
+        "requiere_revision": "la devolución requiere una revisión antes de aprobarse"
+      }
+    }
+  ],
+  "dominios": [
+    {
+      "clave": "tienda-devoluciones",
+      "nombre": "Devoluciones en tienda (ejemplo)",
+      "jurisdiccion": "MX",
+      "dimension": "devoluciones",
+      "cita": "interna",
+      "corte": "2026-01-01",
+      "procedencia": "EJEMPLO FICTICIO: política interna inventada, vigente con su cambio del 2026-01-01.",
+      "categorias": [
+        "ELECTRONICA",
+        "HIGIENE",
+        "ROPA_Y_CALZADO"
+      ]
+    }
+  ],
+  "categorias": [
+    {
+      "clave": "ELECTRONICA",
+      "nombre": "Electrónica",
+      "descripcion": "Aparatos electrónicos y accesorios",
+      "keywords": [
+        "audifonos",
+        "celular",
+        "laptop",
+        "bocina"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "HIGIENE",
+      "nombre": "Productos de higiene personal",
+      "descripcion": "Lo que se usa sobre la piel y no se revende abierto",
+      "keywords": [
+        "ropa interior",
+        "traje de baño",
+        "cosmeticos"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "ROPA_Y_CALZADO",
+      "nombre": "Ropa y calzado",
+      "descripcion": "Prendas y zapatos",
+      "keywords": [
+        "ropa",
+        "zapatos",
+        "calzado",
+        "playera",
+        "pantalon"
+      ],
+      "exclusiones": [
+        "ropa interior",
+        "traje de baño"
+      ]
+    }
+  ],
+  "reglas": [
+    {
+      "clave": "DEV-GEN",
+      "jurisdiccion": "MX",
+      "dimension": "devoluciones",
+      "titulo": "Requisito general",
+      "texto_resumen": "Toda devolución exige comprobante.",
+      "fuente_cita": "Política de devoluciones de la tienda, sección 1",
+      "fuente_url": "https://ejemplo.invalid/politica-de-devoluciones",
+      "vigente_desde": "2024-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": null,
+          "regimen": "GENERAL",
+          "veredicto_base": null,
+          "requisitos": [
+            "Ticket de compra o factura"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "DEV-ROPA-2024",
+      "jurisdiccion": "MX",
+      "dimension": "devoluciones",
+      "titulo": "Ropa y calzado (2024-2025)",
+      "texto_resumen": "Se aceptan devoluciones de ropa y calzado hasta 30 días.",
+      "fuente_cita": "Política de devoluciones de la tienda, sección 2 (versión 2024)",
+      "fuente_url": "https://ejemplo.invalid/politica-de-devoluciones",
+      "vigente_desde": "2024-01-01",
+      "vigente_hasta": "2025-12-31",
+      "impactos": [
+        {
+          "categoria": "ROPA_Y_CALZADO",
+          "regimen": "GENERAL",
+          "veredicto_base": "procede",
+          "requisitos": [
+            "Hasta 30 días desde la compra",
+            "Con etiqueta y sin uso"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "DEV-ROPA-2026",
+      "jurisdiccion": "MX",
+      "dimension": "devoluciones",
+      "titulo": "Ropa y calzado (desde 2026)",
+      "texto_resumen": "El plazo baja a 15 días.",
+      "fuente_cita": "Política de devoluciones de la tienda, sección 2 (versión 2026)",
+      "fuente_url": "https://ejemplo.invalid/politica-de-devoluciones",
+      "vigente_desde": "2026-01-01",
+      "vigente_hasta": null,
+      "reemplaza": "DEV-ROPA-2024",
+      "impactos": [
+        {
+          "categoria": "ROPA_Y_CALZADO",
+          "regimen": "GENERAL",
+          "veredicto_base": "procede",
+          "requisitos": [
+            "Hasta 15 días desde la compra",
+            "Con etiqueta y sin uso"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "DEV-ELECTRONICA",
+      "jurisdiccion": "MX",
+      "dimension": "devoluciones",
+      "titulo": "Electrónica",
+      "texto_resumen": "Toda devolución de electrónica pasa por revisión técnica.",
+      "fuente_cita": "Política de devoluciones de la tienda, sección 3",
+      "fuente_url": "https://ejemplo.invalid/politica-de-devoluciones",
+      "vigente_desde": "2024-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "ELECTRONICA",
+          "regimen": "GENERAL",
+          "veredicto_base": "requiere_revision",
+          "requisitos": [
+            "Empaque original",
+            "Revisión técnica antes de aprobar"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "DEV-HIGIENE",
+      "jurisdiccion": "MX",
+      "dimension": "devoluciones",
+      "titulo": "Higiene personal",
+      "texto_resumen": "No se aceptan devoluciones de productos de higiene abiertos.",
+      "fuente_cita": "Política de devoluciones de la tienda, sección 4",
+      "fuente_url": "https://ejemplo.invalid/politica-de-devoluciones",
+      "vigente_desde": "2024-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "HIGIENE",
+          "regimen": "GENERAL",
+          "veredicto_base": "no_procede",
+          "requisitos": [],
+          "banderas": [
+            "Por higiene, no se aceptan abiertos"
+          ],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}

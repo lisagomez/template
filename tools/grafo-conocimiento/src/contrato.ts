@@ -44,7 +44,15 @@ export const Dimension = z.strictObject({
     .array(TextoVeredicto)
     .min(1)
     .refine((v) => new Set(v).size === v.length, 'vocabulario con veredictos repetidos'),
+  /**
+   * Cómo se dice cada veredicto en una respuesta («procede la devolución»). Opcional: sin ella, el
+   * redactor usa sus frases por defecto. Así tampoco el redactor queda atado a lo legal (TAR-11).
+   */
+  frases: z.record(TextoVeredicto, TextoNoVacio).optional(),
 })
+  .refine((d) => Object.keys(d.frases ?? {}).every((k) => d.vocabulario.includes(k)), {
+    message: 'una frase para un veredicto que no está en el vocabulario de la dimensión',
+  })
 
 export const Categoria = z.strictObject({
   clave: Clave,

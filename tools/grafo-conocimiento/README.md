@@ -5,9 +5,9 @@ Motor de reglas de la **spec 004**: responde una pregunta con un veredicto acota
 determinista. Cuando no hay regla, lo dice con una forma que no se puede confundir con una
 respuesta.
 
-> **Estado: Fase 5 de PRP-005.** Contrato, selección de dominios, motor en paridad con el de Hermes,
-> gate de siembra (`./gate`) y capa de lenguaje natural (`./lenguaje`). Pendiente: dominios de ejemplo
-> y empaquetado (Fase 6) y el enrutado desde `AGENTS.md` (Fase 8, CDC). Plan:
+> **Estado: Fase 6 de PRP-005.** Contrato, selección de dominios, motor en paridad con el de Hermes,
+> gate de siembra (`./gate`) y capa de lenguaje natural (`./lenguaje`). Empaquetado y probado en un proyecto
+> limpio. Pendiente: el aviso de versión (Fase 7) y el enrutado desde `AGENTS.md` (Fase 8, CDC). Plan:
 > `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`.
 
 ```ts
@@ -62,6 +62,11 @@ const r = await responde('¿Puedo repartir paquetes con un dron?', {
   dice de qué regla ni de qué fuente sale, **pero muestra los requisitos y banderas del autor tal cual**:
   no escribas en ellos la fuente.
 - **No medido**: la precisión del parser con un modelo real.
+- **Sin modelo**: `estructuradorSinModelo(conocimiento, 'MX')` estructura por keywords, de forma determinista y
+  gratuita. Entiende oraciones que usan el vocabulario de las reglas; una paráfrasis da «no hay información
+  suficiente». Pruébalo: `node ejemplos/pregunta.mjs "¿Puedo devolver unos zapatos?"`.
+- **Ejemplo no legal**: `ejemplos/politica-devoluciones.json`, ficticio. Una dimensión puede declarar sus `frases`
+  («procede la devolución»), así que el redactor tampoco queda atado a lo legal.
 
 ## El contrato (`src/contrato.ts`, `src/valida.ts`)
 

@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/grafo-conocimiento",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Motor determinista, contrato Zod del conocimiento, selección de dominios, gate de siembra (./gate), capa de lenguaje natural con modelo inyectado (./lenguaje) y paridad con el motor de Hermes (PRP-005).",
   "type": "module",
   "license": "UNLICENSED",

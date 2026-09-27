@@ -27,3 +27,4 @@ export async function responde(pregunta: string, o: OpcionesRespuesta): Promise<
   if ('tipo' in r) return { tipo: 'fallo', fallo: r, texto: redactaFallo(r) }
   return { tipo: 'resultado', resultado: r, texto: redacta(r, o.conocimiento) }
 }
+export { estructuradorSinModelo, type OpcionesSinModelo } from './sin-modelo.js'
