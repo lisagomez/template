@@ -22,7 +22,7 @@ const FRASES: Readonly<Record<string, string>> = {
 /** Las banderas que añade el motor nombran reglas y citas: en un dominio interno no se muestran. */
 const DEL_MOTOR = ['Reglas vigentes en conflicto', 'Importe ']
 
-function cuerpo(c: ConceptoEvaluado, publica: boolean): string[] {
+function cuerpo(c: ConceptoEvaluado, publica: boolean, frases: Readonly<Record<string, string>>): string[] {
   const sobre = `Sobre «${c.descripcion}»:`
   switch (c.motivo) {
     case 'sin_regla':
@@ -34,7 +34,7 @@ function cuerpo(c: ConceptoEvaluado, publica: boolean): string[] {
     case 'tope_excedido':
       return [`${sobre} no puedo afirmar nada: el importe supera el tope que admite la regla.`]
     case 'regla': {
-      const frase = FRASES[c.veredicto!] ?? `el veredicto es «${c.veredicto}»`
+      const frase = frases[c.veredicto!] ?? FRASES[c.veredicto!] ?? `el veredicto es «${c.veredicto}»`
       const cita = publica && c.fuente ? ` Fuente: ${c.fuente.cita} (vigente desde ${c.fuente.vigencia.desde}${c.fuente.vigencia.hasta ? ` hasta ${c.fuente.vigencia.hasta}` : ''}).` : ''
       return [`${sobre} ${frase}.${cita}`]
     }
@@ -52,9 +52,10 @@ function detalle(c: ConceptoEvaluado, publica: boolean): string[] {
 export function redacta(resultado: Resultado, conocimiento: Conocimiento): string {
   const r = Resultado.parse(resultado)
   const cita = new Map(conocimiento.dominios.map((d) => [d.clave, d.cita]))
+  const frases = conocimiento.dimensiones.find((d) => d.codigo === r.contexto.dimension)?.frases ?? {}
   const partes = r.conceptos.flatMap((c) => {
     const publica = c.dominio !== null && cita.get(c.dominio) === 'publica'
-    return [...cuerpo(c, publica), ...detalle(c, publica), '']
+    return [...cuerpo(c, publica, frases), ...detalle(c, publica), '']
   })
   return [
     ...partes,

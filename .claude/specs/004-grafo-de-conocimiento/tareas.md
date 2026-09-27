@@ -1,7 +1,7 @@
 # Tareas 004 — Grafo de conocimiento
 
-> **Cerradas: TAR-1 a TAR-10, TAR-13, TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y
-> decisión; el resto el 2026-09-27, Fases 1 a 5 de PRP-005. Las demás siguen abiertas. Esta spec no
+> **Cerradas: TAR-1 a TAR-14, TAR-16 y TAR-17**. TAR-1 y TAR-3 el 2026-09-26, lectura y decisión; el resto el
+> 2026-09-27, Fases 1 a 6 de PRP-005. Quedan abiertas TAR-15 (autocrítica, en el cierre) y TAR-18 (aviso de versión, Fase 7). Esta spec no
 > está construida y su alcance declarado es el blueprint, no la implementación. Las demás
 > tareas **no están autorizadas**. El PRP que las convertiría en trabajo existe como
 > **propuesta**, `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md` (NO APROBADO),
@@ -93,18 +93,20 @@
 ## Fase 4 — Cerrar
       **Cerrada 2026-09-27 (PRP-005 Fase 5)**: `FalloSinVeredicto` `parser_no_disponible` (por error, por tiempo o por salida sin forma), con su propia plantilla, distinta de sin regla. Duda de la spec resuelta.
 
-- [ ] **TAR-11 · Dos dominios de ejemplo poblados.**
+- [x] **TAR-11 · Dos dominios de ejemplo poblados.**
       Hecho cuando: hay uno regulatorio y uno genérico de otro dominio, demostrando que el
       modelo no está atado a lo legal. RF: DoF-2.
       *Decidido el 2026-09-26*: el regulatorio son **drones de reparto + agentes de seguros**
       (llevan dentro el incidente real), registrados desde la fuente única (TAR-16).
+      **Cerrada 2026-09-27 (PRP-005 Fase 6)**: regulatorio = drones de reparto + agentes de seguros, desde la fuente única (`tools/conocimiento/pruebas/extremo.ts`). No legal = `tools/grafo-conocimiento/ejemplos/politica-devoluciones.json`, ficticio, con vocabulario y frases propios y cita interna (`pruebas/ejemplos.ts`, conteo fijado). Ni el motor ni el redactor quedan atados a lo legal.
 
-- [ ] **TAR-12 · Prueba end-to-end con oración real.**
+- [x] **TAR-12 · Prueba end-to-end con oración real.**
       Hecho cuando: pregunta en lenguaje natural → parser → motor → respuesta natural, sin
       payload armado a mano. RF: DoF-3.
       *Avance 2026-09-27 (Fase 5)*: el camino oración → parser → motor → respuesta existe y está probado de punta a
       punta, pero con estructuradores deterministas. **Falta un modelo real**: no hay clave en este entorno, así que la
       precisión del parser no está medida. No se da por cerrada.
+      **Cerrada 2026-09-27 (PRP-005 Fase 6)**: oración → `estructuradorSinModelo` → motor → redactor, sin payload armado a mano (RF-4 hace opcional el modelo), en los dos dominios. **Sigue sin medir** la precisión del parser con un modelo real (no hay clave): lo que cierra esta tarea es el camino de punta a punta, no esa medición.
 
 - [x] **TAR-13 · Test que fija el conteo de reglas.**
       Hecho cuando: agregar una regla **obliga** a tocar el test en el mismo cambio.

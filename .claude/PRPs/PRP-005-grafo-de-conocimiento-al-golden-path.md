@@ -313,7 +313,24 @@ de «sin regla». El redactor cita solo en los dominios públicos (RF-5).
 - el redactor no puede ejecutarse sin veredicto;
 - prueba de un dominio que cita y otro que no.
 
-### Fase 6: Dominios de ejemplo y extremo a extremo
+### Fase 6: Dominios de ejemplo y extremo a extremo — ✅ CERRADA 2026-09-27
+> - **Dominio regulatorio**: drones de reparto + agentes de seguros, registrados desde la fuente única
+>   (`tools/conocimiento/pruebas/extremo.ts`).
+> - **Dominio no legal**: `tools/grafo-conocimiento/ejemplos/politica-devoluciones.json`, **ficticio** y marcado como
+>   tal, fuera de la fuente única. Tiene vocabulario y frases propios, cita `interna`, una política que cambió con fecha
+>   (30 → 15 días) y una exclusión. Conteo fijado.
+> - **Oraciones reales, sin payload a mano y sin modelo**: `estructuradorSinModelo` (RF-4 hace opcional el modelo).
+>   Resultados:
+>   - el incidente de «drones» como oración → regla de la CNSF, con cita;
+>   - reparto con drones → Ley de Aviación Civil;
+>   - un hecho de 2025 → política de entonces;
+>   - H1 sin modelo → «no hay información suficiente»;
+>   - fiscal con fecha e importe escritos → llegan al motor.
+> - **Empaquetado**: `npm run empaqueta` en verde para los dos paquetes, instalados en un proyecto limpio. El motor con
+>   sus 3 entradas y el paquete de conocimiento con `default` y `version`.
+> - **Arreglo al empaquetador**: ahora corre el `scripts.build` que declara el paquete, y `tsc` solo si no declara
+>   ninguno. Antes fijaba `tsc`, y un paquete de datos quedaba fuera. El motor y el andamio se re-empaquetaron en verde.
+> - Suman 69 pruebas del motor y 24 del paquete.
 **Objetivo**: drones de reparto + agentes de seguros registrados desde la fuente única, y un dominio
 no legal, con el conteo fijado.
 **Validación**: una oración real → respuesta natural, sin payload armado a mano. `npm run empaqueta`
@@ -389,6 +406,14 @@ es una decisión humana, no un paso de script. Hasta ese PRP, su `reglas.json` q
   `main`.
 - **Aplicar en**: toda huella versionada. Y correr `audita:secretos` **después** del commit y antes del
   push, no solo `validate` con el índice.
+
+### 2026-09-27: El empaquetador fijaba `tsc` como build (Fase 6)
+- **Error**: `npm run empaqueta conocimiento` falló con «tsconfig.json no existe». El empaquetador corría `npx tsc`
+  aunque su cabecera prometía «el build que declare el propio paquete», y un paquete de datos no se compila.
+- **Fix**: corre `scripts.build` si existe, y `tsc` si no. Las demás herramientas declaran `tsc` y no cambian:
+  se re-empaquetaron en verde.
+- **Aplicar en**: cualquier herramienta que no sea TypeScript compilado. El contrato del paquete manda sobre el
+  supuesto del script.
 
 ### 2026-09-26: Borrar una regla retirada reescribe el pasado
 - **Error medido en Hermes**: `_bajas` hace `DELETE`; un hecho de 2024 perdió su regla.

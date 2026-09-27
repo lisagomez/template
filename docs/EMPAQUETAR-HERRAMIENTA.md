@@ -58,7 +58,7 @@ Hace cuatro cosas, y **ninguna es opcional**:
 | Paso | Qué caza |
 |---|---|
 | **Contrato del `package.json`** | `exports` sin `types` (el consumidor pierde el typecheck **en silencio**), `files` sin `dist` (publicas fuentes o nada), React en `dependencies` en vez de `peer`, versión que no es semver |
-| **Build** | Lo obvio |
+| **Build** | Lo obvio. Se corre el `scripts.build` que declara el paquete (y `tsc` si no declara ninguno): un paquete de datos, como `tools/conocimiento`, se construye ensamblando JSON |
 | **`'use client'` sobrevive** | Si se pierde, el consumidor recibe un componente que Next intenta renderizar en el servidor y **el error no menciona tu paquete** |
 | **Integración real** | Proyecto temporal limpio → `npm install <tarball>` → importar y ejecutar. Aquí "compatible" deja de ser una opinión |
 
