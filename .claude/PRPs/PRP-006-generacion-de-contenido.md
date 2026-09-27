@@ -1,6 +1,6 @@
 # PRP-006: Generación de contenido para pymes (piezas, carruseles, video sin personas, aprobación)
 
-> **Estado**: FASES AUTORIZADAS COMPLETADAS (2026-09-27) — las bloqueadas (7, 8, 9, 10) esperan firma
+> **Estado**: FASES AUTORIZADAS COMPLETADAS (2026-09-27) — la 7 (reel) quedó firmada el 2026-09-27 y se construye en su propio goal; las bloqueadas (8, 9, 10) esperan firma
 > **Fecha**: 2026-09-27
 > **Proyecto**: línea pymes (`tools/pymes-marketing`, `/estudio`, `/laboratorio-pymes`)
 > **Spec**: `.claude/goals/contenido-pymes/spec.md` (goal compilado; grafo y plan en la misma carpeta).
@@ -111,7 +111,7 @@ bloqueada 9 para guardarla con cuentas).
 | 4 | Video por código sin personas (escena, cuadro, sonido, render MP4 local) | **autorizada · hecha** | local, $0, sin personas |
 | 5 | Aprobación con huella en el celular (sesión del navegador) | **autorizada · hecha** | local, sin cuentas |
 | 6 | Laboratorio visual y app derivada | **autorizada · hecha** | extiende lo existente |
-| 7 | Reel del celular con voz o cara | **BLOQUEADA** | el laboratorio: C4 con terceros; 14 preguntas de `propuesta-video.md` |
+| 7 | Reel del celular con voz o cara | **FIRMADA (2026-09-27) · por construir en su goal** | el laboratorio firmó las 14 preguntas de `propuesta-video.md` §8 con la respuesta recomendada; su aprobación exige sesión autenticada (depende de las cuentas de la fase 9) |
 | 8 | Foto de producto dentro del video | **BLOQUEADA** | el laboratorio: la foto puede traer personas; revisión C4 propia |
 | 9 | Redacción con LLM / aprobación con cuentas | **BLOQUEADA** | el laboratorio: activar el LLM es otro CDC (llave, corrida real medida con su costo; el de los prompts se firmó el 2026-09-27) y `/add-login` (C4, C7) |
 | 10 | Render de video en producción | **BLOQUEADA** | el laboratorio: Chromium + ffmpeg en la imagen (infraestructura) |
