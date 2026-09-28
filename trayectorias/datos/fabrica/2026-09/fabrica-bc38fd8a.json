@@ -1,0 +1,72 @@
+{
+ "version": 1,
+ "id": "fabrica-bc38fd8a",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "7711ba60-3004-4461-8c81-853ec9e9f3ae",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-25T09:48:19.336Z",
+  "fin": "2026-09-25T13:10:29.146Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 546
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 196,
+   "ToolSearch": 1,
+   "mcp__supabase__get_project_url": 1,
+   "mcp__supabase__get_publishable_keys": 1,
+   "AskUserQuestion": 3,
+   "Write": 25,
+   "Edit": 6,
+   "Read": 7,
+   "ListAgents": 1
+  },
+  "llamadasAlModelo": 246,
+  "turnos": 34,
+  "subagentes": 0,
+  "comandos": 3,
+  "ediciones": 74
+ },
+ "uso": {
+  "entrada": 500,
+  "salida": 281765,
+  "cacheCreacion": 512604,
+  "cacheLectura": 74743178
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 12129810
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 20
+  }
+ ],
+ "resultado": {
+  "errores": 9,
+  "erroresPor": {
+   "mcp__supabase__get_publishable_keys": 1,
+   "Bash": 6,
+   "Write": 2
+  }
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}
