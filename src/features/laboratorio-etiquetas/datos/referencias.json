@@ -1,0 +1,12 @@
+{
+  "_comentario": "Huellas SHA-256 del SVG y del ZPL de las piezas de referencia. Se regeneran A PROPÓSITO con npm run etiquetas:referencias.",
+  "generadas": "2026-09-28",
+  "huellas": {
+    "caja-svg": "sha256:de4a0c28e75a1c5eb97d62070bcab94d18966bf736b0eb021c77b29e8a6f7367",
+    "caja-zpl": "sha256:0031d646b70026ab50b9a3c74d4035b745305e66f016ffbbc6f8e2fb17f8ef87",
+    "tarima-svg": "sha256:00d7adf2916bd31c9ad5627b5f1e4df4aa1a9a5581378fad15337eb480a69f5d",
+    "tarima-zpl": "sha256:25746cb0818e26a7e5eee31f8b6f5ff021ce007c397c15a00524a8647a7e91e8",
+    "ubicacion-svg": "sha256:39fd23e0101b9aa2c12d99c3e089fb30f2f566b25d6897a431c96a0d61df9cc1",
+    "ubicacion-zpl": "sha256:6ee067a6ba40bff6ecd11d5d8a1c53208397ad7d937b756a037b9f8736ff4841"
+  }
+}

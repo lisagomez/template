@@ -70,6 +70,13 @@ sale del libro de asignaciones, y un código anterior no se le da a otro artícu
 
 Roles, decisiones, medición de agilidad y riesgos: [`docs/SDD-etiquetas-gs1.md` §12](../../docs/SDD-etiquetas-gs1.md).
 
+## Laboratorio
+
+Cada capacidad, probada caso por caso con su estado real en `/laboratorio-etiquetas` (68 casos, 41
+trampas, y referencias visuales de caja, tarima y ubicación en SVG y ZPL). La app `/etiquetas` usa
+**solo lo que el laboratorio aprueba**: sin motor local medido, la fecha por foto no se usa y se
+teclea. Detalle: [`docs/SDD-etiquetas-gs1.md` §14](../../docs/SDD-etiquetas-gs1.md).
+
 ## Instalar en un sitio nuevo
 
 1. **Prefijo de empresa**: en `/etiquetas/ajustes`, el GCP del certificado de GS1 México. Sin él

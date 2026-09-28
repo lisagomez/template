@@ -11,6 +11,7 @@ import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 import { fotoGuardada, fotosDelServidor, imagenes, motorDelServidor } from './fotos.ts';
+import { motorAprobado } from './laboratorio.ts';
 
 type Respuesta = { status: number; cuerpo: unknown };
 const ok = (cuerpo: unknown): Respuesta => ({ status: 200, cuerpo });
@@ -35,10 +36,11 @@ async function leeCaducidad(a: Accion<'lee-caducidad'>, operador: string): Promi
   if (!art) return mal(422, `el artículo ${a.sku} no está en el catálogo`);
   const aprendido = formatoDe(e0, a.sku);
   const ctx = { hoy: hoyIso(), ...(art.vidaUtilDias ? { vidaUtilDias: art.vidaUtilDias } : {}), ...(aprendido ? { aprendido: { formato: aprendido.formato, tipo: aprendido.tipo } } : {}) };
-  const motor = motorDelServidor();
+  // Solo si «Fecha por foto» pasa su laboratorio (si no, se teclea: la foto queda como evidencia).
+  const { motor, motivo } = await motorAprobado();
   let propuesta: Propuesta
   try {
-    propuesta = motor ? await leeYPropone(motor, recortes.slice(0, 2), ctx, fotos[0]!.bytes) : SIN_MOTOR(ctx.hoy);
+    propuesta = motor ? await leeYPropone(motor, recortes.slice(0, 2), ctx, fotos[0]!.bytes) : { ...SIN_MOTOR(ctx.hoy), ...(motivo ? { mensaje: motivo } : {}) };
   } catch (err) {
     propuesta = { ...SIN_MOTOR(ctx.hoy), mensaje: `El motor de lectura falló (${err instanceof Error ? err.message : 'error'}): teclea la fecha. La foto queda como evidencia.`, motor: motor?.modelo ?? 'ninguno' };
   }

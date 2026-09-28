@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/etiquetas-gs1",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Etiquetas GS1-128 para control de caducidades: arma, parsea y valida cadenas GS1 segun las GS1 General Specifications, genera SVG y ZPL equivalentes, asigna GTIN (regla mixta) y calcula el tablero FEFO. Nucleo sin dependencias; el almacen se inyecta.",
   "type": "module",
   "license": "UNLICENSED",
@@ -76,7 +76,7 @@
     "demo:manipulacion": "node demos/manipulacion.mjs"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "4.6.1"
   },
   "peerDependencies": {
     "bwip-js": "4.11.4",

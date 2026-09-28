@@ -26,6 +26,8 @@ export interface EstadoCliente {
   readonly formatosFecha: FormatoFechaArticulo[];
   /** Los GTIN que un articulo tuvo y ya no tiene: se siguen leyendo como el. */
   readonly codigosAnteriores: CodigoAnterior[];
+  /** Lo que aprobó el laboratorio (/laboratorio-etiquetas); `null` mientras corre la primera vez. */
+  readonly laboratorio: { readonly aprobadas: readonly string[]; readonly cuando: string } | null;
   /** Recepciones con la caducidad por confirmar (sin cantidades para un dispositivo de conteo). */
   readonly revisiones: { sitio: string; folio: string; sku: string; cajas: number; desde: string; revision: string }[];
   /** El motor local de lectura de fechas, o null si no esta instalado. */

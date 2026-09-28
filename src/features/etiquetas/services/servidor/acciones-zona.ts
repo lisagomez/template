@@ -14,7 +14,8 @@ import {
 import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
-import { fotoGuardada, fotosDelServidor, imagenes, motorDelServidor } from './fotos.ts';
+import { fotoGuardada, fotosDelServidor, imagenes } from './fotos.ts';
+import { motorAprobado } from './laboratorio.ts';
 import type { Rol } from './roles.ts';
 
 type Respuesta = { status: number; cuerpo: unknown };
@@ -89,8 +90,8 @@ async function identificaPiezaSuelta(a: Accion<'identifica-pieza'>, rol: Rol): P
   const recortes = await Promise.all(fotos.map((f) => imagenes.recorta(f!.bytes, a.zona, f!)));
   const huellas = await Promise.all(recortes.map((x) => fotosDelServidor().guarda(x, 'png')));
   const e = await almacenDelServidor().lee();
-  const motor = motorDelServidor();
-  if (!motor) return ok({ ok: false, motivo: 'no hay motor de lectura instalado: lee la fecha de la pieza y elige el lote a mano' });
+  const { motor, motivo } = await motorAprobado();
+  if (!motor) return ok({ ok: false, motivo: motivo ?? 'no hay motor de lectura instalado: lee la fecha de la pieza y elige el lote a mano' });
   const propuesta = await leeYPropone(motor, recortes.slice(0, 2), { hoy: hoyIso() }, fotos[0]!.bytes);
   const id = identificaPieza(e, a.sitio, a.sku, propuesta, hoyIso());
   // El almacenista no ve cantidades: la identificacion no las lleva (lote, fecha, semaforo, ubicacion).
