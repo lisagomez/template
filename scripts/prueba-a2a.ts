@@ -1,14 +1,22 @@
 /**
  * Pruebas del puente A2A (spec 005 TAR-8..TAR-13, spec 010 RF-15..RF-21). `node --test scripts/prueba-a2a.ts`.
  *
- * LA DE OPACIDAD, portada de hermes-os-a2a, ENUMERA las rutas de servidor de la app y exige
- * igualdad con las tres: una lista de rutas prohibidas solo caza lo que alguien penso en poner en
- * ella; enumerar caza la ruta que nadie previo. Y el health se compara EXACTO.
+ * LA DE OPACIDAD, portada de hermes-os-a2a, ENUMERA las rutas del bridge y exige igualdad con las
+ * tres: una lista de rutas prohibidas solo caza lo que alguien penso en poner en ella; enumerar
+ * caza la ruta que nadie previo. Y el health se compara EXACTO. Son DOS pruebas, y la segunda
+ * existe para no perder nada al acotar la primera al bridge: el resto de la superficie de servidor
+ * va DECLARADA en `RUTAS_FUERA_DEL_BRIDGE`, asi que una ruta nueva en cualquier sitio sigue
+ * cayendo. Ver el comentario de `rutasDelBridge()` para por que se acoto (2026-09-26).
  *
  * El fail-safe se prueba APAGANDO la capacidad (URL a un puerto cerrado) y con entrada corrupta:
- * un fail-safe probado solo con el camino feliz no es un fail-safe. El camino feliz exige el
- * servicio OCR corriendo en EXTRACTOR_SERVICIO_URL; si no responde, esa prueba FALLA y lo dice:
- * pasar en silencio seria afirmar una capacidad que nunca corrio.
+ * un fail-safe probado solo con el camino feliz no es un fail-safe.
+ *
+ * LAS DOS PRUEBAS QUE EMPIEZAN POR `SERVICIO:` exigen el servicio del extractor corriendo en
+ * EXTRACTOR_SERVICIO_URL; si no responde, FALLAN y lo dicen: pasar en silencio seria afirmar una
+ * capacidad que nunca corrio. La marca en el nombre es lo que permite al padron de gates
+ * (`.claude/gates.json`) correrlas SOLO donde ese servicio existe, en vez de apagar el archivo
+ * entero como estuvo hasta el 2026-09-26. Levantarlo necesita el binario de Tesseract: sin el,
+ * `servicio/configuracion.mjs` lanza y el servicio no arranca.
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -36,6 +44,56 @@ function rutasDeServidor(desde: string, prefijo = ''): string[] {
   return salida
 }
 
+/**
+ * Las rutas que cuelgan de la superficie A2A: el bridge y nada mas. Es `rutasDelBridge()`, el
+ * nombre que le puso el diseno en `docs/SDD-puente-a2a-extractor.md` §6.
+ *
+ * POR QUE NO ENUMERA `src/app` ENTERO (2026-09-26). Esta prueba lo hacia, y era correcto el dia
+ * que se escribio: el bridge era lo UNICO que habia en `src/app`, asi que «las rutas de la app» y
+ * «las rutas del bridge» eran el mismo conjunto. Al crecer la app con las 11 `/api/*` de dictado,
+ * laboratorio, historial y ajustes, la afirmacion se volvio falsa — y como NADIE corria este
+ * archivo (no estaba en ningun script npm), nadie lo vio: la prueba llevaba meses en rojo y la
+ * opacidad A2A sin vigilar. Lo destapo la comprobacion de huerfanos de `verifica-gates.mjs`.
+ *
+ * RF-17 de la spec 010 («expondra exactamente tres rutas de servidor... y una prueba las
+ * enumerara y exigira igualdad») habla del sistema que se despliega en la infra del cliente, y su
+ * modelo es cada agente de hermes-os-a2a: un servicio propio cuya superficie entera son tres
+ * rutas. Aqui el bridge vive dentro de la app de la fabrica, asi que el conjunto que RF-17 acota
+ * es el del bridge. Se enumera igual: no se listan rutas prohibidas.
+ */
+const rutasDelBridge = (): string[] => [
+  ...rutasDeServidor(join(raiz, 'src', 'app', 'a2a'), '/a2a'),
+  ...rutasDeServidor(join(raiz, 'src', 'app', '.well-known'), '/.well-known'),
+]
+
+/**
+ * El resto de la superficie de servidor de la app, DECLARADO una por una.
+ *
+ * Existe para no perder lo que la version vieja de la prueba si daba: que una ruta que nadie
+ * previo caiga sola. Acotar la enumeracion al bridge sin esto habria dejado de cazar una ruta
+ * nueva colgada en cualquier otro sitio — y renunciar a eso para poner la prueba en verde seria
+ * debilitarla, que es justo lo que este arreglo no puede hacer.
+ *
+ * Una ruta nueva aqui NO es un fallo: es una decision que alguien tiene que tomar a la vista. Se
+ * anade a esta lista en el mismo cambio que la crea, y ahi se pregunta si debe quedar detras del
+ * mismo puerto que el bridge (RF-20: el puente no se publica fuera de la red interna del compose).
+ */
+const RUTAS_FUERA_DEL_BRIDGE = [
+  '/api/ajustes',
+  '/api/contenido/video',
+  '/api/dictado',
+  '/api/dictado/movil',
+  '/api/etiquetas',
+  '/api/historial',
+  '/api/laboratorio/datos',
+  '/api/laboratorio/estado',
+  '/api/laboratorio/muestra',
+  '/api/laboratorio/sintetizar',
+  '/api/laboratorio/sintetizar-flujo',
+  '/api/laboratorio/transcribir',
+  '/api/laboratorio/veredictos',
+]
+
 const peticion = (cuerpo: unknown, cabeceras: Record<string, string> = {}): Request =>
   new Request('http://app:3000/a2a', { method: 'POST', headers: { 'content-type': 'application/json', [A2A_VERSION_HEADER]: A2A_PROTOCOL_VERSION, ...cabeceras }, body: typeof cuerpo === 'string' ? cuerpo : JSON.stringify(cuerpo) })
 
@@ -47,8 +105,18 @@ const rpc = async (r: Response): Promise<Rpc> => (await r.json()) as Rpc
 
 // --- Opacidad ---------------------------------------------------------------------------------
 
-test('la superficie de servidor de la app es EXACTAMENTE card, rpc y health (enumerada, no listada)', () => {
-  assert.deepEqual(rutasDeServidor(join(raiz, 'src', 'app')).sort(), [`/${AGENT_CARD_PATH}`, '/a2a', '/a2a/health'].sort())
+test('la superficie A2A es EXACTAMENTE card, rpc y health (enumerada, no listada)', () => {
+  assert.deepEqual(rutasDelBridge().sort(), [`/${AGENT_CARD_PATH}`, '/a2a', '/a2a/health'].sort())
+})
+
+test('ninguna ruta de servidor aparece fuera del bridge sin estar declarada (enumerada, no listada)', () => {
+  const delBridge = new Set(rutasDelBridge())
+  const fuera = rutasDeServidor(join(raiz, 'src', 'app')).filter((r) => !delBridge.has(r))
+  assert.deepEqual(
+    fuera.sort(),
+    [...RUTAS_FUERA_DEL_BRIDGE].sort(),
+    'aparecio o desaparecio una ruta de servidor: declarala en RUTAS_FUERA_DEL_BRIDGE y decide si debe compartir puerto con el bridge (RF-20)',
+  )
 })
 
 test('/a2a/health no reporta nada del interior', async () => {
@@ -121,7 +189,7 @@ test('entrada CORRUPTA: sin documento en la peticion, o bytes que no son nada, T
 
 // --- Camino feliz contra el servicio REAL --------------------------------------------------------
 
-test('camino feliz: un escaneo sintetico vuelve COMPLETADO con confianza, evidencia y revisionHumana por campo, y selloVerificado=false', async () => {
+test('SERVICIO: camino feliz: un escaneo sintetico vuelve COMPLETADO con confianza, evidencia y revisionHumana por campo, y selloVerificado=false', async () => {
   process.env.EXTRACTOR_SERVICIO_URL = SERVICIO
   const ruta = join(raiz, 'tools', 'extractor-documental', 'corpus', 'factura-escaneada-1.png')
   assert.ok(existsSync(ruta), 'falta el corpus sintetico: python3 medicion/genera-corpus.py')
@@ -141,7 +209,7 @@ test('camino feliz: un escaneo sintetico vuelve COMPLETADO con confianza, eviden
   console.log(`  campos ${datos.campos.length} · a revision ${datos.campos.filter((c) => c.revisionHumana).length} · motor ${datos.tiempos.motor} ms`)
 })
 
-test('un XML como texto va por la skill de comprobante: exacto, sin region, selloVerificado=false', async () => {
+test('SERVICIO: un XML como texto va por la skill de comprobante: exacto, sin region, selloVerificado=false', async () => {
   process.env.EXTRACTOR_SERVICIO_URL = SERVICIO
   const xml = readFileSync(join(raiz, 'tools', 'extractor-documental', 'pruebas', 'fixtures', 'cfdi-40-ingreso.xml'), 'utf8')
   const cuerpo = await rpc(await rpcPost(peticion({ jsonrpc: '2.0', id: 3, method: 'SendMessage', params: { message: { messageId: 'm2', role: 'ROLE_USER', parts: [{ text: xml, filename: 'f.xml', mediaType: 'application/xml' }] } } })))

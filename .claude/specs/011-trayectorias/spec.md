@@ -1,7 +1,7 @@
 # Spec 011 — Trayectorias: trazas de ejecución que cierran el lazo de mejora sin autoaprobarse
 
 > **Origen**: [`docs/GOAL-trayectorias.md`](../../../docs/GOAL-trayectorias.md), compilado con
-> `/goal-compiler` el 2026-09-13; grafo en `docs/grafos/trayectorias.json`. Decisión de la dueña:
+> `/goal-compiler` el 2026-09-13; grafo en `docs/grafos/trayectorias.json`. Decisión del laboratorio:
 > «trayectorias» son **trazas de ejecución**, no rutas de producto ni recorridos de usuario.
 > Se apoya en la spec 002 (contabilidad, presupuesto de contexto, routing) y en el control C2.
 
@@ -17,7 +17,7 @@ salgan **propuestas con evidencia que nadie aplica sin CDC**. Automejorado no es
 
 ## Usuarios / actores
 
-- **La dueña**: aprueba o rechaza las propuestas; es la única que cambia comportamiento (C1).
+- **El laboratorio**: aprueba o rechaza las propuestas; es el único que cambia comportamiento (C1).
 - **El operador de la fábrica**: lee el informe, decide qué corpus de trayectorias vale.
 - **El agente ejecutor**: deja trayectoria sin hacer nada especial.
 - **El evaluador**: un subagente o sesión fría que no produjo las trayectorias ni vio el cambio.
@@ -26,10 +26,10 @@ salgan **propuestas con evidencia que nadie aplica sin CDC**. Automejorado no es
 
 ## Historias de usuario
 
-- H1: Como dueña quiero saber qué skill gasta más y acierta menos, para decidir dónde mejorar.
+- H1: Como laboratorio quiero saber qué skill gasta más y acierta menos, para decidir dónde mejorar.
 - H2: Como operador quiero que una regresión de rendimiento de una herramienta se vea en el
   informe sin que nadie la busque.
-- H3: Como dueña quiero que las propuestas de mejora vengan con la trayectoria que las
+- H3: Como laboratorio quiero que las propuestas de mejora vengan con la trayectoria que las
   sostiene, y que ninguna se aplique sin mi firma.
 - H4: Como tercero quiero que ninguna traza de la fábrica contenga mi documento ni mi mensaje.
 
@@ -100,7 +100,7 @@ salgan **propuestas con evidencia que nadie aplica sin CDC**. Automejorado no es
 | Usuarios finales de las apps | Un prompt o documento suyo acaba en un dataset versionado | RF-2: solo forma; el verificador rechaza texto libre e identificadores |
 | Personas en documentos de las herramientas | Un valor extraído acaba en la trayectoria de medición | RF-2 y el patrón «imprime forma, nunca valores» de `medicion/` |
 | La propia fábrica | Un identificador del corpus de casos-trampa filtra qué se evalúa | RF-2 y el verificador de gobernanza |
-| La dueña | Una propuesta se aplica sola y cambia el comportamiento sin firma | RF-15 (C1) |
+| El laboratorio | Una propuesta se aplica sola y cambia el comportamiento sin firma | RF-15 (C1) |
 
 ## Fuera de alcance
 

@@ -67,7 +67,7 @@ lisagomez vía `AskUserQuestion` en plan mode: cerrar la brecha real, sin cotejo
 
 ## Siguiente paso natural
 
-Cuando la dueña aporte el corpus real: `cd tools/extractor-documental && node medicion/servicio.mjs
+Cuando el laboratorio aporte el corpus real: `cd tools/extractor-documental && node medicion/servicio.mjs
 --via http://<ocr>:8080 --en-vuelo 4` sobre él, y recién entonces decidir si la cola merece GPU.
 Hermes con modelo local exige `model.context_length` y `model.ollama_num_ctx` a 65536
 (`hermes/config.extractor.yaml`).

@@ -1,0 +1,38 @@
+{
+  "name": "@tu-scope/grafo-conocimiento",
+  "version": "0.6.0",
+  "description": "Motor determinista, contrato Zod del conocimiento, selección de dominios, gate de siembra (./gate), capa de lenguaje natural con modelo inyectado (./lenguaje) y paridad con el motor de Hermes (PRP-005).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./gate": {
+      "types": "./dist/gate-entrada.d.ts",
+      "import": "./dist/gate-entrada.js"
+    },
+    "./lenguaje": {
+      "types": "./dist/lenguaje/index.d.ts",
+      "import": "./dist/lenguaje/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts",
+    "paridad:genera": "npm run build && node medicion/genera-paridad.mjs"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

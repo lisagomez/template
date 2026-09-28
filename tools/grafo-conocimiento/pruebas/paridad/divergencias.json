@@ -1,0 +1,75 @@
+{
+  "_que_es": "Lo que el conocimiento y el motor de Hermes (corte 97d9f9e) hacen distinto de lo que decidió la Fase 0 del PRP-005. Declarado a mano, con su porqué. La prueba exige que la validación del seed (validacion-seed.json) dé EXACTAMENTE las de `validacion`: una divergencia nueva sin declarar pone rojo, y una declarada que ya no aparece también.",
+  "validacion": [
+    {
+      "tipo": "baja_por_borrado",
+      "clave": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
+      "rf": "RF-14",
+      "porque": "Hermes retiró la regla de la ley de 2010 (vigente_desde 2010-07-06) con `_bajas`, que la BORRA. Medido: «cláusula de confidencialidad» con un hecho del 2024-06-01 da `dudoso / sin regla aplicable`, porque el pasado perdió su regla (caso incidente del corpus).",
+      "se_resuelve_en": "RESUELTO en @tu-scope/conocimiento 0.2.0, firmado por el laboratorio el 2026-09-27. Esta divergencia sigue describiendo el seed de Hermes en el corte, que no cambia."
+    },
+    {
+      "tipo": "conflicto_de_veredicto",
+      "clave": "MX/fiscal/INTERESES",
+      "rf": "RF-8, RF-12",
+      "porque": "MX-LISR-27-VII (deducible) y MX-LISR-28-XXVII (dudoso) están vigentes a la vez sobre la misma categoría. El motor de Hermes lo degrada a `dudoso` con la bandera «Reglas vigentes en conflicto… requiere revisión» en CADA consulta de intereses, y su gate de siembra no lo ve.",
+      "se_resuelve_en": "RESUELTO en @tu-scope/conocimiento 0.2.0, firmado por el laboratorio el 2026-09-27. Esta divergencia sigue describiendo el seed de Hermes en el corte, que no cambia."
+    }
+  ],
+  "estructurales": [
+    {
+      "que": "vocabulario de veredicto global",
+      "rf": "RF-1",
+      "porque": "El seed de Hermes no declara vocabulario por dimensión y su gate aceptaba `deducible` en una regla regulatoria (medido en el expediente).",
+      "como_se_cierra": "`Dimension.vocabulario` en el contrato y `VOCABULARIO_HERMES` en el adaptador. Medido sobre el corte: ningún impacto se sale de esa tabla, así que no aparece como problema de validación."
+    },
+    {
+      "que": "`dudoso` mezcla cuatro motivos",
+      "rf": "RF-6",
+      "porque": "En Hermes, «sin regla», «conflicto», «la regla dice dudoso» y «el importe excede el tope» salen todos como `estado: dudoso` (y el agregado de una evaluación mixta también), y solo el texto de `razon` y `fuente: null` los separan.",
+      "como_se_cierra": "`Motivo` tipado en `ConceptoEvaluado`: solo `regla` lleva veredicto. `sin_regla`, `conflicto` y `tope_excedido` van con `veredicto: null`, porque son fail-safe. `aSalidaHermes` lo traduce a `dudoso` para comparar, y el motor TS da las mismas 782 respuestas que el de Hermes, salvo las firmadas (Fase 3)."
+    },
+    {
+      "que": "la respuesta siempre cita",
+      "rf": "RF-5",
+      "porque": "Hermes cita la fuente en toda respuesta. Aquí se cita por dominio.",
+      "como_se_cierra": "`Dominio.cita`. Todas las fuentes de Hermes son leyes o normas publicadas: sus dominios citan (`publica`), así que para este corpus no hay diferencia observable."
+    },
+    {
+      "que": "sin dominios",
+      "rf": "RF-15",
+      "porque": "El seed de Hermes no tiene dominios: todo el conocimiento va junto.",
+      "como_se_cierra": "`desdeHermes` agrupa provisionalmente por (jurisdicción, dimensión): 6 dominios. La Fase 2 los divide por dominio real (drones de reparto, agentes de seguros…)."
+    },
+    {
+      "que": "fecha supuesta sin avisar",
+      "rf": "RF-13",
+      "porque": "Si el contexto no trae fecha, Hermes usa la de hoy sin decirlo.",
+      "como_se_cierra": "`Resultado.contexto.fecha_supuesta`. En el corpus todos los casos llevan fecha, así que no hay diferencia observable."
+    },
+    {
+      "que": "empates decididos por el orden del seed",
+      "rf": "RF-3",
+      "porque": "En Hermes, a igual largo de keyword gana la categoría que aparece antes en el seed, y a igual vigente_desde la regla que aparece antes.",
+      "como_se_cierra": "El motor TS desempata por clave (categoría y regla), así que no depende de cómo llegue el conocimiento. Medido: en el corpus no cambia ninguna respuesta."
+    },
+    {
+      "que": "el tope solo acota `deducible`, y en MXN",
+      "rf": "RF-6",
+      "porque": "En Hermes, un importe sobre `tope_monto` degradaba solo `deducible`, con una bandera en MXN.",
+      "como_se_cierra": "En el motor TS el tope acota cualquier veredicto (`tope_excedido`, sin veredicto) y la bandera no lleva moneda. Ninguna regla del corte usa tope_monto: se prueba con fixtures."
+    },
+    {
+      "que": "régimen por defecto `PM_TITULO_II`",
+      "rf": "RF-2",
+      "porque": "Si la pregunta no trae régimen, Hermes supone el de las personas morales del Título II: un default fiscal.",
+      "como_se_cierra": "En el motor TS el régimen es obligatorio en `Pregunta`, y una pregunta sin él da `pregunta_invalida`. El parser de la Fase 5 lo estructura."
+    },
+    {
+      "que": "disclaimer fiscal",
+      "rf": "RF-5",
+      "porque": "El disclaimer de Hermes habla de asesoría fiscal y del contribuyente.",
+      "como_se_cierra": "El motor TS lleva uno genérico (`DISCLAIMER`). La paridad no compara el disclaimer."
+    }
+  ]
+}

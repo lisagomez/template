@@ -21,7 +21,7 @@ El hook en `.claude/settings.json` del repo es un **CDC** (cambia el arnés): el
 
 ```
 captura ─► datos/ ─► evalua (estructural, script) ─┐
-                                                   ├─► informe por periodos ─► propuestas ─► ══ CDC (dueña) ══
+                                                   ├─► informe por periodos ─► propuestas ─► ══ CDC (laboratorio) ══
            subagente o sesión fría (juicio, ciego) ─┘
 ```
 

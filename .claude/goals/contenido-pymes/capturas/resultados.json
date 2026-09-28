@@ -1,0 +1,43 @@
+{
+  "url": "http://localhost:3000",
+  "cuando": "2026-09-27T18:49:18.411Z",
+  "capturas": [
+    "1-galeria-carrusel.png",
+    "2-galeria-video.png",
+    "3-carrusel.png",
+    "4-pieza-exportada.png",
+    "5-video-cuadro-inicial.png",
+    "6-video-cuadro-final.png",
+    "7-video-mp4.png",
+    "8-aprobar-celular.png",
+    "9-aprobar-huella.png"
+  ],
+  "laboratorio": {
+    "casos": 7,
+    "pasa": 7,
+    "noMedido": 0,
+    "falla": 0,
+    "diferenciasVisuales": [
+      0.36,
+      0.27,
+      0.3
+    ]
+  },
+  "estudio": {
+    "pngDescargado": 99884,
+    "mp4": "huella 869b7c15d7e4807b… · 19.5 s de render",
+    "aprobacion": [
+      "aprobada:vigente",
+      "aprobada:vigente",
+      "aprobada:vigente",
+      "cambio-pedido:vigente"
+    ],
+    "resumen": "3 de 5 aprobadasCSV del mes",
+    "peticionesAlAprobar": {
+      "salidasPorAprobar": [],
+      "memoriaLocal": 0,
+      "sondeoDelBotonDeDictado": 1
+    }
+  },
+  "erroresDeConsola": []
+}

@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { leeConImports } from './lee-instrucciones.mjs';
 import { geminiSincronizado } from './sincroniza-gemini.mjs';
 import { estadoCorpus } from './lib/corpus.mjs';
+import { cargaManifiesto, gatesDelPerfil, MANIFIESTO } from './lib/gates.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
@@ -30,6 +31,37 @@ const lee = (p) => (existsSync(ruta(p)) ? readFileSync(ruta(p), 'utf8') : null);
  *  sobre un archivo de 17 lineas. */
 const INSTRUCCIONES = new Set(['CLAUDE.md', 'GEMINI.md', 'AGENTS.md']);
 const leeDoc = (p) => (INSTRUCCIONES.has(p) ? leeConImports(ruta(p)) : lee(p));
+
+/**
+ * Los gates ACTIVOS de un perfil, leidos de `.claude/gates.json`.
+ *
+ * Desde el 2026-09-26 `validate` y `predeploy` no llevan la lista: la DERIVAN del manifiesto.
+ * Asi que preguntarle a la cadena de `package.json` —como hacia media docena de
+ * comprobaciones de este archivo— ya no dice la verdad. Se pregunta al padron.
+ *
+ * Si el manifiesto no carga devuelve vacio, y las comprobaciones que lo usan CAEN. Es
+ * deliberado: no poder mirar no es lo mismo que estar en verde (misma doctrina que el coste
+ * `null` de la contabilidad y el exit 2 del vigilante).
+ */
+let _perfilesDeGates = null;
+function enPerfil(perfil, gate) {
+  if (_perfilesDeGates === null) {
+    try {
+      const m = cargaManifiesto(raiz);
+      _perfilesDeGates = Object.fromEntries(
+        Object.keys(m.perfiles).map((p) => [p, gatesDelPerfil(m, p).map((g) => g.nombre)]),
+      );
+    } catch {
+      _perfilesDeGates = {};
+    }
+  }
+  return (_perfilesDeGates[perfil] ?? []).includes(gate);
+}
+/** Los nombres de los gates activos de un perfil, en orden. */
+function gatesDe(perfil) {
+  enPerfil(perfil, '');
+  return _perfilesDeGates[perfil] ?? [];
+}
 
 const vistas = new Set();
 function comprueba(descripcion, condicion, pista) {
@@ -165,12 +197,15 @@ if (businessLogic !== null) {
 // al mirarlo resulto que NO era la excepcion: cuatro de trece pasos estaban sin declarar. Los
 // otros nueve lo estaban por costumbre, no por control. Esto lo vuelve control.
 {
-  const pkgTxt = lee('package.json');
-  const pkgJson = pkgTxt === null ? null : JSON.parse(pkgTxt);
-  const validate = pkgJson?.scripts?.validate ?? '';
-  // `[a-z:-]`: un nombre con guion (`prueba:laboratorio-voz`) se leia truncado y el control
-  // pedia declarar un paso que no existia (medido el 2026-09-20).
-  const pasos = [...validate.matchAll(/npm run ([a-z:-]+)/g)].map((m) => m[1]);
+  // Desde el 2026-09-26 los pasos NO se extraen de la cadena de `validate`: se leen del
+  // perfil `validate` de `.claude/gates.json`, que es de donde `validate` los deriva. Si el
+  // padron no carga, la lista queda vacia y la comprobacion cae: no poder mirar no es verde.
+  let pasos = [];
+  try {
+    pasos = gatesDelPerfil(cargaManifiesto(raiz), 'validate').map((g) => g.nombre);
+  } catch {
+    pasos = [];
+  }
   const docs = ['README.md', 'AGENTS.md', '.claude/README.md']
     .map((d) => leeDoc(d)).filter((t) => t !== null).join('\n');
   const sinDeclarar = pasos.filter((paso) => !docs.includes(paso));
@@ -213,6 +248,16 @@ for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
     `${doc}: el CDC (C1) nombra la configuracion (settings.json / model)`,
     /settings\.json/.test(contenido) && /BITACORA-CDC/.test(contenido),
     'sin nombrarla, un cambio de modelo se lee como tarea de config y el CDC no dispara',
+  );
+  // El manifiesto de gates decide QUE se verifica y que no, para todo el repo, hasta el
+  // proximo cambio: el mismo radio que un skill o el modelo. El SDD de la Fase 6 de
+  // hermes-os-a2a ya lo argumento sobre su gemelo (`reglas/software.toml`): «ningun archivo
+  // que decide que pasa y que no deberia cambiar sin que alguien lo note». Si el CDC no lo
+  // nombra, el control no dispara — y esta capa ya se llevo esa leccion dos veces.
+  comprueba(
+    `${doc}: el CDC (C1) nombra el manifiesto de gates (${MANIFIESTO})`,
+    /gates\.json/.test(contenido),
+    'sin nombrarlo, apagar un gate se lee como editar un JSON de config y el CDC no dispara',
   );
   comprueba(
     `${doc}: rechaza \`latest\` explicitamente`,
@@ -267,17 +312,47 @@ for (const doc of ['CLAUDE.md', 'GEMINI.md']) {
 const pkg = lee('package.json');
 if (pkg !== null) {
   const scripts = JSON.parse(pkg).scripts ?? {};
+  // Igual que 3g-ter: lo que `predeploy` corre se DERIVA del perfil `predeploy` del
+  // manifiesto desde el 2026-09-26, asi que se pregunta al padron y no a la cadena.
+  let gatesDePredeploy = [];
+  try {
+    gatesDePredeploy = gatesDelPerfil(cargaManifiesto(raiz), 'predeploy').map((g) => g.nombre);
+  } catch {
+    gatesDePredeploy = []; // padron roto: cae la comprobacion de abajo, que es lo correcto
+  }
   comprueba(
     'existe el gate predeploy (verificador + regresion)',
-    /verify:gobernanza/.test(scripts.predeploy ?? '') && /regresion/.test(scripts.predeploy ?? ''),
+    /corre-gates\.mjs\s+predeploy/.test(scripts.predeploy ?? '') &&
+      gatesDePredeploy.includes('verify:gobernanza') &&
+      gatesDePredeploy.includes('regresion'),
     'sin predeploy se puede desplegar con la gobernanza en rojo: el gate seria decorativo',
   );
 }
+
+// --- 3g-quater. El manifiesto de gates existe y esta dentro del alcance de C1 -----
+// Es la config que decide QUE verifica el gate. Sin ella no hay gate que derivar; sin C1
+// sobre ella, se puede apagar un gate sin diff, sin regresion y sin firma.
+comprueba(
+  `existe ${MANIFIESTO} (el padron de lo que el gate corre)`,
+  existsSync(ruta(MANIFIESTO)),
+  'sin manifiesto, `validate` y `predeploy` no tienen de donde derivar y el runner no arranca',
+);
+comprueba(
+  'GOBERNANZA.md §2 pone el manifiesto de gates en la tabla de C1',
+  /gates\.json/.test(gobernanza),
+  'el CDC tiene que nombrarlo en su propia tabla, no solo en las reglas inline: si no, el radio del cambio queda sin declarar',
+);
 
 // --- 3g-ter. `validate` corre lo que los documentos dicen que corre ---------
 // El bloque 3g comprueba que exista `predeploy`, pero NO el contenido de `validate`:
 // se le podia quitar un paso sin que el gate se pusiera rojo, desincronizando en
 // silencio a los documentos que declaran lo que corre. Hallazgo de un sujeto de capa B.
+//
+// Desde el 2026-09-26 lo que `validate` corre NO vive en `package.json`: se DERIVA del
+// perfil `validate` de `.claude/gates.json`. Asi que esta comprobacion dejo de hacer regex
+// sobre una cadena de `&&` y pasa a leer el padron real — mismo criterio, mas fuerte: antes
+// bastaba con que la palabra saliera en la cadena; ahora el gate tiene que estar declarado,
+// ACTIVO y en el perfil.
 const PASOS_GATE = [
   ['typecheck', /\btypecheck\b/],
   ['build', /\bbuild\b/],
@@ -285,13 +360,26 @@ const PASOS_GATE = [
   ['regresion', /\bregresion\b/],
 ];
 if (pkg !== null) {
-  const validate = (JSON.parse(pkg).scripts ?? {}).validate ?? '';
-  const reales = PASOS_GATE.filter(([, re]) => re.test(validate)).map(([n]) => n);
+  let gatesDeValidate = null;
+  try {
+    gatesDeValidate = gatesDelPerfil(cargaManifiesto(raiz), 'validate');
+  } catch (e) {
+    gatesDeValidate = null;
+    comprueba(
+      'el manifiesto de gates carga para poder derivar `validate`',
+      false,
+      `${e.message} — con el padron roto no se puede saber que corre el gate (lo detalla npm run verifica:gates)`,
+    );
+  }
+  // El padron es la fuente; si no carga, no se inventa una lista: queda vacia y las
+  // comprobaciones de abajo caen. No poder mirar no es estar en verde.
+  const declarado = (gatesDeValidate ?? []).map((g) => `${g.nombre} ${g.comando}`).join(' ');
+  const reales = PASOS_GATE.filter(([, re]) => re.test(declarado)).map(([n]) => n);
   const faltan = PASOS_GATE.map(([n]) => n).filter((n) => !reales.includes(n));
   comprueba(
-    'el script validate corre los cuatro pasos del gate',
+    'el perfil `validate` del manifiesto declara los cuatro pasos del gate',
     faltan.length === 0,
-    `falta(n) ${faltan.join(', ')} — quitar un paso del gate es un CDC, no una edicion suelta`,
+    `falta(n) ${faltan.join(', ')} en .claude/gates.json — quitar un paso del gate es un CDC, no una edicion suelta`,
   );
   // Y el papel tiene que decir lo mismo que el codigo: es el proposito del verificador.
   for (const doc of ['CLAUDE.md', 'README.md', '.claude/README.md']) {
@@ -575,7 +663,7 @@ comprueba(
 );
 comprueba(
   'el gate de routing corre en validate',
-  /"validate":\s*"[^"]*verifica:routing/.test(lee('package.json') ?? ''),
+  enPerfil('validate', 'verifica:routing'),
   'si depende de que alguien lo invoque, es una costumbre',
 );
 for (const doc of ['AGENTS.md', 'GEMINI.md']) {
@@ -616,8 +704,8 @@ if (contabilidadTexto !== null) {
 }
 comprueba(
   'la prueba de contabilidad corre en validate y en predeploy',
-  /"validate":\s*"[^"]*prueba:contabilidad/.test(lee('package.json') ?? '') &&
-    /"predeploy":\s*"[^"]*prueba:contabilidad/.test(lee('package.json') ?? ''),
+  enPerfil('validate', 'prueba:contabilidad') &&
+    enPerfil('predeploy', 'prueba:contabilidad'),
   'si depende de que alguien la invoque, es una costumbre y no un gate',
 );
 for (const doc of ['AGENTS.md', 'GEMINI.md']) {
@@ -701,8 +789,8 @@ comprueba(
   'la medicion de contexto corre en validate y en predeploy',
   // `lee` directo y no la constante `paquete`: esa se declara mas abajo (bloque 6c) y
   // usarla aqui cae en su zona muerta temporal — el verificador reventaba en vez de fallar.
-  /"validate":\s*"[^"]*mide:contexto/.test(lee('package.json') ?? '') &&
-    /"predeploy":\s*"[^"]*mide:contexto/.test(lee('package.json') ?? ''),
+  enPerfil('validate', 'mide:contexto') &&
+    enPerfil('predeploy', 'mide:contexto'),
   'si depende de que alguien lo invoque, es una costumbre y no un gate',
 );
 
@@ -835,7 +923,7 @@ comprueba(
 const paquete = lee('package.json') ?? '';
 comprueba(
   'la auditoria de credenciales corre en validate y en predeploy',
-  /"validate":\s*"[^"]*audita:secretos/.test(paquete) && /"predeploy":\s*"[^"]*audita:secretos/.test(paquete),
+  enPerfil('validate', 'audita:secretos') && enPerfil('predeploy', 'audita:secretos'),
   'si depende de que alguien se acuerde de invocarla, no es un gate',
 );
 
@@ -908,8 +996,8 @@ for (const f of ['.claude/imprenta/manifiesto.json', 'scripts/audita-imprenta.mj
 }
 comprueba(
   'el auditor de la imprenta corre en validate y en predeploy',
-  /"validate":\s*"[^"]*audita:imprenta/.test(lee('package.json') ?? '') &&
-    /"predeploy":\s*"[^"]*audita:imprenta/.test(lee('package.json') ?? ''),
+  enPerfil('validate', 'audita:imprenta') &&
+    enPerfil('predeploy', 'audita:imprenta'),
   'si depende de que alguien lo invoque, es una costumbre y no un gate',
 );
 
@@ -927,8 +1015,7 @@ for (const f of ['scripts/verifica-specs.mjs', 'scripts/prepara-gate.mjs']) {
 }
 comprueba(
   'el verificador de specs corre en validate y en predeploy',
-  /"validate":\s*"[^"]*verifica:specs/.test(pkgJson) &&
-    /"predeploy":\s*"[^"]*verifica:specs/.test(pkgJson),
+  enPerfil('validate', 'verifica:specs') && enPerfil('predeploy', 'verifica:specs'),
   'vigila lo que ningun otro gate mira: que una spec no pierda un requisito al reformatearse',
 );
 // `pretypecheck` es el enganche que npm ejecuta SOLO: por eso el gate viaja a `validate`,

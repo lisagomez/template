@@ -124,8 +124,11 @@ if (problemas.length > 0) {
 console.log(verde('✓ contrato del package.json'));
 
 // --- 2. Build ---------------------------------------------------------------
+// El build que DECLARA el paquete (su `scripts.build`), y `tsc` solo si no declara ninguno. Un paquete
+// de datos se construye ensamblando JSON, no compilando: fijar `tsc` lo dejaba fuera (2026-09-27).
 try {
-  corre('npx', ['tsc', '-p', 'tsconfig.json'], dir);
+  if (pkg.scripts?.build) corre('npm', ['run', '--silent', 'build'], dir);
+  else corre('npx', ['tsc', '-p', 'tsconfig.json'], dir);
 } catch (e) {
   console.log(rojo('✗ el build fallo'));
   console.log(e.message);

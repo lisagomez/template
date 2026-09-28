@@ -82,6 +82,46 @@
    "cubre": ["tools/asesor-ventas"]
   },
   {
+   "id": "TPL-pymes-marketing",
+   "nombre": "Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/pymes-marketing", "responsable": "dep-sw",
+   "origen": [".claude/goals/pymes-marketing", ".claude/goals/contenido-pymes"],
+   "cubre": ["tools/pymes-marketing"]
+  },
+  {
+   "id": "TPL-feature-estudio-pymes",
+   "nombre": "Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/estudio-pymes", "responsable": "dep-sw",
+   "origen": [".claude/goals/pymes-marketing", ".claude/goals/contenido-pymes"],
+   "cubre": ["src/features/estudio-pymes", "docs/GUIA-DUENO-CONTENIDO.md"]
+  },
+  {
+   "id": "TPL-feature-laboratorio-pymes",
+   "nombre": "Laboratorio de las herramientas pymes: casos, estado real y veredictos",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/laboratorio-pymes", "responsable": "dep-sw",
+   "origen": [".claude/goals/pymes-marketing", ".claude/goals/contenido-pymes"],
+   "cubre": ["src/features/laboratorio-pymes", "scripts/laboratorio-pymes"]
+  },
+  {
+   "id": "TPL-grafo-conocimiento",
+   "nombre": "Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/grafo-conocimiento", "responsable": "dep-sw",
+   "origen": [".claude/specs/004-grafo-de-conocimiento", ".claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md", "docs/SDD-grafo-hermes-a-template.md"],
+   "cubre": ["tools/grafo-conocimiento"]
+  },
+  {
+   "id": "TPL-conocimiento",
+   "nombre": "Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes)",
+   "tipo": "datos", "clase": "CONOCIMIENTO", "estado": "beta",
+   "ubicacion": "tools/conocimiento", "responsable": "dep-sw",
+   "origen": [".claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md", ".claude/specs/004-grafo-de-conocimiento"],
+   "cubre": ["tools/conocimiento"]
+  },
+  {
    "id": "TPL-ejemplo-herramienta",
    "nombre": "Andamio de herramienta empaquetable (el ejemplo a copiar)",
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",
@@ -186,6 +226,15 @@
    "ubicacion": ".claude/gobernanza", "responsable": "dep-sw",
    "origen": [".claude/specs/001-gobernanza-agentica"],
    "cubre": [".claude/gobernanza", ".claude/settings.json", ".claude/example.mcp.json", ".claude/presupuesto-contexto.json", ".claude/hooks/log-tool-usage.sh", "docs/ALINEACION-GOBERNANZA-hermes-os-a2a.md", "scripts/verifica-gobernanza.mjs", "scripts/audita-secretos.mjs", "scripts/audita-fugas.mjs", "scripts/sello-validate.mjs", "scripts/prepara-gate.mjs", "scripts/mide-contexto.mjs", "scripts/vigila-versiones.mjs", "scripts/lib", "scripts/verifica-privado.mjs", "scripts/verifica-marca-blanca.mjs", "scripts/hooks"]
+  },
+  {
+   "id": "TPL-manifiesto-gates",
+   "nombre": "Manifiesto de gates: el padron de lo que el gate corre",
+   "tipo": "software", "clase": "FABRICA", "estado": "produccion",
+   "ubicacion": ".claude/gates.json", "responsable": "dep-sw",
+   "origen": [".claude/goals/manifiesto-de-gates/spec.md", "docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md"],
+   "descripcion": "Los gates de validate, predeploy y cdc como dato declarado (runner, que guarda, que evidencia deja, activo/inactivo con motivo y falta), con invariante fail-closed al cargar. `validate` y `predeploy` DERIVAN de aqui en vez de llevar la lista a mano en package.json. Emite tambien la proyeccion que consume reglas/software.toml de hermes-os-a2a, que hoy la transcribe a mano. Cambiarlo es un CDC (C1).",
+   "cubre": [".claude/gates.json", "scripts/corre-gates.mjs", "scripts/verifica-gates.mjs", "scripts/proyecta-gates.mjs", "scripts/prueba-tools.mjs"]
   },
   {
    "id": "TPL-imprenta",

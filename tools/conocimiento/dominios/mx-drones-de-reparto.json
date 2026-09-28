@@ -1,0 +1,76 @@
+{
+  "dominio": {
+    "clave": "mx-drones-de-reparto",
+    "nombre": "Drones de reparto (RPAS)",
+    "jurisdiccion": "MX",
+    "dimension": "regulatorio",
+    "cita": "publica",
+    "corte": "2026-07-10",
+    "procedencia": "regulatorio MX 2026-07: Ley de Aviacion Civil (reforma consolidada DOF 14-11-2025) + NOM-107-SCT3-2019, Ley de Instituciones de Seguros y de Fianzas (texto vigente DOF 14-11-2025, Art. 91/93/94 sin evidencia de reforma posterior a su publicacion original DOF 04-04-2013) — verificado contra texto primario, no contra blogs de terceros.\n\nFase 8b (2026-07-10): categoria AGENTES_SEGUROS + exclusiones en el clasificador para que no colisione con DRONES_DELIVERY (incidente real en #dep-legal).",
+    "categorias": [
+      "DRONES_DELIVERY"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "MX-LAC-30-REGISTRO-RPAS",
+      "jurisdiccion": "MX",
+      "dimension": "regulatorio",
+      "titulo": "Registro de RPAS ante AFAC (no servicio publico)",
+      "texto_resumen": "Un sistema de aeronave pilotada a distancia (RPAS) que no preste 'servicio publico' (transporte aereo con itinerarios/frecuencias/horarios) debe registrarse ante la Agencia Federal de Aviacion Civil (AFAC) y sujetarse a las disposiciones tecnico-administrativas respectivas (NOM-107-SCT3-2019). Un delivery comercial operado por una empresa privada normalmente no encaja en 'servicio publico' en el sentido de esta Ley, por lo que aplica el regimen de registro, no de concesion. NOM-107-SCT3-2019 num. 4.10.3 prohibe dejar caer/arrojar objetos que puedan danar personas o bienes — condiciona directamente el mecanismo de entrega.",
+      "fuente_cita": "Ley de Aviacion Civil, Art. 30 (reformado DOF 03-05-2023)",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LAC.pdf",
+      "vigente_desde": "2023-05-03",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "DRONES_DELIVERY",
+          "regimen": "GENERAL",
+          "veredicto_base": "permitido",
+          "requisitos": [
+            "Registro del RPAS ante la Agencia Federal de Aviacion Civil (AFAC), via SIIAU/SICT",
+            "Cumplir NOM-107-SCT3-2019: categoria por peso (Micro <=2kg, Pequeno 2-25kg, Grande >25kg) y sus limitaciones operativas",
+            "No dejar caer ni arrojar objetos que puedan danar personas o propiedad al momento de la entrega (NOM-107-SCT3-2019, num. 4.10.3)",
+            "Confirmar si la ruta de entrega requiere operacion BVLOS (mas alla de linea de vista) — solo permitida para RPAS Grande bajo condiciones especificas de la norma"
+          ],
+          "banderas": [
+            "No existe una categoria regulatoria especifica de 'drone delivery' en la Ley: se evalua bajo el regimen general de RPAS sin servicio publico"
+          ],
+          "parametros": {
+            "verificar": false
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LAC-74-SEGURO-RPAS",
+      "jurisdiccion": "MX",
+      "dimension": "regulatorio",
+      "titulo": "Seguro de responsabilidad civil obligatorio para RPAS",
+      "texto_resumen": "Toda persona operadora de una aeronave (incluye RPAS) que transite en espacio aereo nacional debe contratar y mantener vigente un seguro que cubra danos a terceros, carga y equipaje. El contrato de seguro requiere aprobacion previa de AFAC antes de iniciar operaciones (plazo de respuesta de AFAC: 15 dias habiles). NOTA DE VIGENCIAS: NOM-107-SCT3-2019 (2019) cita este requisito como 'articulo 72' de la Ley; la Ley vigente (reforma consolidada DOF 14-11-2025) ubica la obligacion en el Articulo 74 tras renumeraciones posteriores — se cita el numero vigente, no el de la NOM.",
+      "fuente_cita": "Ley de Aviacion Civil, Art. 74 (reformado DOF 03-05-2023)",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LAC.pdf",
+      "vigente_desde": "2023-05-03",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "DRONES_DELIVERY",
+          "regimen": "GENERAL",
+          "veredicto_base": "permitido",
+          "requisitos": [
+            "Contratar y mantener vigente poliza de seguro de responsabilidad civil por danos a terceros, carga y equipaje (LAC Art. 74)",
+            "Obtener la aprobacion de AFAC sobre el contrato de seguro ANTES de iniciar operaciones (LAC Art. 74)",
+            "Portar copia de la poliza vigente en la estacion de control durante la operacion (NOM-107-SCT3-2019)"
+          ],
+          "banderas": [
+            "Operar sin poliza vigente o sin aprobacion de AFAC deja la operacion fuera de cumplimiento — sancionable conforme al capitulo de infracciones de la Ley",
+            "NOM-107-SCT3-2019 cita 'articulo 72'; el articulo vigente hoy es el 74 (renumeracion posterior a 2019) — usar 74"
+          ],
+          "parametros": {
+            "verificar": false
+          }
+        }
+      ]
+    }
+  ]
+}

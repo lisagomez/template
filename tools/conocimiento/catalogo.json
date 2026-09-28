@@ -1,0 +1,1043 @@
+{
+  "procedencia": "Fuente única del conocimiento del grafo (PRP-005). Importada una vez de lisagomez/hermes-os-a2a@97d9f9e (reglas.json sha256:c068719e20c01f59da342ce731381382a4eae85dc4efdcfb1b99f4b50c8aa7a8) con su historial, en tools/conocimiento/origen/. Seed del grafo v4 (Fase 8 + datos-personales): fiscal MX + fiscal CO + contable MX + contractual MX + regulatorio MX (RPAS/drones, intermediacion de seguros) + datos-personales MX (LFPDPPP 2025, prospeccion B2B) + corporativo-mercantil MX (Fase A: LGSM, CFF beneficiario controlador, LFCE concentraciones) + fiduciario/sucesorio/inmobiliario MX (Fase B: LGTOC, CCF, LIE zona restringida) + ambiental MX (Fase C: LGEEPA, LGPGIR, LFRA) + cabildeo/politico MX (Fase D: Reglamentos de las Camaras, LGPP, LGIPE) + frontera financiera MX (LMV 225: asesor en inversiones). FUENTE DE VERDAD del seed; 02-seed.sql se genera de aqui con gen_seed_sql.py. Las reglas retiradas van en _bajas (el upsert del seed NO borra solo). + propiedad industrial MX (LFPPI: marcas y patentes) + comercio exterior MX (Ley Aduanera y Ley de Comercio Exterior: padron, despacho, representacion, valor en aduana, origen, clasificacion, regulaciones no arancelarias, practicas desleales, regimenes e infracciones) + logistica MX (autotransporte federal de carga y carga aerea). + T-MEC (Capitulos 4, 5 y 7: reglas de origen, certificacion y procedimientos de origen, verificacion, envios de entrega rapida y resoluciones anticipadas). DATOS DE TRABAJO: los articulos citados son reales pero las cifras/topes DEBEN validarse contra la fuente oficial (DOF) antes de usarse en produccion. Cada parametro con 'verificar: true' esta pendiente de cotejo. El cron de revision de vigencias es Fase 3.",
+  "jurisdicciones": [
+    {
+      "codigo": "MX",
+      "nombre": "Mexico"
+    },
+    {
+      "codigo": "CO",
+      "nombre": "Colombia"
+    }
+  ],
+  "dimensiones": [
+    {
+      "codigo": "fiscal",
+      "nombre": "Fiscal (deducibilidad de gastos)",
+      "vocabulario": [
+        "deducible",
+        "no_deducible",
+        "dudoso"
+      ]
+    },
+    {
+      "codigo": "contable",
+      "nombre": "Contable (registro y normas de informacion financiera)",
+      "vocabulario": [
+        "deducible",
+        "no_deducible",
+        "dudoso"
+      ]
+    },
+    {
+      "codigo": "contractual",
+      "nombre": "Contractual (clausulas de acuerdos comerciales)",
+      "vocabulario": [
+        "deducible",
+        "no_deducible",
+        "dudoso"
+      ]
+    },
+    {
+      "codigo": "regulatorio",
+      "nombre": "Regulatorio (permisos y cumplimiento operativo)",
+      "vocabulario": [
+        "permitido",
+        "no_permitido",
+        "dudoso"
+      ]
+    },
+    {
+      "codigo": "datos-personales",
+      "nombre": "Datos personales (licitud de tratamiento y prospeccion B2B)",
+      "vocabulario": [
+        "permitido",
+        "no_permitido",
+        "dudoso"
+      ]
+    }
+  ],
+  "categorias": [
+    {
+      "clave": "AGENTES_SEGUROS",
+      "nombre": "Intermediacion de seguros: agentes y corredores",
+      "descripcion": "Actuar como agente/corredor que intermedia la contratacion de seguros (vender, cotizar o asesorar sobre polizas), independientemente del ramo asegurado",
+      "keywords": [
+        "agente de seguros",
+        "agente de seguros y fianzas",
+        "corredor de seguros",
+        "correduria de seguros",
+        "intermediario de seguros",
+        "intermediacion de seguros",
+        "vender seguros",
+        "cedula de agente"
+      ]
+    },
+    {
+      "clave": "APORTACIONES_POLITICAS",
+      "nombre": "Aportaciones a partidos y campanas",
+      "descripcion": "Aportaciones y donativos, en dinero o especie, a partidos politicos, aspirantes, precandidatos o candidatos",
+      "keywords": [
+        "aportacion a partido",
+        "aportaciones a partidos",
+        "donativo a partido",
+        "donativos a partidos",
+        "financiamiento de campana",
+        "financiamiento de campanas",
+        "aportacion a campana",
+        "donar a un partido",
+        "apoyar economicamente a un candidato"
+      ]
+    },
+    {
+      "clave": "ARRENDAMIENTO",
+      "nombre": "Arrendamiento",
+      "descripcion": "Rentas de inmuebles, autos y equipos",
+      "keywords": [
+        "renta",
+        "arrendamiento",
+        "alquiler",
+        "renta de oficina",
+        "renta de local",
+        "renta de auto",
+        "leasing"
+      ]
+    },
+    {
+      "clave": "ASAMBLEAS_SOCIETARIAS",
+      "nombre": "Asambleas y gobierno societario",
+      "descripcion": "Asambleas de socios/accionistas (ordinarias y extraordinarias), convocatorias, actas y organos de administracion y vigilancia",
+      "keywords": [
+        "asamblea de accionistas",
+        "asamblea de socios",
+        "asamblea ordinaria",
+        "asamblea extraordinaria",
+        "convocatoria de asamblea",
+        "acta de asamblea",
+        "consejo de administracion",
+        "comisario"
+      ]
+    },
+    {
+      "clave": "ASESORIA_INVERSIONES",
+      "nombre": "Asesoria de inversiones y administracion de cartera (frontera CNBV)",
+      "descripcion": "Servicios financieros a clientes: donde termina la consultoria financiera libre y empieza el asesor en inversiones regulado (registro CNBV, LMV 225)",
+      "keywords": [
+        "asesoria de inversiones",
+        "asesor en inversiones",
+        "asesores en inversiones",
+        "administracion de cartera",
+        "cartera de valores",
+        "recomendaciones de inversion",
+        "portafolio de inversion",
+        "invertir en bolsa",
+        "consultoria financiera",
+        "asesoria financiera",
+        "financial consulting"
+      ]
+    },
+    {
+      "clave": "AUDITORIA_AMBIENTAL",
+      "nombre": "Auditoria ambiental voluntaria",
+      "descripcion": "Autorregulacion y auditorias ambientales voluntarias (examen de operaciones, cumplimiento y certificacion)",
+      "keywords": [
+        "auditoria ambiental",
+        "autorregulacion ambiental",
+        "industria limpia",
+        "certificado ambiental"
+      ]
+    },
+    {
+      "clave": "AUTOTRANSPORTE_CARGA",
+      "nombre": "Autotransporte federal de carga",
+      "descripcion": "Servicio de autotransporte federal de carga, paqueteria y mensajeria: permiso de la Secretaria, alcance, responsabilidad por la carga y garantia de danos",
+      "keywords": [
+        "autotransporte",
+        "autotransporte de carga",
+        "autotransporte federal",
+        "permiso sict",
+        "transporte terrestre de carga",
+        "carta de porte",
+        "paqueteria y mensajeria",
+        "flete terrestre",
+        "camion de carga",
+        "agencia de carga",
+        "carta porte",
+        "complemento carta porte"
+      ],
+      "exclusiones": [
+        "carga aerea",
+        "guia de carga aerea",
+        "guia aerea",
+        "air waybill",
+        "e-awb",
+        "eawb",
+        "transporte aereo de carga"
+      ]
+    },
+    {
+      "clave": "CABILDEO_CONGRESO",
+      "nombre": "Cabildeo ante el Congreso de la Union",
+      "descripcion": "Actividades de cabildeo (lobby) ante diputados, senadores, organos y comisiones del Congreso: registro, limites y prohibiciones",
+      "keywords": [
+        "cabildeo",
+        "cabildero",
+        "cabilderos",
+        "registro de cabilderos",
+        "lobby",
+        "lobbying",
+        "gestion de intereses",
+        "influir en una iniciativa"
+      ]
+    },
+    {
+      "clave": "CARGA_AEREA_EAWB",
+      "nombre": "Carga aerea: carta de porte o guia de carga aerea (AWB / e-AWB)",
+      "descripcion": "Contrato de transporte aereo de carga y el documento en que debe constar; el formato lo fija una norma oficial mexicana que no forma parte de este grafo",
+      "keywords": [
+        "carga aerea",
+        "guia de carga aerea",
+        "guia aerea",
+        "carta de porte aerea",
+        "air waybill",
+        "awb",
+        "e-awb",
+        "eawb",
+        "transporte aereo de carga"
+      ],
+      "exclusiones": [
+        "autotransporte",
+        "carta de porte terrestre"
+      ]
+    },
+    {
+      "clave": "CLASIFICACION_ARANCELARIA",
+      "nombre": "Clasificacion arancelaria de la mercancia",
+      "descripcion": "Identificacion de la mercancia por su fraccion arancelaria y la nomenclatura de la Tarifa; la tarifa vigente NO forma parte de este grafo",
+      "keywords": [
+        "clasificacion arancelaria",
+        "fraccion arancelaria",
+        "fracciones arancelarias",
+        "arancel",
+        "aranceles",
+        "tarifa arancelaria",
+        "nomenclatura arancelaria"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "CLAUSULA_CONFIDENCIALIDAD",
+      "nombre": "Clausula de confidencialidad",
+      "descripcion": "Obligaciones de no divulgacion y proteccion de informacion",
+      "keywords": [
+        "confidencialidad",
+        "confidencial",
+        "no divulgacion",
+        "nda",
+        "secreto industrial"
+      ]
+    },
+    {
+      "clave": "CLAUSULA_PAGO",
+      "nombre": "Clausula de pago y contraprestacion",
+      "descripcion": "Forma, calendario y condiciones de pago pactadas en el contrato",
+      "keywords": [
+        "forma de pago",
+        "condiciones de pago",
+        "contraprestacion",
+        "precio pactado",
+        "calendario de pagos",
+        "anticipo"
+      ]
+    },
+    {
+      "clave": "CLAUSULA_PENAL",
+      "nombre": "Clausula penal / pena convencional",
+      "descripcion": "Penalizaciones pactadas por incumplimiento",
+      "keywords": [
+        "pena convencional",
+        "clausula penal",
+        "penalizacion",
+        "mora"
+      ]
+    },
+    {
+      "clave": "CLAUSULA_TERMINACION",
+      "nombre": "Clausula de terminacion y vigencia",
+      "descripcion": "Vigencia, renovacion, preaviso y causales de terminacion",
+      "keywords": [
+        "terminacion",
+        "rescision",
+        "vigencia del contrato",
+        "renovacion automatica",
+        "preaviso",
+        "causales de terminacion"
+      ]
+    },
+    {
+      "clave": "COMBUSTIBLES",
+      "nombre": "Combustibles",
+      "descripcion": "Gasolina y diesel para vehiculos del negocio",
+      "keywords": [
+        "gasolina",
+        "diesel",
+        "combustible",
+        "magna",
+        "premium",
+        "carga de combustible"
+      ]
+    },
+    {
+      "clave": "COMPRAVENTA_INMUEBLES",
+      "nombre": "Compraventa de inmuebles: forma",
+      "descripcion": "Adquisicion y enajenacion de bienes inmuebles: forma del contrato (documento privado vs escritura publica) segun el valor del bien",
+      "keywords": [
+        "compraventa de inmueble",
+        "compraventa de inmuebles",
+        "compra de inmueble",
+        "venta de inmueble",
+        "adquirir un inmueble",
+        "enajenacion de inmueble",
+        "bien inmueble",
+        "bienes inmuebles",
+        "predio",
+        "terreno",
+        "inmobiliario",
+        "inmobiliaria",
+        "derecho inmobiliario",
+        "property law",
+        "inmueble",
+        "inmuebles"
+      ],
+      "exclusiones": [
+        "zona restringida",
+        "fideicomiso"
+      ]
+    },
+    {
+      "clave": "CONCENTRACIONES_COFECE",
+      "nombre": "Concentraciones economicas (COFECE)",
+      "descripcion": "Adquisiciones, fusiones o tomas de control que pueden requerir autorizacion previa de la Comision Federal de Competencia Economica",
+      "keywords": [
+        "concentracion economica",
+        "notificacion de concentracion",
+        "cofece",
+        "adquisicion de empresa",
+        "adquisicion de empresas",
+        "compra de empresa",
+        "comprar una empresa",
+        "adquirir una sociedad",
+        "tomar control de una empresa"
+      ]
+    },
+    {
+      "clave": "CONSTITUCION_SOCIEDADES",
+      "nombre": "Constitucion de sociedades mercantiles",
+      "descripcion": "Constituir una sociedad mercantil (SA, S de RL, etc.): escritura o poliza, fedatario, estatutos e inscripcion en el Registro Publico de Comercio",
+      "keywords": [
+        "constitucion de sociedad",
+        "constituir una sociedad",
+        "constituir una empresa",
+        "acta constitutiva",
+        "escritura constitutiva",
+        "estatutos sociales",
+        "sociedad anonima",
+        "sociedad de responsabilidad limitada",
+        "registro publico de comercio"
+      ],
+      "exclusiones": [
+        "sociedad por acciones simplificada"
+      ]
+    },
+    {
+      "clave": "DATOS_CONTACTO_CORPORATIVO",
+      "nombre": "Datos de contacto corporativo (prospeccion B2B)",
+      "descripcion": "Tratamiento de correo/telefono corporativo de representantes o personal de una empresa para prospeccion B2B, incluida la inferencia de correos por patron del dominio",
+      "keywords": [
+        "correo corporativo",
+        "email corporativo",
+        "contacto corporativo",
+        "patron de correo de dominio",
+        "inferencia de correo"
+      ]
+    },
+    {
+      "clave": "DATOS_CONTACTO_PERSONA_FISICA",
+      "nombre": "Datos de contacto de persona fisica titular",
+      "descripcion": "Tratamiento de correo o telefono PERSONAL de una persona fisica (titular) para prospeccion; tratamiento diferenciado del contacto corporativo",
+      "keywords": [
+        "dato de persona fisica",
+        "correo personal de titular",
+        "telefono personal de titular",
+        "prospeccion a persona fisica"
+      ]
+    },
+    {
+      "clave": "DATOS_FUENTE_PUBLICA",
+      "nombre": "Datos de fuentes de acceso publico oficiales",
+      "descripcion": "Consulta y tratamiento de datos que figuran en fuentes de acceso publico por disposicion de ley (DENUE del INEGI, listados 69-B del SAT, padrones publicos)",
+      "keywords": [
+        "fuente publica oficial",
+        "consulta denue",
+        "lista 69-b",
+        "padron publico oficial",
+        "rfc de fuente publica"
+      ]
+    },
+    {
+      "clave": "DATOS_TRANSFERENCIA_INTL",
+      "nombre": "Transferencia de datos a terceros (nacional o internacional)",
+      "descripcion": "Comunicacion de datos personales a terceros distintos del encargado, dentro o fuera del territorio nacional (p. ej. proveedores de enriquecimiento o verificacion)",
+      "keywords": [
+        "transferencia internacional de datos",
+        "proveedor extranjero de datos",
+        "encargado en el extranjero"
+      ]
+    },
+    {
+      "clave": "DESPACHO_ADUANERO",
+      "nombre": "Despacho aduanero: pedimento y documentacion anexa",
+      "descripcion": "Transmision del pedimento y sus anexos en documento electronico o digital ante el sistema electronico aduanero",
+      "keywords": [
+        "despacho aduanero",
+        "pedimento",
+        "pedimentos",
+        "aduana",
+        "aduanas",
+        "documento aduanero",
+        "anexos al pedimento",
+        "sistema electronico aduanero"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "DIVIDENDOS_UTILIDADES",
+      "nombre": "Dividendos, utilidades y reserva legal",
+      "descripcion": "Reparto de utilidades y dividendos a socios/accionistas y constitucion de la reserva legal",
+      "keywords": [
+        "dividendo",
+        "dividendos",
+        "pago de dividendos",
+        "reparto de utilidades",
+        "distribucion de utilidades",
+        "reserva legal"
+      ]
+    },
+    {
+      "clave": "DONATIVOS",
+      "nombre": "Donativos",
+      "descripcion": "Donativos a donatarias autorizadas",
+      "keywords": [
+        "donativo",
+        "donativos",
+        "donacion",
+        "donaciones"
+      ]
+    },
+    {
+      "clave": "DRONES_DELIVERY",
+      "nombre": "Uso de RPAS (drones) para entrega/delivery",
+      "descripcion": "Operacion de aeronaves pilotadas a distancia (RPAS) para reparto/entrega comercial",
+      "keywords": [
+        "dron",
+        "drones",
+        "rpas",
+        "delivery con dron",
+        "entrega por dron",
+        "reparto con dron",
+        "aeronave no tripulada",
+        "vehiculo aereo no tripulado",
+        "dron de reparto",
+        "drone delivery"
+      ],
+      "exclusiones": [
+        "agente de seguros",
+        "agente de seguros y fianzas",
+        "corredor de seguros",
+        "correduria de seguros",
+        "intermediario de seguros",
+        "intermediacion de seguros",
+        "vender seguros",
+        "cedula de agente"
+      ]
+    },
+    {
+      "clave": "EMISIONES_ATMOSFERA",
+      "nombre": "Emisiones a la atmosfera: fuentes fijas",
+      "descripcion": "Operacion de fuentes fijas que emiten a la atmosfera y su licencia/autorizacion ambiental (federal o local segun la industria)",
+      "keywords": [
+        "licencia ambiental",
+        "licencia ambiental unica",
+        "emisiones a la atmosfera",
+        "fuente fija",
+        "fuentes fijas",
+        "emision de gases",
+        "contaminacion atmosferica"
+      ]
+    },
+    {
+      "clave": "EQUIPO_DE_COMPUTO",
+      "nombre": "Equipo de computo",
+      "descripcion": "Computadoras, servidores, perifericos (inversion, no gasto)",
+      "keywords": [
+        "computadora",
+        "laptop",
+        "servidor",
+        "monitor",
+        "impresora",
+        "teclado",
+        "equipo de computo",
+        "macbook",
+        "pc de escritorio",
+        "disco duro",
+        "memoria ram"
+      ]
+    },
+    {
+      "clave": "FIDEICOMISO_CONSTITUCION",
+      "nombre": "Fideicomisos: constitucion y operacion",
+      "descripcion": "Constituir y operar un fideicomiso (fideicomitente, fiduciaria, fideicomisario), incluido el fideicomiso testamentario y sus prohibiciones",
+      "keywords": [
+        "fideicomiso",
+        "fideicomisos",
+        "fideicomitente",
+        "fideicomisario",
+        "fiduciaria",
+        "constituir un fideicomiso",
+        "contrato de fideicomiso",
+        "patrimonio fideicomitido",
+        "fideicomiso testamentario"
+      ]
+    },
+    {
+      "clave": "FIDEICOMISO_ZONA_RESTRINGIDA",
+      "nombre": "Fideicomiso de zona restringida (extranjeros)",
+      "descripcion": "Adquisicion de derechos sobre inmuebles en zona restringida (100 km de fronteras / 50 km de playas) por extranjeros via fideicomiso con permiso de la SRE",
+      "keywords": [
+        "zona restringida",
+        "fideicomiso de zona restringida",
+        "inmueble en zona restringida",
+        "extranjeros en zona restringida",
+        "adquisicion por extranjeros",
+        "extranjero comprar inmueble"
+      ]
+    },
+    {
+      "clave": "FUSION_ESCISION",
+      "nombre": "Fusion y escision de sociedades",
+      "descripcion": "Fusionar o escindir sociedades mercantiles: acuerdos, publicidad, plazos y derechos de oposicion de acreedores",
+      "keywords": [
+        "fusion",
+        "fusion de sociedades",
+        "fusionar",
+        "escision",
+        "escision de sociedades",
+        "escindir"
+      ]
+    },
+    {
+      "clave": "GRUPOS_HOLDING",
+      "nombre": "Grupos de sociedades y holdings",
+      "descripcion": "Estructuras de sociedad controladora/tenedora con subsidiarias o filiales (holding)",
+      "keywords": [
+        "holding",
+        "sociedad controladora",
+        "controladora",
+        "tenedora de acciones",
+        "subsidiaria",
+        "subsidiarias",
+        "grupo de sociedades",
+        "grupo empresarial",
+        "filial",
+        "filiales"
+      ]
+    },
+    {
+      "clave": "IMPACTO_AMBIENTAL",
+      "nombre": "Evaluacion de impacto ambiental (SEMARNAT)",
+      "descripcion": "Obras y actividades que requieren autorizacion previa de SEMARNAT en materia de impacto ambiental y la manifestacion de impacto ambiental (MIA)",
+      "keywords": [
+        "impacto ambiental",
+        "manifestacion de impacto ambiental",
+        "evaluacion de impacto ambiental",
+        "autorizacion de impacto ambiental",
+        "mia",
+        "semarnat"
+      ]
+    },
+    {
+      "clave": "INFRACCIONES_ADUANERAS",
+      "nombre": "Infracciones relacionadas con la importacion o exportacion",
+      "descripcion": "Introducir o extraer mercancias omitiendo contribuciones, sin permiso, sin cumplir regulaciones no arancelarias o cuando esta prohibido",
+      "keywords": [
+        "infraccion aduanera",
+        "infracciones aduaneras",
+        "importacion prohibida",
+        "exportacion prohibida",
+        "mercancia prohibida"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "INTERESES",
+      "nombre": "Intereses y financiamiento",
+      "descripcion": "Intereses de prestamos y creditos del negocio",
+      "keywords": [
+        "interes",
+        "intereses",
+        "interes moratorio",
+        "financiamiento",
+        "credito",
+        "prestamo"
+      ]
+    },
+    {
+      "clave": "MARCAS_REGISTRO",
+      "nombre": "Marcas y avisos comerciales: registro, vigencia y uso",
+      "descripcion": "Registrar y conservar una marca o aviso comercial ante el IMPI: derecho exclusivo, vigencia, renovacion y declaracion de uso",
+      "keywords": [
+        "registro de marca",
+        "registro de marcas",
+        "marcas y patentes",
+        "marca registrada",
+        "signo distintivo",
+        "signos distintivos",
+        "aviso comercial",
+        "avisos comerciales",
+        "marca",
+        "marcas",
+        "trademark"
+      ],
+      "exclusiones": [
+        "marca blanca",
+        "marca personal",
+        "marca de agua"
+      ]
+    },
+    {
+      "clave": "ORIGEN_MERCANCIAS",
+      "nombre": "Origen y procedencia de las mercancias",
+      "descripcion": "Documentacion de origen y procedencia para preferencias arancelarias, marcado de pais de origen, cuotas compensatorias y cupos",
+      "keywords": [
+        "certificado de origen",
+        "regla de origen",
+        "reglas de origen",
+        "prueba de origen",
+        "pais de origen",
+        "marcado de pais de origen",
+        "preferencia arancelaria",
+        "preferencias arancelarias"
+      ],
+      "exclusiones": [
+        "origen de los recursos",
+        "origen de los fondos",
+        "origen licito"
+      ]
+    },
+    {
+      "clave": "PADRON_IMPORTADORES",
+      "nombre": "Padron de Importadores y obligaciones de quien importa o exporta",
+      "descripcion": "Inscripcion en el Padron de Importadores, padrones sectoriales y obligaciones de control de inventarios y expediente electronico de quienes introducen o extraen mercancias",
+      "keywords": [
+        "padron de importadores",
+        "padron de exportadores",
+        "padron sectorial",
+        "padron de sectores especificos",
+        "importador de registro",
+        "expediente electronico"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "PATENTES_INVENCIONES",
+      "nombre": "Patentes, modelos de utilidad y disenos industriales",
+      "descripcion": "Proteger una invencion o creacion tecnica ante el IMPI: vigencias improrrogables, anualidades y renovacion del diseno",
+      "keywords": [
+        "patente",
+        "patentes",
+        "registro de patente",
+        "modelo de utilidad",
+        "modelos de utilidad",
+        "diseño industrial",
+        "diseños industriales",
+        "invencion",
+        "invenciones"
+      ]
+    },
+    {
+      "clave": "PODERES_REPRESENTACION",
+      "nombre": "Representacion y poderes de la sociedad",
+      "descripcion": "Representacion legal de la sociedad y otorgamiento/revocacion de poderes a apoderados",
+      "keywords": [
+        "poder notarial",
+        "poderes notariales",
+        "apoderado",
+        "apoderado legal",
+        "representante legal",
+        "otorgar poderes",
+        "otorgamiento de poderes",
+        "revocacion de poderes"
+      ]
+    },
+    {
+      "clave": "PRACTICAS_DESLEALES",
+      "nombre": "Practicas desleales de comercio internacional y cuotas compensatorias",
+      "descripcion": "Importacion en condiciones de discriminacion de precios o de subvenciones y la cuota compensatoria que la grava",
+      "keywords": [
+        "cuota compensatoria",
+        "cuotas compensatorias",
+        "practica desleal",
+        "practicas desleales",
+        "dumping",
+        "antidumping",
+        "discriminacion de precios",
+        "subvencion",
+        "subvenciones"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "PROPAGANDA_ELECTORAL",
+      "nombre": "Propaganda electoral en radio y television",
+      "descripcion": "Contratacion o adquisicion de propaganda dirigida a influir en preferencias electorales, a favor o en contra de partidos o candidatos",
+      "keywords": [
+        "propaganda electoral",
+        "propaganda politica",
+        "publicidad electoral",
+        "contratar propaganda",
+        "anuncios de campana",
+        "spots electorales"
+      ]
+    },
+    {
+      "clave": "REGIMENES_ADUANEROS",
+      "nombre": "Regimenes aduaneros",
+      "descripcion": "Regimen al que se destina la mercancia: definitivo, temporal, deposito fiscal, transito, recinto fiscalizado y recinto fiscalizado estrategico",
+      "keywords": [
+        "regimen aduanero",
+        "regimenes aduaneros",
+        "importacion temporal",
+        "importacion definitiva",
+        "exportacion temporal",
+        "exportacion definitiva",
+        "deposito fiscal",
+        "transito de mercancias",
+        "transito interno",
+        "transito internacional",
+        "recinto fiscalizado",
+        "recinto fiscalizado estrategico",
+        "programa de maquila",
+        "maquila"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "REGISTRO_ACCIONES_BC",
+      "nombre": "Registro de acciones y beneficiario controlador",
+      "descripcion": "Libro de registro de acciones, transmisiones y la obligacion de identificar al beneficiario controlador",
+      "keywords": [
+        "registro de acciones",
+        "libro de registro de acciones",
+        "transmision de acciones",
+        "cesion de acciones",
+        "beneficiario controlador",
+        "beneficiarios controladores"
+      ]
+    },
+    {
+      "clave": "REGISTRO_PROPIEDAD",
+      "nombre": "Registro Publico de la Propiedad",
+      "descripcion": "Inscripcion de titulos y gravamenes sobre inmuebles en el Registro Publico de la Propiedad y sus efectos frente a terceros",
+      "keywords": [
+        "registro publico de la propiedad",
+        "inscripcion registral",
+        "folio real",
+        "certificado de libertad de gravamen",
+        "certificado de gravamenes",
+        "gravamen inmobiliario",
+        "inscribir la escritura"
+      ]
+    },
+    {
+      "clave": "REGULACIONES_NO_ARANCELARIAS",
+      "nombre": "Regulaciones y restricciones no arancelarias (permisos previos, cupos, NOM)",
+      "descripcion": "Medidas de regulacion y restriccion no arancelarias a la exportacion, importacion, circulacion o transito de mercancias",
+      "keywords": [
+        "regulacion no arancelaria",
+        "regulaciones no arancelarias",
+        "restriccion no arancelaria",
+        "restricciones no arancelarias",
+        "permiso previo",
+        "permisos previos",
+        "cupo",
+        "cupos",
+        "cupo de importacion",
+        "cupo de exportacion",
+        "norma oficial mexicana",
+        "normas oficiales mexicanas"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "REPRESENTACION_ADUANAL",
+      "nombre": "Representacion ante la aduana: agente aduanal, agencia aduanal o representante legal",
+      "descripcion": "Quien puede promover los tramites del despacho aduanero y con que requisitos",
+      "keywords": [
+        "agente aduanal",
+        "agentes aduanales",
+        "agencia aduanal",
+        "agencias aduanales",
+        "apoderado aduanal",
+        "mandatario aduanal",
+        "representante legal aduanero"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "RESIDUOS_PELIGROSOS",
+      "nombre": "Residuos peligrosos: generadores y manejo",
+      "descripcion": "Generacion y manejo de residuos peligrosos: categorias de generador por volumen, registro, plan de manejo y bitacoras",
+      "keywords": [
+        "residuos peligrosos",
+        "residuo peligroso",
+        "generador de residuos",
+        "generadores de residuos",
+        "plan de manejo de residuos",
+        "manejo de residuos",
+        "bitacora de residuos"
+      ]
+    },
+    {
+      "clave": "RESPONSABILIDAD_AMBIENTAL",
+      "nombre": "Responsabilidad por dano ambiental",
+      "descripcion": "Responsabilidad, reparacion y compensacion por danos al ambiente (LFRA), via judicial federal y sanciones",
+      "keywords": [
+        "responsabilidad ambiental",
+        "dano ambiental",
+        "danos ambientales",
+        "reparacion del dano ambiental",
+        "compensacion ambiental",
+        "delito ambiental",
+        "delitos ambientales",
+        "profepa"
+      ]
+    },
+    {
+      "clave": "SAS_CONSTITUCION",
+      "nombre": "Sociedad por acciones simplificada (SAS)",
+      "descripcion": "Constitucion y limites de la SAS: via electronica gratuita ante la Secretaria de Economia, solo personas fisicas, tope de ingresos anuales",
+      "keywords": [
+        "sociedad por acciones simplificada",
+        "acciones simplificada",
+        "sas"
+      ]
+    },
+    {
+      "clave": "SERVICIOS_LEGALES",
+      "nombre": "Servicios legales (operacion de despacho de abogados)",
+      "descripcion": "Operar como despacho/bufete de abogados en Mexico: ejercicio profesional (titulo y cedula) y obligaciones transversales del despacho (prevencion de lavado). Transversal al despacho, NO un area de practica",
+      "keywords": [
+        "de legal",
+        "abogados",
+        "abogacia",
+        "bufete",
+        "bufetes",
+        "despacho de abogados",
+        "despachos de abogados",
+        "despacho juridico",
+        "despacho legal",
+        "firma de abogados",
+        "firma legal",
+        "law firm",
+        "servicios legales",
+        "servicios juridicos",
+        "asesoria juridica",
+        "asesoria legal",
+        "litigio",
+        "litigios",
+        "legal services",
+        "lawyer",
+        "lawyers",
+        "attorney",
+        "attorneys"
+      ],
+      "exclusiones": [
+        "reserva legal",
+        "representante legal",
+        "apoderado legal",
+        "marco legal",
+        "requisitos legales",
+        "fundamento legal"
+      ]
+    },
+    {
+      "clave": "SERVICIOS_PROFESIONALES",
+      "nombre": "Servicios profesionales y honorarios",
+      "descripcion": "Honorarios, consultoria y servicios independientes",
+      "keywords": [
+        "honorarios",
+        "consultoria",
+        "asesoria",
+        "servicios profesionales",
+        "servicio profesional",
+        "abogado",
+        "contador",
+        "notario",
+        "diseno",
+        "desarrollo de software",
+        "freelance"
+      ]
+    },
+    {
+      "clave": "TESTAMENTOS_SUCESIONES",
+      "nombre": "Testamentos y sucesiones",
+      "descripcion": "Testamentos (otorgamiento y clases), sucesion testamentaria y legitima (intestado), herederos, legados y albaceas",
+      "keywords": [
+        "testamento",
+        "testamentos",
+        "testamentario",
+        "sucesion",
+        "sucesiones",
+        "herencia",
+        "heredero",
+        "herederos",
+        "legado",
+        "legatario",
+        "albacea",
+        "intestado",
+        "sucesion legitima",
+        "juicio sucesorio",
+        "juicios sucesorios",
+        "sucesorio",
+        "sucesorios",
+        "intestamentario",
+        "intestamentarios",
+        "derecho sucesorio",
+        "sucesion testamentaria",
+        "sucesiones testamentarias"
+      ],
+      "exclusiones": [
+        "fideicomiso"
+      ]
+    },
+    {
+      "clave": "TMEC_CERTIFICACION_ORIGEN",
+      "nombre": "T-MEC: certificacion de origen (Anexo 5-A)",
+      "descripcion": "Quien llena la certificacion de origen del T-MEC, elementos minimos de informacion, cobertura y excepciones",
+      "keywords": [
+        "certificacion de origen",
+        "certificacion de origen t-mec",
+        "certificado de origen t-mec",
+        "anexo 5-a",
+        "elementos minimos de informacion",
+        "autocertificacion de origen"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "TMEC_ENVIOS_ENTREGA_RAPIDA",
+      "nombre": "T-MEC: envios de entrega rapida y de minimis aduanero",
+      "descripcion": "Piso de facilitacion pactado para envios de entrega rapida (courier); el monto que efectivamente aplica lo fija el ordenamiento juridico mexicano",
+      "keywords": [
+        "envio de entrega rapida",
+        "envios de entrega rapida",
+        "de minimis aduanero",
+        "courier",
+        "mensajeria internacional",
+        "entrega rapida"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "TMEC_REGLAS_ORIGEN",
+      "nombre": "T-MEC: reglas de origen (calificacion de la mercancia)",
+      "descripcion": "Criterios por los que una mercancia es originaria conforme al Capitulo 4 del T-MEC; las reglas especificas por producto del Anexo 4-B NO estan sembradas",
+      "keywords": [
+        "mercancia originaria",
+        "mercancias originarias",
+        "valor de contenido regional",
+        "de minimis",
+        "anexo 4-b",
+        "reglas de origen especificas por producto",
+        "cambio de clasificacion arancelaria",
+        "transbordo",
+        "acumulacion de origen"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "TMEC_RESOLUCIONES_ANTICIPADAS",
+      "nombre": "T-MEC: resoluciones anticipadas en materia aduanera",
+      "descripcion": "Resoluciones anticipadas sobre clasificacion, valoracion, origen y cupos que la administracion aduanera emite antes de la importacion",
+      "keywords": [
+        "resolucion anticipada",
+        "resoluciones anticipadas",
+        "criterio anticipado"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "TMEC_TRATO_PREFERENCIAL",
+      "nombre": "T-MEC: solicitud de trato arancelario preferencial",
+      "descripcion": "Obligaciones de quien solicita trato arancelario preferencial al amparo del T-MEC y devolucion de aranceles pagados en exceso",
+      "keywords": [
+        "t-mec",
+        "tmec",
+        "usmca",
+        "trato arancelario preferencial",
+        "trato preferencial",
+        "tratado entre mexico estados unidos y canada",
+        "arancel preferencial"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "TMEC_VERIFICACION_ORIGEN",
+      "nombre": "T-MEC: verificacion de origen y conservacion de registros",
+      "descripcion": "Facultades de verificacion de la autoridad aduanera sobre una solicitud de trato preferencial y plazos de conservacion de registros",
+      "keywords": [
+        "verificacion de origen",
+        "visita de verificacion",
+        "cuestionario de verificacion",
+        "determinacion de origen",
+        "conservacion de registros",
+        "conservar registros"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "VALOR_ADUANA",
+      "nombre": "Valor en aduana y base gravable de la importacion",
+      "descripcion": "Determinacion de la base gravable del impuesto general de importacion a partir del valor de transaccion",
+      "keywords": [
+        "valor en aduana",
+        "valoracion aduanera",
+        "base gravable",
+        "valor de transaccion",
+        "precio estimado",
+        "cuenta aduanera de garantia"
+      ],
+      "exclusiones": []
+    },
+    {
+      "clave": "VIATICOS",
+      "nombre": "Viaticos y gastos de viaje",
+      "descripcion": "Hospedaje, alimentacion, transporte y kilometraje fuera de la faja de 50 km",
+      "keywords": [
+        "viatico",
+        "viaticos",
+        "hospedaje",
+        "hotel",
+        "vuelo",
+        "avion",
+        "boleto de avion",
+        "viaje",
+        "peaje",
+        "taxi",
+        "uber",
+        "transporte foraneo",
+        "kilometraje"
+      ]
+    }
+  ]
+}

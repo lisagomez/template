@@ -1,6 +1,6 @@
 # PRP-003: Conversación por voz con el agente, sin comandos hablados
 
-> **Estado**: APROBADO (plan aprobado por la dueña el 2026-09-22 en modo plan; ejecución por fases)
+> **Estado**: APROBADO (plan aprobado por el laboratorio el 2026-09-22 en modo plan; ejecución por fases)
 > **Fecha**: 2026-09-22
 > **Proyecto**: SaaS Factory V4 (template) · `tools/dictado`
 > **Spec**: [`.claude/specs/013-dictado/spec.md`](../specs/013-dictado/spec.md), enmendada el
@@ -14,7 +14,7 @@
 
 ## Objetivo
 
-Que la dueña converse por voz con el agente de Claude Code en el terminal como con una persona:
+Que el laboratorio converse por voz con el agente de Claude Code en el terminal como con una persona:
 habla, calla y el turno se envía solo; el agente contesta y ella oye el primer párrafo; mientras
 suena la voz el micrófono está callado; sigue hablando. Sin «dale enter» ni ningún comando dicho.
 
@@ -39,7 +39,7 @@ Los criterios salen de la spec 013 (RF-38 a RF-45) y de la medición.
 - [x] Hook: con `dictar` parado o modo apagado, `exit 0` sin salida en < 100 ms; con modo activo, llega al socket el primer párrafo de prosa ≤ 350 caracteres (RF-42, RF-43). **Código, pruebas y medición C el 2026-09-23** (`src/respuesta.ts`, `scripts/habla-respuesta.{sh,mjs}`, `pruebas/respuesta.ts`, `pruebas/hook-habla.ts`; bloque C: sin dictado, apagada o inactivo p50 3 ms; encendida el texto llega 10/10 y el hook sale a los 51 ms sin esperar a la voz; a media frase también llega). Cableado en `settings.json` y skill actualizado con CDC aprobado y promovido (PR #144).
 - [x] «dale enter», muletillas y el modo actual funcionan igual con la conversación apagada (las pruebas de posproceso y de `dictado.ts` no cambiaron; el envío solo actúa con `activa`).
 - [ ] `npm run prueba` en verde con las pruebas nuevas (sin Windows ni modelos) — **144/144 el 2026-09-23**; `npm run verifica:specs` 118/118 ☑; `npm run validate` sellado ☑ (2026-09-23); `npm run empaqueta dictado` 0.2.0 **pendiente**.
-- [ ] En vivo con la dueña: habla, calla, se envía; oye el primer párrafo; el micrófono no transcribe la voz; sigue hablando.
+- [ ] En vivo con el laboratorio: habla, calla, se envía; oye el primer párrafo; el micrófono no transcribe la voz; sigue hablando.
 
 ### Comportamiento esperado
 ```
@@ -87,11 +87,11 @@ Sin tablas. Ajustes nuevos en `ajustes.json` (grupo «Conversar con el agente»)
 ### Modelo de amenazas (control C3)
 - **Activos que toca**: la caja del agente (todo lo que entra por voz se envía solo), el altavoz (lo que el agente dice se oye en la sala), la configuración del arnés (`settings.json`).
 - **Fronteras que cruza**: micrófono → texto → caja del agente (dato no confiable, sin remitente); hook → socket local (texto del agente, acotado).
-- **Atacante relevante**: O1 inyección de requerimientos (alguien habla en la sala o suena un vídeo y el texto entra como si fuera de la dueña); O3 fatiga de aprobación (aprobar de oído); O4 denial-of-wallet (turnos que se envían solos).
+- **Atacante relevante**: O1 inyección de requerimientos (alguien habla en la sala o suena un vídeo y el texto entra como si fuera del laboratorio); O3 fatiga de aprobación (aprobar de oído); O4 denial-of-wallet (turnos que se envían solos).
 - **Controles**: el envío solo actúa con el dictado escuchando y el modo encendido a mano por ella; lo irreversible sigue pasando por gate humano en el terminal, con el diff legible; el socket escucha solo en 127.0.0.1, tres palabras, texto acotado, sin ejecutar nada; el hook nunca bloquea (`exit 0`, `timeout: 5`). **Brecha abierta a propósito**: no hay allowlist por voz; la mitigación es que el modo se apaga con un toque y se ve en la píldora.
 
 ### Evaluación de impacto / AISIA (control C4)
-- **Partes afectadas**: la dueña; quien esté en la sala (oye al agente, y su voz puede entrar al micrófono).
+- **Partes afectadas**: el laboratorio; quien esté en la sala (oye al agente, y su voz puede entrar al micrófono).
 - **Daño posible con el sistema operando bien**: un envío prematuro por una pausa de pensamiento; una frase ajena enviada como propia.
 - **Reversibilidad**: total en el terminal (lo enviado se ve y se corrige; nada se ejecuta sin gate humano). Nada sale de la máquina.
 - **Decisión**: mitigar (medición A fija `envioMs`; `inicioHabla` cancela; modo a mano). Un cerebro externo (grafo/Hermes) queda fuera y exige su propio C3 + C4.
@@ -126,7 +126,7 @@ Sin tablas. Ajustes nuevos en `ajustes.json` (grupo «Conversar con el agente»)
 
 ### Fase N: Validación final
 - [ ] `npm run validate` sellado; `npm run empaqueta dictado` 0.2.0.
-- [ ] En vivo con la dueña, con las trazas en `en-vivo.log`.
+- [ ] En vivo con el laboratorio, con las trazas en `en-vivo.log`.
 - [ ] README §12, SDD §6 fila (f) y cifras copiadas de la medición.
 
 ---
@@ -144,12 +144,12 @@ Sin tablas. Ajustes nuevos en `ajustes.json` (grupo «Conversar con el agente»)
 - **Aplicar en**: cualquier reloj que se arme con un evento «tardío» (pegado, transcripción) tiene que consultar el estado presente, no el orden en que llegó.
 
 ### 2026-09-22: «dale enter» en medio de la frase no hacía nada
-- **Error**: el comando solo valía al final; en manos libres la dueña lo decía y seguía hablando.
+- **Error**: el comando solo valía al final; en manos libres el laboratorio lo decía y seguía hablando.
 - **Fix**: cuentan todas las apariciones (PR #142); la spec se enmendó después, y ese orden es el error de fondo: el QUÉ cambió en código antes que en la spec.
 - **Aplicar en**: toda enmienda de comportamiento en dictado pasa primero por `013-dictado/spec.md`.
 
 ### 2026-09-22: «para el dictado» dentro de una frase dictada
-- **Error**: el agente apagó el dictado porque la frase dictada terminaba así, y la dueña se quedó pulsando Ctrl derecho sin respuesta.
+- **Error**: el agente apagó el dictado porque la frase dictada terminaba así, y el laboratorio se quedó pulsando Ctrl derecho sin respuesta.
 - **Fix**: solo se apaga si se pide en un mensaje aparte.
 - **Aplicar en**: el hook y el modo conversación no interpretan órdenes de control dentro del texto dictado.
 

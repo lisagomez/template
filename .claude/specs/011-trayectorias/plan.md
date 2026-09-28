@@ -48,6 +48,6 @@
 
 ## Gates y riesgos
 
-- **Gate humano**: toda propuesta es un CDC; aplicar es de la dueña.
+- **Gate humano**: toda propuesta es un CDC; aplicar es del laboratorio.
 - **Riesgo**: el hook en `settings.json` del repo es CDC; se deja propuesto y cableado en local.
 - **Riesgo**: cifras históricas de sesiones con modelos fuera de catálogo salen sin coste.

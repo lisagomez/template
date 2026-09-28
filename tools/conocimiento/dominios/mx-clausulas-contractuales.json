@@ -1,0 +1,144 @@
+{
+  "dominio": {
+    "clave": "mx-clausulas-contractuales",
+    "nombre": "Cláusulas de contratos comerciales",
+    "jurisdiccion": "MX",
+    "dimension": "contractual",
+    "cita": "publica",
+    "corte": "2026-07-30",
+    "procedencia": "seed v4 2026-07-30 — LISR/CFF (MX), ET (CO), NIF CINIF, CCF/CCom (MX); verificar contra fuente oficial (DOF/DIAN) antes de produccion;\n\ndatos-personales MX 2026-07-30: LFPDPPP NUEVA LEY (publicada DOF 20-03-2025, vigente 21-03-2025, texto vigente con ultima reforma DOF 14-11-2025; la ley de 2010 quedo ABROGADA por el Transitorio Segundo del Decreto; autoridad de proteccion de datos: Secretaria Anticorrupcion y Buen Gobierno — INAI extinto, Art. 3 fraccion XV). Arts. 3-X, 5, 6, 9-II, 14, 15, 16, 17, 20, 35 y 36 verificados contra el PDF oficial de Diputados (LeyesBiblio), no contra blogs. La regla MX-LFPDPPP-21-CONFIDENCIALIDAD (ley 2010) se retira via _bajas y la sustituye MX-LFPDPPP2025-20-CONFIDENCIALIDAD.",
+    "categorias": [
+      "CLAUSULA_CONFIDENCIALIDAD",
+      "CLAUSULA_PAGO",
+      "CLAUSULA_PENAL",
+      "CLAUSULA_TERMINACION"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "MX-CCF-1797-TERMINACION",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Terminacion: no al arbitrio de una sola parte",
+      "texto_resumen": "La validez y el cumplimiento de los contratos no puede dejarse al arbitrio de uno de los contratantes; las causales y mecanica de terminacion deben ser claras y bilaterales.",
+      "fuente_cita": "Codigo Civil Federal, Art. 1797",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CCF.pdf",
+      "vigente_desde": "1932-10-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "CLAUSULA_TERMINACION",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Causales de terminacion claras y no potestativas de una sola parte (CCF 1797)",
+            "Preaviso y efectos de la terminacion definidos (pagos devengados, entregables, devolucion de informacion)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-CCF-1843-PENA",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Clausula penal: limite",
+      "texto_resumen": "La clausula penal no puede exceder ni en valor ni en cuantia a la obligacion principal; el exceso es nulo.",
+      "fuente_cita": "Codigo Civil Federal, Art. 1843",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CCF.pdf",
+      "vigente_desde": "1932-10-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "CLAUSULA_PENAL",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "La pena convencional no excede el valor de la obligacion principal (CCF 1843)",
+            "Supuestos de incumplimiento que activan la pena definidos con precision"
+          ],
+          "banderas": [
+            "Clausula penal: si excede la obligacion principal, el exceso es nulo (CCF 1843) — revisar cuantia"
+          ],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-CFF-29A-CONTRACTUAL",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Pagos del contrato y facturacion CFDI",
+      "texto_resumen": "Los pagos pactados en el contrato deben ampararse con CFDI que cumpla los requisitos del CFF 29-A; definir moneda, plazos, y retenciones aplicables segun el tipo de contraparte.",
+      "fuente_cita": "CFF Arts. 29 y 29-A",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CFF.pdf",
+      "vigente_desde": "2014-01-01",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "CLAUSULA_PAGO",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Cada pago pactado se factura con CFDI valido (CFF 29-A)",
+            "Moneda, calendario y condiciones de pago definidos sin ambiguedad",
+            "Retenciones aplicables identificadas segun el tipo de contraparte"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Deber de confidencialidad (datos personales)",
+      "texto_resumen": "Quien trate datos personales debe guardar confidencialidad respecto de ellos; la obligacion subsiste aun despues de terminada la relacion con el titular o el responsable.",
+      "fuente_cita": "LFPDPPP Art. 21",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf",
+      "vigente_desde": "2010-07-06",
+      "vigente_hasta": "2025-03-20",
+      "impactos": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Informacion confidencial delimitada (que incluye y que no)",
+            "Plazo de la obligacion definido; si hay datos personales, la confidencialidad subsiste tras terminar la relacion (LFPDPPP 21)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    },
+    {
+      "clave": "MX-LFPDPPP2025-20-CONFIDENCIALIDAD",
+      "jurisdiccion": "MX",
+      "dimension": "contractual",
+      "titulo": "Deber de confidencialidad (datos personales, LFPDPPP 2025)",
+      "texto_resumen": "El responsable o tercero debe establecer controles o mecanismos para que todas las personas que intervengan en cualquier fase del tratamiento de datos personales guarden confidencialidad respecto de estos; la obligacion subsiste aun despues de finalizar sus relaciones con el responsable. Sustituye a la LFPDPPP 2010 (Art. 21), abrogada por el Decreto DOF 20-03-2025 (Transitorio Segundo).",
+      "fuente_cita": "LFPDPPP (nueva ley, DOF 20/03/2025) Art. 20",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf",
+      "vigente_desde": "2025-03-21",
+      "vigente_hasta": null,
+      "reemplaza": "MX-LFPDPPP-21-CONFIDENCIALIDAD",
+      "impactos": [
+        {
+          "categoria": "CLAUSULA_CONFIDENCIALIDAD",
+          "regimen": "GENERAL",
+          "veredicto_base": "dudoso",
+          "requisitos": [
+            "Informacion confidencial delimitada (que incluye y que no)",
+            "Plazo de la obligacion definido; si hay datos personales, la confidencialidad subsiste tras terminar la relacion (LFPDPPP 2025, Art. 20)",
+            "Controles o mecanismos para que toda persona que intervenga en el tratamiento guarde confidencialidad (LFPDPPP 2025, Art. 20)"
+          ],
+          "banderas": [],
+          "parametros": {}
+        }
+      ]
+    }
+  ]
+}

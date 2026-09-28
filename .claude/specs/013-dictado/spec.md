@@ -24,7 +24,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 
 ## Usuarios / actores
 
-- **Quien dicta** — la dueña de la máquina; su voz es el dato que se procesa.
+- **Quien dicta** — el laboratorio, en su propia máquina; su voz es el dato que se procesa.
 - **Integrador** — instala el paquete en otro proyecto y elige motor, pegador y almacén.
 - **Persona en la reunión** — aparece en un lote diarizado; **no usa el sistema**.
 - **Operador del servicio** — levanta `servicio/` en el VPS y custodia el token.
@@ -54,7 +54,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 > cambia y lo dice. RF-8 antes decía: *«aplicará en este orden snippets, comandos de voz,
 > diccionario y limpieza opcional»*; ahora las muletillas van primero. RF-10 antes decía: *«CUANDO
 > el texto termine en una acción verbal […]; en medio del texto no la tratará como acción»*: en
-> uso real (2026-09-22) la dueña decía «dale enter» y seguía hablando sin callar el segundo que
+> uso real (2026-09-22) el laboratorio decía «dale enter» y seguía hablando sin callar el segundo que
 > cierra el turno, y encadenaba dos envíos en un turno; el PR #142 lo cambió y esta spec no lo
 > decía. RF-36 a RF-45 cierran el QUÉ de la conversación por voz con el agente, que
 > `docs/SDD-dictado.md` nombraba como pendiente sin requisito del que colgar.
@@ -206,7 +206,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
 - **Quien esté en la sala (conversación con el agente, 2026-09-22)**: el altavoz dice el primer
   párrafo de cada respuesta del agente y quien esté cerca lo oye; el modo se enciende y se apaga a
   mano. El micrófono en manos libres capta a cualquiera que hable en la sala, y ese texto entra en
-  la caja del agente como si fuera de la dueña: por eso el envío por silencio solo actúa con el
+  la caja del agente como si fuera del laboratorio: por eso el envío por silencio solo actúa con el
   dictado escuchando, encendido por ella, y todo lo irreversible sigue pasando por gate humano en
   el terminal. Nada sale de la máquina.
 
@@ -228,7 +228,7 @@ Y que quede escrito, con cifras, hasta dónde se alinea sflow con `voz`.
   en verde con `integracion`.
 - `npm run mide` con la tabla en README y SDD, JSON crudo versionado.
 - **Prueba en vivo con una persona** (casos a y b del GOAL): hecha el 2026-09-16 — frases dictadas
-  a Claude Code y al Bloc de notas, confirmadas por la dueña, con latencias en el SDD §6.
+  a Claude Code y al Bloc de notas, confirmadas por el laboratorio, con latencias en el SDD §6.
 - `npm run validate` en verde, o el rojo ajeno demostrado como tal.
 
 ## Dudas abiertas

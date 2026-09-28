@@ -1,0 +1,90 @@
+{
+  "dominio": {
+    "clave": "mx-logistica-carga",
+    "nombre": "Logística de carga (autotransporte y aérea)",
+    "jurisdiccion": "MX",
+    "dimension": "regulatorio",
+    "cita": "publica",
+    "corte": "2026-09-02",
+    "procedencia": "logistica MX 2026-09-02: Ley de Caminos, Puentes y Autotransporte Federal (texto vigente, ultima reforma DOF 14-11-2025, Ley publicada DOF 22-12-1993 y en vigor al dia siguiente) y Ley de Aviacion Civil (texto vigente, ultima reforma DOF 14-11-2025, publicada DOF 12-05-1995 y en vigor al dia siguiente), Arts. 8o./50/66/68 LCPAF y 11/55/56 LAC leidos del PDF oficial de Diputados con pypdf. Cierran las dos categorias que el escaneo regulatorio del Pre-Discovery esperaba y el seed no tenia (AUTOTRANSPORTE_CARGA y CARGA_AEREA_EAWB), cuyo mock las dictaminaba con fuente IATA sin anclaje nacional. La base mexicana de la guia aerea es el Art. 55 LAC —el contrato DEBE constar en carta de porte o guia de carga aerea— y el formato lo fija una NOM que NO esta sembrada: por eso la forma ELECTRONICA (e-AWB) queda como bandera y la Resolucion 672 de IATA se declara estandar sectorial, no exigencia de autoridad. Fuera de alcance: reglamentos de materiales peligrosos, la NOM del formato de la guia, el Convenio de Montreal y las Reglas Generales de Comercio Exterior.",
+    "categorias": [
+      "AUTOTRANSPORTE_CARGA",
+      "CARGA_AEREA_EAWB"
+    ]
+  },
+  "reglas": [
+    {
+      "clave": "MX-LAC-55-56-CARGA-AEREA",
+      "jurisdiccion": "MX",
+      "dimension": "regulatorio",
+      "titulo": "Carga aerea: el contrato de transporte debe constar en carta de porte o guia de carga aerea",
+      "texto_resumen": "El contrato de transporte de carga es el acuerdo por el que el concesionario o permisionario se obliga frente al embarcador a trasladar sus mercancias y entregarlas al consignatario contra el pago de un precio. Ese contrato DEBE constar en una carta de porte o guia de carga aerea que el concesionario o permisionario expide al embarcador al recibir las mercancias bajo su custodia, y cuyo formato se sujeta a lo especificado en la norma oficial mexicana respectiva. El embarcador responde de la exactitud de las declaraciones consignadas en ella. En transporte aereo internacional el contrato se sujeta a los tratados y a esta Ley. El porteador puede retener la carga hasta que se cubra el precio indicado (Art. 56).",
+      "fuente_cita": "Ley de Aviacion Civil, Arts. 55 y 56 (texto vigente, ultima reforma de la Ley DOF 14-11-2025; articulos sin reforma anotada; Ley publicada DOF 12-05-1995 y en vigor al dia siguiente conforme a su Transitorio Primero)",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LAC.pdf",
+      "vigente_desde": "1995-05-13",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "CARGA_AEREA_EAWB",
+          "regimen": "GENERAL",
+          "veredicto_base": "permitido",
+          "requisitos": [
+            "Documentar el contrato de transporte de carga en una carta de porte o guia de carga aerea, expedida por el concesionario o permisionario al embarcador al recibir las mercancias bajo su custodia (Art. 55, parrafo segundo)",
+            "Sujetar el formato de la carta de porte o guia de carga aerea a lo especificado en la norma oficial mexicana respectiva (Art. 55, parrafo segundo)",
+            "El embarcador debe responder por la exactitud de las declaraciones que el o sus representantes consignen en la carta de porte o guia de carga aerea (Art. 55, parrafo tercero)",
+            "En servicios de transporte aereo internacional, sujetar el contrato de transporte de carga a lo dispuesto en los tratados y en esta Ley (Art. 55, parrafo cuarto)",
+            "Verificar que quien presta el servicio al publico de transporte aereo cuente con la concesion o el permiso que corresponda al tipo de servicio (Art. 11)"
+          ],
+          "banderas": [
+            "El formato del documento lo fija una norma oficial mexicana que NO esta sembrada en este grafo: que una guia ELECTRONICA (e-AWB) satisfaga el requisito de forma del Art. 55 debe cotejarse contra esa NOM antes de afirmarlo",
+            "La Resolucion 672 de IATA y el Acuerdo Multilateral e-AWB son estandar SECTORIAL, no exigencia de autoridad mexicana: acreditan practica de la industria, no cumplimiento del Art. 55",
+            "En transporte aereo internacional rigen ademas los tratados (Convenio de Montreal), que NO forman parte de este grafo",
+            "El porteador tiene derecho de retener la carga hasta que se cubra el precio indicado en la carta de porte o guia de carga aerea (Art. 56)",
+            "La transmision de informacion anticipada de carga ante la autoridad aduanera es una obligacion PARALELA y distinta: vive en la Ley Aduanera y en las Reglas Generales de Comercio Exterior"
+          ],
+          "parametros": {
+            "verificar": false
+          }
+        }
+      ]
+    },
+    {
+      "clave": "MX-LCPAF-8-50-66-68-AUTOTRANSPORTE",
+      "jurisdiccion": "MX",
+      "dimension": "regulatorio",
+      "titulo": "Autotransporte federal de carga: permiso de la Secretaria, alcance, responsabilidad y garantia",
+      "texto_resumen": "Se requiere permiso otorgado por la Secretaria para la operacion y explotacion de los servicios de autotransporte federal de carga, para los servicios de paqueteria y mensajeria y para el transporte privado de carga (Art. 8o., fracciones I, IV y XI). El permiso de autotransporte de carga autoriza a transportar cualquier tipo de bienes en todos los caminos de jurisdiccion federal, y los objetos voluminosos o de gran peso exigen permiso especial (Art. 50). El permisionario responde de las perdidas y danos de los bienes desde que recibe la carga hasta que la entrega, con cinco excepciones (Art. 66), y esta obligado a garantizar los danos a terceros y, en materiales y residuos peligrosos, a amparar la carga de puerta a puerta (Art. 68).",
+      "fuente_cita": "Ley de Caminos, Puentes y Autotransporte Federal, Arts. 8o. fracciones I, IV y XI, 50, 66 y 68 (texto vigente, ultima reforma de la Ley DOF 14-11-2025; articulos sin reforma anotada; Ley publicada DOF 22-12-1993 y en vigor al dia siguiente conforme a su Articulo Primero Transitorio)",
+      "fuente_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LCPAF.pdf",
+      "vigente_desde": "1993-12-23",
+      "vigente_hasta": null,
+      "impactos": [
+        {
+          "categoria": "AUTOTRANSPORTE_CARGA",
+          "regimen": "GENERAL",
+          "veredicto_base": "permitido",
+          "requisitos": [
+            "Obtener permiso de la Secretaria para la operacion y explotacion del servicio de autotransporte federal de carga (Art. 8o., fraccion I)",
+            "Obtener permiso tambien para los servicios de paqueteria y mensajeria (Art. 8o., fraccion IV) y para el transporte privado de carga, salvo lo dispuesto en el Art. 40 (Art. 8o., fraccion XI)",
+            "Los permisos de las fracciones I a III, IV y XI se otorgan a todo aquel que cumpla los requisitos de la Ley y su reglamento (Art. 8o., parrafo tercero)",
+            "Obtener permiso especial de la Secretaria cuando se transporten objetos voluminosos o de gran peso (Art. 50, parrafo tercero)",
+            "Garantizar, en los terminos que autorice la Secretaria, los danos que puedan ocasionarse a terceros en sus bienes y personas, a las vias generales de comunicacion y cualquier otro dano que genere el vehiculo o la carga en caso de accidente (Art. 68, parrafo primero)",
+            "Tratandose de materiales, residuos, remanentes y desechos peligrosos, el seguro debe amparar la carga desde que sale de las instalaciones del expedidor o generador hasta que la recibe el consignatario en el destino final, incluyendo los riesgos de la carga y la descarga (Art. 68, parrafo segundo)"
+          ],
+          "banderas": [
+            "El permisionario responde de las perdidas y danos de los bienes desde que recibe la carga hasta que la entrega al destinatario, salvo las cinco excepciones del Art. 66: vicios propios o embalaje inadecuado, deterioro por la naturaleza de la carga, transporte en vehiculo descubierto a peticion escrita del remitente, falsas declaraciones del cargador o consignatario, y falta de declaracion de valor",
+            "Si el usuario NO declara el valor de la mercancia, la responsabilidad queda limitada a 15 dias de salario minimo por tonelada (Art. 66, fraccion V): declarar el valor es una decision economica, no un tramite administrativo",
+            "El Art. 66 fraccion V refiere el salario minimo general vigente en el Distrito Federal, denominacion anterior a la UMA: cotejar la conversion vigente antes de calcular el limite",
+            "El autotransporte de materiales, residuos, remanentes y desechos peligrosos se rige ademas por los reglamentos respectivos, que NO forman parte de este grafo (Art. 50, parrafo segundo)",
+            "El permiso habilita el servicio de transporte; NO sustituye las obligaciones aduaneras de quien importa o exporta la mercancia transportada",
+            "El complemento Carta Porte del CFDI es una obligacion FISCAL distinta del permiso de autotransporte: vive en la Resolucion Miscelanea Fiscal y en las Reglas Generales de Comercio Exterior, que NO forman parte de este grafo"
+          ],
+          "parametros": {
+            "limite_responsabilidad_dias_salario_por_tonelada": 15,
+            "verificar": true
+          }
+        }
+      ]
+    }
+  ]
+}
