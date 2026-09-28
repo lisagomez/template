@@ -105,6 +105,8 @@ async function recibirDespues(h, d, capturas) {
   await escaneaEnZona(p, h.zona('RECIBO'), d);
   await sinDestello(p);
   if (await escaneaEnZona(p, h.caja(h.cajaDe('YOG-001'), h.dia(34), 'ZR102'), d) !== 'recibido') await falla(p, 'no se recibió en zona de recibo');
+  // Al recibir se ve (y queda en el RECIBIDO) cuanto habia del articulo y del lote y cuanto hay despues.
+  await p.waitForSelector('[data-prueba="destello"] [data-prueba="inventario-escaneo"]');
   capturas.recibido = await h.pantalla(p, 'zona-recibido-celular');
   await sinDestello(p);
   capturas.recibidoTarjeta = await h.foto(p, 'main', 'zona-recibido-tarjeta-celular');

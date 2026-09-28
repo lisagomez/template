@@ -5,7 +5,8 @@
 #   2. pruebas (a)…(t) — (h)…(l) son el expediente: cadena, solo-agregar, anclas y conteo;
 #      (m)…(p) la recepción con foto: EN_REVISION sin caducidad, confirma quien registró, fotos por huella;
 #      (q)…(t) escanear por zona: ronda y tareas, TAREA_CERRADA, HALLAZGO, dispositivos, conteo cíclico;
-#      (u) códigos anteriores: siguen siendo del artículo y no se dan a otro
+#      (u) códigos anteriores: siguen siendo del artículo y no se dan a otro;
+#      (v) la foto del inventario de una recepción: después = antes + lo recibido
 #   3. re-corre 004 TAL CUAL y comprueba el hallazgo: reabre el UPDATE de los ledgers del pack
 #   4. aplica 004 con los ledgers del pack en su lista + el pack otra vez (idempotencia) → verde
 #   5. ventas de PRUEBA en el ERP y el adaptador del agente leyéndolas como erp_lector
@@ -30,7 +31,7 @@ docker run -d --name "$ID" -e POSTGRES_PASSWORD="$(openssl rand -hex 12)" "$IMAG
 for _ in $(seq 60); do docker exec "$ID" pg_isready -U postgres >/dev/null 2>&1 && break; sleep 1; done
 sleep 1
 sql() { docker exec -e PGOPTIONS='-c client_min_messages=warning' -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 "$@"; }
-prueba() { docker exec -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 < "$DIR/pruebas.sql" 2>&1 | sed -n 's/^.*NOTICE:  \(([a-u])\)/  \1/p'; }
+prueba() { docker exec -i "$ID" psql -U postgres -X -q -v ON_ERROR_STOP=1 < "$DIR/pruebas.sql" 2>&1 | sed -n 's/^.*NOTICE:  \(([a-v])\)/  \1/p'; }
 
 echo "== 1. ERP 001..005 + pack"
 for f in "$TMP"/00[1-5]_*.sql; do sql < "$f" >/dev/null; done
@@ -65,4 +66,4 @@ prueba
 echo "== 5. ventas del ERP para el agente de riesgo (adaptador del núcleo, leído como erp_lector: rol_swm + tenant)"
 (cd "$DIR/.." && npx tsc -p tsconfig.json)
 node "$DIR/prueba-ventas-erp.mjs" "$ID"
-echo "== OK: la propuesta se instala dos veces, cierra con 004 y pasa (a)…(u); el agente lee ventas de prueba del ERP en solo lectura. No se aplicó a ninguna base real."
+echo "== OK: la propuesta se instala dos veces, cierra con 004 y pasa (a)…(v); el agente lee ventas de prueba del ERP en solo lectura. No se aplicó a ninguna base real."

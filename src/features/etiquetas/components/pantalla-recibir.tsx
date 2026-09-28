@@ -15,7 +15,7 @@ import {
   type Devolucion, type Interpretacion, type Lectura,
 } from '../services/nucleo.ts';
 import { subeFoto, type EstadoCliente, type FotoSubida } from '../services/cliente.ts';
-import { gtinLegible } from '../services/presenta.ts';
+import { gtinLegible, textoInventario } from '../services/presenta.ts';
 import { enlaceExpediente } from '../services/tipos-expediente.ts';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { BandejaRevisiones } from './bandeja-revisiones.tsx';
@@ -31,7 +31,8 @@ import { VincularGtin } from './vincular-gtin.tsx';
 import { VistaEtiqueta } from './vista-etiqueta.tsx';
 
 type Codigo = { gtin: string; nivel: 'unidad' | 'caja'; formato?: string };
-type Hecho = { ok: boolean; motivo?: string; existencia?: { lote: string; caducidad: string; cantidad: number; gtin: string }; rechazada?: Devolucion; corregida?: { fecha: boolean; lote: boolean }; eventos?: { seq: number; tipo: string; hash: string }[] };
+type Inventario = { antes: { lote: number; articulo: number }; despues: { lote: number; articulo: number } };
+type Hecho = { ok: boolean; motivo?: string; existencia?: { lote: string; caducidad: string; cantidad: number; gtin: string }; inventario?: Inventario; rechazada?: Devolucion; corregida?: { fecha: boolean; lote: boolean }; eventos?: { seq: number; tipo: string; hash: string }[] };
 
 function Consejos({ est, sku }: { est: EstadoCliente; sku: string }) {
   const donde = fotoDe(est, sku, 'caducidad');
@@ -206,6 +207,7 @@ function Resultado({ e, hecho, sitio, sku, cajas }: { e: Etiquetas; hecho: Hecho
   return (
     <div className="space-y-3" data-prueba="recibido">
       <p className="rounded-lg bg-emerald-50 p-2 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">Recibido: {x.cantidad} caja(s) · lote <b>{x.lote}</b> · caducidad <b>{x.caducidad}</b>{hecho.corregida ? ` · ${hecho.corregida.fecha || hecho.corregida.lote ? 'corregida por ti' : 'confirmada tal cual'}` : ''} · evento #{hecho.eventos?.[0]?.seq} en la cadena de {sitio}. <a className="font-semibold underline" href={enlaceExpediente({ gtin: x.gtin, lote: x.lote, caducidad: x.caducidad })}>Ver expediente</a></p>
+      {hecho.inventario ? <p className="rounded-lg bg-neutral-100 p-2 text-sm dark:bg-neutral-800" data-prueba="inventario-recepcion">Al recibir, {textoInventario(hecho.inventario)}.</p> : null}
       <p className="text-sm font-medium">3 · Etiqueta GS1-128 de la casa para las {cajas} caja(s): desde aquí se leen por código.</p>
       <EtiquetaDeLaCasa e={e} sitio={sitio} sku={sku} lote={x.lote} caducidad={x.caducidad} cajas={cajas} />
     </div>

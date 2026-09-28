@@ -534,3 +534,34 @@ pruebas (q) a (t), dos instalaciones. 004 debe listar también `eti_ronda` y `et
 **Evidencia**: `npm run prueba:etiquetas` (núcleo `pruebas/zonas.ts` + app `pruebas/zonas-app.ts`),
 `npm run capturas:etiquetas` (flujos 37 a 44 y la tabla de agilidad al final del output),
 `bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh`.
+
+## 13. La foto del inventario en la recepción
+
+**Decisión del laboratorio (2026-09-28)**: al recibir se ve, y queda en la cadena, cuánto había de ese
+artículo en el sitio antes de recibir y cuánto hay después, por lote y en total.
+
+- **Qué se guarda**: el RECIBIDO lleva `existencia: {antes, despues}`, con las cajas del LOTE recibido y
+  del ARTÍCULO entero en el sitio. Cuenta todas las zonas menos la merma (lo que ya no es inventario
+  disponible) e incluye los lotes con un GTIN anterior del mismo artículo. Va en toda recepción:
+  lector, «Recibir» directo o con foto (al confirmar), zona de recibo en «Escanear», alta por
+  etiquetado y el destino de una transferencia. Un RECHAZADO no la lleva: no entra al inventario.
+- **No se puede inventar**: la foto va dentro del evento, así que el hash la protege. Además, la
+  PROYECCIÓN que reconstruye el inventario desde la cadena la vuelve a calcular en ese punto. Si no
+  cuadra, la integridad del sitio lo delata («trae una foto del inventario que no cuadra con la
+  cadena»), aunque la cadena y el estado guardado sean coherentes entre sí. Ningún llamador puede
+  sobrescribirla (va después de los datos extra).
+- **Dónde se ve**: en el destello y la tarjeta del escaneo en recibo, en el resultado de «Recibir» y
+  del lector, y en el expediente del lote («existencia en el sitio: 30 → 42 caja(s) del artículo (de
+  este lote: 0 → 12)»).
+- **Ciego**: el almacenista no recibe en su zona. Aun así, `vistaSinCantidades` quita la foto de
+  cualquier vista.
+- **ERP (propuesta, no aplicada)**: `eti_evento_foto_inventario_check` exige que la foto vaya solo en
+  un RECIBIDO y que lo de después sea lo de antes más lo recibido (lote y artículo). Prueba (v) en el
+  Postgres efímero.
+- **Pruebas**: `pruebas/inventario-en-recepcion.ts` (4) en el núcleo y la última de
+  `pruebas/zonas-app.ts` en la app.
+
+| Riesgo | Qué se hizo | Queda |
+|---|---|---|
+| La foto dice otra cosa que el inventario real del momento | La proyección la recalcula desde la cadena y la integridad lo delata. | Es la foto del SISTEMA, no un conteo físico: si el sistema ya estaba mal, la foto lo refleja fiel. Eso lo corrige el conteo cíclico. |
+| El artículo cuenta mal si un GTIN cambia de dueño | Se cuenta por artículo y la cadena asocia cada GTIN a su artículo. Un código anterior no se da a otro artículo sin decisión humana (§12). | Si se fuerza esa decisión, las fotos siguientes cuentan el GTIN con su nuevo dueño. |

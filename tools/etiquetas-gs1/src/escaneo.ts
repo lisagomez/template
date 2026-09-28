@@ -17,7 +17,7 @@
 import type { Evento } from './cadena.js'
 import { identificaGtin } from './codigos-anteriores.js'
 import { esErrorLectura, parseaLectura } from './elementos.js'
-import { claveDe, mueveConExpediente, recibeConExpediente, registra, ubica, type Paso } from './expediente.js'
+import { claveDe, mueveConExpediente, recibeConExpediente, registra, ubica, type FotoInventario, type Paso } from './expediente.js'
 import { interpreta, type Interpretacion } from './existencias.js'
 import { diasParaCaducar } from './fefo.js'
 import type { Json } from './jcs.js'
@@ -69,6 +69,8 @@ export interface VistaEscaneo {
   /** Lotes del articulo en el sitio (pieza suelta, codigo del proveedor): SIN cantidades. */
   readonly lotes?: readonly { readonly lote: string; readonly caducidad: string; readonly semaforo: EstadoSemaforo; readonly ubicacion: string }[]
   readonly tarea?: { readonly id: string; readonly tipo: string; readonly instruccion: string }
+  /** Recibo: cuanto habia del lote y del articulo en el sitio antes de recibir y cuanto hay despues. */
+  readonly inventario?: FotoInventario
   /** Hash del MOVIDO que se puede deshacer (CORRECCION). */
   readonly deshacer?: string
   readonly evento?: { readonly seq: number; readonly hash: string; readonly tipo: string }
@@ -161,7 +163,7 @@ function enRecibo(estado: EstadoAlmacen, p: PedidoEscaneo, l: Interpretacion): R
   const ev = r.resultado.eventos[0]!
   const rech = r.resultado.valor.rechazada
   if (rech) return { estado: r.estado, eventos: r.resultado.eventos, vista: { tipo: 'rechazado', color: 'error', titulo: 'RECHAZADO: no se recibe', detalle: [rech.regla, `Devolución ${rech.folio}.`], sonido: 'error', articulo: articuloDe(l), evento: { seq: ev.seq, hash: ev.hash, tipo: ev.tipo } }, }
-  return { estado: r.estado, eventos: r.resultado.eventos, vista: { tipo: 'recibido', color: vistaLote(r.estado, l, p.hoy).semaforo, titulo: 'Recibido', detalle: [`${l.articulo.descripcion} · lote ${l.lote} · ${cuantas(p)}`], sonido: 'ok', articulo: articuloDe(l), lote: vistaLote(r.estado, l, p.hoy, 'RECIBO'), evento: { seq: ev.seq, hash: ev.hash, tipo: ev.tipo } } }
+  return { estado: r.estado, eventos: r.resultado.eventos, vista: { tipo: 'recibido', color: vistaLote(r.estado, l, p.hoy).semaforo, titulo: 'Recibido', detalle: [`${l.articulo.descripcion} · lote ${l.lote} · ${cuantas(p)}`], sonido: 'ok', articulo: articuloDe(l), lote: vistaLote(r.estado, l, p.hoy, 'RECIBO'), ...(r.resultado.valor.inventario ? { inventario: r.resultado.valor.inventario } : {}), evento: { seq: ev.seq, hash: ev.hash, tipo: ev.tipo } } }
 }
 
 function infoAlmacen(estado: EstadoAlmacen, p: PedidoEscaneo, l: Interpretacion, aqui: Existencia): ResultadoEscaneo {
@@ -276,7 +278,10 @@ function conCodigoAnterior(l: Interpretacion, r: ResultadoEscaneo): ResultadoEsc
 
 /** La vista para el ALMACENISTA: el mismo resultado sin cifras del sistema en ningun texto. */
 export function vistaSinCantidades(v: VistaEscaneo): VistaEscaneo {
-  return { ...v, titulo: sinCantidades(v.titulo), detalle: v.detalle.map((d) => (/caja\(s\) escaneada\(s\)/.test(d) ? d : sinCantidades(d))) }
+  // La foto del inventario de una recepcion ES cantidad del sistema: fuera, aunque el almacenista no reciba.
+  const { inventario: _inventario, ...resto } = v
+  void _inventario
+  return { ...resto, titulo: sinCantidades(v.titulo), detalle: v.detalle.map((d) => (/caja\(s\) escaneada\(s\)/.test(d) ? d : sinCantidades(d))) }
 }
 
 const skuDe = (estado: EstadoAlmacen, gtin: string): string => identificaGtin(estado, gtin)?.articulo.sku ?? ''
