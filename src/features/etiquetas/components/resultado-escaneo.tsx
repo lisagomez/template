@@ -7,7 +7,7 @@
  */
 import { useEffect } from 'react';
 import type { EstadoSemaforo, VistaEscaneo } from '../services/nucleo.ts';
-import { COLOR_SEMAFORO } from '../services/presenta.ts';
+import { COLOR_SEMAFORO, textoInventario } from '../services/presenta.ts';
 
 export const COLOR_VISTA: Record<VistaEscaneo['color'], string> = {
   ...COLOR_SEMAFORO,
@@ -42,6 +42,7 @@ function Cuerpo({ v }: { v: VistaEscaneo }) {
       <p className="text-3xl font-black leading-tight" data-prueba="titulo-escaneo">{v.titulo}</p>
       {v.articulo?.descripcion ? <p className="text-lg font-semibold">{v.articulo.descripcion}</p> : null}
       {v.lote ? <p className="text-base" data-prueba="lote-escaneo">Lote <b>{v.lote.lote}</b> · caduca <b>{v.lote.caducidad}</b>{v.lote.ubicacion ? <> · en <b>{v.lote.ubicacion}</b></> : null}</p> : null}
+      {v.inventario ? <p className="rounded-lg bg-black/15 px-2 py-1 text-base font-semibold" data-prueba="inventario-escaneo">Al recibir: {textoInventario(v.inventario)}</p> : null}
       {v.fefo ? <p className="rounded-lg bg-black/15 px-2 py-1 text-base font-bold" data-prueba="fefo-escaneo">Baja primero el lote {v.fefo.lote} (caduca {v.fefo.caducidad}) de {v.fefo.ubicacion}</p> : null}
       {v.detalle.filter((d) => !repetido(v, d)).map((d) => <p key={d} className="text-sm opacity-90">{d}</p>)}
       {v.tarea ? <p className="rounded-lg bg-white/20 px-2 py-1 text-sm font-semibold" data-prueba="tarea-cerrada">✓ Tarea de la ronda cerrada: {v.tarea.instruccion}</p> : null}

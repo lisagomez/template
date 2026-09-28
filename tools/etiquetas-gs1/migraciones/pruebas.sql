@@ -374,3 +374,20 @@ do $$ begin
   if exists (select 1 from erp.eti_codigo_anterior where gtin = '19521111000010') then raise exception '(u) vuelto a ser vigente, no es anterior'; end if;
   raise notice '(u) OK el código sustituido sigue siendo del artículo (vista del libro de asignaciones); a otro no se le da; al mismo sí vuelve';
 end $$;
+
+-- (v) la foto del inventario de una recepción: solo en un RECIBIDO y con después = antes + lo recibido
+do $$ begin
+  begin
+    insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 11, '2026-09-28T09:00:00.000Z', 'RECIBIDO', '19521111000010', 'L9001', '2027-06-30', '{"cajas":12,"zona":"recibo","sku":"YOG-001","existencia":{"antes":{"lote":0,"articulo":30},"despues":{"lote":12,"articulo":50}},"cambios":[{"zona":"recibo","cajas":12}]}', 'op-5e1a0c04', 'sha256:e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4', null, 'sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5');
+    raise exception '(v) aceptó una foto donde el artículo no sube lo recibido';
+  exception when check_violation then null; end;
+  begin
+    insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 11, '2026-09-28T09:00:00.000Z', 'MOVIDO', '19521111000010', 'L9001', '2027-06-30', '{"cajas":1,"a":"piso","existencia":{"antes":{"lote":12,"articulo":42},"despues":{"lote":13,"articulo":43}},"cambios":[]}', 'op-5e1a0c04', 'sha256:e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4', null, 'sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5');
+    raise exception '(v) aceptó una foto del inventario en un evento que no es recepción';
+  exception when check_violation then null; end;
+end $$;
+insert into erp.eti_evento (cliente_id, eti_sitio_id, sitio, seq, fecha, tipo, gtin, lote, caducidad, datos, operador, anterior, anterior_lote, hash) values ('11111111-1111-4111-8111-111111111111', 'cccccccc-0000-4000-8000-000000000001', 'CEDIS-NTE', 11, '2026-09-28T09:00:00.000Z', 'RECIBIDO', '19521111000010', 'L9001', '2027-06-30', '{"cajas":12,"zona":"recibo","sku":"YOG-001","existencia":{"antes":{"lote":0,"articulo":30},"despues":{"lote":12,"articulo":42}},"cambios":[{"zona":"recibo","cajas":12}]}', 'op-5e1a0c04', 'sha256:e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4', null, 'sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5');
+do $$ begin
+  if (select (datos->'existencia'->'despues'->>'articulo')::int from erp.eti_evento where hash = 'sha256:e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5') <> 42 then raise exception '(v) no quedó la foto'; end if;
+  raise notice '(v) OK la foto del inventario va en el RECIBIDO y después = antes + lo recibido (lote y artículo)';
+end $$;

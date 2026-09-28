@@ -10,7 +10,7 @@ import {
   type Devolucion, type EstadoAlmacen, type Interpretacion, type Lectura,
 } from '../services/nucleo.ts';
 import type { EstadoCliente } from '../services/cliente.ts';
-import { COLOR_SEMAFORO, fechaCorta, gtinLegible, hashCorto } from '../services/presenta.ts';
+import { COLOR_SEMAFORO, fechaCorta, gtinLegible, hashCorto, textoInventario } from '../services/presenta.ts';
 import { enlaceExpediente } from '../services/tipos-expediente.ts';
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { EntradaPistola } from './entrada-pistola.tsx';
@@ -40,13 +40,13 @@ export function PantallaLector({ e }: { e: Etiquetas }) {
   const inter: Interpretacion | null = lectura ? interpreta(lectura.elementos, comoEstado(est), est.hoy) : null;
 
   const procesa = (t: string) => { setTexto(t); setAviso(null); setDevolucion(null); };
-  type Recepcion = { ok: boolean; motivo?: string; rechazada?: Devolucion; eventos?: { seq: number; hash: string }[] };
+  type Recepcion = { ok: boolean; motivo?: string; rechazada?: Devolucion; inventario?: Parameters<typeof textoInventario>[0]; eventos?: { seq: number; hash: string }[] };
   const recibe = () => {
     if (!texto) return;
     void e.ejecuta<Recepcion>({ accion: 'recepcion', sitio, texto }).then(
       (x) => {
         if (x.rechazada) { setDevolucion(x.rechazada); setAviso(null); return; }
-        setAviso(x.ok ? `Recibido en ${sitio} · evento #${x.eventos?.[0]?.seq ?? '?'} (${hashCorto(x.eventos?.[0]?.hash)}) en la cadena del sitio.` : x.motivo ?? 'no se pudo');
+        setAviso(x.ok ? `Recibido en ${sitio} · evento #${x.eventos?.[0]?.seq ?? '?'} (${hashCorto(x.eventos?.[0]?.hash)}) en la cadena del sitio.${x.inventario ? ` Al recibir, ${textoInventario(x.inventario)}.` : ''}` : x.motivo ?? 'no se pudo');
       },
       (err: unknown) => setAviso(err instanceof Error ? err.message : String(err)),
     );

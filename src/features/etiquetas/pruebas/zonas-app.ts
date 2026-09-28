@@ -116,3 +116,19 @@ test('la cola sin señal: el mismo idCliente no se aplica dos veces', async () =
   assert.deepEqual(r2.vista, r1.vista);
   assert.ok(despues - antes >= 1 && despues - antes <= 2, 'un MOVIDO (y a lo sumo su cierre de tarea), no dos');
 });
+
+test('al recibir, recibo y supervisor ven la foto del inventario (antes → después); y queda en el RECIBIDO', async () => {
+  const gln = await glnDe('SUC-CENTRO');
+  await pide('recibo', escanea('SUC-CENTRO', 'recibo', `(414)${gln}(254)RECIBO`, 30), 'Recibo Uno');
+  const texto = `(01)19521111000010(17)${aAammdd(sumaDiasIso(HOY, 34))}(10)ZINV1`;
+  const r = (await pide('recibo', escanea('SUC-CENTRO', 'recibo', texto, 31, { veces: 6 }), 'Recibo Uno')).cuerpo as { vista: { tipo: string; inventario?: { antes: { lote: number; articulo: number }; despues: { lote: number; articulo: number } } } };
+  assert.equal(r.vista.tipo, 'recibido');
+  const inv = r.vista.inventario!;
+  assert.deepEqual([inv.antes.lote, inv.despues.lote], [0, 6]);
+  assert.equal(inv.despues.articulo - inv.antes.articulo, 6, 'el artículo sube lo que se recibió');
+  const otra = (await pide('operacion', { accion: 'recepcion', sitio: 'SUC-CENTRO', texto }, 'Supervisor')).cuerpo as { ok: boolean; inventario?: typeof inv };
+  assert.ok(otra.ok);
+  assert.deepEqual([otra.inventario?.antes.lote, otra.inventario?.despues.lote], [6, 7], 'la segunda recepción del lote parte de lo que dejó la primera');
+  const ev = (await almacenDelServidor().lee()).eventos!['SUC-CENTRO']!.at(-1)!;
+  assert.deepEqual(ev.datos['existencia'], otra.inventario, 'y es lo que quedó en la cadena');
+});

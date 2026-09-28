@@ -107,6 +107,14 @@ export const COLOR_CLASE: Record<string, string> = {
 const ZONA_LEGIBLE: Record<string, string> = { recibo: 'recibo', almacen: 'almacén', piso: 'piso de venta', merma: 'merma' };
 
 /** Lo que dice un evento, en una linea, a partir de sus datos. */
+/** La foto del inventario de una recepcion, en una linea: el articulo en el sitio y el lote. */
+export function textoInventario(i: { antes: { lote: number; articulo: number }; despues: { lote: number; articulo: number } }): string {
+  return `existencia en el sitio: ${i.antes.articulo} → ${i.despues.articulo} caja(s) del artículo (de este lote: ${i.antes.lote} → ${i.despues.lote})`;
+}
+
+const esInventario = (x: unknown): x is Parameters<typeof textoInventario>[0] =>
+  typeof x === 'object' && x !== null && typeof (x as { antes?: { articulo?: unknown } }).antes?.articulo === 'number' && typeof (x as { despues?: { articulo?: unknown } }).despues?.articulo === 'number';
+
 export function describeEvento(ev: Evento): string {
   const d = ev.datos;
   const n = (k: string) => (typeof d[k] === 'number' ? Number(d[k]) : undefined);
@@ -117,7 +125,7 @@ export function describeEvento(ev: Evento): string {
       const p = (d['propuesta'] ?? {}) as { estado?: string; fecha?: string; lote?: string; motor?: string };
       return [`${cajas} por confirmar (folio ${ev.lote.lote})`, p.fecha ? `la máquina propuso ${p.fecha}${p.lote ? ` · lote ${p.lote}` : ''}` : `la máquina no propuso fecha (${p.estado})`, p.motor ? `motor ${p.motor}` : '', t('reemplaza') ? 'otra toma de la misma recepción' : ''].filter(Boolean).join(' · ');
     }
-    case 'RECIBIDO': return [`${cajas} en ${ZONA_LEGIBLE[t('zona') ?? ''] ?? t('zona')}`, lecturaLegible(d['lectura']), t('desde') ? `transferidas desde ${t('desde')}` : '', d['apertura'] ? 'inventario inicial (apertura)' : '', n('diasRestantes') !== undefined ? `le quedaban ${n('diasRestantes')} días (mínimo ${n('minimoDias')})` : ''].filter(Boolean).join(' · ');
+    case 'RECIBIDO': return [`${cajas} en ${ZONA_LEGIBLE[t('zona') ?? ''] ?? t('zona')}`, esInventario(d['existencia']) ? textoInventario(d['existencia']) : '', lecturaLegible(d['lectura']), t('desde') ? `transferidas desde ${t('desde')}` : '', d['apertura'] ? 'inventario inicial (apertura)' : '', n('diasRestantes') !== undefined ? `le quedaban ${n('diasRestantes')} días (mínimo ${n('minimoDias')})` : ''].filter(Boolean).join(' · ');
     case 'RECHAZADO': return d['descartada'] ? `${cajas} · revisión descartada: ${t('motivo')}` : `${cajas} · ${t('regla')} · le quedaban ${n('diasRestantes')} días · devolución ${t('devolucion')}${d['lectura'] && typeof d['lectura'] === 'object' ? ` · ${lecturaLegible(d['lectura'])}` : ''}`;
     case 'UBICADO': return `${cajas} en rack ${t('posicion')}`;
     case 'MOVIDO': return `${cajas} a ${ZONA_LEGIBLE[t('a') ?? ''] ?? t('a')}${t('sscc') ? ` (tarima ${t('sscc')})` : ''}`;

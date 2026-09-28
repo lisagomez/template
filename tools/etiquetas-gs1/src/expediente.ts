@@ -75,7 +75,27 @@ export function semaforoDe(estado: EstadoAlmacen, sku: string, caducidad: string
   return { dias, estado: estadoSemaforo(dias, categoriaPorId(estado.configuracion.categorias, estado.articulos[sku]?.categoria)) }
 }
 
-export type ValorRecepcion = { readonly existencia: Existencia; readonly rechazada?: undefined } | { readonly rechazada: Devolucion; readonly existencia?: undefined }
+/** Cajas en el sitio (sin merma) del LOTE recibido y del ARTICULO entero, con cualquiera de sus GTIN. */
+export interface ExistenciaEnSitio { readonly lote: number; readonly articulo: number }
+
+/** La «foto» del inventario de una recepcion: cuanto habia antes de recibir y cuanto hay despues. */
+export interface FotoInventario { readonly antes: ExistenciaEnSitio; readonly despues: ExistenciaEnSitio }
+
+export function existenciaEnSitio(estado: EstadoAlmacen, sitio: string, sku: string, l: ClaveLote): ExistenciaEnSitio {
+  let lote = 0
+  let articulo = 0
+  for (const e of estado.existencias) {
+    if (e.sitio !== sitio || e.cantidad <= 0 || zonaDe(e) === 'merma') continue
+    if (e.sku === sku) articulo += e.cantidad
+    if (esDe(e, sitio, l)) lote += e.cantidad
+  }
+  return { lote, articulo }
+}
+
+const fotoInventario = (antes: EstadoAlmacen, despues: EstadoAlmacen, sitio: string, sku: string, l: ClaveLote): FotoInventario =>
+  ({ antes: existenciaEnSitio(antes, sitio, sku, l), despues: existenciaEnSitio(despues, sitio, sku, l) })
+
+export type ValorRecepcion = { readonly existencia: Existencia; readonly inventario: FotoInventario; readonly rechazada?: undefined } | { readonly rechazada: Devolucion; readonly existencia?: undefined; readonly inventario?: undefined }
 
 /**
  * Recepcion con expediente. Si no cumple la vida minima (regla de 2/3 o minimo de la categoria)
@@ -102,16 +122,18 @@ export function recibeConExpediente(estado: EstadoAlmacen, l: Interpretacion, si
   }
   const a = recibe(estado, l, sitio, cuando, id)
   if (!a.resultado.ok) return falla(estado, a.resultado.motivo)
-  const datos = { cajas: l.cajas, zona: 'recibo', sku: l.articulo.sku, origen: 'recepcion', ...(l.vida ? { diasRestantes: l.vida.dias, minimoDias: l.vida.minimo.dias } : {}), ...(l.sscc ? { sscc: l.sscc } : {}), ...extra }
+  const inventario = fotoInventario(estado, a.estado, sitio, l.articulo.sku, lote)
+  // La foto va DESPUES de `extra`: ningun llamador puede ponerle otra (y la proyeccion la comprueba).
+  const datos = { cajas: l.cajas, zona: 'recibo', sku: l.articulo.sku, origen: 'recepcion', ...(l.vida ? { diasRestantes: l.vida.dias, minimoDias: l.vida.minimo.dias } : {}), ...(l.sscc ? { sscc: l.sscc } : {}), ...extra, existencia: json(inventario) }
   const r = conEvento(estado, a.estado, sitio, 'RECIBIDO', lote, datos, operador, cuando)
-  return { estado: r.estado, resultado: { ok: true, valor: { existencia: a.resultado.existencia }, eventos: [r.evento] } }
+  return { estado: r.estado, resultado: { ok: true, valor: { existencia: a.resultado.existencia, inventario }, eventos: [r.evento] } }
 }
 
 /** Alta de un lote (al etiquetar en origen, o inventario inicial) con su evento RECIBIDO. */
 export function altaConExpediente(estado: EstadoAlmacen, a: AltaLote, origen: Existencia['origen'], cuando: string, id: string, operador: string, extra: Record<string, Json> = {}, enlace?: string): Paso<Existencia> {
   const r = altaDeLote(estado, a, origen, cuando, id)
   if (!r.resultado.ok) return falla(estado, r.resultado.motivo)
-  const datos = { cajas: a.cantidad, zona: a.zona ?? 'recibo', sku: a.sku, origen, ...(a.sscc ? { sscc: a.sscc } : {}), ...extra }
+  const datos = { cajas: a.cantidad, zona: a.zona ?? 'recibo', sku: a.sku, origen, ...(a.sscc ? { sscc: a.sscc } : {}), ...extra, existencia: json(fotoInventario(estado, r.estado, a.sitio, a.sku, claveDe(a))) }
   const ev = conEvento(estado, r.estado, a.sitio, 'RECIBIDO', claveDe(a), datos, operador, cuando, enlace)
   return { estado: ev.estado, resultado: { ok: true, valor: r.resultado.existencia, eventos: [ev.evento] } }
 }

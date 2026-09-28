@@ -397,6 +397,17 @@ alter table erp.eti_evento drop constraint if exists eti_evento_caducidad_check;
 -- Un HALLAZGO (pieza de piso que no cuadra con ningún lote) va sin caducidad si la foto no la dejó leer.
 alter table erp.eti_evento add constraint eti_evento_caducidad_check check ((caducidad is null) = (tipo = 'EN_REVISION' or (tipo = 'RECHAZADO' and datos ? 'descartada')
   or (tipo = 'HALLAZGO' and coalesce(datos->'leido'->>'fecha', '') = '')));
+-- La foto del inventario de una recepción (`datos.existencia`, 2026-09-28): solo en un RECIBIDO, y lo
+-- de después es lo de antes más lo recibido, en el lote y en el artículo. (Que cuadre con la cadena
+-- entera lo comprueba la proyección del núcleo.)
+create or replace function erp.eti_foto_inventario_ok(tipo text, datos jsonb) returns boolean language sql immutable as $$
+  select not (datos ? 'existencia') or (tipo = 'RECIBIDO' and jsonb_typeof(datos->'cajas') = 'number'
+    and jsonb_typeof(datos->'existencia'->'antes'->'lote') = 'number' and jsonb_typeof(datos->'existencia'->'antes'->'articulo') = 'number'
+    and (datos->'existencia'->'despues'->>'lote')::numeric = (datos->'existencia'->'antes'->>'lote')::numeric + (datos->>'cajas')::numeric
+    and (datos->'existencia'->'despues'->>'articulo')::numeric = (datos->'existencia'->'antes'->>'articulo')::numeric + (datos->>'cajas')::numeric)
+$$;
+alter table erp.eti_evento drop constraint if exists eti_evento_foto_inventario_check;
+alter table erp.eti_evento add constraint eti_evento_foto_inventario_check check (coalesce(erp.eti_foto_inventario_ok(tipo, datos), false));
 
 -- La base también exige lo que exige el núcleo: la revisión cita una foto que existe, se resuelve
 -- una sola vez, y la CONFIRMA quien la registró (la pantalla no es la frontera; la base tampoco
