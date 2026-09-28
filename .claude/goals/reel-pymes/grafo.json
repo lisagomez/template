@@ -298,7 +298,8 @@
       "sobre": "nodo:app",
       "label": "gate",
       "referencia": "validate en verde después del commit",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "npm run validate después del commit ee42aec, en un clon con la rama, main y golden-sets: 26/26 activos en verde, 0 rojos (tools/reel 12, pymes-marketing 49, laboratorio 92 casos, prueba:a2a 14/0)"
     }
   ]
 }
