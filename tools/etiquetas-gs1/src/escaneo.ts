@@ -15,6 +15,7 @@
  * a ciegas. Lo unico con numero es lo que la persona misma escaneo.
  */
 import type { Evento } from './cadena.js'
+import { identificaGtin } from './codigos-anteriores.js'
 import { esErrorLectura, parseaLectura } from './elementos.js'
 import { claveDe, mueveConExpediente, recibeConExpediente, registra, ubica, type Paso } from './expediente.js'
 import { interpreta, type Interpretacion } from './existencias.js'
@@ -105,7 +106,8 @@ function lotesDelArticulo(estado: EstadoAlmacen, sitio: string, sku: string, hoy
 
 /** El primer lote SURTIBLE del mismo articulo en almacen o recibo que vence antes que `l`. */
 function fefoAntes(estado: EstadoAlmacen, sitio: string, l: Interpretacion, hoy: string): Existencia | undefined {
-  return estado.existencias.filter((e) => e.sitio === sitio && e.cantidad > 0 && e.gtin === l.gtin && e.lote !== l.lote && ['almacen', 'recibo'].includes(zonaDe(e)) && e.caducidad < (l.caducidadIso ?? ''))
+  // Por ARTICULO, no por GTIN: un lote con el codigo anterior del mismo articulo tambien se baja primero.
+  return estado.existencias.filter((e) => e.sitio === sitio && e.cantidad > 0 && e.sku === l.articulo?.sku && !(e.gtin === l.gtin && e.lote === l.lote) && ['almacen', 'recibo'].includes(zonaDe(e)) && e.caducidad < (l.caducidadIso ?? ''))
     .filter((e) => vendible(semaforoDe(estado, e.sku, e.caducidad, hoy).semaforo))
     .sort((a, b) => a.caducidad.localeCompare(b.caducidad))[0]
 }
@@ -253,6 +255,10 @@ export function ejecutaEscaneo(estado: EstadoAlmacen, p: PedidoEscaneo, ronda?: 
   }
   if (!ZONAS_DEL_ROL[p.rol].includes(p.zona)) return error(estado, `Tu rol no opera en ${nombreZona(p.zona).toLowerCase()}`, ['El servidor no deja hacer ahí nada con este dispositivo.'])
   const l = interpreta(lectura.elementos, estado, p.hoy)
+  return conCodigoAnterior(l, porZona(estado, p, l, ronda))
+}
+
+function porZona(estado: EstadoAlmacen, p: PedidoEscaneo, l: Interpretacion, ronda?: RondaDia): ResultadoEscaneo {
   if (p.zona === 'recibo') return enRecibo(estado, p, l)
   if (!l.articulo) return error(estado, 'Código fuera del catálogo', ['Vincúlalo en recibo antes de moverlo.'])
   if (!(l.lote && l.caducidadIso)) return soloCodigoDelProveedor(estado, p, l)
@@ -261,12 +267,19 @@ export function ejecutaEscaneo(estado: EstadoAlmacen, p: PedidoEscaneo, ronda?: 
   return enMerma(estado, p, l)
 }
 
+/** Si la etiqueta trae un codigo ANTERIOR del articulo, se dice (sigue valiendo; el vigente es otro). */
+function conCodigoAnterior(l: Interpretacion, r: ResultadoEscaneo): ResultadoEscaneo {
+  const x = l.codigoAnterior
+  if (!x || r.vista.tipo === 'error') return r
+  return { ...r, vista: { ...r.vista, detalle: [...r.vista.detalle, `Etiqueta con un código ANTERIOR del artículo (${x.gtin}): sigue valiendo; el vigente desde el ${x.hasta.slice(0, 10)} es ${x.sustituidoPor}.`] } }
+}
+
 /** La vista para el ALMACENISTA: el mismo resultado sin cifras del sistema en ningun texto. */
 export function vistaSinCantidades(v: VistaEscaneo): VistaEscaneo {
   return { ...v, titulo: sinCantidades(v.titulo), detalle: v.detalle.map((d) => (/caja\(s\) escaneada\(s\)/.test(d) ? d : sinCantidades(d))) }
 }
 
-const skuDe = (estado: EstadoAlmacen, gtin: string): string => Object.values(estado.articulos).find((a) => a.gtinCaja === gtin || a.gtinUnidad === gtin)?.sku ?? ''
+const skuDe = (estado: EstadoAlmacen, gtin: string): string => identificaGtin(estado, gtin)?.articulo.sku ?? ''
 
 /**
  * «Deshacer el ultimo»: una CORRECCION que revierte la huella del MOVIDO (no un borrado). Solo el

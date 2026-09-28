@@ -8,6 +8,7 @@
  * rechaza moverlas, venderlas o transferirlas con un motivo que dice por que.
  */
 import type { Evento } from './cadena.js'
+import { identificaGtin } from './codigos-anteriores.js'
 import type { EstadoAlmacen } from './modelo.js'
 
 export interface RevisionAbierta {
@@ -60,7 +61,7 @@ export function antiguedad(desde: string, ahora: string): string {
  * transferirlo. `gtin` puede ser el de la pieza o el de la caja.
  */
 export function bloqueoPorRevision(estado: EstadoAlmacen, sitio: string, gtin: string, ahora?: string): string | undefined {
-  const art = Object.values(estado.articulos).find((a) => a.gtinCaja === gtin || a.gtinUnidad === gtin)
+  const art = identificaGtin(estado, gtin)?.articulo
   if (!art) return undefined
   const abiertas = revisionesAbiertas(estado, sitio).filter((r) => r.sku === art.sku)
   if (abiertas.length === 0) return undefined

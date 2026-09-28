@@ -25,7 +25,7 @@ import { completaClave, nuevoEvento } from '../../../../tools/etiquetas-gs1/dist
 import { generaLlaves } from '../../../../tools/etiquetas-gs1/dist/firma.js';
 import { flujosConteo } from './flujos-conteo.mjs';
 import { flujosRecibir } from './flujos-recibir.mjs';
-import { flujosZona } from './flujos-zona.mjs';
+import { codigoAnterior45, flujosZona } from './flujos-zona.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -267,8 +267,9 @@ const impresion = await porVista(async (p, v) => {
 await compone('12', 'Impresion de punta a punta: agente del CEDIS y Browser Print (Zebras simuladas)', [['escritorio · agente', impresion.escritorio[0]], ['escritorio · Browser Print', impresion.escritorio[1]], ['celular · agente', impresion.celular[0]], ['celular · Browser Print', impresion.celular[1]]]);
 
 // Escanear por zona y rol, la ronda del dia, el conteo ciclico y la medicion de agilidad: flujos 37
-// a 44. Van ANTES de reimportar el catalogo (13-14): la v2 cambia el GTIN de caja de la leche y sus
-// lotes sembrados dejarian de leerse (se anota en el SDD §12 como riesgo, no se esconde aqui).
+// a 44, sobre la Sucursal Centro de la semilla, antes de que los flujos siguientes la muevan. (El
+// cambio de GTIN de la leche del flujo 30 ya no esconde sus lotes: el codigo anterior se sigue
+// leyendo, flujo 45.)
 await flujosZona({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, BASE, TOKEN, TOKEN_CONTEO, TOKEN_RECIBO, TOKEN_ALMACEN, dia, aammdd });
 
 const catalogo = await porVista(async (p, v) => {
@@ -381,6 +382,8 @@ await compone('22', 'Agente de riesgo: lote verde en riesgo, una recomendacion e
 // Inventario fisico con roles: flujos 25, 26 y 27 (e2e/flujos-conteo.mjs).
 await flujosConteo({ navegador, contexto, abre, foto, compone, informe, BASE, TOKEN, TOKEN_CONTEO, cajaDe, dia, aammdd });
 await flujosRecibir({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, espera, BASE, TOKEN });
+// Tras el flujo 30 (el ITF-14 del proveedor sustituye la caja interna de la leche): la etiqueta vieja se sigue leyendo.
+await codigoAnterior45({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, BASE, TOKEN, TOKEN_CONTEO, TOKEN_RECIBO, TOKEN_ALMACEN, dia, aammdd });
 informe.conteo = await api({ accion: 'conteos' }).then((r) => r.conteos.map((c) => ({ folio: c.folio, estado: c.estado, eventos: c.aplicado?.eventos, conciliacion: (c.conciliacion ?? []).map((x) => `${x.lote.lote}@${x.zona}${x.posicion ? ` ${x.posicion}` : ''}: cadena ${x.esperado}, contado ${x.contado}, ${x.clase}`) })));
 
 // Anclar lo de hoy (como haria el agente del sitio por la noche) y ver todo en verde.
@@ -421,7 +424,7 @@ await compone('23', 'Integridad por sucursal: todas verifican contra sus anclas 
 await compone('24', 'Integridad tras reescribir Poniente: su cadena cuadra localmente pero el ancla la delata', [['escritorio', integridadDespues.escritorio], ['celular', integridadDespues.celular]]);
 
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
-console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion, zona: { ...informe.zona, tablaAgilidad: undefined } }, null, 1));
+console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion, zona: { ...informe.zona, tablaAgilidad: undefined }, codigoAnterior: informe.codigoAnterior }, null, 1));
 if (informe.zona?.tablaAgilidad) console.log(`\nAgilidad (celular 390×844, medida con Playwright):\n${informe.zona.tablaAgilidad}`);
 await navegador.close();
 await conCamara?.close();

@@ -5,7 +5,7 @@
  */
 import { emiteTicket, secretoValido } from '../../../../../tools/etiquetas-gs1/dist/agente/index.js';
 import {
-  altaConExpediente, aplicaImportacion, CONSUMIBLES_VACIOS, formatoDe, fotoVigente, revisionesAbiertas, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueveConExpediente, parseaLectura, planificaImportacion,
+  altaConExpediente, aplicaImportacion, codigosAnteriores, CONSUMIBLES_VACIOS, formatoDe, fotoVigente, revisionesAbiertas, emiteSscc, esEmision, esErrorLectura, interpreta, leeFilas, leeUbicacion, mueveConExpediente, parseaLectura, planificaImportacion,
   recibeConExpediente, revisaPrefijoEmpresa, revisaZpl, type Consumibles, type EstadoAlmacen, type Paso, type PlanImportacion,
 } from '../nucleo.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
@@ -61,7 +61,9 @@ export async function leeEstado(rol: Rol = 'operacion'): Promise<Respuesta> {
 function fichas(e: EstadoAlmacen) {
   const fotos = VISTAS.flatMap((v) => Object.keys(e.articulos).map((sku) => fotoVigente(e, sku, v)).filter((f) => f !== undefined));
   const formatosFecha = Object.keys(e.articulos).map((sku) => formatoDe(e, sku)).filter((f) => f !== undefined);
-  return { fotos, formatosFecha };
+  // Los GTIN anteriores (del libro de asignaciones, sin nombres ni cantidades): el lector del
+  // navegador los necesita para seguir leyendo etiquetas viejas.
+  return { fotos, formatosFecha, codigosAnteriores: codigosAnteriores(e) };
 }
 const VISTAS = ['principal', 'frente', 'etiqueta', 'caja', 'caducidad'] as const;
 

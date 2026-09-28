@@ -2,7 +2,7 @@
  * Acceso a /api/etiquetas desde el navegador. El codigo del dispositivo y el nombre de quien
  * opera viven en localStorage (se emparejan una vez); todo lo demas vive en el servidor.
  */
-import type { Articulo, Asignacion, Configuracion, Consumibles, Contadores, Devolucion, Existencia, FormatoFechaArticulo, FotoArticulo, Importacion, Movimiento, PerfilImpresora } from './nucleo.ts';
+import type { Articulo, Asignacion, CodigoAnterior, Configuracion, Consumibles, Contadores, Devolucion, Existencia, FormatoFechaArticulo, FotoArticulo, Importacion, Movimiento, PerfilImpresora } from './nucleo.ts';
 import type { AccionEtiquetas } from './esquemas.ts';
 
 export interface EstadoCliente {
@@ -24,6 +24,8 @@ export interface EstadoCliente {
   /** Las fotos VIGENTES de cada articulo (una por vista) y su formato de fecha aprendido. */
   readonly fotos: FotoArticulo[];
   readonly formatosFecha: FormatoFechaArticulo[];
+  /** Los GTIN que un articulo tuvo y ya no tiene: se siguen leyendo como el. */
+  readonly codigosAnteriores: CodigoAnterior[];
   /** Recepciones con la caducidad por confirmar (sin cantidades para un dispositivo de conteo). */
   readonly revisiones: { sitio: string; folio: string; sku: string; cajas: number; desde: string; revision: string }[];
   /** El motor local de lectura de fechas, o null si no esta instalado. */

@@ -65,6 +65,9 @@ conteo cíclico elige pocas ubicaciones por riesgo (`eligeConteoCiclico`) y lo c
 almacenista a ciegas (`vistaSinCantidades`, `vistaConteoSinCantidades`). La pieza suelta de piso
 se identifica por la foto de su fecha (`identificaPieza`) o queda como `HALLAZGO`.
 
+Si un artículo cambia de GTIN, **el anterior se sigue leyendo** (`identificaGtin`, `codigosAnteriores`):
+sale del libro de asignaciones, y un código anterior no se le da a otro artículo sin decisión humana.
+
 Roles, decisiones, medición de agilidad y riesgos: [`docs/SDD-etiquetas-gs1.md` §12](../../docs/SDD-etiquetas-gs1.md).
 
 ## Instalar en un sitio nuevo

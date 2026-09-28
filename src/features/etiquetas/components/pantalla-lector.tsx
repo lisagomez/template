@@ -19,8 +19,13 @@ import { botonPrimario, campo, tarjeta } from './marco.tsx';
 import { FotoArticulo } from './foto.tsx';
 
 /** El estado del cliente con la forma que espera el nucleo (catalogo indexado por sku). */
+/**
+ * El estado del cliente con la forma del nucleo, para interpretar lecturas aqui mismo. Los codigos
+ * anteriores entran como las asignaciones que los sustituyeron (el cliente solo trae las ultimas).
+ */
 export function comoEstado(e: EstadoCliente): EstadoAlmacen {
-  return { ...e, articulos: Object.fromEntries(e.articulos.map((a) => [a.sku, a])), emitidos: [] };
+  const sustituciones = e.codigosAnteriores.map((x) => ({ gtin: x.sustituidoPor, sku: x.sku, nivel: x.nivel, regla: 'fabricante' as const, operador: '', fecha: x.hasta, importacion: '', anterior: x.gtin }));
+  return { ...e, articulos: Object.fromEntries(e.articulos.map((a) => [a.sku, a])), asignaciones: [...e.asignaciones, ...sustituciones], emitidos: [] };
 }
 
 export function PantallaLector({ e }: { e: Etiquetas }) {

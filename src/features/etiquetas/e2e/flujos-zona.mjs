@@ -247,3 +247,36 @@ async function sinSenal(h) {
   }
   await h.compone('44', 'Sin señal: el escaneo se guarda en el equipo y se sube solo, en orden, al volver', [['celular · sin señal', r.celular[0]], ['celular · al volver', r.celular[1]], ['escritorio · sin señal (2)', r.escritorio[0]], ['escritorio · al volver', r.escritorio[1]]]);
 }
+
+/**
+ * 45 · la etiqueta VIEJA se sigue leyendo. Corre DESPUES del flujo 30, donde el ITF-14 del proveedor
+ * sustituye la caja interna de la leche: el lote L0920 conserva la etiqueta interna y se sigue
+ * escaneando (almacenista, celular), el lector lo identifica y lo dice (escritorio), y la ficha del
+ * articulo enseña sus codigos anteriores.
+ */
+export async function codigoAnterior45(h0) {
+  const h = await ayudantes(h0);
+  const ant = (await h.api()).codigosAnteriores.find((x) => x.sku === 'LEC-002');
+  if (!ant) throw new Error('la leche no tiene código anterior: ¿cambió el flujo 30?');
+  const vieja = await h.cajaLote('LEC-002', 'L0920');
+  if (!vieja.includes(ant.gtin)) throw new Error(`L0920 no lleva el código anterior ${ant.gtin}: ${vieja}`);
+  const { c, p } = await enZona(h, 'celular', 'Almacenista Centro', h.TOKEN_ALMACEN, 'PISO');
+  const tipo = await escaneaEnZona(p, vieja);
+  if (tipo === 'error') throw new Error(`la etiqueta vieja no se leyó: ${await textoEnPantalla(p)}`);
+  const celular = await h.pantalla(p, 'codigo-anterior-celular');
+  await c.close();
+  const s = await h.pagina('escritorio', 'Supervisor Centro', h.TOKEN);
+  await h.abre(s.p, '/etiquetas/leer');
+  await s.p.selectOption('[data-prueba="sitio-lector"]', S);
+  await s.p.fill('[data-prueba="pistola"]', vieja);
+  await s.p.press('[data-prueba="pistola"]', 'Enter');
+  await s.p.waitForFunction(() => /código ANTERIOR/.test(document.querySelector('[data-prueba="resultado"]')?.textContent ?? ''));
+  const lector = await h.foto(s.p, '[data-prueba="resultado"]', 'codigo-anterior-lector');
+  await h.abre(s.p, '/etiquetas/catalogo');
+  await s.p.click('[aria-label="Ficha de LEC-002"]');
+  await s.p.waitForSelector('[data-prueba="codigos-anteriores"]');
+  const ficha = await h.foto(s.p, '[data-prueba="ficha"]', 'codigo-anterior-ficha');
+  await s.c.close();
+  h.informe.codigoAnterior = { gtin: ant.gtin, sustituidoPor: ant.sustituidoPor, escaneo: tipo };
+  await h.compone('45', 'Codigo anterior: la caja con la etiqueta vieja se sigue leyendo tras cambiar el GTIN del articulo', [['celular · almacenista en piso, etiqueta vieja', celular], ['escritorio · lector: es un codigo ANTERIOR', lector], ['escritorio · la ficha enseña sus codigos anteriores', ficha]]);
+}

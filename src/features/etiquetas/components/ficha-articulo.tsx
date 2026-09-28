@@ -32,6 +32,7 @@ export function FichaArticulo({ e, sku, alCerrar }: { e: Etiquetas; sku: string;
   const [nota, setNota] = useState(fotoDe(est, sku, 'caducidad')?.nota ?? '');
   const [aviso, setAviso] = useState<string | null>(null);
   const formato = est.formatosFecha.find((f) => f.sku === sku);
+  const anteriores = est.codigosAnteriores.filter((x) => x.sku === sku);
   if (!a) return null;
   const sube = (vista: VistaFoto, f: File | undefined) => { if (f) void ponFoto(e, sku, vista, f, vista === 'caducidad' ? nota.trim() || undefined : undefined).then(setAviso, (x: unknown) => setAviso(x instanceof Error ? x.message : String(x))); };
   const quita = (vista: VistaFoto) => void e.ejecuta({ accion: 'foto-articulo', sku, vista, retirada: true }).then(() => setAviso('Quitada (sigue en el historial).'));
@@ -57,6 +58,12 @@ export function FichaArticulo({ e, sku, alCerrar }: { e: Etiquetas; sku: string;
         ))}
       </div>
       <p className="text-xs text-neutral-600 dark:text-neutral-300">Formato de su fecha: {formato ? <b>{formato.formato} ({formato.tipo === 'consumo-preferente' ? 'consumo preferente' : 'caducidad'})</b> : 'todavía no aprendido (se fija con la primera recepción que se confirme eligiendo una lectura)'}. Fotos en el historial: {est.fotos.filter((f) => f.sku === sku).length} vigentes.</p>
+      {anteriores.length ? (
+        <div className="rounded-lg bg-neutral-100 p-2 text-sm dark:bg-neutral-800" data-prueba="codigos-anteriores">
+          <p className="font-semibold">Códigos anteriores (se siguen leyendo como este artículo)</p>
+          <ul className="list-inside list-disc">{anteriores.map((x) => <li key={x.gtin}><span className="font-mono">{x.gtin}</span> · {x.nivel === 'caja' ? 'caja' : 'pieza'} · hasta el {x.hasta.slice(0, 10)}, lo sustituyó <span className="font-mono">{x.sustituidoPor}</span></li>)}</ul>
+        </div>
+      ) : null}
       {aviso ? <p className="text-sm" role="status" data-prueba="aviso-ficha">{aviso}</p> : null}
     </section>
   );

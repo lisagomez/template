@@ -355,3 +355,22 @@ do $$ begin
   if (select ultimo_conteo from erp.eti_ubicacion_conteo where sitio = 'CEDIS-NTE' and ubicacion = 'PISO') <> '2026-09-27T18:00:00.000Z' then raise exception '(t) último conteo mal'; end if;
   raise notice '(t) OK por ubicación: último conteo y conteos con diferencia (entradas de la regla de riesgo)';
 end $$;
+
+-- (u) códigos ANTERIORES: el que se sustituye queda en la vista como del artículo; darlo a OTRO se
+--     rechaza; devolvérselo al mismo sí
+update erp.eti_articulo set gtin_caja = '19521111000997' where id = 'dddddddd-0000-4000-8000-000000000001';
+insert into erp.eti_asignacion (cliente_id, eti_articulo_id, nivel, gtin, regla, anterior, operador) values
+  ('11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', 'caja', '19521111000997', 'fabricante', '19521111000010', 'op-5e1a0c09');
+do $$ begin
+  if (select eti_articulo_id from erp.eti_codigo_anterior where gtin = '19521111000010') <> 'dddddddd-0000-4000-8000-000000000001' then raise exception '(u) la vista no sabe de quién fue el código'; end if;
+  if (select sustituido_por from erp.eti_codigo_anterior where gtin = '19521111000010') <> '19521111000997' then raise exception '(u) la vista no sabe qué lo sustituyó'; end if;
+  begin
+    insert into erp.eti_articulo (cliente_id, inv_articulo_id, gtin_unidad, gtin_caja, unidades_por_caja) values ('11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0000-4000-8000-000000000002', '09521234000037', '19521111000010', 10);
+    raise exception '(u) se le dio a otro artículo un código anterior';
+  exception when unique_violation then
+    if sqlerrm not like '%fue código de otro artículo%' then raise exception '(u) lo rechazó otra regla: %', sqlerrm; end if;
+  end;
+  update erp.eti_articulo set gtin_caja = '19521111000010' where id = 'dddddddd-0000-4000-8000-000000000001';
+  if exists (select 1 from erp.eti_codigo_anterior where gtin = '19521111000010') then raise exception '(u) vuelto a ser vigente, no es anterior'; end if;
+  raise notice '(u) OK el código sustituido sigue siendo del artículo (vista del libro de asignaciones); a otro no se le da; al mismo sí vuelve';
+end $$;

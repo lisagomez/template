@@ -15,6 +15,7 @@
 import { recibeConExpediente, registra, type Paso, type ValorRecepcion } from './expediente.js'
 import type { Evento } from './cadena.js'
 import { validaCodigo, reglaDeExistente } from './catalogo.js'
+import { anteriorDeOtro, identificaGtin } from './codigos-anteriores.js'
 import type { Interpretacion } from './existencias.js'
 import { aAammdd } from './fechas.js'
 import type { FormatoFecha } from './fechas-impresas.js'
@@ -65,7 +66,7 @@ function revisaPedido(estado: EstadoAlmacen, p: PedidoRevision, operador: string
   const art = estado.articulos[p.sku]
   if (!art) return `el artículo ${p.sku} no está en el catálogo`
   if (!art.gtinCaja) return `el artículo ${p.sku} no tiene GTIN de caja: sin él no se etiqueta la caja`
-  if (p.codigo.gtin !== art.gtinCaja && p.codigo.gtin !== art.gtinUnidad) return `el código leído (${p.codigo.gtin}) no es de ${p.sku}: vincúlalo primero`
+  if (identificaGtin(estado, p.codigo.gtin)?.articulo.sku !== art.sku) return `el código leído (${p.codigo.gtin}) no es de ${p.sku}: vincúlalo primero`
   if (!Number.isInteger(p.cajas) || p.cajas < 1 || p.cajas > 100_000) return 'las cajas van en enteros positivos'
   if (!esHuella(p.fotos.completa) || !p.fotos.recortes.every(esHuella)) return 'falta la foto (o su huella no es SHA-256)'
   if (p.reemplaza) {
@@ -175,6 +176,8 @@ function conflictoDeVinculo(estado: EstadoAlmacen, art: Articulo, gtin: string, 
   const cfg = estado.configuracion
   const dueno = Object.values(estado.articulos).find((a) => a.sku !== art.sku && (a.gtinUnidad === gtin || a.gtinCaja === gtin))
   if (dueno) return `el GTIN ${gtin} ya es del artículo ${dueno.sku} (${dueno.descripcion})`
+  const fue = anteriorDeOtro(estado, gtin, art.sku)
+  if (fue) return `el GTIN ${gtin} fue de ${fue.sku} hasta el ${fue.hasta.slice(0, 10)} y sus etiquetas viejas se siguen leyendo como ${fue.sku}: asignarlo a otro artículo es una decisión de catálogo`
   if (art.marcaPropia && reglaDeExistente(gtin, cfg.prefijoEmpresa, cfg.prefijoInterno) === 'fabricante') return `${art.sku} es marca propia y ${gtin} no está bajo el prefijo de la casa: nunca se etiqueta con un prefijo ajeno`
   if (nivel === 'caja' && art.unidadesPorCaja > 1 && art.gtinUnidad === gtin) return `la caja trae ${art.unidadesPorCaja} piezas y no puede llevar el GTIN de la pieza`
   const actual = nivel === 'caja' ? { g: art.gtinCaja, r: art.reglaCaja } : { g: art.gtinUnidad, r: art.reglaUnidad }

@@ -4,7 +4,7 @@
 -- ESTADO: PROPUESTA. No se aplica a ninguna base: integrarla al ERP es gate humano.
 -- Va DESPUÉS de propuesta-pack-etiquetas.sql (usa eti_sitio, eti_evento, eti_foto y
 -- eti_solo_agregar; los tipos TAREA_CERRADA y HALLAZGO ya están en la lista única de tipos de
--- eti_evento de ese archivo). Validada en el Postgres efímero con `prueba-efimera.sh`, casos (q)…(t).
+-- eti_evento de ese archivo). Validada en el Postgres efímero con `prueba-efimera.sh`, casos (q)…(u).
 -- Mismo contrato: cliente_id en toda tabla (RLS por tenant de 004), lo que es traza solo-agregar.
 -- Idempotente.
 -- ═══════════════════════════════════════════════════════════════════
@@ -119,6 +119,33 @@ create or replace view erp.eti_ubicacion_conteo with (security_invoker = true) a
   from erp.eti_evento e cross join lateral jsonb_array_elements(coalesce(e.datos->'renglones', '[]'::jsonb)) as x(r)
   where e.tipo = 'CONTEO'
   group by e.cliente_id, e.sitio, 3;
+
+-- ============================================================
+-- Códigos ANTERIORES: la etiqueta vieja se sigue leyendo (decisión del laboratorio, 2026-09-28)
+-- ============================================================
+-- eti_asignacion (solo-agregar) ya guarda el `anterior` de cada sustitución: la vista dice de qué
+-- artículo fue cada código que hoy no es vigente de nadie. No es una tabla más: no se desincroniza.
+create or replace view erp.eti_codigo_anterior with (security_invoker = true) as
+  select distinct on (a.cliente_id, a.anterior) a.cliente_id, a.anterior as gtin, a.eti_articulo_id, a.nivel, a.created_at as hasta, a.gtin as sustituido_por
+  from erp.eti_asignacion a
+  where a.anterior is not null and a.anterior <> a.gtin
+    and not exists (select 1 from erp.eti_articulo o where o.cliente_id = a.cliente_id and a.anterior in (o.gtin_unidad, o.gtin_caja))
+  order by a.cliente_id, a.anterior, a.created_at desc;
+
+-- Un código anterior de un artículo no se le da a OTRO: sus etiquetas viejas se siguen leyendo como
+-- el primero (y GS1 pide no reusar un GTIN retirado). Devolvérselo al mismo artículo sí se puede.
+create or replace function erp.eti_gtin_no_anterior_de_otro() returns trigger language plpgsql as $$
+declare x record;
+begin
+  select c.eti_articulo_id, c.hasta into x from erp.eti_codigo_anterior c
+   where c.cliente_id = new.cliente_id and c.eti_articulo_id <> new.id and c.gtin in (new.gtin_unidad, new.gtin_caja) limit 1;
+  if found then
+    raise exception 'ese GTIN fue código de otro artículo hasta % y sus etiquetas viejas se leen como él', x.hasta using errcode = 'unique_violation';
+  end if;
+  return new;
+end $$;
+create or replace trigger eti_gtin_no_anterior_de_otro before insert or update of gtin_unidad, gtin_caja on erp.eti_articulo
+  for each row execute function erp.eti_gtin_no_anterior_de_otro();
 
 -- ============================================================
 -- Append-only (como 005 hace con los suyos)

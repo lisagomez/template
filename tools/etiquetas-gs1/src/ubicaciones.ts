@@ -140,7 +140,7 @@ export function mueve(estado: EstadoAlmacen, p: PedidoMovimiento, cuando: string
   if (p.destino === 'piso') {
     const cat = categoriaPorId(estado.configuracion.categorias, l.articulo.categoria)
     const anio = Number(hoy.slice(0, 4))
-    const antes = del.filter((e) => e.gtin === l.gtin && e.lote !== l.lote && ['almacen', 'recibo'].includes(zonaDe(e)) && e.caducidad < l.caducidadIso!).filter((e) => {
+    const antes = del.filter((e) => e.sku === l.articulo!.sku && !(e.gtin === l.gtin && e.lote === l.lote) && ['almacen', 'recibo'].includes(zonaDe(e)) && e.caducidad < l.caducidadIso!).filter((e) => {
       const f = parseaFechaGs1(aAammdd(e.caducidad), anio)
       const s = esFecha(f) ? estadoSemaforo(diasHasta(f, hoy), cat) : 'vencido'
       return s === 'vigente' || s === 'alerta'

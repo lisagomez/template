@@ -10,6 +10,7 @@
  */
 import { diferencias, reglaDeExistente, validaCodigo, type ErrorFila, type FilaCatalogo, type FilaPlan, type PlanImportacion, type AsignacionPropuesta } from './catalogo.js'
 import type { Articulo, Asignacion, EstadoAlmacen, Regla } from './modelo.js'
+import { anterioresDe, codigosAnteriores } from './codigos-anteriores.js'
 import { derivaCaja, emiteInterno, emitePropio, esEmision } from './numeracion.js'
 import { clasificaPrefijo } from './prefijos.js'
 import { formatoDe, fotoVigente } from './recepcion-foto.js'
@@ -24,6 +25,9 @@ export function planificaImportacion(filas: readonly FilaCatalogo[], errores: re
   for (const a of Object.values(estado.articulos)) {
     for (const g of [a.gtinUnidad, a.gtinCaja]) if (g) { usados.add(g); dueno.set(g, a.sku) }
   }
+  // Los codigos ANTERIORES siguen leyendose como su articulo: ni se emiten ni se dan a otro sin decision humana.
+  const anteriores = new Map(codigosAnteriores(estado).map((x) => [x.gtin, x]))
+  for (const g of anteriores.keys()) usados.add(g)
   // Los codigos validos del archivo tampoco se pueden emitir para otro.
   for (const f of filas) for (const t of [f.gtin, f.gtinCaja]) { const v = validaCodigo(t); if (v.estado === 'valido') usados.add(v.gtin) }
   let { propio, interno } = estado.contadores
@@ -44,6 +48,8 @@ export function planificaImportacion(filas: readonly FilaCatalogo[], errores: re
     // --- conflictos que piden decision humana, ANTES de emitir nada ---------------------
     const conflictos: string[] = []
     const ajeno = (g: string) => { const d = dueno.get(g); return d !== undefined && d !== f.sku ? d : undefined }
+    const fue = (g: string) => { const x = anteriores.get(g); return x && x.sku !== f.sku && !ajeno(g) ? `el GTIN ${g} fue de ${x.sku} hasta el ${x.hasta.slice(0, 10)} y sus etiquetas viejas se siguen leyendo como ${x.sku}: dárselo a otro artículo es una decisión de catálogo` : undefined }
+    for (const v of [vu, vc]) { const m = v.estado === 'valido' ? fue(v.gtin) : undefined; if (m) conflictos.push(m) }
     let reglaU: Regla | undefined
     if (vu.estado === 'valido') {
       reglaU = reglaDeExistente(vu.gtin, cfg.prefijoEmpresa, cfg.prefijoInterno)
@@ -86,16 +92,16 @@ export function planificaImportacion(filas: readonly FilaCatalogo[], errores: re
       gtinC = previo!.gtinCaja; reglaC = previo!.reglaCaja
     } else if (f.unidadesPorCaja === 1) {
       gtinC = gtinU; reglaC = 'igual-unidad'
-      if (previo?.gtinCaja !== gtinC && gtinC) nuevas.push({ nivel: 'caja', gtin: gtinC, regla: reglaC, emitido: false })
+      if (previo?.gtinCaja !== gtinC && gtinC) nuevas.push({ nivel: 'caja', gtin: gtinC, regla: reglaC, emitido: false, ...(previo?.gtinCaja ? { anterior: previo.gtinCaja } : {}) })
     } else if (reglaU && PROPIAS.includes(reglaU)) {
       gtinC = derivaCaja(gtinU!, usados); reglaC = 'derivado-caja'
       if (!gtinC) { plan.push({ fila: f.fila, sku: f.sku, estado: 'conflicto', motivos: ['los ocho indicadores de caja (1-8) ya están usados'], cambios: [], nuevas: [] }); continue }
-      nuevas.push({ nivel: 'caja', gtin: gtinC, regla: reglaC, emitido: true })
+      nuevas.push({ nivel: 'caja', gtin: gtinC, regla: reglaC, emitido: true, ...(previo?.gtinCaja ? { anterior: previo.gtinCaja } : {}) })
     } else {
       const r = emiteInterno(cfg.prefijoInterno, interno, usados)
       if (!esEmision(r)) { plan.push({ fila: f.fila, sku: f.sku, estado: 'conflicto', motivos: [`no se pudo numerar la caja: ${r.error}`], cambios: [], nuevas: [] }); continue }
       interno = r.siguiente; gtinC = r.numero; reglaC = 'interno'
-      nuevas.push({ nivel: 'caja', gtin: gtinC, regla: reglaC, emitido: true })
+      nuevas.push({ nivel: 'caja', gtin: gtinC, regla: reglaC, emitido: true, ...(previo?.gtinCaja ? { anterior: previo.gtinCaja } : {}) })
     }
     if (gtinC) usados.add(gtinC)
     if (reglaU === 'fabricante' && reglaC === 'interno') notas.push('Pide al fabricante el GTIN-14 de la caja: el de la pieza no sirve para la caja, y un GTIN con su prefijo solo lo puede asignar él.')
@@ -112,7 +118,8 @@ export function planificaImportacion(filas: readonly FilaCatalogo[], errores: re
     for (const g of [gtinU, gtinC]) if (g) dueno.set(g, f.sku)
     if (!previo) { plan.push({ fila: f.fila, sku: f.sku, estado: 'nuevo', motivos: [], cambios: [], articulo, nuevas }); continue }
     const cambios = diferencias(previo, articulo)
-    plan.push({ fila: f.fila, sku: f.sku, estado: cambios.length ? 'cambiado' : 'sin-cambio', motivos: [], cambios, articulo, nuevas })
+    const siguen = nuevas.filter((n) => n.anterior).map((n) => `el GTIN de ${n.nivel === 'caja' ? 'caja' : 'pieza'} anterior ${n.anterior} se seguirá leyendo como ${f.sku}: lo que ya trae esa etiqueta no se pierde`)
+    plan.push({ fila: f.fila, sku: f.sku, estado: cambios.length ? 'cambiado' : 'sin-cambio', motivos: siguen, cambios, articulo, nuevas })
   }
   return { filas: plan, errores, resumen: resume(plan, filas, errores), contadores: { ...estado.contadores, propio, interno } }
 }
@@ -166,15 +173,17 @@ export function aplicaImportacion(estado: EstadoAlmacen, plan: PlanImportacion, 
 /** Filas para exportar a CSV o Excel: el catalogo con sus codigos y la regla de cada uno. */
 /**
  * El catalogo para exportar. Las tres ultimas columnas dicen que articulos tienen foto, donde viene
- * su caducidad y con que formato se imprime; al reimportar se ignoran (no son del catalogo).
+ * su caducidad y con que formato se imprime, y sus GTIN anteriores (que se siguen leyendo); al
+ * reimportar se ignoran (no son del catalogo: los anteriores salen del libro de asignaciones).
  */
 export function filasDeExportacion(estado: EstadoAlmacen): string[][] {
-  const cab = ['sku', 'descripcion', 'categoria', 'sitios', 'marca_propia', 'gtin', 'regla_gtin', 'gtin_caja', 'regla_caja', 'circulacion', 'unidades_por_caja', 'cajas_por_tarima', 'vida_util_dias', 'notas', 'foto', 'donde_caducidad', 'formato_caducidad']
+  const cab = ['sku', 'descripcion', 'categoria', 'sitios', 'marca_propia', 'gtin', 'regla_gtin', 'gtin_caja', 'regla_caja', 'circulacion', 'unidades_por_caja', 'cajas_por_tarima', 'vida_util_dias', 'notas', 'foto', 'donde_caducidad', 'formato_caducidad', 'gtins_anteriores']
   const filas = Object.values(estado.articulos).sort((a, b) => a.sku.localeCompare(b.sku)).map((a) => [
     a.sku, a.descripcion, a.categoria, a.sitios.join(';'), a.marcaPropia ? 'SI' : 'NO', a.gtinUnidad ?? '', a.reglaUnidad ?? '', a.gtinCaja ?? '', a.reglaCaja ?? '',
     [a.gtinUnidad, a.gtinCaja].some((g) => g && clasificaPrefijo(g).clase.startsWith('restringido')) ? 'restringida (solo dentro de la cadena)' : 'global',
     String(a.unidadesPorCaja), a.cajasPorTarima ? String(a.cajasPorTarima) : '', a.vidaUtilDias ? String(a.vidaUtilDias) : '', a.notas.join(' '),
     fotoVigente(estado, a.sku) ? 'SI' : 'NO', fotoVigente(estado, a.sku, 'caducidad')?.nota ?? '', formatoDe(estado, a.sku)?.formato ?? '',
+    anterioresDe(estado, a.sku).map((x) => `${x.gtin} (${x.nivel} hasta ${x.hasta.slice(0, 10)})`).join('; '),
   ])
   return [cab, ...filas]
 }
