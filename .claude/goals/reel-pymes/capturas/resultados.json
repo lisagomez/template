@@ -1,0 +1,111 @@
+{
+ "rutasExistentes": {
+  "/dictar": {
+   "estado": 200,
+   "terminaEn": "/dictar"
+  },
+  "/laboratorio-pymes": {
+   "estado": 200,
+   "terminaEn": "/laboratorio-pymes"
+  },
+  "/estudio": {
+   "estado": 200,
+   "terminaEn": "/estudio"
+  },
+  "/historial": {
+   "estado": 200,
+   "terminaEn": "/historial"
+  }
+ },
+ "pasos": [
+  {
+   "que": "ruta protegida sin sesión",
+   "url": "/login?siguiente=%2Freel"
+  },
+  {
+   "que": "rutas existentes sin sesión",
+   "/dictar": {
+    "estado": 200,
+    "terminaEn": "/dictar"
+   },
+   "/laboratorio-pymes": {
+    "estado": 200,
+    "terminaEn": "/laboratorio-pymes"
+   },
+   "/estudio": {
+    "estado": 200,
+    "terminaEn": "/estudio"
+   },
+   "/historial": {
+    "estado": 200,
+    "terminaEn": "/historial"
+   }
+  },
+  {
+   "que": "alta",
+   "termina": "/reel",
+   "cuenta": "…@example.com"
+  },
+  {
+   "que": "salida",
+   "termina": "/login"
+  },
+  {
+   "que": "entrada",
+   "termina": "/reel"
+  },
+  {
+   "que": "subida y proceso",
+   "segundos": 42,
+   "version": "Versión 1 · huella sha256:c7c14aaf06c6…"
+  },
+  {
+   "que": "marca de corte en el segundo 5",
+   "version": "Versión 2 · huella sha256:29619f19f4c2…"
+  },
+  {
+   "que": "aprobar",
+   "registro": "Aprobada por …@example.com · 27/9/2026, 8:17:07 p.m. · versión 2 · sha256:29619f19f4c2…",
+   "hostsTocados": [
+    "localhost:3000"
+   ]
+  },
+  {
+   "que": "editar revoca",
+   "version": "Versión 3 · huella sha256:f938d0e8c3b2…",
+   "registro": "Aprobada por …@example.com · 27/9/2026, 8:17:07 p.m. · versión 2 · sha256:29619f19f4c2… · revocada (el archivo cambió)"
+  },
+  {
+   "que": "borrar proyecto",
+   "antes": "bruto.mp4, cuadros, decisiones.json, hoja.png, master.json, master.mp4, normalizado.mov, proyecto.json, registro.json, resultado.json, rotulos.ass, transcripcion.json",
+   "despues": "(carpeta borrada)"
+  }
+ ],
+ "peticionesAlAprobar": [
+  {
+   "metodo": "GET",
+   "host": "localhost:3000",
+   "ruta": "/api/reel/883cb7ac-afab-41d7-9f2b-a4bfd92202f7/archivo"
+  },
+  {
+   "metodo": "POST",
+   "host": "localhost:3000",
+   "ruta": "/api/reel/883cb7ac-afab-41d7-9f2b-a4bfd92202f7/decision"
+  },
+  {
+   "metodo": "GET",
+   "host": "localhost:3000",
+   "ruta": "/api/dictado"
+  },
+  {
+   "metodo": "GET",
+   "host": "localhost:3000",
+   "ruta": "/reel/883cb7ac-afab-41d7-9f2b-a4bfd92202f7"
+  }
+ ],
+ "erroresDeConsola": [],
+ "almacen": {
+  "antes": "bruto.mp4, cuadros, decisiones.json, hoja.png, master.json, master.mp4, normalizado.mov, proyecto.json, registro.json, resultado.json, rotulos.ass, transcripcion.json",
+  "despues": "(carpeta borrada)"
+ }
+}

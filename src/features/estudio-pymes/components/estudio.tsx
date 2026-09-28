@@ -38,6 +38,12 @@ export function Estudio({ aprobadas }: { aprobadas: readonly IdHerramienta[] }) 
       <Seccion id="calendario" titulo="3. Calendario y piezas" subtitulo="Un mes de publicaciones con imagen en tus colores y texto en tu voz." aprobada={ok('contenido')}><SeccionCalendario /></Seccion>
       <Seccion id="carruseles" titulo="3b. Carruseles" subtitulo="Historias de 3 a 6 láminas con tus datos; la primera se entiende sola." aprobada={ok('piezas')}><SeccionCarruseles /></Seccion>
       <Seccion id="video" titulo="3c. Promo en video" subtitulo="Video vertical de 6 s hecho por código, sin grabar a nadie, con tu marca." aprobada={ok('video')}><SeccionVideo /></Seccion>
+      <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm dark:border-neutral-800 dark:bg-neutral-900" data-prueba="ir-al-reel">
+        <p className="font-semibold">3d. Tu reel del celular</p>
+        {ok('reel') && ok('privacidad') && ok('sala')
+          ? <p className="mt-1">Graba lo que sabes hacer y súbelo: lo cortamos y subtitulamos con tu marca, sin exponer a nadie que no consintió. <Link href="/reel" className="font-semibold underline">Ir a tus reels (con tu cuenta) →</Link></p>
+          : <p className="mt-1 text-neutral-600 dark:text-neutral-400">El reel sigue en el laboratorio.</p>}
+      </div>
       <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950" data-prueba="ir-a-aprobar">
         {ok('aprobacion') ? <Link href="/estudio/aprobar" className="font-semibold underline">Aprobar el mes desde tu celular →</Link> : <span>La aprobación con huella sigue en el laboratorio.</span>}
         <span className="ml-2 text-neutral-600 dark:text-neutral-400">Aprobar no publica: te deja la lista para que tú subas.</span>

@@ -34,7 +34,8 @@ export function TarjetaCaso({ corrido }: { corrido: CasoCorrido }) {
         </ul>
         {resultado.video ? (
           <div className="flex gap-2" data-prueba="video-caso">
-            <video src={resultado.video.mp4} controls muted playsInline preload="metadata" width={180} className="rounded border border-neutral-200 dark:border-neutral-800" />
+            {/* Hay casos que solo tienen hoja de cuadros (el reel de un caso bloqueado no se reproduce): sin `src` vacío. */}
+            {resultado.video.mp4 ? <video src={resultado.video.mp4} controls muted playsInline preload="metadata" width={180} className="rounded border border-neutral-200 dark:border-neutral-800" /> : null}
             {/* eslint-disable-next-line @next/next/no-img-element -- hoja de cuadros generada por ffmpeg del MP4 real */}
             <img src={resultado.video.hoja} alt="Hoja de cuadros del video" width={300} className="rounded border border-neutral-200 dark:border-neutral-800" />
           </div>

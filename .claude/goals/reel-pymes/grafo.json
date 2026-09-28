@@ -1,0 +1,304 @@
+{
+  "slug": "reel-pymes",
+  "titulo": "Reel del celular para pymes: cuentas, reel, privacidad, tarjetas, sala de aprobación, laboratorio y app",
+  "nodos": [
+    {
+      "id": "base",
+      "label": "Base existente: video por código 0.2.0 (escena, cuadro, MP4 determinista), aprobación con huella, /estudio; tools/dictado + voz 0.5.0 (transcriptor, diarización); propuesta-video.md firmada",
+      "estado": "ambar",
+      "evidencia": "reusado: video por código 0.2.0 (ahora 0.3.0 con tarjetas), tools/dictado, voz 0.5.0 (diarización inyectada)"
+    },
+    {
+      "id": "prp",
+      "label": "PRP-007 del reel: fases con candado (firmado / bloqueado), C3 de la superficie nueva (cuentas + subida de video) y AISIA",
+      "estado": "morado",
+      "evidencia": ".claude/PRPs/PRP-007-reel-del-celular.md: 10 fases firmadas hechas, 6 bloqueadas con quién firma, estreno manual"
+    },
+    {
+      "id": "supabase",
+      "label": "Proyecto Supabase en la nube creado por el laboratorio, llaves en el entorno (presencia enmascarada)",
+      "estado": "morado",
+      "evidencia": "proyecto en la nube; 4 variables comprobadas enmascaradas; SQL aplicado por el laboratorio en el SQL Editor (v2)"
+    },
+    {
+      "id": "cuentas",
+      "label": "/add-login acotado: correo y contraseña, profiles, RLS, proxy.ts solo sobre las rutas nuevas; sin service_role en superficies (C7)",
+      "estado": "morado",
+      "evidencia": "Playwright: ruta protegida → /login, alta, salida y entrada; /dictar, /laboratorio-pymes, /estudio y /historial 200 sin sesión"
+    },
+    {
+      "id": "esquema",
+      "label": "Esquema del reel: proyectos, versiones, aprobaciones (quién, cuándo, huella, versión) y estado de consentimientos, con RLS probada entre dos cuentas",
+      "estado": "morado",
+      "evidencia": "npm run reel:rls: 14/14 contra la base real (B no lee, cambia, borra ni suplanta a A; aprobación inmutable)"
+    },
+    {
+      "id": "motores",
+      "label": "Motores locales pineados con licencia y huella: transcripción con marcas por palabra, conteo de hablantes, detección de caras (no reconocimiento), lectura de pantalla",
+      "estado": "morado",
+      "evidencia": "Parakeet, WeSpeaker, YuNet, Piper con versión, huella y licencia (tools/reel/LICENCIAS.md); marcas por palabra p90 140 ms"
+    },
+    {
+      "id": "reel",
+      "label": "Herramienta reel-del-celular: ingesta sin metadatos, transcripción, cortes por reglas, subtítulos de marca en zona segura, cotejo de precios, máster declarativo, QA",
+      "estado": "ambar",
+      "evidencia": "clip sintético → 1080×1920 30 fps H.264/AAC 48 kHz, −14.2 LUFS, ubicación borrada, misma huella ×2; sin estreno real"
+    },
+    {
+      "id": "privacidad",
+      "label": "Controles de la AISIA: desenfoque o bloqueo de caras sin consentimiento, bloqueo por datos en pantalla, consentimientos, retención de 30 días y borrar proyecto",
+      "estado": "ambar",
+      "evidencia": "las 6 trampas firmadas bloquean o desenfocan (priv-1..8); calibrado con voces sintéticas: recalibrar en el estreno"
+    },
+    {
+      "id": "tarjetas",
+      "label": "Tarjetas animadas: versión video de cada pieza del calendario y temporadas firmadas, sobre el video por código existente",
+      "estado": "ambar",
+      "evidencia": "7 temporadas firmadas, tarj-1..5; sin estreno con un cliente"
+    },
+    {
+      "id": "sala",
+      "label": "Sala de aprobación en el celular con sesión: marcar corte o texto en el segundo exacto, aprobar o pedir cambio, registro y revocación",
+      "estado": "ambar",
+      "evidencia": "Playwright en celular: marcar corte → v2, aprobar con huella, editar → v3 revoca; peticiones solo a localhost"
+    },
+    {
+      "id": "laboratorio",
+      "label": "Laboratorio: ≥5 casos por herramienta con las 6 trampas firmadas, material sintético con licencia, estado real y referencias",
+      "estado": "morado",
+      "evidencia": "92/92 casos con el estado que declaran; 27 nuevos (reel 7, privacidad 8, tarjetas 5, sala 7)"
+    },
+    {
+      "id": "app",
+      "label": "App: el reel como pieza del calendario en /estudio y la sala en el celular, recorrida con Playwright",
+      "estado": "ambar",
+      "evidencia": "/reel y /reel/[id] recorridos de punta a punta; /estudio enlaza al reel si el laboratorio lo aprueba; sin estreno"
+    },
+    {
+      "id": "docs",
+      "label": "Guía del dueño para grabar y aprobar, formato de consentimiento (por verificar con asesoría legal), READMEs, propuesta de respaldo",
+      "estado": "morado",
+      "evidencia": "GUIA-DUENO-REEL.md, FORMATO-CONSENTIMIENTO-REEL.md, READMEs, propuesta de respaldo y de gate"
+    },
+    {
+      "id": "firma",
+      "label": "Gate humano: estreno con clips del laboratorio, asesoría legal, respaldo, publicar (siempre el dueño) y lo que sigue bloqueado",
+      "estado": "gris",
+      "evidencia": "pendiente: estreno con clips del laboratorio, asesoría legal del formato, respaldo (GATE 3), gate reel:rls, fases 11–16"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a1",
+      "from": "base",
+      "to": "prp",
+      "tipo": "agente",
+      "label": "lo existente medido y las 14 respuestas firmadas"
+    },
+    {
+      "id": "a2",
+      "from": "prp",
+      "to": "cuentas",
+      "tipo": "agente",
+      "label": "fase 1 del PRP: /add-login acotado"
+    },
+    {
+      "id": "a3",
+      "from": "supabase",
+      "to": "cuentas",
+      "tipo": "manual",
+      "label": "URL y llaves en el entorno; si faltan, el goal se detiene y las pide"
+    },
+    {
+      "id": "a4",
+      "from": "cuentas",
+      "to": "esquema",
+      "tipo": "agente",
+      "label": "migraciones no destructivas + prueba de RLS entre dos cuentas"
+    },
+    {
+      "id": "a5",
+      "from": "prp",
+      "to": "motores",
+      "tipo": "mixta",
+      "label": "instalar pineado (script de tools/dictado) y medir marcas por palabra"
+    },
+    {
+      "id": "a6",
+      "from": "motores",
+      "to": "reel",
+      "tipo": "agente",
+      "label": "contratos inyectados (Transcriptor, ContadorDeHablantes, DetectorDeCaras, LectorDePantalla)"
+    },
+    {
+      "id": "a7",
+      "from": "base",
+      "to": "reel",
+      "tipo": "agente",
+      "label": "render y codificación deterministas ya medidos"
+    },
+    {
+      "id": "a8",
+      "from": "reel",
+      "to": "privacidad",
+      "tipo": "agente",
+      "label": "QA que bloquea el borrador"
+    },
+    {
+      "id": "a9",
+      "from": "esquema",
+      "to": "privacidad",
+      "tipo": "agente",
+      "label": "estado de consentimiento por persona"
+    },
+    {
+      "id": "a10",
+      "from": "base",
+      "to": "tarjetas",
+      "tipo": "agente",
+      "label": "escena/cuadro de 0.2.0"
+    },
+    {
+      "id": "a11",
+      "from": "esquema",
+      "to": "sala",
+      "tipo": "agente",
+      "label": "registro de aprobación con sesión"
+    },
+    {
+      "id": "a12",
+      "from": "privacidad",
+      "to": "sala",
+      "tipo": "agente",
+      "label": "no se aprueba con caras o datos sin cubrir"
+    },
+    {
+      "id": "a13",
+      "from": "reel",
+      "to": "laboratorio",
+      "tipo": "agente",
+      "label": "casos del reel"
+    },
+    {
+      "id": "a14",
+      "from": "privacidad",
+      "to": "laboratorio",
+      "tipo": "agente",
+      "label": "las 6 trampas firmadas"
+    },
+    {
+      "id": "a15",
+      "from": "tarjetas",
+      "to": "laboratorio",
+      "tipo": "agente",
+      "label": "casos de tarjetas"
+    },
+    {
+      "id": "a16",
+      "from": "sala",
+      "to": "laboratorio",
+      "tipo": "agente",
+      "label": "casos de la sala"
+    },
+    {
+      "id": "a17",
+      "from": "laboratorio",
+      "to": "app",
+      "tipo": "agente",
+      "label": "la app usa solo lo que el laboratorio aprueba"
+    },
+    {
+      "id": "a18",
+      "from": "cuentas",
+      "to": "app",
+      "tipo": "agente",
+      "label": "rutas protegidas sin romper las existentes"
+    },
+    {
+      "id": "a19",
+      "from": "app",
+      "to": "docs",
+      "tipo": "agente",
+      "label": "guía y formatos con lo que de verdad hace"
+    },
+    {
+      "id": "a20",
+      "from": "docs",
+      "to": "firma",
+      "tipo": "manual",
+      "label": "estreno, asesoría legal, respaldo, publicar"
+    },
+    {
+      "id": "a21",
+      "from": "prp",
+      "to": "tarjetas",
+      "tipo": "agente",
+      "label": "fase del PRP: tarjetas animadas (respuestas 1 y 13)"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "L1",
+      "sobre": "nodo:prp",
+      "label": "candado",
+      "referencia": "solo se construye lo firmado: sin LLM, transcripción remota, video generativo, GSAP, render en producción ni publicar",
+      "estado": "morado",
+      "evidencia": "fases 11–16 bloqueadas y no construidas; nada publica"
+    },
+    {
+      "id": "L2",
+      "sobre": "nodo:privacidad",
+      "label": "consentimiento",
+      "referencia": "no se aprueba un borrador con más caras o voces que consentimientos registrados; menores nunca",
+      "estado": "morado",
+      "evidencia": "priv-1 (desenfoque + re-detección 0), priv-3 (otra voz bloquea), priv-6 (vencido/revocado bloquea)"
+    },
+    {
+      "id": "L3",
+      "sobre": "nodo:privacidad",
+      "label": "datos en pantalla",
+      "referencia": "la lectura de pantalla bloquea tickets, teléfonos, RFC y chats, y reporta enmascarado a 4 caracteres",
+      "estado": "morado",
+      "evidencia": "priv-2: un bloqueo agrupado, muestra «55 0…», el número completo no aparece en ningún archivo"
+    },
+    {
+      "id": "L4",
+      "sobre": "nodo:esquema",
+      "label": "aislamiento",
+      "referencia": "RLS en toda tabla; la cuenta B no lee nada de la cuenta A (prueba pegada); service_role fuera de superficies",
+      "estado": "morado",
+      "evidencia": "reel:rls 14/14 y priv-8 (ninguna superficie usa service_role, con control negativo)"
+    },
+    {
+      "id": "L5",
+      "sobre": "nodo:reel",
+      "label": "perímetro",
+      "referencia": "video, transcripción y documento de consentimiento no salen del servidor; render con la red bloqueada; peticiones capturadas",
+      "estado": "morado",
+      "evidencia": "todo local (ffmpeg, Parakeet, YuNet, Tesseract); al aprobar, el navegador solo tocó localhost:3000"
+    },
+    {
+      "id": "L6",
+      "sobre": "nodo:reel",
+      "label": "determinismo",
+      "referencia": "mismo máster, misma huella en dos renders",
+      "estado": "morado",
+      "evidencia": "limpio y limpio-2: misma huella (medicion.json deterministico: true)"
+    },
+    {
+      "id": "L7",
+      "sobre": "nodo:privacidad",
+      "label": "retención",
+      "referencia": "bruto y transcripción se borran a los 30 días de aprobar; borrar proyecto verificable con antes y después",
+      "estado": "morado",
+      "evidencia": "reel:retencion con reloj inyectado: día 29 nada, día 30 borra bruto/normalizado/transcripción, día 31 no repite; borrar proyecto 12 → 0"
+    },
+    {
+      "id": "L8",
+      "sobre": "nodo:app",
+      "label": "gate",
+      "referencia": "validate en verde después del commit",
+      "estado": "gris"
+    }
+  ]
+}

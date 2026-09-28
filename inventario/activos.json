@@ -90,6 +90,22 @@
    "cubre": ["tools/pymes-marketing"]
   },
   {
+   "id": "TPL-reel",
+   "nombre": "Reel del celular para pymes: cortes, subtitulos, privacidad (caras, pantalla, voces), master determinista y sala",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/reel", "responsable": "dep-sw",
+   "origen": [".claude/goals/reel-pymes"],
+   "cubre": ["tools/reel", "scripts/reel"]
+  },
+  {
+   "id": "TPL-feature-reel",
+   "nombre": "App del reel: cuentas, subida del clip y sala de aprobacion en el celular",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/reel", "responsable": "dep-sw",
+   "origen": [".claude/goals/reel-pymes"],
+   "cubre": ["src/features/reel", "supabase/migrations/20260927200000_perfiles.sql", "supabase/migrations/20260927200100_reel.sql", "docs/GUIA-DUENO-REEL.md", "docs/FORMATO-CONSENTIMIENTO-REEL.md"]
+  },
+  {
    "id": "TPL-feature-estudio-pymes",
    "nombre": "Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
