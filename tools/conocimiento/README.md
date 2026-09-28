@@ -46,6 +46,26 @@ npm run vigila:versiones                                  # avisa si hay una nue
 Lo prueba `pruebas/aviso.ts`, un ensayo con un registro falso en 127.0.0.1: publica 0.3.0 y avisa; lo repite y
 calla; publica 1.0.0 y avisa como MAYOR; el pin no se mueve; el tarball no da falsa alarma.
 
+### Un consumidor público: vendoriza el recorte, nunca el paquete
+
+Un repo público (Hermes) no instala el paquete: con cada subida del pin publicaría los dominios que
+siembran otros proyectos. Vendoriza solo el **recorte** de los suyos, con su pin:
+
+```bash
+npm run recorta -- --dominios mx-drones-de-reparto,mx-agentes-de-seguros --salida <dir>
+```
+
+- Escribe `recorte.json`, que es `seleccionaDominios` del motor, y `PIN.json`, con la versión, los dominios, la
+  huella del paquete ensamblado (la de `dist/conocimiento.json`) y la del recorte.
+- **Se niega** si el árbol no es exactamente una versión registrada en `versiones.json`: el recorte sale siempre de
+  una versión que pasó el gate.
+- **Se rehace**: la misma versión y los mismos dominios dan las mismas huellas. El consumidor no ve el paquete, así
+  que quien firma una subida del pin lo comprueba aquí.
+- No hay «todos los dominios» a propósito: un dominio que se siembre mañana no le llega a nadie que no lo pida.
+
+Lo prueba `pruebas/recorte.ts`. Del lado de Hermes, `seed/actualiza_paquete.py` recibe el recorte, mide qué
+respuestas cambian y exige la firma del laboratorio (`prp-grafo-lee-paquete.md` de ese repo).
+
 ## Reglas de la casa
 
 - **Solo se añade.** Retirar es cerrar `vigente_hasta`; un significado nuevo es una regla nueva con
