@@ -280,3 +280,257 @@ Conectarlo en la app es otro paso: hace falta un cliente de Postgres pineado y d
 base del ERP, que es PRODUCCIÓN compartida, con datos reales (decisión de flujo de datos, C4). Hoy
 el ERP tampoco tiene los productos de prueba ni sucursales, así que el agente no encontraría ventas
 que cuadren con el laboratorio.
+
+## 11. Recepción con foto de la caducidad (`/etiquetas/recibir`)
+
+Spec: `docs/goals/foto-articulo-y-caducidad-leida.md`. Pantallas: `/etiquetas/recibir` (escanear →
+foto → revisión → etiqueta, y la bandeja «por confirmar»), la ficha del artículo en
+`/etiquetas/catalogo`, y la foto en el lector, mover, conteo, tablero y expediente.
+
+**Decisión del laboratorio**: la caducidad leída es una PROPUESTA. Cuenta para semáforo, FEFO y
+cadena solo cuando quien registra la confirma o la corrige; si la deja pendiente, las cajas se
+quedan en recibo y el servidor no deja moverlas, venderlas ni transferirlas.
+
+**Lo que se investigó y cómo cambió el diseño**
+
+| Fuente | Qué dice | Qué decidió aquí |
+|---|---|---|
+| ISO/IEC 15424 + GenSpecs (EAN/UPC, ITF-14) | La pistola manda `]E0` (EAN-13; UPC-A como EAN-13 con un 0), `]E3` (con suplemento), `]E4` (EAN-8), `]I1` (ITF). `]C0`, `]d1` y `]Q1` son Code 128, DataMatrix y QR **sin** GS1. | `codigos.ts` lee los cuatro, con y sin identificador; lo que no es GS1 se rechaza con su motivo («parece publicidad»), no se adivina un producto. La cámara les antepone el identificador según el formato que decodificó zxing. |
+| GS1 Digital Link 1.4 | La clave va en la ruta (`/01/…`), los calificadores también (`/10/`), los atributos en la consulta (`?17=`). Cualquier dominio. | Se lee la forma sin comprimir; con (17)(10) se recibe **sin foto**. La comprimida no se lee (se dice). |
+| NOM-051-SCFI/SSA1-2010 | En México la etiqueta declara «fecha de caducidad» o «consumo preferente», con día y mes (vida corta) o mes y año (vida larga), con abreviaturas (CAD, Cad., Cons. Pref.). | Los dos tipos se distinguen y se dicen en pantalla; mes y año vale hasta el último día del mes. |
+| Sistemas de visión en líneas de empaque y WMS con captura por cámara | Leen fechas con OCR especializado y **reglas de formato por SKU**; lo dudoso va a una persona. | El formato se APRENDE por artículo con la primera confirmación; la ambigüedad nunca se resuelve sola. |
+| Fotos reales del laboratorio (7) y corpus sintético (60 × 2 tomas) | Ver «Medición». | Motor, cascada, reglas del analizador. |
+
+**Medición (banco `tools/etiquetas-gs1/banco/`, 2026-09-27)** — `node banco/mide-caducidades.mjs`.
+Corpus sintético: 12 textos × 5 fondos (blanco, burbuja de aire, líquido oscuro, luz rasante, letra
+sólida), tinta de puntos 5×7 con el cero con diagonal, dos tomas por imagen; es **sintético** y
+sirve para comparar motores, no para fijar umbrales reales. Corpus real: 7 fotos del laboratorio
+(fuera de git; varias de catálogo web, baja resolución), 2 marcadas `por_confirmar` que no cuentan.
+
+| motor | corpus | n | exacta | con opción correcta | ambigüedad marcada | **EQUIVOCADA** | opciones sin la correcta | no leyó | inventada (sin fecha) | sin fecha, correcto | error | lote exacto / equivocado | ms mediana |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| qwen-completa | real (foto entera) | 5 | 1 | 0 | 0 | **1** | 0 | 0 | 0 | 3 | 0 | 1 / 0 | 17807 |
+| qwen | sintético | 60 | 20 | 2 | 6 | **0** | 1 | 21 | 0 | 10 | 0 | 12 / 20 | 9933 |
+| qwen | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 14292 |
+| rapidocr-2tomas | sintético | 60 | 6 | 3 | 5 | **0** | 0 | 36 | 0 | 10 | 0 | 7 / 3 | 3151 |
+| rapidocr-cascada | sintético | 60 | 25 | 4 | 15 | **0** | 2 | 4 | 0 | 10 | 0 | 26 / 9 | 1526 |
+| rapidocr-cascada | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 992 |
+| rapidocr-completa | real (foto entera) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 0 | 952 |
+| rapidocr-producto | sintético | 60 | 13 | 17 | 15 | **0** | 2 | 3 | 0 | 10 | 0 | 18 / 4 | 5691 |
+| rapidocr-producto | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 1674 |
+| rapidocr-puntos | sintético | 60 | 25 | 4 | 15 | **0** | 2 | 4 | 0 | 10 | 0 | 25 / 9 | 1484 |
+| rapidocr-puntos | real (recorte) | 5 | 0 | 0 | 0 | **0** | 0 | 2 | 0 | 3 | 0 | 0 / 0 | 831 |
+| rapidocr | sintético | 60 | 6 | 0 | 4 | **0** | 0 | 40 | 0 | 10 | 0 | 7 / 4 | 1625 |
+| rapidocr | real (recorte) | 5 | 2 | 0 | 0 | **0** | 0 | 0 | 0 | 3 | 0 | 0 / 1 | 1105 |
+| tesseract-puntos | sintético | 60 | 9 | 12 | 7 | **0** | 0 | 22 | 0 | 10 | 0 | 4 / 11 | 351 |
+| tesseract-puntos | real (recorte) | 5 | 0 | 0 | 0 | **0** | 0 | 2 | 0 | 3 | 0 | 0 / 0 | 348 |
+| tesseract | sintético | 60 | 5 | 0 | 3 | **0** | 1 | 41 | 0 | 10 | 0 | 5 / 0 | 438 |
+| tesseract | real (recorte) | 5 | 0 | 0 | 0 | **0** | 0 | 2 | 0 | 3 | 0 | 0 / 0 | 236 |
+
+Cómo se lee: «EQUIVOCADA» = se propuso UNA fecha y no era (la peligrosa); «con opción correcta» y
+«ambigüedad marcada» = la persona elige entre opciones y la buena está; «inventada» = propuso algo
+en una foto sin fecha. `rapidocr-producto` es la cascada que usa la app (`leeYPropone`) con DOS tomas
+en el sintético y una en el real. Latencia: mediana en CPU (WSL2, sin GPU), incluye lanzar el proceso.
+
+- **Ningún motor inventó una fecha** en las 13 fotos sin fecha (10 sintéticas, 3 reales). Qwen, con
+  la foto entera, sí devolvió números que no están en la foto («20240202») o la clave del
+  proveedor; el analizador no los aceptó (cifras sin rótulo no son fecha).
+- **La única propuesta equivocada es de Qwen con la foto entera**: la lata «14/06/26» leída
+  «14.06.28», fecha válida y plausible. Recortada, la leyó bien. Por eso se lee el recorte.
+- **Tesseract** no lee la tinta de puntos (41/60 sin leer) ni las fotos reales (0 de 2); uniendo
+  puntos lee 9. Antes de las reglas de rótulo y ventana de años, esa variante proponía **10 fechas
+  equivocadas** (medido en la primera corrida: años 2827, fechas armadas con el lote); con las
+  reglas, 0.
+- **RapidOCR** tal cual lee la letra sólida y las fotos reales (2 de 2); uniendo puntos lee la
+  tinta de inyección (25 exactas + 15 ambigüedades marcadas) pero estropea las fotos reales (0 de
+  2). La cascada se queda con lo mejor de las dos.
+- **El cotejo de dos tomas cuesta clics, no errores**: de 25 exactas con una toma pasa a 13 exactas +
+  17 con opción, porque la segunda toma (girada y con más ruido) lee distinto y entonces no se
+  propone una sola. Con una toma ya había 0 equivocadas en el sintético; se mantiene el cotejo porque
+  un clic cuesta menos que una fecha mal leída en el anaquel, y la medición en uso dirá si conviene
+  relajarlo.
+- **El lote falla más que la fecha** (Qwen 20 lotes equivocados en 60; RapidOCR 4 en la cascada,
+  la «A» de Abuelita como «H» en la real): se confirma igual que la fecha.
+- Lo que falta medir en real: fotos de celular del andén a resolución normal (las 7 reales son
+  miniaturas; 2 están `por_confirmar` y no cuentan). Los umbrales no se fijan con este corpus.
+
+**Decisiones**
+
+| Decisión | Por qué |
+|---|---|
+| **Motor: RapidOCR (PP-OCRv4 en ONNX Runtime, CPU) por proceso local**, versiones exactas en `motores/requirements-rapidocr.txt` | Medido: es el único que lee la tinta de puntos (uniendo puntos) Y las fotos reales, con 0 propuestas equivocadas y 0 inventadas, en 1-6 s. Tesseract casi no lee la tinta de puntos ni las fotos reales; Qwen2.5-VL 3B lee bien recortado, pero con la foto entera propuso una fecha equivocada y tarda 10-18 s por imagen en CPU (y sería C8: es un modelo de lenguaje). RapidOCR no es un modelo de lenguaje: no pasa por C8. |
+| **Cascada**: recorte tal cual → uniendo puntos si no vio fecha → foto entera si ninguna toma vio nada | Medido: los puntos unidos salvan la tinta de inyección y estropean la letra sólida; la foto entera ayuda con miniaturas que el motor detecta solo. `leeYPropone` es la misma función en la app y en el banco. |
+| **No se reusa `MotorOcr` del extractor**: se reusa su patrón | Aquel devuelve páginas con campos para documentos; esto, líneas con su caja de un recorte chico. Reusar el puerto obligaba a depender de otra herramienta para un contrato distinto. Sí se reusó: proceso por lectura, directorio temporal borrado siempre, modelo pineado, errores sin el texto leído, confianza que no decide nada. |
+| **El analizador decide, el motor transcribe** (`fechas-impresas.ts`) | Cifras sin rótulo no son fecha (la clave del proveedor también son cifras); el rótulo vale si no hay otras cifras entre él y la fecha; año fuera de ventana no se propone; un día imposible se marca y, si cambiando UNA cifra 8/9/6 por 0 sale una sola fecha, se sugiere (cero con diagonal). |
+| **Dos tomas se cotejan** | Si no dicen lo mismo, `discrepancia`: se enseñan las dos y no se propone ninguna. El lote se compara carácter por carácter. |
+| **`EN_REVISION` en la cadena, antes de que la persona decida** | La propuesta queda anclada: no se puede reescribir después para que parezca que la máquina acertó (probado: alterar la propuesta rompe el hash en esa secuencia). Su clave es el folio, sin caducidad; no mueve existencias. La resuelve un `RECIBIDO` (o `RECHAZADO`) con `revision` = su hash; «otra foto» abre un `EN_REVISION` que la `reemplaza`. |
+| **Confirma quien registró** | Lo exige el núcleo y la base (trigger). Si esa persona no puede, otra la descarta con motivo y se registra de nuevo. |
+| **`corregida` la calcula el servidor** | Compara lo confirmado con la propuesta guardada en la cadena; el navegador no puede decir «tal cual». |
+| **Pendiente = no es inventario** | No está en existencias, FEFO ni semáforo; mover, vender o transferir ese artículo en el sitio devuelve «caducidad por confirmar: N cajas… (hace X)». |
+| **Fotos por huella, fuera de la cadena** | Se normalizan en el servidor (sharp: orienta, reduce a 2000 px, **quita EXIF y GPS**) y se guardan en `ETIQUETAS_DATOS/fotos/` por su SHA-256; la cadena cita la huella. Un SVG, un HTML o lo que no tenga firma de imagen se rechaza por sus bytes; se sirven con `nosniff` y `sandbox`, pedidas con el código del dispositivo. |
+| **Carga masiva por nombre de archivo** (`SKU.jpg`, `SKU-caja.jpg`) | El servidor nunca descarga URLs (SSRF) y la foto no sale de la red de quien la sube. |
+| **Formato aprendido por artículo** | La primera confirmación que elige una lectura fija el formato (p. ej. DDMMAA); la siguiente sale sin ambigüedad, y se sigue confirmando. |
+| **Dónde viene la caducidad** | Una foto y una nota por artículo (vista `caducidad`); la primera persona que la encuentra la guarda al confirmar y las siguientes la ven antes de buscarla. |
+| **Motor externo: no existe** | La herramienta no trae ningún adaptador que saque la foto (C4). Conectar uno es decisión de flujo de datos y, si es un modelo de lenguaje, pasa por el routing (C8) y la contabilidad. |
+
+**Dónde viven y cuánto se retienen las fotos.** En `ETIQUETAS_DATOS/fotos/<2 cifras>/<huella>.jpg|png`,
+junto al estado (misma política de respaldo: inventario de BUSINESS_LOGIC.md §4). Las que cita la
+cadena (evidencia de una recepción o de una corrección) viven lo que el expediente: la cadena es
+solo-agregar, así que en la práctica se conservan; las de la ficha, mientras estén en el historial.
+Solo las que nadie cita (una subida que no se usó) pueden podarse con `poda(huellasReferidas(e), fecha)`;
+**no hay un job que lo haga solo**: borrar es irreversible y queda como gate humano (y como job de
+plataforma declarado, C7, en el ERP). Tamaño medido: ~150-300 KB por foto normalizada.
+
+**Instalación en un sitio**
+
+1. `bash tools/etiquetas-gs1/motores/instala-rapidocr.sh /opt/etiquetas/rapidocr` en el servidor de
+   la app (Python 3.11 aislado, versiones exactas, modelos dentro del paquete: nada se descarga al
+   leer) y `ETIQUETAS_MOTOR_PYTHON=/opt/etiquetas/rapidocr/bin/python`. Sin él, la recepción
+   funciona igual pero sin propuesta: se teclea y la foto queda como evidencia.
+2. La cámara del celular exige https (o localhost), como la del lector.
+3. Respaldar `ETIQUETAS_DATOS/fotos/` con `estado.json`.
+4. Documentar, artículo por artículo, dónde viene la caducidad (se hace solo al confirmar).
+
+**El andén.** La subida reintenta cuatro veces con espera creciente y dice en pantalla qué intento
+va («Subiendo foto 1 de 2 · intento 3…»); la foto sigue en el equipo mientras la página esté
+abierta. **No hay cola que sobreviva a recargar la página** (IndexedDB + reintento en segundo
+plano): queda pendiente, dicho aquí en lugar de a medias.
+
+**ERP (propuesta, no aplicada)**: `eti_foto` (metadatos por huella; los bytes en un almacenamiento
+de objetos privado), `eti_articulo_foto` y `eti_formato_fecha` (solo-agregar), `EN_REVISION` en
+`eti_evento` con caducidad nula solo para la revisión, un trigger que exige la foto, que la
+confirme quien registró y que se resuelva una vez, y la vista `eti_revision_abierta`. Validado en el
+Postgres 17 efímero, pruebas (m) a (p), dos instalaciones seguidas. 004 debe listar también las
+tres tablas nuevas.
+
+**Formas en que esto podría estar mal o incompleto, y qué se hizo**
+
+| Riesgo | Qué se hizo | Queda |
+|---|---|---|
+| La máquina propone una fecha equivocada con confianza alta | Nada cuenta sin confirmación humana (límite de C5: el daño sería de quien compra); ventana de años, calendario, cotejo de dos tomas, aviso de vida útil. | La tasa real de «equivocada» solo se sabe con fotos reales en uso: la bandeja mide confirmadas tal cual contra corregidas por motor y formato. |
+| El motor inventa en una foto sin fecha | Medido: RapidOCR 0 de 3; y el analizador no acepta cifras sin rótulo. | — |
+| Ambigüedad resuelta en silencio (03/04, 241123) | Se enseñan las opciones; el formato se aprende solo cuando una persona elige. | Un formato aprendido mal elegido se arrastra: se ve en la ficha y se cambia con la siguiente confirmación. |
+| El lote se lee mal (A/H, 2/3) | El lote se confirma igual que la fecha; las tomas se comparan carácter por carácter y se avisa. | El lote no tiene dígito verificador: solo la persona lo valida. |
+| Alguien confirma por otro | Núcleo y base exigen el mismo seudónimo. | La identidad sigue siendo «código del dispositivo + nombre declarado» (§5, riesgo 18). |
+| Se borra una revisión pendiente del almacén | Es un evento de la cadena: se delata como cualquier borrado (ancla y testigos). | — |
+| Esquivar la foto con el etiquetado manual (`etiquetado`) | Sigue existiendo: teclear la fecha es una confirmación humana. | No se bloquea el etiquetado de un artículo con revisión abierta: se podría registrar dos veces lo mismo. |
+| La foto completa captura a una persona | La guía encuadra la fecha; lo que se lee es el recorte. | La foto completa se guarda como evidencia: si capta a alguien, es dato personal dentro de lo inmutable (su huella en la cadena; la foto se puede quitar del almacén, y la cadena seguiría verificando). |
+| Tamaño de las fotos | 2000 px JPEG q85 (~150-300 KB). | Sin poda automática (gate humano). |
+| El motor falla o no está | La recepción sigue: sin propuesta, se teclea; el error se dice sin el texto leído. | — |
+| Corpus sintético optimista | Se dice en cada tabla; los umbrales no se fijan con él. | Medir con fotos de celular reales del andén (resolución normal, encuadradas). |
+| Códigos que no se leen | Digital Link comprimido (se dice «no es GS1 Digital Link»); UPC-E sin expandir (da «el dígito no cuadra»: la pistola debe mandarlo expandido a UPC-A); la cámara no busca GS1 DataBar (por pistola con `]e0` sí se lee, es GS1). | Añadir DataBar a la cámara si un proveedor lo usa. |
+
+## 12. Escanear por zona, rondas del día y conteo cíclico (`/etiquetas/escanear`, `/etiquetas/dia`)
+
+Spec: `docs/goals/escaneo-por-zona-y-rondas.md`. Pantallas: `/etiquetas/escanear` (el día con el
+celular) y `/etiquetas/dia` (el supervisor); `/etiquetas/conteo` muestra las ubicaciones del cíclico.
+
+**Decisión del laboratorio**: cuenta el ALMACENISTA, a ciegas; el SUPERVISOR abre, concilia y
+autoriza. Nadie autoriza lo que contó. Consecuencia: el almacenista **no recibe cantidades del
+sistema en ninguna respuesta** (estado, escaneos, ronda, conteos, pieza suelta). Le basta el lote,
+dónde está y su semáforo.
+
+**Lo que se investigó y cómo cambió el diseño**
+
+| Fuente | Qué hace | Qué decidió aquí |
+|---|---|---|
+| SAP EWM (conteo cíclico por ubicación, intervalos por clase ABC) | Cuenta pocas ubicaciones al día según su clase, no el almacén entero. | `conteo-ciclico.ts`: 3 ubicaciones al día por **riesgo** (caducidad, diferencias previas, faltante repetido, volumen, días sin contar), con la razón escrita. A falta de precio, el volumen hace de «valor». |
+| Odoo (frecuencia de conteo por ubicación) | La ubicación lleva su frecuencia y su último conteo. | La vista `eti_ubicacion_conteo` del ERP da último conteo y conteos con diferencia por ubicación. |
+| Tareas dirigidas (Zebra Workcloud y WMS con «task interleaving») | Lista de tareas por recorrido, cerradas por escaneo, con escalamiento de lo atrasado. | `rondas.ts`: la ronda se genera una vez por sitio y día del estado, se congela, va en orden de recorrido (recibo → almacén → piso → merma) y cada tarea se cierra con el escaneo que la prueba (`TAREA_CERRADA`). Lo atrasado pasa a aviso alto del supervisor. |
+| UX de escaneo continuo en celular | Respuesta a pantalla completa por color, háptica y sonora; una mano. | Destello de 1,6 s con el color del semáforo o del resultado, vibración y tono distintos para bien, aviso y error; contador de la sesión; «deshacer». |
+| Offline-first en navegador | IndexedDB + reintento; llave de idempotencia para no aplicar dos veces. | `cola.ts`: el escaneo sin señal se guarda con su `idCliente` y su contexto de zona, se sube en orden al volver, y el servidor guarda la respuesta por `idCliente` (1000 últimas). |
+
+**Arquitectura**
+
+- Núcleo (`tools/etiquetas-gs1/src/`), puro y probado con `node --test`:
+  - `escaneo.ts`: `ejecutaEscaneo` (la acción de la zona según el rol), `vistaSinCantidades`, `deshazMovimiento`;
+  - `rondas.ts`: `generaRonda`, `estadoDeTareas`, `aseguraRonda`, `avanceDeRonda`;
+  - `conteo-ciclico.ts`: `eligeConteoCiclico`; `conteo.ts` gana `ubicaciones` y `vistaConteoSinCantidades`;
+  - `pieza-suelta.ts`: `identificaPieza` y `registraHallazgo` (evento `HALLAZGO`);
+  - `dia.ts`: `diaDelSitio` (tablero y avisos del supervisor).
+- App: `servidor/acciones-zona.ts` (escanea, deshaz, ronda, dia, identifica-pieza, registra-hallazgo),
+  `servidor/roles.ts` (cuatro roles), `services/cola.ts`, `hooks/use-zona.ts` y las pantallas.
+
+**Roles (los decide el servidor por el código del dispositivo)**
+
+| Rol | Variable | Zonas | Qué puede pedir |
+|---|---|---|---|
+| operación (supervisor) | `ETIQUETAS_TOKEN` | todas | todo: abre y concilia conteos, autoriza, ve el día |
+| recibo | `ETIQUETAS_TOKEN_RECIBO` | recibo | escanear, recibir (directo o con foto), confirmar, vincular códigos |
+| almacenista | `ETIQUETAS_TOKEN_ALMACEN` | almacén, piso, merma | escanear, deshacer, ronda, pieza suelta, hallazgo, contar a ciegas |
+| conteo | `ETIQUETAS_TOKEN_CONTEO` | — | solo contar |
+
+El menú de cada rol solo enseña lo suyo y recibo y almacenista entran directo a «Escanear»; pero la
+frontera es el servidor: fuera de la lista es 403, y una zona que no es del rol se rechaza aunque la
+pantalla la mande (probado en `pruebas/zonas-app.ts`).
+
+**Qué hace cada escaneo**
+
+| Zona | Lo escaneado | Resultado |
+|---|---|---|
+| cualquiera | etiqueta (414)(254) de zona o rack | fija el contexto (se olvida a los 30 min sin escanear) |
+| recibo | GS1-128 / DataMatrix / Digital Link con (17)(10) | recibido directo (regla 2/3 incluida) |
+| recibo | EAN/UPC/ITF del proveedor | la recepción con foto AHÍ MISMO (§11), sin cambiar de pantalla |
+| almacén | caja que viene de recibo | entra (y se ubica en el rack del contexto); cierra «ubicar» |
+| almacén | caja ya en almacén | lote, semáforo, rack y «baja primero ése» si otro vence antes |
+| piso | caja en rojo o vencida | RETIRA todas sus cajas de piso (rojo → almacén, vencido → merma); cierra «retirar» |
+| piso | caja de almacén | sube (aviso FEFO); cierra «resurtir» / «promover» |
+| piso | caja ya en piso | ¿se vende? con el color; naranja cierra «promover»; si la ronda pide resurtir ese lote y quedan cajas arriba, baja otra |
+| piso | EAN de una pieza suelta | foto de su fecha → lote identificado, o HALLAZGO |
+| merma | caja | baja con su motivo (vencido no lo pide) |
+
+**Medición de agilidad** — Playwright en celular (390×844), Sucursal Centro, semilla ficticia.
+Toque = click, elegir en una lista o escribir un valor; escaneo = una lectura; pantalla = una ruta
+abierta. Cada «después» empieza sin zona recordada (cuenta el escaneo de la etiqueta de la zona):
+es el peor caso.
+
+| Tarea | Antes (pantallas de hoy) | Después («Escanear» por zona) |
+|---|---|---|
+| Recibir una caja con (17)(10) | 2 toques · 1 escaneo · 1 pantalla | 0 toques · 2 escaneos · 1 pantalla |
+| Retirar de piso un lote en rojo | 3 toques · 1 escaneo · 2 pantallas | 0 toques · 2 escaneos · 1 pantalla |
+| Resurtir en orden FEFO | 2 toques · 1 escaneo · 2 pantallas | 0 toques · 2 escaneos · 1 pantalla |
+| Contar (inventario ciego) | 27 toques · 25 escaneos · 2 pantallas | 15 toques · 14 escaneos · 2 pantallas |
+
+Los escaneos de «después» incluyen la etiqueta de la zona (uno por cambio de zona, no por tarea).
+«Antes» de retirar hay que decir cuántas cajas hay en piso (se ve en el tablero): «después», el
+escaneo retira todas y el almacenista no necesita saber cuántas. En contar, casi todos los toques
+son «cajas por lectura»; el ahorro viene de contar solo las ubicaciones de riesgo del día (3) y no
+la zona entera, y de abrirlo con un toque desde el día.
+
+Lo que la tabla no dice: «antes» la persona además tenía que SABER qué retirar o resurtir (lo veía
+en el tablero y lo recordaba al ir a mover); «después» la ronda se lo dice y se cierra sola.
+
+**Formas en que esto podría estar mal o incompleto, y qué se hizo**
+
+| Riesgo | Qué se hizo | Queda |
+|---|---|---|
+| Una cantidad del sistema se cuela al almacenista (un texto de error, un campo nuevo) | Vistas por lista blanca (`vistaSinCantidades`, `vistaConteoSinCantidades`, `lotesSinCantidad`), textos pasados por `sinCantidades`, y una prueba de app con un lote CENTINELA de 137 cajas: ese número no aparece en ninguna respuesta del almacenista (estado, escaneos, deshacer, ronda, conteos) y el supervisor sí lo ve. | Un campo nuevo que alguien agregue sin pasar por la lista blanca: la prueba del centinela lo atrapa si lleva el número. |
+| El almacenista deduce cantidades («todas» sube 137 y ve cuánto bajó) | «Todas» no dice cuántas; lo que ve es lo que él mismo movió físicamente. | Contar con los ojos no se puede impedir: es lo que hace ciego el conteo del sistema, no la bodega. |
+| El rol lo decide el navegador | El rol sale del código del dispositivo en el servidor (comparación en tiempo constante; un código repetido vale solo el rol de más poder). | La identidad sigue siendo débil (§5, riesgo 18): código compartido por dispositivo + nombre declarado. |
+| Una tarea se da por hecha sin hacerla | No hay botón «hecho»: la cierra un `TAREA_CERRADA` con el escaneo del lote correcto en la zona correcta; en la base, el trigger exige que la tarea exista en la ronda, que el lote sea el suyo, que la acción esté en la cadena y que no se cierre dos veces. | Escanear el lote correcto sin haberlo movido de verdad (la etiqueta en la mano, la caja en su lugar): el conteo cíclico es el que lo destapa. |
+| Deshacer borra historia | Deshacer = `CORRECCION` con `deshace`, solo el propio movimiento y dentro de 15 min, sin nada posterior sobre ese lote; la tarea se reabre. | — |
+| La ronda cambia a media mañana | Se congela al generarse (con la cabeza de la cadena de ese momento); lo que ya no aplica se calcula con su motivo, no se reescribe. | Lo que aparece DESPUÉS de generarla (un lote que entra hoy a rojo) no entra a la ronda de hoy: lo avisa el tablero del día («entró hoy a rojo»). |
+| Selección del cíclico injusta u opaca | Regla determinista con sus razones escritas en la tarea y en la pantalla del contador. | Sin precio en el sistema de etiquetas, «valor» es volumen; con el ERP integrado, usar costo. |
+| Nadie autoriza lo que contó | Núcleo: el autorizador no puede ser quien contó ni recontó (capturado: autorizar con el almacenista que contó se rechaza). | — |
+| La cola sin señal aplica dos veces o fuera de orden | `idCliente` por escaneo y respuesta guardada en el servidor; subida en orden; lo que el servidor rechaza se dice y sale de la cola. | Solo se encolan escaneos: las fotos (pieza suelta, recepción) necesitan señal. La cola vive en el navegador de ese equipo; si se borra el almacenamiento antes de subir, se pierde (se ve «por subir»). Sin Service Worker: la página tiene que estar abierta para subir. |
+| La cola se queda con escaneos de alguien que ya no está | El contexto de zona caduca a los 30 min; la cola no caduca (se sube cuando haya señal). | Un escaneo viejo puede ya no aplicar: el servidor lo decide contra el estado de ese momento y lo dice. |
+| Un artículo cambia de GTIN (medido en las capturas: el flujo 30 vincula el ITF-14 del proveedor y sustituye la caja interna de la leche) y las cajas con la etiqueta vieja se vuelven invisibles | **Resuelto (decisión del laboratorio, 2026-09-28): el catálogo recuerda los GTIN anteriores.** La fuente es el libro de asignaciones (solo-agregar), que ya guardaba el `anterior` de cada sustitución: `identificaGtin` da el artículo del código vigente o del anterior, el escaneo y el lector dicen «código ANTERIOR», el conteo lo acepta, el FEFO, el «baja primero» y el agente comparan por ARTÍCULO (lote viejo y nuevo juntos), las ventas del ERP con el código viejo son del artículo, y la ficha y la exportación los enseñan. Un código anterior no se le da a OTRO artículo sin decisión de catálogo (importación y vínculo lo detienen; en el ERP, un trigger). Pruebas: `pruebas/codigos-anteriores.ts` (5) y (u) en el Postgres efímero; captura 45. | Si por decisión de catálogo otro artículo toma ese código, el vigente gana y las etiquetas viejas del primero se leen como el nuevo dueño: por eso se detiene y lo decide una persona. Un GTIN del fabricante que él mismo reasigna años después se trata igual. |
+| Pieza suelta con fecha mal leída | La identificación es una propuesta: se pide confirmarla con la pieza en la mano; si no cuadra es HALLAZGO (con la foto), no un ajuste. | El hallazgo no mueve inventario: lo resuelve el supervisor (recepción, corrección o merma). |
+| Avisos fuera de la app | No se hicieron: web push pasa por servidores ajenos (C4). Los avisos viven en `/etiquetas/dia`. | Web push solo con contenido sin datos del negocio y como decisión aparte. |
+| El escaneo del supervisor en piso retira sin querer | Retirar es el escaneo SOLO para rojo y vencido, y se puede deshacer. | — |
+
+**Códigos anteriores en el ERP**: la vista `eti_codigo_anterior` sale de `eti_asignacion` (sin tabla
+nueva: no se desincroniza) y el trigger `eti_gtin_no_anterior_de_otro` impide dar a otro artículo un
+código anterior; devolvérselo al mismo sí se puede. Prueba (u).
+
+**ERP (propuesta, no aplicada)**: `tools/etiquetas-gs1/migraciones/propuesta-pack-etiquetas-zona.sql`
+(va después del pack): `eti_ronda` y `eti_tarea` (solo-agregar; las instrucciones no aceptan
+«N cajas»), `eti_dispositivo` (rol de la lista y solo la HUELLA del código; se da de baja, no se
+borra), el trigger de `TAREA_CERRADA` y `HALLAZGO`, y las vistas `eti_ronda_avance` y
+`eti_ubicacion_conteo`. En el pack, los tipos `TAREA_CERRADA` y `HALLAZGO` entran a la lista única de
+`eti_evento` y un hallazgo sin fecha legible va sin caducidad. Validado en el Postgres 17 efímero,
+pruebas (q) a (t), dos instalaciones. 004 debe listar también `eti_ronda` y `eti_tarea`.
+
+**Evidencia**: `npm run prueba:etiquetas` (núcleo `pruebas/zonas.ts` + app `pruebas/zonas-app.ts`),
+`npm run capturas:etiquetas` (flujos 37 a 44 y la tabla de agilidad al final del output),
+`bash tools/etiquetas-gs1/migraciones/prueba-efimera.sh`.

@@ -11,8 +11,10 @@ import { COLOR_SEMAFORO, fechaCorta, ORDEN_SEMAFORO } from '../services/presenta
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { comoEstado } from './pantalla-lector.tsx';
 import { tarjeta } from './marco.tsx';
+import { FotoArticulo } from './foto.tsx';
+import type { EstadoCliente } from '../services/cliente.ts';
 
-function Lista({ titulo, filas, vacio }: { titulo: string; filas: readonly FilaTablero[]; vacio: string }) {
+function Lista({ titulo, filas, vacio, est }: { titulo: string; filas: readonly FilaTablero[]; vacio: string; est?: EstadoCliente }) {
   return (
     <section>
       <h3 className="mb-1 text-sm font-semibold">{titulo} <span className="text-neutral-500">({filas.length})</span></h3>
@@ -20,7 +22,7 @@ function Lista({ titulo, filas, vacio }: { titulo: string; filas: readonly FilaT
         <ul className="divide-y divide-neutral-200 text-sm dark:divide-neutral-800">
           {filas.map((f) => (
             <li key={f.existencia.id} className="flex flex-col gap-0.5 py-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-              <span className="min-w-0"><span className="font-medium">{f.descripcion}</span> <span className="font-mono text-xs text-neutral-500">lote {f.existencia.lote}</span> <span className="rounded bg-neutral-100 px-1 text-[11px] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">{nombreZona(f.zona).toLowerCase()}</span></span>
+              <span className="flex min-w-0 items-center gap-2">{est ? <FotoArticulo est={est} sku={f.existencia.sku} className="h-8 w-8 rounded" /> : null}<span className="font-medium">{f.descripcion}</span> <span className="font-mono text-xs text-neutral-500">lote {f.existencia.lote}</span> <span className="rounded bg-neutral-100 px-1 text-[11px] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">{nombreZona(f.zona).toLowerCase()}</span></span>
               <span className="flex shrink-0 flex-wrap items-center gap-1.5 text-xs"><span>{f.existencia.cantidad} cj · {fechaCorta(f.existencia.caducidad)}</span><span className={`rounded px-1.5 py-0.5 font-semibold ${COLOR_SEMAFORO[f.estado]}`}>{textoDias(f.dias)}</span></span>
             </li>
           ))}
@@ -93,11 +95,11 @@ export function PantallaTablero({ e }: { e: Etiquetas }) {
                 </div>
               </header>
               <Acciones t={t} />
-              <Lista titulo="Vencido: no surtir, merma" filas={t.vencidos} vacio="Nada vencido." />
-              <Lista titulo="Bloqueado para venta normal (rojo): separar" filas={t.retiro} vacio="Nada en días de retiro." />
-              <Lista titulo="Vence esta semana" filas={t.semana} vacio="Nada vence en los próximos 7 días." />
-              <Lista titulo="Vence este mes" filas={t.mes} vacio="Nada vence de 8 a 30 días." />
-              <Lista titulo="Retirar del anaquel (piso de venta)" filas={t.anaquel} vacio="Nada en piso que venza esta semana ni que ya no se deba vender." />
+              <Lista titulo="Vencido: no surtir, merma" filas={t.vencidos} est={est} vacio="Nada vencido." />
+              <Lista titulo="Bloqueado para venta normal (rojo): separar" filas={t.retiro} est={est} vacio="Nada en días de retiro." />
+              <Lista titulo="Vence esta semana" filas={t.semana} est={est} vacio="Nada vence en los próximos 7 días." />
+              <Lista titulo="Vence este mes" filas={t.mes} est={est} vacio="Nada vence de 8 a 30 días." />
+              <Lista titulo="Retirar del anaquel (piso de venta)" filas={t.anaquel} est={est} vacio="Nada en piso que venza esta semana ni que ya no se deba vender." />
               <Grupos titulo="Resurtido: qué bajar primero del almacén a piso" grupos={t.resurtido} vacio="No hay existencias surtibles en almacén ni en recibo." />
               <Grupos titulo="Orden FEFO para surtir (todas las zonas)" grupos={t.fefo} vacio="Sin existencias surtibles." />
               {t.cajasEnMerma ? <p className="text-xs text-neutral-500">En merma (ya separado, fuera de las listas): {t.cajasEnMerma} cajas.</p> : null}

@@ -20,6 +20,12 @@ export type TipoEvento =
   | 'RECIBIDO' | 'RECHAZADO' | 'UBICADO' | 'MOVIDO' | 'TRANSFERIDO'
   | 'VENDIDO' | 'DEVUELTO' | 'DONADO' | 'MERMA'
   | 'RECOMENDACION' | 'RECOMENDACION_EJECUTADA' | 'RECOMENDACION_DESCARTADA' | 'CORRECCION' | 'CONTEO'
+  /** Llego mercancia cuya caducidad se leyo de una foto y aun no se confirma: no mueve existencias. */
+  | 'EN_REVISION'
+  /** Una tarea de la ronda del dia se cerro con el escaneo que la prueba. */
+  | 'TAREA_CERRADA'
+  /** Una pieza en piso que no cuadra con ningun lote conocido del sitio: se registra, no se ignora. */
+  | 'HALLAZGO'
 
 export interface ClaveLote {
   readonly gtin: string
@@ -157,7 +163,10 @@ export function expedienteDe(cadenas: Readonly<Record<string, readonly Evento[]>
       if (claves.has(a) !== claves.has(b)) { claves.add(a); claves.add(b); crecio = true }
     }
   }
-  return todos.filter((e) => claves.has(idLote(e.lote)))
+  // La revision de la foto (EN_REVISION) es de otra clave (el folio): entra por su enlace.
+  const propios = todos.filter((e) => claves.has(idLote(e.lote)))
+  const revisiones = new Set(propios.map((e) => e.datos['revision']).filter((h): h is string => typeof h === 'string'))
+  return [...propios, ...todos.filter((e) => revisiones.has(e.hash))]
     .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.sitio.localeCompare(b.sitio) || a.seq - b.seq)
 }
 

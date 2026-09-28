@@ -66,6 +66,8 @@ export interface VistaConteo {
   readonly folio: string;
   readonly sitio: string;
   readonly zonas: Zona[];
+  /** Conteo ciclico: solo estas ubicaciones (`ALMACEN-B-01-1`, `PISO`). */
+  readonly ubicaciones?: string[];
   readonly tolerancia: number;
   readonly abierto: string;
   readonly abre: string;

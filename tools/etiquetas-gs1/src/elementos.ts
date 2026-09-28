@@ -7,6 +7,7 @@
  * por otro caracter (el teclado no sabe teclear un 0x1D), o ya "bonito", con parentesis. El
  * parser acepta todas; lo que devuelve dice cual llego, para poder diagnosticar la pistola.
  */
+import { esAjeno, leeCodigoDeProducto, pareceGtinSinDigito, type FormatoCodigo } from './codigos.js'
 import { aiAlInicio, entradaAi } from './diccionario/index.js'
 
 export interface Elemento {
@@ -26,7 +27,8 @@ export const GS = '\x1d'
  */
 export const SUSTITUTOS_GS_POR_DEFECTO: readonly string[] = ['␝', '<GS>', '{GS}', '[GS]', '\\x1d', '^]', '|', '~']
 
-export type FormaLectura = 'hri' | 'cruda'
+/** `gtin`: un EAN/UPC/ITF-14 del proveedor (solo trae el GTIN); `digital-link`: un URL GS1. */
+export type FormaLectura = 'hri' | 'cruda' | 'gtin' | 'digital-link'
 
 export interface Lectura {
   readonly elementos: readonly Elemento[]
@@ -35,9 +37,11 @@ export interface Lectura {
   readonly simbologia?: string
   /** Que sustituto de GS se reconocio, si alguno: sirve para configurar la pistola. */
   readonly sustitutoGs?: string
+  /** Si fue un codigo del proveedor: EAN-13, UPC-A, EAN-8, ITF-14 o Digital Link. */
+  readonly formato?: FormatoCodigo
 }
 
-export type CodigoErrorLectura = 'vacio' | 'ai-desconocido' | 'valor-corto' | 'falta-separador' | 'hri-mal-formado'
+export type CodigoErrorLectura = 'vacio' | 'ai-desconocido' | 'valor-corto' | 'falta-separador' | 'hri-mal-formado' | 'no-gs1' | 'digito'
 
 export interface ErrorLectura {
   readonly error: CodigoErrorLectura
@@ -53,6 +57,16 @@ const fallo = (error: CodigoErrorLectura, posicion: number, mensaje: string): Er
 
 /** Lo que se lee de una pistola, de la camara o de un campo de texto. */
 export function parseaLectura(texto: string, sustitutos: readonly string[] = SUSTITUTOS_GS_POR_DEFECTO): Lectura | ErrorLectura {
+  const producto = leeCodigoDeProducto(texto)
+  if (producto && esAjeno(producto)) return fallo('no-gs1', 0, producto.motivo)
+  if (producto) return { elementos: producto.elementos, forma: producto.formato === 'digital-link' ? 'digital-link' : 'gtin', formato: producto.formato, ...(producto.simbologia ? { simbologia: producto.simbologia } : {}) }
+  const gs1 = parseaLecturaGs1(texto, sustitutos)
+  if (esErrorLectura(gs1) && pareceGtinSinDigito(texto)) return fallo('digito', 0, `parece un EAN/UPC de ${texto.trim().length} cifras, pero su dígito verificador no cuadra: vuelve a leerlo`)
+  return gs1
+}
+
+/** La forma GS1: `]C1`/`]d2`/`]Q3`, GS real o sustituido, o texto con parentesis. */
+function parseaLecturaGs1(texto: string, sustitutos: readonly string[]): Lectura | ErrorLectura {
   let s = texto.replace(/^[\s\r\n]+|[\s\r\n]+$/g, '')
   let simbologia: string | undefined
   const id = /^\][A-Za-z][0-9A-Za-z]/.exec(s)

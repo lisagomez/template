@@ -87,14 +87,15 @@ export function resumenLegible(resumen: Readonly<Record<string, number>>): { cla
 export const TEXTO_EVENTO: Record<TipoEvento, string> = {
   RECIBIDO: 'Recibido', RECHAZADO: 'Rechazado', UBICADO: 'Ubicado', MOVIDO: 'Movido', TRANSFERIDO: 'Transferido', VENDIDO: 'Vendido', DEVUELTO: 'Devuelto',
   DONADO: 'Donado', MERMA: 'Merma', RECOMENDACION: 'Recomendación del agente', RECOMENDACION_EJECUTADA: 'Recomendación ejecutada',
-  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección', CONTEO: 'Conteo físico',
+  RECOMENDACION_DESCARTADA: 'Recomendación descartada', CORRECCION: 'Corrección', CONTEO: 'Conteo físico', EN_REVISION: 'Caducidad por confirmar (foto)', TAREA_CERRADA: 'Tarea de la ronda', HALLAZGO: 'Hallazgo en piso',
 };
 
 export const COLOR_EVENTO: Partial<Record<TipoEvento, string>> = {
   RECHAZADO: 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200', CORRECCION: 'bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200',
   RECOMENDACION: 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200', RECOMENDACION_EJECUTADA: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200',
   RECOMENDACION_DESCARTADA: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200', MERMA: 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900',
-  CONTEO: 'bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-200',
+  CONTEO: 'bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-200', EN_REVISION: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200',
+  TAREA_CERRADA: 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200', HALLAZGO: 'bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-950 dark:text-fuchsia-200',
 };
 
 export const TEXTO_CLASE: Record<string, string> = { cuadra: 'Cuadra', faltante: 'Faltante', sobrante: 'Sobrante', desconocido: 'Lote desconocido' };
@@ -112,8 +113,12 @@ export function describeEvento(ev: Evento): string {
   const t = (k: string) => (typeof d[k] === 'string' ? String(d[k]) : undefined);
   const cajas = n('cajas') !== undefined ? `${n('cajas')} caja(s)` : '';
   switch (ev.tipo) {
-    case 'RECIBIDO': return [`${cajas} en ${ZONA_LEGIBLE[t('zona') ?? ''] ?? t('zona')}`, t('desde') ? `transferidas desde ${t('desde')}` : '', d['apertura'] ? 'inventario inicial (apertura)' : '', n('diasRestantes') !== undefined ? `le quedaban ${n('diasRestantes')} días (mínimo ${n('minimoDias')})` : ''].filter(Boolean).join(' · ');
-    case 'RECHAZADO': return `${cajas} · ${t('regla')} · le quedaban ${n('diasRestantes')} días · devolución ${t('devolucion')}`;
+    case 'EN_REVISION': {
+      const p = (d['propuesta'] ?? {}) as { estado?: string; fecha?: string; lote?: string; motor?: string };
+      return [`${cajas} por confirmar (folio ${ev.lote.lote})`, p.fecha ? `la máquina propuso ${p.fecha}${p.lote ? ` · lote ${p.lote}` : ''}` : `la máquina no propuso fecha (${p.estado})`, p.motor ? `motor ${p.motor}` : '', t('reemplaza') ? 'otra toma de la misma recepción' : ''].filter(Boolean).join(' · ');
+    }
+    case 'RECIBIDO': return [`${cajas} en ${ZONA_LEGIBLE[t('zona') ?? ''] ?? t('zona')}`, lecturaLegible(d['lectura']), t('desde') ? `transferidas desde ${t('desde')}` : '', d['apertura'] ? 'inventario inicial (apertura)' : '', n('diasRestantes') !== undefined ? `le quedaban ${n('diasRestantes')} días (mínimo ${n('minimoDias')})` : ''].filter(Boolean).join(' · ');
+    case 'RECHAZADO': return d['descartada'] ? `${cajas} · revisión descartada: ${t('motivo')}` : `${cajas} · ${t('regla')} · le quedaban ${n('diasRestantes')} días · devolución ${t('devolucion')}${d['lectura'] && typeof d['lectura'] === 'object' ? ` · ${lecturaLegible(d['lectura'])}` : ''}`;
     case 'UBICADO': return `${cajas} en rack ${t('posicion')}`;
     case 'MOVIDO': return `${cajas} a ${ZONA_LEGIBLE[t('a') ?? ''] ?? t('a')}${t('sscc') ? ` (tarima ${t('sscc')})` : ''}`;
     case 'TRANSFERIDO': return `${cajas} a ${t('destino')}${t('recomendacion') ? ' (por recomendación del agente)' : ''}`;
@@ -128,6 +133,20 @@ export function describeEvento(ev: Evento): string {
       const dif = rs.reduce((s, r) => s + (r.diferencia ?? 0), 0);
       return `inventario físico ${t('folio')} · contadas ${rs.reduce((s, r) => s + (r.contado ?? 0), 0)} caja(s) · ${dif === 0 ? 'cuadra' : `diferencia ${dif > 0 ? '+' : ''}${dif}`}${t('autoriza') ? ` · autorizó ${t('autoriza')}` : ''}`;
     }
-    case 'CORRECCION': return [`corrige el evento #${n('seqCorregido')}: ${t('motivo')}`, d['ajuste'] ? `ajuste de cajas` : '', t('caducidadNueva') ? `caducidad ${t('caducidadAnterior')} → ${t('caducidadNueva')}` : ''].filter(Boolean).join(' · ');
+    case 'TAREA_CERRADA': return `${t('tipoTarea')} cerrada con un escaneo en ${t('ubicacion')} (ronda ${t('ronda')})`;
+    case 'HALLAZGO': {
+      const l = (d['leido'] ?? {}) as { fecha?: string; lote?: string };
+      return `pieza en ${t('ubicacion')} que no cuadra con ningún lote del sitio · leído ${l.fecha ?? 'sin fecha'}${l.lote ? `, lote ${l.lote}` : ''} · ${t('motivo')}`;
+    }
+    case 'CORRECCION': return [`corrige el evento #${n('seqCorregido')}: ${t('motivo')}`, d['ajuste'] ? `ajuste de cajas` : '', t('caducidadNueva') ? `caducidad ${t('caducidadAnterior')} → ${t('caducidadNueva')}` : '', d['evidencia'] ? 'con foto de evidencia' : ''].filter(Boolean).join(' · ');
   }
+}
+
+/** «leyó 30/05/27 · confirmada 31/05/27 (corregida)» a partir de `datos.lectura` de un RECIBIDO por foto. */
+export function lecturaLegible(l: unknown): string {
+  if (!l || typeof l !== 'object') return '';
+  const x = l as { propuesta?: { fecha?: string }; confirmada?: { caducidad?: string; lote?: string; tipo?: string }; corregida?: { fecha?: boolean; lote?: boolean } };
+  const leido = x.propuesta?.fecha ? `la máquina leyó ${x.propuesta.fecha}` : 'la máquina no propuso fecha';
+  const corr = [x.corregida?.fecha ? 'fecha corregida' : '', x.corregida?.lote ? 'lote corregido' : ''].filter(Boolean).join(' y ');
+  return `${leido} · confirmada ${x.confirmada?.caducidad ?? '?'}${x.confirmada?.tipo === 'consumo-preferente' ? ' (consumo preferente)' : ''}${corr ? ` (${corr})` : ' (tal cual)'}`;
 }

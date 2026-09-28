@@ -5,7 +5,8 @@
  */
 import { valorDe, type Elemento } from './elementos.js'
 import { esFecha, fechaIso, parseaFechaGs1 } from './fechas.js'
-import type { Articulo, EstadoAlmacen, Existencia, Zona } from './modelo.js'
+import { identificaGtin, type CodigoAnterior } from './codigos-anteriores.js'
+import type { Articulo, EstadoAlmacen, Existencia, Nivel, Zona } from './modelo.js'
 import { categoriaPorId, vidaRestante, type VidaRestante } from './semaforo.js'
 
 export interface Interpretacion {
@@ -15,6 +16,10 @@ export interface Interpretacion {
   readonly caducidadIso?: string
   readonly cajas: number
   readonly articulo?: Articulo
+  /** Que se leyo: la pieza o la caja (el GTIN de la pieza no es el de la caja). */
+  readonly nivel?: Nivel
+  /** El GTIN leido es un codigo ANTERIOR del articulo (la etiqueta vieja se sigue leyendo). */
+  readonly codigoAnterior?: CodigoAnterior
   readonly vida?: VidaRestante
   /** Sitios donde hay existencia de ese GTIN y lote. */
   readonly sitios: readonly string[]
@@ -23,8 +28,9 @@ export interface Interpretacion {
   readonly avisos: readonly string[]
 }
 
+/** El articulo de un GTIN: el que lo tiene hoy o aquel del que fue codigo anterior (`codigos-anteriores.ts`). */
 export function buscaArticulo(estado: EstadoAlmacen, gtin: string): Articulo | undefined {
-  return Object.values(estado.articulos).find((a) => a.gtinCaja === gtin || a.gtinUnidad === gtin)
+  return identificaGtin(estado, gtin)?.articulo
 }
 
 export function interpreta(elementos: readonly Elemento[], estado: EstadoAlmacen, hoy: string): Interpretacion {
@@ -34,8 +40,10 @@ export function interpreta(elementos: readonly Elemento[], estado: EstadoAlmacen
   const cad = valorDe(elementos, '17')
   const cuenta37 = valorDe(elementos, '37')
   const avisos: string[] = []
-  const articulo = gtin ? buscaArticulo(estado, gtin) : undefined
+  const id = gtin ? identificaGtin(estado, gtin) : undefined
+  const articulo = id?.articulo
   if (gtin && !articulo) avisos.push('Ese GTIN no está en el catálogo de la casa.')
+  if (id?.anterior) avisos.push(`Es un código ANTERIOR de este artículo (lo sustituyó ${id.anterior.sustituidoPor} el ${id.anterior.hasta.slice(0, 10)}): se sigue leyendo para lo que ya trae esa etiqueta.`)
   const cat = categoriaPorId(estado.configuracion.categorias, articulo?.categoria)
   const vida = cad ? vidaRestante(cad, hoy, cat, articulo?.vidaUtilDias) : undefined
   const fecha = cad ? parseaFechaGs1(cad, Number(hoy.slice(0, 4))) : undefined
@@ -53,7 +61,7 @@ export function interpreta(elementos: readonly Elemento[], estado: EstadoAlmacen
   }
   return {
     ...(gtin ? { gtin } : {}), ...(sscc ? { sscc } : {}), ...(lote ? { lote } : {}), ...(caducidadIso ? { caducidadIso } : {}),
-    cajas: cuenta37 ? Number(cuenta37) : 1, ...(articulo ? { articulo } : {}), ...(vida ? { vida } : {}), sitios, ubicaciones: [...cuenta.values()], avisos,
+    cajas: cuenta37 ? Number(cuenta37) : 1, ...(id ? { articulo: id.articulo, nivel: id.nivel, ...(id.anterior ? { codigoAnterior: id.anterior } : {}) } : {}), ...(vida ? { vida } : {}), sitios, ubicaciones: [...cuenta.values()], avisos,
   }
 }
 

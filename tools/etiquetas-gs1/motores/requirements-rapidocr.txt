@@ -1,0 +1,16 @@
+# Motor local de lectura de fechas: RapidOCR (PaddleOCR PP-OCRv4 en ONNX Runtime, CPU).
+# Versiones EXACTAS (C1): el motor que se midio es este y no otro. Congeladas el 2026-09-27
+# desde el entorno donde se midio (docs/SDD-etiquetas-gs1.md §11). Cambiar una es un CDC.
+rapidocr-onnxruntime==1.4.4
+onnxruntime==1.30.0
+opencv-python==5.0.0.93
+numpy==2.4.6
+pillow==12.3.0
+pyclipper==1.4.0
+shapely==2.1.2
+pyyaml==6.0.3
+six==1.17.0
+tqdm==4.70.1
+flatbuffers==25.12.19
+packaging==26.3
+protobuf==7.36.2

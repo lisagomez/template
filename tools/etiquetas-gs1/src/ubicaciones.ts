@@ -31,6 +31,12 @@ export function zonaDe(e: Existencia): Zona {
   return e.zona ?? 'recibo'
 }
 
+/** Nombre canonico de una ubicacion: `ALMACEN-B-04-2` en un rack, o el codigo de la zona (`PISO`). */
+export function ubicacionDe(zona: Zona, posicion?: string): string {
+  const codigo = ZONAS.find((x) => x.id === zona)!.codigo
+  return posicion && zona === 'almacen' ? `${codigo}-${posicion}` : codigo
+}
+
 export function nombreZona(z: Zona): string {
   return ZONAS.find((x) => x.id === z)?.nombre ?? z
 }
@@ -134,7 +140,7 @@ export function mueve(estado: EstadoAlmacen, p: PedidoMovimiento, cuando: string
   if (p.destino === 'piso') {
     const cat = categoriaPorId(estado.configuracion.categorias, l.articulo.categoria)
     const anio = Number(hoy.slice(0, 4))
-    const antes = del.filter((e) => e.gtin === l.gtin && e.lote !== l.lote && ['almacen', 'recibo'].includes(zonaDe(e)) && e.caducidad < l.caducidadIso!).filter((e) => {
+    const antes = del.filter((e) => e.sku === l.articulo!.sku && !(e.gtin === l.gtin && e.lote === l.lote) && ['almacen', 'recibo'].includes(zonaDe(e)) && e.caducidad < l.caducidadIso!).filter((e) => {
       const f = parseaFechaGs1(aAammdd(e.caducidad), anio)
       const s = esFecha(f) ? estadoSemaforo(diasHasta(f, hoy), cat) : 'vencido'
       return s === 'vigente' || s === 'alerta'

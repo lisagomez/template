@@ -15,7 +15,8 @@
  *   `undefined` (no se sabe). No son lo mismo.
  */
 import { sumaDias } from './fechas.js'
-import type { Articulo } from './modelo.js'
+import { identificaGtin } from './codigos-anteriores.js'
+import type { Articulo, EstadoAlmacen } from './modelo.js'
 import type { FuenteVentas } from './riesgo.js'
 
 /** Estados de pedido que cuentan como venta. */
@@ -41,6 +42,8 @@ export interface OpcionesVentasErp {
   /** Dias de la ventana (por defecto 28). */
   readonly dias?: number
   readonly articulos: Readonly<Record<string, Articulo>>
+  /** El libro de asignaciones: con el, las ventas de un codigo ANTERIOR tambien son del articulo. */
+  readonly asignaciones?: EstadoAlmacen['asignaciones']
 }
 
 export interface FilaVentaErp {
@@ -80,7 +83,7 @@ export function ventasDesdeFilas(filas: readonly FilaVentaErp[], o: OpcionesVent
     nombre: `erp:${o.sitio}`,
     promedioDiario(sitio, gtin) {
       if (sitio !== o.sitio) return undefined
-      const art = Object.values(o.articulos).find((a) => a.gtinCaja === gtin || a.gtinUnidad === gtin)
+      const art = identificaGtin({ articulos: o.articulos, asignaciones: o.asignaciones ?? [] }, gtin)?.articulo
       const f = art ? porSku.get(art.sku) : undefined
       if (!art || !f) return undefined
       const cajas = f.claveUnidad && UNIDADES_CAJA.has(f.claveUnidad) ? f.cantidad : f.cantidad / Math.max(1, art.unidadesPorCaja)

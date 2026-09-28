@@ -84,6 +84,10 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/dictado',
   '/api/dictado/movil',
   '/api/etiquetas',
+  // Fotos de etiquetas (recepción con foto y pieza suelta): misma puerta Bearer y mismo puerto que
+  // `/api/etiquetas`; no van detrás del bridge ni se publican aparte (RF-20).
+  '/api/etiquetas/fotos',
+  '/api/etiquetas/fotos/[huella]',
   '/api/historial',
   '/api/laboratorio/datos',
   '/api/laboratorio/estado',
