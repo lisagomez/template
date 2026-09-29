@@ -4091,3 +4091,36 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   156/156 · `mide:contexto`: `CLAUDE.md` 6236 tokens (78 % de 8000), total por sesión 10623 (89 % de 12000),
   `GEMINI.md` 64 % · `npm run validate` en verde (ver el PR).
 - **Aprobado por**: **lisagomez** (el laboratorio), «Firmo», 2026-09-27, con el diff de las 13 líneas delante.
+
+### 2026-09-29 — skill `readme`: README product first (nuevo, reestructura, revisa) → CDC PROMOVIDO — radio: skills (2), sistema (`AGENTS.md`), contratos C2 (10)
+- **Cambio** (rama `readme-product-first`, sobre `58174c9`):
+  - skill nuevo `readme` con tres comandos (`/readme nuevo <ruta>`, `/readme reestructura <ruta>|todos`,
+    `/readme revisa [ruta]`), su contrato declarado (`contrato.json`: orden de las cuatro partes, siete rubros de
+    infraestructura, alcance y exclusiones con motivo) y su plantilla;
+  - `crear-herramienta`: paso 5 nuevo, el README con `/readme nuevo` antes de empaquetar;
+  - `AGENTS.md`: +3 líneas en el árbol de decisión y conteo 26 → 27; `CLAUDE.md`, `README.md` y
+    `.claude/README.md`: conteo y fila del skill; `GEMINI.md` regenerado con `npm run sincroniza:gemini`;
+  - `golden-sets/contratos.json`: +10 contratos (9 de `readme`, 1 de `crear-herramienta`). La capa A pasa de 131
+    a 146: los 10 contratos, los 3 genéricos del skill nuevo y 2 de contrato no huérfano;
+  - `npm run revisa:readmes` (auditor sin modelo, `--prueba` 8/8) y `npm run readme:no-perdida` (`--prueba` 3/3);
+  - los 12 README de producto y el molde de features reestructurados sin pérdida (13 de 13: 0 líneas borradas sin
+    justificar, 0 cifras perdidas); README nuevos del andamio `tools/ejemplo-herramienta` y de `src/features/etiquetas`.
+- **Motivo**: pedido del laboratorio del 2026-09-29 (goal `readme-product-first`): que quien llega sepa en la
+  primera pantalla qué resuelve, para quién, en qué casos y qué necesita para correr.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo en la conversación ANTES de pedir la firma**: skill,
+  contrato, plantilla, contratos C2, `crear-herramienta`, `AGENTS.md`, `CLAUDE.md` y conteos) · regresión capa A ☑
+  146/146 · **capa B no corrida, a propósito y declarado** («los contratos automáticos bastan»: se suman un skill y
+  una rama del árbol; ninguna regla existente cambia de sentido. El precedente del 2026-09-27, otra rama nueva en el
+  árbol, sí la corrió: 22/22) · `verify:gobernanza` ☑ 156/156 · `mide:contexto` ☑ total por sesión 10841 de 12000
+  (+218 tokens) · `validate` ☑ 26/26 en un worktree limpio de la rama, verificado de nuevo fuera del goal ·
+  aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Gate `revisa:readmes` en `.claude/gates.json`: NO aplicado.** Se propuso con su diff (y la línea de `README.md`
+  que exige la comprobación 3d-bis) en `propuesta-cdc.md` §4, commit `58fa17f`; el laboratorio firmó el skill y no
+  el gate. Queda pendiente de su decisión, como CDC aparte de radio sistema.
+- **Hallazgos fuera de alcance, confirmados**: `scripts/prueba-tools.mjs` cuenta con `ℹ pass` y filtra `✖`, así que
+  una suite que sale en TAP (`# pass`, `not ok`) informa «0 pruebas» y esconde sus fallos; el README de
+  `pymes-marketing` se titula «(0.2.0)» con el paquete en 0.3.0; `tools/grafo-conocimiento` declara `zod`
+  `^4.4.3` (rango, contra el pineo exacto).
+- **Aprobado por**: **lisagomez** (el laboratorio) — «firmo, los contratos automáticos bastan», 2026-09-29, con el
+  diff del CDC delante. Al firmar se borró la propuesta `.claude/goals/readme-product-first/propuesta-cdc.md`
+  (queda en el commit `58fa17f`).
