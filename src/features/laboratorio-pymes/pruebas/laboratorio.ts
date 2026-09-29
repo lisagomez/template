@@ -28,5 +28,5 @@ test('cada caso da el estado que declara (corrido de verdad)', async () => {
 
 test('la app solo usa lo aprobado: las 9 herramientas sí, el redactor con LLM no (no medido)', async () => {
   const a = aprobadas(await correLaboratorio(ctx));
-  assert.deepEqual(a, ['marca', 'ventas', 'contenido', 'resenas', 'visibilidad', 'pulso', 'piezas', 'video', 'aprobacion']);
+  assert.deepEqual(a, ['marca', 'ventas', 'contenido', 'resenas', 'visibilidad', 'pulso', 'piezas', 'video', 'aprobacion', 'reel', 'privacidad', 'tarjetas', 'sala']);
 });

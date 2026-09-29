@@ -1,0 +1,18 @@
+/goal Construye lo descrito en el spec completo: /home/kyara/code/template/.claude/goals/reel-pymes/spec.md. Leelo ENTERO, y la propuesta-video.md firmada que cita, antes de empezar; reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: el dueño de una pyme graba con su celular y recibe un reel 9:16 cortado y subtitulado con su marca, sin exponer a nadie que no consintio, y lo aprueba en su celular con su cuenta; empieza por /add-login.
+Libertad tecnica total salvo RESTRICCIONES del spec.
+VALIDA: npm run typecheck && npm run lint && npm run prueba:laboratorio-pymes + npm run empaqueta <herramienta> tras cada cambio grande, output pegado; npm run validate al final con todo commiteado.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- PRP-007 escrito: ruta y tabla de fases (firmada / bloqueada, quien firma y por que) pegadas
+- llaves de Supabase: presencia enmascarada, nunca el valor; si faltan, te detienes y las pides
+- capturas de Playwright de alta, entrada, salida y ruta protegida; rutas existentes intactas; prueba de RLS pegada (la cuenta B no ve nada de A)
+- motores locales: version, huella y licencia; error medido de las marcas por palabra
+- reel de un clip sintetico: ffprobe (1080x1920 30fps h264, AAC 48kHz), -14 LUFS medido, ubicacion borrada (antes/despues), hoja de cuadros vista, misma huella en dos renders
+- tabla del laboratorio: >=5 casos por herramienta con las 6 trampas firmadas, estado real
+- sala en viewport movil: entrar, marcar corte, aprobar, registro (quien, cuando, huella, version), editar revoca; peticiones de red sin video ni transcripcion
+- borrar proyecto (antes/despues) y retencion de 30 dias probada
+- empaqueta en verde; guia del dueño, formato de consentimiento y READMEs con indice
+- npm run validate en verde DESPUES del commit; grafo.json con estados y evidencia
+- decisiones, formas de estar mal (resueltas) y lo que sigue bloqueado
+RESTRICCIONES: candado (sin LLM, transcripcion remota, video generativo, GSAP, render en produccion ni publicar); video y transcripcion no salen del servidor; secretos jamas en pantalla; service_role fuera de superficies (C7) y RLS en toda tabla; deteccion de caras, nunca reconocimiento; menores nunca; datos sinteticos; no tocar skills, reglas, AGENTS.md, settings ni .mcp.json; gates nuevos y BUSINESS_LOGIC.md solo como propuesta; espanol de Mexico.
+RED DE SEGURIDAD: si tras 80 turnos no converges, detente y reporta el bloqueo y el estado del grafo.
