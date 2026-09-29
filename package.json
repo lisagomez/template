@@ -30,6 +30,8 @@
     "erp:prueba": "bash erp/instalacion/prueba-efimera.sh",
     "erp:control": "bash erp/instalacion/control-reversion.sh",
     "verifica:marca-blanca": "node scripts/verifica-marca-blanca.mjs",
+    "revisa:readmes": "node scripts/revisa-readmes.mjs",
+    "readme:no-perdida": "node scripts/no-perdida-readme.mjs",
     "regresion": "node scripts/regresion-skills.mjs",
     "audita:fugas": "node scripts/audita-fugas.mjs",
     "audita:secretos": "node scripts/audita-secretos.mjs",

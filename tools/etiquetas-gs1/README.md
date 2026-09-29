@@ -1,5 +1,11 @@
 # @tu-scope/etiquetas-gs1
 
+Para una cadena de CEDIS y sucursales que controla caducidades: cada caja y cada tarima lleva un código GS1-128 que
+cualquier lector entiende, con la fecha y el lote dentro, y cualquiera con un celular sabe qué tiene en la mano y
+cuánto le queda de vida.
+
+## Qué hace
+
 Control de caducidades por etiqueta GS1-128: arma, parsea y valida cadenas GS1 según las
 **GS1 General Specifications (Release 26.0)**, genera **SVG** (bwip-js) y **ZPL** (Zebra) que
 codifican exactamente lo mismo, revisa la etiqueta antes de imprimir, asigna GTIN con la regla
@@ -7,6 +13,55 @@ mixta desde Excel/CSV, calcula el tablero FEFO y trae un **agente local de impre
 
 Decisiones, investigación y riesgos: [`docs/SDD-etiquetas-gs1.md`](../../docs/SDD-etiquetas-gs1.md).
 La app que lo usa: `src/features/etiquetas/` (rutas `/etiquetas/*`).
+
+Además: recepción con foto de la caducidad para la mercancía que llega sin GS1-128, escaneo por zona con rondas y
+conteo cíclico a ciegas, y el expediente de cada lote (cadena de hashes, anclaje, agente de riesgo e inventario
+físico). Cada capacidad se prueba en su laboratorio antes de usarse en la app.
+
+### Qué no hace
+
+- No imprime una etiqueta que no pasó la revisión: dígito, combinación, 48 caracteres, lote prohibido, que no quepa o
+  grosor bajo el mínimo la bloquean.
+- No inventa GTIN con un prefijo ajeno: numera solo con el prefijo de la casa, y la caja de un fabricante sin GTIN de
+  caja recibe un código interno y una nota para pedírselo.
+- No da por buena una fecha leída en una foto: es una propuesta hasta que quien registra la confirma o la corrige.
+- No manda la etiqueta ni la foto fuera: la vista previa y la lectura de fechas son locales, y no trae adaptador a un
+  motor externo (C4).
+- No toca la base de datos compartida: la integración al ERP es una propuesta de tablas, validada y no aplicada.
+
+## Casos de uso
+
+- **Recibo del CEDIS, caja del proveedor sin GS1-128**: se escanea su EAN, se fotografía la caducidad, el motor
+  local propone fecha y lote, quien registra confirma, y sale la etiqueta de la casa.
+- **Etiquetar una caja o una tarima**: `(01)(17)(10)` en la caja y la tarima en dos códigos; la revisión dice en
+  lenguaje llano qué falla y, cuando se puede, lo arregla en un clic antes de mandar a la Zebra.
+- **Quien tenga un celular o una pistola** lee la etiqueta: producto, lote, días que le quedan con semáforo y sitio.
+- **Piso de venta**: qué retirar del anaquel y qué lote bajar primero del almacén (FEFO), escaneando la etiqueta de la
+  zona; el almacenista cuenta sin ver cantidades.
+- **Alta del catálogo desde Excel o CSV**: asigna GTIN con la regla mixta, enseña el diff y detiene los conflictos
+  para decisión humana.
+- **Auditar un lote**: su expediente con cadena de hashes, anclas firmadas y el agente de riesgo.
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines`). El núcleo (`.`) no importa nada.
+- **Dependencias del sistema**: `zod` 4.6.1; `bwip-js` 4.11.4 (SVG) y `sharp` 0.35.4 (fotos) como peers opcionales;
+  impresoras Zebra por Zebra Browser Print o por el agente del sitio (TCP 9100); para leer fechas, un Python aislado con
+  RapidOCR y versiones exactas (`motores/instala-rapidocr.sh`). Las pruebas de ida y vuelta usan el Chromium de
+  Playwright, zebrash y zxing.
+- **CPU, GPU y memoria**: lectura de fechas con RapidOCR en CPU, 1-6 s por foto (banco del 2026-09-27, SDD §11; la
+  cascada de la app, `rapidocr-producto`: mediana 5691 ms en el corpus sintético y 1674 ms en recortes reales). GPU: no
+  se usa (no medido). Memoria: no medido.
+- **Servicios externos**: ninguno obligatorio. Browser Print es un servicio local del equipo (`127.0.0.1`) y Labelary
+  viene apagado (C4).
+- **Variables de entorno** (servidor de la app): `ETIQUETAS_TOKEN`, `ETIQUETAS_TOKEN_CONTEO`, `ETIQUETAS_TOKEN_RECIBO`,
+  `ETIQUETAS_TOKEN_ALMACEN`, `ETIQUETAS_AGENTE_SECRETO`, `ETIQUETAS_DATOS`, `ETIQUETAS_ZONA`, `ETIQUETAS_LLAVE_<SITIO>`,
+  `ETIQUETAS_MOTOR_PYTHON`, `ETIQUETAS_CENTRAL` y `ETIQUETAS_SEMILLA` (qué es cada una, al final de «Instalar en un
+  sitio nuevo»).
+- **Almacenamiento**: el almacén se inyecta; `./almacenes/archivo` es un JSON con escritura atómica, las fotos van por
+  su huella en `ETIQUETAS_DATOS/fotos/` (sin EXIF ni GPS) y el central de anclas es otro JSON. Respaldarlos juntos.
+- **Salida del perímetro (C4)**: nada sale por defecto. Labelary se activa en Ajustes y además por uso, con aviso rojo
+  cada vez; las fotos se normalizan quitando EXIF y GPS.
 
 ## Puntos de entrada
 

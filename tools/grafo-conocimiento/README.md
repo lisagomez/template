@@ -5,11 +5,56 @@ Motor de reglas de la **spec 004**: responde una pregunta con un veredicto acota
 determinista. Cuando no hay regla, lo dice con una forma que no se puede confundir con una
 respuesta.
 
+## Qué hace
+
+- Responde «¿esto está permitido?» (o deducible, o procedente) con un veredicto calculado por un motor determinista
+  sobre reglas con fuente, y cita la fuente cuando el dominio es público.
+- Sin regla, en conflicto, sobre el tope o con la categoría en duda, **no da veredicto**, y lo dice con una forma que no
+  se confunde con una respuesta.
+- Entiende la pregunta en lenguaje natural con un modelo que el proyecto inyecta y que solo estructura, o sin modelo,
+  por las keywords de las reglas.
+- Valida el conocimiento antes de usarlo y da el gate de siembra (`./gate`).
+
+### Qué no hace
+
+- No deja que el modelo dé el veredicto: el parser solo estructura y su esquema no tiene campo de veredicto.
+- No trae las reglas: vienen de `@tu-scope/conocimiento`, la fuente única.
+- No trae modelo ni proveedor: se inyectan, con el nivel de `routing-modelos.json` y el gasto en la contabilidad del
+  proyecto.
+
+## Casos de uso
+
+- **Un proyecto que responde con reglas citadas**: «¿Puedo repartir paquetes con un dron?» en MX, régimen GENERAL, da
+  el veredicto de la regla o un fallo tipado (`sin_regla`, `conflicto`, `tope_excedido`).
+- **Una app con chat**: la pregunta pasa por `responde` con el modelo del proyecto; si el parser cae, sale
+  `parser_no_disponible`, que no se redacta como «no hay regla».
+- **Sin gastar en modelo**: `estructuradorSinModelo` responde las preguntas que usan el vocabulario de las reglas, de
+  forma determinista y gratuita.
+- **Fuera de lo legal**: una política de devoluciones (ejemplo ficticio, `ejemplos/politica-devoluciones.json`).
+- **El laboratorio al sembrar**: el gate de siembra rechaza una versión que borra o edita una regla en su sitio sin
+  firma.
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines`).
+- **Dependencias del sistema**: `zod` (`^4.4.3`, en `dependencies`). Para `./lenguaje`, el SDK `ai` y el modelo los
+  trae el proyecto. Regenerar la paridad pide un clon de Hermes.
+- **CPU, GPU y memoria**: no medido. Tampoco está medida la precisión del parser con un modelo real.
+- **Servicios externos**: ninguno para el motor. Para `./lenguaje`, el proveedor del modelo que inyecte el proyecto.
+- **Variables de entorno**: ninguna.
+- **Almacenamiento**: ninguno: recibe el conocimiento y devuelve el resultado.
+- **Salida del perímetro (C4)**: el motor no sale a la red. Con `./lenguaje`, el texto de la pregunta va al modelo que
+  el proyecto inyecte: es decisión C4 del proyecto. Sin modelo, nada sale.
+
+## Estado
+
 > **Estado: construido (PRP-005, las 9 fases, 2026-09-27).** Contrato, selección de dominios, motor en paridad
 > con el de Hermes, gate de siembra (`./gate`), capa de lenguaje natural (`./lenguaje`), empaquetado y aviso de
 > versión. **Qué puede fallar en producción**: la «Autocrítica (TAR-15)» de
 > `.claude/PRPs/PRP-005-grafo-de-conocimiento-al-golden-path.md`. El primer punto sigue abierto: el parser con un modelo
 > real no está medido.
+
+## Uso
 
 ```ts
 import conocimiento from '@tu-scope/conocimiento'

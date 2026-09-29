@@ -227,7 +227,7 @@
    "nombre": "Catalogo de skills de la fabrica",
    "tipo": "config_agentica", "clase": "FABRICA", "estado": "produccion",
    "ubicacion": ".claude/skills", "responsable": "dep-sw",
-   "cubre": [".claude/skills/*", "scripts/regresion-skills.mjs"]
+   "cubre": [".claude/skills/*", "scripts/regresion-skills.mjs", "scripts/revisa-readmes.mjs", "scripts/no-perdida-readme.mjs"]
   },
   {
    "id": "TPL-doctrina",

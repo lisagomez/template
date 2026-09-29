@@ -2,16 +2,6 @@
 
 Hablar y que el texto aparezca donde está el cursor. Local, en WSL2, sobre `@tu-scope/voz`.
 
-**El núcleo es TypeScript puro y no tiene dependencias.** No importa ffmpeg, ONNX, Python ni
-nada de Windows: habla con cuatro interfaces —`DetectorVoz` (la pone `voz`), `Transcriptor`
-(un motor local, un proceso de Python o tu servicio remoto), `Pegador` (donde acaba el texto)
-y `Almacen` (el historial)— y cada entry point le inyecta las suyas. Por eso el dictado entero
-se prueba sin descargar un MB, y por eso el mismo núcleo sirve en WSL2, en un VPS o en una prueba.
-
-Lo que sflow (macOS, MIT, © Daniel Carreón) resolvió bien —diccionario personal, snippets,
-comandos de voz, historial— está portado; lo macOS-only está sustituido o fuera. El mapa
-módulo a módulo y el veredicto están en [`docs/SDD-dictado.md`](../../docs/SDD-dictado.md).
-
 ## Qué hace y qué no
 
 | Hace | No hace |
@@ -20,6 +10,37 @@ módulo a módulo y el veredicto están en [`docs/SDD-dictado.md`](../../docs/SD
 | Elegir el motor **por medición** (tabla abajo), no por fama | Traer los pesos: se descargan pineados por URL con `npm run mide` |
 | Transcribir archivos y **reuniones con hablantes** (turnos por `voz`, texto por aquí) | Mandar audio a ninguna nube: «remoto» es **tu** VPS, con token, y es opcional |
 | Servir el mismo motor por HTTP con autenticación (`servicio/`) | Interfaz gráfica: la terminal pinta estado, nivel y latencia |
+
+## Casos de uso
+
+- **Dictar a Windows desde WSL2**: a Claude Code en Windows Terminal, a VS Code o al navegador; se toca Ctrl derecho (o
+  el icono de la barra) y el texto aparece donde está el cursor.
+- **Conversar con el agente**: en manos libres, lo pegado se envía solo al callar y el agente contesta en voz (PRP-003).
+- **Transcribir un archivo o una reunión con hablantes**: `dictado archivo` y `dictado lote` (turnos por `voz`).
+- **Dictar desde el celular** o revisar lo dictado: la app del template (`/historial`, `/ajustes`), emparejada con el
+  token que deja `dictado instala`.
+- **Transcribir en tu propio VPS, con o sin GPU**: el mismo motor servido por HTTP con autenticación (`servicio/`).
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines`; `dictado instala` lo comprueba).
+- **Dependencias del sistema**: ffmpeg, el micrófono de WSLg y Windows al alcance (PowerShell pega, suena y pinta el
+  icono); los runtimes pineados `sherpa-onnx-node@1.13.8` y `onnxruntime-node@1.30.0`; los pesos pineados (Parakeet
+  int8, Silero, WeSpeaker, voz Piper es_MX: ~750 MB); `@tu-scope/voz` 0.5.0 como peer exacto. Opcionales: Python con
+  `faster-whisper` para el respaldo, y Docker para el servicio remoto.
+- **CPU, GPU y memoria**: medido el 2026-09-15 en un AMD Ryzen 7 5700G (16 hilos, 15 GB, sin CUDA): Parakeet int8 p50
+  532 ms por toma con 1531 MB de RAM residente y 8 hilos (tabla en «Medición»). GPU: no medido (la imagen
+  `Dockerfile.gpu` no ha corrido en ninguna GPU).
+- **Servicios externos**: ninguno. «Remoto» es tu VPS, opcional y con token.
+- **Variables de entorno**: `DICTADO_DATOS`, `DICTADO_MODELOS`, `DICTADO_RUNTIME`, `DICTADO_PYTHON`, `DICTADO_HILOS`,
+  `DICTADO_RETENCION_DIAS`, `DICTADO_REMOTO_URL`, `DICTADO_REMOTO_TOKEN`, `DICTADO_MOVIL_TOKEN`, `DICTADO_VOCES`,
+  `DICTADO_RESPALDO`, `DICTADO_CARACTERES_MAXIMOS`, `DICTADO_CONVERSACION_PUERTO` y `DICTADO_CONVERSACION_TRAZA`
+  (qué es cada una, en «Variables de entorno»). El token nunca se imprime.
+- **Almacenamiento**: `~/.dictado` (`DICTADO_DATOS`): historial con el texto dictado (365 días por defecto),
+  diccionario, snippets, ajustes y token; modelos y runtimes aparte. `npm run mide` baja ~2,5 GB la primera vez. Qué
+  se guarda, dónde y cómo se borra: §10.
+- **Salida del perímetro (C4)**: nada sale de la máquina. El servicio remoto es opcional, propio y no escribe audio ni
+  texto; su modelo de amenazas (C3) y su decisión de flujo de datos (C4) están en el SDD §7.
 
 ## Instalar
 
@@ -47,6 +68,18 @@ tipos y en cifras—, el VAD usa su perfil `dictado`, y el nivel en dB, el pico 
 PCM/WAV son los suyos. `onnxruntime-node` / `sherpa-onnx-node` son peers **opcionales**: los
 instala quien use `./node`. El núcleo (`.`) no necesita ninguno en tiempo de ejecución (solo
 tipos), ni el cliente remoto (`./remoto`).
+
+## El núcleo y de dónde viene
+
+**El núcleo es TypeScript puro y no tiene dependencias.** No importa ffmpeg, ONNX, Python ni
+nada de Windows: habla con cuatro interfaces —`DetectorVoz` (la pone `voz`), `Transcriptor`
+(un motor local, un proceso de Python o tu servicio remoto), `Pegador` (donde acaba el texto)
+y `Almacen` (el historial)— y cada entry point le inyecta las suyas. Por eso el dictado entero
+se prueba sin descargar un MB, y por eso el mismo núcleo sirve en WSL2, en un VPS o en una prueba.
+
+Lo que sflow (macOS, MIT, © Daniel Carreón) resolvió bien —diccionario personal, snippets,
+comandos de voz, historial— está portado; lo macOS-only está sustituido o fuera. El mapa
+módulo a módulo y el veredicto están en [`docs/SDD-dictado.md`](../../docs/SDD-dictado.md).
 
 ## Los seis usos
 

@@ -1,5 +1,52 @@
 # Reel del celular (app)
 
+Donde el dueño de una pyme sube el clip que grabó con su celular, lo revisa en la sala y lo aprueba desde el
+teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA-DUENO-REEL.md`).
+
+## Qué hace
+
+- **Cuentas**: entra con correo y contraseña; cada dueño ve solo lo suyo (RLS por dueño).
+- **Tus reels**: sube el clip con su marca, su catálogo y el diccionario del negocio, y lo manda a procesar con los
+  motores locales de `@tu-scope/reel`.
+- **Sala**: el video con sus bloqueos; marcar un corte o un cambio de texto en el segundo exacto (sale una versión
+  nueva, que revoca lo aprobado); aprobar con la huella del archivo calculada en el celular; el registro; borrar.
+- **Consentimientos**: registra los de quien sale o se oye, y los respeta al procesar.
+
+### Qué no hace
+
+- No publica ni programa: aprobar no sale a la red.
+- No manda el video a ningún servicio, ni para transcribir.
+- No procesa en producción: el render queda bloqueado ahí hasta la fase 16 del PRP-007 (solo local).
+
+## Casos de uso
+
+- **El dueño sube lo que grabó**: en «Tus reels» aparece el reel procesado, cortado y subtitulado, o el bloqueo que lo
+  detuvo (una cara o una voz sin consentimiento, un dato personal en cuadro, un precio que no coincide) y en qué segundo.
+- **Quiere un cambio**: pausa en la sala y toca quitar un tramo o cambiar el texto ahí; sale una versión nueva.
+- **Aprueba desde el celular**: queda quién, cuándo, qué versión y la huella de lo que vio; si algo cambia después, la
+  aprobación se revoca.
+- **Borra el proyecto**: se borra todo, en la cuenta y en el servidor.
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines` del template) y la app Next.js del template.
+- **Dependencias del sistema**: ffmpeg, Tesseract, OpenCV de Python y los modelos y runtimes de `tools/dictado`
+  (ver `tools/reel/LICENCIAS.md`). Sin ellos el proceso no corre.
+- **CPU, GPU y memoria**: CPU medida en `tools/reel` (clips sintéticos, 2026-09-27): ≈ 45–50 s por clip de 25 s; un
+  proceso a la vez. GPU: no medido. Memoria: no medido.
+- **Servicios externos**: Supabase (Auth y base de datos con RLS) para cuentas, proyectos, versiones, aprobaciones y
+  consentimientos.
+- **Variables de entorno**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `REEL_DATOS`, `REEL_RECURSOS`,
+  `DICTADO_MODELOS` y `DICTADO_RUNTIME`; `SUPABASE_DB_URL` solo el job de migraciones (C7) y `REEL_LABORATORIO`
+  solo el laboratorio.
+- **Almacenamiento**: `REEL_DATOS` (video, transcripción, máster y documentos firmados, en el servidor) y la base de
+  Supabase (solo proyecto, versiones, aprobaciones y estado de los consentimientos). A los 30 días de aprobado se
+  borran el video original, su copia de trabajo y la transcripción (`reel:retencion`).
+- **Salida del perímetro (C4)**: el video y la transcripción no salen del servidor; a Supabase van solo los datos de la
+  cuenta y del proyecto listados arriba. Transcribir en la nube o usar un LLM espera firma del laboratorio.
+
+## Piezas
+
 La parte de la app que usa `@tu-scope/reel` (`tools/reel`). Plan con candado: `.claude/PRPs/PRP-007-reel-del-celular.md`.
 
 | Pieza | Dónde | Qué hace |

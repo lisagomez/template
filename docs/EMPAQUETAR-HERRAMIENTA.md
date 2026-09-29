@@ -20,6 +20,7 @@ Lo segundo es lo que casi nadie prueba: el código funciona, los tests pasan, y 
 tools/
 └── mi-herramienta/
     ├── package.json      # el contrato: exports, files, peerDependencies
+    ├── README.md         # product first: qué hace, casos de uso, infraestructura, lo demás
     ├── tsconfig.json     # build propio, con declaration: true
     ├── src/
     │   ├── index.ts      # nucleo: TypeScript puro, CERO dependencias
@@ -29,6 +30,11 @@ tools/
 
 Copia **`tools/ejemplo-herramienta/`** como andamio. No es un ejemplo de mentira: es el que
 pasa el empaquetador en verde, así que su `package.json` ya tiene el contrato correcto.
+
+Su `README.md` también se copia, y se reescribe con **`/readme nuevo tools/<nombre>`** (skill
+`readme`): qué hace y qué no, casos de uso y requerimientos de infraestructura antes que nada
+técnico. `npm run revisa:readmes -- tools/<nombre>/README.md` lo audita sin modelo, y npm lo mete
+en el tarball aunque `files` no lo liste.
 
 ---
 

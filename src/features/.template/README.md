@@ -1,8 +1,33 @@
-# Feature Template
+# «Nombre de la feature» (`/«ruta»`)
 
-Esta es la estructura estándar para cada feature en el proyecto.
+«Una línea: qué resuelve y para quién, en palabras de quien la usa.» Este README es el molde: al copiar `.template`
+se rellena con `/readme nuevo src/features/<nombre>`, y `npm run revisa:readmes` lo vigila.
+
+## Qué hace
+
+- «Capacidad dicha como resultado para quien la usa, no como componente.»
+
+### Qué no hace
+
+- «Límite deliberado y su porqué. Si no hay, se dice.»
+
+## Casos de uso
+
+- **«Quién»**, cuando «situación»: «qué obtiene». *(pendiente hasta que el código, el SDD o el laboratorio lo sostengan)*
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines` del template) y la app Next.js.
+- **Dependencias del sistema**: pendiente («ninguna» si no hay).
+- **CPU, GPU y memoria**: no medido.
+- **Servicios externos**: pendiente (Supabase, si guarda en la base).
+- **Variables de entorno**: pendiente (solo los nombres, jamás un valor).
+- **Almacenamiento**: pendiente.
+- **Salida del perímetro (C4)**: pendiente (si algún dato sale de la máquina, qué, a quién y la decisión C4).
 
 ## Estructura
+
+Esta es la estructura estándar para cada feature en el proyecto.
 
 ```
 features/[nombre-feature]/

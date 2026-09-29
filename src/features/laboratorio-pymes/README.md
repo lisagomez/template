@@ -1,9 +1,46 @@
 # Laboratorio pymes (`/laboratorio-pymes`)
 
+Para el laboratorio: cada herramienta de marketing para pymes probada caso por caso con su estado real, y la puerta
+de lo que la app `/estudio` puede usar.
+
+## Qué hace
+
 Cada herramienta de `@tu-scope/pymes-marketing` probada caso por caso, con datos sintéticos y declarados
 (la «Panadería La Espiga» de Puebla no existe). Los casos corren de verdad al abrir la página y en la
 suite `npm run prueba:laboratorio-pymes` (dentro de `validate`), que exige que cada caso dé el estado que
 declara. **Solo las herramientas con todos sus casos en «pasa» se usan en `/estudio`.**
+
+### Qué no hace
+
+- No usa datos reales: todo es sintético y declarado.
+- No gasta ni sale a la red con el redactor con LLM: su corrida real se hace con firma; aquí queda «no medido».
+- No afirma sin medición: si falta la medición de un caso con motores, el caso dice `no-medido`.
+
+## Casos de uso
+
+- **El laboratorio decide qué entra a `/estudio`**: abre la página y ve, por herramienta, qué casos pasan, cuáles fallan
+  y cuáles no están medidos y por qué; solo lo que pasa entero se usa.
+- **Un cambio visual a propósito**: la suite se pone roja, se regeneran las referencias y se aprueba mirando el diff de
+  las imágenes (ver «Referencias visuales»).
+- **Antes de integrar**: `npm run prueba:laboratorio-pymes`, dentro de `validate`, exige que cada caso dé el estado que
+  declara.
+- **Revisar el reel del celular**: las trampas firmadas del PRP-007 contra la medición real de los clips sintéticos.
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines` del template) y la app Next.js; usa `tools/pymes-marketing` y `tools/reel`.
+- **Dependencias del sistema**: Chromium de Playwright (referencias y capturas, sin red) y ffmpeg con `ffprobe` para
+  el video. Los casos del reel leen la medición de `npm run reel:laboratorio`, que necesita los motores de
+  `tools/reel`.
+- **CPU, GPU y memoria**: no medido para el laboratorio. La del reel, en `tools/reel` (≈ 45–50 s por clip de 25 s).
+- **Servicios externos**: ninguno para la página. `npm run reel:rls` habla con la base de Supabase del proyecto, con
+  dos cuentas @example.com.
+- **Variables de entorno**: `OPENROUTER_API_KEY` solo se mira por presencia, sin leer su valor, para decir por qué el
+  redactor con LLM es «no medido»; `reel:rls` lee `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Almacenamiento**: `datos/` (con `referencias.json`) en el repo, y las imágenes y mediciones en
+  `public/laboratorio-pymes/` (`referencias/`, `reel/`, `video/`).
+- **Salida del perímetro (C4)**: nada con datos de nadie: los datos son sintéticos y las referencias se generan sin red.
+  Solo `reel:rls` sale, a la base del proyecto y con cuentas sintéticas.
 
 ## Cómo leerlo
 - **pasa / falla / no medido**: estado real; «no medido» siempre dice por qué (hoy: el redactor con LLM
