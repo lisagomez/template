@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**35 activos** cubren **218 unidades** del repo.
+**36 activos** cubren **220 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -16,6 +16,7 @@
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
 | TPL-empaquetador | Empaquetador de herramientas y su contrato | FABRICA | software | produccion | 3 | `scripts/empaqueta-herramienta.mjs` |
+| TPL-feature-laboratorio-etiquetas | Laboratorio de la herramienta de etiquetas GS1: casos, estado real, veredictos y referencias visuales; decide que usa /etiquetas | FABRICA | software | beta | 2 | `src/features/laboratorio-etiquetas` |
 | TPL-feature-laboratorio-pymes | Laboratorio de las herramientas pymes: casos, estado real y veredictos | FABRICA | software | beta | 2 | `src/features/laboratorio-pymes` |
 | TPL-feature-laboratorio-voz | Laboratorio de voz: capturas y mediciones del motor | FABRICA | software | beta | 2 | `src/features/laboratorio-voz` |
 | TPL-gobernanza | Capa de gobernanza (controles C1-C8) y gates de validate | FABRICA | software | produccion | 17 | `.claude/gobernanza` |
@@ -30,14 +31,14 @@
 | TPL-asesor-ventas | Asesor de ventas: insights con evidencia desde una reunion diarizada | PRODUCTO | software | blueprint | 1 | `tools/asesor-ventas` |
 | TPL-dictado | Dictado local: hablar y que el texto aparezca donde esta el cursor | PRODUCTO | software | beta | 2 | `tools/dictado` |
 | TPL-erp | ERP agentico: maestro, reglas, migraciones y modulo act (externo: lo cataloga su fuente) | PRODUCTO | software | beta | 10 | `erp` |
-| TPL-etiquetas-gs1 | Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo e inventario fisico | PRODUCTO | software | beta | 1 | `tools/etiquetas-gs1` |
+| TPL-etiquetas-gs1 | Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo, inventario fisico, recepcion con foto, escaneo por zona y codigos anteriores (0.2.0) | PRODUCTO | software | beta | 1 | `tools/etiquetas-gs1` |
 | TPL-extractor-documental | Extractor documental (PDF, imagen, CFDI XML) con revision humana | PRODUCTO | software | beta | 2 | `tools/extractor-documental` |
 | TPL-feature-a2a | Puente A2A del extractor (Agent Card + JSON-RPC + Tasks) | PRODUCTO | software | beta | 2 | `src/features/a2a` |
 | TPL-feature-auth | Autenticacion Supabase (login, registro, perfiles) | PRODUCTO | software | produccion | 1 | `src/features/auth` |
 | TPL-feature-dashboard | Dashboard de la app base | PRODUCTO | software | beta | 1 | `src/features/dashboard` |
 | TPL-feature-dictado | Interfaz web del dictado (pildora, ajustes e historial) | PRODUCTO | software | beta | 3 | `src/features/dictado` |
 | TPL-feature-estudio-pymes | Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo) | PRODUCTO | software | blueprint | 2 | `src/features/estudio-pymes` |
-| TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, mover, caducidades, conteo, expediente, riesgo, integridad) | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
+| TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
 | TPL-feature-reel | App del reel: cuentas, subida del clip y sala de aprobacion en el celular | PRODUCTO | software | blueprint | 5 | `src/features/reel` |
 | TPL-grafo-conocimiento | Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes | PRODUCTO | software | beta | 1 | `tools/grafo-conocimiento` |

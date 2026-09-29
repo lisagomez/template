@@ -565,3 +565,34 @@ artículo en el sitio antes de recibir y cuánto hay después, por lote y en tot
 |---|---|---|
 | La foto dice otra cosa que el inventario real del momento | La proyección la recalcula desde la cadena y la integridad lo delata. | Es la foto del SISTEMA, no un conteo físico: si el sistema ya estaba mal, la foto lo refleja fiel. Eso lo corrige el conteo cíclico. |
 | El artículo cuenta mal si un GTIN cambia de dueño | Se cuenta por artículo y la cadena asocia cada GTIN a su artículo. Un código anterior no se da a otro artículo sin decisión humana (§12). | Si se fuerza esa decisión, las fotos siguientes cuentan el GTIN con su nuevo dueño. |
+
+## 14. El laboratorio de la herramienta (`/laboratorio-etiquetas`)
+
+El mismo molde que `/laboratorio-pymes`: casos con entrada declarada, estado real (**pasa / falla /
+no medido**, y «no medido» siempre dice por qué), veredicto, y **la app usa solo lo aprobado**.
+
+- **Casos**: 68 en 11 herramientas (41 trampas), con al menos 5 por herramienta y al menos una trampa cada una:
+  etiqueta, impresión, lectura, catálogo, recepción, fecha por foto, escanear por zona, ronda, conteo
+  ciego, expediente y agente de riesgo. Casi todos salen de lo que ya probaban el núcleo y las
+  capturas; aquí corren en una página y dan un veredicto por herramienta.
+- **Referencias visuales**: la caja, la tarima y la ubicación, en SVG y en ZPL, con su huella en
+  `src/features/laboratorio-etiquetas/datos/referencias.json`. Un cambio visual o de ZPL pone la
+  suite en rojo **a propósito**; se aprueba con `npm run etiquetas:referencias` y el diff a la vista.
+- **Lo que depende de la máquina**:
+  - el motor local de fechas (`ETIQUETAS_MOTOR_PYTHON`);
+  - el corpus de fotos reales (`ETIQUETAS_CORPUS_REAL`, o `.datos/corpus-caducidades` en la página).
+
+  Sin ellos, los casos del motor quedan «no medido» y **«Fecha por foto» no se aprueba**. Medido el
+  2026-09-28 con RapidOCR y las fotos reales: 2 exactas, 2 ambiguas bien marcadas, 0 equivocadas;
+  la corrida completa tarda unos 9 s con motor y corpus, y menos de medio segundo sin ellos.
+- **La compuerta de la app**:
+  - `/laboratorio-etiquetas` corre todo en cada visita y deja su veredicto al servidor, que dura
+    30 min y se recalcula en segundo plano;
+  - una pantalla de `/etiquetas` cuya herramienta no está aprobada se apaga, con un aviso que lleva
+    al laboratorio;
+  - la lectura de la fecha por foto usa el motor solo si «Fecha por foto» está aprobada; si no, la
+    fecha se teclea y la foto queda como evidencia.
+- **En `validate`**: dentro de `prueba:etiquetas`, que ya es un gate activo. Un gate propio en
+  `.claude/gates.json`, como el de pymes, sería un cambio de gobernanza (CDC) y va aparte.
+- **Paquete**: `@tu-scope/etiquetas-gs1` pasa a `0.2.0` (recepción con foto, escaneo por zona, códigos
+  anteriores y foto del inventario) y `zod` queda fijo en `4.6.1`.

@@ -50,6 +50,7 @@
     "reel:rls": "node scripts/reel/mide-aislamiento.ts",
     "reel:retencion": "node scripts/reel/retencion.ts",
     "contenido:referencias": "node scripts/laboratorio-pymes/referencias.ts",
+    "etiquetas:referencias": "node scripts/laboratorio-etiquetas/referencias.ts",
     "contenido:video": "node scripts/laboratorio-pymes/video.ts",
     "prueba:historial": "node --test src/features/historial/pruebas/*.ts",
     "vigila:versiones": "node scripts/vigila-versiones.mjs",
@@ -71,7 +72,7 @@
     "trayectorias:informe": "node scripts/trayectorias/informe.mjs",
     "trayectorias:propuestas": "node scripts/trayectorias/propuestas.mjs",
     "prueba:ajustes": "node --test src/features/ajustes/pruebas/*.ts",
-    "prueba:etiquetas": "npm --prefix tools/etiquetas-gs1 run prueba && node --test src/features/etiquetas/pruebas/*.ts",
+    "prueba:etiquetas": "npm --prefix tools/etiquetas-gs1 run prueba && node --test src/features/etiquetas/pruebas/*.ts && node --test src/features/laboratorio-etiquetas/pruebas/*.ts",
     "capturas:etiquetas": "node src/features/etiquetas/e2e/capturas.mjs"
   },
   "dependencies": {

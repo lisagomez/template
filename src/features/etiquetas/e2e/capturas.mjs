@@ -26,6 +26,7 @@ import { generaLlaves } from '../../../../tools/etiquetas-gs1/dist/firma.js';
 import { flujosConteo } from './flujos-conteo.mjs';
 import { flujosRecibir } from './flujos-recibir.mjs';
 import { codigoAnterior45, flujosZona } from './flujos-zona.mjs';
+import { laboratorio46 } from './flujo-laboratorio.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -384,6 +385,8 @@ await flujosConteo({ navegador, contexto, abre, foto, compone, informe, BASE, TO
 await flujosRecibir({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, espera, BASE, TOKEN });
 // Tras el flujo 30 (el ITF-14 del proveedor sustituye la caja interna de la leche): la etiqueta vieja se sigue leyendo.
 await codigoAnterior45({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, BASE, TOKEN, TOKEN_CONTEO, TOKEN_RECIBO, TOKEN_ALMACEN, dia, aammdd });
+// El laboratorio de la herramienta: casos, estado real y lo que aprueba para /etiquetas.
+await laboratorio46({ navegador, contexto, foto, compone, informe, BASE });
 informe.conteo = await api({ accion: 'conteos' }).then((r) => r.conteos.map((c) => ({ folio: c.folio, estado: c.estado, eventos: c.aplicado?.eventos, conciliacion: (c.conciliacion ?? []).map((x) => `${x.lote.lote}@${x.zona}${x.posicion ? ` ${x.posicion}` : ''}: cadena ${x.esperado}, contado ${x.contado}, ${x.clase}`) })));
 
 // Anclar lo de hoy (como haria el agente del sitio por la noche) y ver todo en verde.
@@ -424,7 +427,7 @@ await compone('23', 'Integridad por sucursal: todas verifican contra sus anclas 
 await compone('24', 'Integridad tras reescribir Poniente: su cadena cuadra localmente pero el ancla la delata', [['escritorio', integridadDespues.escritorio], ['celular', integridadDespues.celular]]);
 
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
-console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion, zona: { ...informe.zona, tablaAgilidad: undefined }, codigoAnterior: informe.codigoAnterior }, null, 1));
+console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion, zona: { ...informe.zona, tablaAgilidad: undefined }, codigoAnterior: informe.codigoAnterior, laboratorio: informe.laboratorio }, null, 1));
 if (informe.zona?.tablaAgilidad) console.log(`\nAgilidad (celular 390×844, medida con Playwright):\n${informe.zona.tablaAgilidad}`);
 await navegador.close();
 await conCamara?.close();

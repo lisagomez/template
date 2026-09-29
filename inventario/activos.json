@@ -52,10 +52,10 @@
   },
   {
    "id": "TPL-etiquetas-gs1",
-   "nombre": "Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo e inventario fisico",
+   "nombre": "Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo, inventario fisico, recepcion con foto, escaneo por zona y codigos anteriores (0.2.0)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
    "ubicacion": "tools/etiquetas-gs1", "responsable": "dep-sw",
-   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md", "docs/SDD-etiquetas-gs1.md"],
+   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md", "docs/goals/foto-articulo-y-caducidad-leida.md", "docs/goals/escaneo-por-zona-y-rondas.md", "docs/SDD-etiquetas-gs1.md"],
    "cubre": ["tools/etiquetas-gs1"]
   },
   {
@@ -193,11 +193,19 @@
   },
   {
    "id": "TPL-feature-etiquetas",
-   "nombre": "Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, mover, caducidades, conteo, expediente, riesgo, integridad)",
+   "nombre": "Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
    "ubicacion": "src/features/etiquetas", "responsable": "dep-sw",
-   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md"],
+   "origen": ["docs/goals/etiquetas-gs1-caducidades.md", "docs/goals/expediente-lote-cadena-hash.md", "docs/goals/foto-articulo-y-caducidad-leida.md", "docs/goals/escaneo-por-zona-y-rondas.md"],
    "cubre": ["src/features/etiquetas"]
+  },
+  {
+   "id": "TPL-feature-laboratorio-etiquetas",
+   "nombre": "Laboratorio de la herramienta de etiquetas GS1: casos, estado real, veredictos y referencias visuales; decide que usa /etiquetas",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/laboratorio-etiquetas", "responsable": "dep-sw",
+   "origen": ["docs/SDD-etiquetas-gs1.md"],
+   "cubre": ["src/features/laboratorio-etiquetas", "scripts/laboratorio-etiquetas"]
   },
   {
    "id": "TPL-app-base",

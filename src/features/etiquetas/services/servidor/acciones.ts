@@ -15,6 +15,7 @@ import { ejecutaConteo } from './acciones-conteo.ts';
 import { ejecutaRecepcion } from './acciones-recepcion.ts';
 import { ejecutaZona } from './acciones-zona.ts';
 import { motorDelServidor } from './fotos.ts';
+import { veredictoSinEsperar } from './laboratorio.ts';
 import { cuentaACiegas, type Rol } from './roles.ts';
 import { avisaCabezas, seudonimosDelServidor } from './expediente.ts';
 
@@ -63,7 +64,9 @@ function fichas(e: EstadoAlmacen) {
   const formatosFecha = Object.keys(e.articulos).map((sku) => formatoDe(e, sku)).filter((f) => f !== undefined);
   // Los GTIN anteriores (del libro de asignaciones, sin nombres ni cantidades): el lector del
   // navegador los necesita para seguir leyendo etiquetas viejas.
-  return { fotos, formatosFecha, codigosAnteriores: codigosAnteriores(e) };
+  // El laboratorio: lo aprobado apaga o prende pantallas en el marco (null mientras corre la primera vez).
+  const v = veredictoSinEsperar();
+  return { fotos, formatosFecha, codigosAnteriores: codigosAnteriores(e), laboratorio: v ? { aprobadas: v.aprobadas, cuando: v.cuando } : null };
 }
 const VISTAS = ['principal', 'frente', 'etiqueta', 'caja', 'caducidad'] as const;
 

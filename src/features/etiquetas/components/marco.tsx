@@ -8,6 +8,19 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { empareja, type EstadoCliente } from '../services/cliente.ts';
 import { useEtiquetas, type Etiquetas } from '../hooks/use-etiquetas.ts';
+import { herramientaDePantalla, NOMBRE_HERRAMIENTA } from '../../laboratorio-etiquetas/services/pantallas.ts';
+
+/** La app usa solo lo que el laboratorio aprobó: si la herramienta de esta pantalla no pasa, la pantalla se apaga. */
+function EnLaboratorio({ e, ruta }: { e: Etiquetas; ruta: string }) {
+  const h = herramientaDePantalla(ruta);
+  const lab = e.estado?.laboratorio;
+  if (!h || !lab || lab.aprobadas.includes(h)) return null;
+  return (
+    <p className={`${tarjeta} text-sm`} data-prueba="en-laboratorio" data-herramienta={h}>
+      Esta pantalla usa «{NOMBRE_HERRAMIENTA[h]}», que <b>no pasa su laboratorio</b> en esta instalación: queda apagada hasta que pase. <a className="font-semibold underline" href="/laboratorio-etiquetas">Ver el laboratorio</a>
+    </p>
+  );
+}
 
 const RUTAS = [
   ['/etiquetas/escanear', 'Escanear'], ['/etiquetas/dia', 'Día'], ['/etiquetas', 'Etiqueta'], ['/etiquetas/leer', 'Leer'], ['/etiquetas/recibir', 'Recibir'], ['/etiquetas/mover', 'Mover'], ['/etiquetas/caducidades', 'Caducidades'],
@@ -41,6 +54,12 @@ const RUTAS_DEL_ROL: Record<EstadoCliente['rol'], readonly string[] | null> = {
   operacion: null, recibo: ['/etiquetas/escanear', '/etiquetas/recibir'], almacenista: ['/etiquetas/escanear', '/etiquetas/conteo'], conteo: ['/etiquetas/conteo'],
 };
 const ROTULO_ROL: Partial<Record<EstadoCliente['rol'], string>> = { conteo: 'Dispositivo de conteo', recibo: 'Recibo', almacenista: 'Almacenista' };
+
+const apagada = (e: Etiquetas, ruta: string) => {
+  const h = herramientaDePantalla(ruta);
+  const lab = e.estado?.laboratorio;
+  return Boolean(h && lab && !lab.aprobadas.includes(h));
+};
 
 export function Marco({ titulo, descripcion, children }: { titulo: string; descripcion: string; children: (e: Etiquetas) => ReactNode }) {
   const e = useEtiquetas();
@@ -78,7 +97,8 @@ export function Marco({ titulo, descripcion, children }: { titulo: string; descr
         {e.estado && bloqueada ? (
           <p className={`${tarjeta} text-sm`} data-prueba="solo-conteo">{rol === 'conteo' ? <>Este dispositivo es de <b>conteo</b>: solo puede contar, y no ve cantidades del sistema.</> : <>Esta pantalla no es de tu rol ({ROTULO_ROL[rol!]?.toLowerCase()}).</>} <a className="font-semibold underline" href={inicio}>{rol === 'conteo' ? 'Ir al conteo' : 'Ir a Escanear'}</a></p>
         ) : null}
-        {e.estado && !bloqueada ? children(e) : null}
+        {e.estado && !bloqueada ? <EnLaboratorio e={e} ruta={ruta} /> : null}
+        {e.estado && !bloqueada && !apagada(e, ruta) ? children(e) : null}
       </main>
     </div>
   );
