@@ -6,13 +6,16 @@ import { join, resolve, sep } from 'node:path';
 /**
  * El almacén del reel vive en el SERVIDOR (respuesta 2): bruto, transcripción, máster y documentos de
  * consentimiento. Supabase no ve nada de esto. Las rutas salen de UUIDs validados, nunca del cliente.
+ *
+ * turbopackIgnore: las rutas se deciden en tiempo de ejecución; sin esto Turbopack rastrea la raíz entera y
+ * revienta con el symlink del venv del banco de medición, que apunta fuera del root (como en etiquetas).
  */
-export const DATOS = resolve(process.env['REEL_DATOS'] ?? join(homedir(), '.reel', 'datos'));
+export const DATOS = resolve(/*turbopackIgnore: true*/ process.env['REEL_DATOS'] ?? join(homedir(), '.reel', 'datos'));
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export function carpetaDe(duenoId: string, proyectoId: string): string {
   if (!UUID.test(duenoId) || !UUID.test(proyectoId)) throw new Error('identificador inválido');
-  const c = resolve(DATOS, duenoId, proyectoId);
+  const c = resolve(/*turbopackIgnore: true*/ DATOS, duenoId, proyectoId);
   if (!c.startsWith(DATOS + sep)) throw new Error('ruta fuera del almacén');
   return c;
 }
@@ -34,7 +37,7 @@ export async function lista(carpeta: string): Promise<string[]> {
 }
 
 export async function borraCarpeta(carpeta: string): Promise<void> {
-  if (!resolve(carpeta).startsWith(DATOS + sep)) throw new Error('ruta fuera del almacén');
+  if (!resolve(/*turbopackIgnore: true*/ carpeta).startsWith(DATOS + sep)) throw new Error('ruta fuera del almacén');
   await rm(carpeta, { recursive: true, force: true });
 }
 
@@ -45,7 +48,7 @@ let enCurso: Promise<unknown> | null = null;
 export async function procesaEnHijo(peticion: object): Promise<{ estado: string; huella: string | null; duracion: number | null }> {
   if (enCurso) throw new Error('ocupado');
   const trabajo = new Promise<{ estado: string; huella: string | null; duracion: number | null }>((resolver, rechazar) => {
-    const h = spawn(process.execPath, [join(process.cwd(), 'scripts', 'reel', 'procesa-proyecto.ts')], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const h = spawn(process.execPath, [join(/*turbopackIgnore: true*/ process.cwd(), 'scripts', 'reel', 'procesa-proyecto.ts')], { stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '', err = '';
     h.stdout.on('data', (d: Buffer) => { out += d.toString(); });
     h.stderr.on('data', (d: Buffer) => { err += d.toString(); });
