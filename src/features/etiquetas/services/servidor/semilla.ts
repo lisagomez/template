@@ -11,7 +11,7 @@
  */
 import {
   aAammdd, altaConExpediente, aplicaImportacion, CATEGORIAS_EJEMPLO, completaClave, corrige, ESCENARIO_DULCERIA, esErrorLectura, estadoVacio, interpreta, leeFilas,
-  mueveConExpediente, parseaLectura, planificaImportacion, recibeConExpediente, ROLLOS_REFERENCIA, salida, sumaDias, transfiere,
+  mueveConExpediente, parseaLectura, planificaImportacion, recibeConExpediente, ROLLOS_REFERENCIA, salida, sumaDias, transfiere, ubica,
   type ClaveLote, type Compra, type Consumibles, type Consumo, type EstadoAlmacen, type Interpretacion, type Paso, type PerfilImpresora, type Sitio, type Zona,
 } from '../nucleo.ts';
 
@@ -39,16 +39,20 @@ const F = [
   ['CHO-021', 'Chocolate de leche 100 g', 'dulceria', 'CEDIS-NTE;SUC-CENTRO;SUC-PONIENTE', 'NO', completaClave('952111100006'), completaClave('1952111100006'), '48', '50', '270'],
 ];
 
-/** [sitio, sku, lote, dias hasta caducar, cajas, zona]. */
-const LOTES: [string, string, string, number, number, Zona][] = [
+/** [sitio, sku, lote, dias hasta caducar, cajas, zona, rack-nivel-posicion]. */
+const LOTES: [string, string, string, number, number, Zona, string?][] = [
   ['CEDIS-NTE', 'YOG-001', 'L4471', 35, 120, 'almacen'], ['CEDIS-NTE', 'YOG-001', 'L4502', 8, 40, 'almacen'], ['CEDIS-NTE', 'LEC-002', 'L0921', 2, 18, 'almacen'],
   ['CEDIS-NTE', 'LEC-002', 'L0899', -3, 6, 'almacen'], ['CEDIS-NTE', 'ATU-003', 'A2291', 400, 80, 'almacen'], ['CEDIS-NTE', 'REF-007', 'R551', 25, 64, 'almacen'],
   ['CEDIS-NTE', 'REF-007', 'R560', 110, 200, 'recibo'], ['CEDIS-NTE', 'HLD-011', 'H0003', 190, 30, 'almacen'],
-  ['SUC-CENTRO', 'YOG-001', 'L4502', 8, 3, 'almacen'], ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 4, 'almacen'], ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 2, 'piso'], ['SUC-CENTRO', 'LEC-002', 'L0920', 6, 4, 'piso'],
-  ['SUC-CENTRO', 'PAN-004', 'P0078', 4, 3, 'almacen'], ['SUC-CENTRO', 'PAN-004', 'P0077', 1, 2, 'piso'], ['SUC-CENTRO', 'SAL-005', 'S0012', 20, 10, 'almacen'],
+  ['SUC-CENTRO', 'YOG-001', 'L4502', 8, 3, 'almacen', 'A-01-1'], ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 4, 'almacen', 'A-01-2'], ['SUC-CENTRO', 'YOG-001', 'L4471', 35, 2, 'piso'], ['SUC-CENTRO', 'LEC-002', 'L0920', 6, 4, 'piso'],
+  ['SUC-CENTRO', 'PAN-004', 'P0078', 4, 3, 'almacen', 'A-02-1'], ['SUC-CENTRO', 'PAN-004', 'P0077', 1, 2, 'piso'], ['SUC-CENTRO', 'SAL-005', 'S0012', 20, 10, 'almacen', 'B-01-1'],
   ['SUC-CENTRO', 'QSO-006', 'Q0009', -1, 1, 'piso'], ['SUC-CENTRO', 'HLD-011', 'H0003', 190, 5, 'piso'],
   ['SUC-PONIENTE', 'YOG-001', 'L4502', 8, 5, 'piso'], ['SUC-PONIENTE', 'QSO-006', 'Q0010', 9, 2, 'almacen'],
   ['SUC-CENTRO', 'CHO-021', 'CH0310', 12, 40, 'piso'], ['SUC-ORIENTE', 'ATU-003', 'A2291', 400, 12, 'piso'], ['SUC-ORIENTE', 'REF-007', 'R551', 25, 8, 'almacen'],
+  // Para «Escanear» en Centro: dos rojos y un vencido en piso (retirar), y refresco en almacen que vence
+  // antes que el de piso (resurtir FEFO, «baja primero ese»).
+  ['SUC-CENTRO', 'YOG-001', 'L0917', 2, 3, 'piso'], ['SUC-CENTRO', 'YOG-001', 'L0916', 3, 2, 'piso'], ['SUC-CENTRO', 'REF-007', 'R540', -2, 2, 'piso'],
+  ['SUC-CENTRO', 'REF-007', 'R545', 30, 6, 'almacen', 'B-02-1'], ['SUC-CENTRO', 'REF-007', 'R570', 60, 4, 'almacen', 'B-02-2'], ['SUC-CENTRO', 'REF-007', 'R590', 100, 2, 'piso'],
 ];
 
 /**
@@ -145,9 +149,10 @@ function historia(inicio: EstadoAlmacen, hoy: string): EstadoAlmacen {
   paso(mueveConExpediente(e, { sitio: 'SUC-PONIENTE', destino: 'almacen', lectura: lee(e, caja, sumaDias(hoy, -60)), veces: 120, operador: OP.poniente }, a(hoy, -60, 15), 'sem-m2', sumaDias(hoy, -60), 'A-02-1'));
   paso(mueveConExpediente(e, { sitio: 'SUC-PONIENTE', destino: 'piso', lectura: lee(e, caja, sumaDias(hoy, -30)), veces: 10, operador: OP.poniente }, a(hoy, -30, 8), 'sem-m3', sumaDias(hoy, -30)));
   paso(salida(e, { sitio: 'SUC-PONIENTE', tipo: 'VENDIDO', lote: gom, cajas: 3 }, sumaDias(hoy, -20), a(hoy, -20, 20), OP.poniente));
-  LOTES.forEach(([sitio, sku, lote, dias, cantidad, zona], i) => {
+  LOTES.forEach(([sitio, sku, lote, dias, cantidad, zona, posicion], i) => {
     const gtin = e.articulos[sku]?.gtinCaja ?? '';
     paso(altaConExpediente(e, { sitio, sku, gtin, lote, caducidad: sumaDias(hoy, dias), cantidad, zona }, 'semilla', a(hoy, -12, 7), `semilla-${i + 1}`, OP.sistema, { apertura: true }));
+    if (posicion) paso(ubica(e, sitio, { gtin, lote, caducidad: sumaDias(hoy, dias) }, posicion, a(hoy, -12, 8), OP.sistema));
   });
   paso(salida(e, { sitio: 'SUC-PONIENTE', tipo: 'VENDIDO', lote: gom, cajas: 3 }, sumaDias(hoy, -10), a(hoy, -10, 20), OP.poniente));
   paso(salida(e, { sitio: 'SUC-PONIENTE', tipo: 'VENDIDO', lote: gom, cajas: 2 }, sumaDias(hoy, -2), a(hoy, -2, 20), OP.poniente));

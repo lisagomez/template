@@ -112,7 +112,8 @@ function mejorDestino(estado: EstadoAlmacen, r: BaseRiesgo, hoy: string, ventas:
   if (utiles <= 0) return undefined
   const opciones = estado.configuracion.sitios.filter((s) => s.clave !== r.sitio).map((s) => {
     const venta = ventas.promedioDiario(s.clave, r.lote.gtin) ?? 0
-    const delante = lotesVendibles(estado, s.clave, hoy).filter((l) => l.lote.gtin === r.lote.gtin && l.lote.caducidad <= r.lote.caducidad).reduce((t, l) => t + l.cajas, 0)
+    // Por articulo: lo que el destino ya tiene del mismo producto, con su codigo vigente o uno anterior.
+    const delante = lotesVendibles(estado, s.clave, hoy).filter((l) => l.sku === r.sku && l.lote.caducidad <= r.lote.caducidad).reduce((t, l) => t + l.cajas, 0)
     return { sitio: s.clave, venta, capacidad: Math.floor(venta * utiles - delante) }
   }).filter((o) => o.venta > 0 && o.capacidad > 0)
   return opciones.sort((a, b) => b.capacidad - a.capacidad || b.venta - a.venta || a.sitio.localeCompare(b.sitio))[0]

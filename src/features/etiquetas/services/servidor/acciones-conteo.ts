@@ -10,7 +10,7 @@ import {
   abreConteo, aplicaConteo, cancelaConteo, cierraRonda, conteoDe, esErrorLectura, faltantesRepetidos, interpreta, leeEnConteo, leeUbicacion, parseaLectura,
   abreIncidente, type EstadoAlmacen, type Paso,
 } from '../nucleo.ts';
-import { vistaConteo as vistaSegun, type Rol } from './roles.ts';
+import { cuentaACiegas, vistaConteo as vistaSegun, type Rol } from './roles.ts';
 import type { AccionEtiquetas } from '../esquemas.ts';
 import { almacenDelServidor, hoyIso } from './almacen.ts';
 import { avisaCabezas, centralDelServidor, integridadParaActuar, seudonimosDelServidor } from './expediente.ts';
@@ -28,21 +28,22 @@ async function escribe<T>(cambia: (e: EstadoAlmacen) => Paso<T>): Promise<{ ok: 
 type AccionConteo = Extract<AccionEtiquetas, { accion: 'conteos' | 'conteo-abre' | 'conteo-lee' | 'conteo-cierra' | 'conteo-aplica' | 'conteo-cancela' }>;
 
 export async function ejecutaConteo(a: AccionConteo, operador: string, rol: Rol): Promise<Respuesta> {
-  const vista = (e: EstadoAlmacen, c: Parameters<typeof vistaSegun>[1]) => vistaSegun(e, c, rol);
   const ahora = new Date().toISOString();
   const op = () => seudonimosDelServidor().de(operador);
+  const seudonimo = rol === 'almacenista' ? await op() : undefined;
+  const vista = (e: EstadoAlmacen, c: Parameters<typeof vistaSegun>[1]) => vistaSegun(e, c, rol, seudonimo);
   const e = await almacenDelServidor().lee();
   switch (a.accion) {
     case 'conteos':
       return ok({
         conteos: [...(e.conteos ?? [])].reverse().map((c) => vista(e, c)),
-        patrones: rol === 'conteo' ? [] : e.configuracion.sitios.map((s) => ({ sitio: s.clave, faltantes: faltantesRepetidos(e, s.clave) })).filter((x) => x.faltantes.length),
+        patrones: cuentaACiegas(rol) ? [] : e.configuracion.sitios.map((s) => ({ sitio: s.clave, faltantes: faltantesRepetidos(e, s.clave) })).filter((x) => x.faltantes.length),
       });
     case 'conteo-abre': {
       const integridad = await integridadParaActuar(e, a.sitio, 'auditoria', 'no se abrió el conteo');
       const quien = await op();
       const folio = `CNT-${a.sitio}-${ahora.replace(/\D/g, '').slice(0, 14)}`;
-      const r = await escribe((x) => abreConteo(x, { sitio: a.sitio, zonas: a.zonas, tolerancia: a.tolerancia }, folio, ahora, quien, integridad));
+      const r = await escribe((x) => abreConteo(x, { sitio: a.sitio, zonas: a.zonas, tolerancia: a.tolerancia, ...(a.ubicaciones ? { ubicaciones: a.ubicaciones } : {}) }, folio, ahora, quien, integridad));
       return ok(r.ok ? { ok: true, conteo: vista(r.estado, r.valor) } : r);
     }
     case 'conteo-lee': {
@@ -53,7 +54,7 @@ export async function ejecutaConteo(a: AccionConteo, operador: string, rol: Rol)
       const quien = await op();
       const r = await escribe((x) => leeEnConteo(x, a.folio, { zona: a.zona, ...(a.posicion ? { posicion: a.posicion } : {}), lectura: interpreta(lectura.elementos, x, hoyIso()), veces: a.veces }, ahora, quien));
       // Una tarima leida solo por su SSCC toma la cantidad del registro: al contador no se le dice.
-      const cajas = rol === 'conteo' && r.ok && r.valor.porRegistro ? null : r.ok ? r.valor.cajas : null;
+      const cajas = cuentaACiegas(rol) && r.ok && r.valor.porRegistro ? null : r.ok ? r.valor.cajas : null;
       return ok(r.ok ? { ok: true, leido: { lote: r.valor.lote, sku: r.valor.sku, cajas, zona: r.valor.zona, posicion: r.valor.posicion ?? null, sscc: r.valor.sscc ?? null } } : r);
     }
     case 'conteo-cierra': {

@@ -1,0 +1,115 @@
+{
+ "version": 1,
+ "id": "fabrica-f75391ce",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "193cb125-be38-4000-8dce-71f3e1ba3310",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-09-25T11:35:30.081Z",
+  "fin": "2026-09-27T12:06:29.052Z"
+ },
+ "actor": {
+  "skills": [
+   "anthropic-skills:docs",
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 1109
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 316,
+   "Read": 36,
+   "Artifact": 3,
+   "ToolSearch": 4,
+   "WebSearch": 18,
+   "WebFetch": 14,
+   "Write": 106,
+   "Skill": 1,
+   "mcp__claude_ai_Claude_Docs__guide": 1,
+   "mcp__claude_ai_Claude_Docs__batch": 1,
+   "mcp__claude_ai_Claude_Docs__update": 7,
+   "mcp__claude_ai_Claude_Docs__read": 1,
+   "Monitor": 7,
+   "SendUserFile": 4,
+   "AskUserQuestion": 1
+  },
+  "llamadasAlModelo": 465,
+  "turnos": 27,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 237
+ },
+ "uso": {
+  "entrada": 950,
+  "salida": 929098,
+  "cacheCreacion": 3044569,
+  "cacheLectura": 223145766
+ },
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 174658971
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 52
+  },
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 8
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "verde",
+   "veces": 45
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 20
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 18
+  },
+  {
+   "nombre": "regresion",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "verifica:specs",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "desconocido",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 4,
+  "erroresPor": {
+   "WebFetch": 1,
+   "Bash": 1,
+   "Read": 1,
+   "SendUserFile": 1
+  }
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "costo"
+  ]
+ }
+}

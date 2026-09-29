@@ -43,33 +43,82 @@ export interface Reconstruccion {
   readonly incoherencias: readonly { readonly seq: number; readonly detalle: string }[]
 }
 
-/** Reconstruye las existencias de un sitio desde su cadena. */
+type Mapa = Map<string, { r: Omit<Renglon, 'cajas' | 'posicion'>; cajas: number; posicion?: string }>
+
+/** Suma la huella (`cambios`) de un evento a la reconstruccion. */
+function aplicaCambios(m: Mapa, sitio: string, e: Evento, incoherencias: { seq: number; detalle: string }[]): void {
+  const cambios = leeCambios(e)
+  // Una correccion de caducidad re-etiqueta el lote: la caja sigue en el mismo rack.
+  const heredada = new Map(cambios.filter((c) => c.caducidad).map((c) => [`${c.zona}|${c.sscc ?? ''}`, m.get(clave(sitio, e.lote.gtin, e.lote.lote, e.lote.caducidad, c.zona, c.sscc))?.posicion]))
+  for (const c of cambios) {
+    const cad = c.caducidad ?? e.lote.caducidad
+    const k = clave(sitio, e.lote.gtin, e.lote.lote, cad, c.zona, c.sscc)
+    const previo = m.get(k) ?? { r: { sitio, gtin: e.lote.gtin, lote: e.lote.lote, caducidad: cad, zona: c.zona, ...(c.sscc ? { sscc: c.sscc } : {}) }, cajas: 0 }
+    const cajas = previo.cajas + c.cajas
+    if (cajas < 0) incoherencias.push({ seq: e.seq, detalle: `deja ${cajas} cajas en ${c.zona}` })
+    const posicion = previo.posicion ?? (c.caducidad ? heredada.get(`${c.zona}|${c.sscc ?? ''}`) : undefined)
+    // Lo que se vacia pierde su posicion: una caja nueva en el almacen se ubica de nuevo.
+    m.set(k, cajas > 0 ? { r: previo.r, cajas, ...(posicion ? { posicion } : {}) } : { r: previo.r, cajas })
+  }
+}
+
+/** Un UBICADO pone su posicion a las filas del almacen que nombra. */
+function aplicaUbicado(m: Mapa, sitio: string, e: Evento): void {
+  const filas = e.datos['filas']
+  const posicion = e.datos['posicion']
+  if (e.tipo !== 'UBICADO' || typeof posicion !== 'string' || !Array.isArray(filas)) return
+  for (const f of filas) {
+    if (typeof f !== 'object' || f === null || Array.isArray(f)) continue
+    const o = f as Readonly<Record<string, unknown>>
+    const k = clave(sitio, e.lote.gtin, e.lote.lote, e.lote.caducidad, String(o['zona']), typeof o['sscc'] === 'string' ? o['sscc'] : undefined)
+    const previo = m.get(k)
+    if (previo && previo.cajas > 0) m.set(k, { ...previo, posicion })
+  }
+}
+
+type Conteo = { lote: number; articulo: number }
+const esConteo = (x: unknown): x is Conteo => typeof x === 'object' && x !== null && typeof (x as Conteo).lote === 'number' && typeof (x as Conteo).articulo === 'number'
+
+/** La foto del inventario que trae un RECIBIDO (`existencia: {antes, despues}`), si la trae. */
+function leeFoto(e: Evento): { antes: Conteo; despues: Conteo } | undefined {
+  const f = e.datos['existencia'] as { antes?: unknown; despues?: unknown } | undefined
+  return e.tipo === 'RECIBIDO' && f && esConteo(f.antes) && esConteo(f.despues) ? { antes: f.antes, despues: f.despues } : undefined
+}
+
+/** Cajas del lote del evento y de su articulo (por el sku que la cadena asocio a cada GTIN), sin merma. */
+function cuentaEnSitio(m: Mapa, skuDe: ReadonlyMap<string, string>, e: Evento): Conteo {
+  const sku = String(e.datos['sku'] ?? '')
+  let lote = 0
+  let articulo = 0
+  for (const { r, cajas } of m.values()) {
+    if (r.zona === 'merma' || cajas <= 0) continue
+    if (skuDe.get(r.gtin) === sku) articulo += cajas
+    if (r.gtin === e.lote.gtin && r.lote === e.lote.lote && r.caducidad === e.lote.caducidad) lote += cajas
+  }
+  return { lote, articulo }
+}
+
+const txt = (c: Conteo) => `lote ${c.lote}, artículo ${c.articulo}`
+
+/**
+ * Reconstruye las existencias de un sitio desde su cadena. Ademas COMPRUEBA la foto del inventario
+ * de cada recepcion: lo que el RECIBIDO dice que habia antes y hay despues tiene que ser lo que la
+ * cadena da en ese punto. Una foto que no cuadra es una incoherencia (no se puede inventar).
+ */
 export function proyecta(sitio: string, eventos: readonly Evento[]): Reconstruccion {
-  const m = new Map<string, { r: Omit<Renglon, 'cajas' | 'posicion'>; cajas: number; posicion?: string }>()
+  const m: Mapa = new Map()
   const incoherencias: { seq: number; detalle: string }[] = []
+  const skuDe = new Map<string, string>()
   for (const e of eventos) {
-    const cambios = leeCambios(e)
-    // Una correccion de caducidad re-etiqueta el lote: la caja sigue en el mismo rack.
-    const heredada = new Map(cambios.filter((c) => c.caducidad).map((c) => [`${c.zona}|${c.sscc ?? ''}`, m.get(clave(sitio, e.lote.gtin, e.lote.lote, e.lote.caducidad, c.zona, c.sscc))?.posicion]))
-    for (const c of cambios) {
-      const cad = c.caducidad ?? e.lote.caducidad
-      const k = clave(sitio, e.lote.gtin, e.lote.lote, cad, c.zona, c.sscc)
-      const previo = m.get(k) ?? { r: { sitio, gtin: e.lote.gtin, lote: e.lote.lote, caducidad: cad, zona: c.zona, ...(c.sscc ? { sscc: c.sscc } : {}) }, cajas: 0 }
-      const cajas = previo.cajas + c.cajas
-      if (cajas < 0) incoherencias.push({ seq: e.seq, detalle: `deja ${cajas} cajas en ${c.zona}` })
-      const posicion = previo.posicion ?? (c.caducidad ? heredada.get(`${c.zona}|${c.sscc ?? ''}`) : undefined)
-      // Lo que se vacia pierde su posicion: una caja nueva en el almacen se ubica de nuevo.
-      m.set(k, cajas > 0 ? { r: previo.r, cajas, ...(posicion ? { posicion } : {}) } : { r: previo.r, cajas })
-    }
-    const filas = e.datos['filas']
-    const posicion = e.datos['posicion']
-    if (e.tipo !== 'UBICADO' || typeof posicion !== 'string' || !Array.isArray(filas)) continue
-    for (const f of filas) {
-      if (typeof f !== 'object' || f === null || Array.isArray(f)) continue
-      const o = f as Readonly<Record<string, unknown>>
-      const k = clave(sitio, e.lote.gtin, e.lote.lote, e.lote.caducidad, String(o['zona']), typeof o['sscc'] === 'string' ? o['sscc'] : undefined)
-      const previo = m.get(k)
-      if (previo && previo.cajas > 0) m.set(k, { ...previo, posicion })
+    if (typeof e.datos['sku'] === 'string') skuDe.set(e.lote.gtin, e.datos['sku'])
+    const foto = leeFoto(e)
+    const antes = foto ? cuentaEnSitio(m, skuDe, e) : undefined
+    aplicaCambios(m, sitio, e, incoherencias)
+    aplicaUbicado(m, sitio, e)
+    if (!foto || !antes) continue
+    const despues = cuentaEnSitio(m, skuDe, e)
+    if (txt(foto.antes) !== txt(antes) || txt(foto.despues) !== txt(despues)) {
+      incoherencias.push({ seq: e.seq, detalle: `trae una foto del inventario que no cuadra con la cadena: dice ${txt(foto.antes)} → ${txt(foto.despues)}; la cadena da ${txt(antes)} → ${txt(despues)}` })
     }
   }
   const renglones = [...m.values()].filter((x) => x.cajas !== 0).map((x) => ({ ...x.r, cajas: x.cajas, ...(x.posicion ? { posicion: x.posicion } : {}) }))

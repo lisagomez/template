@@ -13,6 +13,8 @@ import type { Expediente, LoteConExpediente } from '../services/tipos-expediente
 import type { Etiquetas } from '../hooks/use-etiquetas.ts';
 import { AccionesLote } from './acciones-lote.tsx';
 import { boton, campo, tarjeta } from './marco.tsx';
+import { Foto, FotoArticulo } from './foto.tsx';
+import type { Evento } from '../services/nucleo.ts';
 
 function inicial(): ClaveLote | null {
   const q = new URLSearchParams(window.location.search);
@@ -44,6 +46,27 @@ function Veredicto({ x }: { x: Expediente }) {
   );
 }
 
+/** Las fotos que un evento cita por su huella: la revision, la recepcion por foto o la correccion. */
+function fotosDelEvento(ev: Evento): { completa?: string; recortes?: string[] } | undefined {
+  const d = ev.datos as Record<string, unknown>;
+  const f = d['fotos'] ?? (d['lectura'] as { fotos?: unknown } | undefined)?.fotos ?? (d['evidencia'] as { fotos?: unknown } | undefined)?.fotos;
+  return f && typeof f === 'object' ? (f as { completa?: string; recortes?: string[] }) : undefined;
+}
+
+function LeidoContraConfirmado({ ev }: { ev: Evento }) {
+  const l = ev.datos['lectura'] as { propuesta?: { fecha?: string; lote?: string; estado?: string }; confirmada?: { caducidad?: string; lote?: string }; corregida?: { fecha?: boolean; lote?: boolean }; motor?: string } | undefined;
+  if (!l?.confirmada) return null;
+  return (
+    <table className="mt-1 text-xs" data-prueba="leido-confirmado">
+      <thead className="text-neutral-500"><tr><th className="pr-3 text-left" /><th className="pr-3 text-left">Caducidad</th><th className="text-left">Lote</th></tr></thead>
+      <tbody>
+        <tr><td className="pr-3">Leyó la máquina ({l.motor ?? '?'})</td><td className="pr-3 font-mono">{l.propuesta?.fecha ?? `— (${l.propuesta?.estado ?? 'sin propuesta'})`}</td><td className="font-mono">{l.propuesta?.lote ?? '—'}</td></tr>
+        <tr className="font-semibold"><td className="pr-3">Confirmó la persona</td><td className={`pr-3 font-mono ${l.corregida?.fecha ? 'text-violet-700 dark:text-violet-300' : ''}`}>{l.confirmada.caducidad}{l.corregida?.fecha ? ' (corregida)' : ''}</td><td className={`font-mono ${l.corregida?.lote ? 'text-violet-700 dark:text-violet-300' : ''}`}>{l.confirmada.lote}{l.corregida?.lote ? ' (corregido)' : ''}</td></tr>
+      </tbody>
+    </table>
+  );
+}
+
 function Linea({ x }: { x: Expediente }) {
   return (
     <ol className="relative space-y-2 border-l-2 border-neutral-300 pl-4 dark:border-neutral-700" data-prueba="linea-tiempo">
@@ -56,6 +79,13 @@ function Linea({ x }: { x: Expediente }) {
             <span className="text-xs text-neutral-500">{fechaHora(ev.fecha)} · {ev.operador}</span>
           </div>
           <p className="text-sm">{describeEvento(ev)}</p>
+          {ev.tipo === 'RECIBIDO' ? <LeidoContraConfirmado ev={ev} /> : null}
+          {fotosDelEvento(ev)?.completa ? (
+            <div className="mt-1 flex flex-wrap gap-2" data-prueba="fotos-evento">
+              <figure className="text-[11px] text-neutral-500"><Foto huella={fotosDelEvento(ev)!.completa!} alt="Foto completa" className="h-24 w-36 rounded bg-neutral-900" /><figcaption>foto {hashCorto(fotosDelEvento(ev)!.completa!)}</figcaption></figure>
+              {[...new Set(fotosDelEvento(ev)!.recortes ?? [])].slice(0, 2).map((h) => <figure key={h} className="text-[11px] text-neutral-500"><Foto huella={h} alt="Lo que leyó el motor" className="h-24 w-48 rounded bg-neutral-900" /><figcaption>recorte leído {hashCorto(h)}</figcaption></figure>)}
+            </div>
+          ) : null}
           <p className="break-all font-mono text-[11px] text-neutral-500">
             hash {hashCorto(ev.hash)} · lote anterior {ev.anteriorLote ? hashCorto(ev.anteriorLote) : '— (primero del lote en este sitio)'} · {anclado ? `anclado ${fechaCorta(anclado.periodo)} ${anclado.verificado ? '✓' : '✗'} (hoja ${anclado.indice + 1} de ${anclado.tamano}, ruta de ${anclado.ruta.length})` : 'sin anclar'}
           </p>
@@ -107,9 +137,12 @@ export function PantallaExpediente({ e }: { e: Etiquetas }) {
         {actual ? (
           <article className={`${tarjeta} space-y-3`} data-prueba="expediente">
             <header className="flex flex-wrap items-start justify-between gap-2">
-              <div className="min-w-0">
+              <div className="flex min-w-0 gap-3">
+                <FotoArticulo est={est} sku={actual.sku} className="h-16 w-16 rounded-lg" />
+                <div className="min-w-0">
                 <h2 className="text-xl font-bold">{actual.descripcion}</h2>
                 <p className="font-mono text-sm">GTIN {gtinLegible(actual.lote.gtin)} · lote {actual.lote.lote} · caduca {fechaCorta(actual.lote.caducidad)}</p>
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {actual.semaforo ? <span className={`rounded px-2 py-1 text-sm font-bold ${COLOR_SEMAFORO[actual.semaforo.estado]}`} title={TEXTO_SEMAFORO[actual.semaforo.estado].accion}>{TEXTO_SEMAFORO[actual.semaforo.estado].etiqueta} · {textoDias(actual.semaforo.dias)}</span> : null}

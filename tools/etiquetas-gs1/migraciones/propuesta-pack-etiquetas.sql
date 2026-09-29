@@ -245,11 +245,12 @@ create table if not exists erp.eti_evento (
 );
 comment on table erp.eti_evento is 'Cadena solo-agregar por sitio: cada evento enlaza con el anterior (seq + hash). El estado de existencias es su proyección.';
 create index if not exists eti_evento_lote_idx on erp.eti_evento (cliente_id, gtin, lote, caducidad);
--- Inventario físico (CONTEO) y existencias que nacen de un conteo: una instalación anterior del
--- pack trae los checks sin ellos, así que se reemplazan (idempotente).
+-- Inventario físico (CONTEO), revisión de la caducidad leída de una foto (EN_REVISION) y
+-- existencias que nacen de un conteo: una instalación anterior del pack trae los checks sin
+-- ellos, así que se reemplazan (idempotente).
 alter table erp.eti_evento drop constraint if exists eti_evento_tipo_check;
 alter table erp.eti_evento add constraint eti_evento_tipo_check check (tipo in ('RECIBIDO','RECHAZADO','UBICADO','MOVIDO','TRANSFERIDO','VENDIDO','DEVUELTO','DONADO','MERMA',
-  'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION','CONTEO'));
+  'RECOMENDACION','RECOMENDACION_EJECUTADA','RECOMENDACION_DESCARTADA','CORRECCION','CONTEO','EN_REVISION','TAREA_CERRADA','HALLAZGO'));
 alter table erp.eti_existencia drop constraint if exists eti_existencia_origen_check;
 alter table erp.eti_existencia add constraint eti_existencia_origen_check check (origen in ('etiquetado', 'recepcion', 'semilla', 'conteo'));
 
@@ -337,12 +338,122 @@ create or replace trigger eti_ancla_solo_agregar before update or delete on erp.
 create or replace trigger eti_testigo_solo_agregar before update or delete on erp.eti_testigo for each row execute function erp.eti_solo_agregar();
 
 -- ============================================================
+-- Fotos del artículo y caducidad leída de una foto (recepción con foto)
+-- ============================================================
+-- Una foto se guarda por su HUELLA SHA-256, ya normalizada (sin EXIF ni GPS). Los BYTES no van a
+-- la base: viven en un almacenamiento de objetos privado del tenant (clave = huella), o en la
+-- carpeta del sitio. Aquí van su huella, tipo, tamaño y dónde está: la cadena cita la huella.
+create table if not exists erp.eti_foto (
+  cliente_id  uuid not null,
+  huella      text not null check (huella ~ '^sha256:[0-9a-f]{64}$'),
+  tipo        text not null check (tipo in ('image/jpeg', 'image/png', 'image/webp')),
+  bytes       int not null check (bytes > 0 and bytes <= 15728640),
+  ancho       int check (ancho is null or ancho > 0),
+  alto        int check (alto is null or alto > 0),
+  ubicacion   text not null check (length(ubicacion) between 1 and 300),
+  created_at  timestamptz not null default now(),
+  primary key (cliente_id, huella)
+);
+comment on table erp.eti_foto is 'Metadatos de una foto normalizada (sin EXIF ni GPS). Los bytes viven fuera de la base, por huella.';
+
+-- Las fotos de cada vista del artículo. Solo-agregar: la vigente es la última; cambiarla o
+-- quitarla (retirada) no borra la anterior.
+create table if not exists erp.eti_articulo_foto (
+  id               uuid primary key default gen_random_uuid(),
+  cliente_id       uuid not null,
+  eti_articulo_id  uuid not null references erp.eti_articulo(id),
+  vista            text not null check (vista in ('principal', 'frente', 'etiqueta', 'caja', 'caducidad')),
+  huella           text,
+  miniatura        text,
+  nota             text check (nota is null or length(nota) <= 200),
+  retirada         boolean not null default false,
+  operador         text not null check (operador ~ '^op-[0-9a-f]{8}$'),
+  created_at       timestamptz not null default now(),
+  check (retirada or huella is not null),
+  foreign key (cliente_id, huella) references erp.eti_foto (cliente_id, huella),
+  foreign key (cliente_id, miniatura) references erp.eti_foto (cliente_id, huella)
+);
+create index if not exists eti_articulo_foto_idx on erp.eti_articulo_foto (cliente_id, eti_articulo_id, vista, created_at desc);
+
+-- Cómo imprime la fecha cada artículo, aprendido de una confirmación (solo-agregar; vale la última).
+create table if not exists erp.eti_formato_fecha (
+  id               uuid primary key default gen_random_uuid(),
+  cliente_id       uuid not null,
+  eti_articulo_id  uuid not null references erp.eti_articulo(id),
+  formato          text not null check (formato in ('DD/MM/AA','DD/MM/AAAA','MM/DD/AA','MM/DD/AAAA','AAAA/MM/DD','DDMMAA','AAMMDD','DDMMAAAA','AAAAMMDD','DD MES AA','DD MES AAAA','MES AA','MES AAAA','MM/AA','MM/AAAA','JULIANO AADDD')),
+  tipo             text not null check (tipo in ('caducidad', 'consumo-preferente')),
+  operador         text not null check (operador ~ '^op-[0-9a-f]{8}$'),
+  evento           text check (evento is null or evento ~ '^sha256:[0-9a-f]{64}$'),
+  created_at       timestamptz not null default now()
+);
+
+-- EN_REVISION: llegó mercancía cuya caducidad se leyó de una foto y aún no se confirma. Su clave
+-- es el FOLIO y no tiene caducidad (null, que el núcleo escribe como ''): no es inventario. La
+-- resuelve un RECIBIDO (o un RECHAZADO) con `datos.revision` = su hash.
+-- (El tipo EN_REVISION ya va en eti_evento_tipo_check, arriba: una sola lista, o reinstalar el pack
+-- la dejaria sin el y rechazaria las revisiones ya guardadas.)
+alter table erp.eti_evento alter column caducidad drop not null;
+alter table erp.eti_evento drop constraint if exists eti_evento_caducidad_check;
+-- Un HALLAZGO (pieza de piso que no cuadra con ningún lote) va sin caducidad si la foto no la dejó leer.
+alter table erp.eti_evento add constraint eti_evento_caducidad_check check ((caducidad is null) = (tipo = 'EN_REVISION' or (tipo = 'RECHAZADO' and datos ? 'descartada')
+  or (tipo = 'HALLAZGO' and coalesce(datos->'leido'->>'fecha', '') = '')));
+-- La foto del inventario de una recepción (`datos.existencia`, 2026-09-28): solo en un RECIBIDO, y lo
+-- de después es lo de antes más lo recibido, en el lote y en el artículo. (Que cuadre con la cadena
+-- entera lo comprueba la proyección del núcleo.)
+create or replace function erp.eti_foto_inventario_ok(tipo text, datos jsonb) returns boolean language sql immutable as $$
+  select not (datos ? 'existencia') or (tipo = 'RECIBIDO' and jsonb_typeof(datos->'cajas') = 'number'
+    and jsonb_typeof(datos->'existencia'->'antes'->'lote') = 'number' and jsonb_typeof(datos->'existencia'->'antes'->'articulo') = 'number'
+    and (datos->'existencia'->'despues'->>'lote')::numeric = (datos->'existencia'->'antes'->>'lote')::numeric + (datos->>'cajas')::numeric
+    and (datos->'existencia'->'despues'->>'articulo')::numeric = (datos->'existencia'->'antes'->>'articulo')::numeric + (datos->>'cajas')::numeric)
+$$;
+alter table erp.eti_evento drop constraint if exists eti_evento_foto_inventario_check;
+alter table erp.eti_evento add constraint eti_evento_foto_inventario_check check (coalesce(erp.eti_foto_inventario_ok(tipo, datos), false));
+
+-- La base también exige lo que exige el núcleo: la revisión cita una foto que existe, se resuelve
+-- una sola vez, y la CONFIRMA quien la registró (la pantalla no es la frontera; la base tampoco
+-- debería ser la única, pero no deja pasar lo que el servidor rechazaría).
+create or replace function erp.eti_evento_revision() returns trigger language plpgsql as $$
+declare rev record; foto text; ref text;
+begin
+  if new.tipo = 'EN_REVISION' then
+    foto := new.datos->'fotos'->>'completa';
+    if foto is null or not exists (select 1 from erp.eti_foto f where f.cliente_id = new.cliente_id and f.huella = foto) then
+      raise exception 'EN_REVISION sin su foto en eti_foto (%)', coalesce(foto, 'falta') using errcode = 'check_violation';
+    end if;
+  end if;
+  ref := coalesce(case when new.tipo in ('RECIBIDO', 'RECHAZADO') then new.datos->>'revision' end, case when new.tipo = 'EN_REVISION' then new.datos->>'reemplaza' end);
+  if ref is not null then
+    select e.operador, e.tipo into rev from erp.eti_evento e where e.cliente_id = new.cliente_id and e.eti_sitio_id = new.eti_sitio_id and e.hash = ref;
+    if not found or rev.tipo <> 'EN_REVISION' then raise exception 'la revisión % no está en la cadena de %', ref, new.sitio using errcode = 'check_violation'; end if;
+    if exists (select 1 from erp.eti_evento r where r.cliente_id = new.cliente_id and r.eti_sitio_id = new.eti_sitio_id
+               and ((r.tipo in ('RECIBIDO', 'RECHAZADO') and r.datos->>'revision' = ref) or (r.tipo = 'EN_REVISION' and r.datos->>'reemplaza' = ref))) then
+      raise exception 'la revisión % ya se resolvió', ref using errcode = 'check_violation';
+    end if;
+    if new.tipo in ('RECIBIDO', 'EN_REVISION') and rev.operador <> new.operador then
+      raise exception 'la caducidad la confirma quien registró la recepción (%)', rev.operador using errcode = 'check_violation';
+    end if;
+  end if;
+  return new;
+end $$;
+create or replace trigger eti_evento_revision before insert on erp.eti_evento for each row execute function erp.eti_evento_revision();
+
+-- La bandeja «por confirmar»: revisiones sin resolver (con la RLS de quien consulta).
+create or replace view erp.eti_revision_abierta with (security_invoker = true) as
+  select e.cliente_id, e.sitio, e.seq, e.fecha, e.lote as folio, e.gtin, e.datos, e.operador, e.hash
+  from erp.eti_evento e
+  where e.tipo = 'EN_REVISION' and not exists (
+    select 1 from erp.eti_evento r where r.cliente_id = e.cliente_id and r.eti_sitio_id = e.eti_sitio_id
+      and ((r.tipo in ('RECIBIDO', 'RECHAZADO') and r.datos->>'revision' = e.hash) or (r.tipo = 'EN_REVISION' and r.datos->>'reemplaza' = e.hash)));
+
+-- ============================================================
 -- Append-only de los ledgers (como 005 hace con los suyos)
 -- ============================================================
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'rol_exe_fin') then
     revoke update, delete on erp.eti_asignacion, erp.eti_emitido, erp.eti_importacion, erp.eti_movimiento, erp.eti_evento, erp.eti_testigo from rol_exe_fin;
+    -- Fotos: la operación agrega; borrar lo que ya nadie cita (retención) es un job de plataforma declarado (C7).
+    revoke update, delete on erp.eti_foto, erp.eti_articulo_foto, erp.eti_formato_fecha from rol_exe_fin;
     -- Las anclas las escribe el central, no la operación de la sucursal.
     revoke insert, update, delete on erp.eti_ancla from rol_exe_fin;
   end if;
@@ -352,5 +463,6 @@ end $$;
 -- `erp` a rol_exe_fin y solo vuelve a quitarlo en sis_bitacora y act_*. Re-correr 004 después de
 -- este pack REABRE el UPDATE de sus ledgers (medido en prueba-efimera.sh, fase 2). Al integrar,
 -- 004 debe listar también: eti_asignacion, eti_emitido, eti_importacion, eti_movimiento,
--- eti_evento, eti_testigo y eti_ancla (esta sin INSERT para rol_exe_fin). Los triggers de
+-- eti_evento, eti_testigo, eti_foto, eti_articulo_foto, eti_formato_fecha, eti_ronda, eti_tarea y eti_ancla (esta sin
+-- INSERT para rol_exe_fin). Las rondas y tareas viven en propuesta-pack-etiquetas-zona.sql. Los triggers de
 -- solo-agregar de las tres del expediente aguantan aunque 004 reabra el UPDATE.

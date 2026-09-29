@@ -5,13 +5,13 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**35 activos** cubren **217 unidades** del repo.
+**35 activos** cubren **218 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
 | TPL-conocimiento | Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes) | CONOCIMIENTO | datos | beta | 1 | `tools/conocimiento` |
 | TPL-doctrina | Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto | CONOCIMIENTO | config_agentica | produccion | 17 | `AGENTS.md` |
-| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 63 | `.claude/specs` |
+| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 64 | `.claude/specs` |
 | TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 5 | `.claude/design-systems` |
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |

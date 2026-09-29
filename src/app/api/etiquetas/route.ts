@@ -12,6 +12,13 @@ import { permitida } from '@/features/etiquetas/services/servidor/roles';
 
 export const dynamic = 'force-dynamic';
 
+const NO_PERMITIDO: Record<string, string> = {
+  conteo: 'este dispositivo es de conteo: solo puede contar',
+  recibo: 'este dispositivo es de recibo: recibe y confirma; lo demás lo hace el almacén o el supervisor',
+  almacenista: 'este dispositivo es del almacén: ronda, mover, piso, merma y contar a ciegas; lo demás lo hace el supervisor',
+  operacion: 'acción no permitida',
+};
+
 export async function GET(peticion: NextRequest): Promise<NextResponse> {
   const p = puerta(peticion);
   if (p instanceof NextResponse) return p;
@@ -24,7 +31,7 @@ export async function POST(peticion: NextRequest): Promise<NextResponse> {
   if (p instanceof NextResponse) return p;
   const cuerpo = esquemaAccion.safeParse(await peticion.json().catch(() => null));
   if (!cuerpo.success) return NextResponse.json({ error: 'petición inválida', detalle: cuerpo.error.issues.slice(0, 5).map((i) => `${i.path.join('.')}: ${i.message}`) }, { status: 400 });
-  if (!permitida(p.rol, cuerpo.data.accion)) return NextResponse.json({ error: 'este dispositivo es de conteo: solo puede contar' }, { status: 403 });
+  if (!permitida(p.rol, cuerpo.data.accion)) return NextResponse.json({ error: NO_PERMITIDO[p.rol] }, { status: 403 });
   try {
     const r = await ejecuta(cuerpo.data, p.operador, p.rol);
     const error = typeof r.cuerpo === 'object' && r.cuerpo !== null && 'error' in r.cuerpo;

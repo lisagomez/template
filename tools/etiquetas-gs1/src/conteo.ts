@@ -19,7 +19,7 @@ import type { Interpretacion } from './existencias.js'
 import { cadenaDe, cambiosDe, claveDe, registra, ubica, type Paso } from './expediente.js'
 import type { EstadoAlmacen, Existencia, Zona } from './modelo.js'
 import { proyecta } from './proyeccion.js'
-import { zonaDe } from './ubicaciones.js'
+import { ubicacionDe, zonaDe } from './ubicaciones.js'
 
 export type Ronda = 1 | 2
 export type EstadoConteo = 'contando' | 'reconteo' | 'por-aplicar' | 'aplicado' | 'cancelado'
@@ -59,6 +59,11 @@ export interface Conteo {
   /** `renglones`: la conciliacion tal como se aplico y se sello en el acta (despues, la cadena ya incluye el ajuste). */
   readonly aplicado?: { readonly fecha: string; readonly autoriza?: string; readonly acta: string; readonly eventos: number; readonly renglones: readonly RenglonConteo[] }
   readonly cancelado?: { readonly fecha: string; readonly motivo: string; readonly operador: string }
+  /**
+   * Conteo CICLICO: solo estas ubicaciones (`ALMACEN-B-04-2`, `PISO`), no las zonas enteras. Las
+   * elige el riesgo (`conteo-ciclico.ts`) y las cuenta el almacenista dentro de su ronda.
+   */
+  readonly ubicaciones?: readonly string[]
 }
 
 export type Clase = 'cuadra' | 'faltante' | 'sobrante' | 'desconocido'
@@ -84,7 +89,11 @@ const cabeza = (estado: EstadoAlmacen, sitio: string) => cadenaDe(estado, sitio)
 const cambia = (estado: EstadoAlmacen, c: Conteo): EstadoAlmacen => ({ ...estado, version: estado.version + 1, conteos: (estado.conteos ?? []).map((x) => (x.folio === c.folio ? c : x)) })
 export const conteoDe = (estado: EstadoAlmacen, folio: string): Conteo | undefined => estado.conteos?.find((c) => c.folio === folio)
 
-export interface PedidoConteo { readonly sitio: string; readonly zonas: readonly Zona[]; readonly tolerancia: number }
+export interface PedidoConteo { readonly sitio: string; readonly zonas: readonly Zona[]; readonly tolerancia: number; readonly ubicaciones?: readonly string[] }
+
+/** ¿La ubicacion (zona y rack) entra en el conteo? Sin lista de ubicaciones, toda la zona entra. */
+export const cubreUbicacion = (c: Pick<Conteo, 'zonas' | 'ubicaciones'>, zona: Zona, posicion?: string): boolean =>
+  c.zonas.includes(zona) && (!c.ubicaciones || c.ubicaciones.includes(ubicacionDe(zona, posicion)) || c.ubicaciones.includes(ubicacionDe(zona)))
 
 /** Abre el conteo si la cadena del sitio se sostiene. Guarda el punto de corte. */
 export function abreConteo(estado: EstadoAlmacen, p: PedidoConteo, folio: string, cuando: string, operador: string, integridad: { ok: boolean; motivo?: string }): Paso<Conteo> {
@@ -92,12 +101,14 @@ export function abreConteo(estado: EstadoAlmacen, p: PedidoConteo, folio: string
   if (!estado.configuracion.sitios.some((s) => s.clave === p.sitio)) return falla(estado, `el sitio ${p.sitio} no existe`)
   if (p.zonas.length === 0) return falla(estado, 'el conteo necesita al menos una zona')
   if (!Number.isInteger(p.tolerancia) || p.tolerancia < 0) return falla(estado, 'la tolerancia va en cajas enteras')
-  const abierto = (estado.conteos ?? []).find((c) => c.sitio === p.sitio && (c.estado === 'contando' || c.estado === 'reconteo' || c.estado === 'por-aplicar') && c.zonas.some((z) => p.zonas.includes(z)))
+  if (p.ubicaciones && p.ubicaciones.length === 0) return falla(estado, 'el conteo cíclico necesita al menos una ubicación')
+  const toca = (c: Conteo) => (p.ubicaciones && c.ubicaciones ? c.ubicaciones.some((u) => p.ubicaciones!.includes(u)) : c.zonas.some((z) => p.zonas.includes(z)))
+  const abierto = (estado.conteos ?? []).find((c) => c.sitio === p.sitio && (c.estado === 'contando' || c.estado === 'reconteo' || c.estado === 'por-aplicar') && toca(c))
   if (abierto) return falla(estado, `ya hay un conteo abierto en esas zonas (${abierto.folio})`)
   const u = cabeza(estado, p.sitio)
   const c: Conteo = {
     folio, sitio: p.sitio, zonas: [...p.zonas], tolerancia: p.tolerancia, abierto: cuando, abre: operador, corte: { seq: u?.seq ?? 0, cabeza: u?.hash ?? '' },
-    ronda: 1, estado: 'contando', lecturas: [], recontar: [], cierres: {},
+    ronda: 1, estado: 'contando', lecturas: [], recontar: [], cierres: {}, ...(p.ubicaciones ? { ubicaciones: [...p.ubicaciones] } : {}),
   }
   return { estado: { ...estado, version: estado.version + 1, conteos: [...(estado.conteos ?? []), c] }, resultado: { ok: true, valor: c, eventos: [] } }
 }
@@ -109,6 +120,7 @@ export function leeEnConteo(estado: EstadoAlmacen, folio: string, p: PedidoLectu
   const c = conteoDe(estado, folio)
   if (!c || (c.estado !== 'contando' && c.estado !== 'reconteo')) return falla(estado, 'ese conteo no está abierto para leer')
   if (!c.zonas.includes(p.zona)) return falla(estado, `la zona ${p.zona} no está en este conteo`)
+  if (!cubreUbicacion(c, p.zona, p.posicion)) return falla(estado, `la ubicación ${ubicacionDe(p.zona, p.posicion)} no es de este conteo cíclico (cuenta: ${c.ubicaciones!.join(', ')})`)
   if (c.ronda === 2 && c.lecturas.some((x) => x.ronda === 1 && x.operador === operador)) return falla(estado, 'el reconteo lo hace otra persona, no quien contó la primera vez')
   const l = p.lectura
   let lote: ClaveLote
@@ -145,7 +157,7 @@ function esperadoHasta(estado: EstadoAlmacen, sitio: string, hastaSeq: number) {
 export function concilia(estado: EstadoAlmacen, c: Conteo, ronda: Ronda = c.ronda): RenglonConteo[] {
   const actual = cabeza(estado, c.sitio)?.seq ?? 0
   const cierre = c.cierres[ronda] ?? actual
-  const universo = [...esperadoHasta(estado, c.sitio, actual).entries()].filter(([, v]) => c.zonas.includes(v.zona) && v.cajas > 0).map(([k]) => k)
+  const universo = [...esperadoHasta(estado, c.sitio, actual).entries()].filter(([, v]) => cubreUbicacion(c, v.zona, v.posicion) && v.cajas > 0).map(([k]) => k)
   const leidas = c.lecturas.filter((x) => x.ronda === 1 || (ronda === 2 && x.ronda === 2))
   const claves = [...new Set([...universo, ...leidas.map((x) => claveConteo(x.lote, x.zona, x.sscc))])].sort()
   const conocidos = new Set(cadenaDe(estado, c.sitio).map((e) => idLote(e.lote)))
@@ -259,4 +271,17 @@ export function faltantesRepetidos(estado: EstadoAlmacen, sitio: string): { ubic
     }
   }
   return [...m.entries()].filter(([, g]) => g.folios.size >= 2).map(([ubicacion, g]) => ({ ubicacion, folios: [...g.folios], cajas: g.cajas }))
+}
+
+/**
+ * Lo que ve de un conteo quien cuenta a CIEGAS (dispositivo de conteo o almacenista): nada de lo
+ * esperado, ni la conciliacion, ni lo que mide una tarima leida por su SSCC, y solo SUS lecturas
+ * de la ronda en curso (el reconteo de otra persona, casi la cifra del sistema, tampoco).
+ */
+export function vistaConteoSinCantidades(c: Conteo, operador?: string) {
+  const { lecturas, recontar, aplicado, ...resto } = c
+  const contando = c.estado === 'contando' || c.estado === 'reconteo'
+  const propias = contando ? lecturas.filter((x) => x.ronda === c.ronda && (!operador || x.operador === operador)).map((x) => (x.porRegistro ? { ...x, cajas: 0 } : x)) : []
+  const recontarLegible = recontar.map((k) => { const [gtin = '', lote = '', caducidad = '', zona = '', sscc = ''] = k.split('|'); return { gtin, lote, caducidad, zona, ...(sscc ? { sscc } : {}) } })
+  return { ...resto, recontar: contando ? recontarLegible : [], lecturas: propias, ...(aplicado ? { aplicado: { fecha: aplicado.fecha } } : {}) }
 }

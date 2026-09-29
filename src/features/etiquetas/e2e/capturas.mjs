@@ -13,7 +13,7 @@
  */
 import { execFileSync, spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -24,6 +24,8 @@ import { creaAgente, esquemaConfigAgente } from '../../../../tools/etiquetas-gs1
 import { completaClave, nuevoEvento } from '../../../../tools/etiquetas-gs1/dist/index.js';
 import { generaLlaves } from '../../../../tools/etiquetas-gs1/dist/firma.js';
 import { flujosConteo } from './flujos-conteo.mjs';
+import { flujosRecibir } from './flujos-recibir.mjs';
+import { codigoAnterior45, flujosZona } from './flujos-zona.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SALIDA = resolve(process.argv[2] ?? join(raiz, '.datos/capturas'));
@@ -32,6 +34,8 @@ const PUERTO = Number(process.env.PUERTO_CAPTURAS ?? 3117);
 const BASE = `http://localhost:${PUERTO}`;
 const TOKEN = randomBytes(24).toString('base64url');
 const TOKEN_CONTEO = randomBytes(24).toString('base64url');
+const TOKEN_RECIBO = randomBytes(24).toString('base64url');
+const TOKEN_ALMACEN = randomBytes(24).toString('base64url');
 const SECRETO = randomBytes(32).toString('base64url');
 const informe = { flujos: [], impresion: [] };
 const dia = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
@@ -65,9 +69,16 @@ const datos = join(SALIDA, 'datos');
 // escribe a disco ni se imprime (en una instalacion real cada una vive en el agente de su sitio).
 const SITIOS = ['CEDIS-NTE', 'SUC-CENTRO', 'SUC-PONIENTE', 'SUC-ORIENTE'];
 const llaves = Object.fromEntries(SITIOS.map((s) => [`ETIQUETAS_LLAVE_${s.replace(/-/g, '_')}`, generaLlaves().privada]));
+// El motor LOCAL de lectura de fechas, si esta instalado (tools/etiquetas-gs1/motores/instala-rapidocr.sh).
+const motorPython = process.env.ETIQUETAS_MOTOR_PYTHON ?? join(raiz, '.datos/motores/rapidocr/bin/python');
+const motor = existsSync(motorPython) ? { ETIQUETAS_MOTOR_PYTHON: motorPython } : {};
+if (!motor.ETIQUETAS_MOTOR_PYTHON) console.log('  sin motor local de fechas: la recepción con foto se capturará sin propuesta');
 const app = spawn(process.execPath, [join(raiz, 'node_modules/next/dist/bin/next'), 'start', '-p', String(PUERTO)], {
-  cwd: raiz, env: { ...process.env, ...llaves, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_TOKEN_CONTEO: TOKEN_CONTEO, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
+  cwd: raiz, env: { ...process.env, ...llaves, ...motor, PORT: String(PUERTO), ETIQUETAS_TOKEN: TOKEN, ETIQUETAS_TOKEN_CONTEO: TOKEN_CONTEO, ETIQUETAS_TOKEN_RECIBO: TOKEN_RECIBO, ETIQUETAS_TOKEN_ALMACEN: TOKEN_ALMACEN, ETIQUETAS_AGENTE_SECRETO: SECRETO, ETIQUETAS_SEMILLA: 'ficticia', ETIQUETAS_DATOS: datos }, stdio: 'ignore',
 });
+// Si el guion falla a medias, el servidor NO se queda huerfano en su puerto (la corrida siguiente
+// le pegaria a el, con los datos de esta ya borrados: aprendizaje del 2026-09-21).
+process.on('exit', () => { try { app.kill('SIGKILL'); } catch { /* ya salio */ } });
 for (let i = 0; i < 60; i++) {
   try { if ((await fetch(`${BASE}/etiquetas`)).ok) break; } catch { /* aun arrancando */ }
   await espera(500);
@@ -255,6 +266,12 @@ const impresion = await porVista(async (p, v) => {
 });
 await compone('12', 'Impresion de punta a punta: agente del CEDIS y Browser Print (Zebras simuladas)', [['escritorio · agente', impresion.escritorio[0]], ['escritorio · Browser Print', impresion.escritorio[1]], ['celular · agente', impresion.celular[0]], ['celular · Browser Print', impresion.celular[1]]]);
 
+// Escanear por zona y rol, la ronda del dia, el conteo ciclico y la medicion de agilidad: flujos 37
+// a 44, sobre la Sucursal Centro de la semilla, antes de que los flujos siguientes la muevan. (El
+// cambio de GTIN de la leche del flujo 30 ya no esconde sus lotes: el codigo anterior se sigue
+// leyendo, flujo 45.)
+await flujosZona({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, BASE, TOKEN, TOKEN_CONTEO, TOKEN_RECIBO, TOKEN_ALMACEN, dia, aammdd });
+
 const catalogo = await porVista(async (p, v) => {
   await abre(p, '/etiquetas/catalogo');
   const seccion = 'section:has([data-prueba="archivo"])';
@@ -364,6 +381,9 @@ await compone('22', 'Agente de riesgo: lote verde en riesgo, una recomendacion e
 
 // Inventario fisico con roles: flujos 25, 26 y 27 (e2e/flujos-conteo.mjs).
 await flujosConteo({ navegador, contexto, abre, foto, compone, informe, BASE, TOKEN, TOKEN_CONTEO, cajaDe, dia, aammdd });
+await flujosRecibir({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, espera, BASE, TOKEN });
+// Tras el flujo 30 (el ITF-14 del proveedor sustituye la caja interna de la leche): la etiqueta vieja se sigue leyendo.
+await codigoAnterior45({ chromium, navegador, contexto, abre, foto, compone, informe, CRUDAS, BASE, TOKEN, TOKEN_CONTEO, TOKEN_RECIBO, TOKEN_ALMACEN, dia, aammdd });
 informe.conteo = await api({ accion: 'conteos' }).then((r) => r.conteos.map((c) => ({ folio: c.folio, estado: c.estado, eventos: c.aplicado?.eventos, conciliacion: (c.conciliacion ?? []).map((x) => `${x.lote.lote}@${x.zona}${x.posicion ? ` ${x.posicion}` : ''}: cadena ${x.esperado}, contado ${x.contado}, ${x.clase}`) })));
 
 // Anclar lo de hoy (como haria el agente del sitio por la noche) y ver todo en verde.
@@ -404,7 +424,8 @@ await compone('23', 'Integridad por sucursal: todas verifican contra sus anclas 
 await compone('24', 'Integridad tras reescribir Poniente: su cadena cuadra localmente pero el ancla la delata', [['escritorio', integridadDespues.escritorio], ['celular', integridadDespues.celular]]);
 
 writeFileSync(join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 2));
-console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion }, null, 1));
+console.log(JSON.stringify({ impresion: informe.impresion, conteo: informe.conteo, rolConteo: informe.rolConteo, manipulacion: informe.manipulacion, agenteTrasManipulacion: informe.agenteTrasManipulacion, zona: { ...informe.zona, tablaAgilidad: undefined }, codigoAnterior: informe.codigoAnterior }, null, 1));
+if (informe.zona?.tablaAgilidad) console.log(`\nAgilidad (celular 390×844, medida con Playwright):\n${informe.zona.tablaAgilidad}`);
 await navegador.close();
 await conCamara?.close();
 app.kill('SIGTERM');

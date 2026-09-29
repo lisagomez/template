@@ -100,7 +100,7 @@ test('rollos de la semilla: el ritmo del mes rebasa lo presupuestado en CEDIS, y
 test('zonas de la semilla: en Sucursal Centro se retira del anaquel lo vencido, lo de retiro y lo que vence esta semana', () => {
   const e = semillaFicticia(HOY);
   const t = tableroSitio(e, 'SUC-CENTRO', HOY);
-  assert.deepEqual(t.anaquel.map((f) => f.existencia.lote).sort(), ['L0920', 'P0077', 'Q0009']);
+  assert.deepEqual(t.anaquel.map((f) => f.existencia.lote).sort(), ['L0916', 'L0917', 'L0920', 'P0077', 'Q0009', 'R540']);
   assert.ok(t.anaquel.every((f) => f.zona === 'piso'));
   assert.ok(t.resurtido.every((g) => g.lotes.every((l) => l.zona === 'almacen' || l.zona === 'recibo')));
   assert.ok(e.configuracion.sitios.every((s) => s.gln && clasificaPrefijo('0' + s.gln).clase === 'demostracion'));
