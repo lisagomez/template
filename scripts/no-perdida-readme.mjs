@@ -9,6 +9,8 @@
  * borrar en silencio no.
  *
  * Uso:  node scripts/no-perdida-readme.mjs <ruta> [--desde <ref>] [--motivos <archivo.json>] [--detalle] [--json]
+ *       node scripts/no-perdida-readme.mjs <ruta> --prueba   (siembra una línea borrada, una cifra
+ *         cambiada y un párrafo reflujado sobre ese README, y exige que las tres caigan)
  *   --motivos  JSON { "motivos": [{ "antes": "<línea original>", "motivo": "<por qué>" }] }
  *   --detalle  lista cada línea reescrita con su motivo, las borradas y las cifras perdidas
  * Exit: 0 sin pérdida · 1 con pérdida · 2 uso incorrecto.
@@ -46,8 +48,34 @@ function imprimeDetalle(r) {
   for (const t of r.motivosSobrantes) console.log(gris(`    motivo sin uso (la línea sigue tal cual): «${t.slice(0, 90)}»`));
 }
 
+/**
+ * La prueba de la prueba: sobre el README de la ruta, tal cual está en la ref, siembra tres
+ * pérdidas —una línea borrada, una cifra cambiada y un párrafo reflujado— y exige que caigan.
+ */
+function prueba(ruta, desde) {
+  const antes = git(['show', `${desde}:${ruta}`]);
+  const lineas = antes.split('\n');
+  const i = lineas.findIndex((l) => /\d/.test(l) && !/^#/.test(l) && l.trim().length > 20);
+  const j = lineas.findIndex((l, k) => k > 0 && l.trim() && lineas[k - 1].trim() && !/^[#|`>-]/.test(l) && !/^[#|`>-]/.test(lineas[k - 1]));
+  const siembras = [
+    ['línea borrada', lineas.filter((_, k) => k !== i).join('\n')],
+    ['cifra cambiada', lineas.map((l, k) => (k === i ? l.replace(/\d/, (d) => String((Number(d) + 1) % 10)) : l)).join('\n')],
+    ['párrafo reflujado', lineas.map((l, k) => (k === j - 1 ? `${l} ${lineas[j]}` : l)).filter((_, k) => k !== j).join('\n')],
+  ];
+  let cazadas = 0;
+  for (const [nombre, texto] of siembras) {
+    const r = comparaNoPerdida(antes, texto);
+    const caza = r.sinJustificar.length > 0 || r.cifrasPerdidas.length > 0;
+    cazadas += caza ? 1 : 0;
+    console.log(caza ? `CAZADA ${nombre} — ${r.sinJustificar.length} borrada(s), ${r.cifrasPerdidas.length} cifra(s)` : rojo(`VIVA   ${nombre}`));
+  }
+  console.log(`\nprueba de la prueba: ${cazadas} de ${siembras.length} pérdidas sembradas cazadas`);
+  process.exit(cazadas === siembras.length ? 0 : 1);
+}
+
 function main() {
   const { ruta, desde, motivos } = entrada();
+  if (process.argv.includes('--prueba')) return prueba(ruta, desde);
   const antes = git(['show', `${desde}:${ruta}`]);
   const despues = readFileSync(join(RAIZ, ruta), 'utf8');
   const r = comparaNoPerdida(antes, despues, motivos);
