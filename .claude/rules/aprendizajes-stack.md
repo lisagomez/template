@@ -119,6 +119,8 @@ aplique a TODO sigue yendo a `AGENTS.md`, no aqui.
 - **Fix**: el bundle no toca ese disco: todo sondeo va en `scripts/laboratorio-voz/maquina.mjs` por
   `execFile`; `fs` solo sobre temporales de `mkdtemp`.
 - **Aplicar en**: todo route handler o server component que mire carpetas fuera de `src/`.
+- **Reincidió el 2026-09-29** (reel): `resolve(process.env.X ?? …)` también lo dispara, y un clon limpio
+  (sin venv) no lo ve. Fix: `/*turbopackIgnore: true*/` en el primer argumento, como en etiquetas.
 
 ### 2026-09-20: `npm install` poda lo no declarado (Playwright desapareció): lo que un guion importa se declara pineado.
 
