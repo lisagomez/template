@@ -96,6 +96,15 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/laboratorio/sintetizar-flujo',
   '/api/laboratorio/transcribir',
   '/api/laboratorio/veredictos',
+  // Reel del celular (PRP-007). RF-20: misma app y mismo puerto que las demás; todas exigen la sesión del
+  // dueño (proxy + getUser) y las que escriben, `Origin` del mismo sitio; RLS por dueño; el video no sale
+  // del servidor. Sin sesión: 401. No se publican fuera de la red del compose más que el resto de la app.
+  '/api/reel/[id]',
+  '/api/reel/[id]/ajustes',
+  '/api/reel/[id]/archivo',
+  '/api/reel/[id]/consentimientos',
+  '/api/reel/[id]/decision',
+  '/api/reel/proyectos',
 ]
 
 const peticion = (cuerpo: unknown, cabeceras: Record<string, string> = {}): Request =>

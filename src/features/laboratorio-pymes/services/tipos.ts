@@ -6,7 +6,7 @@
  */
 export type EstadoDeCaso = 'pasa' | 'falla' | 'no-medido';
 
-export type IdHerramienta = 'marca' | 'ventas' | 'contenido' | 'resenas' | 'visibilidad' | 'pulso' | 'piezas' | 'video' | 'aprobacion' | 'redactor-llm';
+export type IdHerramienta = 'marca' | 'ventas' | 'contenido' | 'resenas' | 'visibilidad' | 'pulso' | 'piezas' | 'video' | 'aprobacion' | 'reel' | 'privacidad' | 'tarjetas' | 'sala' | 'redactor-llm';
 
 export interface ResultadoDeCaso {
   readonly estado: EstadoDeCaso;

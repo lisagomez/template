@@ -3,6 +3,7 @@ import { CASOS_CONTENIDO, CASOS_RESENAS } from './casos-contenido-resenas.ts';
 import { CASOS_APROBACION, CASOS_PIEZAS, CASOS_VIDEO } from './casos-contenido-visual.ts';
 import { CASOS_MARCA, CASOS_VENTAS } from './casos-marca-ventas.ts';
 import { CASOS_REDACTOR } from './casos-redactor.ts';
+import { CASOS_PRIVACIDAD, CASOS_REEL, CASOS_SALA, CASOS_TARJETAS } from './casos-reel.ts';
 import { CASOS_PULSO, CASOS_VISIBILIDAD } from './casos-visibilidad-pulso.ts';
 import type { Caso, CasoCorrido, ContextoDeLaboratorio, Herramienta, IdHerramienta } from './tipos.ts';
 
@@ -16,10 +17,14 @@ export const HERRAMIENTAS: readonly Herramienta[] = [
   { id: 'piezas', nombre: 'Piezas y carruseles', subpath: '@tu-scope/pymes-marketing/contenido', fuente: 'canva-creator + social-content-engine', queHace: 'PNG en la medida de cada canal, carruseles y la revisión visual automática.' },
   { id: 'video', nombre: 'Video por código', subpath: '@tu-scope/pymes-marketing/video', fuente: 'oficio de god-animation y edicion-de-video (idea, no código)', queHace: 'Promos 9:16 sin personas, deterministas, con sonido sintetizado.' },
   { id: 'aprobacion', nombre: 'Aprobación con huella', subpath: '@tu-scope/pymes-marketing/aprobacion', fuente: '— (lo rescatado de la sala de revisión)', queHace: 'Aprobar el archivo exacto; editar revoca; CSV del mes para que el dueño suba.' },
+  { id: 'reel', nombre: 'Reel del celular', subpath: '@tu-scope/reel', fuente: 'oficio de edicion-de-video (idea, no código)', queHace: 'Corta y subtitula lo que el dueño graba, con su marca; local y determinista.' },
+  { id: 'privacidad', nombre: 'Privacidad del reel', subpath: '@tu-scope/reel', fuente: 'AISIA firmada (propuesta-video §7)', queHace: 'Desenfoca caras sin consentimiento y bloquea datos en pantalla, otras voces y música.' },
+  { id: 'tarjetas', nombre: 'Tarjetas animadas', subpath: '@tu-scope/pymes-marketing/video', fuente: 'oficio de god-animation (idea, no código)', queHace: 'La versión video de cada pieza de las temporadas firmadas, sin personas.' },
+  { id: 'sala', nombre: 'Sala de aprobación', subpath: '@tu-scope/reel', fuente: '— (lo rescatado de sfreview, reescrito)', queHace: 'Marcar en el segundo exacto y aprobar con cuenta y huella; cambiar revoca.' },
   { id: 'redactor-llm', nombre: 'Redactor con LLM', subpath: '@tu-scope/pymes-marketing/redactor-openai-compat', fuente: '—', queHace: 'Redacción con un modelo pineado y su costo en la contabilidad. Opcional.' },
 ];
 
-export const CASOS: readonly Caso[] = [...CASOS_MARCA, ...CASOS_VENTAS, ...CASOS_CONTENIDO, ...CASOS_PIEZAS, ...CASOS_VIDEO, ...CASOS_APROBACION, ...CASOS_RESENAS, ...CASOS_VISIBILIDAD, ...CASOS_PULSO, ...CASOS_REDACTOR];
+export const CASOS: readonly Caso[] = [...CASOS_MARCA, ...CASOS_VENTAS, ...CASOS_CONTENIDO, ...CASOS_PIEZAS, ...CASOS_VIDEO, ...CASOS_APROBACION, ...CASOS_REEL, ...CASOS_PRIVACIDAD, ...CASOS_TARJETAS, ...CASOS_SALA, ...CASOS_RESENAS, ...CASOS_VISIBILIDAD, ...CASOS_PULSO, ...CASOS_REDACTOR];
 
 export async function correCaso(caso: Caso, ctx: ContextoDeLaboratorio): Promise<CasoCorrido> {
   const t0 = performance.now();

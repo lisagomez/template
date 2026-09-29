@@ -1,0 +1,19 @@
+{
+  "name": "@tu-scope/reel",
+  "version": "0.1.0",
+  "description": "Reel del celular para pymes: corta y subtitula lo que el dueño graba, con su marca, sin exponer a nadie que no consintió. Núcleo TypeScript puro y CERO dependencias (cortes por reglas, subtítulos en zona segura, cotejo de precios, controles de privacidad, máster declarativo, QA, retención); lo pesado se inyecta (./node: ffmpeg, Parakeet por sherpa-onnx, WeSpeaker, YuNet por OpenCV, Tesseract). Todo local: nada sale del servidor. Nada se publica.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./node": { "types": "./dist/node/index.d.ts", "import": "./dist/node/index.js" }
+  },
+  "files": ["dist", "python", "README.md", "LICENCIAS.md"],
+  "sideEffects": false,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prueba": "node --test pruebas/*.ts"
+  }
+}

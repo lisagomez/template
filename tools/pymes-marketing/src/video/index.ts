@@ -8,3 +8,4 @@ export { escenaDePromo, planDeRender, TIPOS_DE_CAPA, type Escena, type Capa, typ
 export { cuadroSvg, hojaDeCuadrosSvg } from './cuadro.js';
 export { sonidoDeEscena, wavDe, FRECUENCIA_DE_MUESTREO } from './sonido.js';
 export { revisaEscena, type ObservacionDeVideo } from './revision.js';
+export { TEMPORADAS_FIRMADAS, tarjetaDeTemporada, type IdDeTemporada, type PiezaDeTemporada } from './tarjetas.js';

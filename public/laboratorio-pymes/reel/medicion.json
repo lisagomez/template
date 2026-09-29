@@ -1,0 +1,706 @@
+{
+ "cuando": "2026-09-28T01:12:04.588Z",
+ "deterministico": true,
+ "casos": {
+  "limpio": {
+   "caso": "limpio",
+   "estado": "borrador",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 25.08,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Espiga. Hoy sacamos el pan de muer recién horneado. Hoy sacamos el pan de muer recién horneado con azúcar y ajonjolí. El pan de muerto cuesta 45 pesos la pieza. Apártalo por mensaje y pasa por él mañana temprano. Te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 55,
+   "descartes": [
+    {
+     "inicio": 3.52,
+     "fin": 6.96,
+     "motivo": "retoma"
+    },
+    {
+     "inicio": 12.26,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 1,
+   "musica": {
+    "fraccion": 0,
+    "segundos": 0
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    }
+   ],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "precio-coincide",
+     "nivel": "aviso",
+     "mensaje": "«pan de muerto» a $45.00: coincide con el catálogo",
+     "t": 14.64
+    }
+   ],
+   "master": {
+    "huella": "sha256:c7c14aaf06c67cce90fe5e3c7382bda8f45ddb70617eccc6d1e7a047550847a8",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 21.2,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.2,
+    "qa": []
+   },
+   "ms": {
+    "ingesta": 6809,
+    "transcripcion": 3806,
+    "hablantes": 892,
+    "caras": 1889,
+    "pantalla": 5672,
+    "master": 20571
+   }
+  },
+  "cliente-al-fondo": {
+   "caso": "cliente-al-fondo",
+   "estado": "borrador",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 25.08,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Espiga. Hoy sacamos el pan de muer recién horneado. Hoy sacamos el pan de muer recién horneado con azúcar y ajonjolí. El pan de muerto cuesta 45 pesos la pieza. Apártalo por mensaje y pasa por él mañana temprano. Te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 55,
+   "descartes": [
+    {
+     "inicio": 3.52,
+     "fin": 6.96,
+     "motivo": "retoma"
+    },
+    {
+     "inicio": 12.26,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 1,
+   "musica": {
+    "fraccion": 0,
+    "segundos": 0
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    },
+    {
+     "id": 2,
+     "presencia": 1,
+     "area": 2200,
+     "esSujeto": false
+    }
+   ],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "caras-desenfocadas",
+     "nivel": "aviso",
+     "mensaje": "1 cara(s) además de la tuya: se desenfocan por defecto. Si alguien consintió, márcalo en la sala"
+    },
+    {
+     "regla": "precio-coincide",
+     "nivel": "aviso",
+     "mensaje": "«pan de muerto» a $45.00: coincide con el catálogo",
+     "t": 14.64
+    }
+   ],
+   "master": {
+    "huella": "sha256:87b78560f098b8542ab9390e08afc9540287c1f1b95309d550e9612f7400b63d",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 21.2,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.2,
+    "qa": []
+   },
+   "ms": {
+    "ingesta": 7483,
+    "transcripcion": 4096,
+    "hablantes": 592,
+    "caras": 1788,
+    "pantalla": 5547,
+    "master": 20561
+   }
+  },
+  "ticket-telefono": {
+   "caso": "ticket-telefono",
+   "estado": "bloqueado",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 25.08,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Espiga. Hoy sacamos el pan de muer recién horneado. Hoy sacamos el pan de muer recién horneado con azúcar y ajonjolí. El pan de muerto cuesta 45 pesos la pieza. Apártalo por mensaje y pasa por él mañana temprano. Te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 55,
+   "descartes": [
+    {
+     "inicio": 3.52,
+     "fin": 6.96,
+     "motivo": "retoma"
+    },
+    {
+     "inicio": 12.26,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 1,
+   "musica": {
+    "fraccion": 0,
+    "segundos": 0
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    }
+   ],
+   "hallazgos": [
+    {
+     "t": 0,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 1,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 2,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 3,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 4,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 5,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 6,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 7,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 8,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 9,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 10,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 11,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 12,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 13,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 14,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 15,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 16,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 17,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 18,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 19,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 20,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 21,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 22,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 23,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    },
+    {
+     "t": 24,
+     "tipo": "telefono",
+     "muestra": "55 0…"
+    }
+   ],
+   "observaciones": [
+    {
+     "regla": "dato-en-pantalla",
+     "nivel": "bloquea",
+     "t": 0,
+     "mensaje": "Del segundo 0 al 24 se lee un telefono («55 0…»): cúbrelo o corta ese tramo"
+    },
+    {
+     "regla": "precio-coincide",
+     "nivel": "aviso",
+     "mensaje": "«pan de muerto» a $45.00: coincide con el catálogo",
+     "t": 14.64
+    }
+   ],
+   "master": {
+    "huella": "sha256:eb76f58e5a24ff759b9d7a8586692dddb65ff6eaf5555e1cbbf44a0a6c06de4f",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 21.2,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.2,
+    "qa": [
+     {
+      "regla": "dato-sin-cubrir",
+      "nivel": "bloquea",
+      "mensaje": "Al revisar el máster se leen 21 dato(s) personal(es)"
+     }
+    ]
+   },
+   "ms": {
+    "ingesta": 7421,
+    "transcripcion": 3665,
+    "hablantes": 428,
+    "caras": 1844,
+    "pantalla": 5858,
+    "master": 19481
+   }
+  },
+  "precio-no-coincide": {
+   "caso": "precio-no-coincide",
+   "estado": "bloqueado",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 24.733333,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Espiga. Hoy sacamos el pan de muerto recién horneado. Hoy sacamos el pan de muer recién horneado con azúcar y ajonjolí. El pan de muer cuesta 50 pesos la pieza. Apártalo por mensaje y pasa por él mañana temprano te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 55,
+   "descartes": [
+    {
+     "inicio": 12.26,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 1,
+   "musica": {
+    "fraccion": 0,
+    "segundos": 0
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    }
+   ],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "precio-no-coincide",
+     "nivel": "bloquea",
+     "mensaje": "Dices $50.00 por «pan de muerto», pero tu catálogo dice $45.00: corrige el catálogo o vuelve a grabar esa frase",
+     "t": 14.56
+    }
+   ],
+   "master": {
+    "huella": "sha256:739d43c20d182b0c1d42d4f28d42de35a3562116c1758ee9af62985ad8772ab5",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 24.3,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.2,
+    "qa": []
+   },
+   "ms": {
+    "ingesta": 6484,
+    "transcripcion": 3127,
+    "hablantes": 368,
+    "caras": 1633,
+    "pantalla": 5601,
+    "master": 22018
+   }
+  },
+  "horizontal": {
+   "caso": "horizontal",
+   "estado": "bloqueado",
+   "bruto": {
+    "ancho": 1920,
+    "alto": 1080,
+    "duracion": 25.08,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [
+    "location-eng",
+    "com.apple.quicktime.location.ISO6709",
+    "location"
+   ],
+   "texto": null,
+   "palabras": 0,
+   "descartes": [],
+   "hablantes": null,
+   "musica": null,
+   "pistas": [],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "clip-horizontal",
+     "nivel": "bloquea",
+     "mensaje": "El clip es horizontal (1920×1080); el reel es vertical 9:16: vuelve a grabar con el celular de pie"
+    }
+   ],
+   "master": null,
+   "ms": {}
+  },
+  "musica-ajena": {
+   "caso": "musica-ajena",
+   "estado": "bloqueado",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 25.2,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Spica. Hoy sacamos el pan de muerto recién horneado. Hoy sacamos el pan de muerto recién horneado con azúcar y yajonjolí. El pan de muerto cuesta 45 pesos la pieza. Apártalo por mensaje y pasa por él mañana temprano. Te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 55,
+   "descartes": [
+    {
+     "inicio": 3.6,
+     "fin": 6.88,
+     "motivo": "retoma"
+    },
+    {
+     "inicio": 12.34,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 1,
+   "musica": {
+    "fraccion": 1,
+    "segundos": 0.6000000000000001
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    }
+   ],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "musica-de-fondo",
+     "nivel": "bloquea",
+     "mensaje": "Se oye sonido de fondo continuo (posible música o ruido fuerte) en 100 % de las pausas: el reel no lleva música incrustada; agrégala tú en la app de la red al publicar"
+    },
+    {
+     "regla": "precio-coincide",
+     "nivel": "aviso",
+     "mensaje": "«pan de muerto» a $45.00: coincide con el catálogo",
+     "t": 14.72
+    }
+   ],
+   "master": {
+    "huella": "sha256:55850fc27c44f3f0a5a9e5dfe3809f9d0a73e568a96b99c19173cb49c496b862",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 21.5,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.2,
+    "qa": []
+   },
+   "ms": {
+    "ingesta": 6569,
+    "transcripcion": 3659,
+    "hablantes": 477,
+    "caras": 1694,
+    "pantalla": 5248,
+    "master": 19169
+   }
+  },
+  "dos-hablantes": {
+   "caso": "dos-hablantes",
+   "estado": "bloqueado",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 28.139,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Espiga. Hoy sacamos el pan de muerto recién horneado. Hoy sacamos el pan de muerto recién horneado con azúcar y ajonjolí. El pan de muerto cuesta 45 pesos la pieza. Yo te atiendo en la caja con gusto. Apártalo por mensaje y pasa por él mañana temprano. Te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 63,
+   "descartes": [
+    {
+     "inicio": 3.6,
+     "fin": 6.96,
+     "motivo": "retoma"
+    },
+    {
+     "inicio": 12.34,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 2,
+   "musica": {
+    "fraccion": 0,
+    "segundos": 0
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    }
+   ],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "otra-voz",
+     "nivel": "bloquea",
+     "mensaje": "Se oyen 2 voces y solo hay 0 consentimiento(s) además del tuyo: registra el de quien habla o corta su tramo"
+    },
+    {
+     "regla": "precio-coincide",
+     "nivel": "aviso",
+     "mensaje": "«pan de muerto» a $45.00: coincide con el catálogo",
+     "t": 14.64
+    }
+   ],
+   "master": {
+    "huella": "sha256:fef6cdaebdd1b2f15e60158208f4e0ba9091dd27b3a8a86d772d930db31f60eb",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 24.4,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.3,
+    "qa": []
+   },
+   "ms": {
+    "ingesta": 8443,
+    "transcripcion": 3188,
+    "hablantes": 453,
+    "caras": 1839,
+    "pantalla": 6722,
+    "master": 22418
+   }
+  },
+  "limpio-2": {
+   "caso": "limpio-2",
+   "estado": "borrador",
+   "bruto": {
+    "ancho": 1080,
+    "alto": 1920,
+    "duracion": 25.08,
+    "ubicacion": [
+     "location-eng",
+     "com.apple.quicktime.location.ISO6709",
+     "location"
+    ]
+   },
+   "ubicacionTrasIngesta": [],
+   "texto": "Hola, soy Lupita de la panadería La Espiga. Hoy sacamos el pan de muer recién horneado. Hoy sacamos el pan de muer recién horneado con azúcar y ajonjolí. El pan de muerto cuesta 45 pesos la pieza. Apártalo por mensaje y pasa por él mañana temprano. Te esperamos en la panadería, aquí en tu colonia.",
+   "palabras": 55,
+   "descartes": [
+    {
+     "inicio": 3.52,
+     "fin": 6.96,
+     "motivo": "retoma"
+    },
+    {
+     "inicio": 12.26,
+     "fin": 12.78,
+     "motivo": "silencio"
+    }
+   ],
+   "hablantes": 1,
+   "musica": {
+    "fraccion": 0,
+    "segundos": 0
+   },
+   "pistas": [
+    {
+     "id": 1,
+     "presencia": 1,
+     "area": 35280,
+     "esSujeto": true
+    }
+   ],
+   "hallazgos": [],
+   "observaciones": [
+    {
+     "regla": "precio-coincide",
+     "nivel": "aviso",
+     "mensaje": "«pan de muerto» a $45.00: coincide con el catálogo",
+     "t": 14.64
+    }
+   ],
+   "master": {
+    "huella": "sha256:c7c14aaf06c67cce90fe5e3c7382bda8f45ddb70617eccc6d1e7a047550847a8",
+    "medidas": {
+     "ancho": 1080,
+     "alto": 1920,
+     "fps": 30,
+     "duracion": 21.2,
+     "audioHz": 48000,
+     "codecVideo": "h264",
+     "codecAudio": "aac"
+    },
+    "lufs": -14.2,
+    "qa": []
+   },
+   "ms": {
+    "ingesta": 6544,
+    "transcripcion": 2981,
+    "hablantes": 382,
+    "caras": 1839,
+    "pantalla": 5927,
+    "master": 19558
+   }
+  }
+ }
+}
