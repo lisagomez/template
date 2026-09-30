@@ -251,7 +251,39 @@ RLS en **todas**. Las funciones `sgi_es_miembro(org)` y `sgi_tiene_rol(org, role
 ---
 
 ## 🧠 Aprendizajes
-*(se llenan durante la construcción)*
+
+Todos medidos durante la construcción, y cada uno quedó con su caso de regresión o su prueba.
+
+### 2026-09-30: una función `security definer` respondía por organizaciones ajenas
+- **Hecho**: `sgi_faltantes_puerta(proyecto, fase)` corre como su dueño, así que cualquiera con el UUID de un proyecto
+  ajeno veía qué le faltaba. Salió al convertir en prueba real un caso que era un marcador.
+- **Fix**: las 3 funciones de ese tipo comprueban primero la pertenencia. Caso «B pregunta qué le falta al proyecto de A».
+
+### 2026-09-30: proteger estados solo en UPDATE deja la puerta abierta en INSERT
+- **Hecho**: se podía dar de alta una versión ya «aprobada» o una NC ya «cerrada».
+- **Fix**: el disparador cubre INSERT y UPDATE, con 2 casos de regresión.
+
+### 2026-09-30: `insert … returning` evalúa la política de lectura ANTES del disparador AFTER
+- **Hecho**: quien creaba un despacho u organización recibía 42501, porque su membresía nace en un disparador AFTER.
+- **Fix**: `creado_por` con default `auth.uid()`, forzado en el `with check` y admitido en la lectura.
+
+### 2026-09-30: `waitForURL('**/sgi')` coincide con `/login?siguiente=/sgi`
+- **Hecho**: el recorrido seguía antes de entrar y todo lo demás fallaba lejos de la causa.
+- **Fix**: esperar por `pathname` exacto.
+
+### 2026-09-30: aviso de hidratación solo en la primera compilación de cada ruta (Turbopack, desarrollo)
+- **Fix**: el recorrido de evidencia corre contra `next build` + `next start`: 0 errores de consola.
+
+### 2026-09-30: un detector de promesas que no entiende negaciones
+- **Hecho**: «No te certifica» en la guía salía como promesa (falso positivo).
+- **Fix**: una negación inmediata cuenta como deslinde, con casos de regresión en el paquete.
+
+### 2026-09-30: dos reglas del repo que se cumplen, no se esquivan
+- **Hecho 1**: `verify:gobernanza` prohíbe una forma de identificador en el árbol, y un literal de fecha en
+  `orquestador.ts` la tenía. Se cambió el código, no la regla.
+- **Hecho 2**: `verifica:gates` marcó `scripts/sgi/prueba-rls.ts` como huérfana. Se volvió medición
+  (`mide-aislamiento.ts` → `rls.json` → casos `bas-*` dentro de `validate`), como el reel, y su gate inactivo queda
+  propuesto para firma.
 
 ## Gotchas
 - `next dev` en el worktree: puerto libre, **no el 3000**. El `.env.local` del worktree apunta a Supabase local; la

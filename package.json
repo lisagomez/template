@@ -50,7 +50,7 @@
     "prueba:laboratorio-sgi": "node --test src/features/laboratorio-sgi/pruebas/*.ts",
     "sgi:catalogo": "node scripts/sgi/catalogo.ts && node scripts/sgi/catalogo-sql.ts --verifica",
     "sgi:local:reinicia": "npx -y supabase@2.118.0 db reset --local && node scripts/sgi/siembra.ts && node scripts/sgi/entorno-local.ts",
-    "sgi:rls": "node scripts/sgi/prueba-rls.ts",
+    "sgi:rls": "node scripts/sgi/mide-aislamiento.ts",
     "sgi:agentes": "node scripts/sgi/corre-agentes.ts",
     "reel:laboratorio": "node scripts/reel/laboratorio.ts",
     "reel:marcas": "node scripts/reel/mide-marcas.ts public/laboratorio-pymes/reel/marcas.json",

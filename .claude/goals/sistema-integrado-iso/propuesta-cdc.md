@@ -32,6 +32,19 @@
        "prp-o-spec",
   +    "agente-sgi-evaluacion"
   ```
+  3. **`.claude/gates.json`**: nace `prueba:laboratorio-sgi` (**activo**, perfil `validate`). Lo cazó
+     `verifica:gates`: un script con forma de gate sin declarar y su archivo de pruebas huérfano, igual que
+     `prueba:laboratorio-pymes`.
+     - Qué guarda: al menos 5 casos por pieza, las 10 trampas con caso, ninguno en falla, L8 sobre 32 archivos y el
+       espejo SQL del catálogo sin deriva.
+     - Ya está en la rama; entra a `main` solo con esta firma.
+  4. **Propuesto, NO aplicado en el padrón**: `sgi:rls` (`node scripts/sgi/mide-aislamiento.ts`) como gate
+     **inactivo**.
+     - `motivo`: «necesita Docker con la Supabase local y crea 7 cuentas sintéticas por corrida».
+     - `falta`: «un perfil de gate con Docker».
+     - Es el mismo patrón que `reel:rls`. El laboratorio verifica la ÚLTIMA medición (`rls.json`, casos `bas-1…6`)
+       pero no la vuelve a correr: si RLS se rompe después, esos casos siguen en verde hasta que alguien mida otra
+       vez. Declararlo hace visible esa ausencia.
 - **Motivo**: el goal `sistema-integrado-iso` (PRP-008). Sin clase asignada, estos agentes heredarían el default
   caro en silencio (C8). Sin prompts revisados como código, el alcance entero de lo que proponen a una pyme no
   pasaría por ningún gate (C1).

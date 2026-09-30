@@ -1,6 +1,7 @@
 /**
  * MEDICIÓN del aislamiento y de la matriz de roles (L3) contra la Supabase LOCAL, con cuentas sintéticas reales.
- * Escribe public/laboratorio-sgi/rls.json (lo lee el laboratorio). Fuera de `validate`: necesita Docker.
+ * Escribe public/laboratorio-sgi/rls.json, que verifican los casos bas-1…6 del laboratorio (dentro de `validate`).
+ * Fuera de `validate` a propósito, igual que `reel:rls`: necesita Docker y crea cuentas por corrida.
  * Uso: npm run sgi:rls
  */
 import { mkdirSync, writeFileSync } from 'node:fs';

@@ -43,3 +43,9 @@ test('L8: ningún texto de la app, sus guías ni su aviso promete certificación
   console.log(`L8: ${archivos.length} archivos revisados, ${con.length} con promesas`);
   assert.deepEqual(con, []);
 });
+
+test('el espejo SQL del catálogo (migración generada) no tiene deriva', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { sqlDelCatalogo, RUTA } = await import('../../../../scripts/sgi/catalogo-sql.ts');
+  assert.equal(readFileSync(RUTA, 'utf8'), sqlDelCatalogo(), `${RUTA} no coincide con el catálogo: node scripts/sgi/catalogo-sql.ts`);
+});

@@ -171,6 +171,17 @@
       "_nota": "ALTA del 2026-09-27, al mezclar `main` en `pymes-marketing-build`: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo `verifica:gates` (script sin declarar y `src/features/laboratorio-pymes/pruebas/laboratorio.ts` huerfano), igual que en el PR #154"
     },
     {
+      "nombre": "prueba:laboratorio-sgi",
+      "runner": "comando",
+      "comando": "npm run prueba:laboratorio-sgi",
+      "guarda": "el laboratorio del sistema integrado ISO (`/laboratorio-sgi`): >=5 casos por pieza (catalogo, motor, documentos, salvaguardas, orquestador, base y los 9 agentes), las 10 trampas del spec con caso, ningun caso en falla, L8 (ningun texto de la app promete certificacion) y el espejo SQL del catalogo sin deriva. Sin red: los casos con LLM se verifican sobre corridas grabadas y, sin ellas, quedan no-medidos y se dicen",
+      "evidencia": "salida de `node --test`: la tabla de casos (id, pieza, estado, trampa, costo) y el resumen por pieza",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA PROPUESTA del 2026-09-30 en la rama app/iso (goal sistema-integrado-iso): es parte del CDC de .claude/goals/sistema-integrado-iso/propuesta-cdc.md y no se mergea sin la firma del laboratorio. La cazo verifica:gates (script sin declarar y su archivo de pruebas huerfano), igual que prueba:laboratorio-pymes"
+    },
+    {
       "nombre": "prueba:historial",
       "runner": "comando",
       "comando": "npm run prueba:historial",
