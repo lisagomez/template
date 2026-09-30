@@ -31,6 +31,10 @@
       {
         "patron": "add-payments",
         "porque": "el BUSINESS_LOGIC decide si la app cobra y por que camino, antes de construir"
+      },
+      {
+        "patron": "La raiz no se sobrescribe nunca",
+        "porque": "en un monorepo la raiz es el indice del portafolio: sobrescribirla borra el contrato de los demas productos"
       }
     ],
     "prp": [

@@ -132,7 +132,15 @@ dice que fue por defecto.
 
 ## Output Final
 
-Una vez completada la entrevista, genera el archivo `BUSINESS_LOGIC.md` en la raiz del proyecto con este formato:
+Una vez completada la entrevista, genera el archivo `BUSINESS_LOGIC.md` con este formato. Donde
+va depende de lo que ya haya en la raiz:
+
+- **Proyecto de un solo producto** (lo normal al nacer): en la raiz del proyecto.
+- **Monorepo**: si la raiz ya tiene un `BUSINESS_LOGIC.md` que es **indice del portafolio**
+  (lleva `## 1. Productos`), el contrato va junto a la feature principal del producto
+  (`src/features/<feature>/BUSINESS_LOGIC.md`) y su fila del §1 del indice pasa de «pendiente» al
+  enlace (o nace, si no estaba). **La raiz no se sobrescribe nunca**: borraria el contrato de los
+  demas productos. `npm run verify:gobernanza` rechaza un contrato que el indice no enlace.
 
 ```markdown
 # BUSINESS_LOGIC.md - [Nombre del Proyecto]
