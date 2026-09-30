@@ -5,19 +5,20 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**36 activos** cubren **226 unidades** del repo.
+**39 activos** cubren **238 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
 | TPL-conocimiento | Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes) | CONOCIMIENTO | datos | beta | 1 | `tools/conocimiento` |
 | TPL-doctrina | Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto | CONOCIMIENTO | config_agentica | produccion | 17 | `AGENTS.md` |
-| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 65 | `.claude/specs` |
+| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 67 | `.claude/specs` |
 | TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 5 | `.claude/design-systems` |
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
 | TPL-empaquetador | Empaquetador de herramientas y su contrato | FABRICA | software | produccion | 3 | `scripts/empaqueta-herramienta.mjs` |
 | TPL-feature-laboratorio-etiquetas | Laboratorio de la herramienta de etiquetas GS1: casos, estado real, veredictos y referencias visuales; decide que usa /etiquetas | FABRICA | software | beta | 2 | `src/features/laboratorio-etiquetas` |
 | TPL-feature-laboratorio-pymes | Laboratorio de las herramientas pymes: casos, estado real y veredictos | FABRICA | software | beta | 2 | `src/features/laboratorio-pymes` |
+| TPL-feature-laboratorio-sgi | Laboratorio del sistema integrado: casos deterministas, corridas reales de agentes y las 10 trampas | FABRICA | software | beta | 1 | `src/features/laboratorio-sgi` |
 | TPL-feature-laboratorio-voz | Laboratorio de voz: capturas y mediciones del motor | FABRICA | software | beta | 2 | `src/features/laboratorio-voz` |
 | TPL-gobernanza | Capa de gobernanza (controles C1-C8) y gates de validate | FABRICA | software | produccion | 17 | `.claude/gobernanza` |
 | TPL-imprenta | Imprenta de CLIs: manifiesto servicio a CLI y su auditoria | FABRICA | software | produccion | 4 | `.claude/imprenta` |
@@ -41,9 +42,11 @@
 | TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
 | TPL-feature-reel | App del reel: cuentas, subida del clip y sala de aprobacion en el celular | PRODUCTO | software | blueprint | 6 | `src/features/reel` |
+| TPL-feature-sgi | App del sistema integrado ISO: roadmap con puertas, documentos con huella, evidencias, riesgos, SoA, auditoria y CAPA, panel del consultor con marca blanca | PRODUCTO | software | blueprint | 8 | `src/features/sgi` |
 | TPL-grafo-conocimiento | Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes | PRODUCTO | software | beta | 1 | `tools/grafo-conocimiento` |
 | TPL-pymes-marketing | Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso | PRODUCTO | software | blueprint | 1 | `tools/pymes-marketing` |
 | TPL-reel | Reel del celular para pymes: cortes, subtitulos, privacidad (caras, pantalla, voces), master determinista y sala | PRODUCTO | software | blueprint | 2 | `tools/reel` |
+| TPL-sistema-integrado | Sistema integrado ISO 9001 + ISO/IEC 42001: catalogo propio versionado, motor de avance y puertas, agentes que proponen y documentos | PRODUCTO | software | blueprint | 1 | `tools/sistema-integrado` |
 | TPL-voz | Voz: deteccion de voz (VAD) y diarizacion local | PRODUCTO | software | beta | 1 | `tools/voz` |
 
 ## Fuentes que se escanean

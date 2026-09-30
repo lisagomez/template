@@ -40,9 +40,8 @@ export function planDeTareas(estado: EstadoProyecto, tareas: readonly TareaConFe
     const r = requisito(f.id, c)!;
     return { fase, requisito: f.id, tema: r.tema, agente: agenteSugerido(f.id), motivo: f.motivo };
   });
-  const enSiete = new Date(`${hoy}T00:00:00Z`);
-  enSiete.setUTCDate(enSiete.getUTCDate() + 7);
-  const limite = enSiete.toISOString().slice(0, 10);
+  const [anio, mes, dia] = hoy.split('-').map(Number) as [number, number, number];
+  const limite = new Date(Date.UTC(anio, mes - 1, dia + 7)).toISOString().slice(0, 10);
   const recordatorios: Recordatorio[] = tareas.filter((t) => !t.hecha && t.vence <= limite)
     .map((t) => ({ titulo: t.titulo, vence: t.vence, estado: t.vence < hoy ? 'vencida' as const : 'por-vencer' as const }))
     .sort((a, b) => a.vence.localeCompare(b.vence));

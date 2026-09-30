@@ -322,6 +322,30 @@
    "tipo": "documento", "clase": "DISEÑO", "estado": "produccion",
    "ubicacion": ".claude/design-systems", "responsable": "dep-sw",
    "cubre": [".claude/design-systems/*"]
+  },
+  {
+   "id": "TPL-sistema-integrado",
+   "nombre": "Sistema integrado ISO 9001 + ISO/IEC 42001: catalogo propio versionado, motor de avance y puertas, agentes que proponen y documentos",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/sistema-integrado", "responsable": "dep-sw",
+   "origen": [".claude/goals/sistema-integrado-iso", ".claude/PRPs/PRP-008-sistema-integrado-iso.md"],
+   "cubre": ["tools/sistema-integrado"]
+  },
+  {
+   "id": "TPL-feature-sgi",
+   "nombre": "App del sistema integrado ISO: roadmap con puertas, documentos con huella, evidencias, riesgos, SoA, auditoria y CAPA, panel del consultor con marca blanca",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/sgi", "responsable": "dep-sw",
+   "origen": [".claude/goals/sistema-integrado-iso"],
+   "cubre": ["src/features/sgi", "scripts/sgi", "supabase/migrations/20260930100000_sgi_esquema.sql", "supabase/migrations/20260930100100_sgi_seguridad.sql", "supabase/migrations/20260930100200_sgi_catalogo.sql", "docs/GUIA-PYME-SGI.md", "docs/GUIA-CONSULTOR-SGI.md", "docs/AVISO-PRIVACIDAD-SGI.md"]
+  },
+  {
+   "id": "TPL-feature-laboratorio-sgi",
+   "nombre": "Laboratorio del sistema integrado: casos deterministas, corridas reales de agentes y las 10 trampas",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/laboratorio-sgi", "responsable": "dep-sw",
+   "origen": [".claude/goals/sistema-integrado-iso"],
+   "cubre": ["src/features/laboratorio-sgi"]
   }
  ]
 }
