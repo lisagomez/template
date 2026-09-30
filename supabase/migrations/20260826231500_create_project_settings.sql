@@ -36,13 +36,16 @@ create table if not exists public.project_settings (
     or
     (project_type = 'aplicacion'
       and package_scope is null and package_name is null)
-  ),
-
-  -- Singleton REAL: es la configuracion DEL proyecto, no una fila por usuario. Un `unique`
-  -- sobre la constante `true` hace que toda fila colisione con cualquier otra, asi que nunca
-  -- puede existir una segunda. NO es un error de copy-paste: es la tecnica, a proposito.
-  constraint project_settings_singleton unique ((true))
+  )
 );
+
+-- Singleton REAL: es la configuracion DEL proyecto, no una fila por usuario. Un indice unico
+-- sobre la constante `true` hace que toda fila colisione con cualquier otra, asi que nunca
+-- puede existir una segunda. NO es un error de copy-paste: es la tecnica, a proposito.
+-- Va como INDICE y no como `constraint ... unique ((true))` dentro de la tabla: Postgres no
+-- acepta expresiones en una restriccion unique, y asi escrita la migracion no compilaba
+-- (corregido el 2026-09-29; nunca llego a aplicarse en ninguna base).
+create unique index if not exists project_settings_singleton on public.project_settings ((true));
 
 alter table public.project_settings enable row level security;
 
@@ -59,8 +62,9 @@ create policy "Owner can update project settings"
   on public.project_settings for update using (auth.uid() = owner_id);
 
 -- updated_at se mantiene solo: ningun cliente tiene que acordarse.
+-- search_path vacio (lint 0011 del linter de Supabase): `now()` vive en pg_catalog, que se busca siempre.
 create or replace function public.project_settings_touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = '' as $$
 begin
   new.updated_at = now();
   return new;
@@ -73,5 +77,5 @@ create trigger project_settings_touch_updated_at
 
 comment on table public.project_settings is
   'Configuracion unica del proyecto: tipo (aplicacion | herramienta) y sus campos exclusivos. PRP-002. Sin secretos.';
-comment on constraint project_settings_singleton on public.project_settings is
+comment on index public.project_settings_singleton is
   'unique((true)): fuerza una sola fila en toda la tabla. Es intencional.';

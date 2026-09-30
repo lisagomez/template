@@ -6,7 +6,7 @@ import type { ProjectSettingsInput } from '../types/schema'
  * Acceso a `project_settings` con el cliente AUTENTICADO del usuario (anon key + sesion):
  * las policies de RLS por owner_id deciden. Aqui no hay ni habra service_role (control C7).
  *
- * "Upsert" a mano: la fila es un singleton por `unique((true))`, una constraint de
+ * "Upsert" a mano: la fila es un singleton por un indice unico sobre `(true)`, una
  * expresion que PostgREST no puede usar como `on_conflict`. Se lee y, si existe, se
  * actualiza por id; si no, se inserta.
  */
