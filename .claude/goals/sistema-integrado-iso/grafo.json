@@ -89,8 +89,8 @@
     {
       "id": "entrega",
       "label": "Rama propia con todo commiteado, npm run validate en verde después del commit, grafo.json con estados y evidencia, resultados.md",
-      "estado": "gris",
-      "evidencia": "pendiente: corridas reales y npm run validate en verde después del commit final"
+      "estado": "ambar",
+      "evidencia": "validate 29/29 en verde sobre 1df6bcc (árbol sellado 10e620cc3cef); falta repetirlo después de las corridas reales"
     }
   ],
   "aristas": [
@@ -341,8 +341,8 @@
       "sobre": "nodo:entrega",
       "label": "validate",
       "referencia": "npm run validate en verde después del commit, con asiento en el inventario de todo lo nuevo",
-      "estado": "gris",
-      "evidencia": "validate en verde sin commit final todavía"
+      "estado": "morado",
+      "evidencia": "npm run validate 29/29 gates activos en verde tras el commit 1df6bcc; se repite al cerrar"
     }
   ]
 }

@@ -18,7 +18,7 @@ ninguna corrida real de agente ocurrió todavía. No se simuló ninguna.
 | 9 | Laboratorio | ◐ | 33/33 deterministas en verde + L8 (32 archivos). 46 casos con LLM «no medidos». Las 10 trampas tienen caso |
 | 10 | Empaquetado, READMEs, guías, aviso, inventario | ✓ | `empaqueta` en verde (6 subpaths en un proyecto limpio); 18/18 READMEs conformes; guías y aviso en `docs/`; 3 asientos (238 unidades, 0 NUEVO) |
 | 11 | Propuesta CDC y bloqueados | ✓ | `propuesta-cdc.md` (diff del routing + prompts), `propuestas.md` |
-| 12 | `validate` verde tras el commit | ver abajo | |
+| 12 | `validate` verde tras el commit | ✓ (a la fecha) | `npm run validate` sobre el commit `1df6bcc`: **29/29 gates activos en verde**, 8 inactivos declarados, árbol sellado `10e620cc3cef`. Incluye `prueba:laboratorio-sgi`, `prueba:migraciones`, `prueba:a2a`, `verifica:inventario`, `revisa:readmes`, `prueba:tools`. **Se vuelve a correr tras las corridas reales** |
 
 ## Decisiones (reporte)
 
@@ -49,6 +49,8 @@ ninguna corrida real de agente ocurrió todavía. No se simuló ninguna.
 | El creador no ve lo que acaba de crear | `insert … returning` evalúa la lectura antes del disparador (42501, medido); se resolvió con `creado_por` forzado a quien crea |
 | La base y el motor divergen en quién aprueba qué | La prueba de RLS le pregunta a la base las 110 combinaciones y el catálogo espejo; hoy son 0 diferencias |
 | Un detector de promesas que no entiende negaciones | «No te certifica» salía como promesa (falso positivo en la guía). Ahora una negación cuenta como deslinde, con caso |
+| Funciones SECURITY DEFINER expuestas por la API | `prueba:migraciones` rechazó 12: se movieron a `sgi_privado`; las 2 que se consultan por la API son INVOKER. La RLS se volvió a medir (42/42) y el recorrido también (9/9) |
+| Una ruta de servidor nueva sin declarar | `prueba:a2a` la cazó: `/api/sgi/documento/[version]` quedó declarada con sus garantías (solo GET, 401 sin sesión, medido) |
 | Una regla de gobernanza que no vi | `verify:gobernanza` cazó un patrón prohibido en `orquestador.ts` (un literal de fecha). Se cambió el código, no la regla |
 | El aviso de hidratación en desarrollo | Solo en la primera compilación de cada ruta con Turbopack; el recorrido final corre contra el build de producción, sin errores de consola |
 | Los agentes redactan genérico o inventan | Los 46 casos lo miden, **pero todavía no corren**. Hasta entonces, «agentes» y «laboratorio» siguen en ámbar |
