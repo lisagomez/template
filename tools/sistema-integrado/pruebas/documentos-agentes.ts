@@ -83,7 +83,8 @@ test('L5: un ID inventado o no permitido se rechaza; una propuesta sin cita tamb
   if (!f.ok) return;
   const r = revisaCitas(f.salida, ['SGI-C-4.1-01']);
   assert.deepEqual(r.inexistentes, ['SGI-C-99.9-01']);
-  assert.equal(revisaCitas(validaForma(salida(['SGI-C-5.3-01']), t).ok ? (validaForma(salida(['SGI-C-5.3-01']), t) as { salida: never }).salida : null as never, ['SGI-C-4.1-01']).noPermitidos.length, 1);
+  const otra = validaForma(salida(['SGI-C-5.3-01']), t);
+  assert.ok(otra.ok && revisaCitas(otra.salida, ['SGI-C-4.1-01']).noPermitidos.length === 1, 'un ID que existe pero no se permitió también se rechaza');
   const sinCita = validaForma(salida([]), t);
   assert.ok(sinCita.ok && revisaCitas(sinCita.salida, []).sinCita.length === 1);
   assert.equal(validaForma({ resumen: 'x', propuestas: [{ tipo: 'inventado', titulo: 't', detalle: 'd', requisitos: [] }] }, t).ok, false);
