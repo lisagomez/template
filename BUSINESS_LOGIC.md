@@ -24,7 +24,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | Asesor de ventas por voz | [`src/features/dictado/BUSINESS_LOGIC.md`](src/features/dictado/BUSINESS_LOGIC.md) | `TPL-asesor-ventas` `TPL-voz` `TPL-dictado` `TPL-feature-dictado` `TPL-feature-laboratorio-voz` | firmado el 2026-09-20 como hipótesis del piloto |
 | ERP agéntico | [`erp/ERP-MAESTRO.md`](erp/ERP-MAESTRO.md) | `TPL-erp` | maestro propio: lo gobierna su fuente, no este índice |
 | Etiquetas GS1 | [`src/features/etiquetas/BUSINESS_LOGIC.md`](src/features/etiquetas/BUSINESS_LOGIC.md) | `TPL-etiquetas-gs1` `TPL-feature-etiquetas` `TPL-feature-laboratorio-etiquetas` | hipótesis del 2026-09-30, sin cadena real; **firma pendiente del laboratorio** |
-| Extractor documental | pendiente | `TPL-extractor-documental` `TPL-feature-a2a` | falta: que el laboratorio decida si es producto (se ofrece por A2A a terceros) o solo librería, que se queda con su README |
+| Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; **firma pendiente del laboratorio** |
 | Reel del celular | pendiente | `TPL-reel` `TPL-feature-reel` | falta: `/new-app` al salir de blueprint (PRP-007) |
 | Estudio pymes | pendiente | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | falta: `/new-app` al salir de blueprint (PRP-006) |
 
@@ -73,8 +73,9 @@ Regla de criticidad, en una pregunta: **¿se puede reconstruir?**
 Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** → respaldo inmutable.
 
 Aquí va lo que es de todo el servidor o de todo el repo; lo de cada producto va en su contrato:
-[asesor de ventas por voz](src/features/dictado/BUSINESS_LOGIC.md) (§4) y
-[etiquetas GS1](src/features/etiquetas/BUSINESS_LOGIC.md) (§4).
+[asesor de ventas por voz](src/features/dictado/BUSINESS_LOGIC.md) (§4),
+[etiquetas GS1](src/features/etiquetas/BUSINESS_LOGIC.md) (§4) y
+[extractor documental](src/features/a2a/BUSINESS_LOGIC.md) (§4).
 
 | Activo | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|
