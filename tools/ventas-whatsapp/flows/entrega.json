@@ -1,0 +1,43 @@
+{
+  "version": "7.1",
+  "data_api_version": "3.0",
+  "routing_model": { "ENTREGA": ["RESUMEN"], "RESUMEN": [] },
+  "screens": [
+    {
+      "id": "ENTREGA",
+      "title": "Datos de entrega",
+      "data": {
+        "zonas": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } }, "__example__": [{ "id": "Centro", "title": "Centro · $35.00 · 30 min" }] },
+        "horarios": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } }, "__example__": [{ "id": "lo-antes-posible", "title": "Lo antes posible" }] },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextBody", "text": "${data.error}", "visible": true },
+          { "type": "Dropdown", "name": "zona", "label": "Colonia", "required": true, "data-source": "${data.zonas}" },
+          { "type": "TextInput", "name": "direccion", "label": "Calle, número y referencias", "required": true, "input-type": "text" },
+          { "type": "Dropdown", "name": "horario", "label": "¿Cuándo?", "required": true, "data-source": "${data.horarios}" },
+          { "type": "OptIn", "name": "recoger", "label": "Prefiero recoger en el local" },
+          { "type": "Footer", "label": "Continuar", "on-click-action": { "name": "data_exchange", "payload": { "zona": "${form.zona}", "direccion": "${form.direccion}", "horario": "${form.horario}", "recoger": "${form.recoger}" } } }
+        ]
+      }
+    },
+    {
+      "id": "RESUMEN",
+      "title": "Tu pedido",
+      "terminal": true,
+      "data": {
+        "resumen": { "type": "string", "__example__": "2 × Tacos al pastor · Envío $35.00 · Total $205.00" },
+        "pedido_id": { "type": "string", "__example__": "ped_1" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextBody", "text": "${data.resumen}" },
+          { "type": "Footer", "label": "Confirmar y pagar", "on-click-action": { "name": "data_exchange", "payload": { "confirmar": true, "pedido_id": "${data.pedido_id}" } } }
+        ]
+      }
+    }
+  ]
+}

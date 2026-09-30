@@ -5,13 +5,13 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**36 activos** cubren **226 unidades** del repo.
+**38 activos** cubren **229 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
 | TPL-conocimiento | Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes) | CONOCIMIENTO | datos | beta | 1 | `tools/conocimiento` |
 | TPL-doctrina | Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto | CONOCIMIENTO | config_agentica | produccion | 17 | `AGENTS.md` |
-| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 65 | `.claude/specs` |
+| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 66 | `.claude/specs` |
 | TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 5 | `.claude/design-systems` |
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
@@ -41,9 +41,11 @@
 | TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
 | TPL-feature-reel | App del reel: cuentas, subida del clip y sala de aprobacion en el celular | PRODUCTO | software | blueprint | 6 | `src/features/reel` |
+| TPL-feature-ventas-whatsapp | Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a) | PRODUCTO | software | blueprint | 1 | `src/features/ventas-whatsapp` |
 | TPL-grafo-conocimiento | Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes | PRODUCTO | software | beta | 1 | `tools/grafo-conocimiento` |
 | TPL-pymes-marketing | Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso | PRODUCTO | software | blueprint | 1 | `tools/pymes-marketing` |
 | TPL-reel | Reel del celular para pymes: cortes, subtitulos, privacidad (caras, pantalla, voces), master determinista y sala | PRODUCTO | software | blueprint | 2 | `tools/reel` |
+| TPL-ventas-whatsapp | Vendedor con IA en WhatsApp para pymes, fases 0-3 en laboratorio: canal Cloud API, agente acotado con barreras y traspaso, comercio con Flows cifrados y liga de pago, atribucion con Conversions API y ROAS, A2A multi-inquilino, venta y renta de numeros (N-01), BSP propio con Embedded Signup y cobro (N-02), y el simulador de Meta (0.1.0) | PRODUCTO | software | blueprint | 1 | `tools/ventas-whatsapp` |
 | TPL-voz | Voz: deteccion de voz (VAD) y diarizacion local | PRODUCTO | software | beta | 1 | `tools/voz` |
 
 ## Fuentes que se escanean

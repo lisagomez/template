@@ -192,6 +192,22 @@
    "cubre": ["src/features/laboratorio-voz", "scripts/laboratorio-voz"]
   },
   {
+   "id": "TPL-ventas-whatsapp",
+   "nombre": "Vendedor con IA en WhatsApp para pymes, fases 0-3 en laboratorio: canal Cloud API, agente acotado con barreras y traspaso, comercio con Flows cifrados y liga de pago, atribucion con Conversions API y ROAS, A2A multi-inquilino, venta y renta de numeros (N-01), BSP propio con Embedded Signup y cobro (N-02), y el simulador de Meta (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/ventas-whatsapp", "responsable": "dep-sw",
+   "origen": ["docs/goals/ventas-ia-waba.md", "docs/INVESTIGACION-ventas-ia-whatsapp.md"],
+   "cubre": ["tools/ventas-whatsapp"]
+  },
+  {
+   "id": "TPL-feature-ventas-whatsapp",
+   "nombre": "Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/ventas-whatsapp", "responsable": "dep-sw",
+   "origen": ["docs/goals/ventas-ia-waba.md"],
+   "cubre": ["src/features/ventas-whatsapp"]
+  },
+  {
    "id": "TPL-feature-etiquetas",
    "nombre": "Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",

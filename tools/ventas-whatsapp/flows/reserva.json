@@ -1,0 +1,41 @@
+{
+  "version": "7.1",
+  "data_api_version": "3.0",
+  "routing_model": { "DIA": ["HORA"], "HORA": [] },
+  "screens": [
+    {
+      "id": "DIA",
+      "title": "Reservar mesa",
+      "data": {
+        "servicios": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } }, "__example__": [{ "id": "mesa-4", "title": "Mesa para 4" }] },
+        "dias": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } }, "__example__": [{ "id": "2026-10-02", "title": "vie 2 de octubre" }] }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "Dropdown", "name": "servicio", "label": "¿Cuántas personas?", "required": true, "data-source": "${data.servicios}" },
+          { "type": "Dropdown", "name": "dia", "label": "Día", "required": true, "data-source": "${data.dias}" },
+          { "type": "Footer", "label": "Ver horarios", "on-click-action": { "name": "data_exchange", "payload": { "servicio": "${form.servicio}", "dia": "${form.dia}" } } }
+        ]
+      }
+    },
+    {
+      "id": "HORA",
+      "title": "Horario",
+      "terminal": true,
+      "data": {
+        "horarios": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } }, "__example__": [{ "id": "1790000000000", "title": "20:00" }] },
+        "servicio": { "type": "string", "__example__": "mesa-4" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextBody", "text": "${data.error}" },
+          { "type": "RadioButtonsGroup", "name": "inicio", "label": "Elige la hora", "required": true, "data-source": "${data.horarios}" },
+          { "type": "Footer", "label": "Reservar", "on-click-action": { "name": "data_exchange", "payload": { "inicio": "${form.inicio}", "servicio": "${data.servicio}" } } }
+        ]
+      }
+    }
+  ]
+}
