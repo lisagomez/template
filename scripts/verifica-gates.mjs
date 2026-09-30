@@ -36,10 +36,10 @@ const ambar = (s) => `\x1b[33m${s}\x1b[0m`;
 const gris = (s) => `\x1b[2m${s}\x1b[0m`;
 
 /** Scripts de package.json con forma de gate: verifican algo y pueden ponerse rojos. */
-const FORMA_DE_GATE = /^(verifica|verify|prueba|audita|vigila|mide|erp):|^(regresion|typecheck|lint|build)$/;
+const FORMA_DE_GATE = /^(verifica|verify|prueba|audita|vigila|mide|erp|revisa):|^(regresion|typecheck|lint|build)$/;
 /**
  * Escotilla declarada: un script con forma de gate que NO lo es (genera, exporta, mide a
- * mano). Hoy esta VACIA a proposito — los 28 scripts con esta forma estan los 28 en el
+ * mano). Hoy esta VACIA a proposito — los 35 scripts con esta forma estan los 35 en el
  * padron. Excusar uno aqui es una decision visible, que es justo lo contrario de olvidarlo.
  */
 const NO_SON_GATE = new Set([]);

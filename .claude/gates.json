@@ -89,6 +89,17 @@
       "timeout_s": 300
     },
     {
+      "nombre": "revisa:readmes",
+      "runner": "comando",
+      "comando": "npm run revisa:readmes",
+      "guarda": "el contrato product first de los README de herramientas (`tools/*`) y apps (`src/features/*`) que declara el skill `readme`: que qué hace, casos de uso y requerimientos de infraestructura vayan antes que lo demás, que ningún README lleve el valor de una variable de entorno sensible, y que ningún README nuevo quede sin clasificar (en alcance o excluido con motivo)",
+      "evidencia": "README por README, conforme o no y qué le falta; los excluidos con su motivo y las carpetas de producto sin README como pendientes; exit 1 si alguno no es conforme o queda sin clasificar",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "ALTA del 2026-09-30. El skill `readme` se firmó el 2026-09-29 (PR #181) sin su gate: el contrato product first dependía de que alguien corriera el auditor. Fuera de `predeploy` a propósito: un README no cambia lo que se despliega. Las carpetas de producto sin README se listan como pendientes y NO ponen el gate en rojo; lo rojo es un README no conforme o sin clasificar."
+    },
+    {
       "nombre": "regresion",
       "runner": "comando",
       "comando": "npm run regresion",
