@@ -91,6 +91,12 @@
       "label": "Rama propia con todo commiteado, npm run validate en verde después del commit, grafo.json con estados y evidencia, resultados.md",
       "estado": "ambar",
       "evidencia": "validate 29/29 en verde sobre 1df6bcc (árbol sellado 10e620cc3cef); falta repetirlo después de las corridas reales"
+    },
+    {
+      "id": "llave",
+      "label": "Entrada manual: OPENROUTER_API_KEY en el .env.local principal, guardada por el laboratorio con read -rsp (nunca por el chat); se comprueba enmascarada (presente/ausente, largo)",
+      "estado": "gris",
+      "evidencia": "AUSENTE al 2026-09-30. Hueco descubierto en el post-mortem: el grafo compilado no la tenía como nodo y colgaban de ella agentes, app, casa, laboratorio y entrega"
     }
   ],
   "aristas": [
@@ -261,6 +267,13 @@
       "to": "entrega",
       "tipo": "script",
       "label": "commit + npm run validate"
+    },
+    {
+      "id": "a25",
+      "from": "llave",
+      "to": "agentes",
+      "tipo": "manual",
+      "label": "el laboratorio guarda la llave; sin ella el corredor no produce ninguna corrida"
     }
   ],
   "lazos": [

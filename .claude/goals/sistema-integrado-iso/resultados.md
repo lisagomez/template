@@ -3,6 +3,9 @@
 Estado al **2026-09-30**. Lo que dice «pendiente» lo está de verdad: **no hay `OPENROUTER_API_KEY`** en la máquina y
 ninguna corrida real de agente ocurrió todavía. No se simuló ninguna.
 
+Post-mortem (Fase 5, detenido por la red de seguridad): `post-mortem.md`. El grafo tiene ahora el nodo `llave` en gris,
+que es de donde cuelgan los cinco nodos en ámbar.
+
 ## Definición de hecho, punto por punto
 
 | # | Punto | Estado | Evidencia |
