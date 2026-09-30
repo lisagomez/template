@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * Pruebas del formato de trayectoria y de la captura en la linea de aplicacion (spec 011).
+ * Pruebas del formato de trayectoria, de la captura en la linea de aplicacion y de como el informe
+ * junta un periodo (spec 011).
  * `node --test scripts/prueba-trayectorias.ts`. Sin red, sin disco, sin base de datos.
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { validaTrayectoria, cobertura, idDe } from './trayectorias/formato.mjs'
+import { metricasDe, agrega, razon } from './trayectorias/metricas.mjs'
 import { trayectoriaDeUso, conTrayectoria, type Trayectoria } from '../src/lib/ai/trayectorias.ts'
 import { registraUso, type EventoDeUso, type Registrador } from '../src/lib/ai/contabilidad.ts'
 
@@ -109,3 +111,34 @@ test('la trayectoria que emite `dictado dictar` pasa el validador del template (
   assert.deepEqual(validaTrayectoria(t), [])
   assert.equal((t as { linea: string }).linea, 'herramientas')
 })
+
+/** Una sesion de la fabrica con `errores` sobre `usos` herramientas. */
+const sesion = (errores: number, usos: number) => ({ ...buena(), acciones: { herramientas: { Bash: usos }, llamadasAlModelo: 10, turnos: 1 }, resultado: { errores } })
+const errores = (...ss: ReturnType<typeof sesion>[]) => agrega(ss.map((t) => metricasDe(t).erroresPorHerramienta))
+
+test('una tasa del periodo es total ÷ total: una sesion corta no pesa lo mismo que una larga', () => {
+  assert.equal(errores(sesion(7, 47), sesion(9, 2000)), 16 / 2047)
+  assert.notEqual(errores(sesion(7, 47), sesion(9, 2000)), (7 / 47 + 9 / 2000) / 2, 'la media de tasas es la que fabricaba la regresion')
+})
+
+test('el caso del 2026-09-30: la media de tasas subia y el agregado bajaba; el informe sigue al agregado', () => {
+  const antes = [sesion(28, 1000), sesion(28, 1000), sesion(28, 1000)]
+  const despues = [sesion(7, 47), sesion(5, 49), sesion(40, 2000), sesion(40, 2000)]
+  const mediaDeTasas = (ss: ReturnType<typeof sesion>[]) => ss.reduce((a, t) => a + t.resultado.errores / t.acciones.herramientas.Bash, 0) / ss.length
+  assert.ok(mediaDeTasas(despues) > mediaDeTasas(antes) * 1.2, 'la trampa: con la media saldria regresion')
+  assert.ok((errores(...despues) as number) < (errores(...antes) as number), 'con el agregado no la hay')
+})
+
+test('los huecos no entran como ceros: sin denominador la tasa es null, y un periodo sin datos da null', () => {
+  assert.equal(metricasDe(sesion(0, 0)).erroresPorHerramienta, null)
+  assert.equal(razon(null, 10), null)
+  assert.equal(agrega([null, razon(1, 4), null]), 0.25)
+  assert.equal(agrega([null, null]), null)
+  assert.equal(agrega([]), null)
+})
+
+test('los valores sueltos siguen siendo media, y mezclarlos con razones es un error, no un numero', () => {
+  assert.equal(agrega([0.5, 1]), 0.75)
+  assert.throws(() => agrega([0.5, razon(1, 2)]), /mezclad/)
+})
+
