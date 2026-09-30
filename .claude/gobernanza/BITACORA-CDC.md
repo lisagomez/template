@@ -4126,3 +4126,37 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Pendiente (aparte)**: `scripts/configura-deploy.mjs:159` mira el VALOR de `SUPABASE_SERVICE_ROLE_KEY` y no el
   NOMBRE de la variable, así que el caso de `.env.local` le habría pasado de largo. Va con su propio arreglo y su
   aprendizaje.
+
+### 2026-09-29 — alta de `prueba:migraciones` en `validate` (PGlite, sin Docker) → CDC PROMOVIDO — radio: sistema (padrón de gates)
+- **Cambio**: en `.claude/gates.json` nace `prueba:migraciones`, **activo en `validate`** (27 gates activos).
+  Aplica `supabase/migrations/` sobre Postgres 17 en proceso (PGlite), con un Supabase mínimo imitado, y
+  comprueba cinco cosas:
+  - cada migración se aplica;
+  - aplicadas otra vez, ninguna falla (idempotentes: se aplican a mano y sin historial);
+  - RLS en toda tabla de `public`;
+  - ninguna función SECURITY DEFINER de `public` ejecutable por `anon` ni `authenticated` (lints 0028/0029);
+  - `search_path` fijo en toda función de `public` (lint 0011).
+
+  `--prueba` siembra un defecto de cada clase. Dependencia nueva: `@electric-sql/pglite` `0.5.8`, pineada
+  exacta. De paso se asienta en el inventario la migración del #183, que no tenía asiento y dejó `main` en rojo
+  en `verifica:inventario` desde su merge.
+- **Motivo**:
+  - la migración de `project_settings` (2026-08-26) no compilaba y nadie lo vio en un mes, porque ningún gate
+    aplicaba migraciones;
+  - `handle_new_user()` salió ejecutable por `/rest/v1/rpc` y lo cazó el linter de Supabase ya en producción.
+
+  Va con PGlite y no con Docker a propósito: los gates con Docker siguen inactivos porque el gate corre en
+  máquinas sin Docker, y uno inactivo no habría protegido nada.
+- **Gate aplicado**: diff revisado ☑ (**enseñado contra `main` en el PR #185 antes de pedir la firma**) ·
+  regresión verde ☑ capa A 131/131 · aprobación humana ☑ · pineo ☑ (dependencia nueva exacta, sin modelo).
+  **Capa B no corrida, a propósito y declarado** («capa A basta»): no toca skills, prompts, modelo ni
+  instrucciones.
+- **Regresión**:
+  - `prueba:migraciones` en verde en 2,3 s;
+  - `--prueba` **5/5 siembras cazadas**: sintaxis inválida, no idempotente, tabla sin RLS, SECURITY DEFINER
+    expuesta y función sin `search_path`;
+  - contra `main` de esa mañana (`58174c9`) **cae por los dos fallos reales**, uno tras otro;
+  - `verifica:gates --prueba` 6/6;
+  - `npm run validate` **27/27 activos en verde, 8 inactivos declarados, 0 rojos**.
+- **Aprobado por**: **lisagomez** (el laboratorio), «firmo, capa A basta», 2026-09-29, con el diff del padrón
+  y la evidencia delante (PR #185).

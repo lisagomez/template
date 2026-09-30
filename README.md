@@ -254,6 +254,7 @@ npm run prueba:laboratorio-pymes  # el laboratorio de las herramientas pymes (/l
 npm run prueba:historial    # la logica pura de /historial: busqueda con acentos, agrupacion por dia, estadisticas, exportadores
 npm run prueba:ajustes      # la logica pura de /ajustes: agrupar, origen en palabras, cifras del catalogo
 npm run prueba:etiquetas    # etiquetas GS1-128: nucleo contra la norma, ida y vuelta SVG/ZPL, agente de impresion, importacion de catalogo
+npm run prueba:migraciones  # supabase/migrations en Postgres en proceso (PGlite, sin Docker): se aplican, idempotentes, RLS, sin SECURITY DEFINER expuesta
 npm run capturas:etiquetas  # tras build: capturas de escritorio y celular de /etiquetas (camara falsa, Zebras simuladas)
 npm run audita:imprenta  # que CLI hay, cual falta, y que declara como no verificable
 npm run configura:deploy  # EN EL SERVIDOR: mide la maquina y valida .env.production
