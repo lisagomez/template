@@ -105,6 +105,10 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/reel/[id]/consentimientos',
   '/api/reel/[id]/decision',
   '/api/reel/proyectos',
+  // Sistema integrado ISO (PRP-008): exporta la versión EXACTA de un documento a DOCX o PDF. Solo GET (no escribe),
+  // exige sesión (proxy: 401 sin ella) y lee con la sesión de quien pide (RLS por organización); la huella del archivo
+  // viaja en X-Huella. Misma app y mismo puerto que las demás (RF-20).
+  '/api/sgi/documento/[version]',
 ]
 
 const peticion = (cuerpo: unknown, cabeceras: Record<string, string> = {}): Request =>
