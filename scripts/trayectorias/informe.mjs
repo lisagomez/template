@@ -8,12 +8,13 @@
  * Reglas: los huecos no se suman como ceros (se cuenta cuantas trayectorias no tienen el dato);
  * si un periodo tiene menos de la mitad de cobertura que el otro se dice y NO se marca regresion
  * por eso; una regresion es un cambio a peor de mas del 20 % en una metrica con al menos 3
- * trayectorias en cada periodo.
+ * trayectorias en cada periodo; una tasa del periodo es total ÷ total (`metricas.mjs`).
  */
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { leeTrayectorias, evaluaEstructural } from './evalua.mjs'
+import { metricasDe, agrega, MEJOR_SI_SUBE } from './metricas.mjs'
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const EVAL = join(raiz, 'trayectorias', 'evaluaciones')
@@ -36,35 +37,8 @@ if (existsSync(EVAL)) {
   if (ultimo) juicio = JSON.parse(readFileSync(join(EVAL, ultimo), 'utf8'))
 }
 
-const media = (xs) => (xs.length === 0 ? null : xs.reduce((a, b) => a + b, 0) / xs.length)
 const actorDe = (t) => t.linea === 'fabrica' ? (t.actor.tarea ?? 'sin-tarea') : t.linea === 'aplicacion' ? (t.actor.feature ?? t.actor.tarea) : (t.actor.herramienta ?? 'herramienta')
-
-/** Metricas por trayectoria; `null` cuando el dato no esta, y se cuenta aparte. */
-function metricasDe(t) {
-  const herr = Object.values(t.acciones.herramientas ?? {}).reduce((a, b) => a + b, 0)
-  const ev = { ...estructural[t.id], ...(juicio?.veredictos?.[t.id] ?? {}) }
-  const valores = Object.values(ev)
-  // La fabrica se compara por INTENSIDAD (por llamada, por gate, por herramienta), no por totales
-  // de sesion: los totales crecen con la duracion y el primer informe fabrico cuatro regresiones
-  // que solo decian que las sesiones del segundo periodo eran mas largas (2026-09-13).
-  const llamadas = t.acciones.llamadasAlModelo ?? 0
-  const gatesCorridos = t.gates.reduce((a, g) => a + (g.veces ?? 1), 0)
-  return {
-    salidaPorLlamada: t.uso && llamadas > 0 ? t.uso.salida / llamadas : t.linea === 'aplicacion' ? (t.uso?.salida ?? null) : null,
-    cacheRatio: t.uso && t.uso.salida > 0 ? (t.uso.cacheLectura ?? 0) / t.uso.salida : null,
-    costoUsd: t.linea === 'fabrica' ? null : t.costoUsd,
-    costoPorLlamada: t.linea === 'fabrica' && t.costoUsd !== null && llamadas > 0 ? t.costoUsd / llamadas : null,
-    msPorLlamada: t.tiempos.totalMs !== null && llamadas > 0 ? t.tiempos.totalMs / llamadas : t.linea !== 'fabrica' ? t.tiempos.totalMs : null,
-    aciertoEvals: valores.length ? valores.filter(Boolean).length / valores.length : null,
-    revisionHumana: t.resultado.campos ? (t.resultado.revisionHumana ?? 0) / t.resultado.campos : null,
-    gatesRojosPorGate: gatesCorridos > 0 ? t.gates.filter((g) => g.resultado === 'rojo').length / gatesCorridos : null,
-    erroresPorHerramienta: herr ? t.resultado.errores / herr : null,
-    pagMin: t.resultado.metricas?.paginasPorMinutoMotor ?? null,
-    // Dictado (linea herramientas, actor `dictado`): la latencia que vive quien dicta, p50 por sesion.
-    latenciaP50Ms: t.resultado.metricas?.latenciaP50Ms ?? null,
-  }
-}
-const MEJOR_SI_SUBE = { cacheRatio: true, aciertoEvals: true, pagMin: true, latenciaP50Ms: false, salidaPorLlamada: false, costoUsd: false, costoPorLlamada: false, msPorLlamada: false, revisionHumana: false, gatesRojosPorGate: false, erroresPorHerramienta: false }
+const evalsDe = (t) => ({ ...estructural[t.id], ...(juicio?.veredictos?.[t.id] ?? {}) })
 
 // Dos niveles: la LINEA entera (donde de verdad hay base para comparar) y cada actor dentro de
 // ella (donde casi nunca la hay todavia, y se dice). Sin el agregado, 21 sesiones con skills
@@ -73,7 +47,7 @@ const grupos = {}
 for (const t of trayectorias) {
   for (const clave of [`${t.linea} · (todas)`, `${t.linea} · ${actorDe(t)}`]) {
     const g = (grupos[clave] ??= { linea: t.linea, antes: [], despues: [] })
-    g[periodoDe(t)].push({ id: t.id, m: metricasDe(t), modelos: t.modelos })
+    g[periodoDe(t)].push({ id: t.id, m: metricasDe(t, evalsDe(t)), modelos: t.modelos })
   }
 }
 
@@ -98,7 +72,7 @@ const confundidoPorModelo = (g) => {
   return cambio ? `mezcla de modelos distinta (antes ${a.dominante} ${Math.round((a.cuota ?? 0) * 100)} %; despues ${d.dominante} ${Math.round((d.cuota ?? 0) * 100)} %${nuevos.length ? `, nuevos: ${nuevos.join(', ')}` : ''})` : null
 }
 
-const lineas = [`# Informe de trayectorias — corte ${corte}`, '', `> ${trayectorias.length} trayectorias · antes: ${trayectorias.filter((t) => periodoDe(t) === 'antes').length} · despues: ${trayectorias.filter((t) => periodoDe(t) === 'despues').length} · evals de juicio: ${juicio ? `${Object.keys(juicio.veredictos).length} trayectorias por ${juicio.evaluador}` : 'ninguna todavia'}`, '', '> Los huecos no se suman como ceros: cada celda dice sobre cuantas trayectorias se calculo. Una regresion (▼) o mejora (▲) exige al menos 3 en cada periodo y un cambio de mas del 20 %; con cobertura desigual (menos de la mitad) se dice y no se marca. La fabrica se compara por intensidad (por llamada, por gate, por herramienta), no por totales de sesion, que crecen con la duracion.', '']
+const lineas = [`# Informe de trayectorias — corte ${corte}`, '', `> ${trayectorias.length} trayectorias · antes: ${trayectorias.filter((t) => periodoDe(t) === 'antes').length} · despues: ${trayectorias.filter((t) => periodoDe(t) === 'despues').length} · evals de juicio: ${juicio ? `${Object.keys(juicio.veredictos).length} trayectorias por ${juicio.evaluador}` : 'ninguna todavia'}`, '', '> Los huecos no se suman como ceros: cada celda dice sobre cuantas trayectorias se calculo. Una regresion (▼) o mejora (▲) exige al menos 3 en cada periodo y un cambio de mas del 20 %; con cobertura desigual (menos de la mitad) se dice y no se marca. La fabrica se compara por intensidad (por llamada, por gate, por herramienta), no por totales de sesion, que crecen con la duracion; y la intensidad de un periodo es total ÷ total, no la media de las tasas de cada sesion (una sesion corta pesaria lo mismo que una larga).', '']
 const hallazgos = []
 for (const [nombre, g] of Object.entries(grupos).sort()) {
   const confusor = confundidoPorModelo(g)
@@ -109,7 +83,7 @@ for (const [nombre, g] of Object.entries(grupos).sort()) {
     const a = g.antes.map((x) => x.m[metrica]).filter((v) => v !== null)
     const d = g.despues.map((x) => x.m[metrica]).filter((v) => v !== null)
     if (a.length === 0 && d.length === 0) continue
-    const ma = media(a); const md = media(d)
+    const ma = agrega(a); const md = agrega(d)
     const f = (v, n, total) => v === null ? `— (0/${total})` : `${Number.isInteger(v) ? v : v.toFixed(3)} (${n}/${total})`
     let cambio = ''
     if (ma !== null && md !== null && a.length >= MINIMO && d.length >= MINIMO) {

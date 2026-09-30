@@ -33,7 +33,9 @@ captura ─► datos/ ─► evalua (estructural, script) ─┐
   cobertura desigual se dice y no se marca. **La fábrica se compara por intensidad** (tokens de
   salida por llamada, ms por llamada, gates rojos por gate corrido, errores por herramienta), no
   por totales de sesión: el primer informe (2026-09-13) marcó cuatro «regresiones» que solo
-  decían que las sesiones del segundo periodo eran más largas.
+  decían que las sesiones del segundo periodo eran más largas. Y la intensidad de un periodo es
+  **total ÷ total**, no la media de las tasas de cada sesión: con la media, dos sesiones cortas
+  sostuvieron una «regresión» de errores por herramienta durante cuatro informes (2026-09-30).
 - `npm run trayectorias:propuestas`: redacta propuestas con la señal, el destino y las
   trayectorias que las sostienen. **No aplica nada.** Un skill, una regla, un prompt, el routing
   o el arnés solo cambian por CDC con firma. Automejorado no es autoaprobado.
