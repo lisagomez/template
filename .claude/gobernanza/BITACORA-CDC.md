@@ -4160,3 +4160,27 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - `npm run validate` **27/27 activos en verde, 8 inactivos declarados, 0 rojos**.
 - **Aprobado por**: **lisagomez** (el laboratorio), «firmo, capa A basta», 2026-09-29, con el diff del padrón
   y la evidencia delante (PR #185).
+
+### 2026-09-29 — `aprendizajes-stack.md` resumido sin quitar lecciones → CDC PROMOVIDO — radio: instrucciones (reglas del stack)
+- **Cambio**: `.claude/rules/aprendizajes-stack.md` pasa de 2887 a 1715 tokens, y la suma de las rules de **6469
+  a 5297 de 6500** (100 % → 81 %). El tope no se toca.
+  - Las 17 lecciones se quedan con su error, su arreglo y sus comandos exactos; se va la narración.
+  - «`npm run dev`, no `next dev`» se funde en la del puerto 3000 (ya estaba en `AGENTS.md`).
+  - La cabecera apunta al texto largo en git (`git show e823f09:.claude/rules/aprendizajes-stack.md`).
+  - Los `paths:` no cambian: en Claude Code cada lección sigue cargando al tocar sus archivos.
+
+  `aprendizajes-gobernanza.md` queda intacto a propósito: guarda el porqué de los controles.
+- **Motivo**: la suma estaba al 100 % y el siguiente aprendizaje no cabía. El tope se subió el 23/09 poco a
+  propósito para que volviera a chocar, y `mide:contexto` pide recortar antes de subirlo.
+- **Gate aplicado**: diff revisado ☑ (**enseñado en el PR #187 antes de pedir la firma**, con una entrada de
+  ejemplo antes/después) · regresión verde ☑ capa A 131/131 · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia). **Capa B no corrida, a propósito y declarado** («capa A basta»): ninguna lección cambia de
+  sentido, solo se acorta su texto.
+- **Regresión**:
+  - comparación término a término contra el original: cinco referencias útiles recuperadas (el script de
+    ejemplo de sondeos, `npm install --no-save` en `/extractor`, el alcance `cn()`, el arreglo de PCM16 en
+    `voz/node` y `profiles:`);
+  - ningún contrato de regresión ni verificador lee el texto de las rules; `GEMINI.md` solo apunta a ellas;
+  - `mide:contexto` en verde; `npm run validate` **27/27 activos en verde, 0 rojos**.
+- **Aprobado por**: **lisagomez** (el laboratorio), «firmo, capa A basta», 2026-09-29, con el diff y el ejemplo
+  delante (PR #187).
