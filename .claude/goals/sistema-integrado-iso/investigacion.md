@@ -24,7 +24,7 @@ un cliente.
 - **4.1 / 4.2**: la consideración del cambio climático de la enmienda de 2024 queda integrada.
 - **5.1.1**: la alta dirección tiene que **promover una cultura de la calidad y el comportamiento ético**. Deja de ser
   una recomendación.
-- **5.2**: la política tiene que ser coherente con la **dirección estratégica**.
+- **5.2**: la política tiene que ser coherente con la **dirección estratégica**. *Nota del revisor dedicado: esto ya estaba en 2015; el catálogo lo trata igual en las dos ediciones y no lo cuenta como cambio.*
 - **6.1**: riesgos y oportunidades se separan en subapartados (6.1.1 general, 6.1.2 riesgos, 6.1.3 oportunidades).
 - **6.3**: se refuerza la planificación de cambios.
 - **7.3**: la toma de conciencia incluye la cultura de la calidad y la ética.

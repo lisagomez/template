@@ -34,6 +34,8 @@ export interface Referencia {
   readonly edicion: IdEdicion;
   /** Número de cláusula (`4.1`, `7.1.5.2`) o de control del Anexo A (`A.6.2.4`). Solo el número. */
   readonly clausula: string;
+  /** `true` = número SUPUESTO (se copió de la edición anterior sin cotejar la nueva). Se muestra como tal. */
+  readonly supuesta?: boolean;
 }
 
 export interface Requisito {

@@ -14,7 +14,8 @@ export const ROLES: readonly Rol[] = ['consultor', 'admin_pyme', 'alta_direccion
 /** Qué se aprueba en la app. El consultor NUNCA aprueba: propone. */
 export type TipoAprobable =
   | 'politica' | 'soa' | 'evaluacion_impacto' | 'objetivos' | 'riesgos' | 'plan_proyecto'
-  | 'procedimiento' | 'evidencia' | 'plan_capacitacion' | 'proveedor' | 'hallazgo' | 'eficacia_accion' | 'cierre_fase';
+  | 'procedimiento' | 'documento_general' | 'evidencia' | 'plan_capacitacion' | 'proveedor' | 'hallazgo' | 'eficacia_accion'
+  | 'cierre_fase';
 
 /**
  * Quién puede aprobar cada cosa. La misma tabla vive en SQL (`sgi_puede_aprobar`, migración del esquema) y una prueba
@@ -28,6 +29,7 @@ export const APROBADORES: Readonly<Record<Exclude<TipoAprobable, 'cierre_fase'>,
   riesgos: ['alta_direccion', 'admin_pyme'],
   plan_proyecto: ['alta_direccion', 'admin_pyme'],
   procedimiento: ['admin_pyme', 'dueno_proceso'],
+  documento_general: ['admin_pyme', 'alta_direccion'],
   evidencia: ['admin_pyme', 'dueno_proceso', 'alta_direccion'],
   plan_capacitacion: ['admin_pyme'],
   proveedor: ['admin_pyme'],
@@ -47,6 +49,17 @@ export const NOMBRE_FASE: Readonly<Record<Fase, string>> = {
 };
 
 export const FASES: readonly Fase[] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+/** Tipo de documento → qué aprobación le toca. Un documento se aprueba como versión exacta (huella). */
+export type TipoDocumento =
+  | 'politica' | 'procedimiento' | 'formato' | 'soa' | 'evaluacion_impacto' | 'objetivos' | 'riesgos'
+  | 'plan_proyecto' | 'plan_capacitacion' | 'contexto' | 'alcance' | 'informe';
+
+export const APROBACION_DE_DOCUMENTO: Readonly<Record<TipoDocumento, Exclude<TipoAprobable, 'cierre_fase' | 'evidencia' | 'proveedor' | 'hallazgo' | 'eficacia_accion'>>> = {
+  politica: 'politica', procedimiento: 'procedimiento', formato: 'procedimiento', soa: 'soa',
+  evaluacion_impacto: 'evaluacion_impacto', objetivos: 'objetivos', riesgos: 'riesgos', plan_proyecto: 'plan_proyecto',
+  plan_capacitacion: 'plan_capacitacion', contexto: 'documento_general', alcance: 'documento_general', informe: 'documento_general',
+};
 
 export function puedeAprobar(tipo: TipoAprobable, rol: Rol, fase?: Fase): boolean {
   if (rol === 'consultor') return false;

@@ -1,0 +1,196 @@
+{
+ "cuando": "2026-09-30T12:48:02.700Z",
+ "base": "supabase local (Docker)",
+ "filas": [
+  [
+   "el consultor da de alta su despacho (queda como miembro)",
+   "se crea",
+   true
+  ],
+  [
+   "la admin de A da de alta su organización",
+   "se crea y queda como admin_pyme",
+   true
+  ],
+  [
+   "la admin de A agrega dirección, dueño de proceso, auditor y consultor",
+   "se agregan",
+   true
+  ],
+  [
+   "otro consultor del despacho da de alta un cliente suyo (Z)",
+   "se crea",
+   true
+  ],
+  [
+   "el consultor propone un documento en A",
+   "se crea (propone)",
+   true
+  ],
+  [
+   "la base calcula la huella de la versión",
+   "sha256 de 64 hex",
+   true
+  ],
+  [
+   "B lee la organización de A",
+   "0 filas",
+   true
+  ],
+  [
+   "B lee el proyecto de A",
+   "0 filas",
+   true
+  ],
+  [
+   "B lee documentos y versiones de A",
+   "0 filas",
+   true
+  ],
+  [
+   "B cambia el proyecto de A",
+   "0 filas",
+   true
+  ],
+  [
+   "B mete un riesgo con organizacion_id de A",
+   "rechazado",
+   true
+  ],
+  [
+   "B cuelga un riesgo SUYO del proyecto de A",
+   "rechazado (misma organización)",
+   true
+  ],
+  [
+   "B se agrega como alta dirección de A",
+   "rechazado",
+   true
+  ],
+  [
+   "B aprueba la política de A",
+   "rechazado",
+   true
+  ],
+  [
+   "B pregunta qué le falta al proyecto de A (función de la base)",
+   "rechazado: sin acceso",
+   true
+  ],
+  [
+   "B pregunta qué fases cerró A",
+   "nada",
+   true
+  ],
+  [
+   "el consultor ve a su cliente A",
+   "1 fila",
+   true
+  ],
+  [
+   "el consultor ve a Z (del mismo despacho, no asignado)",
+   "0 filas",
+   true
+  ],
+  [
+   "el consultor ve a B",
+   "0 filas",
+   true
+  ],
+  [
+   "el consultor aprueba la política como consultor",
+   "rechazado",
+   true
+  ],
+  [
+   "el consultor se da el rol de alta dirección",
+   "rechazado",
+   true
+  ],
+  [
+   "el dueño de proceso aprueba la política de IA",
+   "rechazado (rol)",
+   true
+  ],
+  [
+   "el dueño de proceso se hace pasar por alta dirección",
+   "rechazado (no tiene el rol)",
+   true
+  ],
+  [
+   "alta dirección aprueba con una huella distinta",
+   "rechazado (O3)",
+   true
+  ],
+  [
+   "alguien pone la versión en «aprobado» sin aprobación",
+   "rechazado",
+   true
+  ],
+  [
+   "alta dirección aprueba la versión exacta",
+   "se registra (quién, cuándo, rol, huella, versión)",
+   true
+  ],
+  [
+   "aprobar crea la evidencia aprobada que cubre sus requisitos",
+   "versión aprobada + evidencia",
+   true
+  ],
+  [
+   "alta dirección reescribe la huella de su aprobación",
+   "rechazado (inmutable)",
+   true
+  ],
+  [
+   "la admin borra la aprobación",
+   "rechazado",
+   true
+  ],
+  [
+   "la dirección firma el hallazgo",
+   "rechazado (solo auditor)",
+   true
+  ],
+  [
+   "el auditor interno firma el hallazgo",
+   "se firma",
+   true
+  ],
+  [
+   "alguien edita el hallazgo firmado",
+   "rechazado",
+   true
+  ],
+  [
+   "alta dirección cierra la fase 2 sin cerrar las anteriores ni cubrir lo obligatorio",
+   "rechazado por la puerta en SQL",
+   true
+  ],
+  [
+   "la puerta en SQL dice qué falta",
+   "lista con fase-1 y requisitos",
+   true
+  ],
+  [
+   "el consultor registra una traza",
+   "se registra",
+   true
+  ],
+  [
+   "alguien edita la traza",
+   "0 filas",
+   true
+  ],
+  [
+   "una traza con modelo «latest»",
+   "rechazado (C1)",
+   true
+  ],
+  [
+   "sin sesión, alguien lista organizaciones",
+   "rechazado o vacío",
+   true
+  ]
+ ]
+}
