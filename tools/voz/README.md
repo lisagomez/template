@@ -2,11 +2,6 @@
 
 Deteccion de voz (VAD) en tiempo real y diarizacion local, en vivo y por lotes.
 
-**El nucleo es TypeScript puro y no tiene dependencias.** No importa `onnxruntime`, ni React,
-ni nada del navegador: habla con dos interfaces (`ModeloVoz`, `ModeloHablante`) y cada punto
-de entrada le inyecta su runtime. Por eso el mismo algoritmo corre en el navegador y en Node,
-y por eso se puede probar entero sin descargar un solo MB de modelos.
-
 ## Que hace y que no
 
 | Hace | No hace |
@@ -18,6 +13,33 @@ y por eso se puede probar entero sin descargar un solo MB de modelos.
 | Diarizar **en vivo con solape**, turnos que se pisan | Transcribir, ya dicho arriba |
 | Reconocer a la misma persona **en la reunion de manana** | Enrolar por ti: los vectores de referencia los eliges tu |
 
+## Casos de uso
+
+- **Un bot de voz que tiene que callarse en cuanto la persona empieza a hablar** (barge-in): solo VAD, ~2 MB con
+  Silero o sin modelos con `modeloEnergia()`, en el navegador o en Node. El laboratorio de voz del template lo usa
+  así, sin modelos (`src/features/laboratorio-voz`).
+- **Una llamada con agente y cliente en canales separados**: el hablante sale del canal, sin modelos de diarización.
+- **El acta de una reunión grabada**: quién habló cuándo, por lotes, y dónde se pisaron si la gente se interrumpe.
+- **Una interfaz que pinta el hablante en vivo** y se corrige hacia atrás cuando la evidencia posterior la contradice.
+- **Poner «Ana» donde dice «Hablante 2», también en la reunión de mañana**: un registro de voces con nombre que
+  sobrevive a la sesión y que no aprende solo.
+- **Dictar**: `@tu-scope/dictado` usa este detector con el perfil `dictado`.
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=20` (`engines`); el núcleo corre igual en el navegador.
+- **Dependencias del sistema**: `onnxruntime-web` (navegador) u `onnxruntime-node` (servidor), peers opcionales, solo
+  para Silero y los modelos de hablante y segmentación. Los pesos no viajan en el paquete: se configuran por ruta y van
+  pineados en `src/node/pesos.ts`. Con `modeloEnergia()` no hace falta ninguno.
+- **CPU, GPU y memoria**: consumo no medido. La última medición de calidad corrió en CPU (AMD
+  Ryzen 7 5700, 16 núcleos, 16 GB, 2026-09-21), y las pruebas con modelos falsos corren en 200 ms sin red.
+- **Servicios externos**: ninguno en ejecución. `npm run mide` baja modelos y audio la primera vez (~35 MB + ~15 MB).
+- **Variables de entorno**: ninguna en el paquete. La demo y el diagnóstico leen `PUERTO` y `WSL_DISTRO_NAME`.
+- **Almacenamiento**: el paquete no escribe nada por su cuenta; lo que queda en disco lo decide quien lo usa (ver «Que
+  se guarda y donde»). Un registro de voces identifica a una persona: es un dato biométrico.
+- **Salida del perímetro (C4)**: el audio no sale de la máquina; es el precio de no igualar a Deepgram o AssemblyAI.
+  Guardar un registro de voces es decisión del proyecto que lo usa, con su C4.
+
 ## Instalar
 
 ```bash
@@ -26,6 +48,13 @@ npm install <ruta>/tools/voz/tu-scope-voz-0.5.0.tgz
 
 El runtime de ONNX es **peerDependency opcional**: instala `onnxruntime-web` (navegador) u
 `onnxruntime-node` (servidor) solo si vas a usar Silero. Con `modeloEnergia()` no hace falta.
+
+## El núcleo, sin dependencias
+
+**El nucleo es TypeScript puro y no tiene dependencias.** No importa `onnxruntime`, ni React,
+ni nada del navegador: habla con dos interfaces (`ModeloVoz`, `ModeloHablante`) y cada punto
+de entrada le inyecta su runtime. Por eso el mismo algoritmo corre en el navegador y en Node,
+y por eso se puede probar entero sin descargar un solo MB de modelos.
 
 ## Los cinco usos
 
@@ -81,7 +110,6 @@ Hay **dos caminos**, y la diferencia no es de calidad sino de lo que pueden repr
 | Habla solapada | **No la ve.** Dos voces a la vez dan un turno con un embedding promedio y una etiqueta que no es de ninguno | La representa: los turnos se **pisan** |
 | Fronteras | Las del VAD | Por marco (~17 ms en pyannote 3.0) |
 | Cuando usarlo | Entrevista, dictado, cualquier audio con turnos limpios | Reunion real, mesa redonda, cualquier sitio donde la gente se interrumpe |
-
 
 **Camino PyanNet** (el que aguanta el solape):
 

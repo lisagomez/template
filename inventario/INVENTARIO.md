@@ -5,13 +5,13 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**36 activos** cubren **222 unidades** del repo.
+**36 activos** cubren **226 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
 | TPL-conocimiento | Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes) | CONOCIMIENTO | datos | beta | 1 | `tools/conocimiento` |
 | TPL-doctrina | Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto | CONOCIMIENTO | config_agentica | produccion | 17 | `AGENTS.md` |
-| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 64 | `.claude/specs` |
+| TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 65 | `.claude/specs` |
 | TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 5 | `.claude/design-systems` |
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
@@ -24,7 +24,7 @@
 | TPL-inventario | Inventario de activos: indice, detector, costeo y export al ERP | FABRICA | software | beta | 3 | `inventario` |
 | TPL-manifiesto-gates | Manifiesto de gates: el padron de lo que el gate corre | FABRICA | software | produccion | 6 | `.claude/gates.json` |
 | TPL-motor-ia | Motor de IA: routing por nivel, contabilidad de tokens y trayectorias de la app | FABRICA | software | produccion | 4 | `src/lib/ai` |
-| TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 27 | `.claude/skills` |
+| TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 30 | `.claude/skills` |
 | TPL-trayectorias | Trayectorias: trazas de ejecucion, evaluador, informe y propuestas | FABRICA | software | produccion | 4 | `scripts/trayectorias` |
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 10 | `docker-compose.yml` |
 | TPL-app-base | App SaaS base (Next.js + Supabase, PWA) | PRODUCTO | software | produccion | 6 | `src/app` |

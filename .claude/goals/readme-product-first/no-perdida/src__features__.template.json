@@ -1,0 +1,10 @@
+{
+  "ruta": "src/features/.template/README.md",
+  "desde": "58174c9",
+  "motivos": [
+    {
+      "antes": "# Feature Template",
+      "motivo": "el título del molde pasa a marcador «Nombre de la feature»: al copiar `.template`, este README es el de la feature nueva, y un título fijo «Feature Template» nacería equivocado en cada copia. Qué es el molde lo dice ahora la línea de propuesta de valor."
+    }
+  ]
+}

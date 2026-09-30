@@ -128,6 +128,9 @@ Usuario dice algo
     |         proyecto limpio. Publicar es gate humano, no un paso de script.
     |         Pinear la version en el consumidor: `latest` es anti-patron aqui igual (C1)
     |
+    ├── "Haz / reestructura / revisa el README" de una herramienta (tools/) o app (src/features/)
+    |       → Ejecutar skill README: que hace → casos de uso → infraestructura → lo demas
+    |
     ├── "Quiero hacer deploy / publicar"
     |       → Vercel CLI o git push
     |       → Servidor propio (Hetzner u otro VPS): `npm run configura:deploy` (mide el

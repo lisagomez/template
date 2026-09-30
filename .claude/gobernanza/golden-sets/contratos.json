@@ -196,6 +196,50 @@
         "patron": "add-payments",
         "porque": "el CTA de venta directa necesita decir con que se cobra (y cuando no es Polar)"
       }
+    ],
+    "readme": [
+      {
+        "patron": "Qu[ée] hace[^\\n]*→[^\\n]*Casos de uso[^\\n]*→[^\\n]*Requerimientos de infraestructura[^\\n]*→[^\\n]*lo dem[áa]s",
+        "porque": "el orden de las cuatro partes es decision del laboratorio (2026-09-29): si el skill deja de declararlo, deja de producirlo"
+      },
+      {
+        "patron": "[Ss]olo por nombre, jam[áa]s el valor",
+        "porque": "variables de entorno solo por nombre: un valor escrito en un README viaja en el tarball y queda en el historial de git"
+      },
+      {
+        "patron": "nunca imprimas el valor de una variable de entorno",
+        "porque": "el skill lee el codigo buscando variables: la regla de secretos en pantalla de AGENTS.md tiene que ir inline donde se buscan"
+      },
+      {
+        "prohibido": "echo\\s+[\"']?\\$\\{?[A-Z0-9_]*(KEY|TOKEN|SECRET|SECRETO|PASSWORD|CLAVE|LLAVE)|printenv\\s+[A-Z]|\\bcat\\s+[^\\n]*\\.env\\b",
+        "porque": "un ejemplo que imprime una variable sensible ensena la fuga que la regla prohibe"
+      },
+      {
+        "patron": "No se inventa",
+        "porque": "casos de uso, requerimientos y cifras salen del codigo, el SDD o una medicion; lo demas es «pendiente» o «no medido»"
+      },
+      {
+        "patron": "una cosa a la vez y con respuesta recomendada",
+        "porque": "lo que solo sabe el laboratorio (para quien es, que decision resuelve) se pregunta; no se rellena"
+      },
+      {
+        "patron": "npm run revisa:readmes",
+        "porque": "el veredicto de conforme lo da el auditor determinista, no el juicio del modelo"
+      },
+      {
+        "patron": "npm run readme:no-perdida",
+        "porque": "reestructurar exige DEMOSTRAR la no perdida (0 borradas sin justificar, 0 cifras perdidas), no afirmarla"
+      },
+      {
+        "patron": "CDC \\(C1\\)",
+        "porque": "tocar contrato.json (una exclusion para callar al auditor) o volverlo gate es cambiar comportamiento: CDC"
+      }
+    ],
+    "crear-herramienta": [
+      {
+        "patron": "/readme nuevo",
+        "porque": "toda herramienta nace con README product first: si el skill que las crea no manda al skill readme, la regla vive en un documento y no dispara"
+      }
     ]
   }
 }

@@ -135,8 +135,10 @@ Herramienta: @tu-scope/ejemplo-herramienta@0.1.0  (tools/ejemplo-herramienta)
 ✓ contrato del package.json
 ✓ build (8 archivos en dist/)
 ✓ 'use client' conservada en react.js
-✓ tarball (9 archivos) ./tools/ejemplo-herramienta/tu-scope-ejemplo-herramienta-0.1.0.tgz
-✓ integracion: instalado e importado en un proyecto limpio
+✓ tarball (10 archivos) ./tools/ejemplo-herramienta/tu-scope-ejemplo-herramienta-0.1.0.tgz
+✓ integracion: 2 subpath(s) instalados e importados en un proyecto limpio
+  @tu-scope/ejemplo-herramienta → 1 export(s)
+  @tu-scope/ejemplo-herramienta/react → sin probar: falta el peer opcional `react`
   exporta: aSlug
 ✓ tipos incluidos (2 .d.ts)
 
@@ -150,6 +152,11 @@ un paquete que luego no se instala; esa no.
 
 Con eso ya puedes usar la herramienta en otro proyecto tuyo **sin publicar nada**: se
 instala desde el archivo empaquetado. Publicar viene después, y solo si hace falta.
+
+Uno de esos diez archivos es el **README**, y va **product first**: qué hace y qué no, casos de
+uso y requerimientos de infraestructura, y después lo demás. Es lo primero que lee quien la
+instala. El andamio ya lo trae; para la tuya lo escribe el agente con el skill `readme`, y lo que
+no se sepa queda «pendiente» o «no medido» en vez de inventarse.
 
 ---
 

@@ -58,7 +58,16 @@ Reacts en el mismo arbol rompen los hooks de una forma que se lleva una tarde en
 **`npm link` no se usa: miente.** Resuelve por enlaces simbolicos y da por bueno lo que en
 una instalacion real falla.
 
-## 5. Empaquetar y probar
+## 5. El README, product first, antes de empaquetar
+
+La herramienta nace con su `README.md` (el andamio ya lo trae) y se reescribe con
+**`/readme nuevo tools/<nombre>`**: que hace y que no, casos de uso y requerimientos de
+infraestructura, y despues lo demas. Lo que solo sabe el usuario (para quien es, que decision
+resuelve) se le pregunta; lo que no se sepa queda «pendiente» o «no medido».
+`npm run revisa:readmes -- tools/<nombre>/README.md` en verde antes de seguir: el README viaja
+en el tarball y es lo primero que lee quien la instala.
+
+## 6. Empaquetar y probar
 
 ```bash
 npm run empaqueta <nombre>                 # incluye la prueba de integracion real
@@ -70,7 +79,7 @@ importa. Las demas comprobaciones las puede tener en verde un paquete que luego 
 instala; esa no. Si el usuario nombro proyectos de destino en el paso 2, usa `--en` contra
 uno: ahi npm dictamina los peers contra el arbol real.
 
-## 6. Si sale en rojo
+## 7. Si sale en rojo
 
 El empaquetador no dice "fallo": dice **que se romperia en el proyecto de destino**
 (`types` sin declarar, `dist` fuera de `files`, React en `dependencies`, `'use client'`

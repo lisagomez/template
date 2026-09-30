@@ -4,6 +4,48 @@
 dominio y versionadas. Se siembra **aquí**, una vez. Cada proyecto registra los dominios que usa y
 fija la versión exacta. Se lee con `@tu-scope/grafo-conocimiento`.
 
+## Qué hace
+
+- Guarda las reglas con las que un proyecto responde «¿esto está permitido?», cada una con su fuente citada, por
+  dominio y versionadas (los 17 dominios de hoy, en «Qué hay»).
+- Deja que cada proyecto elija los dominios que usa y fije la versión exacta, y le avisa de una versión nueva sin
+  moverla.
+- Protege el pasado: solo se añade, y lo que cambia un veredicto va firmado.
+
+### Qué no hace
+
+- No da veredictos: los calcula `@tu-scope/grafo-conocimiento` sobre estas reglas.
+- No se actualiza solo en ningún proyecto: `vigila:versiones` avisa y subir el pin es firma humana.
+- No le da «todos los dominios» a un consumidor público: solo el recorte que pide.
+- No se siembra en Hermes: la fuente única es este paquete.
+
+## Casos de uso
+
+- **Un proyecto que responde con reglas citadas** (p. ej. «¿puedo repartir paquetes con un dron?»): registra sus
+  dominios con `seleccionaDominios` y fija la versión exacta del paquete.
+- **El laboratorio siembra o retira una regla**: investiga con la plantilla, escribe el dominio, sube la versión en
+  `CAMBIOS.md` y firma lo que cambia un veredicto; el gate de siembra rechaza borrar o editar en su sitio.
+- **Sale una versión nueva**: `vigila:versiones` avisa una sola vez con el tamaño del salto; subirla es una decisión con
+  su diff, su regresión y su firma.
+- **Un repo público (Hermes)**: vendoriza solo el recorte de sus dominios, con su pin (`npm run recorta`).
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines`).
+- **Dependencias del sistema**: ninguna en ejecución: es un paquete de datos. Para construir y probar,
+  `@tu-scope/grafo-conocimiento` del mismo repo; la paridad, además, un clon de Hermes con el motor de su corte
+  pineado.
+- **CPU, GPU y memoria**: no medido.
+- **Servicios externos**: ninguno en ejecución. El registro de npm solo para instalar y para que `vigila:versiones`
+  avise; mientras no se publique, no hay aviso.
+- **Variables de entorno**: ninguna.
+- **Almacenamiento**: el JSON ensamblado dentro del paquete (`dist/conocimiento.json`: 233434 bytes en 0.2.0, medido
+  el 2026-09-29) y `versiones.json`, el registro de huellas de cada versión, de solo añadir.
+- **Salida del perímetro (C4)**: no hay datos de personas que salgan: son reglas con fuente pública o interna. El
+  recorte para un repo público publica solo los dominios que ese consumidor pide.
+
+## Uso
+
 ```ts
 import conocimiento from '@tu-scope/conocimiento'
 import { validaConocimiento, seleccionaDominios } from '@tu-scope/grafo-conocimiento'

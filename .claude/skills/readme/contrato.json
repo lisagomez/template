@@ -1,0 +1,50 @@
+{
+  "_comentario": "Contrato «product first» de los README de herramientas y apps. Lo leen el skill `readme` y el auditor determinista `scripts/revisa-readmes.mjs` (`npm run revisa:readmes`). El ORDEN de las tres secciones de producto es decisión del laboratorio (2026-09-29) y no se negocia: qué hace → casos de uso → requerimientos de infraestructura → lo demás. Vive en la carpeta del skill a propósito: añadir una exclusión para silenciar el auditor es cambiar el skill, y eso es un CDC (C1).",
+  "version": 1,
+  "preambulo": {
+    "_comentario": "Entre el título y la primera sección: la línea de propuesta de valor, nada más. Lo técnico (estado, arquitectura, ejemplos de código) va después de las tres de producto.",
+    "maxLineas": 4
+  },
+  "secciones": [
+    {
+      "id": "que-hace",
+      "titulo": "Qué hace",
+      "admitidos": ["Qué hace", "Qué hace y qué no", "Qué hace (y qué no)"],
+      "exige": "que diga también qué NO hace (la frase «no hace»): en esta fábrica los límites son parte del producto"
+    },
+    {
+      "id": "casos-de-uso",
+      "titulo": "Casos de uso",
+      "admitidos": ["Casos de uso"],
+      "exige": "al menos un escenario (lista, tabla o subsección); si nada lo sostiene, «pendiente», nunca inventado"
+    },
+    {
+      "id": "infraestructura",
+      "titulo": "Requerimientos de infraestructura",
+      "admitidos": ["Requerimientos de infraestructura", "Requisitos de infraestructura"],
+      "exige": "los siete rubros, cada uno como viñeta con su etiqueta en negrita; variables de entorno solo por nombre"
+    }
+  ],
+  "rubros": [
+    { "id": "runtime", "etiqueta": "Runtime" },
+    { "id": "sistema", "etiqueta": "Dependencias del sistema" },
+    { "id": "computo", "etiqueta": "CPU, GPU y memoria", "cifraONoMedido": true },
+    { "id": "servicios", "etiqueta": "Servicios externos" },
+    { "id": "entorno", "etiqueta": "Variables de entorno" },
+    { "id": "almacenamiento", "etiqueta": "Almacenamiento" },
+    { "id": "perimetro", "etiqueta": "Salida del perímetro (C4)" }
+  ],
+  "alcance": ["tools/*/README.md", "src/features/*/README.md"],
+  "carpetasDeProducto": ["tools/*", "src/features/*"],
+  "exclusiones": [
+    { "patron": "README.md", "motivo": "README raíz: lo lee la gobernanza (cifras de comprobaciones, conteo de skills, sección de la capa); no es de un producto" },
+    { "patron": ".claude/README.md", "motivo": "documentación de la fábrica; la gobernanza lee sus cifras" },
+    { "patron": ".claude/skills/**", "motivo": "documentación de skills: se rige por SKILL.md y los contratos C2, no por este contrato" },
+    { "patron": ".claude/goals/**", "motivo": "material de trabajo de un goal, no un producto" },
+    { "patron": ".claude/design-systems/README.md", "motivo": "catálogo de referencias de diseño, no un producto" },
+    { "patron": "src/features/README.md", "motivo": "arquitectura feature-first, no una feature" },
+    { "patron": "src/shared/README.md", "motivo": "arquitectura del código compartido, no un producto" },
+    { "patron": "erp/migrations/README.md", "motivo": "reglas de las migraciones del ERP (documentación de arquitectura)" },
+    { "patron": "trayectorias/README.md", "motivo": "formato de datos de la fábrica, no un producto" }
+  ]
+}

@@ -1,0 +1,15 @@
+/goal Construye lo descrito en el spec completo: /home/gsore/code/template/.claude/worktrees/readme-product-first/.claude/goals/readme-product-first/spec.md. Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: todo README de herramienta o app del monorepo abre con que hace, casos de uso y requerimientos de infraestructura, y despues lo demas; un skill con comandos (nuevo, reestructura, revisa) y un auditor determinista lo producen, lo corrigen y lo delatan.
+Libertad tecnica total: nombres, contrato de secciones y metodo de no perdida los eliges tu; lo del spec es sugerencia salvo el orden de las 4 partes y RESTRICCIONES REALES. Investiga 2-3 referencias de README orientado a producto y el skill-creator de aqui antes de codear.
+VALIDA: `npm run validate` en el worktree tras cada cambio grande; surfea su output.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- skill y contratos C2 pegados con su diff
+- auditor antes (12 no conformes) y despues (12 conformes), y su --prueba tumbando las 5 violaciones sembradas del spec
+- por cada README: prueba de no perdida y esqueleto antes/despues
+- README nuevo de src/features/etiquetas pegado, con lo no medido declarado
+- andamio y crear-herramienta mandando al skill; `empaqueta ejemplo-herramienta` en verde
+- propuesta-cdc.md con diff completo y entrada de bitacora "Aprobado por: pendiente"; gate propuesto sin aplicar
+- regresion, verify:gobernanza (27 skills), mide:contexto y el ultimo validate en verde, pegados
+- reporte de decisiones y formas en que podria estar mal, resueltas
+RESTRICCIONES: solo el worktree readme-product-first; CDC sin firmar, diff antes del si; sin push/PR/merge; no se pierde ni se inventa contenido; env vars solo por nombre; sin `any`; espanol.
+RED DE SEGURIDAD: si tras 15 turnos no convergen auditor y validate, detente y reporta el bloqueo con el output real.

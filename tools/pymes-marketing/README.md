@@ -5,6 +5,8 @@ juntas y se importan por separado. TypeScript puro, **cero dependencias**, sin r
 (plantillas o un LLM) y cualquier almacén se **inyectan**. **Nada se publica ni se envía**: toda
 salida es un borrador que el dueño aprueba y sube él mismo.
 
+## Qué hace
+
 Adaptado de la familia de marketing del plugin `small-business` de Anthropic (v1.35.1, Apache-2.0):
 ver `NOTICE` y `LICENSE-APACHE-2.0`.
 
@@ -22,6 +24,44 @@ ver `NOTICE` y `LICENSE-APACHE-2.0`.
 | `./aprobacion` | Aprobar el archivo exacto (huella SHA-256), pedir cambio con nota, revocar al editar, CSV del mes | lo rescatado de la sala de revisión |
 | `./redactor-openai-compat` | Redactor con LLM por cualquier API compatible con OpenAI; devuelve el uso (o `null`) para la contabilidad del proyecto | — |
 
+### Lo que NO hace (a propósito)
+
+- No publica, no programa, no envía, no responde reseñas, no cambia presupuestos: aprobar deja la
+  pieza lista para que el dueño la suba. Publicar el paquete en npm también es firma humana.
+- No se conecta a Canva, Meta, Google, TikTok, HubSpot ni WhatsApp: la entrada es local.
+- No inventa: precios solo confirmados (con impuestos), «qué cambió» solo si el dueño lo dice,
+  temporadas genéricas marcadas «¿coincide con tu negocio?», huecos «POR CONFIRMAR».
+- No elige modelo: el proyecto pasa uno pineado por su routing y registra el uso.
+
+## Casos de uso
+
+- **El dueño de una pyme mexicana sin equipo de marketing**: con sus facturas CFDI 4.0 o el CSV de su caja obtiene el
+  resumen de 90 días, qué empujar y el brief de 30 días con la temporada comercial de México (`./ventas`, `./contenido`).
+- **Quiere su marca sin saber de colores**: da la liga de su sitio o una frase («verde bosque y crema») y la confirma con
+  un «sí» tras la vista previa; nunca se le piden hex (`./marca`).
+- **Tiene reseñas que contestar**: temas con citas textuales y borradores de respuesta uno por uno, con lo delicado
+  retenido o escalado (`./resenas`).
+- **Quiere saber si lo encuentran**: auditoría de buscadores y asistentes de IA, y los arreglos como archivos con
+  «POR CONFIRMAR» (`./visibilidad`).
+- **Paga anuncios**: veredicto de cada anuncio contra su propio promedio e impacto en MXN, y el brief del lunes
+  (`./pulso`).
+- **Quiere una promo sin grabar a nadie**: escena 9:16 por código, cuadros SVG y sonido WAV (`./video`).
+- **Aprueba lo exacto**: la huella SHA-256 del archivo; si cambia, la aprobación se revoca (`./aprobacion`). La app que
+  lo usa entero: `src/features/estudio-pymes/` (`/estudio`).
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=20` (`engines`). Cero dependencias.
+- **Dependencias del sistema**: ninguna para el núcleo. `./rasterizar` corre solo en el navegador (su canvas) y el MP4
+  de la promo se renderiza fuera del paquete (navegador sin ventana + ffmpeg).
+- **CPU, GPU y memoria**: no medido.
+- **Servicios externos**: ninguno por defecto. Con `./redactor-openai-compat`, la API compatible con OpenAI que el
+  proyecto inyecte, con su modelo pineado por su routing.
+- **Variables de entorno**: ninguna. El redactor con LLM recibe la llave y `fetch` inyectados: nunca lee el entorno.
+- **Almacenamiento**: ninguno propio: cualquier almacén se inyecta.
+- **Salida del perímetro (C4)**: sin red por defecto. Con el redactor con LLM, los textos del negocio van al proveedor
+  que el proyecto elija: es decisión C4 del proyecto, no de este paquete.
+
 ## Uso
 
 ```ts
@@ -37,15 +77,6 @@ const brief = estrategiaDe30Dias(resumeVentas(ventas), '2026-10-19');
 const marca = confirmaMarca(capturaDeDescripcion('verde bosque y crema', 'La Espiga')); // tras la vista previa
 const calendario = await calendarioDe30Dias(brief, marca, redactorDePlantillas(), { voz: construyeVoz(muestras) });
 ```
-
-## Lo que NO hace (a propósito)
-
-- No publica, no programa, no envía, no responde reseñas, no cambia presupuestos: aprobar deja la
-  pieza lista para que el dueño la suba. Publicar el paquete en npm también es firma humana.
-- No se conecta a Canva, Meta, Google, TikTok, HubSpot ni WhatsApp: la entrada es local.
-- No inventa: precios solo confirmados (con impuestos), «qué cambió» solo si el dueño lo dice,
-  temporadas genéricas marcadas «¿coincide con tu negocio?», huecos «POR CONFIRMAR».
-- No elige modelo: el proyecto pasa uno pineado por su routing y registra el uso.
 
 ## Pruebas
 

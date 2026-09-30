@@ -3,6 +3,63 @@
 Carga masiva de documentos (PDF, imagenes, carpetas), revision humana de lo extraido, y mapeo
 contra los catalogos que el proyecto **ya tiene**.
 
+## Qué hace
+
+- Lee documentos en masa (PDF, imágenes, carpetas, XML) por la vía que le toca a cada uno según sus bytes: el texto
+  que el PDF ya trae (capa 0), el XML fiscal, los códigos QR y de barras de la página, o un motor de OCR.
+- Pone lo extraído en una cola de revisión humana, con la evidencia de cada campo; lo que no se puede cotejar con
+  una segunda fuente va a revisión.
+- Mapea contra los catálogos que el proyecto ya tiene: «¿es esta fila?» con umbral, y los identificadores por
+  igualdad exacta.
+- Propone, sin aplicarlo, el modelo de entidades que se infiere de un corpus entero.
+- Se instala como servicio en el VPS del cliente (spec 010).
+
+### Qué no hace
+
+- No autentica: no verifica sellos ni consulta al SAT. Leer bien no es autenticar (tabla completa en «Que NO hace, y
+  no es temporal»).
+- No aplica SQL: la propuesta de modelo se emite y nadie la aplica.
+- No trae umbrales: el de confianza, el de similitud y los de la ráfaga del escáner se miden sobre el corpus real.
+- No decide si el documento sale del perímetro: el motor se inyecta, y Mistral viene apagado.
+
+## Casos de uso
+
+- **Cargar facturas**: con el XML, los campos exactos del CFDI sin motor; con el PDF, capa 0 o motor, y el cotejo a
+  tres bandas contra el QR impreso.
+- **Cargar expedientes laborales** (constancia fiscal, CURP, alta del IMSS): RFC, CURP y NSS por su código antes que por
+  OCR, validados por dígito verificador; medido sobre 84 páginas reales.
+- **Un corpus de miles de archivos mezclados**: `leeCorpus` enruta cada uno y `infiereModelo` propone las entidades (un
+  RFC en trescientas facturas es una entidad).
+- **No duplicar proveedores**: resolver que «ACME S.A. de C.V.» es la fila 1874 y no una nueva.
+- **Un cliente que lo quiere en su propio VPS**: `docker compose up`, con Tesseract por zonas en CPU y, si hay GPU, un
+  motor autohospedado; Hermes lo consume por A2A.
+
+## Requerimientos de infraestructura
+
+- **Runtime**: Node `>=22.18` (`engines`); el banco usa `node:sqlite`, que viene dentro de Node 22.18+.
+- **Dependencias del sistema**: el núcleo, ninguna. `./react` pide React y `./lectores/zxing` pide `zxing-wasm` (peers
+  opcionales). `./motores/proceso-local` y el servicio: Python 3 con Tesseract (`spa`), pytesseract, Pillow y zxing
+  (`servicio/Dockerfile`, base pineada por digest). Motores autohospedados opcionales (Ollama o vLLM) con el modelo
+  pineado, y Docker para el servicio.
+- **CPU, GPU y memoria**: sin GPU (16 hilos, 15 GB): Tesseract por zonas a 251,7 pag/min de reloj con 4 en vuelo
+  (2026-09-13, 33 páginas sintéticas: no concluyente) y un motor autohospedado en CPU a ~110 s por página
+  (2026-09-11). GPU: no medido (el perfil `ocr-gpu` está declarado). Memoria del servicio: no medido.
+- **Servicios externos**: ninguno obligatorio. Opcionales: Supabase (almacenes), un motor compatible con OpenAI
+  autohospedado y Mistral, apagado por defecto.
+- **Variables de entorno** (servicio): `EXTRACTOR_PROYECTO`, `EXTRACTOR_PUERTO`, `EXTRACTOR_ESCUCHA`, `EXTRACTOR_PYTHON`,
+  `EXTRACTOR_IDIOMA`, `EXTRACTOR_ESPERA_MS`, `EXTRACTOR_BYTES_MAXIMOS`, `EXTRACTOR_EN_VUELO`, `EXTRACTOR_RESPALDO`,
+  `EXTRACTOR_RESPALDO_BASE`, `EXTRACTOR_RESPALDO_MODELO`, `EXTRACTOR_RESPALDO_MODO`, `EXTRACTOR_RESPALDO_ESPERA_MS`,
+  `EXTRACTOR_RESPALDO_CLAVE`, `EXTRACTOR_MISTRAL_MODELO`, `MISTRAL_API_KEY` y `EXTRACTOR_DECISION_C4`; la demo,
+  `EXTRACTOR_SERVICIO_URL`; el compose del template, `OCR_GPU_MODELO`.
+- **Almacenamiento**: el que se inyecte: tablas de Supabase (esquema en `migraciones/001-extractor-documental.sql`) y un
+  bucket privado para los originales, IndexedDB para la cola sin conexión, o el SQLite embebido del banco. El servicio
+  deja los documentos en tránsito en un temporal (`--tmpfs`). `corpus/` y `demo/corpus/` no entran a git.
+- **Salida del perímetro (C4)**: la decide el proyecto, porque el motor se inyecta. Autohospedado, nada sale. Mistral
+  manda el documento a un tercero y solo entra con una decisión C4 firmada; con datos de terceros, ninguna firma lo
+  autoriza.
+
+## Estado
+
 > **Estado: 774 pruebas en verde** sin red, sin base de datos y sin navegador (specs 007, 008, 009 y 010).
 > Los ocho entry points se instalan e importan en un proyecto limpio (`npm run empaqueta`).
 > **Lo que falta y por que**, en `.claude/specs/007-extractor-documental/tareas.md`: tres umbrales
@@ -745,7 +802,6 @@ La UI tambien tiene pruebas de verdad, no capturas: las decisiones —que column
 campo cae bajo umbral, si se puede suprimir, como se recorre un arbol de carpetas— viven en modulos
 puros fuera de React. En los componentes queda el pegamento, que es justo lo que no lleva
 decisiones dentro.
-
 
 ## Desplegar en el VPS del cliente (spec 010)
 
