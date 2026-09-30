@@ -161,6 +161,17 @@ create or replace function public.sgi_protege_estado()
 returns trigger language plpgsql set search_path = '' as $$
 begin
   if public.sgi_desde_aprobacion() then return new; end if;
+  -- Al CREAR tampoco se salta la aprobación: nadie da de alta algo ya «aprobado», «firmado», «eficaz» o «cerrado».
+  if tg_op = 'INSERT' then
+    if (tg_table_name = 'sgi_documento_version' and new.estado not in ('borrador', 'en_revision'))
+      or (tg_table_name = 'sgi_hallazgo' and new.estado <> 'borrador')
+      or (tg_table_name = 'sgi_proveedor' and new.estado <> 'propuesto')
+      or (tg_table_name = 'sgi_accion_correctiva' and new.estado not in ('pendiente', 'hecha'))
+      or (tg_table_name = 'sgi_no_conformidad' and new.estado = 'cerrada') then
+      raise exception 'sgi: «%» no se asigna al crear: lo pone una aprobación', new.estado using errcode = '42501';
+    end if;
+    return new;
+  end if;
   if tg_table_name = 'sgi_documento_version' then
     if new.contenido is distinct from old.contenido or new.numero <> old.numero or new.documento_id <> old.documento_id then
       raise exception 'sgi: una versión no se edita; se crea una versión nueva' using errcode = '42501';
@@ -192,7 +203,7 @@ declare t text;
 begin
   foreach t in array array['sgi_documento_version', 'sgi_hallazgo', 'sgi_proveedor', 'sgi_accion_correctiva', 'sgi_no_conformidad'] loop
     execute format('drop trigger if exists sgi_protege_estado on public.%I', t);
-    execute format('create trigger sgi_protege_estado before update on public.%I for each row execute function public.sgi_protege_estado()', t);
+    execute format('create trigger sgi_protege_estado before insert or update on public.%I for each row execute function public.sgi_protege_estado()', t);
   end loop;
 end $$;
 

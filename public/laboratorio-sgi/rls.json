@@ -1,5 +1,5 @@
 {
- "cuando": "2026-09-30T12:48:02.700Z",
+ "cuando": "2026-09-30T13:09:56.686Z",
  "base": "supabase local (Docker)",
  "filas": [
   [
@@ -128,6 +128,16 @@
    true
   ],
   [
+   "alguien da de alta una versión ya «aprobada»",
+   "rechazado",
+   true
+  ],
+  [
+   "alguien da de alta una NC ya «cerrada»",
+   "rechazado",
+   true
+  ],
+  [
    "alta dirección aprueba la versión exacta",
    "se registra (quién, cuándo, rol, huella, versión)",
    true
@@ -190,6 +200,16 @@
   [
    "sin sesión, alguien lista organizaciones",
    "rechazado o vacío",
+   true
+  ],
+  [
+   "quién aprueba qué: la base (sgi_rol_aprueba) contra el motor (APROBADORES/ROL_CIERRE), 110 combinaciones",
+   "0 diferencias",
+   true
+  ],
+  [
+   "espejo del catálogo en la base (130 filas) contra el catálogo (130)",
+   "sin deriva",
    true
   ]
  ]

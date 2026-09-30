@@ -118,6 +118,8 @@
     "empaquetar-herramienta": "capaz",
     "redaccion-de-marketing": "capaz",
     "respuesta-a-resenas": "capaz",
+    "agente-sgi-redaccion": "capaz",
+    "agente-sgi-evaluacion": "razonamiento",
     "diseno-de-arquitectura": "razonamiento",
     "prp-o-spec": "razonamiento",
     "decision-de-gobernanza": "razonamiento",
@@ -130,7 +132,8 @@
       "decision-de-gobernanza",
       "caso-trampa-capa-b",
       "incidente",
-      "prp-o-spec"
+      "prp-o-spec",
+      "agente-sgi-evaluacion"
     ],
     "motivo": "deciden sobre riesgo, dinero o datos de terceros; el error sale mas caro que el modelo"
   },

@@ -5,6 +5,8 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { altaCuenta, clienteAnonimo, entornoLocal } from './local.ts';
+import { puedeAprobar, APROBADORES, ROLES, FASES, type Rol, type TipoAprobable } from '../../tools/sistema-integrado/dist/index.js';
+import { CATALOGO } from '../../tools/sistema-integrado/dist/catalogo/index.js';
 
 const e = entornoLocal();
 const filas: [string, string, boolean][] = [];
@@ -68,6 +70,8 @@ anota('el dueño de proceso aprueba la política de IA', 'rechazado (rol)', rech
 anota('el dueño de proceso se hace pasar por alta dirección', 'rechazado (no tiene el rol)', rechazado(await aDueno.c.from('sgi_aprobacion').insert({ organizacion_id: A, objeto_tipo: 'politica', objeto_id: V, huella: HV, decision: 'aprobado', rol: 'alta_direccion' }).select()));
 anota('alta dirección aprueba con una huella distinta', 'rechazado (O3)', rechazado(await aDir.c.from('sgi_aprobacion').insert({ organizacion_id: A, objeto_tipo: 'politica', objeto_id: V, huella: `sha256:${'0'.repeat(64)}`, decision: 'aprobado', rol: 'alta_direccion' }).select()));
 anota('alguien pone la versión en «aprobado» sin aprobación', 'rechazado', rechazado(await aAdmin.c.from('sgi_documento_version').update({ estado: 'aprobado' }).eq('id', V).select()));
+anota('alguien da de alta una versión ya «aprobada»', 'rechazado', rechazado(await aAdmin.c.from('sgi_documento_version').insert({ documento_id: doc.data!.id, organizacion_id: A, numero: 9, contenido: { secciones: [] }, estado: 'aprobado' }).select()));
+anota('alguien da de alta una NC ya «cerrada»', 'rechazado', rechazado(await aAdmin.c.from('sgi_no_conformidad').insert({ organizacion_id: A, proyecto_id: P, descripcion: 'NC que nace cerrada', estado: 'cerrada' }).select()));
 const ap = await aDir.c.from('sgi_aprobacion').insert({ organizacion_id: A, objeto_tipo: 'politica', objeto_id: V, huella: HV, decision: 'aprobado', rol: 'alta_direccion' }).select().single();
 anota('alta dirección aprueba la versión exacta', 'se registra (quién, cuándo, rol, huella, versión)', !ap.error && ap.data?.aprobado_por === aDir.id && ap.data?.version === 1);
 const est = await aAdmin.c.from('sgi_documento_version').select('estado').eq('id', V).single();
@@ -97,6 +101,23 @@ anota('alguien edita la traza', '0 filas', rechazado(await aAdmin.c.from('sgi_tr
 anota('una traza con modelo «latest»', 'rechazado (C1)', rechazado(await cons.c.from('sgi_traza').insert({ organizacion_id: A, agente: 'documental', version_prompt: 'x', modelo: 'openrouter/latest', ok: true, creado_por: cons.id }).select()));
 const anon = await clienteAnonimo(e).from('sgi_organizacion').select('id');
 anota('sin sesión, alguien lista organizaciones', 'rechazado o vacío', !!anon.error || anon.data.length === 0);
+
+// La base y el motor dicen lo mismo: quién aprueba qué (115 combinaciones) y el espejo del catálogo.
+const combos: [string, number | null, Rol][] = [
+  ...Object.keys(APROBADORES).flatMap((t) => ROLES.map((r) => [t, null, r] as [string, null, Rol])),
+  ...FASES.flatMap((f) => ROLES.map((r) => ['cierre_fase', f, r] as [string, number, Rol])),
+];
+let difieren = 0;
+for (const [tipo, fase, rol] of combos) {
+  const db = await aAdmin.c.rpc('sgi_rol_aprueba', { p_tipo: tipo, p_fase: fase, p_rol: rol });
+  const ts = puedeAprobar(tipo as TipoAprobable, rol, (fase ?? undefined) as never);
+  if (db.error || Boolean(db.data) !== ts) difieren++;
+}
+anota(`quién aprueba qué: la base (sgi_rol_aprueba) contra el motor (APROBADORES/ROL_CIERRE), ${combos.length} combinaciones`, '0 diferencias', difieren === 0);
+const req = await aAdmin.c.from('sgi_requisito').select('id, fase, obligatorio, familia');
+const mapa = new Map((req.data ?? []).map((r) => [String(r.id), r]));
+const deriva = CATALOGO.requisitos.filter((r) => { const x = mapa.get(r.id); return !x || x.fase !== r.fase || x.obligatorio !== (r.doc !== null) || x.familia !== r.familia; }).length + Math.max(0, mapa.size - CATALOGO.requisitos.length);
+anota(`espejo del catálogo en la base (${mapa.size} filas) contra el catálogo (${CATALOGO.requisitos.length})`, 'sin deriva', deriva === 0);
 
 console.log('| Comprobación | Esperado | Resultado |\n|---|---|---|');
 for (const [q, esp, ok] of filas) console.log(`| ${q} | ${esp} | ${ok ? '✓' : '✗'} |`);
