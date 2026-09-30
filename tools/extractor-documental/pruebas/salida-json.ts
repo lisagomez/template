@@ -130,7 +130,9 @@ test('lo que escribio la corrida del corpus encaja en los tipos (o no hay corrid
     for (const nombre of readdirSync(dir)) {
       const crudo: unknown = JSON.parse(readFileSync(join(dir, nombre), 'utf8'))
       if (nombre === 'propuesta.json') comoInferencia(crudo)
-      else if (nombre === 'resumen.json') continue
+      // resumen.json y trayectoria.json no son lecturas: los escribe la medicion
+      // (medicion/servicio.mjs escribe la trayectoria de forma junto a la corrida).
+      else if (nombre === 'resumen.json' || nombre === 'trayectoria.json') continue
       else { comoLectura(crudo); lecturas++ }
     }
   }

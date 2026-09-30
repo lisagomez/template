@@ -20,6 +20,7 @@
     "prueba:tools": "node scripts/prueba-tools.mjs",
     "prueba:a2a": "node --test --test-skip-pattern=^SERVICIO: scripts/prueba-a2a.ts",
     "prueba:a2a:servicio": "node --test --test-name-pattern=^SERVICIO: scripts/prueba-a2a.ts",
+    "prueba:migraciones": "node scripts/prueba-migraciones.mjs",
     "gates": "node scripts/verifica-gates.mjs --lista",
     "proyecta:gates": "node scripts/proyecta-gates.mjs",
     "verifica:inventario": "node scripts/inventario/detecta.mjs",
@@ -101,6 +102,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

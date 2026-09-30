@@ -232,6 +232,13 @@ patrón Feature-First del resto del repo.
   sudo): las capturas se tomaron con la imagen oficial
   `mcr.microsoft.com/playwright:v1.62.1-noble` en Docker, `--network host` contra `npm run dev`.
   Playwright NO se añadió al template.
+- **2026-09-29 — la migración nunca compiló.** `constraint project_settings_singleton unique
+  ((true))` dentro de `create table` es un error de sintaxis: Postgres no acepta expresiones en
+  una restricción `unique`, solo en un índice. La tabla no existía en ninguna base y nadie lo
+  vio en un mes, porque ningún gate aplica las migraciones: el PRP marcó `[x]` a la técnica sin
+  haberla ejecutado. Corregido en su sitio (índice único `project_settings_singleton` + `comment
+  on index`), y la función del disparador ganó `set search_path = ''` (lint 0011). Probado en
+  un Postgres desechable: una sola fila, el `CHECK` de exclusión y `updated_at` funcionan.
 
 ---
 
@@ -245,7 +252,8 @@ patrón Feature-First del resto del repo.
       el tipo en Próximos Pasos). Se hizo fuera de este PRP, como pedía, para no mezclar el gate
       de datos con el de comportamiento de agente.
 - [x] `unique ((true))` es una técnica poco común para forzar fila única en toda la
-      tabla — comentario SQL y `comment on constraint` puestos en la migración.
+      tabla — comentario SQL y `comment on index` puestos en la migración. Va como índice
+      único: como `constraint` dentro de la tabla no compila (ver Aprendizajes, 2026-09-29).
 - [x] El Zod del cliente y el `CHECK` de la base **deben** decir exactamente lo mismo —
       ambos archivos se citan mutuamente en sus cabeceras; si se toca uno sin el otro,
       queda un estado que el formulario nunca produce pero que la base sí permitiría.

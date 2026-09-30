@@ -112,6 +112,23 @@ if (swapMB < 1024 && ramMB <= 8192) {
 }
 
 // --- 3. `.env.production` ---------------------------------------------------
+/** El `role` de un JWT de Supabase, o null si el valor no es un JWT legible. */
+function rolDelJwt(valor) {
+  const partes = valor.split('.');
+  if (partes.length !== 3) return null;
+  try {
+    return JSON.parse(Buffer.from(partes[1], 'base64url').toString('utf8')).role ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Una NEXT_PUBLIC_* que es secreta por su nombre o por lo que lleva dentro (JWT service_role o sb_secret_). */
+function secretoPublico(clave, valor) {
+  if (!clave.startsWith('NEXT_PUBLIC_')) return false;
+  return /SERVICE_ROLE|SECRET|PRIVATE/.test(clave) || valor.startsWith('sb_secret_') || rolDelJwt(valor) === 'service_role';
+}
+
 const REQUERIDAS = [
   ['DOMAIN', /^[a-z0-9.-]+\.[a-z]{2,}$/i, 'un dominio real, sin http:// ni barra final'],
   ['TLS_EMAIL', /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i, 'el correo con el que Let\'s Encrypt te avisa'],
@@ -156,8 +173,15 @@ if (!existsSync(ruta(ENV))) {
     const v = valores.get(clave);
     console.log(`${clave}: ${v ? verde(`presente (${v.length} car.)`) : gris('ausente')}`);
   }
-  if (valores.get('SUPABASE_SERVICE_ROLE_KEY')?.startsWith('NEXT_PUBLIC')) {
-    problemas.push('SUPABASE_SERVICE_ROLE_KEY no lleva NUNCA prefijo NEXT_PUBLIC_: se inlinearia en el bundle del navegador (C7).');
+  // C7: una llave que se salta RLS con prefijo NEXT_PUBLIC_ viaja en el bundle del navegador. Se mira
+  // el NOMBRE y el VALOR: el chequeo anterior miraba si el valor de SUPABASE_SERVICE_ROLE_KEY empezaba
+  // por "NEXT_PUBLIC", cosa que un JWT nunca hace, y dejo pasar una NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY
+  // real (2026-09-29). Nunca se imprime el valor.
+  for (const [clave, v] of valores) {
+    if (secretoPublico(clave, v)) {
+      problemas.push(`${clave} lleva prefijo NEXT_PUBLIC_ y es una llave secreta: se inlinearia en el bundle del ` +
+        'navegador y se salta RLS (C7). Quitale el prefijo (SUPABASE_SERVICE_ROLE_KEY) o borrala si la app no la usa.');
+    }
   }
 }
 

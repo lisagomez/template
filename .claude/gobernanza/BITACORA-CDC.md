@@ -4092,6 +4092,99 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `GEMINI.md` 64 % · `npm run validate` en verde (ver el PR).
 - **Aprobado por**: **lisagomez** (el laboratorio), «Firmo», 2026-09-27, con el diff de las 13 líneas delante.
 
+### 2026-09-29 — el conector MCP de Supabase apunta al proyecto real, en solo lectura y con token de alcance mínimo → CDC PROMOVIDO — radio: configuración del agente (`.mcp.json` local)
+- **Cambio**: el servidor `supabase` de `.mcp.json` deja los valores de ejemplo (`YOUR_SUPABASE_PROJECT_REF`,
+  `YOUR_SUPABASE_ACCESS_TOKEN`). `.mcp.json` está ignorado por git, así que el cambio vive solo en la máquina
+  del laboratorio. La nueva configuración:
+  - apunta al proyecto de la app, `uzvcqhgeqkotcbiwfmjy` (organización «Template»);
+  - corre con `--read-only`: el servidor expone 13 herramientas y desaparecen `apply_migration`,
+    `deploy_edge_function` y las de ramas;
+  - lee el token al arrancar de `~/.config/template/supabase-mcp.token` (permisos 600, fuera del repo) y lo pasa
+    como variable de entorno del proceso, no como argumento, así que no sale en la lista de procesos. Si falta
+    el archivo, el servidor sale con un mensaje claro en vez de un «Unauthorized» a secas;
+  - la versión sigue pineada en `0.11.0`.
+
+  `.claude/example.mcp.json`, el que miden los gates, no cambia.
+- **Motivo**: `/primer` no podía leer la base. El conector llevaba los valores de ejemplo, y estos pisaban el
+  token de la terminal, que además es de otra cuenta y no ve el proyecto de la app.
+- **Alcance del token** (`template-mcp-lectura`, 30 días, un solo proyecto), probado contra la API:
+  - puede: SQL de lectura y avisos de seguridad;
+  - da 403: llaves (también reveladas), secretos de funciones, configuración de auth y de la base, otro
+    proyecto y listado de proyectos;
+  - migraciones sin permiso: se leen por SQL;
+  - escritura no probada, a propósito: la cierra `--read-only`.
+- **En el camino**, sin exposición viva:
+  - un primer token se pegó en el chat. Se revocó antes de usarse, comprobado en la lista de tokens del panel;
+  - `.env.local` llevaba la llave `service_role` como `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` (C7). No estaba en
+    git ni en el build, y ningún código la leía. Se borró la línea.
+- **Gate aplicado**: diff revisado ☑ (**enseñado completo ANTES de pedir la firma**) · regresión verde ☑ capa A
+  131/131 · `verify:gobernanza` ☑ 156/156 · aprobación humana ☑ · pineo ☑ (sin cambio de versión). **Capa B no
+  corrida, a propósito y declarado**: ninguna instrucción cambia; la superficie de herramientas solo se reduce.
+- **Regresión**: además, el servidor arrancó por stdio con la configuración nueva: `initialize` ok (supabase
+  0.11.0), 13 herramientas, `list_tables` responde.
+- **Aprobado por**: **lisagomez** (el laboratorio), «si», 2026-09-29, con el diff delante.
+- **Pendiente (aparte)**: `scripts/configura-deploy.mjs:159` mira el VALOR de `SUPABASE_SERVICE_ROLE_KEY` y no el
+  NOMBRE de la variable, así que el caso de `.env.local` le habría pasado de largo. Va con su propio arreglo y su
+  aprendizaje.
+
+### 2026-09-29 — alta de `prueba:migraciones` en `validate` (PGlite, sin Docker) → CDC PROMOVIDO — radio: sistema (padrón de gates)
+- **Cambio**: en `.claude/gates.json` nace `prueba:migraciones`, **activo en `validate`** (27 gates activos).
+  Aplica `supabase/migrations/` sobre Postgres 17 en proceso (PGlite), con un Supabase mínimo imitado, y
+  comprueba cinco cosas:
+  - cada migración se aplica;
+  - aplicadas otra vez, ninguna falla (idempotentes: se aplican a mano y sin historial);
+  - RLS en toda tabla de `public`;
+  - ninguna función SECURITY DEFINER de `public` ejecutable por `anon` ni `authenticated` (lints 0028/0029);
+  - `search_path` fijo en toda función de `public` (lint 0011).
+
+  `--prueba` siembra un defecto de cada clase. Dependencia nueva: `@electric-sql/pglite` `0.5.8`, pineada
+  exacta. De paso se asienta en el inventario la migración del #183, que no tenía asiento y dejó `main` en rojo
+  en `verifica:inventario` desde su merge.
+- **Motivo**:
+  - la migración de `project_settings` (2026-08-26) no compilaba y nadie lo vio en un mes, porque ningún gate
+    aplicaba migraciones;
+  - `handle_new_user()` salió ejecutable por `/rest/v1/rpc` y lo cazó el linter de Supabase ya en producción.
+
+  Va con PGlite y no con Docker a propósito: los gates con Docker siguen inactivos porque el gate corre en
+  máquinas sin Docker, y uno inactivo no habría protegido nada.
+- **Gate aplicado**: diff revisado ☑ (**enseñado contra `main` en el PR #185 antes de pedir la firma**) ·
+  regresión verde ☑ capa A 131/131 · aprobación humana ☑ · pineo ☑ (dependencia nueva exacta, sin modelo).
+  **Capa B no corrida, a propósito y declarado** («capa A basta»): no toca skills, prompts, modelo ni
+  instrucciones.
+- **Regresión**:
+  - `prueba:migraciones` en verde en 2,3 s;
+  - `--prueba` **5/5 siembras cazadas**: sintaxis inválida, no idempotente, tabla sin RLS, SECURITY DEFINER
+    expuesta y función sin `search_path`;
+  - contra `main` de esa mañana (`58174c9`) **cae por los dos fallos reales**, uno tras otro;
+  - `verifica:gates --prueba` 6/6;
+  - `npm run validate` **27/27 activos en verde, 8 inactivos declarados, 0 rojos**.
+- **Aprobado por**: **lisagomez** (el laboratorio), «firmo, capa A basta», 2026-09-29, con el diff del padrón
+  y la evidencia delante (PR #185).
+
+### 2026-09-29 — `aprendizajes-stack.md` resumido sin quitar lecciones → CDC PROMOVIDO — radio: instrucciones (reglas del stack)
+- **Cambio**: `.claude/rules/aprendizajes-stack.md` pasa de 2887 a 1715 tokens, y la suma de las rules de **6469
+  a 5297 de 6500** (100 % → 81 %). El tope no se toca.
+  - Las 17 lecciones se quedan con su error, su arreglo y sus comandos exactos; se va la narración.
+  - «`npm run dev`, no `next dev`» se funde en la del puerto 3000 (ya estaba en `AGENTS.md`).
+  - La cabecera apunta al texto largo en git (`git show e823f09:.claude/rules/aprendizajes-stack.md`).
+  - Los `paths:` no cambian: en Claude Code cada lección sigue cargando al tocar sus archivos.
+
+  `aprendizajes-gobernanza.md` queda intacto a propósito: guarda el porqué de los controles.
+- **Motivo**: la suma estaba al 100 % y el siguiente aprendizaje no cabía. El tope se subió el 23/09 poco a
+  propósito para que volviera a chocar, y `mide:contexto` pide recortar antes de subirlo.
+- **Gate aplicado**: diff revisado ☑ (**enseñado en el PR #187 antes de pedir la firma**, con una entrada de
+  ejemplo antes/después) · regresión verde ☑ capa A 131/131 · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia). **Capa B no corrida, a propósito y declarado** («capa A basta»): ninguna lección cambia de
+  sentido, solo se acorta su texto.
+- **Regresión**:
+  - comparación término a término contra el original: cinco referencias útiles recuperadas (el script de
+    ejemplo de sondeos, `npm install --no-save` en `/extractor`, el alcance `cn()`, el arreglo de PCM16 en
+    `voz/node` y `profiles:`);
+  - ningún contrato de regresión ni verificador lee el texto de las rules; `GEMINI.md` solo apunta a ellas;
+  - `mide:contexto` en verde; `npm run validate` **27/27 activos en verde, 0 rojos**.
+- **Aprobado por**: **lisagomez** (el laboratorio), «firmo, capa A basta», 2026-09-29, con el diff y el ejemplo
+  delante (PR #187).
+
 ### 2026-09-29 — skill `readme`: README product first (nuevo, reestructura, revisa) → CDC PROMOVIDO — radio: skills (2), sistema (`AGENTS.md`), contratos C2 (10)
 - **Cambio** (rama `readme-product-first`, sobre `58174c9`):
   - skill nuevo `readme` con tres comandos (`/readme nuevo <ruta>`, `/readme reestructura <ruta>|todos`,
