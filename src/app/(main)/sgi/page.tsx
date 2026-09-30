@@ -22,7 +22,7 @@ export default async function MisOrganizaciones({ searchParams }: { searchParams
   }
   const esConsultor = [...orgs.values()].some((o) => o.roles.includes('consultor'));
   return (
-    <main className="mx-auto max-w-3xl space-y-4 px-4 py-8">
+    <div className="mx-auto max-w-3xl space-y-4 px-4 py-8">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Sistema integrado ISO 9001 + ISO/IEC 42001</h1>
@@ -42,6 +42,6 @@ export default async function MisOrganizaciones({ searchParams }: { searchParams
         {!orgs.size && <li className="text-sm text-gray-600">Aún no perteneces a ninguna organización.</li>}
       </ul>
       <p className="text-xs text-gray-500">{NO_CERTIFICA}</p>
-    </main>
+    </div>
   );
 }

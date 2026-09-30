@@ -69,7 +69,7 @@ test('L8: promesas de certificación, y lo que NO es promesa (trampa 8)', () => 
   for (const malo of ['Con nosotros te certificamos en 30 días', 'Certificación garantizada', 'Obtén tu certificación ISO', 'Quedarás certificado', 'La empresa está lista para ser certificada por esta app']) {
     assert.ok(promesasDeCertificacion(malo).length > 0, malo);
   }
-  for (const bueno of ['Te preparamos para la auditoría de certificación de un organismo acreditado', 'La certificación la otorga un organismo acreditado por la EMA']) {
+  for (const bueno of ['Te preparamos para la auditoría de certificación de un organismo acreditado', 'La certificación la otorga un organismo acreditado por la EMA', 'Esta app no te certifica: te prepara', 'Nunca garantizamos la certificación']) {
     assert.deepEqual(promesasDeCertificacion(bueno), [], bueno);
   }
 });

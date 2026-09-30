@@ -22,7 +22,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
   const { data: plantillas } = despacho ? await sb.from('sgi_plantilla').select('titulo, tipo').eq('despacho_id', despacho.id) : { data: [] };
   const marca = despacho?.marca ?? {};
   return (
-    <main style={{ ['--sgi-primario' as string]: marca.color_primario ?? '#334155', ['--sgi-acento' as string]: marca.color_acento ?? '#b45309' }} className="min-h-screen bg-gray-50">
+    <div style={{ ['--sgi-primario' as string]: marca.color_primario ?? '#334155', ['--sgi-acento' as string]: marca.color_acento ?? '#b45309' }} className="min-h-screen bg-gray-50">
       <header className="border-b bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-lg font-bold text-white" style={{ background: 'var(--sgi-primario)' }}>{(marca.nombre_corto ?? 'SG').slice(0, 2).toUpperCase()}</span>
@@ -71,6 +71,6 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
         </div>
         <p className="text-xs text-gray-500">{NO_CERTIFICA}</p>
       </div>
-    </main>
+    </div>
   );
 }

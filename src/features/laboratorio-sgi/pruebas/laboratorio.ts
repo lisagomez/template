@@ -30,3 +30,16 @@ test('lo no medido se declara (y, si se exige, cuenta como falla)', () => {
   const piezas = aprobadas(resultados);
   console.log(piezas.map((p) => `${p.aprobada ? '✓' : '·'} ${p.pieza.padEnd(13)} ${p.pasan}/${p.casos}${p.noMedidos ? ` (${p.noMedidos} no medidos)` : ''}`).join('\n'));
 });
+
+test('L8: ningún texto de la app, sus guías ni su aviso promete certificación', async () => {
+  const { readdirSync, readFileSync, statSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { promesasDeCertificacion } = await import('../../../../tools/sistema-integrado/dist/agentes/index.js');
+  const archivos: string[] = [];
+  const recorre = (d: string) => { for (const n of readdirSync(d)) { const r = join(d, n); if (statSync(r).isDirectory()) recorre(r); else if (/\.(tsx?|md)$/.test(n)) archivos.push(r); } };
+  for (const d of ['src/features/sgi', 'src/app/(main)/sgi']) recorre(d);
+  archivos.push('docs/GUIA-PYME-SGI.md', 'docs/GUIA-CONSULTOR-SGI.md', 'docs/AVISO-PRIVACIDAD-SGI.md', 'tools/sistema-integrado/README.md');
+  const con = archivos.map((a) => [a, promesasDeCertificacion(readFileSync(a, 'utf8'))] as const).filter(([, p]) => p.length);
+  console.log(`L8: ${archivos.length} archivos revisados, ${con.length} con promesas`);
+  assert.deepEqual(con, []);
+});

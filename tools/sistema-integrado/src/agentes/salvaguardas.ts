@@ -79,9 +79,16 @@ const PROMESAS = [
   /\bguaranteed\s+certification\b/i,
 ];
 
-/** Frases que prometen certificación. Devuelve los fragmentos encontrados (vacío = limpio). */
+/**
+ * Frases que prometen certificación. Devuelve los fragmentos encontrados (vacío = limpio). Una coincidencia negada
+ * («no te certifica», «nunca garantizamos la certificación») es un deslinde, no una promesa.
+ */
 export function promesasDeCertificacion(texto: string): string[] {
-  return PROMESAS.flatMap((re) => { const m = texto.match(re); return m ? [m[0]] : []; });
+  const negada = (i: number) => /\b(no|nunca|jam[aá]s|ni)\s+(\w+\s+)?$/i.test(texto.slice(Math.max(0, i - 24), i));
+  return PROMESAS.flatMap((re) => {
+    const global = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+    return [...texto.matchAll(global)].filter((m) => !negada(m.index ?? 0)).map((m) => m[0]);
+  });
 }
 
 // ───────────────────────── L5 · forma y citas ─────────────────────────

@@ -11,7 +11,7 @@ export default async function LaboratorioSgi() {
   const info = infoCorridas();
   const gasto = rs.reduce((s, r) => s + (r.costoUsd ?? 0), 0);
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header>
         <h1 className="text-2xl font-bold">Laboratorio del sistema integrado ISO 9001 + ISO/IEC 42001</h1>
         <p className="text-sm text-gray-600">Cada caso corre de verdad: los deterministas en cada visita; los de los agentes se verifican sobre corridas reales grabadas (modelo pineado por routing, datos sintéticos). Un «no medido» nunca aprueba una pieza.</p>
@@ -50,6 +50,6 @@ export default async function LaboratorioSgi() {
         <h2 className="mb-2 font-semibold">Aislamiento y roles contra la base real ({rls.base}, {rls.cuando.slice(0, 16).replace('T', ' ')})</h2>
         <ul className="grid gap-1 text-xs md:grid-cols-2" data-prueba="rls">{(rls.filas as [string, string, boolean][]).map(([q, e, ok], i) => <li key={i}>{ok ? '✓' : '✗'} {q} — {e}</li>)}</ul>
       </section>
-    </main>
+    </div>
   );
 }

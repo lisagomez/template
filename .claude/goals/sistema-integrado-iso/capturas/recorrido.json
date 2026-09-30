@@ -1,0 +1,247 @@
+{
+ "cuando": "2026-09-30T13:23:47.334Z",
+ "base": "http://localhost:3012",
+ "conLlm": false,
+ "pasos": [
+  {
+   "n": 1,
+   "paso": "Roadmap con puertas y % por cláusula, norma y global (Maquinados)",
+   "ok": true,
+   "evidencia": [
+    "✓ 9 fases con puerta",
+    "✓ avance: {\"Global\":6.7,\"ISO 9001:2015 + A1:2024\":11.6,\"ISO/IEC 42001:2023\":5.9}",
+    "✓ avance por cláusula de las dos normas"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/01-roadmap.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 2,
+   "paso": "Una evidencia (acta de revisión por la dirección) sube las DOS normas",
+   "ok": true,
+   "evidencia": [
+    "✓ 9001 11.6% → 17.4% · 42001 5.9% → 10.6% · global 6.7% → 10.8%"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/02-evidencia-dos-normas.png",
+    ".claude/goals/sistema-integrado-iso/capturas/03-roadmap-tras-acta.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 3,
+   "paso": "El agente documental redacta la Política de IA con la terminología del taller",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 4,
+   "paso": "El dueño de proceso intenta aprobar la política: rechazado",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 5,
+   "paso": "La alta dirección aprueba la versión exacta; la puerta 2 ya puede cerrarse y la cierra",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 6,
+   "paso": "Diagnóstico → informe GAP (agente de diagnóstico)",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 7,
+   "paso": "Matriz de riesgos (calidad e IA) propuesta por el agente",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 8,
+   "paso": "Evaluación de impacto de IA propuesta por el agente",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 9,
+   "paso": "SoA: el agente la propone, se prepara la versión y la aprueba la alta dirección",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 10,
+   "paso": "Hallazgo → NC → CAPA: el auditor verifica la eficacia y la NC se cierra",
+   "ok": true,
+   "evidencia": [
+    "✓ NC en tratamiento con acción «hecha»",
+    "✓ acción eficaz → NC cerrada (lo hizo el disparador de la aprobación)",
+    "✓ el hallazgo que la originó está firmado"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/13a-capa-antes.png",
+    ".claude/goals/sistema-integrado-iso/capturas/13-capa-nc-cerrada.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 11,
+   "paso": "Auditoría: el agente redacta hallazgos desde las notas; solo el auditor los firma",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 12,
+   "paso": "Panel del consultor: 3 clientes, avance, marca blanca y plantillas",
+   "ok": true,
+   "evidencia": [
+    "✓ 3 clientes en el panel",
+    "✓ la clínica ve el color del despacho: rgb(124, 58, 237)"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/15-panel-consultor.png",
+    ".claude/goals/sistema-integrado-iso/capturas/16-marca-blanca-en-el-cliente.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 13,
+   "paso": "Reporte de avance para el cliente (agente portafolio)",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 14,
+   "paso": "Modo sin jerga para la pyme",
+   "ok": true,
+   "evidencia": [
+    "✓ fases con nombres de negocio, sin números de cláusula"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/18-modo-pyme.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 15,
+   "paso": "Exportar DOCX y PDF de la política de calidad aprobada, con huella",
+   "ok": true,
+   "evidencia": [
+    "✓ DOCX 3392 bytes · huella del archivo = X-Huella (sha256:c26fd56f634d6bb2…)",
+    "✓ PDF 3490 bytes · huella del archivo = X-Huella (sha256:6a563c1be3da7eb7…)",
+    "✓ el DOCX abre como zip válido y trae el documento",
+    "✓ PDF 1.4 con tabla xref"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/19-exportar.png",
+    ".claude/goals/sistema-integrado-iso/capturas/politica-de-calidad-v1.docx",
+    ".claude/goals/sistema-integrado-iso/capturas/politica-de-calidad-v1.pdf"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 16,
+   "paso": "La casa: la app como su primer inquilino (inventario de sus agentes)",
+   "ok": true,
+   "evidencia": [
+    "✓ 9 agentes en su inventario de IA"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/20-casa-inventario-ia.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 17,
+   "paso": "La casa: SoA, impacto y política de IA propuestos por sus propios agentes, pendientes del laboratorio",
+   "ok": false,
+   "evidencia": [
+    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+   ],
+   "capturas": [],
+   "llm": true,
+   "errores_consola": []
+  },
+  {
+   "n": 18,
+   "paso": "Migración de edición 9001:2015+A1 → 9001:2026",
+   "ok": true,
+   "evidencia": [
+    "✓ 73 ·  · requisitos siguen igual ·  · 2 ·  · cambian de número ·  · 4 ·  · son nuevos (piden evidencia) ·  · 6 ·  · evidencias aprobadas que siguen valiendo (0 a revisar)"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/23-migracion.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  },
+  {
+   "n": 19,
+   "paso": "El laboratorio, en vivo",
+   "ok": true,
+   "evidencia": [
+    "✓ 79 casos"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/24-laboratorio.png"
+   ],
+   "llm": false,
+   "errores_consola": []
+  }
+ ]
+}

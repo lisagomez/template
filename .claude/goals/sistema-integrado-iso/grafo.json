@@ -11,110 +11,338 @@
     {
       "id": "investigacion",
       "label": "investigacion.md: estado de hoy de cada edición (9001, 42001, 23894, 42005, 42006, 19011) con fuente y fecha, licencia del texto ISO, LFPDPPP vigente, acreditación en México (EMA), y 2-3 plataformas de referencia con lo que se toma de cada una",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "investigacion.md: 9001:2026 (16-sep-2026, transición al 30-sep-2029), 19011:2026, 42005:2025, 42006:2025, LFPDPPP 2025, EMA; con fuente y fecha"
     },
     {
       "id": "prp",
       "label": "PRP-008 sobre prp-base.md: fases firmada/bloqueada (quién firma y por qué), decisiones de stack, modelo de amenazas C3 (multiempresa, subida de evidencias, inyección en documentos, capa agéntica, A2A), AISIA C4 de la propia app y flujo de datos hacia el proveedor LLM",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": ".claude/PRPs/PRP-008-sistema-integrado-iso.md: 9 fases firmadas, 11 bloqueadas con quién firma, 1 manual; C3 y AISIA"
     },
     {
       "id": "catalogo",
       "label": "Catálogo de requisitos versionado (norma + edición) con IDs propios estables: paráfrasis y preguntas guía, referencia por número de cláusula, información documentada obligatoria marcada, tipos de evidencia, controles del Anexo A de 42001 parafraseados, mapeo cruzado 9001↔42001; estado 'borrador sin revisión experta' hasta que firme un auditor competente",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "130 requisitos (34 C, 45 Q, 13 IA, 38 Anexo A), 3 ediciones; L2 verde; revisión dedicada aplicada (revision-catalogo.md); sigue BORRADOR sin revisión experta"
     },
     {
       "id": "supabase-local",
       "label": "Supabase local en Docker con CLI pineado; migraciones del repo + las nuevas aplicadas; entorno aparte que no pisa .env.local",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "supabase@2.118.0 pineado, proyecto sgi-local; migraciones del repo + 3 nuevas; entorno aparte (.env.local del worktree, sin service_role)"
     },
     {
       "id": "esquema",
       "label": "Esquema multiempresa: organización, proyecto de SG, norma/edición, requisito, fase, tarea, evidencia (M:N con requisito), documento versionado, parte interesada, riesgo, objetivo, indicador, sistema de IA, evaluación de impacto, control Anexo A con estado SoA, proveedor, auditoría, hallazgo, NC, acción correctiva; aprobaciones inmutables (quién, cuándo, rol, huella, versión); traza de cada artefacto; RLS por organización y rol (consultor, admin pyme, alta dirección, dueño de proceso, auditor interno)",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "npm run sgi:rls 42/42: aislamiento, roles, O3, puerta en SQL, base = motor (110 combinaciones, catálogo sin deriva)"
     },
     {
       "id": "motor",
       "label": "Motor de requisitos (núcleo TypeScript puro, empaquetado en tools/): avance determinista por cláusula, norma y global; una evidencia cubre N requisitos de ambas normas; puertas de fase (evidencia obligatoria + aprobación del rol correcto); migración de edición por diff de catálogos",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "23 pruebas del paquete + casos mot-1..6: doble cobertura, puertas, roles, migración, madurez"
     },
     {
       "id": "agentes",
       "label": "Capa agéntica: orquestador, diagnóstico, contexto, riesgos e IA, documental, capacitación, proveedores, KPIs, auditoría, portafolio; cada salida cita IDs del catálogo (validador rechaza IDs inexistentes), guarda traza (agente, modelo pineado, insumos con huella, versión de prompt, aprobador), texto de evidencias delimitado contra inyección, datos personales minimizados antes de salir; LLM inyectado por routing-modelos.json; costo por contabilidad.ts",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "9 agentes + orquestador cableados; salvaguardas probadas (sal-1..5, 23 pruebas); SIN CORRIDA REAL: falta OPENROUTER_API_KEY"
     },
     {
       "id": "documentos",
       "label": "Generador documental: plantillas propias → DOCX y PDF con control de versiones, flujo borrador → revisión → aprobación por rol, y detector de documento genérico (sin datos de la organización)",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "DOCX válido para zipfile y PDF con xref coherente; huella determinista (mismos bytes en dos corridas); exportados en el recorrido (paso 15)"
     },
     {
       "id": "app",
       "label": "App: roadmap de 9 fases con puertas y % por cláusula/norma/global; diagnóstico adaptativo → informe GAP; repositorio de evidencias; matrices de contexto, riesgos, impacto de IA y SoA; KPIs; auditoría y CAPA; calendario; modo pyme sin jerga; panel del consultor multicliente con biblioteca de plantillas, marca blanca y reporte de avance",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "/sgi completa; recorrido contra producción 9/9 pasos deterministas en verde, sin errores de consola; 10 pasos con agente sin correr (falta la llave)"
     },
     {
       "id": "casa",
       "label": "La app como su primer inquilino: su propio sistema de gestión de IA (inventario de sus agentes, evaluación de impacto, SoA, política de IA) cargado en la app, con las aprobaciones pendientes del laboratorio",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "la casa sembrada con sus 9 agentes en su inventario (paso 16); SoA, impacto y política de IA esperan la corrida real"
     },
     {
       "id": "laboratorio",
       "label": "Laboratorio (mismo molde que /laboratorio-pymes): ≥5 casos por agente y por pieza del motor, con las trampas del spec; corridas reales con la llave de OpenRouter, estado real y costo por corrida",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "33/33 casos deterministas en verde + L8 en 32 archivos; 46 casos con LLM «no medidos» (falta la llave)"
     },
     {
       "id": "propuestas",
       "label": "Propuestas para firma: entrada CDC (prompts + clases nuevas del routing), Supabase en la nube, exponer A2A fuera de localhost, conectores externos, cobros por suscripción/asiento, datos reales de clientes hacia el proveedor LLM, BUSINESS_LOGIC.md del producto, gates nuevos, respaldo de lo nuevo",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "propuesta-cdc.md (diff del routing + prompts) y propuestas.md (fases 10-21 con quién firma)"
     },
     {
       "id": "docs",
       "label": "READMEs product-first de lo nuevo, guía de la pyme y del consultor, aviso de privacidad en borrador ('por verificar con asesoría legal'), asiento en el inventario",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "3 READMEs conformes (18/18 del repo), guías de pyme y consultor, aviso de privacidad en borrador, 3 asientos en el inventario (238 unidades, 0 NUEVO)"
     },
     {
       "id": "entrega",
       "label": "Rama propia con todo commiteado, npm run validate en verde después del commit, grafo.json con estados y evidencia, resultados.md",
-      "estado": "gris"
+      "estado": "gris",
+      "evidencia": "pendiente: corridas reales y npm run validate en verde después del commit final"
     }
   ],
   "aristas": [
-    {"id": "a1", "from": "base", "to": "investigacion", "tipo": "agente", "label": "lo existente leído antes de investigar fuera"},
-    {"id": "a2", "from": "investigacion", "to": "prp", "tipo": "agente", "label": "ediciones vigentes, riesgos legales y referentes"},
-    {"id": "a3", "from": "base", "to": "prp", "tipo": "agente", "label": "qué se reusa y qué es nuevo"},
-    {"id": "a4", "from": "investigacion", "to": "catalogo", "tipo": "agente", "label": "ediciones a catalogar; redacción propia, nunca texto de la norma"},
-    {"id": "a5", "from": "prp", "to": "supabase-local", "tipo": "mixta", "label": "CLI pineado, docker, migraciones"},
-    {"id": "a6", "from": "supabase-local", "to": "esquema", "tipo": "mixta", "label": "migraciones nuevas + pruebas de RLS contra Postgres real"},
-    {"id": "a7", "from": "prp", "to": "esquema", "tipo": "agente", "label": "entidades, roles y matriz de permisos"},
-    {"id": "a8", "from": "catalogo", "to": "motor", "tipo": "agente", "label": "formato del catálogo y mapeo cruzado"},
-    {"id": "a9", "from": "prp", "to": "motor", "tipo": "agente", "label": "reglas de puerta por fase"},
-    {"id": "a10", "from": "motor", "to": "agentes", "tipo": "agente", "label": "el orquestador consulta puertas y avance; nunca los decide"},
-    {"id": "a11", "from": "catalogo", "to": "agentes", "tipo": "agente", "label": "IDs citables"},
-    {"id": "a12", "from": "prp", "to": "agentes", "tipo": "agente", "label": "responsabilidades, contratos de entrada/salida, C3/C4"},
-    {"id": "a13", "from": "catalogo", "to": "documentos", "tipo": "agente", "label": "plantillas atadas a IDs de requisito"},
-    {"id": "a14", "from": "esquema", "to": "app", "tipo": "agente", "label": "persistencia con RLS"},
-    {"id": "a15", "from": "motor", "to": "app", "tipo": "agente", "label": "avance y puertas"},
-    {"id": "a16", "from": "agentes", "to": "app", "tipo": "agente", "label": "propuestas que el humano aprueba"},
-    {"id": "a17", "from": "documentos", "to": "app", "tipo": "agente", "label": "DOCX/PDF versionados"},
-    {"id": "a18", "from": "app", "to": "casa", "tipo": "mixta", "label": "la app se usa a sí misma para su 42001"},
-    {"id": "a19", "from": "app", "to": "laboratorio", "tipo": "mixta", "label": "casos contra la app real"},
-    {"id": "a20", "from": "agentes", "to": "laboratorio", "tipo": "script", "label": "corridas reales con costo"},
-    {"id": "a21", "from": "laboratorio", "to": "propuestas", "tipo": "agente", "label": "resultados que sostienen la entrada CDC"},
-    {"id": "a22", "from": "casa", "to": "propuestas", "tipo": "agente", "label": "AISIA y SoA de la app para firma"},
-    {"id": "a23", "from": "propuestas", "to": "docs", "tipo": "agente", "label": "lo bloqueado y quién firma, en la documentación"},
-    {"id": "a24", "from": "docs", "to": "entrega", "tipo": "script", "label": "commit + npm run validate"}
+    {
+      "id": "a1",
+      "from": "base",
+      "to": "investigacion",
+      "tipo": "agente",
+      "label": "lo existente leído antes de investigar fuera"
+    },
+    {
+      "id": "a2",
+      "from": "investigacion",
+      "to": "prp",
+      "tipo": "agente",
+      "label": "ediciones vigentes, riesgos legales y referentes"
+    },
+    {
+      "id": "a3",
+      "from": "base",
+      "to": "prp",
+      "tipo": "agente",
+      "label": "qué se reusa y qué es nuevo"
+    },
+    {
+      "id": "a4",
+      "from": "investigacion",
+      "to": "catalogo",
+      "tipo": "agente",
+      "label": "ediciones a catalogar; redacción propia, nunca texto de la norma"
+    },
+    {
+      "id": "a5",
+      "from": "prp",
+      "to": "supabase-local",
+      "tipo": "mixta",
+      "label": "CLI pineado, docker, migraciones"
+    },
+    {
+      "id": "a6",
+      "from": "supabase-local",
+      "to": "esquema",
+      "tipo": "mixta",
+      "label": "migraciones nuevas + pruebas de RLS contra Postgres real"
+    },
+    {
+      "id": "a7",
+      "from": "prp",
+      "to": "esquema",
+      "tipo": "agente",
+      "label": "entidades, roles y matriz de permisos"
+    },
+    {
+      "id": "a8",
+      "from": "catalogo",
+      "to": "motor",
+      "tipo": "agente",
+      "label": "formato del catálogo y mapeo cruzado"
+    },
+    {
+      "id": "a9",
+      "from": "prp",
+      "to": "motor",
+      "tipo": "agente",
+      "label": "reglas de puerta por fase"
+    },
+    {
+      "id": "a10",
+      "from": "motor",
+      "to": "agentes",
+      "tipo": "agente",
+      "label": "el orquestador consulta puertas y avance; nunca los decide"
+    },
+    {
+      "id": "a11",
+      "from": "catalogo",
+      "to": "agentes",
+      "tipo": "agente",
+      "label": "IDs citables"
+    },
+    {
+      "id": "a12",
+      "from": "prp",
+      "to": "agentes",
+      "tipo": "agente",
+      "label": "responsabilidades, contratos de entrada/salida, C3/C4"
+    },
+    {
+      "id": "a13",
+      "from": "catalogo",
+      "to": "documentos",
+      "tipo": "agente",
+      "label": "plantillas atadas a IDs de requisito"
+    },
+    {
+      "id": "a14",
+      "from": "esquema",
+      "to": "app",
+      "tipo": "agente",
+      "label": "persistencia con RLS"
+    },
+    {
+      "id": "a15",
+      "from": "motor",
+      "to": "app",
+      "tipo": "agente",
+      "label": "avance y puertas"
+    },
+    {
+      "id": "a16",
+      "from": "agentes",
+      "to": "app",
+      "tipo": "agente",
+      "label": "propuestas que el humano aprueba"
+    },
+    {
+      "id": "a17",
+      "from": "documentos",
+      "to": "app",
+      "tipo": "agente",
+      "label": "DOCX/PDF versionados"
+    },
+    {
+      "id": "a18",
+      "from": "app",
+      "to": "casa",
+      "tipo": "mixta",
+      "label": "la app se usa a sí misma para su 42001"
+    },
+    {
+      "id": "a19",
+      "from": "app",
+      "to": "laboratorio",
+      "tipo": "mixta",
+      "label": "casos contra la app real"
+    },
+    {
+      "id": "a20",
+      "from": "agentes",
+      "to": "laboratorio",
+      "tipo": "script",
+      "label": "corridas reales con costo"
+    },
+    {
+      "id": "a21",
+      "from": "laboratorio",
+      "to": "propuestas",
+      "tipo": "agente",
+      "label": "resultados que sostienen la entrada CDC"
+    },
+    {
+      "id": "a22",
+      "from": "casa",
+      "to": "propuestas",
+      "tipo": "agente",
+      "label": "AISIA y SoA de la app para firma"
+    },
+    {
+      "id": "a23",
+      "from": "propuestas",
+      "to": "docs",
+      "tipo": "agente",
+      "label": "lo bloqueado y quién firma, en la documentación"
+    },
+    {
+      "id": "a24",
+      "from": "docs",
+      "to": "entrega",
+      "tipo": "script",
+      "label": "commit + npm run validate"
+    }
   ],
   "lazos": [
-    {"id": "L1", "sobre": "nodo:catalogo", "label": "derechos de autor", "referencia": "cero texto de la norma: si el laboratorio deja su copia licenciada FUERA del repo (ruta por variable de entorno), un script mide solapamiento de n-gramas y no admite fragmentos de 8+ palabras seguidas; sin copia, 'no medido' declarado + revisor dedicado que no redactó el catálogo", "estado": "gris"},
-    {"id": "L2", "sobre": "nodo:catalogo", "label": "cobertura", "referencia": "cada cláusula 4-10 de cada norma/edición y cada control del Anexo A tiene ≥1 requisito; IDs únicos y estables; mapeo cruzado en ambos sentidos sin huérfanos", "estado": "gris"},
-    {"id": "L3", "sobre": "nodo:esquema", "label": "aislamiento", "referencia": "la organización B no lee, cambia, borra ni suplanta nada de A; matriz de roles probada; el consultor solo ve clientes asignados; service_role fuera de superficies (C7)", "estado": "gris"},
-    {"id": "L4", "sobre": "nodo:motor", "label": "humano en el ciclo", "referencia": "ninguna fase cierra sin evidencia obligatoria + aprobación del rol correcto; aprobaciones inmutables; el avance es determinista y reproducible", "estado": "gris"},
-    {"id": "L5", "sobre": "nodo:agentes", "label": "citas", "referencia": "100 % de las recomendaciones citan IDs existentes del catálogo; un ID inexistente se rechaza", "estado": "gris"},
-    {"id": "L6", "sobre": "nodo:agentes", "label": "inyección", "referencia": "una instrucción escondida en una evidencia no cambia ninguna salida ni estado", "estado": "gris"},
-    {"id": "L7", "sobre": "nodo:documentos", "label": "genérico", "referencia": "un borrador sin datos de la organización se marca y no pasa a revisión", "estado": "gris"},
-    {"id": "L8", "sobre": "nodo:app", "label": "certificación", "referencia": "ningún texto de la app promete certificar; se dice preparación para la auditoría de un organismo acreditado", "estado": "gris"},
-    {"id": "L9", "sobre": "nodo:laboratorio", "label": "costo", "referencia": "costo por corrida desde contabilidad.ts, null cuando no hay uso; tope del goal US$15 con aviso al 80 %", "estado": "gris"},
-    {"id": "L10", "sobre": "nodo:entrega", "label": "validate", "referencia": "npm run validate en verde después del commit, con asiento en el inventario de todo lo nuevo", "estado": "gris"}
+    {
+      "id": "L1",
+      "sobre": "nodo:catalogo",
+      "label": "derechos de autor",
+      "referencia": "cero texto de la norma: si el laboratorio deja su copia licenciada FUERA del repo (ruta por variable de entorno), un script mide solapamiento de n-gramas y no admite fragmentos de 8+ palabras seguidas; sin copia, 'no medido' declarado + revisor dedicado que no redactó el catálogo",
+      "estado": "ambar",
+      "evidencia": "NO MEDIDO: sin copia licenciada; mecanismo probado con referencia sintética (cat-3); revisión dedicada: 0 copias largas, 4 cercanas corregidas"
+    },
+    {
+      "id": "L2",
+      "sobre": "nodo:catalogo",
+      "label": "cobertura",
+      "referencia": "cada cláusula 4-10 de cada norma/edición y cada control del Anexo A tiene ≥1 requisito; IDs únicos y estables; mapeo cruzado en ambos sentidos sin huérfanos",
+      "estado": "morado",
+      "evidencia": "npm run sgi:catalogo: 64+64+32 cláusulas y 38 controles cubiertos, 0 duplicados, 0 fuera, 0 huérfanos"
+    },
+    {
+      "id": "L3",
+      "sobre": "nodo:esquema",
+      "label": "aislamiento",
+      "referencia": "la organización B no lee, cambia, borra ni suplanta nada de A; matriz de roles probada; el consultor solo ve clientes asignados; service_role fuera de superficies (C7)",
+      "estado": "morado",
+      "evidencia": "sgi:rls 42/42 contra Postgres real"
+    },
+    {
+      "id": "L4",
+      "sobre": "nodo:motor",
+      "label": "humano en el ciclo",
+      "referencia": "ninguna fase cierra sin evidencia obligatoria + aprobación del rol correcto; aprobaciones inmutables; el avance es determinista y reproducible",
+      "estado": "morado",
+      "evidencia": "motor (mot-2, mot-3) y SQL (bas-4): ninguna fase cierra sin evidencia ni con otro rol"
+    },
+    {
+      "id": "L5",
+      "sobre": "nodo:agentes",
+      "label": "citas",
+      "referencia": "100 % de las recomendaciones citan IDs existentes del catálogo; un ID inexistente se rechaza",
+      "estado": "ambar",
+      "evidencia": "validador probado (sal-1, reintento en pruebas); falta la corrida real (trampa con el modelo: dia-5)"
+    },
+    {
+      "id": "L6",
+      "sobre": "nodo:agentes",
+      "label": "inyección",
+      "referencia": "una instrucción escondida en una evidencia no cambia ninguna salida ni estado",
+      "estado": "ambar",
+      "evidencia": "delimitación y detección probadas (sal-2); falta la corrida real (ctx-5, doc-6, aud-5)"
+    },
+    {
+      "id": "L7",
+      "sobre": "nodo:documentos",
+      "label": "genérico",
+      "referencia": "un borrador sin datos de la organización se marca y no pasa a revisión",
+      "estado": "morado",
+      "evidencia": "detector probado (doc-d3, doc-d4); la base impide revisión de un genérico (check); corrida real doc-4 pendiente"
+    },
+    {
+      "id": "L8",
+      "sobre": "nodo:app",
+      "label": "certificación",
+      "referencia": "ningún texto de la app promete certificar; se dice preparación para la auditoría de un organismo acreditado",
+      "estado": "morado",
+      "evidencia": "0 promesas en 32 archivos de la app, guías y aviso; validador en toda salida; negaciones tratadas como deslinde"
+    },
+    {
+      "id": "L9",
+      "sobre": "nodo:laboratorio",
+      "label": "costo",
+      "referencia": "costo por corrida desde contabilidad.ts, null cuando no hay uso; tope del goal US$15 con aviso al 80 %",
+      "estado": "ambar",
+      "evidencia": "tope US$15 con aviso al 80 % en el corredor; presupuesto por organización en la app; gasto real US$0 (sin llave)"
+    },
+    {
+      "id": "L10",
+      "sobre": "nodo:entrega",
+      "label": "validate",
+      "referencia": "npm run validate en verde después del commit, con asiento en el inventario de todo lo nuevo",
+      "estado": "gris",
+      "evidencia": "validate en verde sin commit final todavía"
+    }
   ]
 }
