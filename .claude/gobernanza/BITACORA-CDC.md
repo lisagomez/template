@@ -4091,3 +4091,38 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   156/156 · `mide:contexto`: `CLAUDE.md` 6236 tokens (78 % de 8000), total por sesión 10623 (89 % de 12000),
   `GEMINI.md` 64 % · `npm run validate` en verde (ver el PR).
 - **Aprobado por**: **lisagomez** (el laboratorio), «Firmo», 2026-09-27, con el diff de las 13 líneas delante.
+
+### 2026-09-29 — el conector MCP de Supabase apunta al proyecto real, en solo lectura y con token de alcance mínimo → CDC PROMOVIDO — radio: configuración del agente (`.mcp.json` local)
+- **Cambio**: el servidor `supabase` de `.mcp.json` deja los valores de ejemplo (`YOUR_SUPABASE_PROJECT_REF`,
+  `YOUR_SUPABASE_ACCESS_TOKEN`). `.mcp.json` está ignorado por git, así que el cambio vive solo en la máquina
+  del laboratorio. La nueva configuración:
+  - apunta al proyecto de la app, `uzvcqhgeqkotcbiwfmjy` (organización «Template»);
+  - corre con `--read-only`: el servidor expone 13 herramientas y desaparecen `apply_migration`,
+    `deploy_edge_function` y las de ramas;
+  - lee el token al arrancar de `~/.config/template/supabase-mcp.token` (permisos 600, fuera del repo) y lo pasa
+    como variable de entorno del proceso, no como argumento, así que no sale en la lista de procesos. Si falta
+    el archivo, el servidor sale con un mensaje claro en vez de un «Unauthorized» a secas;
+  - la versión sigue pineada en `0.11.0`.
+
+  `.claude/example.mcp.json`, el que miden los gates, no cambia.
+- **Motivo**: `/primer` no podía leer la base. El conector llevaba los valores de ejemplo, y estos pisaban el
+  token de la terminal, que además es de otra cuenta y no ve el proyecto de la app.
+- **Alcance del token** (`template-mcp-lectura`, 30 días, un solo proyecto), probado contra la API:
+  - puede: SQL de lectura y avisos de seguridad;
+  - da 403: llaves (también reveladas), secretos de funciones, configuración de auth y de la base, otro
+    proyecto y listado de proyectos;
+  - migraciones sin permiso: se leen por SQL;
+  - escritura no probada, a propósito: la cierra `--read-only`.
+- **En el camino**, sin exposición viva:
+  - un primer token se pegó en el chat. Se revocó antes de usarse, comprobado en la lista de tokens del panel;
+  - `.env.local` llevaba la llave `service_role` como `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` (C7). No estaba en
+    git ni en el build, y ningún código la leía. Se borró la línea.
+- **Gate aplicado**: diff revisado ☑ (**enseñado completo ANTES de pedir la firma**) · regresión verde ☑ capa A
+  131/131 · `verify:gobernanza` ☑ 156/156 · aprobación humana ☑ · pineo ☑ (sin cambio de versión). **Capa B no
+  corrida, a propósito y declarado**: ninguna instrucción cambia; la superficie de herramientas solo se reduce.
+- **Regresión**: además, el servidor arrancó por stdio con la configuración nueva: `initialize` ok (supabase
+  0.11.0), 13 herramientas, `list_tables` responde.
+- **Aprobado por**: **lisagomez** (el laboratorio), «si», 2026-09-29, con el diff delante.
+- **Pendiente (aparte)**: `scripts/configura-deploy.mjs:159` mira el VALOR de `SUPABASE_SERVICE_ROLE_KEY` y no el
+  NOMBRE de la variable, así que el caso de `.env.local` le habría pasado de largo. Va con su propio arreglo y su
+  aprendizaje.
