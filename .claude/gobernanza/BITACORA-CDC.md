@@ -4263,3 +4263,42 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
     «sin declarar: revisa:readmes — un gate fuera del padrón no lo corre ningún perfil y nadie lo nota»;
   - `verify:gobernanza` ☑ · `npm run validate` ☑ **28/28** activos.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «si», 2026-09-30, con el diff delante y la parte opcional (`FORMA_DE_GATE`) incluida.
+
+### 2026-09-30 — `BUSINESS_LOGIC.md` por producto: la raíz pasa a índice del portafolio → CDC PROMOVIDO — radio: skill (1), plantilla (1), regla (1), contratos C2 (1), verificador de gobernanza
+- **Cambio** (rama `cdc/business-logic-por-producto`, sobre `a396f79`):
+  - el contrato del asesor de ventas por voz se **mueve** de la raíz a `src/features/dictado/BUSINESS_LOGIC.md`
+    con su firma del 2026-09-20; lo firmado no cambia de sentido. Pasan a la raíz, sin cambiarles el texto, lo que
+    es de todo el servidor o de todo el repo: las filas de respaldo de Storage, `.env.production` y trayectorias con
+    la nota de Storage, el RPO/RTO y las dos subsecciones de herencia (corpus de pruebas, imprenta; solo cambia su
+    título, que ya no dice «este proyecto»). En el contrato
+    cambian dos frases, las que apuntan a lo que se fue, y se añade la nota del traslado;
+  - la raíz pasa a **índice del portafolio**: §1 productos → contrato → activos que cubre → estado (dos con contrato:
+    asesor y ERP, que se queda con `erp/ERP-MAESTRO.md`; cuatro pendientes con `falta:`: etiquetas, extractor,
+    reel, estudio pymes), §2 lo que no es producto con su motivo, §3 herencia de la fábrica, §4 respaldo del
+    servidor. El §4 conserva su número: `AGENTS.md` y los SDD de etiquetas y del extractor lo citan;
+  - `scripts/verifica-gobernanza.mjs` (3d): con la raíz vuelta índice, a cada contrato enlazado se le exige su
+    `## 6. Gobernanza`; un pendiente sin `falta:` cae; ningún `BUSINESS_LOGIC.md` de `src/features/*` o `tools/*`
+    puede quedar sin enlace; y todo activo PRODUCTO en beta o producción de `inventario/activos.json` aparece en el
+    índice. Los pendientes se listan aparte y **no cuentan como verde**. Un proyecto de un solo producto sigue con el
+    check de siempre;
+  - `new-app`: en un monorepo escribe el contrato junto a la feature y actualiza la fila del índice; **la raíz no se
+    sobrescribe nunca**. Contrato C2 nuevo que lo vigila (capa A: 146 → 147);
+  - `prp-base.md`: el PRP lee el contrato **del producto**; `flujos.md` carga también con
+    `src/features/*/BUSINESS_LOGIC.md`; `README.md` y `.claude/README.md`: 156 → 169 comprobaciones.
+- **Motivo**: pedido del laboratorio del 2026-09-30. Desde el 2026-09-24 el repo es el monorepo del ERP, las apps y
+  las herramientas, y el contrato de la raíz describía un solo producto: la evaluación de impacto (C4) dejaba fuera
+  a los terceros de etiquetas, extractor y reel, y el respaldo de etiquetas no estaba en ninguna tabla.
+- **Qué pone rojo y qué no**: rojo = contrato enlazado sin sección 6 o inexistente, pendiente sin `falta:`, contrato
+  sin enlace desde el índice, activo del índice que no existe, producto en beta o producción fuera del índice. Los
+  cuatro pendientes de hoy **no** lo ponen rojo; se listan.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo ANTES de pedir la firma**) · regresión capa A ☑ 147/147 ·
+  **capa B no corrida, a propósito y declarado** (propuesta: «capa A basta»; ninguna regla cambia de sentido, se
+  suma una rama a `new-app` y la vigila un contrato) · aprobación humana ☐ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verify:gobernanza` ☑ 169/169, 4 pendientes declarados;
+  - **6/6 siembras cazadas**: contrato sin sección 6, producto beta fuera del índice, pendiente sin `falta:`,
+    contrato huérfano, enlace roto, activo inexistente;
+  - **el hueco del check viejo, medido**: contra el índice, el check de `main` da rojo; añadiendo solo la palabra
+    «Gobernanza» a la raíz y **con el contrato del asesor fuera del disco**, da verde;
+  - `npm run validate` ☑ 28/28 activos (8 inactivos declarados, 0 rojos).
+- **Aprobado por**: **lisagomez** (el laboratorio) — «si», 2026-09-30, con el diff delante; capa A basta.
