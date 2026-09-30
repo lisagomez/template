@@ -23,6 +23,9 @@ const GOB = '.claude/gobernanza';
 
 const fallos = [];
 const ok = [];
+/** Lo declarado como pendiente, con lo que le falta. Se lista aparte y NO cuenta como verde:
+ *  misma doctrina que un gate inactivo en `.claude/gates.json`. */
+const pendientes = [];
 
 const ruta = (p) => join(raiz, p);
 const lee = (p) => (existsSync(ruta(p)) ? readFileSync(ruta(p), 'utf8') : null);
@@ -180,14 +183,91 @@ if (newApp !== null) {
     'sin esto, cada proyecto nuevo nace sin evaluacion de impacto (C4)',
   );
 }
-// Si el proyecto ya tiene su BUSINESS_LOGIC.md, tiene que llevarla.
+// Si el proyecto ya tiene su BUSINESS_LOGIC.md, tiene que llevarla. Un proyecto de un solo
+// producto la lleva en la raiz. En un monorepo la raiz es un INDICE del portafolio (`## 1.
+// Productos`) y la seccion se exige a cada contrato que enlaza: desde el 2026-09-30 es el caso de
+// este template. Mirar solo la raiz ahi pasaria en verde sin revisar ningun producto.
 const businessLogic = lee('BUSINESS_LOGIC.md');
-if (businessLogic !== null) {
+if (businessLogic !== null && !/^##\s*1\.\s*Productos/m.test(businessLogic)) {
   comprueba(
     'BUSINESS_LOGIC.md incluye su seccion de Gobernanza',
     /Gobernanza/.test(businessLogic),
     'fue generado antes de la capa: regeneralo o anade la seccion 6 a mano',
   );
+} else if (businessLogic !== null) {
+  const productos = filasDeSeccion(businessLogic, 1);
+  const noProductos = filasDeSeccion(businessLogic, 2);
+  verificaContratos(productos);
+  verificaCobertura(productos, noProductos);
+}
+
+/** Las filas de datos de la tabla de la seccion `## <n>.` del indice, como celdas recortadas. */
+function filasDeSeccion(indice, n) {
+  const seccion = indice.split(/^## /m).find((s) => s.startsWith(`${n}.`)) ?? '';
+  return seccion
+    .split('\n')
+    .filter((l) => l.startsWith('|') && !/^\|\s*-/.test(l))
+    .slice(1)
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()));
+}
+
+function enlaceDe(celda) {
+  return celda.match(/\]\(([^)]+)\)/)?.[1] ?? null;
+}
+
+/** Cada producto del §1 tiene su contrato, y el contrato su evaluacion de impacto (C4). */
+function verificaContratos(productos) {
+  comprueba('el indice del portafolio declara sus productos', productos.length > 0,
+    'la raiz dice ser indice (`## 1. Productos`) y la tabla esta vacia o rota');
+  for (const [nombre, contrato = '', , estado = ''] of productos) {
+    const enlace = enlaceDe(contrato);
+    if (enlace === null) {
+      const falta = /falta:/.test(estado);
+      comprueba(`el contrato pendiente de «${nombre}» declara lo que le falta`, falta,
+        'un pendiente sin «falta:» se lee igual que un contrato hecho');
+      if (falta) pendientes.push(`contrato de «${nombre}» — ${estado}`);
+      continue;
+    }
+    const texto = lee(enlace);
+    comprueba(`existe el contrato de «${nombre}» (${enlace})`, texto !== null,
+      'el indice apunta a un archivo que no esta: se movio o se borro sin tocar el indice');
+    if (texto === null || !enlace.endsWith('BUSINESS_LOGIC.md')) continue; // maestro propio
+    comprueba(`el contrato de «${nombre}» incluye su seccion de Gobernanza`,
+      /^##\s*6\.\s*Gobernanza/m.test(texto),
+      'sin la seccion 6 ese producto no tiene evaluacion de impacto (C4)');
+  }
+  const enlazados = new Set(productos.map(([, c = '']) => enlaceDe(c)).filter(Boolean));
+  const huerfanos = ['src/features', 'tools']
+    .flatMap((base) => (existsSync(ruta(base)) ? readdirSync(ruta(base)) : [])
+      .map((d) => `${base}/${d}/BUSINESS_LOGIC.md`))
+    .filter((p) => existsSync(ruta(p)) && !enlazados.has(p));
+  comprueba('todo contrato de producto esta enlazado desde el indice', huerfanos.length === 0,
+    `sin fila en el §1: ${huerfanos.join(', ')} — un contrato que el indice no nombra no lo encuentra nadie`);
+}
+
+/** Todo PRODUCTO del inventario en beta o produccion esta en el indice: en un producto del §1 o
+ *  en el §2 con su motivo. Y el indice no cita activos que no existen. */
+function verificaCobertura(productos, noProductos) {
+  let inventario = null;
+  try { inventario = JSON.parse(lee('inventario/activos.json')).activos; } catch { /* cae abajo */ }
+  comprueba('el indice del portafolio puede leer el inventario de activos', Array.isArray(inventario),
+    'sin inventario no hay contra que cruzar: no poder mirar no es estar en verde');
+  if (!Array.isArray(inventario)) return;
+  for (const [activos, motivo = ''] of noProductos) {
+    comprueba(`${activos}: el indice dice por que no lleva contrato`, motivo.length > 0,
+      'un activo en el §2 sin motivo es un producto sin contrato con otro nombre');
+  }
+  const ids = (celda = '') => celda.match(/TPL-[a-z0-9-]+/g) ?? [];
+  const citados = new Set([...productos.flatMap((f) => ids(f[2])), ...noProductos.flatMap((f) => ids(f[0]))]);
+  const conocidos = new Set(inventario.map((a) => a.id));
+  const desconocidos = [...citados].filter((id) => !conocidos.has(id));
+  comprueba('el indice del portafolio solo cita activos del inventario', desconocidos.length === 0,
+    `no existen: ${desconocidos.join(', ')} — errata, o un activo retirado que sigue en el indice`);
+  const sinContrato = inventario
+    .filter((a) => a.clase === 'PRODUCTO' && ['beta', 'produccion'].includes(a.estado) && !citados.has(a.id))
+    .map((a) => a.id);
+  comprueba('todo producto en beta o produccion esta en el indice del portafolio', sinContrato.length === 0,
+    `sin contrato ni motivo: ${sinContrato.join(', ')} — al §1 (con contrato, o pendiente con «falta:») o al §2 con su motivo`);
 }
 
 // --- 3d-bis. Todo paso de `validate` esta declarado en la documentacion -----
@@ -1258,6 +1338,7 @@ for (const { doc, cifra } of DECLARAN_CIFRA) {
 // --- Reporte --------------------------------------------------------------
 const total = ok.length + fallos.length;
 for (const linea of ok) console.log(`  \x1b[32m✓\x1b[0m ${linea}`);
+for (const p of pendientes) console.log(`  \x1b[33m◦\x1b[0m pendiente: ${p}`);
 for (const f of fallos) {
   console.log(`  \x1b[31m✗\x1b[0m ${f.descripcion}`);
   console.log(`      \x1b[2m↳ ${f.pista}\x1b[0m`);
@@ -1265,6 +1346,7 @@ for (const f of fallos) {
 console.log('');
 if (fallos.length === 0) {
   console.log(`\x1b[32mGobernanza cableada: ${ok.length}/${total} comprobaciones en verde.\x1b[0m`);
+  if (pendientes.length > 0) console.log(`\x1b[33m${pendientes.length} pendientes declarados: no cuentan como verde.\x1b[0m`);
   process.exit(0);
 }
 console.log(`\x1b[31mGobernanza DIVERGENTE: ${fallos.length} de ${total} comprobaciones fallaron.\x1b[0m`);
