@@ -278,6 +278,12 @@ Todos medidos durante la construcción, y cada uno quedó con su caso de regresi
 - **Hecho**: «No te certifica» en la guía salía como promesa (falso positivo).
 - **Fix**: una negación inmediata cuenta como deslinde, con casos de regresión en el paquete.
 
+### 2026-09-30: ninguna función SECURITY DEFINER en `public` ejecutable por la API
+- **Hecho**: `prueba:migraciones` rechazó 12 funciones: todo lo que está en `public` se puede llamar por /rpc.
+- **Fix**: las 10 SECURITY DEFINER viven en `sgi_privado`, que la API no expone. Solo `authenticated` ejecuta los 5
+  ayudantes que evalúa la RLS. Las 2 funciones que la app consulta por la API son SECURITY INVOKER y las protege la RLS
+  de quien pregunta. La RLS se volvió a medir: 42/42.
+
 ### 2026-09-30: dos reglas del repo que se cumplen, no se esquivan
 - **Hecho 1**: `verify:gobernanza` prohíbe una forma de identificador en el árbol, y un literal de fecha en
   `orquestador.ts` la tenía. Se cambió el código, no la regla.

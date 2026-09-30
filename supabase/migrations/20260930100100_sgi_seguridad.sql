@@ -7,29 +7,39 @@
 --   5. La puerta de fase verificada EN SQL al cerrar: aunque alguien salte la app, sin evidencia no hay cierre.
 --   6. RLS en toda tabla. Ninguna política para `anon`.
 -- Idempotente y no destructiva.
+--
+-- Toda función SECURITY DEFINER vive en el esquema `sgi_privado`, que la API (PostgREST) no expone: los disparadores no
+-- necesitan permiso de ejecución al dispararse, y los ayudantes de pertenencia que usan las políticas solo los ejecuta
+-- `authenticated` desde la RLS, nunca por /rpc (regla del repo que vigila `prueba:migraciones`). Las dos funciones que sí
+-- se consultan por la API (`sgi_faltantes_puerta`, `sgi_fases_cerradas`) son SECURITY INVOKER: las protege la RLS de
+-- quien pregunta.
+
+create schema if not exists sgi_privado;
+revoke all on schema sgi_privado from public;
+grant usage on schema sgi_privado to authenticated;
 
 -- ───────────────────────── 1. pertenencia y rol ─────────────────────────
 
-create or replace function public.sgi_es_miembro(p_org uuid)
+create or replace function sgi_privado.sgi_es_miembro(p_org uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.sgi_membresia m where m.organizacion_id = p_org and m.user_id = (select auth.uid()));
 $$;
 
-create or replace function public.sgi_tiene_rol(p_org uuid, p_roles text[])
+create or replace function sgi_privado.sgi_tiene_rol(p_org uuid, p_roles text[])
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.sgi_membresia m
     where m.organizacion_id = p_org and m.user_id = (select auth.uid()) and m.rol = any (p_roles));
 $$;
 
-create or replace function public.sgi_en_despacho(p_despacho uuid)
+create or replace function sgi_privado.sgi_en_despacho(p_despacho uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.sgi_despacho_miembro d where d.despacho_id = p_despacho and d.user_id = (select auth.uid()));
 $$;
 
 -- Marca blanca: la pyme ve la marca del despacho que la acompaña.
-create or replace function public.sgi_ve_despacho(p_despacho uuid)
+create or replace function sgi_privado.sgi_ve_despacho(p_despacho uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
-  select public.sgi_en_despacho(p_despacho) or exists (
+  select sgi_privado.sgi_en_despacho(p_despacho) or exists (
     select 1 from public.sgi_organizacion o join public.sgi_membresia m on m.organizacion_id = o.id
     where o.despacho_id = p_despacho and m.user_id = (select auth.uid()));
 $$;
@@ -100,7 +110,7 @@ begin
 end $$;
 
 -- Un hijo no puede colgarse de un padre de OTRA organización (el FK solo mira que exista).
-create or replace function public.sgi_misma_org()
+create or replace function sgi_privado.sgi_misma_org()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   v_col text := tg_argv[0];
@@ -145,7 +155,7 @@ begin
     ['sgi_nc_accion', 'sgi_accion_correctiva', 'no_conformidad_id', 'sgi_no_conformidad']
   ] loop
     execute format('drop trigger if exists %I on public.%I', par[1], par[2]);
-    execute format('create trigger %I before insert or update on public.%I for each row execute function public.sgi_misma_org(%L, %L)',
+    execute format('create trigger %I before insert or update on public.%I for each row execute function sgi_privado.sgi_misma_org(%L, %L)',
       par[1], par[2], par[3], par[4]);
   end loop;
 end $$;
@@ -211,32 +221,32 @@ end $$;
 
 -- Las tres funciones que siguen corren como su dueño: por eso comprueban PRIMERO que quien pregunta es miembro
 -- (sin esto, quien conociera el UUID de un proyecto ajeno vería qué le falta: medido en la prueba de RLS).
-create or replace function public.sgi_evidencia_aprobada(p_evidencia uuid)
+create or replace function sgi_privado.sgi_evidencia_aprobada(p_evidencia uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (
     select 1 from public.sgi_evidencia e join public.sgi_aprobacion a on a.organizacion_id = e.organizacion_id
-    where e.id = p_evidencia and public.sgi_es_miembro(e.organizacion_id) and a.decision = 'aprobado' and a.revocada_en is null
+    where e.id = p_evidencia and sgi_privado.sgi_es_miembro(e.organizacion_id) and a.decision = 'aprobado' and a.revocada_en is null
       and ((a.objeto_tipo = 'evidencia' and a.objeto_id = e.id)
         or (e.origen = 'documento_aprobado' and a.objeto_id = e.documento_version_id)));
 $$;
 
 create or replace function public.sgi_fases_cerradas(p_proyecto uuid)
-returns integer[] language sql stable security definer set search_path = '' as $$
+returns integer[] language sql stable security invoker set search_path = '' as $$
   select coalesce(array_agg(a.fase order by a.fase), '{}') from public.sgi_aprobacion a
-  where a.proyecto_id = p_proyecto and public.sgi_es_miembro(a.organizacion_id)
+  where a.proyecto_id = p_proyecto and sgi_privado.sgi_es_miembro(a.organizacion_id)
     and a.objeto_tipo = 'cierre_fase' and a.decision = 'aprobado' and a.revocada_en is null;
 $$;
 
 -- ESPEJO de `puerta()` del motor. Devuelve lo que falta (vacío = la puerta puede cerrarse).
 create or replace function public.sgi_faltantes_puerta(p_proyecto uuid, p_fase integer)
-returns text[] language plpgsql stable security definer set search_path = '' as $$
+returns text[] language plpgsql stable security invoker set search_path = '' as $$
 declare
   pr public.sgi_proyecto;
   cerradas integer[] := public.sgi_fases_cerradas(p_proyecto);
   faltan text[] := '{}';
 begin
   select * into pr from public.sgi_proyecto where id = p_proyecto;
-  if not found or not public.sgi_es_miembro(pr.organizacion_id) then
+  if not found or not sgi_privado.sgi_es_miembro(pr.organizacion_id) then
     raise exception 'sgi: sin acceso a ese proyecto' using errcode = '42501';
   end if;
   if p_fase = 0 then
@@ -254,7 +264,7 @@ begin
       and coalesce(btrim(pr.no_aplica ->> r.id), '') = ''
       and not exists (
         select 1 from public.sgi_evidencia_requisito er join public.sgi_evidencia e on e.id = er.evidencia_id
-        where er.requisito_id = r.id and e.proyecto_id = p_proyecto and public.sgi_evidencia_aprobada(e.id))
+        where er.requisito_id = r.id and e.proyecto_id = p_proyecto and sgi_privado.sgi_evidencia_aprobada(e.id))
     order by r.id);
   if p_fase = 8 then
     faltan := faltan || array(select 'fase-' || f from generate_series(0, 6) f where not (f = any (cerradas)) order by f);
@@ -271,11 +281,11 @@ $$;
 
 -- Estado de cada evidencia visto con los permisos de quien consulta.
 create or replace view public.sgi_evidencia_estado with (security_invoker = true) as
-  select e.id, e.organizacion_id, e.proyecto_id, public.sgi_evidencia_aprobada(e.id) as aprobada from public.sgi_evidencia e;
+  select e.id, e.organizacion_id, e.proyecto_id, sgi_privado.sgi_evidencia_aprobada(e.id) as aprobada from public.sgi_evidencia e;
 
 -- ───────────────────────── 5. la aprobación ─────────────────────────
 
-create or replace function public.sgi_aprobacion_valida()
+create or replace function sgi_privado.sgi_aprobacion_valida()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   v_org uuid; v_huella text; v_proyecto uuid; v_extra text; v_numero integer; v_faltan text[];
@@ -325,7 +335,7 @@ begin
 end;
 $$;
 
-create or replace function public.sgi_aprobacion_aplica()
+create or replace function sgi_privado.sgi_aprobacion_aplica()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare v_nc uuid;
 begin
@@ -377,9 +387,9 @@ end;
 $$;
 
 drop trigger if exists sgi_aprobacion_valida on public.sgi_aprobacion;
-create trigger sgi_aprobacion_valida before insert on public.sgi_aprobacion for each row execute function public.sgi_aprobacion_valida();
+create trigger sgi_aprobacion_valida before insert on public.sgi_aprobacion for each row execute function sgi_privado.sgi_aprobacion_valida();
 drop trigger if exists sgi_aprobacion_aplica on public.sgi_aprobacion;
-create trigger sgi_aprobacion_aplica after insert on public.sgi_aprobacion for each row execute function public.sgi_aprobacion_aplica();
+create trigger sgi_aprobacion_aplica after insert on public.sgi_aprobacion for each row execute function sgi_privado.sgi_aprobacion_aplica();
 drop trigger if exists sgi_aprobacion_inmutable on public.sgi_aprobacion;
 create trigger sgi_aprobacion_inmutable before update on public.sgi_aprobacion for each row execute function public.sgi_aprobacion_inmutable();
 
@@ -387,22 +397,22 @@ create trigger sgi_aprobacion_inmutable before update on public.sgi_aprobacion f
 
 -- Altas: quien crea una organización queda como admin (o como consultor si la crea para su despacho); quien crea un
 -- despacho queda como su miembro.
-create or replace function public.sgi_alta_organizacion()
+create or replace function sgi_privado.sgi_alta_organizacion()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   if (select auth.uid()) is not null then
     insert into public.sgi_membresia (organizacion_id, user_id, rol)
     values (new.id, (select auth.uid()),
-      case when new.despacho_id is not null and public.sgi_en_despacho(new.despacho_id) then 'consultor' else 'admin_pyme' end)
+      case when new.despacho_id is not null and sgi_privado.sgi_en_despacho(new.despacho_id) then 'consultor' else 'admin_pyme' end)
     on conflict do nothing;
   end if;
   return new;
 end;
 $$;
 drop trigger if exists sgi_alta_organizacion on public.sgi_organizacion;
-create trigger sgi_alta_organizacion after insert on public.sgi_organizacion for each row execute function public.sgi_alta_organizacion();
+create trigger sgi_alta_organizacion after insert on public.sgi_organizacion for each row execute function sgi_privado.sgi_alta_organizacion();
 
-create or replace function public.sgi_alta_despacho()
+create or replace function sgi_privado.sgi_alta_despacho()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   if (select auth.uid()) is not null then
@@ -412,7 +422,7 @@ begin
 end;
 $$;
 drop trigger if exists sgi_alta_despacho on public.sgi_despacho;
-create trigger sgi_alta_despacho after insert on public.sgi_despacho for each row execute function public.sgi_alta_despacho();
+create trigger sgi_alta_despacho after insert on public.sgi_despacho for each row execute function sgi_privado.sgi_alta_despacho();
 
 -- ───────────────────────── 6. RLS ─────────────────────────
 
@@ -437,18 +447,18 @@ begin
     'sgi_control_soa', 'sgi_objetivo', 'sgi_indicador', 'sgi_medicion', 'sgi_competencia', 'sgi_proveedor', 'sgi_auditoria'] loop
     execute format('drop policy if exists "miembros: todo" on public.%I', t);
     execute format('create policy "miembros: todo" on public.%I for all to authenticated
-      using ((select public.sgi_es_miembro(organizacion_id))) with check ((select public.sgi_es_miembro(organizacion_id)))', t);
+      using ((select sgi_privado.sgi_es_miembro(organizacion_id))) with check ((select sgi_privado.sgi_es_miembro(organizacion_id)))', t);
   end loop;
   -- Historia: se lee, se agrega y (salvo excepciones abajo) se edita, pero NO se borra.
   foreach t in array array['sgi_proyecto', 'sgi_documento', 'sgi_documento_version', 'sgi_evidencia', 'sgi_evidencia_requisito',
     'sgi_hallazgo', 'sgi_no_conformidad', 'sgi_accion_correctiva'] loop
     execute format('drop policy if exists "miembros: ver" on public.%I', t);
-    execute format('create policy "miembros: ver" on public.%I for select to authenticated using ((select public.sgi_es_miembro(organizacion_id)))', t);
+    execute format('create policy "miembros: ver" on public.%I for select to authenticated using ((select sgi_privado.sgi_es_miembro(organizacion_id)))', t);
     execute format('drop policy if exists "miembros: agregar" on public.%I', t);
-    execute format('create policy "miembros: agregar" on public.%I for insert to authenticated with check ((select public.sgi_es_miembro(organizacion_id)))', t);
+    execute format('create policy "miembros: agregar" on public.%I for insert to authenticated with check ((select sgi_privado.sgi_es_miembro(organizacion_id)))', t);
     execute format('drop policy if exists "miembros: editar" on public.%I', t);
     execute format('create policy "miembros: editar" on public.%I for update to authenticated
-      using ((select public.sgi_es_miembro(organizacion_id))) with check ((select public.sgi_es_miembro(organizacion_id)))', t);
+      using ((select sgi_privado.sgi_es_miembro(organizacion_id))) with check ((select sgi_privado.sgi_es_miembro(organizacion_id)))', t);
   end loop;
 end $$;
 -- La evidencia aprobada y su vínculo no se editan: se sube una nueva.
@@ -456,19 +466,19 @@ drop policy if exists "miembros: editar" on public.sgi_evidencia_requisito;
 
 -- Traza: se lee y se agrega; nunca se edita ni se borra.
 drop policy if exists "miembros: ver" on public.sgi_traza;
-create policy "miembros: ver" on public.sgi_traza for select to authenticated using ((select public.sgi_es_miembro(organizacion_id)));
+create policy "miembros: ver" on public.sgi_traza for select to authenticated using ((select sgi_privado.sgi_es_miembro(organizacion_id)));
 drop policy if exists "miembros: agregar" on public.sgi_traza;
 create policy "miembros: agregar" on public.sgi_traza for insert to authenticated
-  with check ((select public.sgi_es_miembro(organizacion_id)) and creado_por = (select auth.uid()));
+  with check ((select sgi_privado.sgi_es_miembro(organizacion_id)) and creado_por = (select auth.uid()));
 
 -- Aprobaciones: se ven entre miembros; se crean SOLO con el rol correcto y a nombre propio; se revocan por quien aprobó.
 drop policy if exists "miembros: ver" on public.sgi_aprobacion;
-create policy "miembros: ver" on public.sgi_aprobacion for select to authenticated using ((select public.sgi_es_miembro(organizacion_id)));
+create policy "miembros: ver" on public.sgi_aprobacion for select to authenticated using ((select sgi_privado.sgi_es_miembro(organizacion_id)));
 drop policy if exists "aprobar con el rol correcto" on public.sgi_aprobacion;
 create policy "aprobar con el rol correcto" on public.sgi_aprobacion for insert to authenticated
   with check (
     aprobado_por = (select auth.uid())
-    and public.sgi_tiene_rol(organizacion_id, array[rol])
+    and sgi_privado.sgi_tiene_rol(organizacion_id, array[rol])
     and public.sgi_rol_aprueba(objeto_tipo, fase, rol));
 drop policy if exists "revocar lo propio" on public.sgi_aprobacion;
 create policy "revocar lo propio" on public.sgi_aprobacion for update to authenticated
@@ -477,40 +487,40 @@ create policy "revocar lo propio" on public.sgi_aprobacion for update to authent
 -- Organización: los miembros la ven; cualquiera con sesión da de alta la suya; solo la admin la edita.
 drop policy if exists "miembros: ver" on public.sgi_organizacion;
 create policy "miembros: ver" on public.sgi_organizacion for select to authenticated
-  using ((select public.sgi_es_miembro(id)) or creado_por = (select auth.uid()));
+  using ((select sgi_privado.sgi_es_miembro(id)) or creado_por = (select auth.uid()));
 drop policy if exists "alta" on public.sgi_organizacion;
 create policy "alta" on public.sgi_organizacion for insert to authenticated
-  with check (creado_por = (select auth.uid()) and (despacho_id is null or (select public.sgi_en_despacho(despacho_id))));
+  with check (creado_por = (select auth.uid()) and (despacho_id is null or (select sgi_privado.sgi_en_despacho(despacho_id))));
 drop policy if exists "admin: editar" on public.sgi_organizacion;
 create policy "admin: editar" on public.sgi_organizacion for update to authenticated
-  using ((select public.sgi_tiene_rol(id, array['admin_pyme']))) with check ((select public.sgi_tiene_rol(id, array['admin_pyme'])));
+  using ((select sgi_privado.sgi_tiene_rol(id, array['admin_pyme']))) with check ((select sgi_privado.sgi_tiene_rol(id, array['admin_pyme'])));
 
 -- Membresías: los miembros ven quién está; solo la admin agrega o quita (el consultor no se asigna roles).
 drop policy if exists "miembros: ver" on public.sgi_membresia;
-create policy "miembros: ver" on public.sgi_membresia for select to authenticated using ((select public.sgi_es_miembro(organizacion_id)));
+create policy "miembros: ver" on public.sgi_membresia for select to authenticated using ((select sgi_privado.sgi_es_miembro(organizacion_id)));
 drop policy if exists "admin: agregar" on public.sgi_membresia;
 create policy "admin: agregar" on public.sgi_membresia for insert to authenticated
-  with check ((select public.sgi_tiene_rol(organizacion_id, array['admin_pyme'])));
+  with check ((select sgi_privado.sgi_tiene_rol(organizacion_id, array['admin_pyme'])));
 drop policy if exists "admin: quitar" on public.sgi_membresia;
 create policy "admin: quitar" on public.sgi_membresia for delete to authenticated
-  using ((select public.sgi_tiene_rol(organizacion_id, array['admin_pyme'])));
+  using ((select sgi_privado.sgi_tiene_rol(organizacion_id, array['admin_pyme'])));
 
 -- Despacho (consultor) y marca blanca.
 drop policy if exists "ver" on public.sgi_despacho;
 create policy "ver" on public.sgi_despacho for select to authenticated
-  using ((select public.sgi_ve_despacho(id)) or creado_por = (select auth.uid()));
+  using ((select sgi_privado.sgi_ve_despacho(id)) or creado_por = (select auth.uid()));
 drop policy if exists "alta" on public.sgi_despacho;
 create policy "alta" on public.sgi_despacho for insert to authenticated with check (creado_por = (select auth.uid()));
 drop policy if exists "miembros: editar" on public.sgi_despacho;
 create policy "miembros: editar" on public.sgi_despacho for update to authenticated
-  using ((select public.sgi_en_despacho(id))) with check ((select public.sgi_en_despacho(id)));
+  using ((select sgi_privado.sgi_en_despacho(id))) with check ((select sgi_privado.sgi_en_despacho(id)));
 drop policy if exists "miembros: ver" on public.sgi_despacho_miembro;
-create policy "miembros: ver" on public.sgi_despacho_miembro for select to authenticated using ((select public.sgi_en_despacho(despacho_id)));
+create policy "miembros: ver" on public.sgi_despacho_miembro for select to authenticated using ((select sgi_privado.sgi_en_despacho(despacho_id)));
 drop policy if exists "miembros: agregar" on public.sgi_despacho_miembro;
-create policy "miembros: agregar" on public.sgi_despacho_miembro for insert to authenticated with check ((select public.sgi_en_despacho(despacho_id)));
+create policy "miembros: agregar" on public.sgi_despacho_miembro for insert to authenticated with check ((select sgi_privado.sgi_en_despacho(despacho_id)));
 drop policy if exists "miembros: todo" on public.sgi_plantilla;
 create policy "miembros: todo" on public.sgi_plantilla for all to authenticated
-  using ((select public.sgi_en_despacho(despacho_id))) with check ((select public.sgi_en_despacho(despacho_id)));
+  using ((select sgi_privado.sgi_en_despacho(despacho_id))) with check ((select sgi_privado.sgi_en_despacho(despacho_id)));
 
 -- Catálogo: los IDs son públicos para quien tiene sesión; se escriben solo por migración.
 drop policy if exists "leer" on public.sgi_requisito;
@@ -520,3 +530,8 @@ grant execute on function public.sgi_faltantes_puerta(uuid, integer) to authenti
 grant execute on function public.sgi_fases_cerradas(uuid) to authenticated;
 revoke execute on function public.sgi_faltantes_puerta(uuid, integer) from anon;
 revoke execute on function public.sgi_fases_cerradas(uuid) from anon;
+
+-- Permisos de las funciones privadas: nadie por defecto; `authenticated` solo las que evalúa la RLS.
+revoke all on all functions in schema sgi_privado from public;
+grant execute on function sgi_privado.sgi_es_miembro(uuid), sgi_privado.sgi_tiene_rol(uuid, text[]),
+  sgi_privado.sgi_en_despacho(uuid), sgi_privado.sgi_ve_despacho(uuid), sgi_privado.sgi_evidencia_aprobada(uuid) to authenticated;
