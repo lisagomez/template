@@ -110,3 +110,9 @@ opencode cargan siempre (`opencode.json`).
 - **Fix**: el agente redacta la entrada como **propuesta fuera del registro** (junto al goal o
   al PRP) y pide la firma; al firmar se pega y se borra la propuesta. Nunca «pendiente» dentro.
 - **Aplicar en**: toda entrada de bitácora, registro de riesgo o AISIA que prepare un agente.
+
+### 2026-09-29: el chequeo de C7 en `configura:deploy` miraba el valor, no el nombre
+- **Error**: preguntaba si el VALOR de `SUPABASE_SERVICE_ROLE_KEY` empezaba por `NEXT_PUBLIC` (un JWT
+  nunca); una `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` real pasaba en verde.
+- **Fix**: falla toda `NEXT_PUBLIC_*` secreta por nombre o por valor (JWT `service_role`, `sb_secret_`).
+- **Aplicar en**: todo chequeo de secretos: se prueba con el caso malo antes de darlo por bueno.
