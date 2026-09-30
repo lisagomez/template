@@ -191,6 +191,17 @@
       "_nota": "ALTA del 2026-09-27, al mezclar `main` en el PR #154: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo la comprobacion de huerfanos de verifica-gates.mjs."
     },
     {
+      "nombre": "prueba:migraciones",
+      "runner": "comando",
+      "comando": "npm run prueba:migraciones",
+      "guarda": "las migraciones de `supabase/migrations/` sobre Postgres 17 EN PROCESO (PGlite, sin Docker ni red) con un Supabase minimo imitado: cada una se aplica, aplicadas otra vez ninguna falla (idempotentes: se aplican a mano y sin historial), RLS en toda tabla de `public`, ninguna funcion SECURITY DEFINER ejecutable por `anon` ni `authenticated` (lints 0028/0029) y search_path fijo en toda funcion de `public` (lint 0011). `--prueba` siembra un defecto de cada clase y exige que caigan los cinco",
+      "evidencia": "una linea por fallo con la migracion o la regla y el objeto que la rompe; exit 0 = las N migraciones en verde",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "ALTA del 2026-09-29. La migracion de `project_settings` (2026-08-26) no compilaba y nadie lo vio en un mes porque ningun gate aplicaba migraciones; `handle_new_user()` salio ejecutable por /rest/v1/rpc y lo cazo el linter de Supabase ya en produccion. Contra el estado de `main` de esa manana (58174c9) este gate cae por los dos. Va con PGlite y no con Docker a proposito: los gates con Docker (`erp:prueba`, `prueba:etiquetas:efimera`) siguen inactivos porque el gate corre en maquinas sin Docker, y uno inactivo no habria protegido nada."
+    },
+    {
       "nombre": "prueba:trayectorias",
       "runner": "comando",
       "comando": "npm run prueba:trayectorias",
