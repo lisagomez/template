@@ -4217,3 +4217,24 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Aprobado por**: **lisagomez** (el laboratorio) — «firmo, los contratos automáticos bastan», 2026-09-29, con el
   diff del CDC delante. Al firmar se borró la propuesta `.claude/goals/readme-product-first/propuesta-cdc.md`
   (queda en el commit `58fa17f`).
+
+### 2026-09-30 — precios del arnés: entran `claude-opus-5-5`, `claude-fable-5` y `claude-opus-4-8` → CDC PROMOVIDO — radio: routing (bloque `arnes`, solo contabilidad de trayectorias)
+- **Cambio** (rama `cdc/precios-arnes`, sobre `4880cda`):
+  - `.claude/routing-modelos.json` → `arnes.modelos` gana tres modelos con precio de entrada, salida, lectura y
+    escritura de caché **verificados contra OpenRouter el 2026-09-30**: `claude-opus-5-5` (`anthropic/claude-opus-5.5`:
+    4 / 20 / 0,2 / 5), `claude-fable-5` (`anthropic/claude-fable-5`: 10 / 50 / 1 / 12,5) y `claude-opus-4-8`
+    (`anthropic/claude-opus-4.8`: 5 / 25 / 0,5 / 6,25), USD por millón. Los cuatro que ya estaban se reverificaron
+    **sin cambio**; `consultado` pasa a 2026-09-30 y el comentario lo dice.
+  - Las 6 sesiones con transcript y coste `null` se recapturan con `captura-sesion.mjs`: **solo cambian `costoUsd` y
+    `cobertura`** (comprobado campo a campo), 62,86 USD que antes no se veían.
+- **Motivo**: el informe de trayectorias del 2026-09-30 (PR #188): desde el 20/09 solo 6 de 16 sesiones llevaban
+  coste, porque el arnés empezó a usar modelos que el catálogo no conocía. Ahora son 12 de 16.
+- **Lo que NO cambia**: los niveles del routing y sus modelos pineados; ninguna clase de tarea se reasigna. El bloque
+  `arnes` solo lo lee `scripts/trayectorias/captura-sesion.mjs`: ningún agente ni ruta de la app decide con él.
+- **Quedan en `null`, declarado**: `fabrica-bc85468c` y `fabrica-f75391ce` (un solo modelo) y `fabrica-f4d5a7bd`
+  (dos modelos) ya no tienen transcript; `fabrica-d1fb5fde` no tuvo uso. No se calcula a mano fuera del script.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo ANTES de pedir la firma**) · regresión capa A ☑ 146/146 ·
+  **capa B no corrida, a propósito y declarado**: el cambio son datos de precio que no lee ningún agente ·
+  `verifica:routing` ☑ coherente · `verify:gobernanza` ☑ 156/156 · `validate` ☑ 27/27 · aprobación humana ☑ ·
+  pineo ☑ (identificadores exactos de modelo, precio con fuente y fecha).
+- **Aprobado por**: **lisagomez** (el laboratorio) — «firmo, capa A basta», 2026-09-30, con el diff delante.
