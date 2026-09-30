@@ -1,0 +1,19 @@
+/goal Construye lo descrito en el spec: /home/gsore/code/template/.claude/worktrees/app-iso/.claude/goals/sistema-integrado-iso/spec.md. Leelo ENTERO con grafo.json y plan.md; reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: una pyme mexicana implementa UN sistema de gestion para ISO 9001 e ISO/IEC 42001, con agentes que proponen y personas que aprueban; un consultor lleva a varias desde su panel; la app es su propio primer inquilino 42001.
+Libertad tecnica total dentro del golden path; sigue plan.md (compilado del grafo).
+VALIDA: npm run typecheck && npm run lint && npm run prueba:laboratorio-sgi (la creas tu) + npm run empaqueta <x> tras cada cambio grande, output pegado; npm run validate al final, despues del commit.
+HECHO cuando (el evaluador solo ve esta conversacion: surfea evidencia):
+- PRP-008: ruta y tabla de fases (firmada / bloqueada, quien firma)
+- investigacion.md: ediciones vigentes con fuente y fecha
+- Supabase local: CLI pineado, migraciones, prueba de aislamiento pegada (B no ve A; roles; consultor solo sus clientes)
+- catalogo: conteo por norma/edicion/clausula, gates de cobertura y derechos (o "no medido" declarado), informe del revisor
+- motor: una evidencia sube ambas normas; puerta sin rol correcto rechazada; migracion de edicion
+- llave OpenRouter enmascarada; corrida real por agente con IDs citados (todos existen), traza y costo
+- capturas de Playwright: roadmap con %, informe GAP, politica aprobada por alta direccion y rechazada a otro rol, SoA, impacto de IA, hallazgo a CAPA, panel del consultor con marca blanca, DOCX/PDF
+- la app como su primer inquilino (inventario, impacto, SoA)
+- tabla del laboratorio: >=5 casos por agente con las 10 trampas, estado real
+- empaqueta verde; READMEs, guias, aviso de privacidad borrador, asiento en inventario
+- propuesta CDC (prompts + routing) y bloqueados con quien firma
+- npm run validate verde tras commit; grafo.json con evidencia; decisiones; formas de estar mal, resueltas
+RESTRICCIONES: cero texto de normas ISO (parafrasis propia); nunca prometer certificacion; avance y puertas deterministas, nunca el LLM; LLM solo por routing pineado, datos sinteticos, tope US$15; secretos jamas en pantalla; RLS en toda tabla, service_role fuera (C7); solo Supabase local; A2A/MCP solo localhost; sin conectores, envios, cobros ni deploy; no tocar skills, reglas, AGENTS.md, settings ni .mcp.json; solo en la rama app/iso (su worktree); espanol de Mexico.
+RED DE SEGURIDAD: si tras 100 turnos no converges, se acaba el tope o falta la llave, detente y reporta bloqueo y estado del grafo.
