@@ -372,6 +372,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 npm run verify:gobernanza   # falla si la capa quedo suelta (156 comprobaciones; el propio verificador vigila esta cifra)
 npm run regresion           # C2 capa A: contratos de los 27 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
+npm run revisa:readmes      # README product first de tools/ y src/features/ (skill readme); -- --prueba lo prueba
 ```
 
 El gate corre solo antes de desplegar (`predeploy`), no solo cuando alguien se acuerda.

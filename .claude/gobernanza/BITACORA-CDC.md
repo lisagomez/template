@@ -4238,3 +4238,28 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `verifica:routing` ☑ coherente · `verify:gobernanza` ☑ 156/156 · `validate` ☑ 27/27 · aprobación humana ☑ ·
   pineo ☑ (identificadores exactos de modelo, precio con fuente y fecha).
 - **Aprobado por**: **lisagomez** (el laboratorio) — «firmo, capa A basta», 2026-09-30, con el diff delante.
+
+### 2026-09-30 — alta de `revisa:readmes` en `validate` → CDC PROMOVIDO — radio: sistema (padrón de gates)
+- **Cambio** (rama `cdc/gate-revisa-readmes`, sobre `e3a22c0`), el diff propuesto el 2026-09-29 (`58fa17f`,
+  `propuesta-cdc.md` §4) aplicado sobre el `main` de hoy:
+  - `.claude/gates.json`: nace `revisa:readmes`, **activo en `validate`** (28 gates activos), `timeout_s` 120,
+    fuera de `predeploy` a propósito (un README no cambia lo que se despliega), con `_nota` de alta;
+  - `README.md`: la línea del gate en el bloque de comandos de la gobernanza (comprobación 3d-bis);
+  - `scripts/verifica-gates.mjs`: `revisa` entra en `FORMA_DE_GATE`, para que un `revisa:*` futuro no pueda quedar
+    fuera del padrón en silencio; el comentario de la escotilla pasa de «28 scripts» (desfasado: eran 34) a 35.
+- **Motivo**: el skill `readme` se firmó el 2026-09-29 (PR #181) y su gate no: el contrato product first dependía
+  de que alguien se acordara de correr el auditor. Pedido del laboratorio del 2026-09-30.
+- **Qué pone rojo y qué no**: rojo = un README en alcance no conforme, o uno nuevo sin clasificar (ni en alcance ni
+  excluido con motivo). Las 9 carpetas de `src/features/` sin README se listan como pendientes y **no** lo ponen
+  rojo.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo ANTES de pedir la firma**) · regresión capa A ☑ 146/146 ·
+  **capa B no corrida, a propósito y declarado** («capa A basta», como el alta de `prueba:migraciones` del
+  2026-09-29): no toca skills, prompts, modelo ni instrucciones · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia nueva).
+- **Regresión y demostración**:
+  - `revisa:readmes` en verde contra `main`: 15 en alcance, 15 conformes, 0 no conformes, 13 excluidos, 9 pendientes;
+  - `revisa:readmes -- --prueba`: **8/8 siembras cazadas**;
+  - `verifica:gates` coherente (11 comprobaciones) y `--prueba` 6/6; **quitando la entrada del manifiesto cae**:
+    «sin declarar: revisa:readmes — un gate fuera del padrón no lo corre ningún perfil y nadie lo nota»;
+  - `verify:gobernanza` ☑ · `npm run validate` ☑ **28/28** activos.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «si», 2026-09-30, con el diff delante y la parte opcional (`FORMA_DE_GATE`) incluida.
