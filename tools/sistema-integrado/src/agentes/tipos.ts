@@ -107,6 +107,9 @@ export interface Traza {
   readonly intentos: number;
   /** Por qué se rechazó cada intento anterior al aceptado (o todos, si ninguno se aceptó). Vacío si pasó a la primera. */
   readonly rechazos: readonly string[];
+  /** Citas fuera del catálogo (o de la lista permitida) que se QUITARON como último recurso tras el reintento. Ausente en
+   * corridas anteriores al 2026-10-01. */
+  readonly citasQuitadas?: readonly string[];
   readonly alertas: {
     readonly instruccionIncrustada: boolean;
     readonly datosMinimizados: Readonly<Record<string, number>>;

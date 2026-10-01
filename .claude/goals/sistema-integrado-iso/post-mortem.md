@@ -154,6 +154,15 @@ salió de una corrida, no de una prueba con dobles:
 | El tope del goal (US$15) no era el único: la llave tenía US$5 y la cuenta su propio saldo; con 4 llamadas a Opus en paralelo, OpenRouter reserva el máximo de cada una y rechazó 38 | **nodo que faltaba otra vez**: el saldo es una entrada manual, igual que la llave | Se detuvo antes de dejar la cuenta en cero (la comparten otras llaves) |
 | El guion de capturas leyó un aviso viejo porque `waitForURL(/aviso=/)` ya se cumplía | arista `app → evidencia` | `clicYAviso` espera una URL **distinta** con aviso |
 
+**Segunda ronda, con saldo** (el laboratorio subió el tope de la llave y agregó saldo): 46/46 en el laboratorio y
+19/19 en el recorrido. Tres hallazgos más, que solo se ven con el modelo real:
+
+| Hallazgo | Elemento del grafo | Qué se hizo |
+|---|---|---|
+| La defensa por prompt contra la trampa 1 **no aguanta**: Opus citó el ID inventado en 4 respuestas completas de 4, aun con el reintento que se lo prohíbe | lazo **L5** | Aguantó el validador. Último recurso determinista: quitar la cita y declararla, para que la persona reciba su informe |
+| El detector de promesas castigaba al agente que **se negaba** a prometer, citando la petición | lazo **L8** | Cita en una oración con rechazo explícito = deslinde; contraejemplos que siguen marcados. Antes de cambiarlo se guardó el texto rechazado (antes no se guardaba) y se leyó |
+| El agente agrupa controles de la SoA y la app tomaba uno por propuesta (19 de 38); el laboratorio contaba propuestas, no controles | arista `agentes → app` + lazo **L4** | Una sola función (`soa.ts`) para la app y el laboratorio: 38 de 38 |
+
 **Propuestas nuevas, NO aplicadas** (skills y reglas están fuera del alcance del goal; cada una es CDC):
 
 6. **Skill `goal-compiler`, Fase 2**, ampliando la propuesta 1: además de la llave, se comprueba **el saldo y el tope

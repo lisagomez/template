@@ -9,7 +9,7 @@ import { huella } from '../documentos/index.js';
 import { AGENTES } from './registro.js';
 import { INSTRUCCIONES, SISTEMA_COMUN, VERSION_PROMPTS } from './prompts.js';
 import {
-  delimita, extraeJson, minimiza, minimizaValor, promesasDeCertificacion, revisaCitas, textoDeSalida, tieneInstruccionIncrustada, validaForma,
+  delimita, extraeJson, minimiza, minimizaValor, promesasDeCertificacion, quitaCitas, revisaCitas, textoDeSalida, tieneInstruccionIncrustada, validaForma,
 } from './salvaguardas.js';
 import type { AgenteId, EntradaAgente, ModeloLLM, ResultadoAgente, SalidaAgente, Traza, Uso } from './tipos.js';
 
@@ -79,6 +79,7 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
   let salida: SalidaAgente | null = null;
   let intentos = 0;
   const rechazos: string[] = [];
+  let candidata: { salida: SalidaAgente; fuera: string[] } | null = null;
   let mensaje = usuario;
   while (intentos < 2) {
     intentos++;
@@ -98,6 +99,7 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
         const promesas = promesasDeCertificacion(textoDeSalida(forma.salida));
         if (promesas.length) errores.push(`promete certificación: «${promesas.join('», «')}»`);
         if (!errores.length) salida = forma.salida;
+        else if (!citas.sinCita.length && !promesas.length) candidata = { salida: forma.salida, fuera: [...citas.inexistentes, ...citas.noPermitidos] };
       }
     } catch (e) {
       errores = [`respuesta ilegible: ${(e as Error).message}`];
@@ -106,15 +108,24 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
     rechazos.push(`intento ${intentos}: ${errores.join('; ')}`);
     mensaje = `${usuario}\n\nTU RESPUESTA ANTERIOR NO SE ACEPTÓ por esto:\n- ${errores.join('\n- ')}\nCorrígela y responde de nuevo SOLO con el JSON.`;
   }
+  // L5, último recurso: si tras el reintento lo ÚNICO que falla son citas fuera del catálogo o de la lista, se quitan y se
+  // declaran, en vez de dejar a la persona sin nada (medido el 2026-10-01: la trampa 1 engañó al modelo dos veces, aun
+  // con el reintento explícito). Las promesas de certificación y las propuestas sin cita se siguen rechazando.
+  let citasQuitadas: string[] = [];
+  if (!salida && candidata) {
+    const limpia = quitaCitas(candidata.salida, candidata.fuera);
+    if (validaForma(limpia, tarjeta).ok && revisaCitas(limpia, permitidos, c).ok && limpia.propuestas.length) { salida = limpia; citasQuitadas = candidata.fuera; }
+  }
   const traza: Traza = {
     agente, versionPrompt: VERSION_PROMPTS, modelo: deps.modelo.id, insumos,
     salidaHuella: salida ? await huella(JSON.stringify(salida)) : null,
     requisitosCitados: salida ? revisaCitas(salida, permitidos, c).citados : [],
-    uso, intentos, rechazos, alertas: { instruccionIncrustada, datosMinimizados: conteo }, cuando: ahora().toISOString(),
+    uso, intentos, rechazos, citasQuitadas, alertas: { instruccionIncrustada, datosMinimizados: conteo }, cuando: ahora().toISOString(),
   };
   if (!salida) return { ok: false, errores, traza, textoCrudo };
   const avisos: string[] = [];
   if (instruccionIncrustada) avisos.push('Una evidencia traía instrucciones escondidas: se trató como dato y no cambió nada.');
+  if (citasQuitadas.length) avisos.push(`La tarea pidió citar ${citasQuitadas.join(', ')}, que no existe en el catálogo o no correspondía: se quitó la cita y se descartó lo que quedó sin requisito. Revisa qué requisito real corresponde.`);
   if (Object.keys(conteo).length) avisos.push(`Datos personales minimizados antes de salir: ${Object.entries(conteo).map(([k, n]) => `${k} ×${n}`).join(', ')}.`);
   return { ok: true, salida, traza, avisos };
 }

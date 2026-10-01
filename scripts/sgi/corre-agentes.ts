@@ -90,7 +90,9 @@ async function corre(caso: typeof CASOS_LLM[number]) {
     const r = await ejecutaAgente(caso.agente, caso.entrada, { modelo });
     const costo = r.traza.uso ? costeUsd(clase, r.traza.uso) : null;
     fuera += grabadas.get(caso.id)?.costoUsd ?? 0;
-    grabadas.set(caso.id, { id: caso.id, agente: caso.agente, ok: r.ok, errores: r.ok ? [] : r.errores, salida: r.ok ? r.salida : null, traza: r.traza, costoUsd: costo, cuando: new Date().toISOString() });
+    // Si no se aceptó, se guarda el texto de la última respuesta (datos sintéticos): sin él no se distingue un falso
+    // positivo de un fallo real (kpi-5, 2026-10-01).
+    grabadas.set(caso.id, { id: caso.id, agente: caso.agente, ok: r.ok, errores: r.ok ? [] : r.errores, salida: r.ok ? r.salida : null, traza: r.traza, costoUsd: costo, cuando: new Date().toISOString(), ...(!r.ok && r.textoCrudo ? { textoCrudo: r.textoCrudo.slice(0, 8000) } : {}) });
     guarda();
     console.log(`${r.ok ? '✓' : '✗'} ${caso.id.padEnd(6)} ${caso.agente.padEnd(12)} ${((Date.now() - t0) / 1000).toFixed(0).padStart(3)} s · ${r.traza.intentos} intento(s) · ${costo === null ? 'costo null' : `US$${costo.toFixed(4)}`} · ${r.ok ? `${r.traza.requisitosCitados.length} IDs` : r.errores.join('; ').slice(0, 160)}`);
   } catch (e) {

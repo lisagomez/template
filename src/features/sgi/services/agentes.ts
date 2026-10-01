@@ -9,11 +9,12 @@ import {
   AGENTES, ejecutaAgente, type AgenteId, type EntradaAgente, type EvidenciaDeTerceros, type ModeloLLM, type ResultadoAgente, type SalidaAgente,
 } from '../../../../tools/sistema-integrado/dist/agentes/index.js';
 import { detectaGenerico, textoDe } from '../../../../tools/sistema-integrado/dist/documentos/index.js';
-import { existe, requisitosDe, requisito, type IdEdicion } from '../../../../tools/sistema-integrado/dist/catalogo/index.js';
+import { existe, requisitosDe, type IdEdicion } from '../../../../tools/sistema-integrado/dist/catalogo/index.js';
 import { avance, madurez, puerta, faseActual, type Respuesta } from '../../../../tools/sistema-integrado/dist/index.js';
 import { costeUsd, type ClaseDeTarea } from '../../../lib/ai/routing.ts';
 import { perfilDe, terminosPropios, type Contexto } from './contexto.ts';
 import { presupuestoDe } from './llm.ts';
+import { filasSoa } from './soa.ts';
 
 export interface Corrida {
   readonly ok: boolean;
@@ -140,14 +141,14 @@ export async function correAgente(sb: SupabaseClient, ctx: Ctx, agente: AgenteId
   const { data, error } = await sb.from('sgi_traza').insert({
     organizacion_id: ctx.org.id, proyecto_id: ctx.proyecto.id, agente, version_prompt: r.traza.versionPrompt, modelo: r.traza.modelo,
     insumos: r.traza.insumos, salida_huella: r.traza.salidaHuella, requisitos_citados: r.traza.requisitosCitados,
-    uso: r.traza.uso, costo_usd: costo, intentos: r.traza.intentos, alertas: { ...r.traza.alertas, ...(r.traza.rechazos.length ? { rechazos: r.traza.rechazos } : {}) }, ok: r.ok,
+    uso: r.traza.uso, costo_usd: costo, intentos: r.traza.intentos, alertas: { ...r.traza.alertas, ...(r.traza.rechazos.length ? { rechazos: r.traza.rechazos } : {}), ...(r.traza.citasQuitadas?.length ? { citasQuitadas: r.traza.citasQuitadas } : {}) }, ok: r.ok,
     salida: r.ok ? r.salida : null, errores: r.ok ? [] : r.errores, creado_por: ctx.userId,
   }).select('id').single();
   if (error) throw new Error(`no se pudo guardar la traza: ${error.message}`);
   const aviso = pres.nivel === 'aviso' ? ` ${pres.mensaje}` : '';
   return {
     ok: r.ok, trazaId: String(data.id), costoUsd: costo, resultado: r,
-    mensaje: r.ok ? `Propuesta lista (${r.traza.requisitosCitados.length} requisitos citados${costo !== null ? `, US$${costo.toFixed(4)}` : ', costo sin reportar'}).${aviso}` : `El agente no dio una propuesta válida: ${r.errores.join('; ')}`,
+    mensaje: r.ok ? `Propuesta lista (${r.traza.requisitosCitados.length} requisitos citados${costo !== null ? `, US$${costo.toFixed(4)}` : ', costo sin reportar'}).${r.avisos.length ? ` ${r.avisos.join(' ')}` : ''}${aviso}` : `El agente no dio una propuesta válida: ${r.errores.join('; ')}`,
   };
 }
 
@@ -205,11 +206,7 @@ export async function materializa(sb: SupabaseClient, ctx: Ctx, agente: AgenteId
       const sistema = (v: unknown) => ctx.sistemasIA.find((x) => texto(v).toLowerCase().includes(x.nombre.toLowerCase().slice(0, 12)) || x.nombre.toLowerCase().includes(texto(v).toLowerCase().slice(0, 12)))?.id ?? null;
       await inserta('sgi_riesgo', s.propuestas.filter((p) => ['riesgo', 'oportunidad', 'riesgo_ia'].includes(p.tipo)).map((p) => ({ ...base, tipo: p.tipo, descripcion: `${p.titulo}: ${p.detalle}`.slice(0, 1000), probabilidad: n15(p.datos?.probabilidad), impacto: n15(p.datos?.impacto), tratamiento: texto(p.datos?.tratamiento).slice(0, 1000), sistema_ia_id: p.tipo === 'riesgo_ia' ? sistema(p.datos?.sistema) : null, requisitos: p.requisitos })));
       await inserta('sgi_evaluacion_impacto', s.propuestas.filter((p) => p.tipo === 'impacto_ia' && sistema(p.datos?.sistema)).map((p) => ({ ...base, sistema_ia_id: sistema(p.datos?.sistema), afectados: (texto(p.datos?.afectados) || 'por definir').slice(0, 500), descripcion: `${p.titulo}: ${p.detalle}`.slice(0, 2000), severidad: ['baja', 'media', 'alta'].includes(texto(p.datos?.severidad)) ? texto(p.datos?.severidad) : 'media', medidas: texto(p.datos?.medidas).slice(0, 2000), requisitos: p.requisitos })));
-      const soa = s.propuestas.filter((p) => p.tipo === 'control_soa').map((p) => {
-        const req = p.requisitos.find((id) => id.startsWith('SGI-A-'));
-        const control = req ? requisito(req)?.refs[0]?.clausula : undefined;
-        return control && req ? { ...base, control, requisito_id: req, aplica: p.datos?.aplica !== false && texto(p.datos?.aplica) !== 'false', justificacion: (texto(p.datos?.justificacion) || p.detalle).slice(0, 1000).padEnd(5, '.'), estado_impl: ['no_iniciado', 'en_curso', 'implementado'].includes(texto(p.datos?.estado)) ? texto(p.datos?.estado) : 'no_iniciado' } : null;
-      }).filter((x) => x !== null);
+      const soa = filasSoa(s.propuestas).map((f) => ({ ...base, ...f }));
       if (soa.length) {
         const r = await sb.from('sgi_control_soa').upsert(soa, { onConflict: 'proyecto_id,control' }).select('id');
         if (r.error) throw new Error(`sgi_control_soa: ${r.error.message}`);

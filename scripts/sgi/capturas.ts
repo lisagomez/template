@@ -7,7 +7,7 @@
  */
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium, type Browser, type Locator, type Page } from 'playwright';
 
 const arg = (n: string) => { const i = process.argv.indexOf(`--${n}`); return i > 0 ? process.argv[i + 1] : undefined; };
@@ -178,7 +178,7 @@ await paso(9, 'SoA: el agente la propone, se prepara la versión y la aprueba la
   await c.waitForURL(/(aviso|error)=/, { timeout: 240_000 });
   const decididos = (await c.locator('[data-prueba=soa] tbody tr').filter({ hasNotText: 'sin decidir' }).count());
   await foto(c, '11-soa', caps);
-  marca(ev, decididos >= 30, `${decididos} de 38 controles decididos`);
+  const completa = marca(ev, decididos >= 30, `${decididos} de 38 controles decididos`);
   await c.locator('[data-prueba=foto-soa]').click();
   await c.waitForURL(/documentos\/[0-9a-f-]{36}/);
   const v = c.url().split('/').pop()!.split('?')[0];
@@ -188,7 +188,7 @@ await paso(9, 'SoA: el agente la propone, se prepara la versión y la aprueba la
   await dir.locator('[data-prueba=aprobar]').click();
   await dir.waitForURL(/aviso=/);
   await foto(dir, '12-soa-aprobada', caps);
-  return marca(ev, /aprobado/i.test(await dir.locator('[data-prueba=aprobaciones]').innerText()), 'SoA aprobada por la alta dirección');
+  return marca(ev, /aprobado/i.test(await dir.locator('[data-prueba=aprobaciones]').innerText()), 'SoA aprobada por la alta dirección') && completa;
 });
 
 await paso(10, 'Hallazgo → NC → CAPA: el auditor verifica la eficacia y la NC se cierra', false, async (ev, caps) => {
@@ -314,7 +314,18 @@ await paso(19, 'El laboratorio, en vivo', false, async (ev, caps) => {
 });
 
 await navegador.close();
-writeFileSync(`${DIR}/recorrido.json`, `${JSON.stringify({ cuando: new Date().toISOString(), base: BASE, conLlm: CON_LLM, pasos: registro }, null, 1)}\n`);
+// Con --solo se COMBINA con el registro anterior (cada paso guarda cuándo corrió): repetir 4 pasos no borra la
+// evidencia de los otros 15.
+const ahora = new Date().toISOString();
+const ruta = `${DIR}/recorrido.json`;
+const previos = SOLO && existsSync(ruta) ? (JSON.parse(readFileSync(ruta, 'utf8')) as { cuando: string; pasos: (Registro & { cuando?: string })[] }) : null;
+const pasos = [
+  ...(previos?.pasos ?? []).filter((p) => !registro.some((r) => r.n === p.n)).map((p) => ({ ...p, cuando: p.cuando ?? previos!.cuando })),
+  ...registro.map((r) => ({ ...r, cuando: ahora })),
+].sort((a, b) => a.n - b.n);
+writeFileSync(ruta, `${JSON.stringify({ cuando: ahora, base: BASE, conLlm: CON_LLM, pasos }, null, 1)}\n`);
+const enVerde = pasos.filter((p) => p.ok).length;
+if (previos) console.log(`registro combinado: ${enVerde}/${pasos.length} pasos en verde`);
 const corridos = registro.filter((r) => !r.evidencia[0]?.startsWith('NO CORRIDO'));
 console.log(`\n${corridos.filter((r) => r.ok).length}/${corridos.length} pasos corridos en verde · ${registro.length - corridos.length} sin correr (piden agente)`);
 process.exit(corridos.every((r) => r.ok) ? 0 : 1);

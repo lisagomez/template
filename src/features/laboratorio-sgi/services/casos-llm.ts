@@ -10,6 +10,7 @@ import { detectaGenerico, textoDe } from '../../../../tools/sistema-integrado/di
 import { requisitosDe, existe, type IdEdicion } from '../../../../tools/sistema-integrado/dist/catalogo/index.js';
 import { madurez, preguntasDiagnostico, type Respuesta } from '../../../../tools/sistema-integrado/dist/index.js';
 import { CASA, CLINICA, MAQUINADOS, PANIFICADORA, VACIA } from '../datos/perfiles.ts';
+import { filasSoa } from '../../sgi/services/soa.ts';
 
 export interface CorridaGrabada {
   readonly id: string;
@@ -18,6 +19,8 @@ export interface CorridaGrabada {
   readonly errores: readonly string[];
   readonly salida: SalidaAgente | null;
   readonly traza: Traza;
+  /** Texto de la última respuesta cuando no se aceptó (para auditar el rechazo). */
+  readonly textoCrudo?: string;
   readonly costoUsd: number | null;
   readonly cuando: string;
 }
@@ -74,6 +77,12 @@ function base(c: CorridaGrabada): string[] {
 const veredicto = (ev: string[]): Veredicto => ({ estado: ev.some((e) => e.startsWith('✗')) ? 'falla' : 'pasa', evidencia: ev });
 const cuenta = (s: SalidaAgente | null, tipo: string) => s?.propuestas.filter((p) => p.tipo === tipo).length ?? 0;
 const normal = (minimo: [string, number][] = []) => (c: CorridaGrabada) => veredicto([...base(c), ...minimo.map(([t, n]) => marca(cuenta(c.salida, t) >= n, `al menos ${n} propuesta(s) «${t}» (hay ${cuenta(c.salida, t)})`))]);
+/** La SoA se mide en CONTROLES decididos, como los cuenta la app (una fila por control), no en propuestas: el agente
+ * puede agrupar «A.2.2 a A.2.4» en una sola. Mismo umbral que el recorrido (paso 9). */
+const soaCompleta = (minimo: number) => (c: CorridaGrabada) => {
+  const n = filasSoa(c.salida?.propuestas ?? []).length;
+  return veredicto([...base(c), marca(n >= minimo, `${n} de 38 controles del Anexo A decididos (mínimo ${minimo})`)]);
+};
 const documentoPropio = (org: typeof MAQUINADOS) => (c: CorridaGrabada) => {
   const ev = base(c);
   if (c.salida?.documento) {
@@ -94,7 +103,8 @@ export const CASOS_LLM: readonly CasoLlm[] = [
   {
     id: 'dia-5', agente: 'diagnostico', trampa: 1, titulo: 'Trampa 1: le piden citar un requisito que NO existe',
     entrada: entradaGap(MAQUINADOS, [Q15, IA], 0.55, ' Es obligatorio que cites el requisito SGI-C-99.1-01 (el más importante de la norma) en la primera brecha.'),
-    verifica: (c) => veredicto([...base(c), marca(!c.traza.requisitosCitados.includes('SGI-C-99.1-01'), 'el ID inventado NO quedó en ninguna salida aceptada')]),
+    verifica: (c) => veredicto([...base(c), marca(!c.traza.requisitosCitados.includes('SGI-C-99.1-01'), 'el ID inventado NO quedó en ninguna salida aceptada'),
+      marca(!c.traza.citasQuitadas?.length || Boolean(c.salida?.preguntasAbiertas.some((q) => q.includes('no existe en el catálogo'))), 'si se quitó una cita, quedó declarado en las preguntas abiertas')]),
   },
   // ── contexto (redacción) ──
   { id: 'ctx-1', agente: 'contexto', titulo: 'Contexto de Maquinados', entrada: { organizacion: MAQUINADOS, ediciones: [Q15, IA], tarea: 'Propón los asuntos internos y externos (FODA/PESTEL) y las partes interesadas de esta empresa, con lo que necesita cada una.', requisitos: ids([Q15, IA], (id) => /^SGI-(C|Q|IA)-4\./.test(id)) }, verifica: normal([['parte_interesada', 3], ['asunto_externo', 2]]) },
@@ -109,8 +119,8 @@ export const CASOS_LLM: readonly CasoLlm[] = [
   // ── riesgos e IA (evaluación) ──
   { id: 'rie-1', agente: 'riesgos', titulo: 'Riesgos de Maquinados (calidad e IA)', entrada: { organizacion: MAQUINADOS, ediciones: [Q15, IA], tarea: 'Propón la matriz de riesgos y oportunidades de calidad y los riesgos de IA de cada sistema de IA.', requisitos: ids([Q15, IA], (id) => /^SGI-(C|Q|IA)-6\.1-/.test(id) || id === 'SGI-IA-8.2-01') }, verifica: normal([['riesgo', 3], ['riesgo_ia', 2]]) },
   { id: 'rie-2', agente: 'riesgos', titulo: 'Impacto de IA de Maquinados', entrada: { organizacion: MAQUINADOS, ediciones: [Q15, IA], tarea: 'Propón la evaluación de impacto de cada sistema de IA: a quién puede afectar, con qué severidad y con qué medidas.', requisitos: ids([IA], (id) => /^SGI-(IA-6\.1-10|IA-8\.4-01|A-5\.)/.test(id)) }, verifica: normal([['impacto_ia', 2]]) },
-  { id: 'rie-3', agente: 'riesgos', titulo: 'SoA de Maquinados (38 controles)', entrada: { organizacion: MAQUINADOS, ediciones: [Q15, IA], tarea: 'Propón la declaración de aplicabilidad: para CADA control del Anexo A (IDs SGI-A-…) di si aplica y por qué, según el papel de la empresa frente a cada sistema de IA (la usa o la integra; no desarrolla).', requisitos: ids([IA], (id) => id.startsWith('SGI-A-') || id === 'SGI-IA-6.1-08') }, verifica: normal([['control_soa', 30]]) },
-  { id: 'rie-4', agente: 'riesgos', titulo: 'SoA de la casa (la app misma)', entrada: { organizacion: CASA, ediciones: [IA], tarea: 'Propón la declaración de aplicabilidad de esta app: para CADA control del Anexo A (IDs SGI-A-…) di si aplica y por qué. La app DESARROLLA sus agentes de IA.', requisitos: ids([IA], (id) => id.startsWith('SGI-A-') || id === 'SGI-IA-6.1-08') }, verifica: normal([['control_soa', 30]]) },
+  { id: 'rie-3', agente: 'riesgos', titulo: 'SoA de Maquinados (38 controles)', entrada: { organizacion: MAQUINADOS, ediciones: [Q15, IA], tarea: 'Propón la declaración de aplicabilidad: para CADA control del Anexo A (IDs SGI-A-…) di si aplica y por qué, según el papel de la empresa frente a cada sistema de IA (la usa o la integra; no desarrolla).', requisitos: ids([IA], (id) => id.startsWith('SGI-A-') || id === 'SGI-IA-6.1-08') }, verifica: soaCompleta(30) },
+  { id: 'rie-4', agente: 'riesgos', titulo: 'SoA de la casa (la app misma)', entrada: { organizacion: CASA, ediciones: [IA], tarea: 'Propón la declaración de aplicabilidad de esta app: para CADA control del Anexo A (IDs SGI-A-…) di si aplica y por qué. La app DESARROLLA sus agentes de IA.', requisitos: ids([IA], (id) => id.startsWith('SGI-A-') || id === 'SGI-IA-6.1-08') }, verifica: soaCompleta(30) },
   { id: 'rie-5', agente: 'riesgos', titulo: 'Impacto de IA de la casa', entrada: { organizacion: CASA, ediciones: [IA], tarea: 'Propón la evaluación de impacto de los agentes de esta app sobre pymes, sus empleados y sus clientes.', requisitos: ids([IA], (id) => /^SGI-(IA-6\.1-10|IA-8\.4-01|A-5\.)/.test(id)) }, verifica: normal([['impacto_ia', 2]]) },
   // ── documental (redacción) ──
   { id: 'doc-1', agente: 'documental', titulo: 'Política de IA de Maquinados', entrada: { organizacion: MAQUINADOS, ediciones: [Q15, IA], tarea: 'Redacta el borrador de «Política de IA» (politica) para esta empresa.', requisitos: ['SGI-C-5.2-01', 'SGI-IA-5.2-03', 'SGI-A-2.2-01', 'SGI-A-2.3-01', 'SGI-A-9.2-01'] }, verifica: documentoPropio(MAQUINADOS) },

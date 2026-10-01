@@ -1,5 +1,5 @@
 {
- "cuando": "2026-10-01T10:53:36.470Z",
+ "cuando": "2026-10-01T11:58:46.846Z",
  "base": "http://localhost:3012",
  "conLlm": true,
  "pasos": [
@@ -16,7 +16,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/01-roadmap.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 2,
@@ -30,22 +31,24 @@
     ".claude/goals/sistema-integrado-iso/capturas/03-roadmap-tras-acta.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 3,
    "paso": "El agente documental redacta la Política de IA con la terminología del taller",
-   "ok": false,
+   "ok": true,
    "evidencia": [
     "✓ usa términos del taller: Maquinados del Bajío, Cotizador, Inspección visual, CNC",
-    "✓ traza: Agente: documental · Modelo (pineado): anthropic/claude-sonnet-5 · Versión de prompts: sgi-prompts-2026-09-30.1 · IDs citados: SGI-A-2.2-01, SGI-A-2.3-01, SGI-A-9.2-01, SGI-C-5.2-01, SGI-IA-5.2-03 · Costo: US$0.0363 · intentos 1",
-    "✗ enviada a revisión"
+    "✓ traza: Agente: documental · Modelo (pineado): anthropic/claude-sonnet-5 · Versión de prompts: sgi-prompts-2026-09-30.1 · IDs citados: SGI-A-2.2-01, SGI-A-2.3-01, SGI-A-9.2-01, SGI-C-5.2-01, SGI-IA-5.2-03 · Costo: US$0.0391 · intentos 1",
+    "✓ enviada a revisión"
    ],
    "capturas": [
     ".claude/goals/sistema-integrado-iso/capturas/04-politica-ia-borrador.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
   },
   {
    "n": 4,
@@ -58,14 +61,15 @@
     ".claude/goals/sistema-integrado-iso/capturas/05-politica-rechazada-a-dueno.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
   },
   {
    "n": 5,
    "paso": "La alta dirección aprueba la versión exacta; la puerta 2 ya puede cerrarse y la cierra",
    "ok": true,
    "evidencia": [
-    "✓ registro: aprobado Alta dirección · 1/10/2026, 4:33:17 a.m. · v1 · sha256:6c9010d9d96918a7…",
+    "✓ registro: aprobado Alta dirección · 1/10/2026, 5:31:17 a.m. · v1 · sha256:1b0e5b11c87feccc…",
     "✓ «Fase 2 cerrada.»"
    ],
    "capturas": [
@@ -73,7 +77,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/07-fase-2-cerrada.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
   },
   {
    "n": 6,
@@ -87,7 +92,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/08-informe-gap.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 7,
@@ -100,7 +106,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/09-riesgos.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 8,
@@ -113,21 +120,24 @@
     ".claude/goals/sistema-integrado-iso/capturas/10-impacto-ia.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 9,
    "paso": "SoA: el agente la propone, se prepara la versión y la aprueba la alta dirección",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "✗ 20 de 38 controles decididos",
-    "✗ excepción: locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('select[name=rol]')\u001b[22m\n"
+    "✓ 38 de 38 controles decididos",
+    "✓ SoA aprobada por la alta dirección"
    ],
    "capturas": [
-    ".claude/goals/sistema-integrado-iso/capturas/11-soa.png"
+    ".claude/goals/sistema-integrado-iso/capturas/11-soa.png",
+    ".claude/goals/sistema-integrado-iso/capturas/12-soa-aprobada.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:58:46.846Z"
   },
   {
    "n": 10,
@@ -143,22 +153,23 @@
     ".claude/goals/sistema-integrado-iso/capturas/13-capa-nc-cerrada.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 11,
    "paso": "Auditoría: el agente redacta hallazgos desde las notas; solo el auditor los firma",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "✗ excepción: page.waitForURL: Timeout 240000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
-    "✗ 2 error(es) de consola"
+    "✓ hallazgo en borrador propuesto por el agente",
+    "✓ firmado por el auditor interno"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/14-hallazgo-firmado.png"
+   ],
    "llm": true,
-   "errores_consola": [
-    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
-    "pageerror: Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
-   ]
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
   },
   {
    "n": 12,
@@ -173,7 +184,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/16-marca-blanca-en-el-cliente.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 13,
@@ -186,7 +198,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/17-reporte-de-avance.png"
    ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 14,
@@ -199,7 +212,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/18-modo-pyme.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 15,
@@ -217,7 +231,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/politica-de-calidad-v1.pdf"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 16,
@@ -230,25 +245,26 @@
     ".claude/goals/sistema-integrado-iso/capturas/20-casa-inventario-ia.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 17,
    "paso": "La casa: SoA, impacto y política de IA propuestos por sus propios agentes, pendientes del laboratorio",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "✓ soa: Propuesta lista (39 requisitos citados, US$0.4411).",
-    "✗ excepción: page.waitForURL: Timeout 240000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
-    "✗ 2 error(es) de consola"
+    "✓ soa: Propuesta lista (39 requisitos citados, US$0.2357).",
+    "✓ impacto: Propuesta lista (6 requisitos citados, US$0.2026).",
+    "✓ versión en revisión, pendiente del laboratorio (alta dirección de la casa)"
    ],
    "capturas": [
-    ".claude/goals/sistema-integrado-iso/capturas/21-casa-soa.png"
+    ".claude/goals/sistema-integrado-iso/capturas/21-casa-soa.png",
+    ".claude/goals/sistema-integrado-iso/capturas/21-casa-impacto.png",
+    ".claude/goals/sistema-integrado-iso/capturas/22-casa-soa-pendiente.png"
    ],
    "llm": true,
-   "errores_consola": [
-    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
-    "pageerror: Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
-   ]
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
   },
   {
    "n": 18,
@@ -261,7 +277,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/23-migracion.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
   },
   {
    "n": 19,
@@ -274,7 +291,8 @@
     ".claude/goals/sistema-integrado-iso/capturas/24-laboratorio.png"
    ],
    "llm": false,
-   "errores_consola": []
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:58:46.846Z"
   }
  ]
 }

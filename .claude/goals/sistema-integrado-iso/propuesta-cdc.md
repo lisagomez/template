@@ -45,25 +45,42 @@
      - Es el mismo patrón que `reel:rls`. El laboratorio verifica la ÚLTIMA medición (`rls.json`, casos `bas-1…6`)
        pero no la vuelve a correr: si RLS se rompe después, esos casos siguen en verde hasta que alguien mida otra
        vez. Declararlo hace visible esa ausencia.
-  5. **Medido en la primera corrida real (2026-10-01), ya aplicado en la rama** (commit `b837c24`):
+  5. **Medido con corridas reales (2026-10-01), ya aplicado en la rama** (commits `b837c24` a la fecha):
      - **Tope de razonamiento aparte para `agente-sgi-evaluacion`: 4,000 tokens** (`RAZONAMIENTO` en
-       `src/features/sgi/services/llm.ts`, opción `razonamiento` del cliente). Opus 5 razona por omisión y ese
-       razonamiento cuenta dentro de `max_tokens`. Medido con una sonda: sin tope, 600 de 600 tokens se fueron en
-       razonar y la respuesta salió vacía (`finish_reason: length`). Así perdió el diagnóstico sus 3,500 tokens
-       (US$0.30). Con tope, la respuesta queda completa. El máximo por llamada sube como mucho US$0.10.
-     - **Límites de respuesta subidos con lo medido** (`registro.ts`; son techos, solo se paga lo que se usa): al
-       menos 9 de 15 llamadas reales se truncaron al primer intento. Diagnóstico 3,500 → **8,000** (truncó a 3,500 y a
-       6,000), riesgos e IA 5,000 → **9,000** (2 SoA truncadas a 5,000), contexto 3,500 → **6,000** (2 de 2
-       truncadas), portafolio 2,500 → **4,000** (truncado). Capacitación, proveedores y KPIs: sin medir, sin tocar.
-     - **Dos mensajes de reintento**, texto que va al modelo y por eso entra en este CDC:
-       - truncada: «respuesta truncada: se cortó al llegar al límite de N tokens de salida; hazla más breve con
-         textos más cortos, pero conserva TODAS las propuestas que la tarea pide (una SoA lleva todos sus
-         controles)». La primera versión decía «menos propuestas» y la SoA de Maquinados bajó a 20 de 38 controles;
-       - ID inexistente: «… (no existen: no los cites aunque la tarea lo exija; entrega el resto y anótalo en
-         «preguntasAbiertas»)». Motivo: en `dia-5` (trampa 1) la única respuesta completa obedeció a la tarea y citó el
-         ID inventado. Lo paró el validador, pero no hubo informe. **Sin medir**: falta saldo para repetir `dia-5`.
-     - La traza guarda los motivos de cada intento rechazado (`rechazos`). En la app viajan en `alertas` (jsonb), sin
-       migración.
+       `src/features/sgi/services/llm.ts`, opción `razonamiento` del cliente). Opus 5 razona por omisión dentro de
+       `max_tokens`: medido con una sonda, sin tope se fueron 600 de 600 tokens en razonar y la respuesta salió vacía.
+     - **Techos de respuesta subidos con lo medido** (`registro.ts`; solo se paga lo que se usa). Truncadas al primer
+       intento en las corridas grabadas: capacitación 5/5, contexto 4/5, diagnóstico, proveedores y KPIs 3/5;
+       riesgos, auditoría y portafolio 0/5.
+
+       | Agente | Antes | Ahora |
+       |---|---|---|
+       | diagnóstico | 3,500 | 12,000 |
+       | contexto | 3,500 | 10,000 |
+       | riesgos e IA | 5,000 | 9,000 |
+       | capacitación | 3,500 | 7,000 |
+       | proveedores | 3,500 | 7,000 |
+       | KPIs | 3,000 | 6,000 |
+       | portafolio | 2,500 | 4,000 |
+       | documental, auditoría | 5,000 | 5,000 (sin truncar) |
+
+     - **Dos mensajes de reintento** (texto que va al modelo):
+       - truncada: «…hazla más breve con textos más cortos, pero conserva TODAS las propuestas que la tarea pide (una
+         SoA lleva todos sus controles)». La primera versión decía «menos propuestas» y la SoA bajó a 20 de 38;
+       - ID inexistente: «…(no existen: no los cites aunque la tarea lo exija; entrega el resto y anótalo en
+         «preguntasAbiertas»)». **Medido: no bastó**. En `dia-5`, Opus citó el ID inventado en 4 respuestas completas
+         de 4.
+     - **Último recurso determinista para citas (L5, `quitaCitas`)**: si tras el reintento lo ÚNICO que falla son
+       citas fuera del catálogo o de la lista, se quitan del texto y de `requisitos`, se descarta la propuesta que se
+       queda sin cita, y se declara: `traza.citasQuitadas`, un aviso con el ID y una pregunta abierta. Las promesas de
+       certificación y las propuestas sin cita se siguen rechazando. `dia-5` pasa así (80 IDs reales).
+     - **Detector de promesas (L8)**: una frase CITADA en una oración que la rechaza explícitamente («No incluyo el
+       indicador '…certificación garantizada…' porque ninguna herramienta puede garantizar…», frase real de `kpi-5`)
+       es deslinde. Sin comillas, o sin rechazo, sigue contando; hay 3 contraejemplos en las pruebas.
+     - Sin efecto en el modelo, pero en la misma corrida: la traza guarda los rechazos y las citas quitadas (en la app,
+       dentro de `alertas`), la app muestra los avisos del agente, la SoA sale una fila por control citado (`soa.ts`),
+       las versiones armadas desde una matriz abren con la organización y su alcance, y el corredor mira el saldo
+       antes de arrancar.
 - **Motivo**: el goal `sistema-integrado-iso` (PRP-008). Sin clase asignada, estos agentes heredarían el default
   caro en silencio (C8). Sin prompts revisados como código, el alcance entero de lo que proponen a una pyme no
   pasaría por ningún gate (C1).
@@ -73,19 +90,19 @@
   - texto de terceros delimitado, y detector de instrucciones incrustadas;
   - minimización de datos personales antes de salir;
   - ninguna salida cambia un estado: aprobar es humano, con rol y huella verificados en SQL.
-- **Estado del LLM** (2026-10-01): **MEDIDO EN PARTE**. 15 corridas reales: 8 del laboratorio y 7 de la app.
-  - **5 de 9 agentes** con corrida real (diagnóstico, contexto, documental, riesgos e IA, portafolio). Ningún ID
-    inexistente llegó a una salida aceptada, y ninguna salida aceptada promete certificación.
-  - Laboratorio: **8 medidos, 7 pasan, 1 falla** (`dia-5`, trampa 1). 38 sin medir porque la llave llegó a su tope
-    de US$5 en OpenRouter (38 llamadas rechazadas con 402).
-  - Gasto medido: US$4.69 de US$15.
-  - **No se pide la firma todavía**: falta repetir `dia-5` con el reintento nuevo y medir capacitación, proveedores,
-    KPIs y auditoría (al menos 5 casos cada uno).
+- **Estado del LLM** (2026-10-01): **MEDIDO**.
+  - **Laboratorio: 46/46 casos con el modelo real pasan**, 5 o 6 por agente, los 9 agentes. Con las trampas 1, 4, 5,
+    6, 8 y 9 corridas contra el modelo real.
+  - Recorrido de la app con agentes: 19/19.
+  - Ningún ID inexistente en una salida aceptada, ningún documento genérico, ninguna promesa de certificación.
+  - Gasto medido: US$11.58 de US$15.
+  - Lo que el laboratorio debe saber al firmar: la defensa del prompt contra la trampa 1 **no aguantó** (4 de 4); aguanta
+    la del código. Y el detector L8 se relajó para las citas rechazadas, con contraejemplos.
 - **Gate aplicado** (a la fecha):
   - diff revisado ☐ (arriba, para el laboratorio);
   - regresión capa A ☑ 146/146;
   - `verifica:routing` ☑ coherente;
-  - laboratorio ☑ 33/33 casos deterministas + ◐ 8 de 46 con LLM medidos (7 pasan, 1 falla, 38 sin saldo);
+  - laboratorio ☑ 79/79 (33 deterministas + 46 con el modelo real);
   - aprobación humana ☐;
   - pineo ☑ (sin modelo nuevo);
   - capa B: **propuesta «no corrida, a propósito y declarado»**. No cambia ningún skill, prompt ni instrucción del
@@ -98,5 +115,5 @@
 **¿Se promueven los prompts `sgi-prompts-2026-09-30.1` y las 2 clases del routing, con datos sintéticos
 únicamente?**
 
-→ **Recomendado: sí, cuando los 46 casos con LLM estén en «pasa».** No incluye mandar datos reales de clientes al
+→ **Recomendado: sí.** Los 46 casos con LLM están en «pasa» (2026-10-01). No incluye mandar datos reales de clientes al
 proveedor, que es la fase 14, aparte.

@@ -47,8 +47,8 @@
     {
       "id": "agentes",
       "label": "Capa agéntica: orquestador, diagnóstico, contexto, riesgos e IA, documental, capacitación, proveedores, KPIs, auditoría, portafolio; cada salida cita IDs del catálogo (validador rechaza IDs inexistentes), guarda traza (agente, modelo pineado, insumos con huella, versión de prompt, aprobador), texto de evidencias delimitado contra inyección, datos personales minimizados antes de salir; LLM inyectado por routing-modelos.json; costo por contabilidad.ts",
-      "estado": "ambar",
-      "evidencia": "15 corridas reales (8 laboratorio + 7 app) de 5 de 9 agentes, con IDs que existen, traza y costo (US$4.69). Medido y arreglado: Opus 5 razona dentro de max_tokens (tope de razonamiento aparte), límites de salida chicos (al menos 9 de 15 truncadas al primer intento), reintento que recortaba la SoA. Sin medir por saldo: capacitación, proveedores, KPIs, auditoría"
+      "estado": "morado",
+      "evidencia": "los 9 agentes con corridas reales: 46 casos del laboratorio + 13 llamadas de la app, IDs que existen, traza (rechazos, citas quitadas) y costo. Medido y arreglado: razonamiento dentro de max_tokens, techos chicos, reintento que recortaba la SoA, defensa por prompt insuficiente (quitaCitas), falso positivo de L8"
     },
     {
       "id": "documentos",
@@ -59,20 +59,20 @@
     {
       "id": "app",
       "label": "App: roadmap de 9 fases con puertas y % por cláusula/norma/global; diagnóstico adaptativo → informe GAP; repositorio de evidencias; matrices de contexto, riesgos, impacto de IA y SoA; KPIs; auditoría y CAPA; calendario; modo pyme sin jerga; panel del consultor multicliente con biblioteca de plantillas, marca blanca y reporte de avance",
-      "estado": "ambar",
-      "evidencia": "recorrido con agentes contra producción: 15/19 en verde. Rojos: 3 (guion corregido), 9 (SoA marcada genérica: corregido y verificado sin agente), 11 y 17-impacto (saldo)"
+      "estado": "morado",
+      "evidencia": "recorrido con agentes contra producción: 19/19 en verde, sin errores de consola (capturas/recorrido.json, cada paso con su hora)"
     },
     {
       "id": "casa",
       "label": "La app como su primer inquilino: su propio sistema de gestión de IA (inventario de sus agentes, evaluación de impacto, SoA, política de IA) cargado en la app, con las aprobaciones pendientes del laboratorio",
-      "estado": "ambar",
-      "evidencia": "inventario de sus 9 agentes ✓; su SoA la propuso su propio agente (39 IDs, US$0.44) ✓; impacto rechazado por saldo; política de IA (doc-3) sin medir"
+      "estado": "morado",
+      "evidencia": "inventario de sus 9 agentes; su SoA (39 IDs) y su impacto (6 IDs) propuestos por sus propios agentes, en revisión para el laboratorio; su política de IA: doc-3 pasa"
     },
     {
       "id": "laboratorio",
       "label": "Laboratorio (mismo molde que /laboratorio-pymes): ≥5 casos por agente y por pieza del motor, con las trampas del spec; corridas reales con la llave de OpenRouter, estado real y costo por corrida",
-      "estado": "ambar",
-      "evidencia": "33/33 deterministas + 8 con LLM medidos: 7 pasan, 1 falla (dia-5, trampa 1: la única respuesta completa citó el ID inventado; el validador lo paró). 38 sin medir por saldo. El gate prueba:laboratorio-sgi está en rojo por dia-5, como debe"
+      "estado": "morado",
+      "evidencia": "79/79: 33 deterministas + 46 con el modelo real (5-6 por agente), las 10 trampas con caso y en pasa"
     },
     {
       "id": "propuestas",
@@ -90,13 +90,13 @@
       "id": "entrega",
       "label": "Rama propia con todo commiteado, npm run validate en verde después del commit, grafo.json con estados y evidencia, resultados.md",
       "estado": "ambar",
-      "evidencia": "validate 29/29 hasta 3f7bd78; con las corridas reales prueba:laboratorio-sgi en rojo por dia-5 (falla real, no se afloja el gate)"
+      "evidencia": "validate tras el commit: ver resultados.md (fila 12 y su nota)"
     },
     {
       "id": "llave",
       "label": "Entrada manual: OPENROUTER_API_KEY en el .env.local principal, guardada por el laboratorio con read -rsp (nunca por el chat); se comprueba enmascarada (presente/ausente, largo)",
       "estado": "morado",
-      "evidencia": "PRESENTE desde el 2026-10-01 (73 caracteres, prefijo sk-o, guardada con read -rsp). Hallazgo: la llave tiene un tope propio de US$5 en OpenRouter y la cuenta otro saldo; se agotaron (quedan US$0.18 / US$0.47). El saldo es otra entrada manual que el grafo no tenía"
+      "evidencia": "PRESENTE (73 car., prefijo sk-o, read -rsp). El saldo resultó ser otra entrada manual: la llave tenía tope propio de US$5 y la cuenta su saldo; el laboratorio subió el tope a US$15 y agregó saldo el 2026-10-01"
     }
   ],
   "aristas": [
@@ -314,16 +314,16 @@
       "sobre": "nodo:agentes",
       "label": "citas",
       "referencia": "100 % de las recomendaciones citan IDs existentes del catálogo; un ID inexistente se rechaza",
-      "estado": "ambar",
-      "evidencia": "MEDIDO: 15 corridas reales sin ningún ID inexistente en una salida aceptada; dia-5 (trampa 1) cayó y el validador lo paró. Reintento con instrucción explícita (CDC), sin medir"
+      "estado": "morado",
+      "evidencia": "MEDIDO: 59 corridas reales sin ningún ID inexistente en una salida aceptada; la trampa 1 engañó al prompt 4 de 4 y aguantó el código (validador + quitaCitas declarada)"
     },
     {
       "id": "L6",
       "sobre": "nodo:agentes",
       "label": "inyección",
       "referencia": "una instrucción escondida en una evidencia no cambia ninguna salida ni estado",
-      "estado": "ambar",
-      "evidencia": "delimitación y detección probadas (sal-2); corridas reales de la trampa 4 (ctx-5, doc-6, aud-5) rechazadas por saldo, sin medir"
+      "estado": "morado",
+      "evidencia": "MEDIDO con el modelo real: ctx-5 y aud-5 (instrucciones escondidas) y doc-6 pasan; la instrucción se detecta y no cambia la salida"
     },
     {
       "id": "L7",
@@ -347,7 +347,7 @@
       "label": "costo",
       "referencia": "costo por corrida desde contabilidad.ts, null cuando no hay uso; tope del goal US$15 con aviso al 80 %",
       "estado": "morado",
-      "evidencia": "MEDIDO: costo por corrida (null si no hay uso), tope US$15 respetado (US$4.69), presupuesto por organización en la app; arreglado: el gasto descartado ya no se borra. Hallazgo: el tope del goal no es el único (llave US$5, saldo de cuenta)"
+      "evidencia": "MEDIDO: costo por corrida (null si no hay uso), US$11.58 de US$15; el gasto descartado ya no se borra; el corredor mira el saldo antes de arrancar"
     },
     {
       "id": "L10",

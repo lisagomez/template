@@ -15,13 +15,13 @@ export const AGENTES: Readonly<Record<AgenteId, TarjetaAgente>> = {
     id: 'diagnostico', nombre: 'Diagnóstico', determinista: false, clase: 'agente-sgi-evaluacion', fases: [0, 1, 2, 3, 4, 5, 6, 7],
     descripcion: 'Cuestionario adaptativo por cláusula y el informe de brechas. El puntaje de madurez lo calcula el motor con una regla fija.',
     habilidades: [{ id: 'informe-gap', descripcion: 'Brechas, fortalezas y primeros pasos' }],
-    tipos: ['brecha', 'fortaleza', 'prioridad'], entrada: 'Respuestas del cuestionario + madurez calculada', salida: 'Informe GAP con IDs', maxTokens: 8000,
+    tipos: ['brecha', 'fortaleza', 'prioridad'], entrada: 'Respuestas del cuestionario + madurez calculada', salida: 'Informe GAP con IDs', maxTokens: 12000,
   },
   contexto: {
     id: 'contexto', nombre: 'Contexto', determinista: false, clase: 'agente-sgi-redaccion', fases: [1],
     descripcion: 'Asuntos internos y externos, partes interesadas, alcance y procesos.',
     habilidades: [{ id: 'foda-pestel', descripcion: 'Asuntos internos y externos' }, { id: 'partes-interesadas', descripcion: 'Matriz de partes interesadas' }, { id: 'alcance', descripcion: 'Alcance propuesto' }],
-    tipos: ['asunto_interno', 'asunto_externo', 'parte_interesada', 'alcance', 'proceso'], entrada: 'Perfil de la empresa', salida: 'Matrices de contexto', maxTokens: 6000,
+    tipos: ['asunto_interno', 'asunto_externo', 'parte_interesada', 'alcance', 'proceso'], entrada: 'Perfil de la empresa', salida: 'Matrices de contexto', maxTokens: 10000,
   },
   riesgos: {
     id: 'riesgos', nombre: 'Riesgos e IA', determinista: false, clase: 'agente-sgi-evaluacion', fases: [3],
@@ -39,19 +39,19 @@ export const AGENTES: Readonly<Record<AgenteId, TarjetaAgente>> = {
     id: 'capacitacion', nombre: 'Capacitación', determinista: false, clase: 'agente-sgi-redaccion', fases: [4],
     descripcion: 'Competencias por puesto, brechas y plan de capacitación.',
     habilidades: [{ id: 'matriz-competencias', descripcion: 'Competencias por puesto' }, { id: 'plan-capacitacion', descripcion: 'Cursos y cómo se evalúa su eficacia' }],
-    tipos: ['brecha_competencia', 'curso', 'evaluacion_eficacia'], entrada: 'Puestos + sistemas de IA', salida: 'Matriz y plan', maxTokens: 3500,
+    tipos: ['brecha_competencia', 'curso', 'evaluacion_eficacia'], entrada: 'Puestos + sistemas de IA', salida: 'Matriz y plan', maxTokens: 7000,
   },
   proveedores: {
     id: 'proveedores', nombre: 'Proveedores', determinista: false, clase: 'agente-sgi-redaccion', fases: [5],
     descripcion: 'Criterios, evaluación y reevaluación de proveedores, incluidos los de IA.',
     habilidades: [{ id: 'criterios', descripcion: 'Criterios de selección' }, { id: 'evaluacion', descripcion: 'Evaluación propuesta por proveedor' }],
-    tipos: ['criterio', 'evaluacion_proveedor', 'requisito_a_proveedor'], entrada: 'Proveedores clave y hechos', salida: 'Criterios y evaluaciones propuestas', maxTokens: 3500,
+    tipos: ['criterio', 'evaluacion_proveedor', 'requisito_a_proveedor'], entrada: 'Proveedores clave y hechos', salida: 'Criterios y evaluaciones propuestas', maxTokens: 7000,
   },
   kpis: {
     id: 'kpis', nombre: 'KPIs', determinista: false, clase: 'agente-sgi-redaccion', fases: [3, 6],
     descripcion: 'Objetivos medibles e indicadores.',
     habilidades: [{ id: 'indicadores', descripcion: 'Indicadores con fórmula y meta' }],
-    tipos: ['objetivo', 'indicador'], entrada: 'Perfil + política', salida: 'Tablero propuesto', maxTokens: 3000,
+    tipos: ['objetivo', 'indicador'], entrada: 'Perfil + política', salida: 'Tablero propuesto', maxTokens: 6000,
   },
   auditoria: {
     id: 'auditoria', nombre: 'Auditoría', determinista: false, clase: 'agente-sgi-evaluacion', fases: [6, 7, 8],

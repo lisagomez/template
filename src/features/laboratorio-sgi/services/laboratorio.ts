@@ -24,8 +24,11 @@ export const TRAMPAS: Readonly<Record<number, string>> = {
 
 export const PIEZAS: readonly string[] = ['catalogo', 'motor', 'documentos', 'salvaguardas', 'orquestador', 'base', 'diagnostico', 'contexto', 'riesgos', 'documental', 'capacitacion', 'proveedores', 'kpis', 'auditoria', 'portafolio'];
 
-export const grabadas = (): readonly CorridaGrabada[] => (corridas as { corridas: CorridaGrabada[] }).corridas;
-export const infoCorridas = () => corridas as { corridas: CorridaGrabada[]; gastoTotalUsd?: number; cuando?: string; modelos?: Record<string, string> };
+// El JSON lo escribe el corredor con lo que devolvió el modelo: su tipo inferido no se parece al declarado (los `datos`
+// de cada propuesta son libres). Se trata como dato y cada caso lo verifica con sus reglas.
+const archivo = corridas as unknown as { corridas: CorridaGrabada[]; gastoTotalUsd?: number; cuando?: string; modelos?: Record<string, string> };
+export const grabadas = (): readonly CorridaGrabada[] => archivo.corridas;
+export const infoCorridas = () => archivo;
 
 export async function correLaboratorio(): Promise<Resultado[]> {
   const g = grabadas();

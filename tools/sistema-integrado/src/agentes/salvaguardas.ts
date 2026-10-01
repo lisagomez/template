@@ -79,15 +79,33 @@ const PROMESAS = [
   /\bguaranteed\s+certification\b/i,
 ];
 
+/** Rechazo explícito en la oración: lo que hace de una frase CITADA un deslinde («No incluyo el indicador "…"»). */
+const RECHAZO = /\b(no\s+(incluyo|incluimos|se\s+incluye|propongo|proponemos|se\s+puede|es\s+posible|podemos|puede)|ning[uú]n[oa]?|nadie|nunca|jam[aá]s)\b/i;
+const COMILLAS = `'"«»“”‘’`;
+
 /**
- * Frases que prometen certificación. Devuelve los fragmentos encontrados (vacío = limpio). Una coincidencia negada
- * («no te certifica», «nunca garantizamos la certificación») es un deslinde, no una promesa.
+ * Frases que prometen certificación. Devuelve los fragmentos encontrados (vacío = limpio). No son promesa:
+ * - una coincidencia negada pegada a la frase («no te certifica», «nunca garantizamos la certificación»);
+ * - una coincidencia CITADA entre comillas en una oración que la rechaza explícitamente (medido el 2026-10-01: el
+ *   agente escribió «No incluyo el indicador solicitado con el nombre '…certificación garantizada…' porque ninguna
+ *   herramienta puede garantizar…» y el detector lo tomaba por promesa). Sin comillas, o sin rechazo, sigue contando.
  */
 export function promesasDeCertificacion(texto: string): string[] {
   const negada = (i: number) => /\b(no|nunca|jam[aá]s|ni)\s+(\w+\s+)?$/i.test(texto.slice(Math.max(0, i - 24), i));
+  const citadaYRechazada = (i: number, fin: number) => {
+    const ini = Math.max(texto.lastIndexOf('.', i), texto.lastIndexOf('?', i), texto.lastIndexOf('!', i), texto.lastIndexOf('\n', i)) + 1;
+    const cierre = texto.slice(fin).search(/[.?!\n]/);
+    const oracion = texto.slice(ini, cierre < 0 ? texto.length : fin + cierre);
+    const antes = texto.slice(ini, i), despues = texto.slice(fin, cierre < 0 ? texto.length : fin + cierre);
+    const abre = [...antes].filter((ch) => COMILLAS.includes(ch)).length % 2 === 1;
+    const cierra = [...despues].some((ch) => COMILLAS.includes(ch));
+    return abre && cierra && RECHAZO.test(oracion.replace(texto.slice(i, fin), ''));
+  };
   return PROMESAS.flatMap((re) => {
     const global = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
-    return [...texto.matchAll(global)].filter((m) => !negada(m.index ?? 0)).map((m) => m[0]);
+    return [...texto.matchAll(global)]
+      .filter((m) => !negada(m.index ?? 0) && !citadaYRechazada(m.index ?? 0, (m.index ?? 0) + m[0].length))
+      .map((m) => m[0]);
   });
 }
 
@@ -163,6 +181,25 @@ export function revisaCitas(s: SalidaAgente, permitidos: readonly string[], c: C
   const noPermitidos = citados.filter((id) => existe(id, c) && !permitido.has(id));
   const sinCita = s.propuestas.filter((p) => p.requisitos.length === 0).map((p) => p.titulo);
   return { ok: !inexistentes.length && !noPermitidos.length && !sinCita.length, citados, inexistentes, noPermitidos, sinCita };
+}
+
+/** L5, último recurso: quita de una salida las citas a IDs que no existen o no estaban permitidos, en `requisitos` y en
+ * el texto, y descarta la propuesta que se queda sin ninguna cita. Deja una pregunta abierta SIN el ID (si lo llevara,
+ * el validador lo volvería a encontrar): el ID quitado viaja en la traza y en los avisos. */
+export function quitaCitas(s: SalidaAgente, fuera: readonly string[]): SalidaAgente {
+  const malos = new Set(fuera);
+  const limpia = (t: string) => t.replace(PATRON_ID, (id) => (malos.has(id) ? '(requisito inexistente)' : id));
+  const propuestas = s.propuestas
+    .map((p) => ({
+      ...p, titulo: limpia(p.titulo), detalle: limpia(p.detalle), requisitos: p.requisitos.filter((id) => !malos.has(id)),
+      ...(p.datos ? { datos: Object.fromEntries(Object.entries(p.datos).map(([k, v]) => [k, typeof v === 'string' ? limpia(v) : v])) } : {}),
+    }))
+    .filter((p) => p.requisitos.length > 0);
+  return {
+    resumen: limpia(s.resumen), propuestas,
+    ...(s.documento ? { documento: { titulo: limpia(s.documento.titulo), secciones: s.documento.secciones.map((x) => ({ titulo: limpia(x.titulo), parrafos: x.parrafos.map(limpia) })) } } : {}),
+    preguntasAbiertas: [...s.preguntasAbiertas.map(limpia), 'Se pidió citar un requisito que no existe en el catálogo (o que no correspondía): se quitó la cita. ¿Qué requisito real atiende eso?'],
+  };
 }
 
 /** Todo el texto de una salida (para buscar promesas de certificación o genericidad). */

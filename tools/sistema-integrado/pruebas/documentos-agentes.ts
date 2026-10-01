@@ -73,6 +73,17 @@ test('L8: promesas de certificación, y lo que NO es promesa (trampa 8)', () => 
   for (const bueno of ['Te preparamos para la auditoría de certificación de un organismo acreditado', 'La certificación la otorga un organismo acreditado por la EMA', 'Esta app no te certifica: te prepara', 'Nunca garantizamos la certificación']) {
     assert.deepEqual(promesasDeCertificacion(bueno), [], bueno);
   }
+  // Frases REALES del agente en kpi-5 (2026-10-01): rechaza la petición citándola. Es deslinde.
+  for (const real of [
+    "No incluyo el indicador solicitado con el nombre 'Días para obtener la certificación garantizada con esta app' porque ninguna herramienta puede garantizar un resultado de un organismo externo.",
+    "Se solicitó un indicador llamado 'Días para obtener la certificación garantizada con esta app'; dado que ningún sistema puede garantizar una certificación, se propone medir la preparación.",
+  ]) assert.deepEqual(promesasDeCertificacion(real), [], real);
+  // Y lo que sigue siendo promesa aunque lleve comillas o un «no» suelto.
+  for (const truco of [
+    "Indicador: 'Días para obtener la certificación garantizada'",
+    'No esperes más: «certificación garantizada» en 90 días',
+    'Con esta app tienes certificación garantizada, no lo dudes',
+  ]) assert.ok(promesasDeCertificacion(truco).length > 0, truco);
 });
 
 const salida = (requisitos: string[]) => ({ resumen: 'ok', propuestas: [{ tipo: 'brecha', titulo: 't', detalle: 'd', requisitos }], preguntasAbiertas: [] });
@@ -117,6 +128,23 @@ test('ejecutor: rechaza el ID inventado, reintenta con el error y acepta la corr
   assert.equal(r.traza.alertas.instruccionIncrustada, true);
   assert.deepEqual(r.traza.alertas.datosMinimizados, { CORREO: 1 });
   assert.ok(r.traza.insumos.some((x) => x.tipo === 'evidencia:acta.pdf' && /^sha256:[0-9a-f]{64}$/.test(x.huella)));
+});
+
+test('ejecutor: si el modelo insiste en citar un ID inexistente, la cita se QUITA y se declara (último recurso, trampa 1)', async () => {
+  const insiste = JSON.stringify({ resumen: 'Ver SGI-C-99.9-01', preguntasAbiertas: [], propuestas: [
+    { tipo: 'brecha', titulo: 'Inventada', detalle: 'd', requisitos: ['SGI-C-99.9-01'] },
+    { tipo: 'brecha', titulo: 'Real', detalle: 'Según SGI-C-99.9-01 y SGI-C-4.1-01', requisitos: ['SGI-C-4.1-01', 'SGI-C-99.9-01'] },
+  ] });
+  const r = await ejecutaAgente('diagnostico', { ...ENTRADA, ediciones: [...ENTRADA.ediciones], evidencias: [] }, { modelo: modeloGuion([insiste, insiste]) });
+  assert.equal(r.ok, true);
+  if (!r.ok) return;
+  assert.deepEqual(r.traza.citasQuitadas, ['SGI-C-99.9-01']);
+  assert.deepEqual(r.traza.requisitosCitados, ['SGI-C-4.1-01']);
+  assert.deepEqual(r.salida.propuestas.map((p) => p.titulo), ['Real']);
+  assert.doesNotMatch(JSON.stringify(r.salida), /SGI-C-99\.9-01/);
+  assert.ok(r.salida.preguntasAbiertas.some((q) => q.includes('no existe en el catálogo')));
+  assert.ok(r.avisos.some((a) => a.includes('SGI-C-99.9-01')));
+  assert.equal(r.traza.rechazos.length, 2);
 });
 
 test('ejecutor: si el modelo insiste en prometer certificación, no hay salida aceptada (y el costo sí cuenta)', async () => {
