@@ -46,6 +46,11 @@ create table if not exists vw_contacto (
   opt_in_en timestamptz,
   opt_in_fuente text,
   aviso_privacidad_en timestamptz,
+  -- Lista de bloqueo del dueño: sus mensajes se guardan y no se responden.
+  bloqueado_en timestamptz,
+  bloqueado_motivo text,
+  -- Ráfaga de contactos nuevos: la única respuesta de cortesía ya se mandó.
+  contenido_en timestamptz,
   creado_en timestamptz not null default now(),
   primary key (inquilino_id, wa_id)
 );

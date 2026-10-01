@@ -71,19 +71,19 @@
 | `flow_token` adivinado o ajeno (O2) | Token HMAC con inquilino, conversación, tipo y vencimiento; 427 si no valida; el orquestador rechaza tokens de otra conversación | — |
 | Webhook falso de Meta (O2) | `X-Hub-Signature-256` sobre el cuerpo crudo, comparación en tiempo constante; 401 | Rotación del secreto de la app: sin procedimiento escrito |
 | Reintentos / duplicados (O4) | Idempotencia por `wamid`, `origen_wamid`, id de pago y `event_id` (en código y en el esquema) | — |
-| Denial-of-wallet (O4) | Tope de turnos y tokens por conversación y de tokens por mes por inquilino; al agotarse, pasa al dueño (no silencio) | **Sin rate-limit por remitente** ni lista de bloqueo: una granja de números puede abrir muchas conversaciones. Pendiente antes del piloto |
+| Denial-of-wallet (O4) | Tope de turnos y tokens por conversación y de tokens por mes por inquilino; al agotarse, pasa al dueño (no silencio). **Frontera del número** (`agente/frontera.ts`, 2026-10-01): 20 mensajes en 10 min por contacto; pasados 40 contactos NUEVOS en la hora, los siguientes reciben una sola cortesía sin modelo y sin llegar a la bandeja (los clientes de antes siguen atendidos); pasados 400 mensajes en la hora, nadie gasta modelo pero siguen las respuestas fijas y los traspasos; un aviso por ventana. **Lista de bloqueo** del dueño desde la bandeja, en la cadena de hashes (probado en `pruebas/frontera.ts`) | Los límites son FICTICIOS: se calibran con el tráfico del piloto (por inquilino, `politicas.frontera`). Una granja que pide «hablar con una persona» todavía llega a la bandeja; el dueño la bloquea uno por uno |
 | Cruce entre inquilinos (O6) | Almacén con vistas por inquilino; bus A2A que exige `tenant`; pasarela que toma el inquilino del token y responde «no existe» a lo ajeno; RLS en el esquema propuesto | La pasarela usa tokens HMAC propios: en producción, OAuth 2.0 client credentials |
 | Secretos (activos 1) | Tokens fuera de la configuración del agente y de los logs; la app lee de un almacén de secretos inyectado | **P-02 abierta**: hoy salen de variables de entorno. Vault antes del piloto |
-| Alta fraudulenta (O7) | El código vive 30 s y sirve una vez; se canjea servidor a servidor; el alta es idempotente por WABA y el inquilino sale de la liga de alta, no del navegador (probado en `pruebas/bsp.ts`) | La página no verifica todavía el `origin` del mensaje ni ata la sesión de alta a quien recibió la liga (un `state` firmado) |
+| Alta fraudulenta (O7) | El código vive 30 s y sirve una vez; se canjea servidor a servidor. **Liga de alta** firmada (HMAC), con vencimiento de 7 días y de un solo uso: el inquilino sale de la liga, nunca del navegador. **Origen** exigido: https y facebook.com o un subdominio (la muestra de Meta usa `endsWith('facebook.com')`, que deja pasar `evilfacebook.com`). El token entra a la bóveda solo si Meta acepta la suscripción de ESA WABA; una WABA por pyme y ninguna WABA colgada de otra (probado en `pruebas/alta-segura.ts`) | El origen lo verifica nuestra página en el navegador; el servidor solo ve lo que la página reporta, y su garantía real es el canje del código y la suscripción |
 | Tokens de todas las pymes juntos (activos 7) | Bóveda aparte: el token nunca entra al inquilino, al almacén, al registro del alta ni a una traza (probado); la baja lo revoca y desuscribe la WABA | **P-02 abierta**: en el laboratorio la bóveda es en memoria. Con el BSP propio, la bóveda deja de ser recomendable y pasa a ser condición |
 | Abuso del crédito (O8) | Aviso al 80 %; al 100 % se frena solo el marketing y una persona decide (`estadoCredito`) | Sin límite de crédito por pyme ni política firmada (P-10): hasta entonces, solo Tech Provider |
 | Secuestro de un número (O9) | PIN de dos pasos por número, fuera del pool, del alta y de las trazas (probado); el límite de Meta de 10 registros en 72 h se respeta antes de llamar | El buzón del proveedor es un punto único: acceso, bitácora y alerta de *SIM swap* se definen con P-09 |
 | Número reciclado (activos 2) | Cuarentena de 90 días antes de reasignar; el número vuelve sin el nombre visible del dueño anterior (probado) | — |
 | Fatiga del dueño (O3) | La bandeja muestra el motivo (queja, monto, no se entendieron…) y la conversación entera | Sin aviso fuera de la app (push/correo): decisión de flujo de datos aparte |
 
-**Prioridad antes de conectar un número real**: (1) corrida con el modelo real; (2) rate-limit
-por remitente; (3) vault para los tokens (P-02); (4) verificación del pago contra la API del
-procesador elegido; (5) con el BSP propio, la bóveda y la verificación del `origin` en la
-página de alta antes de la primera pyme por Embedded Signup.
+**Prioridad antes de conectar un número real**: (1) corrida con el modelo real; (2) calibrar los
+límites de la frontera con el tráfico del piloto (hechos en el laboratorio el 2026-10-01); (3) vault
+para los tokens (P-02); (4) verificación del pago contra la API del procesador elegido; (5) con el
+BSP propio, la bóveda antes de la primera pyme por Embedded Signup (la liga y el origen ya están).
 
 Firmada por: ____________  Rol: ____________  Fecha: ____________

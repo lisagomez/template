@@ -18,33 +18,12 @@
 import type { Reloj } from '../comun/base.js';
 import type { Almacen } from '../almacen/almacen.js';
 import type { Inquilino } from '../modelo.js';
-import { esObjeto, texto } from '../comun/base.js';
+import { emiteLigaAlta, filtraMensajeSignup, leeLigaAlta, type EventoSignup } from './liga.js';
 import type { GestorNumeros, Modalidad } from '../dominios/numeros.js';
 
 export type ModalidadBsp = 'tech_provider' | 'solution_partner';
 export const VIDA_CODIGO_SIGNUP_MS = 30_000;
 export const MONEDAS_CREDITO = ['AUD', 'EUR', 'GBP', 'IDR', 'INR', 'USD'] as const;
-
-export type EventoSignup =
-  | { tipo: 'fin'; wabaId: string; phoneNumberId?: string; businessId: string; datasetIds: string[]; catalogIds: string[]; coexistencia: boolean }
-  | { tipo: 'abandono'; paso: string }
-  | { tipo: 'error'; mensaje: string; codigo?: string };
-
-/** Lee el `message` que la ventana de Embedded Signup manda a nuestra página (la página lo reenvía). */
-export function leeEventoSignup(v: unknown): EventoSignup | null {
-  if (!esObjeto(v) || v.type !== 'WA_EMBEDDED_SIGNUP' || !esObjeto(v.data)) return null;
-  const d = v.data;
-  const ids = (x: unknown) => (Array.isArray(x) ? x.filter((i): i is string => typeof i === 'string') : []);
-  if (v.event === 'CANCEL') return { tipo: 'abandono', paso: texto(d.current_step) ?? 'desconocido' };
-  if (v.event === 'ERROR') return { tipo: 'error', mensaje: texto(d.error_message) ?? 'error sin mensaje', codigo: texto(d.error_code) };
-  const wabaId = texto(d.waba_id);
-  const businessId = texto(d.business_id);
-  if (!wabaId || !businessId || typeof v.event !== 'string' || !v.event.startsWith('FINISH')) return null;
-  return {
-    tipo: 'fin', wabaId, businessId, phoneNumberId: v.event === 'FINISH_ONLY_WABA' ? undefined : texto(d.phone_number_id),
-    datasetIds: ids(d.dataset_ids), catalogIds: ids(d.catalog_ids), coexistencia: v.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING',
-  };
-}
 
 export interface GraphBsp {
   canjeaCodigo(code: string): Promise<{ ok: true; token: string } | { ok: false; error: string }>;
@@ -92,6 +71,37 @@ export interface OpcionesBsp {
   pin: (phoneNumberId: string) => string;
   /** N-01: si la pyme no trae número, sale del pool. */
   numeros?: GestorNumeros;
+  /** Dónde viven las altas, el embudo y los nonces de las ligas (en memoria si no se da). */
+  registro?: RegistroAltas;
+  /** Firma las ligas de alta (`ligaDeAlta`, `recibe`). */
+  secretoLigas?: string;
+}
+
+export interface RegistroAltas {
+  lee(wabaId: string): Promise<AltaBsp | undefined>;
+  guarda(a: AltaBsp): Promise<void>;
+  lista(): Promise<AltaBsp[]>;
+  anota(e: { instante: number; resultado: string }): Promise<void>;
+  embudo(): Promise<Array<{ instante: number; resultado: string }>>;
+  /** Aparta el nonce de una liga: `false` si ya estaba apartado (la liga sirve una vez). */
+  apartaNonce(nonce: string): Promise<boolean>;
+  liberaNonce(nonce: string): Promise<void>;
+}
+
+export interface VolcadoAltas { altas: Record<string, AltaBsp>; embudo: Array<{ instante: number; resultado: string }>; nonces: string[] }
+
+export function registroAltasEnMemoria(inicial?: VolcadoAltas, alGuardar?: (v: VolcadoAltas) => void): RegistroAltas {
+  const v: VolcadoAltas = inicial ? structuredClone(inicial) : { altas: {}, embudo: [], nonces: [] };
+  const persiste = () => alGuardar?.(v);
+  return {
+    async lee(w) { const a = v.altas[w]; return a ? structuredClone(a) : undefined; },
+    async guarda(a) { v.altas[a.wabaId] = structuredClone(a); persiste(); },
+    async lista() { return Object.values(v.altas).map((a) => structuredClone(a)); },
+    async anota(e) { v.embudo.push(e); persiste(); },
+    async embudo() { return [...v.embudo]; },
+    async apartaNonce(n) { if (v.nonces.includes(n)) return false; v.nonces.push(n); persiste(); return true; },
+    async liberaNonce(n) { v.nonces = v.nonces.filter((x) => x !== n); persiste(); },
+  };
 }
 
 export interface SolicitudAlta {
@@ -108,12 +118,14 @@ export interface SolicitudAlta {
 }
 
 export function creaBsp(o: OpcionesBsp) {
-  const altas = new Map<string, AltaBsp>();
-  const embudo: Array<{ instante: number; resultado: string }> = [];
-  const falla = (a: AltaBsp, paso: string, detalle: string): AltaBsp => {
+  const registro = o.registro ?? registroAltasEnMemoria();
+  const anota = (resultado: string) => registro.anota({ instante: o.reloj(), resultado });
+  const falla = async (a: AltaBsp, paso: string, detalle: string): Promise<AltaBsp> => {
     const r: AltaBsp = { ...a, estado: 'fallida', pasos: [...a.pasos, { paso, ok: false, detalle }] };
-    altas.set(a.wabaId, r);
-    embudo.push({ instante: o.reloj(), resultado: `fallida en ${paso}` });
+    // Una WABA que no se pudo suscribir no es nuestra: su fallo no pisa el alta buena de otra pyme.
+    const previa = await registro.lee(a.wabaId);
+    if (!previa || previa.estado === 'fallida' || previa.estado === 'baja') await registro.guarda(r);
+    await anota(`fallida en ${paso}`);
     return r;
   };
 
@@ -147,19 +159,23 @@ export function creaBsp(o: OpcionesBsp) {
   }
 
   async function completa(s: SolicitudAlta): Promise<AltaBsp | { rechazo: string }> {
-    if (s.evento.tipo === 'abandono') { embudo.push({ instante: o.reloj(), resultado: `abandono en ${s.evento.paso}` }); return { rechazo: `la pyme abandonó en ${s.evento.paso}` }; }
-    if (s.evento.tipo === 'error') { embudo.push({ instante: o.reloj(), resultado: 'error en la ventana' }); return { rechazo: s.evento.mensaje }; }
-    const previa = altas.get(s.evento.wabaId);
-    if (previa && (previa.estado === 'activa' || previa.estado === 'falta_metodo_pago')) return previa;
+    if (s.evento.tipo === 'abandono') { await anota(`abandono en ${s.evento.paso}`); return { rechazo: `la pyme abandonó en ${s.evento.paso}` }; }
+    if (s.evento.tipo === 'error') { await anota('error en la ventana'); return { rechazo: s.evento.mensaje }; }
+    const vigente = (x: AltaBsp) => x.estado === 'activa' || x.estado === 'falta_metodo_pago';
+    const previa = await registro.lee(s.evento.wabaId);
+    if (previa && vigente(previa)) return previa.inquilinoId === s.inquilinoId ? previa : { rechazo: 'esa WABA ya está dada de alta con otra pyme' };
+    if ((await registro.lista()).some((x) => x.inquilinoId === s.inquilinoId && vigente(x))) return { rechazo: 'esta pyme ya tiene una WABA dada de alta: primero la baja' };
     if (o.reloj() - s.recibidoEn > VIDA_CODIGO_SIGNUP_MS) return { rechazo: 'el código de Embedded Signup vive 30 s: se canjea al recibirlo, servidor a servidor' };
     let a: AltaBsp = { wabaId: s.evento.wabaId, modalidad: o.modalidad, estado: 'fallida', pasos: [], creadaEn: o.reloj() };
     const canje = await o.graph.canjeaCodigo(s.code);
     if (!canje.ok) return falla(a, 'canjear_codigo', canje.error);
-    await o.boveda.guarda(a.wabaId, canje.token);
-    a = { ...a, pasos: [{ paso: 'canjear_codigo', ok: true, detalle: 'token en la bóveda' }] };
+    a = { ...a, pasos: [{ paso: 'canjear_codigo', ok: true }] };
+    // El token entra a la bóveda solo cuando Meta acepta que es de ESA WABA: un mensaje con la WABA de
+    // otro y un código propio no deja un token guardado a nombre ajeno.
     const sus = await o.graph.suscribe(a.wabaId, canje.token);
     if (!sus.ok) return falla(a, 'suscribir_webhooks', sus.error ?? 'sin detalle');
-    a = { ...a, pasos: [...a.pasos, { paso: 'suscribir_webhooks', ok: true }] };
+    await o.boveda.guarda(a.wabaId, canje.token);
+    a = { ...a, pasos: [...a.pasos, { paso: 'suscribir_webhooks', ok: true, detalle: 'token en la bóveda' }] };
     const conCredito = await credito(a);
     if (typeof conCredito === 'string') return falla(a, 'compartir_credito', conCredito);
     const n = await numero(conCredito, s, canje.token);
@@ -174,8 +190,8 @@ export function creaBsp(o: OpcionesBsp) {
     const tp = o.modalidad === 'tech_provider';
     await o.almacen.guardaInquilino(tp ? { ...base, estado: 'pausado', motivoPausa: 'falta el método de pago en WhatsApp Manager (Tech Provider: Meta le cobra a la pyme)' } : base);
     const final: AltaBsp = { ...a, inquilinoId: base.id, estado: tp ? 'falta_metodo_pago' : 'activa', pasos: [...a.pasos, { paso: 'inquilino', ok: true, detalle: base.id }] };
-    altas.set(a.wabaId, final);
-    embudo.push({ instante: o.reloj(), resultado: final.estado });
+    await registro.guarda(final);
+    await anota(final.estado);
     return final;
   }
 
@@ -183,12 +199,12 @@ export function creaBsp(o: OpcionesBsp) {
     completa,
     /** La pyme confirmó su método de pago (Tech Provider): el canal ya envía. */
     async confirmaMetodoPago(wabaId: string): Promise<AltaBsp | undefined> {
-      const a = altas.get(wabaId);
+      const a = await registro.lee(wabaId);
       if (!a?.inquilinoId || a.estado !== 'falta_metodo_pago') return a;
       const i = await o.almacen.inquilino(a.inquilinoId);
-      if (i) { const { motivoPausa: _m, ...resto } = i; await o.almacen.guardaInquilino({ ...resto, estado: 'activo' }); }
+      if (i) { const activo: Inquilino = { ...i, estado: 'activo' }; delete activo.motivoPausa; await o.almacen.guardaInquilino(activo); }
       const r: AltaBsp = { ...a, estado: 'activa', pasos: [...a.pasos, { paso: 'metodo_de_pago', ok: true }] };
-      altas.set(wabaId, r);
+      await registro.guarda(r);
       return r;
     },
     /**
@@ -197,7 +213,7 @@ export function creaBsp(o: OpcionesBsp) {
      * queda como paso manual: su endpoint no se verificó.
      */
     async baja(wabaId: string, motivo: string): Promise<AltaBsp | undefined> {
-      const a = altas.get(wabaId);
+      const a = await registro.lee(wabaId);
       if (!a || a.estado === 'baja') return a;
       const token = await o.boveda.lee(wabaId);
       if (token) await o.graph.desuscribe(wabaId, token);
@@ -211,12 +227,33 @@ export function creaBsp(o: OpcionesBsp) {
       const i = a.inquilinoId ? await o.almacen.inquilino(a.inquilinoId) : undefined;
       if (i) await o.almacen.guardaInquilino({ ...i, estado: 'pausado', motivoPausa: `baja del BSP: ${motivo}` });
       const r: AltaBsp = { ...a, estado: 'baja', pasos };
-      altas.set(wabaId, r);
+      await registro.guarda(r);
       return r;
     },
-    altas: () => [...altas.values()].map((a) => structuredClone(a)),
+    altas: () => registro.lista(),
     /** Cuántas pymes empiezan el alta y dónde se caen. */
-    embudo: () => [...embudo],
+    embudo: () => registro.embudo(),
+    /** La liga privada que se le da a UNA pyme para su alta (firmada, vence, sirve una vez). */
+    ligaDeAlta(inquilinoId: string): string {
+      if (!o.secretoLigas) throw new Error('sin secreto de ligas');
+      return emiteLigaAlta(o.secretoLigas, inquilinoId, o.reloj());
+    },
+    /**
+     * Lo que manda nuestra página: la liga con la que entró la pyme, el `code` y el mensaje de la
+     * ventana con su origen. El inquilino sale de la liga, nunca del navegador.
+     */
+    async recibe(r: { liga: string; code: string; origen: string; mensaje: unknown } & Omit<SolicitudAlta, 'inquilinoId' | 'code' | 'recibidoEn' | 'evento'>): Promise<AltaBsp | { rechazo: string }> {
+      if (!o.secretoLigas) return { rechazo: 'sin secreto de ligas' };
+      const evento = filtraMensajeSignup(r.origen, r.mensaje);
+      if (!evento) { await anota('mensaje que no viene de Meta'); return { rechazo: 'el mensaje no viene de Meta o no es de Embedded Signup' }; }
+      const liga = leeLigaAlta(o.secretoLigas, r.liga, o.reloj());
+      if (!liga) return { rechazo: 'liga inválida o vencida' };
+      if (!await registro.apartaNonce(liga.nonce)) return { rechazo: 'esta liga ya se usó' };
+      const a = await completa({ inquilinoId: liga.inquilinoId, code: r.code, recibidoEn: o.reloj(), evento, perfil: r.perfil, telefonoVisible: r.telefonoVisible, ...(r.delPool ? { delPool: r.delPool } : {}) });
+      // Un abandono o un fallo dejan reintentar con la misma liga; un alta lograda la gasta.
+      if ('rechazo' in a || a.estado === 'fallida') await registro.liberaNonce(liga.nonce);
+      return a;
+    },
   };
 }
 

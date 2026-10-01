@@ -35,6 +35,14 @@ simulador fiel de Meta, sin un número real.
   pueden correr como agentes A2A reales (SDK oficial) detrás de una pasarela multi-inquilino, con
   Agent Card firmada.
 - **Multi-inquilino**: cada pyme ve, gasta y atribuye solo lo suyo, y se prueba.
+- **Frontera del número**, antes del agente:
+  - 20 mensajes en 10 min por contacto;
+  - pasados 40 contactos nuevos en una hora, los siguientes reciben una sola respuesta de cortesía, sin
+    modelo y sin llegar a la bandeja; los clientes de antes siguen atendidos;
+  - pasados 400 mensajes en una hora, el agente sigue con respuestas fijas y traspasos, sin modelo;
+  - lista de bloqueo del dueño, que queda en la cadena de hashes.
+
+  Los límites se ajustan por pyme y hoy son ficticios.
 - **Optimización de respuestas y costos**:
   - un enrutador determinista antes del modelo: saludo, catálogo, producto, FAQ, reserva y despedida
     no gastan tokens;
@@ -61,7 +69,10 @@ simulador fiel de Meta, sin un número real.
   - **cuarentena de 90 días** antes de reasignar un número liberado, calidad del número con aviso en
     rojo, y el cobro del mes (la renta paga el pool entero).
 - **BSP propio (N-02)**: da de alta a la pyme en nuestra app de Meta por Embedded Signup.
-  - Canjea el código (vive 30 s) y guarda el token de negocio en una bóveda, nunca en el inquilino.
+  - Ata cada alta a una **liga firmada** que vence y sirve una vez, y solo acepta el mensaje si viene de
+    facebook.com (más estricto que la muestra de Meta).
+  - Canjea el código (vive 30 s) y guarda el token de negocio en una bóveda, nunca en el inquilino, y
+    solo después de que Meta acepte que la WABA es suya.
   - Suscribe la WABA, comparte la línea de crédito (Solution Partner) y registra el número, o toma
     uno del pool si la pyme no trajo.
   - Factura el mes por pyme en las dos modalidades (Tech Provider: Meta le cobra a la pyme; Solution
@@ -174,7 +185,7 @@ await bsp.completa({ inquilinoId, code, recibidoEn, evento: leeEventoSignup(mens
 
 ## Pruebas
 
-`npm run prueba` corre 87 pruebas en unos 16 s. También entran en el `validate` de la raíz por
+`npm run prueba` corre 96 pruebas en unos 20 s. También entran en el `validate` de la raíz por
 `prueba:tools`. Cubren:
 
 - canal, ventanas y costo;
@@ -194,7 +205,9 @@ await bsp.completa({ inquilinoId, code, recibidoEn, evento: leeEventoSignup(mens
 - trazabilidad;
 - roadmaps;
 - números (alta, límites de Meta, cuarentena, cobro);
-- BSP (Embedded Signup, crédito, baja, factura y conciliación).
+- BSP (Embedded Signup, crédito, baja, factura y conciliación);
+- alta segura (liga, origen, WABA ajena, persistencia);
+- frontera del número (granja, ráfaga, bloqueo).
 
 La evidencia por HTTP con la app construida y las capturas salen de
 `npm run build && node tools/ventas-whatsapp/e2e/capturas.mjs`.

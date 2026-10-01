@@ -18,6 +18,8 @@ interface Datos {
   tablero: Tablero;
   a2a: boolean;
   integridad: Integridad;
+  /** Contactos en la lista de bloqueo del dueño. */
+  bloqueados: string[];
   /** Reloj del servidor al responder: el cronómetro corre desde aquí. */
   ahora: number;
 }
@@ -135,6 +137,7 @@ export function PanelDueno() {
               <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
                 <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-200">{MOTIVO[c.motivo] ?? c.motivo}</span>
                 <span className="font-mono text-xs text-neutral-500">+{c.waId}</span>
+                {datos.bloqueados.includes(c.waId) && <span className="rounded bg-neutral-800 px-2 py-0.5 text-xs font-semibold text-white" data-prueba="bloqueado">bloqueado</span>}
                 <span className="text-xs text-neutral-500">{hora(c.abiertoEn)}</span>
                 {c.ventana && <Ventana v={c.ventana} ahora={datos.ahora} desdeCarga={desdeCarga} />}
                 <span className={`ml-auto rounded px-2 py-0.5 text-xs font-semibold ${c.estado === 'tomado' ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-100 text-neutral-700'}`}>{c.estado === 'tomado' ? 'lo atiendes tú' : 'sin tomar'}</span>
@@ -154,6 +157,10 @@ export function PanelDueno() {
                   <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={() => accion({ accion: 'liberar', casoId: c.id })} data-prueba="liberar">Devolver al agente</button>
                 </div>
               )}
+              <button type="button" className="ml-3 mt-2 text-xs text-neutral-500 underline" data-prueba="bloquear"
+                onClick={() => { const b = datos.bloqueados.includes(c.waId); if (b || confirm('Sus mensajes se guardan, pero el agente ya no le responde. ¿Bloquear este contacto?')) void accion({ accion: 'bloquear', conversacionId: c.conversacionId, motivo: b ? null : 'bloqueado por el dueño desde la bandeja' }); }}>
+                {datos.bloqueados.includes(c.waId) ? 'Desbloquear contacto' : 'Bloquear contacto'}
+              </button>
             </article>
           ))}
           {bandeja.pausadasPorEco.length > 0 && (

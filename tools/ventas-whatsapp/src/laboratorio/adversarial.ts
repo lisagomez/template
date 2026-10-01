@@ -78,6 +78,9 @@ export async function correAdversarial(o: Pick<OpcionesCircuito, 'flows' | 'opti
   let traspasosEsperados = 0;
   for (const caso of casos) {
     actual = caso;
+    // Tráfico realista: un adversario cada 2 min. Este arnés mide las barreras del agente; la
+    // frontera del número (granjas, ráfagas) tiene sus propias pruebas.
+    c.reloj.avanza(2 * 60_000);
     const pyme = pymes[caso.pyme];
     const cl = c.meta.cliente(pyme.canal.phoneNumberId, `52229${String(700000 + caso.n).padStart(7, '0')}`, `Adversario ${caso.n}`);
     const antes = modelo.registro.length;

@@ -1,13 +1,13 @@
 /**
  * /api/ventas-whatsapp/panel — el panel del dueño. GET: su bandeja (casos con la conversación),
  * su tablero de ROAS y sus alertas. POST: una acción validada con Zod (tomar, responder, liberar,
- * catálogo, QR, gasto de campaña, conciliar, reintentar conversiones). El token decide el
+ * bloquear, catálogo, QR, gasto de campaña, conciliar, reintentar conversiones). El token decide el
  * inquilino. La `semilla` (alta de la pyme ficticia) solo existe en el laboratorio.
  */
 import { NextResponse } from 'next/server';
 import { esquemaAccion } from '@/features/ventas-whatsapp/services/esquemas';
 import { inquilinoDelPanel } from '@/features/ventas-whatsapp/services/servidor/puerta';
-import { anclajeDelServidor, vendedorDelServidor } from '@/features/ventas-whatsapp/services/servidor/runtime';
+import { almacenDelServidor, anclajeDelServidor, vendedorDelServidor } from '@/features/ventas-whatsapp/services/servidor/runtime';
 import { configuracion } from '@/features/ventas-whatsapp/services/servidor/configuracion';
 import { CSV_RESTAURANTE, CSV_TIENDA, restaurante, tienda } from '../../../../../tools/ventas-whatsapp/dist/laboratorio/index.js';
 
@@ -23,13 +23,14 @@ export async function GET(peticion: Request): Promise<Response> {
   // El cronómetro del lado del dueño: al abrir el panel se revisan las ventanas que están por cerrar.
   await v.vendedor.panel.revisaVentanas(p.inquilino);
   const a = anclajeDelServidor();
+  const bloqueados = ((await almacenDelServidor()?.de(p.inquilino).lista('contactos')) ?? []).filter((c) => c.bloqueado).map((c) => c.waId);
   const [bandeja, tablero, integridad] = await Promise.all([
     v.vendedor.panel.bandeja(p.inquilino), v.vendedor.panel.tablero(p.inquilino),
     a ? v.vendedor.panel.integridad(p.inquilino, a.anclas, a.verifica) : v.vendedor.panel.integridad(p.inquilino),
   ]);
   return NextResponse.json({
     inquilino: { id: inquilino.id, nombre: inquilino.nombre, giro: inquilino.giro, ciudad: inquilino.ciudad, dueno: inquilino.dueno.nombre, estado: inquilino.estado, ficticio: inquilino.ficticio },
-    bandeja, tablero, a2a: v.pasarela !== null, integridad, ahora: Date.now(),
+    bandeja, tablero, a2a: v.pasarela !== null, integridad, bloqueados, ahora: Date.now(),
   });
 }
 
@@ -49,6 +50,7 @@ export async function POST(peticion: Request): Promise<Response> {
       case 'responder': { const r = await panel.responde(t, a.conversacionId, a.texto); return NextResponse.json(r, { status: r.ok ? 200 : 409 }); }
       case 'liberar': return NextResponse.json(await panel.liberaCaso(t, a.casoId));
       case 'liberarPausa': await panel.liberaPausa(t, a.conversacionId); return NextResponse.json({ ok: true });
+      case 'bloquear': { const c = await panel.bloquea(t, a.conversacionId, a.motivo); return NextResponse.json({ ok: c !== null }, { status: c ? 200 : 404 }); }
       case 'catalogo': return NextResponse.json(await panel.sincronizaCatalogo(t, a.csv));
       case 'qr': return NextResponse.json(await panel.creaQr(t, a.etiqueta, a.mensaje));
       case 'gasto': return NextResponse.json(await panel.registraGasto(t, a.campanaId, a.nombre, a.gastoCentavos, a.anuncios));

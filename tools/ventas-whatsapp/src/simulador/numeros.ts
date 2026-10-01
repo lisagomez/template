@@ -114,7 +114,7 @@ export function creaRegistroNumerosSimulado(o: OpcionesRegistroSimulado) {
       for (const n of numeros.values()) if (n.e164 === e164 && n.status === 'CONNECTED') n.calidad = calidad;
     },
     /** Lo que Meta sabe de cada número (sin el PIN ni el código). */
-    lista: () => [...numeros.values()].map(({ pin: _p, codigo: _c, ...n }) => structuredClone(n)),
+    lista: () => [...numeros.values()].map((n) => { const c = structuredClone(n); delete c.pin; delete c.codigo; return c; }),
   };
 }
 

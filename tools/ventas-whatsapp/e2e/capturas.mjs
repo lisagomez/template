@@ -45,6 +45,7 @@ const TOKENS = { pn_1: aleatorio(), pn_2: aleatorio() };
 const tokensRecurso = { pn_1: TOKENS.pn_1, ds_1: TOKENS.pn_1, pn_2: TOKENS.pn_2, ds_2: TOKENS.pn_2 };
 const PANEL = { pyme_restaurante: aleatorio(), pyme_tienda: aleatorio() };
 const panelEnv = Object.entries(PANEL).map(([k, v]) => `${k}:${v}`).join(',');
+const plataforma = aleatorio();
 
 // --- Meta y el procesador, simulados y servidos por HTTP -------------------------------------
 const meta = creaMetaSimulada({
@@ -82,7 +83,7 @@ const app = spawn(process.execPath, [join(raiz, 'node_modules/next/dist/bin/next
     VENTAS_WA_APP_SECRET: secretoApp, VENTAS_WA_VERIFY_TOKEN: aleatorio(), VENTAS_WA_FLOW_SECRET: aleatorio(), VENTAS_WA_FLOWS_LLAVE: pem64(flowsLlave.privateKey),
     VENTAS_WA_GRAPH_URL: `http://127.0.0.1:${PUERTO_META}`, VENTAS_WA_TOKENS: JSON.stringify(tokensRecurso),
     VENTAS_WA_PAGOS_URL: `http://127.0.0.1:${PUERTO_PAGOS}`, VENTAS_WA_PAGOS_SECRETO: SECRETO_PAGOS,
-    VENTAS_WA_PANEL_TOKENS: panelEnv,
+    VENTAS_WA_PANEL_TOKENS: panelEnv, VENTAS_WA_PLATAFORMA_TOKEN: plataforma,
     VENTAS_WA_A2A_LLAVE: pem64(a2aLlave.privateKey), VENTAS_WA_A2A_SECRETO: aleatorio(),
     VENTAS_WA_TRAZA_LLAVE: aleatorio(), VENTAS_WA_ANCLA_LLAVE: pem64(anclaLlave.privateKey),
   },
@@ -94,6 +95,10 @@ for (let i = 0; i < 80; i++) {
   await espera(500);
 }
 
+const plat = async (cuerpo) => {
+  const r = await fetch(`${APP}/api/ventas-whatsapp/plataforma`, { method: cuerpo ? 'POST' : 'GET', headers: { authorization: `Bearer ${plataforma}`, 'content-type': 'application/json' }, ...(cuerpo ? { body: JSON.stringify(cuerpo) } : {}) });
+  return { status: r.status, cuerpo: await r.json() };
+};
 const panel = async (pyme, cuerpo) => {
   const r = await fetch(`${APP}/api/ventas-whatsapp/panel`, { method: cuerpo ? 'POST' : 'GET', headers: { authorization: `Bearer ${PANEL[pyme]}`, 'content-type': 'application/json' }, ...(cuerpo ? { body: JSON.stringify(cuerpo) } : {}) });
   return { status: r.status, cuerpo: await r.json() };
@@ -154,6 +159,35 @@ const ajena = meta.cliente('pn_2', '5222812340006', 'Curioso');
 ajena.escribe('¿Quién ganó las elecciones para presidente?');
 await asienta();
 informe.pasos.push(`fuera de dominio: ${ajena.ultimo()?.resumen}`);
+
+// --- Lista de bloqueo: el dueño bloquea desde la bandeja a quien insulta ----------------------
+const grosero = meta.cliente('pn_2', '5222812340007', 'Grosero');
+grosero.escribe('Pésimo servicio, son unos inútiles');
+await asienta();
+const casoGrosero = (await panel('pyme_tienda')).cuerpo.bandeja.casos.find((c) => c.waId === '5222812340007');
+const bloqueo = await panel('pyme_tienda', { accion: 'bloquear', conversacionId: casoGrosero.conversacionId, motivo: 'insultos' });
+const antesDelBloqueo = grosero.recibidos.length;
+grosero.escribe('¿Me contestan o qué?');
+await asienta();
+informe.pasos.push(`bloqueo: HTTP ${bloqueo.status}; respuestas después del bloqueo: ${grosero.recibidos.length - antesDelBloqueo}`);
+
+// --- Plataforma: números al pool, altas por el BSP propio (Embedded Signup simulado) y factura --
+for (const modalidad of ['renta', 'renta', 'venta']) await plat({ accion: 'numeroAlPool', modalidad });
+const wabas = {};
+let ligaUsada = '';
+for (const [id, perfil, numero] of [['pyme_lab_taqueria', 'restaurante', 'renta'], ['pyme_lab_boutique', 'tienda', 'propio'], ['pyme_lab_cafe', 'restaurante', 'abandona'], ['pyme_lab_merceria', 'tienda', 'venta']]) {
+  const { liga } = (await plat({ accion: 'liga', inquilinoId: id })).cuerpo;
+  const r = await plat({ accion: 'simulaAlta', liga, perfil, numero });
+  if (r.cuerpo.wabaId) { wabas[id] = r.cuerpo.wabaId; ligaUsada ||= liga; }
+  informe.pasos.push(`alta ${id} (${numero}): ${r.cuerpo.estado ?? r.cuerpo.rechazo}${r.cuerpo.numeroDelPool ? `, número del pool ${r.cuerpo.numeroDelPool}` : ''}`);
+}
+const reuso = await plat({ accion: 'simulaAlta', liga: ligaUsada, perfil: 'restaurante', numero: 'propio' });
+informe.pasos.push(`liga reusada: HTTP ${reuso.status} (${reuso.cuerpo.rechazo})`);
+await plat({ accion: 'confirmaPago', wabaId: wabas.pyme_lab_boutique });
+const sinToken = await fetch(`${APP}/api/ventas-whatsapp/plataforma`, { headers: { authorization: `Bearer ${PANEL.pyme_restaurante}` } });
+informe.pasos.push(`plataforma con el token de una pyme: HTTP ${sinToken.status}`);
+const estadoPlataforma = (await plat()).cuerpo;
+informe.pasos.push(`plataforma: ${estadoPlataforma.altas.map((a) => `${a.inquilinoId}=${a.estado}`).join(', ')}; números: ${estadoPlataforma.numeros.map((n) => `${n.modalidad}/${n.estado}`).join(', ')}; margen de números del mes: ${estadoPlataforma.numerosMes.margenCentavos} centavos`);
 
 // --- Cadena de hashes: se ancla y el panel reporta la integridad ------------------------------
 const ancla = await panel('pyme_restaurante', { accion: 'anclar' });
@@ -233,6 +267,20 @@ for (const vista of ['escritorio', 'celular']) {
   await lab.waitForSelector('[data-prueba="tabla-compuertas"]');
   await foto(lab, `${vista}-6-laboratorio`);
   if (vista === 'escritorio') await foto(lab, 'escritorio-7-lineas-de-negocio', '[data-prueba="lineas-de-negocio"]');
+}
+for (const vista of ['escritorio', 'celular']) {
+  const ctx = await navegador.newContext(VISTAS[vista]);
+  await ctx.addInitScript((t) => { localStorage.setItem('ventas-wa-plataforma', t); }, plataforma);
+  const pl = await ctx.newPage();
+  await pl.goto(`${APP}/plataforma-ventas-whatsapp`);
+  await pl.waitForSelector('[data-prueba="tabla-altas"]');
+  await foto(pl, `${vista}-8-plataforma`);
+}
+{
+  const t = await pagina('escritorio', 'pyme_tienda');
+  await t.goto(`${APP}/ventas-whatsapp`);
+  await t.waitForSelector('[data-prueba="bloqueado"]');
+  await foto(t, 'escritorio-9-contacto-bloqueado', '[data-prueba="bandeja"]');
 }
 await navegador.close();
 

@@ -17,3 +17,15 @@ export function inquilinoDelPanel(cabecera: string | null): { ok: true; inquilin
   }
   return { ok: false, status: 401, error: 'token del panel inválido' };
 }
+
+/** La puerta de la plataforma (N-01, N-02): un solo token, de quien opera; no da acceso a ningún panel de pyme. */
+export function esPlataforma(cabecera: string | null): { ok: true } | { ok: false; status: number; error: string } {
+  const c = configuracion();
+  if (!c.ok) return { ok: false, status: 503, error: c.error };
+  const valido = c.valor.VENTAS_WA_PLATAFORMA_TOKEN;
+  if (!valido) return { ok: false, status: 503, error: 'sin token de plataforma configurado' };
+  const token = (cabecera ?? '').startsWith('Bearer ') ? (cabecera ?? '').slice(7) : '';
+  const a = Buffer.from(valido);
+  const b = Buffer.from(token);
+  return a.length === b.length && timingSafeEqual(a, b) ? { ok: true } : { ok: false, status: 401, error: 'token de plataforma inválido' };
+}
