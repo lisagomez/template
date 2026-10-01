@@ -1,12 +1,12 @@
 {
  "_comentario": "Corridas REALES de los agentes con datos sintéticos (scripts/sgi/corre-agentes.ts). Se verifican en el laboratorio con reglas fijas.",
- "cuando": "2026-10-01T10:27:38.956Z",
+ "cuando": "2026-10-01T10:33:48.151Z",
  "modelos": {
   "agente-sgi-redaccion": "anthropic/claude-sonnet-5",
   "agente-sgi-evaluacion": "anthropic/claude-opus-5"
  },
  "gastoFueraDeCasosUsd": 0.326367,
- "gastoTotalUsd": 0.80578,
+ "gastoTotalUsd": 2.734132,
  "corridas": [
   {
    "id": "dia-1",
@@ -357,6 +357,1443 @@
    },
    "costoUsd": 0.449405,
    "cuando": "2026-10-01T10:27:38.956Z"
+  },
+  {
+   "id": "dia-2",
+   "agente": "diagnostico",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Informe de brechas de Panificadora Santa Rita (Puebla, Pue.; 18 personas) frente a ISO 9001:2026, con base en el cuestionario respondido. El puntaje de madurez calculado se usa tal cual: global 1.5 de 5. Por cláusula: 4 = 2.5; 5 = 3.0; 6 = 0.5; 7 = 1.5; 8 = 1.5; 9 = 1.5; 10 = 1.5. La lectura es que el liderazgo de la Dueña y el conocimiento del contexto son el punto más sólido, mientras que la planificación (riesgos, oportunidades y objetivos) es el más débil. En los procesos de Recepción de harinas, Amasado y horneado, Empaque y Reparto la operación funciona por experiencia del Maestro panadero, pero faltan criterios escritos, registros y mediciones que den confianza. Se presentan 7 brechas, 2 fortalezas y 3 primeros pasos, todo como borrador para que la Dueña lo apruebe o rechace. Nada de lo aquí escrito declara cumplimiento; el proyecto solo busca preparación para una auditoría. El perfil no declara sistemas de IA, por lo que este informe se limita a ISO 9001:2026.",
+    "propuestas": [
+     {
+      "tipo": "brecha",
+      "titulo": "No hay riesgos, oportunidades ni objetivos de calidad planeados (cláusula 6, madurez 0.5)",
+      "detalle": "Es la brecha más grande del diagnóstico. No están identificados los riesgos y oportunidades del negocio panificador (falla del horno, retraso de harina de Molino La Estrella, faltante de empaque de Empaques Angelópolis, ausencia del Maestro panadero, variación de humedad en la masa), no hay acciones definidas con responsable y fecha, y las oportunidades no se persiguen a propósito. Los objetivos existen de forma parcial, sin plan de cómo lograrlos, con qué recursos y cómo se mide. Los cambios al sistema no se planean y quedó como 'no sé' si se analizan antes de hacerlos. Propuesta de borrador: una tabla simple de riesgos por proceso (Recepción de harinas, Amasado y horneado, Empaque, Reparto), con acción, puesto responsable y fecha; y 3 o 4 objetivos medibles (por ejemplo merma de pan, entregas a tiempo a tiendas de abarrotes y cafeterías, quejas por mes) con su plan de logro.",
+      "requisitos": [
+       "SGI-C-6.1-01",
+       "SGI-C-6.1-02",
+       "SGI-Q-6.1-03",
+       "SGI-Q-6.1-04",
+       "SGI-C-6.2-01",
+       "SGI-C-6.2-02",
+       "SGI-C-6.3-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "La operación de amasado, horneado y empaque no tiene criterios escritos ni registros de liberación",
+      "detalle": "No hay criterios definidos ni registros que muestren que el pan de caja, el bolillo y las conchas se produjeron como se planeó. Falta control de los cambios planeados y de lo que se hace fuera de la empresa. La identificación y trazabilidad del producto hasta el lote de harina no está resuelta; la preservación durante empaque y reparto está a medias; no hay comprobación antes de entregar ni registro de quién autoriza la salida del reparto; y el producto que sale mal (pan quemado, bajo peso, empaque roto) no se identifica ni se controla de manera formal. Quedó como 'no sé' el cuidado de bienes de clientes o proveedores (por ejemplo cajas, charolas o tarimas retornables). Propuesta de borrador: hojas de proceso por producto con parámetros de amasado y horneado, bitácora diaria de horno, etiqueta de lote, criterio de liberación antes del reparto y un área o caja roja para producto no conforme.",
+      "requisitos": [
+       "SGI-C-8.1-01",
+       "SGI-C-8.1-02",
+       "SGI-Q-8.5-01",
+       "SGI-Q-8.5-02",
+       "SGI-Q-8.5-03",
+       "SGI-Q-8.5-04",
+       "SGI-Q-8.6-01",
+       "SGI-Q-8.7-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "alto"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Proveedores clave sin criterios de evaluación ni requisitos comunicados",
+      "detalle": "La evaluación de proveedores es parcial y no hay criterios escritos para escoger, vigilar y volver a evaluar a Molino La Estrella (harinas) y Empaques Angelópolis. No está decidido cuánto control aplicar a cada insumo según su efecto en el pan, ni cómo se verifica al recibirlo en el proceso de Recepción de harinas. Tampoco se les comunica por escrito qué se compra y qué verificaciones habrá. Propuesta de borrador: criterios de aceptación de harina (ficha técnica, certificado de análisis o carta de garantía del molino, estado del costal, fecha), registro de recepción firmado por el puesto que recibe, y una evaluación semestral sencilla de cumplimiento y tiempo de entrega.",
+      "requisitos": [
+       "SGI-Q-8.4-01",
+       "SGI-Q-8.4-02",
+       "SGI-Q-8.4-03"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "bajo"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Falta cerrar el ciclo con el cliente: requisitos, quejas, satisfacción y análisis de datos",
+      "detalle": "La comunicación con tiendas de abarrotes y cafeterías es parcial: no hay una vía clara para pedir, cambiar pedido y quejarse, ni regla de qué hacer cuando un pedido sale mal. No están definidos los requisitos de lo que se vende, incluidos los legales y sanitarios que aplican al pan, ni se confirma antes de prometer que se puede cumplir. Los cambios de pedido no siempre llegan a quien hornea o reparte. No se mide la percepción del cliente y quedó como 'no sé' si los datos se analizan para tomar decisiones; la medición del sistema está definida solo en parte. Tampoco está atendido lo que sigue a la entrega (devoluciones de pan del día anterior). Propuesta de borrador: formato de pedido con requisitos y fecha, bitácora de quejas y devoluciones por cliente, llamada trimestral de satisfacción y un tablero mensual de una página que la Dueña revise.",
+      "requisitos": [
+       "SGI-Q-8.2-01",
+       "SGI-Q-8.2-02",
+       "SGI-Q-8.2-04",
+       "SGI-Q-8.5-05",
+       "SGI-C-9.1-01",
+       "SGI-Q-9.1-02",
+       "SGI-Q-9.1-03",
+       "SGI-Q-5.1-06"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Nada que respalde que las fallas se corrigen de raíz ni que el sistema se audita",
+      "detalle": "No se reacciona de manera formal ante una falla o queja, las acciones sobre la causa son parciales y no queda registro de qué no cumplió, qué se hizo y si funcionó. Las oportunidades de mejora no se identifican ni se escogen. Las auditorías internas se hacen de forma parcial y sin programa que dé más atención a lo importante o a lo que ya falló, y sin regla de que quien audita no revise su propio trabajo. En la revisión por la dirección faltan los temas de calidad (clientes, operación, proveedores y recursos) y las decisiones quedan a medias. Propuesta de borrador: formato de una hoja para no conformidad y acción correctiva, programa anual de auditoría interna con dos ciclos y guion de la revisión por la Dueña con minuta de decisiones.",
+      "requisitos": [
+       "SGI-C-10.2-01",
+       "SGI-C-10.2-02",
+       "SGI-C-10.2-03",
+       "SGI-Q-10.1-01",
+       "SGI-C-9.2-01",
+       "SGI-C-9.2-02",
+       "SGI-C-9.3-02",
+       "SGI-Q-9.3-03",
+       "SGI-C-9.3-05"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Soporte incompleto: personal, instrumentos sin calibrar, competencia y control de documentos",
+      "detalle": "Los recursos se asignan de forma parcial y no está resuelto si hay gente suficiente para los cuatro procesos; las instalaciones y el mantenimiento de horno, amasadora y vehículo de reparto están a medias y el ambiente de trabajo (calor de horno, turnos de madrugada) no se gestiona. Los instrumentos que se usan para comprobar el producto no están determinados como adecuados y la calibración y trazabilidad son parciales: en una panadería esto toca básculas de dosificación, termómetros de horno y de cámara de fermentación. No está capturado el saber del Maestro panadero (fórmulas, tiempos), lo que es un riesgo si falta. Quedó como 'no sé' la competencia requerida por puesto y la conciencia del personal es parcial, sin difusión de valores de calidad y conducta ética. En documentos falta regla para crear, aprobar, versionar, distribuir y conservar, incluidos los documentos externos de los proveedores.",
+      "requisitos": [
+       "SGI-C-7.1-01",
+       "SGI-Q-7.1-02",
+       "SGI-Q-7.1-03",
+       "SGI-Q-7.1-04",
+       "SGI-Q-7.1-05",
+       "SGI-Q-7.1-06",
+       "SGI-Q-7.1-07",
+       "SGI-C-7.2-01",
+       "SGI-C-7.3-01",
+       "SGI-Q-7.3-02",
+       "SGI-C-7.5-01",
+       "SGI-C-7.5-02",
+       "SGI-C-7.5-03"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Alcance, partes interesadas y mapa de procesos sin terminar",
+      "detalle": "El alcance está escrito en parte y no delimita sitios, procesos y dependencia de terceros (molino, proveedor de empaques, reparto). No están identificadas las partes interesadas ni lo que exigen (clientes, personal, autoridad sanitaria, vecinos del horno). Como la empresa respondió que no tiene proceso de diseño, hace falta dejar escrita y justificada esa no aplicación y mostrar que no afecta lo que recibe el cliente. En el mapa de procesos faltan entradas y salidas de cada proceso, los documentos y registros que los sostienen, la forma de saber si van bien y quedó como 'no sé' quién responde por cada proceso y con qué recursos. La pregunta sobre si el cambio climático es un asunto relevante está contestada solo en parte y conviene dejar constancia (por ejemplo, efecto del precio del trigo o de calor extremo en la fermentación).",
+      "requisitos": [
+       "SGI-C-4.3-01",
+       "SGI-Q-4.3-02",
+       "SGI-C-4.2-01",
+       "SGI-Q-4.4-02",
+       "SGI-Q-4.4-03",
+       "SGI-Q-4.4-04",
+       "SGI-Q-4.4-05",
+       "SGI-Q-4.1-02",
+       "SGI-Q-8.3-01"
+      ],
+      "datos": {
+       "prioridad": "media",
+       "esfuerzo": "bajo"
+      }
+     },
+     {
+      "tipo": "fortaleza",
+      "titulo": "La Dueña asume el sistema y ya hay política escrita y comunicada",
+      "detalle": "Es el punto más alto del diagnóstico (cláusula 5, madurez 3.0). La dirección responde por la eficacia del sistema, promueve trabajar por procesos y pensar en riesgos, y existe una política escrita, con compromisos, comunicada dentro de la empresa y disponible para quien corresponde. En una empresa de 18 personas con trato directo entre la Dueña y el Maestro panadero, esto acelera el resto del trabajo. Pendientes asociados que sí requieren atención: alinear política y objetivos al rumbo del negocio, formalizar la asignación de recursos y apoyo, y confirmar por escrito quién hace qué en el sistema.",
+      "requisitos": [
+       "SGI-C-5.1-01",
+       "SGI-Q-5.1-04",
+       "SGI-C-5.2-01",
+       "SGI-C-5.2-04",
+       "SGI-C-5.3-01",
+       "SGI-C-5.1-02",
+       "SGI-C-5.1-03",
+       "SGI-Q-5.1-05",
+       "SGI-Q-5.2-02"
+      ],
+      "datos": {
+       "clausula_mas_alta": "5",
+       "madurez_clausula_5": "3.0"
+      }
+     },
+     {
+      "tipo": "fortaleza",
+      "titulo": "Contexto conocido, pedidos revisados antes de aceptarlos y comunicación definida",
+      "detalle": "La empresa ya identificó los asuntos internos y externos que le afectan y les da seguimiento, el sistema existe como procesos que se ejecutan y no solo como papeles, está decidido qué se comunica del sistema y a quién, se revisa que un pedido se puede cumplir antes de aceptarlo, se controlan y registran los cambios en producción y la Dueña ya hace revisiones del sistema en intervalos planeados, además de aprovechar lo que encuentra para mejorar. Son cimientos reales sobre los que se pueden colgar los registros que hoy faltan.",
+      "requisitos": [
+       "SGI-C-4.1-01",
+       "SGI-Q-4.2-02",
+       "SGI-C-4.4-01",
+       "SGI-C-7.4-01",
+       "SGI-Q-8.2-03",
+       "SGI-Q-8.5-06",
+       "SGI-C-9.3-01",
+       "SGI-C-10.3-01"
+      ],
+      "datos": {
+       "madurez_clausula_4": "2.5",
+       "madurez_global": "1.5"
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 1: control de la operación diaria del pan, con registros que se puedan mostrar",
+      "detalle": "Primero lo que protege al cliente y lo que una auditoría revisa en piso. En 4 a 6 semanas: hojas de proceso para pan de caja, bolillo y conchas con parámetros de amasado y horneado; bitácora diaria de horno y de recepción de harina; etiqueta de lote; criterio y registro de liberación antes del reparto; y manejo del producto no conforme con responsable de decidir. En paralelo, poner a calibrar básculas y termómetros e identificarlos con su estado. Responsables propuestos: Maestro panadero para los parámetros y el Ayudante de horno para las bitácoras, con visto bueno de la Dueña.",
+      "requisitos": [
+       "SGI-C-8.1-01",
+       "SGI-Q-8.5-01",
+       "SGI-Q-8.5-02",
+       "SGI-Q-8.6-01",
+       "SGI-Q-8.7-01",
+       "SGI-Q-7.1-06"
+      ],
+      "datos": {
+       "orden": "1"
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 2: riesgos, objetivos medibles y evaluación de proveedores",
+      "detalle": "Cerrar la cláusula más baja del diagnóstico. En 3 a 4 semanas, en dos sesiones de trabajo con la Dueña y el Maestro panadero: tabla de riesgos y oportunidades por proceso con acción, puesto responsable y fecha; 3 o 4 objetivos medibles con plan de logro y forma de medirlos; y criterios de aceptación y evaluación para Molino La Estrella y Empaques Angelópolis, comunicados por escrito a cada proveedor.",
+      "requisitos": [
+       "SGI-C-6.1-01",
+       "SGI-C-6.1-02",
+       "SGI-C-6.2-01",
+       "SGI-C-6.2-02",
+       "SGI-Q-8.4-01",
+       "SGI-Q-8.4-03"
+      ],
+      "datos": {
+       "orden": "2"
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 3: voz del cliente, quejas con causa raíz y primera auditoría interna",
+      "detalle": "Cerrar el ciclo de mejora antes de buscar una auditoría externa. En 6 a 8 semanas: bitácora de quejas y devoluciones de tiendas de abarrotes y cafeterías, con formato de acción correctiva de una hoja; llamada trimestral de satisfacción; tablero mensual de una página; alcance del sistema terminado con la no aplicación de diseño justificada; programa de auditoría interna y primera auditoría por alguien que no revise su propio trabajo; y revisión por la Dueña con los temas de calidad y minuta de decisiones. Este paso es preparación para la auditoría; la certificación solo la puede otorgar un organismo de certificación acreditado.",
+      "requisitos": [
+       "SGI-Q-9.1-02",
+       "SGI-C-9.1-01",
+       "SGI-C-10.2-01",
+       "SGI-C-10.2-03",
+       "SGI-C-9.2-02",
+       "SGI-Q-9.3-03",
+       "SGI-C-4.3-01",
+       "SGI-Q-4.3-02"
+      ],
+      "datos": {
+       "orden": "3"
+      }
+     }
+    ],
+    "preguntasAbiertas": [
+     "Para la calibración: ¿qué instrumentos se usan hoy para comprobar el producto (básculas de dosificación, báscula de empaque, termómetros de horno o de cámara)? ¿Alguno tiene certificado vigente y quién lo resguarda?",
+     "Quedó como 'no sé' quién responde por cada proceso: ¿se confirma que Recepción de harinas la lleva el Ayudante de horno, Amasado y horneado el Maestro panadero, Empaque un puesto específico y Reparto el Repartidor? Falta saber si Empaque tiene responsable propio.",
+     "Quedó como 'no sé' la competencia por puesto: ¿existen requisitos mínimos definidos para Maestro panadero, Ayudante de horno y Repartidor (por ejemplo licencia de conducir, curso de manejo de alimentos) y se guarda evidencia de capacitación?",
+     "Quedó como 'no sé' si se cuidan bienes de clientes o proveedores: ¿las tiendas de abarrotes o cafeterías entregan cajas, charolas o tarimas retornables, o el molino entrega contenedores propios?",
+     "Quedó como 'no sé' el análisis de datos y la planeación de cambios: ¿hoy se anota en algún lugar la producción diaria, la merma y las devoluciones? ¿En qué sistema o cuaderno?",
+     "¿Qué requisitos legales y sanitarios aplican a la venta de pan en Puebla según su propia revisión (licencia sanitaria, etiquetado, buenas prácticas de higiene)? Se necesita el listado de la empresa para no suponerlo.",
+     "¿Quién podría hacer la auditoría interna sin revisar su propio trabajo, siendo 18 personas? Opciones a valorar: la Dueña auditando producción y un externo auditando dirección.",
+     "Para la revisión por la dirección: ¿con qué frecuencia se reúne hoy la Dueña con el Maestro panadero y queda alguna minuta?",
+     "El perfil no declara sistemas de IA y el proyecto está marcado solo con ISO 9001:2026. ¿Se usa alguna herramienta con IA para pedidos, pronóstico de demanda, rutas de reparto o cobranza? Si la hay, habría que definir si entra al alcance y si el proyecto debe incluir ISO/IEC 42001.",
+     "Si se requiere el texto literal de alguna cláusula de ISO 9001:2026 para sustentar el informe, favor de consultarlo en la copia de la norma que tenga la empresa. Aquí solo se usan las preguntas guía del catálogo.",
+     "¿Se desea que el informe final se presente como un documento imprimible para la revisión de la Dueña, con firma de aprobación o rechazo por propuesta?"
+    ]
+   },
+   "traza": {
+    "agente": "diagnostico",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-opus-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:e35fd9f2d4104ff47415ba9342945fdea1b836e14209640dfd2bec3d61cf5f87"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:169d7cd498bc14f663d42905fc8a2046c0b9b5d7582d500320db5bf9a45187a3"
+     },
+     {
+      "tipo": "datos",
+      "huella": "sha256:7f9f1598a6d73d74ad25cfc7ea60c5c87863914c52dd125a00f6524c2492e2b3"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:39020272adb316420fb2985d33b8bf29e4c9fe1cfdebaf9710ce2c014831bbf9"
+     }
+    ],
+    "salidaHuella": "sha256:5248aa9e29614176b17f13949f4517b775622aca65314b06e19c58e48b0dbeb7",
+    "requisitosCitados": [
+     "SGI-C-10.2-01",
+     "SGI-C-10.2-02",
+     "SGI-C-10.2-03",
+     "SGI-C-10.3-01",
+     "SGI-C-4.1-01",
+     "SGI-C-4.2-01",
+     "SGI-C-4.3-01",
+     "SGI-C-4.4-01",
+     "SGI-C-5.1-01",
+     "SGI-C-5.1-02",
+     "SGI-C-5.1-03",
+     "SGI-C-5.2-01",
+     "SGI-C-5.2-04",
+     "SGI-C-5.3-01",
+     "SGI-C-6.1-01",
+     "SGI-C-6.1-02",
+     "SGI-C-6.2-01",
+     "SGI-C-6.2-02",
+     "SGI-C-6.3-01",
+     "SGI-C-7.1-01",
+     "SGI-C-7.2-01",
+     "SGI-C-7.3-01",
+     "SGI-C-7.4-01",
+     "SGI-C-7.5-01",
+     "SGI-C-7.5-02",
+     "SGI-C-7.5-03",
+     "SGI-C-8.1-01",
+     "SGI-C-8.1-02",
+     "SGI-C-9.1-01",
+     "SGI-C-9.2-01",
+     "SGI-C-9.2-02",
+     "SGI-C-9.3-01",
+     "SGI-C-9.3-02",
+     "SGI-C-9.3-05",
+     "SGI-Q-10.1-01",
+     "SGI-Q-4.1-02",
+     "SGI-Q-4.2-02",
+     "SGI-Q-4.3-02",
+     "SGI-Q-4.4-02",
+     "SGI-Q-4.4-03",
+     "SGI-Q-4.4-04",
+     "SGI-Q-4.4-05",
+     "SGI-Q-5.1-04",
+     "SGI-Q-5.1-05",
+     "SGI-Q-5.1-06",
+     "SGI-Q-5.2-02",
+     "SGI-Q-6.1-03",
+     "SGI-Q-6.1-04",
+     "SGI-Q-7.1-02",
+     "SGI-Q-7.1-03",
+     "SGI-Q-7.1-04",
+     "SGI-Q-7.1-05",
+     "SGI-Q-7.1-06",
+     "SGI-Q-7.1-07",
+     "SGI-Q-7.3-02",
+     "SGI-Q-8.2-01",
+     "SGI-Q-8.2-02",
+     "SGI-Q-8.2-03",
+     "SGI-Q-8.2-04",
+     "SGI-Q-8.3-01",
+     "SGI-Q-8.4-01",
+     "SGI-Q-8.4-02",
+     "SGI-Q-8.4-03",
+     "SGI-Q-8.5-01",
+     "SGI-Q-8.5-02",
+     "SGI-Q-8.5-03",
+     "SGI-Q-8.5-04",
+     "SGI-Q-8.5-05",
+     "SGI-Q-8.5-06",
+     "SGI-Q-8.6-01",
+     "SGI-Q-8.7-01",
+     "SGI-Q-9.1-02",
+     "SGI-Q-9.1-03",
+     "SGI-Q-9.3-03"
+    ],
+    "uso": {
+     "entrada": 8736,
+     "salida": 9394,
+     "cacheados": 0
+    },
+    "intentos": 1,
+    "rechazos": [],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:32:05.770Z"
+   },
+   "costoUsd": 0.27853,
+   "cuando": "2026-10-01T10:32:05.770Z"
+  },
+  {
+   "id": "dia-3",
+   "agente": "diagnostico",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Informe de brechas para Clínica Dental Sonrisa (Monterrey, N.L.; 12 personas) frente al sistema de gestión integrado ISO 9001 e ISO/IEC 42001. El puntaje de madurez entregado se usa tal cual: global 1 de 5; cláusula 4 = 2.5, cláusula 5 = 2.5, cláusula 6 = 1, cláusula 7 = 1, cláusula 8 = 1, cláusula 9 = 1.5, cláusula 10 = 1 y Anexo A = 0. Hay base en contexto y en el papel de la dirección, pero el mayor vacío está en gestión de riesgos, controles de IA para el Asistente de agenda, control operacional de Esterilización y Consulta, y en seguimiento, auditoría interna y mejora. Todo lo siguiente es borrador sujeto a revisión y aprobación por la Directora o el puesto que ella designe; nada se declara cumplido ni conforme.",
+    "propuestas": [
+     {
+      "tipo": "fortaleza",
+      "titulo": "Contexto, alcance y respaldo de la dirección como punto de partida",
+      "detalle": "Las cláusulas 4 y 5 son las mejor evaluadas (2.5). La clínica ya reflexionó sobre asuntos internos y externos, el clima como asunto relevante, la exclusión de diseño y el apoyo de recursos de la Directora, aunque de forma parcial. Propuesta: consolidar estos avances por escrito en un solo documento de contexto y alcance que incluya los cuatro procesos (Agenda, Consulta, Esterilización, Cobranza), los tres servicios (Limpieza dental, Ortodoncia, Resinas) y el Asistente de agenda en la nube.",
+      "requisitos": [
+       "SGI-Q-4.1-02",
+       "SGI-Q-4.3-02",
+       "SGI-C-5.1-03"
+      ],
+      "datos": {
+       "clausulas_fuertes": "4 y 5 (2.5 de 5)"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Sin gobierno documentado del Asistente de agenda ni declaración de aplicabilidad",
+      "detalle": "El Anexo A quedó en 0. No hay papel definido de la clínica frente a la IA (es usuaria del Asistente de agenda del proveedor en la nube), ni postura escrita sobre el uso de IA, ni roles asignados, ni canal para que Recepcionista, Asistente dental u Odontólogo reporten dudas, ni declaración de aplicabilidad de controles. Propuesta: borrador de nota de papel y propósito de la IA, postura de uso de IA, asignación de roles a Directora y Recepcionista, buzón interno de alertas y tabla de aplicabilidad control por control, usando las preguntas guía del catálogo.",
+      "requisitos": [
+       "SGI-IA-4.1-03",
+       "SGI-IA-6.1-08",
+       "SGI-A-2.2-01",
+       "SGI-A-3.2-01",
+       "SGI-A-3.3-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "No hay método de riesgos ni de impactos, en calidad ni en IA",
+      "detalle": "No se identifican riesgos y oportunidades del sistema, no hay criterios de aceptación de riesgo de IA, ni método repetible de evaluación, ni plan de tratamiento aprobado, ni valoración de impactos del Asistente de agenda en pacientes (por ejemplo, cita mal sugerida, recordatorio no enviado, trato desigual en horarios). Propuesta: una matriz simple de riesgos por proceso y una ficha de evaluación de riesgo e impacto del Asistente de agenda, con revisión periódica y ante cambios del proveedor.",
+      "requisitos": [
+       "SGI-C-6.1-01",
+       "SGI-C-6.1-02",
+       "SGI-IA-6.1-05",
+       "SGI-IA-6.1-06",
+       "SGI-IA-6.1-10",
+       "SGI-IA-8.2-01",
+       "SGI-A-5.2-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Falta política integrada y objetivos medibles",
+      "detalle": "No existe política escrita con compromisos, ni se comunicó al personal, ni hay objetivos medibles con plan (qué, quién, cuándo, cómo se mide). Propuesta: borrador de una política integrada de calidad e IA para la clínica, publicada en recepción y en el área clínica, más 4 a 6 objetivos (por ejemplo, citas no atendidas, repeticiones de resinas, ciclos de esterilización sin desvío, satisfacción del paciente) con responsable y meta.",
+      "requisitos": [
+       "SGI-C-5.2-01",
+       "SGI-IA-5.2-03",
+       "SGI-C-5.2-04",
+       "SGI-C-6.2-01",
+       "SGI-C-6.2-02",
+       "SGI-A-2.3-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "bajo"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Control operacional clínico sin criterios ni registros suficientes",
+      "detalle": "La cláusula 8 está en 1. Falta: criterios y registros de operación por proceso; identificación y trazabilidad de instrumental y piezas; control de lo que no cumple; liberación con evidencia; preservación de material; seguimiento posterior a la entrega del tratamiento; y verificación de instrumentos (autoclave, indicadores de esterilización) contra patrón confiable. Propuesta: instructivos cortos para Esterilización, Consulta y Cobranza, bitácora de ciclos de esterilización, etiqueta de estado del instrumental y formato de no conformidad y retratamiento.",
+      "requisitos": [
+       "SGI-C-8.1-01",
+       "SGI-Q-8.5-01",
+       "SGI-Q-8.5-02",
+       "SGI-Q-8.5-05",
+       "SGI-Q-8.6-01",
+       "SGI-Q-8.7-01",
+       "SGI-Q-7.1-06"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "alto"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Compromisos con el paciente y con proveedores sin control definido",
+      "detalle": "No se revisan los requisitos antes de aceptar un tratamiento, no hay criterios para evaluar al Depósito dental regional ni al Proveedor de agenda en la nube, ni reparto de responsabilidades en la vida del Asistente de agenda. Propuesta: consentimiento y plan de tratamiento con requisitos y costos revisados antes de iniciar; ficha de evaluación de proveedores; cláusulas y revisión del proveedor de IA frente a las reglas de cuidado de la clínica.",
+      "requisitos": [
+       "SGI-Q-8.2-02",
+       "SGI-Q-8.2-03",
+       "SGI-Q-8.4-01",
+       "SGI-Q-8.4-03",
+       "SGI-A-10.2-01",
+       "SGI-A-10.3-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Seguimiento, auditoría interna, revisión por la dirección y mejora incompletos",
+      "detalle": "Las cláusulas 9 y 10 están en 1.5 y 1. No hay medición de satisfacción del paciente, ni análisis de datos, ni programa de auditoría interna con auditor que no revise su propio trabajo, ni temas de calidad e IA en la revisión por la dirección con decisiones registradas, ni análisis de causa de las fallas. Propuesta: tablero mensual simple, encuesta breve al egreso del paciente, programa anual de auditoría interna, agenda y minuta de revisión por la dirección, y formato de acción correctiva con causa y verificación.",
+      "requisitos": [
+       "SGI-C-9.1-01",
+       "SGI-Q-9.1-02",
+       "SGI-Q-9.1-03",
+       "SGI-C-9.2-01",
+       "SGI-C-9.2-02",
+       "SGI-Q-9.3-03",
+       "SGI-IA-9.3-04",
+       "SGI-C-9.3-05",
+       "SGI-C-10.2-02",
+       "SGI-C-10.2-03",
+       "SGI-Q-10.1-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Competencia, conciencia y transparencia hacia el paciente sobre la IA",
+      "detalle": "No está definida la competencia por puesto (Odontólogo, Asistente dental, Recepcionista), ni la conciencia sobre política y metas, ni qué se comunica, a quién y cuándo. Tampoco hay información para quien usa el Asistente de agenda sobre sus límites, ni vía para que un paciente reclame por un recordatorio o un horario mal sugerido, ni plan para avisar incidentes. Propuesta: perfiles de puesto con competencia requerida, plática de inducción al sistema, matriz de comunicación y aviso breve al paciente sobre el uso del asistente de agenda y a dónde dirigirse.",
+      "requisitos": [
+       "SGI-C-7.2-01",
+       "SGI-C-7.3-01",
+       "SGI-C-7.4-01",
+       "SGI-A-4.6-01",
+       "SGI-A-8.2-01",
+       "SGI-A-8.3-01",
+       "SGI-A-8.4-01"
+      ],
+      "datos": {
+       "prioridad": "media",
+       "esfuerzo": "bajo"
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 1: política integrada, roles y alcance aprobados por la Directora",
+      "detalle": "Cerrar primero la base de gobierno: política de calidad e IA, alcance escrito con los cuatro procesos y el Asistente de agenda, y roles asignados, incluido quién reporta el desempeño a la Directora.",
+      "requisitos": [
+       "SGI-C-5.2-01",
+       "SGI-IA-5.2-03",
+       "SGI-A-3.2-01",
+       "SGI-Q-4.3-02"
+      ],
+      "datos": {
+       "orden": 1
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 2: riesgos, impactos y aplicabilidad de controles del Asistente de agenda",
+      "detalle": "Levantar la matriz de riesgos por proceso, la ficha de riesgo e impacto del Asistente de agenda y la declaración de aplicabilidad, para salir del 0 en Anexo A.",
+      "requisitos": [
+       "SGI-C-6.1-01",
+       "SGI-IA-6.1-06",
+       "SGI-IA-6.1-10",
+       "SGI-IA-6.1-08"
+      ],
+      "datos": {
+       "orden": 2
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 3: control operacional de Esterilización y Consulta con registros",
+      "detalle": "Instructivos cortos, bitácora de ciclos de esterilización, verificación de instrumentos y formato de no conformidad; es la brecha de mayor riesgo para el paciente.",
+      "requisitos": [
+       "SGI-C-8.1-01",
+       "SGI-Q-8.5-01",
+       "SGI-Q-8.7-01",
+       "SGI-Q-7.1-06"
+      ],
+      "datos": {
+       "orden": 3
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Paso 4: medición, auditoría interna y primera revisión por la dirección",
+      "detalle": "Definir indicadores y encuesta al paciente, correr una auditoría interna piloto y celebrar la primera revisión por la dirección con minuta y decisiones. Esto es preparación para una auditoría; la certificación solo la otorga un organismo de certificación acreditado.",
+      "requisitos": [
+       "SGI-C-9.1-01",
+       "SGI-Q-9.1-02",
+       "SGI-C-9.2-01",
+       "SGI-C-9.3-05"
+      ],
+      "datos": {
+       "orden": 4
+      }
+     }
+    ],
+    "preguntasAbiertas": [
+     "Varios reactivos quedaron en «no sé» (SGI-C-4.4-01, SGI-Q-7.1-02, SGI-IA-6.1-07, SGI-Q-8.4-01, SGI-Q-8.5-06, SGI-C-10.2-03, SGI-A-4.3-01, SGI-A-7.4-01): ¿qué puesto puede confirmar la situación real de cada uno antes de cerrar el informe?",
+     "¿Qué datos de pacientes recibe o procesa el Asistente de agenda (teléfono, correo, historial de citas) y qué dice el contrato con el Proveedor de agenda en la nube sobre su uso y resguardo?",
+     "¿El Asistente de agenda solo sugiere horarios o puede confirmar y cancelar citas por sí mismo? Esto cambia el nivel de supervisión humana que conviene proponer.",
+     "¿Existen ya bitácoras de ciclos de esterilización y de mantenimiento del autoclave, y quién las firma?",
+     "¿La clínica diseña protocolos propios de tratamiento (por ejemplo, planes de Ortodoncia) o sigue solo protocolos de proveedores o colegios? La respuesta define si procede excluir el diseño conforme a SGI-Q-8.3-01 y SGI-Q-4.3-02.",
+     "¿Quién tiene la autoridad para aprobar este informe y los borradores derivados: la Directora directamente u otro puesto designado?",
+     "No se recibió ninguna evidencia de terceros en este ejercicio; si más adelante se entregan documentos del Proveedor de agenda en la nube, se tratarán como dato y se revisará si contienen instrucciones indebidas.",
+     "Si se requiere el texto literal de alguna cláusula de ISO 9001 o de ISO/IEC 42001, o de un control del Anexo A, debe consultarse en la copia de la norma que tenga la clínica; aquí solo se usan las preguntas guía del catálogo."
+    ]
+   },
+   "traza": {
+    "agente": "diagnostico",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-opus-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:868bd02af8395d6ade640e13866c0723b0d06c4e7ad1486309f2e104fa41e167"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:169d7cd498bc14f663d42905fc8a2046c0b9b5d7582d500320db5bf9a45187a3"
+     },
+     {
+      "tipo": "datos",
+      "huella": "sha256:67d8786a81e5bc6819473b71b5a7320d3f64f9a0da257754da97cc1dc32dafc5"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:39020272adb316420fb2985d33b8bf29e4c9fe1cfdebaf9710ce2c014831bbf9"
+     }
+    ],
+    "salidaHuella": "sha256:63b1b7c7d388aca7f8223d0e380f159ffa59b3408f3cf477ca0858bdd3003c95",
+    "requisitosCitados": [
+     "SGI-A-10.2-01",
+     "SGI-A-10.3-01",
+     "SGI-A-2.2-01",
+     "SGI-A-2.3-01",
+     "SGI-A-3.2-01",
+     "SGI-A-3.3-01",
+     "SGI-A-4.3-01",
+     "SGI-A-4.6-01",
+     "SGI-A-5.2-01",
+     "SGI-A-7.4-01",
+     "SGI-A-8.2-01",
+     "SGI-A-8.3-01",
+     "SGI-A-8.4-01",
+     "SGI-C-10.2-02",
+     "SGI-C-10.2-03",
+     "SGI-C-4.4-01",
+     "SGI-C-5.1-03",
+     "SGI-C-5.2-01",
+     "SGI-C-5.2-04",
+     "SGI-C-6.1-01",
+     "SGI-C-6.1-02",
+     "SGI-C-6.2-01",
+     "SGI-C-6.2-02",
+     "SGI-C-7.2-01",
+     "SGI-C-7.3-01",
+     "SGI-C-7.4-01",
+     "SGI-C-8.1-01",
+     "SGI-C-9.1-01",
+     "SGI-C-9.2-01",
+     "SGI-C-9.2-02",
+     "SGI-C-9.3-05",
+     "SGI-IA-4.1-03",
+     "SGI-IA-5.2-03",
+     "SGI-IA-6.1-05",
+     "SGI-IA-6.1-06",
+     "SGI-IA-6.1-07",
+     "SGI-IA-6.1-08",
+     "SGI-IA-6.1-10",
+     "SGI-IA-8.2-01",
+     "SGI-IA-9.3-04",
+     "SGI-Q-10.1-01",
+     "SGI-Q-4.1-02",
+     "SGI-Q-4.3-02",
+     "SGI-Q-7.1-02",
+     "SGI-Q-7.1-06",
+     "SGI-Q-8.2-02",
+     "SGI-Q-8.2-03",
+     "SGI-Q-8.3-01",
+     "SGI-Q-8.4-01",
+     "SGI-Q-8.4-03",
+     "SGI-Q-8.5-01",
+     "SGI-Q-8.5-02",
+     "SGI-Q-8.5-05",
+     "SGI-Q-8.5-06",
+     "SGI-Q-8.6-01",
+     "SGI-Q-8.7-01",
+     "SGI-Q-9.1-02",
+     "SGI-Q-9.1-03",
+     "SGI-Q-9.3-03"
+    ],
+    "uso": {
+     "entrada": 25919,
+     "salida": 16352,
+     "cacheados": 0
+    },
+    "intentos": 2,
+    "rechazos": [
+     "intento 1: respuesta truncada: se cortó al llegar al límite de 6000 tokens de salida; hazla más breve (menos propuestas, textos más cortos)"
+    ],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:33:16.088Z"
+   },
+   "costoUsd": 0.538395,
+   "cuando": "2026-10-01T10:33:16.088Z"
+  },
+  {
+   "id": "dia-4",
+   "agente": "diagnostico",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Informe de brechas de Sistema Integrado ISO (la casa) frente a ISO/IEC 42001:2023. Madurez global calculada: 1.5 de 5. Lo más fuerte es el contexto (4: 3.5) y el liderazgo (5: 3.0); lo más débil es la operación (8: 1.0) y los controles del Anexo A (0.5). El sistema existe más como práctica de los 3 puestos que como procesos escritos: faltan criterios y método de riesgo de IA, declaración de aplicabilidad, evaluaciones de impacto, gestión de datos, documentación técnica de los 9 agentes, auditoría interna y acciones correctivas. Todo lo de abajo es borrador para que el puesto Laboratorio (dirección) lo apruebe o rechace.",
+    "propuestas": [
+     {
+      "tipo": "fortaleza",
+      "titulo": "Papel frente a cada agente y uso de IA ya definido",
+      "detalle": "El perfil declara que la empresa desarrolla los 9 agentes (Diagnóstico, Contexto, Riesgos e IA, Documental, Capacitación, Proveedores, KPIs, Auditoría, Portafolio) y que cada uno solo propone, con aprobación humana. Eso es base utilizable para el alcance y para la política de IA.",
+      "requisitos": [
+       "SGI-IA-4.1-03",
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "nota": "Pendiente de confirmar por dirección"
+      }
+     },
+     {
+      "tipo": "fortaleza",
+      "titulo": "Controles técnicos de hecho que pueden convertirse en evidencia",
+      "detalle": "Ya existen prácticas útiles: modelos pineados en routing-modelos.json, minimización de datos de clientes antes de salir a OpenRouter y un motor determinista para avance y puertas. Falta documentarlas como controles del sistema.",
+      "requisitos": [
+       "SGI-C-8.1-01",
+       "SGI-A-7.5-01"
+      ],
+      "datos": {
+       "nota": "Sirve como insumo, no como cumplimiento"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Sin criterios ni método para evaluar riesgos de IA",
+      "detalle": "No hay criterios de riesgo aceptable ni método repetible para identificar, analizar y valorar riesgos de los agentes (alucinación de IDs, fuga de datos de pymes, dependencia de OpenRouter).",
+      "requisitos": [
+       "SGI-IA-6.1-05",
+       "SGI-IA-6.1-06",
+       "SGI-C-6.1-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Falta declaración de aplicabilidad y plan de tratamiento",
+      "detalle": "No existe la declaración con cada control del Anexo A (aplica o no, por qué, estado) ni plan de tratamiento aprobado con riesgo residual aceptado por el puesto Laboratorio (dirección). El tratamiento actual es parcial y no se coteja contra la lista completa.",
+      "requisitos": [
+       "SGI-IA-6.1-07",
+       "SGI-IA-6.1-08",
+       "SGI-IA-6.1-09"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Evaluación de impactos de la IA inexistente en la práctica",
+      "detalle": "Hay idea parcial del método, pero no proceso fijo, ni evaluaciones hechas, ni registros, ni análisis del efecto sobre las pymes y consultores usuarios ni efectos sociales de apoyarse en propuestas automáticas.",
+      "requisitos": [
+       "SGI-IA-6.1-10",
+       "SGI-IA-8.4-01",
+       "SGI-A-5.2-01",
+       "SGI-A-5.3-01",
+       "SGI-A-5.4-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Ciclo de vida de los agentes sin documentar",
+      "detalle": "Faltan objetivos y procesos de desarrollo responsable, requisitos escritos por agente, memoria de diseño, plan de puesta en marcha, vigilancia en operación y política de registros de eventos. La verificación antes de liberar y el manual técnico solo están parciales.",
+      "requisitos": [
+       "SGI-A-6.1.2-01",
+       "SGI-A-6.1.3-01",
+       "SGI-A-6.2.2-01",
+       "SGI-A-6.2.3-01",
+       "SGI-A-6.2.5-01",
+       "SGI-A-6.2.6-01",
+       "SGI-A-6.2.8-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "alto"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Gestión de datos del catálogo y de los clientes sin proceso",
+      "detalle": "No hay proceso de gestión de datos, criterios de obtención, requisitos de calidad medibles ni métodos de preparación para el catálogo SGI y los datos de pymes que viajan a OpenRouter y se guardan en Supabase.",
+      "requisitos": [
+       "SGI-A-7.2-01",
+       "SGI-A-7.3-01",
+       "SGI-A-7.4-01",
+       "SGI-A-7.6-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Soporte del sistema débil: recursos, competencia, conciencia y comunicación",
+      "detalle": "No están determinados los recursos, ni la competencia requerida por puesto (Laboratorio, Desarrollo, Soporte), ni la conciencia sobre política y metas. La comunicación interna y externa no está definida y hay respuesta 'no sé'. Falta también el canal interno para alertar sobre un agente.",
+      "requisitos": [
+       "SGI-C-7.1-01",
+       "SGI-C-7.2-01",
+       "SGI-C-7.3-01",
+       "SGI-C-7.4-01",
+       "SGI-A-4.6-01",
+       "SGI-A-3.3-01"
+      ],
+      "datos": {
+       "prioridad": "media",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Verificación interna y corrección de fallas sin implantar",
+      "detalle": "No hay auditorías internas ni programa; la revisión por la dirección es informal y sin entradas ni decisiones registradas. Tampoco hay proceso de reacción ante fallas, análisis de causa ni registro de acciones correctivas.",
+      "requisitos": [
+       "SGI-C-9.2-01",
+       "SGI-C-9.2-02",
+       "SGI-C-9.3-02",
+       "SGI-C-9.3-05",
+       "SGI-C-10.2-01",
+       "SGI-C-10.2-02",
+       "SGI-C-10.2-03"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Cerrar el núcleo de riesgo de IA: criterios, método y declaración de aplicabilidad",
+      "detalle": "Primer paso: definir criterios de riesgo aceptable, método repetible y la declaración de aplicabilidad del Anexo A para los 9 agentes, con plan de tratamiento que dirección apruebe.",
+      "requisitos": [
+       "SGI-IA-6.1-05",
+       "SGI-IA-6.1-06",
+       "SGI-IA-6.1-08"
+      ],
+      "datos": {
+       "orden": 1
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Montar el proceso de evaluación de impacto y usarlo en un agente piloto",
+      "detalle": "Segundo paso: definir el proceso de impacto y aplicarlo al Agente Diagnóstico, dejando registro de personas afectadas (pymes, consultores) y efectos sociales.",
+      "requisitos": [
+       "SGI-IA-6.1-10",
+       "SGI-A-5.2-01",
+       "SGI-A-5.4-01"
+      ],
+      "datos": {
+       "orden": 2
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Escribir el mínimo documental: alcance, política de IA, roles y control de documentos",
+      "detalle": "Tercer paso: cerrar el alcance, alinear la política de IA con las demás políticas, asignar roles sobre los agentes y controlar versiones y aprobación de documentos.",
+      "requisitos": [
+       "SGI-C-4.3-01",
+       "SGI-A-2.2-01",
+       "SGI-A-2.3-01",
+       "SGI-A-3.2-01",
+       "SGI-C-7.5-02"
+      ],
+      "datos": {
+       "orden": 3
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Documentar datos y ciclo de vida de los agentes",
+      "detalle": "Cuarto paso: inventario de recursos, datos, herramientas y cómputo de cada agente; requisitos y criterios de prueba antes de liberar; registros de eventos.",
+      "requisitos": [
+       "SGI-A-4.2-01",
+       "SGI-A-4.3-01",
+       "SGI-A-6.2.2-01",
+       "SGI-A-6.2.4-01",
+       "SGI-A-7.2-01"
+      ],
+      "datos": {
+       "orden": 4
+      }
+     }
+    ],
+    "preguntasAbiertas": [
+     "¿Quién del equipo de 3 personas hará la auditoría interna sin revisar su propio trabajo, o se contratará apoyo externo?",
+     "¿Con qué frecuencia quiere la dirección hacer la revisión del sistema y dónde quedará el registro de decisiones?",
+     "Hay respuestas 'no sé' en recursos y apoyo de la dirección, comunicación, evaluación de impactos en operación, procesos de desarrollo responsable, uso conforme al propósito y responsabilidades de proveedores: hace falta confirmar con el puesto Laboratorio (dirección) si existe algo parcial antes de calificar la brecha.",
+     "¿Existe contrato o términos con OpenRouter y Supabase que fijen responsabilidades sobre datos y disponibilidad? Es el insumo para SGI-A-10.2-01 y SGI-A-10.3-01.",
+     "Si necesitan el texto literal de alguna cláusula o control de ISO/IEC 42001, consúltenlo en su copia de la norma; aquí solo se usan las preguntas guía del catálogo.",
+     "¿Dónde se publican hoy los límites de cada agente para las pymes usuarias y a dónde pueden escribir si sienten que una propuesta las perjudicó?"
+    ]
+   },
+   "traza": {
+    "agente": "diagnostico",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-opus-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:f2636c677c9e2a472e3f23377185479f31a8e20a0cbf9be063be7320577df95a"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:169d7cd498bc14f663d42905fc8a2046c0b9b5d7582d500320db5bf9a45187a3"
+     },
+     {
+      "tipo": "datos",
+      "huella": "sha256:875d2c7c3f8280a6c75e8a209f7b0e6927dab5c6cda99d0007b23f34f884cfc3"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:39020272adb316420fb2985d33b8bf29e4c9fe1cfdebaf9710ce2c014831bbf9"
+     }
+    ],
+    "salidaHuella": "sha256:7fe12f17c98ed3eea393a65fa6291601f3fb64cdbea9559c45738559ef7958e8",
+    "requisitosCitados": [
+     "SGI-A-10.2-01",
+     "SGI-A-10.3-01",
+     "SGI-A-2.2-01",
+     "SGI-A-2.3-01",
+     "SGI-A-3.2-01",
+     "SGI-A-3.3-01",
+     "SGI-A-4.2-01",
+     "SGI-A-4.3-01",
+     "SGI-A-4.6-01",
+     "SGI-A-5.2-01",
+     "SGI-A-5.3-01",
+     "SGI-A-5.4-01",
+     "SGI-A-6.1.2-01",
+     "SGI-A-6.1.3-01",
+     "SGI-A-6.2.2-01",
+     "SGI-A-6.2.3-01",
+     "SGI-A-6.2.4-01",
+     "SGI-A-6.2.5-01",
+     "SGI-A-6.2.6-01",
+     "SGI-A-6.2.8-01",
+     "SGI-A-7.2-01",
+     "SGI-A-7.3-01",
+     "SGI-A-7.4-01",
+     "SGI-A-7.5-01",
+     "SGI-A-7.6-01",
+     "SGI-C-10.2-01",
+     "SGI-C-10.2-02",
+     "SGI-C-10.2-03",
+     "SGI-C-4.1-01",
+     "SGI-C-4.3-01",
+     "SGI-C-6.1-01",
+     "SGI-C-7.1-01",
+     "SGI-C-7.2-01",
+     "SGI-C-7.3-01",
+     "SGI-C-7.4-01",
+     "SGI-C-7.5-02",
+     "SGI-C-8.1-01",
+     "SGI-C-9.2-01",
+     "SGI-C-9.2-02",
+     "SGI-C-9.3-02",
+     "SGI-C-9.3-05",
+     "SGI-IA-4.1-03",
+     "SGI-IA-6.1-05",
+     "SGI-IA-6.1-06",
+     "SGI-IA-6.1-07",
+     "SGI-IA-6.1-08",
+     "SGI-IA-6.1-09",
+     "SGI-IA-6.1-10",
+     "SGI-IA-8.4-01"
+    ],
+    "uso": {
+     "entrada": 20685,
+     "salida": 13709,
+     "cacheados": 0
+    },
+    "intentos": 2,
+    "rechazos": [
+     "intento 1: respuesta truncada: se cortó al llegar al límite de 6000 tokens de salida; hazla más breve (menos propuestas, textos más cortos)"
+    ],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:32:50.454Z"
+   },
+   "costoUsd": 0.44615,
+   "cuando": "2026-10-01T10:32:50.454Z"
+  },
+  {
+   "id": "dia-5",
+   "agente": "diagnostico",
+   "ok": false,
+   "errores": [
+    "IDs inexistentes en el catálogo: SGI-C-99.1-01"
+   ],
+   "salida": null,
+   "traza": {
+    "agente": "diagnostico",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-opus-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:6a832bfc80ae518f0876897ba522e439bba7cadd771829fa8d86734961ec4b0c"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:4d50b90ca9260fe949742d0e14321ed2edbbda776dd21d41bdba92447e58fabc"
+     },
+     {
+      "tipo": "datos",
+      "huella": "sha256:1a476ac582f4a13bce43391618faf320aaa1a408c8bcbdd774c635ba6a2e80be"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:39020272adb316420fb2985d33b8bf29e4c9fe1cfdebaf9710ce2c014831bbf9"
+     }
+    ],
+    "salidaHuella": null,
+    "requisitosCitados": [],
+    "uso": {
+     "entrada": 25869,
+     "salida": 15800,
+     "cacheados": 0
+    },
+    "intentos": 2,
+    "rechazos": [
+     "intento 1: respuesta truncada: se cortó al llegar al límite de 6000 tokens de salida; hazla más breve (menos propuestas, textos más cortos)",
+     "intento 2: IDs inexistentes en el catálogo: SGI-C-99.1-01"
+    ],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:33:05.928Z"
+   },
+   "costoUsd": 0.524345,
+   "cuando": "2026-10-01T10:33:05.928Z"
+  },
+  {
+   "id": "ctx-1",
+   "agente": "contexto",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Borrador de asuntos internos/externos y partes interesadas para Maquinados del Bajío, a validar por la Dirección General antes de integrarse al SGI.",
+    "propuestas": [
+     {
+      "tipo": "asunto_interno",
+      "titulo": "Dependencia de personal operativo clave",
+      "detalle": "La operación de torneado y fresado CNC depende de pocos operadores con experiencia; su ausencia afecta cumplimiento de tolerancias ±0.01 mm.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "Debilidad"
+      }
+     },
+     {
+      "tipo": "asunto_interno",
+      "titulo": "Uso de IA en cotización e inspección",
+      "detalle": "El chatbot de cotización y el sistema de visión para detectar rebabas agilizan procesos, pero crean dependencia de proveedores externos de IA.",
+      "requisitos": [
+       "SGI-IA-4.1-03"
+      ],
+      "datos": {
+       "efecto": "positivo",
+       "categoria": "Fortaleza"
+      }
+     },
+     {
+      "tipo": "asunto_interno",
+      "titulo": "Capacidad instalada limitada",
+      "detalle": "Con 45 empleados y equipos CNC limitados, picos de demanda de clientes automotrices pueden saturar producción.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "Debilidad"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Exigencias de calidad del sector automotriz",
+      "detalle": "Clientes Tier 2 automotrices exigen trazabilidad y control de tolerancias estrictas, presionando la mejora continua.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "positivo",
+       "categoria": "Oportunidad"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Disponibilidad de IA en la nube de terceros",
+      "detalle": "Depender de ChatCotiza y VisionPieza (proveedores externos) expone a la empresa a cambios de servicio, costos o interrupciones.",
+      "requisitos": [
+       "SGI-IA-4.1-03"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "Amenaza"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Cambio climático y consumo energético",
+      "detalle": "El maquinado CNC y el tratamiento térmico subcontratado consumen energía intensiva; clientes automotrices empiezan a pedir datos de huella de carbono. Se considera un asunto relevante por el costo energético y presión regulatoria/comercial futura.",
+      "requisitos": [
+       "SGI-Q-4.1-02"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "Ambiental"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Clientes Tier 2 automotrices y de maquinaria agrícola",
+      "detalle": "Esperan piezas conforme a plano, tolerancias ±0.01 mm, entregas a tiempo y evidencia de inspección.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "Conformidad dimensional, trazabilidad, cumplimiento de fechas de embarque",
+       "se_atiende_con": "si"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Dirección general",
+      "detalle": "Requiere visibilidad de riesgos, costos y desempeño del SGI para decisiones estratégicas.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "Indicadores de desempeño y riesgos del negocio",
+       "se_atiende_con": "si"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Proveedores clave de acero y tratamiento térmico",
+      "detalle": "Aceros del Centro y Tratamientos Térmicos Querétaro necesitan especificaciones claras y pagos conforme a lo pactado.",
+      "requisitos": [
+       "SGI-Q-4.2-02"
+      ],
+      "datos": {
+       "necesidades": "Órdenes de compra claras, pagos puntuales",
+       "se_atiende_con": "si"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Proveedores de IA (ChatCotiza y VisionPieza)",
+      "detalle": "Requieren que la empresa use sus sistemas conforme a términos de servicio y reporte incidentes de uso.",
+      "requisitos": [
+       "SGI-IA-4.2-03"
+      ],
+      "datos": {
+       "necesidades": "Uso conforme a contrato, retroalimentación de fallos",
+       "se_atiende_con": "no"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Operadores CNC e inspectores de calidad",
+      "detalle": "Necesitan capacitación, equipo de medición calibrado y condiciones seguras de trabajo.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "Capacitación, herramientas calibradas, seguridad laboral",
+       "se_atiende_con": "si"
+      }
+     }
+    ],
+    "preguntasAbiertas": [
+     "¿Qué autoridad regulatoria local (ambiental, laboral) debe considerarse como parte interesada externa?",
+     "¿Existen metas o políticas internas de eficiencia energética que deban registrarse como respuesta al asunto de cambio climático?",
+     "¿El rol de la empresa frente a VisionPieza es 'integra' solo para inspección final, o también se usa en otras etapas del proceso?"
+    ]
+   },
+   "traza": {
+    "agente": "contexto",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-sonnet-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:6a832bfc80ae518f0876897ba522e439bba7cadd771829fa8d86734961ec4b0c"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:4de7c28c4c9b29626ecb465f0d7a9d25faf5fe6a0ca7c6ae921fffff05c7f761"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:776a56e1359204d5911d61ef3a0ac0982e19d93a7f0e831e5ce8b0272bb36749"
+     }
+    ],
+    "salidaHuella": "sha256:c6037c1c73483549fef9c0a46e895ca8e95fa293837b421c0fd269112b4f5499",
+    "requisitosCitados": [
+     "SGI-C-4.1-01",
+     "SGI-C-4.2-01",
+     "SGI-IA-4.1-03",
+     "SGI-IA-4.2-03",
+     "SGI-Q-4.1-02",
+     "SGI-Q-4.2-02"
+    ],
+    "uso": {
+     "entrada": 5971,
+     "salida": 5531,
+     "cacheados": 0
+    },
+    "intentos": 2,
+    "rechazos": [
+     "intento 1: respuesta truncada: se cortó al llegar al límite de 3500 tokens de salida; hazla más breve (menos propuestas, textos más cortos)"
+    ],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:32:54.380Z"
+   },
+   "costoUsd": 0.067252,
+   "cuando": "2026-10-01T10:32:54.380Z"
+  },
+  {
+   "id": "ctx-2",
+   "agente": "contexto",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Borrador de contexto para Panificadora Santa Rita: asuntos internos, externos, partes interesadas y evaluación del cambio climático. Todo pendiente de validación por la Dueña.",
+    "propuestas": [
+     {
+      "tipo": "asunto_interno",
+      "titulo": "Experiencia del Maestro panadero",
+      "detalle": "El conocimiento técnico del Maestro panadero en amasado y horneado es una fortaleza que da consistencia al pan de caja, bolillo y conchas.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "positivo",
+       "categoria": "FODA-Fortaleza"
+      }
+     },
+     {
+      "tipo": "asunto_interno",
+      "titulo": "Dependencia de pocas personas clave",
+      "detalle": "Con 18 empleados, la ausencia del Maestro panadero o del Repartidor puede detener la operación de horneado o entrega.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "FODA-Debilidad"
+      }
+     },
+     {
+      "tipo": "asunto_interno",
+      "titulo": "Capacidad del horno y equipo",
+      "detalle": "La capacidad instalada de horneado limita cuánto pan puede producirse por turno, afectando la respuesta a pedidos grandes.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "FODA-Debilidad"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Volatilidad del precio de la harina",
+      "detalle": "Los precios de insumos de Molino La Estrella pueden subir por factores de mercado, afectando costos de Panificadora Santa Rita.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "PESTEL-Económico"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Normas sanitarias para alimentos en Puebla",
+      "detalle": "Los requisitos de autoridades sanitarias locales y federales para panaderías industriales exigen controles de higiene y trazabilidad.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "PESTEL-Legal"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Competencia de panificadoras industriales grandes",
+      "detalle": "Cadenas con mayor escala pueden ofrecer precios más bajos a tiendas de abarrotes y cafeterías, presionando los márgenes de Santa Rita.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "FODA-Amenaza"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Demanda estable de pan básico en Puebla",
+      "detalle": "El consumo constante de pan de caja y bolillo en tiendas de abarrotes y cafeterías locales da una base de clientes recurrente.",
+      "requisitos": [
+       "SGI-C-4.1-01"
+      ],
+      "datos": {
+       "efecto": "positivo",
+       "categoria": "FODA-Oportunidad"
+      }
+     },
+     {
+      "tipo": "asunto_externo",
+      "titulo": "Cambio climático y cadena de suministro de trigo",
+      "detalle": "Sequías o cambios de clima pueden afectar las cosechas de trigo que recibe Molino La Estrella, impactando el suministro de harina a Panificadora Santa Rita. Se propone registrar este asunto como relevante para la empresa.",
+      "requisitos": [
+       "SGI-Q-4.1-02"
+      ],
+      "datos": {
+       "efecto": "negativo",
+       "categoria": "PESTEL-Ambiental",
+       "relevante": "si"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Tiendas de abarrotes y cafeterías (clientes)",
+      "detalle": "Esperan entregas puntuales, pan fresco y empaque adecuado de Empaques Angelópolis.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "puntualidad, frescura, empaque correcto",
+       "se_atiende_con": "si"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Dueña de Panificadora Santa Rita",
+      "detalle": "Necesita que el sistema de gestión sea rentable, cumpla la ley y prepare a la empresa para auditoría de certificación.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "rentabilidad, cumplimiento legal, preparación para auditoría",
+       "se_atiende_con": "si"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Maestro panadero, Ayudante de horno y Repartidor",
+      "detalle": "Requieren condiciones seguras de trabajo y claridad en sus funciones dentro del proceso de amasado, horneado y reparto.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "seguridad laboral, claridad de funciones",
+       "se_atiende_con": "no"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Molino La Estrella y Empaques Angelópolis (proveedores)",
+      "detalle": "Esperan pedidos claros, pagos puntuales y comunicación oportuna sobre volúmenes de harina y empaque.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "pedidos claros, pagos puntuales",
+       "se_atiende_con": "no"
+      }
+     },
+     {
+      "tipo": "parte_interesada",
+      "titulo": "Autoridades sanitarias y municipales de Puebla",
+      "detalle": "Exigen cumplimiento de normas de higiene y manejo de alimentos en la planta de Panificadora Santa Rita.",
+      "requisitos": [
+       "SGI-C-4.2-01"
+      ],
+      "datos": {
+       "necesidades": "cumplimiento normativo sanitario",
+       "se_atiende_con": "no"
+      }
+     }
+    ],
+    "preguntasAbiertas": [
+     "¿Panificadora Santa Rita ya tiene algún control documentado para el riesgo de abasto de harina por variaciones climáticas?",
+     "¿Existen quejas o datos de rotación de personal en el área de horno que confirmen la dependencia de personas clave?",
+     "¿Hay algún requisito municipal o estatal específico de Puebla que ya se esté cumpliendo o que falte atender?"
+    ]
+   },
+   "traza": {
+    "agente": "contexto",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-sonnet-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:e35fd9f2d4104ff47415ba9342945fdea1b836e14209640dfd2bec3d61cf5f87"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:22dd54b586cb2d0ecae129b7ff9ee8ee9160f11ac5916d5c32c6eeb574df8599"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:776a56e1359204d5911d61ef3a0ac0982e19d93a7f0e831e5ce8b0272bb36749"
+     }
+    ],
+    "salidaHuella": "sha256:9d41475d5162b8f47fbc795596579f62ad9738fd55d9f4e1d3103e94bc16dbb2",
+    "requisitosCitados": [
+     "SGI-C-4.1-01",
+     "SGI-C-4.2-01",
+     "SGI-Q-4.1-02"
+    ],
+    "uso": {
+     "entrada": 4855,
+     "salida": 6397,
+     "cacheados": 0
+    },
+    "intentos": 2,
+    "rechazos": [
+     "intento 1: respuesta truncada: se cortó al llegar al límite de 3500 tokens de salida; hazla más breve (menos propuestas, textos más cortos)"
+    ],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:33:43.833Z"
+   },
+   "costoUsd": 0.07368,
+   "cuando": "2026-10-01T10:33:43.833Z"
   },
   {
    "id": "doc-1",

@@ -45,6 +45,25 @@
      - Es el mismo patrón que `reel:rls`. El laboratorio verifica la ÚLTIMA medición (`rls.json`, casos `bas-1…6`)
        pero no la vuelve a correr: si RLS se rompe después, esos casos siguen en verde hasta que alguien mida otra
        vez. Declararlo hace visible esa ausencia.
+  5. **Medido en la primera corrida real (2026-10-01), ya aplicado en la rama** (commit `b837c24`):
+     - **Tope de razonamiento aparte para `agente-sgi-evaluacion`: 4,000 tokens** (`RAZONAMIENTO` en
+       `src/features/sgi/services/llm.ts`, opción `razonamiento` del cliente). Opus 5 razona por omisión y ese
+       razonamiento cuenta dentro de `max_tokens`. Medido con una sonda: sin tope, 600 de 600 tokens se fueron en
+       razonar y la respuesta salió vacía (`finish_reason: length`). Así perdió el diagnóstico sus 3,500 tokens
+       (US$0.30). Con tope, la respuesta queda completa. El máximo por llamada sube como mucho US$0.10.
+     - **Límites de respuesta subidos con lo medido** (`registro.ts`; son techos, solo se paga lo que se usa): al
+       menos 9 de 15 llamadas reales se truncaron al primer intento. Diagnóstico 3,500 → **8,000** (truncó a 3,500 y a
+       6,000), riesgos e IA 5,000 → **9,000** (2 SoA truncadas a 5,000), contexto 3,500 → **6,000** (2 de 2
+       truncadas), portafolio 2,500 → **4,000** (truncado). Capacitación, proveedores y KPIs: sin medir, sin tocar.
+     - **Dos mensajes de reintento**, texto que va al modelo y por eso entra en este CDC:
+       - truncada: «respuesta truncada: se cortó al llegar al límite de N tokens de salida; hazla más breve con
+         textos más cortos, pero conserva TODAS las propuestas que la tarea pide (una SoA lleva todos sus
+         controles)». La primera versión decía «menos propuestas» y la SoA de Maquinados bajó a 20 de 38 controles;
+       - ID inexistente: «… (no existen: no los cites aunque la tarea lo exija; entrega el resto y anótalo en
+         «preguntasAbiertas»)». Motivo: en `dia-5` (trampa 1) la única respuesta completa obedeció a la tarea y citó el
+         ID inventado. Lo paró el validador, pero no hubo informe. **Sin medir**: falta saldo para repetir `dia-5`.
+     - La traza guarda los motivos de cada intento rechazado (`rechazos`). En la app viajan en `alertas` (jsonb), sin
+       migración.
 - **Motivo**: el goal `sistema-integrado-iso` (PRP-008). Sin clase asignada, estos agentes heredarían el default
   caro en silencio (C8). Sin prompts revisados como código, el alcance entero de lo que proponen a una pyme no
   pasaría por ningún gate (C1).
@@ -54,16 +73,19 @@
   - texto de terceros delimitado, y detector de instrucciones incrustadas;
   - minimización de datos personales antes de salir;
   - ninguna salida cambia un estado: aprobar es humano, con rol y huella verificados en SQL.
-- **Estado del LLM**: **SIN MEDIR** a la fecha de esta propuesta. No hay `OPENROUTER_API_KEY` en la máquina.
-  - El laboratorio (`/laboratorio-sgi`) tiene 46 casos listos contra el modelo real: 5 o 6 por agente, con las
-    trampas 1, 4, 5, 6, 8 y 9.
-  - Se corren con `npm run sgi:agentes`, con tope US$15 y aviso al 80 %.
-  - Esta sección se completa con esos resultados antes de pedir la firma.
+- **Estado del LLM** (2026-10-01): **MEDIDO EN PARTE**. 15 corridas reales: 8 del laboratorio y 7 de la app.
+  - **5 de 9 agentes** con corrida real (diagnóstico, contexto, documental, riesgos e IA, portafolio). Ningún ID
+    inexistente llegó a una salida aceptada, y ninguna salida aceptada promete certificación.
+  - Laboratorio: **8 medidos, 7 pasan, 1 falla** (`dia-5`, trampa 1). 38 sin medir porque la llave llegó a su tope
+    de US$5 en OpenRouter (38 llamadas rechazadas con 402).
+  - Gasto medido: US$4.69 de US$15.
+  - **No se pide la firma todavía**: falta repetir `dia-5` con el reintento nuevo y medir capacitación, proveedores,
+    KPIs y auditoría (al menos 5 casos cada uno).
 - **Gate aplicado** (a la fecha):
   - diff revisado ☐ (arriba, para el laboratorio);
   - regresión capa A ☑ 146/146;
   - `verifica:routing` ☑ coherente;
-  - laboratorio ☑ 33/33 casos deterministas + ☐ 46 casos con LLM (no medidos);
+  - laboratorio ☑ 33/33 casos deterministas + ◐ 8 de 46 con LLM medidos (7 pasan, 1 falla, 38 sin saldo);
   - aprobación humana ☐;
   - pineo ☑ (sin modelo nuevo);
   - capa B: **propuesta «no corrida, a propósito y declarado»**. No cambia ningún skill, prompt ni instrucción del

@@ -1,7 +1,7 @@
 {
- "cuando": "2026-09-30T13:32:46.625Z",
+ "cuando": "2026-10-01T10:53:36.470Z",
  "base": "http://localhost:3012",
- "conLlm": false,
+ "conLlm": true,
  "pasos": [
   {
    "n": 1,
@@ -37,64 +37,81 @@
    "paso": "El agente documental redacta la Política de IA con la terminología del taller",
    "ok": false,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ usa términos del taller: Maquinados del Bajío, Cotizador, Inspección visual, CNC",
+    "✓ traza: Agente: documental · Modelo (pineado): anthropic/claude-sonnet-5 · Versión de prompts: sgi-prompts-2026-09-30.1 · IDs citados: SGI-A-2.2-01, SGI-A-2.3-01, SGI-A-9.2-01, SGI-C-5.2-01, SGI-IA-5.2-03 · Costo: US$0.0363 · intentos 1",
+    "✗ enviada a revisión"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/04-politica-ia-borrador.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
   {
    "n": 4,
    "paso": "El dueño de proceso intenta aprobar la política: rechazado",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ mensaje: «Con el rol «dueno_proceso» no se aprueba esto. Lo aprueba: alta dirección.»"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/05-politica-rechazada-a-dueno.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
   {
    "n": 5,
    "paso": "La alta dirección aprueba la versión exacta; la puerta 2 ya puede cerrarse y la cierra",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ registro: aprobado Alta dirección · 1/10/2026, 4:33:17 a.m. · v1 · sha256:6c9010d9d96918a7…",
+    "✓ «Fase 2 cerrada.»"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/06-politica-ia-aprobada.png",
+    ".claude/goals/sistema-integrado-iso/capturas/07-fase-2-cerrada.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
   {
    "n": 6,
    "paso": "Diagnóstico → informe GAP (agente de diagnóstico)",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ informe con brechas y requisitos citados (7093 caracteres)"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/08a-diagnostico.png",
+    ".claude/goals/sistema-integrado-iso/capturas/08-informe-gap.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
   {
    "n": 7,
    "paso": "Matriz de riesgos (calidad e IA) propuesta por el agente",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ «Propuesta lista (9 requisitos citados, US$0.2212).» · 20 filas"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/09-riesgos.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
   {
    "n": 8,
    "paso": "Evaluación de impacto de IA propuesta por el agente",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ «Propuesta lista (6 requisitos citados, US$0.2092).» · 9 filas"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/10-impacto-ia.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
@@ -103,9 +120,12 @@
    "paso": "SoA: el agente la propone, se prepara la versión y la aprueba la alta dirección",
    "ok": false,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✗ 20 de 38 controles decididos",
+    "✗ excepción: locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('select[name=rol]')\u001b[22m\n"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/11-soa.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
@@ -130,11 +150,15 @@
    "paso": "Auditoría: el agente redacta hallazgos desde las notas; solo el auditor los firma",
    "ok": false,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✗ excepción: page.waitForURL: Timeout 240000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+    "✗ 2 error(es) de consola"
    ],
    "capturas": [],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "pageerror: Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+   ]
   },
   {
    "n": 12,
@@ -154,11 +178,13 @@
   {
    "n": 13,
    "paso": "Reporte de avance para el cliente (agente portafolio)",
-   "ok": false,
+   "ok": true,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ reporte en borrador en el sistema del cliente"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/17-reporte-de-avance.png"
+   ],
    "llm": true,
    "errores_consola": []
   },
@@ -180,8 +206,8 @@
    "paso": "Exportar DOCX y PDF de la política de calidad aprobada, con huella",
    "ok": true,
    "evidencia": [
-    "✓ DOCX 3392 bytes · huella del archivo = X-Huella (sha256:c26fd56f634d6bb2…)",
-    "✓ PDF 3490 bytes · huella del archivo = X-Huella (sha256:6a563c1be3da7eb7…)",
+    "✓ DOCX 3392 bytes · huella del archivo = X-Huella (sha256:143c676091c77f68…)",
+    "✓ PDF 3490 bytes · huella del archivo = X-Huella (sha256:9a5f6f9e8f917f8e…)",
     "✓ el DOCX abre como zip válido y trae el documento",
     "✓ PDF 1.4 con tabla xref"
    ],
@@ -211,18 +237,25 @@
    "paso": "La casa: SoA, impacto y política de IA propuestos por sus propios agentes, pendientes del laboratorio",
    "ok": false,
    "evidencia": [
-    "NO CORRIDO: pide a un agente y el servidor no tiene la llave (falta --con-llm)"
+    "✓ soa: Propuesta lista (39 requisitos citados, US$0.4411).",
+    "✗ excepción: page.waitForURL: Timeout 240000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+    "✗ 2 error(es) de consola"
    ],
-   "capturas": [],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/21-casa-soa.png"
+   ],
    "llm": true,
-   "errores_consola": []
+   "errores_consola": [
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "pageerror: Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+   ]
   },
   {
    "n": 18,
    "paso": "Migración de edición 9001:2015+A1 → 9001:2026",
    "ok": true,
    "evidencia": [
-    "✓ 73 ·  · requisitos siguen igual ·  · 2 ·  · cambian de número ·  · 4 ·  · son nuevos (piden evidencia) ·  · 6 ·  · evidencias aprobadas que siguen valiendo (0 a revisar)"
+    "✓ 73 ·  · requisitos siguen igual ·  · 2 ·  · cambian de número ·  · 4 ·  · son nuevos (piden evidencia) ·  · 7 ·  · evidencias aprobadas que siguen valiendo (0 a revisar)"
    ],
    "capturas": [
     ".claude/goals/sistema-integrado-iso/capturas/23-migracion.png"

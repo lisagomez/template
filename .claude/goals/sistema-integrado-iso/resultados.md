@@ -1,10 +1,11 @@
 # Resultados — goal `sistema-integrado-iso` (rama `app/iso`)
 
-Estado al **2026-09-30**. Lo que dice «pendiente» lo está de verdad: **no hay `OPENROUTER_API_KEY`** en la máquina y
-ninguna corrida real de agente ocurrió todavía. No se simuló ninguna.
+Estado al **2026-10-01**. La llave llegó (`OPENROUTER_API_KEY`: presente, 73 caracteres, prefijo `sk-o…`) y hubo
+**corridas reales**: 8 grabadas en el laboratorio y 7 desde la app en el recorrido. Se detuvo de nuevo por **saldo**:
+la llave tiene un tope propio de US$5 en OpenRouter (quedan US$0.18) y la cuenta tiene US$0.47. El tope del goal
+(US$15) no se alcanzó: el gasto medido es US$4.69. Nada se simuló: lo que dice «no medido» no corrió.
 
-Post-mortem (Fase 5, detenido por la red de seguridad): `post-mortem.md`. El grafo tiene ahora el nodo `llave` en gris,
-que es de donde cuelgan los cinco nodos en ámbar.
+Post-mortem: `post-mortem.md` (escrito al detenerse el 30/09; la sección 6 suma lo aprendido con las corridas reales).
 
 ## Definición de hecho, punto por punto
 
@@ -15,13 +16,13 @@ que es de donde cuelgan los cinco nodos en ámbar.
 | 3 | Supabase local + aislamiento | ✓ | `supabase@2.118.0`, 7 migraciones aplicadas, `npm run sgi:rls` **42/42** (`public/laboratorio-sgi/rls.json`) |
 | 4 | Catálogo | ✓ (borrador) | 130 requisitos; L2 verde; L1 **no medido** declarado (sin copia licenciada); `revision-catalogo.md` con respuesta y correcciones aplicadas |
 | 5 | Motor | ✓ | El acta subió 9001 de 11.6 % a 17.4 % y 42001 de 5.9 % a 10.6 % en la app real (recorrido, paso 2). Puerta con rol equivocado rechazada (mot-3, bas-3). Migración: 73 siguen, 2 remapeados, 4 nuevos |
-| 6 | Llave enmascarada y corrida real por agente | **✗ PENDIENTE** | `OPENROUTER_API_KEY: AUSENTE`. El corredor (`npm run sgi:agentes`) está listo y se niega a inventar |
-| 7 | Capturas de Playwright | ◐ | 9/9 pasos deterministas contra el build de producción, sin errores de consola. 10 pasos con agente sin correr: informe GAP, política de IA aprobada y rechazada a otro rol, riesgos, impacto, SoA, hallazgo del agente, reporte |
-| 8 | La casa | ◐ | Inventario de sus 9 agentes (paso 16). Su SoA, su impacto y su política de IA esperan la corrida real |
-| 9 | Laboratorio | ◐ | 33/33 deterministas en verde + L8 (32 archivos). 46 casos con LLM «no medidos». Las 10 trampas tienen caso |
+| 6 | Llave enmascarada y corrida real por agente | ◐ | Llave: presente, largo 73, prefijo `sk-o`. **5 de 9 agentes con corrida real**, cada una con IDs citados (todos existen: el validador y el laboratorio los comprueban), traza (modelo pineado, versión de prompts, huellas de insumos, intentos, rechazos) y costo: diagnóstico (6), contexto (2), documental (2), riesgos e IA (4: matriz, impacto, SoA de Maquinados y de la casa), portafolio (1). **Sin medir por saldo**: capacitación, proveedores, KPIs y auditoría (la de auditoría se intentó en el paso 11 y el proveedor la rechazó con 402) |
+| 7 | Capturas de Playwright | ◐ | **15/19 pasos en verde** con agentes reales, contra el build de producción: roadmap con %, informe GAP (paso 6), política de IA rechazada al dueño de proceso y aprobada por la alta dirección con huella (pasos 4-5), riesgos (7), impacto de IA (8), hallazgo a CAPA (10), panel del consultor con marca blanca (12), reporte del agente portafolio (13), DOCX/PDF con huella (15), la casa (16), migración (18). En rojo: **3** (la política sí se redactó y se aprobó; falló el guion, que leía el aviso viejo; corregido, falta repetirlo), **9** (la SoA salió marcada genérica; corregido y verificado sin agente con `verifica-soa.ts`: versión en revisión, aprobada por la alta dirección, captura 12), **11 y 17-impacto** (rechazados por saldo) |
+| 8 | La casa | ◐ | Inventario de sus 9 agentes (paso 16) ✓. **Su SoA la propuso su propio agente** (paso 17: 39 IDs, US$0.44) ✓. Su impacto de IA: rechazado por saldo. Su política de IA (`doc-3`): no medida |
+| 9 | Laboratorio | ◐ | 33/33 deterministas en verde + L8 (32 archivos). **Con LLM: 8 medidos, 7 pasan y 1 falla** (`dia-5`, trampa 1: la única respuesta completa citó el ID inventado; el validador la rechazó y el ID no llegó a ninguna salida, pero tampoco hubo informe). 38 «no medidos» por saldo. Las 10 trampas tienen caso; medidas con LLM: solo la 1 |
 | 10 | Empaquetado, READMEs, guías, aviso, inventario | ✓ | `empaqueta` en verde (6 subpaths en un proyecto limpio); 18/18 READMEs conformes; guías y aviso en `docs/`; 3 asientos (238 unidades, 0 NUEVO) |
 | 11 | Propuesta CDC y bloqueados | ✓ | `propuesta-cdc.md` (diff del routing + prompts), `propuestas.md` |
-| 12 | `validate` verde tras el commit | ✓ (a la fecha) | `npm run validate` sobre el commit `1df6bcc`: **29/29 gates activos en verde**, 8 inactivos declarados, árbol sellado `10e620cc3cef`. Incluye `prueba:laboratorio-sgi`, `prueba:migraciones`, `prueba:a2a`, `verifica:inventario`, `revisa:readmes`, `prueba:tools`. **Se vuelve a correr tras las corridas reales** |
+| 12 | `validate` verde tras el commit | ✗ (medido) | Sobre `1df6bcc` y `3f7bd78`: 29/29. **Con las corridas reales, `prueba:laboratorio-sgi` se pone en rojo por `dia-5`**, que es lo que tiene que hacer: el gate exige cero fallas y la trampa 1 falló de verdad. No se afloja el gate; se arregló el mensaje de reintento (CDC) y falta medirlo |
 
 ## Decisiones (reporte)
 
@@ -56,10 +57,19 @@ que es de donde cuelgan los cinco nodos en ámbar.
 | Una ruta de servidor nueva sin declarar | `prueba:a2a` la cazó: `/api/sgi/documento/[version]` quedó declarada con sus garantías (solo GET, 401 sin sesión, medido) |
 | Una regla de gobernanza que no vi | `verify:gobernanza` cazó un patrón prohibido en `orquestador.ts` (un literal de fecha). Se cambió el código, no la regla |
 | El aviso de hidratación en desarrollo | Solo en la primera compilación de cada ruta con Turbopack; el recorrido final corre contra el build de producción, sin errores de consola |
-| Los agentes redactan genérico o inventan | Los 46 casos lo miden, **pero todavía no corren**. Hasta entonces, «agentes» y «laboratorio» siguen en ámbar |
+| Los agentes redactan genérico o inventan | 8 de 46 medidos: ningún ID inexistente llegó a una salida aceptada; la trampa 1 sí engañó al modelo (lo paró el validador). 38 sin medir por saldo |
+| Un modelo que razona se come el límite de salida | **Medido**: Opus 5 razona por omisión dentro de `max_tokens`; con 600 de límite, 600 se fueron en razonar y la respuesta salió vacía. Tope de razonamiento aparte (4,000) y «truncada» en vez de «ilegible» |
+| Los límites de salida quedaron chicos | **Medido**: al menos 9 de 15 llamadas reales se truncaron al primer intento (diagnóstico a 6,000, riesgos a 5,000, contexto a 3,500, portafolio a 2,500) y el reintento las rescató. Límites subidos con ese dato: 8,000 / 9,000 / 6,000 / 4,000. Capacitación, proveedores y KPIs siguen sin medir |
+| «Hazla más breve» recorta lo que no se puede recortar | **Medido**: tras truncarse, la SoA de Maquinados decidió 20 de 38 controles. El reintento ahora pide textos más cortos y conservar todas las propuestas |
+| Una matriz fotografiada parece genérica | **Medido**: la SoA de Maquinados quedó «genérica» y no se podía aprobar. Toda versión armada desde una matriz abre con la organización, sus ediciones y sus sistemas de IA; verificado sin agente |
+| La cuenta del gasto pierde lo descartado | **Medido**: al repetir `dia-1` se borraba el costo del intento anterior (US$0.30). El corredor acumula ahora el gasto de corridas reemplazadas y sondas |
+| El tope del goal no es el único tope | **Medido**: la llave tenía un límite propio de US$5 y la cuenta otro saldo; con 4 llamadas a Opus en paralelo, OpenRouter reserva el máximo de cada una y rechazó 38 con 402 |
 
 ## Gasto
 
-- **US$0.00**: ninguna llamada al modelo.
-- **Tope del goal**: US$15, con aviso al 80 %.
-- **Estimación** (no es medición): unos US$3-5 para los 46 casos más los ~10 pasos con agente del recorrido.
+- **Laboratorio** (`corridas.json`): **US$2.7341**, de los cuales US$0.3264 son corridas reemplazadas y 4 sondas de diagnóstico.
+- **App** (`sgi_traza`, 7 llamadas del recorrido): **US$1.9597**.
+- **Total medido: US$4.69** de los US$15 del goal (31 %). OpenRouter reporta US$4.82 para la llave (sus precios exactos).
+- **Por llamada**: Sonnet 5 entre US$0.03 y US$0.07; Opus 5 entre US$0.21 y US$0.54.
+- **Lo que falta** (estimación, no medición): unos US$5-6 para los 38 casos y unos US$1.5 para repetir los pasos 3, 9, 11 y 17.
+  **Necesita** subir el tope de la llave (hoy US$5) y agregar saldo a la cuenta.

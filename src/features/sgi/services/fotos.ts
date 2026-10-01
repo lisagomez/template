@@ -81,8 +81,15 @@ async function secciones(sb: SupabaseClient, ctx: Contexto, foto: Foto): Promise
 /** Crea la versión siguiente (o la primera) y la deja EN REVISIÓN. Devuelve el id de la versión. */
 export async function fotografia(sb: SupabaseClient, ctx: Contexto, foto: Foto): Promise<{ versionId: string } | { error: string }> {
   if (!ctx.proyecto) return { error: 'La organización no tiene proyecto.' };
-  const secs = await secciones(sb, ctx, foto);
-  if (!secs.length) return { error: 'No hay filas que fotografiar todavía: primero propón o captura la matriz.' };
+  const filas = await secciones(sb, ctx, foto);
+  if (!filas.length) return { error: 'No hay filas que fotografiar todavía: primero propón o captura la matriz.' };
+  // Toda versión armada desde una matriz dice de QUIÉN es: organización, ediciones y sistemas de IA en el alcance (una
+  // SoA real lo lleva). Sin esto, el detector de genéricos (L7) marcaba la SoA de Maquinados aunque sus filas fueran
+  // propias (medido el 2026-10-01): L7 sigue vigilando los documentos que redacta el agente, que es para lo que existe.
+  const secs = [{ titulo: 'Organización y alcance', parrafos: [
+    `Organización: ${ctx.org.nombre}. Normas del sistema: ${ctx.proyecto.ediciones.join(', ')}.`,
+    ...(ctx.sistemasIA.length ? [`Sistemas de IA en el alcance: ${ctx.sistemasIA.map((x) => x.nombre).join(', ')}.`] : []),
+  ] }, ...filas];
   const aplicables = new Set(requisitosDe(ctx.proyecto.ediciones as IdEdicion[]).map((r) => r.id));
   const requisitos = REQUISITOS[foto].filter((id) => aplicables.has(id));
   const previo = await sb.from('sgi_documento').select('id').eq('proyecto_id', ctx.proyecto.id).eq('tipo', TIPO_DOC[foto]).eq('titulo', TITULO[foto]).maybeSingle();

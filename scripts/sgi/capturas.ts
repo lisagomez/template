@@ -8,7 +8,7 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { chromium, type Browser, type Page } from 'playwright';
+import { chromium, type Browser, type Locator, type Page } from 'playwright';
 
 const arg = (n: string) => { const i = process.argv.indexOf(`--${n}`); return i > 0 ? process.argv[i + 1] : undefined; };
 const BASE = arg('base') ?? 'http://localhost:3011';
@@ -66,6 +66,13 @@ async function paso(n: number, nombre: string, llm: boolean, cuerpo: (ev: string
   registro.push({ n, paso: nombre, ok, evidencia: ev, capturas: caps, llm, errores_consola: consola });
   console.log(`${ok ? '✓' : '✗'} ${String(n).padStart(2)} ${nombre}\n${ev.map((e) => `     ${e}`).join('\n')}`);
 }
+/** Clic y espera la NUEVA redirección con aviso: la URL de antes puede traer ya un `aviso=` del paso anterior, y
+ * `waitForURL(/aviso=/)` se cumpliría en el acto leyendo el aviso viejo (pasó en la primera corrida con agentes). */
+async function clicYAviso(p: Page, l: Locator, opciones: { timeout?: number } = {}) {
+  const antes = p.url();
+  await l.click();
+  await p.waitForURL((u) => u.href !== antes && /(aviso|error)=/.test(u.href), opciones);
+}
 const marca = (ev: string[], ok: boolean, t: string) => { ev.push(`${ok ? '✓' : '✗'} ${t}`); return ok; };
 
 const admin = await como('maquinados.admin');
@@ -107,8 +114,7 @@ await paso(3, 'El agente documental redacta la Política de IA con la terminolog
   const propios = ['Maquinados del Bajío', 'Cotizador', 'Inspección visual', 'CNC', 'Querétaro'].filter((t) => texto.toLowerCase().includes(t.toLowerCase()));
   marca(ev, propios.length >= 3, `usa términos del taller: ${propios.join(', ')}`);
   marca(ev, /Modelo \(pineado\): anthropic\//.test(traza), `traza: ${traza.split('\n').slice(0, 5).join(' · ')}`);
-  await c.locator('[data-prueba=enviar-revision]').click();
-  await c.waitForURL(/aviso=/);
+  await clicYAviso(c, c.locator('[data-prueba=enviar-revision]'));
   (globalThis as { versionPolitica?: string }).versionPolitica = c.url().split('/').pop()!.split('?')[0];
   return marca(ev, (await aviso(c)).includes('revisión'), 'enviada a revisión');
 });
@@ -208,8 +214,7 @@ await paso(11, 'Auditoría: el agente redacta hallazgos desde las notas; solo el
   const h = au.locator('[data-prueba=hallazgos] > li', { hasText: 'borrador' }).first();
   marca(ev, await h.count() > 0, 'hallazgo en borrador propuesto por el agente');
   await h.locator('select[name=rol]').selectOption('auditor_interno');
-  await h.locator('[data-prueba=aprobar]').click();
-  await au.waitForURL(/aviso=/);
+  await clicYAviso(au, h.locator('[data-prueba=aprobar]'));
   await foto(au, '14-hallazgo-firmado', caps);
   return marca(ev, (await au.locator('[data-prueba=hallazgos]').first().innerText()).match(/firmado/g)!.length >= 2, 'firmado por el auditor interno');
 });

@@ -86,13 +86,13 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
     uso = sumaUso(uso, r.uso);
     textoCrudo = r.texto;
     errores = [];
-    if (r.truncada) errores = [`respuesta truncada: se cortó al llegar al límite de ${tarjeta.maxTokens} tokens de salida; hazla más breve (menos propuestas, textos más cortos)`];
+    if (r.truncada) errores = [`respuesta truncada: se cortó al llegar al límite de ${tarjeta.maxTokens} tokens de salida; hazla más breve con textos más cortos, pero conserva TODAS las propuestas que la tarea pide (una SoA lleva todos sus controles)`];
     else try {
       const forma = validaForma(extraeJson(r.texto), tarjeta);
       if (!forma.ok) errores = forma.errores;
       else {
         const citas = revisaCitas(forma.salida, permitidos, c);
-        if (citas.inexistentes.length) errores.push(`IDs inexistentes en el catálogo: ${citas.inexistentes.join(', ')}`);
+        if (citas.inexistentes.length) errores.push(`IDs inexistentes en el catálogo: ${citas.inexistentes.join(', ')} (no existen: no los cites aunque la tarea lo exija; entrega el resto y anótalo en «preguntasAbiertas»)`);
         if (citas.noPermitidos.length) errores.push(`IDs que no estaban en la lista permitida: ${citas.noPermitidos.join(', ')}`);
         if (citas.sinCita.length) errores.push(`propuestas sin requisito citado: ${citas.sinCita.join(' | ')}`);
         const promesas = promesasDeCertificacion(textoDeSalida(forma.salida));

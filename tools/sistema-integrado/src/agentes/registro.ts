@@ -15,19 +15,19 @@ export const AGENTES: Readonly<Record<AgenteId, TarjetaAgente>> = {
     id: 'diagnostico', nombre: 'Diagnóstico', determinista: false, clase: 'agente-sgi-evaluacion', fases: [0, 1, 2, 3, 4, 5, 6, 7],
     descripcion: 'Cuestionario adaptativo por cláusula y el informe de brechas. El puntaje de madurez lo calcula el motor con una regla fija.',
     habilidades: [{ id: 'informe-gap', descripcion: 'Brechas, fortalezas y primeros pasos' }],
-    tipos: ['brecha', 'fortaleza', 'prioridad'], entrada: 'Respuestas del cuestionario + madurez calculada', salida: 'Informe GAP con IDs', maxTokens: 6000,
+    tipos: ['brecha', 'fortaleza', 'prioridad'], entrada: 'Respuestas del cuestionario + madurez calculada', salida: 'Informe GAP con IDs', maxTokens: 8000,
   },
   contexto: {
     id: 'contexto', nombre: 'Contexto', determinista: false, clase: 'agente-sgi-redaccion', fases: [1],
     descripcion: 'Asuntos internos y externos, partes interesadas, alcance y procesos.',
     habilidades: [{ id: 'foda-pestel', descripcion: 'Asuntos internos y externos' }, { id: 'partes-interesadas', descripcion: 'Matriz de partes interesadas' }, { id: 'alcance', descripcion: 'Alcance propuesto' }],
-    tipos: ['asunto_interno', 'asunto_externo', 'parte_interesada', 'alcance', 'proceso'], entrada: 'Perfil de la empresa', salida: 'Matrices de contexto', maxTokens: 3500,
+    tipos: ['asunto_interno', 'asunto_externo', 'parte_interesada', 'alcance', 'proceso'], entrada: 'Perfil de la empresa', salida: 'Matrices de contexto', maxTokens: 6000,
   },
   riesgos: {
     id: 'riesgos', nombre: 'Riesgos e IA', determinista: false, clase: 'agente-sgi-evaluacion', fases: [3],
     descripcion: 'Riesgos y oportunidades, riesgos de IA, evaluación de impacto de IA y declaración de aplicabilidad.',
     habilidades: [{ id: 'matriz-riesgos', descripcion: 'Riesgos y oportunidades con probabilidad × impacto' }, { id: 'impacto-ia', descripcion: 'Evaluación de impacto de sistemas de IA' }, { id: 'soa', descripcion: 'Declaración de aplicabilidad propuesta' }],
-    tipos: ['riesgo', 'oportunidad', 'riesgo_ia', 'impacto_ia', 'control_soa', 'objetivo'], entrada: 'Perfil + sistemas de IA + contexto aprobado', salida: 'Matrices y SoA propuestas', maxTokens: 5000,
+    tipos: ['riesgo', 'oportunidad', 'riesgo_ia', 'impacto_ia', 'control_soa', 'objetivo'], entrada: 'Perfil + sistemas de IA + contexto aprobado', salida: 'Matrices y SoA propuestas', maxTokens: 9000,
   },
   documental: {
     id: 'documental', nombre: 'Documental', determinista: false, clase: 'agente-sgi-redaccion', fases: [1, 2, 3, 4, 5, 6, 7],
@@ -63,7 +63,7 @@ export const AGENTES: Readonly<Record<AgenteId, TarjetaAgente>> = {
     id: 'portafolio', nombre: 'Portafolio (consultor)', determinista: false, clase: 'agente-sgi-redaccion', fases: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     descripcion: 'Reporte de avance para cada cliente del consultor, sobre números ya calculados por el motor.',
     habilidades: [{ id: 'reporte-avance', descripcion: 'Reporte para el cliente' }],
-    tipos: ['mensaje', 'siguiente_paso', 'alerta'], entrada: 'Avance y puertas calculados', salida: 'Reporte en borrador', maxTokens: 2500,
+    tipos: ['mensaje', 'siguiente_paso', 'alerta'], entrada: 'Avance y puertas calculados', salida: 'Reporte en borrador', maxTokens: 4000,
   },
 };
 

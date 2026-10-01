@@ -112,7 +112,8 @@ test('ejecutor: rechaza el ID inventado, reintenta con el error y acepta la corr
   assert.equal(r.traza.intentos, 2);
   assert.deepEqual(r.traza.uso, { entrada: 2000, salida: 400, cacheados: 0 });
   assert.deepEqual(r.traza.requisitosCitados, ['SGI-C-4.1-01']);
-  assert.deepEqual(r.traza.rechazos, ['intento 1: IDs inexistentes en el catálogo: SGI-C-99.9-01']);
+  assert.equal(r.traza.rechazos.length, 1);
+  assert.match(r.traza.rechazos[0]!, /^intento 1: IDs inexistentes en el catálogo: SGI-C-99\.9-01 \(no existen: no los cites aunque la tarea lo exija/);
   assert.equal(r.traza.alertas.instruccionIncrustada, true);
   assert.deepEqual(r.traza.alertas.datosMinimizados, { CORREO: 1 });
   assert.ok(r.traza.insumos.some((x) => x.tipo === 'evidencia:acta.pdf' && /^sha256:[0-9a-f]{64}$/.test(x.huella)));

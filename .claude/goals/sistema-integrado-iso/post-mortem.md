@@ -137,3 +137,33 @@ Cada uno se aplica con diff, `npm run regresion` y entrada firmada en `BITACORA-
 4. `resultados.md`, `grafo.json` (agentes, app, casa, laboratorio, entrega; L1, L5, L6, L9) y la
    sección «Estado del LLM» de `propuesta-cdc.md` con los números reales.
 5. Commit, `npm run validate`, y este post-mortem se completa con lo que diga la corrida.
+
+## 6. Con la llave (2026-10-01): lo que solo se ve corriendo de verdad
+
+La llave llegó y hubo 15 corridas reales (US$4.69). El goal se detuvo otra vez, ahora por **saldo**. Cada hallazgo
+salió de una corrida, no de una prueba con dobles:
+
+| Hallazgo | Elemento del grafo | Qué se hizo |
+|---|---|---|
+| Opus 5 razona por omisión **dentro** de `max_tokens`: el diagnóstico gastó 3,500 de 3,500 razonando y la respuesta salió vacía, con un error que decía «ilegible» | arista `motor/catalogo → agentes` (contrato con el proveedor) | Tope de razonamiento aparte (4,000), `truncada` detectada por `finish_reason`; 2 pruebas nuevas. Medido con una sonda antes de cambiar nada |
+| Al menos 9 de 15 llamadas se truncaron al primer intento | nodo `agentes` (límites por tarjeta) | Límites subidos con el dato; el reintento las rescató todas |
+| El reintento «menos propuestas» dejó la SoA en 20 de 38 controles | lazo **L4**: la puerta de la fase 3 depende de una SoA completa | El reintento pide textos más cortos y conservar todas las propuestas (CDC) |
+| La trampa 1 engañó al modelo en su única respuesta completa | lazo **L5** | El validador lo paró (el lazo aguantó); el reintento lo dice explícito (CDC, sin medir) |
+| La SoA fotografiada salió «genérica» y no se podía aprobar | lazo **L7** aplicado a lo que no le toca | La versión abre con la organización y su alcance; L7 sigue vigilando lo que redacta el agente. Verificado sin agente |
+| Al repetir una corrida se borraba lo que ya se había pagado | lazo **L9** (costo) | El corredor acumula el gasto descartado |
+| El tope del goal (US$15) no era el único: la llave tenía US$5 y la cuenta su propio saldo; con 4 llamadas a Opus en paralelo, OpenRouter reserva el máximo de cada una y rechazó 38 | **nodo que faltaba otra vez**: el saldo es una entrada manual, igual que la llave | Se detuvo antes de dejar la cuenta en cero (la comparten otras llaves) |
+| El guion de capturas leyó un aviso viejo porque `waitForURL(/aviso=/)` ya se cumplía | arista `app → evidencia` | `clicYAviso` espera una URL **distinta** con aviso |
+
+**Propuestas nuevas, NO aplicadas** (skills y reglas están fuera del alcance del goal; cada una es CDC):
+
+6. **Skill `goal-compiler`, Fase 2**, ampliando la propuesta 1: además de la llave, se comprueba **el saldo y el tope
+   de la llave**, también enmascarados (OpenRouter: `GET /api/v1/key`, `limit_remaining`). Si el saldo no cubre la
+   estimación del spec, se dice antes de lanzar.
+7. **`.claude/rules/aprendizajes-stack.md`**, al tocar `src/lib/ai/**` o un cliente de modelo: «un modelo que razona
+   por omisión gasta su razonamiento dentro de `max_tokens`: tope de razonamiento aparte y `finish_reason` leído;
+   "length" es truncada, no ilegible».
+8. **`.claude/rules/aprendizajes-stack.md`**, al tocar `scripts/**/capturas*`: «`waitForURL(patrón)` se cumple en el
+   acto si la URL actual ya casa: después de un clic, esperar una URL distinta».
+
+**Intocable, sumado**: medir con una sonda de centavos antes de cambiar código que gasta, y no aflojar un gate que
+se pone en rojo con un dato real (`dia-5`).

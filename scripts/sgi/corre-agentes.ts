@@ -38,6 +38,25 @@ const k = llave();
 console.log(`OPENROUTER_API_KEY: ${k ? `presente, largo ${k.length}, prefijo ${k.slice(0, 4)}` : 'AUSENTE'}`);
 if (!k) { console.error('Sin llave no corre ningún agente (y no se inventa ninguna respuesta). El laboratorio la guarda con `read -rsp` en una terminal aparte.'); process.exit(2); }
 
+/** El tope del goal no es el único: la llave puede traer su propio límite y la cuenta su propio saldo (medido el
+ * 2026-10-01: 38 casos rechazados con 402 con US$10 de tope del goal sin usar). Se mira ANTES de arrancar. */
+async function saldoDisponible(): Promise<number | null> {
+  const lee = async (url: string) => (await (await fetch(url, { headers: { authorization: `Bearer ${k}` } })).json()) as { data?: Record<string, number | null> };
+  try {
+    const [llaveP, cuentaP] = await Promise.all([lee('https://openrouter.ai/api/v1/key'), lee('https://openrouter.ai/api/v1/credits')]);
+    const deLlave = llaveP.data?.limit_remaining, total = cuentaP.data?.total_credits, usado = cuentaP.data?.total_usage;
+    const deCuenta = typeof total === 'number' && typeof usado === 'number' ? total - usado : null;
+    const cifras = [deLlave, deCuenta].filter((x): x is number => typeof x === 'number');
+    return cifras.length ? Math.min(...cifras) : null;
+  } catch { return null; }
+}
+const disponible = await saldoDisponible();
+console.log(`saldo en el proveedor (lo menor entre el tope de la llave y la cuenta): ${disponible === null ? 'no reportado' : `US$${disponible.toFixed(2)}`}`);
+if (disponible !== null && disponible < 1) {
+  console.error('No alcanza para un lote: el laboratorio sube el tope de la llave o agrega saldo antes. No se arranca para no dejar la cuenta en cero (la comparten otras llaves).');
+  process.exit(4);
+}
+
 const archivo = existsSync(RUTA)
   ? JSON.parse(readFileSync(RUTA, 'utf8')) as { corridas: CorridaGrabada[]; gastoFueraDeCasosUsd?: number }
   : { corridas: [] as CorridaGrabada[] };

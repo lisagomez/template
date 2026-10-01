@@ -291,6 +291,27 @@ Todos medidos durante la construcción, y cada uno quedó con su caso de regresi
   (`mide-aislamiento.ts` → `rls.json` → casos `bas-*` dentro de `validate`), como el reel, y su gate inactivo queda
   propuesto para firma.
 
+### 2026-10-01: el razonamiento de Opus 5 cuenta dentro de `max_tokens`
+- **Error**: «respuesta ilegible: no trae un objeto JSON» en el diagnóstico, dos veces, US$0.30. Una sonda de
+  centavos lo aclaró: sin tope, 600 de 600 tokens se fueron en razonar y la respuesta salió vacía.
+- **Fix**: tope de razonamiento aparte por clase (`RAZONAMIENTO` en `llm.ts`), `finish_reason: length` → «truncada»,
+  y los rechazos de cada intento en la traza. Límites de salida subidos con lo medido.
+
+### 2026-10-01: un reintento que pide «menos propuestas» rompe la SoA
+- **Error**: tras truncarse, la SoA de Maquinados decidió 20 de 38 controles y la puerta de la fase 3 no se podía
+  cerrar con ella.
+- **Fix**: el reintento pide textos más cortos y conservar todas las propuestas (CDC).
+
+### 2026-10-01: una matriz fotografiada sin la organización se lee como genérica
+- **Error**: L7 marcó la SoA de Maquinados («no menciona a la empresa») y la versión no podía ir a revisión.
+- **Fix**: toda versión armada desde una matriz abre con la organización, sus ediciones y sus sistemas de IA.
+
+### 2026-10-01: el tope del goal no es el único tope
+- **Error**: 38 casos rechazados con 402. La llave tenía su propio límite de US$5 y la cuenta otro saldo; con 4
+  llamadas a Opus en paralelo, OpenRouter reserva el máximo de cada una.
+- **Fix**: el saldo se comprueba enmascarado antes de un lote (`GET /api/v1/key`), y el gasto descartado ya no se
+  borra de la cuenta.
+
 ## Gotchas
 - `next dev` en el worktree: puerto libre, **no el 3000**. El `.env.local` del worktree apunta a Supabase local; la
   llave del LLM se lee del `.env.local` principal sin imprimirla.
