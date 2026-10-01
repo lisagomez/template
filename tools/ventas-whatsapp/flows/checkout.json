@@ -1,0 +1,43 @@
+{
+  "version": "7.1",
+  "data_api_version": "3.0",
+  "routing_model": { "ENVIO": ["RESUMEN"], "RESUMEN": [] },
+  "screens": [
+    {
+      "id": "ENVIO",
+      "title": "Envío y factura",
+      "data": {
+        "zonas": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } }, "__example__": [{ "id": "Boca del Río", "title": "Boca del Río · $60.00 · 1 día" }] },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextBody", "text": "${data.error}" },
+          { "type": "Dropdown", "name": "zona", "label": "Colonia o municipio", "required": true, "data-source": "${data.zonas}" },
+          { "type": "TextInput", "name": "direccion", "label": "Calle, número, CP", "required": true, "input-type": "text" },
+          { "type": "TextInput", "name": "rfc", "label": "RFC (solo si quieres factura)", "required": false, "input-type": "text" },
+          { "type": "TextInput", "name": "razon_social", "label": "Razón social", "required": false, "input-type": "text" },
+          { "type": "OptIn", "name": "recoger", "label": "Prefiero recoger en la tienda" },
+          { "type": "Footer", "label": "Continuar", "on-click-action": { "name": "data_exchange", "payload": { "zona": "${form.zona}", "direccion": "${form.direccion}", "rfc": "${form.rfc}", "razon_social": "${form.razon_social}", "recoger": "${form.recoger}" } } }
+        ]
+      }
+    },
+    {
+      "id": "RESUMEN",
+      "title": "Tu compra",
+      "terminal": true,
+      "data": {
+        "resumen": { "type": "string", "__example__": "1 × Huipil bordado · Envío $60.00 · Total $1,010.00" },
+        "pedido_id": { "type": "string", "__example__": "ped_1" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextBody", "text": "${data.resumen}" },
+          { "type": "Footer", "label": "Confirmar y pagar", "on-click-action": { "name": "data_exchange", "payload": { "confirmar": true, "pedido_id": "${data.pedido_id}" } } }
+        ]
+      }
+    }
+  ]
+}

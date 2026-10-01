@@ -27,6 +27,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; **firma pendiente del laboratorio** |
 | Reel del celular | pendiente | `TPL-reel` `TPL-feature-reel` | falta: `/new-app` al salir de blueprint (PRP-007) |
 | Estudio pymes | pendiente | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | falta: `/new-app` al salir de blueprint (PRP-006) |
+| Vendedor con IA en WhatsApp | pendiente | `TPL-ventas-whatsapp` `TPL-feature-ventas-whatsapp` | falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar) |
 
 ## 2. Lo que no es producto
 

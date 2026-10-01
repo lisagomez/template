@@ -105,6 +105,19 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/reel/[id]/consentimientos',
   '/api/reel/[id]/decision',
   '/api/reel/proyectos',
+  // Vendedor con IA en WhatsApp (goal ventas-ia-waba, fases 0-3 en laboratorio). RF-20: misma app y mismo
+  // puerto. `webhook`, `flows` y `pagos` son las únicas que un tercero (Meta, el procesador) tendría que
+  // alcanzar, y solo con el canal REAL: la app no lo arranca sin C3 + C4 firmados; en el laboratorio las
+  // llaman simuladores locales. Todas verifican firma (X-Hub-Signature-256 / HMAC del procesador) antes de
+  // leer el cuerpo. `panel`: Bearer por inquilino. `a2a/[dominio]`: la pasarela de `pedidos` y `atribucion`,
+  // OTRA superficie que no es este bridge — local, 503 sin llave de firma, token con inquilino; exponerla a
+  // un partner o a internet es gate humano con C3 + C4.
+  '/api/ventas-whatsapp/a2a/[dominio]',
+  '/api/ventas-whatsapp/a2a/[dominio]/.well-known/agent-card.json',
+  '/api/ventas-whatsapp/flows',
+  '/api/ventas-whatsapp/pagos',
+  '/api/ventas-whatsapp/panel',
+  '/api/ventas-whatsapp/webhook',
 ]
 
 const peticion = (cuerpo: unknown, cabeceras: Record<string, string> = {}): Request =>
