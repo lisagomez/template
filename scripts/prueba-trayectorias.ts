@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * Pruebas del formato de trayectoria, de la captura en la linea de aplicacion y de como el informe
- * junta un periodo (spec 011).
+ * Pruebas del formato de trayectoria, de la captura en la linea de aplicacion y en la fabrica, y de
+ * como el informe junta un periodo (spec 011).
  * `node --test scripts/prueba-trayectorias.ts`. Sin red, sin disco, sin base de datos.
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { validaTrayectoria, cobertura, idDe } from './trayectorias/formato.mjs'
 import { metricasDe, agrega, razon } from './trayectorias/metricas.mjs'
+import { trayectoriaDeTranscript } from './trayectorias/captura-sesion.mjs'
 import { trayectoriaDeUso, conTrayectoria, type Trayectoria } from '../src/lib/ai/trayectorias.ts'
 import { registraUso, type EventoDeUso, type Registrador } from '../src/lib/ai/contabilidad.ts'
 
@@ -142,3 +143,30 @@ test('los valores sueltos siguen siendo media, y mezclarlos con razones es un er
   assert.throws(() => agrega([0.5, razon(1, 2)]), /mezclad/)
 })
 
+
+/** Lineas de transcript del arnes: un turno del usuario y lo que conteste el arnes. */
+const hora = (min: number) => new Date(Date.UTC(2026, 9, 1, 12, min)).toISOString()
+const turnoUsuario = { type: 'user', timestamp: hora(31), message: { role: 'user', content: 'hola' } }
+const errorDeApi = { type: 'assistant', timestamp: hora(36), isApiErrorMessage: true, message: { id: 'sintetico-1', model: '<synthetic>', content: [{ type: 'text', text: '' }], usage: { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } } }
+const llamadaReal = { type: 'assistant', timestamp: hora(32), message: { id: 'real-1', model: 'claude-opus-5-5', content: [{ type: 'text', text: '' }], usage: { input_tokens: 10, output_tokens: 20, cache_creation_input_tokens: 0, cache_read_input_tokens: 300 } } }
+
+test('el caso del 2026-10-01: una sesion caida por la API no es «1 llamada, 0 tokens, completa»', () => {
+  const t = trayectoriaDeTranscript([turnoUsuario, errorDeApi], 'sesion-caida')
+  assert.equal(t.acciones.llamadasAlModelo, 0)
+  assert.equal(t.uso, null)
+  assert.equal(t.costoUsd, null)
+  assert.deepEqual(t.cobertura, { completa: false, faltan: ['uso'] })
+  assert.deepEqual(t.avisos, ['1 error(es) de la API del modelo'])
+  assert.equal(t.resultado.errores, 0, 'los errores de la API no se mezclan con los de herramienta')
+  assert.deepEqual(validaTrayectoria(t), [])
+})
+
+test('un error de la API entre llamadas reales no suma llamada ni uso, y queda en avisos', () => {
+  const t = trayectoriaDeTranscript([turnoUsuario, llamadaReal, errorDeApi], 'sesion-mixta')
+  assert.equal(t.acciones.llamadasAlModelo, 1)
+  assert.deepEqual(t.uso, { entrada: 10, salida: 20, cacheCreacion: 0, cacheLectura: 300 })
+  assert.deepEqual(t.modelos, { 'claude-opus-5-5': 1 })
+  assert.deepEqual(t.avisos, ['1 error(es) de la API del modelo'])
+  assert.deepEqual(validaTrayectoria(t), [])
+  assert.equal(trayectoriaDeTranscript([turnoUsuario, llamadaReal], 'sesion-sana').avisos, undefined)
+})
