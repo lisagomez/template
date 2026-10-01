@@ -22,7 +22,7 @@ Post-mortem: `post-mortem.md` (sección 6: lo aprendido corriendo de verdad).
 | 9 | Laboratorio | ✓ | **79/79 casos pasan**: 33 deterministas + 46 con el modelo real (5 o 6 por agente). Las **10 trampas** tienen caso y pasan; con LLM real: la 1 (`dia-5`), la 4 (`ctx-5`, `aud-5`), la 5 (`doc-4`), la 6 (`doc-5`), la 8 (`doc-6`, `kpi-5`, `por-5`) y la 9 (`cap-5`) |
 | 10 | Empaquetado, READMEs, guías, aviso, inventario | ✓ | `empaqueta` en verde (6 subpaths en un proyecto limpio); 18/18 READMEs conformes; guías y aviso en `docs/`; 3 asientos (238 unidades, 0 NUEVO) |
 | 11 | Propuesta CDC y bloqueados | ✓ | `propuesta-cdc.md` (diff del routing + prompts), `propuestas.md` |
-| 12 | `validate` verde tras el commit | (se mide) | Ver la nota al pie de esta tabla, escrita después de correrlo |
+| 12 | `validate` verde tras el commit | ✓ | `npm run validate` sobre **`996e16d`**: **29/29 gates activos en verde, 8 inactivos declarados, 0 rojos**, árbol sellado `926c834a8f28`. Incluye `prueba:laboratorio-sgi` (79/79), `prueba:tools` (26/26 del paquete), `prueba:migraciones`, `prueba:a2a`, `verifica:inventario`, `revisa:readmes`, `audita:fugas`. `empaqueta sistema-integrado` en verde (6 subpaths, 16 `.d.ts`). Se repite tras el commit de este documento |
 
 ## Decisiones (reporte)
 
