@@ -38,9 +38,13 @@ const k = llave();
 console.log(`OPENROUTER_API_KEY: ${k ? `presente, largo ${k.length}, prefijo ${k.slice(0, 4)}` : 'AUSENTE'}`);
 if (!k) { console.error('Sin llave no corre ningún agente (y no se inventa ninguna respuesta). El laboratorio la guarda con `read -rsp` en una terminal aparte.'); process.exit(2); }
 
-const archivo = existsSync(RUTA) ? JSON.parse(readFileSync(RUTA, 'utf8')) as { corridas: CorridaGrabada[] } : { corridas: [] };
+const archivo = existsSync(RUTA)
+  ? JSON.parse(readFileSync(RUTA, 'utf8')) as { corridas: CorridaGrabada[]; gastoFueraDeCasosUsd?: number }
+  : { corridas: [] as CorridaGrabada[] };
 const grabadas = new Map(archivo.corridas.map((c) => [c.id, c]));
-const gastado = () => [...grabadas.values()].reduce((s, c) => s + (c.costoUsd ?? 0), 0);
+// Lo gastado en corridas que se reemplazan (y en sondas) ya se pagó: sigue contando contra el tope, nunca se borra.
+let fuera = archivo.gastoFueraDeCasosUsd ?? 0;
+const gastado = () => fuera + [...grabadas.values()].reduce((s, c) => s + (c.costoUsd ?? 0), 0);
 const solo = arg('solo')?.split(',');
 const pendientes = CASOS_LLM.filter((c) => (solo ? solo.includes(c.id) : process.argv.includes('--rehace') || !grabadas.get(c.id)?.ok));
 console.log(`${pendientes.length} caso(s) por correr · gastado antes: US$${gastado().toFixed(4)} · tope US$${TOPE} · modelos: redacción ${modeloPara('agente-sgi-redaccion').modelo}, evaluación ${modeloPara('agente-sgi-evaluacion').modelo}`);
@@ -51,7 +55,7 @@ function guarda() {
     _comentario: 'Corridas REALES de los agentes con datos sintéticos (scripts/sgi/corre-agentes.ts). Se verifican en el laboratorio con reglas fijas.',
     cuando: new Date().toISOString(),
     modelos: { 'agente-sgi-redaccion': modeloPara('agente-sgi-redaccion').modelo, 'agente-sgi-evaluacion': modeloPara('agente-sgi-evaluacion').modelo },
-    gastoTotalUsd: Number(gastado().toFixed(6)), corridas,
+    gastoFueraDeCasosUsd: Number(fuera.toFixed(6)), gastoTotalUsd: Number(gastado().toFixed(6)), corridas,
   }, null, 1)}\n`);
 }
 
@@ -66,6 +70,7 @@ async function corre(caso: typeof CASOS_LLM[number]) {
   try {
     const r = await ejecutaAgente(caso.agente, caso.entrada, { modelo });
     const costo = r.traza.uso ? costeUsd(clase, r.traza.uso) : null;
+    fuera += grabadas.get(caso.id)?.costoUsd ?? 0;
     grabadas.set(caso.id, { id: caso.id, agente: caso.agente, ok: r.ok, errores: r.ok ? [] : r.errores, salida: r.ok ? r.salida : null, traza: r.traza, costoUsd: costo, cuando: new Date().toISOString() });
     guarda();
     console.log(`${r.ok ? '✓' : '✗'} ${caso.id.padEnd(6)} ${caso.agente.padEnd(12)} ${((Date.now() - t0) / 1000).toFixed(0).padStart(3)} s · ${r.traza.intentos} intento(s) · ${costo === null ? 'costo null' : `US$${costo.toFixed(4)}`} · ${r.ok ? `${r.traza.requisitosCitados.length} IDs` : r.errores.join('; ').slice(0, 160)}`);

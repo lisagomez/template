@@ -15,6 +15,10 @@ export interface OpcionesOpenAiCompat {
   readonly temperatura?: number;
   /** Cabeceras extra que pide el proveedor (p. ej. X-Title en OpenRouter). */
   readonly cabeceras?: Readonly<Record<string, string>>;
+  /** Tope de tokens para RAZONAR, aparte del de la respuesta. Hay modelos que razonan por omisión (Opus 5) y ese
+   * razonamiento cuenta dentro de `max_tokens`: sin tope propio se come el presupuesto y el JSON nunca sale
+   * (medido el 2026-10-01: 3,500 de 3,500 tokens razonando en el diagnóstico, respuesta vacía). */
+  readonly razonamiento?: { readonly maxTokens: number };
 }
 
 export function modeloOpenAiCompat(o: OpcionesOpenAiCompat): ModeloLLM {
@@ -28,19 +32,20 @@ export function modeloOpenAiCompat(o: OpcionesOpenAiCompat): ModeloLLM {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${o.llave}`, ...(o.cabeceras ?? {}) },
         body: JSON.stringify({
-          model: o.modelo, max_tokens: maxTokens, temperature: o.temperatura ?? 0.2,
+          model: o.modelo, max_tokens: maxTokens + (o.razonamiento?.maxTokens ?? 0), temperature: o.temperatura ?? 0.2,
+          ...(o.razonamiento ? { reasoning: { max_tokens: o.razonamiento.maxTokens } } : {}),
           messages: [{ role: 'system', content: sistema }, { role: 'user', content: usuario }],
         }),
       });
       const cuerpo = await r.text();
       if (!r.ok) throw new Error(`el proveedor respondió ${r.status}: ${cuerpo.slice(0, 300).replaceAll(o.llave, '‹llave›')}`);
-      const j = JSON.parse(cuerpo) as { choices?: { message?: { content?: string } }[]; usage?: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } } };
+      const j = JSON.parse(cuerpo) as { choices?: { message?: { content?: string }; finish_reason?: string }[]; usage?: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } } };
       const texto = j.choices?.[0]?.message?.content ?? '';
       const u = j.usage;
       const uso: Uso | null = u && typeof u.prompt_tokens === 'number' && typeof u.completion_tokens === 'number'
         ? { entrada: u.prompt_tokens, salida: u.completion_tokens, cacheados: u.prompt_tokens_details?.cached_tokens ?? 0 }
         : null;
-      return { texto, uso };
+      return { texto, uso, truncada: j.choices?.[0]?.finish_reason === 'length' };
     },
   };
 }

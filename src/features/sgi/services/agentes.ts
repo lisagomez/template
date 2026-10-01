@@ -140,7 +140,7 @@ export async function correAgente(sb: SupabaseClient, ctx: Ctx, agente: AgenteId
   const { data, error } = await sb.from('sgi_traza').insert({
     organizacion_id: ctx.org.id, proyecto_id: ctx.proyecto.id, agente, version_prompt: r.traza.versionPrompt, modelo: r.traza.modelo,
     insumos: r.traza.insumos, salida_huella: r.traza.salidaHuella, requisitos_citados: r.traza.requisitosCitados,
-    uso: r.traza.uso, costo_usd: costo, intentos: r.traza.intentos, alertas: r.traza.alertas, ok: r.ok,
+    uso: r.traza.uso, costo_usd: costo, intentos: r.traza.intentos, alertas: { ...r.traza.alertas, ...(r.traza.rechazos.length ? { rechazos: r.traza.rechazos } : {}) }, ok: r.ok,
     salida: r.ok ? r.salida : null, errores: r.ok ? [] : r.errores, creado_por: ctx.userId,
   }).select('id').single();
   if (error) throw new Error(`no se pudo guardar la traza: ${error.message}`);

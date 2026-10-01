@@ -1,1 +1,488 @@
-{ "corridas": [] }
+{
+ "_comentario": "Corridas REALES de los agentes con datos sintéticos (scripts/sgi/corre-agentes.ts). Se verifican en el laboratorio con reglas fijas.",
+ "cuando": "2026-10-01T10:27:38.956Z",
+ "modelos": {
+  "agente-sgi-redaccion": "anthropic/claude-sonnet-5",
+  "agente-sgi-evaluacion": "anthropic/claude-opus-5"
+ },
+ "gastoFueraDeCasosUsd": 0.326367,
+ "gastoTotalUsd": 0.80578,
+ "corridas": [
+  {
+   "id": "dia-1",
+   "agente": "diagnostico",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Informe de brechas de Maquinados del Bajío (metalmecánica de precisión, Querétaro) para el sistema integrado ISO 9001 e ISO/IEC 42001. Madurez global recibida: 2 de 5. Lo más sólido es contexto (3.5) y liderazgo (3.5); lo más débil es Anexo A de IA (1), operación (2) y mejora (2). El hueco mayor está en la gestión de los dos sistemas de IA: el cotizador con chatbot (ChatCotiza) y la inspección visual (VisionPieza), sin gobernanza, sin evaluación de riesgos e impactos y sin declaración de aplicabilidad. En calidad, las brechas críticas están en compras, trazabilidad, liberación, producto no conforme, calibración y acciones correctivas. Todo lo aquí escrito es borrador para revisión y aprobación por el rol correspondiente; no representa cumplimiento ni avance hacia una certificación, que solo puede otorgar un organismo acreditado.",
+    "propuestas": [
+     {
+      "tipo": "fortaleza",
+      "titulo": "Base de contexto y liderazgo utilizable",
+      "detalle": "El cuestionario muestra mayor madurez en contexto (3.5) y liderazgo (3.5). El Director general ya participa y hay identificación de asuntos y partes interesadas. Sirve de base para colgar la política integrada y los objetivos.",
+      "requisitos": [
+       "SGI-C-4.1-01",
+       "SGI-C-4.2-01",
+       "SGI-C-5.1-01",
+       "SGI-C-5.2-01"
+      ],
+      "datos": {
+       "madurez_clausula_4": "3.5",
+       "madurez_clausula_5": "3.5"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Sin gobernanza documentada de la IA",
+      "detalle": "No hay postura escrita sobre el uso de IA, ni revisión de choques con otras políticas, ni fechas de revisión, ni roles asignados para ChatCotiza y VisionPieza. El canal para que Operador CNC o Inspector de calidad reporten dudas sobre la IA está incompleto.",
+      "requisitos": [
+       "SGI-A-2.2-01",
+       "SGI-A-2.3-01",
+       "SGI-A-2.4-01",
+       "SGI-A-3.2-01",
+       "SGI-A-3.3-01",
+       "SGI-IA-4.2-03"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "bajo"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Riesgos e impactos de IA sin método ni declaración de aplicabilidad",
+      "detalle": "Falta método repetible de riesgos de IA, elección de tratamiento, cotejo con el Anexo A, declaración de aplicabilidad y aceptación escrita del riesgo residual. Tampoco hay evaluación de impacto documentada del chatbot (planos del cliente) ni de la inspección visual (riesgo de liberar piezas con rebaba).",
+      "requisitos": [
+       "SGI-IA-6.1-06",
+       "SGI-IA-6.1-07",
+       "SGI-IA-6.1-08",
+       "SGI-IA-6.1-09",
+       "SGI-IA-8.3-01",
+       "SGI-IA-8.4-01",
+       "SGI-A-5.2-01",
+       "SGI-A-5.3-01",
+       "SGI-A-5.4-01",
+       "SGI-A-5.5-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "alto"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Ciclo de vida y datos de los sistemas de IA sin documentar",
+      "detalle": "No están documentados los recursos, datos, cómputo ni competencias de cada IA; falta especificar qué debe hacer, cómo se prueba antes y después de cambios, cómo se vigila en operación y qué registros deja. Para VisionPieza esto incluye criterios de aceptación de detección; para ChatCotiza, el manejo de planos y la preparación de datos.",
+      "requisitos": [
+       "SGI-A-4.2-01",
+       "SGI-A-4.3-01",
+       "SGI-A-4.5-01",
+       "SGI-A-6.2.2-01",
+       "SGI-A-6.2.4-01",
+       "SGI-A-6.2.6-01",
+       "SGI-A-6.2.7-01",
+       "SGI-A-6.2.8-01",
+       "SGI-A-7.3-01",
+       "SGI-A-7.5-01",
+       "SGI-A-7.6-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "alto"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Responsabilidades con proveedores de IA y canal para terceros",
+      "detalle": "No está repartido qué le toca a Maquinados del Bajío y qué a ChatCotiza y VisionPieza a lo largo de la vida de la IA, ni hay revisión de que cumplan las reglas de cuidado propias. Falta canal para que un cliente reporte un trato indebido de la IA y plan para avisar incidentes.",
+      "requisitos": [
+       "SGI-A-10.2-01",
+       "SGI-A-10.3-01",
+       "SGI-A-10.4-01",
+       "SGI-A-8.3-01",
+       "SGI-A-8.4-01",
+       "SGI-A-9.2-01",
+       "SGI-A-9.3-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Compras y control de proveedores sin criterios ni registros",
+      "detalle": "No hay criterios escritos para evaluar y reevaluar a Aceros del Centro y Tratamientos Térmicos Querétaro, ni se comunica con claridad al proveedor qué se compra y qué verificaciones habrá. El Comprador trabaja sin registro del control aplicado según el efecto en flechas, bujes y engranes.",
+      "requisitos": [
+       "SGI-Q-8.4-01",
+       "SGI-Q-8.4-02",
+       "SGI-Q-8.4-03",
+       "SGI-C-8.1-02"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Trazabilidad, liberación y producto no conforme incompletos",
+      "detalle": "Falta control del material y planos propiedad del cliente, identificación del estado de inspección, registro de quién libera antes del embarque y manejo documentado de lo que no cumple, incluidos desvíos y cambios en producción. También hay que justificar por escrito que la empresa no diseña producto y cómo eso no afecta al cliente.",
+      "requisitos": [
+       "SGI-Q-8.5-02",
+       "SGI-Q-8.5-03",
+       "SGI-Q-8.5-06",
+       "SGI-Q-8.6-01",
+       "SGI-Q-8.7-01",
+       "SGI-Q-4.3-02",
+       "SGI-Q-8.3-01",
+       "SGI-C-8.1-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Metrología y recursos de los procesos",
+      "detalle": "Con tolerancias de ±0.01 mm, la calibración contra patrón, el marcado de estado y la revisión de mediciones en duda están solo en parte. Tampoco está claro si hay suficiente personal, mantenimiento documentado de los CNC, condiciones de trabajo ni resguardo del saber de Torneado y Fresado CNC.",
+      "requisitos": [
+       "SGI-Q-7.1-06",
+       "SGI-Q-7.1-02",
+       "SGI-Q-7.1-03",
+       "SGI-Q-7.1-04",
+       "SGI-Q-7.1-07",
+       "SGI-C-7.1-01"
+      ],
+      "datos": {
+       "prioridad": "alta",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "brecha",
+      "titulo": "Riesgos, objetivos y mejora sin cierre de ciclo",
+      "detalle": "Riesgos y oportunidades identificados a medias y sin acciones integradas; objetivos sin plan de recursos, responsable y fecha. En mejora falta análisis de causa con registro, análisis de datos, percepción del cliente y decisiones de la revisión por la dirección.",
+      "requisitos": [
+       "SGI-C-6.1-01",
+       "SGI-C-6.1-02",
+       "SGI-C-6.2-01",
+       "SGI-C-6.2-02",
+       "SGI-Q-9.1-02",
+       "SGI-Q-9.1-03",
+       "SGI-Q-10.1-01",
+       "SGI-C-10.2-02",
+       "SGI-C-10.2-03",
+       "SGI-C-9.3-05",
+       "SGI-Q-9.3-03"
+      ],
+      "datos": {
+       "prioridad": "media",
+       "esfuerzo": "medio"
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Inventariar y gobernar los dos sistemas de IA",
+      "detalle": "Primer paso: documentar papel, propósito, datos, proveedor y recursos de ChatCotiza y VisionPieza; asignar responsable por sistema y abrir canal interno de alertas. Borrador para aprobación del Director general.",
+      "requisitos": [
+       "SGI-IA-4.1-03",
+       "SGI-A-4.2-01",
+       "SGI-A-3.2-01",
+       "SGI-A-3.3-01"
+      ],
+      "datos": {
+       "orden": 1
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Método de riesgos de IA, evaluación de impacto y declaración de aplicabilidad",
+      "detalle": "Definir criterios y método, evaluar los dos sistemas, cotejar contra el Anexo A y preparar el plan de tratamiento con riesgo residual para firma de la dirección.",
+      "requisitos": [
+       "SGI-IA-6.1-06",
+       "SGI-IA-6.1-07",
+       "SGI-IA-6.1-08",
+       "SGI-IA-6.1-09"
+      ],
+      "datos": {
+       "orden": 2
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Cerrar compras, liberación y no conforme",
+      "detalle": "Criterios de proveedor, requisitos de compra por escrito, registro de liberación antes del embarque y control documentado del producto no conforme.",
+      "requisitos": [
+       "SGI-Q-8.4-01",
+       "SGI-Q-8.4-03",
+       "SGI-Q-8.6-01",
+       "SGI-Q-8.7-01"
+      ],
+      "datos": {
+       "orden": 3
+      }
+     },
+     {
+      "tipo": "prioridad",
+      "titulo": "Plan de calibración y mantenimiento",
+      "detalle": "Listar instrumentos críticos para ±0.01 mm, su patrón, frecuencia y estado; ligarlo al proceso de Mantenimiento y a la revisión de mediciones en duda.",
+      "requisitos": [
+       "SGI-Q-7.1-06",
+       "SGI-Q-7.1-03"
+      ],
+      "datos": {
+       "orden": 4
+      }
+     }
+    ],
+    "preguntasAbiertas": [
+     "¿Qué puesto quedará como responsable de cada sistema de IA: Gerente de producción para VisionPieza y Vendedor para el cotizador, u otro arreglo?",
+     "¿Los planos que los clientes suben al chatbot salen del país o quedan en la nube del proveedor? ¿Hay acuerdo de confidencialidad con ChatCotiza?",
+     "¿VisionPieza decide por sí sola rechazar una flecha o el Inspector de calidad confirma cada rechazo?",
+     "¿Algún cliente Tier 2 exige requisitos adicionales de trazabilidad o de uso de IA que debamos incluir en el alcance?",
+     "¿Qué instrumentos de medición se consideran críticos y quién los calibra hoy?",
+     "Si requieren el texto literal de alguna cláusula de ISO 9001 o de un control del Anexo A de ISO/IEC 42001, consúltenlo en su copia de la norma; aquí solo se usan las preguntas guía del catálogo.",
+     "Varias respuestas quedaron como «no sé» (por ejemplo, operación del sistema como conjunto, tratamiento de riesgos de IA, evaluación de proveedores, calidad de datos): ¿quién puede confirmar el estado real antes de cerrar el informe?"
+    ]
+   },
+   "traza": {
+    "agente": "diagnostico",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-opus-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:6a832bfc80ae518f0876897ba522e439bba7cadd771829fa8d86734961ec4b0c"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:169d7cd498bc14f663d42905fc8a2046c0b9b5d7582d500320db5bf9a45187a3"
+     },
+     {
+      "tipo": "datos",
+      "huella": "sha256:1a476ac582f4a13bce43391618faf320aaa1a408c8bcbdd774c635ba6a2e80be"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:39020272adb316420fb2985d33b8bf29e4c9fe1cfdebaf9710ce2c014831bbf9"
+     }
+    ],
+    "salidaHuella": "sha256:a19c61ea741955b290aa1e944fb72f5d996aee8d34a18187002b0f64712b27ea",
+    "requisitosCitados": [
+     "SGI-A-10.2-01",
+     "SGI-A-10.3-01",
+     "SGI-A-10.4-01",
+     "SGI-A-2.2-01",
+     "SGI-A-2.3-01",
+     "SGI-A-2.4-01",
+     "SGI-A-3.2-01",
+     "SGI-A-3.3-01",
+     "SGI-A-4.2-01",
+     "SGI-A-4.3-01",
+     "SGI-A-4.5-01",
+     "SGI-A-5.2-01",
+     "SGI-A-5.3-01",
+     "SGI-A-5.4-01",
+     "SGI-A-5.5-01",
+     "SGI-A-6.2.2-01",
+     "SGI-A-6.2.4-01",
+     "SGI-A-6.2.6-01",
+     "SGI-A-6.2.7-01",
+     "SGI-A-6.2.8-01",
+     "SGI-A-7.3-01",
+     "SGI-A-7.5-01",
+     "SGI-A-7.6-01",
+     "SGI-A-8.3-01",
+     "SGI-A-8.4-01",
+     "SGI-A-9.2-01",
+     "SGI-A-9.3-01",
+     "SGI-C-10.2-02",
+     "SGI-C-10.2-03",
+     "SGI-C-4.1-01",
+     "SGI-C-4.2-01",
+     "SGI-C-5.1-01",
+     "SGI-C-5.2-01",
+     "SGI-C-6.1-01",
+     "SGI-C-6.1-02",
+     "SGI-C-6.2-01",
+     "SGI-C-6.2-02",
+     "SGI-C-7.1-01",
+     "SGI-C-8.1-01",
+     "SGI-C-8.1-02",
+     "SGI-C-9.3-05",
+     "SGI-IA-4.1-03",
+     "SGI-IA-4.2-03",
+     "SGI-IA-6.1-06",
+     "SGI-IA-6.1-07",
+     "SGI-IA-6.1-08",
+     "SGI-IA-6.1-09",
+     "SGI-IA-8.3-01",
+     "SGI-IA-8.4-01",
+     "SGI-Q-10.1-01",
+     "SGI-Q-4.3-02",
+     "SGI-Q-7.1-02",
+     "SGI-Q-7.1-03",
+     "SGI-Q-7.1-04",
+     "SGI-Q-7.1-06",
+     "SGI-Q-7.1-07",
+     "SGI-Q-8.3-01",
+     "SGI-Q-8.4-01",
+     "SGI-Q-8.4-02",
+     "SGI-Q-8.4-03",
+     "SGI-Q-8.5-02",
+     "SGI-Q-8.5-03",
+     "SGI-Q-8.5-06",
+     "SGI-Q-8.6-01",
+     "SGI-Q-8.7-01",
+     "SGI-Q-9.1-02",
+     "SGI-Q-9.1-03",
+     "SGI-Q-9.3-03"
+    ],
+    "uso": {
+     "entrada": 25781,
+     "salida": 12820,
+     "cacheados": 0
+    },
+    "intentos": 2,
+    "rechazos": [
+     "intento 1: motivo no registrado (corrida anterior al registro de rechazos del 2026-10-01; por el uso, casi seguro truncada)"
+    ],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:27:38.956Z"
+   },
+   "costoUsd": 0.449405,
+   "cuando": "2026-10-01T10:27:38.956Z"
+  },
+  {
+   "id": "doc-1",
+   "agente": "documental",
+   "ok": true,
+   "errores": [],
+   "salida": {
+    "resumen": "Borrador de la Política de IA de Maquinados del Bajío, que explica para qué usa la empresa el Cotizador con chatbot (ChatCotiza) y la Inspección visual de piezas (VisionPieza), qué cuidados aplica y cómo se relaciona con las demás políticas del sistema de gestión. Es un borrador para revisión y aprobación por la Dirección general; no implica certificación.",
+    "propuestas": [
+     {
+      "tipo": "documento",
+      "titulo": "Política de IA de Maquinados del Bajío",
+      "detalle": "Documento que fija la postura de la empresa sobre el uso de inteligencia artificial en sus procesos de cotización e inspección final, con compromisos de supervisión humana, confidencialidad de los planos del cliente y mejora continua. Sirve de base para fijar objetivos de IA y se enlaza con la política de calidad existente.",
+      "requisitos": [
+       "SGI-C-5.2-01",
+       "SGI-IA-5.2-03",
+       "SGI-A-2.2-01",
+       "SGI-A-2.3-01",
+       "SGI-A-9.2-01"
+      ],
+      "datos": {
+       "sistemasIA": "Cotizador con chatbot (ChatCotiza), Inspección visual de piezas (VisionPieza)",
+       "alcance": "Procesos de Cotización e Inspección final"
+      }
+     }
+    ],
+    "documento": {
+     "titulo": "Política de IA de Maquinados del Bajío",
+     "secciones": [
+      {
+       "titulo": "Propósito y alcance",
+       "parrafos": [
+        "Maquinados del Bajío usa inteligencia artificial en dos procesos: Cotización, con el Cotizador con chatbot (ChatCotiza), e Inspección final, con el sistema Inspección visual de piezas (VisionPieza).",
+        "Esta política aplica a todo el personal que usa estos sistemas, principalmente Vendedor, Inspector de calidad y Gerente de producción, y a los proveedores que los operan: ChatCotiza y VisionPieza.",
+        "El propósito es que la IA ayude a cotizar más rápido y a detectar rebabas y marcas en flechas antes del embarque, sin sustituir el criterio de las personas responsables de cada proceso."
+       ]
+      },
+      {
+       "titulo": "Postura de la empresa frente a la IA",
+       "parrafos": [
+        "Maquinados del Bajío declara que usa IA de dos formas: como usuaria del servicio en la nube ChatCotiza para armar cotizaciones preliminares a partir de los planos que sube el cliente, y como integradora del sistema VisionPieza dentro de su línea de inspección final.",
+        "La empresa no diseña ni entrena modelos de IA propios; su maquila se hace sobre planos del cliente, y los sistemas de IA que usa apoyan tareas administrativas y de inspección, no decisiones de diseño de producto.",
+        "El Director general es quien respalda esta postura y la revisa junto con el Gerente de producción."
+       ]
+      },
+      {
+       "titulo": "Uso del Cotizador con chatbot (ChatCotiza)",
+       "parrafos": [
+        "El Vendedor usa ChatCotiza para responder consultas de clientes y generar cotizaciones preliminares a partir de planos subidos por Proveedores automotrices Tier 2 del Bajío y Fabricantes de maquinaria agrícola.",
+        "Toda cotización preliminar generada por ChatCotiza debe ser revisada por el Vendedor antes de enviarse al cliente; el chatbot no cotiza en automático sin esa revisión.",
+        "Los planos que los clientes suben a ChatCotiza se tratan como información confidencial del cliente; el Vendedor es responsable de verificar que el proveedor ChatCotiza cumple el tratamiento confidencial acordado."
+       ]
+      },
+      {
+       "titulo": "Uso de la Inspección visual de piezas (VisionPieza)",
+       "parrafos": [
+        "El Inspector de calidad usa VisionPieza para detectar rebabas y marcas en flechas y ejes a plano antes del embarque, como apoyo a la inspección final.",
+        "Cuando VisionPieza marca una pieza como no conforme o dudosa, el Inspector de calidad decide si la pieza se libera, se retrabaja o se rechaza; la decisión final de aceptación o rechazo de pieza es siempre del Inspector de calidad, no del sistema.",
+        "El Gerente de producción da seguimiento al desempeño de VisionPieza junto con el proveedor VisionPieza para corregir fallas de detección cuando se identifiquen."
+       ]
+      },
+      {
+       "titulo": "Relación con otras políticas del sistema de gestión",
+       "parrafos": [
+        "Esta Política de IA complementa la política de calidad de Maquinados del Bajío; no la sustituye ni la contradice.",
+        "Las decisiones sobre tolerancias de ±0.01 mm y conformidad de producto siguen el procedimiento de Inspección final vigente; la IA solo apoya esa inspección, no define el criterio de aceptación."
+       ]
+      },
+      {
+       "titulo": "Uso responsable y revisión",
+       "parrafos": [
+        "El personal que opera ChatCotiza y VisionPieza debe reportar al Gerente de producción cualquier resultado que parezca incorrecto o inconsistente, antes de actuar sobre él.",
+        "El Director general revisa esta política cuando cambien los sistemas de IA usados, los proveedores (ChatCotiza, VisionPieza) o los procesos donde se usan."
+       ]
+      }
+     ]
+    },
+    "preguntasAbiertas": [
+     "¿Qué puesto queda a cargo de administrar y actualizar esta Política de IA de forma continua?",
+     "¿Con qué periodicidad se revisará esta política (semestral, anual)?",
+     "¿Qué registro usará el Inspector de calidad para documentar cuándo anula o corrige un resultado de VisionPieza?",
+     "¿Qué cláusula contractual tiene ChatCotiza respecto a la confidencialidad de los planos de los clientes que se le suben?",
+     "¿Existe ya una política de calidad formal con la que deba alinearse explícitamente este documento, o aún está en borrador?"
+    ]
+   },
+   "traza": {
+    "agente": "documental",
+    "versionPrompt": "sgi-prompts-2026-09-30.1",
+    "modelo": "anthropic/claude-sonnet-5",
+    "insumos": [
+     {
+      "tipo": "perfil",
+      "huella": "sha256:6a832bfc80ae518f0876897ba522e439bba7cadd771829fa8d86734961ec4b0c"
+     },
+     {
+      "tipo": "tarea",
+      "huella": "sha256:5196d7bbc4e6769c8900d2578425f423ad9efb7479d1e5ffa85aa3f905be2b7e"
+     },
+     {
+      "tipo": "prompt",
+      "huella": "sha256:ec81817b2fd5dd2c0db8f1dde7cc42617f8e9f3207339ad03e0e1356801f9538"
+     }
+    ],
+    "salidaHuella": "sha256:a70a180e5b4cb49fd5699f544ab35a18c3ad9f9b9d7b4c3aa97dccaa574c07ed",
+    "requisitosCitados": [
+     "SGI-A-2.2-01",
+     "SGI-A-2.3-01",
+     "SGI-A-9.2-01",
+     "SGI-C-5.2-01",
+     "SGI-IA-5.2-03"
+    ],
+    "uso": {
+     "entrada": 2239,
+     "salida": 2553,
+     "cacheados": 0
+    },
+    "intentos": 1,
+    "rechazos": [],
+    "alertas": {
+     "instruccionIncrustada": false,
+     "datosMinimizados": {}
+    },
+    "cuando": "2026-10-01T10:21:54.908Z"
+   },
+   "costoUsd": 0.030008,
+   "cuando": "2026-10-01T10:21:54.908Z"
+  }
+ ]
+}

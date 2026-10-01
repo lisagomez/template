@@ -10,6 +10,7 @@ import {
   minimiza, delimita, tieneInstruccionIncrustada, promesasDeCertificacion, validaForma, revisaCitas, ejecutaAgente,
   planDeTareas, AGENTES, type ModeloLLM,
 } from '../dist/agentes/index.js';
+import { modeloOpenAiCompat } from '../dist/openrouter.js';
 
 const DOC: DocumentoFuente = {
   titulo: 'Política de calidad', organizacion: 'Maquinados del Bajío', version: 2, estado: 'aprobado',
@@ -111,6 +112,7 @@ test('ejecutor: rechaza el ID inventado, reintenta con el error y acepta la corr
   assert.equal(r.traza.intentos, 2);
   assert.deepEqual(r.traza.uso, { entrada: 2000, salida: 400, cacheados: 0 });
   assert.deepEqual(r.traza.requisitosCitados, ['SGI-C-4.1-01']);
+  assert.deepEqual(r.traza.rechazos, ['intento 1: IDs inexistentes en el catálogo: SGI-C-99.9-01']);
   assert.equal(r.traza.alertas.instruccionIncrustada, true);
   assert.deepEqual(r.traza.alertas.datosMinimizados, { CORREO: 1 });
   assert.ok(r.traza.insumos.some((x) => x.tipo === 'evidencia:acta.pdf' && /^sha256:[0-9a-f]{64}$/.test(x.huella)));
@@ -123,6 +125,43 @@ test('ejecutor: si el modelo insiste en prometer certificación, no hay salida a
   if (r.ok) return;
   assert.ok(r.errores.some((e) => e.includes('promete certificación')));
   assert.deepEqual(r.traza.uso, { entrada: 2000, salida: 400, cacheados: 0 });
+});
+
+test('ejecutor: una respuesta truncada se dice «truncada» (no «ilegible») y el reintento pide brevedad', async () => {
+  const mensajes: string[] = [];
+  let i = 0;
+  const modelo: ModeloLLM = {
+    id: 'guion/prueba',
+    async completa(p) {
+      mensajes.push(p.usuario);
+      return i++ === 0 ? { texto: '{"resumen": "Informe de brechas de', uso: { entrada: 1000, salida: 3500 }, truncada: true }
+        : { texto: JSON.stringify(salida(['SGI-C-4.1-01'])), uso: { entrada: 1000, salida: 200 } };
+    },
+  };
+  const r = await ejecutaAgente('diagnostico', { ...ENTRADA, ediciones: [...ENTRADA.ediciones], evidencias: [] }, { modelo });
+  assert.equal(r.ok, true);
+  assert.equal(r.traza.intentos, 2);
+  assert.ok(mensajes[1]!.includes(`respuesta truncada: se cortó al llegar al límite de ${AGENTES.diagnostico.maxTokens} tokens`));
+  assert.doesNotMatch(mensajes[1]!, /ilegible/);
+  assert.equal(r.traza.rechazos.length, 1);
+  assert.match(r.traza.rechazos[0]!, /^intento 1: respuesta truncada/);
+});
+
+test('cliente OpenAI-compat: el tope de razonamiento va aparte y se suma al de la respuesta; «length» es truncada', async () => {
+  let cuerpo: Record<string, unknown> = {};
+  const f = (async (_url: string, init: { body: string }) => {
+    cuerpo = JSON.parse(init.body) as Record<string, unknown>;
+    return new Response(JSON.stringify({ choices: [{ message: { content: '' }, finish_reason: 'length' }], usage: { prompt_tokens: 10, completion_tokens: 7500 } }));
+  }) as unknown as typeof fetch;
+  const m = modeloOpenAiCompat({ llave: 'k', modelo: 'proveedor/modelo-5', fetch: f, razonamiento: { maxTokens: 4000 } });
+  const r = await m.completa({ sistema: 's', usuario: 'u', maxTokens: 3500 });
+  assert.equal(cuerpo.max_tokens, 7500);
+  assert.deepEqual(cuerpo.reasoning, { max_tokens: 4000 });
+  assert.equal(r.truncada, true);
+  const sin = modeloOpenAiCompat({ llave: 'k', modelo: 'proveedor/modelo-5', fetch: f });
+  await sin.completa({ sistema: 's', usuario: 'u', maxTokens: 3500 });
+  assert.equal(cuerpo.max_tokens, 3500);
+  assert.equal('reasoning' in cuerpo, false);
 });
 
 test('orquestador: determinista, sugiere el agente y avisa lo vencido', () => {

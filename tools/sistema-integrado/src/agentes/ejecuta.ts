@@ -78,6 +78,7 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
   let textoCrudo = '';
   let salida: SalidaAgente | null = null;
   let intentos = 0;
+  const rechazos: string[] = [];
   let mensaje = usuario;
   while (intentos < 2) {
     intentos++;
@@ -85,7 +86,8 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
     uso = sumaUso(uso, r.uso);
     textoCrudo = r.texto;
     errores = [];
-    try {
+    if (r.truncada) errores = [`respuesta truncada: se cortó al llegar al límite de ${tarjeta.maxTokens} tokens de salida; hazla más breve (menos propuestas, textos más cortos)`];
+    else try {
       const forma = validaForma(extraeJson(r.texto), tarjeta);
       if (!forma.ok) errores = forma.errores;
       else {
@@ -101,13 +103,14 @@ export async function ejecutaAgente(agente: AgenteId, entrada: EntradaAgente, de
       errores = [`respuesta ilegible: ${(e as Error).message}`];
     }
     if (salida) break;
+    rechazos.push(`intento ${intentos}: ${errores.join('; ')}`);
     mensaje = `${usuario}\n\nTU RESPUESTA ANTERIOR NO SE ACEPTÓ por esto:\n- ${errores.join('\n- ')}\nCorrígela y responde de nuevo SOLO con el JSON.`;
   }
   const traza: Traza = {
     agente, versionPrompt: VERSION_PROMPTS, modelo: deps.modelo.id, insumos,
     salidaHuella: salida ? await huella(JSON.stringify(salida)) : null,
     requisitosCitados: salida ? revisaCitas(salida, permitidos, c).citados : [],
-    uso, intentos, alertas: { instruccionIncrustada, datosMinimizados: conteo }, cuando: ahora().toISOString(),
+    uso, intentos, rechazos, alertas: { instruccionIncrustada, datosMinimizados: conteo }, cuando: ahora().toISOString(),
   };
   if (!salida) return { ok: false, errores, traza, textoCrudo };
   const avisos: string[] = [];

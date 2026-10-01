@@ -12,10 +12,18 @@ import { estadoPresupuesto, type EstadoDePresupuesto } from '../../../lib/ai/con
  * organización (decisión de producto con víctima declarada: la pyme sigue usando todo lo demás, sin redacción). */
 export const PRESUPUESTO_MENSUAL_USD = 5;
 
+/** Tope de razonamiento por clase, aparte del de la respuesta. El modelo de evaluación razona por omisión y, sin tope
+ * propio, se comía todo el límite de salida del diagnóstico (medido el 2026-10-01: respuesta vacía, US$0.30 perdidos). */
+const RAZONAMIENTO: Partial<Record<Exclude<ClaseDeRouting, null>, number>> = { 'agente-sgi-evaluacion': 4000 };
+
 export function modeloDe(clase: Exclude<ClaseDeRouting, null>, llave: string | undefined, f: typeof fetch = fetch): ModeloLLM | null {
   if (!llave) return null;
   const { modelo } = modeloPara(clase as ClaseDeTarea);
-  return modeloOpenAiCompat({ llave, modelo, fetch: f, cabeceras: { 'X-Title': 'sistema-integrado-iso' } });
+  const razonamiento = RAZONAMIENTO[clase];
+  return modeloOpenAiCompat({
+    llave, modelo, fetch: f, cabeceras: { 'X-Title': 'sistema-integrado-iso' },
+    ...(razonamiento ? { razonamiento: { maxTokens: razonamiento } } : {}),
+  });
 }
 
 /** Gasto del mes de UNA organización, leído con la sesión (RLS: solo sus trazas). */

@@ -15,7 +15,7 @@ export const AGENTES: Readonly<Record<AgenteId, TarjetaAgente>> = {
     id: 'diagnostico', nombre: 'Diagnóstico', determinista: false, clase: 'agente-sgi-evaluacion', fases: [0, 1, 2, 3, 4, 5, 6, 7],
     descripcion: 'Cuestionario adaptativo por cláusula y el informe de brechas. El puntaje de madurez lo calcula el motor con una regla fija.',
     habilidades: [{ id: 'informe-gap', descripcion: 'Brechas, fortalezas y primeros pasos' }],
-    tipos: ['brecha', 'fortaleza', 'prioridad'], entrada: 'Respuestas del cuestionario + madurez calculada', salida: 'Informe GAP con IDs', maxTokens: 3500,
+    tipos: ['brecha', 'fortaleza', 'prioridad'], entrada: 'Respuestas del cuestionario + madurez calculada', salida: 'Informe GAP con IDs', maxTokens: 6000,
   },
   contexto: {
     id: 'contexto', nombre: 'Contexto', determinista: false, clase: 'agente-sgi-redaccion', fases: [1],

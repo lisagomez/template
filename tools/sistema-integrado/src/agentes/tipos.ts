@@ -88,10 +88,11 @@ export interface SalidaAgente {
 
 export interface Uso { readonly entrada: number; readonly salida: number; readonly cacheados?: number }
 
-/** El modelo inyectado. `uso: null` cuando el proveedor no lo reporta: se guarda así, nunca como cero. */
+/** El modelo inyectado. `uso: null` cuando el proveedor no lo reporta: se guarda así, nunca como cero.
+ * `truncada`: la respuesta se cortó en el límite de salida. No es «ilegible»: le falta el final. */
 export interface ModeloLLM {
   readonly id: string;
-  completa(p: { sistema: string; usuario: string; maxTokens: number }): Promise<{ texto: string; uso: Uso | null }>;
+  completa(p: { sistema: string; usuario: string; maxTokens: number }): Promise<{ texto: string; uso: Uso | null; truncada?: boolean }>;
 }
 
 export interface Traza {
@@ -104,6 +105,8 @@ export interface Traza {
   /** Suma de todos los intentos; `null` si algún intento no reportó uso. */
   readonly uso: Uso | null;
   readonly intentos: number;
+  /** Por qué se rechazó cada intento anterior al aceptado (o todos, si ninguno se aceptó). Vacío si pasó a la primera. */
+  readonly rechazos: readonly string[];
   readonly alertas: {
     readonly instruccionIncrustada: boolean;
     readonly datosMinimizados: Readonly<Record<string, number>>;
