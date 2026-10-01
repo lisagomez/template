@@ -22,7 +22,7 @@ Post-mortem: `post-mortem.md` (escrito al detenerse el 30/09; la sección 6 suma
 | 9 | Laboratorio | ◐ | 33/33 deterministas en verde + L8 (32 archivos). **Con LLM: 8 medidos, 7 pasan y 1 falla** (`dia-5`, trampa 1: la única respuesta completa citó el ID inventado; el validador la rechazó y el ID no llegó a ninguna salida, pero tampoco hubo informe). 38 «no medidos» por saldo. Las 10 trampas tienen caso; medidas con LLM: solo la 1 |
 | 10 | Empaquetado, READMEs, guías, aviso, inventario | ✓ | `empaqueta` en verde (6 subpaths en un proyecto limpio); 18/18 READMEs conformes; guías y aviso en `docs/`; 3 asientos (238 unidades, 0 NUEVO) |
 | 11 | Propuesta CDC y bloqueados | ✓ | `propuesta-cdc.md` (diff del routing + prompts), `propuestas.md` |
-| 12 | `validate` verde tras el commit | ✗ (medido) | Sobre `1df6bcc` y `3f7bd78`: 29/29. **Con las corridas reales, `prueba:laboratorio-sgi` se pone en rojo por `dia-5`**, que es lo que tiene que hacer: el gate exige cero fallas y la trampa 1 falló de verdad. No se afloja el gate; se arregló el mensaje de reintento (CDC) y falta medirlo |
+| 12 | `validate` verde tras el commit | ✗ (medido) | Sobre `1df6bcc` y `3f7bd78`: 29/29. Sobre **`56294be`** (con las corridas reales), `validate --sigue`: **28/29 en verde, 8 inactivos declarados, 1 rojo: `prueba:laboratorio-sgi` por `dia-5`**. Es lo que tiene que hacer: el gate exige cero fallas y la trampa 1 falló de verdad. No se afloja el gate; se arregló el mensaje de reintento (CDC) y falta medirlo con saldo |
 
 ## Decisiones (reporte)
 
