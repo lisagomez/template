@@ -369,7 +369,7 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (172 comprobaciones; el propio verificador vigila esta cifra)
+npm run verify:gobernanza   # falla si la capa quedo suelta (166 comprobaciones; el propio verificador vigila esta cifra)
 npm run regresion           # C2 capa A: contratos de los 27 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 npm run revisa:readmes      # README product first de tools/ y src/features/ (skill readme); -- --prueba lo prueba

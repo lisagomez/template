@@ -211,38 +211,61 @@ function filasDeSeccion(indice, n) {
     .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()));
 }
 
+/** El enlace de una celda, o null. Un enlace DENTRO de un span de codigo (`[ruta](ruta)` entre
+ *  comillas invertidas) no es un enlace: GitHub lo pinta como texto. Asi lo dejo un formateador al
+ *  guardar la firma del indice (c06249c) y la version anterior de esta funcion lo dio por bueno. */
 function enlaceDe(celda) {
-  return celda.match(/\]\(([^)]+)\)/)?.[1] ?? null;
+  const sinCodigo = celda.replace(/`[^`]*`/g, (span) => (span.includes('](') ? '' : span));
+  return sinCodigo.match(/\]\(([^)]+)\)/)?.[1] ?? null;
 }
 
-/** Cada producto del §1 tiene su contrato, y el contrato su evaluacion de impacto (C4). */
+/** Reparte las filas del §1 por lo que les pasa. Las comprobaciones que salen de aqui son FIJAS y
+ *  agregan sobre las filas: una fila nueva no cambia el total, asi que dos PR que suman productos en
+ *  paralelo ya no se pisan la cifra que declaran los README (paso con #195 y #196: 171 y 171, real 172). */
+function clasificaContratos(productos) {
+  const c = { enCodigo: [], sinFalta: [], inexistentes: [], sinGobernanza: [], sinFirma: [], enlazados: new Set() };
+  for (const [nombre, contrato = '', , estado = ''] of productos) {
+    const enlace = enlaceDe(contrato);
+    if (enlace === null && contrato.includes('](')) { c.enCodigo.push(nombre); continue; }
+    if (enlace === null) {
+      if (/falta:/.test(estado)) pendientes.push(`contrato de «${nombre}» — ${estado}`);
+      else c.sinFalta.push(nombre);
+      continue;
+    }
+    c.enlazados.add(enlace);
+    const texto = lee(enlace);
+    if (texto === null) { c.inexistentes.push(`${nombre} (${enlace})`); continue; }
+    if (!enlace.endsWith('BUSINESS_LOGIC.md')) continue; // maestro propio: lo gobierna su fuente
+    if (!/^##\s*6\.\s*Gobernanza/m.test(texto)) c.sinGobernanza.push(nombre);
+    const firma = texto.match(/^\*\*Firma:\*\*(.*)$/m);
+    if (firma === null) c.sinFirma.push(nombre);
+    else if (/pendiente/i.test(firma[1])) pendientes.push(`firma del contrato de «${nombre}»`);
+  }
+  return c;
+}
+
+/** Cada producto del §1 tiene su contrato, y el contrato su evaluacion de impacto (C4) y su firma. */
 function verificaContratos(productos) {
   comprueba('el indice del portafolio declara sus productos', productos.length > 0,
     'la raiz dice ser indice (`## 1. Productos`) y la tabla esta vacia o rota');
-  for (const [nombre, contrato = '', , estado = ''] of productos) {
-    const enlace = enlaceDe(contrato);
-    if (enlace === null) {
-      const falta = /falta:/.test(estado);
-      comprueba(`el contrato pendiente de «${nombre}» declara lo que le falta`, falta,
-        'un pendiente sin «falta:» se lee igual que un contrato hecho');
-      if (falta) pendientes.push(`contrato de «${nombre}» — ${estado}`);
-      continue;
-    }
-    const texto = lee(enlace);
-    comprueba(`existe el contrato de «${nombre}» (${enlace})`, texto !== null,
-      'el indice apunta a un archivo que no esta: se movio o se borro sin tocar el indice');
-    if (texto === null || !enlace.endsWith('BUSINESS_LOGIC.md')) continue; // maestro propio
-    comprueba(`el contrato de «${nombre}» incluye su seccion de Gobernanza`,
-      /^##\s*6\.\s*Gobernanza/m.test(texto),
-      'sin la seccion 6 ese producto no tiene evaluacion de impacto (C4)');
-  }
-  const enlazados = new Set(productos.map(([, c = '']) => enlaceDe(c)).filter(Boolean));
+  const c = clasificaContratos(productos);
+  const de = (xs) => xs.join(', ');
+  comprueba('ningun contrato del indice esta enlazado dentro de codigo', c.enCodigo.length === 0,
+    `${de(c.enCodigo)}: el enlace va entre comillas invertidas y GitHub lo pinta como texto (¿un formateador al guardar?)`);
+  comprueba('todo contrato pendiente del indice declara lo que le falta', c.sinFalta.length === 0,
+    `${de(c.sinFalta)}: un pendiente sin «falta:» se lee igual que un contrato hecho`);
+  comprueba('todo contrato enlazado desde el indice existe', c.inexistentes.length === 0,
+    `${de(c.inexistentes)}: el indice apunta a un archivo que no esta (se movio o se borro sin tocar el indice)`);
+  comprueba('todo contrato enlazado incluye su seccion de Gobernanza', c.sinGobernanza.length === 0,
+    `${de(c.sinGobernanza)}: sin la seccion 6 ese producto no tiene evaluacion de impacto (C4)`);
+  comprueba('todo contrato enlazado declara su firma', c.sinFirma.length === 0,
+    `${de(c.sinFirma)}: sin linea «**Firma:**» no se sabe si lo firmo el laboratorio; si no, «**Firma:** pendiente»`);
   const huerfanos = ['src/features', 'tools']
     .flatMap((base) => (existsSync(ruta(base)) ? readdirSync(ruta(base)) : [])
       .map((d) => `${base}/${d}/BUSINESS_LOGIC.md`))
-    .filter((p) => existsSync(ruta(p)) && !enlazados.has(p));
+    .filter((p) => existsSync(ruta(p)) && !c.enlazados.has(p));
   comprueba('todo contrato de producto esta enlazado desde el indice', huerfanos.length === 0,
-    `sin fila en el §1: ${huerfanos.join(', ')} — un contrato que el indice no nombra no lo encuentra nadie`);
+    `sin fila en el §1: ${de(huerfanos)} — un contrato que el indice no nombra no lo encuentra nadie`);
 }
 
 /** Todo PRODUCTO del inventario en beta o produccion esta en el indice: en un producto del §1 o
@@ -253,10 +276,9 @@ function verificaCobertura(productos, noProductos) {
   comprueba('el indice del portafolio puede leer el inventario de activos', Array.isArray(inventario),
     'sin inventario no hay contra que cruzar: no poder mirar no es estar en verde');
   if (!Array.isArray(inventario)) return;
-  for (const [activos, motivo = ''] of noProductos) {
-    comprueba(`${activos}: el indice dice por que no lleva contrato`, motivo.length > 0,
-      'un activo en el §2 sin motivo es un producto sin contrato con otro nombre');
-  }
+  const sinMotivo = noProductos.filter(([, motivo = '']) => motivo.length === 0).map(([activos]) => activos);
+  comprueba('todo activo del §2 del indice dice por que no lleva contrato', sinMotivo.length === 0,
+    `${sinMotivo.join(', ')}: un activo en el §2 sin motivo es un producto sin contrato con otro nombre`);
   const ids = (celda = '') => celda.match(/TPL-[a-z0-9-]+/g) ?? [];
   const citados = new Set([...productos.flatMap((f) => ids(f[2])), ...noProductos.flatMap((f) => ids(f[0]))]);
   const conocidos = new Set(inventario.map((a) => a.id));
