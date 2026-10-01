@@ -30,6 +30,8 @@ export interface Politicas {
   citas?: { servicios: Array<{ id: string; nombre: string; minutos: number; precioCentavos: number; /** Cuántas a la vez (mesas de ese tamaño). */ capacidad?: number }>; apertura: number; cierre: number; diasAbiertos: number[] };
   /** Temas del giro que el agente NO trata aunque parezcan del negocio (p. ej. alcohol). */
   temasRestringidos: string[];
+  /** Límites del número en la frontera; sin ellos, `LIMITE_POR_NUMERO`. */
+  frontera?: { contactosNuevos: number; mensajes: number; ventanaMs: number };
 }
 
 export interface Inquilino {
@@ -55,6 +57,10 @@ export interface Contacto {
   nombre?: string;
   optIn?: { fecha: number; fuente: string };
   avisoPrivacidadEn?: number;
+  /** Lista de bloqueo del dueño: sus mensajes se guardan y no se responden. */
+  bloqueado?: { en: number; motivo: string };
+  /** En una ráfaga de contactos nuevos ya recibió su única respuesta de cortesía. */
+  contenidoEn?: number;
   creadoEn: number;
 }
 

@@ -44,7 +44,7 @@
 | **Falsos positivos** de las barreras («gracias a Dios», «pan», «armar un pedido») | Encontrados y corregidos al escribir el léxico; hay una prueba de frases normales que deben pasar |
 | **Métricas de conversión y resolución** vienen de clientes guionados | Marcadas «simulada»; la mezcla de clientes la declara el laboratorio y no predice la real |
 | **Proceso caído** entre el 200 y el trabajo | Cola durable y reanudación al arrancar, probadas |
-| **Denial-of-wallet** | Topes por conversación y por mes, y **límite por remitente** (20 mensajes en 10 min), probados. Falta un límite por número o granja en la frontera (C3) |
+| **Denial-of-wallet** | Topes por conversación y por mes, **límite por remitente** (20 mensajes en 10 min) y, desde la cuarta vuelta, la **frontera del número** (contactos nuevos y mensajes por hora) con lista de bloqueo, probados. Los límites por número son ficticios hasta el piloto |
 | El «escribiendo…» cuando lo atiende el dueño | Corregido: solo cuando el agente va a contestar |
 | Una hoja de catálogo con errores **aplicada a medias** | Corregido: la sincronización es atómica |
 | **Tablas del restaurante** (una sola reserva por horario) | Encontrado por el laboratorio; ahora hay capacidad por tipo de mesa |
@@ -97,7 +97,25 @@ P-10 paso a Solution Partner).
 - **La página de alta** no verifica todavía el `origin` del mensaje ni ata la sesión a quien recibió
   la liga (C3). La bóveda es en memoria (P-02).
 
-## 6. Horizonte (fases 4-5): qué lo habilita y qué lo estorbaría
+## 6. Cuarta vuelta (2026-10-01): frontera, alta segura y la plataforma en la app
+
+| Qué | Resultado |
+|---|---|
+| **Frontera del número** (`agente/frontera.ts`) | Cierra la brecha del C3 de la granja de números. Pasados 40 contactos nuevos en la hora, los siguientes reciben una sola cortesía con el menú y nada más: sin modelo y sin bandeja. Pasados 400 mensajes en la hora, el agente sigue con el enrutador y los traspasos, sin modelo. Un aviso por ventana. Probado: una granja de 60 contactos gasta 40 llamadas al modelo, no 60, y un cliente de antes sigue atendido en plena ráfaga |
+| **Hallazgo: el arnés adversarial era una granja** | Las 200 conversaciones llegaban en el mismo instante simulado y la frontera las contenía antes de que llegaran al agente. Ahora llegan cada 2 minutos: el arnés mide las barreras del agente y la frontera tiene sus propias pruebas |
+| **Lista de bloqueo** | El dueño bloquea o desbloquea desde la bandeja. Del bloqueado se guarda lo que escribe, no se le responde ni se marca como leído, y la acción queda en la cadena de hashes |
+| **Alta segura** (`bsp/liga.ts`) | Liga firmada, que vence y sirve una vez (un abandono deja reintentar). Origen exigido más estricto que la muestra de Meta, que con `endsWith('facebook.com')` deja pasar `evilfacebook.com`. El token entra a la bóveda solo si Meta acepta la suscripción de ESA WABA. Una WABA por pyme |
+| **Persistencia** | Las altas, el embudo, los nonces de las ligas y el pool de números viven en archivo y sobreviven a un reinicio. Los tokens no: siguen en una bóveda en memoria hasta P-02 |
+| **La app** | Botón de bloquear en la bandeja del dueño, y una página de plataforma (`/plataforma-ventas-whatsapp`, con su propio token y solo en el laboratorio) con las altas y su embudo, el pool de números y la factura del mes en las dos modalidades |
+
+**Dónde podría estar mal**: los límites de la frontera son ficticios (40 y 400 por hora) y un
+negocio con un anuncio exitoso podría rebasarlos de buena fe: en ese caso sus clientes nuevos
+reciben la cortesía y el menú, no el agente completo, y el dueño recibe el aviso. Una granja
+que pide «una persona» todavía llega a la bandeja. En la app, las altas simuladas crean pymes
+cuyo número no existe en el simulador de Meta por HTTP: sirven para ver el alta y la factura, no
+para conversar.
+
+## 7. Horizonte (fases 4-5): qué lo habilita y qué lo estorbaría
 
 **Lo habilita**: `tenant` en todo y RLS en el esquema; el alta de inquilino ya es una operación
 (`semilla` en la app del laboratorio, y `creaBsp` con Embedded Signup en la herramienta, contra el simulador); la pasarela A2A multi-inquilino con

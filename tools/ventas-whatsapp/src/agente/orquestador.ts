@@ -69,6 +69,8 @@ export interface Turno {
   mensaje: MensajeEntrante;
   /** Texto ya limpio: sin etiqueta de origen y con datos sensibles ocultos. */
   texto: string;
+  /** Ráfaga en el número (frontera): se atiende con el enrutador y los traspasos, sin modelo. */
+  protegido?: boolean;
 }
 
 export interface Bitacora { tipo: string; detalle: string }
@@ -289,7 +291,12 @@ class Sesion {
       const f = this.i.faqs.find((x) => x.id === 'privacidad');
       if (f) { this.salientes.push({ tipo: 'texto', texto: f.respuesta }); return; }
     }
-    if (this.opt.enrutador && await this.sinModelo(texto)) return;
+    if ((this.opt.enrutador || this.t.protegido) && await this.sinModelo(texto)) return;
+    if (this.t.protegido) {
+      this.bitacora.push({ tipo: 'sin_modelo_por_rafaga', detalle: texto.slice(0, 80) });
+      this.menu('Ahorita tenemos muchos mensajes. Elige una opción y te atiendo, o escríbeme en un rato.');
+      return;
+    }
     // Sin presupuesto de IA, lo determinista sigue atendiendo: solo lo que necesita modelo pasa al dueño.
     if (await this.tokensDelMes() >= pol.presupuestoTokensMensual) { await this.traspasa('inquilino_sin_presupuesto', 'se agotó el presupuesto mensual de IA del negocio'); return; }
     await this.conModelo(texto);

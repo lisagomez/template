@@ -88,6 +88,8 @@ Líneas de números y BSP propio (N-01, N-02), probadas en el laboratorio:
 - **VENTA a nombre de la pyme** (se lo lleva al irse); en RENTA, portabilidad dicha **antes** de vender.
 - **Al tope de crédito no se corta el servicio**: se frena el marketing y una persona decide.
 - La **baja** revoca nuestro acceso y deja a la pyme con su WABA y su número.
+- **Frontera del número** (2026-10-01): ante una ráfaga, los clientes que ya existían siguen atendidos; los
+  contactos nuevos de más reciben una cortesía con el menú (no silencio) y las quejas siguen llegando al dueño.
 
 Pendientes antes del piloto (bloquean la firma, a juicio del agente):
 - **Retención**: definir y aplicar (propuesta: conversaciones y pedidos 12 meses; historial de

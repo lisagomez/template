@@ -6,16 +6,36 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, unlinkSyn
 import { dirname, join } from 'node:path';
 import { almacenEnMemoria, type Almacen, type ColaDurable, type Volcado } from './almacen.js';
 import type { AlmacenAnclas, Ancla } from '../trazabilidad/cadena.js';
+import { registroAltasEnMemoria, type RegistroAltas, type VolcadoAltas } from '../bsp/alta.js';
+import type { NumeroGestionado, PoolNumeros } from '../dominios/numeros.js';
+
+/** Lee un JSON si existe y devuelve con qué reescribirlo de forma atómica (temporal + rename). */
+function jsonEnArchivo<T>(ruta: string): { inicial: T | undefined; escribe: (v: T) => void } {
+  const inicial = existsSync(ruta) ? JSON.parse(readFileSync(ruta, 'utf8')) as T : undefined;
+  mkdirSync(dirname(ruta), { recursive: true });
+  return { inicial, escribe: (v) => { const tmp = `${ruta}.${process.pid}.tmp`; writeFileSync(tmp, JSON.stringify(v)); renameSync(tmp, ruta); } };
+}
 
 export function almacenArchivo(ruta: string): Almacen & { volcado(): Volcado } {
-  let inicial: Volcado | undefined;
-  if (existsSync(ruta)) inicial = JSON.parse(readFileSync(ruta, 'utf8')) as Volcado;
-  mkdirSync(dirname(ruta), { recursive: true });
-  return almacenEnMemoria(inicial, (v) => {
-    const tmp = `${ruta}.${process.pid}.tmp`;
-    writeFileSync(tmp, JSON.stringify(v));
-    renameSync(tmp, ruta);
-  });
+  const f = jsonEnArchivo<Volcado>(ruta);
+  return almacenEnMemoria(f.inicial, f.escribe);
+}
+
+/** Las altas del BSP, su embudo y los nonces de las ligas (N-02). Los tokens NO: viven en la bóveda. */
+export function registroAltasEnArchivo(ruta: string): RegistroAltas {
+  const f = jsonEnArchivo<VolcadoAltas>(ruta);
+  return registroAltasEnMemoria(f.inicial, f.escribe);
+}
+
+/** El pool de números (N-01). El PIN no está aquí: el gestor no lo guarda. */
+export function poolEnArchivo(ruta: string): PoolNumeros {
+  const f = jsonEnArchivo<Record<string, NumeroGestionado>>(ruta);
+  const m: Record<string, NumeroGestionado> = f.inicial ?? {};
+  return {
+    async lee(e) { const n = m[e]; return n ? structuredClone(n) : undefined; },
+    async guarda(n) { m[n.e164] = structuredClone(n); f.escribe(m); },
+    async lista() { return Object.values(m).map((n) => structuredClone(n)); },
+  };
 }
 
 /** La cola durable en una carpeta: un archivo por lote, escrito antes del 200 y borrado al procesarlo. */

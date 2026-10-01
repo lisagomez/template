@@ -141,7 +141,7 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
       registro.push({ instante: reloj(), tipo: 'graph', detalle: `${n.phoneNumberId} → ${para}: ${m.tipo}` });
       return { ok: true, wamid: id };
     },
-    async marcaLeido(phoneNumberId) { return numeros.has(phoneNumberId); },
+    async marcaLeido(phoneNumberId, wamid) { registro.push({ instante: reloj(), tipo: 'leido', detalle: `${phoneNumberId}: ${wamid}` }); return numeros.has(phoneNumberId); },
     async creaQr(phoneNumberId, mensajePrellenado, formato): Promise<RespuestaQr> {
       const n = numeros.get(phoneNumberId);
       if (!n) return { ok: false, error: '(#100) phone_number_id desconocido' };

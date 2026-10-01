@@ -35,7 +35,8 @@
 
 1. ☐ C3 (`C3-modelo-de-amenazas-BORRADOR.md`) y C4 (`C4-AISIA-BORRADOR.md`) **firmados**.
 2. ☐ P-02 resuelta: token de usuario de sistema en el vault, nunca en `.env`.
-3. ☐ Rate-limit por remitente y lista de bloqueo (brecha del C3).
+3. ☐ Calibrar con el piloto los límites de la frontera del número y revisar la lista de bloqueo
+   (construidas y probadas en el laboratorio el 2026-10-01; los valores son ficticios).
 4. ☐ P-03 resuelta y verificación del pago contra la API del procesador.
 5. ☐ CDC del routing aprobado y corrida real del arnés de 200 en verde (P-04).
 6. ☐ **Nuestra app de Meta como Tech Provider** (N-02): verificación de nuestro negocio, revisión de

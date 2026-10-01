@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 /** Un secreto del entorno: largo mínimo y sin valor por omisión. */
 const secreto = z.string().min(16);
+const opcional = secreto.optional();
 const texto = (minimo: number) => z.string().min(minimo);
 
 const esquema = z.object({
@@ -33,6 +34,8 @@ const esquema = z.object({
   VENTAS_WA_TRAZA_LLAVE: z.string().min(16).optional(),
   /** Llave Ed25519 (PEM en base64) que firma las anclas de la cadena. */
   VENTAS_WA_ANCLA_LLAVE: z.string().min(40).optional(),
+  /** Token de quien opera la plataforma (altas por BSP, números, factura). Sin él, la página no abre. */
+  VENTAS_WA_PLATAFORMA_TOKEN: opcional,
 });
 
 export type Configuracion = z.infer<typeof esquema> & { tokens: Record<string, string>; panel: Map<string, string> };

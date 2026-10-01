@@ -400,10 +400,10 @@
     },
     {
       "id": "l-remitente",
-      "label": "límite por remitente",
+      "label": "frontera del número: por contacto, contactos nuevos y mensajes por hora; lista de bloqueo",
       "sobre": "nodo:conversacion",
       "estado": "ambar",
-      "referencia": "20 mensajes en 10 min"
+      "referencia": "20 mensajes en 10 min por contacto; 40 contactos nuevos y 400 mensajes por hora (ficticios); una granja de 60 gasta 40 llamadas al modelo"
     },
     {
       "id": "l-conciliacion",
@@ -470,10 +470,10 @@
     },
     {
       "id": "l-codigo-30s",
-      "label": "el código de Embedded Signup vive 30 s y sirve una vez; el token solo en la bóveda",
+      "label": "liga firmada de un solo uso, origen de Meta, código de 30 s; el token solo en la bóveda y solo si la WABA es suya",
       "sobre": "nodo:alta-bsp",
       "estado": "ambar",
-      "referencia": "canje tardío o repetido rechazado; el token no aparece en el almacén ni en el alta"
+      "referencia": "liga alterada, vencida o reusada rechazada; evilfacebook.com rechazado; WABA ajena sin token guardado"
     },
     {
       "id": "l-conciliacion-meta",

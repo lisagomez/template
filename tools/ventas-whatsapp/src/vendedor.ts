@@ -6,7 +6,7 @@
  * Fase 0 (fuente §Fases): «respuesta 200 inmediata y procesamiento en cola», idempotencia por
  * `message.id`, estados y `pricing` guardados.
  */
-import { createHmac, type KeyLike } from 'node:crypto';
+import type { KeyLike } from 'node:crypto';
 import { idsAleatorios, paisDeWaId, relojDelSistema, type GeneradorIds, type Reloj } from './comun/base.js';
 import { colaEnMemoria, type Almacen, type AlmacenInquilino, type ColaDurable } from './almacen/almacen.js';
 import { respondeVerificacion, verificaFirmaMeta, type RespuestaHttp } from './meta/firma.js';
@@ -30,6 +30,8 @@ import { cronometro } from './meta/cronometro.js';
 import { creaTrazabilidad, verificaAnclas, type AlmacenAnclas, type Ancla, type Eslabon, type Trazabilidad } from './trazabilidad/cadena.js';
 import { partesDeReferencia, type ConectorPagos } from './dominios/pagos.js';
 import { atiendeEndpointFlows } from './flows/endpoint.js';
+import { aplicaFrontera, bloqueaContacto, evaluaFrontera } from './agente/frontera.js';
+import { idConversacionDe, nuevaConversacion } from './agente/conversacion.js';
 
 /** Plantillas aprobadas (en el laboratorio, las que el simulador tiene registradas con su categoría). */
 export const PLANTILLAS: Record<string, CategoriaPlantilla> = { estado_pedido: 'utility', recordatorio_reserva: 'utility' };
@@ -64,7 +66,6 @@ const TAREAS_TRAZADAS = new Set(['crear_pedido', 'agregar_entrega', 'liga_pago',
 const CAMPOS_TRAZADOS = ['id', 'estado', 'totalCentavos', 'eventId', 'nombre', 'motivo', 'servicioId', 'calificado', 'duplicado'];
 
 /** Más allá de esto, un remitente no gasta modelo: denial-of-wallet (C3). */
-export const LIMITE_POR_CONTACTO = { mensajes: 20, ventanaMs: 10 * 60_000 };
 /** Un origen (anuncio o etiqueta) atribuye durante 7 días; después, lo nuevo cuenta como directo. */
 export const VENTANA_ATRIBUCION = 7 * 24 * 3_600_000;
 
@@ -155,19 +156,7 @@ export function creaVendedor(o: OpcionesVendedor) {
     return { ...conv, ventanas: registraSaliente(conv.ventanas, ahora) };
   }
 
-  /**
-   * El id de la conversación es un SEUDÓNIMO del teléfono (HMAC con el secreto de la app), no el
-   * teléfono: viaja como `contextId` de A2A, en las trazas y en la cadena de hashes.
-   */
-  const idConversacion = (waId: string) => `conv_${createHmac('sha256', o.secretos.app).update(`conversacion|${waId}`).digest('hex').slice(0, 20)}`;
-  const nuevaConversacion = (waId: string, instante: number): Conversacion => {
-    const id = idConversacion(waId);
-    return {
-      id, contextId: `ctx_${id}`, waId, abiertaEn: instante, ultimoMensajeEn: instante, ventanas: {},
-      origen: { tipo: 'directo', registradoEn: instante }, historialOrigenes: [], estado: 'agente', fallosComprension: 0,
-      turnos: 0, tokens: 0, leadReportado: false, intencionCompra: false,
-    };
-  };
+  const idConversacion = (waId: string) => idConversacionDe(o.secretos.app, waId);
 
   async function procesaMensaje(e: MensajeEntrante) {
     const tenant = await o.almacen.inquilinoPorTelefono(e.phoneNumberId);
@@ -177,7 +166,7 @@ export function creaVendedor(o: OpcionesVendedor) {
     const datos = o.almacen.de(tenant);
     let contacto: Contacto = (await datos.lee('contactos', e.waId)) ?? { waId: e.waId, creadoEn: e.instante };
     if (e.nombre) contacto.nombre = e.nombre;
-    let conv = (await datos.lee('conversaciones', idConversacion(e.waId))) ?? nuevaConversacion(e.waId, e.instante);
+    let conv = (await datos.lee('conversaciones', idConversacion(e.waId))) ?? nuevaConversacion(idConversacion(e.waId), e.waId, e.instante);
     const etiqueta = e.texto?.match(ETIQUETA)?.[1];
     const textoLimpio = (e.texto ?? '').replace(ETIQUETA, '').replace(/\s+/g, ' ').trim();
     const deAnuncio = !!e.referencia && (e.referencia.sourceType === 'ad' || !!e.referencia.ctwaClid);
@@ -202,16 +191,17 @@ export function creaVendedor(o: OpcionesVendedor) {
       await alerta(datos, 'aviso', `Mensaje de ${e.waId} sin responder: el canal está desconectado (${inquilino.motivoPausa ?? ''})`);
       return;
     }
-    const recientes = (await datos.lista('mensajes')).filter((m) => m.conversacionId === conv.id && m.direccion === 'entrante' && m.instante > e.instante - LIMITE_POR_CONTACTO.ventanaMs).length;
-    if (recientes > LIMITE_POR_CONTACTO.mensajes) {
-      await bitacora(datos, conv.id, 'limite_remitente', `${recientes} mensajes en ${LIMITE_POR_CONTACTO.ventanaMs / 60_000} min: no se gasta modelo`);
-      if (recientes === LIMITE_POR_CONTACTO.mensajes + 1) await alerta(datos, 'aviso', `El contacto ${e.waId} rebasó ${LIMITE_POR_CONTACTO.mensajes} mensajes en ${LIMITE_POR_CONTACTO.ventanaMs / 60_000} min: el agente se detuvo con él.`);
-      await datos.guarda('conversaciones', conv.id, conv); await datos.guarda('contactos', e.waId, contacto);
-      return;
-    }
+    const limites = inquilino.politicas.frontera;
+    const f = await evaluaFrontera(datos, { conversacionId: conv.id, contacto, instante: e.instante, limites });
+    const fr = await aplicaFrontera(f, { datos, negocio: inquilino.nombre, conv, contacto, waId: e.waId, instante: e.instante, limites }, {
+      bitacora: (tipo, detalle) => bitacora(datos, conv.id, tipo, detalle), alerta: (nivel, texto) => alerta(datos, nivel, texto),
+      envia: (texto) => enviaSaliente(inquilino, datos, conv, { tipo: 'texto', texto }, 'agente'),
+    });
+    conv = fr.conv; contacto = fr.contacto;
+    if (fr.detener) { await datos.guarda('conversaciones', conv.id, conv); await datos.guarda('contactos', e.waId, contacto); return; }
     // Leído + «escribiendo…» solo si el agente va a contestar (no si lo lleva el dueño).
     if (conv.estado === 'agente' || (conv.estado === 'pausada_eco' && e.instante >= (conv.pausadaHasta ?? 0))) await o.graph.marcaLeido(e.phoneNumberId, e.wamid);
-    const r = await orquestador.atiende({ inquilino, datos, conversacion: conv, contacto, mensaje: e, texto: seguro });
+    const r = await orquestador.atiende({ inquilino, datos, conversacion: conv, contacto, mensaje: e, texto: seguro, protegido: fr.protegido });
     conv = r.conversacion; contacto = r.contacto;
     for (const b of r.bitacora) await bitacora(datos, conv.id, b.tipo, b.detalle);
     for (const s of r.salientes) conv = await enviaSaliente(inquilino, datos, conv, s, 'agente');
@@ -247,7 +237,7 @@ export function creaVendedor(o: OpcionesVendedor) {
     if (!await o.almacen.primeraVez(`${tenant}:eco:${e.wamid}`)) { metricas.duplicadosIgnorados++; return; }
     const inquilino = (await o.almacen.inquilino(tenant))!;
     const datos = o.almacen.de(tenant);
-    const conv = (await datos.lee('conversaciones', idConversacion(e.waId))) ?? nuevaConversacion(e.waId, e.instante);
+    const conv = (await datos.lee('conversaciones', idConversacion(e.waId))) ?? nuevaConversacion(idConversacion(e.waId), e.waId, e.instante);
     await datos.guarda('mensajes', e.wamid, { wamid: e.wamid, conversacionId: conv.id, waId: e.waId, direccion: 'eco', autor: 'dueno', tipo: e.tipo, resumen: e.texto ?? `[${e.tipo}]`, instante: e.instante });
     // El eco NO abre ni extiende la ventana de 24 h: solo pausa al agente en ese chat.
     const pausada: Conversacion = conv.estado === 'humano' ? conv : { ...conv, estado: 'pausada_eco', pausadaHasta: e.instante + inquilino.politicas.pausaPorEcoMs };
@@ -473,6 +463,12 @@ function creaPanel(d: DepsPanel) {
       const conv = await datos.lee('conversaciones', conversacionId);
       if (conv && d.traza) void d.traza.registra(tenant, 'ACCION_DUENO', conversacionId, { accion: 'liberar_pausa' }, { accion: 'liberar_pausa' }, 'dueno');
       if (conv?.estado === 'pausada_eco') { const libre: Conversacion = { ...conv, estado: 'agente' }; delete libre.pausadaHasta; await datos.guarda('conversaciones', conv.id, libre); }
+    },
+    /** Lista de bloqueo del dueño (`motivo` nulo desbloquea); queda en la cadena como acción del dueño. */
+    async bloquea(tenant: string, conversacionId: string, motivo: string | null) {
+      const c = await bloqueaContacto(d.almacen.de(tenant), conversacionId, d.reloj(), motivo);
+      if (c && d.traza) void d.traza.registra(tenant, 'ACCION_DUENO', conversacionId, { accion: motivo ? 'bloquear' : 'desbloquear' }, { accion: motivo ? 'bloquear' : 'desbloquear' }, 'dueno');
+      return c;
     },
     sincronizaCatalogo: (tenant: string, csv: string) => pide(tenant, 'catalogo', 'sincronizar_csv', { csv }),
     creaQr: (tenant: string, etiqueta: string, mensaje: string) => pide(tenant, 'atribucion', 'crear_qr', { etiqueta, mensaje }),

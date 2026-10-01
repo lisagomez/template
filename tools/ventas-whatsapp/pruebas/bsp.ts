@@ -40,7 +40,8 @@ test('Tech Provider: FINISH → token a la bóveda, webhooks, registro; el canal
   assert.equal(boveda.cuantos(), 1);
   const token = await boveda.lee('waba_restaurante');
   assert.ok(token && !JSON.stringify(almacen.volcado()).includes(token), 'el token vive solo en la bóveda');
-  assert.ok(!JSON.stringify(bsp.altas()).includes(token) && !JSON.stringify(bsp.altas()).includes('246801'), 'ni el token ni el PIN en el alta');
+  const altas = JSON.stringify(await bsp.altas());
+  assert.ok(!altas.includes(token) && !altas.includes('246801'), 'ni el token ni el PIN en el alta');
   assert.equal((await bsp.confirmaMetodoPago('waba_restaurante'))?.estado, 'activa');
   assert.equal((await almacen.inquilino('pyme_restaurante'))?.estado, 'activo');
   const otra = await bsp.completa({ inquilinoId: 'pyme_restaurante', code: s.code, recibidoEn: s.recibidoEn, evento, perfil: restaurante, telefonoVisible: '' });
@@ -56,7 +57,7 @@ test('el código vive 30 s y sirve una vez; abandonos y errores quedan en el emb
   const ab = meta.signup({ wabaId: 'waba_x', businessId: 'bm_3', abandonaEn: 'PHONE_NUMBER_VERIFICATION' });
   const r = await bsp.completa({ inquilinoId: 'pyme_x', code: ab.code, recibidoEn: ab.recibidoEn, evento: leeEventoSignup(ab.mensaje)!, perfil: tienda, telefonoVisible: '' });
   assert.ok('rechazo' in r);
-  assert.deepEqual(bsp.embudo().map((e) => e.resultado), ['abandono en PHONE_NUMBER_VERIFICATION']);
+  assert.deepEqual((await bsp.embudo()).map((e) => e.resultado), ['abandono en PHONE_NUMBER_VERIFICATION']);
   assert.equal((await almacen.inquilinos()).length, 0);
   assert.equal(leeEventoSignup({ type: 'OTRA_COSA', data: {} }), null);
   // Un código canjeado no se vuelve a canjear.

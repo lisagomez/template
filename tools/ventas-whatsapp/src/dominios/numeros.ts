@@ -183,6 +183,12 @@ export function creaGestorNumeros(o: OpcionesGestor) {
 
     liberaVencidos,
 
+    /** El pool entero, con la cuarentena ya vencida liberada. */
+    async lista(): Promise<NumeroGestionado[]> {
+      await liberaVencidos();
+      return o.pool.lista();
+    },
+
     /** El mes de la línea de números: cobros y costos por número asignado. */
     async facturacion(): Promise<{ numeros: number; ingresoCentavos: number; costoCentavos: number; margenCentavos: number; porInquilino: Record<string, number> }> {
       const cobrables = (await o.pool.lista()).filter((n) => n.estado === 'activo' || n.estado === 'registrado');
