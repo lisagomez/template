@@ -50,29 +50,42 @@ const MARCADOR_DE_CIFRA = /\[(C-\d{2})\]/g
 
 export const normaliza = (s) => String(s ?? '').replace(/\s+/g, ' ').trim()
 
-/** Lo que una cita puede tocar del repo. Se inyecta para que `--prueba` no dependa de nada mas. */
-export function repoReal() {
-  const archivos = new Set(git(['ls-files', '--cached', '--others', '--exclude-standard']).split('\n').filter(Boolean))
+/**
+ * El repo TAL COMO ESTABA en el commit analizado: una corrida es una foto. Si se leyera el arbol
+ * de hoy, firmar un contrato (y borrar el «pendiente» que una cita copio) o dar de alta un activo
+ * pondria roja una corrida vieja que era correcta, y el gate se volveria una trampa para cualquier
+ * cambio. Que un dolor se cerro lo dice la corrida SIGUIENTE (fase 3 del PRP-008), no esta.
+ * Se inyecta para que `--prueba` no dependa de nada mas. null si el commit no esta en la historia.
+ */
+export function repoReal(commit) {
+  let ref
+  try { ref = git(['rev-parse', '--verify', `${commit}^{commit}`]).trim() } catch { return null }
+  const archivos = new Set(git(['ls-tree', '-r', '--name-only', ref]).split('\n').filter(Boolean))
   const prs = new Map()
-  for (const bloque of git(['log', '--format=%s%x00%b%x1e', 'HEAD']).split('\x1e')) {
+  for (const bloque of git(['log', '--format=%s%x00%b%x1e', ref]).split('\x1e')) {
     const [asunto = '', cuerpo = ''] = bloque.trim().split('\x00')
     const n = asunto.match(/^Merge pull request #(\d+)/)?.[1] ?? asunto.match(/\(#(\d+)\)\s*$/)?.[1]
     if (n && !prs.has(Number(n))) prs.set(Number(n), `${asunto}\n${cuerpo}`)
   }
   const cache = new Map()
+  const lee = (ruta) => {
+    if (!cache.has(ruta)) cache.set(ruta, git(['show', `${ref}:${ruta}`]))
+    return cache.get(ruta)
+  }
   return {
     existe: (ruta) => archivos.has(ruta),
-    lee: (ruta) => {
-      if (!cache.has(ruta)) cache.set(ruta, readFileSync(join(raiz, ruta), 'utf8'))
-      return cache.get(ruta)
-    },
+    lee,
+    /** El mensaje del commit, si existe y es anterior (o igual) al analizado: no se cita el futuro. */
     commit: (sha) => {
       if (!/^[0-9a-f]{7,40}$/.test(String(sha))) return null
-      try { return git(['log', '-1', '--format=%B', `${sha}^{commit}`]) } catch { return null }
+      try {
+        execFileSync('git', ['merge-base', '--is-ancestor', String(sha), ref], { cwd: raiz, stdio: 'ignore' })
+        return git(['log', '-1', '--format=%B', String(sha)])
+      } catch { return null }
     },
     pr: (n) => prs.get(Number(n)) ?? null,
-    scripts: JSON.parse(readFileSync(join(raiz, 'package.json'), 'utf8')).scripts ?? {},
-    inventario: JSON.parse(readFileSync(join(raiz, 'inventario', 'activos.json'), 'utf8')).activos.map((a) => a.id),
+    scripts: JSON.parse(lee('package.json')).scripts ?? {},
+    inventario: JSON.parse(lee('inventario/activos.json')).activos.map((a) => a.id),
   }
 }
 
@@ -106,7 +119,7 @@ export function motivoDeCita(ev, corrida, repo) {
     }
     case 'commit': {
       const mensaje = repo.commit(ev.sha)
-      if (mensaje === null) return `el commit ${ev.sha} no existe`
+      if (mensaje === null) return `el commit ${ev.sha} no existe o es posterior al analizado`
       return contiene(mensaje, ev.cita) ? null : `el commit ${ev.sha} no dice «${normaliza(ev.cita).slice(0, 60)}»`
     }
     case 'pr': {
@@ -298,9 +311,10 @@ function compruebaBorrador(a, ctx, mete) {
     const b = porId.get(id)
     if (!b) { mete('E-BORRADOR', `${id} sin veredicto`); continue }
     if (!VEREDICTOS.has(b.veredicto)) mete('E-BORRADOR', `${id}: veredicto «${b.veredicto}» desconocido`)
+    // las citas se comprueban en todo veredicto: tambien un «sin evidencia» puede afirmar algo al lado
+    const citas = gradoDeCitas(b.evidencia, ctx.corrida, ctx.repo, mete, id)
     if (b.veredicto === 'sin-evidencia') { if (!normaliza(b.falta)) mete('E-BORRADOR', `${id}: sin evidencia y sin decir que falta`); continue }
     const refs = (b.hallazgos ?? []).filter((h) => hallazgos.has(h)).length
-    const citas = gradoDeCitas(b.evidencia, ctx.corrida, ctx.repo, mete, id)
     if (refs === 0 && citas === 0) mete('E-BORRADOR', `${id}: «${b.veredicto}» sin hallazgo ni cita que lo sostenga`)
   }
 }
@@ -365,7 +379,11 @@ function prueba(dir, repo) {
   let cazadas = 0
   for (const s of SIEMBRAS) {
     const analisis = structuredClone(base.analisis)
-    const sustitutos = s.siembra(analisis, base) ?? {}
+    let sustitutos
+    try { sustitutos = s.siembra(analisis, base) ?? {} } catch (e) {
+      console.log(`  ✗ ${s.nombre} → no se pudo sembrar: ${e.message}`)
+      continue
+    }
     const corrida = { dir, analisis, lee: (rel) => (rel in sustitutos ? sustitutos[rel] : base.lee(rel)) }
     const cae = verifica(corrida, repo).fallos.some((f) => f.codigo === s.espera)
     if (cae) cazadas++
@@ -382,9 +400,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('no hay corrida que verificar (docs/analisis/<fecha>/analisis.json)')
     process.exit(1)
   }
-  const repo = repoReal()
+  const corrida = corridaReal(dir)
+  const repo = repoReal(corrida.analisis.commit)
+  if (!repo) {
+    console.error(`✗ E-ESQUEMA  el commit analizado (${corrida.analisis.commit}) no esta en esta historia: la corrida no se puede verificar; vuelve a correr el analista`)
+    process.exit(1)
+  }
   if (args.includes('--prueba')) process.exit(prueba(dir, repo))
-  const { fallos, resumen } = verifica(corridaReal(dir), repo)
+  const { fallos, resumen } = verifica(corrida, repo)
   const r = resumen
   console.log(`Corrida ${dir}`)
   console.log(`  cobertura del inventario   ${r.cobertura}`)

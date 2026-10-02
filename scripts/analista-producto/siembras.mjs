@@ -6,6 +6,12 @@
  *
  * `siembra(analisis, base)` muta `analisis` y puede devolver archivos sustitutos de la corrida.
  */
+import { execFileSync } from 'node:child_process'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+
 const primeraCita = (a, tipo) => {
   for (const h of a.hallazgos) {
     const ev = h.evidencia.find((e) => e.tipo === tipo)
@@ -36,6 +42,21 @@ export const SIEMBRAS = [
     nombre: 'commit que no existe',
     espera: 'E-CITA',
     siembra: (a) => { a.hallazgos[0].evidencia.push({ tipo: 'commit', sha: 'deadbeef', cita: 'arregla todo' }) },
+  },
+  {
+    nombre: 'cita a un archivo posterior al commit analizado (una corrida es una foto)',
+    espera: 'E-CITA',
+    siembra: (a) => { a.hallazgos[0].evidencia.push({ tipo: 'archivo', ruta: 'docs/analisis/2026-10-02/INFORME.md', cita: 'Dónde duele el repo' }) },
+  },
+  {
+    nombre: 'commit posterior al analizado',
+    espera: 'E-CITA',
+    siembra: (a) => {
+      // solo la rama actual (HEAD), nunca --all: otras ramas incluyen la del corpus ciego
+      const posterior = execFileSync('git', ['rev-list', '-1', 'HEAD', '--not', a.commit], { cwd: raiz, encoding: 'utf8' }).trim()
+      if (!posterior) throw new Error('no hay commits despues del analizado: la prueba se corre con la corrida ya commiteada')
+      a.hallazgos[0].evidencia.push({ tipo: 'commit', sha: posterior, cita: '' })
+    },
   },
   {
     nombre: 'PR que no esta en la historia',

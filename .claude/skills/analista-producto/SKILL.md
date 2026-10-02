@@ -40,8 +40,10 @@ un hallazgo.
 
 `<fecha>` es la de hoy (ISO). Esquema de la salida: `esquema.md`, junto a este archivo.
 
-1. **Inventario en verde.** `npm run verifica:inventario`. Si está rojo, la cobertura no se puede
-   medir: la tarea es `FAILED` y se dice por qué.
+1. **Árbol limpio e inventario en verde.** Se analiza un commit, no un árbol a medio cambiar:
+   `analisis.commit` es `git rev-parse HEAD`, y el verificador lee cada cita **en ese commit**. Una
+   corrida es una foto: sigue verde aunque el repo cambie después. `npm run verifica:inventario`: si
+   está rojo, la cobertura no se puede medir, y la tarea es `FAILED` con su porqué.
 2. **Medir.** `node scripts/analista-producto/medidores.mjs docs/analisis/<fecha>`. Los medidores
    que escriben en el árbol (`mide:mcp`, `trayectorias:informe`, `vigila:versiones`) no se corren:
    se cita su última salida versionada como `medicion` con su comando.
@@ -65,7 +67,8 @@ un hallazgo.
    método y las tablas largas van después.
 10. **Verificar hasta verde**: `node scripts/analista-producto/verifica-evidencia.mjs
     docs/analisis/<fecha>`. Rojo = el informe afirma algo que su evidencia no sostiene: se corrige la
-    cita o el hallazgo baja a hipótesis. Luego `npm run prueba:analista`.
+    cita o el hallazgo baja a hipótesis. Se commitea la corrida y luego `npm run prueba:analista`
+    (su `--prueba` necesita un commit posterior al analizado).
 11. **Si hay una corrida anterior**, di qué dolores se cerraron (con el commit o PR), cuáles
     nacieron y cuáles persisten. La comparación automática es la fase 3 del PRP-008.
 

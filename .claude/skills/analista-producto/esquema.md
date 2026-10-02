@@ -31,7 +31,7 @@ permite decir cuál se cerró. **Nunca** la letra T seguida de dígitos: ese pat
 {
   "version": 1,
   "fecha": "2026-10-02",
-  "commit": "<sha que se analizó>",
+  "commit": "<sha que se analizó>",           // las citas se comprueban en ESTE commit: la corrida es una foto
   "estado": "completed",                     // completed | input-required | failed
   "peticion": { "texto": "…", "hipotesis": [{ "id": "H1", "texto": "…" }] },
   "inventario": { "archivo": "inventario/activos.json", "activos": 39 },

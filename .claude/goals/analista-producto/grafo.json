@@ -2,58 +2,329 @@
   "slug": "analista-producto",
   "titulo": "Analista de producto — rol con contrato A2A: dolores con evidencia, casos de uso por categoria y propuestas product first",
   "nodos": [
-    {"id": "pedido", "label": "Spec: pedido, decision del laboratorio e hipotesis H1-H6 del borrador", "estado": "morado"},
-    {"id": "inventario", "label": "inventario/activos.json (38 activos, 229 unidades, gate verifica:inventario)", "estado": "morado"},
-    {"id": "fuentes", "label": "Fuentes: contratos por producto, registros de gobernanza, specs/PRPs/SDD/goals, trayectorias, git y PR, padron de gates", "estado": "morado"},
-    {"id": "mediciones", "label": "Cifras de los medidores, cada una con su comando (null, nunca cero)", "estado": "gris"},
-    {"id": "sdd", "label": "docs/SDD-<nombre>.md: pipeline, regla de evidencia, contrato, estados, que NO se construye", "estado": "gris"},
-    {"id": "prp", "label": "PRP-008: fase 1 (skill + contrato + corrida) y fase 2 A2A viva planeada con sus gates", "estado": "gris"},
-    {"id": "skill", "label": "Skill del rol (solo lectura; escribe solo en docs/analisis/)", "estado": "gris"},
-    {"id": "contrato-a2a", "label": "Agent Card + estados de Task tipados con @a2a-js/sdk 1.1.0, con prueba, NO servidos", "estado": "gris"},
-    {"id": "verificador", "label": "Comparador determinista de evidencia con --prueba que tumba siembras", "estado": "gris"},
-    {"id": "contrato-c2", "label": "Contrato capa A del skill en golden-sets/contratos.json", "estado": "gris"},
-    {"id": "dolores", "label": "Hallazgos con cita graduada + hipotesis aparte (fechado, formato de maquina)", "estado": "gris"},
-    {"id": "casos", "label": "Casos de uso por categoria: quien, cuando, que intenta, que lo impide, cuanto cuesta", "estado": "gris"},
-    {"id": "priorizacion", "label": "Ranking con vetos C3/C4 aparte", "estado": "gris"},
-    {"id": "propuestas", "label": "One-pagers product first + handoff recomendado (no ejecutado)", "estado": "gris"},
-    {"id": "informe", "label": "docs/analisis/<fecha>/ para el laboratorio, con veredicto de H1-H6", "estado": "gris"},
-    {"id": "propuesta-cdc", "label": "Propuesta CDC: diff completo + bitacora con firma en hueco", "estado": "gris"}
+    {
+      "id": "pedido",
+      "label": "Spec: pedido, decision del laboratorio e hipotesis H1-H6 del borrador",
+      "estado": "morado"
+    },
+    {
+      "id": "inventario",
+      "label": "inventario/activos.json (38 activos, 229 unidades, gate verifica:inventario)",
+      "estado": "morado"
+    },
+    {
+      "id": "fuentes",
+      "label": "Fuentes: contratos por producto, registros de gobernanza, specs/PRPs/SDD/goals, trayectorias, git y PR, padron de gates",
+      "estado": "morado"
+    },
+    {
+      "id": "mediciones",
+      "label": "Cifras de los medidores, cada una con su comando (null, nunca cero)",
+      "estado": "morado"
+    },
+    {
+      "id": "sdd",
+      "label": "docs/SDD-<nombre>.md: pipeline, regla de evidencia, contrato, estados, que NO se construye",
+      "estado": "morado"
+    },
+    {
+      "id": "prp",
+      "label": "PRP-008: fase 1 (skill + contrato + corrida) y fase 2 A2A viva planeada con sus gates",
+      "estado": "morado"
+    },
+    {
+      "id": "skill",
+      "label": "Skill del rol (solo lectura; escribe solo en docs/analisis/)",
+      "estado": "morado"
+    },
+    {
+      "id": "contrato-a2a",
+      "label": "Agent Card + estados de Task tipados con @a2a-js/sdk 1.1.0, con prueba, NO servidos",
+      "estado": "morado"
+    },
+    {
+      "id": "verificador",
+      "label": "Comparador determinista de evidencia con --prueba que tumba siembras",
+      "estado": "morado"
+    },
+    {
+      "id": "contrato-c2",
+      "label": "Contrato capa A del skill en golden-sets/contratos.json",
+      "estado": "morado"
+    },
+    {
+      "id": "dolores",
+      "label": "Hallazgos con cita graduada + hipotesis aparte (fechado, formato de maquina)",
+      "estado": "morado"
+    },
+    {
+      "id": "casos",
+      "label": "Casos de uso por categoria: quien, cuando, que intenta, que lo impide, cuanto cuesta",
+      "estado": "morado"
+    },
+    {
+      "id": "priorizacion",
+      "label": "Ranking con vetos C3/C4 aparte",
+      "estado": "morado"
+    },
+    {
+      "id": "propuestas",
+      "label": "One-pagers product first + handoff recomendado (no ejecutado)",
+      "estado": "morado"
+    },
+    {
+      "id": "informe",
+      "label": "docs/analisis/<fecha>/ para el laboratorio, con veredicto de H1-H6",
+      "estado": "morado"
+    },
+    {
+      "id": "propuesta-cdc",
+      "label": "Propuesta CDC: diff completo + bitacora con firma en hueco",
+      "estado": "ambar"
+    }
   ],
   "aristas": [
-    {"id": "a1", "from": "pedido", "to": "sdd", "tipo": "agente", "label": "disenar el rol leyendo el borrador como hipotesis"},
-    {"id": "a2", "from": "inventario", "to": "sdd", "tipo": "agente", "label": "anclar el diseno en los activos reales"},
-    {"id": "a3", "from": "fuentes", "to": "sdd", "tipo": "agente", "label": "verificar que fuentes existen y que dan"},
-    {"id": "a4", "from": "fuentes", "to": "mediciones", "tipo": "script", "label": "correr los medidores"},
-    {"id": "a5", "from": "sdd", "to": "prp", "tipo": "agente", "label": "planear por fases; la A2A viva con su gate"},
-    {"id": "a6", "from": "prp", "to": "skill", "tipo": "agente", "label": "escribir el skill"},
-    {"id": "a7", "from": "prp", "to": "contrato-a2a", "tipo": "mixta", "label": "Agent Card con tipos del SDK + prueba"},
-    {"id": "a8", "from": "prp", "to": "verificador", "tipo": "mixta", "label": "construir el comparador de evidencia"},
-    {"id": "a9", "from": "skill", "to": "contrato-c2", "tipo": "agente", "label": "declarar su contrato capa A"},
-    {"id": "a10", "from": "skill", "to": "dolores", "tipo": "agente", "label": "primera corrida del skill: detectar y citar"},
-    {"id": "a11", "from": "inventario", "to": "dolores", "tipo": "script", "label": "cobertura: cada activo PRODUCTO revisado"},
-    {"id": "a12", "from": "mediciones", "to": "dolores", "tipo": "script", "label": "las cifras entran por script, no por el modelo"},
-    {"id": "a13", "from": "fuentes", "to": "dolores", "tipo": "agente", "label": "leer las fuentes y citar"},
-    {"id": "a14", "from": "verificador", "to": "dolores", "tipo": "script", "label": "validar cada cita; sin cita = hipotesis"},
-    {"id": "a15", "from": "dolores", "to": "casos", "tipo": "agente", "label": "agrupar por categoria"},
-    {"id": "a16", "from": "casos", "to": "priorizacion", "tipo": "agente", "label": "puntuar y vetar C3/C4"},
-    {"id": "a17", "from": "priorizacion", "to": "propuestas", "tipo": "agente", "label": "one-pager product first por candidato"},
-    {"id": "a18", "from": "propuestas", "to": "informe", "tipo": "agente", "label": "redactar para el laboratorio"},
-    {"id": "a19", "from": "pedido", "to": "informe", "tipo": "agente", "label": "veredicto de H1-H6 con cita"},
-    {"id": "a20", "from": "skill", "to": "propuesta-cdc", "tipo": "mixta", "label": "diff del skill + clase de routing + cuenta de skills"},
-    {"id": "a21", "from": "contrato-a2a", "to": "propuesta-cdc", "tipo": "mixta", "label": "diff del contrato"},
-    {"id": "a22", "from": "contrato-c2", "to": "propuesta-cdc", "tipo": "mixta", "label": "diff del contrato capa A"},
-    {"id": "a23", "from": "verificador", "to": "propuesta-cdc", "tipo": "mixta", "label": "gate propuesto, sin aplicar"},
-    {"id": "a24", "from": "informe", "to": "propuesta-cdc", "tipo": "mixta", "label": "la primera corrida es la evidencia del CDC"}
+    {
+      "id": "a1",
+      "from": "pedido",
+      "to": "sdd",
+      "tipo": "agente",
+      "label": "disenar el rol leyendo el borrador como hipotesis"
+    },
+    {
+      "id": "a2",
+      "from": "inventario",
+      "to": "sdd",
+      "tipo": "agente",
+      "label": "anclar el diseno en los activos reales"
+    },
+    {
+      "id": "a3",
+      "from": "fuentes",
+      "to": "sdd",
+      "tipo": "agente",
+      "label": "verificar que fuentes existen y que dan"
+    },
+    {
+      "id": "a4",
+      "from": "fuentes",
+      "to": "mediciones",
+      "tipo": "script",
+      "label": "correr los medidores"
+    },
+    {
+      "id": "a5",
+      "from": "sdd",
+      "to": "prp",
+      "tipo": "agente",
+      "label": "planear por fases; la A2A viva con su gate"
+    },
+    {
+      "id": "a6",
+      "from": "prp",
+      "to": "skill",
+      "tipo": "agente",
+      "label": "escribir el skill"
+    },
+    {
+      "id": "a7",
+      "from": "prp",
+      "to": "contrato-a2a",
+      "tipo": "mixta",
+      "label": "Agent Card con tipos del SDK + prueba"
+    },
+    {
+      "id": "a8",
+      "from": "prp",
+      "to": "verificador",
+      "tipo": "mixta",
+      "label": "construir el comparador de evidencia"
+    },
+    {
+      "id": "a9",
+      "from": "skill",
+      "to": "contrato-c2",
+      "tipo": "agente",
+      "label": "declarar su contrato capa A"
+    },
+    {
+      "id": "a10",
+      "from": "skill",
+      "to": "dolores",
+      "tipo": "agente",
+      "label": "primera corrida del skill: detectar y citar"
+    },
+    {
+      "id": "a11",
+      "from": "inventario",
+      "to": "dolores",
+      "tipo": "script",
+      "label": "cobertura: cada activo PRODUCTO revisado"
+    },
+    {
+      "id": "a12",
+      "from": "mediciones",
+      "to": "dolores",
+      "tipo": "script",
+      "label": "las cifras entran por script, no por el modelo"
+    },
+    {
+      "id": "a13",
+      "from": "fuentes",
+      "to": "dolores",
+      "tipo": "agente",
+      "label": "leer las fuentes y citar"
+    },
+    {
+      "id": "a14",
+      "from": "verificador",
+      "to": "dolores",
+      "tipo": "script",
+      "label": "validar cada cita; sin cita = hipotesis"
+    },
+    {
+      "id": "a15",
+      "from": "dolores",
+      "to": "casos",
+      "tipo": "agente",
+      "label": "agrupar por categoria"
+    },
+    {
+      "id": "a16",
+      "from": "casos",
+      "to": "priorizacion",
+      "tipo": "agente",
+      "label": "puntuar y vetar C3/C4"
+    },
+    {
+      "id": "a17",
+      "from": "priorizacion",
+      "to": "propuestas",
+      "tipo": "agente",
+      "label": "one-pager product first por candidato"
+    },
+    {
+      "id": "a18",
+      "from": "propuestas",
+      "to": "informe",
+      "tipo": "agente",
+      "label": "redactar para el laboratorio"
+    },
+    {
+      "id": "a19",
+      "from": "pedido",
+      "to": "informe",
+      "tipo": "agente",
+      "label": "veredicto de H1-H6 con cita"
+    },
+    {
+      "id": "a20",
+      "from": "skill",
+      "to": "propuesta-cdc",
+      "tipo": "mixta",
+      "label": "diff del skill + clase de routing + cuenta de skills"
+    },
+    {
+      "id": "a21",
+      "from": "contrato-a2a",
+      "to": "propuesta-cdc",
+      "tipo": "mixta",
+      "label": "diff del contrato"
+    },
+    {
+      "id": "a22",
+      "from": "contrato-c2",
+      "to": "propuesta-cdc",
+      "tipo": "mixta",
+      "label": "diff del contrato capa A"
+    },
+    {
+      "id": "a23",
+      "from": "verificador",
+      "to": "propuesta-cdc",
+      "tipo": "mixta",
+      "label": "gate propuesto, sin aplicar"
+    },
+    {
+      "id": "a24",
+      "from": "informe",
+      "to": "propuesta-cdc",
+      "tipo": "mixta",
+      "label": "la primera corrida es la evidencia del CDC"
+    }
   ],
   "lazos": [
-    {"id": "L1", "sobre": "nodo:dolores", "label": "ningun hallazgo sin cita verificada", "referencia": "verificador en verde; lo no citado en hipotesis; --prueba tumba todas las siembras", "estado": "gris"},
-    {"id": "L2", "sobre": "arista:a11", "label": "ausente no es cero", "referencia": "N/N activos PRODUCTO (y FABRICA con usuario) revisados; sin dolor = dicho", "estado": "gris"},
-    {"id": "L3", "sobre": "nodo:mediciones", "label": "cada cifra con su comando", "referencia": "0 cifras sin comando; dato ausente = null", "estado": "gris"},
-    {"id": "L4", "sobre": "nodo:priorizacion", "label": "C3/C4 vetan, no ponderan", "referencia": "vetados aparte con motivo; ninguno en el ranking", "estado": "gris"},
-    {"id": "L5", "sobre": "nodo:propuestas", "label": "product first verificable", "referencia": "usuario, tarea y coste antes de la tecnologia; >=1 TPL-* existente o motivo", "estado": "gris"},
-    {"id": "L6", "sobre": "nodo:contrato-a2a", "label": "contrato tipado y no servido", "referencia": "typecheck + prueba en verde; 0 rutas nuevas en src/app", "estado": "gris"},
-    {"id": "L7", "sobre": "nodo:informe", "label": "H1-H6 con veredicto", "referencia": "6/6 confirmada | refutada | sin evidencia, con cita", "estado": "gris"},
-    {"id": "L8", "sobre": "nodo:prp", "label": "spec o PRP, nunca los dos", "referencia": "PRP directo (QUE acordado); handoffs de candidatos solo recomendados", "estado": "gris"},
-    {"id": "L9", "sobre": "nodo:propuesta-cdc", "label": "gate completo y firma en hueco", "referencia": "validate en verde tras commit; regresion; verify:gobernanza con 28 skills; aprobacion humana sin marcar", "estado": "gris"}
+    {
+      "id": "L1",
+      "sobre": "nodo:dolores",
+      "label": "ningun hallazgo sin cita verificada",
+      "referencia": "verificador en verde; lo no citado en hipotesis; --prueba tumba todas las siembras",
+      "estado": "morado",
+      "evidencia": "verifica-evidencia: 81 citas comprobadas en verde; --prueba 15/15 siembras cazadas"
+    },
+    {
+      "id": "L2",
+      "sobre": "arista:a11",
+      "label": "ausente no es cero",
+      "referencia": "N/N activos PRODUCTO (y FABRICA con usuario) revisados; sin dolor = dicho",
+      "estado": "morado",
+      "evidencia": "cobertura 39/39 (34 con dolores, 5 sin dolor con cita)"
+    },
+    {
+      "id": "L3",
+      "sobre": "nodo:mediciones",
+      "label": "cada cifra con su comando",
+      "referencia": "0 cifras sin comando; dato ausente = null",
+      "estado": "morado",
+      "evidencia": "14 cifras, cada una con su captura y su comando"
+    },
+    {
+      "id": "L4",
+      "sobre": "nodo:priorizacion",
+      "label": "C3/C4 vetan, no ponderan",
+      "referencia": "vetados aparte con motivo; ninguno en el ranking",
+      "estado": "morado",
+      "evidencia": "P-07 vetado por C4, fuera del ranking, con motivo"
+    },
+    {
+      "id": "L5",
+      "sobre": "nodo:propuestas",
+      "label": "product first verificable",
+      "referencia": "usuario, tarea y coste antes de la tecnologia; >=1 TPL-* existente o motivo",
+      "estado": "morado",
+      "evidencia": "4 one-pagers con orden verificado; cada TPL-* existe y se nombra"
+    },
+    {
+      "id": "L6",
+      "sobre": "nodo:contrato-a2a",
+      "label": "contrato tipado y no servido",
+      "referencia": "typecheck + prueba en verde; 0 rutas nuevas en src/app",
+      "estado": "morado",
+      "evidencia": "prueba:analista 7/7 (Card, transiciones, 0 rutas) y prueba:a2a 14/14"
+    },
+    {
+      "id": "L7",
+      "sobre": "nodo:informe",
+      "label": "H1-H6 con veredicto",
+      "referencia": "6/6 confirmada | refutada | sin evidencia, con cita",
+      "estado": "morado",
+      "evidencia": "H1-H7 con veredicto: 2 confirmadas, 4 parciales, 1 sin evidencia"
+    },
+    {
+      "id": "L8",
+      "sobre": "nodo:prp",
+      "label": "spec o PRP, nunca los dos",
+      "referencia": "PRP directo (QUE acordado); handoffs de candidatos solo recomendados",
+      "estado": "morado",
+      "evidencia": "PRP-008 directo, sin spec; los handoffs solo se recomiendan"
+    },
+    {
+      "id": "L9",
+      "sobre": "nodo:propuesta-cdc",
+      "label": "gate completo y firma en hueco",
+      "referencia": "validate en verde tras commit; regresion; verify:gobernanza con 28 skills; aprobacion humana sin marcar",
+      "estado": "ambar",
+      "evidencia": "validate en verde tras el ultimo commit; la firma del laboratorio, pendiente"
+    }
   ]
 }

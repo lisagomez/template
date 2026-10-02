@@ -161,6 +161,15 @@ del cambio que lo cerró.
   esquivar la comprobación habría sido hacerle trampa al gate.
 - **Aplicar en**: todo goal que construya un verificador con prueba propia.
 
+### 2026-10-02: verificar una corrida contra el árbol de hoy la vuelve una trampa
+- **Error**: la primera versión del verificador leía las citas del árbol actual. Bastaba con firmar un
+  contrato (desaparece el «pendiente» citado) o dar de alta un activo para que `prueba:analista` pusiera
+  rojo `validate` por una corrida que era correcta cuando se hizo. El primer `validate` salió verde
+  porque nada había cambiado todavía: el defecto se vio leyendo el diseño, no en un rojo.
+- **Fix**: el verificador construye el repo **en el commit analizado** (`git show`, `ls-tree`, ancestros,
+  inventario de ese momento), y dos siembras lo prueban (archivo y commit posteriores dan rojo).
+- **Aplicar en**: todo gate que re-verifique un artefacto fechado: se verifica contra su fecha, no contra hoy.
+
 ---
 
 ## Gotchas

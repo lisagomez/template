@@ -20,7 +20,7 @@ la puede inventar (D-22).
    que ya existen. Sin un piloto, el ranking seguirá premiando lo interno.
 2. **¿Qué despacho contable o pyme puede probar el extractor con un mes real de CFDI recibidos?**
    Recomendado: un despacho conocido, con su permiso firmado y un mes cerrado, para medir las horas
-   de captura antes y después. El extractor lleva cuatro specs y ningún corpus real (D-02, D-05).
+   de captura antes y después. El extractor no tiene cliente ni corpus real (D-02, D-05).
 3. **¿Cuánto le importa a ese cliente cada dolor?** Recomendado: cinco entrevistas de media hora
    antes del piloto, con las preguntas del caso CU-02.
 

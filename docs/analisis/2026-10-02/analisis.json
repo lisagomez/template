@@ -1722,7 +1722,14 @@
    "id": "H7",
    "veredicto": "sin-evidencia",
    "hallazgos": [],
-   "evidencia": [],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "BUSINESS_LOGIC.md",
+     "cita": "firmado el 2026-09-20 como hipótesis del piloto",
+     "linea": 26
+    }
+   ],
    "falta": "Un despacho contable real con un mes de CFDI y la medicion de sus horas de captura antes y despues. Hoy el extractor no tiene cliente ni corpus real (D-02, D-05), y el unico contrato de producto firmado es el del asesor de ventas por voz.",
    "nota": "No se sostiene ni se refuta: «vendible» exige un comprador, y ninguna fuente nombra uno."
   }
@@ -1736,7 +1743,7 @@
   {
    "pregunta": "Que despacho contable o pyme puede probar el extractor con un mes real de CFDI recibidos?",
    "recomendada": "Un despacho conocido, con su permiso firmado y un mes cerrado, para medir horas de captura antes y despues",
-   "por_que": "El extractor lleva cuatro specs y ningun corpus real (D-02, D-05): su calidad y su valor no estan medidos"
+   "por_que": "El extractor no tiene cliente ni corpus real (D-02, D-05): su calidad y su valor no estan medidos"
   },
   {
    "pregunta": "Cuanto le importa a ese cliente cada dolor?",

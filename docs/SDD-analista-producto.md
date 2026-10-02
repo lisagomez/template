@@ -79,6 +79,13 @@ frase que la fuente no dice.
 | `pr` | `numero`, `cita?` | existe en la historia el merge de ese PR; con `cita`, el merge la contiene |
 | `medicion` | `comando`, `archivo`, `cita` | el archivo existe; si es una captura de la corrida, su cabecera declara **ese** comando; si es un artefacto versionado, el comando es un script de `package.json`; el literal aparece |
 
+**Contra qué commit.** Todo se comprueba **en el commit analizado** (`analisis.commit`): archivos con
+`git show`, commits que sean ancestros suyos, PR mergeados hasta ahí y el inventario de ese momento.
+Una corrida es una foto. Si se leyera el árbol de hoy, firmar un contrato (y borrar el «pendiente»
+que una cita copió) o dar de alta un activo pondría roja una corrida vieja que era correcta, y el
+gate se volvería una trampa para cualquier cambio ajeno. Que un dolor se cerró lo dice la corrida
+siguiente (fase 3 del PRP-008).
+
 **Lo que no comprueba:** que la cita *signifique* lo que el hallazgo concluye. Eso es juicio, y
 queda a la vista: el literal va pegado junto al hallazgo para que quien lee lo juzgue en un vistazo.
 
