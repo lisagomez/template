@@ -56,11 +56,13 @@ una ruta interna queda alcanzable desde fuera.
 
 **Lo mínimo antes de desplegar el estudio para el piloto:**
 
-1. **El puente A2A se cierra.** **Aprobado por el laboratorio el 2026-10-02 y hecho en el PR #210**
-   (las tres cosas). Que falle **cerrado** en producción si no hay llave (503, como el
-   dictado y las etiquetas), que `configura:deploy` lo marque como **problema** y no solo como
-   «ausente», y que el borde no lo deje entrar desde fuera (Caddy responde 404 a `/a2a*` y a
-   `/.well-known/agent-card.json`). El puente de Hermes lo sigue usando por la red interna.
+1. **El puente A2A se cierra.** **Aprobado por el laboratorio el 2026-10-02 y hecho en el PR #210**:
+   en producción y sin llave falla **cerrado** (503, como el dictado y las etiquetas), el borde no lo
+   deja entrar desde fuera (Caddy responde 404 a `/a2a*` y a `/.well-known/agent-card.json`) y la
+   llave se compara en tiempo constante. `configura:deploy` avisa que sin llave el puente queda
+   apagado y **no deja desplegar** con una llave de menos de 32 caracteres: apagado ya es seguro, y
+   la llave corta es lo que abre el puente con algo adivinable. El puente de Hermes lo sigue usando
+   por la red interna.
 2. **Lo que es local por diseño se apaga en producción**: el reel (`/reel` y `/api/reel/*`) hasta su
    fase 16, `/api/dictado` y `/api/laboratorio/estado`. Propuesta: una lista de
    rutas solo locales que en producción responden 404, en un solo lugar (el proxy) y con su prueba,
