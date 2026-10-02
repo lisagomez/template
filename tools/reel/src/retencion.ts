@@ -62,6 +62,27 @@ export const documentoDeConsentimiento = (consentimiento: string): string => `co
 /** Vencido el día DESPUÉS de `vigenteHasta`, y solo si su documento sigue ahí. */
 export const documentoVencido = (v: VigenciaDeDocumento, hoy: string): boolean => !v.documentoBorradoEn && v.vigenteHasta < hoy;
 
+/**
+ * Tras restaurar una copia: lo que hay que volver a borrar porque se retiró DESPUÉS de la copia. Los retiros
+ * viven en Supabase (`revocado_en`), que no se restaura junto con el almacén. Por cada retiro: su documento y su
+ * archivo de vigencia, y la transcripción conservada del proyecto si se aprobó antes del retiro (la aprobada
+ * después ya no lo incluía). Las rutas son relativas al almacén: `<dueño>/<proyecto>/…`.
+ */
+export interface RetiroRegistrado { consentimiento: string; proyecto: string; dueno: string; revocadoEn: string }
+
+export function rutasTrasRestaurar(retiros: readonly RetiroRegistrado[], aprobadasEn: Readonly<Record<string, string>>): string[] {
+  const rutas = new Set<string>();
+  for (const r of retiros) {
+    const base = `${r.dueno}/${r.proyecto}`;
+    rutas.add(`${base}/${documentoDeConsentimiento(r.consentimiento)}`);
+    rutas.add(`${base}/${vigenciaDeDocumento(r.consentimiento)}`);
+    const aprobada = aprobadasEn[base];
+    // Fechas por valor, no por texto: Supabase escribe `+00:00` y JavaScript `Z`.
+    if (aprobada !== undefined && Date.parse(aprobada) <= Date.parse(r.revocadoEn)) rutas.add(`${base}/${TRANSCRIPCION_CONSERVADA}`);
+  }
+  return [...rutas].sort();
+}
+
 export interface EstadoDeRetencion { id: string; aprobadoEn: string | null; brutoBorradoEn: string | null }
 
 export function venceEl(aprobadoEn: string): Date {

@@ -1,7 +1,7 @@
 /** Pruebas del núcleo del reel: cortes, precios, subtítulos, privacidad, QA, retención y sala. Sin motores. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, transcripcionAConservar, transcripcionVencida, TRANSCRIPCION_CONSERVADA, documentoVencido, documentoDeConsentimiento, vigenciaDeDocumento, type Palabra } from '../dist/index.js';
+import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, transcripcionAConservar, transcripcionVencida, TRANSCRIPCION_CONSERVADA, documentoVencido, documentoDeConsentimiento, vigenciaDeDocumento, rutasTrasRestaurar, type Palabra } from '../dist/index.js';
 import { palabrasDeTokens, lineasDeTsv } from '../dist/node/index.js';
 
 const P = (texto: string, inicio: number, fin: number): Palabra => ({ texto, inicio, fin });
@@ -159,4 +159,11 @@ test('el documento de un consentimiento se conserva mientras dura su vigencia, y
   assert.equal(documentoVencido(v, '2027-01-02'), true);
   assert.equal(documentoVencido({ ...v, documentoBorradoEn: '2027-01-02T12:00:00Z' }, '2027-02-01'), false, 'ya borrado: no se vuelve a contar');
   assert.deepEqual([documentoDeConsentimiento('abc'), vigenciaDeDocumento('abc')], ['consentimientos/abc.bin', 'consentimientos/abc.vigencia.json']);
+});
+
+test('tras restaurar: un retiro posterior a la copia vuelve a borrar documento, vigencia y transcripción aprobada antes', () => {
+  const retiro = { consentimiento: 'c1', proyecto: 'p1', dueno: 'd1', revocadoEn: '2026-10-05T10:00:00+00:00' };
+  assert.deepEqual(rutasTrasRestaurar([retiro], { 'd1/p1': '2026-10-02T18:00:00.000Z' }), ['d1/p1/consentimientos/c1.bin', 'd1/p1/consentimientos/c1.vigencia.json', 'd1/p1/consentimientos/transcripcion-integra.json']);
+  assert.equal(rutasTrasRestaurar([retiro], { 'd1/p1': '2026-10-06T09:00:00Z' }).some((r) => r.endsWith('transcripcion-integra.json')), false, 'aprobada después del retiro: ya no lo incluía');
+  assert.deepEqual(rutasTrasRestaurar([], { 'd1/p1': '2026-10-02T18:00:00Z' }), [], 'sin retiros no se toca nada');
 });
