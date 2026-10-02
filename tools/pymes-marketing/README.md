@@ -80,7 +80,7 @@ const calendario = await calendarioDe30Dias(brief, marca, redactorDePlantillas()
 
 ## Pruebas
 
-`npm run build && npm run prueba` (49 casos). El laboratorio del sitio (`/laboratorio-pymes`) corre
+`npm run build && npm run prueba` (50 casos). El laboratorio del sitio (`/laboratorio-pymes`) corre
 casos de extremo a extremo con CFDI sintéticos y el lector real del extractor.
 
 ## Generación de contenido (0.2.0)
