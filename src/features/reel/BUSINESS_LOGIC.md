@@ -89,7 +89,7 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 |---|---|---|---|
 | Tablas del reel en Supabase (proyectos, versiones, aprobaciones, marcas, consentimientos) | **No**: quién aprobó qué versión y el estado de cada consentimiento son la constancia ante un reclamo | Crítica | Respaldo del proyecto Supabase. **El plan gratis no tiene respaldo automático: verificar el plan antes de prometer nada** |
 | Máster aprobado, `master.json`, `registro.json` (`REEL_DATOS`) | **No**: es el archivo exacto que el dueño aprobó (su huella está en Supabase) | Crítica | Respaldo diario cifrado del almacén, **excluyendo lo que la retención borra** |
-| Documentos de consentimiento (`REEL_DATOS/<dueño>/<proyecto>/consentimientos/`) | **No**: son de terceros | Crítica, **con borrado propagado** | El mismo respaldo; si alguien retira su consentimiento, se borra también de las copias |
+| Documentos de consentimiento (`REEL_DATOS/<dueño>/<proyecto>/consentimientos/`) | **No**: son de terceros | Crítica, **con borrado propagado** | El mismo respaldo; viven lo que su vigencia (en el servidor, `reel:retencion` los borra al vencer); si alguien retira su consentimiento o vence, se borra también de las copias |
 | Bruto, copia normalizada, transcripción y cuadros | — | — | **No se respaldan**: datos de terceros sin aprobar, que la retención borra a los 30 días |
 
 **Riesgo abierto:** si se respalda el bruto por error, la retención de 30 días deja de cumplirse en
@@ -160,8 +160,9 @@ pineados con su huella y licencia en `tools/reel/LICENCIAS.md`.
    de ahí salen el KPI (§5), la recalibración de voces y la sincronía
 2. [ ] Verificar el plan de Supabase antes de prometer respaldo, y cerrar **GATE 3** con una
    restauración probada (tablas + almacén)
-3. [ ] Borrar los documentos de consentimientos vencidos (hoy solo vence la transcripción conservada) y
-   propagar el retiro de un consentimiento a las copias de respaldo (§4)
+3. [ ] Propagar el retiro y el vencimiento de un consentimiento a las copias de respaldo (§4). En el
+   servidor ya se borran: el documento al retirarse o al vencer (desde el 2026-10-02, por `reel:retencion`),
+   y la transcripción conservada con él
 4. [ ] Revisión legal (LFPDPPP y art. 87 de la LFDA) con asesoría
 5. [ ] Cifrado en reposo del almacén y límite de uso por día (brechas de C3)
 6. [ ] Fases bloqueadas (11 a 16), cada una con su firma: LLM sobre la transcripción, transcripción

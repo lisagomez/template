@@ -5,7 +5,7 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, transcripcionAConservar, transcripcionVencida, validaAprobacion, vozDelDueno, BRUTO, REGLAS_DE_CORTE, TRANSCRIPCION_CONSERVADA, type Observacion } from '../../../../tools/reel/dist/index.js';
+import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, documentoVencido, transcripcionAConservar, transcripcionVencida, validaAprobacion, vozDelDueno, BRUTO, REGLAS_DE_CORTE, TRANSCRIPCION_CONSERVADA, type Observacion } from '../../../../tools/reel/dist/index.js';
 import { cuadroSvg, revisaEscena, tarjetaDeTemporada, TEMPORADAS_FIRMADAS } from '../../../../tools/pymes-marketing/dist/video/index.js';
 import { marcaDeReferencia } from './referencias-visuales.ts';
 import type { Caso, ResultadoDeCaso } from './tipos.ts';
@@ -161,6 +161,14 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
       return verifica([[t?.transcripcion.texto === 'me encantó el pan', 'se guarda íntegra'], [solo === null, 'con solo el dueño no se guarda (rige la retención de 30 días)'], [fuera, 'la retención de 30 días no la borra'],
         [!!t && !transcripcionVencida(t, '2027-01-01') && transcripcionVencida(t, '2027-01-02'), 'vence con el consentimiento']],
         [`${TRANSCRIPCION_CONSERVADA} · hasta ${t?.conservarHasta ?? '—'}`], 'Si la clienta reclama que un corte le cambió el sentido, está lo que dijo completo; retirarse la borra.');
+    } },
+  { id: 'priv-13', herramienta: 'privacidad', titulo: 'El documento firmado se borra cuando vence el consentimiento', trampa: 'documento de un tercero guardado para siempre', esperado: 'pasa',
+    entrada: 'Consentimiento de un empleado vigente hasta el 2027-01-01; el reloj marca el 1 y el 2 de enero, y después de borrado.',
+    async corre() {
+      const v = { consentimiento: 'c1', vigenteHasta: '2027-01-01', huella: HUELLA };
+      const d1 = documentoVencido(v, '2027-01-01'), d2 = documentoVencido(v, '2027-01-02'), despues = documentoVencido({ ...v, documentoBorradoEn: '2027-01-02T12:00:00Z' }, '2027-03-01');
+      return verifica([[!d1, 'el último día de vigencia se conserva'], [d2, 'al día siguiente se borra'], [!despues, 'queda la constancia y no se cuenta dos veces']], [`1 ene: ${d1 ? 'borra' : 'conserva'} · 2 ene: ${d2 ? 'borra' : 'conserva'}`],
+        'El documento de un tercero vive lo que autorizó, no más (propuesta de respaldo, 27/09).');
     } },
 ];
 

@@ -49,6 +49,19 @@ export function transcripcionAConservar(p: ProcesoParaConservar, a: { version: n
 /** Vencida el día DESPUÉS de `conservarHasta` (la vigencia incluye ese día). */
 export const transcripcionVencida = (t: { conservarHasta: string }, hoy: string): boolean => t.conservarHasta < hoy;
 
+/**
+ * El documento firmado de un consentimiento se conserva MIENTRAS DURA SU VIGENCIA (propuesta de respaldo del
+ * 2026-09-27) y se borra al vencer o al retirarse. El job de retención no toca Supabase, así que al registrar
+ * se guarda junto al documento su vigencia y su huella (nada personal). Al borrar el documento se queda este
+ * archivo con la fecha: la constancia de que existió y de cuándo se borró, como la fila en Supabase.
+ */
+export interface VigenciaDeDocumento { consentimiento: string; vigenteHasta: string; huella: string; documentoBorradoEn?: string | null }
+export const vigenciaDeDocumento = (consentimiento: string): string => `consentimientos/${consentimiento}.vigencia.json`;
+export const documentoDeConsentimiento = (consentimiento: string): string => `consentimientos/${consentimiento}.bin`;
+
+/** Vencido el día DESPUÉS de `vigenteHasta`, y solo si su documento sigue ahí. */
+export const documentoVencido = (v: VigenciaDeDocumento, hoy: string): boolean => !v.documentoBorradoEn && v.vigenteHasta < hoy;
+
 export interface EstadoDeRetencion { id: string; aprobadoEn: string | null; brutoBorradoEn: string | null }
 
 export function venceEl(aprobadoEn: string): Date {

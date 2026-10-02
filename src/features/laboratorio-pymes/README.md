@@ -67,10 +67,10 @@ propósito**. Para aprobarlo:
 - `../../../scripts/laboratorio-pymes/` — capturas con Playwright, render de video y referencias.
 
 ## Reel del celular (PRP-007)
-Cuatro herramientas más: **reel** (7 casos), **privacidad** (12), **tarjetas** (5) y **sala** (7), con las 6 trampas
+Cuatro herramientas más: **reel** (7 casos), **privacidad** (13), **tarjetas** (5) y **sala** (7), con las 6 trampas
 firmadas (cliente al fondo, ticket con teléfono, precio que no coincide, clip horizontal, música ajena, dos
 hablantes) y otras propias (retoma falsa, texto con código, consentimiento vencido, service_role, versión vieja, un
-corte que parte lo que dijo otra persona, consentimiento retirado, testimonio sin prueba de lo que dijo…).
+corte que parte lo que dijo otra persona, consentimiento retirado, testimonio sin prueba de lo que dijo, documento guardado para siempre…).
 Los casos con motores leen la medición real de `npm run reel:laboratorio` (clips SINTÉTICOS: retratos al óleo de
 dominio público y voces Piper locales) y de `npm run reel:rls` (dos cuentas @example.com contra la base); si falta
 la medición, el caso dice `no-medido` y no afirma nada.

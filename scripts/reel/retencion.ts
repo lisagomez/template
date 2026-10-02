@@ -2,13 +2,14 @@
  * JOB DE PLATAFORMA (respuesta 7 firmada): a los 30 días de aprobado un reel se borran el bruto y su
  * transcripción; se conservan el máster, el registro y los consentimientos. Opera sobre el ALMACÉN LOCAL
  * (donde vive el video); no toca Supabase ni usa llaves. El reloj se inyecta: `--ahora 2026-10-28T12:00:00Z`.
- * También borra la transcripción íntegra que se guardó con un consentimiento cuando su vigencia venció (riesgo 5).
+ * También borra, al vencer su vigencia, la transcripción íntegra guardada con los consentimientos (riesgo 5) y el
+ * documento firmado de cada consentimiento (queda su archivo de vigencia con la fecha de borrado, como constancia).
  * Uso: node scripts/reel/retencion.ts [--ahora ISO] [--seco]
  */
 import { readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { BRUTO, porBorrar, transcripcionVencida, venceEl, TRANSCRIPCION_CONSERVADA } from '../../tools/reel/dist/index.js';
+import { BRUTO, documentoDeConsentimiento, documentoVencido, porBorrar, transcripcionVencida, venceEl, TRANSCRIPCION_CONSERVADA, type VigenciaDeDocumento } from '../../tools/reel/dist/index.js';
 
 const DATOS = resolve(process.env['REEL_DATOS'] ?? join(homedir(), '.reel', 'datos'));
 const arg = (n: string) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : undefined; };
@@ -44,4 +45,24 @@ for (const p of proyectos) {
   if (!seco) rmSync(ruta, { force: true });
   console.log(`${p.id.slice(0, 8)}… transcripción conservada vencida (hasta ${t.conservarHasta})${seco ? ': en seco, no se borró' : ': borrada'}`);
 }
-console.log(`${proyectos.length} proyecto(s) en el almacén · ${vencidos.size} vencido(s) · ${transcripciones} transcripción(es) conservada(s) vencida(s) al ${ahora.toISOString()}${seco ? ' · en seco' : ''}`);
+// Documentos de consentimientos: se conservan mientras dura su vigencia. Los registrados antes de que existiera el
+// archivo de vigencia (2026-10-02) no tienen fecha local: se reportan y NO se borran a ciegas.
+let documentos = 0, sinVigencia = 0;
+for (const p of proyectos) {
+  const dir = join(p.carpeta, 'consentimientos');
+  let nombres: string[] = [];
+  try { nombres = readdirSync(dir); } catch { continue; }
+  for (const n of nombres.filter((x) => x.endsWith('.bin'))) if (!nombres.includes(n.replace(/\.bin$/, '.vigencia.json'))) sinVigencia++;
+  for (const n of nombres.filter((x) => x.endsWith('.vigencia.json'))) {
+    const v = JSON.parse(readFileSync(join(dir, n), 'utf8')) as VigenciaDeDocumento;
+    if (!documentoVencido(v, hoy)) continue;
+    documentos++;
+    if (!seco) {
+      rmSync(join(p.carpeta, documentoDeConsentimiento(v.consentimiento)), { force: true });
+      writeFileSync(join(dir, n), JSON.stringify({ ...v, documentoBorradoEn: ahora.toISOString() }));
+    }
+    console.log(`${p.id.slice(0, 8)}… documento del consentimiento ${v.consentimiento.slice(0, 8)}… vencido (hasta ${v.vigenteHasta})${seco ? ': en seco, no se borró' : ': borrado'}`);
+  }
+}
+if (sinVigencia) console.log(`${sinVigencia} documento(s) sin archivo de vigencia (anteriores al 2026-10-02): no se borran solos; revísalos contra Supabase`);
+console.log(`${proyectos.length} proyecto(s) en el almacén · ${vencidos.size} vencido(s) · ${transcripciones} transcripción(es) conservada(s) y ${documentos} documento(s) vencido(s) al ${ahora.toISOString()}${seco ? ' · en seco' : ''}`);
