@@ -86,6 +86,12 @@ export function aEditado(t: number, edl: Edl): number | null {
   return null;
 }
 
+/** Segundo del reel editado donde queda la unión de un corte que empieza en `t` (tiempo original). */
+export function costura(t: number, edl: Edl): number {
+  const s = edl.conservar.reduce((x, c) => x + Math.max(0, Math.min(c.fin, t) - c.inicio), 0);
+  return Math.round(s * 10) / 10;
+}
+
 /** Tiempo del reel editado → tiempo original (para aplicar una marca de la sala). */
 export function aOriginal(t: number, edl: Edl): number {
   let acumulado = 0;

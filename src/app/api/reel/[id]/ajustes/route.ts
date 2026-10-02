@@ -13,6 +13,7 @@ const ajuste = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('texto'), segundo: z.number().min(0).max(90), nota: z.string().trim().min(1).max(80) }),
   z.object({ tipo: z.literal('cubrir'), indice: z.number().int().min(0).max(50) }),
   z.object({ tipo: z.literal('cara-consentida'), pista: z.number().int().min(1).max(50) }),
+  z.object({ tipo: z.literal('corte-revisado'), clave: z.string().regex(/^\d{1,3}\.\d-\d{1,3}\.\d$/, 'corte inválido') }),
 ]);
 
 /** Un ajuste del dueño en la sala → versión nueva (y lo aprobado queda revocado). */
@@ -34,6 +35,7 @@ export async function POST(p: NextRequest, { params }: { params: Promise<{ id: s
     await ctx.supabase.from('reel_marcas').insert({ proyecto_id: id, version_id: v.id, tipo: marca.tipo, segundo: marca.segundo, hasta: 'hasta' in marca ? marca.hasta : null, nota: 'nota' in marca ? marca.nota : null });
   }
   if (x.tipo === 'cubrir' && !d.cubiertos.includes(x.indice)) d.cubiertos.push(x.indice);
+  if (x.tipo === 'corte-revisado' && !(d.revisados ?? []).includes(x.clave)) d.revisados = [...(d.revisados ?? []), x.clave];
   if (x.tipo === 'cara-consentida') {
     const { count } = await ctx.supabase.from('reel_consentimientos').select('id', { count: 'exact', head: true }).eq('proyecto_id', id).is('revocado_en', null).neq('rol', 'dueno');
     if ((count ?? 0) <= d.conConsentimiento.length) return NextResponse.json({ error: 'Registra primero el consentimiento de esa persona' }, { status: 409 });

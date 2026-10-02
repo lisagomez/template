@@ -1,10 +1,12 @@
 /**
  * Los controles de la AISIA firmada (propuesta §7) como código que BLOQUEA. Lo que no se puede firmar
  * se rediseña: la cara de quien no consintió se desenfoca por defecto; un dato personal en pantalla, una
- * segunda voz sin consentimiento o música ajena bloquean el borrador. Detección, nunca reconocimiento:
+ * segunda voz sin consentimiento, música ajena o un corte que parte lo que dijo otra persona bloquean el
+ * borrador. Detección, nunca reconocimiento:
  * ninguna función de aquí sabe QUIÉN es una cara; solo DÓNDE está y cuánto tiempo.
  */
-import type { Caja, Consentimiento, DeteccionCara, Desenfoque, HallazgoPantalla, Medidas, Observacion, PistaCara, TipoDeDato } from './tipos.js';
+import type { Caja, Consentimiento, DeteccionCara, Desenfoque, HallazgoPantalla, Medidas, Observacion, PistaCara, TipoDeDato, Tramo } from './tipos.js';
+import { costura, type Edl } from './cortes.js';
 
 export const REGLAS_DE_PRIVACIDAD = { confianzaMin: 0.8, iouMin: 0.2, presenciaSujeto: 0.5, margenCaja: 0.3, intervaloMuestreo: 0.5 } as const;
 
@@ -84,6 +86,63 @@ function luhn(d: string): boolean {
 
 export const vigentes = (cs: readonly Consentimiento[], hoy: string): Consentimiento[] => cs.filter((c) => !c.revocado && c.vigenteHasta >= hoy);
 
+/** Un turno de voz con su hablante (salida de `cuentaHablantes`), en segundos del clip original. `null`:
+ *  un turno demasiado corto para saber de quién es. */
+export interface TurnoDeVoz { inicio: number; fin: number; hablante: string | null }
+
+/** Un corte que se lleva una PARTE de lo que dijo otra persona (riesgo 5 de la AISIA firmada). La clave es
+ *  su tramo: si el corte cambia, cambia la clave y hay que volver a revisarlo. `costura`: el segundo del
+ *  reel editado donde queda la unión, que es donde el dueño tiene que escuchar. */
+export interface CorteEnVozAjena { clave: string; desde: number; hasta: number; costura: number }
+
+/**
+ * `minimo`: menos de 0.3 s cortado (o conservado) es el respiro de una frontera, no habla. `dominio`: el
+ * dueño es la voz que más habla SOLO si se lleva el 60 % del habla atribuida; si no (un testimonio largo
+ * del cliente), no se sabe quién es y todo corte parcial se revisa. Valores de partida sin calibrar con
+ * voces reales: se recalibran en el estreno, como `CALIBRACION_DE_VOCES`.
+ */
+export const REGLAS_DE_VOZ_AJENA = { minimo: 0.3, dominio: 0.6 } as const;
+
+const solapa = (a: Tramo, b: Tramo): number => Math.max(0, Math.min(a.fin, b.fin) - Math.max(a.inicio, b.inicio));
+
+/** La voz del dueño: la que más habla, si domina. Si ninguna domina, `null` (no se adivina). */
+export function vozDelDueno(turnos: readonly TurnoDeVoz[], r = REGLAS_DE_VOZ_AJENA): string | null {
+  const porVoz = new Map<string, number>();
+  for (const t of turnos) if (t.hablante) porVoz.set(t.hablante, (porVoz.get(t.hablante) ?? 0) + (t.fin - t.inicio));
+  const total = [...porVoz.values()].reduce((s, x) => s + x, 0);
+  const [voz, tiempo] = [...porVoz.entries()].sort((a, b) => b[1] - a[1])[0] ?? [null, 0];
+  return voz !== null && total > 0 && tiempo / total >= r.dominio ? voz : null;
+}
+
+/**
+ * Cortes dentro del habla de otra persona: de cada voz que no es la del dueño (y de lo que no se puede
+ * atribuir), lo que el EDL descarta MIENTRAS esa voz conserva habla en el reel. Quitarla entera no altera
+ * lo que dijo; partirla sí puede cambiarle el sentido. Con una sola voz no hay a quién proteger.
+ */
+export function cortesEnVozAjena(turnos: readonly TurnoDeVoz[], edl: Edl, hablantes: number, r = REGLAS_DE_VOZ_AJENA): CorteEnVozAjena[] {
+  if (hablantes < 2) return [];
+  const dueno = vozDelDueno(turnos, r);
+  const ajenas = new Map<string, TurnoDeVoz[]>();
+  for (const t of turnos) {
+    if (t.hablante !== null && t.hablante === dueno) continue;
+    const k = t.hablante ?? '?';
+    ajenas.set(k, [...(ajenas.get(k) ?? []), t]);
+  }
+  const salida = new Map<string, CorteEnVozAjena>();
+  for (const ts of ajenas.values()) {
+    const conservado = ts.reduce((s, t) => s + edl.conservar.reduce((x, c) => x + solapa(t, c), 0), 0);
+    if (conservado < r.minimo) continue;
+    for (const d of edl.descartes) {
+      const partes = ts.filter((t) => solapa(t, d) > 0).map((t) => ({ inicio: Math.max(t.inicio, d.inicio), fin: Math.min(t.fin, d.fin) }));
+      if (partes.reduce((s, p) => s + (p.fin - p.inicio), 0) < r.minimo) continue;
+      const desde = Math.min(...partes.map((p) => p.inicio)), hasta = Math.max(...partes.map((p) => p.fin));
+      const clave = `${desde.toFixed(1)}-${hasta.toFixed(1)}`;
+      salida.set(clave, { clave, desde, hasta, costura: costura(d.inicio, edl) });
+    }
+  }
+  return [...salida.values()].sort((a, b) => a.desde - b.desde);
+}
+
 export interface EntradaDeRevision {
   medidas: Medidas;
   pistas: readonly PistaCara[];
@@ -95,6 +154,9 @@ export interface EntradaDeRevision {
   /** Grupos de hallazgos (índices de `agrupaHallazgos`) que el dueño ya cubrió: se desenfocan en el máster. */
   cubiertos?: ReadonlySet<number>;
   musica: { fraccion: number; segundos: number };
+  /** Cortes que parten lo que dijo otra persona (riesgo 5) y las claves que el dueño ya revisó en la sala. */
+  cortesEnVozAjena?: readonly CorteEnVozAjena[];
+  revisados?: ReadonlySet<string>;
 }
 
 /** Todo lo que bloquea o avisa ANTES de componer el máster. */
@@ -109,6 +171,9 @@ export function revisaPrivacidad(e: EntradaDeRevision): Observacion[] {
   // Más de la mitad de las pausas con sonido y al menos 0.5 s: un clip hablado casi sin pausas escondía la
   // música con el umbral anterior de 1.5 s (medido). Solo energía: un ruido fuerte también la dispara.
   if (e.musica.fraccion > 0.5 && e.musica.segundos >= 0.5) obs.push({ regla: 'musica-de-fondo', nivel: 'bloquea', mensaje: `Se oye sonido de fondo continuo (posible música o ruido fuerte) en ${Math.round(e.musica.fraccion * 100)} % de las pausas: el reel no lleva música incrustada; agrégala tú en la app de la red al publicar` });
+  for (const c of e.cortesEnVozAjena ?? []) {
+    if (!e.revisados?.has(c.clave)) obs.push({ regla: 'corte-en-voz-ajena', nivel: 'bloquea', t: c.costura, mensaje: `En el segundo ${c.costura.toFixed(1)} del reel se corta una parte de lo que dice otra persona (del ${c.desde.toFixed(1)} al ${c.hasta.toFixed(1)} del clip): escúchalo y confirma en la sala que no le cambia el sentido` });
+  }
   const otras = e.pistas.filter((p) => p.id !== e.sujetoId);
   if (otras.length) obs.push({ regla: 'caras-desenfocadas', nivel: 'aviso', mensaje: `${otras.length} cara(s) además de la tuya: se desenfocan por defecto. Si alguien consintió, márcalo en la sala` });
   return obs;

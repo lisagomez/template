@@ -5,7 +5,7 @@ import type { Consentimiento, Desenfoque, HallazgoPantalla, MarcaDeNegocio, Marc
 import { propone, duracionEditada, type Edl } from '../cortes.js';
 import { cotejaPrecios } from '../precios.js';
 import { archivoAss, rotulos as armaRotulos, rotulosFueraDeZona, type Rotulo } from '../subtitulos.js';
-import { agrupaHallazgos, carasSinCubrir, desenfoquesDeCaras, fusiona, pistasDeCaras, revisaPrivacidad, sujeto } from '../privacidad.js';
+import { agrupaHallazgos, carasSinCubrir, cortesEnVozAjena, desenfoquesDeCaras, fusiona, pistasDeCaras, revisaPrivacidad, sujeto, type CorteEnVozAjena } from '../privacidad.js';
 import { sonidoEnPausas } from '../audio.js';
 import { argumentosDeMedicion, argumentosDelMaster, leeMedidaDeVolumen, type Master } from '../master.js';
 import { hayBloqueo, revisaMaster } from '../qa.js';
@@ -16,7 +16,9 @@ import { cuentaHablantes, type Diarizacion } from './hablantes.js';
 import { detectaCaras, leePantalla } from './vision.js';
 
 export interface Motores { sherpa: ModuloSherpa; ort: unknown; diarizacion: Diarizacion; parakeet: string; hablante: string; yunet: string; python?: string; tesseract?: string; umbralHablantes?: number }
-export interface Decisiones { marcas: Marca[]; conConsentimiento: number[]; cubiertos: number[] }
+/** `revisados`: claves de los cortes en voz ajena que el dueño confirmó en la sala (opcional: las decisiones
+ *  anteriores al riesgo 5 no lo traen). */
+export interface Decisiones { marcas: Marca[]; conConsentimiento: number[]; cubiertos: number[]; revisados?: string[] }
 export interface EntradaDeProceso {
   bruto: string; carpeta: string; marca: MarcaDeNegocio; catalogo: ProductoDeCatalogo[];
   consentimientos: Consentimiento[]; hoy: string; diccionario?: Record<string, string>; decisiones?: Decisiones;
@@ -28,6 +30,7 @@ export interface ResultadoDeProceso {
   ubicacionTrasIngesta: string[];
   transcripcion?: Transcripcion; edl?: Edl; rotulos?: Rotulo[]; pistas?: PistaCara[]; sujetoId?: number | null;
   hablantes?: number; musica?: { fraccion: number; segundos: number }; hallazgos?: HallazgoPantalla[];
+  cortesEnVozAjena?: Array<CorteEnVozAjena & { revisado: boolean }>;
   observaciones: Observacion[]; master?: MasterHecho; ms: Record<string, number>;
 }
 
@@ -58,6 +61,8 @@ export async function procesa(e: EntradaDeProceso, motores: Motores): Promise<Re
   const edl = aplicaCortes(propone(tr.palabras, n.medidas.duracion), d.marcas);
   const rs = aplicaTextos(armaRotulos(tr.palabras, edl, e.diccionario), d.marcas);
   const h = await cronometra(ms, 'hablantes', () => cuentaHablantes({ diarizacion: motores.diarizacion, ort: motores.ort, modelo: motores.hablante, ...(motores.umbralHablantes !== undefined ? { umbral: motores.umbralHablantes } : {}) }, voz, tr.palabras));
+  const cortesVoz = cortesEnVozAjena(h.turnos, edl, h.hablantes);
+  const revisados = new Set(d.revisados ?? []);
   const musica = sonidoEnPausas(voz, 16_000, tr.palabras);
   const muestrasCaras = await cuadros(norm, join(e.carpeta, 'cuadros', 'caras'), 0.5);
   const caras = await cronometra(ms, 'caras', () => detectaCaras({ modelo: motores.yunet, ...(motores.python ? { python: motores.python } : {}) }, muestrasCaras, 2));
@@ -66,14 +71,14 @@ export async function procesa(e: EntradaDeProceso, motores: Motores): Promise<Re
   const pistas = pistasDeCaras(caras, muestrasCaras.length);
   const suj = sujeto(pistas);
   const observaciones = [
-    ...revisaPrivacidad({ medidas: n.medidas, pistas, sujetoId: suj?.id ?? null, hablantes: h.hablantes, consentimientos: e.consentimientos, hoy: e.hoy, hallazgos, cubiertos: new Set(d.cubiertos), musica }),
+    ...revisaPrivacidad({ medidas: n.medidas, pistas, sujetoId: suj?.id ?? null, hablantes: h.hablantes, consentimientos: e.consentimientos, hoy: e.hoy, hallazgos, cubiertos: new Set(d.cubiertos), musica, cortesEnVozAjena: cortesVoz, revisados }),
     ...cotejaPrecios(tr.palabras, e.catalogo),
   ];
   const coberturas: Desenfoque[] = agrupaHallazgos(hallazgos).filter((_, i) => d.cubiertos.includes(i)).map((g) => ({ inicio: Math.max(0, g.desde - 1), fin: g.hasta + 1, caja: g.caja, motivo: 'pantalla' }));
   const master: Master = { version: 1, edl, desenfoques: fusiona([...desenfoquesDeCaras(pistas, suj?.id ?? null, new Set(d.conConsentimiento)), ...coberturas]), rotulos: rs, marca: e.marca, lufs: -14 };
   const hecho = await cronometra(ms, 'master', () => componeMaster(master, norm, e.carpeta, suj?.detecciones ?? [], motores));
   await writeFile(join(e.carpeta, 'master.json'), JSON.stringify({ master, decisiones: d }, null, 1));
-  const base = { bruto, ubicacionTrasIngesta: ubicacionEn(n.etiquetas), transcripcion: tr, edl, rotulos: rs, pistas, sujetoId: suj?.id ?? null, hablantes: h.hablantes, musica, hallazgos, master: hecho, ms };
+  const base = { bruto, ubicacionTrasIngesta: ubicacionEn(n.etiquetas), transcripcion: tr, edl, rotulos: rs, pistas, sujetoId: suj?.id ?? null, hablantes: h.hablantes, musica, hallazgos, cortesEnVozAjena: cortesVoz.map((c) => ({ ...c, revisado: revisados.has(c.clave) })), master: hecho, ms };
   return { ...base, estado: hayBloqueo([...observaciones, ...hecho.qa]) ? 'bloqueado' : 'borrador', observaciones };
 }
 

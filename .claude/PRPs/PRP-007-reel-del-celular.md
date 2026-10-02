@@ -197,6 +197,16 @@ Todos medidos en el laboratorio o en el recorrido con Playwright; cada uno qued�
   en `validate`. Se volvió medición (`mide-aislamiento.ts` → `rls.json` → caso `sala-7` en `validate`) y el gate
   inactivo con motivo queda propuesto para firma (`.claude/goals/reel-pymes/propuesta-cdc-gate.md`).
 
+### 2026-10-02: un riesgo firmado que nadie construyó
+- **Error**: el riesgo 5 de la AISIA firmada («un corte dentro del habla de otra persona se marca para revisión
+  explícita») no estaba en el código, y nada lo echaba de menos: los criterios de éxito nombraban las 6 trampas,
+  no los 5 riesgos. Lo encontró la consolidación del contrato del reel (`src/features/reel/BUSINESS_LOGIC.md`).
+- **Fix**: `cortesEnVozAjena` + la regla `corte-en-voz-ajena`, que bloquea hasta que el dueño la confirma en la
+  sala (clave por tramo: si el corte cambia, se revisa de nuevo). El dueño es la voz que más habla solo si domina;
+  si no, se revisan todos los cortes. Casos `priv-9` y `priv-10` y tres pruebas del núcleo. La otra mitad (la
+  transcripción íntegra con el consentimiento) sigue pendiente.
+- **Lección**: cada riesgo firmado necesita su caso, no solo cada trampa.
+
 ## Gotchas
 - [ ] Next.js 16: `proxy.ts` (no `middleware.ts`) y `getUser()` en el servidor, nunca `getSession()`.
 - [ ] Las llaves de migración (`SUPABASE_DB_URL`) solo las toca el script de migración; nunca una superficie.

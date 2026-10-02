@@ -9,7 +9,8 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Tus reels**: sube el clip con su marca, su catálogo y el diccionario del negocio, y lo manda a procesar con los
   motores locales de `@tu-scope/reel`.
 - **Sala**: el video con sus bloqueos; marcar un corte o un cambio de texto en el segundo exacto (sale una versión
-  nueva, que revoca lo aprobado); aprobar con la huella del archivo calculada en el celular; el registro; borrar.
+  nueva, que revoca lo aprobado); confirmar que revisó cada corte que parte lo que dijo otra persona; aprobar con la
+  huella del archivo calculada en el celular; el registro; borrar.
 - **Consentimientos**: registra los de quien sale o se oye, y los respeta al procesar.
 
 ### Qué no hace
