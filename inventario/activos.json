@@ -309,6 +309,14 @@
    "cubre": ["inventario", "scripts/inventario", "scripts/prueba-inventario.ts"]
   },
   {
+   "id": "TPL-analista-producto",
+   "nombre": "Analista de producto: dolores con evidencia citada, verificador, contrato A2A no servido y corridas",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "scripts/analista-producto", "responsable": "dep-sw",
+   "origen": [".claude/PRPs/PRP-008-analista-producto.md", ".claude/goals/analista-producto"],
+   "cubre": ["scripts/analista-producto", "docs/analisis"]
+  },
+  {
    "id": "TPL-empaquetador",
    "nombre": "Empaquetador de herramientas y su contrato",
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",

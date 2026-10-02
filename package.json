@@ -20,6 +20,7 @@
     "prueba:tools": "node scripts/prueba-tools.mjs",
     "prueba:a2a": "node --test --test-skip-pattern=^SERVICIO: scripts/prueba-a2a.ts",
     "prueba:a2a:servicio": "node --test --test-name-pattern=^SERVICIO: scripts/prueba-a2a.ts",
+    "prueba:analista": "node --test scripts/analista-producto/prueba-analista.ts",
     "prueba:migraciones": "node scripts/prueba-migraciones.mjs",
     "gates": "node scripts/verifica-gates.mjs --lista",
     "proyecta:gates": "node scripts/proyecta-gates.mjs",

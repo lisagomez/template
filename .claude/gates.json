@@ -338,6 +338,16 @@
       "_nota": "REACTIVADO el 2026-09-26. Estuvo apagado desde que el padron destapo que era huerfano (ningun script lo corria y llevaba meses en rojo). Lo que se arreglo: la prueba de opacidad enumeraba `src/app` ENTERO —correcto cuando el bridge era lo unico que habia, falso al crecer la app— y ahora enumera las rutas DEL BRIDGE, que es el conjunto que RF-17 acota y el nombre que le puso el SDD (§6, `rutasDelBridge()`). Para no perder lo que la version vieja si cazaba, una segunda prueba enumera el resto y lo exige DECLARADO: una ruta nueva en cualquier sitio sigue cayendo (demostrado sembrando una en `/a2a/` y otra en `/api/`). Se excluyen las dos pruebas `SERVICIO:`, que viven en el gate de al lado: no se apagan en silencio."
     },
     {
+      "nombre": "prueba:analista",
+      "runner": "comando",
+      "comando": "npm run prueba:analista",
+      "guarda": "el analista de producto (PRP-008): su contrato A2A con los tipos del SDK, sin nombres del interior y con transiciones de estado coherentes; que NINGUNA ruta lo sirve (enumera `src/app`); que el verificador de evidencia tumba cada siembra (dolor sin cita, ruta inexistente, cita que la fuente no dice, grado inflado, activo omitido, vetado en el ranking...); y que la ULTIMA corrida de `docs/analisis/` sigue en verde: si alguien edita el informe y rompe una cita, cae aqui",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas, con el conteo de siembras cazadas y el resumen de la corrida",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
       "nombre": "prueba:a2a:servicio",
       "runner": "comando",
       "comando": "npm run prueba:a2a:servicio",

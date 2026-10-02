@@ -74,6 +74,9 @@ Usuario dice algo
     ├── "Quiero convertir una idea vaga en un prompt para /goal"
     |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
     |
+    ├── "Donde duele" / "puntos de dolor" / "que producto construimos" / "analisis de producto"
+    |       → Ejecutar skill ANALISTA-PRODUCTO (dolor sin cita = hipotesis; solo escribe en docs/analisis/)
+    |
     ├── "Extraer datos de facturas / documentos / PDF / escaneos / fotos"
     |   "leer codigos de barras o QR" / "digitalizar papeles" / "capturar datos"
     |   "factura en XML" / "CFDI" / "comprobante fiscal"
@@ -165,7 +168,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 27 Herramientas Especializadas
+## Skills: 28 Herramientas Especializadas
 
 Viven en `.claude/skills/<nombre>/SKILL.md`. Su `description` ya entra en contexto en cada
 sesion (el arnes la carga sola), asi que la tabla que antes vivia aqui pagaba dos veces lo
