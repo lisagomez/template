@@ -1,0 +1,1747 @@
+{
+ "version": 1,
+ "fecha": "2026-10-02",
+ "commit": "f2ba87ff462b81e9937d32c29c4d091bbb6a549f",
+ "estado": "completed",
+ "alcance": "repositorio entero",
+ "peticion": {
+  "texto": "planea el rol de A2A que revise el repositorio para un analisis de identificacion de puntos de dolor (problemas) con casos de uso por categoria con las soluciones que ofrecen la combinacion de herramientas, APPs y arquitectura para propuesta de productos con enfoque product first",
+  "hipotesis": [
+   {
+    "id": "H1",
+    "texto": "Documentos fiscales MX: capturar y conciliar CFDI a mano, con errores"
+   },
+   {
+    "id": "H2",
+    "texto": "Voz y dictado: funciona en el laboratorio, no para usuarios"
+   },
+   {
+    "id": "H3",
+    "texto": "Coste de operar agentes: cinco MCP ~20k tokens por sesion; una sesion de fabrica de 162 USD"
+   },
+   {
+    "id": "H4",
+    "texto": "Confianza y gobernanza: deriva silenciosa, controles que parecen funcionar; 151 comprobaciones"
+   },
+   {
+    "id": "H5",
+    "texto": "Operacion e infraestructura: respaldo que es una creencia (GATE 1 y GATE 3)"
+   },
+   {
+    "id": "H6",
+    "texto": "Portabilidad entre arneses: opencode no expande imports @ruta"
+   },
+   {
+    "id": "H7",
+    "texto": "Lectura preliminar: el extractor de CFDI es el candidato mas vendible"
+   }
+  ]
+ },
+ "inventario": {
+  "archivo": "inventario/activos.json",
+  "activos": 39
+ },
+ "importancia_usuario": null,
+ "cobertura": [
+  {
+   "activo": "TPL-extractor-documental",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-05",
+    "D-06",
+    "D-07",
+    "D-21"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-etiquetas-gs1",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-07"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-voz",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-19"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-dictado",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-19"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-asesor-ventas",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-pymes-marketing",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-03"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-reel",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-14"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-reel",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-02",
+    "D-14",
+    "D-15"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-estudio-pymes",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-03"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-laboratorio-pymes",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-03"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-grafo-conocimiento",
+   "estado": "sin-dolor-con-evidencia",
+   "hallazgos": [],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "tools/grafo-conocimiento/README.md",
+     "cita": "Cuando no hay regla, lo dice con una forma que no se puede confundir con una"
+    }
+   ],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-conocimiento",
+   "estado": "sin-dolor-con-evidencia",
+   "hallazgos": [],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "tools/conocimiento/README.md",
+     "cita": "Se siembra **aquí**, una vez."
+    }
+   ],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-ejemplo-herramienta",
+   "estado": "sin-dolor-con-evidencia",
+   "hallazgos": [],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "tools/ejemplo-herramienta/README.md",
+     "cita": "El andamio que se copia para empaquetar una herramienta propia: pasa el empaquetador en verde"
+    }
+   ],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-a2a",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-15",
+    "D-18"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-auth",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-18"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-dashboard",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-18"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-project-settings",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-18"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-dictado",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-15",
+    "D-18",
+    "D-19"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-laboratorio-voz",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-18"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-ventas-whatsapp",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-03",
+    "D-20"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-ventas-whatsapp",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-03",
+    "D-20"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-etiquetas",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-01",
+    "D-15"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-feature-laboratorio-etiquetas",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-18"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-app-base",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-04",
+    "D-16"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-motor-ia",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-08"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-skills",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-09"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-doctrina",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-09",
+    "D-11",
+    "D-17"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-especificaciones",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-14"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-gobernanza",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-09",
+    "D-16"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-manifiesto-gates",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-07"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-imprenta",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-10",
+    "D-13"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-clis-impresos",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-13"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-trayectorias",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-04",
+    "D-08",
+    "D-11"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-inventario",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-07"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-analista-producto",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-22"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-empaquetador",
+   "estado": "sin-dolor-con-evidencia",
+   "hallazgos": [],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "docs/EMPAQUETAR-HERRAMIENTA.md",
+     "cita": "Este template sirve para dos cosas distintas, y conviene saber en cuál estás:"
+    }
+   ],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-despliegue",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-12",
+    "D-15"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-erp",
+   "estado": "con-dolores",
+   "hallazgos": [
+    "D-07",
+    "D-21"
+   ],
+   "evidencia": [],
+   "motivo": null
+  },
+  {
+   "activo": "TPL-design-systems",
+   "estado": "sin-dolor-con-evidencia",
+   "hallazgos": [],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": ".claude/design-systems/README.md",
+     "cita": "Sistemas de diseño y patrones visuales listos para usar en proyectos SaaS Factory."
+    }
+   ],
+   "motivo": null
+  }
+ ],
+ "hallazgos": [
+  {
+   "id": "D-01",
+   "titulo": "Ningun producto tiene medido el costo del dolor que promete resolver",
+   "de_quien": "laboratorio",
+   "categoria": "Validacion de mercado",
+   "activos": [
+    "TPL-extractor-documental",
+    "TPL-feature-a2a",
+    "TPL-etiquetas-gs1",
+    "TPL-feature-etiquetas",
+    "TPL-reel",
+    "TPL-feature-reel",
+    "TPL-dictado",
+    "TPL-feature-dictado",
+    "TPL-asesor-ventas"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/a2a/BUSINESS_LOGIC.md",
+     "cita": "**Costo actual:** **pendiente, no medido** en una operación real.",
+     "linea": 23
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/etiquetas/BUSINESS_LOGIC.md",
+     "cita": "**Costo actual:** **pendiente, no medido.** No hay cifras de merma",
+     "linea": 23
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/reel/BUSINESS_LOGIC.md",
+     "cita": "«Horas» por reel es la estimación del PRP-007, no una",
+     "linea": 22
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/dictado/BUSINESS_LOGIC.md",
+     "cita": "**Costo actual:** [supuesto, a medir en el piloto] media hora por reunión escribiendo el acta,",
+     "linea": 29
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-02",
+   "titulo": "Ningun producto tiene todavia un primer cliente real con quien medirse",
+   "de_quien": "laboratorio",
+   "categoria": "Validacion de mercado",
+   "activos": [
+    "TPL-extractor-documental",
+    "TPL-etiquetas-gs1",
+    "TPL-reel",
+    "TPL-feature-reel"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/a2a/BUSINESS_LOGIC.md",
+     "cita": "**Qué cliente lo usa primero y con qué corpus: pendiente.**",
+     "linea": 66
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/etiquetas/BUSINESS_LOGIC.md",
+     "cita": "**Qué cadena lo usa primero: pendiente.** Lo decide el laboratorio.",
+     "linea": 66
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/reel/BUSINESS_LOGIC.md",
+     "cita": "**Primer cliente real: pendiente.**",
+     "linea": 55
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-03",
+   "titulo": "Tres contratos de producto esperan la firma y dos productos no tienen contrato",
+   "de_quien": "laboratorio",
+   "categoria": "Validacion de mercado",
+   "activos": [
+    "TPL-extractor-documental",
+    "TPL-etiquetas-gs1",
+    "TPL-reel",
+    "TPL-pymes-marketing",
+    "TPL-feature-estudio-pymes",
+    "TPL-feature-laboratorio-pymes",
+    "TPL-ventas-whatsapp",
+    "TPL-feature-ventas-whatsapp"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run verify:gobernanza",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+     "cita": "pendiente: firma del contrato de «Extractor documental»"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run verify:gobernanza",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+     "cita": "pendiente: firma del contrato de «Etiquetas GS1»"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run verify:gobernanza",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+     "cita": "pendiente: firma del contrato de «Reel del celular»"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run verify:gobernanza",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+     "cita": "pendiente: contrato de «Estudio pymes» — falta: `/new-app` al salir de blueprint (PRP-006)"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run verify:gobernanza",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+     "cita": "pendiente: contrato de «Vendedor con IA en WhatsApp»"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-04",
+   "titulo": "La app casi no deja uso registrado: no hay base para medir a sus usuarios",
+   "de_quien": "laboratorio",
+   "categoria": "Validacion de mercado",
+   "activos": [
+    "TPL-app-base",
+    "TPL-trayectorias"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run trayectorias:informe",
+     "archivo": "trayectorias/informes/2026-09-30.md",
+     "cita": "| cacheRatio | 4.444 (1/2) | 0 (1/1) | sin base (min 3 por periodo) |"
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "trayectorias/informes/2026-09-30.md",
+     "cita": "## aplicacion · (todas)",
+     "linea": 7
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-05",
+   "titulo": "La calidad del extractor esta medida con corpus sintetico y sus umbrales no vienen puestos",
+   "de_quien": "usuario",
+   "categoria": "Documentos fiscales y contables",
+   "activos": [
+    "TPL-extractor-documental"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/a2a/BUSINESS_LOGIC.md",
+     "cita": "Todo lo medido sobre calidad es con corpus **sintético**",
+     "linea": 8
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "AGENTS.md",
+     "cita": "OJO: los umbrales de confianza y similitud NO vienen puestos y son obligatorios."
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-06",
+   "titulo": "El OCR autohospedado es lento en CPU: el unico ahorro es no pasar por el motor",
+   "de_quien": "operador",
+   "categoria": "Documentos fiscales y contables",
+   "activos": [
+    "TPL-extractor-documental"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "AGENTS.md",
+     "cita": "medido en CPU: ~110 s por pagina, y enrutar fuera del motor es el unico ahorro"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-07",
+   "titulo": "Los gates de integracion del ERP, el extractor y las etiquetas estan apagados por falta de un nodo con Docker o Tesseract",
+   "de_quien": "laboratorio",
+   "categoria": "Confianza en lo construido",
+   "activos": [
+    "TPL-erp",
+    "TPL-inventario",
+    "TPL-etiquetas-gs1",
+    "TPL-extractor-documental",
+    "TPL-manifiesto-gates"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run gates",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gates.txt",
+     "cita": "inactivos declarados (8) — no cuentan como pasados"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run gates",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gates.txt",
+     "cita": "motivo: Necesita Docker, y el gate corre en maquinas sin Docker"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run gates",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gates.txt",
+     "cita": "Medido el 2026-09-26: Tesseract NO esta instalado en esta maquina"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-08",
+   "titulo": "Operar la fabrica es caro: hay sesiones de 162 y de 354 USD",
+   "de_quien": "laboratorio",
+   "categoria": "Costo y friccion de operar la fabrica",
+   "activos": [
+    "TPL-trayectorias",
+    "TPL-motor-ia"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run trayectorias:captura",
+     "archivo": "trayectorias/datos/fabrica/2026-09/fabrica-d3b8ba3c.json",
+     "cita": "\"costoUsd\": 162.1402,"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run trayectorias:captura",
+     "archivo": "trayectorias/datos/fabrica/2026-09/fabrica-c2fe3422.json",
+     "cita": "\"costoUsd\": 354.5395,"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run trayectorias:informe",
+     "archivo": "trayectorias/informes/2026-09-30.md",
+     "cita": "| costoPorLlamada | 0.206 (20/20) | 0.206 (18/22) | 0 % · confundido por modelo, no se marca |"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-09",
+   "titulo": "Lo que se paga en cada sesion esta al 92 % de su presupuesto, y la memoria del proyecto al 98 %",
+   "de_quien": "laboratorio",
+   "categoria": "Costo y friccion de operar la fabrica",
+   "activos": [
+    "TPL-doctrina",
+    "TPL-skills",
+    "TPL-gobernanza"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run mide:contexto",
+     "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+     "cita": "TOTAL que se paga en cada sesion 11028 tokens 92% de 12000"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run mide:contexto",
+     "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+     "cita": ".claude/memory/MEMORY.md 786 tokens 98% de 800"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run mide:contexto",
+     "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+     "cita": "descripciones de 28 skills 3895 tokens 56% de 7000"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-10",
+   "titulo": "Los MCP cuestan mas de 20 mil tokens por sesion y no hay umbral que lo vuelva gate",
+   "de_quien": "laboratorio",
+   "categoria": "Costo y friccion de operar la fabrica",
+   "activos": [
+    "TPL-imprenta"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run mide:contexto",
+     "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+     "cita": "5 servidores MCP (+4 sin medir: el real es MAYOR) 20363 tokens"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run gates",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gates.txt",
+     "cita": "falta: Un umbral declarado de coste de contexto por MCP para que pueda ser un gate de verdad."
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-11",
+   "titulo": "Bash es la herramienta que mas falla en las sesiones largas, y el mismo error reincide",
+   "de_quien": "laboratorio",
+   "categoria": "Costo y friccion de operar la fabrica",
+   "activos": [
+    "TPL-doctrina",
+    "TPL-trayectorias"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run trayectorias:captura",
+     "archivo": "trayectorias/datos/fabrica/2026-09/fabrica-c2fe3422.json",
+     "cita": "\"errores\": 38, \"erroresPor\": { \"Bash\": 34,"
+    },
+    {
+     "tipo": "registro",
+     "ruta": ".claude/rules/aprendizajes-stack.md",
+     "cita": "mata la shell que lo lanza (el error de Bash más repetido; reincidió el 20/09)"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-12",
+   "titulo": "El agente Hermes deriva: el digest del compose no coincide con el ancla",
+   "de_quien": "operador",
+   "categoria": "Confianza en lo construido",
+   "activos": [
+    "TPL-despliegue"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run gates",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gates.txt",
+     "cita": "hoy en rojo: el digest del compose y el del ancla no coinciden."
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "README.md",
+     "cita": "Pinear sin vigilar no es estabilidad, es rezago silencioso."
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-13",
+   "titulo": "Los cinco CLIs impresos tienen grado parcial y el de pagos falla su dogfood",
+   "de_quien": "laboratorio",
+   "categoria": "Confianza en lo construido",
+   "activos": [
+    "TPL-clis-impresos",
+    "TPL-imprenta"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run audita:imprenta",
+     "archivo": "docs/analisis/2026-10-02/mediciones/imprenta.txt",
+     "cita": "DOGFOOD FAIL polar — defecto CONOCIDO, declarado en el manifiesto"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run audita:imprenta",
+     "archivo": "docs/analisis/2026-10-02/mediciones/imprenta.txt",
+     "cita": "(5 con grado PARCIAL: suficiente en lo medido, con dimensiones sin puntuar arriba.)"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-14",
+   "titulo": "Controles que se dan por hechos sin estar construidos: un riesgo firmado sin codigo y una fase cerrada sin pantalla",
+   "de_quien": "tercero",
+   "categoria": "Confianza en lo construido",
+   "activos": [
+    "TPL-feature-reel",
+    "TPL-reel",
+    "TPL-especificaciones"
+   ],
+   "grado": "registrada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": ".claude/PRPs/PRP-007-reel-del-celular.md",
+     "cita": "### 2026-10-02: un riesgo firmado que nadie construyó"
+    },
+    {
+     "tipo": "archivo",
+     "ruta": ".claude/PRPs/PRP-007-reel-del-celular.md",
+     "cita": "### 2026-10-02: la fase 6 se marcó hecha sin pantalla de consentimientos"
+    },
+    {
+     "tipo": "commit",
+     "sha": "a0f1593",
+     "cita": "la transcripcion integra se conserva con el consentimiento (riesgo 5, segunda mitad)"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-15",
+   "titulo": "El respaldo no tiene RPO ni RTO: GATE 3 sigue abierto en el servidor y en cada producto",
+   "de_quien": "tercero",
+   "categoria": "Operacion y respaldo",
+   "activos": [
+    "TPL-despliegue",
+    "TPL-feature-reel",
+    "TPL-feature-a2a",
+    "TPL-feature-etiquetas",
+    "TPL-feature-dictado"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "BUSINESS_LOGIC.md",
+     "cita": "**RPO / RTO:** [desconocidos hasta cerrar GATE 3 — no se declaran antes de medirlos]",
+     "linea": 95
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/a2a/BUSINESS_LOGIC.md",
+     "cita": "8. [ ] Cerrar **GATE 3** para las tablas y el bucket",
+     "linea": 187
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/dictado/BUSINESS_LOGIC.md",
+     "cita": "7. [ ] Infraestructura de agentes, si aplica, y **respaldo con GATE 3 cerrado**",
+     "linea": 149
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/etiquetas/BUSINESS_LOGIC.md",
+     "cita": "y cerrar **GATE 3** para el",
+     "linea": 182
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "src/features/reel/BUSINESS_LOGIC.md",
+     "cita": "Para GATE 3 falta una restauración",
+     "linea": 103
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-16",
+   "titulo": "El aislamiento entre clientes vive en el codigo hasta el segundo cliente: la salida de service_role esta diferida",
+   "de_quien": "tercero",
+   "categoria": "Operacion y respaldo",
+   "activos": [
+    "TPL-app-base",
+    "TPL-gobernanza"
+   ],
+   "grado": "registrada",
+   "evidencia": [
+    {
+     "tipo": "registro",
+     "ruta": ".claude/gobernanza/REGISTRO-RIESGO.md",
+     "cita": "escrita y el disparador fijado en **el alta del segundo tenant**, no en una fecha."
+    },
+    {
+     "tipo": "registro",
+     "ruta": ".claude/gobernanza/REGISTRO-RIESGO.md",
+     "cita": "RLS no la detiene y el aislamiento vive solo en el código de la aplicación."
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-17",
+   "titulo": "opencode paga todas las reglas en cada sesion y no expande los imports",
+   "de_quien": "laboratorio",
+   "categoria": "Costo y friccion de operar la fabrica",
+   "activos": [
+    "TPL-doctrina"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run mide:contexto",
+     "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+     "cita": "suma de las rules (lo que opencode paga de mas) 5308 tokens 82% de 6500"
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "docs/PORTABILIDAD-ARNESES.md",
+     "cita": "**opencode NO expande los imports `@ruta`** como hace Claude Code."
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-18",
+   "titulo": "Nueve features de producto no tienen README: quien llega no sabe que resuelven",
+   "de_quien": "usuario",
+   "categoria": "Adopcion por terceros",
+   "activos": [
+    "TPL-feature-a2a",
+    "TPL-feature-dictado",
+    "TPL-feature-auth",
+    "TPL-feature-dashboard",
+    "TPL-feature-laboratorio-etiquetas",
+    "TPL-feature-laboratorio-voz",
+    "TPL-feature-project-settings"
+   ],
+   "grado": "medida",
+   "evidencia": [
+    {
+     "tipo": "medicion",
+     "comando": "npm run revisa:readmes",
+     "archivo": "docs/analisis/2026-10-02/mediciones/readmes.txt",
+     "cita": "Sin README: pendientes, se listan y no se crean solos (9):"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run revisa:readmes",
+     "archivo": "docs/analisis/2026-10-02/mediciones/readmes.txt",
+     "cita": "9 sin README (pendientes)."
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-19",
+   "titulo": "El dictado solo corre en WSL2 sobre Windows: macOS y Windows nativo quedan fuera",
+   "de_quien": "usuario",
+   "categoria": "Adopcion por terceros",
+   "activos": [
+    "TPL-dictado",
+    "TPL-voz",
+    "TPL-feature-dictado"
+   ],
+   "grado": "registrada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "tools/dictado/README.md",
+     "cita": "Hablar y que el texto aparezca donde está el cursor. Local, en WSL2, sobre `@tu-scope/voz`.",
+     "linea": 3
+    },
+    {
+     "tipo": "archivo",
+     "ruta": ".claude/goals/voz-lista-para-usuarios/spec.md",
+     "cita": "Ni macOS ni Windows",
+     "linea": 117
+    },
+    {
+     "tipo": "pr",
+     "numero": 127,
+     "cita": "voz: plan de producto y goal compilado «voz lista para usuarios»"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-20",
+   "titulo": "El vendedor de WhatsApp esta probado contra un simulador propio de Meta, con C3 y C4 sin firmar",
+   "de_quien": "tercero",
+   "categoria": "Validacion de mercado",
+   "activos": [
+    "TPL-ventas-whatsapp",
+    "TPL-feature-ventas-whatsapp"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "tools/ventas-whatsapp/piloto/REPORTE.md",
+     "cita": "No hay sandbox oficial que cubra coexistencia, precios de 2026, CTWA y CAPI juntos.",
+     "linea": 11
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "BUSINESS_LOGIC.md",
+     "cita": "C3 y C4 en borrador, sin firmar",
+     "linea": 30
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-21",
+   "titulo": "Los CFDI recibidos entran a mano al ERP, la descarga del SAT espera custodiar credenciales, y leer el XML no autentica",
+   "de_quien": "operador",
+   "categoria": "Documentos fiscales y contables",
+   "activos": [
+    "TPL-erp",
+    "TPL-extractor-documental"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "erp/ERP-MAESTRO.md",
+     "cita": "· CFDI RECIBIDOS: se arranca por CARGA (ctb cargar-documentos, por Slack o",
+     "linea": 1089
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "erp/ERP-MAESTRO.md",
+     "cita": "web); la DESCARGA MASIVA automática del SAT queda CONDICIONADA a resolver",
+     "linea": 1090
+    },
+    {
+     "tipo": "archivo",
+     "ruta": "AGENTS.md",
+     "cita": "Y el sello NO se verifica — leer bien no es autenticar (C4)"
+    }
+   ],
+   "sin_caso": null
+  },
+  {
+   "id": "D-22",
+   "titulo": "Este analista no puede medir cuanto le importa un dolor al cliente: no hay voz del cliente en el repo",
+   "de_quien": "laboratorio",
+   "categoria": "Validacion de mercado",
+   "activos": [
+    "TPL-analista-producto"
+   ],
+   "grado": "declarada",
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "docs/SDD-analista-producto.md",
+     "cita": "la importancia y la satisfacción del usuario: **no hay encuesta**.",
+     "linea": 32
+    }
+   ],
+   "sin_caso": null
+  }
+ ],
+ "hipotesis": [
+  {
+   "id": "HP-01",
+   "titulo": "La tabla de skills del README no lista todos los skills (hoy falta add-a2a)",
+   "origen": "observado al registrar este rol",
+   "falta": "un medidor que compare la tabla con los directorios de .claude/skills/: el chequeo 3e de verify:gobernanza solo compara la cifra, y una ausencia no se puede citar con un literal"
+  },
+  {
+   "id": "HP-02",
+   "titulo": "El registro de incidentes vacio esconde incidentes",
+   "origen": "spec del goal (INCIDENTES.md esta vacio)",
+   "falta": "cotejar los aprendizajes de los PRP y la bitacora CDC contra los criterios de la plantilla de incidente (C6); hoy el registro nace vacio a proposito y nada dice si algo debio entrar"
+  },
+  {
+   "id": "HP-03",
+   "titulo": "Una pyme pagaria por el estudio de marketing",
+   "origen": "portafolio (Estudio pymes en blueprint)",
+   "falta": "un dueno real usando /estudio durante un mes y la entrevista /new-app que el indice exige (D-03)"
+  }
+ ],
+ "cifras": [
+  {
+   "id": "C-01",
+   "valor": "162.1402",
+   "que": "USD de una sesion de fabrica (20-21 sep)",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run trayectorias:captura",
+    "archivo": "trayectorias/datos/fabrica/2026-09/fabrica-d3b8ba3c.json",
+    "cita": "\"costoUsd\": 162.1402,"
+   }
+  },
+  {
+   "id": "C-02",
+   "valor": "354.5395",
+   "que": "USD de la sesion de fabrica mas cara registrada (10-12 sep)",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run trayectorias:captura",
+    "archivo": "trayectorias/datos/fabrica/2026-09/fabrica-c2fe3422.json",
+    "cita": "\"costoUsd\": 354.5395,"
+   }
+  },
+  {
+   "id": "C-03",
+   "valor": "0.206",
+   "que": "USD por llamada en la fabrica (corte 2026-09-13)",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run trayectorias:informe",
+    "archivo": "trayectorias/informes/2026-09-30.md",
+    "cita": "| costoPorLlamada | 0.206 (20/20) | 0.206 (18/22) |"
+   }
+  },
+  {
+   "id": "C-04",
+   "valor": "11028",
+   "que": "tokens que se pagan en cada sesion (92 % de 12000)",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run mide:contexto",
+    "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+    "cita": "TOTAL que se paga en cada sesion 11028 tokens 92% de 12000"
+   }
+  },
+  {
+   "id": "C-05",
+   "valor": "20363",
+   "que": "tokens de 5 servidores MCP por sesion, con 4 sin medir",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run mide:contexto",
+    "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+    "cita": "5 servidores MCP (+4 sin medir: el real es MAYOR) 20363 tokens"
+   }
+  },
+  {
+   "id": "C-06",
+   "valor": "9",
+   "que": "features de producto sin README",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run revisa:readmes",
+    "archivo": "docs/analisis/2026-10-02/mediciones/readmes.txt",
+    "cita": "9 sin README (pendientes)."
+   }
+  },
+  {
+   "id": "C-07",
+   "valor": "8",
+   "que": "gates declarados inactivos",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run gates",
+    "archivo": "docs/analisis/2026-10-02/mediciones/gates.txt",
+    "cita": "inactivos declarados (8) — no cuentan como pasados"
+   }
+  },
+  {
+   "id": "C-08",
+   "valor": "5308",
+   "que": "tokens de reglas que opencode paga en cada sesion",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run mide:contexto",
+    "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+    "cita": "suma de las rules (lo que opencode paga de mas) 5308 tokens"
+   }
+  },
+  {
+   "id": "C-09",
+   "valor": "98%",
+   "que": "de su presupuesto ocupa la memoria del proyecto",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run mide:contexto",
+    "archivo": "docs/analisis/2026-10-02/mediciones/contexto.txt",
+    "cita": ".claude/memory/MEMORY.md 786 tokens 98% de 800"
+   }
+  },
+  {
+   "id": "C-10",
+   "valor": "34",
+   "que": "de 38 errores de herramienta fueron de Bash en la sesion mas cara",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run trayectorias:captura",
+    "archivo": "trayectorias/datos/fabrica/2026-09/fabrica-c2fe3422.json",
+    "cita": "\"errores\": 38, \"erroresPor\": { \"Bash\": 34,"
+   }
+  },
+  {
+   "id": "C-11",
+   "valor": "166/166",
+   "que": "comprobaciones del verificador de gobernanza hoy",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run verify:gobernanza",
+    "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+    "cita": "Gobernanza cableada: 166/166 comprobaciones en verde."
+   }
+  },
+  {
+   "id": "C-12",
+   "valor": "644",
+   "que": "commits en la historia analizada",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "git rev-list --count HEAD",
+    "archivo": "docs/analisis/2026-10-02/mediciones/commits.txt",
+    "cita": "644"
+   }
+  },
+  {
+   "id": "C-13",
+   "valor": "243",
+   "que": "merges (PR) en la historia analizada",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "git rev-list --count --merges HEAD",
+    "archivo": "docs/analisis/2026-10-02/mediciones/merges.txt",
+    "cita": "243"
+   }
+  },
+  {
+   "id": "C-14",
+   "valor": "235",
+   "que": "unidades del repo con asiento en el inventario",
+   "evidencia": {
+    "tipo": "medicion",
+    "comando": "npm run verifica:inventario",
+    "archivo": "docs/analisis/2026-10-02/mediciones/inventario.txt",
+    "cita": "Inventario al dia: 235 unidades con asiento, 0 NUEVO, 0 HUERFANO, 0 AMBIGUO."
+   }
+  }
+ ],
+ "casos": [
+  {
+   "id": "CU-01",
+   "categoria": "Validacion de mercado",
+   "quien": "El laboratorio",
+   "momento": "Al decidir que producto llevar al siguiente cliente y en que invertir el mes",
+   "intenta": "Elegir con evidencia el producto que alguien pagaria",
+   "impide": "Ningun producto tiene costo del dolor medido ni primer cliente; tres firmas y dos contratos pendientes; la app casi no deja uso; WhatsApp solo contra simulador; este analista no oye al cliente",
+   "cuesta": "No medido para el cliente. Para la fabrica: cada sesion de construccion sin senal de demanda cuesta del orden de [C-01] y la mas cara [C-02].",
+   "dolores": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-04",
+    "D-20",
+    "D-22"
+   ]
+  },
+  {
+   "id": "CU-02",
+   "categoria": "Documentos fiscales y contables",
+   "quien": "El contador o administrador de una pyme mexicana, y quien opera el extractor",
+   "momento": "Al cierre de cada mes, con los CFDI recibidos del periodo",
+   "intenta": "Tener cada CFDI recibido en el buzon, leido, cotejado y contabilizado sin teclear",
+   "impide": "La carga es manual, la descarga del SAT depende de custodiar credenciales del cliente, la calidad del extractor solo esta medida con corpus sintetico y sus umbrales no vienen puestos, y el OCR en CPU es lento",
+   "cuesta": "No medido: ninguna fuente tiene las horas de captura de un despacho real.",
+   "dolores": [
+    "D-05",
+    "D-06",
+    "D-21"
+   ]
+  },
+  {
+   "id": "CU-03",
+   "categoria": "Costo y friccion de operar la fabrica",
+   "quien": "El laboratorio operando agentes",
+   "momento": "En cada sesion larga de construccion",
+   "intenta": "Construir sin que el contexto, los MCP y los errores de herramienta se coman la sesion",
+   "impide": "Sesiones caras, contexto fijo al 92 %, MCP sin umbral, Bash que falla y reincide, y opencode pagando todas las reglas",
+   "cuesta": "[C-01] y [C-02] por sesion, [C-03] por llamada; [C-04] tokens fijos por sesion y [C-05] de MCP; [C-10] errores de Bash en una sola sesion; [C-08] tokens extra en opencode; memoria al [C-09].",
+   "dolores": [
+    "D-08",
+    "D-09",
+    "D-10",
+    "D-11",
+    "D-17"
+   ]
+  },
+  {
+   "id": "CU-04",
+   "categoria": "Confianza en lo construido",
+   "quien": "El laboratorio que firma un CDC o da una fase por cerrada",
+   "momento": "Al aprobar un cambio o declarar una fase hecha",
+   "intenta": "Saber que un control funciona, no que esta escrito",
+   "impide": "Gates de integracion apagados sin nodo con Docker, Hermes que deriva, CLIs con grado parcial y controles marcados como hechos sin existir",
+   "cuesta": "[C-07] gates inactivos que no cuentan como pasados; el resto, no medido.",
+   "dolores": [
+    "D-07",
+    "D-12",
+    "D-13",
+    "D-14"
+   ]
+  },
+  {
+   "id": "CU-05",
+   "categoria": "Operacion y respaldo",
+   "quien": "El cliente cuyos datos guarda un producto (tercero), y el laboratorio",
+   "momento": "El dia que algo se pierde, o el dia que llega el segundo cliente",
+   "intenta": "Recuperar sus datos en un tiempo conocido y que nadie mas los vea",
+   "impide": "RPO y RTO desconocidos con GATE 3 abierto, y el aislamiento entre clientes diferido al segundo tenant",
+   "cuesta": "No medido: RPO y RTO son desconocidos por regla hasta cerrar GATE 3.",
+   "dolores": [
+    "D-15",
+    "D-16"
+   ]
+  },
+  {
+   "id": "CU-06",
+   "categoria": "Adopcion por terceros",
+   "quien": "Un usuario o integrador que llega sin el laboratorio",
+   "momento": "Al instalar una herramienta o abrir una feature por primera vez",
+   "intenta": "Entender que resuelve y usarla en su maquina",
+   "impide": "Features sin README y un dictado que solo corre en WSL2",
+   "cuesta": "[C-06] features sin README; el costo de la plataforma unica, no medido.",
+   "dolores": [
+    "D-18",
+    "D-19"
+   ]
+  }
+ ],
+ "candidatos": [
+  {
+   "id": "P-01",
+   "titulo": "Buzon de CFDI recibidos para el despacho contable",
+   "casos": [
+    "CU-02"
+   ],
+   "activos": [
+    "TPL-extractor-documental",
+    "TPL-erp",
+    "TPL-grafo-conocimiento",
+    "TPL-conocimiento",
+    "TPL-feature-a2a",
+    "TPL-app-base"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 3,
+    "severidad": 2,
+    "reuso": 3,
+    "esfuerzo": 2,
+    "solidez": 1,
+    "total": 9.0,
+    "porque": {
+     "frecuencia": "cada mes y por cada cliente del despacho (ERP 5B.2: regla de completitud del buzon al cierre)",
+     "severidad": "declarada, no medida: la captura manual y la descarga condicionada estan escritas, las horas no",
+     "reuso": "el lector exacto de XML, el OCR, el buzon con validacion determinista y las banderas 69-B ya existen",
+     "esfuerzo": "falta unir extractor y buzon por A2A y medir con un corpus real; nada de motor nuevo"
+    }
+   },
+   "veto": null,
+   "onepager": "propuestas/P-01-buzon-cfdi.md",
+   "siguiente_paso": "/spec-generator"
+  },
+  {
+   "id": "P-02",
+   "titulo": "Observatorio del costo de operar la fabrica",
+   "casos": [
+    "CU-03"
+   ],
+   "activos": [
+    "TPL-trayectorias",
+    "TPL-motor-ia",
+    "TPL-imprenta",
+    "TPL-doctrina"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 3,
+    "severidad": 2,
+    "reuso": 3,
+    "esfuerzo": 1,
+    "solidez": 3,
+    "total": 54.0,
+    "porque": {
+     "frecuencia": "cada sesion de la fabrica",
+     "severidad": "sesiones de [C-01] y [C-02] medidas, pero sin un tope que alguien haya pedido",
+     "reuso": "trayectorias, contabilidad, mide:contexto y el routing ya miden todo: falta juntarlo y ponerle umbrales",
+     "esfuerzo": "una vista y unos umbrales sobre datos que ya existen"
+    }
+   },
+   "veto": null,
+   "onepager": "propuestas/P-02-observatorio-costo.md",
+   "siguiente_paso": "/prp"
+  },
+  {
+   "id": "P-03",
+   "titulo": "Piloto medido: un producto, un cliente, el costo del dolor antes y despues",
+   "casos": [
+    "CU-01"
+   ],
+   "activos": [
+    "TPL-trayectorias",
+    "TPL-analista-producto",
+    "TPL-app-base",
+    "TPL-feature-laboratorio-pymes"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 2,
+    "severidad": 3,
+    "reuso": 2,
+    "esfuerzo": 2,
+    "solidez": 3,
+    "total": 18.0,
+    "porque": {
+     "frecuencia": "una vez por producto, y hoy son siete sin cliente",
+     "severidad": "todo el portafolio decide sin senal de demanda (D-01, D-02)",
+     "reuso": "la linea aplicacion de trayectorias, los laboratorios y este analista sirven de banco; el contrato ya tiene la casilla del costo",
+     "esfuerzo": "lo dificil no es codigo: es conseguir el cliente y su permiso"
+    }
+   },
+   "veto": null,
+   "onepager": "propuestas/P-03-piloto-medido.md",
+   "siguiente_paso": "/spec-generator"
+  },
+  {
+   "id": "P-04",
+   "titulo": "Nodo de integracion: los gates apagados vuelven a correr",
+   "casos": [
+    "CU-04"
+   ],
+   "activos": [
+    "TPL-manifiesto-gates",
+    "TPL-despliegue",
+    "TPL-erp",
+    "TPL-extractor-documental"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 2,
+    "severidad": 2,
+    "reuso": 3,
+    "esfuerzo": 2,
+    "solidez": 3,
+    "total": 18.0,
+    "porque": {
+     "frecuencia": "cada cambio al ERP, al extractor o a las etiquetas",
+     "severidad": "[C-07] gates no cuentan como pasados, y el servicio del extractor no se prueba de verdad",
+     "reuso": "el padron ya declara que falta («un perfil de gate con Docker»), el compose y los runners existen",
+     "esfuerzo": "una maquina con Docker y Tesseract, y un perfil nuevo en el padron"
+    }
+   },
+   "veto": null,
+   "onepager": "propuestas/P-04-nodo-de-integracion.md",
+   "siguiente_paso": "/prp"
+  },
+  {
+   "id": "P-05",
+   "titulo": "Dictado para cualquier escritorio",
+   "casos": [
+    "CU-06"
+   ],
+   "activos": [
+    "TPL-voz",
+    "TPL-dictado",
+    "TPL-feature-dictado"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 2,
+    "severidad": 2,
+    "reuso": 2,
+    "esfuerzo": 3,
+    "solidez": 3,
+    "total": 8.0,
+    "porque": {
+     "frecuencia": "cada usuario fuera de WSL2",
+     "severidad": "macOS y Windows nativo quedan fuera del todo",
+     "reuso": "el nucleo de voz corre en WSL2 o en un VPS; lo atado a Windows es el pegado y el icono",
+     "esfuerzo": "una capa de escritorio por plataforma"
+    }
+   },
+   "veto": null,
+   "onepager": null,
+   "siguiente_paso": "/prp"
+  },
+  {
+   "id": "P-06",
+   "titulo": "Respaldo verificado como servicio (GATE 3 cerrado)",
+   "casos": [
+    "CU-05"
+   ],
+   "activos": [
+    "TPL-despliegue"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 1,
+    "severidad": 3,
+    "reuso": 2,
+    "esfuerzo": 2,
+    "solidez": 2,
+    "total": 6.0,
+    "porque": {
+     "frecuencia": "rara: el dia que algo se pierde",
+     "severidad": "los datos son de terceros y hoy no hay tiempo de recuperacion conocido",
+     "reuso": "el runbook de la Fase 0 ya trae los gates y los scripts",
+     "esfuerzo": "una restauracion cronometrada de punta a punta"
+    }
+   },
+   "veto": null,
+   "onepager": null,
+   "siguiente_paso": "/prp"
+  },
+  {
+   "id": "P-07",
+   "titulo": "Descarga masiva automatica de CFDI del SAT con las credenciales del cliente",
+   "casos": [
+    "CU-02"
+   ],
+   "activos": [
+    "TPL-erp",
+    "TPL-extractor-documental"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": null,
+   "veto": {
+    "control": "C4",
+    "motivo": "Exige custodiar la e.firma o la CIEC de terceros; el ERP lo condiciona a un vault dedicado que no existe. Una fuga dana al cliente y a sus proveedores, que no firmaron: no es firmable y no se pondera. Se redisena (carga del cliente, P-01) o no se hace."
+   },
+   "onepager": null,
+   "siguiente_paso": "/spec-generator"
+  },
+  {
+   "id": "P-08",
+   "titulo": "La capa de gobernanza empaquetada para otros repos agenticos",
+   "casos": [
+    "CU-04"
+   ],
+   "activos": [
+    "TPL-gobernanza",
+    "TPL-manifiesto-gates"
+   ],
+   "sin_activos_motivo": null,
+   "puntuacion": {
+    "frecuencia": 1,
+    "severidad": 2,
+    "reuso": 3,
+    "esfuerzo": 3,
+    "solidez": 3,
+    "total": 6.0,
+    "porque": {
+     "frecuencia": "sin comprador identificado: ninguna fuente nombra a otro equipo que la pida",
+     "severidad": "la deriva que resuelve es real aqui (D-12, D-14)",
+     "reuso": "las comprobaciones existen",
+     "esfuerzo": "el verificador lee rutas y documentos de este repo: separarlo es reescribirlo"
+    }
+   },
+   "veto": null,
+   "onepager": null,
+   "siguiente_paso": "/spec-generator"
+  }
+ ],
+ "ranking": [
+  "P-02",
+  "P-03",
+  "P-04",
+  "P-01",
+  "P-05",
+  "P-06",
+  "P-08"
+ ],
+ "borrador": [
+  {
+   "id": "H1",
+   "veredicto": "parcial",
+   "hallazgos": [
+    "D-21",
+    "D-05",
+    "D-02"
+   ],
+   "evidencia": [],
+   "falta": null,
+   "nota": "El ERP declara la carga manual de los CFDI recibidos y el extractor ya lee el XML exacto. Pero el dolor esta declarado, no medido: no hay despacho real ni corpus real con que medir horas o errores."
+  },
+  {
+   "id": "H2",
+   "veredicto": "parcial",
+   "hallazgos": [
+    "D-19",
+    "D-18"
+   ],
+   "evidencia": [
+    {
+     "tipo": "pr",
+     "numero": 127,
+     "cita": "voz: plan de producto y goal compilado «voz lista para usuarios»"
+    },
+    {
+     "tipo": "archivo",
+     "ruta": ".claude/goals/voz-terceros/resultados-etapa-2.md",
+     "cita": "**Total: 2,6 minutos**, 0 acciones humanas en el script.",
+     "linea": 18
+    }
+   ],
+   "falta": null,
+   "nota": "Los nueve huecos existieron (#127) y el de instalacion se cerro y se midio. Queda lo que no se cerro: solo WSL2, y la interfaz web del dictado sin README."
+  },
+  {
+   "id": "H3",
+   "veredicto": "confirmada",
+   "hallazgos": [
+    "D-08",
+    "D-09",
+    "D-10"
+   ],
+   "evidencia": [],
+   "falta": null,
+   "nota": "La sesion de 162 USD existe ([C-01]) y hay una de 354 USD ([C-02]). Los MCP cuestan [C-05] tokens con cuatro sin medir: «~20k» se queda corto."
+  },
+  {
+   "id": "H4",
+   "veredicto": "parcial",
+   "hallazgos": [
+    "D-12",
+    "D-13",
+    "D-14"
+   ],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "README.md",
+     "cita": "encontro **cuatro afirmaciones falsas** en el runbook"
+    },
+    {
+     "tipo": "medicion",
+     "comando": "npm run verify:gobernanza",
+     "archivo": "docs/analisis/2026-10-02/mediciones/gobernanza.txt",
+     "cita": "Gobernanza cableada: 166/166 comprobaciones en verde."
+    }
+   ],
+   "falta": null,
+   "nota": "La deriva es real y esta viva (Hermes en rojo hoy) y las cuatro afirmaciones falsas estan registradas. La cifra «151» esta vieja: hoy son [C-11]. Empaquetar la gobernanza para otros (P-08) no tiene comprador en ninguna fuente."
+  },
+  {
+   "id": "H5",
+   "veredicto": "confirmada",
+   "hallazgos": [
+    "D-15"
+   ],
+   "evidencia": [],
+   "falta": null,
+   "nota": "RPO y RTO son desconocidos por regla hasta cerrar GATE 3, y cada contrato de producto lo tiene sin marcar."
+  },
+  {
+   "id": "H6",
+   "veredicto": "parcial",
+   "hallazgos": [
+    "D-17"
+   ],
+   "evidencia": [
+    {
+     "tipo": "archivo",
+     "ruta": "docs/PORTABILIDAD-ARNESES.md",
+     "cita": "Da igual aqui porque"
+    }
+   ],
+   "falta": null,
+   "nota": "Es cierto que opencode no expande los imports, pero hoy no se pierde ninguna regla porque AGENTS.md es autocontenido. El costo activo es otro: [C-08] tokens de reglas en cada sesion de opencode."
+  },
+  {
+   "id": "H7",
+   "veredicto": "sin-evidencia",
+   "hallazgos": [],
+   "evidencia": [],
+   "falta": "Un despacho contable real con un mes de CFDI y la medicion de sus horas de captura antes y despues. Hoy el extractor no tiene cliente ni corpus real (D-02, D-05), y el unico contrato de producto firmado es el del asesor de ventas por voz.",
+   "nota": "No se sostiene ni se refuta: «vendible» exige un comprador, y ninguna fuente nombra uno."
+  }
+ ],
+ "preguntas_al_laboratorio": [
+  {
+   "pregunta": "El mes que viene, se invierte en vender (un piloto con un cliente) o en abaratar la fabrica?",
+   "recomendada": "Las dos, en ese orden de importancia: P-03 con P-01 como producto del piloto, y P-02 en paralelo solo como vista sobre datos que ya existen",
+   "por_que": "Lo unico medido es interno. Sin un piloto, el ranking seguira premiando lo que le duele a la fabrica y no a quien pagaria"
+  },
+  {
+   "pregunta": "Que despacho contable o pyme puede probar el extractor con un mes real de CFDI recibidos?",
+   "recomendada": "Un despacho conocido, con su permiso firmado y un mes cerrado, para medir horas de captura antes y despues",
+   "por_que": "El extractor lleva cuatro specs y ningun corpus real (D-02, D-05): su calidad y su valor no estan medidos"
+  },
+  {
+   "pregunta": "Cuanto le importa a ese cliente cada dolor?",
+   "recomendada": "Cinco entrevistas de media hora antes del piloto, con las preguntas del caso CU-02",
+   "por_que": "importancia_usuario es null: el repo no tiene voz del cliente y este analista no la puede inventar (D-22)"
+  }
+ ]
+}
