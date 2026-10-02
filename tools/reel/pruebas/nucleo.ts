@@ -1,7 +1,7 @@
 /** Pruebas del núcleo del reel: cortes, precios, subtítulos, privacidad, QA, retención y sala. Sin motores. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, type Palabra } from '../dist/index.js';
+import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, type Palabra } from '../dist/index.js';
 import { palabrasDeTokens, lineasDeTsv } from '../dist/node/index.js';
 
 const P = (texto: string, inicio: number, fin: number): Palabra => ({ texto, inicio, fin });
@@ -98,4 +98,36 @@ test('adaptadores puros: tokens → palabras y TSV de Tesseract → líneas', ()
   assert.equal(ps[1]?.fin, 0.64);
   const tsv = 'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n5\t1\t1\t1\t1\t1\t10\t20\t40\t30\t95\tTel.\n5\t1\t1\t1\t1\t2\t60\t20\t30\t30\t96\t55';
   assert.deepEqual(lineasDeTsv(tsv), [{ texto: 'Tel. 55', x: 10, y: 20, ancho: 80, alto: 30 }]);
+});
+
+// Riesgo 5 de la AISIA firmada: un corte dentro del habla de otra persona se revisa explícitamente.
+const DUENO_Y_CLIENTE = [{ inicio: 0, fin: 4, hablante: 'A' }, { inicio: 4, fin: 8, hablante: 'A' }, { inicio: 8, fin: 10, hablante: 'A' }, { inicio: 10, fin: 14, hablante: 'B' }];
+const REVISION = { medidas: { ancho: 1080, alto: 1920, fps: 30, duracion: 14 }, pistas: [], sujetoId: null, hablantes: 2, consentimientos: [{ alias: 'Cliente', rol: 'cliente' as const, vigenteHasta: '2027-01-01' }], hoy: '2026-10-02', hallazgos: [], musica: { fraccion: 0, segundos: 0 } };
+
+test('riesgo 5: partir lo que dijo el cliente bloquea hasta que el dueño lo revisa; quitarlo entero no', () => {
+  const parte = edlDesde([{ inicio: 11, fin: 12, motivo: 'marca' }], 14);
+  const cs = cortesEnVozAjena(DUENO_Y_CLIENTE, parte, 2);
+  assert.deepEqual(cs.map((c) => [c.clave, c.costura]), [['11.0-12.0', 11]]);
+  const sinRevisar = revisaPrivacidad({ ...REVISION, cortesEnVozAjena: cs });
+  assert.equal(sinRevisar.filter((o) => o.regla === 'corte-en-voz-ajena' && o.nivel === 'bloquea').length, 1);
+  assert.equal(sinRevisar.some((o) => o.regla === 'otra-voz'), false, 'la voz tiene consentimiento: lo que bloquea es el corte');
+  assert.equal(revisaPrivacidad({ ...REVISION, cortesEnVozAjena: cs, revisados: new Set(['11.0-12.0']) }).some((o) => o.regla === 'corte-en-voz-ajena'), false);
+  assert.equal(cortesEnVozAjena(DUENO_Y_CLIENTE, edlDesde([{ inicio: 10, fin: 14, motivo: 'marca' }], 14), 2).length, 0, 'quitar entera su voz no altera lo que dijo');
+});
+
+test('riesgo 5: cortes en la voz del dueño que domina no se revisan; con una sola voz no hay a quién proteger', () => {
+  assert.equal(vozDelDueno(DUENO_Y_CLIENTE), 'A');
+  assert.equal(cortesEnVozAjena(DUENO_Y_CLIENTE, edlDesde([{ inicio: 2, fin: 3, motivo: 'retoma' }], 14), 2).length, 0);
+  assert.equal(cortesEnVozAjena(DUENO_Y_CLIENTE, edlDesde([{ inicio: 11, fin: 12, motivo: 'marca' }], 14), 1).length, 0);
+  const conCorto = [...DUENO_Y_CLIENTE.slice(0, 3), { inicio: 10, fin: 11.5, hablante: null }, { inicio: 11.5, fin: 14, hablante: 'A' }];
+  assert.equal(cortesEnVozAjena(conCorto, edlDesde([{ inicio: 10.5, fin: 11, motivo: 'marca' }], 14), 2).length, 1, 'lo que no se puede atribuir se revisa');
+});
+
+test('riesgo 5: en un testimonio sin voz dominante se revisan los cortes de todas, y la clave cambia con el corte', () => {
+  const testimonio = [{ inicio: 0, fin: 5, hablante: 'A' }, { inicio: 5, fin: 11, hablante: 'B' }];
+  assert.equal(vozDelDueno(testimonio), null);
+  assert.equal(cortesEnVozAjena(testimonio, edlDesde([{ inicio: 2, fin: 3, motivo: 'retoma' }], 11), 2).length, 1);
+  const antes = cortesEnVozAjena(testimonio, edlDesde([{ inicio: 6, fin: 7, motivo: 'marca' }], 11), 2)[0]?.clave;
+  const despues = cortesEnVozAjena(testimonio, edlDesde([{ inicio: 6, fin: 7.5, motivo: 'marca' }], 11), 2)[0]?.clave;
+  assert.notEqual(antes, despues, 'un corte distinto exige otra revisión');
 });

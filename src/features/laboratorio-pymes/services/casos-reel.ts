@@ -5,7 +5,7 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { aplicaCortes, aplicaTextos, archivoAss, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, validaAprobacion, REGLAS_DE_CORTE, type Observacion } from '../../../../tools/reel/dist/index.js';
+import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, validaAprobacion, vozDelDueno, REGLAS_DE_CORTE, type Observacion } from '../../../../tools/reel/dist/index.js';
 import { cuadroSvg, revisaEscena, tarjetaDeTemporada, TEMPORADAS_FIRMADAS } from '../../../../tools/pymes-marketing/dist/video/index.js';
 import { marcaDeReferencia } from './referencias-visuales.ts';
 import type { Caso, ResultadoDeCaso } from './tipos.ts';
@@ -119,6 +119,27 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
       // Armado por partes para que el propio caso no sea un «uso» que el escáner encuentre.
       const sembrado = USO.test(['const k = process.env[', "'SUPABASE_SERVICE", "_ROLE_KEY'];"].join(''));
       return verifica([[usan.length === 0, 'ningún archivo de src/ la usa'], [sembrado, 'control negativo: un uso sembrado sí se detecta']], [`${archivos.length} archivos revisados`, ...usan], 'La app entra con la sesión del dueño; RLS decide (C7).');
+    } },
+  { id: 'priv-9', herramienta: 'privacidad', titulo: 'Un corte que parte lo que dijo otra persona', trampa: 'corte que cambia el sentido', esperado: 'pasa',
+    entrada: 'El dueño habla de 0 a 10 s y la clienta (con consentimiento) de 10 a 14 s; el dueño quita 11–12 s, o quita entera a la clienta.',
+    async corre() {
+      const turnos = [{ inicio: 0, fin: 10, hablante: 'A' }, { inicio: 10, fin: 14, hablante: 'B' }];
+      const base = { medidas: { ancho: 1080, alto: 1920, fps: 30, duracion: 14 }, pistas: [], sujetoId: null, hablantes: 2, consentimientos: [{ alias: 'Clienta', rol: 'cliente' as const, vigenteHasta: '2027-01-01' }], hoy: '2026-10-02', hallazgos: [], musica: { fraccion: 0, segundos: 0 } };
+      const cs = cortesEnVozAjena(turnos, edlDesde([{ inicio: 11, fin: 12, motivo: 'marca' }], 14), 2);
+      const sinRevisar = revisaPrivacidad({ ...base, cortesEnVozAjena: cs }).filter((o) => o.regla === 'corte-en-voz-ajena' && o.nivel === 'bloquea');
+      const revisado = revisaPrivacidad({ ...base, cortesEnVozAjena: cs, revisados: new Set(cs.map((c) => c.clave)) }).filter((o) => o.regla === 'corte-en-voz-ajena');
+      const entera = cortesEnVozAjena(turnos, edlDesde([{ inicio: 10, fin: 14, motivo: 'marca' }], 14), 2);
+      return verifica([[sinRevisar.length === 1, 'partirla bloquea'], [revisado.length === 0, 'el dueño lo revisa en la sala y se libera'], [entera.length === 0, 'quitarla entera no bloquea: no altera lo que dijo']],
+        [sinRevisar[0]?.mensaje ?? '—'], 'Riesgo 5 de la AISIA firmada: lo que dijo otra persona no se recorta a ciegas.');
+    } },
+  { id: 'priv-10', herramienta: 'privacidad', titulo: 'Testimonio: si ninguna voz domina, se revisan todos los cortes', trampa: 'dueño mal identificado', esperado: 'pasa',
+    entrada: 'El dueño habla 5 s y la clienta 6 s; la retoma del dueño corta 2–3 s.',
+    async corre() {
+      const turnos = [{ inicio: 0, fin: 5, hablante: 'A' }, { inicio: 5, fin: 11, hablante: 'B' }];
+      const dueno = vozDelDueno(turnos);
+      const cs = cortesEnVozAjena(turnos, edlDesde([{ inicio: 2, fin: 3, motivo: 'retoma' }], 11), 2);
+      return verifica([[dueno === null, 'no se adivina quién es el dueño'], [cs.length === 1, 'el corte se revisa aunque sea del dueño']], [`dueño: ${dueno ?? 'sin determinar'} · cortes a revisar: ${cs.length}`],
+        'Suponer que el dueño es quien más habla fallaría justo en un testimonio.');
     } },
 ];
 
