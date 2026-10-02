@@ -26,7 +26,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | Etiquetas GS1 | [`src/features/etiquetas/BUSINESS_LOGIC.md`](src/features/etiquetas/BUSINESS_LOGIC.md) | `TPL-etiquetas-gs1` `TPL-feature-etiquetas` `TPL-feature-laboratorio-etiquetas` | hipótesis del 2026-09-30, sin cadena real; **firma pendiente del laboratorio** |
 | Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; **firma pendiente del laboratorio** |
 | Reel del celular | [`src/features/reel/BUSINESS_LOGIC.md`](src/features/reel/BUSINESS_LOGIC.md) | `TPL-reel` `TPL-feature-reel` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-27; **firma pendiente del laboratorio** |
-| Estudio pymes | pendiente | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | falta: `/new-app` al salir de blueprint (PRP-006) |
+| Estudio pymes | [`src/features/estudio-pymes/BUSINESS_LOGIC.md`](src/features/estudio-pymes/BUSINESS_LOGIC.md) | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-26 y el 2026-09-27, sin datos reales; **firma pendiente del laboratorio** |
 | Vendedor con IA en WhatsApp | pendiente | `TPL-ventas-whatsapp` `TPL-feature-ventas-whatsapp` | falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar) |
 
 ## 2. Lo que no es producto
@@ -76,8 +76,9 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 Aquí va lo que es de todo el servidor o de todo el repo; lo de cada producto va en su contrato:
 [asesor de ventas por voz](src/features/dictado/BUSINESS_LOGIC.md) (§4),
 [etiquetas GS1](src/features/etiquetas/BUSINESS_LOGIC.md) (§4),
-[extractor documental](src/features/a2a/BUSINESS_LOGIC.md) (§4) y
-[reel del celular](src/features/reel/BUSINESS_LOGIC.md) (§4).
+[extractor documental](src/features/a2a/BUSINESS_LOGIC.md) (§4),
+[reel del celular](src/features/reel/BUSINESS_LOGIC.md) (§4) y
+[estudio pymes](src/features/estudio-pymes/BUSINESS_LOGIC.md) (§4).
 
 | Activo | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|

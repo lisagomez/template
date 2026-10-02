@@ -1,4 +1,4 @@
-# @tu-scope/pymes-marketing (0.2.0)
+# @tu-scope/pymes-marketing (0.3.0)
 
 El **estudio de contenido y marketing** de una pyme mexicana, en seis herramientas que se instalan
 juntas y se importan por separado. TypeScript puro, **cero dependencias**, sin red: el redactor
@@ -19,7 +19,7 @@ ver `NOTICE` y `LICENSE-APACHE-2.0`.
 | `./resenas` | Temas con citas textuales, borradores de respuesta (<60 palabras, uno por uno), retenidas y escaladas, clientes callados por su propio ritmo | `review-reputation` |
 | `./visibilidad` | Auditoría de buscadores y asistentes de IA (solo lectura), arreglos como archivos (robots.txt, llms.txt, JSON-LD) con «POR CONFIRMAR» | `seo-ai-visibility` |
 | `./pulso` | Anuncios desde la exportación (veredicto contra el promedio propio, impacto mensual en MXN), pulso de crecimiento con umbrales, brief del lunes que funde todo | `ad-manager`, `growth-pulse`, `marketing-monday` |
-| `./video` | Promo 9:16 por código SIN personas: escena declarativa, cuadro SVG de cualquier instante, efectos de sonido sintetizados (WAV), revisión de la escena y hoja de cuadros. El render a MP4 (navegador sin ventana + ffmpeg) vive fuera del paquete | oficio de god-animation y edicion-de-video (idea, no código) |
+| `./video` | Promo 9:16 por código SIN personas: escena declarativa, cuadro SVG de cualquier instante, efectos de sonido sintetizados (WAV), revisión de la escena, hoja de cuadros y tarjetas animadas de las temporadas firmadas (0.3.0). El render a MP4 (navegador sin ventana + ffmpeg) vive fuera del paquete | oficio de god-animation y edicion-de-video (idea, no código) |
 | `./rasterizar` | SVG → PNG con el canvas del propio navegador, sin dependencias | — |
 | `./aprobacion` | Aprobar el archivo exacto (huella SHA-256), pedir cambio con nota, revocar al editar, CSV del mes | lo rescatado de la sala de revisión |
 | `./redactor-openai-compat` | Redactor con LLM por cualquier API compatible con OpenAI; devuelve el uso (o `null`) para la contabilidad del proyecto | — |
