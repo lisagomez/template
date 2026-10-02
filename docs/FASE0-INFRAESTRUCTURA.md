@@ -671,6 +671,10 @@ avisa. Igual que GATE 1: comprobado que dispara, no supuesto.
 - **La llave paper de Borg y la llave `age` privada.** Si viven en el servidor que
   respaldas, no hay respaldo: hay un archivo cifrado que nadie puede abrir.
 - **Secretos en claro.** Ver la regla de exclusión de §9.1.
+- **Datos de terceros que pueden pedir su borrado** (documentos de consentimiento, transcripciones de lo que dijo
+  alguien) **nunca van a N1 ni a N2**: el append-only y el Object Lock existen justo para que nada se borre, y por eso
+  no pueden cumplir un retiro. Van solo a N0, y el retiro llega a las copias cuando vence la última. Al restaurar,
+  el proyecto vuelve a aplicar los retiros posteriores a la copia (en el reel: `npm run reel:tras-restaurar`).
 
 Lo que sí se respalda de estos activos es su **configuración** (ya versionada en
 git), nunca el material privado.

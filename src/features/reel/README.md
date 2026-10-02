@@ -44,8 +44,9 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Servicios externos**: Supabase (Auth y base de datos con RLS) para cuentas, proyectos, versiones, aprobaciones y
   consentimientos.
 - **Variables de entorno**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `REEL_DATOS`, `REEL_RECURSOS`,
-  `DICTADO_MODELOS` y `DICTADO_RUNTIME`; `SUPABASE_DB_URL` solo el job de migraciones (C7) y `REEL_LABORATORIO`
-  solo el laboratorio.
+  `DICTADO_MODELOS` y `DICTADO_RUNTIME`; `SUPABASE_DB_URL` solo el job de migraciones (C7),
+  `SUPABASE_SERVICE_ROLE_KEY` solo el job `reel:tras-restaurar` (C7, lectura de retiros) y `REEL_LABORATORIO` solo
+  el laboratorio.
 - **Almacenamiento**: `REEL_DATOS` (video, transcripción, máster y documentos firmados, en el servidor) y la base de
   Supabase (solo proyecto, versiones, aprobaciones y estado de los consentimientos). A los 30 días de aprobado se
   borran el video original, su copia de trabajo y la transcripción (`reel:retencion`). Si al aprobar habla alguien
@@ -72,7 +73,9 @@ La parte de la app que usa `@tu-scope/reel` (`tools/reel`). Plan con candado: `.
 
 Scripts: `npm run reel:laboratorio` (clips sintéticos, medición), `reel:marcas`, `reel:rls` (aislamiento contra la
 base, con dos cuentas @example.com), `reel:retencion -- --ahora <ISO>` (job de plataforma, reloj inyectado),
-`reel:migraciones` (job de plataforma declarado, C7: único que usa `SUPABASE_DB_URL`).
+`reel:migraciones` (job de plataforma declarado, C7: único que usa `SUPABASE_DB_URL`), `reel:tras-restaurar` (job de
+plataforma declarado, C7: tras restaurar una copia, vuelve a borrar lo de los consentimientos retirados después;
+lee los retiros con `SUPABASE_SERVICE_ROLE_KEY` y no escribe en Supabase).
 
 Solo local: el render necesita ffmpeg, Tesseract, OpenCV de Python y los modelos de `tools/dictado`. En producción
 queda bloqueado (fase 16 del PRP-007).

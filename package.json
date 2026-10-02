@@ -52,6 +52,7 @@
     "reel:migraciones": "node scripts/reel/aplica-migraciones.mjs",
     "reel:rls": "node scripts/reel/mide-aislamiento.ts",
     "reel:retencion": "node scripts/reel/retencion.ts",
+    "reel:tras-restaurar": "node scripts/reel/tras-restaurar.ts",
     "contenido:referencias": "node scripts/laboratorio-pymes/referencias.ts",
     "etiquetas:referencias": "node scripts/laboratorio-etiquetas/referencias.ts",
     "contenido:video": "node scripts/laboratorio-pymes/video.ts",

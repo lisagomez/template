@@ -5,7 +5,7 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, documentoVencido, transcripcionAConservar, transcripcionVencida, validaAprobacion, vozDelDueno, BRUTO, REGLAS_DE_CORTE, TRANSCRIPCION_CONSERVADA, type Observacion } from '../../../../tools/reel/dist/index.js';
+import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, documentoVencido, rutasTrasRestaurar, transcripcionAConservar, transcripcionVencida, validaAprobacion, vozDelDueno, BRUTO, REGLAS_DE_CORTE, TRANSCRIPCION_CONSERVADA, type Observacion } from '../../../../tools/reel/dist/index.js';
 import { cuadroSvg, revisaEscena, tarjetaDeTemporada, TEMPORADAS_FIRMADAS } from '../../../../tools/pymes-marketing/dist/video/index.js';
 import { marcaDeReferencia } from './referencias-visuales.ts';
 import type { Caso, ResultadoDeCaso } from './tipos.ts';
@@ -169,6 +169,16 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
       const d1 = documentoVencido(v, '2027-01-01'), d2 = documentoVencido(v, '2027-01-02'), despues = documentoVencido({ ...v, documentoBorradoEn: '2027-01-02T12:00:00Z' }, '2027-03-01');
       return verifica([[!d1, 'el último día de vigencia se conserva'], [d2, 'al día siguiente se borra'], [!despues, 'queda la constancia y no se cuenta dos veces']], [`1 ene: ${d1 ? 'borra' : 'conserva'} · 2 ene: ${d2 ? 'borra' : 'conserva'}`],
         'El documento de un tercero vive lo que autorizó, no más (propuesta de respaldo, 27/09).');
+    } },
+  { id: 'priv-14', herramienta: 'privacidad', titulo: 'Restaurar una copia no resucita a quien se retiró', trampa: 'respaldo anterior al retiro', esperado: 'pasa',
+    entrada: 'Copia del 2026-10-03 con el documento de la clienta y la transcripción aprobada el 2; la clienta se retiró el 5.',
+    async corre() {
+      const retiro = { consentimiento: 'c1', proyecto: 'p1', dueno: 'd1', revocadoEn: '2026-10-05T10:00:00+00:00' };
+      const rutas = rutasTrasRestaurar([retiro], { 'd1/p1': '2026-10-02T18:00:00.000Z' });
+      const tras = rutasTrasRestaurar([retiro], { 'd1/p1': '2026-10-06T09:00:00Z' });
+      return verifica([[rutas.some((r) => r.endsWith('c1.bin')), 'su documento se vuelve a borrar'], [rutas.some((r) => r.endsWith('transcripcion-integra.json')), 'y la transcripción aprobada antes del retiro'],
+        [!tras.some((r) => r.endsWith('transcripcion-integra.json')), 'la aprobada después ya no la incluía: se queda']], rutas,
+        'Los retiros viven en Supabase, que no se restaura con el almacén: npm run reel:tras-restaurar los vuelve a aplicar.');
     } },
 ];
 
