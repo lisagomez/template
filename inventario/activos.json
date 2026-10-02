@@ -321,7 +321,7 @@
    "nombre": "Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes)",
    "tipo": "infraestructura", "clase": "INFRA", "estado": "produccion",
    "ubicacion": "docker-compose.yml", "responsable": "dep-sw",
-   "cubre": ["Dockerfile", "docker-compose.yml", "Caddyfile", ".hermes-baseline.json", "hermes/.env.ejemplo", "scripts/configura-deploy.mjs", "scripts/verifica-hermes.mjs", "docs/DEPLOY-HETZNER.md", "docs/FASE0-INFRAESTRUCTURA.md", "docs/DICTADO-CELULAR-RED.md"]
+   "cubre": ["Dockerfile", "docker-compose.yml", "Caddyfile", ".hermes-baseline.json", "hermes/.env.ejemplo", "scripts/configura-deploy.mjs", "scripts/verifica-hermes.mjs", "docs/DEPLOY-HETZNER.md", "docs/FASE0-INFRAESTRUCTURA.md", "docs/DICTADO-CELULAR-RED.md", "docs/REVISION-rutas-publicas.md"]
   },
   {
    "id": "TPL-erp",
