@@ -31,6 +31,17 @@ Al cerrar, el contrato se vuelve a firmar con esas cifras.
   reseñas en alguna plataforma. Si le falta alguno de esos datos, esa parte simplemente no se prueba.
 - Que acepte **anotar sus horas** durante el piloto. Sin eso no hay KPI.
 
+**Cómo se consiguen** (decisión del laboratorio, 2026-10-02): una **consultora de estrategia
+go-to-market con IA** recluta 1 o 2 pymes de entre sus clientes y las acompaña. La consultora **no es
+usuaria ni sujeto del piloto**: cada dueño usa el estudio en su propio equipo y anota sus horas, igual
+que sin ella. Lo que eso cambia:
+- **Sesgo declarado**: son pymes que ya pagan asesoría de estrategia, más avanzadas que el promedio.
+  La cifra vale para ellas; generalizarla a cualquier pyme es un **[supuesto]**.
+- **Que la consultora no haga por el dueño las tareas que se miden** (decidir qué publicar, hacer
+  piezas, contestar reseñas, subir). Si ya se las hace, se anota antes de arrancar: el «antes» y el
+  «después» tienen que medir las mismas manos.
+- Lo que la consultora puede y no puede hacer con los datos está en §5 y en el anexo C.
+
 ## 3. Calendario
 
 | Etapa | Duración | Qué pasa |
@@ -68,6 +79,13 @@ Las horas no las registra el estudio: no tiene cuentas ni telemetría, a propós
   aparece por su giro («una panadería») **[supuesto: el nivel de detalle]**.
 - Las reseñas son datos de terceros: se procesan en el equipo del dueño bajo la AISIA de reseñas
   firmada el 2026-09-27, y nada se publica solo.
+- **La consultora ve lo mismo que el laboratorio y nada más**: los agregados y encabezados de las
+  pymes que ella trajo, y solo si el dueño lo acepta (anexo A, punto 6). **No opera el estudio por el
+  dueño**: las horas dejarían de ser suyas y los archivos pasarían por la consultora. **No pasa los
+  datos del dueño por sus herramientas de IA**: los sacaría de su equipo, con datos de clientes que no
+  firmaron nada (C4). Si quiere hacerlo, es otra decisión con su propia evaluación, fuera de este piloto.
+- Si después del piloto la consultora quiere ofrecer el estudio a sus clientes, eso se resuelve con la
+  decisión del cobro (contrato §7), no aquí.
 
 ## 6. Requisito previo: que el estudio enseñe lo que no pudo leer
 
@@ -129,6 +147,8 @@ agregado que ya entregó se borra **[supuesto]**.
 >    negocio solo por su giro.
 > 4. El estudio no publica nada por mí. Lo que suba a mis redes lo subo yo.
 > 5. Puedo dejar el piloto cuando quiera, sin dar explicaciones.
+> 6. La consultora que me acompaña puede ver lo mismo que el laboratorio (punto 2) y nada más:
+>    ☐ sí ☐ no. No recibe mis archivos ni los pasa por sus herramientas.
 >
 > Negocio (giro): ____________ · Fecha: ____________ · Firma: ____________
 
@@ -145,6 +165,19 @@ Una línea por vez que trabaje en su marketing. Minutos, no horas: «20 min» se
 
 En el «después», el tiempo dentro del estudio va en la tarea que tocaba (decidir, hacer, contestar),
 y **subir sigue contando aparte**.
+
+## Anexo C: compromiso de la consultora
+
+> Como consultora que acompaña a estas pymes en el piloto, me comprometo a:
+>
+> 1. No operar el estudio por el dueño ni hacer por él, durante el piloto, las tareas que se miden;
+>    si ya las hacía, decirlo antes de arrancar.
+> 2. No recibir sus facturas, archivos de caja, reseñas ni exportaciones, ni copiarlos de su pantalla.
+> 3. No pasar sus datos por herramientas de IA propias ni de terceros durante el piloto.
+> 4. Ver solo lo que el dueño aceptó compartir (anexo A, punto 6), y mencionar a cada negocio solo
+>    por su giro.
+>
+> Consultora: ____________ · Fecha: ____________ · Firma: ____________
 
 ---
 

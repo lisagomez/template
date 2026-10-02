@@ -76,6 +76,8 @@ sus notas del brief del lunes.
 **Contexto:** desde su computadora o su celular, con lo que ya tiene: XML, un Excel o CSV y
 capturas. Aprueba desde el teléfono.
 **Primer cliente real: pendiente.** Todo está probado con CFDI, reseñas y exportaciones sintéticas.
+El piloto se hará con 1 o 2 pymes que trae una consultora de estrategia go-to-market, sin que ella
+opere el estudio (decidido el 2026-10-02; plan del piloto, §2).
 
 ## 4. Arquitectura de Datos
 
