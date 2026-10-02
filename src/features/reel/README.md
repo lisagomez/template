@@ -50,7 +50,9 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
   Supabase (solo proyecto, versiones, aprobaciones y estado de los consentimientos). A los 30 días de aprobado se
   borran el video original, su copia de trabajo y la transcripción (`reel:retencion`). Si al aprobar habla alguien
   además del dueño con consentimiento vigente, la transcripción íntegra se guarda con los consentimientos y dura lo
-  que su vigencia: la borran el retiro o el mismo job al vencer.
+  que su vigencia: la borran el retiro o el mismo job al vencer. El documento firmado de cada consentimiento también
+  vive lo que su vigencia: el job lo borra al día siguiente de vencer y deja la fecha como constancia, y la sala avisa
+  al dueño que baje el reel de sus redes.
 - **Salida del perímetro (C4)**: el video y la transcripción no salen del servidor; a Supabase van solo los datos de la
   cuenta y del proyecto listados arriba. Transcribir en la nube o usar un LLM espera firma del laboratorio.
 

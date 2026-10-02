@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 
 /**
  * El almacén del reel vive en el SERVIDOR (respuesta 2): bruto, transcripción, máster y documentos de
@@ -21,8 +21,8 @@ export function carpetaDe(duenoId: string, proyectoId: string): string {
 }
 
 export async function guarda(carpeta: string, nombre: string, datos: Uint8Array | string): Promise<string> {
-  await mkdir(carpeta, { recursive: true });
   const ruta = join(carpeta, nombre);
+  await mkdir(dirname(ruta), { recursive: true }); // `nombre` puede traer subcarpeta (consentimientos/…)
   await writeFile(ruta, datos);
   return ruta;
 }

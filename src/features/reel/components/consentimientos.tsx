@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export interface ConsentimientoDeSala { id: string; alias: string; rol: string; alcance: string; vigenteHasta: string; retirado: boolean }
+export interface ConsentimientoDeSala { id: string; alias: string; rol: string; alcance: string; vigenteHasta: string; retirado: boolean; vencido: boolean }
 
 const CAMPO = 'w-full rounded-lg border border-gray-300 p-2 text-sm';
 
@@ -41,13 +41,14 @@ export function Consentimientos({ proyecto, lista }: { proyecto: string; lista: 
       <p className="text-xs text-gray-600">De cada persona que sale o se oye, además de ti, con su formato firmado. Menores, nunca.</p>
       <ul className="space-y-2 text-sm">
         {lista.map((c) => (
-          <li key={c.id} className={`flex items-center justify-between gap-2 ${c.retirado ? 'text-gray-400' : ''}`}>
-            <span>{c.alias} · {c.rol} · hasta {c.vigenteHasta}{c.retirado ? ' · retirado' : ''}</span>
-            {!c.retirado && <button type="button" className="rounded-lg border border-red-300 px-3 py-1 text-red-700" disabled={ocupado} data-prueba="retirar-consentimiento" onClick={() => void retira(c)}>Retirar</button>}
+          <li key={c.id} className={`flex items-center justify-between gap-2 ${c.retirado || c.vencido ? 'text-gray-400' : ''}`}>
+            <span>{c.alias} · {c.rol} · hasta {c.vigenteHasta}{c.retirado ? ' · retirado' : ''}{c.vencido ? ' · vencido' : ''}</span>
+            {!c.retirado && !c.vencido && <button type="button" className="rounded-lg border border-red-300 px-3 py-1 text-red-700" disabled={ocupado} data-prueba="retirar-consentimiento" onClick={() => void retira(c)}>Retirar</button>}
           </li>
         ))}
         {!lista.length && <li className="text-gray-500">Ninguno registrado.</li>}
       </ul>
+      {lista.filter((c) => c.vencido).map((c) => <p key={c.id} className="rounded-lg bg-amber-50 p-2 text-xs" data-prueba="consentimiento-vencido">El consentimiento de {c.alias} venció el {c.vigenteHasta}: si el reel sigue publicado, bájalo de tus redes. Su documento se borra solo.</p>)}
       <form className="space-y-2" data-prueba="alta-consentimiento" onSubmit={(e) => { e.preventDefault(); void registra(e.currentTarget); }}>
         <input name="alias" required maxLength={60} placeholder="Alias (p. ej. «Empleada 1»; el nombre va en el documento)" className={CAMPO} />
         <select name="rol" className={CAMPO} defaultValue="empleado"><option value="empleado">Empleado</option><option value="cliente">Cliente</option></select>

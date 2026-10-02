@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { decisionesTrasRetirar, TRANSCRIPCION_CONSERVADA } from '../../../../../../tools/reel/dist/index.js';
+import { decisionesTrasRetirar, documentoDeConsentimiento, vigenciaDeDocumento, TRANSCRIPCION_CONSERVADA, type VigenciaDeDocumento } from '../../../../../../tools/reel/dist/index.js';
 import { borraArchivo, carpetaDe, guarda, leeJson } from '@/features/reel/services/servidor/almacen';
 import { reprocesa } from '@/features/reel/services/servidor/reproceso';
 import { conSesion, UUID } from '@/features/reel/services/servidor/sesion';
@@ -42,7 +42,11 @@ export async function POST(p: NextRequest, { params }: { params: Promise<{ id: s
     proyecto_id: id, alias: d.data.alias, rol: d.data.rol, alcance: d.data.alcance, vigente_hasta: d.data.vigenteHasta, huella_documento: huella,
   }).select('id').single();
   if (error || !data) return NextResponse.json({ error: 'no se pudo registrar' }, { status: 500 });
-  await guarda(`${carpetaDe(ctx.usuario.id, id)}/consentimientos`, `${String(data.id)}.bin`, bytes);
+  const carpeta = carpetaDe(ctx.usuario.id, id);
+  await guarda(carpeta, documentoDeConsentimiento(String(data.id)), bytes);
+  // Para que el job de retención borre el documento al vencer sin tocar Supabase (nada personal: fecha y huella).
+  const vigencia: VigenciaDeDocumento = { consentimiento: String(data.id), vigenteHasta: d.data.vigenteHasta, huella };
+  await guarda(carpeta, vigenciaDeDocumento(String(data.id)), JSON.stringify(vigencia));
   try {
     return NextResponse.json({ id: data.id, huella, version: await reprocesa(ctx.supabase, ctx.usuario.id, id) });
   } catch {
@@ -68,7 +72,8 @@ export async function PATCH(p: NextRequest, { params }: { params: Promise<{ id: 
   if (error) return NextResponse.json({ error: 'no se pudo retirar' }, { status: 500 });
   if (!data) return NextResponse.json({ error: 'no existe o ya estaba retirado' }, { status: 404 });
   const carpeta = carpetaDe(ctx.usuario.id, id);
-  await borraArchivo(join(carpeta, 'consentimientos', `${r.data.consentimiento}.bin`));
+  await borraArchivo(join(carpeta, documentoDeConsentimiento(r.data.consentimiento)));
+  await borraArchivo(join(carpeta, vigenciaDeDocumento(r.data.consentimiento))); // la constancia del retiro es la fila
   await borraArchivo(join(carpeta, TRANSCRIPCION_CONSERVADA)); // lleva sus palabras: se va con su consentimiento
   await ctx.supabase.from('reel_aprobaciones').update({ revocada_en: new Date().toISOString() }).eq('proyecto_id', id).is('revocada_en', null);
   const registro = await leeJson<{ brutoBorradoEn?: string | null }>(join(carpeta, 'registro.json'));

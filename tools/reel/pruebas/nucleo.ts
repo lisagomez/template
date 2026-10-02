@@ -1,7 +1,7 @@
 /** Pruebas del núcleo del reel: cortes, precios, subtítulos, privacidad, QA, retención y sala. Sin motores. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, transcripcionAConservar, transcripcionVencida, TRANSCRIPCION_CONSERVADA, type Palabra } from '../dist/index.js';
+import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, transcripcionAConservar, transcripcionVencida, TRANSCRIPCION_CONSERVADA, documentoVencido, documentoDeConsentimiento, vigenciaDeDocumento, type Palabra } from '../dist/index.js';
 import { palabrasDeTokens, lineasDeTsv } from '../dist/node/index.js';
 
 const P = (texto: string, inicio: number, fin: number): Palabra => ({ texto, inicio, fin });
@@ -151,4 +151,12 @@ test('riesgo 5, segunda mitad: la transcripción íntegra se conserva con el con
   assert.equal((BRUTO as readonly string[]).some((b) => TRANSCRIPCION_CONSERVADA.startsWith(b)), false);
   assert.equal(transcripcionVencida({ conservarHasta: '2027-06-30' }, '2027-06-30'), false, 'el último día de vigencia sigue');
   assert.equal(transcripcionVencida({ conservarHasta: '2027-06-30' }, '2027-07-01'), true);
+});
+
+test('el documento de un consentimiento se conserva mientras dura su vigencia, y se borra una sola vez', () => {
+  const v = { consentimiento: 'abc', vigenteHasta: '2027-01-01', huella: `sha256:${'ef'.repeat(32)}` };
+  assert.equal(documentoVencido(v, '2027-01-01'), false, 'el último día de vigencia se conserva');
+  assert.equal(documentoVencido(v, '2027-01-02'), true);
+  assert.equal(documentoVencido({ ...v, documentoBorradoEn: '2027-01-02T12:00:00Z' }, '2027-02-01'), false, 'ya borrado: no se vuelve a contar');
+  assert.deepEqual([documentoDeConsentimiento('abc'), vigenciaDeDocumento('abc')], ['consentimientos/abc.bin', 'consentimientos/abc.vigencia.json']);
 });
