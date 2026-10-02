@@ -88,10 +88,15 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 | Activo del producto | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|
 | Tablas del reel en Supabase (proyectos, versiones, aprobaciones, marcas, consentimientos) | **No**: quién aprobó qué versión y el estado de cada consentimiento son la constancia ante un reclamo | Crítica | Respaldo del proyecto Supabase. **El plan gratis no tiene respaldo automático: verificar el plan antes de prometer nada** |
-| Máster aprobado, `master.json`, `registro.json` (`REEL_DATOS`) | **No**: es el archivo exacto que el dueño aprobó (su huella está en Supabase) | Crítica | Respaldo diario cifrado del almacén, **excluyendo lo que la retención borra** |
+| Máster aprobado, `master.json`, `registro.json` (`REEL_DATOS`) | **No**: es el archivo exacto que el dueño aprobó, y el bruto se borra a los 30 días | Crítica | **Solo N0, nunca N1 ni N2** (decisión del laboratorio, 2026-10-02), cifrado y **excluyendo lo que la retención borra**. Lleva caras y voces de quien consintió: en una copia inmutable no se podría borrar si se retira. Si arde el servidor, nuestra copia se pierde; la constancia de qué se aprobó sigue en la huella guardada en Supabase y en la copia del dueño |
 | Documentos de consentimiento (`REEL_DATOS/<dueño>/<proyecto>/consentimientos/`) | **No**: son de terceros | Crítica, **con borrado propagado** | **Solo la copia local rotada de 7 días (N0); nunca N1 (append-only) ni N2 (Object Lock)** (decisión del laboratorio, 2026-10-02): una copia que no se puede borrar no puede cumplir un retiro. Viven lo que su vigencia (`reel:retencion` los borra al vencer); un retiro o vencimiento llega a las copias cuando vence la última, en 7 días como máximo |
 | Transcripción conservada con los consentimientos (`consentimientos/transcripcion-integra.json`) | **No**: son las palabras de un tercero | Crítica, **con borrado propagado** | Igual que los documentos: solo N0, nunca N1 ni N2 |
 | Bruto, copia normalizada, transcripción y cuadros | — | — | **No se respaldan**: datos de terceros sin aprobar, que la retención borra a los 30 días |
+
+**Una sola regla para el almacén:** nada de `REEL_DATOS` va a N1 (append-only) ni a N2 (Object Lock). Es la
+excepción, firmada, a «no reconstruible → respaldo inmutable»: todo lo que hay ahí lleva datos de terceros con
+derecho a borrar, y la constancia que importa (quién aprobó qué versión y su huella) vive en Supabase, que sí va a
+su respaldo normal.
 
 **Riesgo abierto:** si se respalda el bruto por error, la retención de 30 días deja de cumplirse en
 la copia. Y propagar el retiro de un consentimiento a copias ya hechas no está construido.
@@ -165,9 +170,8 @@ pineados con su huella y licencia en `tools/reel/LICENCIAS.md`.
    de ahí salen el KPI (§5), la recalibración de voces y la sincronía
 2. [ ] Verificar el plan de Supabase antes de prometer respaldo, y cerrar **GATE 3** con una
    restauración probada (tablas + almacén)
-3. [ ] Decidir el nivel de respaldo del **máster aprobado**: lleva caras y voces de quien consintió, y en
-   N1 o N2 tampoco se podría borrar si esa persona se retira (los documentos y la transcripción ya van
-   solo a N0, §4)
+3. [ ] Que la copia N0 viva **fuera del servidor** (otro disco u otra máquina): con todo el almacén del reel
+   solo en N0, si arde el servidor no se recupera de nuestras copias (§4)
 4. [ ] Revisión legal (LFPDPPP y art. 87 de la LFDA) con asesoría
 5. [ ] Cifrado en reposo del almacén y límite de uso por día (brechas de C3)
 6. [ ] Fases bloqueadas (11 a 16), cada una con su firma: LLM sobre la transcripción, transcripción
