@@ -11,12 +11,16 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Sala**: el video con sus bloqueos; marcar un corte o un cambio de texto en el segundo exacto (sale una versión
   nueva, que revoca lo aprobado); confirmar que revisó cada corte que parte lo que dijo otra persona; aprobar con la
   huella del archivo calculada en el celular; el registro; borrar.
-- **Consentimientos**: registra los de quien sale o se oye, y los respeta al procesar.
+- **Consentimientos**: desde la sala registra, con el documento firmado, los de quien sale o se oye, y los respeta al
+  procesar; retirar uno borra su documento del servidor, revoca lo aprobado y vuelve a desenfocar y a bloquear lo que
+  dependía de esa persona.
 
 ### Qué no hace
 
 - No publica ni programa: aprobar no sale a la red.
 - No manda el video a ningún servicio, ni para transcribir.
+- No borra a una persona del clip original: retirar su consentimiento la saca del reel, pero su voz y su imagen siguen
+  en el clip hasta que se borra el proyecto (y se le dice al dueño).
 - No procesa en producción: el render queda bloqueado ahí hasta la fase 16 del PRP-007 (solo local).
 
 ## Casos de uso
@@ -26,6 +30,8 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Quiere un cambio**: pausa en la sala y toca quitar un tramo o cambiar el texto ahí; sale una versión nueva.
 - **Aprueba desde el celular**: queda quién, cuándo, qué versión y la huella de lo que vio; si algo cambia después, la
   aprobación se revoca.
+- **Alguien retira su consentimiento**: el dueño lo retira en la sala; lo aprobado queda revocado, la versión nueva
+  vuelve a bloquear su voz y a desenfocar su cara, y se le avisa que lo baje de sus redes si ya lo publicó.
 - **Borra el proyecto**: se borra todo, en la cuenta y en el servidor.
 
 ## Requerimientos de infraestructura

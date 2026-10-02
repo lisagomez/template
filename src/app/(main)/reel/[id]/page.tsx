@@ -24,6 +24,7 @@ export default async function Pagina({ params }: { params: Promise<{ id: string 
   if (!p) notFound();
   const { data: v } = await supabase.from('reel_versiones').select('numero, huella').eq('proyecto_id', id).order('numero', { ascending: false }).limit(1).maybeSingle();
   const { data: registro } = await supabase.from('reel_aprobaciones').select('decision, version, huella, creado_en, revocada_en, nota').eq('proyecto_id', id).order('creado_en', { ascending: false });
+  const { data: consentimientos } = await supabase.from('reel_consentimientos').select('id, alias, rol, alcance, vigente_hasta, revocado_en').eq('proyecto_id', id).neq('rol', 'dueno').order('creado_en');
   const r = await leeJson<ResultadoLocal>(join(carpetaDe(user.id, id), 'resultado.json'));
   const obs = [...(r?.observaciones ?? []), ...(r?.master?.qa ?? [])];
   return (
@@ -37,6 +38,7 @@ export default async function Pagina({ params }: { params: Promise<{ id: string 
         datos: agrupaHallazgos(r?.hallazgos ?? []).map((g, i) => ({ indice: i, texto: `${g.tipo} «${g.muestra}» (s ${g.desde.toFixed(0)}–${g.hasta.toFixed(0)})` })),
         cortesVoz: (r?.cortesEnVozAjena ?? []).filter((c) => !c.revisado).map((c) => ({ clave: c.clave, texto: `segundo ${c.costura.toFixed(1)} del reel (del ${c.desde.toFixed(1)} al ${c.hasta.toFixed(1)} del clip)` })),
         registro: (registro ?? []).map((x) => ({ decision: String(x.decision), version: Number(x.version), huella: String(x.huella), creado_en: String(x.creado_en), revocada_en: x.revocada_en ? String(x.revocada_en) : null, nota: x.nota ? String(x.nota) : null })),
+        consentimientos: (consentimientos ?? []).map((c) => ({ id: String(c.id), alias: String(c.alias), rol: String(c.rol), alcance: String(c.alcance), vigenteHasta: String(c.vigente_hasta), retirado: c.revocado_en !== null })),
         correo: user.email ?? '',
       }} />
     </main>
