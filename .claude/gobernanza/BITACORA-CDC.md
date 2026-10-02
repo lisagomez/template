@@ -4302,3 +4302,34 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
     «Gobernanza» a la raíz y **con el contrato del asesor fuera del disco**, da verde;
   - `npm run validate` ☑ 28/28 activos (8 inactivos declarados, 0 rojos).
 - **Aprobado por**: **lisagomez** (el laboratorio) — «si», 2026-09-30, con el diff delante; capa A basta.
+
+### 2026-10-02 — gate del índice del portafolio: enlaces en código, firma declarada y comprobaciones fijas → CDC PROMOVIDO — radio: verificador de gobernanza
+- **Cambio** (rama `cdc/gate-indice-portafolio`, sobre `bafebe2`; diff enseñado el 2026-10-01 sobre `e40b665`, idéntico tras el rebase), en `scripts/verifica-gobernanza.mjs` (3d):
+  - **un enlace dentro de código ya no cuenta como enlace**: `enlaceDe` descarta el span entre comillas invertidas
+    que contiene `](`; el enlace con código en el texto (`` [`ruta`](ruta) ``) sigue valiendo;
+  - **cada contrato enlazado declara su firma** con una línea `**Firma:**`; si dice «pendiente», el contrato se
+    lista aparte y no cuenta como verde;
+  - **las comprobaciones del índice son fijas** (11) y agregan sobre las filas, nombrando en la pista las que
+    fallan: una fila nueva ya no cambia el total;
+  - `README.md` y `.claude/README.md`: 172 → 166 comprobaciones (este es el último cambio de cifra que provoca una
+    fila del índice).
+- **Motivo**: tres hallazgos del 2026-09-30. **1.** La firma del índice se guardó con un formateador que envolvió en
+  código los enlaces de los contratos (`c06249c`, #193): GitHub los pintaba como texto y el gate los dio por buenos.
+  **2.** El gate no distinguía un contrato firmado de uno con la firma pendiente (etiquetas, extractor). **3.** Cada
+  fila nueva del índice movía la cifra de los README: #195 y #196 subieron los dos a 171, git los juntó sin
+  conflicto y el total real era 172.
+- **Qué pone rojo y qué no**: rojo = enlace dentro de código, contrato enlazado sin línea `**Firma:**`, y lo de
+  antes (contrato inexistente o sin sección 6, pendiente sin `falta:`, contrato huérfano, activo inexistente,
+  producto beta o producción fuera del índice, fila del §2 sin motivo). La firma pendiente **no** lo pone rojo; se
+  lista.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo ANTES de pedir la firma**) · regresión capa A ☑ 147/147 ·
+  **capa B no corrida, a propósito y declarado** («capa A basta», decidido por el laboratorio: no toca skills, prompts, modelo ni
+  instrucciones) · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verify:gobernanza` ☑ 166/166, 5 pendientes declarados (dos firmas y tres contratos);
+  - **10/10 siembras cazadas**: enlace dentro de código, **el índice real de `c06249c`**, contrato sin línea de
+    firma, contrato sin sección 6, producto beta fuera del índice, pendiente sin `falta:`, contrato huérfano, enlace
+    roto, activo inexistente y fila del §2 sin motivo;
+  - **la cifra ya no se mueve**: con una fila pendiente más, o con un contrato enlazado más, el total sigue en 166;
+  - `npm run validate` ☑ 28/28 activos (8 inactivos declarados, 0 rojos).
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-01, con el diff delante; firmado el 2026-10-02.
