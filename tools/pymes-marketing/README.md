@@ -1,4 +1,4 @@
-# @tu-scope/pymes-marketing (0.3.0)
+# @tu-scope/pymes-marketing (0.3.1)
 
 El **estudio de contenido y marketing** de una pyme mexicana, en seis herramientas que se instalan
 juntas y se importan por separado. TypeScript puro, **cero dependencias**, sin red: el redactor

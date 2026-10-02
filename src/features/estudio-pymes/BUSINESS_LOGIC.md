@@ -165,7 +165,7 @@ de píxeles distintos contra la referencia. Aprobar hace 0 salidas de red. Prueb
 
 ### Tipo de proyecto
 
-**Tipo:** herramienta + aplicación. El núcleo es `@tu-scope/pymes-marketing` (0.3.0 en
+**Tipo:** herramienta + aplicación. El núcleo es `@tu-scope/pymes-marketing` (0.3.1 en
 `tools/pymes-marketing`, empaquetada el 2026-10-02: 11 subpaths instalados e importados en un proyecto
 limpio, 53 `.d.ts`): TypeScript puro sin dependencias, con el redactor y cualquier almacén
 **inyectados**. Lo consume la app del template
@@ -199,8 +199,7 @@ de plantillas; el de LLM va por `routing-modelos.json` (clases `redaccion-de-mar
 1. [ ] **Piloto con datos reales** de un negocio, con su permiso: XML, reseñas y exportaciones de
    anuncios. Plan en [`.claude/goals/pymes-marketing/piloto.md`](../../../.claude/goals/pymes-marketing/piloto.md)
    (firma pendiente). De ahí salen la cifra del costo actual (§1), la meta del KPI (§5) y el ajuste
-   de las columnas de Meta. Antes de arrancar, la app tiene que enseñar lo que no pudo leer de
-   anuncios y reseñas (plan, §6), y la app tiene que estar desplegada (decidido el 2026-10-02),
+   de las columnas de Meta. Antes de arrancar, la app tiene que estar desplegada (decidido el 2026-10-02),
    con la revisión de qué rutas quedan públicas
 2. [ ] Leer el sitio por URL con protección SSRF: superficie nueva con su modelo de amenazas (C3)
 3. [ ] Lista guardada de competidores
