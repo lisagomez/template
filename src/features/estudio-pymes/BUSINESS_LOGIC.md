@@ -179,7 +179,12 @@ Atribución Apache-2.0 al plugin `small-business` en `NOTICE`.
 **Cobro en línea: pendiente.** Dos preguntas distintas y abiertas: cómo cobra el laboratorio por el
 estudio, y la pasarela con la que la pyme cobraría a **sus** clientes. Para la segunda,
 `/add-payments` **no aplica**: Polar no permite bienes físicos ni servicios presenciales
-(`resultados.md` del goal).
+(`resultados.md` del goal). Para la primera hay investigación del 2026-10-02:
+[`docs/INVESTIGACION-cobro-estudio-pymes.md`](../../../docs/INVESTIGACION-cobro-estudio-pymes.md) compara
+los esquemas por modelo de negocio (suscripción directa, acompañado, canal de la consultora y licencia
+del paquete) y recomienda una suscripción por negocio en pesos y con CFDI, con la consultora como
+referidora. **No fija el precio**: sale del piloto. Antes de cobrar hacen falta las cuentas (fase 9) y
+decidir la pasarela: una local con CFDI cambia el skill `/add-payments`, y eso es CDC.
 
 ### Features (Feature-First)
 
@@ -208,7 +213,7 @@ de plantillas; el de LLM va por `routing-modelos.json` (clases `redaccion-de-mar
 4. [ ] Fases bloqueadas del PRP-006, cada una con su firma: 8 (foto de producto, C4), 9 (redactor con
    LLM = CDC con corrida medida; aprobación con cuentas = C4 y C7, y su fila en la tabla de respaldo)
    y 10 (render en producción, infraestructura)
-5. [ ] Decidir el cobro (§7)
+5. [ ] Decidir el cobro (§7, con la investigación de esquemas de precio)
 6. [ ] Las otras familias del plugin (finanzas, ventas, operación), cada una con su goal
 
 ---
