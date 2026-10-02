@@ -168,6 +168,11 @@ if (!existsSync(ruta(ENV))) {
   const modeloGpu = valores.get('OCR_GPU_MODELO');
   if (modeloGpu && /(^|[-:@/])(latest|stable|current|default|head)$/i.test(modeloGpu)) problemas.push(`OCR_GPU_MODELO="${modeloGpu}" es un alias autoactualizable: el modelo va pineado (C1).`);
   if (modeloGpu && !gpu.runtimeDocker) avisos.push(`OCR_GPU_MODELO esta puesto pero esta maquina no expone GPU a Docker (${gpu.motivo}): no levantes el perfil ocr-gpu aqui.`);
+  // El puente A2A del extractor: en produccion, sin clave queda APAGADO (503) y Caddy no lo deja entrar
+  // desde fuera. Una clave corta es peor que ninguna: abre el puente con algo adivinable.
+  const claveA2a = valores.get('A2A_API_KEY') ?? '';
+  if (claveA2a === '') avisos.push('A2A_API_KEY vacia: el puente A2A del extractor queda apagado (503). Solo hace falta si corre el perfil hermes.');
+  else if (claveA2a.length < 32) problemas.push(`A2A_API_KEY tiene ${claveA2a.length} caracteres: con menos de 32 se adivina. Genera una con \`openssl rand -hex 32\`.`);
   // Secretos: solo presencia, nunca valor.
   for (const clave of ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY', 'A2A_API_KEY', 'MISTRAL_API_KEY']) {
     const v = valores.get(clave);
