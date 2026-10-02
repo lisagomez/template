@@ -24,8 +24,22 @@ piezas no tienen su marca ni la medida de cada red, las reseñas se quedan sin c
 anuncios sin saber cuáles queman dinero. Las herramientas que resuelven esto asumen Estados Unidos,
 dólares y QuickBooks, Canva o HubSpot conectados. La pyme tiene sus facturas XML, el archivo de su
 caja y capturas de pantalla (spec, MISION).
-**Costo actual:** **pendiente, no medido.** Ninguna fuente lo cuantifica: ni las horas del dueño
-al mes, ni lo que paga a un tercero, ni las ventas de temporada que se le escapan.
+**Costo actual: sin cifra hasta medirla en el piloto** (decisión del laboratorio, 2026-10-02).
+Ninguna fuente lo cuantifica y no se estima. Se mide en dos unidades:
+- **Horas del dueño al mes** en su marketing: decidir qué publicar, hacer las piezas, subirlas y
+  contestar reseñas. *Antes*: lo que el dueño anota durante cuatro semanas sin el estudio
+  **[supuesto: el periodo]**. Si no anota, la cifra queda pendiente y no se estima. *Después*: su
+  tiempo con el estudio, desde que sube sus facturas hasta que tiene el mes aprobado (el mismo número
+  es candidato a KPI, §5).
+- **Dinero al mes en anuncios que no rinden**: sobre su exportación real, el gasto mensual
+  (normalizado a 30 días, como lo calcula `./pulso`) de las campañas con veredicto «problema».
+  «Vigilar» se reporta aparte, y «sin veredicto» no se cuenta ni como pérdida ni como cero. **Solo
+  vale después de cotejar las columnas con ese archivo** (§6, daño 3): antes, el número podría salir
+  de una columna mal leída. Si el negocio no paga anuncios, esta parte no aplica, que no es lo mismo
+  que cero.
+
+Quedan **fuera de la medición** (misma decisión): lo que paga a un tercero y las ventas de
+temporada que se le escapan.
 
 ## 2. Solución
 
@@ -132,7 +146,7 @@ de píxeles distintos contra la referencia. Aprobar hace 0 salidas de red. Prueb
 |---|---|
 | **Datos personales que toca** | El RFC y el nombre de los receptores de los CFDI (en el resumen solo queda su huella); nombres y a veces teléfonos de clientes en el CSV de caja y en las reseñas (se tapan teléfono, correo, RFC, CURP, CLABE y tarjeta al leer y otra vez al redactar; el autor queda como «Nombre I.»); el ritmo de compra de cada cliente (los «callados», solo con alias y huella). El teléfono **del negocio** sí queda. Las piezas no llevan datos personales. |
 | **Partes afectadas** | El dueño; sus clientes (receptores, autores de reseñas, callados); quien ve las piezas publicadas; los competidores que el dueño anota. |
-| **Daño con el sistema operando bien** | **1.** Un brief que empuja el producto equivocado: las reglas solo se han probado con ventas sintéticas. **2.** Un precio publicado equivocado o sin IVA (PROFECO): solo entra el precio que el dueño confirmó, con impuestos; si no hay, la pieza sale sin precio y avisa. **3.** Un anuncio declarado «quema dinero» por leer mal una columna: las columnas de las exportaciones vienen de la documentación y **nunca se cotejaron con un archivo real de Meta**; hay mínimos antes de concluir y «sin veredicto». **4.** Una respuesta a reseña que repite un dato personal, inventa una política o contesta con plantilla un caso de salud o legal (mitigado en la AISIA de reseñas). **5.** Una temporada genérica que no le toca a ese negocio: se marca «¿coincide con tu negocio?», y las fechas móviles «aproximada». |
+| **Daño con el sistema operando bien** | **1.** Un brief que empuja el producto equivocado: las reglas solo se han probado con ventas sintéticas. **2.** Un precio publicado equivocado o sin IVA (PROFECO): solo entra el precio que el dueño confirmó, con impuestos; si no hay, la pieza sale sin precio y avisa. **3.** Un anuncio declarado «problema» por leer mal una columna: las columnas de las exportaciones vienen de la documentación y **nunca se cotejaron con un archivo real de Meta**; hay mínimos antes de concluir y «sin veredicto». **4.** Una respuesta a reseña que repite un dato personal, inventa una política o contesta con plantilla un caso de salud o legal (mitigado en la AISIA de reseñas). **5.** Una temporada genérica que no le toca a ese negocio: se marca «¿coincide con tu negocio?», y las fechas móviles «aproximada». |
 | **Riesgos que ninguna firma autoriza** (límite de C5) | Se **rediseñan**, no se aceptan: **1.** publicar respuestas a reseñas automáticamente, o mandar mensajes a los clientes callados sin revisión: el daño cae sobre terceros que no firmaron (AISIA de reseñas, §5); **2.** personas en pantalla: los tipos de capa del video están cerrados (etiqueta, titular, apoyo, precio, marca) y una capa de foto no pasa la revisión de la escena. La foto de producto (que puede traer personas) es la fase 8, bloqueada; el reel con voz y cara es otro producto, con su contrato ([reel del celular](../reel/BUSINESS_LOGIC.md)). |
 | **Salida del perímetro** | Nada sale del navegador del dueño, salvo la escena del video al servidor local (marca y producto, sin datos de clientes). El **redactor con LLM está apagado**: sus prompts se firmaron (CDC del 2026-09-27), pero activarlo es otro CDC con llave y corrida medida, y **una decisión C4**: los textos del negocio y las reseñas de terceros irían al proveedor del modelo. La AISIA de reseñas se revisa en ese momento. |
 | **Acciones irreversibles** | **Publicar** y **cambiar el presupuesto de anuncios**, y las dos están **fuera** de la herramienta: el dueño las hace a mano (los anuncios salen como un bloque «cómo hacerlo tú»). Aprobar no publica ni sale a la red. |
