@@ -28,9 +28,8 @@ caja y capturas de pantalla (spec, MISION).
 Ninguna fuente lo cuantifica y no se estima. Se mide en dos unidades:
 - **Horas del dueño al mes** en su marketing: decidir qué publicar, hacer las piezas, subirlas y
   contestar reseñas. *Antes*: lo que el dueño anota durante cuatro semanas sin el estudio
-  **[supuesto: el periodo]**. Si no anota, la cifra queda pendiente y no se estima. *Después*: su
-  tiempo con el estudio, desde que sube sus facturas hasta que tiene el mes aprobado (el mismo número
-  es candidato a KPI, §5).
+  **[supuesto: el periodo]**. Si no anota, la cifra queda pendiente y no se estima. *Después*: las
+  mismas tareas con el estudio (es la métrica principal, §5).
 - **Dinero al mes en anuncios que no rinden**: sobre su exportación real, el gasto mensual
   (normalizado a 30 días, como lo calcula `./pulso`) de las campañas con veredicto «problema».
   «Vigilar» se reporta aparte, y «sin veredicto» no se cuenta ni como pérdida ni como cero. **Solo
@@ -125,9 +124,18 @@ en el servidor.
 
 ## 5. KPI de Éxito
 
-**Métrica principal: pendiente.** Sale del piloto con datos reales y la fija el laboratorio.
-**[supuesto]** El candidato natural es el tiempo del dueño desde que sube sus facturas hasta que
-tiene su mes aprobado, y cuántas piezas aprueba sin pedir cambio. Ninguno está medido.
+**Métrica principal** (decisión del laboratorio, 2026-10-02): **las horas del dueño para tener su
+mes de contenido resuelto con el estudio, contra sus horas al mes sin él** (§1). Se mide con lo
+mismo que el costo actual, así que no agrega trabajo al piloto.
+- **Las dos mediciones cubren las mismas tareas**: decidir qué publicar, hacer las piezas, contestar
+  reseñas y subir. Con el estudio, son su tiempo hasta tener el mes aprobado (incluidas las
+  respuestas a reseñas) **más** lo que tarda en subir lo aprobado, que sigue siendo a mano. Sin esa
+  suma, el «después» saldría más barato que el «antes» por medir menos cosas.
+- **El estudio no registra tiempos**: no tiene cuentas ni telemetría, a propósito. El «después» lo
+  anota el dueño igual que el «antes».
+
+**Meta: se fija después de medir el antes.** El laboratorio la pone con la cifra del piloto delante;
+hasta entonces no hay número (la misma regla que el costo actual).
 
 Ya medido, con datos sintéticos (SDD §10, 2026-09-27): 65 casos de laboratorio, 64 pasan, 1 no
 medido (el LLM, sin llave), 0 fallan, 35 con trampa y al menos 5 por herramienta. Render de la promo
@@ -189,7 +197,8 @@ de plantillas; el de LLM va por `routing-modelos.json` (clases `redaccion-de-mar
 ### Próximos pasos
 
 1. [ ] **Piloto con datos reales** de un negocio, con su permiso: XML, reseñas y exportaciones de
-   anuncios. De ahí salen el costo actual (§1), el KPI (§5) y el ajuste de las columnas de Meta.
+   anuncios. De ahí salen la cifra del costo actual (§1), la meta del KPI (§5) y el ajuste de las
+   columnas de Meta.
    Día de Muertos y Buen Fin son buen momento para hacerlo
 2. [ ] Leer el sitio por URL con protección SSRF: superficie nueva con su modelo de amenazas (C3)
 3. [ ] Lista guardada de competidores
