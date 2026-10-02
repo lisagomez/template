@@ -197,9 +197,10 @@ de plantillas; el de LLM va por `routing-modelos.json` (clases `redaccion-de-mar
 ### Próximos pasos
 
 1. [ ] **Piloto con datos reales** de un negocio, con su permiso: XML, reseñas y exportaciones de
-   anuncios. De ahí salen la cifra del costo actual (§1), la meta del KPI (§5) y el ajuste de las
-   columnas de Meta.
-   Día de Muertos y Buen Fin son buen momento para hacerlo
+   anuncios. Plan en [`.claude/goals/pymes-marketing/piloto.md`](../../../.claude/goals/pymes-marketing/piloto.md)
+   (firma pendiente). De ahí salen la cifra del costo actual (§1), la meta del KPI (§5) y el ajuste
+   de las columnas de Meta. Antes de arrancar, la app tiene que enseñar lo que no pudo leer de
+   anuncios y reseñas (plan, §6), y falta decidir dónde corre el estudio para el dueño
 2. [ ] Leer el sitio por URL con protección SSRF: superficie nueva con su modelo de amenazas (C3)
 3. [ ] Lista guardada de competidores
 4. [ ] Fases bloqueadas del PRP-006, cada una con su firma: 8 (foto de producto, C4), 9 (redactor con
