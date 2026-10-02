@@ -116,8 +116,9 @@ equipo, que es justo lo que §5 descarta. Lo que trae la decisión:
 - Desplegar es **gate humano** y pasa por el suyo (`npm run configura:deploy`, `predeploy`,
   `docs/DEPLOY-HETZNER.md`).
 - **Se despliega la app entera, no solo `/estudio`**: hoy las cuentas protegen solo el reel, y el
-  dictado, los laboratorios y las demás rutas de `/api` quedarían en internet. Antes de desplegar se
-  revisa qué queda público y qué se apaga (C3). **Pendiente.**
+  dictado, los laboratorios y las demás rutas de `/api` quedarían en internet. **Revisado el
+  2026-10-02** (C3, [`docs/REVISION-rutas-publicas.md`](../../../docs/REVISION-rutas-publicas.md), PR #209):
+  lo que se apaga lo decide el laboratorio con su §4, y es requisito de este arranque.
 
 ## 7. Cierre
 
