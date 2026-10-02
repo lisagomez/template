@@ -1,7 +1,7 @@
 /** Pruebas del núcleo del reel: cortes, precios, subtítulos, privacidad, QA, retención y sala. Sin motores. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, type Palabra } from '../dist/index.js';
+import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, type Palabra } from '../dist/index.js';
 import { palabrasDeTokens, lineasDeTsv } from '../dist/node/index.js';
 
 const P = (texto: string, inicio: number, fin: number): Palabra => ({ texto, inicio, fin });
@@ -130,4 +130,11 @@ test('riesgo 5: en un testimonio sin voz dominante se revisan los cortes de toda
   const antes = cortesEnVozAjena(testimonio, edlDesde([{ inicio: 6, fin: 7, motivo: 'marca' }], 11), 2)[0]?.clave;
   const despues = cortesEnVozAjena(testimonio, edlDesde([{ inicio: 6, fin: 7.5, motivo: 'marca' }], 11), 2)[0]?.clave;
   assert.notEqual(antes, despues, 'un corte distinto exige otra revisión');
+});
+
+test('retirar un consentimiento: caras y cortes revisados dejan de valer; marcas y datos cubiertos siguen', () => {
+  const antes = { marcas: [{ tipo: 'corte' as const, segundo: 3, hasta: 4.5 }], conConsentimiento: [2], cubiertos: [0], revisados: ['11.0-12.0'] };
+  const despues = decisionesTrasRetirar(antes);
+  assert.deepEqual(despues, { marcas: antes.marcas, conConsentimiento: [], cubiertos: [0], revisados: [] });
+  assert.deepEqual(antes.conConsentimiento, [2], 'no muta la entrada');
 });

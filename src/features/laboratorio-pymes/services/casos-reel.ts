@@ -5,7 +5,7 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, validaAprobacion, vozDelDueno, REGLAS_DE_CORTE, type Observacion } from '../../../../tools/reel/dist/index.js';
+import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, validaAprobacion, vozDelDueno, REGLAS_DE_CORTE, type Observacion } from '../../../../tools/reel/dist/index.js';
 import { cuadroSvg, revisaEscena, tarjetaDeTemporada, TEMPORADAS_FIRMADAS } from '../../../../tools/pymes-marketing/dist/video/index.js';
 import { marcaDeReferencia } from './referencias-visuales.ts';
 import type { Caso, ResultadoDeCaso } from './tipos.ts';
@@ -140,6 +140,15 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
       const cs = cortesEnVozAjena(turnos, edlDesde([{ inicio: 2, fin: 3, motivo: 'retoma' }], 11), 2);
       return verifica([[dueno === null, 'no se adivina quién es el dueño'], [cs.length === 1, 'el corte se revisa aunque sea del dueño']], [`dueño: ${dueno ?? 'sin determinar'} · cortes a revisar: ${cs.length}`],
         'Suponer que el dueño es quien más habla fallaría justo en un testimonio.');
+    } },
+  { id: 'priv-11', herramienta: 'privacidad', titulo: 'Retirar un consentimiento vuelve a desenfocar y a bloquear', trampa: 'consentimiento retirado', esperado: 'pasa',
+    entrada: 'La clienta consintió: su cara marcada y un corte en su voz revisado. Después lo retira.',
+    async corre() {
+      const d = decisionesTrasRetirar({ marcas: [], conConsentimiento: [2], cubiertos: [], revisados: ['11.0-12.0'] });
+      const base = { medidas: { ancho: 1080, alto: 1920, fps: 30, duracion: 14 }, pistas: [], sujetoId: null, hablantes: 2, hoy: '2026-10-02', hallazgos: [], musica: { fraccion: 0, segundos: 0 } };
+      const voz = revisaPrivacidad({ ...base, consentimientos: [{ alias: 'Clienta', rol: 'cliente', vigenteHasta: '2027-01-01', revocado: true }] });
+      return verifica([[d.conConsentimiento.length === 0, 'su cara vuelve a desenfocarse'], [(d.revisados ?? []).length === 0, 'los cortes en su voz se revisan de nuevo'], [voz.some((o) => o.regla === 'otra-voz' && o.nivel === 'bloquea'), 'su voz vuelve a bloquear']],
+        ['caras consentidas: 0 · cortes revisados: 0 · voz: bloquea'], 'Retirarse deshace todo lo que dependía de esa persona; lo publicado no se recupera (se le avisa al dueño).');
     } },
 ];
 

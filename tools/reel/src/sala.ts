@@ -15,6 +15,16 @@ export function aplicaCortes(edl: Edl, marcas: readonly Marca[]): Edl {
   return nuevos.length ? edlDesde([...edl.descartes, ...nuevos], edl.duracionOriginal) : edl;
 }
 
+/**
+ * Al retirarse un consentimiento, lo que dependía de esa persona deja de valer: las caras marcadas como
+ * consentidas y los cortes en su voz ya revisados. La decisión no guarda a qué consentimiento iba cada una,
+ * así que se revisan TODAS de nuevo (se desenfoca de más, nunca de menos). Las marcas de corte o texto y los
+ * datos cubiertos siguen: no dependen de ninguna persona.
+ */
+export function decisionesTrasRetirar<D extends { conConsentimiento: number[]; revisados?: string[] }>(d: D): D {
+  return { ...d, conConsentimiento: [], revisados: [] };
+}
+
 /** «Cambia este texto»: la nota reemplaza el rótulo que está en pantalla en ese segundo. */
 export function aplicaTextos(rs: readonly Rotulo[], marcas: readonly Marca[]): Rotulo[] {
   return rs.map((r) => {

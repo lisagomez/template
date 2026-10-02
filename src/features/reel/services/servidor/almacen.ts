@@ -41,6 +41,12 @@ export async function borraCarpeta(carpeta: string): Promise<void> {
   await rm(carpeta, { recursive: true, force: true });
 }
 
+/** Borra un archivo del almacén (el documento de un consentimiento retirado). Fuera del almacén, nunca. */
+export async function borraArchivo(ruta: string): Promise<void> {
+  if (!resolve(/*turbopackIgnore: true*/ ruta).startsWith(DATOS + sep)) throw new Error('ruta fuera del almacén');
+  await rm(ruta, { force: true });
+}
+
 export const existe = async (ruta: string): Promise<boolean> => stat(ruta).then(() => true, () => false);
 
 /** Corre el proceso del reel en un hijo; un proceso a la vez por servidor (O4: el CPU no se reparte a ciegas). */
