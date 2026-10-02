@@ -56,7 +56,8 @@ una ruta interna queda alcanzable desde fuera.
 
 **Lo mínimo antes de desplegar el estudio para el piloto:**
 
-1. **El puente A2A se cierra.** Que falle **cerrado** en producción si no hay llave (503, como el
+1. **El puente A2A se cierra.** **Aprobado por el laboratorio el 2026-10-02 y hecho en el PR #210**
+   (las tres cosas). Que falle **cerrado** en producción si no hay llave (503, como el
    dictado y las etiquetas), que `configura:deploy` lo marque como **problema** y no solo como
    «ausente», y que el borde no lo deje entrar desde fuera (Caddy responde 404 a `/a2a*` y a
    `/.well-known/agent-card.json`). El puente de Hermes lo sigue usando por la red interna.
