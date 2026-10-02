@@ -35,7 +35,7 @@ Al cerrar, el contrato se vuelve a firmar con esas cifras.
 
 | Etapa | Duración | Qué pasa |
 |---|---|---|
-| 0. Arranque | 1 semana **[supuesto]** | El dueño firma el permiso (anexo A). El laboratorio confirma que el requisito previo (§6) está construido |
+| 0. Arranque | 1 semana **[supuesto]** | El dueño firma el permiso (anexo A). El laboratorio confirma que el requisito previo (§6) está construido y que el estudio está desplegado |
 | 1. El «antes» | 4 semanas **[supuesto]** | El dueño hace su marketing como siempre y anota sus horas (anexo B). **No usa el estudio** |
 | 2. El «después» | el mes siguiente | Usa el estudio para su mes y anota sus horas en la misma hoja, sobre las mismas tareas |
 | 3. Cierre | 1 semana **[supuesto]** | Cifras agregadas, cotejo, defectos convertidos en casos, re-firma del contrato |
@@ -84,10 +84,18 @@ pudieron leer, pero la app lo tira antes de mostrarlo:
 Ventas ya muestra sus avisos y lo que falta. **Sin este arreglo no se puede hacer el cotejo ni medir el
 gasto por veredicto**: va en un PR aparte, antes del arranque.
 
-**Pendiente: dónde corre el estudio para el dueño.** Hoy solo corre en local. Las dos salidas son
-desplegar la app en el servidor (los datos siguen sin salir de su navegador, pero desplegar tiene su
-gate y el render del video ahí responde 501) o llevarlo en un equipo del laboratorio, y entonces los
-archivos del dueño pasarían por ese equipo, que es justo lo que §5 descarta.
+**Dónde corre el estudio para el dueño: desplegado en un servidor** (decisión del laboratorio,
+2026-10-02). Llevarlo en un equipo del laboratorio habría hecho pasar los archivos del dueño por ese
+equipo, que es justo lo que §5 descarta. Lo que trae la decisión:
+- Los archivos del dueño se siguen leyendo **en su navegador**: el servidor sirve la página y no los
+  recibe.
+- El piloto va **sin la promo en video**: en el servidor la ruta del render responde 501 hasta la
+  fase 10 del PRP-006.
+- Desplegar es **gate humano** y pasa por el suyo (`npm run configura:deploy`, `predeploy`,
+  `docs/DEPLOY-HETZNER.md`).
+- **Se despliega la app entera, no solo `/estudio`**: hoy las cuentas protegen solo el reel, y el
+  dictado, los laboratorios y las demás rutas de `/api` quedarían en internet. Antes de desplegar se
+  revisa qué queda público y qué se apaga (C3). **Pendiente.**
 
 ## 7. Cierre
 
