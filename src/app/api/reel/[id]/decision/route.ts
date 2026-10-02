@@ -1,8 +1,9 @@
 import { join } from 'node:path';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { validaAprobacion, type Observacion } from '../../../../../../tools/reel/dist/index.js';
+import { transcripcionAConservar, validaAprobacion, vigentes, TRANSCRIPCION_CONSERVADA, type Observacion, type ProcesoParaConservar } from '../../../../../../tools/reel/dist/index.js';
 import { carpetaDe, guarda, leeJson } from '@/features/reel/services/servidor/almacen';
+import { hoyEnMexico } from '@/features/reel/services/servidor/reproceso';
 import { conSesion, UUID } from '@/features/reel/services/servidor/sesion';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ export async function POST(p: NextRequest, { params }: { params: Promise<{ id: s
   const { data: v } = await ctx.supabase.from('reel_versiones').select('id, numero, huella').eq('proyecto_id', id).order('numero', { ascending: false }).limit(1).maybeSingle();
   if (!v) return NextResponse.json({ error: 'no hay versión que decidir' }, { status: 404 });
   const carpeta = carpetaDe(ctx.usuario.id, id);
-  const r = await leeJson<{ observaciones: Observacion[]; master?: { qa: Observacion[] } }>(join(carpeta, 'resultado.json'));
+  const r = await leeJson<{ observaciones: Observacion[]; master?: { qa: Observacion[] } } & ProcesoParaConservar>(join(carpeta, 'resultado.json'));
   const motivo = validaAprobacion({ numero: Number(v.numero), huella: String(v.huella), bloqueos: [...(r?.observaciones ?? []), ...(r?.master?.qa ?? [])] }, d.data);
   if (motivo) return NextResponse.json({ error: motivo }, { status: 409 });
   const { data: registro, error } = await ctx.supabase.from('reel_aprobaciones').insert({
@@ -36,6 +37,12 @@ export async function POST(p: NextRequest, { params }: { params: Promise<{ id: s
     const cuando = String(registro.creado_en);
     await ctx.supabase.from('reel_proyectos').update({ estado: 'aprobado', aprobado_en: cuando }).eq('id', id);
     await guarda(carpeta, 'registro.json', JSON.stringify({ aprobadoEn: cuando, brutoBorradoEn: null }));
+    // Riesgo 5, segunda mitad: si habla alguien más con consentimiento vigente, su transcripción íntegra se
+    // queda CON el consentimiento (la retención de 30 días no la toca; el retiro y el vencimiento, sí).
+    const { data: cs } = await ctx.supabase.from('reel_consentimientos').select('alias, rol, vigente_hasta, revocado_en').eq('proyecto_id', id).neq('rol', 'dueno');
+    const vivos = vigentes((cs ?? []).map((c) => ({ alias: String(c.alias), rol: c.rol as 'empleado' | 'cliente', vigenteHasta: String(c.vigente_hasta), revocado: c.revocado_en !== null })), hoyEnMexico());
+    const conservada = r ? transcripcionAConservar(r, { version: d.data.version, huella: d.data.huella, aprobadoEn: cuando, consentimientos: vivos }) : null;
+    if (conservada) await guarda(carpeta, TRANSCRIPCION_CONSERVADA, JSON.stringify(conservada));
   }
   return NextResponse.json({ registro: { ...registro, correo: ctx.usuario.email } });
 }

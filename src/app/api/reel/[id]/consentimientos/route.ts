@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { decisionesTrasRetirar } from '../../../../../../tools/reel/dist/index.js';
+import { decisionesTrasRetirar, TRANSCRIPCION_CONSERVADA } from '../../../../../../tools/reel/dist/index.js';
 import { borraArchivo, carpetaDe, guarda, leeJson } from '@/features/reel/services/servidor/almacen';
 import { reprocesa } from '@/features/reel/services/servidor/reproceso';
 import { conSesion, UUID } from '@/features/reel/services/servidor/sesion';
@@ -20,7 +20,7 @@ const retiro = z.object({ consentimiento: z.string().regex(UUID) });
 
 /** El aviso de la AISIA firmada (§7, derecho a borrar): lo publicado no se recupera, y el clip original no se edita.
  *  Sin `export`: un `route.ts` de Next solo exporta handlers y configuración. */
-const AVISO_AL_RETIRAR = 'Consentimiento retirado: su documento se borró y lo aprobado quedó revocado. Si ya publicaste el reel, bájalo de tus redes: lo publicado no se puede recuperar. Su voz y su imagen siguen en el clip original hasta que borres el proyecto.';
+const AVISO_AL_RETIRAR = 'Consentimiento retirado: su documento y la transcripción guardada con él se borraron, y lo aprobado quedó revocado. Si ya publicaste el reel, bájalo de tus redes: lo publicado no se puede recuperar. Su voz y su imagen siguen en el clip original hasta que borres el proyecto.';
 
 /**
  * Registra el consentimiento de una persona (no menores: el formato lo excluye). El documento firmado se
@@ -69,6 +69,7 @@ export async function PATCH(p: NextRequest, { params }: { params: Promise<{ id: 
   if (!data) return NextResponse.json({ error: 'no existe o ya estaba retirado' }, { status: 404 });
   const carpeta = carpetaDe(ctx.usuario.id, id);
   await borraArchivo(join(carpeta, 'consentimientos', `${r.data.consentimiento}.bin`));
+  await borraArchivo(join(carpeta, TRANSCRIPCION_CONSERVADA)); // lleva sus palabras: se va con su consentimiento
   await ctx.supabase.from('reel_aprobaciones').update({ revocada_en: new Date().toISOString() }).eq('proyecto_id', id).is('revocada_en', null);
   const registro = await leeJson<{ brutoBorradoEn?: string | null }>(join(carpeta, 'registro.json'));
   await guarda(carpeta, 'registro.json', JSON.stringify({ aprobadoEn: null, brutoBorradoEn: registro?.brutoBorradoEn ?? null }));
