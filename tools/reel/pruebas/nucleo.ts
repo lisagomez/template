@@ -1,7 +1,7 @@
 /** Pruebas del núcleo del reel: cortes, precios, subtítulos, privacidad, QA, retención y sala. Sin motores. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, type Palabra } from '../dist/index.js';
+import { BRUTO, SE_CONSERVA, propone, edlDesde, aEditado, aOriginal, cotejaPrecios, preciosDichos, rotulos, archivoAss, rotulosFueraDeZona, enLineas, pistasDeCaras, sujeto, desenfoquesDeCaras, datosEnTexto, agrupaHallazgos, carasSinCubrir, revisaMaster, porBorrar, validaAprobacion, aplicaCortes, sonidoEnPausas, argumentosDelMaster, cortesEnVozAjena, vozDelDueno, revisaPrivacidad, decisionesTrasRetirar, transcripcionAConservar, transcripcionVencida, TRANSCRIPCION_CONSERVADA, type Palabra } from '../dist/index.js';
 import { palabrasDeTokens, lineasDeTsv } from '../dist/node/index.js';
 
 const P = (texto: string, inicio: number, fin: number): Palabra => ({ texto, inicio, fin });
@@ -137,4 +137,18 @@ test('retirar un consentimiento: caras y cortes revisados dejan de valer; marcas
   const despues = decisionesTrasRetirar(antes);
   assert.deepEqual(despues, { marcas: antes.marcas, conConsentimiento: [], cubiertos: [0], revisados: [] });
   assert.deepEqual(antes.conConsentimiento, [2], 'no muta la entrada');
+});
+
+test('riesgo 5, segunda mitad: la transcripción íntegra se conserva con el consentimiento, no con el bruto', () => {
+  const proceso = { hablantes: 2, transcripcion: { texto: 'hola soy Lupita', palabras: frase('hola soy Lupita') }, turnos: DUENO_Y_CLIENTE, edl: { descartes: [{ inicio: 11, fin: 12, motivo: 'marca' as const }] } };
+  const aprobacion = { version: 3, huella: `sha256:${'cd'.repeat(32)}`, aprobadoEn: '2026-10-02T18:00:00Z' };
+  assert.equal(transcripcionAConservar({ ...proceso, hablantes: 1 }, { ...aprobacion, consentimientos: [{ alias: 'Clienta', vigenteHasta: '2027-01-01' }] }), null, 'una sola voz: rige la retención de 30 días');
+  assert.equal(transcripcionAConservar(proceso, { ...aprobacion, consentimientos: [] }), null, 'sin consentimiento vigente no hay qué guardar con él');
+  const t = transcripcionAConservar(proceso, { ...aprobacion, consentimientos: [{ alias: 'Clienta', vigenteHasta: '2027-01-01' }, { alias: 'Empleado', vigenteHasta: '2027-06-30' }] });
+  assert.equal(t?.conservarHasta, '2027-06-30', 'dura lo que la vigencia más larga');
+  assert.deepEqual([t?.version, t?.cortes.length, t?.turnos.length], [3, 1, 4]);
+  assert.equal(TRANSCRIPCION_CONSERVADA.startsWith(`${SE_CONSERVA.find((x) => x === 'consentimientos')}/`), true, 'vive en lo que la retención conserva');
+  assert.equal((BRUTO as readonly string[]).some((b) => TRANSCRIPCION_CONSERVADA.startsWith(b)), false);
+  assert.equal(transcripcionVencida({ conservarHasta: '2027-06-30' }, '2027-06-30'), false, 'el último día de vigencia sigue');
+  assert.equal(transcripcionVencida({ conservarHasta: '2027-06-30' }, '2027-07-01'), true);
 });

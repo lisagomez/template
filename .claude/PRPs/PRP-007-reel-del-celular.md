@@ -204,7 +204,8 @@ Todos medidos en el laboratorio o en el recorrido con Playwright; cada uno qued�
 - **Fix**: `cortesEnVozAjena` + la regla `corte-en-voz-ajena`, que bloquea hasta que el dueño la confirma en la
   sala (clave por tramo: si el corte cambia, se revisa de nuevo). El dueño es la voz que más habla solo si domina;
   si no, se revisan todos los cortes. Casos `priv-9` y `priv-10` y tres pruebas del núcleo. La otra mitad (la
-  transcripción íntegra con el consentimiento) sigue pendiente.
+  transcripción íntegra con el consentimiento) llegó después del ciclo de consentimientos: `transcripcionAConservar`
+  al aprobar, borrada al retirar y por `reel:retencion` al vencer (caso `priv-12`).
 - **Lección**: cada riesgo firmado necesita su caso, no solo cada trampa.
 
 ### 2026-10-02: la fase 6 se marcó hecha sin pantalla de consentimientos

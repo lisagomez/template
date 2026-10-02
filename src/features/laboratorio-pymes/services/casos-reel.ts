@@ -5,7 +5,7 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, validaAprobacion, vozDelDueno, REGLAS_DE_CORTE, type Observacion } from '../../../../tools/reel/dist/index.js';
+import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, transcripcionAConservar, transcripcionVencida, validaAprobacion, vozDelDueno, BRUTO, REGLAS_DE_CORTE, TRANSCRIPCION_CONSERVADA, type Observacion } from '../../../../tools/reel/dist/index.js';
 import { cuadroSvg, revisaEscena, tarjetaDeTemporada, TEMPORADAS_FIRMADAS } from '../../../../tools/pymes-marketing/dist/video/index.js';
 import { marcaDeReferencia } from './referencias-visuales.ts';
 import type { Caso, ResultadoDeCaso } from './tipos.ts';
@@ -149,6 +149,18 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
       const voz = revisaPrivacidad({ ...base, consentimientos: [{ alias: 'Clienta', rol: 'cliente', vigenteHasta: '2027-01-01', revocado: true }] });
       return verifica([[d.conConsentimiento.length === 0, 'su cara vuelve a desenfocarse'], [(d.revisados ?? []).length === 0, 'los cortes en su voz se revisan de nuevo'], [voz.some((o) => o.regla === 'otra-voz' && o.nivel === 'bloquea'), 'su voz vuelve a bloquear']],
         ['caras consentidas: 0 · cortes revisados: 0 · voz: bloquea'], 'Retirarse deshace todo lo que dependía de esa persona; lo publicado no se recupera (se le avisa al dueño).');
+    } },
+  { id: 'priv-12', herramienta: 'privacidad', titulo: 'La transcripción íntegra se queda con el consentimiento', trampa: 'testimonio sin prueba de lo que dijo', esperado: 'pasa',
+    entrada: 'Testimonio de una clienta con consentimiento hasta el 2027-01-01, aprobado el 2026-10-02; y el mismo reel con solo el dueño.',
+    async corre() {
+      const proceso = { hablantes: 2, transcripcion: { texto: 'me encantó el pan', palabras: [P('me', 0, 0.3), P('encantó', 0.3, 0.8), P('el', 0.8, 1), P('pan', 1, 1.4)] }, turnos: [{ inicio: 0, fin: 1.4, hablante: 'B' }], edl: { descartes: [] } };
+      const aprobacion = { version: 1, huella: HUELLA, aprobadoEn: '2026-10-02T18:00:00Z' };
+      const t = transcripcionAConservar(proceso, { ...aprobacion, consentimientos: [{ alias: 'Clienta', vigenteHasta: '2027-01-01' }] });
+      const solo = transcripcionAConservar({ ...proceso, hablantes: 1 }, { ...aprobacion, consentimientos: [{ alias: 'Clienta', vigenteHasta: '2027-01-01' }] });
+      const fuera = !(BRUTO as readonly string[]).some((b) => TRANSCRIPCION_CONSERVADA.startsWith(b));
+      return verifica([[t?.transcripcion.texto === 'me encantó el pan', 'se guarda íntegra'], [solo === null, 'con solo el dueño no se guarda (rige la retención de 30 días)'], [fuera, 'la retención de 30 días no la borra'],
+        [!!t && !transcripcionVencida(t, '2027-01-01') && transcripcionVencida(t, '2027-01-02'), 'vence con el consentimiento']],
+        [`${TRANSCRIPCION_CONSERVADA} · hasta ${t?.conservarHasta ?? '—'}`], 'Si la clienta reclama que un corte le cambió el sentido, está lo que dijo completo; retirarse la borra.');
     } },
 ];
 
