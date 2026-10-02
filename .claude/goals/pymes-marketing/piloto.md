@@ -64,6 +64,7 @@ que decir.
 | Gasto en anuncios por veredicto | El estudio, en su equipo, con la exportación de 90 días | el dueño, con el laboratorio acompañando | el gasto mensual sumado por veredicto (funciona · vigilar · problema · sin veredicto), **sin nombres de campaña** |
 | Cotejo de columnas | La primera línea de cada exportación de anuncios y de reseñas: los nombres de las columnas, sin un solo dato | el dueño la copia | esa línea, y lo que el estudio dijo que no reconoció |
 | Defectos | Lo que salió raro: una cifra que no cuadra, un aviso que no se entiende, una pieza mal | el dueño y el laboratorio | la descripción, **sin datos**; el caso sintético lo arma el laboratorio |
+| Disposición a pagar | Las cuatro preguntas de precio del anexo D, al cerrar el «después» | el dueño, con el laboratorio | sus cuatro montos en pesos al mes |
 
 Las horas no las registra el estudio: no tiene cuentas ni telemetría, a propósito (contrato §5).
 
@@ -126,6 +127,9 @@ equipo, que es justo lo que §5 descarta. Lo que trae la decisión:
 - El cotejo: qué columnas reconoció el estudio y cuáles no. Los sinónimos que falten se agregan con su
   caso sintético.
 - Los defectos convertidos en casos sintéticos del laboratorio.
+- Las cuatro respuestas de precio de cada dueño (anexo D). Con 1 o 2 pymes son una anécdota y se
+  dicen así: ubican la banda de la suscripción, no fijan el precio
+  ([investigación del cobro](../../../docs/INVESTIGACION-cobro-estudio-pymes.md), §3.1 y §5).
 - El contrato con las cifras, la meta del KPI fijada por el laboratorio y la firma de nuevo.
 
 **Si el dueño se retira**, el piloto se detiene ahí y no se usa nada de lo suyo. Si lo pide, lo
@@ -142,7 +146,8 @@ agregado que ya entregó se borra **[supuesto]**.
 >    exportaciones de anuncios **no salen de él**.
 > 2. Le comparto al laboratorio solo: mis horas totales por tarea, el gasto sumado de mis anuncios
 >    por veredicto (sin nombres de campañas), la primera línea de mis archivos de anuncios y reseñas
->    (los nombres de las columnas) y lo que me haya salido raro.
+>    (los nombres de las columnas), lo que me haya salido raro y mis respuestas a las cuatro
+>    preguntas de precio.
 > 3. El laboratorio no graba mi pantalla ni copia mis archivos, y en sus documentos menciona mi
 >    negocio solo por su giro.
 > 4. El estudio no publica nada por mí. Lo que suba a mis redes lo subo yo.
@@ -178,6 +183,21 @@ y **subir sigue contando aparte**.
 >    por su giro.
 >
 > Consultora: ____________ · Fecha: ____________ · Firma: ____________
+
+## Anexo D: las cuatro preguntas de precio
+
+Se hacen **al cerrar el «después»**, cuando el dueño ya usó el estudio un mes entero, y en pesos al
+mes. Las hace **el laboratorio, no la consultora**, que tiene interés comercial en la respuesta.
+**Antes no se le menciona ningún precio** (ni el de Canva ni el de un community manager): el primer
+número que oye se queda como ancla.
+
+1. ¿A qué precio al mes te parecería **tan barato** que dudarías de que sirve?
+2. ¿A qué precio te parecería **una ganga**, una buena compra?
+3. ¿A qué precio te parecería **caro, pero todavía lo pagarías**?
+4. ¿A qué precio sería **tan caro** que no lo pagarías?
+
+Es el método de Van Westendorp. Con muchas respuestas, las cuatro curvas marcan un rango de precio
+aceptable; con 1 o 2 pymes solo dicen dónde cae cada dueño dentro de la banda de la investigación.
 
 ---
 

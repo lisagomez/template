@@ -134,7 +134,10 @@ contador el régimen del laboratorio.
 1. **Durante el piloto no se cobra.** Al cerrar, cada dueño contesta cuatro preguntas de disposición a
    pagar (método Van Westendorp): a qué precio le parecería **tan barato** que dudaría de la calidad,
    **una ganga**, **caro pero lo pagaría** y **tan caro** que no lo pagaría. Con 1 o 2 pymes es
-   anecdótico, y se dice así; sirve para ubicar la banda de §3.1, no para fijar el precio.
+   anecdótico, y se dice así; sirve para ubicar la banda de §3.1, no para fijar el precio. Las
+   preguntas y cómo se hacen (sin anclar con ningún precio, y las hace el laboratorio, no la
+   consultora) están en el anexo D del
+   [plan del piloto](../.claude/goals/pymes-marketing/piloto.md).
 2. **Primer cobro: suscripción por negocio**, dos niveles, mensual o anual, en pesos y con CFDI. La
    consultora entra como **referidora** con comisión recurrente por un plazo fijo. Exige la fase 9
    firmada y decidir la pasarela (§4).
