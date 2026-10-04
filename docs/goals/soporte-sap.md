@@ -535,6 +535,44 @@ un producto **cerrado** y no de uno a medias, y para que una falla tarde no tire
   - la excepción es lo mínimo para que el producto se declare con la plantilla, y eso se dice en
     el informe.
 
+## ARRANQUE DE LA CORRIDA B (lo que dejó la A, 2026-10-04)
+
+Hechos que la B necesita y que no se leen solo en el informe de la A:
+
+- **La A cerró en `5e3be4c`** con `npm run validate` 28/28 en verde. Su informe
+  (`docs/goals/soporte-sap-informe-a.md`) y su propuesta de CDC
+  (`docs/goals/soporte-sap-propuesta-cdc.md`) están **sin firmar**; la AISIA y el C3 del PRP-008,
+  también. La B no los firma ni los da por firmados.
+- **«Producto» ya tiene tres usos en el repo, no dos**:
+  1. la **clase** `PRODUCTO` de `inventario/activos.json` (un activo: app, feature o herramienta);
+  2. la **fila del índice** de `BUSINESS_LOGIC.md` (raíz), que ya **compone activos** —el asesor de
+     ventas por voz compone cinco— y apunta a un contrato C4 por producto; es lo más cercano al
+     concepto que se pide;
+  3. el **campo** `producto` (slug) que la A añadió a los activos de Soporte SAP y a sus 7 CLIs, con
+     `grado`, y la vista «Por producto» de `inventario/INVENTARIO.md` (`scripts/inventario/nucleo.mjs`).
+     Está en la propuesta de CDC de la A, sin firmar.
+
+  La B decide si los tres conviven con un vocabulario claro o si uno absorbe a otro, y si su CDC
+  incorpora el de la A o va aparte. La fila de Soporte SAP del índice nombra 3 activos y no los
+  7 CLIs ni los componentes que reusa (extractor, grafo, sala).
+- **Los gates que leen ese vocabulario**: `verify:gobernanza` (índice del portafolio × inventario),
+  `verifica:inventario` y `prueba:inventario`, `verifica:marca-blanca` (frontera de entrega del ERP),
+  `revisa:readmes` y `verifica:gates`.
+- **Candidatos a segundo producto** (ya existen y tienen fila en el índice): el asesor de ventas
+  por voz, Etiquetas GS1, el extractor documental (que en Soporte SAP es componente), el reel, el
+  vendedor en WhatsApp (contrato pendiente) y el ERP (con su maestro, packs verticales y modelo B
+  de entrega en `erp/`). La B elige y dice por qué.
+- **Lo que la A ya mide y la plantilla puede leer**: el reuso de la matriz dominio × capa
+  (`node tools/soporte-sap/clis/ss-reuso.mjs`: 40.7 % amplio, 14.8 % estricto), la frontera FDE
+  (`fronteraNucleo`), el corte semántico (`tools/soporte-sap/semantica/corte.json`), el estimado por
+  tamaño y el README comercial.
+- **Lecciones de la A que muerden en la B**: toda huella sha256 en un archivo versionado va como
+  `sha256:<hex>` (si no, `audita:secretos`); ningún identificador con forma de caso-trampa
+  (`T` + uno o dos dígitos) en `.md/.mjs/.ts/.tsx/.json`; `npm run inventario:vista` en cada commit
+  que añade archivos; un archivo `prueba-*.mjs` que ningún gate corre tumba `verifica:gates`; un
+  `next dev` que se mata puede dejar `.next/dev` corrupto (se borra antes de validar); el validate
+  se corre **después** del commit.
+
 ## DEFINICION DE HECHO (evidencia visible en la conversación)
 
 El evaluador solo ve la conversación. Cada punto se demuestra con salida pegada, no se declara.
