@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**48 activos** cubren **241 unidades** del repo.
+**49 activos** cubren **243 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -24,6 +24,7 @@
 | TPL-inventario | Inventario de activos: indice, detector, costeo y export al ERP | FABRICA | software | beta | 3 | `inventario` |
 | TPL-manifiesto-gates | Manifiesto de gates: el padron de lo que el gate corre | FABRICA | software | produccion | 6 | `.claude/gates.json` |
 | TPL-motor-ia | Motor de IA: routing por nivel, contabilidad de tokens y trayectorias de la app | FABRICA | software | produccion | 4 | `src/lib/ai` |
+| TPL-productos | El concepto de producto, su plantilla y sus manifiestos (productos/), con el gate que los cruza con el indice del portafolio y el inventario (verifica:productos) | FABRICA | software | blueprint | 2 | `productos` |
 | TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 30 | `.claude/skills` |
 | TPL-trayectorias | Trayectorias: trazas de ejecucion, evaluador, informe y propuestas | FABRICA | software | produccion | 4 | `scripts/trayectorias` |
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 10 | `docker-compose.yml` |
@@ -79,6 +80,7 @@ El clasificador de producto: las piezas que un producto vende, con su estado y, 
 
 - `tools/*/`
 - `tools/*/clis/*.mjs`
+- `productos/`
 - `src/features/*/`
 - `src/lib/*/`
 - `src/app/`

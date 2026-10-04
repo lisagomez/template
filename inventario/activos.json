@@ -4,6 +4,7 @@
  "fuentes": [
   { "patron": "tools/*/" },
   { "patron": "tools/*/clis/*.mjs" },
+  { "patron": "productos/" },
   { "patron": "src/features/*/" },
   { "patron": "src/lib/*/" },
   { "patron": "src/app/" },
@@ -356,6 +357,14 @@
    "origen": [".claude/PRPs/PRP-004-erp-al-monorepo-privado.md"],
    "descripcion": "Lo cataloga archivo por archivo su propio detector (erp/bin/detector-swm-act.py, ubicaciones template/erp/...). Aqui cuenta como cubierto y no se exporta: un escritor por origen.",
    "cubre": ["erp/*", "erp/*.md"]
+  },
+  {
+   "id": "TPL-productos",
+   "nombre": "El concepto de producto, su plantilla y sus manifiestos (productos/), con el gate que los cruza con el indice del portafolio y el inventario (verifica:productos)",
+   "tipo": "software", "clase": "FABRICA", "estado": "blueprint",
+   "ubicacion": "productos", "responsable": "dep-sw",
+   "origen": ["docs/goals/soporte-sap.md"],
+   "cubre": ["productos", "scripts/verifica-productos.mjs"]
   },
   {
    "id": "TPL-design-systems",

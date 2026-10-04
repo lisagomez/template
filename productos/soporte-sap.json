@@ -1,0 +1,111 @@
+{
+ "slug": "soporte-sap",
+ "nombre": "Soporte SAP",
+ "version": 1,
+ "estado": "blueprint",
+ "indice": "Soporte SAP",
+ "contrato": {
+  "ruta": "src/features/soporte-sap/BUSINESS_LOGIC.md",
+  "c3": ".claude/PRPs/PRP-008-soporte-sap.md",
+  "aisia": "docs/goals/soporte-sap-AISIA.md",
+  "firma": "pendiente del laboratorio"
+ },
+ "modeloDeNegocio": {
+  "quienPaga": "la consultora de soporte SAP (N2)",
+  "aQuienSirve": ["los consultores de la consultora", "los clientes de la consultora (N3) y sus usuarios SAP"],
+  "forma": "B2B2C de tres niveles",
+  "propuesta": "soporte SAP AMS con triage con evidencia, la solución conocida preparada y verificada, el aprendizaje sin exponer datos, el SLA medido y una sola versión de cada número para la consultora y su cliente"
+ },
+ "niveles": [
+  { "id": "N1", "quien": "el laboratorio", "que": "vende el producto; opera el sandbox, la sala y el núcleo de conocimiento" },
+  { "id": "N2", "quien": "la consultora", "que": "atiende a sus clientes con el agente; paga el producto" },
+  { "id": "N3", "quien": "el cliente de la consultora", "que": "levanta incidencias y ve su servicio" }
+ ],
+ "tenencia": {
+  "arbol": ["laboratorio", "consultora", "cliente"],
+  "aislamiento": {
+   "control": "RLS enable + force en las 22 tablas, roles de servicio sin bypassrls acotados por token de tarea, buckets con ruta por tenant",
+   "prueba": "tools/soporte-sap/pruebas/aislamiento.ts"
+  }
+ },
+ "roles": [
+  { "id": "superadmin", "tipo": "persona", "nivel": "N1", "aprueba": true },
+  { "id": "experto", "tipo": "persona", "nivel": "N1", "aprueba": true },
+  { "id": "consultor", "tipo": "persona", "nivel": "N2", "aprueba": true },
+  { "id": "usuario_cliente", "tipo": "persona", "nivel": "N3", "aprueba": false },
+  { "id": "soporte-sap-a2a", "tipo": "agente", "nivel": "N1", "aprueba": false, "que": "el FDE: categoriza, propone, enseña al sandbox" },
+  { "id": "ejecutor-sap", "tipo": "agente", "nivel": "N1", "aprueba": false, "que": "prepara el plan desde la matriz" },
+  { "id": "supervisor-sap", "tipo": "agente", "nivel": "N1", "aprueba": false, "que": "re-verifica el plan contra el simulador" }
+ ],
+ "activos": {
+  "propios": [
+   "TPL-soporte-sap", "TPL-sala-a2a", "TPL-feature-soporte-sap",
+   "TPL-cli-ss-reuso", "TPL-cli-ss-triage", "TPL-cli-ss-simulador", "TPL-cli-ss-mapea", "TPL-cli-ss-cadena", "TPL-cli-ss-ingesta", "TPL-cli-ss-respaldo"
+  ],
+  "componentes": [
+   { "id": "TPL-extractor-documental", "para": "leer los adjuntos por sus bytes: capa 0, CFDI y OCR local" },
+   { "id": "TPL-feature-a2a", "para": "el patrón de Agent Card y puente A2A (la app todavía no sirve la tarjeta: exponerla es gate humano)" }
+  ],
+  "base": [
+   { "id": "TPL-app-base", "para": "la app Next.js" },
+   { "id": "TPL-feature-auth", "para": "la identidad (auth.uid) que firma en la sala" },
+   { "id": "TPL-grafo-conocimiento", "para": "el veredicto determinista de la matriz" },
+   { "id": "TPL-conocimiento", "para": "el formato de dominio y la siembra firmada" },
+   { "id": "TPL-motor-ia", "para": "el presupuesto y la contabilidad como patrón" },
+   { "id": "TPL-despliegue", "para": "el compose y configura:deploy" },
+   { "id": "TPL-trayectorias", "para": "el autodiagnóstico que propone y no aplica" },
+   { "id": "TPL-design-systems", "para": "el bento-grid" }
+  ]
+ },
+ "canales": [
+  { "id": "sala-a2a", "tipo": "interno", "que": "N1–N2: el plan del agente y la decisión humana" },
+  { "id": "chat-hil", "tipo": "interno", "que": "N1 con el agente; lo que pide aprobación se promueve a la sala" },
+  { "id": "app", "tipo": "interno", "que": "/soporte-sap, un bento por nivel" }
+ ],
+ "pricing": {
+  "variables": ["tamaño del N3", "volumen al mes", "proporción crítica (P1 + P2)", "proporción compleja", "respuesta 24×7 en el contrato"],
+  "tiers": ["esencial", "profesional", "critico"],
+  "precio": null,
+  "modeloDeCobro": null,
+  "planComercial": null,
+  "quienDecide": "el laboratorio: plan comercial (ERP-7, D5)",
+  "fuente": "tools/soporte-sap/src/pricing.ts"
+ },
+ "metricas": {
+  "fuente": "tools/soporte-sap/semantica/corte.json",
+  "catalogo": "tools/soporte-sap/semantica/modelos/semantica/metricas.yml",
+  "definicionUnica": true
+ },
+ "sla": {
+  "contratos": "tools/soporte-sap/src/sla.ts",
+  "plantilla": "tools/soporte-sap/contratos/plantilla-contrato-sla.md"
+ },
+ "entrega": {
+  "modelo": "por decidir",
+  "decision": "D3",
+  "recomendacion": "mixto: la consultora opera su N2 y su SLA; el laboratorio opera solo el N1 y no compromete disponibilidad antes de GATE 3"
+ },
+ "respaldo": {
+  "inventario": "src/features/soporte-sap/BUSINESS_LOGIC.md",
+  "procedimiento": "export y restauración por tenant (docs/SDD-soporte-sap.md §13)",
+  "rpoRto": "desconocidos",
+  "gate3": false
+ },
+ "reuso": {
+  "matriz": { "amplio": 40.7, "estricto": 14.8, "comando": "node tools/soporte-sap/clis/ss-reuso.mjs" }
+ },
+ "fde": {
+  "aMedida": ["el mapeo de la herramienta de tickets de cada consultora", "el contrato N2–N3 de cada cliente y sus versiones", "los parámetros de impacto de cada cliente (D15)", "los umbrales del extractor medidos con su corpus (D9)"],
+  "nucleo": ["la matriz y las reglas firmadas del grafo", "el reloj de SLA", "el anonimizador", "la capa semántica y su catálogo", "los CLIs adoptados"],
+  "vuelta": "lo a medida que se repite vuelve como propuesta de siembra del sandbox (anonimizada y generalizada, D1) o de CLI (CDC); lo firma el laboratorio",
+  "registro": "tools/soporte-sap/src/fde.ts"
+ },
+ "fuera": [
+  "no toca un SAP real: implementa contra un simulador (D6)",
+  "no aprueba nada solo: ni el agente ni el chat insertan una aprobación",
+  "no pone precios, créditos, exclusiones ni texto legal",
+  "no compromete disponibilidad ni RPO/RTO antes de GATE 3",
+  "no llama a un modelo con datos de clientes (D7)"
+ ],
+ "decisiones": "docs/goals/soporte-sap.md"
+}
