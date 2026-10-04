@@ -22,8 +22,8 @@ grant usage on schema public to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to service_role;
 `
 
-export const T1 = '30000000-0000-4000-8000-000000000001'
-export const T2 = '30000000-0000-4000-8000-000000000002'
+export const TEN_A = '30000000-0000-4000-8000-000000000001'
+export const TEN_B = '30000000-0000-4000-8000-000000000002'
 export const H = { a: '40000000-0000-4000-8000-00000000000a', a2: '40000000-0000-4000-8000-0000000000a2', b: '40000000-0000-4000-8000-00000000000b' } as const
 const C1 = '50000000-0000-4000-8000-000000000001'
 const C2 = '50000000-0000-4000-8000-000000000002'
@@ -37,13 +37,13 @@ export async function baseSala(sabotaje = ''): Promise<PGlite> {
   await db.exec(SQL_SALA)
   await db.exec(SQL_SALA)
   await db.exec(`
-    insert into sala_participante values ('${T1}', '${H.a}', 'miembro'), ('${T1}', '${H.a2}', 'miembro'), ('${T2}', '${H.b}', 'miembro');
-    insert into sala_canales (id, tenant_id, slug, nombre, tipo) values ('${C1}', '${T1}', 'consultora-a', 'Consultora A', 'publico'),
-      ('${C2}', '${T2}', 'consultora-b', 'Consultora B', 'publico');
+    insert into sala_participante values ('${TEN_A}', '${H.a}', 'miembro'), ('${TEN_A}', '${H.a2}', 'miembro'), ('${TEN_B}', '${H.b}', 'miembro');
+    insert into sala_canales (id, tenant_id, slug, nombre, tipo) values ('${C1}', '${TEN_A}', 'consultora-a', 'Consultora A', 'publico'),
+      ('${C2}', '${TEN_B}', 'consultora-b', 'Consultora B', 'publico');
     insert into sala_mensajes (id, tenant_id, canal_id, autor_tipo, autor_agente, cuerpo, task_id, bloques) values
-      ('${M1}', '${T1}', '${C1}', 'agente', 'soporte-sap-a2a', 'Plan para MIGO: reabrir periodo en el simulador', 'tarea-1',
+      ('${M1}', '${TEN_A}', '${C1}', 'agente', 'soporte-sap-a2a', 'Plan para MIGO: reabrir periodo en el simulador', 'tarea-1',
        '[{"tipo":"acciones","acciones":["aprobar","rechazar","a_revision"],"sha256":"${SHA}","taskId":"tarea-1"}]'),
-      ('${M2}', '${T2}', '${C2}', 'agente', 'soporte-sap-a2a', 'Plan para el CFDI', 'tarea-2', '[]');
+      ('${M2}', '${TEN_B}', '${C2}', 'agente', 'soporte-sap-a2a', 'Plan para el CFDI', 'tarea-2', '[]');
   `)
   if (sabotaje) await db.exec(sabotaje)
   return db
@@ -64,10 +64,10 @@ export interface Comprobacion { readonly id: string; readonly clase: 'conducta' 
 export interface Opciones { readonly enruta?: typeof enrutaReal }
 
 const aprobacion = (decide: string) => `insert into sala_aprobaciones (tenant_id, mensaje_id, accion, task_id, sha256_artefacto, decidida_por)
-  values ('${T1}', '${M1}', 'aprobar', 'tarea-1', '${SHA}', '${decide}')`
+  values ('${TEN_A}', '${M1}', 'aprobar', 'tarea-1', '${SHA}', '${decide}')`
 
 async function aislamiento(db: PGlite): Promise<Comprobacion[]> {
-  const bLee = await comoHumano(db, H.b, `select id from sala_mensajes where tenant_id = '${T1}'`)
+  const bLee = await comoHumano(db, H.b, `select id from sala_mensajes where tenant_id = '${TEN_A}'`)
   const entrega = await comoHumano(db, H.b, `select id from sala_mensajes where id = '${M1}'`)
   const sinForce = await db.query(`select relname from pg_class where relnamespace = 'public'::regnamespace and relname like 'sala\\_%' and relkind = 'r' and not (relrowsecurity and relforcerowsecurity)`)
   return [
@@ -91,8 +91,8 @@ async function candado(db: PGlite): Promise<Comprobacion[]> {
 async function servicios(db: PGlite): Promise<Comprobacion[]> {
   const roles = (await db.query<{ r: string }>(`select rolname as r from pg_roles where rolname in ('service_role', 'sala_agente', 'soporte_sap_agente')`)).rows.map((x) => x.r)
   const privilegios = await db.query<{ r: string }>(`select r from unnest(array[${roles.map((r) => `'${r}'`).join(',')}]) as r where has_table_privilege(r, 'public.sala_aprobaciones', 'INSERT')`)
-  const servicio = await falla(() => comoRol(db, 'service_role', T1, aprobacion(H.a2)))
-  const agente = await falla(() => comoRol(db, 'sala_agente', T1, aprobacion(H.a2)))
+  const servicio = await falla(() => comoRol(db, 'service_role', TEN_A, aprobacion(H.a2)))
+  const agente = await falla(() => comoRol(db, 'sala_agente', TEN_A, aprobacion(H.a2)))
   return [
     { id: 'S2b·estr', clase: 'estructura', que: `ningún rol de servicio o de agente (${roles.join(', ')}) tiene INSERT en sala_aprobaciones`, ok: privilegios.rows.length === 0 },
     { id: 'S2b', clase: 'conducta', que: 'service_role (bypassrls) inserta una aprobación', ok: servicio },
@@ -102,12 +102,12 @@ async function servicios(db: PGlite): Promise<Comprobacion[]> {
 
 async function forma(db: PGlite, opciones: Opciones): Promise<Comprobacion[]> {
   const respuesta = '60000000-0000-4000-8000-0000000000f1'
-  await db.exec(`insert into sala_mensajes (id, tenant_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo) values ('${respuesta}', '${T1}', '${C1}', '${M1}', 'agente', 'x', 'respuesta')`)
-  const nieto = await falla(() => db.exec(`insert into sala_mensajes (tenant_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo) values ('${T1}', '${C1}', '${respuesta}', 'agente', 'x', 'nieto')`))
-  const deptoHumano = await falla(() => db.exec(`insert into sala_mensajes (tenant_id, canal_id, autor_tipo, autor_usuario, departamento, cuerpo) values ('${T1}', '${C1}', 'humano', '${H.a}', 'procesos', 'x')`))
-  const agenteComoHumano = await falla(() => comoRol(db, 'sala_agente', T1, `insert into sala_mensajes (tenant_id, canal_id, autor_tipo, autor_usuario, cuerpo) values ('${T1}', '${C1}', 'humano', '${H.a}', 'soy humano')`))
-  const humanoComoAgente = await falla(() => comoHumano(db, H.a, `insert into sala_mensajes (tenant_id, canal_id, autor_tipo, autor_agente, cuerpo) values ('${T1}', '${C1}', 'agente', 'soporte-sap-a2a', 'soy el agente')`))
-  const espejo: Mensaje = { id: 'e1', tenant: T1, canal: C1, hilo: null, autor: { tipo: 'humano', id: H.a }, departamento: null, cuerpo: '@dep-procesos revisa esto', bloques: [], origen: 'espejo_slack', creado: '2026-10-04T00:00:00Z' }
+  await db.exec(`insert into sala_mensajes (id, tenant_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo) values ('${respuesta}', '${TEN_A}', '${C1}', '${M1}', 'agente', 'x', 'respuesta')`)
+  const nieto = await falla(() => db.exec(`insert into sala_mensajes (tenant_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo) values ('${TEN_A}', '${C1}', '${respuesta}', 'agente', 'x', 'nieto')`))
+  const deptoHumano = await falla(() => db.exec(`insert into sala_mensajes (tenant_id, canal_id, autor_tipo, autor_usuario, departamento, cuerpo) values ('${TEN_A}', '${C1}', 'humano', '${H.a}', 'procesos', 'x')`))
+  const agenteComoHumano = await falla(() => comoRol(db, 'sala_agente', TEN_A, `insert into sala_mensajes (tenant_id, canal_id, autor_tipo, autor_usuario, cuerpo) values ('${TEN_A}', '${C1}', 'humano', '${H.a}', 'soy humano')`))
+  const humanoComoAgente = await falla(() => comoHumano(db, H.a, `insert into sala_mensajes (tenant_id, canal_id, autor_tipo, autor_agente, cuerpo) values ('${TEN_A}', '${C1}', 'agente', 'soporte-sap-a2a', 'soy el agente')`))
+  const espejo: Mensaje = { id: 'e1', tenant: TEN_A, canal: C1, hilo: null, autor: { tipo: 'humano', id: H.a }, departamento: null, cuerpo: '@dep-procesos revisa esto', bloques: [], origen: 'espejo_slack', creado: '2026-10-04T00:00:00Z' }
   const r = (opciones.enruta ?? enrutaReal)(espejo, ['procesos'])
   return [
     { id: 'S3', clase: 'conducta', que: 'una respuesta a una respuesta (hilo de segundo nivel)', ok: nieto },

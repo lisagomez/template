@@ -8,11 +8,11 @@ import {
 
 const SHA = 'ab'.repeat(32)
 function sala(): EstadoSala {
-  let s = agregaParticipante(salaVacia(), 'T1', 'h-a')
-  s = agregaParticipante(s, 'T1', 'h-a2')
-  s = agregaParticipante(s, 'T2', 'h-b')
-  s = creaCanal(s, { id: 'c1', tenant: 'T1', slug: 'consultora-a', nombre: 'Consultora A', departamento: null })
-  s = creaCanal(s, { id: 'c2', tenant: 'T2', slug: 'consultora-b', nombre: 'Consultora B', departamento: null })
+  let s = agregaParticipante(salaVacia(), 'ten-a', 'h-a')
+  s = agregaParticipante(s, 'ten-a', 'h-a2')
+  s = agregaParticipante(s, 'ten-b', 'h-b')
+  s = creaCanal(s, { id: 'c1', tenant: 'ten-a', slug: 'consultora-a', nombre: 'Consultora A', departamento: null })
+  s = creaCanal(s, { id: 'c2', tenant: 'ten-b', slug: 'consultora-b', nombre: 'Consultora B', departamento: null })
   return publica(s, { id: 'm1', canal: 'c1', autor: { tipo: 'agente', id: 'soporte-sap-a2a' }, cuerpo: 'Plan MIGO', creado: '2026-10-04T10:00:00Z',
     bloques: [{ tipo: 'acciones', acciones: ['aprobar', 'rechazar', 'a_revision'], sha256: SHA, taskId: 'tarea-1' }] })
 }
@@ -56,11 +56,11 @@ test('el cuerpo de un mensaje es dato delimitado', () => {
 })
 
 test('presupuesto fail-closed y aviso al 80 %', () => {
-  const filas = [{ tenant: 'T1', claseTarea: 'triage', tope: 100, gastado: 70 }]
-  assert.equal(guardiaPresupuesto(filas, 'T2', 'triage', 1).permitido, false)
-  const v = guardiaPresupuesto(filas, 'T1', 'triage', 15)
+  const filas = [{ tenant: 'ten-a', claseTarea: 'triage', tope: 100, gastado: 70 }]
+  assert.equal(guardiaPresupuesto(filas, 'ten-b', 'triage', 1).permitido, false)
+  const v = guardiaPresupuesto(filas, 'ten-a', 'triage', 15)
   assert.ok(v.permitido && v.aviso)
-  assert.equal(guardiaPresupuesto(filas, 'T1', 'triage', 40).permitido, false)
+  assert.equal(guardiaPresupuesto(filas, 'ten-a', 'triage', 40).permitido, false)
 })
 
 test('superficie opaca: card, rpc y health; nada más', () => {

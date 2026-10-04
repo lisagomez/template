@@ -141,7 +141,7 @@ export function generaCorpus(digitos: DigitosMx, semilla = 20261004): CorpusLab 
     let n = 0
     for (let mes = 4; mes <= 9; mes++) {
       const inicioMes = Date.parse(`2026-${String(mes).padStart(2, '0')}-01T15:00:00Z`)
-      if (inicioMes < Date.parse(`${cl.alta}T00:00:00Z`)) continue
+      if (inicioMes < Date.parse(cl.alta)) continue
       for (let k = 0; k < VOLUMEN_MENSUAL[cl.tamano]; k++) {
         const creada = sumaMinutosHabiles(CALENDARIO_CDMX, inicioMes, a.entero(0, 20 * 9 * 60))
         if (creada > corte) continue

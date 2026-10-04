@@ -176,6 +176,10 @@ Se firma junto con el BUSINESS_LOGIC del producto.
   (v2) con su prueba negativa. **Lección**: un control escrito en el C3 sin una comprobación que se
   ponga roja es una intención; la revisión cruzada lo encuentra antes que un atacante.
 
+- **2026-10-04 · la regla de identificadores de caso muerde nombres de prueba.** `verify:gobernanza`
+  rechaza cualquier «T» seguida de uno o dos dígitos como palabra suelta: tenants de prueba con ese
+  nombre y una plantilla de fecha con la hora pegada a una llave lo dispararon. Antes de cada
+  commit, el mismo patrón se pasa sobre lo nuevo; los tenants de prueba se llaman `TEN_A`/`ten-a`.
 - **2026-10-04 · un cuerpo SQL se valida al crearse.** `ss_priv.baja_original` nombraba
   `ss_acceso_motivado` antes de que existiera y la propuesta no se aplicaba. Las funciones que leen
   una tabla van después de ella.
