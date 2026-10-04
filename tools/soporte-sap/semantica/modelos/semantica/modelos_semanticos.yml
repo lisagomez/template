@@ -46,6 +46,8 @@ semantic_models:
       - {name: horas_respuesta_promedio, agg: average, expr: respuesta_horas}
       - {name: sla_respuesta_medidas, agg: sum, expr: case when sla_respuesta_medido then 1 else 0 end, create_metric: true}
       - {name: sla_respuesta_cumplidas, agg: sum, expr: case when sla_respuesta_medido and sla_respuesta_cumplido then 1 else 0 end, create_metric: true}
+      - {name: tardias_p1, agg: sum, expr: case when sla_respuesta_medido and not sla_respuesta_cumplido and prioridad = 'P1' then 1 else 0 end}
+      - {name: tardias_p2, agg: sum, expr: case when sla_respuesta_medido and not sla_respuesta_cumplido and prioridad = 'P2' then 1 else 0 end}
       - name: sla_resolucion_medidas
         agg: sum
         expr: case when sla_resolucion_medido then 1 else 0 end

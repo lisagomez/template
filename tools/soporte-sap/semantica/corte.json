@@ -242,6 +242,28 @@
    "auxiliar": false
   },
   {
+   "nombre": "respuestas_tardias_p1",
+   "etiqueta": "Respuestas tardías P1",
+   "descripcion": "Incidencias P1 recibidas en el periodo cuya primera respuesta pasó la meta (reloj ya decidido).",
+   "tipo": "simple",
+   "unidad": "incidencias",
+   "visibleAlCliente": true,
+   "etapa": "operacion",
+   "supuestos": null,
+   "auxiliar": false
+  },
+  {
+   "nombre": "respuestas_tardias_p2",
+   "etiqueta": "Respuestas tardías P2",
+   "descripcion": "Incidencias P2 recibidas en el periodo cuya primera respuesta pasó la meta (reloj ya decidido).",
+   "tipo": "simple",
+   "unidad": "incidencias",
+   "visibleAlCliente": true,
+   "etapa": "operacion",
+   "supuestos": null,
+   "auxiliar": false
+  },
+  {
    "nombre": "resueltas",
    "etiqueta": "Incidencias resueltas",
    "descripcion": "Incidencias cuya última resolución cae en el periodo.",
@@ -7377,6 +7399,1166 @@
    "cliente": null,
    "etapa": null,
    "valor": 0.657143
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-04",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-04",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 1
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-04",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 1
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-04",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-04",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 1
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-04",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-05",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-06",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-07",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-08",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p1",
+   "periodo": "2026-09",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 1
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-04",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-04",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "aceros-del-norte",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "alimentos-del-bajio",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": "farmacias-del-centro",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "bebidas-del-sur",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "cliente",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": "textiles-del-golfo",
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-04",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "andina",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "consultora",
+   "tamano": null,
+   "consultora": "boreal",
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-04",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-04",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "tamano",
+   "tamano": "L",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "tamano",
+   "tamano": "M",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "tamano",
+   "tamano": "S",
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-04",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-05",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-06",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-07",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-08",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
+  },
+  {
+   "metrica": "respuestas_tardias_p2",
+   "periodo": "2026-09",
+   "alcance": "total",
+   "tamano": null,
+   "consultora": null,
+   "cliente": null,
+   "etapa": null,
+   "valor": 0
   },
   {
    "metrica": "resueltas",

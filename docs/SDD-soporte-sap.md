@@ -293,13 +293,13 @@ aceptados, relaciones, y tres propias: la importación cuadra, ningún hecho se 
 huecos). `mf validate-configs`: 0 errores; 2 avisos que pone el parser de dbt 1.12 al convertir la
 medida de los dos acumulados en métrica de entrada (la medida se ignora; el resultado es el mismo).
 
-**El catálogo** (19 métricas, cada una con unidad, etapa del ciclo y si el cliente la ve):
+**El catálogo** (21 métricas, cada una con unidad, etapa del ciclo y si el cliente la ve):
 
 | Etapa | Métricas |
 |---|---|
 | Onboarding | tiempo al primer valor, cobertura del mapeo (filas limpias / importadas) |
 | Adopción | reuso del conocimiento (resuelto con regla del grafo) |
-| Operación | volumen, resueltas, MTTR, primera respuesta, resolución al primer contacto, reapertura, backlog al cierre, cumplimiento de SLA de respuesta y de resolución, horas de consultor, horas por incidencia, proporción crítica (P1+P2) y proporción compleja (variables del pricing) |
+| Operación | volumen, resueltas, MTTR, primera respuesta, resolución al primer contacto, reapertura, backlog al cierre, cumplimiento de SLA de respuesta y de resolución, horas de consultor, horas por incidencia, proporción crítica (P1+P2) y proporción compleja (variables del pricing), respuestas tardías P1 y P2 (base del impacto para el N3) |
 | Renovación | salud de la cuenta, riesgo de baja |
 | Todas | clientes en cartera por etapa (alta, onboarding, adopción, operación, renovación) |
 
@@ -308,7 +308,7 @@ La **etapa** de cada cliente por mes y la fórmula de la **salud** son definicio
 es salud < 0.85. Sin SLA medido no hay salud: el corte dice «sin dato», nunca un cero.
 
 **El corte semántico** es la salida: en el producto, la tabla `ss_metrica` (§12) con RLS por nivel;
-en el laboratorio, `semantica/corte.json` (1 070 valores, versión = `sha256:` + la huella de las entradas). **Es lo único
+en el laboratorio, `semantica/corte.json` (1 186 valores, versión = `sha256:` + la huella de las entradas). **Es lo único
 que leen** los tableros N1, N2 y N3, el SLA, el pricing, los impactos y el chat
 (`src/corte.ts` + `src/superficies.ts`). La prueba lo vigila de tres maneras: la misma métrica del mismo
 periodo da el mismo número en las seis superficies; un valor centinela plantado en el corte aparece
@@ -385,13 +385,23 @@ medición.
   avisa; al tope o sin fila de presupuesto, **P1 y P2 pasan a una persona en el momento** y P3 y P4
   esperan con aviso. Cortar el servicio por la factura es una decisión con víctima (C4): aquí nunca
   deja sin atención a un P1 o un P2.
-- **Impactos en MXN.** Cada proyección muestra su fórmula, sus supuestos y su rango (bajo, central
-  y alto). Los supuestos son parámetros: costo hora del consultor, costo de un paro por prioridad,
-  volumen esperado. Hasta que la consultora los capture (D15), dicen «supuesto del laboratorio».
-  Una proyección no es una promesa al cliente, y la pantalla lo dice.
-- **Accionables.** Reglas sobre el corte semántico: cada accionable trae su evidencia (métricas e
-  incidencias), su impacto en MXN, su confianza (por el volumen de datos que lo sostiene) y su
-  responsable. El FODA del cliente se arma con ellos: cada punto cita su dato.
+- **Impactos en MXN** (`tools/soporte-sap/src/impactos.ts`, `node tools/soporte-sap/evidencia/impactos.ts`).
+  Cada proyección muestra su fórmula, sus supuestos y su rango (bajo, central y alto). Los supuestos
+  son parámetros (D15): el **costo hora del consultor** sale de una fuente pública (Jooble México,
+  consultor SAP, $201.19 la hora al 30-09-2026) por un factor de carga supuesto (1.3 · 1.6 · 2.0);
+  el costo de una hora de paro P1 y P2, la fracción sembrable, el ahorro por regla, el retrabajo
+  por reapertura y las horas de paro por respuesta tardía son **supuestos del laboratorio sin
+  fuente**, y así se dicen, hasta que la consultora los capture por cliente. Si un parámetro cambia,
+  `recalcula` muestra el antes y el después. Una proyección no es una promesa al cliente, y la
+  pantalla lo dice.
+- **Accionables.** Dos familias, porque el dinero es de partes distintas: para la **consultora**
+  (horas de consultor que se dejan de gastar: volver regla lo resuelto sin solución conocida,
+  cerrar sin reaperturas) y para el **N3** (horas de paro evitadas: responder a tiempo). Cada uno
+  trae su evidencia del corte semántico (sin dato, no hay accionable), su confianza (baja con menos
+  de 15 incidencias; con supuestos de por medio, nunca alta) y su responsable.
+- **FODA del N3.** Se arma solo con lo que el cliente ve de sí mismo: fortalezas y debilidades por
+  umbrales supuestos a la vista, oportunidades con los accionables para el N3 y amenazas por
+  tendencia (el backlog contra el mes anterior). Cada punto cita su dato (`pruebas/impactos.ts`).
 
 ## 12. Esquema de almacenamiento
 

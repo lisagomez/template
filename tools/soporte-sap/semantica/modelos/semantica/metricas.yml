@@ -102,6 +102,20 @@ metrics:
     type_params: {numerator: sla_resolucion_cumplidas, denominator: sla_resolucion_medidas}
     config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
 
+  - name: respuestas_tardias_p1
+    label: Respuestas tardías P1
+    description: Incidencias P1 recibidas en el periodo cuya primera respuesta pasó la meta (reloj ya decidido).
+    type: simple
+    type_params: {measure: tardias_p1}
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion}}
+
+  - name: respuestas_tardias_p2
+    label: Respuestas tardías P2
+    description: Incidencias P2 recibidas en el periodo cuya primera respuesta pasó la meta (reloj ya decidido).
+    type: simple
+    type_params: {measure: tardias_p2}
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion}}
+
   # --- Conocimiento y esfuerzo ----------------------------------------------------------------
   - name: reuso_conocimiento
     label: Reuso del conocimiento

@@ -31,7 +31,7 @@ const bin = (x) => join(VENV, 'bin', x)
 
 const OPERACION = ['volumen', 'resueltas', 'mttr_horas', 'primera_respuesta_horas', 'resolucion_primer_contacto', 'tasa_reapertura', 'backlog',
   'cumplimiento_sla_respuesta', 'cumplimiento_sla_resolucion', 'reuso_conocimiento', 'horas_consultor', 'horas_por_ticket', 'salud_cuenta',
-  'proporcion_critica', 'proporcion_compleja']
+  'proporcion_critica', 'proporcion_compleja', 'respuestas_tardias_p1', 'respuestas_tardias_p2']
 /** Qué se pregunta por alcance. `riesgo_de_baja` es de la cuenta (cliente); la importación, de la consultora. */
 export const CONSULTAS = [
   { alcance: 'total', metricas: [...OPERACION, 'tiempo_al_primer_valor_dias', 'cobertura_mapeo', 'filas_importadas', 'filas_en_revision'], por: [] },

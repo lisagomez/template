@@ -115,7 +115,7 @@
     {
       "id": "impactos-accionables",
       "label": "Impactos proyectados en MXN y accionables recomendados: cada proyección con fórmula, supuestos y rango; cada accionable con evidencia, impacto, confianza y responsable; el agente propone",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "chat-hil",
@@ -908,7 +908,7 @@
       "id": "l-mxn",
       "label": "ningún peso sin fórmula ni supuestos",
       "sobre": "nodo:impactos-accionables",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "cada cifra en MXN muestra fórmula, supuestos parametrizados y rango; los parámetros del laboratorio dicen «supuesto»; ningún accionable sin evidencia"
     }
   ]

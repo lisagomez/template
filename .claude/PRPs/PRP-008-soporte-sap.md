@@ -188,6 +188,13 @@ Se firma junto con el BUSINESS_LOGIC del producto.
   forma, y las 63 entradas quedan como fixture permanente. **Lección**: la referencia de un lazo de
   privacidad la pone alguien que no escribió el detector; el banco propio solo cuida regresiones.
 
+- **2026-10-04 · un impacto que mezcla denominadores multiplica el error.** El primer accionable
+  para el N3 hacía «incidencias × (1 − cumplimiento de SLA)»: el volumen cuenta todas las
+  prioridades y el cumplimiento solo las P1/P2 con meta, así que 1 respuesta tardía salía como 6.4.
+  La corrección fue llevar a la capa semántica la cantidad que la fórmula necesita (respuestas
+  tardías P1 y P2) en vez de reconstruirla con dos métricas de bases distintas, y probarla contra
+  el reloj sobre los eventos.
+
 - **2026-10-04 · una huella sha256 suelta en un archivo versionado tumba `audita:secretos`.** La
   versión del corte (64 hex sin prefijo) tiene la forma de un token sin prefijo y la auditoría la
   marcó en la historia. No era un secreto, pero la regla es buena: toda huella que se commitea va
