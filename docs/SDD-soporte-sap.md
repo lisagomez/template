@@ -169,6 +169,22 @@ hermes-os-a2a@e122f54 y llevada al stack de este monorepo:
 - su contenido es dato: una instrucción escrita en un mensaje no cambia lo que el chat puede
   hacer.
 
+Implementado en `tools/soporte-sap/src/chat.ts` (`respondeHil`), determinista y sin modelo:
+
+| Lo que llega | Lo que hace | Quién |
+|---|---|---|
+| una pregunta por una métrica | el valor del corte, la cita de la capa semántica y la **definición** del catálogo | los dos; el experto no ve costo ni salud |
+| una pregunta de soporte | la solución de la matriz con la cita de la regla del grafo (`consultaMatriz`), o «no lo sé» y al sandbox | los dos |
+| «te enseño…» | una **propuesta** del sandbox (`estado = propuesta`), con el texto delimitado como dato | solo el experto |
+| «aprueba…», «autoriza…», «ejecuta…» | **se promueve** al hilo del plan en la sala (`origen = chat_hil`, sin bloques de acción); ahí decide una persona con su sesión | los dos; ninguno aprueba en el chat |
+| cualquier otra cosa | «no lo sé» | — |
+
+`pruebas/chat.ts` lo demuestra: el chat no importa la sala ni conoce la tabla de aprobaciones; en
+una base con los dos esquemas (sala + Soporte SAP) la suite de la sala vigila también al rol con el
+que escribe el chat (`soporte_sap_agente`), el chat no puede insertar una aprobación y **el sabotaje
+que se lo permite pone la suite en rojo** (`S2b·estr`); una instrucción sembrada viaja delimitada
+como dato y no cambia el rol de la sesión.
+
 ## 6. Documentos y anonimización
 
 **Ingesta** por el puerto `LectorDocumentos`, que en el producto implementa el extractor
@@ -310,18 +326,46 @@ MTTR y cumplimiento de SLA de abril, julio y septiembre, idénticos.
 
 ## 10. Contratos SLA
 
-- **Datos versionados**: N1–N2 (laboratorio con la consultora) y N2–N3 (consultora con su
-  cliente). Cada versión trae calendario (zona, días, horario y feriados), metas de respuesta y de
-  resolución por prioridad, escalamiento, créditos y exclusiones.
-- **Las cifras del laboratorio son de laboratorio**: salen de referencias públicas de AMS, con su
-  fuente, y no son una oferta. La plantilla del contrato va con las cifras y el texto legal en
-  blanco (D13). El laboratorio no compromete disponibilidad antes de GATE 3.
-- **El reloj**: corre en horario hábil del calendario; se **pausa** en espera del cliente y se
-  reanuda con su respuesta; una **reapertura** continúa el reloj de resolución donde quedó; un
-  **cambio de prioridad** recalcula la meta con la nueva prioridad y conserva el tiempo
-  transcurrido; al 80 % de la meta escala.
-- **El cumplimiento se mide**: el reloj produce el hecho por ticket desde los eventos de la cadena
-  y la capa semántica lo agrega.
+**Datos versionados** (`tools/soporte-sap/src/sla.ts`; en el producto, `ss_contrato_sla` con
+`(id, version, vigente_desde)` y el contrato entero en `contenido`):
+
+| | N1–N2 (laboratorio → consultora) | N2–N3 (consultora → cliente) |
+|---|---|---|
+| Objeto | la respuesta del laboratorio a lo que la consultora le escala | la atención a las incidencias del cliente |
+| Metas | **por decidir** (no hay referencia pública para este servicio) | P1 respuesta 60 min continuos y P2 240 min hábiles, citadas de SAP Enterprise Support Schedule §2.1.1 como **referencia**; resolución y P3–P4 sin meta |
+| Categorización | la del escalamiento es la de la incidencia | **un agente categoriza**; el cliente impugna y resuelve su consultora |
+| Créditos, exclusiones | por decidir (el laboratorio) | por decidir (el laboratorio) |
+| Disponibilidad | no se compromete antes de GATE 3 | no se compromete antes de GATE 3 |
+
+Una versión nueva rige **después** de la anterior y no la edita (`nuevaVersion`); una incidencia
+se mide con la versión vigente al recibirla (`vigenteEn`). La plantilla del documento
+([`tools/soporte-sap/contratos/plantilla-contrato-sla.md`](../tools/soporte-sap/contratos/plantilla-contrato-sla.md))
+lleva cada cifra y cada cláusula legal como `[POR DECIDIR]` (D13); lo que no es hueco es la
+definición del reloj, que es la misma que usa el producto.
+
+**El reloj** (`relojSla`, la única definición por ticket):
+
+- arranca al recibir, en el calendario de la meta: hábil (lunes a viernes 09:00–18:00 de la Ciudad
+  de México, feriados de la LFT art. 74) o continuo (24×7); lo recibido fuera de horario cuenta al
+  abrir;
+- la **espera del cliente** pausa la resolución; **resolver** lo detiene, también en una pausa; una
+  **reapertura** lo reanuda desde la reapertura;
+- un **cambio de prioridad** aplica la meta de la nueva prioridad desde la recepción (o desde el
+  cambio, si el contrato lo pacta);
+- sin respuesta y con el plazo vencido, **ya incumplió**; sin meta, nunca incumple;
+- deja los **tramos** (corre, pausa, detenido) con el evento que abrió cada uno: la evidencia de un
+  incumplimiento;
+- con el reloj abierto, una **alerta interna** escala al 80 % de la meta (supuesto del laboratorio:
+  un aviso operativo, no una cláusula).
+
+`pruebas/sla.ts` prueba los bordes (fuera de horario, P1 en continuo, feriado, espera, resolver en
+pausa, reapertura, cambio de prioridad en las dos modalidades, plazo vencido sin responder, alerta) y
+que el cumplimiento de tres periodos sintéticos **recalculado desde los eventos** es el mismo número
+que da la capa semántica.
+
+**Lo que falta medir**: el N1–N2. El corpus sintético no trae escalamientos con hora de respuesta
+del laboratorio; hasta que la sala los registre, ese contrato existe como dato y plantilla, sin
+medición.
 
 ## 11. Pricing, costos, impactos y accionables
 

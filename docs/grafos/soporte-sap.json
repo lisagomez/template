@@ -105,7 +105,7 @@
     {
       "id": "contratos-sla",
       "label": "Contratos SLA N1–N2 (y el N2–N3 que ya pide el brief) como datos versionados + plantilla del documento: reloj con horario y pausas, metas por prioridad, créditos y escalamiento, medidos desde la capa semántica; cifras y texto legal por decidir",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "modelo-pricing",
@@ -120,7 +120,7 @@
     {
       "id": "chat-hil",
       "label": "Interfaz conversacional del HIL (superadministrador y experto) con el A2A, conviviendo con la sala: chat 1:1 para explorar y enseñar; lo que pide aprobación o involucra a otros se promueve a un hilo de la sala; el chat no aprueba; respuestas con fuente",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "app-soporte-sap",
@@ -866,14 +866,14 @@
       "id": "l-chat-no-aprueba",
       "label": "el chat no aprueba nada",
       "sobre": "nodo:chat-hil",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "desde el chat no hay camino a la tabla de aprobaciones; aprobar se promueve a un hilo de la sala y espera la fila humana; dar al chat permiso de insertar pone la suite en rojo"
     },
     {
       "id": "l-chat-con-fuente",
       "label": "el chat contesta con fuente o dice que no sabe",
       "sobre": "nodo:chat-hil",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "cada cifra cita su métrica de la capa semántica y cada regla su fuente del grafo; sin fuente, «no lo sé»"
     },
     {
@@ -901,7 +901,7 @@
       "id": "l-sla-medido",
       "label": "el SLA se mide, no se declara",
       "sobre": "nodo:contratos-sla",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "incumplimientos calculados desde los eventos con traza sha256; reloj probado en bordes: fuera de horario, espera del cliente, reapertura y cambio de prioridad"
     },
     {
