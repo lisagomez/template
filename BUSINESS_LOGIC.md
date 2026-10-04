@@ -11,6 +11,12 @@
 > (auth, dashboard, parametrización) tampoco.** Lo cruza `npm run verify:gobernanza` contra
 > `inventario/activos.json`: todo activo de clase PRODUCTO en beta o producción aparece aquí, en un
 > producto o en el §2 con su motivo.
+>
+> **Qué es un producto** (desde el 2026-10-04): una fila de esta tabla. Un modelo de negocio que compone
+> activos para un cliente que paga; «activo de clase PRODUCTO» es una pieza vendible, no un producto, y el
+> campo `producto` del inventario nombra al **dueño** del activo. El concepto y su vocabulario:
+> [`productos/CONCEPTO.md`](productos/CONCEPTO.md); cada producto se declara en un manifiesto de
+> `productos/` que verifica `npm run verifica:productos`.
 
 ---
 
