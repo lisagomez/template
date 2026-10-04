@@ -277,6 +277,45 @@ o reordenar un evento rompe la verificación.
   incidencias), su impacto en MXN, su confianza (por el volumen de datos que lo sostiene) y su
   responsable. El FODA del cliente se arma con ellos: cada punto cita su dato.
 
+## 12. Esquema de almacenamiento
+
+**Propuesta, no aplicada**: [`tools/soporte-sap/migraciones/propuesta-soporte-sap.sql`](../tools/soporte-sap/migraciones/propuesta-soporte-sap.sql).
+La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 18 tablas; ninguna
+función `security definer` en `public`; árbol y roles impuestos en la base; solo agregar) y
+`pruebas/aislamiento.ts` (31 intentos con el rol real, buckets incluidos), en un Postgres efímero.
+
+**Tablas por dominio y sus claves de tenencia**:
+
+| Dominio | Tablas | Tenencia | Notas |
+|---|---|---|---|
+| Identidad | `ss_organizacion`, `ss_miembro` | árbol laboratorio → consultora → cliente | el árbol y el rol por tipo de organización los impone un disparador |
+| Producción | `ss_incidencia`, `ss_evento`, `ss_adjunto`, `ss_campo_extraido` | `consultora_id` + `cliente_id` | el cliente tiene que ser de esa consultora (disparador); `ss_evento` es de **solo agregar** |
+| Sandbox | `ss_caso_sandbox`, `ss_cuarentena` | `origen_consultora_id`; la cuarentena por cliente | el sandbox solo tiene texto anonimizado; la cuarentena guarda **tipos** de señal, nunca el dato |
+| Núcleo y FDE | `ss_propuesta` | `consultora_id` si es a medida, nulo si va al núcleo | el agente solo inserta en estado `propuesta` |
+| Acceso | `ss_acceso_motivado` | por usuario y cliente | solo el superadministrador lo otorga, con motivo y vencimiento (D14) |
+| SLA y horas | `ss_contrato_sla`, `ss_sla_resultado`, `ss_horas`, `ss_presupuesto` | N1–N2 por consultora; N2–N3 por cliente | contrato versionado por `(id, version)` |
+| Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién |
+| Chat | `ss_chat_mensaje` | `usuario_id` | cada quien ve su conversación; solo el laboratorio conversa |
+
+**Roles.** `authenticated` (las personas, por `auth.uid()`) y `soporte_sap_agente` (`nobypassrls`),
+acotado a la consultora de su tarea por `ss.consultora`: sin tarea no ve nada. Las funciones de
+visibilidad viven en `ss_priv`, un esquema que la API no expone.
+
+**Buckets** (privados; ruta por tenant y nombre por sha256, así un mismo archivo no se duplica y
+la ruta dice de quién es):
+
+| Bucket | Ruta | Quién lee | Quién escribe |
+|---|---|---|---|
+| `ss-originales` | `{consultora}/{cliente}/{incidencia}/{sha256}` | el cliente y su consultora; el laboratorio solo con acceso motivado vigente | el cliente y su consultora |
+| `ss-sandbox` | `{consultora_origen}/{caso}/{sha256}` | el laboratorio; la consultora, lo que nació de ella | el agente, después del anonimizador |
+| `ss-exportes` | `{consultora}/{fecha}-{sha256}` | la consultora y el superadministrador | el export por tenant (§13) |
+
+**Retención** (D8, valor por defecto): los originales se guardan mientras dure el contrato; al
+salir, la consultora recibe su export (ERP-6) y se borran, también en las copias de respaldo. El
+crudo y la cadena de eventos son la evidencia del servicio: viven lo mismo que el contrato.
+
+**Crecimiento**: por tamaño de cliente en la §14, medido con carga sintética.
+
 ## 17. Decisiones abiertas
 
 Las quince de la spec (D1–D15), con su valor seguro por defecto, viven en

@@ -25,7 +25,7 @@
     {
       "id": "sdd",
       "label": "SDD de Soporte SAP: los tres niveles, los flujos sandbox y producción, qué activo cubre qué y el % de reuso",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "business-logic",
@@ -35,22 +35,22 @@
     {
       "id": "prp",
       "label": "PRP de Soporte SAP: fases con salida verificable",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "amenazas-aisia",
       "label": "C3 (sala y canal N1-N2 como superficie externa) y C4 (anonimización, FODA, decisiones sobre terceros) en borrador",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "esquema-almacenamiento",
       "label": "Esquema de almacenamiento: tablas por dominio con claves de tenencia, eventos append-only, buckets por nivel con ruta por tenant y sha256, RLS de storage.objects, retención y crecimiento",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "rol-fde",
       "label": "El A2A como Forward Deployed Engineer: playbook por consultora (onboarding → mapeo y limpieza → configuración del workspace → solución a medida → medición de impacto → vuelta al núcleo), una capacidad de la Agent Card por función, acotado: propone y el HIL aprueba",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "tool-sala-a2a",
