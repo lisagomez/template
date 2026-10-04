@@ -55,12 +55,12 @@
     {
       "id": "tool-sala-a2a",
       "label": "tools/sala-a2a: esquema multi-tenant, aprobación como fila que ningún modelo fabrica, card opaca, suite de sabotajes",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "dominio-sap",
       "label": "Dominio SAP: matriz problema-solución con fuente citada, corpus sintético de incidencias y simulador de SAP/tickets",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "ingesta-documentos",
@@ -100,7 +100,7 @@
     {
       "id": "cadena-eventos",
       "label": "Traza sha256 encadenada de eventos por incidencia (reusa la cadena de etiquetas)",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "contratos-sla",
@@ -740,7 +740,7 @@
       "id": "l-invariante-sala",
       "label": "ningún componente que ejecuta un modelo fabrica una aprobación",
       "sobre": "nodo:tool-sala-a2a",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "S1-S6 y S2b: cada sabotaje pone la suite en rojo; un principal legítimo que firma por otro es rechazado"
     },
     {
@@ -782,7 +782,7 @@
       "id": "l-cadena",
       "label": "una traza alterada se detecta",
       "sobre": "nodo:cadena-eventos",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "alterar, borrar o reordenar un evento rompe la verificación de la cadena"
     },
     {
