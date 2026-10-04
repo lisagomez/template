@@ -170,7 +170,7 @@
     {
       "id": "propuesta-cdc",
       "label": "Propuesta de CDC (diff, regresión y trampas) para lo que toca gates, skills o doctrina; firma del laboratorio pendiente",
-      "estado": "gris"
+      "estado": "ambar"
     }
   ],
   "aristas": [
@@ -733,7 +733,7 @@
       "id": "l-validate",
       "label": "el gate completo en verde",
       "sobre": "nodo:evidencia-e2e",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "npm run validate: todos los gates del perfil validate en verde, ninguno inactivo contado como verde"
     },
     {
@@ -796,7 +796,7 @@
       "id": "l-autoaprendizaje",
       "label": "el agente propone, no se cambia solo",
       "sobre": "nodo:app-soporte-sap",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "diagnóstico y automejora salen como propuestas; aplicar una es CDC con firma"
     },
     {
@@ -831,7 +831,7 @@
       "id": "l-trampa",
       "label": "los controles siguen disparando",
       "sobre": "nodo:propuesta-cdc",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "npm run regresion -- --trampa en verde"
     },
     {
