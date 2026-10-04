@@ -14,7 +14,23 @@ test('se aplica dos veces y toda tabla ss_ tiene RLS con force', async () => {
     and relkind = 'r' and relname like 'ss\\_%' and not (relrowsecurity and relforcerowsecurity)`)
   assert.deepEqual(sinRls.rows, [])
   const tablas = await db.query<{ n: number }>(`select count(*)::int as n from pg_class where relnamespace = 'public'::regnamespace and relkind = 'r' and relname like 'ss\\_%'`)
-  assert.equal(tablas.rows[0]?.n, 18)
+  assert.equal(tablas.rows[0]?.n, 20)
+})
+
+test('las tablas hijas no pueden contradecir la tenencia de su incidencia', async () => {
+  const db = await baseSoporte()
+  assert.match(await falla(() => db.exec(`insert into ss_cuarentena (incidencia_id, consultora_id, cliente_id, senales) values ('${INC.a1}', '${ORG.CB}', '${ORG.B1}', '{rfc}')`)) ?? '', /no es la de su incidencia/)
+  assert.match(await falla(() => db.exec(`insert into ss_adjunto (incidencia_id, consultora_id, cliente_id, sha256, ruta, tipo_mime, bytes, via)
+    values ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', '${'7'.repeat(64)}', 'otra/ruta', 'image/png', 10, 'ocr_local')`)) ?? '', /ss_ruta_de_su_tenant/)
+})
+
+test('ningún rol de servicio sale con bypassrls ni puede decidir', async () => {
+  const db = await baseSoporte()
+  const bypass = await db.query(`select rolname from pg_roles where rolname like 'soporte_sap_%' and rolbypassrls`)
+  assert.deepEqual(bypass.rows, [])
+  const deciden = await db.query(`select r, t from unnest(array['soporte_sap_agente', 'soporte_sap_ingesta']) r, unnest(array['ss_mapeo', 'ss_campo_extraido', 'ss_propuesta']) t
+    where has_table_privilege(r, 'public.' || t, 'UPDATE')`)
+  assert.deepEqual(deciden.rows, [])
 })
 
 test('ninguna función security definer en public; las de ss_priv fijan search_path', async () => {

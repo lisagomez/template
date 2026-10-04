@@ -74,39 +74,93 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 
 ### Modelo de amenazas (C3)
 
-**Activos que toca**, por daño: datos personales de empleados y usuarios de los clientes N3 que
-llegan en tickets y adjuntos (RR. HH., nómina, RFC/CURP/NSS) · la integridad de las aprobaciones
-(un plan aprobado que no lo aprobó nadie) · los originales de los clientes · el conocimiento
-acumulado (el foso, ERP §1.7) · el presupuesto de modelo y OCR (denial-of-wallet).
+> v2, tras la revisión independiente del 2026-10-04: un agente distinto del que lo escribió
+> encontró cuatro afirmaciones que el SQL no sostenía. Se corrigieron en el esquema y cada una tiene
+> su prueba negativa en `tools/soporte-sap/pruebas/_aislamiento.ts` (las marcadas «revisión»).
 
-**Fronteras que cruza**: el texto y los adjuntos del N3 (no confiables: archivos falsificables e
-inyección indirecta) · la sala, que es superficie **externa** porque las consultoras son terceros
-· el chat del HIL · los exportes de tickets de cada consultora · la salida del modelo (simulado
-hoy) · las propuestas del agente.
+**Activos que toca**, por daño:
 
-**Atacantes relevantes**: O1 (un usuario del N3 o de una consultora que escribe instrucciones en
-un ticket, un adjunto o un mensaje de la sala) · O2 (un exporte o un documento con datos falsos que
-se toman por evidencia) · O3 (el experto que aprueba en verde tras cuarenta planes buenos) · O4
-(abuso de la sala o de la ingesta para quemar OCR) · O5 (las dependencias de dbt y la imagen de
-Postgres).
+1. datos personales de empleados y usuarios de los N3 en tickets y adjuntos (RR. HH., nómina,
+   RFC/CURP/NSS), y de las contrapartes de un CFDI;
+2. la integridad de las decisiones humanas: aprobaciones en la sala, mapeos, campos confirmados y
+   propuestas (una fila «decidida» que no decidió nadie);
+3. los originales de los clientes y los exportes por tenant;
+4. el SLA y las horas: dinero entre consultora y cliente;
+5. la cadena de eventos (la evidencia del servicio);
+6. la matriz común y el grafo (el foso, ERP §1.7), envenenables por la siembra;
+7. credenciales: el secreto que firma los tokens de tarea y las llaves de cada rol de servicio;
+8. el presupuesto de modelo y de OCR, y la disponibilidad del VPS compartido.
+
+**Fronteras que cruza**:
+
+- el texto y los adjuntos del N3, falsificables y maliciosos contra los parsers (XML del CFDI, PDF);
+- la sala, que es superficie **externa** porque las consultoras son terceros;
+- el chat del HIL;
+- los exportes de tickets de cada consultora;
+- la salida del modelo, simulado hoy;
+- el paso del sandbox al núcleo (siembra);
+- el puente A2A del extractor;
+- el destino de los respaldos (D12).
+
+**Atacantes relevantes**:
+
+- **O1**: instrucciones en un ticket, un adjunto o un mensaje.
+- **O2**: datos falsos en un exporte o un documento, o un consultor que carga horas a otro cliente.
+- **O3**: el experto que aprueba en verde tras cuarenta planes buenos.
+- **O4**: abuso de la ingesta para quemar OCR o tumbar el VPS. Un motor autohospedado sin GPU va a
+  unos 110 s por página.
+- **O5**: dbt, MetricFlow, la imagen de Postgres y las dependencias npm.
+- **O6**: el agente (o un rol de servicio) comprometido o manipulado, usado como palanca.
 
 **Controles y brechas**:
 
-- **Aprobaciones**: fila humana con política `as restrictive` y ningún `insert` para servicios;
-  el chat no tiene camino; sabotajes S1–S6 y S2b que se ven fallar. *Brecha*: la fatiga del
-  aprobador (O3) no la cierra una política; la mitigan el veredicto del supervisor visible y el
-  antes y el después del simulador en el mismo mensaje.
-- **Inyección**: el contenido de tickets, adjuntos y mensajes es dato delimitado; las decisiones
-  (categoría, veredicto, tier) son deterministas y no leen instrucciones. *Brecha*: el día que el
-  modelo sea real, el corpus de inyecciones se corre contra él antes de encenderlo.
-- **Datos personales**: anonimizador fail-closed antes del sandbox, cuarentena sin copia del dato,
-  originales que el laboratorio no baja sin acceso motivado, OCR local. *Brecha*: un dato
-  sensible con una forma que ningún detector conoce; por eso la cuarentena y no un «probablemente
-  limpio».
-- **Aislamiento**: RLS con `force` en todo, agente acotado por tarea, buckets por ruta de tenant.
-  *Brecha*: Realtime y el JWT con `org_id` no se prueban sin un Supabase real.
-- **Superficie**: nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
-  AISIA firmados.
+- **Alcance de los roles de servicio (O6).** La consultora de la tarea sale del claim de un token
+  **firmado por el orquestador**, que no corre el modelo, y que verifica la pasarela. El agente
+  presenta su token; nunca fija su alcance. Ninguno de los tres roles tiene `bypassrls`.
+  - *Pruebas*: token falsificado rechazado; con tarea de A, 0 filas de B.
+  - *Brecha*: con una conexión SQL directa, cualquier rol fija sus GUC. Por eso el agente **no
+    tiene** conexión directa, solo la API; si la tuviera, este control desaparece.
+- **Decisiones humanas (doble cierre en todas).** Un rol de servicio solo inserta en estado inicial
+  (`propuesto`, `por_revisar`, `propuesta`) y no tiene `update`. Una persona decide **a su nombre**
+  por política restrictiva: `aprobado_por`, `revisado_por` y `decidida_por` deben ser
+  `auth.uid()`. Lo que va al núcleo lo decide el superadministrador (D2).
+  - En la sala, la fila de aprobación con política `as restrictive` y sin `insert` para servicios
+    se prueba con los sabotajes S1–S6 y S2b de la fase 4.
+  - *Brecha*: la fatiga del aprobador (O3) no la cierra una política. La mitigan el veredicto del
+    supervisor y el antes y el después del simulador en el mismo mensaje.
+- **Tenencia atada (O2).** Un disparador ata la tenencia de cada tabla hija a su incidencia (o, sin
+  incidencia, el cliente a su consultora). El bucket exige que la carpeta 2 sea cliente de la
+  carpeta 1, y el adjunto, que su ruta sea la de su tenant. La fecha y el actor de un evento los da
+  la base, no quien escribe.
+  - *Prueba*: horas a otro cliente y subidas cruzadas, rechazadas.
+- **Datos personales.**
+  - El laboratorio lee solo lo **escalado** por la consultora, y los originales con un acceso que
+    **otorga la consultora** a un miembro del laboratorio, por 72 h como máximo, nunca a sí mismo.
+  - Los exportes son de la consultora y el laboratorio no los lee.
+  - Hay anonimizador fail-closed antes del sandbox, cuarentena sin copia del dato y OCR local.
+  - *Brecha*: un dato sensible con una forma que ningún detector conoce; por eso la cuarentena y no
+    un «probablemente limpio».
+- **Inyección (O1).** El contenido de tickets, adjuntos y mensajes es dato delimitado. Categoría,
+  veredicto y tier son deterministas y no leen instrucciones.
+  - *Brecha*: el día que el modelo sea real, el corpus de inyecciones se corre contra él antes de
+    encenderlo.
+- **Archivos maliciosos y abuso (O1, O4).** Se valida por bytes y por tamaño, y el lector de XML
+  del extractor rechaza `<!DOCTYPE` y toda declaración `<!`, así que no resuelve entidades
+  externas (`tools/extractor-documental/src/xml/lexico.ts`). Hay un tope de páginas OCR por consultora
+  (`ss_presupuesto`) y un límite de adjuntos por incidencia.
+  - *Brecha*: un PDF que agote memoria en el parser; el servicio de OCR corre con memoria acotada
+    en su contenedor.
+- **Cadena de suministro (O5).** dbt, MetricFlow y Postgres van pineados por versión y la imagen
+  por digest; las dependencias npm ya pasan por el lockfile.
+  - *Brecha*: hasta que un CDC adopte `vigila:versiones` para estas piezas, nadie avisa de un
+    parche de seguridad.
+- **Jobs de plataforma (C7, declarados).** `soporte_sap_ingesta` lee originales y deja campos por
+  revisar; `soporte_sap_plataforma` exporta, restaura y borra por retención; ambos acotados por
+  token a una consultora. Ninguno es `service_role`.
+- **Siembra (frontera sandbox → núcleo).** Lo que cambia un veredicto lo firma el laboratorio en
+  `tools/conocimiento`; el agente solo deja propuestas.
+- **Superficie.** Nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
+  AISIA firmados. Realtime y el JWT de Supabase no se prueban sin un Supabase real.
 
 ### Evaluación de impacto (C4)
 
@@ -114,6 +168,13 @@ Borrador fuera del registro: [`docs/goals/soporte-sap-AISIA.md`](../../docs/goal
 Se firma junto con el BUSINESS_LOGIC del producto.
 
 ## Aprendizajes
+
+- **2026-10-04 · el C3 afirmaba controles que el SQL no tenía.** Un agente revisor distinto del
+  que escribió encontró que el alcance del agente era una variable que el agente mismo fijaba, que
+  mapeos, campos y propuestas se podían insertar ya «decididos», que el laboratorio leía toda la
+  operación y que las tablas hijas no ataban su tenencia. Las cuatro se corrigieron en el esquema
+  (v2) con su prueba negativa. **Lección**: un control escrito en el C3 sin una comprobación que se
+  ponga roja es una intención; la revisión cruzada lo encuentra antes que un atacante.
 
 - **2026-10-04 · un cuerpo SQL se valida al crearse.** `ss_priv.baja_original` nombraba
   `ss_acceso_motivado` antes de que existiera y la propuesta no se aplicaba. Las funciones que leen

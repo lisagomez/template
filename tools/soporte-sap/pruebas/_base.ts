@@ -2,10 +2,15 @@
  * Un Postgres EFÍMERO (PGlite, en proceso, sin red ni Docker) con un Supabase mínimo imitado
  * —roles, `auth.uid()` y un `storage` con `objects` y `foldername`— y la propuesta de esquema
  * aplicada dos veces. Nada de esto toca una base real: se prueba y se tira.
+ *
+ * Los roles de servicio entran como entraría PostgREST: con un token de tarea FIRMADO que la
+ * pasarela verifica antes de fijar `request.jwt.claims`. Ningún código de prueba que haga de agente
+ * fija su propio alcance.
  */
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
+import { emiteTokenDeTarea, verificaTokenDeTarea, type RolDeServicio } from '../dist/index.js'
 import { HERRAMIENTA } from './_ayuda.ts'
 
 export const SQL_SOPORTE = readFileSync(join(HERRAMIENTA, 'migraciones', 'propuesta-soporte-sap.sql'), 'utf8')
@@ -16,6 +21,7 @@ create schema auth;
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 grant usage on schema auth to anon, authenticated;
 grant usage on schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to service_role;
 create schema storage;
 create table storage.buckets (id text primary key, name text not null, public boolean not null default false);
 create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets (id),
@@ -54,7 +60,10 @@ export const INC = {
   b1: '20000000-0000-4000-8000-0000000000b1',
 } as const
 
-const sha = (c: string) => c.repeat(64)
+export const SHA = { a1: 'a'.repeat(64), a2: 'b'.repeat(64), b1: 'c'.repeat(64) } as const
+export const SECRETO_TAREAS = 'secreto-de-laboratorio-para-tareas-0123456789'
+
+const ruta = (c: string, cl: string, i: string, s: string) => `${c}/${cl}/${i}/${s}`
 
 /** La base con el esquema y el escenario sembrado (como dueño de las tablas). */
 export async function baseSoporte(extra = ''): Promise<PGlite> {
@@ -76,23 +85,28 @@ export async function baseSoporte(extra = ''): Promise<PGlite> {
       ('${ORG.CA}', '${USR.ca}', 'consultor'), ('${ORG.CB}', '${USR.cb}', 'consultor'),
       ('${ORG.A1}', '${USR.ua1}', 'usuario_cliente'), ('${ORG.A2}', '${USR.ua2}', 'usuario_cliente'),
       ('${ORG.B1}', '${USR.ub1}', 'usuario_cliente');
-    insert into ss_incidencia (id, consultora_id, cliente_id, titulo) values
-      ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 'MIGO no contabiliza'),
-      ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', 'Dump en VA01'),
-      ('${INC.b1}', '${ORG.CB}', '${ORG.B1}', 'CFDI no timbra');
+    insert into ss_incidencia (id, consultora_id, cliente_id, titulo, descripcion) values
+      ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 'MIGO no contabiliza', 'M7 053 al contabilizar la entrada'),
+      ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', 'Dump en VA01', 'DBSQL_DUPLICATE_KEY_ERROR'),
+      ('${INC.b1}', '${ORG.CB}', '${ORG.B1}', 'CFDI no timbra', 'CFDI40102');
+    insert into ss_escalamiento (incidencia_id, consultora_id, cliente_id, motivo, escalada_por) values
+      ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 'el plan necesita aprobación del laboratorio', 'agente:soporte-sap-a2a');
     insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, actor, fecha, anterior, hash) values
-      ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 1, 'RECIBIDA', 'cliente', now(), 'genesis', '${sha('1')}'),
-      ('${INC.b1}', '${ORG.CB}', '${ORG.B1}', 1, 'RECIBIDA', 'cliente', now(), 'genesis', '${sha('2')}');
-    insert into ss_adjunto (incidencia_id, consultora_id, cliente_id, sha256, ruta, tipo_mime, bytes, via) values
-      ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', '${sha('a')}', '${ORG.CA}/${ORG.A1}/${INC.a1}/${sha('a')}', 'image/png', 1000, 'ocr_local'),
-      ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', '${sha('b')}', '${ORG.CA}/${ORG.A2}/${INC.a2}/${sha('b')}', 'application/pdf', 2000, 'capa0'),
-      ('${INC.b1}', '${ORG.CB}', '${ORG.B1}', '${sha('c')}', '${ORG.CB}/${ORG.B1}/${INC.b1}/${sha('c')}', 'application/xml', 500, 'xml');
+      ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 1, 'RECIBIDA', 'usr-000000000001', now(), 'genesis', '${'1'.repeat(64)}'),
+      ('${INC.b1}', '${ORG.CB}', '${ORG.B1}', 1, 'RECIBIDA', 'usr-000000000002', now(), 'genesis', '${'2'.repeat(64)}');
+    insert into ss_adjunto (id, incidencia_id, consultora_id, cliente_id, sha256, ruta, tipo_mime, bytes, via) values
+      ('70000000-0000-4000-8000-0000000000a1', '${INC.a1}', '${ORG.CA}', '${ORG.A1}', '${SHA.a1}', '${ruta(ORG.CA, ORG.A1, INC.a1, SHA.a1)}', 'image/png', 1000, 'ocr_local'),
+      ('70000000-0000-4000-8000-0000000000a2', '${INC.a2}', '${ORG.CA}', '${ORG.A2}', '${SHA.a2}', '${ruta(ORG.CA, ORG.A2, INC.a2, SHA.a2)}', 'application/pdf', 2000, 'capa0'),
+      ('70000000-0000-4000-8000-0000000000b1', '${INC.b1}', '${ORG.CB}', '${ORG.B1}', '${SHA.b1}', '${ruta(ORG.CB, ORG.B1, INC.b1, SHA.b1)}', 'application/xml', 500, 'xml');
+    insert into ss_campo_extraido (adjunto_id, incidencia_id, consultora_id, cliente_id, campo, valor, evidencia) values
+      ('70000000-0000-4000-8000-0000000000a1', '${INC.a1}', '${ORG.CA}', '${ORG.A1}', 'transaccion', 'MIGO', 'captura: «Transacción MIGO»');
     insert into storage.objects (bucket_id, name) values
-      ('ss-originales', '${ORG.CA}/${ORG.A1}/${INC.a1}/${sha('a')}'),
-      ('ss-originales', '${ORG.CA}/${ORG.A2}/${INC.a2}/${sha('b')}'),
-      ('ss-originales', '${ORG.CB}/${ORG.B1}/${INC.b1}/${sha('c')}'),
-      ('ss-sandbox', '${ORG.CA}/caso-a/${sha('d')}'),
-      ('ss-sandbox', '${ORG.CB}/caso-b/${sha('e')}');
+      ('ss-originales', '${ruta(ORG.CA, ORG.A1, INC.a1, SHA.a1)}'),
+      ('ss-originales', '${ruta(ORG.CA, ORG.A2, INC.a2, SHA.a2)}'),
+      ('ss-originales', '${ruta(ORG.CB, ORG.B1, INC.b1, SHA.b1)}'),
+      ('ss-sandbox', '${ORG.CA}/caso-a/${'d'.repeat(64)}'),
+      ('ss-sandbox', '${ORG.CB}/caso-b/${'e'.repeat(64)}'),
+      ('ss-exportes', '${ORG.CA}/2026-10-04-${'f'.repeat(64)}');
     insert into ss_caso_sandbox (origen_consultora_id, texto) values
       ('${ORG.CA}', 'MIGO 101 rechaza el movimiento: periodo cerrado para la sociedad [SOCIEDAD]'),
       ('${ORG.CB}', 'El CFDI no timbra: el RFC del receptor no está en la LCO');
@@ -100,11 +114,19 @@ export async function baseSoporte(extra = ''): Promise<PGlite> {
       ('sla-ca', 1, 'N1-N2', '${ORG.CA}', null, '{}', '2026-10-01'),
       ('sla-cb', 1, 'N1-N2', '${ORG.CB}', null, '{}', '2026-10-01'),
       ('sla-a1', 1, 'N2-N3', '${ORG.CA}', '${ORG.A1}', '{}', '2026-10-01');
+    insert into ss_mapeo (consultora_id, herramienta, version, contenido) values ('${ORG.CA}', 'mesauno', 1, '{}');
+    insert into ss_propuesta (id, tipo, origen, alcance, contenido, propuesta_por) values
+      ('80000000-0000-4000-8000-000000000001', 'regla', 'sandbox', 'nucleo', '{"regla":"periodo cerrado MM"}', 'agente:soporte-sap-a2a');
     insert into ss_chat_mensaje (usuario_id, autor, contenido) values
       ('${USR.sup}', 'humano', '¿Cómo va el cumplimiento de SLA de Andina?'),
       ('${USR.exp}', 'humano', 'Te enseño el caso de MIGO');
   `)
   return db
+}
+
+/** El seudónimo de una persona, igual que `ss_priv.seudonimo`. */
+export async function seudonimo(db: PGlite, usuario: string): Promise<string> {
+  return (await db.query<{ s: string }>(`select ss_priv.seudonimo('${usuario}') as s`)).rows[0]!.s
 }
 
 /** Corre `sql` como una persona (rol authenticated con su `sub`). Siempre vuelve a dueño. */
@@ -113,11 +135,20 @@ export async function como<T = Record<string, unknown>>(db: PGlite, usuario: str
   try { return (await db.query<T>(sql)).rows } finally { await db.exec(`reset role; select set_config('request.jwt.claim.sub', '', false);`) }
 }
 
-/** Corre `sql` como el agente, acotado a la consultora de su tarea (o a ninguna). */
-export async function comoAgente<T = Record<string, unknown>>(db: PGlite, consultora: string | null, sql: string): Promise<T[]> {
-  await db.exec(`set role soporte_sap_agente; select set_config('ss.consultora', '${consultora ?? ''}', false);`)
-  try { return (await db.query<T>(sql)).rows } finally { await db.exec(`reset role; select set_config('ss.consultora', '', false);`) }
+/** La pasarela: verifica el token de la tarea y SOLO entonces fija el rol y los claims. */
+export async function comoServicio<T = Record<string, unknown>>(db: PGlite, token: string, sql: string): Promise<T[]> {
+  const claims = verificaTokenDeTarea(SECRETO_TAREAS, token, Date.now())
+  await db.exec(`set role ${claims.rol}; select set_config('request.jwt.claims', '${JSON.stringify(claims)}', false);`)
+  try { return (await db.query<T>(sql)).rows } finally { await db.exec(`reset role; select set_config('request.jwt.claims', '', false);`) }
 }
+
+/** Un token válido para una consultora y un rol, firmado como lo firmaría el orquestador. */
+export const tokenDe = (consultora: string, rol: RolDeServicio = 'soporte_sap_agente'): string =>
+  emiteTokenDeTarea(SECRETO_TAREAS, { consultora, tarea: `tarea-${rol}`, rol, exp: Date.now() + 60_000 })
+
+/** Corre `sql` como el agente con una tarea legítima de esa consultora. */
+export const comoAgente = <T = Record<string, unknown>>(db: PGlite, consultora: string, sql: string): Promise<T[]> =>
+  comoServicio<T>(db, tokenDe(consultora), sql)
 
 /** ¿Falla? Devuelve el mensaje del error, o null si pasó. */
 export async function falla(f: () => Promise<unknown>): Promise<string | null> {

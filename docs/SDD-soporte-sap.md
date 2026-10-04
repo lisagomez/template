@@ -95,8 +95,8 @@ es `ss_miembro(organizacion_id, usuario_id, rol)` sobre `auth.users` (la identid
 
 | Rol | Organización | Lee | Escribe |
 |---|---|---|---|
-| `superadmin` | laboratorio | operación de todas las consultoras, sandbox, métricas, sala | contratos, configuración, aprobaciones en la sala |
-| `experto` | laboratorio | incidencias de producción, sandbox, sala | enseñanza en el sandbox, aprobaciones en la sala |
+| `superadmin` | laboratorio | lo escalado por las consultoras, sandbox, métricas agregadas, sala | presupuestos, decisiones que van al núcleo, aprobaciones en la sala |
+| `experto` | laboratorio | lo escalado, sandbox, sala | enseñanza en el sandbox, decisiones a medida, aprobaciones en la sala |
 | `consultor` | consultora | sus clientes, sus tickets, su SLA y sus horas, su sala | atención, horas, aprobaciones de su lado |
 | `usuario_cliente` | cliente | sus incidencias y su tablero | alta de incidencias y adjuntos |
 | agente `soporte-sap-a2a` | — (Agent Card) | lo que su tarea necesita, por rol de Postgres sin `bypassrls` | eventos, propuestas, mensajes en la sala; **nunca** aprobaciones |
@@ -105,9 +105,13 @@ es `ss_miembro(organizacion_id, usuario_id, rol)` sobre `auth.users` (la identid
 
 - un cliente ve solo lo de su organización; una consultora ve lo de todos sus clientes y nada de
   otra consultora;
-- el laboratorio ve la operación de producción, porque aprueba sobre ella (el modelo del brief,
-  D3), pero **no** baja los originales de un cliente sin un acceso con motivo registrado y con
-  vencimiento (D14);
+- el laboratorio **no** lee la operación de una consultora por ser laboratorio: lee lo que la
+  consultora (o el agente, al mandar un plan a la sala) le **escaló**; los originales de un cliente,
+  solo con un acceso motivado que **otorga la consultora** a un miembro del laboratorio, por 72 h
+  como máximo y nunca a sí mismo (D14). Corrección de la revisión independiente del C3;
+- el agente, la ingesta y los jobs de plataforma entran con un **token de tarea firmado** por el
+  orquestador (que no corre modelo): su alcance es la consultora del token, no una variable que
+  ellos fijen;
 - el sandbox solo guarda casos anonimizados: el laboratorio los ve todos; una consultora ve los
   que nacieron de sus incidencias; un cliente no ve ninguno;
 - el agente escribe con su propio rol, sin `bypassrls`, y no tiene `insert` sobre aprobaciones.
@@ -280,16 +284,20 @@ o reordenar un evento rompe la verificación.
 ## 12. Esquema de almacenamiento
 
 **Propuesta, no aplicada**: [`tools/soporte-sap/migraciones/propuesta-soporte-sap.sql`](../tools/soporte-sap/migraciones/propuesta-soporte-sap.sql).
-La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 18 tablas; ninguna
-función `security definer` en `public`; árbol y roles impuestos en la base; solo agregar) y
-`pruebas/aislamiento.ts` (31 intentos con el rol real, buckets incluidos), en un Postgres efímero.
+La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 20 tablas; ninguna
+función `security definer` en `public`; árbol, roles y tenencia de las tablas hijas impuestos en
+la base; solo agregar; ningún rol de servicio con `bypassrls` ni `update` sobre lo que se decide) y
+`pruebas/aislamiento.ts` (56 intentos con el rol real, buckets incluidos), en un Postgres efímero.
+La v2 nace de la revisión independiente del C3, que encontró cuatro afirmaciones sin sostén en el
+SQL (alcance del agente, decisiones fabricables fuera de la sala, lectura del laboratorio y
+tenencia de las tablas hijas).
 
 **Tablas por dominio y sus claves de tenencia**:
 
 | Dominio | Tablas | Tenencia | Notas |
 |---|---|---|---|
 | Identidad | `ss_organizacion`, `ss_miembro` | árbol laboratorio → consultora → cliente | el árbol y el rol por tipo de organización los impone un disparador |
-| Producción | `ss_incidencia`, `ss_evento`, `ss_adjunto`, `ss_campo_extraido` | `consultora_id` + `cliente_id` | el cliente tiene que ser de esa consultora (disparador); `ss_evento` es de **solo agregar** |
+| Producción | `ss_incidencia`, `ss_escalamiento`, `ss_evento`, `ss_adjunto`, `ss_campo_extraido`, `ss_impugnacion` | `consultora_id` + `cliente_id` | el cliente tiene que ser de esa consultora y cada hija hereda la tenencia de su incidencia (disparadores); `ss_evento` es de **solo agregar**, con fecha y actor que da la base; un campo lo confirma una persona a su nombre; el cliente impugna y su consultora resuelve |
 | Sandbox | `ss_caso_sandbox`, `ss_cuarentena` | `origen_consultora_id`; la cuarentena por cliente | el sandbox solo tiene texto anonimizado; la cuarentena guarda **tipos** de señal, nunca el dato |
 | Núcleo y FDE | `ss_propuesta` | `consultora_id` si es a medida, nulo si va al núcleo | el agente solo inserta en estado `propuesta` |
 | Acceso | `ss_acceso_motivado` | por usuario y cliente | solo el superadministrador lo otorga, con motivo y vencimiento (D14) |
@@ -297,18 +305,21 @@ función `security definer` en `public`; árbol y roles impuestos en la base; so
 | Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién |
 | Chat | `ss_chat_mensaje` | `usuario_id` | cada quien ve su conversación; solo el laboratorio conversa |
 
-**Roles.** `authenticated` (las personas, por `auth.uid()`) y `soporte_sap_agente` (`nobypassrls`),
-acotado a la consultora de su tarea por `ss.consultora`: sin tarea no ve nada. Las funciones de
-visibilidad viven en `ss_priv`, un esquema que la API no expone.
+**Roles.** `authenticated` (las personas, por `auth.uid()`) y tres roles de servicio sin
+`bypassrls`, cada uno acotado a la consultora del **token de tarea firmado** que presenta
+(`request.jwt.claims`): `soporte_sap_agente` (lee y propone; nunca decide), `soporte_sap_ingesta`
+(lee originales y deja campos por revisar) y `soporte_sap_plataforma` (export, restauración y
+retención; job declarado, C7). Sin token válido no ven nada. Las funciones de visibilidad viven en
+`ss_priv`, un esquema que la API no expone.
 
 **Buckets** (privados; ruta por tenant y nombre por sha256, así un mismo archivo no se duplica y
 la ruta dice de quién es):
 
 | Bucket | Ruta | Quién lee | Quién escribe |
 |---|---|---|---|
-| `ss-originales` | `{consultora}/{cliente}/{incidencia}/{sha256}` | el cliente y su consultora; el laboratorio solo con acceso motivado vigente | el cliente y su consultora |
-| `ss-sandbox` | `{consultora_origen}/{caso}/{sha256}` | el laboratorio; la consultora, lo que nació de ella | el agente, después del anonimizador |
-| `ss-exportes` | `{consultora}/{fecha}-{sha256}` | la consultora y el superadministrador | el export por tenant (§13) |
+| `ss-originales` | `{consultora}/{cliente}/{incidencia}/{sha256}` | el cliente y su consultora; la ingesta de esa consultora; el laboratorio solo con acceso motivado vigente | el cliente y su consultora, si la carpeta 2 es cliente de la carpeta 1 |
+| `ss-sandbox` | `{consultora_origen}/{caso}/{sha256}` | el laboratorio; la consultora, lo que nació de ella | el agente de esa consultora, después del anonimizador |
+| `ss-exportes` | `{consultora}/{fecha}-{sha256}` | la consultora (el laboratorio no) | el job de plataforma de esa consultora (§13) |
 
 **Retención** (D8, valor por defecto): los originales se guardan mientras dure el contrato; al
 salir, la consultora recibe su export (ERP-6) y se borran, también en las copias de respaldo. El
