@@ -86,6 +86,10 @@ A2A y su presupuesto de IA. El presupuesto ya existía en el motor de IA (agosto
 volvió a escribir cuatro días después en Soporte SAP (`ss-cadena`). Esas repeticiones son las candidatas a
 volver al núcleo (§4); el informe de la corrida B las lista, y aquí no se toca su código.
 
+**El reuso de composición no se compara entre productos**: depende de lo fino que esté partido el inventario
+(los 7 CLIs de Soporte SAP son 7 activos; todo el vendedor es uno). Se compara un producto consigo mismo en
+el tiempo.
+
 ## 6. Lo que el concepto no es
 
 - **No es la clase `PRODUCTO`** (§2): una pieza vendible no es un producto.

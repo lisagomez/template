@@ -155,17 +155,17 @@
     {
       "id": "concepto-producto",
       "label": "El concepto «producto» extraído de Soporte SAP: vocabulario sin choque con la clase PRODUCTO y el índice actual",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "plantilla-producto",
       "label": "Plantilla de producto: manifiesto, documento y gate que la verifica",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "segundo-producto",
       "label": "Prueba de generalización: un segundo producto que ya existe, descrito con la plantilla sin tocar código",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "propuesta-cdc",
@@ -824,7 +824,7 @@
       "id": "l-generalizacion",
       "label": "la plantilla sirve para algo más que Soporte SAP",
       "sobre": "nodo:segundo-producto",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "un producto existente cabe sin cambiar código; lo que no cupo queda escrito"
     },
     {
