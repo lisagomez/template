@@ -190,8 +190,11 @@ irrecuperable es `.env.production` — guardalo en tu gestor de contrasenas.
 
 > ⚠️ **"Viven en Supabase" no es un plan de respaldo, es una dependencia.** Lo que
 > recuperas es lo que dé **tu plan contratado**, y el PITR es un add-on de pago: en los
-> planes bajos no existe. Sin PITR confirmado en el dashboard, el RPO real de tus datos
-> **es 24h**. Compruebalo mirando, no suponiendo — y si el proyecto necesita mas, el
+> planes bajos no existe. Y en el plan **Free no hay ningun respaldo**: la doc de Supabase
+> pide exportar con `supabase db dump` y guardarlo fuera. Con Pro y sin PITR confirmado en el
+> dashboard, el RPO real de tus datos **es 24h** (respaldo diario, 7 dias). En Free, sin un dump
+> propio, el RPO es **todo lo que haya desde el principio**. Compruebalo mirando, no suponiendo
+> (verificado en la doc el 2026-10-04) — y si el proyecto necesita mas, el
 > contrato de respaldo completo esta en
 > [FASE0-INFRAESTRUCTURA.md §9](FASE0-INFRAESTRUCTURA.md).
 >

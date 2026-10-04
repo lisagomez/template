@@ -65,12 +65,12 @@
     {
       "id": "ingesta-documentos",
       "label": "Subida de documentos a la incidencia (capturas, PDF, dumps, CFDI XML): validación por bytes y tamaño, bucket privado por tenant, extractor documental con motor local (capa 0, XML, códigos, Tesseract), evidencia por campo y cola de revisión humana",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "respaldo-restauracion",
       "label": "Respaldo y restauración: decisión de snapshot por capa, respaldo de la BD (proveedor, PITR o físico + WAL), export y restauración por tenant, línea propia de Storage, simulacro cronometrado en efímero",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "estimado-recursos",
@@ -80,7 +80,7 @@
     {
       "id": "mapeo-contextual",
       "label": "Mapeo al esquema contextual: el esquema de origen de cada consultora (su herramienta de tickets, sus categorías y el panorama SAP de cada N3) a un esquema canónico con contexto; propuesto por el FDE, aprobado por el HIL, versionado; lo que no mapea va a revisión",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "limpieza-enriquecimiento",
@@ -130,7 +130,7 @@
     {
       "id": "clis-producto",
       "label": "CLIs del producto contra el simulador: dry-run, readOnly correcto, sin grado = no medido",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "deploy-config",
@@ -761,21 +761,21 @@
       "id": "l-documento-dato",
       "label": "el texto de un documento es dato, nunca instrucción",
       "sobre": "nodo:ingesta-documentos",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "documentos con instrucciones sembradas (en el texto, en la imagen y en campos del XML): 0 obedecidas por el agente"
     },
     {
       "id": "l-perimetro",
       "label": "ningún byte del documento sale del perímetro",
       "sobre": "nodo:ingesta-documentos",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "motor local; un motor externo se rechaza sin decisión C4, y con datos de terceros ninguna firma lo autoriza"
     },
     {
       "id": "l-umbral",
       "label": "sin umbral medido, todo campo va a revisión humana",
       "sobre": "nodo:ingesta-documentos",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "ningún campo se acepta solo por un umbral no medido; la calibración sobre el corpus sintético se marca como no medida sobre corpus real (TAR-17, TAR-25)"
     },
     {
@@ -845,14 +845,14 @@
       "id": "l-restauracion",
       "label": "un respaldo sin restauración probada no es respaldo",
       "sobre": "nodo:respaldo-restauracion",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "export por tenant → restaurar en Postgres efímero → conteo de filas y cadena sha256 en verde, cronometrado por tamaño; RPO/RTO de producción siguen desconocidos hasta GATE 3"
     },
     {
       "id": "l-restauracion-tenant",
       "label": "restaurar a un tenant no toca a los demás",
       "sobre": "nodo:respaldo-restauracion",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "tras restaurar al tenant A, los conteos y la cadena del tenant B no cambian"
     },
     {
@@ -887,7 +887,7 @@
       "id": "l-mapeo",
       "label": "nada se tira en silencio",
       "sobre": "nodo:mapeo-contextual",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "cada campo de origen queda mapeado, en revisión o descartado con motivo; filas de entrada = salida + revisión + descartadas"
     },
     {

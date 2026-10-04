@@ -24,7 +24,7 @@ import { identidadDe } from './identidad.js'
 import { imagenesDelPdf } from './pdf-flujos.js'
 import { leeCfdi40, camposParaCotejo } from './xml/cfdi/comprobante-40.js'
 import { registroDeEsquemas } from './xml/registro.js'
-import { tipoMimeDe } from './archivos.js'
+import { tipoMimeDe, esXmlPorBytes } from './archivos.js'
 import { camposPorPatron } from './patrones.js'
 import type { Patron } from './patrones.js'
 import { cotejaContraTranscripcion } from './transcripcion.js'
@@ -158,12 +158,7 @@ const fundeCotejos = (cotejos: readonly (Cotejo | undefined)[]): Cotejo | undefi
   }
 }
 
-const esXml = (bytes: Uint8Array): boolean => {
-  let i = 0
-  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) i = 3
-  while (i < bytes.length && (bytes[i] === 0x20 || bytes[i] === 0x0a || bytes[i] === 0x0d || bytes[i] === 0x09)) i++
-  return bytes[i] === 0x3c
-}
+const esXml = esXmlPorBytes
 
 function leeXml(bytes: Uint8Array, registro: RegistroDeEsquemas, opciones: OpcionesDeCorpus): Parcial {
   const lectura = leeCfdi40(bytes, registro)

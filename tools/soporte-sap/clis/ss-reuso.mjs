@@ -10,9 +10,9 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { leeMatriz, cuentaReuso, bloqueReuso, conBloqueReuso } from '../dist/index.js'
+import { leeMatriz, cuentaReuso, bloqueReuso, conBloqueReuso, ayuda } from '../dist/index.js'
 
-export const DESCRIPCION = { nombre: 'ss-reuso', readOnly: true, escribe: '--escribe sustituye el bloque de reuso del SDD' }
+export const DESCRIPCION = { nombre: 'ss-reuso', que: 'cuenta el reuso desde la matriz dominio × capa del SDD', uso: 'ss-reuso [--escribe] [--json] [--sdd ruta]', readOnly: false, dryRunPorDefecto: true }
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const argumento = (bandera) => {
@@ -22,7 +22,7 @@ const argumento = (bandera) => {
 const ruta = argumento('--sdd') ?? join(raiz, 'docs', 'SDD-soporte-sap.md')
 
 if (process.argv.includes('--help')) {
-  console.log('ss-reuso [--escribe] [--json] [--sdd <ruta>] — cuenta el reuso desde la matriz del SDD')
+  console.log(ayuda(DESCRIPCION))
   process.exit(0)
 }
 

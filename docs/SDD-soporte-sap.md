@@ -327,6 +327,48 @@ crudo y la cadena de eventos son la evidencia del servicio: viven lo mismo que e
 
 **Crecimiento**: por tamaño de cliente en la §14, medido con carga sintética.
 
+## 13. Respaldo y restauración
+
+**Qué aplica en cada capa** (datos verificados el 2026-10-04 en la doc oficial; lo que depende del
+proveedor del VPS queda como **pregunta abierta hasta D12**, no como dato):
+
+| Capa | Snapshot | Respaldo del proveedor / PITR | Físico + WAL | Export lógico por tenant | Sincronización aparte |
+|---|---|---|---|---|---|
+| BD en Supabase gestionado (hoy) | no aplica: la BD no vive en el VPS | **Free: ninguno**. Pro: 7 días; Team: 14; Enterprise: 30. PITR es add-on (RPO ~2 min) y exige compute Small. Restaura **todo el proyecto**, con el proyecto inaccesible mientras dura | no aplica (lo opera el proveedor) | **sí**: es lo único que devuelve a **un** tenant (`exportaTenant` / `restauraTenant`) y es la portabilidad de ERP-6 | — |
+| BD en un Postgres propio (si D10 lo elige) | solo si es **atómico** sobre `PGDATA` + WAL en el mismo volumen (equivale a un corte de luz; sin PITR) | — | **sí**: pgBackRest o WAL-G para PITR | **sí**, igual que arriba | — |
+| Storage (originales, sandbox, exportes) | no aplica | **no**: el respaldo de la BD guarda solo los metadatos de `storage.objects` | no aplica | el export lleva el **manifiesto** de objetos, no sus bytes | **sí**: línea propia (Borg o rclone a un destino append-only o inmutable; proveedor por D12) |
+| VPS (app, Caddy, OCR, `.env`) | sirve para **reconstruir rápido la máquina**, no como respaldo. Al proveedor elegido hay que preguntarle (D12): ¿es consistente con el servidor encendido? ¿incluye los volúmenes? ¿sobrevive al borrar el servidor? | — | — | — | `.env.production` cifrado con `age`, fuera del servidor (FASE0 §9) |
+
+Fuentes: [Supabase, Database Backups](https://supabase.com/docs/guides/platform/backups) ·
+[Hetzner, FAQ de backups y snapshots](https://docs.hetzner.com/cloud/servers/backups-snapshots/faq/)
+(como ejemplo de las tres preguntas; no se usará) · [PostgreSQL, snapshots atómicos](https://www.postgresql.org/message-id/20200618192642.GH6680%40tamriel.snowman.net).
+
+**Por qué el export por tenant y no solo el respaldo del proveedor** (probado en
+`pruebas/respaldo.ts`): restaurar la base entera, sea un snapshot o el respaldo del proveedor,
+regresa en el tiempo a **todas** las consultoras. En la prueba, B pierde una incidencia que no
+tenía nada que ver.
+
+**El procedimiento para un tenant** (job de plataforma declarado, C7; `ss-respaldo`):
+
+1. `exportaTenant`: filas de las 16 tablas del tenant, conteos y huella sha256 por tabla
+   (calculada en la base) y el manifiesto de sus objetos.
+2. Se guarda en `ss-exportes/{consultora}/{fecha}-{sha256}`, y su línea de respaldo es la de Storage.
+3. `restauraTenant`: una sola transacción; borra las filas del tenant (hijas primero) y las vuelve
+   a poner (padres primero) con los disparadores en modo réplica. Solo toca ese tenant.
+4. `verificaRestauracion`: conteos y huellas del tenant iguales al export, y los de los demás
+   iguales a como estaban. Si algo falla en el paso 3, la transacción no deja nada a medias.
+
+**Simulacro en efímero** (`node tools/soporte-sap/evidencia/respaldo.ts`, 2026-10-04, PGlite en
+proceso en una máquina de desarrollo):
+
+| Tamaño de la consultora | Incidencias (12 meses) | Filas | Export | Restauración | Verificación | A = export | B intacta |
+|---|---|---|---|---|---|---|---|
+| S | 290 | 2 603 | 97 ms | 62 ms | 70 ms | ✓ | ✓ |
+| M | 770 | 6 923 | 221 ms | 129 ms | 114 ms | ✓ | ✓ |
+| L | 2 618 | 23 555 | 732 ms | 395 ms | 285 ms | ✓ | ✓ |
+
+Son **tiempos de laboratorio**. **RPO y RTO de producción: desconocidos hasta GATE 3.**
+
 ## 17. Decisiones abiertas
 
 Las quince de la spec (D1–D15), con su valor seguro por defecto, viven en

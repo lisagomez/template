@@ -47,7 +47,17 @@ export function prioridadItil(impacto: 1 | 2 | 3, urgencia: 1 | 2 | 3): Priorida
   return suma <= 2 ? 'P1' : suma === 3 ? 'P2' : suma === 4 ? 'P3' : 'P4'
 }
 
-function transaccionDe(texto: string): string | null {
+/** El mensaje de error SAP del texto (`M7 053`, `CFDI40102`, un dump) y el módulo que delata. */
+export function mensajeDe(texto: string): { mensaje: string; modulo: string } | null {
+  for (const [re, modulo] of MENSAJES) {
+    const m = re.exec(texto)
+    if (m) return { mensaje: m.slice(1).filter(Boolean).join(' '), modulo }
+  }
+  return null
+}
+
+/** La transacción SAP del texto: una conocida o una Z. */
+export function transaccionDe(texto: string): string | null {
   const conocidas = Object.keys(TRANSACCIONES).sort((a, b) => b.length - a.length)
   for (const t of conocidas) if (new RegExp(`(?<![A-Z0-9_-])${t.replace('-', '\\-')}(?![A-Z0-9_])`).test(texto.toUpperCase())) return t
   return /(?<![A-Z0-9_])(Z[A-Z0-9_]{2,19})(?![A-Z0-9_])/.exec(texto.toUpperCase())?.[1] ?? null
@@ -57,12 +67,9 @@ function transaccionDe(texto: string): string | null {
 export function categoriza(texto: string): Clasificacion {
   const razones: string[] = []
   const transaccion = transaccionDe(texto)
-  let mensaje: string | null = null
-  let moduloMensaje: string | null = null
-  for (const [re, modulo] of MENSAJES) {
-    const m = re.exec(texto)
-    if (m) { mensaje = m.slice(1).filter(Boolean).join(' '); moduloMensaje = modulo; break }
-  }
+  const m = mensajeDe(texto)
+  const mensaje = m?.mensaje ?? null
+  const moduloMensaje = m?.modulo ?? null
   const modulo = (transaccion && TRANSACCIONES[transaccion]) ?? moduloMensaje ?? (transaccion?.startsWith('Z') ? 'ABAP' : null)
   if (transaccion) razones.push(`transacción ${transaccion}`)
   if (mensaje) razones.push(`mensaje ${mensaje}`)
