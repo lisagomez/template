@@ -288,18 +288,18 @@ prueba de las superficies contra el corte (`pruebas/semantica.ts`).
 | `marts` | `fct_incidencia`, `dim_cliente`, `fct_cliente_mes`, `fct_importacion`, `metricflow_time_spine` | las tablas que lee MetricFlow |
 | Semántica | `modelos_semanticos.yml`, `metricas.yml` | 4 modelos semánticos (incidencias, clientes, ciclo de vida, importación) y el catálogo |
 
-`dbt build`: **51 nodos, PASS=51** (5 semillas, 12 modelos, 34 pruebas: unicidad, nulos, valores
+`dbt build`: **53 nodos, PASS=53** (5 semillas, 12 modelos, 36 pruebas: unicidad, nulos, valores
 aceptados, relaciones, y tres propias: la importación cuadra, ningún hecho se pierde, el ciclo no tiene
 huecos). `mf validate-configs`: 0 errores; 2 avisos que pone el parser de dbt 1.12 al convertir la
 medida de los dos acumulados en métrica de entrada (la medida se ignora; el resultado es el mismo).
 
-**El catálogo** (17 métricas, cada una con unidad, etapa del ciclo y si el cliente la ve):
+**El catálogo** (19 métricas, cada una con unidad, etapa del ciclo y si el cliente la ve):
 
 | Etapa | Métricas |
 |---|---|
 | Onboarding | tiempo al primer valor, cobertura del mapeo (filas limpias / importadas) |
 | Adopción | reuso del conocimiento (resuelto con regla del grafo) |
-| Operación | volumen, resueltas, MTTR, primera respuesta, resolución al primer contacto, reapertura, backlog al cierre, cumplimiento de SLA de respuesta y de resolución, horas de consultor, horas por incidencia |
+| Operación | volumen, resueltas, MTTR, primera respuesta, resolución al primer contacto, reapertura, backlog al cierre, cumplimiento de SLA de respuesta y de resolución, horas de consultor, horas por incidencia, proporción crítica (P1+P2) y proporción compleja (variables del pricing) |
 | Renovación | salud de la cuenta, riesgo de baja |
 | Todas | clientes en cartera por etapa (alta, onboarding, adopción, operación, renovación) |
 
@@ -308,7 +308,7 @@ La **etapa** de cada cliente por mes y la fórmula de la **salud** son definicio
 es salud < 0.85. Sin SLA medido no hay salud: el corte dice «sin dato», nunca un cero.
 
 **El corte semántico** es la salida: en el producto, la tabla `ss_metrica` (§12) con RLS por nivel;
-en el laboratorio, `semantica/corte.json` (954 valores, versión = `sha256:` + la huella de las entradas). **Es lo único
+en el laboratorio, `semantica/corte.json` (1 070 valores, versión = `sha256:` + la huella de las entradas). **Es lo único
 que leen** los tableros N1, N2 y N3, el SLA, el pricing, los impactos y el chat
 (`src/corte.ts` + `src/superficies.ts`). La prueba lo vigila de tres maneras: la misma métrica del mismo
 periodo da el mismo número en las seis superficies; un valor centinela plantado en el corte aparece
@@ -369,13 +369,22 @@ medición.
 
 ## 11. Pricing, costos, impactos y accionables
 
-- **Pricing.** Las variables del cliente (tipo de empresa y tamaño, mezcla de prioridades,
-  complejidad por la categoría de la matriz, tiempo de respuesta contratado) asignan un **tier**
-  con una regla determinista. El **costo por tier** sale del estimado de consumo (§14) por costos
-  unitarios con fuente, o «no medido». **El precio es un parámetro por decidir** (ERP-7, D5): la
-  pantalla nunca muestra un número inventado.
-- **Control de costos.** Presupuesto por consultora con el aviso al 80 % de la contabilidad de la
-  app (`TPL-motor-ia`). Cortar al 100 % lo decide la app y es una decisión con víctima (C4).
+- **Pricing** (`tools/soporte-sap/src/pricing.ts`, `node tools/soporte-sap/evidencia/pricing.ts`).
+  Las variables del N3 salen del **corte semántico** (volumen, proporción crítica P1+P2 y
+  proporción compleja, dos métricas que se sumaron al catálogo para esto) y del **contrato**
+  (¿alguna meta corre 24×7?); el tamaño, del perfil del cliente. Una regla determinista las lleva a
+  un **tier** (esencial, profesional, crítico) con umbrales **supuestos** (D11), a la vista. El
+  **costo por tier** = consumo del estimado (§14, cada cifra medida, derivada o supuesta) más las
+  horas de consultor (horas por incidencia del corte × volumen supuesto), por un **precio unitario
+  por decidir** (proveedor D12, modelo D7, BD D10, costo hora de la consultora): hasta tenerlo, el
+  costo dice «no medido», nunca cero. **El precio de venta y el modelo de cobro son parámetros por
+  decidir** (ERP-7, D5); los modelos de cobro de referencia (por tier, bolsa de horas, por ticket)
+  están en §18. Ningún número de precio en el código ni en la pantalla (`pruebas/pricing.ts`).
+- **Control de costos.** La guardia de presupuesto de la sala (fail-closed, aviso al 80 %) dice si
+  se puede llamar al modelo; `accionAnteElPresupuesto` decide qué hace el triage: al 80 %, llama y
+  avisa; al tope o sin fila de presupuesto, **P1 y P2 pasan a una persona en el momento** y P3 y P4
+  esperan con aviso. Cortar el servicio por la factura es una decisión con víctima (C4): aquí nunca
+  deja sin atención a un P1 o un P2.
 - **Impactos en MXN.** Cada proyección muestra su fórmula, sus supuestos y su rango (bajo, central
   y alto). Los supuestos son parámetros: costo hora del consultor, costo de un paro por prioridad,
   volumen esperado. Hasta que la consultora los capture (D15), dicen «supuesto del laboratorio».

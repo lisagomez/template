@@ -14,11 +14,14 @@ semantic_models:
       - {name: creada_en, type: time, type_params: {time_granularity: day}}
       - {name: resuelta_en, type: time, type_params: {time_granularity: day}}
       - {name: prioridad, type: categorical}
+      - {name: complejidad, type: categorical}
       - {name: modulo, type: categorical}
       - {name: sistema, type: categorical}
       - {name: estado, type: categorical}
     measures:
       - {name: incidencias_recibidas, agg: sum, expr: '1', create_metric: true}
+      - {name: incidencias_criticas, agg: sum, expr: case when es_critica then 1 else 0 end, create_metric: true}
+      - {name: incidencias_complejas, agg: sum, expr: case when es_compleja then 1 else 0 end, create_metric: true}
       - name: incidencias_resueltas
         agg: sum
         expr: case when esta_resuelta then 1 else 0 end

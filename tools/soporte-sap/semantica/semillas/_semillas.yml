@@ -14,6 +14,7 @@ seeds:
         sistema: text
         modulo: text
         prioridad: text
+        complejidad: text
         regla_aplicada: text
         estado: text
         creada_en: timestamptz

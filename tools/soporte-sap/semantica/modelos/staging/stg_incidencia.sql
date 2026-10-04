@@ -7,6 +7,7 @@ select distinct on (id)
   sistema,
   upper(coalesce(modulo, 'SIN_MODULO')) as modulo,
   prioridad,
+  coalesce(complejidad, 'alta')         as complejidad,
   regla_aplicada,
   estado,
   creada_en::timestamptz                as creada_en,

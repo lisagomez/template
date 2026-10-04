@@ -73,6 +73,20 @@ metrics:
       metrics: [{name: recibidas_acumuladas}, {name: resueltas_acumuladas}]
     config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion}}
 
+  - name: proporcion_critica
+    label: Proporción crítica
+    description: De lo recibido en el periodo, la proporción P1 o P2. Variable del pricing (urgencia y prioridad del N3).
+    type: ratio
+    type_params: {numerator: incidencias_criticas, denominator: incidencias_recibidas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
+
+  - name: proporcion_compleja
+    label: Proporción compleja
+    description: De lo recibido en el periodo, la proporción de complejidad alta (sin caso en la matriz o caso complejo). Variable del pricing.
+    type: ratio
+    type_params: {numerator: incidencias_complejas, denominator: incidencias_recibidas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
+
   # --- SLA ------------------------------------------------------------------------------------
   - name: cumplimiento_sla_respuesta
     label: Cumplimiento de SLA de respuesta

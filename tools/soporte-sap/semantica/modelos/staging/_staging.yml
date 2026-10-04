@@ -32,6 +32,11 @@ models:
         data_tests:
           - accepted_values:
               arguments: {values: ['nueva', 'en_atencion', 'espera_cliente', 'en_revision', 'resuelta', 'cerrada']}
+      - name: complejidad
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: {values: ['baja', 'media', 'alta']}
 
   - name: stg_sla_resultado
     description: El resultado del reloj de SLA por incidencia, tal como lo escribió src/sla.ts.

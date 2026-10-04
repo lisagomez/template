@@ -110,7 +110,7 @@
     {
       "id": "modelo-pricing",
       "label": "Modelo de pricing y control de costos: variables del N3, costo medido por operación, tiers con cifras por decidir",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "impactos-accionables",
@@ -789,7 +789,7 @@
       "id": "l-precio",
       "label": "ninguna cifra inventada",
       "sobre": "nodo:modelo-pricing",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "cada costo tiene fuente medida o dice no medido; cada precio es parámetro por decidir del laboratorio (ERP-7)"
     },
     {

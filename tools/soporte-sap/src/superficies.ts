@@ -82,6 +82,8 @@ export function insumosPricing(corte: Corte, lector: Lector, consultora: string,
     horasPorTicket: tarjeta(corte, lector, 'horas_por_ticket', periodo, donde),
     mttrHoras: tarjeta(corte, lector, 'mttr_horas', periodo, donde),
     cumplimientoSlaRespuesta: tarjeta(corte, lector, 'cumplimiento_sla_respuesta', periodo, donde),
+    proporcionCritica: tarjeta(corte, lector, 'proporcion_critica', periodo, donde),
+    proporcionCompleja: tarjeta(corte, lector, 'proporcion_compleja', periodo, donde),
     clientesEnCartera: cliente ? null : ETAPAS.map((e) => tarjeta(corte, lector, 'clientes_en_cartera', periodo, { alcance: 'consultora', consultora, etapa: e })),
   }
 }

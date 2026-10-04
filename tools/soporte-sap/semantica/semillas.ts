@@ -7,8 +7,8 @@
 import { createHash } from 'node:crypto'
 import { similitud, digitoVerificadorRfc, digitoVerificadorCurp } from '../../extractor-documental/dist/index.js'
 import {
-  generaCorpus, exporteSucio, proponeMapeo, apruebaMapeo, aplicaMapeo, limpia, relojSla, contratoDeLaboratorio, CLIENTES,
-  type CorpusLab,
+  generaCorpus, exporteSucio, proponeMapeo, apruebaMapeo, aplicaMapeo, limpia, relojSla, contratoDeLaboratorio, complejidadDe,
+  CLIENTES, MATRIZ_LABORATORIO, type CorpusLab,
 } from '../dist/index.js'
 
 export type Valor = string | number | boolean | null
@@ -57,13 +57,14 @@ function incidencias(c: CorpusLab): { incidencia: Tabla; sla: Tabla; horas: Tabl
     const contrato = contratoDeLaboratorio(i.consultora, i.cliente, cl.alta)
     const r = relojSla(ev, i.prioridad, contrato, c.corte)
     const regla = resuelta && i.reglaDeOrigen ? i.reglaDeOrigen : null
-    inc.push([i.id, i.consultora, i.cliente, i.sistema, i.modulo, i.prioridad, regla, estado, i.creada, primera(ev, 'PRIMERA_RESPUESTA'), resuelta, ultima(ev, 'CERRADA')])
+    const complejidad = complejidadDe(MATRIZ_LABORATORIO.find((e) => e.regla === i.reglaDeOrigen) ?? null)
+    inc.push([i.id, i.consultora, i.cliente, i.sistema, i.modulo, i.prioridad, complejidad, regla, estado, i.creada, primera(ev, 'PRIMERA_RESPUESTA'), resuelta, ultima(ev, 'CERRADA')])
     sla.push([i.id, contrato.id, contrato.version, i.consultora, i.cliente, r.prioridad, r.respuestaMin, r.resolucionMin, r.metaRespuestaMin,
       r.metaResolucionMin, r.cumpleRespuesta, r.cumpleResolucion, r.estado, r.pausadoMin, r.reabierta, r.esperoCliente])
     if (i.minutosConsultor > 0) horas.push([i.consultora, i.cliente, i.id, i.minutosConsultor, (ev.at(-1)?.fecha ?? i.creada).slice(0, 10)])
   }
   return {
-    incidencia: { columnas: ['id', 'consultora_id', 'cliente_id', 'sistema', 'modulo', 'prioridad', 'regla_aplicada', 'estado', 'creada_en', 'primera_respuesta_en', 'resuelta_en', 'cerrada_en'], filas: inc },
+    incidencia: { columnas: ['id', 'consultora_id', 'cliente_id', 'sistema', 'modulo', 'prioridad', 'complejidad', 'regla_aplicada', 'estado', 'creada_en', 'primera_respuesta_en', 'resuelta_en', 'cerrada_en'], filas: inc },
     sla: { columnas: ['incidencia_id', 'contrato_id', 'contrato_version', 'consultora_id', 'cliente_id', 'prioridad', 'respuesta_min', 'resolucion_min', 'meta_respuesta_min', 'meta_resolucion_min', 'cumple_respuesta', 'cumple_resolucion', 'estado', 'pausado_min', 'reabierta', 'espero_cliente'], filas: sla },
     horas: { columnas: ['consultora_id', 'cliente_id', 'incidencia_id', 'minutos', 'fecha'], filas: horas },
   }
