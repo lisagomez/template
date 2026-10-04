@@ -176,6 +176,13 @@ Se firma junto con el BUSINESS_LOGIC del producto.
   (v2) con su prueba negativa. **Lección**: un control escrito en el C3 sin una comprobación que se
   ponga roja es una intención; la revisión cruzada lo encuentra antes que un atacante.
 
+- **2026-10-04 · un banco de pruebas hecho a la medida del detector mide al detector, no la fuga.**
+  La v1 del anonimizador daba 0 fugas sobre variantes que el mismo autor había escrito; un revisor
+  adversarial independiente construyó 63 entradas (RFC partido, «arroba», nombres fuera de lista,
+  minúsculas) y fugaron 54. La v2 reconoce nombres por **exclusión** del vocabulario y datos por su
+  forma, y las 63 entradas quedan como fixture permanente. **Lección**: la referencia de un lazo de
+  privacidad la pone alguien que no escribió el detector; el banco propio solo cuida regresiones.
+
 - **2026-10-04 · la regla de identificadores de caso muerde nombres de prueba.** `verify:gobernanza`
   rechaza cualquier «T» seguida de uno o dos dígitos como palabra suelta: tenants de prueba con ese
   nombre y una plantilla de fecha con la hora pegada a una llave lo dispararon. Antes de cada

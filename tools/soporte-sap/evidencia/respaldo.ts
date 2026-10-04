@@ -8,28 +8,11 @@
  * Uso: node tools/soporte-sap/evidencia/respaldo.ts   · Exit 1 si una restauración no cuadra.
  */
 import { exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, type Consulta } from '../dist/index.js'
-import { baseSoporte, ORG } from '../pruebas/_base.ts'
+import { baseSoporte, cargaSintetica as carga, ORG } from '../pruebas/_base.ts'
 
 /** Incidencias por mes de una consultora según su tamaño (SUPUESTO del laboratorio, D11). */
 const TAMANOS = { S: 24, M: 64, L: 218 } as const
 
-async function carga(db: Awaited<ReturnType<typeof baseSoporte>>, consultora: string, cliente: string, porMes: number): Promise<void> {
-  const n = porMes * 12
-  await db.exec(`begin; set local session_replication_role = replica;
-    insert into ss_incidencia (id, consultora_id, cliente_id, titulo, descripcion, prioridad, estado, creada_en)
-      select gen_random_uuid(), '${consultora}', '${cliente}', 'Incidencia sintética ' || g, repeat('texto de la incidencia ', 12), (array['P1','P2','P3','P4'])[1 + g % 4], 'cerrada', now() - (g || ' hours')::interval
-      from generate_series(1, ${n}) g;
-    insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, actor, fecha, anterior, hash)
-      select i.id, i.consultora_id, i.cliente_id, s, (array['RECIBIDA','CATEGORIZADA','PRIMERA_RESPUESTA','RESUELTA','CERRADA','NOTA'])[s], 'agente:soporte-sap-a2a', i.creada_en + (s || ' minutes')::interval, md5(i.id::text || (s - 1)), md5(i.id::text || s)
-      from ss_incidencia i, generate_series(1, 6) s where i.consultora_id = '${consultora}' and i.titulo like 'Incidencia sintética%';
-    insert into ss_adjunto (incidencia_id, consultora_id, cliente_id, sha256, ruta, tipo_mime, bytes, via)
-      select i.id, i.consultora_id, i.cliente_id, encode(sha256(i.id::text::bytea), 'hex'), i.consultora_id || '/' || i.cliente_id || '/' || i.id || '/' || encode(sha256(i.id::text::bytea), 'hex'), 'image/png', 180000, 'ocr_local'
-      from ss_incidencia i where i.consultora_id = '${consultora}' and i.titulo like 'Incidencia sintética%';
-    insert into ss_horas (consultora_id, cliente_id, incidencia_id, consultor, minutos, fecha)
-      select i.consultora_id, i.cliente_id, i.id, 'usr-000000000abc', 30 + (random() * 300)::int, current_date
-      from ss_incidencia i where i.consultora_id = '${consultora}' and i.titulo like 'Incidencia sintética%';
-    commit;`)
-}
 
 const ms = (t0: number) => `${(performance.now() - t0).toFixed(0)} ms`
 

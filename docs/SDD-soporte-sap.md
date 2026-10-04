@@ -184,11 +184,27 @@ documental (`TPL-extractor-documental`, sin parches: lo que falte se pide como v
    pantalla lo dice;
 6. el texto extraído es dato: nunca instrucción para el agente.
 
-**Anonimización** antes del sandbox, **fail-closed**: RFC, CURP y NSS (validados por dígito
-verificador con los identificadores del extractor), correos, teléfonos, CLABE y cuentas, números de
-personal de SAP HCM, usuarios SAP, montos de nómina y nombres. Si queda una señal que no se puede
-resolver con certeza, el caso queda **en cuarentena** para el experto y no entra al sandbox. Los
-datos de empleados del N3 son daño a terceros: no es firmable (límite de C5).
+**Anonimización** antes del sandbox, **fail-closed** (`tools/soporte-sap/src/anonimiza.ts`, v2):
+
+1. **identificadores**: RFC, CURP y NSS se reconocen por su **forma**, también partidos en trozos,
+   con guiones, con 0↔O y 1↔I↔L de OCR; el dígito verificador del extractor solo dice qué etiqueta
+   lleva, no si se quita. Correos (también «arroba»/«punto»), teléfonos, CLABE, cuentas, números de
+   personal, usuarios SAP, montos, fechas de nacimiento y domicilios;
+2. **nombres por exclusión**: un nombre es la secuencia en mayúsculas que **no** es vocabulario
+   (español de los tickets, SAP, nombres de empresa del laboratorio: `src/lexico.ts`), la que sigue
+   a un tratamiento (Lic., Ing.) o a un disparador («de parte de», «según»), o la que precede a un
+   verbo de reporte. Una lista de nombres deja pasar a quien no está en ella; esta regla no;
+3. **cuarentena**: lo que queda con forma de dato (siete dígitos o más, un correo, un tratamiento,
+   un posible usuario) no entra. Y **todo caso de RR. HH. o nómina va a revisión humana** aunque
+   quede bien anonimizado: un finiquito o una incapacidad identifican a una persona por contexto, y
+   ahí el daño recae en un tercero que no firmó (límite de C5);
+4. la cuarentena guarda **tipos** de señal, nunca el dato.
+
+Medido sobre el corpus sintético (`node tools/soporte-sap/evidencia/anonimizacion.ts`): 277 casos
+(corpus, variantes propias y las **63 entradas del revisor adversarial**, que la v1 dejaba fugar en
+54), **0 fugas**. Las 63 quedan como fixture permanente (`pruebas/_adversariales.ts`). Medir sobre
+un corpus real con consentimiento queda pendiente (D9). `generaliza` además quita lo que identifica
+al cliente (transacciones Z, sociedad, nombre del cliente) antes de que un caso suba al núcleo.
 
 ## 7. El agente como Forward Deployed Engineer
 
@@ -368,6 +384,46 @@ proceso en una máquina de desarrollo):
 | L | 2 618 | 23 555 | 732 ms | 395 ms | 285 ms | ✓ | ✓ |
 
 Son **tiempos de laboratorio**. **RPO y RTO de producción: desconocidos hasta GATE 3.**
+
+## 14. Estimado de consumo por cliente y por tamaño
+
+Medido con `node tools/soporte-sap/evidencia/estimado.ts` (2026-10-04), que escribe
+[`tools/soporte-sap/medicion/estimado.json`](../tools/soporte-sap/medicion/estimado.json): lo leen
+el pricing (§11) y el dimensionamiento del VPS (§15). **Cada cifra dice qué es**, y una derivada que
+depende de un supuesto, aunque sea de lejos, lo dice (prueba: `pruebas/estimado.ts`).
+
+| Insumo | Valor | Naturaleza |
+|---|---|---|
+| bytes de BD por incidencia (con 6 eventos, adjunto y horas) | 2 815 | **medida** (PGlite, 2 616 incidencias sintéticas) |
+| bytes de export por incidencia | 3 857 | **medida** |
+| ms de CPU por incidencia (categorizador + matriz sobre el grafo + cadena) | 0.518 | **medida** |
+| segundos de OCR por página (Tesseract por zonas, CPU, sin GPU) | 0.29 | **medida** sobre una captura sintética |
+| documentos por incidencia · bytes por documento · fracción de imágenes | 1.2 · 250 000 · 0.6 | **supuesta** |
+| tokens por incidencia | 9 000 | **supuesta**: sin LLM real no hay medición (D7) |
+| bytes servidos por incidencia · RAM base · RAM por trabajador de OCR | 400 000 · 768 MB · 350 MB | **supuesta** |
+
+**Volumen por tamaño (supuesto, D11):** consultora S/M/L = 24/64/218 incidencias al mes; cliente
+S/M/L = 8/20/45.
+
+| Consumo al mes (consultora) | S | M | L |
+|---|---|---|---|
+| BD | 0.07 MB | 0.18 MB | 0.61 MB |
+| Storage (originales) | 7.2 MB | 19.2 MB | 65.4 MB |
+| Páginas de OCR · CPU de OCR | 17 · 0.08 CPU-min | 46 · 0.22 CPU-min | 157 · 0.76 CPU-min |
+| Tokens (supuesto) | 216 000 | 576 000 | 1 962 000 |
+| Respaldo (export) | 0.09 MB | 0.25 MB | 0.84 MB |
+| Egreso | 9.6 MB | 25.6 MB | 87.2 MB |
+| **Máquina si corriera sola** | 2 vCPU · 1.5 GB · 21 GB | 2 vCPU · 1.5 GB · 21 GB | 2 vCPU · 1.5 GB · 22 GB |
+
+Todas las filas de consumo son **derivadas con supuesto** (el volumen por tamaño es supuesto); la
+tabla completa, con la fórmula de cada fila y el tamaño de cliente, la imprime el script.
+
+**Lectura.** La infraestructura que pide una consultora, incluso L, cabe en la máquina más chica que
+tenga sentido (2 vCPU). Lo que mueve el costo no es el cómputo: son **las horas del consultor y del
+experto** y, cuando haya un modelo real, **los tokens**, que hoy son supuesto. Por eso el pricing se
+apoya en la mezcla de prioridades y el tiempo de respuesta contratado, no en la infraestructura. Con
+un motor de OCR autohospedado sin GPU (unos 110 s por página, medido por el extractor), el OCR de una
+consultora L ya pediría más vCPU en la hora pico: la prueba de `maquinaPara` lo cubre.
 
 ## 17. Decisiones abiertas
 

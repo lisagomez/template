@@ -208,6 +208,14 @@
    "cubre": ["src/features/ventas-whatsapp"]
   },
   {
+   "id": "TPL-feature-soporte-sap",
+   "nombre": "App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente) y su contrato de negocio",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/soporte-sap", "responsable": "dep-sw",
+   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md"],
+   "cubre": ["src/features/soporte-sap"]
+  },
+  {
    "id": "TPL-sala-a2a",
    "nombre": "Sala A2A: canales, hilos de un nivel y aprobaciones como fila que ningun componente que ejecuta un modelo puede fabricar; esquema propuesto con su suite de sabotajes S1-S7 (0.1.0)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",

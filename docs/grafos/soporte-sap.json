@@ -30,7 +30,7 @@
     {
       "id": "business-logic",
       "label": "BUSINESS_LOGIC de Soporte SAP: contrato C4, respaldo §4 y decisiones abiertas; firma pendiente",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "prp",
@@ -75,7 +75,7 @@
     {
       "id": "estimado-recursos",
       "label": "Estimado de consumo por cliente y por tamaño (consultora y N3, S/M/L): BD, Storage, OCR, tokens, CPU/RAM, respaldo y egreso; cada cifra medida en laboratorio, derivada o supuesta, sin mezclarlas",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "mapeo-contextual",
@@ -85,7 +85,7 @@
     {
       "id": "limpieza-enriquecimiento",
       "label": "Limpieza y enriquecimiento: deduplicar y normalizar el histórico (módulo, componente, transacción, fechas, prioridades) y enriquecerlo con el extractor, la matriz y el grafo; procedencia por campo y el crudo inmutable",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "capa-semantica",
@@ -95,7 +95,7 @@
     {
       "id": "anonimizador",
       "label": "Anonimizador fail-closed: lo que no se anonimiza con certeza no entra al sandbox",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "cadena-eventos",
@@ -747,14 +747,14 @@
       "id": "l-aislamiento",
       "label": "aislamiento de tres niveles probado, no asumido",
       "sobre": "nodo:app-soporte-sap",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "consultora A no ve a B; un N3 no ve a otro N3; N3 no ve el sandbox; ni las filas ni los originales del bucket; todos los intentos con el rol real, rechazados"
     },
     {
       "id": "l-anonimizacion",
       "label": "cero fugas de datos sensibles al sandbox",
       "sobre": "arista:a-app-anon",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "corpus con datos sensibles sembrados (nombres, RFC, CURP, correos, nómina, cuentas): 0 fugas; ante la duda no entra"
     },
     {
@@ -859,7 +859,7 @@
       "id": "l-estimado",
       "label": "cada cifra dice de dónde sale",
       "sobre": "nodo:estimado-recursos",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "medida (laboratorio, sintético), derivada (fórmula visible) o supuesta; ninguna supuesta se presenta como medida"
     },
     {
@@ -894,7 +894,7 @@
       "id": "l-procedencia",
       "label": "cada dato limpio o enriquecido dice de dónde salió",
       "sobre": "nodo:limpieza-enriquecimiento",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "el crudo es inmutable; cada valor limpio o enriquecido apunta a su original y a la regla o fuente que lo cambió; se puede reconstruir el crudo"
     },
     {
