@@ -1,4 +1,5 @@
 {
+ "plantilla": 2,
  "slug": "soporte-sap",
  "nombre": "Soporte SAP",
  "version": 1,
@@ -62,6 +63,14 @@
   { "id": "chat-hil", "tipo": "interno", "que": "N1 con el agente; lo que pide aprobación se promueve a la sala" },
   { "id": "app", "tipo": "interno", "que": "/soporte-sap, un bento por nivel" }
  ],
+ "terceros": [
+  { "quien": "la base de datos gestionada (Supabase u otro Postgres)", "recibe": "la base del producto: incidencias, documentos y datos de operación de los N3, con RLS", "datosPersonales": true, "decision": "D10 (por decidir: proyecto propio o compartido, o un Postgres de la casa)",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el plan como parámetro: Free no tiene respaldo, Pro guarda 7 días" } },
+  { "quien": "el proveedor del VPS y del respaldo fuera de sitio", "recibe": "la app, la sala, el almacenamiento y las copias de respaldo", "datosPersonales": true, "decision": "D12 (por decidir: lo elige el laboratorio; no Hetzner)",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts" } },
+  { "quien": "el proveedor de modelo", "recibe": "hoy nada: sin LLM real, y nunca datos de clientes sin decidir qué modelo está prohibido por clase de dato", "datosPersonales": false, "decision": "D7 (por decidir)",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "la línea de tokens del costo" } }
+ ],
  "pricing": {
   "variables": ["tamaño del N3", "volumen al mes", "proporción crítica (P1 + P2)", "proporción compleja", "respuesta 24×7 en el contrato"],
   "tiers": ["esencial", "profesional", "critico"],
@@ -107,5 +116,6 @@
   "no compromete disponibilidad ni RPO/RTO antes de GATE 3",
   "no llama a un modelo con datos de clientes (D7)"
  ],
+ "noCupo": [],
  "decisiones": "docs/goals/soporte-sap.md"
 }

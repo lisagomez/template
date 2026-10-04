@@ -266,7 +266,7 @@ npm run inventario:vista     # regenera inventario/INVENTARIO.md tras tocar el i
 npm run inventario:exporta   # costeo + ledger + SQL para el modulo act del ERP, en inventario/salida/ (fuera de git)
 npm run inventario:valida-erp  # carga el export en un Postgres desechable con erp/migrations/ (Docker)
 npm run verifica:marca-blanca  # todo archivo de erp/ clasificado (erp/entrega.json); ni defendibles ni huellas de la casa en lo que se entrega
-npm run verifica:productos  # cada manifiesto de productos/ contra el indice y el inventario (dueno, composicion, lo que no se negocia); siembra 18 defectos
+npm run verifica:productos  # cada manifiesto de productos/ contra el indice y el inventario (dueno, composicion, terceros, lo que no se negocia, lo que falta y lo que no cupo); siembra 26 defectos
 npm run erp:prueba   # instala el ERP 2 veces en un Postgres 17 desechable, pruebas de cierre (a)-(j) y esquema ≡ produccion (Docker)
 npm run erp:control  # la prueba de las pruebas del ERP: 6 mutaciones de las migraciones, todas deben caer en rojo (Docker)
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado

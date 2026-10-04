@@ -75,6 +75,8 @@ El clasificador de producto: las piezas que un producto vende, con su estado y, 
 | soporte-sap | TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente) y su contrato de negocio | blueprint | — |
 | soporte-sap | TPL-sala-a2a | Sala A2A: canales, hilos de un nivel y aprobaciones como fila que ningun componente que ejecuta un modelo puede fabricar; esquema propuesto con su suite de sabotajes S1-S7 (0.1.0) | blueprint | — |
 | soporte-sap | TPL-soporte-sap | Soporte SAP en laboratorio: dominio de tres niveles (laboratorio, consultora, cliente), matriz problema-solucion sobre el grafo, simulador SAP y de tickets, anonimizador, cadena de eventos, mapeo y limpieza, SLA, pricing, impactos en MXN, respaldo por tenant y el agente FDE (0.1.0) | blueprint | — |
+| ventas-whatsapp | TPL-feature-ventas-whatsapp | Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a) | blueprint | — |
+| ventas-whatsapp | TPL-ventas-whatsapp | Vendedor con IA en WhatsApp para pymes, fases 0-3 en laboratorio: canal Cloud API, agente acotado con barreras y traspaso, comercio con Flows cifrados y liga de pago, atribucion con Conversions API y ROAS, A2A multi-inquilino, venta y renta de numeros (N-01), BSP propio con Embedded Signup y cobro (N-02), y el simulador de Meta (0.1.0) | blueprint | — |
 
 ## Fuentes que se escanean
 

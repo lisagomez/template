@@ -46,6 +46,12 @@ contrato y clientes que lo compran solo) **y** un componente de Soporte SAP. Las
 vez porque «producto» ya no es una propiedad del activo sino una relación: el extractor tiene un dueño y
 varios compositores.
 
+**Lo que no es activo: los terceros.** Lo que un producto usa y no está en el inventario —la base de datos
+gestionada, el proveedor del VPS, Meta, un procesador de pagos, un proveedor de LLM— no se compone: se
+contrata. El manifiesto lo declara aparte (`terceros`), con lo que recibe, la decisión que lo fija y lo que
+cuesta, porque ahí es donde el dato sale del perímetro (C4). Soporte SAP los tenía en sus decisiones (D7, D10,
+D12) y la plantilla v1 no los recogía; lo destapó el segundo producto, el vendedor en WhatsApp, que tiene cinco.
+
 ## 4. La frontera FDE: a medida y núcleo
 
 El A2A trabaja como Forward Deployed Engineer: entra a cada cliente, configura, resuelve a medida y devuelve
@@ -73,6 +79,12 @@ Dos medidas, que no se confunden:
 - **reuso de la matriz dominio × capa** (si el producto la tiene): la cuenta por celda del SDD. En Soporte
   SAP, 40.7 % amplio y 14.8 % estricto (`node tools/soporte-sap/clis/ss-reuso.mjs`). Es más fina, pero solo
   existe donde alguien hizo la matriz.
+
+Medido con los dos manifiestos: Soporte SAP compone 20 activos con 50 % de reuso de composición; el vendedor
+en WhatsApp, 3 con 33.3 %. El vendedor se construyó casi solo, con su propia cadena de hashes, su pasarela
+A2A y su presupuesto de IA. El presupuesto ya existía en el motor de IA (agosto), y la cadena de hashes se
+volvió a escribir cuatro días después en Soporte SAP (`ss-cadena`). Esas repeticiones son las candidatas a
+volver al núcleo (§4); el informe de la corrida B las lista, y aquí no se toca su código.
 
 ## 6. Lo que el concepto no es
 
