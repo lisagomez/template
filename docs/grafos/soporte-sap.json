@@ -1,0 +1,915 @@
+{
+  "slug": "soporte-sap",
+  "titulo": "Soporte SAP y el concepto «producto»: el grafo de construcción. Primero el producto real (niveles 1-2-3 sobre apps y herramientas que ya existen), después el concepto y la plantilla extraídos de él. Estados honestos: morado = existe y está validado; ámbar = existe sin estreno (beta o propuesta); gris = falta. Al 2026-10-04 todo lo que se construye está en gris.",
+  "nodos": [
+    {
+      "id": "brief",
+      "label": "Brief del laboratorio (SoporteSAP.md, 2026-10-04): tres niveles B2B2C, sandbox y producción, sala A2A, pricing por tipo de empresa N3",
+      "estado": "morado"
+    },
+    {
+      "id": "spec-sala",
+      "label": "SPEC-sala-a2a r2 + PRP fase A (hermes-os-a2a@e122f54): invariante de aprobación humana, política restrictiva, sabotajes S1-S6",
+      "estado": "ambar"
+    },
+    {
+      "id": "activos",
+      "label": "Activos que ya existen: extractor, grafo + conocimiento, trayectorias, contabilidad y routing, puente A2A, cadena de hashes de etiquetas, voz/asesor, ERP (packs, frontera, ERP-6/7), inventario, bento-grid",
+      "estado": "ambar"
+    },
+    {
+      "id": "arquitectura-capas",
+      "label": "Análisis de arquitectura por dominio y por capas: matriz dominio × capa (presentación, servicio y A2A, dominio y CLIs, agentes, datos, infraestructura) con el activo que cubre cada celda o «a fabricar»",
+      "estado": "ambar"
+    },
+    {
+      "id": "sdd",
+      "label": "SDD de Soporte SAP: los tres niveles, los flujos sandbox y producción, qué activo cubre qué y el % de reuso",
+      "estado": "gris"
+    },
+    {
+      "id": "business-logic",
+      "label": "BUSINESS_LOGIC de Soporte SAP: contrato C4, respaldo §4 y decisiones abiertas; firma pendiente",
+      "estado": "gris"
+    },
+    {
+      "id": "prp",
+      "label": "PRP de Soporte SAP: fases con salida verificable",
+      "estado": "gris"
+    },
+    {
+      "id": "amenazas-aisia",
+      "label": "C3 (sala y canal N1-N2 como superficie externa) y C4 (anonimización, FODA, decisiones sobre terceros) en borrador",
+      "estado": "gris"
+    },
+    {
+      "id": "esquema-almacenamiento",
+      "label": "Esquema de almacenamiento: tablas por dominio con claves de tenencia, eventos append-only, buckets por nivel con ruta por tenant y sha256, RLS de storage.objects, retención y crecimiento",
+      "estado": "gris"
+    },
+    {
+      "id": "rol-fde",
+      "label": "El A2A como Forward Deployed Engineer: playbook por consultora (onboarding → mapeo y limpieza → configuración del workspace → solución a medida → medición de impacto → vuelta al núcleo), una capacidad de la Agent Card por función, acotado: propone y el HIL aprueba",
+      "estado": "gris"
+    },
+    {
+      "id": "tool-sala-a2a",
+      "label": "tools/sala-a2a: esquema multi-tenant, aprobación como fila que ningún modelo fabrica, card opaca, suite de sabotajes",
+      "estado": "gris"
+    },
+    {
+      "id": "dominio-sap",
+      "label": "Dominio SAP: matriz problema-solución con fuente citada, corpus sintético de incidencias y simulador de SAP/tickets",
+      "estado": "gris"
+    },
+    {
+      "id": "ingesta-documentos",
+      "label": "Subida de documentos a la incidencia (capturas, PDF, dumps, CFDI XML): validación por bytes y tamaño, bucket privado por tenant, extractor documental con motor local (capa 0, XML, códigos, Tesseract), evidencia por campo y cola de revisión humana",
+      "estado": "gris"
+    },
+    {
+      "id": "respaldo-restauracion",
+      "label": "Respaldo y restauración: decisión de snapshot por capa, respaldo de la BD (proveedor, PITR o físico + WAL), export y restauración por tenant, línea propia de Storage, simulacro cronometrado en efímero",
+      "estado": "gris"
+    },
+    {
+      "id": "estimado-recursos",
+      "label": "Estimado de consumo por cliente y por tamaño (consultora y N3, S/M/L): BD, Storage, OCR, tokens, CPU/RAM, respaldo y egreso; cada cifra medida en laboratorio, derivada o supuesta, sin mezclarlas",
+      "estado": "gris"
+    },
+    {
+      "id": "mapeo-contextual",
+      "label": "Mapeo al esquema contextual: el esquema de origen de cada consultora (su herramienta de tickets, sus categorías y el panorama SAP de cada N3) a un esquema canónico con contexto; propuesto por el FDE, aprobado por el HIL, versionado; lo que no mapea va a revisión",
+      "estado": "gris"
+    },
+    {
+      "id": "limpieza-enriquecimiento",
+      "label": "Limpieza y enriquecimiento: deduplicar y normalizar el histórico (módulo, componente, transacción, fechas, prioridades) y enriquecerlo con el extractor, la matriz y el grafo; procedencia por campo y el crudo inmutable",
+      "estado": "gris"
+    },
+    {
+      "id": "capa-semantica",
+      "label": "Capa semántica en dbt: staging → intermedio → marts → modelos semánticos y métricas (MetricFlow) unificadas a lo largo del ciclo de vida de la consultora y del N3; una definición por métrica, leída por todas las superficies",
+      "estado": "gris"
+    },
+    {
+      "id": "anonimizador",
+      "label": "Anonimizador fail-closed: lo que no se anonimiza con certeza no entra al sandbox",
+      "estado": "gris"
+    },
+    {
+      "id": "cadena-eventos",
+      "label": "Traza sha256 encadenada de eventos por incidencia (reusa la cadena de etiquetas)",
+      "estado": "gris"
+    },
+    {
+      "id": "contratos-sla",
+      "label": "Contratos SLA N1–N2 (y el N2–N3 que ya pide el brief) como datos versionados + plantilla del documento: reloj con horario y pausas, metas por prioridad, créditos y escalamiento, medidos desde la capa semántica; cifras y texto legal por decidir",
+      "estado": "gris"
+    },
+    {
+      "id": "modelo-pricing",
+      "label": "Modelo de pricing y control de costos: variables del N3, costo medido por operación, tiers con cifras por decidir",
+      "estado": "gris"
+    },
+    {
+      "id": "impactos-accionables",
+      "label": "Impactos proyectados en MXN y accionables recomendados: cada proyección con fórmula, supuestos y rango; cada accionable con evidencia, impacto, confianza y responsable; el agente propone",
+      "estado": "gris"
+    },
+    {
+      "id": "chat-hil",
+      "label": "Interfaz conversacional del HIL (superadministrador y experto) con el A2A, conviviendo con la sala: chat 1:1 para explorar y enseñar; lo que pide aprobación o involucra a otros se promueve a un hilo de la sala; el chat no aprueba; respuestas con fuente",
+      "estado": "gris"
+    },
+    {
+      "id": "app-soporte-sap",
+      "label": "App Soporte SAP: N1 (superadmin, experto, A2A con card), sandbox y producción por workspaces, N2 consultor, N3 dashboard con métricas y FODA; enjambre ejecutor→supervisor con HIL en la sala",
+      "estado": "gris"
+    },
+    {
+      "id": "clis-producto",
+      "label": "CLIs del producto contra el simulador: dry-run, readOnly correcto, sin grado = no medido",
+      "estado": "gris"
+    },
+    {
+      "id": "deploy-config",
+      "label": "Configuración Docker del producto para un VPS de cualquier proveedor (servicios, puertos, .env validado, máquina por tamaño en vCPU/RAM/disco), sin desplegar; el proveedor lo elige el laboratorio (D12)",
+      "estado": "gris"
+    },
+    {
+      "id": "inventario-producto",
+      "label": "Asiento de cada activo del producto (CLIs incluidos) con su clasificador de producto",
+      "estado": "gris"
+    },
+    {
+      "id": "readme-comercial",
+      "label": "README comercial antes que técnico",
+      "estado": "gris"
+    },
+    {
+      "id": "evidencia-e2e",
+      "label": "Recorrido de punta a punta con Playwright, sabotajes y aislamiento de tres niveles, con salida pegada",
+      "estado": "gris"
+    },
+    {
+      "id": "concepto-producto",
+      "label": "El concepto «producto» extraído de Soporte SAP: vocabulario sin choque con la clase PRODUCTO y el índice actual",
+      "estado": "gris"
+    },
+    {
+      "id": "plantilla-producto",
+      "label": "Plantilla de producto: manifiesto, documento y gate que la verifica",
+      "estado": "gris"
+    },
+    {
+      "id": "segundo-producto",
+      "label": "Prueba de generalización: un segundo producto que ya existe, descrito con la plantilla sin tocar código",
+      "estado": "gris"
+    },
+    {
+      "id": "propuesta-cdc",
+      "label": "Propuesta de CDC (diff, regresión y trampas) para lo que toca gates, skills o doctrina; firma del laboratorio pendiente",
+      "estado": "gris"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a-arq-brief",
+      "label": "cada dominio del brief en sus capas",
+      "tipo": "agente",
+      "from": "brief",
+      "to": "arquitectura-capas"
+    },
+    {
+      "id": "a-sdd-arq",
+      "label": "la arquitectura por capas es el esqueleto del SDD",
+      "tipo": "agente",
+      "from": "arquitectura-capas",
+      "to": "sdd"
+    },
+    {
+      "id": "a-esquema-sdd",
+      "label": "datos y archivos de cada dominio",
+      "tipo": "agente",
+      "from": "sdd",
+      "to": "esquema-almacenamiento"
+    },
+    {
+      "id": "a-respaldo-esquema",
+      "label": "qué se respalda, cómo y con qué criticidad",
+      "tipo": "mixta",
+      "from": "esquema-almacenamiento",
+      "to": "respaldo-restauracion"
+    },
+    {
+      "id": "a-respaldo-activos",
+      "label": "el contrato de respaldo de FASE0 §9 y los gates 1 y 3",
+      "tipo": "agente",
+      "from": "activos",
+      "to": "respaldo-restauracion"
+    },
+    {
+      "id": "a-respaldo-cadena",
+      "label": "la cadena sha256 verifica lo restaurado",
+      "tipo": "script",
+      "from": "cadena-eventos",
+      "to": "respaldo-restauracion"
+    },
+    {
+      "id": "a-estimado-esquema",
+      "label": "bytes por fila, por evento y por documento",
+      "tipo": "mixta",
+      "from": "esquema-almacenamiento",
+      "to": "estimado-recursos"
+    },
+    {
+      "id": "a-estimado-dominio",
+      "label": "carga sintética S/M/L",
+      "tipo": "script",
+      "from": "dominio-sap",
+      "to": "estimado-recursos"
+    },
+    {
+      "id": "a-estimado-ingesta",
+      "label": "OCR medido por página y por vía",
+      "tipo": "script",
+      "from": "ingesta-documentos",
+      "to": "estimado-recursos"
+    },
+    {
+      "id": "a-estimado-respaldo",
+      "label": "tamaño y tiempo de respaldo y restauración por tamaño",
+      "tipo": "script",
+      "from": "respaldo-restauracion",
+      "to": "estimado-recursos"
+    },
+    {
+      "id": "a-pricing-estimado",
+      "label": "costo por tier desde el consumo por tamaño",
+      "tipo": "mixta",
+      "from": "estimado-recursos",
+      "to": "modelo-pricing"
+    },
+    {
+      "id": "a-deploy-estimado",
+      "label": "dimensionar el VPS y los límites por servicio",
+      "tipo": "script",
+      "from": "estimado-recursos",
+      "to": "deploy-config"
+    },
+    {
+      "id": "a-bl-respaldo",
+      "label": "el §4 del contrato sale del diseño de respaldo",
+      "tipo": "agente",
+      "from": "respaldo-restauracion",
+      "to": "business-logic"
+    },
+    {
+      "id": "a-app-esquema",
+      "label": "migraciones y buckets de la app",
+      "tipo": "mixta",
+      "from": "esquema-almacenamiento",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-sdd-brief",
+      "label": "traducir el brief a arquitectura",
+      "tipo": "agente",
+      "from": "brief",
+      "to": "sdd"
+    },
+    {
+      "id": "a-arq-activos",
+      "label": "mapear qué activo cubre qué y medir el reuso",
+      "tipo": "agente",
+      "from": "activos",
+      "to": "arquitectura-capas"
+    },
+    {
+      "id": "a-arq-sala",
+      "label": "alinear el canal N1-N2 con la spec de la sala",
+      "tipo": "agente",
+      "from": "spec-sala",
+      "to": "arquitectura-capas"
+    },
+    {
+      "id": "a-bl",
+      "label": "contrato de negocio y C4 del producto",
+      "tipo": "agente",
+      "from": "sdd",
+      "to": "business-logic"
+    },
+    {
+      "id": "a-prp",
+      "label": "fases con salida verificable",
+      "tipo": "agente",
+      "from": "sdd",
+      "to": "prp"
+    },
+    {
+      "id": "a-amenazas",
+      "label": "modelo de amenazas y AISIA con revisor dedicado",
+      "tipo": "agente",
+      "from": "sdd",
+      "to": "amenazas-aisia"
+    },
+    {
+      "id": "a-sala-spec",
+      "label": "llevar la spec al stack del monorepo sin perder el invariante",
+      "tipo": "mixta",
+      "from": "spec-sala",
+      "to": "tool-sala-a2a"
+    },
+    {
+      "id": "a-sala-prp",
+      "label": "construir la fase de la sala que pide el PRP",
+      "tipo": "mixta",
+      "from": "prp",
+      "to": "tool-sala-a2a"
+    },
+    {
+      "id": "a-dominio",
+      "label": "matriz, corpus sintético y simulador",
+      "tipo": "mixta",
+      "from": "prp",
+      "to": "dominio-sap"
+    },
+    {
+      "id": "a-ingesta-activos",
+      "label": "componer el extractor documental existente, sin reescribirlo",
+      "tipo": "mixta",
+      "from": "activos",
+      "to": "ingesta-documentos"
+    },
+    {
+      "id": "a-ingesta-prp",
+      "label": "la fase de documentos que pide el PRP",
+      "tipo": "mixta",
+      "from": "prp",
+      "to": "ingesta-documentos"
+    },
+    {
+      "id": "a-ingesta-corpus",
+      "label": "corpus sintético de documentos SAP (capturas de error, dumps, spool, CFDI)",
+      "tipo": "script",
+      "from": "dominio-sap",
+      "to": "ingesta-documentos"
+    },
+    {
+      "id": "a-ingesta-aisia",
+      "label": "el documento es entrada no confiable: inyección y salida del perímetro",
+      "tipo": "agente",
+      "from": "amenazas-aisia",
+      "to": "ingesta-documentos"
+    },
+    {
+      "id": "a-anon-ingesta",
+      "label": "los documentos traen datos sensibles; los identificadores que el extractor valida por dígito alimentan la anonimización",
+      "tipo": "mixta",
+      "from": "ingesta-documentos",
+      "to": "anonimizador"
+    },
+    {
+      "id": "a-app-ingesta",
+      "label": "evidencia citada en el ticket y en el triage",
+      "tipo": "mixta",
+      "from": "ingesta-documentos",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-anon-dominio",
+      "label": "medir contra el corpus con datos sensibles sembrados",
+      "tipo": "mixta",
+      "from": "dominio-sap",
+      "to": "anonimizador"
+    },
+    {
+      "id": "a-anon-aisia",
+      "label": "lo que C4 exige que nunca salga",
+      "tipo": "agente",
+      "from": "amenazas-aisia",
+      "to": "anonimizador"
+    },
+    {
+      "id": "a-cadena",
+      "label": "reusar la cadena de hashes para los eventos de incidencia",
+      "tipo": "script",
+      "from": "prp",
+      "to": "cadena-eventos"
+    },
+    {
+      "id": "a-pricing-prp",
+      "label": "variables del N3 a tiers",
+      "tipo": "agente",
+      "from": "prp",
+      "to": "modelo-pricing"
+    },
+    {
+      "id": "a-pricing-activos",
+      "label": "costo por operación medido con la contabilidad de tokens",
+      "tipo": "script",
+      "from": "activos",
+      "to": "modelo-pricing"
+    },
+    {
+      "id": "a-app-sala",
+      "label": "el canal y las aprobaciones",
+      "tipo": "mixta",
+      "from": "tool-sala-a2a",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-dominio",
+      "label": "triage y solución contra la matriz",
+      "tipo": "mixta",
+      "from": "dominio-sap",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-anon",
+      "label": "entrada al sandbox",
+      "tipo": "mixta",
+      "from": "anonimizador",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-cadena",
+      "label": "traza de cada evento",
+      "tipo": "mixta",
+      "from": "cadena-eventos",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-pricing",
+      "label": "costos, avisos y tiers en pantalla",
+      "tipo": "mixta",
+      "from": "modelo-pricing",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-clis",
+      "label": "operaciones repetidas del dominio a CLI contra el simulador",
+      "tipo": "mixta",
+      "from": "dominio-sap",
+      "to": "clis-producto"
+    },
+    {
+      "id": "a-deploy",
+      "label": "servicios, puertos y entorno",
+      "tipo": "script",
+      "from": "app-soporte-sap",
+      "to": "deploy-config"
+    },
+    {
+      "id": "a-inv-app",
+      "label": "asiento de app y features",
+      "tipo": "script",
+      "from": "app-soporte-sap",
+      "to": "inventario-producto"
+    },
+    {
+      "id": "a-inv-clis",
+      "label": "asiento de cada CLI",
+      "tipo": "script",
+      "from": "clis-producto",
+      "to": "inventario-producto"
+    },
+    {
+      "id": "a-inv-sala",
+      "label": "asiento de la herramienta sala",
+      "tipo": "script",
+      "from": "tool-sala-a2a",
+      "to": "inventario-producto"
+    },
+    {
+      "id": "a-readme",
+      "label": "lo que compra la consultora, antes que cómo está hecho",
+      "tipo": "agente",
+      "from": "app-soporte-sap",
+      "to": "readme-comercial"
+    },
+    {
+      "id": "a-e2e-app",
+      "label": "recorrido N3→N2→N1 y de vuelta",
+      "tipo": "script",
+      "from": "app-soporte-sap",
+      "to": "evidencia-e2e"
+    },
+    {
+      "id": "a-e2e-deploy",
+      "label": "build de producción con la configuración del VPS",
+      "tipo": "script",
+      "from": "deploy-config",
+      "to": "evidencia-e2e"
+    },
+    {
+      "id": "a-concepto-e2e",
+      "label": "extraer del producto probado, no del brief",
+      "tipo": "agente",
+      "from": "evidencia-e2e",
+      "to": "concepto-producto"
+    },
+    {
+      "id": "a-concepto-inv",
+      "label": "qué es producto y qué es activo en el inventario",
+      "tipo": "agente",
+      "from": "inventario-producto",
+      "to": "concepto-producto"
+    },
+    {
+      "id": "a-concepto-bl",
+      "label": "qué es producto y qué es contrato en el índice",
+      "tipo": "agente",
+      "from": "business-logic",
+      "to": "concepto-producto"
+    },
+    {
+      "id": "a-concepto-readme",
+      "label": "la cara comercial del producto",
+      "tipo": "agente",
+      "from": "readme-comercial",
+      "to": "concepto-producto"
+    },
+    {
+      "id": "a-plantilla",
+      "label": "manifiesto, documento y gate",
+      "tipo": "mixta",
+      "from": "concepto-producto",
+      "to": "plantilla-producto"
+    },
+    {
+      "id": "a-segundo",
+      "label": "describir otro producto existente con la plantilla",
+      "tipo": "agente",
+      "from": "plantilla-producto",
+      "to": "segundo-producto"
+    },
+    {
+      "id": "a-cdc-plantilla",
+      "label": "diff, regresión y trampas de lo que toca gobernanza",
+      "tipo": "mixta",
+      "from": "plantilla-producto",
+      "to": "propuesta-cdc"
+    },
+    {
+      "id": "a-cdc-segundo",
+      "label": "lo que no cupo cambia la plantilla, no el producto",
+      "tipo": "agente",
+      "from": "segundo-producto",
+      "to": "propuesta-cdc"
+    },
+    {
+      "id": "a-fde-sdd",
+      "label": "el papel del agente frente a cada consultora",
+      "tipo": "agente",
+      "from": "sdd",
+      "to": "rol-fde"
+    },
+    {
+      "id": "a-mapeo-esquema",
+      "label": "el esquema canónico de destino",
+      "tipo": "mixta",
+      "from": "esquema-almacenamiento",
+      "to": "mapeo-contextual"
+    },
+    {
+      "id": "a-mapeo-dominio",
+      "label": "exportes sintéticos y sucios de herramientas de tickets",
+      "tipo": "script",
+      "from": "dominio-sap",
+      "to": "mapeo-contextual"
+    },
+    {
+      "id": "a-mapeo-fde",
+      "label": "el FDE propone el mapeo de cada consultora",
+      "tipo": "agente",
+      "from": "rol-fde",
+      "to": "mapeo-contextual"
+    },
+    {
+      "id": "a-mapeo-activos",
+      "label": "el «¿es esta fila?» y la inferencia de modelo del extractor",
+      "tipo": "mixta",
+      "from": "activos",
+      "to": "mapeo-contextual"
+    },
+    {
+      "id": "a-limpieza-mapeo",
+      "label": "limpiar sobre lo ya mapeado",
+      "tipo": "mixta",
+      "from": "mapeo-contextual",
+      "to": "limpieza-enriquecimiento"
+    },
+    {
+      "id": "a-limpieza-ingesta",
+      "label": "enriquecer con lo leído de los documentos",
+      "tipo": "mixta",
+      "from": "ingesta-documentos",
+      "to": "limpieza-enriquecimiento"
+    },
+    {
+      "id": "a-semantica-limpieza",
+      "label": "staging e intermedio desde los datos limpios",
+      "tipo": "mixta",
+      "from": "limpieza-enriquecimiento",
+      "to": "capa-semantica"
+    },
+    {
+      "id": "a-semantica-esquema",
+      "label": "fuentes de dbt sobre el esquema",
+      "tipo": "script",
+      "from": "esquema-almacenamiento",
+      "to": "capa-semantica"
+    },
+    {
+      "id": "a-semantica-activos",
+      "label": "contabilidad de tokens y trayectorias como métricas del mismo catálogo",
+      "tipo": "mixta",
+      "from": "activos",
+      "to": "capa-semantica"
+    },
+    {
+      "id": "a-sla-semantica",
+      "label": "cumplimiento medido con las mismas métricas",
+      "tipo": "mixta",
+      "from": "capa-semantica",
+      "to": "contratos-sla"
+    },
+    {
+      "id": "a-sla-sdd",
+      "label": "qué compromete cada nivel y qué no",
+      "tipo": "agente",
+      "from": "sdd",
+      "to": "contratos-sla"
+    },
+    {
+      "id": "a-pricing-sla",
+      "label": "tiempo de respuesta y prioridad del SLA a tier",
+      "tipo": "mixta",
+      "from": "contratos-sla",
+      "to": "modelo-pricing"
+    },
+    {
+      "id": "a-impactos-semantica",
+      "label": "métricas del ciclo de vida a impacto",
+      "tipo": "mixta",
+      "from": "capa-semantica",
+      "to": "impactos-accionables"
+    },
+    {
+      "id": "a-impactos-pricing",
+      "label": "costos y tiers en MXN",
+      "tipo": "mixta",
+      "from": "modelo-pricing",
+      "to": "impactos-accionables"
+    },
+    {
+      "id": "a-impactos-sla",
+      "label": "riesgo de incumplimiento y créditos",
+      "tipo": "mixta",
+      "from": "contratos-sla",
+      "to": "impactos-accionables"
+    },
+    {
+      "id": "a-chat-sala",
+      "label": "promover a hilo y esperar la fila de aprobación",
+      "tipo": "mixta",
+      "from": "tool-sala-a2a",
+      "to": "chat-hil"
+    },
+    {
+      "id": "a-chat-semantica",
+      "label": "contestar con la métrica y su definición",
+      "tipo": "mixta",
+      "from": "capa-semantica",
+      "to": "chat-hil"
+    },
+    {
+      "id": "a-chat-fde",
+      "label": "el FDE conversa con el experto y el superadministrador",
+      "tipo": "agente",
+      "from": "rol-fde",
+      "to": "chat-hil"
+    },
+    {
+      "id": "a-app-chat",
+      "label": "la vista del HIL",
+      "tipo": "mixta",
+      "from": "chat-hil",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-impactos",
+      "label": "tableros N2 y N3, FODA y accionables",
+      "tipo": "mixta",
+      "from": "impactos-accionables",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-sla",
+      "label": "reloj de SLA y contratos en pantalla",
+      "tipo": "mixta",
+      "from": "contratos-sla",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-app-semantica",
+      "label": "todas las métricas desde la capa semántica",
+      "tipo": "mixta",
+      "from": "capa-semantica",
+      "to": "app-soporte-sap"
+    },
+    {
+      "id": "a-concepto-fde",
+      "label": "lo que el FDE hizo a medida y lo que vuelve al núcleo",
+      "tipo": "agente",
+      "from": "rol-fde",
+      "to": "concepto-producto"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "l-validate",
+      "label": "el gate completo en verde",
+      "sobre": "nodo:evidencia-e2e",
+      "estado": "gris",
+      "referencia": "npm run validate: todos los gates del perfil validate en verde, ninguno inactivo contado como verde"
+    },
+    {
+      "id": "l-invariante-sala",
+      "label": "ningún componente que ejecuta un modelo fabrica una aprobación",
+      "sobre": "nodo:tool-sala-a2a",
+      "estado": "gris",
+      "referencia": "S1-S6 y S2b: cada sabotaje pone la suite en rojo; un principal legítimo que firma por otro es rechazado"
+    },
+    {
+      "id": "l-aislamiento",
+      "label": "aislamiento de tres niveles probado, no asumido",
+      "sobre": "nodo:app-soporte-sap",
+      "estado": "gris",
+      "referencia": "consultora A no ve a B; un N3 no ve a otro N3; N3 no ve el sandbox; ni las filas ni los originales del bucket; todos los intentos con el rol real, rechazados"
+    },
+    {
+      "id": "l-anonimizacion",
+      "label": "cero fugas de datos sensibles al sandbox",
+      "sobre": "arista:a-app-anon",
+      "estado": "gris",
+      "referencia": "corpus con datos sensibles sembrados (nombres, RFC, CURP, correos, nómina, cuentas): 0 fugas; ante la duda no entra"
+    },
+    {
+      "id": "l-documento-dato",
+      "label": "el texto de un documento es dato, nunca instrucción",
+      "sobre": "nodo:ingesta-documentos",
+      "estado": "gris",
+      "referencia": "documentos con instrucciones sembradas (en el texto, en la imagen y en campos del XML): 0 obedecidas por el agente"
+    },
+    {
+      "id": "l-perimetro",
+      "label": "ningún byte del documento sale del perímetro",
+      "sobre": "nodo:ingesta-documentos",
+      "estado": "gris",
+      "referencia": "motor local; un motor externo se rechaza sin decisión C4, y con datos de terceros ninguna firma lo autoriza"
+    },
+    {
+      "id": "l-umbral",
+      "label": "sin umbral medido, todo campo va a revisión humana",
+      "sobre": "nodo:ingesta-documentos",
+      "estado": "gris",
+      "referencia": "ningún campo se acepta solo por un umbral no medido; la calibración sobre el corpus sintético se marca como no medida sobre corpus real (TAR-17, TAR-25)"
+    },
+    {
+      "id": "l-cadena",
+      "label": "una traza alterada se detecta",
+      "sobre": "nodo:cadena-eventos",
+      "estado": "gris",
+      "referencia": "alterar, borrar o reordenar un evento rompe la verificación de la cadena"
+    },
+    {
+      "id": "l-precio",
+      "label": "ninguna cifra inventada",
+      "sobre": "nodo:modelo-pricing",
+      "estado": "gris",
+      "referencia": "cada costo tiene fuente medida o dice no medido; cada precio es parámetro por decidir del laboratorio (ERP-7)"
+    },
+    {
+      "id": "l-autoaprendizaje",
+      "label": "el agente propone, no se cambia solo",
+      "sobre": "nodo:app-soporte-sap",
+      "estado": "gris",
+      "referencia": "diagnóstico y automejora salen como propuestas; aplicar una es CDC con firma"
+    },
+    {
+      "id": "l-inventario",
+      "label": "ningún activo sin asiento",
+      "sobre": "nodo:inventario-producto",
+      "estado": "gris",
+      "referencia": "npm run verifica:inventario en verde y cada CLI del producto con su clasificador"
+    },
+    {
+      "id": "l-readme",
+      "label": "README product first",
+      "sobre": "nodo:readme-comercial",
+      "estado": "gris",
+      "referencia": "npm run revisa:readmes en verde"
+    },
+    {
+      "id": "l-e2e",
+      "label": "el recorrido existe en pantalla",
+      "sobre": "nodo:evidencia-e2e",
+      "estado": "gris",
+      "referencia": "capturas de Playwright de cada paso del flujo, con antes y después"
+    },
+    {
+      "id": "l-generalizacion",
+      "label": "la plantilla sirve para algo más que Soporte SAP",
+      "sobre": "nodo:segundo-producto",
+      "estado": "gris",
+      "referencia": "un producto existente cabe sin cambiar código; lo que no cupo queda escrito"
+    },
+    {
+      "id": "l-trampa",
+      "label": "los controles siguen disparando",
+      "sobre": "nodo:propuesta-cdc",
+      "estado": "gris",
+      "referencia": "npm run regresion -- --trampa en verde"
+    },
+    {
+      "id": "l-arquitectura",
+      "label": "ninguna celda huérfana",
+      "sobre": "nodo:arquitectura-capas",
+      "estado": "ambar",
+      "referencia": "cada celda dominio × capa nombra el activo que la cubre o dice «a fabricar»; el % de reuso se calcula de la matriz, no se estima"
+    },
+    {
+      "id": "l-restauracion",
+      "label": "un respaldo sin restauración probada no es respaldo",
+      "sobre": "nodo:respaldo-restauracion",
+      "estado": "gris",
+      "referencia": "export por tenant → restaurar en Postgres efímero → conteo de filas y cadena sha256 en verde, cronometrado por tamaño; RPO/RTO de producción siguen desconocidos hasta GATE 3"
+    },
+    {
+      "id": "l-restauracion-tenant",
+      "label": "restaurar a un tenant no toca a los demás",
+      "sobre": "nodo:respaldo-restauracion",
+      "estado": "gris",
+      "referencia": "tras restaurar al tenant A, los conteos y la cadena del tenant B no cambian"
+    },
+    {
+      "id": "l-estimado",
+      "label": "cada cifra dice de dónde sale",
+      "sobre": "nodo:estimado-recursos",
+      "estado": "gris",
+      "referencia": "medida (laboratorio, sintético), derivada (fórmula visible) o supuesta; ninguna supuesta se presenta como medida"
+    },
+    {
+      "id": "l-chat-no-aprueba",
+      "label": "el chat no aprueba nada",
+      "sobre": "nodo:chat-hil",
+      "estado": "gris",
+      "referencia": "desde el chat no hay camino a la tabla de aprobaciones; aprobar se promueve a un hilo de la sala y espera la fila humana; dar al chat permiso de insertar pone la suite en rojo"
+    },
+    {
+      "id": "l-chat-con-fuente",
+      "label": "el chat contesta con fuente o dice que no sabe",
+      "sobre": "nodo:chat-hil",
+      "estado": "gris",
+      "referencia": "cada cifra cita su métrica de la capa semántica y cada regla su fuente del grafo; sin fuente, «no lo sé»"
+    },
+    {
+      "id": "l-una-metrica",
+      "label": "una métrica, una definición",
+      "sobre": "nodo:capa-semantica",
+      "estado": "gris",
+      "referencia": "dbt build y la validación de MetricFlow en verde; la misma métrica y el mismo periodo dan el mismo número en N1, N2, N3, SLA, pricing y chat; ninguna superficie calcula métricas por su cuenta"
+    },
+    {
+      "id": "l-mapeo",
+      "label": "nada se tira en silencio",
+      "sobre": "nodo:mapeo-contextual",
+      "estado": "gris",
+      "referencia": "cada campo de origen queda mapeado, en revisión o descartado con motivo; filas de entrada = salida + revisión + descartadas"
+    },
+    {
+      "id": "l-procedencia",
+      "label": "cada dato limpio o enriquecido dice de dónde salió",
+      "sobre": "nodo:limpieza-enriquecimiento",
+      "estado": "gris",
+      "referencia": "el crudo es inmutable; cada valor limpio o enriquecido apunta a su original y a la regla o fuente que lo cambió; se puede reconstruir el crudo"
+    },
+    {
+      "id": "l-sla-medido",
+      "label": "el SLA se mide, no se declara",
+      "sobre": "nodo:contratos-sla",
+      "estado": "gris",
+      "referencia": "incumplimientos calculados desde los eventos con traza sha256; reloj probado en bordes: fuera de horario, espera del cliente, reapertura y cambio de prioridad"
+    },
+    {
+      "id": "l-mxn",
+      "label": "ningún peso sin fórmula ni supuestos",
+      "sobre": "nodo:impactos-accionables",
+      "estado": "gris",
+      "referencia": "cada cifra en MXN muestra fórmula, supuestos parametrizados y rango; los parámetros del laboratorio dicen «supuesto»; ningún accionable sin evidencia"
+    }
+  ]
+}

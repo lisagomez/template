@@ -208,6 +208,14 @@
    "cubre": ["src/features/ventas-whatsapp"]
   },
   {
+   "id": "TPL-soporte-sap",
+   "nombre": "Soporte SAP en laboratorio: dominio de tres niveles (laboratorio, consultora, cliente), matriz problema-solucion sobre el grafo, simulador SAP y de tickets, anonimizador, cadena de eventos, mapeo y limpieza, SLA, pricing, impactos en MXN, respaldo por tenant y el agente FDE (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap", "responsable": "dep-sw",
+   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md"],
+   "cubre": ["tools/soporte-sap"]
+  },
+  {
    "id": "TPL-feature-etiquetas",
    "nombre": "Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
