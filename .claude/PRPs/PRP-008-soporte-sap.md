@@ -162,6 +162,10 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   `ss_metrica`, que nadie cambia ni borra (`pruebas/metricas-rls.ts`).
   - *Brecha*: un agregado sobre un grupo muy chico (un cliente S solo en su tamaño) puede delatar a
     ese cliente ante el laboratorio; el corte no aplica todavía un tamaño mínimo de grupo (D9).
+- **La ruta del laboratorio (`/api/soporte-sap`).** Declarada en `scripts/prueba-a2a.ts` (RF-20): misma
+  app y puerto, 404 sin `SOPORTE_SAP_LABORATORIO=1`, estado sintético en memoria, identidades de
+  laboratorio, sin base ni `service_role`. *Brecha*: con la variable encendida en un servidor expuesto,
+  cualquiera elegiría el rol que quiera; por eso `configura:deploy` rechaza la variable en producción.
 - **Siembra (frontera sandbox → núcleo).** Lo que cambia un veredicto lo firma el laboratorio en
   `tools/conocimiento`; el agente solo deja propuestas.
 - **Superficie.** Nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
