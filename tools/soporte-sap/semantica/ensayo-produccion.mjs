@@ -11,7 +11,7 @@
  *   5. cada valor de `ss_metrica` se compara con el del corte del laboratorio (mismas entradas, mismo
  *      número); todo se tira al final.
  *
- * Uso: node tools/soporte-sap/semantica/prueba-produccion.mjs   (exit 1 si algo no cuadra)
+ * Uso: node tools/soporte-sap/semantica/ensayo-produccion.mjs   (exit 1 si algo no cuadra)
  */
 import { spawnSync } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'

@@ -575,7 +575,7 @@ humano: crearlo con su contraseña fuera del chat; la contraseña viaja por vari
 `configura:deploy` solo dice si está). Materializa sus modelos en `ss_semantica`, que la API no
 expone, y no puede crear nada en `public` (`pruebas/semantica-produccion.ts`).
 
-**Probado contra el esquema del producto** (`node tools/soporte-sap/semantica/prueba-produccion.mjs`,
+**Probado contra el esquema del producto** (`node tools/soporte-sap/semantica/ensayo-produccion.mjs`,
 2026-10-04): red Docker interna, Postgres por digest con el Supabase mínimo y la propuesta aplicada,
 las 542 incidencias sintéticas en las tablas `ss_*`, el usuario del job y la imagen construida: el job
 escribió **1 186 valores en `ss_metrica` y los 1 186 coinciden con el corte del laboratorio**, con la
