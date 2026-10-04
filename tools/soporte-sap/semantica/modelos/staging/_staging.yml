@@ -1,0 +1,61 @@
+models:
+  - name: stg_organizacion
+    description: El árbol laboratorio → consultora → cliente y el perfil del cliente.
+    columns:
+      - name: organizacion_id
+        data_tests: [unique, not_null]
+      - name: tipo
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['laboratorio', 'consultora', 'cliente']}
+      - name: tamano
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['S', 'M', 'L']}
+
+  - name: stg_incidencia
+    description: Una fila por incidencia, sin texto.
+    columns:
+      - name: incidencia_id
+        data_tests: [unique, not_null]
+      - name: cliente_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('stg_organizacion'), field: organizacion_id}
+      - name: prioridad
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: {values: ['P1', 'P2', 'P3', 'P4']}
+      - name: estado
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['nueva', 'en_atencion', 'espera_cliente', 'en_revision', 'resuelta', 'cerrada']}
+
+  - name: stg_sla_resultado
+    description: El resultado del reloj de SLA por incidencia, tal como lo escribió src/sla.ts.
+    columns:
+      - name: incidencia_id
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments: {to: ref('stg_incidencia'), field: incidencia_id}
+
+  - name: stg_horas
+    columns:
+      - name: incidencia_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_incidencia'), field: incidencia_id}
+
+  - name: stg_importacion_fila
+    description: Entrada = limpias + revisión + descartadas, fila por fila.
+    columns:
+      - name: fila_id
+        data_tests: [unique, not_null]
+      - name: resultado
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['limpia', 'revision', 'descartada']}

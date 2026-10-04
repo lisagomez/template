@@ -12,10 +12,15 @@
 --   · `soporte_sap_ingesta`  el lector de documentos (sin modelo): lee originales, escribe campos
 --                            por revisar;
 --   · `soporte_sap_plataforma` los jobs declarados (export por tenant, restauración, retención).
--- Los tres roles de servicio van acotados a UNA consultora por tarea, y esa consultora sale del
+-- Los tres primeros roles de servicio van acotados a UNA consultora por tarea, y esa consultora sale del
 -- claim `consultora` del JWT de la tarea (`request.jwt.claims`), que firma quien encola la tarea
 -- y verifica la pasarela: ningún proceso que corre el modelo fija su propio alcance. Ninguno tiene
 -- bypassrls y ninguna superficie usa service_role (C7).
+--
+-- El cuarto, `soporte_sap_metricas`, es el job de la capa semántica (dbt): para dar totales tiene
+-- que leer a todas las consultoras, así que su acotamiento es otro: solo columnas SIN TEXTO
+-- (privilegios por columna: ni títulos, ni descripciones, ni contenido, ni nombres) y solo escribe
+-- en `ss_metrica`. Lo que no puede leer no lo puede filtrar.
 --
 -- El laboratorio NO lee la operación de una consultora por ser laboratorio: lee lo que la
 -- consultora le escaló (`ss_escalamiento`) y, con un acceso motivado que otorga la consultora
@@ -28,7 +33,7 @@ create schema if not exists ss_priv;
 do $$
 declare r text;
 begin
-  foreach r in array array['soporte_sap_agente', 'soporte_sap_ingesta', 'soporte_sap_plataforma'] loop
+  foreach r in array array['soporte_sap_agente', 'soporte_sap_ingesta', 'soporte_sap_plataforma', 'soporte_sap_metricas'] loop
     if not exists (select 1 from pg_roles where rolname = r) then
       execute format('create role %I nologin nobypassrls', r);
     end if;
@@ -43,7 +48,12 @@ create table if not exists public.ss_organizacion (
   nombre     text not null,
   padre_id   uuid references public.ss_organizacion (id) on delete restrict,
   creada_en  timestamptz not null default now(),
-  constraint ss_org_arbol check ((tipo = 'laboratorio') = (padre_id is null))
+  -- El perfil que leen el pricing y la capa semántica: tamaño (S/M/L), sistema y usuarios SAP.
+  tamano     text check (tamano in ('S', 'M', 'L')),
+  sistema    text check (sistema in ('ECC', 'S4HANA')),
+  usuarios_sap integer check (usuarios_sap >= 0),
+  constraint ss_org_arbol check ((tipo = 'laboratorio') = (padre_id is null)),
+  constraint ss_sistema_es_de_cliente check (sistema is null or tipo = 'cliente')
 );
 
 create table if not exists public.ss_miembro (
@@ -152,6 +162,8 @@ create table if not exists public.ss_incidencia (
   urgencia             smallint check (urgencia between 1 and 3),
   prioridad            text check (prioridad in ('P1', 'P2', 'P3', 'P4')),
   complejidad          text check (complejidad in ('baja', 'media', 'alta')),
+  -- La regla del grafo con la que se resolvió (identificador, no texto): el reuso del conocimiento.
+  regla_aplicada       text check (regla_aplicada ~ '^SS-[A-Z0-9-]+$'),
   -- La cuarentena NO es un estado de atención: solo impide que el caso entre al sandbox.
   estado               text not null default 'nueva'
                        check (estado in ('nueva', 'en_atencion', 'espera_cliente', 'en_revision', 'resuelta', 'cerrada')),
@@ -381,6 +393,11 @@ create table if not exists public.ss_sla_resultado (
   meta_resolucion_min integer,
   cumple_respuesta    boolean,
   cumple_resolucion   boolean,
+  prioridad           text check (prioridad in ('P1', 'P2', 'P3', 'P4')),
+  estado              text check (estado in ('resuelta', 'abierta')),
+  pausado_min         integer not null default 0 check (pausado_min >= 0),
+  reabierta           boolean not null default false,
+  espero_cliente      boolean not null default false,
   calculado_en        timestamptz not null default now(),
   primary key (incidencia_id, contrato_id, contrato_version)
 );
@@ -440,6 +457,42 @@ create table if not exists public.ss_procedencia (
   primary key (consultora_id, registro, campo, regla)
 );
 
+-- Lo que pasó con cada fila de un crudo al aplicarle un mapeo aprobado: entrada = limpias +
+-- revisión + descartadas, siempre. Lo que no mapea queda en revisión, nunca se tira.
+create table if not exists public.ss_importacion_fila (
+  crudo_id      uuid not null references public.ss_crudo (id),
+  indice        integer not null check (indice >= 0),
+  consultora_id uuid not null references public.ss_organizacion (id),
+  cliente_id    uuid references public.ss_organizacion (id),
+  herramienta   text not null,
+  version_mapeo integer not null check (version_mapeo >= 1),
+  resultado     text not null check (resultado in ('limpia', 'revision', 'descartada')),
+  motivo        text,
+  decidido_en   timestamptz not null default now(),
+  primary key (crudo_id, indice),
+  constraint ss_no_limpia_tiene_motivo check ((resultado = 'limpia') = (motivo is null))
+);
+
+-- El corte semántico: lo único que leen los tableros, el SLA, el pricing y el chat. Lo escribe solo
+-- el job de métricas; cada versión es la huella de sus entradas. Un alcance por fila.
+create table if not exists public.ss_metrica (
+  version       text not null,
+  metrica       text not null,
+  periodo       date not null,
+  alcance       text not null check (alcance in ('total', 'tamano', 'consultora', 'cliente')),
+  tamano        text check (tamano in ('S', 'M', 'L')),
+  consultora_id uuid references public.ss_organizacion (id),
+  cliente_id    uuid references public.ss_organizacion (id),
+  valor         numeric,
+  generado_en   timestamptz not null default now(),
+  constraint ss_metrica_una unique nulls not distinct (version, metrica, periodo, alcance, tamano, consultora_id, cliente_id),
+  constraint ss_metrica_alcance check (case alcance
+    when 'total' then tamano is null and consultora_id is null and cliente_id is null
+    when 'tamano' then tamano is not null and consultora_id is null and cliente_id is null
+    when 'consultora' then consultora_id is not null and cliente_id is null
+    else consultora_id is not null and cliente_id is not null end)
+);
+
 -- --- Chat del HIL: cada quien su conversación ----------------------------------------------
 
 create table if not exists public.ss_chat_mensaje (
@@ -463,6 +516,23 @@ begin
   end loop;
 end $$;
 
+create or replace function ss_priv.cliente_es_de_consultora() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if new.cliente_id is not null and ss_priv.padre_de(new.cliente_id) is distinct from new.consultora_id then
+    raise exception 'el cliente % no es de la consultora %', new.cliente_id, new.consultora_id;
+  end if;
+  return new;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['ss_importacion_fila', 'ss_metrica'] loop
+    execute format('drop trigger if exists %I on public.%I', t || '_tenencia', t);
+    execute format('create trigger %I before insert or update on public.%I for each row execute function ss_priv.cliente_es_de_consultora()', t || '_tenencia', t);
+  end loop;
+end $$;
+
 -- --- RLS: enable + force en toda tabla ------------------------------------------------------
 
 do $$
@@ -471,7 +541,7 @@ begin
   foreach t in array array['ss_organizacion', 'ss_miembro', 'ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto',
     'ss_campo_extraido', 'ss_cuarentena', 'ss_impugnacion', 'ss_caso_sandbox', 'ss_propuesta', 'ss_acceso_motivado',
     'ss_contrato_sla', 'ss_sla_resultado', 'ss_horas', 'ss_presupuesto', 'ss_crudo', 'ss_mapeo',
-    'ss_procedencia', 'ss_chat_mensaje'] loop
+    'ss_procedencia', 'ss_chat_mensaje', 'ss_importacion_fila', 'ss_metrica'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('alter table public.%I force row level security', t);
   end loop;
@@ -542,6 +612,18 @@ create policy ss_mapeo_lee on public.ss_mapeo for select to authenticated
 drop policy if exists ss_procedencia_lee on public.ss_procedencia;
 create policy ss_procedencia_lee on public.ss_procedencia for select to authenticated
   using (ss_priv.ve_consultora(consultora_id));
+
+drop policy if exists ss_importacion_lee on public.ss_importacion_fila;
+create policy ss_importacion_lee on public.ss_importacion_fila for select to authenticated
+  using (ss_priv.rol_en(consultora_id) = 'consultor');
+
+-- El corte por nivel: el laboratorio, los agregados (total, tamaño, consultora); la consultora, lo
+-- suyo y lo de sus clientes; el cliente, solo lo suyo. Nadie ve el total de otros por ser consultora.
+drop policy if exists ss_metrica_lee on public.ss_metrica;
+create policy ss_metrica_lee on public.ss_metrica for select to authenticated
+  using ((alcance <> 'cliente' and ss_priv.es_laboratorio())
+      or (alcance in ('consultora', 'cliente') and ss_priv.rol_en(consultora_id) = 'consultor')
+      or (alcance = 'cliente' and ss_priv.ve_cliente(cliente_id)));
 
 drop policy if exists ss_chat_lee on public.ss_chat_mensaje;
 create policy ss_chat_lee on public.ss_chat_mensaje for select to authenticated
@@ -627,7 +709,7 @@ do $$
 declare t text;
 begin
   foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
-    'ss_sla_resultado', 'ss_crudo', 'ss_mapeo', 'ss_procedencia', 'ss_presupuesto', 'ss_contrato_sla'] loop
+    'ss_sla_resultado', 'ss_crudo', 'ss_mapeo', 'ss_procedencia', 'ss_presupuesto', 'ss_contrato_sla', 'ss_importacion_fila'] loop
     execute format('drop policy if exists %I on public.%I', t || '_agente_lee', t);
     execute format('create policy %I on public.%I for select to soporte_sap_agente using (consultora_id = ss_priv.consultora_de_tarea())', t || '_agente_lee', t);
   end loop;
@@ -677,17 +759,30 @@ do $$
 declare t text;
 begin
   foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
-    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_crudo', 'ss_mapeo', 'ss_procedencia'] loop
+    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_crudo', 'ss_mapeo', 'ss_procedencia', 'ss_importacion_fila'] loop
     execute format('drop policy if exists %I on public.%I', t || '_plataforma', t);
     execute format('create policy %I on public.%I for all to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea()) with check (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma', t);
   end loop;
 end $$;
 
+-- El job de métricas (C7, declarado): lee filas de todos los tenants; las COLUMNAS las acotan los
+-- privilegios de abajo. Inserta el corte; no lo cambia ni lo borra (una versión nueva es otra fila).
+do $$
+declare t text;
+begin
+  foreach t in array array['ss_organizacion', 'ss_incidencia', 'ss_sla_resultado', 'ss_horas', 'ss_importacion_fila', 'ss_metrica'] loop
+    execute format('drop policy if exists %I on public.%I', t || '_metricas', t);
+    execute format('create policy %I on public.%I for select to soporte_sap_metricas using (true)', t || '_metricas', t);
+  end loop;
+end $$;
+drop policy if exists ss_metrica_escribe on public.ss_metrica;
+create policy ss_metrica_escribe on public.ss_metrica for insert to soporte_sap_metricas with check (true);
+
 -- --- Privilegios: lo justo por rol --------------------------------------------------------------
 
-grant usage on schema ss_priv to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
-grant execute on all functions in schema ss_priv to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
-grant usage on schema public to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
+grant usage on schema ss_priv to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
+grant execute on all functions in schema ss_priv to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
+grant usage on schema public to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
 grant select on public.ss_organizacion, public.ss_miembro to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
 
 grant select, insert, update on public.ss_incidencia, public.ss_campo_extraido, public.ss_impugnacion,
@@ -695,14 +790,14 @@ grant select, insert, update on public.ss_incidencia, public.ss_campo_extraido, 
 grant select, insert on public.ss_escalamiento, public.ss_evento, public.ss_adjunto, public.ss_horas,
   public.ss_acceso_motivado, public.ss_chat_mensaje to authenticated;
 grant select on public.ss_cuarentena, public.ss_caso_sandbox, public.ss_contrato_sla, public.ss_sla_resultado,
-  public.ss_crudo, public.ss_procedencia to authenticated;
+  public.ss_crudo, public.ss_procedencia, public.ss_importacion_fila, public.ss_metrica to authenticated;
 
 grant select on public.ss_incidencia, public.ss_escalamiento, public.ss_evento, public.ss_adjunto, public.ss_campo_extraido,
   public.ss_cuarentena, public.ss_caso_sandbox, public.ss_sla_resultado, public.ss_crudo, public.ss_mapeo,
-  public.ss_procedencia, public.ss_presupuesto, public.ss_contrato_sla to soporte_sap_agente;
+  public.ss_procedencia, public.ss_presupuesto, public.ss_contrato_sla, public.ss_importacion_fila to soporte_sap_agente;
 grant insert on public.ss_escalamiento, public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,
   public.ss_sla_resultado, public.ss_mapeo, public.ss_procedencia, public.ss_chat_mensaje to soporte_sap_agente;
-grant update (estado, categoria, modulo, componente, transaccion, mensaje_error, impacto, urgencia, prioridad, complejidad,
+grant update (estado, categoria, regla_aplicada, modulo, componente, transaccion, mensaje_error, impacto, urgencia, prioridad, complejidad,
   primera_respuesta_en, resuelta_en, cerrada_en) on public.ss_incidencia to soporte_sap_agente;
 
 grant select on public.ss_incidencia, public.ss_adjunto to soporte_sap_ingesta;
@@ -712,9 +807,21 @@ grant select, insert, delete on public.ss_incidencia, public.ss_escalamiento, pu
   public.ss_cuarentena, public.ss_impugnacion, public.ss_sla_resultado, public.ss_horas, public.ss_mapeo,
   public.ss_procedencia to soporte_sap_plataforma;
 grant select, insert on public.ss_evento, public.ss_crudo to soporte_sap_plataforma;
+grant select, insert, delete on public.ss_importacion_fila to soporte_sap_plataforma;
+
+-- Métricas: privilegios POR COLUMNA. Ni `titulo`, ni `descripcion`, ni `nombre`, ni `motivo`.
+grant select (id, tipo, padre_id, creada_en, tamano, sistema, usuarios_sap) on public.ss_organizacion to soporte_sap_metricas;
+grant select (id, consultora_id, cliente_id, sistema, modulo, prioridad, complejidad, regla_aplicada, estado, creada_en,
+  primera_respuesta_en, resuelta_en, cerrada_en) on public.ss_incidencia to soporte_sap_metricas;
+grant select on public.ss_sla_resultado to soporte_sap_metricas;
+grant select (consultora_id, cliente_id, incidencia_id, minutos, fecha) on public.ss_horas to soporte_sap_metricas;
+grant select (crudo_id, indice, consultora_id, cliente_id, herramienta, version_mapeo, resultado, decidido_en)
+  on public.ss_importacion_fila to soporte_sap_metricas;
+grant select, insert on public.ss_metrica to soporte_sap_metricas;
 
 -- Solo agregar: nadie cambia ni borra eventos ni crudo (además del disparador).
 revoke update, delete on public.ss_evento, public.ss_crudo from authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
+revoke update, delete on public.ss_metrica from authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
 -- Ninguna fila decidida sale de un rol de servicio: el agente no actualiza mapeos, campos ni propuestas.
 revoke update on public.ss_mapeo, public.ss_campo_extraido, public.ss_propuesta from soporte_sap_agente, soporte_sap_ingesta;
 

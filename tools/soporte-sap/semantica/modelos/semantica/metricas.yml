@@ -1,0 +1,153 @@
+# El catálogo de métricas del ciclo de vida: UNA definición por métrica. Es lo único que leen los
+# tableros N1, N2 y N3, el SLA, el pricing, los impactos y el chat (a través del corte semántico).
+# `meta.visible_al_cliente`: si el N3 la ve de sí mismo; `meta.etapa`: en qué parte del ciclo pesa;
+# `meta.supuestos`: lo que el laboratorio fijó sin dato real (D11).
+metrics:
+  # --- Operación ------------------------------------------------------------------------------
+  - name: volumen
+    label: Volumen de incidencias
+    description: Incidencias recibidas en el periodo, por fecha de recepción.
+    type: simple
+    type_params: {measure: incidencias_recibidas}
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion}}
+
+  - name: resueltas
+    label: Incidencias resueltas
+    description: Incidencias cuya última resolución cae en el periodo.
+    type: simple
+    type_params: {measure: incidencias_resueltas}
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion}}
+
+  - name: mttr_horas
+    label: Tiempo medio de resolución
+    description: Promedio de horas de resolución (reloj de SLA, hábiles o continuas según la meta; sin la espera del cliente) de lo resuelto en el periodo.
+    type: simple
+    type_params: {measure: horas_resolucion_promedio}
+    config: {meta: {unidad: horas, visible_al_cliente: true, etapa: operacion}}
+
+  - name: primera_respuesta_horas
+    label: Tiempo medio a la primera respuesta
+    description: Promedio de horas desde la recepción hasta la primera respuesta de lo recibido en el periodo.
+    type: simple
+    type_params: {measure: horas_respuesta_promedio}
+    config: {meta: {unidad: horas, visible_al_cliente: true, etapa: operacion}}
+
+  - name: resolucion_primer_contacto
+    label: Resolución al primer contacto
+    description: De lo resuelto en el periodo, la proporción que se resolvió sin esperar al cliente y sin reabrirse.
+    type: ratio
+    type_params: {numerator: resueltas_primer_contacto, denominator: incidencias_resueltas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
+
+  - name: tasa_reapertura
+    label: Tasa de reapertura
+    description: De lo resuelto en el periodo, la proporción que se había reabierto.
+    type: ratio
+    type_params: {numerator: resueltas_reabiertas, denominator: incidencias_resueltas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
+
+  - name: recibidas_acumuladas
+    label: Incidencias recibidas (acumulado)
+    description: Todas las incidencias recibidas hasta el cierre del periodo.
+    type: cumulative
+    type_params:
+      measure: {name: incidencias_recibidas}
+      cumulative_type_params: {period_agg: last}
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion, auxiliar: true}}
+
+  - name: resueltas_acumuladas
+    label: Incidencias resueltas (acumulado)
+    description: Todas las incidencias resueltas hasta el cierre del periodo.
+    type: cumulative
+    type_params:
+      measure: {name: incidencias_resueltas}
+      cumulative_type_params: {period_agg: last}
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion, auxiliar: true}}
+
+  - name: backlog
+    label: Backlog al cierre
+    description: Incidencias abiertas al cierre del periodo (recibidas menos resueltas, acumuladas).
+    type: derived
+    type_params:
+      expr: recibidas_acumuladas - resueltas_acumuladas
+      metrics: [{name: recibidas_acumuladas}, {name: resueltas_acumuladas}]
+    config: {meta: {unidad: incidencias, visible_al_cliente: true, etapa: operacion}}
+
+  # --- SLA ------------------------------------------------------------------------------------
+  - name: cumplimiento_sla_respuesta
+    label: Cumplimiento de SLA de respuesta
+    description: De lo recibido en el periodo con meta de respuesta y reloj ya decidido, la proporción que respondió a tiempo. Lo que sigue en plazo no cuenta.
+    type: ratio
+    type_params: {numerator: sla_respuesta_cumplidas, denominator: sla_respuesta_medidas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
+
+  - name: cumplimiento_sla_resolucion
+    label: Cumplimiento de SLA de resolución
+    description: De lo resuelto en el periodo con meta de resolución, la proporción resuelta a tiempo. Sin meta pactada no hay dato (el contrato del laboratorio no fija resolución).
+    type: ratio
+    type_params: {numerator: sla_resolucion_cumplidas, denominator: sla_resolucion_medidas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: true, etapa: operacion}}
+
+  # --- Conocimiento y esfuerzo ----------------------------------------------------------------
+  - name: reuso_conocimiento
+    label: Reuso del conocimiento
+    description: De lo resuelto en el periodo, la proporción resuelta con una regla del grafo (solución conocida).
+    type: ratio
+    type_params: {numerator: resueltas_por_regla, denominator: incidencias_resueltas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: false, etapa: adopcion}}
+
+  - name: horas_consultor
+    label: Horas de consultor
+    description: Horas registradas en las incidencias recibidas en el periodo.
+    type: simple
+    type_params: {measure: horas_consultor_suma}
+    config: {meta: {unidad: horas, visible_al_cliente: false, etapa: operacion}}
+
+  - name: horas_por_ticket
+    label: Horas por incidencia
+    description: Horas de consultor entre incidencias recibidas en el periodo. El costo en MXN sale de aquí por una fórmula con supuestos (impactos), no de otra cuenta.
+    type: derived
+    type_params:
+      expr: horas_consultor / nullif(volumen, 0)
+      metrics: [{name: horas_consultor}, {name: volumen}]
+    config: {meta: {unidad: horas, visible_al_cliente: false, etapa: operacion}}
+
+  # --- Ciclo de vida --------------------------------------------------------------------------
+  - name: tiempo_al_primer_valor_dias
+    label: Tiempo al primer valor
+    description: Días desde el alta del cliente hasta su primera incidencia resuelta, por mes de alta.
+    type: simple
+    type_params: {measure: dias_al_primer_valor_promedio}
+    config: {meta: {unidad: dias, visible_al_cliente: true, etapa: onboarding}}
+
+  - name: clientes_en_cartera
+    label: Clientes en cartera
+    description: Clientes activos en el mes; con la dimensión de etapa, cuántos hay en alta, onboarding, adopción, operación o renovación.
+    type: simple
+    type_params: {measure: clientes_mes}
+    config: {meta: {unidad: clientes, visible_al_cliente: false, etapa: todas}}
+
+  - name: cobertura_mapeo
+    label: Cobertura del mapeo
+    description: De las filas importadas de las herramientas anteriores, la proporción que quedó limpia. Lo demás está en revisión o descartado con motivo.
+    type: ratio
+    type_params: {numerator: filas_limpias, denominator: filas_importadas}
+    config: {meta: {unidad: proporcion, visible_al_cliente: false, etapa: onboarding}}
+
+  - name: salud_cuenta
+    label: Salud de la cuenta
+    description: Cumplimiento de SLA de respuesta por (1 − tasa de reapertura). Sin SLA medido en el periodo, no hay dato. La fórmula es un SUPUESTO del laboratorio.
+    type: derived
+    type_params:
+      expr: cumplimiento_sla_respuesta * (1 - coalesce(tasa_reapertura, 0))
+      metrics: [{name: cumplimiento_sla_respuesta}, {name: tasa_reapertura}]
+    config: {meta: {unidad: proporcion, visible_al_cliente: false, etapa: renovacion, supuestos: 'fórmula de la salud (laboratorio)'}}
+
+  - name: riesgo_de_baja
+    label: Riesgo de baja
+    description: 1 si la salud de la cuenta queda por debajo de 0.85, 0 si no; sin salud medida, sin dato. El umbral 0.85 es un SUPUESTO del laboratorio.
+    type: derived
+    type_params:
+      expr: case when salud_cuenta is null then null when salud_cuenta < 0.85 then 1 else 0 end
+      metrics: [{name: salud_cuenta}]
+    config: {meta: {unidad: bandera, visible_al_cliente: false, etapa: renovacion, supuestos: 'umbral de riesgo 0.85 (laboratorio)'}}

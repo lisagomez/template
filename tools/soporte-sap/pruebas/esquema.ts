@@ -14,7 +14,7 @@ test('se aplica dos veces y toda tabla ss_ tiene RLS con force', async () => {
     and relkind = 'r' and relname like 'ss\\_%' and not (relrowsecurity and relforcerowsecurity)`)
   assert.deepEqual(sinRls.rows, [])
   const tablas = await db.query<{ n: number }>(`select count(*)::int as n from pg_class where relnamespace = 'public'::regnamespace and relkind = 'r' and relname like 'ss\\_%'`)
-  assert.equal(tablas.rows[0]?.n, 20)
+  assert.equal(tablas.rows[0]?.n, 22)
 })
 
 test('las tablas hijas no pueden contradecir la tenencia de su incidencia', async () => {

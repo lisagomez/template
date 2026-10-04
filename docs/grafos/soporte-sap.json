@@ -90,7 +90,7 @@
     {
       "id": "capa-semantica",
       "label": "Capa semántica en dbt: staging → intermedio → marts → modelos semánticos y métricas (MetricFlow) unificadas a lo largo del ciclo de vida de la consultora y del N3; una definición por métrica, leída por todas las superficies",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "anonimizador",
@@ -880,7 +880,7 @@
       "id": "l-una-metrica",
       "label": "una métrica, una definición",
       "sobre": "nodo:capa-semantica",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "dbt build y la validación de MetricFlow en verde; la misma métrica y el mismo periodo dan el mismo número en N1, N2, N3, SLA, pricing y chat; ninguna superficie calcula métricas por su cuenta"
     },
     {

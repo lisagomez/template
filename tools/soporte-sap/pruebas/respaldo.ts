@@ -6,7 +6,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { PGlite } from '@electric-sql/pglite'
-import { exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, type Consulta } from '../dist/index.js'
+import { exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, TABLAS_DE_TENANT, type Consulta } from '../dist/index.js'
 import { baseSoporte, ORG, INC } from './_base.ts'
 
 const consulta = (db: PGlite): Consulta => async <T>(sql: string, p?: unknown[]) => (await db.query<T>(sql, p)).rows
@@ -75,3 +75,13 @@ test('restaurar es una transacción: si falla, no queda nada a medias', async ()
   await assert.rejects(restauraTenant(q, roto))
   assert.equal((await huellaTenant(q, ORG.CA)).total, antes.total)
 })
+
+test('toda tabla con datos de una consultora está en el respaldo por tenant, o se declara derivada', async () => {
+  const db = await baseSoporte()
+  const conTenant = (await db.query<{ t: string }>(`select distinct table_name as t from information_schema.columns
+    where table_schema = 'public' and table_name like 'ss\\_%' and column_name in ('consultora_id', 'origen_consultora_id') order by 1`)).rows.map((r) => r.t)
+  // ss_metrica es DERIVADA: se regenera con la capa semántica después de restaurar; no se respalda aparte.
+  const DERIVADAS = ['ss_metrica']
+  assert.deepEqual(conTenant.filter((t) => !DERIVADAS.includes(t)).sort(), TABLAS_DE_TENANT.map(([t]) => t).sort())
+})
+

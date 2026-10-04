@@ -1,0 +1,103 @@
+# Los modelos semánticos de MetricFlow: qué entidades unen los hechos y qué medidas se agregan.
+# Las MÉTRICAS (lo que leen las superficies) viven en metricas.yml.
+semantic_models:
+  - name: incidencias
+    description: Una incidencia, su reloj de SLA y sus horas.
+    model: ref('fct_incidencia')
+    defaults:
+      agg_time_dimension: creada_en
+    entities:
+      - {name: incidencia, type: primary, expr: incidencia_id}
+      - {name: cliente, type: foreign, expr: cliente_id}
+      - {name: consultora, type: foreign, expr: consultora_id}
+    dimensions:
+      - {name: creada_en, type: time, type_params: {time_granularity: day}}
+      - {name: resuelta_en, type: time, type_params: {time_granularity: day}}
+      - {name: prioridad, type: categorical}
+      - {name: modulo, type: categorical}
+      - {name: sistema, type: categorical}
+      - {name: estado, type: categorical}
+    measures:
+      - {name: incidencias_recibidas, agg: sum, expr: '1', create_metric: true}
+      - name: incidencias_resueltas
+        agg: sum
+        expr: case when esta_resuelta then 1 else 0 end
+        agg_time_dimension: resuelta_en
+        create_metric: true
+      - name: resueltas_por_regla
+        agg: sum
+        expr: case when esta_resuelta and resuelta_por_regla then 1 else 0 end
+        agg_time_dimension: resuelta_en
+        create_metric: true
+      - name: resueltas_primer_contacto
+        agg: sum
+        expr: case when primer_contacto then 1 else 0 end
+        agg_time_dimension: resuelta_en
+        create_metric: true
+      - name: resueltas_reabiertas
+        agg: sum
+        expr: case when esta_resuelta and reabierta then 1 else 0 end
+        agg_time_dimension: resuelta_en
+        create_metric: true
+      - {name: horas_resolucion_promedio, agg: average, expr: resolucion_horas, agg_time_dimension: resuelta_en}
+      - {name: horas_respuesta_promedio, agg: average, expr: respuesta_horas}
+      - {name: sla_respuesta_medidas, agg: sum, expr: case when sla_respuesta_medido then 1 else 0 end, create_metric: true}
+      - {name: sla_respuesta_cumplidas, agg: sum, expr: case when sla_respuesta_medido and sla_respuesta_cumplido then 1 else 0 end, create_metric: true}
+      - name: sla_resolucion_medidas
+        agg: sum
+        expr: case when sla_resolucion_medido then 1 else 0 end
+        agg_time_dimension: resuelta_en
+        create_metric: true
+      - name: sla_resolucion_cumplidas
+        agg: sum
+        expr: case when sla_resolucion_medido and sla_resolucion_cumplido then 1 else 0 end
+        agg_time_dimension: resuelta_en
+        create_metric: true
+      - {name: horas_consultor_suma, agg: sum, expr: horas_consultor}
+
+  - name: clientes
+    description: El cliente (N3), su tamaño y su tiempo al primer valor.
+    model: ref('dim_cliente')
+    defaults:
+      agg_time_dimension: alta_en
+    entities:
+      - {name: cliente, type: primary, expr: cliente_id}
+      - {name: consultora, type: foreign, expr: consultora_id}
+    dimensions:
+      - {name: alta_en, type: time, type_params: {time_granularity: day}}
+      - {name: tamano, type: categorical}
+    measures:
+      - {name: dias_al_primer_valor_promedio, agg: average, expr: dias_al_primer_valor}
+      - {name: clientes_dados_de_alta, agg: sum, expr: '1', create_metric: true}
+
+  - name: ciclo_de_vida
+    description: Un cliente por mes y su etapa (alta, onboarding, adopción, operación, renovación).
+    model: ref('fct_cliente_mes')
+    defaults:
+      agg_time_dimension: mes
+    entities:
+      - {name: cliente_mes, type: primary, expr: cliente_mes_id}
+      - {name: cliente, type: foreign, expr: cliente_id}
+      - {name: consultora, type: foreign, expr: consultora_id}
+    dimensions:
+      - {name: mes, type: time, type_params: {time_granularity: month}}
+      - {name: etapa, type: categorical}
+    measures:
+      - {name: clientes_mes, agg: sum, expr: '1'}
+
+  - name: importacion
+    description: Cada fila importada de las herramientas anteriores de una consultora.
+    model: ref('fct_importacion')
+    defaults:
+      agg_time_dimension: decidido_en
+    entities:
+      - {name: fila, type: primary, expr: fila_id}
+      - {name: consultora, type: foreign, expr: consultora_id}
+    dimensions:
+      - {name: decidido_en, type: time, type_params: {time_granularity: day}}
+      - {name: resultado, type: categorical}
+      - {name: herramienta, type: categorical}
+    measures:
+      - {name: filas_importadas, agg: sum, expr: '1', create_metric: true}
+      - {name: filas_limpias, agg: sum, expr: case when resultado = 'limpia' then 1 else 0 end, create_metric: true}
+      - {name: filas_en_revision, agg: sum, expr: case when resultado = 'revision' then 1 else 0 end, create_metric: true}

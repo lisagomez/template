@@ -42,6 +42,7 @@
 | **Corte por presupuesto** | El presupuesto es fail-closed: sin fila o al tope, el agente no llama al modelo y el triage de una consultora se detiene. |
 | **Restauración que toca a los demás** | Para devolver a un tenant a su estado se restaura la base entera, y los demás regresan en el tiempo. |
 | **Opacidad** | El N3 no sabe que el laboratorio lee lo que su consultora escala, ni que un agente categoriza sus tickets. |
+| **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
 
 ## 3. Severidad × probabilidad × reversibilidad
 
@@ -60,6 +61,7 @@
 | Corte por presupuesto | Media-alta | **Media**: el fail-closed es el valor por defecto | Sí |
 | Restauración que toca a los demás | Alta | Baja con export por tenant | No, si se restaura la base entera |
 | Opacidad | Media | Alta | Sí |
+| Riesgo de baja como etiqueta | Media | Media | Sí, si la fórmula y el umbral se ven junto al número |
 
 ## 4. Mitigaciones
 
@@ -101,6 +103,10 @@
 - **Opacidad**: el contrato N2–N3 dice que un agente categoriza y que el laboratorio ve lo escalado;
   el aviso de privacidad hacia los empleados es del N3 (responsable de esos datos) y el contrato se
   lo exige.
+- **Riesgo de baja**: es un aviso para que la consultora atienda, no una decisión; la pantalla
+  muestra la fórmula y el umbral (supuestos del laboratorio) junto al número, y el producto no
+  conecta el riesgo con el precio ni con la prioridad de atención. La capa semántica no lee
+  nombres de consultores (privilegios por columna): no hay métrica por persona que publicar.
 
 ## 5. Decisión
 

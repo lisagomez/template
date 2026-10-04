@@ -156,7 +156,12 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     parche de seguridad.
 - **Jobs de plataforma (C7, declarados).** `soporte_sap_ingesta` lee originales y deja campos por
   revisar; `soporte_sap_plataforma` exporta, restaura y borra por retención; ambos acotados por
-  token a una consultora. Ninguno es `service_role`.
+  token a una consultora. Ninguno es `service_role`. **v3 (fase 7):** `soporte_sap_metricas`, el
+  job de la capa semántica, lee a **todas** las consultoras para dar totales; su acotamiento es por
+  columna (sin títulos, descripciones, nombres, contenido, motivos ni consultores) y solo inserta en
+  `ss_metrica`, que nadie cambia ni borra (`pruebas/metricas-rls.ts`).
+  - *Brecha*: un agregado sobre un grupo muy chico (un cliente S solo en su tamaño) puede delatar a
+    ese cliente ante el laboratorio; el corte no aplica todavía un tamaño mínimo de grupo (D9).
 - **Siembra (frontera sandbox → núcleo).** Lo que cambia un veredicto lo firma el laboratorio en
   `tools/conocimiento`; el agente solo deja propuestas.
 - **Superficie.** Nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
@@ -182,6 +187,18 @@ Se firma junto con el BUSINESS_LOGIC del producto.
   minúsculas) y fugaron 54. La v2 reconoce nombres por **exclusión** del vocabulario y datos por su
   forma, y las 63 entradas quedan como fixture permanente. **Lección**: la referencia de un lazo de
   privacidad la pone alguien que no escribió el detector; el banco propio solo cuida regresiones.
+
+- **2026-10-04 · una huella sha256 suelta en un archivo versionado tumba `audita:secretos`.** La
+  versión del corte (64 hex sin prefijo) tiene la forma de un token sin prefijo y la auditoría la
+  marcó en la historia. No era un secreto, pero la regla es buena: toda huella que se commitea va
+  como `sha256:<hex>`, el ancla pública que la auditoría excluye. Se corrigió el commit local antes
+  de empujar, para que el blob dejara de ser alcanzable.
+
+- **2026-10-04 · un acumulado de MetricFlow rellena la espina de tiempo entera.** Con `backlog`
+  (derivada de dos acumulados) en la consulta, `mf query` devolvía filas hasta el final de la espina
+  (2027-12), todas vacías: 3 474 valores, dos tercios sin dato. Toda consulta del corte va con
+  `--start-time` y `--end-time` del periodo medido. Y `uv venv` no trae `pip`: las versiones se leen
+  con `uv pip freeze --python`.
 
 - **2026-10-04 · la regla de identificadores de caso muerde nombres de prueba.** `verify:gobernanza`
   rechaza cualquier «T» seguida de uno o dos dígitos como palabra suelta: tenants de prueba con ese

@@ -1,0 +1,39 @@
+models:
+  - name: fct_incidencia
+    description: Una fila por incidencia con el reloj de SLA, las horas y el perfil del cliente.
+    columns:
+      - name: incidencia_id
+        data_tests: [unique, not_null]
+      - name: tamano
+        data_tests: [not_null]
+
+  - name: dim_cliente
+    description: El cliente (N3), su alta y su tiempo al primer valor.
+    columns:
+      - name: cliente_id
+        data_tests: [unique, not_null]
+
+  - name: fct_cliente_mes
+    description: Un cliente por mes y su etapa del ciclo de vida.
+    columns:
+      - name: cliente_mes_id
+        data_tests: [unique, not_null]
+      - name: etapa
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: {values: ['alta', 'onboarding', 'adopcion', 'operacion', 'renovacion']}
+
+  - name: fct_importacion
+    columns:
+      - name: fila_id
+        data_tests: [unique, not_null]
+
+  - name: metricflow_time_spine
+    description: La espina de tiempo diaria de MetricFlow.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+        data_tests: [unique, not_null]

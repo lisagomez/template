@@ -1,0 +1,11 @@
+# En producción (`--vars '{laboratorio: false}'`) las entradas son las tablas del producto, leídas por
+# el rol `soporte_sap_metricas`: los privilegios por columna le cierran todo el texto.
+sources:
+  - name: producto
+    schema: public
+    tables:
+      - name: ss_organizacion
+      - name: ss_incidencia
+      - name: ss_sla_resultado
+      - name: ss_horas
+      - name: ss_importacion_fila

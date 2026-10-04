@@ -1,0 +1,14 @@
+# Sin secretos en el archivo: todo llega por variables de entorno que fija `corre.mjs` para un
+# Postgres efímero. En producción, el usuario es el rol `soporte_sap_metricas` (sin texto, C7).
+soporte_sap:
+  target: laboratorio
+  outputs:
+    laboratorio:
+      type: postgres
+      host: "{{ env_var('SS_PG_HOST', '127.0.0.1') }}"
+      port: "{{ env_var('SS_PG_PORT') | as_number }}"
+      user: "{{ env_var('SS_PG_USER', 'postgres') }}"
+      password: "{{ env_var('SS_PG_PASSWORD') }}"
+      dbname: "{{ env_var('SS_PG_DB', 'semantica') }}"
+      schema: semantica
+      threads: 4

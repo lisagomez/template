@@ -252,18 +252,61 @@ o reordenar un evento rompe la verificación.
 
 ## 9. Capa semántica (dbt + MetricFlow)
 
-- **Capas de dbt**: `staging` (la limpieza, desde las tablas del producto) → `intermediate`
-  (enriquecimiento y hechos por ticket, incluido el resultado de SLA) → `marts` → modelos
-  semánticos y métricas de **MetricFlow**.
-- **Local y pineado**: dbt Core y MetricFlow en un entorno Python 3.12 (`uv`), contra un Postgres
-  efímero. Nada de dbt Cloud ni de una capa semántica alojada: los datos no salen.
-- **Una definición por métrica.** El corte semántico (los valores que produce MetricFlow) es lo
-  único que leen los tableros N1, N2 y N3, el SLA, el pricing, el FODA y el chat. Ninguna
-  superficie agrega datos por su cuenta, y una prueba lo vigila.
-- **Ciclo de vida** de la consultora y de cada cliente: alta → onboarding → adopción → operación →
-  renovación, y riesgo de baja. El catálogo de métricas (volumen, MTTR, primera respuesta,
-  resolución al primer contacto, cumplimiento de SLA, backlog, reuso del conocimiento, horas, costo
-  por ticket, tiempo al primer valor y salud de la cuenta) vive en el proyecto dbt.
+**Dónde vive**: [`tools/soporte-sap/semantica/`](../tools/soporte-sap/semantica/). La corre
+`node tools/soporte-sap/semantica/corre.mjs` (unos 35 s): entorno Python 3.12 con el
+`requirements.lock` con hashes (dbt-core 1.12.5, dbt-postgres 1.11.0, dbt-metricflow 0.15.0,
+metricflow 0.213.0; Apache 2.0) por `uv`, Postgres efímero `postgres@sha256:b0f9…` solo en
+`127.0.0.1` y con contraseña al azar que no aparece en ninguna línea de comandos, `dbt build`,
+`mf validate-configs` y `mf query` por alcance. Sin telemetría (`DBT_SEND_ANONYMOUS_USAGE_STATS=false`,
+`DO_NOT_TRACK=1`). Nada de dbt Cloud ni de una capa semántica alojada: los datos no salen. Necesita
+Docker y Python, así que **no entra al `validate`** (un gate nuevo sería CDC); lo que sí entra es la
+prueba de las superficies contra el corte (`pruebas/semantica.ts`).
+
+**Capas**:
+
+| Capa | Modelos | Qué hace |
+|---|---|---|
+| Entradas | semillas (laboratorio) o `fuentes.yml` (producto, `--vars '{laboratorio: false}'`) | las mismas columnas que el rol `soporte_sap_metricas` puede leer: **ningún texto** |
+| `staging` | `stg_organizacion`, `stg_incidencia`, `stg_sla_resultado`, `stg_horas`, `stg_importacion_fila` | tipa, normaliza (módulo, prioridad) y deja una fila por clave |
+| `intermedio` | `int_incidencia_hechos`, `int_cliente_ciclo` | define UNA vez las banderas (resuelta, primer contacto, SLA medido) y la etapa del ciclo de vida |
+| `marts` | `fct_incidencia`, `dim_cliente`, `fct_cliente_mes`, `fct_importacion`, `metricflow_time_spine` | las tablas que lee MetricFlow |
+| Semántica | `modelos_semanticos.yml`, `metricas.yml` | 4 modelos semánticos (incidencias, clientes, ciclo de vida, importación) y el catálogo |
+
+`dbt build`: **51 nodos, PASS=51** (5 semillas, 12 modelos, 34 pruebas: unicidad, nulos, valores
+aceptados, relaciones, y tres propias: la importación cuadra, ningún hecho se pierde, el ciclo no tiene
+huecos). `mf validate-configs`: 0 errores; 2 avisos que pone el parser de dbt 1.12 al convertir la
+medida de los dos acumulados en métrica de entrada (la medida se ignora; el resultado es el mismo).
+
+**El catálogo** (17 métricas, cada una con unidad, etapa del ciclo y si el cliente la ve):
+
+| Etapa | Métricas |
+|---|---|
+| Onboarding | tiempo al primer valor, cobertura del mapeo (filas limpias / importadas) |
+| Adopción | reuso del conocimiento (resuelto con regla del grafo) |
+| Operación | volumen, resueltas, MTTR, primera respuesta, resolución al primer contacto, reapertura, backlog al cierre, cumplimiento de SLA de respuesta y de resolución, horas de consultor, horas por incidencia |
+| Renovación | salud de la cuenta, riesgo de baja |
+| Todas | clientes en cartera por etapa (alta, onboarding, adopción, operación, renovación) |
+
+La **etapa** de cada cliente por mes y la fórmula de la **salud** son definiciones del laboratorio
+(supuestos, D11): la salud es cumplimiento de SLA de respuesta × (1 − reapertura) y el riesgo de baja
+es salud < 0.85. Sin SLA medido no hay salud: el corte dice «sin dato», nunca un cero.
+
+**El corte semántico** es la salida: en el producto, la tabla `ss_metrica` (§12) con RLS por nivel;
+en el laboratorio, `semantica/corte.json` (954 valores, versión = `sha256:` + la huella de las entradas). **Es lo único
+que leen** los tableros N1, N2 y N3, el SLA, el pricing, los impactos y el chat
+(`src/corte.ts` + `src/superficies.ts`). La prueba lo vigila de tres maneras: la misma métrica del mismo
+periodo da el mismo número en las seis superficies; un valor centinela plantado en el corte aparece
+igual en todas; y ningún archivo de superficie trae código que agregue (con cinco sabotajes que se
+ponen en rojo). Si el generador de las entradas cambia y nadie vuelve a correr la capa, la versión del
+corte no cuadra y la prueba falla.
+
+**Quién ve qué** (la misma regla en `ss_metrica` y en `leeMetrica`): el laboratorio, agregados (total,
+tamaño, consultora), nunca un cliente; la consultora, lo suyo y lo de sus clientes, nunca el total de
+las demás; el cliente, solo lo suyo y solo lo que la métrica declara visible (no ve su salud, su riesgo
+de baja ni las horas de consultor).
+
+**Verificado contra un cálculo independiente** desde las semillas (2026-10-04): backlog, volumen,
+MTTR y cumplimiento de SLA de abril, julio y septiembre, idénticos.
 
 ## 10. Contratos SLA
 
@@ -300,7 +343,7 @@ o reordenar un evento rompe la verificación.
 ## 12. Esquema de almacenamiento
 
 **Propuesta, no aplicada**: [`tools/soporte-sap/migraciones/propuesta-soporte-sap.sql`](../tools/soporte-sap/migraciones/propuesta-soporte-sap.sql).
-La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 20 tablas; ninguna
+La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 22 tablas; ninguna
 función `security definer` en `public`; árbol, roles y tenencia de las tablas hijas impuestos en
 la base; solo agregar; ningún rol de servicio con `bypassrls` ni `update` sobre lo que se decide) y
 `pruebas/aislamiento.ts` (56 intentos con el rol real, buckets incluidos), en un Postgres efímero.
@@ -318,14 +361,19 @@ tenencia de las tablas hijas).
 | Núcleo y FDE | `ss_propuesta` | `consultora_id` si es a medida, nulo si va al núcleo | el agente solo inserta en estado `propuesta` |
 | Acceso | `ss_acceso_motivado` | por usuario y cliente | solo el superadministrador lo otorga, con motivo y vencimiento (D14) |
 | SLA y horas | `ss_contrato_sla`, `ss_sla_resultado`, `ss_horas`, `ss_presupuesto` | N1–N2 por consultora; N2–N3 por cliente | contrato versionado por `(id, version)` |
-| Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién |
+| Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia`, `ss_importacion_fila` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién; cada fila importada queda limpia, en revisión o descartada con motivo |
+| Métricas | `ss_metrica` | `alcance` (total, tamaño, consultora, cliente) | el corte semántico (§9); solo lo escribe el job de métricas, nadie lo cambia ni lo borra; derivada: se regenera |
 | Chat | `ss_chat_mensaje` | `usuario_id` | cada quien ve su conversación; solo el laboratorio conversa |
 
 **Roles.** `authenticated` (las personas, por `auth.uid()`) y tres roles de servicio sin
 `bypassrls`, cada uno acotado a la consultora del **token de tarea firmado** que presenta
 (`request.jwt.claims`): `soporte_sap_agente` (lee y propone; nunca decide), `soporte_sap_ingesta`
 (lee originales y deja campos por revisar) y `soporte_sap_plataforma` (export, restauración y
-retención; job declarado, C7). Sin token válido no ven nada. Las funciones de visibilidad viven en
+retención; job declarado, C7). Sin token válido no ven nada. El cuarto, `soporte_sap_metricas` (la
+capa semántica, job declarado, C7), lee a **todas** las consultoras para dar totales, así que su
+acotamiento es por **columna**: no tiene privilegio sobre títulos, descripciones, nombres, contenido,
+motivos ni consultores (`pruebas/metricas-rls.ts` lo intenta columna por columna), y solo escribe en
+`ss_metrica`. Las funciones de visibilidad viven en
 `ss_priv`, un esquema que la API no expone.
 
 **Buckets** (privados; ruta por tenant y nombre por sha256, así un mismo archivo no se duplica y
@@ -366,7 +414,9 @@ tenía nada que ver.
 
 **El procedimiento para un tenant** (job de plataforma declarado, C7; `ss-respaldo`):
 
-1. `exportaTenant`: filas de las 16 tablas del tenant, conteos y huella sha256 por tabla
+1. `exportaTenant`: filas de las 17 tablas del tenant (`ss_metrica` no: es derivada y se
+   regenera con la capa semántica; una prueba exige que toda tabla con `consultora_id` esté en una
+   lista o en la otra), conteos y huella sha256 por tabla
    (calculada en la base) y el manifiesto de sus objetos.
 2. Se guarda en `ss-exportes/{consultora}/{fecha}-{sha256}`, y su línea de respaldo es la de Storage.
 3. `restauraTenant`: una sola transacción; borra las filas del tenant (hijas primero) y las vuelve
@@ -446,3 +496,10 @@ recomendación de cada una, después de construir, va en el informe de la corrid
   MetricFlow es Apache 2.0 desde octubre de 2025:
   [dbt Labs](https://www.getdbt.com/blog/open-source-metricflow-governed-metrics).
 - Respaldos de Supabase: [Database Backups](https://supabase.com/docs/guides/platform/backups).
+- Metas de respuesta del contrato de laboratorio (P1 una hora 24×7; P2 cuatro horas en horario
+  local; la «acción correctiva» de P1 no es resolución): [SAP Enterprise Support Schedule, §2.1.1 y
+  §2.1.2](https://assets.cdn.sap.com/agreements/product-use-and-support-terms/sup/sap-enterprise-support-schedule-canada-english-v10-2018.pdf).
+  Son el soporte de SAP a sus licenciatarios: referencia, no promesa del laboratorio.
+- Versiones pineadas de la capa semántica (PyPI, 2026-10-04): dbt-core 1.12.5, dbt-postgres 1.11.0,
+  dbt-metricflow 0.15.0 y metricflow 0.213.0, todas Apache 2.0; dbt-metricflow 0.15 exige
+  dbt-core ≥ 1.11 y < 1.13 y soporta Python < 3.15.

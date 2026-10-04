@@ -9,7 +9,7 @@
  */
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
-export type RolDeServicio = 'soporte_sap_agente' | 'soporte_sap_ingesta' | 'soporte_sap_plataforma'
+export type RolDeServicio = 'soporte_sap_agente' | 'soporte_sap_ingesta' | 'soporte_sap_plataforma' | 'soporte_sap_metricas'
 
 export interface ClaimsTarea {
   readonly consultora: string
@@ -19,7 +19,7 @@ export interface ClaimsTarea {
   readonly exp: number
 }
 
-const ROLES: readonly RolDeServicio[] = ['soporte_sap_agente', 'soporte_sap_ingesta', 'soporte_sap_plataforma']
+const ROLES: readonly RolDeServicio[] = ['soporte_sap_agente', 'soporte_sap_ingesta', 'soporte_sap_plataforma', 'soporte_sap_metricas']
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const b64 = (s: string): string => Buffer.from(s, 'utf8').toString('base64url')

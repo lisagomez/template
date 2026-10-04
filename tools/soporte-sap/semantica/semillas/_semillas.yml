@@ -1,0 +1,47 @@
+# Las semillas las escribe `semantica/semillas.ts` desde el corpus SINTÉTICO: las mismas columnas que
+# el rol `soporte_sap_metricas` puede leer del producto, ni una más (sin títulos, descripciones,
+# nombres ni motivos).
+seeds:
+  - name: ss_organizacion
+    config:
+      column_types: {id: text, tipo: text, padre_id: text, creada_en: timestamptz, tamano: text, sistema: text, usuarios_sap: integer}
+  - name: ss_incidencia
+    config:
+      column_types:
+        id: text
+        consultora_id: text
+        cliente_id: text
+        sistema: text
+        modulo: text
+        prioridad: text
+        regla_aplicada: text
+        estado: text
+        creada_en: timestamptz
+        primera_respuesta_en: timestamptz
+        resuelta_en: timestamptz
+        cerrada_en: timestamptz
+  - name: ss_sla_resultado
+    config:
+      column_types:
+        incidencia_id: text
+        contrato_id: text
+        contrato_version: integer
+        consultora_id: text
+        cliente_id: text
+        prioridad: text
+        respuesta_min: integer
+        resolucion_min: integer
+        meta_respuesta_min: integer
+        meta_resolucion_min: integer
+        cumple_respuesta: boolean
+        cumple_resolucion: boolean
+        estado: text
+        pausado_min: integer
+        reabierta: boolean
+        espero_cliente: boolean
+  - name: ss_horas
+    config:
+      column_types: {consultora_id: text, cliente_id: text, incidencia_id: text, minutos: integer, fecha: date}
+  - name: ss_importacion_fila
+    config:
+      column_types: {crudo_id: text, indice: integer, consultora_id: text, cliente_id: text, herramienta: text, version_mapeo: integer, resultado: text, decidido_en: timestamptz}
