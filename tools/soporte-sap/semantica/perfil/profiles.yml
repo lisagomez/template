@@ -1,7 +1,11 @@
-# Sin secretos en el archivo: todo llega por variables de entorno que fija `corre.mjs` para un
-# Postgres efímero. En producción, el usuario es el rol `soporte_sap_metricas` (sin texto, C7).
+# Sin secretos en el archivo: todo llega por variables de entorno.
+#   laboratorio: un Postgres efímero que levanta `corre.mjs` (las semillas sintéticas).
+#   produccion:  la base del producto, con el rol `soporte_sap_metricas` (C7: sin columnas de texto, solo
+#                inserta en ss_metrica). Los modelos de dbt viven en `ss_semantica`, un esquema que la API
+#                no expone.
 soporte_sap:
-  target: laboratorio
+  # MetricFlow no acepta --target: el target sale de esta variable (la imagen del job la fija en produccion).
+  target: "{{ env_var('SS_DBT_TARGET', 'laboratorio') }}"
   outputs:
     laboratorio:
       type: postgres
@@ -12,3 +16,13 @@ soporte_sap:
       dbname: "{{ env_var('SS_PG_DB', 'semantica') }}"
       schema: semantica
       threads: 4
+    produccion:
+      type: postgres
+      host: "{{ env_var('SS_PG_HOST') }}"
+      port: "{{ env_var('SS_PG_PORT', '5432') | as_number }}"
+      user: "{{ env_var('SS_PG_USER') }}"
+      password: "{{ env_var('SS_PG_PASSWORD') }}"
+      dbname: "{{ env_var('SS_PG_DB', 'postgres') }}"
+      role: soporte_sap_metricas
+      schema: ss_semantica
+      threads: 2

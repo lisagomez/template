@@ -135,17 +135,17 @@
     {
       "id": "deploy-config",
       "label": "Configuración Docker del producto para un VPS de cualquier proveedor (servicios, puertos, .env validado, máquina por tamaño en vCPU/RAM/disco), sin desplegar; el proveedor lo elige el laboratorio (D12)",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "inventario-producto",
       "label": "Asiento de cada activo del producto (CLIs incluidos) con su clasificador de producto",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "readme-comercial",
       "label": "README comercial antes que técnico",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "evidencia-e2e",
@@ -803,14 +803,14 @@
       "id": "l-inventario",
       "label": "ningún activo sin asiento",
       "sobre": "nodo:inventario-producto",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "npm run verifica:inventario en verde y cada CLI del producto con su clasificador"
     },
     {
       "id": "l-readme",
       "label": "README product first",
       "sobre": "nodo:readme-comercial",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "npm run revisa:readmes en verde"
     },
     {

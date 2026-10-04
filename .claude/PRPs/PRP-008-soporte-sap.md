@@ -192,6 +192,14 @@ Se firma junto con el BUSINESS_LOGIC del producto.
   forma, y las 63 entradas quedan como fixture permanente. **Lección**: la referencia de un lazo de
   privacidad la pone alguien que no escribió el detector; el banco propio solo cuida regresiones.
 
+- **2026-10-04 · un filtro en el lector no es un control en la base.** El lector del corte del
+  laboratorio respetaba «visible al cliente», pero la RLS de `ss_metrica` no: en producción, un N3 habría
+  leído su propio riesgo de baja. Y la tabla no tenía dónde guardar la etapa del ciclo de vida, así que
+  el job habría chocado con su propia restricción de unicidad. Las dos salieron al escribir el job de
+  producción y probarlo contra el esquema real, no en el laboratorio. **Lección**: lo que el laboratorio
+  filtra en código, producción lo tiene que filtrar en la base; la prueba que lo demuestra corre contra
+  el esquema, con el rol real.
+
 - **2026-10-04 · el supervisor encontró un defecto que nadie buscaba.** El simulador abría el
   periodo con el texto tal cual (`2026/10`) y el síntoma lo normalizaba (`2026-10`): «abrir el
   periodo» no quitaba el error. La primera prueba del par ejecutor → supervisor lo puso en rojo

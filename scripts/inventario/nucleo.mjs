@@ -14,11 +14,14 @@ import { createHash } from 'node:crypto';
 export const TIPOS = ['software', 'config_agentica', 'datos', 'documento', 'infraestructura', 'licencia_suscripcion'];
 export const CLASES = ['PRODUCTO', 'FABRICA', 'CONOCIMIENTO', 'DISEÑO', 'COMERCIAL', 'INFRA'];
 export const ESTADOS = ['produccion', 'beta', 'blueprint'];
+// El grado de un CLI (la nota de la imprenta) o «no medido»: sin grado no es aprobado, es no medido.
+export const GRADOS = ['A', 'B', 'C', 'D', 'F', 'no medido'];
 
 // El repo es publico: costo y clasificacion estrategica viajan al ERP, nunca a git (SDD §2.1).
 const PROHIBIDO = /(costo|usd|monto|tokens|eje_?dei|defensib|clasificacion|capitaliz)/i;
+// `producto`: el producto que vende la pieza (el clasificador de producto); `grado`: el de un CLI.
 const CAMPOS = ['id', 'nombre', 'tipo', 'clase', 'estado', 'ubicacion', 'responsable', 'origen',
-  'descripcion', 'cubre', 'externo'];
+  'descripcion', 'cubre', 'externo', 'producto', 'grado'];
 
 /** Glob minimo: `*` no cruza `/`; el resto es literal. */
 export function coincide(patron, texto) {
@@ -85,6 +88,9 @@ export function validaAsientos(indice, existe) {
     if (!ESTADOS.includes(a.estado)) mal(`estado «${a.estado}» no es uno de ${ESTADOS.join('|')}`);
     if (!Array.isArray(a.cubre) || a.cubre.length === 0) mal('cubre debe listar al menos un patron');
     for (const o of [a.origen ?? []].flat()) if (!existe(o)) mal(`origen «${o}» no existe`);
+    if (a.producto !== undefined && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(a.producto)) mal(`producto «${a.producto}» debe ser un slug en kebab-case`);
+    if (a.grado !== undefined && !GRADOS.includes(a.grado)) mal(`grado «${a.grado}» no es uno de ${GRADOS.join('|')}`);
+    if ((a.cubre ?? []).some((p) => /\/clis\//.test(p)) && a.grado === undefined) mal('un CLI declara su grado (o «no medido»): sin grado no es aprobado');
   }
   return errores;
 }

@@ -483,9 +483,14 @@ create table if not exists public.ss_metrica (
   tamano        text check (tamano in ('S', 'M', 'L')),
   consultora_id uuid references public.ss_organizacion (id),
   cliente_id    uuid references public.ss_organizacion (id),
+  -- El segmento del ciclo de vida (solo en `clientes_en_cartera`): cuántos clientes hay en cada etapa.
+  etapa         text check (etapa in ('alta', 'onboarding', 'adopcion', 'operacion', 'renovacion')),
   valor         numeric,
+  -- Si el cliente la ve de sí mismo (el `meta.visible_al_cliente` del catálogo): el riesgo de baja,
+  -- la salud y las horas son de la consultora. Sin esta columna la RLS dejaba al N3 leerlas.
+  visible_al_cliente boolean not null default false,
   generado_en   timestamptz not null default now(),
-  constraint ss_metrica_una unique nulls not distinct (version, metrica, periodo, alcance, tamano, consultora_id, cliente_id),
+  constraint ss_metrica_una unique nulls not distinct (version, metrica, periodo, alcance, tamano, consultora_id, cliente_id, etapa),
   constraint ss_metrica_alcance check (case alcance
     when 'total' then tamano is null and consultora_id is null and cliente_id is null
     when 'tamano' then tamano is not null and consultora_id is null and cliente_id is null
@@ -623,7 +628,7 @@ drop policy if exists ss_metrica_lee on public.ss_metrica;
 create policy ss_metrica_lee on public.ss_metrica for select to authenticated
   using ((alcance <> 'cliente' and ss_priv.es_laboratorio())
       or (alcance in ('consultora', 'cliente') and ss_priv.rol_en(consultora_id) = 'consultor')
-      or (alcance = 'cliente' and ss_priv.ve_cliente(cliente_id)));
+      or (alcance = 'cliente' and visible_al_cliente and ss_priv.ve_cliente(cliente_id)));
 
 drop policy if exists ss_chat_lee on public.ss_chat_mensaje;
 create policy ss_chat_lee on public.ss_chat_mensaje for select to authenticated
@@ -777,6 +782,11 @@ begin
 end $$;
 drop policy if exists ss_metrica_escribe on public.ss_metrica;
 create policy ss_metrica_escribe on public.ss_metrica for insert to soporte_sap_metricas with check (true);
+
+-- Los modelos de la capa semántica (dbt) viven en su propio esquema, que la API no expone; el job de
+-- métricas crea ahí sus vistas y tablas y no puede crear nada en `public`.
+create schema if not exists ss_semantica;
+grant usage, create on schema ss_semantica to soporte_sap_metricas;
 
 -- --- Privilegios: lo justo por rol --------------------------------------------------------------
 

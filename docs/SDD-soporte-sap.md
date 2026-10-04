@@ -442,7 +442,7 @@ tenencia de las tablas hijas).
 | Acceso | `ss_acceso_motivado` | por usuario y cliente | solo el superadministrador lo otorga, con motivo y vencimiento (D14) |
 | SLA y horas | `ss_contrato_sla`, `ss_sla_resultado`, `ss_horas`, `ss_presupuesto` | N1–N2 por consultora; N2–N3 por cliente | contrato versionado por `(id, version)` |
 | Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia`, `ss_importacion_fila` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién; cada fila importada queda limpia, en revisión o descartada con motivo |
-| Métricas | `ss_metrica` | `alcance` (total, tamaño, consultora, cliente) | el corte semántico (§9); solo lo escribe el job de métricas, nadie lo cambia ni lo borra; derivada: se regenera |
+| Métricas | `ss_metrica` | `alcance` (total, tamaño, consultora, cliente) | el corte semántico (§9), con `etapa` (el segmento del ciclo de vida) y `visible_al_cliente` (la RLS no deja al N3 leer lo interno); solo lo escribe el job de métricas, nadie lo cambia ni lo borra; derivada: se regenera |
 | Chat | `ss_chat_mensaje` | `usuario_id` | cada quien ve su conversación; solo el laboratorio conversa |
 
 **Roles.** `authenticated` (las personas, por `auth.uid()`) y tres roles de servicio sin
@@ -554,6 +554,88 @@ experto** y, cuando haya un modelo real, **los tokens**, que hoy son supuesto. P
 apoya en la mezcla de prioridades y el tiempo de respuesta contratado, no en la infraestructura. Con
 un motor de OCR autohospedado sin GPU (unos 110 s por página, medido por el extractor), el OCR de una
 consultora L ya pediría más vCPU en la hora pico: la prueba de `maquinaPara` lo cubre.
+
+## 15. Despliegue en cualquier VPS
+
+**Nada del producto depende de un proveedor.** El compose del monorepo (`docker-compose.yml`) se
+dimensiona midiendo la máquina donde corre (`npm run configura:deploy`: `nproc`, `/proc/meminfo`, GPU
+si hay) y no conoce planes de nadie. Solo Caddy publica puertos (80 y 443); la app, el OCR y el job
+de la capa semántica no tienen ninguno.
+
+| Servicio | Perfil | Qué hace | Red |
+|---|---|---|---|
+| `app` + `caddy` | (base) | la app con `/soporte-sap` (en producción, con `auth.uid()`; el laboratorio no se despliega) | `web`, `interna` |
+| `ocr` | `ocr` | el extractor documental con Tesseract por zonas en CPU (spec 010) | `interna`, sin salida |
+| `semantica` | `semantica` | el job de la capa semántica: `dbt build` + MetricFlow + inserción del corte en `ss_metrica`; un disparo por noche (`docker compose --profile semantica run --rm semantica`) | `web` (Supabase gestionado está fuera); `interna` con un Postgres propio (D10) |
+
+**El job de la capa semántica** (`tools/soporte-sap/semantica/Dockerfile`): base
+`python@sha256:57cd…` y el `requirements.lock` con hashes; sin privilegios (`nobody`) y sin
+telemetría. Entra con un usuario de login que **solo es miembro de `soporte_sap_metricas`** (paso
+humano: crearlo con su contraseña fuera del chat; la contraseña viaja por variable de entorno y
+`configura:deploy` solo dice si está). Materializa sus modelos en `ss_semantica`, que la API no
+expone, y no puede crear nada en `public` (`pruebas/semantica-produccion.ts`).
+
+**Probado contra el esquema del producto** (`node tools/soporte-sap/semantica/prueba-produccion.mjs`,
+2026-10-04): red Docker interna, Postgres por digest con el Supabase mínimo y la propuesta aplicada,
+las 542 incidencias sintéticas en las tablas `ss_*`, el usuario del job y la imagen construida: el job
+escribió **1 186 valores en `ss_metrica` y los 1 186 coinciden con el corte del laboratorio**, con la
+bandera «visible al cliente» bien puesta en todos (143 s, todo se tira al final).
+
+**Lo que `configura:deploy` rechaza** además de lo de siempre: `SOPORTE_SAP_LABORATORIO=1` (el
+laboratorio elige identidades y vive en memoria) y un `SS_PG_HOST` sin su usuario y contraseña.
+
+**La máquina por tamaño** sale del estimado (§14): una consultora, aun L, cabe en 2 vCPU, 1.5 GB y
+~22 GB de disco si corriera sola; el VPS de varias consultoras se dimensiona sumando y midiendo con
+`configura:deploy`. Lo que cambia el tamaño es un motor de OCR autohospedado sin GPU, no el producto.
+
+**Candidatos para el VPS con datos en México** (consultado el 2026-10-04; **D12 sigue abierta**: la
+elige el laboratorio, porque decide dónde quedan los datos de los clientes, C4):
+
+| Proveedor | Región | Desde | Fuente |
+|---|---|---|---|
+| AWS | Mexico (Central), `mx-central-1`, tres zonas en Querétaro | enero de 2025 | [AWS News Blog](https://aws.amazon.com/blogs/aws/now-open-aws-mexico-central-region) |
+| Microsoft Azure | Mexico Central, Querétaro, tres zonas | 2024 | [Azure updates](https://azure.microsoft.com/de-de/updates/general-availability-microsoft-azure-now-available-from-new-cloud-region-in-mexico/) |
+| Google Cloud | `northamerica-south1`, Querétaro | diciembre de 2024 | [Converge Digest](https://convergedigest.com/google-cloud-opens-new-region-in-queretaro-mexico/) |
+| Oracle Cloud | Querétaro (su región 39) | junio de 2022 | [Oracle](https://www.oracle.com/news/announcement/oracle-becomes-first-hyperscaler-to-open-a-cloud-region-in-mexico-2022-06-30) |
+
+No hay precios en la tabla a propósito: compararlos exige una cotización vigente del tamaño elegido.
+A cualquiera de ellos (o a un VPS de otro proveedor) hay que hacerle las tres preguntas del §13 sobre
+sus snapshots. **Un dato que cambia la decisión**: Supabase gestionado **no tiene región en México**
+(la más cercana es Virginia o São Paulo; [Supabase, regions](https://supabase.com/docs/guides/platform/regions)).
+Si la residencia en México es requisito, el VPS en Querétaro no basta: la base tendría que ser un
+Postgres propio en la misma región (D10, con pgBackRest o WAL-G); si no lo es, la base vive fuera y el
+contrato lo dice (C4). **Recomendación** para que el laboratorio decida: elegir primero D10 (dónde vive
+la base) y después D12 con la misma región, cotizando dos de las cuatro.
+
+## 16. Seguridad
+
+Los controles, cada uno con la prueba que se pone roja si falta (detalle en el C3 del PRP-008):
+
+| Riesgo | Control | Prueba |
+|---|---|---|
+| Un tenant lee a otro | RLS `enable` + `force` en las 22 tablas, tenencia de las hijas por disparador, buckets por ruta | `pruebas/aislamiento.ts` (56 intentos), `pruebas/esquema.ts` |
+| Un servicio se salta la RLS | ningún rol de servicio con `bypassrls`; cada uno acotado por un token de tarea firmado; ninguna superficie con `service_role` | `pruebas/token-tarea.ts`, `pruebas/esquema.ts` |
+| Un modelo fabrica una aprobación | política `as restrictive` + sin `insert` para servicios; el chat no conoce la tabla | suite de la sala con S1–S7 y `pruebas/chat.ts` (el sabotaje «el chat aprueba» la pone en rojo) |
+| El job de métricas filtra texto | privilegios por columna: ni títulos, ni descripciones, ni nombres, ni motivos | `pruebas/metricas-rls.ts`, `pruebas/semantica-produccion.ts` |
+| El cliente ve lo interno | `ss_metrica.visible_al_cliente` en la RLS (riesgo de baja, salud y horas son de la consultora) | `pruebas/metricas-rls.ts` |
+| Un dato personal llega al sandbox | anonimizador fail-closed; RR. HH. y nómina siempre a revisión humana | `pruebas/anonimiza.ts` (0 fugas en 277, 63 del revisor) |
+| Un documento da órdenes | el texto extraído es dato, delimitado; nada lo ejecuta | `pruebas/ingesta.ts`, evidencia de documentos (0 obedecidas) |
+| La cadena se reescribe | sha256 encadenado, solo agregar, fecha y actor de la base | `pruebas/cadena.ts` |
+| El laboratorio se despliega | 404 sin la variable; `configura:deploy` la rechaza | `scripts/prueba-a2a.ts` (ruta declarada), caso malo y control positivo de `configura:deploy` |
+| Un secreto en pantalla | contraseñas al azar por variable o stdin, nunca en una línea de comandos; huellas como `sha256:` | `npm run audita:secretos` |
+| Cadena de suministro | Postgres y Python por digest; dbt y MetricFlow por lock con hashes | el corte registra con qué se generó (`generadoCon`) |
+
+**Lo que esta corrida encontró y corrigió** (cada uno en los Aprendizajes del PRP): el C3 que afirmaba
+controles que el SQL no tenía (cuatro), el anonimizador medido contra su propio banco (54 fugas de 63),
+el simulador que no normalizaba el periodo (lo cazó el supervisor), la promoción del chat a un hilo de
+segundo nivel (lo cazó el recorrido), un impacto en MXN que mezclaba denominadores, la RLS de
+`ss_metrica` sin «visible al cliente» y sin etapa, y la vista del laboratorio que mostraba el título de
+un caso que no se le escaló.
+
+**Riesgos abiertos**: el corte no aplica un tamaño mínimo de grupo (un cliente S solo en su tamaño puede
+quedar expuesto ante el laboratorio); el contrato N1–N2 no se puede medir sin escalamientos con hora;
+Realtime, Auth y el JWT de Supabase no se probaron sin un Supabase real; y la residencia de los datos
+depende de D10 y D12.
 
 ## 17. Decisiones abiertas
 

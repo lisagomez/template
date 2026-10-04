@@ -22,27 +22,16 @@ import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { semillas, aCsv } from './semillas.ts'
+import { IMAGEN_POSTGRES } from './imagen.mjs'
 
 const AQUI = dirname(fileURLToPath(import.meta.url))
-export const IMAGEN_POSTGRES = 'postgres@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24'
 const LOCK = readFileSync(join(AQUI, 'requirements.lock'), 'utf8')
 const VENV = process.env.SS_DBT_VENV ?? join(homedir(), '.cache', 'soporte-sap-semantica', `venv-${createHash('sha256').update(LOCK).digest('hex').slice(0, 12)}`)
 const bin = (x) => join(VENV, 'bin', x)
 
-const OPERACION = ['volumen', 'resueltas', 'mttr_horas', 'primera_respuesta_horas', 'resolucion_primer_contacto', 'tasa_reapertura', 'backlog',
-  'cumplimiento_sla_respuesta', 'cumplimiento_sla_resolucion', 'reuso_conocimiento', 'horas_consultor', 'horas_por_ticket', 'salud_cuenta',
-  'proporcion_critica', 'proporcion_compleja', 'respuestas_tardias_p1', 'respuestas_tardias_p2']
-/** Qué se pregunta por alcance. `riesgo_de_baja` es de la cuenta (cliente); la importación, de la consultora. */
-export const CONSULTAS = [
-  { alcance: 'total', metricas: [...OPERACION, 'tiempo_al_primer_valor_dias', 'cobertura_mapeo', 'filas_importadas', 'filas_en_revision'], por: [] },
-  { alcance: 'tamano', metricas: [...OPERACION, 'tiempo_al_primer_valor_dias'], por: ['cliente__tamano'] },
-  { alcance: 'consultora', metricas: [...OPERACION, 'tiempo_al_primer_valor_dias', 'cobertura_mapeo', 'filas_importadas', 'filas_en_revision'], por: ['consultora'] },
-  { alcance: 'cliente', metricas: [...OPERACION, 'riesgo_de_baja', 'tiempo_al_primer_valor_dias'], por: ['cliente'] },
-  { alcance: 'total', metricas: ['clientes_en_cartera'], por: ['cliente_mes__etapa'] },
-  { alcance: 'tamano', metricas: ['clientes_en_cartera'], por: ['cliente__tamano', 'cliente_mes__etapa'] },
-  { alcance: 'consultora', metricas: ['clientes_en_cartera'], por: ['consultora', 'cliente_mes__etapa'] },
-  { alcance: 'cliente', metricas: ['clientes_en_cartera'], por: ['cliente', 'cliente_mes__etapa'] },
-]
+/** Qué se pregunta por alcance: una sola definición, compartida con el job de producción (job.py). */
+const DEF = JSON.parse(readFileSync(join(AQUI, 'consultas.json'), 'utf8'))
+export const CONSULTAS = DEF.consultas.map((q) => ({ ...q, metricas: q.metricas.flatMap((m) => (m === '@operacion' ? DEF.operacion : [m])) }))
 
 function corre(cmd, args, opciones = {}) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, ...opciones })
