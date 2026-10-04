@@ -87,7 +87,7 @@ export function leeMetrica(corte: Corte, lector: Lector, q: Consulta): Lectura {
   if (!puedeVer(lector, destino, metrica)) throw new SinAcceso(`${lector.nivel} no ve «${q.metrica}» con alcance ${q.alcance}`)
   return {
     valor: fila?.valor ?? null, metrica,
-    fuente: `capa semántica · ${q.metrica} · ${q.periodo} · ${q.alcance}${q.cliente ? `:${q.cliente}` : q.consultora ? `:${q.consultora}` : q.tamano ? `:${q.tamano}` : ''} · versión ${corte.version.replace(/^sha256:/, '').slice(0, 12)}`,
+    fuente: `capa semántica · ${q.metrica} · ${q.periodo} · ${q.alcance}${q.cliente ? `:${q.cliente}` : q.consultora ? `:${q.consultora}` : q.tamano ? `:${q.tamano}` : ''}${q.etapa ? ` · etapa ${q.etapa}` : ''} · versión ${corte.version.replace(/^sha256:/, '').slice(0, 12)}`,
   }
 }
 

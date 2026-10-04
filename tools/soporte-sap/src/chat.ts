@@ -47,10 +47,36 @@ export interface PropuestaDeEnsenanza {
   readonly contenido: string
 }
 
+/** Un CLI que el experto enseñó como operación repetible: PROPUESTA (imprimirlo o adoptarlo es CDC, C1). */
+export interface PropuestaDeCli {
+  readonly tipo: 'cli'
+  readonly nombre: string
+  readonly operacion: string
+  /** Cambia estado en el SAP del cliente: no es de solo lectura, y por eso va en dry-run por defecto. */
+  readonly readOnly: false
+  readonly dryRunPorDefecto: true
+  readonly estado: 'propuesta'
+  readonly nota: string
+}
+
+const OPERACION = /\b(limpi\w*|reprocesa\w*|reinici\w*|desbloque\w*|borr\w*|reenvi\w*|regenera\w*)\s+(?:la |el |los |las )?([\p{L} ]{3,40}?)(?=[,.;:]|$| del | de la | en )/u
+const slug = (s: string) => s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30)
+
+/** Si lo que enseña el experto es una operación repetible, el agente propone un CLI (no lo imprime). */
+export function propuestaDeCli(texto: string): PropuestaDeCli | null {
+  const m = OPERACION.exec(texto)
+  if (!m) return null
+  const operacion = `${m[1]} ${m[2]}`.trim()
+  return {
+    tipo: 'cli', nombre: `ss-${slug(operacion)}`, operacion, readOnly: false, dryRunPorDefecto: true, estado: 'propuesta',
+    nota: 'imprimir o adoptar un CLI es CDC (C1): queda como propuesta, sin imprimir; llama al simulador, nunca inventa una respuesta',
+  }
+}
+
 export type RespuestaHil =
   | { readonly tipo: 'valor' | 'regla'; readonly texto: string; readonly fuentes: readonly FuenteChat[] }
   | { readonly tipo: 'promovida'; readonly texto: string; readonly publicacion: PublicacionChat }
-  | { readonly tipo: 'propuesta'; readonly texto: string; readonly propuesta: PropuestaDeEnsenanza }
+  | { readonly tipo: 'propuesta'; readonly texto: string; readonly propuesta: PropuestaDeEnsenanza; readonly cli: PropuestaDeCli | null }
   | { readonly tipo: 'no_lo_se' | 'no_permitido'; readonly texto: string }
 
 export interface ContextoChat {
@@ -84,6 +110,7 @@ export function respondeHil(ctx: ContextoChat, sesion: SesionHil, texto: string)
     return {
       tipo: 'propuesta', texto: 'Lo dejo como PROPUESTA en el sandbox. Una regla nueva la firma el laboratorio en tools/conocimiento; yo no la siembro.',
       propuesta: { tipo: 'caso', origen: 'sandbox', alcance: 'nucleo', estado: 'propuesta', propuestaPor: `agente:${ctx.agente} (enseñado por ${sesion.usuario})`, contenido: ctx.delimitaDato(texto) },
+      cli: propuestaDeCli(texto),
     }
   }
   if (PIDE_METRICA.test(t) && !PIDE_SOLUCION.test(t)) return metrica(ctx, sesion, texto)

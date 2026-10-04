@@ -66,6 +66,8 @@ test('cada rol ve lo suyo: el experto no ve costo ni salud; el superadministrado
   const r = respondeHil(ctx, EXP, 'Te enseño el caso de la app Fiori en blanco: hay que limpiar la caché del launchpad')
   assert.equal(r.tipo, 'propuesta')
   assert.ok(r.tipo === 'propuesta' && r.propuesta.estado === 'propuesta' && r.propuesta.contenido.startsWith('<<<DATO_DE_LA_SALA'))
+  assert.ok(r.tipo === 'propuesta' && r.cli !== null, 'una operación repetible trae su propuesta de CLI')
+  if (r.tipo === 'propuesta' && r.cli) assert.deepEqual([r.cli.nombre, r.cli.estado, r.cli.dryRunPorDefecto, r.cli.readOnly], ['ss-limpiar-cache', 'propuesta', true, false])
 })
 
 test('aprobar desde el chat NO aprueba: se promueve al hilo del plan y decide una persona en la sala', () => {

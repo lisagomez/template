@@ -125,7 +125,7 @@
     {
       "id": "app-soporte-sap",
       "label": "App Soporte SAP: N1 (superadmin, experto, A2A con card), sandbox y producción por workspaces, N2 consultor, N3 dashboard con métricas y FODA; enjambre ejecutor→supervisor con HIL en la sala",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "clis-producto",
@@ -150,7 +150,7 @@
     {
       "id": "evidencia-e2e",
       "label": "Recorrido de punta a punta con Playwright, sabotajes y aislamiento de tres niveles, con salida pegada",
-      "estado": "gris"
+      "estado": "ambar"
     },
     {
       "id": "concepto-producto",
@@ -817,7 +817,7 @@
       "id": "l-e2e",
       "label": "el recorrido existe en pantalla",
       "sobre": "nodo:evidencia-e2e",
-      "estado": "gris",
+      "estado": "ambar",
       "referencia": "capturas de Playwright de cada paso del flujo, con antes y después"
     },
     {

@@ -132,6 +132,23 @@ es `ss_miembro(organizacion_id, usuario_id, rol)` sobre `auth.users` (la identid
    al simulador con el antes y el después en la cadena. **A revisión**: el agente analiza el
    motivo, corrige y vuelve a proponer; cada vuelta queda en la cadena.
 
+**La app de laboratorio** (`/soporte-sap`, `src/features/soporte-sap/`): un bento por nivel (N3 cliente,
+N2 consultor, N1 superadministrador y experto) sobre un runtime **en memoria** que compone las
+herramientas tal cual (extractor con OCR local si la máquina lo tiene, categorizador, grafo, par
+ejecutor → supervisor, sala, simulador, anonimizador, cadena sha256, reloj y chat). Solo corre con
+`SOPORTE_SAP_LABORATORIO=1`; las identidades son de laboratorio (en producción, `auth.uid()` y la RLS
+de §12). El laboratorio ve **solo lo escalado a la sala** (sin adjuntos originales) y, del sandbox, el
+texto anonimizado. La interfaz no agrega: pinta lo que el servidor leyó del corte. El recorrido de
+punta a punta lo corre `node src/features/soporte-sap/pruebas/recorrido.mjs <url> <carpeta>` con
+Playwright: 17 capturas en `docs/goals/soporte-sap-capturas/`, cada una con su comprobación, y los
+errores de consola contados (2026-10-04: 0 en rojo, 0 errores).
+
+**El par ejecutor → supervisor** (`tools/soporte-sap/src/enjambre.ts`): el ejecutor prepara el plan
+desde la matriz y lo simula; el supervisor —otro agente— lo re-verifica con seis comprobaciones
+propias (huella, grado, parámetros, el error se reproduce antes, el plan aplica, el error ya no se
+reproduce después). «A revisión» lee el motivo como dato y solo toma de él los parámetros que la regla
+declara; la versión nueva tiene otra huella y va como hilo del plan anterior.
+
 **Sandbox (subnivel 1).** Sin regla en el grafo, el caso se **anonimiza** (§6, fail-closed) y entra
 al sandbox normalizado. Cuando el experto entra, el agente le pregunta hasta entender **por qué**
 funcionó la solución, lo documenta y propone:

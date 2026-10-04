@@ -64,7 +64,8 @@ const p = (paso: PasoSolucion, nombre: string): string => {
 type Efecto = (sap: SapSimulado, paso: PasoSolucion) => Omit<Aplicacion, 'reversible'>
 
 const abrePeriodo = (libro: 'fi' | 'mm'): Efecto => (sap, paso) => {
-  const soc = p(paso, 'sociedad'), per = p(paso, 'periodo')
+  // El periodo se guarda como AAAA-MM: el texto de una incidencia lo trae como 2026/10 o 2026-10.
+  const soc = p(paso, 'sociedad'), per = p(paso, 'periodo').replace('/', '-')
   const actual = sap.periodos[soc]
   exige(actual, `la sociedad ${soc} no existe`)
   exige(!actual![libro].includes(per), `el periodo ${per} de ${libro.toUpperCase()} ya está abierto en ${soc}`)

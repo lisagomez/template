@@ -119,19 +119,22 @@ export function agregaPorSuCuenta(codigo: string): string[] {
   return AGREGA.filter((r) => r.test(sinComentarios)).map((r) => r.source)
 }
 
+/** Las superficies: las del dominio y TODO lo que pinta la app (componentes, página y vistas). El runtime compone el dominio. */
 function archivosDeSuperficie(): string[] {
-  const raiz = join(HERRAMIENTA, '..', '..', 'src', 'features', 'soporte-sap')
-  const fuera: string[] = [join(HERRAMIENTA, 'src', 'superficies.ts'), join(HERRAMIENTA, 'src', 'corte.ts')]
+  const app = join(HERRAMIENTA, '..', '..', 'src')
+  const fuera: string[] = [join(HERRAMIENTA, 'src', 'superficies.ts'), join(HERRAMIENTA, 'src', 'corte.ts'), join(app, 'features', 'soporte-sap', 'services', 'vistas.ts')]
   const recorre = (d: string): void => {
     if (!existsSync(d)) return
     for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) recorre(p); else if (/\.(ts|tsx)$/.test(n)) fuera.push(p) }
   }
-  recorre(raiz)
+  recorre(join(app, 'features', 'soporte-sap', 'components'))
+  recorre(join(app, 'app', '(main)', 'soporte-sap'))
   return fuera
 }
 
 test('ninguna superficie agrega por su cuenta; y un sabotaje que lo hace se pone en rojo', () => {
   const archivos = archivosDeSuperficie()
+  assert.ok(archivos.length >= 8, `${archivos.length} archivos de superficie revisados`)
   const culpables = archivos.flatMap((a) => agregaPorSuCuenta(readFileSync(a, 'utf8')).map((r) => `${a.replace(HERRAMIENTA, 'tools/soporte-sap')}: ${r}`))
   assert.deepEqual(culpables, [])
   const sabotajes = [

@@ -188,6 +188,15 @@ Se firma junto con el BUSINESS_LOGIC del producto.
   forma, y las 63 entradas quedan como fixture permanente. **Lección**: la referencia de un lazo de
   privacidad la pone alguien que no escribió el detector; el banco propio solo cuida regresiones.
 
+- **2026-10-04 · el supervisor encontró un defecto que nadie buscaba.** El simulador abría el
+  periodo con el texto tal cual (`2026/10`) y el síntoma lo normalizaba (`2026-10`): «abrir el
+  periodo» no quitaba el error. La primera prueba del par ejecutor → supervisor lo puso en rojo
+  porque el supervisor comprueba el síntoma **después**, en vez de confiar en que el paso corrió. Un
+  verificador que re-ejecuta encuentra lo que uno que lee la previsión no ve.
+- **2026-10-04 · un hilo de un nivel también se cuida en la promoción.** El chat promovía la
+  petición al hilo de la v2 de un plan, que ya es respuesta, y la sala lo rechazaba (400). La
+  promoción va a la raíz del hilo. El recorrido de Playwright lo encontró como un error de consola.
+
 - **2026-10-04 · un impacto que mezcla denominadores multiplica el error.** El primer accionable
   para el N3 hacía «incidencias × (1 − cumplimiento de SLA)»: el volumen cuenta todas las
   prioridades y el cumplimiento solo las P1/P2 con meta, así que 1 respuesta tardía salía como 6.4.
