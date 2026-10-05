@@ -2,7 +2,7 @@
 
 > Spec: [`docs/goals/soporte-sap.md`](soporte-sap.md) · Diseño: [`docs/SDD-soporte-sap.md`](../SDD-soporte-sap.md) ·
 > Plan y C3: [`.claude/PRPs/PRP-008-soporte-sap.md`](../../.claude/PRPs/PRP-008-soporte-sap.md) · AISIA (borrador):
-> [`soporte-sap-AISIA.md`](soporte-sap-AISIA.md) · Propuesta de CDC: [`soporte-sap-propuesta-cdc.md`](soporte-sap-propuesta-cdc.md) ·
+> [`soporte-sap-AISIA.md`](soporte-sap-AISIA.md) ·  CDC: firmado el 2026-10-04, en la [bitácora](../../.claude/gobernanza/BITACORA-CDC.md) (la propuesta se borró al firmar) ·
 > Capturas: [`soporte-sap-capturas/`](soporte-sap-capturas/) · Grafo: [`docs/grafos/soporte-sap.json`](../grafos/soporte-sap.json)
 
 **Qué quedó.** Soporte SAP construido y probado **en laboratorio** (datos sintéticos, simulador en lugar de
@@ -35,7 +35,7 @@ tamaño. Nada se desplegó, expuso ni empujó; el concepto «producto» queda pa
 | Pricing sin cifras inventadas | precio, modelo de cobro y precios unitarios por decidir; costo «no medido», nunca cero; aviso al 80 % y P1/P2 a una persona al tope | `node tools/soporte-sap/evidencia/pricing.ts`, `pruebas/pricing.ts` |
 | `verifica:inventario` y `revisa:readmes` en verde | 241 unidades con asiento (los 7 CLIs con `producto` y grado «no medido»); 20/20 README conformes | `npm run verifica:inventario`, `npm run revisa:readmes` |
 | Informe y grafo | este archivo; grafo con 55 elementos en ámbar, 1 morado y 4 grises (los de la corrida B) | `docs/grafos/soporte-sap.json` |
-| Propuesta de CDC fuera del registro, `regresion --trampa` en verde, firma pendiente | capa A 147/147, capa B 22/22 (corpus completo; los casos en sesión fría los decide el laboratorio) | `soporte-sap-propuesta-cdc.md` |
+| Propuesta de CDC fuera del registro, `regresion --trampa` en verde, firma pendiente | capa A 147/147, capa B 22/22 (corpus completo; los casos en sesión fría los decide el laboratorio)  | `.claude/gobernanza/BITACORA-CDC.md` (firmado el 2026-10-04) |
 
 Además: el job de la capa semántica en Docker, contra el esquema del producto con el rol real, escribió
 1 186 valores en `ss_metrica` **iguales** al corte del laboratorio (`node tools/soporte-sap/semantica/ensayo-produccion.mjs`).

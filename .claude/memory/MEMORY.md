@@ -17,7 +17,7 @@
 - [Extractor documental: en qué quedamos](project/extractor-documental.md) — spec 010 mezclada: Tesseract + cola por regla, sin umbral; A2A montado y SIN publicar; banco de pruebas cerrado con `leePagina`; falta corpus real y GPU.
 - [Trayectorias: en qué quedamos](project/trayectorias.md) — spec 011; dos CDC promovidos por capa B (21/21); el sujeto va sin `git log` porque el historial alcanza el corpus; una tanda cuesta ~20 USD.
 - [Protocolo de specs (SDD)](project/protocolo-de-specs.md) — `/spec-generator` + `.claude/specs/NNN/{spec,plan,tareas}` + gate `verifica:specs`; C4 en la spec, C3 en el plan; spec o PRP segun se sepa el QUE.
-- [Soporte SAP y el concepto «producto»](project/soporte-sap-y-concepto-producto.md) — sin PR ni firmas; B-3 abierta.
+- [Soporte SAP y el concepto «producto»](project/soporte-sap-y-concepto-producto.md) — sin PR; CDC A firmado; B-3 abierta.
 
 ## feedback/ — Correcciones y preferencias
 (vacio)

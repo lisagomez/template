@@ -540,9 +540,9 @@ un producto **cerrado** y no de uno a medias, y para que una falla tarde no tire
 Hechos que la B necesita y que no se leen solo en el informe de la A:
 
 - **La A cerró en `5e3be4c`** con `npm run validate` 28/28 en verde. Su informe
-  (`docs/goals/soporte-sap-informe-a.md`) y su propuesta de CDC
-  (`docs/goals/soporte-sap-propuesta-cdc.md`) están **sin firmar**; la AISIA y el C3 del PRP-008,
-  también. La B no los firma ni los da por firmados.
+    (`docs/goals/soporte-sap-informe-a.md`) y su propuesta de CDC estaban **sin firmar** al arrancar
+    la B (el CDC se firmó el 2026-10-04, al cerrarla, y está en `.claude/gobernanza/BITACORA-CDC.md`);
+    la AISIA y el C3 del PRP-008, también. La B no los firma ni los da por firmados.
 - **«Producto» ya tiene tres usos en el repo, no dos**:
   1. la **clase** `PRODUCTO` de `inventario/activos.json` (un activo: app, feature o herramienta);
   2. la **fila del índice** de `BUSINESS_LOGIC.md` (raíz), que ya **compone activos** —el asesor de

@@ -32,9 +32,10 @@
   4. **El concepto y la plantilla** (`productos/CONCEPTO.md`, `productos/PLANTILLA.md` v2, `productos/soporte-sap.json`,
      `productos/ventas-whatsapp.json`): documentos y datos nuevos. No son skill ni prompt. Pasan por este CDC
      porque el gate los lee: cambiar la plantilla cambia lo que el gate exige.
-- **Relación con el CDC de la corrida A** (`docs/goals/soporte-sap-propuesta-cdc.md`): **va aparte y después**.
-  La B lee el campo `producto` del inventario, que **introduce la A** (`scripts/inventario/nucleo.mjs`). Si el
-  laboratorio rechaza la A, la B no se sostiene. Si las firma juntas, el orden de la bitácora es A y luego B.
+ - **Relación con el CDC de la corrida A** (firmado el 2026-10-04, en `.claude/gobernanza/BITACORA-CDC.md`): **va
+    aparte y después**. La B lee el campo `producto` del inventario, que **introduce la A**
+    (`scripts/inventario/nucleo.mjs`). Al firmar la B, el comentario de ese campo en `nucleo.mjs` («el producto que
+    vende la pieza») se alinea con el concepto («el dueño»).
 - **Motivo**: el DoF de la corrida B pide que el gate nuevo corra en el `validate`, por un gate existente o dado
   de alta en `.claude/gates.json` dentro de su CDC. Ningún gate existente lee manifiestos, así que se dio de alta.
 - **Propuesto, NO aplicado** (cada uno con su CDC si el laboratorio lo quiere):
