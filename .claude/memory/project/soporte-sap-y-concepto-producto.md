@@ -1,8 +1,8 @@
 # Soporte SAP y el concepto «producto»: en qué quedamos
 
 **Añadido:** 2026-10-04 · **Estado:** construido en laboratorio en la rama `soporte/sap`, subida a GitHub
-**sin PR**. El CDC de la corrida A está **firmado** (2026-10-04, en la bitácora); el de la B, la AISIA y el C3
-  del PRP-008 esperan al laboratorio.
+**sin PR**. Los CDC de las corridas A y B están **firmados** (2026-10-04 y 2026-10-05, en la bitácora); la AISIA
+  y el C3 del PRP-008 esperan al laboratorio.
 
 Un solo goal en dos corridas (spec: `docs/goals/soporte-sap.md`):
 

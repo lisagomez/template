@@ -3,7 +3,7 @@
 > Spec: [`docs/goals/soporte-sap.md`](soporte-sap.md) (§2 de la misión y «Arranque de la corrida B») ·
 > Concepto: [`productos/CONCEPTO.md`](../../productos/CONCEPTO.md) · Plantilla: [`productos/PLANTILLA.md`](../../productos/PLANTILLA.md) ·
 > Manifiestos: [`soporte-sap.json`](../../productos/soporte-sap.json), [`ventas-whatsapp.json`](../../productos/ventas-whatsapp.json) ·
-> Propuesta de CDC: [`soporte-sap-propuesta-cdc-b.md`](soporte-sap-propuesta-cdc-b.md) · Informe de la A:
+> Propuesta de CDC: firmado el 2026-10-05, en la [bitácora](../../.claude/gobernanza/BITACORA-CDC.md) (la propuesta se borró al firmar) · Informe de la A:
 > [`soporte-sap-informe-a.md`](soporte-sap-informe-a.md) · Grafo: [`docs/grafos/soporte-sap.json`](../grafos/soporte-sap.json)
 
 **Qué quedó.** Un producto es una fila del índice: un modelo de negocio que compone activos para un cliente que
@@ -27,7 +27,7 @@ escrito como propuesta. Nada se firmó, desplegó, expuso ni empujó.
 | El gate en el `validate`, sin pruebas huérfanas | dado de alta en `.claude/gates.json` (perfil `validate`), con su CDC propuesto. `verifica:gates` en verde: padrón, documentación y huérfanos | `npm run gates`, `npm run verifica:gates` |
 | `npm run validate` en verde tras el último commit | §8 | `npm run validate` |
 | Informe y grafo | este archivo. En el grafo, `concepto-producto`, `plantilla-producto`, `segundo-producto` y el lazo `l-generalizacion` pasan de gris a ámbar | `docs/grafos/soporte-sap.json` |
-| Propuesta de CDC, regresión y trampas en verde, firma pendiente | `npm run regresion`: capa A 147/147; `npm run regresion -- --trampa`: capa B 22/22. Firma en blanco | `soporte-sap-propuesta-cdc-b.md` |
+| Propuesta de CDC, regresión y trampas en verde, firma pendiente | `npm run regresion`: capa A 147/147; `npm run regresion -- --trampa`: capa B 22/22. Firma en blanco | `.claude/gobernanza/BITACORA-CDC.md` (firmado el 2026-10-05) |
 
 ## 2. Las decisiones y por qué
 

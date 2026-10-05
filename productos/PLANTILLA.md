@@ -89,5 +89,4 @@
 
 **La regla de entrada**: un cambio entra a la plantilla si Soporte SAP también lo tiene o si es una regla
 que la plantilla ya escribía. Lo que solo tiene un producto se queda en su `noCupo`. Que entre lo que tienen
-dos productos aunque no lo tenga la referencia es un cambio de esta regla: lo decide el laboratorio en el
-CDC (`docs/goals/soporte-sap-propuesta-cdc-b.md`).
+dos productos aunque no lo tenga la referencia es un cambio de esta regla: lo decide el laboratorio en un CDC aparte (decisión B-3, `docs/goals/soporte-sap-informe-b.md` §7).
