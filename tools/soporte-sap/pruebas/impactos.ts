@@ -82,3 +82,10 @@ test('las respuestas tardías del corte son las que da el reloj sobre los evento
   }
 })
 
+test('con pocos datos la confianza baja: un cliente de 8 incidencias da «baja», uno de 45 da «media»', () => {
+  const pocos = accionables(CORTE, 'andina', 'farmacias-del-centro', P)
+  const muchos = accionables(CORTE, 'andina', 'alimentos-del-bajio', P)
+  assert.equal(valor('volumen', 'farmacias-del-centro'), 8)
+  assert.ok(pocos.length > 0 && pocos.every((a) => a.confianza === 'baja'), JSON.stringify(pocos.map((a) => a.confianza)))
+  assert.ok(muchos.length > 0 && muchos.every((a) => a.confianza === 'media'), JSON.stringify(muchos.map((a) => a.confianza)))
+})

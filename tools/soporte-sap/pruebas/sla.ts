@@ -137,3 +137,12 @@ test('el cumplimiento de un periodo, recalculado desde los EVENTOS con el reloj,
     assert.equal(enCorte === null ? null : Number(enCorte.toFixed(6)), desdeEventos === null ? null : Number(desdeEventos.toFixed(6)), `${cliente} ${periodo}`)
   }
 })
+
+test('el contrato le dice al cliente que un agente categoriza y qué ve el laboratorio; el aviso de privacidad queda por decidir (AISIA, opacidad)', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const transparencia = p.slice(p.indexOf('## 11. Datos personales y transparencia'), p.indexOf('## 12.'))
+  assert.match(transparencia, /un agente\s+categoriza las incidencias/)
+  assert.match(transparencia, /el laboratorio ve \*\*lo que la consultora le\s+escala\*\*/)
+  assert.match(transparencia, /acceso motivado que otorga la consultora/)
+  assert.match(transparencia, /\[POR DECIDIR: aviso de privacidad/, 'el aviso de privacidad es redacción legal pendiente, no un agente')
+})

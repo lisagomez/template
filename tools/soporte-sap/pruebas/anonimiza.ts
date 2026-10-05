@@ -72,3 +72,10 @@ test('la cuarentena no frena la atención: el reloj de SLA no la conoce y el cas
   assert.match(cuerpo, /\n  i\.sla\.push\(\{ tipo: 'PRIMERA_RESPUESTA'/, 'la primera respuesta corre igual, entre o no al sandbox')
   assert.match(cuerpo, /\n  i\.estado = 'en_atencion'/, 'el caso sigue en atención, entre o no al sandbox')
 })
+
+test('la red de señales residuales: un dominio que ningún detector reconoce deja el caso en cuarentena', () => {
+  const r = anonimiza('MIGO marca M7 053; escribir a soporte en grupo-norteno.com.mx para el detalle', VALIDADORES)
+  assert.equal(r.veredicto, 'cuarentena', JSON.stringify(r))
+  assert.ok(r.senales.includes('queda algo con forma de correo'), JSON.stringify(r.senales))
+  assert.ok(!r.senales.some((x) => x.includes('grupo-norteno')), 'la señal dice el tipo, nunca el dato')
+})
