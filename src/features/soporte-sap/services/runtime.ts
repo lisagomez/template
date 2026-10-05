@@ -16,7 +16,7 @@ import { motorPorProceso } from '../../../../tools/extractor-documental/dist/mot
 import { evaluaSeguro } from '../../../../tools/grafo-conocimiento/dist/index.js'
 import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, aprobado, delimitaDato, type EstadoSala } from '../../../../tools/sala-a2a/dist/index.js'
 import {
-  ingiere, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, sapDeLaboratorio, preparaPlan, supervisa, mensajeDePlan,
+  ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, sapDeLaboratorio, preparaPlan, supervisa, mensajeDePlan,
   corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz,
@@ -37,12 +37,12 @@ export interface IncidenciaLab {
   adjuntos: ResultadoIngesta[]; clasificacion: Clasificacion; consulta: ConsultaMatriz; entrada: EntradaMatriz | null
   cadena: EventoIncidencia[]; sla: EventoSla[]; planes: PlanLab[]; sandbox: Anonimizado | null; estado: string
 }
-interface Estado { n: number; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[] }
+interface Estado { n: number; paginasOcr: Record<string, number>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[] }
 
 function nuevo(): Estado {
   let sala = creaCanal(salaVacia(), { id: CANAL, tenant: 'andina', slug: 'consultora-andina', nombre: 'Consultora Andina', departamento: null })
   for (const u of ['usr-superadmin', 'usr-experto', 'usr-consultor-andina']) sala = agregaParticipante(sala, 'andina', u)
-  return { n: 0, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [] }
+  return { n: 0, paginasOcr: {}, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [] }
 }
 
 const g = globalThis as { __soporteSapLab?: Estado }
@@ -52,7 +52,8 @@ const conocimiento = conocimientoDeMatriz(MATRIZ_LABORATORIO, '2026-10-04')
 export const motor: MotorReglas = (p) => evaluaSeguro(conocimiento, p, { hoy: '2026-10-04' }) as ReturnType<MotorReglas>
 const VALIDADORES = { rfc: (x: string) => validaRfc(x), curp: validaCurp, nss: validaNss }
 const conTimbre = registroDeEsquemas([lectorDeTimbre11])
-const CONFIG = { bytesMaximos: 5_000_000, motor: 'local' as const, decisionC4: null }
+// Topes de la ingesta (C3, O4): adjuntos por incidencia y páginas de OCR por consultora en el laboratorio.
+const CONFIG = { bytesMaximos: 5_000_000, adjuntosMaximos: 10, paginasOcrMaximas: 500, motor: 'local' as const, decisionC4: null }
 
 /** El OCR LOCAL (Tesseract por zonas) si la máquina lo tiene; si no, la imagen se guarda sin extracción y se dice. */
 function ocrLocal(): PuertosIngesta['ocr'] {
@@ -84,8 +85,9 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
   const e = estado()
   const cl = CLIENTES.find((c) => c.id === s.organizacion)!
   const id = `inc-${String(++e.n).padStart(3, '0')}`
-  const adjuntos: ResultadoIngesta[] = []
-  for (const a of d.archivos) adjuntos.push(await ingiere(puertosIngesta(), CONFIG, a))
+  const ingesta = await ingiereTodos(puertosIngesta(), CONFIG, d.archivos, e.paginasOcr[cl.consultora] ?? 0)
+  e.paginasOcr[cl.consultora] = ingesta.paginasOcr
+  const adjuntos: ResultadoIngesta[] = ingesta.resultados
   const evidencia = adjuntos.flatMap((a) => (a.aceptado ? a.campos.map((c) => `${c.campo}: ${c.valor}`) : []))
   const texto = `${d.titulo}. ${d.descripcion}\n${evidencia.join('\n')}`
   const clasificacion = categoriza(texto)

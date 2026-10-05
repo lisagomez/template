@@ -48,6 +48,7 @@ export function Metricas({ tarjetas, prueba }: { tarjetas: readonly Tarjeta[]; p
           <p className="text-xs text-neutral-500">{t.etiqueta}</p>
           <p className="text-xl font-bold tabular-nums">{valorConUnidad(t.valor, t.unidad)}</p>
           <p className="mt-1 truncate text-[10px] text-neutral-400">{t.fuente}</p>
+          {t.supuestos && <p data-supuesto={t.nombre} className="mt-1 text-[10px] leading-snug text-amber-700 dark:text-amber-400">{t.definicion} Supuesto: {t.supuestos}.</p>}
         </div>
       ))}
     </div>

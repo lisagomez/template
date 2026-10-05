@@ -16,7 +16,8 @@ export const SESIONES: Readonly<Record<Rol, Sesion>> = {
   experto: { rol: 'experto', usuario: 'usr-experto', nombre: 'Experto HIL del laboratorio', organizacion: 'laboratorio', nivel: 'N1' },
 }
 
-export interface Tarjeta { readonly nombre: string; readonly etiqueta: string; readonly valor: number | null; readonly unidad: string | null; readonly fuente: string }
+/** `definicion` y `supuestos` del catálogo: una métrica con supuestos los enseña junto al número (AISIA §4, riesgo de baja). */
+export interface Tarjeta { readonly nombre: string; readonly etiqueta: string; readonly valor: number | null; readonly unidad: string | null; readonly fuente: string; readonly definicion: string; readonly supuestos: string | null }
 
 export interface CampoVista { readonly campo: string; readonly valor: string; readonly evidencia: string; readonly via: string; readonly confianza: number | null; readonly estado: string }
 export interface AdjuntoVista { readonly nombre: string; readonly aceptado: boolean; readonly via: string | null; readonly aviso: string | null; readonly motivo: string | null; readonly campos: readonly CampoVista[] }

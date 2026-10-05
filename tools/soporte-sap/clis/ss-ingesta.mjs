@@ -37,6 +37,8 @@ const puertos = {
   leeCfdi: (x) => { const l = leeCfdi40(x, timbre); return { esCfdi: l.esCfdi, motivo: l.motivo, campos: l.campos.map((c) => ({ clave: c.clave, valor: c.valor })) } },
   ocr: motorLocal(),
 }
-const r = await ingiere(puertos, { bytesMaximos: Number(a.valores.maximo ?? 5_000_000), motor: 'local', decisionC4: null }, { nombre: a.valores.archivo, bytes: new Uint8Array(readFileSync(a.valores.archivo)) })
+// Un archivo suelto: una incidencia sin adjuntos previos y una consultora sin OCR gastado; los topes, los del laboratorio.
+const config = { bytesMaximos: Number(a.valores.maximo ?? 5_000_000), adjuntosMaximos: 10, paginasOcrMaximas: 500, motor: 'local', decisionC4: null }
+const r = await ingiere(puertos, config, { nombre: a.valores.archivo, bytes: new Uint8Array(readFileSync(a.valores.archivo)) }, { adjuntos: 0, paginasOcr: 0 })
 console.log(JSON.stringify(r.aceptado ? { ...r, texto: `${r.texto.length} caracteres (dato delimitado, no se imprime)` } : r, null, 1))
 process.exit(r.aceptado ? 0 : 1)
