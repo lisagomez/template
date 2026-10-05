@@ -168,8 +168,17 @@ if (!existsSync(ruta(ENV))) {
   const modeloGpu = valores.get('OCR_GPU_MODELO');
   if (modeloGpu && /(^|[-:@/])(latest|stable|current|default|head)$/i.test(modeloGpu)) problemas.push(`OCR_GPU_MODELO="${modeloGpu}" es un alias autoactualizable: el modelo va pineado (C1).`);
   if (modeloGpu && !gpu.runtimeDocker) avisos.push(`OCR_GPU_MODELO esta puesto pero esta maquina no expone GPU a Docker (${gpu.motivo}): no levantes el perfil ocr-gpu aqui.`);
+  // Soporte SAP: el runtime de LABORATORIO (estado en memoria, identidades elegibles) no se despliega.
+  if (valores.get('SOPORTE_SAP_LABORATORIO') === '1') {
+    problemas.push('SOPORTE_SAP_LABORATORIO=1 enciende el laboratorio de Soporte SAP: identidades de laboratorio que cualquiera elige y ' +
+      'estado sintético en memoria. No va a producción: quítala de .env.production (el producto real usa auth.uid() y la RLS del esquema).');
+  }
+  // Soporte SAP, perfil `semantica`: con base declarada, el usuario del job y su contraseña (solo presencia).
+  if (valores.get('SS_PG_HOST') && (!valores.get('SS_PG_USER') || !valores.get('SS_PG_PASSWORD'))) {
+    problemas.push('SS_PG_HOST está puesto pero falta SS_PG_USER o SS_PG_PASSWORD: el job de la capa semántica entra con un usuario que solo es miembro de soporte_sap_metricas.');
+  }
   // Secretos: solo presencia, nunca valor.
-  for (const clave of ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY', 'A2A_API_KEY', 'MISTRAL_API_KEY']) {
+  for (const clave of ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY', 'A2A_API_KEY', 'MISTRAL_API_KEY', 'SS_PG_PASSWORD']) {
     const v = valores.get(clave);
     console.log(`${clave}: ${v ? verde(`presente (${v.length} car.)`) : gris('ausente')}`);
   }

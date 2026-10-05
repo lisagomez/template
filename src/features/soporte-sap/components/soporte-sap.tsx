@@ -1,0 +1,89 @@
+'use client'
+
+/**
+ * Soporte SAP en laboratorio, por nivel: N3 (cliente) levanta y ve su servicio; N2 (consultor) atiende
+ * con SLA, horas y accionables; N1 (superadministrador y experto) decide en la sala, conversa con el A2A
+ * y ve los agregados y el sandbox. Las identidades son de laboratorio: en producción, `auth.uid()`.
+ */
+import { useState } from 'react'
+import { SESIONES, type Rol, type Vista } from '../services/tipos'
+import { FormularioIncidencia, Incidencias } from './incidencias'
+import { Sala, Chat } from './sala-chat'
+import { Tablero, Sla, Horas, RelojDemo, Accionables, Foda, Propuestas, Sandbox } from './negocio'
+import { Pildora } from './ui'
+
+const ROLES: ReadonlyArray<[Rol, string]> = [['cliente', 'N3 · Cliente'], ['consultor', 'N2 · Consultor'], ['superadmin', 'N1 · Superadministrador'], ['experto', 'N1 · Experto HIL']]
+
+export function SoporteSap({ inicial }: { inicial: Vista }) {
+  const [vista, setVista] = useState(inicial)
+  const [ocupado, setOcupado] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const rol = vista.sesion.rol
+
+  const pide = async (r: Rol, init?: RequestInit) => {
+    setOcupado(true); setError(null)
+    try {
+      const resp = await fetch(`/api/soporte-sap?rol=${r}`, init)
+      const datos = (await resp.json()) as { vista?: Vista; error?: string } & Partial<Vista>
+      if (datos.error) setError(datos.error)
+      setVista(datos.vista ?? (datos as Vista))
+    } finally { setOcupado(false) }
+  }
+  const cambia = (r: Rol) => pide(r)
+  const actua = (a: object) => pide(rol, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(a) })
+  const levanta = (f: FormData) => pide(rol, { method: 'POST', body: f })
+  const decide = (mensaje: string, accion: string, motivo: string) => actua({ tipo: 'decide', mensaje, accion, motivo })
+  const envia = (texto: string) => actua({ tipo: 'chat', texto })
+
+  return (
+    <main className="mx-auto max-w-7xl px-4 pb-24 pt-6">
+      <header className="mb-4 pr-32">
+        <p className="text-xs uppercase tracking-widest text-neutral-500">Soporte SAP · laboratorio · datos sintéticos, simulador en lugar de SAP, sin modelo</p>
+        <h1 className="text-3xl font-bold">{SESIONES[rol].nombre}</h1>
+        <p className="text-sm text-neutral-500">Periodo de las métricas: {vista.periodo} · corte semántico {vista.versionCorte} · identidad de laboratorio <code>{vista.sesion.usuario}</code></p>
+      </header>
+      <nav className="mb-4 flex flex-wrap gap-2" data-prueba="roles">
+        {ROLES.map(([r, t]) => (
+          <button key={r} type="button" onClick={() => cambia(r)} data-prueba={`rol-${r}`}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold ${r === rol ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'border border-neutral-300 dark:border-neutral-700'}`}>{t}</button>
+        ))}
+        <button type="button" onClick={() => actua({ tipo: 'reinicia' })} className="ml-auto rounded-full border border-dashed px-3 py-1 text-xs" data-prueba="reinicia">Reiniciar laboratorio</button>
+      </nav>
+      {error ? <p className="mb-3" data-prueba="error"><Pildora tono="mal">{error}</Pildora></p> : null}
+      <div className="grid grid-cols-12 gap-4" data-prueba={`vista-${rol}`}>
+        {rol === 'cliente' ? (
+          <>
+            <FormularioIncidencia levanta={levanta} ocupado={ocupado} />
+            <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Tus incidencias" />
+            <Tablero grupos={vista.tablero} />
+            {vista.sla ? <Sla sla={vista.sla} /> : null}
+            <Accionables lista={vista.accionables} ancho={5} />
+            {vista.foda ? <Foda foda={vista.foda} /> : null}
+          </>
+        ) : null}
+        {rol === 'consultor' ? (
+          <>
+            <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Bandeja de la consultora" />
+            {vista.sla ? <Sla sla={vista.sla} /> : null}
+            <Horas tarjetas={vista.horas} />
+            {vista.relojesDemo.length ? <RelojDemo relojes={vista.relojesDemo} /> : null}
+            <Accionables lista={vista.accionables} />
+            <Sala mensajes={vista.sala} rol={rol} decide={decide} />
+            <Tablero grupos={vista.tablero} />
+            {vista.foda ? <Foda foda={vista.foda} /> : null}
+          </>
+        ) : null}
+        {rol === 'superadmin' || rol === 'experto' ? (
+          <>
+            <Sala mensajes={vista.sala} rol={rol} decide={decide} />
+            <Chat mensajes={vista.chat} rol={rol} envia={envia} />
+            <Propuestas lista={vista.propuestas} />
+            <Sandbox casos={vista.sandbox} />
+            <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Lo escalado al laboratorio" />
+            <Tablero grupos={vista.tablero} />
+          </>
+        ) : null}
+      </div>
+    </main>
+  )
+}

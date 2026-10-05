@@ -105,6 +105,10 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/reel/[id]/consentimientos',
   '/api/reel/[id]/decision',
   '/api/reel/proyectos',
+  // Soporte SAP en LABORATORIO (PRP-008). RF-20: misma app y mismo puerto. Responde 404 sin
+  // SOPORTE_SAP_LABORATORIO=1 (que `configura:deploy` rechaza en producción); estado sintético en memoria,
+  // identidades de laboratorio, sin base y sin `service_role`. Exponerla es gate humano con C3 + C4.
+  '/api/soporte-sap',
   // Vendedor con IA en WhatsApp (goal ventas-ia-waba, fases 0-3 en laboratorio). RF-20: misma app y mismo
   // puerto. `webhook`, `flows` y `pagos` son las únicas que un tercero (Meta, el procesador) tendría que
   // alcanzar, y solo con el canal REAL: la app no lo arranca sin C3 + C4 firmados; en el laboratorio las

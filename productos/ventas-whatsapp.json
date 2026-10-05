@@ -1,0 +1,133 @@
+{
+ "plantilla": 2,
+ "slug": "ventas-whatsapp",
+ "nombre": "Vendedor con IA en WhatsApp",
+ "version": 1,
+ "estado": "blueprint",
+ "indice": "Vendedor con IA en WhatsApp",
+ "contrato": {
+  "ruta": null,
+  "falta": "/new-app al salir de blueprint (goal docs/goals/ventas-ia-waba.md; C3 y C4 en borrador, sin firmar)",
+  "c3": "tools/ventas-whatsapp/piloto/C3-modelo-de-amenazas-BORRADOR.md",
+  "aisia": "tools/ventas-whatsapp/piloto/C4-AISIA-BORRADOR.md",
+  "firma": "pendiente del laboratorio: C3 y C4 son borradores"
+ },
+ "modeloDeNegocio": {
+  "quienPaga": "la pyme (N2): el plan mensual y, si no trae número, la venta o la renta de uno",
+  "aQuienSirve": ["el dueño de la pyme y quien atiende su WhatsApp", "los clientes de la pyme que escriben por WhatsApp (N3)"],
+  "forma": "B2B2C de tres niveles",
+  "propuesta": "un vendedor con IA dentro del WhatsApp de la pyme que atiende, cierra el pedido, cobra con una liga y demuestra cuánto vendió cada anuncio; además vende o renta el número (N-01) y da de alta a la pyme con un BSP propio (N-02)"
+ },
+ "niveles": [
+  { "id": "N1", "quien": "el laboratorio", "que": "opera la plataforma, es el BSP propio ante Meta (N-02) y lleva el pool de números (N-01)" },
+  { "id": "N2", "quien": "la pyme", "que": "vende por WhatsApp con el agente; atiende lo que el agente le pasa; paga el producto" },
+  { "id": "N3", "quien": "el cliente de la pyme", "que": "pregunta, arma su carrito y paga por WhatsApp" }
+ ],
+ "tenencia": {
+  "arbol": ["laboratorio", "pyme", "contacto"],
+  "aislamiento": {
+   "control": "almacén y cadena de hashes por inquilino; el token del panel decide la pyme; los tokens A2A acotan dominios y skills; el esquema con RLS es una propuesta validada en efímero y no aplicada",
+   "prueba": "tools/ventas-whatsapp/pruebas/aislamiento.ts"
+  }
+ },
+ "roles": [
+  { "id": "operador-plataforma", "tipo": "persona", "nivel": "N1", "aprueba": true, "que": "altas de pymes, pool de números y factura del mes (solo en el laboratorio)" },
+  { "id": "dueno", "tipo": "persona", "nivel": "N2", "aprueba": true, "que": "toma lo que el agente le pasa (queja, monto alto, no se entendieron, presupuesto, pidió una persona) y decide" },
+  { "id": "cliente", "tipo": "persona", "nivel": "N3", "aprueba": false },
+  { "id": "vendedor", "tipo": "agente", "nivel": "N2", "aprueba": false, "que": "contesta acotado al negocio, arma el carrito y manda la liga de pago; sobre el umbral de monto pasa al dueño" },
+  { "id": "pedidos-a2a", "tipo": "agente", "nivel": "N2", "aprueba": false, "que": "el dominio de pedidos como agente A2A detrás de la pasarela multi-inquilino" },
+  { "id": "atribucion-a2a", "tipo": "agente", "nivel": "N2", "aprueba": false, "que": "el dominio de atribución como agente A2A; una agencia con token de propósito solo lee el ROAS" }
+ ],
+ "activos": {
+  "propios": ["TPL-ventas-whatsapp", "TPL-feature-ventas-whatsapp"],
+  "componentes": [],
+  "base": [
+   { "id": "TPL-app-base", "para": "la app Next.js que monta el panel, el laboratorio, la plataforma y las rutas /api/ventas-whatsapp" }
+  ]
+ },
+ "canales": [
+  { "id": "whatsapp", "tipo": "externo", "que": "la Cloud API de Meta con los clientes de la pyme: webhook firmado, Flows cifrados; hoy solo contra el simulador (sin C3 y C4 firmados la app no habla con la Graph API real)" },
+  { "id": "a2a-pasarela", "tipo": "externo", "que": "pedidos y atribución por A2A con Agent Card firmada, para agentes de terceros (una agencia); hoy local" },
+  { "id": "panel-dueno", "tipo": "interno", "que": "/ventas-whatsapp: bandeja con traspaso, tablero de ROAS, cronómetro, integridad y bloqueo" },
+  { "id": "plataforma", "tipo": "interno", "que": "/plataforma-ventas-whatsapp: altas, números y factura; solo en el laboratorio" },
+  { "id": "laboratorio", "tipo": "interno", "que": "/laboratorio-ventas-whatsapp: casos, compuertas de las fases 0 a 3, A/B y conversaciones de punta a punta" }
+ ],
+ "terceros": [
+  { "quien": "Meta (Cloud API, Conversions API y Embedded Signup)", "recibe": "los mensajes con los clientes de la pyme, el catálogo y los eventos de conversión con ctwa_clid (sin datos personales en el evento)", "datosPersonales": true, "decision": "N-02 (BSP propio, decidido el 2026-09-30) y la checklist del primer número",
+    "costo": { "naturaleza": "supuesto", "fuente": "tools/ventas-whatsapp/src/meta/tarifas.ts", "nota": "las reglas se verificaron el 2026-09-30; la tarjeta en MXN (P-05) y el cupo de 1,000 (P-06) no: mueven el costo de Meta ~57 veces" } },
+  { "quien": "el procesador de pagos", "recibe": "monto y referencia del pedido", "datosPersonales": false, "decision": "P-03 (abierta: Mercado Pago, Conekta, Stripe MX o Clip)",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/ventas-whatsapp/piloto/DECISIONES-ABIERTAS.md" } },
+  { "quien": "el proveedor de LLM", "recibe": "el texto del cliente cuando el enrutador determinista no basta", "datosPersonales": true, "decision": "P-04 (abierta: seudonimizar teléfono y nombre antes, CDC del routing y AISIA firmada)",
+    "costo": { "naturaleza": "supuesto", "fuente": "tools/ventas-whatsapp/src/laboratorio/presupuesto.ts", "nota": "precio por millón ficticio y tokens estimados del modelo simulado; las llamadas por conversación sí son medidas" } },
+  { "quien": "el proveedor de números", "recibe": "la identidad del titular de la línea y los códigos de verificación de Meta", "datosPersonales": true, "decision": "P-09 (abierta: SIM a nombre de la pyme para venta, virtuales para renta)",
+    "costo": { "naturaleza": "supuesto", "fuente": "tools/ventas-whatsapp/src/laboratorio/presupuesto.ts" } },
+  { "quien": "la infraestructura (VPS y base de datos)", "recibe": "todo: almacén, cola durable, cadena de hashes y la bóveda de tokens", "datosPersonales": true, "decision": "sin decisión propia: el roadmap supone VPS y base de datos; la custodia de tokens es P-02",
+    "costo": { "naturaleza": "supuesto", "fuente": "tools/ventas-whatsapp/src/laboratorio/presupuesto.ts" } }
+ ],
+ "pricing": {
+  "variables": ["conversaciones por pyme al mes", "fracción que nace de un anuncio (72 h gratis)", "si la pyme trae número o lo compra o renta (N-01)", "modalidad del BSP: Tech Provider o Solution Partner (N-02, P-10)"],
+  "tiers": [],
+  "precio": null,
+  "modeloDeCobro": null,
+  "planComercial": null,
+  "quienDecide": "el laboratorio: el plan comercial; los precios del roadmap son ficticios y se fijan midiendo en el piloto (P-05, P-06)",
+  "fuente": "tools/ventas-whatsapp/src/laboratorio/presupuesto.ts"
+ },
+ "metricas": {
+  "fuente": "tools/ventas-whatsapp/src/atribucion/tablero.ts",
+  "catalogo": null,
+  "definicionUnica": false,
+  "nota": "el ROAS y el costo por conversación se definen una vez en tablero.ts, sin catálogo semántico; Meta lleva su propio conteo y se compara contra automatic_events"
+ },
+ "sla": {
+  "aplica": false,
+  "motivo": "la pyme no contrata un tiempo de respuesta: el agente contesta al momento y lo que pasa al dueño lo atiende el dueño; las ventanas de 24 h y 72 h son reglas de precio de Meta (el cronómetro), no un SLA. La disponibilidad tampoco se promete sin GATE 3"
+ },
+ "entrega": {
+  "modelo": "por decidir",
+  "decision": "sin decisión propia: el BSP propio (N-02) y el roadmap (llave en mano → autoservicio) suponen que el laboratorio opera la plataforma",
+  "recomendacion": "A: la plataforma la opera el laboratorio; sin GATE 3 no compromete disponibilidad"
+ },
+ "respaldo": {
+  "inventario": null,
+  "falta": "el inventario de respaldo va en el §4 del contrato, que se escribe con /new-app al salir de blueprint",
+  "procedimiento": "ninguno: el almacén vive en .datos/ventas-whatsapp/, fuera de git, y nadie lo respalda",
+  "rpoRto": "desconocidos",
+  "gate3": false
+ },
+ "reuso": {
+  "matriz": null,
+  "falta": "no hay matriz dominio × capa: el reuso que se mide es el de composición, que calcula el gate"
+ },
+ "fde": {
+  "aMedida": ["el catálogo de cada pyme (su hoja o CSV, con sus retailer_id)", "los límites de la frontera del número por pyme (hoy ficticios)", "el umbral de monto alto y la lista de bloqueo del dueño", "los Flows publicados en su número"],
+  "nucleo": ["el agente con sus barreras y el enrutador determinista", "el canal con la cola durable y la idempotencia", "la atribución con su ledger", "la cadena de hashes", "el BSP y el gestor de números"],
+  "vuelta": "lo que se repite entre pymes vuelve como dominio o como conversación-plantilla del roadmap (CDC); lo firma el laboratorio",
+  "registro": null,
+  "falta": "no hay registro de lo hecho a medida por pyme: la configuración vive en el almacén de cada inquilino y nada la propone al núcleo con firma"
+ },
+ "fuera": [
+  "no conecta un número real sin C3 y C4 firmados",
+  "no gasta en un LLM: el agente corre con un modelo simulado hasta el CDC del routing (P-04)",
+  "no cobra por su cuenta: un pedido sobre el umbral o un pago que no cuadra pasan al dueño",
+  "no hace marketing masivo",
+  "no da de alta pymes reales ni comparte crédito real",
+  "no reasigna un número antes de su cuarentena de 90 días",
+  "no corta el servicio de una pyme al tope de crédito"
+ ],
+ "noCupo": [
+  { "que": "tres líneas de negocio, cada una con su cobro y sus reglas que no se negocian: el vendedor (SaaS), los números (N-01: venta o renta, cuarentena de 90 días) y el BSP propio (N-02: token en la bóveda, crédito compartido)",
+    "donde": "tools/ventas-whatsapp/piloto/DECISIONES-ABIERTAS.md",
+    "propuesta": "modeloDeNegocio.lineas, cada una con su cobro y sus reglas; no entra en la v2 porque Soporte SAP tiene una sola línea" },
+  { "que": "un agente que actúa solo bajo un umbral: bajo el monto del inquilino, el vendedor arma el pedido y manda la liga de pago sin pasar por el dueño; «aprueba: false» no lo distingue de un agente que solo propone",
+    "donde": "tools/ventas-whatsapp/src/dominios/pedidos.ts",
+    "propuesta": "roles[].actuaSoloHasta, y la regla de que lo que mueve dinero sin persona exige la AISIA firmada antes de beta; no entra porque en Soporte SAP ningún agente actúa solo" },
+  { "que": "fases del producto con compuertas: de la 0 a la 3 construidas en laboratorio, la 4 (multi-pyme) y la 5 (multipaís) sin construir",
+    "donde": "tools/ventas-whatsapp/piloto/REPORTE.md",
+    "propuesta": "fases, cada una con su estado y su compuerta; no entra porque Soporte SAP no tiene fases de producto (sus corridas son de construcción)" },
+  { "que": "la inversión de una vez antes del piloto (presupuesto del laboratorio, con el BSP propio dentro), aparte del costo del mes",
+    "donde": "tools/ventas-whatsapp/piloto/ROADMAP-COSTOS.md",
+    "propuesta": "pricing.inversion, con la naturaleza de cada cifra; no entra porque Soporte SAP no la tiene" }
+ ],
+ "decisiones": "tools/ventas-whatsapp/piloto/DECISIONES-ABIERTAS.md"
+}
