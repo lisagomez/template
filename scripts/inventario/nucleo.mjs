@@ -19,7 +19,7 @@ export const GRADOS = ['A', 'B', 'C', 'D', 'F', 'no medido'];
 
 // El repo es publico: costo y clasificacion estrategica viajan al ERP, nunca a git (SDD §2.1).
 const PROHIBIDO = /(costo|usd|monto|tokens|eje_?dei|defensib|clasificacion|capitaliz)/i;
-// `producto`: el producto que vende la pieza (el clasificador de producto); `grado`: el de un CLI.
+// `producto`: el DUEÑO de la pieza, el producto que la mantiene (a lo sumo uno; productos/CONCEPTO.md §2); `grado`: el de un CLI.
 const CAMPOS = ['id', 'nombre', 'tipo', 'clase', 'estado', 'ubicacion', 'responsable', 'origen',
   'descripcion', 'cubre', 'externo', 'producto', 'grado'];
 

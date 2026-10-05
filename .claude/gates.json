@@ -261,7 +261,7 @@
       "perfiles": ["validate"],
       "activo": true,
       "timeout_s": 120,
-      "_nota": "ALTA del 2026-10-04 (corrida B de Soporte SAP) con la firma PENDIENTE: la propuesta de CDC esta en docs/goals/soporte-sap-propuesta-cdc-b.md. Fuera de predeploy a proposito: un manifiesto no cambia lo que se despliega. Los productos sin manifiesto se listan como pendientes y NO ponen el gate en rojo."
+      "_nota": "ALTA del 2026-10-04 (corrida B de Soporte SAP: el concepto en productos/CONCEPTO.md, la plantilla en productos/PLANTILLA.md). Fuera de predeploy a proposito: un manifiesto no cambia lo que se despliega. Los productos sin manifiesto se listan como pendientes y NO ponen el gate en rojo."
     },
     {
       "nombre": "prueba:inventario",

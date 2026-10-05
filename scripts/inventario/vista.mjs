@@ -40,7 +40,7 @@ export function renderVista(indice, porActivo) {
   }
   const conProducto = activos.filter((a) => a.producto).sort((a, b) => a.producto.localeCompare(b.producto) || a.id.localeCompare(b.id));
   if (conProducto.length) {
-    lineas.push('', '## Por producto', '', 'El clasificador de producto: las piezas que un producto vende, con su estado y, si es un CLI, su grado.', '');
+    lineas.push('', '## Por producto', '', 'El dueño de cada pieza (`producto`), con su estado y, si es un CLI, su grado. Lo que un producto compone sin ser su dueño está en su manifiesto (`productos/`).', '');
     lineas.push(fila(['Producto', 'ID', 'Activo', 'Estado', 'Grado']), fila(['---', '---', '---', '---', '---']));
     for (const a of conProducto) lineas.push(fila([a.producto, a.id, a.nombre, a.estado, a.grado ?? '—']));
   }

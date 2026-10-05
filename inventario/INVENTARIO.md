@@ -61,7 +61,7 @@
 
 ## Por producto
 
-El clasificador de producto: las piezas que un producto vende, con su estado y, si es un CLI, su grado.
+El dueño de cada pieza (`producto`), con su estado y, si es un CLI, su grado. Lo que un producto compone sin ser su dueño está en su manifiesto (`productos/`).
 
 | Producto | ID | Activo | Estado | Grado |
 | --- | --- | --- | --- | --- |
