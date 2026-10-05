@@ -80,7 +80,7 @@
     {
       "id": "propuesta-cdc",
       "label": "Propuesta CDC: diff completo + bitacora con firma en hueco",
-      "estado": "ambar"
+      "estado": "morado"
     }
   ],
   "aristas": [
@@ -323,8 +323,8 @@
       "sobre": "nodo:propuesta-cdc",
       "label": "gate completo y firma en hueco",
       "referencia": "validate en verde tras commit; regresion; verify:gobernanza con 28 skills; aprobacion humana sin marcar",
-      "estado": "ambar",
-      "evidencia": "validate en verde tras el ultimo commit; la firma del laboratorio, pendiente"
+      "estado": "morado",
+      "evidencia": "validate 29/29 tras el ultimo commit; firmado por el laboratorio el 2026-10-05 (capa A basta)"
     }
   ]
 }

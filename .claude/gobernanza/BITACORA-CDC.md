@@ -4333,3 +4333,38 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - **la cifra ya no se mueve**: con una fila pendiente más, o con un contrato enlazado más, el total sigue en 166;
   - `npm run validate` ☑ 28/28 activos (8 inactivos declarados, 0 rojos).
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-01, con el diff delante; firmado el 2026-10-02.
+
+### 2026-10-02 — skill `analista-producto`: rol con contrato A2A no servido, verificador de evidencia y gate `prueba:analista` — radio: skill
+- **Cambio** (rama `paintpoints`, sobre `1623a5c`; diff completo en `.claude/goals/analista-producto/propuesta-cdc.md`):
+  - **skill nuevo** `.claude/skills/analista-producto/` (`SKILL.md`, `esquema.md`, `plantilla-one-pager.md`): dolores con
+    cita verificada, casos de uso por categoría y propuestas product first; solo escribe en `docs/analisis/`;
+  - **gate nuevo** `prueba:analista` en el perfil `validate` (`.claude/gates.json` + `package.json`): Card y transiciones
+    con los tipos de `@a2a-js/sdk` 1.1.0, ninguna ruta lo sirve (enumera `src/app`), `--prueba` del verificador (17
+    siembras) y la última corrida en verde **contra su propio commit** (una corrida es una foto);
+  - **clase de routing** `analisis-de-producto` → `razonamiento` (C8); el paso de vetos sigue en `decision-de-gobernanza`;
+  - **contrato capa A** del skill (12 reglas) en `golden-sets/contratos.json`;
+  - **cuenta de skills 27 → 28** en `CLAUDE.md`, `AGENTS.md`, `README.md` y `.claude/README.md`; rama nueva en el decision
+    tree de `AGENTS.md`; `GEMINI.md` regenerado con `sincroniza:gemini`.
+- **Motivo**: pedido del laboratorio del 2026-10-02 («planea el rol de A2A que revise el repositorio…»), decidido como
+  análisis + SDD + PRP + skill + contrato A2A. Diseño: `docs/SDD-analista-producto.md`; plan: PRP-008.
+- **Qué pone rojo y qué no**: rojo = una cita que no existe o no dice lo afirmado, un grado inflado, un activo fuera de la
+  cobertura, un hallazgo que no cae en ningún caso, una cifra sin su captura, un vetado en el ranking, un one-pager con las
+  piezas antes que el usuario, una hipótesis del pedido sin veredicto, o una ruta que sirva al rol. **No** pone rojo que una
+  cita signifique otra cosa que lo que concluye el hallazgo (juicio, a la vista del lector).
+- **Desviación del goal, declarada**: el goal pedía el gate «propuesto sin aplicar». Va aplicado en la rama porque el
+  padrón pone rojo un archivo de pruebas que ningún gate corre (`verifica-gates.mjs`, comprobación 4); renombrarlo para
+  esquivarlo habría sido hacerle trampa al gate. Nada se integra sin esta firma.
+- **Gate aplicado**: diff visible ☑ (completo en la propuesta, **antes** de pedir la firma) · regresión capa A ☑ 163/163 ·
+  **capa B no corrida por el agente, a propósito**: leer la rama `golden-sets` contamina las corridas en frío; decide el
+  laboratorio («capa A basta») ☑ · aprobación humana ☑ ·
+  pineo ☑ (sin modelo ni dependencia nueva: el SDK ya estaba en 1.1.0).
+- **Regresión y demostración**:
+  - `verify:gobernanza` ☑ 166/166 (5 pendientes declarados, los de antes);
+  - `prueba:analista` ☑ 7/7; **17/17 siembras cazadas**, cada una con un solo fallo y el esperado;
+  - **la corrida es una foto, demostrado**: cambiado en el árbol el literal citado de un contrato, la corrida sigue verde;
+  - `prueba:a2a` ☑ 14/14: ninguna ruta nueva fuera del bridge;
+  - primera corrida (`docs/analisis/2026-10-02/`, sobre `f2ba87f`): cobertura 39/39, 22 hallazgos, 82 citas comprobadas;
+  - `mide:contexto` ☑: lo que se paga en cada sesión pasa a 11028 tokens (92 % de 12000) con la descripción del skill y la
+    rama del decision tree;
+  - `npm run validate` ☑ 29/29 gates activos (8 inactivos declarados, 0 rojos) tras el último commit.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-05, con el diff delante.

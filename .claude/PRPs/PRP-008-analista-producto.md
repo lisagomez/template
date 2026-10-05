@@ -1,6 +1,6 @@
 # PRP-008: Analista de producto (rol con contrato A2A: dolores con evidencia, casos de uso y propuestas product first)
 
-> **Estado**: FASE 1 CONSTRUIDA EN LA RAMA `paintpoints` (2026-10-02), **CDC sin firmar** · fase 2 BLOQUEADA (gate humano) · fase 3 a la segunda corrida
+> **Estado**: FASE 1 CONSTRUIDA EN LA RAMA `paintpoints` (2026-10-02), **CDC firmado por el laboratorio el 2026-10-05 (capa A basta)** · fase 2 BLOQUEADA (gate humano) · fase 3 a la segunda corrida
 > **Fecha**: 2026-10-02
 > **Proyecto**: la fábrica (monorepo del laboratorio)
 > **Spec**: sin spec, a propósito. El QUÉ quedó acordado en el goal compilado
@@ -40,7 +40,7 @@ una decisión del laboratorio salga de un informe.
 - [x] Agent Card y estados tipados con `@a2a-js/sdk` 1.1.0, probados, y **ninguna ruta** que los sirva
 - [x] Verificador de evidencia en verde sobre la corrida, y su `--prueba` tumbando cada siembra
 - [x] Primera corrida en `docs/analisis/2026-10-02/` con cobertura N/N del inventario
-- [ ] CDC firmado por el laboratorio (hueco listo en `~/propuesta-cdc.md`)
+- [x] CDC firmado por el laboratorio (2026-10-05, capa A basta; entrada en `BITACORA-CDC.md`)
 - [ ] Fase 2 desbloqueada por el laboratorio con C3, C4 y C8 resueltos
 
 ### Comportamiento Esperado
@@ -147,7 +147,7 @@ del cambio que lo cerró.
 ### Fase N: Validación final
 **Validación**:
 - [x] `npm run validate` pasa (lo corre el goal tras el último commit)
-- [ ] la firma del laboratorio en `BITACORA-CDC.md`
+- [x] la firma del laboratorio en `BITACORA-CDC.md` (2026-10-05)
 
 ---
 
@@ -192,4 +192,4 @@ del cambio que lo cerró.
 
 ---
 
-*Fase 1 construida en la rama; CDC pendiente de la firma del laboratorio.*
+*Fase 1 construida en la rama y CDC firmado (2026-10-05).*
