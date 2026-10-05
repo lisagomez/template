@@ -79,3 +79,12 @@ lee los retiros con `SUPABASE_SERVICE_ROLE_KEY` y no escribe en Supabase).
 
 Solo local: el render necesita ffmpeg, Tesseract, OpenCV de Python y los modelos de `tools/dictado`. En producción
 queda bloqueado (fase 16 del PRP-007).
+
+### Probar la sala
+
+`node scripts/reel/captura-sala.mjs` recorre la sala en un celular emulado: consentimiento, corte en la voz de otra
+persona (riesgo 5), revisión, aprobar con la transcripción conservada, retirar y borrar (15 comprobaciones; la primera
+corrida, el 2026-10-05, salió 15/15 sin errores de consola). Necesita la app arrancada con los motores locales:
+`DICTADO_MODELOS` y `DICTADO_RUNTIME` (los del banco de `tools/dictado` sirven), `REEL_RECURSOS` con YuNet 2022mar y
+los retratos de `tools/reel/LICENCIAS.md`, y `tesseract` y un `python3` con OpenCV 4.6 en el `PATH`. Crea una cuenta
+`@example.com` en el Supabase de la app que queda creada; el proyecto se borra al final.

@@ -215,7 +215,8 @@ Todos medidos en el laboratorio o en el recorrido con Playwright; cada uno qued�
 - **Fix**: registrar y retirar en la sala. Retirar borra el documento, revoca lo aprobado antes de reprocesar,
   `decisionesTrasRetirar` deshace las caras y los cortes revisados, y se avisa al dueño con la verdad (lo publicado
   no se recupera; su voz e imagen siguen en el clip original hasta borrar el proyecto). Caso `priv-11`.
-- **Lección**: «hecha» se comprueba en la interfaz, no en la API.
+- **Lección**: «hecha» se comprueba en la interfaz, no en la API. Y así se hizo: el 2026-10-05 la sala se recorrió
+  en el navegador con el clip de dos voces (`scripts/reel/captura-sala.mjs`, 15/15, 0 errores de consola).
 
 ## Gotchas
 - [ ] Next.js 16: `proxy.ts` (no `middleware.ts`) y `getUser()` en el servidor, nunca `getSession()`.
