@@ -17,6 +17,7 @@ import { leeConImports } from './lee-instrucciones.mjs';
 import { geminiSincronizado } from './sincroniza-gemini.mjs';
 import { estadoCorpus } from './lib/corpus.mjs';
 import { cargaManifiesto, gatesDelPerfil, MANIFIESTO } from './lib/gates.mjs';
+import { revisaFirmas, pruebaFirmas, SIEMBRAS, FECHA_CASILLA } from './lib/firmas.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
@@ -1033,27 +1034,31 @@ comprueba(
 // Una decision de riesgo sin firmar no es una decision: es un descuido con formato de
 // decision, y esa diferencia es justo lo que pregunta un auditor. Paso el gate una que
 // llevaba dias sin firma porque nada la miraba — la marca append-only si se vigilaba,
-// la firma no. Solo se miran las entradas reales (tras "## Entradas"), no la plantilla
-// del bloque "## Formato", que nace vacia a proposito.
-const FIRMA = /^[-*]\s+\*\*(?:Firmado|Aprobado) por\*\*(?:\s*\([^)]*\))?:\s*(.+)$/m;
-const SIN_VALOR = /^(_?pendiente|\[|☐|todo\b|—\s*$)/i;
+// la firma no. Una firma es un NOMBRE (`scripts/lib/firmas.mjs`): la lista de huecos que se
+// miraba antes dejo pasar diez entradas sin firmar (2026-10-06). Una entrada sin firma solo
+// se cierra con un `**Cierra**` en una entrada posterior y firmada.
 for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`]) {
-  const contenido = lee(registro) ?? '';
-  const cuerpo = contenido.split(/^##\s+Entradas\s*$/m)[1];
-  const sinFirma = [];
-  for (const entrada of (cuerpo ?? '').split(/^### /m).slice(1)) {
-    const titulo = entrada.split('\n')[0].trim();
-    const firma = entrada.match(FIRMA);
-    if (!firma || SIN_VALOR.test(firma[1].trim())) sinFirma.push(titulo.slice(0, 60));
-  }
+  const revision = revisaFirmas(lee(registro) ?? '');
+  const corta = (titulos) => titulos.map((t) => t.slice(0, 60)).join(' | ');
   comprueba(
     `toda entrada de ${registro} esta firmada`,
-    cuerpo !== undefined && sinFirma.length === 0,
-    cuerpo === undefined
+    revision !== null && revision.sinFirma.length === 0,
+    revision === null
       ? 'no se encontro la seccion "## Entradas": el registro cambio de forma'
-      : `sin firma: ${sinFirma.join(' | ')} — una decision sin dueno no es una decision`,
+      : `sin firma: ${corta(revision.sinFirma)} — una decision sin dueno no es una decision`,
+  );
+  comprueba(
+    `${registro}: desde ${FECHA_CASILLA}, ninguna entrada firmada lleva «aprobación humana ☐»`,
+    revision !== null && revision.casillaVacia.length === 0,
+    `firma y casilla vacia a la vez: ${corta(revision?.casillaVacia ?? [])} — o se aprobo o no`,
   );
 }
+const siembrasFallidas = pruebaFirmas();
+comprueba(
+  `6b caza sus ${SIEMBRAS.length} siembras (firma, cierre y casilla)`,
+  siembrasFallidas.length === 0,
+  `no ve como debe: ${siembrasFallidas.join(' | ')} — un patron de firma que no caza un hueco lo deja pasar`,
+);
 
 // --- 6k. La escalera CLI-first y las cuatro reglas, INLINE ------------------
 // La tercera palanca de eficiencia solo existe si esta donde el agente decide. Escrita solo
