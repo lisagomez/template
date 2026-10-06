@@ -12,6 +12,8 @@
 > - su servicio corre en una red sin salida;
 > - **el buzón del ERP (5B.2) está especificado y sin código**;
 > - **la lista 69-B no existe** en el repo.
+>
+> **Aprobado por el laboratorio el 2026-10-06.**
 
 ## Módulos y requisitos que cubren
 

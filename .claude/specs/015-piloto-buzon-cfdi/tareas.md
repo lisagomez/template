@@ -7,7 +7,8 @@
 ## Fase 1 — Spec, plan y tareas
 
 - [x] **TAR-1 · Spec aprobada** por el laboratorio el 2026-10-06, con cinco dudas abiertas.
-- [ ] **TAR-2 · Plan y tareas aprobados** (este directorio). `npm run verifica:specs` en verde.
+- [x] **TAR-2 · Plan y tareas aprobados** por el laboratorio el 2026-10-06. `npm run verifica:specs`:
+      136/136; `npm run validate`: 30/30 gates activos.
 
 ## Fase 2 — Despliegue en el despacho
 
