@@ -3,6 +3,8 @@
  "version": 1,
  "fuentes": [
   { "patron": "tools/*/" },
+  { "patron": "tools/*/clis/*.mjs" },
+  { "patron": "productos/" },
   { "patron": "src/features/*/" },
   { "patron": "src/lib/*/" },
   { "patron": "src/app/" },
@@ -195,7 +197,7 @@
    "id": "TPL-ventas-whatsapp",
    "nombre": "Vendedor con IA en WhatsApp para pymes, fases 0-3 en laboratorio: canal Cloud API, agente acotado con barreras y traspaso, comercio con Flows cifrados y liga de pago, atribucion con Conversions API y ROAS, A2A multi-inquilino, venta y renta de numeros (N-01), BSP propio con Embedded Signup y cobro (N-02), y el simulador de Meta (0.1.0)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
-   "ubicacion": "tools/ventas-whatsapp", "responsable": "dep-sw",
+   "ubicacion": "tools/ventas-whatsapp", "responsable": "dep-sw", "producto": "ventas-whatsapp",
    "origen": ["docs/goals/ventas-ia-waba.md", "docs/INVESTIGACION-ventas-ia-whatsapp.md"],
    "cubre": ["tools/ventas-whatsapp"]
   },
@@ -203,9 +205,33 @@
    "id": "TPL-feature-ventas-whatsapp",
    "nombre": "Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
-   "ubicacion": "src/features/ventas-whatsapp", "responsable": "dep-sw",
+   "ubicacion": "src/features/ventas-whatsapp", "responsable": "dep-sw", "producto": "ventas-whatsapp",
    "origen": ["docs/goals/ventas-ia-waba.md"],
    "cubre": ["src/features/ventas-whatsapp"]
+  },
+  {
+   "id": "TPL-feature-soporte-sap",
+   "nombre": "App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente) y su contrato de negocio",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/soporte-sap", "responsable": "dep-sw", "producto": "soporte-sap",
+   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md"],
+   "cubre": ["src/features/soporte-sap"]
+  },
+  {
+   "id": "TPL-sala-a2a",
+   "nombre": "Sala A2A: canales, hilos de un nivel y aprobaciones como fila que ningun componente que ejecuta un modelo puede fabricar; esquema propuesto con su suite de sabotajes S1-S7 (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/sala-a2a", "responsable": "dep-sw", "producto": "soporte-sap",
+   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md"],
+   "cubre": ["tools/sala-a2a"]
+  },
+  {
+   "id": "TPL-soporte-sap",
+   "nombre": "Soporte SAP en laboratorio: dominio de tres niveles (laboratorio, consultora, cliente), matriz problema-solucion sobre el grafo, simulador SAP y de tickets, anonimizador, cadena de eventos, mapeo y limpieza, SLA, pricing, impactos en MXN, respaldo por tenant y el agente FDE (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap", "responsable": "dep-sw", "producto": "soporte-sap",
+   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md"],
+   "cubre": ["tools/soporte-sap"]
   },
   {
    "id": "TPL-feature-etiquetas",
@@ -341,11 +367,75 @@
    "cubre": ["erp/*", "erp/*.md"]
   },
   {
+   "id": "TPL-productos",
+   "nombre": "El concepto de producto, su plantilla y sus manifiestos (productos/), con el gate que los cruza con el indice del portafolio y el inventario (verifica:productos)",
+   "tipo": "software", "clase": "FABRICA", "estado": "blueprint",
+   "ubicacion": "productos", "responsable": "dep-sw",
+   "origen": ["docs/goals/soporte-sap.md"],
+   "cubre": ["productos", "scripts/verifica-productos.mjs"]
+  },
+  {
    "id": "TPL-design-systems",
    "nombre": "Design systems de referencia (bento, glass, neobrutalismo...)",
    "tipo": "documento", "clase": "DISEÑO", "estado": "produccion",
    "ubicacion": ".claude/design-systems", "responsable": "dep-sw",
    "cubre": [".claude/design-systems/*"]
+  },
+  {
+   "id": "TPL-cli-ss-reuso",
+   "nombre": "CLI ss-reuso de Soporte SAP: cuenta el reuso desde la matriz dominio × capa del SDD; --escribe reescribe el bloque del SDD (cambia estado, dry-run por defecto)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-reuso.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-reuso.mjs"]
+  },
+  {
+   "id": "TPL-cli-ss-triage",
+   "nombre": "CLI ss-triage de Soporte SAP: categoriza una incidencia y consulta la matriz sobre el grafo (solo lectura)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-triage.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-triage.mjs"]
+  },
+  {
+   "id": "TPL-cli-ss-simulador",
+   "nombre": "CLI ss-simulador de Soporte SAP: estado, simulación y ejecución contra el SAP simulado; ejecutar exige la aprobación de la sala (cambia estado, dry-run por defecto)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-simulador.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-simulador.mjs"]
+  },
+  {
+   "id": "TPL-cli-ss-mapea",
+   "nombre": "CLI ss-mapea de Soporte SAP: propone el mapeo de un exporte de tickets y muestra la cuenta (solo lectura)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-mapea.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-mapea.mjs"]
+  },
+  {
+   "id": "TPL-cli-ss-cadena",
+   "nombre": "CLI ss-cadena de Soporte SAP: verifica la cadena sha256 de eventos de una incidencia (solo lectura)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-cadena.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-cadena.mjs"]
+  },
+  {
+   "id": "TPL-cli-ss-ingesta",
+   "nombre": "CLI ss-ingesta de Soporte SAP: lee un documento por su vía y muestra sus campos con evidencia (solo lectura)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-ingesta.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-ingesta.mjs"]
+  },
+  {
+   "id": "TPL-cli-ss-respaldo",
+   "nombre": "CLI ss-respaldo de Soporte SAP: simulacro de restauración por tenant en efímero, cronometrado S/M/L (solo lectura)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/soporte-sap/clis/ss-respaldo.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
+   "origen": ["tools/soporte-sap/clis/manifiesto.json"],
+   "cubre": ["tools/soporte-sap/clis/ss-respaldo.mjs"]
   }
  ]
 }

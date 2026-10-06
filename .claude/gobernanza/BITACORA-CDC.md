@@ -4368,3 +4368,117 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
     rama del decision tree;
   - `npm run validate` ☑ 29/29 gates activos (8 inactivos declarados, 0 rojos) tras el último commit.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-05, con el diff delante.
+
+### 2026-10-04 — Soporte SAP (corrida A): inventario por producto, una superficie declarada, chequeos de deploy, un job con imagen y lock nuevos, extractor 0.8.0 → CDC PROMOVIDO — radio: verificador de inventario, declaración de superficie (C3), deploy, cadena de suministro
+
+- **Cambio** (rama `soporte/sap`, 18 commits sobre `main`, hasta `5e3be4c`; lo que toca gobernanza: 12 archivos, +188 −12):
+  1. **Gate `verifica:inventario`** (`scripts/inventario/nucleo.mjs`, `vista.mjs`, `scripts/prueba-inventario.ts`,
+     `inventario/activos.json`): dos campos opcionales nuevos en el índice, `producto` (slug: el clasificador de
+     producto) y `grado` (`A`–`F` o «no medido»); **un asiento que cubre un CLI sin `grado` se rechaza**; la fuente
+     `tools/*/clis/*.mjs` descubre cada CLI como unidad, y los 7 de Soporte SAP tienen su asiento («no medido»);
+     la vista gana la sección «Por producto». La exportación al ERP lista sus campos y no cambia.
+  2. **Superficie declarada (C3)** (`scripts/prueba-a2a.ts`): `/api/soporte-sap` entra a `RUTAS_FUERA_DEL_BRIDGE`
+     con su justificación: misma app y puerto, 404 sin `SOPORTE_SAP_LABORATORIO=1`, estado sintético en memoria,
+     sin base ni `service_role`. Exponerla sigue siendo gate humano (C3 + C4).
+  3. **Deploy** (`scripts/configura-deploy.mjs`, `docker-compose.yml`): `configura:deploy` **rechaza
+     `SOPORTE_SAP_LABORATORIO=1`** en producción y exige usuario y contraseña del job si hay `SS_PG_HOST` (solo
+     presencia); el compose gana el perfil `semantica` (un disparo, sin puertos).
+  4. **Cadena de suministro**: una imagen base nueva pineada por digest (`python@sha256:57cd…`) y un lock de Python
+     con hashes (`tools/soporte-sap/semantica/requirements.lock`: dbt-core 1.12.5, dbt-postgres 1.11.0,
+     dbt-metricflow 0.15.0, metricflow 0.213.0, Apache 2.0); el Postgres efímero, por digest
+     (`postgres@sha256:b0f9…`). Nada de esto entra al bundle de la app.
+  5. **Extractor documental 0.8.0** (`tools/extractor-documental`): `clasePorBytes` sube al núcleo (la ingesta de
+     Soporte SAP la pidió como versión nueva en vez de parchearla); `lote-corpus` la reusa. Sin cambio de conducta
+     (779 pruebas).
+  6. **Opcional, no aplicado** (es `gates.json`, CDC por sí mismo): declarar como gates **inactivos** con motivo
+     «necesita Docker» el corredor de la capa semántica (`node tools/soporte-sap/semantica/corre.mjs`) y el ensayo
+     del job contra el esquema del producto (`node tools/soporte-sap/semantica/ensayo-produccion.mjs`), para que
+     queden en el padrón como `erp:prueba`.
+- **Motivo**: el DoF de la corrida A pide los CLIs del producto inventariados con su clasificador y su grado, la
+  app en laboratorio (una ruta nueva) y la configuración para cualquier VPS; las tres tocan verificadores.
+- **Fuera de este CDC, con su propia firma**: el C3 del PRP-008 (v3, con el rol de métricas y la ruta del
+  laboratorio) y la AISIA (`docs/goals/soporte-sap-AISIA.md`, borrador con la firma en blanco). No se tocaron
+  `AGENTS.md`, `gates.json`, skills, prompts, `routing-modelos.json` ni el modelo.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo en el chat el 2026-10-04, ANTES de pedir la firma**, con el Dockerfile y el lock del job:
+  `git diff main...5e3be4c -- scripts/ docker-compose.yml inventario/activos.json tools/extractor-documental/src tools/extractor-documental/package.json .gitignore`)
+  · regresión capa A ☑ 147/147 · capa B ☑ el corpus está completo (22/22); **los casos no se corrieron en sesiones
+  frías**: decide el laboratorio si basta la capa A (no toca skills, prompts, modelo ni instrucciones) ·
+  aprobación humana ☑ · pineo ☑ (digests y lock con hashes; sin modelo).
+- **Regresión y demostración**:
+  - `scripts/prueba-inventario.ts` ☑ 15/15, con la siembra nueva: un CLI sin grado, un producto que no es slug y un
+    grado fuera del enum se rechazan; `verifica:inventario` ☑ 241 unidades, 0 nuevas, 0 huérfanas, 0 ambiguas;
+  - `prueba:a2a` ☑ 14/14: la ruta nueva **puso el gate en rojo** hasta declararla (2026-10-04, validate de la fase 11);
+  - `configura:deploy`: con `SOPORTE_SAP_LABORATORIO=1` sale con 1 y lo nombra; sin ella, exit 0 (caso malo y
+    control positivo, con un `.env` sintético que no se commitea);
+  - el job en Docker contra el esquema del producto: 1 186 valores en `ss_metrica`, iguales al corte del laboratorio;
+  - `npm run validate` ☑ 28/28 activos (8 inactivos declarados) tras el último commit de la corrida.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-04, con el diff delante
+
+### 2026-10-04 — Soporte SAP (corrida B): el concepto «producto», su plantilla v2 y el gate `verifica:productos` en el padrón → CDC PROMOVIDO — radio: manifiesto de gates, doctrina del índice del portafolio, inventario y su verificador (un comentario y un texto)
+
+- **Cambio** (rama `soporte/sap`, sobre el cierre de la corrida A `5e3be4c`; lo que toca gobernanza: 12 archivos,
+  +752 −4):
+  1. **Alta de un gate en el padrón** (`.claude/gates.json`, perfil `validate`, fuera de `predeploy`):
+     `verifica:productos` (`scripts/verifica-productos.mjs`, `package.json`, línea en `README.md`). Cruza cada
+     manifiesto de `productos/` con el índice del portafolio y el inventario. Lo que comprueba:
+     - dueño y composición: propios, componentes y base, sin solaparse;
+     - lo que no se negocia: ningún precio sin plan comercial; RPO y RTO desconocidos hasta GATE 3; canal
+       externo con C3 y C4; tercero con datos personales con AISIA; ningún agente aprueba;
+     - los huecos: ningún null callado, una sección que no aplica con su motivo, lo que no cupo escrito.
+
+     Siembra 26 defectos sobre el manifiesto de referencia y cae en rojo si alguno no muerde. Una fila del
+     índice sin manifiesto se lista como **pendiente** y no pone el gate en rojo. **Es alta, no baja**: no se
+     apaga ni se edita ningún gate existente. Su `_nota` describe la alta, como las demás del padrón; la firma
+     vive en esta entrada.
+  2. **Doctrina del índice** (`BUSINESS_LOGIC.md` raíz, solo la cabecera): «qué es un producto» (una fila de la
+     tabla; la clase `PRODUCTO` es una pieza vendible; `producto` en el inventario nombra al dueño), con el
+     enlace al concepto. **No cambia ninguna fila, ninguna tabla ni la firma del índice**, pero es el
+     documento que el laboratorio firmó el 2026-09-30, así que la cabecera nueva necesita su visto bueno.
+  3. **Inventario** (`inventario/activos.json`, `INVENTARIO.md` regenerada):
+     - la fuente `productos/`;
+     - un asiento nuevo, `TPL-productos` (clase `FABRICA`, `blueprint`);
+     - el dueño `producto: "ventas-whatsapp"` en `TPL-ventas-whatsapp` y `TPL-feature-ventas-whatsapp`;
+     - el campo `producto` dice **dueño** también en el verificador: su comentario en
+       `scripts/inventario/nucleo.mjs` y el texto de la sección «Por producto» de la vista
+       (`scripts/inventario/vista.mjs`). Sin cambio de conducta: `prueba:inventario` 15/15.
+
+     Ninguna clase se renombra y ningún asiento se borra.
+  4. **El concepto y la plantilla** (`productos/CONCEPTO.md`, `productos/PLANTILLA.md` v2, `productos/soporte-sap.json`,
+     `productos/ventas-whatsapp.json`): documentos y datos nuevos. No son skill ni prompt. Pasan por este CDC
+     porque el gate los lee: cambiar la plantilla cambia lo que el gate exige.
+- **Relación con el CDC de la corrida A** (firmado el 2026-10-04, en `.claude/gobernanza/BITACORA-CDC.md`): **va
+  aparte y después**. La B lee el campo `producto` del inventario, que **introduce la A**
+  (`scripts/inventario/nucleo.mjs`), y alinea su comentario («el producto que vende la pieza») con el concepto
+  («el dueño»): punto 3.
+- **Motivo**: el DoF de la corrida B pide que el gate nuevo corra en el `validate`, por un gate existente o dado
+  de alta en `.claude/gates.json` dentro de su CDC. Ningún gate existente lee manifiestos, así que se dio de alta.
+- **Propuesto, NO aplicado** (cada uno con su CDC si el laboratorio lo quiere):
+  - que cada fila pendiente del índice gane su manifiesto: hoy 6 de 8 (el gate las lista);
+  - que el skill `new-app` genere el manifiesto junto con el contrato: es skill, radio sistema, con diff antes
+    del sí;
+  - **plantilla v3**: `retencion` y `salida` (portabilidad), que Soporte SAP tiene en D8 y el vendedor en P-07
+    y en su baja. Por la regla de entrada debieron entrar en la v2 y no se vieron a tiempo (informe B, §6);
+  - **cambiar la regla de entrada** para que entre lo que tienen dos productos aunque no lo tenga la
+    referencia. Hoy no se puede: la spec de la corrida B dice que lo que no aparece en Soporte SAP no entra.
+- **No se tocaron**: `AGENTS.md`, skills, prompts, `routing-modelos.json`, el modelo, `.mcp.json`, `settings.json`,
+  ni el código de ningún producto: el vendedor en WhatsApp se describió sin cambiar una línea de
+  `tools/ventas-whatsapp` ni de `src/features/ventas-whatsapp`.
+- **Gate aplicado**:
+  - diff visible ☑, **enseñado completo el 2026-10-04, ANTES de pedir la firma** (lo de gobernanza en el chat y el
+    diff entero, script, manifiestos y documentos incluidos, en el editor):
+    `git diff 5e3be4c..245f9b4 -- .claude/gates.json scripts/verifica-productos.mjs scripts/inventario/ package.json README.md inventario/activos.json BUSINESS_LOGIC.md productos/`;
+  - regresión capa A ☑ 147/147;
+  - capa B ☑ 22/22 (`regresion -- --trampa`: corpus completo, leído solo el resumen). **Los casos no se corrieron en sesiones frías**: 
+    capa A basta, decidido por el laboratorio (es una alta en el padrón y doctrina del índice, sin skills, prompts ni modelo);
+  - aprobación humana ☑;
+  - pineo: no aplica (sin modelo, sin imagen, sin dependencias nuevas).
+- **Regresión y demostración**:
+  - el gate en verde con los dos manifiestos y **26/26 siembras cazadas**: cada defecto tumba su comprobación;
+  - **la plantilla cambió y el gate lo nota**: la v2 contra los dos manifiestos en v1 da **9 comprobaciones
+    en rojo**. Entre ellas, los 4 nulls callados del vendedor que la v1 dejaba en verde;
+  - `verifica:gates` ☑: sin archivos de prueba huérfanos, y el gate nuevo está en el padrón y en la
+    documentación;
+  - `verifica:inventario` ☑ 243 unidades, 0 nuevas, 0 huérfanas, 0 ambiguas;
+  - `npm run validate` ☑ 29/29 gates activos en verde (8 inactivos declarados) tras `245f9b4`; regresión capa A
+    147/147 y capa B 22/22 corridas de nuevo tras ese commit.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-05, con el diff delante.
