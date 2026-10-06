@@ -4517,3 +4517,49 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - `mide:contexto` ☑: el índice de la memoria del proyecto queda en 798 de 800 tokens;
   - `npm run validate` ☑ 30/30 gates activos (8 inactivos declarados, 0 rojos) tras `4361708`.
 - **Aprobado por**:  **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-06, con el diff delante.
+
+### 2026-10-06 — 6b: una firma es un nombre, y esta acta cierra las diez entradas que pasaban sin firma — radio: verificador (gobernanza)
+- **Cambio** (rama `gobernanza/firma-6b`, commit `1b802b3`; 5 archivos, +123 −17):
+  - `scripts/lib/firmas.mjs` (nuevo): la firma tiene que **empezar por un nombre de usuario**, en vez de no
+    coincidir con una lista de huecos; una entrada sin firma solo se cierra con una línea
+    `**Cierra** (ratificada | no ratificada …): <título>` en una entrada **posterior y firmada**; desde el
+    2026-10-06, una entrada firmada no lleva «aprobación humana ☐»;
+  - `verifica-gobernanza.mjs`: 6b usa la librería, más una comprobación de la casilla por registro y otra que
+    corre **17 siembras** en cada pasada (166 → 169 comprobaciones; cifra al día en `README.md` y
+    `.claude/README.md`);
+  - el bloque «Formato» de esta bitácora documenta la firma y el cierre.
+- **Motivo**: la lista de huecos se quedaba corta. Dejaba pasar `<firma>` (el 2026-10-05 se anexó así una
+  propuesta sin firmar y el gate la dio por firmada), `— **sin firma**` y `**PENDIENTE**`. Con
+  la regla nueva aparecieron **diez entradas sin firmar** que el gate daba por firmadas desde agosto: siete
+  del 2026-08-30, posteriores al acta de ese día, y tres del 2026-09-13. Es la forma de fallo de siempre:
+  el control existía, pero no veía lo que tenía delante.
+- **Qué pone rojo y qué no**: rojo = una firma que no empieza por un nombre (`<firma>`, `— **sin firma**`,
+  `**PENDIENTE**`, `_pendiente_`, `☐`, `[nombre]`, o sin línea); un cierre sin firmar, anterior, sin decisión o
+  con un prefijo de menos de 30 caracteres; una entrada firmada con «aprobación humana ☐» desde el 2026-10-06
+  (solo en la línea «Gate aplicado»: citar la regla en prosa no cuenta). **No** pone rojo las diez entradas
+  antiguas firmadas en bloque que conservan la casilla vacía: la firma manda y la casilla se exige desde hoy.
+- **Esta acta cierra las diez** (la decisión es del laboratorio; las diez están en vigor desde su fecha):
+  - **Cierra** (ratificada): 2026-08-30 — la ruta de specs entra al decision tree — radio: sistema
+  - **Cierra** (ratificada): 2026-08-30 — el escaneo de credenciales fallaba por la razón equivocada — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el hueco de 3i no se cierra por el lado del arbol: se invierte el sujeto — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el auditor de fugas pasa de instrumento a GATE — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el auditor mira tambien lo que no esta versionado — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el papel no nombraba el gate nuevo, y la memoria recomendaba lo refutado — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — comprobacion 151: todo paso de `validate` esta declarado en la documentacion — radio: plantilla
+  - **Cierra** (ratificada): 2026-09-13 — el extractor documental en la infraestructura del cliente: puente A2A montado (sin publicar), servicio OCR, GPU como servicio del VPS y Hermes como consumidor — radio: sistema
+  - **Cierra** (ratificada): 2026-09-13 — trayectorias (spec 011): el lazo de mejora queda construido y CORTADO en el gate humano; primeras propuestas, sin aplicar — radio: sistema
+  - **Cierra** (ratificada): 2026-09-13 — trayectorias: dos correcciones del formato dictadas por el evaluador ciego — radio: menor (no toca skill, prompt ni arnés)
+- **Gate aplicado**: diff visible ☑ (completo **antes** de pedir la firma) · regresión capa A ☑ 163/163 ·
+  **capa B no corrida por el agente**: cambia el verificador, no el comportamiento del agente; decide el
+  laboratorio («capa A basta» o corrida en sesión limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia nueva).
+- **Regresión y demostración**:
+  - **17/17 siembras cazadas**; la regla vieja, con las mismas siembras, deja pasar `<firma>`,
+    `— **sin firma**` y `**PENDIENTE**`;
+  - contra los registros reales: 121 firmas de la bitácora y las 6 del registro de riesgo pasan; caen
+    **exactamente** las diez de arriba;
+  - **sin esta acta**: `verify:gobernanza` 168/169, en rojo nombrando las diez; `npm run validate -- --sigue`
+    29 gates en verde y un rojo, ese;
+  - **con esta acta firmada**, sobre el texto real de la bitácora: las diez quedan cerradas y no queda
+    ninguna sin firma; con la firma en `pendiente`, son once (las diez y la propia acta).
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-06, con el diff delante.
