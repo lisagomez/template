@@ -1,5 +1,5 @@
 /**
- * El gate del analista de producto (`npm run prueba:analista`, PRP-008). `node --test`.
+ * El gate del analista de producto (`npm run prueba:analista`, PRP-009). `node --test`.
  *
  * Prueba el contrato A2A con los tipos y constantes del SDK instalado, que NINGUNA ruta lo sirve
  * (enumerando `src/app`, no buscando una lista), que el verificador tumba cada siembra y que la

@@ -4,7 +4,7 @@
 **PR #214** (2026-10-06). CDC **firmado** el 2026-10-05 («capa A basta», en la bitácora).
 
 `/analista-producto` lee el repo entero y responde dónde duele y qué producto lo resolvería, con cada dolor
-citado. Diseño: `docs/SDD-analista-producto.md`; plan: `.claude/PRPs/PRP-008-analista-producto.md`.
+citado. Diseño: `docs/SDD-analista-producto.md`; plan: `.claude/PRPs/PRP-009-analista-producto.md`.
 
 ## Decisiones que no se deducen del código
 
@@ -17,6 +17,10 @@ citado. Diseño: `docs/SDD-analista-producto.md`; plan: `.claude/PRPs/PRP-008-an
 - **Dolor sin cita = hipótesis**, y la importancia para el cliente queda en `null` mientras no se mida:
   el analista no la inventa.
 
+- **Su PRP es el 009, y fue el 008.** Nació como PRP-008 el 2026-10-02 en su rama; Soporte SAP tomó el mismo
+  número el 2026-10-04 en otra y entró antes en `main`. Se renumeró por CDC (2026-10-06). Los registros cerrados (goal compilado, propuesta del CDC, corrida
+  del 02/10 y bitácora) siguen diciendo PRP-008: ahí no se reescribe la historia.
+
 ## Lo que dijo la primera corrida (`docs/analisis/2026-10-02/`)
 
 El ranking pone arriba un producto **interno** (P-02, observatorio de costo) porque lo único medido es lo
@@ -25,7 +29,5 @@ P-02 en paralelo como vista sobre datos que ya existen. **La decisión es del la
 
 ## Lo que falta
 
-- **PRP-008 repetido**: lo usan este rol y Soporte SAP. Renumerar el del analista toca el skill, el padrón
-  y la corrida congelada: es CDC propio.
 - el caso-trampa de la capa B está propuesto fuera del repo, sin sembrar en `golden-sets`;
 - el hueco de la comprobación 6b de `verify:gobernanza`: `SIN_VALOR` no reconoce `<firma>` como hueco.

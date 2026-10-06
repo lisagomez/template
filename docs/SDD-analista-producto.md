@@ -3,7 +3,7 @@
 > Diseño del rol que pidió el laboratorio el 2026-10-02 («planea el rol de A2A que revise el
 > repositorio para un análisis de identificación de puntos de dolor…»). Origen:
 > [`.claude/goals/analista-producto/spec.md`](../.claude/goals/analista-producto/spec.md), con su
-> grafo y su plan al lado. Plan por fases: [PRP-008](../.claude/PRPs/PRP-008-analista-producto.md).
+> grafo y su plan al lado. Plan por fases: [PRP-009](../.claude/PRPs/PRP-009-analista-producto.md).
 > Skill: `.claude/skills/analista-producto/`. Código: `scripts/analista-producto/`.
 > Primera corrida: `docs/analisis/2026-10-02/`.
 
@@ -44,7 +44,7 @@ Card y el ciclo de estados de sus tareas** quedan escritos y probados con los ti
 repo fija (`@a2a-js/sdk` 1.1.0), **sin ruta que los sirva**. Por qué no un servicio vivo ya: haría
 falta un motor LLM en el servidor, y entonces el contenido del repo sale a un proveedor (C4),
 necesita su clase de routing (C8) y su contabilidad, y abre una superficie de entrada (C3). Eso es
-la fase 2 del PRP-008, con su gate.
+la fase 2 del PRP-009, con su gate.
 
 ### 3.2 La fase 0 se consume, no se rehace
 
@@ -84,7 +84,7 @@ frase que la fuente no dice.
 Una corrida es una foto. Si se leyera el árbol de hoy, firmar un contrato (y borrar el «pendiente»
 que una cita copió) o dar de alta un activo pondría roja una corrida vieja que era correcta, y el
 gate se volvería una trampa para cualquier cambio ajeno. Que un dolor se cerró lo dice la corrida
-siguiente (fase 3 del PRP-008).
+siguiente (fase 3 del PRP-009).
 
 **Lo que no comprueba:** que la cita *signifique* lo que el hallazgo concluye. Eso es juicio, y
 queda a la vista: el literal va pegado junto al hallazgo para que quien lee lo juzgue en un vistazo.
@@ -196,7 +196,7 @@ lectura, y el verificador trabaja sin red (los PR se comprueban por sus merges e
 | `INPUT_REQUIRED` por cada hipótesis | §3.10: interrumpe toda corrida; la hipótesis es un resultado |
 | `INCIDENTES.md` como fuente principal | está vacío; un registro vacío no prueba que no haya incidentes, y la evidencia de lo que falló está en la bitácora CDC, los commits y los aprendizajes de los PRP |
 | Puntuación ODI | sin encuesta no hay importancia ni satisfacción medidas (§2) |
-| Servicio A2A vivo ya | fase 2 del PRP-008, con C3, C4, C8 y la decisión de flujo de datos |
+| Servicio A2A vivo ya | fase 2 del PRP-009, con C3, C4, C8 y la decisión de flujo de datos |
 
 ## 5. Modelo de amenazas (C3)
 

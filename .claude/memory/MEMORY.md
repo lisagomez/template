@@ -18,7 +18,7 @@
 - [Trayectorias: en qué quedamos](project/trayectorias.md) — spec 011; dos CDC promovidos por capa B (21/21); el sujeto va sin `git log` porque el historial alcanza el corpus; una tanda cuesta ~20 USD.
 - [Protocolo de specs (SDD)](project/protocolo-de-specs.md) — `/spec-generator` + `.claude/specs/NNN/{spec,plan,tareas}` + gate `verifica:specs`; C4 en la spec, C3 en el plan; spec o PRP segun se sepa el QUE.
 - [Soporte SAP y el concepto «producto»](project/soporte-sap-y-concepto-producto.md) — en main; CDC A y B firmados; B-3 abierta.
-- [Analista de producto](project/analista-de-producto.md) — en main (#214); PRP-008 repetido.
+- [Analista de producto](project/analista-de-producto.md) — en main (#214); PRP-009 (era 008).
 
 ## feedback/ — Correcciones y preferencias
 (vacio)

@@ -54,7 +54,7 @@ export const normaliza = (s) => String(s ?? '').replace(/\s+/g, ' ').trim()
  * El repo TAL COMO ESTABA en el commit analizado: una corrida es una foto. Si se leyera el arbol
  * de hoy, firmar un contrato (y borrar el «pendiente» que una cita copio) o dar de alta un activo
  * pondria roja una corrida vieja que era correcta, y el gate se volveria una trampa para cualquier
- * cambio. Que un dolor se cerro lo dice la corrida SIGUIENTE (fase 3 del PRP-008), no esta.
+ * cambio. Que un dolor se cerro lo dice la corrida SIGUIENTE (fase 3 del PRP-009), no esta.
  * Se inyecta para que `--prueba` no dependa de nada mas. null si el commit no esta en la historia.
  */
 export function repoReal(commit) {

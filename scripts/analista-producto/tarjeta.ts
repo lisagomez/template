@@ -1,8 +1,8 @@
 /**
- * El contrato A2A del analista de producto (PRP-008, SDD §3.10): su Agent Card, el ciclo de estados
+ * El contrato A2A del analista de producto (PRP-009, SDD §3.10): su Agent Card, el ciclo de estados
  * de sus tareas y el catalogo cerrado de rechazos, con los TIPOS del SDK instalado. Es contrato, no
  * superficie: NINGUNA ruta lo sirve, y `prueba-analista.ts` lo comprueba enumerando `src/app`.
- * Servirlo es la fase 2 del PRP-008, con gate humano (C3, C4, C8 y la decision de flujo de datos).
+ * Servirlo es la fase 2 del PRP-009, con gate humano (C3, C4, C8 y la decision de flujo de datos).
  *
  * Una capacidad y no tres (`add-a2a`: una skill por Card para empezar). Separar la deteccion de la
  * propuesta dejaria pedir propuestas sin ver los grados de evidencia en que se apoyan, y eso es la
