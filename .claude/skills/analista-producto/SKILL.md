@@ -6,7 +6,7 @@ description: "Encuentra dónde duele el repo con evidencia citada (medida, regis
 # Analista de producto
 
 Responde **dónde duele, a quién, con qué evidencia y qué producto lo resolvería** recombinando lo
-que el monorepo ya tiene. Diseño: `docs/SDD-analista-producto.md`. Plan: PRP-008. Contrato A2A
+que el monorepo ya tiene. Diseño: `docs/SDD-analista-producto.md`. Plan: PRP-009. Contrato A2A
 (no servido): `scripts/analista-producto/tarjeta.ts`.
 
 **Regla de oro: el grado de evidencia de cada hallazgo.** Quien lee tiene que poder distinguir un
@@ -70,7 +70,7 @@ un hallazgo.
     cita o el hallazgo baja a hipótesis. Se commitea la corrida y luego `npm run prueba:analista`
     (su `--prueba` necesita un commit posterior al analizado).
 11. **Si hay una corrida anterior**, di qué dolores se cerraron (con el commit o PR), cuáles
-    nacieron y cuáles persisten. La comparación automática es la fase 3 del PRP-008.
+    nacieron y cuáles persisten. La comparación automática es la fase 3 del PRP-009.
 
 ## Estados de la tarea (contrato A2A)
 

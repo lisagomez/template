@@ -352,7 +352,7 @@
       "nombre": "prueba:analista",
       "runner": "comando",
       "comando": "npm run prueba:analista",
-      "guarda": "el analista de producto (PRP-008): su contrato A2A con los tipos del SDK, sin nombres del interior y con transiciones de estado coherentes; que NINGUNA ruta lo sirve (enumera `src/app`); que el verificador de evidencia tumba cada siembra (dolor sin cita, ruta inexistente, cita que la fuente no dice, grado inflado, activo omitido, vetado en el ranking...); y que la ULTIMA corrida de `docs/analisis/` sigue en verde contra SU commit (una corrida es una foto: cambiar despues una fuente citada no la rompe, editar el informe y romper una cita si)",
+      "guarda": "el analista de producto (PRP-009): su contrato A2A con los tipos del SDK, sin nombres del interior y con transiciones de estado coherentes; que NINGUNA ruta lo sirve (enumera `src/app`); que el verificador de evidencia tumba cada siembra (dolor sin cita, ruta inexistente, cita que la fuente no dice, grado inflado, activo omitido, vetado en el ranking...); y que la ULTIMA corrida de `docs/analisis/` sigue en verde contra SU commit (una corrida es una foto: cambiar despues una fuente citada no la rompe, editar el informe y romper una cita si)",
       "evidencia": "salida de `node --test`: pruebas pasadas y falladas, con el conteo de siembras cazadas y el resumen de la corrida",
       "perfiles": ["validate"],
       "activo": true,

@@ -4482,3 +4482,33 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - `npm run validate` ☑ 29/29 gates activos en verde (8 inactivos declarados) tras `245f9b4`; regresión capa A
     147/147 y capa B 22/22 corridas de nuevo tras ese commit.
 - **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-05, con el diff delante.
+
+### 2026-10-06 — skill `analista-producto`: su PRP pasa de 008 a 009 — radio: skill y padrón de gates
+- **Cambio** (rama `prp/analista-009`, commit `4361708`; 11 archivos, un renombre, +20 −18):
+  - `.claude/PRPs/PRP-008-analista-producto.md` → `PRP-009-analista-producto.md`, con su encabezado;
+  - **skill** `analista-producto/SKILL.md`: las dos menciones del plan;
+  - **padrón** `.claude/gates.json`: la `guarda` de `prueba:analista`;
+  - **contrato capa A** (`golden-sets/contratos.json`): el `porque` de la regla de oro del rol;
+  - fuera de C1, en el mismo commit: el SDD, el `origen` del activo en `inventario/activos.json`, tres comentarios
+    de código y la memoria del proyecto.
+- **Motivo**: dos PRP con el mismo número. El del analista nació el 2026-10-02 en su rama; Soporte SAP tomó PRP-008
+  el 2026-10-04 en otra y entró antes en `main` (#211); el del analista entró después (#214). Se renumera el del
+  analista porque el de Soporte SAP lo citan su manifiesto (`productos/soporte-sap.json`, campo `c3`) y su contrato
+  de negocio, que espera firma.
+- **Lo que NO se toca, a propósito**: los registros cerrados siguen diciendo PRP-008. Son el goal compilado
+  (`.claude/goals/analista-producto/`), la propuesta del CDC firmado el 2026-10-05, la corrida
+  `docs/analisis/2026-10-02/` con su regresión capturada y las entradas de esta bitácora. Reescribirlos cambiaría lo
+  que se firmó y lo que se midió.
+- **Qué pone rojo y qué no**: nada cambia. Ninguna comprobación es nueva, el comportamiento del skill es el mismo y
+  su `description` no se mueve.
+- **Gate aplicado**: diff visible ☑ (completo **antes** de pedir la firma) · regresión capa A ☑ 163/163 ·
+  **capa B no corrida por el agente**: leer la rama `golden-sets` contamina las corridas en frío; decide el
+  laboratorio («capa A basta» o corrida en sesión limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia nueva).
+- **Regresión y demostración**:
+  - `verify:gobernanza` ☑ 166/166;
+  - `prueba:analista` ☑ 7/7, y la corrida del 2026-10-02 sigue en verde contra su commit;
+  - `verifica:gates` ☑ 11 comprobaciones;
+  - `mide:contexto` ☑: el índice de la memoria del proyecto queda en 798 de 800 tokens;
+  - `npm run validate` ☑ 30/30 gates activos (8 inactivos declarados, 0 rojos) tras `4361708`.
+- **Aprobado por**:  **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-06, con el diff delante.

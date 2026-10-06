@@ -1,4 +1,4 @@
-# PRP-008: Analista de producto (rol con contrato A2A: dolores con evidencia, casos de uso y propuestas product first)
+# PRP-009: Analista de producto (rol con contrato A2A: dolores con evidencia, casos de uso y propuestas product first)
 
 > **Estado**: FASE 1 CONSTRUIDA EN LA RAMA `paintpoints` (2026-10-02), **CDC firmado por el laboratorio el 2026-10-05 (capa A basta)** · fase 2 BLOQUEADA (gate humano) · fase 3 a la segunda corrida
 > **Fecha**: 2026-10-02

@@ -248,7 +248,7 @@
     "analista-producto": [
       {
         "patron": "Un dolor sin cita verificada es una hip[óo]tesis",
-        "porque": "la regla de oro del rol (PRP-008): si el skill deja de declararla, el informe vuelve a afirmar dolores que nadie cito"
+        "porque": "la regla de oro del rol (PRP-009): si el skill deja de declararla, el informe vuelve a afirmar dolores que nadie cito"
       },
       {
         "patron": "verifica-evidencia\\.mjs",
