@@ -28,6 +28,11 @@
 - **Aprobado por**:
 ```
 
+La firma es un **nombre**: «Aprobado por» empieza por el usuario que decide (`verify:gobernanza` 6b).
+Una entrada sin firma no se edita en su sitio: la cierra una entrada **posterior y firmada** con una
+línea por cada una, `- **Cierra** (ratificada | no ratificada: <qué se hace>): <título de la entrada>`.
+Desde el 2026-10-06, una entrada firmada no lleva «aprobación humana ☐».
+
 ---
 
 ## Entradas
