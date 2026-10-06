@@ -1,0 +1,141 @@
+# comando: npm run verifica:specs
+# fecha: 2026-10-02T15:16:42.233Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 verifica:specs
+> node scripts/verifica-specs.mjs
+
+
+Integridad de las specs — 14 carpetas en .claude/specs/
+
+  ✓ 001-gobernanza-agentica: nombre con tres digitos y kebab-case
+  ✓ 002-eficiencia-tokens: nombre con tres digitos y kebab-case
+  ✓ 003-imprenta-de-clis: nombre con tres digitos y kebab-case
+  ✓ 004-grafo-de-conocimiento: nombre con tres digitos y kebab-case
+  ✓ 005-a2a-interoperabilidad: nombre con tres digitos y kebab-case
+  ✓ 006-crear-una-herramienta: nombre con tres digitos y kebab-case
+  ✓ 007-extractor-documental: nombre con tres digitos y kebab-case
+  ✓ 008-corpus-a-modelo: nombre con tres digitos y kebab-case
+  ✓ 009-identificadores-y-codigos: nombre con tres digitos y kebab-case
+  ✓ 010-extractor-en-infra-del-cliente: nombre con tres digitos y kebab-case
+  ✓ 011-trayectorias: nombre con tres digitos y kebab-case
+  ✓ 012-voz: nombre con tres digitos y kebab-case
+  ✓ 013-dictado: nombre con tres digitos y kebab-case
+  ✓ 014-inventario-de-activos: nombre con tres digitos y kebab-case
+  ✓ la numeracion es correlativa desde 001, sin saltos ni repetidos
+  ✓ 001-gobernanza-agentica: existe spec.md
+  ✓ 001-gobernanza-agentica: existe plan.md
+  ✓ 001-gobernanza-agentica: existe tareas.md
+  ✓ 001-gobernanza-agentica: las diez secciones de la plantilla
+  ✓ 001-gobernanza-agentica: tiene requisitos funcionales numerados
+  ✓ 001-gobernanza-agentica: los 13 requisitos usan notacion EARS
+  ✓ 001-gobernanza-agentica: los requisitos van numerados sin saltos
+  ✓ 001-gobernanza-agentica: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 002-eficiencia-tokens: existe spec.md
+  ✓ 002-eficiencia-tokens: existe plan.md
+  ✓ 002-eficiencia-tokens: existe tareas.md
+  ✓ 002-eficiencia-tokens: las diez secciones de la plantilla
+  ✓ 002-eficiencia-tokens: tiene requisitos funcionales numerados
+  ✓ 002-eficiencia-tokens: los 14 requisitos usan notacion EARS
+  ✓ 002-eficiencia-tokens: los requisitos van numerados sin saltos
+  ✓ 002-eficiencia-tokens: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 003-imprenta-de-clis: existe spec.md
+  ✓ 003-imprenta-de-clis: existe plan.md
+  ✓ 003-imprenta-de-clis: existe tareas.md
+  ✓ 003-imprenta-de-clis: las diez secciones de la plantilla
+  ✓ 003-imprenta-de-clis: tiene requisitos funcionales numerados
+  ✓ 003-imprenta-de-clis: los 13 requisitos usan notacion EARS
+  ✓ 003-imprenta-de-clis: los requisitos van numerados sin saltos
+  ✓ 003-imprenta-de-clis: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 004-grafo-de-conocimiento: existe spec.md
+  ✓ 004-grafo-de-conocimiento: existe plan.md
+  ✓ 004-grafo-de-conocimiento: existe tareas.md
+  ✓ 004-grafo-de-conocimiento: las diez secciones de la plantilla
+  ✓ 004-grafo-de-conocimiento: tiene requisitos funcionales numerados
+  ✓ 004-grafo-de-conocimiento: los 16 requisitos usan notacion EARS
+  ✓ 004-grafo-de-conocimiento: los requisitos van numerados sin saltos
+  ✓ 004-grafo-de-conocimiento: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 005-a2a-interoperabilidad: existe spec.md
+  ✓ 005-a2a-interoperabilidad: existe plan.md
+  ✓ 005-a2a-interoperabilidad: existe tareas.md
+  ✓ 005-a2a-interoperabilidad: las diez secciones de la plantilla
+  ✓ 005-a2a-interoperabilidad: tiene requisitos funcionales numerados
+  ✓ 005-a2a-interoperabilidad: los 13 requisitos usan notacion EARS
+  ✓ 005-a2a-interoperabilidad: los requisitos van numerados sin saltos
+  ✓ 005-a2a-interoperabilidad: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 006-crear-una-herramienta: existe spec.md
+  ✓ 006-crear-una-herramienta: existe plan.md
+  ✓ 006-crear-una-herramienta: existe tareas.md
+  ✓ 006-crear-una-herramienta: las diez secciones de la plantilla
+  ✓ 006-crear-una-herramienta: tiene requisitos funcionales numerados
+  ✓ 006-crear-una-herramienta: los 12 requisitos usan notacion EARS
+  ✓ 006-crear-una-herramienta: los requisitos van numerados sin saltos
+  ✓ 006-crear-una-herramienta: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 007-extractor-documental: existe spec.md
+  ✓ 007-extractor-documental: existe plan.md
+  ✓ 007-extractor-documental: existe tareas.md
+  ✓ 007-extractor-documental: las diez secciones de la plantilla
+  ✓ 007-extractor-documental: tiene requisitos funcionales numerados
+  ✓ 007-extractor-documental: los 97 requisitos usan notacion EARS
+  ✓ 007-extractor-documental: los requisitos van numerados sin saltos
+  ✓ 007-extractor-documental: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 008-corpus-a-modelo: existe spec.md
+  ✓ 008-corpus-a-modelo: existe plan.md
+  ✓ 008-corpus-a-modelo: existe tareas.md
+  ✓ 008-corpus-a-modelo: las diez secciones de la plantilla
+  ✓ 008-corpus-a-modelo: tiene requisitos funcionales numerados
+  ✓ 008-corpus-a-modelo: los 36 requisitos usan notacion EARS
+  ✓ 008-corpus-a-modelo: los requisitos van numerados sin saltos
+  ✓ 008-corpus-a-modelo: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 009-identificadores-y-codigos: existe spec.md
+  ✓ 009-identificadores-y-codigos: existe plan.md
+  ✓ 009-identificadores-y-codigos: existe tareas.md
+  ✓ 009-identificadores-y-codigos: las diez secciones de la plantilla
+  ✓ 009-identificadores-y-codigos: tiene requisitos funcionales numerados
+  ✓ 009-identificadores-y-codigos: los 37 requisitos usan notacion EARS
+  ✓ 009-identificadores-y-codigos: los requisitos van numerados sin saltos
+  ✓ 009-identificadores-y-codigos: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 010-extractor-en-infra-del-cliente: existe spec.md
+  ✓ 010-extractor-en-infra-del-cliente: existe plan.md
+  ✓ 010-extractor-en-infra-del-cliente: existe tareas.md
+  ✓ 010-extractor-en-infra-del-cliente: las diez secciones de la plantilla
+  ✓ 010-extractor-en-infra-del-cliente: tiene requisitos funcionales numerados
+  ✓ 010-extractor-en-infra-del-cliente: los 24 requisitos usan notacion EARS
+  ✓ 010-extractor-en-infra-del-cliente: los requisitos van numerados sin saltos
+  ✓ 010-extractor-en-infra-del-cliente: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 011-trayectorias: existe spec.md
+  ✓ 011-trayectorias: existe plan.md
+  ✓ 011-trayectorias: existe tareas.md
+  ✓ 011-trayectorias: las diez secciones de la plantilla
+  ✓ 011-trayectorias: tiene requisitos funcionales numerados
+  ✓ 011-trayectorias: los 15 requisitos usan notacion EARS
+  ✓ 011-trayectorias: los requisitos van numerados sin saltos
+  ✓ 011-trayectorias: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 012-voz: existe spec.md
+  ✓ 012-voz: existe plan.md
+  ✓ 012-voz: existe tareas.md
+  ✓ 012-voz: las diez secciones de la plantilla
+  ✓ 012-voz: tiene requisitos funcionales numerados
+  ✓ 012-voz: los 26 requisitos usan notacion EARS
+  ✓ 012-voz: los requisitos van numerados sin saltos
+  ✓ 012-voz: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 013-dictado: existe spec.md
+  ✓ 013-dictado: existe plan.md
+  ✓ 013-dictado: existe tareas.md
+  ✓ 013-dictado: las diez secciones de la plantilla
+  ✓ 013-dictado: tiene requisitos funcionales numerados
+  ✓ 013-dictado: los 45 requisitos usan notacion EARS
+  ✓ 013-dictado: los requisitos van numerados sin saltos
+  ✓ 013-dictado: sin aclaraciones pendientes dentro de los requisitos
+  ✓ 014-inventario-de-activos: existe spec.md
+  ✓ 014-inventario-de-activos: existe plan.md
+  ✓ 014-inventario-de-activos: existe tareas.md
+  ✓ 014-inventario-de-activos: las diez secciones de la plantilla
+  ✓ 014-inventario-de-activos: tiene requisitos funcionales numerados
+  ✓ 014-inventario-de-activos: los 16 requisitos usan notacion EARS
+  ✓ 014-inventario-de-activos: los requisitos van numerados sin saltos
+  ✓ 014-inventario-de-activos: sin aclaraciones pendientes dentro de los requisitos
+
+Specs integras: 127/127 comprobaciones en verde.

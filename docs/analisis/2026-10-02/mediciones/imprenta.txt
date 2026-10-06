@@ -1,0 +1,21 @@
+# comando: npm run audita:imprenta
+# fecha: 2026-10-02T15:16:38.830Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 audita:imprenta
+> node scripts/audita-imprenta.mjs
+
+Auditoria de la imprenta — 15 servicios en el manifiesto
+Grado minimo: A · fuente_impresos: libreria
+
+  GRADO PARCIAL polar — A con 3 dimension(es) sin puntuar: mcp_description_quality, mcp_token_efficiency, live_api_verification
+  GRADO PARCIAL hetzner-cloud — A con 5 dimension(es) sin puntuar: mcp_description_quality, mcp_token_efficiency, path_validity, auth_protocol, live_api_verification
+  GRADO PARCIAL digitalocean — A con 5 dimension(es) sin puntuar: mcp_description_quality, mcp_token_efficiency, path_validity, auth_protocol, live_api_verification
+  GRADO PARCIAL supabase-data-api — A con 4 dimension(es) sin puntuar: mcp_tool_design, mcp_surface_strategy, auth_protocol, live_api_verification
+  GRADO PARCIAL telegram-bot — A con 4 dimension(es) sin puntuar: mcp_description_quality, mcp_token_efficiency, auth_protocol, live_api_verification
+  DOGFOOD FAIL polar — defecto CONOCIDO, declarado en el manifiesto
+
+✓ Imprenta conforme: 5 CLI(s) declarados, impresos y con grado suficiente.
+  (5 con grado PARCIAL: suficiente en lo medido, con dimensiones sin puntuar arriba.)

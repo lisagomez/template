@@ -1,0 +1,183 @@
+# comando: npm run verify:gobernanza
+# fecha: 2026-10-02T15:16:41.924Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 verify:gobernanza
+> node scripts/verifica-gobernanza.mjs
+
+  ✓ existe .claude/gobernanza/GOBERNANZA.md
+  ✓ existe .claude/gobernanza/golden-sets/contratos.json
+  ✓ existe .claude/gobernanza/REGISTRO-RIESGO.md
+  ✓ existe .claude/gobernanza/BITACORA-CDC.md
+  ✓ existe .claude/gobernanza/INCIDENTES.md
+  ✓ existe .claude/gobernanza/plantillas/aisia.md
+  ✓ existe .claude/gobernanza/plantillas/modelo-amenazas.md
+  ✓ existe .claude/gobernanza/plantillas/incidente.md
+  ✓ control C1 (Cambio de Comportamiento) declarado en GOBERNANZA.md
+  ✓ control C2 (regresión de skills) declarado en GOBERNANZA.md
+  ✓ control C3 (Modelo de amenazas) declarado en GOBERNANZA.md
+  ✓ control C4 (Evaluación de Impacto) declarado en GOBERNANZA.md
+  ✓ control C5 (decisiones de riesgo) declarado en GOBERNANZA.md
+  ✓ control C6 (incidente) declarado en GOBERNANZA.md
+  ✓ control C7 (service_role) declarado en GOBERNANZA.md
+  ✓ CLAUDE.md referencia .claude/gobernanza/
+  ✓ CLAUDE.md tiene entrada de gobernanza en su decision tree
+  ✓ CLAUDE.md declara la regla service_role (C7) en Reglas de Codigo
+  ✓ GEMINI.md referencia .claude/gobernanza/
+  ✓ GEMINI.md declara la regla service_role (C7)
+  ✓ GEMINI.md coincide con lo que genera sincroniza-gemini.mjs desde AGENTS.md
+  ✓ README.md documenta la capa de gobernanza
+  ✓ .claude/README.md documenta la capa de gobernanza
+  ✓ el skill new-app emite la seccion de Gobernanza en BUSINESS_LOGIC.md
+  ✓ el indice del portafolio declara sus productos
+  ✓ ningun contrato del indice esta enlazado dentro de codigo
+  ✓ todo contrato pendiente del indice declara lo que le falta
+  ✓ todo contrato enlazado desde el indice existe
+  ✓ todo contrato enlazado incluye su seccion de Gobernanza
+  ✓ todo contrato enlazado declara su firma
+  ✓ todo contrato de producto esta enlazado desde el indice
+  ✓ el indice del portafolio puede leer el inventario de activos
+  ✓ todo activo del §2 del indice dice por que no lleva contrato
+  ✓ el indice del portafolio solo cita activos del inventario
+  ✓ todo producto en beta o produccion esta en el indice del portafolio
+  ✓ todo paso de validate esta declarado en la documentacion (29 pasos)
+  ✓ README.md declara el numero real de skills (28)
+  ✓ .claude/README.md declara el numero real de skills (28)
+  ✓ CLAUDE.md declara el numero real de skills (28)
+  ✓ CLAUDE.md: el CDC (C1) nombra la configuracion (settings.json / model)
+  ✓ CLAUDE.md: el CDC (C1) nombra el manifiesto de gates (.claude/gates.json)
+  ✓ CLAUDE.md: rechaza `latest` explicitamente
+  ✓ CLAUDE.md: C5 esta en las reglas, no solo en el documento
+  ✓ CLAUDE.md: declara el limite de C5 (riesgos infirmables)
+  ✓ CLAUDE.md: prohibe imprimir valores de variables de entorno
+  ✓ CLAUDE.md: declara la regla de idioma
+  ✓ CLAUDE.md: el respaldo es un contrato y las cifras no se inventan
+  ✓ CLAUDE.md: los canales de chat externos exigen C3 y C4
+  ✓ CLAUDE.md: el pineo cubre tambien la imagen del agente
+  ✓ GEMINI.md: el CDC (C1) nombra la configuracion (settings.json / model)
+  ✓ GEMINI.md: el CDC (C1) nombra el manifiesto de gates (.claude/gates.json)
+  ✓ GEMINI.md: rechaza `latest` explicitamente
+  ✓ GEMINI.md: C5 esta en las reglas, no solo en el documento
+  ✓ GEMINI.md: declara el limite de C5 (riesgos infirmables)
+  ✓ GEMINI.md: prohibe imprimir valores de variables de entorno
+  ✓ GEMINI.md: declara la regla de idioma
+  ✓ GEMINI.md: el respaldo es un contrato y las cifras no se inventan
+  ✓ GEMINI.md: los canales de chat externos exigen C3 y C4
+  ✓ GEMINI.md: el pineo cubre tambien la imagen del agente
+  ✓ existe el gate predeploy (verificador + regresion)
+  ✓ existe .claude/gates.json (el padron de lo que el gate corre)
+  ✓ GOBERNANZA.md §2 pone el manifiesto de gates en la tabla de C1
+  ✓ el perfil `validate` del manifiesto declara los cuatro pasos del gate
+  ✓ CLAUDE.md describe validate con los pasos que realmente corre
+  ✓ README.md describe validate con los pasos que realmente corre
+  ✓ .claude/README.md describe validate con los pasos que realmente corre
+  ✓ next.config.ts no desactiva el chequeo de tipos del build
+  ✓ next.config.ts no desactiva ESLint en el build
+  ✓ el corpus de casos-trampa NO esta en el arbol de trabajo
+  ✓ la rama local golden-sets no esta rezagada respecto a origin
+  ✓ el corpus es recuperable desde la rama golden-sets
+  ✓ las expectativas del corpus siguen codificadas
+  ✓ ningun identificador de caso aparece en el arbol de trabajo
+  ✓ ninguna entrada del corpus aparece verbatim en el arbol de trabajo
+  ✓ existe el ancla del vigilante de Hermes (.hermes-baseline.json)
+  ✓ el ancla de Hermes coincide con la imagen pineada en el runbook
+  ✓ el ancla de Hermes declara el digest del tag pineado
+  ✓ el runbook pinea la imagen del agente por digest
+  ✓ el digest del compose y el del ancla coinciden
+  ✓ prp-base.md contiene la seccion "Modelo de amenazas"
+  ✓ prp-base.md contiene la seccion "Evaluación de impacto"
+  ✓ prp-base.md pregunta por CDC aplicable
+  ✓ referencia viva: GOBERNANZA.md -> BITACORA-CDC.md
+  ✓ referencia viva: GOBERNANZA.md -> plantillas/modelo-amenazas.md
+  ✓ referencia viva: GOBERNANZA.md -> plantillas/aisia.md
+  ✓ referencia viva: GOBERNANZA.md -> REGISTRO-RIESGO.md
+  ✓ referencia viva: GOBERNANZA.md -> plantillas/incidente.md
+  ✓ referencia viva: GOBERNANZA.md -> INCIDENTES.md
+  ✓ referencia viva: GOBERNANZA.md -> CLAUDE.md
+  ✓ referencia viva: GOBERNANZA.md -> prp-base.md
+  ✓ referencia viva: GOBERNANZA.md -> SKILL.md
+  ✓ referencia viva: GOBERNANZA.md -> corridas.md
+  ✓ .claude/gobernanza/REGISTRO-RIESGO.md conserva la marca append-only
+  ✓ .claude/gobernanza/BITACORA-CDC.md conserva la marca append-only
+  ✓ .claude/gobernanza/INCIDENTES.md conserva la marca append-only
+  ✓ existe .claude/routing-modelos.json (routing por nivel de tarea)
+  ✓ existe scripts/verifica-routing.mjs
+  ✓ el gate de routing corre en validate
+  ✓ AGENTS.md: declara el routing por nivel y el limite de lo que no se abarata
+  ✓ GEMINI.md: declara el routing por nivel y el limite de lo que no se abarata
+  ✓ existe src/lib/ai/contabilidad.ts (contabilidad de tokens y presupuesto)
+  ✓ existe scripts/prueba-contabilidad.ts
+  ✓ la contabilidad saca el precio del catalogo de routing, no de una cifra pegada
+  ✓ la prueba de contabilidad corre en validate y en predeploy
+  ✓ AGENTS.md: declara que una llamada sin uso se guarda con coste null, no como cero
+  ✓ GEMINI.md: declara que una llamada sin uso se guarda con coste null, no como cero
+  ✓ ningun script de npm invoca el binario de un arnes
+  ✓ existe docs/PORTABILIDAD-ARNESES.md (la portabilidad, medida y no afirmada)
+  ✓ existe scripts/vigila-versiones.mjs (frescura de lo pineado)
+  ✓ el vigilante de versiones NO corre dentro de validate
+  ✓ existe scripts/mide-contexto.mjs (presupuesto de contexto)
+  ✓ existe .claude/presupuesto-contexto.json
+  ✓ el presupuesto de contexto declara su calibracion (ratio, muestra y margen)
+  ✓ la medicion de contexto corre en validate y en predeploy
+  ✓ existe scripts/empaqueta-herramienta.mjs (empaqueta y PRUEBA la integracion)
+  ✓ existe el andamio tools/ejemplo-herramienta con su contrato
+  ✓ CLAUDE.md: el decision tree enruta "herramienta / libreria / paquete"
+  ✓ GEMINI.md: el decision tree enruta "herramienta / libreria / paquete"
+  ✓ el andamio no mete React en dependencies (va como peer)
+  ✓ existe docs/CREAR-UNA-HERRAMIENTA.md (puerta de entrada Agent-First)
+  ✓ la puerta delega el contrato tecnico en EMPAQUETAR-HERRAMIENTA.md
+  ✓ la puerta declara el registro Agent-First (el lector no teclea)
+  ✓ la puerta nombra el gate humano de publicacion (irreversible)
+  ✓ CLAUDE.md: el decision tree enruta a la puerta CREAR-UNA-HERRAMIENTA
+  ✓ GEMINI.md: el decision tree enruta a la puerta CREAR-UNA-HERRAMIENTA
+  ✓ existe scripts/configura-deploy.mjs (dimensiona el deploy contra la maquina real)
+  ✓ los limites del compose no estan cableados a un modelo de servidor
+  ✓ la imagen de la app lleva el nombre del proyecto, no el del template
+  ✓ .env.production.example documenta las variables de tamaño
+  ✓ existe scripts/audita-secretos.mjs (auditoria de credenciales sobre la historia)
+  ✓ la auditoria de credenciales corre en validate y en predeploy
+  ✓ toda entrada de .claude/gobernanza/REGISTRO-RIESGO.md esta firmada
+  ✓ toda entrada de .claude/gobernanza/BITACORA-CDC.md esta firmada
+  ✓ AGENTS.md: declara la escalera CLI-first y que imprimir es un CDC
+  ✓ AGENTS.md: declara la regla anti-reimplementacion de los CLIs
+  ✓ AGENTS.md: sin grado no es aprobado
+  ✓ AGENTS.md: instalar de la libreria publica es adoptar un CLI no medido
+  ✓ GEMINI.md: declara la escalera CLI-first y que imprimir es un CDC
+  ✓ GEMINI.md: declara la regla anti-reimplementacion de los CLIs
+  ✓ GEMINI.md: sin grado no es aprobado
+  ✓ GEMINI.md: instalar de la libreria publica es adoptar un CLI no medido
+  ✓ existe .claude/imprenta/manifiesto.json
+  ✓ existe scripts/audita-imprenta.mjs
+  ✓ el auditor de la imprenta corre en validate y en predeploy
+  ✓ existe scripts/verifica-specs.mjs
+  ✓ existe scripts/prepara-gate.mjs
+  ✓ el verificador de specs corre en validate y en predeploy
+  ✓ el preparador del gate cuelga de pretypecheck (lo dispara npm, no una costumbre)
+  ✓ package.json declara engines.node, que es lo que el preparador hace cumplir
+  ✓ AGENTS.md: el decision tree rutea a spec-generator
+  ✓ AGENTS.md: distingue cuando toca spec y cuando PRP
+  ✓ AGENTS.md: nombra docs/constitution.md
+  ✓ GEMINI.md: el decision tree rutea a spec-generator
+  ✓ GEMINI.md: distingue cuando toca spec y cuando PRP
+  ✓ GEMINI.md: nombra docs/constitution.md
+  ✓ existe docs/constitution.md
+  ✓ existe .claude/example.mcp.json (superficie revisable de los MCP)
+  ✓ todo servidor MCP configurado esta declarado en example.mcp.json (no hay .mcp.json vivo en esta maquina)
+  ✓ example.mcp.json pinea sus servidores MCP (sin alias auto-actualizables)
+  ✓ .mcp.json vivo pinea sus servidores MCP (no hay .mcp.json vivo en esta maquina)
+  ✓ example.mcp.json no lleva credenciales reales, solo placeholders
+  ✓ el arbol versionado se puede listar (requisito del escaneo de credenciales)
+  ✓ ningun archivo versionado lleva una credencial viva
+  ✓ ningun archivo versionado quedo sin escanear
+  ✓ README.md declara el numero real de comprobaciones del verificador (166)
+  ✓ .claude/README.md declara el numero real de comprobaciones del verificador (166)
+  ◦ pendiente: firma del contrato de «Etiquetas GS1»
+  ◦ pendiente: firma del contrato de «Extractor documental»
+  ◦ pendiente: firma del contrato de «Reel del celular»
+  ◦ pendiente: contrato de «Estudio pymes» — falta: `/new-app` al salir de blueprint (PRP-006)
+  ◦ pendiente: contrato de «Vendedor con IA en WhatsApp» — falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar)
+
+Gobernanza cableada: 166/166 comprobaciones en verde.
+5 pendientes declarados: no cuentan como verde.

@@ -1,0 +1,53 @@
+# comando: npm run verifica:inventario
+# fecha: 2026-10-02T15:16:39.274Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 verifica:inventario
+> node scripts/inventario/detecta.mjs
+
+
+Inventario de activos — 39 activos, 235 unidades
+
+  ✓ TPL-extractor-documental           2 u  e62eef2f  beta      
+  ✓ TPL-etiquetas-gs1                  1 u  39e81a88  beta      
+  ✓ TPL-voz                            1 u  f43305f0  beta      
+  ✓ TPL-dictado                        2 u  973e9c8e  beta      
+  ✓ TPL-asesor-ventas                  1 u  446e8255  blueprint 
+  ✓ TPL-pymes-marketing                1 u  d57e5ad1  blueprint 
+  ✓ TPL-reel                           2 u  1f300edc  blueprint 
+  ✓ TPL-feature-reel                   6 u  417989e6  blueprint 
+  ✓ TPL-feature-estudio-pymes          2 u  42f158d0  blueprint 
+  ✓ TPL-feature-laboratorio-pymes      2 u  71faada4  beta      
+  ✓ TPL-grafo-conocimiento             1 u  c9b22c97  beta      
+  ✓ TPL-conocimiento                   1 u  d1a7a217  beta      
+  ✓ TPL-ejemplo-herramienta            1 u  6dbc19ef  produccion
+  ✓ TPL-feature-a2a                    2 u  8d59af8b  beta      
+  ✓ TPL-feature-auth                   1 u  0d03ccf0  produccion
+  ✓ TPL-feature-dashboard              1 u  162406bd  beta      
+  ✓ TPL-feature-project-settings       2 u  f9e15b06  beta      
+  ✓ TPL-feature-dictado                3 u  08563f12  beta      
+  ✓ TPL-feature-laboratorio-voz        2 u  f265c5cf  beta      
+  ✓ TPL-ventas-whatsapp                1 u  498e5d2c  blueprint 
+  ✓ TPL-feature-ventas-whatsapp        1 u  34bf6a42  blueprint 
+  ✓ TPL-feature-etiquetas              1 u  e97bb80b  beta      
+  ✓ TPL-feature-laboratorio-etiquetas   2 u  97783c3a  beta      
+  ✓ TPL-app-base                       6 u  893efe9d  produccion
+  ✓ TPL-motor-ia                       4 u  16f700d5  produccion
+  ✓ TPL-skills                        31 u  688ba3ab  produccion
+  ✓ TPL-doctrina                      17 u  ffbbaf1c  produccion
+  ✓ TPL-especificaciones              69 u  b379e44c  produccion
+  ✓ TPL-gobernanza                    17 u  95b8a921  produccion
+  ✓ TPL-manifiesto-gates               6 u  bb816e7f  produccion
+  ✓ TPL-imprenta                       4 u  30521ef3  produccion
+  ✓ TPL-clis-impresos                  5 u  —         produccion
+  ✓ TPL-trayectorias                   4 u  64556fb4  produccion
+  ✓ TPL-inventario                     3 u  1a2c2d8f  beta      
+  ✓ TPL-analista-producto              2 u  1b3dcc86  beta      
+  ✓ TPL-empaquetador                   3 u  e5270ac4  produccion
+  ✓ TPL-despliegue                    10 u  8dcf2985  produccion
+  ✓ TPL-erp                           10 u  59f3b9b0  beta      
+  ✓ TPL-design-systems                 5 u  02cf0870  produccion
+
+Inventario al dia: 235 unidades con asiento, 0 NUEVO, 0 HUERFANO, 0 AMBIGUO.
