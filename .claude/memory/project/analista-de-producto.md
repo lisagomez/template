@@ -26,8 +26,3 @@ citado. Diseño: `docs/SDD-analista-producto.md`; plan: `.claude/PRPs/PRP-009-an
 El ranking pone arriba un producto **interno** (P-02, observatorio de costo) porque lo único medido es lo
 que le duele a la fábrica. El informe recomienda un piloto externo (P-03) con el buzón de CFDI (P-01), y
 P-02 en paralelo como vista sobre datos que ya existen. **La decisión es del laboratorio y sigue abierta.**
-
-## Lo que falta
-
-- el caso-trampa de la capa B está propuesto fuera del repo, sin sembrar en `golden-sets`;
-- el hueco de la comprobación 6b de `verify:gobernanza`: `SIN_VALOR` no reconoce `<firma>` como hueco.

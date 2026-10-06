@@ -4563,3 +4563,20 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - **con esta acta firmada**, sobre el texto real de la bitácora: las diez quedan cerradas y no queda
     ninguna sin firma; con la firma en `pendiente`, son once (las diez y la propia acta).
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-06, con el diff delante.
+
+### 2026-10-06 — alta de un caso nuevo en el corpus — radio: ninguno
+> No es un cambio de comportamiento: amplía el corpus de la capa B, que se revisa como código.
+
+- **Qué se hizo**: se añade al corpus un caso (rama `golden-sets`, commit `66bac32`). A qué CDC responde y qué
+  mide, solo en la rama. El borrador que vivía fuera del repo se borró, y la memoria del proyecto deja de
+  mencionarlo.
+- **Diseño**: falla por los dos lados, y su entrada se redactó con vocabulario que no existe en el árbol de
+  trabajo.
+- **Verificación**:
+  - round-trip base64 comprobado;
+  - `npm run regresion -- --trampa`: corpus completo, 23/23;
+  - `verify:gobernanza` 169/169: el corpus fuera del árbol, sus expectativas codificadas, ningún identificador de
+    caso en el árbol y ninguna ventana de ocho palabras de la entrada en el repo.
+- **Lo que esto NO cierra**: el corpus completo **no es evidencia**. El caso nuevo sigue **sin ejecutar en sesión
+  fría**: la sesión que lo redactó leyó el corpus y no puede correrlo.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo», 2026-10-06.
