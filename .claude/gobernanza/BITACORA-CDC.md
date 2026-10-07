@@ -4580,3 +4580,30 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Lo que esto NO cierra**: el corpus completo **no es evidencia**. El caso nuevo sigue **sin ejecutar en sesión
   fría**: la sesión que lo redactó leyó el corpus y no puede correrlo.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo», 2026-10-06.
+
+### 2026-10-07 — gate nuevo `prueba:buzon`: el perímetro del despacho y `configura:deploy` en modo despacho — radio: padrón de gates
+- **Cambio** (rama `buzon/fase-2-despliegue`, commit `e38dee3`):
+  - `.claude/gates.json`: entrada `prueba:buzon` en el perfil `validate` (10 líneas); `package.json`: su script,
+    `node --test scripts/buzon/prueba-*.mjs`;
+  - `js-yaml` 4.3.1 declarado como devDependency exacta (ya estaba en el lock como transitiva), para leer el compose
+    sin Docker;
+  - fuera de C1, en el mismo commit: la fase 2 de la spec 015 (compose del despacho, Caddyfile, init SQL,
+    `configura:deploy` en modo despacho, `llaves.mjs`), su prueba, el runbook y el inventario.
+- **Motivo**: la fase 2 trae la primera prueba del piloto, y el padrón pone en rojo un archivo de pruebas que ningún
+  gate corre. El plan lo dejaba para la fase 8 (TAR-18); se adelanta y queda declarado en las tareas.
+- **Qué pone rojo y qué no**: rojo = un servicio del compose del despacho, salvo Caddy, en una red con salida, con
+  puertos, sin digest, con llaves de fuera o con la cola de visión distinta de «ninguno»; y `configura:deploy` en modo
+  despacho que deje pasar un Supabase gestionado o en otro origen, el respaldo de visión, Mistral, service_role en la
+  app, llaves firmadas con otro secreto o RAM corta. **No** pone rojo el compose normal (`docker-compose.yml`), que
+  sigue dando salida a la app a propósito.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (js-yaml exacto, imágenes por digest).
+- **Regresión y demostración**:
+  - `prueba:buzon` ☑ 26/26, con 18 siembras (7 del perímetro, 11 del `.env` y de la máquina);
+  - el perímetro sale limpio también sobre la configuración que resuelve Docker (`docker compose config`);
+  - en vivo, con datos sintéticos: ningún servicio con documentos sale a internet y Caddy sí; a través de Caddy, alta
+    por el operador, autorregistro negado, sesión `authenticated`, y rest y storage en 200;
+  - `verifica:gates` ☑ 11 comprobaciones; `verifica:inventario` ☑ 252 unidades; `verify:gobernanza` ☑ 169/169;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `e38dee3`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-07, con el diff delante.

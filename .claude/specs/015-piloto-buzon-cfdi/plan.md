@@ -121,3 +121,19 @@ Un solo despacho es una sola organización: el RLS separa por organización, nin
 | 3 · ¿Basta una pyme? | La exportación lleva el número de pymes con los dos meses completos; el umbral lo pone el laboratorio |
 | 4 · ¿Qué contrato recibe la cifra? | El del extractor seguro; el del ERP no tiene el campo, y añadirlo es decisión del laboratorio |
 | 5 · ¿Qué pone el despacho? | `configura:deploy` dice si su máquina alcanza; sin máquina, el piloto no arranca |
+
+## Aprendizajes
+
+### 2026-10-07: `: ` dentro de un mensaje de `${VAR:?...}` rompe el YAML del compose
+- **Error**: `${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD: corre ...}` no es YAML válido: el segundo `: ` abre un
+  mapa. Lo cazó `prueba:buzon` al leer el compose. Docker tampoco lo habría aceptado.
+- **Fix**: el mensaje va sin `: `, con paréntesis: `(corre scripts/despacho/llaves.mjs)`.
+- **Aplicar en**: todo mensaje de variable obligatoria en un compose.
+
+### 2026-10-07: el `roles.sql` oficial de Supabase corta la inicialización si falta un servicio
+- **Error**: el `roles.sql` oficial cambia la contraseña de `supabase_functions_admin`, un rol que crea
+  `webhooks.sql`. Sin ese script, el `ALTER` fallaba y cortaba el resto: storage se quedaba sin su contraseña
+  (`28P01`) y las migraciones de la imagen no corrían. Por eso auth fallaba con «must be owner of function uid».
+- **Fix**: `despacho/db/roles.sql` no lleva esa línea, y su cabecera dice por qué.
+- **Aplicar en**: todo Supabase autohospedado recortado. Al quitar un servicio, se quita también lo que sus
+  scripts de inicio dan por hecho.

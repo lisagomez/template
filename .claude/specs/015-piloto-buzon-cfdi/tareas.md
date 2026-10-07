@@ -12,10 +12,21 @@
 
 ## Fase 2 — Despliegue en el despacho
 
-- [ ] **TAR-3 · Supabase autohospedado en el compose**, con imágenes pineadas por digest y la app en la
+- [x] **TAR-3 · Supabase autohospedado en el compose**, con imágenes pineadas por digest y la app en la
       red `interna`. Prueba: con el compose arriba, ningún servicio de documentos tiene ruta a internet.
-- [ ] **TAR-4 · `configura:deploy` para el despacho**: mide la RAM, comprueba que `EXTRACTOR_RESPALDO`
+      Hecho el 2026-10-07 en un archivo propio, `docker-compose.despacho.yml`, con db, auth, rest y storage, y
+      Caddy como pasarela. Prueba en vivo con datos sintéticos:
+      - desde auth, storage, la base y un contenedor nuevo en `frente` o en `interna`: **no sale**; desde Caddy
+        y desde `web`, sí;
+      - a través de Caddy, el operador da de alta una cuenta (200), el autorregistro se niega
+        (`signup_disabled`), el inicio de sesión da un token `authenticated`, y rest y storage responden 200;
+      - el dominio resuelve a Caddy desde `frente`, sin salida;
+      - en reposo: base 86 MB, storage 106, rest 25, auth 11 y Caddy 17.
+- [x] **TAR-4 · `configura:deploy` para el despacho**: mide la RAM, comprueba que `EXTRACTOR_RESPALDO`
       está apagado y rechaza un `SUPABASE_URL` gestionado. Prueba con el caso malo de cada uno.
+      Hecho el 2026-10-07: se activa con `DESPLIEGUE=despacho` (`scripts/despacho/reglas.mjs`), y
+      `scripts/despacho/llaves.mjs` genera los secretos sin imprimirlos. `prueba:buzon` da 26 en verde, con 7
+      siembras del perímetro y 11 del `.env` y de la máquina.
 
 ## Fase 3 — Consentimiento y buzón
 
@@ -61,8 +72,10 @@
 
 ## Fase 8 — Gate y demo
 
-- [ ] **TAR-18 · Gate `prueba:buzon` en `validate`**. **CDC (C1)**: entrada en la bitácora con la firma del
-      laboratorio.
+- [x] **TAR-18 · Gate `prueba:buzon` en `validate`**. **CDC (C1)**: entrada en la bitácora con la firma del
+      laboratorio. **Adelantado a la fase 2** (2026-10-07): el padrón pone en rojo un archivo de pruebas que
+      ningún gate corre, así que el gate entra con su primera prueba. CDC firmado el 2026-10-07 («capa A basta»). Las
+      pruebas de las fases siguientes se suman a este mismo gate.
 - [ ] **TAR-19 · Recorrido con Playwright** del flujo completo sobre corpus sintético, con capturas.
 - [ ] **TAR-20 · Inventario y contrato**: el activo de la feature, con dueño el Extractor documental, y
       `npm run inventario:vista`.
