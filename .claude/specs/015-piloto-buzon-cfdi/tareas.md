@@ -72,9 +72,10 @@
 
 ## Fase 8 — Gate y demo
 
-- [ ] **TAR-18 · Gate `prueba:buzon` en `validate`**. **CDC (C1)**: entrada en la bitácora con la firma del
+- [x] **TAR-18 · Gate `prueba:buzon` en `validate`**. **CDC (C1)**: entrada en la bitácora con la firma del
       laboratorio. **Adelantado a la fase 2** (2026-10-07): el padrón pone en rojo un archivo de pruebas que
-      ningún gate corre, así que el gate entra con su primera prueba. Aquí queda lo que falte sumarle.
+      ningún gate corre, así que el gate entra con su primera prueba. CDC firmado el 2026-10-07 («capa A basta»). Las
+      pruebas de las fases siguientes se suman a este mismo gate.
 - [ ] **TAR-19 · Recorrido con Playwright** del flujo completo sobre corpus sintético, con capturas.
 - [ ] **TAR-20 · Inventario y contrato**: el activo de la feature, con dueño el Extractor documental, y
       `npm run inventario:vista`.
