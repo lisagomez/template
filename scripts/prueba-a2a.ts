@@ -80,6 +80,20 @@ const rutasDelBridge = (): string[] => [
  */
 const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ajustes',
+  // Buzón de CFDI del despacho (spec 015). RF-20: misma app y mismo puerto; en el despacho la app no tiene salida
+  // a internet (docker-compose.despacho.yml). Todas exigen sesión y ser miembro del despacho (`entra()`), las que
+  // escriben, `Origin` del mismo sitio; RLS y disparadores deciden. NO pasan por `src/proxy.ts` a propósito: Next 16
+  // corta ahí el cuerpo a 10 MB sin error. El documento no se guarda, solo su lectura; sin consentimiento, ni se lee.
+  '/api/buzon/cifras',
+  '/api/buzon/consentimientos',
+  '/api/buzon/documentos',
+  '/api/buzon/documentos/[id]',
+  '/api/buzon/exporta',
+  '/api/buzon/horas',
+  '/api/buzon/lista-69b',
+  '/api/buzon/pendientes',
+  '/api/buzon/piloto',
+  '/api/buzon/pymes',
   '/api/contenido/video',
   '/api/dictado',
   '/api/dictado/movil',
@@ -105,6 +119,10 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/reel/[id]/consentimientos',
   '/api/reel/[id]/decision',
   '/api/reel/proyectos',
+  // Soporte SAP en LABORATORIO (PRP-008). RF-20: misma app y mismo puerto. Responde 404 sin
+  // SOPORTE_SAP_LABORATORIO=1 (que `configura:deploy` rechaza en producción); estado sintético en memoria,
+  // identidades de laboratorio, sin base y sin `service_role`. Exponerla es gate humano con C3 + C4.
+  '/api/soporte-sap',
   // Vendedor con IA en WhatsApp (goal ventas-ia-waba, fases 0-3 en laboratorio). RF-20: misma app y mismo
   // puerto. `webhook`, `flows` y `pagos` son las únicas que un tercero (Meta, el procesador) tendría que
   // alcanzar, y solo con el canal REAL: la app no lo arranca sin C3 + C4 firmados; en el laboratorio las

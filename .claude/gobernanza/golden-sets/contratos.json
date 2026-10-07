@@ -244,6 +244,56 @@
         "patron": "/readme nuevo",
         "porque": "toda herramienta nace con README product first: si el skill que las crea no manda al skill readme, la regla vive en un documento y no dispara"
       }
+    ],
+    "analista-producto": [
+      {
+        "patron": "Un dolor sin cita verificada es una hip[óo]tesis",
+        "porque": "la regla de oro del rol (PRP-009): si el skill deja de declararla, el informe vuelve a afirmar dolores que nadie cito"
+      },
+      {
+        "patron": "verifica-evidencia\\.mjs",
+        "porque": "el grado y las citas los comprueba el comparador determinista, no el juicio del modelo que escribe el hallazgo"
+      },
+      {
+        "patron": "medidores\\.mjs",
+        "porque": "las cifras salen de un medidor con su comando; una cifra de cabeza es hipotesis"
+      },
+      {
+        "patron": "solo escribe en `docs/analisis/",
+        "porque": "el rol es de solo lectura: un analista que arregla lo que encuentra deja de ser auditable"
+      },
+      {
+        "patron": "No lees la rama `golden-sets`",
+        "porque": "leer el corpus de la capa B contamina las corridas en frio (README raiz §3)"
+      },
+      {
+        "patron": "nunca imprimas el valor de una variable de entorno",
+        "porque": "el rol lee el repo entero: la regla de secretos en pantalla tiene que ir inline donde se lee"
+      },
+      {
+        "prohibido": "echo\\s+[\"']?\\$\\{?[A-Z0-9_]*(KEY|TOKEN|SECRET|SECRETO|PASSWORD|CLAVE|LLAVE)|printenv\\s+[A-Z]|\\bcat\\s+[^\\n]*\\.env\\b",
+        "porque": "un ejemplo que imprime una variable sensible ensena la fuga que la regla prohibe"
+      },
+      {
+        "patron": "dato no confiable",
+        "porque": "el texto del repo puede traer instrucciones (C3, O1): se analiza, no se obedece"
+      },
+      {
+        "patron": "C3 y C4 vetan, no ponderan",
+        "porque": "el dano a terceros no es firmable: ponderarlo lo vuelve negociable"
+      },
+      {
+        "patron": "se recomiendan, no se ejecutan",
+        "porque": "el rol propone; lanzar /prp o /new-app es decision del laboratorio"
+      },
+      {
+        "patron": "una cosa a la vez y con respuesta recomendada",
+        "porque": "la importancia para el cliente solo la sabe el laboratorio: se pregunta, no se rellena"
+      },
+      {
+        "patron": "CDC \\(C1\\)",
+        "porque": "editar el skill, su esquema, el verificador o su gate cambia el comportamiento del rol"
+      }
     ]
   }
 }

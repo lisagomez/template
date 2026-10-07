@@ -42,7 +42,7 @@ export function Consentimientos({ proyecto, lista }: { proyecto: string; lista: 
       <ul className="space-y-2 text-sm">
         {lista.map((c) => (
           <li key={c.id} className={`flex items-center justify-between gap-2 ${c.retirado || c.vencido ? 'text-gray-400' : ''}`}>
-            <span>{c.alias} · {c.rol} · hasta {c.vigenteHasta}{c.retirado ? ' · retirado' : ''}{c.vencido ? ' · vencido' : ''}</span>
+            <span>{c.alias} · {c.rol} · <span className="whitespace-nowrap">hasta {c.vigenteHasta}</span>{c.retirado ? ' · retirado' : ''}{c.vencido ? ' · vencido' : ''}</span>
             {!c.retirado && !c.vencido && <button type="button" className="rounded-lg border border-red-300 px-3 py-1 text-red-700" disabled={ocupado} data-prueba="retirar-consentimiento" onClick={() => void retira(c)}>Retirar</button>}
           </li>
         ))}

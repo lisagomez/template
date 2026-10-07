@@ -1,0 +1,28 @@
+{
+  "name": "@tu-scope/sala-a2a",
+  "version": "0.1.0",
+  "description": "Sala conversacional con agentes, alineada con SPEC-sala-a2a r2: canales, hilos de un nivel y aprobaciones como fila que ningún componente que ejecuta un modelo puede fabricar. Núcleo sin dependencias; esquema propuesto con su suite de sabotajes.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "migraciones"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts",
+    "sabotajes": "node evidencia/sabotajes.ts"
+  }
+}
