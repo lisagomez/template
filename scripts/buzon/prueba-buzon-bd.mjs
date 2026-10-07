@@ -132,7 +132,12 @@ test('el RFC se valida en la base, y el seudónimo no dice nada del RFC', async 
 // --- La prueba de la prueba: con la regla quitada, la conducta tiene que cambiar ---------------------
 
 test('siembra: sin la comprobación del consentimiento, el documento entra sin él (RF-2 la mide de verdad)', async () => {
-  const { db, comoMiembro } = await despacho(['public.buzon_soy_miembro() and public.buzon_consiente(pyme_id)', 'public.buzon_soy_miembro()']);
+  // La política de ingesta vigente la redefine la migración del cierre (fase 7, suma «piloto activo»): sembrar en la de
+  // la fase 3 ya no sembraría nada (lo cazó esta misma prueba al llegar la fase 7).
+  const { db, comoMiembro } = await despacho([
+    'public.buzon_soy_miembro() and public.buzon_consiente(pyme_id) and public.buzon_piloto_activo()',
+    'public.buzon_soy_miembro() and public.buzon_piloto_activo()', '20261007180000_buzon_cierre.sql',
+  ]);
   await comoMiembro();
   const pyme = await nuevaPyme(db);
   await entra(db, pyme.id, 1);

@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-interface Props { pymeId: string; consiente: boolean }
+interface Props { pymeId: string; consiente: boolean; activo?: boolean }
 interface Resultado { nombre: string; ok: boolean; texto: string }
 
 /**
  * La zona de ingesta: XML (lo que manda) o su representación impresa (PDF o foto). Se suben de uno en uno, y cada
  * uno dice qué pasó con él. Sin consentimiento vigente no se sube nada (RF-1, RF-2).
  */
-export function IngestaDocumentos({ pymeId, consiente }: Props) {
+export function IngestaDocumentos({ pymeId, consiente, activo = true }: Props) {
   const router = useRouter();
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [subiendo, setSubiendo] = useState(false);
@@ -31,6 +31,10 @@ export function IngestaDocumentos({ pymeId, consiente }: Props) {
     }
     setSubiendo(false);
     router.refresh();
+  }
+  if (!activo) {
+    return <p role="status" className="rounded-xl bg-gray-100 p-4 text-sm" data-prueba="piloto-parado">
+      El piloto está parado: ya no entra ningún documento. Lo pendiente vuelve a captura manual.</p>;
   }
   if (!consiente) {
     return <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900" data-prueba="sin-consentimiento">

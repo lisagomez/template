@@ -29,7 +29,7 @@ export default async function Pagina() {
     <main className="mx-auto max-w-2xl space-y-4 px-4 py-6">
       <header>
         <h1 className="text-2xl font-bold">Buzón de CFDI recibidos</h1>
-        <p className="text-sm text-gray-600">Piloto en la máquina del despacho: ningún documento sale de ella.</p>
+        <p className="text-sm text-gray-600">Piloto en la máquina del despacho: ningún documento sale de ella. <Link href="/buzon/cierre" className="underline" data-prueba="ir-a-cierre">Parar o cerrar el piloto</Link></p>
       </header>
       <ul className="space-y-2" data-prueba="pymes">
         {(pymes ?? []).map((p) => (

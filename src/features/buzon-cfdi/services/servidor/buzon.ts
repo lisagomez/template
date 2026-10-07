@@ -12,6 +12,7 @@ import type { ResultadoDeExtraccion } from '../../../a2a/esquema.ts'
 import { aCsv, clasifica, empareja, pendientes, revisaCampo, revisaDiscrepancia } from '../lectura.ts'
 import { bandera, decodifica, leeListado69B, type BanderaSat, type Situacion } from '../lista-69b.ts'
 import { cifras, cifrasACsv, type CifraDelMes, type DocumentoMedido, type RegistroDeHoras } from '../medicion.ts'
+import { paraCapturaManual, pendientesACsv, type EstadoDelPiloto } from '../cierre.ts'
 import type { DocumentoDelBuzon, Revision } from '../../types/index.ts'
 
 export type Resultado<T> = { ok: true; datos: T } | { ok: false; estado: number; aviso: string }
@@ -73,6 +74,9 @@ export async function ingresa(supabase: SupabaseClient, pymeId: string, archivo:
   Promise<Resultado<{ id: string; estado: string; avisos: string[]; pendientes: string[] }>> {
   const { data: pyme } = await supabase.from('buzon_pymes').select('id, rfc').eq('id', pymeId).maybeSingle()
   if (!pyme) return falla(404, 'no existe esa pyme en este despacho')
+  // Antes que el consentimiento: parado, la base rechaza con el mismo código y el aviso diría otra cosa.
+  const { data: activo } = await supabase.rpc('buzon_piloto_activo')
+  if (activo !== true) return falla(409, 'el piloto está parado: no entra ningún documento nuevo (RF-25)')
   const { data: consiente } = await supabase.rpc('buzon_consiente', { pyme: pymeId })
   if (consiente !== true) return falla(403, SIN_CONSENTIMIENTO)
 
@@ -220,5 +224,41 @@ export async function cifrasEnCsv(supabase: SupabaseClient): Promise<Resultado<s
   } catch (e) {
     return falla(500, e instanceof Error ? e.message : 'no se pudieron preparar las cifras')
   }
+}
+
+// --- Parar y cerrar (fase 7) -------------------------------------------------------------------------------------
+
+export interface Piloto { readonly estado: EstadoDelPiloto; readonly parado_en: string | null; readonly cerrado_en: string | null }
+
+export async function piloto(supabase: SupabaseClient): Promise<Piloto> {
+  const { data } = await supabase.from('buzon_piloto').select('estado, parado_en, cerrado_en').maybeSingle<Piloto>()
+  return data ?? { estado: 'activo', parado_en: null, cerrado_en: null }
+}
+
+/** Parar (RF-25) o cerrar (RF-27). La base exige el orden y, al cerrar, borra todo y deja la constancia. */
+export async function avanzaPiloto(supabase: SupabaseClient, accion: 'parar' | 'cerrar'): Promise<Resultado<Piloto>> {
+  const { data, error } = await supabase.from('buzon_piloto').update({ estado: accion === 'parar' ? 'parado' : 'cerrado' })
+    .eq('id', true).select('estado, parado_en, cerrado_en').single<Piloto>()
+  return error ? aviso(error) : { ok: true, datos: data }
+}
+
+/** Lo que vuelve a captura manual al parar (RF-26): todo lo no confirmado, con su pyme. */
+export async function pendientesDeCaptura(supabase: SupabaseClient): Promise<ReturnType<typeof paraCapturaManual>> {
+  const [{ data: pymes }, { data: docs }] = await Promise.all([
+    supabase.from('buzon_pymes').select('id, nombre'),
+    supabase.from('buzon_documentos').select(COLUMNAS),
+  ])
+  const nombre = new Map((pymes ?? []).map((p) => [String(p.id), String(p.nombre)]))
+  return paraCapturaManual(((docs ?? []) as DocumentoDelBuzon[]).map((d) => ({ ...d, pyme_nombre: nombre.get(d.pyme_id) ?? '' })))
+}
+
+export async function pendientesEnCsv(supabase: SupabaseClient): Promise<string> {
+  return pendientesACsv(await pendientesDeCaptura(supabase))
+}
+
+export async function constanciaDeCierre(supabase: SupabaseClient) {
+  const { data } = await supabase.from('buzon_constancias').select('documentos_borrados, registros_de_horas_borrados, pymes_borradas, listados_borrados, borrado_en')
+    .eq('motivo', 'cierre_del_piloto').order('borrado_en', { ascending: false }).limit(1).maybeSingle()
+  return data
 }
 
