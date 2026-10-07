@@ -22,7 +22,9 @@ sale del perímetro** (spec 008). Por eso «masivo» no se logra con un motor m�
 se logra enrutando fuera del motor todo lo que no lo necesita.
 **Costo actual:** **pendiente, no medido** en una operación real. Lo único calculado es el costo de
 la alternativa que se descartó por C4: unas 5.000 páginas con un motor de API salen en ~20 USD
-(SDD §2.18).
+(SDD §2.18). **Se medirá con el piloto del buzón de CFDI** (spec 015): horas de captura por pyme y por
+mes antes y después, en un despacho real, y la proporción de CFDI pendientes al cierre. Al cerrar el
+piloto, esta línea lleva la cifra y su fuente, o «desconocido» con el motivo (RF-23, RF-24).
 
 ## 2. Solución
 

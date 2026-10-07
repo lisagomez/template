@@ -4607,3 +4607,20 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - `verifica:gates` ☑ 11 comprobaciones; `verifica:inventario` ☑ 252 unidades; `verify:gobernanza` ☑ 169/169;
   - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `e38dee3`.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-07, con el diff delante.
+
+### 2026-10-07 — la `guarda` del gate `prueba:buzon` cubre ya todo el piloto — radio: padrón de gates
+- **Cambio** (rama `buzon/fase-8-cierre-formal`, commit `2ec6eb2`): `.claude/gates.json`, la `guarda` y la `evidencia`
+  de `prueba:buzon` (2 líneas). El comando no cambia: `node --test scripts/buzon/prueba-*.mjs`.
+- **Motivo**: la `guarda` describía solo la fase 2 (el perímetro y `configura:deploy`). El gate corre ya 92 pruebas de
+  las fases 2 a 7, y un padrón que dice menos de lo que el gate guarda engaña a quien lo lee para decidir. Se dejó a
+  propósito para un solo CDC al cerrar la construcción, y así quedó declarado en las tareas, en vez de uno por fase.
+- **Qué pone rojo y qué no**: ninguna comprobación cambia. Lo que pone rojo es lo mismo que ya ponía; solo cambia la
+  descripción.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `prueba:buzon` ☑ 92/92; `verifica:gates` ☑ 11 comprobaciones; `verify:gobernanza` ☑ 169/169;
+  - `npm run recorrido:buzon` ☑ 29/29 pasos en un stack desechable que se borró al terminar;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `2ec6eb2`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-07, con el diff delante.

@@ -376,7 +376,8 @@ npm run regresion           # C2 capa A: contratos de los 28 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 npm run revisa:readmes      # README product first de tools/ y src/features/ (skill readme); -- --prueba lo prueba
 npm run prueba:analista     # analista de producto: contrato A2A no servido, siembras del verificador y la ultima corrida en verde
-npm run prueba:buzon        # piloto del buzon de CFDI (spec 015): el perimetro del despacho y configura:deploy en modo despacho
+npm run prueba:buzon        # piloto del buzon de CFDI (spec 015), de punta a punta: perimetro, base, lectura, 69-B, medicion y cierre
+npm run recorrido:buzon     # el mismo piloto en el navegador, en un stack desechable (necesita Docker; no es un gate)
 ```
 
 El gate corre solo antes de desplegar (`predeploy`), no solo cuando alguien se acuerda.

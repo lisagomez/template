@@ -160,11 +160,17 @@
 - [x] **TAR-18 · Gate `prueba:buzon` en `validate`**. **CDC (C1)**: entrada en la bitácora con la firma del
       laboratorio. **Adelantado a la fase 2** (2026-10-07): el padrón pone en rojo un archivo de pruebas que
       ningún gate corre, así que el gate entra con su primera prueba. CDC firmado el 2026-10-07 («capa A basta»). Las
-      pruebas de las fases siguientes se suman a este mismo gate. Su `guarda` en el padrón describe solo la fase 2:
-      se pone al día en un solo CDC al cerrar la fase 8, no uno por fase.
-- [ ] **TAR-19 · Recorrido con Playwright** del flujo completo sobre corpus sintético, con capturas.
-- [ ] **TAR-20 · Inventario y contrato**: el activo de la feature, con dueño el Extractor documental, y
+      pruebas de las fases siguientes se suman a este mismo gate. Su `guarda` en el padrón describía solo la fase 2:
+      se puso al día en un solo CDC al cerrar la fase 8 (2026-10-07), no uno por fase.
+- [x] **TAR-19 · Recorrido con Playwright** del flujo completo sobre corpus sintético, con capturas.
+      Hecho el 2026-10-07: `npm run recorrido:buzon` (`scripts/buzon/recorrido.sh`) lo hace todo con un comando.
+      Levanta un stack desechable del despacho, aplica las 9 migraciones, da de alta una cuenta sintética, arranca
+      el extractor y la app, corre los **29 pasos** y lo borra todo: contenedores, volúmenes y secretos. Capturas y
+      pasos en `recorrido/`. No es un gate, porque necesita Docker.
+- [x] **TAR-20 · Inventario y contrato**: el activo de la feature, con dueño el Extractor documental, y
       `npm run inventario:vista`.
+      `TPL-piloto-buzon-cfdi` entra en la fila del Extractor documental del índice del portafolio. El contrato del
+      extractor dice que su «Costo actual» se medirá con este piloto (RF-23, RF-24).
 
 ## Fase 9 — Checkpoint humano (sin código)
 
