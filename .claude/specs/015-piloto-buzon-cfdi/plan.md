@@ -155,3 +155,12 @@ Un solo despacho es una sola organización: el RLS separa por organización, nin
   (`services/servidor/ruta.ts`).
 - **Aplicar en**: toda ruta que reciba archivos de más de 10 MB.
 
+### 2026-10-07: el Supabase real rechaza un DELETE sin WHERE, aunque vaya dentro de una función
+- **Error**: el cierre fallaba solo en el Supabase real con «DELETE requires a WHERE clause» (código 21000). Su API
+  carga `pg_safeupdate` en las sesiones de PostgREST, y la extensión alcanza también al SECURITY DEFINER disparado
+  desde esa sesión. Las pruebas en PGlite pasaban, porque PGlite no la trae; lo cazó el recorrido.
+- **Fix**: los borrados masivos llevan `where true`, explícito. Una guarda en `prueba:buzon` rechaza un DELETE o
+  UPDATE sin WHERE en las migraciones del buzón, con su siembra.
+- **Aplicar en**: toda migración de Supabase. La guarda solo mira las del buzón; extenderla a `prueba:migraciones` es
+  cambiar un gate, y va con su propio CDC si el laboratorio lo quiere.
+

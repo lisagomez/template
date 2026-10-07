@@ -166,6 +166,32 @@ try {
   paso('RF-3, RF-4: al revocar, sus documentos desaparecen', (await pagina.locator('[data-prueba="documento"]').count()) === 0);
   await pagina.goto(`${APP}/buzon`);
   paso('RF-5: tras revocar, la pyme sale de las cifras', /^0 fila\(s\)/.test(await pagina.locator('[data-prueba="cifras-resumen"]').innerText()));
+
+  // --- Fase 7: parar y cerrar (RF-25 a RF-29) -----------------------------------------------------------------------
+  await pagina.goto(`${APP}/buzon/cierre`);
+  pagina.once('dialog', (d) => d.accept());
+  await pagina.click('[data-prueba="parar"]');
+  await pagina.locator('[data-prueba="estado-piloto"][data-estado="parado"]').waitFor();
+  paso('RF-25: el piloto se para', true);
+  await pagina.goto(`${APP}/buzon`);
+  await pagina.goto(`${APP}${await pagina.locator('[data-prueba="pyme"]', { hasText: 'Otra pyme' }).getByRole('link').getAttribute('href')}`);
+  paso('parado, ya no hay zona de subida y lo dice', await pagina.locator('[data-prueba="piloto-parado"]').isVisible());
+  await pagina.goto(`${APP}/buzon/cierre`);
+  const pendientesCsv = await pagina.evaluate(async (url) => (await fetch(url)).text(), `${APP}/api/buzon/pendientes`);
+  writeFileSync(join(SALIDA, 'para-captura-manual.csv'), pendientesCsv);
+  paso('RF-26: lo no confirmado vuelve a captura manual, ninguno perdido', /receptor ajeno/.test(pendientesCsv)
+    && /1 CFDI sin confirmar/.test(await pagina.locator('[data-prueba="pendientes-resumen"]').innerText()), pendientesCsv.trim().split('\r\n').length - 1 + ' fila(s)');
+  await foto('11-parado');
+  paso('cerrar exige haber descargado antes las cifras', !(await pagina.locator('[data-prueba="cerrar"]').isEnabled()));
+  await pagina.check('[data-prueba="ya-descargue"]');
+  pagina.once('dialog', (d) => d.accept());
+  await pagina.click('[data-prueba="cerrar"]');
+  await pagina.locator('[data-prueba="constancia-cierre"]').waitFor();
+  paso('RF-27, RF-29: al cerrar queda la constancia, sin datos de las pymes', /pyme\(s\)/.test(await pagina.locator('[data-prueba="constancia-cierre"]').innerText()),
+    await pagina.locator('[data-prueba="constancia-cierre"]').innerText());
+  await foto('12-cerrado');
+  await pagina.goto(`${APP}/buzon`);
+  paso('cerrado, en el buzón no queda ninguna pyme', /Aún no hay pymes/.test(await pagina.locator('[data-prueba="pymes"]').innerText()));
   await foto('06-revocado');
 } catch (e) {
   paso('el recorrido se cortó', false, String(e?.message ?? e).split('\n')[0]);

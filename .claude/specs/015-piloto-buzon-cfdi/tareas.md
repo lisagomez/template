@@ -136,10 +136,24 @@
 
 ## Fase 7 — Parar, cerrar y borrar
 
-- [ ] **TAR-16 · Parar el piloto** (RF-25, RF-26): cada CFDI del mes queda confirmado o en la lista de
+- [x] **TAR-16 · Parar el piloto** (RF-25, RF-26): cada CFDI del mes queda confirmado o en la lista de
       vuelta a captura manual, sin ninguno perdido.
-- [ ] **TAR-17 · Borrado al cierre** (RF-27 a RF-29): borra todo lo generado, no toca los originales y
+      Hecho el 2026-10-07 (`20261007180000_buzon_cierre.sql`, `services/cierre.ts`, `/buzon/cierre`).
+      - El piloto solo avanza: activo → parado → cerrado.
+      - Parado, la base no deja entrar ningún documento, y la app lo comprueba ANTES que el consentimiento para que
+        el aviso diga lo que pasa. Las horas aún se pueden completar.
+      - La lista para captura manual lleva todo lo no confirmado; el receptor ajeno va marcado.
+- [x] **TAR-17 · Borrado al cierre** (RF-27 a RF-29): borra todo lo generado, no toca los originales y
       deja constancia sin datos.
+      Cerrar solo se puede desde parado, y la pantalla exige marcar antes que se descargaron la lista y las cifras
+      (RF-30). Un SECURITY DEFINER sin EXECUTE para nadie borra pymes, consentimientos, lecturas, horas y
+      listados, y deja la constancia. Quedan las cuentas y las constancias. Los originales nunca se guardaron.
+      **Hallazgo del Supabase real:** su API carga `pg_safeupdate`, que rechaza un DELETE sin WHERE incluso dentro
+      del SECURITY DEFINER. PGlite no la trae, así que las pruebas pasaban y el recorrido falló. Los borrados llevan
+      `where true`, y una guarda nueva en `prueba:buzon` rechaza un DELETE o UPDATE sin WHERE en las migraciones del
+      buzón, con su siembra.
+
+      `prueba:buzon`: 10 pruebas nuevas (92 en total). **Recorrido contra el stack real: 29 de 29.**
 
 ## Fase 8 — Gate y demo
 
