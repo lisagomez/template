@@ -30,12 +30,33 @@
 
 ## Fase 3 — Consentimiento y buzón
 
-- [ ] **TAR-5 · Migración del buzón**: pymes, consentimientos (se revocan, nunca se reescriben) y buzón
+- [x] **TAR-5 · Migración del buzón**: pymes, consentimientos (se revocan, nunca se reescriben) y buzón
       por pyme, con RLS por organización. Ninguna policy usa `service_role`.
-- [ ] **TAR-6 · Ingesta solo con consentimiento** (RF-1, RF-2): un documento de una pyme sin
+      Hecho el 2026-10-07 (`supabase/migrations/20261007100000_buzon_cfdi.sql`). Dos decisiones del camino:
+      - **esquema propio, no el del extractor**: la persistencia del extractor guarda quién corrigió cada campo
+        (`versiones_de_campo.autor`), y eso chocaría con el RF-21; el extractor se usa como servicio de lectura;
+      - **la organización es la lista de miembros del despacho**, porque un despliegue es un despacho.
+
+      Las políticas usan una función SECURITY INVOKER: no hace falta ninguna SECURITY DEFINER expuesta.
+      `prueba:migraciones`: 5 migraciones en verde.
+- [x] **TAR-6 · Ingesta solo con consentimiento** (RF-1, RF-2): un documento de una pyme sin
       consentimiento no se lee y avisa.
-- [ ] **TAR-7 · Retiro del consentimiento** (RF-3 a RF-5): deja de leerse, se borra lo suyo con
+      En la base (2026-10-07): sin consentimiento vigente, el RLS rechaza el documento. **El aviso en pantalla
+      va en la fase 4**, con la zona de ingesta.
+- [x] **TAR-7 · Retiro del consentimiento** (RF-3 a RF-5): deja de leerse, se borra lo suyo con
       constancia y sale de las cifras.
+      En la base (2026-10-07): revocar dispara un SECURITY DEFINER sin EXECUTE para nadie. Borra los documentos
+      de la pyme y escribe la constancia, que ningún miembro puede inventar ni borrar. Un consentimiento revocado
+      no se des-revoca. **Salir de las cifras (RF-5) va en la fase 6**, donde nacen las cifras.
+      `prueba:buzon`: 13 pruebas de comportamiento en PGlite (miembro, ajena y anónimo), con 3 siembras que
+      quitan cada regla y exigen que la conducta cambie. El gate pasa a 39.
+      **Y sobre el Supabase real** (el stack de la fase 2, con datos sintéticos): las 5 migraciones del repo se
+      aplican. Por la API REST, a través de Caddy, como contadora miembro:
+      - documento sin consentimiento: 403 (RLS);
+      - reescribir el consentimiento: 403;
+      - revocar: 200, y después 0 documentos y la constancia con 1 borrado;
+      - inventar una constancia: 403; un anónimo: 401;
+      - la función del disparador no existe como RPC (404).
 
 ## Fase 4 — Lectura, cotejo, revisión y confirmación
 
@@ -75,7 +96,8 @@
 - [x] **TAR-18 · Gate `prueba:buzon` en `validate`**. **CDC (C1)**: entrada en la bitácora con la firma del
       laboratorio. **Adelantado a la fase 2** (2026-10-07): el padrón pone en rojo un archivo de pruebas que
       ningún gate corre, así que el gate entra con su primera prueba. CDC firmado el 2026-10-07 («capa A basta»). Las
-      pruebas de las fases siguientes se suman a este mismo gate.
+      pruebas de las fases siguientes se suman a este mismo gate. Su `guarda` en el padrón describe solo la fase 2:
+      se pone al día en un solo CDC al cerrar la fase 8, no uno por fase.
 - [ ] **TAR-19 · Recorrido con Playwright** del flujo completo sobre corpus sintético, con capturas.
 - [ ] **TAR-20 · Inventario y contrato**: el activo de la feature, con dueño el Extractor documental, y
       `npm run inventario:vista`.
