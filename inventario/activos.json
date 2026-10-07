@@ -436,6 +436,14 @@
    "ubicacion": "tools/soporte-sap/clis/ss-respaldo.mjs", "responsable": "dep-sw", "producto": "soporte-sap", "grado": "no medido",
    "origen": ["tools/soporte-sap/clis/manifiesto.json"],
    "cubre": ["tools/soporte-sap/clis/ss-respaldo.mjs"]
+  },
+  {
+   "id": "TPL-piloto-buzon-cfdi",
+   "nombre": "Piloto del buzón de CFDI en la máquina del despacho: perímetro sin salida, Supabase autohospedado y su gate",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "scripts/buzon", "responsable": "dep-sw",
+   "origen": [".claude/specs/015-piloto-buzon-cfdi"],
+   "cubre": ["scripts/buzon", "scripts/despacho", "docker-compose.despacho.yml", "despacho"]
   }
  ]
 }

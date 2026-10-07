@@ -212,3 +212,31 @@ MCP→A2A). `npm run configura:deploy` mide la GPU y escribe `OCR_GPU`, `OCR_CPU
 El puente A2A (`app:3000/a2a`) solo existe en la red `interna`; **Caddy no lo enruta, y exponerlo
 es gate humano** (C3 + C4). Detalle: `tools/extractor-documental/README.md`, sección «Desplegar
 en el VPS del cliente».
+
+## Anexo (2026-10-07) — En la máquina de un despacho contable (spec 015)
+
+El piloto del buzón de CFDI corre **entero en la máquina del despacho**, y ningún documento sale de ella. Usa su
+propio compose, `docker-compose.despacho.yml`, no el de este runbook: aquí la app tiene salida a internet y allí
+no puede tenerla.
+
+- **Supabase autohospedado**, reducido a base, auth, rest y storage, con las imágenes pineadas por digest. No hay
+  proyecto en supabase.com: `configura:deploy` **rechaza** un `NEXT_PUBLIC_SUPABASE_URL` gestionado.
+- **Caddy es la única salida y la pasarela**: `/auth/v1`, `/rest/v1` y `/storage/v1` van al mismo dominio que la
+  app (`despacho/Caddyfile`). Todo lo demás vive en dos redes sin salida, `frente` e `interna`.
+- **Nadie se registra solo**: el operador da de alta las cuentas del despacho. Sin SMTP, porque no hay salida.
+- **La cola de visión va fija en «ninguno».** No hay Mistral ni ninguna otra API externa (RF-7).
+
+```bash
+# en la máquina del despacho, con DOMAIN, TLS_EMAIL y NEXT_PUBLIC_SITE_URL ya en .env.production
+echo "NEXT_PUBLIC_SUPABASE_URL=https://$DOMAIN" >> .env.production   # el mismo origen que la app
+node scripts/despacho/llaves.mjs              # secretos: una sola vez, nunca los reescribe ni los imprime
+npm run configura:deploy -- --escribir        # modo despacho: mide la RAM y comprueba el perímetro
+docker compose -f docker-compose.despacho.yml --env-file .env.production up -d
+```
+
+Medido el 2026-10-07 con datos sintéticos: desde auth, storage, la base y cualquier contenedor de `frente` o de
+`interna` **no se llega a internet**, y desde Caddy sí. A través de Caddy, el operador da de alta una cuenta, el
+autorregistro se niega, el inicio de sesión da un token `authenticated`, y rest y storage responden. En reposo,
+la pila de Supabase gasta unos 230 MB. Los límites declarados suman 2 GB, y el mínimo que exige `configura:deploy`
+sale de ellos.
+

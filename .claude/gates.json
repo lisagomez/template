@@ -359,6 +359,16 @@
       "timeout_s": 300
     },
     {
+      "nombre": "prueba:buzon",
+      "runner": "comando",
+      "comando": "npm run prueba:buzon",
+      "guarda": "el piloto del buzón de CFDI (spec 015): el PERÍMETRO del despacho —ningún servicio con documentos tiene salida a internet, publica puertos, usa una imagen sin digest ni recibe llaves de fuera en `docker-compose.despacho.yml`, y la cola de visión va fija en «ninguno»— y `configura:deploy` en modo despacho con el caso malo de cada regla (Supabase gestionado, otro origen, respaldo de visión, service_role en la app, llaves firmadas con otro secreto, RAM corta); cada regla con su siembra",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas. 26 en verde al darlo de alta el 2026-10-07 (fase 2: TAR-3 y TAR-4)",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 120
+    },
+    {
       "nombre": "prueba:a2a:servicio",
       "runner": "comando",
       "comando": "npm run prueba:a2a:servicio",
