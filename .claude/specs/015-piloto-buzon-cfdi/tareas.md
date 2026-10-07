@@ -92,10 +92,27 @@
 
 ## Fase 5 — Banderas 69-B
 
-- [ ] **TAR-12 · Importación de la lista pública fechada** (RF-18): se guardan la fuente y la fecha de
+- [x] **TAR-12 · Importación de la lista pública fechada** (RF-18): se guardan la fuente y la fecha de
       la lista, y se marca al proveedor que aparece en ella.
-- [ ] **TAR-13 · Sin veredicto** (RF-19): el tipo de la bandera no tiene campo de veredicto, y una
+      Hecho el 2026-10-07 (`20261007140000_buzon_lista_69b.sql`, `services/lista-69b.ts`). Formato medido sobre el
+      listado real: Latin-1, la fecha en el preámbulo («actualizada al…»), 14,234 filas. Diseño:
+      - **la fecha la pone el propio listado**, no quien importa; se guarda solo el RFC y la situación;
+      - **un RFC puede tener varias situaciones** (82 de ellos, p. ej. «Definitivo» y «Sentencia Favorable») y se
+        guardan todas;
+      - **la importación es una sola llamada a la base**, todo o nada;
+      - las filas de relleno (91 «RFC» sin un solo dígito) se descartan y se cuentan.
+
+      **Escala, medida en el recorrido:** el listado real completo, 14,110 entradas, entra en 1-2 s en un stack
+      desechable que después se borró.
+- [x] **TAR-13 · Sin veredicto** (RF-19): el tipo de la bandera no tiene campo de veredicto, y una
       prueba rechaza cualquier texto de «no deducible» o de «riesgoso».
+      **Decisión del laboratorio (2026-10-07):** todas las situaciones se ven tal cual las publica el SAT.
+      - «Presunto» y «Definitivo» van resaltados;
+      - «Desvirtuado» y «Sentencia Favorable» van sin alerta y diciendo que el contribuyente desmontó la presunción,
+        para no señalar de más a quien salió limpio (C4).
+
+      `prueba:buzon`: 10 pruebas nuevas, con un listado SINTÉTICO que imita el formato real. Recorrido: 20 de 20
+      pasos, con la bandera en pantalla, su fuente y su fecha, y «No es un veredicto».
 
 ## Fase 6 — Medición
 
