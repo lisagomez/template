@@ -137,3 +137,21 @@ Un solo despacho es una sola organización: el RLS separa por organización, nin
 - **Fix**: `despacho/db/roles.sql` no lleva esa línea, y su cabecera dice por qué.
 - **Aplicar en**: todo Supabase autohospedado recortado. Al quitar un servicio, se quita también lo que sus
   scripts de inicio dan por hecho.
+
+### 2026-10-07: un identificador inválido desaparecía en silencio del buzón
+- **Error**: el extractor no devuelve como campo un RFC que no pasa el dígito verificador: lo lista en
+  `identificadoresInvalidos`. El buzón ignoraba esa lista, y el RFC del emisor se perdía sin aviso. Eso dejaba
+  vacía la columna del CSV y habría dejado sin bandera 69-B al proveedor. Lo destapó el recorrido en el navegador,
+  no las pruebas unitarias: su fixture no traía identificadores inválidos.
+- **Fix**: `clasifica` mete cada identificador inválido como campo marcado para revisión, con lo leído y un aviso.
+  Prueba nueva en `prueba:buzon`.
+- **Aplicar en**: todo consumidor del extractor. Lo que el servicio separa en `identificadoresInvalidos` se lee
+  también.
+
+### 2026-10-07: Next 16 corta a 10 MB, sin error, el cuerpo de lo que pasa por `proxy.ts`
+- **Error**: `proxyClientMaxBodySize` vale 10 MB por defecto y el cuerpo se trunca SIN fallar. Un CFDI puede pesar
+  20 MB (el límite del extractor).
+- **Fix**: `/api/buzon` no está en el matcher de `src/proxy.ts`, y cada ruta comprueba sesión, origen y pertenencia
+  (`services/servidor/ruta.ts`).
+- **Aplicar en**: toda ruta que reciba archivos de más de 10 MB.
+
