@@ -10,6 +10,7 @@ import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js'
 import { extraeConElServicio, FalloDeCapacidad, type DocumentoEntrante } from '../../../a2a/servicio-extractor.ts'
 import type { ResultadoDeExtraccion } from '../../../a2a/esquema.ts'
 import { aCsv, clasifica, empareja, pendientes, revisaCampo, revisaDiscrepancia } from '../lectura.ts'
+import { bandera, decodifica, leeListado69B, type BanderaSat, type Situacion } from '../lista-69b.ts'
 import type { DocumentoDelBuzon, Revision } from '../../types/index.ts'
 
 export type Resultado<T> = { ok: true; datos: T } | { ok: false; estado: number; aviso: string }
@@ -127,3 +128,53 @@ export async function documentosDe(supabase: SupabaseClient, pymeId: string): Pr
 export async function exporta(supabase: SupabaseClient, pymeId: string): Promise<string> {
   return aCsv(await documentosDe(supabase, pymeId))
 }
+
+// --- El listado 69-B del SAT (fase 5) ----------------------------------------------------------------------------
+
+export interface Lista69B { readonly id: string; readonly fuente: string; readonly actualizada_al: string; readonly registros: number; readonly descartados: number }
+
+/**
+ * Importa el listado que el operador bajó fuera (la máquina del despacho no sale a internet). Una sola llamada a la
+ * base: la lista y sus filas entran juntas o no entra nada. La fecha es la que el propio listado declara.
+ */
+export async function importaLista69B(supabase: SupabaseClient, d: { bytes: Uint8Array; fuente: string }):
+  Promise<Resultado<{ id: string; registros: number; descartados: number; actualizadaAl: string }>> {
+  let leido: ReturnType<typeof leeListado69B>
+  try {
+    leido = leeListado69B(decodifica(d.bytes))
+  } catch (e) {
+    return falla(400, e instanceof Error ? e.message : 'no se pudo leer el listado')
+  }
+  if (!leido.actualizadaAl) return falla(400, 'el listado no dice a qué fecha está actualizado: sin fecha no se importa (RF-18)')
+  if (leido.filas.length === 0) return falla(400, 'el listado no trae ninguna fila con RFC válido')
+  const { data, error } = await supabase.rpc('buzon_importa_69b', {
+    fuente: d.fuente, actualizada_al: leido.actualizadaAl, huella: huellaDe(d.bytes), descartados: leido.descartadas.length, filas: leido.filas,
+  })
+  if (error?.code === '23505') return falla(409, 'ese mismo archivo del listado ya está importado')
+  if (error) return aviso(error)
+  return { ok: true, datos: { id: String(data), registros: leido.filas.length, descartados: leido.descartadas.length, actualizadaAl: leido.actualizadaAl } }
+}
+
+/** El listado vigente: el de fecha más reciente (y, a igual fecha, el último importado). */
+export async function listaVigente(supabase: SupabaseClient): Promise<Lista69B | null> {
+  const { data } = await supabase.from('buzon_listas_69b').select('id, fuente, actualizada_al, registros, descartados')
+    .order('actualizada_al', { ascending: false }).order('importada_en', { ascending: false }).limit(1).maybeSingle<Lista69B>()
+  return data ?? null
+}
+
+/** Las banderas de los emisores de un grupo de CFDI, contra el listado vigente (RF-18). Sin listado, ninguna. */
+export async function banderasDe(supabase: SupabaseClient, rfcs: readonly string[]): Promise<Map<string, BanderaSat>> {
+  const lista = await listaVigente(supabase)
+  const unicos = [...new Set(rfcs.map((r) => r.trim().toUpperCase()).filter(Boolean))]
+  if (!lista || unicos.length === 0) return new Map()
+  const { data } = await supabase.from('buzon_lista_69b_rfc').select('rfc, situacion').eq('lista_id', lista.id).in('rfc', unicos)
+  const por = new Map<string, Situacion[]>()
+  for (const f of data ?? []) por.set(String(f.rfc), [...(por.get(String(f.rfc)) ?? []), f.situacion as Situacion])
+  const banderas = new Map<string, BanderaSat>()
+  for (const [rfc, situaciones] of por) {
+    const b = bandera(rfc, situaciones, { fuente: lista.fuente, actualizadaAl: lista.actualizada_al })
+    if (b) banderas.set(rfc, b)
+  }
+  return banderas
+}
+

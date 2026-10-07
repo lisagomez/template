@@ -11,7 +11,7 @@
  *   3. la app: npm run dev con NEXT_PUBLIC_SUPABASE_URL=https://localhost:18443, EXTRACTOR_SERVICIO_URL y
  *      NODE_EXTRA_CA_CERTS con la raíz de Caddy (no se apaga la verificación TLS);
  *   4. APP=http://localhost:3001 SALIDA=<carpeta> XML=tools/extractor-documental/pruebas/fixtures/cfdi-40-ingreso.xml
- *      node scripts/buzon/recorrido.mjs
+ *      [LISTADO_REAL=<el CSV del SAT, para la prueba de escala>] node scripts/buzon/recorrido.mjs
  */
 import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -104,6 +104,38 @@ try {
   paso('RF-12: el CFDI de otra pyme queda como «receptor ajeno» y sin «Confirmar»',
     (await ajeno.getAttribute('data-estado')) === 'receptor_ajeno' && (await ajeno.locator('[data-prueba="confirmar"]').count()) === 0);
   await foto('05-receptor-ajeno');
+
+  // --- Fase 5: el listado 69-B (RF-18, RF-19) -----------------------------------------------------------------
+  const importaListado = async (archivo, fuente) => {
+    await pagina.goto(`${APP}/buzon`);
+    await pagina.locator('[data-prueba="lista-archivo"]').setInputFiles(archivo);
+    if (fuente) await pagina.fill('[data-prueba="lista-fuente"]', fuente);
+    await pagina.click('[data-prueba="importar-lista"]');
+    await pagina.locator('[data-prueba="lista-aviso"]').waitFor({ timeout: 180000 });
+    return pagina.locator('[data-prueba="lista-aviso"]').innerText();
+  };
+  if (process.env.LISTADO_REAL) {
+    const t0 = Date.now();
+    const aviso = await importaListado(process.env.LISTADO_REAL);
+    paso('escala: el listado REAL completo entra en una sola llamada (todo o nada)', /Importado: \d{5} registros/.test(aviso), `${aviso} · ${Math.round((Date.now() - t0) / 1000)} s`);
+  }
+  // Sintético y POSTERIOR al real: pasa a ser el vigente. El emisor del fixture aparece como «Presunto».
+  const sintetico = Buffer.from(['"Información actualizada al 30 de septiembre de 2026; listado sintético de prueba.",,,',
+    'Listado completo de contribuyentes (Artículo 69-B del CFF),,,', 'No,RFC,Nombre del Contribuyente,Situación del contribuyente',
+    '1,AAA010101AAA,EMISOR SINTETICO,Presunto', '2,ZZZ020202ZZ2,OTRO SINTETICO,Sentencia Favorable'].join('\r\n'), 'latin1');
+  paso('se importa un listado sintético posterior', /Importado: 2 registros, actualizado al 2026-09-30/.test(await importaListado({ name: 'listado-69b-sintetico.csv', mimeType: 'text/csv', buffer: sintetico }, 'Listado SINTÉTICO de prueba (no es del SAT)')));
+  // Se espera al refresco de la pantalla: leerla al instante muestra todavía el listado anterior (medido).
+  const vigente = await pagina.locator('[data-prueba="lista-vigente"]', { hasText: 'actualizado al 2026-09-30' })
+    .waitFor({ timeout: 20000 }).then(() => true, () => false);
+  paso('el listado vigente es el de fecha más reciente', vigente);
+  await foto('07-listado-69b');
+  await pagina.goto(`${APP}${enlace}`);
+  const conBandera = pagina.locator('[data-prueba="bandera-69b"]').first();
+  const textoBandera = await conBandera.innerText();
+  paso('RF-18: el CFDI del emisor en el listado lleva su bandera resaltada, con fuente y fecha',
+    (await conBandera.getAttribute('data-alerta')) === 'true' && /«Presunto»/.test(textoBandera) && /2026-09-30/.test(textoBandera));
+  paso('RF-19: la bandera dice que no es un veredicto', /No es un veredicto/.test(textoBandera));
+  await foto('08-bandera-69b');
 
   await pagina.goto(`${APP}/buzon`);
   pagina.once('dialog', (d) => d.accept());

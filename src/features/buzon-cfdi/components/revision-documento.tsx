@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { pendientes } from '@/features/buzon-cfdi/services/lectura';
+import type { BanderaSat } from '@/features/buzon-cfdi/services/lista-69b';
 import type { DocumentoDelBuzon, Revision } from '@/features/buzon-cfdi/types';
 
 const ESTADO: Record<DocumentoDelBuzon['estado'], string> = {
@@ -13,7 +14,7 @@ const ESTADO: Record<DocumentoDelBuzon['estado'], string> = {
  * Un CFDI, campo por campo. Lo dudoso (evidencia solo de imagen, RF-11) y cada discrepancia con su XML (RF-14) se
  * revisan aquí; mientras quede algo, no se confirma (RF-17). Se confirma de uno en uno: no hay «confirmar todos».
  */
-export function RevisionDocumento({ doc }: { doc: DocumentoDelBuzon }) {
+export function RevisionDocumento({ doc, bandera }: { doc: DocumentoDelBuzon; bandera?: BanderaSat | null }) {
   const router = useRouter();
   const [aviso, setAviso] = useState('');
   const faltan = pendientes(doc);
@@ -32,6 +33,10 @@ export function RevisionDocumento({ doc }: { doc: DocumentoDelBuzon }) {
         <span className="text-sm text-gray-600">{doc.tipo === 'xml' ? 'XML' : 'Impresa'} · {ESTADO[doc.estado]}</span>
       </header>
       <p className="text-xs text-gray-600">Folio fiscal: {doc.uuid ?? 'no leído'} · <b data-prueba="sello">Sello no verificado</b>: leer bien no es autenticar.</p>
+      {bandera && (
+        <p className={`rounded-lg p-2 text-sm ${bandera.alerta ? 'bg-amber-50 text-amber-900' : 'bg-gray-50 text-gray-700'}`}
+          data-prueba="bandera-69b" data-alerta={bandera.alerta}>{bandera.texto}</p>
+      )}
       <table className="w-full table-fixed text-sm">
         <tbody>
           {doc.campos.map((c) => (

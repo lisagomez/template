@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AltaPyme } from '@/features/buzon-cfdi/components/alta-pyme';
 import { ConsentimientoPyme } from '@/features/buzon-cfdi/components/consentimiento-pyme';
-import { soyMiembro } from '@/features/buzon-cfdi/services/servidor/buzon';
+import { ImportaLista69B } from '@/features/buzon-cfdi/components/importa-lista-69b';
+import { listaVigente, soyMiembro } from '@/features/buzon-cfdi/services/servidor/buzon';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -15,10 +16,11 @@ export default async function Pagina() {
   if (!(await soyMiembro(supabase))) {
     return <main className="mx-auto max-w-lg px-4 py-6"><p data-prueba="no-miembro">Tu cuenta no es miembro de este despacho. Las altas las hace el operador.</p></main>;
   }
-  const [{ data: pymes }, { data: vigentes }, { data: documentos }] = await Promise.all([
+  const [{ data: pymes }, { data: vigentes }, { data: documentos }, lista] = await Promise.all([
     supabase.from('buzon_pymes').select('id, rfc, nombre').order('nombre'),
     supabase.from('buzon_consentimientos').select('pyme_id, firmado_en').is('revocado_en', null),
     supabase.from('buzon_documentos').select('pyme_id, estado'),
+    listaVigente(supabase),
   ]);
   const consiente = new Map((vigentes ?? []).map((c) => [String(c.pyme_id), String(c.firmado_en)]));
   const porRevisar = (id: string) => (documentos ?? []).filter((d) => String(d.pyme_id) === id && d.estado === 'en_revision').length;
@@ -41,6 +43,7 @@ export default async function Pagina() {
         {!pymes?.length && <li className="text-sm text-gray-600">Aún no hay pymes en el buzón.</li>}
       </ul>
       <AltaPyme />
+      <ImportaLista69B vigente={lista} />
     </main>
   );
 }

@@ -88,6 +88,7 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/buzon/documentos',
   '/api/buzon/documentos/[id]',
   '/api/buzon/exporta',
+  '/api/buzon/lista-69b',
   '/api/buzon/pymes',
   '/api/contenido/video',
   '/api/dictado',
