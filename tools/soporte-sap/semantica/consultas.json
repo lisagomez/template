@@ -1,0 +1,108 @@
+{
+ "_comentario": "Qué se le pregunta a MetricFlow para armar el corte semántico, por alcance. Lo leen el corredor del laboratorio (corre.mjs) y el job de producción (job.py): una sola definición. «@operacion» se expande a la lista `operacion`. `riesgo_de_baja` es de la cuenta (cliente); la importación, de la consultora.",
+ "operacion": [
+  "volumen",
+  "resueltas",
+  "mttr_horas",
+  "primera_respuesta_horas",
+  "resolucion_primer_contacto",
+  "tasa_reapertura",
+  "backlog",
+  "cumplimiento_sla_respuesta",
+  "cumplimiento_sla_resolucion",
+  "reuso_conocimiento",
+  "horas_consultor",
+  "horas_por_ticket",
+  "salud_cuenta",
+  "proporcion_critica",
+  "proporcion_compleja",
+  "respuestas_tardias_p1",
+  "respuestas_tardias_p2"
+ ],
+ "consultas": [
+  {
+   "alcance": "total",
+   "metricas": [
+    "@operacion",
+    "tiempo_al_primer_valor_dias",
+    "cobertura_mapeo",
+    "filas_importadas",
+    "filas_en_revision"
+   ],
+   "por": []
+  },
+  {
+   "alcance": "tamano",
+   "metricas": [
+    "@operacion",
+    "tiempo_al_primer_valor_dias"
+   ],
+   "por": [
+    "cliente__tamano"
+   ]
+  },
+  {
+   "alcance": "consultora",
+   "metricas": [
+    "@operacion",
+    "tiempo_al_primer_valor_dias",
+    "cobertura_mapeo",
+    "filas_importadas",
+    "filas_en_revision"
+   ],
+   "por": [
+    "consultora"
+   ]
+  },
+  {
+   "alcance": "cliente",
+   "metricas": [
+    "@operacion",
+    "riesgo_de_baja",
+    "tiempo_al_primer_valor_dias"
+   ],
+   "por": [
+    "cliente"
+   ]
+  },
+  {
+   "alcance": "total",
+   "metricas": [
+    "clientes_en_cartera"
+   ],
+   "por": [
+    "cliente_mes__etapa"
+   ]
+  },
+  {
+   "alcance": "tamano",
+   "metricas": [
+    "clientes_en_cartera"
+   ],
+   "por": [
+    "cliente__tamano",
+    "cliente_mes__etapa"
+   ]
+  },
+  {
+   "alcance": "consultora",
+   "metricas": [
+    "clientes_en_cartera"
+   ],
+   "por": [
+    "consultora",
+    "cliente_mes__etapa"
+   ]
+  },
+  {
+   "alcance": "cliente",
+   "metricas": [
+    "clientes_en_cartera"
+   ],
+   "por": [
+    "cliente",
+    "cliente_mes__etapa"
+   ]
+  }
+ ]
+}

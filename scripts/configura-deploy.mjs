@@ -27,11 +27,12 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { revisaDespacho, RESERVA_SUPABASE_MB } from './despacho/reglas.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const ruta = (p) => join(raiz, p);
+const ruta = (p) => resolve(raiz, p);
 const ENV = process.env.ENV_PRODUCCION ?? '.env.production';
 const ESCRIBIR = process.argv.includes('--escribir');
 
@@ -60,6 +61,18 @@ try {
   process.exit(2);
 }
 
+// --- 1c. `.env.production`, leido una vez ------------------------------------
+// Antes del reparto: con DESPLIEGUE=despacho (spec 015) el Supabase vive en esta misma maquina, y lo
+// que se le reserva ya no lo tiene la app.
+const valores = new Map();
+if (existsSync(ruta(ENV))) {
+  for (const linea of readFileSync(ruta(ENV), 'utf8').split('\n')) {
+    const m = linea.match(/^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*)$/);
+    if (m) valores.set(m[1], m[2].trim().replace(/^["']|["']$/g, ''));
+  }
+}
+const DESPACHO = valores.get('DESPLIEGUE') === 'despacho';
+
 // --- 2. Reparto ------------------------------------------------------------
 // Caddy y el SO no son opcionales: si la app se queda con toda la RAM, el OOM killer
 // elige por ti y suele elegir mal. Se reserva antes de repartir.
@@ -68,7 +81,7 @@ const CADDY_MEM_MB = 512;
 // En un servidor de 1 vCPU, medio nucleo para Caddy es la mitad de la maquina; en uno
 // grande sobra. Tampoco esto puede ser una constante.
 const caddyCpus = 0.5;
-const appMemMB = Math.max(1024, ramMB - RESERVA_SO_MB - CADDY_MEM_MB);
+const appMemMB = Math.max(1024, ramMB - RESERVA_SO_MB - CADDY_MEM_MB - (DESPACHO ? RESERVA_SUPABASE_MB : 0));
 // El pico de memoria es el BUILD, no el runtime. 75% del limite deja aire al resto del
 // contenedor; el tope de 6 GB evita que un servidor grande pida un heap absurdo.
 const heapMB = Math.min(Math.floor(appMemMB * 0.75), 6144);
@@ -100,7 +113,8 @@ console.log(`Servidor: ${vcpu} vCPU · ${ramMB} MB RAM · ${swapMB} MB swap`);
 console.log(gpu.presente
   ? `GPU: ${gpu.nombre} · ${gpu.vramMB} MB · ${gpu.runtimeDocker ? verde('expuesta a Docker') : rojo(gpu.motivo)}`
   : gris(`GPU: ninguna (${gpu.motivo}). El perfil ocr-gpu no se levanta; la cola de OCR va en CPU.`));
-console.log(gris(`Reparto: SO ${RESERVA_SO_MB} MB · Caddy ${CADDY_MEM_MB} MB · app ${appMemMB} MB\n`));
+if (DESPACHO) console.log('Modo despacho (spec 015): Supabase autohospedado en esta máquina, ningún documento sale de ella.');
+console.log(gris(`Reparto: SO ${RESERVA_SO_MB} MB · Caddy ${CADDY_MEM_MB} MB${DESPACHO ? ` · Supabase ${RESERVA_SUPABASE_MB} MB` : ''} · app ${appMemMB} MB\n`));
 
 if (ramMB < 2048) {
   problemas.push(`Con ${ramMB} MB de RAM el build de Next.js no cabe. Menos de 2 GB no es un servidor de app.`);
@@ -141,13 +155,9 @@ const PLACEHOLDER = /(tuapp\.com|tu@email|your_|tu[-_]|xxxxx|eyJhbGci\.\.\.|\.\.
 if (!existsSync(ruta(ENV))) {
   problemas.push(`No existe ${ENV}. Copialo de .env.production.example y rellenalo (no se commitea: esta en .gitignore).`);
 } else {
-  const texto = readFileSync(ruta(ENV), 'utf8');
-  const valores = new Map();
-  for (const linea of texto.split('\n')) {
-    const m = linea.match(/^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*)$/);
-    if (m) valores.set(m[1], m[2].trim().replace(/^["']|["']$/g, ''));
-  }
-  for (const [clave, forma, que] of REQUERIDAS) {
+  // En el despacho la URL de Supabase NO es la de un proyecto gestionado: la revisa revisaDespacho.
+  const requeridas = DESPACHO ? REQUERIDAS.filter(([clave]) => clave !== 'NEXT_PUBLIC_SUPABASE_URL') : REQUERIDAS;
+  for (const [clave, forma, que] of requeridas) {
     const v = valores.get(clave);
     if (v === undefined || v === '') problemas.push(`${clave} falta o esta vacia — ${que}.`);
     else if (PLACEHOLDER.test(v)) problemas.push(`${clave} sigue con el placeholder del ejemplo — ${que}.`);
@@ -161,15 +171,31 @@ if (!existsSync(ruta(ENV))) {
       'el build pasa, el certificado pasa, y el usuario no vuelve del login.');
   }
   // El extractor: Mistral solo con decision C4 escrita; ocr-gpu solo con modelo pineado y GPU expuesta.
-  if (valores.get('OCR_RESPALDO') === 'mistral') {
+  if (!DESPACHO && valores.get('OCR_RESPALDO') === 'mistral') {
     const decision = valores.get('OCR_DECISION_C4_ARCHIVO');
     if (!decision || !existsSync(decision)) problemas.push('OCR_RESPALDO=mistral manda el documento a un tercero: exige OCR_DECISION_C4_ARCHIVO apuntando a la decision C4 firmada. Sin ella, el servicio lo deja apagado (y con datos de terceros ninguna firma lo autoriza).');
   }
   const modeloGpu = valores.get('OCR_GPU_MODELO');
   if (modeloGpu && /(^|[-:@/])(latest|stable|current|default|head)$/i.test(modeloGpu)) problemas.push(`OCR_GPU_MODELO="${modeloGpu}" es un alias autoactualizable: el modelo va pineado (C1).`);
   if (modeloGpu && !gpu.runtimeDocker) avisos.push(`OCR_GPU_MODELO esta puesto pero esta maquina no expone GPU a Docker (${gpu.motivo}): no levantes el perfil ocr-gpu aqui.`);
+  // Soporte SAP: el runtime de LABORATORIO (estado en memoria, identidades elegibles) no se despliega.
+  if (valores.get('SOPORTE_SAP_LABORATORIO') === '1') {
+    problemas.push('SOPORTE_SAP_LABORATORIO=1 enciende el laboratorio de Soporte SAP: identidades de laboratorio que cualquiera elige y ' +
+      'estado sintético en memoria. No va a producción: quítala de .env.production (el producto real usa auth.uid() y la RLS del esquema).');
+  }
+  // Soporte SAP, perfil `semantica`: con base declarada, el usuario del job y su contraseña (solo presencia).
+  if (valores.get('SS_PG_HOST') && (!valores.get('SS_PG_USER') || !valores.get('SS_PG_PASSWORD'))) {
+    problemas.push('SS_PG_HOST está puesto pero falta SS_PG_USER o SS_PG_PASSWORD: el job de la capa semántica entra con un usuario que solo es miembro de soporte_sap_metricas.');
+  }
+  if (DESPACHO) {
+    const despacho = revisaDespacho(valores, { ramMB });
+    problemas.push(...despacho.problemas);
+    avisos.push(...despacho.avisos);
+  }
   // Secretos: solo presencia, nunca valor.
-  for (const clave of ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY', 'A2A_API_KEY', 'MISTRAL_API_KEY']) {
+  const secretos = ['SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY', 'A2A_API_KEY', 'MISTRAL_API_KEY', 'SS_PG_PASSWORD'];
+  if (DESPACHO) secretos.push('POSTGRES_PASSWORD', 'JWT_SECRET', 'SERVICE_ROLE_KEY');
+  for (const clave of secretos) {
     const v = valores.get(clave);
     console.log(`${clave}: ${v ? verde(`presente (${v.length} car.)`) : gris('ausente')}`);
   }

@@ -1,0 +1,22 @@
+# comando: npm run verifica:routing
+# fecha: 2026-10-02T15:16:38.961Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 verifica:routing
+> node scripts/verifica-routing.mjs
+
+Catalogo: 3 niveles · 20 clases de tarea
+Precios: https://openrouter.ai/api/v1/models (consultados el 2026-08-23)
+
+  ligero         anthropic/claude-haiku-4.5     $1/M in · $5/M out · $0.1/M cache  6 clase(s) cod 43.9/ag 16.5
+                 abierto: deepseek/deepseek-v4-flash-0731 $0.14/M in · $0.28/M out cod 69.1/ag 48.4
+  capaz          anthropic/claude-sonnet-5      $2/M in · $10/M out · $0.2/M cache  8 clase(s) cod 71.5/ag 49.7
+                 abierto: qwen/qwen3.8-2.4t-a95b $2/M in · $6/M out cod 71.9/ag 57.1
+  razonamiento   anthropic/claude-opus-5        $5/M in · $25/M out · $0.5/M cache  6 clase(s) cod 78/ag 59.2
+                 abierto: moonshotai/kimi-k3    $3/M in · $15/M out cod 76.2/ag 54.3
+
+  Cache de prefijo: 90% del coste de entrada del contexto base si el prefijo aguanta.
+
+✓ Routing coherente: cada clase con su nivel, cada nivel pineado y con precio.

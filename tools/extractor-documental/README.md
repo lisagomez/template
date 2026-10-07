@@ -60,7 +60,7 @@ contra los catalogos que el proyecto **ya tiene**.
 
 ## Estado
 
-> **Estado: 774 pruebas en verde** sin red, sin base de datos y sin navegador (specs 007, 008, 009 y 010).
+> **Estado: 779 pruebas en verde** sin red, sin base de datos y sin navegador (specs 007, 008, 009 y 010). **0.8.0**: `clasePorBytes` (pdf, imagen, xml, zip o desconocido) para que un producto compare lo que un nombre declara con lo que los bytes son; la pidió Soporte SAP.
 > Los ocho entry points se instalan e importan en un proyecto limpio (`npm run empaqueta`).
 > **Lo que falta y por que**, en `.claude/specs/007-extractor-documental/tareas.md`: tres umbrales
 > que se MIDEN y no se inventan (TAR-17, TAR-25, TAR-34) y el enrutado desde `AGENTS.md`, que es

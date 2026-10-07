@@ -1,0 +1,37 @@
+# comando: npm run mide:contexto
+# fecha: 2026-10-02T15:16:38.700Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 mide:contexto
+> node scripts/mide-contexto.mjs
+
+Metodo: estimado: chars / 3.644 — p10 3.44 / p90 3.95 sobre 100+ archivos: ~±8% por archivo, mucho menos en el agregado
+Calibrado el 2026-08-23 sobre 762817 caracteres -> 209324 tokens reales (todos los .md versionados)
+
+— siempre —
+  ✓ CLAUDE.md                                6347 tokens  79% de 8000
+  ✓ .claude/memory/MEMORY.md                  786 tokens  98% de 800
+  ✓ descripciones de 28 skills               3895 tokens  56% de 7000
+  ✓ TOTAL que se paga en cada sesion        11028 tokens  92% de 12000
+— condicional (solo al tocar sus paths; en opencode, siempre) —
+  ✓ rules/aprendizajes-gobernanza.md         2127 tokens  53% de 4000
+  ✓ rules/aprendizajes-stack.md              1715 tokens  43% de 4000
+  ✓ rules/arquitectura.md                     223 tokens  6% de 4000
+  ✓ rules/estructura-fabrica.md               177 tokens  4% de 4000
+  ✓ rules/flujos.md                           378 tokens  9% de 4000
+  ✓ rules/herramientas-qa.md                  412 tokens  10% de 4000
+  ✓ rules/qr-seguros.md                       276 tokens  7% de 4000
+  ✓ suma de las rules (lo que opencode paga de mas)   5308 tokens  82% de 6500
+— espejo —
+  ✓ GEMINI.md                                5839 tokens  65% de 9000
+— por invocacion —
+  ✓ skill mas caro (add-login)               6796 tokens  42% de 16000
+  ✓ suma de los 28 skills                   65922 tokens  51% de 130000
+— mcp —
+  ✓ 5 servidores MCP (+4 sin medir: el real es MAYOR)  20363 tokens  42% de 48000
+
+✓ Contexto dentro de presupuesto.
+  Recuerda que esto mide el SUELO: no ve el historial, ni las salidas de herramientas,
+  ni lo que se pegue en la sesion. Lo que mide, lo mide de verdad.

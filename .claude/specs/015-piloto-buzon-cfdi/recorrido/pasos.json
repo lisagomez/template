@@ -1,0 +1,147 @@
+[
+  {
+    "n": "sin sesión, /buzon manda a entrar",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "la contadora entra y llega al buzón",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "alta de dos pymes",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-2: sin consentimiento no hay zona de subida, y lo dice",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-1: consentimiento escrito registrado",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "el XML entra",
+    "ok": true,
+    "detalle": "cfdi-40-ingreso.xml: entró (en_revision) · «rfc_emisor» no pasa su validación (digito): revísalo antes de confirmar"
+  },
+  {
+    "n": "RF-15: dice «sello no verificado»",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-17: con el RFC del emisor sin validar, «Confirmar» está deshabilitado y dice por qué",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-17: aunque se llame a la API a mano, la base no deja confirmar",
+    "ok": true,
+    "detalle": "quedan campos por revisar: no se confirma (RF-17)"
+  },
+  {
+    "n": "revisado el campo, «Confirmar» se habilita",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-16: confirmado por la persona, CFDI por CFDI",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-13: el mismo folio no entra dos veces",
+    "ok": true,
+    "detalle": "mismo-folio.xml: este folio fiscal ya está en el buzón de la pyme: no se duplica (RF-13)"
+  },
+  {
+    "n": "TAR-11: el CSV lleva el CFDI confirmado",
+    "ok": true,
+    "detalle": "1 fila(s)"
+  },
+  {
+    "n": "RF-12: el CFDI de otra pyme queda como «receptor ajeno» y sin «Confirmar»",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "se importa un listado sintético posterior",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "el listado vigente es el de fecha más reciente",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-18: el CFDI del emisor en el listado lleva su bandera resaltada, con fuente y fecha",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-19: la bandera dice que no es un veredicto",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-20, RF-21: horas del mes previo y del mes del piloto, sin preguntar quién",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "una pyme con los dos meses completos",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-8: las cifras llevan el seudónimo y números, sin RFC ni folio",
+    "ok": true,
+    "detalle": "pyme-aedfbf02cb,2026-09,previo,12.5,40, | pyme-aedfbf02cb,2026-10,piloto,4,1,0"
+  },
+  {
+    "n": "RF-3, RF-4: al revocar, sus documentos desaparecen",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-5: tras revocar, la pyme sale de las cifras",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-25: el piloto se para",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "parado, ya no hay zona de subida y lo dice",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-26: lo no confirmado vuelve a captura manual, ninguno perdido",
+    "ok": true,
+    "detalle": "1 fila(s)"
+  },
+  {
+    "n": "cerrar exige haber descargado antes las cifras",
+    "ok": true,
+    "detalle": ""
+  },
+  {
+    "n": "RF-27, RF-29: al cerrar queda la constancia, sin datos de las pymes",
+    "ok": true,
+    "detalle": "Constancia del cierre\n\nBorrado el 2026-10-07: 2 pyme(s), 1 lectura(s) de documentos, 0 registro(s) de horas y 1 listado(s) 69-B. Los originales nunca se guardaron aquí."
+  },
+  {
+    "n": "cerrado, en el buzón no queda ninguna pyme",
+    "ok": true,
+    "detalle": ""
+  }
+]

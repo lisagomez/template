@@ -38,6 +38,12 @@ export function renderVista(indice, porActivo) {
     const nombre = a.externo ? `${a.nombre} (externo: lo cataloga su fuente)` : a.nombre;
     lineas.push(fila([a.id, nombre, a.clase, a.tipo, a.estado, String(n), `\`${a.ubicacion}\``]));
   }
+  const conProducto = activos.filter((a) => a.producto).sort((a, b) => a.producto.localeCompare(b.producto) || a.id.localeCompare(b.id));
+  if (conProducto.length) {
+    lineas.push('', '## Por producto', '', 'El dueño de cada pieza (`producto`), con su estado y, si es un CLI, su grado. Lo que un producto compone sin ser su dueño está en su manifiesto (`productos/`).', '');
+    lineas.push(fila(['Producto', 'ID', 'Activo', 'Estado', 'Grado']), fila(['---', '---', '---', '---', '---']));
+    for (const a of conProducto) lineas.push(fila([a.producto, a.id, a.nombre, a.estado, a.grado ?? '—']));
+  }
   lineas.push('', '## Fuentes que se escanean', '');
   for (const f of indice.fuentes ?? []) lineas.push(`- \`${f.patron}\``);
   lineas.push('', 'Una unidad que ninguna fila cubre pone el gate en rojo: el asiento nace con la pieza.', '');

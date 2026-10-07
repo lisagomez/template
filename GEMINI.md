@@ -83,6 +83,9 @@ Usuario dice algo
     ├── "Quiero convertir una idea vaga en un prompt para /goal"
     |       → Ejecutar skill GOAL-COMPILER (outcome claro, como libre)
     |
+    ├── "Donde duele" / "puntos de dolor" / "que producto construimos" / "analisis de producto"
+    |       → Ejecutar skill ANALISTA-PRODUCTO (dolor sin cita = hipotesis; solo escribe en docs/analisis/)
+    |
     ├── "Extraer datos de facturas / documentos / PDF / escaneos / fotos"
     |   "leer codigos de barras o QR" / "digitalizar papeles" / "capturar datos"
     |   "factura en XML" / "CFDI" / "comprobante fiscal"
