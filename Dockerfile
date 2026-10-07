@@ -19,6 +19,11 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Ningun `.env*` entra al build: Next standalone los copiaria a la imagen final y los cargaria al
+# arrancar, con `service_role` y todas las llaves del servidor (PRP-010 H-29). Si alguien afloja
+# `.dockerignore`, el build cae aqui en vez de desplegar los secretos.
+RUN if find . -path ./node_modules -prune -o -name '.env*' -print | grep -q .; then \
+      echo 'ERROR: hay un .env* en el contexto del build (revisa .dockerignore)' >&2; exit 1; fi
 
 # GOTCHA CRITICO: las variables NEXT_PUBLIC_* se INLINEAN en el bundle
 # durante el build, no se leen en runtime. Si las pasas solo por
