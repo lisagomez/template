@@ -60,15 +60,35 @@
 
 ## Fase 4 — Lectura, cotejo, revisión y confirmación
 
-- [ ] **TAR-8 · Lectura por el servicio del extractor**: manda el XML (RF-9); sin XML, confianza y
+- [x] **TAR-8 · Lectura por el servicio del extractor**: manda el XML (RF-9); sin XML, confianza y
       evidencia por campo (RF-10); lo que solo sale de una imagen va a revisión (RF-11); se ve «sello no
       verificado» (RF-15).
-- [ ] **TAR-9 · Cotejo al entrar al buzón**: receptor igual a la pyme (RF-12), folio fiscal único por
+      Hecho el 2026-10-07 con `extraeConElServicio` de `src/features/a2a`, sin importar el `dist` del extractor.
+      **El consentimiento se comprueba ANTES de llamar al extractor (RF-1)**: sin él, el extractor ni se llama.
+      Un identificador que no pasa su validación entra marcado para revisión, en vez de perderse.
+- [x] **TAR-9 · Cotejo al entrar al buzón**: receptor igual a la pyme (RF-12), folio fiscal único por
       buzón (RF-13) y discrepancia entre XML e impresa a revisión (RF-14).
-- [ ] **TAR-10 · Revisión y confirmación por CFDI**: monta `TablaDeRevision`, sin «confirmar todos»;
+      En la base (`20261007120000_buzon_lectura.sql`): el folio entra una vez por tipo; no se confirma con un
+      receptor ajeno. El emparejamiento XML↔impresa (uuid, RFC, total) lo hace la app.
+- [x] **TAR-10 · Revisión y confirmación por CFDI**: monta `TablaDeRevision`, sin «confirmar todos»;
       un campo en revisión bloquea la confirmación (RF-16, RF-17).
-- [ ] **TAR-11 · Exportación de confirmados** para el sistema contable del despacho. El formato lo
+      **Desviación declarada: revisión propia, no `TablaDeRevision`.** Esa tabla marca por umbral de confianza
+      (contra el RF-11 y la decisión de no fijar umbrales), y sus botones de «Eliminar» y «predeterminada» no se
+      pueden ocultar. La base exige el RF-17 aunque se llame a la API a mano. Lo confirmado ya no cambia.
+- [x] **TAR-11 · Exportación de confirmados** para el sistema contable del despacho. El formato lo
       decide el despacho elegido: hasta entonces, un CSV con los campos del CFDI.
+      Solo lo confirmado, cada folio una vez (manda el XML) y sin fórmulas ejecutables.
+
+      **Evidencia de la fase 4** (2026-10-07):
+      - `prueba:buzon` sube a 62 pruebas: 8 de la base, 2 de ellas siembras, y 15 de la lógica y del orden de la
+        ingesta;
+      - **recorrido en el navegador contra el stack real**, con el Supabase del despacho, el servicio del
+        extractor con Tesseract y la app (`scripts/buzon/recorrido.mjs`): **15 de 15 pasos**. Entre ellos, el
+        RF-17 por la pantalla y por la API a mano (la base lo rechaza), y el folio repetido, el receptor ajeno, el
+        CSV y el retiro que borra.
+
+      **Desviación declarada: tampoco se monta `ZonaDeIngesta`.** Exigiría construir el `dist` del extractor antes
+      de `next build`, y la imagen de la app no lo hace. Un selector de archivos sube de uno en uno.
 
 ## Fase 5 — Banderas 69-B
 

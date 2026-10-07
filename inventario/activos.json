@@ -443,7 +443,8 @@
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
    "ubicacion": "scripts/buzon", "responsable": "dep-sw",
    "origen": [".claude/specs/015-piloto-buzon-cfdi"],
-   "cubre": ["scripts/buzon", "scripts/despacho", "docker-compose.despacho.yml", "despacho", "supabase/migrations/20261007100000_buzon_cfdi.sql"]
+   "cubre": ["scripts/buzon", "scripts/despacho", "docker-compose.despacho.yml", "despacho", "supabase/migrations/20261007100000_buzon_cfdi.sql",
+              "supabase/migrations/20261007120000_buzon_lectura.sql", "src/features/buzon-cfdi"]
   }
  ]
 }

@@ -80,6 +80,15 @@ const rutasDelBridge = (): string[] => [
  */
 const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ajustes',
+  // Buzón de CFDI del despacho (spec 015). RF-20: misma app y mismo puerto; en el despacho la app no tiene salida
+  // a internet (docker-compose.despacho.yml). Todas exigen sesión y ser miembro del despacho (`entra()`), las que
+  // escriben, `Origin` del mismo sitio; RLS y disparadores deciden. NO pasan por `src/proxy.ts` a propósito: Next 16
+  // corta ahí el cuerpo a 10 MB sin error. El documento no se guarda, solo su lectura; sin consentimiento, ni se lee.
+  '/api/buzon/consentimientos',
+  '/api/buzon/documentos',
+  '/api/buzon/documentos/[id]',
+  '/api/buzon/exporta',
+  '/api/buzon/pymes',
   '/api/contenido/video',
   '/api/dictado',
   '/api/dictado/movil',
