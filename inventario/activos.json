@@ -445,7 +445,7 @@
    "origen": [".claude/specs/015-piloto-buzon-cfdi"],
    "cubre": ["scripts/buzon", "scripts/despacho", "docker-compose.despacho.yml", "despacho", "supabase/migrations/20261007100000_buzon_cfdi.sql",
               "supabase/migrations/20261007120000_buzon_lectura.sql", "src/features/buzon-cfdi",
-              "supabase/migrations/20261007140000_buzon_lista_69b.sql"]
+              "supabase/migrations/20261007140000_buzon_lista_69b.sql", "supabase/migrations/20261007160000_buzon_medicion.sql"]
   }
  ]
 }

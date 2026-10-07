@@ -11,6 +11,7 @@ import { extraeConElServicio, FalloDeCapacidad, type DocumentoEntrante } from '.
 import type { ResultadoDeExtraccion } from '../../../a2a/esquema.ts'
 import { aCsv, clasifica, empareja, pendientes, revisaCampo, revisaDiscrepancia } from '../lectura.ts'
 import { bandera, decodifica, leeListado69B, type BanderaSat, type Situacion } from '../lista-69b.ts'
+import { cifras, cifrasACsv, type CifraDelMes, type DocumentoMedido, type RegistroDeHoras } from '../medicion.ts'
 import type { DocumentoDelBuzon, Revision } from '../../types/index.ts'
 
 export type Resultado<T> = { ok: true; datos: T } | { ok: false; estado: number; aviso: string }
@@ -176,5 +177,48 @@ export async function banderasDe(supabase: SupabaseClient, rfcs: readonly string
     if (b) banderas.set(rfc, b)
   }
   return banderas
+}
+
+// --- La medición (fase 6) ------------------------------------------------------------------------------------------
+
+/** Las horas de un mes de una pyme: se registran o se corrigen. Sin quién (RF-21); sin consentimiento, no (RF-5). */
+export async function registraHoras(supabase: SupabaseClient, r: { pyme_id: string; mes: string; fase: 'previo' | 'piloto'; horas: number; cfdi_recibidos: number | null }):
+  Promise<Resultado<{ id: string }>> {
+  const fila = { pyme_id: r.pyme_id, mes: `${r.mes}-01`, fase: r.fase, horas: r.horas, cfdi_recibidos: r.cfdi_recibidos }
+  const { data: previa } = await supabase.from('buzon_horas').select('id').eq('pyme_id', r.pyme_id).eq('mes', fila.mes).eq('fase', r.fase).maybeSingle()
+  const { data, error } = previa
+    ? await supabase.from('buzon_horas').update({ horas: r.horas, cfdi_recibidos: r.cfdi_recibidos }).eq('id', previa.id).select('id').single()
+    : await supabase.from('buzon_horas').insert(fila).select('id').single()
+  if (error?.code === '23514') return falla(400, 'el mes previo necesita cuántos CFDI se capturaron a mano')
+  return error ? aviso(error) : { ok: true, datos: { id: String(data.id) } }
+}
+
+export async function horasDe(supabase: SupabaseClient, pymeId: string): Promise<RegistroDeHoras[]> {
+  const { data } = await supabase.from('buzon_horas').select('pyme_id, mes, fase, horas, cfdi_recibidos').eq('pyme_id', pymeId).order('mes')
+  return (data ?? []).map((h) => ({ ...h, horas: Number(h.horas) })) as RegistroDeHoras[]
+}
+
+/** Las cifras del despacho entero, con seudónimo (RF-8). Una pyme sin consentimiento vigente no entra (RF-5). */
+export async function cifrasDelDespacho(supabase: SupabaseClient): Promise<{ filas: CifraDelMes[]; pymesCompletas: number }> {
+  const [{ data: pymes }, { data: vigentes }, { data: horas }, { data: documentos }] = await Promise.all([
+    supabase.from('buzon_pymes').select('id, seudonimo'),
+    supabase.from('buzon_consentimientos').select('pyme_id').is('revocado_en', null),
+    supabase.from('buzon_horas').select('pyme_id, mes, fase, horas, cfdi_recibidos'),
+    supabase.from('buzon_documentos').select('id, pyme_id, tipo, estado, uuid, recibido_en, confirmado_en'),
+  ])
+  const consienten = new Set((vigentes ?? []).map((c) => String(c.pyme_id)))
+  return cifras(
+    (pymes ?? []).map((p) => ({ id: String(p.id), seudonimo: String(p.seudonimo), consiente: consienten.has(String(p.id)) })),
+    (horas ?? []).map((h) => ({ ...h, horas: Number(h.horas) })) as RegistroDeHoras[],
+    (documentos ?? []) as DocumentoMedido[],
+  )
+}
+
+export async function cifrasEnCsv(supabase: SupabaseClient): Promise<Resultado<string>> {
+  try {
+    return { ok: true, datos: cifrasACsv((await cifrasDelDespacho(supabase)).filas) }
+  } catch (e) {
+    return falla(500, e instanceof Error ? e.message : 'no se pudieron preparar las cifras')
+  }
 }
 
