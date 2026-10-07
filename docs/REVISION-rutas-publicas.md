@@ -21,6 +21,10 @@ dos rutas no tienen guarda y en producción no sirven para nada.
 - **La app solo recibe las variables que le pone `docker-compose.yml`**: Supabase, OpenRouter y la
   llave del puente A2A. No recibe `DICTADO_MOVIL_TOKEN`, `ETIQUETAS_TOKEN` ni las `VENTAS_WA_*`, así
   que esas rutas responden 503 en producción.
+  > **Corrección (2026-10-07):** esta premisa **era falsa hasta el #226**. `.dockerignore` dejaba pasar
+  > `.env.production`, y el build standalone de Next lo copiaba a la imagen y lo cargaba al arrancar: la
+  > app recibía todo lo que hubiera en ese archivo, aunque el compose no se lo diera (PRP-010, H-29).
+  > Desde el #226 es cierta, y la vigila `prueba:buzon` (`scripts/buzon/prueba-imagen.mjs`).
 - **`src/proxy.ts`** refresca la sesión solo en `/reel`, `/api/reel`, `/login` y `/signup` (también
   nombra `/cuenta`, que hoy no existe). Las demás rutas se protegen solas o no se protegen.
 - **Ninguna superficie usa `service_role`** (búsqueda en `src/`; lo vigila además el caso `priv-8`
