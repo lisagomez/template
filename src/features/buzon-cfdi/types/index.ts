@@ -52,3 +52,13 @@ export const revision = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('confirmar') }),
 ])
 export type Revision = z.infer<typeof revision>
+
+/** El registro de horas de un mes: el mismo formulario el mes previo y el del piloto (RF-20), sin persona (RF-21). */
+export const horasDelMes = z.object({
+  pyme_id: z.string().regex(UUID_DB),
+  mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'mes con forma AAAA-MM'),
+  fase: z.enum(['previo', 'piloto']),
+  horas: z.coerce.number().min(0).max(744),
+  cfdi_recibidos: z.preprocess((v) => (v === '' || v === null || v === undefined ? null : v), z.coerce.number().int().min(0).nullable()),
+}).refine((h) => h.fase === 'piloto' || h.cfdi_recibidos !== null, { message: 'el mes previo necesita cuántos CFDI se capturaron a mano', path: ['cfdi_recibidos'] })
+

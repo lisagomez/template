@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**51 activos** cubren **256 unidades** del repo.
+**51 activos** cubren **257 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -53,7 +53,7 @@
 | TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente) y su contrato de negocio | PRODUCTO | software | blueprint | 1 | `src/features/soporte-sap` |
 | TPL-feature-ventas-whatsapp | Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a) | PRODUCTO | software | blueprint | 1 | `src/features/ventas-whatsapp` |
 | TPL-grafo-conocimiento | Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes | PRODUCTO | software | beta | 1 | `tools/grafo-conocimiento` |
-| TPL-piloto-buzon-cfdi | Piloto del buzón de CFDI en la máquina del despacho: perímetro sin salida, Supabase autohospedado y su gate | PRODUCTO | software | blueprint | 6 | `scripts/buzon` |
+| TPL-piloto-buzon-cfdi | Piloto del buzón de CFDI en la máquina del despacho: perímetro sin salida, Supabase autohospedado y su gate | PRODUCTO | software | blueprint | 7 | `scripts/buzon` |
 | TPL-pymes-marketing | Herramientas de marketing para pymes: marca y voz, ventas, contenido, resenas, visibilidad y pulso | PRODUCTO | software | blueprint | 1 | `tools/pymes-marketing` |
 | TPL-reel | Reel del celular para pymes: cortes, subtitulos, privacidad (caras, pantalla, voces), master determinista y sala | PRODUCTO | software | blueprint | 2 | `tools/reel` |
 | TPL-sala-a2a | Sala A2A: canales, hilos de un nivel y aprobaciones como fila que ningun componente que ejecuta un modelo puede fabricar; esquema propuesto con su suite de sabotajes S1-S7 (0.1.0) | PRODUCTO | software | blueprint | 1 | `tools/sala-a2a` |

@@ -137,12 +137,35 @@ try {
   paso('RF-19: la bandera dice que no es un veredicto', /No es un veredicto/.test(textoBandera));
   await foto('08-bandera-69b');
 
+  // --- Fase 6: la medición (RF-5, RF-8, RF-20, RF-21) -------------------------------------------------------------
+  await pagina.goto(`${APP}${enlace}`);
+  for (const [mes, fase, horas, cfdi] of [['2026-09', 'previo', '12.5', '40'], ['2026-10', 'piloto', '4', '']]) {
+    await pagina.fill('[data-prueba="horas-mes"]', mes);
+    await pagina.selectOption('[data-prueba="horas-fase"]', fase);
+    await pagina.fill('[data-prueba="horas-horas"]', horas);
+    await pagina.fill('[data-prueba="horas-cfdi"]', cfdi);
+    await pagina.click('[data-prueba="horas-registrar"]');
+    await pagina.locator('[data-prueba="horas-registradas"] tr', { hasText: mes }).waitFor();
+  }
+  paso('RF-20, RF-21: horas del mes previo y del mes del piloto, sin preguntar quién', (await pagina.locator('[data-prueba="horas-registradas"] tr').count()) === 2);
+  await foto('09-horas');
+  await pagina.goto(`${APP}/buzon`);
+  paso('una pyme con los dos meses completos', /1 pyme\(s\) con los dos meses completos/.test(await pagina.locator('[data-prueba="cifras-resumen"]').innerText()));
+  const cifrasCsv = await pagina.evaluate(async (url) => (await fetch(url)).text(), `${APP}/api/buzon/cifras`);
+  writeFileSync(join(SALIDA, 'cifras-piloto.csv'), cifrasCsv);
+  paso('RF-8: las cifras llevan el seudónimo y números, sin RFC ni folio',
+    /^pyme,mes,fase,horas/.test(cifrasCsv) && /pyme-[0-9a-f]{10},2026-09,previo,12\.5,40,/.test(cifrasCsv)
+    && !/[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}|[0-9a-f]{8}-[0-9a-f]{4}-/i.test(cifrasCsv), cifrasCsv.trim().split('\r\n').slice(1).join(' | '));
+  await foto('10-cifras');
+
   await pagina.goto(`${APP}/buzon`);
   pagina.once('dialog', (d) => d.accept());
   await pyme.locator('[data-prueba="revocar"]').click();
   await pyme.locator('[data-prueba="registrar-consentimiento"]').waitFor();
   await pagina.goto(`${APP}${enlace}`);
   paso('RF-3, RF-4: al revocar, sus documentos desaparecen', (await pagina.locator('[data-prueba="documento"]').count()) === 0);
+  await pagina.goto(`${APP}/buzon`);
+  paso('RF-5: tras revocar, la pyme sale de las cifras', /^0 fila\(s\)/.test(await pagina.locator('[data-prueba="cifras-resumen"]').innerText()));
   await foto('06-revocado');
 } catch (e) {
   paso('el recorrido se cortó', false, String(e?.message ?? e).split('\n')[0]);

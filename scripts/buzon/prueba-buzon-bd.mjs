@@ -153,9 +153,12 @@ test('siembra: con UPDATE abierto, el consentimiento se reescribe (la regla de c
 });
 
 test('siembra: si el retiro no borra, revocar deja los documentos (RF-4 la mide de verdad)', async () => {
+  // La definición vigente de la función de retiro vive en la migración de la medición (fase 6), que la redefine:
+  // sembrar en la de la fase 3 ya no sembraría nada (lo cazó esta misma prueba al llegar la fase 6).
   const { db, comoMiembro } = await despacho([
     'delete from public.buzon_documentos where pyme_id = new.pyme_id;',
     'perform 1; -- sembrado: no borra',
+    '20261007160000_buzon_medicion.sql',
   ]);
   await comoMiembro();
   const pyme = await nuevaPyme(db);

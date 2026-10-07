@@ -116,10 +116,23 @@
 
 ## Fase 6 — Medición
 
-- [ ] **TAR-14 · Registro de tiempo** por pyme y por mes, sin persona (RF-20, RF-21). Prueba: la tabla no
+- [x] **TAR-14 · Registro de tiempo** por pyme y por mes, sin persona (RF-20, RF-21). Prueba: la tabla no
       tiene ninguna columna que identifique a quien capturó.
-- [ ] **TAR-15 · Cifras agregadas** con seudónimo (RF-8, RF-22, RF-30), y una prueba anti-fuga que
+      Hecho el 2026-10-07 (`20261007160000_buzon_medicion.sql`). El registro es el mismo formulario los dos meses.
+      Los CFDI del mes previo los declara el despacho, porque se capturaron a mano; los del mes del piloto los
+      cuenta el buzón. Sin consentimiento no se registran horas. **Revocar borra también las horas**, y la
+      constancia las cuenta: así la pyme sale de las cifras por construcción (RF-5, que quedó pendiente de la
+      fase 3). La prueba de RF-21 de la fase 3 ya recorre la tabla nueva.
+- [x] **TAR-15 · Cifras agregadas** con seudónimo (RF-8, RF-22, RF-30), y una prueba anti-fuga que
       rechaza valores con forma de RFC o UUID en el archivo.
+      Hecho el 2026-10-07 (`services/medicion.ts`).
+      - **La proporción de pendientes (RF-22)** es la de los CFDI recibidos en el mes del piloto que no estaban
+        confirmados al cerrarlo. No cuentan ni el receptor ajeno ni la impresa de un XML.
+      - **El guardián contra fugas va en la propia salida:** si el texto lleva algo con forma de RFC, de folio o de
+        correo, la ruta no lo entrega.
+      - `prueba:buzon`: 10 pruebas nuevas, con siembras de consentimiento y de fuga.
+      - **Recorrido: 23 de 23.** Registra horas de los dos meses, sale una pyme completa, el CSV lleva solo el
+        seudónimo y números, y tras revocar la pyme sale de las cifras.
 
 ## Fase 7 — Parar, cerrar y borrar
 

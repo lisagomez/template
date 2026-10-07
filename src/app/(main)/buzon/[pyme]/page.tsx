@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { IngestaDocumentos } from '@/features/buzon-cfdi/components/ingesta-documentos';
+import { RegistroHoras } from '@/features/buzon-cfdi/components/registro-horas';
 import { RevisionDocumento } from '@/features/buzon-cfdi/components/revision-documento';
-import { banderasDe, documentosDe, soyMiembro } from '@/features/buzon-cfdi/services/servidor/buzon';
+import { banderasDe, documentosDe, horasDe, soyMiembro } from '@/features/buzon-cfdi/services/servidor/buzon';
 import { UUID_DB } from '@/features/buzon-cfdi/types';
 import { createClient } from '@/lib/supabase/server';
 
@@ -17,9 +18,10 @@ export default async function Pagina({ params }: { params: Promise<{ pyme: strin
   if (!UUID_DB.test(id) || !(await soyMiembro(supabase))) notFound();
   const { data: pyme } = await supabase.from('buzon_pymes').select('id, rfc, nombre').eq('id', id).maybeSingle();
   if (!pyme) notFound();
-  const [{ data: vigente }, documentos] = await Promise.all([
+  const [{ data: vigente }, documentos, horas] = await Promise.all([
     supabase.from('buzon_consentimientos').select('id').eq('pyme_id', id).is('revocado_en', null).maybeSingle(),
     documentosDe(supabase, id),
+    horasDe(supabase, id),
   ]);
   const confirmados = documentos.filter((d) => d.estado === 'confirmado').length;
   const emisor = (d: (typeof documentos)[number]) => d.campos.find((c) => c.clave === 'rfc_emisor')?.valor.trim().toUpperCase() ?? '';
@@ -32,6 +34,7 @@ export default async function Pagina({ params }: { params: Promise<{ pyme: strin
         <p className="text-sm text-gray-600">{String(pyme.rfc)} · {documentos.length} documento(s) · {confirmados} confirmado(s)</p>
       </header>
       <IngestaDocumentos pymeId={id} consiente={Boolean(vigente)} />
+      {vigente && <RegistroHoras pymeId={id} registros={horas} />}
       {confirmados > 0 && <a href={`/api/buzon/exporta?pyme=${id}`} className="inline-block rounded-lg border px-4 py-2 text-sm" data-prueba="exportar">Exportar los confirmados (CSV)</a>}
       <section className="space-y-3" data-prueba="documentos">
         {documentos.map((d) => <RevisionDocumento key={d.id} doc={d} bandera={banderas.get(emisor(d)) ?? null} />)}

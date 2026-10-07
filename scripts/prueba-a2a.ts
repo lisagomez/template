@@ -84,10 +84,12 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   // a internet (docker-compose.despacho.yml). Todas exigen sesión y ser miembro del despacho (`entra()`), las que
   // escriben, `Origin` del mismo sitio; RLS y disparadores deciden. NO pasan por `src/proxy.ts` a propósito: Next 16
   // corta ahí el cuerpo a 10 MB sin error. El documento no se guarda, solo su lectura; sin consentimiento, ni se lee.
+  '/api/buzon/cifras',
   '/api/buzon/consentimientos',
   '/api/buzon/documentos',
   '/api/buzon/documentos/[id]',
   '/api/buzon/exporta',
+  '/api/buzon/horas',
   '/api/buzon/lista-69b',
   '/api/buzon/pymes',
   '/api/contenido/video',

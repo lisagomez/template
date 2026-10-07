@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { AltaPyme } from '@/features/buzon-cfdi/components/alta-pyme';
 import { ConsentimientoPyme } from '@/features/buzon-cfdi/components/consentimiento-pyme';
 import { ImportaLista69B } from '@/features/buzon-cfdi/components/importa-lista-69b';
-import { listaVigente, soyMiembro } from '@/features/buzon-cfdi/services/servidor/buzon';
+import { cifrasDelDespacho, listaVigente, soyMiembro } from '@/features/buzon-cfdi/services/servidor/buzon';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -16,11 +16,12 @@ export default async function Pagina() {
   if (!(await soyMiembro(supabase))) {
     return <main className="mx-auto max-w-lg px-4 py-6"><p data-prueba="no-miembro">Tu cuenta no es miembro de este despacho. Las altas las hace el operador.</p></main>;
   }
-  const [{ data: pymes }, { data: vigentes }, { data: documentos }, lista] = await Promise.all([
+  const [{ data: pymes }, { data: vigentes }, { data: documentos }, lista, medicion] = await Promise.all([
     supabase.from('buzon_pymes').select('id, rfc, nombre').order('nombre'),
     supabase.from('buzon_consentimientos').select('pyme_id, firmado_en').is('revocado_en', null),
     supabase.from('buzon_documentos').select('pyme_id, estado'),
     listaVigente(supabase),
+    cifrasDelDespacho(supabase),
   ]);
   const consiente = new Map((vigentes ?? []).map((c) => [String(c.pyme_id), String(c.firmado_en)]));
   const porRevisar = (id: string) => (documentos ?? []).filter((d) => String(d.pyme_id) === id && d.estado === 'en_revision').length;
@@ -44,6 +45,12 @@ export default async function Pagina() {
       </ul>
       <AltaPyme />
       <ImportaLista69B vigente={lista} />
+      <section className="space-y-1 rounded-xl bg-white p-4 text-sm shadow-sm" data-prueba="cifras">
+        <h2 className="font-semibold">Cifras para el laboratorio</h2>
+        <p>Solo salen el seudónimo de cada pyme y números: horas, CFDI recibidos y proporción pendiente al cierre del mes del piloto.</p>
+        <p data-prueba="cifras-resumen">{medicion.filas.length} fila(s) · {medicion.pymesCompletas} pyme(s) con los dos meses completos.</p>
+        {medicion.filas.length > 0 && <a href="/api/buzon/cifras" className="inline-block rounded-lg border px-3 py-1" data-prueba="cifras-descargar">Descargar las cifras (CSV)</a>}
+      </section>
     </main>
   );
 }
