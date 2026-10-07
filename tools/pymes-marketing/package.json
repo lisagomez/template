@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/pymes-marketing",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Estudio de marketing para pymes mexicanas: marca y voz, ventas desde CFDI y CSV, estrategia, calendario, piezas PNG, carruseles y video 9:16 por codigo sin personas, aprobacion con huella, resenas, visibilidad en buscadores y asistentes de IA, anuncios y el brief del lunes. TypeScript puro, CERO dependencias; el redactor (plantillas o LLM) se inyecta. Nada se publica ni se envia: todo sale en borrador. Adaptado de small-business@1.35.1 (Apache-2.0), ver NOTICE.",
   "type": "module",
   "license": "UNLICENSED",

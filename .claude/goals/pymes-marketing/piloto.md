@@ -46,7 +46,7 @@ que sin ella. Lo que eso cambia:
 
 | Etapa | Duración | Qué pasa |
 |---|---|---|
-| 0. Arranque | 1 semana **[supuesto]** | El dueño firma el permiso (anexo A). El laboratorio confirma que el requisito previo (§6) está construido y que el estudio está desplegado |
+| 0. Arranque | 1 semana **[supuesto]** | El dueño firma el permiso (anexo A). El laboratorio confirma que el estudio está desplegado (el requisito previo de §6 ya está construido) |
 | 1. El «antes» | 4 semanas **[supuesto]** | El dueño hace su marketing como siempre y anota sus horas (anexo B). **No usa el estudio** |
 | 2. El «después» | el mes siguiente | Usa el estudio para su mes y anota sus horas en la misma hoja, sobre las mismas tareas |
 | 3. Cierre | 1 semana **[supuesto]** | Cifras agregadas, cotejo, defectos convertidos en casos, re-firma del contrato |
@@ -88,20 +88,23 @@ Las horas no las registra el estudio: no tiene cuentas ni telemetría, a propós
 - Si después del piloto la consultora quiere ofrecer el estudio a sus clientes, eso se resuelve con la
   decisión del cobro (contrato §7), no aquí.
 
-## 6. Requisito previo: lo que el estudio hoy no le enseña al dueño
+## 6. Requisito previo: que el estudio enseñe lo que no pudo leer
 
 **Hallazgo del 2026-10-02, al preparar este plan.** Los lectores del paquete sí reportan lo que no
-pudieron leer, pero la app lo tira antes de mostrarlo:
+pudieron leer, pero la app lo tiraba antes de mostrarlo:
 
-| Sección | Qué reporta el paquete | Qué hace hoy la app | Por qué rompe el piloto |
+| Sección | Qué reporta el paquete | Qué hacía la app | Por qué rompía el piloto |
 |---|---|---|---|
 | Anuncios | columnas no reconocidas (`faltan`) | no las muestra | sin ellas no hay cotejo: si no reconoce la columna de resultados, todo sale «sin veredicto» y no se ve por qué |
 | Anuncios | filas que no pudo leer (`rechazadas`) | las descarta | el gasto sale menor y el veredicto se calcula con datos parciales, en silencio |
 | Anuncios | la moneda (`MXN` o `USD`) | el gasto de la tabla siempre se pinta en pesos | una exportación en dólares se lee como pesos |
 | Reseñas | avisos (p. ej. «no encontré la columna del texto») y reseñas no leídas | los descarta | con una exportación real que no reconoce, analiza cero reseñas sin decirlo |
 
-Ventas ya muestra sus avisos y lo que falta. **Sin este arreglo no se puede hacer el cotejo ni medir el
-gasto por veredicto**: va en un PR aparte, antes del arranque.
+Ventas ya muestra sus avisos y lo que falta. **Arreglado el 2026-10-02 (0.3.1)**: la app enseña las
+cuatro cosas, con los encabezados del archivo para el cotejo, y cinco casos-trampa del laboratorio
+lo vigilan (`pulso-8` a `pulso-10`, `resenas-8` y `resenas-9`). En el camino salieron dos más, ya
+arreglados: la reseña de solo estrellas se tiraba diciendo que contaba para el promedio, y el brief
+del lunes decía «MXN» con una exportación en dólares.
 
 **Dónde corre el estudio para el dueño: desplegado en un servidor** (decisión del laboratorio,
 2026-10-02). Llevarlo en un equipo del laboratorio habría hecho pasar los archivos del dueño por ese

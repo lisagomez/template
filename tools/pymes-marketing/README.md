@@ -1,4 +1,4 @@
-# @tu-scope/pymes-marketing (0.3.0)
+# @tu-scope/pymes-marketing (0.3.1)
 
 El **estudio de contenido y marketing** de una pyme mexicana, en seis herramientas que se instalan
 juntas y se importan por separado. TypeScript puro, **cero dependencias**, sin red: el redactor
@@ -80,7 +80,7 @@ const calendario = await calendarioDe30Dias(brief, marca, redactorDePlantillas()
 
 ## Pruebas
 
-`npm run build && npm run prueba` (49 casos). El laboratorio del sitio (`/laboratorio-pymes`) corre
+`npm run build && npm run prueba` (50 casos). El laboratorio del sitio (`/laboratorio-pymes`) corre
 casos de extremo a extremo con CFDI sintéticos y el lector real del extractor.
 
 ## Generación de contenido (0.2.0)

@@ -1,5 +1,6 @@
 /** Casos de contenido (brief, calendario, pieza) y de reseñas (C3/C4). */
-import { redactorDePlantillas, construyeVoz, sinDatos, formatoDinero } from '../../../../tools/pymes-marketing/dist/index.js';
+import { redactorDePlantillas, construyeVoz, sinDatos, formatoDinero, VOZ_NEUTRA } from '../../../../tools/pymes-marketing/dist/index.js';
+import { resenas as resenasDelEstudio } from '../../estudio-pymes/services/estudio.ts';
 import { capturaDeSitio, confirmaMarca } from '../../../../tools/pymes-marketing/dist/marca/index.js';
 import { ventasDesdeCfdi, resumeVentas } from '../../../../tools/pymes-marketing/dist/ventas/index.js';
 import { estrategiaDe30Dias, briefEnTexto, calendarioDe30Dias, extiendeCalendario, marcaFila, piezaSvg } from '../../../../tools/pymes-marketing/dist/contenido/index.js';
@@ -139,6 +140,24 @@ export const CASOS_RESENAS: readonly Caso[] = [
       for (const d of ['01/08/2026', '08/08/2026', '15/08/2026', '22/08/2026', '20/09/2026']) filas.push(`${d},Concha,50,cliente@ejemplo.mx`);
       const c = clientesCallados(ventasDesdeCsv(filas.join('\n')).lineas, '2026-09-26');
       return verifica([[c.length === 1 && c[0]!.estado === 'perdido', 'uno perdido (más de 3 veces su ritmo)'], [!JSON.stringify(c).includes('5555') && !JSON.stringify(c).includes('@'), 'solo alias']], c.map((x) => `${x.alias}: ${x.compras} compras, ${formatoDinero(x.gastoCentavos)}, ${x.diasSinComprar} días sin comprar (ritmo ${x.intervaloNormal} días)`), 'Quién se fue, sin exponer quién es; el mensaje lo decide el dueño.');
+    },
+  },
+  {
+    id: 'resenas-8', herramienta: 'resenas', titulo: 'El estudio avisa cuando no encuentra la columna del texto', trampa: 'columna no reconocida', esperado: 'pasa',
+    entrada: 'CSV sintético exportado con «Comentarios» como columna del texto.',
+    async corre() {
+      const r = await resenasDelEstudio('Autor,Estrellas,Comentarios\nAna,5,Muy rico el pan\n', VOZ_NEUTRA, NEGOCIO_DEMO.nombre, '', null, '2026-09-26');
+      const aviso = r.avisos.find((x) => /no encontré la columna del texto/.test(x)) ?? '';
+      return verifica([[r.analisis.borradores.length === 0, 'no inventa reseñas'], [/Comentarios/.test(aviso), 'lo dice al dueño, con los encabezados del archivo']], r.avisos, 'Antes el análisis salía en cero reseñas sin decir por qué.');
+    },
+  },
+  {
+    id: 'resenas-9', herramienta: 'resenas', titulo: 'La reseña de solo estrellas cuenta para la calificación', trampa: 'dato ausente (sin texto)', esperado: 'pasa',
+    entrada: 'CSV sintético: una reseña de 5 estrellas con texto y una de 1 estrella sin texto.',
+    async corre() {
+      const r = await resenasDelEstudio('Autor,Calificación,Fecha,Reseña\nAna,5,20/09/2026,Riquísimo el pan\nLuis,1,21/09/2026,\n', VOZ_NEUTRA, NEGOCIO_DEMO.nombre, '', null, '2026-09-26');
+      const promedio = r.analisis.calificaciones[0]?.promedio ?? null;
+      return verifica([[promedio === 3, 'el 1 entra al promedio (sin él daría 5)'], [r.analisis.borradores.length === 1, 'a la reseña sin texto no se le redacta respuesta'], [r.avisos.some((x) => /solo con estrellas/.test(x)), 'se le dice al dueño']], [`promedio ${promedio}`, ...r.avisos], 'Antes se tiraba diciendo que «contaba para el promedio»: la calificación salía sesgada.');
     },
   },
 ];
