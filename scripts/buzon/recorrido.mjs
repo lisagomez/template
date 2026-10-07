@@ -3,15 +3,9 @@
  * corre ningún gate: es la evidencia de que las pantallas, las rutas y la base se entienden de verdad (fase 4, y la
  * base de TAR-19 en la fase 8).
  *
- * Cómo se corrió el 2026-10-07 (todo local, nada sale de la máquina):
- *   1. el Supabase del despacho: docker compose -p despacho-e2e -f docker-compose.despacho.yml (+ un override con el
- *      puerto 18443) con DOMAIN=localhost y los secretos de scripts/despacho/llaves.mjs; las migraciones con psql;
- *      una cuenta dada de alta por la API de admin y hecha miembro con SQL;
- *   2. el extractor: node tools/extractor-documental/servicio/servidor.mjs (EXTRACTOR_RESPALDO=ninguno, Tesseract local);
- *   3. la app: npm run dev con NEXT_PUBLIC_SUPABASE_URL=https://localhost:18443, EXTRACTOR_SERVICIO_URL y
- *      NODE_EXTRA_CA_CERTS con la raíz de Caddy (no se apaga la verificación TLS);
- *   4. APP=http://localhost:3001 SALIDA=<carpeta> XML=tools/extractor-documental/pruebas/fixtures/cfdi-40-ingreso.xml
- *      [LISTADO_REAL=<el CSV del SAT, para la prueba de escala>] node scripts/buzon/recorrido.mjs
+ * Se corre con `npm run recorrido:buzon` (scripts/buzon/recorrido.sh): levanta un stack desechable del despacho,
+ * aplica las migraciones, da de alta una cuenta sintética, arranca el extractor y la app, corre este archivo y lo
+ * borra todo al terminar. Variables: APP, SALIDA, XML y, opcional, LISTADO_REAL (el CSV del SAT, prueba de escala).
  */
 import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync } from 'node:fs';

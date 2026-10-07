@@ -362,8 +362,8 @@
       "nombre": "prueba:buzon",
       "runner": "comando",
       "comando": "npm run prueba:buzon",
-      "guarda": "el piloto del buzón de CFDI (spec 015): el PERÍMETRO del despacho —ningún servicio con documentos tiene salida a internet, publica puertos, usa una imagen sin digest ni recibe llaves de fuera en `docker-compose.despacho.yml`, y la cola de visión va fija en «ninguno»— y `configura:deploy` en modo despacho con el caso malo de cada regla (Supabase gestionado, otro origen, respaldo de visión, service_role en la app, llaves firmadas con otro secreto, RAM corta); cada regla con su siembra",
-      "evidencia": "salida de `node --test`: pruebas pasadas y falladas. 26 en verde al darlo de alta el 2026-10-07 (fase 2: TAR-3 y TAR-4)",
+      "guarda": "el piloto del buzón de CFDI (spec 015), de punta a punta: el PERÍMETRO del despacho (ningún servicio con documentos sale a internet, publica puertos, usa una imagen sin digest ni recibe llaves de fuera; la cola de visión fija en «ninguno») y `configura:deploy` en modo despacho; en PGlite, actuando como miembro, ajena y anónimo, que sin consentimiento no entra ni se lee un documento (RF-1, RF-2), que un consentimiento solo se revoca y revocar borra con constancia (RF-3, RF-4), que no se confirma con campos por revisar, discrepancias abiertas ni receptor ajeno (RF-12, RF-14, RF-17), que el folio entra una vez (RF-13) y que nada registra quién hizo qué (RF-21); el orden de la ingesta (sin consentimiento, el extractor ni se llama); el listado 69-B todo o nada y sin veredicto (RF-18, RF-19); la medición con seudónimo y guardián contra fugas (RF-5, RF-8, RF-20 a RF-22); parar y cerrar (RF-25 a RF-29); y que ninguna migración del buzón haga DELETE o UPDATE sin WHERE (el `pg_safeupdate` del Supabase real). Cada regla con su siembra",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas. 26 al darlo de alta (fase 2) y 92 al cerrar la construcción (fase 8), el 2026-10-07",
       "perfiles": ["validate"],
       "activo": true,
       "timeout_s": 120
