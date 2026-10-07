@@ -1,5 +1,5 @@
 /**
- * El despliegue en el despacho contable (spec 015, fase 2). Tres piezas, puras —no leen el disco ni
+ * El despliegue en el despacho contable (spec 015, fase 2). Cuatro piezas, puras —no leen el disco ni
  * imprimen: decide quien llama—:
  *
  *   · `revisaDespacho`: lo que `configura:deploy` exige con `DESPLIEGUE=despacho`. Lo contrario del
@@ -9,6 +9,8 @@
  *     con otro secreto no da error al arrancar: auth, rest y storage la rechazan después, en silencio.
  *   · `revisaPerimetro`: lee el compose del despacho y dice qué servicio tiene salida a internet,
  *     publica puertos, usa una imagen sin pinear o puede mandar un documento fuera.
+ *   · `revisaImagen`: lo que el compose no ve. Dice si un archivo con llaves entraría a la imagen de la
+ *     app (y de ahí a su entorno) y si el `Dockerfile` perdió la guarda que lo impide.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
@@ -109,6 +111,57 @@ const redesDe = (servicio) => (Array.isArray(servicio.networks) ? servicio.netwo
 const entornoDe = (servicio) => (Array.isArray(servicio.environment)
   ? Object.fromEntries(servicio.environment.map((linea) => linea.split(/=(.*)/s).slice(0, 2)))
   : servicio.environment ?? {});
+
+/**
+ * Donde viven las llaves del servidor. `.env.production` lo escribe `llaves.mjs` (y `configura:deploy`
+ * lo valida); los demás, por si alguien los deja en el árbol del servidor.
+ */
+export const ARCHIVOS_CON_LLAVES = ['.env', '.env.production', '.env.local', '.env.development',
+  '.env.production.local', 'hermes/.env', 'tools/una-herramienta/.env.production'];
+
+/** Un patrón de `.dockerignore` a expresión regular, con la semántica de Docker (`**`, `*`, `?`). */
+function patronARegex(patron) {
+  let re = '';
+  for (let i = 0; i < patron.length; i++) {
+    const c = patron[i];
+    if (c === '*' && patron[i + 1] === '*') {
+      i++;
+      if (patron[i + 1] === '/') { i++; re += '(?:.*/)?'; } else re += '.*';
+    } else if (c === '*') re += '[^/]*';
+    else if (c === '?') re += '[^/]';
+    else re += c.replace(/[\\^$.|+(){}[\]]/g, '\\$&');
+  }
+  return new RegExp(`^${re}$`);
+}
+
+/** Docker excluye una ruta si un patrón la nombra a ella o a una carpeta suya; gana la última regla. */
+function excluida(dockerignore, ruta) {
+  const partes = ruta.split('/');
+  const prefijos = partes.map((_, i) => partes.slice(0, i + 1).join('/'));
+  let fuera = false;
+  for (const linea of dockerignore.split('\n').map((l) => l.trim())) {
+    if (!linea || linea.startsWith('#')) continue;
+    const niega = linea.startsWith('!');
+    const re = patronARegex((niega ? linea.slice(1) : linea).replace(/^\/+|\/+$/g, ''));
+    if (prefijos.some((p) => re.test(p))) fuera = !niega;
+  }
+  return fuera;
+}
+
+/**
+ * Lo que la IMAGEN le pasa a la app por detrás del compose. El build standalone de Next copia `.env` y
+ * `.env.production` a la imagen final y los carga al arrancar: si entran al contexto, la app recibe
+ * `service_role` y todas las llaves del servidor aunque el compose no se las dé (PRP-010 H-29). Vale
+ * para los dos composes, que construyen con el mismo `Dockerfile`. Devuelve qué archivo con llaves
+ * entraría al contexto y si al `Dockerfile` le falta la guarda que tumba el build cuando entra uno.
+ */
+export function revisaImagen({ dockerignore, dockerfile }) {
+  const entran = ARCHIVOS_CON_LLAVES.filter((ruta) => !excluida(dockerignore, ruta));
+  const copia = dockerfile.indexOf('COPY . .');
+  const guarda = dockerfile.search(/RUN if find \.[^\n]*-name '\.env\*'[^\n]*\n[^\n]*exit 1/);
+  const build = dockerfile.indexOf('RUN npm run build');
+  return { entran, sinGuarda: !(copia >= 0 && guarda > copia && guarda < build) };
+}
 
 /**
  * Recibe el compose ya parseado. Devuelve cada infracción con el servicio que la comete; todo vacío
