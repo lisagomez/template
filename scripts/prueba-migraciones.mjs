@@ -32,6 +32,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PGlite } from '@electric-sql/pglite';
+import { SUPABASE_MINIMO } from './lib/supabase-minimo.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR = 'supabase/migrations';
@@ -39,17 +40,6 @@ const rojo = (s) => `\x1b[31m${s}\x1b[0m`;
 const verde = (s) => `\x1b[32m${s}\x1b[0m`;
 const gris = (s) => `\x1b[2m${s}\x1b[0m`;
 
-const SUPABASE_MINIMO = `
-create role anon nologin; create role authenticated nologin; create role service_role nologin;
-create role supabase_auth_admin nologin;
-create schema auth;
-create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}'::jsonb);
-create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
-grant usage on schema auth to anon, authenticated, supabase_auth_admin;
-grant insert, select on auth.users to supabase_auth_admin;
-grant usage on schema public to anon, authenticated, service_role;
-alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
-`;
 
 const INVARIANTES = [
   ['toda tabla de public tiene RLS',
