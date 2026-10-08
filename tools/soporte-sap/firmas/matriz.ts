@@ -505,7 +505,7 @@ export const FILAS: readonly Fila[] = [
     id: 'c3-conexion-directa', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
     afirmacion: "con SQL, una sesión que fija sus variables (set_config, en la misma consulta) no cambia su alcance: la base verifica el token de su tarea (antes era una brecha declarada)",
     control: "SQL · ss_priv.consultora_de_tarea() lee ss_priv.claims_de_tarea(), no request.jwt.claims",
-    comprobacion: prueba('cierre-base.ts', "H-21 · con set_config dentro de la consulta, una tarea de A no lee B"),
+    comprobacion: prueba('cierre-base.ts', "H-21 · con set_config en la misma sesión, una tarea de A no lee B"),
     sabotaje: { que: "el alcance vuelve a salir de request.jwt.claims", ediciones: [
       ed(SQL, "  select ss_priv.uuid_o_nulo(ss_priv.claims_de_tarea() ->> 'consultora')", "  select ss_priv.uuid_o_nulo(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'consultora')")] },
   },

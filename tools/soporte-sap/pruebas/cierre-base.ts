@@ -229,14 +229,19 @@ const tarea = (consultora: string, opciones: { secreto?: string; exp?: number; r
   emiteTokenDeTarea(opciones.secreto ?? SECRETO_TAREAS, { consultora, tarea: 't', rol: opciones.rol ?? 'soporte_sap_agente', exp: opciones.exp ?? Date.now() + 60_000 })
 const deB = `select id from ss_incidencia where consultora_id = '${ORG.CB}'`
 
-test('H-21 · con set_config dentro de la consulta, una tarea de A no lee B', async () => {
+test('H-21 · con set_config en la misma sesión, una tarea de A no lee B', async () => {
   const db = await baseSoporte()
-  // La sonda del 05/10: el alcance era `request.jwt.claims`, y la sesión lo reescribía en la misma consulta.
-  const claims = await comoAgente(db, ORG.CA, `select id from ss_incidencia
-    where consultora_id = '${ORG.CB}' and set_config('request.jwt.claims', '{"consultora":"${ORG.CB}"}', true) is not null`)
-  const token = await comoAgente(db, ORG.CA, `select id from ss_incidencia
-    where consultora_id = '${ORG.CB}' and set_config('ss.tarea', '${tarea(ORG.CB, { secreto: 'un-secreto-que-el-agente-se-invento-0000' })}', true) is not null`)
-  assert.deepEqual([claims.length, token.length], [0, 0])
+  // La sonda del 05/10, en su forma que de verdad funciona (medido el 07/10): una sesión del agente con SQL fija la
+  // variable en una sentencia y consulta en la siguiente. En una sola consulta (WHERE o LATERAL) no funciona ni con la
+  // función vieja, porque la base evalúa antes la función estable, y una prueba así pasaría en vacío.
+  const conAtaque = async (ataque: string) => {
+    await db.exec(`set role soporte_sap_agente; select set_config('ss.tarea', '${tarea(ORG.CA)}', false); ${ataque}`)
+    try { return (await db.query(deB)).rows.length }
+    finally { await db.exec(`reset role; select set_config('ss.tarea', '', false); select set_config('request.jwt.claims', '', false);`) }
+  }
+  const claims = await conAtaque(`select set_config('request.jwt.claims', '{"consultora":"${ORG.CB}"}', false);`)
+  const token = await conAtaque(`select set_config('ss.tarea', '${tarea(ORG.CB, { secreto: 'un-secreto-que-el-agente-se-invento-0000' })}', false);`)
+  assert.deepEqual([claims, token], [0, 0])
 })
 
 test('H-21 · un token falso, vencido o de otro rol no da alcance', async () => {
