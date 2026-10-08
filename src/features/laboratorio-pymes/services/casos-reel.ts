@@ -111,11 +111,15 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
   { id: 'priv-8', herramienta: 'privacidad', titulo: 'Ninguna superficie usa service_role', trampa: 'llave que anula RLS', esperado: 'pasa',
     entrada: 'Todo `src/` del proyecto.',
     async corre() {
-      const archivos = (await readdir(join(process.cwd(), 'src'), { recursive: true })).map(String).filter((f) => /\.(ts|tsx)$/.test(f));
+      // La imagen de produccion no lleva la fuente (PRP-010 H-31): ahi no hay que revisar, y se dice.
+      const fuente = join(/*turbopackIgnore: true*/ process.cwd(), 'src');
+      const lista = await readdir(fuente, { recursive: true }).catch(() => null);
+      if (!lista) return { estado: 'no-medido', evidencia: ['esta instalación no lleva la fuente (la imagen de producción no la trae)'], veredicto: 'Sin fuente no se afirma nada: el caso corre en el laboratorio.' };
+      const archivos = lista.map(String).filter((f) => /\.(ts|tsx)$/.test(f));
       // Se busca el USO de la llave, no la palabra (los comentarios que citan C7 no la usan).
       const USO = /process\.env(\.|\[['"])SUPABASE_SERVICE_ROLE_KEY/;
       const usan: string[] = [];
-      for (const f of archivos) if (USO.test(await readFile(join(process.cwd(), 'src', f), 'utf8'))) usan.push(f);
+      for (const f of archivos) if (USO.test(await readFile(join(fuente, f), 'utf8'))) usan.push(f);
       // Armado por partes para que el propio caso no sea un «uso» que el escáner encuentre.
       const sembrado = USO.test(['const k = process.env[', "'SUPABASE_SERVICE", "_ROLE_KEY'];"].join(''));
       return verifica([[usan.length === 0, 'ningún archivo de src/ la usa'], [sembrado, 'control negativo: un uso sembrado sí se detecta']], [`${archivos.length} archivos revisados`, ...usan], 'La app entra con la sesión del dueño; RLS decide (C7).');
