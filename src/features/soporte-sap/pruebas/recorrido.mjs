@@ -92,6 +92,12 @@ await captura(10.5, 'la v2 se aprueba en la sala con la sesion humana', async ()
 // 7 y 11: el workspace del consultor con SLA y horas; el reloj corre, se pausa, se reanuda; el incumplimiento con su evidencia.
 await rol('consultor')
 await pagina.click(sel('incidencia-inc-002'))
+// PRP-010 H-17 (DP-4): que el plan ya esté en la sala no es haberle respondido al cliente; responde el consultor.
+await captura(11.1, 'sin respuesta de una persona el reloj de respuesta sigue abierto', async () => /· respuesta — min/.test(await texto(sel('reloj-incidencia'))), sel('reloj-incidencia'))
+await pagina.fill(`${sel('responde-al-cliente')} input`, 'Ya revisamos el periodo contable; te confirmamos hoy mismo.')
+await pagina.click(`${sel('responde-al-cliente')} button`)
+await pagina.waitForTimeout(400)
+await captura(11.2, 'la respuesta del consultor para el reloj de respuesta', async () => /· respuesta \d+ min/.test(await texto(sel('reloj-incidencia'))), sel('reloj-incidencia'))
 await pagina.click(sel('espera-cliente'))
 await pagina.waitForTimeout(1200)
 await pagina.click(sel('responde-cliente'))

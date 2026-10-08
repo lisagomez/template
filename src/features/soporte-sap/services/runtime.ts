@@ -119,7 +119,7 @@ function proponPlan(i: IncidenciaLab, plan: Plan, hilo: string | null): void {
     lab.mensaje = `m-${i.id}-v${plan.version}`
     e.sala = publica(e.sala, { id: lab.mensaje, canal: CANAL, hilo, autor: { tipo: 'agente', id: AGENTE }, cuerpo: m.cuerpo, bloques: m.bloques, creado: ahora() })
     anota(i, 'ENVIADA_A_SALA', `agente:${AGENTE}`, { mensaje: lab.mensaje, sha256: `sha256:${plan.sha256}` })
-    if (!i.sla.some((x) => x.tipo === 'PRIMERA_RESPUESTA')) i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })
+    // Mandar el plan a la sala NO es responder al cliente: la primera respuesta la da una persona (DP-4, PRP-010 H-17).
     i.estado = 'en_revision'
   }
   i.planes.push(lab)
@@ -131,7 +131,8 @@ function alSandbox(i: IncidenciaLab): void {
   i.sandbox = a
   anota(i, 'ANONIMIZADA', `agente:${AGENTE}`, { reemplazos: Object.values(a.reemplazos).length, veredicto: a.veredicto })
   anota(i, a.veredicto === 'entra' ? 'EN_SANDBOX' : 'EN_CUARENTENA', `agente:${AGENTE}`, { senales: [...a.senales] })
-  i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })
+  // Anonimizar tampoco es responder: el caso sigue en atención con su consultora y su reloj corre hasta que una
+  // persona le responda al cliente (DP-4, PRP-010 H-17).
   i.estado = 'en_atencion'
 }
 
@@ -204,10 +205,24 @@ function relojDelCliente(s: Sesion, id: string, tipo: 'ESPERA_CLIENTE' | 'RESPUE
   i.estado = tipo === 'ESPERA_CLIENTE' ? 'espera_cliente' : 'en_atencion'
 }
 
+/**
+ * El consultor le responde al cliente. La PRIMERA respuesta de una persona es la que para el reloj de respuesta
+ * (DP-4, PRP-010 H-17): ni mandar a la sala ni anonimizar cuentan, y una P1 ya no se «cumple» sola.
+ */
+function respondeAlCliente(s: Sesion, id: string, texto: string): void {
+  if (s.rol !== 'consultor') throw new Error('al cliente le responde el consultor de su consultora')
+  const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
+  if (!i) throw new Error('esa incidencia no es de tu consultora')
+  if (i.sla.some((x) => x.tipo === 'PRIMERA_RESPUESTA')) return
+  i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })
+  anota(i, 'PRIMERA_RESPUESTA', s.usuario, { caracteres: texto.length })
+}
+
 export function actua(s: Sesion, a: Accion): void {
   if (a.tipo === 'reinicia') { g.__soporteSapLab = nuevo(); return }
   if (a.tipo === 'decide') return decide(s, a.mensaje, a.accion, a.motivo ?? '')
   if (a.tipo === 'chat') return conversa(s, a.texto)
+  if (a.tipo === 'responde') return respondeAlCliente(s, a.incidencia, a.texto)
   return relojDelCliente(s, a.incidencia, a.tipo === 'espera_cliente' ? 'ESPERA_CLIENTE' : 'RESPUESTA_CLIENTE')
 }
 

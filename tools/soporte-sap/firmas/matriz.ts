@@ -49,6 +49,8 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-persona-runtime'], afirmacion: 'la primera respuesta es de una persona (DP-4)', encontrado: 'PRP-010 H-17, el runtime (07/10): la app marcaba la primera respuesta al anonimizar o al mandar el plan a la sala, y una prueba lo exigía como requisito' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-job', 'aisia-sla-job-no-inventa', 'c3-plataforma-sla-suya'], afirmacion: 'el SLA se mide desde los eventos', encontrado: 'PRP-010 H-16, el job (07/10): nadie calculaba `ss_sla_resultado` desde la base; desde la tanda 1e, además, ningún rol podía escribirlo' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-restaura-firma', 'aisia-restaura-filas', 'aisia-restaura-antes-commit', 'aisia-restaura-accesos', 'aisia-restaura-sala'], afirmacion: 'export y restauración por tenant: restaurar a una consultora no toca a las demás', encontrado: 'PRP-010 H-08 (05/10 y 07/10): la restauración, como superusuario y con los disparadores apagados, insertaba filas de otro tenant sin comprobarlas y verificaba después del commit; el export no iba firmado y dejaba fuera el acceso motivado y la sala' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-plataforma-no-inserta', 'c3-plataforma-exporta'], afirmacion: 'soporte_sap_plataforma exporta, restaura y borra por retención, acotado por token a una consultora', encontrado: 'PRP-010 H-07 (07/10): con `for all` insertaba decisiones ya tomadas y eventos con el seudónimo de un consultor, ninguna prueba usaba ese rol, y con él `exportaTenant` fallaba con «permission denied»' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-cadena-base'], afirmacion: 'la cadena de eventos es la evidencia del servicio', encontrado: 'PRP-010 H-13 (05/10): la base no verificaba `anterior`, `hash` ni `seq`: quien escribía ponía los que quisiera' },
@@ -146,7 +148,7 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'la cuarentena no frena la atención: el caso sigue con su consultora y su reloj de SLA; solo no entra al sandbox',
     control: 'src/features/soporte-sap/services/runtime.ts · alSandbox(); src/sla.ts no conoce la cuarentena',
     comprobacion: prueba('anonimiza.ts', 'la cuarentena no frena la atención: el reloj de SLA no la conoce y el caso sigue en atención con su consultora'),
-    sabotaje: { que: 'el caso en cuarentena deja de atenderse', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })\n  i.estado = 'en_atencion'\n}", "  if (a.veredicto === 'entra') i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })\n  if (a.veredicto === 'entra') i.estado = 'en_atencion'\n}")] },
+    sabotaje: { que: 'el caso en cuarentena deja de atenderse', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  i.estado = 'en_atencion'\n}", "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  if (a.veredicto === 'entra') i.estado = 'en_atencion'\n}")] },
   },
   {
     id: 'aisia-dato-corpus-real', doc: 'AISIA', ref: 'Dato personal en el sandbox', infirmable: true, estado: 'depende',
@@ -418,6 +420,38 @@ export const FILAS: readonly Fila[] = [
       ed(SQL, "    raise exception 'una impugnación resuelta no se reabre ni se cambia';", "    null;")] },
   },
   {
+    id: 'aisia-sla-persona-runtime', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "en la app, ni anonimizar ni mandar el plan a la sala marcan la primera respuesta: la marca el consultor al responderle al cliente (DP-4)",
+    control: "src/features/soporte-sap/services/runtime.ts · respondeAlCliente()",
+    comprobacion: prueba("anonimiza.ts", "H-17 · ni anonimizar ni mandar a la sala marcan la primera respuesta: solo la da el consultor, respondiéndole al cliente"),
+    sabotaje: { que: "anonimizar vuelve a marcar la primera respuesta", ediciones: [
+      ed('src/features/soporte-sap/services/runtime.ts', "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  i.estado = 'en_atencion'", "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })\n  i.estado = 'en_atencion'")] },
+  },
+  {
+    id: 'aisia-sla-job', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "el resultado de SLA lo calcula un job desde la base (fecha de alta, eventos de la cadena y contrato vigente) con la misma función que la app, y lo escribe con el rol de plataforma",
+    control: "src/sla-job.ts · calculaResultadosSla() con relojSla()",
+    comprobacion: prueba("sla-job.ts", "H-16 · el job calcula el resultado desde los eventos de la base, igual que relojSla, y lo escribe con el rol de plataforma"),
+    sabotaje: { que: "el job deja de leer la primera respuesta", ediciones: [
+      ed(dist('sla-job.js'), "'PRIMERA_RESPUESTA', ", "")] },
+  },
+  {
+    id: 'aisia-sla-job-no-inventa', doc: 'AISIA', ref: 'SLA mal medido', estado: 'probado',
+    afirmacion: "sin contrato válido o sin prioridad inicial, el job no inventa un resultado: lo omite y dice por qué (ausente no es cero)",
+    control: "src/sla-job.ts · omitidas",
+    comprobacion: prueba("sla-job.ts", "H-16 · sin contrato válido o sin prioridad inicial, el job no inventa un resultado: lo omite y dice por qué"),
+    sabotaje: { que: "el job mide con un contrato a medias", ediciones: [
+      ed(dist('sla-job.js'), "&& !!k.metas && ['P1', 'P2', 'P3', 'P4'].every((p) => k.metas[p] !== undefined) && !!k.calendario", "")] },
+  },
+  {
+    id: 'c3-plataforma-sla-suya', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
+    afirmacion: "el job del SLA de una consultora no escribe resultados de otra",
+    control: "SQL · ss_sla_resultado_plataforma_calcula con consultora_de_tarea()",
+    comprobacion: prueba("sla-job.ts", "H-16 · el job de una consultora no escribe resultados de otra"),
+    sabotaje: { que: "el job escribe resultados de cualquiera", ediciones: [
+      ed(SQL, "create policy ss_sla_resultado_plataforma_calcula on public.ss_sla_resultado for insert to soporte_sap_plataforma\n  with check (consultora_id = ss_priv.consultora_de_tarea());", "create policy ss_sla_resultado_plataforma_calcula on public.ss_sla_resultado for insert to soporte_sap_plataforma\n  with check (true);")] },
+  },
+  {
     id: 'aisia-sla-cifras', doc: 'AISIA', ref: 'SLA mal medido', estado: 'probado',
     afirmacion: 'las cifras del contrato (créditos, exclusiones, disponibilidad) no las pone un agente: van en blanco hasta D13',
     control: 'contratos/plantilla-contrato-sla.md',
@@ -494,7 +528,7 @@ export const FILAS: readonly Fila[] = [
   },
   {
     id: 'c3-plataforma-no-inserta', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
-    afirmacion: "el rol de plataforma no inserta nada: ni un mapeo aprobado, ni un campo confirmado, ni horas, ni un evento con el seudónimo de un consultor",
+    afirmacion: "el rol de plataforma no inserta decisiones ni eventos (ni un mapeo aprobado, ni un campo confirmado, ni horas, ni un evento con el seudónimo de un consultor): lo único que escribe es el resultado de SLA que calcula su job",
     control: "SQL · políticas *_plataforma_lee (select) y *_plataforma_borra (delete); grants sin insert",
     comprobacion: prueba('cierre-base.ts', "H-07 · la plataforma no inserta decisiones ni eventos: un mapeo aprobado, un evento ajeno, horas, un campo confirmado"),
     sabotaje: { que: "la plataforma vuelve a tener for all e insert", ediciones: [

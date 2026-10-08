@@ -47,6 +47,24 @@ export function Reloj({ r, prueba }: { r: RelojVista; prueba?: string }) {
   )
 }
 
+/** El consultor le responde al cliente: su primera respuesta es la que para el reloj (DP-4, PRP-010 H-17). */
+function RespuestaAlCliente({ incidencia, actua }: { incidencia: string; actua: (a: object) => Promise<void> }) {
+  const [texto, setTexto] = useState('')
+  const envia = async (ev: FormEvent) => {
+    ev.preventDefault()
+    if (texto.trim().length < 5) return
+    await actua({ tipo: 'responde', incidencia, texto: texto.trim() })
+    setTexto('')
+  }
+  return (
+    <form onSubmit={envia} className="mt-2 flex gap-2" data-prueba="responde-al-cliente">
+      <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Respuesta al cliente" maxLength={2000}
+        className="flex-1 rounded border px-2 py-1 text-xs" aria-label="Respuesta al cliente" />
+      <button type="submit" className="rounded border px-2 py-1 text-xs">Responder</button>
+    </form>
+  )
+}
+
 function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
   return (
     <div className="mt-3 space-y-3 text-sm" data-prueba={`detalle-${i.id}`}>
@@ -94,6 +112,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
       <div data-prueba="reloj-incidencia">
         <h3 className="font-semibold">Reloj de SLA</h3>
         <Reloj r={i.reloj} />
+        {rol === 'consultor' ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
         {rol === 'consultor' ? (
           <div className="mt-2 flex gap-2">
             <button type="button" onClick={() => actua({ tipo: 'espera_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="espera-cliente">Pedir un dato al cliente (pausa)</button>
