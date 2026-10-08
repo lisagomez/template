@@ -6,8 +6,11 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SENALES, CONTEXTO_PERSONAL, categoriza, emiteTokenDeTarea } from '../dist/index.js'
-import { baseSoporte, como, comoAgente, comoServicio, falla, ORG, USR, INC, SQL_SOPORTE, SECRETO_TAREAS } from './_base.ts'
+import { SENALES, CONTEXTO_PERSONAL, categoriza, emiteTokenDeTarea, verificaCadena, type EventoIncidencia } from '../dist/index.js'
+import { createHash } from 'node:crypto'
+import { PGlite } from '@electric-sql/pglite'
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
+import { baseSoporte, como, comoAgente, comoServicio, falla, ORG, USR, INC, SQL_SOPORTE, SECRETO_TAREAS, SUPABASE_MINIMO } from './_base.ts'
 
 const otorga = (extra = '', valores = '') => `insert into ss_acceso_motivado (usuario_id, cliente_id, motivo, otorgado_por, vence_en${extra})
   values ('${USR.sup}', '${ORG.A1}', 'aprobar la solución de la incidencia MIGO', '${USR.ca}', ${valores || "now() + interval '24 hours'"})`
@@ -267,4 +270,92 @@ test('H-21 · el secreto de firma no lo lee ningún rol de la API', async () => 
     ['agente', () => comoAgente(db, ORG.CA, 'select secreto from ss_priv.secreto_tareas')],
     ['persona', () => como(db, USR.sup, 'select secreto from ss_priv.secreto_tareas')],
   ] as const) assert.ok(await falla(f), quien)
+})
+
+// === Tanda 1d · la cadena, los vínculos, las horas y el chat =========================================
+
+const CAD = '20000000-0000-4000-8000-0000000000cd'
+const eventosDe = async (db: Db, inc: string): Promise<EventoIncidencia[]> =>
+  (await db.query<{ seq: number; fecha: Date; tipo: string; actor: string; datos: Record<string, never>; anterior: string; hash: string }>(
+    `select seq, fecha, tipo, actor, datos, anterior, hash from ss_evento where incidencia_id = '${inc}' order by seq`)).rows
+    .map((e) => ({ v: 1, incidencia: inc, seq: e.seq, fecha: e.fecha.toISOString(), tipo: e.tipo as EventoIncidencia['tipo'], actor: e.actor, datos: e.datos, anterior: e.anterior, hash: e.hash }))
+
+test('H-13 · la base calcula la cadena, y el verificador del código la acepta', async () => {
+  const db = await baseSoporte()
+  await db.exec(`insert into ss_incidencia (id, consultora_id, cliente_id, titulo, descripcion) values ('${CAD}', '${ORG.CA}', '${ORG.A1}', 'Cadena', 'x')`)
+  const nota = (actor: string, datos: string) => `insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, datos, actor, fecha, anterior, hash)
+    values ('${CAD}', '${ORG.CA}', '${ORG.A1}', 99, 'NOTA', '${datos}', '${actor}', now() - interval '3 days', 'inventado', 'inventado')`
+  // Quien escribe propone seq, anterior, hash y fecha; la base los pone ella. Datos con acentos, anidados y números.
+  await como(db, USR.ca, nota(await seudonimoDe(db, USR.ca), '{"texto":"Sí, ya revisé la sociedad","n":3,"z":{"b":[1,"ñ"],"a":true}}'))
+  await comoAgente(db, ORG.CA, nota('agente:soporte-sap-a2a', '{"plan":"reabrir periodo","pasos":["MMPV","OB52"]}'))
+  await como(db, USR.ca, nota(await seudonimoDe(db, USR.ca), '{}'))
+  const cadena = await eventosDe(db, CAD)
+  assert.deepEqual(cadena.map((e) => e.seq), [1, 2, 3], 'la secuencia la pone la base')
+  assert.ok(cadena.every((e) => e.hash !== 'inventado' && e.anterior !== 'inventado'))
+  assert.deepEqual(verificaCadena(CAD, cadena), { ok: true, n: 3, cabeza: cadena[2]!.hash })
+})
+
+const conBase = async (antes: string) => {
+  const db = new PGlite({ extensions: { pgcrypto } })
+  await db.exec(SUPABASE_MINIMO)
+  await db.exec(antes)
+  await db.exec(SQL_SOPORTE)
+  return db
+}
+
+test('H-14 · un rol de servicio que ya existía con bypassrls queda corregido al aplicar el esquema', async () => {
+  const db = await conBase('create role soporte_sap_agente login bypassrls;')
+  const r = (await db.query<{ b: boolean; l: boolean }>(`select rolbypassrls as b, rolcanlogin as l from pg_roles where rolname = 'soporte_sap_agente'`)).rows[0]!
+  assert.deepEqual(r, { b: false, l: false })
+})
+
+test('H-14 · un bucket que ya existía público queda privado al aplicar el esquema', async () => {
+  const db = await conBase(`insert into storage.buckets (id, name, public) values ('ss-originales', 'ss-originales', true);`)
+  assert.deepEqual((await db.query<{ p: boolean }>(`select bool_or(public) as p from storage.buckets where id like 'ss-%'`)).rows[0], { p: false })
+})
+
+test('H-14 · un campo extraído cuelga de un adjunto de SU incidencia', async () => {
+  const db = await baseSoporte()
+  const adjuntoDe = async (inc: string) => (await db.query<{ id: string }>(`select id from ss_adjunto where incidencia_id = '${inc}' limit 1`)).rows[0]!.id
+  const campo = (adjunto: string) => `insert into ss_campo_extraido (adjunto_id, incidencia_id, consultora_id, cliente_id, campo, valor, evidencia)
+    values ('${adjunto}', '${INC.a2}', '${ORG.CA}', '${ORG.A2}', 'rfc_receptor', '[RFC]', 'página 1')`
+  const [deA1, deB1] = [await adjuntoDe(INC.a1), await adjuntoDe(INC.b1)]
+  assert.match(await falla(() => db.exec(campo(deA1))) ?? '', /no es de la incidencia/, 'adjunto de otra incidencia de la misma consultora')
+  assert.match(await falla(() => db.exec(campo(deB1))) ?? '', /no es de la incidencia/, 'adjunto de otra consultora')
+})
+
+test('H-14 · una fila importada no cuelga del crudo de otra consultora, ni un contrato del cliente de otra', async () => {
+  const db = await baseSoporte()
+  const [crudoB] = (await db.query<{ id: string }>(`insert into ss_crudo (consultora_id, herramienta, huella, contenido)
+    values ('${ORG.CB}', 'jira', '${'c'.repeat(64)}', '{}') returning id`)).rows
+  assert.match(await falla(() => db.exec(`insert into ss_importacion_fila (crudo_id, indice, consultora_id, herramienta, version_mapeo, resultado)
+    values ('${crudoB!.id}', 0, '${ORG.CA}', 'jira', 1, 'limpia')`)) ?? '', /no es de la consultora/)
+  assert.match(await falla(() => db.exec(`insert into ss_contrato_sla (id, version, nivel, consultora_id, cliente_id, contenido, vigente_desde)
+    values ('sla-cruzado', 1, 'N2-N3', '${ORG.CA}', '${ORG.B1}', '{}', '2026-10-01')`)) ?? '', /no es de la consultora/)
+})
+
+test('H-12 · el agente escribe solo en el chat del usuario de su turno', async () => {
+  const db = await baseSoporte()
+  const turno = (usuario?: string) => emiteTokenDeTarea(SECRETO_TAREAS, { consultora: ORG.CA, tarea: 'chat', rol: 'soporte_sap_agente', exp: Date.now() + 60_000, ...(usuario ? { usuario } : {}) })
+  const escribe = (usuario: string) => `insert into ss_chat_mensaje (usuario_id, autor, contenido) values ('${usuario}', 'agente', 'el plan está en la sala')`
+  assert.equal(await falla(() => comoServicio(db, turno(USR.exp), escribe(USR.exp))), null, 'control: en el chat de su turno, sí')
+  assert.ok(await falla(() => comoServicio(db, turno(USR.exp), escribe(USR.sup))), 'en el chat de otro usuario, no')
+  assert.ok(await falla(() => comoServicio(db, turno(), escribe(USR.exp))), 'sin turno de chat, no')
+})
+
+test('H-05 · cada consultor ve sus horas, no las de sus colegas', async () => {
+  const db = await baseSoporte()
+  const colega = '10000000-0000-4000-8000-0000000000c2'
+  await db.exec(`insert into ss_miembro values ('${ORG.CA}', '${colega}', 'consultor')`)
+  for (const u of [USR.ca, colega]) await como(db, u, `insert into ss_horas (consultora_id, cliente_id, consultor, minutos, fecha)
+    values ('${ORG.CA}', '${ORG.A1}', '${await seudonimoDe(db, u)}', 90, current_date)`)
+  const mias = await como<{ consultor: string }>(db, USR.ca, 'select consultor from ss_horas')
+  assert.deepEqual(mias.map((h) => h.consultor), [await seudonimoDe(db, USR.ca)])
+})
+
+test('H-05 · el seudónimo no se revierte con un md5 del id, y la sal no la lee ningún rol de la API', async () => {
+  const db = await baseSoporte()
+  const md5 = `usr-${createHash('md5').update(USR.ca).digest('hex').slice(0, 12)}`
+  assert.notEqual(await seudonimoDe(db, USR.ca), md5)
+  assert.ok(await falla(() => como(db, USR.sup, 'select sal from ss_priv.sal_seudonimos')), 'el superadministrador no lee la sal')
 })

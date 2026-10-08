@@ -64,7 +64,7 @@ arregló en parte.
 | H-02 | El tope de 72 h del acceso a originales se salta con un `creado_en` futuro: **8 832 h**, confirmado con sonda. El acceso es por cliente, no por incidencia, y no se puede revocar | 1 y 2 | sí | código: la base fija `creado_en`, el tope se mide contra `now()`, hay revocación y una prueba con `creado_en` futuro | **cerrado en la tanda 1a** |
 | H-03 | La base acepta texto crudo en `ss_caso_sandbox` y datos personales en `senales` de cuarentena, y el laboratorio lee los dos. Nada liga el sandbox con el veredicto del anonimizador | 1 y 2 | sí | código: el agente no escribe en el sandbox; `senales`, solo del vocabulario fijo | **cerrado en la tanda 1a** (segundo cerrojo; ver nota) |
 | H-04 | El anonimizador falla abierto ante formas nuevas: 5 de 14 frases entran con el dato («pepe gonzalez de almacen», «jgarcia», «doña Lupita», «El chofer Ramiro», «rosa punto elena en gmail»). La revisión humana de la cuarentena no existe | 2 | sí | código: las 5 al fixture permanente y el detector arreglado. Texto: «fail-closed» promete de más, y la cuarentena es definitiva hasta D14 (DP-8) | — |
-| H-05 | Cualquier consultor lee fila por fila las horas de sus colegas y el actor de cada evento. El seudónimo es un md5 sin sal que el laboratorio puede revertir con `ss_miembro` | 1 y 2 | — | código: cada quien sus filas más un agregado; seudónimo con sal | — |
+| H-05 | Cualquier consultor lee fila por fila las horas de sus colegas y el actor de cada evento. El seudónimo es un md5 sin sal que el laboratorio puede revertir con `ss_miembro` | 1 y 2 | — | código: cada quien sus filas más un agregado; seudónimo con sal | **cerrado en la tanda 1d** |
 
 **Decisiones humanas e integridad**
 
@@ -76,14 +76,14 @@ arregló en parte.
 | H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | **cerrado en la tanda 1b** |
 | H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | **base: tanda 1b** (la pantalla, en la fase 2) |
 | H-11 | `ejecuta()` no ata la aprobación a la huella del plan, y `ss-simulador --param` ejecuta sin compararla | 1 y 2 | sí, con SAP real | código + prueba negativa | — |
-| H-12 | El agente, con la tarea de cualquier consultora, escribe en el chat de cualquier usuario («aprueba el plan de Boreal ya») | 1 y 2 | — | código | — |
-| H-13 | La base no verifica `anterior`, `hash` ni `seq` de la cadena de eventos | 1 | — | código: la base calcula la cadena | — |
+| H-12 | El agente, con la tarea de cualquier consultora, escribe en el chat de cualquier usuario («aprueba el plan de Boreal ya») | 1 y 2 | — | código | **cerrado en la tanda 1d** |
+| H-13 | La base no verifica `anterior`, `hash` ni `seq` de la cadena de eventos | 1 | — | código: la base calcula la cadena | **cerrado en la tanda 1d** |
 
 **Tenencia y vínculos sin atar**
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-14 | Sin atar: `ss_campo_extraido.adjunto_id` (cuelga el adjunto de un N3 en la incidencia de otro), `ss_sla_resultado` sin FK al contrato, `ss_importacion_fila.crudo_id`, `ss_contrato_sla`, `ss_chat_mensaje` y `ss_procedencia`. Cinco disparadores de tenencia no tienen caso directo. Buckets sin prueba de `public=false`, sin `file_size_limit` ni `allowed_mime_types`. Roles creados con `if not exists`, que no corrigen un rol que ya exista con `bypassrls` | 1 y 2 | sí | código + un sabotaje por disparador | — |
+| H-14 | Sin atar: `ss_campo_extraido.adjunto_id` (cuelga el adjunto de un N3 en la incidencia de otro), `ss_sla_resultado` sin FK al contrato, `ss_importacion_fila.crudo_id`, `ss_contrato_sla`, `ss_chat_mensaje` y `ss_procedencia`. Cinco disparadores de tenencia no tienen caso directo. Buckets sin prueba de `public=false`, sin `file_size_limit` ni `allowed_mime_types`. Roles creados con `if not exists`, que no corrigen un rol que ya exista con `bypassrls` | 1 y 2 | sí | código + un sabotaje por disparador | **cerrado en la tanda 1d** (salvo `ss_procedencia` y el tamaño y tipo de los buckets: ver nota) |
 
 **Prioridad y SLA**
 
@@ -126,6 +126,7 @@ arregló en parte.
 | H-29 | `.env.production` entra en la imagen. `.dockerignore` excluye `.env` y `.env*.local` pero no `.env.production`, el `Dockerfile` hace `COPY . .` y el modo standalone de Next lo copia (`node_modules/next/dist/build/index.js`, `writeStandaloneDirectory`) y lo carga al arrancar. Efectos: `service_role`, `SS_PG_PASSWORD` y las llaves del despacho (`scripts/despacho/llaves.mjs` escribe ahí) quedan en el sistema de archivos de la app; y variables que el compose **no** pasa, como `SOPORTE_SAP_LABORATORIO=1` o los tokens de otras rutas, llegan al runtime. Eso tumba la premisa de la revisión de rutas públicas (#209): «la app solo recibe lo que le pone el compose». Afecta también a `docker-compose.despacho.yml`, que usa el mismo `Dockerfile` | 2 | sí | código + prueba (fase 0) | **cerrado en #226** |
 | H-30 | **La imagen de la app no se construye desde un clon limpio, tampoco en `main`.** Se encontró el 07/10 al construir la imagen real desde un `git archive` para la evidencia de la fase 0, y tiene tres capas: (1) `tools/*/dist` está en `.gitignore` y `npm run build` no lo compila (solo `prepara:gate`, por `pretypecheck`): Turbopack da 427 errores; (2) `.dockerignore` excluye `.claude`, y `src/lib/ai/routing.ts` importa `.claude/routing-modelos.json`; (3) el typecheck de `next build` incluye `tools/dictado/src`, y `@tu-scope/voz` no está en la imagen. `npm run deploy` falla en un servidor recién clonado, incluido el despacho del buzón | 07/10 | — | código + prueba (fase 0b) | **cerrado en la fase 0b** |
 | H-31 | **La imagen final arrastra archivos del repo.** El file tracing de Next copia a `.next/standalone` lo que las rutas tocan con `fs`, y en la imagen quedan `src/` (3 MB de fuente), `tools/` (4.3 MB), `docs/`, `trayectorias/` (60 archivos de datos de sesiones), `inventario/`, `productos/` y `erp/` (`casa/huellas.txt`, `entrega.json`, referencias de roles y servidor). La cabecera del `Dockerfile` dice «la imagen final NO contiene código fuente». En el despacho la imagen vive en la máquina de un tercero, y lo defendible del ERP «no sale» (§1.7). Salió al arrancar por primera vez la imagen de la fase 0b; en `main` pasa igual | 07/10 | — | código: qué ruta necesita cada archivo en tiempo de ejecución, y fuera lo demás (`outputFileTracingExcludes`) + prueba que inspeccione la imagen | **cerrado** (ver «H-31, hecho») |
+| H-32 | **El importador seudonimiza los nombres de consultores sin sal**: `src/mapeo.ts:154` da `usr-` + `sha256(consultora|nombre)`, y quien adivine un nombre lo revierte. Lo mismo que H-05, pero en el código que importa los exportes de tickets, no en la base | 07/10 | — | código (fase 2): la sal de la base, o una sal propia del importador | — |
 
 **Texto y cifras** (fase 4, todo `texto`):
 
@@ -436,6 +437,12 @@ La base verifica el token de la tarea: firma con `pgcrypto`, rol de la sesión y
 PostgREST tiene que pasar la cabecera `x-tarea`; `configura:deploy` debería comprobar que el secreto existe sin
 imprimirlo. **Lo que queda de la fase 1 va en la tanda 1d**: H-05, H-07, H-08, H-12, H-13 y H-14.
 
+**Tanda 1d, hecha (2026-10-07, rama `soporte/cierre-1d`)**: H-13 (la base calcula la cadena, y el verificador del código
+la acepta), H-14, H-12 y H-05. Ahora hay 97 filas «probado». **Quedan de H-14**: `ss_procedencia` no tiene a qué atarse
+(su `registro` es texto libre) y el tamaño y tipo de los buckets dependen de la versión de Storage (fase 3). **Para el
+despliegue**: cargar la sal de los seudónimos es otro paso humano. **Hallazgo nuevo**: H-32, el seudónimo sin sal del
+importador (fase 2). **Sigue la tanda 1e**: H-07 y H-08, la plataforma y la restauración.
+
 ### Fase 2: Cablear lo que la app promete y no hace
 **Objetivo**:
 - cablear el presupuesto (H-18), la generalización y el «a medida» por defecto (H-19), la impugnación en la app
@@ -515,6 +522,15 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
   bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.
   **Lección**: un control que no se puede romper por el camino que se prueba parece más fuerte de lo que es.
+- **2026-10-07 · un control nuevo puede dejar sin efecto el sabotaje de uno viejo** (fase 1, tanda 1d). Al correr solo
+  las filas nuevas, todo verde; la matriz COMPLETA dio dos «NO CAE» en filas viejas. La cadena ahora pone la fecha del
+  evento, así que quitar la ventana de `evento_honesto` ya no cambiaba nada; y el nuevo `alter role` corregía el
+  `bypassrls` que sembraba el sabotaje de `c3-bypassrls`. **Fix**: esos sabotajes quitan los dos cerrojos. **Lección**:
+  antes de cada PR se corre la matriz entera, y el commit de su documento solo se hace si sale en verde.
+- **2026-10-07 · un control que compara con `<>` se abre cuando le falta un dato** (fase 1, tanda 1d). `evento_honesto`
+  rechazaba un actor ajeno con `new.actor <> seudonimo(...)`. Con la sal sin cargar, el seudónimo es NULL y `<>` da
+  NULL: el evento entraba con el actor de otro. **Fix**: `is distinct from`. **Lección**: en una regla de seguridad,
+  toda comparación contra un valor que puede faltar falla cerrado.
 - **2026-10-07 · dos pruebas vacías del H-21, y las dos parecían razonables** (fase 1, tanda 1c). La sonda del
   `set_config` iba en el WHERE y después en un LATERAL de la misma consulta: no leía B **ni con la función vieja**,
   porque la base evalúa antes la función estable de la política. El arnés dijo «NO CAE» dos veces. Una sonda medida

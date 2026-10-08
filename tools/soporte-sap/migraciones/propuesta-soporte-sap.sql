@@ -30,6 +30,10 @@
 
 create schema if not exists ss_priv;
 
+-- pgcrypto vive en `extensions`, como en Supabase: firma de tareas (H-21) y seudónimos con sal (H-05).
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
 do $$
 declare r text;
 begin
@@ -37,6 +41,8 @@ begin
     if not exists (select 1 from pg_roles where rolname = r) then
       execute format('create role %I nologin nobypassrls', r);
     end if;
+    -- Y si ya existía, se corrige: `if not exists` no tocaba un rol creado antes con bypassrls (PRP-010 H-14).
+    execute format('alter role %I nologin nobypassrls', r);
   end loop;
 end $$;
 
@@ -130,8 +136,16 @@ create or replace function ss_priv.ve_cliente(cli uuid) returns boolean language
 $$;
 
 -- El seudónimo de una persona en la cadena de eventos: estable, no reversible sin la tabla de miembros.
-create or replace function ss_priv.seudonimo(u uuid) returns text language sql immutable set search_path = '' as $$
-  select 'usr-' || left(md5(u::text), 12)
+-- Con SAL (PRP-010 H-05): `md5(uuid)` lo revertía cualquiera que leyera `ss_miembro`, laboratorio incluido. La sal
+-- vive en `ss_priv.sal_seudonimos`, que solo lee esta función; se carga al desplegar (paso humano, fuera del chat).
+-- Sin sal no hay seudónimo, y las políticas que lo comparan no dejan pasar a nadie.
+create table if not exists ss_priv.sal_seudonimos (
+  id  smallint primary key default 1 check (id = 1),
+  sal text not null check (length(sal) >= 32)
+);
+revoke all on ss_priv.sal_seudonimos from public;
+create or replace function ss_priv.seudonimo(u uuid) returns text language sql stable security definer set search_path = '' as $$
+  select 'usr-' || left(encode(extensions.hmac(u::text, s.sal, 'sha256'), 'hex'), 12) from ss_priv.sal_seudonimos s where s.id = 1
 $$;
 
 -- La consultora de la tarea: el claim `consultora` del JWT que firmó quien encoló la tarea.
@@ -139,9 +153,7 @@ $$;
 -- `request.jwt.claims`, que cualquier sesión con SQL fija con `set_config` (dentro de la misma consulta): con una tarea
 -- de A se leía B. Ahora la sesión presenta el token CRUDO (`ss.tarea`, o la cabecera `x-tarea` vía PostgREST) y la base
 -- comprueba la firma del orquestador, el vencimiento y que el rol del token sea el de la sesión. Sin token válido, la
--- consultora es nula y las políticas no dejan ver nada. pgcrypto vive en `extensions`, como en Supabase.
-create schema if not exists extensions;
-create extension if not exists pgcrypto with schema extensions;
+-- consultora es nula y las políticas no dejan ver nada. pgcrypto (en `extensions`) se crea al principio del esquema.
 
 -- El secreto con el que firma el orquestador. Solo lo lee `firma_valida` (security definer); ningún rol de la API
 -- lo ve. Se carga al desplegar, como paso humano y fuera del chat; sin él, ninguna tarea tiene alcance.
@@ -334,7 +346,8 @@ begin
   if new.fecha < now() - interval '5 minutes' or new.fecha > now() + interval '1 minute' then
     raise exception 'la fecha de un evento la da el reloj de la base, no quien escribe';
   end if;
-  if current_user = 'authenticated' and new.actor <> ss_priv.seudonimo(auth.uid()) then
+  -- `is distinct from`, no `<>`: sin sal el seudónimo es NULL, y `<>` con NULL no rechazaba (falla cerrado, H-05).
+  if current_user = 'authenticated' and new.actor is distinct from ss_priv.seudonimo(auth.uid()) then
     raise exception 'el actor de un evento humano es el seudónimo de su sesión';
   end if;
   if current_user = 'soporte_sap_agente' and new.actor not like 'agente:%' then
@@ -345,6 +358,58 @@ end $$;
 drop trigger if exists ss_evento_honesto on public.ss_evento;
 create trigger ss_evento_honesto before insert on public.ss_evento
   for each row execute function ss_priv.evento_honesto();
+
+-- La CADENA la calcula la base (PRP-010 H-13): quien escribe no elige `seq`, `anterior` ni `hash` (antes la base
+-- aceptaba los que le dieran). La fórmula es la de src/cadena.ts: sha256 del JSON canónico del registro completo
+-- (`v`, incidencia, seq, fecha ISO en milisegundos, tipo, actor, datos, anterior), y el génesis, el de la incidencia.
+-- `pruebas/cierre-base.ts` verifica con `verificaCadena` (el código) la cadena que dejó la base.
+create or replace function ss_priv.canonico(v jsonb) returns text language plpgsql immutable set search_path = '' as $$
+declare r text;
+begin
+  case jsonb_typeof(v)
+    when 'object' then
+      select '{' || coalesce(string_agg(to_json(key)::text || ':' || ss_priv.canonico(value), ',' order by key collate "C"), '') || '}'
+        into r from jsonb_each(v);
+    when 'array' then
+      select '[' || coalesce(string_agg(ss_priv.canonico(value), ',' order by ord), '') || ']'
+        into r from jsonb_array_elements(v) with ordinality as x(value, ord);
+    else
+      r := v::text;
+  end case;
+  return r;
+end $$;
+
+create or replace function ss_priv.sha256(t text) returns text language sql immutable security definer set search_path = '' as $$
+  select encode(extensions.digest(t, 'sha256'), 'hex')
+$$;
+
+-- La cabeza de la cadena, como dueño: quien escribe puede no ver todos los eventos de la incidencia.
+create or replace function ss_priv.cabeza_de(inc uuid) returns table (seq integer, hash text) language sql stable security definer set search_path = '' as $$
+  select e.seq, e.hash from public.ss_evento e where e.incidencia_id = inc order by e.seq desc limit 1
+$$;
+
+create or replace function ss_priv.evento_encadena() returns trigger language plpgsql set search_path = '' as $$
+declare
+  c_seq  integer;
+  c_hash text;
+begin
+  if current_user not in ('authenticated', 'soporte_sap_agente', 'soporte_sap_ingesta') then
+    return new;  -- la historia (semilla, restauración) trae su cadena; la verifica la restauración (H-08)
+  end if;
+  perform pg_advisory_xact_lock(hashtextextended(new.incidencia_id::text, 0));
+  select c.seq, c.hash into c_seq, c_hash from ss_priv.cabeza_de(new.incidencia_id) c;
+  new.seq := coalesce(c_seq, 0) + 1;
+  new.anterior := coalesce(c_hash, ss_priv.sha256(ss_priv.canonico(jsonb_build_object('genesis', new.incidencia_id::text))));
+  new.fecha := date_trunc('milliseconds', now());
+  new.hash := ss_priv.sha256(ss_priv.canonico(jsonb_build_object(
+    'v', 1, 'incidencia', new.incidencia_id::text, 'seq', new.seq,
+    'fecha', to_char(new.fecha at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+    'tipo', new.tipo, 'actor', new.actor, 'datos', new.datos, 'anterior', new.anterior)));
+  return new;
+end $$;
+drop trigger if exists ss_evento_cadena on public.ss_evento;
+create trigger ss_evento_cadena before insert on public.ss_evento
+  for each row execute function ss_priv.evento_encadena();
 
 -- Quién emite qué (PRP-010 H-16, H-17, DP-4). Responder, pausar el reloj, resolver, cerrar, reabrir y cambiar la
 -- prioridad son actos de una PERSONA de la consultora: una acción de la máquina no cuenta como primera respuesta
@@ -701,6 +766,31 @@ begin
   end loop;
 end $$;
 
+-- Los vínculos que la tenencia no ataba (PRP-010 H-14): un campo extraído cuelga de un adjunto de SU incidencia (si
+-- no, el valor leído del documento de un cliente aparecía en la incidencia de otro), y una fila importada, de un crudo
+-- de SU consultora. Se comprueban como dueño: quien escribe puede no ver la fila referida.
+create or replace function ss_priv.campo_de_su_adjunto() returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if not exists (select 1 from public.ss_adjunto a where a.id = new.adjunto_id and a.incidencia_id = new.incidencia_id) then
+    raise exception 'el adjunto % no es de la incidencia %', new.adjunto_id, new.incidencia_id;
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_campo_extraido_adjunto on public.ss_campo_extraido;
+create trigger ss_campo_extraido_adjunto before insert or update on public.ss_campo_extraido
+  for each row execute function ss_priv.campo_de_su_adjunto();
+
+create or replace function ss_priv.fila_de_su_crudo() returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if not exists (select 1 from public.ss_crudo c where c.id = new.crudo_id and c.consultora_id = new.consultora_id) then
+    raise exception 'el crudo % no es de la consultora %', new.crudo_id, new.consultora_id;
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_importacion_fila_crudo on public.ss_importacion_fila;
+create trigger ss_importacion_fila_crudo before insert or update on public.ss_importacion_fila
+  for each row execute function ss_priv.fila_de_su_crudo();
+
 create or replace function ss_priv.cliente_es_de_consultora() returns trigger language plpgsql set search_path = '' as $$
 begin
   if new.cliente_id is not null and ss_priv.padre_de(new.cliente_id) is distinct from new.consultora_id then
@@ -712,7 +802,8 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['ss_importacion_fila', 'ss_metrica'] loop
+  -- `ss_contrato_sla` también (PRP-010 H-14): un contrato N2-N3 no se firma con el cliente de otra consultora.
+  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla'] loop
     execute format('drop trigger if exists %I on public.%I', t || '_tenencia', t);
     execute format('create trigger %I before insert or update on public.%I for each row execute function ss_priv.cliente_es_de_consultora()', t || '_tenencia', t);
   end loop;
@@ -762,8 +853,11 @@ create policy ss_cuarentena_lee on public.ss_cuarentena for select to authentica
 
 -- Las horas son de la consultora: ni el cliente ni el laboratorio las leen fila por fila.
 drop policy if exists ss_horas_lee on public.ss_horas;
+-- Cada consultor ve SUS filas (PRP-010 H-05): leer las de sus colegas una por una era una vista de desempeño
+-- individual, y el producto dice que no la ofrece. Los totales salen de la capa semántica (`horas_por_ticket` en
+-- `ss_metrica`), sin persona; una función `security definer` en `public` para sumarlas rompería la regla del esquema.
 create policy ss_horas_lee on public.ss_horas for select to authenticated
-  using (ss_priv.rol_en(consultora_id) = 'consultor');
+  using (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.seudonimo(auth.uid()));
 
 drop policy if exists ss_sandbox_lee on public.ss_caso_sandbox;
 create policy ss_sandbox_lee on public.ss_caso_sandbox for select to authenticated
@@ -939,8 +1033,10 @@ create policy ss_propuesta_agente on public.ss_propuesta for insert to soporte_s
   with check (estado = 'propuesta' and decidida_por is null and (consultora_id is null or consultora_id = ss_priv.consultora_de_tarea()));
 
 drop policy if exists ss_chat_agente on public.ss_chat_mensaje;
+-- Solo en el chat del usuario de SU turno: el token de la tarea de chat lo nombra (`usuario`). Antes bastaba
+-- `autor = 'agente'`, y con una tarea de cualquier consultora escribía en el chat de cualquiera (PRP-010 H-12).
 create policy ss_chat_agente on public.ss_chat_mensaje for insert to soporte_sap_agente
-  with check (autor = 'agente');
+  with check (autor = 'agente' and usuario_id = ss_priv.uuid_o_nulo(ss_priv.claims_de_tarea() ->> 'usuario'));
 
 -- La ingesta (sin modelo): ve incidencias y adjuntos de su consultora y deja campos POR REVISAR ----
 
@@ -1045,7 +1141,8 @@ insert into storage.buckets (id, name, public) values
   ('ss-originales', 'ss-originales', false),
   ('ss-sandbox', 'ss-sandbox', false),
   ('ss-exportes', 'ss-exportes', false)
-on conflict (id) do nothing;
+-- Privados SIEMPRE: con `do nothing`, un bucket que ya existiera como público se quedaba público (PRP-010 H-14).
+on conflict (id) do update set public = false;
 
 create or replace function ss_priv.carpeta(name text, n int) returns uuid language sql immutable set search_path = '' as $$
   select ss_priv.uuid_o_nulo((storage.foldername(name))[n])

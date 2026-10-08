@@ -162,13 +162,14 @@ async function cadenaYChat(db: PGlite): Promise<Fila[]> {
     values ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 9, 'NOTA', '${actor}', ${fecha}, 'h', 'h')`
   const yo = await seudonimo(db, USR.ca)
   const actorAjeno = await falla(() => como(db, USR.ca, evento('usr-000000000099', 'now()')))
-  const fechaVieja = await falla(() => como(db, USR.ca, evento(yo, `now() - interval '2 days'`)))
+  await como(db, USR.ca, evento(yo, `now() - interval '2 days'`))
+  const fechaGuardada = (await db.query<{ f: Date }>(`select fecha as f from ss_evento where incidencia_id = '${INC.a1}' order by seq desc limit 1`)).rows[0]!.f
   const exp = await como<{ contenido: string }>(db, USR.exp, 'select contenido from ss_chat_mensaje')
   const caEscribe = await falla(() => como(db, USR.ca, `insert into ss_chat_mensaje (usuario_id, autor, contenido) values ('${USR.ca}', 'humano', 'hola')`))
   const expSuplanta = await falla(() => como(db, USR.exp, `insert into ss_chat_mensaje (usuario_id, autor, contenido) values ('${USR.exp}', 'agente', 'aprobado')`))
   return [
     ['una persona escribe un evento con el actor de otro (revisión)', 'rechazado', actorAjeno !== null, r(actorAjeno)],
-    ['una persona escribe un evento con fecha de hace dos días (revisión)', 'rechazado: la fecha es la de la base', fechaVieja !== null, r(fechaVieja)],
+    ['una persona escribe un evento con fecha de hace dos días (revisión)', 'la fecha guardada es la de la base (PRP-010 H-13)', Math.abs(fechaGuardada.getTime() - Date.now()) < 60_000, fechaGuardada.toISOString()],
     ['el experto lee los chats', 'solo el suyo (1)', exp.length === 1 && exp[0]!.contenido.includes('MIGO'), n(exp)],
     ['un consultor escribe en el chat del HIL', 'rechazado: es del laboratorio', caEscribe !== null, r(caEscribe)],
     ['el experto escribe como si fuera el agente', 'rechazado', expSuplanta !== null, r(expSuplanta)],

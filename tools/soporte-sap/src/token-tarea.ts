@@ -17,6 +17,8 @@ export interface ClaimsTarea {
   readonly rol: RolDeServicio
   /** Vencimiento, en milisegundos desde la época. */
   readonly exp: number
+  /** En una tarea de chat, el usuario de ESE turno: el agente solo escribe en su chat (PRP-010 H-12). */
+  readonly usuario?: string
 }
 
 const ROLES: readonly RolDeServicio[] = ['soporte_sap_agente', 'soporte_sap_ingesta', 'soporte_sap_plataforma', 'soporte_sap_metricas']
@@ -29,6 +31,7 @@ export function emiteTokenDeTarea(secreto: string, claims: ClaimsTarea): string 
   if (secreto.length < 32) throw new Error('el secreto de firma de tareas debe tener al menos 32 caracteres')
   if (!UUID.test(claims.consultora)) throw new Error('la consultora de una tarea es un uuid')
   if (!ROLES.includes(claims.rol)) throw new Error(`rol de servicio desconocido: ${claims.rol}`)
+  if (claims.usuario !== undefined && !UUID.test(claims.usuario)) throw new Error('el usuario de una tarea de chat es un uuid')
   const cuerpo = b64(JSON.stringify(claims))
   return `${cuerpo}.${firma(secreto, cuerpo)}`
 }
@@ -45,5 +48,6 @@ export function verificaTokenDeTarea(secreto: string, token: string, ahora: numb
   if (typeof c.tarea !== 'string' || !c.tarea) throw new Error('el token no trae la tarea')
   if (!c.rol || !ROLES.includes(c.rol)) throw new Error('el token no trae un rol de servicio válido')
   if (typeof c.exp !== 'number' || c.exp <= ahora) throw new Error('el token de tarea venció')
-  return { consultora: c.consultora, tarea: c.tarea, rol: c.rol, exp: c.exp }
+  if (c.usuario !== undefined && (typeof c.usuario !== 'string' || !UUID.test(c.usuario))) throw new Error('el token trae un usuario que no es un uuid')
+  return { consultora: c.consultora, tarea: c.tarea, rol: c.rol, exp: c.exp, ...(c.usuario ? { usuario: c.usuario } : {}) }
 }
