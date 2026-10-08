@@ -342,9 +342,11 @@ export const FILAS: readonly Fila[] = [
   {
     id: 'aisia-sla-fecha', doc: 'AISIA', ref: 'SLA mal medido', estado: 'probado',
     afirmacion: 'la fecha de cada evento la da la base, no quien escribe',
-    control: 'SQL · ss_priv.evento_honesto()',
+    control: 'SQL · ss_priv.evento_encadena() pone la fecha (y ss_priv.evento_honesto() vigila la ventana)',
     comprobacion: AISLAMIENTO,
-    sabotaje: { que: 'cualquiera fecha su evento', ediciones: [ed(SQL, "  if new.fecha < now() - interval '5 minutes' or new.fecha > now() + interval '1 minute' then", '  if false then')] },
+    sabotaje: { que: 'cualquiera fecha su evento: se quitan los dos cerrojos', ediciones: [
+      ed(SQL, "  new.fecha := date_trunc('milliseconds', now());\n", ''),
+      ed(SQL, "  if new.fecha < now() - interval '5 minutes' or new.fecha > now() + interval '1 minute' then", '  if false then')] },
   },
   {
     id: 'aisia-sla-alta', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
@@ -503,7 +505,9 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'ninguno de los roles de servicio tiene bypassrls',
     control: 'SQL · create role … nobypassrls',
     comprobacion: prueba('esquema.ts', 'ningún rol de servicio sale con bypassrls ni puede decidir'),
-    sabotaje: { que: 'los roles nacen con bypassrls', ediciones: [ed(SQL, "execute format('create role %I nologin nobypassrls', r);", "execute format('create role %I nologin bypassrls', r);")] },
+    sabotaje: { que: 'los roles nacen con bypassrls y nada los corrige', ediciones: [
+      ed(SQL, "execute format('create role %I nologin nobypassrls', r);", "execute format('create role %I nologin bypassrls', r);"),
+      ed(SQL, "    execute format('alter role %I nologin nobypassrls', r);\n", '')] },
   },
   {
     id: 'c3-conexion-directa', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
