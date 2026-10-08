@@ -1,13 +1,13 @@
 /**
  * Cierre de la base (PRP-010): lo que la AISIA y el C3 prometían y la base no cumplía. Tanda 1a, datos personales
- * y decisiones humanas; tanda 1b, prioridad y SLA. Cada prueba es una sonda de la revisión del 2026-10-07 con el
+ * y decisiones humanas; tanda 1b, prioridad y SLA; tanda 1c, roles y tenencia. Cada prueba es una sonda de la revisión del 2026-10-07 con el
  * resultado que debe dar; cada una tiene su fila y su sabotaje en `firmas/matriz.ts`. Las de la sala
  * (H-06) viven en `tools/sala-a2a/pruebas/_suite.ts` (S10 y S10b).
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SENALES, CONTEXTO_PERSONAL, categoriza } from '../dist/index.js'
-import { baseSoporte, como, comoAgente, falla, ORG, USR, INC, SQL_SOPORTE } from './_base.ts'
+import { SENALES, CONTEXTO_PERSONAL, categoriza, emiteTokenDeTarea } from '../dist/index.js'
+import { baseSoporte, como, comoAgente, comoServicio, falla, ORG, USR, INC, SQL_SOPORTE, SECRETO_TAREAS } from './_base.ts'
 
 const otorga = (extra = '', valores = '') => `insert into ss_acceso_motivado (usuario_id, cliente_id, motivo, otorgado_por, vence_en${extra})
   values ('${USR.sup}', '${ORG.A1}', 'aprobar la solución de la incidencia MIGO', '${USR.ca}', ${valores || "now() + interval '24 hours'"})`
@@ -221,4 +221,45 @@ test('H-10 · la consultora no reescribe la queja del cliente; la resuelve a su 
   const r = (await db.query<{ resuelta_en: Date | null }>(`select resuelta_en from ss_impugnacion where id = '${imp!.id}'`)).rows[0]!
   assert.notEqual(r.resuelta_en, null, 'la resolución queda fechada por la base')
   assert.match(await falla(() => como(db, USR.ca, `update ss_impugnacion set estado = 'abierta', resuelta_por = null where id = '${imp!.id}'`)) ?? '', /no se reabre/)
+})
+
+// === Tanda 1c · roles y tenencia ===================================================================
+
+const tarea = (consultora: string, opciones: { secreto?: string; exp?: number; rol?: 'soporte_sap_agente' | 'soporte_sap_ingesta' } = {}) =>
+  emiteTokenDeTarea(opciones.secreto ?? SECRETO_TAREAS, { consultora, tarea: 't', rol: opciones.rol ?? 'soporte_sap_agente', exp: opciones.exp ?? Date.now() + 60_000 })
+const deB = `select id from ss_incidencia where consultora_id = '${ORG.CB}'`
+
+test('H-21 · con set_config dentro de la consulta, una tarea de A no lee B', async () => {
+  const db = await baseSoporte()
+  // La sonda del 05/10: el alcance era `request.jwt.claims`, y la sesión lo reescribía en la misma consulta.
+  const claims = await comoAgente(db, ORG.CA, `select id from ss_incidencia
+    where consultora_id = '${ORG.CB}' and set_config('request.jwt.claims', '{"consultora":"${ORG.CB}"}', true) is not null`)
+  const token = await comoAgente(db, ORG.CA, `select id from ss_incidencia
+    where consultora_id = '${ORG.CB}' and set_config('ss.tarea', '${tarea(ORG.CB, { secreto: 'un-secreto-que-el-agente-se-invento-0000' })}', true) is not null`)
+  assert.deepEqual([claims.length, token.length], [0, 0])
+})
+
+test('H-21 · un token falso, vencido o de otro rol no da alcance', async () => {
+  const db = await baseSoporte()
+  const falso = await comoServicio(db, tarea(ORG.CB, { secreto: 'otro-secreto-que-no-es-el-del-orquestador' }), deB)
+  const vencido = await comoServicio(db, tarea(ORG.CB, { exp: Date.now() - 1000 }), deB)
+  // Un token legítimo de la INGESTA de B, presentado por una sesión del agente: el rol no cuadra.
+  const ingesta = tarea(ORG.CB, { rol: 'soporte_sap_ingesta' })
+  await db.exec(`set role soporte_sap_agente; select set_config('ss.tarea', '${ingesta}', false);`)
+  const otroRol = (await db.query(deB).finally(() => db.exec(`reset role; select set_config('ss.tarea', '', false);`))).rows
+  assert.deepEqual([falso.length, vencido.length, otroRol.length], [0, 0, 0])
+})
+
+test('H-21 · control: con el token firmado de su tarea, el agente lee su consultora y nada más', async () => {
+  const db = await baseSoporte()
+  const propias = await comoServicio<{ consultora_id: string }>(db, tarea(ORG.CB), 'select consultora_id from ss_incidencia')
+  assert.ok(propias.length > 0 && propias.every((f) => f.consultora_id === ORG.CB), `vio ${propias.length}`)
+})
+
+test('H-21 · el secreto de firma no lo lee ningún rol de la API', async () => {
+  const db = await baseSoporte()
+  for (const [quien, f] of [
+    ['agente', () => comoAgente(db, ORG.CA, 'select secreto from ss_priv.secreto_tareas')],
+    ['persona', () => como(db, USR.sup, 'select secreto from ss_priv.secreto_tareas')],
+  ] as const) assert.ok(await falla(f), quien)
 })

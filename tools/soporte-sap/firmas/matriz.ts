@@ -49,6 +49,7 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-conexion-directa', 'c3-token-base-firma', 'c3-token-base-rol', 'c3-token-base-vence', 'c3-token-secreto', 'c3-sala-tenant-token'], afirmacion: 'la consultora de la tarea sale de un token firmado por el orquestador y verificado por la pasarela', encontrado: 'PRP-010 H-21 (05/10 y 07/10): la verificación solo existía en el arnés de pruebas; la base leía `request.jwt.claims`, que la sesión reescribe con `set_config` en la misma consulta (un token de A leía B), y `sala_agente` se acotaba con una variable que fijaba él mismo' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-prioridad-piso-base', 'aisia-prioridad-vocabulario', 'aisia-prioridad-cambio'], afirmacion: 'un ticket con señales de nómina o RR. HH. no queda debajo de P2 sin que un humano lo baje', encontrado: 'PRP-010 H-15 (07/10): IMSS, PTU, aguinaldo, incapacidad, la quincena o un infotipo salían P4 (dos vocabularios distintos), y la base no imponía el piso: el cliente insertaba la prioridad que quería y el consultor la cambiaba sin motivo ni evento' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-alta', 'aisia-sla-marcas', 'aisia-sla-de-eventos', 'aisia-sla-resultado-contrato', 'aisia-sla-resultado-agente'], afirmacion: 'el SLA se mide desde los eventos; la fecha y el actor los da la base', encontrado: 'PRP-010 H-16 (07/10): el cliente creaba con una fecha de hace un mes, el consultor reescribía `creada_en` y la primera respuesta, y el agente guardaba `cumple=true` con un contrato inventado' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-persona'], afirmacion: 'la primera respuesta es de una persona (DP-4)', encontrado: 'PRP-010 H-17 (07/10): la marcaba la máquina al anonimizar o al mandar a la sala, y una P1 a 60 min se cumplía siempre (en la base; el runtime va en la fase 2)' },
@@ -501,10 +502,51 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'los roles nacen con bypassrls', ediciones: [ed(SQL, "execute format('create role %I nologin nobypassrls', r);", "execute format('create role %I nologin bypassrls', r);")] },
   },
   {
-    id: 'c3-conexion-directa', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', estado: 'brecha',
-    afirmacion: 'con una conexión SQL directa, cualquier rol fija sus GUC',
-    control: 'el agente no tiene conexión directa, solo la API',
-    nota: 'si un día la tuviera, el control de alcance desaparece: no es comprobable en laboratorio',
+    id: 'c3-conexion-directa', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
+    afirmacion: "con SQL, una sesión que fija sus variables (set_config, en la misma consulta) no cambia su alcance: la base verifica el token de su tarea (antes era una brecha declarada)",
+    control: "SQL · ss_priv.consultora_de_tarea() lee ss_priv.claims_de_tarea(), no request.jwt.claims",
+    comprobacion: prueba('cierre-base.ts', "H-21 · con set_config dentro de la consulta, una tarea de A no lee B"),
+    sabotaje: { que: "el alcance vuelve a salir de request.jwt.claims", ediciones: [
+      ed(SQL, "  select ss_priv.uuid_o_nulo(ss_priv.claims_de_tarea() ->> 'consultora')", "  select ss_priv.uuid_o_nulo(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'consultora')")] },
+  },
+  {
+    id: 'c3-token-base-firma', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
+    afirmacion: "la firma del orquestador se verifica DENTRO de la base: un token firmado con otro secreto no da alcance (DP-2)",
+    control: "SQL · ss_priv.firma_valida() (security definer, pgcrypto)",
+    comprobacion: prueba('cierre-base.ts', "H-21 · un token falso, vencido o de otro rol no da alcance"),
+    sabotaje: { que: "la base deja de comprobar la firma", ediciones: [
+      ed(SQL, "  if not ss_priv.firma_valida(split_part(token, '.', 1), split_part(token, '.', 2)) then return null; end if;\n", "")] },
+  },
+  {
+    id: 'c3-token-base-rol', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
+    afirmacion: "el token es del rol de la sesión: uno legítimo de la ingesta no le sirve al agente",
+    control: "SQL · ss_priv.claims_de_tarea() compara claims->>'rol' con current_user",
+    comprobacion: prueba('cierre-base.ts', "H-21 · un token falso, vencido o de otro rol no da alcance"),
+    sabotaje: { que: "la base deja de comprobar el rol", ediciones: [
+      ed(SQL, "  if claims ->> 'rol' is distinct from current_user then return null; end if;\n", "")] },
+  },
+  {
+    id: 'c3-token-base-vence', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
+    afirmacion: "un token vencido no da alcance",
+    control: "SQL · ss_priv.claims_de_tarea() compara exp con el reloj",
+    comprobacion: prueba('cierre-base.ts', "H-21 · un token falso, vencido o de otro rol no da alcance"),
+    sabotaje: { que: "la base deja de mirar el vencimiento", ediciones: [
+      ed(SQL, "  if coalesce((claims ->> 'exp')::bigint, 0) <= (extract(epoch from clock_timestamp()) * 1000)::bigint then return null; end if;\n  return claims;", "  return claims;")] },
+  },
+  {
+    id: 'c3-token-secreto', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
+    afirmacion: "el secreto que firma los tokens no lo lee ningún rol de la API: solo la función que verifica",
+    control: "SQL · ss_priv.secreto_tareas sin grants; revoke all from public",
+    comprobacion: prueba('cierre-base.ts', "H-21 · el secreto de firma no lo lee ningún rol de la API"),
+    sabotaje: { que: "el secreto queda legible", ediciones: [
+      ed(SQL, "revoke all on ss_priv.secreto_tareas from public;", "grant select on ss_priv.secreto_tareas to public;")] },
+  },
+  {
+    id: 'c3-sala-tenant-token', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', infirmable: true, estado: 'probado',
+    afirmacion: 'en la sala, el agente no fija su tenant: lo verifica la base desde el token firmado de su tarea (S11)',
+    control: 'tools/sala-a2a · sala_priv.tenant_de_tarea() con sala_priv.firma_valida()',
+    comprobacion: { tipo: 'comando', carpeta: 'tools/sala-a2a', comando: ['node', 'evidencia/sabotajes.ts'] },
+    sabotaje: { que: 'la suite de la sala siembra S11 (el tenant vuelve a ser una variable de sesión) y exige que caiga', integrado: true },
   },
   {
     id: 'c3-decision-mapeo', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
@@ -529,7 +571,7 @@ export const FILAS: readonly Fila[] = [
   },
   {
     id: 'c3-sala', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
-    afirmacion: 'en la sala, la fila de aprobación no la fabrica ningún componente que ejecuta un modelo (sabotajes S1–S10)',
+    afirmacion: 'en la sala, la fila de aprobación no la fabrica ningún componente que ejecuta un modelo (sabotajes S1–S11)',
     control: 'tools/sala-a2a · política as restrictive, sin insert para servicios',
     comprobacion: { tipo: 'comando', carpeta: 'tools/sala-a2a', comando: ['node', 'evidencia/sabotajes.ts'] },
     sabotaje: { que: 'la suite de la sala siembra cada sabotaje en una base nueva y exige que caiga', integrado: true },

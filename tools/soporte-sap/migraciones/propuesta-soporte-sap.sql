@@ -135,8 +135,53 @@ create or replace function ss_priv.seudonimo(u uuid) returns text language sql i
 $$;
 
 -- La consultora de la tarea: el claim `consultora` del JWT que firmó quien encoló la tarea.
+-- El alcance de un rol de servicio se VERIFICA en la base (PRP-010 H-21, DP-2). Antes, la consultora salía de
+-- `request.jwt.claims`, que cualquier sesión con SQL fija con `set_config` (dentro de la misma consulta): con una tarea
+-- de A se leía B. Ahora la sesión presenta el token CRUDO (`ss.tarea`, o la cabecera `x-tarea` vía PostgREST) y la base
+-- comprueba la firma del orquestador, el vencimiento y que el rol del token sea el de la sesión. Sin token válido, la
+-- consultora es nula y las políticas no dejan ver nada. pgcrypto vive en `extensions`, como en Supabase.
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
+-- El secreto con el que firma el orquestador. Solo lo lee `firma_valida` (security definer); ningún rol de la API
+-- lo ve. Se carga al desplegar, como paso humano y fuera del chat; sin él, ninguna tarea tiene alcance.
+create table if not exists ss_priv.secreto_tareas (
+  id      smallint primary key default 1 check (id = 1),
+  secreto text not null check (length(secreto) >= 32)
+);
+revoke all on ss_priv.secreto_tareas from public;
+
+create or replace function ss_priv.b64url(t text) returns bytea language sql immutable set search_path = '' as $$
+  select decode(rpad(translate(t, '-_', '+/'), (length(t) + 3) / 4 * 4, '='), 'base64')
+$$;
+
+-- ¿La firma es del orquestador? Se comparan los resúmenes, no los sellos: así el tiempo de respuesta no dice
+-- cuántos caracteres del sello coinciden.
+create or replace function ss_priv.firma_valida(cuerpo text, sello text) returns boolean language sql stable security definer set search_path = '' as $$
+  select coalesce((select extensions.digest(rtrim(translate(encode(extensions.hmac(cuerpo, s.secreto, 'sha256'), 'base64'), '+/', '-_'), '='), 'sha256')
+                        = extensions.digest(sello, 'sha256')
+                   from ss_priv.secreto_tareas s where s.id = 1), false)
+$$;
+
+-- Corre con los permisos de quien llama: `current_user` es el rol de la sesión, y el token tiene que ser de ESE rol.
+create or replace function ss_priv.claims_de_tarea() returns jsonb language plpgsql stable set search_path = '' as $$
+declare
+  token  text := coalesce(nullif(current_setting('ss.tarea', true), ''),
+                          nullif(current_setting('request.headers', true), '')::jsonb ->> 'x-tarea');
+  claims jsonb;
+begin
+  if token is null or token !~ '^[A-Za-z0-9_-]+[.][A-Za-z0-9_-]+$' then return null; end if;
+  if not ss_priv.firma_valida(split_part(token, '.', 1), split_part(token, '.', 2)) then return null; end if;
+  claims := convert_from(ss_priv.b64url(split_part(token, '.', 1)), 'utf8')::jsonb;
+  if claims ->> 'rol' is distinct from current_user then return null; end if;
+  if coalesce((claims ->> 'exp')::bigint, 0) <= (extract(epoch from clock_timestamp()) * 1000)::bigint then return null; end if;
+  return claims;
+exception when others then
+  return null;
+end $$;
+
 create or replace function ss_priv.consultora_de_tarea() returns uuid language sql stable set search_path = '' as $$
-  select ss_priv.uuid_o_nulo(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'consultora')
+  select ss_priv.uuid_o_nulo(ss_priv.claims_de_tarea() ->> 'consultora')
 $$;
 
 create or replace function ss_priv.solo_agregar() returns trigger language plpgsql set search_path = '' as $$

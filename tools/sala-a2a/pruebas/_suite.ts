@@ -7,7 +7,9 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createHmac } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
 import { enruta as enrutaReal, type Mensaje } from '../dist/index.js'
 
 export const SQL_SALA = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'migraciones', 'propuesta-sala-a2a.sql'), 'utf8')
@@ -31,11 +33,20 @@ export const M1 = '60000000-0000-4000-8000-000000000001'
 const M2 = '60000000-0000-4000-8000-000000000002'
 const SHA = 'ab'.repeat(32)
 
+/** El secreto de la sala con el que firma el orquestador; en la base, solo lo lee `sala_priv.firma_valida`. */
+export const SECRETO_SALA = 'secreto-de-la-sala-para-las-tareas-0123456789'
+/** Un token de tarea del agente de la sala, con el formato del orquestador: base64url(JSON).hmac. */
+export const tokenSala = (tenant: string, secreto = SECRETO_SALA, exp = Date.now() + 60_000): string => {
+  const cuerpo = Buffer.from(JSON.stringify({ tenant, tarea: 'tarea-sala', rol: 'sala_agente', exp })).toString('base64url')
+  return `${cuerpo}.${createHmac('sha256', secreto).update(cuerpo).digest('base64url')}`
+}
+
 export async function baseSala(sabotaje = ''): Promise<PGlite> {
-  const db = new PGlite()
+  const db = new PGlite({ extensions: { pgcrypto } })
   await db.exec(SUPABASE_MINIMO)
   await db.exec(SQL_SALA)
   await db.exec(SQL_SALA)
+  await db.exec(`insert into sala_priv.secreto_tareas (secreto) values ('${SECRETO_SALA}') on conflict (id) do nothing`)
   await db.exec(`
     insert into sala_participante values ('${TEN_A}', '${H.a}', 'miembro'), ('${TEN_A}', '${H.a2}', 'miembro'), ('${TEN_B}', '${H.b}', 'miembro');
     insert into sala_canales (id, tenant_id, slug, nombre, tipo) values ('${C1}', '${TEN_A}', 'consultora-a', 'Consultora A', 'publico'),
@@ -53,10 +64,12 @@ const comoHumano = async (db: PGlite, u: string, sql: string) => {
   await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub', '${u}', false);`)
   try { return (await db.query(sql)).rows } finally { await db.exec(`reset role; select set_config('request.jwt.claim.sub', '', false);`) }
 }
-const comoRol = async (db: PGlite, rol: string, tenant: string, sql: string) => {
-  await db.exec(`set role ${rol}; select set_config('sala.tenant', '${tenant}', false);`)
-  try { return (await db.query(sql)).rows } finally { await db.exec(`reset role; select set_config('sala.tenant', '', false);`) }
+/** Una sesión de servicio que presenta el token de su tarea tal cual: quien verifica es la base (PRP-010 H-21). */
+const comoRolConToken = async (db: PGlite, rol: string, token: string, sql: string) => {
+  await db.exec(`set role ${rol}; select set_config('sala.tarea', '${token}', false);`)
+  try { return (await db.query(sql)).rows } finally { await db.exec(`reset role; select set_config('sala.tarea', '', false); select set_config('sala.tenant', '', false);`) }
 }
+const comoRol = (db: PGlite, rol: string, tenant: string, sql: string) => comoRolConToken(db, rol, tokenSala(tenant), sql)
 const falla = async (f: () => Promise<unknown>): Promise<boolean> => { try { await f(); return false } catch { return true } }
 
 export interface Comprobacion { readonly id: string; readonly clase: 'conducta' | 'estructura'; readonly que: string; readonly ok: boolean }
@@ -113,6 +126,19 @@ async function servicios(db: PGlite): Promise<Comprobacion[]> {
   ]
 }
 
+async function alcanceDelAgente(db: PGlite): Promise<Comprobacion[]> {
+  const leeB = `select id from sala_mensajes where tenant_id = '${TEN_B}'`
+  const conVariable = await comoRolConToken(db, 'sala_agente', tokenSala(TEN_A), `select id from sala_mensajes where tenant_id = '${TEN_B}' and set_config('sala.tenant', '${TEN_B}', true) is not null`)
+  const sinToken = await comoRolConToken(db, 'sala_agente', '', `select id from sala_mensajes where set_config('sala.tenant', '${TEN_B}', true) is not null`)
+  const falso = await comoRolConToken(db, 'sala_agente', tokenSala(TEN_B, 'otro-secreto-que-no-es-el-de-la-sala-000000'), leeB)
+  const vencido = await comoRolConToken(db, 'sala_agente', tokenSala(TEN_B, SECRETO_SALA, Date.now() - 1000), leeB)
+  const suyo = await comoRol(db, 'sala_agente', TEN_A, `select id from sala_mensajes where tenant_id = '${TEN_A}'`)
+  return [
+    { id: 'S11', clase: 'conducta', que: 'el agente fija su tenant con una variable de sesión, sin token, con un token falso o vencido', ok: [conVariable, sinToken, falso, vencido].every((r) => r.length === 0) },
+    { id: 'S11·control', clase: 'conducta', que: 'control positivo: con el token firmado de su tarea, el agente lee su tenant', ok: suyo.length > 0 },
+  ]
+}
+
 async function forma(db: PGlite, opciones: Opciones): Promise<Comprobacion[]> {
   const respuesta = '60000000-0000-4000-8000-0000000000f1'
   await db.exec(`insert into sala_mensajes (id, tenant_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo) values ('${respuesta}', '${TEN_A}', '${C1}', '${M1}', 'agente', 'x', 'respuesta')`)
@@ -133,7 +159,7 @@ async function forma(db: PGlite, opciones: Opciones): Promise<Comprobacion[]> {
 
 /** Corre la suite completa sobre una base (con o sin sabotaje). */
 export async function corre(db: PGlite, opciones: Opciones = {}): Promise<Comprobacion[]> {
-  return [...await aislamiento(db), ...await candado(db), ...await servicios(db), ...await forma(db, opciones)]
+  return [...await aislamiento(db), ...await candado(db), ...await servicios(db), ...await alcanceDelAgente(db), ...await forma(db, opciones)]
 }
 
 export interface Sabotaje { readonly id: string; readonly que: string; readonly sql?: string; readonly opciones?: Opciones; readonly caza: readonly string[] }
@@ -152,6 +178,8 @@ export const SABOTAJES: readonly Sabotaje[] = [
   } }, caza: ['S5'] },
   { id: 'S6', que: 'la política de lectura de mensajes con using (true)', sql: `drop policy tenant_sala_mensajes on sala_mensajes;
     create policy tenant_sala_mensajes on sala_mensajes for select to authenticated using (true);`, caza: ['S6', 'S1'] },
+  { id: 'S11', que: 'el tenant del agente vuelve a ser una variable de sesión', sql: `create or replace function sala_priv.tenant_de_tarea() returns uuid language sql stable set search_path = '' as $$
+    select case when current_setting('sala.tenant', true) ~* '^[0-9a-f-]{36}$' then current_setting('sala.tenant', true)::uuid end $$;`, caza: ['S11'] },
   { id: 'S10', que: 'quitar el disparador que ata la aprobación a su mensaje', sql: 'drop trigger tg_sala_aprobacion_del_mensaje on sala_aprobaciones;', caza: ['S10', 'S10b'] },
   { id: 'S7', que: 'darle al chat (rol del agente) permiso de insertar aprobaciones', sql: `grant insert on sala_aprobaciones to sala_agente;
     create policy chat_aprueba on sala_aprobaciones for insert to sala_agente with check (true);`, caza: ['S2b·estr', 'S7'] },

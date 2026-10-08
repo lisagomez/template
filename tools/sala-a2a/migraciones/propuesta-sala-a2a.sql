@@ -37,9 +37,40 @@ create or replace function sala_priv.es_participante(t uuid) returns boolean lan
   select exists (select 1 from public.sala_participante p where p.tenant_id = t and p.usuario_id = auth.uid())
 $$;
 
-create or replace function sala_priv.tenant_de_tarea() returns uuid language sql stable set search_path = '' as $$
-  select case when current_setting('sala.tenant', true) ~* '^[0-9a-f-]{36}$' then current_setting('sala.tenant', true)::uuid end
+-- El tenant del agente se VERIFICA en la base (PRP-010 H-21): antes era la variable `sala.tenant`, que el propio
+-- agente fijaba. Ahora presenta el token crudo de su tarea (`sala.tarea`, o la cabecera `x-tarea`), firmado por el
+-- orquestador con el secreto de la sala; la base comprueba firma, vencimiento y que el rol sea el de la sesión.
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+create table if not exists sala_priv.secreto_tareas (
+  id      smallint primary key default 1 check (id = 1),
+  secreto text not null check (length(secreto) >= 32)
+);
+revoke all on sala_priv.secreto_tareas from public;
+
+create or replace function sala_priv.firma_valida(cuerpo text, sello text) returns boolean language sql stable security definer set search_path = '' as $$
+  select coalesce((select extensions.digest(rtrim(translate(encode(extensions.hmac(cuerpo, s.secreto, 'sha256'), 'base64'), '+/', '-_'), '='), 'sha256')
+                        = extensions.digest(sello, 'sha256')
+                   from sala_priv.secreto_tareas s where s.id = 1), false)
 $$;
+
+create or replace function sala_priv.tenant_de_tarea() returns uuid language plpgsql stable set search_path = '' as $$
+declare
+  token  text := coalesce(nullif(current_setting('sala.tarea', true), ''),
+                          nullif(current_setting('request.headers', true), '')::jsonb ->> 'x-tarea');
+  cuerpo text;
+  claims jsonb;
+begin
+  if token is null or token !~ '^[A-Za-z0-9_-]+[.][A-Za-z0-9_-]+$' then return null; end if;
+  cuerpo := split_part(token, '.', 1);
+  if not sala_priv.firma_valida(cuerpo, split_part(token, '.', 2)) then return null; end if;
+  claims := convert_from(decode(rpad(translate(cuerpo, '-_', '+/'), (length(cuerpo) + 3) / 4 * 4, '='), 'base64'), 'utf8')::jsonb;
+  if claims ->> 'rol' is distinct from current_user then return null; end if;
+  if coalesce((claims ->> 'exp')::bigint, 0) <= (extract(epoch from clock_timestamp()) * 1000)::bigint then return null; end if;
+  return case when claims ->> 'tenant' ~* '^[0-9a-f-]{36}$' then (claims ->> 'tenant')::uuid end;
+exception when others then
+  return null;
+end $$;
 
 create table if not exists public.sala_canales (
   id           uuid primary key default gen_random_uuid(),
