@@ -438,7 +438,7 @@ PostgREST tiene que pasar la cabecera `x-tarea`; `configura:deploy` debería com
 imprimirlo. **Lo que queda de la fase 1 va en la tanda 1d**: H-05, H-07, H-08, H-12, H-13 y H-14.
 
 **Tanda 1d, hecha (2026-10-07, rama `soporte/cierre-1d`)**: H-13 (la base calcula la cadena, y el verificador del código
-la acepta), H-14, H-12 y H-05. Ahora hay 98 filas «probado». **Quedan de H-14**: `ss_procedencia` no tiene a qué atarse
+la acepta), H-14, H-12 y H-05. Ahora hay 97 filas «probado». **Quedan de H-14**: `ss_procedencia` no tiene a qué atarse
 (su `registro` es texto libre) y el tamaño y tipo de los buckets dependen de la versión de Storage (fase 3). **Para el
 despliegue**: cargar la sal de los seudónimos es otro paso humano. **Hallazgo nuevo**: H-32, el seudónimo sin sal del
 importador (fase 2). **Sigue la tanda 1e**: H-07 y H-08, la plataforma y la restauración.
@@ -522,6 +522,11 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
   bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.
   **Lección**: un control que no se puede romper por el camino que se prueba parece más fuerte de lo que es.
+- **2026-10-07 · un control nuevo puede dejar sin efecto el sabotaje de uno viejo** (fase 1, tanda 1d). Al correr solo
+  las filas nuevas, todo verde; la matriz COMPLETA dio dos «NO CAE» en filas viejas. La cadena ahora pone la fecha del
+  evento, así que quitar la ventana de `evento_honesto` ya no cambiaba nada; y el nuevo `alter role` corregía el
+  `bypassrls` que sembraba el sabotaje de `c3-bypassrls`. **Fix**: esos sabotajes quitan los dos cerrojos. **Lección**:
+  antes de cada PR se corre la matriz entera, y el commit de su documento solo se hace si sale en verde.
 - **2026-10-07 · un control que compara con `<>` se abre cuando le falta un dato** (fase 1, tanda 1d). `evento_honesto`
   rechazaba un actor ajeno con `new.actor <> seudonimo(...)`. Con la sal sin cargar, el seudónimo es NULL y `<>` da
   NULL: el evento entraba con el actor de otro. **Fix**: `is distinct from`. **Lección**: en una regla de seguridad,
