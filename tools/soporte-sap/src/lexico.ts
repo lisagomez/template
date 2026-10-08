@@ -27,6 +27,10 @@ cuenta cuentas banco bancaria pago pagos deposito nomina quincena sueldo salario
 empleado empleada trabajador trabajadora contacto correo telefono celular extension ext tel
 norte sur centro golfo bajio alimentos aceros farmacias bebidas textiles grupo industrias comercial servicios
 consultora andina boreal laboratorio
+mesa servicio prioridad media cordiales zona zonas yendo final contable general lacteos enviado enviada reenviado
+asunto original whatsapp chofer almacenista capturista gerente jefe jefa supervisor supervisora companero companera
+encargado encargada comprador compradora vendedor vendedora cajero cajera becario becaria secretario secretaria
+tesorero tesorera
 enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre lunes martes miercoles
 jueves viernes sabado domingo`
 
@@ -35,7 +39,7 @@ cockpit edoc monitor workflow idoc idocs bapi rfc odata alv spool transporte tra
 fi co mm sd pp pm qm hcm hr ps wm ewm tm ariba concur successfactors py pt pa om ess mss bw bi crm srm
 migo miro mmpv ob52 su01 su53 sm37 bd87 we02 va01 va02 vf01 vf02 vkoa me21n me23n me29n me2n mb52 mm03 fb60 f110
 vl02n snro pa20 pa30 pa40 pc00 infotipo cfdi pac lco sat imss idse sua infonavit ptu uuid xml pdf
-grafo matriz sandbox sala`
+grafo matriz sandbox sala badi cocd plnt sloc`
 
 export const LEXICO: ReadonlySet<string> = new Set(`${ESPANOL} ${SAP}`.split(/\s+/).filter(Boolean))
 

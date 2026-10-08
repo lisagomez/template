@@ -13,10 +13,11 @@ import { evaluaSeguro } from '../../grafo-conocimiento/dist/index.js'
 import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, aprobado, delimitaDato } from '../../sala-a2a/dist/index.js'
 import { baseSala, corre } from '../../sala-a2a/pruebas/_suite.ts'
 import {
-  respondeHil, conocimientoDeMatriz, MATRIZ_LABORATORIO, type ContextoChat, type Corte, type MotorReglas, type SesionHil,
+  respondeHil, alNucleo, conocimientoDeMatriz, MATRIZ_LABORATORIO, type ContextoChat, type Corte, type MotorReglas, type SesionHil,
 } from '../dist/index.js'
 import { SUPABASE_MINIMO, SQL_SOPORTE, ORG, USR, como, comoServicio, tokenDe, falla, baseSoporte } from './_base.ts'
 import { HERRAMIENTA } from './_ayuda.ts'
+import { VALIDADORES } from './_anonimizacion.ts'
 
 const CORTE: Corte = JSON.parse(readFileSync(join(HERRAMIENTA, 'semantica', 'corte.json'), 'utf8'))
 const conocimiento = conocimientoDeMatriz(MATRIZ_LABORATORIO, '2026-10-04')
@@ -29,7 +30,9 @@ const ctx: ContextoChat = {
   corte: CORTE, motor, matriz: MATRIZ_LABORATORIO, delimitaDato, agente: 'soporte-sap-a2a', ahora: '2026-10-04T12:00:00Z', nuevoId: () => `chat-${++n}`,
   entidades: { andina: { tipo: 'consultora', nombre: 'Consultora Andina' }, boreal: { tipo: 'consultora', nombre: 'Consultora Boreal' } },
   planes: [{ taskId: 'tarea-migo-7', mensaje: 'plan-1', canal: 'canal-andina', resumen: 'reabrir el periodo MM 2026/10 en el simulador' }],
+  casos: [{ incidencia: 'inc-005', consultora: 'andina' }, { incidencia: 'inc-012', consultora: 'boreal' }], validadores: VALIDADORES,
 }
+const ENSENA_FIORI = 'Te enseño el caso inc-005 de la app Fiori en blanco: hay que limpiar la caché del launchpad'
 
 /** Una sala con el plan publicado por el agente y una persona del laboratorio que participa. */
 function salaConPlan() {
@@ -62,12 +65,42 @@ test('sin fuente, «no lo sé»', () => {
 test('cada rol ve lo suyo: el experto no ve costo ni salud; el superadministrador no enseña', () => {
   assert.equal(respondeHil(ctx, EXP, '¿Cuántas horas por ticket tuvo Consultora Andina en septiembre de 2026?').tipo, 'no_permitido')
   assert.equal(respondeHil(ctx, SUP, '¿Cuántas horas por ticket tuvo Consultora Andina en septiembre de 2026?').tipo, 'valor')
-  assert.equal(respondeHil(ctx, SUP, 'Te enseño el caso de la app Fiori en blanco: hay que limpiar la caché del launchpad').tipo, 'no_permitido')
-  const r = respondeHil(ctx, EXP, 'Te enseño el caso de la app Fiori en blanco: hay que limpiar la caché del launchpad')
+  assert.equal(respondeHil(ctx, SUP, ENSENA_FIORI).tipo, 'no_permitido')
+  const r = respondeHil(ctx, EXP, ENSENA_FIORI)
   assert.equal(r.tipo, 'propuesta')
   assert.ok(r.tipo === 'propuesta' && r.propuesta.estado === 'propuesta' && r.propuesta.contenido.startsWith('<<<DATO_DE_LA_SALA'))
   assert.ok(r.tipo === 'propuesta' && r.cli !== null, 'una operación repetible trae su propuesta de CLI')
   if (r.tipo === 'propuesta' && r.cli) assert.deepEqual([r.cli.nombre, r.cli.estado, r.cli.dryRunPorDefecto, r.cli.readOnly], ['ss-limpiar-cache', 'propuesta', true, false])
+})
+
+// PRP-010 H-19: lo que enseña el experto queda A MEDIDA de la consultora del caso, anonimizado; al núcleo, generalizado.
+test('H-19 · la enseñanza queda a medida de la consultora del caso que nombra y anonimizada; sin caso, no se guarda', () => {
+  const r = respondeHil(ctx, EXP, 'Te enseño el caso inc-012: lo resolvió Xóchitl Tzompantzi limpiando la caché del launchpad')
+  assert.ok(r.tipo === 'propuesta', r.texto)
+  if (r.tipo !== 'propuesta') return
+  assert.deepEqual([r.propuesta.alcance, r.propuesta.consultora], ['a_medida', 'boreal'])
+  assert.doesNotMatch(r.propuesta.contenido, /Xóchitl|Tzompantzi/)
+  assert.equal(respondeHil(ctx, EXP, 'Te enseño el caso de la app Fiori en blanco: hay que limpiar la caché').tipo, 'no_lo_se', 'sin caso no hay consultora')
+  assert.equal(respondeHil(ctx, EXP, 'Te enseño el caso inc-0050: hay que limpiar la caché').tipo, 'no_lo_se', 'inc-0050 no es inc-005')
+})
+
+test('H-19 · con un caso de nómina o un dato que no se resuelve, la enseñanza no se guarda: dice el tipo, nunca el dato', () => {
+  const r = respondeHil(ctx, EXP, 'Te enseño el caso inc-005: a Rosa Elena Pérez no le timbró el finiquito')
+  assert.equal(r.tipo, 'no_permitido')
+  assert.match(r.texto, /revisión humana/)
+  assert.doesNotMatch(r.texto, /Rosa|Elena|Pérez/)
+})
+
+test('H-19 · al núcleo sube generalizada y sin consultora; si al generalizar queda una señal, no sube', () => {
+  const r = respondeHil(ctx, EXP, 'Te enseño el caso inc-005: en Aceros del Norte la ZMM_PRECIOS truena en la sociedad MX01; hay que limpiar la caché')
+  assert.ok(r.tipo === 'propuesta', r.texto)
+  if (r.tipo !== 'propuesta') return
+  assert.match(r.propuesta.contenido, /ZMM_PRECIOS/, 'a medida, lo propio del cliente se queda: es para su consultora')
+  const n = alNucleo(r.propuesta, VALIDADORES, ['Aceros del Norte', 'Consultora Andina'])
+  assert.deepEqual([n.alcance, n.consultora], ['nucleo', null])
+  assert.doesNotMatch(n.contenido, /ZMM_PRECIOS|Aceros|MX01/)
+  assert.ok(n.contenido.startsWith('<<<DATO_DE_LA_SALA') && n.contenido.endsWith('DATO_DE_LA_SALA>>>'), 'sigue delimitado como dato')
+  assert.throws(() => alNucleo({ ...r.propuesta, contenido: 'No abre portal.acme.com.mx desde el servidor' }, VALIDADORES, []), /no sube al núcleo/)
 })
 
 test('aprobar desde el chat NO aprueba: se promueve al hilo del plan y decide una persona en la sala', () => {

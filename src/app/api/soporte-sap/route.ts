@@ -19,6 +19,7 @@ const ACCION = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('espera_cliente'), incidencia: z.string().min(1).max(40) }),
   z.object({ tipo: z.literal('responde_cliente'), incidencia: z.string().min(1).max(40) }),
   z.object({ tipo: z.literal('responde'), incidencia: z.string().min(1).max(40), texto: z.string().trim().min(5).max(2000) }),
+  z.object({ tipo: z.literal('al_nucleo'), propuesta: z.string().min(1).max(40) }),
   z.object({ tipo: z.literal('reinicia') }),
 ])
 const MAX_ADJUNTOS = 5

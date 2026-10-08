@@ -72,8 +72,14 @@ await captura(4.5, 'aprobado por el HIL y aplicado al simulador antes y despues'
 // 5: caso desconocido → anonimiza → sandbox → el experto enseña en el chat → propuesta de regla y de CLI.
 await levanta('La app Fiori F0842 se queda en blanco', 'La app Fiori F0842 se queda en blanco al abrirla desde el launchpad; lo reporta Xóchitl Tzompantzi, xtzompantzi@alimentos.example', [])
 await rol('experto')
-await chatea('Te enseño el caso de la app Fiori en blanco: hay que limpiar la caché del launchpad, y vuelve a abrir')
-await captura(5, 'caso desconocido anonimizado al sandbox y el experto enseña', async () => { const s = await texto(sel('sandbox')); const p = await texto(sel('propuestas')); return /\[NOMBRE\]/.test(s) && !/Tzompantzi/.test(s) && /ss-limpiar-cache/.test(p) && /regla/.test(p) && !/Fiori F0842 se queda en blanco|Tzompantzi/.test(await texto(sel('incidencias'))) })
+await chatea('Te enseño el caso inc-002 de la app Fiori en blanco: en Alimentos del Bajío pasa con la ZFI_FIORI_CACHE; hay que limpiar la caché del launchpad, y vuelve a abrir')
+await captura(5, 'caso desconocido anonimizado al sandbox y el experto enseña', async () => { const s = await texto(sel('sandbox')); const p = await texto(sel('propuestas')); return /\[NOMBRE\]/.test(s) && !/Tzompantzi/.test(s) && /ss-limpiar-cache/.test(p) && /regla/.test(p) && /a medida de andina/.test(p) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 && !/Fiori F0842 se queda en blanco|Tzompantzi/.test(await texto(sel('incidencias'))) })
+
+// 5.1 (PRP-010 H-19): lo enseñado queda a medida de la consultora; al núcleo lo sube el superadministrador, generalizado.
+await rol('superadmin')
+await pagina.locator('[data-prueba^="al-nucleo-"]').first().click()
+await pagina.waitForTimeout(400)
+await captura(5.1, 'el superadministrador sube la enseñanza al núcleo generalizada', async () => { const p = await texto(sel('propuestas')); return /núcleo/.test(p) && /\[CLIENTE\]/.test(p) && /\[OBJETO_PROPIO\]/.test(p) && !/Bajío|ZFI_FIORI_CACHE/.test(p) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 }, sel('propuestas'))
 
 // 6: revisión → el agente corrige y vuelve a proponer.
 await rol('cliente')

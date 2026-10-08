@@ -77,7 +77,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
           <>
             <Sala mensajes={vista.sala} rol={rol} decide={decide} />
             <Chat mensajes={vista.chat} rol={rol} envia={envia} />
-            <Propuestas lista={vista.propuestas} />
+            <Propuestas lista={vista.propuestas} alNucleo={rol === 'superadmin' ? (id) => actua({ tipo: 'al_nucleo', propuesta: id }) : null} />
             <Sandbox casos={vista.sandbox} />
             <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Lo escalado al laboratorio" />
             <Tablero grupos={vista.tablero} />

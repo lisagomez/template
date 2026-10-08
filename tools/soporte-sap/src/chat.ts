@@ -17,6 +17,8 @@ import { respondeMetrica } from './superficies.js'
 import { consultaMatriz, type MotorReglas, type EntradaMatriz } from './matriz.js'
 import type { Corte, Lector } from './corte.js'
 import type { Sistema } from './simulador.js'
+import { anonimiza, type Validadores } from './anonimiza.js'
+import { generaliza } from './generaliza.js'
 
 export type RolHil = 'superadmin' | 'experto'
 export interface SesionHil { readonly usuario: string; readonly rol: RolHil }
@@ -37,11 +39,20 @@ export interface PublicacionChat {
   readonly creado: string
 }
 
-/** Una enseñanza del experto: entra como propuesta del sandbox; decide una persona, en otro lado. */
+/** Un caso del sandbox que el chat conoce: la consultora de la que es (lo que una enseñanza necesita para quedar a medida). */
+export interface CasoDelSandbox { readonly incidencia: string; readonly consultora: string }
+
+/**
+ * Una enseñanza del experto: PROPUESTA del sandbox, ANONIMIZADA y A MEDIDA de la consultora del caso por defecto
+ * (PRP-010 H-19). Al núcleo, que leen todas las consultoras, solo la sube el superadministrador con `alNucleo`,
+ * generalizada; y la base la rechaza si llega sin generalizar. Decide una persona, en otro lado.
+ */
 export interface PropuestaDeEnsenanza {
   readonly tipo: 'caso'
   readonly origen: 'sandbox'
-  readonly alcance: 'nucleo'
+  readonly alcance: 'a_medida' | 'nucleo'
+  /** La consultora del caso; `null` solo en el núcleo (la base exige lo mismo: `ss_a_medida_es_de_alguien`). */
+  readonly consultora: string | null
   readonly estado: 'propuesta'
   readonly propuestaPor: string
   readonly contenido: string
@@ -87,6 +98,9 @@ export interface ContextoChat {
   readonly planes: readonly PlanEnSala[]
   /** El delimitador de contenido de la sala (inyectado: el texto humano viaja como DATO). */
   readonly delimitaDato: (texto: string) => string
+  /** Los casos del sandbox: una enseñanza nombra el suyo y queda a medida de su consultora. */
+  readonly casos: readonly CasoDelSandbox[]
+  readonly validadores: Validadores
   readonly agente: string
   readonly ahora: string
   readonly nuevoId: () => string
@@ -105,17 +119,37 @@ const SISTEMA = /\b(s\/?4\s?hana|s4)\b/i
 export function respondeHil(ctx: ContextoChat, sesion: SesionHil, texto: string): RespuestaHil {
   const t = sinAcentos(texto)
   if (PIDE_APROBAR.test(t)) return promueve(ctx, sesion, texto)
-  if (ENSENA.test(t)) {
-    if (sesion.rol !== 'experto') return { tipo: 'no_permitido', texto: 'Enseñar en el sandbox es del experto. Como superadministrador puedes preguntar por la operación.' }
-    return {
-      tipo: 'propuesta', texto: 'Lo dejo como PROPUESTA en el sandbox. Una regla nueva la firma el laboratorio en tools/conocimiento; yo no la siembro.',
-      propuesta: { tipo: 'caso', origen: 'sandbox', alcance: 'nucleo', estado: 'propuesta', propuestaPor: `agente:${ctx.agente} (enseñado por ${sesion.usuario})`, contenido: ctx.delimitaDato(texto) },
-      cli: propuestaDeCli(texto),
-    }
-  }
+  if (ENSENA.test(t)) return ensena(ctx, sesion, texto)
   if (PIDE_METRICA.test(t) && !PIDE_SOLUCION.test(t)) return metrica(ctx, sesion, texto)
   if (PIDE_SOLUCION.test(t)) return regla(ctx, texto)
   return { tipo: 'no_lo_se', texto: 'No lo sé: no reconozco una pregunta sobre una métrica ni sobre una incidencia. No respondo sin una fuente.' }
+}
+
+const escapa = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/** El experto enseña: a medida de la consultora del caso que nombra, y anonimizado; con dudas, no se guarda. */
+function ensena(ctx: ContextoChat, sesion: SesionHil, texto: string): RespuestaHil {
+  if (sesion.rol !== 'experto') return { tipo: 'no_permitido', texto: 'Enseñar en el sandbox es del experto. Como superadministrador puedes preguntar por la operación.' }
+  const caso = ctx.casos.find((c) => new RegExp(`(?<![\\w-])${escapa(c.incidencia)}(?![\\w-])`).test(texto))
+  if (!caso) return { tipo: 'no_lo_se', texto: 'No sé de qué caso es: nombra su incidencia. La propuesta queda a medida de la consultora del caso; al núcleo solo la sube el superadministrador, generalizada.' }
+  const a = anonimiza(texto, ctx.validadores)
+  if (a.veredicto === 'cuarentena') return { tipo: 'no_permitido', texto: `No la guardo como propuesta: ${a.senales.join('; ')}. Escríbela sin el dato.` }
+  return {
+    tipo: 'propuesta', texto: `Lo dejo como PROPUESTA a medida de la consultora de ${caso.incidencia}, anonimizada. Al núcleo solo la sube el superadministrador, generalizada; una regla nueva la firma el laboratorio en tools/conocimiento, y yo no la siembro.`,
+    propuesta: { tipo: 'caso', origen: 'sandbox', alcance: 'a_medida', consultora: caso.consultora, estado: 'propuesta', propuestaPor: `agente:${ctx.agente} (enseñado por ${sesion.usuario})`, contenido: ctx.delimitaDato(a.texto) },
+    cli: propuestaDeCli(a.texto),
+  }
+}
+
+/**
+ * Subir una enseñanza al NÚCLEO (D1, D2; PRP-010 H-19): la decide el superadministrador y va GENERALIZADA, sin lo
+ * que identifica al cliente ni a la consultora (`nombres`). Si al generalizar queda una señal, no sube: lanza.
+ */
+export function alNucleo(p: PropuestaDeEnsenanza, v: Validadores, nombres: readonly string[]): PropuestaDeEnsenanza {
+  if (p.alcance === 'nucleo') return p
+  const g = generaliza(p.contenido, v, nombres)
+  if (g.veredicto === 'cuarentena') throw new Error(`no sube al núcleo: ${g.senales.join('; ')}`)
+  return { ...p, alcance: 'nucleo', consultora: null, contenido: g.texto }
 }
 
 function metrica(ctx: ContextoChat, sesion: SesionHil, texto: string): RespuestaHil {
