@@ -440,15 +440,16 @@ export const FILAS: readonly Fila[] = [
     afirmacion: "sin contrato válido o sin prioridad inicial, el job no inventa un resultado: lo omite y dice por qué (ausente no es cero)",
     control: "src/sla-job.ts · omitidas",
     comprobacion: prueba("sla-job.ts", "H-16 · sin contrato válido o sin prioridad inicial, el job no inventa un resultado: lo omite y dice por qué"),
-    sabotaje: { que: "el job mide con un contrato a medias", ediciones: [
-      ed(dist('sla-job.js'), "&& !!k.metas && ['P1', 'P2', 'P3', 'P4'].every((p) => k.metas[p] !== undefined) && !!k.calendario", "")] },
+    sabotaje: { que: "el job inventa la prioridad que falta", ediciones: [
+      ed(dist('sla-job.js'), "prioridadInicial: PRIORIDADES.has(String(categorizada)) ? String(categorizada) : null", "prioridadInicial: PRIORIDADES.has(String(categorizada)) ? String(categorizada) : 'P4'")] },
   },
   {
     id: 'c3-plataforma-sla-suya', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
     afirmacion: "el job del SLA de una consultora no escribe resultados de otra",
     control: "SQL · ss_sla_resultado_plataforma_calcula con consultora_de_tarea()",
     comprobacion: prueba("sla-job.ts", "H-16 · el job de una consultora no escribe resultados de otra"),
-    sabotaje: { que: "el job escribe resultados de cualquiera", ediciones: [
+    sabotaje: { que: "el job escribe resultados de cualquiera: se abren los dos cerrojos (la política y lo que la plataforma ve)", ediciones: [
+      ed(SQL, "for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);", "for select to soporte_sap_plataforma using (true)', t || '_plataforma_lee', t);"),
       ed(SQL, "create policy ss_sla_resultado_plataforma_calcula on public.ss_sla_resultado for insert to soporte_sap_plataforma\n  with check (consultora_id = ss_priv.consultora_de_tarea());", "create policy ss_sla_resultado_plataforma_calcula on public.ss_sla_resultado for insert to soporte_sap_plataforma\n  with check (true);")] },
   },
   {
