@@ -90,8 +90,8 @@ arregló en parte.
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
 | H-15 | El piso de nómina deja **P4** a IMSS, PTU, aguinaldo, incapacidad, vacaciones, sueldo, infotipo, el depósito de la quincena y SUA/IDSE. El categorizador y el anonimizador usan vocabularios distintos. La base no impone el piso: el N3 inserta la prioridad que quiera y el consultor la cambia sin motivo ni evento. **Confirmado con sonda** | 1 y 2 | sí | código: un solo vocabulario, el piso en la base y el cambio de prioridad con motivo y evento | **cerrado en la tanda 1b** |
-| H-16 | El SLA es manipulable por las tres partes. El N3 crea con `creada_en` pasado, P1 y estado resuelta. El consultor reescribe `creada_en` y `primera_respuesta_en`. El agente inserta `ss_sla_resultado` con `cumple=true` y un contrato inventado. La ventana de ±5 min la elige quien escribe. La prueba de recálculo es circular | 1 y 2 | sí (dinero ajeno) | código: un job calcula el resultado desde los eventos; la base fija las fechas; tipos de evento por rol | **base: tanda 1b** (el job que calcula el resultado, en la fase 2) |
-| H-17 | La primera respuesta la marca la máquina (al anonimizar o al mandar a la sala), así que una P1 a 60 min se cumple siempre. Ni el contrato ni la plantilla definen «respuesta» | 1 y 2 | sí | código + definición en el contrato (DP-4) | **base: tanda 1b** (el runtime, en la fase 2) |
+| H-16 | El SLA es manipulable por las tres partes. El N3 crea con `creada_en` pasado, P1 y estado resuelta. El consultor reescribe `creada_en` y `primera_respuesta_en`. El agente inserta `ss_sla_resultado` con `cumple=true` y un contrato inventado. La ventana de ±5 min la elige quien escribe. La prueba de recálculo es circular | 1 y 2 | sí (dinero ajeno) | código: un job calcula el resultado desde los eventos; la base fija las fechas; tipos de evento por rol | **cerrado** (la base en la 1b; el job, en la fase 2) |
+| H-17 | La primera respuesta la marca la máquina (al anonimizar o al mandar a la sala), así que una P1 a 60 min se cumple siempre. Ni el contrato ni la plantilla definen «respuesta» | 1 y 2 | sí | código + definición en el contrato (DP-4) | **cerrado** (la base en la 1b; el runtime, en la fase 2) |
 | H-18 | «P1 y P2 nunca se cortan por presupuesto» es una función que nadie llama. El aviso no llega a nadie. Nadie lee `ss_presupuesto`; el tope de OCR vive en memoria y sin periodo | 1 y 2 | sí | código: cablear en el runtime y en el enjambre, aviso registrado, tope leído de la base con su periodo | parcial: tope en memoria |
 
 **Núcleo de conocimiento**
@@ -467,6 +467,16 @@ camino cinco pruebas o sabotajes que no medían nada; están en los aprendizajes
 **Validación**: cada cambio con su fila en la matriz, que ejerce el camino del runtime o del CLI; recorrido de
 Playwright en verde; `prueba:buzon` en verde tras tocar el extractor.
 
+**Fase 2, primera parte: el SLA, hecha (2026-10-08, rama `soporte/fase2-sla`)**:
+- **H-17**: el runtime ya no marca la primera respuesta; la marca el consultor al responderle al cliente (acción
+  `responde` y su formulario).
+- **H-16**: `src/sla-job.ts` calcula `ss_sla_resultado` desde la base con `relojSla`. Lo escribe la plataforma (lo
+  único que escribe) y, sin contrato válido o sin prioridad inicial, no inventa: omite y dice por qué.
+- **Evidencia**: 4 filas nuevas en la matriz, el recorrido de Playwright en verde (19 capturas) y la demostración de
+  que el código viejo daba «respuesta en meta» sin respuesta.
+- **H-22 sigue pendiente, sin cambios en esta rama.** El hallazgo está confirmado (un PDF pequeño agota la memoria del
+  lector); el tope de inflado lo lleva el laboratorio por otra vía.
+
 ### Fase 3: El perfil de despliegue (VPS seleccionable en el laboratorio y en la instalación)
 **Objetivo**:
 - la sección `despliegue` en la plantilla v3 (DP-5) y en los dos manifiestos;
@@ -533,6 +543,13 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
   bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.
   **Lección**: un control que no se puede romper por el camino que se prueba parece más fuerte de lo que es.
+- **2026-10-08 · en el recorrido, «se ve el número» no prueba nada** (fase 2, H-17). La primera versión de los pasos 11.1
+  y 11.2 miraba los minutos del reloj: «respuesta 0 min» se veía igual antes y después de responder, así que el 11.2
+  pasaba en vacío. La segunda miraba la cadena, y tampoco servía, porque el código viejo marcaba la primera respuesta
+  en el reloj sin anotarla. Lo que delata el bug es el ESTADO del reloj: con el código viejo, la P1 decía «respuesta en
+  meta» sin que nadie respondiera. Se demostró aparte con `relojSla` (viejo: cumple `true`; nuevo: `null`, en plazo).
+  **Lección**: un paso de recorrido se escribe contra lo que el bug cambia en pantalla, y se comprueba que el código
+  viejo lo pondría en rojo.
 - **2026-10-07 · un control nuevo puede dejar sin efecto el sabotaje de uno viejo** (fase 1, tanda 1d). Al correr solo
   las filas nuevas, todo verde; la matriz COMPLETA dio dos «NO CAE» en filas viejas. La cadena ahora pone la fecha del
   evento, así que quitar la ventana de `evento_honesto` ya no cambiaba nada; y el nuevo `alter role` corregía el
