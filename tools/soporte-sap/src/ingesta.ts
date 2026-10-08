@@ -28,9 +28,16 @@ export interface PuertosIngesta {
 
 export interface ConfigIngesta {
   readonly bytesMaximos: number
+  /** Cuántos adjuntos admite una incidencia (C3, O4): el siguiente se rechaza. */
+  readonly adjuntosMaximos: number
+  /** Las páginas de OCR de la consultora en el periodo (C3, O4; en producción, `ss_presupuesto.tope_paginas_ocr`). */
+  readonly paginasOcrMaximas: number
   readonly motor: 'local' | 'externo'
   readonly decisionC4: string | null
 }
+
+/** Lo ya consumido: adjuntos de ESTA incidencia y páginas de OCR de SU consultora en el periodo. */
+export interface UsoIngesta { readonly adjuntos: number; readonly paginasOcr: number }
 
 export type Via = 'capa0' | 'xml' | 'ocr_local' | 'sin_extraccion'
 
@@ -51,6 +58,8 @@ export type ResultadoIngesta =
   | {
       readonly aceptado: true; readonly nombre: string; readonly sha256: string; readonly tipoMime: string; readonly bytes: number
       readonly via: Via; readonly campos: readonly CampoConEvidencia[]; readonly texto: string; readonly aviso: string | null
+      /** Las páginas de OCR que gastó este archivo (0 fuera del motor). */
+      readonly paginasOcr: number
     }
 
 /** Un motor externo no entra: el dato de un ticket es de terceros (límite de C5), con o sin firma. */
@@ -61,6 +70,8 @@ export function validaConfig(c: ConfigIngesta): void {
       : 'motor externo sin decisión C4: rechazado (y con ella también: datos de terceros, límite de C5)')
   }
   if (!(c.bytesMaximos > 0)) throw new Error('la ingesta necesita un tamaño máximo')
+  if (!(Number.isInteger(c.adjuntosMaximos) && c.adjuntosMaximos > 0)) throw new Error('la ingesta necesita un máximo de adjuntos por incidencia')
+  if (!(Number.isInteger(c.paginasOcrMaximas) && c.paginasOcrMaximas >= 0)) throw new Error('la ingesta necesita un tope de páginas de OCR por consultora')
 }
 
 /** Lo que cada extensión DECLARA ser. Se compara con la clase por bytes: si no coinciden, miente. */
@@ -102,7 +113,21 @@ export function camposSap(texto: string, via: Via, confianza: number | null): Ca
 export const delimitaDocumento = (nombre: string, texto: string): string =>
   `<<<DOCUMENTO ${nombre.replace(/[<>]/g, '')}\n${texto.replaceAll('<<<', '‹‹‹').replaceAll('>>>', '›››')}\nDOCUMENTO>>>`
 
-async function lee(p: PuertosIngesta, tipo: ClasePorBytes, bytes: Uint8Array): Promise<{ via: Via; campos: CampoConEvidencia[]; texto: string; aviso: string | null }> {
+type Lectura = { via: Via; campos: CampoConEvidencia[]; texto: string; aviso: string | null; paginasOcr: number }
+
+async function lee(p: PuertosIngesta, tipo: ClasePorBytes, bytes: Uint8Array, paginasOcrRestantes: number): Promise<Lectura> {
+  const r = await leeSinOcr(p, tipo, bytes)
+  if (r) return { ...r, paginasOcr: 0 }
+  if (!p.ocr) return { via: 'sin_extraccion', campos: [], texto: '', aviso: 'imagen sin motor local de OCR configurado: queda como adjunto', paginasOcr: 0 }
+  if (paginasOcrRestantes <= 0) return { via: 'sin_extraccion', campos: [], texto: '', aviso: 'la consultora llegó a su tope de páginas de OCR del periodo: la imagen queda como adjunto, sin extracción', paginasOcr: 0 }
+  const paginas = await p.ocr.extrae(bytes)
+  const texto = paginas.map((x) => x.markdown).join('\n')
+  const confianza = paginas[0]?.confianza ?? null
+  return { via: 'ocr_local', campos: camposSap(texto, 'ocr_local', confianza), texto, aviso: null, paginasOcr: Math.max(1, paginas.length) }
+}
+
+/** XML, PDF y Office se leen sin motor; una imagen devuelve null (va al OCR local, si hay y si queda tope). */
+async function leeSinOcr(p: PuertosIngesta, tipo: ClasePorBytes, bytes: Uint8Array): Promise<Omit<Lectura, 'paginasOcr'> | null> {
   if (tipo === 'xml') {
     const c = p.leeCfdi(bytes)
     if (!c.esCfdi) return { via: 'sin_extraccion', campos: [], texto: '', aviso: `XML guardado sin extracción: ${c.motivo ?? 'no es un CFDI'}` }
@@ -115,17 +140,18 @@ async function lee(p: PuertosIngesta, tipo: ClasePorBytes, bytes: Uint8Array): P
     return { via: 'sin_extraccion', campos: [], texto: '', aviso: `PDF sin texto propio (${r.motivo ?? 'escaneado'}): sin rasterizador local, queda como adjunto` }
   }
   if (tipo === 'zip') return { via: 'sin_extraccion', campos: [], texto: '', aviso: 'Word o Excel: el extractor no lee este formato; se guarda como adjunto, sin extracción' }
-  if (!p.ocr) return { via: 'sin_extraccion', campos: [], texto: '', aviso: 'imagen sin motor local de OCR configurado: queda como adjunto' }
-  const paginas = await p.ocr.extrae(bytes)
-  const texto = paginas.map((x) => x.markdown).join('\n')
-  const confianza = paginas[0]?.confianza ?? null
-  return { via: 'ocr_local', campos: camposSap(texto, 'ocr_local', confianza), texto, aviso: null }
+  return null
 }
 
-/** Ingiere un archivo: valida bytes y tamaño, lee por su vía y deja cada campo por revisar. */
-export async function ingiere(p: PuertosIngesta, c: ConfigIngesta, archivo: { nombre: string; bytes: Uint8Array }): Promise<ResultadoIngesta> {
+/**
+ * Ingiere un archivo: valida adjuntos, bytes y tamaño, lee por su vía y deja cada campo por revisar.
+ * `uso` es lo ya consumido (adjuntos de la incidencia, páginas de OCR de la consultora): el tope se
+ * aplica sobre él, así que el llamador lo pasa siempre y suma `paginasOcr` del resultado.
+ */
+export async function ingiere(p: PuertosIngesta, c: ConfigIngesta, archivo: { nombre: string; bytes: Uint8Array }, uso: UsoIngesta): Promise<ResultadoIngesta> {
   validaConfig(c)
   const { nombre, bytes } = archivo
+  if (uso.adjuntos >= c.adjuntosMaximos) return { aceptado: false, nombre, motivo: `la incidencia ya tiene ${uso.adjuntos} adjuntos y el máximo es ${c.adjuntosMaximos}` }
   if (bytes.byteLength === 0) return { aceptado: false, nombre, motivo: 'el archivo está vacío' }
   if (bytes.byteLength > c.bytesMaximos) return { aceptado: false, nombre, motivo: `pesa ${bytes.byteLength} bytes y el máximo es ${c.bytesMaximos}` }
   const ext = nombre.toLowerCase().split('.').pop() ?? ''
@@ -133,6 +159,18 @@ export async function ingiere(p: PuertosIngesta, c: ConfigIngesta, archivo: { no
   if (!declarado) return { aceptado: false, nombre, motivo: `formato no admitido (.${ext})` }
   const real = p.clasePorBytes(bytes)
   if (real !== declarado) return { aceptado: false, nombre, motivo: `el archivo dice ser .${ext} y sus bytes son de tipo ${real}` }
-  const r = await lee(p, real, bytes)
+  const r = await lee(p, real, bytes, c.paginasOcrMaximas - uso.paginasOcr)
   return { aceptado: true, nombre, sha256: createHash('sha256').update(bytes).digest('hex'), tipoMime: MIME[real], bytes: bytes.byteLength, ...r }
+}
+
+/** Los archivos de una incidencia, uno tras otro, con el uso acumulado: el que pasa de un tope lo dice. */
+export async function ingiereTodos(p: PuertosIngesta, c: ConfigIngesta, archivos: ReadonlyArray<{ nombre: string; bytes: Uint8Array }>, paginasOcrUsadas: number): Promise<{ resultados: ResultadoIngesta[]; paginasOcr: number }> {
+  const resultados: ResultadoIngesta[] = []
+  let paginasOcr = paginasOcrUsadas
+  for (const a of archivos) {
+    const r = await ingiere(p, c, a, { adjuntos: resultados.filter((x) => x.aceptado).length, paginasOcr })
+    if (r.aceptado) paginasOcr += r.paginasOcr
+    resultados.push(r)
+  }
+  return { resultados, paginasOcr }
 }

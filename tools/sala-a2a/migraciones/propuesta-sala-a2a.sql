@@ -175,6 +175,33 @@ create policy aprobacion_solo_humana on public.sala_aprobaciones
   for insert to authenticated
   with check (decidida_por = auth.uid());
 
+-- Una aprobación decide SOBRE UN MENSAJE: el de su tenant, su tarea y la huella de su plan. Sin esto, un
+-- humano de B aprobaba el plan de A poniendo su propio `tenant_id` y el `mensaje_id` de A, y la versión en
+-- memoria sí lo impedía (PRP-010 H-06). Lee el mensaje como dueño: quien aprueba en B no ve el de A.
+create or replace function sala_priv.aprobacion_del_mensaje() returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  m_tenant uuid;
+  m_task   text;
+  huellas  text[];
+begin
+  select m.tenant_id, m.task_id, array(select b->>'sha256' from jsonb_array_elements(m.bloques) b where b ? 'sha256')
+    into m_tenant, m_task, huellas
+    from public.sala_mensajes m where m.id = new.mensaje_id;
+  if not found or m_tenant <> new.tenant_id then
+    raise exception 'la aprobación no es del tenant de su mensaje';
+  end if;
+  if new.task_id is distinct from m_task then
+    raise exception 'la aprobación no es de la tarea de su mensaje';
+  end if;
+  if cardinality(huellas) > 0 and (new.sha256_artefacto is null or not new.sha256_artefacto = any (huellas)) then
+    raise exception 'la huella aprobada no es la del plan del mensaje';
+  end if;
+  return new;
+end $$;
+drop trigger if exists tg_sala_aprobacion_del_mensaje on public.sala_aprobaciones;
+create trigger tg_sala_aprobacion_del_mensaje before insert on public.sala_aprobaciones
+  for each row execute function sala_priv.aprobacion_del_mensaje();
+
 -- El agente: lee canales y mensajes del tenant de su tarea y publica como agente o sistema.
 drop policy if exists sala_agente_lee_canales on public.sala_canales;
 create policy sala_agente_lee_canales on public.sala_canales for select to sala_agente

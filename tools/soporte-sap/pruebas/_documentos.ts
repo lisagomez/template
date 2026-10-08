@@ -22,4 +22,6 @@ export function puertos(ocr: PuertosIngesta['ocr']): PuertosIngesta {
 
 export const documento = (nombre: string): Uint8Array => new Uint8Array(readFileSync(join(HERRAMIENTA, 'documentos', nombre)))
 
-export const CONFIG = { bytesMaximos: 5_000_000, motor: 'local' as const, decisionC4: null }
+export const CONFIG = { bytesMaximos: 5_000_000, adjuntosMaximos: 10, paginasOcrMaximas: 500, motor: 'local' as const, decisionC4: null }
+/** Una incidencia sin adjuntos todavía, de una consultora que no ha gastado OCR en el periodo. */
+export const SIN_USO = { adjuntos: 0, paginasOcr: 0 }

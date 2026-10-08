@@ -77,7 +77,18 @@ async function aislamiento(db: PGlite): Promise<Comprobacion[]> {
   ]
 }
 
+const aprueba = (tenant: string, mensaje: string, task: string, sha: string | null, decide: string) =>
+  `insert into sala_aprobaciones (tenant_id, mensaje_id, accion, task_id, sha256_artefacto, decidida_por)
+  values ('${tenant}', '${mensaje}', 'aprobar', '${task}', ${sha ? `'${sha}'` : 'null'}, '${decide}')`
+
 async function candado(db: PGlite): Promise<Comprobacion[]> {
+  // PRP-010 H-06: B, en su propio tenant, aprueba el MENSAJE de A; y A aprueba con otra tarea u otra huella.
+  // Cada intento se deshace (con un sabotaje, entra): si no, la clave única tumbaría el control de abajo.
+  const intenta = async (u: string, sql: string) => { const r = await falla(() => comoHumano(db, u, sql)); await db.exec('delete from sala_aprobaciones'); return r }
+  const cruzada = await intenta(H.b, aprueba(TEN_B, M1, 'tarea-1', SHA, H.b))
+  const otraHuella = await intenta(H.a, aprueba(TEN_A, M1, 'tarea-1', 'cd'.repeat(32), H.a))
+  const otraTarea = await intenta(H.a, aprueba(TEN_A, M1, 'tarea-2', SHA, H.a))
+  const sinHuella = await intenta(H.a, aprueba(TEN_A, M1, 'tarea-1', null, H.a))
   const porOtro = await falla(() => comoHumano(db, H.a, aprobacion(H.a2)))
   const propia = !(await falla(() => comoHumano(db, H.a, aprobacion(H.a))))
   const restrictiva = await db.query<{ p: boolean }>(`select polpermissive as p from pg_policy where polname = 'aprobacion_solo_humana' and polrelid = 'public.sala_aprobaciones'::regclass`)
@@ -85,6 +96,8 @@ async function candado(db: PGlite): Promise<Comprobacion[]> {
     { id: 'S2', clase: 'conducta', que: 'un humano legítimo firma una aprobación a nombre de otro', ok: porOtro },
     { id: 'S2·control', clase: 'conducta', que: 'control positivo: el humano firma a su nombre y entra', ok: propia },
     { id: 'S2·estr', clase: 'estructura', que: 'aprobacion_solo_humana existe y es RESTRICTIVA', ok: restrictiva.rows.length === 1 && restrictiva.rows[0]!.p === false },
+    { id: 'S10', clase: 'conducta', que: 'un humano del tenant B aprueba, en su tenant, el mensaje del tenant A', ok: cruzada },
+    { id: 'S10b', clase: 'conducta', que: 'una aprobación con otra huella, otra tarea o sin la huella del plan', ok: otraHuella && otraTarea && sinHuella },
   ]
 }
 
@@ -139,6 +152,7 @@ export const SABOTAJES: readonly Sabotaje[] = [
   } }, caza: ['S5'] },
   { id: 'S6', que: 'la política de lectura de mensajes con using (true)', sql: `drop policy tenant_sala_mensajes on sala_mensajes;
     create policy tenant_sala_mensajes on sala_mensajes for select to authenticated using (true);`, caza: ['S6', 'S1'] },
+  { id: 'S10', que: 'quitar el disparador que ata la aprobación a su mensaje', sql: 'drop trigger tg_sala_aprobacion_del_mensaje on sala_aprobaciones;', caza: ['S10', 'S10b'] },
   { id: 'S7', que: 'darle al chat (rol del agente) permiso de insertar aprobaciones', sql: `grant insert on sala_aprobaciones to sala_agente;
     create policy chat_aprueba on sala_aprobaciones for insert to sala_agente with check (true);`, caza: ['S2b·estr', 'S7'] },
 ]

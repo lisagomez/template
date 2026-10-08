@@ -290,13 +290,19 @@ create table if not exists public.ss_campo_extraido (
   constraint ss_revisado_tiene_quien check ((estado = 'por_revisar') = (revisado_por is null))
 );
 
--- La cuarentena guarda el MOTIVO (tipos de señal), nunca una copia del dato sensible.
+-- La cuarentena guarda el MOTIVO (tipos de señal), nunca una copia del dato sensible. La base lo hace
+-- cumplir: solo admite las señales del anonimizador (`SENALES` en src/anonimiza.ts; una prueba vigila que
+-- las dos listas no se separen), así que un dato no entra disfrazado de señal (PRP-010 H-03).
 create table if not exists public.ss_cuarentena (
   incidencia_id uuid primary key references public.ss_incidencia (id) on delete cascade,
   consultora_id uuid not null,
   cliente_id    uuid not null,
   senales       text[] not null,
-  creada_en     timestamptz not null default now()
+  creada_en     timestamptz not null default now(),
+  constraint ss_cuarentena_solo_senales check (cardinality(senales) > 0 and senales <@ array[
+    'caso de RR. HH. o nómina: revisión humana obligatoria antes del sandbox',
+    'queda algo con forma de correo', 'queda una secuencia larga de dígitos',
+    'queda un tratamiento seguido de un nombre', 'queda un posible usuario SAP']::text[])
 );
 
 -- El cliente puede impugnar una prioridad o una categoría; la resuelve su consultora.
@@ -316,13 +322,21 @@ create table if not exists public.ss_impugnacion (
 
 -- --- Sandbox, propuestas y acceso motivado -----------------------------------------------
 
+-- Segundo cerrojo, independiente del anonimizador (PRP-010 H-03): ni el agente ni un error suyo meten al
+-- sandbox, que lee todo el laboratorio, un identificador con forma (correo, RFC, CURP, una secuencia larga
+-- de dígitos como NSS, CLABE o teléfono). El anonimizador los cambia por marcas (`[RFC]`, `[NUMERO]`…); si
+-- uno llega crudo, la fila no entra. Los nombres sin forma siguen siendo trabajo del anonimizador (H-04).
 create table if not exists public.ss_caso_sandbox (
   id                   uuid primary key default gen_random_uuid(),
   origen_consultora_id uuid not null references public.ss_organizacion (id),
   texto                text not null,
   campos               jsonb not null default '{}'::jsonb,
   estado               text not null default 'aprendiendo' check (estado in ('aprendiendo', 'documentado', 'propuesto')),
-  creado_en            timestamptz not null default now()
+  creado_en            timestamptz not null default now(),
+  constraint ss_sandbox_sin_identificadores check (
+    (texto || ' ' || campos::text) !~* '(@|\marroba\M|\(at\)|\[at\]|\mpunto[[:space:]]+com\M)'
+    and (texto || ' ' || campos::text) !~ '[0-9]([[:space:]().-]{0,2}[0-9]){6,}'
+    and (texto || ' ' || campos::text) !~* '\m[A-ZÑ&]{3,4}[0-9]{6}')
 );
 
 -- Una propuesta la decide una persona a su nombre; lo que va al núcleo, el superadministrador (D2).
@@ -342,7 +356,9 @@ create table if not exists public.ss_propuesta (
 );
 
 -- El acceso motivado del laboratorio a los originales de un cliente lo otorga un consultor de la
--- consultora de ese cliente, a un miembro del laboratorio, por 72 h como máximo (D14).
+-- consultora de ese cliente, a un miembro del laboratorio, por 72 h como máximo (D14), y lo puede revocar
+-- antes. La fecha de alta la pone la BASE: si la eligiera quien otorga, un `creado_en` futuro estiraba el
+-- tope a un año (PRP-010 H-02, medido el 2026-10-07: 8 832 h).
 create table if not exists public.ss_acceso_motivado (
   id           uuid primary key default gen_random_uuid(),
   usuario_id   uuid not null,
@@ -351,15 +367,32 @@ create table if not exists public.ss_acceso_motivado (
   otorgado_por uuid not null,
   vence_en     timestamptz not null,
   creado_en    timestamptz not null default now(),
+  revocado_en  timestamptz,
   constraint ss_acceso_con_tope check (vence_en <= creado_en + interval '72 hours'),
   constraint ss_acceso_no_a_si_mismo check (otorgado_por <> usuario_id)
 );
+
+create or replace function ss_priv.acceso_fechas_de_la_base() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if tg_op = 'INSERT' then
+    new.creado_en := now();
+    new.revocado_en := null;
+  elsif old.revocado_en is not null then
+    raise exception 'un acceso revocado no se reabre: se otorga uno nuevo';
+  elsif new.revocado_en is not null then
+    new.revocado_en := now();
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_acceso_fechas on public.ss_acceso_motivado;
+create trigger ss_acceso_fechas before insert or update on public.ss_acceso_motivado
+  for each row execute function ss_priv.acceso_fechas_de_la_base();
 
 create or replace function ss_priv.baja_original(cli uuid) returns boolean language sql stable security definer set search_path = '' as $$
   select ss_priv.ve_cliente(cli)
       or (ss_priv.es_laboratorio() and exists (
             select 1 from public.ss_acceso_motivado a
-            where a.usuario_id = auth.uid() and a.cliente_id = cli and a.vence_en > now()))
+            where a.usuario_id = auth.uid() and a.cliente_id = cli and a.vence_en > now() and a.revocado_en is null))
 $$;
 
 create or replace function ss_priv.es_del_laboratorio(u uuid) returns boolean language sql stable security definer set search_path = '' as $$
@@ -595,7 +628,7 @@ create policy ss_propuesta_lee on public.ss_propuesta for select to authenticate
 
 drop policy if exists ss_acceso_lee on public.ss_acceso_motivado;
 create policy ss_acceso_lee on public.ss_acceso_motivado for select to authenticated
-  using (usuario_id = auth.uid() or otorgado_por = auth.uid());
+  using (usuario_id = auth.uid() or otorgado_por = auth.uid() or ss_priv.rol_en(ss_priv.padre_de(cliente_id)) = 'consultor');
 
 drop policy if exists ss_contrato_lee on public.ss_contrato_sla;
 create policy ss_contrato_lee on public.ss_contrato_sla for select to authenticated
@@ -693,6 +726,13 @@ create policy ss_acceso_otorga on public.ss_acceso_motivado for insert to authen
     and ss_priv.rol_en(ss_priv.padre_de(cliente_id)) = 'consultor'
     and ss_priv.es_del_laboratorio(usuario_id));
 
+-- Revocar es de la consultora del cliente, cualquiera de sus consultores (si quien otorgó se va, el acceso
+-- no queda huérfano). Solo se toca `revocado_en`, y la hora la pone la base (PRP-010 H-02).
+drop policy if exists ss_acceso_revoca on public.ss_acceso_motivado;
+create policy ss_acceso_revoca on public.ss_acceso_motivado for update to authenticated
+  using (ss_priv.rol_en(ss_priv.padre_de(cliente_id)) = 'consultor')
+  with check (ss_priv.rol_en(ss_priv.padre_de(cliente_id)) = 'consultor' and revocado_en is not null);
+
 drop policy if exists ss_presupuesto_fija on public.ss_presupuesto;
 create policy ss_presupuesto_fija on public.ss_presupuesto for all to authenticated
   using (ss_priv.es_superadmin()) with check (ss_priv.es_superadmin());
@@ -710,6 +750,10 @@ create policy ss_chat_escribe on public.ss_chat_mensaje for insert to authentica
 
 -- El agente: lee la consultora de su tarea y PROPONE; ninguna fila sale de él ya decidida ---------
 
+-- La política vieja del agente sobre el escalamiento se borra ANTES del bloque: si un cambio lo vuelve a
+-- meter en la lista, la política reaparece y su prueba cae (si se borrara después, lo taparía).
+drop policy if exists ss_escalamiento_agente_escribe on public.ss_escalamiento;
+
 do $$
 declare t text;
 begin
@@ -718,7 +762,9 @@ begin
     execute format('drop policy if exists %I on public.%I', t || '_agente_lee', t);
     execute format('create policy %I on public.%I for select to soporte_sap_agente using (consultora_id = ss_priv.consultora_de_tarea())', t || '_agente_lee', t);
   end loop;
-  foreach t in array array['ss_escalamiento', 'ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop
+  -- Sin `ss_escalamiento`: escalar al laboratorio lo decide la consultora a su nombre, no el agente (DP-3,
+  -- PRP-010 H-01). Con el agente escalando, el laboratorio leía lo que nadie de la consultora eligió darle.
+  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop
     execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);
     execute format('create policy %I on public.%I for insert to soporte_sap_agente with check (consultora_id = ss_priv.consultora_de_tarea())', t || '_agente_escribe', t);
   end loop;
@@ -799,13 +845,14 @@ grant select, insert, update on public.ss_incidencia, public.ss_campo_extraido, 
   public.ss_propuesta, public.ss_mapeo, public.ss_presupuesto to authenticated;
 grant select, insert on public.ss_escalamiento, public.ss_evento, public.ss_adjunto, public.ss_horas,
   public.ss_acceso_motivado, public.ss_chat_mensaje to authenticated;
+grant update (revocado_en) on public.ss_acceso_motivado to authenticated;
 grant select on public.ss_cuarentena, public.ss_caso_sandbox, public.ss_contrato_sla, public.ss_sla_resultado,
   public.ss_crudo, public.ss_procedencia, public.ss_importacion_fila, public.ss_metrica to authenticated;
 
 grant select on public.ss_incidencia, public.ss_escalamiento, public.ss_evento, public.ss_adjunto, public.ss_campo_extraido,
   public.ss_cuarentena, public.ss_caso_sandbox, public.ss_sla_resultado, public.ss_crudo, public.ss_mapeo,
   public.ss_procedencia, public.ss_presupuesto, public.ss_contrato_sla, public.ss_importacion_fila to soporte_sap_agente;
-grant insert on public.ss_escalamiento, public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,
+grant insert on public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,
   public.ss_sla_resultado, public.ss_mapeo, public.ss_procedencia, public.ss_chat_mensaje to soporte_sap_agente;
 grant update (estado, categoria, regla_aplicada, modulo, componente, transaccion, mensaje_error, impacto, urgencia, prioridad, complejidad,
   primera_respuesta_en, resuelta_en, cerrada_en) on public.ss_incidencia to soporte_sap_agente;

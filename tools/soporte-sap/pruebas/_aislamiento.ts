@@ -18,7 +18,6 @@ async function lecturas(db: PGlite): Promise<Fila[]> {
   const ca = await inc(USR.ca), cb = await inc(USR.cb), ua1 = await inc(USR.ua1), sup = await inc(USR.sup)
   const ub1VeA1 = await como(db, USR.ub1, `select id from ss_incidencia where id = '${INC.a1}'`)
   const supCampo = await como(db, USR.sup, `select valor from ss_campo_extraido`)
-  const supHoras = await como(db, USR.sup, `select id from ss_horas`)
   return [
     ['la consultora A lista incidencias', 'solo las de sus clientes A1 y A2', ca.map((x) => x.id).join() === [INC.a1, INC.a2].join(), `${ca.length} filas`],
     ['la consultora B lista incidencias', 'solo la de B1, nada de A', cb.length === 1 && cb[0]!.id === INC.b1, `${cb.length} filas`],
@@ -26,7 +25,6 @@ async function lecturas(db: PGlite): Promise<Fila[]> {
     ['el cliente B1 pide la incidencia de A1 por su id', '0 filas', ub1VeA1.length === 0, n(ub1VeA1)],
     ['el laboratorio lista incidencias (revisión)', 'solo la que A le escaló (1), no toda la operación', sup.length === 1 && sup[0]!.id === INC.a1, n(sup)],
     ['el laboratorio lee los campos extraídos', 'solo los de lo escalado (1)', supCampo.length === 1, n(supCampo)],
-    ['el laboratorio lee las horas de los consultores', '0 filas: son de la consultora', supHoras.length === 0, n(supHoras)],
   ]
 }
 
@@ -177,10 +175,33 @@ async function cadenaYChat(db: PGlite): Promise<Fila[]> {
   ]
 }
 
+/** Las horas son de la consultora: se lee DESPUÉS de cargarlas (antes, «0 filas» se cumplía en vacío). */
+async function horas(db: PGlite): Promise<Fila[]> {
+  const ca = await como(db, USR.ca, `select id from ss_horas`)
+  const sup = await como(db, USR.sup, `select id from ss_horas`)
+  const ua1 = await como(db, USR.ua1, `select id from ss_horas`)
+  return [
+    ['la consultora A lee sus horas (firmas)', 'las que cargó (≥ 1)', ca.length >= 1, n(ca)],
+    ['el laboratorio lee las horas de los consultores', '0 filas: son de la consultora', ca.length >= 1 && sup.length === 0, n(sup)],
+    ['el cliente A1 lee las horas de los consultores (firmas)', '0 filas', ca.length >= 1 && ua1.length === 0, n(ua1)],
+  ]
+}
+
+/** El job de plataforma (export y restauración, C7): su token lo acota a una consultora, también al borrar. */
+async function plataforma(db: PGlite): Promise<Fila[]> {
+  const token = tokenDe(ORG.CA, 'soporte_sap_plataforma')
+  const listaB = await comoServicio<{ id: string }>(db, token, `select id from ss_incidencia where consultora_id = '${ORG.CB}'`)
+  const borraB = await comoServicio<{ id: string }>(db, token, `delete from ss_incidencia where consultora_id = '${ORG.CB}' returning id`)
+  return [
+    ['la plataforma con tarea de A lista incidencias de B (firmas)', '0 filas: el alcance sale del token', listaB.length === 0, n(listaB)],
+    ['la plataforma con tarea de A borra incidencias de B (firmas)', '0 filas: no ve lo de B', borraB.length === 0, n(borraB)],
+  ]
+}
+
 /** Todas las comprobaciones, en orden. */
 export async function revisaAislamiento(db: PGlite): Promise<Fila[]> {
   const filas: Fila[] = []
-  for (const grupo of [lecturas, sandbox, originales, accesoMotivado, escrituras, contratos, agente, decisiones, cadenaYChat]) filas.push(...await grupo(db))
+  for (const grupo of [lecturas, sandbox, originales, accesoMotivado, escrituras, contratos, agente, decisiones, cadenaYChat, horas, plataforma]) filas.push(...await grupo(db))
   return filas
 }
 

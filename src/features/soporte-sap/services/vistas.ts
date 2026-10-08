@@ -16,7 +16,7 @@ const PERIODO = '2026-09'
 const SOLO_SUPERADMIN = new Set(['horas_consultor', 'horas_por_ticket', 'salud_cuenta'])
 /** En el orden de `ETAPAS` del dominio. */
 const ETAPAS_ES = ['alta', 'onboarding', 'adopción', 'operación', 'renovación']
-const tarjeta = (t: TarjetaDominio): Tarjeta => ({ nombre: t.nombre, etiqueta: t.metrica.etiqueta, valor: t.valor, unidad: t.metrica.unidad, fuente: t.fuente })
+const tarjeta = (t: TarjetaDominio): Tarjeta => ({ nombre: t.nombre, etiqueta: t.metrica.etiqueta, valor: t.valor, unidad: t.metrica.unidad, fuente: t.fuente, definicion: t.metrica.descripcion, supuestos: t.metrica.supuestos })
 const nombreDe = (id: string) => CLIENTES.find((c) => c.id === id)?.nombre ?? id
 
 function reloj(r: ResultadoSla): RelojVista {

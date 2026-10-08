@@ -119,15 +119,27 @@ function aplicaDetectores(texto: string, v: Validadores, c: Cuenta): string {
   return reemplazaNombres(t, c)
 }
 
+/**
+ * Las ÚNICAS señales que guarda la cuarentena: el tipo, nunca el dato. La base exige esta misma lista
+ * (`ss_cuarentena_solo_senales`) y `pruebas/cierre-base.ts` vigila que no se separen (PRP-010 H-03).
+ */
+export const SENALES = {
+  personal: 'caso de RR. HH. o nómina: revisión humana obligatoria antes del sandbox',
+  correo: 'queda algo con forma de correo',
+  digitos: 'queda una secuencia larga de dígitos',
+  tratamiento: 'queda un tratamiento seguido de un nombre',
+  usuario: 'queda un posible usuario SAP',
+} as const
+
 /** Lo que queda después de reemplazar y que podría ser personal: si aparece, no entra. */
 function senalesResiduales(t: string): string[] {
   const s = new Set<string>()
-  if (/@|\barroba\b|\(at\)|\[at\]|\bpunto\s+com\b|\b[\w-]+\.(?:com|mx|net|org|edu|gob)\b/i.test(t)) s.add('queda algo con forma de correo')
-  if (/\d(?:[\s\-.()]{0,2}\d){6,}/.test(t)) s.add('queda una secuencia larga de dígitos')
-  if (/\b(?:Lic|Ing|Sr|Sra|Srta|Dr|Dra|Mtro|Mtra)\.?\s+\p{L}/u.test(t)) s.add('queda un tratamiento seguido de un nombre')
+  if (/@|\barroba\b|\(at\)|\[at\]|\bpunto\s+com\b|\b[\w-]+\.(?:com|mx|net|org|edu|gob)\b/i.test(t)) s.add(SENALES.correo)
+  if (/\d(?:[\s\-.()]{0,2}\d){6,}/.test(t)) s.add(SENALES.digitos)
+  if (/\b(?:Lic|Ing|Sr|Sra|Srta|Dr|Dra|Mtro|Mtra)\.?\s+\p{L}/u.test(t)) s.add(SENALES.tratamiento)
   if (/(su01|contrase[nñ]a|desbloque|bloquead|\brol\b)/i.test(t) && /\b[A-Z]{5,15}\b/.test(t.replace(/\b[A-Z]{2,5}\d\w*\b/g, ''))) {
     const sueltas = [...t.matchAll(/\b[A-Z]{5,15}\b/g)].map((m) => m[0]).filter((p) => !esVocabulario(p))
-    if (sueltas.length) s.add('queda un posible usuario SAP')
+    if (sueltas.length) s.add(SENALES.usuario)
   }
   return [...s]
 }
@@ -137,7 +149,7 @@ export function anonimiza(texto: string, v: Validadores): Anonimizado {
   const cuenta: Cuenta = {}
   const t = aplicaDetectores(texto, v, cuenta)
   const senales = senalesResiduales(t)
-  if (CONTEXTO_PERSONAL.test(texto)) senales.unshift('caso de RR. HH. o nómina: revisión humana obligatoria antes del sandbox')
+  if (CONTEXTO_PERSONAL.test(texto)) senales.unshift(SENALES.personal)
   return { texto: t, reemplazos: cuenta, senales, veredicto: senales.length ? 'cuarentena' : 'entra' }
 }
 

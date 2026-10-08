@@ -8,6 +8,9 @@ import assert from 'node:assert/strict'
 import { anonimiza, generaliza } from '../dist/index.js'
 import { casosDelSandbox, mide, VALIDADORES, fuga } from './_anonimizacion.ts'
 import { CASOS_ADVERSARIALES, CASOS_TECNICOS } from './_adversariales.ts'
+import { HERRAMIENTA, lee } from './_ayuda.ts'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 test('0 fugas: ningún valor sembrado sale en un texto que entra al sandbox', () => {
   const m = mide(casosDelSandbox())
@@ -58,4 +61,21 @@ test('la cuarentena dice tipos de señal, nunca el dato', () => {
 test('generalizar para el núcleo quita también lo que identifica al cliente', () => {
   const r = generaliza('El reporte ZVENTAS_MES de Aceros del Norte falla en sociedad 2000', VALIDADORES, ['Aceros del Norte'])
   assert.equal(r.texto, 'El reporte [TRANSACCION_Z] de [CLIENTE] falla en sociedad [SOCIEDAD]')
+})
+
+test('la cuarentena no frena la atención: el reloj de SLA no la conoce y el caso sigue en atención con su consultora', () => {
+  assert.doesNotMatch(readFileSync(join(HERRAMIENTA, 'src', 'sla.ts'), 'utf8'), /cuarentena|veredicto/i, 'el reloj de SLA no depende de la cuarentena')
+  const runtime = lee('src/features/soporte-sap/services/runtime.ts')
+  const desde = runtime.indexOf('function alSandbox(')
+  const cuerpo = runtime.slice(desde, runtime.indexOf('\n}\n', desde))
+  assert.match(cuerpo, /EN_CUARENTENA/, 'el caso en cuarentena queda en su cadena')
+  assert.match(cuerpo, /\n  i\.sla\.push\(\{ tipo: 'PRIMERA_RESPUESTA'/, 'la primera respuesta corre igual, entre o no al sandbox')
+  assert.match(cuerpo, /\n  i\.estado = 'en_atencion'/, 'el caso sigue en atención, entre o no al sandbox')
+})
+
+test('la red de señales residuales: un dominio que ningún detector reconoce deja el caso en cuarentena', () => {
+  const r = anonimiza('MIGO marca M7 053; escribir a soporte en grupo-norteno.com.mx para el detalle', VALIDADORES)
+  assert.equal(r.veredicto, 'cuarentena', JSON.stringify(r))
+  assert.ok(r.senales.includes('queda algo con forma de correo'), JSON.stringify(r.senales))
+  assert.ok(!r.senales.some((x) => x.includes('grupo-norteno')), 'la señal dice el tipo, nunca el dato')
 })
