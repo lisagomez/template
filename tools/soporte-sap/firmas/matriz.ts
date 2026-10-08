@@ -49,6 +49,10 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-sala-mensaje'], afirmacion: 'en la sala, la aprobación la firma una persona a su nombre y en su tenant', encontrado: 'PRP-010 H-06 (07/10): `sala_aprobaciones` no ataba el `mensaje_id` a su tenant, tarea ni huella: un humano de B aprobaba el plan de A (la versión en memoria sí lo impedía)' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-lab-escala-la-consultora'], afirmacion: 'el laboratorio lee solo lo escalado por la consultora', encontrado: 'PRP-010 H-01 (07/10): el agente escalaba por su cuenta y firmaba `escalada_por` con cualquier seudónimo; la fila «aisia-lab-escalado» probaba la lectura, no quién escala' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-lab-72h-fecha', 'aisia-lab-revoca'], afirmacion: 'los originales, con un acceso que otorga la consultora por 72 h como máximo', encontrado: 'PRP-010 H-02 (07/10): con un `creado_en` futuro el acceso duraba 8 832 h, y no había forma de revocarlo; «aisia-lab-72h» sabotaba el intervalo, no la fecha' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-dato-cuarentena-base', 'aisia-dato-sandbox-cerrojo'], afirmacion: 'la cuarentena guarda solo tipos de señal; al sandbox no entra el dato', encontrado: 'PRP-010 H-03 (07/10): la base aceptaba el dato en `senales` y texto crudo en el sandbox, y el laboratorio lee los dos; el control vivía solo en el código que escribe' },
   { doc: 'C3', por: 'autor', resolucion: 'codigo', filas: ['c3-archivos-ocr-tope'], afirmacion: 'hay un tope de páginas OCR por consultora (`ss_presupuesto`)', encontrado: 'la columna `tope_paginas_ocr` existía y nadie la leía: la ingesta no tenía tope' },
   { doc: 'C3', por: 'autor', resolucion: 'codigo', filas: ['c3-archivos-adjuntos'], afirmacion: 'hay un límite de adjuntos por incidencia', encontrado: 'no existía en la ingesta, ni en el runtime, ni en el CLI' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-riesgo-pantalla'], afirmacion: 'la pantalla muestra la fórmula y el umbral junto al número del riesgo de baja', encontrado: 'la tarjeta enseñaba etiqueta, valor y fuente; la fórmula y el umbral se quedaban en el catálogo' },
@@ -109,6 +113,21 @@ export const FILAS: readonly Fila[] = [
     control: 'src/anonimiza.ts · las señales son frases fijas',
     comprobacion: prueba('anonimiza.ts', 'la cuarentena dice tipos de señal, nunca el dato'),
     sabotaje: { que: 'la cuarentena copia el texto original', ediciones: [ed(dist('anonimiza.js'), 'return { texto: t, reemplazos: cuenta, senales, veredicto', 'return { texto: t, reemplazos: cuenta, senales: [...senales, texto], veredicto')] },
+  },
+  {
+    id: 'aisia-dato-cuarentena-base', doc: 'AISIA', ref: 'Dato personal en el sandbox', infirmable: true, estado: 'probado',
+    afirmacion: 'la cuarentena guarda solo tipos de señal, y la BASE lo exige: un dato no entra disfrazado de señal',
+    control: 'SQL · constraint ss_cuarentena_solo_senales (la lista de SENALES del anonimizador)',
+    comprobacion: prueba('cierre-base.ts', 'H-03 · la cuarentena solo guarda señales del vocabulario fijo, nunca el dato'),
+    sabotaje: { que: 'la cuarentena acepta cualquier texto', ediciones: [ed(SQL, 'check (cardinality(senales) > 0 and senales <@ array[', 'check (cardinality(senales) > 0 or senales <@ array[')] },
+  },
+  {
+    id: 'aisia-dato-sandbox-cerrojo', doc: 'AISIA', ref: 'Dato personal en el sandbox', infirmable: true, estado: 'probado',
+    afirmacion: 'al sandbox no entra un identificador con forma (correo, RFC, CURP, NSS, CLABE, teléfono), aunque lo escriba el agente',
+    control: 'SQL · constraint ss_sandbox_sin_identificadores (segundo cerrojo, independiente del anonimizador)',
+    comprobacion: prueba('cierre-base.ts', 'H-03 · el sandbox rechaza un identificador formal aunque lo escriba el agente'),
+    sabotaje: { que: 'el sandbox acepta lo que le llegue', ediciones: [ed(SQL, '  constraint ss_sandbox_sin_identificadores check (\n', '  constraint ss_sandbox_sin_identificadores check (true or\n')] },
+    nota: 'los nombres sin forma siguen siendo trabajo del anonimizador (H-04, fase 2)',
   },
   {
     id: 'aisia-dato-no-frena', doc: 'AISIA', ref: 'Dato personal en el sandbox', estado: 'probado',
@@ -212,6 +231,31 @@ export const FILAS: readonly Fila[] = [
     control: 'SQL · constraint ss_acceso_con_tope',
     comprobacion: AISLAMIENTO,
     sabotaje: { que: 'el tope pasa a 720 h', ediciones: [ed(SQL, "check (vence_en <= creado_en + interval '72 hours')", "check (vence_en <= creado_en + interval '720 hours')")] },
+  },
+  {
+    id: 'aisia-lab-escala-la-consultora', doc: 'AISIA', ref: 'El laboratorio lee lo que no necesita', infirmable: true, estado: 'probado',
+    afirmacion: 'lo escalado lo escala la consultora a su nombre: el agente no escala, ni con el seudónimo de un consultor',
+    control: 'SQL · ss_escalamiento fuera de las políticas y del grant de escritura del agente (DP-3)',
+    comprobacion: prueba('cierre-base.ts', 'H-01 · el agente no escala al laboratorio, ni a su nombre ni al de un consultor'),
+    sabotaje: { que: 'el agente vuelve a escalar', ediciones: [
+      ed(SQL, "  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);",
+        "  foreach t in array array['ss_escalamiento', 'ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);"),
+      ed(SQL, 'grant insert on public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,',
+        'grant insert on public.ss_escalamiento, public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,')] },
+  },
+  {
+    id: 'aisia-lab-72h-fecha', doc: 'AISIA', ref: 'El laboratorio lee lo que no necesita', infirmable: true, estado: 'probado',
+    afirmacion: 'las 72 h no se estiran: la fecha de alta la pone la base, no quien otorga',
+    control: 'SQL · disparador ss_acceso_fechas (creado_en := now())',
+    comprobacion: prueba('cierre-base.ts', 'H-02 · un acceso a originales no dura más de 72 h aunque quien lo otorga declare otra fecha de alta'),
+    sabotaje: { que: 'quien otorga vuelve a elegir la fecha de alta', ediciones: [ed(SQL, '    new.creado_en := now();\n', '')] },
+  },
+  {
+    id: 'aisia-lab-revoca', doc: 'AISIA', ref: 'El laboratorio lee lo que no necesita', infirmable: true, estado: 'probado',
+    afirmacion: 'la consultora revoca el acceso antes de que venza, y revocado el laboratorio deja de ver los originales',
+    control: 'SQL · revocado_en en ss_priv.baja_original() y la política ss_acceso_revoca',
+    comprobacion: prueba('cierre-base.ts', 'H-02 · la consultora revoca un acceso y el laboratorio deja de ver los originales'),
+    sabotaje: { que: 'revocar deja de cortar el acceso', ediciones: [ed(SQL, ' and a.vence_en > now() and a.revocado_en is null))', ' and a.vence_en > now()))')] },
   },
   {
     id: 'aisia-lab-se-otorga', doc: 'AISIA', ref: 'El laboratorio lee lo que no necesita', estado: 'probado',
@@ -373,8 +417,15 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'se decide a nombre de otro', ediciones: [ed(SQL, '  with check (decidida_por is null or decidida_por = auth.uid());', '  with check (true);')] },
   },
   {
+    id: 'c3-sala-mensaje', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', infirmable: true, estado: 'probado',
+    afirmacion: 'una aprobación es del tenant, de la tarea y de la huella de su mensaje: un humano de B no aprueba el plan de A',
+    control: 'tools/sala-a2a · disparador tg_sala_aprobacion_del_mensaje (S10, S10b)',
+    comprobacion: { tipo: 'comando', carpeta: 'tools/sala-a2a', comando: ['node', 'evidencia/sabotajes.ts'] },
+    sabotaje: { que: 'la suite de la sala siembra S10 (sin el disparador) y exige que S10 y S10b caigan', integrado: true },
+  },
+  {
     id: 'c3-sala', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
-    afirmacion: 'en la sala, la fila de aprobación no la fabrica ningún componente que ejecuta un modelo (sabotajes S1–S7)',
+    afirmacion: 'en la sala, la fila de aprobación no la fabrica ningún componente que ejecuta un modelo (sabotajes S1–S10)',
     control: 'tools/sala-a2a · política as restrictive, sin insert para servicios',
     comprobacion: { tipo: 'comando', carpeta: 'tools/sala-a2a', comando: ['node', 'evidencia/sabotajes.ts'] },
     sabotaje: { que: 'la suite de la sala siembra cada sabotaje en una base nueva y exige que caiga', integrado: true },
