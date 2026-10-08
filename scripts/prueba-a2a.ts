@@ -202,8 +202,28 @@ test('con A2A_API_KEY configurada, sin la cabecera es 401; con ella pasa', async
     assert.equal(card.securityRequirements.length, 1, 'la Card declara la clave cuando se exige')
     const con = await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }, { 'X-API-Key': 'clave-de-prueba' }))
     assert.equal(con.status, 200)
+    const casi = await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }, { 'X-API-Key': 'clave-de-pruebA' }))
+    assert.equal(casi.status, 401, 'misma longitud, un caracter distinto')
   } finally {
     delete process.env.A2A_API_KEY
+  }
+})
+
+test('en PRODUCCION sin clave el puente esta apagado: rpc y Card responden 503 (revision C3 del 2026-10-02)', async () => {
+  const entorno = process.env as Record<string, string | undefined>
+  const antes = entorno['NODE_ENV']
+  entorno['NODE_ENV'] = 'production'
+  try {
+    const rpcApagado = await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }))
+    assert.equal(rpcApagado.status, 503)
+    assert.equal((await rpc(rpcApagado)).error?.message, 'puente A2A apagado')
+    assert.equal((await cardGet()).status, 503, 'no se anuncia un agente que no atiende')
+    entorno['A2A_API_KEY'] = 'clave-de-prueba'
+    assert.equal((await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }))).status, 401, 'con clave vuelve a exigirla')
+    assert.equal((await cardGet()).status, 200)
+  } finally {
+    entorno['NODE_ENV'] = antes
+    delete entorno['A2A_API_KEY']
   }
 })
 

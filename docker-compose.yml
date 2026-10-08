@@ -51,7 +51,8 @@ services:
       # runtime y NO se inlinean en el bundle del navegador.
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-      # Puente A2A (solo red interna). La clave la comparte con `puente-hermes`; vacia = sin clave.
+      # Puente A2A (solo red interna: Caddy lo bloquea desde fuera). La clave la comparte con
+      # `puente-hermes`; vacia = puente apagado (503).
       A2A_URL_BASE: http://app:3000
       A2A_API_KEY: ${A2A_API_KEY:-}
       EXTRACTOR_SERVICIO_URL: http://ocr:8080

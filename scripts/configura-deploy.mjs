@@ -178,6 +178,15 @@ if (!existsSync(ruta(ENV))) {
   const modeloGpu = valores.get('OCR_GPU_MODELO');
   if (modeloGpu && /(^|[-:@/])(latest|stable|current|default|head)$/i.test(modeloGpu)) problemas.push(`OCR_GPU_MODELO="${modeloGpu}" es un alias autoactualizable: el modelo va pineado (C1).`);
   if (modeloGpu && !gpu.runtimeDocker) avisos.push(`OCR_GPU_MODELO esta puesto pero esta maquina no expone GPU a Docker (${gpu.motivo}): no levantes el perfil ocr-gpu aqui.`);
+  // El puente A2A del extractor: en produccion, sin clave queda APAGADO (503) y Caddy no lo deja entrar
+  // desde fuera. Una clave corta es peor que ninguna: abre el puente con algo adivinable. En el despacho
+  // no aplica: su compose no le pasa la clave a la app (ni corre puente-hermes), asi que el puente queda
+  // apagado igual, y una clave suya no deberia frenar el deploy.
+  if (!DESPACHO) {
+    const claveA2a = valores.get('A2A_API_KEY') ?? '';
+    if (claveA2a === '') avisos.push('A2A_API_KEY vacia: el puente A2A del extractor queda apagado (503). Solo hace falta si corre el perfil hermes.');
+    else if (claveA2a.length < 32) problemas.push(`A2A_API_KEY tiene ${claveA2a.length} caracteres: con menos de 32 se adivina. Genera una con \`openssl rand -hex 32\`.`);
+  }
   // Soporte SAP: el runtime de LABORATORIO (estado en memoria, identidades elegibles) no se despliega.
   if (valores.get('SOPORTE_SAP_LABORATORIO') === '1') {
     problemas.push('SOPORTE_SAP_LABORATORIO=1 enciende el laboratorio de Soporte SAP: identidades de laboratorio que cualquiera elige y ' +
