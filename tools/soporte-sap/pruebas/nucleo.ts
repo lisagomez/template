@@ -28,6 +28,8 @@ test('H-19 · la base rechaza al núcleo lo que llega sin generalizar: un nombre
   for (const t of SIN_GENERALIZAR) if (!/se generaliza antes/.test(await falla(() => comoAgente(db, ORG.CA, propone('nucleo', t))) ?? '')) pasaron.push(t)
   assert.deepEqual(pasaron, [])
   assert.equal(await falla(() => comoAgente(db, ORG.CA, propone('a_medida', SIN_GENERALIZAR[0]!))), null, 'control: a medida de su consultora, entra tal cual')
+  for (const t of ['la planta 3 está detenida desde ayer', 'BSEG-ZLSCH viene vacío y EKKO-ZTERM no existe', 'ya quedó la zona de transporte en la VL02N', 'el periodo 2026/10/01 no abre en la OB52'])
+    assert.equal(await falla(() => comoAgente(db, ORG.CA, propone('nucleo', t))), null, `control: lo estándar sí entra al núcleo («${t}»)`)
 })
 
 test('H-19 · promover al núcleo sin generalizar falla; con lo que deja generaliza, el superadministrador lo sube', async () => {
