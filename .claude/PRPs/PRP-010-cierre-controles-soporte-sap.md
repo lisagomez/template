@@ -124,7 +124,8 @@ arregló en parte.
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
 | H-29 | `.env.production` entra en la imagen. `.dockerignore` excluye `.env` y `.env*.local` pero no `.env.production`, el `Dockerfile` hace `COPY . .` y el modo standalone de Next lo copia (`node_modules/next/dist/build/index.js`, `writeStandaloneDirectory`) y lo carga al arrancar. Efectos: `service_role`, `SS_PG_PASSWORD` y las llaves del despacho (`scripts/despacho/llaves.mjs` escribe ahí) quedan en el sistema de archivos de la app; y variables que el compose **no** pasa, como `SOPORTE_SAP_LABORATORIO=1` o los tokens de otras rutas, llegan al runtime. Eso tumba la premisa de la revisión de rutas públicas (#209): «la app solo recibe lo que le pone el compose». Afecta también a `docker-compose.despacho.yml`, que usa el mismo `Dockerfile` | 2 | sí | código + prueba (fase 0) | **cerrado en #226** |
-| H-30 | **La imagen de la app no se construye desde un clon limpio, tampoco en `main`.** Se encontró el 07/10 al construir la imagen real desde un `git archive` para la evidencia de la fase 0, y tiene tres capas: (1) `tools/*/dist` está en `.gitignore` y `npm run build` no lo compila (solo `prepara:gate`, por `pretypecheck`): Turbopack da 427 errores; (2) `.dockerignore` excluye `.claude`, y `src/lib/ai/routing.ts` importa `.claude/routing-modelos.json`; (3) el typecheck de `next build` incluye `tools/dictado/src`, y `@tu-scope/voz` no está en la imagen. `npm run deploy` falla en un servidor recién clonado, incluido el despacho del buzón | 07/10 | — | código + prueba (fase 0b) | — |
+| H-30 | **La imagen de la app no se construye desde un clon limpio, tampoco en `main`.** Se encontró el 07/10 al construir la imagen real desde un `git archive` para la evidencia de la fase 0, y tiene tres capas: (1) `tools/*/dist` está en `.gitignore` y `npm run build` no lo compila (solo `prepara:gate`, por `pretypecheck`): Turbopack da 427 errores; (2) `.dockerignore` excluye `.claude`, y `src/lib/ai/routing.ts` importa `.claude/routing-modelos.json`; (3) el typecheck de `next build` incluye `tools/dictado/src`, y `@tu-scope/voz` no está en la imagen. `npm run deploy` falla en un servidor recién clonado, incluido el despacho del buzón | 07/10 | — | código + prueba (fase 0b) | **cerrado en la fase 0b** |
+| H-31 | **La imagen final arrastra archivos del repo.** El file tracing de Next copia a `.next/standalone` lo que las rutas tocan con `fs`, y en la imagen quedan `src/` (3 MB de fuente), `tools/` (4.3 MB), `docs/`, `trayectorias/` (60 archivos de datos de sesiones), `inventario/`, `productos/` y `erp/` (`casa/huellas.txt`, `entrega.json`, referencias de roles y servidor). La cabecera del `Dockerfile` dice «la imagen final NO contiene código fuente». En el despacho la imagen vive en la máquina de un tercero, y lo defendible del ERP «no sale» (§1.7). Salió al arrancar por primera vez la imagen de la fase 0b; en `main` pasa igual | 07/10 | — | código: qué ruta necesita cada archivo en tiempo de ejecución, y fuera lo demás (`outputFileTracingExcludes`) + prueba que inspeccione la imagen | — |
 
 **Texto y cifras** (fase 4, todo `texto`):
 
@@ -366,6 +367,19 @@ con este `Dockerfile`. Si su prueba necesita alta en el padrón, es un CDC chico
 **Validación**: una imagen construida desde un `git archive`, con un `.env.production` sembrado, arranca, responde su
 healthcheck y no contiene ningún `.env*`. Esto cierra también la evidencia que la fase 0 no pudo dar. Además, una
 prueba sin Docker caza cada capa de H-30 con su siembra, y validate en verde.
+**Hecho (2026-10-07, `d66336c`)**:
+- `prebuild` = `prepara-gate`: compila `tools/*/dist` e instala el peer del dictado.
+- `.dockerignore`: `!.claude/routing-modelos.json`, más `**/node_modules`, `**/dist` y `**/*.tgz`.
+- `revisaConstruible`, con 8 casos en `prueba:buzon`. Sobre los archivos de `main` caza las tres capas.
+
+**Evidencia con Docker real**, desde un `git archive` del commit y con un `.env.production` sembrado con canarios:
+- el build pasa en 243 s, con las 13 herramientas compiladas dentro;
+- el contenedor queda **healthy** y `/` responde **200**;
+- hay **0** archivos `.env*` en la imagen;
+- el cargador de Next (`@next/env`) encuentra **0 archivos** en `/app`, y ni el canario ni `service_role` llegan al
+  proceso. Esto cierra la evidencia que la fase 0 no pudo dar.
+
+Al arrancarla salió **H-31**.
 
 ### Fase 1: Los huecos de la base, con su arnés de sabotajes
 **Objetivo**: las dos propuestas SQL cierran H-01, H-02, H-03, H-05 a H-10 (la parte de la base), H-12 a H-16 y
@@ -441,6 +455,10 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   la vista del inventario divergía en una rama que no lo traía. **Fix**: validar en un worktree limpio, desacoplado
   del commit y con `npm ci` real. No se borra un archivo sin seguimiento para que pase el gate: el clasificador lo
   bloquea, y con razón, porque no tiene respaldo.
+- **2026-10-07 · construir la imagen no basta: hay que mirar qué lleva dentro** (fase 0b → H-31). La primera imagen
+  que llegó a construirse traía `src/`, `erp/` y `trayectorias/`, contra lo que dice el propio `Dockerfile`. Un
+  build en verde dice que compila, no qué se lleva. **Lección**: la evidencia de una imagen incluye listar `/app`
+  y buscar lo que no debería estar, no solo el healthcheck.
 - **2026-10-07 · en esta máquina Docker no tiene buildx.** `DOCKER_BUILDKIT=0` (el builder clásico) respeta igual el
   `.dockerignore` e ignora la línea `# syntax`; en el servidor, `docker compose build` usa BuildKit.
 
