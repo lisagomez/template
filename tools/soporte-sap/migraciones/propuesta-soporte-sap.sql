@@ -1070,6 +1070,15 @@ begin
     execute format('create policy %I on public.%I for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_borra', t);
   end loop;
 end $$;
+-- Lo ÚNICO que escribe la plataforma: el resultado de SLA que calcula su job desde los eventos de la base, con
+-- `relojSla` (src/sla-job.ts), para su consultora (PRP-010 H-16). Ni decisiones, ni eventos, ni horas (H-07).
+drop policy if exists ss_sla_resultado_plataforma_calcula on public.ss_sla_resultado;
+create policy ss_sla_resultado_plataforma_calcula on public.ss_sla_resultado for insert to soporte_sap_plataforma
+  with check (consultora_id = ss_priv.consultora_de_tarea());
+drop policy if exists ss_sla_resultado_plataforma_recalcula on public.ss_sla_resultado;
+create policy ss_sla_resultado_plataforma_recalcula on public.ss_sla_resultado for update to soporte_sap_plataforma
+  using (consultora_id = ss_priv.consultora_de_tarea()) with check (consultora_id = ss_priv.consultora_de_tarea());
+
 drop policy if exists ss_caso_sandbox_plataforma_lee on public.ss_caso_sandbox;
 create policy ss_caso_sandbox_plataforma_lee on public.ss_caso_sandbox for select to soporte_sap_plataforma
   using (origen_consultora_id = ss_priv.consultora_de_tarea());
@@ -1133,6 +1142,7 @@ grant select, delete on public.ss_incidencia, public.ss_escalamiento, public.ss_
 -- `exportaTenant` con este rol fallaba con «permission denied».
 grant select on public.ss_evento, public.ss_crudo, public.ss_contrato_sla, public.ss_presupuesto, public.ss_propuesta,
   public.ss_caso_sandbox, public.ss_acceso_motivado to soporte_sap_plataforma;
+grant insert, update on public.ss_sla_resultado to soporte_sap_plataforma;
 
 -- Métricas: privilegios POR COLUMNA. Ni `titulo`, ni `descripcion`, ni `nombre`, ni `motivo`.
 grant select (id, tipo, padre_id, creada_en, tamano, sistema, usuarios_sap) on public.ss_organizacion to soporte_sap_metricas;

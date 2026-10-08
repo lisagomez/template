@@ -69,8 +69,20 @@ test('la cuarentena no frena la atención: el reloj de SLA no la conoce y el cas
   const desde = runtime.indexOf('function alSandbox(')
   const cuerpo = runtime.slice(desde, runtime.indexOf('\n}\n', desde))
   assert.match(cuerpo, /EN_CUARENTENA/, 'el caso en cuarentena queda en su cadena')
-  assert.match(cuerpo, /\n  i\.sla\.push\(\{ tipo: 'PRIMERA_RESPUESTA'/, 'la primera respuesta corre igual, entre o no al sandbox')
   assert.match(cuerpo, /\n  i\.estado = 'en_atencion'/, 'el caso sigue en atención, entre o no al sandbox')
+})
+
+// PRP-010 H-17 (DP-4): la primera respuesta es de una PERSONA. Antes, esta misma prueba exigía lo contrario (que
+// anonimizar marcara la primera respuesta): fijaba el bug como requisito, y una P1 a 60 min se cumplía sola.
+const cuerpoDe = (runtime: string, funcion: string) => { const d = runtime.indexOf(`function ${funcion}(`); return runtime.slice(d, runtime.indexOf('\n}\n', d)) }
+test('H-17 · ni anonimizar ni mandar a la sala marcan la primera respuesta: solo la da el consultor, respondiéndole al cliente', () => {
+  const runtime = lee('src/features/soporte-sap/services/runtime.ts')
+  for (const f of ['alSandbox', 'proponPlan', 'levanta', 'decide', 'aplica', 'revisa', 'conversa', 'relojDelCliente']) {
+    assert.doesNotMatch(cuerpoDe(runtime, f), /PRIMERA_RESPUESTA/, `${f} no la marca`)
+  }
+  const responde = cuerpoDe(runtime, 'respondeAlCliente')
+  assert.match(responde, /if \(s\.rol !== 'consultor'\) throw/, 'solo el consultor responde')
+  assert.match(responde, /i\.sla\.push\(\{ tipo: 'PRIMERA_RESPUESTA'/, 'y su respuesta es la que marca el reloj')
 })
 
 test('la red de señales residuales: un dominio que ningún detector reconoce deja el caso en cuarentena', () => {

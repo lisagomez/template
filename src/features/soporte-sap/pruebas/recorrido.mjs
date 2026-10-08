@@ -91,6 +91,18 @@ await captura(10.5, 'la v2 se aprueba en la sala con la sesion humana', async ()
 
 // 7 y 11: el workspace del consultor con SLA y horas; el reloj corre, se pausa, se reanuda; el incumplimiento con su evidencia.
 await rol('consultor')
+// PRP-010 H-17 (DP-4): el plan de inc-001 fue a la sala (y se aplicó), y eso NO es haberle respondido al cliente; la
+// primera respuesta la da el consultor. Se mira el ESTADO del reloj y la CADENA (textContent: el <details> está cerrado),
+// no los minutos: «respuesta 0 min» se ve igual antes y después. Y la cadena sola tampoco basta: el código viejo
+// marcaba la primera respuesta en el reloj sin anotarla en la cadena, así que el estado del reloj es lo que la delata
+// (con el código viejo, esta P1 decía «respuesta en meta» sin que nadie hubiera respondido).
+const cadena = async () => (await pagina.locator(sel('cadena')).first().textContent()) ?? ''
+await pagina.click(sel('incidencia-inc-001'))
+await captura(11.1, 'con el plan ya en la sala nadie le ha respondido al cliente', async () => { const c = await cadena(), r = await texto(sel('reloj-incidencia')); return /ENVIADA_A_SALA/.test(c) && !/PRIMERA_RESPUESTA/.test(c) && /en plazo/.test(r) && !/respuesta en meta/.test(r) }, sel('reloj-incidencia'))
+await pagina.fill(`${sel('responde-al-cliente')} input`, 'Ya revisamos el periodo contable; te confirmamos hoy mismo.')
+await pagina.click(`${sel('responde-al-cliente')} button`)
+await pagina.waitForTimeout(400)
+await captura(11.2, 'la primera respuesta la marca el consultor al responder', async () => /PRIMERA_RESPUESTA · usr-consultor/.test(await cadena()) && /respuesta en meta/.test(await texto(sel('reloj-incidencia'))), sel('reloj-incidencia'))
 await pagina.click(sel('incidencia-inc-002'))
 await pagina.click(sel('espera-cliente'))
 await pagina.waitForTimeout(1200)

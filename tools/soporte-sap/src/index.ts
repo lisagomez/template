@@ -60,3 +60,6 @@ export { accionables, recalcula, foda, PARAMETROS_LABORATORIO, CRITERIOS_FODA, F
 export type { Rango, Parametro, Evidencia, Accionable, Cambio, PuntoFoda, Foda } from './impactos.js'
 export { preparaPlan, supervisa, mensajeDePlan, corrige } from './enjambre.js'
 export type { Plan, ComprobacionSupervisor, VeredictoSupervisor } from './enjambre.js'
+
+export { calculaResultadosSla, entradaDelReloj } from './sla-job.js'
+export type { CorridaSla, Omitida, EventoDeLaBase } from './sla-job.js'

@@ -81,4 +81,6 @@ export type Accion =
   | { readonly tipo: 'chat'; readonly texto: string }
   | { readonly tipo: 'espera_cliente'; readonly incidencia: string }
   | { readonly tipo: 'responde_cliente'; readonly incidencia: string }
+  /** El consultor le responde al cliente: su primera respuesta para el reloj (DP-4). */
+  | { readonly tipo: 'responde'; readonly incidencia: string; readonly texto: string }
   | { readonly tipo: 'reinicia' }
