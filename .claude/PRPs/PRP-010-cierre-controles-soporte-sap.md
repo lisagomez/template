@@ -70,7 +70,7 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-06 | En la sala en SQL, una persona de un tenant aprueba el plan de otro: `sala_aprobaciones` no ata `mensaje_id` a `tenant_id`, `task_id` ni la huella. `sala_agente` se acota con un GUC que fija su propia sesión. La versión en memoria sí lo hace bien | 2 | sí | código, más un sabotaje nuevo en la suite de la sala | **cerrado en la tanda 1a** (la aprobación; el GUC de `sala_agente` va con H-21) |
+| H-06 | En la sala en SQL, una persona de un tenant aprueba el plan de otro: `sala_aprobaciones` no ata `mensaje_id` a `tenant_id`, `task_id` ni la huella. `sala_agente` se acota con un GUC que fija su propia sesión. La versión en memoria sí lo hace bien | 2 | sí | código, más un sabotaje nuevo en la suite de la sala | **cerrado** (la aprobación en la 1a; el tenant de `sala_agente`, en la 1c) |
 | H-07 | El rol de plataforma inserta decisiones ya tomadas (mapeo aprobado, campo confirmado) y eventos con el seudónimo de un consultor. Ninguna prueba usa ese rol | 1 y 2 | — | código | — |
 | H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | — |
 | H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | **cerrado en la tanda 1b** |
@@ -105,7 +105,7 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-21 | **El control central del C3 no existe fuera de las pruebas.** El token de tarea solo se verifica en `pruebas/_base.ts`; es un HMAC propio, no un JWT. Con `set_config` dentro de la consulta, un token de A lee B. «Sin conexión directa» es papel. El secreto de firma no tiene variable, rotación ni chequeo | 1 y 2 | sí | código: verificar la firma en la base (DP-2) | — |
+| H-21 | **El control central del C3 no existe fuera de las pruebas.** El token de tarea solo se verifica en `pruebas/_base.ts`; es un HMAC propio, no un JWT. Con `set_config` dentro de la consulta, un token de A lee B. «Sin conexión directa» es papel. El secreto de firma no tiene variable, rotación ni chequeo | 1 y 2 | sí | código: verificar la firma en la base (DP-2) | **cerrado en la tanda 1c** (cargar el secreto al desplegar es paso humano) |
 | H-22 | Un PDF de unos 300 KB tumba la app de todos los tenants y productos. La capa 0 corre en el proceso de la app y el inflado no tiene tope | 1 | — (O4) | código: tope de bytes inflados, medido sobre el corpus real del extractor | — |
 | H-23 | Los adjuntos se cuentan por lote, no por incidencia. El tope de OCR se mira antes de leer. El N3 sube directo al bucket sin validación de bytes. `formData()` carga todo en memoria | 1 y 2 | — | código | parcial |
 | H-24 | `delimitaDocumento` no se usa. Los parámetros del plan (usuario SAP, BP, RFC) salen del texto no confiable. La prioridad sube con palabras clave, y el banco de inyección no las toca | 1 y 2 | — | código mínimo (delimitar) + brecha O1/O2 declarada | — |
@@ -429,6 +429,13 @@ vocabulario en el código y en la base. **Para la fase 2**: el runtime en memori
 anonimizar o al mandar a la sala (H-17), y el job que calcula `ss_sla_resultado` desde los eventos no existe (la
 plataforma tiene permiso; falta el código).
 
+**Tanda 1c, hecha (2026-10-07, rama `soporte/cierre-1c`)**: H-21 y el tenant de `sala_agente` (lo que quedaba de H-06).
+La base verifica el token de la tarea: firma con `pgcrypto`, rol de la sesión y vencimiento. El secreto vive en
+`ss_priv.secreto_tareas` y `sala_priv.secreto_tareas`, y solo lo lee la función que verifica. La brecha
+`c3-conexion-directa` pasa a «probado». **Para el despliegue (fase 3)**: cargar los dos secretos es un paso humano, y
+PostgREST tiene que pasar la cabecera `x-tarea`; `configura:deploy` debería comprobar que el secreto existe sin
+imprimirlo. **Lo que queda de la fase 1 va en la tanda 1d**: H-05, H-07, H-08, H-12, H-13 y H-14.
+
 ### Fase 2: Cablear lo que la app promete y no hace
 **Objetivo**:
 - cablear el presupuesto (H-18), la generalización y el «a medida» por defecto (H-19), la impugnación en la app
@@ -508,6 +515,12 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
   bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.
   **Lección**: un control que no se puede romper por el camino que se prueba parece más fuerte de lo que es.
+- **2026-10-07 · dos pruebas vacías del H-21, y las dos parecían razonables** (fase 1, tanda 1c). La sonda del
+  `set_config` iba en el WHERE y después en un LATERAL de la misma consulta: no leía B **ni con la función vieja**,
+  porque la base evalúa antes la función estable de la política. El arnés dijo «NO CAE» dos veces. Una sonda medida
+  aparte lo resolvió: el ataque real son DOS sentencias en la misma sesión, que es lo que hace un agente con SQL.
+  **Lección**: una prueba de seguridad se escribe contra el ataque que funciona en el sistema SIN el control; si no
+  se mide primero que el ataque funciona, la prueba puede estar midiendo nada.
 - **2026-10-07 · un `fs` con camino dinámico es un glob sobre todo el repo** (H-31). `turbopackIgnore` en la app no
   alcanza el código compilado de una herramienta, y cada ruta nueva puede reintroducirlo. **Fix**: una lista global de
   lo que nunca viaja, probada con la semántica de Next, y la imagen inspeccionada por dentro.
