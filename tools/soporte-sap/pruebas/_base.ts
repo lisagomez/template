@@ -63,6 +63,7 @@ export const INC = {
 
 export const SHA = { a1: 'a'.repeat(64), a2: 'b'.repeat(64), b1: 'c'.repeat(64) } as const
 export const SECRETO_TAREAS = 'secreto-de-laboratorio-para-tareas-0123456789'
+export const SAL_SEUDONIMOS = 'sal-de-laboratorio-para-los-seudonimos-0123456789'
 
 const ruta = (c: string, cl: string, i: string, s: string) => `${c}/${cl}/${i}/${s}`
 
@@ -74,6 +75,8 @@ export async function baseSoporte(extra = ''): Promise<PGlite> {
   await db.exec(SQL_SOPORTE)
   // El secreto del orquestador, como lo cargaría el despliegue (PRP-010 H-21): solo la base lo lee.
   await db.exec(`insert into ss_priv.secreto_tareas (secreto) values ('${SECRETO_TAREAS}') on conflict (id) do nothing`)
+  // La sal de los seudónimos (PRP-010 H-05), igual: se carga al desplegar y solo la lee ss_priv.seudonimo().
+  await db.exec(`insert into ss_priv.sal_seudonimos (sal) values ('${SAL_SEUDONIMOS}') on conflict (id) do nothing`)
   if (extra) await db.exec(extra)
   await db.exec(`
     insert into ss_organizacion (id, tipo, nombre, padre_id) values

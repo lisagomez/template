@@ -49,6 +49,10 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-cadena-base'], afirmacion: 'la cadena de eventos es la evidencia del servicio', encontrado: 'PRP-010 H-13 (05/10): la base no verificaba `anterior`, `hash` ni `seq`: quien escribía ponía los que quisiera' },
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-roles-corregidos', 'c3-buckets-privados', 'c3-campo-adjunto', 'c3-fila-crudo', 'c3-contrato-cliente'], afirmacion: 'la tenencia de cada tabla hija está atada', encontrado: 'PRP-010 H-14 (07/10): un campo colgaba del adjunto de otro cliente, una fila del crudo de otra consultora, un contrato del cliente de otra; y un rol con bypassrls o un bucket público previos no se corregían' },
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-chat-turno'], afirmacion: 'el agente escribe en el chat del HIL', encontrado: 'PRP-010 H-12 (07/10): con la tarea de cualquier consultora escribía en el chat de cualquier usuario' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-consultor-horas-propias', 'aisia-consultor-sal'], afirmacion: 'el producto no ofrece una vista de desempeño individual; el seudónimo protege a los consultores', encontrado: 'PRP-010 H-05 (05/10 y 07/10): cualquier consultor leía fila por fila las horas de sus colegas, y el seudónimo era un md5 sin sal que se revertía desde `ss_miembro`' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-conexion-directa', 'c3-token-base-firma', 'c3-token-base-rol', 'c3-token-base-vence', 'c3-token-secreto', 'c3-sala-tenant-token'], afirmacion: 'la consultora de la tarea sale de un token firmado por el orquestador y verificado por la pasarela', encontrado: 'PRP-010 H-21 (05/10 y 07/10): la verificación solo existía en el arnés de pruebas; la base leía `request.jwt.claims`, que la sesión reescribe con `set_config` en la misma consulta (un token de A leía B), y `sala_agente` se acotaba con una variable que fijaba él mismo' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-prioridad-piso-base', 'aisia-prioridad-vocabulario', 'aisia-prioridad-cambio'], afirmacion: 'un ticket con señales de nómina o RR. HH. no queda debajo de P2 sin que un humano lo baje', encontrado: 'PRP-010 H-15 (07/10): IMSS, PTU, aguinaldo, incapacidad, la quincena o un infotipo salían P4 (dos vocabularios distintos), y la base no imponía el piso: el cliente insertaba la prioridad que quería y el consultor la cambiaba sin motivo ni evento' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-alta', 'aisia-sla-marcas', 'aisia-sla-de-eventos', 'aisia-sla-resultado-contrato', 'aisia-sla-resultado-agente'], afirmacion: 'el SLA se mide desde los eventos; la fecha y el actor los da la base', encontrado: 'PRP-010 H-16 (07/10): el cliente creaba con una fecha de hace un mes, el consultor reescribía `creada_en` y la primera respuesta, y el agente guardaba `cumple=true` con un contrato inventado' },
@@ -428,7 +432,7 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'las horas son de la consultora: ni el cliente ni el laboratorio las leen fila por fila',
     control: 'SQL · ss_horas_lee',
     comprobacion: AISLAMIENTO,
-    sabotaje: { que: 'cualquiera lee las horas', ediciones: [ed(SQL, "create policy ss_horas_lee on public.ss_horas for select to authenticated\n  using (ss_priv.rol_en(consultora_id) = 'consultor');", 'create policy ss_horas_lee on public.ss_horas for select to authenticated\n  using (true);')] },
+    sabotaje: { que: 'cualquiera lee las horas', ediciones: [ed(SQL, "create policy ss_horas_lee on public.ss_horas for select to authenticated\n  using (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.seudonimo(auth.uid()));", 'create policy ss_horas_lee on public.ss_horas for select to authenticated\n  using (true);')] },
   },
   {
     id: 'aisia-presupuesto', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
@@ -611,11 +615,83 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'se sube a cualquier carpeta', ediciones: [ed(SQL, '    and ss_priv.padre_de(ss_priv.carpeta(name, 2)) = ss_priv.carpeta(name, 1)\n', '')] },
   },
   {
+    id: 'c3-cadena-base', doc: 'C3', ref: 'Tenencia atada (O2)', estado: 'probado',
+    afirmacion: "la cadena de eventos la calcula la base (seq, anterior, hash y fecha), con la fórmula del código: quien escribe no elige ninguno, y el verificador del código acepta lo que deja la base",
+    control: "SQL · disparador ss_evento_cadena con ss_priv.canonico()",
+    comprobacion: prueba('cierre-base.ts', "H-13 · la base calcula la cadena, y el verificador del código la acepta"),
+    sabotaje: { que: "la base vuelve a aceptar la cadena que le den", ediciones: [
+      ed(SQL, "create trigger ss_evento_cadena before insert on public.ss_evento\n  for each row execute function ss_priv.evento_encadena();", "select 1;")] },
+  },
+  {
+    id: 'c3-roles-corregidos', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', estado: 'probado',
+    afirmacion: "un rol de servicio que ya existía con bypassrls o login queda corregido al aplicar el esquema",
+    control: "SQL · alter role … nologin nobypassrls tras crearlos",
+    comprobacion: prueba('cierre-base.ts', "H-14 · un rol de servicio que ya existía con bypassrls queda corregido al aplicar el esquema"),
+    sabotaje: { que: "el esquema deja los roles como estaban", ediciones: [
+      ed(SQL, "    execute format('alter role %I nologin nobypassrls', r);\n", "")] },
+  },
+  {
+    id: 'c3-buckets-privados', doc: 'C3', ref: 'Tenencia atada (O2)', estado: 'probado',
+    afirmacion: "los tres buckets son privados aunque ya existieran públicos",
+    control: "SQL · on conflict (id) do update set public = false",
+    comprobacion: prueba('cierre-base.ts', "H-14 · un bucket que ya existía público queda privado al aplicar el esquema"),
+    sabotaje: { que: "un bucket público se queda público", ediciones: [
+      ed(SQL, "on conflict (id) do update set public = false;", "on conflict (id) do nothing;")] },
+  },
+  {
+    id: 'c3-campo-adjunto', doc: 'C3', ref: 'Tenencia atada (O2)', infirmable: true, estado: 'probado',
+    afirmacion: "un campo extraído cuelga de un adjunto de su incidencia: el valor leído del documento de un cliente no aparece en la incidencia de otro",
+    control: "SQL · disparador ss_campo_extraido_adjunto",
+    comprobacion: prueba('cierre-base.ts', "H-14 · un campo extraído cuelga de un adjunto de SU incidencia"),
+    sabotaje: { que: "el campo cuelga de cualquier adjunto", ediciones: [
+      ed(SQL, "create trigger ss_campo_extraido_adjunto before insert or update on public.ss_campo_extraido\n  for each row execute function ss_priv.campo_de_su_adjunto();", "select 1;")] },
+  },
+  {
+    id: 'c3-fila-crudo', doc: 'C3', ref: 'Tenencia atada (O2)', estado: 'probado',
+    afirmacion: "una fila importada cuelga de un crudo de su consultora",
+    control: "SQL · disparador ss_importacion_fila_crudo",
+    comprobacion: prueba('cierre-base.ts', "H-14 · una fila importada no cuelga del crudo de otra consultora, ni un contrato del cliente de otra"),
+    sabotaje: { que: "la fila cuelga de cualquier crudo", ediciones: [
+      ed(SQL, "create trigger ss_importacion_fila_crudo before insert or update on public.ss_importacion_fila\n  for each row execute function ss_priv.fila_de_su_crudo();", "select 1;")] },
+  },
+  {
+    id: 'c3-contrato-cliente', doc: 'C3', ref: 'Tenencia atada (O2)', estado: 'probado',
+    afirmacion: "un contrato N2-N3 no se firma con el cliente de otra consultora",
+    control: "SQL · ss_contrato_sla en la tenencia cliente-consultora",
+    comprobacion: prueba('cierre-base.ts', "H-14 · una fila importada no cuelga del crudo de otra consultora, ni un contrato del cliente de otra"),
+    sabotaje: { que: "el contrato se firma con cualquier cliente", ediciones: [
+      ed(SQL, "  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla'] loop", "  foreach t in array array['ss_importacion_fila', 'ss_metrica'] loop")] },
+  },
+  {
+    id: 'c3-chat-turno', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
+    afirmacion: "el agente escribe solo en el chat del usuario de su turno (el token de la tarea de chat lo nombra)",
+    control: "SQL · ss_chat_agente con claims_de_tarea()->>'usuario'",
+    comprobacion: prueba('cierre-base.ts', "H-12 · el agente escribe solo en el chat del usuario de su turno"),
+    sabotaje: { que: "el agente escribe en cualquier chat", ediciones: [
+      ed(SQL, "  with check (autor = 'agente' and usuario_id = ss_priv.uuid_o_nulo(ss_priv.claims_de_tarea() ->> 'usuario'));", "  with check (autor = 'agente');")] },
+  },
+  {
+    id: 'aisia-consultor-horas-propias', doc: 'AISIA', ref: 'Consultor juzgado por una métrica', estado: 'probado',
+    afirmacion: "cada consultor ve sus horas, no las de sus colegas una por una: no hay vista de desempeño individual",
+    control: "SQL · ss_horas_lee compara consultor con el seudónimo de la sesión",
+    comprobacion: prueba('cierre-base.ts', "H-05 · cada consultor ve sus horas, no las de sus colegas"),
+    sabotaje: { que: "un consultor lee las horas de todos", ediciones: [
+      ed(SQL, " using (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.seudonimo(auth.uid()));", " using (ss_priv.rol_en(consultora_id) = 'consultor');")] },
+  },
+  {
+    id: 'aisia-consultor-sal', doc: 'AISIA', ref: 'Consultor juzgado por una métrica', estado: 'probado',
+    afirmacion: "el seudónimo lleva una sal que solo lee la base: no se revierte con un md5 del id ni leyendo ss_miembro",
+    control: "SQL · ss_priv.seudonimo() con ss_priv.sal_seudonimos",
+    comprobacion: prueba('cierre-base.ts', "H-05 · el seudónimo no se revierte con un md5 del id, y la sal no la lee ningún rol de la API"),
+    sabotaje: { que: "el seudónimo vuelve a ser el md5 del id", ediciones: [
+      ed(SQL, "  select 'usr-' || left(encode(extensions.hmac(u::text, s.sal, 'sha256'), 'hex'), 12) from ss_priv.sal_seudonimos s where s.id = 1", "  select 'usr-' || left(md5(u::text), 12)")] },
+  },
+  {
     id: 'c3-tenencia-actor', doc: 'C3', ref: 'Tenencia atada (O2)', estado: 'probado',
     afirmacion: 'el actor de un evento lo da la base: una persona no firma con el seudónimo de otra',
     control: 'SQL · ss_priv.evento_honesto()',
     comprobacion: AISLAMIENTO,
-    sabotaje: { que: 'cualquiera firma como otro', ediciones: [ed(SQL, "  if current_user = 'authenticated' and new.actor <> ss_priv.seudonimo(auth.uid()) then", '  if false then')] },
+    sabotaje: { que: 'cualquiera firma como otro', ediciones: [ed(SQL, "  if current_user = 'authenticated' and new.actor is distinct from ss_priv.seudonimo(auth.uid()) then", '  if false then')] },
   },
   {
     id: 'c3-datos-exportes', doc: 'C3', ref: 'Datos personales', estado: 'probado',
