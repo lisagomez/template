@@ -64,6 +64,8 @@ export const INC = {
 export const SHA = { a1: 'a'.repeat(64), a2: 'b'.repeat(64), b1: 'c'.repeat(64) } as const
 export const SECRETO_TAREAS = 'secreto-de-laboratorio-para-tareas-0123456789'
 export const SAL_SEUDONIMOS = 'sal-de-laboratorio-para-los-seudonimos-0123456789'
+/** El secreto con el que el job firma los exports por tenant (PRP-010 H-08); en producción, el del job. */
+export const SECRETO_RESPALDOS = 'secreto-de-laboratorio-para-los-respaldos-0123456789'
 
 const ruta = (c: string, cl: string, i: string, s: string) => `${c}/${cl}/${i}/${s}`
 

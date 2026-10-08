@@ -15,7 +15,7 @@ import {
   categoriza, consultaMatriz, conocimientoDeMatriz, agrega, exportaTenant, generaCorpus, MATRIZ_LABORATORIO, consumoMensual,
   maquinaPara, celda, medida, supuesta, INCIDENCIAS_MES, type Insumos, type Consulta, type EventoIncidencia, type MotorReglas,
 } from '../dist/index.js'
-import { baseSoporte, cargaSintetica, ORG } from '../pruebas/_base.ts'
+import { baseSoporte, cargaSintetica, ORG, SECRETO_RESPALDOS } from '../pruebas/_base.ts'
 import { HERRAMIENTA, RAIZ } from '../pruebas/_ayuda.ts'
 
 async function bdYExport(): Promise<{ bytesBd: number; bytesExport: number; n: number }> {
@@ -25,7 +25,7 @@ async function bdYExport(): Promise<{ bytesBd: number; bytesExport: number; n: n
   await cargaSintetica(db, ORG.CA, ORG.A1, INCIDENCIAS_MES.consultora.L)
   const n = (await db.query<{ n: number }>(`select count(*)::int as n from ss_incidencia where titulo like 'Incidencia sintética%'`)).rows[0]!.n
   const q: Consulta = async <T>(sql: string, p?: unknown[]) => (await db.query<T>(sql, p)).rows
-  const e = await exportaTenant(q, ORG.CA, new Date().toISOString())
+  const e = await exportaTenant(q, ORG.CA, new Date().toISOString(), SECRETO_RESPALDOS)
   return { bytesBd: (Number(await tam()) - antes) / n, bytesExport: Buffer.byteLength(JSON.stringify(e)) / n, n }
 }
 

@@ -71,8 +71,8 @@ arregló en parte.
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
 | H-06 | En la sala en SQL, una persona de un tenant aprueba el plan de otro: `sala_aprobaciones` no ata `mensaje_id` a `tenant_id`, `task_id` ni la huella. `sala_agente` se acota con un GUC que fija su propia sesión. La versión en memoria sí lo hace bien | 2 | sí | código, más un sabotaje nuevo en la suite de la sala | **cerrado** (la aprobación en la 1a; el tenant de `sala_agente`, en la 1c) |
-| H-07 | El rol de plataforma inserta decisiones ya tomadas (mapeo aprobado, campo confirmado) y eventos con el seudónimo de un consultor. Ninguna prueba usa ese rol | 1 y 2 | — | código | — |
-| H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | — |
+| H-07 | El rol de plataforma inserta decisiones ya tomadas (mapeo aprobado, campo confirmado) y eventos con el seudónimo de un consultor. Ninguna prueba usa ese rol | 1 y 2 | — | código | **cerrado en la tanda 1e** |
+| H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | **cerrado en la tanda 1e** (los bytes de Storage van por su línea; la retención es D8) |
 | H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | **cerrado en la tanda 1b** |
 | H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | **base: tanda 1b** (la pantalla, en la fase 2) |
 | H-11 | `ejecuta()` no ata la aprobación a la huella del plan, y `ss-simulador --param` ejecuta sin compararla | 1 y 2 | sí, con SAP real | código + prueba negativa | — |
@@ -442,6 +442,17 @@ la acepta), H-14, H-12 y H-05. Ahora hay 97 filas «probado». **Quedan de H-14*
 (su `registro` es texto libre) y el tamaño y tipo de los buckets dependen de la versión de Storage (fase 3). **Para el
 despliegue**: cargar la sal de los seudónimos es otro paso humano. **Hallazgo nuevo**: H-32, el seudónimo sin sal del
 importador (fase 2). **Sigue la tanda 1e**: H-07 y H-08, la plataforma y la restauración.
+
+**Tanda 1e, hecha (2026-10-08, rama `soporte/cierre-1e`)**: H-07 y H-08. La plataforma solo lee y borra, nunca inserta,
+y exporta con su propio rol. La restauración, con privilegio de migración, verifica la firma del export, el tenant de
+cada fila y las huellas (la suya y las de los demás) **antes del commit**. El export lleva los accesos motivados y, si
+está en la misma base, la sala. **Siguen como texto, para el C3 v4**: el privilegio de migración de la restauración,
+declarado en C7; los bytes de Storage, que van por su propia línea de respaldo; y la retención, que no existe (D8; además
+`ss_evento` es de solo agregar, así que una incidencia con eventos no se puede borrar).
+
+**La fase 1 está completa** (2026-10-08): H-01 a H-03, H-05 a H-10 y H-12 a H-16 cerrados en la base, H-17 en la base, y
+H-21. Son 104 filas «probado» en la matriz, todas en verde sin sabotaje y en rojo con él. El arnés atrapó en el
+camino cinco pruebas o sabotajes que no medían nada; están en los aprendizajes.
 
 ### Fase 2: Cablear lo que la app promete y no hace
 **Objetivo**:

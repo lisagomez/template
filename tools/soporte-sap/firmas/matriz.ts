@@ -49,6 +49,8 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-restaura-firma', 'aisia-restaura-filas', 'aisia-restaura-antes-commit', 'aisia-restaura-accesos', 'aisia-restaura-sala'], afirmacion: 'export y restauración por tenant: restaurar a una consultora no toca a las demás', encontrado: 'PRP-010 H-08 (05/10 y 07/10): la restauración, como superusuario y con los disparadores apagados, insertaba filas de otro tenant sin comprobarlas y verificaba después del commit; el export no iba firmado y dejaba fuera el acceso motivado y la sala' },
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-plataforma-no-inserta', 'c3-plataforma-exporta'], afirmacion: 'soporte_sap_plataforma exporta, restaura y borra por retención, acotado por token a una consultora', encontrado: 'PRP-010 H-07 (07/10): con `for all` insertaba decisiones ya tomadas y eventos con el seudónimo de un consultor, ninguna prueba usaba ese rol, y con él `exportaTenant` fallaba con «permission denied»' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-cadena-base'], afirmacion: 'la cadena de eventos es la evidencia del servicio', encontrado: 'PRP-010 H-13 (05/10): la base no verificaba `anterior`, `hash` ni `seq`: quien escribía ponía los que quisiera' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-roles-corregidos', 'c3-buckets-privados', 'c3-campo-adjunto', 'c3-fila-crudo', 'c3-contrato-cliente'], afirmacion: 'la tenencia de cada tabla hija está atada', encontrado: 'PRP-010 H-14 (07/10): un campo colgaba del adjunto de otro cliente, una fila del crudo de otra consultora, un contrato del cliente de otra; y un rol con bypassrls o un bucket público previos no se corregían' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-chat-turno'], afirmacion: 'el agente escribe en el chat del HIL', encontrado: 'PRP-010 H-12 (07/10): con la tarea de cualquier consultora escribía en el chat de cualquier usuario' },
@@ -448,7 +450,65 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'export y restauración por tenant: restaurar a una consultora no toca a las demás',
     control: 'src/respaldo.ts · restauraTenant()',
     comprobacion: prueba('respaldo.ts', 'restaurar solo a la consultora A: A vuelve a su export y B no cambia'),
-    sabotaje: { que: 'restaurar borra a todos', ediciones: [ed(dist('respaldo.js'), 'delete from public.${tabla} t where t.${col} = $1 returning 1', 'delete from public.${tabla} t where t.${col} = $1 or true returning 1')] },
+    sabotaje: { que: 'restaurar borra a todos', ediciones: [ed(dist('respaldo.js'), 'delete from public.${tabla[0]} t where ${condicion(tabla)} returning 1', 'delete from public.${tabla[0]} t where ${condicion(tabla)} or true returning 1')] },
+  },
+  {
+    id: 'aisia-restaura-firma', doc: 'AISIA', ref: 'Restauración que toca a los demás', infirmable: true, estado: 'probado',
+    afirmacion: "un export alterado no se restaura: va firmado por el job, y quien lo cambie no puede recalcular la huella y hacerlo pasar",
+    control: "src/respaldo.ts · exportIntegro() antes de abrir la transacción",
+    comprobacion: prueba('cierre-base.ts', "H-08 · un export alterado no se restaura: la firma no cuadra"),
+    sabotaje: { que: "la restauración deja de mirar la firma", ediciones: [
+      ed(dist('respaldo.js'), "if (!exportIntegro(e, secreto))", "if (false)")] },
+  },
+  {
+    id: 'aisia-restaura-filas', doc: 'AISIA', ref: 'Restauración que toca a los demás', infirmable: true, estado: 'probado',
+    afirmacion: "una restauración solo pone filas del tenant que restaura: con los disparadores apagados, nada más lo ataría",
+    control: "src/respaldo.ts · filasAjenas() antes de escribir",
+    comprobacion: prueba('cierre-base.ts', "H-08 · un export firmado con filas de otra consultora no se restaura"),
+    sabotaje: { que: "la restauración acepta filas de otra consultora", ediciones: [
+      ed(dist('respaldo.js'), "if (ajenas.length)", "if (false)")] },
+  },
+  {
+    id: 'aisia-restaura-antes-commit', doc: 'AISIA', ref: 'Restauración que toca a los demás', estado: 'probado',
+    afirmacion: "la restauración se verifica ANTES del commit: si la huella del tenant no es la del export, rollback y nada a medias",
+    control: "src/respaldo.ts · huellaTenant() dentro de la transacción",
+    comprobacion: prueba('cierre-base.ts', "H-08 · la verificación ocurre ANTES del commit: si la huella no cuadra, rollback"),
+    sabotaje: { que: "la restauración confirma sin comparar la huella", ediciones: [
+      ed(dist('respaldo.js'), "if (despues.total !== e.huella.total)", "if (false)")] },
+  },
+  {
+    id: 'aisia-restaura-accesos', doc: 'AISIA', ref: 'Restauración que toca a los demás', estado: 'probado',
+    afirmacion: "el export por tenant lleva los accesos motivados de sus clientes (el registro de quién vio los originales)",
+    control: "src/respaldo.ts · ss_acceso_motivado en TABLAS_DE_TENANT, por cliente",
+    comprobacion: prueba('cierre-base.ts', "H-08 · el export lleva los accesos motivados de los clientes del tenant, no los de otro"),
+    sabotaje: { que: "los accesos motivados se quedan fuera del export", ediciones: [
+      ed(dist('respaldo.js'), "['ss_propuesta', 'consultora_id'], ['ss_acceso_motivado', 'cliente_id', 'cliente'],", "['ss_propuesta', 'consultora_id'],")] },
+  },
+  {
+    id: 'aisia-restaura-sala', doc: 'AISIA', ref: 'Restauración que toca a los demás', estado: 'probado',
+    afirmacion: "con la sala en la misma base, las aprobaciones de la consultora viajan en su export y vuelven al restaurar, sin tocar las de otra",
+    control: "src/respaldo.ts · tablasDelRespaldo() con TABLAS_DE_LA_SALA",
+    comprobacion: prueba('cierre-base.ts', "H-08 · con la sala en la misma base, las aprobaciones de la consultora viajan en su export y vuelven al restaurar"),
+    sabotaje: { que: "la sala se queda fuera del export", ediciones: [
+      ed(dist('respaldo.js'), "return r?.sala ? [...TABLAS_DE_TENANT, ...TABLAS_DE_LA_SALA] : TABLAS_DE_TENANT;", "return TABLAS_DE_TENANT;")] },
+  },
+  {
+    id: 'c3-plataforma-no-inserta', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
+    afirmacion: "el rol de plataforma no inserta nada: ni un mapeo aprobado, ni un campo confirmado, ni horas, ni un evento con el seudónimo de un consultor",
+    control: "SQL · políticas *_plataforma_lee (select) y *_plataforma_borra (delete); grants sin insert",
+    comprobacion: prueba('cierre-base.ts', "H-07 · la plataforma no inserta decisiones ni eventos: un mapeo aprobado, un evento ajeno, horas, un campo confirmado"),
+    sabotaje: { que: "la plataforma vuelve a tener for all e insert", ediciones: [
+      ed(SQL, "'create policy %I on public.%I for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);", "'create policy %I on public.%I for all to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);"),
+      ed(SQL, "grant select, delete on public.ss_incidencia,", "grant select, insert, delete on public.ss_incidencia,"),
+      ed(SQL, "grant select on public.ss_evento, public.ss_crudo, public.ss_contrato_sla,", "grant select, insert on public.ss_evento, public.ss_crudo, public.ss_contrato_sla,")] },
+  },
+  {
+    id: 'c3-plataforma-exporta', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
+    afirmacion: "la plataforma exporta con su propio rol: lee todo lo de su consultora (antes fallaba con «permission denied») y nada de otra",
+    control: "SQL · grant select del export y políticas por consultora_de_tarea()",
+    comprobacion: prueba('cierre-base.ts', "H-07 · la plataforma exporta con su propio rol: todo lo de su consultora y nada de otra"),
+    sabotaje: { que: "a la plataforma le vuelven a faltar tablas", ediciones: [
+      ed(SQL, "grant select on public.ss_evento, public.ss_crudo, public.ss_contrato_sla, public.ss_presupuesto, public.ss_propuesta,\n  public.ss_caso_sandbox, public.ss_acceso_motivado to soporte_sap_plataforma;", "grant select on public.ss_evento, public.ss_crudo to soporte_sap_plataforma;")] },
   },
   {
     id: 'aisia-opacidad-contrato', doc: 'AISIA', ref: 'Opacidad', estado: 'probado',
@@ -807,9 +867,11 @@ export const FILAS: readonly Fila[] = [
   {
     id: 'c3-jobs-plataforma', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
     afirmacion: 'el job de plataforma está acotado por su token a una consultora, también al borrar',
-    control: 'SQL · políticas *_plataforma con ss_priv.consultora_de_tarea()',
+    control: 'SQL · políticas *_plataforma_lee y *_plataforma_borra con ss_priv.consultora_de_tarea()',
     comprobacion: AISLAMIENTO,
-    sabotaje: { que: 'la plataforma ve y borra a todas', ediciones: [ed(SQL, 'for all to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea()) with check (consultora_id = ss_priv.consultora_de_tarea())', 'for all to soporte_sap_plataforma using (true) with check (true)')] },
+    sabotaje: { que: 'la plataforma ve y borra a todas', ediciones: [
+      ed(SQL, "for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);", "for select to soporte_sap_plataforma using (true)', t || '_plataforma_lee', t);"),
+      ed(SQL, "for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_borra', t);", "for delete to soporte_sap_plataforma using (true)', t || '_plataforma_borra', t);")] },
   },
   {
     id: 'c3-jobs-ingesta', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',

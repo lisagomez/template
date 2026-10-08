@@ -1050,16 +1050,32 @@ drop policy if exists ss_campo_ingesta on public.ss_campo_extraido;
 create policy ss_campo_ingesta on public.ss_campo_extraido for insert to soporte_sap_ingesta
   with check (consultora_id = ss_priv.consultora_de_tarea() and estado = 'por_revisar' and revisado_por is null);
 
--- La plataforma (jobs declarados, C7): export y restauración por tenant de la consultora de su tarea.
+-- La plataforma (jobs declarados, C7): EXPORTA (lee) y BORRA por retención, solo la consultora de su tarea. No
+-- inserta nada (PRP-010 H-07): con `for all` metía decisiones ya tomadas (un mapeo aprobado, un campo confirmado) y
+-- eventos con el seudónimo de un consultor. Restaurar NO es de este rol: es la ruta con privilegio de migración, y
+-- `restauraTenant` verifica el export firmado, el tenant de cada fila y las huellas antes del commit (H-08).
 do $$
 declare t text;
 begin
   foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
-    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_crudo', 'ss_mapeo', 'ss_procedencia', 'ss_importacion_fila'] loop
+    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_crudo', 'ss_mapeo', 'ss_procedencia', 'ss_importacion_fila',
+    'ss_contrato_sla', 'ss_presupuesto', 'ss_propuesta'] loop
     execute format('drop policy if exists %I on public.%I', t || '_plataforma', t);
-    execute format('create policy %I on public.%I for all to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea()) with check (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma', t);
+    execute format('drop policy if exists %I on public.%I', t || '_plataforma_lee', t);
+    execute format('create policy %I on public.%I for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);
+  end loop;
+  foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
+    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_mapeo', 'ss_procedencia', 'ss_importacion_fila'] loop
+    execute format('drop policy if exists %I on public.%I', t || '_plataforma_borra', t);
+    execute format('create policy %I on public.%I for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_borra', t);
   end loop;
 end $$;
+drop policy if exists ss_caso_sandbox_plataforma_lee on public.ss_caso_sandbox;
+create policy ss_caso_sandbox_plataforma_lee on public.ss_caso_sandbox for select to soporte_sap_plataforma
+  using (origen_consultora_id = ss_priv.consultora_de_tarea());
+drop policy if exists ss_acceso_motivado_plataforma_lee on public.ss_acceso_motivado;
+create policy ss_acceso_motivado_plataforma_lee on public.ss_acceso_motivado for select to soporte_sap_plataforma
+  using (ss_priv.padre_de(cliente_id) = ss_priv.consultora_de_tarea());
 
 -- El job de métricas (C7, declarado): lee filas de todos los tenants; las COLUMNAS las acotan los
 -- privilegios de abajo. Inserta el corte; no lo cambia ni lo borra (una versión nueva es otra fila).
@@ -1110,11 +1126,13 @@ grant update (estado, categoria, regla_aplicada, modulo, componente, transaccion
 grant select on public.ss_incidencia, public.ss_adjunto to soporte_sap_ingesta;
 grant insert on public.ss_campo_extraido to soporte_sap_ingesta;
 
-grant select, insert, delete on public.ss_incidencia, public.ss_escalamiento, public.ss_adjunto, public.ss_campo_extraido,
+grant select, delete on public.ss_incidencia, public.ss_escalamiento, public.ss_adjunto, public.ss_campo_extraido,
   public.ss_cuarentena, public.ss_impugnacion, public.ss_sla_resultado, public.ss_horas, public.ss_mapeo,
-  public.ss_procedencia to soporte_sap_plataforma;
-grant select, insert on public.ss_evento, public.ss_crudo to soporte_sap_plataforma;
-grant select, insert, delete on public.ss_importacion_fila to soporte_sap_plataforma;
+  public.ss_procedencia, public.ss_importacion_fila to soporte_sap_plataforma;
+-- Sin `insert` en ninguna tabla (PRP-010 H-07). Lectura de todo lo que exporta: sin `ss_contrato_sla` y compañía,
+-- `exportaTenant` con este rol fallaba con «permission denied».
+grant select on public.ss_evento, public.ss_crudo, public.ss_contrato_sla, public.ss_presupuesto, public.ss_propuesta,
+  public.ss_caso_sandbox, public.ss_acceso_motivado to soporte_sap_plataforma;
 
 -- Métricas: privilegios POR COLUMNA. Ni `titulo`, ni `descripcion`, ni `nombre`, ni `motivo`.
 grant select (id, tipo, padre_id, creada_en, tamano, sistema, usuarios_sap) on public.ss_organizacion to soporte_sap_metricas;
@@ -1162,6 +1180,12 @@ create policy ss_originales_sube on storage.objects for insert to authenticated
 drop policy if exists ss_originales_ingesta on storage.objects;
 create policy ss_originales_ingesta on storage.objects for select to soporte_sap_ingesta
   using (bucket_id = 'ss-originales' and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
+
+-- El manifiesto de objetos del export: la plataforma lista los de su consultora (sin esto, con su rol el manifiesto
+-- salía vacío sin decir nada, PRP-010 H-08).
+drop policy if exists ss_objetos_plataforma on storage.objects;
+create policy ss_objetos_plataforma on storage.objects for select to soporte_sap_plataforma
+  using (bucket_id in ('ss-originales', 'ss-sandbox', 'ss-exportes') and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
 
 drop policy if exists ss_sandbox_lee_objetos on storage.objects;
 create policy ss_sandbox_lee_objetos on storage.objects for select to authenticated
