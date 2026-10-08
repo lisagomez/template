@@ -9,6 +9,7 @@ import { anonimiza, generaliza } from '../dist/index.js'
 import { casosDelSandbox, mide, VALIDADORES, fuga } from './_anonimizacion.ts'
 import { CASOS_ADVERSARIALES, CASOS_TECNICOS } from './_adversariales.ts'
 import { BANCO_ANONIMIZA, BANCO_GENERALIZA, FRASES_DE_LA_REVISION, GENERALIZA_DE_LA_REVISION, DE_REVISION_HUMANA, NOMBRES_DEL_CLIENTE } from './_banco-independiente.ts'
+import { CONTROL_ANONIMIZA, CONTROL_GENERALIZA, NOMBRES_CONTROL } from './_banco-de-control.ts'
 import { HERRAMIENTA, lee } from './_ayuda.ts'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -101,9 +102,11 @@ const fugasDe = (banco: readonly CasoDeBanco[], f: (t: string) => { texto: strin
   const r = f(c.texto)
   return r.veredicto === 'entra' ? c.noDebeQuedar.filter((s) => contiene(r.texto, s)).map((s) => `«${c.texto}» deja «${s}»`) : []
 })
-/** Lo técnico que se perdió: el control entró a cuarentena o el término ya no está. */
+/** Lo técnico que se perdió: el término ya no está, o un control sin datos personales fue a cuarentena. Un caso CON
+ *  datos que va a cuarentena no pierde nada: es la respuesta segura. */
 const tapadosDe = (banco: readonly CasoDeBanco[], f: (t: string) => { texto: string; veredicto: string }) => banco.flatMap((c) => {
   const r = f(c.texto)
+  if (r.veredicto !== 'entra' && c.noDebeQuedar.length) return []
   return (c.debeQuedar ?? []).filter((s) => r.veredicto !== 'entra' || !contiene(r.texto, s)).map((s) => `«${c.texto}» pierde «${s}» → ${r.texto}`)
 })
 const an = (t: string) => anonimiza(t, VALIDADORES)
@@ -134,6 +137,22 @@ test('H-04 · un nombre que no está en la lista de nombres comunes se reconoce 
 test('H-19 · el banco independiente de la generalización: nada que identifique al cliente sube al núcleo, y lo estándar se queda', () => {
   assert.deepEqual(fugasDe([...GENERALIZA_DE_LA_REVISION, ...BANCO_GENERALIZA], gen), [])
   assert.deepEqual(tapadosDe(BANCO_GENERALIZA, gen), [])
+})
+
+/** Por diseño, un número de 7 dígitos o más y una fecha se generalizan aunque sean técnicos (cabecera de anonimiza.ts). */
+const porDiseno = (s: string) => /^\d{7,}$/.test(s) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)
+const sinLoDeDiseno = (banco: readonly CasoDeBanco[]) => banco.map((c) => ({ ...c, debeQuedar: c.debeQuedar?.filter((s) => !porDiseno(s)) }))
+
+test('H-04 · el banco de control (escrito después, sin ver el detector): ningún dato entra, lo de nómina va a revisión y lo técnico se queda', () => {
+  assert.deepEqual(fugasDe(CONTROL_ANONIMIZA, an), [])
+  assert.deepEqual(CONTROL_ANONIMIZA.filter((c) => c.revision && an(c.texto).veredicto === 'entra').map((c) => c.texto), [])
+  assert.deepEqual(tapadosDe(sinLoDeDiseno(CONTROL_ANONIMIZA), an), [])
+})
+
+test('H-19 · el banco de control de la generalización: nada del cliente sube al núcleo, y lo estándar (ZTERM, /SCWM/) se queda', () => {
+  const g = (t: string) => generaliza(t, VALIDADORES, NOMBRES_CONTROL)
+  assert.deepEqual(fugasDe(CONTROL_GENERALIZA, g), [])
+  assert.deepEqual(tapadosDe(CONTROL_GENERALIZA, g), [])
 })
 
 test('H-19 · en la app, al núcleo solo sube el superadministrador, y sube con alNucleo (generalizada)', () => {

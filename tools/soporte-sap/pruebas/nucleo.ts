@@ -9,6 +9,7 @@ import { generaliza } from '../dist/index.js'
 import { baseSoporte, como, comoAgente, falla, ORG, USR } from './_base.ts'
 import { VALIDADORES } from './_anonimizacion.ts'
 import { BANCO_GENERALIZA, NOMBRES_DEL_CLIENTE } from './_banco-independiente.ts'
+import { CONTROL_GENERALIZA, NOMBRES_CONTROL } from './_banco-de-control.ts'
 
 const NUEVA = '80000000-0000-4000-8000-0000000000f1'
 const json = (texto: string) => JSON.stringify({ texto }).replaceAll("'", "''")
@@ -43,12 +44,12 @@ test('H-19 · promover al núcleo sin generalizar falla; con lo que deja general
   assert.equal((await promueve(g.texto)).length, 1, 'generalizado, sube')
 })
 
-test('H-19 · lo que generaliza deja del banco independiente, la base lo acepta: los dos cerrojos no se contradicen', async () => {
+test('H-19 · lo que generaliza deja de los dos bancos, la base lo acepta: los dos cerrojos no se contradicen', async () => {
   const db = await baseSoporte()
   const orgs = (await db.query<{ nombre: string }>(`select nombre from ss_organizacion where tipo in ('consultora', 'cliente')`)).rows.map((r) => r.nombre)
   const rechazados: string[] = []
-  for (const c of BANCO_GENERALIZA) {
-    const g = generaliza(c.texto, VALIDADORES, [...NOMBRES_DEL_CLIENTE, ...orgs])
+  for (const c of [...BANCO_GENERALIZA, ...CONTROL_GENERALIZA]) {
+    const g = generaliza(c.texto, VALIDADORES, [...NOMBRES_DEL_CLIENTE, ...NOMBRES_CONTROL, ...orgs])
     const e = g.veredicto === 'entra' ? await falla(() => comoAgente(db, ORG.CA, propone('nucleo', g.texto))) : null
     if (e) rechazados.push(`${g.texto} → ${e}`)
   }

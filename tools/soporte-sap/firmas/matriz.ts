@@ -49,7 +49,7 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
-  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-dato-revision-frases', 'aisia-dato-banco-independiente', 'aisia-dato-sueltas', 'aisia-dato-tecnico'], afirmacion: 'anonimizador fail-closed: lo que no se resuelve con certeza va a cuarentena', encontrado: 'PRP-010 H-04 (07/10): 5 de 14 frases nuevas entraban con el dato; el banco que escribió quien no leyó el detector (08/10) encontró 8 de 30 más, y 4 controles técnicos tapados' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-dato-revision-frases', 'aisia-dato-banco-independiente', 'aisia-dato-banco-control', 'aisia-dato-sueltas', 'aisia-dato-tecnico'], afirmacion: 'anonimizador fail-closed: lo que no se resuelve con certeza va a cuarentena', encontrado: 'PRP-010 H-04 (07/10): 5 de 14 frases nuevas entraban con el dato; el banco que escribió quien no leyó el detector (08/10) encontró 8 de 30 más y 4 controles tapados; y después del arreglo, un banco de control escrito sin verlo encontró 3 de 30' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-secreto-generaliza', 'aisia-secreto-estructura', 'aisia-secreto-cliente', 'aisia-secreto-a-medida', 'aisia-secreto-al-nucleo', 'aisia-secreto-runtime', 'aisia-secreto-base-nucleo'], afirmacion: 'lo que va al núcleo se generaliza además de anonimizarse', encontrado: 'PRP-010 H-19 (07/10): `generaliza` no la llamaba nadie, el chat proponía al núcleo el texto crudo del experto por defecto y la base lo aceptaba; además no cubría Y…, minúsculas, namespaces ni la estructura en sus formas, y el banco independiente (08/10) encontró 12 de 20 más' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-persona-runtime'], afirmacion: 'la primera respuesta es de una persona (DP-4)', encontrado: 'PRP-010 H-17, el runtime (07/10): la app marcaba la primera respuesta al anonimizar o al mandar el plan a la sala, y una prueba lo exigía como requisito' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-job', 'aisia-sla-job-no-inventa', 'c3-plataforma-sla-suya'], afirmacion: 'el SLA se mide desde los eventos', encontrado: 'PRP-010 H-16, el job (07/10): nadie calculaba `ss_sla_resultado` desde la base; desde la tanda 1e, además, ningún rol podía escribirlo' },
@@ -171,6 +171,13 @@ export const FILAS: readonly Fila[] = [
     comprobacion: prueba('anonimiza.ts', 'H-04 · el banco independiente: ningún dato personal entra al sandbox, y lo de nómina va a revisión humana'),
     sabotaje: { que: 'los separadores de un procesador de texto (·) vuelven a partir un teléfono', ediciones: [ed(dist('anonimiza.js'), 'const SEP = String.raw `[\\s\\-.()·•–]`;', 'const SEP = String.raw `[\\s\\-.()]`;')] },
     nota: 'no es «cero fugas»: un nombre en minúsculas, sin contexto y fuera de la lista de nombres comunes pasa (límite declarado; D9: corpus real antes de salir del laboratorio)',
+  },
+  {
+    id: 'aisia-dato-banco-control', doc: 'AISIA', ref: 'Dato personal en el sandbox', infirmable: true, estado: 'probado',
+    afirmacion: 'el banco de control, escrito después y sin ver el detector ni el primer banco, no fuga, y sus casos de nómina van a revisión humana (medido antes del arreglo: 3 fugas de 30)',
+    control: 'src/anonimiza.ts · números leídos con errores de OCR, `usr=`, diminutivos, menciones de chat',
+    comprobacion: prueba('anonimiza.ts', 'H-04 · el banco de control (escrito después, sin ver el detector): ningún dato entra, lo de nómina va a revisión y lo técnico se queda'),
+    sabotaje: { que: 'un teléfono leído con O por 0 y l por 1 vuelve a pasar', ediciones: [ed(dist('anonimiza.js'), '    t = t.replace(NUMERO_OCR, (m) => (/[OolI]/.test(m) && comoDigitos(m).length >= 7 ? marca(c, tipoDeNumero(comoDigitos(m), v)) : m));\n', '')] },
   },
   {
     id: 'aisia-dato-sueltas', doc: 'AISIA', ref: 'Dato personal en el sandbox', infirmable: true, estado: 'probado',

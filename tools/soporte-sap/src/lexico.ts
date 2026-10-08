@@ -28,7 +28,7 @@ empleado empleada trabajador trabajadora contacto correo telefono celular extens
 norte sur centro golfo bajio alimentos aceros farmacias bebidas textiles grupo industrias comercial servicios
 consultora andina boreal laboratorio
 mesa servicio prioridad media cordiales zona zonas yendo final contable general lacteos enviado enviada reenviado
-asunto original whatsapp chofer almacenista capturista gerente jefe jefa supervisor supervisora companero companera
+asunto original whatsapp liberado liberada cantidad saldo tesoreria logon chofer almacenista capturista gerente jefe jefa supervisor supervisora companero companera
 encargado encargada comprador compradora vendedor vendedora cajero cajera becario becaria secretario secretaria
 tesorero tesorera
 enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre lunes martes miercoles

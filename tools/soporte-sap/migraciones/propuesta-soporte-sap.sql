@@ -577,7 +577,7 @@ declare
 begin
   if new.alcance <> 'nucleo' then return new; end if;
   if crudo ~* '(@|\marroba\M|\(at\)|\[at\]|\mpunto[[:space:]]+com\M)' or crudo ~ '[0-9]([[:space:]().·•–-]{0,2}[0-9]){6,}'
-     or crudo ~* '\m[A-ZÑ&]{3,4}[0-9]{6}' or t ~ '[[:alnum:]-]+\.(com|net|org|edu|gob)(\.[a-z]{2})?\M' then
+     or crudo ~* '\m[A-ZÑ&]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])' or t ~ '[[:alnum:]-]+\.(com|net|org|edu|gob)(\.[a-z]{2})?\M' then
     raise exception 'lo que sube al núcleo no lleva identificadores: se generaliza antes';
   end if;
   -- El nombre, también sin la razón social («Lácteos La Huasteca» de «Lácteos La Huasteca, S.A. de C.V.»).
@@ -586,8 +586,9 @@ begin
                ',?[[:space:]]+(s\.?[[:space:]]*a\.?([[:space:]]*p\.?[[:space:]]*i\.?)?|s\.?[[:space:]]*de[[:space:]]+r\.?[[:space:]]*l\.?|s\.?[[:space:]]*c\.?|a\.?[[:space:]]*c\.?)([[:space:]]+de[[:space:]]+c\.?[[:space:]]*v\.?)?$', '') in t) > 0) then
     raise exception 'lo que sube al núcleo no nombra a una consultora ni a un cliente: se generaliza antes';
   end if;
-  -- Z… y Y… propios: no tras un guion (`BSEG-ZLSCH` es estándar) salvo los campos ZZ/YY; namespaces que no son de SAP.
-  if crudo ~ '(^|[^[:alnum:]_/-])[ZY][A-Z0-9_]{2,}' or t ~ '(^|[^[:alnum:]_/-])[zy][a-z0-9]*(_|[0-9])' or t ~ '/[no][zy][a-z0-9_]{2,}'
+  -- Z… y Y… propios: no tras un guion (`BSEG-ZLSCH`) ni los campos estándar que empiezan con Z (`ZTERM`), salvo los
+  -- campos ZZ/YY; namespaces que no son de SAP.
+  if crudo ~ '(^|[^[:alnum:]_/-])(?!(ZLSCH|ZTERM|ZFBDT|ZUONR|ZLSPR|ZEILE|ZBD[123][TP]|ZWELS|ZAHLS|ZBUKR|ZINKZ)\M)[ZY][A-Z0-9_]{2,}' or t ~ '(^|[^[:alnum:]_/-])(?!zbd[123][tp]\M)[zy][a-z0-9]*(_|[0-9])' or t ~ '/[no][zy][a-z0-9_]{2,}'
      or t ~ '[[:alnum:]]-(zz|yy)[a-z0-9_]'
      or t ~ '(^|[^[:alnum:]_/])/(?!(sapapo|scwm|scmtms|ui2|ui5|iwfnd|iwbep|bobf|sapsll|saptrx)/)[a-z0-9_]{2,10}/'
      or t ~ '\m(sociedad(es)?|company codes?|co\.?[[:space:]]?cd|bukrs|soc|centros?( de (costos?|beneficios?))?|plants?|plantas?|plnt|werks|almacen(es)?|alm|sloc|lgort|org(anizacion(es)?)?\.?[[:space:]]+(de[[:space:]]+)?(ventas|vtas|compras)|sales orgs?|vkorg|ekorg|kokrs|kostl|prctr)\M[[:space:]:=#.''"]{0,6}(es[[:space:]]+)?([a-z]{1,3}[0-9]|[0-9][a-z0-9])' then

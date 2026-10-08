@@ -59,7 +59,20 @@ const MONTO = /(?:\$|\bmxn\b|\bm\.n\.)\s?\d[\d,.\s]*\d|\b\d[\d,.\s]*\d\s?(?:peso
 const MESES = 'enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre'
 const FECHA = new RegExp(`(?<![\\d-])\\b\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}\\b(?![-/]\\d)|\\b\\d{1,2}\\s+de\\s+(?:${MESES})(?:\\s+de(?:l)?\\s+\\d{4})?\\b`, 'gi')
 const DOMICILIO = /\b(?:calle|av\.?|avenida|blvd\.?|boulevard|calzada|calz\.|col\.?|colonia|domicilio|int\.)\s+[^,;\n]{1,40}/gi
+/** Una mención de chat («@Yatziri», «@fidel.ocaña»): la @ va pegada a la palabra y sin nada antes; un correo lleva algo antes. */
+const MENCION = /(?<![\p{L}\p{N}._%+-])@[\p{L}][\p{L}\p{N}._-]*(?<![.])/gu
 const NUMERO_LARGO = new RegExp(String.raw`(?<![\w])\+?\d(?:${SEP}{0,2}\d){6,}(?![\w])`, 'g')
+/** Un número leído con errores de OCR (O por 0, l o I por 1): cada trozo lleva al menos un dígito de verdad. */
+const TROZO_OCR = String.raw`[\dOolI]*\d[\dOolI]*`
+const NUMERO_OCR = new RegExp(String.raw`(?<![\w])\+?${TROZO_OCR}(?:${SEP}{1,2}${TROZO_OCR})+(?![\w])`, 'g')
+const comoDigitos = (s: string) => s.replace(/[Oo]/g, '0').replace(/[lI]/g, '1').replace(/\D/g, '')
+
+/** La fecha AAMMDD de un RFC o una CURP, con O por 0 e I o L por 1: un código de error («CFDI40147») no la tiene. */
+function fechaValida(seis: string): boolean {
+  const d = seis.replace(/O/g, '0').replace(/[IL]/g, '1')
+  const mes = Number(d.slice(2, 4)), dia = Number(d.slice(4, 6))
+  return /^\d{6}$/.test(d) && mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31
+}
 
 /** RFC y CURP aunque vengan en minúsculas, partidos por espacios, guiones o saltos, o con O por 0. */
 function reemplazaIdentificadores(texto: string, c: Cuenta): string {
@@ -73,7 +86,8 @@ function reemplazaIdentificadores(texto: string, c: Cuenta): string {
     for (let j = i; j < Math.min(i + 5, trozos.length); j++) {
       if (j > i && !/^[\s\-.]{1,2}$/.test(texto.slice(trozos[j - 1]!.fin, trozos[j]!.ini))) break
       junto += trozos[j]!.t
-      const tipo: TipoDato | null = CURP.test(junto) ? 'CURP' : RFC.test(junto) ? 'RFC' : null
+      const tipo: TipoDato | null = CURP.test(junto) && fechaValida(junto.slice(4, 10)) ? 'CURP'
+        : RFC.test(junto) && fechaValida(junto.slice(-9, -3)) ? 'RFC' : null
       if (tipo) { tramos.push({ ini: trozos[i]!.ini, fin: trozos[j]!.fin, tipo }); i = j; break }
       if (junto.length > 18) break
     }
@@ -94,7 +108,7 @@ function tipoDeNumero(digitos: string, v: Validadores): TipoDato {
 
 /** Una transacción, un objeto de autorización o una palabra: lo que va tras «desbloquear» y NO es un usuario. */
 const noEsUsuario = (v: string): boolean => esVocabulario(v) || /^[A-Z]{1,4}\d{1,3}[A-Z]?$/i.test(v) || /^[A-Z]{1,4}_[A-Z_]+$/.test(v)
-const USUARIO = /(\b(?:usuario(?:\s+sap)?|user|id\s+sap\b[^.\n]{0,40}?\bes|desbloque\w*|bloque\w*|resete\w*)(?![\p{L}\p{N}_]))((?:\s*[:=]\s*|\s+)(?:al?\s+)?(?:(?:el|su)\s+usuario\s+)?)([A-Za-z][A-Za-z0-9._]{2,30})(?![\p{L}\p{N}_])/giu
+const USUARIO = /(\b(?:usuario(?:\s+sap)?|user|usr|uname|login|id\s+sap\b[^.\n]{0,40}?\bes|desbloque\w*|bloque\w*|resete\w*)(?![\p{L}\p{N}_]))((?:\s*[:=]\s*|\s+)(?:al?\s+)?(?:(?:el|su)\s+usuario\s+)?)([A-Za-z][A-Za-z0-9._]{2,30})(?![\p{L}\p{N}_])/giu
 const USUARIO_DE_RED = /\b[A-Za-z][\w-]{1,15}\\[A-Za-z][\w.-]{1,30}/g
 const NOMBRE_PUNTO_APELLIDO = /(?<![\p{L}\p{N}_.])([\p{L}]{1,20})[._]([\p{L}]{2,20})(?![\p{L}\p{N}_]|\.[\p{L}])/gu
 const INICIAL_Y_APELLIDO = /(?<![\p{L}\p{N}_])([\p{L}]{4,22})(\d{0,3})(?![\p{L}\p{N}_])/gu
@@ -189,12 +203,13 @@ function reemplazaNombres(texto: string, c: Cuenta): string {
 }
 
 function aplicaDetectores(texto: string, v: Validadores, c: Cuenta): string {
-  let t = texto.replace(CORREO, () => marca(c, 'CORREO')).replace(CORREO_DICHO, () => marca(c, 'CORREO'))
+  let t = texto.replace(MENCION, () => marca(c, 'USUARIO')).replace(CORREO, () => marca(c, 'CORREO')).replace(CORREO_DICHO, () => marca(c, 'CORREO'))
   t = reemplazaIdentificadores(t, c)
   t = t.replace(ETIQUETA_PERSONAL, (_m, etq: string, sep: string) => `${etq}${sep}${marca(c, 'DATO_PERSONAL')}`)
   t = t.replace(MONTO, () => marca(c, 'MONTO')).replace(FECHA, () => marca(c, 'FECHA')).replace(DOMICILIO, () => marca(c, 'DOMICILIO'))
+  t = t.replace(NUMERO_OCR, (m) => (/[OolI]/.test(m) && comoDigitos(m).length >= 7 ? marca(c, tipoDeNumero(comoDigitos(m), v)) : m))
   t = t.replace(NUMERO_LARGO, (m, pos: number, todo: string) => {
-    const tecnico = /\b(pedido|documento|doc\.?|orden|material|factura|idoc|entrega|folio|oc|fi|sd|mm)\s*\w{0,3}\s*$/i.test(todo.slice(Math.max(0, pos - 24), pos))
+    const tecnico = /\b(pedido|documento|doc\.?|orden|material|factura|idoc|entrega|folio|oc|fi|sd|mm)(?:\s+\p{L}{2,15})?\s*\w{0,3}\s*$/iu.test(todo.slice(Math.max(0, pos - 40), pos))
     return marca(c, tecnico ? 'NUMERO' : tipoDeNumero(m.replace(/\D/g, ''), v))
   })
   return reemplazaNombres(reemplazaUsuarios(t, c), c)

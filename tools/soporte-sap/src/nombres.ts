@@ -49,6 +49,13 @@ const conjunto = (lista: string) => new Set(lista.split(/\s+/).filter(Boolean))
 const PILA: ReadonlySet<string> = conjunto(DE_PILA)
 const APELLIDO: ReadonlySet<string> = conjunto(APELLIDOS)
 
-export const esNombreDePila = (palabra: string): boolean => PILA.has(normalizaPalabra(palabra))
+const DIMINUTIVO = /(?:ecit[oa]s?|cit[oa]s?|it[oa]s?|ill[oa]s?)$/
+/** Un nombre de pila, también en diminutivo («chuyita», «juanito», «pepito», «anita»). */
+export const esNombreDePila = (palabra: string): boolean => {
+  const p = normalizaPalabra(palabra)
+  if (PILA.has(p)) return true
+  const raiz = p.replace(DIMINUTIVO, '')
+  return raiz !== p && raiz.length >= 2 && ['', 'a', 'o', 'e', 'os'].some((v) => PILA.has(raiz + v))
+}
 export const esApellido = (palabra: string): boolean => APELLIDO.has(normalizaPalabra(palabra))
 export const esNombreConocido = (palabra: string): boolean => esNombreDePila(palabra) || esApellido(palabra)

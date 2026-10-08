@@ -20,7 +20,9 @@ const NAMESPACES_SAP: ReadonlySet<string> = new Set(['sapapo', 'scwm', 'scmtms',
 const NAMESPACE = /(?:(?<![\w/])|(?<=\/[nNoO]))\/([A-Za-z0-9_]{2,10})\/[A-Za-z0-9_]*/g
 const OBJETO_Z = /(?:(?<![\p{L}\p{N}_/-])|(?<=\/[nNoO]))([ZzYy][\p{L}\p{N}_]{2,40})(?![\p{L}\p{N}_])/gu
 const CAMPO_ZZ = /(?<=[\p{L}\p{N}]-)(?:ZZ|YY)[\p{L}\p{N}_]*/giu
-const esPropio = (o: string) => /[\d_]/.test(o) || o === o.toUpperCase() || !esVocabulario(o)
+/** Campos ESTÁNDAR de SAP que empiezan con Z (pago, asignación, posición): no son del cliente. */
+const Z_ESTANDAR: ReadonlySet<string> = new Set(['zlsch', 'zterm', 'zfbdt', 'zuonr', 'zlspr', 'zeile', 'zbd1t', 'zbd2t', 'zbd3t', 'zbd1p', 'zbd2p', 'zwels', 'zahls', 'zbukr', 'zinkz'])
+const esPropio = (o: string) => !Z_ESTANDAR.has(o.toLowerCase()) && (/[\d_]/.test(o) || o === o.toUpperCase() || !esVocabulario(o))
 
 function quitaObjetosPropios(texto: string): string {
   return texto
