@@ -125,7 +125,7 @@ arregló en parte.
 |---|---|---|---|---|---|
 | H-29 | `.env.production` entra en la imagen. `.dockerignore` excluye `.env` y `.env*.local` pero no `.env.production`, el `Dockerfile` hace `COPY . .` y el modo standalone de Next lo copia (`node_modules/next/dist/build/index.js`, `writeStandaloneDirectory`) y lo carga al arrancar. Efectos: `service_role`, `SS_PG_PASSWORD` y las llaves del despacho (`scripts/despacho/llaves.mjs` escribe ahí) quedan en el sistema de archivos de la app; y variables que el compose **no** pasa, como `SOPORTE_SAP_LABORATORIO=1` o los tokens de otras rutas, llegan al runtime. Eso tumba la premisa de la revisión de rutas públicas (#209): «la app solo recibe lo que le pone el compose». Afecta también a `docker-compose.despacho.yml`, que usa el mismo `Dockerfile` | 2 | sí | código + prueba (fase 0) | **cerrado en #226** |
 | H-30 | **La imagen de la app no se construye desde un clon limpio, tampoco en `main`.** Se encontró el 07/10 al construir la imagen real desde un `git archive` para la evidencia de la fase 0, y tiene tres capas: (1) `tools/*/dist` está en `.gitignore` y `npm run build` no lo compila (solo `prepara:gate`, por `pretypecheck`): Turbopack da 427 errores; (2) `.dockerignore` excluye `.claude`, y `src/lib/ai/routing.ts` importa `.claude/routing-modelos.json`; (3) el typecheck de `next build` incluye `tools/dictado/src`, y `@tu-scope/voz` no está en la imagen. `npm run deploy` falla en un servidor recién clonado, incluido el despacho del buzón | 07/10 | — | código + prueba (fase 0b) | **cerrado en la fase 0b** |
-| H-31 | **La imagen final arrastra archivos del repo.** El file tracing de Next copia a `.next/standalone` lo que las rutas tocan con `fs`, y en la imagen quedan `src/` (3 MB de fuente), `tools/` (4.3 MB), `docs/`, `trayectorias/` (60 archivos de datos de sesiones), `inventario/`, `productos/` y `erp/` (`casa/huellas.txt`, `entrega.json`, referencias de roles y servidor). La cabecera del `Dockerfile` dice «la imagen final NO contiene código fuente». En el despacho la imagen vive en la máquina de un tercero, y lo defendible del ERP «no sale» (§1.7). Salió al arrancar por primera vez la imagen de la fase 0b; en `main` pasa igual | 07/10 | — | código: qué ruta necesita cada archivo en tiempo de ejecución, y fuera lo demás (`outputFileTracingExcludes`) + prueba que inspeccione la imagen | — |
+| H-31 | **La imagen final arrastra archivos del repo.** El file tracing de Next copia a `.next/standalone` lo que las rutas tocan con `fs`, y en la imagen quedan `src/` (3 MB de fuente), `tools/` (4.3 MB), `docs/`, `trayectorias/` (60 archivos de datos de sesiones), `inventario/`, `productos/` y `erp/` (`casa/huellas.txt`, `entrega.json`, referencias de roles y servidor). La cabecera del `Dockerfile` dice «la imagen final NO contiene código fuente». En el despacho la imagen vive en la máquina de un tercero, y lo defendible del ERP «no sale» (§1.7). Salió al arrancar por primera vez la imagen de la fase 0b; en `main` pasa igual | 07/10 | — | código: qué ruta necesita cada archivo en tiempo de ejecución, y fuera lo demás (`outputFileTracingExcludes`) + prueba que inspeccione la imagen | **cerrado** (ver «H-31, hecho») |
 
 **Texto y cifras** (fase 4, todo `texto`):
 
@@ -381,6 +381,34 @@ prueba sin Docker caza cada capa de H-30 con su siembra, y validate en verde.
 
 Al arrancarla salió **H-31**.
 
+### H-31, hecho (2026-10-07, `f63bd26` + `e2e4ac4`, apilado sobre la fase 0b)
+**Causa**: el file tracing convierte un `fs` con camino dinámico en un glob por extensión sobre todo el repo:
+- ventas, por `tools/ventas-whatsapp/src/almacen/archivo.ts:55` → todo `*.json`;
+- `laboratorio/muestra`, por el `mkdtemp` → todo `*.txt`, `erp/casa/huellas.txt` incluido;
+- `contenido/video` → todo `*.png`;
+- soporte-sap → `*-pagina.ts`;
+- el caso `priv-8` del laboratorio pymes → todo `src/`.
+
+Arreglarlo ruta por ruta lo reintroduce la siguiente ruta.
+
+**Arreglo**: `NUNCA_EN_LA_IMAGEN` en `next.config.ts`, bajo la clave `/**`:
+- `erp`, `trayectorias`, `inventario`, `productos`, `docs`, `.claude`, `scripts` y `src`;
+- de `tools/`, `src`, `pruebas`, `manual` y `medicion`;
+- la configuración de la raíz.
+
+Ninguna ruta lee nada de eso en tiempo de ejecución. `priv-8` dice «no medido» sin fuente. 6 casos en `prueba:buzon`
+prueban la configuración real con el picomatch y las opciones de Next (`collect-build-traces.js`).
+
+**Evidencia** con Docker real, desde un `git archive`:
+- en `/app` solo quedan `.next`, `node_modules`, `package.json`, `public`, `server.js` y `tools`;
+- `erp`, `trayectorias`, `src`, `docs` y el resto, 0 archivos; `.env*`, 0;
+- la imagen queda healthy;
+- `/`, `/estudio`, `/laboratorio-pymes`, `/buzon` y `/soporte-sap` responden 200, sin ningún `ENOENT` en los logs.
+
+**Decisión abierta del laboratorio**: en `tools/` quedan 66 archivos de datos que las herramientas leen en tiempo de
+ejecución. Entre ellos están las **reglas del grafo** (`tools/conocimiento/dominios`, 17), que son de lo defendible
+(§1.7). ¿Pueden ir en la imagen del despacho? Si no, la imagen del despacho necesita su propia lista.
+
 ### Fase 1: Los huecos de la base, con su arnés de sabotajes
 **Objetivo**: las dos propuestas SQL cierran H-01, H-02, H-03, H-05 a H-10 (la parte de la base), H-12 a H-16 y
 H-21 (según DP-2), y cada control tiene una prueba negativa con el rol real y un sabotaje que la tumba. Arranca de la
@@ -459,6 +487,9 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   que llegó a construirse traía `src/`, `erp/` y `trayectorias/`, contra lo que dice el propio `Dockerfile`. Un
   build en verde dice que compila, no qué se lleva. **Lección**: la evidencia de una imagen incluye listar `/app`
   y buscar lo que no debería estar, no solo el healthcheck.
+- **2026-10-07 · un `fs` con camino dinámico es un glob sobre todo el repo** (H-31). `turbopackIgnore` en la app no
+  alcanza el código compilado de una herramienta, y cada ruta nueva puede reintroducirlo. **Fix**: una lista global de
+  lo que nunca viaja, probada con la semántica de Next, y la imagen inspeccionada por dentro.
 - **2026-10-07 · en esta máquina Docker no tiene buildx.** `DOCKER_BUILDKIT=0` (el builder clásico) respeta igual el
   `.dockerignore` e ignora la línea `# syntax`; en el servidor, `docker compose build` usa BuildKit.
 
