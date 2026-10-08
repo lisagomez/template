@@ -13,6 +13,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { revisaImagen, revisaConstruible } from '../despacho/reglas.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -113,5 +114,56 @@ for (const [nombre, siembra, caza] of siembrasConstruible) {
     const r = construible();
     siembra(r);
     assert.ok(caza(revisaConstruible(r)), `no caza: ${nombre}`);
+  });
+}
+
+// --- Lo que nunca viaja en la imagen (PRP-010 H-31) ----------------------------------------------
+// El file tracing de Next metía en la imagen `erp/`, `trayectorias/`, `src/` y `docs/`. Se prueba la
+// configuración REAL con la semántica de Next (`collect-build-traces.js`): cada clave casa con la ruta y
+// cada patrón con la ruta absoluta del archivo, con el picomatch que trae Next y sus mismas opciones.
+const picomatch = createRequire(import.meta.url)('next/dist/compiled/picomatch');
+const { default: nextConfig } = await import('../../next.config.ts');
+
+function excluido(config, ruta, archivo) {
+  const opciones = { dot: true, contains: true };
+  const patrones = Object.entries(config.outputFileTracingExcludes ?? {})
+    .filter(([clave]) => picomatch(clave, opciones)(ruta))
+    .flatMap(([, ps]) => ps.map((p) => join(raiz, p)));
+  return patrones.length > 0 && picomatch(patrones, opciones)(join(raiz, archivo));
+}
+const RUTAS = ['/', '/estudio', '/laboratorio-pymes', '/soporte-sap', '/api/ventas-whatsapp/a2a/[dominio]',
+  '/api/laboratorio/muestra', '/api/contenido/video'];
+const NO_SALEN = ['erp/casa/huellas.txt', 'erp/entrega.json', 'trayectorias/datos/aplicacion/2026-09/una.json',
+  'inventario/activos.json', 'productos/soporte-sap.json', 'docs/analisis/2026-10-02/analisis.json', '.claude/routing-modelos.json',
+  'scripts/package.json', 'src/features/etiquetas/services/servidor/puerta.ts', 'tools/extractor-documental/src/lote-pagina.ts',
+  'tools/soporte-sap/pruebas/aislamiento.ts', 'tools/extractor-documental/manual/pantallas/caso-cfdi.png',
+  'tools/dictado/medicion/corpus-propio/pildora/captura-idle.png', 'opencode.json', 'tsconfig.json', 'package-lock.json'];
+const SI_SALEN = ['tools/reel/dist/index.js', 'tools/conocimiento/dominios/un-dominio.json', 'public/manifest.json',
+  'node_modules/next/package.json', 'package.json'];
+const fugas = (c) => RUTAS.flatMap((r) => NO_SALEN.filter((a) => !excluido(c, r, a)).map((a) => `${r}: ${a}`));
+const faltan = (c) => RUTAS.flatMap((r) => SI_SALEN.filter((a) => excluido(c, r, a)).map((a) => `${r}: ${a}`));
+
+test('ninguna ruta lleva a la imagen lo que no sale (erp, trayectorias, la fuente…), y sí lo que necesita', () => {
+  assert.deepEqual({ fugas: fugas(nextConfig), faltan: faltan(nextConfig) }, { fugas: [], faltan: [] });
+});
+
+const copia = () => ({ ...nextConfig, outputFileTracingExcludes: Object.fromEntries(
+  Object.entries(nextConfig.outputFileTracingExcludes).map(([k, v]) => [k, [...v]])) });
+const sinPatron = (c, patron) => { c.outputFileTracingExcludes['/**'] = c.outputFileTracingExcludes['/**'].filter((p) => p !== patron); };
+const siembrasTraza = [
+  ['se quita `erp/**`', (c) => sinPatron(c, 'erp/**'), (c) => fugas(c).some((f) => f.includes(': erp/'))],
+  ['se quita `trayectorias/**`', (c) => sinPatron(c, 'trayectorias/**'), (c) => fugas(c).some((f) => f.includes(': trayectorias/'))],
+  ['se quita `src/**`', (c) => sinPatron(c, 'src/**'), (c) => fugas(c).some((f) => f.includes(': src/'))],
+  ['la clave solo cubre `/api/**` y deja fuera las páginas', (c) => {
+    c.outputFileTracingExcludes['/api/**'] = c.outputFileTracingExcludes['/**']; delete c.outputFileTracingExcludes['/**'];
+  }, (c) => fugas(c).some((f) => f.startsWith('/estudio:'))],
+  ['una exclusión demasiado ancha se lleva el `dist` que la app ejecuta', (c) => { c.outputFileTracingExcludes['/**'].push('tools/**'); },
+    (c) => faltan(c).some((f) => f.includes('tools/reel/dist/'))],
+];
+for (const [nombre, siembra, caza] of siembrasTraza) {
+  test(`siembra de la traza: ${nombre}`, () => {
+    const c = copia();
+    siembra(c);
+    assert.ok(caza(c), `no caza: ${nombre}`);
   });
 }
