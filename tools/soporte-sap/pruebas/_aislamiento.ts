@@ -122,14 +122,14 @@ async function agente(db: PGlite): Promise<Fila[]> {
   const deA = (await db.query(`select id from ss_incidencia where consultora_id = '${ORG.CA}'`)).rows.length
   const pideB = await comoAgente(db, ORG.CA, `select id from ss_incidencia where consultora_id = '${ORG.CB}'`)
   const falsificado = emiteTokenDeTarea('otro-secreto-que-no-es-el-del-orquestador-xx', { consultora: ORG.CB, tarea: 't', rol: 'soporte_sap_agente', exp: Date.now() + 60_000 })
-  const conFalso = await falla(() => comoServicio(db, falsificado, 'select id from ss_incidencia'))
+  const conFalso = await comoServicio(db, falsificado, 'select id from ss_incidencia')
   const cruza = await falla(() => comoAgente(db, ORG.CA, `insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, actor, fecha, anterior, hash)
     values ('${INC.b1}', '${ORG.CB}', '${ORG.B1}', 2, 'X', 'agente:soporte-sap-a2a', now(), 'h', 'h')`))
   const cambia = await falla(() => comoAgente(db, ORG.CA, `update ss_evento set tipo = 'X' where incidencia_id = '${INC.a1}'`))
   return [
     ['el agente con una tarea de A lista incidencias', `todas las de A (${deA}) y ninguna de B`, conTarea.length === deA && conTarea.every((f) => f.consultora_id === ORG.CA), n(conTarea)],
     ['el agente con una tarea de A pide las de B (revisión)', '0 filas: el alcance sale del token firmado', pideB.length === 0, n(pideB)],
-    ['el agente presenta un token de B que no firmó el orquestador (revisión)', 'rechazado en la pasarela', conFalso !== null, r(conFalso)],
+    ['el agente presenta un token de B que no firmó el orquestador (revisión)', '0 filas: la base no reconoce la firma (PRP-010 H-21)', conFalso.length === 0, n(conFalso)],
     ['el agente de una tarea de A escribe un evento de B', 'rechazado', cruza !== null, r(cruza)],
     ['el agente cambia un evento', 'rechazado (solo agregar)', cambia !== null, r(cambia)],
   ]

@@ -1,6 +1,6 @@
 /**
  * La suite cuenta solo si se pone roja cuando debe: sin sabotaje, todo verde; con cada sabotaje
- * (S1–S10, en una base nueva), al menos la comprobación que lo vigila cae.
+ * (S1–S11, en una base nueva), al menos la comprobación que lo vigila cae.
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'

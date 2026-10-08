@@ -10,7 +10,8 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
-import { emiteTokenDeTarea, verificaTokenDeTarea, type RolDeServicio } from '../dist/index.js'
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
+import { emiteTokenDeTarea, type RolDeServicio } from '../dist/index.js'
 import { HERRAMIENTA } from './_ayuda.ts'
 
 export const SQL_SOPORTE = readFileSync(join(HERRAMIENTA, 'migraciones', 'propuesta-soporte-sap.sql'), 'utf8')
@@ -67,10 +68,12 @@ const ruta = (c: string, cl: string, i: string, s: string) => `${c}/${cl}/${i}/$
 
 /** La base con el esquema y el escenario sembrado (como dueño de las tablas). */
 export async function baseSoporte(extra = ''): Promise<PGlite> {
-  const db = new PGlite()
+  const db = new PGlite({ extensions: { pgcrypto } })
   await db.exec(SUPABASE_MINIMO)
   await db.exec(SQL_SOPORTE)
   await db.exec(SQL_SOPORTE)
+  // El secreto del orquestador, como lo cargaría el despliegue (PRP-010 H-21): solo la base lo lee.
+  await db.exec(`insert into ss_priv.secreto_tareas (secreto) values ('${SECRETO_TAREAS}') on conflict (id) do nothing`)
   if (extra) await db.exec(extra)
   await db.exec(`
     insert into ss_organizacion (id, tipo, nombre, padre_id) values
@@ -135,11 +138,21 @@ export async function como<T = Record<string, unknown>>(db: PGlite, usuario: str
   try { return (await db.query<T>(sql)).rows } finally { await db.exec(`reset role; select set_config('request.jwt.claim.sub', '', false);`) }
 }
 
-/** La pasarela: verifica el token de la tarea y SOLO entonces fija el rol y los claims. */
+/** El rol que dice el cuerpo del token, SIN verificar: es la conexión con la que llega la sesión. */
+const rolDeLaConexion = (token: string): string => {
+  const rol = String(JSON.parse(Buffer.from(token.split('.')[0] ?? '', 'base64url').toString('utf8') || '{}').rol ?? '')
+  if (!/^soporte_sap_[a-z]+$/.test(rol)) throw new Error(`rol de conexión inesperado: ${rol}`)
+  return rol
+}
+
+/**
+ * Una sesión de un rol de servicio que presenta el token de su tarea TAL CUAL. Quien verifica es la base
+ * (`ss_priv.claims_de_tarea`, PRP-010 H-21): este ayudante ya no hace de pasarela, así que una prueba con un
+ * token falso o vencido mide el control de verdad y no la buena voluntad del arnés.
+ */
 export async function comoServicio<T = Record<string, unknown>>(db: PGlite, token: string, sql: string): Promise<T[]> {
-  const claims = verificaTokenDeTarea(SECRETO_TAREAS, token, Date.now())
-  await db.exec(`set role ${claims.rol}; select set_config('request.jwt.claims', '${JSON.stringify(claims)}', false);`)
-  try { return (await db.query<T>(sql)).rows } finally { await db.exec(`reset role; select set_config('request.jwt.claims', '', false);`) }
+  await db.exec(`set role ${rolDeLaConexion(token)}; select set_config('ss.tarea', '${token.replace(/'/g, "''")}', false);`)
+  try { return (await db.query<T>(sql)).rows } finally { await db.exec(`reset role; select set_config('ss.tarea', '', false);`) }
 }
 
 /** Un token válido para una consultora y un rol, firmado como lo firmaría el orquestador. */
