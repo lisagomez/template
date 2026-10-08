@@ -60,9 +60,9 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-01 | El agente escala por su cuenta y firma `escalada_por` con cualquier nombre. El laboratorio pasa a leer título, descripción y campos extraídos (RFC y montos del CFDI). En el runtime, toda incidencia con regla llega al N1 sin que la consultora escale nada. **Confirmado con sonda** | 1 y 2 | sí | código: escalar es decisión de la consultora, a su nombre; los campos extraídos, bajo el acceso motivado (DP-3) | — |
-| H-02 | El tope de 72 h del acceso a originales se salta con un `creado_en` futuro: **8 832 h**, confirmado con sonda. El acceso es por cliente, no por incidencia, y no se puede revocar | 1 y 2 | sí | código: la base fija `creado_en`, el tope se mide contra `now()`, hay revocación y una prueba con `creado_en` futuro | — |
-| H-03 | La base acepta texto crudo en `ss_caso_sandbox` y datos personales en `senales` de cuarentena, y el laboratorio lee los dos. Nada liga el sandbox con el veredicto del anonimizador | 1 y 2 | sí | código: el agente no escribe en el sandbox; `senales`, solo del vocabulario fijo | — |
+| H-01 | El agente escala por su cuenta y firma `escalada_por` con cualquier nombre. El laboratorio pasa a leer título, descripción y campos extraídos (RFC y montos del CFDI). En el runtime, toda incidencia con regla llega al N1 sin que la consultora escale nada. **Confirmado con sonda** | 1 y 2 | sí | código: escalar es decisión de la consultora, a su nombre; los campos extraídos, bajo el acceso motivado (DP-3) | **cerrado en la tanda 1a** |
+| H-02 | El tope de 72 h del acceso a originales se salta con un `creado_en` futuro: **8 832 h**, confirmado con sonda. El acceso es por cliente, no por incidencia, y no se puede revocar | 1 y 2 | sí | código: la base fija `creado_en`, el tope se mide contra `now()`, hay revocación y una prueba con `creado_en` futuro | **cerrado en la tanda 1a** |
+| H-03 | La base acepta texto crudo en `ss_caso_sandbox` y datos personales en `senales` de cuarentena, y el laboratorio lee los dos. Nada liga el sandbox con el veredicto del anonimizador | 1 y 2 | sí | código: el agente no escribe en el sandbox; `senales`, solo del vocabulario fijo | **cerrado en la tanda 1a** (segundo cerrojo; ver nota) |
 | H-04 | El anonimizador falla abierto ante formas nuevas: 5 de 14 frases entran con el dato («pepe gonzalez de almacen», «jgarcia», «doña Lupita», «El chofer Ramiro», «rosa punto elena en gmail»). La revisión humana de la cuarentena no existe | 2 | sí | código: las 5 al fixture permanente y el detector arreglado. Texto: «fail-closed» promete de más, y la cuarentena es definitiva hasta D14 (DP-8) | — |
 | H-05 | Cualquier consultor lee fila por fila las horas de sus colegas y el actor de cada evento. El seudónimo es un md5 sin sal que el laboratorio puede revertir con `ss_miembro` | 1 y 2 | — | código: cada quien sus filas más un agregado; seudónimo con sal | — |
 
@@ -70,7 +70,7 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-06 | En la sala en SQL, una persona de un tenant aprueba el plan de otro: `sala_aprobaciones` no ata `mensaje_id` a `tenant_id`, `task_id` ni la huella. `sala_agente` se acota con un GUC que fija su propia sesión. La versión en memoria sí lo hace bien | 2 | sí | código, más un sabotaje nuevo en la suite de la sala | — |
+| H-06 | En la sala en SQL, una persona de un tenant aprueba el plan de otro: `sala_aprobaciones` no ata `mensaje_id` a `tenant_id`, `task_id` ni la huella. `sala_agente` se acota con un GUC que fija su propia sesión. La versión en memoria sí lo hace bien | 2 | sí | código, más un sabotaje nuevo en la suite de la sala | **cerrado en la tanda 1a** (la aprobación; el GUC de `sala_agente` va con H-21) |
 | H-07 | El rol de plataforma inserta decisiones ya tomadas (mapeo aprobado, campo confirmado) y eventos con el seudónimo de un consultor. Ninguna prueba usa ese rol | 1 y 2 | — | código | — |
 | H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | — |
 | H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | — |
@@ -416,6 +416,12 @@ rama `soporte/firmas` rebasada (DP-1). La matriz pasa a ser el arnés de Soporte
 **Validación**: el arnés corre todos los sabotajes y cada uno cae; las pruebas de `tools/soporte-sap` y de
 `tools/sala-a2a` en verde; las sondas del 07/10 re-ejecutadas dan **rechazado**.
 
+**Tanda 1a, hecha (2026-10-07, rama `soporte/cierre-base`)**: H-01, H-02, H-03 y H-06, con 6 filas nuevas en la matriz y
+4 hallazgos «revision». **Una desviación sobre la propuesta**: en H-03 el agente sigue escribiendo en el sandbox. La base
+cierra el DATO, no al escritor: `ss_sandbox_sin_identificadores` rechaza correo, RFC, CURP y secuencias largas de dígitos
+aunque los escriba el agente, y `ss_cuarentena_solo_senales` solo admite las señales del anonimizador. Quitarle la
+escritura al agente obliga a otro escritor, y eso es un cambio de flujo. Los nombres sin forma siguen en H-04.
+
 ### Fase 2: Cablear lo que la app promete y no hace
 **Objetivo**:
 - cablear el presupuesto (H-18), la generalización y el «a medida» por defecto (H-19), la impugnación en la app
@@ -487,6 +493,14 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   que llegó a construirse traía `src/`, `erp/` y `trayectorias/`, contra lo que dice el propio `Dockerfile`. Un
   build en verde dice que compila, no qué se lleva. **Lección**: la evidencia de una imagen incluye listar `/app`
   y buscar lo que no debería estar, no solo el healthcheck.
+- **2026-10-07 · la matriz del 05/10 daba 64/64 en verde, y aun así tenía los huecos de hoy** (fase 1, tanda 1a).
+  `aisia-lab-escalado` saboteaba la lectura del laboratorio, no quién escala; `aisia-lab-72h` saboteaba el intervalo,
+  no quién pone la fecha. Una fila «probado» prueba exactamente lo que siembra su sabotaje, y nada más.
+  **Lección**: cada afirmación se parte en todas las formas de romperla, y cada forma lleva su fila.
+- **2026-10-07 · una limpieza puede tapar su propio sabotaje.** Para quitar la política vieja del agente puse un
+  `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
+  bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.
+  **Lección**: un control que no se puede romper por el camino que se prueba parece más fuerte de lo que es.
 - **2026-10-07 · un `fs` con camino dinámico es un glob sobre todo el repo** (H-31). `turbopackIgnore` en la app no
   alcanza el código compilado de una herramienta, y cada ruta nueva puede reintroducirlo. **Fix**: una lista global de
   lo que nunca viaja, probada con la semántica de Next, y la imagen inspeccionada por dentro.
