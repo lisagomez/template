@@ -1,5 +1,5 @@
 /**
- * El despliegue en el despacho contable (spec 015, fase 2). Cuatro piezas, puras —no leen el disco ni
+ * El despliegue en el despacho contable (spec 015, fase 2). Cinco piezas, puras —no leen el disco ni
  * imprimen: decide quien llama—:
  *
  *   · `revisaDespacho`: lo que `configura:deploy` exige con `DESPLIEGUE=despacho`. Lo contrario del
@@ -11,6 +11,8 @@
  *     publica puertos, usa una imagen sin pinear o puede mandar un documento fuera.
  *   · `revisaImagen`: lo que el compose no ve. Dice si un archivo con llaves entraría a la imagen de la
  *     app (y de ahí a su entorno) y si el `Dockerfile` perdió la guarda que lo impide.
+ *   · `revisaConstruible`: si la imagen se construye desde un clon limpio, sin lo que solo tiene el
+ *     anfitrión (`dist`, `node_modules`, tarballs).
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
@@ -161,6 +163,30 @@ export function revisaImagen({ dockerignore, dockerfile }) {
   const guarda = dockerfile.search(/RUN if find \.[^\n]*-name '\.env\*'[^\n]*\n[^\n]*exit 1/);
   const build = dockerfile.indexOf('RUN npm run build');
   return { entran, sinGuarda: !(copia >= 0 && guarda > copia && guarda < build) };
+}
+
+/** Lo que el anfitrión tiene y un clon limpio no: si entra al contexto, tapa que la imagen no sabe hacerlo. */
+const DEL_ANFITRION = ['tools/una-herramienta/node_modules/un-paquete/index.js', 'tools/una-herramienta/dist/index.js',
+  'tools/una-herramienta/tu-scope-una-herramienta-0.1.0.tgz'];
+
+/**
+ * Si la imagen se construye desde un clon limpio, que es lo que tiene un servidor recién clonado
+ * (PRP-010 H-30). `importados` son las rutas, relativas a la raíz, que `src/` importa desde fuera de
+ * `src/`; las lee quien llama. Devuelve:
+ *   · `sinHerramientas`: el build no compila `tools/<x>/dist` ni instala sus peers (`prepara-gate`).
+ *   · `importsExcluidos`: lo que la app importa y `.dockerignore` deja fuera del contexto.
+ *   · `delAnfitrion`: `node_modules`, `dist` o tarballs del anfitrión que entrarían al contexto.
+ */
+export function revisaConstruible({ dockerignore, dockerfile, scripts, importados }) {
+  const build = dockerfile.indexOf('RUN npm run build');
+  const enDockerfile = dockerfile.search(/RUN [^\n]*prepara-gate/);
+  const compila = build >= 0 && (/prepara-gate/.test(scripts.prebuild ?? '') || (enDockerfile >= 0 && enDockerfile < build));
+  const generado = (ruta) => /^tools\/[^/]+\/dist\//.test(ruta);
+  return {
+    sinHerramientas: !compila,
+    importsExcluidos: importados.filter((ruta) => !generado(ruta) && excluida(dockerignore, ruta)),
+    delAnfitrion: DEL_ANFITRION.filter((ruta) => !excluida(dockerignore, ruta)),
+  };
 }
 
 /**

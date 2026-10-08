@@ -1,12 +1,19 @@
-# Dependencias y build (se regeneran dentro de la imagen)
+# Dependencias y build (se regeneran dentro de la imagen). En CUALQUIER carpeta: un `node_modules`
+# o un `dist` del anfitrion (binarios de otra plataforma, compilados viejos) taparía que la imagen
+# no sabe construirlos desde un clon limpio (PRP-010 H-30). `npm run build` los rehace (`prebuild`).
 node_modules
+**/node_modules
 .next
 out
 build
 dist
+**/dist
+**/*.tgz
 
-# La fabrica no viaja al servidor
+# La fabrica no viaja al servidor. Excepcion: lo que la app IMPORTA al compilar (el routing por
+# nivel, C8, que lee `src/lib/ai/routing.ts`). Lo vigila `revisaConstruible` en `prueba:buzon`.
 .claude
+!.claude/routing-modelos.json
 .git
 .gitignore
 GEMINI.md
