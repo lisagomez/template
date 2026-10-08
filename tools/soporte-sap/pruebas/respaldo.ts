@@ -6,8 +6,15 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { PGlite } from '@electric-sql/pglite'
-import { exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, TABLAS_DE_TENANT, type Consulta } from '../dist/index.js'
-import { baseSoporte, ORG, INC } from './_base.ts'
+import { createHmac } from 'node:crypto'
+import { canonico, exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, TABLAS_DE_TENANT, type Consulta, type ExportTenant, type Json } from '../dist/index.js'
+import { baseSoporte, ORG, INC, SECRETO_RESPALDOS as S } from './_base.ts'
+
+/** Lo que haría quien tiene el secreto (o un job con un error): firmar de nuevo un export cambiado. */
+export const refirma = (e: ExportTenant): ExportTenant => {
+  const { firma: _, ...resto } = e
+  return { ...resto, firma: createHmac('sha256', S).update(canonico(resto as unknown as Json)).digest('hex') }
+}
 
 const consulta = (db: PGlite): Consulta => async <T>(sql: string, p?: unknown[]) => (await db.query<T>(sql, p)).rows
 
@@ -22,12 +29,12 @@ async function danaA(db: PGlite): Promise<void> {
 test('restaurar solo a la consultora A: A vuelve a su export y B no cambia', async () => {
   const db = await baseSoporte()
   const q = consulta(db)
-  const e = await exportaTenant(q, ORG.CA, '2026-10-04T12:00:00Z')
+  const e = await exportaTenant(q, ORG.CA, '2026-10-04T12:00:00Z', S)
   assert.ok(e.huella.conteos['ss_incidencia']! >= 2 && e.huella.conteos['ss_evento']! >= 1)
   const bAntes = await huellaTenant(q, ORG.CB)
   await danaA(db)
   assert.notEqual((await huellaTenant(q, ORG.CA)).total, e.huella.total, 'el daño cambió a A')
-  const r = await restauraTenant(q, e)
+  const r = await restauraTenant(q, e, S)
   assert.ok(r.insertadas > 0)
   const v = verificaRestauracion(e, await huellaTenant(q, ORG.CA), { [ORG.CB]: bAntes }, { [ORG.CB]: await huellaTenant(q, ORG.CB) })
   assert.deepEqual(v.diferencias, [])
@@ -35,7 +42,7 @@ test('restaurar solo a la consultora A: A vuelve a su export y B no cambia', asy
 })
 
 test('un export lleva el manifiesto de sus objetos de Storage, no sus bytes', async () => {
-  const e = await exportaTenant(consulta(await baseSoporte()), ORG.CA, '2026-10-04T12:00:00Z')
+  const e = await exportaTenant(consulta(await baseSoporte()), ORG.CA, '2026-10-04T12:00:00Z', S)
   assert.ok(e.objetos.some((o) => o.bucket === 'ss-originales' && o.nombre.startsWith(ORG.CA)))
   assert.ok(e.objetos.every((o) => o.nombre.startsWith(ORG.CA)), 'nada de otro tenant')
 })
@@ -69,17 +76,18 @@ test('restaurar la base entera (snapshot o respaldo del proveedor) regresa en el
 test('restaurar es una transacción: si falla, no queda nada a medias', async () => {
   const db = await baseSoporte()
   const q = consulta(db)
-  const e = await exportaTenant(q, ORG.CA, '2026-10-04T12:00:00Z')
+  const e = await exportaTenant(q, ORG.CA, '2026-10-04T12:00:00Z', S)
   const antes = await huellaTenant(q, ORG.CA)
-  const roto = { ...e, tablas: { ...e.tablas, ss_horas: [{ id: 'no-es-uuid' }] } }
-  await assert.rejects(restauraTenant(q, roto))
+  // Pasa la firma y el tenant de cada fila, y falla DENTRO de la transacción: así se prueba el rollback.
+  const roto = refirma({ ...e, tablas: { ...e.tablas, ss_horas: [{ id: 'no-es-uuid', consultora_id: ORG.CA }] } })
+  await assert.rejects(restauraTenant(q, roto, S))
   assert.equal((await huellaTenant(q, ORG.CA)).total, antes.total)
 })
 
 test('toda tabla con datos de una consultora está en el respaldo por tenant, o se declara derivada', async () => {
   const db = await baseSoporte()
   const conTenant = (await db.query<{ t: string }>(`select distinct table_name as t from information_schema.columns
-    where table_schema = 'public' and table_name like 'ss\\_%' and column_name in ('consultora_id', 'origen_consultora_id') order by 1`)).rows.map((r) => r.t)
+    where table_schema = 'public' and table_name like 'ss\\_%' and column_name in ('consultora_id', 'origen_consultora_id', 'cliente_id') order by 1`)).rows.map((r) => r.t)
   // ss_metrica es DERIVADA: se regenera con la capa semántica después de restaurar; no se respalda aparte.
   const DERIVADAS = ['ss_metrica']
   assert.deepEqual(conTenant.filter((t) => !DERIVADAS.includes(t)).sort(), TABLAS_DE_TENANT.map(([t]) => t).sort())

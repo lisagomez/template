@@ -42,7 +42,7 @@ export {
 export type { CampoCanonico, Mapeo, Similitud, Procedencia, IncidenciaCanonica, Fila, ResultadoMapeo } from './mapeo.js'
 export { exporteSucio } from './laboratorio/exportes.js'
 export type { Exporte } from './laboratorio/exportes.js'
-export { huellaTenant, exportaTenant, restauraTenant, verificaRestauracion, TABLAS_DE_TENANT } from './respaldo.js'
+export { huellaTenant, exportaTenant, exportIntegro, restauraTenant, verificaRestauracion, tablasDelRespaldo, TABLAS_DE_TENANT, TABLAS_DE_LA_SALA } from './respaldo.js'
 export type { Consulta, HuellaTenant, ExportTenant, VerificacionRestauracion } from './respaldo.js'
 export { anonimiza, generaliza, SENALES, CONTEXTO_PERSONAL } from './anonimiza.js'
 export type { Validadores, TipoDato, Anonimizado } from './anonimiza.js'

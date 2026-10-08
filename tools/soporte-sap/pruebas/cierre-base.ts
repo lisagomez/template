@@ -1,16 +1,20 @@
 /**
  * Cierre de la base (PRP-010): lo que la AISIA y el C3 prometían y la base no cumplía. Tanda 1a, datos personales
- * y decisiones humanas; tanda 1b, prioridad y SLA; tanda 1c, roles y tenencia. Cada prueba es una sonda de la revisión del 2026-10-07 con el
+ * y decisiones humanas; 1b, prioridad y SLA; 1c y 1d, roles y tenencia; 1e, la plataforma y la restauración. Cada prueba es una sonda de la revisión del 2026-10-07 con el
  * resultado que debe dar; cada una tiene su fila y su sabotaje en `firmas/matriz.ts`. Las de la sala
  * (H-06) viven en `tools/sala-a2a/pruebas/_suite.ts` (S10 y S10b).
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SENALES, CONTEXTO_PERSONAL, categoriza, emiteTokenDeTarea, verificaCadena, type EventoIncidencia } from '../dist/index.js'
+import { SENALES, CONTEXTO_PERSONAL, categoriza, emiteTokenDeTarea, verificaCadena, exportaTenant, huellaTenant, restauraTenant, type EventoIncidencia, type Consulta } from '../dist/index.js'
+import { refirma } from './respaldo.ts'
 import { createHash } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
 import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
-import { baseSoporte, como, comoAgente, comoServicio, falla, ORG, USR, INC, SQL_SOPORTE, SECRETO_TAREAS, SUPABASE_MINIMO } from './_base.ts'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { baseSoporte, como, comoAgente, comoServicio, falla, tokenDe, ORG, USR, INC, SQL_SOPORTE, SECRETO_TAREAS, SECRETO_RESPALDOS as S, SUPABASE_MINIMO } from './_base.ts'
+import { HERRAMIENTA } from './_ayuda.ts'
 
 const otorga = (extra = '', valores = '') => `insert into ss_acceso_motivado (usuario_id, cliente_id, motivo, otorgado_por, vence_en${extra})
   values ('${USR.sup}', '${ORG.A1}', 'aprobar la solución de la incidencia MIGO', '${USR.ca}', ${valores || "now() + interval '24 hours'"})`
@@ -358,4 +362,112 @@ test('H-05 · el seudónimo no se revierte con un md5 del id, y la sal no la lee
   const md5 = `usr-${createHash('md5').update(USR.ca).digest('hex').slice(0, 12)}`
   assert.notEqual(await seudonimoDe(db, USR.ca), md5)
   assert.ok(await falla(() => como(db, USR.sup, 'select sal from ss_priv.sal_seudonimos')), 'el superadministrador no lee la sal')
+})
+
+// === Tanda 1e · la plataforma y la restauración ====================================================
+
+const consultaDe = (db: Db): Consulta => async <T>(sql: string, p?: unknown[]) => (await db.query<T>(sql, p)).rows
+const cuentaDe = async (db: Db, c: string) => (await huellaTenant(consultaDe(db), c)).total
+
+test('H-08 · un export alterado no se restaura: la firma no cuadra', async () => {
+  const db = await baseSoporte()
+  const q = consultaDe(db)
+  const e = await exportaTenant(q, ORG.CA, '2026-10-08T12:00:00Z', S)
+  const antes = await cuentaDe(db, ORG.CA)
+  const filas = (e.tablas['ss_incidencia'] as Array<Record<string, unknown>>).map((f, i) => (i === 0 ? { ...f, prioridad: 'P4' } : f))
+  const alterado = { ...e, tablas: { ...e.tablas, ss_incidencia: filas } }
+  await assert.rejects(restauraTenant(q, alterado, S), /no lo firmó este job/)
+  assert.equal(await cuentaDe(db, ORG.CA), antes, 'la base no cambió')
+})
+
+test('H-08 · un export firmado con filas de otra consultora no se restaura', async () => {
+  const db = await baseSoporte()
+  const q = consultaDe(db)
+  const e = await exportaTenant(q, ORG.CA, '2026-10-08T12:00:00Z', S)
+  const deB = (await exportaTenant(q, ORG.CB, '2026-10-08T12:00:00Z', S)).tablas['ss_incidencia']!
+  // Firmado con el secreto (un job con un error, o quien lo tiene): la firma sola no basta, hay que ver cada fila.
+  const mezclado = refirma({ ...e, tablas: { ...e.tablas, ss_incidencia: [...e.tablas['ss_incidencia']!, ...deB] } })
+  const [antesA, antesB] = [await cuentaDe(db, ORG.CA), await cuentaDe(db, ORG.CB)]
+  await assert.rejects(restauraTenant(q, mezclado, S), /no son de la consultora/)
+  assert.deepEqual([await cuentaDe(db, ORG.CA), await cuentaDe(db, ORG.CB)], [antesA, antesB])
+})
+
+test('H-08 · la verificación ocurre ANTES del commit: si la huella no cuadra, rollback', async () => {
+  const db = await baseSoporte()
+  const q = consultaDe(db)
+  const e = await exportaTenant(q, ORG.CA, '2026-10-08T12:00:00Z', S)
+  await db.exec(`insert into ss_horas (consultora_id, cliente_id, consultor, minutos, fecha) values ('${ORG.CA}', '${ORG.A1}', 'usr-000000000abc', 30, current_date)`)
+  const antes = await cuentaDe(db, ORG.CA)
+  // Un export cuya huella declarada no es la de sus filas (firmado): restaurar lo dejaría distinto de lo prometido.
+  const mentiroso = refirma({ ...e, huella: { ...e.huella, total: 'f'.repeat(64) } })
+  await assert.rejects(restauraTenant(q, mentiroso, S), /rollback/)
+  assert.equal(await cuentaDe(db, ORG.CA), antes, 'nada a medias: la hora cargada después del export sigue ahí')
+})
+
+test('H-08 · el export lleva los accesos motivados de los clientes del tenant, no los de otro', async () => {
+  const db = await baseSoporte()
+  await db.exec(`insert into ss_acceso_motivado (usuario_id, cliente_id, motivo, otorgado_por, vence_en) values
+    ('${USR.sup}', '${ORG.A1}', 'aprobar la solución de la incidencia MIGO', '${USR.ca}', now() + interval '24 hours'),
+    ('${USR.sup}', '${ORG.B1}', 'aprobar la solución del CFDI de Boreal', '${USR.cb}', now() + interval '24 hours')`)
+  const e = await exportaTenant(consultaDe(db), ORG.CA, '2026-10-08T12:00:00Z', S)
+  const accesos = e.tablas['ss_acceso_motivado'] as Array<{ cliente_id: string }>
+  assert.deepEqual(accesos.map((a) => a.cliente_id), [ORG.A1])
+})
+
+/** Una sesión del rol de plataforma con el token de su tarea, para correr el export con SU rol. */
+async function comoPlataforma<T>(db: Db, consultora: string, f: (q: Consulta) => Promise<T>): Promise<T> {
+  await db.exec(`set role soporte_sap_plataforma; select set_config('ss.tarea', '${tokenDe(consultora, 'soporte_sap_plataforma')}', false);`)
+  try { return await f(consultaDe(db)) } finally { await db.exec(`reset role; select set_config('ss.tarea', '', false);`) }
+}
+
+test('H-07 · la plataforma exporta con su propio rol: todo lo de su consultora y nada de otra', async () => {
+  const db = await baseSoporte()
+  const comoDueno = await exportaTenant(consultaDe(db), ORG.CA, '2026-10-08T12:00:00Z', S)
+  const conSuRol = await comoPlataforma(db, ORG.CA, (q) => exportaTenant(q, ORG.CA, '2026-10-08T12:00:00Z', S))
+  assert.equal(conSuRol.huella.total, comoDueno.huella.total, 'con su rol ve lo mismo que el dueño: no le falta ninguna tabla')
+  assert.deepEqual(conSuRol.objetos, comoDueno.objetos, 'y el manifiesto de objetos no sale vacío')
+  const deB = await comoPlataforma(db, ORG.CA, (q) => huellaTenant(q, ORG.CB))
+  assert.ok(Object.values(deB.conteos).every((n) => n === 0), 'con una tarea de A no ve nada de B')
+})
+
+test('H-07 · la plataforma no inserta decisiones ni eventos: un mapeo aprobado, un evento ajeno, horas, un campo confirmado', async () => {
+  const db = await baseSoporte()
+  const intentos = [
+    `insert into ss_mapeo (consultora_id, herramienta, version, contenido, estado, aprobado_por) values ('${ORG.CA}', 'jira', 9, '{}', 'aprobado', '${USR.sup}')`,
+    `insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, actor, fecha, anterior, hash) values ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 7, 'APROBADA', 'usr-000000000001', now(), 'h', 'h')`,
+    `insert into ss_horas (consultora_id, cliente_id, consultor, minutos, fecha) values ('${ORG.CA}', '${ORG.A1}', 'usr-000000000001', 600, current_date)`,
+    `insert into ss_campo_extraido (adjunto_id, incidencia_id, consultora_id, cliente_id, campo, valor, evidencia, estado, revisado_por)
+      values ((select id from ss_adjunto where incidencia_id = '${INC.a1}' limit 1), '${INC.a1}', '${ORG.CA}', '${ORG.A1}', 'total', '[NUMERO]', 'página 1', 'confirmado', '${USR.ca}')`,
+  ]
+  const pasan = []
+  for (const sql of intentos) if (!(await falla(() => comoPlataforma(db, ORG.CA, (q) => q(sql))))) pasan.push(sql.slice(12, 40))
+  assert.deepEqual(pasan, [])
+  // Control: los mismos intentos SÍ entran como dueño. Si no, la prueba pasaría por un SQL mal escrito y no por el permiso.
+  const otra = await baseSoporte()
+  for (const sql of intentos) assert.equal(await falla(() => otra.query(sql)), null, `como dueño: ${sql.slice(12, 40)}`)
+})
+
+test('H-08 · restaurar no es del rol de plataforma: necesita el privilegio de migración', async () => {
+  const db = await baseSoporte()
+  const e = await exportaTenant(consultaDe(db), ORG.CA, '2026-10-08T12:00:00Z', S)
+  await assert.rejects(comoPlataforma(db, ORG.CA, (q) => restauraTenant(q, e, S)))
+})
+
+test('H-08 · con la sala en la misma base, las aprobaciones de la consultora viajan en su export y vuelven al restaurar', async () => {
+  const SQL_SALA = readFileSync(join(HERRAMIENTA, '..', 'sala-a2a', 'migraciones', 'propuesta-sala-a2a.sql'), 'utf8')
+  const db = await baseSoporte(SQL_SALA)
+  const q = consultaDe(db)
+  const sala = (tenant: string, canal: string, mensaje: string, humano: string) => `
+    insert into sala_participante values ('${tenant}', '${humano}', 'miembro');
+    insert into sala_canales (id, tenant_id, slug, nombre, tipo) values ('${canal}', '${tenant}', 'n1-n2', 'N1-N2', 'publico');
+    insert into sala_mensajes (id, tenant_id, canal_id, autor_tipo, autor_agente, cuerpo, task_id) values ('${mensaje}', '${tenant}', '${canal}', 'agente', 'soporte-sap-a2a', 'plan', 't');
+    insert into sala_aprobaciones (tenant_id, mensaje_id, accion, task_id, decidida_por) values ('${tenant}', '${mensaje}', 'aprobar', 't', '${humano}');`
+  await db.exec(sala(ORG.CA, '50000000-0000-4000-8000-0000000000a1', '60000000-0000-4000-8000-0000000000a1', USR.ca))
+  await db.exec(sala(ORG.CB, '50000000-0000-4000-8000-0000000000b1', '60000000-0000-4000-8000-0000000000b1', USR.cb))
+  const e = await exportaTenant(q, ORG.CA, '2026-10-08T12:00:00Z', S)
+  assert.deepEqual((e.tablas['sala_aprobaciones'] as Array<{ tenant_id: string }>).map((a) => a.tenant_id), [ORG.CA])
+  await db.exec(`delete from sala_aprobaciones where tenant_id = '${ORG.CA}'`)
+  await restauraTenant(q, e, S)
+  assert.equal((await db.query(`select 1 from sala_aprobaciones where tenant_id = '${ORG.CA}'`)).rows.length, 1, 'la aprobación de A volvió')
+  assert.equal((await db.query(`select 1 from sala_aprobaciones where tenant_id = '${ORG.CB}'`)).rows.length, 1, 'la de B no se tocó')
 })
