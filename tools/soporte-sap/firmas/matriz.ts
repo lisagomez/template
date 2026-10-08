@@ -49,6 +49,11 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-prioridad-piso-base', 'aisia-prioridad-vocabulario', 'aisia-prioridad-cambio'], afirmacion: 'un ticket con señales de nómina o RR. HH. no queda debajo de P2 sin que un humano lo baje', encontrado: 'PRP-010 H-15 (07/10): IMSS, PTU, aguinaldo, incapacidad, la quincena o un infotipo salían P4 (dos vocabularios distintos), y la base no imponía el piso: el cliente insertaba la prioridad que quería y el consultor la cambiaba sin motivo ni evento' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-alta', 'aisia-sla-marcas', 'aisia-sla-de-eventos', 'aisia-sla-resultado-contrato', 'aisia-sla-resultado-agente'], afirmacion: 'el SLA se mide desde los eventos; la fecha y el actor los da la base', encontrado: 'PRP-010 H-16 (07/10): el cliente creaba con una fecha de hace un mes, el consultor reescribía `creada_en` y la primera respuesta, y el agente guardaba `cumple=true` con un contrato inventado' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-persona'], afirmacion: 'la primera respuesta es de una persona (DP-4)', encontrado: 'PRP-010 H-17 (07/10): la marcaba la máquina al anonimizar o al mandar a la sala, y una P1 a 60 min se cumplía siempre (en la base; el runtime va en la fase 2)' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-impugna-queja', 'aisia-impugna-cierre'], afirmacion: 'el N3 impugna y su consultora la resuelve a su nombre', encontrado: 'PRP-010 H-10 (07/10): la consultora podía reescribir el motivo y el autor de la queja, resolver no dejaba fecha, y una pausa del reloj no se podía impugnar' },
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-agente-actualiza'], afirmacion: 'el agente actualiza su incidencia por columna', encontrado: 'PRP-010 H-09 (07/10): el `update` del agente fallaba por accidente (un disparador leía `ss_organizacion` sin permiso), y arreglarlo sin cuidado le abría la prioridad, las fechas y los estados terminales' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-sala-mensaje'], afirmacion: 'en la sala, la aprobación la firma una persona a su nombre y en su tenant', encontrado: 'PRP-010 H-06 (07/10): `sala_aprobaciones` no ataba el `mensaje_id` a su tenant, tarea ni huella: un humano de B aprobaba el plan de A (la versión en memoria sí lo impedía)' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-lab-escala-la-consultora'], afirmacion: 'el laboratorio lee solo lo escalado por la consultora', encontrado: 'PRP-010 H-01 (07/10): el agente escalaba por su cuenta y firmaba `escalada_por` con cualquier seudónimo; la fila «aisia-lab-escalado» probaba la lectura, no quién escala' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-lab-72h-fecha', 'aisia-lab-revoca'], afirmacion: 'los originales, con un acceso que otorga la consultora por 72 h como máximo', encontrado: 'PRP-010 H-02 (07/10): con un `creado_en` futuro el acceso duraba 8 832 h, y no había forma de revocarlo; «aisia-lab-72h» sabotaba el intervalo, no la fecha' },
@@ -170,6 +175,38 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'sin piso de nómina', ediciones: [ed(dist('categoriza.js'), "if (pisoNomina && (prioridad === 'P3' || prioridad === 'P4')) {", 'if (false) {')] },
   },
   {
+    id: 'aisia-prioridad-piso-base', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: "el piso de nómina lo sostiene también la BASE: ni el agente ni un consultor dejan una incidencia de nómina en P3 o P4 sin un evento con motivo",
+    control: "SQL · ss_priv.incidencia_campos_de_la_base() con ss_priv.contexto_personal()",
+    comprobacion: prueba('cierre-base.ts', 'H-15 · una incidencia de nómina no queda en P3 ni P4 al categorizarla'),
+    sabotaje: { que: "la base deja de sostener el piso", ediciones: [
+      ed(SQL, "  if new.prioridad in ('P3', 'P4') and ss_priv.contexto_personal(new.titulo || ' ' || new.descripcion) then", "  if false then")] },
+  },
+  {
+    id: 'aisia-prioridad-vocabulario', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: "un solo vocabulario de nómina y RR. HH. (IMSS, PTU, aguinaldo, incapacidad, la quincena, infotipos…) para el categorizador, el anonimizador y la base",
+    control: "src/categoriza.ts usa CONTEXTO_PERSONAL de src/anonimiza.ts",
+    comprobacion: prueba('cierre-base.ts', 'H-15 · el categorizador pone en P2 lo que la revisión vio en P4 (IMSS, PTU, aguinaldo, la quincena…)'),
+    sabotaje: { que: "el categorizador vuelve a su lista corta", ediciones: [
+      ed(dist('categoriza.js'), "const pisoNomina = CONTEXTO_PERSONAL.test(texto) || modulo === 'HCM'", "const pisoNomina = /(n[oó]mina|pc00_m32)/i.test(texto) || modulo === 'HCM'")] },
+  },
+  {
+    id: 'aisia-prioridad-cambio', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: "fijada la prioridad, solo una persona la cambia, con un evento CAMBIO_PRIORIDAD y su motivo: queda en la cadena",
+    control: "SQL · ss_priv.incidencia_campos_de_la_base() y ss_priv.evento_de_quien_puede()",
+    comprobacion: prueba('cierre-base.ts', 'H-15 · la prioridad, una vez fijada, cambia solo con un evento de una persona y con motivo'),
+    sabotaje: { que: "la prioridad se cambia directo, sin evento", ediciones: [
+      ed(SQL, "  if old.prioridad is not null and new.prioridad is distinct from old.prioridad then", "  if false then")] },
+  },
+  {
+    id: 'c3-agente-actualiza', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
+    afirmacion: "el agente actualiza su incidencia (categoría, prioridad inicial) por columna, sin fechas ni estados terminales; antes fallaba por un disparador que leía sin permiso",
+    control: "SQL · ss_priv.cliente_de_su_consultora() security definer, grant por columna",
+    comprobacion: prueba('cierre-base.ts', 'H-15 · una incidencia de nómina no queda en P3 ni P4 al categorizarla'),
+    sabotaje: { que: "el disparador de tenencia vuelve a leer con los permisos del agente", ediciones: [
+      ed(SQL, "create or replace function ss_priv.cliente_de_su_consultora() returns trigger language plpgsql security definer set search_path = '' as $$", "create or replace function ss_priv.cliente_de_su_consultora() returns trigger language plpgsql set search_path = '' as $$")] },
+  },
+  {
     id: 'aisia-prioridad-impugna', doc: 'AISIA', ref: 'Prioridad mal asignada', estado: 'probado',
     afirmacion: 'el N3 puede impugnar la prioridad de lo suyo (no la de otro), y la resuelve su consultora a su nombre',
     control: 'SQL · ss_impugnacion_alta, ss_impugnacion_resuelve, ss_impugnacion_a_su_nombre',
@@ -238,8 +275,8 @@ export const FILAS: readonly Fila[] = [
     control: 'SQL · ss_escalamiento fuera de las políticas y del grant de escritura del agente (DP-3)',
     comprobacion: prueba('cierre-base.ts', 'H-01 · el agente no escala al laboratorio, ni a su nombre ni al de un consultor'),
     sabotaje: { que: 'el agente vuelve a escalar', ediciones: [
-      ed(SQL, "  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);",
-        "  foreach t in array array['ss_escalamiento', 'ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);"),
+      ed(SQL, "  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);",
+        "  foreach t in array array['ss_escalamiento', 'ss_evento', 'ss_cuarentena', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);"),
       ed(SQL, 'grant insert on public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,',
         'grant insert on public.ss_escalamiento, public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,')] },
   },
@@ -303,6 +340,73 @@ export const FILAS: readonly Fila[] = [
     control: 'SQL · ss_priv.evento_honesto()',
     comprobacion: AISLAMIENTO,
     sabotaje: { que: 'cualquiera fecha su evento', ediciones: [ed(SQL, "  if new.fecha < now() - interval '5 minutes' or new.fecha > now() + interval '1 minute' then", '  if false then')] },
+  },
+  {
+    id: 'aisia-sla-alta', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "el cliente no elige la fecha de alta, la prioridad ni el estado de su incidencia: los pone la base",
+    control: "SQL · ss_priv.incidencia_campos_de_la_base() al insertar",
+    comprobacion: prueba('cierre-base.ts', 'H-16 · el cliente no elige la fecha de alta, la prioridad ni el estado al levantar una incidencia'),
+    sabotaje: { que: "quien levanta elige fecha, prioridad y estado", ediciones: [
+      ed(SQL, "    new.creada_en := now();\n    new.primera_respuesta_en := null; new.resuelta_en := null; new.cerrada_en := null;\n    new.estado := 'nueva'; new.prioridad := null;\n", "")] },
+  },
+  {
+    id: 'aisia-sla-marcas', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "nadie reescribe la fecha de alta ni las marcas del reloj de una incidencia, ni el consultor ni el agente",
+    control: "SQL · grant por columna (sin fechas) y ss_priv.incidencia_campos_de_la_base()",
+    comprobacion: prueba('cierre-base.ts', 'H-16 · nadie reescribe las fechas de una incidencia: ni el consultor ni el agente'),
+    sabotaje: { que: "las fechas se pueden escribir directo", ediciones: [
+      ed(SQL, "  regla_aplicada, estado) on public.ss_incidencia to authenticated;", "  regla_aplicada, estado, creada_en, primera_respuesta_en) on public.ss_incidencia to authenticated;"),
+      ed(SQL, "impacto, urgencia, prioridad, complejidad)\n  on public.ss_incidencia to soporte_sap_agente;", "impacto, urgencia, prioridad, complejidad, resuelta_en)\n  on public.ss_incidencia to soporte_sap_agente;"),
+      ed(SQL, "    raise exception 'las fechas de la incidencia las pone la base desde sus eventos';", "    null;")] },
+  },
+  {
+    id: 'aisia-sla-de-eventos', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "las marcas del reloj (primera respuesta, resuelta, cerrada) salen de los eventos de la cadena, y resolver o cerrar es un evento",
+    control: "SQL · disparador ss_evento_aplica",
+    comprobacion: prueba('cierre-base.ts', 'H-16 · las marcas del reloj salen de los eventos de una persona de la consultora'),
+    sabotaje: { que: "los eventos dejan de marcar el reloj", ediciones: [
+      ed(SQL, "create trigger ss_evento_aplica after insert on public.ss_evento\n  for each row execute function ss_priv.evento_aplica();", "select 1;")] },
+  },
+  {
+    id: 'aisia-sla-persona', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "la primera respuesta, la pausa del reloj y la resolución son actos de una persona: el agente no las emite (DP-4)",
+    control: "SQL · ss_priv.evento_de_quien_puede()",
+    comprobacion: prueba('cierre-base.ts', 'H-17 · el agente no marca la primera respuesta, ni pausa el reloj, ni resuelve (DP-4)'),
+    sabotaje: { que: "el agente emite cualquier evento", ediciones: [
+      ed(SQL, "     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) = 'consultor') then", "     and false then")] },
+  },
+  {
+    id: 'aisia-sla-resultado-contrato', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "el resultado de SLA es de un contrato que existe",
+    control: "SQL · constraint ss_sla_de_un_contrato",
+    comprobacion: prueba('cierre-base.ts', 'H-16 · el resultado de SLA no lo guarda el agente, y es de un contrato que existe'),
+    sabotaje: { que: "un resultado con un contrato inventado", ediciones: [
+      ed(SQL, "foreign key (contrato_id, contrato_version) references public.ss_contrato_sla (id, version)", "check (true)")] },
+  },
+  {
+    id: 'aisia-sla-resultado-agente', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: "el resultado de SLA no lo escribe el agente: lo calcula el job de la plataforma desde los eventos",
+    control: "SQL · ss_sla_resultado fuera de la política y del grant de escritura del agente",
+    comprobacion: prueba('cierre-base.ts', 'H-16 · el resultado de SLA no lo guarda el agente, y es de un contrato que existe'),
+    sabotaje: { que: "el agente vuelve a escribir el «cumple»", ediciones: [
+      ed(SQL, "  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);", "  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop\n    execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);"),
+      ed(SQL, "grant insert on public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,\n  public.ss_mapeo,", "grant insert on public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,\n  public.ss_sla_resultado, public.ss_mapeo,")] },
+  },
+  {
+    id: 'aisia-impugna-queja', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: "la consultora no reescribe la queja del cliente: de una impugnación solo decide su estado, a su nombre",
+    control: "SQL · grant update (estado, resuelta_por) on ss_impugnacion",
+    comprobacion: prueba('cierre-base.ts', 'H-10 · la consultora no reescribe la queja del cliente; la resuelve a su nombre y no se reabre'),
+    sabotaje: { que: "la consultora puede reescribir la impugnación", ediciones: [
+      ed(SQL, "grant update (estado, resuelta_por) on public.ss_impugnacion to authenticated;", "grant update on public.ss_impugnacion to authenticated;")] },
+  },
+  {
+    id: 'aisia-impugna-cierre', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: "una impugnación resuelta queda fechada por la base y no se reabre; el cliente puede impugnar también una pausa del reloj",
+    control: "SQL · ss_priv.impugnacion_fechas() y campo «pausa»",
+    comprobacion: prueba('cierre-base.ts', 'H-10 · la consultora no reescribe la queja del cliente; la resuelve a su nombre y no se reabre'),
+    sabotaje: { que: "una impugnación resuelta se reabre", ediciones: [
+      ed(SQL, "    raise exception 'una impugnación resuelta no se reabre ni se cambia';", "    null;")] },
   },
   {
     id: 'aisia-sla-cifras', doc: 'AISIA', ref: 'SLA mal medido', estado: 'probado',

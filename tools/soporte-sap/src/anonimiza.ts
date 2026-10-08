@@ -36,7 +36,7 @@ export interface Anonimizado {
 type Cuenta = Partial<Record<TipoDato, number>>
 const marca = (c: Cuenta, t: TipoDato): string => { c[t] = (c[t] ?? 0) + 1; return `[${t}]` }
 
-export const CONTEXTO_PERSONAL = /\b(n[oó]minas?|finiquitos?|aguinaldos?|imss|idse|sua|infonavit|ptu|incapacidad(?:es)?|vacaciones|emplead[oa]s?|trabajador(?:a|es|as)?|colaborador(?:a|es|as)?|liquidaci[oó]n|sueldos?|salarios?|pa20|pa30|pa40|pc00_\w+|infotipos?|hcm|personal)\b/i
+export const CONTEXTO_PERSONAL = /\b(n[oó]minas?|finiquitos?|aguinaldos?|imss|idse|sua|infonavit|ptu|incapacidad(?:es)?|vacaciones|emplead[oa]s?|trabajador(?:a|es|as)?|colaborador(?:a|es|as)?|liquidaci[oó]n|sueldos?|salarios?|quincenas?|recibos? de pago|pa20|pa30|pa40|pc00_\w+|infotipos?|hcm|personal)\b/i
 
 const CORREO = /[\w.%+-]+@[\w.-]+\.[a-z]{2,}/gi
 const CORREO_OFUSCADO = /[\w.%+-]+\s*(?:\[\s*(?:arroba|at)\s*\]|\(\s*(?:arroba|at)\s*\)|\s+arroba\s+)\s*[\w-]+(?:\s*(?:\.|\s+punto\s+)\s*[\w-]+)+/gi

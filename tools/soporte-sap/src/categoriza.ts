@@ -7,6 +7,7 @@
  * Piso de nómina y RR. HH. (AISIA §4): un ticket con señales de nómina o de personal no queda por
  * debajo de P2 sin que un humano lo baje. La prioridad mal asignada ahí es daño a terceros.
  */
+import { CONTEXTO_PERSONAL } from './anonimiza.js'
 
 export type Prioridad = 'P1' | 'P2' | 'P3' | 'P4'
 
@@ -39,7 +40,6 @@ const IMPACTO_ALTO = /(toda la (planta|empresa|operaci[oó]n)|no podemos (factur
 const IMPACTO_MEDIO = /(varios usuarios|un departamento|un almac[eé]n|una sucursal|el equipo de)/i
 const URGENCIA_ALTA = /(hoy|urgente|cierre de mes|antes de las \d|en este momento|ya$)/i
 const URGENCIA_MEDIA = /(esta semana|ma[nñ]ana|pronto)/i
-const NOMINA = /(n[oó]mina|pc00_m32|pa30|pa20|\bhcm\b|recibo de pago|finiquito|empleados?|personal)/i
 
 /** Matriz ITIL: impacto + urgencia → P1..P4. */
 export function prioridadItil(impacto: 1 | 2 | 3, urgencia: 1 | 2 | 3): Prioridad {
@@ -77,7 +77,9 @@ export function categoriza(texto: string): Clasificacion {
   const urgencia: 1 | 2 | 3 = URGENCIA_ALTA.test(texto) ? 1 : URGENCIA_MEDIA.test(texto) ? 2 : 3
   razones.push(`impacto ${impacto}, urgencia ${urgencia}`)
   let prioridad = prioridadItil(impacto, urgencia)
-  const pisoNomina = NOMINA.test(texto) || modulo === 'HCM'
+  // Un solo vocabulario con el anonimizador y con la base (PRP-010 H-15): el de aquí dejaba IMSS, PTU,
+  // aguinaldo, incapacidad o la quincena en P4.
+  const pisoNomina = CONTEXTO_PERSONAL.test(texto) || modulo === 'HCM'
   if (pisoNomina && (prioridad === 'P3' || prioridad === 'P4')) {
     prioridad = 'P2'
     razones.push('piso de nómina y RR. HH.: no baja de P2 sin que un humano lo baje')

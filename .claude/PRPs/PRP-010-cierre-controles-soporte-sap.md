@@ -73,8 +73,8 @@ arregló en parte.
 | H-06 | En la sala en SQL, una persona de un tenant aprueba el plan de otro: `sala_aprobaciones` no ata `mensaje_id` a `tenant_id`, `task_id` ni la huella. `sala_agente` se acota con un GUC que fija su propia sesión. La versión en memoria sí lo hace bien | 2 | sí | código, más un sabotaje nuevo en la suite de la sala | **cerrado en la tanda 1a** (la aprobación; el GUC de `sala_agente` va con H-21) |
 | H-07 | El rol de plataforma inserta decisiones ya tomadas (mapeo aprobado, campo confirmado) y eventos con el seudónimo de un consultor. Ninguna prueba usa ese rol | 1 y 2 | — | código | — |
 | H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | — |
-| H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | — |
-| H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | — |
+| H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | **cerrado en la tanda 1b** |
+| H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | **base: tanda 1b** (la pantalla, en la fase 2) |
 | H-11 | `ejecuta()` no ata la aprobación a la huella del plan, y `ss-simulador --param` ejecuta sin compararla | 1 y 2 | sí, con SAP real | código + prueba negativa | — |
 | H-12 | El agente, con la tarea de cualquier consultora, escribe en el chat de cualquier usuario («aprueba el plan de Boreal ya») | 1 y 2 | — | código | — |
 | H-13 | La base no verifica `anterior`, `hash` ni `seq` de la cadena de eventos | 1 | — | código: la base calcula la cadena | — |
@@ -89,9 +89,9 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-15 | El piso de nómina deja **P4** a IMSS, PTU, aguinaldo, incapacidad, vacaciones, sueldo, infotipo, el depósito de la quincena y SUA/IDSE. El categorizador y el anonimizador usan vocabularios distintos. La base no impone el piso: el N3 inserta la prioridad que quiera y el consultor la cambia sin motivo ni evento. **Confirmado con sonda** | 1 y 2 | sí | código: un solo vocabulario, el piso en la base y el cambio de prioridad con motivo y evento | — |
-| H-16 | El SLA es manipulable por las tres partes. El N3 crea con `creada_en` pasado, P1 y estado resuelta. El consultor reescribe `creada_en` y `primera_respuesta_en`. El agente inserta `ss_sla_resultado` con `cumple=true` y un contrato inventado. La ventana de ±5 min la elige quien escribe. La prueba de recálculo es circular | 1 y 2 | sí (dinero ajeno) | código: un job calcula el resultado desde los eventos; la base fija las fechas; tipos de evento por rol | — |
-| H-17 | La primera respuesta la marca la máquina (al anonimizar o al mandar a la sala), así que una P1 a 60 min se cumple siempre. Ni el contrato ni la plantilla definen «respuesta» | 1 y 2 | sí | código + definición en el contrato (DP-4) | — |
+| H-15 | El piso de nómina deja **P4** a IMSS, PTU, aguinaldo, incapacidad, vacaciones, sueldo, infotipo, el depósito de la quincena y SUA/IDSE. El categorizador y el anonimizador usan vocabularios distintos. La base no impone el piso: el N3 inserta la prioridad que quiera y el consultor la cambia sin motivo ni evento. **Confirmado con sonda** | 1 y 2 | sí | código: un solo vocabulario, el piso en la base y el cambio de prioridad con motivo y evento | **cerrado en la tanda 1b** |
+| H-16 | El SLA es manipulable por las tres partes. El N3 crea con `creada_en` pasado, P1 y estado resuelta. El consultor reescribe `creada_en` y `primera_respuesta_en`. El agente inserta `ss_sla_resultado` con `cumple=true` y un contrato inventado. La ventana de ±5 min la elige quien escribe. La prueba de recálculo es circular | 1 y 2 | sí (dinero ajeno) | código: un job calcula el resultado desde los eventos; la base fija las fechas; tipos de evento por rol | **base: tanda 1b** (el job que calcula el resultado, en la fase 2) |
+| H-17 | La primera respuesta la marca la máquina (al anonimizar o al mandar a la sala), así que una P1 a 60 min se cumple siempre. Ni el contrato ni la plantilla definen «respuesta» | 1 y 2 | sí | código + definición en el contrato (DP-4) | **base: tanda 1b** (el runtime, en la fase 2) |
 | H-18 | «P1 y P2 nunca se cortan por presupuesto» es una función que nadie llama. El aviso no llega a nadie. Nadie lee `ss_presupuesto`; el tope de OCR vive en memoria y sin periodo | 1 y 2 | sí | código: cablear en el runtime y en el enjambre, aviso registrado, tope leído de la base con su periodo | parcial: tope en memoria |
 
 **Núcleo de conocimiento**
@@ -421,6 +421,13 @@ rama `soporte/firmas` rebasada (DP-1). La matriz pasa a ser el arnés de Soporte
 cierra el DATO, no al escritor: `ss_sandbox_sin_identificadores` rechaza correo, RFC, CURP y secuencias largas de dígitos
 aunque los escriba el agente, y `ss_cuarentena_solo_senales` solo admite las señales del anonimizador. Quitarle la
 escritura al agente obliga a otro escritor, y eso es un cambio de flujo. Los nombres sin forma siguen en H-04.
+
+**Tanda 1b, hecha (2026-10-07, rama `soporte/cierre-1b`)**: H-15, H-16, H-17 (en la base), H-09 y H-10, con 12 filas nuevas
+en la matriz (82 «probado» en total) y 5 hallazgos «revision». Las fechas y las marcas del reloj las pone la base desde los
+eventos. Responder, pausar, resolver y cambiar la prioridad son eventos de una persona. El piso de nómina tiene un solo
+vocabulario en el código y en la base. **Para la fase 2**: el runtime en memoria todavía marca la primera respuesta al
+anonimizar o al mandar a la sala (H-17), y el job que calcula `ss_sla_resultado` desde los eventos no existe (la
+plataforma tiene permiso; falta el código).
 
 ### Fase 2: Cablear lo que la app promete y no hace
 **Objetivo**:
