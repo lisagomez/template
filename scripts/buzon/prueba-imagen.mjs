@@ -137,7 +137,7 @@ const NO_SALEN = ['erp/casa/huellas.txt', 'erp/entrega.json', 'trayectorias/dato
   'inventario/activos.json', 'productos/soporte-sap.json', 'docs/analisis/2026-10-02/analisis.json', '.claude/routing-modelos.json',
   'scripts/package.json', 'src/features/etiquetas/services/servidor/puerta.ts', 'tools/extractor-documental/src/lote-pagina.ts',
   'tools/soporte-sap/pruebas/aislamiento.ts', 'tools/extractor-documental/manual/pantallas/caso-cfdi.png',
-  'tools/dictado/medicion/corpus-propio/pildora/captura-idle.png'];
+  'tools/dictado/medicion/corpus-propio/pildora/captura-idle.png', 'opencode.json', 'tsconfig.json', 'package-lock.json'];
 const SI_SALEN = ['tools/reel/dist/index.js', 'tools/conocimiento/dominios/un-dominio.json', 'public/manifest.json',
   'node_modules/next/package.json', 'package.json'];
 const fugas = (c) => RUTAS.flatMap((r) => NO_SALEN.filter((a) => !excluido(c, r, a)).map((a) => `${r}: ${a}`));

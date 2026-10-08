@@ -10,6 +10,8 @@ import type { NextConfig } from 'next'
 export const NUNCA_EN_LA_IMAGEN = [
   'erp/**', 'trayectorias/**', 'inventario/**', 'productos/**', 'docs/**', '.claude/**', 'scripts/**', 'src/**',
   'tools/*/src/**', 'tools/*/pruebas/**', 'tools/*/manual/**', 'tools/*/medicion/**',
+  // Configuracion de la raiz que arrastra el glob de `*.json` (el `package.json` si viaja: lo necesita el servidor).
+  'opencode.json', 'components.json', 'tsconfig.json', 'package-lock.json',
 ]
 
 const nextConfig: NextConfig = {
