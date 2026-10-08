@@ -175,7 +175,9 @@ create table if not exists public.ss_incidencia (
   cerrada_en           timestamptz
 );
 
-create or replace function ss_priv.cliente_de_su_consultora() returns trigger language plpgsql set search_path = '' as $$
+-- security definer: lee el árbol de organizaciones como dueño. Sin esto, el agente (que no lee
+-- ss_organizacion) no podía actualizar su propia incidencia y la categorización fallaba (PRP-010 H-09).
+create or replace function ss_priv.cliente_de_su_consultora() returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   if ss_priv.padre_de(new.cliente_id) is distinct from new.consultora_id
      or not exists (select 1 from public.ss_organizacion o where o.id = new.cliente_id and o.tipo = 'cliente') then
@@ -186,6 +188,46 @@ end $$;
 drop trigger if exists ss_incidencia_tenencia on public.ss_incidencia;
 create trigger ss_incidencia_tenencia before insert or update on public.ss_incidencia
   for each row execute function ss_priv.cliente_de_su_consultora();
+
+-- El vocabulario de personal y nómina, el MISMO de src/anonimiza.ts (`CONTEXTO_PERSONAL`; una prueba vigila que
+-- no se separen). Con él la base sostiene el piso: una incidencia de nómina o RR. HH. no queda en P3 o P4.
+create or replace function ss_priv.contexto_personal(t text) returns boolean language sql immutable set search_path = '' as $$
+  select t ~* '\m(n[oó]minas?|finiquitos?|aguinaldos?|imss|idse|sua|infonavit|ptu|incapacidad(?:es)?|vacaciones|emplead[oa]s?|trabajador(?:a|es|as)?|colaborador(?:a|es|as)?|liquidaci[oó]n|sueldos?|salarios?|quincenas?|recibos? de pago|pa20|pa30|pa40|pc00_\w+|infotipos?|hcm|personal)\M'
+$$;
+
+-- Lo que la incidencia NO deja escribir a quien entra por la API (PRP-010 H-16, H-15, H-09). La fecha de alta y
+-- las marcas del reloj las pone la base, y las marcas salen de los eventos (`ss_evento_aplica`). La prioridad la fija
+-- la primera categorización; después cambia solo con un evento CAMBIO_PRIORIDAD de una persona, con motivo. El
+-- agente no cierra ni resuelve. La plataforma (restauración) y las migraciones no pasan por aquí: traen historia.
+create or replace function ss_priv.incidencia_campos_de_la_base() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if current_user not in ('authenticated', 'soporte_sap_agente', 'soporte_sap_ingesta') then
+    return new;
+  end if;
+  if tg_op = 'INSERT' then
+    new.creada_en := now();
+    new.primera_respuesta_en := null; new.resuelta_en := null; new.cerrada_en := null;
+    new.estado := 'nueva'; new.prioridad := null;
+    return new;
+  end if;
+  if new.creada_en is distinct from old.creada_en or new.primera_respuesta_en is distinct from old.primera_respuesta_en
+     or new.resuelta_en is distinct from old.resuelta_en or new.cerrada_en is distinct from old.cerrada_en then
+    raise exception 'las fechas de la incidencia las pone la base desde sus eventos';
+  end if;
+  if old.prioridad is not null and new.prioridad is distinct from old.prioridad then
+    raise exception 'la prioridad cambia con un evento CAMBIO_PRIORIDAD de una persona, con motivo';
+  end if;
+  if new.prioridad in ('P3', 'P4') and ss_priv.contexto_personal(new.titulo || ' ' || new.descripcion) then
+    raise exception 'piso de nómina y RR. HH.: no queda debajo de P2 sin que una persona lo baje con motivo';
+  end if;
+  if new.estado in ('resuelta', 'cerrada') and new.estado is distinct from old.estado then
+    raise exception 'resolver o cerrar es un evento (RESUELTA, CERRADA) de una persona, con su fecha';
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_incidencia_campos on public.ss_incidencia;
+create trigger ss_incidencia_campos before insert or update on public.ss_incidencia
+  for each row execute function ss_priv.incidencia_campos_de_la_base();
 
 -- Lo que la consultora (o el agente, al mandar a la sala) escala al laboratorio. Sin escalamiento,
 -- el laboratorio no lee la incidencia.
@@ -259,6 +301,45 @@ drop trigger if exists ss_evento_honesto on public.ss_evento;
 create trigger ss_evento_honesto before insert on public.ss_evento
   for each row execute function ss_priv.evento_honesto();
 
+-- Quién emite qué (PRP-010 H-16, H-17, DP-4). Responder, pausar el reloj, resolver, cerrar, reabrir y cambiar la
+-- prioridad son actos de una PERSONA de la consultora: una acción de la máquina no cuenta como primera respuesta
+-- ni pausa el SLA. El cambio de prioridad lleva la nueva y su motivo.
+create or replace function ss_priv.evento_de_quien_puede() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if new.tipo in ('PRIMERA_RESPUESTA', 'ESPERA_CLIENTE', 'RESUELTA', 'CERRADA', 'REABIERTA', 'CAMBIO_PRIORIDAD')
+     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) = 'consultor') then
+    raise exception 'un evento % lo emite una persona de la consultora, no %', new.tipo, current_user;
+  end if;
+  if new.tipo = 'CAMBIO_PRIORIDAD' and (coalesce(new.datos->>'prioridad', '') not in ('P1', 'P2', 'P3', 'P4')
+     or length(coalesce(new.datos->>'motivo', '')) < 10) then
+    raise exception 'un cambio de prioridad lleva la nueva prioridad y un motivo';
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_evento_quien on public.ss_evento;
+create trigger ss_evento_quien before insert on public.ss_evento
+  for each row execute function ss_priv.evento_de_quien_puede();
+
+-- Lo que el evento le hace a la incidencia, como dueño: ningún rol de la API escribe las marcas directo.
+create or replace function ss_priv.evento_aplica() returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if new.tipo = 'PRIMERA_RESPUESTA' then
+    update public.ss_incidencia set primera_respuesta_en = coalesce(primera_respuesta_en, new.fecha) where id = new.incidencia_id;
+  elsif new.tipo = 'RESUELTA' then
+    update public.ss_incidencia set resuelta_en = new.fecha, estado = 'resuelta' where id = new.incidencia_id;
+  elsif new.tipo = 'CERRADA' then
+    update public.ss_incidencia set cerrada_en = new.fecha, estado = 'cerrada' where id = new.incidencia_id;
+  elsif new.tipo = 'REABIERTA' then
+    update public.ss_incidencia set resuelta_en = null, cerrada_en = null, estado = 'en_atencion' where id = new.incidencia_id;
+  elsif new.tipo = 'CAMBIO_PRIORIDAD' then
+    update public.ss_incidencia set prioridad = new.datos->>'prioridad' where id = new.incidencia_id;
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_evento_aplica on public.ss_evento;
+create trigger ss_evento_aplica after insert on public.ss_evento
+  for each row execute function ss_priv.evento_aplica();
+
 create table if not exists public.ss_adjunto (
   id            uuid primary key default gen_random_uuid(),
   incidencia_id uuid not null references public.ss_incidencia (id) on delete cascade,
@@ -311,14 +392,33 @@ create table if not exists public.ss_impugnacion (
   incidencia_id uuid not null references public.ss_incidencia (id) on delete cascade,
   consultora_id uuid not null,
   cliente_id    uuid not null,
-  campo         text not null check (campo in ('prioridad', 'categoria', 'complejidad')),
+  campo         text not null check (campo in ('prioridad', 'categoria', 'complejidad', 'pausa')),
   motivo        text not null check (length(motivo) >= 10),
   creada_por    uuid not null,
   estado        text not null default 'abierta' check (estado in ('abierta', 'aceptada', 'rechazada')),
   resuelta_por  uuid,
   creada_en     timestamptz not null default now(),
+  resuelta_en   timestamptz,
   constraint ss_resuelta_tiene_quien check ((estado = 'abierta') = (resuelta_por is null))
 );
+
+-- La impugnación la levanta el cliente y la resuelve su consultora a su nombre: la consultora no reescribe la
+-- queja (los permisos son por columna), la resolución se fecha en la base y una resuelta no se reabre
+-- (PRP-010 H-10). Se puede impugnar también una pausa del reloj: si no, el cliente no tenía cómo discutirla.
+create or replace function ss_priv.impugnacion_fechas() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if tg_op = 'INSERT' then
+    new.creada_en := now(); new.resuelta_en := null;
+  elsif old.estado <> 'abierta' then
+    raise exception 'una impugnación resuelta no se reabre ni se cambia';
+  elsif new.estado <> 'abierta' then
+    new.resuelta_en := now();
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_impugnacion_fechas on public.ss_impugnacion;
+create trigger ss_impugnacion_fechas before insert or update on public.ss_impugnacion
+  for each row execute function ss_priv.impugnacion_fechas();
 
 -- --- Sandbox, propuestas y acceso motivado -----------------------------------------------
 
@@ -432,7 +532,9 @@ create table if not exists public.ss_sla_resultado (
   reabierta           boolean not null default false,
   espero_cliente      boolean not null default false,
   calculado_en        timestamptz not null default now(),
-  primary key (incidencia_id, contrato_id, contrato_version)
+  primary key (incidencia_id, contrato_id, contrato_version),
+  -- El resultado es de un contrato que existe (PRP-010 H-16: el agente lo guardaba con un contrato inventado).
+  constraint ss_sla_de_un_contrato foreign key (contrato_id, contrato_version) references public.ss_contrato_sla (id, version)
 );
 
 create table if not exists public.ss_horas (
@@ -753,6 +855,8 @@ create policy ss_chat_escribe on public.ss_chat_mensaje for insert to authentica
 -- La política vieja del agente sobre el escalamiento se borra ANTES del bloque: si un cambio lo vuelve a
 -- meter en la lista, la política reaparece y su prueba cae (si se borrara después, lo taparía).
 drop policy if exists ss_escalamiento_agente_escribe on public.ss_escalamiento;
+-- Igual con el resultado de SLA: lo calcula el job de la plataforma desde los eventos, no el agente (PRP-010 H-16).
+drop policy if exists ss_sla_resultado_agente_escribe on public.ss_sla_resultado;
 
 do $$
 declare t text;
@@ -764,7 +868,7 @@ begin
   end loop;
   -- Sin `ss_escalamiento`: escalar al laboratorio lo decide la consultora a su nombre, no el agente (DP-3,
   -- PRP-010 H-01). Con el agente escalando, el laboratorio leía lo que nadie de la consultora eligió darle.
-  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_sla_resultado', 'ss_procedencia'] loop
+  foreach t in array array['ss_evento', 'ss_cuarentena', 'ss_procedencia'] loop
     execute format('drop policy if exists %I on public.%I', t || '_agente_escribe', t);
     execute format('create policy %I on public.%I for insert to soporte_sap_agente with check (consultora_id = ss_priv.consultora_de_tarea())', t || '_agente_escribe', t);
   end loop;
@@ -841,8 +945,13 @@ grant execute on all functions in schema ss_priv to authenticated, soporte_sap_a
 grant usage on schema public to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
 grant select on public.ss_organizacion, public.ss_miembro to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
 
-grant select, insert, update on public.ss_incidencia, public.ss_campo_extraido, public.ss_impugnacion,
-  public.ss_propuesta, public.ss_mapeo, public.ss_presupuesto to authenticated;
+grant select, insert, update on public.ss_campo_extraido, public.ss_propuesta, public.ss_mapeo, public.ss_presupuesto to authenticated;
+-- Por columna (PRP-010 H-16, H-10): ni las fechas ni el texto del cliente se reescriben, y de una impugnación
+-- solo se decide su estado; el motivo y quien la levantó son del cliente.
+grant select, insert on public.ss_incidencia, public.ss_impugnacion to authenticated;
+grant update (sistema, modulo, componente, transaccion, mensaje_error, categoria, impacto, urgencia, prioridad, complejidad,
+  regla_aplicada, estado) on public.ss_incidencia to authenticated;
+grant update (estado, resuelta_por) on public.ss_impugnacion to authenticated;
 grant select, insert on public.ss_escalamiento, public.ss_evento, public.ss_adjunto, public.ss_horas,
   public.ss_acceso_motivado, public.ss_chat_mensaje to authenticated;
 grant update (revocado_en) on public.ss_acceso_motivado to authenticated;
@@ -853,9 +962,9 @@ grant select on public.ss_incidencia, public.ss_escalamiento, public.ss_evento, 
   public.ss_cuarentena, public.ss_caso_sandbox, public.ss_sla_resultado, public.ss_crudo, public.ss_mapeo,
   public.ss_procedencia, public.ss_presupuesto, public.ss_contrato_sla, public.ss_importacion_fila to soporte_sap_agente;
 grant insert on public.ss_evento, public.ss_cuarentena, public.ss_caso_sandbox, public.ss_propuesta,
-  public.ss_sla_resultado, public.ss_mapeo, public.ss_procedencia, public.ss_chat_mensaje to soporte_sap_agente;
-grant update (estado, categoria, regla_aplicada, modulo, componente, transaccion, mensaje_error, impacto, urgencia, prioridad, complejidad,
-  primera_respuesta_en, resuelta_en, cerrada_en) on public.ss_incidencia to soporte_sap_agente;
+  public.ss_mapeo, public.ss_procedencia, public.ss_chat_mensaje to soporte_sap_agente;
+grant update (estado, categoria, regla_aplicada, modulo, componente, transaccion, mensaje_error, impacto, urgencia, prioridad, complejidad)
+  on public.ss_incidencia to soporte_sap_agente;
 
 grant select on public.ss_incidencia, public.ss_adjunto to soporte_sap_ingesta;
 grant insert on public.ss_campo_extraido to soporte_sap_ingesta;
