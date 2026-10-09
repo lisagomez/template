@@ -64,10 +64,17 @@ export function transaccionDe(texto: string): string | null {
 }
 
 /** Categoriza el texto de una incidencia (título + descripción + evidencia de adjuntos ya leída). */
-export function categoriza(texto: string): Clasificacion {
+/**
+ * `texto` es lo que DECLARA el cliente (título y descripción); `documentos`, lo que se leyó de sus adjuntos. De los
+ * documentos salen la transacción, el mensaje y el módulo, y cuentan para el piso de nómina; la urgencia y el impacto
+ * salen solo de lo que declara el cliente (PRP-010 H-24): un PDF reenviado que dice «urgente» o «toda la planta» no
+ * convierte un caso cualquiera en P1.
+ */
+export function categoriza(texto: string, documentos = ''): Clasificacion {
   const razones: string[] = []
-  const transaccion = transaccionDe(texto)
-  const m = mensajeDe(texto)
+  const todo = documentos ? `${texto}\n${documentos}` : texto
+  const transaccion = transaccionDe(todo)
+  const m = mensajeDe(todo)
   const mensaje = m?.mensaje ?? null
   const moduloMensaje = m?.modulo ?? null
   const modulo = (transaccion && TRANSACCIONES[transaccion]) ?? moduloMensaje ?? (transaccion?.startsWith('Z') ? 'ABAP' : null)
@@ -79,7 +86,7 @@ export function categoriza(texto: string): Clasificacion {
   let prioridad = prioridadItil(impacto, urgencia)
   // Un solo vocabulario con el anonimizador y con la base (PRP-010 H-15): el de aquí dejaba IMSS, PTU,
   // aguinaldo, incapacidad o la quincena en P4.
-  const pisoNomina = CONTEXTO_PERSONAL.test(texto) || modulo === 'HCM'
+  const pisoNomina = CONTEXTO_PERSONAL.test(todo) || modulo === 'HCM'
   if (pisoNomina && (prioridad === 'P3' || prioridad === 'P4')) {
     prioridad = 'P2'
     razones.push('piso de nómina y RR. HH.: no baja de P2 sin que un humano lo baje')

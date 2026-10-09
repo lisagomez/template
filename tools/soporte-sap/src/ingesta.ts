@@ -120,10 +120,14 @@ async function lee(p: PuertosIngesta, tipo: ClasePorBytes, bytes: Uint8Array, pa
   if (r) return { ...r, paginasOcr: 0 }
   if (!p.ocr) return { via: 'sin_extraccion', campos: [], texto: '', aviso: 'imagen sin motor local de OCR configurado: queda como adjunto', paginasOcr: 0 }
   if (paginasOcrRestantes <= 0) return { via: 'sin_extraccion', campos: [], texto: '', aviso: 'la consultora llegó a su tope de páginas de OCR del periodo: la imagen queda como adjunto, sin extracción', paginasOcr: 0 }
-  const paginas = await p.ocr.extrae(bytes)
+  // El tope se mira antes de leer y también después (PRP-010 H-23): de lo que devuelva el motor solo cuenta y se usa lo
+  // que cabe en las páginas que le quedan al periodo, así que la cuenta nunca pasa del tope.
+  const leidas = await p.ocr.extrae(bytes)
+  const paginas = leidas.slice(0, paginasOcrRestantes)
   const texto = paginas.map((x) => x.markdown).join('\n')
   const confianza = paginas[0]?.confianza ?? null
-  return { via: 'ocr_local', campos: camposSap(texto, 'ocr_local', confianza), texto, aviso: null, paginasOcr: Math.max(1, paginas.length) }
+  const aviso = leidas.length > paginas.length ? `el tope de OCR del periodo alcanzó para ${paginas.length} de ${leidas.length} páginas: el resto queda sin extracción` : null
+  return { via: 'ocr_local', campos: camposSap(texto, 'ocr_local', confianza), texto, aviso, paginasOcr: Math.max(1, paginas.length) }
 }
 
 /** XML, PDF y Office se leen sin motor; una imagen devuelve null (va al OCR local, si hay y si queda tope). */
@@ -163,13 +167,17 @@ export async function ingiere(p: PuertosIngesta, c: ConfigIngesta, archivo: { no
   return { aceptado: true, nombre, sha256: createHash('sha256').update(bytes).digest('hex'), tipoMime: MIME[real], bytes: bytes.byteLength, ...r }
 }
 
-/** Los archivos de una incidencia, uno tras otro, con el uso acumulado: el que pasa de un tope lo dice. */
-export async function ingiereTodos(p: PuertosIngesta, c: ConfigIngesta, archivos: ReadonlyArray<{ nombre: string; bytes: Uint8Array }>, paginasOcrUsadas: number): Promise<{ resultados: ResultadoIngesta[]; paginasOcr: number }> {
+/**
+ * Los archivos de una incidencia, uno tras otro, con el uso acumulado: el que pasa de un tope lo dice. `uso` es lo que la
+ * incidencia YA tiene (sus adjuntos) y lo que la consultora ya gastó de OCR: los adjuntos se cuentan por incidencia, no
+ * por lote (PRP-010 H-23); si no, subir de cinco en cinco no tenía tope. La base lo exige también (`ss_adjunto_tope`).
+ */
+export async function ingiereTodos(p: PuertosIngesta, c: ConfigIngesta, archivos: ReadonlyArray<{ nombre: string; bytes: Uint8Array }>, uso: UsoIngesta): Promise<{ resultados: ResultadoIngesta[]; paginasOcr: number }> {
   const resultados: ResultadoIngesta[] = []
-  let paginasOcr = paginasOcrUsadas
+  let adjuntos = uso.adjuntos, paginasOcr = uso.paginasOcr
   for (const a of archivos) {
-    const r = await ingiere(p, c, a, { adjuntos: resultados.filter((x) => x.aceptado).length, paginasOcr })
-    if (r.aceptado) paginasOcr += r.paginasOcr
+    const r = await ingiere(p, c, a, { adjuntos, paginasOcr })
+    if (r.aceptado) { adjuntos++; paginasOcr += r.paginasOcr }
     resultados.push(r)
   }
   return { resultados, paginasOcr }

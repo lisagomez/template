@@ -18,7 +18,7 @@ import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, 
 import {
   ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, CONSULTORAS, sapDeLaboratorio, alNucleo, preparaPlan, supervisa, mensajeDePlan,
   corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
-  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe, NoAplica,
+  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe, NoAplica, delimitaDocumento,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
   type AccionDeTriage, type PresupuestoDelMes,
@@ -74,7 +74,9 @@ export const motor: MotorReglas = (p) => evaluaSeguro(conocimiento, p, { hoy: '2
 const VALIDADORES = { rfc: (x: string) => validaRfc(x), curp: validaCurp, nss: validaNss }
 const conTimbre = registroDeEsquemas([lectorDeTimbre11])
 // Topes de la ingesta (C3, O4): adjuntos por incidencia; las páginas de OCR salen del presupuesto del mes.
-const CONFIG = { bytesMaximos: 5_000_000, adjuntosMaximos: 10, motor: 'local' as const, decisionC4: null }
+/** Lo que puede pesar un adjunto: la ruta lo usa para acotar la subida antes de leerla. */
+export const BYTES_MAXIMOS_POR_ADJUNTO = 5_000_000
+const CONFIG = { bytesMaximos: BYTES_MAXIMOS_POR_ADJUNTO, adjuntosMaximos: 10, motor: 'local' as const, decisionC4: null }
 const TOPE_DE_LABORATORIO: TopeDelMes = { topeTokens: 500_000, topePaginasOcr: 500 }
 /**
  * Lo que gasta preparar un plan. Sin modelo no hay medición (D7): en el laboratorio es el SUPUESTO de
@@ -141,10 +143,15 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
   const cl = CLIENTES.find((c) => c.id === s.organizacion)!
   const id = `inc-${String(++e.n).padStart(3, '0')}`
   const ocr = ocrDelMes(presupuestoDe(cl.consultora))
-  const adjuntos: ResultadoIngesta[] = (await ingiereTodos(puertosIngesta(), { ...CONFIG, paginasOcrMaximas: ocr.maximas }, d.archivos, ocr.usadas)).resultados
-  const evidencia = adjuntos.flatMap((a) => (a.aceptado ? a.campos.map((c) => `${c.campo}: ${c.valor}`) : []))
-  const texto = `${d.titulo}. ${d.descripcion}\n${evidencia.join('\n')}`
-  const clasificacion = categoriza(texto)
+  // Una incidencia nueva no trae adjuntos: los de una subida posterior contarían los que ya tiene (PRP-010 H-23).
+  const adjuntos: ResultadoIngesta[] = (await ingiereTodos(puertosIngesta(), { ...CONFIG, paginasOcrMaximas: ocr.maximas }, d.archivos, { adjuntos: 0, paginasOcr: ocr.usadas })).resultados
+  // Lo que se leyó de un documento es DATO de la incidencia, delimitado; la urgencia y el impacto los declara el
+  // cliente, no sus documentos (PRP-010 H-24). Los parámetros del plan sí pueden salir de un documento: lo ve una
+  // persona en la sala antes de aprobar (brecha O1/O2, declarada en el C3).
+  const declarado = `${d.titulo}. ${d.descripcion}`
+  const documentos = adjuntos.flatMap((a) => (a.aceptado && a.campos.length ? [delimitaDocumento(a.nombre, a.campos.map((c) => `${c.campo}: ${c.valor}`).join('\n'))] : [])).join('\n')
+  const texto = documentos ? `${declarado}\n${documentos}` : declarado
+  const clasificacion = categoriza(declarado, documentos)
   const consulta = consultaMatriz(motor, MATRIZ_LABORATORIO, texto, cl.sistema)
   const i: IncidenciaLab = {
     id, cliente: cl.id, consultora: cl.consultora, sistema: cl.sistema, titulo: d.titulo.slice(0, 120), texto, adjuntos, clasificacion, consulta,

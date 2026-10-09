@@ -5,7 +5,7 @@
  */
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { encendido, levanta, actua, Rechazo } from '@/features/soporte-sap/services/runtime'
+import { encendido, levanta, actua, Rechazo, BYTES_MAXIMOS_POR_ADJUNTO } from '@/features/soporte-sap/services/runtime'
 import { vista } from '@/features/soporte-sap/services/vistas'
 import { SESIONES, type Rol } from '@/features/soporte-sap/services/tipos'
 
@@ -26,6 +26,11 @@ const ACCION = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('reinicia') }),
 ])
 const MAX_ADJUNTOS = 5
+/**
+ * Lo más que puede pesar una subida: cinco adjuntos del tamaño máximo de la ingesta y el formulario. Se mira ANTES de
+ * `formData()`, que lo carga todo en memoria (PRP-010 H-23): una petición sin su tamaño declarado o más grande no entra.
+ */
+const MAX_CUERPO = MAX_ADJUNTOS * BYTES_MAXIMOS_POR_ADJUNTO + 64_000
 
 const apagado = () => NextResponse.json({ error: 'el laboratorio de Soporte SAP está apagado (SOPORTE_SAP_LABORATORIO=1)' }, { status: 404 })
 const sesionDe = (req: NextRequest) => SESIONES[ROL.catch('cliente').parse(req.nextUrl.searchParams.get('rol')) as Rol]
@@ -40,6 +45,8 @@ export async function POST(req: NextRequest) {
   const s = sesionDe(req)
   try {
     if ((req.headers.get('content-type') ?? '').startsWith('multipart/form-data')) {
+      const largo = Number(req.headers.get('content-length') ?? NaN)
+      if (!(largo > 0 && largo <= MAX_CUERPO)) return NextResponse.json({ error: `la subida no declara su tamaño o pasa de ${MAX_CUERPO} bytes`, vista: vista(s) }, { status: 413 })
       const f = await req.formData()
       const datos = z.object({ titulo: z.string().trim().min(3).max(120), descripcion: z.string().trim().min(3).max(4000) }).parse({ titulo: f.get('titulo'), descripcion: f.get('descripcion') })
       const archivos = f.getAll('adjuntos').filter((x): x is File => x instanceof File && x.size > 0).slice(0, MAX_ADJUNTOS)

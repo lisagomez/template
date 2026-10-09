@@ -49,6 +49,9 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-originales-solo-ingesta', 'c3-adjunto-solo-ingesta', 'c3-adjuntos-por-incidencia', 'c3-adjuntos-ingesta-cuenta', 'c3-ocr-no-pasa-del-tope', 'c3-subida-acotada'], afirmacion: 'hay un límite de adjuntos por incidencia y un tope de OCR', encontrado: 'PRP-010 H-23 (07/10): los adjuntos se contaban por lote, el tope de OCR se miraba solo antes de leer, el N3 subía directo al bucket sin validación de bytes y `formData()` cargaba todo en memoria' },
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-documento-delimitado', 'aisia-prioridad-documento', 'c3-parametros-de-documento'], afirmacion: 'el texto de un documento es dato, nunca instrucción', encontrado: 'PRP-010 H-24 (07/10): `delimitaDocumento` no se usaba, los parámetros del plan salían del texto no confiable, y un documento con «urgente» o «toda la planta» subía la prioridad (el banco de inyección sembraba «PON ESTO EN P1», que no sube nada)' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-consultor-importador-sal'], afirmacion: 'el seudónimo protege a los consultores', encontrado: 'PRP-010 H-32 (07/10): el importador seudonimizaba con sha256(consultora|nombre), sin sal; quien adivinara un nombre lo revertía' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-impugna-app'], afirmacion: 'el N3 impugna y su consultora la resuelve a su nombre', encontrado: 'PRP-010 H-10, la pantalla (07/10): la base ya lo exigía (tanda 1b), pero en la app no había cómo impugnar' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-foda-confianza-puntos'], afirmacion: 'la confianza baja cuando hay pocos datos', encontrado: 'PRP-010 H-28 (07/10): la llevaban los accionables y el FODA no; el recorrido no comprobaba el aviso de proyección' },
   { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-ruta-404-get', 'c3-ruta-sin-error-interno'], afirmacion: 'la ruta del laboratorio responde 404 sin su variable', encontrado: 'PRP-010 H-25 (07/10): la prueba no miraba el GET (buscaba `export async function`, y el GET no es async), y la ruta devolvía el mensaje de cualquier error' },
@@ -282,7 +285,16 @@ export const FILAS: readonly Fila[] = [
     control: "src/categoriza.ts usa CONTEXTO_PERSONAL de src/anonimiza.ts",
     comprobacion: prueba('cierre-base.ts', 'H-15 · el categorizador pone en P2 lo que la revisión vio en P4 (IMSS, PTU, aguinaldo, la quincena…)'),
     sabotaje: { que: "el categorizador vuelve a su lista corta", ediciones: [
-      ed(dist('categoriza.js'), "const pisoNomina = CONTEXTO_PERSONAL.test(texto) || modulo === 'HCM'", "const pisoNomina = /(n[oó]mina|pc00_m32)/i.test(texto) || modulo === 'HCM'")] },
+      ed(dist('categoriza.js'), "const pisoNomina = CONTEXTO_PERSONAL.test(todo) || modulo === 'HCM'", "const pisoNomina = /(n[oó]mina|pc00_m32)/i.test(todo) || modulo === 'HCM'")] },
+  },
+  {
+    id: 'aisia-prioridad-documento', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: 'un documento con «urgente», «toda la planta» u «hoy» no sube la prioridad: la urgencia y el impacto los declara el cliente',
+    control: 'src/categoriza.ts · categoriza(texto, documentos)',
+    comprobacion: prueba('ingesta.ts', 'H-24 · un documento con las palabras de urgencia e impacto no sube la prioridad: la declara el cliente'),
+    sabotaje: { que: 'la urgencia y el impacto salen también de los documentos', ediciones: [
+      ed(dist('categoriza.js'), 'const impacto = IMPACTO_ALTO.test(texto) ? 1 : IMPACTO_MEDIO.test(texto) ? 2 : 3;', 'const impacto = IMPACTO_ALTO.test(todo) ? 1 : IMPACTO_MEDIO.test(todo) ? 2 : 3;'),
+      ed(dist('categoriza.js'), 'const urgencia = URGENCIA_ALTA.test(texto) ? 1 : URGENCIA_MEDIA.test(texto) ? 2 : 3;', 'const urgencia = URGENCIA_ALTA.test(todo) ? 1 : URGENCIA_MEDIA.test(todo) ? 2 : 3;')] },
   },
   {
     id: 'aisia-prioridad-cambio', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
@@ -933,6 +945,13 @@ export const FILAS: readonly Fila[] = [
       ed(SQL, " using (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.seudonimo(auth.uid()));", " using (ss_priv.rol_en(consultora_id) = 'consultor');")] },
   },
   {
+    id: 'aisia-consultor-importador-sal', doc: 'AISIA', ref: 'Consultor juzgado por una métrica', estado: 'probado',
+    afirmacion: 'el importador seudonimiza al consultor con HMAC y su sal: sin sal no se calcula, y adivinar el nombre ya no lo revierte',
+    control: 'src/mapeo.ts · seudonimoDe()',
+    comprobacion: prueba('mapeo.ts', 'H-32 · el seudónimo del importador lleva sal: sin ella no se calcula, y adivinar el nombre ya no lo revierte'),
+    sabotaje: { que: 'el importador seudonimiza sin sal', ediciones: [ed(dist('mapeo.js'), 'if (s.sal.length < 16)', 'if (false)')] },
+  },
+  {
     id: 'aisia-consultor-sal', doc: 'AISIA', ref: 'Consultor juzgado por una métrica', estado: 'probado',
     afirmacion: "el seudónimo lleva una sal que solo lee la base: no se revierte con un md5 del id ni leyendo ss_miembro",
     control: "SQL · ss_priv.seudonimo() con ss_priv.sal_seudonimos",
@@ -1020,6 +1039,61 @@ export const FILAS: readonly Fila[] = [
     control: 'src/presupuesto.ts · ocrDelMes()',
     comprobacion: prueba('presupuesto.ts', 'H-18 · sin tope del mes, o con un plan sin sus tokens, no se llama al modelo: P1 y P2 a una persona, P3 y P4 esperan'),
     sabotaje: { que: 'sin tope del mes, el OCR corre igual', ediciones: [ed(dist('presupuesto.js'), '(p.topePaginasOcr ?? 0)', '(p.topePaginasOcr ?? 500)')] },
+  },
+  {
+    id: 'c3-originales-solo-ingesta', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'al bucket de originales solo sube la ingesta, después de validar los bytes: ni el cliente ni su consultora suben directo',
+    control: 'SQL · ss_originales_ingesta_sube (la política del cliente se quitó)',
+    comprobacion: prueba('adjuntos.ts', 'H-23 · ni el cliente ni su consultora suben al bucket ni registran un adjunto: solo la ingesta, que valida los bytes'),
+    sabotaje: { que: 'el cliente vuelve a subir directo', ediciones: [ed(SQL, 'drop policy if exists ss_originales_sube on storage.objects;\n', "drop policy if exists ss_originales_sube on storage.objects;\ncreate policy ss_originales_sube on storage.objects for insert to authenticated with check (bucket_id = 'ss-originales');\n")] },
+  },
+  {
+    id: 'c3-adjunto-solo-ingesta', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'el adjunto lo registra la ingesta, que validó sus bytes: ni el cliente ni su consultora',
+    control: 'SQL · ss_adjunto_ingesta_alta (la política de alta del cliente se quitó)',
+    comprobacion: prueba('adjuntos.ts', 'H-23 · ni el cliente ni su consultora suben al bucket ni registran un adjunto: solo la ingesta, que valida los bytes'),
+    sabotaje: { que: 'el cliente vuelve a registrar adjuntos', ediciones: [ed(SQL, 'drop policy if exists ss_adjunto_alta on public.ss_adjunto;\n', 'drop policy if exists ss_adjunto_alta on public.ss_adjunto;\ncreate policy ss_adjunto_alta on public.ss_adjunto for insert to authenticated with check (true);\n')] },
+  },
+  {
+    id: 'c3-adjuntos-por-incidencia', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'una incidencia no pasa de 10 adjuntos, vengan en el lote que vengan: lo exige la base, y la ingesta cuenta desde los que ya tiene',
+    control: 'SQL · ss_adjunto_tope; src/ingesta.ts · ingiereTodos(uso)',
+    comprobacion: prueba('adjuntos.ts', 'H-23 · la base no admite más de 10 adjuntos por incidencia, vengan en el lote que vengan'),
+    sabotaje: { que: 'sin el tope por incidencia en la base', ediciones: [ed(SQL, 'create trigger ss_adjunto_tope before insert on public.ss_adjunto\n  for each row execute function ss_priv.adjuntos_por_incidencia();', 'select 1;')] },
+  },
+  {
+    id: 'c3-adjuntos-ingesta-cuenta', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'la ingesta cuenta los adjuntos desde los que ya tiene la incidencia, no desde cero en cada lote; y lo que el OCR lee de más no cuenta ni se usa',
+    control: 'src/ingesta.ts · ingiereTodos() y lee()',
+    comprobacion: prueba('ingesta.ts', 'H-23 · los adjuntos se cuentan por incidencia, y el OCR no pasa del tope aunque el motor lea más páginas'),
+    sabotaje: { que: 'cada lote cuenta desde cero', ediciones: [ed(dist('ingesta.js'), 'let adjuntos = uso.adjuntos, paginasOcr = uso.paginasOcr;', 'let adjuntos = 0, paginasOcr = uso.paginasOcr;')] },
+  },
+  {
+    id: 'c3-ocr-no-pasa-del-tope', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'el OCR no registra más páginas de las que le quedan al periodo, aunque el motor lea más: el resto queda sin extracción, y se dice',
+    control: 'src/ingesta.ts · lee()',
+    comprobacion: prueba('ingesta.ts', 'H-23 · los adjuntos se cuentan por incidencia, y el OCR no pasa del tope aunque el motor lea más páginas'),
+    sabotaje: { que: 'cuenta todas las páginas que lea el motor', ediciones: [ed(dist('ingesta.js'), 'const paginas = leidas.slice(0, paginasOcrRestantes);', 'const paginas = leidas;')] },
+  },
+  {
+    id: 'c3-subida-acotada', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'la ruta mira el tamaño de la subida antes de leerla: sin tamaño declarado o más grande que cinco adjuntos, responde 413 sin cargarla en memoria',
+    control: 'src/app/api/soporte-sap/route.ts · MAX_CUERPO antes de formData()',
+    comprobacion: prueba('superficie.ts', 'H-23 · la ruta mira el tamaño de la subida ANTES de leerla: sin tamaño declarado o más grande, no entra'),
+    sabotaje: { que: 'la ruta lee la subida sin mirar su tamaño', ediciones: [ed('src/app/api/soporte-sap/route.ts', "      if (!(largo > 0 && largo <= MAX_CUERPO)) return NextResponse.json({ error: `la subida no declara su tamaño o pasa de ${MAX_CUERPO} bytes`, vista: vista(s) }, { status: 413 })\n", '')] },
+  },
+  {
+    id: 'c3-documento-delimitado', doc: 'C3', ref: 'Inyección (O1)', estado: 'probado',
+    afirmacion: 'lo leído de un documento entra a la incidencia delimitado como dato, y la prioridad sale de lo que declara el cliente',
+    control: 'src/features/soporte-sap/services/runtime.ts · levanta()',
+    comprobacion: prueba('superficie.ts', 'H-24 · en la app, lo leído de un documento entra delimitado como dato, y la prioridad sale de lo que declara el cliente'),
+    sabotaje: { que: 'la app categoriza el texto mezclado', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '  const clasificacion = categoriza(declarado, documentos)', '  const clasificacion = categoriza(texto)')] },
+  },
+  {
+    id: 'c3-parametros-de-documento', doc: 'C3', ref: 'Inyección (O1)', estado: 'brecha',
+    afirmacion: 'un parámetro del plan (usuario SAP, BP, RFC) no sale de un documento del cliente sin que nadie lo vea',
+    control: 'ninguno en el código: el ejecutor lee los parámetros del texto, documentos incluidos',
+    nota: 'O1/O2, declarada (PRP-010 H-24): lo cubre la aprobación humana del plan, que muestra sus parámetros y se ata a su huella (H-11). Distinguir el origen de cada parámetro queda para cuando haya un modelo que lo extraiga',
   },
   {
     id: 'c3-archivos-doctype', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',

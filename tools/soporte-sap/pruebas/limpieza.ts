@@ -5,7 +5,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createHash } from 'node:crypto'
+import { createHmac } from 'node:crypto'
 import { evaluaSeguro } from '../../grafo-conocimiento/dist/index.js'
 import { similitud, digitoVerificadorRfc, digitoVerificadorCurp } from '../../extractor-documental/dist/index.js'
 import {
@@ -13,7 +13,8 @@ import {
   MATRIZ_LABORATORIO, CLIENTES, type MotorReglas,
 } from '../dist/index.js'
 
-const sha256 = (s: string) => createHash('sha256').update(s).digest('hex')
+/** Una sal de PRUEBA: el importador seudonimiza con HMAC y su sal (PRP-010 H-32). */
+const seudonimiza = { sal: 'sal-de-prueba-del-importador', hmac: (k: string, s: string) => createHmac('sha256', k).update(s).digest('hex') }
 const corpus = generaCorpus({ rfc: digitoVerificadorRfc, curp: digitoVerificadorCurp })
 const conocimiento = conocimientoDeMatriz(MATRIZ_LABORATORIO, '2026-10-04')
 const motor: MotorReglas = (p) => evaluaSeguro(conocimiento, p, { hoy: '2026-10-04' }) as ReturnType<MotorReglas>
@@ -21,7 +22,7 @@ const motor: MotorReglas = (p) => evaluaSeguro(conocimiento, p, { hoy: '2026-10-
 function tuberia(consultora: 'andina' | 'boreal') {
   const e = exporteSucio(corpus, consultora)
   const m = apruebaMapeo(proponeMapeo({ consultora, herramienta: e.herramienta, version: 1, columnas: e.columnas, muestras: e.filas, desfaseFechasMin: -360, similitud }), { tipo: 'humano', id: 'usr-experto' }, [])
-  const mapeado = aplicaMapeo(m, e.filas, sha256)
+  const mapeado = aplicaMapeo(m, e.filas, seudonimiza)
   const catalogo = CLIENTES.filter((c) => c.consultora === consultora).map((c) => ({ id: c.id, nombre: c.nombre }))
   const limpio = limpia(mapeado, catalogo)
   const ctx = { motor, matriz: MATRIZ_LABORATORIO, sistemaDe: (id: string) => CLIENTES.find((c) => c.id === id)!.sistema, contratoDe: (id: string) => `sla-${id}` }

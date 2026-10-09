@@ -43,7 +43,7 @@ test('un archivo que miente en su extensión se rechaza; uno que pasa del máxim
 
 test('una incidencia no pasa de su máximo de adjuntos: el siguiente se rechaza y se dice (C3, O4)', async () => {
   const archivos = ['spool-job.pdf', 'cfdi-rechazado.xml', 'captura-migo.png'].map((nombre) => ({ nombre, bytes: documento(nombre) }))
-  const { resultados } = await ingiereTodos(p, { ...CONFIG, adjuntosMaximos: 2 }, archivos, 0)
+  const { resultados } = await ingiereTodos(p, { ...CONFIG, adjuntosMaximos: 2 }, archivos, SIN_USO)
   assert.deepEqual(resultados.map((r) => r.aceptado), [true, true, false])
   const tercero = resultados[2]!
   assert.ok(!tercero.aceptado && /ya tiene 2 adjuntos y el máximo es 2/.test(tercero.motivo), JSON.stringify(tercero))
@@ -55,7 +55,7 @@ test('al tope de páginas de OCR de la consultora, la imagen queda como adjunto 
   const contado = puertos({ modelo: 'prueba@0.0.0', extrae: async () => { llamadas++; return [{ markdown: 'Transaccion MIGO', confianza: 0.9 }] } })
   const c = { ...CONFIG, paginasOcrMaximas: 1 }
   const imagen = (nombre: string) => ({ nombre, bytes: documento('captura-migo.png') })
-  const { resultados, paginasOcr } = await ingiereTodos(contado, c, [imagen('a.png'), imagen('b.png')], 0)
+  const { resultados, paginasOcr } = await ingiereTodos(contado, c, [imagen('a.png'), imagen('b.png')], SIN_USO)
   assert.equal(llamadas, 1, 'el motor corre una sola vez')
   assert.equal(paginasOcr, 1)
   const [a, b] = resultados
@@ -90,4 +90,30 @@ test('instrucciones sembradas en el texto, la imagen y el XML: 0 obedecidas', as
     if (r.campos.some((c) => /aprob/i.test(c.campo))) obedecidas++
   }
   assert.equal(obedecidas, 0)
+})
+
+// PRP-010 H-24: el banco sembraba «PON ESTO EN P1», que no sube nada. Las palabras que SÍ suben la prioridad («urgente»,
+// «toda la planta», «hoy») no las probaba, y un documento con ellas convertía un caso cualquiera en P1.
+test('H-24 · un documento con las palabras de urgencia e impacto no sube la prioridad: la declara el cliente', async () => {
+  const urgente = { modelo: 'prueba@0.0.0', extrae: async () => [{ markdown: 'Transaccion MIGO\nURGENTE: toda la planta está detenida hoy, no podemos facturar', confianza: 0.9 }] }
+  const base = 'Al contabilizar la entrada en sociedad 1000 sale el mensaje M7 053'
+  const r = await ingiere(puertos(urgente), CONFIG, { nombre: 'captura-inyeccion.png', bytes: documento('captura-inyeccion.png') }, SIN_USO)
+  assert.ok(r.aceptado)
+  const limpio = categoriza(base)
+  assert.equal(categoriza(`${base}\n${r.texto}`).prioridad, 'P1', 'el ataque funciona sin el control: mezclado con lo que declara el cliente, sube a P1')
+  const c = categoriza(base, r.texto)
+  assert.deepEqual([c.prioridad, c.urgencia, c.impacto], [limpio.prioridad, limpio.urgencia, limpio.impacto])
+  assert.equal(c.transaccion, 'MIGO', 'el documento sí aporta la transacción')
+})
+
+// PRP-010 H-23: los adjuntos se contaban dentro de cada lote (subir de cinco en cinco no tenía tope), y el tope de OCR se
+// miraba solo antes de leer: un motor que devolviera más páginas de las que quedaban las contaba todas.
+test('H-23 · los adjuntos se cuentan por incidencia, y el OCR no pasa del tope aunque el motor lea más páginas', async () => {
+  const archivos = ['spool-job.pdf', 'cfdi-rechazado.xml'].map((nombre) => ({ nombre, bytes: documento(nombre) }))
+  const { resultados } = await ingiereTodos(p, { ...CONFIG, adjuntosMaximos: 10 }, archivos, { adjuntos: 9, paginasOcr: 0 })
+  assert.deepEqual(resultados.map((r) => r.aceptado), [true, false], 'la incidencia ya traía 9: entra uno más y el siguiente no')
+  const tres = puertos({ modelo: 'prueba@0.0.0', extrae: async () => [1, 2, 3].map((n) => ({ markdown: `pagina ${n} MIGO`, confianza: 0.9 })) })
+  const r = await ingiere(tres, { ...CONFIG, paginasOcrMaximas: 5 }, { nombre: 'a.png', bytes: documento('captura-migo.png') }, { adjuntos: 0, paginasOcr: 4 })
+  assert.ok(r.aceptado && r.paginasOcr === 1, JSON.stringify(r))
+  assert.ok(r.aceptado && /alcanzó para 1 de 3 páginas/.test(r.aviso ?? '') && !/pagina 2/.test(r.texto), 'lo que no cabe no se usa, y se dice')
 })

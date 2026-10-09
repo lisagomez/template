@@ -40,6 +40,21 @@ test('H-25 · la ruta del laboratorio no le devuelve al usuario un error interno
   assert.doesNotMatch(runtime, /throw new Error\(/, 'las reglas del runtime son rechazos con nombre')
 })
 
+test('H-23 · la ruta mira el tamaño de la subida ANTES de leerla: sin tamaño declarado o más grande, no entra', () => {
+  const ruta = lee('src/app/api/soporte-sap/route.ts')
+  const guarda = ruta.indexOf("if (!(largo > 0 && largo <= MAX_CUERPO)) return NextResponse.json(")
+  assert.ok(guarda > 0, 'la guarda del tamaño existe')
+  assert.ok(guarda < ruta.indexOf('await req.formData()'), 'y va antes de formData(), que lo carga todo en memoria')
+  assert.match(ruta, /const MAX_CUERPO = MAX_ADJUNTOS \* BYTES_MAXIMOS_POR_ADJUNTO \+ 64_000/)
+})
+
+test('H-24 · en la app, lo leído de un documento entra delimitado como dato, y la prioridad sale de lo que declara el cliente', () => {
+  const runtime = lee('src/features/soporte-sap/services/runtime.ts')
+  assert.match(runtime, /delimitaDocumento\(a\.nombre, /, 'cada documento, delimitado')
+  assert.match(runtime, /const clasificacion = categoriza\(declarado, documentos\)/, 'la urgencia y el impacto, de lo declarado')
+  assert.doesNotMatch(runtime, /categoriza\(texto\)/, 'nadie categoriza el texto mezclado')
+})
+
 test('configura:deploy rechaza el laboratorio en producción y un SS_PG_HOST sin su usuario, sin imprimir la contraseña', () => {
   const dir = mkdtempSync(join(tmpdir(), 'ss-deploy-'))
   try {

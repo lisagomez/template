@@ -8,7 +8,7 @@
  *   El exporte es un JSON con { herramienta, columnas, filas }.
  */
 import { readFileSync } from 'node:fs'
-import { createHash } from 'node:crypto'
+import { createHmac, randomBytes } from 'node:crypto'
 import { similitud, digitoVerificadorRfc, digitoVerificadorCurp } from '../../extractor-documental/dist/index.js'
 import { proponeMapeo, cuentaPrevia, exporteSucio, generaCorpus, leeArgumentos, ayuda } from '../dist/index.js'
 
@@ -24,6 +24,9 @@ if (!e?.consultora) { console.error(ayuda(DESCRIPCION)); process.exit(2) }
 
 const m = proponeMapeo({ consultora: e.consultora, herramienta: e.herramienta, version: 1, columnas: e.columnas, muestras: e.filas.slice(0, 500), desfaseFechasMin: Number(a.valores.desfase ?? -360), similitud })
 // Vista previa de la PROPUESTA: solo cuenta. Cargar algo exige el mapeo aprobado por una persona en la app.
-const vista = cuentaPrevia(m, e.filas, (s) => createHash('sha256').update(s).digest('hex'))
+// La vista previa solo cuenta: no muestra ni guarda un seudónimo, así que sin la sal del importador usa una del momento.
+// Cargar exige el mapeo aprobado y la sal del despliegue (`SS_SAL_IMPORTADOR`, PRP-010 H-32).
+const seudonimiza = { sal: process.env.SS_SAL_IMPORTADOR || randomBytes(32).toString('hex'), hmac: (k, s) => createHmac('sha256', k).update(s).digest('hex') }
+const vista = cuentaPrevia(m, e.filas, seudonimiza)
 console.log(JSON.stringify({ propuesta: { columnas: m.columnas, sinMapear: m.sinMapear, propuestosPorSimilitud: m.propuestosPorSimilitud, estado: m.estado },
   vistaPrevia: { ...vista, motivos: vista.motivos.slice(0, 10) } }, null, 1))

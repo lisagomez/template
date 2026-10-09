@@ -107,8 +107,8 @@ arregló en parte.
 |---|---|---|---|---|---|
 | H-21 | **El control central del C3 no existe fuera de las pruebas.** El token de tarea solo se verifica en `pruebas/_base.ts`; es un HMAC propio, no un JWT. Con `set_config` dentro de la consulta, un token de A lee B. «Sin conexión directa» es papel. El secreto de firma no tiene variable, rotación ni chequeo | 1 y 2 | sí | código: verificar la firma en la base (DP-2) | **cerrado en la tanda 1c** (cargar el secreto al desplegar es paso humano) |
 | H-22 | Un PDF de unos 300 KB tumba la app de todos los tenants y productos. La capa 0 corre en el proceso de la app y el inflado no tiene tope | 1 | — (O4) | código: tope de bytes inflados, medido sobre el corpus real del extractor | — |
-| H-23 | Los adjuntos se cuentan por lote, no por incidencia. El tope de OCR se mira antes de leer. El N3 sube directo al bucket sin validación de bytes. `formData()` carga todo en memoria | 1 y 2 | — | código | parcial |
-| H-24 | `delimitaDocumento` no se usa. Los parámetros del plan (usuario SAP, BP, RFC) salen del texto no confiable. La prioridad sube con palabras clave, y el banco de inyección no las toca | 1 y 2 | — | código mínimo (delimitar) + brecha O1/O2 declarada | — |
+| H-23 | Los adjuntos se cuentan por lote, no por incidencia. El tope de OCR se mira antes de leer. El N3 sube directo al bucket sin validación de bytes. `formData()` carga todo en memoria | 1 y 2 | — | código | **cerrado** en la fase 2 |
+| H-24 | `delimitaDocumento` no se usa. Los parámetros del plan (usuario SAP, BP, RFC) salen del texto no confiable. La prioridad sube con palabras clave, y el banco de inyección no las toca | 1 y 2 | — | código mínimo (delimitar) + brecha O1/O2 declarada | **cerrado** en la fase 2 (la brecha, declarada en la matriz) |
 | H-25 | La prueba del 404 no mira el GET, y el GET devuelve la vista de cualquier rol, superadministrador incluido. La ruta devuelve `e.message`. Los logs no están inventariados | 1 y 2 | — | código + prueba que invoca los handlers | **código cerrado** en la fase 2 (la vista de cualquier rol y los logs: texto, fase 4) |
 | H-26 | `configura:deploy` no está en `predeploy`. El SDD §16 cita una prueba suya que no existe en `main` | 2 | — | CDC del padrón (fase 3) | parcial: prueba |
 
@@ -126,7 +126,7 @@ arregló en parte.
 | H-29 | `.env.production` entra en la imagen. `.dockerignore` excluye `.env` y `.env*.local` pero no `.env.production`, el `Dockerfile` hace `COPY . .` y el modo standalone de Next lo copia (`node_modules/next/dist/build/index.js`, `writeStandaloneDirectory`) y lo carga al arrancar. Efectos: `service_role`, `SS_PG_PASSWORD` y las llaves del despacho (`scripts/despacho/llaves.mjs` escribe ahí) quedan en el sistema de archivos de la app; y variables que el compose **no** pasa, como `SOPORTE_SAP_LABORATORIO=1` o los tokens de otras rutas, llegan al runtime. Eso tumba la premisa de la revisión de rutas públicas (#209): «la app solo recibe lo que le pone el compose». Afecta también a `docker-compose.despacho.yml`, que usa el mismo `Dockerfile` | 2 | sí | código + prueba (fase 0) | **cerrado en #226** |
 | H-30 | **La imagen de la app no se construye desde un clon limpio, tampoco en `main`.** Se encontró el 07/10 al construir la imagen real desde un `git archive` para la evidencia de la fase 0, y tiene tres capas: (1) `tools/*/dist` está en `.gitignore` y `npm run build` no lo compila (solo `prepara:gate`, por `pretypecheck`): Turbopack da 427 errores; (2) `.dockerignore` excluye `.claude`, y `src/lib/ai/routing.ts` importa `.claude/routing-modelos.json`; (3) el typecheck de `next build` incluye `tools/dictado/src`, y `@tu-scope/voz` no está en la imagen. `npm run deploy` falla en un servidor recién clonado, incluido el despacho del buzón | 07/10 | — | código + prueba (fase 0b) | **cerrado en la fase 0b** |
 | H-31 | **La imagen final arrastra archivos del repo.** El file tracing de Next copia a `.next/standalone` lo que las rutas tocan con `fs`, y en la imagen quedan `src/` (3 MB de fuente), `tools/` (4.3 MB), `docs/`, `trayectorias/` (60 archivos de datos de sesiones), `inventario/`, `productos/` y `erp/` (`casa/huellas.txt`, `entrega.json`, referencias de roles y servidor). La cabecera del `Dockerfile` dice «la imagen final NO contiene código fuente». En el despacho la imagen vive en la máquina de un tercero, y lo defendible del ERP «no sale» (§1.7). Salió al arrancar por primera vez la imagen de la fase 0b; en `main` pasa igual | 07/10 | — | código: qué ruta necesita cada archivo en tiempo de ejecución, y fuera lo demás (`outputFileTracingExcludes`) + prueba que inspeccione la imagen | **cerrado** (ver «H-31, hecho») |
-| H-32 | **El importador seudonimiza los nombres de consultores sin sal**: `src/mapeo.ts:154` da `usr-` + `sha256(consultora|nombre)`, y quien adivine un nombre lo revierte. Lo mismo que H-05, pero en el código que importa los exportes de tickets, no en la base | 07/10 | — | código (fase 2): la sal de la base, o una sal propia del importador | — |
+| H-32 | **El importador seudonimiza los nombres de consultores sin sal**: `src/mapeo.ts:154` da `usr-` + `sha256(consultora|nombre)`, y quien adivine un nombre lo revierte. Lo mismo que H-05, pero en el código que importa los exportes de tickets, no en la base | 07/10 | — | código (fase 2): la sal de la base, o una sal propia del importador | **cerrado** en la fase 2 (sal propia: `SS_SAL_IMPORTADOR`) |
 
 **Texto y cifras** (fase 4, todo `texto`):
 
@@ -535,6 +535,22 @@ Playwright en verde; `prueba:buzon` en verde tras tocar el extractor.
   complejidad no existe, y no hay tamaño mínimo de grupo.
 - **Evidencia**: 5 filas nuevas en la matriz y los pasos 14 y 14.5 del recorrido. Salieron 23 capturas, 0 en rojo y
   0 errores de consola.
+
+**Fase 2, quinta parte: la ingesta, los documentos y el importador, hecha (2026-10-09, rama `soporte/fase2-ingesta`)**:
+- **H-23**: al bucket de originales solo sube la ingesta, que valida los bytes, y solo ella registra el adjunto (antes
+  subían el cliente y su consultora). La base no admite más de 10 adjuntos por incidencia (`ss_adjunto_tope`), y la
+  ingesta cuenta desde los que la incidencia ya tiene. De lo que lee el motor de OCR, solo cuenta y se usa lo que cabe en
+  el tope del periodo. La ruta mira el tamaño de la subida antes de `formData()`: sin tamaño declarado, o con más de
+  cinco adjuntos del máximo, responde 413. Comprobado a mano: una subida que declara 40 MB da 413.
+- **H-24**: lo leído de un documento entra a la incidencia delimitado (`delimitaDocumento`). La urgencia y el impacto
+  salen de lo que declara el cliente, no de sus documentos. El banco de inyección sembraba «PON ESTO EN P1», que no
+  sube nada; la prueba nueva siembra las palabras que sí la suben («urgente», «toda la planta», «hoy»), y demuestra que
+  sin el control un documento convertía el caso en P1. **Brecha declarada** (`c3-parametros-de-documento`): un
+  parámetro del plan puede salir de un documento. Lo cubre la aprobación humana del plan, atada a su huella (H-11).
+- **H-32**: el importador seudonimiza con HMAC y su sal (`Seudonimizador`); sin sal, o con una corta, no seudonimiza.
+  La sal del despliegue es `SS_SAL_IMPORTADOR`; la vista previa de `ss-mapea`, que no muestra ni guarda seudónimos, usa
+  una del momento si falta. **Para la fase 3**: `configura:deploy` comprueba que la sal existe, sin imprimirla.
+- **Evidencia**: 10 filas nuevas en la matriz (9 «probado» y 1 brecha) y el recorrido en verde (23 capturas).
 
 ### Fase 3: El perfil de despliegue (VPS seleccionable en el laboratorio y en la instalación)
 **Objetivo**:

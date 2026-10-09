@@ -465,6 +465,19 @@ create table if not exists public.ss_adjunto (
   constraint ss_ruta_de_su_tenant check (ruta = consultora_id::text || '/' || cliente_id::text || '/' || incidencia_id::text || '/' || sha256)
 );
 
+-- Diez adjuntos por INCIDENCIA, no por lote (PRP-010 H-23): la ingesta los contaba dentro de cada subida, así que
+-- subir de cinco en cinco no tenía tope. El mismo número que `adjuntosMaximos` de la ingesta; una prueba los ata.
+create or replace function ss_priv.adjuntos_por_incidencia() returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if (select count(*) from public.ss_adjunto a where a.incidencia_id = new.incidencia_id) >= 10 then
+    raise exception 'la incidencia ya tiene 10 adjuntos: es el máximo por incidencia';
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_adjunto_tope on public.ss_adjunto;
+create trigger ss_adjunto_tope before insert on public.ss_adjunto
+  for each row execute function ss_priv.adjuntos_por_incidencia();
+
 -- Un campo por revisar no lo confirma nadie que no sea una persona, a su nombre.
 create table if not exists public.ss_campo_extraido (
   adjunto_id    uuid not null references public.ss_adjunto (id) on delete cascade,
@@ -961,9 +974,8 @@ drop policy if exists ss_evento_alta on public.ss_evento;
 create policy ss_evento_alta on public.ss_evento for insert to authenticated
   with check (ss_priv.ve_cliente(cliente_id) or ss_priv.lab_trabaja(incidencia_id));
 
+-- El adjunto lo registra la ingesta, que es la que validó sus bytes (PRP-010 H-23): ni el cliente ni la consultora.
 drop policy if exists ss_adjunto_alta on public.ss_adjunto;
-create policy ss_adjunto_alta on public.ss_adjunto for insert to authenticated
-  with check (ss_priv.rol_en(cliente_id) = 'usuario_cliente' or ss_priv.rol_en(consultora_id) = 'consultor');
 
 -- Confirmar o corregir un campo: un consultor de la consultora o un usuario del cliente, A SU NOMBRE.
 drop policy if exists ss_campo_revisa on public.ss_campo_extraido;
@@ -1081,6 +1093,9 @@ create policy ss_incidencia_ingesta on public.ss_incidencia for select to soport
 drop policy if exists ss_adjunto_ingesta on public.ss_adjunto;
 create policy ss_adjunto_ingesta on public.ss_adjunto for select to soporte_sap_ingesta
   using (consultora_id = ss_priv.consultora_de_tarea());
+drop policy if exists ss_adjunto_ingesta_alta on public.ss_adjunto;
+create policy ss_adjunto_ingesta_alta on public.ss_adjunto for insert to soporte_sap_ingesta
+  with check (consultora_id = ss_priv.consultora_de_tarea());
 drop policy if exists ss_campo_ingesta on public.ss_campo_extraido;
 create policy ss_campo_ingesta on public.ss_campo_extraido for insert to soporte_sap_ingesta
   with check (consultora_id = ss_priv.consultora_de_tarea() and estado = 'por_revisar' and revisado_por is null);
@@ -1168,6 +1183,7 @@ grant update (estado, categoria, regla_aplicada, modulo, componente, transaccion
   on public.ss_incidencia to soporte_sap_agente;
 
 grant select on public.ss_incidencia, public.ss_adjunto to soporte_sap_ingesta;
+grant insert on public.ss_adjunto to soporte_sap_ingesta;
 grant insert on public.ss_campo_extraido to soporte_sap_ingesta;
 
 grant select, delete on public.ss_incidencia, public.ss_escalamiento, public.ss_adjunto, public.ss_campo_extraido,
@@ -1215,12 +1231,15 @@ drop policy if exists ss_originales_lee on storage.objects;
 create policy ss_originales_lee on storage.objects for select to authenticated
   using (bucket_id = 'ss-originales' and ss_priv.baja_original(ss_priv.carpeta(name, 2)));
 
--- Subir: el cliente o su consultora, y la carpeta 2 tiene que ser cliente de la carpeta 1.
+-- Subir: SOLO la ingesta, después de validar los bytes (PRP-010 H-23). Antes subían el cliente o su consultora directo
+-- al bucket, y un archivo que dice ser PNG y es otra cosa quedaba guardado sin pasar por `clasePorBytes`. La carpeta 1
+-- es la consultora de la tarea, y la carpeta 2 tiene que ser cliente de la carpeta 1.
 drop policy if exists ss_originales_sube on storage.objects;
-create policy ss_originales_sube on storage.objects for insert to authenticated
+drop policy if exists ss_originales_ingesta_sube on storage.objects;
+create policy ss_originales_ingesta_sube on storage.objects for insert to soporte_sap_ingesta
   with check (bucket_id = 'ss-originales'
     and ss_priv.padre_de(ss_priv.carpeta(name, 2)) = ss_priv.carpeta(name, 1)
-    and (ss_priv.rol_en(ss_priv.carpeta(name, 2)) = 'usuario_cliente' or ss_priv.rol_en(ss_priv.carpeta(name, 1)) = 'consultor'));
+    and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
 
 drop policy if exists ss_originales_ingesta on storage.objects;
 create policy ss_originales_ingesta on storage.objects for select to soporte_sap_ingesta
@@ -1251,6 +1270,6 @@ create policy ss_exportes_plataforma on storage.objects for all to soporte_sap_p
   with check (bucket_id = 'ss-exportes' and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
 
 grant usage on schema storage to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
-grant select on storage.objects to soporte_sap_ingesta;
+grant select, insert on storage.objects to soporte_sap_ingesta;
 grant insert on storage.objects to soporte_sap_agente;
 grant select, insert, delete on storage.objects to soporte_sap_plataforma;
