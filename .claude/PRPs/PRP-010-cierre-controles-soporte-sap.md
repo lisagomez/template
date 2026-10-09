@@ -170,10 +170,10 @@ ninguna imagen se ha construido desde un clon limpio; si existe un servidor, su 
       *#228: imagen real desde un `git archive`, healthy; `revisaConstruible` en `prueba:buzon`*
 - [x] Cada hallazgo con resolución `código` tiene una prueba negativa que pasa en verde sin sabotaje y cae con su
       sabotaje, y la corre un gate. Las tres sondas confirmadas el 07/10 (H-02, H-01 y H-06) quedan como pruebas
-      permanentes — *la matriz entera, 203/203 (verdes sin sabotaje, rojas con él); las pruebas las corre `prueba:tools`
+      permanentes — *la matriz entera, 204/204 (verdes sin sabotaje, rojas con él); las pruebas las corre `prueba:tools`
       en cada validate, y el arnés de sabotajes, antes de cada PR. H-02 y H-01 en `cierre-base.ts`; H-06 en S10 y S10b*
 - [x] **Ningún hallazgo infirmable termina como `brecha`.** Se cierra en código o el producto deja de ofrecer esa
-      función, y la AISIA lo dice — *90 filas infirmables: 86 probadas, 4 que esperan una decisión (D1, D6, D9, el aviso
+      función, y la AISIA lo dice — *91 filas infirmables: 87 probadas, 4 que esperan una decisión (D1, D6, D9, el aviso
       de privacidad), 0 brechas. Lo que no se ofrece: el SAP real (D6) y el SLA como evidencia en modo despacho*
 - [x] Cada fila del arnés de sabotajes ejerce el **camino del producto** (runtime, CLI o rol real de la base), no
       solo la función aislada — *todas salvo una: la tarjeta del riesgo de baja es un componente de React, se prueba
@@ -655,7 +655,7 @@ revisión no deja ninguna afirmación contradicha sin resolver.
 **Fase 5, hecha (2026-10-09, rama `soporte/fase5-firma`)**:
 - **El kit** (`docs/goals/soporte-sap-kit-de-firma.md`), fuera de todo registro:
   - qué se firma: la AISIA v3 y el contrato con su C3 v4;
-  - los infirmables arriba, con su resultado de hoy (90 filas: 86 probadas, 4 que esperan una decisión, 0 brechas);
+  - los infirmables arriba, con su resultado de hoy (91 filas: 87 probadas, 4 que esperan una decisión, 0 brechas);
   - lo que queda abierto, con el porqué de cada cosa;
   - dónde aterriza cada cosa y los pasos en orden.
 - **`tools/soporte-sap/firmas/aterriza.mjs`**: lo corre el laboratorio **después** de escribir sus dos firmas.

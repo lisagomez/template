@@ -25,14 +25,14 @@ autoriza a salir del laboratorio. Para eso la §5 lista lo que falta:
 
 Son los daños que caen sobre quien no firmó: los empleados del N3, las contrapartes de un CFDI, el dinero del SLA
 entre la consultora y su cliente. **Tu firma no los cubre** (límite de C5). Por eso cada uno está cerrado en código
-o el producto no lo ofrece, y aquí está su resultado de hoy. Hay 90 filas, 86 probadas, 4 que esperan una decisión y
+o el producto no lo ofrece, y aquí está su resultado de hoy. Hay 91 filas, 87 probadas, 4 que esperan una decisión y
 **0 brechas**. «Probada» quiere decir que su prueba pasa sin sabotaje y cae con él.
 
 | Documento | Daño o control | Filas probadas | Lo que espera una decisión |
 |---|---|---|---|
 | AISIA | Dato personal en el sandbox | 16 | **D9**: medir el anonimizador sobre un corpus real con consentimiento, antes de salir del laboratorio |
 | AISIA | Prioridad mal asignada | 7 | — |
-| AISIA | SLA mal medido | 8 | — |
+| AISIA | SLA mal medido | 9 | — |
 | AISIA | Pausa unilateral | 8 | — |
 | AISIA | Primera respuesta automática | 5 | — |
 | AISIA | Resolución unilateral | 3 | — |
