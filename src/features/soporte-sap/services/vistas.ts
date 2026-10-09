@@ -6,11 +6,11 @@
  * ni la descripción originales de un caso que no se le escaló.
  */
 import {
-  tableroN1, tableroN2, tableroN3, estadoSla, accionables, foda, verificaCadena, contratoDeLaboratorio, CLIENTES,
+  tableroN1, tableroN2, tableroN3, estadoSla, accionables, foda, verificaCadena, contratoDeLaboratorio, CLIENTES, CONSULTORAS,
   type Tarjeta as TarjetaDominio, type ResultadoSla, type Prioridad,
 } from '../../../../tools/soporte-sap/dist/index.js'
-import { CORTE, estado, relojDe, relojesDeDemostracion, type IncidenciaLab } from './runtime'
-import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista } from './tipos'
+import { CORTE, estado, relojDe, relojesDeDemostracion, presupuestoDe, type IncidenciaLab } from './runtime'
+import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista, PresupuestoVista } from './tipos'
 
 const PERIODO = '2026-09'
 const SOLO_SUPERADMIN = new Set(['horas_consultor', 'horas_por_ticket', 'salud_cuenta'])
@@ -108,5 +108,15 @@ export function vista(s: Sesion): Vista {
       return { fortalezas: p(f.fortalezas), debilidades: p(f.debilidades), oportunidades: p(f.oportunidades), amenazas: p(f.amenazas) }
     })(),
     sandbox: s.nivel === 'N1' ? e.incidencias.filter((i) => i.sandbox).map((i) => ({ incidencia: i.id, veredicto: i.sandbox!.veredicto, texto: i.sandbox!.veredicto === 'entra' ? i.sandbox!.texto : null, senales: [...i.sandbox!.senales] })) : [],
+    presupuesto: (s.rol === 'consultor' ? [s.organizacion] : s.rol === 'superadmin' ? CONSULTORAS.map((c) => c.id) : []).map(presupuestoVista),
   }
+}
+
+const AVISOS: ReadonlySet<string> = new Set(['AVISO_PRESUPUESTO', 'A_HUMANO_POR_PRESUPUESTO', 'EN_ESPERA_POR_PRESUPUESTO'])
+/** El presupuesto del mes de una consultora y sus avisos: que el aviso llegue a alguien (PRP-010 H-18). */
+function presupuestoVista(consultora: string): PresupuestoVista {
+  const p = presupuestoDe(consultora)
+  const avisos = estado().incidencias.filter((i) => i.consultora === consultora)
+    .flatMap((i) => i.cadena.filter((x) => AVISOS.has(x.tipo)).map((x) => ({ incidencia: i.id, tipo: x.tipo, aviso: String((x.datos as Record<string, unknown>)['aviso'] ?? ''), fecha: x.fecha })))
+  return { consultora, mes: p.mes, topeTokens: p.topeTokens, tokens: p.tokens, topePaginasOcr: p.topePaginasOcr, paginasOcr: p.paginasOcr, avisos }
 }

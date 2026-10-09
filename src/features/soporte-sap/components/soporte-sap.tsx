@@ -11,6 +11,7 @@ import { FormularioIncidencia, Incidencias } from './incidencias'
 import { Sala, Chat } from './sala-chat'
 import { Tablero, Sla, Horas, RelojDemo, Accionables, Foda, Propuestas, Sandbox } from './negocio'
 import { Pildora } from './ui'
+import { Presupuesto } from './presupuesto'
 
 const ROLES: ReadonlyArray<[Rol, string]> = [['cliente', 'N3 · Cliente'], ['consultor', 'N2 · Consultor'], ['superadmin', 'N1 · Superadministrador'], ['experto', 'N1 · Experto HIL']]
 
@@ -34,6 +35,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
   const levanta = (f: FormData) => pide(rol, { method: 'POST', body: f })
   const decide = (mensaje: string, accion: string, motivo: string) => actua({ tipo: 'decide', mensaje, accion, motivo })
   const envia = (texto: string) => actua({ tipo: 'chat', texto })
+  const fija = (consultora: string, topeTokens: number | null, topePaginasOcr: number | null) => actua({ tipo: 'fija_presupuesto', consultora, topeTokens, topePaginasOcr })
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-24 pt-6">
@@ -66,6 +68,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Bandeja de la consultora" />
             {vista.sla ? <Sla sla={vista.sla} /> : null}
             <Horas tarjetas={vista.horas} />
+            <Presupuesto lista={vista.presupuesto} fija={null} />
             {vista.relojesDemo.length ? <RelojDemo relojes={vista.relojesDemo} /> : null}
             <Accionables lista={vista.accionables} />
             <Sala mensajes={vista.sala} rol={rol} decide={decide} />
@@ -78,6 +81,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Sala mensajes={vista.sala} rol={rol} decide={decide} />
             <Chat mensajes={vista.chat} rol={rol} envia={envia} />
             <Propuestas lista={vista.propuestas} alNucleo={rol === 'superadmin' ? (id) => actua({ tipo: 'al_nucleo', propuesta: id }) : null} />
+            {rol === 'superadmin' ? <Presupuesto lista={vista.presupuesto} fija={fija} /> : null}
             <Sandbox casos={vista.sandbox} />
             <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Lo escalado al laboratorio" />
             <Tablero grupos={vista.tablero} />

@@ -5,6 +5,7 @@
  * cambiar nada; en ejecución exigen la aprobación humana (la fila de la sala) que el llamador ya
  * verificó.
  */
+import { huellaDePlan, type ArtefactoDePlan } from './artefacto.js'
 
 export type Sistema = 'ECC' | 'S4HANA'
 
@@ -142,11 +143,16 @@ export const simula = (sap: SapSimulado, pasos: readonly PasoSolucion[]): Result
 
 /**
  * Ejecuta el plan en el simulador. Exige la aprobación humana de la sala (que el llamador verificó
- * con `aprobado(sala, taskId, sha256)`): sin ella, no corre. El estado nuevo lo persiste el llamador.
+ * con `aprobado(sala, taskId, sha256)`): sin ella, no corre. Y la aprobación tiene que ser de ESTE artefacto: la
+ * huella se recalcula sobre lo que va a correr, así que cambiar un parámetro invalida la aprobación (PRP-010 H-11).
+ * El estado nuevo lo persiste el llamador.
  */
-export function ejecuta(sap: SapSimulado, pasos: readonly PasoSolucion[], aprobacion: Aprobacion | null): ResultadoPlan {
+export function ejecuta(sap: SapSimulado, plan: ArtefactoDePlan, aprobacion: Aprobacion | null): ResultadoPlan {
   if (!aprobacion) throw new NoAplica('sin aprobación humana no se ejecuta: la simulación es lo único que corre sin ella')
-  return encadena(sap, pasos)
+  if (aprobacion.taskId !== plan.taskId || aprobacion.sha256 !== huellaDePlan(plan)) {
+    throw new NoAplica(`la aprobación es de otro artefacto: se aprobó ${aprobacion.sha256.slice(0, 12)} de ${aprobacion.taskId}, y esto es ${huellaDePlan(plan).slice(0, 12)} de ${plan.taskId}`)
+  }
+  return encadena(sap, plan.pasos)
 }
 
 export type Sintoma =

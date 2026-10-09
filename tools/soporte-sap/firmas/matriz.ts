@@ -49,6 +49,8 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-presupuesto-enjambre', 'aisia-presupuesto-runtime', 'aisia-presupuesto-p1-ocr', 'aisia-presupuesto-mes', 'aisia-presupuesto-sin-medir', 'aisia-presupuesto-reglas', 'c3-ocr-tope-del-mes'], afirmacion: 'el triage de P1 y P2 nunca se corta por presupuesto', encontrado: 'PRP-010 H-18 (07/10): la función que lo decide no la llamaba nadie, el aviso no llegaba a nadie, nadie leía `ss_presupuesto` y el tope de OCR vivía en memoria y sin periodo; la fila «aisia-presupuesto» probaba la función, no el camino' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-solucion-artefacto', 'aisia-solucion-cli-huella'], afirmacion: 'se ejecuta exactamente lo aprobado', encontrado: 'PRP-010 H-11 (05/10): `ejecuta()` recibía los pasos sueltos y nunca comparaba la huella (con la aprobación de desbloquear a un usuario se desbloqueaba a otro), y `ss-simulador --param` ejecutaba otro artefacto con la aprobación de uno' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-dato-revision-frases', 'aisia-dato-banco-independiente', 'aisia-dato-banco-control', 'aisia-dato-sueltas', 'aisia-dato-tecnico'], afirmacion: 'anonimizador fail-closed: lo que no se resuelve con certeza va a cuarentena', encontrado: 'PRP-010 H-04 (07/10): 5 de 14 frases nuevas entraban con el dato; el banco que escribió quien no leyó el detector (08/10) encontró 8 de 30 más y 4 controles tapados; y después del arreglo, un banco de control escrito sin verlo encontró 3 de 30' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-secreto-generaliza', 'aisia-secreto-estructura', 'aisia-secreto-cliente', 'aisia-secreto-a-medida', 'aisia-secreto-al-nucleo', 'aisia-secreto-runtime', 'aisia-secreto-base-nucleo'], afirmacion: 'lo que va al núcleo se generaliza además de anonimizarse', encontrado: 'PRP-010 H-19 (07/10): `generaliza` no la llamaba nadie, el chat proponía al núcleo el texto crudo del experto por defecto y la base lo aceptaba; además no cubría Y…, minúsculas, namespaces ni la estructura en sus formas, y el banco independiente (08/10) encontró 12 de 20 más' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-sla-persona-runtime'], afirmacion: 'la primera respuesta es de una persona (DP-4)', encontrado: 'PRP-010 H-17, el runtime (07/10): la app marcaba la primera respuesta al anonimizar o al mandar el plan a la sala, y una prueba lo exigía como requisito' },
@@ -314,6 +316,20 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'el simulador ejecuta sin aprobación', ediciones: [ed(dist('simulador.js'), 'if (!aprobacion)', 'if (false)')] },
   },
   {
+    id: 'aisia-solucion-artefacto', doc: 'AISIA', ref: 'Solución equivocada aprobada', infirmable: true, estado: 'probado',
+    afirmacion: 'se ejecuta exactamente lo aprobado: la huella se recalcula sobre lo que va a correr, y otro parámetro, otra versión u otra tarea no ejecutan',
+    control: 'src/simulador.ts · ejecuta() compara la huella del artefacto (src/artefacto.ts)',
+    comprobacion: prueba('simulador.ts', 'H-11 · una aprobación de otro artefacto no ejecuta: otro parámetro, otra versión u otra tarea invalidan la huella'),
+    sabotaje: { que: 'el simulador ejecuta cualquier artefacto con una aprobación', ediciones: [ed(dist('simulador.js'), 'if (aprobacion.taskId !== plan.taskId || aprobacion.sha256 !== huellaDePlan(plan)) {', 'if (false) {')] },
+  },
+  {
+    id: 'aisia-solucion-cli-huella', doc: 'AISIA', ref: 'Solución equivocada aprobada', infirmable: true, estado: 'probado',
+    afirmacion: 'el CLI del simulador ejecuta por el mismo camino: un `--param` distinto del aprobado no corre',
+    control: 'clis/ss-simulador.mjs · arma el artefacto y llama a ejecuta()',
+    comprobacion: prueba('clis.ts', 'ss-simulador: sin --ejecutar simula; con --ejecutar y sin aprobación no corre; con la fila humana sí'),
+    sabotaje: { que: 'el CLI corre los pasos sin pasar por ejecuta()', ediciones: [ed(`${SS}/clis/ss-simulador.mjs`, '    const r = ejecuta(sap, artefacto, fila ? { taskId: fila.taskId, sha256: fila.sha256, decididaPor: fila.decididaPor } : null)', '    const r = simula(sap, artefacto.pasos)')] },
+  },
+  {
     id: 'aisia-solucion-supervisor', doc: 'AISIA', ref: 'Solución equivocada aprobada', infirmable: true, estado: 'probado',
     afirmacion: 'el supervisor re-verifica contra el simulador y detiene lo que no cuadra; el humano ve el antes y el después',
     control: 'src/enjambre.ts · supervisa()',
@@ -556,9 +572,51 @@ export const FILAS: readonly Fila[] = [
   {
     id: 'aisia-presupuesto', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
     afirmacion: 'el triage de P1 y P2 nunca se corta: al tope pasa a una persona; P3 y P4 esperan con aviso',
-    control: 'src/pricing.ts · controlDeCosto()',
+    control: 'src/pricing.ts · accionAnteElPresupuesto()',
     comprobacion: prueba('pricing.ts', 'control de costos: avisa al 80 %; al tope, P1 y P2 pasan a una persona y P3 y P4 esperan; sin fila, nada llama al modelo'),
     sabotaje: { que: 'al tope, P1 y P2 también se cortan', ediciones: [ed(dist('pricing.js'), "if (prioridad === 'P1' || prioridad === 'P2')", 'if (false)')] },
+  },
+  {
+    id: 'aisia-presupuesto-enjambre', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
+    afirmacion: 'el enjambre no prepara ni corrige un plan sin el visto bueno del presupuesto del mes',
+    control: 'src/enjambre.ts · preparaPlan() exige la decisión del presupuesto',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · el enjambre no prepara ni corrige un plan sin el visto bueno del presupuesto'),
+    sabotaje: { que: 'el enjambre prepara el plan sin mirar el presupuesto', ediciones: [ed(dist('enjambre.js'), "if (o.presupuesto.accion !== 'llama_modelo')", 'if (false)')] },
+  },
+  {
+    id: 'aisia-presupuesto-runtime', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
+    afirmacion: 'en la app, todo paso que gasta modelo pasa por el presupuesto del mes de su consultora; al tope, P1 y P2 a una persona y P3 y P4 en espera, con el aviso en la cadena y a la vista del consultor y del superadministrador',
+    control: 'src/features/soporte-sap/services/runtime.ts · conPresupuesto()',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · en la app, todo paso que gasta modelo pasa por el presupuesto del mes, el aviso queda en la cadena y el OCR lee su tope del mes'),
+    sabotaje: { que: 'la app ignora el presupuesto', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '  const decision = accionAnteElPresupuesto(veredictoDelMes(presupuestoDe(i.consultora), TOKENS_POR_PLAN), i.clasificacion.prioridad)', "  const decision: AccionDeTriage = { accion: 'llama_modelo', aviso: null }")] },
+  },
+  {
+    id: 'aisia-presupuesto-p1-ocr', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
+    afirmacion: 'un P1 o un P2 con una imagen sin leer por el tope de OCR del mes pasa a una persona ahora, y se dice',
+    control: 'src/features/soporte-sap/services/runtime.ts · levanta()',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · en la app, todo paso que gasta modelo pasa por el presupuesto del mes, el aviso queda en la cadena y el OCR lee su tope del mes'),
+    sabotaje: { que: 'la evidencia sin leer no pasa a nadie', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  if (sinLeer.length && (clasificacion.prioridad === 'P1' || clasificacion.prioridad === 'P2')) {", '  if (false) {')] },
+  },
+  {
+    id: 'aisia-presupuesto-mes', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
+    afirmacion: 'el tope sale de la base por mes (`ss_presupuesto`) y lo gastado de la cadena del mes; lo de otro mes no cuenta, y el agente no lee el presupuesto de otra consultora',
+    control: 'src/presupuesto.ts · leePresupuesto()',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · el tope sale de la base por mes y lo gastado de la cadena del mes: otro mes no cuenta'),
+    sabotaje: { que: 'lo gastado de otros meses cuenta en este', ediciones: [ed(dist('presupuesto.js'), "fecha < ($2::date + interval '1 month')", "fecha < ($2::date + interval '10 years')")] },
+  },
+  {
+    id: 'aisia-presupuesto-sin-medir', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
+    afirmacion: 'sin tope del mes, o con un plan sin sus tokens, no se llama al modelo: lo gastado sin medir no cuenta como cero',
+    control: 'src/presupuesto.ts · usoDelMes() y veredictoDelMes()',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · sin tope del mes, o con un plan sin sus tokens, no se llama al modelo: P1 y P2 a una persona, P3 y P4 esperan'),
+    sabotaje: { que: 'un plan sin sus tokens cuenta como cero', ediciones: [ed(dist('presupuesto.js'), '                tokensSinMedir++;', '                tokensSinMedir += 0;')] },
+  },
+  {
+    id: 'aisia-presupuesto-reglas', doc: 'AISIA', ref: 'Corte por presupuesto', estado: 'probado',
+    afirmacion: 'el presupuesto del mes sigue las reglas de la guardia de la sala: fail-closed y aviso al 80 %',
+    control: 'src/presupuesto.ts · veredictoDelMes()',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · veredictoDelMes sigue las reglas de la guardia de la sala (fail-closed, aviso al 80 %)'),
+    sabotaje: { que: 'el aviso llega al 90 %', ediciones: [ed(dist('presupuesto.js'), '(p.tokens + costo) / p.topeTokens >= 0.8', '(p.tokens + costo) / p.topeTokens >= 0.9')] },
   },
   {
     id: 'aisia-restauracion', doc: 'AISIA', ref: 'Restauración que toca a los demás', estado: 'probado',
@@ -938,6 +996,13 @@ export const FILAS: readonly Fila[] = [
     control: 'src/ingesta.ts · paginasOcrMaximas',
     comprobacion: prueba('ingesta.ts', 'al tope de páginas de OCR de la consultora, la imagen queda como adjunto sin motor y se dice (C3, O4)'),
     sabotaje: { que: 'sin tope de OCR', ediciones: [ed(dist('ingesta.js'), 'if (paginasOcrRestantes <= 0)', 'if (false)')] },
+  },
+  {
+    id: 'c3-ocr-tope-del-mes', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'el tope de OCR es el del mes de la consultora; sin tope declarado, o con lecturas sin medir, el OCR no corre',
+    control: 'src/presupuesto.ts · ocrDelMes()',
+    comprobacion: prueba('presupuesto.ts', 'H-18 · sin tope del mes, o con un plan sin sus tokens, no se llama al modelo: P1 y P2 a una persona, P3 y P4 esperan'),
+    sabotaje: { que: 'sin tope del mes, el OCR corre igual', ediciones: [ed(dist('presupuesto.js'), '(p.topePaginasOcr ?? 0)', '(p.topePaginasOcr ?? 500)')] },
   },
   {
     id: 'c3-archivos-doctype', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',

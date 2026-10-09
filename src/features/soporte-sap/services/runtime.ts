@@ -18,10 +18,13 @@ import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, 
 import {
   ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, CONSULTORAS, sapDeLaboratorio, alNucleo, preparaPlan, supervisa, mensajeDePlan,
   corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
+  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
+  type AccionDeTriage, type PresupuestoDelMes,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import corteJson from '../../../../tools/soporte-sap/semantica/corte.json'
+import estimadoJson from '../../../../tools/soporte-sap/medicion/estimado.json'
 import type { Sesion, MensajeChatVista, PropuestaVista, Accion } from './tipos'
 
 export const encendido = (): boolean => process.env['SOPORTE_SAP_LABORATORIO'] === '1'
@@ -37,12 +40,16 @@ export interface IncidenciaLab {
   adjuntos: ResultadoIngesta[]; clasificacion: Clasificacion; consulta: ConsultaMatriz; entrada: EntradaMatriz | null
   cadena: EventoIncidencia[]; sla: EventoSla[]; planes: PlanLab[]; sandbox: Anonimizado | null; estado: string
 }
-interface Estado { n: number; paginasOcr: Record<string, number>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[]; ensenanzas: Record<string, PropuestaDeEnsenanza> }
+/** El tope de una consultora en un mes (`consultora:AAAA-MM-01`), como una fila de `ss_presupuesto`. */
+export interface TopeDelMes { topeTokens: number | null; topePaginasOcr: number | null }
+interface Estado { n: number; presupuestos: Record<string, TopeDelMes>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[]; ensenanzas: Record<string, PropuestaDeEnsenanza> }
 
 function nuevo(): Estado {
   let sala = creaCanal(salaVacia(), { id: CANAL, tenant: 'andina', slug: 'consultora-andina', nombre: 'Consultora Andina', departamento: null })
   for (const u of ['usr-superadmin', 'usr-experto', 'usr-consultor-andina']) sala = agregaParticipante(sala, 'andina', u)
-  return { n: 0, paginasOcr: {}, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {} }
+  // El laboratorio arranca con un tope para el mes en curso. Sin fila del mes, nada llama al modelo (fail-closed).
+  const presupuestos = Object.fromEntries(CONSULTORAS.map((c) => [`${c.id}:${mesDe(ahora())}`, { ...TOPE_DE_LABORATORIO }]))
+  return { n: 0, presupuestos, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {} }
 }
 
 const g = globalThis as { __soporteSapLab?: Estado }
@@ -52,8 +59,14 @@ const conocimiento = conocimientoDeMatriz(MATRIZ_LABORATORIO, '2026-10-04')
 export const motor: MotorReglas = (p) => evaluaSeguro(conocimiento, p, { hoy: '2026-10-04' }) as ReturnType<MotorReglas>
 const VALIDADORES = { rfc: (x: string) => validaRfc(x), curp: validaCurp, nss: validaNss }
 const conTimbre = registroDeEsquemas([lectorDeTimbre11])
-// Topes de la ingesta (C3, O4): adjuntos por incidencia y páginas de OCR por consultora en el laboratorio.
-const CONFIG = { bytesMaximos: 5_000_000, adjuntosMaximos: 10, paginasOcrMaximas: 500, motor: 'local' as const, decisionC4: null }
+// Topes de la ingesta (C3, O4): adjuntos por incidencia; las páginas de OCR salen del presupuesto del mes.
+const CONFIG = { bytesMaximos: 5_000_000, adjuntosMaximos: 10, motor: 'local' as const, decisionC4: null }
+const TOPE_DE_LABORATORIO: TopeDelMes = { topeTokens: 500_000, topePaginasOcr: 500 }
+/**
+ * Lo que gasta preparar un plan. Sin modelo no hay medición (D7): en el laboratorio es el SUPUESTO de
+ * `medicion/estimado.json`, y el evento lo dice (`tokensSon: 'estimados'`).
+ */
+const TOKENS_POR_PLAN = estimadoJson.insumos.tokensPorIncidencia.valor
 
 /** El OCR LOCAL (Tesseract por zonas) si la máquina lo tiene; si no, la imagen se guarda sin extracción y se dice. */
 function ocrLocal(): PuertosIngesta['ocr'] {
@@ -79,15 +92,42 @@ function anota(i: IncidenciaLab, tipo: EventoIncidencia['tipo'], actor: string, 
   i.cadena = agrega(i.id, i.cadena, { fecha: ahora(), tipo, actor, datos })
 }
 
+/** El presupuesto del mes de una consultora: su tope (la fila del mes) y lo gastado según su cadena (`usoDelMes`). */
+export function presupuestoDe(consultora: string): PresupuestoDelMes {
+  const e = estado()
+  const mes = mesDe(ahora())
+  const eventos = e.incidencias.filter((i) => i.consultora === consultora).flatMap((i) => i.cadena).filter((x) => mesDe(x.fecha) === mes)
+  const tope = e.presupuestos[`${consultora}:${mes}`]
+  return { consultora, mes, topeTokens: tope?.topeTokens ?? null, topePaginasOcr: tope?.topePaginasOcr ?? null, ...usoDelMes(eventos.map((x) => ({ tipo: x.tipo, datos: x.datos as Record<string, unknown> }))) }
+}
+
+/**
+ * El presupuesto ante un paso que gasta modelo (PRP-010 H-18). Con presupuesto, el paso corre y el aviso del 80 %
+ * queda en la cadena. Al tope (o sin tope del mes), P1 y P2 pasan a una persona AHORA y P3 y P4 esperan, con aviso:
+ * el presupuesto nunca deja sin atención a un P1 o un P2 (AISIA §4).
+ */
+function conPresupuesto(i: IncidenciaLab, paso: (decision: AccionDeTriage) => void): void {
+  const decision = accionAnteElPresupuesto(veredictoDelMes(presupuestoDe(i.consultora), TOKENS_POR_PLAN), i.clasificacion.prioridad)
+  if (decision.accion === 'llama_modelo') {
+    if (decision.aviso) anota(i, 'AVISO_PRESUPUESTO', `agente:${AGENTE}`, { aviso: decision.aviso })
+    paso(decision)
+  } else if (decision.accion === 'a_humano') {
+    anota(i, 'A_HUMANO_POR_PRESUPUESTO', `agente:${AGENTE}`, { aviso: decision.aviso })
+    i.estado = 'en_atencion'
+  } else {
+    anota(i, 'EN_ESPERA_POR_PRESUPUESTO', `agente:${AGENTE}`, { aviso: decision.aviso })
+    i.estado = 'espera_presupuesto'
+  }
+}
+
 /** El N3 levanta una incidencia con sus adjuntos. Todo lo demás lo hace el agente, y queda en la cadena. */
 export async function levanta(s: Sesion, d: { titulo: string; descripcion: string; archivos: Array<{ nombre: string; bytes: Uint8Array }> }): Promise<string> {
   if (s.rol !== 'cliente') throw new Error('solo el cliente (N3) levanta incidencias aquí')
   const e = estado()
   const cl = CLIENTES.find((c) => c.id === s.organizacion)!
   const id = `inc-${String(++e.n).padStart(3, '0')}`
-  const ingesta = await ingiereTodos(puertosIngesta(), CONFIG, d.archivos, e.paginasOcr[cl.consultora] ?? 0)
-  e.paginasOcr[cl.consultora] = ingesta.paginasOcr
-  const adjuntos: ResultadoIngesta[] = ingesta.resultados
+  const ocr = ocrDelMes(presupuestoDe(cl.consultora))
+  const adjuntos: ResultadoIngesta[] = (await ingiereTodos(puertosIngesta(), { ...CONFIG, paginasOcrMaximas: ocr.maximas }, d.archivos, ocr.usadas)).resultados
   const evidencia = adjuntos.flatMap((a) => (a.aceptado ? a.campos.map((c) => `${c.campo}: ${c.valor}`) : []))
   const texto = `${d.titulo}. ${d.descripcion}\n${evidencia.join('\n')}`
   const clasificacion = categoriza(texto)
@@ -97,11 +137,16 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
     entrada: consulta.tipo === 'sin_solucion' ? null : consulta.entrada, cadena: [], sla: [{ tipo: 'RECIBIDA', fecha: ahora() }], planes: [], sandbox: null, estado: 'nueva',
   }
   anota(i, 'RECIBIDA', s.usuario, { cliente: cl.id, titulo: i.titulo })
-  for (const a of adjuntos) anota(i, 'ADJUNTO_LEIDO', `agente:${AGENTE}`, a.aceptado ? { nombre: a.nombre, via: a.via, campos: a.campos.length, sha256: a.sha256 } : { nombre: a.nombre, rechazado: a.motivo })
+  for (const a of adjuntos) anota(i, 'ADJUNTO_LEIDO', `agente:${AGENTE}`, a.aceptado ? { nombre: a.nombre, via: a.via, campos: a.campos.length, sha256: a.sha256, paginasOcr: a.paginasOcr } : { nombre: a.nombre, rechazado: a.motivo })
   anota(i, 'CATEGORIZADA', `agente:${AGENTE}`, { prioridad: clasificacion.prioridad, modulo: clasificacion.modulo, transaccion: clasificacion.transaccion, mensaje: clasificacion.mensaje, etiquetas: [...clasificacion.etiquetas] })
   anota(i, 'VEREDICTO_GRAFO', `agente:${AGENTE}`, { tipo: consulta.tipo, regla: consulta.tipo === 'sin_solucion' ? null : consulta.entrada.regla, razon: consulta.razon })
   e.incidencias.unshift(i)
-  if (consulta.tipo === 'solucion') proponPlan(i, preparaPlan({ ejecutor: EJECUTOR, incidencia: id, taskId: `tarea-${id}`, entrada: consulta.entrada, texto, sap: e.sap[cl.id]!, version: 1 }), null)
+  // Un P1 o un P2 con una imagen sin leer por el tope de OCR no espera: lo revisa una persona ahora, y se dice.
+  const sinLeer = adjuntos.filter((a) => a.aceptado && a.aviso?.includes('tope de páginas de OCR')).map((a) => a.nombre)
+  if (sinLeer.length && (clasificacion.prioridad === 'P1' || clasificacion.prioridad === 'P2')) {
+    anota(i, 'A_HUMANO_POR_PRESUPUESTO', `agente:${AGENTE}`, { aviso: `evidencia sin leer por el tope de OCR del mes (${sinLeer.join(', ')}): la revisa una persona ahora` })
+  }
+  if (consulta.tipo === 'solucion') conPresupuesto(i, (presupuesto) => proponPlan(i, preparaPlan({ ejecutor: EJECUTOR, incidencia: id, taskId: `tarea-${id}`, entrada: consulta.entrada, texto, sap: e.sap[cl.id]!, presupuesto, version: 1 }), null))
   else if (consulta.tipo === 'grado_insuficiente') anota(i, 'ESCALADA', `agente:${AGENTE}`, { motivo: 'grado insuficiente: lo revisa el experto' })
   else alSandbox(i)
   return id
@@ -110,7 +155,7 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
 /** El supervisor revisa; si pasa, el plan va a la sala (como hilo si es una versión corregida). */
 function proponPlan(i: IncidenciaLab, plan: Plan, hilo: string | null): void {
   const e = estado()
-  anota(i, 'PLAN_PREPARADO', EJECUTOR, { version: plan.version, sha256: `sha256:${plan.sha256}`, error: plan.error })
+  anota(i, 'PLAN_PREPARADO', EJECUTOR, { version: plan.version, sha256: `sha256:${plan.sha256}`, error: plan.error, tokens: TOKENS_POR_PLAN, tokensSon: 'estimados' })
   const veredicto = supervisa({ supervisor: SUPERVISOR, plan, entrada: i.entrada!, sap: e.sap[i.cliente]! })
   anota(i, 'VEREDICTO_SUPERVISOR', SUPERVISOR, { resultado: veredicto.resultado, verdes: veredicto.comprobaciones.filter((c) => c.ok).length, total: veredicto.comprobaciones.length })
   const lab: PlanLab = { plan, veredicto, mensaje: null, decision: null, aplicado: null }
@@ -155,7 +200,7 @@ function aplica(i: IncidenciaLab, lab: PlanLab): void {
   const a = aprobado(e.sala, lab.plan.taskId, lab.plan.sha256)!
   anota(i, 'APROBADA', a.decididaPor, { sha256: `sha256:${a.sha256}`, taskId: a.taskId })
   const antes = e.sap[i.cliente]!
-  const r = ejecuta(antes, lab.plan.pasos, { taskId: a.taskId, sha256: a.sha256, decididaPor: a.decididaPor })
+  const r = ejecuta(antes, lab.plan, { taskId: a.taskId, sha256: a.sha256, decididaPor: a.decididaPor })
   e.sap[i.cliente] = r.final
   const sintoma = i.entrada!.sintoma?.(lab.plan.parametros) ?? null
   lab.aplicado = {
@@ -171,9 +216,11 @@ function aplica(i: IncidenciaLab, lab: PlanLab): void {
 function revisa(i: IncidenciaLab, lab: PlanLab, mensaje: string, motivo: string, quien: string): void {
   const e = estado()
   anota(i, 'A_REVISION', quien, { mensaje, motivo: delimitaDato(motivo) })
-  const r = corrige({ ejecutor: EJECUTOR, plan: lab.plan, motivo, entrada: i.entrada!, texto: i.texto, sap: e.sap[i.cliente]! })
-  if (r.plan) proponPlan(i, r.plan, mensaje)
-  else e.sala = publica(e.sala, { id: `nota-${mensaje}-${e.n++}`, canal: CANAL, hilo: mensaje, autor: { tipo: 'agente', id: AGENTE }, cuerpo: r.nota, creado: ahora() })
+  conPresupuesto(i, (presupuesto) => {
+    const r = corrige({ ejecutor: EJECUTOR, plan: lab.plan, motivo, entrada: i.entrada!, texto: i.texto, sap: e.sap[i.cliente]!, presupuesto })
+    if (r.plan) proponPlan(i, r.plan, mensaje)
+    else e.sala = publica(e.sala, { id: `nota-${mensaje}-${e.n++}`, canal: CANAL, hilo: mensaje, autor: { tipo: 'agente', id: AGENTE }, cuerpo: r.nota, creado: ahora() })
+  })
 }
 
 /** El chat del HIL: contesta con fuente, propone o promueve a la sala. Nunca aprueba. */
@@ -239,12 +286,20 @@ function respondeAlCliente(s: Sesion, id: string, texto: string): void {
   anota(i, 'PRIMERA_RESPUESTA', s.usuario, { caracteres: texto.length })
 }
 
+/** El tope del mes lo fija el superadministrador (como `ss_presupuesto_fija` en la base). */
+function fijaPresupuesto(s: Sesion, consultora: string, tope: TopeDelMes): void {
+  if (s.rol !== 'superadmin') throw new Error('el presupuesto del mes lo fija el superadministrador')
+  if (!CONSULTORAS.some((c) => c.id === consultora)) throw new Error('esa consultora no existe')
+  estado().presupuestos[`${consultora}:${mesDe(ahora())}`] = tope
+}
+
 export function actua(s: Sesion, a: Accion): void {
   if (a.tipo === 'reinicia') { g.__soporteSapLab = nuevo(); return }
   if (a.tipo === 'decide') return decide(s, a.mensaje, a.accion, a.motivo ?? '')
   if (a.tipo === 'chat') return conversa(s, a.texto)
   if (a.tipo === 'responde') return respondeAlCliente(s, a.incidencia, a.texto)
   if (a.tipo === 'al_nucleo') return subeAlNucleo(s, a.propuesta)
+  if (a.tipo === 'fija_presupuesto') return fijaPresupuesto(s, a.consultora, { topeTokens: a.topeTokens, topePaginasOcr: a.topePaginasOcr })
   return relojDelCliente(s, a.incidencia, a.tipo === 'espera_cliente' ? 'ESPERA_CLIENTE' : 'RESPUESTA_CLIENTE')
 }
 

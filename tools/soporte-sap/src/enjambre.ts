@@ -8,7 +8,8 @@
  * Si la persona lo manda a revisión, el ejecutor lee el MOTIVO como dato (solo extrae de él los
  * parámetros que la regla declara) y propone una versión nueva, con otra huella.
  */
-import { canonico, sha256 } from './cadena.js'
+import { huellaDePlan } from './artefacto.js'
+import type { AccionDeTriage } from './pricing.js'
 import { extraeParametros, pasosDe, GRADOS_DE_PRODUCCION, type EntradaMatriz } from './matriz.js'
 import { simula, reproduce, NoAplica, type SapSimulado, type PasoSolucion } from './simulador.js'
 
@@ -30,14 +31,21 @@ export interface Plan {
   readonly cambios: readonly string[]
 }
 
-const huella = (p: Pick<Plan, 'taskId' | 'version' | 'regla' | 'parametros' | 'pasos'>): string =>
-  sha256(canonico({ taskId: p.taskId, version: p.version, regla: p.regla, parametros: { ...p.parametros }, pasos: p.pasos.map((x) => ({ accion: x.accion, parametros: { ...x.parametros } })) }))
+const huella = huellaDePlan
 
-/** El ejecutor prepara el plan: parámetros del texto (y los ajustes de una revisión), pasos y simulación. */
+/** El enjambre no corre sin el visto bueno del presupuesto del mes (PRP-010 H-18). */
+export class SinPresupuesto extends Error {}
+
+/**
+ * El ejecutor prepara el plan: parámetros del texto (y los ajustes de una revisión), pasos y simulación. Preparar un
+ * plan es lo que gasta modelo, así que exige la decisión del presupuesto (`accionAnteElPresupuesto`): si no es
+ * «llama_modelo», no corre. Qué hacer entonces (una persona para P1 y P2, esperar para P3 y P4) lo hace quien llama.
+ */
 export function preparaPlan(o: {
   ejecutor: string; incidencia: string; taskId: string; entrada: EntradaMatriz; texto: string; sap: SapSimulado
-  version?: number; ajustes?: Readonly<Record<string, string>>; cambios?: readonly string[]
+  presupuesto: AccionDeTriage; version?: number; ajustes?: Readonly<Record<string, string>>; cambios?: readonly string[]
 }): Plan {
+  if (o.presupuesto.accion !== 'llama_modelo') throw new SinPresupuesto(`el enjambre no prepara el plan: ${o.presupuesto.aviso ?? o.presupuesto.accion}`)
   const extraidos = extraeParametros(o.entrada, o.texto)
   const parametros = { ...extraidos.parametros, ...(o.ajustes ?? {}) }
   const faltan = Object.keys(o.entrada.parametros).filter((k) => !parametros[k])
@@ -93,11 +101,11 @@ export function mensajeDePlan(plan: Plan, v: VeredictoSupervisor) {
  * «A revisión»: el ejecutor lee el motivo como DATO y solo toma de él los parámetros que la regla
  * declara (con los mismos patrones). Si el motivo no trae ninguno, no inventa: lo dice y pide aclarar.
  */
-export function corrige(o: { ejecutor: string; plan: Plan; motivo: string; entrada: EntradaMatriz; texto: string; sap: SapSimulado }): { plan: Plan | null; nota: string } {
+export function corrige(o: { ejecutor: string; plan: Plan; motivo: string; entrada: EntradaMatriz; texto: string; sap: SapSimulado; presupuesto: AccionDeTriage }): { plan: Plan | null; nota: string } {
   const delMotivo = extraeParametros(o.entrada, o.motivo).parametros
   const cambian = Object.entries(delMotivo).filter(([k, v]) => o.plan.parametros[k] !== v)
   if (!cambian.length) return { plan: null, nota: 'El motivo no trae un dato que cambie el plan; pido aclararlo en el hilo antes de volver a proponer.' }
   const cambios = cambian.map(([k, v]) => `${k}: ${o.plan.parametros[k] ?? '—'} → ${v} (del motivo de la revisión)`)
-  const plan = preparaPlan({ ejecutor: o.ejecutor, incidencia: o.plan.incidencia, taskId: o.plan.taskId, entrada: o.entrada, texto: o.texto, sap: o.sap, version: o.plan.version + 1, ajustes: Object.fromEntries(cambian), cambios })
+  const plan = preparaPlan({ ejecutor: o.ejecutor, incidencia: o.plan.incidencia, taskId: o.plan.taskId, entrada: o.entrada, texto: o.texto, sap: o.sap, presupuesto: o.presupuesto, version: o.plan.version + 1, ajustes: Object.fromEntries(cambian), cambios })
   return { plan, nota: `Corregido: ${cambios.join('; ')}.` }
 }
