@@ -171,6 +171,27 @@ test('H-17 · el agente no marca la primera respuesta, ni pausa el reloj, ni res
   assert.equal((await incidencia(db, INC.a1)).primera_respuesta_en, null)
 })
 
+test('H-17 · ni el cliente ni el laboratorio responden, pausan, resuelven o cambian la prioridad: solo una persona de la consultora', async () => {
+  const db = await baseSoporte()
+  const ua1 = await seudonimoDe(db, USR.ua1), ca = await seudonimoDe(db, USR.ca), sup = await seudonimoDe(db, USR.sup)
+  const actos = [['PRIMERA_RESPUESTA', '{}'], ['ESPERA_CLIENTE', '{"pide":"el log de la ST22 del 3 de octubre"}'], ['RESUELTA', '{}'],
+    ['CAMBIO_PRIORIDAD', '{"prioridad":"P1","motivo":"lo decide el cliente por su cuenta"}']] as const
+  for (const [tipo, datos] of actos) {
+    assert.match(await falla(() => como(db, USR.ua1, evento(INC.a1, tipo, ua1, datos))) ?? '', /lo emite una persona de la consultora/, `el cliente: ${tipo}`)
+  }
+  const i = await incidencia(db, INC.a1)
+  assert.deepEqual([i.prioridad, i.estado, i.primera_respuesta_en], [null, 'nueva', null], 'la incidencia sigue como estaba')
+  // El laboratorio, en lo que la consultora le escaló: lee, pero no responde por ella.
+  await como(db, USR.ca, `insert into ss_escalamiento (incidencia_id, consultora_id, cliente_id, motivo, escalada_por)
+    values ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', 'el plan necesita la mirada del laboratorio', '${ca}')`)
+  const delLab = `insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, datos, actor, fecha, anterior, hash)
+    values ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', (select coalesce(max(seq), 0) + 1 from ss_evento where incidencia_id = '${INC.a2}'),
+            'PRIMERA_RESPUESTA', '{}', '${sup}', now(), 'previo', '${'a'.repeat(64)}')`
+  assert.match(await falla(() => como(db, USR.sup, delLab)) ?? '', /lo emite una persona de la consultora/, 'el laboratorio')
+  await como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', ca))
+  assert.notEqual((await incidencia(db, INC.a1)).primera_respuesta_en, null, 'control: el consultor sí')
+})
+
 test('pausa unilateral · pausar dice qué se le pide al cliente, y el cliente reanuda el reloj sin depender de nadie', async () => {
   const db = await baseSoporte()
   const ca = await seudonimoDe(db, USR.ca), ua1 = await seudonimoDe(db, USR.ua1), ub1 = await seudonimoDe(db, USR.ub1)

@@ -416,8 +416,10 @@ create trigger ss_evento_cadena before insert on public.ss_evento
 -- ni pausa el SLA. El cambio de prioridad lleva la nueva y su motivo.
 create or replace function ss_priv.evento_de_quien_puede() returns trigger language plpgsql set search_path = '' as $$
 begin
+  -- `is not distinct from`, no `=`: para quien no es miembro, `rol_en` es NULL, y `not (… and NULL)` es NULL, que no
+  -- lanza. Con `=`, el cliente y el laboratorio respondían, resolvían y cambiaban la prioridad (PRP-010, fase 4).
   if new.tipo in ('PRIMERA_RESPUESTA', 'ESPERA_CLIENTE', 'RESUELTA', 'CERRADA', 'REABIERTA', 'CAMBIO_PRIORIDAD')
-     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) = 'consultor') then
+     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor') then
     raise exception 'un evento % lo emite una persona de la consultora, no %', new.tipo, current_user;
   end if;
   if new.tipo = 'CAMBIO_PRIORIDAD' and (coalesce(new.datos->>'prioridad', '') not in ('P1', 'P2', 'P3', 'P4')
@@ -430,7 +432,7 @@ begin
     raise exception 'pausar el reloj lleva lo que se le pide al cliente';
   end if;
   if new.tipo = 'RESPUESTA_CLIENTE' and not (current_user = 'authenticated'
-     and (ss_priv.rol_en(new.consultora_id) = 'consultor' or ss_priv.rol_en(new.cliente_id) = 'usuario_cliente')) then
+     and (ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor' or ss_priv.rol_en(new.cliente_id) is not distinct from 'usuario_cliente')) then
     raise exception 'la respuesta del cliente la registra una persona del cliente o de su consultora, no %', current_user;
   end if;
   return new;

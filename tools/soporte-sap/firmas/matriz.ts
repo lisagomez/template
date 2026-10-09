@@ -49,6 +49,7 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-sla-solo-la-consultora', 'aisia-pausa-cliente-reanuda'], afirmacion: 'la primera respuesta, la pausa y la resolución son actos de una persona de la consultora', encontrado: 'fase 4 (09/10), porque un sabotaje no caía: `rol_en` es NULL para quien no es miembro, y `not (… and NULL)` no lanza. El cliente marcaba su primera respuesta, resolvía y se subía a P1, y el laboratorio podía hacer lo mismo en lo escalado. La prueba de H-17 solo probaba al agente' },
   { doc: 'AISIA', por: 'revision', resolucion: 'texto', filas: ['aisia-dato-failclosed', 'aisia-dato-rrhh', 'aisia-dato-contrato-cuarentena'], afirmacion: 'anonimizador fail-closed; los casos de nómina los revisa una persona antes del sandbox', encontrado: 'PRP-010 H-04 y DP-7 (07/10): «fail-closed» prometía de más, y la revisión humana de la cuarentena no existe. En la fase 4 se corrigieron la AISIA, el contrato, la señal que guarda la base y la pantalla: la cuarentena es definitiva hasta D14' },
   { doc: 'AISIA', por: 'revision', resolucion: 'texto', filas: ['aisia-fatiga', 'aisia-grupo-chico', 'aisia-sla-persona', 'aisia-pausa-pide', 'aisia-impugna-queja', 'aisia-presupuesto-p1-ocr'], afirmacion: 'la §2 lista los daños posibles sin atacante', encontrado: 'PRP-010 (07/10): seis daños sin listar (la fatiga del aprobador, el grupo chico, la primera respuesta automática, la pausa unilateral, la consultora que altera la impugnación y la P1 sin evidencia leída). La v3 los lista con sus filas' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-pausa-pide', 'aisia-pausa-cliente-reanuda', 'aisia-pausa-agente', 'aisia-pausa-app-pide', 'aisia-pausa-app-cliente', 'aisia-pausa-contrato'], afirmacion: 'pausar el reloj es un acto de una persona, y el cliente puede impugnar la pausa', encontrado: 'fase 4 (09/10), al escribir el daño: la consultora pausaba sin decir qué pedía y era la única que podía reanudar el reloj, y la impugnación la resolvía ella misma. Ahora la pausa dice qué pide y el cliente la reanuda al responder' },
@@ -513,7 +514,15 @@ export const FILAS: readonly Fila[] = [
     control: "SQL · ss_priv.evento_de_quien_puede()",
     comprobacion: prueba('cierre-base.ts', 'H-17 · el agente no marca la primera respuesta, ni pausa el reloj, ni resuelve (DP-4)'),
     sabotaje: { que: "el agente emite cualquier evento", ediciones: [
-      ed(SQL, "     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) = 'consultor') then", "     and false then")] },
+      ed(SQL, "     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor') then", "     and false then")] },
+  },
+  {
+    id: 'aisia-sla-solo-la-consultora', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: 'responder, pausar, resolver y cambiar la prioridad son actos de una persona de la CONSULTORA: ni el cliente ni el laboratorio los emiten',
+    control: 'SQL · ss_priv.evento_de_quien_puede() con `is not distinct from`',
+    comprobacion: prueba('cierre-base.ts', 'H-17 · ni el cliente ni el laboratorio responden, pausan, resuelven o cambian la prioridad: solo una persona de la consultora'),
+    sabotaje: { que: 'vuelve el `=` que dejaba pasar el NULL', ediciones: [
+      ed(SQL, "     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor') then", "     and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) = 'consultor') then")] },
   },
   {
     id: 'aisia-sla-resultado-contrato', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
@@ -777,7 +786,7 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'el cliente de la incidencia reanuda el reloj él mismo al responder: no depende de su consultora',
     control: 'SQL · ss_priv.evento_de_quien_puede()',
     comprobacion: prueba('cierre-base.ts', 'pausa unilateral · pausar dice qué se le pide al cliente, y el cliente reanuda el reloj sin depender de nadie'),
-    sabotaje: { que: 'solo la consultora reanuda', ediciones: [ed(SQL, "(ss_priv.rol_en(new.consultora_id) = 'consultor' or ss_priv.rol_en(new.cliente_id) = 'usuario_cliente')) then", "ss_priv.rol_en(new.consultora_id) = 'consultor') then")] },
+    sabotaje: { que: 'solo la consultora reanuda', ediciones: [ed(SQL, "(ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor' or ss_priv.rol_en(new.cliente_id) is not distinct from 'usuario_cliente')) then", "ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor') then")] },
   },
   {
     id: 'aisia-pausa-agente', doc: 'AISIA', ref: 'Pausa unilateral', infirmable: true, estado: 'probado',
