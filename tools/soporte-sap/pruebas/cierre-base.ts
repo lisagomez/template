@@ -171,6 +171,18 @@ test('H-17 · el agente no marca la primera respuesta, ni pausa el reloj, ni res
   assert.equal((await incidencia(db, INC.a1)).primera_respuesta_en, null)
 })
 
+test('pausa unilateral · pausar dice qué se le pide al cliente, y el cliente reanuda el reloj sin depender de nadie', async () => {
+  const db = await baseSoporte()
+  const ca = await seudonimoDe(db, USR.ca), ua1 = await seudonimoDe(db, USR.ua1), ub1 = await seudonimoDe(db, USR.ub1)
+  assert.match(await falla(() => como(db, USR.ca, evento(INC.a1, 'ESPERA_CLIENTE', ca))) ?? '', /lo que se le pide al cliente/, 'sin decir qué pide')
+  await como(db, USR.ca, evento(INC.a1, 'ESPERA_CLIENTE', ca, '{"pide":"el log de la ST22 del 3 de octubre"}'))
+  assert.match(await falla(() => comoAgente(db, ORG.CA, evento(INC.a1, 'RESPUESTA_CLIENTE', 'agente:soporte-sap-a2a'))) ?? '', /una persona del cliente o de su consultora/, 'el agente no reanuda')
+  assert.match(await falla(() => como(db, USR.ub1, evento(INC.a1, 'RESPUESTA_CLIENTE', ub1))) ?? '', /./, 'el cliente de otra consultora, tampoco')
+  await como(db, USR.ua1, evento(INC.a1, 'RESPUESTA_CLIENTE', ua1))
+  const tipos = (await db.query<{ tipo: string; actor: string }>(`select tipo, actor from ss_evento where incidencia_id = '${INC.a1}' order by seq`)).rows
+  assert.deepEqual(tipos.slice(-2).map((r) => `${r.tipo}:${r.actor === ua1 ? 'cliente' : r.actor === ca ? 'consultor' : r.actor}`), ['ESPERA_CLIENTE:consultor', 'RESPUESTA_CLIENTE:cliente'])
+})
+
 test('H-16 · el resultado de SLA no lo guarda el agente, y es de un contrato que existe', async () => {
   const db = await baseSoporte()
   const resultado = (contrato: string, version: number) => `insert into ss_sla_resultado

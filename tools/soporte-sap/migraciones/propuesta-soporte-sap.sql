@@ -424,6 +424,15 @@ begin
      or length(coalesce(new.datos->>'motivo', '')) < 10) then
     raise exception 'un cambio de prioridad lleva la nueva prioridad y un motivo';
   end if;
+  -- La pausa unilateral (PRP-010, fase 4): pausar dice qué se le pide al cliente, y la respuesta del cliente la
+  -- registra una persona, del cliente o de su consultora. Así el cliente reanuda el reloj sin depender de nadie.
+  if new.tipo = 'ESPERA_CLIENTE' and length(coalesce(new.datos->>'pide', '')) < 10 then
+    raise exception 'pausar el reloj lleva lo que se le pide al cliente';
+  end if;
+  if new.tipo = 'RESPUESTA_CLIENTE' and not (current_user = 'authenticated'
+     and (ss_priv.rol_en(new.consultora_id) = 'consultor' or ss_priv.rol_en(new.cliente_id) = 'usuario_cliente')) then
+    raise exception 'la respuesta del cliente la registra una persona del cliente o de su consultora, no %', current_user;
+  end if;
   return new;
 end $$;
 drop trigger if exists ss_evento_quien on public.ss_evento;
@@ -504,7 +513,7 @@ create table if not exists public.ss_cuarentena (
   senales       text[] not null,
   creada_en     timestamptz not null default now(),
   constraint ss_cuarentena_solo_senales check (cardinality(senales) > 0 and senales <@ array[
-    'caso de RR. HH. o nómina: revisión humana obligatoria antes del sandbox',
+    'caso de RR. HH. o nómina: no entra al sandbox (cuarentena definitiva hasta D14)',
     'queda algo con forma de correo', 'queda una secuencia larga de dígitos',
     'queda un tratamiento seguido de un nombre', 'queda un posible usuario SAP']::text[])
 );

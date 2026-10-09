@@ -149,7 +149,7 @@ propias (huella, grado, parámetros, el error se reproduce antes, el plan aplica
 reproduce después). «A revisión» lee el motivo como dato y solo toma de él los parámetros que la regla
 declara; la versión nueva tiene otra huella y va como hilo del plan anterior.
 
-**Sandbox (subnivel 1).** Sin regla en el grafo, el caso se **anonimiza** (§6, fail-closed) y entra
+**Sandbox (subnivel 1).** Sin regla en el grafo, el caso se **anonimiza** (§6: lo que deja forma de dato va a cuarentena) y entra
 al sandbox normalizado. Cuando el experto entra, el agente le pregunta hasta entender **por qué**
 funcionó la solución, lo documenta y propone:
 
@@ -217,7 +217,10 @@ documental (`TPL-extractor-documental`, sin parches: lo que falte se pide como v
    pantalla lo dice;
 6. el texto extraído es dato: nunca instrucción para el agente.
 
-**Anonimización** antes del sandbox, **fail-closed** (`tools/soporte-sap/src/anonimiza.ts`, v2):
+**Anonimización** antes del sandbox (`tools/soporte-sap/src/anonimiza.ts`, v3). **Reduce el riesgo, no lo
+garantiza**: un nombre en minúsculas, sin contexto y fuera de la lista de nombres comunes pasa (límite declarado).
+Por eso hay dos cerrojos que no dependen de él: la cuarentena guarda solo tipos de señal, y la base rechaza en el
+sandbox un identificador con forma (PRP-010 H-03):
 
 1. **identificadores**: RFC, CURP y NSS se reconocen por su **forma**, también partidos en trozos,
    con guiones, con 0↔O y 1↔I↔L de OCR; el dígito verificador del extractor solo dice qué etiqueta
@@ -228,8 +231,8 @@ documental (`TPL-extractor-documental`, sin parches: lo que falte se pide como v
    a un tratamiento (Lic., Ing.) o a un disparador («de parte de», «según»), o la que precede a un
    verbo de reporte. Una lista de nombres deja pasar a quien no está en ella; esta regla no;
 3. **cuarentena**: lo que queda con forma de dato (siete dígitos o más, un correo, un tratamiento,
-   un posible usuario) no entra. Y **todo caso de RR. HH. o nómina va a revisión humana** aunque
-   quede bien anonimizado: un finiquito o una incapacidad identifican a una persona por contexto, y
+   un posible usuario) no entra. Y **todo caso de RR. HH. o nómina va a cuarentena** aunque
+   quede bien anonimizado (definitiva: nadie la revisa hasta D14, DP-7): un finiquito o una incapacidad identifican a una persona por contexto, y
    ahí el daño recae en un tercero que no firmó (límite de C5);
 4. la cuarentena guarda **tipos** de señal, nunca el dato.
 
@@ -426,7 +429,7 @@ medición.
 La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 22 tablas; ninguna
 función `security definer` en `public`; árbol, roles y tenencia de las tablas hijas impuestos en
 la base; solo agregar; ningún rol de servicio con `bypassrls` ni `update` sobre lo que se decide) y
-`pruebas/aislamiento.ts` (56 intentos con el rol real, buckets incluidos), en un Postgres efímero.
+`pruebas/aislamiento.ts` (63 comprobaciones con el rol real, buckets incluidos; varias son controles positivos), en un Postgres efímero.
 La v2 nace de la revisión independiente del C3, que encontró cuatro afirmaciones sin sostén en el
 SQL (alcance del agente, decisiones fabricables fuera de la sala, lectura del laboratorio y
 tenencia de las tablas hijas).
@@ -439,17 +442,19 @@ tenencia de las tablas hijas).
 | Producción | `ss_incidencia`, `ss_escalamiento`, `ss_evento`, `ss_adjunto`, `ss_campo_extraido`, `ss_impugnacion` | `consultora_id` + `cliente_id` | el cliente tiene que ser de esa consultora y cada hija hereda la tenencia de su incidencia (disparadores); `ss_evento` es de **solo agregar**, con fecha y actor que da la base; un campo lo confirma una persona a su nombre; el cliente impugna y su consultora resuelve |
 | Sandbox | `ss_caso_sandbox`, `ss_cuarentena` | `origen_consultora_id`; la cuarentena por cliente | el sandbox solo tiene texto anonimizado; la cuarentena guarda **tipos** de señal, nunca el dato |
 | Núcleo y FDE | `ss_propuesta` | `consultora_id` si es a medida, nulo si va al núcleo | el agente solo inserta en estado `propuesta` |
-| Acceso | `ss_acceso_motivado` | por usuario y cliente | solo el superadministrador lo otorga, con motivo y vencimiento (D14) |
+| Acceso | `ss_acceso_motivado` | por usuario y cliente | lo otorga **la consultora** a un miembro del laboratorio, con motivo, por 72 h como máximo desde una fecha que pone la base; se revoca, y nadie se lo otorga a sí mismo (D14 decide qué más ve el superadministrador) |
 | SLA y horas | `ss_contrato_sla`, `ss_sla_resultado`, `ss_horas`, `ss_presupuesto` | N1–N2 por consultora; N2–N3 por cliente | contrato versionado por `(id, version)` |
 | Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia`, `ss_importacion_fila` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién; cada fila importada queda limpia, en revisión o descartada con motivo |
 | Métricas | `ss_metrica` | `alcance` (total, tamaño, consultora, cliente) | el corte semántico (§9), con `etapa` (el segmento del ciclo de vida) y `visible_al_cliente` (la RLS no deja al N3 leer lo interno); solo lo escribe el job de métricas, nadie lo cambia ni lo borra; derivada: se regenera |
 | Chat | `ss_chat_mensaje` | `usuario_id` | cada quien ve su conversación; solo el laboratorio conversa |
 
-**Roles.** `authenticated` (las personas, por `auth.uid()`) y tres roles de servicio sin
-`bypassrls`, cada uno acotado a la consultora del **token de tarea firmado** que presenta
+**Roles.** `authenticated` (las personas, por `auth.uid()`) y cuatro roles de servicio sin
+`bypassrls` (más `sala_agente`, el de la sala, en su propia propuesta). Tres de ellos van cada uno acotado a la consultora del **token de tarea firmado** que presenta
 (`request.jwt.claims`): `soporte_sap_agente` (lee y propone; nunca decide), `soporte_sap_ingesta`
-(lee originales y deja campos por revisar) y `soporte_sap_plataforma` (export, restauración y
-retención; job declarado, C7). Sin token válido no ven nada. El cuarto, `soporte_sap_metricas` (la
+(lee originales y deja campos por revisar) y `soporte_sap_plataforma` (export y el resultado del SLA; job
+declarado, C7; tiene el privilegio de borrar por retención, pero ningún job lo usa todavía: D8). Sin token
+válido no ven nada. La **restauración** no la hace un rol de servicio: corre con privilegio de migración (C7,
+declarado en el C3) y verifica todo antes del commit (§13). El cuarto, `soporte_sap_metricas` (la
 capa semántica, job declarado, C7), lee a **todas** las consultoras para dar totales, así que su
 acotamiento es por **columna**: no tiene privilegio sobre títulos, descripciones, nombres, contenido,
 motivos ni consultores (`pruebas/metricas-rls.ts` lo intenta columna por columna), y solo escribe en
@@ -466,8 +471,10 @@ la ruta dice de quién es):
 | `ss-exportes` | `{consultora}/{fecha}-{sha256}` | la consultora (el laboratorio no) | el job de plataforma de esa consultora (§13) |
 
 **Retención** (D8, valor por defecto): los originales se guardan mientras dure el contrato; al
-salir, la consultora recibe su export (ERP-6) y se borran, también en las copias de respaldo. El
-crudo y la cadena de eventos son la evidencia del servicio: viven lo mismo que el contrato.
+salir, la consultora recibe su export (ERP-6) y se borran de la base y de Storage. En el respaldo
+inmutable fuera de sitio **no se pueden borrar antes**: vencen cuando vence su bloqueo
+(`RESPALDO_S3_BLOQUEO_DIAS`), y ese plazo es parte de D8. El job de retención todavía no existe. El crudo y la
+cadena de eventos son la evidencia del servicio: viven lo mismo que el contrato.
 
 **Crecimiento**: por tamaño de cliente en la §14, medido con carga sintética.
 
@@ -613,12 +620,12 @@ Los controles, cada uno con la prueba que se pone roja si falta (detalle en el C
 
 | Riesgo | Control | Prueba |
 |---|---|---|
-| Un tenant lee a otro | RLS `enable` + `force` en las 22 tablas, tenencia de las hijas por disparador, buckets por ruta | `pruebas/aislamiento.ts` (56 intentos), `pruebas/esquema.ts` |
+| Un tenant lee a otro | RLS `enable` + `force` en las 22 tablas, tenencia de las hijas por disparador, buckets por ruta | `pruebas/aislamiento.ts` (63 comprobaciones), `pruebas/esquema.ts` |
 | Un servicio se salta la RLS | ningún rol de servicio con `bypassrls`; cada uno acotado por un token de tarea firmado; ninguna superficie con `service_role` | `pruebas/token-tarea.ts`, `pruebas/esquema.ts` |
-| Un modelo fabrica una aprobación | política `as restrictive` + sin `insert` para servicios; el chat no conoce la tabla | suite de la sala con S1–S7 y `pruebas/chat.ts` (el sabotaje «el chat aprueba» la pone en rojo) |
+| Un modelo fabrica una aprobación | política `as restrictive` + sin `insert` para servicios; el chat no conoce la tabla | suite de la sala con S1–S11 (S2b y S10b incluidos) y `pruebas/chat.ts` (el sabotaje «el chat aprueba» la pone en rojo) |
 | El job de métricas filtra texto | privilegios por columna: ni títulos, ni descripciones, ni nombres, ni motivos | `pruebas/metricas-rls.ts`, `pruebas/semantica-produccion.ts` |
 | El cliente ve lo interno | `ss_metrica.visible_al_cliente` en la RLS (riesgo de baja, salud y horas son de la consultora) | `pruebas/metricas-rls.ts` |
-| Un dato personal llega al sandbox | anonimizador fail-closed; RR. HH. y nómina siempre a revisión humana | `pruebas/anonimiza.ts` (0 fugas en 277, 63 del revisor) |
+| Un dato personal llega al sandbox | el anonimizador reduce, no garantiza: lo que deja forma de dato va a cuarentena, y RR. HH. y nómina siempre van a cuarentena (definitiva hasta D14, DP-7); la base rechaza en el sandbox un identificador con forma | `pruebas/anonimiza.ts` (0 fugas en 277, 63 del revisor), `pruebas/cierre-base.ts` |
 | Un documento da órdenes | el texto extraído es dato, delimitado; nada lo ejecuta | `pruebas/ingesta.ts`, evidencia de documentos (0 obedecidas) |
 | La cadena se reescribe | sha256 encadenado, solo agregar, fecha y actor de la base | `pruebas/cadena.ts` |
 | El laboratorio se despliega | 404 sin la variable; `configura:deploy` la rechaza, y corre en `predeploy` aunque el árbol tenga sello (PRP-010 H-26) | `scripts/prueba-a2a.ts` (ruta declarada), `pruebas/superficie.ts` (el caso malo y el control positivo de `configura:deploy`) |

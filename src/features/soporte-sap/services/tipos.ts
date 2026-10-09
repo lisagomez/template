@@ -44,6 +44,8 @@ export interface IncidenciaVista {
   readonly planes: readonly PlanVista[]; readonly sandbox: { readonly veredicto: string; readonly texto: string | null; readonly senales: readonly string[] } | null
   readonly reloj: RelojVista
   readonly impugnaciones: readonly ImpugnacionVista[]
+  /** Lo que la consultora le pidió al cliente mientras el reloj espera; null si no espera nada. */
+  readonly pide: string | null
 }
 export interface MensajeSalaVista {
   readonly id: string; readonly hilo: string | null; readonly autor: string; readonly tipoAutor: string; readonly cuerpo: string; readonly origen: string
@@ -104,7 +106,8 @@ export interface PresupuestoVista {
 export type Accion =
   | { readonly tipo: 'decide'; readonly mensaje: string; readonly accion: 'aprobar' | 'rechazar' | 'a_revision'; readonly motivo?: string }
   | { readonly tipo: 'chat'; readonly texto: string }
-  | { readonly tipo: 'espera_cliente'; readonly incidencia: string }
+  /** El consultor pausa el reloj diciendo qué le pide al cliente; el cliente (o su consultor) lo reanuda al responder. */
+  | { readonly tipo: 'espera_cliente'; readonly incidencia: string; readonly pide: string }
   | { readonly tipo: 'responde_cliente'; readonly incidencia: string }
   /** El consultor le responde al cliente: su primera respuesta para el reloj (DP-4). */
   | { readonly tipo: 'responde'; readonly incidencia: string; readonly texto: string }

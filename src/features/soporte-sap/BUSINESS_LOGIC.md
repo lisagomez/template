@@ -39,7 +39,8 @@ aprenderla. Ninguna solución se aplica sin que una persona la apruebe en la sal
    veredicto; el plan llega a la **sala A2A**. Una persona aprueba, y eso es una fila que ningún
    modelo puede escribir. Se aplica al **simulador**, con el antes y el después en la cadena. **A
    revisión:** el agente corrige y vuelve a proponer.
-5. **Sin solución:** el caso se **anonimiza** (fail-closed) y entra al sandbox; el experto enseña y
+5. **Sin solución:** el caso se **anonimiza** (lo que deja forma de dato, y todo caso de RR. HH. o nómina, va a
+   cuarentena y no entra) y entra al sandbox; el experto enseña y
    el agente propone la regla y el CLI, que firma el laboratorio.
 6. **Medición:** la capa semántica (dbt + MetricFlow) da las métricas del ciclo de vida, el SLA se
    mide desde los eventos, y el tablero del cliente muestra accionables con impacto en MXN y su
@@ -59,10 +60,10 @@ parámetro por decidir**.
 
 ## 4. Arquitectura de Datos
 
-Propuesta de esquema con RLS forzada en las 20 tablas, tenencia en árbol (laboratorio → consultora →
+Propuesta de esquema con RLS forzada en las 22 tablas, tenencia en árbol (laboratorio → consultora →
 cliente) y tres buckets privados, en [`tools/soporte-sap/migraciones/propuesta-soporte-sap.sql`](../../../tools/soporte-sap/migraciones/propuesta-soporte-sap.sql)
-(SDD §12). **Validada en efímero, no aplicada a ninguna base.** El aislamiento se prueba con 56
-intentos con el rol real (`tools/soporte-sap/pruebas/aislamiento.ts`).
+(SDD §12). **Validada en efímero, no aplicada a ninguna base.** El aislamiento se prueba con 63
+comprobaciones con el rol real (`tools/soporte-sap/pruebas/aislamiento.ts`).
 
 ### Respaldo — qué pierde ESTE producto si arde el servidor
 
@@ -94,8 +95,8 @@ laboratorio (SDD §13): no son el RTO de producción.
 Lo que el producto **ya puede medir** (capa semántica, una definición por métrica): MTTR, primera
 respuesta, cumplimiento de SLA, resolución al primer contacto, reuso del conocimiento, backlog, horas
 por cliente, costo por ticket y tiempo al primer valor de cada cliente. Ya medido, en laboratorio:
-0 fugas del anonimizador sobre 92 casos con datos sembrados; los 9 sabotajes de la sala cazados; 56
-intentos cruzados rechazados; restauración por tenant S, M y L sin tocar a la vecina.
+0 fugas del anonimizador sobre 277 casos sintéticos (155 con datos sembrados); los 11 sabotajes de la suite de la
+sala cazados; 63 comprobaciones de aislamiento en verde; restauración por tenant S, M y L sin tocar a la vecina.
 
 ## 6. Gobernanza (controles C4 y C7)
 
@@ -110,7 +111,7 @@ intentos cruzados rechazados; restauración por tenant S, M y L sin tocar a la v
 | **Partes afectadas** | Los clientes (N3) y sus empleados, que no firmaron nada; las contrapartes de sus CFDI; las consultoras (N2) y sus consultores; el laboratorio. |
 | **Daño con el sistema operando bien** | Un dato personal que entra al sandbox; un secreto del cliente que llega al núcleo; una prioridad mal asignada (una nómina tratada como P3); una solución equivocada aprobada por fatiga; el conocimiento de una consultora usado para otra (D1); un FODA o una proyección en MXN leídos como promesa; un SLA mal medido; el triage cortado por presupuesto. **Los daños sobre terceros no son firmables** (límite de C5): se cierran con un control o no se ofrecen. |
 | **Acciones irreversibles** | **Ninguna automática.** Aplicar una solución en el SAP de un cliente no está cableado (D6): en el laboratorio se aplica al simulador y exige la fila de aprobación humana de la sala. Exponer la sala o el canal N1–N2 es gate humano con C3 y la AISIA firmados. Un motor externo de OCR no entra. |
-| **Vía de apelación humana** | El cliente **impugna** una prioridad, una categoría o una complejidad (`ss_impugnacion`), y su consultora la resuelve a su nombre. Un plan va a revisión con su motivo. Un campo leído se confirma o se corrige a nombre de quien lo revisa. Un caso en cuarentena lo revisa el experto, y la cuarentena no frena la atención. |
+| **Vía de apelación humana** | El cliente **impugna** una prioridad, una categoría o una complejidad (`ss_impugnacion`), y su consultora la resuelve a su nombre. Un plan va a revisión con su motivo. Un campo leído se confirma o se corrige a nombre de quien lo revisa. La cuarentena es definitiva y nadie la revisa hasta D14 (DP-7), y no frena la atención. El cliente impugna también una pausa del reloj, y él mismo la reanuda al responder. |
 | **Aislamiento de datos** | RLS forzada en toda tabla; ninguna superficie usa `service_role` (C7). El agente, la ingesta y los jobs de plataforma entran con un token de tarea firmado por el orquestador y solo ven la consultora del token. El laboratorio lee solo lo escalado, y los originales con un acceso que otorga la consultora (72 h). |
 
 ## 7. Especificación Técnica (Para el Agente)

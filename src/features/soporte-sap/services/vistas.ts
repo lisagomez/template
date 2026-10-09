@@ -26,6 +26,12 @@ function reloj(r: ResultadoSla): RelojVista {
   }
 }
 
+/** Lo último que la consultora le pidió al cliente (el evento ESPERA_CLIENTE de la cadena). */
+const pideDe = (i: IncidenciaLab): string | null => {
+  const pide = [...i.cadena].reverse().find((x) => x.tipo === 'ESPERA_CLIENTE')?.datos.pide
+  return typeof pide === 'string' ? pide : null
+}
+
 function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
   const c = i.clasificacion, q = i.consulta
   const verAdjuntos = s.nivel !== 'N1'
@@ -47,6 +53,7 @@ function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
     sandbox: i.sandbox ? { veredicto: i.sandbox.veredicto, texto: i.sandbox.veredicto === 'entra' ? i.sandbox.texto : null, senales: [...i.sandbox.senales] } : null,
     reloj: reloj(relojDe(i)),
     impugnaciones: i.impugnaciones.map((m) => ({ ...m })),
+    pide: i.estado === 'espera_cliente' ? pideDe(i) : null,
   }
 }
 

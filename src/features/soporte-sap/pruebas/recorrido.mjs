@@ -110,7 +110,8 @@ await pagina.click(`${sel('responde-al-cliente')} button`)
 await pagina.waitForTimeout(400)
 await captura(11.2, 'la primera respuesta la marca el consultor al responder', async () => /PRIMERA_RESPUESTA · usr-consultor/.test(await cadena()) && /respuesta en meta/.test(await texto(sel('reloj-incidencia'))), sel('reloj-incidencia'))
 await pagina.click(sel('incidencia-inc-002'))
-await pagina.click(sel('espera-cliente'))
+await pagina.fill(`${sel('espera-cliente')} input`, 'Necesitamos el log de la ST22 del día del error')
+await pagina.click(`${sel('espera-cliente')} button`)
 await pagina.waitForTimeout(1200)
 await pagina.click(sel('responde-cliente'))
 await pagina.waitForTimeout(400)
@@ -175,6 +176,23 @@ await captura(14, 'el cliente impugna y la consultora la resuelve a su nombre', 
   const t = await texto(sel('impugnaciones'))
   return /aceptada/.test(t) && /prioridad/.test(t) && /nadie del almacén/.test(t) && /resuelta por usr-consultor-andina/.test(t) && (await pagina.locator(sel('impugnacion-acepta')).count()) === 0
 }, sel('impugnaciones'))
+
+// 14.2 (PRP-010, fase 4): la pausa unilateral. El consultor pausa diciendo qué pide; el cliente lo ve y reanuda el
+// reloj él mismo al responder, sin depender de su consultora.
+await rol('consultor')
+await abre('Usuario bloqueado')
+await pagina.fill(`${sel('espera-cliente')} input`, 'Confírmanos si el bloqueo fue por intentos fallidos')
+await pagina.click(`${sel('espera-cliente')} button`)
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await abre('Usuario bloqueado')
+const pidio = /intentos fallidos/.test(await texto(sel('cliente-pide')))
+await pagina.click(sel('cliente-reanuda'))
+await pagina.waitForTimeout(400)
+await captura(14.2, 'el cliente ve que se le pide y reanuda el reloj al responder', async () => {
+  const c = await cadena()
+  return pidio && /ESPERA_CLIENTE · usr-consultor-andina/.test(c) && /RESPUESTA_CLIENTE · usr-cliente-bajio/.test(c) && (await pagina.locator(sel('cliente-reanuda')).count()) === 0
+}, sel('reloj-incidencia'))
 
 // H-28: el FODA dice su confianza, y una proyección dice que no es una promesa.
 await captura(14.5, 'el FODA lleva su confianza y la proyección su aviso', async () => {

@@ -220,7 +220,7 @@ function aplicaDetectores(texto: string, v: Validadores, c: Cuenta): string {
  * (`ss_cuarentena_solo_senales`) y `pruebas/cierre-base.ts` vigila que no se separen (PRP-010 H-03).
  */
 export const SENALES = {
-  personal: 'caso de RR. HH. o nómina: revisión humana obligatoria antes del sandbox',
+  personal: 'caso de RR. HH. o nómina: no entra al sandbox (cuarentena definitiva hasta D14)',
   correo: 'queda algo con forma de correo',
   digitos: 'queda una secuencia larga de dígitos',
   tratamiento: 'queda un tratamiento seguido de un nombre',

@@ -90,6 +90,19 @@ test('configura:deploy mide contra el perfil del producto y no imprime ningún s
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 
+test('con Soporte SAP, configura:deploy no deja encender un motor de OCR fuera de la máquina, ni con una decisión C4', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ss-ocr-'))
+  try {
+    const decision = join(dir, 'decision-c4.md')
+    writeFileSync(decision, 'una decisión C4 firmada para otro uso')
+    const env = join(dir, 'env')
+    writeFileSync(env, [...completa({ OCR_RESPALDO: 'mistral', OCR_DECISION_C4_ARCHIVO: decision })].map(([k, v]) => `${k}=${v}`).join('\n'))
+    const r = spawnSync(process.execPath, ['scripts/configura-deploy.mjs'], { cwd: RAIZ, env: { ...process.env, ENV_PRODUCCION: relative(RAIZ, env) }, encoding: 'utf8' })
+    assert.equal(r.status, 1)
+    assert.match(`${r.stdout}${r.stderr}`, /OCR_RESPALDO=mistral mandaría los documentos de Soporte SAP a un motor fuera de la máquina/)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
 // --- La ficha de servidor (PRP-010, fase 3): no dice «apto» sin la restauración probada en esa máquina (GATE 3).
 test('la ficha de servidor no dice «apto» sin la restauración probada en esa máquina, aunque todo lo demás esté', () => {
   const medicion = revisa(completa()).medicion!

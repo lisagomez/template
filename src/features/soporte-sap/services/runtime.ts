@@ -285,14 +285,33 @@ function subeAlNucleo(s: Sesion, id: string): void {
   e.propuestas = e.propuestas.map((v) => (v.id === id ? { ...v, alcance: alcanceDe(n), detalle: n.contenido, por: `${v.por} · al núcleo por ${s.usuario}` } : v))
 }
 
-/** El consultor pide un dato al cliente (pausa el reloj) o registra su respuesta (lo reanuda). */
-function relojDelCliente(s: Sesion, id: string, tipo: 'ESPERA_CLIENTE' | 'RESPUESTA_CLIENTE'): void {
-  if (s.rol !== 'consultor') throw new Rechazo('el reloj lo mueve el consultor de la consultora')
+/**
+ * El consultor le pide un dato al cliente y el reloj se pausa. Pausar dice QUÉ se pide (como `ss_evento` en la base):
+ * una pausa sin pedir nada es la pausa unilateral (AISIA §2), y el cliente la ve y la puede impugnar.
+ */
+function pideAlCliente(s: Sesion, id: string, pide: string): void {
+  if (s.rol !== 'consultor') throw new Rechazo('la pausa la pide el consultor de la consultora')
   const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
   if (!i) throw new Rechazo('esa incidencia no es de tu consultora')
-  i.sla.push({ tipo, fecha: ahora() })
-  anota(i, tipo, s.usuario, {})
-  i.estado = tipo === 'ESPERA_CLIENTE' ? 'espera_cliente' : 'en_atencion'
+  if (pide.trim().length < 10) throw new Rechazo('pausar el reloj lleva lo que se le pide al cliente')
+  if (i.estado === 'espera_cliente') throw new Rechazo('el reloj ya espera al cliente')
+  i.sla.push({ tipo: 'ESPERA_CLIENTE', fecha: ahora() })
+  anota(i, 'ESPERA_CLIENTE', s.usuario, { pide: pide.trim() })
+  i.estado = 'espera_cliente'
+}
+
+/**
+ * La respuesta del cliente reanuda el reloj. La registra el cliente de la incidencia o su consultor: si solo pudiera
+ * la consultora, el reloj quedaría en pausa mientras ella quisiera (la pausa unilateral, PRP-010 fase 4).
+ */
+function respuestaDelCliente(s: Sesion, id: string): void {
+  const i = estado().incidencias.find((x) => x.id === id
+    && ((s.rol === 'consultor' && x.consultora === s.organizacion) || (s.rol === 'cliente' && x.cliente === s.organizacion)))
+  if (!i) throw new Rechazo('la respuesta la registra el cliente de la incidencia o su consultora')
+  if (i.estado !== 'espera_cliente') throw new Rechazo('no hay nada pedido al cliente')
+  i.sla.push({ tipo: 'RESPUESTA_CLIENTE', fecha: ahora() })
+  anota(i, 'RESPUESTA_CLIENTE', s.usuario, {})
+  i.estado = 'en_atencion'
 }
 
 /**
@@ -349,7 +368,8 @@ function despacha(s: Sesion, a: Accion): void {
   if (a.tipo === 'fija_presupuesto') return fijaPresupuesto(s, a.consultora, { topeTokens: a.topeTokens, topePaginasOcr: a.topePaginasOcr })
   if (a.tipo === 'impugna') return impugna(s, a.incidencia, a.campo, a.motivo)
   if (a.tipo === 'resuelve_impugnacion') return resuelveImpugnacion(s, a.incidencia, a.impugnacion, a.decision)
-  return relojDelCliente(s, a.incidencia, a.tipo === 'espera_cliente' ? 'ESPERA_CLIENTE' : 'RESPUESTA_CLIENTE')
+  if (a.tipo === 'espera_cliente') return pideAlCliente(s, a.incidencia, a.pide)
+  return respuestaDelCliente(s, a.incidencia)
 }
 
 /**

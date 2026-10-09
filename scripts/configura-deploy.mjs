@@ -233,6 +233,12 @@ if (!producto) {
   problemas.push(`PRODUCTO=${producto}: no existe productos/${producto}.json`);
 } else {
   const manifiesto = JSON.parse(readFileSync(ruta(`productos/${producto}.json`), 'utf8'));
+  // Soporte SAP: sus documentos llevan datos de terceros (empleados, contrapartes de un CFDI). Un motor de OCR fuera de
+  // la máquina los sacaría, y ninguna firma lo autoriza (límite de C5): tampoco la decisión C4 que el servicio de OCR
+  // acepta para otros usos (PRP-010, fase 4).
+  if (producto === 'soporte-sap' && valores.get('OCR_RESPALDO')) {
+    problemas.push(`OCR_RESPALDO=${valores.get('OCR_RESPALDO')} mandaría los documentos de Soporte SAP a un motor fuera de la máquina: llevan datos de terceros, y ninguna firma lo autoriza (límite de C5). Quítalo: el OCR de este producto es local.`);
+  }
   const perfil = revisaPerfil(manifiesto, valores, { vcpu, ramMB, discoGb: mideDisco() }, new Date().toISOString());
   problemas.push(...perfil.problemas);
   avisos.push(...perfil.avisos);

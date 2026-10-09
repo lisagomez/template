@@ -66,6 +66,39 @@ function RespuestaAlCliente({ incidencia, actua }: { incidencia: string; actua: 
   )
 }
 
+/**
+ * La pausa del reloj: el consultor la pide diciendo qué le pide al cliente, y el cliente la ve y la reanuda al
+ * responder, sin depender de su consultora (la pausa unilateral, AISIA §2).
+ */
+function PausaDelReloj({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
+  const [pide, setPide] = useState('')
+  const pausa = async (ev: FormEvent) => {
+    ev.preventDefault()
+    if (pide.trim().length < 10) return
+    await actua({ tipo: 'espera_cliente', incidencia: i.id, pide: pide.trim() })
+    setPide('')
+  }
+  if (rol === 'cliente') {
+    return i.pide ? (
+      <div className="mt-2 rounded bg-amber-50 p-2 text-xs dark:bg-amber-950" data-prueba="cliente-pide">
+        <p>Tu consultora te pidió: «{i.pide}». El reloj de resolución está en pausa hasta que respondas.</p>
+        <button type="button" onClick={() => actua({ tipo: 'responde_cliente', incidencia: i.id })} className="mt-1 rounded border px-2 py-1" data-prueba="cliente-reanuda">Ya respondí (reanuda el reloj)</button>
+      </div>
+    ) : null
+  }
+  if (rol !== 'consultor') return null
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      <form onSubmit={pausa} className="flex flex-1 gap-2" data-prueba="espera-cliente">
+        <input value={pide} onChange={(e) => setPide(e.target.value)} placeholder="Qué le pides al cliente" maxLength={500}
+          className="flex-1 rounded border px-2 py-1 text-xs" aria-label="Qué le pides al cliente" />
+        <button type="submit" className="rounded border px-2 py-1 text-xs">Pedir y pausar</button>
+      </form>
+      <button type="button" onClick={() => actua({ tipo: 'responde_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="responde-cliente">El cliente respondió (reanuda)</button>
+    </div>
+  )
+}
+
 function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
   return (
     <div className="mt-3 space-y-3 text-sm" data-prueba={`detalle-${i.id}`}>
@@ -105,7 +138,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
       ))}
       {i.sandbox ? (
         <div data-prueba="sandbox-incidencia" className="rounded-lg bg-neutral-50 p-2 text-xs dark:bg-neutral-800/60">
-          <b>Sin regla: anonimizada → {i.sandbox.veredicto === 'entra' ? 'al sandbox' : 'en cuarentena (revisión humana)'}</b>
+          <b>Sin regla: anonimizada → {i.sandbox.veredicto === 'entra' ? 'al sandbox' : 'en cuarentena (no entra al sandbox; nadie la revisa hasta D14)'}</b>
           {i.sandbox.texto ? <p className="mt-1 font-mono">{i.sandbox.texto}</p> : null}
           {i.sandbox.senales.length ? <p className="text-neutral-500">Señales: {i.sandbox.senales.join('; ')}</p> : null}
         </div>
@@ -114,12 +147,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
         <h3 className="font-semibold">Reloj de SLA</h3>
         <Reloj r={i.reloj} />
         {rol === 'consultor' ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
-        {rol === 'consultor' ? (
-          <div className="mt-2 flex gap-2">
-            <button type="button" onClick={() => actua({ tipo: 'espera_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="espera-cliente">Pedir un dato al cliente (pausa)</button>
-            <button type="button" onClick={() => actua({ tipo: 'responde_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="responde-cliente">El cliente respondió (reanuda)</button>
-          </div>
-        ) : null}
+        <PausaDelReloj i={i} rol={rol} actua={actua} />
       </div>
       <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={rol} actua={actua} />
       <details data-prueba="cadena">
