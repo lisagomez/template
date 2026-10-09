@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { salaVacia, agregaParticipante, creaCanal, publica, registraAprobacion } from '../../sala-a2a/dist/index.js'
 import { HERRAMIENTA } from './_ayuda.ts'
+import { huellaDePlan, pasosDe, MATRIZ_LABORATORIO } from '../dist/index.js'
 
 const DIR = join(HERRAMIENTA, 'clis')
 const manifiesto = JSON.parse(readFileSync(join(DIR, 'manifiesto.json'), 'utf8')) as { producto: string; clis: Array<{ nombre: string; archivo: string; readOnly: boolean; dryRunPorDefecto: boolean; grado: string }> }
@@ -37,7 +38,8 @@ test('ss-simulador: sin --ejecutar simula; con --ejecutar y sin aprobación no c
   const base = ['ejecuta', '--regla', 'SS-BC-USUARIO', '--param', 'usuario=ALMACEN01']
   assert.match(corre('ss-simulador.mjs', base).stdout, /dry-run/)
   const dir = mkdtempSync(join(tmpdir(), 'sala-'))
-  const sha = 'ab'.repeat(32)
+  const regla = MATRIZ_LABORATORIO.find((e) => e.regla === 'SS-BC-USUARIO')!
+  const sha = huellaDePlan({ taskId: 'tarea-7', version: 1, regla: regla.regla, parametros: { usuario: 'ALMACEN01' }, pasos: pasosDe(regla, { usuario: 'ALMACEN01' }) })
   let sala = creaCanal(agregaParticipante(salaVacia(), 'ten-a', 'usr-experto'), { id: 'c1', tenant: 'ten-a', slug: 'andina', nombre: 'Andina', departamento: null })
   sala = publica(sala, { id: 'm1', canal: 'c1', autor: { tipo: 'agente', id: 'soporte-sap-a2a' }, cuerpo: 'plan', creado: 'x', bloques: [{ tipo: 'acciones', acciones: ['aprobar'], sha256: sha, taskId: 'tarea-7' }] })
   writeFileSync(join(dir, 'sin.json'), JSON.stringify(sala))
@@ -49,6 +51,10 @@ test('ss-simulador: sin --ejecutar simula; con --ejecutar y sin aprobación no c
   assert.equal(con.status, 0, con.stderr)
   assert.match(con.stdout, /"aprobadoPor": "usr-experto"/)
   assert.match(con.stdout, /ALMACEN01: activo/)
+  // PRP-010 H-11: con la misma aprobación, otro `--param` es otro artefacto y no corre.
+  const otro = corre('ss-simulador.mjs', ['ejecuta', '--regla', 'SS-BC-USUARIO', '--param', 'usuario=VENTAS02', '--ejecutar', '--sala', join(dir, 'con.json'), '--tarea', 'tarea-7', '--sha', sha])
+  assert.equal(otro.status, 1, otro.stdout)
+  assert.match(otro.stderr, /la aprobación es de otro artefacto/)
 })
 
 test('ss-triage: el caso de MIGO sale con su regla y su fuente sintética', () => {

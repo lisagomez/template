@@ -59,7 +59,11 @@ export { tierDe, costoDelTier, accionAnteElPresupuesto, pide24x7, UMBRALES_TIER,
 export type { Tier, VariablesN3, LineaDeCosto, FilaDelModelo, Veredicto, AccionDeTriage, Clasificacion as ClasificacionTier } from './pricing.js'
 export { accionables, recalcula, foda, PARAMETROS_LABORATORIO, CRITERIOS_FODA, FUENTE_SALARIO } from './impactos.js'
 export type { Rango, Parametro, Evidencia, Accionable, Cambio, PuntoFoda, Foda } from './impactos.js'
-export { preparaPlan, supervisa, mensajeDePlan, corrige } from './enjambre.js'
+export { preparaPlan, supervisa, mensajeDePlan, corrige, SinPresupuesto } from './enjambre.js'
+export { huellaDePlan } from './artefacto.js'
+export { leePresupuesto, usoDelMes, veredictoDelMes, ocrDelMes, mesDe } from './presupuesto.js'
+export type { PresupuestoDelMes, UsoDelMes, EventoDeUso } from './presupuesto.js'
+export type { ArtefactoDePlan } from './artefacto.js'
 export type { Plan, ComprobacionSupervisor, VeredictoSupervisor } from './enjambre.js'
 
 export { calculaResultadosSla, entradaDelReloj } from './sla-job.js'

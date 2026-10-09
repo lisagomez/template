@@ -18,6 +18,8 @@ export type TipoEvento =
   | 'VEREDICTO_SUPERVISOR' | 'ENVIADA_A_SALA' | 'APROBADA' | 'RECHAZADA' | 'A_REVISION' | 'APLICADA_EN_SIMULADOR'
   | 'ANONIMIZADA' | 'EN_CUARENTENA' | 'EN_SANDBOX' | 'PROPUESTA' | 'PRIMERA_RESPUESTA'
   | 'ESPERA_CLIENTE' | 'RESPUESTA_CLIENTE' | 'CAMBIO_PRIORIDAD' | 'ESCALADA' | 'RESUELTA' | 'REABIERTA' | 'CERRADA'
+  /** El presupuesto del mes ante un paso que gasta modelo (PRP-010 H-18): aviso al 80 %, una persona al tope (P1 y P2) o espera (P3 y P4). */
+  | 'AVISO_PRESUPUESTO' | 'A_HUMANO_POR_PRESUPUESTO' | 'EN_ESPERA_POR_PRESUPUESTO'
 
 export interface EventoIncidencia {
   readonly v: 1

@@ -133,6 +133,23 @@ await captura(9, 'vista del superadministrador', async () => /Todas las consulto
 await rol('experto')
 await captura(9.5, 'vista del experto', async () => { const t = await texto(sel('tablero')); return /Todas las consultoras/.test(t) && !/Horas por incidencia/.test(t) })
 
+// 13 (PRP-010 H-18): el presupuesto del mes. El superadministrador lo deja en 0: un P1 con una captura pasa a una
+// persona AHORA (por la imagen sin leer y por el presupuesto) y un P4 espera, con aviso. El consultor lo ve.
+await rol('superadmin')
+await pagina.fill(sel('tope-tokens-andina'), '0')
+await pagina.fill(sel('tope-ocr-andina'), '0')
+await pagina.locator(`${sel('fija-presupuesto-andina')} button`).click()
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await levanta('MIGO detenida otra vez', 'Al contabilizar la entrada 101 en MIGO sale el mensaje M7 053 en sociedad 1000; necesitamos el periodo 2026/10 y toda la planta está detenida hoy.', ['captura-migo.png'])
+await levanta('Usuario bloqueado', 'El usuario ALMACEN01 está bloqueado en SU01, cuando puedan', [])
+await rol('consultor')
+await pagina.locator(sel('presupuesto')).scrollIntoViewIfNeeded()
+await captura(13, 'al tope del presupuesto el P1 pasa a una persona y el P4 espera', async () => {
+  const t = await texto(sel('presupuesto'))
+  return /tokens [\d.,]+ de 0/.test(t) && /a una persona[^\n]*evidencia sin leer/.test(t) && /a una persona[^\n]*no alcanza[^\n]*P1 pasa a una persona/.test(t) && /en espera[^\n]*P4 espera/.test(t)
+}, sel('presupuesto'))
+
 await navegador.close()
 const malos = pasos.filter((p) => !p.ok)
 console.log(`\n${pasos.length} capturas · ${malos.length} comprobaciones en rojo · ${errores.length} errores de consola${errores.length ? `:\n  ${errores.join('\n  ')}` : ''}`)

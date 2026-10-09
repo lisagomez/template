@@ -75,7 +75,7 @@ arregló en parte.
 | H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | **cerrado en la tanda 1e** (los bytes de Storage van por su línea; la retención es D8) |
 | H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | **cerrado en la tanda 1b** |
 | H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | **base: tanda 1b** (la pantalla, en la fase 2) |
-| H-11 | `ejecuta()` no ata la aprobación a la huella del plan, y `ss-simulador --param` ejecuta sin compararla | 1 y 2 | sí, con SAP real | código + prueba negativa | — |
+| H-11 | `ejecuta()` no ata la aprobación a la huella del plan, y `ss-simulador --param` ejecuta sin compararla | 1 y 2 | sí, con SAP real | código + prueba negativa | **cerrado** en la fase 2 |
 | H-12 | El agente, con la tarea de cualquier consultora, escribe en el chat de cualquier usuario («aprueba el plan de Boreal ya») | 1 y 2 | — | código | **cerrado en la tanda 1d** |
 | H-13 | La base no verifica `anterior`, `hash` ni `seq` de la cadena de eventos | 1 | — | código: la base calcula la cadena | **cerrado en la tanda 1d** |
 
@@ -92,7 +92,7 @@ arregló en parte.
 | H-15 | El piso de nómina deja **P4** a IMSS, PTU, aguinaldo, incapacidad, vacaciones, sueldo, infotipo, el depósito de la quincena y SUA/IDSE. El categorizador y el anonimizador usan vocabularios distintos. La base no impone el piso: el N3 inserta la prioridad que quiera y el consultor la cambia sin motivo ni evento. **Confirmado con sonda** | 1 y 2 | sí | código: un solo vocabulario, el piso en la base y el cambio de prioridad con motivo y evento | **cerrado en la tanda 1b** |
 | H-16 | El SLA es manipulable por las tres partes. El N3 crea con `creada_en` pasado, P1 y estado resuelta. El consultor reescribe `creada_en` y `primera_respuesta_en`. El agente inserta `ss_sla_resultado` con `cumple=true` y un contrato inventado. La ventana de ±5 min la elige quien escribe. La prueba de recálculo es circular | 1 y 2 | sí (dinero ajeno) | código: un job calcula el resultado desde los eventos; la base fija las fechas; tipos de evento por rol | **cerrado** (la base en la 1b; el job, en la fase 2) |
 | H-17 | La primera respuesta la marca la máquina (al anonimizar o al mandar a la sala), así que una P1 a 60 min se cumple siempre. Ni el contrato ni la plantilla definen «respuesta» | 1 y 2 | sí | código + definición en el contrato (DP-4) | **cerrado** (la base en la 1b; el runtime, en la fase 2) |
-| H-18 | «P1 y P2 nunca se cortan por presupuesto» es una función que nadie llama. El aviso no llega a nadie. Nadie lee `ss_presupuesto`; el tope de OCR vive en memoria y sin periodo | 1 y 2 | sí | código: cablear en el runtime y en el enjambre, aviso registrado, tope leído de la base con su periodo | parcial: tope en memoria |
+| H-18 | «P1 y P2 nunca se cortan por presupuesto» es una función que nadie llama. El aviso no llega a nadie. Nadie lee `ss_presupuesto`; el tope de OCR vive en memoria y sin periodo | 1 y 2 | sí | código: cablear en el runtime y en el enjambre, aviso registrado, tope leído de la base con su periodo | **cerrado** en la fase 2 |
 
 **Núcleo de conocimiento**
 
@@ -500,6 +500,25 @@ Playwright en verde; `prueba:buzon` en verde tras tocar el extractor.
 - **Evidencia**: 11 filas de la matriz nuevas o rehechas, y el paso 5.1 del recorrido (el superadministrador sube la
   enseñanza y la pantalla muestra `[CLIENTE]` y `[OBJETO_PROPIO]`), con 20 capturas, 0 en rojo y 0 errores de consola.
 
+**Fase 2, tercera parte: el presupuesto y la huella de la ejecución, hecha (2026-10-09, rama `soporte/fase2-presupuesto`)**:
+- **H-11**: lo que se aprueba y lo que se ejecuta son el mismo artefacto (`src/artefacto.ts`). `ejecuta()` recalcula la
+  huella sobre lo que va a correr y la compara con la aprobada: otro parámetro, otra versión u otra tarea no ejecutan,
+  tampoco desde `ss-simulador`. La prueba vieja del CLI aprobaba una huella inventada (`'ab' × 32`) y ejecutaba: fijaba
+  el bug como requisito.
+- **H-18**: `src/presupuesto.ts` lee el tope de la base por mes (`ss_presupuesto`) y calcula lo gastado desde la cadena
+  del mes. Las páginas las anota cada `ADJUNTO_LEIDO` y los tokens cada `PLAN_PREPARADO`; lo que no trae su medida no
+  cuenta como cero. El enjambre no prepara ni corrige un plan sin el visto bueno del presupuesto. El runtime pasa por
+  `conPresupuesto` todo paso que gasta modelo:
+  - con presupuesto, el paso corre, y el aviso del 80 % queda en la cadena;
+  - al tope o sin tope del mes, P1 y P2 pasan a una persona ahora y P3 y P4 esperan.
+  Un P1 o un P2 con una imagen sin leer por el tope de OCR también pasa a una persona. Los avisos se ven en el panel
+  «Presupuesto del mes» del consultor y del superadministrador, y el tope lo fija el superadministrador. En el
+  laboratorio no hay modelo: los tokens son el supuesto de `medicion/estimado.json`, y el evento lo dice
+  (`tokensSon: 'estimados'`). No hay tabla nueva.
+- **Evidencia**: 9 filas nuevas en la matriz y el paso 13 del recorrido. En ese paso, con el tope en 0, el P1 con su
+  captura pasa a una persona por las dos razones y el P4 espera. El recorrido dio 21 capturas, 0 en rojo y 0 errores
+  de consola, con Tesseract.
+
 ### Fase 3: El perfil de despliegue (VPS seleccionable en el laboratorio y en la instalación)
 **Objetivo**:
 - la sección `despliegue` en la plantilla v3 (DP-5) y en los dos manifiestos;
@@ -573,6 +592,15 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   meta» sin que nadie respondiera. Se demostró aparte con `relojSla` (viejo: cumple `true`; nuevo: `null`, en plazo).
   **Lección**: un paso de recorrido se escribe contra lo que el bug cambia en pantalla, y se comprueba que el código
   viejo lo pondría en rojo.
+- **2026-10-09 · una prueba que lee el código prueba la línea que busca, y nada más** (fase 2, H-18). La prueba del P1 con
+  evidencia sin leer buscaba el `anota(... 'A_HUMANO_POR_PRESUPUESTO' ... evidencia sin leer)`. Un sabotaje que apaga la
+  condición (`if (false)`) la habría dejado en verde. **Fix**: la prueba exige la condición junto con la línea, y el
+  recorrido lo ejercita de punta a punta. **Lección**: en una prueba de lectura de código, el sabotaje que se imagina
+  es el que decide qué se busca; se escribe primero el sabotaje y después la expresión.
+- **2026-10-09 · el ataque de «otro parámetro» necesita un usuario que exista** (fase 2, H-11). La primera versión
+  ejecutaba con la aprobación de ALMACEN01 un plan para FINANZAS02, que no existe en el SAP simulado: el código viejo
+  también habría fallado, por «usuario inexistente». **Fix**: VENTAS02, bloqueado en el estado de la prueba, y una
+  comprobación de que cada «otro» artefacto es ejecutable antes de probar que no se ejecuta.
 - **2026-10-08 · un banco que ya leíste deja de medir** (fase 2, H-04). El banco independiente encontró 20 fugas que
   el banco propio no veía. Pero al arreglarlas, el banco pasa a ser parte del diseño, y su «0 fugas» ya no dice nada
   de lo que no se ha visto. **Fix**: un segundo banco de control, escrito después y sin ver ni el detector ni el

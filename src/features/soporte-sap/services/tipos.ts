@@ -75,6 +75,15 @@ export interface Vista {
   readonly accionables: readonly AccionableVista[]
   readonly foda: FodaVista | null
   readonly sandbox: ReadonlyArray<{ readonly incidencia: string; readonly veredicto: string; readonly texto: string | null; readonly senales: readonly string[] }>
+  /** El presupuesto del mes que ve cada quien: el consultor el de su consultora; el superadministrador el de todas. */
+  readonly presupuesto: readonly PresupuestoVista[]
+}
+
+/** Tope y gastado del mes, y los avisos que dejó en la cadena (PRP-010 H-18). Los tokens del laboratorio son estimados. */
+export interface PresupuestoVista {
+  readonly consultora: string; readonly mes: string
+  readonly topeTokens: number | null; readonly tokens: number; readonly topePaginasOcr: number | null; readonly paginasOcr: number
+  readonly avisos: ReadonlyArray<{ readonly incidencia: string; readonly tipo: string; readonly aviso: string; readonly fecha: string }>
 }
 
 export type Accion =
@@ -86,4 +95,6 @@ export type Accion =
   | { readonly tipo: 'responde'; readonly incidencia: string; readonly texto: string }
   /** El superadministrador sube una enseñanza al núcleo, generalizada (PRP-010 H-19). */
   | { readonly tipo: 'al_nucleo'; readonly propuesta: string }
+  /** El superadministrador fija el tope del mes de una consultora (como `ss_presupuesto_fija`). */
+  | { readonly tipo: 'fija_presupuesto'; readonly consultora: string; readonly topeTokens: number | null; readonly topePaginasOcr: number | null }
   | { readonly tipo: 'reinicia' }
