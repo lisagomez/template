@@ -130,6 +130,13 @@ await captura(12.5, 'accionables con impacto en MXN en el tablero del N3', async
 // 9: las vistas del superadministrador y del experto.
 await rol('superadmin')
 await captura(9, 'vista del superadministrador', async () => /Todas las consultoras/.test(await texto(sel('tablero'))) && !/inc-002/.test(await texto(sel('incidencias'))))
+// 9.1 (PRP-010, fase 3): la ficha de servidor por consultora. Sin medir, sin las respuestas del proveedor y sin
+// restauración probada, ninguna es apta: la pantalla no dice «apto» sin GATE 3.
+await pagina.locator(sel('fichas')).scrollIntoViewIfNeeded()
+await captura(9.1, 'la ficha de servidor no dice apto sin la restauracion probada', async () => {
+  const t = await texto(sel('fichas'))
+  return /andina · gestionado/.test(t) && /boreal · despacho/.test(t) && (await pagina.locator(sel('ficha-no-apto')).count()) === 2 && (await pagina.locator(sel('ficha-apto')).count()) === 0 && /GATE 3/.test(t)
+}, sel('fichas'))
 await rol('experto')
 await captura(9.5, 'vista del experto', async () => { const t = await texto(sel('tablero')); return /Todas las consultoras/.test(t) && !/Horas por incidencia/.test(t) })
 

@@ -621,7 +621,8 @@ Los controles, cada uno con la prueba que se pone roja si falta (detalle en el C
 | Un dato personal llega al sandbox | anonimizador fail-closed; RR. HH. y nómina siempre a revisión humana | `pruebas/anonimiza.ts` (0 fugas en 277, 63 del revisor) |
 | Un documento da órdenes | el texto extraído es dato, delimitado; nada lo ejecuta | `pruebas/ingesta.ts`, evidencia de documentos (0 obedecidas) |
 | La cadena se reescribe | sha256 encadenado, solo agregar, fecha y actor de la base | `pruebas/cadena.ts` |
-| El laboratorio se despliega | 404 sin la variable; `configura:deploy` la rechaza | `scripts/prueba-a2a.ts` (ruta declarada), caso malo y control positivo de `configura:deploy` |
+| El laboratorio se despliega | 404 sin la variable; `configura:deploy` la rechaza, y corre en `predeploy` aunque el árbol tenga sello (PRP-010 H-26) | `scripts/prueba-a2a.ts` (ruta declarada), `pruebas/superficie.ts` (el caso malo y el control positivo de `configura:deploy`) |
+| Una instalación no cabe en lo contratado | el perfil `despliegue` del manifiesto (plantilla v3): `configura:deploy` mide la máquina contra el tamaño, la región frente a D10 («pendiente», nunca «cumple»), el respaldo inmutable y los secretos, sin imprimirlos; la ficha de servidor no dice «apto» sin GATE 3 | `pruebas/despliegue.ts`, siembras de `verifica:productos` |
 | Un secreto en pantalla | contraseñas al azar por variable o stdin, nunca en una línea de comandos; huellas como `sha256:` | `npm run audita:secretos` |
 | Cadena de suministro | Postgres y Python por digest; dbt y MetricFlow por lock con hashes | el corte registra con qué se generó (`generadoCon`) |
 

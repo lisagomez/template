@@ -25,11 +25,12 @@
  *
  * Exit 0 = listo para desplegar · 1 = hay que arreglar algo · 2 = no pude medir.
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, statfsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { revisaDespacho, RESERVA_SUPABASE_MB } from './despacho/reglas.mjs';
+import { revisaPerfil } from './despliegue/perfil.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ruta = (p) => resolve(raiz, p);
@@ -220,6 +221,31 @@ if (!existsSync(ruta(ENV))) {
   }
 }
 
+// --- 3b. El perfil de despliegue del producto (PRP-010, fase 3) ------------
+// El producto declara REQUISITOS (`productos/<slug>.json`, bloque `despliegue`); aquí se mide la instalación contra
+// ellos: el tamaño contratado, la región frente a su decisión, el destino de respaldo y los secretos del producto.
+const mideDisco = () => { try { const f = statfsSync('/'); return Math.floor((f.blocks * f.bsize) / 1e9); } catch { return null; } };
+let medicionDelPerfil = null;
+const producto = valores.get('PRODUCTO');
+if (!producto) {
+  avisos.push('sin PRODUCTO en .env.production: no se mide contra el perfil de despliegue de un producto (productos/<slug>.json)');
+} else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(producto) || !existsSync(ruta(`productos/${producto}.json`))) {
+  problemas.push(`PRODUCTO=${producto}: no existe productos/${producto}.json`);
+} else {
+  const manifiesto = JSON.parse(readFileSync(ruta(`productos/${producto}.json`), 'utf8'));
+  const perfil = revisaPerfil(manifiesto, valores, { vcpu, ramMB, discoGb: mideDisco() }, new Date().toISOString());
+  problemas.push(...perfil.problemas);
+  avisos.push(...perfil.avisos);
+  medicionDelPerfil = perfil.medicion;
+  const m = perfil.medicion;
+  if (m) console.log(`Perfil de ${producto}: modo ${m.modo} · tamaño ${m.tamano ?? '—'} (${m.cabe === null ? 'sin comparar' : m.cabe ? 'cabe' : 'NO cabe'}) · región: ${m.region_estado} · respaldo: ${m.respaldo}`);
+  // Los secretos del producto: solo presencia y largo, nunca el valor.
+  for (const clave of manifiesto.despliegue?.secretos ?? []) {
+    const v = valores.get(clave);
+    console.log(`${clave}: ${v ? verde(`presente (${v.length} car.)`) : gris('ausente')}`);
+  }
+}
+
 // --- 4. El bloque de tamaño -------------------------------------------------
 const bloque = [
   '',
@@ -250,6 +276,13 @@ if (ESCRIBIR && existsSync(ruta(ENV))) {
   console.log(verde(`✓ Bloque escrito en ${ENV} (reemplaza el anterior si lo habia).`));
 } else if (ESCRIBIR) {
   console.log(rojo(`✗ No puedo escribir: ${ENV} no existe.`));
+}
+// La medición del perfil, sin un solo secreto: la lee la ficha de servidor (PRP-010, fase 3). No entra a git ni a la
+// imagen (`.gitignore`, `.dockerignore`).
+if (ESCRIBIR && medicionDelPerfil) {
+  mkdirSync(ruta('.despliegue'), { recursive: true });
+  writeFileSync(ruta('.despliegue/medicion.json'), `${JSON.stringify(medicionDelPerfil, null, 1)}\n`);
+  console.log(verde('✓ Medición del perfil escrita en .despliegue/medicion.json (sin secretos).'));
 }
 
 // --- 5. Veredicto -----------------------------------------------------------

@@ -19,7 +19,7 @@
     },
     "predeploy": {
       "descripcion": "Lo que corre EN EL SERVIDOR antes de desplegar. Subconjunto estricto de validate: sin build ni pruebas de feature (el build lo hace la imagen), con las auditorias y la gobernanza completas. El gate vive DENTRO de la ruta de deploy a proposito: sacarlo de ahi fue el hueco del 2026-08-23.",
-      "siempre": ["verifica:privado"],
+      "siempre": ["verifica:privado", "configura:deploy"],
       "atajo": "sello"
     },
     "cdc": {
@@ -325,6 +325,17 @@
       "activo": true,
       "timeout_s": 120,
       "_nota": "Fuera de `validate` a proposito: necesita red. Corre SIEMPRE en predeploy, incluso con sello vigente, porque la visibilidad del repo puede cambiar sin que cambie el arbol."
+    },
+    {
+      "nombre": "configura:deploy",
+      "runner": "comando",
+      "comando": "npm run configura:deploy",
+      "guarda": "que la instalacion quepa en lo que declara su producto y que su .env.production este completo (PRP-010 H-26): la maquina contra el tamaño contratado, la region frente a su decision, el destino de respaldo inmutable y los secretos del producto, sin imprimir ninguno; y lo de siempre (placeholders, NEXT_PUBLIC_ secretas, swap, el laboratorio apagado)",
+      "evidencia": "una linea por comprobacion y el perfil medido; exit 1 si hay algo que arreglar, 2 si no pudo medir la maquina",
+      "perfiles": ["predeploy"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "Fuera de `validate` a proposito: mide la maquina y el .env.production del SERVIDOR, que en una maquina de desarrollo no existe. Corre SIEMPRE en predeploy, incluso con sello vigente, porque la maquina y el .env cambian sin que cambie el arbol."
     },
     {
       "nombre": "regresion:trampa",

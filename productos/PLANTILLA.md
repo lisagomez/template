@@ -1,4 +1,4 @@
-# Plantilla de producto (v2)
+# Plantilla de producto (v3)
 
 > Para declarar el siguiente producto. Qué es un producto: [`CONCEPTO.md`](CONCEPTO.md). El manifiesto
 > de referencia es [`soporte-sap.json`](soporte-sap.json); la plantilla salió de él y **lo que no aparece en
@@ -22,7 +22,7 @@
 
 | Campo | Qué lleva | En Soporte SAP | En el vendedor en WhatsApp | Lo que el gate exige |
 |---|---|---|---|---|
-| `plantilla` | la versión de la plantilla que sigue | 2 | 2 | la vigente |
+| `plantilla` | la versión de la plantilla que sigue | 3 | 3 | la vigente |
 | `slug`, `nombre`, `version` | identidad | `soporte-sap`, versión 1 | `ventas-whatsapp` | `slug` en kebab-case = nombre del archivo |
 | `estado` | `blueprint`, `beta` o `produccion` | `blueprint` | `blueprint` | no más avanzado que el menos avanzado de sus propios |
 | `indice` | el nombre de su fila en `BUSINESS_LOGIC.md` §1 | «Soporte SAP» | «Vendedor con IA en WhatsApp» | la fila existe; cita solo propios del manifiesto |
@@ -39,6 +39,7 @@
 | `sla` | los contratos y la plantilla del documento, o `aplica: false` con `motivo` | `sla.ts` y su plantilla | no aplica: nadie contrata un tiempo de respuesta | existen, o el motivo |
 | `entrega` | modelo `A`, `B`, `mixto` o `por decidir`, con la decisión que lo fija | por decidir (D3) | por decidir, sin decisión propia | uno de los cuatro |
 | `respaldo` | dónde está su inventario de respaldo, el procedimiento y `rpoRto` | export por tenant | falta: va en el contrato pendiente | inventario (o `falta`); **RPO y RTO `desconocidos` hasta GATE 3**; nunca «no aplica» |
+| `despliegue` | **requisitos, no proveedores**: `modos` (`gestionado`, `despacho`), la máquina de cada `tamano` (S, M, L) con su `fuente`, lo que `exige` (la región según su decisión, respaldo inmutable fuera de sitio, puertos, Docker), quién lo `opera` y con qué decisión, y los `secretos` que necesita en producción | gestionado y despacho; 2 vCPU · 1.5 GB · 21–22 GB del estimado; región por D10 (abierta); opera por D3 | gestionado; tamaños: falta (sin estimado) | **ningún proveedor ni plan**; los tamaños con su máquina y su fuente (o `falta`); **respaldo inmutable fuera de sitio**; la región, abierta o decidida con sus regiones; ningún secreto con `NEXT_PUBLIC_` |
 | `reuso` | la matriz dominio × capa, si existe, con su comando | 40.7 % / 14.8 % | falta: no hay matriz | el comando existe (o `falta`); el reuso de composición lo calcula el gate |
 | `fde` | `aMedida`, `nucleo`, `vuelta` y su `registro` | mapeos y contratos por cliente | catálogo, límites y umbral por pyme | las dos listas con algo, cómo vuelve lo a medida, y el registro (o `falta`) |
 | `fuera` | lo que el producto no hace | sin SAP real, sin aprobar solo | sin número real, sin LLM, sin cobrar solo | al menos una línea |
@@ -48,7 +49,7 @@
 
 ```json
 {
- "plantilla": 2, "slug": "", "nombre": "", "version": 1, "estado": "blueprint", "indice": "",
+ "plantilla": 3, "slug": "", "nombre": "", "version": 1, "estado": "blueprint", "indice": "",
  "contrato": { "ruta": null, "falta": "", "c3": null, "aisia": null, "firma": "pendiente del laboratorio" },
  "modeloDeNegocio": { "quienPaga": "", "aQuienSirve": [], "forma": "", "propuesta": "" },
  "niveles": [], "tenencia": { "arbol": [], "aislamiento": { "control": "", "prueba": "" } },
@@ -59,6 +60,7 @@
  "sla": { "contratos": "", "plantilla": "" },
  "entrega": { "modelo": "por decidir", "decision": "" },
  "respaldo": { "inventario": null, "falta": "", "procedimiento": "", "rpoRto": "desconocidos", "gate3": false },
+ "despliegue": { "modos": [], "tamanos": null, "falta": "", "exige": { "region": { "decision": "", "estado": "abierta", "regiones": [] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true }, "opera": { "quien": "por decidir", "decision": "" }, "secretos": [] },
  "reuso": { "matriz": null, "falta": "" }, "fde": { "aMedida": [], "nucleo": [], "vuelta": "", "registro": null, "falta": "" },
  "fuera": [], "noCupo": []
 }
@@ -86,6 +88,18 @@
     - las fases del producto con compuertas;
     - la inversión de una vez antes del piloto.
   - 8 siembras nuevas (26 en total).
+
+- **v3 (2026-10-09)**: `despliegue` (PRP-010, DP-5). Soporte SAP lo tiene y la v2 no lo recogía: el estimado de
+  la máquina por tamaño (SDD §14), el despliegue en cualquier VPS (§15) y tres decisiones abiertas, D3 (quién opera),
+  D10 (dónde viven los datos) y D12 (el proveedor). Es la misma regla de entrada, sin cambiarla (B-3).
+  - **Requisitos, no proveedores**: una tabla de planes envejece sin que nadie lo note, y el repo ya lo aprendió
+    (`configura:deploy` no tiene tabla de planes a propósito). El proveedor y la región de cada instalación son un
+    dato de su `.env.production`, y la máquina se mide.
+  - `configura:deploy` mide la máquina contra el tamaño contratado. Compara la región con su decisión, y mientras
+    esté abierta dice «pendiente», nunca «cumple». Avisa si falta el destino de respaldo y comprueba que estén los
+    `secretos`, sin imprimirlos.
+  - `retencion` y `salida` no entran: siguen la recomendación de B-6 y entran con el siguiente manifiesto.
+  - 9 siembras nuevas (35 en total).
 
 **La regla de entrada**: un cambio entra a la plantilla si Soporte SAP también lo tiene o si es una regla
 que la plantilla ya escribía. Lo que solo tiene un producto se queda en su `noCupo`. Que entre lo que tienen

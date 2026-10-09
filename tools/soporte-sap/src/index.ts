@@ -61,6 +61,8 @@ export { accionables, recalcula, foda, PARAMETROS_LABORATORIO, CRITERIOS_FODA, F
 export type { Rango, Parametro, Evidencia, Accionable, Cambio, PuntoFoda, Foda } from './impactos.js'
 export { preparaPlan, supervisa, mensajeDePlan, corrige, SinPresupuesto } from './enjambre.js'
 export { huellaDePlan } from './artefacto.js'
+export { veredictoDeFicha, PREGUNTAS_SNAPSHOT } from './ficha.js'
+export type { FichaDeServidor, MedicionDeServidor } from './ficha.js'
 export { leePresupuesto, usoDelMes, veredictoDelMes, ocrDelMes, mesDe } from './presupuesto.js'
 export type { PresupuestoDelMes, UsoDelMes, EventoDeUso } from './presupuesto.js'
 export type { ArtefactoDePlan } from './artefacto.js'
