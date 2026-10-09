@@ -32,17 +32,19 @@ const verde = (s) => `\x1b[32m${s}\x1b[0m`;
 const ambar = (s) => `\x1b[33m${s}\x1b[0m`;
 
 /** La versión vigente de la plantilla (su historia, en `productos/PLANTILLA.md`). */
-export const PLANTILLA = 2;
+export const PLANTILLA = 3;
 export const ESTADOS = ['blueprint', 'beta', 'produccion'];
 export const ENTREGAS = ['A', 'B', 'mixto', 'por decidir'];
 /** La naturaleza de una cifra: el vocabulario común de los dos productos («ficticio» del vendedor es «supuesto»). */
 export const NATURALEZAS = ['medido', 'supuesto', 'fuente', 'por decidir'];
 /** Los campos de la plantilla. Un campo que no aplica se declara con su motivo, no se omite. */
 export const CAMPOS = ['plantilla', 'slug', 'nombre', 'version', 'estado', 'indice', 'contrato', 'modeloDeNegocio', 'niveles', 'tenencia',
-  'roles', 'activos', 'canales', 'terceros', 'pricing', 'metricas', 'sla', 'entrega', 'respaldo', 'reuso', 'fde', 'fuera', 'noCupo'];
+  'roles', 'activos', 'canales', 'terceros', 'pricing', 'metricas', 'sla', 'entrega', 'respaldo', 'despliegue', 'reuso', 'fde', 'fuera', 'noCupo'];
 /** Lo que no puede quedar en null sin decir qué falta (`<sección>.falta`). */
 export const REQUERIDOS = [['tenencia', 'aislamiento.prueba'], ['metricas', 'fuente'], ['sla', 'contratos'], ['respaldo', 'inventario'],
-  ['pricing', 'fuente'], ['reuso', 'matriz'], ['fde', 'registro']];
+  ['despliegue', 'tamanos'], ['pricing', 'fuente'], ['reuso', 'matriz'], ['fde', 'registro']];
+/** Cómo se despliega (v3, PRP-010 DP-5): en la infraestructura que opera el laboratorio o en la máquina de quien la pone. */
+export const MODOS = ['gestionado', 'despacho'];
 /** Las secciones que pueden declararse `{ "aplica": false, "motivo": … }`: solo las que un producto ya necesitó. */
 export const PUEDEN_NO_APLICAR = ['sla'];
 
@@ -78,7 +80,7 @@ const noAplica = (m, s) => m?.[s]?.aplica === false;
 function rutas(m) {
   return [m.contrato?.ruta, m.contrato?.c3, m.contrato?.aisia, m.tenencia?.aislamiento?.prueba, m.metricas?.fuente, m.metricas?.catalogo,
     m.sla?.contratos, m.sla?.plantilla, m.respaldo?.inventario, m.respaldo?.evidenciaGate3, m.pricing?.fuente, m.pricing?.planComercial,
-    m.fde?.registro, m.reuso?.matriz?.comando?.split(/\s+/).find((t) => /\.(m?js|ts)$/.test(t)),
+    m.fde?.registro, m.despliegue?.tamanos?.fuente, m.reuso?.matriz?.comando?.split(/\s+/).find((t) => /\.(m?js|ts)$/.test(t)),
     ...lista(m.terceros).map((t) => t?.costo?.fuente)].filter((r) => r !== null && r !== undefined);
 }
 
@@ -143,6 +145,27 @@ function verificaReglas(m, ctx, comprueba) {
   comprueba('dice lo que no hace', lista(m.fuera).length > 0, 'un producto sin «qué no hace» promete de más');
 }
 
+/**
+ * El despliegue (v3): REQUISITOS, no proveedores. La tabla de planes de un proveedor envejece sin que nadie lo note; el
+ * proveedor y la región de una instalación son un dato de su `.env.production`, y la máquina se mide (`configura:deploy`).
+ */
+function verificaDespliegue(m, ctx, comprueba) {
+  const d = m.despliegue;
+  if (!d || noAplica(m, 'despliegue')) return;
+  const deProveedor = Object.keys(d).filter((k) => /proveedor|planes|precio/i.test(k));
+  comprueba('el despliegue declara requisitos, no proveedores', deProveedor.length === 0, `${deProveedor.join(', ')}: el proveedor y la región de una instalación van en su .env.production, no en el producto`);
+  comprueba('los modos de despliegue son gestionado o despacho', lista(d.modos).length > 0 && lista(d.modos).every((x) => MODOS.includes(x)), `modos ${JSON.stringify(d.modos)}`);
+  const maquina = (x) => x && [x.vcpu, x.ramGb, x.discoGb].every((n) => typeof n === 'number' && n > 0);
+  const t = d.tamanos;
+  comprueba('cada tamaño declara su máquina (vCPU, RAM y disco) y su fuente', t === null || (['S', 'M', 'L'].every((k) => maquina(t?.[k])) && ctx.existe(t?.fuente)), 'S, M y L con vcpu, ramGb y discoGb mayores que cero, y la fuente que los mide');
+  comprueba('el despliegue exige respaldo inmutable fuera de sitio', d.exige?.respaldo === 'inmutable-fuera-de-sitio', `respaldo «${d.exige?.respaldo}»: no hay respaldo implícito (FASE0 §9)`);
+  const r = d.exige?.region;
+  comprueba('la región sale de una decisión, abierta o decidida con sus regiones', texto(r?.decision) && (r?.estado === 'abierta' || (r?.estado === 'decidida' && lista(r?.regiones).length > 0)), 'region { decision, estado: abierta, o decidida con sus regiones }');
+  comprueba('dice quién lo opera y qué decisión lo fija', texto(d.opera?.quien) && texto(d.opera?.decision), 'opera { quien, decision }');
+  const malos = lista(d.secretos).filter((x) => typeof x !== 'string' || !/^[A-Z][A-Z0-9_]*$/.test(x) || x.startsWith('NEXT_PUBLIC_'));
+  comprueba('los secretos del producto son variables de servidor', Array.isArray(d.secretos) && malos.length === 0, `${malos.join(', ')}: un secreto con NEXT_PUBLIC_ se inlinea en el bundle del navegador`);
+}
+
 /** Los huecos (v2): nulls con lo que falta, secciones que no aplican con su motivo, terceros completos, lo que no cupo. */
 function verificaHuecos(m, ctx, comprueba) {
   comprueba('sigue la versión vigente de la plantilla', m.plantilla === PLANTILLA, `plantilla v${m.plantilla}: migra a la v${PLANTILLA} (productos/PLANTILLA.md, «Historia de la plantilla»)`);
@@ -170,6 +193,7 @@ export function verifica(m, ctx, archivo = `${m?.slug}.json`) {
   verificaComposicion(m, ctx, fila, comprueba);
   verificaReglas(m, ctx, comprueba);
   verificaHuecos(m, ctx, comprueba);
+  verificaDespliegue(m, ctx, comprueba);
   return c;
 }
 
@@ -219,6 +243,16 @@ export const SIEMBRAS = [
   ['un tercero sin la decisión que lo fija', (m) => { m.terceros.push(tercero({ decision: '' })); }, 'cada tercero dice qué recibe, qué decisión lo fija y qué cuesta'],
   ['un costo con la naturaleza de otro vocabulario («ficticio»)', (m) => { m.terceros[0].costo.naturaleza = 'ficticio'; }, 'cada tercero dice qué recibe, qué decisión lo fija y qué cuesta'],
   ['algo que no cupo sin evidencia', (m) => { m.noCupo.push({ que: 'x', donde: 'docs/no-existe.md', propuesta: 'y' }); }, 'lo que no cupo dice qué, dónde y qué se propone'],
+  // v3: el despliegue (PRP-010 DP-5)
+  ['un manifiesto sin despliegue', (m) => { delete m.despliegue; }, 'el manifiesto tiene todos los campos de la plantilla'],
+  ['un despliegue que nombra a su proveedor', (m) => { m.despliegue.proveedor = 'el de siempre'; }, 'el despliegue declara requisitos, no proveedores'],
+  ['un modo de despliegue que no existe', (m) => { m.despliegue.modos.push('kubernetes'); }, 'los modos de despliegue son gestionado o despacho'],
+  ['un tamaño sin su máquina', (m) => { delete m.despliegue.tamanos.L; }, 'cada tamaño declara su máquina (vCPU, RAM y disco) y su fuente'],
+  ['los tamaños en null sin decir qué falta', (m) => { m.despliegue.tamanos = null; }, 'cada campo en null dice lo que falta'],
+  ['un respaldo que no es inmutable fuera de sitio', (m) => { m.despliegue.exige.respaldo = 'snapshot del proveedor'; }, 'el despliegue exige respaldo inmutable fuera de sitio'],
+  ['una región «decidida» sin regiones', (m) => { m.despliegue.exige.region.estado = 'decidida'; }, 'la región sale de una decisión, abierta o decidida con sus regiones'],
+  ['sin la decisión de quién lo opera', (m) => { m.despliegue.opera.decision = ''; }, 'dice quién lo opera y qué decisión lo fija'],
+  ['un secreto con NEXT_PUBLIC_', (m) => { m.despliegue.secretos.push('NEXT_PUBLIC_SS_SECRETO_TAREAS'); }, 'los secretos del producto son variables de servidor'],
 ];
 
 function siembra(ctx) {

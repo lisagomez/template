@@ -83,6 +83,15 @@ export interface Vista {
   readonly sandbox: ReadonlyArray<{ readonly incidencia: string; readonly veredicto: string; readonly texto: string | null; readonly senales: readonly string[] }>
   /** El presupuesto del mes que ve cada quien: el consultor el de su consultora; el superadministrador el de todas. */
   readonly presupuesto: readonly PresupuestoVista[]
+  /** La ficha de servidor de cada consultora: solo el superadministrador (PRP-010, fase 3). */
+  readonly fichas: readonly FichaVista[]
+}
+
+/** Una ficha de servidor: no dice «apto» sin la restauración probada en esa máquina (GATE 3). */
+export interface FichaVista {
+  readonly consultora: string; readonly modo: string; readonly medicion: string | null
+  readonly preguntas: ReadonlyArray<{ readonly pregunta: string; readonly respuesta: string | null }>
+  readonly restauracion: string | null; readonly apto: boolean; readonly faltan: readonly string[]
 }
 
 /** Tope y gastado del mes, y los avisos que dejó en la cadena (PRP-010 H-18). Los tokens del laboratorio son estimados. */

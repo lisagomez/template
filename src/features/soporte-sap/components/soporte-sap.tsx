@@ -12,6 +12,7 @@ import { Sala, Chat } from './sala-chat'
 import { Tablero, Sla, Horas, RelojDemo, Accionables, Foda, Propuestas, Sandbox } from './negocio'
 import { Pildora } from './ui'
 import { Presupuesto } from './presupuesto'
+import { FichasDeServidor } from './ficha-servidor'
 
 const ROLES: ReadonlyArray<[Rol, string]> = [['cliente', 'N3 · Cliente'], ['consultor', 'N2 · Consultor'], ['superadmin', 'N1 · Superadministrador'], ['experto', 'N1 · Experto HIL']]
 
@@ -82,6 +83,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Chat mensajes={vista.chat} rol={rol} envia={envia} />
             <Propuestas lista={vista.propuestas} alNucleo={rol === 'superadmin' ? (id) => actua({ tipo: 'al_nucleo', propuesta: id }) : null} />
             {rol === 'superadmin' ? <Presupuesto lista={vista.presupuesto} fija={fija} /> : null}
+            {rol === 'superadmin' ? <FichasDeServidor fichas={vista.fichas} /> : null}
             <Sandbox casos={vista.sandbox} />
             <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Lo escalado al laboratorio" />
             <Tablero grupos={vista.tablero} />

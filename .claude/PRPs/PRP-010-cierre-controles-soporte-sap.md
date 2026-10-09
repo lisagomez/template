@@ -110,7 +110,7 @@ arregló en parte.
 | H-23 | Los adjuntos se cuentan por lote, no por incidencia. El tope de OCR se mira antes de leer. El N3 sube directo al bucket sin validación de bytes. `formData()` carga todo en memoria | 1 y 2 | — | código | **cerrado** en la fase 2 |
 | H-24 | `delimitaDocumento` no se usa. Los parámetros del plan (usuario SAP, BP, RFC) salen del texto no confiable. La prioridad sube con palabras clave, y el banco de inyección no las toca | 1 y 2 | — | código mínimo (delimitar) + brecha O1/O2 declarada | **cerrado** en la fase 2 (la brecha, declarada en la matriz) |
 | H-25 | La prueba del 404 no mira el GET, y el GET devuelve la vista de cualquier rol, superadministrador incluido. La ruta devuelve `e.message`. Los logs no están inventariados | 1 y 2 | — | código + prueba que invoca los handlers | **código cerrado** en la fase 2 (la vista de cualquier rol y los logs: texto, fase 4) |
-| H-26 | `configura:deploy` no está en `predeploy`. El SDD §16 cita una prueba suya que no existe en `main` | 2 | — | CDC del padrón (fase 3) | parcial: prueba |
+| H-26 | `configura:deploy` no está en `predeploy`. El SDD §16 cita una prueba suya que no existe en `main` | 2 | — | CDC del padrón (fase 3) | **cerrado** en la fase 3 (con el CDC del padrón firmado) |
 
 **Pantalla y métricas**
 
@@ -564,6 +564,29 @@ Dos CDC: la plantilla y el padrón.
 **Validación**: `verifica:productos` con siembras nuevas que cazan un `despliegue` mal declarado; casos de
 `configura:deploy` que fallan con una máquina chica, con una región frente a D10 y sin destino de respaldo, y uno
 que pasa; captura de la ficha; regresión en verde y propuestas de CDC con la firma en blanco.
+
+**Fase 3, hecha (2026-10-09, rama `soporte/fase3-despliegue`), con dos CDC que firma el laboratorio**:
+- **CDC 1, la plantilla v3** (DP-5): la sección `despliegue` en `PLANTILLA.md` y en los dos manifiestos. Declara
+  requisitos, no proveedores: los modos, la máquina por tamaño (sale de `maquinaPara`), lo que exige (la región por su
+  decisión, el respaldo inmutable, los puertos y Docker), quién opera y los secretos.
+  - `verifica:productos` la exige, con 9 siembras nuevas (35 en total).
+  - Ventas WhatsApp declara `tamanos: null` con su `falta`.
+- **`configura:deploy` mide contra el perfil** (`scripts/despliegue/perfil.mjs`, puro). Con `PRODUCTO=<slug>`:
+  - comprueba la máquina contra el tamaño contratado;
+  - dice la región «pendiente de D10», nunca «cumple»;
+  - avisa si falta el destino de respaldo por S3 con días de bloqueo;
+  - exige los secretos del producto sin imprimirlos.
+  Con `--escribir` deja la medición, sin secretos, en `.despliegue/medicion.json`, fuera de git y de la imagen.
+- **La ficha de servidor** (`src/ficha.ts`) en la pantalla del superadministrador: una por consultora. No dice
+  «apto» sin una restauración probada en esa máquina (GATE 3). En el laboratorio las dos dicen «no apto», sin medir.
+- **El respaldo por protocolo**: cualquier S3 con Object Lock (FASE0 §9.2, N2), con `rclone` sin remoto con nombre y
+  el control negativo a mano. El runbook queda sin proveedor fijo; el nombre del archivo es histórico.
+- **CDC 2, el padrón** (H-26): `configura:deploy` entra en `predeploy` como gate `siempre`, porque la máquina y el
+  `.env` cambian sin que cambie el árbol. El SDD §16 cita ya dónde está su prueba.
+- **Evidencia**: 8 pruebas en `pruebas/despliegue.ts`, entre ellas la máquina chica, la región frente a D10, el
+  respaldo que falta y la instalación que pasa. Además, el paso 9.1 del recorrido (24 capturas), `verifica:productos`
+  35/35, la regresión capa A 163/163 y `verifica:gates` con 34 activos. Esta fase no añade filas a la matriz: el
+  control «perfil de despliegue» entra con el C3 v4 (fase 4).
 
 ### Fase 4: AISIA v3 y C3 v4, y la tercera revisión
 **Objetivo**:

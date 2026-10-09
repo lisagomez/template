@@ -18,10 +18,10 @@ import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, 
 import {
   ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, CONSULTORAS, sapDeLaboratorio, alNucleo, preparaPlan, supervisa, mensajeDePlan,
   corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
-  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe, NoAplica, delimitaDocumento,
+  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe, NoAplica, delimitaDocumento, PREGUNTAS_SNAPSHOT,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
-  type AccionDeTriage, type PresupuestoDelMes,
+  type AccionDeTriage, type PresupuestoDelMes, type FichaDeServidor,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import corteJson from '../../../../tools/soporte-sap/semantica/corte.json'
 import estimadoJson from '../../../../tools/soporte-sap/medicion/estimado.json'
@@ -351,6 +351,15 @@ function despacha(s: Sesion, a: Accion): void {
   if (a.tipo === 'resuelve_impugnacion') return resuelveImpugnacion(s, a.incidencia, a.impugnacion, a.decision)
   return relojDelCliente(s, a.incidencia, a.tipo === 'espera_cliente' ? 'ESPERA_CLIENTE' : 'RESPUESTA_CLIENTE')
 }
+
+/**
+ * La ficha de servidor de cada consultora (PRP-010, fase 3). En el laboratorio no hay un servidor por consultora: Andina
+ * va en la infraestructura del laboratorio (gestionado) y Boreal en su máquina (despacho), las dos SIN MEDIR, sin las
+ * respuestas del proveedor (D12) y sin restauración probada. Por eso ninguna es apta, y la pantalla lo dice.
+ */
+export const fichasDeServidor = (): FichaDeServidor[] => CONSULTORAS.map((c) => ({
+  consultora: c.id, modo: c.id === 'boreal' ? 'despacho' : 'gestionado', medicion: null, respuestas: PREGUNTAS_SNAPSHOT.map(() => null), restauracion: null,
+}))
 
 /** El reloj de una incidencia de la sesión, a este momento (la única definición: `relojSla`). */
 export const relojDe = (i: IncidenciaLab): ResultadoSla => relojSla(i.sla, i.clasificacion.prioridad, contratoDeLaboratorio(i.consultora, i.cliente, '2026-04-01'), ahora())

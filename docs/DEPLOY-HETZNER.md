@@ -1,7 +1,9 @@
-# Deploy en un VPS (Hetzner Cloud u otro)
+# Deploy en un VPS (cualquier proveedor)
 
 Runbook completo para poner esta app en un servidor propio con TLS automatico. De
-servidor vacio a produccion.
+servidor vacio a produccion. **No depende de un proveedor**: el nombre del archivo es
+historico (y lo enlazan `AGENTS.md`, el README y el inventario), pero nada de lo que sigue
+supone uno. El proveedor y la region son un dato de cada instalacion (`.env.production`).
 
 **Stack:** Docker + Next.js standalone + Caddy (reverse proxy y certificados).
 
@@ -32,11 +34,17 @@ ponerte a optimizar codigo.
 
 ## 1. Crear el servidor
 
-En Hetzner Cloud Console:
-- **Tipo:** el que cumpla la tabla de arriba (2 GB de RAM como minimo duro)
+En la consola del proveedor que elegiste (el del laboratorio o el de la consultora):
+- **Tipo:** el que cumpla la tabla de arriba (2 GB de RAM como minimo duro) y, si el
+  producto declara su perfil, el **tamaño contratado** (ver «El perfil del producto» abajo)
+- **Region:** la que fije la decision del producto sobre donde quedan los datos (en
+  Soporte SAP, **D10**). Mientras siga abierta, `configura:deploy` dira «pendiente», nunca «cumple»
 - **Imagen:** Ubuntu 24.04 LTS
 - **SSH key:** subir la tuya (NO uses password)
 - **Firewall:** permitir solo `22`, `80`, `443`
+
+**Crear el servidor no se automatiza**: es un cobro, pasa por gate humano, y solo se
+automatiza despues de haberlo hecho tres veces a mano.
 
 Apunta tu dominio antes de seguir: registro **A** de `tuapp.com` -> IP del servidor.
 Verifica con `dig +short tuapp.com` que ya responde la IP correcta. Sin DNS
@@ -118,6 +126,36 @@ El configurador **no es cosmetico**: caza tres fallos que de otro modo descubres
 | `SUPABASE_SERVICE_ROLE_KEY` sin prefijo `NEXT_PUBLIC_` | Con el prefijo se inlinea en el bundle del navegador (C7) |
 
 De los secretos solo dice **presente/ausente y el largo**: nunca imprime el valor.
+
+### El perfil del producto (PRP-010, fase 3)
+
+Si el `.env.production` dice `PRODUCTO=<slug>`, `configura:deploy` mide la instalacion contra el
+bloque `despliegue` de `productos/<slug>.json` (plantilla v3). El producto declara **requisitos,
+no proveedores**:
+
+| Lo que mide | Contra que | Si no cumple |
+|---|---|---|
+| vCPU, RAM y disco de esta maquina | el `DESPLIEGUE_TAMANO` contratado (S, M o L), con su fuente | no pasa |
+| `DESPLIEGUE_REGION` | la decision del producto sobre la region | abierta: **«pendiente»**, nunca «cumple»; decidida y fuera: no pasa |
+| `RESPALDO_S3_*` (URL https, bucket, llaves y dias de bloqueo) | respaldo inmutable fuera de sitio (FASE0 §9.2, N2) | si falta, aviso; sin https o sin dias de bloqueo, no pasa |
+| los `secretos` del producto | presencia y 32 caracteres o mas | no pasa (nunca imprime el valor) |
+
+Con `--escribir` deja la medicion, **sin un solo secreto**, en `.despliegue/medicion.json`, que
+no entra a git ni a la imagen. Es la que lee la **ficha de servidor** del producto, que no dice
+«apto» sin una restauracion probada en esa maquina (GATE 3).
+
+**El respaldo, por protocolo.** El destino es cualquier almacen compatible con S3 **con bloqueo
+de objetos** (Object Lock). El proveedor se reduce a una URL y unas llaves: no hay codigo por
+proveedor. El bucket se crea con el bloqueo encendido (eso lo hace una persona, en la consola del
+proveedor); `rclone` lo usa sin un remoto con nombre:
+
+```bash
+rclone copyto "$ARCHIVO" ":s3,provider=Other,endpoint=$RESPALDO_S3_URL,access_key_id=$RESPALDO_S3_LLAVE,secret_access_key=$RESPALDO_S3_SECRETO:$RESPALDO_S3_BUCKET/$(date +%Y-%m)/$(basename "$ARCHIVO")"
+```
+
+**Control negativo, a mano y una vez** (como GATE 1): con esas mismas llaves, borrar lo que se
+acaba de subir **tiene que fallar**. Si se borra, no hay bloqueo, y el respaldo se va con la misma
+llave que lo sube.
 
 ---
 

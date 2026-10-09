@@ -113,3 +113,5 @@ tools/soporte-sap/semantica/target/
 tools/soporte-sap/semantica/logs/
 tools/soporte-sap/semantica/dbt_packages/
 tools/soporte-sap/semantica/.user.yml
+# La medición del perfil de despliegue (configura:deploy --escribir): es de la máquina, no del repo
+.despliegue/

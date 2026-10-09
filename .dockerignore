@@ -39,3 +39,5 @@ README.md
 Dockerfile
 .dockerignore
 docker-compose.yml
+# La medición del perfil de despliegue (configura:deploy --escribir): es de la máquina, no del repo
+.despliegue

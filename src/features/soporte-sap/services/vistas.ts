@@ -6,11 +6,11 @@
  * ni la descripción originales de un caso que no se le escaló.
  */
 import {
-  tableroN1, tableroN2, tableroN3, estadoSla, accionables, foda, verificaCadena, contratoDeLaboratorio, CLIENTES, CONSULTORAS,
+  tableroN1, tableroN2, tableroN3, estadoSla, accionables, foda, verificaCadena, contratoDeLaboratorio, CLIENTES, CONSULTORAS, veredictoDeFicha, PREGUNTAS_SNAPSHOT,
   type Tarjeta as TarjetaDominio, type ResultadoSla, type Prioridad,
 } from '../../../../tools/soporte-sap/dist/index.js'
-import { CORTE, estado, relojDe, relojesDeDemostracion, presupuestoDe, type IncidenciaLab } from './runtime'
-import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista, PresupuestoVista } from './tipos'
+import { CORTE, estado, relojDe, relojesDeDemostracion, presupuestoDe, fichasDeServidor, type IncidenciaLab } from './runtime'
+import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista, PresupuestoVista, FichaVista } from './tipos'
 
 const PERIODO = '2026-09'
 const SOLO_SUPERADMIN = new Set(['horas_consultor', 'horas_por_ticket', 'salud_cuenta'])
@@ -110,6 +110,18 @@ export function vista(s: Sesion): Vista {
     })(),
     sandbox: s.nivel === 'N1' ? e.incidencias.filter((i) => i.sandbox).map((i) => ({ incidencia: i.id, veredicto: i.sandbox!.veredicto, texto: i.sandbox!.veredicto === 'entra' ? i.sandbox!.texto : null, senales: [...i.sandbox!.senales] })) : [],
     presupuesto: (s.rol === 'consultor' ? [s.organizacion] : s.rol === 'superadmin' ? CONSULTORAS.map((c) => c.id) : []).map(presupuestoVista),
+    fichas: s.rol === 'superadmin' ? fichasDeServidor().map(fichaVista) : [],
+  }
+}
+
+/** La ficha tal como se ve: lo medido en una línea, cada pregunta con su respuesta y el veredicto con lo que falta. */
+function fichaVista(f: ReturnType<typeof fichasDeServidor>[number]): FichaVista {
+  const v = veredictoDeFicha(f), m = f.medicion
+  return {
+    consultora: f.consultora, modo: f.modo,
+    medicion: m ? `${m.fecha.slice(0, 10)} · ${m.maquina.vcpu} vCPU · ${m.maquina.ramGb} GB · ${m.maquina.discoGb ?? '—'} GB de disco · tamaño ${m.tamano ?? '—'} · región ${m.region_estado} · respaldo ${m.respaldo}` : null,
+    preguntas: PREGUNTAS_SNAPSHOT.map((pregunta, k) => ({ pregunta, respuesta: f.respuestas[k] ?? null })),
+    restauracion: f.restauracion ? `${f.restauracion.fecha} · ${f.restauracion.evidencia}` : null, apto: v.apto, faltan: [...v.faltan],
   }
 }
 

@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**51 activos** cubren **260 unidades** del repo.
+**51 activos** cubren **261 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -28,7 +28,7 @@
 | TPL-productos | El concepto de producto, su plantilla y sus manifiestos (productos/), con el gate que los cruza con el indice del portafolio y el inventario (verifica:productos) | FABRICA | software | blueprint | 2 | `productos` |
 | TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 31 | `.claude/skills` |
 | TPL-trayectorias | Trayectorias: trazas de ejecucion, evaluador, informe y propuestas | FABRICA | software | produccion | 4 | `scripts/trayectorias` |
-| TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 11 | `docker-compose.yml` |
+| TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 12 | `docker-compose.yml` |
 | TPL-app-base | App SaaS base (Next.js + Supabase, PWA) | PRODUCTO | software | produccion | 6 | `src/app` |
 | TPL-asesor-ventas | Asesor de ventas: insights con evidencia desde una reunion diarizada | PRODUCTO | software | blueprint | 1 | `tools/asesor-ventas` |
 | TPL-cli-ss-cadena | CLI ss-cadena de Soporte SAP: verifica la cadena sha256 de eventos de una incidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-cadena.mjs` |

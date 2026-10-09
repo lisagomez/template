@@ -427,7 +427,7 @@ No todo proyecto necesita los tres. El inventario decide:
 |---|---|---|---|
 | **N0** | Copia diaria local rotada (7 días) **+ restauración verificada** | **Siempre.** Sin excepción | $0 |
 | **N1** | Borg → Hetzner Storage Box, modo **append-only** | Si alguna fila del inventario es **Crítica** | ~€4/mes (BX11, 1 TB) |
-| **N2** | Archivo mensual cifrado → Backblaze B2 con **Object Lock** | Si hay obligación legal de retención, o el ransomware es una amenaza real | ~$1/mes |
+| **N2** | Archivo mensual cifrado → **cualquier almacén compatible con S3 con Object Lock** (B2 es un ejemplo; el perfil del producto lo declara por protocolo, sin código por proveedor: `DEPLOY-HETZNER.md`, «El perfil del producto») | Si hay obligación legal de retención, o el ransomware es una amenaza real | ~$1/mes |
 | **N3** | Copia trimestral en disco cifrado, domicilio fiscal | Si el proyecto factura en México (art. 28 III CFF) | ~$60 una vez |
 
 **N0 no es opcional y no es el fácil.** Es el único nivel que incluye probar que la

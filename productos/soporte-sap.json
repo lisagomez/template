@@ -1,5 +1,5 @@
 {
- "plantilla": 2,
+ "plantilla": 3,
  "slug": "soporte-sap",
  "nombre": "Soporte SAP",
  "version": 1,
@@ -99,6 +99,19 @@
   "procedimiento": "export y restauración por tenant (docs/SDD-soporte-sap.md §13)",
   "rpoRto": "desconocidos",
   "gate3": false
+ },
+ "despliegue": {
+  "modos": ["gestionado", "despacho"],
+  "tamanos": {
+   "fuente": "tools/soporte-sap/medicion/estimado.json",
+   "nota": "una consultora si corriera sola (SDD §14): el VPS de varias se dimensiona sumando y midiendo con configura:deploy",
+   "S": { "vcpu": 2, "ramGb": 1.5, "discoGb": 21 },
+   "M": { "vcpu": 2, "ramGb": 1.5, "discoGb": 21 },
+   "L": { "vcpu": 2, "ramGb": 1.5, "discoGb": 22 }
+  },
+  "exige": { "region": { "decision": "D10", "estado": "abierta", "regiones": [] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true },
+  "opera": { "quien": "por decidir", "decision": "D3" },
+  "secretos": ["SS_SECRETO_TAREAS", "SS_SECRETO_RESPALDOS", "SS_SAL_IMPORTADOR"]
  },
  "reuso": {
   "matriz": { "amplio": 40.7, "estricto": 14.8, "comando": "node tools/soporte-sap/clis/ss-reuso.mjs" }

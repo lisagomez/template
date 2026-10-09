@@ -1,5 +1,5 @@
 {
- "plantilla": 2,
+ "plantilla": 3,
  "slug": "ventas-whatsapp",
  "nombre": "Vendedor con IA en WhatsApp",
  "version": 1,
@@ -94,6 +94,14 @@
   "procedimiento": "ninguno: el almacén vive en .datos/ventas-whatsapp/, fuera de git, y nadie lo respalda",
   "rpoRto": "desconocidos",
   "gate3": false
+ },
+ "despliegue": {
+  "modos": ["gestionado"],
+  "tamanos": null,
+  "falta": "el vendedor no tiene estimado de consumo: sin medir su carga no hay tamaños; se miden al salir de blueprint",
+  "exige": { "region": { "decision": "sin decisión propia: la infraestructura que supone el roadmap (VPS y base de datos)", "estado": "abierta", "regiones": [] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true },
+  "opera": { "quien": "por decidir", "decision": "sin decisión propia: el roadmap supone que el laboratorio opera la plataforma" },
+  "secretos": []
  },
  "reuso": {
   "matriz": null,
