@@ -545,7 +545,7 @@ create table if not exists public.ss_caso_sandbox (
   creado_en            timestamptz not null default now(),
   constraint ss_sandbox_sin_identificadores check (
     (texto || ' ' || campos::text) !~* '(@|\marroba\M|\(at\)|\[at\]|\mpunto[[:space:]]+com\M)'
-    and (texto || ' ' || campos::text) !~ '[0-9]([[:space:]().-]{0,2}[0-9]){6,}'
+    and (texto || ' ' || campos::text) !~ '[0-9]([[:space:]().·•–-]{0,2}[0-9]){6,}'
     and (texto || ' ' || campos::text) !~* '\m[A-ZÑ&]{3,4}[0-9]{6}')
 );
 
@@ -564,6 +564,41 @@ create table if not exists public.ss_propuesta (
   constraint ss_a_medida_es_de_alguien check ((alcance = 'a_medida') = (consultora_id is not null)),
   constraint ss_decidida_tiene_quien check ((estado = 'propuesta') = (decidida_por is null))
 );
+
+-- Lo del núcleo lo leen todas las consultoras: llega GENERALIZADO o no entra, ni al proponerse ni al promoverse
+-- (PRP-010 H-19). Segundo cerrojo, independiente de `generaliza`: sin identificadores con forma, sin el nombre de
+-- una consultora o de un cliente, sin objetos propios (Z…, Y…, /NS/…) y sin el código de una unidad de su
+-- estructura (sociedad, centro, almacén, organización de ventas…). Lee los nombres de TODAS las organizaciones,
+-- también las que la RLS le oculta a quien escribe: por eso es security definer.
+create or replace function ss_priv.propuesta_nucleo_generalizada() returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  crudo text := new.contenido::text;
+  t text := translate(lower(new.contenido::text), 'áéíóúüñ', 'aeiouun');
+begin
+  if new.alcance <> 'nucleo' then return new; end if;
+  if crudo ~* '(@|\marroba\M|\(at\)|\[at\]|\mpunto[[:space:]]+com\M)' or crudo ~ '[0-9]([[:space:]().·•–-]{0,2}[0-9]){6,}'
+     or crudo ~* '\m[A-ZÑ&]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])' or t ~ '[[:alnum:]-]+\.(com|net|org|edu|gob)(\.[a-z]{2})?\M' then
+    raise exception 'lo que sube al núcleo no lleva identificadores: se generaliza antes';
+  end if;
+  -- El nombre, también sin la razón social («Lácteos La Huasteca» de «Lácteos La Huasteca, S.A. de C.V.»).
+  if exists (select 1 from public.ss_organizacion o where o.tipo in ('consultora', 'cliente')
+             and position(regexp_replace(translate(lower(o.nombre), 'áéíóúüñ', 'aeiouun'),
+               ',?[[:space:]]+(s\.?[[:space:]]*a\.?([[:space:]]*p\.?[[:space:]]*i\.?)?|s\.?[[:space:]]*de[[:space:]]+r\.?[[:space:]]*l\.?|s\.?[[:space:]]*c\.?|a\.?[[:space:]]*c\.?)([[:space:]]+de[[:space:]]+c\.?[[:space:]]*v\.?)?$', '') in t) > 0) then
+    raise exception 'lo que sube al núcleo no nombra a una consultora ni a un cliente: se generaliza antes';
+  end if;
+  -- Z… y Y… propios: no tras un guion (`BSEG-ZLSCH`) ni los campos estándar que empiezan con Z (`ZTERM`), salvo los
+  -- campos ZZ/YY; namespaces que no son de SAP.
+  if crudo ~ '(^|[^[:alnum:]_/-])(?!(ZLSCH|ZTERM|ZFBDT|ZUONR|ZLSPR|ZEILE|ZBD[123][TP]|ZWELS|ZAHLS|ZBUKR|ZINKZ)\M)[ZY][A-Z0-9_]{2,}' or t ~ '(^|[^[:alnum:]_/-])(?!zbd[123][tp]\M)[zy][a-z0-9]*(_|[0-9])' or t ~ '/[no][zy][a-z0-9_]{2,}'
+     or t ~ '[[:alnum:]]-(zz|yy)[a-z0-9_]'
+     or t ~ '(^|[^[:alnum:]_/])/(?!(sapapo|scwm|scmtms|ui2|ui5|iwfnd|iwbep|bobf|sapsll|saptrx)/)[a-z0-9_]{2,10}/'
+     or t ~ '\m(sociedad(es)?|company codes?|co\.?[[:space:]]?cd|bukrs|soc|centros?( de (costos?|beneficios?))?|plants?|plantas?|plnt|werks|almacen(es)?|alm|sloc|lgort|org(anizacion(es)?)?\.?[[:space:]]+(de[[:space:]]+)?(ventas|vtas|compras)|sales orgs?|vkorg|ekorg|kokrs|kostl|prctr)\M[[:space:]:=#.''"]{0,6}(es[[:space:]]+)?([a-z]{1,3}[0-9]|[0-9][a-z0-9])' then
+    raise exception 'lo que sube al núcleo no lleva objetos propios ni la estructura del cliente: se generaliza antes';
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_propuesta_nucleo_generalizada on public.ss_propuesta;
+create trigger ss_propuesta_nucleo_generalizada before insert or update on public.ss_propuesta
+  for each row execute function ss_priv.propuesta_nucleo_generalizada();
 
 -- El acceso motivado del laboratorio a los originales de un cliente lo otorga un consultor de la
 -- consultora de ese cliente, a un miembro del laboratorio, por 72 h como máximo (D14), y lo puede revocar

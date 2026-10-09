@@ -16,10 +16,10 @@ import { motorPorProceso } from '../../../../tools/extractor-documental/dist/mot
 import { evaluaSeguro } from '../../../../tools/grafo-conocimiento/dist/index.js'
 import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, aprobado, delimitaDato, type EstadoSala } from '../../../../tools/sala-a2a/dist/index.js'
 import {
-  ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, sapDeLaboratorio, preparaPlan, supervisa, mensajeDePlan,
+  ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, CONSULTORAS, sapDeLaboratorio, alNucleo, preparaPlan, supervisa, mensajeDePlan,
   corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
-  type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz,
+  type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import corteJson from '../../../../tools/soporte-sap/semantica/corte.json'
 import type { Sesion, MensajeChatVista, PropuestaVista, Accion } from './tipos'
@@ -37,12 +37,12 @@ export interface IncidenciaLab {
   adjuntos: ResultadoIngesta[]; clasificacion: Clasificacion; consulta: ConsultaMatriz; entrada: EntradaMatriz | null
   cadena: EventoIncidencia[]; sla: EventoSla[]; planes: PlanLab[]; sandbox: Anonimizado | null; estado: string
 }
-interface Estado { n: number; paginasOcr: Record<string, number>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[] }
+interface Estado { n: number; paginasOcr: Record<string, number>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[]; ensenanzas: Record<string, PropuestaDeEnsenanza> }
 
 function nuevo(): Estado {
   let sala = creaCanal(salaVacia(), { id: CANAL, tenant: 'andina', slug: 'consultora-andina', nombre: 'Consultora Andina', departamento: null })
   for (const u of ['usr-superadmin', 'usr-experto', 'usr-consultor-andina']) sala = agregaParticipante(sala, 'andina', u)
-  return { n: 0, paginasOcr: {}, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [] }
+  return { n: 0, paginasOcr: {}, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {} }
 }
 
 const g = globalThis as { __soporteSapLab?: Estado }
@@ -183,16 +183,37 @@ function conversa(s: Sesion, texto: string): void {
   const planes = e.sala.mensajes.filter((m) => m.bloques.length && !e.sala.aprobaciones.some((a) => a.mensaje === m.id))
     // La promoción va a la RAÍZ del hilo: una versión corregida ya es respuesta, y los hilos son de un nivel.
     .map((m) => ({ taskId: m.bloques[0]!.taskId, mensaje: m.hilo ?? m.id, canal: m.canal, resumen: m.cuerpo.split('\n')[0]! }))
+  const casos = e.incidencias.filter((i) => i.sandbox).map((i) => ({ incidencia: i.id, consultora: i.consultora }))
   const r = respondeHil({ corte: CORTE, entidades: { andina: { tipo: 'consultora', nombre: 'Consultora Andina' }, boreal: { tipo: 'consultora', nombre: 'Consultora Boreal' } },
-    motor, matriz: MATRIZ_LABORATORIO, planes, delimitaDato, agente: AGENTE, ahora: ahora(), nuevoId: () => `chat-${e.n++}` }, { usuario: s.usuario, rol: s.rol }, texto)
+    motor, matriz: MATRIZ_LABORATORIO, planes, casos, validadores: VALIDADORES, delimitaDato, agente: AGENTE, ahora: ahora(), nuevoId: () => `chat-${e.n++}` }, { usuario: s.usuario, rol: s.rol }, texto)
   const hilo = (e.chat[s.usuario] ??= [])
   hilo.push({ autor: 'humano', texto, tipo: null, fuentes: [] })
   hilo.push({ autor: 'agente', texto: r.texto, tipo: r.tipo, fuentes: 'fuentes' in r ? r.fuentes.map((f) => f.cita) : [] })
   if (r.tipo === 'promovida') e.sala = publica(e.sala, r.publicacion)
   if (r.tipo === 'propuesta') {
-    e.propuestas.unshift({ tipo: 'regla', titulo: 'Caso nuevo para la matriz y regla para el grafo (propuesta de siembra)', detalle: r.propuesta.contenido, estado: r.propuesta.estado, por: r.propuesta.propuestaPor })
-    if (r.cli) e.propuestas.unshift({ tipo: 'cli', titulo: r.cli.nombre, detalle: `${r.cli.operacion} · dry-run por defecto · readOnly: ${String(r.cli.readOnly)} · ${r.cli.nota}`, estado: r.cli.estado, por: r.propuesta.propuestaPor })
+    // Su propio contador: el de `e.n` numera las incidencias, y el recorrido cuenta con esa numeración.
+    const id = `prop-${Object.keys(e.ensenanzas).length + 1}`
+    e.ensenanzas[id] = r.propuesta
+    e.propuestas.unshift({ id, alcance: alcanceDe(r.propuesta), tipo: 'regla', titulo: 'Caso nuevo para la matriz y regla para el grafo (propuesta de siembra)', detalle: r.propuesta.contenido, estado: r.propuesta.estado, por: r.propuesta.propuestaPor })
+    if (r.cli) e.propuestas.unshift({ id: null, alcance: null, tipo: 'cli', titulo: r.cli.nombre, detalle: `${r.cli.operacion} · dry-run por defecto · readOnly: ${String(r.cli.readOnly)} · ${r.cli.nota}`, estado: r.cli.estado, por: r.propuesta.propuestaPor })
   }
+}
+
+const alcanceDe = (p: PropuestaDeEnsenanza) => (p.alcance === 'nucleo' ? 'núcleo' : `a medida de ${p.consultora}`)
+const NOMBRES_DE_ORGANIZACION = [...CLIENTES.map((c) => c.nombre), ...CONSULTORAS.map((c) => c.nombre)]
+
+/**
+ * Subir una enseñanza al NÚCLEO (D2; PRP-010 H-19): lo decide el superadministrador, y sube GENERALIZADA con
+ * `alNucleo` (sin objetos propios, estructura ni nombres de organización). Si al generalizar queda una señal, no sube.
+ */
+function subeAlNucleo(s: Sesion, id: string): void {
+  if (s.rol !== 'superadmin') throw new Error('al núcleo solo sube el superadministrador')
+  const e = estado()
+  const p = e.ensenanzas[id]
+  if (!p) throw new Error('esa propuesta no existe')
+  const n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION)
+  e.ensenanzas[id] = n
+  e.propuestas = e.propuestas.map((v) => (v.id === id ? { ...v, alcance: alcanceDe(n), detalle: n.contenido, por: `${v.por} · al núcleo por ${s.usuario}` } : v))
 }
 
 /** El consultor pide un dato al cliente (pausa el reloj) o registra su respuesta (lo reanuda). */
@@ -223,6 +244,7 @@ export function actua(s: Sesion, a: Accion): void {
   if (a.tipo === 'decide') return decide(s, a.mensaje, a.accion, a.motivo ?? '')
   if (a.tipo === 'chat') return conversa(s, a.texto)
   if (a.tipo === 'responde') return respondeAlCliente(s, a.incidencia, a.texto)
+  if (a.tipo === 'al_nucleo') return subeAlNucleo(s, a.propuesta)
   return relojDelCliente(s, a.incidencia, a.tipo === 'espera_cliente' ? 'ESPERA_CLIENTE' : 'RESPUESTA_CLIENTE')
 }
 

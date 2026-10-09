@@ -63,7 +63,7 @@ arregló en parte.
 | H-01 | El agente escala por su cuenta y firma `escalada_por` con cualquier nombre. El laboratorio pasa a leer título, descripción y campos extraídos (RFC y montos del CFDI). En el runtime, toda incidencia con regla llega al N1 sin que la consultora escale nada. **Confirmado con sonda** | 1 y 2 | sí | código: escalar es decisión de la consultora, a su nombre; los campos extraídos, bajo el acceso motivado (DP-3) | **cerrado en la tanda 1a** |
 | H-02 | El tope de 72 h del acceso a originales se salta con un `creado_en` futuro: **8 832 h**, confirmado con sonda. El acceso es por cliente, no por incidencia, y no se puede revocar | 1 y 2 | sí | código: la base fija `creado_en`, el tope se mide contra `now()`, hay revocación y una prueba con `creado_en` futuro | **cerrado en la tanda 1a** |
 | H-03 | La base acepta texto crudo en `ss_caso_sandbox` y datos personales en `senales` de cuarentena, y el laboratorio lee los dos. Nada liga el sandbox con el veredicto del anonimizador | 1 y 2 | sí | código: el agente no escribe en el sandbox; `senales`, solo del vocabulario fijo | **cerrado en la tanda 1a** (segundo cerrojo; ver nota) |
-| H-04 | El anonimizador falla abierto ante formas nuevas: 5 de 14 frases entran con el dato («pepe gonzalez de almacen», «jgarcia», «doña Lupita», «El chofer Ramiro», «rosa punto elena en gmail»). La revisión humana de la cuarentena no existe | 2 | sí | código: las 5 al fixture permanente y el detector arreglado. Texto: «fail-closed» promete de más, y la cuarentena es definitiva hasta D14 (DP-8) | — |
+| H-04 | El anonimizador falla abierto ante formas nuevas: 5 de 14 frases entran con el dato («pepe gonzalez de almacen», «jgarcia», «doña Lupita», «El chofer Ramiro», «rosa punto elena en gmail»). La revisión humana de la cuarentena no existe | 2 | sí | código: las 5 al fixture permanente y el detector arreglado. Texto: «fail-closed» promete de más, y la cuarentena es definitiva hasta D14 (DP-8) | **código cerrado** en la fase 2 (el texto, en la fase 4) |
 | H-05 | Cualquier consultor lee fila por fila las horas de sus colegas y el actor de cada evento. El seudónimo es un md5 sin sal que el laboratorio puede revertir con `ss_miembro` | 1 y 2 | — | código: cada quien sus filas más un agregado; seudónimo con sal | **cerrado en la tanda 1d** |
 
 **Decisiones humanas e integridad**
@@ -98,7 +98,7 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-19 | `generaliza` no la llama nadie. El chat propone al núcleo el texto crudo del experto, con alcance `nucleo` **por defecto**. La base acepta propuestas sin generalizar. `generaliza` no cubre `Y…`, minúsculas, `/ACME/…`, `BUKRS 2000`, «Sociedad: 2000» ni «centro 1010» | 1 y 2 | sí | código: «a medida» por defecto, `generaliza` en el camino y un banco adversarial escrito por otro. Texto: ayuda, y el control es la firma del superadministrador | — |
+| H-19 | `generaliza` no la llama nadie. El chat propone al núcleo el texto crudo del experto, con alcance `nucleo` **por defecto**. La base acepta propuestas sin generalizar. `generaliza` no cubre `Y…`, minúsculas, `/ACME/…`, `BUKRS 2000`, «Sociedad: 2000» ni «centro 1010» | 1 y 2 | sí | código: «a medida» por defecto, `generaliza` en el camino y un banco adversarial escrito por otro. Texto: ayuda, y el control es la firma del superadministrador | **cerrado** en la fase 2 (el texto, en la fase 4) |
 | H-20 | Los veredictos salen de `tools/soporte-sap/src/laboratorio/matriz.ts`, no de `tools/conocimiento`: un commit cambia un veredicto sin gate de firma | 1 | — | texto + brecha | — |
 
 **Superficie, abuso e inyección**
@@ -477,6 +477,29 @@ Playwright en verde; `prueba:buzon` en verde tras tocar el extractor.
 - **H-22 sigue pendiente, sin cambios en esta rama.** El hallazgo está confirmado (un PDF pequeño agota la memoria del
   lector); el tope de inflado lo lleva el laboratorio por otra vía.
 
+**Fase 2, segunda parte: el núcleo y el anonimizador, hecha (2026-10-08, rama `soporte/fase2-nucleo`)**:
+- **H-19**: lo que enseña el experto queda **a medida** de la consultora del caso que nombra, y anonimizado; sin
+  caso, no se guarda. Al núcleo lo sube el superadministrador con `alNucleo`, que generaliza (acción `al_nucleo` y su
+  botón). La base rechaza lo que llegue sin generalizar, al proponerlo y al promoverlo
+  (`ss_priv.propuesta_nucleo_generalizada`). Por sí sola rechaza 25 de los 27 casos del banco; solo se le escapan la
+  marca y las siglas, que no conoce. `generaliza` vive ahora en `src/generaliza.ts`.
+- **H-04**: las 5 frases y un banco que escribió un agente que **no leyó el detector** quedan como fixture permanente
+  (`pruebas/_banco-independiente.ts`). Contra el código de entonces, ese banco dio:
+  - anonimizador: 8 fugas de 30 y 4 controles técnicos tapados (como «En VA01» → «[NOMBRE]01»);
+  - generalizador: 12 fugas de 20 y 4 controles tapados.
+  Ahora da 0 en los dos. Ese banco ya lo vio quien escribió el arreglo, así que dejó de ser independiente; la medida
+  honesta es el **banco de control** (`pruebas/_banco-de-control.ts`), que otro agente escribió después sin ver ni el
+  detector ni el primer banco, y midió una sola vez antes de que se tocara nada por él:
+  - anonimizador: **3 fugas de 30**: un `usr=`, un teléfono leído con O por 0 y l por 1, y un diminutivo en minúsculas
+    («chuyita»). Los 4 casos de nómina fueron a revisión, y quedaron 4 de 10 controles técnicos tapados;
+  - generalizador: **0 fugas de 20**, y 1 de 6 controles tapados (`ZTERM`, `ZLSCH`: campos estándar que empiezan con Z).
+  Se arreglaron, y los dos bancos quedan como fixture permanente. Ahora dan 0 fugas. Los únicos «tapados» que quedan son
+  un número de documento de 10 dígitos y una fecha, que se generalizan **por diseño**, y la prueba lo dice.
+  **No es «cero fugas»**: un nombre en minúsculas, sin contexto y fuera de la lista de nombres comunes pasa. Va
+  como límite en el texto de la fase 4.
+- **Evidencia**: 11 filas de la matriz nuevas o rehechas, y el paso 5.1 del recorrido (el superadministrador sube la
+  enseñanza y la pantalla muestra `[CLIENTE]` y `[OBJETO_PROPIO]`), con 20 capturas, 0 en rojo y 0 errores de consola.
+
 ### Fase 3: El perfil de despliegue (VPS seleccionable en el laboratorio y en la instalación)
 **Objetivo**:
 - la sección `despliegue` en la plantilla v3 (DP-5) y en los dos manifiestos;
@@ -550,6 +573,19 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   meta» sin que nadie respondiera. Se demostró aparte con `relojSla` (viejo: cumple `true`; nuevo: `null`, en plazo).
   **Lección**: un paso de recorrido se escribe contra lo que el bug cambia en pantalla, y se comprueba que el código
   viejo lo pondría en rojo.
+- **2026-10-08 · un banco que ya leíste deja de medir** (fase 2, H-04). El banco independiente encontró 20 fugas que
+  el banco propio no veía. Pero al arreglarlas, el banco pasa a ser parte del diseño, y su «0 fugas» ya no dice nada
+  de lo que no se ha visto. **Fix**: un segundo banco de control, escrito después y sin ver ni el detector ni el
+  primero; su número es el que se reporta. **Lección**: el referente lo escribe otro, y se mide UNA vez antes de tocar
+  el código por él.
+- **2026-10-08 · una lista de nombres tapa al detector general en el banco** (fase 2, H-04). Todos los nombres del
+  banco eran comunes, así que la lista los atrapaba y el detector del «nombre suelto con mayúscula» no tenía un caso
+  que solo él cubriera: su sabotaje habría dado «NO CAE». **Fix**: un caso con nombres fuera de la lista (Tlacaélel,
+  Yaretzi). **Lección**: cuando dos detectores se solapan, cada uno necesita un caso que solo él atrapa.
+- **2026-10-08 · dos cerrojos tienen que estar de acuerdo** (fase 2, H-19). El primer disparador del núcleo rechazaba
+  `BSEG-ZLSCH`, una fecha `2026/10/01` y «la planta 3»: lo que `generaliza` deja pasar porque es estándar, la base lo
+  habría rechazado. **Fix**: una prueba que manda a la base todo lo que `generaliza` deja del banco, más controles de
+  lo estándar. **Lección**: un segundo cerrojo se prueba en las dos direcciones, lo que rechaza y lo que deja pasar.
 - **2026-10-07 · un control nuevo puede dejar sin efecto el sabotaje de uno viejo** (fase 1, tanda 1d). Al correr solo
   las filas nuevas, todo verde; la matriz COMPLETA dio dos «NO CAE» en filas viejas. La cadena ahora pone la fecha del
   evento, así que quitar la ventana de `evento_honesto` ya no cambiaba nada; y el nuevo `alter role` corregía el

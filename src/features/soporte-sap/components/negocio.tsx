@@ -87,11 +87,18 @@ export function Foda({ foda }: { foda: FodaVista }) {
   )
 }
 
-export function Propuestas({ lista }: { lista: readonly PropuestaVista[] }) {
+/** Lo enseñado queda a medida de la consultora del caso; al núcleo lo sube el superadministrador, generalizado (PRP-010 H-19). */
+export function Propuestas({ lista, alNucleo }: { lista: readonly PropuestaVista[]; alNucleo: ((id: string) => void) | null }) {
   return (
-    <Celda titulo="Propuestas del agente (nada se aplica solo)" ancho={7} prueba="propuestas" nota="Una regla la firma el laboratorio en tools/conocimiento; imprimir un CLI es CDC.">
-      {lista.length === 0 ? <p className="text-sm text-neutral-500">Sin propuestas todavía: enseña un caso en el chat.</p> : null}
-      <ul className="space-y-2 text-xs">{lista.map((p, k) => <li key={k} className="rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/60"><Pildora tono="info">{p.tipo}</Pildora> <b>{p.titulo}</b> · {p.estado} · {p.por}<p className="mt-1 whitespace-pre-wrap font-mono text-[10px]">{p.detalle}</p></li>)}</ul>
+    <Celda titulo="Propuestas del agente (nada se aplica solo)" ancho={7} prueba="propuestas" nota="Lo enseñado queda a medida de la consultora del caso. Al núcleo lo sube el superadministrador, generalizado. Una regla la firma el laboratorio en tools/conocimiento; imprimir un CLI es CDC.">
+      {lista.length === 0 ? <p className="text-sm text-neutral-500">Sin propuestas todavía: enseña un caso en el chat, nombrando su incidencia.</p> : null}
+      <ul className="space-y-2 text-xs">{lista.map((p, k) => (
+        <li key={k} className="rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/60" data-prueba={p.id ? `propuesta-${p.id}` : undefined}>
+          <Pildora tono="info">{p.tipo}</Pildora> {p.alcance ? <Pildora tono={p.alcance === 'núcleo' ? 'aviso' : 'bien'}>{p.alcance}</Pildora> : null} <b>{p.titulo}</b> · {p.estado} · {p.por}
+          <p className="mt-1 whitespace-pre-wrap font-mono text-[10px]">{p.detalle}</p>
+          {alNucleo && p.id && p.alcance !== 'núcleo' ? <button type="button" onClick={() => alNucleo(p.id!)} className="mt-1 rounded-full border px-3 py-0.5 text-[11px] font-semibold" data-prueba={`al-nucleo-${p.id}`}>Subir al núcleo, generalizada</button> : null}
+        </li>
+      ))}</ul>
     </Celda>
   )
 }

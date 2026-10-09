@@ -49,7 +49,8 @@ export interface MensajeSalaVista {
   readonly acciones: readonly string[] | null; readonly decisiones: readonly string[]
 }
 export interface MensajeChatVista { readonly autor: 'humano' | 'agente'; readonly texto: string; readonly tipo: string | null; readonly fuentes: readonly string[] }
-export interface PropuestaVista { readonly tipo: string; readonly titulo: string; readonly detalle: string; readonly estado: string; readonly por: string }
+/** `alcance`: «a medida de <consultora>» o «núcleo»; `id`, la enseñanza que el superadministrador puede subir al núcleo. */
+export interface PropuestaVista { readonly id: string | null; readonly alcance: string | null; readonly tipo: string; readonly titulo: string; readonly detalle: string; readonly estado: string; readonly por: string }
 export interface AccionableVista {
   readonly id: string; readonly para: string; readonly titulo: string; readonly evidencia: readonly string[]; readonly formula: string
   readonly supuestos: readonly string[]; readonly bajo: number; readonly central: number; readonly alto: number; readonly confianza: string; readonly responsable: string; readonly aviso: string
@@ -83,4 +84,6 @@ export type Accion =
   | { readonly tipo: 'responde_cliente'; readonly incidencia: string }
   /** El consultor le responde al cliente: su primera respuesta para el reloj (DP-4). */
   | { readonly tipo: 'responde'; readonly incidencia: string; readonly texto: string }
+  /** El superadministrador sube una enseñanza al núcleo, generalizada (PRP-010 H-19). */
+  | { readonly tipo: 'al_nucleo'; readonly propuesta: string }
   | { readonly tipo: 'reinicia' }

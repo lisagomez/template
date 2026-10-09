@@ -11,6 +11,7 @@ import {
   type Corte, type MotorReglas, type ContextoChat, type EventoSla,
 } from '../dist/index.js'
 import { HERRAMIENTA } from '../pruebas/_ayuda.ts'
+import { VALIDADORES } from '../pruebas/_anonimizacion.ts'
 
 const mx = (f: string, h: string) => new Date(Date.parse(`${f}T${h}:00-06:00`)).toISOString()
 const K = contratoDeLaboratorio('andina', 'alimentos-del-bajio', '2026-04-01')
@@ -44,6 +45,7 @@ const ctx: ContextoChat = {
   corte, motor, matriz: MATRIZ_LABORATORIO, delimitaDato, agente: 'soporte-sap-a2a', ahora: '2026-10-04T12:00:00Z', nuevoId: () => `chat-${++n}`,
   entidades: { andina: { tipo: 'consultora', nombre: 'Consultora Andina' } },
   planes: [{ taskId: 'tarea-migo-7', mensaje: 'plan-1', canal: 'canal-andina', resumen: 'reabrir el periodo MM 2026/10 en el simulador' }],
+  casos: [{ incidencia: 'inc-005', consultora: 'andina' }], validadores: VALIDADORES,
 }
 let sala = agregaParticipante(creaCanal(salaVacia(), { id: 'canal-andina', tenant: 'andina', slug: 'andina', nombre: 'Andina', departamento: null }), 'andina', 'usr-superadmin')
 sala = publica(sala, { id: 'plan-1', canal: 'canal-andina', autor: { tipo: 'agente', id: 'soporte-sap-a2a' }, cuerpo: 'Plan: reabrir el periodo', creado: '2026-10-04T11:00:00Z',
@@ -51,7 +53,7 @@ sala = publica(sala, { id: 'plan-1', canal: 'canal-andina', autor: { tipo: 'agen
 const turnos: Array<[string, 'superadmin' | 'experto', string]> = [
   ['superadmin', 'superadmin', '¿Cuál fue el MTTR de Consultora Andina en septiembre de 2026?'],
   ['experto', 'experto', '¿Qué hago con MIGO? Mensaje M7 053: solo se puede en periodos 2026/08 y 2026/09 en sociedad 1000; necesitamos el periodo 2026/10'],
-  ['experto', 'experto', 'Te enseño el caso de la app Fiori en blanco: hay que limpiar la caché del launchpad'],
+  ['experto', 'experto', 'Te enseño el caso inc-005 de la app Fiori en blanco: hay que limpiar la caché del launchpad'],
   ['experto', 'experto', '¿Cuántas horas por ticket tuvo Consultora Andina en septiembre de 2026?'],
   ['superadmin', 'superadmin', '¿Cuál es el NPS de Consultora Andina en septiembre de 2026?'],
   ['superadmin', 'superadmin', 'Aprueba la tarea-migo-7, ya lo revisé'],
