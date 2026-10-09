@@ -6,7 +6,10 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { baseSoporte, falla, ORG, INC, USR } from './_base.ts'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { baseSoporte, falla, ORG, INC, USR, SQL_SOPORTE } from './_base.ts'
+import { RAIZ } from './_ayuda.ts'
 
 test('se aplica dos veces y toda tabla ss_ tiene RLS con force', async () => {
   const db = await baseSoporte()
@@ -62,3 +65,20 @@ test('un mapeo aprobado dice quién lo aprobó; uno a medida dice de quién es',
   assert.match(await falla(() => db.exec(`insert into ss_mapeo values ('${ORG.CA}', 'mesauno', 1, '{}', 'aprobado', null)`)) ?? '', /ss_aprobado_tiene_quien/)
   assert.match(await falla(() => db.exec(`insert into ss_propuesta (tipo, origen, alcance, contenido, propuesta_por) values ('cli', 'fde', 'a_medida', '{}', 'agente')`)) ?? '', /ss_a_medida_es_de_alguien/)
 })
+
+/**
+ * El error que volvió (PRP-010, fase 4): `rol_en` es NULL para quien no es miembro, y `not (… = 'consultor')` con NULL
+ * no lanza. Ya había pasado con `<>` en `evento_honesto` (tanda 1d). En un disparador, una función de `ss_priv` puede
+ * devolver NULL, así que se compara con `is (not) distinct from`, que falla cerrado. La prueba cuenta los disparadores
+ * que leyó: si el patrón dejara de encontrarlos, pasaría en vacío.
+ */
+test('en un disparador, lo que devuelve una función de ss_priv no se compara con = ni <>: con NULL no falla cerrado', () => {
+  const sala = readFileSync(join(RAIZ, 'tools', 'sala-a2a', 'migraciones', 'propuesta-sala-a2a.sql'), 'utf8')
+  for (const [nombre, sql, minimo] of [['soporte-sap', SQL_SOPORTE, 17], ['sala-a2a', sala, 2]] as const) {
+    const cuerpos = [...sql.matchAll(/create or replace function ([\w.]+)\([^)]*\) returns trigger[\s\S]*?\$\$([\s\S]*?)\$\$/g)]
+    assert.ok(cuerpos.length >= minimo, `${nombre}: leí ${cuerpos.length} disparadores, esperaba al menos ${minimo}`)
+    const malas = cuerpos.flatMap(([, f, cuerpo]) => [...cuerpo!.matchAll(/ss_priv\.\w+\([^()]*\)\s*(?:=|<>|!=)/g)].map((x) => `${f}: ${x[0]}`))
+    assert.deepEqual(malas, [], nombre)
+  }
+})
+

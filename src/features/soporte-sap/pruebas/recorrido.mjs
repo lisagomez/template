@@ -188,7 +188,8 @@ await rol('cliente')
 await abre('Usuario bloqueado')
 const pidio = /intentos fallidos/.test(await texto(sel('cliente-pide')))
 await pagina.click(sel('cliente-reanuda'))
-await pagina.waitForTimeout(400)
+// La captura espera a que el reloj muestre la reanudación: con un tiempo fijo salía el reloj de antes.
+await pagina.locator(sel('reloj-incidencia'), { hasText: 'RESPUESTA_CLIENTE' }).first().waitFor({ timeout: 10_000 })
 await captura(14.2, 'el cliente ve que se le pide y reanuda el reloj al responder', async () => {
   const c = await cadena()
   return pidio && /ESPERA_CLIENTE · usr-consultor-andina/.test(c) && /RESPUESTA_CLIENTE · usr-cliente-bajio/.test(c) && (await pagina.locator(sel('cliente-reanuda')).count()) === 0

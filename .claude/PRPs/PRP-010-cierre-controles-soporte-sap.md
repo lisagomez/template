@@ -637,6 +637,14 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `aisia-lab-escalado` saboteaba la lectura del laboratorio, no quién escala; `aisia-lab-72h` saboteaba el intervalo,
   no quién pone la fecha. Una fila «probado» prueba exactamente lo que siembra su sabotaje, y nada más.
   **Lección**: cada afirmación se parte en todas las formas de romperla, y cada forma lleva su fila.
+- **2026-10-09 · el NULL volvió, ahora con `=`** (fase 4). La lección del 07/10 era «`<>` con NULL no rechaza», y se
+  arregló en `evento_honesto`. En `evento_de_quien_puede` la regla era `not (… and rol_en(consultora) = 'consultor')`:
+  para quien no es miembro, `rol_en` es NULL, `not (… and NULL)` es NULL y el `if` no lanza. El cliente marcaba su
+  primera respuesta, resolvía y se subía a P1; el laboratorio, lo mismo en lo escalado. La prueba de H-17 solo
+  intentaba al agente. Lo destapó un sabotaje que no caía (la fila de la pausa). **Fix**: `is not distinct from`,
+  una prueba con el cliente y el laboratorio, y una prueba estructural que prohíbe `=` y `<>` sobre funciones de
+  `ss_priv` en todos los disparadores, y cuenta los que lee. **Lección**: una lección escrita no impide que el error
+  vuelva con otra forma; lo impide una prueba que lo busque en todo el código, no solo en la línea que falló.
 - **2026-10-07 · una limpieza puede tapar su propio sabotaje.** Para quitar la política vieja del agente puse un
   `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
   bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.

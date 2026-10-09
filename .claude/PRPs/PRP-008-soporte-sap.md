@@ -159,6 +159,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   `por_revisar`, `propuesta`) y no decide. El agente solo actualiza su incidencia, y por columna: categoría y
   prioridad inicial, sin fechas ni estados terminales. Una persona decide **a su nombre** por política restrictiva
   (`auth.uid()`). Lo que va al núcleo lo decide el superadministrador (D2).
+  - Responder, pausar, resolver y cambiar la prioridad son actos de una persona **de la consultora**: ni el agente,
+    ni el cliente, ni el laboratorio los emiten. Las reglas de la base fallan cerradas ante un NULL: en un
+    disparador, lo que devuelve una función se compara con `is (not) distinct from`, y una prueba lo vigila en todos.
   - En la sala, una aprobación es del tenant, de la tarea y de la huella de su mensaje: una persona de B no aprueba
     el plan de A. Ningún componente que ejecuta un modelo la fabrica: la suite de la sala tiene 11 sabotajes (S1 a
     S11), y cada uno la pone en rojo.

@@ -982,6 +982,14 @@ export const FILAS: readonly Fila[] = [
     nota: 'una persona que aprueba en verde tras cuarenta planes buenos no es comprobable con una prueba',
   },
   {
+    id: 'c3-nulos-fallan-cerrado', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
+    afirmacion: 'en un disparador, lo que devuelve una función de ss_priv se compara con `is (not) distinct from`: ante un NULL, la regla falla cerrada',
+    control: 'propuesta-soporte-sap.sql y propuesta-sala-a2a.sql, todos los disparadores',
+    comprobacion: prueba('esquema.ts', 'en un disparador, lo que devuelve una función de ss_priv no se compara con = ni <>: con NULL no falla cerrado'),
+    sabotaje: { que: 'vuelve el `=` en una regla de quién emite', ediciones: [
+      ed(SQL, "or ss_priv.rol_en(new.cliente_id) is not distinct from 'usuario_cliente')) then", "or ss_priv.rol_en(new.cliente_id) = 'usuario_cliente')) then")] },
+  },
+  {
     id: 'c3-tenencia-hijas', doc: 'C3', ref: 'Tenencia atada (O2)', estado: 'probado',
     afirmacion: 'un disparador ata la tenencia de cada tabla hija a su incidencia',
     control: 'SQL · ss_priv.tenencia_de_incidencia()',
