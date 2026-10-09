@@ -89,3 +89,13 @@ test('con pocos datos la confianza baja: un cliente de 8 incidencias da «baja»
   assert.ok(pocos.length > 0 && pocos.every((a) => a.confianza === 'baja'), JSON.stringify(pocos.map((a) => a.confianza)))
   assert.ok(muchos.length > 0 && muchos.every((a) => a.confianza === 'media'), JSON.stringify(muchos.map((a) => a.confianza)))
 })
+
+// PRP-010 H-28: los accionables llevaban su confianza y el FODA no. Un 100 % de 8 incidencias no dice lo mismo que uno
+// de 45: cada punto lleva la confianza del volumen del cliente en el periodo.
+test('H-28 · cada punto del FODA lleva su confianza: con pocos datos, «baja»; con suficientes, «media»', () => {
+  const puntos = (cliente: string) => { const f = foda(CORTE, 'andina', cliente, P); return [...f.fortalezas, ...f.debilidades, ...f.oportunidades, ...f.amenazas] }
+  const pocos = puntos('farmacias-del-centro'), muchos = puntos('alimentos-del-bajio')
+  assert.equal(valor('volumen', 'farmacias-del-centro'), 8)
+  assert.ok(pocos.length > 0 && pocos.every((x) => x.confianza === 'baja'), JSON.stringify(pocos.map((x) => x.confianza)))
+  assert.ok(muchos.length > 0 && muchos.every((x) => x.confianza === 'media'), JSON.stringify(muchos.map((x) => x.confianza)))
+})

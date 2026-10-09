@@ -8,6 +8,7 @@
 import { useState, type FormEvent } from 'react'
 import type { IncidenciaVista, RelojVista, Rol } from '../services/tipos'
 import { Celda, Pildora, hora } from './ui'
+import { Impugnaciones } from './impugnaciones'
 
 export function FormularioIncidencia({ levanta, ocupado }: { levanta: (f: FormData) => Promise<void>; ocupado: boolean }) {
   const enviar = async (ev: FormEvent<HTMLFormElement>) => { ev.preventDefault(); const form = ev.currentTarget; await levanta(new FormData(form)); form.reset() }
@@ -120,6 +121,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
           </div>
         ) : null}
       </div>
+      <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={rol} actua={actua} />
       <details data-prueba="cadena">
         <summary className="cursor-pointer text-xs font-semibold">Cadena de eventos ({i.cadena.length}) · {i.cadenaIntegra ? 'íntegra ✓' : 'ROTA ✗'}</summary>
         <ol className="mt-1 space-y-0.5 text-[11px]">{i.cadena.map((e) => <li key={e.seq}><span className="font-mono text-neutral-500">#{e.seq} {e.hash.slice(0, 10)}</span> {e.tipo} · {e.actor} · {e.resumen}</li>)}</ol>

@@ -46,6 +46,7 @@ function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
     })),
     sandbox: i.sandbox ? { veredicto: i.sandbox.veredicto, texto: i.sandbox.veredicto === 'entra' ? i.sandbox.texto : null, senales: [...i.sandbox.senales] } : null,
     reloj: reloj(relojDe(i)),
+    impugnaciones: i.impugnaciones.map((m) => ({ ...m })),
   }
 }
 
@@ -104,7 +105,7 @@ export function vista(s: Sesion): Vista {
     })),
     foda: s.nivel === 'N1' ? null : (() => {
       const f = foda(CORTE, 'andina', 'alimentos-del-bajio', PERIODO)
-      const p = (xs: typeof f.fortalezas) => xs.map((x) => ({ texto: x.texto, criterio: x.criterio, datos: x.datos.map((d) => `${d.metrica} = ${d.valor} (${d.fuente.split(' · ').slice(1, 4).join(' · ')})`) }))
+      const p = (xs: typeof f.fortalezas) => xs.map((x) => ({ texto: x.texto, criterio: x.criterio, confianza: x.confianza, datos: x.datos.map((d) => `${d.metrica} = ${d.valor} (${d.fuente.split(' · ').slice(1, 4).join(' · ')})`) }))
       return { fortalezas: p(f.fortalezas), debilidades: p(f.debilidades), oportunidades: p(f.oportunidades), amenazas: p(f.amenazas) }
     })(),
     sandbox: s.nivel === 'N1' ? e.incidencias.filter((i) => i.sandbox).map((i) => ({ incidencia: i.id, veredicto: i.sandbox!.veredicto, texto: i.sandbox!.veredicto === 'entra' ? i.sandbox!.texto : null, senales: [...i.sandbox!.senales] })) : [],

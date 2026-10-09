@@ -140,7 +140,8 @@ export function recalcula(corte: Corte, consultora: string, cliente: string, per
 
 // --- El FODA del N3: cada punto cita su dato ------------------------------------------------------
 
-export interface PuntoFoda { readonly texto: string; readonly datos: readonly Evidencia[]; readonly criterio: string }
+/** `confianza`: la del volumen del cliente en el periodo; con pocas incidencias, un 100 % no dice mucho (PRP-010 H-28). */
+export interface PuntoFoda { readonly texto: string; readonly datos: readonly Evidencia[]; readonly criterio: string; readonly confianza: Accionable['confianza'] }
 export interface Foda { readonly fortalezas: readonly PuntoFoda[]; readonly debilidades: readonly PuntoFoda[]; readonly oportunidades: readonly PuntoFoda[]; readonly amenazas: readonly PuntoFoda[] }
 
 /** Los umbrales del FODA: SUPUESTOS del laboratorio, a la vista junto a cada punto. */
@@ -161,14 +162,16 @@ export function foda(corte: Corte, consultora: string, cliente: string, periodo:
   const reab = ev(corte, n3, 'tasa_reapertura', periodo, d)
   const backlog = ev(corte, n3, 'backlog', periodo, d)
   const backlogAntes = ev(corte, n3, 'backlog', mesAnterior(periodo), d)
+  // Sin volumen no hay con qué medir la confianza: «baja», nunca la de un cliente con datos.
+  const confianza = confianzaDe(ev(corte, n3, 'volumen', periodo, d)?.valor ?? 0)
   const F: PuntoFoda[] = [], D: PuntoFoda[] = [], A: PuntoFoda[] = []
-  if (sla && sla.valor >= c.slaBueno) F.push({ texto: 'Las incidencias críticas se responden a tiempo', datos: [sla], criterio: `cumplimiento ≥ ${c.slaBueno} (${c.fuente})` })
-  if (sla && sla.valor < c.slaMalo) D.push({ texto: 'Hay incidencias críticas que se respondieron tarde', datos: [sla], criterio: `cumplimiento < ${c.slaMalo} (${c.fuente})` })
-  if (fcr && fcr.valor >= c.primerContactoBueno) F.push({ texto: 'La mayoría se resuelve sin esperarte ni reabrirse', datos: [fcr], criterio: `primer contacto ≥ ${c.primerContactoBueno} (${c.fuente})` })
-  if (fcr && fcr.valor < c.primerContactoBueno) D.push({ texto: 'Muchas incidencias necesitan esperarte o se reabren', datos: [fcr], criterio: `primer contacto < ${c.primerContactoBueno} (${c.fuente})` })
-  if (reab && reab.valor > c.reaperturaMala) D.push({ texto: 'Se reabren demasiadas incidencias', datos: [reab], criterio: `reapertura > ${c.reaperturaMala} (${c.fuente})` })
-  if (backlog && backlogAntes && backlog.valor > backlogAntes.valor) A.push({ texto: 'El backlog creció respecto del mes anterior', datos: [backlogAntes, backlog], criterio: 'backlog del periodo > backlog del mes anterior' })
+  if (sla && sla.valor >= c.slaBueno) F.push({ texto: 'Las incidencias críticas se responden a tiempo', datos: [sla], criterio: `cumplimiento ≥ ${c.slaBueno} (${c.fuente})`, confianza })
+  if (sla && sla.valor < c.slaMalo) D.push({ texto: 'Hay incidencias críticas que se respondieron tarde', datos: [sla], criterio: `cumplimiento < ${c.slaMalo} (${c.fuente})`, confianza })
+  if (fcr && fcr.valor >= c.primerContactoBueno) F.push({ texto: 'La mayoría se resuelve sin esperarte ni reabrirse', datos: [fcr], criterio: `primer contacto ≥ ${c.primerContactoBueno} (${c.fuente})`, confianza })
+  if (fcr && fcr.valor < c.primerContactoBueno) D.push({ texto: 'Muchas incidencias necesitan esperarte o se reabren', datos: [fcr], criterio: `primer contacto < ${c.primerContactoBueno} (${c.fuente})`, confianza })
+  if (reab && reab.valor > c.reaperturaMala) D.push({ texto: 'Se reabren demasiadas incidencias', datos: [reab], criterio: `reapertura > ${c.reaperturaMala} (${c.fuente})`, confianza })
+  if (backlog && backlogAntes && backlog.valor > backlogAntes.valor) A.push({ texto: 'El backlog creció respecto del mes anterior', datos: [backlogAntes, backlog], criterio: 'backlog del periodo > backlog del mes anterior', confianza })
   const O = accionables(corte, consultora, cliente, periodo).filter((a) => a.para === 'n3')
-    .map((a) => ({ texto: `${a.titulo}: entre $${a.impactoMxn.bajo.toLocaleString('es-MX')} y $${a.impactoMxn.alto.toLocaleString('es-MX')} MXN al mes de paro evitado (proyección)`, datos: a.evidencia, criterio: `${a.formula}. ${a.aviso}` }))
+    .map((a) => ({ texto: `${a.titulo}: entre $${a.impactoMxn.bajo.toLocaleString('es-MX')} y $${a.impactoMxn.alto.toLocaleString('es-MX')} MXN al mes de paro evitado (proyección)`, datos: a.evidencia, criterio: `${a.formula}. ${a.aviso}`, confianza: a.confianza }))
   return { fortalezas: F, debilidades: D, oportunidades: O, amenazas: A }
 }

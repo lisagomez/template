@@ -5,7 +5,7 @@
  */
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { encendido, levanta, actua } from '@/features/soporte-sap/services/runtime'
+import { encendido, levanta, actua, Rechazo } from '@/features/soporte-sap/services/runtime'
 import { vista } from '@/features/soporte-sap/services/vistas'
 import { SESIONES, type Rol } from '@/features/soporte-sap/services/tipos'
 
@@ -21,6 +21,8 @@ const ACCION = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('responde'), incidencia: z.string().min(1).max(40), texto: z.string().trim().min(5).max(2000) }),
   z.object({ tipo: z.literal('al_nucleo'), propuesta: z.string().min(1).max(40) }),
   z.object({ tipo: z.literal('fija_presupuesto'), consultora: z.string().min(1).max(40), topeTokens: z.number().int().min(0).max(1e9).nullable(), topePaginasOcr: z.number().int().min(0).max(1e6).nullable() }),
+  z.object({ tipo: z.literal('impugna'), incidencia: z.string().min(1).max(40), campo: z.enum(['prioridad', 'categoria', 'complejidad', 'pausa']), motivo: z.string().trim().min(10).max(2000) }),
+  z.object({ tipo: z.literal('resuelve_impugnacion'), incidencia: z.string().min(1).max(40), impugnacion: z.string().min(1).max(60), decision: z.enum(['aceptada', 'rechazada']) }),
   z.object({ tipo: z.literal('reinicia') }),
 ])
 const MAX_ADJUNTOS = 5
@@ -47,7 +49,9 @@ export async function POST(req: NextRequest) {
     actua(s, ACCION.parse(await req.json()))
     return NextResponse.json({ vista: vista(s) })
   } catch (e) {
-    const mensaje = e instanceof z.ZodError ? 'datos inválidos' : e instanceof Error ? e.message : String(e)
-    return NextResponse.json({ error: mensaje, vista: vista(s) }, { status: 400 })
+    // Al usuario solo le llega lo que el laboratorio le dice a propósito; un error interno se queda en el log (PRP-010 H-25).
+    const publico = e instanceof z.ZodError ? 'datos inválidos' : e instanceof Rechazo ? e.message : null
+    if (publico === null) console.error('soporte-sap: error interno', e)
+    return NextResponse.json({ error: publico ?? 'error interno del laboratorio', vista: vista(s) }, { status: publico === null ? 500 : 400 })
   }
 }

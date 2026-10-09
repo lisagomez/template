@@ -150,6 +150,31 @@ await captura(13, 'al tope del presupuesto el P1 pasa a una persona y el P4 espe
   return /tokens [\d.,]+ de 0/.test(t) && /a una persona[^\n]*evidencia sin leer/.test(t) && /a una persona[^\n]*no alcanza[^\n]*P1 pasa a una persona/.test(t) && /en espera[^\n]*P4 espera/.test(t)
 }, sel('presupuesto'))
 
+// 14 (PRP-010 H-10): el cliente impugna la prioridad; la consultora la resuelve a su nombre, y una resuelta no se reabre.
+const abre = (titulo) => pagina.locator('[data-prueba^="incidencia-"]', { hasText: titulo }).first().click()
+await rol('cliente')
+await abre('Usuario bloqueado')
+await pagina.selectOption(sel('impugna-campo'), 'prioridad')
+await pagina.fill(sel('impugna-motivo'), 'Es P4, pero nadie del almacén puede surtir sin ese usuario')
+await pagina.click(sel('impugna-envia'))
+await pagina.waitForTimeout(400)
+await rol('consultor')
+await abre('Usuario bloqueado')
+await pagina.click(sel('impugnacion-acepta'))
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await abre('Usuario bloqueado')
+await captura(14, 'el cliente impugna y la consultora la resuelve a su nombre', async () => {
+  const t = await texto(sel('impugnaciones'))
+  return /aceptada/.test(t) && /prioridad/.test(t) && /nadie del almacén/.test(t) && /resuelta por usr-consultor-andina/.test(t) && (await pagina.locator(sel('impugnacion-acepta')).count()) === 0
+}, sel('impugnaciones'))
+
+// H-28: el FODA dice su confianza, y una proyección dice que no es una promesa.
+await captura(14.5, 'el FODA lleva su confianza y la proyección su aviso', async () => {
+  const f = await texto(sel('foda')), a = await texto(sel('accionables'))
+  return /confianza (media|baja)/.test(f) && /Proyección con supuestos, no una promesa/.test(a)
+}, sel('foda'))
+
 await navegador.close()
 const malos = pasos.filter((p) => !p.ok)
 console.log(`\n${pasos.length} capturas · ${malos.length} comprobaciones en rojo · ${errores.length} errores de consola${errores.length ? `:\n  ${errores.join('\n  ')}` : ''}`)

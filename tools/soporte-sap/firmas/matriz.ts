@@ -49,6 +49,9 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-impugna-app'], afirmacion: 'el N3 impugna y su consultora la resuelve a su nombre', encontrado: 'PRP-010 H-10, la pantalla (07/10): la base ya lo exigía (tanda 1b), pero en la app no había cómo impugnar' },
+  { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-foda-confianza-puntos'], afirmacion: 'la confianza baja cuando hay pocos datos', encontrado: 'PRP-010 H-28 (07/10): la llevaban los accionables y el FODA no; el recorrido no comprobaba el aviso de proyección' },
+  { doc: 'C3', por: 'revision', resolucion: 'codigo', filas: ['c3-ruta-404-get', 'c3-ruta-sin-error-interno'], afirmacion: 'la ruta del laboratorio responde 404 sin su variable', encontrado: 'PRP-010 H-25 (07/10): la prueba no miraba el GET (buscaba `export async function`, y el GET no es async), y la ruta devolvía el mensaje de cualquier error' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-presupuesto-enjambre', 'aisia-presupuesto-runtime', 'aisia-presupuesto-p1-ocr', 'aisia-presupuesto-mes', 'aisia-presupuesto-sin-medir', 'aisia-presupuesto-reglas', 'c3-ocr-tope-del-mes'], afirmacion: 'el triage de P1 y P2 nunca se corta por presupuesto', encontrado: 'PRP-010 H-18 (07/10): la función que lo decide no la llamaba nadie, el aviso no llegaba a nadie, nadie leía `ss_presupuesto` y el tope de OCR vivía en memoria y sin periodo; la fila «aisia-presupuesto» probaba la función, no el camino' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-solucion-artefacto', 'aisia-solucion-cli-huella'], afirmacion: 'se ejecuta exactamente lo aprobado', encontrado: 'PRP-010 H-11 (05/10): `ejecuta()` recibía los pasos sueltos y nunca comparaba la huella (con la aprobación de desbloquear a un usuario se desbloqueaba a otro), y `ss-simulador --param` ejecutaba otro artefacto con la aprobación de uno' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-dato-revision-frases', 'aisia-dato-banco-independiente', 'aisia-dato-banco-control', 'aisia-dato-sueltas', 'aisia-dato-tecnico'], afirmacion: 'anonimizador fail-closed: lo que no se resuelve con certeza va a cuarentena', encontrado: 'PRP-010 H-04 (07/10): 5 de 14 frases nuevas entraban con el dato; el banco que escribió quien no leyó el detector (08/10) encontró 8 de 30 más y 4 controles tapados; y después del arreglo, un banco de control escrito sin verlo encontró 3 de 30' },
@@ -235,7 +238,7 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'en la app, al núcleo solo sube el superadministrador, y sube generalizada',
     control: 'src/features/soporte-sap/services/runtime.ts · subeAlNucleo()',
     comprobacion: prueba('anonimiza.ts', 'H-19 · en la app, al núcleo solo sube el superadministrador, y sube con alNucleo (generalizada)'),
-    sabotaje: { que: 'la app sube el texto sin generalizar', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '  const n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION)', "  const n: PropuestaDeEnsenanza = { ...p, alcance: 'nucleo', consultora: null }")] },
+    sabotaje: { que: 'la app sube el texto sin generalizar', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', 'n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION)', "n = { ...p, alcance: 'nucleo', consultora: null }")] },
   },
   {
     id: 'aisia-secreto-base-nucleo', doc: 'AISIA', ref: 'Secreto del N3 en el núcleo', estado: 'probado',
@@ -419,6 +422,13 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'una debilidad sin su dato', ediciones: [ed(dist('impactos.js'), "D.push({ texto: 'Hay incidencias críticas que se respondieron tarde', datos: [sla],", "D.push({ texto: 'Hay incidencias críticas que se respondieron tarde', datos: [],")] },
   },
   {
+    id: 'aisia-foda-confianza-puntos', doc: 'AISIA', ref: 'FODA o accionable que afirma de más', estado: 'probado',
+    afirmacion: 'cada punto del FODA lleva la confianza del volumen del cliente: con pocos datos, baja (la llevaban los accionables y el FODA no)',
+    control: 'src/impactos.ts · foda()',
+    comprobacion: prueba('impactos.ts', 'H-28 · cada punto del FODA lleva su confianza: con pocos datos, «baja»; con suficientes, «media»'),
+    sabotaje: { que: 'el FODA dice «media» con pocos datos', ediciones: [ed(dist('impactos.js'), "const confianza = confianzaDe(ev(corte, n3, 'volumen', periodo, d)?.valor ?? 0);", "const confianza = 'media';")] },
+  },
+  {
     id: 'aisia-foda-confianza', doc: 'AISIA', ref: 'FODA o accionable que afirma de más', estado: 'probado',
     afirmacion: 'la confianza baja cuando hay pocos datos',
     control: 'src/impactos.ts · confianzaDe()',
@@ -506,6 +516,13 @@ export const FILAS: readonly Fila[] = [
     comprobacion: prueba('cierre-base.ts', 'H-10 · la consultora no reescribe la queja del cliente; la resuelve a su nombre y no se reabre'),
     sabotaje: { que: "la consultora puede reescribir la impugnación", ediciones: [
       ed(SQL, "grant update (estado, resuelta_por) on public.ss_impugnacion to authenticated;", "grant update on public.ss_impugnacion to authenticated;")] },
+  },
+  {
+    id: 'aisia-impugna-app', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
+    afirmacion: 'en la app el cliente impugna (también una pausa del reloj) con su motivo, y la consultora la resuelve a su nombre; una resuelta no se reabre',
+    control: 'src/features/soporte-sap/services/runtime.ts · impugna() y resuelveImpugnacion()',
+    comprobacion: prueba('pantallas.ts', 'H-10 · en la app, impugna el cliente de la incidencia con su motivo, y la consultora la resuelve a su nombre sin reabrirla'),
+    sabotaje: { que: 'una impugnación resuelta se vuelve a resolver', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  if (m.estado !== 'abierta') throw new Rechazo('una impugnación resuelta no se reabre ni se cambia')\n", '')] },
   },
   {
     id: 'aisia-impugna-cierre', doc: 'AISIA', ref: 'Prioridad mal asignada', infirmable: true, estado: 'probado',
@@ -1102,6 +1119,20 @@ export const FILAS: readonly Fila[] = [
     control: 'src/app/api/soporte-sap/route.ts · guarda al principio de cada método',
     comprobacion: prueba('superficie.ts', 'la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1: cada método empieza con la guarda'),
     sabotaje: { que: 'el POST sin guarda', ediciones: [ed('src/app/api/soporte-sap/route.ts', 'export async function POST(req: NextRequest) {\n  if (!encendido()) return apagado()\n', 'export async function POST(req: NextRequest) {\n')] },
+  },
+  {
+    id: 'c3-ruta-404-get', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'probado',
+    afirmacion: 'el GET también responde 404 sin SOPORTE_SAP_LABORATORIO=1 (la prueba no lo veía: el GET no es async)',
+    control: 'src/app/api/soporte-sap/route.ts · la guarda es la primera línea de cada método',
+    comprobacion: prueba('superficie.ts', 'la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1: cada método empieza con la guarda'),
+    sabotaje: { que: 'el GET sin guarda', ediciones: [ed('src/app/api/soporte-sap/route.ts', 'export function GET(req: NextRequest) {\n  if (!encendido()) return apagado()\n', 'export function GET(req: NextRequest) {\n')] },
+  },
+  {
+    id: 'c3-ruta-sin-error-interno', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'probado',
+    afirmacion: 'la ruta no le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje; lo demás va al log del servidor',
+    control: 'src/app/api/soporte-sap/route.ts · Rechazo (runtime)',
+    comprobacion: prueba('superficie.ts', 'H-25 · la ruta del laboratorio no le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje'),
+    sabotaje: { que: 'la ruta devuelve el mensaje de cualquier error', ediciones: [ed('src/app/api/soporte-sap/route.ts', "e instanceof Rechazo ? e.message : null", "e instanceof Error ? e.message : null")] },
   },
   {
     id: 'c3-ruta-deploy', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'probado',

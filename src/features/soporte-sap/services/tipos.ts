@@ -43,6 +43,7 @@ export interface IncidenciaVista {
   readonly estado: string; readonly adjuntos: readonly AdjuntoVista[]; readonly cadena: readonly EventoVista[]; readonly cadenaIntegra: boolean
   readonly planes: readonly PlanVista[]; readonly sandbox: { readonly veredicto: string; readonly texto: string | null; readonly senales: readonly string[] } | null
   readonly reloj: RelojVista
+  readonly impugnaciones: readonly ImpugnacionVista[]
 }
 export interface MensajeSalaVista {
   readonly id: string; readonly hilo: string | null; readonly autor: string; readonly tipoAutor: string; readonly cuerpo: string; readonly origen: string
@@ -55,7 +56,12 @@ export interface AccionableVista {
   readonly id: string; readonly para: string; readonly titulo: string; readonly evidencia: readonly string[]; readonly formula: string
   readonly supuestos: readonly string[]; readonly bajo: number; readonly central: number; readonly alto: number; readonly confianza: string; readonly responsable: string; readonly aviso: string
 }
-export interface PuntoFodaVista { readonly texto: string; readonly datos: readonly string[]; readonly criterio: string }
+/** Una impugnación tal como la ven el cliente, su consultora y el laboratorio en lo escalado. */
+export interface ImpugnacionVista {
+  readonly id: string; readonly campo: string; readonly motivo: string; readonly por: string; readonly creada: string
+  readonly estado: 'abierta' | 'aceptada' | 'rechazada'; readonly resueltaPor: string | null; readonly resuelta: string | null
+}
+export interface PuntoFodaVista { readonly texto: string; readonly datos: readonly string[]; readonly criterio: string; readonly confianza: 'baja' | 'media' }
 export interface FodaVista { readonly fortalezas: readonly PuntoFodaVista[]; readonly debilidades: readonly PuntoFodaVista[]; readonly oportunidades: readonly PuntoFodaVista[]; readonly amenazas: readonly PuntoFodaVista[] }
 export interface SlaVista { readonly contrato: string; readonly notas: readonly string[]; readonly metas: ReadonlyArray<{ readonly prioridad: string; readonly respuesta: string; readonly resolucion: string; readonly fuente: string }>; readonly tarjetas: readonly Tarjeta[] }
 export interface GrupoTarjetas { readonly titulo: string; readonly tarjetas: readonly Tarjeta[] }
@@ -97,4 +103,7 @@ export type Accion =
   | { readonly tipo: 'al_nucleo'; readonly propuesta: string }
   /** El superadministrador fija el tope del mes de una consultora (como `ss_presupuesto_fija`). */
   | { readonly tipo: 'fija_presupuesto'; readonly consultora: string; readonly topeTokens: number | null; readonly topePaginasOcr: number | null }
+  /** El cliente impugna un campo de su incidencia; la consultora la resuelve a su nombre (PRP-010 H-10). */
+  | { readonly tipo: 'impugna'; readonly incidencia: string; readonly campo: 'prioridad' | 'categoria' | 'complejidad' | 'pausa'; readonly motivo: string }
+  | { readonly tipo: 'resuelve_impugnacion'; readonly incidencia: string; readonly impugnacion: string; readonly decision: 'aceptada' | 'rechazada' }
   | { readonly tipo: 'reinicia' }
