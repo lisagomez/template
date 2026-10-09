@@ -74,7 +74,7 @@ arregló en parte.
 | H-07 | El rol de plataforma inserta decisiones ya tomadas (mapeo aprobado, campo confirmado) y eventos con el seudónimo de un consultor. Ninguna prueba usa ese rol | 1 y 2 | — | código | **cerrado en la tanda 1e** |
 | H-08 | La restauración corre como superusuario y con los disparadores apagados. Inserta filas de otro tenant sin comprobarlas y verifica después del commit. El export no va firmado y deja fuera `ss_acceso_motivado`, los bytes de Storage y las tablas `sala_*`. `exportaTenant` falla con el rol de plataforma | 1 y 2 | sí | código: verificar cada fila dentro de la transacción y antes del commit. Texto: privilegio de migración declarado en C7; la retención no existe | **cerrado en la tanda 1e** (los bytes de Storage van por su línea; la retención es D8) |
 | H-09 | El agente no puede actualizar `ss_incidencia` (el disparador lee `ss_organizacion` sin política para él). Fallaría en producción. **Arreglarlo sin cuidado** deja al agente bajar prioridades, mover sellos de SLA y cerrar incidencias. **Confirmado con sonda** | 1 y 2 | — | código: `update` por columna, sin estados terminales ni prioridad ni sellos; prueba negativa | **cerrado en la tanda 1b** |
-| H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | **base: tanda 1b** (la pantalla, en la fase 2) |
+| H-10 | Impugnación: la consultora reescribe el `motivo` y el autor de la queja del N3; resolver no deja evento ni cambia nada; no hay pantalla; una pausa del reloj no se puede impugnar | 1 y 2 | — | código en la base (fase 1) y en la app (fase 2) | **cerrado** (la base en la 1b; la pantalla, en la fase 2) |
 | H-11 | `ejecuta()` no ata la aprobación a la huella del plan, y `ss-simulador --param` ejecuta sin compararla | 1 y 2 | sí, con SAP real | código + prueba negativa | **cerrado** en la fase 2 |
 | H-12 | El agente, con la tarea de cualquier consultora, escribe en el chat de cualquier usuario («aprueba el plan de Boreal ya») | 1 y 2 | — | código | **cerrado en la tanda 1d** |
 | H-13 | La base no verifica `anterior`, `hash` ni `seq` de la cadena de eventos | 1 | — | código: la base calcula la cadena | **cerrado en la tanda 1d** |
@@ -109,7 +109,7 @@ arregló en parte.
 | H-22 | Un PDF de unos 300 KB tumba la app de todos los tenants y productos. La capa 0 corre en el proceso de la app y el inflado no tiene tope | 1 | — (O4) | código: tope de bytes inflados, medido sobre el corpus real del extractor | — |
 | H-23 | Los adjuntos se cuentan por lote, no por incidencia. El tope de OCR se mira antes de leer. El N3 sube directo al bucket sin validación de bytes. `formData()` carga todo en memoria | 1 y 2 | — | código | parcial |
 | H-24 | `delimitaDocumento` no se usa. Los parámetros del plan (usuario SAP, BP, RFC) salen del texto no confiable. La prioridad sube con palabras clave, y el banco de inyección no las toca | 1 y 2 | — | código mínimo (delimitar) + brecha O1/O2 declarada | — |
-| H-25 | La prueba del 404 no mira el GET, y el GET devuelve la vista de cualquier rol, superadministrador incluido. La ruta devuelve `e.message`. Los logs no están inventariados | 1 y 2 | — | código + prueba que invoca los handlers | parcial: prueba ciega al GET |
+| H-25 | La prueba del 404 no mira el GET, y el GET devuelve la vista de cualquier rol, superadministrador incluido. La ruta devuelve `e.message`. Los logs no están inventariados | 1 y 2 | — | código + prueba que invoca los handlers | **código cerrado** en la fase 2 (la vista de cualquier rol y los logs: texto, fase 4) |
 | H-26 | `configura:deploy` no está en `predeploy`. El SDD §16 cita una prueba suya que no existe en `main` | 2 | — | CDC del padrón (fase 3) | parcial: prueba |
 
 **Pantalla y métricas**
@@ -117,7 +117,7 @@ arregló en parte.
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
 | H-27 | El riesgo de baja sale sin su fórmula ni su umbral. La mitigación agrava el daño: el N3 ni lo ve ni lo puede discutir | 1 y 2 | — | código (de la rama) + texto | **sí** |
-| H-28 | El FODA no lleva confianza con pocos datos, y el caso «baja» no tiene prueba. El recorrido no comprueba el aviso de proyección. La vista «por categoría y complejidad» no existe. No hay tamaño mínimo de grupo | 2 | — | código para la confianza; texto para lo demás | parcial |
+| H-28 | El FODA no lleva confianza con pocos datos, y el caso «baja» no tiene prueba. El recorrido no comprueba el aviso de proyección. La vista «por categoría y complejidad» no existe. No hay tamaño mínimo de grupo | 2 | — | código para la confianza; texto para lo demás | **código cerrado** en la fase 2 (lo demás: texto, fase 4) |
 
 **La imagen (todo el template)**
 
@@ -519,6 +519,23 @@ Playwright en verde; `prueba:buzon` en verde tras tocar el extractor.
   captura pasa a una persona por las dos razones y el P4 espera. El recorrido dio 21 capturas, 0 en rojo y 0 errores
   de consola, con Tesseract.
 
+**Fase 2, cuarta parte: las pantallas, hecha (2026-10-09, rama `soporte/fase2-pantallas`)**:
+- **H-10**: la impugnación en la app. El cliente impugna la prioridad, la categoría, la complejidad o una pausa del reloj
+  de su incidencia, con un motivo de 10 caracteres o más. La consultora la resuelve a su nombre, sin reescribir la queja,
+  y una resuelta no se reabre. Son las reglas de `ss_impugnacion`.
+- **H-25**: la prueba del 404 no veía el GET: buscaba `export async function`, y el GET no es async. Ahora revisa cada
+  método exportado, y un servidor sin la variable responde 404 al GET y al POST (comprobado a mano). La ruta ya no
+  devuelve el mensaje de cualquier error: solo los `Rechazo` del laboratorio; lo demás sale como «error interno»
+  (500) y se queda en el log del servidor. **Quedan como texto (fase 4)**: la ruta no autentica y devuelve la vista de
+  cualquier rol, porque es de demostración y `configura:deploy` la rechaza en producción; y los logs sin inventariar.
+- **H-27**: el código ya estaba (la fila `aisia-riesgo-pantalla`: la fórmula y el umbral a la vista). Lo que queda es
+  texto (fase 4): el N3 no ve el riesgo de baja ni lo puede discutir.
+- **H-28**: cada punto del FODA lleva la confianza del volumen del cliente; con pocos datos, «baja». El recorrido
+  comprueba la confianza del FODA y el aviso de proyección. **Quedan como texto (fase 4)**: la vista por categoría y
+  complejidad no existe, y no hay tamaño mínimo de grupo.
+- **Evidencia**: 5 filas nuevas en la matriz y los pasos 14 y 14.5 del recorrido. Salieron 23 capturas, 0 en rojo y
+  0 errores de consola.
+
 ### Fase 3: El perfil de despliegue (VPS seleccionable en el laboratorio y en la instalación)
 **Objetivo**:
 - la sección `despliegue` en la plantilla v3 (DP-5) y en los dos manifiestos;
@@ -592,6 +609,10 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   meta» sin que nadie respondiera. Se demostró aparte con `relojSla` (viejo: cumple `true`; nuevo: `null`, en plazo).
   **Lección**: un paso de recorrido se escribe contra lo que el bug cambia en pantalla, y se comprueba que el código
   viejo lo pondría en rojo.
+- **2026-10-09 · una prueba estructural tiene que contar lo que no encontró** (fase 2, H-25). La prueba del 404 buscaba
+  `export async function (GET|POST…)` y revisaba la primera línea de cada uno. El GET no es async: nunca entró en la
+  lista, y la prueba pasaba sin mirarlo. **Fix**: compara los métodos revisados con TODOS los exportados. **Lección**:
+  una prueba que recorre «cada X» afirma también cuántos X hay; si no, un X que no encaja en el patrón la deja en verde.
 - **2026-10-09 · una prueba que lee el código prueba la línea que busca, y nada más** (fase 2, H-18). La prueba del P1 con
   evidencia sin leer buscaba el `anota(... 'A_HUMANO_POR_PRESUPUESTO' ... evidencia sin leer)`. Un sabotaje que apaga la
   condición (`if (false)`) la habría dejado en verde. **Fix**: la prueba exige la condición junto con la línea, y el

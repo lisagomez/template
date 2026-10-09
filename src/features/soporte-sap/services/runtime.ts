@@ -18,7 +18,7 @@ import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, 
 import {
   ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, CONSULTORAS, sapDeLaboratorio, alNucleo, preparaPlan, supervisa, mensajeDePlan,
   corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
-  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe,
+  accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe, NoAplica,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
   type AccionDeTriage, type PresupuestoDelMes,
@@ -28,6 +28,13 @@ import estimadoJson from '../../../../tools/soporte-sap/medicion/estimado.json'
 import type { Sesion, MensajeChatVista, PropuestaVista, Accion } from './tipos'
 
 export const encendido = (): boolean => process.env['SOPORTE_SAP_LABORATORIO'] === '1'
+/**
+ * Lo que el laboratorio le dice al usuario a propósito: una regla de quién puede qué, o un plan que no aplica. Es lo
+ * único cuyo mensaje sale por la ruta; cualquier otro error es interno y se queda en el log (PRP-010 H-25).
+ */
+export class Rechazo extends Error {}
+/** Un plan que no aplica en el simulador también se le dice al usuario: es una regla, no una falla. */
+const comoRechazo = (e: unknown): unknown => (e instanceof NoAplica ? new Rechazo(e.message) : e)
 export const CORTE = corteJson as unknown as Corte
 export const AGENTE = 'soporte-sap-a2a'
 const EJECUTOR = 'agente:ejecutor-sap'
@@ -39,6 +46,13 @@ export interface IncidenciaLab {
   id: string; cliente: string; consultora: string; sistema: 'ECC' | 'S4HANA'; titulo: string; texto: string
   adjuntos: ResultadoIngesta[]; clasificacion: Clasificacion; consulta: ConsultaMatriz; entrada: EntradaMatriz | null
   cadena: EventoIncidencia[]; sla: EventoSla[]; planes: PlanLab[]; sandbox: Anonimizado | null; estado: string
+  impugnaciones: ImpugnacionLab[]
+}
+/** Lo que el cliente impugna (como `ss_impugnacion`): el campo, su motivo y quién lo resolvió, con sus fechas. */
+export type CampoImpugnable = 'prioridad' | 'categoria' | 'complejidad' | 'pausa'
+export interface ImpugnacionLab {
+  readonly id: string; readonly campo: CampoImpugnable; readonly motivo: string; readonly por: string; readonly creada: string
+  estado: 'abierta' | 'aceptada' | 'rechazada'; resueltaPor: string | null; resuelta: string | null
 }
 /** El tope de una consultora en un mes (`consultora:AAAA-MM-01`), como una fila de `ss_presupuesto`. */
 export interface TopeDelMes { topeTokens: number | null; topePaginasOcr: number | null }
@@ -122,7 +136,7 @@ function conPresupuesto(i: IncidenciaLab, paso: (decision: AccionDeTriage) => vo
 
 /** El N3 levanta una incidencia con sus adjuntos. Todo lo demás lo hace el agente, y queda en la cadena. */
 export async function levanta(s: Sesion, d: { titulo: string; descripcion: string; archivos: Array<{ nombre: string; bytes: Uint8Array }> }): Promise<string> {
-  if (s.rol !== 'cliente') throw new Error('solo el cliente (N3) levanta incidencias aquí')
+  if (s.rol !== 'cliente') throw new Rechazo('solo el cliente (N3) levanta incidencias aquí')
   const e = estado()
   const cl = CLIENTES.find((c) => c.id === s.organizacion)!
   const id = `inc-${String(++e.n).padStart(3, '0')}`
@@ -134,7 +148,7 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
   const consulta = consultaMatriz(motor, MATRIZ_LABORATORIO, texto, cl.sistema)
   const i: IncidenciaLab = {
     id, cliente: cl.id, consultora: cl.consultora, sistema: cl.sistema, titulo: d.titulo.slice(0, 120), texto, adjuntos, clasificacion, consulta,
-    entrada: consulta.tipo === 'sin_solucion' ? null : consulta.entrada, cadena: [], sla: [{ tipo: 'RECIBIDA', fecha: ahora() }], planes: [], sandbox: null, estado: 'nueva',
+    entrada: consulta.tipo === 'sin_solucion' ? null : consulta.entrada, cadena: [], sla: [{ tipo: 'RECIBIDA', fecha: ahora() }], planes: [], sandbox: null, estado: 'nueva', impugnaciones: [],
   }
   anota(i, 'RECIBIDA', s.usuario, { cliente: cl.id, titulo: i.titulo })
   for (const a of adjuntos) anota(i, 'ADJUNTO_LEIDO', `agente:${AGENTE}`, a.aceptado ? { nombre: a.nombre, via: a.via, campos: a.campos.length, sha256: a.sha256, paginasOcr: a.paginasOcr } : { nombre: a.nombre, rechazado: a.motivo })
@@ -183,7 +197,7 @@ function alSandbox(i: IncidenciaLab): void {
 
 /** Una persona del laboratorio decide EN LA SALA con su sesión. Solo así se aplica algo al simulador. */
 function decide(s: Sesion, mensaje: string, accion: 'aprobar' | 'rechazar' | 'a_revision', motivo: string): void {
-  if (s.nivel !== 'N1') throw new Error('decide el HIL del laboratorio, en la sala')
+  if (s.nivel !== 'N1') throw new Rechazo('decide el HIL del laboratorio, en la sala')
   const e = estado()
   e.sala = registraAprobacion(e.sala, { principal: { tipo: 'humano', id: s.usuario } }, { id: `dec-${mensaje}-${s.usuario}`, mensaje, accion, decidida: ahora() })
   const i = e.incidencias.find((x) => x.planes.some((p) => p.mensaje === mensaje))
@@ -225,7 +239,7 @@ function revisa(i: IncidenciaLab, lab: PlanLab, mensaje: string, motivo: string,
 
 /** El chat del HIL: contesta con fuente, propone o promueve a la sala. Nunca aprueba. */
 function conversa(s: Sesion, texto: string): void {
-  if (s.rol !== 'superadmin' && s.rol !== 'experto') throw new Error('el chat del HIL es del superadministrador y del experto')
+  if (s.rol !== 'superadmin' && s.rol !== 'experto') throw new Rechazo('el chat del HIL es del superadministrador y del experto')
   const e = estado()
   const planes = e.sala.mensajes.filter((m) => m.bloques.length && !e.sala.aprobaciones.some((a) => a.mensaje === m.id))
     // La promoción va a la RAÍZ del hilo: una versión corregida ya es respuesta, y los hilos son de un nivel.
@@ -254,20 +268,21 @@ const NOMBRES_DE_ORGANIZACION = [...CLIENTES.map((c) => c.nombre), ...CONSULTORA
  * `alNucleo` (sin objetos propios, estructura ni nombres de organización). Si al generalizar queda una señal, no sube.
  */
 function subeAlNucleo(s: Sesion, id: string): void {
-  if (s.rol !== 'superadmin') throw new Error('al núcleo solo sube el superadministrador')
+  if (s.rol !== 'superadmin') throw new Rechazo('al núcleo solo sube el superadministrador')
   const e = estado()
   const p = e.ensenanzas[id]
-  if (!p) throw new Error('esa propuesta no existe')
-  const n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION)
+  if (!p) throw new Rechazo('esa propuesta no existe')
+  let n: PropuestaDeEnsenanza
+  try { n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION) } catch (e) { throw new Rechazo(e instanceof Error ? e.message : String(e)) }
   e.ensenanzas[id] = n
   e.propuestas = e.propuestas.map((v) => (v.id === id ? { ...v, alcance: alcanceDe(n), detalle: n.contenido, por: `${v.por} · al núcleo por ${s.usuario}` } : v))
 }
 
 /** El consultor pide un dato al cliente (pausa el reloj) o registra su respuesta (lo reanuda). */
 function relojDelCliente(s: Sesion, id: string, tipo: 'ESPERA_CLIENTE' | 'RESPUESTA_CLIENTE'): void {
-  if (s.rol !== 'consultor') throw new Error('el reloj lo mueve el consultor de la consultora')
+  if (s.rol !== 'consultor') throw new Rechazo('el reloj lo mueve el consultor de la consultora')
   const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
-  if (!i) throw new Error('esa incidencia no es de tu consultora')
+  if (!i) throw new Rechazo('esa incidencia no es de tu consultora')
   i.sla.push({ tipo, fecha: ahora() })
   anota(i, tipo, s.usuario, {})
   i.estado = tipo === 'ESPERA_CLIENTE' ? 'espera_cliente' : 'en_atencion'
@@ -278,28 +293,55 @@ function relojDelCliente(s: Sesion, id: string, tipo: 'ESPERA_CLIENTE' | 'RESPUE
  * (DP-4, PRP-010 H-17): ni mandar a la sala ni anonimizar cuentan, y una P1 ya no se «cumple» sola.
  */
 function respondeAlCliente(s: Sesion, id: string, texto: string): void {
-  if (s.rol !== 'consultor') throw new Error('al cliente le responde el consultor de su consultora')
+  if (s.rol !== 'consultor') throw new Rechazo('al cliente le responde el consultor de su consultora')
   const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
-  if (!i) throw new Error('esa incidencia no es de tu consultora')
+  if (!i) throw new Rechazo('esa incidencia no es de tu consultora')
   if (i.sla.some((x) => x.tipo === 'PRIMERA_RESPUESTA')) return
   i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })
   anota(i, 'PRIMERA_RESPUESTA', s.usuario, { caracteres: texto.length })
 }
 
+/**
+ * El cliente impugna la prioridad, la categoría, la complejidad o una pausa del reloj de SU incidencia, con un motivo
+ * de 10 caracteres o más (PRP-010 H-10; las mismas reglas que `ss_impugnacion`).
+ */
+function impugna(s: Sesion, id: string, campo: CampoImpugnable, motivo: string): void {
+  if (s.rol !== 'cliente') throw new Rechazo('impugna el cliente de la incidencia')
+  const i = estado().incidencias.find((x) => x.id === id && x.cliente === s.organizacion)
+  if (!i) throw new Rechazo('esa incidencia no es tuya')
+  if (motivo.trim().length < 10) throw new Rechazo('el motivo de una impugnación lleva al menos 10 caracteres')
+  i.impugnaciones.push({ id: `imp-${i.id}-${i.impugnaciones.length + 1}`, campo, motivo: motivo.trim(), por: s.usuario, creada: ahora(), estado: 'abierta', resueltaPor: null, resuelta: null })
+}
+
+/** La consultora la resuelve A SU NOMBRE: decide el estado, no reescribe la queja, y una resuelta no se reabre. */
+function resuelveImpugnacion(s: Sesion, id: string, impugnacion: string, decision: 'aceptada' | 'rechazada'): void {
+  if (s.rol !== 'consultor') throw new Rechazo('la impugnación la resuelve el consultor de la consultora')
+  const m = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)?.impugnaciones.find((x) => x.id === impugnacion)
+  if (!m) throw new Rechazo('esa impugnación no es de tu consultora')
+  if (m.estado !== 'abierta') throw new Rechazo('una impugnación resuelta no se reabre ni se cambia')
+  m.estado = decision; m.resueltaPor = s.usuario; m.resuelta = ahora()
+}
+
 /** El tope del mes lo fija el superadministrador (como `ss_presupuesto_fija` en la base). */
 function fijaPresupuesto(s: Sesion, consultora: string, tope: TopeDelMes): void {
-  if (s.rol !== 'superadmin') throw new Error('el presupuesto del mes lo fija el superadministrador')
-  if (!CONSULTORAS.some((c) => c.id === consultora)) throw new Error('esa consultora no existe')
+  if (s.rol !== 'superadmin') throw new Rechazo('el presupuesto del mes lo fija el superadministrador')
+  if (!CONSULTORAS.some((c) => c.id === consultora)) throw new Rechazo('esa consultora no existe')
   estado().presupuestos[`${consultora}:${mesDe(ahora())}`] = tope
 }
 
 export function actua(s: Sesion, a: Accion): void {
+  try { despacha(s, a) } catch (e) { throw comoRechazo(e) }
+}
+
+function despacha(s: Sesion, a: Accion): void {
   if (a.tipo === 'reinicia') { g.__soporteSapLab = nuevo(); return }
   if (a.tipo === 'decide') return decide(s, a.mensaje, a.accion, a.motivo ?? '')
   if (a.tipo === 'chat') return conversa(s, a.texto)
   if (a.tipo === 'responde') return respondeAlCliente(s, a.incidencia, a.texto)
   if (a.tipo === 'al_nucleo') return subeAlNucleo(s, a.propuesta)
   if (a.tipo === 'fija_presupuesto') return fijaPresupuesto(s, a.consultora, { topeTokens: a.topeTokens, topePaginasOcr: a.topePaginasOcr })
+  if (a.tipo === 'impugna') return impugna(s, a.incidencia, a.campo, a.motivo)
+  if (a.tipo === 'resuelve_impugnacion') return resuelveImpugnacion(s, a.incidencia, a.impugnacion, a.decision)
   return relojDelCliente(s, a.incidencia, a.tipo === 'espera_cliente' ? 'ESPERA_CLIENTE' : 'RESPUESTA_CLIENTE')
 }
 

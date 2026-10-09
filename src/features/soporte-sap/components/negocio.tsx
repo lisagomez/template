@@ -73,13 +73,13 @@ export function Foda({ foda }: { foda: FodaVista }) {
     ['Fortalezas', foda.fortalezas, 'bien'], ['Debilidades', foda.debilidades, 'mal'], ['Oportunidades', foda.oportunidades, 'info'], ['Amenazas', foda.amenazas, 'aviso'],
   ]
   return (
-    <Celda titulo="FODA del servicio" ancho={12} prueba="foda" nota="Cada punto cita su dato y su criterio (umbrales supuestos, a la vista).">
+    <Celda titulo="FODA del servicio" ancho={12} prueba="foda" nota="Cada punto cita su dato, su criterio (umbrales supuestos, a la vista) y su confianza: con pocas incidencias en el periodo, baja.">
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         {bloques.map(([t, puntos, tono]) => (
           <div key={t} className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-800/60">
             <p className="mb-1"><Pildora tono={tono}>{t}</Pildora></p>
             {puntos.length === 0 ? <p className="text-xs text-neutral-500">— (ningún dato lo sostiene)</p> : null}
-            <ul className="space-y-2 text-xs">{puntos.map((p) => <li key={p.texto}><b>{p.texto}</b><br /><span className="text-neutral-500">Dato: {p.datos.join('; ')}</span><br /><span className="text-[10px] text-neutral-400">Criterio: {p.criterio}</span></li>)}</ul>
+            <ul className="space-y-2 text-xs">{puntos.map((p) => <li key={p.texto}><b>{p.texto}</b> <Pildora tono={p.confianza === 'baja' ? 'aviso' : 'neutro'}>confianza {p.confianza}</Pildora><br /><span className="text-neutral-500">Dato: {p.datos.join('; ')}</span><br /><span className="text-[10px] text-neutral-400">Criterio: {p.criterio}</span></li>)}</ul>
           </div>
         ))}
       </div>

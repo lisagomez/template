@@ -20,12 +20,24 @@ test('la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1: cada m
   assert.ok(rutas.length > 0)
   for (const f of rutas) {
     const fuente = lee(`${carpeta}/${f}`)
-    const metodos = [...fuente.matchAll(/export async function (GET|POST|PUT|PATCH|DELETE)\b[^{]*\{\n\s*([^\n]+)/g)]
+    // PRP-010 H-25: antes buscaba solo `export async function`, y el GET no es async: nunca se revisaba.
+    const metodos = [...fuente.matchAll(/export (?:async )?function (GET|POST|PUT|PATCH|DELETE)\b[^{]*\{\n\s*([^\n]+)/g)]
+    const exportados = [...fuente.matchAll(/export (?:async )?(?:function|const) (GET|POST|PUT|PATCH|DELETE)\b/g)].map((m) => m[1])
     assert.ok(metodos.length > 0, `${f}: sin métodos`)
+    assert.deepEqual(metodos.map((m) => m[1]), exportados, `${f}: cada método exportado se revisa`)
     for (const [, metodo, primera] of metodos) assert.equal(primera!.trim(), GUARDA, `${f} ${metodo}: la primera línea no es la guarda`)
     assert.match(fuente, /const apagado = \(\) => NextResponse\.json\(.*\{ status: 404 \}\)/)
   }
   assert.match(lee('src/features/soporte-sap/services/runtime.ts'), /export const encendido = \(\): boolean => process\.env\['SOPORTE_SAP_LABORATORIO'\] === '1'/)
+})
+
+test('H-25 · la ruta del laboratorio no le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje', () => {
+  const ruta = lee('src/app/api/soporte-sap/route.ts')
+  const runtime = lee('src/features/soporte-sap/services/runtime.ts')
+  assert.match(ruta, /const publico = e instanceof z\.ZodError \? 'datos inválidos' : e instanceof Rechazo \? e\.message : null/, 'el mensaje sale solo de un rechazo')
+  assert.match(ruta, /error: publico \?\? 'error interno del laboratorio'/, 'lo demás sale como error interno')
+  assert.doesNotMatch(ruta, /e instanceof Error \? e\.message/, 'ningún Error cualquiera')
+  assert.doesNotMatch(runtime, /throw new Error\(/, 'las reglas del runtime son rechazos con nombre')
 })
 
 test('configura:deploy rechaza el laboratorio en producción y un SS_PG_HOST sin su usuario, sin imprimir la contraseña', () => {
