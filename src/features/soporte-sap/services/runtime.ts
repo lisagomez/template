@@ -47,9 +47,13 @@ export interface IncidenciaLab {
   adjuntos: ResultadoIngesta[]; clasificacion: Clasificacion; consulta: ConsultaMatriz; entrada: EntradaMatriz | null
   cadena: EventoIncidencia[]; sla: EventoSla[]; planes: PlanLab[]; sandbox: Anonimizado | null; estado: string
   impugnaciones: ImpugnacionLab[]
+  /** Quién de la consultora lo escaló al laboratorio (DP-3); sin esto, el laboratorio no lo ve. */
+  escalada: { readonly por: string; readonly fecha: string } | null
+  /** Lo que el consultor le respondió al cliente: el cliente lo lee (DP-4). */
+  respuestas: Array<{ readonly texto: string; readonly por: string; readonly fecha: string }>
 }
 /** Lo que el cliente impugna (como `ss_impugnacion`): el campo, su motivo y quién lo resolvió, con sus fechas. */
-export type CampoImpugnable = 'prioridad' | 'categoria' | 'complejidad' | 'pausa'
+export type CampoImpugnable = 'prioridad' | 'categoria' | 'complejidad' | 'pausa' | 'resolucion'
 export interface ImpugnacionLab {
   readonly id: string; readonly campo: CampoImpugnable; readonly motivo: string; readonly por: string; readonly creada: string
   estado: 'abierta' | 'aceptada' | 'rechazada'; resueltaPor: string | null; resuelta: string | null
@@ -156,6 +160,7 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
   const i: IncidenciaLab = {
     id, cliente: cl.id, consultora: cl.consultora, sistema: cl.sistema, titulo: d.titulo.slice(0, 120), texto, adjuntos, clasificacion, consulta,
     entrada: consulta.tipo === 'sin_solucion' ? null : consulta.entrada, cadena: [], sla: [{ tipo: 'RECIBIDA', fecha: ahora() }], planes: [], sandbox: null, estado: 'nueva', impugnaciones: [],
+    escalada: null, respuestas: [],
   }
   anota(i, 'RECIBIDA', s.usuario, { cliente: cl.id, titulo: i.titulo })
   for (const a of adjuntos) anota(i, 'ADJUNTO_LEIDO', `agente:${AGENTE}`, a.aceptado ? { nombre: a.nombre, via: a.via, campos: a.campos.length, sha256: a.sha256, paginasOcr: a.paginasOcr } : { nombre: a.nombre, rechazado: a.motivo })
@@ -168,7 +173,8 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
     anota(i, 'A_HUMANO_POR_PRESUPUESTO', `agente:${AGENTE}`, { aviso: `evidencia sin leer por el tope de OCR del mes (${sinLeer.join(', ')}): la revisa una persona ahora` })
   }
   if (consulta.tipo === 'solucion') conPresupuesto(i, (presupuesto) => proponPlan(i, preparaPlan({ ejecutor: EJECUTOR, incidencia: id, taskId: `tarea-${id}`, entrada: consulta.entrada, texto, sap: e.sap[cl.id]!, presupuesto, version: 1 }), null))
-  else if (consulta.tipo === 'grado_insuficiente') anota(i, 'ESCALADA', `agente:${AGENTE}`, { motivo: 'grado insuficiente: lo revisa el experto' })
+  // Con grado insuficiente el agente NO escala: el laboratorio ve solo lo que la consultora le escala (DP-3).
+  else if (consulta.tipo === 'grado_insuficiente') i.estado = 'en_atencion'
   else alSandbox(i)
   return id
 }
@@ -180,15 +186,35 @@ function proponPlan(i: IncidenciaLab, plan: Plan, hilo: string | null): void {
   const veredicto = supervisa({ supervisor: SUPERVISOR, plan, entrada: i.entrada!, sap: e.sap[i.cliente]! })
   anota(i, 'VEREDICTO_SUPERVISOR', SUPERVISOR, { resultado: veredicto.resultado, verdes: veredicto.comprobaciones.filter((c) => c.ok).length, total: veredicto.comprobaciones.length })
   const lab: PlanLab = { plan, veredicto, mensaje: null, decision: null, aplicado: null }
-  if (veredicto.resultado === 'a_la_sala') {
-    const m = mensajeDePlan(plan, veredicto)
-    lab.mensaje = `m-${i.id}-v${plan.version}`
-    e.sala = publica(e.sala, { id: lab.mensaje, canal: CANAL, hilo, autor: { tipo: 'agente', id: AGENTE }, cuerpo: m.cuerpo, bloques: m.bloques, creado: ahora() })
-    anota(i, 'ENVIADA_A_SALA', `agente:${AGENTE}`, { mensaje: lab.mensaje, sha256: `sha256:${plan.sha256}` })
-    // Mandar el plan a la sala NO es responder al cliente: la primera respuesta la da una persona (DP-4, PRP-010 H-17).
-    i.estado = 'en_revision'
-  }
   i.planes.push(lab)
+  // El plan verificado va primero a la consultora: a la sala del laboratorio llega solo si ella lo escala (DP-3,
+  // tercera revisión R3-03). Antes llegaba siempre, y el laboratorio leía todo plan con sus parámetros.
+  if (veredicto.resultado === 'a_la_sala') {
+    if (i.escalada) aLaSala(i, lab, hilo)
+    else i.estado = 'en_atencion'
+  }
+}
+
+function aLaSala(i: IncidenciaLab, lab: PlanLab, hilo: string | null): void {
+  const e = estado()
+  const m = mensajeDePlan(lab.plan, lab.veredicto)
+  lab.mensaje = `m-${i.id}-v${lab.plan.version}`
+  e.sala = publica(e.sala, { id: lab.mensaje, canal: CANAL, hilo, autor: { tipo: 'agente', id: AGENTE }, cuerpo: m.cuerpo, bloques: m.bloques, creado: ahora() })
+  anota(i, 'ENVIADA_A_SALA', `agente:${AGENTE}`, { mensaje: lab.mensaje, sha256: `sha256:${lab.plan.sha256}` })
+  // Mandar el plan a la sala NO es responder al cliente: la primera respuesta la da una persona (DP-4, PRP-010 H-17).
+  i.estado = 'en_revision'
+}
+
+/** La consultora escala al laboratorio, a su nombre (DP-3): con eso, y solo con eso, el laboratorio lo ve. */
+function escala(s: Sesion, id: string): void {
+  if (s.rol !== 'consultor') throw new Rechazo('al laboratorio lo escala la consultora, a su nombre')
+  const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
+  if (!i) throw new Rechazo('esa incidencia no es de tu consultora')
+  if (i.escalada) throw new Rechazo('ya está escalada')
+  i.escalada = { por: s.usuario, fecha: ahora() }
+  anota(i, 'ESCALADA', s.usuario, { motivo: 'la consultora lo escala al laboratorio' })
+  const pendiente = i.planes.find((p) => p.veredicto.resultado === 'a_la_sala' && !p.mensaje && !p.decision)
+  if (pendiente) aLaSala(i, pendiente, null)
 }
 
 /** Sin regla en el grafo: anonimiza; entra al sandbox o queda en cuarentena (nunca entra con dudas). */
@@ -229,8 +255,18 @@ function aplica(i: IncidenciaLab, lab: PlanLab): void {
     errorAntes: sintoma ? reproduce(antes, sintoma) : false, errorDespues: sintoma ? reproduce(r.final, sintoma) : false,
   }
   anota(i, 'APLICADA_EN_SIMULADOR', `agente:${AGENTE}`, { antes: lab.aplicado.antes, despues: lab.aplicado.despues, errorDespues: lab.aplicado.errorDespues })
-  anota(i, 'RESUELTA', `agente:${AGENTE}`, { por: 'plan aprobado y aplicado en el simulador' })
+  // Aplicar no es resolver: lo da por resuelto una persona de la consultora, y el cliente puede impugnarlo (R3-08).
+  i.estado = 'en_atencion'
+}
+
+/** El consultor da por resuelta la incidencia: detiene el reloj, a su nombre (DP-4). El cliente puede impugnarlo. */
+function resuelve(s: Sesion, id: string): void {
+  if (s.rol !== 'consultor') throw new Rechazo('resolver es de una persona de la consultora')
+  const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
+  if (!i) throw new Rechazo('esa incidencia no es de tu consultora')
+  if (i.estado === 'resuelta') throw new Rechazo('ya está resuelta')
   i.sla.push({ tipo: 'RESUELTA', fecha: ahora() })
+  anota(i, 'RESUELTA', s.usuario, {})
   i.estado = 'resuelta'
 }
 
@@ -322,9 +358,11 @@ function respondeAlCliente(s: Sesion, id: string, texto: string): void {
   if (s.rol !== 'consultor') throw new Rechazo('al cliente le responde el consultor de su consultora')
   const i = estado().incidencias.find((x) => x.id === id && x.consultora === s.organizacion)
   if (!i) throw new Rechazo('esa incidencia no es de tu consultora')
+  // El mensaje se guarda y el cliente lo lee: una «respuesta» que el cliente no ve no es responderle (R3-07).
+  i.respuestas.push({ texto, por: s.usuario, fecha: ahora() })
   if (i.sla.some((x) => x.tipo === 'PRIMERA_RESPUESTA')) return
   i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })
-  anota(i, 'PRIMERA_RESPUESTA', s.usuario, { caracteres: texto.length })
+  anota(i, 'PRIMERA_RESPUESTA', s.usuario, { mensaje: texto })
 }
 
 /**
@@ -336,7 +374,10 @@ function impugna(s: Sesion, id: string, campo: CampoImpugnable, motivo: string):
   const i = estado().incidencias.find((x) => x.id === id && x.cliente === s.organizacion)
   if (!i) throw new Rechazo('esa incidencia no es tuya')
   if (motivo.trim().length < 10) throw new Rechazo('el motivo de una impugnación lleva al menos 10 caracteres')
-  i.impugnaciones.push({ id: `imp-${i.id}-${i.impugnaciones.length + 1}`, campo, motivo: motivo.trim(), por: s.usuario, creada: ahora(), estado: 'abierta', resueltaPor: null, resuelta: null })
+  const m: ImpugnacionLab = { id: `imp-${i.id}-${i.impugnaciones.length + 1}`, campo, motivo: motivo.trim(), por: s.usuario, creada: ahora(), estado: 'abierta', resueltaPor: null, resuelta: null }
+  i.impugnaciones.push(m)
+  // La queja queda también en la cadena: quién, cuándo y qué impugnó (R3-09).
+  anota(i, 'IMPUGNADA', s.usuario, { impugnacion: m.id, campo })
 }
 
 /** La consultora la resuelve A SU NOMBRE: decide el estado, no reescribe la queja, y una resuelta no se reabre. */
@@ -346,6 +387,8 @@ function resuelveImpugnacion(s: Sesion, id: string, impugnacion: string, decisio
   if (!m) throw new Rechazo('esa impugnación no es de tu consultora')
   if (m.estado !== 'abierta') throw new Rechazo('una impugnación resuelta no se reabre ni se cambia')
   m.estado = decision; m.resueltaPor = s.usuario; m.resuelta = ahora()
+  const i = estado().incidencias.find((x) => x.id === id)!
+  anota(i, 'IMPUGNACION_RESUELTA', s.usuario, { impugnacion: m.id, decision })
 }
 
 /** El tope del mes lo fija el superadministrador (como `ss_presupuesto_fija` en la base). */
@@ -368,6 +411,8 @@ function despacha(s: Sesion, a: Accion): void {
   if (a.tipo === 'fija_presupuesto') return fijaPresupuesto(s, a.consultora, { topeTokens: a.topeTokens, topePaginasOcr: a.topePaginasOcr })
   if (a.tipo === 'impugna') return impugna(s, a.incidencia, a.campo, a.motivo)
   if (a.tipo === 'resuelve_impugnacion') return resuelveImpugnacion(s, a.incidencia, a.impugnacion, a.decision)
+  if (a.tipo === 'escala') return escala(s, a.incidencia)
+  if (a.tipo === 'resuelve') return resuelve(s, a.incidencia)
   if (a.tipo === 'espera_cliente') return pideAlCliente(s, a.incidencia, a.pide)
   return respuestaDelCliente(s, a.incidencia)
 }

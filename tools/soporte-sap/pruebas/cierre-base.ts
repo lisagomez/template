@@ -6,7 +6,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SENALES, CONTEXTO_PERSONAL, categoriza, emiteTokenDeTarea, verificaCadena, exportaTenant, huellaTenant, restauraTenant, type EventoIncidencia, type Consulta } from '../dist/index.js'
+import { SENALES, CONTEXTO_PERSONAL, anonimiza, categoriza, emiteTokenDeTarea, verificaCadena, exportaTenant, huellaTenant, restauraTenant, type EventoIncidencia, type Consulta } from '../dist/index.js'
 import { refirma } from './respaldo.ts'
 import { createHash } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
@@ -15,6 +15,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { baseSoporte, como, comoAgente, comoServicio, falla, tokenDe, ORG, USR, INC, SQL_SOPORTE, SECRETO_TAREAS, SECRETO_RESPALDOS as S, SUPABASE_MINIMO } from './_base.ts'
 import { HERRAMIENTA } from './_ayuda.ts'
+import { casosDelSandbox, VALIDADORES } from './_anonimizacion.ts'
+import { BANCO_ANONIMIZA } from './_banco-independiente.ts'
 
 const otorga = (extra = '', valores = '') => `insert into ss_acceso_motivado (usuario_id, cliente_id, motivo, otorgado_por, vence_en${extra})
   values ('${USR.sup}', '${ORG.A1}', 'aprobar la solución de la incidencia MIGO', '${USR.ca}', ${valores || "now() + interval '24 hours'"})`
@@ -129,6 +131,8 @@ const incidencia = async (db: Db, id: string) =>
   (await db.query<{ prioridad: string | null; estado: string; creada_en: Date; primera_respuesta_en: Date | null; resuelta_en: Date | null }>(
     `select prioridad, estado, creada_en, primera_respuesta_en, resuelta_en from ss_incidencia where id = '${id}'`)).rows[0]!
 const seudonimoDe = async (db: Db, u: string) => (await db.query<{ s: string }>(`select ss_priv.seudonimo('${u}') as s`)).rows[0]!.s
+/** La primera respuesta es un mensaje al cliente (DP-4): la base exige su texto (PRP-010, tercera revisión: R3-07). */
+const MENSAJE = '{"mensaje":"Ya lo revisamos, te confirmo hoy mismo"}'
 /** Un evento de la cadena; `actor` lo exige la base (el seudónimo de la sesión o `agente:`). */
 const evento = (inc: string, tipo: string, actor: string, datos = '{}') => `insert into ss_evento
   (incidencia_id, consultora_id, cliente_id, seq, tipo, datos, actor, fecha, anterior, hash)
@@ -154,7 +158,7 @@ test('H-16 · nadie reescribe las fechas de una incidencia: ni el consultor ni e
 
 test('H-16 · las marcas del reloj salen de los eventos de una persona de la consultora', async () => {
   const db = await baseSoporte()
-  await como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', await seudonimoDe(db, USR.ca)))
+  await como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', await seudonimoDe(db, USR.ca), MENSAJE))
   assert.notEqual((await incidencia(db, INC.a1)).primera_respuesta_en, null, 'la primera respuesta queda marcada')
   await como(db, USR.ca, evento(INC.a1, 'RESUELTA', await seudonimoDe(db, USR.ca)))
   const i = await incidencia(db, INC.a1)
@@ -174,7 +178,7 @@ test('H-17 · el agente no marca la primera respuesta, ni pausa el reloj, ni res
 test('H-17 · ni el cliente ni el laboratorio responden, pausan, resuelven o cambian la prioridad: solo una persona de la consultora', async () => {
   const db = await baseSoporte()
   const ua1 = await seudonimoDe(db, USR.ua1), ca = await seudonimoDe(db, USR.ca), sup = await seudonimoDe(db, USR.sup)
-  const actos = [['PRIMERA_RESPUESTA', '{}'], ['ESPERA_CLIENTE', '{"pide":"el log de la ST22 del 3 de octubre"}'], ['RESUELTA', '{}'],
+  const actos = [['PRIMERA_RESPUESTA', MENSAJE], ['ESPERA_CLIENTE', '{"pide":"el log de la ST22 del 3 de octubre"}'], ['RESUELTA', '{}'],
     ['CAMBIO_PRIORIDAD', '{"prioridad":"P1","motivo":"lo decide el cliente por su cuenta"}']] as const
   for (const [tipo, datos] of actos) {
     assert.match(await falla(() => como(db, USR.ua1, evento(INC.a1, tipo, ua1, datos))) ?? '', /lo emite una persona de la consultora/, `el cliente: ${tipo}`)
@@ -186,9 +190,9 @@ test('H-17 · ni el cliente ni el laboratorio responden, pausan, resuelven o cam
     values ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', 'el plan necesita la mirada del laboratorio', '${ca}')`)
   const delLab = `insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, datos, actor, fecha, anterior, hash)
     values ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', (select coalesce(max(seq), 0) + 1 from ss_evento where incidencia_id = '${INC.a2}'),
-            'PRIMERA_RESPUESTA', '{}', '${sup}', now(), 'previo', '${'a'.repeat(64)}')`
+            'PRIMERA_RESPUESTA', '${MENSAJE}', '${sup}', now(), 'previo', '${'a'.repeat(64)}')`
   assert.match(await falla(() => como(db, USR.sup, delLab)) ?? '', /lo emite una persona de la consultora/, 'el laboratorio')
-  await como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', ca))
+  await como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', ca, MENSAJE))
   assert.notEqual((await incidencia(db, INC.a1)).primera_respuesta_en, null, 'control: el consultor sí')
 })
 
@@ -504,3 +508,137 @@ test('H-08 · con la sala en la misma base, las aprobaciones de la consultora vi
   assert.equal((await db.query(`select 1 from sala_aprobaciones where tenant_id = '${ORG.CA}'`)).rows.length, 1, 'la aprobación de A volvió')
   assert.equal((await db.query(`select 1 from sala_aprobaciones where tenant_id = '${ORG.CB}'`)).rows.length, 1, 'la de B no se tocó')
 })
+
+// === Tercera revisión (2026-10-09): cada sonda que mostró el ataque funcionando, con su control positivo ==========
+
+test('R3-01 · la prioridad que mide el SLA la fija la base: la categorización es una, del agente, y dice la prioridad de la incidencia', async () => {
+  const db = await baseSoporte()
+  const ua1 = await seudonimoDe(db, USR.ua1), ca = await seudonimoDe(db, USR.ca)
+  assert.match(await falla(() => como(db, USR.ua1, evento(INC.a1, 'CATEGORIZADA', ua1, '{"prioridad":"P1"}'))) ?? '', /lo emite el agente/, 'el cliente')
+  assert.match(await falla(() => como(db, USR.ca, evento(INC.a1, 'CATEGORIZADA', ca, '{"prioridad":"P4"}'))) ?? '', /lo emite el agente/, 'el consultor')
+  await comoAgente(db, ORG.CA, `update ss_incidencia set prioridad = 'P2' where id = '${INC.a1}'`)
+  assert.match(await falla(() => comoAgente(db, ORG.CA, evento(INC.a1, 'CATEGORIZADA', 'agente:x', '{"prioridad":"P4"}'))) ?? '', /prioridad que fijó la base/, 'otra que la de la base')
+  await comoAgente(db, ORG.CA, evento(INC.a1, 'CATEGORIZADA', 'agente:x', '{"prioridad":"P2"}'))
+  assert.match(await falla(() => comoAgente(db, ORG.CA, evento(INC.a1, 'CATEGORIZADA', 'agente:x', '{"prioridad":"P2"}'))) ?? '', /es una/, 'una segunda')
+})
+
+test('R3-10 · una persona no emite los eventos que gastan presupuesto: no agota el modelo ni el OCR de su consultora', async () => {
+  const db = await baseSoporte()
+  const ua1 = await seudonimoDe(db, USR.ua1)
+  for (const [tipo, datos] of [['PLAN_PREPARADO', '{"tokens":0}'], ['ADJUNTO_LEIDO', '{"paginasOcr":0}'], ['AVISO_PRESUPUESTO', '{}']] as const) {
+    assert.match(await falla(() => como(db, USR.ua1, evento(INC.a1, tipo, ua1, datos))) ?? '', /lo emite el agente/, tipo)
+  }
+  assert.equal(await falla(() => comoAgente(db, ORG.CA, evento(INC.a1, 'PLAN_PREPARADO', 'agente:x', '{"tokens":1200}'))), null, 'control: el agente sí')
+})
+
+test('R3-02 · un cambio de prioridad cambia la prioridad: P2 → P2 no reinicia el reloj', async () => {
+  const db = await baseSoporte()
+  const ca = await seudonimoDe(db, USR.ca)
+  await comoAgente(db, ORG.CA, `update ss_incidencia set prioridad = 'P2' where id = '${INC.a1}'`)
+  assert.match(await falla(() => como(db, USR.ca, evento(INC.a1, 'CAMBIO_PRIORIDAD', ca, '{"prioridad":"P2","motivo":"reinicio el reloj por si acaso"}'))) ?? '', /cambia la prioridad/)
+  await como(db, USR.ca, evento(INC.a1, 'CAMBIO_PRIORIDAD', ca, '{"prioridad":"P1","motivo":"el cliente confirmó que la planta está parada"}'))
+  assert.equal((await incidencia(db, INC.a1)).prioridad, 'P1', 'control: un cambio de verdad entra')
+})
+
+test('R3-07 · la primera respuesta lleva el mensaje al cliente: sin su texto, no cuenta', async () => {
+  const db = await baseSoporte()
+  const ca = await seudonimoDe(db, USR.ca)
+  assert.match(await falla(() => como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', ca))) ?? '', /lleva su texto/)
+  assert.equal((await incidencia(db, INC.a1)).primera_respuesta_en, null)
+  await como(db, USR.ca, evento(INC.a1, 'PRIMERA_RESPUESTA', ca, MENSAJE))
+  assert.notEqual((await incidencia(db, INC.a1)).primera_respuesta_en, null, 'control: con su texto, sí')
+})
+
+test('R3-11 · lo que declaró el cliente no se reescribe; la prioridad inicial y la espera no se ponen a mano', async () => {
+  const db = await baseSoporte()
+  const ca = await seudonimoDe(db, USR.ca), ua1 = await seudonimoDe(db, USR.ua1)
+  assert.match(await falla(() => como(db, USR.ca, `update ss_incidencia set impacto = 3, urgencia = 3 where id = '${INC.a1}'`)) ?? '', /lo que declaró el cliente/, 'el consultor')
+  assert.match(await falla(() => comoAgente(db, ORG.CA, `update ss_incidencia set urgencia = 1 where id = '${INC.a1}'`)) ?? '', /lo que declaró el cliente/, 'el agente')
+  assert.match(await falla(() => como(db, USR.ca, `update ss_incidencia set prioridad = 'P4' where id = '${INC.a1}'`)) ?? '', /prioridad inicial la fija la categorización/)
+  assert.match(await falla(() => comoAgente(db, ORG.CA, `update ss_incidencia set estado = 'espera_cliente' where id = '${INC.a1}'`)) ?? '', /evento ESPERA_CLIENTE/)
+  await como(db, USR.ca, evento(INC.a1, 'ESPERA_CLIENTE', ca, '{"pide":"el log de la ST22 del 3 de octubre"}'))
+  assert.equal((await incidencia(db, INC.a1)).estado, 'espera_cliente', 'control: la pausa por su evento')
+  await como(db, USR.ua1, evento(INC.a1, 'RESPUESTA_CLIENTE', ua1))
+  assert.equal((await incidencia(db, INC.a1)).estado, 'en_atencion', 'y la respuesta del cliente la reanuda')
+})
+
+test('R3-04 · el laboratorio lee lo leído de un original (RFC, total) solo con el acceso motivado vigente', async () => {
+  const db = await baseSoporte()
+  const campos = async () => (await como(db, USR.sup, `select valor from ss_campo_extraido where incidencia_id = '${INC.a1}'`)).length
+  assert.equal(await campos(), 0, 'escalada, pero sin acceso')
+  await como(db, USR.ca, otorga())
+  assert.equal(await campos(), 1, 'control: con el acceso que otorga la consultora, sí')
+})
+
+test('R3-05 · una propuesta a medida no cambia de consultora ni de contenido; al núcleo la sube el superadministrador', async () => {
+  const db = await baseSoporte()
+  const id = '90000000-0000-4000-8000-0000000000a1'
+  await comoAgente(db, ORG.CA, `insert into ss_propuesta (id, tipo, origen, alcance, consultora_id, contenido, propuesta_por)
+    values ('${id}', 'caso', 'sandbox', 'a_medida', '${ORG.CA}', '{"texto":"en Alimentos del Bajío la ZMIGO_BAJIO del centro BJ01"}', 'agente:x')`)
+  const lleva = `update ss_propuesta set consultora_id = '${ORG.CB}', estado = 'aprobada', decidida_por = '${USR.exp}' where id = '${id}'`
+  assert.match(await falla(() => como(db, USR.exp, lleva)) ?? '', /no cambia de consultora/, 'el experto la lleva a B')
+  assert.match(await falla(() => como(db, USR.exp, `update ss_propuesta set contenido = '{"texto":"otra cosa"}' where id = '${id}'`)) ?? '', /no cambia/, 'ni la reescribe')
+  await como(db, USR.exp, `update ss_propuesta set estado = 'aprobada', decidida_por = '${USR.exp}' where id = '${id}'`)
+  assert.equal((await como(db, USR.cb, `select id from ss_propuesta where id = '${id}'`)).length, 0, 'control: aprobada, sigue siendo de A')
+})
+
+test('R3-12 · un campo revisado no se deshace, y la evidencia es la del documento', async () => {
+  const db = await baseSoporte()
+  await como(db, USR.ca, `update ss_campo_extraido set estado = 'confirmado', revisado_por = '${USR.ca}' where incidencia_id = '${INC.a1}'`)
+  const deshace = `update ss_campo_extraido set valor = 'MB1C', evidencia = 'captura: «Transacción MB1C»', estado = 'por_revisar', revisado_por = null where incidencia_id = '${INC.a1}'`
+  assert.match(await falla(() => como(db, USR.ua1, deshace)) ?? '', /revisado no se deshace/)
+  const otra = await baseSoporte()
+  assert.match(await falla(() => como(otra, USR.ua1, `update ss_campo_extraido set evidencia = 'lo que yo diga' where incidencia_id = '${INC.a1}'`)) ?? '', /la evidencia es la del documento/)
+  await como(otra, USR.ua1, `update ss_campo_extraido set valor = 'MIGO_GR', estado = 'corregido', revisado_por = '${USR.ua1}' where incidencia_id = '${INC.a1}'`)
+  assert.equal((await otra.query<{ estado: string }>(`select estado from ss_campo_extraido where incidencia_id = '${INC.a1}'`)).rows[0]!.estado, 'corregido', 'control: corregir a su nombre, sí')
+})
+
+test('R3-06 · al sandbox no entran las formas que la revisión pasó, y al bucket del sandbox nadie sube', async () => {
+  const db = await baseSoporte()
+  const formas = ['teléfono 55/1234/5678', 'teléfono 55 - 1234 - 5678', 'tel 55_1234_5678', 'escribir a xochitl.tzompantzi at acme.mx',
+    'correo xochitl＠acme.mx', 'el RFC TOCX 850312 K77 no timbra', 'la CURP TOCX-850312-HDFRRN09', 'el NSS １２３４５６７８９０１']
+  const pasan = []
+  for (const t of formas) if (!(await falla(() => comoAgente(db, ORG.CA, alSandbox(t))))) pasan.push(t)
+  assert.deepEqual(pasan, [])
+  assert.ok(await falla(() => comoAgente(db, ORG.CA, `insert into storage.objects (bucket_id, name) values ('ss-sandbox', '${ORG.CA}/caso-x/captura-con-rfc.png')`)), 'el agente no sube objetos al sandbox')
+})
+
+test('R3-06 · los dos cerrojos están de acuerdo: lo que el anonimizador deja entrar, la base lo acepta', async () => {
+  const db = await baseSoporte()
+  const rechazados: string[] = []
+  for (const c of [...casosDelSandbox(), ...BANCO_ANONIMIZA]) {
+    const r = anonimiza(c.texto, VALIDADORES)
+    if (r.veredicto !== 'entra') continue
+    const e = await falla(() => comoAgente(db, ORG.CA, alSandbox(r.texto)))
+    if (e) rechazados.push(`${r.texto.slice(0, 80)} → ${e}`)
+  }
+  assert.deepEqual(rechazados, [])
+})
+
+test('R3-09 · la plataforma no borra una impugnación: es la evidencia de una queja', async () => {
+  const db = await baseSoporte()
+  await como(db, USR.ua1, `insert into ss_impugnacion (incidencia_id, consultora_id, cliente_id, campo, motivo, creada_por)
+    values ('${INC.a1}', '${ORG.CA}', '${ORG.A1}', 'resolucion', 'no quedó resuelto: sigue saliendo el M7 053', '${USR.ua1}')`)
+  assert.ok(await falla(() => comoPlataforma(db, ORG.CA, (q) => q(`delete from ss_impugnacion where incidencia_id = '${INC.a1}'`))), 'la plataforma no la borra')
+  assert.equal((await db.query(`select id from ss_impugnacion where incidencia_id = '${INC.a1}'`)).rows.length, 1)
+})
+
+test('R3-18 · el seudónimo de otro no lo calcula nadie por la API, y el laboratorio no lee la cuarentena', async () => {
+  const db = await baseSoporte()
+  assert.match(await falla(() => como(db, USR.sup, `select ss_priv.seudonimo('${USR.ca}') as s`)) ?? '', /permission denied/, 'el seudónimo de otro')
+  assert.equal((await como<{ s: string }>(db, USR.ca, 'select ss_priv.mi_seudonimo() as s'))[0]!.s, await seudonimoDe(db, USR.ca), 'control: el suyo, sí')
+  await comoAgente(db, ORG.CA, `insert into ss_cuarentena (incidencia_id, consultora_id, cliente_id, senales) values ('${INC.a2}', '${ORG.CA}', '${ORG.A2}', array['${SENALES.personal}'])`)
+  assert.equal((await como(db, USR.sup, 'select incidencia_id from ss_cuarentena')).length, 0, 'el laboratorio')
+  assert.equal((await como(db, USR.ca, 'select incidencia_id from ss_cuarentena')).length, 1, 'control: la consultora la ve')
+})
+
+test('R3-03 · en la base, al laboratorio lo escala la consultora, y una decisión de la sala la registra el laboratorio', async () => {
+  const db = await baseSoporte()
+  const ua1 = await seudonimoDe(db, USR.ua1), ca = await seudonimoDe(db, USR.ca)
+  assert.match(await falla(() => como(db, USR.ua1, evento(INC.a1, 'ESCALADA', ua1))) ?? '', /lo escala la consultora/, 'el cliente no escala')
+  assert.match(await falla(() => comoAgente(db, ORG.CA, evento(INC.a1, 'ESCALADA', 'agente:x'))) ?? '', /./, 'el agente tampoco')
+  assert.match(await falla(() => como(db, USR.ua1, evento(INC.a1, 'APROBADA', ua1))) ?? '', /la persona del laboratorio que decide/, 'el cliente no aprueba')
+  assert.match(await falla(() => como(db, USR.ca, evento(INC.a1, 'APROBADA', ca))) ?? '', /la persona del laboratorio que decide/, 'ni el consultor')
+  assert.equal(await falla(() => como(db, USR.ca, evento(INC.a1, 'ESCALADA', ca))), null, 'control: el consultor escala, a su nombre')
+})
+

@@ -79,7 +79,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 > **v4** (PRP-010, 2026-10-09). La v2 salió de la revisión independiente del 2026-10-04, y la v3 añadió la capa
 > semántica. Dos revisiones más contra el código (05/10 y 07/10) encontraron que la v3 afirmaba controles que no
 > existían fuera de las pruebas: el token de tarea verificado por una «pasarela» que no hay, el presupuesto que nadie
-> leía, la impugnación sin pantalla. El PRP-010 los cerró en código o los declara aquí. **Cada frase de esta sección
+> leía, la impugnación sin pantalla. El PRP-010 los cerró en código o los declara aquí. Una tercera revisión, contra
+> el borrador de esta v4 (09/10), encontró 18 más; también están cerrados en código o declarados. **Cada frase de esta sección
 > tiene su fila** en la matriz ([`docs/goals/soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)),
 > en uno de tres estados: **probado** (una prueba pasa sin su sabotaje y cae con él), **brecha** (abierta y declarada)
 > o **depende** (espera una decisión del laboratorio). Donde una frase la sostiene una fila de la AISIA, se dice.
@@ -160,11 +161,18 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   prioridad inicial, sin fechas ni estados terminales. Una persona decide **a su nombre** por política restrictiva
   (`auth.uid()`). Lo que va al núcleo lo decide el superadministrador (D2).
   - Responder, pausar, resolver y cambiar la prioridad son actos de una persona **de la consultora**: ni el agente,
-    ni el cliente, ni el laboratorio los emiten. Las reglas de la base fallan cerradas ante un NULL: en un
+    ni el cliente, ni el laboratorio los emiten. Escalar al laboratorio es de la consultora; registrar una decisión
+    de la sala, de la persona del laboratorio que decide. Las reglas de la base fallan cerradas ante un NULL: en un
     disparador, lo que devuelve una función se compara con `is (not) distinct from`, y una prueba lo vigila en todos.
+  - Una persona emite solo actos de persona. Los eventos de la máquina (categorizar, preparar un plan, leer un
+    adjunto, el presupuesto) son del agente, y la categorización es una y dice la prioridad que fijó la base.
+  - Una propuesta no cambia de consultora, de alcance ni de contenido; lo único que cambia de dueña es la promoción
+    al núcleo, que hace el superadministrador. Un campo revisado no se deshace, y su evidencia es la del documento.
   - En la sala, una aprobación es del tenant, de la tarea y de la huella de su mensaje: una persona de B no aprueba
-    el plan de A. Ningún componente que ejecuta un modelo la fabrica: la suite de la sala tiene 11 sabotajes (S1 a
-    S11), y cada uno la pone en rojo.
+    el plan de A. Ningún componente que ejecuta un modelo la fabrica: la suite de la sala tiene 11 sabotajes (S1,
+    S1·force, S2, S2b, S3 a S7, S10 y S11), y cada uno la pone en rojo.
+  - *Brecha*: S8 («el agente publica como si fuera un humano») y S9 se comprueban, pero no tienen sabotaje propio:
+    nadie las ha visto caer.
   - Aprobar desde el chat no aprueba: se promueve al hilo del plan en la sala. El agente escribe solo en el chat del
     usuario de su turno.
   - *Brecha*: la fatiga del aprobador (O3) no la cierra una política. La mitigan el veredicto del supervisor, el
@@ -188,6 +196,11 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - El anonimizador **reduce, no garantiza**. Lo que deja forma de dato, y todo caso de RR. HH. o nómina, va a una
     cuarentena que guarda solo tipos de señal, y nadie la revisa hasta D14 (DP-7). La base rechaza en el sandbox un
     identificador con forma.
+  - Lo leído de un original (el RFC y el total de un CFDI) va con el original: el laboratorio lo lee en lo escalado
+    y con el acceso motivado vigente. La cuarentena no la lee el laboratorio.
+  - Al bucket del sandbox nadie sube objetos: es solo texto. El cerrojo de la base mira las mismas formas que el
+    anonimizador, sobre el texto normalizado.
+  - El seudónimo de otra persona no lo calcula nadie por la API: cada quien obtiene solo el suyo.
   - El OCR es local: la ingesta no acepta un motor externo, y `configura:deploy` no deja encenderlo con Soporte SAP,
     ni con una decisión C4 (límite de C5).
   - *Brecha*: un dato sensible con una forma que ningún detector conoce. Por eso existen la cuarentena y el cerrojo
@@ -201,7 +214,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - *Brecha*: el día que el modelo sea real, el corpus de inyecciones se corre contra él antes de encenderlo (D7).
 - **Archivos maliciosos y abuso (O1, O4).**
   - Se valida por bytes y por tamaño. La ruta mira el tamaño de la subida antes de leerla, y responde 413 si no lo
-    declara o si pasa de cinco adjuntos.
+    declara o si pasa del tamaño de cinco adjuntos. Más de cinco archivos se rechazan con su motivo, no se recortan
+    en silencio.
+  - Una persona no emite los eventos que gastan presupuesto: no agota el modelo ni el OCR de su consultora.
   - Al bucket de originales solo sube la ingesta, después de validar, y el adjunto lo registra ella.
   - Una incidencia no pasa de 10 adjuntos: lo exige la base, contando los que ya tiene.
   - El lector de XML del extractor rechaza `<!DOCTYPE` y toda declaración `<!`, así que no resuelve entidades
@@ -219,8 +234,10 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - `soporte_sap_ingesta` lee originales y deja campos por revisar, acotada por su token: con la tarea de A no lista
     los originales de B.
   - `soporte_sap_plataforma` exporta lo de su consultora con su propio rol, y escribe solo el resultado de SLA que
-    calcula su job, el de su consultora. No inserta decisiones ni eventos. Tiene el privilegio de borrar por
-    retención, acotado por su token, pero ningún job lo usa todavía (D8).
+    calcula su job, el de su consultora. No inserta decisiones ni eventos, y no borra impugnaciones. Tiene el
+    privilegio de borrar por retención, acotado por su token, pero ningún job lo usa todavía (D8).
+  - *Brecha* (O6): la base no ata el resultado de SLA a los eventos: un job comprometido escribiría otro. No es la
+    evidencia: la evidencia es la cadena, que la plataforma no toca, y cualquiera recalcula el resultado desde ella.
   - `soporte_sap_metricas`, el job de la capa semántica, lee a **todas** las consultoras para dar totales. Su
     acotamiento es por columna: no lee títulos, descripciones, nombres, contenido, motivos ni consultores. Solo
     inserta en `ss_metrica`, que nadie cambia ni borra, y cada nivel lee lo suyo; el N3, solo lo que la métrica
@@ -277,7 +294,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 | 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |
 | 6 | Grupo chico ante el laboratorio | con una sola consultora o un tamaño de un cliente | un tamaño mínimo de grupo (D14) |
 | 7 | La fatiga del aprobador | con SAP real (D6) | ningún control: la mitigan el supervisor y la huella |
-| 8 | Lo demás: logs de la ruta, `ss_procedencia`, límites de los buckets, parches de O5, Realtime y JWT, región autodeclarada, forma desconocida de dato | al salir del laboratorio | cada una en su fila de la matriz |
+| 8 | El resultado de SLA sin atar a los eventos | con un job de plataforma comprometido | recalcularlo desde la cadena; atarlo en la base |
+| 9 | Lo demás: logs de la ruta, `ss_procedencia`, límites de los buckets, S8 y S9 sin sabotaje, parches de O5, Realtime y JWT, región autodeclarada, forma desconocida de dato | al salir del laboratorio | cada una en su fila de la matriz |
 
 ### Evaluación de impacto (C4)
 

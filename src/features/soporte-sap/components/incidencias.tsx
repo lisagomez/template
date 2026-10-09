@@ -99,6 +99,18 @@ function PausaDelReloj({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua:
   )
 }
 
+/** Lo que solo hace la consultora: escalar al laboratorio a su nombre (DP-3) y dar por resuelta la incidencia. */
+function AccionesDeLaConsultora({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
+  if (rol !== 'consultor') return i.escaladaPor ? <p className="mt-2 text-xs text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.</p> : null
+  return (
+    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+      {i.escaladaPor ? <span className="text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.</span>
+        : <button type="button" onClick={() => actua({ tipo: 'escala', incidencia: i.id })} className="rounded border px-2 py-1" data-prueba="escala">Escalar al laboratorio</button>}
+      {i.estado !== 'resuelta' ? <button type="button" onClick={() => actua({ tipo: 'resuelve', incidencia: i.id })} className="rounded border px-2 py-1" data-prueba="resuelve">Dar por resuelta</button> : null}
+    </div>
+  )
+}
+
 function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
   return (
     <div className="mt-3 space-y-3 text-sm" data-prueba={`detalle-${i.id}`}>
@@ -130,7 +142,8 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
           <ul className="ml-4 list-disc text-xs">{p.pasos.map((x) => <li key={x}>{x}</li>)}</ul>
           <p className="text-xs text-neutral-500">Previsión en el simulador: {p.prevision.join('; ') || 'sin previsión'}</p>
           <ul className="mt-1 text-xs">{p.supervisor.comprobaciones.map((c) => <li key={c.que}>{c.ok ? '✓' : '✗'} {c.que} <span className="text-neutral-500">({c.detalle})</span></li>)}</ul>
-          {p.decision ? <p className="mt-1 text-xs">Decisión en la sala: <b>{p.decision.accion}</b> por {p.decision.por}{p.decision.motivo ? ` · motivo: «${p.decision.motivo}»` : ''}</p> : p.mensaje ? <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">En la sala, esperando la fila humana.</p> : null}
+          {p.decision ? <p className="mt-1 text-xs">Decisión en la sala: <b>{p.decision.accion}</b> por {p.decision.por}{p.decision.motivo ? ` · motivo: «${p.decision.motivo}»` : ''}</p> : p.mensaje ? <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">En la sala, esperando la fila humana.</p>
+            : p.supervisor.resultado === 'a_la_sala' ? <p className="mt-1 text-xs text-sky-700 dark:text-sky-300" data-prueba="plan-pendiente">Verificado: espera que la consultora lo escale al laboratorio.</p> : null}
           {p.aplicado ? (
             <p data-prueba="antes-despues" className="mt-1 rounded bg-emerald-50 p-1 text-xs dark:bg-emerald-950">Aplicado en el simulador · antes: {p.aplicado.antes} (error {p.aplicado.errorAntes ? 'presente' : 'ausente'}) → después: {p.aplicado.despues} (error {p.aplicado.errorDespues ? 'presente' : 'ausente'})</p>
           ) : null}
@@ -148,6 +161,10 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
         <Reloj r={i.reloj} />
         {rol === 'consultor' ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
         <PausaDelReloj i={i} rol={rol} actua={actua} />
+        <AccionesDeLaConsultora i={i} rol={rol} actua={actua} />
+        {i.respuestas.length ? (
+          <ul className="mt-2 space-y-1 text-xs" data-prueba="respuestas">{i.respuestas.map((r) => <li key={r.fecha + r.por}>Respuesta de {r.por}: «{r.texto}»</li>)}</ul>
+        ) : null}
       </div>
       <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={rol} actua={actua} />
       <details data-prueba="cadena">

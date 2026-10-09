@@ -148,6 +148,12 @@ create or replace function ss_priv.seudonimo(u uuid) returns text language sql s
   select 'usr-' || left(encode(extensions.hmac(u::text, s.sal, 'sha256'), 'hex'), 12) from ss_priv.sal_seudonimos s where s.id = 1
 $$;
 
+-- El seudónimo de quien está en la sesión. Las políticas y los disparadores usan esta, no `seudonimo(uuid)`: con esa y
+-- `ss_miembro`, el laboratorio calculaba el seudónimo de cualquiera (PRP-010, tercera revisión: R3-18).
+create or replace function ss_priv.mi_seudonimo() returns text language sql stable security definer set search_path = '' as $$
+  select ss_priv.seudonimo(auth.uid())
+$$;
+
 -- La consultora de la tarea: el claim `consultora` del JWT que firmó quien encoló la tarea.
 -- El alcance de un rol de servicio se VERIFICA en la base (PRP-010 H-21, DP-2). Antes, la consultora salía de
 -- `request.jwt.claims`, que cualquier sesión con SQL fija con `set_config` (dentro de la misma consulta): con una tarea
@@ -277,6 +283,17 @@ begin
   if new.prioridad in ('P3', 'P4') and ss_priv.contexto_personal(new.titulo || ' ' || new.descripcion) then
     raise exception 'piso de nómina y RR. HH.: no queda debajo de P2 sin que una persona lo baje con motivo';
   end if;
+  -- Lo que declaró el cliente no se reescribe, y la prioridad inicial la fija la categorización del agente: una
+  -- persona la cambia con un evento CAMBIO_PRIORIDAD, que queda en la cadena (PRP-010, tercera revisión: R3-11).
+  if new.impacto is distinct from old.impacto or new.urgencia is distinct from old.urgencia then
+    raise exception 'el impacto y la urgencia son lo que declaró el cliente';
+  end if;
+  if old.prioridad is null and new.prioridad is not null and current_user is distinct from 'soporte_sap_agente' then
+    raise exception 'la prioridad inicial la fija la categorización; una persona la cambia con un evento CAMBIO_PRIORIDAD';
+  end if;
+  if new.estado = 'espera_cliente' and new.estado is distinct from old.estado then
+    raise exception 'la espera del cliente es un evento ESPERA_CLIENTE de una persona, con lo que se le pide';
+  end if;
   if new.estado in ('resuelta', 'cerrada') and new.estado is distinct from old.estado then
     raise exception 'resolver o cerrar es un evento (RESUELTA, CERRADA) de una persona, con su fecha';
   end if;
@@ -347,7 +364,7 @@ begin
     raise exception 'la fecha de un evento la da el reloj de la base, no quien escribe';
   end if;
   -- `is distinct from`, no `<>`: sin sal el seudónimo es NULL, y `<>` con NULL no rechazaba (falla cerrado, H-05).
-  if current_user = 'authenticated' and new.actor is distinct from ss_priv.seudonimo(auth.uid()) then
+  if current_user = 'authenticated' and new.actor is distinct from ss_priv.mi_seudonimo() then
     raise exception 'el actor de un evento humano es el seudónimo de su sesión';
   end if;
   if current_user = 'soporte_sap_agente' and new.actor not like 'agente:%' then
@@ -414,6 +431,16 @@ create trigger ss_evento_cadena before insert on public.ss_evento
 -- Quién emite qué (PRP-010 H-16, H-17, DP-4). Responder, pausar el reloj, resolver, cerrar, reabrir y cambiar la
 -- prioridad son actos de una PERSONA de la consultora: una acción de la máquina no cuenta como primera respuesta
 -- ni pausa el SLA. El cambio de prioridad lleva la nueva y su motivo.
+-- Leen la incidencia como dueño: quien emite el evento puede no verla entera.
+create or replace function ss_priv.prioridad_de(inc uuid) returns text language sql stable security definer set search_path = '' as $$
+  select i.prioridad from public.ss_incidencia i where i.id = inc
+$$;
+create or replace function ss_priv.categorizacion_valida(inc uuid, p text) returns boolean language sql stable security definer set search_path = '' as $$
+  select p is not null
+     and not exists (select 1 from public.ss_evento e where e.incidencia_id = inc and e.tipo = 'CATEGORIZADA')
+     and exists (select 1 from public.ss_incidencia i where i.id = inc and i.prioridad = p)
+$$;
+
 create or replace function ss_priv.evento_de_quien_puede() returns trigger language plpgsql set search_path = '' as $$
 begin
   -- `is not distinct from`, no `=`: para quien no es miembro, `rol_en` es NULL, y `not (… and NULL)` es NULL, que no
@@ -425,6 +452,38 @@ begin
   if new.tipo = 'CAMBIO_PRIORIDAD' and (coalesce(new.datos->>'prioridad', '') not in ('P1', 'P2', 'P3', 'P4')
      or length(coalesce(new.datos->>'motivo', '')) < 10) then
     raise exception 'un cambio de prioridad lleva la nueva prioridad y un motivo';
+  end if;
+  -- Una persona emite solo actos de persona. Los eventos de la máquina (categorizar, preparar un plan, leer un
+  -- adjunto, el presupuesto) son del agente: con ellos, el cliente fijaba la prioridad que mide el SLA y cualquiera
+  -- agotaba el presupuesto del mes de su consultora (PRP-010, tercera revisión: R3-01 y R3-10).
+  if current_user = 'authenticated' and new.tipo not in ('RECIBIDA', 'PRIMERA_RESPUESTA', 'ESPERA_CLIENTE', 'RESPUESTA_CLIENTE',
+     'CAMBIO_PRIORIDAD', 'RESUELTA', 'REABIERTA', 'CERRADA', 'ESCALADA', 'APROBADA', 'RECHAZADA', 'A_REVISION', 'NOTA',
+     'IMPUGNADA', 'IMPUGNACION_RESUELTA') then
+    raise exception 'un evento % lo emite el agente, no una persona', new.tipo;
+  end if;
+  -- Escalar al laboratorio es de la consultora (DP-3); decidir en la sala, de una persona del laboratorio. Las
+  -- migraciones (el dueño) traen historia y no pasan por aquí.
+  if current_user not in ('authenticated', 'soporte_sap_agente', 'soporte_sap_ingesta', 'soporte_sap_plataforma') then
+    return new;
+  end if;
+  if new.tipo = 'ESCALADA' and not (current_user = 'authenticated' and ss_priv.rol_en(new.consultora_id) is not distinct from 'consultor') then
+    raise exception 'al laboratorio lo escala la consultora, a su nombre, no %', current_user;
+  end if;
+  if new.tipo in ('APROBADA', 'RECHAZADA', 'A_REVISION') and not (current_user = 'authenticated' and ss_priv.es_laboratorio() is not distinct from true) then
+    raise exception 'una decisión de la sala la registra la persona del laboratorio que decide, no %', current_user;
+  end if;
+  -- La prioridad que mide el SLA sale de la ÚNICA categorización, y es la que fijó la base con su piso (R3-01).
+  if new.tipo = 'CATEGORIZADA' and current_user = 'soporte_sap_agente'
+     and not ss_priv.categorizacion_valida(new.incidencia_id, new.datos->>'prioridad') then
+    raise exception 'la categorización es una, y dice la prioridad que fijó la base (con su piso)';
+  end if;
+  -- Un cambio de prioridad cambia la prioridad: P1 → P1 reiniciaba el reloj con un contrato «desde el cambio» (R3-02).
+  if new.tipo = 'CAMBIO_PRIORIDAD' and (new.datos->>'prioridad') is not distinct from ss_priv.prioridad_de(new.incidencia_id) then
+    raise exception 'un cambio de prioridad cambia la prioridad';
+  end if;
+  -- La primera respuesta es un MENSAJE al cliente (DP-4): sin su texto, no cuenta (R3-07).
+  if new.tipo = 'PRIMERA_RESPUESTA' and length(coalesce(new.datos->>'mensaje', '')) < 5 then
+    raise exception 'la primera respuesta es un mensaje al cliente: lleva su texto';
   end if;
   -- La pausa unilateral (PRP-010, fase 4): pausar dice qué se le pide al cliente, y la respuesta del cliente la
   -- registra una persona, del cliente o de su consultora. Así el cliente reanuda el reloj sin depender de nadie.
@@ -454,6 +513,10 @@ begin
     update public.ss_incidencia set resuelta_en = null, cerrada_en = null, estado = 'en_atencion' where id = new.incidencia_id;
   elsif new.tipo = 'CAMBIO_PRIORIDAD' then
     update public.ss_incidencia set prioridad = new.datos->>'prioridad' where id = new.incidencia_id;
+  elsif new.tipo = 'ESPERA_CLIENTE' then
+    update public.ss_incidencia set estado = 'espera_cliente' where id = new.incidencia_id;
+  elsif new.tipo = 'RESPUESTA_CLIENTE' then
+    update public.ss_incidencia set estado = 'en_atencion' where id = new.incidencia_id and estado = 'espera_cliente';
   end if;
   return new;
 end $$;
@@ -505,6 +568,25 @@ create table if not exists public.ss_campo_extraido (
   constraint ss_revisado_tiene_quien check ((estado = 'por_revisar') = (revisado_por is null))
 );
 
+-- Un campo revisado no se deshace ni lo cambia otro, y la evidencia es la del documento: con `update` sobre todas las
+-- columnas, el cliente volvía a «por revisar» lo que el consultor había confirmado y reescribía la evidencia
+-- (PRP-010, tercera revisión: R3-12).
+create or replace function ss_priv.campo_revisado_se_queda() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if current_user not in ('authenticated', 'soporte_sap_agente', 'soporte_sap_ingesta') then return new; end if;
+  if old.estado <> 'por_revisar' then
+    raise exception 'un campo revisado no se deshace ni lo cambia otro';
+  end if;
+  if (new.adjunto_id, new.incidencia_id, new.consultora_id, new.cliente_id, new.campo, new.evidencia, new.confianza)
+     is distinct from (old.adjunto_id, old.incidencia_id, old.consultora_id, old.cliente_id, old.campo, old.evidencia, old.confianza) then
+    raise exception 'de un campo se decide su estado y, al corregirlo, su valor: la evidencia es la del documento';
+  end if;
+  if new.valor is distinct from old.valor and new.estado <> 'corregido' then
+    raise exception 'cambiar el valor de un campo es corregirlo';
+  end if;
+  return new;
+end $$;
+
 -- La cuarentena guarda el MOTIVO (tipos de señal), nunca una copia del dato sensible. La base lo hace
 -- cumplir: solo admite las señales del anonimizador (`SENALES` en src/anonimiza.ts; una prueba vigila que
 -- las dos listas no se separen), así que un dato no entra disfrazado de señal (PRP-010 H-03).
@@ -526,7 +608,7 @@ create table if not exists public.ss_impugnacion (
   incidencia_id uuid not null references public.ss_incidencia (id) on delete cascade,
   consultora_id uuid not null,
   cliente_id    uuid not null,
-  campo         text not null check (campo in ('prioridad', 'categoria', 'complejidad', 'pausa')),
+  campo         text not null check (campo in ('prioridad', 'categoria', 'complejidad', 'pausa', 'resolucion')),
   motivo        text not null check (length(motivo) >= 10),
   creada_por    uuid not null,
   estado        text not null default 'abierta' check (estado in ('abierta', 'aceptada', 'rechazada')),
@@ -560,6 +642,18 @@ create trigger ss_impugnacion_fechas before insert or update on public.ss_impugn
 -- sandbox, que lee todo el laboratorio, un identificador con forma (correo, RFC, CURP, una secuencia larga
 -- de dígitos como NSS, CLABE o teléfono). El anonimizador los cambia por marcas (`[RFC]`, `[NUMERO]`…); si
 -- uno llega crudo, la fila no entra. Los nombres sin forma siguen siendo trabajo del anonimizador (H-04).
+-- Las formas del cerrojo son las de la red del anonimizador (`senalesResiduales` en src/anonimiza.ts), sobre el texto
+-- normalizado (NFKC: un dígito o una arroba de ancho completo cuentan como tales). La tercera revisión (2026-10-09)
+-- pasó 8 de 10 formas que la versión anterior no veía: teléfonos con `/` o `_`, «at», la arroba de ancho completo, el
+-- RFC partido y la CURP con guiones.
+create or replace function ss_priv.sin_identificadores(t text) returns boolean language sql immutable set search_path = '' as $$
+  select n !~* '(@|\marroba\M|\(at\)|\[at\]|\mpunto[[:space:]]+com\M|\mat[[:space:]]+[[:alnum:]_-]+[.][[:alpha:]]{2,}|[[:alnum:]_-]+[.](com|mx|net|org|edu|gob)\M|\m(gmail|hotmail|yahoo|icloud|protonmail)\M)'
+     and n !~ '[0-9]([[:space:]().·•–/_-]{0,3}[0-9]){6,}'
+     and n !~* '\m[A-ZÑ&]{3,4}[0-9]{6}'
+     and n !~* '\m[A-ZÑ&]{3,4}[[:space:]_./-][0-9]{6}[[:space:]_./-]?[A-Z0-9]{3}'
+  from (select normalize(t, NFKC) as n) x
+$$;
+
 create table if not exists public.ss_caso_sandbox (
   id                   uuid primary key default gen_random_uuid(),
   origen_consultora_id uuid not null references public.ss_organizacion (id),
@@ -567,10 +661,7 @@ create table if not exists public.ss_caso_sandbox (
   campos               jsonb not null default '{}'::jsonb,
   estado               text not null default 'aprendiendo' check (estado in ('aprendiendo', 'documentado', 'propuesto')),
   creado_en            timestamptz not null default now(),
-  constraint ss_sandbox_sin_identificadores check (
-    (texto || ' ' || campos::text) !~* '(@|\marroba\M|\(at\)|\[at\]|\mpunto[[:space:]]+com\M)'
-    and (texto || ' ' || campos::text) !~ '[0-9]([[:space:]().·•–-]{0,2}[0-9]){6,}'
-    and (texto || ' ' || campos::text) !~* '\m[A-ZÑ&]{3,4}[0-9]{6}')
+  constraint ss_sandbox_sin_identificadores check (ss_priv.sin_identificadores(texto || ' ' || campos::text))
 );
 
 -- Una propuesta la decide una persona a su nombre; lo que va al núcleo, el superadministrador (D2).
@@ -620,6 +711,25 @@ begin
   end if;
   return new;
 end $$;
+-- Una propuesta no cambia de consultora, de alcance ni de contenido: con `update` sobre todas las columnas, el experto
+-- llevaba lo «a medida» de A a B sin generalizar (PRP-010, tercera revisión: R3-05). Lo único que cambia de dueña es
+-- la promoción al núcleo, y la hace el superadministrador (D2), generalizada (el disparador de arriba).
+create or replace function ss_priv.propuesta_no_cambia_de_duena() returns trigger language plpgsql set search_path = '' as $$
+begin
+  if current_user not in ('authenticated', 'soporte_sap_agente', 'soporte_sap_ingesta') then return new; end if;
+  if (new.tipo, new.origen, new.propuesta_por, new.creada_en) is distinct from (old.tipo, old.origen, old.propuesta_por, old.creada_en) then
+    raise exception 'de una propuesta no se reescribe quién la propuso ni de dónde salió';
+  end if;
+  if (new.alcance, new.consultora_id, new.contenido) is distinct from (old.alcance, old.consultora_id, old.contenido)
+     and not (old.alcance = 'a_medida' and new.alcance = 'nucleo' and new.consultora_id is null and ss_priv.es_superadmin() is not distinct from true) then
+    raise exception 'una propuesta no cambia de consultora, de alcance ni de contenido: al núcleo la sube el superadministrador';
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_propuesta_duena on public.ss_propuesta;
+create trigger ss_propuesta_duena before update on public.ss_propuesta
+  for each row execute function ss_priv.propuesta_no_cambia_de_duena();
+
 drop trigger if exists ss_propuesta_nucleo_generalizada on public.ss_propuesta;
 create trigger ss_propuesta_nucleo_generalizada before insert or update on public.ss_propuesta
   for each row execute function ss_priv.propuesta_nucleo_generalizada();
@@ -835,6 +945,9 @@ begin
   end if;
   return new;
 end $$;
+drop trigger if exists ss_campo_revisado on public.ss_campo_extraido;
+create trigger ss_campo_revisado before update on public.ss_campo_extraido
+  for each row execute function ss_priv.campo_revisado_se_queda();
 drop trigger if exists ss_campo_extraido_adjunto on public.ss_campo_extraido;
 create trigger ss_campo_extraido_adjunto before insert or update on public.ss_campo_extraido
   for each row execute function ss_priv.campo_de_su_adjunto();
@@ -905,10 +1018,18 @@ begin
   end loop;
 end $$;
 
--- La cuarentena no guarda datos, solo tipos de señal: el laboratorio la ve para revisarla.
+-- Lo leído de un documento (el RFC y el total de un CFDI) es contenido del original: el laboratorio lo lee en lo
+-- escalado y con el acceso motivado vigente, como los bytes. Sin eso, lo leía sin acceso (PRP-010, tercera revisión:
+-- R3-04). Reemplaza la política del bucle de arriba.
+drop policy if exists ss_campo_extraido_lee on public.ss_campo_extraido;
+create policy ss_campo_extraido_lee on public.ss_campo_extraido for select to authenticated
+  using (ss_priv.ve_cliente(cliente_id) or (ss_priv.lab_trabaja(incidencia_id) and ss_priv.baja_original(cliente_id)));
+
+-- La cuarentena no guarda datos, solo tipos de señal, y nadie la revisa hasta D14 (DP-7): el laboratorio no la lee.
+-- Antes la leía entera, también la de incidencias que nadie le escaló (R3-18).
 drop policy if exists ss_cuarentena_lee on public.ss_cuarentena;
 create policy ss_cuarentena_lee on public.ss_cuarentena for select to authenticated
-  using (ss_priv.ve_cliente(cliente_id) or ss_priv.es_laboratorio());
+  using (ss_priv.ve_cliente(cliente_id));
 
 -- Las horas son de la consultora: ni el cliente ni el laboratorio las leen fila por fila.
 drop policy if exists ss_horas_lee on public.ss_horas;
@@ -916,7 +1037,7 @@ drop policy if exists ss_horas_lee on public.ss_horas;
 -- individual, y el producto dice que no la ofrece. Los totales salen de la capa semántica (`horas_por_ticket` en
 -- `ss_metrica`), sin persona; una función `security definer` en `public` para sumarlas rompería la regla del esquema.
 create policy ss_horas_lee on public.ss_horas for select to authenticated
-  using (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.seudonimo(auth.uid()));
+  using (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.mi_seudonimo());
 
 drop policy if exists ss_sandbox_lee on public.ss_caso_sandbox;
 create policy ss_sandbox_lee on public.ss_caso_sandbox for select to authenticated
@@ -979,7 +1100,7 @@ create policy ss_incidencia_atiende on public.ss_incidencia for update to authen
 
 drop policy if exists ss_escalamiento_alta on public.ss_escalamiento;
 create policy ss_escalamiento_alta on public.ss_escalamiento for insert to authenticated
-  with check (ss_priv.rol_en(consultora_id) = 'consultor' and escalada_por = ss_priv.seudonimo(auth.uid()));
+  with check (ss_priv.rol_en(consultora_id) = 'consultor' and escalada_por = ss_priv.mi_seudonimo());
 
 drop policy if exists ss_evento_alta on public.ss_evento;
 create policy ss_evento_alta on public.ss_evento for insert to authenticated
@@ -1008,7 +1129,7 @@ create policy ss_impugnacion_a_su_nombre on public.ss_impugnacion as restrictive
 
 drop policy if exists ss_horas_alta on public.ss_horas;
 create policy ss_horas_alta on public.ss_horas for insert to authenticated
-  with check (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.seudonimo(auth.uid()));
+  with check (ss_priv.rol_en(consultora_id) = 'consultor' and consultor = ss_priv.mi_seudonimo());
 
 -- Decidir una propuesta: lo a medida, el laboratorio; lo que va al núcleo, el superadministrador.
 drop policy if exists ss_propuesta_decide on public.ss_propuesta;
@@ -1169,6 +1290,7 @@ grant usage, create on schema ss_semantica to soporte_sap_metricas;
 
 grant usage on schema ss_priv to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
 grant execute on all functions in schema ss_priv to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
+revoke execute on function ss_priv.seudonimo(uuid) from public, authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
 grant usage on schema public to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma, soporte_sap_metricas;
 grant select on public.ss_organizacion, public.ss_miembro to authenticated, soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
 
@@ -1198,8 +1320,11 @@ grant insert on public.ss_adjunto to soporte_sap_ingesta;
 grant insert on public.ss_campo_extraido to soporte_sap_ingesta;
 
 grant select, delete on public.ss_incidencia, public.ss_escalamiento, public.ss_adjunto, public.ss_campo_extraido,
-  public.ss_cuarentena, public.ss_impugnacion, public.ss_sla_resultado, public.ss_horas, public.ss_mapeo,
+  public.ss_cuarentena, public.ss_sla_resultado, public.ss_horas, public.ss_mapeo,
   public.ss_procedencia, public.ss_importacion_fila to soporte_sap_plataforma;
+-- Una impugnación es la evidencia de una queja: la plataforma la lee para exportarla, no la borra (R3-09). La
+-- retención, cuando exista, es D8.
+grant select on public.ss_impugnacion to soporte_sap_plataforma;
 -- Sin `insert` en ninguna tabla (PRP-010 H-07). Lectura de todo lo que exporta: sin `ss_contrato_sla` y compañía,
 -- `exportaTenant` con este rol fallaba con «permission denied».
 grant select on public.ss_evento, public.ss_crudo, public.ss_contrato_sla, public.ss_presupuesto, public.ss_propuesta,
@@ -1266,9 +1391,9 @@ drop policy if exists ss_sandbox_lee_objetos on storage.objects;
 create policy ss_sandbox_lee_objetos on storage.objects for select to authenticated
   using (bucket_id = 'ss-sandbox' and (ss_priv.es_laboratorio() or ss_priv.rol_en(ss_priv.carpeta(name, 1)) = 'consultor'));
 
+-- Nadie sube objetos al sandbox: es solo texto anonimizado, y una imagen no la revisa ningún cerrojo. El agente
+-- subía cualquier objeto y todo el laboratorio lo leía (PRP-010, tercera revisión: R3-06).
 drop policy if exists ss_sandbox_agente_sube on storage.objects;
-create policy ss_sandbox_agente_sube on storage.objects for insert to soporte_sap_agente
-  with check (bucket_id = 'ss-sandbox' and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
 
 -- Los exportes son de la consultora que se lleva sus datos: el laboratorio no los lee.
 drop policy if exists ss_exportes_lee on storage.objects;
@@ -1282,5 +1407,4 @@ create policy ss_exportes_plataforma on storage.objects for all to soporte_sap_p
 
 grant usage on schema storage to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
 grant select, insert on storage.objects to soporte_sap_ingesta;
-grant insert on storage.objects to soporte_sap_agente;
 grant select, insert, delete on storage.objects to soporte_sap_plataforma;

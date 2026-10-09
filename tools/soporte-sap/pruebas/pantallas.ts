@@ -20,7 +20,7 @@ test('H-10 · en la app, impugna el cliente de la incidencia con su motivo, y la
   assert.match(resuelve, /if \(m\.estado !== 'abierta'\) throw new Rechazo\('una impugnación resuelta no se reabre/, 'una resuelta no se reabre')
   assert.match(resuelve, /m\.resueltaPor = s\.usuario; m\.resuelta = ahora\(\)/, 'a su nombre y con fecha')
   assert.doesNotMatch(resuelve, /m\.(motivo|campo|por)\s*=/, 'no reescribe la queja')
-  assert.match(lee('src/app/api/soporte-sap/route.ts'), /tipo: z\.literal\('impugna'\)[^\n]*campo: z\.enum\(\['prioridad', 'categoria', 'complejidad', 'pausa'\]\)[^\n]*motivo: z\.string\(\)\.trim\(\)\.min\(10\)/, 'la ruta exige lo mismo, también la pausa')
+  assert.match(lee('src/app/api/soporte-sap/route.ts'), /tipo: z\.literal\('impugna'\)[^\n]*campo: z\.enum\(\['prioridad', 'categoria', 'complejidad', 'pausa', 'resolucion'\]\)[^\n]*motivo: z\.string\(\)\.trim\(\)\.min\(10\)/, 'la ruta exige lo mismo, también la pausa')
 })
 
 test('pausa unilateral · en la app, pausar dice qué se le pide al cliente, y el cliente de la incidencia la reanuda al responder', () => {

@@ -66,7 +66,8 @@ pantalla dice «sin meta».
 3. **Resolver** detiene el reloj, también durante una espera.
 4. Una **reapertura** lo reanuda desde la reapertura; el tiempo entre resolver y reabrir no cuenta.
 5. Si la **prioridad cambia**, rige la meta de la nueva prioridad, contada
-   [POR DECIDIR: desde la recepción | desde el cambio].
+   [POR DECIDIR: desde la recepción | desde el cambio]. Un incumplimiento que **ya ocurrió** con la prioridad
+   anterior se queda: cambiar la prioridad después no lo borra.
 6. Sin respuesta y con el plazo vencido, la incidencia **ya incumplió**, aunque siga abierta.
 7. Cada incidencia guarda sus tramos (corre, pausa, detenido) con el evento que abrió cada uno: es
    la evidencia de un incumplimiento. Fecha y actor de cada evento los da la base.

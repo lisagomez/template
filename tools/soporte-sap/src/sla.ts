@@ -168,6 +168,8 @@ export interface ResultadoSla {
   /** Solo con meta y con el reloj todavía abierto; `null` si no hay meta o ya terminó. */
   readonly alertaRespuesta: Alerta | null
   readonly alertaResolucion: Alerta | null
+  /** Un incumplimiento que ocurrió con una prioridad anterior: se queda aunque la prioridad cambie después (R3-02). */
+  readonly incumplidaAntesDelCambio: boolean
 }
 
 const cumple = (min: number, meta: number | null, terminado: boolean): boolean | null =>
@@ -182,9 +184,30 @@ const alerta = (min: number, meta: number | null, terminado: boolean): Alerta | 
  *   horario empieza a contar al abrir;
  * - la espera del cliente lo PAUSA (de ESPERA_CLIENTE a RESPUESTA_CLIENTE) y solo pausa la resolución;
  * - resolver lo DETIENE, también durante una pausa; una reapertura lo REANUDA desde la reapertura;
- * - un cambio de prioridad aplica la meta nueva según `cambioDePrioridad` del contrato.
+ * - un cambio de prioridad aplica la meta nueva según `cambioDePrioridad` del contrato, pero un incumplimiento que ya
+ *   ocurrió con la prioridad anterior SE QUEDA: bajar la prioridad después de vencer la meta no lo borra (PRP-010,
+ *   tercera revisión: R3-02).
  */
 export function relojSla(eventos: readonly EventoSla[], prioridadInicial: Prioridad, contrato: ContratoSla, corte: string): ResultadoSla {
+  const r = relojSinHistoria(eventos, prioridadInicial, contrato, corte)
+  // Cada cambio de prioridad se mide con la prioridad que regía justo antes: si la meta ya estaba vencida, se queda.
+  let respuestaVencida = false, resolucionVencida = false
+  for (const c of eventos.filter((e) => e.tipo === 'CAMBIO_PRIORIDAD' && e.prioridad && Date.parse(e.fecha) <= Date.parse(corte))) {
+    const previos = eventos.filter((e) => Date.parse(e.fecha) < Date.parse(c.fecha))
+    if (!previos.some((e) => e.tipo === 'RECIBIDA')) continue
+    const antes = relojSinHistoria(previos, prioridadInicial, contrato, c.fecha)
+    respuestaVencida ||= antes.alertaRespuesta === 'vencida' || antes.cumpleRespuesta === false
+    resolucionVencida ||= antes.alertaResolucion === 'vencida' || antes.cumpleResolucion === false
+  }
+  return {
+    ...r,
+    cumpleRespuesta: respuestaVencida ? false : r.cumpleRespuesta,
+    cumpleResolucion: resolucionVencida ? false : r.cumpleResolucion,
+    incumplidaAntesDelCambio: respuestaVencida || resolucionVencida,
+  }
+}
+
+function relojSinHistoria(eventos: readonly EventoSla[], prioridadInicial: Prioridad, contrato: ContratoSla, corte: string): ResultadoSla {
   const ev = [...eventos].sort((a, b) => Date.parse(a.fecha) - Date.parse(b.fecha))
   const recibida = ev.find((e) => e.tipo === 'RECIBIDA')
   if (!recibida) throw new Error('una incidencia sin RECIBIDA no tiene reloj')
@@ -227,5 +250,6 @@ export function relojSla(eventos: readonly EventoSla[], prioridadInicial: Priori
     contrato: `${contrato.id} v${contrato.version}`, tramos,
     alertaRespuesta: alerta(respuestaMin, meta.respuestaMin, Boolean(respondida)),
     alertaResolucion: alerta(total, meta.resolucionMin, resuelta),
+    incumplidaAntesDelCambio: false,
   }
 }

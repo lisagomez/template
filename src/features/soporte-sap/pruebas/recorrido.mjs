@@ -61,6 +61,17 @@ await captura(2, 'evidencia extraida por campo y en revision', async () => { con
 await pagina.click(`${sel('cadena')} summary`)
 await captura(3, 'el agente categoriza con la evidencia y la traza', async () => { const t = await texto(sel('categorizacion')); return /Prioridad P[12]/.test(t) && /SS-MM-PERIODO/.test(t) && /íntegra ✓/.test(await texto(sel('cadena'))) }, sel('detalle-inc-001'))
 
+// 3.5 (DP-3, tercera revisión R3-03): el plan verificado va primero a la consultora; al laboratorio llega si ella lo escala.
+await rol('superadmin')
+const sinEscalar = await texto(sel('sala'))
+await rol('consultor')
+await pagina.click(sel('incidencia-inc-001'))
+const pendiente = await texto(sel('plan-pendiente'))
+await pagina.click(sel('escala'))
+await pagina.waitForTimeout(400)
+await captura(3.5, 'la consultora escala al laboratorio a su nombre', async () => !/Plan v1 para inc-001/.test(sinEscalar) && /espera que la consultora lo escale/.test(pendiente)
+  && /Escalada al laboratorio por usr-consultor-andina/.test(await texto(sel('detalle-inc-001'))), sel('detalle-inc-001'))
+
 // 4: caso conocido → ejecutor → supervisor → sala → aprobación humana → simulador con antes y después.
 await rol('superadmin')
 await captura(4, 'plan del caso conocido en la sala con veredicto del supervisor', async () => /Supervisor \(agente:supervisor-sap\): 6\/6/.test(await texto(sel('sala'))), sel('sala'))
@@ -84,6 +95,10 @@ await captura(5.1, 'el superadministrador sube la enseñanza al núcleo generali
 // 6: revisión → el agente corrige y vuelve a proponer.
 await rol('cliente')
 await levanta('FB01 no deja contabilizar', 'FB01 marca F5 201: el periodo contable no está abierto en sociedad 1000 para el periodo 2026/10', [])
+await rol('consultor')
+await pagina.click(sel('incidencia-inc-003'))
+await pagina.click(sel('escala'))
+await pagina.waitForTimeout(400)
 await rol('superadmin')
 await decide('Plan v1 para inc-003', 'a_revision', 'El periodo correcto es el periodo 2026/11; corrige y vuelve a proponer')
 await captura(6, 'a revision el agente corrige y propone la v2', async () => /Plan v2 para inc-003[\s\S]*periodo: 2026\/10 → 2026\/11/.test(await texto(sel('sala'))), sel('sala'))
@@ -194,6 +209,18 @@ await captura(14.2, 'el cliente ve que se le pide y reanuda el reloj al responde
   const c = await cadena()
   return pidio && /ESPERA_CLIENTE · usr-consultor-andina/.test(c) && /RESPUESTA_CLIENTE · usr-cliente-bajio/.test(c) && (await pagina.locator(sel('cliente-reanuda')).count()) === 0
 }, sel('reloj-incidencia'))
+
+// 14.3 (DP-4, R3-07): el cliente lee lo que se le respondió. 14.4 (R3-08): lo da por resuelto el consultor, no el agente.
+await abre('MIGO no deja contabilizar la entrada')
+await captura(14.3, 'el cliente lee la respuesta de su consultora', async () => /Ya revisamos el periodo contable/.test(await texto(sel('respuestas'))), sel('respuestas'))
+await rol('consultor')
+await abre('MIGO no deja contabilizar la entrada')
+const antesDeResolver = await cadena()
+await pagina.click(sel('resuelve'))
+await pagina.locator(sel('cadena'), { hasText: 'RESUELTA · usr-consultor-andina' }).first().waitFor({ timeout: 10_000 })
+await captura(14.4, 'aplicar no resuelve lo da por resuelto el consultor', async () => /APLICADA_EN_SIMULADOR/.test(antesDeResolver) && !/RESUELTA/.test(antesDeResolver)
+  && /RESUELTA · usr-consultor-andina/.test(await cadena()), sel('reloj-incidencia'))
+await rol('cliente')
 
 // H-28: el FODA dice su confianza, y una proyección dice que no es una promesa.
 await captura(14.5, 'el FODA lleva su confianza y la proyección su aviso', async () => {

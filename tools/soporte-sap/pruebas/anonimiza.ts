@@ -162,3 +162,14 @@ test('H-19 · en la app, al núcleo solo sube el superadministrador, y sube con 
   assert.match(cuerpo, /= alNucleo\(p, VALIDADORES, NOMBRES_DE_ORGANIZACION\)/, 'y sube lo que deja alNucleo')
   assert.match(runtime, /if \(a\.tipo === 'al_nucleo'\) return subeAlNucleo\(s, a\.propuesta\)/, 'la acción llega a esa función')
 })
+
+test('R3-06 · el anonimizador no deja entrar las formas de la tercera revisión: separadores, «at», ancho completo', () => {
+  const casos: Array<[string, string[]]> = [
+    ['llamar al teléfono 55/1234/5678 por la tarde', ['1234', '5678']], ['tel 55_1234_5678', ['1234', '5678']],
+    ['el NSS １２３４５６７８９０１ no aparece', ['12345678901', '１２３４５６７８９０１']], ['correo xochitl＠acme.mx', ['xochitl', 'acme']],
+    ['escribir a xochitl.tzompantzi at acme.io', ['tzompantzi', 'acme']],
+  ]
+  const fugan = casos.filter(([t, datos]) => { const r = anonimiza(t, VALIDADORES); return r.veredicto === 'entra' && datos.some((d) => r.texto.includes(d)) })
+  assert.deepEqual(fugan.map(([t]) => t), [])
+})
+

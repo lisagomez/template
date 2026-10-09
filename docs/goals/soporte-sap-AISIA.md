@@ -6,7 +6,9 @@
 > solución en un SAP real, al salir del laboratorio o tras un incidente.
 >
 > **v3** (PRP-010): la v2 prometía controles que el código no tenía. Dos revisiones contra el código
-> (05/10 y 07/10) encontraron 32 hallazgos, y el PRP-010 los cerró en código o los dice aquí. **Cada
+> (05/10 y 07/10) encontraron 32 hallazgos, y el PRP-010 los cerró en código o los dice aquí. Una tercera
+> revisión, contra el borrador de esta v3 (09/10), encontró 18 más, nueve sobre infirmables; también están
+> cerrados en código o dichos aquí. **Cada
 > afirmación de §4 y §5 tiene su fila** en la matriz
 > ([`soporte-sap-firmas-matriz.md`](soporte-sap-firmas-matriz.md)). Cada fila queda en uno de tres
 > estados: **probado**, si una prueba pasa sin su sabotaje y cae con él; **brecha**, si está abierta
@@ -51,7 +53,9 @@
 | **SLA mal medido** | El reloj no pausa una espera del cliente, o cuenta horas fuera del calendario: la consultora paga créditos que no debía, o el N3 no recibe los que le tocaban. |
 | **Primera respuesta automática** | Una acción de la máquina (anonimizar, mandar el plan a la sala) cuenta como respuesta al cliente: una P1 «cumple» sin que nadie le haya respondido. |
 | **Pausa unilateral** | La consultora pausa el reloj («se le pidió un dato al cliente») sin que haya pasado, o no lo reanuda cuando el cliente contesta, y su plazo deja de correr. |
-| **La consultora altera la impugnación** | La consultora reescribe la queja del cliente, o la resuelve sin que quede quién ni cuándo. |
+| **Resolución unilateral** | La consultora (o una máquina) da por resuelta una incidencia que no lo está, y el reloj se detiene. |
+| **Incumplimiento borrado** | Se baja la prioridad después de vencer la meta, y el incumplimiento desaparece del resultado. |
+| **La consultora altera la impugnación** | La consultora reescribe la queja del cliente, la borra, o la resuelve sin que quede quién ni cuándo. |
 | **Consultor juzgado por una métrica** | MTTR o primera respuesta sin contexto castigan a quien toma los casos difíciles; el seudónimo no lo protege de su propio empleador. |
 | **Corte por presupuesto** | Sin presupuesto del mes o al tope, el agente no llama al modelo y el triage de una consultora se detiene. |
 | **P1 sin evidencia leída** | Al llegar al tope de OCR del mes, la captura de una P1 queda sin leer y el caso se atiende sin su evidencia. |
@@ -76,6 +80,8 @@
 | SLA mal medido | Media (dinero) | Baja-media | Sí, si fecha y actor de cada evento los da la base |
 | Primera respuesta automática | Media (dinero) | Alta si la máquina marca | Sí, si la marca es un evento de una persona |
 | Pausa unilateral | Media (dinero) | Media | Sí, si lo pedido queda escrito y el cliente reanuda el reloj él mismo |
+| Resolución unilateral | Media (dinero) | Media | Sí, si resolver es de una persona y el cliente lo puede impugnar |
+| Incumplimiento borrado | Media (dinero) | Media | Sí, si el incumplimiento ya ocurrido se queda |
 | La consultora altera la impugnación | Media | Baja | No, si la queja original se pierde |
 | Consultor juzgado por una métrica | Media | Media | Sí |
 | Corte por presupuesto | Alta para un P1 | Media sin control | **No** para el P1 que esperó: por eso P1 y P2 nunca se cortan |
@@ -98,7 +104,11 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - **Dos cerrojos que no dependen del anonimizador**:
     - la cuarentena guarda solo tipos de señal, y la base lo exige;
     - la base rechaza en el sandbox un identificador con forma (correo, RFC, CURP, NSS, CLABE,
-      teléfono), aunque lo escriba el agente.
+      teléfono), aunque lo escriba el agente. Mira las mismas formas que el anonimizador, sobre el
+      texto normalizado (un dígito o una arroba de ancho completo cuentan como tales), y una prueba
+      comprueba que los dos cerrojos no se contradicen.
+  - **Al bucket del sandbox nadie sube objetos**: el sandbox es solo texto, y una imagen no la revisa
+    ningún cerrojo.
   - **Todo caso de RR. HH. o nómina va a cuarentena.** La cuarentena es **definitiva** y nadie la
     revisa hasta D14 (DP-7): falla seguro, porque el caso no entra al sandbox. Tampoco frena la
     atención: el caso sigue con su consultora y su reloj de SLA.
@@ -109,13 +119,18 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     propios, la estructura del cliente y los nombres de la consultora y del cliente; ayuda, pero no
     garantiza.
   - Los dos controles son la firma del superadministrador a su nombre y la base, que rechaza lo que
-    llegue sin generalizar. La base sola no basta: conoce los nombres de las organizaciones, no la
+    llegue sin generalizar. Además, una propuesta no cambia de consultora, de alcance ni de contenido:
+    lo único que cambia de dueña es la promoción al núcleo, y la hace el superadministrador. La base sola no basta: conoce los nombres de las organizaciones, no la
     marca ni las siglas de un cliente.
 - **Prioridad**:
   - **La regla de prioridad** es determinista y visible (ITIL), y la urgencia y el impacto salen de
     lo que declara el cliente: un documento no sube la prioridad.
   - **El piso de nómina** vive en la base, con un solo vocabulario: un ticket con señales de nómina
     o RR. HH. no baja de P2 sin que una persona lo baje.
+  - **La prioridad que mide el SLA es la que fijó la base**: la prioridad inicial la pone la
+    categorización del agente, que es una y dice la prioridad de la incidencia (con su piso). Una
+    persona no emite eventos de la máquina, y el impacto y la urgencia que declaró el cliente no se
+    reescriben.
   - **Cambiar la prioridad**, una vez fijada, es un evento de una persona, con su motivo, y queda en la
     cadena.
   - **El N3 la puede impugnar**, en la app y en la base.
@@ -135,7 +150,11 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - D1 exige **consentimiento por contrato** de la consultora y de su cliente. Hasta decidirla, el
     núcleo común no se alimenta fuera del laboratorio.
 - **Lo que lee el laboratorio**:
-  - Solo lo que **la consultora escala, a su nombre** (DP-3): el agente no escala.
+  - Solo lo que **la consultora escala, a su nombre** (DP-3): el agente no escala. En la app, el plan
+    verificado espera a la consultora, y a la sala del laboratorio llega solo si ella lo escala.
+  - Lo leído de un original (el RFC y el total de un CFDI) va con el original: el laboratorio lo lee en
+    lo escalado y con el acceso motivado vigente.
+  - La cuarentena no la lee el laboratorio: nadie la revisa (DP-7).
   - Los originales, con un acceso que **otorga la consultora** por 72 h como máximo. La fecha la pone
     la base, se puede revocar, y nadie se lo otorga a sí mismo.
   - D14 decide qué más ve el superadministrador.
@@ -150,30 +169,42 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
 - **SLA**:
   - La fecha y el actor de cada evento los da la base, y la cadena la calcula la base.
   - El resultado lo calcula un job desde los eventos, con la misma función que la app. Sin contrato
-    válido no inventa nada.
+    válido no inventa nada. El resultado no es la evidencia: la evidencia es la cadena, y cualquiera
+    lo recalcula desde ella. La base no ata el resultado a los eventos (brecha del C3).
   - Las cifras del contrato las decide el laboratorio (D13).
   - **En modo despacho** la base vive en el servidor de la consultora, y quien tiene root puede
     reescribir la cadena: ahí la medición **no es evidencia independiente**, y el contrato lo dice.
 - **Primera respuesta automática**: la primera respuesta es **un mensaje de una persona al
-  cliente** (DP-4). Ni la base ni la app la marcan por una acción de la máquina.
+  cliente** (DP-4). Ni la base ni la app la marcan por una acción de la máquina, la base exige su
+  texto, y el cliente lo lee.
+- **Resolución unilateral**: resolver es un acto de una persona de la consultora; ni el agente, ni el
+  cliente, ni el laboratorio lo emiten. Aplicar un plan en el simulador no resuelve. El cliente puede
+  impugnar la resolución.
+- **Incumplimiento borrado**: un incumplimiento que ocurrió con la prioridad anterior se queda,
+  aunque la prioridad cambie después. Un cambio de prioridad tiene que cambiarla.
 - **Pausa unilateral**:
   - Pausar el reloj es un evento de una persona de la consultora, y **dice qué se le pide al
     cliente**: sin eso, ni la base ni la app lo aceptan.
   - **El cliente lo ve y reanuda el reloj él mismo** al responder, sin depender de su consultora. El
     agente no lo reanuda.
   - El cliente puede impugnar la pausa. La impugnación la resuelve la misma consultora: lo que protege
-    al cliente es que lo pedido, la pausa y su queja quedan en la cadena, con actor y fecha de la base.
+    al cliente es que lo pedido y la pausa quedan en la cadena, y su queja en la base, con actor y fecha
+    de la base, sin que nadie la reescriba ni la borre.
 - **La consultora altera la impugnación**: no reescribe la queja (los permisos son por columna), la
-  resuelve a su nombre con fecha de la base, y una impugnación resuelta no se reabre.
+  resuelve a su nombre con fecha de la base, y una impugnación resuelta no se reabre. Ningún rol de la
+  API la borra. En la app, impugnar y resolver quedan además en la cadena.
 - **Consultores**:
   - El producto **no ofrece** una vista de desempeño individual. Cada consultor ve sus horas, no las
     de sus colegas; los totales salen de la capa semántica, sin persona.
   - El seudónimo lleva sal, en la base y en el importador.
   - La capa semántica no lee nombres de consultores (privilegios por columna).
   - Las métricas por categoría y complejidad **no existen todavía**: no se prometen.
+  - *Brecha*: la cadena dice qué consultor respondió y resolvió cada incidencia, y cuándo. Con ella,
+    un colega o su empleador pueden reconstruir tiempos por persona.
 - **Corte por presupuesto**:
   - El tope sale de la base por mes, y lo gastado, de la cadena; sin tope, nada llama al modelo.
   - El enjambre no prepara un plan sin el visto bueno del presupuesto.
+  - Lo gastado no lo puede inflar una persona: los eventos que gastan son del agente.
   - **P1 y P2 nunca se cortan**: al tope pasan a una persona en el momento. P3 y P4 esperan. El
     aviso queda en la cadena y a la vista del consultor y del superadministrador.
 - **P1 sin evidencia leída**: un P1 o un P2 con una imagen sin leer por el tope de OCR pasa a una
@@ -189,7 +220,8 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - El contrato N2–N3 dice que un agente categoriza y que el laboratorio ve lo que la consultora le
     escala.
   - **El contrato todavía no exige el aviso de privacidad** hacia los empleados del N3: es redacción
-    legal pendiente (brecha).
+    legal pendiente. Como el daño es de terceros, no queda como brecha: sin ese aviso, el producto no
+    opera con datos reales.
 - **Riesgo de baja**:
   - Es un aviso para la consultora, no una decisión. La pantalla muestra la fórmula y el umbral
     (supuestos del laboratorio) junto al número.
@@ -207,11 +239,14 @@ quedan hoy:
 
 | Riesgo infirmable | Cómo queda |
 |---|---|
-| El dato personal de los empleados y de las contrapartes | Lo cierran los controles probados: anonimizador, cuarentena y el cerrojo de la base. Sin cero fugas, **el producto no sale del laboratorio** sin medir el anonimizador sobre un corpus real (D9). |
+| El dato personal de los empleados y de las contrapartes | Lo **reducen** los controles probados: anonimizador, cuarentena y el cerrojo de la base, que miran las mismas formas. No son cero fugas: **el producto no sale del laboratorio** sin medir el anonimizador sobre un corpus real (D9). |
+| El aviso de privacidad hacia los empleados del N3 | Es redacción legal pendiente: sin él, **el producto no opera con datos reales**. |
 | El secreto del N3 en el núcleo | A medida por defecto. Al núcleo, generalizado y firmado por el superadministrador, y la base lo exige. |
-| La prioridad de una incidencia de nómina | El piso en la base, sin depender del categorizador. |
+| La prioridad de una incidencia de nómina | El piso en la base, sin depender del categorizador, y la prioridad que mide el SLA es la que fijó la base. |
 | El SLA, que es dinero entre la consultora y su cliente | Fechas y actor de la base, primera respuesta de una persona, resultado desde los eventos, y pausa que dice qué pide y que el cliente reanuda él mismo. En modo despacho, la medición **no se ofrece** como evidencia independiente (el contrato lo dice). |
-| La impugnación del cliente | La base: la queja no se reescribe y la resuelta no se reabre. |
+| La impugnación del cliente | La base: la queja no se reescribe ni se borra, y la resuelta no se reabre. |
+| La resolución y el incumplimiento | Resolver es de una persona de la consultora, y el cliente lo impugna. Un incumplimiento ya ocurrido se queda aunque cambie la prioridad. |
+| Lo que lee el laboratorio | Lo que la consultora escala, también en la app, y lo leído de un original con el acceso motivado. |
 | El triage urgente cortado por presupuesto, o sin su evidencia | P1 y P2 pasan a una persona; nunca se cortan. |
 | La restauración que toca a otros tenants | Por tenant, verificada antes del commit. |
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece**: no hay SAP real cableado (D6). |
@@ -222,6 +257,8 @@ Para salir del laboratorio hacen falta:
 - D1 (con consentimiento contractual), D3, D6, D7, D8, D10, D12, D13 y D14 decididas;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
+- el aviso de privacidad hacia los empleados del N3, redactado y exigido en el contrato;
+- los veredictos, desde `tools/conocimiento` y con su firma (H-20);
 - GATE 3 cerrado en la máquina donde corra, si el laboratorio opera el servicio (D3): la ficha de
   servidor no dice «apto» sin él;
 - el C3 y esta AISIA firmados.

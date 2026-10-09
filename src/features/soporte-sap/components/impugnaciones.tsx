@@ -9,7 +9,7 @@ import { useState, type FormEvent } from 'react'
 import type { ImpugnacionVista, Rol } from '../services/tipos'
 import { Pildora, hora } from './ui'
 
-const CAMPOS = [['prioridad', 'la prioridad'], ['categoria', 'la categoría'], ['complejidad', 'la complejidad'], ['pausa', 'una pausa del reloj']] as const
+const CAMPOS = [['prioridad', 'la prioridad'], ['categoria', 'la categoría'], ['complejidad', 'la complejidad'], ['pausa', 'una pausa del reloj'], ['resolucion', 'que quedó resuelta']] as const
 
 export function Impugnaciones({ incidencia, lista, rol, actua }: { incidencia: string; lista: readonly ImpugnacionVista[]; rol: Rol; actua: (a: object) => Promise<void> }) {
   return (

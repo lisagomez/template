@@ -54,6 +54,8 @@ function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
     reloj: reloj(relojDe(i)),
     impugnaciones: i.impugnaciones.map((m) => ({ ...m })),
     pide: i.estado === 'espera_cliente' ? pideDe(i) : null,
+    escaladaPor: i.escalada?.por ?? null,
+    respuestas: s.nivel === 'N1' ? [] : i.respuestas.map((r) => ({ ...r })),
   }
 }
 
@@ -89,7 +91,7 @@ const relojesDemo = (): Vista['relojesDemo'] => relojesDeDemostracion().map((d) 
 
 export function vista(s: Sesion): Vista {
   const e = estado()
-  const mias = e.incidencias.filter((i) => (s.rol === 'cliente' ? i.cliente === s.organizacion : s.rol === 'consultor' ? i.consultora === s.organizacion : i.planes.some((p) => p.mensaje)))
+  const mias = e.incidencias.filter((i) => (s.rol === 'cliente' ? i.cliente === s.organizacion : s.rol === 'consultor' ? i.consultora === s.organizacion : i.escalada !== null))
   const ve = (n: string) => (s.rol === 'cliente' ? false : s.rol === 'consultor' ? true : s.rol === 'superadmin' || !SOLO_SUPERADMIN.has(n))
   const horas = s.rol === 'consultor' ? tableroN2(CORTE, s.organizacion, PERIODO).propio.filter((t) => ve(t.nombre) && t.nombre.startsWith('horas')).map(tarjeta) : []
   const acc = s.nivel === 'N1' ? [] : accionables(CORTE, 'andina', 'alimentos-del-bajio', PERIODO).filter((a) => s.rol === 'consultor' || a.para === 'n3')
