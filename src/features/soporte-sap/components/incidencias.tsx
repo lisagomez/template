@@ -66,6 +66,51 @@ function RespuestaAlCliente({ incidencia, actua }: { incidencia: string; actua: 
   )
 }
 
+/**
+ * La pausa del reloj: el consultor la pide diciendo qué le pide al cliente, y el cliente la ve y la reanuda al
+ * responder, sin depender de su consultora (la pausa unilateral, AISIA §2).
+ */
+function PausaDelReloj({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
+  const [pide, setPide] = useState('')
+  const pausa = async (ev: FormEvent) => {
+    ev.preventDefault()
+    if (pide.trim().length < 10) return
+    await actua({ tipo: 'espera_cliente', incidencia: i.id, pide: pide.trim() })
+    setPide('')
+  }
+  if (rol === 'cliente') {
+    return i.pide ? (
+      <div className="mt-2 rounded bg-amber-50 p-2 text-xs dark:bg-amber-950" data-prueba="cliente-pide">
+        <p>Tu consultora te pidió: «{i.pide}». El reloj de resolución está en pausa hasta que respondas.</p>
+        <button type="button" onClick={() => actua({ tipo: 'responde_cliente', incidencia: i.id })} className="mt-1 rounded border px-2 py-1" data-prueba="cliente-reanuda">Ya respondí (reanuda el reloj)</button>
+      </div>
+    ) : null
+  }
+  if (rol !== 'consultor') return null
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      <form onSubmit={pausa} className="flex flex-1 gap-2" data-prueba="espera-cliente">
+        <input value={pide} onChange={(e) => setPide(e.target.value)} placeholder="Qué le pides al cliente" maxLength={500}
+          className="flex-1 rounded border px-2 py-1 text-xs" aria-label="Qué le pides al cliente" />
+        <button type="submit" className="rounded border px-2 py-1 text-xs">Pedir y pausar</button>
+      </form>
+      <button type="button" onClick={() => actua({ tipo: 'responde_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="responde-cliente">El cliente respondió (reanuda)</button>
+    </div>
+  )
+}
+
+/** Lo que solo hace la consultora: escalar al laboratorio a su nombre (DP-3) y dar por resuelta la incidencia. */
+function AccionesDeLaConsultora({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
+  if (rol !== 'consultor') return i.escaladaPor ? <p className="mt-2 text-xs text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.</p> : null
+  return (
+    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+      {i.escaladaPor ? <span className="text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.</span>
+        : <button type="button" onClick={() => actua({ tipo: 'escala', incidencia: i.id })} className="rounded border px-2 py-1" data-prueba="escala">Escalar al laboratorio</button>}
+      {i.estado !== 'resuelta' ? <button type="button" onClick={() => actua({ tipo: 'resuelve', incidencia: i.id })} className="rounded border px-2 py-1" data-prueba="resuelve">Dar por resuelta</button> : null}
+    </div>
+  )
+}
+
 function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
   return (
     <div className="mt-3 space-y-3 text-sm" data-prueba={`detalle-${i.id}`}>
@@ -97,7 +142,8 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
           <ul className="ml-4 list-disc text-xs">{p.pasos.map((x) => <li key={x}>{x}</li>)}</ul>
           <p className="text-xs text-neutral-500">Previsión en el simulador: {p.prevision.join('; ') || 'sin previsión'}</p>
           <ul className="mt-1 text-xs">{p.supervisor.comprobaciones.map((c) => <li key={c.que}>{c.ok ? '✓' : '✗'} {c.que} <span className="text-neutral-500">({c.detalle})</span></li>)}</ul>
-          {p.decision ? <p className="mt-1 text-xs">Decisión en la sala: <b>{p.decision.accion}</b> por {p.decision.por}{p.decision.motivo ? ` · motivo: «${p.decision.motivo}»` : ''}</p> : p.mensaje ? <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">En la sala, esperando la fila humana.</p> : null}
+          {p.decision ? <p className="mt-1 text-xs">Decisión en la sala: <b>{p.decision.accion}</b> por {p.decision.por}{p.decision.motivo ? ` · motivo: «${p.decision.motivo}»` : ''}</p> : p.mensaje ? <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">En la sala, esperando la fila humana.</p>
+            : p.supervisor.resultado === 'a_la_sala' ? <p className="mt-1 text-xs text-sky-700 dark:text-sky-300" data-prueba="plan-pendiente">Verificado: espera que la consultora lo escale al laboratorio.</p> : null}
           {p.aplicado ? (
             <p data-prueba="antes-despues" className="mt-1 rounded bg-emerald-50 p-1 text-xs dark:bg-emerald-950">Aplicado en el simulador · antes: {p.aplicado.antes} (error {p.aplicado.errorAntes ? 'presente' : 'ausente'}) → después: {p.aplicado.despues} (error {p.aplicado.errorDespues ? 'presente' : 'ausente'})</p>
           ) : null}
@@ -105,7 +151,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
       ))}
       {i.sandbox ? (
         <div data-prueba="sandbox-incidencia" className="rounded-lg bg-neutral-50 p-2 text-xs dark:bg-neutral-800/60">
-          <b>Sin regla: anonimizada → {i.sandbox.veredicto === 'entra' ? 'al sandbox' : 'en cuarentena (revisión humana)'}</b>
+          <b>Sin regla: anonimizada → {i.sandbox.veredicto === 'entra' ? 'al sandbox' : 'en cuarentena (no entra al sandbox; nadie la revisa hasta D14)'}</b>
           {i.sandbox.texto ? <p className="mt-1 font-mono">{i.sandbox.texto}</p> : null}
           {i.sandbox.senales.length ? <p className="text-neutral-500">Señales: {i.sandbox.senales.join('; ')}</p> : null}
         </div>
@@ -114,11 +160,10 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
         <h3 className="font-semibold">Reloj de SLA</h3>
         <Reloj r={i.reloj} />
         {rol === 'consultor' ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
-        {rol === 'consultor' ? (
-          <div className="mt-2 flex gap-2">
-            <button type="button" onClick={() => actua({ tipo: 'espera_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="espera-cliente">Pedir un dato al cliente (pausa)</button>
-            <button type="button" onClick={() => actua({ tipo: 'responde_cliente', incidencia: i.id })} className="rounded border px-2 py-1 text-xs" data-prueba="responde-cliente">El cliente respondió (reanuda)</button>
-          </div>
+        <PausaDelReloj i={i} rol={rol} actua={actua} />
+        <AccionesDeLaConsultora i={i} rol={rol} actua={actua} />
+        {i.respuestas.length ? (
+          <ul className="mt-2 space-y-1 text-xs" data-prueba="respuestas">{i.respuestas.map((r) => <li key={r.fecha + r.por}>Respuesta de {r.por}: «{r.texto}»</li>)}</ul>
         ) : null}
       </div>
       <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={rol} actua={actua} />

@@ -46,7 +46,8 @@ const marca = (c: Cuenta, t: TipoDato): string => { c[t] = (c[t] ?? 0) + 1; retu
 export const CONTEXTO_PERSONAL = /\b(n[oó]minas?|finiquitos?|aguinaldos?|imss|idse|sua|infonavit|ptu|incapacidad(?:es)?|vacaciones|emplead[oa]s?|trabajador(?:a|es|as)?|colaborador(?:a|es|as)?|liquidaci[oó]n|sueldos?|salarios?|quincenas?|recibos? de pago|pa20|pa30|pa40|pc00_\w+|infotipos?|hcm|personal)\b/i
 
 /** Lo que separa dígitos en un teléfono o una cuenta: espacios, guiones, puntos, paréntesis y los de un procesador de texto. */
-const SEP = String.raw`[\s\-.()·•–]`
+/** Lo que separa los trozos de un número: también `/` y `_` (tercera revisión, R3-06: «55/1234/5678» entraba). */
+const SEP = String.raw`[\s\-.()·•–/_]`
 const PROVEEDOR = 'gmail|hotmail|yahoo|outlook|live|icloud|protonmail|proton|prodigy|aol|msn'
 const AT = String.raw`(?:\s*@\s*|\s*\[\s*(?:arroba|at)\s*\]\s*|\s*\(\s*(?:arroba|at)\s*\)\s*|\s+arroba\s+)`
 const DOT = String.raw`(?:\s*\.\s*|\s+punto\s+|\s*\[\s*(?:dot|punto)\s*\]\s*|\s*\(\s*(?:dot|punto)\s*\)\s*)`
@@ -220,7 +221,7 @@ function aplicaDetectores(texto: string, v: Validadores, c: Cuenta): string {
  * (`ss_cuarentena_solo_senales`) y `pruebas/cierre-base.ts` vigila que no se separen (PRP-010 H-03).
  */
 export const SENALES = {
-  personal: 'caso de RR. HH. o nómina: revisión humana obligatoria antes del sandbox',
+  personal: 'caso de RR. HH. o nómina: no entra al sandbox (cuarentena definitiva hasta D14)',
   correo: 'queda algo con forma de correo',
   digitos: 'queda una secuencia larga de dígitos',
   tratamiento: 'queda un tratamiento seguido de un nombre',
@@ -231,8 +232,8 @@ export const SENALES = {
 function senalesResiduales(texto: string): string[] {
   const t = texto.replace(/\[[A-Z_]+\]/g, ' ')
   const s = new Set<string>()
-  if (new RegExp(String.raw`@|\barroba\b|\(at\)|\[at\]|\bpunto\s+com\b|\b[\w-]+\.(?:com|mx|net|org|edu|gob)\b|\b(?:gmail|hotmail|yahoo|icloud|protonmail)\b`, 'i').test(t)) s.add(SENALES.correo)
-  if (new RegExp(String.raw`\d(?:${SEP}{0,2}\d){6,}`).test(t)) s.add(SENALES.digitos)
+  if (new RegExp(String.raw`@|\barroba\b|\(at\)|\[at\]|\bpunto\s+com\b|\b[\w-]+\.(?:com|mx|net|org|edu|gob)\b|\bat\s+[\w-]+\.[a-z]{2,}\b|\b(?:gmail|hotmail|yahoo|icloud|protonmail)\b`, 'i').test(t)) s.add(SENALES.correo)
+  if (new RegExp(String.raw`\d(?:${SEP}{0,3}\d){6,}`).test(t)) s.add(SENALES.digitos)
   if (/\b(?:Lic|Ing|Inge|Sr|Sra|Srta|Dr|Dra|Mtro|Mtra|Doña|Don)\.?\s+\p{L}/u.test(t)) s.add(SENALES.tratamiento)
   if (/(su01|contrase[nñ]a|desbloque|bloquead|\brol\b)/i.test(t) && /\b[A-Z]{5,15}\b/.test(t.replace(/\b[A-Z]{2,5}\d\w*\b/g, ''))) {
     const sueltas = [...t.matchAll(/\b[A-Z]{5,15}\b/g)].map((m) => m[0]).filter((p) => !esVocabulario(p))
@@ -242,7 +243,9 @@ function senalesResiduales(texto: string): string[] {
 }
 
 /** Anonimiza para el sandbox. Caso de personal o señal residual → cuarentena. */
-export function anonimiza(texto: string, v: Validadores): Anonimizado {
+export function anonimiza(entrada: string, v: Validadores): Anonimizado {
+  // NFKC: un dígito o una arroba de ancho completo cuentan como tales (tercera revisión, R3-06: el NSS en «１２３…» entraba).
+  const texto = entrada.normalize('NFKC')
   const cuenta: Cuenta = {}
   const t = aplicaDetectores(texto, v, cuenta)
   const senales = senalesResiduales(t)

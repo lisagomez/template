@@ -146,3 +146,28 @@ test('el contrato le dice al cliente que un agente categoriza y qué ve el labor
   assert.match(transparencia, /acceso motivado que otorga la consultora/)
   assert.match(transparencia, /\[POR DECIDIR: aviso de privacidad/, 'el aviso de privacidad es redacción legal pendiente, no un agente')
 })
+
+test('el contrato define la primera respuesta (DP-4), la pausa que el cliente ve y reanuda, y a quién escala la consultora (DP-3)', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const reloj = p.slice(p.indexOf('## 5. Cómo se mide'), p.indexOf('## 6.')), escala = p.slice(p.indexOf('## 6.'), p.indexOf('## 7.'))
+  const transparencia = p.slice(p.indexOf('## 11.'), p.indexOf('## 12.'))
+  assert.match(reloj, /La \*\*primera respuesta\*\* es un mensaje de una \*\*persona\*\*[\s\S]*Una acción automática[^\n]*no cuenta/, 'DP-4')
+  assert.match(reloj, /su respuesta la registra \*\*él mismo\*\*/, 'el cliente reanuda la pausa')
+  assert.match(reloj, /Un incumplimiento que \*\*ya ocurrió\*\* con la prioridad\s+anterior se queda/, 'R3-02: bajar la prioridad no lo borra')
+  assert.match(escala, /cuando \*\*la consultora\*\* lo escala, a su nombre[^\n]*Un agente no escala/, 'DP-3')
+  assert.match(transparencia, /\*\*agregados de operación\*\*/, 'lo que ve el laboratorio además de lo escalado')
+  assert.doesNotMatch(transparencia, /revisa una persona/, 'la cuarentena no la revisa nadie hasta D14 (DP-7)')
+  assert.match(reloj, /\(\*\*modo despacho\*\*\)[\s\S]*la medición \*\*no es evidencia independiente\*\*/, 'el root ajeno: el SLA de ese modo no se ofrece como evidencia')
+})
+
+test('R3-02 · bajar la prioridad después de vencer la meta no borra el incumplimiento', () => {
+  const k = contratoDeLaboratorio('andina', 'alimentos-del-bajio', '2026-04-01')
+  const base = [ev('RECIBIDA', '2026-09-21', '10:00'), ev('PRIMERA_RESPUESTA', '2026-09-21', '11:40')]
+  const sinCambio = relojSla(base, 'P1', k, mx('2026-09-30', '23:00'))
+  assert.equal(sinCambio.cumpleRespuesta, false, 'una P1 respondida a los 100 min incumple')
+  const bajada = relojSla([...base, { ...ev('CAMBIO_PRIORIDAD', '2026-09-21', '12:00'), prioridad: 'P3' as const }], 'P1', k, mx('2026-09-30', '23:00'))
+  assert.deepEqual([bajada.prioridad, bajada.cumpleRespuesta, bajada.incumplidaAntesDelCambio], ['P3', false, true], 'bajarla a P3 después no lo borra')
+  const aTiempo = relojSla([ev('RECIBIDA', '2026-09-21', '10:00'), ev('PRIMERA_RESPUESTA', '2026-09-21', '10:30'), { ...ev('CAMBIO_PRIORIDAD', '2026-09-21', '12:00'), prioridad: 'P3' as const }], 'P1', k, mx('2026-09-30', '23:00'))
+  assert.equal(aTiempo.incumplidaAntesDelCambio, false, 'control: respondida a tiempo, el cambio no inventa un incumplimiento')
+})
+

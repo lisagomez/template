@@ -63,7 +63,7 @@ arregló en parte.
 | H-01 | El agente escala por su cuenta y firma `escalada_por` con cualquier nombre. El laboratorio pasa a leer título, descripción y campos extraídos (RFC y montos del CFDI). En el runtime, toda incidencia con regla llega al N1 sin que la consultora escale nada. **Confirmado con sonda** | 1 y 2 | sí | código: escalar es decisión de la consultora, a su nombre; los campos extraídos, bajo el acceso motivado (DP-3) | **cerrado en la tanda 1a** |
 | H-02 | El tope de 72 h del acceso a originales se salta con un `creado_en` futuro: **8 832 h**, confirmado con sonda. El acceso es por cliente, no por incidencia, y no se puede revocar | 1 y 2 | sí | código: la base fija `creado_en`, el tope se mide contra `now()`, hay revocación y una prueba con `creado_en` futuro | **cerrado en la tanda 1a** |
 | H-03 | La base acepta texto crudo en `ss_caso_sandbox` y datos personales en `senales` de cuarentena, y el laboratorio lee los dos. Nada liga el sandbox con el veredicto del anonimizador | 1 y 2 | sí | código: el agente no escribe en el sandbox; `senales`, solo del vocabulario fijo | **cerrado en la tanda 1a** (segundo cerrojo; ver nota) |
-| H-04 | El anonimizador falla abierto ante formas nuevas: 5 de 14 frases entran con el dato («pepe gonzalez de almacen», «jgarcia», «doña Lupita», «El chofer Ramiro», «rosa punto elena en gmail»). La revisión humana de la cuarentena no existe | 2 | sí | código: las 5 al fixture permanente y el detector arreglado. Texto: «fail-closed» promete de más, y la cuarentena es definitiva hasta D14 (DP-8) | **código cerrado** en la fase 2 (el texto, en la fase 4) |
+| H-04 | El anonimizador falla abierto ante formas nuevas: 5 de 14 frases entran con el dato («pepe gonzalez de almacen», «jgarcia», «doña Lupita», «El chofer Ramiro», «rosa punto elena en gmail»). La revisión humana de la cuarentena no existe | 2 | sí | código: las 5 al fixture permanente y el detector arreglado. Texto: «fail-closed» promete de más, y la cuarentena es definitiva hasta D14 (DP-8) | **cerrado**: el código en la fase 2, el texto en la fase 4 |
 | H-05 | Cualquier consultor lee fila por fila las horas de sus colegas y el actor de cada evento. El seudónimo es un md5 sin sal que el laboratorio puede revertir con `ss_miembro` | 1 y 2 | — | código: cada quien sus filas más un agregado; seudónimo con sal | **cerrado en la tanda 1d** |
 
 **Decisiones humanas e integridad**
@@ -98,8 +98,8 @@ arregló en parte.
 
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
-| H-19 | `generaliza` no la llama nadie. El chat propone al núcleo el texto crudo del experto, con alcance `nucleo` **por defecto**. La base acepta propuestas sin generalizar. `generaliza` no cubre `Y…`, minúsculas, `/ACME/…`, `BUKRS 2000`, «Sociedad: 2000» ni «centro 1010» | 1 y 2 | sí | código: «a medida» por defecto, `generaliza` en el camino y un banco adversarial escrito por otro. Texto: ayuda, y el control es la firma del superadministrador | **cerrado** en la fase 2 (el texto, en la fase 4) |
-| H-20 | Los veredictos salen de `tools/soporte-sap/src/laboratorio/matriz.ts`, no de `tools/conocimiento`: un commit cambia un veredicto sin gate de firma | 1 | — | texto + brecha | — |
+| H-19 | `generaliza` no la llama nadie. El chat propone al núcleo el texto crudo del experto, con alcance `nucleo` **por defecto**. La base acepta propuestas sin generalizar. `generaliza` no cubre `Y…`, minúsculas, `/ACME/…`, `BUKRS 2000`, «Sociedad: 2000» ni «centro 1010» | 1 y 2 | sí | código: «a medida» por defecto, `generaliza` en el camino y un banco adversarial escrito por otro. Texto: ayuda, y el control es la firma del superadministrador | **cerrado**: el código en la fase 2, el texto en la fase 4 |
+| H-20 | Los veredictos salen de `tools/soporte-sap/src/laboratorio/matriz.ts`, no de `tools/conocimiento`: un commit cambia un veredicto sin gate de firma | 1 | — | texto + brecha | **declarada** en el C3 v4 (fase 4), y es condición de salida de la AISIA |
 
 **Superficie, abuso e inyección**
 
@@ -109,7 +109,7 @@ arregló en parte.
 | H-22 | Un PDF de unos 300 KB tumba la app de todos los tenants y productos. La capa 0 corre en el proceso de la app y el inflado no tiene tope | 1 | — (O4) | código: tope de bytes inflados, medido sobre el corpus real del extractor | — |
 | H-23 | Los adjuntos se cuentan por lote, no por incidencia. El tope de OCR se mira antes de leer. El N3 sube directo al bucket sin validación de bytes. `formData()` carga todo en memoria | 1 y 2 | — | código | **cerrado** en la fase 2 |
 | H-24 | `delimitaDocumento` no se usa. Los parámetros del plan (usuario SAP, BP, RFC) salen del texto no confiable. La prioridad sube con palabras clave, y el banco de inyección no las toca | 1 y 2 | — | código mínimo (delimitar) + brecha O1/O2 declarada | **cerrado** en la fase 2 (la brecha, declarada en la matriz) |
-| H-25 | La prueba del 404 no mira el GET, y el GET devuelve la vista de cualquier rol, superadministrador incluido. La ruta devuelve `e.message`. Los logs no están inventariados | 1 y 2 | — | código + prueba que invoca los handlers | **código cerrado** en la fase 2 (la vista de cualquier rol y los logs: texto, fase 4) |
+| H-25 | La prueba del 404 no mira el GET, y el GET devuelve la vista de cualquier rol, superadministrador incluido. La ruta devuelve `e.message`. Los logs no están inventariados | 1 y 2 | — | código + prueba que invoca los handlers | **cerrado**: el código en la fase 2; la vista de cualquier rol y los logs, brechas declaradas en la fase 4 |
 | H-26 | `configura:deploy` no está en `predeploy`. El SDD §16 cita una prueba suya que no existe en `main` | 2 | — | CDC del padrón (fase 3) | **cerrado** en la fase 3 (con el CDC del padrón firmado) |
 
 **Pantalla y métricas**
@@ -117,7 +117,7 @@ arregló en parte.
 | Id | Hallazgo | Rev. | Infirmable | Resolución propuesta | Rama |
 |---|---|---|---|---|---|
 | H-27 | El riesgo de baja sale sin su fórmula ni su umbral. La mitigación agrava el daño: el N3 ni lo ve ni lo puede discutir | 1 y 2 | — | código (de la rama) + texto | **sí** |
-| H-28 | El FODA no lleva confianza con pocos datos, y el caso «baja» no tiene prueba. El recorrido no comprueba el aviso de proyección. La vista «por categoría y complejidad» no existe. No hay tamaño mínimo de grupo | 2 | — | código para la confianza; texto para lo demás | **código cerrado** en la fase 2 (lo demás: texto, fase 4) |
+| H-28 | El FODA no lleva confianza con pocos datos, y el caso «baja» no tiene prueba. El recorrido no comprueba el aviso de proyección. La vista «por categoría y complejidad» no existe. No hay tamaño mínimo de grupo | 2 | — | código para la confianza; texto para lo demás | **cerrado**: el código en la fase 2, el texto en la fase 4 |
 
 **La imagen (todo el template)**
 
@@ -600,6 +600,36 @@ que pasa; captura de la ficha; regresión en verde y propuestas de CDC con la fi
 **Validación**: la matriz cubre cada daño de la AISIA y cada control del C3, con su resultado de hoy; la tercera
 revisión no deja ninguna afirmación contradicha sin resolver.
 
+**Fase 4, hecha (2026-10-09, rama `soporte/fase4-documentos`)**:
+- **AISIA v3** (`docs/goals/soporte-sap-AISIA.md`): ocho daños nuevos en la §2 (los seis del texto, más la resolución
+  unilateral y el incumplimiento borrado, que trajo la tercera revisión). Las mitigaciones dicen lo que hace el código,
+  y la §5 lista todos los infirmables y las condiciones de salida (el aviso de privacidad y H-20, entre ellas).
+- **C3 v4** (PRP-008): flujos con sus cruces de frontera, la priorización de lo abierto y dos controles nuevos, el
+  perfil de despliegue y el root ajeno. En modo despacho, el SLA **no se ofrece** como evidencia independiente, y el
+  contrato lo dice. El PRP-008 ya no dice «EN EJECUCIÓN».
+- **Código antes de la revisión**:
+  - con Soporte SAP, `configura:deploy` no deja encender un OCR externo;
+  - la pausa del reloj dice qué pide, y el cliente la reanuda él mismo;
+  - la cuarentena ya no promete revisión humana (DP-7), ni en la señal, ni en la pantalla, ni en el contrato;
+  - y un error que destapó un sabotaje que no caía: `rol_en` es NULL para quien no es miembro, `not (… and NULL)` no
+    lanza, y el cliente marcaba su primera respuesta, resolvía y se subía a P1. Ahora hay una prueba estructural que
+    lo prohíbe en todos los disparadores.
+- **La tercera revisión** (un agente con opus que no escribió nada, con sondas): **18 hallazgos, nueve sobre
+  infirmables**, todos confirmados al re-ejecutar sus sondas. Resolución, con su fila en la matriz cada uno:
+  - **código**: R3-01 (la prioridad que mide el SLA la escribía cualquiera), R3-02 (bajar la prioridad borraba el
+    incumplimiento), R3-03 (en la app, todo plan iba al laboratorio sin que la consultora escalara: H-01 estaba
+    cerrado en la base, no en el runtime), R3-04 (el laboratorio leía el RFC de un CFDI sin acceso), R3-05 (el experto
+    llevaba lo a medida de A a B), R3-06 (8 de 10 formas entraban al sandbox, y el anonimizador dejaba pasar tres),
+    R3-07 (la primera respuesta no llegaba al cliente), R3-08 (el agente resolvía), R3-09 (la plataforma borraba la
+    queja), R3-10 (un cliente apagaba el presupuesto de su consultora), R3-11, R3-12 y lo de R3-18;
+  - **prueba**: R3-14, las filas de la app se prueban ahora **ejecutando** el runtime (`pruebas/app.ts`);
+  - **texto**: R3-13 (el aviso de privacidad no puede quedar como brecha: es condición de salida) y R3-16 (la matriz
+    publicada, regenerada);
+  - **brecha** (ninguna infirmable): S8 y S9 sin sabotaje (R3-15), los tiempos por consultor en la cadena (R3-17) y el
+    resultado de SLA sin atar a los eventos (la evidencia es la cadena).
+- **Evidencia**: la batería de la herramienta 286/286, el recorrido 28 capturas sin rojo y la matriz entera (abajo, en
+  el PR).
+
 ### Fase 5: Validación final y kit de firma
 **Objetivo**: todo en verde tras el último commit, y el kit listo, fuera de todo registro:
 - el texto final de los dos documentos con la firma en blanco;
@@ -637,6 +667,27 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `aisia-lab-escalado` saboteaba la lectura del laboratorio, no quién escala; `aisia-lab-72h` saboteaba el intervalo,
   no quién pone la fecha. Una fila «probado» prueba exactamente lo que siembra su sabotaje, y nada más.
   **Lección**: cada afirmación se parte en todas las formas de romperla, y cada forma lleva su fila.
+- **2026-10-09 · una prueba que lee el código no prueba la conducta** (fase 4, R3-14). Las filas de la app se probaban
+  con expresiones regulares sobre `runtime.ts`, porque «el runtime no corre fuera de Next». Corre: con un cargador de
+  20 líneas (`pruebas/_app.mjs`). Ejecutado, enseñó cuatro infirmables que las regex daban por cerrados. **Lección**:
+  antes de escribir una prueba de lectura, se intenta ejecutar el código; la lectura es el último recurso, no el primero.
+- **2026-10-09 · un control cerrado en la base no está cerrado en la app** (fase 4, R3-03). H-01 quedó cerrado en la
+  tanda 1a: la base no deja al agente escalar. Pero el runtime publicaba cada plan en la sala del laboratorio, sin
+  pasar por la base. **Lección**: un hallazgo se cierra en cada camino que lo produce, y cada camino tiene su prueba.
+- **2026-10-09 · un control sobre una columna no vigila el evento que la alimenta** (fase 4, R3-01). El piso de nómina
+  vigilaba `ss_incidencia.prioridad`; el SLA se medía con el primer evento `CATEGORIZADA`, que podía emitir el cliente.
+  **Lección**: el control va donde se lee el dato, no donde se escribe otra copia de él.
+- **2026-10-09 · el ataque que la prueba no intentó es el que funciona** (fase 4, la tercera revisión). Casi todos los
+  hallazgos eran un rol que ninguna prueba probaba (el cliente, el laboratorio, la plataforma) o una forma que el banco
+  no tenía. **Lección**: una prueba de seguridad enumera los roles que podrían hacerlo, no solo el que se temía.
+- **2026-10-09 · el NULL volvió, ahora con `=`** (fase 4). La lección del 07/10 era «`<>` con NULL no rechaza», y se
+  arregló en `evento_honesto`. En `evento_de_quien_puede` la regla era `not (… and rol_en(consultora) = 'consultor')`:
+  para quien no es miembro, `rol_en` es NULL, `not (… and NULL)` es NULL y el `if` no lanza. El cliente marcaba su
+  primera respuesta, resolvía y se subía a P1; el laboratorio, lo mismo en lo escalado. La prueba de H-17 solo
+  intentaba al agente. Lo destapó un sabotaje que no caía (la fila de la pausa). **Fix**: `is not distinct from`,
+  una prueba con el cliente y el laboratorio, y una prueba estructural que prohíbe `=` y `<>` sobre funciones de
+  `ss_priv` en todos los disparadores, y cuenta los que lee. **Lección**: una lección escrita no impide que el error
+  vuelva con otra forma; lo impide una prueba que lo busque en todo el código, no solo en la línea que falló.
 - **2026-10-07 · una limpieza puede tapar su propio sabotaje.** Para quitar la política vieja del agente puse un
   `drop policy` DESPUÉS del bloque que crea las políticas: con el sabotaje (volver a meter la tabla en la lista), el
   bloque la recreaba y el `drop` la borraba otra vez, y el arnés dijo «NO CAE». **Fix**: el `drop` va antes del bloque.

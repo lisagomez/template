@@ -1,6 +1,8 @@
 # PRP-008: Soporte SAP (corrida A: el producto en laboratorio)
 
-> **Estado**: EN EJECUCIÓN por `/goal` (corrida A, 2026-10-04, rama `soporte/sap`).
+> **Estado**: corrida A **cerrada** (2026-10-04; en `main` por el PR #211). Sus controles los revisaron dos
+> agentes (05/10 y 07/10) y los cerró el PRP-010 (fases 0 a 3, PRs #226 a #240). El C3 v4 de abajo y la AISIA v3
+> esperan la firma del laboratorio (PRP-010, fase 5).
 > **Spec del goal**: [`docs/goals/soporte-sap.md`](../../docs/goals/soporte-sap.md) · **Diseño**: [`docs/SDD-soporte-sap.md`](../../docs/SDD-soporte-sap.md)
 > · **Grafo**: [`docs/grafos/soporte-sap.json`](../../docs/grafos/soporte-sap.json)
 > **CDC aplicable**: SÍ para lo que toque el inventario (campo de producto y fuente de CLIs) y
@@ -74,22 +76,28 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 
 ### Modelo de amenazas (C3)
 
-> v2, tras la revisión independiente del 2026-10-04: un agente distinto del que lo escribió
-> encontró cuatro afirmaciones que el SQL no sostenía. Se corrigieron en el esquema y cada una tiene
-> su prueba negativa en `tools/soporte-sap/pruebas/_aislamiento.ts` (las marcadas «revisión»).
+> **v4** (PRP-010, 2026-10-09). La v2 salió de la revisión independiente del 2026-10-04, y la v3 añadió la capa
+> semántica. Dos revisiones más contra el código (05/10 y 07/10) encontraron que la v3 afirmaba controles que no
+> existían fuera de las pruebas: el token de tarea verificado por una «pasarela» que no hay, el presupuesto que nadie
+> leía, la impugnación sin pantalla. El PRP-010 los cerró en código o los declara aquí. Una tercera revisión, contra
+> el borrador de esta v4 (09/10), encontró 18 más; también están cerrados en código o declarados. **Cada frase de esta sección
+> tiene su fila** en la matriz ([`docs/goals/soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)),
+> en uno de tres estados: **probado** (una prueba pasa sin su sabotaje y cae con él), **brecha** (abierta y declarada)
+> o **depende** (espera una decisión del laboratorio). Donde una frase la sostiene una fila de la AISIA, se dice.
 
 **Activos que toca**, por daño:
 
 1. datos personales de empleados y usuarios de los N3 en tickets y adjuntos (RR. HH., nómina,
    RFC/CURP/NSS), y de las contrapartes de un CFDI;
-2. la integridad de las decisiones humanas: aprobaciones en la sala, mapeos, campos confirmados y
-   propuestas (una fila «decidida» que no decidió nadie);
-3. los originales de los clientes y los exportes por tenant;
-4. el SLA y las horas: dinero entre consultora y cliente;
-5. la cadena de eventos (la evidencia del servicio);
+2. la integridad de las decisiones humanas: aprobaciones en la sala, mapeos, campos confirmados,
+   propuestas e impugnaciones (una fila «decidida» que no decidió nadie);
+3. el SLA y las horas: dinero entre consultora y cliente, y la cadena de eventos que es su evidencia;
+4. los originales de los clientes y los exportes por tenant;
+5. los secretos del servidor: el que firma los tokens de tarea, el que firma los exportes, la sal de los
+   seudónimos y la del importador, las llaves del destino de respaldo y la contraseña de la base;
 6. la matriz común y el grafo (el foso, ERP §1.7), envenenables por la siembra;
-7. credenciales: el secreto que firma los tokens de tarea y las llaves de cada rol de servicio;
-8. el presupuesto de modelo y de OCR, y la disponibilidad del VPS compartido.
+7. el presupuesto de modelo y de OCR, y la disponibilidad del VPS compartido;
+8. la máquina donde corre, que en modo despacho es de la consultora.
 
 **Fronteras que cruza**:
 
@@ -100,76 +108,194 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 - la salida del modelo, simulado hoy;
 - el paso del sandbox al núcleo (siembra);
 - el puente A2A del extractor;
-- el destino de los respaldos (D12).
+- el `.env.production` del servidor, que puede estar en una máquina de la consultora;
+- el root de esa máquina, en modo despacho;
+- el destino de los respaldos, que es de un tercero (D12).
+
+**Flujos**. Cada «⇢» cruza una frontera; ahí vive el riesgo.
+
+1. **Ingesta**: el N3 levanta la incidencia ⇢ la ruta (tamaño antes de leer) ⇢ la ingesta valida los bytes ⇢ el
+   bucket de originales y el adjunto ⇢ el OCR local, con el tope del mes ⇢ los campos, delimitados como dato y por
+   revisar.
+2. **Triage y solución**: la categorización determinista (la prioridad sale de lo que declara el cliente, con el piso
+   de nómina en la base) → el grafo (veredicto con su fuente) → el enjambre, con el visto bueno del presupuesto del
+   mes ⇢ la sala: una persona aprueba a su nombre, atada a la huella del plan ⇢ el simulador, con lo aprobado y nada
+   más.
+3. **Aprendizaje**: el anonimizador ⇢ el sandbox, o la cuarentena si queda forma de dato o es de nómina ⇢ el experto
+   enseña y queda **a medida** de la consultora ⇢ el superadministrador lo sube al núcleo, generalizado, y la base lo
+   exige ⇢ `tools/conocimiento`, firmado por el laboratorio (hoy no: ver «Siembra»).
+4. **SLA**: los eventos de una persona (responder, pausar diciendo qué se pide, la respuesta del cliente, resolver),
+   con fecha y actor de la base ⇢ la cadena, que calcula la base ⇢ el job de plataforma calcula el resultado desde
+   los eventos y el contrato vigente.
+5. **Métricas**: el job de métricas lee a todas las consultoras, por columna ⇢ `ss_metrica` ⇢ cada nivel lee lo suyo,
+   y el N3 solo lo que la métrica declara visible para él.
+6. **Respaldo**: el export firmado por tenant ⇢ el destino inmutable fuera de sitio. La restauración, con privilegio
+   de migración, verifica todo antes del commit.
+7. **Despliegue**: `configura:deploy` mide la máquina y el `.env.production` contra el perfil del producto ⇢
+   `predeploy`, siempre ⇢ la imagen.
 
 **Atacantes relevantes**:
 
 - **O1**: instrucciones en un ticket, un adjunto o un mensaje.
-- **O2**: datos falsos en un exporte o un documento, o un consultor que carga horas a otro cliente.
+- **O2**: datos falsos en un exporte o un documento; un consultor que carga horas a otro cliente; una
+  región o una respuesta del proveedor declaradas en falso.
 - **O3**: el experto que aprueba en verde tras cuarenta planes buenos.
 - **O4**: abuso de la ingesta para quemar OCR o tumbar el VPS. Un motor autohospedado sin GPU va a
   unos 110 s por página.
 - **O5**: dbt, MetricFlow, la imagen de Postgres y las dependencias npm.
-- **O6**: el agente (o un rol de servicio) comprometido o manipulado, usado como palanca.
+- **O6**: el agente (o un rol de servicio) comprometido o manipulado, usado como palanca; y el root de una
+  máquina ajena.
 
 **Controles y brechas**:
 
-- **Alcance de los roles de servicio (O6).** La consultora de la tarea sale del claim de un token
-  **firmado por el orquestador**, que no corre el modelo, y que verifica la pasarela. El agente
-  presenta su token; nunca fija su alcance. Ninguno de los tres roles tiene `bypassrls`.
-  - *Pruebas*: token falsificado rechazado; con tarea de A, 0 filas de B.
-  - *Brecha*: con una conexión SQL directa, cualquier rol fija sus GUC. Por eso el agente **no
-    tiene** conexión directa, solo la API; si la tuviera, este control desaparece.
-- **Decisiones humanas (doble cierre en todas).** Un rol de servicio solo inserta en estado inicial
-  (`propuesto`, `por_revisar`, `propuesta`) y no tiene `update`. Una persona decide **a su nombre**
-  por política restrictiva: `aprobado_por`, `revisado_por` y `decidida_por` deben ser
-  `auth.uid()`. Lo que va al núcleo lo decide el superadministrador (D2).
-  - En la sala, la fila de aprobación con política `as restrictive` y sin `insert` para servicios
-    se prueba con los sabotajes S1–S6 y S2b de la fase 4.
-  - *Brecha*: la fatiga del aprobador (O3) no la cierra una política. La mitigan el veredicto del
-    supervisor y el antes y el después del simulador en el mismo mensaje.
-- **Tenencia atada (O2).** Un disparador ata la tenencia de cada tabla hija a su incidencia (o, sin
-  incidencia, el cliente a su consultora). El bucket exige que la carpeta 2 sea cliente de la
-  carpeta 1, y el adjunto, que su ruta sea la de su tenant. La fecha y el actor de un evento los da
-  la base, no quien escribe.
-  - *Prueba*: horas a otro cliente y subidas cruzadas, rechazadas.
-- **Datos personales.**
-  - El laboratorio lee solo lo **escalado** por la consultora, y los originales con un acceso que
-    **otorga la consultora** a un miembro del laboratorio, por 72 h como máximo, nunca a sí mismo.
-  - Los exportes son de la consultora y el laboratorio no los lee.
-  - Hay anonimizador fail-closed antes del sandbox, cuarentena sin copia del dato y OCR local.
-  - *Brecha*: un dato sensible con una forma que ningún detector conoce; por eso la cuarentena y no
-    un «probablemente limpio».
-- **Inyección (O1).** El contenido de tickets, adjuntos y mensajes es dato delimitado. Categoría,
-  veredicto y tier son deterministas y no leen instrucciones.
-  - *Brecha*: el día que el modelo sea real, el corpus de inyecciones se corre contra él antes de
-    encenderlo.
-- **Archivos maliciosos y abuso (O1, O4).** Se valida por bytes y por tamaño, y el lector de XML
-  del extractor rechaza `<!DOCTYPE` y toda declaración `<!`, así que no resuelve entidades
-  externas (`tools/extractor-documental/src/xml/lexico.ts`). Hay un tope de páginas OCR por consultora
-  (`ss_presupuesto`) y un límite de adjuntos por incidencia.
-  - *Brecha*: un PDF que agote memoria en el parser; el servicio de OCR corre con memoria acotada
-    en su contenedor.
+- **Alcance de los roles de servicio (O6).** La consultora de la tarea sale de un token firmado por el
+  orquestador, que no corre el modelo. Es un HMAC propio, no un JWT, y **la firma la verifica la base**:
+  `ss_priv.consultora_de_tarea()` la comprueba con un secreto que solo lee esa función (DP-2).
+  - El agente presenta su token; nunca fija su alcance. Una sesión que fija sus variables con SQL no cambia de
+    consultora.
+  - No dan alcance un token de otro rol, uno vencido ni uno firmado con otro secreto.
+  - Con la tarea de A, el agente ve 0 filas de B. En la sala, el tenant del agente también sale del token (S11).
+  - Ninguno de los cuatro roles de servicio tiene `bypassrls` ni `login`, aunque ya existieran así.
+- **Decisiones humanas (doble cierre en todas).** Un rol de servicio solo inserta en estado inicial (`propuesto`,
+  `por_revisar`, `propuesta`) y no decide. El agente solo actualiza su incidencia, y por columna: categoría y
+  prioridad inicial, sin fechas ni estados terminales. Una persona decide **a su nombre** por política restrictiva
+  (`auth.uid()`). Lo que va al núcleo lo decide el superadministrador (D2).
+  - Responder, pausar, resolver y cambiar la prioridad son actos de una persona **de la consultora**: ni el agente,
+    ni el cliente, ni el laboratorio los emiten. Escalar al laboratorio es de la consultora; registrar una decisión
+    de la sala, de la persona del laboratorio que decide. Las reglas de la base fallan cerradas ante un NULL: en un
+    disparador, lo que devuelve una función se compara con `is (not) distinct from`, y una prueba lo vigila en todos.
+  - Una persona emite solo actos de persona. Los eventos de la máquina (categorizar, preparar un plan, leer un
+    adjunto, el presupuesto) son del agente, y la categorización es una y dice la prioridad que fijó la base.
+  - Una propuesta no cambia de consultora, de alcance ni de contenido; lo único que cambia de dueña es la promoción
+    al núcleo, que hace el superadministrador. Un campo revisado no se deshace, y su evidencia es la del documento.
+  - En la sala, una aprobación es del tenant, de la tarea y de la huella de su mensaje: una persona de B no aprueba
+    el plan de A. Ningún componente que ejecuta un modelo la fabrica: la suite de la sala tiene 11 sabotajes (S1,
+    S1·force, S2, S2b, S3 a S7, S10 y S11), y cada uno la pone en rojo.
+  - *Brecha*: S8 («el agente publica como si fuera un humano») y S9 se comprueban, pero no tienen sabotaje propio:
+    nadie las ha visto caer.
+  - Aprobar desde el chat no aprueba: se promueve al hilo del plan en la sala. El agente escribe solo en el chat del
+    usuario de su turno.
+  - *Brecha*: la fatiga del aprobador (O3) no la cierra una política. La mitigan el veredicto del supervisor, el
+    antes y el después del simulador en el mismo mensaje, y que lo ejecutado tenga la huella de lo aprobado.
+- **Tenencia atada (O2).** Un disparador ata la tenencia de cada tabla hija a su incidencia (o, sin incidencia, el
+  cliente a su consultora).
+  - También van atados el campo extraído al adjunto de su incidencia, la fila importada al crudo de su consultora y
+    el contrato al cliente de su consultora.
+  - Los tres buckets son privados, aunque ya existieran públicos. El de originales exige que la carpeta 2 sea
+    cliente de la carpeta 1.
+  - La cadena de eventos la calcula la base (secuencia, anterior, huella y fecha), y el actor también lo da la base:
+    nadie firma con el seudónimo de otro.
+  - *Brechas*: `ss_procedencia` no tiene a qué atarse, porque su registro es texto libre. Y los buckets no fijan
+    tamaño ni tipo en Storage (depende de su versión): los valida la ingesta, que es la única que sube a originales.
+- **Datos personales.** Lo sostienen, sobre todo, las filas de la AISIA («Dato personal en el sandbox» y «El
+  laboratorio lee lo que no necesita»).
+  - El laboratorio lee solo lo que **la consultora escala, a su nombre** (DP-3). Los originales, con un acceso que
+    otorga la consultora a un miembro del laboratorio por 72 h como máximo, con la fecha que pone la base; se puede
+    revocar y nadie se lo otorga a sí mismo.
+  - Los exportes son de la consultora, y el laboratorio no los lee.
+  - El anonimizador **reduce, no garantiza**. Lo que deja forma de dato, y todo caso de RR. HH. o nómina, va a una
+    cuarentena que guarda solo tipos de señal, y nadie la revisa hasta D14 (DP-7). La base rechaza en el sandbox un
+    identificador con forma.
+  - Lo leído de un original (el RFC y el total de un CFDI) va con el original: el laboratorio lo lee en lo escalado
+    y con el acceso motivado vigente. La cuarentena no la lee el laboratorio.
+  - Al bucket del sandbox nadie sube objetos: es solo texto. El cerrojo de la base mira las mismas formas que el
+    anonimizador, sobre el texto normalizado.
+  - El seudónimo de otra persona no lo calcula nadie por la API: cada quien obtiene solo el suyo.
+  - El OCR es local: la ingesta no acepta un motor externo, y `configura:deploy` no deja encenderlo con Soporte SAP,
+    ni con una decisión C4 (límite de C5).
+  - *Brecha*: un dato sensible con una forma que ningún detector conoce. Por eso existen la cuarentena y el cerrojo
+    de la base, y no un «probablemente limpio».
+- **Inyección (O1).** El contenido de tickets, adjuntos y mensajes es dato. Lo leído de un documento entra a la
+  incidencia delimitado, y la prioridad sale de lo que declara el cliente. Categoría, veredicto y tier son
+  deterministas y no leen instrucciones: de las instrucciones sembradas en texto, imagen y XML, 0 obedecidas.
+  - *Brecha* (O1, O2): un parámetro del plan (usuario SAP, BP, RFC) puede salir de un documento del cliente. Lo
+    cubre la aprobación humana del plan, que muestra sus parámetros y queda atada a su huella; nada marca de dónde
+    salió cada uno.
+  - *Brecha*: el día que el modelo sea real, el corpus de inyecciones se corre contra él antes de encenderlo (D7).
+- **Archivos maliciosos y abuso (O1, O4).**
+  - Se valida por bytes y por tamaño. La ruta mira el tamaño de la subida antes de leerla, y responde 413 si no lo
+    declara o si pasa del tamaño de cinco adjuntos. Más de cinco archivos se rechazan con su motivo, no se recortan
+    en silencio.
+  - Una persona no emite los eventos que gastan presupuesto: no agota el modelo ni el OCR de su consultora.
+  - Al bucket de originales solo sube la ingesta, después de validar, y el adjunto lo registra ella.
+  - Una incidencia no pasa de 10 adjuntos: lo exige la base, contando los que ya tiene.
+  - El lector de XML del extractor rechaza `<!DOCTYPE` y toda declaración `<!`, así que no resuelve entidades
+    externas (`tools/extractor-documental/src/xml/lexico.ts`).
+  - El OCR tiene un tope de páginas del mes por consultora (`ss_presupuesto`). Sin tope, o con lecturas sin medir,
+    no corre, y no registra más páginas de las que le quedan.
+  - El servicio de OCR corre con memoria acotada en su contenedor.
+  - *Brecha* (PRP-010 H-22, en pausa): un PDF de unos 300 KB tumba la app de todos los tenants. La capa 0 lee el
+    PDF en el proceso de la app, y el inflado no tiene tope. La memoria acotada del servicio de OCR no lo contiene.
 - **Cadena de suministro (O5).** dbt, MetricFlow y Postgres van pineados por versión y la imagen
   por digest; las dependencias npm ya pasan por el lockfile.
   - *Brecha*: hasta que un CDC adopte `vigila:versiones` para estas piezas, nadie avisa de un
     parche de seguridad.
-- **Jobs de plataforma (C7, declarados).** `soporte_sap_ingesta` lee originales y deja campos por
-  revisar; `soporte_sap_plataforma` exporta, restaura y borra por retención; ambos acotados por
-  token a una consultora. Ninguno es `service_role`. **v3 (fase 7):** `soporte_sap_metricas`, el
-  job de la capa semántica, lee a **todas** las consultoras para dar totales; su acotamiento es por
-  columna (sin títulos, descripciones, nombres, contenido, motivos ni consultores) y solo inserta en
-  `ss_metrica`, que nadie cambia ni borra (`pruebas/metricas-rls.ts`).
-  - *Brecha*: un agregado sobre un grupo muy chico (un cliente S solo en su tamaño) puede delatar a
-    ese cliente ante el laboratorio; el corte no aplica todavía un tamaño mínimo de grupo (D9).
-- **La ruta del laboratorio (`/api/soporte-sap`).** Declarada en `scripts/prueba-a2a.ts` (RF-20): misma
-  app y puerto, 404 sin `SOPORTE_SAP_LABORATORIO=1`, estado sintético en memoria, identidades de
-  laboratorio, sin base ni `service_role`. *Brecha*: con la variable encendida en un servidor expuesto,
-  cualquiera elegiría el rol que quiera; por eso `configura:deploy` rechaza la variable en producción.
+- **Jobs de plataforma (C7, declarados).** Ninguno es `service_role`.
+  - `soporte_sap_ingesta` lee originales y deja campos por revisar, acotada por su token: con la tarea de A no lista
+    los originales de B.
+  - `soporte_sap_plataforma` exporta lo de su consultora con su propio rol, y escribe solo el resultado de SLA que
+    calcula su job, el de su consultora. No inserta decisiones ni eventos, y no borra impugnaciones. Tiene el
+    privilegio de borrar por retención, acotado por su token, pero ningún job lo usa todavía (D8).
+  - *Brecha* (O6): la base no ata el resultado de SLA a los eventos: un job comprometido escribiría otro. No es la
+    evidencia: la evidencia es la cadena, que la plataforma no toca, y cualquiera recalcula el resultado desde ella.
+  - `soporte_sap_metricas`, el job de la capa semántica, lee a **todas** las consultoras para dar totales. Su
+    acotamiento es por columna: no lee títulos, descripciones, nombres, contenido, motivos ni consultores. Solo
+    inserta en `ss_metrica`, que nadie cambia ni borra, y cada nivel lee lo suyo; el N3, solo lo que la métrica
+    declara visible para él.
+  - **La restauración corre con privilegio de migración**, declarado aquí: vuelve a poner los eventos con su fecha y
+    su cadena originales, con los disparadores en modo réplica. Por eso verifica antes la firma del export y el
+    tenant de cada fila, y antes del commit, la huella de esa consultora y la de cada otra (filas de la AISIA,
+    «Restauración que toca a los demás»).
+  - *Brecha*: un agregado sobre un grupo muy chico (un cliente S solo en su tamaño) puede delatar a ese cliente ante
+    el laboratorio. El corte no aplica todavía un tamaño mínimo de grupo: depende de D14.
+- **La ruta del laboratorio (`/api/soporte-sap`).** Declarada en `scripts/prueba-a2a.ts` (RF-20): misma app y
+  puerto, estado sintético en memoria, identidades de laboratorio, sin base ni `service_role`.
+  - Sin `SOPORTE_SAP_LABORATORIO=1` responde 404, también el GET.
+  - No le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje.
+  - `configura:deploy` rechaza la variable en producción.
+  - *Brecha*: la ruta no autentica. Con la variable encendida, cualquiera elige el rol, superadministrador incluido,
+    y el GET le devuelve su vista. Por eso no se enciende fuera del laboratorio.
+  - *Brecha*: lo que la ruta manda al log del servidor no está inventariado (ni retención ni dueño).
 - **Siembra (frontera sandbox → núcleo).** Lo que cambia un veredicto lo firma el laboratorio en
   `tools/conocimiento`; el agente solo deja propuestas.
+  - *Brecha* (H-20): hoy los veredictos del producto salen de la matriz sintética del laboratorio
+    (`tools/soporte-sap/src/laboratorio/matriz.ts`), no de `tools/conocimiento`, y un commit la cambia sin el gate de
+    firma. Antes de resolver incidencias reales, la matriz tiene que venir de `tools/conocimiento`.
+- **Perfil de despliegue.** `configura:deploy` mide la instalación contra el perfil `despliegue` del manifiesto
+  (plantilla v3), sin imprimir ni guardar un secreto:
+  - la máquina contra el tamaño contratado (vCPU, RAM y disco);
+  - la región frente a D10: mientras D10 siga abierta, «pendiente», nunca «cumple»;
+  - el destino de respaldo inmutable fuera de sitio, por S3: si falta, avisa; sin https o sin días de bloqueo, no
+    pasa;
+  - los secretos del producto: presentes y de 32 caracteres o más;
+  - con Soporte SAP, ningún motor de OCR fuera de la máquina (`OCR_RESPALDO`), ni con una decisión C4.
+
+  Corre en `predeploy` **siempre**, también con el sello vigente (H-26). La ficha de servidor de cada consultora no
+  dice «apto» sin una restauración probada en esa máquina (GATE 3).
+  - *Brecha* (O2): la región, el proveedor y las respuestas sobre snapshots los declara quien instala. Nadie puede
+    comprobarlos desde la máquina: los verifica quien contrata.
+- **Root ajeno (modo despacho).** En modo despacho el servidor es de la consultora. Quien tiene root lee la base
+  entera, los secretos (incluida la sal de los seudónimos) y los respaldos, y la RLS no lo impide.
+  - *Brecha*: lo que ve de su propia operación (sus clientes, las horas de cada consultor y quién es cada seudónimo)
+    no lo cierra ningún control. Va al contrato y a D3.
+  - **No se ofrece**: en modo despacho, la medición del SLA **no es evidencia independiente** frente al N3, porque
+    root puede reescribir la cadena entera, huellas incluidas. El contrato lo dice (§5).
 - **Superficie.** Nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
-  AISIA firmados. Realtime y el JWT de Supabase no se prueban sin un Supabase real.
+  AISIA firmados. *Brecha*: Realtime y el JWT de Supabase no se prueban sin un Supabase real.
+
+**Priorización** de lo que queda abierto, por daño y por cuándo muerde:
+
+| # | Brecha | Muerde | Qué la cierra |
+|---|---|---|---|
+| 1 | Un PDF tumba la app de todos los tenants (H-22) | en cuanto el laboratorio reciba documentos de fuera | el tope de inflado, medido sobre el corpus real del extractor (en pausa) |
+| 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza; no se enciende fuera del laboratorio |
+| 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato y D3; el SLA de ese modo no se ofrece como evidencia |
+| 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real | mover la matriz a `tools/conocimiento`, con su firma |
+| 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |
+| 6 | Grupo chico ante el laboratorio | con una sola consultora o un tamaño de un cliente | un tamaño mínimo de grupo (D14) |
+| 7 | La fatiga del aprobador | con SAP real (D6) | ningún control: la mitigan el supervisor y la huella |
+| 8 | El resultado de SLA sin atar a los eventos | con un job de plataforma comprometido | recalcularlo desde la cadena; atarlo en la base |
+| 9 | Lo demás: logs de la ruta, `ss_procedencia`, límites de los buckets, S8 y S9 sin sabotaje, parches de O5, Realtime y JWT, región autodeclarada, forma desconocida de dato | al salir del laboratorio | cada una en su fila de la matriz |
 
 ### Evaluación de impacto (C4)
 

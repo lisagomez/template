@@ -26,6 +26,12 @@ function reloj(r: ResultadoSla): RelojVista {
   }
 }
 
+/** Lo último que la consultora le pidió al cliente (el evento ESPERA_CLIENTE de la cadena). */
+const pideDe = (i: IncidenciaLab): string | null => {
+  const pide = [...i.cadena].reverse().find((x) => x.tipo === 'ESPERA_CLIENTE')?.datos.pide
+  return typeof pide === 'string' ? pide : null
+}
+
 function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
   const c = i.clasificacion, q = i.consulta
   const verAdjuntos = s.nivel !== 'N1'
@@ -47,6 +53,9 @@ function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
     sandbox: i.sandbox ? { veredicto: i.sandbox.veredicto, texto: i.sandbox.veredicto === 'entra' ? i.sandbox.texto : null, senales: [...i.sandbox.senales] } : null,
     reloj: reloj(relojDe(i)),
     impugnaciones: i.impugnaciones.map((m) => ({ ...m })),
+    pide: i.estado === 'espera_cliente' ? pideDe(i) : null,
+    escaladaPor: i.escalada?.por ?? null,
+    respuestas: s.nivel === 'N1' ? [] : i.respuestas.map((r) => ({ ...r })),
   }
 }
 
@@ -82,7 +91,7 @@ const relojesDemo = (): Vista['relojesDemo'] => relojesDeDemostracion().map((d) 
 
 export function vista(s: Sesion): Vista {
   const e = estado()
-  const mias = e.incidencias.filter((i) => (s.rol === 'cliente' ? i.cliente === s.organizacion : s.rol === 'consultor' ? i.consultora === s.organizacion : i.planes.some((p) => p.mensaje)))
+  const mias = e.incidencias.filter((i) => (s.rol === 'cliente' ? i.cliente === s.organizacion : s.rol === 'consultor' ? i.consultora === s.organizacion : i.escalada !== null))
   const ve = (n: string) => (s.rol === 'cliente' ? false : s.rol === 'consultor' ? true : s.rol === 'superadmin' || !SOLO_SUPERADMIN.has(n))
   const horas = s.rol === 'consultor' ? tableroN2(CORTE, s.organizacion, PERIODO).propio.filter((t) => ve(t.nombre) && t.nombre.startsWith('horas')).map(tarjeta) : []
   const acc = s.nivel === 'N1' ? [] : accionables(CORTE, 'andina', 'alimentos-del-bajio', PERIODO).filter((a) => s.rol === 'consultor' || a.para === 'n3')

@@ -24,7 +24,7 @@ async function lecturas(db: PGlite): Promise<Fila[]> {
     ['el cliente A1 lista incidencias', 'solo la suya, nada de A2 (otro N3)', ua1.length === 1 && ua1[0]!.id === INC.a1, `${ua1.length} filas`],
     ['el cliente B1 pide la incidencia de A1 por su id', '0 filas', ub1VeA1.length === 0, n(ub1VeA1)],
     ['el laboratorio lista incidencias (revisión)', 'solo la que A le escaló (1), no toda la operación', sup.length === 1 && sup[0]!.id === INC.a1, n(sup)],
-    ['el laboratorio lee los campos extraídos', 'solo los de lo escalado (1)', supCampo.length === 1, n(supCampo)],
+    ['el laboratorio lee los campos extraídos de lo escalado, sin acceso motivado', '0: lo leído de un original va con el original (R3-04)', supCampo.length === 0, n(supCampo)],
   ]
 }
 

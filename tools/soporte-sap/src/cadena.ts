@@ -20,6 +20,8 @@ export type TipoEvento =
   | 'ESPERA_CLIENTE' | 'RESPUESTA_CLIENTE' | 'CAMBIO_PRIORIDAD' | 'ESCALADA' | 'RESUELTA' | 'REABIERTA' | 'CERRADA'
   /** El presupuesto del mes ante un paso que gasta modelo (PRP-010 H-18): aviso al 80 %, una persona al tope (P1 y P2) o espera (P3 y P4). */
   | 'AVISO_PRESUPUESTO' | 'A_HUMANO_POR_PRESUPUESTO' | 'EN_ESPERA_POR_PRESUPUESTO'
+  /** El cliente impugna y la consultora resuelve: la queja queda también en la cadena (tercera revisión, R3-09). */
+  | 'IMPUGNADA' | 'IMPUGNACION_RESUELTA'
 
 export interface EventoIncidencia {
   readonly v: 1

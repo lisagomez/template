@@ -1,6 +1,6 @@
 /**
  * El anonimizador (v2): 0 fugas sobre el corpus sembrado, las variantes propias y las 63 entradas
- * del revisor adversarial; todo caso de RR. HH. o nómina a revisión humana; lo técnico entra y no
+ * del revisor adversarial; todo caso de RR. HH. o nómina a cuarentena; lo técnico entra y no
  * se confunde con nombres.
  */
 import { test } from 'node:test'
@@ -29,11 +29,11 @@ test('las 63 entradas del revisor adversarial: ninguna fuga, una por una', () =>
   assert.deepEqual(malas, [])
 })
 
-test('todo caso de RR. HH. o nómina va a revisión humana, aunque esté bien anonimizado', () => {
+test('todo caso de RR. HH. o nómina va a cuarentena, aunque esté bien anonimizado', () => {
   for (const t of ['Error en PC00_M32_CALC de la quincena', 'Baja IMSS rechazada por el IDSE', 'La trabajadora no tiene PTU calculada']) {
     const r = anonimiza(t, VALIDADORES)
     assert.equal(r.veredicto, 'cuarentena', t)
-    assert.match(r.senales[0] ?? '', /revisión humana obligatoria/)
+    assert.match(r.senales[0] ?? '', /no entra al sandbox \(cuarentena definitiva hasta D14\)/)
   }
 })
 
@@ -116,10 +116,10 @@ test('H-04 · las 5 frases de la revisión del 07/10 ya no entran con el dato, s
   assert.deepEqual(fugasDe(FRASES_DE_LA_REVISION, an), [])
 })
 
-test('H-04 · el banco independiente: ningún dato personal entra al sandbox, y lo de nómina va a revisión humana', () => {
+test('H-04 · el banco independiente: ningún dato personal entra al sandbox, y lo de nómina va a cuarentena', () => {
   assert.deepEqual(fugasDe(BANCO_ANONIMIZA, an), [])
   const deNomina = BANCO_ANONIMIZA.filter((c) => DE_REVISION_HUMANA.some((d) => c.texto.includes(d)))
-  assert.equal(deNomina.length, DE_REVISION_HUMANA.length, 'cada marca de revisión humana encuentra su caso')
+  assert.equal(deNomina.length, DE_REVISION_HUMANA.length, 'cada caso de nómina del banco encuentra su marca')
   assert.deepEqual(deNomina.filter((c) => an(c.texto).veredicto === 'entra').map((c) => c.texto), [])
 })
 
@@ -143,7 +143,7 @@ test('H-19 · el banco independiente de la generalización: nada que identifique
 const porDiseno = (s: string) => /^\d{7,}$/.test(s) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)
 const sinLoDeDiseno = (banco: readonly CasoDeBanco[]) => banco.map((c) => ({ ...c, debeQuedar: c.debeQuedar?.filter((s) => !porDiseno(s)) }))
 
-test('H-04 · el banco de control (escrito después, sin ver el detector): ningún dato entra, lo de nómina va a revisión y lo técnico se queda', () => {
+test('H-04 · el banco de control (escrito después, sin ver el detector): ningún dato entra, lo de nómina va a cuarentena y lo técnico se queda', () => {
   assert.deepEqual(fugasDe(CONTROL_ANONIMIZA, an), [])
   assert.deepEqual(CONTROL_ANONIMIZA.filter((c) => c.revision && an(c.texto).veredicto === 'entra').map((c) => c.texto), [])
   assert.deepEqual(tapadosDe(sinLoDeDiseno(CONTROL_ANONIMIZA), an), [])
@@ -162,3 +162,14 @@ test('H-19 · en la app, al núcleo solo sube el superadministrador, y sube con 
   assert.match(cuerpo, /= alNucleo\(p, VALIDADORES, NOMBRES_DE_ORGANIZACION\)/, 'y sube lo que deja alNucleo')
   assert.match(runtime, /if \(a\.tipo === 'al_nucleo'\) return subeAlNucleo\(s, a\.propuesta\)/, 'la acción llega a esa función')
 })
+
+test('R3-06 · el anonimizador no deja entrar las formas de la tercera revisión: separadores, «at», ancho completo', () => {
+  const casos: Array<[string, string[]]> = [
+    ['llamar al teléfono 55/1234/5678 por la tarde', ['1234', '5678']], ['tel 55_1234_5678', ['1234', '5678']],
+    ['el NSS １２３４５６７８９０１ no aparece', ['12345678901', '１２３４５６７８９０１']], ['correo xochitl＠acme.mx', ['xochitl', 'acme']],
+    ['escribir a xochitl.tzompantzi at acme.io', ['tzompantzi', 'acme']],
+  ]
+  const fugan = casos.filter(([t, datos]) => { const r = anonimiza(t, VALIDADORES); return r.veredicto === 'entra' && datos.some((d) => r.texto.includes(d)) })
+  assert.deepEqual(fugan.map(([t]) => t), [])
+})
+

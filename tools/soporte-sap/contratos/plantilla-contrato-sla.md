@@ -60,14 +60,22 @@ pantalla dice «sin meta».
 1. Arranca al **recibir** la incidencia, en el calendario de su meta: hábil (lunes a viernes,
    horario y feriados del contrato) o continuo (24×7). Lo recibido fuera de horario empieza a contar
    al abrir.
-2. La **espera del cliente** pausa la resolución, desde que se le pide algo hasta que contesta.
+2. La **espera del cliente** pausa la resolución, desde que se le pide algo hasta que contesta. Lo que se le pide
+   queda escrito y el cliente lo ve; su respuesta la registra **él mismo** (o su consultor), y puede impugnar una
+   pausa.
 3. **Resolver** detiene el reloj, también durante una espera.
 4. Una **reapertura** lo reanuda desde la reapertura; el tiempo entre resolver y reabrir no cuenta.
 5. Si la **prioridad cambia**, rige la meta de la nueva prioridad, contada
-   [POR DECIDIR: desde la recepción | desde el cambio].
+   [POR DECIDIR: desde la recepción | desde el cambio]. Un incumplimiento que **ya ocurrió** con la prioridad
+   anterior se queda: cambiar la prioridad después no lo borra.
 6. Sin respuesta y con el plazo vencido, la incidencia **ya incumplió**, aunque siga abierta.
 7. Cada incidencia guarda sus tramos (corre, pausa, detenido) con el evento que abrió cada uno: es
    la evidencia de un incumplimiento. Fecha y actor de cada evento los da la base.
+8. La **primera respuesta** es un mensaje de una **persona** de quien presta el servicio a quien lo recibe.
+   Una acción automática (categorizar, anonimizar, preparar un plan, mandarlo a aprobación) no cuenta.
+9. Si el servicio corre en un servidor de quien lo presta (**modo despacho**), la medición vive en su base: quien
+   tiene root en ese servidor puede reescribirla. En ese modo, la medición **no es evidencia independiente** frente
+   a quien recibe el servicio.
 
 Calendario: horario [POR DECIDIR: días y horas], zona [POR DECIDIR], feriados
 [POR DECIDIR: lista o referencia legal].
@@ -77,7 +85,7 @@ Calendario: horario [POR DECIDIR: días y horas], zona [POR DECIDIR], feriados
 | A quién | Cuándo |
 |---|---|
 | Consultor de la consultora | toda incidencia, al recibirla |
-| Laboratorio (experto) | sin regla en el grafo de conocimiento, o un plan que pide aprobación en la sala |
+| Laboratorio (experto) | cuando **la consultora** lo escala, a su nombre (sin regla en el grafo, o un plan que pide aprobación en la sala). Un agente no escala |
 | Superadministrador del laboratorio | un escalamiento sin respuesta del experto |
 
 Plazos de escalamiento: [POR DECIDIR]
@@ -106,9 +114,11 @@ restauración probada). Hasta entonces RPO y RTO son desconocidos y así se dice
 
 - En N2–N3, un agente categoriza las incidencias y el laboratorio ve **lo que la consultora le
   escala**; los originales, solo con un acceso motivado que otorga la consultora, por un tiempo
-  máximo.
-- Antes de que un caso sirva para aprender, se anonimiza; los casos de recursos humanos o nómina los
-  revisa una persona antes.
+  máximo. El laboratorio ve además **agregados de operación** (métricas por consultora y por tamaño de
+  cliente), sin textos ni nombres.
+- Antes de que un caso sirva para aprender, se anonimiza. Lo que no se puede anonimizar con certeza, y
+  todo caso de recursos humanos o nómina, **no sirve para aprender**: queda en cuarentena y su atención
+  sigue igual.
 - [POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal]
 
 ## 12. Vigencia y versiones

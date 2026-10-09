@@ -44,6 +44,11 @@ export interface IncidenciaVista {
   readonly planes: readonly PlanVista[]; readonly sandbox: { readonly veredicto: string; readonly texto: string | null; readonly senales: readonly string[] } | null
   readonly reloj: RelojVista
   readonly impugnaciones: readonly ImpugnacionVista[]
+  /** Lo que la consultora le pidió al cliente mientras el reloj espera; null si no espera nada. */
+  readonly pide: string | null
+  /** Quién de la consultora lo escaló al laboratorio (DP-3), y lo que el consultor le respondió al cliente (DP-4). */
+  readonly escaladaPor: string | null
+  readonly respuestas: ReadonlyArray<{ readonly texto: string; readonly por: string; readonly fecha: string }>
 }
 export interface MensajeSalaVista {
   readonly id: string; readonly hilo: string | null; readonly autor: string; readonly tipoAutor: string; readonly cuerpo: string; readonly origen: string
@@ -104,8 +109,12 @@ export interface PresupuestoVista {
 export type Accion =
   | { readonly tipo: 'decide'; readonly mensaje: string; readonly accion: 'aprobar' | 'rechazar' | 'a_revision'; readonly motivo?: string }
   | { readonly tipo: 'chat'; readonly texto: string }
-  | { readonly tipo: 'espera_cliente'; readonly incidencia: string }
+  /** El consultor pausa el reloj diciendo qué le pide al cliente; el cliente (o su consultor) lo reanuda al responder. */
+  | { readonly tipo: 'espera_cliente'; readonly incidencia: string; readonly pide: string }
   | { readonly tipo: 'responde_cliente'; readonly incidencia: string }
+  /** La consultora escala al laboratorio, a su nombre (DP-3); el consultor da por resuelta la incidencia. */
+  | { readonly tipo: 'escala'; readonly incidencia: string }
+  | { readonly tipo: 'resuelve'; readonly incidencia: string }
   /** El consultor le responde al cliente: su primera respuesta para el reloj (DP-4). */
   | { readonly tipo: 'responde'; readonly incidencia: string; readonly texto: string }
   /** El superadministrador sube una enseñanza al núcleo, generalizada (PRP-010 H-19). */
@@ -113,6 +122,6 @@ export type Accion =
   /** El superadministrador fija el tope del mes de una consultora (como `ss_presupuesto_fija`). */
   | { readonly tipo: 'fija_presupuesto'; readonly consultora: string; readonly topeTokens: number | null; readonly topePaginasOcr: number | null }
   /** El cliente impugna un campo de su incidencia; la consultora la resuelve a su nombre (PRP-010 H-10). */
-  | { readonly tipo: 'impugna'; readonly incidencia: string; readonly campo: 'prioridad' | 'categoria' | 'complejidad' | 'pausa'; readonly motivo: string }
+  | { readonly tipo: 'impugna'; readonly incidencia: string; readonly campo: 'prioridad' | 'categoria' | 'complejidad' | 'pausa' | 'resolucion'; readonly motivo: string }
   | { readonly tipo: 'resuelve_impugnacion'; readonly incidencia: string; readonly impugnacion: string; readonly decision: 'aceptada' | 'rechazada' }
   | { readonly tipo: 'reinicia' }

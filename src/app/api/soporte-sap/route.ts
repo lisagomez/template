@@ -16,12 +16,14 @@ const ROL = z.enum(['cliente', 'consultor', 'superadmin', 'experto'])
 const ACCION = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('decide'), mensaje: z.string().min(1).max(200), accion: z.enum(['aprobar', 'rechazar', 'a_revision']), motivo: z.string().max(2000).optional() }),
   z.object({ tipo: z.literal('chat'), texto: z.string().min(1).max(2000) }),
-  z.object({ tipo: z.literal('espera_cliente'), incidencia: z.string().min(1).max(40) }),
+  z.object({ tipo: z.literal('espera_cliente'), incidencia: z.string().min(1).max(40), pide: z.string().trim().min(10).max(500) }),
   z.object({ tipo: z.literal('responde_cliente'), incidencia: z.string().min(1).max(40) }),
+  z.object({ tipo: z.literal('escala'), incidencia: z.string().min(1).max(40) }),
+  z.object({ tipo: z.literal('resuelve'), incidencia: z.string().min(1).max(40) }),
   z.object({ tipo: z.literal('responde'), incidencia: z.string().min(1).max(40), texto: z.string().trim().min(5).max(2000) }),
   z.object({ tipo: z.literal('al_nucleo'), propuesta: z.string().min(1).max(40) }),
   z.object({ tipo: z.literal('fija_presupuesto'), consultora: z.string().min(1).max(40), topeTokens: z.number().int().min(0).max(1e9).nullable(), topePaginasOcr: z.number().int().min(0).max(1e6).nullable() }),
-  z.object({ tipo: z.literal('impugna'), incidencia: z.string().min(1).max(40), campo: z.enum(['prioridad', 'categoria', 'complejidad', 'pausa']), motivo: z.string().trim().min(10).max(2000) }),
+  z.object({ tipo: z.literal('impugna'), incidencia: z.string().min(1).max(40), campo: z.enum(['prioridad', 'categoria', 'complejidad', 'pausa', 'resolucion']), motivo: z.string().trim().min(10).max(2000) }),
   z.object({ tipo: z.literal('resuelve_impugnacion'), incidencia: z.string().min(1).max(40), impugnacion: z.string().min(1).max(60), decision: z.enum(['aceptada', 'rechazada']) }),
   z.object({ tipo: z.literal('reinicia') }),
 ])
@@ -49,7 +51,10 @@ export async function POST(req: NextRequest) {
       if (!(largo > 0 && largo <= MAX_CUERPO)) return NextResponse.json({ error: `la subida no declara su tamaño o pasa de ${MAX_CUERPO} bytes`, vista: vista(s) }, { status: 413 })
       const f = await req.formData()
       const datos = z.object({ titulo: z.string().trim().min(3).max(120), descripcion: z.string().trim().min(3).max(4000) }).parse({ titulo: f.get('titulo'), descripcion: f.get('descripcion') })
-      const archivos = f.getAll('adjuntos').filter((x): x is File => x instanceof File && x.size > 0).slice(0, MAX_ADJUNTOS)
+      // Más adjuntos de los que caben se rechazan con su motivo: recortarlos en silencio dejaba evidencia fuera sin que el
+      // cliente lo supiera (PRP-010, tercera revisión: R3-18).
+      const archivos = f.getAll('adjuntos').filter((x): x is File => x instanceof File && x.size > 0)
+      if (archivos.length > MAX_ADJUNTOS) throw new Rechazo(`una incidencia se levanta con ${MAX_ADJUNTOS} adjuntos como máximo; llegaron ${archivos.length}`)
       const id = await levanta(s, { ...datos, archivos: await Promise.all(archivos.map(async (a) => ({ nombre: a.name, bytes: new Uint8Array(await a.arrayBuffer()) }))) })
       return NextResponse.json({ id, vista: vista(s) })
     }

@@ -40,6 +40,14 @@ test('H-25 · la ruta del laboratorio no le devuelve al usuario un error interno
   assert.doesNotMatch(runtime, /throw new Error\(/, 'las reglas del runtime son rechazos con nombre')
 })
 
+test('H-26 · configura:deploy corre en predeploy SIEMPRE, también con el sello vigente: mide la máquina y el .env del servidor', () => {
+  const gates = JSON.parse(lee('.claude/gates.json')) as { perfiles: Record<string, { siempre?: string[] }>; gates: Array<{ nombre: string; comando: string; perfiles: string[]; activo: boolean }> }
+  const g = gates.gates.find((x) => x.nombre === 'configura:deploy')
+  assert.ok(g && g.activo && g.comando === 'npm run configura:deploy' && g.perfiles.includes('predeploy'), 'el gate existe, activo, en predeploy')
+  assert.ok(gates.perfiles['predeploy']?.siempre?.includes('configura:deploy'), 'y el atajo del sello no se lo salta')
+  assert.ok(!g.perfiles.includes('validate'), 'fuera de validate: en desarrollo no hay .env.production')
+})
+
 test('H-23 · la ruta mira el tamaño de la subida ANTES de leerla: sin tamaño declarado o más grande, no entra', () => {
   const ruta = lee('src/app/api/soporte-sap/route.ts')
   const guarda = ruta.indexOf("if (!(largo > 0 && largo <= MAX_CUERPO)) return NextResponse.json(")

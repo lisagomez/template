@@ -19,7 +19,7 @@ console.log(`\nReemplazos por tipo: ${Object.entries(porTipo).sort().map(([t, n]
 const dudoso = anonimiza('Le escribo por el finiquito de Xóchitl Tzompantzi Cuauhtle, no le llegó el pago', VALIDADORES)
 console.log(`\nCaso dudoso («finiquito de Xóchitl Tzompantzi Cuauhtle»): ${dudoso.veredicto} — señales: ${dudoso.senales.join('; ')}`)
 const nomina = anonimiza(casos.find((k) => k.sensibles.length > 5)!.texto, VALIDADORES)
-console.log(`Nómina anonimizada (${nomina.veredicto}: un humano la revisa antes del sandbox): «${nomina.texto}»`)
+console.log(`Nómina anonimizada (${nomina.veredicto}: no entra al sandbox y nadie la revisa hasta D14): «${nomina.texto}»`)
 const entra = casos.map((k) => ({ k, r: anonimiza(k.texto, VALIDADORES) })).find(({ k, r }) => r.veredicto === 'entra' && k.sensibles.length > 1)
 if (entra) console.log(`Ejemplo con datos que sí entra: «${entra.r.texto}»`)
 console.log(m.fugas.length ? `\n✗ ${m.fugas.length} fuga(s)` : '\n✓ 0 fugas · corpus SINTÉTICO: medir sobre un corpus real con consentimiento queda pendiente (D9)')

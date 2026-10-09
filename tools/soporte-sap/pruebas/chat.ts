@@ -87,7 +87,7 @@ test('H-19 · la enseñanza queda a medida de la consultora del caso que nombra 
 test('H-19 · con un caso de nómina o un dato que no se resuelve, la enseñanza no se guarda: dice el tipo, nunca el dato', () => {
   const r = respondeHil(ctx, EXP, 'Te enseño el caso inc-005: a Rosa Elena Pérez no le timbró el finiquito')
   assert.equal(r.tipo, 'no_permitido')
-  assert.match(r.texto, /revisión humana/)
+  assert.match(r.texto, /cuarentena definitiva hasta D14/)
   assert.doesNotMatch(r.texto, /Rosa|Elena|Pérez/)
 })
 

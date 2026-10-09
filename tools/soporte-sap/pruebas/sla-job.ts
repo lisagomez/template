@@ -27,9 +27,13 @@ async function escenario({ categorizada = true, contrato = true } = {}) {
   await db.exec(`insert into ss_incidencia (id, consultora_id, cliente_id, titulo, descripcion) values ('${NUEVA}', '${ORG.CA}', '${ORG.A1}', 'MIGO no contabiliza', 'M7 053')`)
   const evento = (tipo: string, actor: string, datos = '{}') => `insert into ss_evento (incidencia_id, consultora_id, cliente_id, seq, tipo, datos, actor, fecha, anterior, hash)
     values ('${NUEVA}', '${ORG.CA}', '${ORG.A1}', 1, '${tipo}', '${datos}', '${actor}', now(), 'x', 'x')`
-  if (categorizada) await comoAgente(db, ORG.CA, evento('CATEGORIZADA', 'agente:soporte-sap-a2a', '{"prioridad":"P2"}'))
+  // La categorización es UNA y dice la prioridad que fijó la base (PRP-010, tercera revisión: R3-01): primero la incidencia.
+  if (categorizada) {
+    await comoAgente(db, ORG.CA, `update ss_incidencia set prioridad = 'P2' where id = '${NUEVA}'`)
+    await comoAgente(db, ORG.CA, evento('CATEGORIZADA', 'agente:soporte-sap-a2a', '{"prioridad":"P2"}'))
+  }
   const seudo = (await db.query<{ s: string }>(`select ss_priv.seudonimo('${USR.ca}') as s`)).rows[0]!.s
-  await como(db, USR.ca, evento('PRIMERA_RESPUESTA', seudo))
+  await como(db, USR.ca, evento('PRIMERA_RESPUESTA', seudo, '{"mensaje":"Ya lo revisamos, te confirmo hoy"}'))
   return { db, k }
 }
 const iso = (db: PGlite, sql: string) => db.query<{ f: string }>(`select to_char(f at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as f from (${sql}) x`).then((r) => r.rows[0]!.f)
