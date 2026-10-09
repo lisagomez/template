@@ -58,7 +58,7 @@
 | **La consultora altera la impugnación** | La consultora reescribe la queja del cliente, la borra, o la resuelve sin que quede quién ni cuándo. |
 | **Consultor juzgado por una métrica** | MTTR o primera respuesta sin contexto castigan a quien toma los casos difíciles; el seudónimo no lo protege de su propio empleador. |
 | **Corte por presupuesto** | Sin presupuesto del mes o al tope, el agente no llama al modelo y el triage de una consultora se detiene. |
-| **P1 sin evidencia leída** | Al llegar al tope de OCR del mes, la captura de una P1 queda sin leer y el caso se atiende sin su evidencia. |
+| **P1 sin evidencia leída** | La captura de una P1 queda sin leer (por el tope de OCR del mes, porque la máquina no tiene motor de OCR o porque no cupieron todas sus páginas) y el caso se atiende sin su evidencia. |
 | **Restauración que toca a los demás** | Para devolver a un tenant a su estado se restaura la base entera, y los demás regresan en el tiempo. |
 | **Opacidad** | El N3 no sabe que el laboratorio lee lo que su consultora escala, ni que un agente categoriza sus tickets. |
 | **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
@@ -207,8 +207,8 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - Lo gastado no lo puede inflar una persona: los eventos que gastan son del agente.
   - **P1 y P2 nunca se cortan**: al tope pasan a una persona en el momento. P3 y P4 esperan. El
     aviso queda en la cadena y a la vista del consultor y del superadministrador.
-- **P1 sin evidencia leída**: un P1 o un P2 con una imagen sin leer por el tope de OCR pasa a una
-  persona en el momento, y se dice.
+- **P1 sin evidencia leída**: un P1 o un P2 con evidencia sin leer, entera o en parte y por cualquier
+  causa, pasa a una persona en el momento, y se dice.
 - **Restauración**:
   - Export y restauración **por tenant**, con el export firmado.
   - Se verifican el tenant de cada fila y las huellas, la suya y la de cada otra consultora, **antes
