@@ -179,7 +179,9 @@ await captura(13, 'al tope del presupuesto el P1 pasa a una persona y el P4 espe
 }, sel('presupuesto'))
 
 // 14 (PRP-010 H-10): el cliente impugna la prioridad; la consultora la resuelve a su nombre, y una resuelta no se reabre.
-const abre = (titulo) => pagina.locator('[data-prueba^="incidencia-"]', { hasText: titulo }).first().click()
+// El prefijo es «incidencia-inc-»: con «incidencia-» también encajaba la lista entera («incidencias»), y el clic caía
+// en el centro de la lista, en otra incidencia.
+const abre = (titulo) => pagina.locator('[data-prueba^="incidencia-inc-"]', { hasText: titulo }).first().click()
 await rol('cliente')
 await abre('Usuario bloqueado')
 await pagina.selectOption(sel('impugna-campo'), 'prioridad')

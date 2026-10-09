@@ -163,27 +163,35 @@ ninguna imagen se ha construido desde un clon limpio; si existe un servidor, su 
 
 ### Criterios de Éxito
 
-- [ ] La imagen de la app, construida con un `.env.production` sembrado, **no contiene ningún `.env*`** fuera de los
+- [x] La imagen de la app, construida con un `.env.production` sembrado, **no contiene ningún `.env*`** fuera de los
       `.example`. La app en marcha ve solo las variables que le pasa el compose. Hay una prueba que se pone roja si
-      vuelve a entrar (fase 0)
-- [ ] La imagen de la app se construye desde un clon limpio, sin pasos a mano, y una prueba lo vigila (fase 0b, H-30)
-- [ ] Cada hallazgo con resolución `código` tiene una prueba negativa que pasa en verde sin sabotaje y cae con su
+      vuelve a entrar (fase 0) — *#226: imagen real sin `.env*`; `revisaImagen` en `prueba:buzon`, que corre en el validate*
+- [x] La imagen de la app se construye desde un clon limpio, sin pasos a mano, y una prueba lo vigila (fase 0b, H-30) —
+      *#228: imagen real desde un `git archive`, healthy; `revisaConstruible` en `prueba:buzon`*
+- [x] Cada hallazgo con resolución `código` tiene una prueba negativa que pasa en verde sin sabotaje y cae con su
       sabotaje, y la corre un gate. Las tres sondas confirmadas el 07/10 (H-02, H-01 y H-06) quedan como pruebas
-      permanentes
-- [ ] **Ningún hallazgo infirmable termina como `brecha`.** Se cierra en código o el producto deja de ofrecer esa
-      función, y la AISIA lo dice
-- [ ] Cada fila del arnés de sabotajes ejerce el **camino del producto** (runtime, CLI o rol real de la base), no
-      solo la función aislada
-- [ ] `configura:deploy` mide la máquina contra el perfil `despliegue` del manifiesto: dice si cabe el tamaño
+      permanentes — *la matriz entera, 203/203 (verdes sin sabotaje, rojas con él); las pruebas las corre `prueba:tools`
+      en cada validate, y el arnés de sabotajes, antes de cada PR. H-02 y H-01 en `cierre-base.ts`; H-06 en S10 y S10b*
+- [x] **Ningún hallazgo infirmable termina como `brecha`.** Se cierra en código o el producto deja de ofrecer esa
+      función, y la AISIA lo dice — *90 filas infirmables: 86 probadas, 4 que esperan una decisión (D1, D6, D9, el aviso
+      de privacidad), 0 brechas. Lo que no se ofrece: el SAP real (D6) y el SLA como evidencia en modo despacho*
+- [x] Cada fila del arnés de sabotajes ejerce el **camino del producto** (runtime, CLI o rol real de la base), no
+      solo la función aislada — *todas salvo una: la tarjeta del riesgo de baja es un componente de React, se prueba
+      leyéndolo y en el recorrido (paso 7.1). Las de la app ejecutan el runtime y la ruta (`pruebas/app.ts`)*
+- [x] `configura:deploy` mide la máquina contra el perfil `despliegue` del manifiesto: dice si cabe el tamaño
       contratado, compara la región declarada con D10 (y dice «pendiente de D10» mientras siga abierta, nunca
-      «cumple») y avisa si falta el destino de respaldo, sin imprimir llaves. Corre en `predeploy`
-- [ ] `verifica:productos` en verde con la plantilla v3 y siembras nuevas para `despliegue`
-- [ ] La ficha de servidor por consultora se ve en la pantalla del laboratorio, con captura de Playwright, y no dice
-      «apto» sin la restauración probada en esa máquina (GATE 3)
-- [ ] La AISIA v3 y el C3 v4: cada frase tiene su fila en la matriz con estado `probado`, `brecha` o `depende`. Una
-      **tercera revisión independiente** no deja ninguna afirmación contradicha sin resolver
-- [ ] `npm run validate` en verde **después** del último commit; `npm run regresion` en verde en cada CDC
-- [ ] Ninguna firma escrita por el agente
+      «cumple») y avisa si falta el destino de respaldo, sin imprimir llaves. Corre en `predeploy` — *#240;
+      `pruebas/despliegue.ts` y H-26 en `superficie.ts`; las filas del «Perfil de despliegue» en la matriz*
+- [x] `verifica:productos` en verde con la plantilla v3 y siembras nuevas para `despliegue` — *#240: 35/35 siembras*
+- [x] La ficha de servidor por consultora se ve en la pantalla del laboratorio, con captura de Playwright, y no dice
+      «apto» sin la restauración probada en esa máquina (GATE 3) — *recorrido, paso 9.1; fila `c3-perfil-ficha`*
+- [x] La AISIA v3 y el C3 v4: cada frase tiene su fila en la matriz con estado `probado`, `brecha` o `depende`. Una
+      **tercera revisión independiente** no deja ninguna afirmación contradicha sin resolver — *#241: 18 hallazgos,
+      todos resueltos y re-ejecutadas sus sondas; `pruebas/firmas.ts` exige una fila por daño y por control*
+- [x] `npm run validate` en verde **después** del último commit; `npm run regresion` en verde en cada CDC — *31/31 en
+      cada fase; regresión capa A 163/163 en los dos CDC de la fase 3 y en la fase 5*
+- [x] Ninguna firma escrita por el agente — *las firmas de los CDC las escribió el laboratorio; la AISIA y el contrato
+      van con la firma en blanco, y `aterriza.mjs` no escribe ninguna (su prueba lo exige)*
 
 ### Comportamiento Esperado
 
@@ -644,6 +652,27 @@ revisión no deja ninguna afirmación contradicha sin resolver.
 - [ ] Captura de Playwright de la app con la impugnación y la ficha de servidor
 - [ ] Todos los criterios de éxito marcados con su evidencia
 
+**Fase 5, hecha (2026-10-09, rama `soporte/fase5-firma`)**:
+- **El kit** (`docs/goals/soporte-sap-kit-de-firma.md`), fuera de todo registro:
+  - qué se firma: la AISIA v3 y el contrato con su C3 v4;
+  - los infirmables arriba, con su resultado de hoy (90 filas: 86 probadas, 4 que esperan una decisión, 0 brechas);
+  - lo que queda abierto, con el porqué de cada cosa;
+  - dónde aterriza cada cosa y los pasos en orden.
+- **`tools/soporte-sap/firmas/aterriza.mjs`**: lo corre el laboratorio **después** de escribir sus dos firmas.
+  - Mueve la AISIA a `.claude/gobernanza/AISIA-soporte-sap.md` y pone al día manifiesto, índice, C3, contrato e informe.
+  - No escribe ninguna firma, no hace nada si falta una y lo hace todo o nada. Tiene 4 pruebas.
+  - Simulado en un worktree aparte con una firma de prueba: la gobernanza, los productos, el inventario, los README y
+    la matriz quedan en verde.
+- **13 filas de la app pasan a ejecutar el producto** (`pruebas/app.ts`); se va `pantallas.ts`. Al ejecutarlas
+  salieron dos defectos:
+  - la P1 con evidencia sin leer solo pasaba a una persona si la causa era el tope de OCR (sin motor, o con una
+    lectura parcial, no);
+  - el reloj no emitía el tramo en curso cuando duraba cero: la pantalla no decía que el cliente lo reanudó. Era la
+    «inestabilidad» del recorrido.
+- **El §6 del contrato**, al día con la v3.
+- **Evidencia**: pruebas de la herramienta en verde, regresión capa A 163/163, recorrido de 29 capturas dos veces
+  seguidas sin rojo y la matriz entera (en el PR).
+
 ---
 
 ## Aprendizajes (Self-Annealing)
@@ -667,6 +696,12 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `aisia-lab-escalado` saboteaba la lectura del laboratorio, no quién escala; `aisia-lab-72h` saboteaba el intervalo,
   no quién pone la fecha. Una fila «probado» prueba exactamente lo que siembra su sabotaje, y nada más.
   **Lección**: cada afirmación se parte en todas las formas de romperla, y cada forma lleva su fila.
+- **2026-10-09 · una prueba inestable puede ser el producto** (fase 5). El paso 14.2 del recorrido fallaba uno de cada
+  dos intentos. Primero apareció un fallo real del recorrido (`abre` también encajaba con la lista entera), pero no
+  era la causa. Instrumentado, el estado en el servidor era correcto y la pantalla no; con una carga nueva, sí. La causa:
+  `relojSla` no emitía el tramo en curso de duración cero, y la vista se calcula en el mismo milisegundo que la acción.
+  **Lección**: antes de subir un tiempo de espera, se mira qué dice el servidor y qué dice la pantalla en el momento
+  del fallo; un «flaky» que alterna es un borde, no ruido.
 - **2026-10-09 · una prueba que lee el código no prueba la conducta** (fase 4, R3-14). Las filas de la app se probaban
   con expresiones regulares sobre `runtime.ts`, porque «el runtime no corre fuera de Next». Corre: con un cargador de
   20 líneas (`pruebas/_app.mjs`). Ejecutado, enseñó cuatro infirmables que las regex daban por cerrados. **Lección**:

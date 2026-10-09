@@ -171,3 +171,10 @@ test('R3-02 · bajar la prioridad después de vencer la meta no borra el incumpl
   assert.equal(aTiempo.incumplidaAntesDelCambio, false, 'control: respondida a tiempo, el cambio no inventa un incumplimiento')
 })
 
+test('el tramo en curso se ve aunque dure cero: el corte en el mismo instante que la respuesta del cliente', () => {
+  const k = contratoDeLaboratorio('andina', 'alimentos-del-bajio', '2026-04-01')
+  const corte = mx('2026-09-21', '11:30')
+  const r = relojSla([ev('RECIBIDA', '2026-09-21', '10:00'), ev('ESPERA_CLIENTE', '2026-09-21', '11:00'), ev('RESPUESTA_CLIENTE', '2026-09-21', '11:30')], 'P3', k, corte)
+  assert.deepEqual(r.tramos.map((x) => `${x.estado}:${x.porque}`), ['corre:RECIBIDA', 'pausa:ESPERA_CLIENTE', 'corre:RESPUESTA_CLIENTE'])
+})
+

@@ -49,6 +49,7 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-sla-tramo-en-curso'], afirmacion: 'cada incidencia guarda sus tramos (contrato §5)', encontrado: 'fase 5 (09/10), por un recorrido que fallaba uno de cada dos intentos: el tramo en curso de duración cero no se emitía, y la pantalla no decía que el cliente reanudó el reloj' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-presupuesto-p1-ocr'], afirmacion: 'un P1 con una imagen sin leer pasa a una persona', encontrado: 'fase 5 (09/10), al pasar la fila a una prueba que ejecuta la app: solo miraba el aviso del tope de OCR. Sin motor de OCR, o con una lectura parcial, la evidencia de una P1 quedaba sin leer y sin nadie' },
   { doc: 'AISIA', por: 'autor', resolucion: 'prueba', filas: ['aisia-dato-no-frena', 'aisia-secreto-runtime', 'aisia-impugna-app', 'aisia-sla-persona-runtime', 'aisia-presupuesto-runtime', 'aisia-pausa-app-pide', 'aisia-pausa-app-cliente', 'c3-subida-acotada', 'c3-documento-delimitado', 'c3-ruta-404', 'c3-ruta-404-get', 'c3-ruta-sin-error-interno'], afirmacion: 'cada fila ejerce el camino del producto (criterio de éxito del PRP-010)', encontrado: 'fase 5 (09/10): 13 filas seguían probándose leyendo el código con regex; ahora ejecutan el runtime o la ruta. Queda una, la tarjeta del riesgo de baja: es un componente de React y se prueba leyéndolo y en el recorrido' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-prioridad-maquina', 'aisia-prioridad-categorizada', 'aisia-prioridad-declarada'], afirmacion: 'la prioridad de nómina: el piso en la base', encontrado: 'tercera revisión R3-01 y R3-11 (09/10): el job medía la prioridad del primer CATEGORIZADA, que podía emitir el cliente, el consultor o el laboratorio; y el impacto, la urgencia y la prioridad inicial se reescribían sin evento' },
@@ -1054,6 +1055,13 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'la cadena dice qué consultor respondió y resolvió cada incidencia, y cuándo: con ella se reconstruyen tiempos por persona',
     control: 'ninguno: la cadena es la evidencia del servicio y lleva el actor',
     nota: 'tercera revisión R3-17: no es infirmable (el daño es entre la consultora y sus empleados); quitar el actor rompería la evidencia del SLA',
+  },
+  {
+    id: 'aisia-sla-tramo-en-curso', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: 'cada incidencia muestra sus tramos, también el que acaba de abrirse: la evidencia de un incumplimiento no pierde el último',
+    control: 'src/sla.ts · relojSla(): el tramo en curso se emite aunque dure cero',
+    comprobacion: prueba('sla.ts', 'el tramo en curso se ve aunque dure cero: el corte en el mismo instante que la respuesta del cliente'),
+    sabotaje: { que: 'el tramo en curso de duración cero desaparece', ediciones: [ed(dist('sla.js'), '(x > inicio || (enCurso && x === inicio))', '(x > inicio)')] },
   },
   // ──────────────────────────────── C3 ─────────────────────────────────
   {
