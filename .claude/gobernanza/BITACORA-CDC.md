@@ -4624,3 +4624,59 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - `npm run recorrido:buzon` ☑ 29/29 pasos en un stack desechable que se borró al terminar;
   - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `2ec6eb2`.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-07, con el diff delante.
+
+### 2026-10-09 — plantilla de producto v3: la sección `despliegue` (PRP-010, fase 3, DP-5) — radio: plantilla de productos, los dos manifiestos y su verificador
+- **Cambio** (rama `soporte/fase3-despliegue`, commit `f6bbf5e`):
+  - `productos/PLANTILLA.md` pasa a v3: la fila `despliegue`, el esqueleto y la historia;
+  - `productos/soporte-sap.json` y `productos/ventas-whatsapp.json` pasan a `"plantilla": 3` y declaran su `despliegue`
+    (23 líneas en los dos);
+  - `scripts/verifica-productos.mjs`: `PLANTILLA = 3`, el campo en `CAMPOS` y en `REQUERIDOS`, `verificaDespliegue` y
+    9 siembras nuevas.
+- **Motivo**: Soporte SAP lo tiene y la v2 no lo recogía. Tiene el estimado de la máquina por tamaño (SDD §14), el
+  despliegue en cualquier VPS (§15) y tres decisiones abiertas: D3 (quién opera), D10 (dónde quedan los datos) y D12
+  (el proveedor). Es la misma regla de entrada, sin cambiarla (B-3). El producto declara **requisitos, no
+  proveedores**. El proveedor y la región de cada instalación son un dato de su `.env.production`, y la máquina se mide.
+- **Qué pone rojo y qué no**:
+  - **en rojo**:
+    - un manifiesto sin `despliegue`, o que nombra a su proveedor o sus planes;
+    - un modo que no es `gestionado` ni `despacho`, o un tamaño (S, M o L) sin su máquina o sin su fuente;
+    - los tamaños en null sin decir qué falta, o un respaldo que no es inmutable fuera de sitio;
+    - una región «decidida» sin regiones, o el «quién opera» sin su decisión;
+    - un secreto con `NEXT_PUBLIC_`;
+  - **no se pone rojo**: el vendedor en WhatsApp con `tamanos: null`, porque dice qué falta (no tiene estimado de
+    consumo). `retencion` y `salida` no entran: siguen la recomendación de B-6.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verifica:productos` ☑ en verde con los dos manifiestos en v3 y **35/35 siembras cazadas**;
+  - `tools/soporte-sap/pruebas/despliegue.ts` ☑ 8/8: los tamaños del manifiesto son los de `maquinaPara`, y `configura:deploy`
+    mide contra el perfil (la máquina chica, la región frente a D10, el respaldo que falta, los secretos y la instalación que
+    pasa) sin imprimir ningún secreto;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `f6bbf5e`.
+- **Aprobado por**:  **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-09, con el diff delante.
+
+### 2026-10-09 — `configura:deploy` entra en `predeploy` (PRP-010 H-26) — radio: padrón de gates
+- **Cambio** (rama `soporte/fase3-despliegue`, commit `f6bbf5e`): `.claude/gates.json`:
+  - un gate nuevo, `configura:deploy` (`npm run configura:deploy`), solo en el perfil `predeploy`;
+  - el perfil lo pone en `siempre`, junto a `verifica:privado` (12 líneas).
+- **Motivo** (H-26): `configura:deploy` estaba documentado y no corría en ningún gate. Un deploy podía salir con el
+  laboratorio encendido, una llave `NEXT_PUBLIC_` secreta o una máquina que no cabe en lo contratado. Va en
+  `siempre` porque mide la máquina y el `.env.production` del servidor, que cambian sin que cambie el árbol: con el
+  sello vigente, el atajo de `predeploy` se lo saltaría. Fuera de `validate` a propósito: en una máquina de desarrollo
+  no hay `.env.production`.
+- **Qué pone rojo y qué no**:
+  - **en rojo**, en el servidor y antes de `npm run deploy`, lo que `configura:deploy` ya rechazaba a mano:
+    - los placeholders o una `NEXT_PUBLIC_` secreta;
+    - el laboratorio encendido, o la falta de swap;
+    - y ahora el perfil del producto: la máquina que no cabe, la región fuera de su decisión decidida, el respaldo
+      sin https o sin días de bloqueo, o los secretos que faltan;
+  - **no se pone rojo**: `validate`, que no lo corre.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verifica:gates` ☑: 11 comprobaciones en verde, 34 gates activos (antes 33), 8 inactivos declarados;
+  - el caso malo y el control positivo de `configura:deploy` ☑ en `pruebas/superficie.ts` y `pruebas/despliegue.ts`;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `f6bbf5e`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-09, con el diff delante.
