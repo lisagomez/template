@@ -2,14 +2,15 @@
  * De crudo a enriquecido con los dos exportes sucios: la cuenta, los duplicados, el rastro de un
  * valor limpio y uno enriquecido, y el crudo reconstruido. Uso: node tools/soporte-sap/evidencia/datos.ts
  */
-import { createHash } from 'node:crypto'
+import { createHmac } from 'node:crypto'
 import { evaluaSeguro } from '../../grafo-conocimiento/dist/index.js'
 import { similitud, digitoVerificadorRfc, digitoVerificadorCurp } from '../../extractor-documental/dist/index.js'
 import {
   generaCorpus, exporteSucio, proponeMapeo, apruebaMapeo, aplicaMapeo, limpia, enriquece, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, type MotorReglas,
 } from '../dist/index.js'
 
-const sha256 = (s: string) => createHash('sha256').update(s).digest('hex')
+/** Una sal de PRUEBA: el importador seudonimiza con HMAC y su sal (PRP-010 H-32). */
+const seudonimiza = { sal: 'sal-de-prueba-del-importador', hmac: (k: string, s: string) => createHmac('sha256', k).update(s).digest('hex') }
 const corpus = generaCorpus({ rfc: digitoVerificadorRfc, curp: digitoVerificadorCurp })
 const conocimiento = conocimientoDeMatriz(MATRIZ_LABORATORIO, '2026-10-04')
 const motor: MotorReglas = (p) => evaluaSeguro(conocimiento, p, { hoy: '2026-10-04' }) as ReturnType<MotorReglas>
@@ -21,7 +22,7 @@ for (const consultora of ['andina', 'boreal'] as const) {
   const e = exporteSucio(corpus, consultora)
   const propuesta = proponeMapeo({ consultora, herramienta: e.herramienta, version: 1, columnas: e.columnas, muestras: e.filas, desfaseFechasMin: -360, similitud })
   const m = apruebaMapeo(propuesta, { tipo: 'humano', id: 'usr-experto' }, [])
-  const l = limpia(aplicaMapeo(m, e.filas, sha256), CLIENTES.filter((c) => c.consultora === consultora).map((c) => ({ id: c.id, nombre: c.nombre })))
+  const l = limpia(aplicaMapeo(m, e.filas, seudonimiza), CLIENTES.filter((c) => c.consultora === consultora).map((c) => ({ id: c.id, nombre: c.nombre })))
   const dup = l.descartadas.filter((d) => /duplicado/.test(d.motivo)).length
   const pru = l.descartadas.filter((d) => d.motivo === 'ticket de prueba').length
   if (!l.cuenta.cuadra) malo = true

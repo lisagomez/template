@@ -39,7 +39,7 @@ export { sapDeLaboratorio } from './laboratorio/sap.js'
 export {
   proponeMapeo, apruebaMapeo, aplicaMapeo, cuentaPrevia, fechaUtc, seudonimoDe, OBLIGATORIOS, SINONIMOS, VALORES,
 } from './mapeo.js'
-export type { CampoCanonico, Mapeo, Similitud, Procedencia, IncidenciaCanonica, Fila, ResultadoMapeo } from './mapeo.js'
+export type { CampoCanonico, Mapeo, Similitud, Procedencia, IncidenciaCanonica, Fila, ResultadoMapeo, Seudonimizador } from './mapeo.js'
 export { exporteSucio } from './laboratorio/exportes.js'
 export type { Exporte } from './laboratorio/exportes.js'
 export { huellaTenant, exportaTenant, exportIntegro, restauraTenant, verificaRestauracion, tablasDelRespaldo, TABLAS_DE_TENANT, TABLAS_DE_LA_SALA } from './respaldo.js'

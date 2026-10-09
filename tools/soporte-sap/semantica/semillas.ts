@@ -4,7 +4,7 @@
  * títulos, descripciones, nombres ni motivos). Sale del corpus sintético, del reloj de SLA y del
  * mapeo + limpieza de los dos exportes sucios. Determinista: misma semilla, misma huella.
  */
-import { createHash } from 'node:crypto'
+import { createHash, createHmac } from 'node:crypto'
 import { similitud, digitoVerificadorRfc, digitoVerificadorCurp } from '../../extractor-documental/dist/index.js'
 import {
   generaCorpus, exporteSucio, proponeMapeo, apruebaMapeo, aplicaMapeo, limpia, relojSla, contratoDeLaboratorio, complejidadDe,
@@ -15,6 +15,8 @@ export type Valor = string | number | boolean | null
 export interface Tabla { readonly columnas: readonly string[]; readonly filas: ReadonlyArray<readonly Valor[]> }
 
 const sha256 = (s: string) => createHash('sha256').update(s).digest('hex')
+/** El importador seudonimiza con HMAC y su sal (PRP-010 H-32). Las semillas no guardan el asignado: la sal es del laboratorio. */
+const seudonimiza = { sal: 'sal-del-laboratorio-semillas', hmac: (k: string, m: string) => createHmac('sha256', k).update(m).digest('hex') }
 export const LABORATORIO = 'laboratorio'
 /** El exporte de las herramientas viejas se importó al cierre del corpus (supuesto del laboratorio). */
 export const FECHA_IMPORTACION = '2026-09-30T18:00:00.000Z'
@@ -77,7 +79,7 @@ function importacion(c: CorpusLab): Tabla {
     const e = exporteSucio(c, consultora)
     const propuesta = proponeMapeo({ consultora, herramienta: e.herramienta, version: 1, columnas: e.columnas, muestras: e.filas, desfaseFechasMin: -360, similitud })
     const m = apruebaMapeo(propuesta, { tipo: 'humano', id: 'usr-experto' }, [])
-    const l = limpia(aplicaMapeo(m, e.filas, sha256), CLIENTES.filter((k) => k.consultora === consultora).map((k) => ({ id: k.id, nombre: k.nombre })))
+    const l = limpia(aplicaMapeo(m, e.filas, seudonimiza), CLIENTES.filter((k) => k.consultora === consultora).map((k) => ({ id: k.id, nombre: k.nombre })))
     if (!l.cuenta.cuadra) throw new Error(`la cuenta de ${consultora} no cuadra`)
     const crudo = `crudo-${consultora}-${e.herramienta}`
     for (const x of l.limpias) filas.push([crudo, x.indice, consultora, x.incidencia.clienteId, e.herramienta, 1, 'limpia', FECHA_IMPORTACION])

@@ -50,6 +50,12 @@ async function originales(db: PGlite): Promise<Fila[]> {
   const caExportes = await lista(USR.ca, 'ss-exportes')
   const ua1SubeA2 = await falla(() => como(db, USR.ua1, `insert into storage.objects (bucket_id, name) values ('ss-originales', '${ORG.CA}/${ORG.A2}/${INC.a2}/${'9'.repeat(64)}')`))
   const caSubeB1 = await falla(() => como(db, USR.ca, `insert into storage.objects (bucket_id, name) values ('ss-originales', '${ORG.CA}/${ORG.B1}/${INC.b1}/${'8'.repeat(64)}')`))
+  // PRP-010 H-23: sube SOLO la ingesta, después de validar los bytes; y la tenencia de la carpeta la exige la base.
+  const sube = (ruta: string) => falla(() => comoServicio(db, tokenDe(ORG.CA, 'soporte_sap_ingesta'), `insert into storage.objects (bucket_id, name) values ('ss-originales', '${ruta}')`))
+  const ingestaA1 = await sube(`${ORG.CA}/${ORG.A1}/${INC.a1}/${'7'.repeat(64)}`)
+  await db.exec(`delete from storage.objects where name = '${ORG.CA}/${ORG.A1}/${INC.a1}/${'7'.repeat(64)}'`) // el control no deja rastro para las filas que siguen
+  const ingestaB1 = await sube(`${ORG.CA}/${ORG.B1}/${INC.b1}/${'6'.repeat(64)}`)
+  const ingestaOtra = await sube(`${ORG.CB}/${ORG.B1}/${INC.b1}/${'5'.repeat(64)}`)
   return [
     ['el cliente A1 lista el bucket de originales', 'solo su documento (1)', ua1.length === 1 && ua1[0]!.name.includes(ORG.A1), n(ua1)],
     ['el cliente A1 busca el original de A2', '0 objetos', ua1BajaA2.length === 0, n(ua1BajaA2)],
@@ -59,6 +65,9 @@ async function originales(db: PGlite): Promise<Fila[]> {
     ['la consultora A lista sus exportes', 'el suyo (1)', caExportes.length === 1, n(caExportes)],
     ['el cliente A1 sube a la carpeta de A2', 'rechazado', ua1SubeA2 !== null, r(ua1SubeA2)],
     ['la consultora A sube a {A}/{B1}/… (revisión)', 'rechazado: B1 no es cliente de A', caSubeB1 !== null, r(caSubeB1)],
+    ['la ingesta de A sube el original de su cliente A1', 'aceptado (control)', ingestaA1 === null, r(ingestaA1)],
+    ['la ingesta de A sube a {A}/{B1}/…', 'rechazado: B1 no es cliente de A', ingestaB1 !== null, r(ingestaB1)],
+    ['la ingesta de A sube a la carpeta de B', 'rechazado: no es su consultora', ingestaOtra !== null, r(ingestaOtra)],
   ]
 }
 

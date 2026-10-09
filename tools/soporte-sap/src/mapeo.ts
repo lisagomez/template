@@ -149,13 +149,25 @@ export function fechaUtc(original: string, desfaseMin: number): string | null {
   return new Date(conZona ? t : t - desfaseMin * 60_000).toISOString()
 }
 
-/** El asignado de un exporte es una persona: en el esquema canónico entra como seudónimo estable. */
-export const seudonimoDe = (consultora: string, nombre: string, sha256: (s: string) => string): string =>
-  `usr-${sha256(`${consultora}|${norm(nombre)}`).slice(0, 12)}`
+/**
+ * Cómo seudonimiza el importador: un HMAC con su SAL (PRP-010 H-32). Antes era `sha256(consultora|nombre)` sin sal, y
+ * quien adivinara un nombre lo revertía; lo mismo que H-05 en la base. La sal es un secreto del despliegue, como la de la
+ * base: sin ella (o corta), no se seudonimiza.
+ */
+export interface Seudonimizador {
+  readonly sal: string
+  readonly hmac: (clave: string, mensaje: string) => string
+}
+
+/** El asignado de un exporte es una persona: en el esquema canónico entra como seudónimo estable, con sal. */
+export function seudonimoDe(consultora: string, nombre: string, s: Seudonimizador): string {
+  if (s.sal.length < 16) throw new Error('el importador necesita su sal (16 caracteres o más): sin sal, quien adivine un nombre revierte el seudónimo')
+  return `usr-${s.hmac(s.sal, `${consultora}|${norm(nombre)}`).slice(0, 12)}`
+}
 
 type Lectura = { valor: string | null; regla: string; motivo?: string }
 
-function leeValor(m: Mapeo, campo: CampoCanonico, original: string, sha256: (s: string) => string): Lectura {
+function leeValor(m: Mapeo, campo: CampoCanonico, original: string, seudonimiza: Seudonimizador): Lectura {
   const v = norm(original)
   if (campo === 'creada' || campo === 'resuelta') {
     const f = fechaUtc(original, m.desfaseFechasMin)
@@ -169,7 +181,7 @@ function leeValor(m: Mapeo, campo: CampoCanonico, original: string, sha256: (s: 
     if (aceptado) return { valor: aceptado, regla: `similitud aceptada por ${m.aprobadoPor}` }
     return { valor: null, regla: `vocabulario de ${campo}`, motivo: `${campo} fuera de vocabulario: «${original}»` }
   }
-  if (campo === 'asignado') return v ? { valor: seudonimoDe(m.consultora, original, sha256), regla: 'seudónimo' } : { valor: null, regla: 'vacío' }
+  if (campo === 'asignado') return v ? { valor: seudonimoDe(m.consultora, original, seudonimiza), regla: 'seudónimo' } : { valor: null, regla: 'vacío' }
   if (campo === 'transaccion') return { valor: v ? original.trim().toUpperCase() : null, regla: 'transacción en mayúsculas' }
   return { valor: original.trim() || null, regla: 'copia' }
 }
@@ -185,21 +197,21 @@ function canonicaDe(m: Mapeo, valores: Partial<Record<CampoCanonico, string | nu
 }
 
 /** Aplica un mapeo APROBADO. Toda fila sale mapeada o en revisión, y la cuenta cierra. */
-export function aplicaMapeo(m: Mapeo, filas: readonly Fila[], sha256: (s: string) => string): ResultadoMapeo {
+export function aplicaMapeo(m: Mapeo, filas: readonly Fila[], seudonimiza: Seudonimizador): ResultadoMapeo {
   if (m.estado !== 'aprobado' || !m.aprobadoPor) throw new Error('el mapeo no está aprobado: no se aplica')
-  return mapeaFilas(m, filas, sha256)
+  return mapeaFilas(m, filas, seudonimiza)
 }
 
 /**
  * Vista previa de una PROPUESTA: cuántas filas saldrían mapeadas y por qué irían a revisión. No
  * devuelve registros canónicos, así que no sirve para cargar nada: para eso, el mapeo aprobado.
  */
-export function cuentaPrevia(m: Mapeo, filas: readonly Fila[], sha256: (s: string) => string): ResultadoMapeo['cuenta'] & { motivos: readonly string[] } {
-  const r = mapeaFilas(m, filas, sha256)
+export function cuentaPrevia(m: Mapeo, filas: readonly Fila[], seudonimiza: Seudonimizador): ResultadoMapeo['cuenta'] & { motivos: readonly string[] } {
+  const r = mapeaFilas(m, filas, seudonimiza)
   return { ...r.cuenta, motivos: [...new Set(r.revision.flatMap((x) => x.motivos))] }
 }
 
-function mapeaFilas(m: Mapeo, filas: readonly Fila[], sha256: (s: string) => string): ResultadoMapeo {
+function mapeaFilas(m: Mapeo, filas: readonly Fila[], seudonimiza: Seudonimizador): ResultadoMapeo {
   const mapeadas: Array<ResultadoMapeo['mapeadas'][number]> = []
   const revision: Array<ResultadoMapeo['revision'][number]> = []
   filas.forEach((fila, indice) => {
@@ -208,7 +220,7 @@ function mapeaFilas(m: Mapeo, filas: readonly Fila[], sha256: (s: string) => str
     const motivos: string[] = []
     for (const [campo, columna] of Object.entries(m.columnas) as Array<[CampoCanonico, string]>) {
       const original = fila[columna] ?? ''
-      const l = leeValor(m, campo, original, sha256)
+      const l = leeValor(m, campo, original, seudonimiza)
       valores[campo] = l.valor
       if (l.motivo) motivos.push(l.motivo)
       procedencia.push({ campo, columna, original, valor: l.valor, regla: l.regla })
