@@ -145,7 +145,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
           {p.decision ? <p className="mt-1 text-xs">Decisión en la sala: <b>{p.decision.accion}</b> por {p.decision.por}{p.decision.motivo ? ` · motivo: «${p.decision.motivo}»` : ''}</p> : p.mensaje ? <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">En la sala, esperando la fila humana.</p>
             : p.supervisor.resultado === 'a_la_sala' ? <p className="mt-1 text-xs text-sky-700 dark:text-sky-300" data-prueba="plan-pendiente">Verificado: espera que la consultora lo escale al laboratorio.</p> : null}
           {p.aplicado ? (
-            <p data-prueba="antes-despues" className="mt-1 rounded bg-emerald-50 p-1 text-xs dark:bg-emerald-950">Aplicado en el simulador · antes: {p.aplicado.antes} (error {p.aplicado.errorAntes ? 'presente' : 'ausente'}) → después: {p.aplicado.despues} (error {p.aplicado.errorDespues ? 'presente' : 'ausente'})</p>
+            <p data-prueba="antes-despues" className="mt-1 rounded bg-emerald-50 p-1 text-xs dark:bg-emerald-950">Aplicado en el simulador, no en el SAP del cliente · antes: {p.aplicado.antes} (error {p.aplicado.errorAntes ? 'presente' : 'ausente'}) → después: {p.aplicado.despues} (error {p.aplicado.errorDespues ? 'presente' : 'ausente'})<span data-prueba="fuera-del-producto" className="block text-neutral-500">Llevarlo a su SAP lo hace una persona con su propio acceso y el control de cambios del cliente, fuera del producto (contrato §13, D6).</span></p>
           ) : null}
         </div>
       ))}

@@ -123,7 +123,7 @@
   "registro": "tools/soporte-sap/src/fde.ts"
  },
  "fuera": [
-  "no toca un SAP real: implementa contra un simulador (D6)",
+  "no se conecta a un SAP real ni guarda sus credenciales: implementa contra un simulador, y llevar la solución al SAP del cliente lo hace una persona, fuera del producto (D6)",
   "no aprueba nada solo: ni el agente ni el chat insertan una aprobación",
   "no pone precios, créditos, exclusiones ni texto legal",
   "no compromete disponibilidad ni RPO/RTO antes de GATE 3",

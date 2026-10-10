@@ -37,7 +37,8 @@ aprenderla. Ninguna solución se aplica sin que una persona la apruebe en la sal
 3. **Matriz:** el motor del grafo da la solución conocida con su fuente y su grado, o `sin_regla`.
 4. **Con solución:** el ejecutor prepara el plan y lo simula; el supervisor, otro agente, emite su
    veredicto; el plan llega a la **sala A2A**. Una persona aprueba, y eso es una fila que ningún
-   modelo puede escribir. Se aplica al **simulador**, con el antes y el después en la cadena. **A
+   modelo puede escribir. Se aplica al **simulador**, con el antes y el después en la cadena; llevarlo al
+   SAP del cliente lo hace una persona con su propio acceso, fuera del producto (D6). **A
    revisión:** el agente corrige y vuelve a proponer.
 5. **Sin solución:** el caso se **anonimiza** (lo que deja forma de dato, y todo caso de RR. HH. o nómina, va a
    cuarentena y no entra) y entra al sandbox; el experto enseña y
@@ -112,7 +113,7 @@ sala cazados; 63 comprobaciones de aislamiento en verde; restauración por tenan
 | **Datos personales que toca** | Los de empleados de los clientes que llegan en tickets y adjuntos (RR. HH., nómina, RFC, CURP, NSS, CLABE, correos), los de las contrapartes de un CFDI, y los de los consultores (sus horas, como seudónimo). |
 | **Partes afectadas** | Los clientes (N3) y sus empleados, que no firmaron nada; las contrapartes de sus CFDI; las consultoras (N2) y sus consultores; el laboratorio. |
 | **Daño con el sistema operando bien** | Un dato personal que entra al sandbox; un secreto del cliente que llega al núcleo; una prioridad mal asignada (una nómina tratada como P3); una solución equivocada aprobada por fatiga; el conocimiento de una consultora usado para otra (D1); un FODA o una proyección en MXN leídos como promesa; un SLA mal medido (una primera respuesta automática, una pausa o una resolución unilateral, un incumplimiento borrado al bajar la prioridad); el triage cortado por presupuesto o sin su evidencia leída. **Los daños sobre terceros no son firmables** (límite de C5): se cierran con un control o no se ofrecen. |
-| **Acciones irreversibles** | **Ninguna automática.** Aplicar una solución en el SAP de un cliente no está cableado (D6): en el laboratorio se aplica al simulador y exige la fila de aprobación humana de la sala. Exponer la sala o el canal N1–N2 es gate humano con C3 y la AISIA firmados. Un motor externo de OCR no entra. |
+| **Acciones irreversibles** | **Ninguna automática.** Aplicar una solución en el SAP de un cliente no lo hace el producto (D6, decidida): no se conecta a ningún SAP ni guarda sus credenciales, y la aplica una persona de la consultora o del cliente, con su propio acceso y bajo el control de cambios del cliente (contrato §13). El producto la aplica al simulador, y eso exige la fila de aprobación humana de la sala. Exponer la sala o el canal N1–N2 es gate humano con C3 y la AISIA firmados. Un motor externo de OCR no entra. |
 | **Vía de apelación humana** | El cliente **impugna** una prioridad, una categoría, una complejidad, una pausa del reloj o que se dé por resuelta (`ss_impugnacion`), y su consultora la resuelve a su nombre; la queja no se reescribe ni se borra. Un plan va a revisión con su motivo. Un campo leído se confirma o se corrige a nombre de quien lo revisa. La cuarentena es definitiva y nadie la revisa hasta D14 (DP-7), y no frena la atención. La pausa del reloj dice qué se le pide al cliente, y él mismo la reanuda al responder. |
 | **Aislamiento de datos** | RLS forzada en toda tabla; ninguna superficie usa `service_role` (C7). El agente, la ingesta y los jobs de plataforma entran con un token de tarea firmado por el orquestador y solo ven la consultora del token. El laboratorio lee solo lo que **la consultora le escala** (también en la app: el plan va primero a ella), y los originales, y lo leído de ellos, con un acceso que otorga la consultora (72 h). |
 
@@ -130,10 +131,11 @@ Producto compuesto: dos herramientas en `tools/` (`soporte-sap`, `sala-a2a`) y u
 - Decisiones abiertas D2 y D4–D15 (spec del goal), con la recomendación de cada una en el informe de la
   corrida A (`docs/goals/soporte-sap-informe-a.md`). Decididas el 2026-10-10: D1, con el consentimiento de la
   consultora y de su cliente (PRP-011); D3, mixto (la consultora opera su N2 y el laboratorio solo el N1, sin
-  comprometer disponibilidad antes de GATE 3).
+  comprometer disponibilidad antes de GATE 3); D6, fuera del producto (la solución en el SAP del cliente la aplica
+  una persona con su propio acceso; el producto no se conecta a ningún SAP).
 - Primera consultora real: medir el anonimizador sobre su corpus con consentimiento (D9), fijar los
   umbrales del extractor, conectar un modelo real tras el CDC del routing (D7).
-- Salir del laboratorio exige lo que lista la AISIA §5: entre otras, D6, D7, D8, D10, D12, D13 y D14, el
+- Salir del laboratorio exige lo que lista la AISIA §5: entre otras, D7, D8, D10, D12, D13 y D14, el
   aviso de privacidad, los veredictos desde `tools/conocimiento` (H-20), el tope del lector de PDF (H-22) y GATE 3.
 
 ---

@@ -141,13 +141,29 @@ Lo que ya estaba a medida antes del consentimiento puede subir cuando el consent
 
 [POR DECIDIR: redacción legal de la cláusula y de quién, en cada organización, puede consentir por ella]
 
-## 13. Vigencia y versiones
+## 13. Soluciones en el SAP del cliente
+
+El producto **no se conecta a ningún SAP** del cliente ni guarda sus credenciales. Una solución que se aprueba en la
+sala se aplica a un **SAP simulado**: el antes y el después que se muestran son los de ese simulador, no los del
+sistema del cliente.
+
+Llevar una solución al SAP del cliente lo hace **una persona**, de la consultora o del propio cliente, con **su
+propio acceso** y bajo el **control de cambios del cliente**, fuera del producto. Quién la aplica y con qué
+autorización lo acuerdan la consultora y su cliente. El laboratorio no aplica soluciones en el SAP de ningún
+cliente.
+
+No se comparten contraseñas ni otras credenciales de SAP por el producto (incidencias, chat o adjuntos): el producto
+no las pide ni las necesita.
+
+[POR DECIDIR: redacción legal de la responsabilidad por lo que se aplica en el SAP del cliente]
+
+## 14. Vigencia y versiones
 
 Cada cambio es una **versión nueva** con fecha de inicio; la anterior no se edita. Una incidencia se
 mide con la versión que regía al recibirla. Vigencia: [POR DECIDIR]. Terminación y entrega de datos
 (export por tenant): [POR DECIDIR].
 
-## 14. Firmas
+## 15. Firmas
 
 | Parte | Nombre | Firma | Fecha |
 |---|---|---|---|

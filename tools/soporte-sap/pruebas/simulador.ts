@@ -2,6 +2,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { simula, ejecuta, reproduce, sapDeLaboratorio, MATRIZ_LABORATORIO, pasosDe, extraeParametros, huellaDePlan } from '../dist/index.js'
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import { lee, RAIZ } from './_ayuda.ts'
 
 const sap = sapDeLaboratorio('alimentos-del-bajio', 'S4HANA')
 const caso = (regla: string) => MATRIZ_LABORATORIO.find((e) => e.regla === regla)!
@@ -57,4 +60,32 @@ test('CFDI: corregir un RFC que tampoco está en la LCO no aplica; el orden de l
 
 test('un parámetro con forma inválida no entra al simulador', () => {
   assert.throws(() => simula(sap, pasosDe(caso('SS-BC-USUARIO'), { usuario: "ALMACEN01'; drop table" })), /forma inválida/)
+})
+
+/** Un cliente de SAP: RFC (node-rfc, sapnwrfc) o los SDK de SAP. */
+const CLIENTE_SAP = /(?:from\s+|import\s*\(\s*|require\s*\(\s*|import\s+)['"](node-rfc|sapnwrfc|node-sap[^'"]*|@sap\/[^'"]+|@sap-cloud-sdk\/[^'"]+)['"]/
+const DEL_PRODUCTO = ['tools/soporte-sap/src', 'tools/soporte-sap/clis', 'src/features/soporte-sap', 'src/app']
+const codigoDelProducto = () => DEL_PRODUCTO.flatMap((d) => readdirSync(join(RAIZ, d), { recursive: true, encoding: 'utf8' })
+  .map((f) => `${d}/${f}`)
+  .filter((f) => /\.(ts|tsx|mjs|js)$/.test(f) && (!f.startsWith('src/app') || f.includes('soporte-sap'))))
+
+test('D6 · el producto no se conecta a un SAP real: ningún módulo importa un cliente de SAP ni lo declara como dependencia', () => {
+  for (const muestra of ["import { Client } from 'node-rfc'", "const c = require('sapnwrfc')", "import '@sap-cloud-sdk/http-client'", "await import('@sap/xsenv')"]) {
+    assert.match(muestra, CLIENTE_SAP, `control positivo: ${muestra}`)
+  }
+  const archivos = codigoDelProducto()
+  assert.ok(archivos.some((f) => f.endsWith('simulador.ts')) && archivos.some((f) => f.includes('src/app/') && f.includes('soporte-sap')), 'recorre el dominio y las rutas')
+  assert.deepEqual(archivos.filter((f) => CLIENTE_SAP.test(lee(f))), [], 'ningún módulo importa un cliente de SAP')
+  for (const pkg of ['package.json', 'tools/soporte-sap/package.json']) {
+    const j = JSON.parse(lee(pkg)) as Record<string, Record<string, string> | undefined>
+    const deps = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].flatMap((k) => Object.keys(j[k] ?? {}))
+    assert.deepEqual(deps.filter((d) => CLIENTE_SAP.test(`from '${d}'`)), [], `${pkg} no declara un cliente de SAP`)
+  }
+})
+
+test('D6 · la pantalla dice que lo aplicado fue al simulador, no al SAP del cliente, y de quién es llevarlo a su SAP', () => {
+  const plan = lee('src/features/soporte-sap/components/incidencias.tsx')
+  const bloque = plan.slice(plan.indexOf('data-prueba="antes-despues"'), plan.indexOf('</p>', plan.indexOf('data-prueba="antes-despues"')))
+  assert.match(bloque, />Aplicado en el simulador, no en el SAP del cliente · antes:/)
+  assert.match(bloque, /data-prueba="fuera-del-producto"[^>]*>Llevarlo a su SAP lo hace una persona con su propio acceso y el control de cambios del cliente, fuera del producto/)
 })

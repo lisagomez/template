@@ -188,3 +188,12 @@ test('D1 · el contrato dice qué es el núcleo común: generalizado, del supera
   assert.match(d1, /no dice de qué consultora ni de qué cliente vino/, 'el origen no viaja')
 })
 
+test('D6 · el contrato dice que el producto no se conecta al SAP del cliente ni guarda sus credenciales, y quién aplica la solución', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d6 = p.slice(p.indexOf('## 13. Soluciones en el SAP del cliente'), p.indexOf('## 14.'))
+  assert.match(d6, /El producto \*\*no se conecta a ningún SAP\*\* del cliente ni guarda sus credenciales/, 'sin conector')
+  assert.match(d6, /se aplica a un \*\*SAP simulado\*\*: el antes y el después que se muestran son los de ese simulador/, 'el antes y el después son del simulador')
+  assert.match(d6, /lo hace \*\*una persona\*\*, de la consultora o del propio cliente, con \*\*su\s+propio acceso\*\* y bajo el \*\*control de cambios del cliente\*\*, fuera del producto/, 'quién la aplica')
+  assert.match(d6, /El laboratorio no aplica soluciones en el SAP de ningún\s+cliente/, 'el laboratorio, tampoco (D3)')
+  assert.match(d6, /No se comparten contraseñas ni otras credenciales de SAP por el producto/, 'las credenciales no pasan por el producto')
+})

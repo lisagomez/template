@@ -78,7 +78,7 @@ await captura(4, 'plan del caso conocido en la sala con veredicto del supervisor
 await decide('Plan v1 para inc-001', 'aprobar')
 await rol('cliente')
 await pagina.locator(sel('antes-despues')).first().scrollIntoViewIfNeeded()
-await captura(4.5, 'aprobado por el HIL y aplicado al simulador antes y despues', async () => /error presente.*error ausente/s.test(await texto(sel('antes-despues'))), sel('plan-v1'))
+await captura(4.5, 'aprobado por el HIL y aplicado al simulador antes y despues', async () => { const t = await texto(sel('antes-despues')); return /error presente.*error ausente/s.test(t) && /no en el SAP del cliente/.test(t) && /fuera del producto/.test(t) }, sel('plan-v1'))
 
 // 5: caso desconocido → anonimiza → sandbox → el experto enseña en el chat → propuesta de regla y de CLI.
 await levanta('La app Fiori F0842 se queda en blanco', 'La app Fiori F0842 se queda en blanco al abrirla desde el launchpad; lo reporta Xóchitl Tzompantzi, xtzompantzi@alimentos.example', [])
