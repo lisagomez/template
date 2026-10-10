@@ -18,6 +18,10 @@
 > **Revisión 1** (2026-10-10, PRP-011): el laboratorio decidió **D1 «con consentimiento»**, y la base, la app y el
 > contrato ya lo cumplen. La fila de D1 pasa de «depende» a «probado». Cambian la §3, la §4 «Conocimiento cruzado» y
 > la §5. Va firmada al pie, junto a la firma de la v3.
+>
+> **Revisión 2** (2026-10-10): el laboratorio decidió **D3 «mixto»**. Hasta GATE 3, la consultora opera su N2 (la
+> atención y el SLA con su cliente) y el laboratorio opera solo el N1 (sala, sandbox y núcleo), sin comprometer
+> disponibilidad. Cambia la §5. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -261,16 +265,18 @@ quedan hoy:
 
 Para salir del laboratorio hacen falta:
 
-- D3, D6, D7, D8, D10, D12, D13 y D14 decididas (D1 ya lo está);
+- D6, D7, D8, D10, D12, D13 y D14 decididas (D1 y D3 ya lo están);
 - la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
 - el aviso de privacidad hacia los empleados del N3, redactado y exigido en el contrato;
 - los veredictos, desde `tools/conocimiento` y con su firma (H-20);
-- GATE 3 cerrado en la máquina donde corra, si el laboratorio opera el servicio (D3): la ficha de
-  servidor no dice «apto» sin él;
+- GATE 3 cerrado en la máquina donde corre lo que opera el laboratorio (el N1, por D3), antes de comprometer
+  disponibilidad: la ficha de servidor no dice «apto» sin él;
 - el C3 y esta AISIA firmados.
 
 Firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
 
 Revisión 1 (D1), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
+
+Revisión 2 (D3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
