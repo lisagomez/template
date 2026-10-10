@@ -696,6 +696,12 @@ revisión no deja ninguna afirmación contradicha sin resolver.
   `aisia-lab-escalado` saboteaba la lectura del laboratorio, no quién escala; `aisia-lab-72h` saboteaba el intervalo,
   no quién pone la fecha. Una fila «probado» prueba exactamente lo que siembra su sabotaje, y nada más.
   **Lección**: cada afirmación se parte en todas las formas de romperla, y cada forma lleva su fila.
+- **2026-10-10 · una prueba que copia el repo depende de su estado** (la firma). La prueba de `aterriza.mjs` copiaba los
+  archivos reales y daba por hecho que seguían sin firmar. Al firmar, el borrador desapareció y el `validate` cayó en
+  `prueba:tools`. La simulación de la fase 5 corrió los gates de la firma, no toda la batería. **Fix**: un repo mínimo
+  sintético para los casos del guion, y una prueba aparte del estado real después de la firma. **Lección**: una prueba
+  no lee el estado que el propio guion va a cambiar; y una simulación «antes de» corre el `validate` entero, no los
+  gates que uno cree que toca.
 - **2026-10-09 · una prueba inestable puede ser el producto** (fase 5). El paso 14.2 del recorrido fallaba uno de cada
   dos intentos. Primero apareció un fallo real del recorrido (`abre` también encajaba con la lista entera), pero no
   era la causa. Instrumentado, el estado en el servidor era correcto y la pantalla no; con una carga nueva, sí. La causa:

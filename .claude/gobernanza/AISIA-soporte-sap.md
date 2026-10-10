@@ -1,7 +1,6 @@
-# AISIA — Soporte SAP (borrador v3)
+# AISIA — Soporte SAP (v3)
 
-> Fecha: 2026-10-09 · Estado: **borrador, fuera del registro** (no es una entrada de
-> `.claude/gobernanza/`; al firmarla, el laboratorio la pega donde corresponda) · Revisión: al
+> Fecha: 2026-10-09 · Estado: **firmada** por lisagomez el 2026-10-10 · Revisión: al
 > conectar un LLM real, al exponer la sala o el canal N1–N2, al cablear la aplicación de una
 > solución en un SAP real, al salir del laboratorio o tras un incidente.
 >
@@ -10,7 +9,7 @@
 > revisión, contra el borrador de esta v3 (09/10), encontró 18 más, nueve sobre infirmables; también están
 > cerrados en código o dichos aquí. **Cada
 > afirmación de §4 y §5 tiene su fila** en la matriz
-> ([`soporte-sap-firmas-matriz.md`](soporte-sap-firmas-matriz.md)). Cada fila queda en uno de tres
+> ([`soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)). Cada fila queda en uno de tres
 > estados: **probado**, si una prueba pasa sin su sabotaje y cae con él; **brecha**, si está abierta
 > y declarada; o **depende**, si espera una decisión del laboratorio. Plantilla:
 > `.claude/gobernanza/plantillas/aisia.md`. Su hermano, el modelo de amenazas (C3 v4), está en
@@ -263,4 +262,4 @@ Para salir del laboratorio hacen falta:
   servidor no dice «apto» sin él;
 - el C3 y esta AISIA firmados.
 
-Firmada por: ____________  Rol: ____________  Fecha: ____________
+Firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
