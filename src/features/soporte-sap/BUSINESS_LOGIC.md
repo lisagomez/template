@@ -127,12 +127,13 @@ Producto compuesto: dos herramientas en `tools/` (`soporte-sap`, `sala-a2a`) y u
 
 ### Próximos pasos
 
-- Decisiones abiertas D2–D15 (spec del goal), con la recomendación de cada una en el informe de la
-  corrida A (`docs/goals/soporte-sap-informe-a.md`). D1 está decidida (2026-10-10): con el consentimiento de la
-  consultora y de su cliente (PRP-011).
+- Decisiones abiertas D2 y D4–D15 (spec del goal), con la recomendación de cada una en el informe de la
+  corrida A (`docs/goals/soporte-sap-informe-a.md`). Decididas el 2026-10-10: D1, con el consentimiento de la
+  consultora y de su cliente (PRP-011); D3, mixto (la consultora opera su N2 y el laboratorio solo el N1, sin
+  comprometer disponibilidad antes de GATE 3).
 - Primera consultora real: medir el anonimizador sobre su corpus con consentimiento (D9), fijar los
   umbrales del extractor, conectar un modelo real tras el CDC del routing (D7).
-- Salir del laboratorio exige lo que lista la AISIA §5: entre otras, D3, D6, D7, D8, D10, D12, D13 y D14, el
+- Salir del laboratorio exige lo que lista la AISIA §5: entre otras, D6, D7, D8, D10, D12, D13 y D14, el
   aviso de privacidad, los veredictos desde `tools/conocimiento` (H-20), el tope del lector de PDF (H-22) y GATE 3.
 
 ---

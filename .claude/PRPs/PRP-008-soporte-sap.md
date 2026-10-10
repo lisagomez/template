@@ -283,7 +283,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 - **Root ajeno (modo despacho).** En modo despacho el servidor es de la consultora. Quien tiene root lee la base
   entera, los secretos (incluida la sal de los seudónimos) y los respaldos, y la RLS no lo impide.
   - *Brecha*: lo que ve de su propia operación (sus clientes, las horas de cada consultor y quién es cada seudónimo)
-    no lo cierra ningún control. Va al contrato y a D3.
+    no lo cierra ningún control. Va al contrato. D3, decidida (mixto): la consultora opera su N2, y si lo hace en su
+    propio servidor, ese servidor es suyo.
   - **No se ofrece**: en modo despacho, la medición del SLA **no es evidencia independiente** frente al N3, porque
     root puede reescribir la cadena entera, huellas incluidas. El contrato lo dice (§5).
 - **Superficie.** Nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
@@ -295,7 +296,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 |---|---|---|---|
 | 1 | Un PDF tumba la app de todos los tenants (H-22) | en cuanto el laboratorio reciba documentos de fuera | el tope de inflado, medido sobre el corpus real del extractor (en pausa) |
 | 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza; no se enciende fuera del laboratorio |
-| 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato y D3; el SLA de ese modo no se ofrece como evidencia |
+| 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato (D3 decidida: mixto); el SLA de ese modo no se ofrece como evidencia |
 | 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real | mover la matriz a `tools/conocimiento`, con su firma |
 | 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |
 | 6 | Grupo chico ante el laboratorio | con una sola consultora o un tamaño de un cliente | un tamaño mínimo de grupo (D14) |

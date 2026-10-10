@@ -840,6 +840,8 @@ tras construir:
     ser encargado de los datos de terceros.
   - Hay que decidir si Soporte SAP es A, B o mixto, y su frontera de entrega. Hasta cerrar GATE 3,
     RPO y RTO son «desconocidos».
+  - **Decidida el 2026-10-10: mixto.** Hasta GATE 3, la consultora opera su N2 (la atención y el SLA con su
+    cliente) y el laboratorio opera solo el N1 (sala, sandbox, núcleo), sin comprometer disponibilidad.
 - **D4. Qué tabla representa al humano que firma en la sala** (decisión 5 de la spec de la
   sala). Por defecto aquí: `auth.uid()` con `profiles`.
 - **D5. Las cifras del pricing y los tiers**, que dependen del plan comercial (ERP-7).
