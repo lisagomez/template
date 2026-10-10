@@ -1,7 +1,8 @@
 # PRP-011: D1, el núcleo común con consentimiento (Soporte SAP)
 
-> **Estado**: APROBADO (2026-10-10) por el laboratorio, en sesión: «apruebo el PRP-011 con tus recomendaciones».
-> DP-1 a DP-4 quedan como su recomendación. La fase 1 (la base) está en la rama `soporte/d1-fase1`.
+> **Estado**: **COMPLETADO** (2026-10-10). Las tres fases están en `main` (#245, #246, #247), y la revisión 1 de la AISIA
+> la firmó lisagomez. **Aprobado** (2026-10-10) por el laboratorio, en sesión: «apruebo el PRP-011 con tus
+> recomendaciones». DP-1 a DP-4 quedan como su recomendación.
 > **Decisión de origen**: D1, decidida por el laboratorio el 2026-10-10 en sesión: **«con consentimiento»**. Lo
 > aprendido con una consultora llega al núcleo común solo generalizado, firmado por el superadministrador y con el
 > consentimiento por contrato de la consultora de origen **y** de su cliente.
