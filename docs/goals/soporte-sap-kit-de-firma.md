@@ -2,6 +2,10 @@
 
 > **Fuera de todo registro.** Prepara la firma de la AISIA v3 y del C3 v4 de Soporte SAP (PRP-010, fase 5). **La
 > firma la escribes tú**: este kit no firma nada, y el guion que lo acompaña no hace nada si falta una firma.
+>
+> **Usado el 2026-10-10**: lisagomez firmó las dos y la AISIA está ya en
+> [`.claude/gobernanza/AISIA-soporte-sap.md`](../../.claude/gobernanza/AISIA-soporte-sap.md) (PR #243). Lo de abajo
+> queda como registro de lo que se firmó.
 
 ## Qué firmas
 
@@ -9,7 +13,7 @@ Dos firmas, cada una en su línea:
 
 | Firma | Qué firma | Dónde está hoy | Línea que escribes |
 |---|---|---|---|
-| **La AISIA v3** (C4) | a quién puede dañar el producto sin que nadie lo ataque, y qué lo impide | [`docs/goals/soporte-sap-AISIA.md`](soporte-sap-AISIA.md), §5 | `Firmada por: <nombre>  Rol: <rol>  Fecha: <AAAA-MM-DD>` |
+| **La AISIA v3** (C4) | a quién puede dañar el producto sin que nadie lo ataque, y qué lo impide | `docs/goals/soporte-sap-AISIA.md`, §5 (hoy en `.claude/gobernanza/`) | `Firmada por: <nombre>  Rol: <rol>  Fecha: <AAAA-MM-DD>` |
 | **El contrato** | el producto, con su C3 v4 (quién lo ataca y qué lo impide) y su AISIA v3 | [`src/features/soporte-sap/BUSINESS_LOGIC.md`](../../src/features/soporte-sap/BUSINESS_LOGIC.md), la línea `**Firma:**`; el C3 vive en el [PRP-008](../../.claude/PRPs/PRP-008-soporte-sap.md) | `**Firma:** <nombre> (<rol>) · Fecha: <AAAA-MM-DD> · firma el contrato con su C3 v4 y su AISIA v3.` |
 
 **Lo que decides al firmar** es lo que dice la AISIA §5: **mitigar y operar solo en laboratorio**. Firmar **no**
