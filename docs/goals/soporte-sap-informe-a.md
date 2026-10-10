@@ -2,7 +2,7 @@
 
 > Spec: [`docs/goals/soporte-sap.md`](soporte-sap.md) · Diseño: [`docs/SDD-soporte-sap.md`](../SDD-soporte-sap.md) ·
 > Plan y C3: [`.claude/PRPs/PRP-008-soporte-sap.md`](../../.claude/PRPs/PRP-008-soporte-sap.md) · AISIA (borrador):
-> [`soporte-sap-AISIA.md`](soporte-sap-AISIA.md) ·  CDC: firmado el 2026-10-04, en la [bitácora](../../.claude/gobernanza/BITACORA-CDC.md) (la propuesta se borró al firmar) ·
+> [`AISIA-soporte-sap.md`](../../.claude/gobernanza/AISIA-soporte-sap.md) ·  CDC: firmado el 2026-10-04, en la [bitácora](../../.claude/gobernanza/BITACORA-CDC.md) (la propuesta se borró al firmar) ·
 > Capturas: [`soporte-sap-capturas/`](soporte-sap-capturas/) · Grafo: [`docs/grafos/soporte-sap.json`](../grafos/soporte-sap.json)
 
 **Qué quedó.** Soporte SAP construido y probado **en laboratorio** (datos sintéticos, simulador en lugar de

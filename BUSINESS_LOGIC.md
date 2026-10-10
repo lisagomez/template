@@ -33,7 +33,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` `TPL-piloto-buzon-cfdi` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; **firma pendiente del laboratorio** |
 | Reel del celular | [`src/features/reel/BUSINESS_LOGIC.md`](src/features/reel/BUSINESS_LOGIC.md) | `TPL-reel` `TPL-feature-reel` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-27; **firma pendiente del laboratorio** |
 | Estudio pymes | pendiente | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | falta: `/new-app` al salir de blueprint (PRP-006) |
-| Soporte SAP | [`src/features/soporte-sap/BUSINESS_LOGIC.md`](src/features/soporte-sap/BUSINESS_LOGIC.md) | `TPL-soporte-sap` `TPL-sala-a2a` `TPL-feature-soporte-sap` | hipótesis del 2026-10-04 construida en laboratorio (corrida A del goal); **firma pendiente del laboratorio** |
+| Soporte SAP | [`src/features/soporte-sap/BUSINESS_LOGIC.md`](src/features/soporte-sap/BUSINESS_LOGIC.md) | `TPL-soporte-sap` `TPL-sala-a2a` `TPL-feature-soporte-sap` | construida en laboratorio (corrida A, cerrada por el PRP-010); **C3 v4 y AISIA v3 firmados** por lisagomez el 2026-10-10; opera solo en laboratorio (AISIA §5) |
 | Vendedor con IA en WhatsApp | pendiente | `TPL-ventas-whatsapp` `TPL-feature-ventas-whatsapp` | falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar) |
 
 ## 2. Lo que no es producto

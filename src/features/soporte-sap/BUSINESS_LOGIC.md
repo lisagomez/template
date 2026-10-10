@@ -100,8 +100,8 @@ sala cazados; 63 comprobaciones de aislamiento en verde; restauración por tenan
 
 ## 6. Gobernanza (controles C4 y C7)
 
-> La evaluación completa está en la AISIA en borrador,
-> [`docs/goals/soporte-sap-AISIA.md`](../../../docs/goals/soporte-sap-AISIA.md), y el modelo de
+> La evaluación completa está en la AISIA firmada,
+> [`.claude/gobernanza/AISIA-soporte-sap.md`](../../../.claude/gobernanza/AISIA-soporte-sap.md), y el modelo de
 > amenazas (C3 v4) en [`.claude/PRPs/PRP-008-soporte-sap.md`](../../../.claude/PRPs/PRP-008-soporte-sap.md).
 > Los dos los revisaron, contra el código, tres agentes que no los escribieron (PRP-010), y cada frase tiene su
 > fila en la [matriz](../../../docs/goals/soporte-sap-firmas-matriz.md): probada con su sabotaje, brecha declarada o
@@ -136,4 +136,4 @@ Producto compuesto: dos herramientas en `tools/` (`soporte-sap`, `sala-a2a`) y u
 
 ---
 
-**Firma:** pendiente: el laboratorio firma aquí el contrato con su C3 v4 y su AISIA v3 (PRP-010, fase 5; el kit está en `docs/goals/soporte-sap-kit-de-firma.md`).
+**Firma:** lisagomez (responsable del proyecto) · Fecha: 2026-10-10 · firma el contrato con su C3 v4 y su AISIA v3. 

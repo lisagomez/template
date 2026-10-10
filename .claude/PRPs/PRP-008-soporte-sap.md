@@ -2,7 +2,7 @@
 
 > **Estado**: corrida A **cerrada** (2026-10-04; en `main` por el PR #211). Sus controles los revisaron dos
 > agentes (05/10 y 07/10) y los cerró el PRP-010 (fases 0 a 3, PRs #226 a #240). El C3 v4 de abajo y la AISIA v3
-> esperan la firma del laboratorio (PRP-010, fase 5).
+> los firmó lisagomez el 2026-10-10 (PRP-010, fase 5).
 > **Spec del goal**: [`docs/goals/soporte-sap.md`](../../docs/goals/soporte-sap.md) · **Diseño**: [`docs/SDD-soporte-sap.md`](../../docs/SDD-soporte-sap.md)
 > · **Grafo**: [`docs/grafos/soporte-sap.json`](../../docs/grafos/soporte-sap.json)
 > **CDC aplicable**: SÍ para lo que toque el inventario (campo de producto y fuente de CLIs) y
@@ -299,7 +299,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 
 ### Evaluación de impacto (C4)
 
-Borrador fuera del registro: [`docs/goals/soporte-sap-AISIA.md`](../../docs/goals/soporte-sap-AISIA.md).
+Firmada por lisagomez el 2026-10-10: [`.claude/gobernanza/AISIA-soporte-sap.md`](../gobernanza/AISIA-soporte-sap.md).
 Se firma junto con el BUSINESS_LOGIC del producto.
 
 ## Aprendizajes

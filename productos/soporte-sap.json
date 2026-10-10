@@ -8,8 +8,8 @@
  "contrato": {
   "ruta": "src/features/soporte-sap/BUSINESS_LOGIC.md",
   "c3": ".claude/PRPs/PRP-008-soporte-sap.md",
-  "aisia": "docs/goals/soporte-sap-AISIA.md",
-  "firma": "pendiente del laboratorio"
+  "aisia": ".claude/gobernanza/AISIA-soporte-sap.md",
+  "firma": "firmada por lisagomez el 2026-10-10"
  },
  "modeloDeNegocio": {
   "quienPaga": "la consultora de soporte SAP (N2)",
