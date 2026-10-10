@@ -225,7 +225,9 @@ function relojSinHistoria(eventos: readonly EventoSla[], prioridadInicial: Prior
 
   const tramos: Tramo[] = []
   let estado = 'corre' as Tramo['estado'], inicio = desde, porque: TipoEventoSla = ultimoCambio && contrato.cambioDePrioridad === 'desde_el_cambio' ? 'CAMBIO_PRIORIDAD' : 'RECIBIDA'
-  const cierra = (x: number) => { if (x > inicio) tramos.push({ desde: iso(inicio), hasta: iso(x), estado, minutos: minutosHabiles(cal, inicio, x), porque }) }
+  // El tramo en curso se emite aunque dure cero: si el corte cae en el mismo milisegundo que el evento que lo abrió (la
+  // vista se calcula justo después de la acción), sin él la pantalla no decía que el reloj se reanudó (PRP-010, fase 5).
+  const cierra = (x: number, enCurso = false) => { if (x > inicio || (enCurso && x === inicio)) tramos.push({ desde: iso(inicio), hasta: iso(x), estado, minutos: minutosHabiles(cal, inicio, x), porque }) }
   const pasa = (x: number, nuevo: Tramo['estado'], e: TipoEventoSla) => { cierra(x); estado = nuevo; inicio = x; porque = e }
   for (const e of ev) {
     const x = t(e.fecha)
@@ -235,7 +237,7 @@ function relojSinHistoria(eventos: readonly EventoSla[], prioridadInicial: Prior
     else if (e.tipo === 'RESUELTA' && estado !== 'detenido') pasa(x, 'detenido', e.tipo)
     else if (e.tipo === 'REABIERTA' && estado === 'detenido') pasa(x, 'corre', e.tipo)
   }
-  if (estado !== 'detenido') cierra(fin)
+  if (estado !== 'detenido') cierra(fin, true)
   const suma = (s: Tramo['estado']) => tramos.filter((x) => x.estado === s).reduce((a, x) => a + x.minutos, 0)
   const resuelta = estado === 'detenido'
   const total = suma('corre')

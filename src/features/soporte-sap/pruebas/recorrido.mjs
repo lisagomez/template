@@ -131,6 +131,11 @@ await pagina.waitForTimeout(1200)
 await pagina.click(sel('responde-cliente'))
 await pagina.waitForTimeout(400)
 await captura(7, 'workspace del consultor con SLA y horas', async () => { const t = await texto(sel('sla')); return /P1/.test(t) && /SAP Enterprise Support/.test(t) && (await texto(sel('horas'))).includes('Horas') }, sel('sla'))
+// 7.1 (AISIA §4, riesgo de baja): la tarjeta enseña la fórmula y el umbral SUPUESTO junto al número. Es la única fila de
+// la matriz que se prueba leyendo el código (un componente de React): aquí se ve en la pantalla.
+const riesgo = pagina.locator('[data-supuesto="riesgo_de_baja"]').first()
+await riesgo.scrollIntoViewIfNeeded()
+await captura(7.1, 'el riesgo de baja con su formula y su umbral supuesto', async () => { const t = (await riesgo.textContent()) ?? ''; return /0\.85/.test(t) && /Supuesto:/.test(t) }, '[data-supuesto="riesgo_de_baja"]')
 await captura(11, 'reloj de una incidencia corre se pausa y se reanuda', async () => { const r = await texto(sel('reloj-incidencia')); return /pausa/.test(r) && /RESPUESTA_CLIENTE/.test(r) }, sel('reloj-incidencia'))
 await pagina.locator(sel('reloj-demo')).scrollIntoViewIfNeeded()
 await captura(11.5, 'incumplimiento de SLA con su evidencia', async () => { const d = await texto(sel('reloj-demo')); return /fuera de meta/.test(d) && /ESPERA_CLIENTE/.test(d) && /RESPUESTA_CLIENTE/.test(d) }, sel('reloj-demo'))
@@ -174,7 +179,9 @@ await captura(13, 'al tope del presupuesto el P1 pasa a una persona y el P4 espe
 }, sel('presupuesto'))
 
 // 14 (PRP-010 H-10): el cliente impugna la prioridad; la consultora la resuelve a su nombre, y una resuelta no se reabre.
-const abre = (titulo) => pagina.locator('[data-prueba^="incidencia-"]', { hasText: titulo }).first().click()
+// El prefijo es «incidencia-inc-»: con «incidencia-» también encajaba la lista entera («incidencias»), y el clic caía
+// en el centro de la lista, en otra incidencia.
+const abre = (titulo) => pagina.locator('[data-prueba^="incidencia-inc-"]', { hasText: titulo }).first().click()
 await rol('cliente')
 await abre('Usuario bloqueado')
 await pagina.selectOption(sel('impugna-campo'), 'prioridad')

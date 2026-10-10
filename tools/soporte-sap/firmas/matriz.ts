@@ -49,6 +49,9 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-sla-tramo-en-curso'], afirmacion: 'cada incidencia guarda sus tramos (contrato §5)', encontrado: 'fase 5 (09/10), por un recorrido que fallaba uno de cada dos intentos: el tramo en curso de duración cero no se emitía, y la pantalla no decía que el cliente reanudó el reloj' },
+  { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-presupuesto-p1-ocr'], afirmacion: 'un P1 con una imagen sin leer pasa a una persona', encontrado: 'fase 5 (09/10), al pasar la fila a una prueba que ejecuta la app: solo miraba el aviso del tope de OCR. Sin motor de OCR, o con una lectura parcial, la evidencia de una P1 quedaba sin leer y sin nadie' },
+  { doc: 'AISIA', por: 'autor', resolucion: 'prueba', filas: ['aisia-dato-no-frena', 'aisia-secreto-runtime', 'aisia-impugna-app', 'aisia-sla-persona-runtime', 'aisia-presupuesto-runtime', 'aisia-pausa-app-pide', 'aisia-pausa-app-cliente', 'c3-subida-acotada', 'c3-documento-delimitado', 'c3-ruta-404', 'c3-ruta-404-get', 'c3-ruta-sin-error-interno'], afirmacion: 'cada fila ejerce el camino del producto (criterio de éxito del PRP-010)', encontrado: 'fase 5 (09/10): 13 filas seguían probándose leyendo el código con regex; ahora ejecutan el runtime o la ruta. Queda una, la tarjeta del riesgo de baja: es un componente de React y se prueba leyéndolo y en el recorrido' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-prioridad-maquina', 'aisia-prioridad-categorizada', 'aisia-prioridad-declarada'], afirmacion: 'la prioridad de nómina: el piso en la base', encontrado: 'tercera revisión R3-01 y R3-11 (09/10): el job medía la prioridad del primer CATEGORIZADA, que podía emitir el cliente, el consultor o el laboratorio; y el impacto, la urgencia y la prioridad inicial se reescribían sin evento' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-borrado-cambio-cambia', 'aisia-borrado-se-queda'], afirmacion: '(daño sin listar) bajar la prioridad después de vencer', encontrado: 'tercera revisión R3-02: una P1 respondida a los 100 min dejaba de incumplir al bajarla a P3, y P1 → P1 reiniciaba el reloj' },
   { doc: 'AISIA', por: 'revision', resolucion: 'codigo', filas: ['aisia-lab-escala-app'], afirmacion: 'el laboratorio lee solo lo que la consultora escala', encontrado: 'tercera revisión R3-03: en la app, todo plan iba a la sala del laboratorio sin que la consultora escalara (H-01 estaba cerrado en la base, no en el runtime)' },
@@ -186,7 +189,7 @@ export const FILAS: readonly Fila[] = [
     id: 'aisia-dato-no-frena', doc: 'AISIA', ref: 'Dato personal en el sandbox', estado: 'probado',
     afirmacion: 'la cuarentena no frena la atención: el caso sigue con su consultora y su reloj de SLA; solo no entra al sandbox',
     control: 'src/features/soporte-sap/services/runtime.ts · alSandbox(); src/sla.ts no conoce la cuarentena',
-    comprobacion: prueba('anonimiza.ts', 'la cuarentena no frena la atención: el reloj de SLA no la conoce y el caso sigue en atención con su consultora'),
+    comprobacion: prueba('app.ts', 'la cuarentena no frena la atención: un caso de nómina sigue en atención con su consultora y su reloj corre'),
     sabotaje: { que: 'el caso en cuarentena deja de atenderse', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  i.estado = 'en_atencion'\n}", "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  if (a.veredicto === 'entra') i.estado = 'en_atencion'\n}")] },
   },
   {
@@ -269,7 +272,7 @@ export const FILAS: readonly Fila[] = [
     id: 'aisia-secreto-runtime', doc: 'AISIA', ref: 'Secreto del N3 en el núcleo', estado: 'probado',
     afirmacion: 'en la app, al núcleo solo sube el superadministrador, y sube generalizada',
     control: 'src/features/soporte-sap/services/runtime.ts · subeAlNucleo()',
-    comprobacion: prueba('anonimiza.ts', 'H-19 · en la app, al núcleo solo sube el superadministrador, y sube con alNucleo (generalizada)'),
+    comprobacion: prueba('app.ts', 'H-19 · en la app, al núcleo solo sube el superadministrador, y sube generalizada'),
     sabotaje: { que: 'la app sube el texto sin generalizar', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', 'n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION)', "n = { ...p, alcance: 'nucleo', consultora: null }")] },
   },
   {
@@ -570,7 +573,7 @@ export const FILAS: readonly Fila[] = [
     id: 'aisia-impugna-app', doc: 'AISIA', ref: 'La consultora altera la impugnación', infirmable: true, estado: 'probado',
     afirmacion: 'en la app el cliente impugna (también una pausa del reloj) con su motivo, y la consultora la resuelve a su nombre; una resuelta no se reabre',
     control: 'src/features/soporte-sap/services/runtime.ts · impugna() y resuelveImpugnacion()',
-    comprobacion: prueba('pantallas.ts', 'H-10 · en la app, impugna el cliente de la incidencia con su motivo, y la consultora la resuelve a su nombre sin reabrirla'),
+    comprobacion: prueba('app.ts', 'H-10 · en la app, el cliente impugna con su motivo y la consultora la resuelve a su nombre; una resuelta no se reabre'),
     sabotaje: { que: 'una impugnación resuelta se vuelve a resolver', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  if (m.estado !== 'abierta') throw new Rechazo('una impugnación resuelta no se reabre ni se cambia')\n", '')] },
   },
   {
@@ -585,7 +588,7 @@ export const FILAS: readonly Fila[] = [
     id: 'aisia-sla-persona-runtime', doc: 'AISIA', ref: 'Primera respuesta automática', infirmable: true, estado: 'probado',
     afirmacion: "en la app, ni anonimizar ni mandar el plan a la sala marcan la primera respuesta: la marca el consultor al responderle al cliente (DP-4)",
     control: "src/features/soporte-sap/services/runtime.ts · respondeAlCliente()",
-    comprobacion: prueba("anonimiza.ts", "H-17 · ni anonimizar ni mandar a la sala marcan la primera respuesta: solo la da el consultor, respondiéndole al cliente"),
+    comprobacion: prueba('app.ts', 'H-17 · en la app, ni anonimizar ni preparar el plan marcan la primera respuesta: la da el consultor'),
     sabotaje: { que: "anonimizar vuelve a marcar la primera respuesta", ediciones: [
       ed('src/features/soporte-sap/services/runtime.ts', "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  i.estado = 'en_atencion'", "  // persona le responda al cliente (DP-4, PRP-010 H-17).\n  i.sla.push({ tipo: 'PRIMERA_RESPUESTA', fecha: ahora() })\n  i.estado = 'en_atencion'")] },
   },
@@ -653,14 +656,14 @@ export const FILAS: readonly Fila[] = [
     id: 'aisia-presupuesto-runtime', doc: 'AISIA', ref: 'Corte por presupuesto', infirmable: true, estado: 'probado',
     afirmacion: 'en la app, todo paso que gasta modelo pasa por el presupuesto del mes de su consultora; al tope, P1 y P2 a una persona y P3 y P4 en espera, con el aviso en la cadena y a la vista del consultor y del superadministrador',
     control: 'src/features/soporte-sap/services/runtime.ts · conPresupuesto()',
-    comprobacion: prueba('presupuesto.ts', 'H-18 · en la app, todo paso que gasta modelo pasa por el presupuesto del mes, el aviso queda en la cadena y el OCR lee su tope del mes'),
+    comprobacion: prueba('app.ts', 'H-18 · en la app, al tope del presupuesto un P1 con una captura sin leer pasa a una persona y un P4 espera'),
     sabotaje: { que: 'la app ignora el presupuesto', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '  const decision = accionAnteElPresupuesto(veredictoDelMes(presupuestoDe(i.consultora), TOKENS_POR_PLAN), i.clasificacion.prioridad)', "  const decision: AccionDeTriage = { accion: 'llama_modelo', aviso: null }")] },
   },
   {
     id: 'aisia-presupuesto-p1-ocr', doc: 'AISIA', ref: 'P1 sin evidencia leída', infirmable: true, estado: 'probado',
-    afirmacion: 'un P1 o un P2 con una imagen sin leer por el tope de OCR del mes pasa a una persona ahora, y se dice',
+    afirmacion: 'un P1 o un P2 con evidencia sin leer (por el tope de OCR, porque la máquina no tiene motor o porque no cupieron todas sus páginas) pasa a una persona ahora, y se dice',
     control: 'src/features/soporte-sap/services/runtime.ts · levanta()',
-    comprobacion: prueba('presupuesto.ts', 'H-18 · en la app, todo paso que gasta modelo pasa por el presupuesto del mes, el aviso queda en la cadena y el OCR lee su tope del mes'),
+    comprobacion: prueba('app.ts', 'H-18 · en la app, al tope del presupuesto un P1 con una captura sin leer pasa a una persona y un P4 espera'),
     sabotaje: { que: 'la evidencia sin leer no pasa a nadie', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  if (sinLeer.length && (clasificacion.prioridad === 'P1' || clasificacion.prioridad === 'P2')) {", '  if (false) {')] },
   },
   {
@@ -816,14 +819,14 @@ export const FILAS: readonly Fila[] = [
     id: 'aisia-pausa-app-pide', doc: 'AISIA', ref: 'Pausa unilateral', infirmable: true, estado: 'probado',
     afirmacion: 'en la app, el consultor pausa diciendo qué pide, y lo pedido queda en la cadena',
     control: 'src/features/soporte-sap/services/runtime.ts · pideAlCliente()',
-    comprobacion: prueba('pantallas.ts', 'pausa unilateral · en la app, pausar dice qué se le pide al cliente, y el cliente de la incidencia la reanuda al responder'),
+    comprobacion: prueba('app.ts', 'pausa unilateral · en la app, el consultor pausa diciendo qué pide y el cliente la reanuda; nadie más'),
     sabotaje: { que: 'la app pausa sin pedir nada', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  if (pide.trim().length < 10) throw new Rechazo('pausar el reloj lleva lo que se le pide al cliente')\n", '')] },
   },
   {
     id: 'aisia-pausa-app-cliente', doc: 'AISIA', ref: 'Pausa unilateral', infirmable: true, estado: 'probado',
     afirmacion: 'en la app, el cliente ve lo que se le pidió y reanuda el reloj al responder',
     control: 'src/features/soporte-sap/services/runtime.ts · respuestaDelCliente() y la pantalla',
-    comprobacion: prueba('pantallas.ts', 'pausa unilateral · en la app, pausar dice qué se le pide al cliente, y el cliente de la incidencia la reanuda al responder'),
+    comprobacion: prueba('app.ts', 'pausa unilateral · en la app, el consultor pausa diciendo qué pide y el cliente la reanuda; nadie más'),
     sabotaje: { que: 'en la app solo reanuda la consultora', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "\n    && ((s.rol === 'consultor' && x.consultora === s.organizacion) || (s.rol === 'cliente' && x.cliente === s.organizacion)))", "\n    && (s.rol === 'consultor' && x.consultora === s.organizacion))")] },
   },
   {
@@ -1052,6 +1055,13 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'la cadena dice qué consultor respondió y resolvió cada incidencia, y cuándo: con ella se reconstruyen tiempos por persona',
     control: 'ninguno: la cadena es la evidencia del servicio y lleva el actor',
     nota: 'tercera revisión R3-17: no es infirmable (el daño es entre la consultora y sus empleados); quitar el actor rompería la evidencia del SLA',
+  },
+  {
+    id: 'aisia-sla-tramo-en-curso', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
+    afirmacion: 'cada incidencia muestra sus tramos, también el que acaba de abrirse: la evidencia de un incumplimiento no pierde el último',
+    control: 'src/sla.ts · relojSla(): el tramo en curso se emite aunque dure cero',
+    comprobacion: prueba('sla.ts', 'el tramo en curso se ve aunque dure cero: el corte en el mismo instante que la respuesta del cliente'),
+    sabotaje: { que: 'el tramo en curso de duración cero desaparece', ediciones: [ed(dist('sla.js'), '(x > inicio || (enCurso && x === inicio))', '(x > inicio)')] },
   },
   // ──────────────────────────────── C3 ─────────────────────────────────
   {
@@ -1393,14 +1403,14 @@ export const FILAS: readonly Fila[] = [
     id: 'c3-subida-acotada', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
     afirmacion: 'la ruta mira el tamaño de la subida antes de leerla: sin tamaño declarado o más grande que cinco adjuntos, responde 413 sin cargarla en memoria',
     control: 'src/app/api/soporte-sap/route.ts · MAX_CUERPO antes de formData()',
-    comprobacion: prueba('superficie.ts', 'H-23 · la ruta mira el tamaño de la subida ANTES de leerla: sin tamaño declarado o más grande, no entra'),
+    comprobacion: prueba('app.ts', 'H-23 · la ruta mira el tamaño de la subida antes de leerla: sin tamaño declarado o más grande, 413'),
     sabotaje: { que: 'la ruta lee la subida sin mirar su tamaño', ediciones: [ed('src/app/api/soporte-sap/route.ts', "      if (!(largo > 0 && largo <= MAX_CUERPO)) return NextResponse.json({ error: `la subida no declara su tamaño o pasa de ${MAX_CUERPO} bytes`, vista: vista(s) }, { status: 413 })\n", '')] },
   },
   {
     id: 'c3-documento-delimitado', doc: 'C3', ref: 'Inyección (O1)', estado: 'probado',
     afirmacion: 'lo leído de un documento entra a la incidencia delimitado como dato, y la prioridad sale de lo que declara el cliente',
     control: 'src/features/soporte-sap/services/runtime.ts · levanta()',
-    comprobacion: prueba('superficie.ts', 'H-24 · en la app, lo leído de un documento entra delimitado como dato, y la prioridad sale de lo que declara el cliente'),
+    comprobacion: prueba('app.ts', 'H-24 · en la app, lo leído de un documento entra delimitado como dato y no sube la prioridad'),
     sabotaje: { que: 'la app categoriza el texto mezclado', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '  const clasificacion = categoriza(declarado, documentos)', '  const clasificacion = categoriza(texto)')] },
   },
   {
@@ -1505,21 +1515,21 @@ export const FILAS: readonly Fila[] = [
     id: 'c3-ruta-404', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'probado',
     afirmacion: 'responde 404 sin SOPORTE_SAP_LABORATORIO=1',
     control: 'src/app/api/soporte-sap/route.ts · guarda al principio de cada método',
-    comprobacion: prueba('superficie.ts', 'la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1: cada método empieza con la guarda'),
+    comprobacion: prueba('app.ts', 'la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1, el GET y el POST'),
     sabotaje: { que: 'el POST sin guarda', ediciones: [ed('src/app/api/soporte-sap/route.ts', 'export async function POST(req: NextRequest) {\n  if (!encendido()) return apagado()\n', 'export async function POST(req: NextRequest) {\n')] },
   },
   {
     id: 'c3-ruta-404-get', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'probado',
     afirmacion: 'el GET también responde 404 sin SOPORTE_SAP_LABORATORIO=1 (la prueba no lo veía: el GET no es async)',
     control: 'src/app/api/soporte-sap/route.ts · la guarda es la primera línea de cada método',
-    comprobacion: prueba('superficie.ts', 'la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1: cada método empieza con la guarda'),
+    comprobacion: prueba('app.ts', 'la ruta del laboratorio responde 404 sin SOPORTE_SAP_LABORATORIO=1, el GET y el POST'),
     sabotaje: { que: 'el GET sin guarda', ediciones: [ed('src/app/api/soporte-sap/route.ts', 'export function GET(req: NextRequest) {\n  if (!encendido()) return apagado()\n', 'export function GET(req: NextRequest) {\n')] },
   },
   {
     id: 'c3-ruta-sin-error-interno', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'probado',
     afirmacion: 'la ruta no le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje; lo demás va al log del servidor',
     control: 'src/app/api/soporte-sap/route.ts · Rechazo (runtime)',
-    comprobacion: prueba('superficie.ts', 'H-25 · la ruta del laboratorio no le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje'),
+    comprobacion: prueba('app.ts', 'H-25 · la ruta no le devuelve al usuario un error interno: solo los rechazos del laboratorio llevan su mensaje'),
     sabotaje: { que: 'la ruta devuelve el mensaje de cualquier error', ediciones: [ed('src/app/api/soporte-sap/route.ts', "e instanceof Rechazo ? e.message : null", "e instanceof Error ? e.message : null")] },
   },
   {

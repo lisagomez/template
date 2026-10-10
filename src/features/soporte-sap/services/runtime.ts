@@ -167,10 +167,12 @@ export async function levanta(s: Sesion, d: { titulo: string; descripcion: strin
   anota(i, 'CATEGORIZADA', `agente:${AGENTE}`, { prioridad: clasificacion.prioridad, modulo: clasificacion.modulo, transaccion: clasificacion.transaccion, mensaje: clasificacion.mensaje, etiquetas: [...clasificacion.etiquetas] })
   anota(i, 'VEREDICTO_GRAFO', `agente:${AGENTE}`, { tipo: consulta.tipo, regla: consulta.tipo === 'sin_solucion' ? null : consulta.entrada.regla, razon: consulta.razon })
   e.incidencias.unshift(i)
-  // Un P1 o un P2 con una imagen sin leer por el tope de OCR no espera: lo revisa una persona ahora, y se dice.
-  const sinLeer = adjuntos.filter((a) => a.aceptado && a.aviso?.includes('tope de páginas de OCR')).map((a) => a.nombre)
+  // Un P1 o un P2 con evidencia sin leer, entera o en parte, no espera: lo revisa una persona ahora, y se dice. Sin leer
+  // por CUALQUIER causa: el tope de OCR del mes, la máquina sin motor o páginas que no cupieron (PRP-010, fase 5: solo
+  // miraba el aviso del tope, así que sin motor, o con una lectura parcial, la evidencia de una P1 quedaba sin nadie).
+  const sinLeer = adjuntos.filter((a) => a.aceptado && (a.via === 'sin_extraccion' || (a.aviso ?? '').includes('sin extracción'))).map((a) => a.nombre)
   if (sinLeer.length && (clasificacion.prioridad === 'P1' || clasificacion.prioridad === 'P2')) {
-    anota(i, 'A_HUMANO_POR_PRESUPUESTO', `agente:${AGENTE}`, { aviso: `evidencia sin leer por el tope de OCR del mes (${sinLeer.join(', ')}): la revisa una persona ahora` })
+    anota(i, 'A_HUMANO_POR_PRESUPUESTO', `agente:${AGENTE}`, { aviso: `evidencia sin leer (${sinLeer.join(', ')}): la revisa una persona ahora` })
   }
   if (consulta.tipo === 'solucion') conPresupuesto(i, (presupuesto) => proponPlan(i, preparaPlan({ ejecutor: EJECUTOR, incidencia: id, taskId: `tarea-${id}`, entrada: consulta.entrada, texto, sap: e.sap[cl.id]!, presupuesto, version: 1 }), null))
   // Con grado insuficiente el agente NO escala: el laboratorio ve solo lo que la consultora le escala (DP-3).
