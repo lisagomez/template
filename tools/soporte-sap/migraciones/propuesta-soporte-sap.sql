@@ -676,6 +676,9 @@ create table if not exists public.ss_propuesta (
   propuesta_por   text not null,
   decidida_por    uuid,
   creada_en       timestamptz not null default now(),
+  -- La incidencia de la que nace (D1, PRP-011). Solo viaja al insertar: un disparador guarda aparte su consultora y
+  -- su cliente (`ss_priv.propuesta_origen`) y la deja en nulo, así una entrada del núcleo no dice de dónde vino.
+  incidencia_id   uuid,
   constraint ss_a_medida_es_de_alguien check ((alcance = 'a_medida') = (consultora_id is not null)),
   constraint ss_decidida_tiene_quien check ((estado = 'propuesta') = (decidida_por is null))
 );
@@ -715,14 +718,21 @@ end $$;
 -- llevaba lo «a medida» de A a B sin generalizar (PRP-010, tercera revisión: R3-05). Lo único que cambia de dueña es
 -- la promoción al núcleo, y la hace el superadministrador (D2), generalizada (el disparador de arriba).
 create or replace function ss_priv.propuesta_no_cambia_de_duena() returns trigger language plpgsql set search_path = '' as $$
+declare motivo text;
 begin
   if current_user not in ('authenticated', 'soporte_sap_agente', 'soporte_sap_ingesta') then return new; end if;
-  if (new.tipo, new.origen, new.propuesta_por, new.creada_en) is distinct from (old.tipo, old.origen, old.propuesta_por, old.creada_en) then
+  if (new.tipo, new.origen, new.propuesta_por, new.creada_en, new.incidencia_id) is distinct from (old.tipo, old.origen, old.propuesta_por, old.creada_en, old.incidencia_id) then
     raise exception 'de una propuesta no se reescribe quién la propuso ni de dónde salió';
   end if;
   if (new.alcance, new.consultora_id, new.contenido) is distinct from (old.alcance, old.consultora_id, old.contenido)
      and not (old.alcance = 'a_medida' and new.alcance = 'nucleo' and new.consultora_id is null and ss_priv.es_superadmin() is not distinct from true) then
     raise exception 'una propuesta no cambia de consultora, de alcance ni de contenido: al núcleo la sube el superadministrador';
+  end if;
+  -- D1 (PRP-011): al núcleo común solo sube lo que tiene su origen registrado, con el consentimiento vigente de la
+  -- consultora y del cliente de los que nació. Sin eso, el conocimiento de A llegaba a B sin que ninguno lo supiera.
+  if old.alcance = 'a_medida' and new.alcance = 'nucleo' then
+    motivo := ss_priv.falta_para_el_nucleo(new.id);
+    if motivo is not null then raise exception '%', motivo; end if;
   end if;
   return new;
 end $$;
@@ -792,6 +802,94 @@ create table if not exists public.ss_contrato_sla (
   primary key (id, version),
   constraint ss_nivel_y_partes check ((nivel = 'N1-N2') = (cliente_id is null))
 );
+
+-- --- D1: el núcleo común con consentimiento (PRP-011) ---------------------------------------
+-- Lo aprendido con los casos de una consultora sube al núcleo común solo con el consentimiento por contrato de esa
+-- consultora Y de su cliente. Lo da una persona de ESA organización, a su nombre: un consultor por su consultora
+-- (DP-2), un usuario del cliente por su cliente. Vale para la versión de su contrato con la que se dio (DP-3). La
+-- fecha la pone la base. Se revoca, y revocar frena lo que no ha subido; lo ya subido, generalizado, se queda (DP-1).
+create table if not exists public.ss_consentimiento_nucleo (
+  id               uuid primary key default gen_random_uuid(),
+  consultora_id    uuid not null references public.ss_organizacion (id),
+  -- Nulo: consiente la consultora. Con valor: consiente ese cliente de la consultora.
+  cliente_id       uuid references public.ss_organizacion (id),
+  contrato_id      text not null,
+  contrato_version integer not null,
+  otorgado_por     uuid not null,
+  otorgado_en      timestamptz not null default now(),
+  revocado_en      timestamptz,
+  constraint ss_consentimiento_de_un_contrato foreign key (contrato_id, contrato_version) references public.ss_contrato_sla (id, version)
+);
+
+-- La fecha la pone la base, y el contrato tiene que ser el de esa organización: el N1-N2 de la consultora o el N2-N3
+-- de ese cliente. De una fila solo se toca la revocación, una vez.
+create or replace function ss_priv.consentimiento_de_la_base() returns trigger language plpgsql security definer set search_path = '' as $$
+declare k record;
+begin
+  if tg_op = 'INSERT' then
+    new.otorgado_en := now(); new.revocado_en := null;
+    select nivel, consultora_id, cliente_id into k from public.ss_contrato_sla where id = new.contrato_id and version = new.contrato_version;
+    if not found or k.consultora_id is distinct from new.consultora_id or k.cliente_id is distinct from new.cliente_id then
+      raise exception 'el consentimiento va con el contrato de esa organización (N1-N2 la consultora, N2-N3 su cliente)';
+    end if;
+    return new;
+  end if;
+  if (new.consultora_id, new.cliente_id, new.contrato_id, new.contrato_version, new.otorgado_por, new.otorgado_en)
+     is distinct from (old.consultora_id, old.cliente_id, old.contrato_id, old.contrato_version, old.otorgado_por, old.otorgado_en) then
+    raise exception 'de un consentimiento solo se registra su revocación';
+  end if;
+  if old.revocado_en is not null then raise exception 'un consentimiento revocado no se reabre: se da uno nuevo'; end if;
+  new.revocado_en := now();
+  return new;
+end $$;
+drop trigger if exists ss_consentimiento_fechas on public.ss_consentimiento_nucleo;
+create trigger ss_consentimiento_fechas before insert or update on public.ss_consentimiento_nucleo
+  for each row execute function ss_priv.consentimiento_de_la_base();
+
+-- ¿Consiente esa organización, con la versión vigente de su contrato? (`cli` nulo: la consultora.)
+create or replace function ss_priv.consiente_nucleo(cons uuid, cli uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.ss_consentimiento_nucleo c
+    where c.consultora_id = cons and c.cliente_id is not distinct from cli and c.revocado_en is null
+      and c.contrato_version = (select max(k.version) from public.ss_contrato_sla k
+                                where k.id = c.contrato_id and k.vigente_desde <= current_date))
+$$;
+
+-- De dónde nació cada propuesta: aquí y no en su fila. Ningún rol de la API lo lee; solo la regla de promoción.
+create table if not exists ss_priv.propuesta_origen (
+  propuesta_id  uuid primary key,
+  consultora_id uuid not null,
+  cliente_id    uuid not null
+);
+revoke all on ss_priv.propuesta_origen from public;
+
+create or replace function ss_priv.propuesta_registra_origen() returns trigger language plpgsql security definer set search_path = '' as $$
+declare c uuid; cl uuid;
+begin
+  if new.incidencia_id is null then return new; end if;
+  select i.consultora_id, i.cliente_id into c, cl from public.ss_incidencia i where i.id = new.incidencia_id;
+  if c is null or c is distinct from new.consultora_id then
+    raise exception 'una propuesta nace de una incidencia de su consultora';
+  end if;
+  insert into ss_priv.propuesta_origen (propuesta_id, consultora_id, cliente_id) values (new.id, c, cl)
+    on conflict (propuesta_id) do nothing;
+  new.incidencia_id := null;
+  return new;
+end $$;
+drop trigger if exists ss_propuesta_origen on public.ss_propuesta;
+create trigger ss_propuesta_origen before insert on public.ss_propuesta
+  for each row execute function ss_priv.propuesta_registra_origen();
+
+-- Lo que le falta a una propuesta para subir al núcleo, o nulo. Dice QUÉ falta, nunca de quién.
+create or replace function ss_priv.falta_para_el_nucleo(p uuid) returns text language plpgsql stable security definer set search_path = '' as $$
+declare o record;
+begin
+  select consultora_id, cliente_id into o from ss_priv.propuesta_origen where propuesta_id = p;
+  if not found then return 'al núcleo común solo sube lo que tiene su origen registrado (D1)'; end if;
+  if not ss_priv.consiente_nucleo(o.consultora_id, null) then return 'falta el consentimiento de la consultora de origen para el núcleo común (D1)'; end if;
+  if not ss_priv.consiente_nucleo(o.consultora_id, o.cliente_id) then return 'falta el consentimiento del cliente de origen para el núcleo común (D1)'; end if;
+  return null;
+end $$;
 
 create table if not exists public.ss_sla_resultado (
   incidencia_id       uuid not null references public.ss_incidencia (id) on delete cascade,
@@ -975,7 +1073,7 @@ do $$
 declare t text;
 begin
   -- `ss_contrato_sla` también (PRP-010 H-14): un contrato N2-N3 no se firma con el cliente de otra consultora.
-  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla'] loop
+  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla', 'ss_consentimiento_nucleo'] loop
     execute format('drop trigger if exists %I on public.%I', t || '_tenencia', t);
     execute format('create trigger %I before insert or update on public.%I for each row execute function ss_priv.cliente_es_de_consultora()', t || '_tenencia', t);
   end loop;
@@ -989,7 +1087,7 @@ begin
   foreach t in array array['ss_organizacion', 'ss_miembro', 'ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto',
     'ss_campo_extraido', 'ss_cuarentena', 'ss_impugnacion', 'ss_caso_sandbox', 'ss_propuesta', 'ss_acceso_motivado',
     'ss_contrato_sla', 'ss_sla_resultado', 'ss_horas', 'ss_presupuesto', 'ss_crudo', 'ss_mapeo',
-    'ss_procedencia', 'ss_chat_mensaje', 'ss_importacion_fila', 'ss_metrica'] loop
+    'ss_procedencia', 'ss_chat_mensaje', 'ss_importacion_fila', 'ss_metrica', 'ss_consentimiento_nucleo'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('alter table public.%I force row level security', t);
   end loop;
@@ -1140,6 +1238,22 @@ drop policy if exists ss_propuesta_a_su_nombre on public.ss_propuesta;
 create policy ss_propuesta_a_su_nombre on public.ss_propuesta as restrictive for update to authenticated
   with check (decidida_por is null or decidida_por = auth.uid());
 
+-- D1: consiente una persona de ESA organización, a su nombre; la lee esa organización (y la consultora, lo de sus
+-- clientes). Ni el laboratorio ni un rol de servicio escriben un consentimiento.
+drop policy if exists ss_consentimiento_lee on public.ss_consentimiento_nucleo;
+create policy ss_consentimiento_lee on public.ss_consentimiento_nucleo for select to authenticated
+  using (case when cliente_id is null then ss_priv.rol_en(consultora_id) is not distinct from 'consultor' else ss_priv.ve_cliente(cliente_id) end);
+drop policy if exists ss_consentimiento_otorga on public.ss_consentimiento_nucleo;
+create policy ss_consentimiento_otorga on public.ss_consentimiento_nucleo for insert to authenticated
+  with check (otorgado_por = auth.uid() and case when cliente_id is null then ss_priv.rol_en(consultora_id) is not distinct from 'consultor'
+                                                  else ss_priv.rol_en(cliente_id) is not distinct from 'usuario_cliente' end);
+drop policy if exists ss_consentimiento_revoca on public.ss_consentimiento_nucleo;
+create policy ss_consentimiento_revoca on public.ss_consentimiento_nucleo for update to authenticated
+  using (case when cliente_id is null then ss_priv.rol_en(consultora_id) is not distinct from 'consultor'
+              else ss_priv.rol_en(cliente_id) is not distinct from 'usuario_cliente' end)
+  with check (case when cliente_id is null then ss_priv.rol_en(consultora_id) is not distinct from 'consultor'
+                   else ss_priv.rol_en(cliente_id) is not distinct from 'usuario_cliente' end);
+
 drop policy if exists ss_acceso_otorga on public.ss_acceso_motivado;
 create policy ss_acceso_otorga on public.ss_acceso_motivado for insert to authenticated
   with check (otorgado_por = auth.uid()
@@ -1208,8 +1322,10 @@ create policy ss_sandbox_agente_escribe on public.ss_caso_sandbox for insert to 
   with check (origen_consultora_id = ss_priv.consultora_de_tarea());
 
 drop policy if exists ss_propuesta_agente on public.ss_propuesta;
+-- Solo A MEDIDA de su consultora (D1, PRP-011): al núcleo se llega promoviendo, con el origen y los consentimientos.
+-- Antes el agente insertaba directo al núcleo y la regla del consentimiento quedaba esquivada.
 create policy ss_propuesta_agente on public.ss_propuesta for insert to soporte_sap_agente
-  with check (estado = 'propuesta' and decidida_por is null and (consultora_id is null or consultora_id = ss_priv.consultora_de_tarea()));
+  with check (estado = 'propuesta' and decidida_por is null and alcance = 'a_medida' and consultora_id = ss_priv.consultora_de_tarea());
 
 drop policy if exists ss_chat_agente on public.ss_chat_mensaje;
 -- Solo en el chat del usuario de SU turno: el token de la tarea de chat lo nombra (`usuario`). Antes bastaba
@@ -1241,7 +1357,7 @@ declare t text;
 begin
   foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
     'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_crudo', 'ss_mapeo', 'ss_procedencia', 'ss_importacion_fila',
-    'ss_contrato_sla', 'ss_presupuesto', 'ss_propuesta'] loop
+    'ss_contrato_sla', 'ss_presupuesto', 'ss_propuesta', 'ss_consentimiento_nucleo'] loop
     execute format('drop policy if exists %I on public.%I', t || '_plataforma', t);
     execute format('drop policy if exists %I on public.%I', t || '_plataforma_lee', t);
     execute format('create policy %I on public.%I for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);
@@ -1304,6 +1420,9 @@ grant update (estado, resuelta_por) on public.ss_impugnacion to authenticated;
 grant select, insert on public.ss_escalamiento, public.ss_evento, public.ss_adjunto, public.ss_horas,
   public.ss_acceso_motivado, public.ss_chat_mensaje to authenticated;
 grant update (revocado_en) on public.ss_acceso_motivado to authenticated;
+grant select, insert on public.ss_consentimiento_nucleo to authenticated;
+grant update (revocado_en) on public.ss_consentimiento_nucleo to authenticated;
+grant select on public.ss_consentimiento_nucleo to soporte_sap_plataforma;
 grant select on public.ss_cuarentena, public.ss_caso_sandbox, public.ss_contrato_sla, public.ss_sla_resultado,
   public.ss_crudo, public.ss_procedencia, public.ss_importacion_fila, public.ss_metrica to authenticated;
 

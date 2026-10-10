@@ -60,7 +60,7 @@ parámetro por decidir**.
 
 ## 4. Arquitectura de Datos
 
-Propuesta de esquema con RLS forzada en las 22 tablas, tenencia en árbol (laboratorio → consultora →
+Propuesta de esquema con RLS forzada en las 23 tablas, tenencia en árbol (laboratorio → consultora →
 cliente) y tres buckets privados, en [`tools/soporte-sap/migraciones/propuesta-soporte-sap.sql`](../../../tools/soporte-sap/migraciones/propuesta-soporte-sap.sql)
 (SDD §12). **Validada en efímero, no aplicada a ninguna base.** El aislamiento se prueba con 63
 comprobaciones con el rol real (`tools/soporte-sap/pruebas/aislamiento.ts`).

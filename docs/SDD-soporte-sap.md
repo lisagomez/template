@@ -426,7 +426,7 @@ medición.
 ## 12. Esquema de almacenamiento
 
 **Propuesta, no aplicada**: [`tools/soporte-sap/migraciones/propuesta-soporte-sap.sql`](../tools/soporte-sap/migraciones/propuesta-soporte-sap.sql).
-La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 22 tablas; ninguna
+La prueban `pruebas/esquema.ts` (se aplica dos veces; RLS con `force` en las 23 tablas; ninguna
 función `security definer` en `public`; árbol, roles y tenencia de las tablas hijas impuestos en
 la base; solo agregar; ningún rol de servicio con `bypassrls` ni `update` sobre lo que se decide) y
 `pruebas/aislamiento.ts` (63 comprobaciones con el rol real, buckets incluidos; varias son controles positivos), en un Postgres efímero.
@@ -441,7 +441,7 @@ tenencia de las tablas hijas).
 | Identidad | `ss_organizacion`, `ss_miembro` | árbol laboratorio → consultora → cliente | el árbol y el rol por tipo de organización los impone un disparador |
 | Producción | `ss_incidencia`, `ss_escalamiento`, `ss_evento`, `ss_adjunto`, `ss_campo_extraido`, `ss_impugnacion` | `consultora_id` + `cliente_id` | el cliente tiene que ser de esa consultora y cada hija hereda la tenencia de su incidencia (disparadores); `ss_evento` es de **solo agregar**, con fecha y actor que da la base; un campo lo confirma una persona a su nombre; el cliente impugna y su consultora resuelve |
 | Sandbox | `ss_caso_sandbox`, `ss_cuarentena` | `origen_consultora_id`; la cuarentena por cliente | el sandbox solo tiene texto anonimizado; la cuarentena guarda **tipos** de señal, nunca el dato |
-| Núcleo y FDE | `ss_propuesta` | `consultora_id` si es a medida, nulo si va al núcleo | el agente solo inserta en estado `propuesta` |
+| Núcleo y FDE | `ss_propuesta`, `ss_consentimiento_nucleo` | `consultora_id` si es a medida, nulo si va al núcleo; el consentimiento, por consultora o por cliente | el agente solo propone a medida, desde una incidencia de su consultora; al núcleo se llega promoviendo, con el origen (guardado aparte, en `ss_priv`) y el consentimiento vigente de la consultora y del cliente de origen (D1, PRP-011) |
 | Acceso | `ss_acceso_motivado` | por usuario y cliente | lo otorga **la consultora** a un miembro del laboratorio, con motivo, por 72 h como máximo desde una fecha que pone la base; se revoca, y nadie se lo otorga a sí mismo (D14 decide qué más ve el superadministrador) |
 | SLA y horas | `ss_contrato_sla`, `ss_sla_resultado`, `ss_horas`, `ss_presupuesto` | N1–N2 por consultora; N2–N3 por cliente | contrato versionado por `(id, version)` |
 | Onboarding | `ss_crudo`, `ss_mapeo`, `ss_procedencia`, `ss_importacion_fila` | `consultora_id` | el crudo es de **solo agregar** y se identifica por su huella; un mapeo aprobado dice quién; cada fila importada queda limpia, en revisión o descartada con motivo |
@@ -620,7 +620,7 @@ Los controles, cada uno con la prueba que se pone roja si falta (detalle en el C
 
 | Riesgo | Control | Prueba |
 |---|---|---|
-| Un tenant lee a otro | RLS `enable` + `force` en las 22 tablas, tenencia de las hijas por disparador, buckets por ruta | `pruebas/aislamiento.ts` (63 comprobaciones), `pruebas/esquema.ts` |
+| Un tenant lee a otro | RLS `enable` + `force` en las 23 tablas, tenencia de las hijas por disparador, buckets por ruta | `pruebas/aislamiento.ts` (63 comprobaciones), `pruebas/esquema.ts` |
 | Un servicio se salta la RLS | ningún rol de servicio con `bypassrls`; cada uno acotado por un token de tarea firmado; ninguna superficie con `service_role` | `pruebas/token-tarea.ts`, `pruebas/esquema.ts` |
 | Un modelo fabrica una aprobación | política `as restrictive` + sin `insert` para servicios; el chat no conoce la tabla | suite de la sala con S1–S11 (S2b y S10b incluidos) y `pruebas/chat.ts` (el sabotaje «el chat aprueba» la pone en rojo) |
 | El job de métricas filtra texto | privilegios por columna: ni títulos, ni descripciones, ni nombres, ni motivos | `pruebas/metricas-rls.ts`, `pruebas/semantica-produccion.ts` |

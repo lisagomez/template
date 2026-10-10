@@ -49,6 +49,7 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-cruzado-consentimiento', 'aisia-d1-cliente', 'aisia-d1-solo-promoviendo', 'aisia-d1-origen-privado', 'aisia-d1-quien-consiente', 'aisia-d1-su-contrato', 'aisia-d1-fecha', 'aisia-d1-revoca', 'aisia-d1-no-se-reabre', 'aisia-d1-version', 'c3-d1-consentimiento', 'c3-d1-solo-promoviendo'], afirmacion: 'a la matriz común solo pasa lo general con consentimiento (dependía de D1)', encontrado: 'PRP-011 (10/10): D1 decidida «con consentimiento». No existía el consentimiento, y el agente proponía directo al núcleo, así que la regla se habría esquivado' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-sla-tramo-en-curso'], afirmacion: 'cada incidencia guarda sus tramos (contrato §5)', encontrado: 'fase 5 (09/10), por un recorrido que fallaba uno de cada dos intentos: el tramo en curso de duración cero no se emitía, y la pantalla no decía que el cliente reanudó el reloj' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-presupuesto-p1-ocr'], afirmacion: 'un P1 con una imagen sin leer pasa a una persona', encontrado: 'fase 5 (09/10), al pasar la fila a una prueba que ejecuta la app: solo miraba el aviso del tope de OCR. Sin motor de OCR, o con una lectura parcial, la evidencia de una P1 quedaba sin leer y sin nadie' },
   { doc: 'AISIA', por: 'autor', resolucion: 'prueba', filas: ['aisia-dato-no-frena', 'aisia-secreto-runtime', 'aisia-impugna-app', 'aisia-sla-persona-runtime', 'aisia-presupuesto-runtime', 'aisia-pausa-app-pide', 'aisia-pausa-app-cliente', 'c3-subida-acotada', 'c3-documento-delimitado', 'c3-ruta-404', 'c3-ruta-404-get', 'c3-ruta-sin-error-interno'], afirmacion: 'cada fila ejerce el camino del producto (criterio de éxito del PRP-010)', encontrado: 'fase 5 (09/10): 13 filas seguían probándose leyendo el código con regex; ahora ejecutan el runtime o la ruta. Queda una, la tarjeta del riesgo de baja: es un componente de React y se prueba leyéndolo y en el recorrido' },
@@ -403,9 +404,11 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'se registra sin motivo', ediciones: [ed(dist('fde.js'), 'if (!t.motivo.trim())', 'if (false)')] },
   },
   {
-    id: 'aisia-cruzado-consentimiento', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'depende',
-    afirmacion: 'a la matriz común solo pasa lo general con consentimiento por contrato de la consultora y de su cliente',
-    control: 'D1', nota: 'sin D1 decidida, lo aprendido queda aislado por consultora (la fila de arriba)',
+    id: 'aisia-cruzado-consentimiento', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'al núcleo común solo sube lo que tiene su origen registrado, con el consentimiento vigente de la consultora de origen (D1, decidida el 2026-10-10)',
+    control: 'SQL · ss_priv.falta_para_el_nucleo() en ss_priv.propuesta_no_cambia_de_duena()',
+    comprobacion: prueba('nucleo.ts', 'D1 · sin el consentimiento de la consultora o del cliente de origen no sube al núcleo; con los dos, sí'),
+    sabotaje: { que: 'se promueve sin mirar el consentimiento', ediciones: [ed(SQL, "    motivo := ss_priv.falta_para_el_nucleo(new.id);\n    if motivo is not null then raise exception '%', motivo; end if;", '    motivo := null;')] },
   },
   {
     id: 'aisia-lab-escalado', doc: 'AISIA', ref: 'El laboratorio lee lo que no necesita', estado: 'probado',
@@ -550,7 +553,7 @@ export const FILAS: readonly Fila[] = [
     control: "SQL · constraint ss_sla_de_un_contrato",
     comprobacion: prueba('cierre-base.ts', 'H-16 · el resultado de SLA no lo guarda el agente, y es de un contrato que existe'),
     sabotaje: { que: "un resultado con un contrato inventado", ediciones: [
-      ed(SQL, "foreign key (contrato_id, contrato_version) references public.ss_contrato_sla (id, version)", "check (true)")] },
+      ed(SQL, "constraint ss_sla_de_un_contrato foreign key (contrato_id, contrato_version) references public.ss_contrato_sla (id, version)", "constraint ss_sla_de_un_contrato check (true)")] },
   },
   {
     id: 'aisia-sla-resultado-agente', doc: 'AISIA', ref: 'SLA mal medido', infirmable: true, estado: 'probado',
@@ -1063,6 +1066,69 @@ export const FILAS: readonly Fila[] = [
     comprobacion: prueba('sla.ts', 'el tramo en curso se ve aunque dure cero: el corte en el mismo instante que la respuesta del cliente'),
     sabotaje: { que: 'el tramo en curso de duración cero desaparece', ediciones: [ed(dist('sla.js'), '(x > inicio || (enCurso && x === inicio))', '(x > inicio)')] },
   },
+  {
+    id: 'aisia-d1-cliente', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'al núcleo tampoco sube sin el consentimiento vigente del cliente de origen: la consultora no basta',
+    control: 'SQL · ss_priv.falta_para_el_nucleo()',
+    comprobacion: prueba('nucleo.ts', 'D1 · sin el consentimiento de la consultora o del cliente de origen no sube al núcleo; con los dos, sí'),
+    sabotaje: { que: 'basta la consultora', ediciones: [ed(SQL, '  if not ss_priv.consiente_nucleo(o.consultora_id, o.cliente_id) then return', '  if false then return')] },
+  },
+  {
+    id: 'aisia-d1-solo-promoviendo', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'el agente no propone directo al núcleo: al núcleo se llega promoviendo algo a medida, con su origen',
+    control: 'SQL · ss_propuesta_agente',
+    comprobacion: prueba('nucleo.ts', 'D1 · el agente no propone directo al núcleo: al núcleo se llega promoviendo, y una propuesta nace de una incidencia de su consultora'),
+    sabotaje: { que: 'el agente vuelve a proponer al núcleo', ediciones: [ed(SQL, "and alcance = 'a_medida' and consultora_id = ss_priv.consultora_de_tarea());", 'and (consultora_id is null or consultora_id = ss_priv.consultora_de_tarea()));')] },
+  },
+  {
+    id: 'aisia-d1-origen-privado', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'una entrada del núcleo no dice de dónde vino: el origen se guarda aparte y ningún rol de la API lo lee',
+    control: 'SQL · ss_priv.propuesta_registra_origen()',
+    comprobacion: prueba('nucleo.ts', 'D1 · el agente no propone directo al núcleo: al núcleo se llega promoviendo, y una propuesta nace de una incidencia de su consultora'),
+    sabotaje: { que: 'la fila se queda con su incidencia', ediciones: [ed(SQL, '  new.incidencia_id := null;\n', '')] },
+  },
+  {
+    id: 'aisia-d1-quien-consiente', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'consiente una persona de esa organización, a su nombre: ni la consultora por su cliente, ni el laboratorio, ni el agente',
+    control: 'SQL · ss_consentimiento_otorga',
+    comprobacion: prueba('nucleo.ts', 'D1 · consiente una persona de esa organización, a su nombre y con su contrato; nadie consiente por otra'),
+    sabotaje: { que: 'cualquiera consiente por cualquiera', ediciones: [ed(SQL, 'create policy ss_consentimiento_otorga on public.ss_consentimiento_nucleo for insert to authenticated\n  with check (otorgado_por = auth.uid() and case', 'create policy ss_consentimiento_otorga on public.ss_consentimiento_nucleo for insert to authenticated\n  with check (true or case')] },
+  },
+  {
+    id: 'aisia-d1-su-contrato', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'el consentimiento va con el contrato de esa organización: el N1-N2 de la consultora o el N2-N3 de su cliente',
+    control: 'SQL · ss_priv.consentimiento_de_la_base()',
+    comprobacion: prueba('nucleo.ts', 'D1 · consiente una persona de esa organización, a su nombre y con su contrato; nadie consiente por otra'),
+    sabotaje: { que: 'se consiente con el contrato de otro', ediciones: [ed(SQL, '    if not found or k.consultora_id is distinct from new.consultora_id or k.cliente_id is distinct from new.cliente_id then', '    if false then')] },
+  },
+  {
+    id: 'aisia-d1-fecha', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'la fecha del consentimiento la pone la base',
+    control: 'SQL · ss_priv.consentimiento_de_la_base()',
+    comprobacion: prueba('nucleo.ts', 'D1 · consiente una persona de esa organización, a su nombre y con su contrato; nadie consiente por otra'),
+    sabotaje: { que: 'quien consiente elige su fecha', ediciones: [ed(SQL, '    new.otorgado_en := now(); new.revocado_en := null;', '    new.revocado_en := null;')] },
+  },
+  {
+    id: 'aisia-d1-revoca', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'revocar frena lo que no ha subido (lo ya subido se queda, DP-1)',
+    control: 'SQL · ss_priv.consiente_nucleo()',
+    comprobacion: prueba('nucleo.ts', 'D1 · revocar frena lo que no ha subido; lo ya subido se queda, y un consentimiento revocado no se reabre'),
+    sabotaje: { que: 'un consentimiento revocado sigue valiendo', ediciones: [ed(SQL, '    where c.consultora_id = cons and c.cliente_id is not distinct from cli and c.revocado_en is null', '    where c.consultora_id = cons and c.cliente_id is not distinct from cli')] },
+  },
+  {
+    id: 'aisia-d1-no-se-reabre', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'un consentimiento revocado no se reabre: se da uno nuevo',
+    control: 'SQL · ss_priv.consentimiento_de_la_base()',
+    comprobacion: prueba('nucleo.ts', 'D1 · revocar frena lo que no ha subido; lo ya subido se queda, y un consentimiento revocado no se reabre'),
+    sabotaje: { que: 'un revocado se reabre', ediciones: [ed(SQL, "  if old.revocado_en is not null then raise exception 'un consentimiento revocado no se reabre: se da uno nuevo'; end if;", '')] },
+  },
+  {
+    id: 'aisia-d1-version', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'el consentimiento vale para la versión vigente de su contrato: un contrato nuevo pide uno nuevo (DP-3)',
+    control: 'SQL · ss_priv.consiente_nucleo()',
+    comprobacion: prueba('nucleo.ts', 'D1 · el consentimiento vale para la versión vigente de su contrato: un contrato nuevo pide uno nuevo'),
+    sabotaje: { que: 'un sí viejo vale para siempre', ediciones: [ed(SQL, '      and c.contrato_version = (select max(k.version) from public.ss_contrato_sla k', '      and c.contrato_version >= (select min(k.version) from public.ss_contrato_sla k')] },
+  },
   // ──────────────────────────────── C3 ─────────────────────────────────
   {
     id: 'c3-token-firma', doc: 'C3', ref: 'Alcance de los roles de servicio (O6)', estado: 'probado',
@@ -1250,7 +1316,7 @@ export const FILAS: readonly Fila[] = [
     control: "SQL · ss_contrato_sla en la tenencia cliente-consultora",
     comprobacion: prueba('cierre-base.ts', "H-14 · una fila importada no cuelga del crudo de otra consultora, ni un contrato del cliente de otra"),
     sabotaje: { que: "el contrato se firma con cualquier cliente", ediciones: [
-      ed(SQL, "  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla'] loop", "  foreach t in array array['ss_importacion_fila', 'ss_metrica'] loop")] },
+      ed(SQL, "  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla', 'ss_consentimiento_nucleo'] loop", "  foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_consentimiento_nucleo'] loop")] },
   },
   {
     id: 'c3-chat-turno', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
@@ -1544,7 +1610,7 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'el agente solo deja propuestas: no inserta una propuesta ya decidida',
     control: 'SQL · ss_propuesta_agente',
     comprobacion: AISLAMIENTO,
-    sabotaje: { que: 'el agente inserta propuestas aprobadas', ediciones: [ed(SQL, "  with check (estado = 'propuesta' and decidida_por is null and (consultora_id is null or consultora_id = ss_priv.consultora_de_tarea()));", '  with check (true);')] },
+    sabotaje: { que: 'el agente inserta propuestas aprobadas', ediciones: [ed(SQL, "  with check (estado = 'propuesta' and decidida_por is null and alcance = 'a_medida' and consultora_id = ss_priv.consultora_de_tarea());", '  with check (true);')] },
   },
   {
     id: 'c3-siembra-firma', doc: 'C3', ref: 'Siembra (frontera sandbox → núcleo)', estado: 'brecha',
@@ -1777,5 +1843,19 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'la base no ata el resultado de SLA a los eventos: un job comprometido escribiría otro',
     control: 'la evidencia es la cadena, que la plataforma no toca; el resultado se recalcula desde ella con relojSla',
     nota: 'tercera revisión R3-09: el resultado es derivado; el daño infirmable (el dinero del SLA) lo cubre la evidencia, no el resultado',
+  },
+  {
+    id: 'c3-d1-consentimiento', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', estado: 'probado',
+    afirmacion: 'el consentimiento para el núcleo lo da una persona de esa organización, a su nombre y con la fecha de la base; ningún rol de servicio lo escribe',
+    control: 'SQL · ss_consentimiento_nucleo',
+    comprobacion: prueba('nucleo.ts', 'D1 · consiente una persona de esa organización, a su nombre y con su contrato; nadie consiente por otra'),
+    sabotaje: { que: 'cualquiera consiente por cualquiera', ediciones: [ed(SQL, 'create policy ss_consentimiento_otorga on public.ss_consentimiento_nucleo for insert to authenticated\n  with check (otorgado_por = auth.uid() and case', 'create policy ss_consentimiento_otorga on public.ss_consentimiento_nucleo for insert to authenticated\n  with check (true or case')] },
+  },
+  {
+    id: 'c3-d1-solo-promoviendo', doc: 'C3', ref: 'Siembra (frontera sandbox → núcleo)', estado: 'probado',
+    afirmacion: 'al núcleo se llega promoviendo, con el origen y los dos consentimientos: el agente no propone directo al núcleo',
+    control: 'SQL · ss_propuesta_agente',
+    comprobacion: prueba('nucleo.ts', 'D1 · el agente no propone directo al núcleo: al núcleo se llega promoviendo, y una propuesta nace de una incidencia de su consultora'),
+    sabotaje: { que: 'el agente vuelve a proponer al núcleo', ediciones: [ed(SQL, "and alcance = 'a_medida' and consultora_id = ss_priv.consultora_de_tarea());", 'and (consultora_id is null or consultora_id = ss_priv.consultora_de_tarea()));')] },
   },
 ]

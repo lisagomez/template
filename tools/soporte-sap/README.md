@@ -68,7 +68,7 @@ Lo que compra una consultora (N2) para atender a sus clientes (N3):
   producción), `TESSERACT_CMD`, `TESSDATA_PREFIX`, `LD_LIBRARY_PATH` (OCR local), `SS_DBT_VENV` (opcional)
   y, en el corredor de la capa semántica, `SS_PG_HOST`, `SS_PG_PORT`, `SS_PG_USER`, `SS_PG_PASSWORD`,
   `SS_PG_DB`.
-- **Almacenamiento**: 22 tablas `ss_*` con RLS forzada y tres buckets privados (`ss-originales`,
+- **Almacenamiento**: 23 tablas `ss_*` con RLS forzada y tres buckets privados (`ss-originales`,
   `ss-sandbox`, `ss-exportes`) con ruta por tenant y nombre por sha256 (`migraciones/propuesta-soporte-sap.sql`);
   respaldo por tenant con export lógico (SDD §13). Crecimiento por tamaño: SDD §14.
 - **Salida del perímetro (C4)**: ninguna. Los documentos se leen en local, dbt y MetricFlow corren

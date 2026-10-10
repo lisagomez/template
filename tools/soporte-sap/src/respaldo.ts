@@ -33,7 +33,7 @@ export const TABLAS_DE_TENANT: ReadonlyArray<readonly [tabla: string, columna: s
   ['ss_adjunto', 'consultora_id'], ['ss_campo_extraido', 'consultora_id'], ['ss_cuarentena', 'consultora_id'],
   ['ss_impugnacion', 'consultora_id'], ['ss_sla_resultado', 'consultora_id'], ['ss_horas', 'consultora_id'],
   ['ss_crudo', 'consultora_id'], ['ss_importacion_fila', 'consultora_id'], ['ss_mapeo', 'consultora_id'], ['ss_procedencia', 'consultora_id'],
-  ['ss_contrato_sla', 'consultora_id'], ['ss_presupuesto', 'consultora_id'], ['ss_caso_sandbox', 'origen_consultora_id'],
+  ['ss_contrato_sla', 'consultora_id'], ['ss_consentimiento_nucleo', 'consultora_id'], ['ss_presupuesto', 'consultora_id'], ['ss_caso_sandbox', 'origen_consultora_id'],
   ['ss_propuesta', 'consultora_id'], ['ss_acceso_motivado', 'cliente_id', 'cliente'],
 ]
 
