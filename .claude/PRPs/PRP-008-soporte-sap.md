@@ -80,7 +80,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 > semántica. Dos revisiones más contra el código (05/10 y 07/10) encontraron que la v3 afirmaba controles que no
 > existían fuera de las pruebas: el token de tarea verificado por una «pasarela» que no hay, el presupuesto que nadie
 > leía, la impugnación sin pantalla. El PRP-010 los cerró en código o los declara aquí. Una tercera revisión, contra
-> el borrador de esta v4 (09/10), encontró 18 más; también están cerrados en código o declarados. **Cada frase de esta sección
+> el borrador de esta v4 (09/10), encontró 18 más; también están cerrados en código o declarados. **Revisión 1**
+> (2026-10-10, PRP-011): D1 decidida «con consentimiento»; se firma con la revisión de la AISIA. **Cada frase de esta sección
 > tiene su fila** en la matriz ([`docs/goals/soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)),
 > en uno de tres estados: **probado** (una prueba pasa sin su sabotaje y cae con él), **brecha** (abierta y declarada)
 > o **depende** (espera una decisión del laboratorio). Donde una frase la sostiene una fila de la AISIA, se dice.
@@ -168,6 +169,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     adjunto, el presupuesto) son del agente, y la categorización es una y dice la prioridad que fijó la base.
   - Una propuesta no cambia de consultora, de alcance ni de contenido; lo único que cambia de dueña es la promoción
     al núcleo, que hace el superadministrador. Un campo revisado no se deshace, y su evidencia es la del documento.
+  - El consentimiento para el núcleo común (D1) lo da una persona de esa organización, a su nombre, con su contrato
+    y la fecha de la base; ningún rol de servicio ni el laboratorio lo escriben.
   - En la sala, una aprobación es del tenant, de la tarea y de la huella de su mensaje: una persona de B no aprueba
     el plan de A. Ningún componente que ejecuta un modelo la fabrica: la suite de la sala tiene 11 sabotajes (S1,
     S1·force, S2, S2b, S3 a S7, S10 y S11), y cada uno la pone en rojo.
@@ -258,6 +261,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - *Brecha*: lo que la ruta manda al log del servidor no está inventariado (ni retención ni dueño).
 - **Siembra (frontera sandbox → núcleo).** Lo que cambia un veredicto lo firma el laboratorio en
   `tools/conocimiento`; el agente solo deja propuestas.
+  - Al núcleo común se llega **promoviendo** algo a medida, y solo con el consentimiento vigente de la consultora y
+    del cliente de origen (D1, PRP-011). El agente no propone directo al núcleo, y el origen de cada propuesta se
+    guarda aparte: una entrada del núcleo no dice de dónde vino.
   - *Brecha* (H-20): hoy los veredictos del producto salen de la matriz sintética del laboratorio
     (`tools/soporte-sap/src/laboratorio/matriz.ts`), no de `tools/conocimiento`, y un commit la cambia sin el gate de
     firma. Antes de resolver incidencias reales, la matriz tiene que venir de `tools/conocimiento`.

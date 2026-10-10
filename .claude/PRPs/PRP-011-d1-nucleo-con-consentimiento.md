@@ -135,6 +135,14 @@ la sección «Conocimiento común» del contrato. Pruebas que ejecutan el runtim
 La revisión de la AISIA y del C3 (la fila de D1 a «probado»), la matriz entera, el `validate` y el kit de una línea
 para que el laboratorio firme la revisión.
 
+**Fase 3, preparada (2026-10-10, rama `soporte/d1-fase3`)**: la fase 2 está en #246.
+- **La revisión 1 de la AISIA**, como borrador fuera del registro (`docs/goals/soporte-sap-AISIA-revision-d1.md`): la
+  §3, la §4 «Conocimiento cruzado» y la §5, con la firma de la v3 intacta y una línea «Revisión 1 (D1), firmada por»
+  en blanco.
+- **El C3 (PRP-008)**: el consentimiento en «Decisiones humanas» y en «Siembra».
+- **El BUSINESS_LOGIC y la spec**: D1 decidida.
+- **El laboratorio** firma la línea y mueve el borrador a `.claude/gobernanza/AISIA-soporte-sap.md`.
+
 ## Gotchas
 
 - **La AISIA está firmada**: este PRP no la edita sin la firma del laboratorio. La revisión va en la fase 3, con su kit.

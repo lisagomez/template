@@ -14,6 +14,10 @@
 > y declarada; o **depende**, si espera una decisión del laboratorio. Plantilla:
 > `.claude/gobernanza/plantillas/aisia.md`. Su hermano, el modelo de amenazas (C3 v4), está en
 > `.claude/PRPs/PRP-008-soporte-sap.md`.
+>
+> **Revisión 1** (2026-10-10, PRP-011): el laboratorio decidió **D1 «con consentimiento»**, y la base, la app y el
+> contrato ya lo cumplen. La fila de D1 pasa de «depende» a «probado». Cambian la §3, la §4 «Conocimiento cruzado» y
+> la §5. Va firmada al pie, junto a la firma de la v3.
 
 ## 1. Partes afectadas
 
@@ -71,7 +75,7 @@
 | Prioridad mal asignada | Alta (pagos, operación) | Media | Parcial: el retraso ya ocurrió |
 | Solución equivocada aprobada | Alta en un SAP real · baja en el simulador | Media | En el simulador, sí; en un SAP real, **no** |
 | Fatiga del aprobador | Alta en un SAP real · baja en el simulador | **Alta**: es estadística, no malicia (O3) | Igual que la solución que deja pasar |
-| Conocimiento cruzado entre consultoras | Media-alta | Alta si D1 no se decide | No |
+| Conocimiento cruzado entre consultoras | Media-alta | Baja: D1 decidida, y la base exige el consentimiento | No |
 | El laboratorio lee lo que no necesita | Media | Alta (es el diseño) | No |
 | Reidentificación por grupo chico | Media | Media mientras haya tamaños con un cliente | No |
 | FODA o accionable que afirma de más | Media | Media | Sí, si cada punto cita su dato y su confianza |
@@ -146,8 +150,12 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - Aislado por consultora por defecto: lo enseñado queda a medida.
   - Al núcleo solo pasa lo que sube el superadministrador, generalizado.
   - El registro FDE dice qué fue a medida y qué al núcleo.
-  - D1 exige **consentimiento por contrato** de la consultora y de su cliente. Hasta decidirla, el
-    núcleo común no se alimenta fuera del laboratorio.
+  - **D1, decidida (con consentimiento)**: al núcleo común solo sube con el consentimiento vigente de
+    **la consultora y del cliente de origen**. Lo da una persona de cada organización, a su nombre, para la
+    versión vigente de su contrato, y la base lo exige al promover.
+  - El origen de cada enseñanza se guarda aparte: una entrada del núcleo no dice de dónde vino. El agente
+    no propone directo al núcleo.
+  - Revocar frena lo que no ha subido; lo ya subido, generalizado, se queda. El contrato lo dice (§12).
 - **Lo que lee el laboratorio**:
   - Solo lo que **la consultora escala, a su nombre** (DP-3): el agente no escala. En la app, el plan
     verificado espera a la consultora, y a la sala del laboratorio llega solo si ella lo escala.
@@ -249,11 +257,12 @@ quedan hoy:
 | El triage urgente cortado por presupuesto, o sin su evidencia | P1 y P2 pasan a una persona; nunca se cortan. |
 | La restauración que toca a otros tenants | Por tenant, verificada antes del commit. |
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece**: no hay SAP real cableado (D6). |
-| El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo con el consentimiento de D1, que **depende** de esa decisión. |
+| El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
 
 Para salir del laboratorio hacen falta:
 
-- D1 (con consentimiento contractual), D3, D6, D7, D8, D10, D12, D13 y D14 decididas;
+- D3, D6, D7, D8, D10, D12, D13 y D14 decididas (D1 ya lo está);
+- la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
 - el aviso de privacidad hacia los empleados del N3, redactado y exigido en el contrato;
@@ -263,3 +272,5 @@ Para salir del laboratorio hacen falta:
 - el C3 y esta AISIA firmados.
 
 Firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
+
+Revisión 1 (D1), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10

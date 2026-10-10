@@ -829,7 +829,8 @@ tras construir:
 
 - **D1. ¿Lo aprendido con una consultora sirve a las demás?** Por defecto el conocimiento queda
   aislado por consultora. A la matriz común solo pasa lo que el experto marca como general y está
-  anonimizado. Es contrato y C4: el conocimiento nace de datos de terceros.
+  anonimizado. Es contrato y C4: el conocimiento nace de datos de terceros. **Decidida el 2026-10-10: con
+  consentimiento** de la consultora y de su cliente, por contrato (PRP-011).
 - **D2. ¿La validación del experto HIL vale como firma de una regla que cambia veredictos?** Por
   defecto, no: el experto valida y el laboratorio firma, que es la regla vigente.
 - **D3. El modelo de operación.**
