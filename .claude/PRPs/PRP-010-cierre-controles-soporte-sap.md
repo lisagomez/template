@@ -1,7 +1,10 @@
 # PRP-010: Cierre de controles de Soporte SAP antes de firmar la AISIA y el C3
 
-> **Estado**: APROBADO (2026-10-07) por el laboratorio, en sesión: «apruebo el PRP con tus recomendaciones; el
-> build como H-30». DP-1 a DP-7 quedan como su recomendación. La fase 0 está en el PR #226.
+> **Estado**: **COMPLETADO** (2026-10-10). Las cinco fases están en `main` (#226 a #242), y la AISIA v3 y el C3 v4 los
+> firmó lisagomez (responsable del proyecto) el 2026-10-10 (#243): mitigar y operar solo en laboratorio. Queda en
+> pausa H-22 (el tope del lector de PDF), declarado como brecha en el C3 v4.
+> **Aprobado** (2026-10-07) por el laboratorio, en sesión: «apruebo el PRP con tus recomendaciones; el build como
+> H-30». DP-1 a DP-7 quedan como su recomendación.
 > **Fecha**: 2026-10-07
 > **Proyecto**: Soporte SAP (`productos/soporte-sap.json`), más una fase que toca a todo despliegue del template
 > **Spec**: no hay. El QUÉ se acuerda aquí: es el inventario de hallazgos de abajo, que sale de dos revisiones
@@ -647,10 +650,10 @@ revisión no deja ninguna afirmación contradicha sin resolver.
 
 **La firma la escribe el laboratorio.**
 **Validación**:
-- [ ] `npm run validate` en verde después del último commit, con el conteo de gates
-- [ ] `npm run regresion` en verde (y `-- --trampa` si el laboratorio lo pide en algún CDC)
-- [ ] Captura de Playwright de la app con la impugnación y la ficha de servidor
-- [ ] Todos los criterios de éxito marcados con su evidencia
+- [x] `npm run validate` en verde después del último commit, con el conteo de gates — *31/31 en #242 y en #243*
+- [x] `npm run regresion` en verde (y `-- --trampa` si el laboratorio lo pide en algún CDC) — *capa A 163/163*
+- [x] Captura de Playwright de la app con la impugnación y la ficha de servidor — *recorrido, pasos 14 y 9.1*
+- [x] Todos los criterios de éxito marcados con su evidencia — *los once, arriba*
 
 **Fase 5, hecha (2026-10-09, rama `soporte/fase5-firma`)**:
 - **El kit** (`docs/goals/soporte-sap-kit-de-firma.md`), fuera de todo registro:
