@@ -49,6 +49,7 @@ export interface Hallazgo {
 }
 
 export const HALLAZGOS: readonly Hallazgo[] = [
+  { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-d1-app', 'aisia-d1-app-origen', 'aisia-d1-app-quien', 'aisia-d1-app-quien-ve', 'aisia-d1-dominio', 'aisia-d1-dominio-historial', 'aisia-d1-contrato'], afirmacion: 'el contrato dice qué ve y qué aprende el laboratorio', encontrado: 'PRP-011 fase 2 (10/10): en la app no había consentimiento, la enseñanza no sabía de qué caso nació y el contrato no decía nada del núcleo común' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-cruzado-consentimiento', 'aisia-d1-cliente', 'aisia-d1-solo-promoviendo', 'aisia-d1-origen-privado', 'aisia-d1-quien-consiente', 'aisia-d1-su-contrato', 'aisia-d1-fecha', 'aisia-d1-revoca', 'aisia-d1-no-se-reabre', 'aisia-d1-version', 'c3-d1-consentimiento', 'c3-d1-solo-promoviendo'], afirmacion: 'a la matriz común solo pasa lo general con consentimiento (dependía de D1)', encontrado: 'PRP-011 (10/10): D1 decidida «con consentimiento». No existía el consentimiento, y el agente proponía directo al núcleo, así que la regla se habría esquivado' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-sla-tramo-en-curso'], afirmacion: 'cada incidencia guarda sus tramos (contrato §5)', encontrado: 'fase 5 (09/10), por un recorrido que fallaba uno de cada dos intentos: el tramo en curso de duración cero no se emitía, y la pantalla no decía que el cliente reanudó el reloj' },
   { doc: 'AISIA', por: 'autor', resolucion: 'codigo', filas: ['aisia-presupuesto-p1-ocr'], afirmacion: 'un P1 con una imagen sin leer pasa a una persona', encontrado: 'fase 5 (09/10), al pasar la fila a una prueba que ejecuta la app: solo miraba el aviso del tope de OCR. Sin motor de OCR, o con una lectura parcial, la evidencia de una P1 quedaba sin leer y sin nadie' },
@@ -1128,6 +1129,55 @@ export const FILAS: readonly Fila[] = [
     control: 'SQL · ss_priv.consiente_nucleo()',
     comprobacion: prueba('nucleo.ts', 'D1 · el consentimiento vale para la versión vigente de su contrato: un contrato nuevo pide uno nuevo'),
     sabotaje: { que: 'un sí viejo vale para siempre', ediciones: [ed(SQL, '      and c.contrato_version = (select max(k.version) from public.ss_contrato_sla k', '      and c.contrato_version >= (select min(k.version) from public.ss_contrato_sla k')] },
+  },
+  {
+    id: 'aisia-d1-app', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'en la app, al núcleo no sube una enseñanza sin el consentimiento vigente de la consultora y del cliente de origen',
+    control: 'src/features/soporte-sap/services/runtime.ts · subeAlNucleo()',
+    comprobacion: prueba('app.ts', 'D1 · en la app, al núcleo no sube sin el consentimiento de la consultora y del cliente de origen; con los dos, sí'),
+    sabotaje: { que: 'la app sube sin mirar el consentimiento', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '  if (falta) throw new Rechazo(falta)\n', '')] },
+  },
+  {
+    id: 'aisia-d1-app-origen', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'en la app, el origen de cada enseñanza (la consultora y el cliente de su caso) se registra aparte, no en la propuesta',
+    control: 'src/features/soporte-sap/services/runtime.ts · conversa()',
+    comprobacion: prueba('app.ts', 'D1 · en la app, al núcleo no sube sin el consentimiento de la consultora y del cliente de origen; con los dos, sí'),
+    sabotaje: { que: 'la enseñanza no registra su origen', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', '    if (inc) e.origenes[id] = { consultora: inc.consultora, cliente: inc.cliente }\n', '')] },
+  },
+  {
+    id: 'aisia-d1-app-quien', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'en la app, consiente cada organización por sí: el laboratorio y el experto no consienten por nadie',
+    control: 'src/features/soporte-sap/services/runtime.ts · conocimientoComun()',
+    comprobacion: prueba('app.ts', 'D1 · en la app, cada organización consiente por sí: ni el laboratorio, ni el experto; y la consultora ve el de su cliente'),
+    sabotaje: { que: 'el laboratorio consiente por otros', ediciones: [ed('src/features/soporte-sap/services/runtime.ts', "  if (s.rol !== 'consultor' && s.rol !== 'cliente') throw new Rechazo(", '  if (false) throw new Rechazo(')] },
+  },
+  {
+    id: 'aisia-d1-app-quien-ve', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', estado: 'probado',
+    afirmacion: 'en la app, cada organización ve su consentimiento y la consultora el de sus clientes; el laboratorio no los ve',
+    control: 'src/features/soporte-sap/services/vistas.ts · consentimientosQueVe()',
+    comprobacion: prueba('app.ts', 'D1 · en la app, cada organización consiente por sí: ni el laboratorio, ni el experto; y la consultora ve el de su cliente'),
+    sabotaje: { que: 'el laboratorio ve los consentimientos', ediciones: [ed('src/features/soporte-sap/services/vistas.ts', ".map((c) => de(c.id))]\n  return []", ".map((c) => de(c.id))]\n  return [de('andina')]")] },
+  },
+  {
+    id: 'aisia-d1-dominio', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'el dominio aplica la misma regla que la base, con los mismos mensajes: dicen qué falta, nunca de quién',
+    control: 'src/consentimiento.ts · faltaParaElNucleo()',
+    comprobacion: prueba('consentimiento.ts', 'D1 · sin origen, o sin el consentimiento de la consultora o del cliente de origen, no sube; con los dos, sí'),
+    sabotaje: { que: 'el dominio olvida al cliente', ediciones: [ed(dist('consentimiento.js'), '    if (!vigente(cs, origen.cliente))', '    if (false)')] },
+  },
+  {
+    id: 'aisia-d1-dominio-historial', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', estado: 'probado',
+    afirmacion: 'un consentimiento no se duplica, y uno revocado no se reabre: se da uno nuevo y el historial queda',
+    control: 'src/consentimiento.ts · consiente()',
+    comprobacion: prueba('consentimiento.ts', 'D1 · revocar frena lo nuevo; un consentimiento revocado no se reabre, se da uno nuevo y el historial queda'),
+    sabotaje: { que: 'se consiente dos veces', ediciones: [ed(dist('consentimiento.js'), "    if (vigente(cs, organizacion))\n        throw new Error('ya hay un consentimiento vigente: para cambiarlo, se revoca');", "    if (false)\n        throw new Error('ya hay un consentimiento vigente: para cambiarlo, se revoca');")] },
+  },
+  {
+    id: 'aisia-d1-contrato', doc: 'AISIA', ref: 'Conocimiento de una consultora usado para otra', infirmable: true, estado: 'probado',
+    afirmacion: 'el contrato dice qué es el núcleo común: generalizado, del superadministrador, con el sí de las dos partes, y que revocar frena lo nuevo y lo ya subido se queda',
+    control: 'contratos/plantilla-contrato-sla.md §12',
+    comprobacion: prueba('sla.ts', 'D1 · el contrato dice qué es el núcleo común: generalizado, del superadministrador, con el sí de las dos partes, y qué pasa al revocar'),
+    sabotaje: { que: 'el contrato calla el consentimiento', ediciones: [ed(`${SS}/contratos/plantilla-contrato-sla.md`, 'lo **consintieron las dos partes**', 'lo aprobó el laboratorio')] },
   },
   // ──────────────────────────────── C3 ─────────────────────────────────
   {

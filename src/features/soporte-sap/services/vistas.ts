@@ -7,10 +7,11 @@
  */
 import {
   tableroN1, tableroN2, tableroN3, estadoSla, accionables, foda, verificaCadena, contratoDeLaboratorio, CLIENTES, CONSULTORAS, veredictoDeFicha, PREGUNTAS_SNAPSHOT,
+  faltaParaElNucleo, vigente,
   type Tarjeta as TarjetaDominio, type ResultadoSla, type Prioridad,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import { CORTE, estado, relojDe, relojesDeDemostracion, presupuestoDe, fichasDeServidor, type IncidenciaLab } from './runtime'
-import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista, PresupuestoVista, FichaVista } from './tipos'
+import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista, PresupuestoVista, FichaVista, ConsentimientoVista } from './tipos'
 
 const PERIODO = '2026-09'
 const SOLO_SUPERADMIN = new Set(['horas_consultor', 'horas_por_ticket', 'salud_cuenta'])
@@ -86,6 +87,18 @@ function sla(s: Sesion): SlaVista | null {
   }
 }
 
+/** D1: cada organización ve su consentimiento; la consultora, además, el de sus clientes. El laboratorio, ninguno. */
+function consentimientosQueVe(s: Sesion): ConsentimientoVista[] {
+  const e = estado()
+  const de = (org: string): ConsentimientoVista => {
+    const v = vigente(e.consentimientos, org)
+    return { organizacion: org, nombre: nombreDe(org) === org ? (CONSULTORAS.find((c) => c.id === org)?.nombre ?? org) : nombreDe(org), vigente: v ? { por: v.por, fecha: v.fecha } : null }
+  }
+  if (s.rol === 'cliente') return [de(s.organizacion)]
+  if (s.rol === 'consultor') return [de(s.organizacion), ...CLIENTES.filter((c) => c.consultora === s.organizacion).map((c) => de(c.id))]
+  return []
+}
+
 /** Los relojes de demostración del corpus, con la forma de la vista. */
 const relojesDemo = (): Vista['relojesDemo'] => relojesDeDemostracion().map((d) => ({ titulo: d.titulo, reloj: reloj(d.reloj) }))
 
@@ -104,7 +117,9 @@ export function vista(s: Sesion): Vista {
       decisiones: e.sala.aprobaciones.filter((a) => a.mensaje === m.id).map((a) => `${a.accion} por ${a.decididaPor}`),
     })),
     chat: s.nivel === 'N1' ? [...(e.chat[s.usuario] ?? [])] : [],
-    propuestas: s.nivel === 'N1' ? [...e.propuestas] : [],
+    // D1: el superadministrador ve qué le falta a cada enseñanza para subir al núcleo, nunca de quién.
+    propuestas: s.nivel === 'N1' ? e.propuestas.map((v) => ({ ...v, falta: s.rol === 'superadmin' && v.id && e.ensenanzas[v.id]?.alcance === 'a_medida' ? faltaParaElNucleo(e.consentimientos, e.origenes[v.id] ?? null) : null })) : [],
+    conocimientoComun: consentimientosQueVe(s),
     tablero: tablero(s), sla: sla(s), horas,
     relojesDemo: s.rol === 'consultor' ? relojesDemo() : [],
     accionables: acc.map((a) => ({

@@ -22,6 +22,7 @@ import {
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
   type AccionDeTriage, type PresupuestoDelMes, type FichaDeServidor,
+  faltaParaElNucleo, consiente, revoca, type Consentimientos, type Origen,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import corteJson from '../../../../tools/soporte-sap/semantica/corte.json'
 import estimadoJson from '../../../../tools/soporte-sap/medicion/estimado.json'
@@ -60,14 +61,16 @@ export interface ImpugnacionLab {
 }
 /** El tope de una consultora en un mes (`consultora:AAAA-MM-01`), como una fila de `ss_presupuesto`. */
 export interface TopeDelMes { topeTokens: number | null; topePaginasOcr: number | null }
-interface Estado { n: number; presupuestos: Record<string, TopeDelMes>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[]; ensenanzas: Record<string, PropuestaDeEnsenanza> }
+interface Estado { n: number; presupuestos: Record<string, TopeDelMes>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[]; ensenanzas: Record<string, PropuestaDeEnsenanza>
+  /** D1 (PRP-011): el consentimiento de cada organización, y de dónde nació cada enseñanza (aparte, no en la propuesta). */
+  consentimientos: Consentimientos; origenes: Record<string, Origen> }
 
 function nuevo(): Estado {
   let sala = creaCanal(salaVacia(), { id: CANAL, tenant: 'andina', slug: 'consultora-andina', nombre: 'Consultora Andina', departamento: null })
   for (const u of ['usr-superadmin', 'usr-experto', 'usr-consultor-andina']) sala = agregaParticipante(sala, 'andina', u)
   // El laboratorio arranca con un tope para el mes en curso. Sin fila del mes, nada llama al modelo (fail-closed).
   const presupuestos = Object.fromEntries(CONSULTORAS.map((c) => [`${c.id}:${mesDe(ahora())}`, { ...TOPE_DE_LABORATORIO }]))
-  return { n: 0, presupuestos, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {} }
+  return { n: 0, presupuestos, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {}, consentimientos: {}, origenes: {} }
 }
 
 const g = globalThis as { __soporteSapLab?: Estado }
@@ -300,6 +303,8 @@ function conversa(s: Sesion, texto: string): void {
     // Su propio contador: el de `e.n` numera las incidencias, y el recorrido cuenta con esa numeración.
     const id = `prop-${Object.keys(e.ensenanzas).length + 1}`
     e.ensenanzas[id] = r.propuesta
+    const inc = e.incidencias.find((i) => i.id === r.caso.incidencia)
+    if (inc) e.origenes[id] = { consultora: inc.consultora, cliente: inc.cliente }
     e.propuestas.unshift({ id, alcance: alcanceDe(r.propuesta), tipo: 'regla', titulo: 'Caso nuevo para la matriz y regla para el grafo (propuesta de siembra)', detalle: r.propuesta.contenido, estado: r.propuesta.estado, por: r.propuesta.propuestaPor })
     if (r.cli) e.propuestas.unshift({ id: null, alcance: null, tipo: 'cli', titulo: r.cli.nombre, detalle: `${r.cli.operacion} · dry-run por defecto · readOnly: ${String(r.cli.readOnly)} · ${r.cli.nota}`, estado: r.cli.estado, por: r.propuesta.propuestaPor })
   }
@@ -317,10 +322,21 @@ function subeAlNucleo(s: Sesion, id: string): void {
   const e = estado()
   const p = e.ensenanzas[id]
   if (!p) throw new Rechazo('esa propuesta no existe')
+  // D1 (PRP-011): con el consentimiento vigente de la consultora y del cliente de origen, o no sube.
+  const falta = faltaParaElNucleo(e.consentimientos, e.origenes[id] ?? null)
+  if (falta) throw new Rechazo(falta)
   let n: PropuestaDeEnsenanza
   try { n = alNucleo(p, VALIDADORES, NOMBRES_DE_ORGANIZACION) } catch (e) { throw new Rechazo(e instanceof Error ? e.message : String(e)) }
   e.ensenanzas[id] = n
   e.propuestas = e.propuestas.map((v) => (v.id === id ? { ...v, alcance: alcanceDe(n), detalle: n.contenido, por: `${v.por} · al núcleo por ${s.usuario}` } : v))
+}
+
+/** D1: consiente o revoca una persona de ESA organización, por ella: un consultor por su consultora, el cliente por sí. */
+function conocimientoComun(s: Sesion, accion: 'consiente' | 'revoca'): void {
+  if (s.rol !== 'consultor' && s.rol !== 'cliente') throw new Rechazo('consiente la consultora o el cliente, cada uno por sí: el laboratorio no')
+  const e = estado()
+  try { e.consentimientos = accion === 'consiente' ? consiente(e.consentimientos, s.organizacion, s.usuario, ahora()) : revoca(e.consentimientos, s.organizacion, ahora()) }
+  catch (x) { throw new Rechazo(x instanceof Error ? x.message : String(x)) }
 }
 
 /**
@@ -413,6 +429,7 @@ function despacha(s: Sesion, a: Accion): void {
   if (a.tipo === 'fija_presupuesto') return fijaPresupuesto(s, a.consultora, { topeTokens: a.topeTokens, topePaginasOcr: a.topePaginasOcr })
   if (a.tipo === 'impugna') return impugna(s, a.incidencia, a.campo, a.motivo)
   if (a.tipo === 'resuelve_impugnacion') return resuelveImpugnacion(s, a.incidencia, a.impugnacion, a.decision)
+  if (a.tipo === 'consiente_nucleo' || a.tipo === 'revoca_nucleo') return conocimientoComun(s, a.tipo === 'consiente_nucleo' ? 'consiente' : 'revoca')
   if (a.tipo === 'escala') return escala(s, a.incidencia)
   if (a.tipo === 'resuelve') return resuelve(s, a.incidencia)
   if (a.tipo === 'espera_cliente') return pideAlCliente(s, a.incidencia, a.pide)

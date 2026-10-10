@@ -136,6 +136,7 @@ test('H-19 · en la app, al núcleo solo sube el superadministrador, y sube gene
   const propuesta = vista(superadmin).propuestas.find((x: { id: string | null }) => x.id)
   assert.ok(propuesta, 'la enseñanza queda como propuesta a medida')
   assert.throws(() => rt.actua(SESIONES.experto, { tipo: 'al_nucleo', propuesta: propuesta.id }), /superadministrador/, 'el experto no la sube')
+  rt.actua(consultor, { tipo: 'consiente_nucleo' }); rt.actua(cliente, { tipo: 'consiente_nucleo' }) // D1: con las dos partes
   rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: propuesta.id })
   const subida = vista(superadmin).propuestas.find((x: { id: string | null }) => x.id === propuesta.id)
   assert.match(subida.alcance, /núcleo/)
@@ -204,5 +205,48 @@ test('H-25 · la ruta no le devuelve al usuario un error interno: solo los recha
   } finally { console.error = original; rt.actua(superadmin, { tipo: 'reinicia' }) }
   const rechazo = await POST(new NextRequest('http://lab/api/soporte-sap?rol=cliente', { method: 'POST', body: JSON.stringify({ tipo: 'escala', incidencia: 'inc-001' }), headers: { 'content-type': 'application/json' } }))
   assert.match((await rechazo.json() as { error: string }).error, /la consultora/, 'control: un rechazo del laboratorio sí lleva su mensaje')
+})
+
+// --- D1 (PRP-011): al núcleo común, con el consentimiento de la consultora y del cliente de origen ---
+
+const ensena = async () => {
+  await rt.levanta(cliente, FIORI)
+  rt.actua(SESIONES.experto, { tipo: 'chat', texto: 'Te enseño el caso inc-001 de la app Fiori en blanco: hay que limpiar la caché del launchpad, y vuelve a abrir' })
+  return vista(superadmin).propuestas.find((x: { id: string | null }) => x.id).id as string
+}
+const falta = (id: string) => vista(superadmin).propuestas.find((x: { id: string | null }) => x.id === id).falta
+
+test('D1 · en la app, al núcleo no sube sin el consentimiento de la consultora y del cliente de origen; con los dos, sí', async () => {
+  const id = await ensena()
+  assert.throws(() => rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: id }), /consultora de origen/)
+  rt.actua(consultor, { tipo: 'consiente_nucleo' })
+  assert.throws(() => rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: id }), /cliente de origen/)
+  rt.actua(cliente, { tipo: 'consiente_nucleo' })
+  rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: id })
+  assert.match(vista(superadmin).propuestas.find((x: { id: string | null }) => x.id === id).alcance, /núcleo/)
+})
+
+test('D1 · en la app, cada organización consiente por sí: ni el laboratorio, ni el experto; y la consultora ve el de su cliente', async () => {
+  assert.throws(() => rt.actua(superadmin, { tipo: 'consiente_nucleo' }), /el laboratorio no/)
+  assert.throws(() => rt.actua(SESIONES.experto, { tipo: 'consiente_nucleo' }), /el laboratorio no/)
+  rt.actua(cliente, { tipo: 'consiente_nucleo' })
+  const delConsultor = vista(consultor).conocimientoComun
+  assert.deepEqual(delConsultor.map((c: { organizacion: string; vigente: unknown }) => [c.organizacion, Boolean(c.vigente)]),
+    [['andina', false], ['alimentos-del-bajio', true], ['aceros-del-norte', false], ['farmacias-del-centro', false]], 'la consultora ve el de sus clientes, sin consentir por ellos')
+  assert.deepEqual(vista(superadmin).conocimientoComun, [], 'el laboratorio no los ve')
+})
+
+test('D1 · en la app, el superadministrador ve qué falta para subir, nunca de quién; revocar frena lo nuevo y lo ya subido se queda', async () => {
+  const id = await ensena()
+  assert.match(falta(id), /consultora de origen/)
+  assert.doesNotMatch(falta(id), /andina|Bajío|bajio/i, 'sin decir de quién')
+  rt.actua(consultor, { tipo: 'consiente_nucleo' }); rt.actua(cliente, { tipo: 'consiente_nucleo' })
+  assert.equal(falta(id), null)
+  rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: id })
+  rt.actua(cliente, { tipo: 'revoca_nucleo' })
+  assert.match(vista(superadmin).propuestas.find((x: { id: string | null }) => x.id === id).alcance, /núcleo/, 'lo ya subido se queda (DP-1)')
+  rt.actua(SESIONES.experto, { tipo: 'chat', texto: 'Te enseño el caso inc-001 otra vez: si no abre, revisar el rol de catálogo del usuario' })
+  const otra = vista(superadmin).propuestas.find((x: { id: string | null; alcance: string }) => x.id && x.id !== id && /a medida/.test(x.alcance)).id
+  assert.throws(() => rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: otra }), /cliente de origen/, 'revocado, lo nuevo no sube')
 })
 

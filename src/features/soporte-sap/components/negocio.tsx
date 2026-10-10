@@ -5,8 +5,8 @@
  * horas, el reloj con su evidencia, los accionables con su impacto en MXN (fórmula, supuestos y rango a
  * la vista), el FODA con su dato, y lo que el agente propone (regla y CLI) sin aplicarlo.
  */
-import type { AccionableVista, FodaVista, GrupoTarjetas, PropuestaVista, SlaVista, Tarjeta, Vista } from '../services/tipos'
-import { Celda, Metricas, Pildora, mxn } from './ui'
+import type { AccionableVista, ConsentimientoVista, FodaVista, GrupoTarjetas, PropuestaVista, SlaVista, Tarjeta, Vista } from '../services/tipos'
+import { Celda, Metricas, Pildora, hora, mxn } from './ui'
 import { Reloj } from './incidencias'
 
 export function Tablero({ grupos, ancho = 12 }: { grupos: readonly GrupoTarjetas[]; ancho?: 7 | 12 }) {
@@ -96,7 +96,8 @@ export function Propuestas({ lista, alNucleo }: { lista: readonly PropuestaVista
         <li key={k} className="rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/60" data-prueba={p.id ? `propuesta-${p.id}` : undefined}>
           <Pildora tono="info">{p.tipo}</Pildora> {p.alcance ? <Pildora tono={p.alcance === 'núcleo' ? 'aviso' : 'bien'}>{p.alcance}</Pildora> : null} <b>{p.titulo}</b> · {p.estado} · {p.por}
           <p className="mt-1 whitespace-pre-wrap font-mono text-[10px]">{p.detalle}</p>
-          {alNucleo && p.id && p.alcance !== 'núcleo' ? <button type="button" onClick={() => alNucleo(p.id!)} className="mt-1 rounded-full border px-3 py-0.5 text-[11px] font-semibold" data-prueba={`al-nucleo-${p.id}`}>Subir al núcleo, generalizada</button> : null}
+          {alNucleo && p.id && p.alcance !== 'núcleo' && p.falta ? <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-300" data-prueba={`falta-${p.id}`}>No sube todavía: {p.falta}.</p> : null}
+          {alNucleo && p.id && p.alcance !== 'núcleo' && !p.falta ? <button type="button" onClick={() => alNucleo(p.id!)} className="mt-1 rounded-full border px-3 py-0.5 text-[11px] font-semibold" data-prueba={`al-nucleo-${p.id}`}>Subir al núcleo, generalizada</button> : null}
         </li>
       ))}</ul>
     </Celda>
@@ -111,3 +112,25 @@ export function Sandbox({ casos }: { casos: Vista['sandbox'] }) {
     </Celda>
   )
 }
+
+/**
+ * D1 (PRP-011): la consultora (un consultor) y el cliente consienten, cada uno por sí, que lo aprendido de sus casos
+ * suba generalizado al núcleo común. La consultora ve también el de sus clientes, pero no consiente por ellos.
+ */
+export function ConocimientoComun({ lista, propia, actua }: { lista: readonly ConsentimientoVista[]; propia: string; actua: (a: object) => Promise<void> }) {
+  return (
+    <Celda titulo="Conocimiento común (D1)" ancho={5} prueba="conocimiento-comun" nota="Lo que se aprende de tus casos puede servir a otras consultoras solo generalizado (sin nombres, objetos propios ni estructura) y solo si tu organización y la otra parte lo consienten. Revocar frena lo que no ha subido; lo que ya subió, generalizado, se queda.">
+      <ul className="space-y-1 text-xs">{lista.map((c) => (
+        <li key={c.organizacion} data-prueba={`consentimiento-${c.organizacion}`}>
+          <b>{c.nombre}</b> · {c.vigente ? <Pildora tono="bien">consiente</Pildora> : <Pildora tono="neutro">no consiente</Pildora>}
+          {c.vigente ? <span className="text-neutral-500"> · por {c.vigente.por}, {hora(c.vigente.fecha)}</span> : null}
+          {c.organizacion === propia ? (
+            <button type="button" onClick={() => actua({ tipo: c.vigente ? 'revoca_nucleo' : 'consiente_nucleo' })} className="ml-2 rounded-full border px-2 py-0.5 text-[11px]"
+              data-prueba={c.vigente ? 'revoca-nucleo' : 'consiente-nucleo'}>{c.vigente ? 'Revocar' : 'Consentir'}</button>
+          ) : null}
+        </li>
+      ))}</ul>
+    </Celda>
+  )
+}
+

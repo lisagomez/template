@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { SESIONES, type Rol, type Vista } from '../services/tipos'
 import { FormularioIncidencia, Incidencias } from './incidencias'
 import { Sala, Chat } from './sala-chat'
-import { Tablero, Sla, Horas, RelojDemo, Accionables, Foda, Propuestas, Sandbox } from './negocio'
+import { Tablero, Sla, Horas, RelojDemo, Accionables, Foda, Propuestas, Sandbox, ConocimientoComun } from './negocio'
 import { Pildora } from './ui'
 import { Presupuesto } from './presupuesto'
 import { FichasDeServidor } from './ficha-servidor'
@@ -62,6 +62,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             {vista.sla ? <Sla sla={vista.sla} /> : null}
             <Accionables lista={vista.accionables} ancho={5} />
             {vista.foda ? <Foda foda={vista.foda} /> : null}
+            <ConocimientoComun lista={vista.conocimientoComun} propia={vista.sesion.organizacion} actua={actua} />
           </>
         ) : null}
         {rol === 'consultor' ? (
@@ -75,6 +76,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Sala mensajes={vista.sala} rol={rol} decide={decide} />
             <Tablero grupos={vista.tablero} />
             {vista.foda ? <Foda foda={vista.foda} /> : null}
+            <ConocimientoComun lista={vista.conocimientoComun} propia={vista.sesion.organizacion} actua={actua} />
           </>
         ) : null}
         {rol === 'superadmin' || rol === 'experto' ? (

@@ -56,7 +56,10 @@ export interface MensajeSalaVista {
 }
 export interface MensajeChatVista { readonly autor: 'humano' | 'agente'; readonly texto: string; readonly tipo: string | null; readonly fuentes: readonly string[] }
 /** `alcance`: «a medida de <consultora>» o «núcleo»; `id`, la enseñanza que el superadministrador puede subir al núcleo. */
-export interface PropuestaVista { readonly id: string | null; readonly alcance: string | null; readonly tipo: string; readonly titulo: string; readonly detalle: string; readonly estado: string; readonly por: string }
+/** `falta`: lo que le falta para subir al núcleo (D1), solo para el superadministrador; dice qué, nunca de quién. */
+export interface PropuestaVista { readonly id: string | null; readonly alcance: string | null; readonly tipo: string; readonly titulo: string; readonly detalle: string; readonly estado: string; readonly por: string; readonly falta?: string | null }
+/** El consentimiento de una organización para el núcleo común (D1): vigente desde cuándo y por quién, o null. */
+export interface ConsentimientoVista { readonly organizacion: string; readonly nombre: string; readonly vigente: { readonly por: string; readonly fecha: string } | null }
 export interface AccionableVista {
   readonly id: string; readonly para: string; readonly titulo: string; readonly evidencia: readonly string[]; readonly formula: string
   readonly supuestos: readonly string[]; readonly bajo: number; readonly central: number; readonly alto: number; readonly confianza: string; readonly responsable: string; readonly aviso: string
@@ -79,6 +82,8 @@ export interface Vista {
   readonly sala: readonly MensajeSalaVista[]
   readonly chat: readonly MensajeChatVista[]
   readonly propuestas: readonly PropuestaVista[]
+  /** D1: el consentimiento de la propia organización y, para la consultora, el de sus clientes. Vacío en el laboratorio. */
+  readonly conocimientoComun: readonly ConsentimientoVista[]
   readonly tablero: readonly GrupoTarjetas[]
   readonly sla: SlaVista | null
   readonly horas: readonly Tarjeta[]
@@ -114,6 +119,9 @@ export type Accion =
   | { readonly tipo: 'responde_cliente'; readonly incidencia: string }
   /** La consultora escala al laboratorio, a su nombre (DP-3); el consultor da por resuelta la incidencia. */
   | { readonly tipo: 'escala'; readonly incidencia: string }
+  /** D1: la consultora (un consultor) o el cliente consienten, o revocan, que lo aprendido de sus casos suba al núcleo. */
+  | { readonly tipo: 'consiente_nucleo' }
+  | { readonly tipo: 'revoca_nucleo' }
   | { readonly tipo: 'resuelve'; readonly incidencia: string }
   /** El consultor le responde al cliente: su primera respuesta para el reloj (DP-4). */
   | { readonly tipo: 'responde'; readonly incidencia: string; readonly texto: string }

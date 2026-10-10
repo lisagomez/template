@@ -87,7 +87,8 @@ export function propuestaDeCli(texto: string): PropuestaDeCli | null {
 export type RespuestaHil =
   | { readonly tipo: 'valor' | 'regla'; readonly texto: string; readonly fuentes: readonly FuenteChat[] }
   | { readonly tipo: 'promovida'; readonly texto: string; readonly publicacion: PublicacionChat }
-  | { readonly tipo: 'propuesta'; readonly texto: string; readonly propuesta: PropuestaDeEnsenanza; readonly cli: PropuestaDeCli | null }
+  /** `caso`: de qué caso nació, para registrar su origen aparte (D1, PRP-011); la propuesta no lo lleva. */
+  | { readonly tipo: 'propuesta'; readonly texto: string; readonly propuesta: PropuestaDeEnsenanza; readonly cli: PropuestaDeCli | null; readonly caso: CasoDelSandbox }
   | { readonly tipo: 'no_lo_se' | 'no_permitido'; readonly texto: string }
 
 export interface ContextoChat {
@@ -138,6 +139,7 @@ function ensena(ctx: ContextoChat, sesion: SesionHil, texto: string): RespuestaH
     tipo: 'propuesta', texto: `Lo dejo como PROPUESTA a medida de la consultora de ${caso.incidencia}, anonimizada. Al núcleo solo la sube el superadministrador, generalizada; una regla nueva la firma el laboratorio en tools/conocimiento, y yo no la siembro.`,
     propuesta: { tipo: 'caso', origen: 'sandbox', alcance: 'a_medida', consultora: caso.consultora, estado: 'propuesta', propuestaPor: `agente:${ctx.agente} (enseñado por ${sesion.usuario})`, contenido: ctx.delimitaDato(a.texto) },
     cli: propuestaDeCli(a.texto),
+    caso,
   }
 }
 

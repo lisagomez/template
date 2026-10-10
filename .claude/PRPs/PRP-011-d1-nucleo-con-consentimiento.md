@@ -114,6 +114,23 @@ control positivo), y sus filas en la matriz.
 Consentir y revocar en la vista de la consultora y del cliente; el superadministrador ve si puede subir y qué falta;
 la sección «Conocimiento común» del contrato. Pruebas que ejecutan el runtime y un paso del recorrido.
 
+**Fase 1, hecha (2026-10-10, #245)**: en la base.
+- `ss_consentimiento_nucleo` y el origen privado (`ss_priv.propuesta_origen`).
+- La regla de promoción (`ss_priv.falta_para_el_nucleo`).
+- El agente ya no propone directo al núcleo: la regla se habría esquivado.
+- Matriz 216/216.
+
+**Fase 2, hecha (2026-10-10, rama `soporte/d1-fase2`)**:
+- **El dominio** (`src/consentimiento.ts`) aplica la misma regla que la base, con los mismos mensajes. El chat devuelve
+  el caso del que nace cada enseñanza, y la app registra su origen aparte.
+- **La app**:
+  - la consultora (un consultor) y el cliente consienten y revocan, cada uno por sí; la consultora ve el
+    consentimiento de sus clientes, y el laboratorio ninguno;
+  - el superadministrador ve qué le falta a cada enseñanza para subir, nunca de quién.
+- **El contrato**: §12 «Conocimiento común», con DP-1 a DP-4.
+- **Evidencia**: pruebas del dominio y de la app, ejecutadas; el recorrido con los pasos 5.01 (no sube y dice qué
+  falta) y 5.02 (consienten las dos partes), 31 capturas dos veces seguidas sin rojo.
+
 ### Fase 3: La AISIA y la firma
 La revisión de la AISIA y del C3 (la fila de D1 a «probado»), la matriz entera, el `validate` y el kit de una línea
 para que el laboratorio firme la revisión.

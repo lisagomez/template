@@ -178,3 +178,13 @@ test('el tramo en curso se ve aunque dure cero: el corte en el mismo instante qu
   assert.deepEqual(r.tramos.map((x) => `${x.estado}:${x.porque}`), ['corre:RECIBIDA', 'pausa:ESPERA_CLIENTE', 'corre:RESPUESTA_CLIENTE'])
 })
 
+test('D1 · el contrato dice qué es el núcleo común: generalizado, del superadministrador, con el sí de las dos partes, y qué pasa al revocar', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d1 = p.slice(p.indexOf('## 12. Conocimiento común'), p.indexOf('## 13.'))
+  assert.match(d1, /sube \*\*generalizado\*\*/, 'generalizado')
+  assert.match(d1, /lo \*\*consintieron las dos partes\*\*: la consultora en su contrato N1–N2 y su cliente en el suyo N2–N3/, 'las dos partes')
+  assert.match(d1, /para la versión vigente de su contrato/, 'DP-3')
+  assert.match(d1, /Revocar frena lo que todavía no ha subido; lo que\s+ya subió, generalizado, \*\*se queda\*\*/, 'DP-1')
+  assert.match(d1, /no dice de qué consultora ni de qué cliente vino/, 'el origen no viaja')
+})
+
