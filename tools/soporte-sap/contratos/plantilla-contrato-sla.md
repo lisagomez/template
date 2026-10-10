@@ -121,13 +121,33 @@ restauración probada). Hasta entonces RPO y RTO son desconocidos y así se dice
   sigue igual.
 - [POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal]
 
-## 12. Vigencia y versiones
+## 12. Conocimiento común
+
+Lo que el laboratorio aprende de los casos de una consultora queda **a medida** de esa consultora. Puede servir a
+otras consultoras (el **núcleo común**) solo si se cumplen las tres condiciones:
+
+- sube **generalizado**: sin nombres de personas ni de organizaciones, sin objetos propios (transacciones Z,
+  programas, campos) y sin la estructura del cliente (sociedades, centros, almacenes);
+- lo sube el superadministrador del laboratorio, a su nombre;
+- lo **consintieron las dos partes**: la consultora en su contrato N1–N2 y su cliente en el suyo N2–N3, cada una
+  por sí y para la versión vigente de su contrato. Un contrato nuevo pide un consentimiento nuevo.
+
+Una entrada del núcleo no dice de qué consultora ni de qué cliente vino.
+
+Cualquiera de las dos partes puede **revocar** su consentimiento. Revocar frena lo que todavía no ha subido; lo que
+ya subió, generalizado, **se queda** en el núcleo.
+
+Lo que ya estaba a medida antes del consentimiento puede subir cuando el consentimiento llegue.
+
+[POR DECIDIR: redacción legal de la cláusula y de quién, en cada organización, puede consentir por ella]
+
+## 13. Vigencia y versiones
 
 Cada cambio es una **versión nueva** con fecha de inicio; la anterior no se edita. Una incidencia se
 mide con la versión que regía al recibirla. Vigencia: [POR DECIDIR]. Terminación y entrega de datos
 (export por tenant): [POR DECIDIR].
 
-## 13. Firmas
+## 14. Firmas
 
 | Parte | Nombre | Firma | Fecha |
 |---|---|---|---|

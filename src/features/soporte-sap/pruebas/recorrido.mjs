@@ -86,6 +86,18 @@ await rol('experto')
 await chatea('Te enseño el caso inc-002 de la app Fiori en blanco: en Alimentos del Bajío pasa con la ZFI_FIORI_CACHE; hay que limpiar la caché del launchpad, y vuelve a abrir')
 await captura(5, 'caso desconocido anonimizado al sandbox y el experto enseña', async () => { const s = await texto(sel('sandbox')); const p = await texto(sel('propuestas')); return /\[NOMBRE\]/.test(s) && !/Tzompantzi/.test(s) && /ss-limpiar-cache/.test(p) && /regla/.test(p) && /a medida de andina/.test(p) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 && !/Fiori F0842 se queda en blanco|Tzompantzi/.test(await texto(sel('incidencias'))) })
 
+// 5.01 y 5.02 (D1, PRP-011): sin el consentimiento de la consultora y del cliente de origen, no sube; la pantalla dice
+// qué falta, nunca de quién. Cada organización consiente por sí.
+await rol('superadmin')
+await captura(5.01, 'sin consentimiento la ensenanza no sube y se dice que falta', async () => { const t = await texto('[data-prueba^="falta-"]'); return /consultora de origen/.test(t) && !/Andina|Bajío/.test(t) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 }, sel('propuestas'))
+await rol('consultor')
+await pagina.click(sel('consiente-nucleo'))
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await pagina.click(sel('consiente-nucleo'))
+await pagina.waitForTimeout(400)
+await captura(5.02, 'el cliente y su consultora consienten cada uno por si', async () => /consiente/.test(await texto(sel('consentimiento-alimentos-del-bajio'))) && (await pagina.locator(sel('revoca-nucleo')).count()) === 1, sel('conocimiento-comun'))
+
 // 5.1 (PRP-010 H-19): lo enseñado queda a medida de la consultora; al núcleo lo sube el superadministrador, generalizado.
 await rol('superadmin')
 await pagina.locator('[data-prueba^="al-nucleo-"]').first().click()
