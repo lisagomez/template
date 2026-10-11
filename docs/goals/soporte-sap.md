@@ -889,6 +889,11 @@ tras construir:
   - El laboratorio elige, porque decide dónde quedan los datos de los clientes (C4).
   - Elegido el proveedor, se reescribe para él la parte de FASE0 §9 que hoy nombra la Storage
     Box: Borg append-only y GATE 1 y 3.
+  - **Decidida el 2026-10-11**: el servidor del modo gestionado en **AWS `us-east-1`**, la misma nube y región que
+    la base (D10); el respaldo inmutable fuera de sitio en **Backblaze B2 US East** (Reston, Virginia), con Object
+    Lock en modo compliance, cifrado antes de salir. FASE0 §9 no se reescribe, porque es el runbook del servidor de
+    agentes del template: el respaldo de Soporte SAP con estos proveedores, con su GATE 1 y su GATE 3, está en el
+    SDD §13, «Con D12».
 - **D13. Qué compromete el laboratorio en el SLA N1–N2**: cifras, créditos, exclusiones y texto
   legal. Depende de D3 y de GATE 3. Por defecto, solo lo que el laboratorio controla.
 - **D14. Qué ve el superadministrador de los datos de un N3.** Por defecto, mínimo privilegio:

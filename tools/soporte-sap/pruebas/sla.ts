@@ -229,3 +229,10 @@ test('D10 · el contrato dice dónde viven los datos: en Estados Unidos en el mo
   assert.match(d10, /se queden \*\*en México\*\*, el servicio\s+se opera en una máquina de su consultora \(modo despacho\)/, 'cómo quedarse en México')
   assert.match(d10, /\[POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal\]/, 'la redacción legal de la transferencia sigue pendiente')
 })
+
+test('D12 · el contrato dice que las copias de respaldo salen cifradas a otro proveedor y que nadie las borra antes de su bloqueo', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d12 = p.slice(p.indexOf('## 11. Datos personales y transparencia'), p.indexOf('## 12.'))
+  assert.match(d12, /Las \*\*copias de respaldo\*\* salen \*\*cifradas\*\* a otro proveedor, también en\s+Virginia, que no puede leerlas/, 'cifradas, en otro proveedor')
+  assert.match(d12, /nadie las borra antes de que venza su bloqueo \(§14\)/, 'inmutables hasta su bloqueo')
+})

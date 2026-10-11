@@ -398,7 +398,7 @@ medición.
   un **tier** (esencial, profesional, crítico) con umbrales **supuestos** (D11), a la vista. El
   **costo por tier** = consumo del estimado (§14, cada cifra medida, derivada o supuesta) más las
   horas de consultor (horas por incidencia del corte × volumen supuesto), por un **precio unitario
-  por decidir** (proveedor D12, modelo D7, la cotización de la BD de D10, costo hora de la consultora): hasta tenerlo, el
+  por decidir** (las cotizaciones del servidor y del respaldo de D12 y de la BD de D10, el modelo de D7 y el costo hora de la consultora): hasta tenerlo, el
   costo dice «no medido», nunca cero. **El precio de venta y el modelo de cobro son parámetros por
   decidir** (ERP-7, D5); los modelos de cobro de referencia (por tier, bolsa de horas, por ticket)
   están en §18. Ningún número de precio en el código ni en la pantalla (`pruebas/pricing.ts`).
@@ -491,19 +491,49 @@ la ruta dice de quién es):
 
 ## 13. Respaldo y restauración
 
-**Qué aplica en cada capa** (datos verificados el 2026-10-04 en la doc oficial; lo que depende del
-proveedor del VPS queda como **pregunta abierta hasta D12**, no como dato):
+**Qué aplica en cada capa** (datos verificados el 2026-10-04 en la doc oficial; con D12 decidida el 2026-10-11, lo
+del servidor y del destino fuera de sitio está abajo, en «Con D12»):
 
 | Capa | Snapshot | Respaldo del proveedor / PITR | Físico + WAL | Export lógico por tenant | Sincronización aparte |
 |---|---|---|---|---|---|
 | BD en Supabase gestionado (D10: proyecto propio, Pro con PITR, `us-east-1`) | no aplica: la BD no vive en el VPS | **Free: ninguno**. Pro: 7 días; Team: 14; Enterprise: 30. PITR es add-on (RPO ~2 min) y exige compute Small. Restaura **todo el proyecto**, con el proyecto inaccesible mientras dura | no aplica (lo opera el proveedor) | **sí**: es lo único que devuelve a **un** tenant (`exportaTenant` / `restauraTenant`) y es la portabilidad de ERP-6 | — |
 | BD en el modo despacho (Supabase autohospedado en la máquina de la consultora) | solo si es **atómico** sobre `PGDATA` + WAL en el mismo volumen (equivale a un corte de luz; sin PITR) | — | **sí**: pgBackRest o WAL-G para PITR | **sí**, igual que arriba | — |
-| Storage (originales, sandbox, exportes) | no aplica | **no**: el respaldo de la BD guarda solo los metadatos de `storage.objects` | no aplica | el export lleva el **manifiesto** de objetos, no sus bytes | **sí**: línea propia (Borg o rclone a un destino append-only o inmutable; proveedor por D12) |
-| VPS (app, Caddy, OCR, `.env`) | sirve para **reconstruir rápido la máquina**, no como respaldo. Al proveedor elegido hay que preguntarle (D12): ¿es consistente con el servidor encendido? ¿incluye los volúmenes? ¿sobrevive al borrar el servidor? | — | — | — | `.env.production` cifrado con `age`, fuera del servidor (FASE0 §9) |
+| Storage (originales, sandbox, exportes) | no aplica | **no**: el respaldo de la BD guarda solo los metadatos de `storage.objects` | no aplica | el export lleva el **manifiesto** de objetos, no sus bytes | **sí**: línea propia (rclone, cifrado, a Backblaze B2 US East con Object Lock en modo compliance: D12) |
+| VPS (app, Caddy, OCR, `.env`) | sirve para **reconstruir rápido la máquina**, no como respaldo. D12: AWS en `us-east-1`; lo que responde a las tres preguntas, en «Con D12», abajo | — | — | — | `.env.production` cifrado con `age`, fuera del servidor (FASE0 §9) |
 
 Fuentes: [Supabase, Database Backups](https://supabase.com/docs/guides/platform/backups) ·
 [Hetzner, FAQ de backups y snapshots](https://docs.hetzner.com/cloud/servers/backups-snapshots/faq/)
 (como ejemplo de las tres preguntas; no se usará) · [PostgreSQL, snapshots atómicos](https://www.postgresql.org/message-id/20200618192642.GH6680%40tamriel.snowman.net).
+
+**Con D12** (decidida el 2026-10-11): el servidor del modo gestionado es de **AWS, en `us-east-1`**, la misma nube y la
+misma región que la base, y el destino fuera de sitio es **Backblaze B2 US East** (Reston, Virginia), otra empresa.
+FASE0 §9 no se reescribe: es el runbook del servidor de agentes del template. De él vale la regla (3-2-1-1-0 y sus dos
+gates), y aquí va cómo la cumple Soporte SAP.
+
+- **Qué va a B2**: los originales de Storage (sincronización diaria con rclone), los exportes por tenant, la lista de
+  bajas (`listaDeBajas`, cada día y aparte de la base) y el `.env.production`. Todo sale **cifrado** (rclone crypt o
+  `age`), con la llave privada fuera del servidor: B2 guarda bytes que no puede leer.
+- **Inmutable**: el bucket lleva Object Lock en modo **compliance**, con la retención por defecto dentro del tope de D8
+  (`RESPALDO_S3_BLOQUEO_DIAS` ≤ 365, que `configura:deploy` exige). La llave del servidor solo sube: no puede borrar ni
+  saltarse el bloqueo.
+- **La base** no va a B2: la respalda Supabase (Pro, 7 días, y PITR; D10). El PITR restaura el proyecto entero:
+  devolver a un tenant es siempre su export.
+- **Las tres preguntas, según la documentación de AWS**. Se confirman en la máquina contratada, y la ficha de servidor
+  guarda la respuesta escrita. Los snapshots de EBS son consistentes como un corte de luz; en Lightsail, los
+  automáticos se borran con la instancia y los manuales no. La base no vive en el servidor: su snapshot solo sirve
+  para reconstruir la máquina.
+- **GATE 1 (el bloqueo es real)**: con la llave del servidor, borrar o sobreescribir un objeto bloqueado en B2 tiene que
+  **fallar**. Si no falla, la inmutabilidad no existe.
+- **GATE 3 (la restauración)**: restaurar un tenant desde su export y sus originales en B2, en una base de prueba, con
+  `restauraTenant`, `trasRestaurar` y `verificaRestauracion`, y cronometrarlo. Hasta entonces, RPO y RTO son
+  desconocidos.
+- *Depende*: el job de respaldo del servidor que hace todo esto no existe todavía. Se escribe al contratar el servidor.
+
+Fuentes (consultadas el 2026-10-11): [Supabase, regiones](https://supabase.com/docs/guides/platform/regions) ·
+[AWS, borrar instancias de Lightsail](https://docs.aws.amazon.com/lightsail/latest/userguide/delete-an-amazon-lightsail-instance.html) ·
+[AWS, EBS](https://docs.aws.amazon.com/ebs/latest/userguide/EBSFeatures.md) ·
+[Backblaze, región US East](https://www.backblaze.com/blog/backblaze-adds-us-east-region-expanding-location-choices-and-cloud-replication-options/) ·
+[Backblaze, Object Lock](https://www.backblaze.com/docs/cloud-storage-object-lock).
 
 **Por qué el export por tenant y no solo el respaldo del proveedor** (probado en
 `pruebas/respaldo.ts`): restaurar la base entera, sea un snapshot o el respaldo del proveedor,
@@ -606,8 +636,8 @@ laboratorio elige identidades y vive en memoria) y un `SS_PG_HOST` sin su usuari
 ~22 GB de disco si corriera sola; el VPS de varias consultoras se dimensiona sumando y midiendo con
 `configura:deploy`. Lo que cambia el tamaño es un motor de OCR autohospedado sin GPU, no el producto.
 
-**Candidatos para el VPS con datos en México** (consultado el 2026-10-04; **D12 sigue abierta**: la
-elige el laboratorio, porque decide dónde quedan los datos de los clientes, C4):
+**Candidatos para un servidor con datos en México** (consultado el 2026-10-04). Con D10 y D12 decididas, el modo
+gestionado vive en Virginia; esta tabla le sirve a la consultora que pone su máquina en México (modo despacho):
 
 | Proveedor | Región | Desde | Fuente |
 |---|---|---|---|
@@ -625,8 +655,9 @@ sus snapshots. **Un dato que cambia la decisión**: Supabase gestionado **no tie
 PITR restaura el proyecto entero: compartido, devolver Soporte SAP a un punto regresaría a los demás productos. Quien
 exija que sus datos se queden en México va por el modo despacho, con Supabase autohospedado en la máquina de su
 consultora: estos candidatos le sirven a él. `configura:deploy` rechaza una instalación gestionada que declare otra
-región, y en despacho solo exige que la declare. **Para D12**, la recomendación pasa a ser el VPS del modo gestionado en
-la misma región que la base (Virginia), cotizando dos proveedores.
+región, y en despacho solo exige que la declare. **D12, decidida el 2026-10-11**: el servidor del modo gestionado en AWS
+`us-east-1`, la misma nube y región que la base, y el respaldo fuera de sitio en Backblaze B2 US East (§13, «Con
+D12»).
 
 ## 16. Seguridad
 

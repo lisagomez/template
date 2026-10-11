@@ -111,7 +111,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 - el puente A2A del extractor;
 - el `.env.production` del servidor, que puede estar en una máquina de la consultora;
 - el root de esa máquina, en modo despacho;
-- el destino de los respaldos, que es de un tercero (D12).
+- el destino de los respaldos, que es de un tercero (D12: Backblaze B2 US East; las copias salen cifradas).
 
 **Flujos**. Cada «⇢» cruza una frontera; ahí vive el riesgo.
 
@@ -246,7 +246,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - Por retención (D8) borra **solo lo que la base da por vencido**: los bytes de un original con su plazo cumplido y,
     con el export de quien se va y la gracia terminada, el tenant entero. En Storage solo sube su export. Con la salida
     registrada nada de ese tenant cambia, y el job del SLA lo omite. El job de retención (`src/retencion.ts`) separa
-    el plan, que no borra, de su ejecución; todavía no corre en ningún servidor (D12, GATE 3).
+    el plan, que no borra, de su ejecución; todavía no corre en ningún servidor: falta contratarlo (D12 ya lo eligió) y GATE 3.
   - *Brecha*: el crudo de importación y su procedencia no tienen cliente; los de un cliente que se va se quedan hasta
     que se va su consultora.
   - *Brecha* (O6): la base no ata el resultado de SLA a los eventos: un job comprometido escribiría otro. No es la

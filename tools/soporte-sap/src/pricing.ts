@@ -4,7 +4,7 @@
  *   variables del N3 (tamaño, volumen, proporción crítica, proporción compleja, respuesta 24×7)
  *     → tier (reglas con umbrales SUPUESTOS del laboratorio, a confirmar: D11)
  *     → consumo del tier (el estimado: cada cifra medida, derivada o supuesta, con su fuente)
- *     → costo = consumo × precio unitario (POR DECIDIR: proveedor D12, modelo D7)
+ *     → costo = consumo × precio unitario (POR DECIDIR: las cotizaciones de D10 y D12, y el modelo de D7)
  *     → precio de venta (POR DECIDIR: plan comercial, ERP-7 y D5).
  *
  * Ninguna cifra de precio aquí. Las variables que son métricas salen del corte semántico (no se
@@ -58,15 +58,15 @@ export interface LineaDeCosto {
   readonly costo: Cifra
 }
 
-const QUIEN_PRECIO_INFRA = 'el laboratorio, con el proveedor del VPS elegido (D12)'
+const QUIEN_PRECIO_INFRA = 'el laboratorio: el servidor está decidido (D12, AWS us-east-1) y la cifra sale de la cotización vigente'
 const PRECIO_UNITARIO: Readonly<Record<Rubro | 'horasConsultor', PorDecidir<number>>> = {
   bd: { valor: null, quienDecide: 'el laboratorio: el plan está decidido (D10, Supabase Pro con PITR) y la cifra sale de la cotización vigente' },
-  storage: { valor: null, quienDecide: QUIEN_PRECIO_INFRA },
+  storage: { valor: null, quienDecide: 'el laboratorio: Storage vive en el proyecto de Supabase (D10) y la cifra sale de la cotización vigente' },
   paginasOcr: { valor: null, quienDecide: 'no aplica: el OCR es local; su costo es CPU (cpuOcr)' },
   cpuOcr: { valor: null, quienDecide: QUIEN_PRECIO_INFRA },
   tokens: { valor: null, quienDecide: 'el laboratorio, con el modelo permitido por clase de dato (D7)' },
   cpuApp: { valor: null, quienDecide: QUIEN_PRECIO_INFRA },
-  respaldo: { valor: null, quienDecide: 'el laboratorio, con el destino de respaldo (D12)' },
+  respaldo: { valor: null, quienDecide: 'el laboratorio: el destino está decidido (D12, Backblaze B2 US East) y la cifra sale de la cotización vigente' },
   egreso: { valor: null, quienDecide: QUIEN_PRECIO_INFRA },
   horasConsultor: { valor: null, quienDecide: 'la consultora: su costo por hora' },
 }
