@@ -125,6 +125,7 @@ export const HALLAZGOS: readonly Hallazgo[] = [
   { doc: 'C3', por: 'autor', resolucion: 'prueba', filas: ['c3-archivos-memoria'], afirmacion: 'el servicio de OCR corre con memoria acotada en su contenedor', encontrado: 'cierto en el compose, sin comprobación' },
   { doc: 'AISIA', por: 'autor', resolucion: 'prueba', filas: ['aisia-dato-red'], afirmacion: 'lo que no se resuelve con certeza va a cuarentena (fail-closed)', encontrado: 'quitar la red de señales residuales no ponía ninguna prueba en rojo: los casos sembrados los atrapaban antes los detectores' },
   { doc: 'AISIA', por: 'autor', resolucion: 'prueba', filas: ['aisia-consultor-horas'], afirmacion: 'el laboratorio no lee las horas de los consultores', encontrado: 'la comprobación se cumplía en vacío: corría antes de que hubiera horas cargadas, así que «0 filas» no probaba nada' },
+  { doc: 'C3', por: 'autor', resolucion: 'codigo', filas: ['c3-plataforma-originales-a-voluntad'], afirmacion: 'la plataforma borra por retención, y solo lo vencido', encontrado: 'D8, fase 1 (10/10), por una prueba escrita contra el ataque: la política `ss_exportes_plataforma` era `for all` sobre exportes y originales, y la plataforma borraba un original en cualquier momento; ninguna prueba lo intentaba' },
   { doc: 'C3', por: 'autor', resolucion: 'prueba', filas: ['c3-jobs-plataforma'], afirmacion: 'el job de plataforma está acotado por token a una consultora', encontrado: 'solo lo protegía el `where` del código de restauración: una política RLS permisiva no ponía nada en rojo' },
 ]
 
@@ -1655,7 +1656,7 @@ export const FILAS: readonly Fila[] = [
     comprobacion: AISLAMIENTO,
     sabotaje: { que: 'la plataforma ve y borra a todas', ediciones: [
       ed(SQL, "for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);", "for select to soporte_sap_plataforma using (true)', t || '_plataforma_lee', t);"),
-      ed(SQL, "for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_borra', t);", "for delete to soporte_sap_plataforma using (true)', t || '_plataforma_borra', t);")] },
+      ed(SQL, "for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea() and ss_priv.baja_vencida(consultora_id, cliente_id))', t || '_plataforma_borra', t);", "for delete to soporte_sap_plataforma using (true)', t || '_plataforma_borra', t);")] },
   },
   {
     id: 'c3-jobs-ingesta', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
@@ -1767,9 +1768,66 @@ export const FILAS: readonly Fila[] = [
     nota: 'depende de la versión de Storage; sin un Supabase real no se prueba',
   },
   {
-    id: 'c3-plataforma-retencion', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'depende',
-    afirmacion: 'la plataforma tiene el privilegio de borrar por retención, pero ningún job lo usa todavía',
-    control: 'D8', nota: 'el plazo de retención y el job que borra esperan D8; en el respaldo inmutable los datos vencen con su bloqueo, no antes',
+    id: 'c3-plataforma-retencion', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
+    afirmacion: 'la plataforma borra solo lo de un tenant cuya baja venció (con el export de quien se va y la gracia terminada), y nunca de otra consultora (D8)',
+    control: 'SQL · políticas *_plataforma_borra con ss_priv.baja_vencida()',
+    comprobacion: prueba('retencion-base.ts', 'D8 · sin una baja vencida la plataforma no borra nada de su consultora: ni una incidencia, ni un original, ni su mapeo'),
+    sabotaje: { que: 'la plataforma vuelve a borrar lo de su consultora en cualquier momento', ediciones: [ed(SQL, "for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea() and ss_priv.baja_vencida(consultora_id, cliente_id))', t || '_plataforma_borra', t);", "for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_borra', t);")] },
+  },
+  {
+    id: 'c3-plataforma-originales-a-voluntad', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
+    afirmacion: 'la plataforma no borra un original a voluntad: en Storage solo sube su export, y borra solo lo vencido',
+    control: 'SQL · ss_exportes_plataforma (solo insert) y ss_objetos_plataforma_borra con ss_priv.objeto_vencido()',
+    comprobacion: prueba('retencion-base.ts', 'D8 · sin una baja vencida la plataforma no borra nada de su consultora: ni una incidencia, ni un original, ni su mapeo'),
+    sabotaje: { que: 'la política de exportes vuelve a ser for all sobre exportes y originales', ediciones: [ed(SQL, "create policy ss_exportes_plataforma on storage.objects for insert to soporte_sap_plataforma\n  with check (", "create policy ss_exportes_plataforma on storage.objects for all to soporte_sap_plataforma\n  using (bucket_id in ('ss-exportes', 'ss-originales') and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea())\n  with check (")] },
+  },
+  {
+    id: 'c3-plataforma-original-vencido', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
+    afirmacion: 'un original vence N días (contrato N2-N3) después de la última resolución, de la incidencia o de su impugnación; con una impugnación abierta o sin N declarado, no vence (DP-3, DP-4)',
+    control: 'SQL · ss_priv.original_vencido()',
+    comprobacion: prueba('retencion-base.ts', 'D8 · un original vence N días después de resolver y sin impugnación abierta: solo entonces se borran sus bytes, y la fila y sus campos se quedan'),
+    sabotaje: { que: 'un original vence aunque haya una impugnación abierta', ediciones: [ed(SQL, "      and not exists (select 1 from public.ss_impugnacion m where m.incidencia_id = i.id and m.estado = 'abierta')\n      and greatest(", "      and greatest(")] },
+  },
+  {
+    id: 'c3-plataforma-marca-original', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
+    afirmacion: 'marcar un original como borrado exige que haya vencido y que sus bytes ya no estén; la fecha la pone la base, y no se des-borra',
+    control: 'SQL · ss_priv.original_borrado_de_la_base()',
+    comprobacion: prueba('retencion-base.ts', 'D8 · un original vence N días después de resolver y sin impugnación abierta: solo entonces se borran sus bytes, y la fila y sus campos se quedan'),
+    sabotaje: { que: 'se marca borrado con los bytes todavía en Storage', ediciones: [ed(SQL, "  if exists (select 1 from storage.objects o where o.bucket_id = 'ss-originales' and o.name = old.ruta) then", '  if false then')] },
+  },
+  {
+    id: 'c3-baja-persona', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', infirmable: true, estado: 'probado',
+    afirmacion: 'una salida la registra una persona de esa organización, a su nombre (DP-2): el cliente o su consultora; la de una consultora, el superadministrador. Ni el agente, ni la plataforma, ni otra organización; y nadie elige su plazo',
+    control: 'SQL · ss_baja_registra, ss_priv.baja_de_la_base() y grant insert (consultora_id, cliente_id)',
+    comprobacion: prueba('retencion-base.ts', 'D8 · una salida la registra una persona de esa organización (DP-2): el cliente o su consultora; la de una consultora, el superadministrador'),
+    sabotaje: { que: 'cualquiera registra la salida de cualquiera', ediciones: [ed(SQL, "create policy ss_baja_registra on public.ss_baja for insert to authenticated\n  with check (case", "create policy ss_baja_registra on public.ss_baja for insert to authenticated\n  with check (true or case")] },
+  },
+  {
+    id: 'c3-baja-entrada', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
+    afirmacion: 'con la salida registrada no entra nada nuevo de ese cliente: ni incidencias, ni originales, ni adjuntos',
+    control: 'SQL · ss_incidencia_sin_baja (restrictiva), ss_adjunto_ingesta_alta y ss_originales_ingesta_sube con ss_priv.en_baja()',
+    comprobacion: prueba('retencion-base.ts', 'D8 · con la salida registrada no entra nada nuevo de ese cliente; su vecino sigue igual'),
+    sabotaje: { que: 'las incidencias siguen entrando tras la salida', ediciones: [ed(SQL, '  with check (not ss_priv.en_baja(consultora_id, cliente_id));', '  with check (true);')] },
+  },
+  {
+    id: 'c3-baja-cumplida', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
+    afirmacion: 'tras la gracia y con el export, la plataforma borra todo el tenant, la cadena incluida; la baja se da por cumplida solo si no queda nada, y entonces se van sus personas y su nombre',
+    control: 'SQL · ss_priv.baja_de_la_base() con ss_priv.quedan_datos_de(), y ss_priv.solo_agregar() tras la baja vencida',
+    comprobacion: prueba('retencion-base.ts', 'D8 · tras la gracia y con el export, la plataforma borra todo el tenant, la cadena incluida, y la baja se cumple solo si no queda nada'),
+    sabotaje: { que: 'la baja se da por cumplida aunque queden datos', ediciones: [ed(SQL, '    if ss_priv.quedan_datos_de(old.consultora_id, old.cliente_id) then', '    if false then')] },
+  },
+  {
+    id: 'c3-cadena-hasta-la-baja', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'probado',
+    afirmacion: 'la cadena de eventos sigue siendo de solo agregar mientras no venza la baja de su tenant: ni el dueño la borra',
+    control: 'SQL · ss_priv.solo_agregar()',
+    comprobacion: prueba('retencion-base.ts', 'D8 · sin una baja vencida la plataforma no borra nada de su consultora: ni una incidencia, ni un original, ni su mapeo'),
+    sabotaje: { que: 'la cadena se borra sin baja', ediciones: [ed(SQL, "  if tg_op = 'DELETE' and ss_priv.baja_vencida(old.consultora_id, (to_jsonb(old) ->> 'cliente_id')::uuid) then", "  if tg_op = 'DELETE' then")] },
+  },
+  {
+    id: 'c3-baja-crudo-del-cliente', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', estado: 'brecha',
+    afirmacion: 'el crudo de importación y su procedencia son de la consultora: cuando se va un solo cliente, sus tickets crudos se quedan en ellos hasta que se va la consultora',
+    control: 'ss_crudo y ss_procedencia no tienen cliente; se borran con la baja de la consultora',
+    nota: 'el crudo es inmutable y su huella cubre a todos sus clientes: separar uno rompería la huella',
   },
   {
     id: 'c3-ruta-sin-autenticar', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'brecha',

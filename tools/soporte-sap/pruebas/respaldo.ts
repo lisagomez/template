@@ -90,6 +90,10 @@ test('toda tabla con datos de una consultora está en el respaldo por tenant, o 
     where table_schema = 'public' and table_name like 'ss\\_%' and column_name in ('consultora_id', 'origen_consultora_id', 'cliente_id') order by 1`)).rows.map((r) => r.t)
   // ss_metrica es DERIVADA: se regenera con la capa semántica después de restaurar; no se respalda aparte.
   const DERIVADAS = ['ss_metrica']
-  assert.deepEqual(conTenant.filter((t) => !DERIVADAS.includes(t)).sort(), TABLAS_DE_TENANT.map(([t]) => t).sort())
+  // ss_baja es la LISTA DE BAJAS (D8, PRP-012): si viajara con el tenant, restaurar un export viejo borraría una baja
+  // más nueva y resucitaría lo dado de baja. Viaja aparte, y se aplica la más reciente.
+  const FUERA = ['ss_baja']
+  assert.deepEqual(conTenant.filter((t) => !DERIVADAS.includes(t) && !FUERA.includes(t)).sort(), TABLAS_DE_TENANT.map(([t]) => t).sort())
+  assert.ok(!TABLAS_DE_TENANT.some(([t]) => FUERA.includes(t)), 'la lista de bajas no se restaura con el tenant')
 })
 
