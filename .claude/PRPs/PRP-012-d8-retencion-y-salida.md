@@ -1,6 +1,10 @@
 # PRP-012: D8, retención y salida de los datos (Soporte SAP)
 
-> **Estado**: **APROBADO** (2026-10-10) por el laboratorio, con las recomendaciones de DP-1 a DP-4.
+> **Estado**: **COMPLETADO** (2026-10-11). Las fases 1 a 3 están en `main` (#251, #252 y #253). La 4 entra con su PR,
+> con la revisión 5 de la AISIA firmada por lisagomez y el CDC de la plantilla v4 firmado en la bitácora. Quedan
+> fuera, declarados: N y la gracia (los fija el laboratorio con su asesoría legal, DP-4) y el job del servidor que
+> lleva la lista de bajas a los respaldos y corre la retención (D10, D12, GATE 3).
+> **Aprobado** (2026-10-10) por el laboratorio, con las recomendaciones de DP-1 a DP-4.
 > **Decisión de origen**: D8, decidida por el laboratorio el 2026-10-10 en sesión:
 > - **en vigencia**, los documentos originales se borran **N días después de resolver** la incidencia. La
 >   incidencia, su cadena de eventos y los campos revisados viven lo que dure el contrato;
@@ -31,21 +35,24 @@ tiene el privilegio de borrar y ningún job lo usa (C3, fila `c3-plataforma-rete
 
 ### Criterios de éxito
 
-- [ ] El original de una incidencia resuelta se borra de Storage N días después de `resuelta_en`, **no antes**, y
+- [x] El original de una incidencia resuelta se borra de Storage N días después de `resuelta_en`, **no antes**, y
       nunca con una impugnación abierta. Su fila de metadatos y los campos revisados se quedan, marcados «original
       borrado».
-- [ ] Una salida la registra **una persona** (DP-2), con la fecha que pone la base. El export firmado de quien se va
+- [x] Una salida la registra **una persona** (DP-2), con la fecha que pone la base. El export firmado de quien se va
       existe antes de borrar. Antes de que termine la gracia, la base no deja borrar nada de ese tenant.
-- [ ] Tras la gracia, del tenant no queda nada en la base ni en Storage, salvo la lista de bajas (sin datos
+- [x] Tras la gracia, del tenant no queda nada en la base ni en Storage, salvo la lista de bajas (sin datos
       personales), el sandbox anonimizado, el núcleo y las métricas agregadas.
-- [ ] Una restauración, por tenant o de la base entera, **no resucita** un tenant ni un original dados de baja. La
-      lista de bajas viaja a todos los niveles de respaldo, y se aplica la más reciente.
-- [ ] El contrato dice N, la gracia y el **plazo máximo** en que el borrado llega a las copias (DP-1). El perfil de
+- [x] Una restauración, por tenant o de la base entera, **no resucita** un tenant ni un original dados de baja. La
+      lista de bajas viaja a todos los niveles de respaldo, y se aplica la más reciente. *(Que viaje a todos los
+      niveles depende del job de respaldo del servidor, que no existe: la fila queda en «depende».)*
+- [x] El contrato dice N, la gracia y el **plazo máximo** en que el borrado llega a las copias (DP-1). El perfil de
       despliegue rechaza un bloqueo de respaldo mayor que ese plazo.
-- [ ] La matriz: cada frase nueva con su fila, que pasa sin sabotaje y cae con él. `c3-plataforma-retencion` pasa a
+- [x] La matriz: cada frase nueva con su fila, que pasa sin sabotaje y cae con él. `c3-plataforma-retencion` pasa a
       «probado».
-- [ ] La revisión de la AISIA, firmada por el laboratorio; `validate` en verde después del último commit; el
-      recorrido, con un original que vence y una salida con su gracia.
+- [x] La revisión de la AISIA, firmada por el laboratorio; `validate` en verde después del último commit; el
+      recorrido, con un original que vence y una salida con su gracia. *(En el recorrido el original «no vence» y la
+      salida queda «sin gracia», porque los contratos del laboratorio no fijan N ni la gracia (DP-4). El caso con N
+      se prueba sobre la misma función y contra la base.)*
 
 ### Decisiones del laboratorio (recomendación primero)
 
