@@ -851,7 +851,12 @@ tras construir:
   la consultora o del N3, con su propio acceso y bajo el control de cambios del N3 (contrato §13).
 - **D7. Las llamadas a modelo con datos de clientes.** Con un proveedor externo, el dato sale del
   perímetro (C4); pesos abiertos en un proveedor ajeno no cambian eso. Hay que decidir qué modelo
-  está **prohibido** por clase de dato antes de mirar capacidad o costo.
+  está **prohibido** por clase de dato antes de mirar capacidad o costo. **Decidida el 2026-10-10: externo
+  solo anonimizado.** Lo crudo (ticket, chat, documentos y adjuntos) nunca va a un proveedor externo, tampoco
+  con pesos abiertos: solo a un modelo autohospedado. Lo anonimizado (sandbox) y lo generalizado (núcleo) pueden
+  ir a uno externo con su decisión C4 (sin conservación ni entrenamiento, con el anonimizador medido, D9) y el
+  CDC del routing. Lo que no lleva texto de clientes sigue el routing. La política vive en
+  `tools/soporte-sap/src/politica-modelo.ts`, y dónde corre un modelo se deduce de su dirección.
 - **D8. Cuánto tiempo se guardan los documentos que sube un N3 y qué pasa con ellos cuando la
   consultora o su cliente se van.** Incluye la portabilidad (ERP-6: exportar los datos y los XML
   del tenant que se va) y su respaldo. Por defecto: se guardan mientras dure el contrato, se

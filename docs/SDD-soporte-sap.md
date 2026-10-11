@@ -27,7 +27,8 @@ aprueba.
 **Lo que no es.** No se conecta a ningún SAP real: «implementar la solución» en el laboratorio
 es aplicarla al simulador. En el SAP de un N3 es una acción irreversible sobre un tercero, y no la hace
 el producto: la aplica una persona de la consultora o del N3, con su propio acceso y bajo el control de
-cambios del N3 (D6, decidida). No usa un LLM real (D7). No fija precios ni
+cambios del N3 (D6, decidida). No usa un LLM real; cuando lo use, lo crudo solo irá a un modelo autohospedado
+y a uno externo solo lo anonimizado o generalizado, con su decisión C4 (D7, decidida). No fija precios ni
 cifras de SLA (D5, D13).
 
 ## 2. Arquitectura por dominio y por capas

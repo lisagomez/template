@@ -5,13 +5,20 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { FILAS, HALLAZGOS } from '../firmas/matriz.ts'
 import { RAIZ, lee } from './_ayuda.ts'
 
-/** La AISIA vive como borrador en docs/goals hasta que el laboratorio la firma y la mueve a gobernanza. */
-const AISIA = ['.claude/gobernanza/AISIA-soporte-sap.md', 'docs/goals/soporte-sap-AISIA.md'].find((p) => existsSync(join(RAIZ, p)))!
+/**
+ * La AISIA vive como borrador en docs/goals hasta que el laboratorio la firma y la mueve a gobernanza. Una revisión
+ * pendiente de firma (`soporte-sap-AISIA-revision-*.md`) es lo que el laboratorio va a firmar: la matriz se compara con
+ * ella, y a lo sumo hay una.
+ */
+const REVISIONES = readdirSync(join(RAIZ, 'docs/goals')).filter((f) => /^soporte-sap-AISIA-revision-.+\.md$/.test(f)).map((f) => `docs/goals/${f}`)
+const AISIA = [...REVISIONES, '.claude/gobernanza/AISIA-soporte-sap.md', 'docs/goals/soporte-sap-AISIA.md'].find((p) => existsSync(join(RAIZ, p)))!
+
+test('a lo sumo una revisión de la AISIA espera la firma', () => assert.ok(REVISIONES.length <= 1, REVISIONES.join(', ')))
 const C3 = '.claude/PRPs/PRP-008-soporte-sap.md'
 
 const seccion = (texto: string, desde: RegExp, hasta: RegExp): string => {

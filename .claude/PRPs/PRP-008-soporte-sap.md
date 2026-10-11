@@ -190,8 +190,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     nadie firma con el seudónimo de otro.
   - *Brechas*: `ss_procedencia` no tiene a qué atarse, porque su registro es texto libre. Y los buckets no fijan
     tamaño ni tipo en Storage (depende de su versión): los valida la ingesta, que es la única que sube a originales.
-- **Datos personales.** Lo sostienen, sobre todo, las filas de la AISIA («Dato personal en el sandbox» y «El
-  laboratorio lee lo que no necesita»).
+- **Datos personales.** Lo sostienen, sobre todo, las filas de la AISIA («Dato personal en el sandbox», «El
+  laboratorio lee lo que no necesita» y, por D7, «Dato del cliente en un proveedor de modelo»: lo crudo solo va a un
+  modelo autohospedado).
   - El laboratorio lee solo lo que **la consultora escala, a su nombre** (DP-3). Los originales, con un acceso que
     otorga la consultora a un miembro del laboratorio por 72 h como máximo, con la fecha que pone la base; se puede
     revocar y nadie se lo otorga a sí mismo.

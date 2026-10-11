@@ -119,6 +119,9 @@ restauración probada). Hasta entonces RPO y RTO son desconocidos y así se dice
 - Antes de que un caso sirva para aprender, se anonimiza. Lo que no se puede anonimizar con certeza, y
   todo caso de recursos humanos o nómina, **no sirve para aprender**: queda en cuarentena y su atención
   sigue igual.
+- El texto de sus incidencias, del chat y de sus documentos **no se envía a ningún proveedor externo de modelos de
+  IA**. Si un modelo lo procesa, corre en un servidor de quien opera el servicio. A un proveedor externo solo puede ir
+  lo ya anonimizado o generalizado, con un contrato que le prohíbe conservarlo o entrenar con él.
 - [POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal]
 
 ## 12. Conocimiento común

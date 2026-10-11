@@ -71,3 +71,4 @@ export type { Plan, ComprobacionSupervisor, VeredictoSupervisor } from './enjamb
 export { calculaResultadosSla, entradaDelReloj } from './sla-job.js'
 export type { CorridaSla, Omitida, EventoDeLaBase } from './sla-job.js'
 export { vigente, faltaParaElNucleo, consiente, revoca, type Consentimiento, type Consentimientos, type Origen } from './consentimiento.js'
+export { alojamientoDe, puedeLlamar, EXTERNO_D7, type ClaseDeDato, type Alojamiento, type ReglaExterna, type VeredictoModelo } from './politica-modelo.js'
