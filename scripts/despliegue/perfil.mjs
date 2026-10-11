@@ -5,7 +5,9 @@
  *
  *   · la máquina contra el tamaño contratado (`DESPLIEGUE_TAMANO`): vCPU, RAM y disco;
  *   · el modo (`DESPLIEGUE`; gestionado si no se dice) entre los que admite el producto;
- *   · la región declarada (`DESPLIEGUE_REGION`) contra su decisión: mientras esté abierta, «pendiente», nunca «cumple»;
+ *   · la región declarada (`DESPLIEGUE_REGION`) contra su decisión: mientras esté abierta, «pendiente», nunca «cumple».
+ *     La decisión fija dónde quedan los datos en el modo gestionado; en despacho la máquina es de quien la pone, y lo
+ *     decide él (en México, si quiere): solo tiene que declararla;
  *   · el destino de respaldo por S3 con bloqueo de objetos (`RESPALDO_S3_*`): una URL y unas llaves, sin código por
  *     proveedor; si falta, se avisa. El bloqueo no pasa el tope que el producto promete (`retencion.bloqueoMaximoDias`,
  *     D8): una copia bloqueada más tiempo no se puede borrar, y el borrado no llegaría en el plazo del contrato;
@@ -33,9 +35,10 @@ function cabe(d, tamano, maquina, slug, problemas, avisos) {
   return cortos.length === 0;
 }
 
-/** La región declarada contra su decisión. Abierta: «pendiente», nunca «cumple». */
-function region(r, declarada, problemas, avisos) {
+/** La región declarada contra su decisión. Abierta: «pendiente», nunca «cumple». En despacho, la de quien pone la máquina. */
+function region(r, declarada, modo, problemas, avisos) {
   if (!declarada) { problemas.push(`DESPLIEGUE_REGION falta: dónde quedan los datos lo fija una decisión (${r.decision}), y la instalación lo declara`); return 'sin declarar'; }
+  if (modo === 'despacho') { avisos.push(`región «${declarada}»: en despacho, dónde quedan los datos lo decide quien pone la máquina, y lo dice su contrato con su cliente (${r.decision} fija el modo gestionado)`); return 'cumple'; }
   if (r.estado !== 'decidida') { avisos.push(`región «${declarada}»: pendiente de ${r.decision}. No se compara mientras la decisión siga abierta, y no «cumple»`); return `pendiente de ${r.decision}`; }
   if (r.regiones.includes(declarada)) return 'cumple';
   problemas.push(`región «${declarada}» fuera de las que fija ${r.decision}: ${r.regiones.join(', ')}`);
@@ -69,7 +72,7 @@ export function revisaPerfil(manifiesto, valores, maquina, fecha) {
   if (!d.modos.includes(modo)) problemas.push(`DESPLIEGUE=${modo}: ${slug} se despliega en modo ${d.modos.join(' o ')}`);
   const tamano = v('DESPLIEGUE_TAMANO').toUpperCase();
   const cabeLaMaquina = cabe(d, tamano, maquina, slug, problemas, avisos);
-  const regionEstado = region(d.exige.region, v('DESPLIEGUE_REGION'), problemas, avisos);
+  const regionEstado = region(d.exige.region, v('DESPLIEGUE_REGION'), modo, problemas, avisos);
   const respaldoEstado = respaldo(v, manifiesto.retencion?.bloqueoMaximoDias, slug, problemas, avisos);
   for (const k of d.secretos) {
     const largo = v(k).length;

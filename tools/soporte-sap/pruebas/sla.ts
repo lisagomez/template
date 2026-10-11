@@ -220,3 +220,12 @@ test('D8 · el contrato dice cuándo se borran los originales, qué pasa al sali
   assert.match(d8, /\*\*Una restauración nunca devuelve lo borrado\*\*/, 'la lista de bajas')
   assert.match(d8, /Mientras el contrato no diga N, no se borra\s+ningún original[\s\S]*Mientras el\s+contrato no diga la gracia, no se borra nada/, 'sin plazos, nada se borra')
 })
+
+test('D10 · el contrato dice dónde viven los datos: en Estados Unidos en el modo gestionado, y cómo quedarse en México', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d10 = p.slice(p.indexOf('## 11. Datos personales y transparencia'), p.indexOf('## 12.'))
+  assert.match(d10, /la base y los archivos viven\s+en un proveedor de base de datos gestionada, \*\*en Estados Unidos\*\* \(Virginia\)/, 'dónde, en gestionado')
+  assert.match(d10, /que los guarda por encargo de quien\s+opera el servicio/, 'quién los guarda')
+  assert.match(d10, /se queden \*\*en México\*\*, el servicio\s+se opera en una máquina de su consultora \(modo despacho\)/, 'cómo quedarse en México')
+  assert.match(d10, /\[POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal\]/, 'la redacción legal de la transferencia sigue pendiente')
+})

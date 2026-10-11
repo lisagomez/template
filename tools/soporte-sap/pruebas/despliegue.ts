@@ -19,7 +19,7 @@ const GRANDE = { vcpu: 4, ramMB: 8192, discoGb: 80 }
 /** Una instalación completa de Soporte SAP: tamaño, región, respaldo y secretos. */
 const completa = (cambios: Record<string, string | null> = {}) => {
   const base: Record<string, string> = {
-    PRODUCTO: 'soporte-sap', DESPLIEGUE_TAMANO: 'M', DESPLIEGUE_REGION: 'mx-central-1', DESPLIEGUE_PROVEEDOR: 'el mío',
+    PRODUCTO: 'soporte-sap', DESPLIEGUE_TAMANO: 'M', DESPLIEGUE_REGION: 'us-east-1', DESPLIEGUE_PROVEEDOR: 'el mío',
     RESPALDO_S3_URL: 'https://s3.ejemplo.mx', RESPALDO_S3_BUCKET: 'respaldo-ss', RESPALDO_S3_LLAVE: 'LLAVE-DE-PRUEBA', RESPALDO_S3_SECRETO: SECRETO, RESPALDO_S3_BLOQUEO_DIAS: '30',
     SS_SECRETO_TAREAS: SECRETO, SS_SECRETO_RESPALDOS: SECRETO, SS_SAL_IMPORTADOR: SECRETO,
   }
@@ -28,10 +28,10 @@ const completa = (cambios: Record<string, string | null> = {}) => {
 }
 const revisa = (valores: Map<string, string>, maquina = GRANDE, manifiesto = MANIFIESTO) => revisaPerfil(manifiesto, valores, maquina, '2026-10-09T00:00:00Z')
 
-test('una instalación completa pasa: cabe, la región queda «pendiente de D10» y el respaldo, declarado', () => {
+test('una instalación completa pasa: cabe, la región es la que fija D10 y el respaldo, declarado', () => {
   const r = revisa(completa())
   assert.deepEqual(r.problemas, [])
-  assert.deepEqual([r.medicion?.cabe, r.medicion?.region_estado, r.medicion?.respaldo, r.medicion?.proveedor], [true, 'pendiente de D10', 'declarado', 'el mío'])
+  assert.deepEqual([r.medicion?.cabe, r.medicion?.region_estado, r.medicion?.respaldo, r.medicion?.proveedor], [true, 'cumple', 'declarado', 'el mío'])
 })
 
 test('una máquina chica no cabe en el tamaño contratado, y se dice qué le falta', () => {
@@ -42,16 +42,25 @@ test('una máquina chica no cabe en el tamaño contratado, y se dice qué le fal
 })
 
 test('la región frente a D10: abierta, «pendiente» y nunca «cumple»; decidida, cumple o queda fuera; sin declarar, no pasa', () => {
-  const abierta = revisa(completa())
-  assert.equal(abierta.medicion?.region_estado, 'pendiente de D10')
-  assert.match(abierta.avisos.join('\n'), /pendiente de D10.*no «cumple»/)
-  const decidida = structuredClone(MANIFIESTO)
-  decidida.despliegue.exige.region = { decision: 'D10', estado: 'decidida', regiones: ['mx-central-1'] }
-  assert.equal(revisa(completa(), GRANDE, decidida).medicion?.region_estado, 'cumple')
-  const fuera = revisa(completa({ DESPLIEGUE_REGION: 'us-east-1' }), GRANDE, decidida)
+  const abierta = structuredClone(MANIFIESTO)
+  abierta.despliegue.exige.region = { decision: 'D10', estado: 'abierta', regiones: [] }
+  const pendiente = revisa(completa(), GRANDE, abierta)
+  assert.equal(pendiente.medicion?.region_estado, 'pendiente de D10')
+  assert.match(pendiente.avisos.join('\n'), /pendiente de D10.*no «cumple»/)
+  assert.equal(revisa(completa()).medicion?.region_estado, 'cumple')
+  const fuera = revisa(completa({ DESPLIEGUE_REGION: 'mx-central-1' }))
   assert.equal(fuera.medicion?.region_estado, 'fuera')
-  assert.match(fuera.problemas.join('\n'), /fuera de las que fija D10/)
+  assert.match(fuera.problemas.join('\n'), /fuera de las que fija D10: us-east-1/)
   assert.match(revisa(completa({ DESPLIEGUE_REGION: null })).problemas.join('\n'), /DESPLIEGUE_REGION falta/)
+})
+
+test('D10 · en gestionado solo pasa la región que fija D10 (us-east-1); en despacho, la que declare quien pone la máquina', () => {
+  assert.deepEqual(MANIFIESTO.despliegue.exige.region, { decision: 'D10', estado: 'decidida', regiones: ['us-east-1'] })
+  assert.equal(revisa(completa({ DESPLIEGUE_REGION: 'mx-central-1' })).medicion?.region_estado, 'fuera', 'gestionado en México: fuera de D10')
+  const despacho = revisa(completa({ DESPLIEGUE: 'despacho', DESPLIEGUE_REGION: 'mx-central-1' }))
+  assert.equal(despacho.medicion?.region_estado, 'cumple', 'en la máquina de la consultora, en México')
+  assert.match(despacho.avisos.join('\n'), /en despacho, dónde quedan los datos lo decide quien pone la máquina, y lo dice su contrato/)
+  assert.match(revisa(completa({ DESPLIEGUE: 'despacho', DESPLIEGUE_REGION: null })).problemas.join('\n'), /DESPLIEGUE_REGION falta/, 'pero la declara')
 })
 
 test('sin destino de respaldo, aviso; un destino sin https o sin días de bloqueo, no pasa', () => {
@@ -97,7 +106,7 @@ test('configura:deploy mide contra el perfil del producto y no imprime ningún s
     writeFileSync(env, [...completa({ DESPLIEGUE_TAMANO: 'S' })].map(([k, v]) => `${k}=${v}`).join('\n'))
     const r = spawnSync(process.execPath, ['scripts/configura-deploy.mjs'], { cwd: RAIZ, env: { ...process.env, ENV_PRODUCCION: relative(RAIZ, env) }, encoding: 'utf8' })
     const salida = `${r.stdout}${r.stderr}`
-    assert.match(salida, /Perfil de soporte-sap: modo gestionado · tamaño S \((cabe|NO cabe)\) · región: pendiente de D10 · respaldo: declarado/)
+    assert.match(salida, /Perfil de soporte-sap: modo gestionado · tamaño S \((cabe|NO cabe)\) · región: cumple · respaldo: declarado/)
     assert.match(salida, /SS_SAL_IMPORTADOR: .*presente \(64 car\.\)/)
     assert.doesNotMatch(salida, new RegExp(`${SECRETO}|LLAVE-DE-PRUEBA`))
   } finally { rmSync(dir, { recursive: true, force: true }) }
@@ -127,6 +136,9 @@ test('la ficha de servidor no dice «apto» sin la restauración probada en esa 
   assert.deepEqual([conGate3.apto, conGate3.faltan], [true, []])
   const hoy = veredictoDeFicha({ consultora: 'andina', modo: 'gestionado', medicion, respuestas: [null, null, null], restauracion: null })
   assert.equal(hoy.apto, false)
-  assert.match(hoy.faltan.join('\n'), /la región: pendiente de D10[\s\S]*3 de 3 preguntas[\s\S]*GATE 3/, 'mientras D10 siga abierta, tampoco')
+  assert.match(hoy.faltan.join('\n'), /3 de 3 preguntas[\s\S]*GATE 3/, 'sin las respuestas del proveedor ni la restauración, tampoco')
+  const enMexico = revisa(completa({ DESPLIEGUE_REGION: 'mx-central-1' })).medicion!
+  assert.match(veredictoDeFicha({ consultora: 'andina', modo: 'gestionado', medicion: enMexico, respuestas, restauracion: { fecha: '2026-10-09', evidencia: 'x' } }).faltan.join('\n'),
+    /la región: fuera/, 'una gestionada fuera de la región de D10, tampoco')
   assert.match(veredictoDeFicha({ consultora: 'boreal', modo: 'despacho', medicion: null, respuestas: [], restauracion: null }).faltan[0]!, /medir la máquina/)
 })

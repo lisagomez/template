@@ -878,6 +878,10 @@ tras construir:
   - Va de la mano con D3 (modelo A o B). Su costo entra al pricing.
   - Por defecto: ninguna. El goal diseña para Supabase gestionado con el plan como parámetro y
     deja escrito qué cambia con un Postgres propio.
+  - **Decidida el 2026-10-11**: en el modo gestionado, un proyecto de Supabase **propio del producto**, plan Pro
+    con PITR, en `us-east-1` (Virginia), porque Supabase no tiene región en México; el contrato lo dice (§11). Quien
+    exija que sus datos se queden en México va por el modo despacho (Supabase autohospedado en la máquina de su
+    consultora).
 - **D11. Los cortes de tamaño S/M/L.** El goal los propone desde la carga sintética. El
   laboratorio los confirma, porque definen los tiers que se venden.
 - **D12. El proveedor del VPS y el destino de los respaldos fuera de sitio** (no Hetzner).

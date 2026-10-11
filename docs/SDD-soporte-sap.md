@@ -398,7 +398,7 @@ medición.
   un **tier** (esencial, profesional, crítico) con umbrales **supuestos** (D11), a la vista. El
   **costo por tier** = consumo del estimado (§14, cada cifra medida, derivada o supuesta) más las
   horas de consultor (horas por incidencia del corte × volumen supuesto), por un **precio unitario
-  por decidir** (proveedor D12, modelo D7, BD D10, costo hora de la consultora): hasta tenerlo, el
+  por decidir** (proveedor D12, modelo D7, la cotización de la BD de D10, costo hora de la consultora): hasta tenerlo, el
   costo dice «no medido», nunca cero. **El precio de venta y el modelo de cobro son parámetros por
   decidir** (ERP-7, D5); los modelos de cobro de referencia (por tier, bolsa de horas, por ticket)
   están en §18. Ningún número de precio en el código ni en la pantalla (`pruebas/pricing.ts`).
@@ -496,8 +496,8 @@ proveedor del VPS queda como **pregunta abierta hasta D12**, no como dato):
 
 | Capa | Snapshot | Respaldo del proveedor / PITR | Físico + WAL | Export lógico por tenant | Sincronización aparte |
 |---|---|---|---|---|---|
-| BD en Supabase gestionado (hoy) | no aplica: la BD no vive en el VPS | **Free: ninguno**. Pro: 7 días; Team: 14; Enterprise: 30. PITR es add-on (RPO ~2 min) y exige compute Small. Restaura **todo el proyecto**, con el proyecto inaccesible mientras dura | no aplica (lo opera el proveedor) | **sí**: es lo único que devuelve a **un** tenant (`exportaTenant` / `restauraTenant`) y es la portabilidad de ERP-6 | — |
-| BD en un Postgres propio (si D10 lo elige) | solo si es **atómico** sobre `PGDATA` + WAL en el mismo volumen (equivale a un corte de luz; sin PITR) | — | **sí**: pgBackRest o WAL-G para PITR | **sí**, igual que arriba | — |
+| BD en Supabase gestionado (D10: proyecto propio, Pro con PITR, `us-east-1`) | no aplica: la BD no vive en el VPS | **Free: ninguno**. Pro: 7 días; Team: 14; Enterprise: 30. PITR es add-on (RPO ~2 min) y exige compute Small. Restaura **todo el proyecto**, con el proyecto inaccesible mientras dura | no aplica (lo opera el proveedor) | **sí**: es lo único que devuelve a **un** tenant (`exportaTenant` / `restauraTenant`) y es la portabilidad de ERP-6 | — |
+| BD en el modo despacho (Supabase autohospedado en la máquina de la consultora) | solo si es **atómico** sobre `PGDATA` + WAL en el mismo volumen (equivale a un corte de luz; sin PITR) | — | **sí**: pgBackRest o WAL-G para PITR | **sí**, igual que arriba | — |
 | Storage (originales, sandbox, exportes) | no aplica | **no**: el respaldo de la BD guarda solo los metadatos de `storage.objects` | no aplica | el export lleva el **manifiesto** de objetos, no sus bytes | **sí**: línea propia (Borg o rclone a un destino append-only o inmutable; proveedor por D12) |
 | VPS (app, Caddy, OCR, `.env`) | sirve para **reconstruir rápido la máquina**, no como respaldo. Al proveedor elegido hay que preguntarle (D12): ¿es consistente con el servidor encendido? ¿incluye los volúmenes? ¿sobrevive al borrar el servidor? | — | — | — | `.env.production` cifrado con `age`, fuera del servidor (FASE0 §9) |
 
@@ -620,10 +620,13 @@ No hay precios en la tabla a propósito: compararlos exige una cotización vigen
 A cualquiera de ellos (o a un VPS de otro proveedor) hay que hacerle las tres preguntas del §13 sobre
 sus snapshots. **Un dato que cambia la decisión**: Supabase gestionado **no tiene región en México**
 (la más cercana es Virginia o São Paulo; [Supabase, regions](https://supabase.com/docs/guides/platform/regions)).
-Si la residencia en México es requisito, el VPS en Querétaro no basta: la base tendría que ser un
-Postgres propio en la misma región (D10, con pgBackRest o WAL-G); si no lo es, la base vive fuera y el
-contrato lo dice (C4). **Recomendación** para que el laboratorio decida: elegir primero D10 (dónde vive
-la base) y después D12 con la misma región, cotizando dos de las cuatro.
+**D10, decidida el 2026-10-11**: en el modo gestionado, la base y los archivos viven en un proyecto de Supabase
+**propio del producto**, plan Pro con PITR, en `us-east-1` (Virginia), y el contrato lo dice (§11). Propio, porque el
+PITR restaura el proyecto entero: compartido, devolver Soporte SAP a un punto regresaría a los demás productos. Quien
+exija que sus datos se queden en México va por el modo despacho, con Supabase autohospedado en la máquina de su
+consultora: estos candidatos le sirven a él. `configura:deploy` rechaza una instalación gestionada que declare otra
+región, y en despacho solo exige que la declare. **Para D12**, la recomendación pasa a ser el VPS del modo gestionado en
+la misma región que la base (Virginia), cotizando dos proveedores.
 
 ## 16. Seguridad
 
@@ -640,7 +643,7 @@ Los controles, cada uno con la prueba que se pone roja si falta (detalle en el C
 | Un documento da órdenes | el texto extraído es dato, delimitado; nada lo ejecuta | `pruebas/ingesta.ts`, evidencia de documentos (0 obedecidas) |
 | La cadena se reescribe | sha256 encadenado, solo agregar, fecha y actor de la base | `pruebas/cadena.ts` |
 | El laboratorio se despliega | 404 sin la variable; `configura:deploy` la rechaza, y corre en `predeploy` aunque el árbol tenga sello (PRP-010 H-26) | `scripts/prueba-a2a.ts` (ruta declarada), `pruebas/superficie.ts` (el caso malo y el control positivo de `configura:deploy`) |
-| Una instalación no cabe en lo contratado | el perfil `despliegue` del manifiesto (plantilla v3): `configura:deploy` mide la máquina contra el tamaño, la región frente a D10 («pendiente», nunca «cumple»), el respaldo inmutable y los secretos, sin imprimirlos; la ficha de servidor no dice «apto» sin GATE 3 | `pruebas/despliegue.ts`, siembras de `verifica:productos` |
+| Una instalación no cabe en lo contratado | el perfil `despliegue` del manifiesto (plantilla v3): `configura:deploy` mide la máquina contra el tamaño, la región frente a D10 (en gestionado, `us-east-1` o no pasa; en despacho, la que declare quien pone la máquina), el respaldo inmutable y los secretos, sin imprimirlos; la ficha de servidor no dice «apto» sin GATE 3 | `pruebas/despliegue.ts`, siembras de `verifica:productos` |
 | Un secreto en pantalla | contraseñas al azar por variable o stdin, nunca en una línea de comandos; huellas como `sha256:` | `npm run audita:secretos` |
 | Cadena de suministro | Postgres y Python por digest; dbt y MetricFlow por lock con hashes | el corte registra con qué se generó (`generadoCon`) |
 
@@ -653,8 +656,8 @@ un caso que no se le escaló.
 
 **Riesgos abiertos**: el corte no aplica un tamaño mínimo de grupo (un cliente S solo en su tamaño puede
 quedar expuesto ante el laboratorio); el contrato N1–N2 no se puede medir sin escalamientos con hora;
-Realtime, Auth y el JWT de Supabase no se probaron sin un Supabase real; y la residencia de los datos
-depende de D10 y D12.
+Realtime, Auth y el JWT de Supabase no se probaron sin un Supabase real; y en el modo gestionado los datos viven
+en Estados Unidos (D10): quien exija México va por despacho.
 
 ## 17. Decisiones abiertas
 

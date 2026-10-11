@@ -1893,7 +1893,7 @@ export const FILAS: readonly Fila[] = [
   {
     id: 'aisia-lista-en-los-respaldos', doc: 'AISIA', ref: 'Restauración que toca a los demás', estado: 'depende',
     afirmacion: 'la lista de bajas viaja a todos los niveles de respaldo, y tras restaurar se aplica la más reciente',
-    control: 'D10, D12 y GATE 3', nota: 'listaDeBajas() y trasRestaurar() existen y están probados; quien los corre es el job de respaldo del servidor, que todavía no existe en el repo',
+    control: 'D12 y GATE 3', nota: 'listaDeBajas() y trasRestaurar() existen y están probados; quien los corre es el job de respaldo del servidor, que todavía no existe en el repo',
   },
   // ─── D8 (PRP-012), revisión 5 de la AISIA: el dato que vive de más o que vuelve ───
   {
@@ -1944,10 +1944,42 @@ export const FILAS: readonly Fila[] = [
     control: 'ss_crudo y ss_procedencia no tienen cliente; se borran con la baja de la consultora',
     nota: 'la misma brecha que c3-baja-crudo-del-cliente: el crudo es inmutable y su huella cubre a todos sus clientes',
   },
+  // ─── D10, revisión 6 de la AISIA: dónde viven los datos ───
+  {
+    id: 'aisia-fuera-contrato', doc: 'AISIA', ref: 'Dato fuera de México', infirmable: true, estado: 'probado',
+    afirmacion: 'el contrato le dice al cliente que en el modo gestionado sus datos viven en Estados Unidos, quién los guarda y cómo quedarse en México (§11)',
+    control: 'contratos/plantilla-contrato-sla.md §11',
+    comprobacion: prueba('sla.ts', 'D10 · el contrato dice dónde viven los datos: en Estados Unidos en el modo gestionado, y cómo quedarse en México'),
+    sabotaje: { que: 'el contrato deja de decir que los datos viven en Estados Unidos', ediciones: [ed(`${SS}/contratos/plantilla-contrato-sla.md`, 'en un proveedor de base de datos gestionada, **en Estados Unidos** (Virginia), que los guarda', 'en un proveedor de base de datos gestionada, que los guarda')] },
+  },
+  {
+    id: 'aisia-fuera-gestionado', doc: 'AISIA', ref: 'Dato fuera de México', infirmable: true, estado: 'probado',
+    afirmacion: 'el manifiesto fija la región de D10 (us-east-1) y una instalación gestionada en otra región no pasa: los datos no van a parar a un sitio que el contrato no dice',
+    control: 'productos/soporte-sap.json (despliegue.exige.region) y scripts/despliegue/perfil.mjs · region()',
+    comprobacion: prueba('despliegue.ts', 'D10 · en gestionado solo pasa la región que fija D10 (us-east-1); en despacho, la que declare quien pone la máquina'),
+    sabotaje: { que: 'el manifiesto admite cualquier región', ediciones: [ed('productos/soporte-sap.json', '"regiones": ["us-east-1"]', '"regiones": ["us-east-1", "mx-central-1"]')] },
+  },
+  {
+    id: 'aisia-fuera-despacho', doc: 'AISIA', ref: 'Dato fuera de México', estado: 'probado',
+    afirmacion: 'quien exija que sus datos se queden en México va por el modo despacho: ahí la región la decide quien pone la máquina, y solo tiene que declararla',
+    control: 'scripts/despliegue/perfil.mjs · region(), en modo despacho',
+    comprobacion: prueba('despliegue.ts', 'D10 · en gestionado solo pasa la región que fija D10 (us-east-1); en despacho, la que declare quien pone la máquina'),
+    sabotaje: { que: 'en despacho, una máquina en México queda fuera', ediciones: [ed('scripts/despliegue/perfil.mjs', "  if (modo === 'despacho') { avisos.push(", '  if (false) { avisos.push(')] },
+  },
+  {
+    id: 'aisia-fuera-aviso', doc: 'AISIA', ref: 'Dato fuera de México', infirmable: true, estado: 'depende',
+    afirmacion: 'el aviso de privacidad hacia los empleados del N3 dice que, en el modo gestionado, sus datos se transfieren a Estados Unidos',
+    control: 'redacción legal del laboratorio (contrato §11)', nota: 'sin el aviso, el producto no opera con datos reales (AISIA §5)',
+  },
+  {
+    id: 'aisia-fuera-declarada', doc: 'AISIA', ref: 'Dato fuera de México', estado: 'brecha',
+    afirmacion: 'la región la declara quien instala: nadie la comprueba desde la máquina',
+    control: 'DESPLIEGUE_REGION del .env.production', nota: 'la misma brecha O2 del perfil de despliegue: la verifica quien contrata',
+  },
   {
     id: 'aisia-retencion-en-servidor', doc: 'AISIA', ref: 'Dato que vive de más o que vuelve', estado: 'depende',
     afirmacion: 'el job de retención corre en el servidor y borra lo que vence',
-    control: 'D10, D12 y GATE 3', nota: 'planDeRetencion() y ejecutaRetencion() existen y están probados contra la base; no hay servidor donde correrlos',
+    control: 'D12 y GATE 3', nota: 'planDeRetencion() y ejecutaRetencion() existen y están probados contra la base; no hay servidor donde correrlos',
   },
   {
     id: 'c3-ruta-sin-autenticar', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'brecha',
@@ -1970,10 +2002,24 @@ export const FILAS: readonly Fila[] = [
   },
   {
     id: 'c3-perfil-region', doc: 'C3', ref: 'Perfil de despliegue', estado: 'probado',
-    afirmacion: 'mientras D10 siga abierta, la región sale «pendiente de D10», nunca «cumple»',
+    afirmacion: 'mientras la decisión de la región siga abierta, la región sale «pendiente», nunca «cumple»',
     control: 'scripts/despliegue/perfil.mjs · region()',
     comprobacion: prueba('despliegue.ts', 'la región frente a D10: abierta, «pendiente» y nunca «cumple»; decidida, cumple o queda fuera; sin declarar, no pasa'),
     sabotaje: { que: 'la región se compara con una decisión abierta', ediciones: [ed('scripts/despliegue/perfil.mjs', "  if (r.estado !== 'decidida') {", '  if (false) {')] },
+  },
+  {
+    id: 'c3-perfil-region-d10', doc: 'C3', ref: 'Perfil de despliegue', estado: 'probado',
+    afirmacion: 'con D10 decidida, una instalación gestionada de Soporte SAP solo pasa en us-east-1: en otra región queda fuera',
+    control: 'scripts/despliegue/perfil.mjs · region()',
+    comprobacion: prueba('despliegue.ts', 'D10 · en gestionado solo pasa la región que fija D10 (us-east-1); en despacho, la que declare quien pone la máquina'),
+    sabotaje: { que: 'cualquier región cumple', ediciones: [ed('scripts/despliegue/perfil.mjs', '  if (r.regiones.includes(declarada)) return', '  if (true) return')] },
+  },
+  {
+    id: 'c3-perfil-region-despacho', doc: 'C3', ref: 'Perfil de despliegue', estado: 'probado',
+    afirmacion: 'en despacho la región la decide quien pone la máquina: no se compara con la del modo gestionado, pero se declara',
+    control: 'scripts/despliegue/perfil.mjs · region(), en modo despacho',
+    comprobacion: prueba('despliegue.ts', 'D10 · en gestionado solo pasa la región que fija D10 (us-east-1); en despacho, la que declare quien pone la máquina'),
+    sabotaje: { que: 'en despacho, una máquina en México queda fuera', ediciones: [ed('scripts/despliegue/perfil.mjs', "  if (modo === 'despacho') { avisos.push(", '  if (false) { avisos.push(')] },
   },
   {
     id: 'c3-perfil-respaldo-falta', doc: 'C3', ref: 'Perfil de despliegue', estado: 'probado',
