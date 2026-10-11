@@ -161,14 +161,15 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
       <div data-prueba="reloj-incidencia">
         <h3 className="font-semibold">Reloj de SLA</h3>
         <Reloj r={i.reloj} />
-        {rol === 'consultor' ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
-        <PausaDelReloj i={i} rol={rol} actua={actua} />
-        <AccionesDeLaConsultora i={i} rol={rol} actua={actua} />
+        {/* Con la salida registrada nada cambia (D8): sin los botones que la base y el runtime ya rechazan. */}
+        {rol === 'consultor' && !i.congelada ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
+        {i.congelada ? null : <PausaDelReloj i={i} rol={rol} actua={actua} />}
+        <AccionesDeLaConsultora i={i} rol={i.congelada ? 'experto' : rol} actua={actua} />
         {i.respuestas.length ? (
           <ul className="mt-2 space-y-1 text-xs" data-prueba="respuestas">{i.respuestas.map((r) => <li key={r.fecha + r.por}>Respuesta de {r.por}: «{r.texto}»</li>)}</ul>
         ) : null}
       </div>
-      <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={rol} actua={actua} />
+      <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={i.congelada ? 'experto' : rol} actua={actua} />
       <details data-prueba="cadena">
         <summary className="cursor-pointer text-xs font-semibold">Cadena de eventos ({i.cadena.length}) · {i.cadenaIntegra ? 'íntegra ✓' : 'ROTA ✗'}</summary>
         <ol className="mt-1 space-y-0.5 text-[11px]">{i.cadena.map((e) => <li key={e.seq}><span className="font-mono text-neutral-500">#{e.seq} {e.hash.slice(0, 10)}</span> {e.tipo} · {e.actor} · {e.resumen}</li>)}</ol>

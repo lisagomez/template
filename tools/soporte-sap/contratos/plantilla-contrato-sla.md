@@ -160,13 +160,37 @@ no las pide ni las necesita.
 
 [POR DECIDIR: redacción legal de la responsabilidad por lo que se aplica en el SAP del cliente]
 
-## 14. Vigencia y versiones
+## 14. Retención y salida de los datos
+
+**Mientras dura el contrato.** Los documentos originales que el cliente adjunta (capturas, PDF, XML) se borran
+**[POR DECIDIR: N] días después de la última resolución** de su incidencia, sea la de la incidencia o la de una
+impugnación. Mientras haya una impugnación abierta, no se borran. La incidencia, su cadena de eventos y los campos que se
+leyeron y revisaron de esos documentos se guardan lo que dure el contrato. Mientras el contrato no diga N, no se borra
+ningún original.
+
+**Al terminar.** La salida la registra **una persona** del cliente o de su consultora (la de una consultora entera, el
+superadministrador del laboratorio): un agente no la registra. Desde ese momento lo del cliente **no cambia más**: no
+entran incidencias nuevas, y las que tenga ya no se atienden ni se impugnan en el producto. El cliente y su consultora
+reciben un **export firmado** de lo suyo, que es el último, y pueden descargarlo durante una **gracia de [POR DECIDIR:
+días]**. Terminada la gracia se borra todo lo del cliente, el export incluido. Se quedan el caso anonimizado del sandbox,
+lo que haya subido al núcleo generalizado (§12) y las métricas agregadas, que ya no dicen de quién vinieron. Mientras el
+contrato no diga la gracia, no se borra nada.
+
+**En los respaldos.** Una copia de respaldo es inmutable durante su bloqueo: no se puede borrar antes de que venza. Por
+eso el borrado llega a todas las copias **en un máximo de 12 meses** desde que se borra del servicio. Los datos de este
+servicio no entran al archivo legal de varios años de quien lo opera. **Una restauración nunca devuelve lo borrado**: al
+restaurar se aplica la lista de bajas más reciente antes de dar la restauración por buena.
+
+[POR DECIDIR: redacción legal de la cláusula, y si N y la gracia son las mismas para todos los clientes o se pactan en
+cada contrato]
+
+## 15. Vigencia y versiones
 
 Cada cambio es una **versión nueva** con fecha de inicio; la anterior no se edita. Una incidencia se
-mide con la versión que regía al recibirla. Vigencia: [POR DECIDIR]. Terminación y entrega de datos
-(export por tenant): [POR DECIDIR].
+mide con la versión que regía al recibirla. Vigencia: [POR DECIDIR]. Terminación: [POR DECIDIR]; la entrega y el
+borrado de los datos al terminar, en el §14.
 
-## 15. Firmas
+## 16. Firmas
 
 | Parte | Nombre | Firma | Fecha |
 |---|---|---|---|

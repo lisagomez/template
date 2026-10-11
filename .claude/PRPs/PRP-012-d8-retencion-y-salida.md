@@ -188,6 +188,31 @@ la matriz.
 - **DP-1 pasa a la fase 3.** El tope del bloqueo de respaldo necesita un campo en la plantilla de producto, que está
   bajo CDC, y va junto con la cláusula del contrato que declara el plazo máximo.
 
+### Fase 3 (la app, el contrato y el tope del respaldo)
+- **CDC de la plantilla v4** (`retencion`): Soporte SAP declara D8 con un tope de 365 días y fuera del archivo legal, y
+  el vendedor la declara en null porque su P-07 sigue abierta. `configura:deploy` rechaza un bloqueo mayor que el tope;
+  con Soporte SAP, el de 2555 días que FASE0 §9.4 pone por defecto ya no pasa. Se adelanta a B-6, que pedía esperar
+  al siguiente manifiesto: sin el campo, el tope viviría en el código del perfil. La firma es del laboratorio.
+- **Las reglas de los plazos viven una sola vez** (`src/vencimiento.ts`): el job y la pantalla usan las mismas
+  (`estadoDeBaja`, `vencimientoDeOriginal`), y son las de la base.
+- **La app no inventa cifras legales**: los contratos del laboratorio siguen sin N ni gracia (DP-4), así que en la
+  pantalla nada vence y la salida queda «sin gracia: no se borra nada». La regla con N se prueba sobre la misma
+  función, y la base con sus plazos en `pruebas/retencion*.ts`.
+- **La salida en la app** (`services/salida.ts`): la registran el cliente o su consultora, nunca el laboratorio. Desde
+  ese momento el cliente queda congelado: no levanta, nadie atiende ni impugna lo suyo, su reloj se detiene y la
+  pantalla esconde los botones. El export se descarga por la ruta (`?export=`), solo él y su consultora; el
+  laboratorio ve la baja, no el export. En el laboratorio el export lleva su huella sha256; el firmado con
+  `SS_SECRETO_RESPALDOS` es el de la base (`exportaCliente`).
+- **La salida de una consultora entera** está en la base (la registra el superadministrador), no en la pantalla del
+  laboratorio.
+- **`clis/ss-retencion.mjs` no se construye todavía**: no hay base contra la que correr el job en dry-run, y un
+  simulacro repetiría `pruebas/retencion.ts`. Llega con el job de respaldo del servidor (la fila «depende»: D10,
+  D12, GATE 3).
+- **Para la fase 4**: el BUSINESS_LOGIC de la app dice «Acciones irreversibles: ninguna automática», y el job de
+  retención borra solo. Borra únicamente lo que el contrato firmado dice y la base deja (lo vencido), y con dry-run;
+  la revisión de la AISIA lo tiene que decir, junto con el daño nuevo (un dato que vive más de lo que dice el
+  contrato, o que vuelve con una restauración).
+
 ## Aprendizajes
 
 ### 2026-10-10: `node --test` no comprueba los tipos
@@ -196,3 +221,13 @@ la matriz.
 - **Fix**: anotar el tipo, y correr `npx tsc --noEmit` antes de la matriz entera, no solo el `validate` al final.
 - **Aplicar en**: toda prueba de `tools/`: Node quita los tipos sin comprobarlos.
 
+### 2026-10-11: el arnés solo sabotea lo que está en un commit
+- **Error**: la fila nueva de `perfil.mjs` dio «no se pudo sembrar: tiene cambios sin commit».
+- **Fix**: hacer commit en la rama antes de correr `--fila`. En un CDC, el commit local va antes de la firma, y la
+  firma antes del PR.
+- **Aplicar en**: toda fila nueva de la matriz.
+
+### 2026-10-11: un 400 esperado es un error de consola para el recorrido
+- **Error**: el paso que comprueba el rechazo de un cliente congelado dejó el recorrido en rojo por el 400 que provoca.
+- **Fix**: apartar ese error, y solo ese, alrededor del paso, y comprobar que hubo exactamente uno.
+- **Aplicar en**: todo paso del recorrido que pruebe un rechazo.

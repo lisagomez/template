@@ -1943,6 +1943,13 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'un respaldo sin bloqueo pasa', ediciones: [ed('scripts/despliegue/perfil.mjs', '  if (!(Number.isInteger(dias) && dias >= 1)) {', '  if (false) {')] },
   },
   {
+    id: 'c3-contrato-retencion', doc: 'C3', ref: 'Datos personales', estado: 'probado',
+    afirmacion: 'el contrato dice cuándo se borran los originales, qué pasa al salir y que el borrado llega a todas las copias de respaldo en 12 meses como máximo (D8, DP-1)',
+    control: 'contratos/plantilla-contrato-sla.md §14',
+    comprobacion: prueba('sla.ts', 'D8 · el contrato dice cuándo se borran los originales, qué pasa al salir y en cuánto llega el borrado a los respaldos'),
+    sabotaje: { que: 'el contrato deja de poner plazo al borrado en los respaldos', ediciones: [ed(`${SS}/contratos/plantilla-contrato-sla.md`, 'eso el borrado llega a todas las copias **en un máximo de 12 meses** desde', 'eso el borrado llega a todas las copias **cuando se pueda** desde')] },
+  },
+  {
     id: 'c3-app-salida-persona', doc: 'C3', ref: 'Decisiones humanas (doble cierre en todas)', infirmable: true, estado: 'probado',
     afirmacion: 'en la app, la salida de un cliente la registra una persona del cliente o de su consultora: el laboratorio no, ni la de un cliente ajeno, ni dos veces (D8, DP-2)',
     control: 'src/features/soporte-sap/services/salida.ts · registraSalida()',

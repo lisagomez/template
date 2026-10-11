@@ -247,6 +247,29 @@ await captura(14.5, 'el FODA lleva su confianza y la proyección su aviso', asyn
   return /confianza (media|baja)/.test(f) && /Proyección con supuestos, no una promesa/.test(a)
 }, sel('foda'))
 
+// 14.6–14.8 (D8, PRP-012): cada original dice cuándo vence; el cliente registra su salida, descarga su export y queda
+// congelado. Va al final: con la salida registrada, nada de este cliente cambia más.
+await abre('MIGO no deja contabilizar la entrada')
+await captura(14.6, 'cada original dice cuando vence', async () => /Original: no vence: el contrato todavía no dice cuántos días se guarda/.test(await texto(sel('evidencia'))), sel('evidencia'))
+await pagina.locator(sel('salidas')).scrollIntoViewIfNeeded()
+await pagina.check(sel('salida-entiendo'))
+await pagina.click(sel('salida-registra'))
+await pagina.locator(sel('salida-registrada')).first().waitFor({ timeout: 10_000 })
+const exporta = (r) => pagina.request.get(`${base}/api/soporte-sap?rol=${r}&export=alimentos-del-bajio`)
+await captura(14.7, 'la salida registrada con su export y su gracia', async () => {
+  const t = await texto(sel('salidas'))
+  return /Registrada por usr-cliente-bajio/.test(t) && /sin gracia en el contrato: no se borra nada/.test(t) && /Gracia de su contrato: por decidir/.test(t)
+    && (await exporta('cliente')).status() === 200 && (await exporta('superadmin')).status() === 404
+}, sel('salidas'))
+// El 400 de este rechazo es el esperado: se aparta de los errores de consola, y solo ese.
+const antesDelRechazo = errores.length
+await levanta('Otra más', 'El usuario ALMACEN02 también está bloqueado en SU01', [])
+const rechazos = errores.splice(antesDelRechazo)
+errores.push(...rechazos.filter((e) => !/status of 400/.test(e)))
+await captura(14.8, 'con la salida registrada el cliente no levanta y lo suyo no cambia', async () =>
+  rechazos.length === 1 && /la salida de este cliente está registrada \(D8\)/.test(await texto(sel('error'))) && /La salida de este cliente está registrada/.test(await texto(sel('congelada')))
+  && (await pagina.locator(sel('impugna')).count()) === 0, sel('vista-cliente'))
+
 await navegador.close()
 const malos = pasos.filter((p) => !p.ok)
 console.log(`\n${pasos.length} capturas · ${malos.length} comprobaciones en rojo · ${errores.length} errores de consola${errores.length ? `:\n  ${errores.join('\n  ')}` : ''}`)
