@@ -213,6 +213,18 @@ la matriz.
   la revisión de la AISIA lo tiene que decir, junto con el daño nuevo (un dato que vive más de lo que dice el
   contrato, o que vuelve con una restauración).
 
+### Fase 4 (la AISIA y la firma)
+- **Revisión 5 de la AISIA** (borrador en `docs/goals/soporte-sap-AISIA-revision-d8.md`, lo firma y lo mueve el
+  laboratorio): entra el daño «Dato que vive de más o que vuelve» (§2 y §3). La §4 gana «Retención y salida», y la
+  restauración ya no dice «la retención no existe». La §5 tiene una fila infirmable nueva, y en la lista de salida
+  D8 queda decidida, con N y la gracia por fijar (DP-4) y el job de respaldo del servidor.
+- **La AISIA dice que el job de retención borra solo**: es la única acción irreversible sin una persona en el
+  momento. La base acota lo que borra (solo lo vencido); el contrato firmado fija el cuándo, y una persona registra
+  la salida. El BUSINESS_LOGIC de la app deja de decir «ninguna automática».
+- **El C3** (PRP-008): la plataforma borra solo lo vencido; la salida es un acto de una persona; el perfil compara
+  el bloqueo con el tope de la plantilla v4.
+- **8 filas nuevas** del daño nuevo: 6 probadas, 1 brecha (el crudo) y 1 depende (el job en un servidor).
+
 ## Aprendizajes
 
 ### 2026-10-10: `node --test` no comprueba los tipos
