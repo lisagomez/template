@@ -25,8 +25,9 @@ aprueba.
 | N3 · empresa atendida | usuario del cliente final | sus incidencias y el tablero de su servicio | levanta incidencias con adjuntos |
 
 **Lo que no es.** No se conecta a ningún SAP real: «implementar la solución» en el laboratorio
-es aplicarla al simulador, y en el SAP de un N3 es una acción irreversible sobre un tercero que va
-con gate humano por acción y no está cableada (D6). No usa un LLM real (D7). No fija precios ni
+es aplicarla al simulador. En el SAP de un N3 es una acción irreversible sobre un tercero, y no la hace
+el producto: la aplica una persona de la consultora o del N3, con su propio acceso y bajo el control de
+cambios del N3 (D6, decidida). No usa un LLM real (D7). No fija precios ni
 cifras de SLA (D5, D13).
 
 ## 2. Arquitectura por dominio y por capas

@@ -28,7 +28,7 @@ simulado, con corpus sintético y LLM simulado.
 | Una mesa AMS resuelve una y otra vez lo mismo, y el conocimiento vive en la cabeza de quien lo resolvió | matriz problema-solución sobre el motor determinista del grafo, alimentada por el sandbox (KCS) |
 | El triage depende de capturas y documentos que alguien tiene que leer | ingesta con el extractor documental, evidencia por campo y revisión humana |
 | El SLA se discute con hojas de cálculo | contratos versionados y un reloj que mide desde los eventos con traza |
-| Un agente que «arregla» en el SAP del cliente es un riesgo que nadie firma | el agente propone; un humano aprueba en una fila que ningún modelo puede escribir; la aplicación real no está cableada (D6) |
+| Un agente que «arregla» en el SAP del cliente es un riesgo que nadie firma | el agente propone; un humano aprueba en una fila que ningún modelo puede escribir; en el SAP real no aplica nada el producto: lo aplica una persona con su propio acceso (D6, decidida) |
 
 **Valor de negocio**: es el primer producto vendible del laboratorio y el primero que compone
 activos existentes (extractor, grafo, A2A, contabilidad, despliegue) para un modelo de negocio.
@@ -300,7 +300,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 | 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real | mover la matriz a `tools/conocimiento`, con su firma |
 | 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |
 | 6 | Grupo chico ante el laboratorio | con una sola consultora o un tamaño de un cliente | un tamaño mínimo de grupo (D14) |
-| 7 | La fatiga del aprobador | con SAP real (D6) | ningún control: la mitigan el supervisor y la huella |
+| 7 | La fatiga del aprobador | si D6 cambia y el producto llega a aplicar en un SAP real | ningún control: la mitigan el supervisor y la huella; con D6 (fuera del producto), su daño directo es al simulador |
 | 8 | El resultado de SLA sin atar a los eventos | con un job de plataforma comprometido | recalcularlo desde la cadena; atarlo en la base |
 | 9 | Lo demás: logs de la ruta, `ss_procedencia`, límites de los buckets, S8 y S9 sin sabotaje, parches de O5, Realtime y JWT, región autodeclarada, forma desconocida de dato | al salir del laboratorio | cada una en su fila de la matriz |
 

@@ -846,7 +846,9 @@ tras construir:
   sala). Por defecto aquí: `auth.uid()` con `profiles`.
 - **D5. Las cifras del pricing y los tiers**, que dependen del plan comercial (ERP-7).
 - **D6. Quién ejecuta la solución en el SAP real de un N3 y con qué acceso.** Por defecto nadie
-  en este goal.
+  en este goal. **Decidida el 2026-10-10: fuera del producto.** El producto no se conecta a ningún SAP ni
+  guarda sus credenciales; lo aprobado se aplica al simulador. Llevarlo al SAP del N3 lo hace una persona de
+  la consultora o del N3, con su propio acceso y bajo el control de cambios del N3 (contrato §13).
 - **D7. Las llamadas a modelo con datos de clientes.** Con un proveedor externo, el dato sale del
   perímetro (C4); pesos abiertos en un proveedor ajeno no cambian eso. Hay que decidir qué modelo
   está **prohibido** por clase de dato antes de mirar capacidad o costo.

@@ -22,6 +22,11 @@
 > **Revisión 2** (2026-10-10): el laboratorio decidió **D3 «mixto»**. Hasta GATE 3, la consultora opera su N2 (la
 > atención y el SLA con su cliente) y el laboratorio opera solo el N1 (sala, sandbox y núcleo), sin comprometer
 > disponibilidad. Cambia la §5. Va firmada al pie.
+>
+> **Revisión 3** (2026-10-10): el laboratorio decidió **D6 «fuera del producto»**. El producto no se conecta a
+> ningún SAP ni guarda sus credenciales. Llevar una solución al SAP del N3 lo hace una persona de la consultora o del
+> N3, con su propio acceso y bajo el control de cambios del N3, y la pantalla y el contrato (§13) lo dicen. Cambian
+> la §4 «Solución equivocada» y «Fatiga del aprobador», y la §5. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -145,11 +150,17 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - El veredicto lo da el motor determinista con su fuente.
   - El supervisor no es el ejecutor.
   - El humano ve el antes y el después en el simulador.
-  - Se ejecuta **exactamente lo aprobado**: la huella se recalcula sobre lo que va a correr. La
-    aplicación en un SAP real **no está cableada** (D6), así que el producto no la ofrece.
+  - Se ejecuta **exactamente lo aprobado**: la huella se recalcula sobre lo que va a correr.
+  - **D6, decidida (fuera del producto)**: el producto no se conecta a ningún SAP ni guarda sus credenciales, y lo
+    único que ejecuta es el simulador. Llevar una solución al SAP del N3 lo hace una persona de la consultora o del
+    N3, con su propio acceso y bajo el control de cambios del N3. La pantalla y el contrato (§13) dicen que el antes
+    y el después son del simulador, no del SAP del cliente.
+  - Una credencial de SAP pegada en una incidencia, en el chat o en un adjunto **no la detecta** el producto
+    (brecha): el contrato dice que no se comparten por ahí.
 - **Fatiga del aprobador** (brecha): no la cierra una política. La mitigan el veredicto del
   supervisor y el antes y el después en el mismo mensaje, y que lo aprobado y lo ejecutado tengan la
-  misma huella. Mientras no haya SAP real, su daño es al simulador.
+  misma huella. Como el producto no aplica en un SAP real (D6), su daño directo es al simulador; llevar lo
+  aprobado al SAP del N3 lo decide una persona, fuera del producto, con el control de cambios del N3.
 - **Conocimiento cruzado**:
   - Aislado por consultora por defecto: lo enseñado queda a medida.
   - Al núcleo solo pasa lo que sube el superadministrador, generalizado.
@@ -260,12 +271,12 @@ quedan hoy:
 | Lo que lee el laboratorio | Lo que la consultora escala, también en la app, y lo leído de un original con el acceso motivado. |
 | El triage urgente cortado por presupuesto, o sin su evidencia | P1 y P2 pasan a una persona; nunca se cortan. |
 | La restauración que toca a otros tenants | Por tenant, verificada antes del commit. |
-| Una solución mal aplicada en el SAP de un N3 | **No se ofrece**: no hay SAP real cableado (D6). |
+| Una solución mal aplicada en el SAP de un N3 | **No se ofrece** (D6, decidida): el producto no se conecta a ningún SAP ni guarda sus credenciales. La aplica una persona, fuera del producto, con el control de cambios del N3, y la pantalla y el contrato dicen que el antes y el después son del simulador. |
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
 
 Para salir del laboratorio hacen falta:
 
-- D6, D7, D8, D10, D12, D13 y D14 decididas (D1 y D3 ya lo están);
+- D7, D8, D10, D12, D13 y D14 decididas (D1, D3 y D6 ya lo están);
 - la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
@@ -280,3 +291,5 @@ Firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
 Revisión 1 (D1), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
 
 Revisión 2 (D3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
+
+Revisión 3 (D6), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
