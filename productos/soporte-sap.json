@@ -1,5 +1,5 @@
 {
- "plantilla": 3,
+ "plantilla": 4,
  "slug": "soporte-sap",
  "nombre": "Soporte SAP",
  "version": 1,
@@ -99,6 +99,15 @@
   "procedimiento": "export y restauración por tenant (docs/SDD-soporte-sap.md §13)",
   "rpoRto": "desconocidos",
   "gate3": false
+ },
+ "retencion": {
+  "decision": "D8 (PRP-012)",
+  "plazos": "tools/soporte-sap/src/sla.ts",
+  "nota": "N (los originales, desde la última resolución y nunca con una impugnación abierta) y la gracia de salida van en el contrato de cada cliente (retencionOriginalesDias, graciaSalidaDias); sin ellos no se borra nada (DP-4)",
+  "salida": "una persona registra la baja y el tenant se congela; se genera su export firmado, y tras la gracia se borra todo salvo el sandbox anonimizado y el núcleo",
+  "restauracion": "la lista de bajas viaja aparte de la base y, tras restaurar, se aplica la más reciente (restauraTenant y trasRestaurar): no resucita un tenant ni un original dados de baja",
+  "bloqueoMaximoDias": 365,
+  "archivoLegal": false
  },
  "despliegue": {
   "modos": ["gestionado", "despacho"],

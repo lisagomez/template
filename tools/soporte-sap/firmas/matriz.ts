@@ -1943,6 +1943,13 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'un respaldo sin bloqueo pasa', ediciones: [ed('scripts/despliegue/perfil.mjs', '  if (!(Number.isInteger(dias) && dias >= 1)) {', '  if (false) {')] },
   },
   {
+    id: 'c3-perfil-respaldo-tope', doc: 'C3', ref: 'Perfil de despliegue', estado: 'probado',
+    afirmacion: 'un bloqueo de respaldo mayor que el tope del producto (365 días en Soporte SAP) no pasa: el borrado no llegaría a las copias en el plazo del contrato (D8, DP-1)',
+    control: 'scripts/despliegue/perfil.mjs · respaldo(), con retencion.bloqueoMaximoDias del manifiesto (plantilla v4)',
+    comprobacion: prueba('despliegue.ts', 'el bloqueo del respaldo no pasa el tope que promete el producto (D8): una copia bloqueada no se borra'),
+    sabotaje: { que: 'un bloqueo de siete años pasa', ediciones: [ed('scripts/despliegue/perfil.mjs', '  else if (dias > tope) {', '  else if (false) {')] },
+  },
+  {
     id: 'c3-perfil-secretos', doc: 'C3', ref: 'Perfil de despliegue', estado: 'probado',
     afirmacion: 'los secretos del producto tienen que estar y tener 32 caracteres o más',
     control: 'scripts/despliegue/perfil.mjs · revisaPerfil()',

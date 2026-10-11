@@ -62,6 +62,19 @@ test('sin destino de respaldo, aviso; un destino sin https o sin días de bloque
   assert.match(revisa(completa({ RESPALDO_S3_BLOQUEO_DIAS: '0' })).problemas.join('\n'), /sin bloqueo, el respaldo se borra/)
 })
 
+test('el bloqueo del respaldo no pasa el tope que promete el producto (D8): una copia bloqueada no se borra', () => {
+  assert.equal(MANIFIESTO.retencion.bloqueoMaximoDias, 365)
+  assert.deepEqual(revisa(completa({ RESPALDO_S3_BLOQUEO_DIAS: '365' })).problemas, [])
+  const largo = revisa(completa({ RESPALDO_S3_BLOQUEO_DIAS: '2555' }))
+  assert.equal(largo.medicion?.respaldo, 'mal')
+  assert.match(largo.problemas.join('\n'), /RESPALDO_S3_BLOQUEO_DIAS=2555 pasa el tope de 365 días que promete soporte-sap/)
+  const sinTope = structuredClone(MANIFIESTO)
+  sinTope.retencion = { ...sinTope.retencion, plazos: null, bloqueoMaximoDias: null }
+  const r = revisa(completa({ RESPALDO_S3_BLOQUEO_DIAS: '2555' }), GRANDE, sinTope)
+  assert.deepEqual(r.problemas, [])
+  assert.match(r.avisos.join('\n'), /no declara hasta cuándo llega el borrado a las copias/, 'sin tope declarado, se avisa: no se calla')
+})
+
 test('los secretos del producto: si faltan o son cortos no pasa, y la medición no lleva ninguno', () => {
   assert.match(revisa(completa({ SS_SAL_IMPORTADOR: null })).problemas.join('\n'), /SS_SAL_IMPORTADOR falta/)
   assert.match(revisa(completa({ SS_SECRETO_TAREAS: 'corto' })).problemas.join('\n'), /SS_SECRETO_TAREAS tiene 5 caracteres/)
