@@ -7,7 +7,7 @@
  *
  * Uso: node tools/soporte-sap/evidencia/respaldo.ts   · Exit 1 si una restauración no cuadra.
  */
-import { exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, type Consulta } from '../dist/index.js'
+import { exportaTenant, huellaTenant, restauraTenant, LISTA_VACIA, verificaRestauracion, type Consulta } from '../dist/index.js'
 import { baseSoporte, cargaSintetica as carga, ORG, SECRETO_RESPALDOS } from '../pruebas/_base.ts'
 
 /** Incidencias por mes de una consultora según su tamaño (SUPUESTO del laboratorio, D11). */
@@ -31,7 +31,7 @@ for (const [tamano, porMes] of Object.entries(TAMANOS)) {
   await db.exec(`begin; set local session_replication_role = replica; delete from ss_evento where consultora_id = '${ORG.CA}'; delete from ss_horas where consultora_id = '${ORG.CA}'; commit;`)
   const tDano = ms(t)
   t = performance.now()
-  await restauraTenant(q, e, SECRETO_RESPALDOS)
+  await restauraTenant(q, e, SECRETO_RESPALDOS, LISTA_VACIA)
   const tRestaura = ms(t)
   t = performance.now()
   const v = verificaRestauracion(e, await huellaTenant(q, ORG.CA), { [ORG.CB]: bAntes }, { [ORG.CB]: await huellaTenant(q, ORG.CB) })

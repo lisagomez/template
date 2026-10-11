@@ -40,9 +40,13 @@ function esContrato(c: unknown): c is ContratoSla {
 export async function calculaResultadosSla(q: Consulta, consultora: string, corte: string): Promise<CorridaSla> {
   const incidencias = await q<{ id: string; cliente_id: string; alta: string }>(
     `select id, cliente_id, ${ISO('creada_en')} as alta from public.ss_incidencia where consultora_id = $1 order by creada_en`, [consultora])
+  // D8: un tenant con la salida registrada está congelado; su resultado de SLA ya está en su export.
+  const congelados = new Set((await q<{ id: string }>(
+    `select distinct cliente_id as id from public.ss_incidencia where consultora_id = $1 and ss_priv.en_baja(consultora_id, cliente_id)`, [consultora])).map((r) => r.id))
   const omitidas: Omitida[] = []
   let calculadas = 0
   for (const i of incidencias) {
+    if (congelados.has(i.cliente_id)) { omitidas.push({ incidencia: i.id, motivo: 'su cliente registró la salida (D8): congelado' }); continue }
     const filas = await q<{ id: string; version: number; contenido: unknown }>(
       `select id, version, contenido from public.ss_contrato_sla where cliente_id = $1 and nivel = 'N2-N3'`, [i.cliente_id])
     const versiones = filas.filter((f) => esContrato(f.contenido) && f.contenido.id === f.id && f.contenido.version === f.version).map((f) => f.contenido as ContratoSla)

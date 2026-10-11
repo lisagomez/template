@@ -880,9 +880,11 @@ create table if not exists public.ss_baja (
   constraint ss_una_baja_por_tenant unique nulls not distinct (consultora_id, cliente_id)
 );
 
--- Los días que declara el contrato vigente de esa pareja (`cli` nulo: el N1-N2 de la consultora), o null.
+-- Los días que declara el contrato vigente de esa pareja (`cli` nulo: el N1-N2 de la consultora), o null. Van como
+-- los demás números legales del contrato (`ContratoSla`, src/sla.ts): `{ valor, quienDecide }`, y `valor` null es
+-- «por decidir».
 create or replace function ss_priv.dias_del_contrato(cons uuid, cli uuid, clave text) returns integer language sql stable security definer set search_path = '' as $$
-  select case when (k.contenido ->> clave) ~ '^[0-9]{1,4}$' then (k.contenido ->> clave)::integer end
+  select case when (k.contenido -> clave ->> 'valor') ~ '^[0-9]{1,4}$' then (k.contenido -> clave ->> 'valor')::integer end
   from public.ss_contrato_sla k
   where k.consultora_id = cons and k.cliente_id is not distinct from cli and k.vigente_desde <= current_date
   order by k.vigente_desde desc, k.version desc limit 1
@@ -910,7 +912,7 @@ create or replace function ss_priv.original_vencido(adj uuid) returns boolean la
       and i.estado in ('resuelta', 'cerrada') and i.resuelta_en is not null
       and not exists (select 1 from public.ss_impugnacion m where m.incidencia_id = i.id and m.estado = 'abierta')
       and greatest(i.resuelta_en, (select max(m.resuelta_en) from public.ss_impugnacion m where m.incidencia_id = i.id))
-          + make_interval(days => ss_priv.dias_del_contrato(a.consultora_id, a.cliente_id, 'retencion_originales_dias')) <= now())
+          + make_interval(days => ss_priv.dias_del_contrato(a.consultora_id, a.cliente_id, 'retencionOriginalesDias')) <= now())
 $$;
 
 create or replace function ss_priv.baja_de_la_base() returns trigger language plpgsql security definer set search_path = '' as $$
@@ -923,7 +925,7 @@ begin
     new.registrada_por := auth.uid();
     if new.registrada_por is null then raise exception 'una salida la registra una persona (D8, DP-2)'; end if;
     new.registrada_en := now();
-    g := ss_priv.dias_del_contrato(new.consultora_id, new.cliente_id, 'gracia_salida_dias');
+    g := ss_priv.dias_del_contrato(new.consultora_id, new.cliente_id, 'graciaSalidaDias');
     new.borrar_desde := now() + make_interval(days => g);
     new.export_sha256 := null;
     new.borrada_en := null;
@@ -1198,6 +1200,28 @@ begin
   foreach t in array array['ss_importacion_fila', 'ss_metrica', 'ss_contrato_sla', 'ss_consentimiento_nucleo'] loop
     execute format('drop trigger if exists %I on public.%I', t || '_tenencia', t);
     execute format('create trigger %I before insert or update on public.%I for each row execute function ss_priv.cliente_es_de_consultora()', t || '_tenencia', t);
+  end loop;
+end $$;
+
+-- D8 (PRP-012): con la salida registrada, el tenant se CONGELA. Su export es el último que hay, y la gracia sirve para
+-- descargarlo y discutir con él en la mano: nada de lo suyo se escribe ni se cambia. Restaurar corre en modo réplica
+-- (sin disparadores), y la plataforma solo borra. Lo que no tiene cliente se congela con la baja de su consultora.
+create or replace function ss_priv.congelado_por_baja() returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if ss_priv.en_baja(new.consultora_id, (to_jsonb(new) ->> 'cliente_id')::uuid) then
+    raise exception 'la salida de este tenant está registrada (D8): no cambia nada, y su export es el último';
+  end if;
+  return new;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
+    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_importacion_fila', 'ss_contrato_sla', 'ss_consentimiento_nucleo',
+    'ss_mapeo', 'ss_procedencia', 'ss_presupuesto', 'ss_crudo'] loop
+    execute format('drop trigger if exists %I on public.%I', t || '_congelado', t);
+    execute format('create trigger %I before insert or update on public.%I for each row execute function ss_priv.congelado_por_baja()', t || '_congelado', t);
   end loop;
 end $$;
 
@@ -1653,7 +1677,7 @@ create or replace function ss_priv.objeto_vencido(bucket text, nombre text) retu
   select case bucket
     when 'ss-originales' then ss_priv.baja_vencida(ss_priv.carpeta(nombre, 1), ss_priv.carpeta(nombre, 2))
                            or exists (select 1 from public.ss_adjunto a where a.ruta = nombre and ss_priv.original_vencido(a.id))
-    when 'ss-exportes' then ss_priv.baja_vencida(ss_priv.carpeta(nombre, 1), null)
+    when 'ss-exportes' then ss_priv.baja_vencida(ss_priv.carpeta(nombre, 1), ss_priv.carpeta(nombre, 2))
     else false end
 $$;
 -- ¿Queda algo de ese tenant? (`cli` nulo: la consultora entera.) Lo que se queda a propósito no cuenta: el sandbox
@@ -1719,6 +1743,10 @@ create policy ss_sandbox_lee_objetos on storage.objects for select to authentica
 drop policy if exists ss_sandbox_agente_sube on storage.objects;
 
 -- Los exportes son de la consultora que se lleva sus datos: el laboratorio no los lee.
+-- D8: el cliente que se va lee SU export ({consultora}/{cliente}/...), y nada más de ss-exportes.
+drop policy if exists ss_exportes_cliente_lee on storage.objects;
+create policy ss_exportes_cliente_lee on storage.objects for select to authenticated
+  using (bucket_id = 'ss-exportes' and ss_priv.rol_en(ss_priv.carpeta(name, 2)) is not distinct from 'usuario_cliente');
 drop policy if exists ss_exportes_lee on storage.objects;
 create policy ss_exportes_lee on storage.objects for select to authenticated
   using (bucket_id = 'ss-exportes' and ss_priv.rol_en(ss_priv.carpeta(name, 1)) = 'consultor');
