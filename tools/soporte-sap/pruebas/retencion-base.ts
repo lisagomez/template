@@ -18,9 +18,9 @@ const E1 = 'e'.repeat(64)
 /** Como dueño y sin disparadores: mueve el reloj de una fila, que por la API pone la base. */
 const sinDisparadores = (db: Db, sql: string) => db.exec(`set session_replication_role = replica; ${sql}; set session_replication_role = origin;`)
 /** Una versión vigente desde hoy de un contrato, con sus plazos (DP-4). */
-const plazos = (db: Db, id: string, cliente: string | null, consultora: string = ORG.CA, dias: Record<string, number> = { retencion_originales_dias: 30, gracia_salida_dias: 30 }) =>
+const plazos = (db: Db, id: string, cliente: string | null, consultora: string = ORG.CA, dias: Record<string, number> = { retencionOriginalesDias: 30, graciaSalidaDias: 30 }) =>
   db.exec(`insert into ss_contrato_sla (id, version, nivel, consultora_id, cliente_id, contenido, vigente_desde)
-    values ('${id}', 2, '${cliente ? 'N2-N3' : 'N1-N2'}', '${consultora}', ${cliente ? `'${cliente}'` : 'null'}, '${JSON.stringify(dias)}', current_date)`)
+    values ('${id}', 2, '${cliente ? 'N2-N3' : 'N1-N2'}', '${consultora}', ${cliente ? `'${cliente}'` : 'null'}, '${JSON.stringify(Object.fromEntries(Object.entries(dias).map(([k, v]) => [k, { valor: v, quienDecide: 'prueba' }])))}', current_date)`)
 const resuelta = (db: Db, inc: string, haceDias: number) =>
   sinDisparadores(db, `update ss_incidencia set estado = 'resuelta', resuelta_en = now() - interval '${haceDias} days' where id = '${inc}'`)
 const hay = async (db: Db, sql: string) => (await db.query<{ n: number }>(`select count(*)::int as n from (${sql}) x`)).rows[0]?.n ?? 0
@@ -150,7 +150,7 @@ test('D8 · tras la gracia y con el export, la plataforma borra todo el tenant, 
 
 test('D8 · la salida de una consultora entera: el superadministrador la registra, y tras su gracia se va con sus clientes', async () => {
   const db = await baseSoporte()
-  await plazos(db, 'sla-cb', null, ORG.CB, { gracia_salida_dias: 15 })
+  await plazos(db, 'sla-cb', null, ORG.CB, { graciaSalidaDias: 15 })
   await como(db, USR.sup, registra(null, ORG.CB))
   await sinDisparadores(db, `update ss_baja set borrar_desde = now() - interval '1 day', export_sha256 = '${E1}' where consultora_id = '${ORG.CB}'`)
   for (const sql of [`delete from storage.objects where bucket_id = 'ss-originales'`, `delete from ss_incidencia`, `delete from ss_contrato_sla`]) {

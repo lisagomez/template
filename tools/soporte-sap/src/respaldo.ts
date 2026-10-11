@@ -104,7 +104,7 @@ export async function huellaTenant(q: Consulta, consultora: string): Promise<Hue
   return { conteos, huellas, total: t?.h ?? '' }
 }
 
-const firmaDe = (secreto: string, e: Omit<ExportTenant, 'firma'>): string =>
+const firmaDe = (secreto: string, e: object): string =>
   createHmac('sha256', secreto).update(canonico(e as unknown as Json)).digest('hex')
 
 /** Export lógico de un tenant, FIRMADO: sus filas, su huella y el manifiesto de sus objetos. */
@@ -121,8 +121,94 @@ export async function exportaTenant(q: Consulta, consultora: string, ahora: stri
   return { ...sinFirma, firma: firmaDe(exigeSecreto(secreto), sinFirma) }
 }
 
+/** El export de UN cliente (D8, PRP-012): el que se va se lleva lo suyo. No se restaura: es portabilidad. */
+export interface ExportCliente {
+  readonly version: 1
+  readonly consultora: string
+  readonly cliente: string
+  readonly exportado: string
+  readonly tablas: Readonly<Record<string, unknown[]>>
+  /** Sus originales: los descarga en la gracia, con el acceso que ya tiene. */
+  readonly objetos: ReadonlyArray<{ readonly bucket: string; readonly nombre: string }>
+  readonly firma: string
+}
+
+/** Export lógico de un cliente, FIRMADO: las filas de las tablas del tenant que son suyas, y el manifiesto de sus originales. */
+export async function exportaCliente(q: Consulta, consultora: string, cliente: string, ahora: string, secreto: string): Promise<ExportCliente> {
+  const c = exigeUuid(consultora), cl = exigeUuid(cliente)
+  const conCliente = new Set((await q<{ t: string }>(
+    `select table_name as t from information_schema.columns where table_schema = 'public' and column_name = 'cliente_id'`)).map((r) => r.t))
+  const tablas: Record<string, unknown[]> = {}
+  for (const [t, col, via] of TABLAS_DE_TENANT.filter(([t]) => conCliente.has(t))) {
+    const donde = via === 'cliente' ? `ss_priv.padre_de(t.${col}) = $1 and t.${col} = $2` : `t.${col} = $1 and t.cliente_id = $2`
+    const [r] = await q<{ filas: unknown[] }>(`select coalesce(jsonb_agg(to_jsonb(t) order by to_jsonb(t)::text), '[]'::jsonb) as filas from public.${t} t where ${donde}`, [c, cl])
+    tablas[t] = r?.filas ?? []
+  }
+  const objetos = await q<{ bucket: string; nombre: string }>(
+    `select bucket_id as bucket, name as nombre from storage.objects where bucket_id = 'ss-originales' and name like $1 order by 1, 2`, [`${c}/${cl}/%`])
+  const sinFirma = { version: 1 as const, consultora: c, cliente: cl, exportado: ahora, tablas, objetos }
+  return { ...sinFirma, firma: firmaDe(exigeSecreto(secreto), sinFirma) }
+}
+
+/**
+ * La LISTA DE BAJAS (D8): qué tenants se fueron y qué originales se borraron. Sin datos personales en claro:
+ * identificadores, fechas y huellas. Viaja APARTE a todos los niveles de respaldo y, tras restaurar cualquier cosa, se
+ * aplica la más reciente: si viviera solo en la base, restaurar una base vieja la haría volver atrás.
+ */
+export interface ListaDeBajas {
+  readonly version: 1
+  readonly generada: string
+  readonly bajas: ReadonlyArray<{
+    readonly consultora: string; readonly cliente: string | null; readonly registradaPor: string; readonly registradaEn: string
+    readonly borrarDesde: string | null; readonly exportSha256: string | null; readonly borradaEn: string | null
+  }>
+  readonly originales: ReadonlyArray<{ readonly ruta: string; readonly borradoEn: string }>
+}
+export const LISTA_VACIA: ListaDeBajas = { version: 1, generada: '1970-01-01T00:00:00Z', bajas: [], originales: [] }
+const ISO = (c: string) => `to_char(${c} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`
+
+/** La lista de bajas de toda la base. La genera el job de respaldo, con su privilegio (lee a todas las consultoras). */
+export async function listaDeBajas(q: Consulta, ahora: string): Promise<ListaDeBajas> {
+  const bajas = await q<ListaDeBajas['bajas'][number]>(`select consultora_id as consultora, cliente_id as cliente, registrada_por as "registradaPor",
+      ${ISO('registrada_en')} as "registradaEn", ${ISO('borrar_desde')} as "borrarDesde", export_sha256 as "exportSha256", ${ISO('borrada_en')} as "borradaEn"
+    from public.ss_baja order by registrada_en, consultora_id, cliente_id`)
+  const originales = await q<ListaDeBajas['originales'][number]>(
+    `select ruta, ${ISO('original_borrado_en')} as "borradoEn" from public.ss_adjunto where original_borrado_en is not null order by ruta`)
+  return { version: 1, generada: ahora, bajas, originales }
+}
+
+/** Lo que se queda tras la baja (D8): el sandbox anonimizado y lo enseñado. Todo lo demás del tenant se va. */
+export const QUEDAN_TRAS_LA_BAJA: readonly string[] = ['ss_caso_sandbox', 'ss_propuesta']
+
+/**
+ * Aplica la lista a las FILAS de una consultora, en modo réplica (sin disparadores ni cascadas: borra tabla por tabla):
+ * lo de un tenant cuya baja se cumplió se borra, y un original borrado queda marcado. Los bytes son del `Almacen`.
+ */
+export async function podaConLista(q: Consulta, lista: ListaDeBajas, consultora: string): Promise<{ filas: number; originales: number }> {
+  const c = exigeUuid(consultora)
+  let filas = 0, originales = 0
+  for (const b of lista.bajas.filter((x) => x.consultora === c && x.borradaEn !== null)) {
+    for (const [t, col, via] of TABLAS_DE_TENANT.filter(([t]) => !QUEDAN_TRAS_LA_BAJA.includes(t))) {
+      if (b.cliente === null) {
+        const donde = via === 'cliente' ? `ss_priv.padre_de(t.${col}) = $1` : `t.${col} = $1`
+        filas += (await q<{ n: number }>(`with b as (delete from public.${t} t where ${donde} returning 1) select count(*)::int as n from b`, [c]))[0]?.n ?? 0
+      } else {
+        const tieneCliente = (await q<{ si: boolean }>(`select exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = $1 and column_name = 'cliente_id') as si`, [t]))[0]?.si
+        if (!tieneCliente) continue
+        const donde = via === 'cliente' ? `ss_priv.padre_de(t.${col}) = $1 and t.${col} = $2` : `t.${col} = $1 and t.cliente_id = $2`
+        filas += (await q<{ n: number }>(`with b as (delete from public.${t} t where ${donde} returning 1) select count(*)::int as n from b`, [c, exigeUuid(b.cliente)]))[0]?.n ?? 0
+      }
+    }
+  }
+  for (const o of lista.originales.filter((x) => x.ruta.startsWith(`${c}/`))) {
+    originales += (await q<{ n: number }>(`with m as (update public.ss_adjunto set original_borrado_en = $2 where ruta = $1 and original_borrado_en is null returning 1)
+      select count(*)::int as n from m`, [o.ruta, o.borradoEn]))[0]?.n ?? 0
+  }
+  return { filas, originales }
+}
+
 /** ¿Lo firmó el job con este secreto, y nadie lo tocó después? */
-export function exportIntegro(e: ExportTenant, secreto: string): boolean {
+export function exportIntegro(e: ExportTenant | ExportCliente, secreto: string): boolean {
   const { firma, ...resto } = e
   if (typeof firma !== 'string' || !/^[0-9a-f]{64}$/.test(firma)) return false
   return timingSafeEqual(Buffer.from(firmaDe(exigeSecreto(secreto), resto), 'hex'), Buffer.from(firma, 'hex'))
@@ -145,8 +231,11 @@ async function filasAjenas(q: Consulta, e: ExportTenant, tablas: readonly Tabla[
 /**
  * Restaura UN tenant desde su export. Verifica antes de escribir (firma y tenant de cada fila) y antes de
  * confirmar (huellas del tenant y de los demás); si algo no cuadra, rollback. No toca a nadie más.
+ *
+ * La LISTA DE BAJAS es obligatoria (D8): un export viejo trae lo que después se dio de baja o se borró por retención.
+ * Se aplica después de verificar que el export entró entero y antes del commit: lo dado de baja no resucita.
  */
-export async function restauraTenant(q: Consulta, e: ExportTenant, secreto: string): Promise<{ borradas: number; insertadas: number }> {
+export async function restauraTenant(q: Consulta, e: ExportTenant, secreto: string, lista: ListaDeBajas): Promise<{ borradas: number; insertadas: number; podadas: number }> {
   const c = exigeUuid(e.consultora)
   if (e.version !== 1) throw new Error(`versión de export desconocida: ${String(e.version)}`)
   if (!exportIntegro(e, secreto)) throw new Error('el export no lo firmó este job, o lo cambiaron después: no se restaura')
@@ -154,7 +243,8 @@ export async function restauraTenant(q: Consulta, e: ExportTenant, secreto: stri
   const ajenas = await filasAjenas(q, e, tablas)
   if (ajenas.length) throw new Error(`el export trae filas que no son de la consultora ${c}: ${ajenas.slice(0, 3).join('; ')}`)
   const otras = (await q<{ id: string }>(`select id from public.ss_organizacion where tipo = 'consultora' and id <> $1 order by id`, [c])).map((r) => r.id)
-  let borradas = 0, insertadas = 0
+  if (lista?.version !== 1) throw new Error('sin la lista de bajas no se restaura: lo dado de baja resucitaría (D8)')
+  let borradas = 0, insertadas = 0, podadas = 0
   await q('begin')
   try {
     const otrasAntes = await Promise.all(otras.map(async (o) => [o, (await huellaTenant(q, o)).total] as const))
@@ -175,12 +265,14 @@ export async function restauraTenant(q: Consulta, e: ExportTenant, secreto: stri
     for (const [o, total] of otrasAntes) {
       if ((await huellaTenant(q, o)).total !== total) throw new Error(`restaurar tocó a la consultora ${o}: rollback`)
     }
+    const poda = await podaConLista(q, lista, c)
+    podadas = poda.filas + poda.originales
     await q('commit')
   } catch (err) {
     await q('rollback')
     throw err
   }
-  return { borradas, insertadas }
+  return { borradas, insertadas, podadas }
 }
 
 export interface VerificacionRestauracion {

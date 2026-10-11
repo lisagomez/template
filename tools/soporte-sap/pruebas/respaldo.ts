@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { PGlite } from '@electric-sql/pglite'
 import { createHmac } from 'node:crypto'
-import { canonico, exportaTenant, huellaTenant, restauraTenant, verificaRestauracion, TABLAS_DE_TENANT, type Consulta, type ExportTenant, type Json } from '../dist/index.js'
+import { canonico, exportaTenant, huellaTenant, restauraTenant, LISTA_VACIA, verificaRestauracion, TABLAS_DE_TENANT, type Consulta, type ExportTenant, type Json } from '../dist/index.js'
 import { baseSoporte, ORG, INC, SECRETO_RESPALDOS as S } from './_base.ts'
 
 /** Lo que haría quien tiene el secreto (o un job con un error): firmar de nuevo un export cambiado. */
@@ -34,7 +34,7 @@ test('restaurar solo a la consultora A: A vuelve a su export y B no cambia', asy
   const bAntes = await huellaTenant(q, ORG.CB)
   await danaA(db)
   assert.notEqual((await huellaTenant(q, ORG.CA)).total, e.huella.total, 'el daño cambió a A')
-  const r = await restauraTenant(q, e, S)
+  const r = await restauraTenant(q, e, S, LISTA_VACIA)
   assert.ok(r.insertadas > 0)
   const v = verificaRestauracion(e, await huellaTenant(q, ORG.CA), { [ORG.CB]: bAntes }, { [ORG.CB]: await huellaTenant(q, ORG.CB) })
   assert.deepEqual(v.diferencias, [])
@@ -80,7 +80,7 @@ test('restaurar es una transacción: si falla, no queda nada a medias', async ()
   const antes = await huellaTenant(q, ORG.CA)
   // Pasa la firma y el tenant de cada fila, y falla DENTRO de la transacción: así se prueba el rollback.
   const roto = refirma({ ...e, tablas: { ...e.tablas, ss_horas: [{ id: 'no-es-uuid', consultora_id: ORG.CA }] } })
-  await assert.rejects(restauraTenant(q, roto, S))
+  await assert.rejects(restauraTenant(q, roto, S, LISTA_VACIA))
   assert.equal((await huellaTenant(q, ORG.CA)).total, antes.total)
 })
 

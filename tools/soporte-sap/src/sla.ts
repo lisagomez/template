@@ -44,6 +44,10 @@ export interface ContratoSla {
   readonly creditos: PorDecidir<{ readonly porcentaje: number; readonly tope: number }>
   readonly exclusiones: PorDecidir<readonly string[]>
   readonly disponibilidad: PorDecidir<number>
+  /** D8 (PRP-012): los días que viven los originales tras la última resolución; `null`, no vencen (DP-4). */
+  readonly retencionOriginalesDias: PorDecidir<number>
+  /** D8: los días de gracia tras registrar la salida, para descargar el export; `null`, no se borra (DP-4). */
+  readonly graciaSalidaDias: PorDecidir<number>
   /** De dónde sale cada cifra y cada cláusula que no es una meta. */
   readonly notas: readonly string[]
 }
@@ -81,6 +85,8 @@ export function contratoDeLaboratorio(consultora: string, cliente: string, vigen
     creditos: { valor: null, quienDecide: LABORATORIO_DECIDE },
     exclusiones: { valor: null, quienDecide: LABORATORIO_DECIDE },
     disponibilidad: { valor: null, quienDecide: 'no se compromete antes de GATE 3' },
+    retencionOriginalesDias: { valor: null, quienDecide: 'el laboratorio con su asesoría legal (D8, DP-4)' },
+    graciaSalidaDias: { valor: null, quienDecide: 'el laboratorio con su asesoría legal (D8, DP-4)' },
     notas: [
       'metas de REFERENCIA tomadas del soporte de SAP a sus licenciatarios, no comprometidas por el laboratorio',
       NOTAS_CALENDARIO,
@@ -109,6 +115,8 @@ export function contratoN1N2DeLaboratorio(consultora: string, vigenteDesde: stri
     creditos: { valor: null, quienDecide: LABORATORIO_DECIDE },
     exclusiones: { valor: null, quienDecide: LABORATORIO_DECIDE },
     disponibilidad: { valor: null, quienDecide: 'no se compromete antes de GATE 3' },
+    retencionOriginalesDias: { valor: null, quienDecide: 'el laboratorio con su asesoría legal (D8, DP-4)' },
+    graciaSalidaDias: { valor: null, quienDecide: 'el laboratorio con su asesoría legal (D8, DP-4)' },
     notas: [
       'el laboratorio solo compromete lo que controla',
       NOTAS_CALENDARIO,

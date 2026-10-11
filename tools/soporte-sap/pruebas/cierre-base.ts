@@ -6,7 +6,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SENALES, CONTEXTO_PERSONAL, anonimiza, categoriza, emiteTokenDeTarea, verificaCadena, exportaTenant, huellaTenant, restauraTenant, type EventoIncidencia, type Consulta } from '../dist/index.js'
+import { SENALES, CONTEXTO_PERSONAL, anonimiza, categoriza, emiteTokenDeTarea, verificaCadena, exportaTenant, huellaTenant, restauraTenant, LISTA_VACIA, type EventoIncidencia, type Consulta } from '../dist/index.js'
 import { refirma } from './respaldo.ts'
 import { createHash } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
@@ -413,7 +413,7 @@ test('H-08 · un export alterado no se restaura: la firma no cuadra', async () =
   const antes = await cuentaDe(db, ORG.CA)
   const filas = (e.tablas['ss_incidencia'] as Array<Record<string, unknown>>).map((f, i) => (i === 0 ? { ...f, prioridad: 'P4' } : f))
   const alterado = { ...e, tablas: { ...e.tablas, ss_incidencia: filas } }
-  await assert.rejects(restauraTenant(q, alterado, S), /no lo firmó este job/)
+  await assert.rejects(restauraTenant(q, alterado, S, LISTA_VACIA), /no lo firmó este job/)
   assert.equal(await cuentaDe(db, ORG.CA), antes, 'la base no cambió')
 })
 
@@ -425,7 +425,7 @@ test('H-08 · un export firmado con filas de otra consultora no se restaura', as
   // Firmado con el secreto (un job con un error, o quien lo tiene): la firma sola no basta, hay que ver cada fila.
   const mezclado = refirma({ ...e, tablas: { ...e.tablas, ss_incidencia: [...e.tablas['ss_incidencia']!, ...deB] } })
   const [antesA, antesB] = [await cuentaDe(db, ORG.CA), await cuentaDe(db, ORG.CB)]
-  await assert.rejects(restauraTenant(q, mezclado, S), /no son de la consultora/)
+  await assert.rejects(restauraTenant(q, mezclado, S, LISTA_VACIA), /no son de la consultora/)
   assert.deepEqual([await cuentaDe(db, ORG.CA), await cuentaDe(db, ORG.CB)], [antesA, antesB])
 })
 
@@ -437,7 +437,7 @@ test('H-08 · la verificación ocurre ANTES del commit: si la huella no cuadra, 
   const antes = await cuentaDe(db, ORG.CA)
   // Un export cuya huella declarada no es la de sus filas (firmado): restaurar lo dejaría distinto de lo prometido.
   const mentiroso = refirma({ ...e, huella: { ...e.huella, total: 'f'.repeat(64) } })
-  await assert.rejects(restauraTenant(q, mentiroso, S), /rollback/)
+  await assert.rejects(restauraTenant(q, mentiroso, S, LISTA_VACIA), /rollback/)
   assert.equal(await cuentaDe(db, ORG.CA), antes, 'nada a medias: la hora cargada después del export sigue ahí')
 })
 
@@ -487,7 +487,7 @@ test('H-07 · la plataforma no inserta decisiones ni eventos: un mapeo aprobado,
 test('H-08 · restaurar no es del rol de plataforma: necesita el privilegio de migración', async () => {
   const db = await baseSoporte()
   const e = await exportaTenant(consultaDe(db), ORG.CA, '2026-10-08T12:00:00Z', S)
-  await assert.rejects(comoPlataforma(db, ORG.CA, (q) => restauraTenant(q, e, S)))
+  await assert.rejects(comoPlataforma(db, ORG.CA, (q) => restauraTenant(q, e, S, LISTA_VACIA)))
 })
 
 test('H-08 · con la sala en la misma base, las aprobaciones de la consultora viajan en su export y vuelven al restaurar', async () => {
@@ -504,7 +504,7 @@ test('H-08 · con la sala en la misma base, las aprobaciones de la consultora vi
   const e = await exportaTenant(q, ORG.CA, '2026-10-08T12:00:00Z', S)
   assert.deepEqual((e.tablas['sala_aprobaciones'] as Array<{ tenant_id: string }>).map((a) => a.tenant_id), [ORG.CA])
   await db.exec(`delete from sala_aprobaciones where tenant_id = '${ORG.CA}'`)
-  await restauraTenant(q, e, S)
+  await restauraTenant(q, e, S, LISTA_VACIA)
   assert.equal((await db.query(`select 1 from sala_aprobaciones where tenant_id = '${ORG.CA}'`)).rows.length, 1, 'la aprobación de A volvió')
   assert.equal((await db.query(`select 1 from sala_aprobaciones where tenant_id = '${ORG.CB}'`)).rows.length, 1, 'la de B no se tocó')
 })

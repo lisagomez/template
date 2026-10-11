@@ -163,3 +163,36 @@ la matriz.
   originales lo decide el contrato firmado, no el job.
 - **Una prueba de retención se escribe contra el ataque que hoy funciona**: hoy la plataforma borra cualquier cosa de
   su consultora en cualquier momento, así que esa prueba tiene que caer antes de construir la regla.
+
+## Notas de ejecución
+
+### Fase 1 (base), en `main` por #251
+- **Hallazgo**: `ss_exportes_plataforma` era `for all` sobre exportes **y originales**. La plataforma borraba un
+  original en cualquier momento, y ninguna prueba lo intentaba. Lo destapó la prueba escrita contra ese ataque; ahora la
+  plataforma solo sube su export.
+- **Brecha declarada**: el crudo de importación y su procedencia son de la consultora y no tienen cliente. Los tickets
+  crudos de un cliente que se va se quedan hasta que se va su consultora.
+
+### Fase 2 (job, export por cliente y restauración)
+- **Registrar la salida congela el tenant.** Si después siguiera entrando actividad, el export quedaría viejo; y un
+  export final hecho al terminar la gracia se borraría con el tenant. Por eso, desde el registro, nada suyo se escribe
+  ni cambia (`ss_priv.congelado_por_baja`), su export es el último, y la gracia sirve para descargarlo y discutir con él
+  en la mano. El job del SLA omite al tenant congelado y dice por qué.
+- **N y la gracia viven en el `ContratoSla`** (`retencionOriginalesDias`, `graciaSalidaDias`), como los demás números
+  legales: `{ valor, quienDecide }`, y `valor` null es «por decidir» (DP-4). En la fase 1 iban en snake_case fuera del
+  tipo; el job del SLA lee el contrato con ese tipo, así que pasan a él.
+- **La restauración por tenant exige la lista de bajas** y la aplica antes del commit, después de verificar que el
+  export entró entero. `trasRestaurar` hace lo mismo tras restaurar la base entera, con filas y bytes.
+- **Depende**: quien lleva la lista a los niveles de respaldo es el job de respaldo del servidor, que todavía no
+  existe en el repo (D10, D12, GATE 3).
+- **DP-1 pasa a la fase 3.** El tope del bloqueo de respaldo necesita un campo en la plantilla de producto, que está
+  bajo CDC, y va junto con la cláusula del contrato que declara el plazo máximo.
+
+## Aprendizajes
+
+### 2026-10-10: `node --test` no comprueba los tipos
+- **Error**: una prueba pasaba con `node --test` y el `validate` cayó en `typecheck` (un parámetro con el tipo literal
+  de `ORG.CA`).
+- **Fix**: anotar el tipo, y correr `npx tsc --noEmit` antes de la matriz entera, no solo el `validate` al final.
+- **Aplicar en**: toda prueba de `tools/`: Node quita los tipos sin comprobarlos.
+
