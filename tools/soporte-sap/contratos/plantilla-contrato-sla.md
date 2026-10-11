@@ -88,7 +88,12 @@ Calendario: horario [POR DECIDIR: días y horas], zona [POR DECIDIR], feriados
 | Laboratorio (experto) | cuando **la consultora** lo escala, a su nombre (sin regla en el grafo, o un plan que pide aprobación en la sala). Un agente no escala |
 | Superadministrador del laboratorio | un escalamiento sin respuesta del experto |
 
-Plazos de escalamiento: [POR DECIDIR]
+**Lo que compromete el laboratorio (N1–N2)**: solo su **respuesta a lo que la consultora le escala**. Se mide desde
+la escalada hasta la **primera decisión de una persona del laboratorio en la sala** sobre el plan escalado, con las
+fechas que pone la base, y la consultora la ve en cada incidencia. Un caso escalado sin plan en la sala no tiene ese
+reloj: el laboratorio lo atiende por el chat, que no registra una respuesta.
+Plazo de respuesta y su calendario: [POR DECIDIR hasta GATE 3]. Antes de GATE 3 no hay créditos ni se compromete
+disponibilidad (§8, §10).
 
 ## 7. Reporte
 
@@ -115,7 +120,8 @@ restauración probada). Hasta entonces RPO y RTO son desconocidos y así se dice
 - En N2–N3, un agente categoriza las incidencias y el laboratorio ve **lo que la consultora le
   escala**; los originales, solo con un acceso motivado que otorga la consultora, por un tiempo
   máximo. El laboratorio ve además **agregados de operación** (métricas por consultora y por tamaño de
-  cliente), sin textos ni nombres.
+  cliente), sin textos ni nombres, y solo de grupos de **3 clientes o más**: no ve el de un grupo más chico, ni uno
+  que lo dejaría despejar restando del total. La **cuarentena** no la revisa nadie, tampoco el laboratorio.
 - Antes de que un caso sirva para aprender, se anonimiza. Lo que no se puede anonimizar con certeza, y
   todo caso de recursos humanos o nómina, **no sirve para aprender**: queda en cuarentena y su atención
   sigue igual.

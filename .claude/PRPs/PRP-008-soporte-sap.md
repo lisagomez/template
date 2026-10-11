@@ -202,7 +202,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     revocar y nadie se lo otorga a sí mismo.
   - Los exportes son de la consultora, y el laboratorio no los lee.
   - El anonimizador **reduce, no garantiza**. Lo que deja forma de dato, y todo caso de RR. HH. o nómina, va a una
-    cuarentena que guarda solo tipos de señal, y nadie la revisa hasta D14 (DP-7). La base rechaza en el sandbox un
+    cuarentena que guarda solo tipos de señal, y nadie la revisa: es definitiva (D14). La base rechaza en el sandbox un
     identificador con forma.
   - Lo leído de un original (el RFC y el total de un CFDI) va con el original: el laboratorio lo lee en lo escalado
     y con el acceso motivado vigente. La cuarentena no la lee el laboratorio.
@@ -259,8 +259,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     su cadena originales, con los disparadores en modo réplica. Por eso verifica antes la firma del export y el
     tenant de cada fila, y antes del commit, la huella de esa consultora y la de cada otra (filas de la AISIA,
     «Restauración que toca a los demás»).
-  - *Brecha*: un agregado sobre un grupo muy chico (un cliente S solo en su tamaño) puede delatar a ese cliente ante
-    el laboratorio. El corte no aplica todavía un tamaño mínimo de grupo: depende de D14.
+  - Un agregado sobre un grupo chico no delata a su cliente ante el laboratorio (D14): la base solo le deja ver el de
+    un grupo de 3 clientes o más, y suprime la partición entera si lo suprimido se despejaría restando del total. El
+    job de la capa semántica marca el corte del laboratorio con la misma regla, y una prueba cruza las dos.
 - **La ruta del laboratorio (`/api/soporte-sap`).** Declarada en `scripts/prueba-a2a.ts` (RF-20): misma app y
   puerto, estado sintético en memoria, identidades de laboratorio, sin base ni `service_role`.
   - Sin `SOPORTE_SAP_LABORATORIO=1` responde 404, también el GET.
@@ -311,7 +312,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 | 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato (D3 decidida: mixto); el SLA de ese modo no se ofrece como evidencia |
 | 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real | mover la matriz a `tools/conocimiento`, con su firma |
 | 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |
-| 6 | Grupo chico ante el laboratorio | con una sola consultora o un tamaño de un cliente | un tamaño mínimo de grupo (D14) |
+| 6 | Grupo chico ante el laboratorio | cerrado con D14: 3 clientes o más, con supresión complementaria | — |
 | 7 | La fatiga del aprobador | si D6 cambia y el producto llega a aplicar en un SAP real | ningún control: la mitigan el supervisor y la huella; con D6 (fuera del producto), su daño directo es al simulador |
 | 8 | El resultado de SLA sin atar a los eventos | con un job de plataforma comprometido | recalcularlo desde la cadena; atarlo en la base |
 | 9 | Lo demás: logs de la ruta, `ss_procedencia`, límites de los buckets, S8 y S9 sin sabotaje, parches de O5, Realtime y JWT, región autodeclarada, forma desconocida de dato | al salir del laboratorio | cada una en su fila de la matriz |

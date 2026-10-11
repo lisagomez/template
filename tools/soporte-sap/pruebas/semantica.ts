@@ -14,6 +14,7 @@ import {
 } from '../dist/index.js'
 import { semillas } from '../semantica/semillas.ts'
 import { HERRAMIENTA } from './_ayuda.ts'
+import { marcaLoQueVeElLaboratorio } from '../semantica/grupo-minimo.ts'
 
 const CORTE: Corte = JSON.parse(readFileSync(join(HERRAMIENTA, 'semantica', 'corte.json'), 'utf8'))
 const P = '2026-09'
@@ -45,7 +46,7 @@ function porSuperficie(c: Corte, m: string) {
   const chat = (l: Lector, quien: string) => respondeMetrica(c, l, `¿Cuál fue el ${PREGUNTA[m]} de ${quien} en septiembre de 2026?`, ENTIDADES).valor
   return {
     consultora: {
-      'N1 tablero': valorDe(n1.porConsultora.find((x) => x.consultora === 'andina')!.tarjetas, m),
+      'N1 tablero': valorDe(n1.porConsultora.find((x) => x.consultora === 'andina')?.tarjetas ?? [], m),
       'N2 tablero': valorDe(n2.propio, m),
       'SLA N1–N2 (lab)': delSla(slaC), 'SLA N1–N2 (consultora)': delSla(slaC2),
       pricing: delPricing(prC),
@@ -60,6 +61,13 @@ function porSuperficie(c: Corte, m: string) {
     },
   }
 }
+
+/**
+ * El corte con cada consultora en 3 clientes (D14): en el del laboratorio Boreal tiene 2, y con solo dos consultoras
+ * Andina se despejaría restándola del total, así que el laboratorio no ve a ninguna. Para comparar superficies, el
+ * laboratorio tiene que verlas.
+ */
+const VISIBLE: Corte = { ...CORTE, filas: marcaLoQueVeElLaboratorio(CORTE.filas.map((f) => f.metrica === 'clientes_en_cartera' && f.alcance === 'consultora' && f.consultora === 'boreal' && f.etapa === 'operacion' ? { ...f, valor: 3 } : f)) }
 
 const fila = (c: Corte, m: string, alcance: string, quien: string) =>
   c.filas.find((f) => f.metrica === m && f.periodo === P && f.alcance === alcance && (alcance === 'cliente' ? f.cliente : f.consultora) === quien && f.etapa === null)!
@@ -83,7 +91,7 @@ test('el catálogo cubre el ciclo de vida, y cada métrica dice su unidad, su et
 
 for (const m of ['mttr_horas', 'cumplimiento_sla_respuesta', 'volumen', 'backlog', 'horas_por_ticket']) {
   test(`«${m}» de ${P}: el mismo número en N1, N2, N3, SLA, pricing y chat`, () => {
-    const s = porSuperficie(CORTE, m)
+    const s = porSuperficie(VISIBLE, m)
     const esperadoC = fila(CORTE, m, 'consultora', 'andina').valor
     const esperadoK = fila(CORTE, m, 'cliente', 'alimentos-del-bajio').valor
     assert.notEqual(esperadoC, null)
@@ -99,10 +107,19 @@ for (const m of ['mttr_horas', 'cumplimiento_sla_respuesta', 'volumen', 'backlog
   })
 }
 
+test('D14 · con el corte del laboratorio, sus superficies no ven a ninguna consultora: Boreal tiene 2 clientes y Andina se despejaría restando', () => {
+  const s = porSuperficie(CORTE, 'mttr_horas')
+  assert.deepEqual(tableroN1(CORTE, P).porConsultora, [], 'el tablero no lista consultoras')
+  assert.deepEqual([s.consultora['SLA N1–N2 (lab)'], s.consultora['chat N1']], [null, null], 'ni el SLA ni el chat del laboratorio')
+  assert.match(leeMetrica(CORTE, N1, { metrica: 'mttr_horas', periodo: P, alcance: 'consultora', consultora: 'andina' }).fuente, /suprimido para el laboratorio \(D14\)/)
+  assert.notEqual(leeMetrica(CORTE, N1, { metrica: 'mttr_horas', periodo: P, alcance: 'total' }).valor, null, 'el total (5 clientes) sí')
+  assert.notEqual(s.consultora['N2 tablero'], null, 'y la consultora ve lo suyo, con sus 3 clientes o con menos')
+})
+
 test('centinela: un valor plantado en el corte aparece IGUAL en todas las superficies (leen, no calculan)', () => {
   const CENTINELA = 4242.4242
   for (const m of ['mttr_horas', 'cumplimiento_sla_respuesta']) {
-    const c: Corte = { ...CORTE, filas: CORTE.filas.map((f) => f.metrica === m && f.periodo === P && f.etapa === null
+    const c: Corte = { ...VISIBLE, filas: VISIBLE.filas.map((f) => f.metrica === m && f.periodo === P && f.etapa === null
       && ((f.alcance === 'consultora' && f.consultora === 'andina') || (f.alcance === 'cliente' && f.cliente === 'alimentos-del-bajio')) ? { ...f, valor: CENTINELA } : f) }
     const s = porSuperficie(c, m)
     for (const [donde, v] of [...Object.entries(s.consultora), ...Object.entries(s.cliente)]) if (v !== undefined) assert.equal(v, CENTINELA, `${m} · ${donde}`)

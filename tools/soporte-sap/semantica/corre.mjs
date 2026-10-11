@@ -22,6 +22,7 @@ import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { semillas, aCsv } from './semillas.ts'
+import { marcaLoQueVeElLaboratorio } from './grupo-minimo.ts'
 import { IMAGEN_POSTGRES } from './imagen.mjs'
 
 const AQUI = dirname(fileURLToPath(import.meta.url))
@@ -131,7 +132,7 @@ async function principal() {
     const corte = {
       version: `sha256:${s.huella}`, corte: s.corte,
       generadoCon: { ...versiones, postgres: IMAGEN_POSTGRES, python: '3.12' },
-      metricas, filas,
+      metricas, filas: marcaLoQueVeElLaboratorio(filas),
     }
     writeFileSync(join(AQUI, 'corte.json'), `${JSON.stringify(corte, null, 1)}\n`)
     console.log(`▸ corte.json: ${metricas.length} métricas en el catálogo · ${filas.length} valores · versión ${s.huella.slice(0, 12)} · ${((Date.now() - inicio) / 1000).toFixed(1)} s`)

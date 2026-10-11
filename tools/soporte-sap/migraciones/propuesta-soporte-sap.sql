@@ -1322,9 +1322,24 @@ create policy ss_importacion_lee on public.ss_importacion_fila for select to aut
 
 -- El corte por nivel: el laboratorio, los agregados (total, tamaño, consultora); la consultora, lo
 -- suyo y lo de sus clientes; el cliente, solo lo suyo. Nadie ve el total de otros por ser consultora.
+-- D14: el laboratorio ve un agregado solo si su grupo tiene 3 clientes o más en ese periodo (`clientes_en_cartera`,
+-- sumado por etapa). Y en una partición (las consultoras, o los tamaños) lo suprimido junto tiene que sumar 3 o más: si
+-- no, el grupo chico se despejaría restando del total, y la partición entera se suprime. Sin el conteo, no se ve. La
+-- misma regla marca el corte del laboratorio (`semantica/grupo-minimo.ts`), y una prueba cruza las dos.
+create or replace function ss_priv.grupo_visible_al_laboratorio(ver text, per date, alc text, tam text, cons uuid) returns boolean
+language sql stable security definer set search_path = '' as $$
+  with grupos as (
+    select m.tamano, m.consultora_id, sum(m.valor) as n from public.ss_metrica m
+    where m.version = ver and m.metrica = 'clientes_en_cartera' and m.periodo = per and m.alcance = alc and m.cliente_id is null
+      and m.etapa is not null
+    group by m.tamano, m.consultora_id)
+  select coalesce((select g.n from grupos g where g.tamano is not distinct from tam and g.consultora_id is not distinct from cons), 0) >= 3
+     and coalesce((select sum(g.n) from grupos g where g.n < 3) not between 1 and 2, true)
+$$;
+
 drop policy if exists ss_metrica_lee on public.ss_metrica;
 create policy ss_metrica_lee on public.ss_metrica for select to authenticated
-  using ((alcance <> 'cliente' and ss_priv.es_laboratorio())
+  using ((alcance <> 'cliente' and ss_priv.es_laboratorio() and ss_priv.grupo_visible_al_laboratorio(version, periodo, alcance, tamano, consultora_id))
       or (alcance in ('consultora', 'cliente') and ss_priv.rol_en(consultora_id) = 'consultor')
       or (alcance = 'cliente' and visible_al_cliente and ss_priv.ve_cliente(cliente_id)));
 

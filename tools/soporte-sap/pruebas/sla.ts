@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { digitoVerificadorRfc, digitoVerificadorCurp } from '../../extractor-documental/dist/index.js'
 import {
-  relojSla, contratoDeLaboratorio, contratoN1N2DeLaboratorio, nuevaVersion, vigenteEn, generaCorpus, type EventoSla, type Corte,
+  relojSla, contratoDeLaboratorio, contratoN1N2DeLaboratorio, nuevaVersion, vigenteEn, generaCorpus, respuestaDelLaboratorio, type EventoSla, type Corte,
 } from '../dist/index.js'
 import { baseSoporte, como, ORG, USR } from './_base.ts'
 import { HERRAMIENTA } from './_ayuda.ts'
@@ -156,7 +156,7 @@ test('el contrato define la primera respuesta (DP-4), la pausa que el cliente ve
   assert.match(reloj, /Un incumplimiento que \*\*ya ocurrió\*\* con la prioridad\s+anterior se queda/, 'R3-02: bajar la prioridad no lo borra')
   assert.match(escala, /cuando \*\*la consultora\*\* lo escala, a su nombre[^\n]*Un agente no escala/, 'DP-3')
   assert.match(transparencia, /\*\*agregados de operación\*\*/, 'lo que ve el laboratorio además de lo escalado')
-  assert.doesNotMatch(transparencia, /revisa una persona/, 'la cuarentena no la revisa nadie hasta D14 (DP-7)')
+  assert.doesNotMatch(transparencia, /revisa una persona/, 'la cuarentena no la revisa nadie: es definitiva (D14)')
   assert.match(reloj, /\(\*\*modo despacho\*\*\)[\s\S]*la medición \*\*no es evidencia independiente\*\*/, 'el root ajeno: el SLA de ese modo no se ofrece como evidencia')
 })
 
@@ -235,4 +235,30 @@ test('D12 · el contrato dice que las copias de respaldo salen cifradas a otro p
   const d12 = p.slice(p.indexOf('## 11. Datos personales y transparencia'), p.indexOf('## 12.'))
   assert.match(d12, /Las \*\*copias de respaldo\*\* salen \*\*cifradas\*\* a otro proveedor, también en\s+Virginia, que no puede leerlas/, 'cifradas, en otro proveedor')
   assert.match(d12, /nadie las borra antes de que venza su bloqueo \(§14\)/, 'inmutables hasta su bloqueo')
+})
+
+test('D13 · la respuesta del laboratorio va de la escalada a su primera decisión en la sala; sin escalada no hay reloj', () => {
+  const e = (tipo: string, hhmm: string) => ({ tipo, fecha: `2026-10-11T${hhmm}:00.000Z` })
+  assert.equal(respuestaDelLaboratorio([e('RECIBIDA', '10:00'), e('PLAN_PREPARADO', '10:01')], '2026-10-11T12:00:00.000Z'), null, 'sin escalada, nada')
+  const espera = respuestaDelLaboratorio([e('RECIBIDA', '10:00'), e('ESCALADA', '10:30')], '2026-10-11T11:15:00.000Z')
+  assert.deepEqual(espera, { escaladaEn: '2026-10-11T10:30:00.000Z', respondidaEn: null, minutos: 45 }, 'sin respuesta, cuenta hasta ahora')
+  const resp = respuestaDelLaboratorio([e('RECIBIDA', '10:00'), e('ESCALADA', '10:30'), e('NOTA', '10:40'), e('A_REVISION', '11:00'), e('APROBADA', '11:30')], '2026-10-11T12:00:00.000Z')
+  assert.deepEqual([resp?.respondidaEn, resp?.minutos], ['2026-10-11T11:00:00.000Z', 30], 'la primera decisión, aunque sea pedir revisión; una nota no lo es')
+  assert.match(contratoN1N2DeLaboratorio('andina', '2026-04-01').notas.join('\n'), /D13: se mide en la cadena/)
+})
+
+test('D13 · el contrato dice qué compromete el laboratorio: solo la respuesta a lo escalado, con su cifra hasta GATE 3', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d13 = p.slice(p.indexOf('## 6. Escalamiento'), p.indexOf('## 7.'))
+  assert.match(d13, /solo su \*\*respuesta a lo que la consultora le escala\*\*/, 'qué')
+  assert.match(d13, /hasta la \*\*primera decisión de una persona del laboratorio en la sala\*\*/, 'cómo se mide')
+  assert.match(d13, /Un caso escalado sin plan en la sala no tiene ese\s+reloj/, 'la brecha, dicha')
+  assert.match(d13, /\[POR\s+DECIDIR hasta GATE 3\]/, 'la cifra, en blanco')
+})
+
+test('D14 · el contrato le dice al cliente qué agregados ve el laboratorio (3 clientes o más) y que la cuarentena no la revisa nadie', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d14 = p.slice(p.indexOf('## 11. Datos personales y transparencia'), p.indexOf('## 12.'))
+  assert.match(d14, /solo de grupos de \*\*3 clientes o más\*\*: no ve el de un grupo más chico, ni uno\s+que lo dejaría despejar restando del total/)
+  assert.match(d14, /La \*\*cuarentena\*\* no la revisa nadie, tampoco el laboratorio/)
 })

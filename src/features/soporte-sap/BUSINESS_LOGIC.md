@@ -117,7 +117,7 @@ sala cazados; 63 comprobaciones de aislamiento en verde; restauración por tenan
 | **Acciones irreversibles** | **Una sola automática: el borrado por retención (D8).** Lo hace el job de retención, y solo lo que la base da por vencido: un original con su plazo del contrato cumplido y sin impugnación abierta, o un tenant que se fue, con su export y la gracia terminada. La salida la registra una persona, y sin N ni gracia en el contrato no se borra nada. Aplicar una solución en el SAP de un cliente no lo hace el producto (D6, decidida): no se conecta a ningún SAP ni guarda sus credenciales, y la aplica una persona de la consultora o del cliente, con su propio acceso y bajo el control de cambios del cliente (contrato §13). El producto la aplica al simulador, y eso exige la fila de aprobación humana de la sala. Exponer la sala o el canal N1–N2 es gate humano con C3 y la AISIA firmados. Un motor externo de OCR no entra. |
 | **Modelos de IA (D7)** | Hoy ninguno: el triage, el chat y el supervisor son deterministas. Decidida el 2026-10-10: lo crudo (tickets, chat, documentos y adjuntos) solo va a un modelo autohospedado; a un proveedor externo, solo lo anonimizado o generalizado, con su decisión C4 (`tools/soporte-sap/src/politica-modelo.ts`). El contrato lo dice (§11). |
 | **Dónde viven los datos (D10 y D12)** | En el modo gestionado, en un proyecto de Supabase propio del producto, plan Pro con PITR, en Virginia (Estados Unidos): Supabase no tiene región en México. La app corre en un servidor de AWS en la misma región, y las copias de respaldo salen cifradas a Backblaze B2 US East, otra empresa, donde nadie las borra antes de su bloqueo (D12). Quien exija México va por el modo despacho, con Supabase en la máquina de su consultora. El contrato lo dice (§11), y el aviso de privacidad tendrá que decir la transferencia. |
-| **Vía de apelación humana** | El cliente **impugna** una prioridad, una categoría, una complejidad, una pausa del reloj o que se dé por resuelta (`ss_impugnacion`), y su consultora la resuelve a su nombre; la queja no se reescribe ni se borra. Un plan va a revisión con su motivo. Un campo leído se confirma o se corrige a nombre de quien lo revisa. La cuarentena es definitiva y nadie la revisa hasta D14 (DP-7), y no frena la atención. La pausa del reloj dice qué se le pide al cliente, y él mismo la reanuda al responder. |
+| **Vía de apelación humana** | El cliente **impugna** una prioridad, una categoría, una complejidad, una pausa del reloj o que se dé por resuelta (`ss_impugnacion`), y su consultora la resuelve a su nombre; la queja no se reescribe ni se borra. Un plan va a revisión con su motivo. Un campo leído se confirma o se corrige a nombre de quien lo revisa. La cuarentena es definitiva y nadie la revisa (D14), y no frena la atención. La pausa del reloj dice qué se le pide al cliente, y él mismo la reanuda al responder. |
 | **Aislamiento de datos** | RLS forzada en toda tabla; ninguna superficie usa `service_role` (C7). El agente, la ingesta y los jobs de plataforma entran con un token de tarea firmado por el orquestador y solo ven la consultora del token. El laboratorio lee solo lo que **la consultora le escala** (también en la app: el plan va primero a ella), y los originales, y lo leído de ellos, con un acceso que otorga la consultora (72 h). |
 
 ## 7. Especificación Técnica (Para el Agente)
@@ -140,12 +140,14 @@ Producto compuesto: dos herramientas en `tools/` (`soporte-sap`, `sala-a2a`) y u
   vencen por contrato, la salida congela al cliente y se borra tras la gracia con su export, y el borrado llega a las
   copias en 12 meses como máximo (contrato §14). Decidida el 2026-10-11: D10, en el modo gestionado la base vive en
   un proyecto de Supabase propio del producto, Pro con PITR, en Virginia (Estados Unidos); quien exija México va por
-  el modo despacho (contrato §11). D12, el servidor del modo gestionado en AWS `us-east-1` y el respaldo fuera de
+  el modo despacho (contrato §11). D13, el laboratorio solo compromete su respuesta a lo escalado, medida de la
+  escalada a su primera decisión en la sala (contrato §6). D14, el superadministrador ve lo mínimo de hoy, la cuarentena
+  es definitiva, y un agregado solo se le muestra con 3 clientes o más en su grupo. D12, el servidor del modo gestionado en AWS `us-east-1` y el respaldo fuera de
   sitio, cifrado, en Backblaze B2 US East (SDD §13).
 - Primera consultora real: medir el anonimizador sobre su corpus con consentimiento (D9), fijar los
   umbrales del extractor, conectar un modelo real tras el CDC del routing (por D7, lo crudo solo a uno
   autohospedado).
-- Salir del laboratorio exige lo que lista la AISIA §5: entre otras, D13 y D14, N y la gracia
+- Salir del laboratorio exige lo que lista la AISIA §5: entre otras, N y la gracia
   en el contrato (D8), el aviso de privacidad, los veredictos desde `tools/conocimiento` (H-20), el tope del lector de PDF (H-22) y GATE 3.
 
 ---

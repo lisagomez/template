@@ -29,7 +29,7 @@ es aplicarla al simulador. En el SAP de un N3 es una acción irreversible sobre 
 el producto: la aplica una persona de la consultora o del N3, con su propio acceso y bajo el control de
 cambios del N3 (D6, decidida). No usa un LLM real; cuando lo use, lo crudo solo irá a un modelo autohospedado
 y a uno externo solo lo anonimizado o generalizado, con su decisión C4 (D7, decidida). No fija precios ni
-cifras de SLA (D5, D13).
+cifras de SLA (D5; D13 decidió que el laboratorio solo compromete su respuesta a lo escalado, con la cifra hasta GATE 3).
 
 ## 2. Arquitectura por dominio y por capas
 
@@ -234,7 +234,7 @@ sandbox un identificador con forma (PRP-010 H-03):
    verbo de reporte. Una lista de nombres deja pasar a quien no está en ella; esta regla no;
 3. **cuarentena**: lo que queda con forma de dato (siete dígitos o más, un correo, un tratamiento,
    un posible usuario) no entra. Y **todo caso de RR. HH. o nómina va a cuarentena** aunque
-   quede bien anonimizado (definitiva: nadie la revisa hasta D14, DP-7): un finiquito o una incapacidad identifican a una persona por contexto, y
+   quede bien anonimizado (definitiva: nadie la revisa, D14): un finiquito o una incapacidad identifican a una persona por contexto, y
    ahí el daño recae en un tercero que no firmó (límite de C5);
 4. la cuarentena guarda **tipos** de señal, nunca el dato.
 
@@ -670,7 +670,7 @@ Los controles, cada uno con la prueba que se pone roja si falta (detalle en el C
 | Un modelo fabrica una aprobación | política `as restrictive` + sin `insert` para servicios; el chat no conoce la tabla | suite de la sala con S1–S11 (S2b y S10b incluidos) y `pruebas/chat.ts` (el sabotaje «el chat aprueba» la pone en rojo) |
 | El job de métricas filtra texto | privilegios por columna: ni títulos, ni descripciones, ni nombres, ni motivos | `pruebas/metricas-rls.ts`, `pruebas/semantica-produccion.ts` |
 | El cliente ve lo interno | `ss_metrica.visible_al_cliente` en la RLS (riesgo de baja, salud y horas son de la consultora) | `pruebas/metricas-rls.ts` |
-| Un dato personal llega al sandbox | el anonimizador reduce, no garantiza: lo que deja forma de dato va a cuarentena, y RR. HH. y nómina siempre van a cuarentena (definitiva hasta D14, DP-7); la base rechaza en el sandbox un identificador con forma | `pruebas/anonimiza.ts` (0 fugas en 277, 63 del revisor), `pruebas/cierre-base.ts` |
+| Un dato personal llega al sandbox | el anonimizador reduce, no garantiza: lo que deja forma de dato va a cuarentena, y RR. HH. y nómina siempre van a cuarentena (definitiva: nadie la revisa, D14); la base rechaza en el sandbox un identificador con forma | `pruebas/anonimiza.ts` (0 fugas en 277, 63 del revisor), `pruebas/cierre-base.ts` |
 | Un documento da órdenes | el texto extraído es dato, delimitado; nada lo ejecuta | `pruebas/ingesta.ts`, evidencia de documentos (0 obedecidas) |
 | La cadena se reescribe | sha256 encadenado, solo agregar, fecha y actor de la base | `pruebas/cadena.ts` |
 | El laboratorio se despliega | 404 sin la variable; `configura:deploy` la rechaza, y corre en `predeploy` aunque el árbol tenga sello (PRP-010 H-26) | `scripts/prueba-a2a.ts` (ruta declarada), `pruebas/superficie.ts` (el caso malo y el control positivo de `configura:deploy`) |
@@ -685,8 +685,8 @@ segundo nivel (lo cazó el recorrido), un impacto en MXN que mezclaba denominado
 `ss_metrica` sin «visible al cliente» y sin etapa, y la vista del laboratorio que mostraba el título de
 un caso que no se le escaló.
 
-**Riesgos abiertos**: el corte no aplica un tamaño mínimo de grupo (un cliente S solo en su tamaño puede
-quedar expuesto ante el laboratorio); el contrato N1–N2 no se puede medir sin escalamientos con hora;
+**Riesgos abiertos**: un caso escalado sin plan en la sala no tiene reloj del laboratorio (D13: el chat no registra
+una respuesta);
 Realtime, Auth y el JWT de Supabase no se probaron sin un Supabase real; y en el modo gestionado los datos viven
 en Estados Unidos (D10): quien exija México va por despacho.
 

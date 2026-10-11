@@ -250,3 +250,17 @@ test('D1 · en la app, el superadministrador ve qué falta para subir, nunca de 
   assert.throws(() => rt.actua(superadmin, { tipo: 'al_nucleo', propuesta: otra }), /cliente de origen/, 'revocado, lo nuevo no sube')
 })
 
+test('D13 · en la app, la consultora ve cuánto tarda el laboratorio en responder lo escalado; el cliente no', async () => {
+  const id = await rt.levanta(cliente, FB01)
+  const respuesta = (s: unknown) => vista(s).incidencias.find((x: { id: string }) => x.id === id)?.respuestaLaboratorio
+  assert.equal(respuesta(consultor), null, 'sin escalar, no hay reloj del laboratorio')
+  rt.actua(consultor, { tipo: 'escala', incidencia: id })
+  assert.match(respuesta(consultor), /esperando la respuesta del laboratorio: \d+ min desde la escalada/)
+  rt.actua(superadmin, { tipo: 'decide', mensaje: incidencia(id).planes[0]!.mensaje, accion: 'aprobar' })
+  assert.match(respuesta(consultor), /el laboratorio respondió en \d+ min \(su decisión en la sala\)/)
+  assert.match(respuesta(superadmin), /el laboratorio respondió/, 'el laboratorio también lo ve')
+  assert.equal(respuesta(cliente), null, 'es del contrato N1–N2: el cliente no lo ve')
+  const sinPlan = await rt.levanta(cliente, NOMINA)
+  rt.actua(consultor, { tipo: 'escala', incidencia: sinPlan })
+  assert.match(vista(consultor).incidencias.find((x: { id: string }) => x.id === sinPlan).respuestaLaboratorio, /sin plan en la sala: este escalamiento no tiene reloj del laboratorio \(D13\)/)
+})
