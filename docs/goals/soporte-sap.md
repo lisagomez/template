@@ -861,7 +861,12 @@ tras construir:
   consultora o su cliente se van.** Incluye la portabilidad (ERP-6: exportar los datos y los XML
   del tenant que se va) y su respaldo. Por defecto: se guardan mientras dure el contrato, se
   exportan y se borran al salir, y el borrado llega también a las copias de respaldo, como ya
-  hace el reel con los retiros de consentimiento (#206).
+  hace el reel con los retiros de consentimiento (#206). **Decidida el 2026-10-10** (PRP-012): los originales se
+  borran N días después de resolver la incidencia (sin correr con una impugnación abierta); la incidencia, su
+  cadena y los campos revisados viven lo que el contrato. Al salir, export firmado y borrado tras una gracia; el
+  sandbox anonimizado y el núcleo se quedan. En los respaldos inmutables el borrado llega cuando vence el bloqueo,
+  Soporte SAP no entra al archivo anual, y una restauración no resucita lo dado de baja. N y la gracia, en el
+  contrato.
 - **D9. Los umbrales del extractor** (confianza y similitud) se miden con el primer corpus real de
   una consultora. Hasta entonces, todo a revisión humana. Hay que decidir de quién es ese corpus
   y con qué consentimiento se usa para medir.

@@ -204,6 +204,11 @@ $$;
 
 create or replace function ss_priv.solo_agregar() returns trigger language plpgsql set search_path = '' as $$
 begin
+  -- D8 (PRP-012): la cadena y el crudo son la evidencia del servicio y viven lo que el contrato. Tras la gracia de
+  -- una baja (con su export), se borran con su tenant; antes, nadie. `to_jsonb`: el crudo no tiene cliente.
+  if tg_op = 'DELETE' and ss_priv.baja_vencida(old.consultora_id, (to_jsonb(old) ->> 'cliente_id')::uuid) then
+    return old;
+  end if;
   raise exception '% es de solo agregar: no se cambia ni se borra', tg_table_name;
 end $$;
 
@@ -534,6 +539,9 @@ create table if not exists public.ss_adjunto (
   tipo_mime     text not null,
   bytes         integer not null check (bytes > 0),
   via           text not null check (via in ('capa0', 'xml', 'ocr_local', 'sin_extraccion')),
+  -- D8 (PRP-012): cuándo se borraron los bytes. La fila y sus campos revisados se quedan (`ss_campo_extraido`
+  -- cuelga de ella en cascada): se borran los bytes y se marca, nunca la fila.
+  original_borrado_en timestamptz,
   creado_en     timestamptz not null default now(),
   unique (incidencia_id, sha256),
   constraint ss_ruta_de_su_tenant check (ruta = consultora_id::text || '/' || cliente_id::text || '/' || incidencia_id::text || '/' || sha256)
@@ -855,6 +863,120 @@ create or replace function ss_priv.consiente_nucleo(cons uuid, cli uuid) returns
                                 where k.id = c.contrato_id and k.vigente_desde <= current_date))
 $$;
 
+-- --- D8 (PRP-012): retención y salida -------------------------------------------------------
+-- Una salida la registra una PERSONA (DP-2): la de un cliente, el propio cliente o un consultor de su consultora; la
+-- de una consultora, el superadministrador. La base pone quién y cuándo, y calcula desde cuándo se borra (la gracia
+-- del contrato vigente, DP-4). Sin FK a la organización: la baja sobrevive a lo que borra, y es la lista de bajas.
+create table if not exists public.ss_baja (
+  id             uuid primary key default gen_random_uuid(),
+  consultora_id  uuid not null,
+  cliente_id     uuid,
+  registrada_por uuid not null,
+  registrada_en  timestamptz not null default now(),
+  -- Null: el contrato no declara gracia, y entonces no vence nunca (DP-4: sin plazo no se borra nada).
+  borrar_desde   timestamptz,
+  export_sha256  text check (export_sha256 ~ '^[0-9a-f]{64}$'),
+  borrada_en     timestamptz,
+  constraint ss_una_baja_por_tenant unique nulls not distinct (consultora_id, cliente_id)
+);
+
+-- Los días que declara el contrato vigente de esa pareja (`cli` nulo: el N1-N2 de la consultora), o null.
+create or replace function ss_priv.dias_del_contrato(cons uuid, cli uuid, clave text) returns integer language sql stable security definer set search_path = '' as $$
+  select case when (k.contenido ->> clave) ~ '^[0-9]{1,4}$' then (k.contenido ->> clave)::integer end
+  from public.ss_contrato_sla k
+  where k.consultora_id = cons and k.cliente_id is not distinct from cli and k.vigente_desde <= current_date
+  order by k.vigente_desde desc, k.version desc limit 1
+$$;
+
+-- ¿Hay una baja registrada que cubra a ese tenant? (`cli` nulo: lo que es de la consultora, no de un cliente.)
+create or replace function ss_priv.en_baja(cons uuid, cli uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.ss_baja b
+                 where b.consultora_id = cons and (b.cliente_id is null or (cli is not null and b.cliente_id = cli)))
+$$;
+
+-- ¿Ya se puede borrar ese tenant? Con su export registrado y la gracia terminada; sin gracia declarada, nunca.
+create or replace function ss_priv.baja_vencida(cons uuid, cli uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.ss_baja b
+                 where b.consultora_id = cons and (b.cliente_id is null or (cli is not null and b.cliente_id = cli))
+                   and b.export_sha256 is not null and b.borrar_desde <= now())
+$$;
+
+-- ¿Venció el original? N días (contrato N2-N3, DP-4) desde la última de: la resolución de la incidencia o la de su
+-- última impugnación; con una impugnación abierta, no vence (DP-3). Sin N declarado, nunca.
+create or replace function ss_priv.original_vencido(adj uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.ss_adjunto a join public.ss_incidencia i on i.id = a.incidencia_id
+    where a.id = adj and a.original_borrado_en is null
+      and i.estado in ('resuelta', 'cerrada') and i.resuelta_en is not null
+      and not exists (select 1 from public.ss_impugnacion m where m.incidencia_id = i.id and m.estado = 'abierta')
+      and greatest(i.resuelta_en, (select max(m.resuelta_en) from public.ss_impugnacion m where m.incidencia_id = i.id))
+          + make_interval(days => ss_priv.dias_del_contrato(a.consultora_id, a.cliente_id, 'retencion_originales_dias')) <= now())
+$$;
+
+create or replace function ss_priv.baja_de_la_base() returns trigger language plpgsql security definer set search_path = '' as $$
+declare g integer;
+begin
+  if tg_op = 'INSERT' then
+    if new.cliente_id is not null and ss_priv.padre_de(new.cliente_id) is distinct from new.consultora_id then
+      raise exception 'el cliente % no es de la consultora %', new.cliente_id, new.consultora_id;
+    end if;
+    new.registrada_por := auth.uid();
+    if new.registrada_por is null then raise exception 'una salida la registra una persona (D8, DP-2)'; end if;
+    new.registrada_en := now();
+    g := ss_priv.dias_del_contrato(new.consultora_id, new.cliente_id, 'gracia_salida_dias');
+    new.borrar_desde := now() + make_interval(days => g);
+    new.export_sha256 := null;
+    new.borrada_en := null;
+    return new;
+  end if;
+  if (new.consultora_id, new.cliente_id, new.registrada_por, new.registrada_en, new.borrar_desde)
+     is distinct from (old.consultora_id, old.cliente_id, old.registrada_por, old.registrada_en, old.borrar_desde) then
+    raise exception 'una baja no cambia de tenant, de quien la registró ni de plazo';
+  end if;
+  if old.export_sha256 is not null and new.export_sha256 is distinct from old.export_sha256 then
+    raise exception 'el export de una baja se registra una sola vez';
+  end if;
+  if new.borrada_en is distinct from old.borrada_en then
+    if old.borrada_en is not null then raise exception 'una baja cumplida no se reabre'; end if;
+    if not ss_priv.baja_vencida(old.consultora_id, coalesce(old.cliente_id, old.consultora_id)) then
+      raise exception 'sin el export de quien se va, o antes de que termine la gracia, la baja no se cumple (D8)';
+    end if;
+    if ss_priv.quedan_datos_de(old.consultora_id, old.cliente_id) then
+      raise exception 'quedan datos del tenant: la baja no se da por cumplida';
+    end if;
+    new.borrada_en := now();
+    -- Las personas se van con su organización; el nombre, también. La fila queda (el sandbox y las métricas la nombran).
+    delete from public.ss_miembro m where m.organizacion_id in
+      (select o.id from public.ss_organizacion o where o.id = coalesce(old.cliente_id, old.consultora_id)
+         or (old.cliente_id is null and o.padre_id = old.consultora_id));
+    update public.ss_organizacion o set nombre = 'dada de baja'
+      where o.id = coalesce(old.cliente_id, old.consultora_id) or (old.cliente_id is null and o.padre_id = old.consultora_id);
+  end if;
+  return new;
+end $$;
+drop trigger if exists ss_baja_de_la_base on public.ss_baja;
+create trigger ss_baja_de_la_base before insert or update on public.ss_baja
+  for each row execute function ss_priv.baja_de_la_base();
+
+-- Marcar un original como borrado: solo si venció (o venció la baja de su tenant) y sus bytes ya no están. La fecha
+-- la pone la base, y un original borrado no se des-borra.
+create or replace function ss_priv.original_borrado_de_la_base() returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if new.original_borrado_en is not distinct from old.original_borrado_en then return new; end if;
+  if old.original_borrado_en is not null then raise exception 'un original borrado no se des-borra'; end if;
+  if not (ss_priv.original_vencido(old.id) or ss_priv.baja_vencida(old.consultora_id, old.cliente_id)) then
+    raise exception 'el original todavía no vence (D8): N días después de resolver y sin impugnación abierta';
+  end if;
+  if exists (select 1 from storage.objects o where o.bucket_id = 'ss-originales' and o.name = old.ruta) then
+    raise exception 'los bytes del original siguen en Storage: primero se borran, luego se marca';
+  end if;
+  new.original_borrado_en := now();
+  return new;
+end $$;
+drop trigger if exists ss_adjunto_original_borrado on public.ss_adjunto;
+create trigger ss_adjunto_original_borrado before update on public.ss_adjunto
+  for each row execute function ss_priv.original_borrado_de_la_base();
+
 -- De dónde nació cada propuesta: aquí y no en su fila. Ningún rol de la API lo lee; solo la regla de promoción.
 create table if not exists ss_priv.propuesta_origen (
   propuesta_id  uuid primary key,
@@ -1087,7 +1209,7 @@ begin
   foreach t in array array['ss_organizacion', 'ss_miembro', 'ss_incidencia', 'ss_escalamiento', 'ss_evento', 'ss_adjunto',
     'ss_campo_extraido', 'ss_cuarentena', 'ss_impugnacion', 'ss_caso_sandbox', 'ss_propuesta', 'ss_acceso_motivado',
     'ss_contrato_sla', 'ss_sla_resultado', 'ss_horas', 'ss_presupuesto', 'ss_crudo', 'ss_mapeo',
-    'ss_procedencia', 'ss_chat_mensaje', 'ss_importacion_fila', 'ss_metrica', 'ss_consentimiento_nucleo'] loop
+    'ss_procedencia', 'ss_chat_mensaje', 'ss_importacion_fila', 'ss_metrica', 'ss_consentimiento_nucleo', 'ss_baja'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('alter table public.%I force row level security', t);
   end loop;
@@ -1191,6 +1313,21 @@ create policy ss_chat_lee on public.ss_chat_mensaje for select to authenticated
 drop policy if exists ss_incidencia_alta on public.ss_incidencia;
 create policy ss_incidencia_alta on public.ss_incidencia for insert to authenticated
   with check (ss_priv.rol_en(cliente_id) = 'usuario_cliente' or ss_priv.rol_en(consultora_id) = 'consultor');
+-- D8: con la salida registrada no entra nada nuevo de ese cliente (el export ya no lo llevaría).
+drop policy if exists ss_incidencia_sin_baja on public.ss_incidencia;
+create policy ss_incidencia_sin_baja on public.ss_incidencia as restrictive for insert to authenticated
+  with check (not ss_priv.en_baja(consultora_id, cliente_id));
+
+-- La salida (D8, DP-2): la registra una persona de esa organización, a su nombre (la base pone quién).
+drop policy if exists ss_baja_registra on public.ss_baja;
+create policy ss_baja_registra on public.ss_baja for insert to authenticated
+  with check (case when cliente_id is null then coalesce(ss_priv.es_superadmin(), false)
+                   else ss_priv.rol_en(cliente_id) is not distinct from 'usuario_cliente'
+                        or ss_priv.rol_en(consultora_id) is not distinct from 'consultor' end);
+drop policy if exists ss_baja_lee on public.ss_baja;
+create policy ss_baja_lee on public.ss_baja for select to authenticated
+  using (coalesce(ss_priv.es_superadmin(), false) or ss_priv.rol_en(consultora_id) is not distinct from 'consultor'
+         or (cliente_id is not null and ss_priv.rol_en(cliente_id) is not distinct from 'usuario_cliente'));
 
 drop policy if exists ss_incidencia_atiende on public.ss_incidencia;
 create policy ss_incidencia_atiende on public.ss_incidencia for update to authenticated
@@ -1343,7 +1480,7 @@ create policy ss_adjunto_ingesta on public.ss_adjunto for select to soporte_sap_
   using (consultora_id = ss_priv.consultora_de_tarea());
 drop policy if exists ss_adjunto_ingesta_alta on public.ss_adjunto;
 create policy ss_adjunto_ingesta_alta on public.ss_adjunto for insert to soporte_sap_ingesta
-  with check (consultora_id = ss_priv.consultora_de_tarea());
+  with check (consultora_id = ss_priv.consultora_de_tarea() and not ss_priv.en_baja(consultora_id, cliente_id));
 drop policy if exists ss_campo_ingesta on public.ss_campo_extraido;
 create policy ss_campo_ingesta on public.ss_campo_extraido for insert to soporte_sap_ingesta
   with check (consultora_id = ss_priv.consultora_de_tarea() and estado = 'por_revisar' and revisado_por is null);
@@ -1362,10 +1499,16 @@ begin
     execute format('drop policy if exists %I on public.%I', t || '_plataforma_lee', t);
     execute format('create policy %I on public.%I for select to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_lee', t);
   end loop;
+  -- D8 (PRP-012): borra SOLO lo de un tenant cuya baja venció (con su export y la gracia terminada). Antes borraba
+  -- lo de su consultora en cualquier momento. Lo que es de un cliente mira su baja; lo de la consultora, la suya.
   foreach t in array array['ss_incidencia', 'ss_escalamiento', 'ss_adjunto', 'ss_campo_extraido', 'ss_cuarentena',
-    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_mapeo', 'ss_procedencia', 'ss_importacion_fila'] loop
+    'ss_impugnacion', 'ss_sla_resultado', 'ss_horas', 'ss_importacion_fila', 'ss_contrato_sla', 'ss_consentimiento_nucleo'] loop
     execute format('drop policy if exists %I on public.%I', t || '_plataforma_borra', t);
-    execute format('create policy %I on public.%I for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea())', t || '_plataforma_borra', t);
+    execute format('create policy %I on public.%I for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea() and ss_priv.baja_vencida(consultora_id, cliente_id))', t || '_plataforma_borra', t);
+  end loop;
+  foreach t in array array['ss_mapeo', 'ss_procedencia', 'ss_presupuesto', 'ss_crudo'] loop
+    execute format('drop policy if exists %I on public.%I', t || '_plataforma_borra', t);
+    execute format('create policy %I on public.%I for delete to soporte_sap_plataforma using (consultora_id = ss_priv.consultora_de_tarea() and ss_priv.baja_vencida(consultora_id, null))', t || '_plataforma_borra', t);
   end loop;
 end $$;
 -- Lo ÚNICO que escribe la plataforma: el resultado de SLA que calcula su job desde los eventos de la base, con
@@ -1380,6 +1523,20 @@ create policy ss_sla_resultado_plataforma_recalcula on public.ss_sla_resultado f
 drop policy if exists ss_caso_sandbox_plataforma_lee on public.ss_caso_sandbox;
 create policy ss_caso_sandbox_plataforma_lee on public.ss_caso_sandbox for select to soporte_sap_plataforma
   using (origen_consultora_id = ss_priv.consultora_de_tarea());
+drop policy if exists ss_acceso_motivado_plataforma_borra on public.ss_acceso_motivado;
+create policy ss_acceso_motivado_plataforma_borra on public.ss_acceso_motivado for delete to soporte_sap_plataforma
+  using (ss_priv.padre_de(cliente_id) = ss_priv.consultora_de_tarea() and ss_priv.baja_vencida(ss_priv.padre_de(cliente_id), cliente_id));
+-- D8: la plataforma lee las bajas de su consultora, registra el export (una vez) y la da por cumplida (la base
+-- verifica que no quede nada). Marca un original como borrado; la base verifica que venció y que no están los bytes.
+drop policy if exists ss_baja_plataforma_lee on public.ss_baja;
+create policy ss_baja_plataforma_lee on public.ss_baja for select to soporte_sap_plataforma
+  using (consultora_id = ss_priv.consultora_de_tarea());
+drop policy if exists ss_baja_plataforma_cumple on public.ss_baja;
+create policy ss_baja_plataforma_cumple on public.ss_baja for update to soporte_sap_plataforma
+  using (consultora_id = ss_priv.consultora_de_tarea()) with check (consultora_id = ss_priv.consultora_de_tarea());
+drop policy if exists ss_adjunto_plataforma_marca on public.ss_adjunto;
+create policy ss_adjunto_plataforma_marca on public.ss_adjunto for update to soporte_sap_plataforma
+  using (consultora_id = ss_priv.consultora_de_tarea()) with check (consultora_id = ss_priv.consultora_de_tarea());
 drop policy if exists ss_acceso_motivado_plataforma_lee on public.ss_acceso_motivado;
 create policy ss_acceso_motivado_plataforma_lee on public.ss_acceso_motivado for select to soporte_sap_plataforma
   using (ss_priv.padre_de(cliente_id) = ss_priv.consultora_de_tarea());
@@ -1444,6 +1601,12 @@ grant select, delete on public.ss_incidencia, public.ss_escalamiento, public.ss_
 -- Una impugnación es la evidencia de una queja: la plataforma la lee para exportarla, no la borra (R3-09). La
 -- retención, cuando exista, es D8.
 grant select on public.ss_impugnacion to soporte_sap_plataforma;
+-- D8 (PRP-012): lo que borra tras la baja vencida, el original que marca y la baja que cumple. Sin `insert`.
+grant delete on public.ss_contrato_sla, public.ss_consentimiento_nucleo, public.ss_presupuesto, public.ss_crudo,
+  public.ss_acceso_motivado to soporte_sap_plataforma;
+grant update (original_borrado_en) on public.ss_adjunto to soporte_sap_plataforma;
+grant select, update (export_sha256, borrada_en) on public.ss_baja to soporte_sap_plataforma;
+grant select, insert (consultora_id, cliente_id) on public.ss_baja to authenticated;
 -- Sin `insert` en ninguna tabla (PRP-010 H-07). Lectura de todo lo que exporta: sin `ss_contrato_sla` y compañía,
 -- `exportaTenant` con este rol fallaba con «permission denied».
 grant select on public.ss_evento, public.ss_crudo, public.ss_contrato_sla, public.ss_presupuesto, public.ss_propuesta,
@@ -1482,6 +1645,37 @@ create or replace function ss_priv.carpeta(name text, n int) returns uuid langua
   select ss_priv.uuid_o_nulo((storage.foldername(name))[n])
 $$;
 
+-- D8 (PRP-012): un original borrado no vuelve a subir; lo que vence se puede borrar; y lo que queda de un tenant.
+create or replace function ss_priv.original_dado_de_baja(nombre text) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.ss_adjunto a where a.ruta = nombre and a.original_borrado_en is not null)
+$$;
+create or replace function ss_priv.objeto_vencido(bucket text, nombre text) returns boolean language sql stable security definer set search_path = '' as $$
+  select case bucket
+    when 'ss-originales' then ss_priv.baja_vencida(ss_priv.carpeta(nombre, 1), ss_priv.carpeta(nombre, 2))
+                           or exists (select 1 from public.ss_adjunto a where a.ruta = nombre and ss_priv.original_vencido(a.id))
+    when 'ss-exportes' then ss_priv.baja_vencida(ss_priv.carpeta(nombre, 1), null)
+    else false end
+$$;
+-- ¿Queda algo de ese tenant? (`cli` nulo: la consultora entera.) Lo que se queda a propósito no cuenta: el sandbox
+-- anonimizado, las propuestas, el núcleo y las métricas (D8). La baja no se da por cumplida mientras quede algo.
+create or replace function ss_priv.quedan_datos_de(cons uuid, cli uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.ss_incidencia t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_evento t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_adjunto t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_horas t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_importacion_fila t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_contrato_sla t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_consentimiento_nucleo t where t.consultora_id = cons and (cli is null or t.cliente_id = cli))
+      or exists (select 1 from public.ss_acceso_motivado t where ss_priv.padre_de(t.cliente_id) = cons and (cli is null or t.cliente_id = cli))
+      or (cli is null and (exists (select 1 from public.ss_mapeo t where t.consultora_id = cons)
+                        or exists (select 1 from public.ss_procedencia t where t.consultora_id = cons)
+                        or exists (select 1 from public.ss_presupuesto t where t.consultora_id = cons)
+                        or exists (select 1 from public.ss_crudo t where t.consultora_id = cons)))
+      or exists (select 1 from storage.objects o where o.bucket_id in ('ss-originales', 'ss-exportes')
+                   and ss_priv.carpeta(o.name, 1) = cons and (cli is null or ss_priv.carpeta(o.name, 2) = cli))
+$$;
+
+
 drop policy if exists ss_originales_lee on storage.objects;
 create policy ss_originales_lee on storage.objects for select to authenticated
   using (bucket_id = 'ss-originales' and ss_priv.baja_original(ss_priv.carpeta(name, 2)));
@@ -1494,7 +1688,17 @@ drop policy if exists ss_originales_ingesta_sube on storage.objects;
 create policy ss_originales_ingesta_sube on storage.objects for insert to soporte_sap_ingesta
   with check (bucket_id = 'ss-originales'
     and ss_priv.padre_de(ss_priv.carpeta(name, 2)) = ss_priv.carpeta(name, 1)
-    and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
+    and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea()
+    and not ss_priv.en_baja(ss_priv.carpeta(name, 1), ss_priv.carpeta(name, 2))
+    and not ss_priv.original_dado_de_baja(name));
+
+-- D8 (PRP-012): la plataforma borra los bytes de un original vencido, o de un tenant cuya baja venció; los exportes
+-- de su consultora, solo con la baja de la consultora vencida.
+drop policy if exists ss_objetos_plataforma_borra on storage.objects;
+create policy ss_objetos_plataforma_borra on storage.objects for delete to soporte_sap_plataforma
+  using (bucket_id in ('ss-originales', 'ss-exportes') and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea()
+         and ss_priv.objeto_vencido(bucket_id, name));
+
 
 drop policy if exists ss_originales_ingesta on storage.objects;
 create policy ss_originales_ingesta on storage.objects for select to soporte_sap_ingesta
@@ -1519,9 +1723,11 @@ drop policy if exists ss_exportes_lee on storage.objects;
 create policy ss_exportes_lee on storage.objects for select to authenticated
   using (bucket_id = 'ss-exportes' and ss_priv.rol_en(ss_priv.carpeta(name, 1)) = 'consultor');
 
+-- La plataforma SUBE el export de su consultora. Era `for all` sobre exportes Y originales: con ella borraba un original
+-- en cualquier momento, y ninguna prueba lo intentaba (hallazgo de D8, PRP-012). Leer es `ss_objetos_plataforma`;
+-- borrar, `ss_objetos_plataforma_borra`, solo lo vencido.
 drop policy if exists ss_exportes_plataforma on storage.objects;
-create policy ss_exportes_plataforma on storage.objects for all to soporte_sap_plataforma
-  using (bucket_id in ('ss-exportes', 'ss-originales') and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea())
+create policy ss_exportes_plataforma on storage.objects for insert to soporte_sap_plataforma
   with check (bucket_id = 'ss-exportes' and ss_priv.carpeta(name, 1) = ss_priv.consultora_de_tarea());
 
 grant usage on schema storage to soporte_sap_agente, soporte_sap_ingesta, soporte_sap_plataforma;
