@@ -27,6 +27,11 @@
 > ningún SAP ni guarda sus credenciales. Llevar una solución al SAP del N3 lo hace una persona de la consultora o del
 > N3, con su propio acceso y bajo el control de cambios del N3, y la pantalla y el contrato (§13) lo dicen. Cambian
 > la §4 «Solución equivocada» y «Fatiga del aprobador», y la §5. Va firmada al pie.
+>
+> **Revisión 4** (2026-10-10): el laboratorio decidió **D7 «externo solo anonimizado»**. Lo crudo (ticket, chat,
+> documentos y adjuntos) nunca va a un proveedor externo de modelos, tampoco con pesos abiertos: solo a un modelo
+> autohospedado. Lo anonimizado y lo generalizado pueden ir a uno externo con su decisión C4. Entra el daño «Dato del
+> cliente en un proveedor de modelo» (§2 y §3), y cambian la §1, la §4 y la §5. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -44,7 +49,8 @@
   de sus datos.
 - **Los terceros del despliegue**: reciben los datos de todos los anteriores, según se decida. Son
   el proveedor de modelo (D7), la base de datos gestionada (D10) y el proveedor del servidor y del
-  respaldo fuera de sitio (D12). Hoy no hay ninguno: no hay modelo, y el laboratorio no se despliega.
+  respaldo fuera de sitio (D12). Hoy no hay ninguno: no hay modelo, y el laboratorio no se despliega. Al
+  proveedor de modelo, por D7, nunca le llega lo crudo.
 - **Quien tiene root en el servidor**: en modo despacho, alguien de la consultora. Lee todo, la base
   entera incluida, y la RLS no lo impide (C3, «Root ajeno»).
 
@@ -74,6 +80,7 @@
 | **Restauración que toca a los demás** | Para devolver a un tenant a su estado se restaura la base entera, y los demás regresan en el tiempo. |
 | **Opacidad** | El N3 no sabe que el laboratorio lee lo que su consultora escala, ni que un agente categoriza sus tickets. |
 | **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
+| **Dato del cliente en un proveedor de modelo** | Para categorizar, resumir o extraer parámetros, el texto de un ticket, del chat o de un documento (con datos de empleados del N3 o secretos de su negocio) se manda a un proveedor de modelos, que lo conserva o entrena con él. Pesos abiertos en un proveedor ajeno no cambian nada: el dato sale igual. |
 
 ## 3. Severidad × probabilidad × reversibilidad
 
@@ -101,6 +108,7 @@
 | Restauración que toca a los demás | Alta | Baja con export por tenant | No, si se restaura la base entera |
 | Opacidad | Media | Alta | Sí |
 | Riesgo de baja como etiqueta | Media | Media | Sí, si la fórmula y el umbral se ven junto al número |
+| Dato del cliente en un proveedor de modelo | **Alta** | Baja: hoy no hay modelo, y para lo crudo la política lo prohíbe | **No**: lo que sale no se recupera |
 
 ## 4. Mitigaciones
 
@@ -250,6 +258,19 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - El producto no lo conecta con el precio ni con la prioridad.
   - **El N3 no lo ve ni lo puede discutir.** Eso no lo arregla esta AISIA: mostrárselo es una
     decisión de producto.
+- **Proveedor de modelo** (D7, decidida: externo solo anonimizado):
+  - Hoy el producto no llama a ningún modelo: el triage, el chat y el supervisor son deterministas.
+  - Cuando llame (CDC del routing), la llamada pasa por `puedeLlamar`. Lo crudo (ticket, chat, documentos y
+    adjuntos) solo va a un modelo autohospedado. Lo anonimizado (sandbox) y lo generalizado (núcleo) van a uno
+    externo solo con su decisión C4, que exige el anonimizador medido (D9) y un contrato sin conservación ni
+    entrenamiento. Lo que no lleva texto de clientes sigue el routing.
+  - Dónde corre el modelo se deduce de la dirección de su servidor: autohospedado es la propia máquina o una red
+    privada, y un nombre público es externo diga lo que diga.
+  - Un barrido del producto exige que un módulo que importe un SDK de modelo o el `lib/ai` de la app pase por la
+    política.
+  - **Brechas**: una dirección privada puede ser un túnel hacia un proveedor externo, y una llamada HTTP escrita a
+    mano a la API de un modelo no la ve el barrido. Las revisa el CDC del routing.
+  - El contrato (§11) le dice al cliente que su texto no va a un proveedor externo.
 
 ## 5. Decisión
 
@@ -262,6 +283,7 @@ quedan hoy:
 | Riesgo infirmable | Cómo queda |
 |---|---|
 | El dato personal de los empleados y de las contrapartes | Lo **reducen** los controles probados: anonimizador, cuarentena y el cerrojo de la base, que miran las mismas formas. No son cero fugas: **el producto no sale del laboratorio** sin medir el anonimizador sobre un corpus real (D9). |
+| El dato del cliente en un proveedor de modelo | **No se ofrece** para lo crudo (D7, decidida): solo va a un modelo autohospedado, y la política lo exige en el código. Lo anonimizado o generalizado va a uno externo solo con su decisión C4. Hoy no hay modelo. |
 | El aviso de privacidad hacia los empleados del N3 | Es redacción legal pendiente: sin él, **el producto no opera con datos reales**. |
 | El secreto del N3 en el núcleo | A medida por defecto. Al núcleo, generalizado y firmado por el superadministrador, y la base lo exige. |
 | La prioridad de una incidencia de nómina | El piso en la base, sin depender del categorizador, y la prioridad que mide el SLA es la que fijó la base. |
@@ -276,7 +298,7 @@ quedan hoy:
 
 Para salir del laboratorio hacen falta:
 
-- D7, D8, D10, D12, D13 y D14 decididas (D1, D3 y D6 ya lo están);
+- D8, D10, D12, D13 y D14 decididas (D1, D3, D6 y D7 ya lo están);
 - la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
@@ -293,3 +315,5 @@ Revisión 1 (D1), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 
 Revisión 2 (D3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
 
 Revisión 3 (D6), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
+
+Revisión 4 (D7), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
