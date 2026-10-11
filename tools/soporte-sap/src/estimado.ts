@@ -6,7 +6,7 @@
  * Nunca se mezclan: una derivada de un supuesto sigue diciendo que depende de un supuesto.
  *
  * Alimenta el costo por tier del pricing y el dimensionamiento del VPS (vCPU, RAM y disco; no planes
- * de un proveedor, que no está elegido: D12).
+ * de un proveedor: el producto declara requisitos, y el servidor de la instalación gestionada, D12, se cotiza aparte).
  */
 
 export type Naturaleza = 'medida' | 'derivada' | 'supuesta'

@@ -1893,7 +1893,7 @@ export const FILAS: readonly Fila[] = [
   {
     id: 'aisia-lista-en-los-respaldos', doc: 'AISIA', ref: 'Restauración que toca a los demás', estado: 'depende',
     afirmacion: 'la lista de bajas viaja a todos los niveles de respaldo, y tras restaurar se aplica la más reciente',
-    control: 'D12 y GATE 3', nota: 'listaDeBajas() y trasRestaurar() existen y están probados; quien los corre es el job de respaldo del servidor, que todavía no existe en el repo',
+    control: 'GATE 3, con el servidor que eligió D12', nota: 'listaDeBajas() y trasRestaurar() existen y están probados; quien los corre es el job de respaldo del servidor, que todavía no existe en el repo',
   },
   // ─── D8 (PRP-012), revisión 5 de la AISIA: el dato que vive de más o que vuelve ───
   {
@@ -1966,6 +1966,19 @@ export const FILAS: readonly Fila[] = [
     comprobacion: prueba('despliegue.ts', 'D10 · en gestionado solo pasa la región que fija D10 (us-east-1); en despacho, la que declare quien pone la máquina'),
     sabotaje: { que: 'en despacho, una máquina en México queda fuera', ediciones: [ed('scripts/despliegue/perfil.mjs', "  if (modo === 'despacho') { avisos.push(", '  if (false) { avisos.push(')] },
   },
+  // ─── D12, revisión 7 de la AISIA: el servidor y el respaldo fuera de sitio ───
+  {
+    id: 'aisia-fuera-copias-contrato', doc: 'AISIA', ref: 'Dato fuera de México', infirmable: true, estado: 'probado',
+    afirmacion: 'el contrato le dice al cliente que las copias de respaldo salen cifradas a otro proveedor, que no puede leerlas, y que nadie las borra antes de su bloqueo (§11)',
+    control: 'contratos/plantilla-contrato-sla.md §11',
+    comprobacion: prueba('sla.ts', 'D12 · el contrato dice que las copias de respaldo salen cifradas a otro proveedor y que nadie las borra antes de su bloqueo'),
+    sabotaje: { que: 'el contrato deja de decir que las copias salen cifradas', ediciones: [ed(`${SS}/contratos/plantilla-contrato-sla.md`, 'Las **copias de respaldo** salen **cifradas** a otro proveedor', 'Las **copias de respaldo** salen a otro proveedor')] },
+  },
+  {
+    id: 'aisia-fuera-copias-cifradas', doc: 'AISIA', ref: 'Dato fuera de México', infirmable: true, estado: 'depende',
+    afirmacion: 'las copias de respaldo salen cifradas, con la llave privada fuera del servidor, a Backblaze B2 US East con Object Lock en modo compliance: el destino no las lee, y nadie las borra antes de su bloqueo',
+    control: 'GATE 3, con el servidor que eligió D12', nota: 'las cifra y las sube el job de respaldo del servidor, que todavía no existe; el SDD §13 («Con D12») dice cómo, con su GATE 1',
+  },
   {
     id: 'aisia-fuera-aviso', doc: 'AISIA', ref: 'Dato fuera de México', infirmable: true, estado: 'depende',
     afirmacion: 'el aviso de privacidad hacia los empleados del N3 dice que, en el modo gestionado, sus datos se transfieren a Estados Unidos',
@@ -1979,7 +1992,7 @@ export const FILAS: readonly Fila[] = [
   {
     id: 'aisia-retencion-en-servidor', doc: 'AISIA', ref: 'Dato que vive de más o que vuelve', estado: 'depende',
     afirmacion: 'el job de retención corre en el servidor y borra lo que vence',
-    control: 'D12 y GATE 3', nota: 'planDeRetencion() y ejecutaRetencion() existen y están probados contra la base; no hay servidor donde correrlos',
+    control: 'GATE 3, con el servidor que eligió D12', nota: 'planDeRetencion() y ejecutaRetencion() existen y están probados contra la base; no hay servidor donde correrlos',
   },
   {
     id: 'c3-ruta-sin-autenticar', doc: 'C3', ref: 'La ruta del laboratorio (`/api/soporte-sap`)', estado: 'brecha',

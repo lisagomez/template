@@ -19,7 +19,7 @@ export interface MedicionDeServidor {
   readonly respaldo: string
 }
 
-/** Las tres preguntas que hay que hacerle al proveedor sobre sus snapshots (SDD §13; dependen de D12). */
+/** Las tres preguntas sobre los snapshots del proveedor (SDD §13): con D12, AWS; la respuesta se confirma en cada máquina. */
 export const PREGUNTAS_SNAPSHOT = [
   '¿El snapshot es consistente con el servidor encendido?',
   '¿Incluye los volúmenes?',
