@@ -114,12 +114,14 @@ function AccionesDeLaConsultora({ i, rol, actua }: { i: IncidenciaVista; rol: Ro
 function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
   return (
     <div className="mt-3 space-y-3 text-sm" data-prueba={`detalle-${i.id}`}>
+      {i.congelada ? <p data-prueba="congelada"><Pildora tono="aviso">La salida de este cliente está registrada: la incidencia ya no cambia, y su export es el último</Pildora></p> : null}
       {i.adjuntos.length ? (
         <div data-prueba="evidencia">
           <h3 className="font-semibold">Evidencia de los adjuntos <span className="font-normal text-neutral-500">(cada campo queda por revisar: sin umbral medido)</span></h3>
           {i.adjuntos.map((a) => (
             <div key={a.nombre} className="mt-1 rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/60">
               <p className="text-xs"><b>{a.nombre}</b> · {a.aceptado ? `vía ${a.via}` : `rechazado: ${a.motivo}`}{a.aviso ? ` · ${a.aviso}` : ''}</p>
+              {a.vence ? <p className="text-xs text-neutral-500" data-prueba="vence">Original: {a.vence}</p> : null}
               {a.campos.length ? (
                 <table className="mt-1 w-full text-xs"><thead className="text-left text-neutral-500"><tr><th>Campo</th><th>Valor</th><th>De dónde salió</th><th>Estado</th></tr></thead>
                   <tbody>{a.campos.map((c) => <tr key={`${c.campo}-${c.valor}`} className="border-t border-neutral-200 dark:border-neutral-700"><td>{c.campo}</td><td className="font-mono">{c.valor}</td><td className="text-neutral-500">{c.evidencia}</td><td><Pildora tono="aviso">{c.estado.replace('_', ' ')}</Pildora></td></tr>)}</tbody>
@@ -159,14 +161,15 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
       <div data-prueba="reloj-incidencia">
         <h3 className="font-semibold">Reloj de SLA</h3>
         <Reloj r={i.reloj} />
-        {rol === 'consultor' ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
-        <PausaDelReloj i={i} rol={rol} actua={actua} />
-        <AccionesDeLaConsultora i={i} rol={rol} actua={actua} />
+        {/* Con la salida registrada nada cambia (D8): sin los botones que la base y el runtime ya rechazan. */}
+        {rol === 'consultor' && !i.congelada ? <RespuestaAlCliente incidencia={i.id} actua={actua} /> : null}
+        {i.congelada ? null : <PausaDelReloj i={i} rol={rol} actua={actua} />}
+        <AccionesDeLaConsultora i={i} rol={i.congelada ? 'experto' : rol} actua={actua} />
         {i.respuestas.length ? (
           <ul className="mt-2 space-y-1 text-xs" data-prueba="respuestas">{i.respuestas.map((r) => <li key={r.fecha + r.por}>Respuesta de {r.por}: «{r.texto}»</li>)}</ul>
         ) : null}
       </div>
-      <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={rol} actua={actua} />
+      <Impugnaciones incidencia={i.id} lista={i.impugnaciones} rol={i.congelada ? 'experto' : rol} actua={actua} />
       <details data-prueba="cadena">
         <summary className="cursor-pointer text-xs font-semibold">Cadena de eventos ({i.cadena.length}) · {i.cadenaIntegra ? 'íntegra ✓' : 'ROTA ✗'}</summary>
         <ol className="mt-1 space-y-0.5 text-[11px]">{i.cadena.map((e) => <li key={e.seq}><span className="font-mono text-neutral-500">#{e.seq} {e.hash.slice(0, 10)}</span> {e.tipo} · {e.actor} · {e.resumen}</li>)}</ol>

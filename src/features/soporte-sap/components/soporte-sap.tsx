@@ -13,6 +13,7 @@ import { Tablero, Sla, Horas, RelojDemo, Accionables, Foda, Propuestas, Sandbox,
 import { Pildora } from './ui'
 import { Presupuesto } from './presupuesto'
 import { FichasDeServidor } from './ficha-servidor'
+import { Salidas } from './salida'
 
 const ROLES: ReadonlyArray<[Rol, string]> = [['cliente', 'N3 · Cliente'], ['consultor', 'N2 · Consultor'], ['superadmin', 'N1 · Superadministrador'], ['experto', 'N1 · Experto HIL']]
 
@@ -63,6 +64,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Accionables lista={vista.accionables} ancho={5} />
             {vista.foda ? <Foda foda={vista.foda} /> : null}
             <ConocimientoComun lista={vista.conocimientoComun} propia={vista.sesion.organizacion} actua={actua} />
+            <Salidas lista={vista.salidas} rol={rol} actua={actua} />
           </>
         ) : null}
         {rol === 'consultor' ? (
@@ -77,6 +79,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Tablero grupos={vista.tablero} />
             {vista.foda ? <Foda foda={vista.foda} /> : null}
             <ConocimientoComun lista={vista.conocimientoComun} propia={vista.sesion.organizacion} actua={actua} />
+            <Salidas lista={vista.salidas} rol={rol} actua={actua} />
           </>
         ) : null}
         {rol === 'superadmin' || rol === 'experto' ? (
@@ -86,6 +89,7 @@ export function SoporteSap({ inicial }: { inicial: Vista }) {
             <Propuestas lista={vista.propuestas} alNucleo={rol === 'superadmin' ? (id) => actua({ tipo: 'al_nucleo', propuesta: id }) : null} />
             {rol === 'superadmin' ? <Presupuesto lista={vista.presupuesto} fija={fija} /> : null}
             {rol === 'superadmin' ? <FichasDeServidor fichas={vista.fichas} /> : null}
+            <Salidas lista={vista.salidas} rol={rol} actua={actua} />
             <Sandbox casos={vista.sandbox} />
             <Incidencias lista={vista.incidencias} rol={rol} actua={actua} titulo="Lo escalado al laboratorio" />
             <Tablero grupos={vista.tablero} />

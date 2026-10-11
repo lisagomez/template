@@ -1,5 +1,5 @@
 {
- "plantilla": 3,
+ "plantilla": 4,
  "slug": "ventas-whatsapp",
  "nombre": "Vendedor con IA en WhatsApp",
  "version": 1,
@@ -94,6 +94,15 @@
   "procedimiento": "ninguno: el almacén vive en .datos/ventas-whatsapp/, fuera de git, y nadie lo respalda",
   "rpoRto": "desconocidos",
   "gate3": false
+ },
+ "retencion": {
+  "decision": "P-07, abierta (propuesta: conversaciones y pedidos 12 meses, historial de coexistencia 90 días, borrado a petición en 20 días hábiles o menos)",
+  "plazos": null,
+  "falta": "P-07 sigue abierta en tools/ventas-whatsapp/piloto/DECISIONES-ABIERTAS.md: hasta que el laboratorio la decida no hay plazos, ni salida, ni tope del bloqueo de respaldo",
+  "salida": null,
+  "restauracion": null,
+  "bloqueoMaximoDias": null,
+  "archivoLegal": null
  },
  "despliegue": {
   "modos": ["gestionado"],

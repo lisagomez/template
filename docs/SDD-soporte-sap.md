@@ -470,13 +470,22 @@ la ruta dice de quién es):
 |---|---|---|---|
 | `ss-originales` | `{consultora}/{cliente}/{incidencia}/{sha256}` | el cliente y su consultora; la ingesta de esa consultora; el laboratorio solo con acceso motivado vigente | el cliente y su consultora, si la carpeta 2 es cliente de la carpeta 1 |
 | `ss-sandbox` | `{consultora_origen}/{caso}/{sha256}` | el laboratorio; la consultora, lo que nació de ella | el agente de esa consultora, después del anonimizador |
-| `ss-exportes` | `{consultora}/{fecha}-{sha256}` | la consultora (el laboratorio no) | el job de plataforma de esa consultora (§13) |
+| `ss-exportes` | `{consultora}/{fecha}-{sha256}`; el de un cliente que se va, `{consultora}/{cliente}/{fecha}-{sha256}` | la consultora; el suyo, el cliente (el laboratorio no) | el job de plataforma de esa consultora (§13) |
 
-**Retención** (D8, valor por defecto): los originales se guardan mientras dure el contrato; al
-salir, la consultora recibe su export (ERP-6) y se borran de la base y de Storage. En el respaldo
-inmutable fuera de sitio **no se pueden borrar antes**: vencen cuando vence su bloqueo
-(`RESPALDO_S3_BLOQUEO_DIAS`), y ese plazo es parte de D8. El job de retención todavía no existe. El crudo y la
-cadena de eventos son la evidencia del servicio: viven lo mismo que el contrato.
+**Retención** (D8, decidida; PRP-012 y contrato §14):
+
+- **Originales**: se borran N días después de la última resolución (de la incidencia o de una impugnación), nunca con
+  una impugnación abierta. La fila del adjunto y los campos revisados se quedan. N vive en el contrato y, sin él, no
+  vence nada (`ss_priv.original_vencido`, `vencimientoDeOriginal`).
+- **Salida**: la registra una persona del cliente o de su consultora (`ss_baja`). Desde ese momento el tenant queda
+  congelado, se genera su export firmado y, tras la gracia del contrato, el job de retención borra todo lo suyo, el
+  export incluido. El sandbox anonimizado, el núcleo y las métricas agregadas se quedan.
+- **Respaldos**: el bloqueo del respaldo inmutable no pasa de 365 días (`retencion.bloqueoMaximoDias` del manifiesto,
+  que `configura:deploy` compara con `RESPALDO_S3_BLOQUEO_DIAS`), y Soporte SAP no entra al archivo anual. Así el
+  borrado llega a todas las copias en 12 meses como máximo. Una restauración aplica la lista de bajas más reciente
+  (`restauraTenant`, `trasRestaurar`), y esa lista viaja aparte de la base.
+- El crudo y la procedencia son de la consultora y no tienen cliente: los de un cliente que se va se quedan hasta que
+  se va su consultora (brecha declarada en la matriz).
 
 **Crecimiento**: por tamaño de cliente en la §14, medido con carga sintética.
 

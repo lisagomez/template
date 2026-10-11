@@ -11,6 +11,7 @@ import {
   type Tarjeta as TarjetaDominio, type ResultadoSla, type Prioridad,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import { CORTE, estado, relojDe, relojesDeDemostracion, presupuestoDe, fichasDeServidor, type IncidenciaLab } from './runtime'
+import { salidasQueVe, venceDe } from './salida'
 import type { Sesion, Vista, Tarjeta, IncidenciaVista, RelojVista, GrupoTarjetas, SlaVista, PresupuestoVista, FichaVista, ConsentimientoVista } from './tipos'
 
 const PERIODO = '2026-09'
@@ -36,13 +37,14 @@ const pideDe = (i: IncidenciaLab): string | null => {
 function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
   const c = i.clasificacion, q = i.consulta
   const verAdjuntos = s.nivel !== 'N1'
+  const vence = venceDe(estado(), i, new Date().toISOString())
   return {
     id: i.id, titulo: i.titulo, cliente: nombreDe(i.cliente), prioridad: c.prioridad, modulo: c.modulo, transaccion: c.transaccion, mensaje: c.mensaje,
     etiquetas: [...c.etiquetas], razones: [...c.razones], estado: i.estado,
     consulta: q.tipo === 'sin_solucion' ? { tipo: q.tipo, regla: null, grado: null, cita: null, razon: q.razon } : { tipo: q.tipo, regla: q.entrada.regla, grado: q.entrada.grado, cita: q.fuente.cita, razon: q.razon },
     adjuntos: verAdjuntos ? i.adjuntos.map((a) => (a.aceptado
-      ? { nombre: a.nombre, aceptado: true, via: a.via, aviso: a.aviso, motivo: null, campos: a.campos.map((x) => ({ ...x })) }
-      : { nombre: a.nombre, aceptado: false, via: null, aviso: null, motivo: a.motivo, campos: [] })) : [],
+      ? { nombre: a.nombre, aceptado: true, via: a.via, aviso: a.aviso, motivo: null, campos: a.campos.map((x) => ({ ...x })), vence }
+      : { nombre: a.nombre, aceptado: false, via: null, aviso: null, motivo: a.motivo, campos: [], vence: null })) : [],
     cadena: i.cadena.map((e) => ({ seq: e.seq, tipo: e.tipo, actor: e.actor, fecha: e.fecha, resumen: JSON.stringify(e.datos).slice(0, 160), hash: e.hash })),
     cadenaIntegra: verificaCadena(i.id, i.cadena).ok,
     planes: i.planes.map((p) => ({
@@ -57,6 +59,7 @@ function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
     pide: i.estado === 'espera_cliente' ? pideDe(i) : null,
     escaladaPor: i.escalada?.por ?? null,
     respuestas: s.nivel === 'N1' ? [] : i.respuestas.map((r) => ({ ...r })),
+    congelada: estado().bajas[i.cliente] !== undefined,
   }
 }
 
@@ -135,6 +138,7 @@ export function vista(s: Sesion): Vista {
     sandbox: s.nivel === 'N1' ? e.incidencias.filter((i) => i.sandbox).map((i) => ({ incidencia: i.id, veredicto: i.sandbox!.veredicto, texto: i.sandbox!.veredicto === 'entra' ? i.sandbox!.texto : null, senales: [...i.sandbox!.senales] })) : [],
     presupuesto: (s.rol === 'consultor' ? [s.organizacion] : s.rol === 'superadmin' ? CONSULTORAS.map((c) => c.id) : []).map(presupuestoVista),
     fichas: s.rol === 'superadmin' ? fichasDeServidor().map(fichaVista) : [],
+    salidas: salidasQueVe(e, s, new Date().toISOString()),
   }
 }
 

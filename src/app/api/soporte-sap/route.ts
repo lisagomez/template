@@ -5,8 +5,9 @@
  */
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { encendido, levanta, actua, Rechazo, BYTES_MAXIMOS_POR_ADJUNTO } from '@/features/soporte-sap/services/runtime'
+import { encendido, levanta, actua, estado, Rechazo, BYTES_MAXIMOS_POR_ADJUNTO } from '@/features/soporte-sap/services/runtime'
 import { vista } from '@/features/soporte-sap/services/vistas'
+import { exportDe } from '@/features/soporte-sap/services/salida'
 import { SESIONES, type Rol } from '@/features/soporte-sap/services/tipos'
 
 export const runtime = 'nodejs'
@@ -27,8 +28,11 @@ const ACCION = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('fija_presupuesto'), consultora: z.string().min(1).max(40), topeTokens: z.number().int().min(0).max(1e9).nullable(), topePaginasOcr: z.number().int().min(0).max(1e6).nullable() }),
   z.object({ tipo: z.literal('impugna'), incidencia: z.string().min(1).max(40), campo: z.enum(['prioridad', 'categoria', 'complejidad', 'pausa', 'resolucion']), motivo: z.string().trim().min(10).max(2000) }),
   z.object({ tipo: z.literal('resuelve_impugnacion'), incidencia: z.string().min(1).max(40), impugnacion: z.string().min(1).max(60), decision: z.enum(['aceptada', 'rechazada']) }),
+  z.object({ tipo: z.literal('registra_salida'), cliente: z.string().min(1).max(60) }),
   z.object({ tipo: z.literal('reinicia') }),
 ])
+/** El cliente cuyo export se pide (`?export=`): solo letras, cifras y guiones, porque va al nombre del archivo. */
+const CLIENTE = z.string().regex(/^[a-z0-9-]{1,60}$/)
 const MAX_ADJUNTOS = 5
 /**
  * Lo más que puede pesar una subida: cinco adjuntos del tamaño máximo de la ingesta y el formulario. Se mira ANTES de
@@ -41,7 +45,13 @@ const sesionDe = (req: NextRequest) => SESIONES[ROL.catch('cliente').parse(req.n
 
 export function GET(req: NextRequest) {
   if (!encendido()) return apagado()
-  return NextResponse.json(vista(sesionDe(req)))
+  const pedido = req.nextUrl.searchParams.get('export')
+  if (pedido === null) return NextResponse.json(vista(sesionDe(req)))
+  // D8: el export de un cliente que se va lo descargan él y su consultora; a nadie más se le dice si existe.
+  const cliente = CLIENTE.safeParse(pedido)
+  const contenido = cliente.success ? exportDe(estado(), sesionDe(req), cliente.data) : null
+  if (contenido === null) return NextResponse.json({ error: 'no hay un export tuyo con ese nombre' }, { status: 404 })
+  return new NextResponse(contenido, { headers: { 'content-type': 'application/json; charset=utf-8', 'content-disposition': `attachment; filename="export-${cliente.data}.json"` } })
 }
 
 export async function POST(req: NextRequest) {

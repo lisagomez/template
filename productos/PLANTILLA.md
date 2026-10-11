@@ -1,4 +1,4 @@
-# Plantilla de producto (v3)
+# Plantilla de producto (v4)
 
 > Para declarar el siguiente producto. Qué es un producto: [`CONCEPTO.md`](CONCEPTO.md). El manifiesto
 > de referencia es [`soporte-sap.json`](soporte-sap.json); la plantilla salió de él y **lo que no aparece en
@@ -22,7 +22,7 @@
 
 | Campo | Qué lleva | En Soporte SAP | En el vendedor en WhatsApp | Lo que el gate exige |
 |---|---|---|---|---|
-| `plantilla` | la versión de la plantilla que sigue | 3 | 3 | la vigente |
+| `plantilla` | la versión de la plantilla que sigue | 4 | 4 | la vigente |
 | `slug`, `nombre`, `version` | identidad | `soporte-sap`, versión 1 | `ventas-whatsapp` | `slug` en kebab-case = nombre del archivo |
 | `estado` | `blueprint`, `beta` o `produccion` | `blueprint` | `blueprint` | no más avanzado que el menos avanzado de sus propios |
 | `indice` | el nombre de su fila en `BUSINESS_LOGIC.md` §1 | «Soporte SAP» | «Vendedor con IA en WhatsApp» | la fila existe; cita solo propios del manifiesto |
@@ -39,6 +39,7 @@
 | `sla` | los contratos y la plantilla del documento, o `aplica: false` con `motivo` | `sla.ts` y su plantilla | no aplica: nadie contrata un tiempo de respuesta | existen, o el motivo |
 | `entrega` | modelo `A`, `B`, `mixto` o `por decidir`, con la decisión que lo fija | por decidir (D3) | por decidir, sin decisión propia | uno de los cuatro |
 | `respaldo` | dónde está su inventario de respaldo, el procedimiento y `rpoRto` | export por tenant | falta: va en el contrato pendiente | inventario (o `falta`); **RPO y RTO `desconocidos` hasta GATE 3**; nunca «no aplica» |
+| `retencion` | la `decision` que la fija; dónde viven los `plazos`; cómo sale un tenant (`salida`); cómo no lo resucita una `restauracion`; hasta cuándo llega el borrado a las copias (`bloqueoMaximoDias`), y si sus datos entran al archivo legal de la casa (`archivoLegal`) | D8: plazos en el contrato, export y gracia, lista de bajas, 365 días, fuera del archivo legal | falta: P-07 sigue abierta | la decisión; los plazos (o `falta`); decidida, la salida, la restauración y el tope; **el tope cubre el archivo legal si entra a él**; nunca «no aplica». `configura:deploy` **rechaza un bloqueo de respaldo mayor que el tope** |
 | `despliegue` | **requisitos, no proveedores**: `modos` (`gestionado`, `despacho`), la máquina de cada `tamano` (S, M, L) con su `fuente`, lo que `exige` (la región según su decisión, respaldo inmutable fuera de sitio, puertos, Docker), quién lo `opera` y con qué decisión, y los `secretos` que necesita en producción | gestionado y despacho; 2 vCPU · 1.5 GB · 21–22 GB del estimado; región por D10 (abierta); opera por D3 | gestionado; tamaños: falta (sin estimado) | **ningún proveedor ni plan**; los tamaños con su máquina y su fuente (o `falta`); **respaldo inmutable fuera de sitio**; la región, abierta o decidida con sus regiones; ningún secreto con `NEXT_PUBLIC_` |
 | `reuso` | la matriz dominio × capa, si existe, con su comando | 40.7 % / 14.8 % | falta: no hay matriz | el comando existe (o `falta`); el reuso de composición lo calcula el gate |
 | `fde` | `aMedida`, `nucleo`, `vuelta` y su `registro` | mapeos y contratos por cliente | catálogo, límites y umbral por pyme | las dos listas con algo, cómo vuelve lo a medida, y el registro (o `falta`) |
@@ -49,7 +50,7 @@
 
 ```json
 {
- "plantilla": 3, "slug": "", "nombre": "", "version": 1, "estado": "blueprint", "indice": "",
+ "plantilla": 4, "slug": "", "nombre": "", "version": 1, "estado": "blueprint", "indice": "",
  "contrato": { "ruta": null, "falta": "", "c3": null, "aisia": null, "firma": "pendiente del laboratorio" },
  "modeloDeNegocio": { "quienPaga": "", "aQuienSirve": [], "forma": "", "propuesta": "" },
  "niveles": [], "tenencia": { "arbol": [], "aislamiento": { "control": "", "prueba": "" } },
@@ -60,6 +61,7 @@
  "sla": { "contratos": "", "plantilla": "" },
  "entrega": { "modelo": "por decidir", "decision": "" },
  "respaldo": { "inventario": null, "falta": "", "procedimiento": "", "rpoRto": "desconocidos", "gate3": false },
+ "retencion": { "decision": "", "plazos": null, "falta": "", "salida": null, "restauracion": null, "bloqueoMaximoDias": null, "archivoLegal": null },
  "despliegue": { "modos": [], "tamanos": null, "falta": "", "exige": { "region": { "decision": "", "estado": "abierta", "regiones": [] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true }, "opera": { "quien": "por decidir", "decision": "" }, "secretos": [] },
  "reuso": { "matriz": null, "falta": "" }, "fde": { "aMedida": [], "nucleo": [], "vuelta": "", "registro": null, "falta": "" },
  "fuera": [], "noCupo": []
@@ -100,6 +102,21 @@
     `secretos`, sin imprimirlos.
   - `retencion` y `salida` no entran: siguen la recomendación de B-6 y entran con el siguiente manifiesto.
   - 9 siembras nuevas (35 en total).
+
+- **v4 (2026-10-11)**: `retencion` (PRP-012, DP-1). Soporte SAP la tiene desde que el laboratorio decidió D8, así que
+  entra por la misma regla de entrada, sin cambiarla (B-3). El vendedor la declara en null con lo que falta: su P-07
+  sigue abierta.
+  - **Por qué ahora y no con el siguiente manifiesto (B-6)**: D8 pide que `configura:deploy` rechace un bloqueo de
+    respaldo mayor que el plazo que promete el contrato, y el perfil solo lee lo que declara el manifiesto. Sin el
+    campo, el tope viviría en el código del perfil o en ninguna parte. El vendedor la pone a prueba igual, aunque sea
+    con un null: con P-07 decidida, sus plazos tienen dónde ir.
+  - **`salida` no es una sección aparte**: es un texto dentro de `retencion`. Los dos productos la tienen ligada a sus
+    plazos (la gracia de Soporte SAP, el borrado a petición de P-07).
+  - **El tope**: una copia bloqueada no se puede borrar, así que el borrado llega a todas las copias cuando vence el
+    bloqueo más largo. `archivoLegal` dice si los datos del producto entran al archivo legal de la casa (el anual de
+    FASE0 §9.3, 2555 días). Si entran, el tope no puede ser menor que eso. Soporte SAP no entra (DP-1): sus copias
+    viven como mucho el archivo mensual, y el tope es de 365 días.
+  - 8 siembras nuevas (43 en total).
 
 **La regla de entrada**: un cambio entra a la plantilla si Soporte SAP también lo tiene o si es una regla
 que la plantilla ya escribía. Lo que solo tiene un producto se queda en su `noCupo`. Que entre lo que tienen

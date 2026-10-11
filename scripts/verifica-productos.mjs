@@ -10,7 +10,9 @@
  *     hasta GATE 3, un canal externo exige C3 y C4, un tercero que recibe datos personales exige AISIA,
  *     ningún agente aprueba, y el producto no está más avanzado que sus piezas;
  *   - los huecos (v2): un campo en null dice lo que falta, una sección que no aplica dice por qué, y lo
- *     que el producto tiene y la plantilla no recoge se escribe en `noCupo` con su propuesta.
+ *     que el producto tiene y la plantilla no recoge se escribe en `noCupo` con su propuesta;
+ *   - la retención (v4): sale de una decisión y, decidida, dice cómo sale un tenant, cómo no lo resucita una
+ *     restauración y hasta cuándo llega el borrado a las copias (el tope que `configura:deploy` compara).
  *
  * Una fila del índice sin manifiesto es PENDIENTE (se lista, no pone rojo), como un contrato pendiente.
  * Después de verificar, siembra cada defecto sobre una copia del manifiesto de referencia y exige que su
@@ -32,19 +34,21 @@ const verde = (s) => `\x1b[32m${s}\x1b[0m`;
 const ambar = (s) => `\x1b[33m${s}\x1b[0m`;
 
 /** La versión vigente de la plantilla (su historia, en `productos/PLANTILLA.md`). */
-export const PLANTILLA = 3;
+export const PLANTILLA = 4;
 export const ESTADOS = ['blueprint', 'beta', 'produccion'];
 export const ENTREGAS = ['A', 'B', 'mixto', 'por decidir'];
 /** La naturaleza de una cifra: el vocabulario común de los dos productos («ficticio» del vendedor es «supuesto»). */
 export const NATURALEZAS = ['medido', 'supuesto', 'fuente', 'por decidir'];
 /** Los campos de la plantilla. Un campo que no aplica se declara con su motivo, no se omite. */
 export const CAMPOS = ['plantilla', 'slug', 'nombre', 'version', 'estado', 'indice', 'contrato', 'modeloDeNegocio', 'niveles', 'tenencia',
-  'roles', 'activos', 'canales', 'terceros', 'pricing', 'metricas', 'sla', 'entrega', 'respaldo', 'despliegue', 'reuso', 'fde', 'fuera', 'noCupo'];
+  'roles', 'activos', 'canales', 'terceros', 'pricing', 'metricas', 'sla', 'entrega', 'respaldo', 'retencion', 'despliegue', 'reuso', 'fde', 'fuera', 'noCupo'];
 /** Lo que no puede quedar en null sin decir qué falta (`<sección>.falta`). */
 export const REQUERIDOS = [['tenencia', 'aislamiento.prueba'], ['metricas', 'fuente'], ['sla', 'contratos'], ['respaldo', 'inventario'],
-  ['despliegue', 'tamanos'], ['pricing', 'fuente'], ['reuso', 'matriz'], ['fde', 'registro']];
+  ['retencion', 'plazos'], ['despliegue', 'tamanos'], ['pricing', 'fuente'], ['reuso', 'matriz'], ['fde', 'registro']];
 /** Cómo se despliega (v3, PRP-010 DP-5): en la infraestructura que opera el laboratorio o en la máquina de quien la pone. */
 export const MODOS = ['gestionado', 'despacho'];
+/** El archivo legal de la casa (FASE0 §9.3 y §9.4): el anual va con un bloqueo de 2555 días (7 años). */
+export const ARCHIVO_LEGAL_DIAS = 2555;
 /** Las secciones que pueden declararse `{ "aplica": false, "motivo": … }`: solo las que un producto ya necesitó. */
 export const PUEDEN_NO_APLICAR = ['sla'];
 
@@ -80,7 +84,7 @@ const noAplica = (m, s) => m?.[s]?.aplica === false;
 function rutas(m) {
   return [m.contrato?.ruta, m.contrato?.c3, m.contrato?.aisia, m.tenencia?.aislamiento?.prueba, m.metricas?.fuente, m.metricas?.catalogo,
     m.sla?.contratos, m.sla?.plantilla, m.respaldo?.inventario, m.respaldo?.evidenciaGate3, m.pricing?.fuente, m.pricing?.planComercial,
-    m.fde?.registro, m.despliegue?.tamanos?.fuente, m.reuso?.matriz?.comando?.split(/\s+/).find((t) => /\.(m?js|ts)$/.test(t)),
+    m.fde?.registro, m.retencion?.plazos, m.despliegue?.tamanos?.fuente, m.reuso?.matriz?.comando?.split(/\s+/).find((t) => /\.(m?js|ts)$/.test(t)),
     ...lista(m.terceros).map((t) => t?.costo?.fuente)].filter((r) => r !== null && r !== undefined);
 }
 
@@ -166,6 +170,24 @@ function verificaDespliegue(m, ctx, comprueba) {
   comprueba('los secretos del producto son variables de servidor', Array.isArray(d.secretos) && malos.length === 0, `${malos.join(', ')}: un secreto con NEXT_PUBLIC_ se inlinea en el bundle del navegador`);
 }
 
+/**
+ * La retención (v4, PRP-012 DP-1): cuánto viven los datos y cuándo deja de haberlos, también en las copias. Decidida,
+ * dice cómo sale un tenant, cómo no lo resucita una restauración y el tope del bloqueo de respaldo, y ese tope no puede
+ * prometer menos de lo que dura el archivo legal si los datos entran a él. Nunca «no aplica»: todo producto guarda algo.
+ */
+function verificaRetencion(m, comprueba) {
+  const r = m.retencion;
+  if (!r || noAplica(m, 'retencion')) return;
+  comprueba('la retención sale de una decisión', texto(r.decision), 'retencion.decision: la decisión que fija los plazos, abierta o tomada');
+  if (r.plazos === null || r.plazos === undefined) return;
+  const tope = r.bloqueoMaximoDias;
+  comprueba('una retención decidida dice cómo sale un tenant, cómo no lo resucita una restauración y hasta cuándo llega el borrado a las copias',
+    texto(r.salida) && texto(r.restauracion) && Number.isInteger(tope) && tope >= 1 && typeof r.archivoLegal === 'boolean',
+    'salida y restauracion con texto, bloqueoMaximoDias entero ≥ 1 y archivoLegal true o false');
+  comprueba('el tope del bloqueo cubre el archivo legal', r.archivoLegal !== true || tope >= ARCHIVO_LEGAL_DIAS,
+    `archivoLegal con un tope de ${tope} días: el archivo legal guarda ${ARCHIVO_LEGAL_DIAS}, y el borrado no llega antes`);
+}
+
 /** Los huecos (v2): nulls con lo que falta, secciones que no aplican con su motivo, terceros completos, lo que no cupo. */
 function verificaHuecos(m, ctx, comprueba) {
   comprueba('sigue la versión vigente de la plantilla', m.plantilla === PLANTILLA, `plantilla v${m.plantilla}: migra a la v${PLANTILLA} (productos/PLANTILLA.md, «Historia de la plantilla»)`);
@@ -193,6 +215,7 @@ export function verifica(m, ctx, archivo = `${m?.slug}.json`) {
   verificaComposicion(m, ctx, fila, comprueba);
   verificaReglas(m, ctx, comprueba);
   verificaHuecos(m, ctx, comprueba);
+  verificaRetencion(m, comprueba);
   verificaDespliegue(m, ctx, comprueba);
   return c;
 }
@@ -253,6 +276,15 @@ export const SIEMBRAS = [
   ['una región «decidida» sin regiones', (m) => { m.despliegue.exige.region.estado = 'decidida'; }, 'la región sale de una decisión, abierta o decidida con sus regiones'],
   ['sin la decisión de quién lo opera', (m) => { m.despliegue.opera.decision = ''; }, 'dice quién lo opera y qué decisión lo fija'],
   ['un secreto con NEXT_PUBLIC_', (m) => { m.despliegue.secretos.push('NEXT_PUBLIC_SS_SECRETO_TAREAS'); }, 'los secretos del producto son variables de servidor'],
+  // v4: la retención (PRP-012 DP-1)
+  ['un manifiesto sin retención', (m) => { delete m.retencion; }, 'el manifiesto tiene todos los campos de la plantilla'],
+  ['la retención declarada «no aplica»', (m) => { m.retencion = { aplica: false, motivo: 'no guardamos nada' }; }, 'una sección que no aplica dice por qué, y solo si puede no aplicar'],
+  ['los plazos de retención en null sin decir qué falta', (m) => { m.retencion.plazos = null; }, 'cada campo en null dice lo que falta'],
+  ['unos plazos en una ruta que no existe', (m) => { m.retencion.plazos = 'tools/no-existe.ts'; }, 'cada ruta que cita existe'],
+  ['una retención sin la decisión que la fija', (m) => { m.retencion.decision = ''; }, 'la retención sale de una decisión'],
+  ['una retención decidida sin tope de bloqueo', (m) => { m.retencion.bloqueoMaximoDias = null; }, 'una retención decidida dice cómo sale un tenant, cómo no lo resucita una restauración y hasta cuándo llega el borrado a las copias'],
+  ['una retención decidida que no dice cómo no resucita', (m) => { m.retencion.restauracion = ''; }, 'una retención decidida dice cómo sale un tenant, cómo no lo resucita una restauración y hasta cuándo llega el borrado a las copias'],
+  ['los datos en el archivo legal con un tope de un año', (m) => { m.retencion.archivoLegal = true; }, 'el tope del bloqueo cubre el archivo legal'],
 ];
 
 function siembra(ctx) {

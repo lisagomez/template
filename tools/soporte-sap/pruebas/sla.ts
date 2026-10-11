@@ -205,3 +205,18 @@ test('D7 · el contrato dice que el texto del cliente no va a un proveedor exter
   assert.match(d7, /Si un modelo lo procesa, corre en un servidor de quien opera el servicio/, 'autohospedado')
   assert.match(d7, /solo puede ir\s+lo ya anonimizado o generalizado, con un contrato que le prohíbe conservarlo o entrenar con él/, 'lo anonimizado, con contrato')
 })
+
+test('D8 · el contrato dice cuándo se borran los originales, qué pasa al salir y en cuánto llega el borrado a los respaldos', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d8 = p.slice(p.indexOf('## 14. Retención y salida de los datos'), p.indexOf('## 15.'))
+  assert.match(d8, /\*\*\[POR DECIDIR: N\] días después de la última resolución\*\*/, 'N lo decide el laboratorio (DP-4)')
+  assert.match(d8, /Mientras haya una impugnación abierta, no se borran/, 'DP-3')
+  assert.match(d8, /La salida la registra \*\*una persona\*\* del cliente o de su consultora[\s\S]*un agente no la registra/, 'DP-2')
+  assert.match(d8, /lo del cliente \*\*no cambia más\*\*/, 'el congelamiento')
+  assert.match(d8, /\*\*export firmado\*\* de lo suyo, que es el último/, 'el export')
+  assert.match(d8, /Terminada la gracia se borra todo lo del cliente, el export incluido/, 'tras la gracia')
+  assert.match(d8, /el borrado llega a todas las copias \*\*en un máximo de 12 meses\*\*/, 'DP-1: el plazo máximo en los respaldos')
+  assert.match(d8, /no entran al archivo legal de varios años/, 'DP-1: fuera del archivo anual')
+  assert.match(d8, /\*\*Una restauración nunca devuelve lo borrado\*\*/, 'la lista de bajas')
+  assert.match(d8, /Mientras el contrato no diga N, no se borra\s+ningún original[\s\S]*Mientras el\s+contrato no diga la gracia, no se borra nada/, 'sin plazos, nada se borra')
+})
