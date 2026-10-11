@@ -246,7 +246,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - Por retención (D8) borra **solo lo que la base da por vencido**: los bytes de un original con su plazo cumplido y,
     con el export de quien se va y la gracia terminada, el tenant entero. En Storage solo sube su export. Con la salida
     registrada nada de ese tenant cambia, y el job del SLA lo omite. El job de retención (`src/retencion.ts`) separa
-    el plan, que no borra, de su ejecución; todavía no corre en ningún servidor (D10, D12, GATE 3).
+    el plan, que no borra, de su ejecución; todavía no corre en ningún servidor (D12, GATE 3).
   - *Brecha*: el crudo de importación y su procedencia no tienen cliente; los de un cliente que se va se quedan hasta
     que se va su consultora.
   - *Brecha* (O6): la base no ata el resultado de SLA a los eventos: un job comprometido escribiría otro. No es la
@@ -280,7 +280,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 - **Perfil de despliegue.** `configura:deploy` mide la instalación contra el perfil `despliegue` del manifiesto
   (plantilla v4), sin imprimir ni guardar un secreto:
   - la máquina contra el tamaño contratado (vCPU, RAM y disco);
-  - la región frente a D10: mientras D10 siga abierta, «pendiente», nunca «cumple»;
+  - la región frente a su decisión: mientras esté abierta, «pendiente», nunca «cumple». Con D10 decidida, una
+    instalación gestionada de Soporte SAP solo pasa en `us-east-1`; en despacho, la región la decide quien pone la
+    máquina, y solo tiene que declararla;
   - el destino de respaldo inmutable fuera de sitio, por S3: si falta, avisa; sin https, sin días de bloqueo o con un
     bloqueo mayor que el tope de la `retencion` del producto (365 días en Soporte SAP, D8), no pasa;
   - los secretos del producto: presentes y de 32 caracteres o más;

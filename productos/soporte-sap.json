@@ -64,8 +64,8 @@
   { "id": "app", "tipo": "interno", "que": "/soporte-sap, un bento por nivel" }
  ],
  "terceros": [
-  { "quien": "la base de datos gestionada (Supabase u otro Postgres)", "recibe": "la base del producto: incidencias, documentos y datos de operación de los N3, con RLS", "datosPersonales": true, "decision": "D10 (por decidir: proyecto propio o compartido, o un Postgres de la casa)",
-    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el plan como parámetro: Free no tiene respaldo, Pro guarda 7 días" } },
+  { "quien": "la base de datos gestionada (Supabase u otro Postgres)", "recibe": "la base del producto: incidencias, documentos y datos de operación de los N3, con RLS", "datosPersonales": true, "decision": "D10, decidida: en el modo gestionado, un proyecto de Supabase propio del producto, plan Pro con PITR, en us-east-1 (Virginia, Estados Unidos); en despacho, Supabase autohospedado en la máquina de la consultora, donde ella decida",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el plan está decidido (Pro con PITR, D10); la cifra sale de la cotización vigente al dar de alta el proyecto" } },
   { "quien": "el proveedor del VPS y del respaldo fuera de sitio", "recibe": "la app, la sala, el almacenamiento y las copias de respaldo", "datosPersonales": true, "decision": "D12 (por decidir: lo elige el laboratorio; no Hetzner)",
     "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts" } },
   { "quien": "el proveedor de modelo", "recibe": "hoy nada: sin LLM real. Por D7, nunca lo crudo (tickets, chat, documentos y adjuntos), que solo va a un modelo autohospedado; a lo sumo lo anonimizado (sandbox) o generalizado (núcleo), con su decisión C4", "datosPersonales": false, "decision": "D7 (decidida el 2026-10-10: externo solo anonimizado; tools/soporte-sap/src/politica-modelo.ts)",
@@ -118,7 +118,7 @@
    "M": { "vcpu": 2, "ramGb": 1.5, "discoGb": 21 },
    "L": { "vcpu": 2, "ramGb": 1.5, "discoGb": 22 }
   },
-  "exige": { "region": { "decision": "D10", "estado": "abierta", "regiones": [] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true },
+  "exige": { "region": { "decision": "D10", "estado": "decidida", "regiones": ["us-east-1"] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true },
   "opera": { "quien": "la consultora, su N2 (atención y SLA con su cliente); el laboratorio, el N1 (sala, sandbox, núcleo), sin comprometer disponibilidad antes de GATE 3", "decision": "D3" },
   "secretos": ["SS_SECRETO_TAREAS", "SS_SECRETO_RESPALDOS", "SS_SAL_IMPORTADOR"]
  },

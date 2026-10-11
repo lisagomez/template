@@ -122,6 +122,11 @@ restauración probada). Hasta entonces RPO y RTO son desconocidos y así se dice
 - El texto de sus incidencias, del chat y de sus documentos **no se envía a ningún proveedor externo de modelos de
   IA**. Si un modelo lo procesa, corre en un servidor de quien opera el servicio. A un proveedor externo solo puede ir
   lo ya anonimizado o generalizado, con un contrato que le prohíbe conservarlo o entrenar con él.
+- **Dónde viven sus datos.** Cuando el laboratorio opera el servicio (modo gestionado), la base y los archivos viven
+  en un proveedor de base de datos gestionada, **en Estados Unidos** (Virginia), que los guarda por encargo de quien
+  opera el servicio, con respaldo continuo. Si el cliente necesita que sus datos se queden **en México**, el servicio
+  se opera en una máquina de su consultora (modo despacho), en la región que acuerden: [POR DECIDIR: la región, si
+  aplica].
 - [POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal]
 
 ## 12. Conocimiento común

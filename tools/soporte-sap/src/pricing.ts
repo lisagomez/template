@@ -60,7 +60,7 @@ export interface LineaDeCosto {
 
 const QUIEN_PRECIO_INFRA = 'el laboratorio, con el proveedor del VPS elegido (D12)'
 const PRECIO_UNITARIO: Readonly<Record<Rubro | 'horasConsultor', PorDecidir<number>>> = {
-  bd: { valor: null, quienDecide: 'el laboratorio, con el plan de la BD (D10)' },
+  bd: { valor: null, quienDecide: 'el laboratorio: el plan está decidido (D10, Supabase Pro con PITR) y la cifra sale de la cotización vigente' },
   storage: { valor: null, quienDecide: QUIEN_PRECIO_INFRA },
   paginasOcr: { valor: null, quienDecide: 'no aplica: el OCR es local; su costo es CPU (cpuOcr)' },
   cpuOcr: { valor: null, quienDecide: QUIEN_PRECIO_INFRA },

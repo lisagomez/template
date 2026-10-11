@@ -41,6 +41,12 @@
 > laboratorio con su asesoría legal (DP-4): sin ellos no se borra nada. Entra el daño «Dato que vive de más o que
 > vuelve» (§2 y §3); cambian la §1, la §4 «Restauración» y la §5, y entra la §4 «Retención y salida». Va firmada al
 > pie.
+>
+> **Revisión 6** (2026-10-11): el laboratorio decidió **D10**. En el modo gestionado, la base y los archivos viven en
+> un proyecto de Supabase propio del producto, plan Pro con PITR, en Virginia (Estados Unidos): Supabase no tiene
+> región en México. Quien exija que sus datos se queden en México va por el modo despacho, con Supabase autohospedado
+> en la máquina de su consultora. Entra el daño «Dato fuera de México» (§2 y §3), y cambian la §1, la §4
+> «Restauración», la §4 «Dónde viven los datos» (nueva) y la §5. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -58,8 +64,8 @@
 - **El laboratorio (N1)**: aprueba sobre la operación de terceros y acumula conocimiento que nace
   de sus datos.
 - **Los terceros del despliegue**: reciben los datos de todos los anteriores, según se decida. Son
-  el proveedor de modelo (D7), la base de datos gestionada (D10) y el proveedor del servidor y del
-  respaldo fuera de sitio (D12). Hoy no hay ninguno: no hay modelo, y el laboratorio no se despliega. Al
+  el proveedor de modelo (D7), la base de datos gestionada (D10: Supabase, en Virginia, Estados Unidos) y el
+  proveedor del servidor y del respaldo fuera de sitio (D12). Hoy no hay ninguno: no hay modelo, y el laboratorio no se despliega. Al
   proveedor de modelo, por D7, nunca le llega lo crudo.
 - **Quien tiene root en el servidor**: en modo despacho, alguien de la consultora. Lee todo, la base
   entera incluida, y la RLS no lo impide (C3, «Root ajeno»).
@@ -91,6 +97,7 @@
 | **Opacidad** | El N3 no sabe que el laboratorio lee lo que su consultora escala, ni que un agente categoriza sus tickets. |
 | **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
 | **Dato del cliente en un proveedor de modelo** | Para categorizar, resumir o extraer parámetros, el texto de un ticket, del chat o de un documento (con datos de empleados del N3 o secretos de su negocio) se manda a un proveedor de modelos, que lo conserva o entrena con él. Pesos abiertos en un proveedor ajeno no cambian nada: el dato sale igual. |
+| **Dato fuera de México** | En el modo gestionado, la base y los archivos de los N3 viven en un proveedor de Estados Unidos. Los datos de sus empleados y de sus contrapartes quedan bajo otra jurisdicción, y el N3 puede no saberlo, o estar obligado a guardarlos en México. |
 | **Dato que vive de más o que vuelve** | Las capturas y los CFDI de un N3, con datos de sus empleados y de sus contrapartes, se guardan para siempre; el N3 se va y lo suyo se queda; se borra del servicio y sigue en una copia de respaldo; o una restauración devuelve lo que ya se había borrado. Y al revés: el borrado automático se lleva algo antes de tiempo, con una impugnación abierta o antes de que quien se va tenga su export. |
 
 ## 3. Severidad × probabilidad × reversibilidad
@@ -120,6 +127,7 @@
 | Opacidad | Media | Alta | Sí |
 | Riesgo de baja como etiqueta | Media | Media | Sí, si la fórmula y el umbral se ven junto al número |
 | Dato del cliente en un proveedor de modelo | **Alta** | Baja: hoy no hay modelo, y para lo crudo la política lo prohíbe | **No**: lo que sale no se recupera |
+| Dato fuera de México | Media-alta (datos de terceros, otra jurisdicción) | **Alta** en el modo gestionado: es el diseño | Parcial: el N3 puede pasar al modo despacho y borrarse del proveedor (D8), pero lo que ya estuvo fuera estuvo |
 | Dato que vive de más o que vuelve | **Alta** (datos de terceros) | Baja con D8: la base decide qué vence, y sin plazos en el contrato no se borra nada | Lo que vive de más, sí: se borra. Lo borrado antes de tiempo, **no** |
 
 ## 4. Mitigaciones
@@ -257,10 +265,24 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     del commit**.
   - La restauración corre con el privilegio de migración (declarado en C7).
   - Los bytes de Storage van por su línea de respaldo.
+  - **El PITR de Supabase restaura el proyecto entero** (D10), y con él a todos los tenants: se usa solo ante un
+    desastre que los alcanza a todos. Devolver a un tenant es siempre el export por tenant. Tras un PITR se aplica la
+    lista de bajas, como tras cualquier restauración.
   - **Una restauración no devuelve lo borrado** (D8): la lista de bajas viaja aparte de la base, y la más reciente
     se aplica antes del commit. La restauración por tenant la exige, y tras restaurar la base entera se aplica igual.
   - *Depende*: quien lleva la lista a todos los niveles de respaldo es el job de respaldo del servidor, que todavía
-    no existe (D10, D12 y GATE 3).
+    no existe (D12 y GATE 3).
+- **Dónde viven los datos** (D10, decidida):
+  - **En el modo gestionado**, en un proyecto de Supabase **propio del producto**, plan Pro con PITR, en Virginia
+    (`us-east-1`): Supabase no tiene región en México. Propio, porque una restauración del proyecto no regresa a otros
+    productos, y la región, el plan y el costo son de este. `configura:deploy` no deja pasar una instalación gestionada
+    que declare otra región.
+  - **En el modo despacho**, Supabase autohospedado en la máquina de la consultora: los datos quedan donde ella
+    decida, en México si quiere. La región la declara quien pone la máquina, y la dice su contrato con su cliente.
+  - El contrato (§11) le dice al cliente dónde viven sus datos, quién los guarda por encargo y cómo quedarse en
+    México. **El aviso de privacidad** hacia los empleados del N3 tiene que decir la transferencia: es redacción legal
+    pendiente, y sin él el producto no opera con datos reales.
+  - *Brecha* (O2): la región la declara quien instala; nadie la comprueba desde la máquina.
 - **Retención y salida** (D8, decidida):
   - **Originales**: se borran N días después de la última resolución, de la incidencia o de una impugnación, y nunca
     con una impugnación abierta. La fila del adjunto y los campos revisados se quedan. La base decide qué venció: la
@@ -282,7 +304,7 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     quién vinieron.
   - *Brecha*: el crudo de importación y su procedencia son de la consultora y no tienen cliente; los de un cliente
     que se va se quedan hasta que se va su consultora.
-  - *Depende*: el job de retención no corre todavía en ningún servidor (D10, D12 y GATE 3).
+  - *Depende*: el job de retención no corre todavía en ningún servidor (D12 y GATE 3).
 - **Opacidad**:
   - El contrato N2–N3 dice que un agente categoriza y que el laboratorio ve lo que la consultora le
     escala.
@@ -330,20 +352,22 @@ quedan hoy:
 | Lo que lee el laboratorio | Lo que la consultora escala, también en la app, y lo leído de un original con el acceso motivado. |
 | El triage urgente cortado por presupuesto, o sin su evidencia | P1 y P2 pasan a una persona; nunca se cortan. |
 | La restauración que toca a otros tenants | Por tenant, verificada antes del commit, y sin devolver lo borrado: la lista de bajas se aplica antes del commit. |
+| El dato de terceros fuera de México | **Se dice y se puede evitar** (D10): el contrato y el aviso de privacidad dicen dónde viven los datos y quién los guarda, y quien exija México va por el modo despacho, con la base en la máquina de su consultora. Sin el aviso, el producto no opera con datos reales. |
 | El dato de terceros que vive de más, o que vuelve | Los originales vencen por contrato y la base decide qué venció; al salir, lo del cliente se congela y se borra tras la gracia, con su export en la mano; el borrado llega a las copias en 12 meses como máximo. Sin N ni gracia en el contrato **no se borra nada**: el producto no ofrece un borrado que nadie fijó. |
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece** (D6, decidida): el producto no se conecta a ningún SAP ni guarda sus credenciales. La aplica una persona, fuera del producto, con el control de cambios del N3, y la pantalla y el contrato dicen que el antes y el después son del simulador. |
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
 
 Para salir del laboratorio hacen falta:
 
-- D10, D12, D13 y D14 decididas (D1, D3, D6, D7 y D8 ya lo están);
+- D12, D13 y D14 decididas (D1, D3, D6, D7, D8 y D10 ya lo están);
 - N y la gracia de salida en el contrato, decididas por el laboratorio con su asesoría legal, y la redacción legal del
   §14 (D8, DP-4);
 - el job de respaldo del servidor, llevando la lista de bajas a todos los niveles (D8; con GATE 3);
 - la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
-- el aviso de privacidad hacia los empleados del N3, redactado y exigido en el contrato;
+- el aviso de privacidad hacia los empleados del N3, redactado y exigido en el contrato, con la transferencia de sus
+  datos a Estados Unidos en el modo gestionado (D10);
 - los veredictos, desde `tools/conocimiento` y con su firma (H-20);
 - GATE 3 cerrado en la máquina donde corre lo que opera el laboratorio (el N1, por D3), antes de comprometer
   disponibilidad: la ficha de servidor no dice «apto» sin él;
@@ -360,3 +384,5 @@ Revisión 3 (D6), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 
 Revisión 4 (D7), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
 
 Revisión 5 (D8), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
+
+Revisión 6 (D10), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11

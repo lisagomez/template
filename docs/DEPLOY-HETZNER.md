@@ -38,7 +38,8 @@ En la consola del proveedor que elegiste (el del laboratorio o el de la consulto
 - **Tipo:** el que cumpla la tabla de arriba (2 GB de RAM como minimo duro) y, si el
   producto declara su perfil, el **tamaño contratado** (ver «El perfil del producto» abajo)
 - **Region:** la que fije la decision del producto sobre donde quedan los datos (en
-  Soporte SAP, **D10**). Mientras siga abierta, `configura:deploy` dira «pendiente», nunca «cumple»
+  Soporte SAP, **D10**: `us-east-1` en el modo gestionado; en despacho, la que decida quien pone la
+  maquina). Mientras una decision siga abierta, `configura:deploy` dira «pendiente», nunca «cumple»
 - **Imagen:** Ubuntu 24.04 LTS
 - **SSH key:** subir la tuya (NO uses password)
 - **Firewall:** permitir solo `22`, `80`, `443`
