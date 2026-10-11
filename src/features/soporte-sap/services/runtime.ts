@@ -27,13 +27,11 @@ import {
 import corteJson from '../../../../tools/soporte-sap/semantica/corte.json'
 import estimadoJson from '../../../../tools/soporte-sap/medicion/estimado.json'
 import type { Sesion, MensajeChatVista, PropuestaVista, Accion } from './tipos'
+import { Rechazo } from './rechazo'
+import { registraSalida, congelamiento, CONGELADO, type BajaLab } from './salida'
 
 export const encendido = (): boolean => process.env['SOPORTE_SAP_LABORATORIO'] === '1'
-/**
- * Lo que el laboratorio le dice al usuario a propósito: una regla de quién puede qué, o un plan que no aplica. Es lo
- * único cuyo mensaje sale por la ruta; cualquier otro error es interno y se queda en el log (PRP-010 H-25).
- */
-export class Rechazo extends Error {}
+export { Rechazo }
 /** Un plan que no aplica en el simulador también se le dice al usuario: es una regla, no una falla. */
 const comoRechazo = (e: unknown): unknown => (e instanceof NoAplica ? new Rechazo(e.message) : e)
 export const CORTE = corteJson as unknown as Corte
@@ -63,14 +61,16 @@ export interface ImpugnacionLab {
 export interface TopeDelMes { topeTokens: number | null; topePaginasOcr: number | null }
 interface Estado { n: number; presupuestos: Record<string, TopeDelMes>; incidencias: IncidenciaLab[]; sala: EstadoSala; sap: Record<string, SapSimulado>; chat: Record<string, MensajeChatVista[]>; propuestas: PropuestaVista[]; ensenanzas: Record<string, PropuestaDeEnsenanza>
   /** D1 (PRP-011): el consentimiento de cada organización, y de dónde nació cada enseñanza (aparte, no en la propuesta). */
-  consentimientos: Consentimientos; origenes: Record<string, Origen> }
+  consentimientos: Consentimientos; origenes: Record<string, Origen>
+  /** D8 (PRP-012): las salidas registradas, por cliente; con la suya, el cliente queda congelado. */
+  bajas: Record<string, BajaLab> }
 
 function nuevo(): Estado {
   let sala = creaCanal(salaVacia(), { id: CANAL, tenant: 'andina', slug: 'consultora-andina', nombre: 'Consultora Andina', departamento: null })
   for (const u of ['usr-superadmin', 'usr-experto', 'usr-consultor-andina']) sala = agregaParticipante(sala, 'andina', u)
   // El laboratorio arranca con un tope para el mes en curso. Sin fila del mes, nada llama al modelo (fail-closed).
   const presupuestos = Object.fromEntries(CONSULTORAS.map((c) => [`${c.id}:${mesDe(ahora())}`, { ...TOPE_DE_LABORATORIO }]))
-  return { n: 0, presupuestos, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {}, consentimientos: {}, origenes: {} }
+  return { n: 0, presupuestos, incidencias: [], sala, sap: Object.fromEntries(CLIENTES.map((c) => [c.id, sapDeLaboratorio(c.id, c.sistema)])), chat: {}, propuestas: [], ensenanzas: {}, consentimientos: {}, origenes: {}, bajas: {} }
 }
 
 const g = globalThis as { __soporteSapLab?: Estado }
@@ -147,6 +147,7 @@ function conPresupuesto(i: IncidenciaLab, paso: (decision: AccionDeTriage) => vo
 export async function levanta(s: Sesion, d: { titulo: string; descripcion: string; archivos: Array<{ nombre: string; bytes: Uint8Array }> }): Promise<string> {
   if (s.rol !== 'cliente') throw new Rechazo('solo el cliente (N3) levanta incidencias aquí')
   const e = estado()
+  if (e.bajas[s.organizacion]) throw new Rechazo(CONGELADO)
   const cl = CLIENTES.find((c) => c.id === s.organizacion)!
   const id = `inc-${String(++e.n).padStart(3, '0')}`
   const ocr = ocrDelMes(presupuestoDe(cl.consultora))
@@ -417,6 +418,8 @@ function fijaPresupuesto(s: Sesion, consultora: string, tope: TopeDelMes): void 
 }
 
 export function actua(s: Sesion, a: Accion): void {
+  const congelado = congelamiento(estado(), s, a)
+  if (congelado) throw new Rechazo(congelado)
   try { despacha(s, a) } catch (e) { throw comoRechazo(e) }
 }
 
@@ -432,6 +435,7 @@ function despacha(s: Sesion, a: Accion): void {
   if (a.tipo === 'consiente_nucleo' || a.tipo === 'revoca_nucleo') return conocimientoComun(s, a.tipo === 'consiente_nucleo' ? 'consiente' : 'revoca')
   if (a.tipo === 'escala') return escala(s, a.incidencia)
   if (a.tipo === 'resuelve') return resuelve(s, a.incidencia)
+  if (a.tipo === 'registra_salida') return registraSalida(estado(), s, a.cliente, ahora())
   if (a.tipo === 'espera_cliente') return pideAlCliente(s, a.incidencia, a.pide)
   return respuestaDelCliente(s, a.incidencia)
 }
@@ -445,8 +449,9 @@ export const fichasDeServidor = (): FichaDeServidor[] => CONSULTORAS.map((c) => 
   consultora: c.id, modo: c.id === 'boreal' ? 'despacho' : 'gestionado', medicion: null, respuestas: PREGUNTAS_SNAPSHOT.map(() => null), restauracion: null,
 }))
 
-/** El reloj de una incidencia de la sesión, a este momento (la única definición: `relojSla`). */
-export const relojDe = (i: IncidenciaLab): ResultadoSla => relojSla(i.sla, i.clasificacion.prioridad, contratoDeLaboratorio(i.consultora, i.cliente, '2026-04-01'), ahora())
+/** El reloj de una incidencia, a este momento (la única definición: `relojSla`); el de un cliente que se va, al registrarla. */
+export const relojDe = (i: IncidenciaLab): ResultadoSla =>
+  relojSla(i.sla, i.clasificacion.prioridad, contratoDeLaboratorio(i.consultora, i.cliente, '2026-04-01'), estado().bajas[i.cliente]?.registradaEn ?? ahora())
 
 let demo: Array<{ titulo: string; reloj: ResultadoSla }> | undefined
 /**

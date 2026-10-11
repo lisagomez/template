@@ -11,6 +11,7 @@
  */
 import { createHash } from 'node:crypto'
 import { exportaCliente, exportaTenant, podaConLista, TABLAS_DE_TENANT, type Consulta, type ListaDeBajas } from './respaldo.js'
+import { estadoDeBaja, type EstadoBaja } from './vencimiento.js'
 
 export interface Almacen {
   sube(bucket: string, ruta: string, contenido: string): Promise<void>
@@ -18,8 +19,6 @@ export interface Almacen {
   lista(bucket: string, prefijo: string): Promise<readonly string[]>
 }
 
-/** Dónde va una baja: sin plazo en el contrato, sin export todavía, en su gracia, lista para borrar o cumplida. */
-export type EstadoBaja = 'sin_plazo' | 'sin_export' | 'en_gracia' | 'lista' | 'cumplida'
 export interface BajaEnPlan {
   readonly id: string; readonly consultora: string; readonly cliente: string | null
   readonly estado: EstadoBaja; readonly borrarDesde: string | null
@@ -33,9 +32,6 @@ export interface PlanDeRetencion {
   readonly avisos: readonly string[]
 }
 
-const estadoDe = (b: { export_sha256: string | null; borrar_desde: string | null; vencio: boolean; borrada_en: string | null }): EstadoBaja =>
-  b.borrada_en ? 'cumplida' : !b.export_sha256 ? 'sin_export' : b.borrar_desde === null ? 'sin_plazo' : b.vencio ? 'lista' : 'en_gracia'
-
 /** El dry-run: qué vence y qué baja está en qué punto. No escribe nada. */
 export async function planDeRetencion(q: Consulta, consultora: string): Promise<PlanDeRetencion> {
   const originales = await q<{ adjunto: string; ruta: string }>(`select a.id as adjunto, a.ruta from public.ss_adjunto a
@@ -43,7 +39,8 @@ export async function planDeRetencion(q: Consulta, consultora: string): Promise<
   const filas = await q<{ id: string; consultora_id: string; cliente_id: string | null; borrar_desde: string | null; export_sha256: string | null; borrada_en: string | null; vencio: boolean }>(
     `select id, consultora_id, cliente_id, borrar_desde::text, export_sha256, borrada_en::text, coalesce(borrar_desde <= now(), false) as vencio
        from public.ss_baja where consultora_id = $1 order by registrada_en`, [consultora])
-  const bajas = filas.map((b) => ({ id: b.id, consultora: b.consultora_id, cliente: b.cliente_id, estado: estadoDe(b), borrarDesde: b.borrar_desde }))
+  const bajas = filas.map((b) => ({ id: b.id, consultora: b.consultora_id, cliente: b.cliente_id, borrarDesde: b.borrar_desde,
+    estado: estadoDeBaja({ exportSha256: b.export_sha256, borrarDesde: b.borrar_desde, borradaEn: b.borrada_en, vencio: b.vencio }) }))
   const sinN = await q<{ cliente: string }>(`select distinct k.cliente_id as cliente from public.ss_contrato_sla k
     where k.consultora_id = $1 and k.cliente_id is not null and ss_priv.dias_del_contrato($1, k.cliente_id, 'retencionOriginalesDias') is null`, [consultora])
   const avisos = [

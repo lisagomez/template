@@ -20,7 +20,8 @@ export const SESIONES: Readonly<Record<Rol, Sesion>> = {
 export interface Tarjeta { readonly nombre: string; readonly etiqueta: string; readonly valor: number | null; readonly unidad: string | null; readonly fuente: string; readonly definicion: string; readonly supuestos: string | null }
 
 export interface CampoVista { readonly campo: string; readonly valor: string; readonly evidencia: string; readonly via: string; readonly confianza: number | null; readonly estado: string }
-export interface AdjuntoVista { readonly nombre: string; readonly aceptado: boolean; readonly via: string | null; readonly aviso: string | null; readonly motivo: string | null; readonly campos: readonly CampoVista[] }
+/** `vence`: cuándo se borra el original (D8); null si el adjunto se rechazó y no se guardó. */
+export interface AdjuntoVista { readonly nombre: string; readonly aceptado: boolean; readonly via: string | null; readonly aviso: string | null; readonly motivo: string | null; readonly campos: readonly CampoVista[]; readonly vence: string | null }
 export interface EventoVista { readonly seq: number; readonly tipo: string; readonly actor: string; readonly fecha: string; readonly resumen: string; readonly hash: string }
 export interface TramoVista { readonly desde: string; readonly hasta: string; readonly estado: string; readonly minutos: number; readonly porque: string }
 export interface RelojVista {
@@ -49,6 +50,19 @@ export interface IncidenciaVista {
   /** Quién de la consultora lo escaló al laboratorio (DP-3), y lo que el consultor le respondió al cliente (DP-4). */
   readonly escaladaPor: string | null
   readonly respuestas: ReadonlyArray<{ readonly texto: string; readonly por: string; readonly fecha: string }>
+  /** D8: la salida de su cliente está registrada, y nada de la incidencia cambia. */
+  readonly congelada: boolean
+}
+/**
+ * D8: la salida de un cliente. Sin registrar, quién puede registrarla y la gracia de su contrato; registrada, quién y
+ * cuándo, en qué punto va y su export (que el laboratorio no ve).
+ */
+export interface SalidaVista {
+  readonly cliente: string; readonly nombre: string; readonly gracia: string; readonly puedeRegistrar: boolean
+  readonly registrada: {
+    readonly por: string; readonly fecha: string; readonly borrarDesde: string | null; readonly estado: string
+    readonly export: { readonly sha256: string; readonly incidencias: number; readonly bytes: number } | null
+  } | null
 }
 export interface MensajeSalaVista {
   readonly id: string; readonly hilo: string | null; readonly autor: string; readonly tipoAutor: string; readonly cuerpo: string; readonly origen: string
@@ -95,6 +109,8 @@ export interface Vista {
   readonly presupuesto: readonly PresupuestoVista[]
   /** La ficha de servidor de cada consultora: solo el superadministrador (PRP-010, fase 3). */
   readonly fichas: readonly FichaVista[]
+  /** D8: las salidas que ve cada quien. */
+  readonly salidas: readonly SalidaVista[]
 }
 
 /** Una ficha de servidor: no dice «apto» sin la restauración probada en esa máquina (GATE 3). */
@@ -132,4 +148,6 @@ export type Accion =
   /** El cliente impugna un campo de su incidencia; la consultora la resuelve a su nombre (PRP-010 H-10). */
   | { readonly tipo: 'impugna'; readonly incidencia: string; readonly campo: 'prioridad' | 'categoria' | 'complejidad' | 'pausa' | 'resolucion'; readonly motivo: string }
   | { readonly tipo: 'resuelve_impugnacion'; readonly incidencia: string; readonly impugnacion: string; readonly decision: 'aceptada' | 'rechazada' }
+  /** D8: una persona del cliente o de su consultora registra la salida del cliente (DP-2). */
+  | { readonly tipo: 'registra_salida'; readonly cliente: string }
   | { readonly tipo: 'reinicia' }
