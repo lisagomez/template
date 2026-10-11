@@ -7,6 +7,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { ingiere, ingiereTodos, validaConfig, categoriza } from '../dist/index.js'
 import { puertos, documento, CONFIG, SIN_USO } from './_documentos.ts'
+import { leeCapaCero, presupuestoDeInflado } from '../../extractor-documental/dist/index.js'
 
 const ocrDePrueba = { modelo: 'prueba@0.0.0', extrae: async () => [{ markdown: 'Transaccion MIGO\nMensaje num. M7 053\nen la sociedad 1000, periodo 2026/10', confianza: 0.91 }] }
 const p = puertos(ocrDePrueba)
@@ -116,4 +117,27 @@ test('H-23 · los adjuntos se cuentan por incidencia, y el OCR no pasa del tope 
   const r = await ingiere(tres, { ...CONFIG, paginasOcrMaximas: 5 }, { nombre: 'a.png', bytes: documento('captura-migo.png') }, { adjuntos: 0, paginasOcr: 4 })
   assert.ok(r.aceptado && r.paginasOcr === 1, JSON.stringify(r))
   assert.ok(r.aceptado && /alcanzó para 1 de 3 páginas/.test(r.aviso ?? '') && !/pagina 2/.test(r.texto), 'lo que no cabe no se usa, y se dice')
+})
+
+/** Un PDF normal con su contenido comprimido (FlateDecode), como lo escriben casi todos los generadores. */
+async function pdfComprimido(contenido: string): Promise<Uint8Array> {
+  const cuerpo = new Uint8Array(await new Response(new Blob([contenido]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer())
+  const b = (x: string) => new TextEncoder().encode(x)
+  const partes = [b(`%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\n4 0 obj\n<< /Length ${cuerpo.length} /Filter /FlateDecode >>\nstream\n`), cuerpo, b('\nendstream\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n')]
+  const salida = new Uint8Array(partes.reduce((n, x) => n + x.length, 0))
+  let k = 0
+  for (const x of partes) { salida.set(x, k); k += x.length }
+  return salida
+}
+
+test('H-22 · un PDF que infla más que su tope no se lee: queda como adjunto, sin extracción, y se dice por qué', async () => {
+  // Un spool normal que infla a menos de 1 KB, contra un tope bajado a 64 bytes. Ninguna prueba fabrica un PDF que infle de más.
+  const pdf = await pdfComprimido('BT /F1 12 Tf 72 720 Td (Runtime error DBSQL_DUPLICATE_KEY_ERROR en VA01) Tj ET\n'.repeat(10))
+  const normal = await ingiere(p, CONFIG, { nombre: 'spool.pdf', bytes: pdf }, SIN_USO)
+  assert.ok(normal.aceptado && normal.via === 'capa0', `control: con el tope de siempre se lee (${JSON.stringify(normal)})`)
+  const corto = { ...p, leeCapaCero: (x: Uint8Array) => leeCapaCero(x, presupuestoDeInflado(64)) }
+  const r = await ingiere(corto, CONFIG, { nombre: 'spool.pdf', bytes: pdf }, SIN_USO)
+  assert.ok(r.aceptado && r.via === 'sin_extraccion', JSON.stringify(r))
+  assert.ok(r.aceptado && /infla más que su tope .*\(H-22\)/.test(r.aviso ?? ''), r.aceptado ? r.aviso ?? '' : '')
+  assert.ok(r.aceptado && r.campos.length === 0, 'nada leído a medias')
 })

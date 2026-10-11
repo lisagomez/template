@@ -232,8 +232,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - El OCR tiene un tope de páginas del mes por consultora (`ss_presupuesto`). Sin tope, o con lecturas sin medir,
     no corre, y no registra más páginas de las que le quedan.
   - El servicio de OCR corre con memoria acotada en su contenedor.
-  - *Brecha* (PRP-010 H-22, en pausa): un PDF de unos 300 KB tumba la app de todos los tenants. La capa 0 lee el
-    PDF en el proceso de la app, y el inflado no tiene tope. La memoria acotada del servicio de OCR no lo contiene.
+  - La capa 0 lee el PDF en el proceso de la app, y su inflado tiene un tope por documento (32 MiB, H-22): se lee por
+    trozos y se corta al pasarlo. Ese PDF no se lee, queda como adjunto sin extracción, se dice por qué y no va al
+    motor. El tope sale de la memoria de la máquina, no de un corpus: se recalibra con el corpus real.
 - **Cadena de suministro (O5).** dbt, MetricFlow y Postgres van pineados por versión y la imagen
   por digest; las dependencias npm ya pasan por el lockfile.
   - *Brecha*: hasta que un CDC adopte `vigila:versiones` para estas piezas, nadie avisa de un
@@ -307,7 +308,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 
 | # | Brecha | Muerde | Qué la cierra |
 |---|---|---|---|
-| 1 | Un PDF tumba la app de todos los tenants (H-22) | en cuanto el laboratorio reciba documentos de fuera | el tope de inflado, medido sobre el corpus real del extractor (en pausa) |
+| 1 | Un PDF tumba la app de todos los tenants (H-22) | cerrado: tope de inflado por documento (32 MiB), por memoria | recalibrarlo con el corpus real del extractor |
 | 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza; no se enciende fuera del laboratorio |
 | 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato (D3 decidida: mixto); el SLA de ese modo no se ofrece como evidencia |
 | 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real | mover la matriz a `tools/conocimiento`, con su firma |

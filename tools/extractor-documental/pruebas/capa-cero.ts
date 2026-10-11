@@ -8,7 +8,7 @@ import {
   cuentaPaginasPdf,
   capaCeroComoJson,
 } from '../dist/capa-cero.js'
-import { imagenesDelPdf } from '../dist/pdf-flujos.js'
+import { imagenesDelPdf, flujosDeContenido, presupuestoDeInflado, TOPE_INFLADO_POR_DOCUMENTO } from '../dist/pdf-flujos.js'
 import type { MotorOcr } from '../dist/puertos.js'
 import type { PaginaExtraida } from '../dist/tipos.js'
 
@@ -470,3 +470,41 @@ test('lo que NO es un JPEG se omite en vez de devolverse como si lo fuera', asyn
   assert.deepEqual(await imagenesDelPdf(pdf), [])
 })
 
+// --- H-22: el tope de inflado. Se prueba con documentos NORMALES y un tope bajado a propósito: ningún archivo de estas
+// pruebas infla más de unos KB.
+
+const FACTURA_H22 = 'BT /F1 12 Tf 72 720 Td (Factura de prueba del laboratorio, sociedad 1000) Tj ET\n'.repeat(20)
+
+test('H-22 · un documento que infla más que su tope no se lee, dice por qué y no va al motor', async () => {
+  const pdf = await pdfCon(FACTURA_H22, { comprimido: true })
+  assert.equal((await leeCapaCero(pdf)).hayTexto, true, 'control: con el tope de siempre se lee')
+  const corto = presupuestoDeInflado(256)
+  const r = await leeCapaCero(pdf, corto)
+  assert.deepEqual([r.hayTexto, r.topeDeInflado, corto.agotado], [false, true, true])
+  assert.match(r.motivo ?? '', /infla más que su tope \(\d+ bytes por documento\): no se lee \(H-22\)/)
+  let llamadas = 0
+  const motor: MotorOcr = { modelo: 'prueba', limites: { bytesMaximos: 1000, paginasMaximas: 10, paginasPorAnotacion: 8 }, extrae: async () => { llamadas++; return [] } }
+  const e = await extraeConCapaCero(motor, pdf, undefined, presupuestoDeInflado(256))
+  assert.deepEqual([llamadas, e.porCapaCero, e.paginas.length], [0, false, 0], 'ese documento no va al motor')
+  assert.match(e.motivo ?? '', /\(H-22\)/)
+})
+
+test('H-22 · el inflado se corta al pasar el tope y no acumula lo que sigue; lo que cabe sale entero, aunque llegue en trozos', async () => {
+  const corto = presupuestoDeInflado(256)
+  const f = await flujosDeContenido(await pdfCon(FACTURA_H22, { comprimido: true }), corto)
+  assert.deepEqual([f.topeDeInflado, f.flujos.length], [true, 0], 'nada de lo leído a medias se devuelve')
+  // Un flujo que comprimido pasa de los 4 KB de cada trozo de entrada: sale idéntico.
+  const variado = Array.from({ length: 3000 }, (_, k) => `(linea ${k} ${(k * 7919) % 104729}) Tj`).join('\n')
+  const g = await flujosDeContenido(await pdfCon(variado, { comprimido: true }))
+  assert.equal(g.topeDeInflado, false)
+  assert.equal(g.flujos[0], variado)
+  assert.equal(TOPE_INFLADO_POR_DOCUMENTO, 32 * 1024 * 1024, 'el tope declarado (sale de la memoria, no de un corpus)')
+})
+
+test('H-22 · las imágenes de un documento comparten su presupuesto: pasado el tope, no se sigue', async () => {
+  const pdf = await pdfCon(FACTURA_H22, { comprimido: true })
+  const presupuesto = presupuestoDeInflado(256)
+  await leeCapaCero(pdf, presupuesto)
+  assert.equal(presupuesto.agotado, true)
+  assert.deepEqual(await imagenesDelPdf(pdf, presupuesto), [], 'con el presupuesto agotado no infla nada más')
+})

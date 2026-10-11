@@ -1682,10 +1682,12 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'el OCR sin límite de memoria', ediciones: [ed('docker-compose.yml', '          cpus: "${OCR_CPUS:-2}"\n          memory: ${OCR_MEM:-2G}\n', '          cpus: "${OCR_CPUS:-2}"\n')] },
   },
   {
-    id: 'c3-archivos-pdf', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'brecha',
-    afirmacion: 'un PDF de unos 300 KB tumba la app de todos los tenants: la capa 0 lo lee en el proceso de la app y el inflado no tiene tope',
-    control: 'ninguno todavía: la memoria acotada del servicio de OCR (fila de arriba) no contiene lo que pasa en el proceso de la app',
-    nota: 'PRP-010 H-22, en pausa: el tope de inflado se mide sobre el corpus real del extractor, no con entradas de estrés',
+    id: 'c3-archivos-pdf', doc: 'C3', ref: 'Archivos maliciosos y abuso (O1, O4)', estado: 'probado',
+    afirmacion: 'un PDF que infla más que su tope por documento (32 MiB) no se lee: queda como adjunto sin extracción, se dice por qué y no va al motor (H-22)',
+    control: 'tools/extractor-documental · inflar() por trozos con presupuestoDeInflado(); leeCapaCero() lo declara',
+    comprobacion: prueba('ingesta.ts', 'H-22 · un PDF que infla más que su tope no se lee: queda como adjunto, sin extracción, y se dice por qué'),
+    sabotaje: { que: 'el inflado vuelve a no tener tope', ediciones: [ed('tools/extractor-documental/dist/pdf-flujos.js', 'if (total > presupuesto.quedan) {', 'if (false) {')] },
+    nota: 'el tope sale de la memoria de la máquina (1.5 GB por consultora, 5 adjuntos), no de un corpus: se recalibra con el corpus real (TAR-17, TAR-25). Se prueba con PDF normales y un tope bajado, sin entradas de estrés',
   },
   {
     id: 'c3-suministro-pines', doc: 'C3', ref: 'Cadena de suministro (O5)', estado: 'probado',
