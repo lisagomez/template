@@ -605,7 +605,7 @@ create table if not exists public.ss_cuarentena (
   senales       text[] not null,
   creada_en     timestamptz not null default now(),
   constraint ss_cuarentena_solo_senales check (cardinality(senales) > 0 and senales <@ array[
-    'caso de RR. HH. o nómina: no entra al sandbox (cuarentena definitiva hasta D14)',
+    'caso de RR. HH. o nómina: no entra al sandbox (cuarentena definitiva: nadie la revisa, D14)',
     'queda algo con forma de correo', 'queda una secuencia larga de dígitos',
     'queda un tratamiento seguido de un nombre', 'queda un posible usuario SAP']::text[])
 );
