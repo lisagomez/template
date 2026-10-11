@@ -115,10 +115,12 @@ await rol('superadmin')
 await decide('Plan v1 para inc-003', 'a_revision', 'El periodo correcto es el periodo 2026/11; corrige y vuelve a proponer')
 await captura(6, 'a revision el agente corrige y propone la v2', async () => /Plan v2 para inc-003[\s\S]*periodo: 2026\/10 → 2026\/11/.test(await texto(sel('sala'))), sel('sala'))
 
-// 10: el chat del HIL: métrica con definición; aprobar desde el chat se promueve a la sala y se aprueba allí.
+// 10: el chat del HIL: métrica con definición; aprobar desde el chat se promueve a la sala y se aprueba allí. La de
+// una consultora no la contesta: con dos, se despejaría restando del total (D14), y lo dice.
+await chatea('¿Cuál fue el MTTR en septiembre de 2026?')
 await chatea('¿Cuál fue el MTTR de Consultora Andina en septiembre de 2026?')
 await chatea('Aprueba la tarea-inc-003, ya lo revisé')
-await captura(10, 'chat del HIL metrica con definicion y peticion promovida a la sala', async () => { const c = await texto(sel('chat')); const s = await texto(sel('sala')); return /Definición:/.test(c) && /capa semántica · mttr_horas/.test(c) && /No apruebo desde el chat/.test(c) && /desde el chat del HIL/.test(s) }, sel('chat'))
+await captura(10, 'chat del HIL metrica con definicion y peticion promovida a la sala', async () => { const c = await texto(sel('chat')); const s = await texto(sel('sala')); return /Definición:/.test(c) && /capa semántica · mttr_horas · 2026-09 · total/.test(c) && /su grupo tiene menos de 3 clientes, o se despejaría restando \(D14\)/.test(c) && /No apruebo desde el chat/.test(c) && /desde el chat del HIL/.test(s) }, sel('chat'))
 await decide('Plan v2 para inc-003', 'aprobar')
 await captura(10.5, 'la v2 se aprueba en la sala con la sesion humana', async () => /aprobar por usr-superadmin/.test(await texto(sel('sala'))), sel('sala'))
 
