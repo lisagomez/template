@@ -68,7 +68,7 @@
     "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el plan como parámetro: Free no tiene respaldo, Pro guarda 7 días" } },
   { "quien": "el proveedor del VPS y del respaldo fuera de sitio", "recibe": "la app, la sala, el almacenamiento y las copias de respaldo", "datosPersonales": true, "decision": "D12 (por decidir: lo elige el laboratorio; no Hetzner)",
     "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts" } },
-  { "quien": "el proveedor de modelo", "recibe": "hoy nada: sin LLM real, y nunca datos de clientes sin decidir qué modelo está prohibido por clase de dato", "datosPersonales": false, "decision": "D7 (por decidir)",
+  { "quien": "el proveedor de modelo", "recibe": "hoy nada: sin LLM real. Por D7, nunca lo crudo (tickets, chat, documentos y adjuntos), que solo va a un modelo autohospedado; a lo sumo lo anonimizado (sandbox) o generalizado (núcleo), con su decisión C4", "datosPersonales": false, "decision": "D7 (decidida el 2026-10-10: externo solo anonimizado; tools/soporte-sap/src/politica-modelo.ts)",
     "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "la línea de tokens del costo" } }
  ],
  "pricing": {
@@ -127,7 +127,7 @@
   "no aprueba nada solo: ni el agente ni el chat insertan una aprobación",
   "no pone precios, créditos, exclusiones ni texto legal",
   "no compromete disponibilidad ni RPO/RTO antes de GATE 3",
-  "no llama a un modelo con datos de clientes (D7)"
+  "no manda tickets, chat ni documentos a un proveedor externo de modelos: lo crudo solo va a un modelo autohospedado (D7)"
  ],
  "noCupo": [],
  "decisiones": "docs/goals/soporte-sap.md"

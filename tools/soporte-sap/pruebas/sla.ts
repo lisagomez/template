@@ -197,3 +197,11 @@ test('D6 · el contrato dice que el producto no se conecta al SAP del cliente ni
   assert.match(d6, /El laboratorio no aplica soluciones en el SAP de ningún\s+cliente/, 'el laboratorio, tampoco (D3)')
   assert.match(d6, /No se comparten contraseñas ni otras credenciales de SAP por el producto/, 'las credenciales no pasan por el producto')
 })
+
+test('D7 · el contrato dice que el texto del cliente no va a un proveedor externo de modelos, y qué puede ir', () => {
+  const p = readFileSync(join(HERRAMIENTA, 'contratos', 'plantilla-contrato-sla.md'), 'utf8')
+  const d7 = p.slice(p.indexOf('## 11. Datos personales y transparencia'), p.indexOf('## 12.'))
+  assert.match(d7, /El texto de sus incidencias, del chat y de sus documentos \*\*no se envía a ningún proveedor externo de modelos de\s+IA\*\*/, 'lo crudo no sale')
+  assert.match(d7, /Si un modelo lo procesa, corre en un servidor de quien opera el servicio/, 'autohospedado')
+  assert.match(d7, /solo puede ir\s+lo ya anonimizado o generalizado, con un contrato que le prohíbe conservarlo o entrenar con él/, 'lo anonimizado, con contrato')
+})
