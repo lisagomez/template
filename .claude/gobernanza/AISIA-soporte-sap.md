@@ -52,6 +52,13 @@
 > `us-east-1`, la misma nube y región que la base. El respaldo inmutable fuera de sitio va a Backblaze B2 US East
 > (Reston, Virginia), otra empresa, cifrado antes de salir y con Object Lock en modo compliance dentro del tope de D8.
 > Cambian la §1, la §4 «Dónde viven los datos», los pendientes que esperaban a D12 y la §5. Va firmada al pie.
+>
+> **Revisión 8** (2026-10-11): el laboratorio decidió **D13 y D14**. En el contrato N1–N2 el laboratorio solo
+> compromete su respuesta a lo que la consultora le escala, de la escalada a su primera decisión en la sala; la cifra,
+> hasta GATE 3. El superadministrador ve lo mínimo de hoy, la cuarentena es definitiva y nadie la revisa, y un agregado
+> solo se le muestra si su grupo tiene 3 clientes o más, sin poder despejar un grupo chico restando del total. Cambian
+> la §2, la §3, la §4 «Dato personal», «Lo que lee el laboratorio», «Reidentificación por grupo chico» y «SLA», y la
+> §5. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -86,7 +93,7 @@
 | **Solución equivocada aprobada** | La matriz da una solución con grado alto para un caso parecido pero distinto, y el supervisor la valida. En el simulador, el daño es al simulador; en un SAP real sería un cambio de datos que **no** se revierte con un transporte. |
 | **Fatiga del aprobador** | Tras muchos planes buenos, quien aprueba en la sala deja de leer y aprueba uno que no arregla nada, o que arregla otra cosa. |
 | **Conocimiento de una consultora usado para otra** | Lo aprendido con los datos de A se vuelve regla común y beneficia a su competidora B sin que A ni su cliente lo sepan (D1). |
-| **El laboratorio lee lo que no necesita** | Operando como se diseñó, el laboratorio lee el texto de lo escalado, y en él hay datos personales (D14). |
+| **El laboratorio lee lo que no necesita** | Operando como se diseñó, el laboratorio lee el texto de lo escalado, y en él hay datos personales (D14 lo deja en lo que la consultora escala). |
 | **Reidentificación por grupo chico** | Un agregado por tamaño con un solo cliente (un S solo en su tamaño) le da al laboratorio las cifras de ese cliente. |
 | **FODA o accionable que afirma de más** | El tablero del N3 dice una debilidad o un impacto en MXN con pocos datos, y la consultora lo presenta como un hecho. |
 | **Proyección tomada por promesa** | Un impacto en MXN con supuestos del laboratorio se lee como un compromiso. |
@@ -117,7 +124,7 @@
 | Fatiga del aprobador | Alta en un SAP real · baja en el simulador | **Alta**: es estadística, no malicia (O3) | Igual que la solución que deja pasar |
 | Conocimiento cruzado entre consultoras | Media-alta | Baja: D1 decidida, y la base exige el consentimiento | No |
 | El laboratorio lee lo que no necesita | Media | Alta (es el diseño) | No |
-| Reidentificación por grupo chico | Media | Media mientras haya tamaños con un cliente | No |
+| Reidentificación por grupo chico | Media | Baja con D14: el laboratorio solo ve grupos de 3 clientes o más, y no puede despejar uno chico restando | No |
 | FODA o accionable que afirma de más | Media | Media | Sí, si cada punto cita su dato y su confianza |
 | Proyección tomada por promesa | Media | Alta | Sí |
 | SLA mal medido | Media (dinero) | Baja-media | Sí, si fecha y actor de cada evento los da la base |
@@ -156,7 +163,7 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - **Al bucket del sandbox nadie sube objetos**: el sandbox es solo texto, y una imagen no la revisa
     ningún cerrojo.
   - **Todo caso de RR. HH. o nómina va a cuarentena.** La cuarentena es **definitiva** y nadie la
-    revisa hasta D14 (DP-7): falla seguro, porque el caso no entra al sandbox. Tampoco frena la
+    revisa (D14): falla seguro, porque el caso no entra al sandbox. Tampoco frena la
     atención: el caso sigue con su consultora y su reloj de SLA.
   - **Salir del laboratorio** exige medir el anonimizador sobre un corpus real con consentimiento (D9).
 - **Secreto del N3**:
@@ -213,9 +220,15 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - La cuarentena no la lee el laboratorio: nadie la revisa (DP-7).
   - Los originales, con un acceso que **otorga la consultora** por 72 h como máximo. La fecha la pone
     la base, se puede revocar, y nadie se lo otorga a sí mismo.
-  - D14 decide qué más ve el superadministrador.
-- **Reidentificación por grupo chico** (depende de D14): el corte no aplica todavía un tamaño
-  mínimo de grupo. El contrato le dice al N3 que el laboratorio ve agregados de operación.
+  - **D14, decidida**: el superadministrador no ve nada más que esto, y la cuarentena no la revisa nadie, tampoco él.
+- **Reidentificación por grupo chico** (D14, decidida):
+  - El laboratorio ve un agregado solo si su grupo (el total, una consultora o un tamaño) tiene **3 clientes o más**
+    en ese periodo.
+  - Si lo suprimido de una partición (las consultoras, o los tamaños) suma 1 o 2 clientes, se despejaría restando
+    del total, y la partición entera se suprime. Con las dos consultoras del laboratorio, hoy solo ve el total.
+  - Lo aplica la base al leer, y el corte del laboratorio sale marcado con la misma regla desde la capa semántica;
+    una prueba cruza las dos, y las pantallas solo leen la marca.
+  - El contrato (§11) le dice al N3 que el laboratorio ve agregados de operación, solo de grupos de 3 clientes o más.
 - **FODA, accionables y proyecciones**:
   - Cada punto cita su métrica del corte semántico.
   - Cada punto y cada accionable llevan **la confianza del volumen del cliente**; con pocos datos,
@@ -227,7 +240,11 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - El resultado lo calcula un job desde los eventos, con la misma función que la app. Sin contrato
     válido no inventa nada. El resultado no es la evidencia: la evidencia es la cadena, y cualquiera
     lo recalcula desde ella. La base no ata el resultado a los eventos (brecha del C3).
-  - Las cifras del contrato las decide el laboratorio (D13).
+  - Las cifras del contrato las decide el laboratorio. **D13, decidida**: en N1–N2 el laboratorio solo compromete su
+    respuesta a lo que la consultora le escala, de la escalada a su primera decisión en la sala, con fechas de la base;
+    la consultora la ve en cada incidencia. La cifra y los créditos quedan en blanco hasta GATE 3.
+  - *Brecha*: un caso escalado sin plan en la sala no tiene ese reloj; el laboratorio lo atiende por el chat, que no
+    registra una respuesta.
   - **En modo despacho** la base vive en el servidor de la consultora, y quien tiene root puede
     reescribir la cadena: ahí la medición **no es evidencia independiente**, y el contrato lo dice.
 - **Primera respuesta automática**: la primera respuesta es **un mensaje de una persona al
@@ -361,7 +378,7 @@ quedan hoy:
 | El SLA, que es dinero entre la consultora y su cliente | Fechas y actor de la base, primera respuesta de una persona, resultado desde los eventos, y pausa que dice qué pide y que el cliente reanuda él mismo. En modo despacho, la medición **no se ofrece** como evidencia independiente (el contrato lo dice). |
 | La impugnación del cliente | La base: la queja no se reescribe ni se borra, y la resuelta no se reabre. |
 | La resolución y el incumplimiento | Resolver es de una persona de la consultora, y el cliente lo impugna. Un incumplimiento ya ocurrido se queda aunque cambie la prioridad. |
-| Lo que lee el laboratorio | Lo que la consultora escala, también en la app, y lo leído de un original con el acceso motivado. |
+| Lo que lee el laboratorio | Lo que la consultora escala, también en la app, y lo leído de un original con el acceso motivado. De los agregados, solo los de grupos de 3 clientes o más (D14). |
 | El triage urgente cortado por presupuesto, o sin su evidencia | P1 y P2 pasan a una persona; nunca se cortan. |
 | La restauración que toca a otros tenants | Por tenant, verificada antes del commit, y sin devolver lo borrado: la lista de bajas se aplica antes del commit. |
 | El dato de terceros fuera de México | **Se dice y se puede evitar** (D10 y D12): el contrato y el aviso de privacidad dicen dónde viven los datos y quién los guarda, las copias salen cifradas a un tercero que no las lee, y quien exija México va por el modo despacho, con la base en la máquina de su consultora. Sin el aviso, el producto no opera con datos reales. |
@@ -371,7 +388,8 @@ quedan hoy:
 
 Para salir del laboratorio hacen falta:
 
-- D13 y D14 decididas (D1, D3, D6, D7, D8, D10 y D12 ya lo están);
+- la cifra del plazo de respuesta del laboratorio en N1–N2, al cerrar GATE 3 (D13; las decisiones D1, D3, D6, D7, D8,
+  D10, D12, D13 y D14 ya están tomadas);
 - N y la gracia de salida en el contrato, decididas por el laboratorio con su asesoría legal, y la redacción legal del
   §14 (D8, DP-4);
 - el job de respaldo del servidor, llevando la lista de bajas a todos los niveles (D8; con GATE 3);
@@ -400,3 +418,5 @@ Revisión 5 (D8), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 
 Revisión 6 (D10), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
 
 Revisión 7 (D12), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
+
+Revisión 8 (D13 y D14), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11

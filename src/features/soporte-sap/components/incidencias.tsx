@@ -101,10 +101,11 @@ function PausaDelReloj({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua:
 
 /** Lo que solo hace la consultora: escalar al laboratorio a su nombre (DP-3) y dar por resuelta la incidencia. */
 function AccionesDeLaConsultora({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: object) => Promise<void> }) {
-  if (rol !== 'consultor') return i.escaladaPor ? <p className="mt-2 text-xs text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.</p> : null
+  const respuesta = i.respuestaLaboratorio ? <span data-prueba="respuesta-laboratorio"> · {i.respuestaLaboratorio}</span> : null
+  if (rol !== 'consultor') return i.escaladaPor ? <p className="mt-2 text-xs text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.{respuesta}</p> : null
   return (
     <div className="mt-2 flex flex-wrap gap-2 text-xs">
-      {i.escaladaPor ? <span className="text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.</span>
+      {i.escaladaPor ? <span className="text-neutral-500">Escalada al laboratorio por {i.escaladaPor}.{respuesta}</span>
         : <button type="button" onClick={() => actua({ tipo: 'escala', incidencia: i.id })} className="rounded border px-2 py-1" data-prueba="escala">Escalar al laboratorio</button>}
       {i.estado !== 'resuelta' ? <button type="button" onClick={() => actua({ tipo: 'resuelve', incidencia: i.id })} className="rounded border px-2 py-1" data-prueba="resuelve">Dar por resuelta</button> : null}
     </div>
@@ -153,7 +154,7 @@ function Detalle({ i, rol, actua }: { i: IncidenciaVista; rol: Rol; actua: (a: o
       ))}
       {i.sandbox ? (
         <div data-prueba="sandbox-incidencia" className="rounded-lg bg-neutral-50 p-2 text-xs dark:bg-neutral-800/60">
-          <b>Sin regla: anonimizada → {i.sandbox.veredicto === 'entra' ? 'al sandbox' : 'en cuarentena (no entra al sandbox; nadie la revisa hasta D14)'}</b>
+          <b>Sin regla: anonimizada → {i.sandbox.veredicto === 'entra' ? 'al sandbox' : 'en cuarentena (no entra al sandbox; es definitiva y nadie la revisa, D14)'}</b>
           {i.sandbox.texto ? <p className="mt-1 font-mono">{i.sandbox.texto}</p> : null}
           {i.sandbox.senales.length ? <p className="text-neutral-500">Señales: {i.sandbox.senales.join('; ')}</p> : null}
         </div>

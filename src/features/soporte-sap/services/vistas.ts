@@ -7,7 +7,7 @@
  */
 import {
   tableroN1, tableroN2, tableroN3, estadoSla, accionables, foda, verificaCadena, contratoDeLaboratorio, CLIENTES, CONSULTORAS, veredictoDeFicha, PREGUNTAS_SNAPSHOT,
-  faltaParaElNucleo, vigente,
+  faltaParaElNucleo, vigente, respuestaDelLaboratorio,
   type Tarjeta as TarjetaDominio, type ResultadoSla, type Prioridad,
 } from '../../../../tools/soporte-sap/dist/index.js'
 import { CORTE, estado, relojDe, relojesDeDemostracion, presupuestoDe, fichasDeServidor, type IncidenciaLab } from './runtime'
@@ -26,6 +26,18 @@ function reloj(r: ResultadoSla): RelojVista {
     contrato: r.contrato, prioridad: r.prioridad, metaRespuestaMin: r.metaRespuestaMin, respuestaMin: r.respuestaMin, resolucionMin: r.resolucionMin,
     pausadoMin: r.pausadoMin, cumpleRespuesta: r.cumpleRespuesta, alerta: r.alertaRespuesta, estado: r.estado, tramos: r.tramos.map((t) => ({ ...t })),
   }
+}
+
+/**
+ * D13: la respuesta del laboratorio a lo escalado, como la ven la consultora y el laboratorio. Un caso escalado sin plan
+ * en la sala no tiene reloj: el laboratorio lo atiende por el chat, que no registra una respuesta.
+ */
+function respuestaLaboratorio(i: IncidenciaLab, s: Sesion): string | null {
+  if (s.rol === 'cliente' || !i.escalada) return null
+  if (!i.planes.some((p) => p.mensaje)) return 'sin plan en la sala: este escalamiento no tiene reloj del laboratorio (D13)'
+  const r = respuestaDelLaboratorio(i.cadena, new Date().toISOString())
+  if (!r) return null
+  return r.respondidaEn ? `el laboratorio respondió en ${r.minutos} min (su decisión en la sala)` : `esperando la respuesta del laboratorio: ${r.minutos} min desde la escalada`
 }
 
 /** Lo último que la consultora le pidió al cliente (el evento ESPERA_CLIENTE de la cadena). */
@@ -60,6 +72,7 @@ function incidencia(i: IncidenciaLab, s: Sesion): IncidenciaVista {
     escaladaPor: i.escalada?.por ?? null,
     respuestas: s.nivel === 'N1' ? [] : i.respuestas.map((r) => ({ ...r })),
     congelada: estado().bajas[i.cliente] !== undefined,
+    respuestaLaboratorio: respuestaLaboratorio(i, s),
   }
 }
 

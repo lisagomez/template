@@ -31,6 +31,11 @@ export interface FilaDelCorte {
   readonly etapa: string | null
   /** `null` = sin dato en ese periodo (p. ej., sin SLA medido): nunca un cero inventado. */
   readonly valor: number | null
+  /**
+   * D14: si el laboratorio ve este agregado. Lo decide quien genera el corte (`semantica/grupo-minimo.ts`; en la base,
+   * `ss_priv.grupo_visible_al_laboratorio`), no la superficie. Sin la marca, no lo ve.
+   */
+  readonly visibleAlLaboratorio?: boolean
 }
 
 export interface Corte {
@@ -63,6 +68,8 @@ export interface Lectura {
   readonly metrica: MetricaDelCatalogo
   /** De dónde sale el número: lo que cita una pantalla o el chat. */
   readonly fuente: string
+  /** D14: el laboratorio no ve el agregado de un grupo chico; el valor es null por eso, no porque falte. */
+  readonly suprimida?: boolean
 }
 
 export class SinAcceso extends Error {
@@ -76,6 +83,12 @@ export function puedeVer(l: Lector, f: Pick<FilaDelCorte, 'alcance' | 'consultor
   return f.alcance === 'cliente' && f.cliente === l.cliente && m.visibleAlCliente
 }
 
+/** D14: cuántos clientes tiene que tener un grupo para que el laboratorio vea su agregado. */
+export const GRUPO_MINIMO = 3
+/** D14: un agregado que el laboratorio no ve porque su grupo es chico (la marca la pone quien genera el corte). */
+const suprimidaAlLaboratorio = (l: Lector, f: Pick<FilaDelCorte, 'alcance' | 'visibleAlLaboratorio'>) =>
+  l.nivel === 'N1' && f.alcance !== 'cliente' && f.visibleAlLaboratorio !== true
+
 /** Lee UN valor del corte. Si la métrica no existe o el lector no la puede ver, lo dice; no inventa. */
 export function leeMetrica(corte: Corte, lector: Lector, q: Consulta): Lectura {
   const metrica = corte.metricas.find((m) => m.nombre === q.metrica)
@@ -85,15 +98,16 @@ export function leeMetrica(corte: Corte, lector: Lector, q: Consulta): Lectura {
     && f.cliente === (q.cliente ?? null) && f.etapa === (q.etapa ?? null))
   const destino = fila ?? { alcance: q.alcance, consultora: q.consultora ?? null, cliente: q.cliente ?? null }
   if (!puedeVer(lector, destino, metrica)) throw new SinAcceso(`${lector.nivel} no ve «${q.metrica}» con alcance ${q.alcance}`)
-  return {
-    valor: fila?.valor ?? null, metrica,
-    fuente: `capa semántica · ${q.metrica} · ${q.periodo} · ${q.alcance}${q.cliente ? `:${q.cliente}` : q.consultora ? `:${q.consultora}` : q.tamano ? `:${q.tamano}` : ''}${q.etapa ? ` · etapa ${q.etapa}` : ''} · versión ${corte.version.replace(/^sha256:/, '').slice(0, 12)}`,
+  const fuente = `capa semántica · ${q.metrica} · ${q.periodo} · ${q.alcance}${q.cliente ? `:${q.cliente}` : q.consultora ? `:${q.consultora}` : q.tamano ? `:${q.tamano}` : ''}${q.etapa ? ` · etapa ${q.etapa}` : ''} · versión ${corte.version.replace(/^sha256:/, '').slice(0, 12)}`
+  if (fila && suprimidaAlLaboratorio(lector, fila)) {
+    return { valor: null, metrica, suprimida: true, fuente: `${fuente} · suprimido para el laboratorio (D14): su grupo tiene menos de ${GRUPO_MINIMO} clientes, o se despejaría restando` }
   }
+  return { valor: fila?.valor ?? null, metrica, fuente }
 }
 
 /** Las filas que un lector puede ver de una métrica (para series y tablas), sin transformarlas. */
 export function filasVisibles(corte: Corte, lector: Lector, metrica: string): readonly FilaDelCorte[] {
   const m = corte.metricas.find((x) => x.nombre === metrica)
   if (!m) return []
-  return corte.filas.filter((f) => f.metrica === metrica && puedeVer(lector, f, m))
+  return corte.filas.filter((f) => f.metrica === metrica && puedeVer(lector, f, m) && !suprimidaAlLaboratorio(lector, f))
 }

@@ -52,6 +52,8 @@ export interface IncidenciaVista {
   readonly respuestas: ReadonlyArray<{ readonly texto: string; readonly por: string; readonly fecha: string }>
   /** D8: la salida de su cliente está registrada, y nada de la incidencia cambia. */
   readonly congelada: boolean
+  /** D13: cuánto tardó (o lleva) el laboratorio en responder lo escalado; lo ven la consultora y el laboratorio. */
+  readonly respuestaLaboratorio: string | null
 }
 /**
  * D8: la salida de un cliente. Sin registrar, quién puede registrarla y la gracia de su contrato; registrada, quién y

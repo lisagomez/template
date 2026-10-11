@@ -4,7 +4,7 @@
  * NINGUNA calcula: no suman, no promedian, no dividen (la prueba `semantica.ts` lo vigila en el código
  * y con un valor centinela). Si el corte no tiene el dato, la superficie dice «sin dato».
  */
-import { leeMetrica, filasVisibles, SinAcceso, type Corte, type Lector, type Lectura } from './corte.js'
+import { leeMetrica, filasVisibles, SinAcceso, GRUPO_MINIMO, type Corte, type Lector, type Lectura } from './corte.js'
 import type { ContratoSla } from './sla.js'
 
 /** Lo que muestra cada tablero de operación. */
@@ -21,7 +21,8 @@ const tarjeta = (corte: Corte, lector: Lector, metrica: string, periodo: string,
 /** N1 (superadministrador, experto): agregados del laboratorio, por consultora y por tamaño; nunca un cliente. */
 export function tableroN1(corte: Corte, periodo: string) {
   const l: Lector = { nivel: 'N1' }
-  const consultoras = [...new Set(filasVisibles(corte, l, 'volumen').filter((f) => f.alcance === 'consultora').map((f) => f.consultora!))].sort()
+  // Las consultoras que el laboratorio ve EN ESE periodo: un grupo chico se suprime por mes (D14).
+  const consultoras = [...new Set(filasVisibles(corte, l, 'volumen').filter((f) => f.alcance === 'consultora' && f.periodo === periodo).map((f) => f.consultora!))].sort()
   return {
     periodo,
     total: [...METRICAS_OPERACION, ...METRICAS_INTERNAS].map((m) => tarjeta(corte, l, m, periodo, { alcance: 'total' })),
@@ -136,6 +137,7 @@ export function respondeMetrica(corte: Corte, lector: Lector, pregunta: string, 
     : ent[1].tipo === 'consultora' ? { alcance: 'consultora' as const, consultora: ent[0] } : { alcance: 'cliente' as const, consultora: ent[1].consultora, cliente: ent[0] }
   try {
     const r = leeMetrica(corte, lector, { metrica, periodo, ...donde })
+    if (r.suprimida) return noSe(`el laboratorio no ve ese agregado: su grupo tiene menos de ${GRUPO_MINIMO} clientes, o se despejaría restando (D14)`)
     if (r.valor === null) return noSe(`la capa semántica no tiene dato de ${r.metrica.etiqueta} para ${periodo}`)
     return { tipo: 'valor', texto: `${r.metrica.etiqueta} (${periodo}): ${r.valor} ${r.metrica.unidad ?? ''}`.trim(), valor: r.valor, fuente: r.fuente }
   } catch (e) {

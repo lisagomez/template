@@ -33,7 +33,7 @@ test('todo caso de RR. HH. o nómina va a cuarentena, aunque esté bien anonimiz
   for (const t of ['Error en PC00_M32_CALC de la quincena', 'Baja IMSS rechazada por el IDSE', 'La trabajadora no tiene PTU calculada']) {
     const r = anonimiza(t, VALIDADORES)
     assert.equal(r.veredicto, 'cuarentena', t)
-    assert.match(r.senales[0] ?? '', /no entra al sandbox \(cuarentena definitiva hasta D14\)/)
+    assert.match(r.senales[0] ?? '', /no entra al sandbox \(cuarentena definitiva: nadie la revisa, D14\)/)
   }
 })
 

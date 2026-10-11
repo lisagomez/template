@@ -120,9 +120,28 @@ export function contratoN1N2DeLaboratorio(consultora: string, vigenteDesde: stri
     notas: [
       'el laboratorio solo compromete lo que controla',
       NOTAS_CALENDARIO,
-      'el corpus sintético no trae escalamientos con hora de respuesta: este contrato no se puede medir todavía en el laboratorio',
+      'D13: se mide en la cadena de cada incidencia escalada, de la escalada a la primera decisión de una persona del laboratorio en la sala (respuestaDelLaboratorio); la cifra, hasta GATE 3',
+      'un caso escalado sin plan no tiene reloj: el laboratorio lo atiende por el chat, que no registra una respuesta',
     ],
   }
+}
+
+/** Lo que hace una persona del laboratorio en la sala sobre un plan escalado: su respuesta para el contrato N1–N2 (D13). */
+export const DECISIONES_DEL_LABORATORIO: readonly string[] = ['APROBADA', 'RECHAZADA', 'A_REVISION']
+
+/**
+ * D13: lo único que compromete el laboratorio en N1–N2, su respuesta a lo que la consultora le escala. Va de la escalada
+ * (el evento de la consultora, a su nombre) a la primera decisión de una persona del laboratorio en la sala, con las
+ * fechas que pone la base; sin respuesta, cuenta hasta `ahora`. Sin escalada, null. Son minutos continuos: el calendario
+ * y la cifra los fija el laboratorio, hasta GATE 3.
+ */
+export function respuestaDelLaboratorio(eventos: ReadonlyArray<{ readonly tipo: string; readonly fecha: string }>, ahora: string):
+  { readonly escaladaEn: string; readonly respondidaEn: string | null; readonly minutos: number } | null {
+  const escalada = eventos.find((e) => e.tipo === 'ESCALADA')
+  if (!escalada) return null
+  const respuesta = eventos.find((e) => DECISIONES_DEL_LABORATORIO.includes(e.tipo) && e.fecha >= escalada.fecha)
+  const hasta = respuesta?.fecha ?? ahora
+  return { escaladaEn: escalada.fecha, respondidaEn: respuesta?.fecha ?? null, minutos: Math.max(0, Math.round((Date.parse(hasta) - Date.parse(escalada.fecha)) / 60_000)) }
 }
 
 /** Una versión nueva de un contrato: lo que cambia, desde cuándo. La anterior no se toca. */

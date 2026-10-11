@@ -895,9 +895,15 @@ tras construir:
     agentes del template: el respaldo de Soporte SAP con estos proveedores, con su GATE 1 y su GATE 3, está en el
     SDD §13, «Con D12».
 - **D13. Qué compromete el laboratorio en el SLA N1–N2**: cifras, créditos, exclusiones y texto
-  legal. Depende de D3 y de GATE 3. Por defecto, solo lo que el laboratorio controla.
+  legal. Depende de D3 y de GATE 3. Por defecto, solo lo que el laboratorio controla. **Decidida el 2026-10-11**:
+  solo la respuesta a lo que la consultora le escala, de la escalada a la primera decisión de una persona del
+  laboratorio en la sala, con fechas de la base; la consultora la ve. Cifras y créditos en blanco hasta GATE 3.
 - **D14. Qué ve el superadministrador de los datos de un N3.** Por defecto, mínimo privilegio:
   métricas agregadas y el sandbox anonimizado; el dato crudo de un N3, solo con motivo registrado.
+  **Decidida el 2026-10-11**: el mínimo de hoy (agregados, sandbox anonimizado, lo que la consultora escala a su
+  nombre, y los originales solo con el acceso motivado de 72 h que ella otorga); la cuarentena es definitiva y nadie
+  la revisa; y un agregado se le muestra solo si su grupo tiene 3 clientes o más, sin poder despejar un grupo chico
+  restando del total.
 - **D15. De dónde salen los parámetros de los impactos en MXN** (costo hora, costo de un paro
   por prioridad). Por defecto, los captura la consultora por cliente; hasta entonces son supuestos
   del laboratorio, marcados como tales.
