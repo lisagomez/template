@@ -32,11 +32,21 @@
 > documentos y adjuntos) nunca va a un proveedor externo de modelos, tampoco con pesos abiertos: solo a un modelo
 > autohospedado. Lo anonimizado y lo generalizado pueden ir a uno externo con su decisión C4. Entra el daño «Dato del
 > cliente en un proveedor de modelo» (§2 y §3), y cambian la §1, la §4 y la §5. Va firmada al pie.
+>
+> **Revisión 5** (2026-10-11, PRP-012): el laboratorio decidió **D8**. Mientras dura el contrato, los originales se
+> borran N días después de la última resolución, nunca con una impugnación abierta, y la incidencia, su cadena y los
+> campos revisados se quedan. Al salir, una persona registra la baja, lo del cliente se congela, se genera su export
+> firmado y, tras la gracia, se borra. En los respaldos el borrado llega cuando vence el bloqueo (365 días como
+> máximo, fuera del archivo legal), y una restauración nunca devuelve lo borrado. N y la gracia los decide el
+> laboratorio con su asesoría legal (DP-4): sin ellos no se borra nada. Entra el daño «Dato que vive de más o que
+> vuelve» (§2 y §3); cambian la §1, la §4 «Restauración» y la §5, y entra la §4 «Retención y salida». Va firmada al
+> pie.
 
 ## 1. Partes afectadas
 
 - **Las empresas atendidas (N3)**: sus incidencias, documentos y datos de operación pasan por un
-  sistema que categoriza, propone y mide. Nunca hablaron con el laboratorio.
+  sistema que categoriza, propone y mide. Nunca hablaron con el laboratorio. Cuando se van, se llevan su export, y lo
+  suyo se borra (D8).
 - **Las personas dentro de los N3**: empleados cuyos datos de RR. HH., nómina o usuario SAP aparecen
   en un ticket o en una captura. No son usuarios de nada y no firmaron nada.
 - **Las contrapartes de un CFDI**: proveedores y clientes del N3, a veces personas físicas, cuyo RFC
@@ -81,6 +91,7 @@
 | **Opacidad** | El N3 no sabe que el laboratorio lee lo que su consultora escala, ni que un agente categoriza sus tickets. |
 | **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
 | **Dato del cliente en un proveedor de modelo** | Para categorizar, resumir o extraer parámetros, el texto de un ticket, del chat o de un documento (con datos de empleados del N3 o secretos de su negocio) se manda a un proveedor de modelos, que lo conserva o entrena con él. Pesos abiertos en un proveedor ajeno no cambian nada: el dato sale igual. |
+| **Dato que vive de más o que vuelve** | Las capturas y los CFDI de un N3, con datos de sus empleados y de sus contrapartes, se guardan para siempre; el N3 se va y lo suyo se queda; se borra del servicio y sigue en una copia de respaldo; o una restauración devuelve lo que ya se había borrado. Y al revés: el borrado automático se lleva algo antes de tiempo, con una impugnación abierta o antes de que quien se va tenga su export. |
 
 ## 3. Severidad × probabilidad × reversibilidad
 
@@ -109,6 +120,7 @@
 | Opacidad | Media | Alta | Sí |
 | Riesgo de baja como etiqueta | Media | Media | Sí, si la fórmula y el umbral se ven junto al número |
 | Dato del cliente en un proveedor de modelo | **Alta** | Baja: hoy no hay modelo, y para lo crudo la política lo prohíbe | **No**: lo que sale no se recupera |
+| Dato que vive de más o que vuelve | **Alta** (datos de terceros) | Baja con D8: la base decide qué vence, y sin plazos en el contrato no se borra nada | Lo que vive de más, sí: se borra. Lo borrado antes de tiempo, **no** |
 
 ## 4. Mitigaciones
 
@@ -245,7 +257,32 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     del commit**.
   - La restauración corre con el privilegio de migración (declarado en C7).
   - Los bytes de Storage van por su línea de respaldo.
-  - La retención no existe todavía (D8).
+  - **Una restauración no devuelve lo borrado** (D8): la lista de bajas viaja aparte de la base, y la más reciente
+    se aplica antes del commit. La restauración por tenant la exige, y tras restaurar la base entera se aplica igual.
+  - *Depende*: quien lleva la lista a todos los niveles de respaldo es el job de respaldo del servidor, que todavía
+    no existe (D10, D12 y GATE 3).
+- **Retención y salida** (D8, decidida):
+  - **Originales**: se borran N días después de la última resolución, de la incidencia o de una impugnación, y nunca
+    con una impugnación abierta. La fila del adjunto y los campos revisados se quedan. La base decide qué venció: la
+    plataforma no borra nada que no lo haya hecho, ni de otra consultora.
+  - **N y la gracia viven en el contrato** y los decide el laboratorio con su asesoría legal (DP-4). Sin ellos no se
+    borra nada. Hoy los contratos del laboratorio no los dicen: nada vence, y la pantalla lo dice.
+  - **La salida la registra una persona** del cliente o de su consultora (la de una consultora entera, el
+    superadministrador); un agente no (DP-2). Desde ese momento lo del cliente se congela: no entra nada nuevo, nada
+    suyo cambia y su export firmado es el último. Lo descargan él y su consultora; el laboratorio ve la baja, no el
+    export.
+  - **El job de retención borra solo**: es la única acción irreversible que el producto hace sin una persona en el
+    momento. Borra únicamente lo que la base da por vencido (un original con su plazo cumplido; un tenant con su
+    export y la gracia terminada), con el rol de plataforma de su consultora (C7). Separa el plan, que dice qué
+    vence sin borrar nada, de su ejecución. Una baja se da por cumplida solo si no queda nada del tenant.
+  - **En los respaldos**: una copia inmutable no se borra antes de que venza su bloqueo. El bloqueo no pasa de 365
+    días (`configura:deploy` rechaza uno mayor), y Soporte SAP no entra al archivo legal de la casa. Así el borrado
+    llega a todas las copias en 12 meses como máximo, y el contrato lo dice (§14).
+  - Se quedan el sandbox anonimizado, lo subido al núcleo generalizado y las métricas agregadas, que no dicen de
+    quién vinieron.
+  - *Brecha*: el crudo de importación y su procedencia son de la consultora y no tienen cliente; los de un cliente
+    que se va se quedan hasta que se va su consultora.
+  - *Depende*: el job de retención no corre todavía en ningún servidor (D10, D12 y GATE 3).
 - **Opacidad**:
   - El contrato N2–N3 dice que un agente categoriza y que el laboratorio ve lo que la consultora le
     escala.
@@ -292,13 +329,17 @@ quedan hoy:
 | La resolución y el incumplimiento | Resolver es de una persona de la consultora, y el cliente lo impugna. Un incumplimiento ya ocurrido se queda aunque cambie la prioridad. |
 | Lo que lee el laboratorio | Lo que la consultora escala, también en la app, y lo leído de un original con el acceso motivado. |
 | El triage urgente cortado por presupuesto, o sin su evidencia | P1 y P2 pasan a una persona; nunca se cortan. |
-| La restauración que toca a otros tenants | Por tenant, verificada antes del commit. |
+| La restauración que toca a otros tenants | Por tenant, verificada antes del commit, y sin devolver lo borrado: la lista de bajas se aplica antes del commit. |
+| El dato de terceros que vive de más, o que vuelve | Los originales vencen por contrato y la base decide qué venció; al salir, lo del cliente se congela y se borra tras la gracia, con su export en la mano; el borrado llega a las copias en 12 meses como máximo. Sin N ni gracia en el contrato **no se borra nada**: el producto no ofrece un borrado que nadie fijó. |
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece** (D6, decidida): el producto no se conecta a ningún SAP ni guarda sus credenciales. La aplica una persona, fuera del producto, con el control de cambios del N3, y la pantalla y el contrato dicen que el antes y el después son del simulador. |
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
 
 Para salir del laboratorio hacen falta:
 
-- D8, D10, D12, D13 y D14 decididas (D1, D3, D6 y D7 ya lo están);
+- D10, D12, D13 y D14 decididas (D1, D3, D6, D7 y D8 ya lo están);
+- N y la gracia de salida en el contrato, decididas por el laboratorio con su asesoría legal, y la redacción legal del
+  §14 (D8, DP-4);
+- el job de respaldo del servidor, llevando la lista de bajas a todos los niveles (D8; con GATE 3);
 - la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
 - el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
@@ -317,3 +358,5 @@ Revisión 2 (D3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 
 Revisión 3 (D6), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
 
 Revisión 4 (D7), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-10
+
+Revisión 5 (D8), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11

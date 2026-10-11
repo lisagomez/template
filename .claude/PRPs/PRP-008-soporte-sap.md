@@ -171,6 +171,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     al núcleo, que hace el superadministrador. Un campo revisado no se deshace, y su evidencia es la del documento.
   - El consentimiento para el núcleo común (D1) lo da una persona de esa organización, a su nombre, con su contrato
     y la fecha de la base; ningún rol de servicio ni el laboratorio lo escriben.
+  - La salida de un cliente la registra una persona del cliente o de su consultora, y la de una consultora entera, el
+    superadministrador, a su nombre y con la fecha de la base; ni el agente ni la plataforma (D8, DP-2). Nadie elige
+    su plazo: sale del contrato.
   - En la sala, una aprobación es del tenant, de la tarea y de la huella de su mensaje: una persona de B no aprueba
     el plan de A. Ningún componente que ejecuta un modelo la fabrica: la suite de la sala tiene 11 sabotajes (S1,
     S1·force, S2, S2b, S3 a S7, S10 y S11), y cada uno la pone en rojo.
@@ -191,8 +194,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - *Brechas*: `ss_procedencia` no tiene a qué atarse, porque su registro es texto libre. Y los buckets no fijan
     tamaño ni tipo en Storage (depende de su versión): los valida la ingesta, que es la única que sube a originales.
 - **Datos personales.** Lo sostienen, sobre todo, las filas de la AISIA («Dato personal en el sandbox», «El
-  laboratorio lee lo que no necesita» y, por D7, «Dato del cliente en un proveedor de modelo»: lo crudo solo va a un
-  modelo autohospedado).
+  laboratorio lee lo que no necesita»; por D7, «Dato del cliente en un proveedor de modelo»: lo crudo solo va a un
+  modelo autohospedado; y por D8, «Dato que vive de más o que vuelve»: los originales vencen por contrato, al salir se
+  borra tras la gracia y una restauración no devuelve lo borrado).
   - El laboratorio lee solo lo que **la consultora escala, a su nombre** (DP-3). Los originales, con un acceso que
     otorga la consultora a un miembro del laboratorio por 72 h como máximo, con la fecha que pone la base; se puede
     revocar y nadie se lo otorga a sí mismo.
@@ -238,8 +242,13 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
   - `soporte_sap_ingesta` lee originales y deja campos por revisar, acotada por su token: con la tarea de A no lista
     los originales de B.
   - `soporte_sap_plataforma` exporta lo de su consultora con su propio rol, y escribe solo el resultado de SLA que
-    calcula su job, el de su consultora. No inserta decisiones ni eventos, y no borra impugnaciones. Tiene el
-    privilegio de borrar por retención, acotado por su token, pero ningún job lo usa todavía (D8).
+    calcula su job, el de su consultora. No inserta decisiones ni eventos, y no borra impugnaciones.
+  - Por retención (D8) borra **solo lo que la base da por vencido**: los bytes de un original con su plazo cumplido y,
+    con el export de quien se va y la gracia terminada, el tenant entero. En Storage solo sube su export. Con la salida
+    registrada nada de ese tenant cambia, y el job del SLA lo omite. El job de retención (`src/retencion.ts`) separa
+    el plan, que no borra, de su ejecución; todavía no corre en ningún servidor (D10, D12, GATE 3).
+  - *Brecha*: el crudo de importación y su procedencia no tienen cliente; los de un cliente que se va se quedan hasta
+    que se va su consultora.
   - *Brecha* (O6): la base no ata el resultado de SLA a los eventos: un job comprometido escribiría otro. No es la
     evidencia: la evidencia es la cadena, que la plataforma no toca, y cualquiera recalcula el resultado desde ella.
   - `soporte_sap_metricas`, el job de la capa semántica, lee a **todas** las consultoras para dar totales. Su
@@ -269,11 +278,11 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     (`tools/soporte-sap/src/laboratorio/matriz.ts`), no de `tools/conocimiento`, y un commit la cambia sin el gate de
     firma. Antes de resolver incidencias reales, la matriz tiene que venir de `tools/conocimiento`.
 - **Perfil de despliegue.** `configura:deploy` mide la instalación contra el perfil `despliegue` del manifiesto
-  (plantilla v3), sin imprimir ni guardar un secreto:
+  (plantilla v4), sin imprimir ni guardar un secreto:
   - la máquina contra el tamaño contratado (vCPU, RAM y disco);
   - la región frente a D10: mientras D10 siga abierta, «pendiente», nunca «cumple»;
-  - el destino de respaldo inmutable fuera de sitio, por S3: si falta, avisa; sin https o sin días de bloqueo, no
-    pasa;
+  - el destino de respaldo inmutable fuera de sitio, por S3: si falta, avisa; sin https, sin días de bloqueo o con un
+    bloqueo mayor que el tope de la `retencion` del producto (365 días en Soporte SAP, D8), no pasa;
   - los secretos del producto: presentes y de 32 caracteres o más;
   - con Soporte SAP, ningún motor de OCR fuera de la máquina (`OCR_RESPALDO`), ni con una decisión C4.
 
