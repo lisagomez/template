@@ -4680,3 +4680,44 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - el caso malo y el control positivo de `configura:deploy` ☑ en `pruebas/superficie.ts` y `pruebas/despliegue.ts`;
   - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `f6bbf5e`.
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-09, con el diff delante.
+
+### 2026-10-11 — plantilla de producto v4: la sección `retencion` (PRP-012, D8, DP-1) — radio: plantilla de productos, los dos manifiestos, su verificador y el perfil de despliegue
+- **Cambio** (rama `soporte/d8-fase3`, commit `aac8fd9`):
+  - `productos/PLANTILLA.md` pasa a v4: la fila `retencion`, el esqueleto y la historia;
+  - `productos/soporte-sap.json` y `productos/ventas-whatsapp.json` pasan a `"plantilla": 4` y declaran su `retencion`
+    (10 líneas en cada uno);
+  - `scripts/verifica-productos.mjs`: `PLANTILLA = 4`, el campo en `CAMPOS` y en `REQUERIDOS`, `ARCHIVO_LEGAL_DIAS`,
+    `verificaRetencion` y 8 siembras nuevas;
+  - `scripts/despliegue/perfil.mjs`: `respaldo()` compara `RESPALDO_S3_BLOQUEO_DIAS` con `retencion.bloqueoMaximoDias`;
+  - fuera de C1, en el mismo commit: una prueba en `tools/soporte-sap/pruebas/despliegue.ts` y su fila en la matriz
+    (`c3-perfil-respaldo-tope`).
+- **Motivo**: D8 (PRP-012, DP-1) pide que `configura:deploy` rechace un bloqueo de respaldo mayor que el plazo en que el
+  contrato promete que el borrado llega a todas las copias, y el perfil solo lee lo que declara el manifiesto. Soporte
+  SAP tiene retención desde que el laboratorio decidió D8, así que entra por la misma regla de entrada, sin cambiarla
+  (B-3). **Se adelanta a B-6**, que recomendaba que entrara con el siguiente manifiesto: sin el campo, el tope viviría
+  en el código del perfil o en ninguna parte. El vendedor la declara en null con lo que falta (P-07 sigue abierta).
+  `salida` no es una sección aparte: va como texto dentro de `retencion`.
+- **Qué pone rojo y qué no**:
+  - **en rojo**:
+    - un manifiesto sin `retencion`, o que la declara «no aplica»;
+    - una retención sin la decisión que la fija, o con los plazos en null sin decir qué falta, o en una ruta que no existe;
+    - una retención decidida sin salida, sin restauración o sin tope (`bloqueoMaximoDias` entero ≥ 1 y `archivoLegal`
+      true o false);
+    - un tope menor que el archivo legal (2555 días, FASE0 §9.3 y §9.4) en un producto cuyos datos entran a él;
+    - en el servidor, `configura:deploy` con un `RESPALDO_S3_BLOQUEO_DIAS` mayor que el tope: con Soporte SAP, el
+      bloqueo de 2555 días que FASE0 §9.4 pone por defecto ya no pasa (el tope es de 365);
+  - **no se pone rojo**: el vendedor en WhatsApp con `plazos: null`, porque dice qué falta. Sin tope declarado,
+    `configura:deploy` avisa en vez de callar.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verifica:productos` ☑ en verde con los dos manifiestos en v4 y **43/43 siembras cazadas**;
+  - **la plantilla cambió y el gate lo nota**: la v4 contra los dos manifiestos en v3 da 3 comprobaciones en rojo en
+    cada uno (falta el campo, la versión y el null sin «falta»);
+  - `tools/soporte-sap/pruebas/despliegue.ts` ☑ 10/10: con 365 días pasa, con 2555 no, y sin tope declarado avisa;
+  - la fila `c3-perfil-respaldo-tope` ☑ verde sin sabotaje y roja con él, y las tres filas vecinas del respaldo siguen
+    cayendo con el suyo;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `aac8fd9`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la
+  capa A», 2026-10-11, con el diff delante.
