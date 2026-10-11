@@ -59,6 +59,12 @@
 > solo se le muestra si su grupo tiene 3 clientes o más, sin poder despejar un grupo chico restando del total. Cambian
 > la §2, la §3, la §4 «Dato personal», «Lo que lee el laboratorio», «Reidentificación por grupo chico» y «SLA», y la
 > §5. Va firmada al pie.
+>
+> **Revisión 9** (2026-10-11): **H-22 cerrado y el candado de H-20**. El lector de PDF tiene un tope de inflado por
+> documento (32 MiB, sacado de la memoria de la máquina porque no hay corpus real con que medirlo): lo que lo pasa no
+> se lee, no va al motor y cuenta como evidencia sin leer. Con incidencias reales, los veredictos solo pueden salir de
+> `tools/conocimiento` en su versión exacta y registrada, y la matriz sintética no pasa; las reglas reales entran con
+> la primera incidencia real, firmadas. Cambian la §4 «P1 sin evidencia leída» y la §5. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -281,7 +287,8 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
   - **P1 y P2 nunca se cortan**: al tope pasan a una persona en el momento. P3 y P4 esperan. El
     aviso queda en la cadena y a la vista del consultor y del superadministrador.
 - **P1 sin evidencia leída**: un P1 o un P2 con evidencia sin leer, entera o en parte y por cualquier
-  causa, pasa a una persona en el momento, y se dice.
+  causa, pasa a una persona en el momento, y se dice. Un PDF que infla más que su tope por documento (H-22) es una de
+  esas causas: no se lee, no va al motor y queda como adjunto sin extracción.
 - **Restauración**:
   - Export y restauración **por tenant**, con el export firmado.
   - Se verifican el tenant de cada fila y las huellas, la suya y la de cada otra consultora, **antes
@@ -395,10 +402,12 @@ Para salir del laboratorio hacen falta:
 - el job de respaldo del servidor, llevando la lista de bajas a todos los niveles (D8; con GATE 3);
 - la redacción legal del §12 del contrato (conocimiento común) y quién puede consentir en cada organización;
 - el anonimizador medido sobre un corpus real con consentimiento (D9);
-- el tope de memoria del lector de PDF (PRP-010 H-22), cerrado;
+- el tope de memoria del lector de PDF (H-22), recalibrado con el corpus real: hoy está cerrado con un tope de 32 MiB
+  por documento, sacado de la memoria de la máquina;
 - el aviso de privacidad hacia los empleados del N3, redactado y exigido en el contrato, con la transferencia de sus
   datos a Estados Unidos en el modo gestionado (D10);
-- los veredictos, desde `tools/conocimiento` y con su firma (H-20);
+- los veredictos reales, sembrados en `tools/conocimiento` con su firma (H-20): el candado ya impide arrancar con
+  incidencias reales sin ellos, y la matriz sintética del laboratorio no pasa;
 - GATE 3 cerrado en la máquina donde corre lo que opera el laboratorio (el N1, por D3), antes de comprometer
   disponibilidad: la ficha de servidor no dice «apto» sin él;
 - el C3 y esta AISIA firmados.
@@ -420,3 +429,5 @@ Revisión 6 (D10), firmada por: lisagomez  Rol: responsable del proyecto  Fecha:
 Revisión 7 (D12), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
 
 Revisión 8 (D13 y D14), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
+
+Revisión 9 (H-20 y H-22), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
