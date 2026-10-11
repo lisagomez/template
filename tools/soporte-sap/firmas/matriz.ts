@@ -1807,7 +1807,11 @@ export const FILAS: readonly Fila[] = [
     afirmacion: 'con la salida registrada no entra nada nuevo de ese cliente: ni incidencias, ni originales, ni adjuntos',
     control: 'SQL · ss_incidencia_sin_baja (restrictiva), ss_adjunto_ingesta_alta y ss_originales_ingesta_sube con ss_priv.en_baja()',
     comprobacion: prueba('retencion-base.ts', 'D8 · con la salida registrada no entra nada nuevo de ese cliente; su vecino sigue igual'),
-    sabotaje: { que: 'las incidencias siguen entrando tras la salida', ediciones: [ed(SQL, '  with check (not ss_priv.en_baja(consultora_id, cliente_id));', '  with check (true);')] },
+    sabotaje: { que: 'las incidencias siguen entrando tras la salida: sin la política restrictiva ni el congelamiento (doble cierre)', ediciones: [
+      ed(SQL, '  with check (not ss_priv.en_baja(consultora_id, cliente_id));', '  with check (true);'),
+      ed(SQL, "  if ss_priv.en_baja(new.consultora_id, (to_jsonb(new) ->> 'cliente_id')::uuid) then", '  if false then'),
+    ] },
+    nota: 'doble cierre desde la fase 2: la política restrictiva y el congelamiento del tenant (ss_priv.congelado_por_baja); quitar uno solo no basta, y el arnés lo encontró',
   },
   {
     id: 'c3-baja-cumplida', doc: 'C3', ref: 'Jobs de plataforma (C7, declarados)', infirmable: true, estado: 'probado',
