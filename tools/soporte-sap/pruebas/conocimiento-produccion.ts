@@ -55,8 +55,8 @@ test('H-20 · el código de la matriz no sube un veredicto: si la regla dice «a
   assert.equal(r.tipo, 'grado_insuficiente', 'manda la regla, no la entrada de código')
 })
 
-/** Quién importa la matriz sintética. Solo el laboratorio: su runtime, sus CLI, su evidencia y las pruebas. */
-const PERMITIDOS = [/^src\/features\/soporte-sap\/services\/runtime\.ts$/, /^tools\/soporte-sap\/(clis|evidencia|pruebas)\//,
+/** Quién importa la matriz sintética. Solo el laboratorio: su runtime, sus CLI, su evidencia, sus semillas, las pruebas y la matriz de firmas (que la nombra en un sabotaje). */
+const PERMITIDOS = [/^src\/features\/soporte-sap\/services\/runtime\.ts$/, /^tools\/soporte-sap\/(clis|evidencia|pruebas|firmas)\//,
   /^tools\/soporte-sap\/src\/(laboratorio\/|index\.ts$|matriz\.ts$)/, /^tools\/soporte-sap\/semantica\/semillas\.ts$/]
 const USA_LA_SINTETICA = /\bMATRIZ_LABORATORIO\b|\bconocimientoDeMatriz\b/
 export function quienUsaLaSintetica(archivos: ReadonlyArray<{ ruta: string; codigo: string }>): string[] {
