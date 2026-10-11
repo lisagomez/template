@@ -273,7 +273,9 @@ export const SIEMBRAS = [
   ['un tamaño sin su máquina', (m) => { delete m.despliegue.tamanos.L; }, 'cada tamaño declara su máquina (vCPU, RAM y disco) y su fuente'],
   ['los tamaños en null sin decir qué falta', (m) => { m.despliegue.tamanos = null; }, 'cada campo en null dice lo que falta'],
   ['un respaldo que no es inmutable fuera de sitio', (m) => { m.despliegue.exige.respaldo = 'snapshot del proveedor'; }, 'el despliegue exige respaldo inmutable fuera de sitio'],
-  ['una región «decidida» sin regiones', (m) => { m.despliegue.exige.region.estado = 'decidida'; }, 'la región sale de una decisión, abierta o decidida con sus regiones'],
+  // Las dos cosas a la vez: con D10 decidida, el manifiesto de referencia ya está «decidida» y con sus regiones, y una
+  // siembra que solo cambiaba el estado dejó de romper nada (lo cazó el validate del 2026-10-11).
+  ['una región «decidida» sin regiones', (m) => { m.despliegue.exige.region.estado = 'decidida'; m.despliegue.exige.region.regiones = []; }, 'la región sale de una decisión, abierta o decidida con sus regiones'],
   ['sin la decisión de quién lo opera', (m) => { m.despliegue.opera.decision = ''; }, 'dice quién lo opera y qué decisión lo fija'],
   ['un secreto con NEXT_PUBLIC_', (m) => { m.despliegue.secretos.push('NEXT_PUBLIC_SS_SECRETO_TAREAS'); }, 'los secretos del producto son variables de servidor'],
   // v4: la retención (PRP-012 DP-1)
