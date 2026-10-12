@@ -161,3 +161,24 @@ test('en vivo · el estado siempre responde 200: con la vista si está encendido
   const a = await apagado.json(); assert.equal(a.encendido, false); assert.match(a.motivo, /apagado/)
   assert.equal((await (await estadoEnVivo({})).json()).encendido, false, 'sin configurar')
 })
+
+const CON_DATOS = [
+  { tipo: 'chat', texto: 'lo reporta Xóchitl Tzompantzi, xtzompantzi@alimentos.example' },
+  { tipo: 'responde', incidencia: 'inc-001', texto: 'Le escribimos a Juan Pérez al 55 1234 5678' },
+  { levanta: { titulo: 'CFDI rechazado', descripcion: 'El RFC GODE561231GR8 no timbra', muestras: ['cfdi-rechazado.xml'] } },
+]
+
+test('en vivo · un texto con forma de dato personal no cruza el túnel, y el portero lo vuelve a rechazar', async () => {
+  const c = cadena()
+  for (const a of CON_DATOS) {
+    const r = await c.pide(desdeElNavegador('?rol=cliente', JSON.stringify(a)))
+    assert.equal(r.status, 400, JSON.stringify(a)); assert.match((await r.json()).error, /solo van datos sintéticos/)
+  }
+  assert.equal(c.enviadas.length, 0, 'nada cruzó el túnel')
+  const lab = laboratorio()
+  const portero = creaPortero({ secreto: SECRETO, laboratorio: LAB, documentos: DOCUMENTOS, reenvia: lab.reenvia })
+  for (const a of CON_DATOS) assert.equal((await portero(firmada(RUTA, JSON.stringify(a)))).status, 400, `portero: ${JSON.stringify(a)}`)
+  assert.equal(lab.llegadas.length, 0, 'ni llegó al laboratorio')
+  const sinteticos = [{ tipo: 'chat', texto: 'Te enseño el caso inc-002: en Alimentos del Bajío pasa con la ZFI_FIORI_CACHE; hay que limpiar la caché' }, { tipo: 'chat', texto: 'La nómina de la quincena no se calcula en PC00_M99_CALC' }]
+  for (const a of sinteticos) assert.equal((await c.pide(desdeElNavegador('?rol=experto', JSON.stringify(a)))).status, 200, `pasa: ${a.texto}`)
+})

@@ -8,6 +8,7 @@
  */
 import { CABECERA_FIRMA, firma, secretoValido } from './firma.ts'
 import { RUTA_DEL_LABORATORIO, CUERPO_MAXIMO, consultaValida } from './contrato.ts'
+import { datoRealEn } from './sin-datos-reales.ts'
 
 export interface EntornoEnVivo { readonly EN_VIVO_URL?: string; readonly EN_VIVO_SECRETO?: string }
 /** El túnel y el secreto, del entorno del servidor. Solo los leen las rutas de la vitrina, nunca el navegador. */
@@ -44,6 +45,11 @@ export async function atiendeEnVivo(req: Request, env: EntornoEnVivo, reenvia: t
     if (!(req.headers.get('content-type') ?? '').startsWith('application/json')) return Response.json({ error: 'en vivo solo se mandan acciones: los adjuntos son documentos de muestra' }, { status: 415 })
     cuerpo = new Uint8Array(await req.arrayBuffer())
     if (cuerpo.length > CUERPO_MAXIMO) return Response.json({ error: 'la acción es demasiado grande' }, { status: 413 })
+    let accion: unknown
+    try { accion = JSON.parse(new TextDecoder().decode(cuerpo)) } catch { return Response.json({ error: 'datos inválidos' }, { status: 400 }) }
+    // Un dato real no cruza el túnel: se rechaza aquí, y el portero lo vuelve a mirar.
+    const dato = datoRealEn(accion)
+    if (dato) return Response.json({ error: dato }, { status: 400 })
   }
   const ruta = `${RUTA_DEL_LABORATORIO}?${consulta}`
   const cabeceras: Record<string, string> = { [CABECERA_FIRMA]: firma(env.EN_VIVO_SECRETO!, { metodo: req.method, ruta, cuerpo }, ahora()) }

@@ -5,7 +5,8 @@
  * Lo que deja pasar, y solo eso:
  *   · `GET` y `POST` a `/api/soporte-sap`, con `rol` y `export` validados; cualquier otra ruta no existe;
  *   · con la firma de Vercel de ESA petición (`firma.ts`): sin ella, o vieja, o repetida, responde como si no existiera;
- *   · acciones en JSON. Adjuntos, no: quien levanta elige documentos de muestra y el portero los lee de este disco.
+ *   · acciones en JSON. Adjuntos, no: quien levanta elige documentos de muestra y el portero los lee de este disco;
+ *   · y sin texto con forma de dato personal (`sin-datos-reales.ts`): en vivo solo van datos sintéticos.
  *
  * Uso: node --env-file=$HOME/.soporte-sap-en-vivo.env src/features/soporte-sap/vitrina/en-vivo/portero.ts
  * (EN_VIVO_SECRETO; opcionales EN_VIVO_LABORATORIO, por defecto http://localhost:3011, y EN_VIVO_PUERTO, 8787).
@@ -15,6 +16,7 @@ import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { CABECERA_FIRMA, verifica, secretoValido } from './firma.ts'
 import { esMuestra } from './muestras.ts'
+import { datoRealEn } from './sin-datos-reales.ts'
 import { RUTA_DEL_LABORATORIO as RUTA, CUERPO_MAXIMO, consultaValida } from './contrato.ts'
 
 const MUESTRAS_POR_INCIDENCIA = 3
@@ -78,6 +80,8 @@ export function creaPortero(c: ConfigPortero): (req: Request) => Promise<Respons
       if (!(req.headers.get('content-type') ?? '').startsWith('application/json')) return json(415, { error: 'en vivo solo se mandan acciones: los adjuntos son documentos de muestra' })
       let accion: unknown
       try { accion = JSON.parse(new TextDecoder().decode(cuerpo)) } catch { return json(400, { error: 'datos inválidos' }) }
+      const dato = datoRealEn(accion)
+      if (dato) return json(400, { error: dato })
       const l = levantaDe(accion)
       if (l === 'invalida') return json(400, { error: 'en vivo se levanta con documentos de muestra, hasta tres, sin repetir' })
       if (l === null) return await pasa(await reenvia(destino, { method: 'POST', headers: { 'content-type': 'application/json' }, body: cuerpo }))
