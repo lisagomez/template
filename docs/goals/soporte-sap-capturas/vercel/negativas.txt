@@ -1,0 +1,22 @@
+Negativas de la vitrina en Vercel · 2026-10-12T10:37Z · despliegue dpl_GWe5bQGWVkiMFVGw2zoqqmuSc2Zc
+
+1. Sin sesión no abre (esperado: 302 al inicio de sesión de Vercel)
+   soporte-vitrina.vercel.app/                                              302 → https://vercel.com/sso-api
+   soporte-vitrina.vercel.app/vitrina/soporte-sap                           302 → https://vercel.com/sso-api
+   soporte-vitrina.vercel.app/vitrina/soporte-sap/soporte-sap-deck.pdf      302 → https://vercel.com/sso-api
+   soporte-vitrina-3mqk1gbn7-lisagomezs-projects.vercel.app/vitrina/soporte-sap 302 → https://vercel.com/sso-api
+   soporte-vitrina.vercel.app/api/vitrina/soporte-sap/en-vivo/estado        302 → https://vercel.com/sso-api
+   soporte-vitrina.vercel.app/api/soporte-sap                               302 → https://vercel.com/sso-api
+
+2. Con el bypass, fuera de la vitrina no hay nada (esperado: páginas 307 a la vitrina, APIs 404)
+   /soporte-sap                                                             307 → https://soporte-vitrina.vercel.app/vitrina/soporte-sap
+   /buzon                                                                   307 → https://soporte-vitrina.vercel.app/vitrina/soporte-sap
+   /laboratorio-voz                                                         307 → https://soporte-vitrina.vercel.app/vitrina/soporte-sap
+   /a2a                                                                     307 → https://soporte-vitrina.vercel.app/vitrina/soporte-sap
+   /.well-known/agent-card.json                                             307 → https://soporte-vitrina.vercel.app/vitrina/soporte-sap
+   /api/soporte-sap                                                         404
+   /api/laboratorio/estado                                                  404
+   /api/buzon/documentos                                                    404
+   /api/soporte-sap/vitrina                                                 404
+
+3. El túnel sin el secreto: PENDIENTE (el túnel aún no está abierto)
