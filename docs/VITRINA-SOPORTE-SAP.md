@@ -34,7 +34,12 @@ Antes de abrir el túnel, **firma la revisión 10 de la AISIA**: `docs/goals/sop
 después se mueve a `.claude/gobernanza/AISIA-soporte-sap.md`.
 
 1. **Entra a Vercel**, en una terminal aparte, porque es interactivo: `npx vercel@63.1.2 login`.
-2. **Enlaza el proyecto**, desde la raíz de este worktree: `npx vercel@63.1.2 link --yes --project soporte-sap-vitrina`.
+2. **Enlaza el proyecto** desde la raíz de este worktree, en la terminal aparte y sin `--yes`: `npx vercel@63.1.2 link`.
+   Crea un proyecto nuevo, `soporte-sap-vitrina`, con el código en `./`. A la pregunta de conectar el repositorio de Git,
+   responde **No**.
+   - **No lo importes desde GitHub en el panel.** Conectado al repo, Vercel construye en su nube cada push, sin
+     `VITRINA_SOPORTE_SAP=1`, y lo que sube es la aplicación entera, no la vitrina.
+   - Si quedó conectado: `npx vercel@63.1.2 git disconnect`. Settings → Git debe ofrecer «Connect Git Repository».
 3. **Protege todos los despliegues.** En el panel de Vercel, entra al proyecto y luego a Settings → Deployment Protection:
    - activa **Vercel Authentication** en **All Deployments**, que en el plan Hobby no cuesta;
    - en **Protection Bypass for Automation**, crea un secreto y guárdalo sin que pase por el chat, en una terminal

@@ -2,7 +2,8 @@
 # Despliega la vitrina de Soporte SAP a Vercel: se construye AQUÍ, como vitrina (VITRINA_SOPORTE_SAP=1: en ese
 # despliegue solo existe la vitrina), y a Vercel sube el resultado. Después comprueba que la URL responda «protegida» a
 # quien llega sin sesión; si no, lo dice y sale con error.
-# Antes, una vez: vercel login, vercel link, y en el panel de Vercel la protección en TODOS los despliegues.
+# Antes, una vez: vercel login, vercel link (sin conectar el repo de Git: conectado, Vercel construiría cada push con
+# la aplicación entera), y en el panel de Vercel la protección en TODOS los despliegues.
 # Uso: bash scripts/vitrina/despliega.sh
 set -euo pipefail
 VERCEL="npx --yes vercel@63.1.2"
