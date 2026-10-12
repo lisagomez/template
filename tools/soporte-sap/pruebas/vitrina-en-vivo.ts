@@ -138,6 +138,8 @@ test('en vivo · sin configurar, con otro secreto o con el túnel caído: apagad
   assert.equal(otro.status, 503); assert.match((await otro.json()).error, /no reconoce la firma/)
   const caido = await cadena(SECRETO, SECRETO, true).pide(desdeElNavegador('?rol=cliente'))
   assert.equal(caido.status, 503); assert.match((await caido.json()).error, /apagado/)
+  const sinTunel = await atiendeEnVivo(desdeElNavegador('?rol=cliente'), { EN_VIVO_URL: 'https://lab.ejemplo.ts.net', EN_VIVO_SECRETO: SECRETO }, (async () => { throw new Error('ECONNREFUSED') }) as typeof fetch)
+  assert.equal(sinTunel.status, 503, 'el túnel mismo no responde'); assert.match((await sinTunel.json()).error, /el túnel no responde/)
 })
 
 test('en vivo · el navegador no manda archivos ni consultas raras, y levanta con muestras de punta a punta', async () => {
