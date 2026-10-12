@@ -14,7 +14,41 @@ export const NUNCA_EN_LA_IMAGEN = [
   'opencode.json', 'components.json', 'tsconfig.json', 'package-lock.json',
 ]
 
+/**
+ * La vitrina de Soporte SAP en Vercel (`docs/goals/soporte-sap-vitrina.md`). Con `VITRINA_SOPORTE_SAP=1` en el build,
+ * el despliegue sirve SOLO la vitrina: cualquier otra página lleva a ella y cualquier otra API no existe (404). Las
+ * reglas se hornean en el build, así que no dependen de que nadie se acuerde de nada en el servidor.
+ */
+export const INICIO_DE_LA_VITRINA = '/vitrina/soporte-sap'
+type Entorno = Readonly<Record<string, string | undefined>>
+export const esVitrina = (env: Entorno): boolean => env['VITRINA_SOPORTE_SAP'] === '1'
+
+/**
+ * Lo que va a Vercel no lleva el laboratorio: con `SOPORTE_SAP_LABORATORIO` puesta (con cualquier valor), el build de
+ * Vercel o de la vitrina falla. El runtime de laboratorio (identidades elegibles, estado en memoria) solo corre en la
+ * máquina del laboratorio; en Vercel, lo en vivo pasa a ella firmado.
+ */
+export function compruebaDespliegue(env: Entorno): void {
+  if ((env['VERCEL'] === '1' || esVitrina(env)) && env['SOPORTE_SAP_LABORATORIO'] !== undefined) {
+    throw new Error('SOPORTE_SAP_LABORATORIO no va a Vercel ni a la vitrina: el laboratorio corre solo en su máquina. Quítala del entorno del proyecto.')
+  }
+}
+
+export function reglasDeLaVitrina(env: Entorno) {
+  if (!esVitrina(env)) return { redirects: [], rewrites: [] }
+  return {
+    redirects: [{ source: '/:ruta((?!vitrina(?:/|$)|api/|_next/|manifest\\.json$|sw\\.js$|icons/|favicon\\.ico$).*)', destination: INICIO_DE_LA_VITRINA, permanent: false }],
+    // Un destino que no existe da el 404 de Next: en la vitrina, la única API es la suya.
+    rewrites: [{ source: '/api/:ruta((?!vitrina/).*)', destination: '/vitrina/no-existe' }],
+  }
+}
+
+compruebaDespliegue(process.env)
+
 const nextConfig: NextConfig = {
+  async redirects() { return reglasDeLaVitrina(process.env).redirects },
+  async rewrites() { return { beforeFiles: reglasDeLaVitrina(process.env).rewrites, afterFiles: [], fallback: [] } },
+
   // Activa el MCP server en /_next/mcp (Next.js 16+)
   experimental: {
     mcpServer: true,

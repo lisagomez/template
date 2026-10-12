@@ -9,15 +9,24 @@ import { useState, type FormEvent } from 'react'
 import type { IncidenciaVista, RelojVista, Rol } from '../services/tipos'
 import { Celda, Pildora, hora } from './ui'
 import { Impugnaciones } from './impugnaciones'
+import type { Muestra } from '../vitrina/en-vivo/muestras'
 
-export function FormularioIncidencia({ levanta, ocupado }: { levanta: (f: FormData) => Promise<void>; ocupado: boolean }) {
+/** `muestras`: en vivo no se suben archivos, se eligen documentos de muestra (`vitrina/en-vivo/muestras.ts`). */
+export function FormularioIncidencia({ levanta, ocupado, muestras = null }: { levanta: (f: FormData) => Promise<void>; ocupado: boolean; muestras?: readonly Muestra[] | null }) {
   const enviar = async (ev: FormEvent<HTMLFormElement>) => { ev.preventDefault(); const form = ev.currentTarget; await levanta(new FormData(form)); form.reset() }
   return (
     <Celda titulo="Levantar una incidencia" ancho={5} prueba="formulario-incidencia" nota="Adjunta la captura del error, el PDF del spool o el XML del CFDI: se leen por sus bytes, en local.">
       <form onSubmit={enviar} className="space-y-2">
         <input name="titulo" required minLength={3} placeholder="Título" className="w-full rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-700" data-prueba="titulo" />
         <textarea name="descripcion" required minLength={3} rows={3} placeholder="¿Qué pasa? Transacción, mensaje, sociedad, periodo…" className="w-full rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-700" data-prueba="descripcion" />
-        <input name="adjuntos" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.xml" className="block w-full text-sm" data-prueba="adjuntos" />
+        {muestras ? (
+          <fieldset className="space-y-1 text-sm" data-prueba="muestras">
+            <legend className="text-xs text-neutral-500">En vivo no se suben archivos: elige documentos de muestra, sintéticos.</legend>
+            {muestras.map((m) => (
+              <label key={m.archivo} className="flex items-start gap-2"><input type="checkbox" name="muestras" value={m.archivo} className="mt-1" data-prueba={`muestra-${m.archivo}`} /><span><code>{m.archivo}</code> · {m.que}</span></label>
+            ))}
+          </fieldset>
+        ) : <input name="adjuntos" type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.xml" className="block w-full text-sm" data-prueba="adjuntos" />}
         <button disabled={ocupado} className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900" data-prueba="levantar">{ocupado ? 'Leyendo adjuntos…' : 'Levantar incidencia'}</button>
       </form>
     </Celda>

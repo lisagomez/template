@@ -39,6 +39,9 @@ async function levanta(titulo, descripcion, archivos) {
   await pagina.fill(sel('descripcion'), descripcion)
   await pagina.setInputFiles(sel('adjuntos'), archivos.map((a) => join(DOCS, a)))
   await pagina.click(sel('levantar'))
+  // El formulario se vacía cuando la API ya respondió (también si rechaza). Esperar a que el botón deje de estar
+  // deshabilitado se cumplía a veces ANTES de que llegara a deshabilitarse, y la captura salía sin la incidencia.
+  await pagina.waitForFunction(() => document.querySelector('[data-prueba="titulo"]')?.value === '', null, { timeout: 120_000 })
   await pagina.waitForFunction(() => !document.querySelector('[data-prueba="levantar"]')?.hasAttribute('disabled'), null, { timeout: 120_000 })
 }
 async function decide(mensajeContiene, accion, motivo) {

@@ -138,6 +138,12 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ventas-whatsapp/panel',
   '/api/ventas-whatsapp/plataforma',
   '/api/ventas-whatsapp/webhook',
+  // La vitrina de Soporte SAP (docs/VITRINA-SOPORTE-SAP.md). RF-20: misma app y mismo puerto. En Vercel, detrás de su
+  // protección; NO enciende el laboratorio: firma cada petición (HMAC, ventana y una sola vez) y la pasa por un túnel
+  // al portero de la máquina del laboratorio, que solo deja pasar /api/soporte-sap. Sin EN_VIVO_URL ni EN_VIVO_SECRETO
+  // (fuera de Vercel) responden «apagado». `estado`: siempre 200, para que un laboratorio apagado no sea un error.
+  '/api/vitrina/soporte-sap/en-vivo',
+  '/api/vitrina/soporte-sap/en-vivo/estado',
 ]
 
 const peticion = (cuerpo: unknown, cabeceras: Record<string, string> = {}): Request =>

@@ -81,7 +81,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 > existían fuera de las pruebas: el token de tarea verificado por una «pasarela» que no hay, el presupuesto que nadie
 > leía, la impugnación sin pantalla. El PRP-010 los cerró en código o los declara aquí. Una tercera revisión, contra
 > el borrador de esta v4 (09/10), encontró 18 más; también están cerrados en código o declarados. **Revisión 1**
-> (2026-10-10, PRP-011): D1 decidida «con consentimiento»; se firma con la revisión de la AISIA. **Cada frase de esta sección
+> (2026-10-10, PRP-011): D1 decidida «con consentimiento»; se firma con la revisión de la AISIA. **Revisión de la
+> vitrina** (2026-10-11): la vitrina de laboratorio en Vercel y su sección en vivo, que pasa al laboratorio de la máquina
+> del laboratorio por un túnel firmado; se firma con la revisión 10 de la AISIA. **Cada frase de esta sección
 > tiene su fila** en la matriz ([`docs/goals/soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)),
 > en uno de tres estados: **probado** (una prueba pasa sin su sabotaje y cae con él), **brecha** (abierta y declarada)
 > o **depende** (espera una decisión del laboratorio). Donde una frase la sostiene una fila de la AISIA, se dice.
@@ -305,15 +307,42 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     propio servidor, ese servidor es suyo.
   - **No se ofrece**: en modo despacho, la medición del SLA **no es evidencia independiente** frente al N3, porque
     root puede reescribir la cadena entera, huellas incluidas. El contrato lo dice (§5).
-- **Superficie.** Nada expuesto. Exponer la sala o el canal N1–N2 es gate humano con este C3 y la
-  AISIA firmados. *Brecha*: Realtime y el JWT de Supabase no se prueban sin un Supabase real.
+- **La vitrina y la sección en vivo.** La vitrina de laboratorio vive en Vercel, protegida (solo la abre quien el
+  laboratorio invite) y con datos sintéticos. Su sección en vivo pasa por un túnel al laboratorio que corre en la máquina
+  del laboratorio: el laboratorio no se despliega.
+  - En su despliegue solo existe la vitrina (`VITRINA_SOPORTE_SAP=1`, horneado en el build): otra página lleva a ella y
+    otra API, `/api/soporte-sap` incluida, da 404.
+  - En Vercel o en la vitrina, el build falla con `SOPORTE_SAP_LABORATORIO` puesta, con cualquier valor. Nada de la
+    vitrina importa el runtime de laboratorio ni lee su variable.
+  - Vercel firma cada petición (HMAC del método, la ruta, el cuerpo y el instante) y el portero de la máquina del
+    laboratorio la verifica: dentro de 60 s y una sola vez. Sin esa firma responde como si no existiera, así que la URL
+    del túnel filtrada no abre nada, y la llave no viaja por el túnel.
+  - El portero escucha solo en 127.0.0.1 y solo deja pasar `/api/soporte-sap`, con `rol` y `export`. No acepta
+    archivos: quien levanta elige documentos de muestra, que el portero lee de su propio disco.
+  - El texto con forma de dato personal (el mismo anonimizador del producto) se rechaza en Vercel, antes de cruzar el
+    túnel, y otra vez en el portero.
+  - El secreto vive solo en el servidor de Vercel y en un archivo de la máquina del laboratorio: ninguna variable
+    pública ni componente de cliente lo toca.
+  - El portero no arranca, y se apaga, si la vitrina no responde «protegida» a quien llega sin sesión: lo comprueba al
+    arrancar y cada 5 minutos. Sin respuesta, tampoco arranca.
+  - *Brecha*: dentro del laboratorio un invitado elige su identidad, también la de superadministrador, y aprueba en la
+    sala. El laboratorio es sintético, y el riesgo es del laboratorio.
+  - *Brecha*: un dato real sin forma de dato (el nombre de una empresa, cómo opera) pasa el filtro. Lo mitigan el aviso
+    permanente, que no haya adjuntos y que el estado viva en memoria; va en la AISIA.
+  - *Brecha*: quién está invitado y el enlace para compartir se configuran en el panel de Vercel; el código no los
+    prueba. Cada despliegue comprueba que sin sesión no abre, y el portero también.
+  - *Brecha*: Vercel ve el tráfico de lo en vivo, que es sintético. El túnel recomendado (Tailscale Funnel) termina el
+    TLS en la máquina del laboratorio y su relevo no lo descifra; otro túnel puede verlo.
+- **Superficie.** Nada del producto expuesto: la vitrina expone el laboratorio sintético a invitados, con su control.
+  Exponer la sala o el canal N1–N2 del producto es gate humano con este C3 y la AISIA firmados. *Brecha*: Realtime y el
+  JWT de Supabase no se prueban sin un Supabase real.
 
 **Priorización** de lo que queda abierto, por daño y por cuándo muerde:
 
 | # | Brecha | Muerde | Qué la cierra |
 |---|---|---|---|
 | 1 | Un PDF tumba la app de todos los tenants (H-22) | cerrado: tope de inflado por documento (32 MiB), por memoria | recalibrarlo con el corpus real del extractor |
-| 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza; no se enciende fuera del laboratorio |
+| 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza y el build de Vercel también; lo en vivo de la vitrina pasa firmado a la máquina del laboratorio, solo para invitados |
 | 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato (D3 decidida: mixto); el SLA de ese modo no se ofrece como evidencia |
 | 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real (el candado ya impide arrancar sin ellas) | sembrar las reglas reales del dominio `sap-soporte` en `tools/conocimiento`, con su firma |
 | 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |
