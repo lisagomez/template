@@ -186,3 +186,41 @@ contra el laboratorio local.
   lo simules ni lo esquives.
 - Detente y reporta el bloqueo si en 40 turnos no convergiste, o si para pasar hay que tocar una guarda o una fila de la
   matriz.
+
+## Lo que se decidió al construirlo (2026-10-12)
+
+| Decisión | Por qué |
+|---|---|
+| La vitrina pinta el **mismo componente** de la app (`SoporteSap`), con dos fuentes nuevas: `vitrina` (solo lectura) y `en-vivo` | Lo que se ve es el producto, no una maqueta que se desincroniza |
+| Los momentos se **congelan recorriendo el journey por la API real** (`genera.mjs`): 9 momentos × 4 vistas | Si el producto cambia, se regenera; nada se dibuja a mano |
+| Las rutas viven en `/vitrina/soporte-sap/*`, fuera del layout `(main)` | Sin el botón de dictado ni nada de otros productos |
+| **Vercel Hobby con Vercel Authentication en All Deployments** | Gratis en todos los planes desde 2026-09 (docs de Vercel); protege también producción. Playwright entra con el bypass de automatización |
+| **Se construye en la máquina del laboratorio** y se sube con `--prebuilt` | A Vercel no llega el código fuente, solo el resultado; `VITRINA_SOPORTE_SAP=1` queda horneado |
+| En ese despliegue **solo existe la vitrina** (`next.config.ts`), y el build **falla con la variable del laboratorio** | La guarda de `configura:deploy` no cubre Vercel; esta sí |
+| **Firma HMAC por petición** (método, ruta, cuerpo, instante; 60 s; una vez), no un secreto fijo en una cabecera | La llave no viaja: copiar una firma no sirve para otra petición ni para repetirla |
+| **Portero** en 127.0.0.1:8787: solo `/api/soporte-sap`, solo JSON, documentos de muestra, filtro de datos, y **exige que la vitrina responda «protegida»** | El laboratorio no se expone; si alguien apagara la protección, lo en vivo se cierra solo |
+| El filtro de datos usa **el anonimizador del producto** | Una sola definición de «forma de dato», ya medida y con sus cerrojos |
+| La ruta `estado` responde siempre 200 | Un laboratorio apagado no es un error de consola |
+| Túnel recomendado: **Tailscale Funnel** | Gratis, URL estable y el TLS termina en la máquina del laboratorio: su relevo no ve el contenido. Alternativa: `cloudflared` (cambia de URL en cada arranque: hay que volver a sembrar y desplegar) |
+| El deck es una página HTML 16:9 en bento-grid; el PDF lo imprime Playwright (13 páginas) | Un solo origen; `contenido/propuesta.ts` concentra lo que se afirma, y una prueba rechaza precios, RPO/RTO y disponibilidades con cifra |
+| El manual tiene una sola fuente (`contenido/manual.ts`) para la página y para `MANUAL.md` | Una prueba exige que digan lo mismo |
+| Las huellas sha256 de los momentos van abreviadas a 16 caracteres | La pantalla muestra 10 o 12; un hex de 64 suelto es, para `audita:secretos`, una llave |
+| `vercel@63.1.2` fijado en los guiones, sin añadirlo a `package.json` | CLI del golden path, pineado; no entra a las dependencias de la app |
+
+## Lo que podría estar mal
+
+- **La protección de Vercel no se prueba desde el código** (se configura en su panel). La comprueban `despliega.sh`
+  después de cada despliegue y el portero al arrancar y cada 5 minutos; brecha declarada en el C3.
+- **`vercel build` con `output: 'standalone'`** no se ha corrido todavía: necesita el proyecto enlazado. Se verá en el
+  primer despliegue.
+- **Dentro de lo en vivo, un invitado elige su identidad** (también superadministrador): brecha declarada.
+- **Un dato real sin forma de dato pasa el filtro**: brecha declarada en la AISIA (revisión 10).
+- **En Hobby hay un solo enlace para compartir por cuenta**: invitar a varias consultoras a la vez puede pedir el
+  plan Pro (asientos de lectura). Es un costo: lo decide el laboratorio.
+- **Los momentos se congelan en un instante**: los minutos «desde la escalada» son los de ese instante. La vitrina dice
+  cuándo y desde qué commit se congelaron.
+- **`public/vitrina` (unos 4 MB) también viaja en la imagen del producto**, y `/vitrina` existe en sus despliegues (lo en
+  vivo, apagado sin su configuración). Es sintético; se declara.
+- **El layout raíz dice `lang="en"`** y la vitrina está en español: es compartido con el resto de la app; no se tocó.
+- **El paso 1 del recorrido era intermitente** (la espera se cumplía antes de tiempo): arreglado, 34/34 en la primera
+  corrida contra un servidor recién levantado.
