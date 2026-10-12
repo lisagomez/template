@@ -91,8 +91,8 @@
   el proveedor de modelo (D7), la base de datos gestionada (D10: Supabase, en Virginia, Estados Unidos), el
   proveedor del servidor (D12: AWS, en la misma región) y el del respaldo fuera de sitio (D12: Backblaze B2, US East,
   que recibe las copias cifradas). Hoy ninguno recibe datos de los N3: no hay modelo, y el producto no se despliega. La
-  vitrina de laboratorio sí: Vercel la sirve con datos sintéticos, y Vercel y el proveedor del túnel ven el tráfico de
-  su sección en vivo, que también es sintético (revisión 10). Al
+  vitrina de laboratorio sí: Vercel la sirve con datos sintéticos y ve el tráfico de su sección en vivo, que también
+  es sintético; el túnel recomendado no lo descifra (revisión 10). Al
   proveedor de modelo, por D7, nunca le llega lo crudo.
 - **Quien tiene root en el servidor**: en modo despacho, alguien de la consultora. Lee todo, la base
   entera incluida, y la RLS no lo impide (C3, «Root ajeno»).
@@ -125,7 +125,7 @@
 | **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
 | **Dato del cliente en un proveedor de modelo** | Para categorizar, resumir o extraer parámetros, el texto de un ticket, del chat o de un documento (con datos de empleados del N3 o secretos de su negocio) se manda a un proveedor de modelos, que lo conserva o entrena con él. Pesos abiertos en un proveedor ajeno no cambian nada: el dato sale igual. |
 | **Dato fuera de México** | En el modo gestionado, la base y los archivos de los N3 viven en un proveedor de Estados Unidos. Los datos de sus empleados y de sus contrapartes quedan bajo otra jurisdicción, y el N3 puede no saberlo, o estar obligado a guardarlos en México. |
-| **Dato real en la sección en vivo** | La vitrina tiene una sección en vivo para invitados, con datos sintéticos. Un invitado, una consultora que lo evalúa, escribe ahí el ticket real de un cliente suyo, con nombres o identificadores de sus empleados: llega a la máquina del laboratorio, lo ven los demás invitados, y Vercel y el túnel lo transportan. |
+| **Dato real en la sección en vivo** | La vitrina tiene una sección en vivo para invitados, con datos sintéticos. Un invitado, una consultora que lo evalúa, escribe ahí el ticket real de un cliente suyo, con nombres o identificadores de sus empleados: llega a la máquina del laboratorio, lo ven los demás invitados, y pasa por Vercel. |
 | **Dato que vive de más o que vuelve** | Las capturas y los CFDI de un N3, con datos de sus empleados y de sus contrapartes, se guardan para siempre; el N3 se va y lo suyo se queda; se borra del servicio y sigue en una copia de respaldo; o una restauración devuelve lo que ya se había borrado. Y al revés: el borrado automático se lleva algo antes de tiempo, con una impugnación abierta o antes de que quien se va tenga su export. |
 
 ## 3. Severidad × probabilidad × reversibilidad
@@ -379,7 +379,8 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
 
 - **La vitrina en vivo** (revisión 10):
   - Solo la abre quien el laboratorio invite, y todo lo que muestra es sintético. El laboratorio no se despliega: lo en
-    vivo pasa a la máquina del laboratorio por un túnel, con cada petición firmada.
+    vivo pasa a la máquina del laboratorio por un túnel, con cada petición firmada. Si la vitrina responde a quien
+    llega sin sesión, la máquina del laboratorio no abre lo en vivo, y lo cierra si pasa mientras corre.
   - En vivo no se suben archivos: quien levanta elige documentos de muestra, que la máquina del laboratorio lee de su
     disco.
   - El texto con forma de dato personal se rechaza antes de cruzar el túnel y otra vez al llegar. Lo reconoce el mismo

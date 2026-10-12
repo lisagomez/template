@@ -1889,6 +1889,13 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'la puerta de Vercel pasa a ser un componente de cliente', ediciones: [ed(`${VI}/en-vivo/proxy.ts`, '/**\n * La puerta de Vercel', "'use client'\n/**\n * La puerta de Vercel")] },
   },
   {
+    id: 'c3-vitrina-exige-proteccion', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'el portero no arranca, y se apaga, si la vitrina no responde «protegida» a quien llega sin sesión (401 o el inicio de sesión de Vercel); sin respuesta, tampoco',
+    control: 'vitrina/en-vivo/portero.ts · vitrinaProtegida, al arrancar y cada 5 minutos',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · el portero no arranca si la vitrina no responde «protegida» a quien llega sin sesión'),
+    sabotaje: { que: 'cualquier respuesta cuenta como protegida', ediciones: [ed(`${VI}/en-vivo/portero.ts`, 'const protegida = r.status === 401 ||', 'const protegida = r.status > 0 ||')] },
+  },
+  {
     id: 'c3-vitrina-apagado', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
     afirmacion: 'con el túnel caído, sin configurar o con otro secreto, lo en vivo dice «apagado» y la vitrina sigue; el estado responde 200 para que el navegador no lo cuente como error',
     control: 'vitrina/en-vivo/proxy.ts · atiendeEnVivo y estadoEnVivo',
@@ -1905,12 +1912,12 @@ export const FILAS: readonly Fila[] = [
     id: 'c3-vitrina-proteccion', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'brecha',
     afirmacion: 'solo abre la vitrina quien el laboratorio invite (la protección de Vercel)',
     control: 'el panel de Vercel: Vercel Authentication en todos los despliegues, y el enlace para compartir',
-    nota: 'brecha declarada: se configura fuera del código y no se prueba desde él; cada despliegue comprueba que sin sesión no abre',
+    nota: 'brecha declarada: se configura fuera del código y no se prueba desde él; cada despliegue comprueba que sin sesión no abre, y el portero se niega a abrir lo en vivo si abre (c3-vitrina-exige-proteccion)',
   },
   {
     id: 'c3-vitrina-terceros', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'brecha',
-    afirmacion: 'Vercel y el proveedor del túnel ven el tráfico de lo en vivo',
-    control: 'ninguno: es su papel; el tráfico es sintético y la firma no les da la llave',
+    afirmacion: 'Vercel ve el tráfico de lo en vivo; el túnel recomendado (Tailscale Funnel) no lo descifra, otro puede verlo',
+    control: 'ninguno: es su papel; el tráfico es sintético y la firma no da la llave',
     nota: 'brecha declarada: son terceros del despliegue de la vitrina, con datos sintéticos (AISIA §1, revisión 10)',
   },
   {

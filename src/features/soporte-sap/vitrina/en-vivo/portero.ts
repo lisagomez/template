@@ -9,7 +9,8 @@
  *   · y sin texto con forma de dato personal (`sin-datos-reales.ts`): en vivo solo van datos sintéticos.
  *
  * Uso: node --env-file=$HOME/.soporte-sap-en-vivo.env src/features/soporte-sap/vitrina/en-vivo/portero.ts
- * (EN_VIVO_SECRETO; opcionales EN_VIVO_LABORATORIO, por defecto http://localhost:3011, y EN_VIVO_PUERTO, 8787).
+ * (EN_VIVO_SECRETO y EN_VIVO_VITRINA, la URL de la vitrina; opcionales EN_VIVO_LABORATORIO, por defecto
+ * http://localhost:3011, y EN_VIVO_PUERTO, 8787). No arranca, y se apaga, si la vitrina no responde «protegida».
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { readFileSync } from 'node:fs'
@@ -93,6 +94,22 @@ export function creaPortero(c: ConfigPortero): (req: Request) => Promise<Respons
   }
 }
 
+/**
+ * ¿La vitrina responde «protegida» a quien llega sin sesión? Vercel contesta 401, o lleva a su inicio de sesión. Si
+ * responde la página, cualquiera entraría a lo en vivo, y el portero no arranca (ni sigue). Sin respuesta, tampoco: lo
+ * que no se puede comprobar no se da por bueno.
+ */
+export async function vitrinaProtegida(url: string, consulta: typeof fetch = fetch): Promise<{ protegida: boolean; vio: string }> {
+  try {
+    const r = await consulta(`${url.replace(/\/$/, '')}/vitrina/soporte-sap`, { redirect: 'manual', cache: 'no-store', signal: AbortSignal.timeout(15_000) })
+    const destino = r.headers.get('location') ?? ''
+    const protegida = r.status === 401 || (r.status >= 300 && r.status < 400 && /^https:\/\/vercel\.com\//.test(destino))
+    return { protegida, vio: `${r.status}${destino ? ` → ${destino.slice(0, 60)}` : ''}` }
+  } catch (e) {
+    return { protegida: false, vio: `sin respuesta (${(e as Error).message})` }
+  }
+}
+
 /** Lee el cuerpo con tope: lo que pasa de él se corta y responde como lo que no existe. */
 async function cuerpoDe(req: IncomingMessage): Promise<Uint8Array<ArrayBuffer> | null> {
   const trozos: Buffer[] = []
@@ -114,11 +131,24 @@ export function escucha(c: ConfigPortero, puerto: number): ReturnType<typeof cre
   return servidor.listen(puerto, '127.0.0.1')
 }
 
-if (import.meta.url === `file://${resolve(process.argv[1] ?? '')}`) {
+const CADA_CUANTO_SE_COMPRUEBA_MS = 5 * 60_000
+
+async function arranca(): Promise<void> {
   const secreto = process.env['EN_VIVO_SECRETO'] ?? ''
+  const vitrina = process.env['EN_VIVO_VITRINA'] ?? ''
   if (!secretoValido(secreto)) { console.error('EN_VIVO_SECRETO ausente o corto: el portero no arranca'); process.exit(1) }
+  if (!vitrina) { console.error('EN_VIVO_VITRINA ausente: sin la URL de la vitrina no se comprueba su protección, y el portero no arranca'); process.exit(1) }
+  const comprueba = async () => {
+    const p = await vitrinaProtegida(vitrina)
+    if (!p.protegida) { console.error(`la vitrina no responde «protegida» a quien llega sin sesión (${p.vio}): el portero se apaga. Activa la protección de Vercel en todos los despliegues.`); process.exit(1) }
+    return p
+  }
+  const p = await comprueba()
   const laboratorio = process.env['EN_VIVO_LABORATORIO'] ?? 'http://localhost:3011'
   const puerto = Number(process.env['EN_VIVO_PUERTO'] ?? 8787)
   escucha({ secreto, laboratorio, documentos: resolve('tools/soporte-sap/documentos') }, puerto)
-  console.log(`portero de la sección en vivo en 127.0.0.1:${puerto} → ${laboratorio}${RUTA} (secreto presente, ${secreto.length} caracteres)`)
+  setInterval(() => { void comprueba() }, CADA_CUANTO_SE_COMPRUEBA_MS)
+  console.log(`portero en 127.0.0.1:${puerto} → ${laboratorio}${RUTA} · secreto presente (${secreto.length} caracteres) · la vitrina responde protegida (${p.vio})`)
 }
+
+if (import.meta.url === `file://${resolve(process.argv[1] ?? '')}`) await arranca()

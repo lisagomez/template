@@ -12,7 +12,7 @@ import { RAIZ } from './_ayuda.ts'
 
 const DIR = join(RAIZ, 'src', 'features', 'soporte-sap', 'vitrina', 'en-vivo')
 const { firma, verifica, CABECERA_FIRMA, VENTANA_MS } = await import(pathToFileURL(join(DIR, 'firma.ts')).href)
-const { creaPortero } = await import(pathToFileURL(join(DIR, 'portero.ts')).href)
+const { creaPortero, vitrinaProtegida } = await import(pathToFileURL(join(DIR, 'portero.ts')).href)
 const { atiendeEnVivo, estadoEnVivo } = await import(pathToFileURL(join(DIR, 'proxy.ts')).href)
 
 const SECRETO = 'a'.repeat(24) + 'secreto-de-prueba-0123456789'
@@ -183,4 +183,13 @@ test('en vivo · un texto con forma de dato personal no cruza el túnel, y el po
   assert.equal(lab.llegadas.length, 0, 'ni llegó al laboratorio')
   const sinteticos = [{ tipo: 'chat', texto: 'Te enseño el caso inc-002: en Alimentos del Bajío pasa con la ZFI_FIORI_CACHE; hay que limpiar la caché' }, { tipo: 'chat', texto: 'La nómina de la quincena no se calcula en PC00_M99_CALC' }]
   for (const a of sinteticos) assert.equal((await c.pide(desdeElNavegador('?rol=experto', JSON.stringify(a)))).status, 200, `pasa: ${a.texto}`)
+})
+
+test('en vivo · el portero no arranca si la vitrina no responde «protegida» a quien llega sin sesión', async () => {
+  const responde = (status: number, location?: string) => (async () => new Response('x', { status, headers: location ? { location } : {} })) as typeof fetch
+  assert.equal((await vitrinaProtegida('https://vitrina.vercel.app', responde(401))).protegida, true, '401 de Vercel')
+  assert.equal((await vitrinaProtegida('https://vitrina.vercel.app', responde(307, 'https://vercel.com/sso-api?url=x'))).protegida, true, 'al inicio de sesión de Vercel')
+  assert.equal((await vitrinaProtegida('https://vitrina.vercel.app', responde(200))).protegida, false, 'la página, a cualquiera')
+  assert.equal((await vitrinaProtegida('https://vitrina.vercel.app', responde(307, 'https://otro.example/login'))).protegida, false, 'otro destino')
+  assert.equal((await vitrinaProtegida('https://vitrina.vercel.app', (async () => { throw new Error('ENOTFOUND') }) as typeof fetch)).protegida, false, 'sin respuesta')
 })

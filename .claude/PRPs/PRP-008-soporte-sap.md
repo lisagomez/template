@@ -323,13 +323,16 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     túnel, y otra vez en el portero.
   - El secreto vive solo en el servidor de Vercel y en un archivo de la máquina del laboratorio: ninguna variable
     pública ni componente de cliente lo toca.
+  - El portero no arranca, y se apaga, si la vitrina no responde «protegida» a quien llega sin sesión: lo comprueba al
+    arrancar y cada 5 minutos. Sin respuesta, tampoco arranca.
   - *Brecha*: dentro del laboratorio un invitado elige su identidad, también la de superadministrador, y aprueba en la
     sala. El laboratorio es sintético, y el riesgo es del laboratorio.
   - *Brecha*: un dato real sin forma de dato (el nombre de una empresa, cómo opera) pasa el filtro. Lo mitigan el aviso
     permanente, que no haya adjuntos y que el estado viva en memoria; va en la AISIA.
   - *Brecha*: quién está invitado y el enlace para compartir se configuran en el panel de Vercel; el código no los
-    prueba. Se comprueba en cada despliegue que sin sesión no abre.
-  - *Brecha*: Vercel y el proveedor del túnel ven el tráfico de lo en vivo, que es sintético.
+    prueba. Cada despliegue comprueba que sin sesión no abre, y el portero también.
+  - *Brecha*: Vercel ve el tráfico de lo en vivo, que es sintético. El túnel recomendado (Tailscale Funnel) termina el
+    TLS en la máquina del laboratorio y su relevo no lo descifra; otro túnel puede verlo.
 - **Superficie.** Nada del producto expuesto: la vitrina expone el laboratorio sintético a invitados, con su control.
   Exponer la sala o el canal N1–N2 del producto es gate humano con este C3 y la AISIA firmados. *Brecha*: Realtime y el
   JWT de Supabase no se prueban sin un Supabase real.
