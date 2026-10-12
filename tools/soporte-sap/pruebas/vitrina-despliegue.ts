@@ -4,13 +4,17 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
-import { RAIZ } from './_ayuda.ts'
+import { RAIZ, lee } from './_ayuda.ts'
 
 const config = await import(pathToFileURL(join(RAIZ, 'next.config.ts')).href)
+const { envFueraDeGit } = await import(pathToFileURL(join(RAIZ, 'scripts', 'vitrina', 'sin-env.mjs')).href) as {
+  envFueraDeGit: (salida: string, enGit: Set<string>) => string[]
+}
 const { getPathMatch } = createRequire(join(RAIZ, 'package.json'))('next/dist/shared/lib/router/utils/path-match') as {
   getPathMatch: (ruta: string, o: { removeUnnamedParams: boolean; strict: boolean }) => (p: string) => false | object
 }
@@ -34,6 +38,44 @@ test('vitrina · en su despliegue solo existe la vitrina: otra página lleva a e
   for (const p of ['/vitrina/soporte-sap', '/vitrina/soporte-sap/deck', '/_next/static/x.js', '/manifest.json', '/icons/dictado-180.png']) assert.equal(pagina(p), false, `${p} se sirve`)
   for (const p of ['/api/soporte-sap', '/api/buzon/sube', '/api/a2a', '/api/dictado/movil']) assert.ok(api(p), `${p} no existe`)
   assert.equal(api('/api/vitrina/soporte-sap/en-vivo'), false, 'la de la vitrina, sí')
+})
+
+/** Una salida de `vercel build` de mentira: cada función declara en su `.vc-config.json` qué archivos lleva. */
+function salidaCon(funciones: Record<string, string[]>): string {
+  const salida = mkdtempSync(join(tmpdir(), 'vitrina-salida-'))
+  for (const [nombre, lleva] of Object.entries(funciones)) {
+    const dir = join(salida, 'functions', `${nombre}.func`)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, '.vc-config.json'), JSON.stringify({ filePathMap: Object.fromEntries(lleva.map((a) => [a, a])) }))
+  }
+  return salida
+}
+
+test('vitrina · a Vercel no sube un .env fuera de Git: el candado lo nombra, también en una función enlazada', () => {
+  const enGit = new Set(['.env.local.example', '.env.production.example', 'package.json'])
+  const sucia = salidaCon({ pagina: ['package.json', '.env.local.example'], api: ['tools/x/.env.production'] })
+  const limpia = salidaCon({ pagina: ['package.json', '.env.local.example', '.env.production.example'] })
+  try {
+    // Vercel enlaza funciones con un symlink a otro directorio: lo que solo está detrás del enlace también cuenta.
+    const enlazada = join(sucia, 'enlazada.func')
+    mkdirSync(enlazada)
+    writeFileSync(join(enlazada, '.vc-config.json'), JSON.stringify({ filePathMap: { '.env.local': '.env.local' } }))
+    symlinkSync(enlazada, join(sucia, 'functions', 'pagina.rsc.func'))
+    assert.deepEqual(envFueraDeGit(sucia, enGit), ['.env.local', 'tools/x/.env.production'], 'lo que no está en Git se nombra')
+    assert.deepEqual(envFueraDeGit(limpia, enGit), [], 'los ejemplos de Git pasan')
+  } finally {
+    rmSync(sucia, { recursive: true, force: true })
+    rmSync(limpia, { recursive: true, force: true })
+  }
+})
+
+test('vitrina · despliega.sh corre el candado de .env entre el build y la subida', () => {
+  const pasos = lee('scripts/vitrina/despliega.sh').split('\n').filter((l) => !l.trim().startsWith('#'))
+  const donde = (re: RegExp) => pasos.findIndex((l) => re.test(l))
+  const build = donde(/\$VERCEL build/), candado = donde(/^node scripts\/vitrina\/sin-env\.mjs\b/), subida = donde(/\$VERCEL deploy/)
+  assert.ok(build >= 0 && subida >= 0, 'el guion construye y sube')
+  assert.ok(candado > build && candado < subida, 'el candado va después del build y antes de subir')
+  assert.match(lee('scripts/vitrina/despliega.sh'), /^set -euo pipefail$/m, 'y su error para el guion')
 })
 
 const archivos = (dir: string): string[] => readdirSync(dir).flatMap((n) => {
