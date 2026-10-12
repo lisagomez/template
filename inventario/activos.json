@@ -211,11 +211,11 @@
   },
   {
    "id": "TPL-feature-soporte-sap",
-   "nombre": "App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente) y su contrato de negocio",
+   "nombre": "App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio y su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
    "ubicacion": "src/features/soporte-sap", "responsable": "dep-sw", "producto": "soporte-sap",
-   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md"],
-   "cubre": ["src/features/soporte-sap"]
+   "origen": ["docs/goals/soporte-sap.md", "docs/SDD-soporte-sap.md", "docs/goals/soporte-sap-vitrina.md"],
+   "cubre": ["src/features/soporte-sap", "scripts/vitrina", "docs/VITRINA-SOPORTE-SAP.md"]
   },
   {
    "id": "TPL-sala-a2a",
