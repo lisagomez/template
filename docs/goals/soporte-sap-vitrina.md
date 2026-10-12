@@ -211,8 +211,15 @@ contra el laboratorio local.
 
 - **La protección de Vercel no se prueba desde el código** (se configura en su panel). La comprueban `despliega.sh`
   después de cada despliegue y el portero al arrancar y cada 5 minutos; brecha declarada en el C3.
-- **`vercel build` con `output: 'standalone'`** no se ha corrido todavía: necesita el proyecto enlazado. Se verá en el
-  primer despliegue.
+- **`vercel build` con `output: 'standalone'`**: corrido en el primer despliegue (2026-10-12), sin problema. Salieron
+  dos cosas, y las dos se arreglaron:
+  - **Sin terminal, `vercel deploy` escribe JSON**, y el chequeo de protección dio un rojo falso con la vitrina cerrada.
+    `despliega.sh` lee la URL del JSON y comprueba la del despliegue y la de producción.
+  - **El `.env.local` que deja `vercel link` viajó dentro de cada función** de los dos primeros despliegues. Llevaba un
+    token de desarrollo de este proyecto, que caduca a las 12 h (22:12 UTC del 12/10), y no se sirve por HTTP.
+    `@vercel/next` mete todo `.env*` de la raíz sin mirar `outputFileTracingExcludes`. Se borró y `despliega.sh` ya no
+    sube si alguna función lleva un `.env*` que no esté en Git. Los dos despliegues viejos lo conservan hasta que se
+    borren, y el laboratorio decide si se borran.
 - **Dentro de lo en vivo, un invitado elige su identidad** (también superadministrador): brecha declarada.
 - **Un dato real sin forma de dato pasa el filtro**: brecha declarada en la AISIA (revisión 10).
 - **En Hobby hay un solo enlace para compartir por cuenta**: invitar a varias consultoras a la vez puede pedir el

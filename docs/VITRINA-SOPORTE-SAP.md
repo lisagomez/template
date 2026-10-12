@@ -40,6 +40,8 @@ después se mueve a `.claude/gobernanza/AISIA-soporte-sap.md`.
    - **No lo importes desde GitHub en el panel.** Conectado al repo, Vercel construye en su nube cada push, sin
      `VITRINA_SOPORTE_SAP=1`, y lo que sube es la aplicación entera, no la vitrina.
    - Si quedó conectado: `npx vercel@63.1.2 git disconnect`. Settings → Git debe ofrecer «Connect Git Repository».
+   - **Borra el `.env.local` que deja el enlace** (`rm .env.local`): solo trae un token de desarrollo que nada usa, y el
+     constructor de Vercel mete todo `.env*` de la raíz en cada función. `despliega.sh` no sube si hay alguno fuera de Git.
 3. **Protege todos los despliegues.** En el panel de Vercel, entra al proyecto y luego a Settings → Deployment Protection:
    - activa **Vercel Authentication** en **All Deployments**, que en el plan Hobby no cuesta;
    - en **Protection Bypass for Automation**, crea un secreto y guárdalo sin que pase por el chat, en una terminal
