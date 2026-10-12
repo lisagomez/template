@@ -184,8 +184,8 @@ export type {
   InferenciaDeCorpus,
 } from './corpus.js'
 
-export { imagenesDelPdf } from './pdf-flujos.js'
-export type { ImagenDelPdf } from './pdf-flujos.js'
+export { imagenesDelPdf, presupuestoDeInflado, TOPE_INFLADO_POR_DOCUMENTO } from './pdf-flujos.js'
+export type { ImagenDelPdf, PresupuestoDeInflado } from './pdf-flujos.js'
 
 // Identificadores mexicanos con digito verificador, y clasificacion de paginas por titulo (spec 009).
 export {

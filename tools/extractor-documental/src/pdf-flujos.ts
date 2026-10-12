@@ -26,15 +26,66 @@ export function indiceDe(heno: Uint8Array, aguja: string, desde: number): number
   return -1
 }
 
-/** Inflado zlib por API web. PDF usa Flate CON cabecera zlib, que es el modo `deflate`. */
-async function inflar(datos: Uint8Array): Promise<Uint8Array | null> {
+/**
+ * H-22: lo más que puede inflar UN documento, sumando todos sus flujos.
+ *
+ * Un PDF de unos cientos de KB puede declarar flujos que inflan a gigas, y esta capa corre en el proceso de quien la
+ * llama: sin tope, un adjunto tumba la app de todos sus inquilinos. El valor sale de la memoria, no de un corpus,
+ * porque todavía no hay corpus real con el que medirlo (TAR-17, TAR-25): la máquina de Soporte SAP tiene 1.5 GB por
+ * consultora y una incidencia entra con 5 adjuntos como máximo, así que 32 MiB por documento son 160 MiB en el peor
+ * caso. Un PDF de texto infla a unos KB por página; uno escaneado guarda la imagen en JPEG, que no se infla. Se
+ * recalibra con el corpus real.
+ */
+export const TOPE_INFLADO_POR_DOCUMENTO = 32 * 1024 * 1024
+
+/** Lo que le queda a un documento por inflar. Se comparte entre todos sus flujos. */
+export interface PresupuestoDeInflado {
+  quedan: number
+  /** Se pasó del tope: lo que siga no se infla, y quien llama lo dice. */
+  agotado: boolean
+}
+export const presupuestoDeInflado = (tope: number = TOPE_INFLADO_POR_DOCUMENTO): PresupuestoDeInflado => ({ quedan: tope, agotado: false })
+
+/** La entrada va en trozos pequeños: un solo trozo comprimido no puede inflar más de ~1000 veces su tamaño de golpe. */
+const TROZO_DE_ENTRADA = 4096
+
+/**
+ * Inflado zlib por API web. PDF usa Flate CON cabecera zlib, que es el modo `deflate`. Se lee por trozos y se corta en
+ * cuanto el documento pasa su presupuesto (H-22): lo inflado nunca se acumula sin límite.
+ */
+async function inflar(datos: Uint8Array, presupuesto: PresupuestoDeInflado): Promise<Uint8Array | null> {
+  if (presupuesto.agotado) return null
+  let posicion = 0
+  const entrada = new ReadableStream<BufferSource>({
+    pull(c) {
+      if (posicion >= datos.length) { c.close(); return }
+      c.enqueue(datos.subarray(posicion, posicion + TROZO_DE_ENTRADA) as BufferSource)
+      posicion += TROZO_DE_ENTRADA
+    },
+  })
+  const lector = entrada.pipeThrough(new DecompressionStream('deflate')).getReader()
+  const trozos: Uint8Array[] = []
+  let total = 0
   try {
-    const entrada = new Blob([datos as BlobPart]).stream()
-    const salida = entrada.pipeThrough(new DecompressionStream('deflate'))
-    return new Uint8Array(await new Response(salida).arrayBuffer())
+    for (;;) {
+      const { done, value } = await lector.read()
+      if (done) break
+      total += value.length
+      if (total > presupuesto.quedan) {
+        presupuesto.agotado = true
+        await lector.cancel().catch(() => undefined)
+        return null
+      }
+      trozos.push(value)
+    }
   } catch {
     return null
   }
+  presupuesto.quedan -= total
+  const salida = new Uint8Array(total)
+  let i = 0
+  for (const t of trozos) { salida.set(t, i); i += t.length }
+  return salida
 }
 
 interface FlujoCrudo {
@@ -95,10 +146,12 @@ export interface FlujosDelPdf {
   readonly flujos: readonly string[]
   /** Flujos de contenido con un filtro que no se sabe deshacer. Se declaran, no se callan. */
   readonly filtrosDesconocidos: number
+  /** H-22: el documento infla más que su tope; lo que se leyó está incompleto y no se usa. */
+  readonly topeDeInflado: boolean
 }
 
 /** Trocea el PDF y devuelve SOLO sus flujos de contenido de pagina. */
-export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> {
+export async function flujosDeContenido(pdf: Uint8Array, presupuesto: PresupuestoDeInflado = presupuestoDeInflado()): Promise<FlujosDelPdf> {
   const flujos: string[] = []
   let filtrosDesconocidos = 0
   for (const { cabecera, datos } of recorreFlujos(pdf)) {
@@ -125,7 +178,8 @@ export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> 
     if (esFontaneria) {
       // Ni cuenta como filtro fallido: no se esperaba texto de aqui.
     } else if (/\/Filter\s*\/FlateDecode/.test(cabecera)) {
-      const crudo = await inflar(datos)
+      const crudo = await inflar(datos, presupuesto)
+      if (presupuesto.agotado) break
       if (crudo === null) filtrosDesconocidos++
       else flujos.push(aLatin1(crudo))
     } else if (/\/Filter/.test(cabecera)) {
@@ -137,7 +191,7 @@ export async function flujosDeContenido(pdf: Uint8Array): Promise<FlujosDelPdf> 
     }
   }
 
-  return { flujos, filtrosDesconocidos }
+  return { flujos, filtrosDesconocidos, topeDeInflado: presupuesto.agotado }
 }
 
 export interface ImagenDelPdf {
@@ -171,7 +225,7 @@ const esJpeg = (b: Uint8Array): boolean => b[0] === 0xff && b[1] === 0xd8 && b[2
  * llama vera menos imagenes que paginas, que es visible; devolver bytes que no son una imagen
  * seria peor.
  */
-export async function imagenesDelPdf(pdf: Uint8Array): Promise<readonly ImagenDelPdf[]> {
+export async function imagenesDelPdf(pdf: Uint8Array, presupuesto: PresupuestoDeInflado = presupuestoDeInflado()): Promise<readonly ImagenDelPdf[]> {
   const salida: ImagenDelPdf[] = []
   for (const { cabecera, datos } of recorreFlujos(pdf)) {
     if (!/\/Subtype\s*\/Image/.test(cabecera)) continue
@@ -179,7 +233,9 @@ export async function imagenesDelPdf(pdf: Uint8Array): Promise<readonly ImagenDe
     // El orden de los filtros es el orden en que se aplicaron. `[/FlateDecode /DCTDecode]` es un
     // JPEG comprimido otra vez con zlib, que es lo que produce mas de un escaner.
     let bytes: Uint8Array | null = datos
-    if (/\/Filter\s*\[?[^\]]*\/FlateDecode/.test(cabecera)) bytes = await inflar(datos)
+    if (/\/Filter\s*\[?[^\]]*\/FlateDecode/.test(cabecera)) bytes = await inflar(datos, presupuesto)
+    // H-22: pasado el tope no se sigue; quien llama mira `presupuesto.agotado` y lo dice.
+    if (presupuesto.agotado) break
     if (bytes === null) continue
     if (!esJpeg(bytes)) continue
 

@@ -148,7 +148,7 @@ Producto compuesto: dos herramientas en `tools/` (`soporte-sap`, `sala-a2a`) y u
   umbrales del extractor, conectar un modelo real tras el CDC del routing (por D7, lo crudo solo a uno
   autohospedado).
 - Salir del laboratorio exige lo que lista la AISIA §5: entre otras, N y la gracia
-  en el contrato (D8), el aviso de privacidad, los veredictos desde `tools/conocimiento` (H-20), el tope del lector de PDF (H-22) y GATE 3.
+  en el contrato (D8), el aviso de privacidad, los veredictos reales desde `tools/conocimiento`, firmados (H-20: el candado ya está), recalibrar el tope del lector de PDF con el corpus real (H-22, cerrado con un tope por memoria) y GATE 3.
 
 ---
 

@@ -1,8 +1,10 @@
 # PRP-010: Cierre de controles de Soporte SAP antes de firmar la AISIA y el C3
 
 > **Estado**: **COMPLETADO** (2026-10-10). Las cinco fases están en `main` (#226 a #242), y la AISIA v3 y el C3 v4 los
-> firmó lisagomez (responsable del proyecto) el 2026-10-10 (#243): mitigar y operar solo en laboratorio. Queda en
-> pausa H-22 (el tope del lector de PDF), declarado como brecha en el C3 v4.
+> firmó lisagomez (responsable del proyecto) el 2026-10-10 (#243): mitigar y operar solo en laboratorio. Quedó en
+> pausa H-22 (el tope del lector de PDF), declarado como brecha en el C3 v4. **Cerrado el 2026-10-11** (rama
+> `soporte/h20-h22`) con un tope de inflado por documento sacado de la memoria, sin generar entradas de estrés; queda
+> recalibrarlo con el corpus real. H-20 tiene su candado; las reglas reales entran con la primera incidencia real.
 > **Aprobado** (2026-10-07) por el laboratorio, en sesión: «apruebo el PRP con tus recomendaciones; el build como
 > H-30». DP-1 a DP-7 quedan como su recomendación.
 > **Fecha**: 2026-10-07
