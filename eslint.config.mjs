@@ -12,9 +12,11 @@ export default defineConfig([
   // alguien instala dependencias ahi (hace falta para correr los gates en una rama), ESLint
   // se pone a lintear una copia entera del proyecto y su node_modules, y el gate sale en
   // rojo por codigo que no es el que se esta cambiando. Ya estan en .gitignore; aqui se
-  // declara lo mismo para la herramienta que no lo lee.
+  // declara lo mismo para la herramienta que no lo lee. `.vercel/**` es la salida de `vercel build`
+  // (la vitrina se construye aqui): codigo minificado que tumbaba el lint con 93 errores ajenos.
   globalIgnores([
     '.next/**',
+    '.vercel/**',
     'out/**',
     'build/**',
     'next-env.d.ts',
