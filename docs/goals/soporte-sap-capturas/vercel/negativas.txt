@@ -1,4 +1,4 @@
-Negativas de la vitrina en Vercel · 2026-10-12T10:37Z · despliegue dpl_GWe5bQGWVkiMFVGw2zoqqmuSc2Zc
+Negativas de la vitrina en Vercel · 2026-10-12T10:37Z · 1 y 2 contra el despliegue dpl_GWe5bQGWVkiMFVGw2zoqqmuSc2Zc; la protección se volvió a comprobar en los dos siguientes (despliega.sh)
 
 1. Sin sesión no abre (esperado: 302 al inicio de sesión de Vercel)
    soporte-vitrina.vercel.app/                                              302 → https://vercel.com/sso-api
@@ -19,4 +19,17 @@ Negativas de la vitrina en Vercel · 2026-10-12T10:37Z · despliegue dpl_GWe5bQG
    /api/buzon/documentos                                                    404
    /api/soporte-sap/vitrina                                                 404
 
-3. El túnel sin el secreto: PENDIENTE (el túnel aún no está abierto)
+3. El túnel sin el secreto no responde a Soporte SAP · 2026-10-12T11:14Z (esperado: 404 «Not Found», igual que una ruta que no existe)
+   túnel: https://desktop-r7qrokm.<tailnet>.ts.net → portero 127.0.0.1:8787 (lo en vivo encendido)
+   GET /api/soporte-sap?rol=cliente, sin firma                        404
+   GET /api/soporte-sap?rol=cliente, firma mal formada                404
+   GET /api/soporte-sap?rol=cliente, firma con forma válida y llave falsa 404
+   POST /api/soporte-sap, sin firma                                   404
+   PUT /api/soporte-sap, sin firma                                    404
+   GET /                                                              404
+   GET /soporte-sap                                                   404
+   GET /vitrina/soporte-sap                                           404
+   GET /api/laboratorio/estado                                        404
+   GET /api/buzon/documentos                                          404
+   GET /_next/static/chunks/main.js                                   404
+   cuerpo de la respuesta sin firma                                   «Not Found»
