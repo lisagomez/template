@@ -135,6 +135,8 @@ const prueba = (archivo: string, nombre: string): Comprobacion => ({ tipo: 'prue
 const AISLAMIENTO = prueba('aislamiento.ts', 'aislamiento de tres niveles: cada intento cruzado, rechazado')
 const ed = (archivo: string, buscar: string, poner: string): Edicion => ({ archivo, buscar, poner })
 const dist = (f: string) => `${SS}/dist/${f}`
+/** La vitrina de Soporte SAP (revisión 10 de la AISIA): sus piezas viven en la app. */
+const VI = 'src/features/soporte-sap/vitrina'
 
 export const FILAS: readonly Fila[] = [
   // ─────────────────────────────── AISIA ───────────────────────────────
@@ -1822,6 +1824,114 @@ export const FILAS: readonly Fila[] = [
     control: 'pruebas/conocimiento-produccion.ts · quienUsaLaSintetica()',
     comprobacion: prueba('conocimiento-produccion.ts', 'H-20 · la matriz sintética solo la importa el laboratorio; un archivo de producción que la importe se caza'),
     sabotaje: { que: 'un job de producción importa la matriz sintética', ediciones: [ed(`${SS}/src/sla-job.ts`, "import type { Prioridad } from './categoriza.js'\n", "import type { Prioridad } from './categoriza.js'\nimport { MATRIZ_LABORATORIO } from './laboratorio/matriz.js'\n")] },
+  },
+  {
+    id: 'c3-vitrina-solo-vitrina', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'en el despliegue de la vitrina solo existe la vitrina: otra página lleva a ella y otra API, /api/soporte-sap incluida, da 404',
+    control: 'next.config.ts · reglasDeLaVitrina (VITRINA_SOPORTE_SAP=1, horneado en el build)',
+    comprobacion: prueba('vitrina-despliegue.ts', 'vitrina · en su despliegue solo existe la vitrina: otra página lleva a ella y otra API da 404'),
+    sabotaje: { que: 'la regla de las APIs deja pasar /api/soporte-sap', ediciones: [ed('next.config.ts', "rewrites: [{ source: '/api/:ruta((?!vitrina/).*)'", "rewrites: [{ source: '/api/:ruta((?!vitrina/|soporte-sap).*)'")] },
+  },
+  {
+    id: 'c3-vitrina-sin-laboratorio', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'en Vercel o en la vitrina el build falla con SOPORTE_SAP_LABORATORIO puesta, con cualquier valor',
+    control: 'next.config.ts · compruebaDespliegue',
+    comprobacion: prueba('vitrina-despliegue.ts', 'vitrina · lo que va a Vercel no lleva SOPORTE_SAP_LABORATORIO: con ella, el build falla'),
+    sabotaje: { que: 'la guarda solo mira el valor «1»', ediciones: [ed('next.config.ts', "env['SOPORTE_SAP_LABORATORIO'] !== undefined", "env['SOPORTE_SAP_LABORATORIO'] === '1'")] },
+  },
+  {
+    id: 'c3-vitrina-no-enciende', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'nada de la vitrina importa el runtime de laboratorio ni lee su variable',
+    control: 'pruebas/vitrina-despliegue.ts · el barrido de src/features/soporte-sap/vitrina, src/app/vitrina y src/app/api/vitrina',
+    comprobacion: prueba('vitrina-despliegue.ts', 'vitrina · no enciende el laboratorio: nada suyo importa el runtime ni lee su variable'),
+    sabotaje: { que: 'una pieza de la vitrina importa el runtime', ediciones: [ed(`${VI}/componentes/bento.tsx`, "import Link from 'next/link'\n", "import Link from 'next/link'\nimport { encendido } from '../../services/runtime'\n")] },
+  },
+  {
+    id: 'c3-vitrina-firma', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'el portero responde como si no existiera a lo que no trae la firma de Vercel de esa petición: sin firma, la de otra petición, vieja o con otro secreto',
+    control: 'vitrina/en-vivo/portero.ts · creaPortero, con firma.ts · verifica',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · el portero no existe para quien no trae la firma de Vercel: ni la de otra petición, ni vieja, ni repetida'),
+    sabotaje: { que: 'el portero no mira la firma', ediciones: [ed(`${VI}/en-vivo/portero.ts`, 'if (!v.ok) return nada()', 'if (!v.ok && false) return nada()')] },
+  },
+  {
+    id: 'c3-vitrina-firma-una-vez', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'una firma vale una sola vez: copiada del túnel y repetida, no pasa',
+    control: 'vitrina/en-vivo/firma.ts · verifica (las firmas vistas, con su vencimiento)',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · la firma vale para su petición, una vez, y dentro de la ventana'),
+    sabotaje: { que: 'la firma no recuerda las que ya vio', ediciones: [ed(`${VI}/en-vivo/firma.ts`, "  if (vistas.has(m[2]!)) return { ok: false, motivo: 'firma ya usada' }\n", '')] },
+  },
+  {
+    id: 'c3-vitrina-solo-soporte-sap', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'el portero solo deja pasar /api/soporte-sap, con rol y export validados: otra ruta, aun firmada, no existe',
+    control: 'vitrina/en-vivo/portero.ts · la ruta, y contrato.ts · consultaValida',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · el portero solo deja pasar Soporte SAP: otra ruta, aun firmada, no existe'),
+    sabotaje: { que: 'el portero no mira la ruta', ediciones: [ed(`${VI}/en-vivo/portero.ts`, 'if (url.pathname !== RUTA || ', 'if (')] },
+  },
+  {
+    id: 'c3-vitrina-sin-archivos', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'el portero no acepta archivos: solo documentos de muestra del catálogo, que lee de su propio disco',
+    control: 'vitrina/en-vivo/muestras.ts · esMuestra, y portero.ts · levantaDe',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · el portero no acepta archivos: solo documentos de muestra, que lee de este disco'),
+    sabotaje: { que: 'cualquier nombre cuenta como muestra', ediciones: [ed(`${VI}/en-vivo/muestras.ts`, "typeof archivo === 'string' && MUESTRAS.some((m) => m.archivo === archivo)", "typeof archivo === 'string'")] },
+  },
+  {
+    id: 'c3-vitrina-sin-datos', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'el texto con forma de dato personal se rechaza en Vercel, antes de cruzar el túnel, y otra vez en el portero',
+    control: 'vitrina/en-vivo/sin-datos-reales.ts · datoRealEn (el anonimizador del producto), en proxy.ts y en portero.ts',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · un texto con forma de dato personal no cruza el túnel, y el portero lo vuelve a rechazar'),
+    sabotaje: { que: 'el filtro no rechaza nada', ediciones: [ed(`${VI}/en-vivo/sin-datos-reales.ts`, 'if (formas.length) return', 'if (formas.length && false) return')] },
+  },
+  {
+    id: 'c3-vitrina-secreto', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'el secreto de lo en vivo solo lo leen la puerta de Vercel y el portero, en el servidor: ninguna variable pública ni componente de cliente lo toca',
+    control: 'pruebas/vitrina-despliegue.ts · el barrido de src/',
+    comprobacion: prueba('vitrina-despliegue.ts', 'vitrina · el secreto de la sección en vivo vive solo en el servidor'),
+    sabotaje: { que: 'la puerta de Vercel pasa a ser un componente de cliente', ediciones: [ed(`${VI}/en-vivo/proxy.ts`, '/**\n * La puerta de Vercel', "'use client'\n/**\n * La puerta de Vercel")] },
+  },
+  {
+    id: 'c3-vitrina-apagado', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'con el túnel caído, sin configurar o con otro secreto, lo en vivo dice «apagado» y la vitrina sigue; el estado responde 200 para que el navegador no lo cuente como error',
+    control: 'vitrina/en-vivo/proxy.ts · atiendeEnVivo y estadoEnVivo',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · sin configurar, con otro secreto o con el túnel caído: apagado, con su aviso'),
+    sabotaje: { que: 'el túnel caído tumba la ruta', ediciones: [ed(`${VI}/en-vivo/proxy.ts`, "} catch { return apagado('el túnel no responde') }", '} catch (e) { throw e }')] },
+  },
+  {
+    id: 'c3-vitrina-identidad', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'brecha',
+    afirmacion: 'dentro del laboratorio un invitado elige su identidad, también la de superadministrador, y aprueba en la sala',
+    control: 'ninguno: el laboratorio usa identidades elegibles; lo acota que solo entra quien el laboratorio invita',
+    nota: 'brecha declarada: el laboratorio es sintético y el riesgo es del laboratorio; en producción la sesión es auth.uid()',
+  },
+  {
+    id: 'c3-vitrina-proteccion', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'brecha',
+    afirmacion: 'solo abre la vitrina quien el laboratorio invite (la protección de Vercel)',
+    control: 'el panel de Vercel: Vercel Authentication en todos los despliegues, y el enlace para compartir',
+    nota: 'brecha declarada: se configura fuera del código y no se prueba desde él; cada despliegue comprueba que sin sesión no abre',
+  },
+  {
+    id: 'c3-vitrina-terceros', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'brecha',
+    afirmacion: 'Vercel y el proveedor del túnel ven el tráfico de lo en vivo',
+    control: 'ninguno: es su papel; el tráfico es sintético y la firma no les da la llave',
+    nota: 'brecha declarada: son terceros del despliegue de la vitrina, con datos sintéticos (AISIA §1, revisión 10)',
+  },
+  {
+    id: 'aisia-vivo-dato-real', doc: 'AISIA', ref: 'Dato real en la sección en vivo', estado: 'probado',
+    afirmacion: 'en vivo se rechaza el texto con forma de dato personal en todos los campos libres (título, descripción, chat, respuesta, lo que se pide, motivo)',
+    control: 'vitrina/en-vivo/sin-datos-reales.ts · datoRealEn, en Vercel y en el portero',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · un texto con forma de dato personal no cruza el túnel, y el portero lo vuelve a rechazar'),
+    sabotaje: { que: 'el filtro solo mira el título', ediciones: [ed(`${VI}/en-vivo/sin-datos-reales.ts`, "const CAMPOS = ['titulo', 'descripcion', 'texto', 'pide', 'motivo'] as const", "const CAMPOS = ['titulo'] as const")] },
+  },
+  {
+    id: 'aisia-vivo-sin-adjuntos', doc: 'AISIA', ref: 'Dato real en la sección en vivo', estado: 'probado',
+    afirmacion: 'en vivo no se suben archivos: un multipart no pasa ni por Vercel ni por el portero',
+    control: 'vitrina/en-vivo/proxy.ts y portero.ts · solo application/json',
+    comprobacion: prueba('vitrina-en-vivo.ts', 'en vivo · el navegador no manda archivos ni consultas raras, y levanta con muestras de punta a punta'),
+    sabotaje: { que: 'la puerta de Vercel deja pasar el multipart', ediciones: [ed(`${VI}/en-vivo/proxy.ts`, "    if (!(req.headers.get('content-type') ?? '').startsWith('application/json')) return Response.json({ error: 'en vivo solo se mandan acciones: los adjuntos son documentos de muestra' }, { status: 415 })\n", '')] },
+  },
+  {
+    id: 'aisia-vivo-dato-sin-forma', doc: 'AISIA', ref: 'Dato real en la sección en vivo', estado: 'brecha',
+    afirmacion: 'un dato real sin forma de dato (el nombre de una empresa, cómo opera) pasa el filtro',
+    control: 'el aviso permanente, sin adjuntos, el estado en memoria y que solo entra quien el laboratorio invita',
+    nota: 'brecha declarada en la revisión 10: no es «cero datos reales»; lo decide el laboratorio al invitar',
   },
   {
     id: 'c3-superficie', doc: 'C3', ref: 'Superficie', estado: 'brecha',
