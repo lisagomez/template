@@ -11,7 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync, readdirSync, rmSync } from 'nod
 import { join, resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
 
-const [base = 'http://localhost:3011'] = process.argv.slice(2)
+const base = process.argv[2] ?? 'http://localhost:3011'
 const DOCS = resolve('tools/soporte-sap/documentos')
 const SALIDA = resolve('public/vitrina/soporte-sap/momentos')
 const ROLES = ['cliente', 'consultor', 'superadmin', 'experto']
@@ -44,11 +44,17 @@ async function mensajeDe(rol, contiene) {
 const decide = async (rol, contiene, accion, motivo) => actua(rol, { tipo: 'decide', mensaje: await mensajeDe(rol, contiene), accion, ...(motivo ? { motivo } : {}) })
 const idDe = async (rol, titulo) => (await vista(rol)).incidencias.find((i) => i.titulo === titulo).id
 
+/**
+ * Las huellas sha256 (la cadena, los planes, los exports) se guardan abreviadas a 16 caracteres: la pantalla muestra 10
+ * o 12, así que no cambia lo que se ve. Un hex de 64 suelto en el repo es, para la auditoría de secretos, una llave.
+ */
+export const abrevia = (json) => json.replace(/(?<![0-9a-f])([0-9a-f]{16})[0-9a-f]{48}(?![0-9a-f])/g, '$1')
+
 const momentos = []
 /** Un momento del journey: las cuatro vistas tal como las devuelve el producto en ese instante. */
 async function congela(id, titulo, resumen) {
   const vistas = Object.fromEntries(await Promise.all(ROLES.map(async (r) => [r, await vista(r)])))
-  writeFileSync(join(SALIDA, `${id}.json`), JSON.stringify(vistas))
+  writeFileSync(join(SALIDA, `${id}.json`), abrevia(JSON.stringify(vistas)))
   momentos.push({ id, titulo, resumen })
   console.log(`✓ ${id} · ${titulo}`)
 }
@@ -115,9 +121,11 @@ async function impugna() {
   await actua('consultor', { tipo: 'resuelve', incidencia: 'inc-001' })
 }
 
-rmSync(SALIDA, { recursive: true, force: true })
-mkdirSync(SALIDA, { recursive: true })
-await recorre()
-const commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
-writeFileSync(join(SALIDA, 'indice.json'), `${JSON.stringify({ generado: new Date().toISOString(), commit, roles: ROLES, momentos }, null, 1)}\n`)
-console.log(`\n${momentos.length} momentos × ${ROLES.length} vistas en ${SALIDA} (${readdirSync(SALIDA).length} archivos) · commit ${commit}`)
+if (import.meta.url === `file://${resolve(process.argv[1] ?? '')}`) {
+  rmSync(SALIDA, { recursive: true, force: true })
+  mkdirSync(SALIDA, { recursive: true })
+  await recorre()
+  const commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
+  writeFileSync(join(SALIDA, 'indice.json'), `${JSON.stringify({ generado: new Date().toISOString(), commit, roles: ROLES, momentos }, null, 1)}\n`)
+  console.log(`\n${momentos.length} momentos × ${ROLES.length} vistas en ${SALIDA} (${readdirSync(SALIDA).length} archivos) · commit ${commit}`)
+}
