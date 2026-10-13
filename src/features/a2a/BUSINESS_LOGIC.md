@@ -7,7 +7,9 @@
 > herramienta y la Agent Card del puente. Nada de aquí se inventa: lo que ninguna fuente dice va
 > marcado **[supuesto]** o **pendiente**. Todo lo medido sobre calidad es con corpus **sintético**
 > o no concluyente, salvo los identificadores de expedientes laborales (84 páginas reales).
-> Cubre `tools/extractor-documental`, su servicio contenedorizado y el puente A2A (`/a2a`).
+> Cubre `tools/extractor-documental`, su servicio contenedorizado, el puente A2A (`/a2a`) y el piloto del
+> buzón de CFDI (`/buzon`). El impacto del piloto sobre terceros vive en su spec (015), y **su AISIA se firma
+> aparte**, antes del primer documento real: firmar este contrato no la firma.
 
 ---
 
@@ -156,7 +158,7 @@ Ya medido, y dicho con su alcance:
 ### Tipo de proyecto
 
 **Tipo:** herramienta + servicio + aplicación. El núcleo es la herramienta empaquetable
-`@tu-scope/extractor-documental` (0.7.1, en `tools/extractor-documental`, ocho entry points); el
+`@tu-scope/extractor-documental` (0.9.0, en `tools/extractor-documental`, once entry points); el
 servicio contenedorizado se levanta en el VPS del cliente con `docker compose up`, con o sin GPU
 (spec 010); y la app del template expone el puente A2A en `/a2a`, con tres rutas exactas: la Card,
 el JSON-RPC y el health.
@@ -190,4 +192,4 @@ Supabase. `@a2a-js/sdk` pineado sin rangos; imagen del servicio y motores pinead
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-13 · Se vuelve a firmar con el corpus real del cliente.

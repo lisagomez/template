@@ -158,7 +158,8 @@ imagen).
 ```
 src/features/
 ├── reel/      # tus reels, subida, sala de aprobación en el celular, consentimientos (hecho)
-└── auth/      # cuentas por correo y contraseña; el proxy protege solo /reel, /cuenta y /api/reel
+└── auth/      # cuentas por correo y contraseña; el proxy protege /reel, /cuenta y /api/reel, y desde
+               # la spec 015 también las páginas del buzón (la sesión vive en src/lib/supabase/sesion.ts)
 ```
 
 ### Stack confirmado
@@ -182,4 +183,4 @@ pineados con su huella y licencia en `tools/reel/LICENCIAS.md`.
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-13 · Firma también la tabla de respaldo · Se vuelve a firmar tras el estreno con clips reales.
