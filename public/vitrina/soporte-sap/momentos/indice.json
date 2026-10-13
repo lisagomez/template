@@ -1,0 +1,57 @@
+{
+ "generado": "2026-10-12T04:43:45.169Z",
+ "commit": "cdefd05",
+ "roles": [
+  "cliente",
+  "consultor",
+  "superadmin",
+  "experto"
+ ],
+ "momentos": [
+  {
+   "id": "01-levanta",
+   "titulo": "El cliente levanta una incidencia",
+   "resumen": "Con una captura y un CFDI. La evidencia se extrae por campo y el agente categoriza con su traza."
+  },
+  {
+   "id": "02-escala",
+   "titulo": "La consultora escala al laboratorio",
+   "resumen": "El plan verificado va primero a la consultora; al laboratorio llega solo si ella lo escala, a su nombre."
+  },
+  {
+   "id": "03-aprueba",
+   "titulo": "Una persona aprueba y el simulador aplica",
+   "resumen": "El supervisor verificó 6 de 6; aprueba una persona en la sala, y se aplica en el simulador con su antes y su después."
+  },
+  {
+   "id": "04-ensena",
+   "titulo": "Un caso nuevo se aprende sin exponer a nadie",
+   "resumen": "Se anonimiza al sandbox, el experto enseña, cada organización consiente por sí y al núcleo sube generalizado."
+  },
+  {
+   "id": "05-revision",
+   "titulo": "A revisión: el agente corrige",
+   "resumen": "La persona pide corregir, el agente propone la v2 y se aprueba en la sala; el chat no aprueba nada."
+  },
+  {
+   "id": "06-sla",
+   "titulo": "El SLA corre, se pausa y se reanuda",
+   "resumen": "La primera respuesta la da el consultor; esperar al cliente pausa el reloj y su respuesta lo reanuda."
+  },
+  {
+   "id": "07-presupuesto",
+   "titulo": "Al tope del presupuesto, nadie se queda sin atención",
+   "resumen": "Un P1 pasa a una persona en el momento; un P4 espera, con aviso."
+  },
+  {
+   "id": "08-impugna",
+   "titulo": "El cliente impugna y la consultora resuelve",
+   "resumen": "Cada decisión lleva nombre; aplicar en el simulador no es resolver, lo resuelve el consultor."
+  },
+  {
+   "id": "09-salida",
+   "titulo": "El cliente se va con su export",
+   "resumen": "Su salida queda registrada, descarga su export y lo suyo se congela; el borrado espera la gracia del contrato."
+  }
+ ]
+}

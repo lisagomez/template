@@ -16,6 +16,10 @@
 #                  no tiene GPU, NO se levanta este perfil y `ocr` sigue solo en CPU
 #   hermes         Hermes (imagen pineada por digest) + el puente MCP->A2A que consume
 #                  el extractor. Hermes no tiene ninguna llave del extractor
+#   semantica      Soporte SAP: el job de la capa semántica (dbt + MetricFlow, imagen base por
+#                  digest, lock con hashes). Un disparo: `docker compose --profile semantica run
+#                  --rm semantica` (cron nocturno). Corre con el rol `soporte_sap_metricas`
+#                  (sin columnas de texto; solo inserta en ss_metrica). Sin puertos
 #
 #   docker compose --profile ocr up -d                      # sin GPU
 #   docker compose --profile ocr --profile ocr-gpu up -d    # con GPU
@@ -47,7 +51,8 @@ services:
       # runtime y NO se inlinean en el bundle del navegador.
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-      # Puente A2A (solo red interna). La clave la comparte con `puente-hermes`; vacia = sin clave.
+      # Puente A2A (solo red interna: Caddy lo bloquea desde fuera). La clave la comparte con
+      # `puente-hermes`; vacia = puente apagado (503).
       A2A_URL_BASE: http://app:3000
       A2A_API_KEY: ${A2A_API_KEY:-}
       EXTRACTOR_SERVICIO_URL: http://ocr:8080
@@ -239,6 +244,35 @@ services:
     networks:
       # `interna` para hablar con el puente; `web` para su proveedor de modelo. Sin puertos.
       - interna
+      - web
+
+  # ---- Soporte SAP: la capa semántica (job de un disparo) ---------------------------
+  semantica:
+    profiles: ["semantica"]
+    build:
+      context: ./tools/soporte-sap/semantica
+    image: ${APP_NAME:-saas-factory-app}-semantica:${APP_VERSION:-latest}
+    restart: "no"
+    environment:
+      # Un usuario de login que SOLO es miembro de soporte_sap_metricas (SDD de Soporte SAP §15).
+      # La contraseña es secreta: solo presencia en configura:deploy, nunca su valor.
+      SS_PG_HOST: ${SS_PG_HOST:-}
+      SS_PG_PORT: ${SS_PG_PORT:-5432}
+      SS_PG_USER: ${SS_PG_USER:-}
+      SS_PG_PASSWORD: ${SS_PG_PASSWORD:-}
+      SS_PG_DB: ${SS_PG_DB:-postgres}
+    deploy:
+      resources:
+        limits:
+          cpus: "${SEMANTICA_CPUS:-1}"
+          memory: ${SEMANTICA_MEM:-1G}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      # `web` porque con Supabase gestionado la base está fuera; con un Postgres propio (D10), `interna`.
       - web
 
 volumes:

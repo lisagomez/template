@@ -11,12 +11,16 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Sala**: el video con sus bloqueos; marcar un corte o un cambio de texto en el segundo exacto (sale una versión
   nueva, que revoca lo aprobado); confirmar que revisó cada corte que parte lo que dijo otra persona; aprobar con la
   huella del archivo calculada en el celular; el registro; borrar.
-- **Consentimientos**: registra los de quien sale o se oye, y los respeta al procesar.
+- **Consentimientos**: desde la sala registra, con el documento firmado, los de quien sale o se oye, y los respeta al
+  procesar; retirar uno borra su documento del servidor, revoca lo aprobado y vuelve a desenfocar y a bloquear lo que
+  dependía de esa persona.
 
 ### Qué no hace
 
 - No publica ni programa: aprobar no sale a la red.
 - No manda el video a ningún servicio, ni para transcribir.
+- No borra a una persona del clip original: retirar su consentimiento la saca del reel, pero su voz y su imagen siguen
+  en el clip hasta que se borra el proyecto (y se le dice al dueño).
 - No procesa en producción: el render queda bloqueado ahí hasta la fase 16 del PRP-007 (solo local).
 
 ## Casos de uso
@@ -26,6 +30,8 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Quiere un cambio**: pausa en la sala y toca quitar un tramo o cambiar el texto ahí; sale una versión nueva.
 - **Aprueba desde el celular**: queda quién, cuándo, qué versión y la huella de lo que vio; si algo cambia después, la
   aprobación se revoca.
+- **Alguien retira su consentimiento**: el dueño lo retira en la sala; lo aprobado queda revocado, la versión nueva
+  vuelve a bloquear su voz y a desenfocar su cara, y se le avisa que lo baje de sus redes si ya lo publicó.
 - **Borra el proyecto**: se borra todo, en la cuenta y en el servidor.
 
 ## Requerimientos de infraestructura
@@ -38,11 +44,16 @@ teléfono. Aprobar no publica: descarga el reel y lo sube él (guía: `docs/GUIA
 - **Servicios externos**: Supabase (Auth y base de datos con RLS) para cuentas, proyectos, versiones, aprobaciones y
   consentimientos.
 - **Variables de entorno**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `REEL_DATOS`, `REEL_RECURSOS`,
-  `DICTADO_MODELOS` y `DICTADO_RUNTIME`; `SUPABASE_DB_URL` solo el job de migraciones (C7) y `REEL_LABORATORIO`
-  solo el laboratorio.
+  `DICTADO_MODELOS` y `DICTADO_RUNTIME`; `SUPABASE_DB_URL` solo el job de migraciones (C7),
+  `SUPABASE_SERVICE_ROLE_KEY` solo el job `reel:tras-restaurar` (C7, lectura de retiros) y `REEL_LABORATORIO` solo
+  el laboratorio.
 - **Almacenamiento**: `REEL_DATOS` (video, transcripción, máster y documentos firmados, en el servidor) y la base de
   Supabase (solo proyecto, versiones, aprobaciones y estado de los consentimientos). A los 30 días de aprobado se
-  borran el video original, su copia de trabajo y la transcripción (`reel:retencion`).
+  borran el video original, su copia de trabajo y la transcripción (`reel:retencion`). Si al aprobar habla alguien
+  además del dueño con consentimiento vigente, la transcripción íntegra se guarda con los consentimientos y dura lo
+  que su vigencia: la borran el retiro o el mismo job al vencer. El documento firmado de cada consentimiento también
+  vive lo que su vigencia: el job lo borra al día siguiente de vencer y deja la fecha como constancia, y la sala avisa
+  al dueño que baje el reel de sus redes.
 - **Salida del perímetro (C4)**: el video y la transcripción no salen del servidor; a Supabase van solo los datos de la
   cuenta y del proyecto listados arriba. Transcribir en la nube o usar un LLM espera firma del laboratorio.
 
@@ -62,7 +73,18 @@ La parte de la app que usa `@tu-scope/reel` (`tools/reel`). Plan con candado: `.
 
 Scripts: `npm run reel:laboratorio` (clips sintéticos, medición), `reel:marcas`, `reel:rls` (aislamiento contra la
 base, con dos cuentas @example.com), `reel:retencion -- --ahora <ISO>` (job de plataforma, reloj inyectado),
-`reel:migraciones` (job de plataforma declarado, C7: único que usa `SUPABASE_DB_URL`).
+`reel:migraciones` (job de plataforma declarado, C7: único que usa `SUPABASE_DB_URL`), `reel:tras-restaurar` (job de
+plataforma declarado, C7: tras restaurar una copia, vuelve a borrar lo de los consentimientos retirados después;
+lee los retiros con `SUPABASE_SERVICE_ROLE_KEY` y no escribe en Supabase).
 
 Solo local: el render necesita ffmpeg, Tesseract, OpenCV de Python y los modelos de `tools/dictado`. En producción
 queda bloqueado (fase 16 del PRP-007).
+
+### Probar la sala
+
+`node scripts/reel/captura-sala.mjs` recorre la sala en un celular emulado: consentimiento, corte en la voz de otra
+persona (riesgo 5), revisión, aprobar con la transcripción conservada, retirar y borrar (15 comprobaciones; la primera
+corrida, el 2026-10-05, salió 15/15 sin errores de consola). Necesita la app arrancada con los motores locales:
+`DICTADO_MODELOS` y `DICTADO_RUNTIME` (los del banco de `tools/dictado` sirven), `REEL_RECURSOS` con YuNet 2022mar y
+los retratos de `tools/reel/LICENCIAS.md`, y `tesseract` y un `python3` con OpenCV 4.6 en el `PATH`. Crea una cuenta
+`@example.com` en el Supabase de la app que queda creada; el proyecto se borra al final.

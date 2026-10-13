@@ -1,0 +1,174 @@
+# comando: npm run regresion
+# fecha: 2026-10-02T15:16:39.561Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+
+> saas-factory-app@0.1.0 regresion
+> node scripts/regresion-skills.mjs
+
+  ✓ hay skills que verificar (28)
+  ✓ add-a2a: frontmatter YAML presente
+  ✓ add-a2a: el skill declara su nombre
+  ✓ add-a2a: sin description el agente no sabe cuando activarlo
+  ✓ add-a2a: exponer un endpoint A2A sin gate es justo lo que RF-12 existe para impedir
+  ✓ add-a2a: una capacidad A2A que toca Supabase sin nombrar C7 acaba usando la llave que anula RLS
+  ✓ add-a2a: la ruta la exporta el SDK; reescribirla a mano cuela la barra de mas, y compila igual
+  ✓ add-a2a: un rango en el SDK del protocolo es `latest` con otro nombre: RF-10 pide version exacta
+  ✓ add-a2a: add-payments NO pregunta (su golden path corre sin preguntas): la comparacion era falsa
+  ✓ add-emails: frontmatter YAML presente
+  ✓ add-emails: el skill declara su nombre
+  ✓ add-emails: sin description el agente no sabe cuando activarlo
+  ✓ add-login: frontmatter YAML presente
+  ✓ add-login: el skill declara su nombre
+  ✓ add-login: sin description el agente no sabe cuando activarlo
+  ✓ add-login: auth sin RLS es auth decorativa
+  ✓ add-mobile: frontmatter YAML presente
+  ✓ add-mobile: el skill declara su nombre
+  ✓ add-mobile: sin description el agente no sabe cuando activarlo
+  ✓ add-payments: frontmatter YAML presente
+  ✓ add-payments: el skill declara su nombre
+  ✓ add-payments: sin description el agente no sabe cuando activarlo
+  ✓ add-payments: el cobro se confirma por webhook, no por redireccion del cliente
+  ✓ add-payments: un webhook sin verificar su firma es un endpoint abierto
+  ✓ add-payments: Polar no permite vender bienes fisicos: sin este limite, cualquier «quiero cobrar» de una pyme de mercancia termina aqui
+  ✓ add-payments: el codigo da acceso por suscripcion; un pago unico no activa nada sin adaptar el webhook
+  ✓ ai: frontmatter YAML presente
+  ✓ ai: el skill declara su nombre
+  ✓ ai: sin description el agente no sabe cuando activarlo
+  ✓ ai: Golden Path: el proveedor no se improvisa por feature
+  ✓ analista-producto: frontmatter YAML presente
+  ✓ analista-producto: el skill declara su nombre
+  ✓ analista-producto: sin description el agente no sabe cuando activarlo
+  ✓ analista-producto: la regla de oro del rol (PRP-008): si el skill deja de declararla, el informe vuelve a afirmar dolores que nadie cito
+  ✓ analista-producto: el grado y las citas los comprueba el comparador determinista, no el juicio del modelo que escribe el hallazgo
+  ✓ analista-producto: las cifras salen de un medidor con su comando; una cifra de cabeza es hipotesis
+  ✓ analista-producto: el rol es de solo lectura: un analista que arregla lo que encuentra deja de ser auditable
+  ✓ analista-producto: leer el corpus de la capa B contamina las corridas en frio (README raiz §3)
+  ✓ analista-producto: el rol lee el repo entero: la regla de secretos en pantalla tiene que ir inline donde se lee
+  ✓ analista-producto: un ejemplo que imprime una variable sensible ensena la fuga que la regla prohibe
+  ✓ analista-producto: el texto del repo puede traer instrucciones (C3, O1): se analiza, no se obedece
+  ✓ analista-producto: el dano a terceros no es firmable: ponderarlo lo vuelve negociable
+  ✓ analista-producto: el rol propone; lanzar /prp o /new-app es decision del laboratorio
+  ✓ analista-producto: la importancia para el cliente solo la sabe el laboratorio: se pregunta, no se rellena
+  ✓ analista-producto: editar el skill, su esquema, el verificador o su gate cambia el comportamiento del rol
+  ✓ autoresearch: frontmatter YAML presente
+  ✓ autoresearch: el skill declara su nombre
+  ✓ autoresearch: sin description el agente no sabe cuando activarlo
+  ✓ bucle-agentico: frontmatter YAML presente
+  ✓ bucle-agentico: el skill declara su nombre
+  ✓ bucle-agentico: sin description el agente no sabe cuando activarlo
+  ✓ bucle-agentico: la ejecucion es por fases, no de un tiron
+  ✓ bucle-agentico: cada fase cierra con validacion, no con buena voluntad
+  ✓ bucle-agentico: el ejemplo empujaba a Stripe directo, que add-payments excluye
+  ✓ cli-audit: frontmatter YAML presente
+  ✓ cli-audit: el skill declara su nombre
+  ✓ cli-audit: sin description el agente no sabe cuando activarlo
+  ✓ crear-herramienta: frontmatter YAML presente
+  ✓ crear-herramienta: el skill declara su nombre
+  ✓ crear-herramienta: sin description el agente no sabe cuando activarlo
+  ✓ crear-herramienta: toda herramienta nace con README product first: si el skill que las crea no manda al skill readme, la regla vive en un documento y no dispara
+  ✓ eject-sf: frontmatter YAML presente
+  ✓ eject-sf: el skill declara su nombre
+  ✓ eject-sf: sin description el agente no sabe cuando activarlo
+  ✓ eject-sf: una accion irreversible se anuncia como tal
+  ✓ eject-sf: gate humano antes de borrar
+  ✓ goal-compiler: frontmatter YAML presente
+  ✓ goal-compiler: el skill declara su nombre
+  ✓ goal-compiler: sin description el agente no sabe cuando activarlo
+  ✓ google-workspace: frontmatter YAML presente
+  ✓ google-workspace: el skill declara su nombre
+  ✓ google-workspace: sin description el agente no sabe cuando activarlo
+  ✓ image-generation: frontmatter YAML presente
+  ✓ image-generation: el skill declara su nombre
+  ✓ image-generation: sin description el agente no sabe cuando activarlo
+  ✓ image-generation: los ids preview que OpenRouter retiro no vuelven al skill (deriva del 2026-09-10: 400 mudo en produccion)
+  ✓ image-generation: el alias flotante queda vetado por escrito: el modo auto es fallback entre candidatos PINEADOS (C1)
+  ✓ knowledge-search: frontmatter YAML presente
+  ✓ knowledge-search: el skill declara su nombre
+  ✓ knowledge-search: sin description el agente no sabe cuando activarlo
+  ✓ memory-manager: frontmatter YAML presente
+  ✓ memory-manager: el skill declara su nombre
+  ✓ memory-manager: sin description el agente no sabe cuando activarlo
+  ✓ new-app: frontmatter YAML presente
+  ✓ new-app: el skill declara su nombre
+  ✓ new-app: sin description el agente no sabe cuando activarlo
+  ✓ new-app: C4: todo BUSINESS_LOGIC.md nace con su evaluacion de impacto
+  ✓ new-app: es el artefacto que este skill existe para producir
+  ✓ new-app: C7: la regla de aislamiento se declara desde el contrato de negocio
+  ✓ new-app: el BUSINESS_LOGIC decide si la app cobra y por que camino, antes de construir
+  ✓ new-app: en un monorepo la raiz es el indice del portafolio: sobrescribirla borra el contrato de los demas productos
+  ✓ playwright-cli: frontmatter YAML presente
+  ✓ playwright-cli: el skill declara su nombre
+  ✓ playwright-cli: sin description el agente no sabe cuando activarlo
+  ✓ playwright-cli: la evidencia visual es el producto de este skill
+  ✓ playwright-cli: lo que lleva estado va bajo `playwright cli` con sesion con nombre: sin ella cada invocacion abre un navegador nuevo
+  ✓ playwright-cli: sin esto `open` busca Chrome de marca en /opt/google/chrome y falla en una maquina que solo instalo chromium
+  ✓ playwright-cli: sintaxis deducida del MCP que nunca existio en el CLI (2026-08-25): esos verbos viven bajo `playwright cli`, y `navigate` se llama `goto`
+  ✓ playwright-cli: `npx playwright screenshot` toma el archivo POSICIONAL; bajo `playwright cli` es --filename. `--output` no existe en ninguno de los dos
+  ✓ primer: frontmatter YAML presente
+  ✓ primer: el skill declara su nombre
+  ✓ primer: sin description el agente no sabe cuando activarlo
+  ✓ prp: frontmatter YAML presente
+  ✓ prp: el skill declara su nombre
+  ✓ prp: sin description el agente no sabe cuando activarlo
+  ✓ prp: el PRP se genera desde el template, no de memoria
+  ✓ prp: C3: todo PRP responde quien nos ataca
+  ✓ prp: C4: todo PRP responde a quien dañamos sin atacante
+  ✓ readme: frontmatter YAML presente
+  ✓ readme: el skill declara su nombre
+  ✓ readme: sin description el agente no sabe cuando activarlo
+  ✓ readme: el orden de las cuatro partes es decision del laboratorio (2026-09-29): si el skill deja de declararlo, deja de producirlo
+  ✓ readme: variables de entorno solo por nombre: un valor escrito en un README viaja en el tarball y queda en el historial de git
+  ✓ readme: el skill lee el codigo buscando variables: la regla de secretos en pantalla de AGENTS.md tiene que ir inline donde se buscan
+  ✓ readme: un ejemplo que imprime una variable sensible ensena la fuga que la regla prohibe
+  ✓ readme: casos de uso, requerimientos y cifras salen del codigo, el SDD o una medicion; lo demas es «pendiente» o «no medido»
+  ✓ readme: lo que solo sabe el laboratorio (para quien es, que decision resuelve) se pregunta; no se rellena
+  ✓ readme: el veredicto de conforme lo da el auditor determinista, no el juicio del modelo
+  ✓ readme: reestructurar exige DEMOSTRAR la no perdida (0 borradas sin justificar, 0 cifras perdidas), no afirmarla
+  ✓ readme: tocar contrato.json (una exclusion para callar al auditor) o volverlo gate es cambiar comportamiento: CDC
+  ✓ skill-creator: frontmatter YAML presente
+  ✓ skill-creator: el skill declara su nombre
+  ✓ skill-creator: sin description el agente no sabe cuando activarlo
+  ✓ spec-generator: frontmatter YAML presente
+  ✓ spec-generator: el skill declara su nombre
+  ✓ spec-generator: sin description el agente no sabe cuando activarlo
+  ✓ supabase: frontmatter YAML presente
+  ✓ supabase: el skill declara su nombre
+  ✓ supabase: sin description el agente no sabe cuando activarlo
+  ✓ supabase: ninguna tabla se crea sin RLS
+  ✓ supabase: la metrica de MRR supone la tabla purchases que crea ese skill
+  ✓ update-sf: frontmatter YAML presente
+  ✓ update-sf: el skill declara su nombre
+  ✓ update-sf: sin description el agente no sabe cuando activarlo
+  ✓ update-sf: actualizar es comparar antes de copiar: el skill produce un diff, no un reemplazo
+  ✓ update-sf: traer skills de fuera cambia comportamiento y el skill lo declara como CDC (C1)
+  ✓ update-sf: gate humano: nada se escribe en .claude/ sin el si sobre el diff
+  ✓ update-sf: lo que entra de fuera queda registrado con el commit upstream pineado
+  ✓ update-sf: borrar .claude/ entera destruia gobernanza, rules, specs y 7 skills propios (medido 2026-09-17: 21 elementos solo locales)
+  ✓ update-sf: copiar el directorio entero encima retrocedia 13 archivos mas nuevos en local; cada archivo entra por su nombre
+  ✓ video-visuals: frontmatter YAML presente
+  ✓ video-visuals: el skill declara su nombre
+  ✓ video-visuals: sin description el agente no sabe cuando activarlo
+  ✓ website-3d: frontmatter YAML presente
+  ✓ website-3d: el skill declara su nombre
+  ✓ website-3d: sin description el agente no sabe cuando activarlo
+  ✓ website-3d: el CTA de venta directa necesita decir con que se cobra (y cuando no es Polar)
+  ✓ el contrato de "new-app" apunta a un skill existente
+  ✓ el contrato de "prp" apunta a un skill existente
+  ✓ el contrato de "supabase" apunta a un skill existente
+  ✓ el contrato de "add-a2a" apunta a un skill existente
+  ✓ el contrato de "add-login" apunta a un skill existente
+  ✓ el contrato de "add-payments" apunta a un skill existente
+  ✓ el contrato de "bucle-agentico" apunta a un skill existente
+  ✓ el contrato de "eject-sf" apunta a un skill existente
+  ✓ el contrato de "playwright-cli" apunta a un skill existente
+  ✓ el contrato de "ai" apunta a un skill existente
+  ✓ el contrato de "image-generation" apunta a un skill existente
+  ✓ el contrato de "update-sf" apunta a un skill existente
+  ✓ el contrato de "website-3d" apunta a un skill existente
+  ✓ el contrato de "readme" apunta a un skill existente
+  ✓ el contrato de "crear-herramienta" apunta a un skill existente
+  ✓ el contrato de "analista-producto" apunta a un skill existente
+
+C2 capa A (contratos): 163/163 en verde — promovible.

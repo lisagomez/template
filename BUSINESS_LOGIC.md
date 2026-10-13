@@ -11,6 +11,12 @@
 > (auth, dashboard, parametrización) tampoco.** Lo cruza `npm run verify:gobernanza` contra
 > `inventario/activos.json`: todo activo de clase PRODUCTO en beta o producción aparece aquí, en un
 > producto o en el §2 con su motivo.
+>
+> **Qué es un producto** (desde el 2026-10-04): una fila de esta tabla. Un modelo de negocio que compone
+> activos para un cliente que paga; «activo de clase PRODUCTO» es una pieza vendible, no un producto, y el
+> campo `producto` del inventario nombra al **dueño** del activo. El concepto y su vocabulario:
+> [`productos/CONCEPTO.md`](productos/CONCEPTO.md); cada producto se declara en un manifiesto de
+> `productos/` que verifica `npm run verifica:productos`.
 
 ---
 
@@ -23,10 +29,11 @@ verificador lo lista aparte, igual que un gate inactivo.
 |---|---|---|---|
 | Asesor de ventas por voz | [`src/features/dictado/BUSINESS_LOGIC.md`](src/features/dictado/BUSINESS_LOGIC.md) | `TPL-asesor-ventas` `TPL-voz` `TPL-dictado` `TPL-feature-dictado` `TPL-feature-laboratorio-voz` | firmado el 2026-09-20 como hipótesis del piloto |
 | ERP agéntico | [`erp/ERP-MAESTRO.md`](erp/ERP-MAESTRO.md) | `TPL-erp` | maestro propio: lo gobierna su fuente, no este índice |
-| Etiquetas GS1 | [`src/features/etiquetas/BUSINESS_LOGIC.md`](src/features/etiquetas/BUSINESS_LOGIC.md) | `TPL-etiquetas-gs1` `TPL-feature-etiquetas` `TPL-feature-laboratorio-etiquetas` | hipótesis del 2026-09-30, sin cadena real; **firma pendiente del laboratorio** |
-| Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; **firma pendiente del laboratorio** |
-| Reel del celular | [`src/features/reel/BUSINESS_LOGIC.md`](src/features/reel/BUSINESS_LOGIC.md) | `TPL-reel` `TPL-feature-reel` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-27; **firma pendiente del laboratorio** |
+| Etiquetas GS1 | [`src/features/etiquetas/BUSINESS_LOGIC.md`](src/features/etiquetas/BUSINESS_LOGIC.md) | `TPL-etiquetas-gs1` `TPL-feature-etiquetas` `TPL-feature-laboratorio-etiquetas` | hipótesis del 2026-09-30, sin cadena real; firmado como hipótesis el 2026-10-13, se vuelve a firmar con la primera cadena real |
+| Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` `TPL-piloto-buzon-cfdi` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; firmado como hipótesis el 2026-10-13, se vuelve a firmar con el corpus real del cliente; la AISIA del piloto del buzón se firma aparte |
+| Reel del celular | [`src/features/reel/BUSINESS_LOGIC.md`](src/features/reel/BUSINESS_LOGIC.md) | `TPL-reel` `TPL-feature-reel` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-27; firmado como hipótesis el 2026-10-13, con su tabla de respaldo; se vuelve a firmar tras el estreno con clips reales |
 | Estudio pymes | [`src/features/estudio-pymes/BUSINESS_LOGIC.md`](src/features/estudio-pymes/BUSINESS_LOGIC.md) | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-26 y el 2026-09-27, sin datos reales; **firma pendiente del laboratorio** |
+| Soporte SAP | [`src/features/soporte-sap/BUSINESS_LOGIC.md`](src/features/soporte-sap/BUSINESS_LOGIC.md) | `TPL-soporte-sap` `TPL-sala-a2a` `TPL-feature-soporte-sap` | construida en laboratorio (corrida A, cerrada por el PRP-010); **C3 v4 y AISIA v3 firmados** por lisagomez el 2026-10-10; opera solo en laboratorio (AISIA §5) |
 | Vendedor con IA en WhatsApp | pendiente | `TPL-ventas-whatsapp` `TPL-feature-ventas-whatsapp` | falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar) |
 
 ## 2. Lo que no es producto
@@ -77,8 +84,9 @@ Aquí va lo que es de todo el servidor o de todo el repo; lo de cada producto va
 [asesor de ventas por voz](src/features/dictado/BUSINESS_LOGIC.md) (§4),
 [etiquetas GS1](src/features/etiquetas/BUSINESS_LOGIC.md) (§4),
 [extractor documental](src/features/a2a/BUSINESS_LOGIC.md) (§4),
-[reel del celular](src/features/reel/BUSINESS_LOGIC.md) (§4) y
-[estudio pymes](src/features/estudio-pymes/BUSINESS_LOGIC.md) (§4).
+[reel del celular](src/features/reel/BUSINESS_LOGIC.md) (§4),
+[estudio pymes](src/features/estudio-pymes/BUSINESS_LOGIC.md) (§4) y
+[Soporte SAP](src/features/soporte-sap/BUSINESS_LOGIC.md) (§4).
 
 | Activo | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|

@@ -185,4 +185,4 @@ README de la herramienta.
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-13 · Se vuelve a firmar con la primera cadena real.

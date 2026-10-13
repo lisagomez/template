@@ -24,7 +24,7 @@
  * navegador, que es la condicion para que el nucleo siga siendo instalable en cualquier proyecto.
  */
 import type { PaginaExtraida } from './tipos.js'
-import { flujosDeContenido, aLatin1, indiceDe } from './pdf-flujos.js'
+import { flujosDeContenido, aLatin1, indiceDe, presupuestoDeInflado, TOPE_INFLADO_POR_DOCUMENTO, type PresupuestoDeInflado } from './pdf-flujos.js'
 import { saneaTextoExtraido } from './saneado.js'
 import type { MotorOcr, OpcionesDeExtraccion } from './puertos.js'
 
@@ -41,6 +41,8 @@ export interface ResultadoCapaCero {
   paginas: readonly string[]
   /** Por que se descarto. `null` cuando `hayTexto` es verdadero. Se dice, no se calla. */
   motivo: string | null
+  /** H-22: se descartó porque infla más que su tope. Ese documento no va a ningún motor. */
+  topeDeInflado?: boolean
 }
 
 const sinCapa = (motivo: string): ResultadoCapaCero => ({ hayTexto: false, paginas: [], motivo })
@@ -241,7 +243,7 @@ export function pareceTexto(texto: string): boolean {
  * Devuelve `hayTexto: false` con su motivo ante cualquier duda; el motivo se conserva para que
  * quien depure sepa POR QUE se gasto una llamada, en vez de verla aparecer sin explicacion.
  */
-export async function leeCapaCero(pdf: Uint8Array): Promise<ResultadoCapaCero> {
+export async function leeCapaCero(pdf: Uint8Array, presupuesto: PresupuestoDeInflado = presupuestoDeInflado()): Promise<ResultadoCapaCero> {
   if (pdf.length < 5 || aLatin1(pdf.subarray(0, 5)) !== '%PDF-') {
     return sinCapa('no es un PDF: la capa 0 solo aplica a PDF')
   }
@@ -249,7 +251,9 @@ export async function leeCapaCero(pdf: Uint8Array): Promise<ResultadoCapaCero> {
   // pasaria por texto si nadie mira, que es exactamente el falso positivo que no se admite.
   if (indiceDe(pdf, '/Encrypt', 0) >= 0) return sinCapa('PDF cifrado: la capa 0 no descifra')
 
-  const { flujos, filtrosDesconocidos } = await flujosDeContenido(pdf)
+  const { flujos, filtrosDesconocidos, topeDeInflado } = await flujosDeContenido(pdf, presupuesto)
+  // H-22: pasado el tope, lo leído está incompleto. No se usa ni un trozo: se dice por qué y no se sigue.
+  if (topeDeInflado) return { ...sinCapa(`el PDF infla más que su tope (${TOPE_INFLADO_POR_DOCUMENTO} bytes por documento): no se lee (H-22)`), topeDeInflado: true }
 
   /**
    * Un candidato tiene que ser lo bastante largo para SER una capa de texto.
@@ -340,12 +344,13 @@ export async function extraeConCapaCero(
   motor: MotorOcr,
   documento: Uint8Array,
   opciones?: OpcionesDeExtraccion,
+  presupuesto: PresupuestoDeInflado = presupuestoDeInflado(),
 ): Promise<ExtraccionConCapaCero> {
   if (opciones?.esquemaDeAnotacion !== undefined) {
     const paginas = await motor.extrae(documento, opciones)
     return { paginas, porCapaCero: false, motivo: 'se pidieron anotaciones: la capa 0 da texto, no campos' }
   }
-  const capa = await leeCapaCero(documento)
+  const capa = await leeCapaCero(documento, presupuesto)
   if (capa.hayTexto) {
     return {
       paginas: capa.paginas.map((markdown, indice) => ({ indice, markdown, campos: [] })),
@@ -353,6 +358,8 @@ export async function extraeConCapaCero(
       motivo: null,
     }
   }
+  // H-22: un documento que infla más que su tope no se le pasa al motor, que lo inflaría igual.
+  if (capa.topeDeInflado) return { paginas: [], porCapaCero: false, motivo: capa.motivo }
   const paginas = await motor.extrae(documento, opciones)
   return { paginas, porCapaCero: false, motivo: capa.motivo }
 }

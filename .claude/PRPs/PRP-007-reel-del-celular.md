@@ -204,8 +204,19 @@ Todos medidos en el laboratorio o en el recorrido con Playwright; cada uno qued�
 - **Fix**: `cortesEnVozAjena` + la regla `corte-en-voz-ajena`, que bloquea hasta que el dueño la confirma en la
   sala (clave por tramo: si el corte cambia, se revisa de nuevo). El dueño es la voz que más habla solo si domina;
   si no, se revisan todos los cortes. Casos `priv-9` y `priv-10` y tres pruebas del núcleo. La otra mitad (la
-  transcripción íntegra con el consentimiento) sigue pendiente.
+  transcripción íntegra con el consentimiento) llegó después del ciclo de consentimientos: `transcripcionAConservar`
+  al aprobar, borrada al retirar y por `reel:retencion` al vencer (caso `priv-12`).
 - **Lección**: cada riesgo firmado necesita su caso, no solo cada trampa.
+
+### 2026-10-02: la fase 6 se marcó hecha sin pantalla de consentimientos
+- **Error**: la API registraba consentimientos, pero ninguna pantalla ni script la llamaba, y retirar uno no existía
+  (el esquema dejaba escribir `revocado_en`; nada lo hacía). El README de la app decía que los registraba. Sin
+  consentimientos, toda segunda voz bloquea: el reel fallaba hacia lo seguro, pero solo servía con el dueño solo.
+- **Fix**: registrar y retirar en la sala. Retirar borra el documento, revoca lo aprobado antes de reprocesar,
+  `decisionesTrasRetirar` deshace las caras y los cortes revisados, y se avisa al dueño con la verdad (lo publicado
+  no se recupera; su voz e imagen siguen en el clip original hasta borrar el proyecto). Caso `priv-11`.
+- **Lección**: «hecha» se comprueba en la interfaz, no en la API. Y así se hizo: el 2026-10-05 la sala se recorrió
+  en el navegador con el clip de dos voces (`scripts/reel/captura-sala.mjs`, 15/15, 0 errores de consola).
 
 ## Gotchas
 - [ ] Next.js 16: `proxy.ts` (no `middleware.ts`) y `getUser()` en el servidor, nunca `getSession()`.

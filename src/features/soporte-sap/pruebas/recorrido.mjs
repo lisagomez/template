@@ -1,0 +1,281 @@
+#!/usr/bin/env node
+/**
+ * El recorrido del DoF (punto 7, pasos 1–12) con Playwright contra el laboratorio corriendo, con una
+ * captura por paso y los errores de consola contados. Necesita el servidor con SOPORTE_SAP_LABORATORIO=1
+ * (y el OCR local para leer la captura).
+ *
+ * Uso: node src/features/soporte-sap/pruebas/recorrido.mjs http://localhost:3001 docs/goals/soporte-sap-capturas
+ */
+import { mkdirSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { chromium } from 'playwright'
+
+const [base = 'http://localhost:3001', carpeta = 'docs/goals/soporte-sap-capturas'] = process.argv.slice(2)
+const DOCS = resolve('tools/soporte-sap/documentos')
+mkdirSync(carpeta, { recursive: true })
+
+const navegador = await chromium.launch()
+const pagina = await navegador.newPage({ viewport: { width: 1440, height: 1000 } })
+const errores = []
+pagina.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()) })
+pagina.on('pageerror', (e) => errores.push(e.message))
+const pasos = []
+const sel = (p) => `[data-prueba="${p}"]`
+
+/** Captura la celda del bento que prueba el paso (o la vista, si no se dice cuál) y comprueba lo que debe verse. */
+async function captura(n, que, comprueba, foco = null) {
+  const [entero, decimal] = String(n).split('.')
+  const archivo = join(carpeta, `paso-${entero.padStart(2, '0')}${decimal ? `-${decimal}` : ''}-${que.replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 40)}.jpg`)
+  if (foco) await pagina.locator(foco).first().screenshot({ path: archivo, type: 'jpeg', quality: 60 })
+  else await pagina.screenshot({ path: archivo, type: 'jpeg', quality: 60 })
+  const ok = comprueba ? await comprueba() : true
+  pasos.push({ paso: n, que, ok, archivo })
+  console.log(`${ok ? '✓' : '✗'} ${n}. ${que} → ${archivo}`)
+}
+const rol = async (r) => { await pagina.click(sel(`rol-${r}`)); await pagina.waitForSelector(sel(`vista-${r}`)) }
+const texto = async (s) => (await pagina.locator(s).allInnerTexts()).join('\n')
+async function levanta(titulo, descripcion, archivos) {
+  await pagina.fill(sel('titulo'), titulo)
+  await pagina.fill(sel('descripcion'), descripcion)
+  await pagina.setInputFiles(sel('adjuntos'), archivos.map((a) => join(DOCS, a)))
+  await pagina.click(sel('levantar'))
+  // El formulario se vacía cuando la API ya respondió (también si rechaza). Esperar a que el botón deje de estar
+  // deshabilitado se cumplía a veces ANTES de que llegara a deshabilitarse, y la captura salía sin la incidencia.
+  await pagina.waitForFunction(() => document.querySelector('[data-prueba="titulo"]')?.value === '', null, { timeout: 120_000 })
+  await pagina.waitForFunction(() => !document.querySelector('[data-prueba="levantar"]')?.hasAttribute('disabled'), null, { timeout: 120_000 })
+}
+async function decide(mensajeContiene, accion, motivo) {
+  const m = pagina.locator('li[data-prueba^="sala-"]', { hasText: mensajeContiene }).filter({ has: pagina.locator(sel('acciones-sala')) }).first()
+  if (motivo) { await m.locator(sel('motivo')).fill(motivo); await m.locator(sel('a-revision')).click() }
+  else await m.locator(sel(accion)).click()
+  await pagina.waitForTimeout(400)
+}
+async function chatea(t) { await pagina.fill(sel('chat-texto'), t); await pagina.click(sel('chat-enviar')); await pagina.waitForTimeout(400) }
+
+await pagina.goto(`${base}/soporte-sap`)
+await pagina.click(sel('reinicia'))
+await rol('cliente')
+
+// 1–3: el N3 levanta con una captura y un CFDI; la evidencia y la categorización con su traza.
+await levanta('MIGO no deja contabilizar la entrada', 'Al contabilizar la entrada 101 en MIGO sale el mensaje M7 053 en sociedad 1000; necesitamos el periodo 2026/10 y toda la planta está detenida hoy.', ['captura-migo.png', 'cfdi-rechazado.xml'])
+await captura(1, 'N3 levanta una incidencia con adjuntos', async () => (await texto(sel('incidencias'))).includes('inc-001'), sel('vista-cliente'))
+await pagina.locator(sel('evidencia')).scrollIntoViewIfNeeded()
+await captura(2, 'evidencia extraida por campo y en revision', async () => { const t = await texto(sel('evidencia')); return /captura-migo\.png/.test(t) && /cfdi-rechazado\.xml/.test(t) && /por revisar/.test(t) }, sel('evidencia'))
+await pagina.click(`${sel('cadena')} summary`)
+await captura(3, 'el agente categoriza con la evidencia y la traza', async () => { const t = await texto(sel('categorizacion')); return /Prioridad P[12]/.test(t) && /SS-MM-PERIODO/.test(t) && /íntegra ✓/.test(await texto(sel('cadena'))) }, sel('detalle-inc-001'))
+
+// 3.5 (DP-3, tercera revisión R3-03): el plan verificado va primero a la consultora; al laboratorio llega si ella lo escala.
+await rol('superadmin')
+const sinEscalar = await texto(sel('sala'))
+await rol('consultor')
+await pagina.click(sel('incidencia-inc-001'))
+const pendiente = await texto(sel('plan-pendiente'))
+await pagina.click(sel('escala'))
+await pagina.waitForTimeout(400)
+await captura(3.5, 'la consultora escala al laboratorio a su nombre', async () => !/Plan v1 para inc-001/.test(sinEscalar) && /espera que la consultora lo escale/.test(pendiente)
+  && /Escalada al laboratorio por usr-consultor-andina/.test(await texto(sel('detalle-inc-001'))), sel('detalle-inc-001'))
+
+// 4: caso conocido → ejecutor → supervisor → sala → aprobación humana → simulador con antes y después.
+await rol('superadmin')
+await captura(4, 'plan del caso conocido en la sala con veredicto del supervisor', async () => /Supervisor \(agente:supervisor-sap\): 6\/6/.test(await texto(sel('sala'))), sel('sala'))
+await decide('Plan v1 para inc-001', 'aprobar')
+await rol('cliente')
+await pagina.locator(sel('antes-despues')).first().scrollIntoViewIfNeeded()
+await captura(4.5, 'aprobado por el HIL y aplicado al simulador antes y despues', async () => { const t = await texto(sel('antes-despues')); return /error presente.*error ausente/s.test(t) && /no en el SAP del cliente/.test(t) && /fuera del producto/.test(t) }, sel('plan-v1'))
+
+// 5: caso desconocido → anonimiza → sandbox → el experto enseña en el chat → propuesta de regla y de CLI.
+await levanta('La app Fiori F0842 se queda en blanco', 'La app Fiori F0842 se queda en blanco al abrirla desde el launchpad; lo reporta Xóchitl Tzompantzi, xtzompantzi@alimentos.example', [])
+await rol('experto')
+await chatea('Te enseño el caso inc-002 de la app Fiori en blanco: en Alimentos del Bajío pasa con la ZFI_FIORI_CACHE; hay que limpiar la caché del launchpad, y vuelve a abrir')
+await captura(5, 'caso desconocido anonimizado al sandbox y el experto enseña', async () => { const s = await texto(sel('sandbox')); const p = await texto(sel('propuestas')); return /\[NOMBRE\]/.test(s) && !/Tzompantzi/.test(s) && /ss-limpiar-cache/.test(p) && /regla/.test(p) && /a medida de andina/.test(p) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 && !/Fiori F0842 se queda en blanco|Tzompantzi/.test(await texto(sel('incidencias'))) })
+
+// 5.01 y 5.02 (D1, PRP-011): sin el consentimiento de la consultora y del cliente de origen, no sube; la pantalla dice
+// qué falta, nunca de quién. Cada organización consiente por sí.
+await rol('superadmin')
+await captura(5.01, 'sin consentimiento la ensenanza no sube y se dice que falta', async () => { const t = await texto('[data-prueba^="falta-"]'); return /consultora de origen/.test(t) && !/Andina|Bajío/.test(t) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 }, sel('propuestas'))
+await rol('consultor')
+await pagina.click(sel('consiente-nucleo'))
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await pagina.click(sel('consiente-nucleo'))
+await pagina.waitForTimeout(400)
+await captura(5.02, 'el cliente y su consultora consienten cada uno por si', async () => /consiente/.test(await texto(sel('consentimiento-alimentos-del-bajio'))) && (await pagina.locator(sel('revoca-nucleo')).count()) === 1, sel('conocimiento-comun'))
+
+// 5.1 (PRP-010 H-19): lo enseñado queda a medida de la consultora; al núcleo lo sube el superadministrador, generalizado.
+await rol('superadmin')
+await pagina.locator('[data-prueba^="al-nucleo-"]').first().click()
+await pagina.waitForTimeout(400)
+await captura(5.1, 'el superadministrador sube la enseñanza al núcleo generalizada', async () => { const p = await texto(sel('propuestas')); return /núcleo/.test(p) && /\[CLIENTE\]/.test(p) && /\[OBJETO_PROPIO\]/.test(p) && !/Bajío|ZFI_FIORI_CACHE/.test(p) && (await pagina.locator('[data-prueba^="al-nucleo-"]').count()) === 0 }, sel('propuestas'))
+
+// 6: revisión → el agente corrige y vuelve a proponer.
+await rol('cliente')
+await levanta('FB01 no deja contabilizar', 'FB01 marca F5 201: el periodo contable no está abierto en sociedad 1000 para el periodo 2026/10', [])
+await rol('consultor')
+await pagina.click(sel('incidencia-inc-003'))
+await pagina.click(sel('escala'))
+await pagina.waitForTimeout(400)
+await rol('superadmin')
+await decide('Plan v1 para inc-003', 'a_revision', 'El periodo correcto es el periodo 2026/11; corrige y vuelve a proponer')
+await captura(6, 'a revision el agente corrige y propone la v2', async () => /Plan v2 para inc-003[\s\S]*periodo: 2026\/10 → 2026\/11/.test(await texto(sel('sala'))), sel('sala'))
+
+// 10: el chat del HIL: métrica con definición; aprobar desde el chat se promueve a la sala y se aprueba allí. La de
+// una consultora no la contesta: con dos, se despejaría restando del total (D14), y lo dice.
+await chatea('¿Cuál fue el MTTR en septiembre de 2026?')
+await chatea('¿Cuál fue el MTTR de Consultora Andina en septiembre de 2026?')
+await chatea('Aprueba la tarea-inc-003, ya lo revisé')
+await captura(10, 'chat del HIL metrica con definicion y peticion promovida a la sala', async () => { const c = await texto(sel('chat')); const s = await texto(sel('sala')); return /Definición:/.test(c) && /capa semántica · mttr_horas · 2026-09 · total/.test(c) && /su grupo tiene menos de 3 clientes, o se despejaría restando \(D14\)/.test(c) && /No apruebo desde el chat/.test(c) && /desde el chat del HIL/.test(s) }, sel('chat'))
+await decide('Plan v2 para inc-003', 'aprobar')
+await captura(10.5, 'la v2 se aprueba en la sala con la sesion humana', async () => /aprobar por usr-superadmin/.test(await texto(sel('sala'))), sel('sala'))
+
+// 7 y 11: el workspace del consultor con SLA y horas; el reloj corre, se pausa, se reanuda; el incumplimiento con su evidencia.
+await rol('consultor')
+// PRP-010 H-17 (DP-4): el plan de inc-001 fue a la sala (y se aplicó), y eso NO es haberle respondido al cliente; la
+// primera respuesta la da el consultor. Se mira el ESTADO del reloj y la CADENA (textContent: el <details> está cerrado),
+// no los minutos: «respuesta 0 min» se ve igual antes y después. Y la cadena sola tampoco basta: el código viejo
+// marcaba la primera respuesta en el reloj sin anotarla en la cadena, así que el estado del reloj es lo que la delata
+// (con el código viejo, esta P1 decía «respuesta en meta» sin que nadie hubiera respondido).
+const cadena = async () => (await pagina.locator(sel('cadena')).first().textContent()) ?? ''
+await pagina.click(sel('incidencia-inc-001'))
+await captura(11.1, 'con el plan ya en la sala nadie le ha respondido al cliente', async () => { const c = await cadena(), r = await texto(sel('reloj-incidencia')); return /ENVIADA_A_SALA/.test(c) && !/PRIMERA_RESPUESTA/.test(c) && /en plazo/.test(r) && !/respuesta en meta/.test(r) }, sel('reloj-incidencia'))
+await pagina.fill(`${sel('responde-al-cliente')} input`, 'Ya revisamos el periodo contable; te confirmamos hoy mismo.')
+await pagina.click(`${sel('responde-al-cliente')} button`)
+await pagina.waitForTimeout(400)
+await captura(11.2, 'la primera respuesta la marca el consultor al responder', async () => /PRIMERA_RESPUESTA · usr-consultor/.test(await cadena()) && /respuesta en meta/.test(await texto(sel('reloj-incidencia'))), sel('reloj-incidencia'))
+await pagina.click(sel('incidencia-inc-002'))
+await pagina.fill(`${sel('espera-cliente')} input`, 'Necesitamos el log de la ST22 del día del error')
+await pagina.click(`${sel('espera-cliente')} button`)
+await pagina.waitForTimeout(1200)
+await pagina.click(sel('responde-cliente'))
+await pagina.waitForTimeout(400)
+await captura(7, 'workspace del consultor con SLA y horas', async () => { const t = await texto(sel('sla')); return /P1/.test(t) && /SAP Enterprise Support/.test(t) && (await texto(sel('horas'))).includes('Horas') }, sel('sla'))
+// 7.1 (AISIA §4, riesgo de baja): la tarjeta enseña la fórmula y el umbral SUPUESTO junto al número. Es la única fila de
+// la matriz que se prueba leyendo el código (un componente de React): aquí se ve en la pantalla.
+const riesgo = pagina.locator('[data-supuesto="riesgo_de_baja"]').first()
+await riesgo.scrollIntoViewIfNeeded()
+await captura(7.1, 'el riesgo de baja con su formula y su umbral supuesto', async () => { const t = (await riesgo.textContent()) ?? ''; return /0\.85/.test(t) && /Supuesto:/.test(t) }, '[data-supuesto="riesgo_de_baja"]')
+await captura(11, 'reloj de una incidencia corre se pausa y se reanuda', async () => { const r = await texto(sel('reloj-incidencia')); return /pausa/.test(r) && /RESPUESTA_CLIENTE/.test(r) }, sel('reloj-incidencia'))
+await pagina.locator(sel('reloj-demo')).scrollIntoViewIfNeeded()
+await captura(11.5, 'incumplimiento de SLA con su evidencia', async () => { const d = await texto(sel('reloj-demo')); return /fuera de meta/.test(d) && /ESPERA_CLIENTE/.test(d) && /RESPUESTA_CLIENTE/.test(d) }, sel('reloj-demo'))
+await pagina.locator(sel('accionables')).scrollIntoViewIfNeeded()
+await captura(12, 'accionables con impacto en MXN en el tablero del consultor', async () => { const t = await texto(sel('accionables')); return /Fórmula:/.test(t) && /Supuestos:/.test(t) && /MXN al mes/.test(t) && /para la consultora/.test(t) }, sel('accionables'))
+
+// 8: el tablero del N3 con métricas y FODA; 12 también en el N3.
+await rol('cliente')
+await captura(8, 'tablero del N3 con metricas y FODA que cita su dato', async () => { const f = await texto(sel('foda')); return /Dato: /.test(f) && /Criterio: /.test(f) && /capa semántica/.test(await pagina.locator(sel('tablero')).innerHTML()) }, sel('foda'))
+await pagina.locator(sel('accionables')).scrollIntoViewIfNeeded()
+await captura(12.5, 'accionables con impacto en MXN en el tablero del N3', async () => { const t = await texto(sel('accionables')); return /para el cliente/.test(t) && !/para la consultora/.test(t) }, sel('accionables'))
+
+// 9: las vistas del superadministrador y del experto.
+await rol('superadmin')
+await captura(9, 'vista del superadministrador', async () => /Todas las consultoras/.test(await texto(sel('tablero'))) && !/inc-002/.test(await texto(sel('incidencias'))))
+// 9.1 (PRP-010, fase 3): la ficha de servidor por consultora. Sin medir, sin las respuestas del proveedor y sin
+// restauración probada, ninguna es apta: la pantalla no dice «apto» sin GATE 3.
+await pagina.locator(sel('fichas')).scrollIntoViewIfNeeded()
+await captura(9.1, 'la ficha de servidor no dice apto sin la restauracion probada', async () => {
+  const t = await texto(sel('fichas'))
+  return /andina · gestionado/.test(t) && /boreal · despacho/.test(t) && (await pagina.locator(sel('ficha-no-apto')).count()) === 2 && (await pagina.locator(sel('ficha-apto')).count()) === 0 && /GATE 3/.test(t)
+}, sel('fichas'))
+await rol('experto')
+await captura(9.5, 'vista del experto', async () => { const t = await texto(sel('tablero')); return /Todas las consultoras/.test(t) && !/Horas por incidencia/.test(t) })
+
+// 13 (PRP-010 H-18): el presupuesto del mes. El superadministrador lo deja en 0: un P1 con una captura pasa a una
+// persona AHORA (por la imagen sin leer y por el presupuesto) y un P4 espera, con aviso. El consultor lo ve.
+await rol('superadmin')
+await pagina.fill(sel('tope-tokens-andina'), '0')
+await pagina.fill(sel('tope-ocr-andina'), '0')
+await pagina.locator(`${sel('fija-presupuesto-andina')} button`).click()
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await levanta('MIGO detenida otra vez', 'Al contabilizar la entrada 101 en MIGO sale el mensaje M7 053 en sociedad 1000; necesitamos el periodo 2026/10 y toda la planta está detenida hoy.', ['captura-migo.png'])
+await levanta('Usuario bloqueado', 'El usuario ALMACEN01 está bloqueado en SU01, cuando puedan', [])
+await rol('consultor')
+await pagina.locator(sel('presupuesto')).scrollIntoViewIfNeeded()
+await captura(13, 'al tope del presupuesto el P1 pasa a una persona y el P4 espera', async () => {
+  const t = await texto(sel('presupuesto'))
+  return /tokens [\d.,]+ de 0/.test(t) && /a una persona[^\n]*evidencia sin leer/.test(t) && /a una persona[^\n]*no alcanza[^\n]*P1 pasa a una persona/.test(t) && /en espera[^\n]*P4 espera/.test(t)
+}, sel('presupuesto'))
+
+// 14 (PRP-010 H-10): el cliente impugna la prioridad; la consultora la resuelve a su nombre, y una resuelta no se reabre.
+// El prefijo es «incidencia-inc-»: con «incidencia-» también encajaba la lista entera («incidencias»), y el clic caía
+// en el centro de la lista, en otra incidencia.
+const abre = (titulo) => pagina.locator('[data-prueba^="incidencia-inc-"]', { hasText: titulo }).first().click()
+await rol('cliente')
+await abre('Usuario bloqueado')
+await pagina.selectOption(sel('impugna-campo'), 'prioridad')
+await pagina.fill(sel('impugna-motivo'), 'Es P4, pero nadie del almacén puede surtir sin ese usuario')
+await pagina.click(sel('impugna-envia'))
+await pagina.waitForTimeout(400)
+await rol('consultor')
+await abre('Usuario bloqueado')
+await pagina.click(sel('impugnacion-acepta'))
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await abre('Usuario bloqueado')
+await captura(14, 'el cliente impugna y la consultora la resuelve a su nombre', async () => {
+  const t = await texto(sel('impugnaciones'))
+  return /aceptada/.test(t) && /prioridad/.test(t) && /nadie del almacén/.test(t) && /resuelta por usr-consultor-andina/.test(t) && (await pagina.locator(sel('impugnacion-acepta')).count()) === 0
+}, sel('impugnaciones'))
+
+// 14.2 (PRP-010, fase 4): la pausa unilateral. El consultor pausa diciendo qué pide; el cliente lo ve y reanuda el
+// reloj él mismo al responder, sin depender de su consultora.
+await rol('consultor')
+await abre('Usuario bloqueado')
+await pagina.fill(`${sel('espera-cliente')} input`, 'Confírmanos si el bloqueo fue por intentos fallidos')
+await pagina.click(`${sel('espera-cliente')} button`)
+await pagina.waitForTimeout(400)
+await rol('cliente')
+await abre('Usuario bloqueado')
+const pidio = /intentos fallidos/.test(await texto(sel('cliente-pide')))
+await pagina.click(sel('cliente-reanuda'))
+// La captura espera a que el reloj muestre la reanudación: con un tiempo fijo salía el reloj de antes.
+await pagina.locator(sel('reloj-incidencia'), { hasText: 'RESPUESTA_CLIENTE' }).first().waitFor({ timeout: 10_000 })
+await captura(14.2, 'el cliente ve que se le pide y reanuda el reloj al responder', async () => {
+  const c = await cadena()
+  return pidio && /ESPERA_CLIENTE · usr-consultor-andina/.test(c) && /RESPUESTA_CLIENTE · usr-cliente-bajio/.test(c) && (await pagina.locator(sel('cliente-reanuda')).count()) === 0
+}, sel('reloj-incidencia'))
+
+// 14.3 (DP-4, R3-07): el cliente lee lo que se le respondió. 14.4 (R3-08): lo da por resuelto el consultor, no el agente.
+await abre('MIGO no deja contabilizar la entrada')
+await captura(14.3, 'el cliente lee la respuesta de su consultora', async () => /Ya revisamos el periodo contable/.test(await texto(sel('respuestas'))), sel('respuestas'))
+await rol('consultor')
+await abre('MIGO no deja contabilizar la entrada')
+const antesDeResolver = await cadena()
+await pagina.click(sel('resuelve'))
+await pagina.locator(sel('cadena'), { hasText: 'RESUELTA · usr-consultor-andina' }).first().waitFor({ timeout: 10_000 })
+await captura(14.4, 'aplicar no resuelve lo da por resuelto el consultor', async () => /APLICADA_EN_SIMULADOR/.test(antesDeResolver) && !/RESUELTA/.test(antesDeResolver)
+  && /RESUELTA · usr-consultor-andina/.test(await cadena()), sel('reloj-incidencia'))
+await rol('cliente')
+
+// H-28: el FODA dice su confianza, y una proyección dice que no es una promesa.
+await captura(14.5, 'el FODA lleva su confianza y la proyección su aviso', async () => {
+  const f = await texto(sel('foda')), a = await texto(sel('accionables'))
+  return /confianza (media|baja)/.test(f) && /Proyección con supuestos, no una promesa/.test(a)
+}, sel('foda'))
+
+// 14.6–14.8 (D8, PRP-012): cada original dice cuándo vence; el cliente registra su salida, descarga su export y queda
+// congelado. Va al final: con la salida registrada, nada de este cliente cambia más.
+await abre('MIGO no deja contabilizar la entrada')
+await captura(14.6, 'cada original dice cuando vence', async () => /Original: no vence: el contrato todavía no dice cuántos días se guarda/.test(await texto(sel('evidencia'))), sel('evidencia'))
+await pagina.locator(sel('salidas')).scrollIntoViewIfNeeded()
+await pagina.check(sel('salida-entiendo'))
+await pagina.click(sel('salida-registra'))
+await pagina.locator(sel('salida-registrada')).first().waitFor({ timeout: 10_000 })
+const exporta = (r) => pagina.request.get(`${base}/api/soporte-sap?rol=${r}&export=alimentos-del-bajio`)
+await captura(14.7, 'la salida registrada con su export y su gracia', async () => {
+  const t = await texto(sel('salidas'))
+  return /Registrada por usr-cliente-bajio/.test(t) && /sin gracia en el contrato: no se borra nada/.test(t) && /Gracia de su contrato: por decidir/.test(t)
+    && (await exporta('cliente')).status() === 200 && (await exporta('superadmin')).status() === 404
+}, sel('salidas'))
+// El 400 de este rechazo es el esperado: se aparta de los errores de consola, y solo ese.
+const antesDelRechazo = errores.length
+await levanta('Otra más', 'El usuario ALMACEN02 también está bloqueado en SU01', [])
+const rechazos = errores.splice(antesDelRechazo)
+errores.push(...rechazos.filter((e) => !/status of 400/.test(e)))
+await captura(14.8, 'con la salida registrada el cliente no levanta y lo suyo no cambia', async () =>
+  rechazos.length === 1 && /la salida de este cliente está registrada \(D8\)/.test(await texto(sel('error'))) && /La salida de este cliente está registrada/.test(await texto(sel('congelada')))
+  && (await pagina.locator(sel('impugna')).count()) === 0, sel('vista-cliente'))
+
+await navegador.close()
+const malos = pasos.filter((p) => !p.ok)
+console.log(`\n${pasos.length} capturas · ${malos.length} comprobaciones en rojo · ${errores.length} errores de consola${errores.length ? `:\n  ${errores.join('\n  ')}` : ''}`)
+process.exit(malos.length || errores.length ? 1 : 0)

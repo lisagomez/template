@@ -1,0 +1,71 @@
+{
+ "medido": "2026-10-04",
+ "insumos": {
+  "bytesBdPorIncidencia": {
+   "valor": 2815,
+   "unidad": "bytes",
+   "naturaleza": "medida",
+   "fuente": "PGlite: tamaño de las tablas ss_* tras 2616 incidencias sintéticas con 6 eventos, adjunto y horas (evidencia/estimado.ts, 2026-10-04)"
+  },
+  "documentosPorIncidencia": {
+   "valor": 1.2,
+   "unidad": "documentos",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: una captura o un PDF por incidencia, a veces dos"
+  },
+  "bytesPorDocumento": {
+   "valor": 250000,
+   "unidad": "bytes",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: captura de pantalla completa; la sintética del laboratorio mide 60736 bytes"
+  },
+  "fraccionImagenes": {
+   "valor": 0.6,
+   "unidad": "fracción",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: seis de cada diez adjuntos son imágenes (el resto, PDF con texto o XML)"
+  },
+  "segundosOcrPorPagina": {
+   "valor": 0.29,
+   "unidad": "s/página",
+   "naturaleza": "medida",
+   "fuente": "Tesseract por zonas, 3 lecturas de una captura sintética de 1400 px (CPU, sin GPU, 2026-10-04)"
+  },
+  "tokensPorIncidencia": {
+   "valor": 9000,
+   "unidad": "tokens",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: sin LLM real no hay medición (D7); triage y redacción de un plan"
+  },
+  "msCpuPorIncidencia": {
+   "valor": 0.518,
+   "unidad": "ms",
+   "naturaleza": "medida",
+   "fuente": "categorizador + matriz sobre el motor del grafo + 6 eventos de la cadena, 500 incidencias del corpus (2026-10-04)"
+  },
+  "bytesExportPorIncidencia": {
+   "valor": 3857,
+   "unidad": "bytes",
+   "naturaleza": "medida",
+   "fuente": "export por tenant de 2616 incidencias sintéticas (JSON) (2026-10-04)"
+  },
+  "bytesEgresoPorIncidencia": {
+   "valor": 400000,
+   "unidad": "bytes",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: vistas del ticket y de los tableros por incidencia"
+  },
+  "ramBaseMb": {
+   "valor": 768,
+   "unidad": "MB",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: Next standalone y Node; no medido en un VPS"
+  },
+  "ramPorTrabajadorOcrMb": {
+   "valor": 350,
+   "unidad": "MB",
+   "naturaleza": "supuesta",
+   "fuente": "SUPUESTO: un proceso de Tesseract por zonas con su Python"
+  }
+ }
+}

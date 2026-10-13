@@ -7,7 +7,9 @@
 > herramienta y la Agent Card del puente. Nada de aquí se inventa: lo que ninguna fuente dice va
 > marcado **[supuesto]** o **pendiente**. Todo lo medido sobre calidad es con corpus **sintético**
 > o no concluyente, salvo los identificadores de expedientes laborales (84 páginas reales).
-> Cubre `tools/extractor-documental`, su servicio contenedorizado y el puente A2A (`/a2a`).
+> Cubre `tools/extractor-documental`, su servicio contenedorizado, el puente A2A (`/a2a`) y el piloto del
+> buzón de CFDI (`/buzon`). El impacto del piloto sobre terceros vive en su spec (015), y **su AISIA se firma
+> aparte**, antes del primer documento real: firmar este contrato no la firma.
 
 ---
 
@@ -22,7 +24,9 @@ sale del perímetro** (spec 008). Por eso «masivo» no se logra con un motor m�
 se logra enrutando fuera del motor todo lo que no lo necesita.
 **Costo actual:** **pendiente, no medido** en una operación real. Lo único calculado es el costo de
 la alternativa que se descartó por C4: unas 5.000 páginas con un motor de API salen en ~20 USD
-(SDD §2.18).
+(SDD §2.18). **Se medirá con el piloto del buzón de CFDI** (spec 015): horas de captura por pyme y por
+mes antes y después, en un despacho real, y la proporción de CFDI pendientes al cierre. Al cerrar el
+piloto, esta línea lleva la cifra y su fuente, o «desconocido» con el motivo (RF-23, RF-24).
 
 ## 2. Solución
 
@@ -144,7 +148,7 @@ Ya medido, y dicho con su alcance:
 | **Partes afectadas** | Los **titulares** de los documentos; el **proveedor legítimo**, que no cobra si un código sustituido desvía el pago; los **empleados** cuya nómina se lee; el **dueño del esquema**, que paga un duplicado; y el **agente** que consume, que actuaría en casa de otro sobre un dato falso. |
 | **Daño con el sistema operando bien** | **1.** Un dato mal extraído que pasa la revisión visual y decide algo sobre la persona (un importe, una fecha, una dosis). Mitigación: confianza y evidencia visibles, región de origen obligatoria, sin umbral por defecto hasta medirlo. **2.** Una factura tomada por auténtica porque su XML se leyó bien: **el sello no se verifica** y la Card y la respuesta lo dicen; no se consulta al SAT, para no revelar la relación entre dos terceros. **3.** Un alta que debió ser coincidencia parte en dos el historial de alguien: ninguna alta sin confirmación, con los parecidos a la vista. **4.** Un pago desviado por un QR sustituido: nunca se navega a la dirección de un código, y ningún dato de pago se promueve sin confirmación. **5.** Un campo apagado en la plantilla desaparece de mil documentos: queda quién lo apagó y cuándo. **6.** La evidencia perdida por creerla respaldada (§4). **7.** Un CSV exportado deja de estar bajo RLS: queda registrado quién exportó qué y cuándo. |
 | **Salida del perímetro** | **Ningún documento con datos de terceros sale del perímetro, y ninguna firma lo autoriza** (límite de C5): el daño recae en quien no firmó. El motor es autohospedado; Mistral viene apagado y solo arrancaría con una decisión C4 escrita, que con datos de terceros no procede. |
-| **Exponer el puente A2A** | Solo en la red interna del compose, con clave de API: **por ahora no se ofrece a partners** (decisión del laboratorio, 2026-09-30). **Ofrecerlo a un partner o a internet es gate humano** (spec 005 RF-12, spec 010 RF-20) y va con modelo de amenazas (C3) y la evaluación de impacto de ese caso, que está **pendiente**: el documento de un partner trae datos de alguien que no firmó nada. Falta también la gestión de credenciales, cuota y límite por partner. |
+| **Exponer el puente A2A** | Solo en la red interna del compose, con clave de API. **Desde el 2026-10-02 se hace cumplir**: Caddy responde 404 desde fuera y, en producción, sin clave el puente se apaga (revisión C3 de rutas públicas). Además, **por ahora no se ofrece a partners** (decisión del laboratorio, 2026-09-30). **Ofrecerlo a un partner o a internet es gate humano** (spec 005 RF-12, spec 010 RF-20) y va con modelo de amenazas (C3) y la evaluación de impacto de ese caso, que está **pendiente**: el documento de un partner trae datos de alguien que no firmó nada. Falta también la gestión de credenciales, cuota y límite por partner. |
 | **Acciones irreversibles** | Ninguna automática. Con gate humano o confirmación: suprimir (otra operación y otra autoridad que corregir), borrar por retención, aplicar la propuesta de modelo, dar de alta en un catálogo, promover un dato de pago y exponer el puente. |
 | **Vía de apelación humana** | Una corrección añade versión con quién, cuándo y por qué; lo validado no se edita. El titular puede pedir la supresión y queda la lápida. El agente recibe una Task fallida con razón legible, o `revisionHumana=true`, en vez de un dato inventado. |
 | **Aislamiento de datos** | RLS por organización en toda tabla y en el bucket (primer segmento de la ruta). **Las policies de la migración 001 no se han ejecutado nunca** (SDD §8): hasta probarlas en un Postgres real, «lo aísla la base» es una afirmación. El worker de ingesta con `service_role` es un job de plataforma declarado (C7); la subida va con la sesión del usuario. Hermes no recibe llaves del extractor, del almacén ni `service_role`. |
@@ -154,7 +158,7 @@ Ya medido, y dicho con su alcance:
 ### Tipo de proyecto
 
 **Tipo:** herramienta + servicio + aplicación. El núcleo es la herramienta empaquetable
-`@tu-scope/extractor-documental` (0.7.1, en `tools/extractor-documental`, ocho entry points); el
+`@tu-scope/extractor-documental` (0.9.0, en `tools/extractor-documental`, once entry points); el
 servicio contenedorizado se levanta en el VPS del cliente con `docker compose up`, con o sin GPU
 (spec 010); y la app del template expone el puente A2A en `/a2a`, con tres rutas exactas: la Card,
 el JSON-RPC y el health.
@@ -188,4 +192,4 @@ Supabase. `@a2a-js/sdk` pineado sin rangos; imagen del servicio y motores pinead
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-13 · Se vuelve a firmar con el corpus real del cliente.

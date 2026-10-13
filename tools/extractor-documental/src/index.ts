@@ -44,8 +44,8 @@ export {
   siguientes,
 } from './estados.js'
 
-export { tipoDe, tipoMimeDe, clasificaArchivo, clasificaLote, troceaPaginas } from './archivos.js'
-export type { ResultadoDeIngesta } from './archivos.js'
+export { tipoDe, tipoMimeDe, clasePorBytes, esXmlPorBytes, clasificaArchivo, clasificaLote, troceaPaginas } from './archivos.js'
+export type { ResultadoDeIngesta, ClasePorBytes } from './archivos.js'
 
 export { identidadDe, esElMismoDocumento, identidadDeLectura } from './identidad.js'
 export type { LecturaDeCodigo } from './identidad.js'
@@ -184,8 +184,8 @@ export type {
   InferenciaDeCorpus,
 } from './corpus.js'
 
-export { imagenesDelPdf } from './pdf-flujos.js'
-export type { ImagenDelPdf } from './pdf-flujos.js'
+export { imagenesDelPdf, presupuestoDeInflado, TOPE_INFLADO_POR_DOCUMENTO } from './pdf-flujos.js'
+export type { ImagenDelPdf, PresupuestoDeInflado } from './pdf-flujos.js'
 
 // Identificadores mexicanos con digito verificador, y clasificacion de paginas por titulo (spec 009).
 export {

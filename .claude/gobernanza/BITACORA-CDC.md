@@ -28,6 +28,11 @@
 - **Aprobado por**:
 ```
 
+La firma es un **nombre**: «Aprobado por» empieza por el usuario que decide (`verify:gobernanza` 6b).
+Una entrada sin firma no se edita en su sitio: la cierra una entrada **posterior y firmada** con una
+línea por cada una, `- **Cierra** (ratificada | no ratificada: <qué se hace>): <título de la entrada>`.
+Desde el 2026-10-06, una entrada firmada no lleva «aprobación humana ☐».
+
 ---
 
 ## Entradas
@@ -4333,3 +4338,386 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - **la cifra ya no se mueve**: con una fila pendiente más, o con un contrato enlazado más, el total sigue en 166;
   - `npm run validate` ☑ 28/28 activos (8 inactivos declarados, 0 rojos).
 - **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-01, con el diff delante; firmado el 2026-10-02.
+
+### 2026-10-02 — skill `analista-producto`: rol con contrato A2A no servido, verificador de evidencia y gate `prueba:analista` — radio: skill
+- **Cambio** (rama `paintpoints`, sobre `1623a5c`; diff completo en `.claude/goals/analista-producto/propuesta-cdc.md`):
+  - **skill nuevo** `.claude/skills/analista-producto/` (`SKILL.md`, `esquema.md`, `plantilla-one-pager.md`): dolores con
+    cita verificada, casos de uso por categoría y propuestas product first; solo escribe en `docs/analisis/`;
+  - **gate nuevo** `prueba:analista` en el perfil `validate` (`.claude/gates.json` + `package.json`): Card y transiciones
+    con los tipos de `@a2a-js/sdk` 1.1.0, ninguna ruta lo sirve (enumera `src/app`), `--prueba` del verificador (17
+    siembras) y la última corrida en verde **contra su propio commit** (una corrida es una foto);
+  - **clase de routing** `analisis-de-producto` → `razonamiento` (C8); el paso de vetos sigue en `decision-de-gobernanza`;
+  - **contrato capa A** del skill (12 reglas) en `golden-sets/contratos.json`;
+  - **cuenta de skills 27 → 28** en `CLAUDE.md`, `AGENTS.md`, `README.md` y `.claude/README.md`; rama nueva en el decision
+    tree de `AGENTS.md`; `GEMINI.md` regenerado con `sincroniza:gemini`.
+- **Motivo**: pedido del laboratorio del 2026-10-02 («planea el rol de A2A que revise el repositorio…»), decidido como
+  análisis + SDD + PRP + skill + contrato A2A. Diseño: `docs/SDD-analista-producto.md`; plan: PRP-008.
+- **Qué pone rojo y qué no**: rojo = una cita que no existe o no dice lo afirmado, un grado inflado, un activo fuera de la
+  cobertura, un hallazgo que no cae en ningún caso, una cifra sin su captura, un vetado en el ranking, un one-pager con las
+  piezas antes que el usuario, una hipótesis del pedido sin veredicto, o una ruta que sirva al rol. **No** pone rojo que una
+  cita signifique otra cosa que lo que concluye el hallazgo (juicio, a la vista del lector).
+- **Desviación del goal, declarada**: el goal pedía el gate «propuesto sin aplicar». Va aplicado en la rama porque el
+  padrón pone rojo un archivo de pruebas que ningún gate corre (`verifica-gates.mjs`, comprobación 4); renombrarlo para
+  esquivarlo habría sido hacerle trampa al gate. Nada se integra sin esta firma.
+- **Gate aplicado**: diff visible ☑ (completo en la propuesta, **antes** de pedir la firma) · regresión capa A ☑ 163/163 ·
+  **capa B no corrida por el agente, a propósito**: leer la rama `golden-sets` contamina las corridas en frío; decide el
+  laboratorio («capa A basta») ☑ · aprobación humana ☑ ·
+  pineo ☑ (sin modelo ni dependencia nueva: el SDK ya estaba en 1.1.0).
+- **Regresión y demostración**:
+  - `verify:gobernanza` ☑ 166/166 (5 pendientes declarados, los de antes);
+  - `prueba:analista` ☑ 7/7; **17/17 siembras cazadas**, cada una con un solo fallo y el esperado;
+  - **la corrida es una foto, demostrado**: cambiado en el árbol el literal citado de un contrato, la corrida sigue verde;
+  - `prueba:a2a` ☑ 14/14: ninguna ruta nueva fuera del bridge;
+  - primera corrida (`docs/analisis/2026-10-02/`, sobre `f2ba87f`): cobertura 39/39, 22 hallazgos, 82 citas comprobadas;
+  - `mide:contexto` ☑: lo que se paga en cada sesión pasa a 11028 tokens (92 % de 12000) con la descripción del skill y la
+    rama del decision tree;
+  - `npm run validate` ☑ 29/29 gates activos (8 inactivos declarados, 0 rojos) tras el último commit.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-05, con el diff delante.
+
+### 2026-10-04 — Soporte SAP (corrida A): inventario por producto, una superficie declarada, chequeos de deploy, un job con imagen y lock nuevos, extractor 0.8.0 → CDC PROMOVIDO — radio: verificador de inventario, declaración de superficie (C3), deploy, cadena de suministro
+
+- **Cambio** (rama `soporte/sap`, 18 commits sobre `main`, hasta `5e3be4c`; lo que toca gobernanza: 12 archivos, +188 −12):
+  1. **Gate `verifica:inventario`** (`scripts/inventario/nucleo.mjs`, `vista.mjs`, `scripts/prueba-inventario.ts`,
+     `inventario/activos.json`): dos campos opcionales nuevos en el índice, `producto` (slug: el clasificador de
+     producto) y `grado` (`A`–`F` o «no medido»); **un asiento que cubre un CLI sin `grado` se rechaza**; la fuente
+     `tools/*/clis/*.mjs` descubre cada CLI como unidad, y los 7 de Soporte SAP tienen su asiento («no medido»);
+     la vista gana la sección «Por producto». La exportación al ERP lista sus campos y no cambia.
+  2. **Superficie declarada (C3)** (`scripts/prueba-a2a.ts`): `/api/soporte-sap` entra a `RUTAS_FUERA_DEL_BRIDGE`
+     con su justificación: misma app y puerto, 404 sin `SOPORTE_SAP_LABORATORIO=1`, estado sintético en memoria,
+     sin base ni `service_role`. Exponerla sigue siendo gate humano (C3 + C4).
+  3. **Deploy** (`scripts/configura-deploy.mjs`, `docker-compose.yml`): `configura:deploy` **rechaza
+     `SOPORTE_SAP_LABORATORIO=1`** en producción y exige usuario y contraseña del job si hay `SS_PG_HOST` (solo
+     presencia); el compose gana el perfil `semantica` (un disparo, sin puertos).
+  4. **Cadena de suministro**: una imagen base nueva pineada por digest (`python@sha256:57cd…`) y un lock de Python
+     con hashes (`tools/soporte-sap/semantica/requirements.lock`: dbt-core 1.12.5, dbt-postgres 1.11.0,
+     dbt-metricflow 0.15.0, metricflow 0.213.0, Apache 2.0); el Postgres efímero, por digest
+     (`postgres@sha256:b0f9…`). Nada de esto entra al bundle de la app.
+  5. **Extractor documental 0.8.0** (`tools/extractor-documental`): `clasePorBytes` sube al núcleo (la ingesta de
+     Soporte SAP la pidió como versión nueva en vez de parchearla); `lote-corpus` la reusa. Sin cambio de conducta
+     (779 pruebas).
+  6. **Opcional, no aplicado** (es `gates.json`, CDC por sí mismo): declarar como gates **inactivos** con motivo
+     «necesita Docker» el corredor de la capa semántica (`node tools/soporte-sap/semantica/corre.mjs`) y el ensayo
+     del job contra el esquema del producto (`node tools/soporte-sap/semantica/ensayo-produccion.mjs`), para que
+     queden en el padrón como `erp:prueba`.
+- **Motivo**: el DoF de la corrida A pide los CLIs del producto inventariados con su clasificador y su grado, la
+  app en laboratorio (una ruta nueva) y la configuración para cualquier VPS; las tres tocan verificadores.
+- **Fuera de este CDC, con su propia firma**: el C3 del PRP-008 (v3, con el rol de métricas y la ruta del
+  laboratorio) y la AISIA (`docs/goals/soporte-sap-AISIA.md`, borrador con la firma en blanco). No se tocaron
+  `AGENTS.md`, `gates.json`, skills, prompts, `routing-modelos.json` ni el modelo.
+- **Gate aplicado**: diff visible ☑ (**enseñado completo en el chat el 2026-10-04, ANTES de pedir la firma**, con el Dockerfile y el lock del job:
+  `git diff main...5e3be4c -- scripts/ docker-compose.yml inventario/activos.json tools/extractor-documental/src tools/extractor-documental/package.json .gitignore`)
+  · regresión capa A ☑ 147/147 · capa B ☑ el corpus está completo (22/22); **los casos no se corrieron en sesiones
+  frías**: decide el laboratorio si basta la capa A (no toca skills, prompts, modelo ni instrucciones) ·
+  aprobación humana ☑ · pineo ☑ (digests y lock con hashes; sin modelo).
+- **Regresión y demostración**:
+  - `scripts/prueba-inventario.ts` ☑ 15/15, con la siembra nueva: un CLI sin grado, un producto que no es slug y un
+    grado fuera del enum se rechazan; `verifica:inventario` ☑ 241 unidades, 0 nuevas, 0 huérfanas, 0 ambiguas;
+  - `prueba:a2a` ☑ 14/14: la ruta nueva **puso el gate en rojo** hasta declararla (2026-10-04, validate de la fase 11);
+  - `configura:deploy`: con `SOPORTE_SAP_LABORATORIO=1` sale con 1 y lo nombra; sin ella, exit 0 (caso malo y
+    control positivo, con un `.env` sintético que no se commitea);
+  - el job en Docker contra el esquema del producto: 1 186 valores en `ss_metrica`, iguales al corte del laboratorio;
+  - `npm run validate` ☑ 28/28 activos (8 inactivos declarados) tras el último commit de la corrida.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-04, con el diff delante
+
+### 2026-10-04 — Soporte SAP (corrida B): el concepto «producto», su plantilla v2 y el gate `verifica:productos` en el padrón → CDC PROMOVIDO — radio: manifiesto de gates, doctrina del índice del portafolio, inventario y su verificador (un comentario y un texto)
+
+- **Cambio** (rama `soporte/sap`, sobre el cierre de la corrida A `5e3be4c`; lo que toca gobernanza: 12 archivos,
+  +752 −4):
+  1. **Alta de un gate en el padrón** (`.claude/gates.json`, perfil `validate`, fuera de `predeploy`):
+     `verifica:productos` (`scripts/verifica-productos.mjs`, `package.json`, línea en `README.md`). Cruza cada
+     manifiesto de `productos/` con el índice del portafolio y el inventario. Lo que comprueba:
+     - dueño y composición: propios, componentes y base, sin solaparse;
+     - lo que no se negocia: ningún precio sin plan comercial; RPO y RTO desconocidos hasta GATE 3; canal
+       externo con C3 y C4; tercero con datos personales con AISIA; ningún agente aprueba;
+     - los huecos: ningún null callado, una sección que no aplica con su motivo, lo que no cupo escrito.
+
+     Siembra 26 defectos sobre el manifiesto de referencia y cae en rojo si alguno no muerde. Una fila del
+     índice sin manifiesto se lista como **pendiente** y no pone el gate en rojo. **Es alta, no baja**: no se
+     apaga ni se edita ningún gate existente. Su `_nota` describe la alta, como las demás del padrón; la firma
+     vive en esta entrada.
+  2. **Doctrina del índice** (`BUSINESS_LOGIC.md` raíz, solo la cabecera): «qué es un producto» (una fila de la
+     tabla; la clase `PRODUCTO` es una pieza vendible; `producto` en el inventario nombra al dueño), con el
+     enlace al concepto. **No cambia ninguna fila, ninguna tabla ni la firma del índice**, pero es el
+     documento que el laboratorio firmó el 2026-09-30, así que la cabecera nueva necesita su visto bueno.
+  3. **Inventario** (`inventario/activos.json`, `INVENTARIO.md` regenerada):
+     - la fuente `productos/`;
+     - un asiento nuevo, `TPL-productos` (clase `FABRICA`, `blueprint`);
+     - el dueño `producto: "ventas-whatsapp"` en `TPL-ventas-whatsapp` y `TPL-feature-ventas-whatsapp`;
+     - el campo `producto` dice **dueño** también en el verificador: su comentario en
+       `scripts/inventario/nucleo.mjs` y el texto de la sección «Por producto» de la vista
+       (`scripts/inventario/vista.mjs`). Sin cambio de conducta: `prueba:inventario` 15/15.
+
+     Ninguna clase se renombra y ningún asiento se borra.
+  4. **El concepto y la plantilla** (`productos/CONCEPTO.md`, `productos/PLANTILLA.md` v2, `productos/soporte-sap.json`,
+     `productos/ventas-whatsapp.json`): documentos y datos nuevos. No son skill ni prompt. Pasan por este CDC
+     porque el gate los lee: cambiar la plantilla cambia lo que el gate exige.
+- **Relación con el CDC de la corrida A** (firmado el 2026-10-04, en `.claude/gobernanza/BITACORA-CDC.md`): **va
+  aparte y después**. La B lee el campo `producto` del inventario, que **introduce la A**
+  (`scripts/inventario/nucleo.mjs`), y alinea su comentario («el producto que vende la pieza») con el concepto
+  («el dueño»): punto 3.
+- **Motivo**: el DoF de la corrida B pide que el gate nuevo corra en el `validate`, por un gate existente o dado
+  de alta en `.claude/gates.json` dentro de su CDC. Ningún gate existente lee manifiestos, así que se dio de alta.
+- **Propuesto, NO aplicado** (cada uno con su CDC si el laboratorio lo quiere):
+  - que cada fila pendiente del índice gane su manifiesto: hoy 6 de 8 (el gate las lista);
+  - que el skill `new-app` genere el manifiesto junto con el contrato: es skill, radio sistema, con diff antes
+    del sí;
+  - **plantilla v3**: `retencion` y `salida` (portabilidad), que Soporte SAP tiene en D8 y el vendedor en P-07
+    y en su baja. Por la regla de entrada debieron entrar en la v2 y no se vieron a tiempo (informe B, §6);
+  - **cambiar la regla de entrada** para que entre lo que tienen dos productos aunque no lo tenga la
+    referencia. Hoy no se puede: la spec de la corrida B dice que lo que no aparece en Soporte SAP no entra.
+- **No se tocaron**: `AGENTS.md`, skills, prompts, `routing-modelos.json`, el modelo, `.mcp.json`, `settings.json`,
+  ni el código de ningún producto: el vendedor en WhatsApp se describió sin cambiar una línea de
+  `tools/ventas-whatsapp` ni de `src/features/ventas-whatsapp`.
+- **Gate aplicado**:
+  - diff visible ☑, **enseñado completo el 2026-10-04, ANTES de pedir la firma** (lo de gobernanza en el chat y el
+    diff entero, script, manifiestos y documentos incluidos, en el editor):
+    `git diff 5e3be4c..245f9b4 -- .claude/gates.json scripts/verifica-productos.mjs scripts/inventario/ package.json README.md inventario/activos.json BUSINESS_LOGIC.md productos/`;
+  - regresión capa A ☑ 147/147;
+  - capa B ☑ 22/22 (`regresion -- --trampa`: corpus completo, leído solo el resumen). **Los casos no se corrieron en sesiones frías**: 
+    capa A basta, decidido por el laboratorio (es una alta en el padrón y doctrina del índice, sin skills, prompts ni modelo);
+  - aprobación humana ☑;
+  - pineo: no aplica (sin modelo, sin imagen, sin dependencias nuevas).
+- **Regresión y demostración**:
+  - el gate en verde con los dos manifiestos y **26/26 siembras cazadas**: cada defecto tumba su comprobación;
+  - **la plantilla cambió y el gate lo nota**: la v2 contra los dos manifiestos en v1 da **9 comprobaciones
+    en rojo**. Entre ellas, los 4 nulls callados del vendedor que la v1 dejaba en verde;
+  - `verifica:gates` ☑: sin archivos de prueba huérfanos, y el gate nuevo está en el padrón y en la
+    documentación;
+  - `verifica:inventario` ☑ 243 unidades, 0 nuevas, 0 huérfanas, 0 ambiguas;
+  - `npm run validate` ☑ 29/29 gates activos en verde (8 inactivos declarados) tras `245f9b4`; regresión capa A
+    147/147 y capa B 22/22 corridas de nuevo tras ese commit.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-05, con el diff delante.
+
+### 2026-10-06 — skill `analista-producto`: su PRP pasa de 008 a 009 — radio: skill y padrón de gates
+- **Cambio** (rama `prp/analista-009`, commit `4361708`; 11 archivos, un renombre, +20 −18):
+  - `.claude/PRPs/PRP-008-analista-producto.md` → `PRP-009-analista-producto.md`, con su encabezado;
+  - **skill** `analista-producto/SKILL.md`: las dos menciones del plan;
+  - **padrón** `.claude/gates.json`: la `guarda` de `prueba:analista`;
+  - **contrato capa A** (`golden-sets/contratos.json`): el `porque` de la regla de oro del rol;
+  - fuera de C1, en el mismo commit: el SDD, el `origen` del activo en `inventario/activos.json`, tres comentarios
+    de código y la memoria del proyecto.
+- **Motivo**: dos PRP con el mismo número. El del analista nació el 2026-10-02 en su rama; Soporte SAP tomó PRP-008
+  el 2026-10-04 en otra y entró antes en `main` (#211); el del analista entró después (#214). Se renumera el del
+  analista porque el de Soporte SAP lo citan su manifiesto (`productos/soporte-sap.json`, campo `c3`) y su contrato
+  de negocio, que espera firma.
+- **Lo que NO se toca, a propósito**: los registros cerrados siguen diciendo PRP-008. Son el goal compilado
+  (`.claude/goals/analista-producto/`), la propuesta del CDC firmado el 2026-10-05, la corrida
+  `docs/analisis/2026-10-02/` con su regresión capturada y las entradas de esta bitácora. Reescribirlos cambiaría lo
+  que se firmó y lo que se midió.
+- **Qué pone rojo y qué no**: nada cambia. Ninguna comprobación es nueva, el comportamiento del skill es el mismo y
+  su `description` no se mueve.
+- **Gate aplicado**: diff visible ☑ (completo **antes** de pedir la firma) · regresión capa A ☑ 163/163 ·
+  **capa B no corrida por el agente**: leer la rama `golden-sets` contamina las corridas en frío; decide el
+  laboratorio («capa A basta» o corrida en sesión limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia nueva).
+- **Regresión y demostración**:
+  - `verify:gobernanza` ☑ 166/166;
+  - `prueba:analista` ☑ 7/7, y la corrida del 2026-10-02 sigue en verde contra su commit;
+  - `verifica:gates` ☑ 11 comprobaciones;
+  - `mide:contexto` ☑: el índice de la memoria del proyecto queda en 798 de 800 tokens;
+  - `npm run validate` ☑ 30/30 gates activos (8 inactivos declarados, 0 rojos) tras `4361708`.
+- **Aprobado por**:  **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-06, con el diff delante.
+
+### 2026-10-06 — 6b: una firma es un nombre, y esta acta cierra las diez entradas que pasaban sin firma — radio: verificador (gobernanza)
+- **Cambio** (rama `gobernanza/firma-6b`, commit `1b802b3`; 5 archivos, +123 −17):
+  - `scripts/lib/firmas.mjs` (nuevo): la firma tiene que **empezar por un nombre de usuario**, en vez de no
+    coincidir con una lista de huecos; una entrada sin firma solo se cierra con una línea
+    `**Cierra** (ratificada | no ratificada …): <título>` en una entrada **posterior y firmada**; desde el
+    2026-10-06, una entrada firmada no lleva «aprobación humana ☐»;
+  - `verifica-gobernanza.mjs`: 6b usa la librería, más una comprobación de la casilla por registro y otra que
+    corre **17 siembras** en cada pasada (166 → 169 comprobaciones; cifra al día en `README.md` y
+    `.claude/README.md`);
+  - el bloque «Formato» de esta bitácora documenta la firma y el cierre.
+- **Motivo**: la lista de huecos se quedaba corta. Dejaba pasar `<firma>` (el 2026-10-05 se anexó así una
+  propuesta sin firmar y el gate la dio por firmada), `— **sin firma**` y `**PENDIENTE**`. Con
+  la regla nueva aparecieron **diez entradas sin firmar** que el gate daba por firmadas desde agosto: siete
+  del 2026-08-30, posteriores al acta de ese día, y tres del 2026-09-13. Es la forma de fallo de siempre:
+  el control existía, pero no veía lo que tenía delante.
+- **Qué pone rojo y qué no**: rojo = una firma que no empieza por un nombre (`<firma>`, `— **sin firma**`,
+  `**PENDIENTE**`, `_pendiente_`, `☐`, `[nombre]`, o sin línea); un cierre sin firmar, anterior, sin decisión o
+  con un prefijo de menos de 30 caracteres; una entrada firmada con «aprobación humana ☐» desde el 2026-10-06
+  (solo en la línea «Gate aplicado»: citar la regla en prosa no cuenta). **No** pone rojo las diez entradas
+  antiguas firmadas en bloque que conservan la casilla vacía: la firma manda y la casilla se exige desde hoy.
+- **Esta acta cierra las diez** (la decisión es del laboratorio; las diez están en vigor desde su fecha):
+  - **Cierra** (ratificada): 2026-08-30 — la ruta de specs entra al decision tree — radio: sistema
+  - **Cierra** (ratificada): 2026-08-30 — el escaneo de credenciales fallaba por la razón equivocada — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el hueco de 3i no se cierra por el lado del arbol: se invierte el sujeto — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el auditor de fugas pasa de instrumento a GATE — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el auditor mira tambien lo que no esta versionado — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — el papel no nombraba el gate nuevo, y la memoria recomendaba lo refutado — radio: plantilla
+  - **Cierra** (ratificada): 2026-08-30 — comprobacion 151: todo paso de `validate` esta declarado en la documentacion — radio: plantilla
+  - **Cierra** (ratificada): 2026-09-13 — el extractor documental en la infraestructura del cliente: puente A2A montado (sin publicar), servicio OCR, GPU como servicio del VPS y Hermes como consumidor — radio: sistema
+  - **Cierra** (ratificada): 2026-09-13 — trayectorias (spec 011): el lazo de mejora queda construido y CORTADO en el gate humano; primeras propuestas, sin aplicar — radio: sistema
+  - **Cierra** (ratificada): 2026-09-13 — trayectorias: dos correcciones del formato dictadas por el evaluador ciego — radio: menor (no toca skill, prompt ni arnés)
+- **Gate aplicado**: diff visible ☑ (completo **antes** de pedir la firma) · regresión capa A ☑ 163/163 ·
+  **capa B no corrida por el agente**: cambia el verificador, no el comportamiento del agente; decide el
+  laboratorio («capa A basta» o corrida en sesión limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni
+  dependencia nueva).
+- **Regresión y demostración**:
+  - **17/17 siembras cazadas**; la regla vieja, con las mismas siembras, deja pasar `<firma>`,
+    `— **sin firma**` y `**PENDIENTE**`;
+  - contra los registros reales: 121 firmas de la bitácora y las 6 del registro de riesgo pasan; caen
+    **exactamente** las diez de arriba;
+  - **sin esta acta**: `verify:gobernanza` 168/169, en rojo nombrando las diez; `npm run validate -- --sigue`
+    29 gates en verde y un rojo, ese;
+  - **con esta acta firmada**, sobre el texto real de la bitácora: las diez quedan cerradas y no queda
+    ninguna sin firma; con la firma en `pendiente`, son once (las diez y la propia acta).
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-06, con el diff delante.
+
+### 2026-10-06 — alta de un caso nuevo en el corpus — radio: ninguno
+> No es un cambio de comportamiento: amplía el corpus de la capa B, que se revisa como código.
+
+- **Qué se hizo**: se añade al corpus un caso (rama `golden-sets`, commit `66bac32`). A qué CDC responde y qué
+  mide, solo en la rama. El borrador que vivía fuera del repo se borró, y la memoria del proyecto deja de
+  mencionarlo.
+- **Diseño**: falla por los dos lados, y su entrada se redactó con vocabulario que no existe en el árbol de
+  trabajo.
+- **Verificación**:
+  - round-trip base64 comprobado;
+  - `npm run regresion -- --trampa`: corpus completo, 23/23;
+  - `verify:gobernanza` 169/169: el corpus fuera del árbol, sus expectativas codificadas, ningún identificador de
+    caso en el árbol y ninguna ventana de ocho palabras de la entrada en el repo.
+- **Lo que esto NO cierra**: el corpus completo **no es evidencia**. El caso nuevo sigue **sin ejecutar en sesión
+  fría**: la sesión que lo redactó leyó el corpus y no puede correrlo.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo», 2026-10-06.
+
+### 2026-10-07 — gate nuevo `prueba:buzon`: el perímetro del despacho y `configura:deploy` en modo despacho — radio: padrón de gates
+- **Cambio** (rama `buzon/fase-2-despliegue`, commit `e38dee3`):
+  - `.claude/gates.json`: entrada `prueba:buzon` en el perfil `validate` (10 líneas); `package.json`: su script,
+    `node --test scripts/buzon/prueba-*.mjs`;
+  - `js-yaml` 4.3.1 declarado como devDependency exacta (ya estaba en el lock como transitiva), para leer el compose
+    sin Docker;
+  - fuera de C1, en el mismo commit: la fase 2 de la spec 015 (compose del despacho, Caddyfile, init SQL,
+    `configura:deploy` en modo despacho, `llaves.mjs`), su prueba, el runbook y el inventario.
+- **Motivo**: la fase 2 trae la primera prueba del piloto, y el padrón pone en rojo un archivo de pruebas que ningún
+  gate corre. El plan lo dejaba para la fase 8 (TAR-18); se adelanta y queda declarado en las tareas.
+- **Qué pone rojo y qué no**: rojo = un servicio del compose del despacho, salvo Caddy, en una red con salida, con
+  puertos, sin digest, con llaves de fuera o con la cola de visión distinta de «ninguno»; y `configura:deploy` en modo
+  despacho que deje pasar un Supabase gestionado o en otro origen, el respaldo de visión, Mistral, service_role en la
+  app, llaves firmadas con otro secreto o RAM corta. **No** pone rojo el compose normal (`docker-compose.yml`), que
+  sigue dando salida a la app a propósito.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (js-yaml exacto, imágenes por digest).
+- **Regresión y demostración**:
+  - `prueba:buzon` ☑ 26/26, con 18 siembras (7 del perímetro, 11 del `.env` y de la máquina);
+  - el perímetro sale limpio también sobre la configuración que resuelve Docker (`docker compose config`);
+  - en vivo, con datos sintéticos: ningún servicio con documentos sale a internet y Caddy sí; a través de Caddy, alta
+    por el operador, autorregistro negado, sesión `authenticated`, y rest y storage en 200;
+  - `verifica:gates` ☑ 11 comprobaciones; `verifica:inventario` ☑ 252 unidades; `verify:gobernanza` ☑ 169/169;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `e38dee3`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-07, con el diff delante.
+
+### 2026-10-07 — la `guarda` del gate `prueba:buzon` cubre ya todo el piloto — radio: padrón de gates
+- **Cambio** (rama `buzon/fase-8-cierre-formal`, commit `2ec6eb2`): `.claude/gates.json`, la `guarda` y la `evidencia`
+  de `prueba:buzon` (2 líneas). El comando no cambia: `node --test scripts/buzon/prueba-*.mjs`.
+- **Motivo**: la `guarda` describía solo la fase 2 (el perímetro y `configura:deploy`). El gate corre ya 92 pruebas de
+  las fases 2 a 7, y un padrón que dice menos de lo que el gate guarda engaña a quien lo lee para decidir. Se dejó a
+  propósito para un solo CDC al cerrar la construcción, y así quedó declarado en las tareas, en vez de uno por fase.
+- **Qué pone rojo y qué no**: ninguna comprobación cambia. Lo que pone rojo es lo mismo que ya ponía; solo cambia la
+  descripción.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `prueba:buzon` ☑ 92/92; `verifica:gates` ☑ 11 comprobaciones; `verify:gobernanza` ☑ 169/169;
+  - `npm run recorrido:buzon` ☑ 29/29 pasos en un stack desechable que se borró al terminar;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `2ec6eb2`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-07, con el diff delante.
+
+### 2026-10-09 — plantilla de producto v3: la sección `despliegue` (PRP-010, fase 3, DP-5) — radio: plantilla de productos, los dos manifiestos y su verificador
+- **Cambio** (rama `soporte/fase3-despliegue`, commit `f6bbf5e`):
+  - `productos/PLANTILLA.md` pasa a v3: la fila `despliegue`, el esqueleto y la historia;
+  - `productos/soporte-sap.json` y `productos/ventas-whatsapp.json` pasan a `"plantilla": 3` y declaran su `despliegue`
+    (23 líneas en los dos);
+  - `scripts/verifica-productos.mjs`: `PLANTILLA = 3`, el campo en `CAMPOS` y en `REQUERIDOS`, `verificaDespliegue` y
+    9 siembras nuevas.
+- **Motivo**: Soporte SAP lo tiene y la v2 no lo recogía. Tiene el estimado de la máquina por tamaño (SDD §14), el
+  despliegue en cualquier VPS (§15) y tres decisiones abiertas: D3 (quién opera), D10 (dónde quedan los datos) y D12
+  (el proveedor). Es la misma regla de entrada, sin cambiarla (B-3). El producto declara **requisitos, no
+  proveedores**. El proveedor y la región de cada instalación son un dato de su `.env.production`, y la máquina se mide.
+- **Qué pone rojo y qué no**:
+  - **en rojo**:
+    - un manifiesto sin `despliegue`, o que nombra a su proveedor o sus planes;
+    - un modo que no es `gestionado` ni `despacho`, o un tamaño (S, M o L) sin su máquina o sin su fuente;
+    - los tamaños en null sin decir qué falta, o un respaldo que no es inmutable fuera de sitio;
+    - una región «decidida» sin regiones, o el «quién opera» sin su decisión;
+    - un secreto con `NEXT_PUBLIC_`;
+  - **no se pone rojo**: el vendedor en WhatsApp con `tamanos: null`, porque dice qué falta (no tiene estimado de
+    consumo). `retencion` y `salida` no entran: siguen la recomendación de B-6.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verifica:productos` ☑ en verde con los dos manifiestos en v3 y **35/35 siembras cazadas**;
+  - `tools/soporte-sap/pruebas/despliegue.ts` ☑ 8/8: los tamaños del manifiesto son los de `maquinaPara`, y `configura:deploy`
+    mide contra el perfil (la máquina chica, la región frente a D10, el respaldo que falta, los secretos y la instalación que
+    pasa) sin imprimir ningún secreto;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `f6bbf5e`.
+- **Aprobado por**:  **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-09, con el diff delante.
+
+### 2026-10-09 — `configura:deploy` entra en `predeploy` (PRP-010 H-26) — radio: padrón de gates
+- **Cambio** (rama `soporte/fase3-despliegue`, commit `f6bbf5e`): `.claude/gates.json`:
+  - un gate nuevo, `configura:deploy` (`npm run configura:deploy`), solo en el perfil `predeploy`;
+  - el perfil lo pone en `siempre`, junto a `verifica:privado` (12 líneas).
+- **Motivo** (H-26): `configura:deploy` estaba documentado y no corría en ningún gate. Un deploy podía salir con el
+  laboratorio encendido, una llave `NEXT_PUBLIC_` secreta o una máquina que no cabe en lo contratado. Va en
+  `siempre` porque mide la máquina y el `.env.production` del servidor, que cambian sin que cambie el árbol: con el
+  sello vigente, el atajo de `predeploy` se lo saltaría. Fuera de `validate` a propósito: en una máquina de desarrollo
+  no hay `.env.production`.
+- **Qué pone rojo y qué no**:
+  - **en rojo**, en el servidor y antes de `npm run deploy`, lo que `configura:deploy` ya rechazaba a mano:
+    - los placeholders o una `NEXT_PUBLIC_` secreta;
+    - el laboratorio encendido, o la falta de swap;
+    - y ahora el perfil del producto: la máquina que no cabe, la región fuera de su decisión decidida, el respaldo
+      sin https o sin días de bloqueo, o los secretos que faltan;
+  - **no se pone rojo**: `validate`, que no lo corre.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verifica:gates` ☑: 11 comprobaciones en verde, 34 gates activos (antes 33), 8 inactivos declarados;
+  - el caso malo y el control positivo de `configura:deploy` ☑ en `pruebas/superficie.ts` y `pruebas/despliegue.ts`;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `f6bbf5e`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la capa A», 2026-10-09, con el diff delante.
+
+### 2026-10-11 — plantilla de producto v4: la sección `retencion` (PRP-012, D8, DP-1) — radio: plantilla de productos, los dos manifiestos, su verificador y el perfil de despliegue
+- **Cambio** (rama `soporte/d8-fase3`, commit `aac8fd9`):
+  - `productos/PLANTILLA.md` pasa a v4: la fila `retencion`, el esqueleto y la historia;
+  - `productos/soporte-sap.json` y `productos/ventas-whatsapp.json` pasan a `"plantilla": 4` y declaran su `retencion`
+    (10 líneas en cada uno);
+  - `scripts/verifica-productos.mjs`: `PLANTILLA = 4`, el campo en `CAMPOS` y en `REQUERIDOS`, `ARCHIVO_LEGAL_DIAS`,
+    `verificaRetencion` y 8 siembras nuevas;
+  - `scripts/despliegue/perfil.mjs`: `respaldo()` compara `RESPALDO_S3_BLOQUEO_DIAS` con `retencion.bloqueoMaximoDias`;
+  - fuera de C1, en el mismo commit: una prueba en `tools/soporte-sap/pruebas/despliegue.ts` y su fila en la matriz
+    (`c3-perfil-respaldo-tope`).
+- **Motivo**: D8 (PRP-012, DP-1) pide que `configura:deploy` rechace un bloqueo de respaldo mayor que el plazo en que el
+  contrato promete que el borrado llega a todas las copias, y el perfil solo lee lo que declara el manifiesto. Soporte
+  SAP tiene retención desde que el laboratorio decidió D8, así que entra por la misma regla de entrada, sin cambiarla
+  (B-3). **Se adelanta a B-6**, que recomendaba que entrara con el siguiente manifiesto: sin el campo, el tope viviría
+  en el código del perfil o en ninguna parte. El vendedor la declara en null con lo que falta (P-07 sigue abierta).
+  `salida` no es una sección aparte: va como texto dentro de `retencion`.
+- **Qué pone rojo y qué no**:
+  - **en rojo**:
+    - un manifiesto sin `retencion`, o que la declara «no aplica»;
+    - una retención sin la decisión que la fija, o con los plazos en null sin decir qué falta, o en una ruta que no existe;
+    - una retención decidida sin salida, sin restauración o sin tope (`bloqueoMaximoDias` entero ≥ 1 y `archivoLegal`
+      true o false);
+    - un tope menor que el archivo legal (2555 días, FASE0 §9.3 y §9.4) en un producto cuyos datos entran a él;
+    - en el servidor, `configura:deploy` con un `RESPALDO_S3_BLOQUEO_DIAS` mayor que el tope: con Soporte SAP, el
+      bloqueo de 2555 días que FASE0 §9.4 pone por defecto ya no pasa (el tope es de 365);
+  - **no se pone rojo**: el vendedor en WhatsApp con `plazos: null`, porque dice qué falta. Sin tope declarado,
+    `configura:deploy` avisa en vez de callar.
+- **Gate aplicado**: diff visible ☑ (antes de pedir la firma) · regresión capa A ☑ 163/163 · capa B no corrida por el
+  agente: no toca skills, prompts, modelo ni instrucciones; decide el laboratorio («capa A basta» o corrida en sesión
+  limpia) ☑ · aprobación humana ☑ · pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión y demostración**:
+  - `verifica:productos` ☑ en verde con los dos manifiestos en v4 y **43/43 siembras cazadas**;
+  - **la plantilla cambió y el gate lo nota**: la v4 contra los dos manifiestos en v3 da 3 comprobaciones en rojo en
+    cada uno (falta el campo, la versión y el null sin «falta»);
+  - `tools/soporte-sap/pruebas/despliegue.ts` ☑ 10/10: con 365 días pasa, con 2555 no, y sin tope declarado avisa;
+  - la fila `c3-perfil-respaldo-tope` ☑ verde sin sabotaje y roja con él, y las tres filas vecinas del respaldo siguen
+    cayendo con el suyo;
+  - `npm run validate` ☑ 31/31 gates activos (8 inactivos declarados) tras `aac8fd9`.
+- **Aprobado por**: **lisagomez** (el laboratorio) — «Firmo y basta la
+  capa A», 2026-10-11, con el diff delante.

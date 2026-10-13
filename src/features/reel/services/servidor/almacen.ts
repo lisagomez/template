@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 
 /**
  * El almacén del reel vive en el SERVIDOR (respuesta 2): bruto, transcripción, máster y documentos de
@@ -21,8 +21,8 @@ export function carpetaDe(duenoId: string, proyectoId: string): string {
 }
 
 export async function guarda(carpeta: string, nombre: string, datos: Uint8Array | string): Promise<string> {
-  await mkdir(carpeta, { recursive: true });
   const ruta = join(carpeta, nombre);
+  await mkdir(dirname(ruta), { recursive: true }); // `nombre` puede traer subcarpeta (consentimientos/…)
   await writeFile(ruta, datos);
   return ruta;
 }
@@ -39,6 +39,12 @@ export async function lista(carpeta: string): Promise<string[]> {
 export async function borraCarpeta(carpeta: string): Promise<void> {
   if (!resolve(/*turbopackIgnore: true*/ carpeta).startsWith(DATOS + sep)) throw new Error('ruta fuera del almacén');
   await rm(carpeta, { recursive: true, force: true });
+}
+
+/** Borra un archivo del almacén (el documento de un consentimiento retirado). Fuera del almacén, nunca. */
+export async function borraArchivo(ruta: string): Promise<void> {
+  if (!resolve(/*turbopackIgnore: true*/ ruta).startsWith(DATOS + sep)) throw new Error('ruta fuera del almacén');
+  await rm(ruta, { force: true });
 }
 
 export const existe = async (ruta: string): Promise<boolean> => stat(ruta).then(() => true, () => false);

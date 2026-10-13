@@ -5,7 +5,7 @@ import type { Consentimiento, Desenfoque, HallazgoPantalla, MarcaDeNegocio, Marc
 import { propone, duracionEditada, type Edl } from '../cortes.js';
 import { cotejaPrecios } from '../precios.js';
 import { archivoAss, rotulos as armaRotulos, rotulosFueraDeZona, type Rotulo } from '../subtitulos.js';
-import { agrupaHallazgos, carasSinCubrir, cortesEnVozAjena, desenfoquesDeCaras, fusiona, pistasDeCaras, revisaPrivacidad, sujeto, type CorteEnVozAjena } from '../privacidad.js';
+import { agrupaHallazgos, carasSinCubrir, cortesEnVozAjena, desenfoquesDeCaras, fusiona, pistasDeCaras, revisaPrivacidad, sujeto, type CorteEnVozAjena, type TurnoDeVoz } from '../privacidad.js';
 import { sonidoEnPausas } from '../audio.js';
 import { argumentosDeMedicion, argumentosDelMaster, leeMedidaDeVolumen, type Master } from '../master.js';
 import { hayBloqueo, revisaMaster } from '../qa.js';
@@ -31,6 +31,8 @@ export interface ResultadoDeProceso {
   transcripcion?: Transcripcion; edl?: Edl; rotulos?: Rotulo[]; pistas?: PistaCara[]; sujetoId?: number | null;
   hablantes?: number; musica?: { fraccion: number; segundos: number }; hallazgos?: HallazgoPantalla[];
   cortesEnVozAjena?: Array<CorteEnVozAjena & { revisado: boolean }>;
+  /** Quién habla en cada turno (sin contenido): lo que guarda la transcripción conservada con el consentimiento. */
+  turnos?: TurnoDeVoz[];
   observaciones: Observacion[]; master?: MasterHecho; ms: Record<string, number>;
 }
 
@@ -78,7 +80,7 @@ export async function procesa(e: EntradaDeProceso, motores: Motores): Promise<Re
   const master: Master = { version: 1, edl, desenfoques: fusiona([...desenfoquesDeCaras(pistas, suj?.id ?? null, new Set(d.conConsentimiento)), ...coberturas]), rotulos: rs, marca: e.marca, lufs: -14 };
   const hecho = await cronometra(ms, 'master', () => componeMaster(master, norm, e.carpeta, suj?.detecciones ?? [], motores));
   await writeFile(join(e.carpeta, 'master.json'), JSON.stringify({ master, decisiones: d }, null, 1));
-  const base = { bruto, ubicacionTrasIngesta: ubicacionEn(n.etiquetas), transcripcion: tr, edl, rotulos: rs, pistas, sujetoId: suj?.id ?? null, hablantes: h.hablantes, musica, hallazgos, cortesEnVozAjena: cortesVoz.map((c) => ({ ...c, revisado: revisados.has(c.clave) })), master: hecho, ms };
+  const base = { bruto, ubicacionTrasIngesta: ubicacionEn(n.etiquetas), transcripcion: tr, edl, rotulos: rs, pistas, sujetoId: suj?.id ?? null, hablantes: h.hablantes, musica, hallazgos, cortesEnVozAjena: cortesVoz.map((c) => ({ ...c, revisado: revisados.has(c.clave) })), turnos: h.turnos, master: hecho, ms };
   return { ...base, estado: hayBloqueo([...observaciones, ...hecho.qa]) ? 'bloqueado' : 'borrador', observaciones };
 }
 

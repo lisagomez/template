@@ -1,19 +1,30 @@
-# Dependencias y build (se regeneran dentro de la imagen)
+# Dependencias y build (se regeneran dentro de la imagen). En CUALQUIER carpeta: un `node_modules`
+# o un `dist` del anfitrion (binarios de otra plataforma, compilados viejos) taparía que la imagen
+# no sabe construirlos desde un clon limpio (PRP-010 H-30). `npm run build` los rehace (`prebuild`).
 node_modules
+**/node_modules
 .next
 out
 build
 dist
+**/dist
+**/*.tgz
 
-# La fabrica no viaja al servidor
+# La fabrica no viaja al servidor. Excepcion: lo que la app IMPORTA al compilar (el routing por
+# nivel, C8, que lee `src/lib/ai/routing.ts`). Lo vigila `revisaConstruible` en `prueba:buzon`.
 .claude
+!.claude/routing-modelos.json
 .git
 .gitignore
 GEMINI.md
 
-# Secretos: NUNCA dentro de la imagen
-.env
-.env*.local
+# Secretos: NUNCA dentro de la imagen. TODO `.env*`, en cualquier carpeta: `.env` y `.env*.local`
+# dejaban pasar `.env.production`, y el build standalone de Next COPIA `.env` y `.env.production` a
+# la imagen final y los CARGA al arrancar (2026-10-07, PRP-010 H-29). La app recibe lo que le pone el
+# compose y nada mas. Lo vigila `revisaImagen` (scripts/despacho/reglas.mjs) en `prueba:buzon`, y la
+# guarda del Dockerfile en cada build.
+.env*
+**/.env*
 *.mcp.json
 
 # Ruido
@@ -28,3 +39,5 @@ README.md
 Dockerfile
 .dockerignore
 docker-compose.yml
+# La medición del perfil de despliegue (configura:deploy --escribir): es de la máquina, no del repo
+.despliegue

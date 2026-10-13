@@ -1,0 +1,6 @@
+# comando: git rev-list --count --merges HEAD
+# fecha: 2026-10-02T15:16:42.264Z
+# commit: f2ba87ff462b81e9937d32c29c4d091bbb6a549f
+# salida: 0
+# capturado por scripts/analista-producto/medidores.mjs; colores ANSI quitados
+243

@@ -8,10 +8,10 @@ export const DESTINO_POR_DEFECTO = '/reel';
 export function destinoSeguro(siguiente: unknown): string {
   if (typeof siguiente !== 'string' || siguiente.length > 200) return DESTINO_POR_DEFECTO;
   if (!siguiente.startsWith('/') || siguiente.startsWith('//') || siguiente.includes('\\')) return DESTINO_POR_DEFECTO;
-  return /^\/(reel|cuenta)(\/|\?|$)/.test(siguiente) ? siguiente : DESTINO_POR_DEFECTO;
+  return /^\/(reel|cuenta|buzon)(\/|\?|$)/.test(siguiente) ? siguiente : DESTINO_POR_DEFECTO;
 }
 
 /** Rutas que exigen sesión. Todo lo demás del template sigue como estaba. */
-export const esRutaProtegida = (ruta: string): boolean => /^\/(reel|cuenta)(\/|$)/.test(ruta);
+export const esRutaProtegida = (ruta: string): boolean => /^\/(reel|cuenta|buzon)(\/|$)/.test(ruta);
 export const esApiProtegida = (ruta: string): boolean => /^\/api\/reel(\/|$)/.test(ruta);
 export const esRutaDeCuentas = (ruta: string): boolean => /^\/(login|signup)(\/|$)/.test(ruta);

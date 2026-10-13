@@ -88,15 +88,25 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 | Activo del producto | ¿Reconstruible? | Criticidad | Destino |
 |---|---|---|---|
 | Tablas del reel en Supabase (proyectos, versiones, aprobaciones, marcas, consentimientos) | **No**: quién aprobó qué versión y el estado de cada consentimiento son la constancia ante un reclamo | Crítica | Respaldo del proyecto Supabase. **El plan gratis no tiene respaldo automático: verificar el plan antes de prometer nada** |
-| Máster aprobado, `master.json`, `registro.json` (`REEL_DATOS`) | **No**: es el archivo exacto que el dueño aprobó (su huella está en Supabase) | Crítica | Respaldo diario cifrado del almacén, **excluyendo lo que la retención borra** |
-| Documentos de consentimiento (`REEL_DATOS/<dueño>/<proyecto>/consentimientos/`) | **No**: son de terceros | Crítica, **con borrado propagado** | El mismo respaldo; si alguien retira su consentimiento, se borra también de las copias |
+| Máster aprobado, `master.json`, `registro.json` (`REEL_DATOS`) | **No**: es el archivo exacto que el dueño aprobó, y el bruto se borra a los 30 días | Crítica | **Solo N0, nunca N1 ni N2** (decisión del laboratorio, 2026-10-02), cifrado y **excluyendo lo que la retención borra**. Lleva caras y voces de quien consintió: en una copia inmutable no se podría borrar si se retira. Si arde el servidor, nuestra copia se pierde; la constancia de qué se aprobó sigue en la huella guardada en Supabase y en la copia del dueño |
+| Documentos de consentimiento (`REEL_DATOS/<dueño>/<proyecto>/consentimientos/`) | **No**: son de terceros | Crítica, **con borrado propagado** | **Solo la copia local rotada de 7 días (N0); nunca N1 (append-only) ni N2 (Object Lock)** (decisión del laboratorio, 2026-10-02): una copia que no se puede borrar no puede cumplir un retiro. Viven lo que su vigencia (`reel:retencion` los borra al vencer); un retiro o vencimiento llega a las copias cuando vence la última, en 7 días como máximo |
+| Transcripción conservada con los consentimientos (`consentimientos/transcripcion-integra.json`) | **No**: son las palabras de un tercero | Crítica, **con borrado propagado** | Igual que los documentos: solo N0, nunca N1 ni N2 |
 | Bruto, copia normalizada, transcripción y cuadros | — | — | **No se respaldan**: datos de terceros sin aprobar, que la retención borra a los 30 días |
+
+**Una sola regla para el almacén:** nada de `REEL_DATOS` va a N1 (append-only) ni a N2 (Object Lock). Es la
+excepción, firmada, a «no reconstruible → respaldo inmutable»: todo lo que hay ahí lleva datos de terceros con
+derecho a borrar, y la constancia que importa (quién aprobó qué versión y su huella) vive en Supabase, que sí va a
+su respaldo normal.
 
 **Riesgo abierto:** si se respalda el bruto por error, la retención de 30 días deja de cumplirse en
 la copia. Y propagar el retiro de un consentimiento a copias ya hechas no está construido.
 
+**Tras restaurar** una copia del almacén, antes de abrir la app: `npm run reel:tras-restaurar` (vuelve a borrar lo
+de los consentimientos retirados después de la copia; los retiros viven en Supabase, que no se restaura con el
+almacén) y luego `npm run reel:retencion` (los vencimientos).
+
 **RPO / RTO:** los del servidor, en el §4 del índice de la raíz. Para GATE 3 falta una restauración
-probada de punta a punta (tablas + almacén).
+probada de punta a punta (tablas + almacén), con los dos pasos de arriba.
 
 ## 5. KPI de Éxito
 
@@ -107,7 +117,9 @@ laboratorio. La propuesta firmada promete ≈ 2-3 minutos de cómputo y $0 en se
 Ya medido, con clips sintéticos (2026-09-27): ≈ 45-50 s de CPU por clip de 25 s; marcas por palabra
 con mediana de 51 ms y p90 de 140 ms; misma huella en dos renders; las 6 trampas firmadas (cliente
 al fondo, ticket con teléfono, precio que no coincide, clip horizontal, música ajena, dos
-hablantes) bloquean o avisan lo que deben. La sincronía tiene un sesgo de −80 a −115 ms que se
+hablantes) bloquean o avisan lo que deben. La **sala**, recorrida en un celular emulado el 2026-10-05 con el clip de
+dos voces (`scripts/reel/captura-sala.mjs`): consentimiento, riesgo 5, revisión, aprobar con la transcripción
+conservada, retirar y borrar, 15/15 sin errores de consola. La sincronía tiene un sesgo de −80 a −115 ms que se
 calibra antes de usarla como candado.
 
 ## 6. Gobernanza (controles C4 y C7)
@@ -123,11 +135,11 @@ calibra antes de usarla como candado.
 | **Datos personales que toca** | Imagen y voz del dueño y de terceros (datos personales según la LFPDPPP; identificar a alguien con ellas las volvería biométricas y sensibles, y **no se hace**: se detectan caras, no se reconocen); lo que aparece en cuadro (tickets, chats, libretas con teléfonos, CFDI con RFC, placas); la ubicación del negocio en el fondo y en los metadatos. La lectura legal sigue **por verificar con asesoría legal**. |
 | **Partes afectadas** | El dueño; empleados; clientes y transeúntes; menores; quien aparece en tickets y chats. |
 | **Daño con el sistema operando bien** | Un cliente identificable publicado sin permiso; un teléfono en un ticket; un corte que cambia el sentido de lo que dijo alguien; un precio equivocado. |
-| **Riesgos que ninguna firma autoriza** (límite de C5) | Se **rediseñan**, no se aceptan: **1.** caras sin consentimiento, desenfocadas por defecto y re-verificadas en el máster, o el clip se descarta; la sala no deja aprobar mientras haya caras sin cubrir; **2.** datos en pantalla, que bloquean hasta cubrirlos, con reporte enmascarado a 4 caracteres; **3.** la voz de terceros nunca va a un servicio remoto; **4.** nada de IA que genere o altere a personas reales (ni animar una foto, ni clonar la voz, ni avatares); **5.** un corte dentro del habla de otra persona se marca para revisión explícita: **construido el 2026-10-02** (bloquea hasta que el dueño confirma en la sala que el corte no le cambia el sentido; quitar entera su voz no bloquea, y si ninguna voz domina se revisan los cortes de todas). La otra mitad del riesgo 5, guardar la transcripción íntegra con el consentimiento, **sigue sin construir**. Más voces que consentimientos bloquea; un precio que no coincide bloquea. |
+| **Riesgos que ninguna firma autoriza** (límite de C5) | Se **rediseñan**, no se aceptan: **1.** caras sin consentimiento, desenfocadas por defecto y re-verificadas en el máster, o el clip se descarta; la sala no deja aprobar mientras haya caras sin cubrir; **2.** datos en pantalla, que bloquean hasta cubrirlos, con reporte enmascarado a 4 caracteres; **3.** la voz de terceros nunca va a un servicio remoto; **4.** nada de IA que genere o altere a personas reales (ni animar una foto, ni clonar la voz, ni avatares); **5.** un corte dentro del habla de otra persona se marca para revisión explícita: **construido el 2026-10-02** (bloquea hasta que el dueño confirma en la sala que el corte no le cambia el sentido; quitar entera su voz no bloquea, y si ninguna voz domina se revisan los cortes de todas). La otra mitad, guardar la transcripción íntegra con el consentimiento, **construida el 2026-10-02**: al aprobar con otra voz y consentimiento vigente, dura lo que la vigencia más larga y la borran el retiro o el job de retención al vencer. Más voces que consentimientos bloquea; un precio que no coincide bloquea. |
 | **Salida del perímetro** | Nada sale del servidor. Transcripción remota, LLM sobre la transcripción y video generativo están **bloqueados hasta firma** (fases 11 a 13; los que cambien prompts o modelo, además, son CDC). |
 | **Acciones irreversibles** | **Publicar**, y está **fuera** de la herramienta: lo hace siempre el dueño, a mano. Aprobar no publica. Borrar un proyecto es irreversible y lo pide el dueño. |
-| **Vía de apelación humana** | El dueño marca cortes y cambios de texto, y cada versión nueva revoca lo aprobado. Quien retira su consentimiento se borra de nuestras copias, y se avisa al dueño para que lo baje de sus redes; lo ya publicado no se puede recuperar, y por eso publicar es siempre humano. |
-| **Aislamiento de datos** | RLS por dueño en toda tabla, medida contra la base real con dos cuentas; el servidor comprueba además el dueño. Ninguna ruta de la app usa `service_role`; `SUPABASE_DB_URL` solo la usa el job de migraciones declarado (C7). Aprobar exige sesión, `Origin` del mismo sitio y la huella exacta. **Brechas abiertas a propósito** (PRP-007, C3): el almacén local no está cifrado en reposo, y el límite de uso es por proceso, no por día. |
+| **Vía de apelación humana** | El dueño marca cortes y cambios de texto, y cada versión nueva revoca lo aprobado. **Retirar un consentimiento** (construido el 2026-10-02: hasta entonces no había forma de registrarlo ni de retirarlo desde la app) borra su documento, revoca lo aprobado y vuelve a bloquear su voz y a desenfocar su cara; se avisa al dueño que lo baje de sus redes, porque lo publicado no se recupera. **Su voz y su imagen siguen en el clip original hasta borrar el proyecto**: de una grabación no se puede borrar a una persona, y se le dice. Si retirar debe borrar también el clip original lo **decide el dueño, con aviso** (decisión del laboratorio, 2026-10-02): puede seguir editando sin esa persona o borrar el proyecto. |
+| **Aislamiento de datos** | RLS por dueño en toda tabla, medida contra la base real con dos cuentas; el servidor comprueba además el dueño. Ninguna ruta de la app usa `service_role`; `SUPABASE_DB_URL` solo la usa el job de migraciones y `SUPABASE_SERVICE_ROLE_KEY` solo el job `reel:tras-restaurar`, que lee los retiros de todos los dueños sin escribir nada; los dos son jobs de plataforma declarados (C7). Aprobar exige sesión, `Origin` del mismo sitio y la huella exacta. **Brechas abiertas a propósito** (PRP-007, C3): el almacén local no está cifrado en reposo, y el límite de uso es por proceso, no por día. |
 
 ## 7. Especificación Técnica (Para el Agente)
 
@@ -146,7 +158,8 @@ imagen).
 ```
 src/features/
 ├── reel/      # tus reels, subida, sala de aprobación en el celular, consentimientos (hecho)
-└── auth/      # cuentas por correo y contraseña; el proxy protege solo /reel, /cuenta y /api/reel
+└── auth/      # cuentas por correo y contraseña; el proxy protege /reel, /cuenta y /api/reel, y desde
+               # la spec 015 también las páginas del buzón (la sesión vive en src/lib/supabase/sesion.ts)
 ```
 
 ### Stack confirmado
@@ -160,8 +173,8 @@ pineados con su huella y licencia en `tools/reel/LICENCIAS.md`.
    de ahí salen el KPI (§5), la recalibración de voces y la sincronía
 2. [ ] Verificar el plan de Supabase antes de prometer respaldo, y cerrar **GATE 3** con una
    restauración probada (tablas + almacén)
-3. [ ] Guardar la transcripción íntegra con el consentimiento (la otra mitad del riesgo 5, §6), y el
-   borrado propagado de consentimientos a las copias (§4)
+3. [ ] Que la copia N0 viva **fuera del servidor** (otro disco u otra máquina): con todo el almacén del reel
+   solo en N0, si arde el servidor no se recupera de nuestras copias (§4)
 4. [ ] Revisión legal (LFPDPPP y art. 87 de la LFDA) con asesoría
 5. [ ] Cifrado en reposo del almacén y límite de uso por día (brechas de C3)
 6. [ ] Fases bloqueadas (11 a 16), cada una con su firma: LLM sobre la transcripción, transcripción
@@ -170,4 +183,4 @@ pineados con su huella y licencia en `tools/reel/LICENCIAS.md`.
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-13 · Firma también la tabla de respaldo · Se vuelve a firmar tras el estreno con clips reales.
