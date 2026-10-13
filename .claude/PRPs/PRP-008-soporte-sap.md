@@ -83,7 +83,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 > el borrador de esta v4 (09/10), encontró 18 más; también están cerrados en código o declarados. **Revisión 1**
 > (2026-10-10, PRP-011): D1 decidida «con consentimiento»; se firma con la revisión de la AISIA. **Revisión de la
 > vitrina** (2026-10-11): la vitrina de laboratorio en Vercel y su sección en vivo, que pasa al laboratorio de la máquina
-> del laboratorio por un túnel firmado; se firma con la revisión 10 de la AISIA. **Cada frase de esta sección
+> del laboratorio por un túnel firmado; se firma con la revisión 10 de la AISIA; el incidente del 2026-10-12 le suma
+> el candado de `.env`. **Cada frase de esta sección
 > tiene su fila** en la matriz ([`docs/goals/soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)),
 > en uno de tres estados: **probado** (una prueba pasa sin su sabotaje y cae con él), **brecha** (abierta y declarada)
 > o **depende** (espera una decisión del laboratorio). Donde una frase la sostiene una fila de la AISIA, se dice.
@@ -325,6 +326,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     pública ni componente de cliente lo toca.
   - El portero no arranca, y se apaga, si la vitrina no responde «protegida» a quien llega sin sesión: lo comprueba al
     arrancar y cada 5 minutos. Sin respuesta, tampoco arranca.
+  - A Vercel no sube un `.env` fuera de Git. `@vercel/next` mete todo `.env*` de la raíz en cada función, y la
+    vitrina se construye en la máquina del laboratorio: `despliega.sh` corre un candado entre el build y la subida, y
+    no sube si alguna función lo lleva (incidente del 2026-10-12).
   - *Brecha*: dentro del laboratorio un invitado elige su identidad, también la de superadministrador, y aprueba en la
     sala. El laboratorio es sintético, y el riesgo es del laboratorio.
   - *Brecha*: un dato real sin forma de dato (el nombre de una empresa, cómo opera) pasa el filtro. Lo mitigan el aviso
@@ -415,3 +419,11 @@ Se firma junto con el BUSINESS_LOGIC del producto.
 - **2026-10-04 · un cuerpo SQL se valida al crearse.** `ss_priv.baja_original` nombraba
   `ss_acceso_motivado` antes de que existiera y la propuesta no se aplicaba. Las funciones que leen
   una tabla van después de ella.
+
+- **2026-10-12 · lo que el CLI deja en la raíz viaja en el despliegue.** `vercel link` dejó un `.env.local` con un
+  token de desarrollo, y `@vercel/next` mete todo `.env*` de la raíz en cada función, sin mirar
+  `outputFileTracingExcludes` ni `.dockerignore`: en su nube construye desde Git y no los ve, pero la vitrina se
+  construye aquí. Viajó en dos despliegues, y la primera búsqueda dio 0 porque el código de las funciones no está
+  copiado en `.vercel/output`: lo nombra el `filePathMap` de cada `.vc-config.json`. **Lección**: lo que sube se
+  revisa en lo que el despliegue declara que lleva, con un control positivo que demuestre que la búsqueda encuentra; y
+  la lección de Docker (`.env*` fuera de la imagen) se repite en cada ruta nueva de despliegue, con su candado.

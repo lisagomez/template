@@ -1840,6 +1840,20 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'la guarda solo mira el valor «1»', ediciones: [ed('next.config.ts', "env['SOPORTE_SAP_LABORATORIO'] !== undefined", "env['SOPORTE_SAP_LABORATORIO'] === '1'")] },
   },
   {
+    id: 'c3-vitrina-sin-env', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'a Vercel no sube un .env fuera de Git: el candado nombra el que una función llevaría, también detrás de un enlace (incidente del 2026-10-12)',
+    control: 'scripts/vitrina/sin-env.mjs · envFueraDeGit',
+    comprobacion: prueba('vitrina-despliegue.ts', 'vitrina · a Vercel no sube un .env fuera de Git: el candado lo nombra, también en una función enlazada'),
+    sabotaje: { que: 'el candado solo mira el .env a secas', ediciones: [ed('scripts/vitrina/sin-env.mjs', 'if (/^\\.env/.test(basename(v))', 'if (/^\\.env$/.test(basename(v))')] },
+  },
+  {
+    id: 'c3-vitrina-sin-env-al-subir', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
+    afirmacion: 'despliega.sh corre el candado de .env entre el build y la subida, y su error para el guion',
+    control: 'scripts/vitrina/despliega.sh',
+    comprobacion: prueba('vitrina-despliegue.ts', 'vitrina · despliega.sh corre el candado de .env entre el build y la subida'),
+    sabotaje: { que: 'el guion ya no corre el candado', ediciones: [ed('scripts/vitrina/despliega.sh', 'node scripts/vitrina/sin-env.mjs\n', '')] },
+  },
+  {
     id: 'c3-vitrina-no-enciende', doc: 'C3', ref: 'La vitrina y la sección en vivo', estado: 'probado',
     afirmacion: 'nada de la vitrina importa el runtime de laboratorio ni lee su variable',
     control: 'pruebas/vitrina-despliegue.ts · el barrido de src/features/soporte-sap/vitrina, src/app/vitrina y src/app/api/vitrina',
