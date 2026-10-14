@@ -1,55 +1,13 @@
 # Propuestas de CDC (C1) — crecimiento demostrado
 
-> Redactadas el 2026-10-02; puestas al día el 2026-10-14. **El CDC-0 se firma ahora** y su entrada,
-> abajo, se pega en `.claude/gobernanza/BITACORA-CDC.md` cuando el laboratorio firme (entonces se
-> borra de aquí). **El CDC-1 sigue siendo propuesta**: se aplica con diff, `npm run regresion`, la
+> Redactadas el 2026-10-02; puestas al día el 2026-10-14. **El CDC-0 está firmado** (2026-10-14).
+> **El CDC-1 sigue siendo propuesta**: se aplica con diff, `npm run regresion`, la
 > medición con un LLM real y su propia entrada firmada.
 
-## CDC-0 · Los 3 prompts entran apagados y el gate de Lean, inactivo (entrada para la bitácora)
+## CDC-0 · Los 3 prompts entran apagados y el gate de Lean, inactivo
 
-### 2026-10-14 — crecimiento demostrado: 3 prompts entran apagados + gate de Lean inactivo — radio: producto (paquete `@tu-scope/crecimiento-demostrado`, app `/crecimiento`) y padrón de gates
-
-- **Cambio** (rama `crecimiento/demostrado`, construida el 2026-10-02 y puesta al día con `main` el 2026-10-14):
-  1. **Prompts nuevos, APAGADOS**, en `tools/crecimiento-demostrado/src/agentes/llm.ts` (sha256 `b377eecaa88ff8d5…`):
-     - `PROMPT_PLAN`: el planificador. Solo un vocabulario cerrado de 6 consultas, nunca SQL, y no calcula nada;
-     - `PROMPT_DERIVACION`: el proponente de Γ ⊢ φ. Solo las reglas y los teoremas del kernel, solo hechos de la
-       lista con su valor exacto, todos los supuestos declarados, y toda causa es una hipótesis con su experimento;
-     - `PROMPT_NARRACION`: el narrador. Solo las cifras de la respuesta verificada, con su formato, y sin causas
-       salvo que la respuesta sea una hipótesis.
-
-     **Nadie inyecta un modelo**: `ProponenteLLM` y `NarradorLLM` responden «no medido», y su único uso es la
-     trampa `llm-sin-llave` del laboratorio. **Ninguna clase nueva en el routing.**
-  2. **`.claude/gates.json`: `prueba:lean-crecimiento` declarado INACTIVO** (`bash tools/crecimiento-demostrado/lean/comprueba.sh`).
-     - `motivo`: el toolchain de Lean (unos 900 MB) no está en todas las máquinas ni en CI, y sin él el script
-       sale con 2 («no medido»).
-     - `falta`: instalar Lean 4.34.1 donde corra el gate, contra `lean/toolchain.sha256`. Hasta entonces, a mano.
-     - **Corrección de la propuesta del 2026-10-02**: decía que la prueba de estructura detecta si el teorema y el
-       kernel divergen. **No es así**: nada en `prueba:tools` compara el enunciado de Lean con el del kernel. Lo que
-       sí vigila es que el kernel exija las hipótesis de cada teorema (las siembras de `kernel/teoremas`).
-- **Motivo**: C1 pide CDC para un prompt nuevo aunque esté apagado (precedente: el redactor de pymes, 2026-09-27).
-  Encenderlo es el CDC-1, aparte: dos clases de routing, la medición con un LLM real y la decisión C4 de qué sale
-  al proveedor. El gate de Lean se declara para que su ausencia se vea en `npm run gates`.
-- **Qué hace que los prompts no basten solos** (en código y probado con agentes simulados):
-  - el plan pasa por su esquema: vocabulario cerrado, sin SQL;
-  - un kernel sin LLM verifica cada paso de la derivación y rechaza lo que no se deriva;
-  - la inclusión de números bloquea una narración con una cifra que no esté verificada;
-  - Γ, el texto y A2A llevan seudónimos HMAC, nunca RFC ni nombre;
-  - toda acción sale como propuesta para una persona; ninguna se ejecuta.
-- **Estado del LLM** (2026-10-14): **NO MEDIDO, a propósito** (decisión del laboratorio del 2026-10-02: agentes
-  simulados). Con simulados: 53/53 pruebas de la herramienta, 19/19 trampas, 12/12 snapshots sucios, puente igual
-  a la verdad plantada en 60/60 filas, 19/19 siembras tumbadas y replay idéntico entre procesos. Lean 4.34.1
-  comprueba `Puente.lean` hoy (a mano).
-- **Gate aplicado** (2026-10-14, tras la mezcla con `main`):
-  - diff revisado ☐ (arriba, para el laboratorio);
-  - regresión capa A ☑ 163/163;
-  - `verifica:routing` ☑ coherente (sin clases nuevas);
-  - `verifica:gates` ☑ 11 comprobaciones; 35 activos y 10 inactivos con motivo;
-  - aprobación humana ☐;
-  - pineo ☑ (sin modelo ni dependencia nueva; Lean pineado en `lean-toolchain`);
-  - capa B no corrida por el agente: no toca skills ni instrucciones del arnés, y leer la rama `golden-sets`
-    contamina las corridas en frío; decide el laboratorio («capa A basta» o corrida en sesión limpia) ☐.
-- **Regresión**: `npm run validate` ☑ VALIDATE_PENDIENTE.
-- **Aprobado por**: pendiente
+**Firmado por el laboratorio el 2026-10-14** (capa A basta). La entrada está en
+`.claude/gobernanza/BITACORA-CDC.md` y se borró de aquí al pegarla.
 
 ## CDC-1 · Dos clases de routing para activar el LLM real
 
