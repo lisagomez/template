@@ -4,9 +4,9 @@
 > firma no se escribe en `BITACORA-CDC.md`: se pega ahí cuando el laboratorio firme, y entonces se borra este
 > archivo. **Nada de la rama `app/iso` se mergea sin esa firma.**
 
-### 2026-09-30 — sistema integrado ISO 9001 + ISO/IEC 42001: prompts de 9 agentes + 2 clases de tarea en el routing → CDC PROPUESTO — radio: producto (paquete `@tu-scope/sistema-integrado`, app `/sgi`) y routing (C8)
+### 2026-10-14 — sistema integrado ISO 9001 + ISO/IEC 42001: prompts de 9 agentes + 2 clases de tarea en el routing + gate `prueba:laboratorio-sgi` — radio: producto (paquete `@tu-scope/sistema-integrado`, app `/sgi`) y routing (C8)
 
-- **Cambio**:
+- **Cambio** (propuesto el 2026-09-30, medido el 2026-10-01, puesto al día con `main` el 2026-10-14; rama `app/iso`):
   1. **Prompts nuevos** en `tools/sistema-integrado/src/agentes/prompts.ts` (70 líneas, sha256 `038b3c2da8c47014…`),
      versión `sgi-prompts-2026-09-30.1`:
      - un `SISTEMA_COMUN` con 8 reglas: propones y no decides; citas solo IDs del catálogo que se te dan; no copias
@@ -81,6 +81,13 @@
        dentro de `alertas`), la app muestra los avisos del agente, la SoA sale una fila por control citado (`soa.ts`),
        las versiones armadas desde una matriz abren con la organización y su alcance, y el corredor mira el saldo
        antes de arrancar.
+  6. **Puesta al día con `main` (2026-10-14)**, fuera de C1 y en la misma rama:
+     - mezcla `9549e24`: el proxy y el destino del login protegen `/sgi` junto a `/reel`, `/cuenta` y `/buzon`;
+       `/api/sgi` pasa por el proxy y `/api/buzon` sigue comprobando la sesión en cada ruta (el corte de 10 MB de
+       Next 16). El inventario junta los tres activos del SGI con los de Soporte SAP y el buzón;
+     - `681144b`: el PRP pasa de 008 a 013, porque Soporte SAP tomó el 008 y entró antes (#211), como el analista
+       pasó a 009. Los registros del goal siguen diciendo PRP-008;
+     - la `_nota` del gate nuevo deja de decir «propuesta» y apunta a esta entrada.
 - **Motivo**: el goal `sistema-integrado-iso` (PRP-013). Sin clase asignada, estos agentes heredarían el default
   caro en silencio (C8). Sin prompts revisados como código, el alcance entero de lo que proponen a una pyme no
   pasaría por ningún gate (C1).
@@ -98,17 +105,19 @@
   - Gasto medido: US$11.58 de US$15.
   - Lo que el laboratorio debe saber al firmar: la defensa del prompt contra la trampa 1 **no aguantó** (4 de 4); aguanta
     la del código. Y el detector L8 se relajó para las citas rechazadas, con contraejemplos.
-- **Gate aplicado** (a la fecha):
+- **Gate aplicado** (2026-10-14, tras la mezcla con `main`):
   - diff revisado ☐ (arriba, para el laboratorio);
-  - regresión capa A ☑ 146/146;
+  - regresión capa A ☑ 163/163;
   - `verifica:routing` ☑ coherente;
-  - laboratorio ☑ 79/79 (33 deterministas + 46 con el modelo real);
+  - laboratorio ☑ 79/79 (33 deterministas + 46 con el modelo real, 2026-10-01). Los casos con LLM no se repiten: los
+    prompts no cambiaron desde la medición (sha256 `038b3c2da8c47014…`) y los modelos siguen pineados igual en `main`;
   - aprobación humana ☐;
   - pineo ☑ (sin modelo nuevo);
   - capa B: **propuesta «no corrida, a propósito y declarado»**. No cambia ningún skill, prompt ni instrucción del
     arnés (los prompts son del producto, no de Claude Code). El laboratorio decide si la exige.
-- **Regresión**: `npm run validate` en la rama después del commit (ver `resultados.md`).
-- **Aprobado por**: *(firma del laboratorio al pegar esta entrada en la bitácora)*
+- **Regresión**: `npm run validate` ☑ 32/32 gates activos (8 inactivos declarados, 0 rojos) tras la mezcla y el
+  renumerado (`681144b`); se repite tras el último commit antes del PR.
+- **Aprobado por**: pendiente
 
 ## Qué firma el laboratorio (una decisión, con respuesta recomendada)
 

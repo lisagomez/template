@@ -179,7 +179,7 @@
       "perfiles": ["validate"],
       "activo": true,
       "timeout_s": 300,
-      "_nota": "ALTA PROPUESTA del 2026-09-30 en la rama app/iso (goal sistema-integrado-iso): es parte del CDC de .claude/goals/sistema-integrado-iso/propuesta-cdc.md y no se mergea sin la firma del laboratorio. La cazo verifica:gates (script sin declarar y su archivo de pruebas huerfano), igual que prueba:laboratorio-pymes"
+      "_nota": "ALTA con el CDC del sistema integrado (goal sistema-integrado-iso, propuesto el 2026-09-30 en la rama app/iso; su entrada esta en BITACORA-CDC.md). La cazo verifica:gates (script sin declarar y su archivo de pruebas huerfano), igual que prueba:laboratorio-pymes"
     },
     {
       "nombre": "prueba:historial",
