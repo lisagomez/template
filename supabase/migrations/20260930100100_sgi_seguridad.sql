@@ -1,4 +1,4 @@
--- PRP-008 fase 7: seguridad del sistema integrado.
+-- PRP-013 fase 7: seguridad del sistema integrado.
 --   1. Pertenencia y rol (security definer, search_path vacío, nombres calificados).
 --   2. Huellas SHA-256 calculadas POR LA BASE desde el contenido: nadie puede aprobar una versión y que se aplique otra.
 --   3. Estados que solo cambia una aprobación («aprobado», «firmado», «eficaz», «cerrada»).

@@ -1,5 +1,5 @@
 /**
- * CORRIDAS REALES de los agentes del laboratorio (PRP-008 fase 8): cada caso de casos-llm.ts contra el modelo pineado
+ * CORRIDAS REALES de los agentes del laboratorio (PRP-013 fase 8): cada caso de casos-llm.ts contra el modelo pineado
  * por routing, con datos SINTÉTICOS. Graba cada corrida en public/laboratorio-sgi/corridas.json (se versiona: son
  * datos sintéticos, sin secretos) y se detiene ANTES de pasar el tope de gasto del goal.
  *

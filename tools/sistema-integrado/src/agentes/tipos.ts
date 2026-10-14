@@ -14,7 +14,7 @@ export type ClaseDeRouting = 'agente-sgi-redaccion' | 'agente-sgi-evaluacion' | 
 
 /**
  * La «tarjeta» del agente: la misma información que una Agent Card de A2A (nombre, descripción, habilidades,
- * entradas y salidas), para que exponerlo por A2A sea mecánico el día que se firme (PRP-008 fase 13). Hoy la
+ * entradas y salidas), para que exponerlo por A2A sea mecánico el día que se firme (PRP-013 fase 13). Hoy la
  * delegación es en proceso.
  */
 export interface TarjetaAgente {

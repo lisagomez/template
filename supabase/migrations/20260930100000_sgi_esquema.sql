@@ -1,4 +1,4 @@
--- PRP-008 fase 7: esquema multiempresa del sistema integrado ISO 9001 + ISO/IEC 42001 (prefijo sgi_).
+-- PRP-013 fase 7: esquema multiempresa del sistema integrado ISO 9001 + ISO/IEC 42001 (prefijo sgi_).
 -- Todo lo aprobable se aprueba como VERSIÓN EXACTA (huella SHA-256) en sgi_aprobacion, que es inmutable; los estados
 -- «aprobado/firmado/eficaz» solo los escribe el disparador de aprobación (migración 20260930100100). RLS en toda tabla,
 -- ninguna superficie usa service_role (C7). Idempotente y no destructiva.
@@ -144,7 +144,7 @@ create table if not exists public.sgi_evidencia (
   proyecto_id uuid not null references public.sgi_proyecto (id) on delete cascade,
   titulo text not null check (char_length(titulo) between 2 and 200),
   tipo text not null check (tipo in ('documento', 'registro', 'acta', 'foto', 'otro')),
-  -- Texto de la evidencia (escrito por terceros: NO confiable). Archivos = PRP-008 fase 12, bloqueada.
+  -- Texto de la evidencia (escrito por terceros: NO confiable). Archivos = PRP-013 fase 12, bloqueada.
   contenido text not null default '' check (char_length(contenido) <= 20000),
   huella text not null check (huella ~ '^sha256:[0-9a-f]{64}$'),
   origen text not null default 'subida' check (origen in ('subida', 'documento_aprobado')),
@@ -309,7 +309,7 @@ create table if not exists public.sgi_competencia (
   id uuid primary key default gen_random_uuid(),
   organizacion_id uuid not null references public.sgi_organizacion (id) on delete cascade,
   proyecto_id uuid not null references public.sgi_proyecto (id) on delete cascade,
-  -- Por PUESTO, nunca por persona (AISIA de PRP-008).
+  -- Por PUESTO, nunca por persona (AISIA de PRP-013).
   puesto text not null check (char_length(puesto) between 2 and 80),
   competencia text not null check (char_length(competencia) between 2 and 300),
   nivel_requerido text not null default '' check (char_length(nivel_requerido) <= 80),

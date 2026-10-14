@@ -386,7 +386,7 @@
    "nombre": "Sistema integrado ISO 9001 + ISO/IEC 42001: catalogo propio versionado, motor de avance y puertas, agentes que proponen y documentos",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
    "ubicacion": "tools/sistema-integrado", "responsable": "dep-sw",
-   "origen": [".claude/goals/sistema-integrado-iso", ".claude/PRPs/PRP-008-sistema-integrado-iso.md"],
+   "origen": [".claude/goals/sistema-integrado-iso", ".claude/PRPs/PRP-013-sistema-integrado-iso.md"],
    "cubre": ["tools/sistema-integrado"]
   },
   {

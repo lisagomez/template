@@ -1,8 +1,10 @@
-# PRP-008: Sistema integrado ISO 9001 + ISO/IEC 42001 para pymes y consultores
+# PRP-013: Sistema integrado ISO 9001 + ISO/IEC 42001 para pymes y consultores
 
 > **Estado**: EN CONSTRUCCIÓN (goal `sistema-integrado-iso`, rama `app/iso`). Las fases firmadas se construyen y
 > las bloqueadas esperan firma.
 > **Fecha**: 2026-09-30
+> **Número**: nació como PRP-008. Pasa a 013 el 2026-10-14, al ponerse al día con `main`, porque Soporte SAP tomó
+> el 008 y entró antes (#211), igual que el analista pasó a 009. Los registros del goal siguen diciendo PRP-008.
 > **Proyecto**: línea pymes. Herramienta en `tools/sistema-integrado/`; app en `src/features/sgi/` y `/sgi`;
 > laboratorio en `/laboratorio-sgi`.
 > **Spec**: `.claude/goals/sistema-integrado-iso/spec.md`. Grafo y plan en la misma carpeta; la investigación de

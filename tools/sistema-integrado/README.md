@@ -25,7 +25,7 @@ Un solo sistema de gestión para ISO 9001 e ISO/IEC 42001: la pyme ve qué le fa
 - **No certifica.** Prepara para la auditoría de un organismo acreditado (en México, la EMA). Ninguna salida
   promete certificación: el validador la rechaza.
 - **No incluye texto de las normas.** Quien la usa necesita su copia de la norma. Licenciar el contenido es otra
-  decisión (PRP-008 fase 19).
+  decisión (PRP-013 fase 19).
 - **No decide.** El avance y las puertas los calcula el motor. Los agentes proponen y aprobar es de una persona con
   el rol correcto, nunca de un agente ni del consultor.
 - **No elige modelo ni lee llaves**: el modelo y `fetch` se inyectan (`./openrouter` es opcional).
@@ -55,7 +55,7 @@ Un solo sistema de gestión para ISO 9001 e ISO/IEC 42001: la pyme ve qué le fa
 - **Salida del perímetro (C4)**: el núcleo no saca nada. Con `./agentes` + `./openrouter` sale, hacia el proveedor
   del modelo, el perfil de la organización (puestos, nunca nombres) y el texto de las evidencias que se le pasen,
   **minimizado** (CURP, RFC, NSS, CLABE, correos y teléfonos como marcadores). Mandar datos reales de clientes es
-  decisión del laboratorio con la AISIA de PRP-008 (fase 14, bloqueada).
+  decisión del laboratorio con la AISIA de PRP-013 (fase 14, bloqueada).
 
 ## Instalar
 

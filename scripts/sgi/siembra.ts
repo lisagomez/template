@@ -1,5 +1,5 @@
 /**
- * SIEMBRA sintética de la Supabase LOCAL (PRP-008): despacho, tres pymes y la casa. Entra con CUENTAS y SESIONES reales
+ * SIEMBRA sintética de la Supabase LOCAL (PRP-013): despacho, tres pymes y la casa. Entra con CUENTAS y SESIONES reales
  * (llave anónima), así que pasa por las mismas políticas RLS, huellas y puertas que la app: si una regla está mal,
  * la siembra revienta. Sin LLM: lo que redactan los agentes se genera después, en la app o en el laboratorio.
  * Las contraseñas (aleatorias) quedan en supabase/.temp/sgi-cuentas.json (ignorado por git, permisos 600); nunca se

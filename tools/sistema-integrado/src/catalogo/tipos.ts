@@ -15,7 +15,7 @@ export interface Edicion {
   readonly situacion: string;
   /**
    * `false` = la estructura y los requisitos se catalogaron sin cotejar contra la norma licenciada. Toda edición nace
-   * así; pasa a `true` solo con la firma de un auditor competente (PRP-008 fase 10).
+   * así; pasa a `true` solo con la firma de un auditor competente (PRP-013 fase 10).
    */
   readonly verificada: boolean;
   readonly nota?: string;

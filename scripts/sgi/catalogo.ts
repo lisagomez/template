@@ -1,5 +1,5 @@
 /**
- * Gates del catálogo (PRP-008 fase 3):
+ * Gates del catálogo (PRP-013 fase 3):
  *   L2 cobertura — todas las cláusulas y controles cubiertos, IDs únicos, sin referencias fuera, sin huérfanos.
  *   L1 derechos  — contra la copia LICENCIADA de la norma, que vive FUERA del repo: SGI_NORMAS_LICENCIADAS apunta a un
  *                  archivo de texto (o a varios, separados por «:»). Sin ella: «no medido», nunca «pasa». El informe

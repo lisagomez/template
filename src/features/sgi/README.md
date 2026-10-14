@@ -56,7 +56,7 @@ La pyme lleva un solo sistema de gestión para calidad e IA, guiada y en su idio
 - **Almacenamiento**: tablas `sgi_*` en Supabase con RLS en todas (migraciones `20260930100000`–`100200`).
 - **Salida del perímetro (C4)**: al pedir una propuesta sale, hacia el proveedor del modelo, el perfil de la
   organización (procesos, productos, puestos, nunca nombres) y el texto de las evidencias, minimizado. En este goal
-  solo con datos sintéticos. Mandar datos reales de clientes es la fase 14 del PRP-008, que el laboratorio no ha
+  solo con datos sintéticos. Mandar datos reales de clientes es la fase 14 del PRP-013, que el laboratorio no ha
   firmado.
 
 ## Uso
@@ -80,4 +80,4 @@ ignora y nunca se imprime.
 
 - Guía de la pyme: `docs/GUIA-PYME-SGI.md` · guía del consultor: `docs/GUIA-CONSULTOR-SGI.md`
 - Aviso de privacidad (borrador): `docs/AVISO-PRIVACIDAD-SGI.md`
-- Qué, por qué y qué está bloqueado: `.claude/PRPs/PRP-008-sistema-integrado-iso.md`
+- Qué, por qué y qué está bloqueado: `.claude/PRPs/PRP-013-sistema-integrado-iso.md`

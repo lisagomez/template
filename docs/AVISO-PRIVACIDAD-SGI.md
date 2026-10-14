@@ -3,7 +3,7 @@
 > **Borrador por verificar con asesoría legal.** Redactado el 2026-09-30 sobre la LFPDPPP vigente (publicada en el
 > DOF el 20-mar-2025, en vigor desde el 21-mar-2025; la autoridad es la Secretaría Anticorrupción y Buen Gobierno).
 > **No confirmado**: si ya hay reglamento nuevo o sigue aplicando el anterior en lo que no se oponga. No se publica
-> ni se usa con datos reales hasta que lo revise un abogado y lo firme el laboratorio (PRP-008, fases 11 y 14).
+> ni se usa con datos reales hasta que lo revise un abogado y lo firme el laboratorio (PRP-013, fases 11 y 14).
 
 ## Quién es quién
 

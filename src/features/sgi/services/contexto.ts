@@ -31,7 +31,7 @@ export interface Contexto {
 
 const lista = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 
-/** Perfil para los agentes: puestos, nunca personas (AISIA de PRP-008). */
+/** Perfil para los agentes: puestos, nunca personas (AISIA de PRP-013). */
 export function perfilDe(ctx: Pick<Contexto, 'org' | 'sistemasIA'>): PerfilOrganizacion {
   const p = ctx.org.perfil;
   return {

@@ -81,7 +81,7 @@
        dentro de `alertas`), la app muestra los avisos del agente, la SoA sale una fila por control citado (`soa.ts`),
        las versiones armadas desde una matriz abren con la organización y su alcance, y el corredor mira el saldo
        antes de arrancar.
-- **Motivo**: el goal `sistema-integrado-iso` (PRP-008). Sin clase asignada, estos agentes heredarían el default
+- **Motivo**: el goal `sistema-integrado-iso` (PRP-013). Sin clase asignada, estos agentes heredarían el default
   caro en silencio (C8). Sin prompts revisados como código, el alcance entero de lo que proponen a una pyme no
   pasaría por ningún gate (C1).
 - **Qué hace que los prompts no basten solos** (defensa en profundidad, ya en código y probada):
