@@ -1,0 +1,100 @@
+{
+ "version": 1,
+ "id": "fabrica-0c29581d",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "8f6d0cec-76c1-4a56-a7db-da01c7129543",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-06T10:41:48.197Z",
+  "fin": "2026-10-07T12:02:30.925Z"
+ },
+ "actor": {
+  "skills": [
+   "bucle-agentico",
+   "primer",
+   "spec-generator"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 1078
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 352,
+   "ToolSearch": 2,
+   "mcp__supabase__list_tables": 1,
+   "Write": 46,
+   "Edit": 12,
+   "AskUserQuestion": 9,
+   "Skill": 2,
+   "Agent": 2,
+   "Read": 9,
+   "TaskStop": 8
+  },
+  "llamadasAlModelo": 483,
+  "turnos": 168,
+  "subagentes": 2,
+  "comandos": 1,
+  "ediciones": 167
+ },
+ "uso": {
+  "entrada": 1114,
+  "salida": 572012,
+  "cacheCreacion": 2014665,
+  "cacheLectura": 234864053
+ },
+ "costoUsd": 68.4908,
+ "tiempos": {
+  "totalMs": 91242728
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 30
+  },
+  {
+   "nombre": "regresion",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "verifica:specs",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 23
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "rojo",
+   "veces": 13
+  },
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 3
+  }
+ ],
+ "resultado": {
+  "errores": 8,
+  "erroresPor": {
+   "Bash": 7,
+   "Write": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ },
+ "avisos": [
+  "1 error(es) de la API del modelo"
+ ]
+}

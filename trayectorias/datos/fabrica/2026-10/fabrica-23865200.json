@@ -1,0 +1,88 @@
+{
+ "version": 1,
+ "id": "fabrica-23865200",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "87aa0242-2c51-41f0-b20a-a8db52329005",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-02T12:17:43.481Z",
+  "fin": "2026-10-05T13:01:30.062Z"
+ },
+ "actor": {
+  "skills": [
+   "new-app"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 584
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 248,
+   "AskUserQuestion": 7,
+   "Write": 7,
+   "Skill": 1,
+   "Edit": 12,
+   "Read": 5,
+   "ToolSearch": 3,
+   "SendUserFile": 1,
+   "WebSearch": 20
+  },
+  "llamadasAlModelo": 293,
+  "turnos": 33,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 49
+ },
+ "uso": {
+  "entrada": 622,
+  "salida": 215703,
+  "cacheCreacion": 799128,
+  "cacheLectura": 91685359
+ },
+ "costoUsd": 26.6493,
+ "tiempos": {
+  "totalMs": 261826581
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 11
+  },
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 4
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 25
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "verde",
+   "veces": 2
+  }
+ ],
+ "resultado": {
+  "errores": 1,
+  "erroresPor": {
+   "Bash": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "version": 1,
+ "id": "fabrica-c86bac70",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "e036ed33-af7b-461b-b855-ff8c6d90bd8e",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-14T07:34:41.739Z",
+  "fin": "2026-10-14T07:36:25.322Z"
+ },
+ "actor": {
+  "skills": [
+   "primer"
+  ],
+  "tarea": "lectura"
+ },
+ "modelos": {
+  "claude-opus-5-5": 14
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 4,
+   "ToolSearch": 1,
+   "mcp__supabase__list_tables": 2
+  },
+  "llamadasAlModelo": 7,
+  "turnos": 2,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 0
+ },
+ "uso": {
+  "entrada": 14,
+  "salida": 3664,
+  "cacheCreacion": 54526,
+  "cacheLectura": 490607
+ },
+ "costoUsd": 0.4441,
+ "tiempos": {
+  "totalMs": 103583
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 2,
+  "erroresPor": {
+   "mcp__supabase__list_tables": 2
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}
