@@ -1,0 +1,486 @@
+{
+  "slug": "ventas-ia-waba",
+  "titulo": "Vendedor con IA en WhatsApp para pymes: el grafo del producto (fases 0-3 en laboratorio). Estados honestos: ámbar = construido y probado en el laboratorio pero SIN estreno real (instalado no es estrenado); gris = falta; morado = nada todavía, porque nada ha corrido con Meta, dinero o clientes reales.",
+  "nodos": [
+    {
+      "id": "webhook-crudo",
+      "label": "Cuerpo crudo del webhook de Meta, firma verificada, guardado en la cola durable ANTES del 200",
+      "estado": "ambar"
+    },
+    {
+      "id": "evento-canal",
+      "label": "Evento normalizado (mensaje, estado con pricing, eco, historial, cuenta, automatic_events)",
+      "estado": "ambar"
+    },
+    {
+      "id": "conversacion",
+      "label": "Conversación con id seudónimo, ventanas (24 h / 72 h), origen con vigencia de 7 días y estado (agente, humano, pausada por eco)",
+      "estado": "ambar"
+    },
+    {
+      "id": "turno",
+      "label": "Turno del orquestador: enrutador determinista → (si hace falta) modelo → barreras → mensajes ricos compactados",
+      "estado": "ambar"
+    },
+    {
+      "id": "tarea-a2a",
+      "label": "Tarea A2A (tenant, contextId, taskId) en un dominio: catálogo, ventas, pedidos, citas, soporte, atribución",
+      "estado": "ambar"
+    },
+    {
+      "id": "mensaje-saliente",
+      "label": "Mensaje saliente validado contra los límites de Meta, con precio decidido por ventana y cupo",
+      "estado": "ambar"
+    },
+    {
+      "id": "caso",
+      "label": "Caso en la bandeja del dueño (queja, monto, comprensión, presupuesto, petición)",
+      "estado": "ambar"
+    },
+    {
+      "id": "pedido",
+      "label": "Pedido: carrito del order o del chat, precio del catálogo, entrega por Flow cifrado",
+      "estado": "ambar"
+    },
+    {
+      "id": "liga",
+      "label": "Liga de pago del procesador (una por pedido)",
+      "estado": "ambar"
+    },
+    {
+      "id": "pago",
+      "label": "Pago confirmado por webhook firmado, idempotente por id",
+      "estado": "ambar"
+    },
+    {
+      "id": "evento-conversion",
+      "label": "Evento de conversión (Purchase / LeadSubmitted) en el ledger, event_id único",
+      "estado": "ambar"
+    },
+    {
+      "id": "tablero",
+      "label": "Tablero del dueño: ROAS por canal, costo por conversación (Meta + IA)",
+      "estado": "ambar"
+    },
+    {
+      "id": "eslabon",
+      "label": "Eslabón de la cadena de hashes por inquilino (huellas, sin datos personales)",
+      "estado": "ambar"
+    },
+    {
+      "id": "ancla",
+      "label": "Ancla: raíz de Merkle firmada (Ed25519), guardada fuera del almacén del inquilino",
+      "estado": "ambar"
+    },
+    {
+      "id": "roadmaps",
+      "label": "Roadmaps de costos (ficticio) y de conversaciones-plantilla, generados del código",
+      "estado": "ambar"
+    },
+    {
+      "id": "numero-real",
+      "label": "Número real de la pyme conectado (coexistencia o dedicado)",
+      "estado": "gris"
+    },
+    {
+      "id": "c3-c4-firmados",
+      "label": "Modelo de amenazas (C3) y AISIA (C4) firmados",
+      "estado": "gris"
+    },
+    {
+      "id": "modelo-real",
+      "label": "Modelo real pineado, clase en el routing (CDC) y corrida del arnés de 200",
+      "estado": "gris"
+    },
+    {
+      "id": "vault-tokens",
+      "label": "Tokens del canal en vault (P-02)",
+      "estado": "gris"
+    },
+    {
+      "id": "procesador-real",
+      "label": "Procesador de pagos mexicano elegido y verificado contra su API (P-03)",
+      "estado": "gris"
+    },
+    {
+      "id": "esquema-aplicado",
+      "label": "Esquema Postgres con RLS aplicado (hoy: propuesta validada en efímero)",
+      "estado": "gris"
+    },
+    {
+      "id": "reglas-comercio",
+      "label": "Dominio de reglas citadas de política de comercio y categorías de plantilla en tools/conocimiento",
+      "estado": "gris"
+    },
+    {
+      "id": "pool-numeros",
+      "label": "Pool de números con ciclo de vida, cuarentena y cobro (N-01), contra el simulador del alta de Meta",
+      "estado": "ambar"
+    },
+    {
+      "id": "alta-bsp",
+      "label": "Alta de la pyme por Embedded Signup con nuestro BSP (N-02): token en la bóveda, webhooks, crédito y registro, contra el simulador",
+      "estado": "ambar"
+    },
+    {
+      "id": "factura-bsp",
+      "label": "Factura del mes por pyme (Tech Provider o Solution Partner) y conciliación con la de Meta",
+      "estado": "ambar"
+    },
+    {
+      "id": "tech-provider",
+      "label": "Nuestra app de Meta aprobada como Tech Provider (verificación del negocio y revisión de la app)",
+      "estado": "gris"
+    },
+    {
+      "id": "proveedor-numeros",
+      "label": "Proveedor de números elegido y trámites verificados (P-09)",
+      "estado": "gris"
+    },
+    {
+      "id": "solution-partner",
+      "label": "Solution Partner con línea de crédito y política de crédito firmada (P-10)",
+      "estado": "gris"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a-recibe",
+      "label": "verificar firma, guardar en la cola durable y acusar 200",
+      "tipo": "script",
+      "from": "webhook-crudo",
+      "to": "evento-canal"
+    },
+    {
+      "id": "a-ingiere",
+      "label": "idempotencia por wamid, ventanas, origen, datos sensibles ocultos",
+      "tipo": "script",
+      "from": "evento-canal",
+      "to": "conversacion"
+    },
+    {
+      "id": "a-atiende",
+      "label": "orquestar el turno (enrutador determinista primero, LLM solo como respaldo)",
+      "tipo": "mixta",
+      "from": "conversacion",
+      "to": "turno"
+    },
+    {
+      "id": "a-delega",
+      "label": "delegar por A2A con tenant, contextId y messageId",
+      "tipo": "script",
+      "from": "turno",
+      "to": "tarea-a2a"
+    },
+    {
+      "id": "a-responde",
+      "label": "validar límites, decidir precio por ventana y enviar",
+      "tipo": "script",
+      "from": "turno",
+      "to": "mensaje-saliente"
+    },
+    {
+      "id": "a-traspasa",
+      "label": "abrir caso por queja, monto, comprensión, presupuesto o petición",
+      "tipo": "script",
+      "from": "turno",
+      "to": "caso"
+    },
+    {
+      "id": "a-atiende-dueno",
+      "label": "el dueño toma, contesta y libera",
+      "tipo": "manual",
+      "from": "caso",
+      "to": "mensaje-saliente"
+    },
+    {
+      "id": "a-arma-pedido",
+      "label": "crear pedido y datos de entrega (Flow cifrado)",
+      "tipo": "script",
+      "from": "tarea-a2a",
+      "to": "pedido"
+    },
+    {
+      "id": "a-cobra",
+      "label": "generar liga del procesador",
+      "tipo": "script",
+      "from": "pedido",
+      "to": "liga"
+    },
+    {
+      "id": "a-confirma",
+      "label": "webhook del procesador: firma, monto que cuadra, idempotencia",
+      "tipo": "script",
+      "from": "liga",
+      "to": "pago"
+    },
+    {
+      "id": "a-convierte",
+      "label": "reportar Purchase con ctwa_clid, una sola vez",
+      "tipo": "script",
+      "from": "pago",
+      "to": "evento-conversion"
+    },
+    {
+      "id": "a-proyecta",
+      "label": "proyectar por canal y campaña",
+      "tipo": "script",
+      "from": "evento-conversion",
+      "to": "tablero"
+    },
+    {
+      "id": "a-encadena-tarea",
+      "label": "encadenar la tarea con su huella",
+      "tipo": "script",
+      "from": "tarea-a2a",
+      "to": "eslabon"
+    },
+    {
+      "id": "a-encadena-mensaje",
+      "label": "encadenar el mensaje con su huella",
+      "tipo": "script",
+      "from": "mensaje-saliente",
+      "to": "eslabon"
+    },
+    {
+      "id": "a-ancla",
+      "label": "raíz de Merkle del periodo y firma",
+      "tipo": "script",
+      "from": "eslabon",
+      "to": "ancla"
+    },
+    {
+      "id": "a-mide",
+      "label": "medir el laboratorio y generar los roadmaps",
+      "tipo": "script",
+      "from": "tablero",
+      "to": "roadmaps"
+    },
+    {
+      "id": "a-firma",
+      "label": "revisar y firmar C3 y C4",
+      "tipo": "manual",
+      "from": "roadmaps",
+      "to": "c3-c4-firmados"
+    },
+    {
+      "id": "a-cdc-modelo",
+      "label": "CDC del routing, llave, corrida real del arnés",
+      "tipo": "mixta",
+      "from": "c3-c4-firmados",
+      "to": "modelo-real"
+    },
+    {
+      "id": "a-vault",
+      "label": "custodia de tokens en vault",
+      "tipo": "mixta",
+      "from": "c3-c4-firmados",
+      "to": "vault-tokens"
+    },
+    {
+      "id": "a-procesador",
+      "label": "elegir procesador y verificar pagos contra su API",
+      "tipo": "mixta",
+      "from": "c3-c4-firmados",
+      "to": "procesador-real"
+    },
+    {
+      "id": "a-esquema",
+      "label": "aplicar el esquema con gate humano",
+      "tipo": "manual",
+      "from": "c3-c4-firmados",
+      "to": "esquema-aplicado"
+    },
+    {
+      "id": "a-conecta",
+      "label": "conectar el primer número real (gate humano)",
+      "tipo": "manual",
+      "from": "vault-tokens",
+      "to": "numero-real"
+    },
+    {
+      "id": "a-siembra",
+      "label": "sembrar reglas citadas de comercio y plantillas (firma del laboratorio)",
+      "tipo": "manual",
+      "from": "c3-c4-firmados",
+      "to": "reglas-comercio"
+    },
+    {
+      "id": "a-numero-pool",
+      "label": "reservar y dar de alta un número del pool cuando la pyme no trae uno (FINISH_ONLY_WABA)",
+      "tipo": "script",
+      "from": "pool-numeros",
+      "to": "alta-bsp"
+    },
+    {
+      "id": "a-alta-canal",
+      "label": "la WABA suscrita empieza a mandar webhooks a la plataforma",
+      "tipo": "script",
+      "from": "alta-bsp",
+      "to": "webhook-crudo"
+    },
+    {
+      "id": "a-factura",
+      "label": "sumar el pricing de Meta por WABA y aplicar la modalidad, el margen y el tipo de cambio",
+      "tipo": "script",
+      "from": "mensaje-saliente",
+      "to": "factura-bsp"
+    },
+    {
+      "id": "a-tech-provider",
+      "label": "verificar nuestro negocio y pasar la revisión de la app de Meta",
+      "tipo": "manual",
+      "from": "c3-c4-firmados",
+      "to": "tech-provider"
+    },
+    {
+      "id": "a-proveedor-numeros",
+      "label": "elegir proveedor y verificar el registro de líneas y la recepción del código",
+      "tipo": "manual",
+      "from": "c3-c4-firmados",
+      "to": "proveedor-numeros"
+    },
+    {
+      "id": "a-solution-partner",
+      "label": "firmar la política de crédito y entrar como Meta Business Partner",
+      "tipo": "manual",
+      "from": "tech-provider",
+      "to": "solution-partner"
+    },
+    {
+      "id": "a-alta-real",
+      "label": "primera pyme real por Embedded Signup (gate humano)",
+      "tipo": "manual",
+      "from": "tech-provider",
+      "to": "numero-real"
+    },
+    {
+      "id": "a-numero-vendido",
+      "label": "o un número de la línea N-01 (gate humano)",
+      "tipo": "manual",
+      "from": "proveedor-numeros",
+      "to": "numero-real"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "l-firma-webhook",
+      "label": "firma X-Hub-Signature-256 sobre el cuerpo crudo",
+      "sobre": "arista:a-recibe",
+      "estado": "ambar",
+      "referencia": "HMAC-SHA256 con el secreto de la app; 401 si no cuadra"
+    },
+    {
+      "id": "l-idempotencia",
+      "label": "un wamid, un evento; los estados solo avanzan",
+      "sobre": "arista:a-ingiere",
+      "estado": "ambar",
+      "referencia": "cero duplicados con reintentos y desorden (prueba)"
+    },
+    {
+      "id": "l-barreras",
+      "label": "barrera de entrada y de salida",
+      "sobre": "arista:a-atiende",
+      "estado": "ambar",
+      "referencia": "0/200 fechorías con el modelo adversarial; con el modelo real: no medido"
+    },
+    {
+      "id": "l-traspaso",
+      "label": "disparadores del traspaso independientes del modelo",
+      "sobre": "arista:a-traspasa",
+      "estado": "ambar",
+      "referencia": "queja, monto, 2 fallos, presupuesto, petición"
+    },
+    {
+      "id": "l-ventana",
+      "label": "cronómetro de ventanas y precio por mensaje",
+      "sobre": "arista:a-responde",
+      "estado": "ambar",
+      "referencia": "24 h, 72 h, cupo de 1,000 (no verificado); aviso al dueño a < 2 h"
+    },
+    {
+      "id": "l-remitente",
+      "label": "frontera del número: por contacto, contactos nuevos y mensajes por hora; lista de bloqueo",
+      "sobre": "nodo:conversacion",
+      "estado": "ambar",
+      "referencia": "20 mensajes en 10 min por contacto; 40 contactos nuevos y 400 mensajes por hora (ficticios); una granja de 60 gasta 40 llamadas al modelo"
+    },
+    {
+      "id": "l-conciliacion",
+      "label": "conciliación pedidos contra el procesador",
+      "sobre": "nodo:pago",
+      "estado": "ambar",
+      "referencia": "0 diferencias"
+    },
+    {
+      "id": "l-ledger",
+      "label": "event_id único y comparación con automatic_events",
+      "sobre": "arista:a-convierte",
+      "estado": "ambar",
+      "referencia": "un Purchase por pedido; valor de Meta en milésimas"
+    },
+    {
+      "id": "l-roas",
+      "label": "ROAS del tablero contra el Administrador de anuncios",
+      "sobre": "nodo:tablero",
+      "estado": "ambar",
+      "referencia": "±10 % (simulado 0.0 %); contra el real: gris"
+    },
+    {
+      "id": "l-cadena",
+      "label": "la cadena verifica y cuadra con sus anclas",
+      "sobre": "nodo:ancla",
+      "estado": "ambar",
+      "referencia": "alteración, borrado y reescritura detectados (prueba)"
+    },
+    {
+      "id": "l-optimizacion",
+      "label": "ahorro sin recorte: tokens contra resolución y conversión",
+      "sobre": "nodo:roadmaps",
+      "estado": "ambar",
+      "referencia": "−86 % tokens, misma resolución y conversión (A/B con cola larga)"
+    },
+    {
+      "id": "l-papel-codigo",
+      "label": "los roadmaps en papel son los del código",
+      "sobre": "nodo:roadmaps",
+      "estado": "ambar",
+      "referencia": "prueba de igualdad del Markdown generado"
+    },
+    {
+      "id": "l-firma-humana",
+      "label": "C3 y C4 firmados por una persona",
+      "sobre": "nodo:c3-c4-firmados",
+      "estado": "manual",
+      "referencia": "ningún agente firma"
+    },
+    {
+      "id": "l-arnes-real",
+      "label": "0/200 fuera de dominio con el modelo real",
+      "sobre": "nodo:modelo-real",
+      "estado": "gris",
+      "referencia": "compuerta de la fase 1"
+    },
+    {
+      "id": "l-cuarentena",
+      "label": "un número liberado no se reasigna antes de 90 días",
+      "sobre": "nodo:pool-numeros",
+      "estado": "ambar",
+      "referencia": "historial con cuarentena → disponible; prueba de reasignación temprana rechazada"
+    },
+    {
+      "id": "l-codigo-30s",
+      "label": "liga firmada de un solo uso, origen de Meta, código de 30 s; el token solo en la bóveda y solo si la WABA es suya",
+      "sobre": "nodo:alta-bsp",
+      "estado": "ambar",
+      "referencia": "liga alterada, vencida o reusada rechazada; evilfacebook.com rechazado; WABA ajena sin token guardado"
+    },
+    {
+      "id": "l-conciliacion-meta",
+      "label": "nuestra cuenta por WABA contra la factura de Meta",
+      "sobre": "nodo:factura-bsp",
+      "estado": "ambar",
+      "referencia": "diferencia > 1 % se revisa; al tope de crédito se frena solo el marketing y decide una persona"
+    }
+  ]
+}

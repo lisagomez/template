@@ -1,0 +1,28 @@
+{
+  "name": "@tu-scope/ventas-whatsapp",
+  "version": "0.1.0",
+  "description": "Vendedor con IA en WhatsApp para pymes (fases 0-3, laboratorio): canal de Cloud API con firma e idempotencia, ventanas y costeo por mensaje, agente acotado al negocio con barreras y traspaso a humano, comercio en el chat (catalogo, pedido, liga de pago, Flows cifrados), atribucion con Conversions API y tablero de ROAS, y un simulador fiel de Meta para probarlo todo sin numero real. Nucleo TypeScript sin dependencias; el LLM, el transporte, el almacen y el procesador de pagos se inyectan.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./simulador": { "types": "./dist/simulador/index.d.ts", "import": "./dist/simulador/index.js" },
+    "./laboratorio": { "types": "./dist/laboratorio/index.d.ts", "import": "./dist/laboratorio/index.js" },
+    "./almacen-archivo": { "types": "./dist/almacen/archivo.d.ts", "import": "./dist/almacen/archivo.js" },
+    "./a2a": { "types": "./dist/a2a/index.d.ts", "import": "./dist/a2a/index.js" }
+  },
+  "files": ["dist", "flows", "migraciones", "README.md"],
+  "sideEffects": false,
+  "engines": { "node": ">=22.18" },
+  "peerDependencies": {
+    "@a2a-js/sdk": "1.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@a2a-js/sdk": { "optional": true }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prueba": "node --test pruebas/*.ts"
+  }
+}

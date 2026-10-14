@@ -12,10 +12,13 @@ se publica. Diseño y candado: `.claude/PRPs/PRP-007-reel-del-celular.md`; lo fi
 - **Privacidad** (AISIA firmada): caras sin consentimiento desenfocadas por defecto y re-verificadas en el
   máster; datos en pantalla (teléfono, RFC, CURP, correo, tarjeta) bloquean con reporte enmascarado a 4
   caracteres; más voces que consentimientos bloquea; sonido de fondo continuo (música) bloquea; clip horizontal
-  bloquea antes de gastar CPU.
+  bloquea antes de gastar CPU; un corte que parte lo que dijo otra persona (quitarla entera no) bloquea hasta que el
+  dueño confirma en la sala que no le cambia el sentido, y si ninguna voz domina se revisan los cortes de todas.
 - **Máster declarativo y determinista** (misma entrada, mismos bytes) a 1080×1920, 30 fps, H.264 + AAC 48 kHz,
   −14 LUFS; **QA** que bloquea; hoja de cuadros.
-- **Retención** de 30 días con reloj inyectado; **sala**: validar aprobaciones y aplicar marcas en el segundo exacto.
+- **Retención** de 30 días con reloj inyectado; si en el reel habla alguien además del dueño, su **transcripción
+  íntegra** se conserva con su consentimiento (`transcripcionAConservar`) y vence con él; **sala**: validar
+  aprobaciones y aplicar marcas en el segundo exacto.
 
 ### Lo que no hace (bloqueado hasta firma)
 LLM sobre la transcripción, transcripción remota, video generativo, reducción de ruido, foto de producto en

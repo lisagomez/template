@@ -3,6 +3,7 @@ import { auditaVisibilidad, llmsTxt, jsonLdNegocio, robotsPropuesto } from '../.
 import { leeAnuncios, campanas, recomendaciones, pulsoDeCrecimiento, pulsoParaElLunes, briefDelLunes, anunciosParaElLunes, competenciaParaElLunes, resenasParaElLunes, visibilidadParaElLunes, leeNotasDeCompetencia } from '../../../../tools/pymes-marketing/dist/pulso/index.js';
 import { ventasDesdeCfdi, resumeVentas } from '../../../../tools/pymes-marketing/dist/ventas/index.js';
 import { formatoDinero } from '../../../../tools/pymes-marketing/dist/index.js';
+import { anuncios } from '../../estudio-pymes/services/estudio.ts';
 import { demoPanaderia, RFC_DEMO } from '../datos/cfdi-sinteticos.ts';
 import { anunciosDemo, NEGOCIO_DEMO, NOTAS_COMPETENCIA_DEMO, ROBOTS_BLOQUEA_IA, ROBOTS_SANO, SITIO_CON_PROBLEMAS, SITIO_DEMO } from '../datos/demo.ts';
 import { leeXml } from './casos-marca-ventas.ts';
@@ -130,6 +131,35 @@ export const CASOS_PULSO: readonly Caso[] = [
       const l = leeAnuncios('Campaign name,Amount spent (USD),Results\nPromo,$50.00,4\n');
       const r = recomendaciones(campanas(l), l.moneda);
       return verifica([[l.moneda === 'USD', 'se reconoce la moneda'], [!r.some((b) => /MXN/.test(b.cuestaHoy)), 'no se reporta como pesos']], [`moneda ${l.moneda}; gasto ${formatoDinero(l.filas[0]!.gasto, 'USD')}`], 'Nunca se convierte ni se mezcla en silencio.');
+    },
+  },
+  {
+    id: 'pulso-8', herramienta: 'pulso', titulo: 'El estudio enseña la columna que no reconoce, con los encabezados del archivo', trampa: 'columna no reconocida', esperado: 'pasa',
+    entrada: 'Exportación sintética con «Monto invertido» en lugar de un nombre de gasto conocido.',
+    async corre() {
+      const a = anuncios('Campaña,Monto invertido,Resultados\nPromo,$50.00,4\n');
+      const falta = a.avisos.find((x) => x.startsWith('No reconocí')) ?? '';
+      return verifica([[a.campanas.length === 0, 'sin gasto no juzga ninguna campaña'], [/el gasto/.test(falta) && /Monto invertido/.test(falta), 'dice qué columna falta y qué trae el archivo'], [a.avisos.some((x) => /no puedo juzgar/.test(x)), 'dice por qué no hay veredictos']], a.avisos, 'Una columna que no se reconoce se ve, con lo necesario para cotejarla (piloto, §6).');
+    },
+  },
+  {
+    id: 'pulso-9', herramienta: 'pulso', titulo: 'Una fila ilegible no desaparece en silencio', trampa: 'fila ilegible', esperado: 'pasa',
+    entrada: 'Exportación sintética de 3 días; el gasto de uno dice «N/D».',
+    async corre() {
+      const a = anuncios('Día,Campaña,Gasto,Resultados\n2026-09-01,Promo,$10.00,1\n2026-09-02,Promo,N/D,1\n2026-09-03,Promo,$10.00,1\n');
+      const aviso = a.avisos.find((x) => /No pude leer 1 fila/.test(x)) ?? '';
+      return verifica([[a.campanas[0]?.gasto === 2000, 'el gasto suma solo lo que se leyó'], [/línea 3/.test(aviso) && /no está en las cifras/.test(aviso), 'dice cuál fila y que su gasto falta']], a.avisos, 'Un gasto menor del real se avisa: sin eso, el veredicto sale de datos parciales.');
+    },
+  },
+  {
+    id: 'pulso-10', herramienta: 'pulso', titulo: 'Dólares de punta a punta: tabla, avisos y brief del lunes', trampa: 'moneda mezclada', esperado: 'pasa',
+    entrada: 'Exportación sintética en USD: 20 días gastando sin un solo resultado.',
+    async corre() {
+      const filas = ['Day,Campaign name,Amount spent (USD),Results'];
+      for (let d = 0; d < 20; d++) filas.push(`${new Date(Date.UTC(2026, 8, 1 + d)).toISOString().slice(0, 10)},Promo,$5.00,0`);
+      const a = anuncios(filas.join('\n'));
+      const impacto = anunciosParaElLunes(a.campanas, a.bloques).acciones[0]?.impacto ?? '';
+      return verifica([[a.moneda === 'USD', 'la moneda llega a la app'], [a.avisos.some((x) => /dólares/.test(x)), 'se le dice al dueño'], [/USD al mes/.test(impacto) && !/MXN/.test(impacto), 'el brief del lunes no la llama pesos']], [`moneda ${a.moneda}`, ...a.avisos, `lunes: ${impacto}`], 'Antes el brief decía «MXN al mes» con una exportación en dólares.');
     },
   },
 ];

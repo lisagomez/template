@@ -9,8 +9,9 @@
  *
  * Lo que se cuenta: skills invocados (por `<command-name>` en mensajes de usuario y por la
  * herramienta Skill), herramientas por nombre, modelos por mensaje, tokens con cache, turnos,
- * subagentes, errores de herramienta, y los gates que se corrieron (validate, prueba, regresion,
- * verifica:specs, gobernanza, lint, typecheck, build) con un resultado deducido de su salida.
+ * subagentes, errores de herramienta, errores de la API (en `avisos`), y los gates que se corrieron
+ * (validate, prueba, regresion, verifica:specs, gobernanza, lint, typecheck, build) con un
+ * resultado deducido de su salida.
  *
  * Lo que NO se copia, a proposito: ningun texto de mensaje, ningun comando, ningun nombre de
  * archivo. El `usage` se deduplica por id de mensaje: en el transcript cada bloque de contenido
@@ -41,10 +42,7 @@ const PRECIOS = preciosDelArnes()
 function costeDe(usoPorMensaje, modeloPorMensaje) {
   let total = 0
   for (const [id, u] of usoPorMensaje) {
-    const modelo = modeloPorMensaje.get(id) ?? ''
-    // `<synthetic>`: mensajes que fabrica el arnes sin llamar a ningun modelo. No cuestan.
-    if (modelo.startsWith('<')) continue
-    const precio = PRECIOS[modelo]?.precio
+    const precio = PRECIOS[modeloPorMensaje.get(id) ?? '']?.precio
     if (precio === undefined) return null
     total += ((u.input_tokens ?? 0) * precio.entrada + (u.output_tokens ?? 0) * precio.salida
       + (u.cache_read_input_tokens ?? 0) * precio.lectura_cache + (u.cache_creation_input_tokens ?? 0) * precio.escritura_cache) / 1e6
@@ -122,6 +120,7 @@ export function trayectoriaDeTranscript(lineas, referencia) {
   const resultados = new Map()
   const usos = new Map()
   const erroresPor = {}
+  const erroresApi = new Set()
   let turnos = 0
   let subagentes = 0
   let errores = 0
@@ -135,8 +134,13 @@ export function trayectoriaDeTranscript(lineas, referencia) {
     const m = l.message
     if (!m || typeof m !== 'object') continue
     if (l.type === 'assistant') {
-      if (m.model && !String(m.model).startsWith('<')) modelos[m.model] = (modelos[m.model] ?? 0) + 1
-      if (m.usage && m.id && !usoPorMensaje.has(m.id)) { usoPorMensaje.set(m.id, m.usage); modeloPorMensaje.set(m.id, String(m.model ?? '')) }
+      // `<synthetic>`: lo fabrica el arnes sin llamar a ningun modelo (un error de la API, una
+      // interrupcion). No es una llamada ni tiene uso: contarlo dio una sesion caida por la API
+      // como «1 llamada, 0 tokens, cobertura completa» y sin ningun error (2026-10-01).
+      const sintetico = String(m.model ?? '').startsWith('<')
+      if (m.model && !sintetico) modelos[m.model] = (modelos[m.model] ?? 0) + 1
+      if (sintetico) { if (l.isApiErrorMessage === true) erroresApi.add(m.id ?? l.uuid) }
+      else if (m.usage && m.id && !usoPorMensaje.has(m.id)) { usoPorMensaje.set(m.id, m.usage); modeloPorMensaje.set(m.id, String(m.model ?? '')) }
       for (const b of Array.isArray(m.content) ? m.content : []) {
         if (b?.type !== 'tool_use') continue
         const nombre = String(b.name ?? 'desconocida').slice(0, 60)
@@ -202,6 +206,8 @@ export function trayectoriaDeTranscript(lineas, referencia) {
     gates: Object.values(gates),
     resultado: { errores, erroresPor },
     cobertura: cobertura(faltan),
+    // Aparte de `resultado.errores`, que son de herramienta: mezclarlos falsearia erroresPorHerramienta.
+    ...(erroresApi.size > 0 ? { avisos: [`${erroresApi.size} error(es) de la API del modelo`] } : {}),
   }
   return t
 }

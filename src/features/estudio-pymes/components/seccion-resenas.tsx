@@ -29,7 +29,7 @@ function Respuesta({ b, i }: { b: BorradorDeRespuesta; i: number }) {
 }
 
 export function SeccionResenas() {
-  const { analisis, cargaResenas } = useEstudio();
+  const { analisis, avisosResenas, cargaResenas } = useEstudio();
   const [texto, setTexto] = useState('');
   return (
     <div className="space-y-4">
@@ -37,6 +37,7 @@ export function SeccionResenas() {
       <Boton variante="primario" onClick={() => void cargaResenas(texto)} disabled={!texto.trim()}>Leer reseñas</Boton>
       {analisis ? (
         <div className="space-y-4" data-prueba="analisis-resenas">
+          <Lista titulo="Lo que no pude leer" elementos={avisosResenas} />
           <div className="flex flex-wrap gap-2 text-sm">{analisis.calificaciones.map((c) => <Pastilla key={c.plataforma}>{c.plataforma}: {c.promedio ?? '—'} ({c.resenas}){c.cambio !== null ? ` ${c.cambio >= 0 ? '+' : ''}${c.cambio}` : ''}</Pastilla>)}<span className="text-xs text-neutral-500">Cada plataforma por separado: no se promedian.</span></div>
           <table className="text-sm"><tbody>{analisis.fuentes.map((f) => <tr key={f.nombre}><td className="pr-4">{f.nombre}</td><td className="tabular-nums">{f.cuantas ?? '—'}</td><td className="pl-3 text-xs text-neutral-500">{f.nota}</td></tr>)}</tbody></table>
           <div className="grid gap-3 md:grid-cols-2">{analisis.temas.map((t) => <Lista key={t.id} titulo={`${t.etiqueta}: ${t.conteo} (${t.quejas} quejas)`} elementos={t.citas} />)}</div>

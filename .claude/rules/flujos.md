@@ -1,6 +1,7 @@
 ---
 paths:
   - "BUSINESS_LOGIC.md"
+  - "src/features/*/BUSINESS_LOGIC.md"
   - ".claude/PRPs/**"
   - ".claude/skills/**"
 ---

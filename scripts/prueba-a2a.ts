@@ -80,6 +80,20 @@ const rutasDelBridge = (): string[] => [
  */
 const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ajustes',
+  // Buzón de CFDI del despacho (spec 015). RF-20: misma app y mismo puerto; en el despacho la app no tiene salida
+  // a internet (docker-compose.despacho.yml). Todas exigen sesión y ser miembro del despacho (`entra()`), las que
+  // escriben, `Origin` del mismo sitio; RLS y disparadores deciden. NO pasan por `src/proxy.ts` a propósito: Next 16
+  // corta ahí el cuerpo a 10 MB sin error. El documento no se guarda, solo su lectura; sin consentimiento, ni se lee.
+  '/api/buzon/cifras',
+  '/api/buzon/consentimientos',
+  '/api/buzon/documentos',
+  '/api/buzon/documentos/[id]',
+  '/api/buzon/exporta',
+  '/api/buzon/horas',
+  '/api/buzon/lista-69b',
+  '/api/buzon/pendientes',
+  '/api/buzon/piloto',
+  '/api/buzon/pymes',
   '/api/contenido/video',
   '/api/dictado',
   '/api/dictado/movil',
@@ -109,6 +123,31 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   // exige sesión (proxy: 401 sin ella) y lee con la sesión de quien pide (RLS por organización); la huella del archivo
   // viaja en X-Huella. Misma app y mismo puerto que las demás (RF-20).
   '/api/sgi/documento/[version]',
+  // Soporte SAP en LABORATORIO (PRP-008). RF-20: misma app y mismo puerto. Responde 404 sin
+  // SOPORTE_SAP_LABORATORIO=1 (que `configura:deploy` rechaza en producción); estado sintético en memoria,
+  // identidades de laboratorio, sin base y sin `service_role`. Exponerla es gate humano con C3 + C4.
+  '/api/soporte-sap',
+  // Vendedor con IA en WhatsApp (goal ventas-ia-waba, fases 0-3 en laboratorio). RF-20: misma app y mismo
+  // puerto. `webhook`, `flows` y `pagos` son las únicas que un tercero (Meta, el procesador) tendría que
+  // alcanzar, y solo con el canal REAL: la app no lo arranca sin C3 + C4 firmados; en el laboratorio las
+  // llaman simuladores locales. Todas verifican firma (X-Hub-Signature-256 / HMAC del procesador) antes de
+  // leer el cuerpo. `panel`: Bearer por inquilino. `plataforma`: Bearer de quien opera, solo en el
+  // laboratorio. `a2a/[dominio]`: la pasarela de `pedidos` y `atribucion`, OTRA superficie que no es este
+  // bridge — local, 503 sin llave de firma, token con inquilino; exponerla a un partner o a internet es gate
+  // humano con C3 + C4.
+  '/api/ventas-whatsapp/a2a/[dominio]',
+  '/api/ventas-whatsapp/a2a/[dominio]/.well-known/agent-card.json',
+  '/api/ventas-whatsapp/flows',
+  '/api/ventas-whatsapp/pagos',
+  '/api/ventas-whatsapp/panel',
+  '/api/ventas-whatsapp/plataforma',
+  '/api/ventas-whatsapp/webhook',
+  // La vitrina de Soporte SAP (docs/VITRINA-SOPORTE-SAP.md). RF-20: misma app y mismo puerto. En Vercel, detrás de su
+  // protección; NO enciende el laboratorio: firma cada petición (HMAC, ventana y una sola vez) y la pasa por un túnel
+  // al portero de la máquina del laboratorio, que solo deja pasar /api/soporte-sap. Sin EN_VIVO_URL ni EN_VIVO_SECRETO
+  // (fuera de Vercel) responden «apagado». `estado`: siempre 200, para que un laboratorio apagado no sea un error.
+  '/api/vitrina/soporte-sap/en-vivo',
+  '/api/vitrina/soporte-sap/en-vivo/estado',
 ]
 
 const peticion = (cuerpo: unknown, cabeceras: Record<string, string> = {}): Request =>
@@ -173,8 +212,28 @@ test('con A2A_API_KEY configurada, sin la cabecera es 401; con ella pasa', async
     assert.equal(card.securityRequirements.length, 1, 'la Card declara la clave cuando se exige')
     const con = await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }, { 'X-API-Key': 'clave-de-prueba' }))
     assert.equal(con.status, 200)
+    const casi = await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }, { 'X-API-Key': 'clave-de-pruebA' }))
+    assert.equal(casi.status, 401, 'misma longitud, un caracter distinto')
   } finally {
     delete process.env.A2A_API_KEY
+  }
+})
+
+test('en PRODUCCION sin clave el puente esta apagado: rpc y Card responden 503 (revision C3 del 2026-10-02)', async () => {
+  const entorno = process.env as Record<string, string | undefined>
+  const antes = entorno['NODE_ENV']
+  entorno['NODE_ENV'] = 'production'
+  try {
+    const rpcApagado = await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }))
+    assert.equal(rpcApagado.status, 503)
+    assert.equal((await rpc(rpcApagado)).error?.message, 'puente A2A apagado')
+    assert.equal((await cardGet()).status, 503, 'no se anuncia un agente que no atiende')
+    entorno['A2A_API_KEY'] = 'clave-de-prueba'
+    assert.equal((await rpcPost(peticion({ jsonrpc: '2.0', id: 1, method: 'SendMessage', params: {} }))).status, 401, 'con clave vuelve a exigirla')
+    assert.equal((await cardGet()).status, 200)
+  } finally {
+    entorno['NODE_ENV'] = antes
+    delete entorno['A2A_API_KEY']
   }
 })
 

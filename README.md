@@ -18,7 +18,7 @@ segun cual sea:
 | Comando | `npm run configura:deploy` + `npm run deploy` | `npm run empaqueta <nombre>` |
 
 Lo que **no** cambia entre las dos: la capa de gobernanza, el gate `npm run validate`, las
-specs y los 27 skills. Se hereda entero, construyas lo que construyas.
+specs y los 28 skills. Se hereda entero, construyas lo que construyas.
 
 Un mismo repo puede llevar las dos: la app en `src/`, y en `tools/` lo que ya reusaste
 lo bastante como para sacarlo de ahi.
@@ -43,7 +43,7 @@ laboratorio lo prueba aqui y de aqui sale lo que se licencia a clientes. Vive en
 - Supabase (Database + Auth + RLS)
 - Tailwind CSS 3.4 + shadcn/ui **cableado**: tokens en variables CSS, tema claro/oscuro, `cn()` y `Button`
 - Zustand para el estado que comparten los componentes de una feature
-- 27 Skills de Claude Code (V4 Skills 2.0)
+- 28 Skills de Claude Code (V4 Skills 2.0)
 - Specs con requisitos en notacion EARS + `docs/constitution.md`
 - `tools/` + `npm run empaqueta`: el camino de paquete reutilizable, con su integracion probada
 - **Extractor documental** listo para instalar (`tools/extractor-documental/`): OCR, codigos de
@@ -164,7 +164,7 @@ src/
     └── types/
 ```
 
-## Skills (27 total)
+## Skills (28 total)
 
 Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 
@@ -178,6 +178,7 @@ Invocables con `/nombre`; Claude tambien los activa solo segun la tarea.
 | `/website-3d` | Landing cinematica: scroll-driven video + copy AIDA/PAS |
 | `/crear-herramienta` | Convertir algo ya reusado en paquete instalable (`tools/`) |
 | `/readme` | README product first de herramientas y apps: nuevo, reestructura, revisa |
+| `/analista-producto` | Donde duele el repo, con evidencia citada → casos de uso y propuestas product first |
 | `/spec-generator` | Entrevista de requisitos → spec.md con RF en notacion EARS |
 | `/prp` | Planificar features complejas antes de implementar |
 | `/bucle-agentico` | Implementar features complejas por fases |
@@ -267,6 +268,7 @@ npm run inventario:vista     # regenera inventario/INVENTARIO.md tras tocar el i
 npm run inventario:exporta   # costeo + ledger + SQL para el modulo act del ERP, en inventario/salida/ (fuera de git)
 npm run inventario:valida-erp  # carga el export en un Postgres desechable con erp/migrations/ (Docker)
 npm run verifica:marca-blanca  # todo archivo de erp/ clasificado (erp/entrega.json); ni defendibles ni huellas de la casa en lo que se entrega
+npm run verifica:productos  # cada manifiesto de productos/ contra el indice y el inventario (dueno, composicion, terceros, lo que no se negocia, lo que falta y lo que no cupo); siembra 26 defectos
 npm run erp:prueba   # instala el ERP 2 veces en un Postgres 17 desechable, pruebas de cierre (a)-(j) y esquema ≡ produccion (Docker)
 npm run erp:control  # la prueba de las pruebas del ERP: 6 mutaciones de las migraciones, todas deben caer en rojo (Docker)
 npm run mide:contexto  # cuanto cuesta el contexto base, contra presupuesto declarado
@@ -370,10 +372,13 @@ consultarse y un verificador falla si el papel y el codigo divergen.
 | **C7** `service_role` | Tiene BYPASSRLS: las superficies de negocio no lo usan |
 
 ```bash
-npm run verify:gobernanza   # falla si la capa quedo suelta (156 comprobaciones; el propio verificador vigila esta cifra)
-npm run regresion           # C2 capa A: contratos de los 27 skills
+npm run verify:gobernanza   # falla si la capa quedo suelta (169 comprobaciones; el propio verificador vigila esta cifra)
+npm run regresion           # C2 capa A: contratos de los 28 skills
 npm run regresion -- --trampa   # C2 capa B: casos-trampa, para cada CDC
 npm run revisa:readmes      # README product first de tools/ y src/features/ (skill readme); -- --prueba lo prueba
+npm run prueba:analista     # analista de producto: contrato A2A no servido, siembras del verificador y la ultima corrida en verde
+npm run prueba:buzon        # piloto del buzon de CFDI (spec 015), de punta a punta: perimetro, base, lectura, 69-B, medicion y cierre
+npm run recorrido:buzon     # el mismo piloto en el navegador, en un stack desechable (necesita Docker; no es un gate)
 ```
 
 El gate corre solo antes de desplegar (`predeploy`), no solo cuando alguien se acuerda.
@@ -602,7 +607,7 @@ o lo declara no medido y fuera de produccion.
 
 ```
 .claude/
-├── skills/                    # 27 Skills (V4 Skills 2.0)
+├── skills/                    # 28 Skills (V4 Skills 2.0)
 │   └── ai/references/         # AI Templates (11 bloques)
 ├── gobernanza/                # 7 controles, plantillas, registros y golden-sets
 ├── specs/                     # spec.md (EARS) + plan.md + tareas.md, por feature

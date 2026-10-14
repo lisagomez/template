@@ -13,7 +13,7 @@ Template **production-ready** para crear aplicaciones SaaS modernas con desarrol
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth)
 - Tailwind CSS + shadcn/ui
-- 27 Skills de Claude Code (V4 Skills 2.0)
+- 28 Skills de Claude Code (V4 Skills 2.0)
 - Arquitectura Feature-First optimizada para IA
 - Auto port detection (3000-3006)
 - Capa de gobernanza agentica: 7 controles cableados y auto-verificados
@@ -141,7 +141,7 @@ npm run verifica:gates     # el padron y el codigo no divergen (`--prueba`: 6 si
 > V4 migra TODO a Skills 2.0. Hot reload, auto-discovery, zero config.
 > Cada skill es una carpeta con `SKILL.md` (frontmatter YAML + instrucciones).
 
-Los 27 skills son invocables con `/nombre` y activables por Claude segun
+Los 28 skills son invocables con `/nombre` y activables por Claude segun
 el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
@@ -155,6 +155,7 @@ el `description` de su frontmatter.
 | `spec-generator` | `/spec-generator` | Entrevista de requisitos → `spec.md` con RF en notacion EARS |
 | `crear-herramienta` | `/crear-herramienta` | Convertir algo ya reusado en paquete instalable (`tools/`) |
 | `readme` | `/readme` | README product first de `tools/` y `src/features/`: nuevo, reestructura, revisa |
+| `analista-producto` | `/analista-producto` | Donde duele el repo, con evidencia citada → casos de uso y propuestas product first |
 | `cli-audit` | `/cli-audit` | Estado de la imprenta de CLIs y coste en contexto de los MCP |
 | `prp` | `/prp` | Generar Product Requirements Proposal |
 | `bucle-agentico` | `/bucle-agentico` | Features complejas por fases (DB + API + UI) |
@@ -281,7 +282,7 @@ sesiones frias lo encontraron leyendo el repo y la prueba dejo de ser ciega. Se 
 ### Se verifica sola
 
 ```bash
-npm run verify:gobernanza   # 156 comprobaciones (la cifra la vigila el propio verificador)
+npm run verify:gobernanza   # 169 comprobaciones (la cifra la vigila el propio verificador)
 npm run regresion           # C2 capa A
 npm run regresion -- --trampa   # C2 capa B (para cada CDC)
 ```
@@ -343,7 +344,7 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 
 ```
 .claude/
-├── skills/                    # Skills 2.0 (V4) - 27 skills
+├── skills/                    # Skills 2.0 (V4) - 28 skills
 │   ├── new-app/                 # Entrevista de negocio → BUSINESS_LOGIC.md
 │   ├── add-login/               # Auth completo Supabase: login, signup, password reset, profiles, RLS
 │   ├── add-payments/            # Pagos con Polar (MoR): checkout, webhooks, suscripciones

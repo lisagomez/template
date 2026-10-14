@@ -100,6 +100,30 @@ export function troceaPaginas(totalPaginas: number, porPeticion: number): readon
   return trozos
 }
 
+/** ¿Los bytes son XML? Admite BOM y espacios iniciales; el primer carácter significativo es «<». */
+export function esXmlPorBytes(bytes: Uint8Array): boolean {
+  let i = 0
+  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) i = 3
+  while (i < bytes.length && (bytes[i] === 0x20 || bytes[i] === 0x0a || bytes[i] === 0x0d || bytes[i] === 0x09)) i++
+  return bytes[i] === 0x3c
+}
+
+export type ClasePorBytes = 'pdf' | 'imagen' | 'xml' | 'zip' | 'desconocido'
+
+/**
+ * La clase de un archivo por sus BYTES, nunca por su nombre (0.8.0). Un producto que recibe archivos
+ * de terceros la compara con lo que el nombre declara: si no coinciden, el nombre miente. `zip` es
+ * el contenedor de Word y Excel, que este extractor NO lee: se dice para que el producto lo guarde
+ * como adjunto en vez de mandarlo a un motor.
+ */
+export function clasePorBytes(bytes: Uint8Array): ClasePorBytes {
+  const mime = tipoMimeDe(bytes)
+  if (mime === 'application/pdf') return 'pdf'
+  if (mime.startsWith('image/')) return 'imagen'
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04) return 'zip'
+  return esXmlPorBytes(bytes) ? 'xml' : 'desconocido'
+}
+
 /** Detecta el tipo por los bytes y no por el nombre: un `.pdf` renombrado sigue siendo lo que es. */
 export function tipoMimeDe(bytes: Uint8Array): string {
   const empieza = (...b: number[]) => b.every((v, i) => bytes[i] === v)

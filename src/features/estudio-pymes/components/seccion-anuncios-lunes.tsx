@@ -3,7 +3,7 @@
 /** Anuncios desde tu exportación (el clic lo das tú) y el brief del lunes que junta todo. */
 import { useState } from 'react';
 import { Boton } from '@/features/laboratorio-voz/components/ui';
-import { formatoPesosRedondo } from '../../../../tools/pymes-marketing/dist/index.js';
+import { formatoDinero } from '../../../../tools/pymes-marketing/dist/index.js';
 import type { BriefDelLunes } from '../../../../tools/pymes-marketing/dist/pulso/index.js';
 import { useEstudio } from '../store/estudio.ts';
 import { AreaDeTexto, Lista, Pastilla } from './ui-estudio.tsx';
@@ -11,7 +11,7 @@ import { AreaDeTexto, Lista, Pastilla } from './ui-estudio.tsx';
 const TONO = { funciona: 'bien', vigilar: 'revisar', problema: 'problema', 'sin-veredicto': 'sin' } as const;
 
 export function SeccionAnuncios() {
-  const { campanas, bloques, cargaAnuncios } = useEstudio();
+  const { campanas, bloques, monedaAnuncios, avisosAnuncios, cargaAnuncios } = useEstudio();
   const [csv, setCsv] = useState('');
   return (
     <div className="space-y-4">
@@ -19,8 +19,9 @@ export function SeccionAnuncios() {
       <Boton variante="primario" onClick={() => cargaAnuncios(csv)} disabled={!csv.trim()}>Leer anuncios</Boton>
       {campanas ? (
         <div className="space-y-3" data-prueba="anuncios">
+          <Lista titulo="Lo que no pude leer" elementos={avisosAnuncios} />
           <table className="w-full text-sm"><tbody>{campanas.map((c) => (
-            <tr key={c.nombre} className="border-t border-neutral-100 dark:border-neutral-900"><td className="py-1 pr-2">{c.nombre}</td><td className="tabular-nums">{formatoPesosRedondo(c.gasto)}</td><td className="tabular-nums">{c.resultados ?? '—'} resultados</td><td><Pastilla tono={TONO[c.veredicto]}>{c.veredicto}</Pastilla></td><td className="text-xs text-neutral-500">{c.porque}</td></tr>))}</tbody></table>
+            <tr key={c.nombre} className="border-t border-neutral-100 dark:border-neutral-900"><td className="py-1 pr-2">{c.nombre}</td><td className="tabular-nums">{formatoDinero(c.gasto, monedaAnuncios)}</td><td className="tabular-nums">{c.resultados ?? '—'} resultados</td><td><Pastilla tono={TONO[c.veredicto]}>{c.veredicto}</Pastilla></td><td className="text-xs text-neutral-500">{c.porque}</td></tr>))}</tbody></table>
           <p className="text-xs text-neutral-500">Cada campaña contra su propio promedio, no contra referencias de internet.</p>
           <div className="grid gap-2 md:grid-cols-2">{bloques.map((b) => (
             <div key={b.cambio} className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800">

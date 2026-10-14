@@ -80,6 +80,17 @@ test('asientos mal formados: enum, id y campo desconocido', () => {
   }
 })
 
+test('clasificador de producto: slug, grado del enum, y un CLI sin grado se rechaza', () => {
+  const mal = indice([activo('TPL-a', ['tools/a'], { producto: 'Soporte SAP', grado: 'excelente' }), activo('TPL-cli-x', ['tools/b/clis/x.mjs'], { producto: 'soporte-sap' })])
+  const errores = validaAsientos(mal, () => true).join('\n')
+  for (const esperado of ['producto «Soporte SAP»', 'grado «excelente»', 'TPL-cli-x: un CLI declara su grado']) assert.ok(errores.includes(esperado), esperado)
+  const bien = indice([activo('TPL-a', ['tools/a'], { producto: 'soporte-sap' }), activo('TPL-cli-x', ['tools/b/clis/x.mjs'], { producto: 'soporte-sap', grado: 'no medido' })])
+  assert.deepEqual(validaAsientos(bien, () => true), [])
+  const v = renderVista(bien, new Map())
+  assert.match(v, /## Por producto/)
+  assert.match(v, /\| soporte-sap \| TPL-cli-x \| TPL-cli-x \| beta \| no medido \|/)
+})
+
 test('los enums son los de los check de 005_activos.sql y del catalogo', () => {
   assert.deepEqual(TIPOS, ['software', 'config_agentica', 'datos', 'documento', 'infraestructura', 'licencia_suscripcion'])
   assert.deepEqual(CLASES, ['PRODUCTO', 'FABRICA', 'CONOCIMIENTO', 'DISEÑO', 'COMERCIAL', 'INFRA'])

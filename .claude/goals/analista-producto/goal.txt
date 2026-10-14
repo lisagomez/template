@@ -1,0 +1,16 @@
+/goal Construye lo descrito en el spec completo: /home/gsore/code/template/.claude/worktrees/paintpoints/.claude/goals/analista-producto/spec.md (con grafo.json y plan.md al lado). Leelo ENTERO antes de empezar y reafirma el objetivo en una linea antes de cada edicion grande.
+Outcome: un rol de analista de producto (SDD, PRP-008, skill y contrato A2A tipado y no servido) cuya primera corrida sobre este repo entrega dolores con evidencia citada, casos de uso por categoria y propuestas product first que recombinan herramientas, apps y arquitectura existentes.
+Libertad tecnica: nombres, esquemas, categorias, priorizacion y reparto del trabajo los eliges tu; el borrador del spec es hipotesis salvo RESTRICCIONES. Investiga 2-3 referencias de descubrimiento de producto con evidencia antes de disenar.
+VALIDA: `npm run validate` en el worktree tras cada cambio grande (y el verificador de evidencia en cuanto exista); surfea su output.
+HECHO cuando (el evaluador solo ve esta conversacion: pega la evidencia):
+- esqueleto de SDD y PRP-008 (fase 2 A2A viva planeada con sus gates)
+- SKILL.md y contrato capa A; `regresion` en verde
+- Agent Card y su prueba en verde; 0 rutas nuevas servidas
+- verificador en verde sobre la corrida y su --prueba tumbando los dolores sembrados
+- corrida en docs/analisis/<fecha>/: cobertura N/N del inventario, hallazgos por grado de evidencia, hipotesis aparte, casos por categoria, ranking con vetos C3/C4 aparte, 3+ one-pagers y veredicto de H1-H6 con cita
+- cada cifra con el comando que la produjo
+- propuesta-cdc.md con diff completo y firma en hueco (copia en ~/propuesta-cdc.md)
+- `validate` completo en verde tras el ultimo commit
+- reporte de decisiones y formas en que podria estar mal, resueltas
+RESTRICCIONES: solo el worktree paintpoints; commits locales, sin push/PR/merge; CDC sin firmar; el rol solo escribe en docs/analisis/; nada se sirve; sin LLM de servidor ni APIs de pago; no leer golden-sets ni .env*; dolor sin cita = hipotesis; env vars solo por nombre; sin `any`; espanol.
+RED DE SEGURIDAD: si tras 20 turnos no convergen verificador y validate, detente y reporta el bloqueo con el output real.

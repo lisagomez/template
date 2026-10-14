@@ -1,0 +1,145 @@
+{
+ "plantilla": 4,
+ "slug": "soporte-sap",
+ "nombre": "Soporte SAP",
+ "version": 1,
+ "estado": "blueprint",
+ "indice": "Soporte SAP",
+ "contrato": {
+  "ruta": "src/features/soporte-sap/BUSINESS_LOGIC.md",
+  "c3": ".claude/PRPs/PRP-008-soporte-sap.md",
+  "aisia": ".claude/gobernanza/AISIA-soporte-sap.md",
+  "firma": "firmada por lisagomez el 2026-10-10"
+ },
+ "modeloDeNegocio": {
+  "quienPaga": "la consultora de soporte SAP (N2)",
+  "aQuienSirve": ["los consultores de la consultora", "los clientes de la consultora (N3) y sus usuarios SAP"],
+  "forma": "B2B2C de tres niveles",
+  "propuesta": "soporte SAP AMS con triage con evidencia, la solución conocida preparada y verificada, el aprendizaje sin exponer datos, el SLA medido y una sola versión de cada número para la consultora y su cliente"
+ },
+ "niveles": [
+  { "id": "N1", "quien": "el laboratorio", "que": "vende el producto; opera el sandbox, la sala y el núcleo de conocimiento" },
+  { "id": "N2", "quien": "la consultora", "que": "atiende a sus clientes con el agente; paga el producto" },
+  { "id": "N3", "quien": "el cliente de la consultora", "que": "levanta incidencias y ve su servicio" }
+ ],
+ "tenencia": {
+  "arbol": ["laboratorio", "consultora", "cliente"],
+  "aislamiento": {
+   "control": "RLS enable + force en las 22 tablas, roles de servicio sin bypassrls acotados por token de tarea, buckets con ruta por tenant",
+   "prueba": "tools/soporte-sap/pruebas/aislamiento.ts"
+  }
+ },
+ "roles": [
+  { "id": "superadmin", "tipo": "persona", "nivel": "N1", "aprueba": true },
+  { "id": "experto", "tipo": "persona", "nivel": "N1", "aprueba": true },
+  { "id": "consultor", "tipo": "persona", "nivel": "N2", "aprueba": true },
+  { "id": "usuario_cliente", "tipo": "persona", "nivel": "N3", "aprueba": false },
+  { "id": "soporte-sap-a2a", "tipo": "agente", "nivel": "N1", "aprueba": false, "que": "el FDE: categoriza, propone, enseña al sandbox" },
+  { "id": "ejecutor-sap", "tipo": "agente", "nivel": "N1", "aprueba": false, "que": "prepara el plan desde la matriz" },
+  { "id": "supervisor-sap", "tipo": "agente", "nivel": "N1", "aprueba": false, "que": "re-verifica el plan contra el simulador" }
+ ],
+ "activos": {
+  "propios": [
+   "TPL-soporte-sap", "TPL-sala-a2a", "TPL-feature-soporte-sap",
+   "TPL-cli-ss-reuso", "TPL-cli-ss-triage", "TPL-cli-ss-simulador", "TPL-cli-ss-mapea", "TPL-cli-ss-cadena", "TPL-cli-ss-ingesta", "TPL-cli-ss-respaldo"
+  ],
+  "componentes": [
+   { "id": "TPL-extractor-documental", "para": "leer los adjuntos por sus bytes: capa 0, CFDI y OCR local" },
+   { "id": "TPL-feature-a2a", "para": "el patrón de Agent Card y puente A2A (la app todavía no sirve la tarjeta: exponerla es gate humano)" }
+  ],
+  "base": [
+   { "id": "TPL-app-base", "para": "la app Next.js" },
+   { "id": "TPL-feature-auth", "para": "la identidad (auth.uid) que firma en la sala" },
+   { "id": "TPL-grafo-conocimiento", "para": "el veredicto determinista de la matriz" },
+   { "id": "TPL-conocimiento", "para": "el formato de dominio y la siembra firmada" },
+   { "id": "TPL-motor-ia", "para": "el presupuesto y la contabilidad como patrón" },
+   { "id": "TPL-despliegue", "para": "el compose y configura:deploy" },
+   { "id": "TPL-trayectorias", "para": "el autodiagnóstico que propone y no aplica" },
+   { "id": "TPL-design-systems", "para": "el bento-grid" }
+  ]
+ },
+ "canales": [
+  { "id": "sala-a2a", "tipo": "interno", "que": "N1–N2: el plan del agente y la decisión humana" },
+  { "id": "chat-hil", "tipo": "interno", "que": "N1 con el agente; lo que pide aprobación se promueve a la sala" },
+  { "id": "app", "tipo": "interno", "que": "/soporte-sap, un bento por nivel" }
+ ],
+ "terceros": [
+  { "quien": "la base de datos gestionada (Supabase u otro Postgres)", "recibe": "la base del producto: incidencias, documentos y datos de operación de los N3, con RLS", "datosPersonales": true, "decision": "D10, decidida: en el modo gestionado, un proyecto de Supabase propio del producto, plan Pro con PITR, en us-east-1 (Virginia, Estados Unidos); en despacho, Supabase autohospedado en la máquina de la consultora, donde ella decida",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el plan está decidido (Pro con PITR, D10); la cifra sale de la cotización vigente al dar de alta el proyecto" } },
+  { "quien": "el proveedor del servidor del modo gestionado (AWS)", "recibe": "la app, la sala y el OCR local: procesan los datos de los N3 en memoria y en disco temporal; la base y los archivos viven en Supabase (D10)", "datosPersonales": true, "decision": "D12, decidida: AWS en us-east-1, la misma nube y la misma región que la base",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el servidor está decidido; la cifra sale de la cotización vigente del tamaño contratado" } },
+  { "quien": "el destino del respaldo inmutable fuera de sitio (Backblaze B2)", "recibe": "las copias de los originales, los exportes, la lista de bajas y el .env.production, cifradas antes de salir", "datosPersonales": true, "decision": "D12, decidida: Backblaze B2 US East (Reston, Virginia), con Object Lock en modo compliance y el bloqueo dentro del tope de D8 (365 días); otra empresa que el servidor y que la base",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "el destino está decidido; la cifra sale de la cotización vigente" } },
+  { "quien": "el proveedor de modelo", "recibe": "hoy nada: sin LLM real. Por D7, nunca lo crudo (tickets, chat, documentos y adjuntos), que solo va a un modelo autohospedado; a lo sumo lo anonimizado (sandbox) o generalizado (núcleo), con su decisión C4", "datosPersonales": false, "decision": "D7 (decidida el 2026-10-10: externo solo anonimizado; tools/soporte-sap/src/politica-modelo.ts)",
+    "costo": { "naturaleza": "por decidir", "fuente": "tools/soporte-sap/src/pricing.ts", "nota": "la línea de tokens del costo" } }
+ ],
+ "pricing": {
+  "variables": ["tamaño del N3", "volumen al mes", "proporción crítica (P1 + P2)", "proporción compleja", "respuesta 24×7 en el contrato"],
+  "tiers": ["esencial", "profesional", "critico"],
+  "precio": null,
+  "modeloDeCobro": null,
+  "planComercial": null,
+  "quienDecide": "el laboratorio: plan comercial (ERP-7, D5)",
+  "fuente": "tools/soporte-sap/src/pricing.ts"
+ },
+ "metricas": {
+  "fuente": "tools/soporte-sap/semantica/corte.json",
+  "catalogo": "tools/soporte-sap/semantica/modelos/semantica/metricas.yml",
+  "definicionUnica": true
+ },
+ "sla": {
+  "contratos": "tools/soporte-sap/src/sla.ts",
+  "plantilla": "tools/soporte-sap/contratos/plantilla-contrato-sla.md"
+ },
+ "entrega": {
+  "modelo": "mixto",
+  "decision": "D3",
+  "decidida": "2026-10-10: la consultora opera su N2 y su SLA con su cliente; el laboratorio opera solo el N1 (sala, sandbox, núcleo) y no compromete disponibilidad antes de GATE 3"
+ },
+ "respaldo": {
+  "inventario": "src/features/soporte-sap/BUSINESS_LOGIC.md",
+  "procedimiento": "export y restauración por tenant (docs/SDD-soporte-sap.md §13)",
+  "rpoRto": "desconocidos",
+  "gate3": false
+ },
+ "retencion": {
+  "decision": "D8 (PRP-012)",
+  "plazos": "tools/soporte-sap/src/sla.ts",
+  "nota": "N (los originales, desde la última resolución y nunca con una impugnación abierta) y la gracia de salida van en el contrato de cada cliente (retencionOriginalesDias, graciaSalidaDias); sin ellos no se borra nada (DP-4)",
+  "salida": "una persona registra la baja y el tenant se congela; se genera su export firmado, y tras la gracia se borra todo salvo el sandbox anonimizado y el núcleo",
+  "restauracion": "la lista de bajas viaja aparte de la base y, tras restaurar, se aplica la más reciente (restauraTenant y trasRestaurar): no resucita un tenant ni un original dados de baja",
+  "bloqueoMaximoDias": 365,
+  "archivoLegal": false
+ },
+ "despliegue": {
+  "modos": ["gestionado", "despacho"],
+  "tamanos": {
+   "fuente": "tools/soporte-sap/medicion/estimado.json",
+   "nota": "una consultora si corriera sola (SDD §14): el VPS de varias se dimensiona sumando y midiendo con configura:deploy",
+   "S": { "vcpu": 2, "ramGb": 1.5, "discoGb": 21 },
+   "M": { "vcpu": 2, "ramGb": 1.5, "discoGb": 21 },
+   "L": { "vcpu": 2, "ramGb": 1.5, "discoGb": 22 }
+  },
+  "exige": { "region": { "decision": "D10", "estado": "decidida", "regiones": ["us-east-1"] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true },
+  "opera": { "quien": "la consultora, su N2 (atención y SLA con su cliente); el laboratorio, el N1 (sala, sandbox, núcleo), sin comprometer disponibilidad antes de GATE 3", "decision": "D3" },
+  "secretos": ["SS_SECRETO_TAREAS", "SS_SECRETO_RESPALDOS", "SS_SAL_IMPORTADOR"]
+ },
+ "reuso": {
+  "matriz": { "amplio": 40.7, "estricto": 14.8, "comando": "node tools/soporte-sap/clis/ss-reuso.mjs" }
+ },
+ "fde": {
+  "aMedida": ["el mapeo de la herramienta de tickets de cada consultora", "el contrato N2–N3 de cada cliente y sus versiones", "los parámetros de impacto de cada cliente (D15)", "los umbrales del extractor medidos con su corpus (D9)"],
+  "nucleo": ["la matriz y las reglas firmadas del grafo", "el reloj de SLA", "el anonimizador", "la capa semántica y su catálogo", "los CLIs adoptados"],
+  "vuelta": "lo a medida que se repite vuelve como propuesta de siembra del sandbox (anonimizada y generalizada, D1) o de CLI (CDC); lo firma el laboratorio",
+  "registro": "tools/soporte-sap/src/fde.ts"
+ },
+ "fuera": [
+  "no se conecta a un SAP real ni guarda sus credenciales: implementa contra un simulador, y llevar la solución al SAP del cliente lo hace una persona, fuera del producto (D6)",
+  "no aprueba nada solo: ni el agente ni el chat insertan una aprobación",
+  "no pone precios, créditos, exclusiones ni texto legal",
+  "no compromete disponibilidad ni RPO/RTO antes de GATE 3",
+  "no manda tickets, chat ni documentos a un proveedor externo de modelos: lo crudo solo va a un modelo autohospedado (D7)"
+ ],
+ "noCupo": [],
+ "decisiones": "docs/goals/soporte-sap.md"
+}

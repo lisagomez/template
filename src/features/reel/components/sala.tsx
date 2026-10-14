@@ -2,10 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
+import { Consentimientos, type ConsentimientoDeSala } from './consentimientos';
 
 export interface DatosDeSala {
   id: string; titulo: string; estado: string; version: number | null; huella: string | null;
   bloqueos: string[]; avisos: string[]; carasExtra: number[]; datos: Array<{ indice: number; texto: string }>;
+  /** Cortes que parten lo que dijo otra persona y que el dueño todavía no revisó (riesgo 5). */
+  cortesVoz: Array<{ clave: string; texto: string }>;
+  consentimientos: ConsentimientoDeSala[];
   registro: Array<{ decision: string; version: number; huella: string; creado_en: string; revocada_en: string | null; nota: string | null }>;
   correo: string;
 }
@@ -70,8 +74,12 @@ export function Sala({ d }: { d: DatosDeSala }) {
         <button type="button" className={`${BOTON} border border-gray-300`} disabled={!!ocupado || !d.version} data-prueba="pedir-cambio" onClick={() => void decide('cambio-pedido')}>Pedir cambio</button>
       </div>
       {d.datos.map((x) => <button key={x.indice} type="button" className="w-full rounded-xl border border-red-300 p-3 text-sm" data-prueba="cubrir" disabled={!!ocupado} onClick={() => void manda('ajustes', { tipo: 'cubrir', indice: x.indice }, 'cubrir')}>Cubrir: {x.texto}</button>)}
+      {d.cortesVoz.map((c) => <button key={c.clave} type="button" className="w-full rounded-xl border border-red-300 p-3 text-sm" data-prueba="revisar-corte" disabled={!!ocupado}
+        onClick={() => { if (window.confirm('¿Escuchaste ese momento y el corte no le cambia el sentido a lo que dijo esa persona?')) void manda('ajustes', { tipo: 'corte-revisado', clave: c.clave }, 'revisar'); }}>Revisé el corte del {c.texto}</button>)}
       {ocupado && <p className="text-sm text-gray-700" data-prueba="ocupado">{ocupado === 'huella' ? 'Calculando la huella del archivo que viste…' : 'Preparando la versión nueva en el servidor…'}</p>}
       {aviso && <p role="alert" className="text-sm text-red-700" data-prueba="aviso">{aviso}</p>}
+
+      <Consentimientos proyecto={d.id} lista={d.consentimientos} />
 
       <section className="rounded-xl bg-white p-4 shadow-sm">
         <h2 className="font-semibold">Registro</h2>

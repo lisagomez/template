@@ -427,7 +427,7 @@ No todo proyecto necesita los tres. El inventario decide:
 |---|---|---|---|
 | **N0** | Copia diaria local rotada (7 días) **+ restauración verificada** | **Siempre.** Sin excepción | $0 |
 | **N1** | Borg → Hetzner Storage Box, modo **append-only** | Si alguna fila del inventario es **Crítica** | ~€4/mes (BX11, 1 TB) |
-| **N2** | Archivo mensual cifrado → Backblaze B2 con **Object Lock** | Si hay obligación legal de retención, o el ransomware es una amenaza real | ~$1/mes |
+| **N2** | Archivo mensual cifrado → **cualquier almacén compatible con S3 con Object Lock** (B2 es un ejemplo; el perfil del producto lo declara por protocolo, sin código por proveedor: `DEPLOY-HETZNER.md`, «El perfil del producto») | Si hay obligación legal de retención, o el ransomware es una amenaza real | ~$1/mes |
 | **N3** | Copia trimestral en disco cifrado, domicilio fiscal | Si el proyecto factura en México (art. 28 III CFF) | ~$60 una vez |
 
 **N0 no es opcional y no es el fácil.** Es el único nivel que incluye probar que la
@@ -671,6 +671,10 @@ avisa. Igual que GATE 1: comprobado que dispara, no supuesto.
 - **La llave paper de Borg y la llave `age` privada.** Si viven en el servidor que
   respaldas, no hay respaldo: hay un archivo cifrado que nadie puede abrir.
 - **Secretos en claro.** Ver la regla de exclusión de §9.1.
+- **Datos de terceros que pueden pedir su borrado** (documentos de consentimiento, transcripciones de lo que dijo
+  alguien) **nunca van a N1 ni a N2**: el append-only y el Object Lock existen justo para que nada se borre, y por eso
+  no pueden cumplir un retiro. Van solo a N0, y el retiro llega a las copias cuando vence la última. Al restaurar,
+  el proyecto vuelve a aplicar los retiros posteriores a la copia (en el reel: `npm run reel:tras-restaurar`).
 
 Lo que sí se respalda de estos activos es su **configuración** (ya versionada en
 git), nunca el material privado.

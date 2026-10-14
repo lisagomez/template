@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
- * Lo que `validate` daba por hecho y no lo estaba. Corre ANTES del typecheck.
+ * Lo que `validate` daba por hecho y no lo estaba. Corre ANTES del typecheck y ANTES del build
+ * (`pretypecheck` y `prebuild`): la app importa `tools/<x>/dist`, y la imagen de produccion se
+ * construye desde un clon limpio, donde `dist/` no existe (PRP-010 H-30, 2026-10-07).
  *
  * Dos fallos reales, los dos del 2026-08-30, los dos con el mismo sintoma: el gate
  * reventaba diciendo algo que no era el problema.

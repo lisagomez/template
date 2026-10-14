@@ -17,12 +17,16 @@ import { leeConImports } from './lee-instrucciones.mjs';
 import { geminiSincronizado } from './sincroniza-gemini.mjs';
 import { estadoCorpus } from './lib/corpus.mjs';
 import { cargaManifiesto, gatesDelPerfil, MANIFIESTO } from './lib/gates.mjs';
+import { revisaFirmas, pruebaFirmas, SIEMBRAS, FECHA_CASILLA } from './lib/firmas.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
 
 const fallos = [];
 const ok = [];
+/** Lo declarado como pendiente, con lo que le falta. Se lista aparte y NO cuenta como verde:
+ *  misma doctrina que un gate inactivo en `.claude/gates.json`. */
+const pendientes = [];
 
 const ruta = (p) => join(raiz, p);
 const lee = (p) => (existsSync(ruta(p)) ? readFileSync(ruta(p), 'utf8') : null);
@@ -180,14 +184,113 @@ if (newApp !== null) {
     'sin esto, cada proyecto nuevo nace sin evaluacion de impacto (C4)',
   );
 }
-// Si el proyecto ya tiene su BUSINESS_LOGIC.md, tiene que llevarla.
+// Si el proyecto ya tiene su BUSINESS_LOGIC.md, tiene que llevarla. Un proyecto de un solo
+// producto la lleva en la raiz. En un monorepo la raiz es un INDICE del portafolio (`## 1.
+// Productos`) y la seccion se exige a cada contrato que enlaza: desde el 2026-09-30 es el caso de
+// este template. Mirar solo la raiz ahi pasaria en verde sin revisar ningun producto.
 const businessLogic = lee('BUSINESS_LOGIC.md');
-if (businessLogic !== null) {
+if (businessLogic !== null && !/^##\s*1\.\s*Productos/m.test(businessLogic)) {
   comprueba(
     'BUSINESS_LOGIC.md incluye su seccion de Gobernanza',
     /Gobernanza/.test(businessLogic),
     'fue generado antes de la capa: regeneralo o anade la seccion 6 a mano',
   );
+} else if (businessLogic !== null) {
+  const productos = filasDeSeccion(businessLogic, 1);
+  const noProductos = filasDeSeccion(businessLogic, 2);
+  verificaContratos(productos);
+  verificaCobertura(productos, noProductos);
+}
+
+/** Las filas de datos de la tabla de la seccion `## <n>.` del indice, como celdas recortadas. */
+function filasDeSeccion(indice, n) {
+  const seccion = indice.split(/^## /m).find((s) => s.startsWith(`${n}.`)) ?? '';
+  return seccion
+    .split('\n')
+    .filter((l) => l.startsWith('|') && !/^\|\s*-/.test(l))
+    .slice(1)
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()));
+}
+
+/** El enlace de una celda, o null. Un enlace DENTRO de un span de codigo (`[ruta](ruta)` entre
+ *  comillas invertidas) no es un enlace: GitHub lo pinta como texto. Asi lo dejo un formateador al
+ *  guardar la firma del indice (c06249c) y la version anterior de esta funcion lo dio por bueno. */
+function enlaceDe(celda) {
+  const sinCodigo = celda.replace(/`[^`]*`/g, (span) => (span.includes('](') ? '' : span));
+  return sinCodigo.match(/\]\(([^)]+)\)/)?.[1] ?? null;
+}
+
+/** Reparte las filas del §1 por lo que les pasa. Las comprobaciones que salen de aqui son FIJAS y
+ *  agregan sobre las filas: una fila nueva no cambia el total, asi que dos PR que suman productos en
+ *  paralelo ya no se pisan la cifra que declaran los README (paso con #195 y #196: 171 y 171, real 172). */
+function clasificaContratos(productos) {
+  const c = { enCodigo: [], sinFalta: [], inexistentes: [], sinGobernanza: [], sinFirma: [], enlazados: new Set() };
+  for (const [nombre, contrato = '', , estado = ''] of productos) {
+    const enlace = enlaceDe(contrato);
+    if (enlace === null && contrato.includes('](')) { c.enCodigo.push(nombre); continue; }
+    if (enlace === null) {
+      if (/falta:/.test(estado)) pendientes.push(`contrato de «${nombre}» — ${estado}`);
+      else c.sinFalta.push(nombre);
+      continue;
+    }
+    c.enlazados.add(enlace);
+    const texto = lee(enlace);
+    if (texto === null) { c.inexistentes.push(`${nombre} (${enlace})`); continue; }
+    if (!enlace.endsWith('BUSINESS_LOGIC.md')) continue; // maestro propio: lo gobierna su fuente
+    if (!/^##\s*6\.\s*Gobernanza/m.test(texto)) c.sinGobernanza.push(nombre);
+    const firma = texto.match(/^\*\*Firma:\*\*(.*)$/m);
+    if (firma === null) c.sinFirma.push(nombre);
+    else if (/pendiente/i.test(firma[1])) pendientes.push(`firma del contrato de «${nombre}»`);
+  }
+  return c;
+}
+
+/** Cada producto del §1 tiene su contrato, y el contrato su evaluacion de impacto (C4) y su firma. */
+function verificaContratos(productos) {
+  comprueba('el indice del portafolio declara sus productos', productos.length > 0,
+    'la raiz dice ser indice (`## 1. Productos`) y la tabla esta vacia o rota');
+  const c = clasificaContratos(productos);
+  const de = (xs) => xs.join(', ');
+  comprueba('ningun contrato del indice esta enlazado dentro de codigo', c.enCodigo.length === 0,
+    `${de(c.enCodigo)}: el enlace va entre comillas invertidas y GitHub lo pinta como texto (¿un formateador al guardar?)`);
+  comprueba('todo contrato pendiente del indice declara lo que le falta', c.sinFalta.length === 0,
+    `${de(c.sinFalta)}: un pendiente sin «falta:» se lee igual que un contrato hecho`);
+  comprueba('todo contrato enlazado desde el indice existe', c.inexistentes.length === 0,
+    `${de(c.inexistentes)}: el indice apunta a un archivo que no esta (se movio o se borro sin tocar el indice)`);
+  comprueba('todo contrato enlazado incluye su seccion de Gobernanza', c.sinGobernanza.length === 0,
+    `${de(c.sinGobernanza)}: sin la seccion 6 ese producto no tiene evaluacion de impacto (C4)`);
+  comprueba('todo contrato enlazado declara su firma', c.sinFirma.length === 0,
+    `${de(c.sinFirma)}: sin linea «**Firma:**» no se sabe si lo firmo el laboratorio; si no, «**Firma:** pendiente»`);
+  const huerfanos = ['src/features', 'tools']
+    .flatMap((base) => (existsSync(ruta(base)) ? readdirSync(ruta(base)) : [])
+      .map((d) => `${base}/${d}/BUSINESS_LOGIC.md`))
+    .filter((p) => existsSync(ruta(p)) && !c.enlazados.has(p));
+  comprueba('todo contrato de producto esta enlazado desde el indice', huerfanos.length === 0,
+    `sin fila en el §1: ${de(huerfanos)} — un contrato que el indice no nombra no lo encuentra nadie`);
+}
+
+/** Todo PRODUCTO del inventario en beta o produccion esta en el indice: en un producto del §1 o
+ *  en el §2 con su motivo. Y el indice no cita activos que no existen. */
+function verificaCobertura(productos, noProductos) {
+  let inventario = null;
+  try { inventario = JSON.parse(lee('inventario/activos.json')).activos; } catch { /* cae abajo */ }
+  comprueba('el indice del portafolio puede leer el inventario de activos', Array.isArray(inventario),
+    'sin inventario no hay contra que cruzar: no poder mirar no es estar en verde');
+  if (!Array.isArray(inventario)) return;
+  const sinMotivo = noProductos.filter(([, motivo = '']) => motivo.length === 0).map(([activos]) => activos);
+  comprueba('todo activo del §2 del indice dice por que no lleva contrato', sinMotivo.length === 0,
+    `${sinMotivo.join(', ')}: un activo en el §2 sin motivo es un producto sin contrato con otro nombre`);
+  const ids = (celda = '') => celda.match(/TPL-[a-z0-9-]+/g) ?? [];
+  const citados = new Set([...productos.flatMap((f) => ids(f[2])), ...noProductos.flatMap((f) => ids(f[0]))]);
+  const conocidos = new Set(inventario.map((a) => a.id));
+  const desconocidos = [...citados].filter((id) => !conocidos.has(id));
+  comprueba('el indice del portafolio solo cita activos del inventario', desconocidos.length === 0,
+    `no existen: ${desconocidos.join(', ')} — errata, o un activo retirado que sigue en el indice`);
+  const sinContrato = inventario
+    .filter((a) => a.clase === 'PRODUCTO' && ['beta', 'produccion'].includes(a.estado) && !citados.has(a.id))
+    .map((a) => a.id);
+  comprueba('todo producto en beta o produccion esta en el indice del portafolio', sinContrato.length === 0,
+    `sin contrato ni motivo: ${sinContrato.join(', ')} — al §1 (con contrato, o pendiente con «falta:») o al §2 con su motivo`);
 }
 
 // --- 3d-bis. Todo paso de `validate` esta declarado en la documentacion -----
@@ -931,27 +1034,31 @@ comprueba(
 // Una decision de riesgo sin firmar no es una decision: es un descuido con formato de
 // decision, y esa diferencia es justo lo que pregunta un auditor. Paso el gate una que
 // llevaba dias sin firma porque nada la miraba — la marca append-only si se vigilaba,
-// la firma no. Solo se miran las entradas reales (tras "## Entradas"), no la plantilla
-// del bloque "## Formato", que nace vacia a proposito.
-const FIRMA = /^[-*]\s+\*\*(?:Firmado|Aprobado) por\*\*(?:\s*\([^)]*\))?:\s*(.+)$/m;
-const SIN_VALOR = /^(_?pendiente|\[|☐|todo\b|—\s*$)/i;
+// la firma no. Una firma es un NOMBRE (`scripts/lib/firmas.mjs`): la lista de huecos que se
+// miraba antes dejo pasar diez entradas sin firmar (2026-10-06). Una entrada sin firma solo
+// se cierra con un `**Cierra**` en una entrada posterior y firmada.
 for (const registro of [`${GOB}/REGISTRO-RIESGO.md`, `${GOB}/BITACORA-CDC.md`]) {
-  const contenido = lee(registro) ?? '';
-  const cuerpo = contenido.split(/^##\s+Entradas\s*$/m)[1];
-  const sinFirma = [];
-  for (const entrada of (cuerpo ?? '').split(/^### /m).slice(1)) {
-    const titulo = entrada.split('\n')[0].trim();
-    const firma = entrada.match(FIRMA);
-    if (!firma || SIN_VALOR.test(firma[1].trim())) sinFirma.push(titulo.slice(0, 60));
-  }
+  const revision = revisaFirmas(lee(registro) ?? '');
+  const corta = (titulos) => titulos.map((t) => t.slice(0, 60)).join(' | ');
   comprueba(
     `toda entrada de ${registro} esta firmada`,
-    cuerpo !== undefined && sinFirma.length === 0,
-    cuerpo === undefined
+    revision !== null && revision.sinFirma.length === 0,
+    revision === null
       ? 'no se encontro la seccion "## Entradas": el registro cambio de forma'
-      : `sin firma: ${sinFirma.join(' | ')} — una decision sin dueno no es una decision`,
+      : `sin firma: ${corta(revision.sinFirma)} — una decision sin dueno no es una decision`,
+  );
+  comprueba(
+    `${registro}: desde ${FECHA_CASILLA}, ninguna entrada firmada lleva «aprobación humana ☐»`,
+    revision !== null && revision.casillaVacia.length === 0,
+    `firma y casilla vacia a la vez: ${corta(revision?.casillaVacia ?? [])} — o se aprobo o no`,
   );
 }
+const siembrasFallidas = pruebaFirmas();
+comprueba(
+  `6b caza sus ${SIEMBRAS.length} siembras (firma, cierre y casilla)`,
+  siembrasFallidas.length === 0,
+  `no ve como debe: ${siembrasFallidas.join(' | ')} — un patron de firma que no caza un hueco lo deja pasar`,
+);
 
 // --- 6k. La escalera CLI-first y las cuatro reglas, INLINE ------------------
 // La tercera palanca de eficiencia solo existe si esta donde el agente decide. Escrita solo
@@ -1258,6 +1365,7 @@ for (const { doc, cifra } of DECLARAN_CIFRA) {
 // --- Reporte --------------------------------------------------------------
 const total = ok.length + fallos.length;
 for (const linea of ok) console.log(`  \x1b[32m✓\x1b[0m ${linea}`);
+for (const p of pendientes) console.log(`  \x1b[33m◦\x1b[0m pendiente: ${p}`);
 for (const f of fallos) {
   console.log(`  \x1b[31m✗\x1b[0m ${f.descripcion}`);
   console.log(`      \x1b[2m↳ ${f.pista}\x1b[0m`);
@@ -1265,6 +1373,7 @@ for (const f of fallos) {
 console.log('');
 if (fallos.length === 0) {
   console.log(`\x1b[32mGobernanza cableada: ${ok.length}/${total} comprobaciones en verde.\x1b[0m`);
+  if (pendientes.length > 0) console.log(`\x1b[33m${pendientes.length} pendientes declarados: no cuentan como verde.\x1b[0m`);
   process.exit(0);
 }
 console.log(`\x1b[31mGobernanza DIVERGENTE: ${fallos.length} de ${total} comprobaciones fallaron.\x1b[0m`);

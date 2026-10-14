@@ -5,7 +5,7 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { aplicaCortes, aplicaTextos, archivoAss, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, validaAprobacion, REGLAS_DE_CORTE, type Observacion } from '../../../../tools/reel/dist/index.js';
+import { aplicaCortes, aplicaTextos, archivoAss, cortesEnVozAjena, decisionesTrasRetirar, edlDesde, porBorrar, propone, revisaPrivacidad, rotulos, rotulosFueraDeZona, documentoVencido, rutasTrasRestaurar, transcripcionAConservar, transcripcionVencida, validaAprobacion, vozDelDueno, BRUTO, REGLAS_DE_CORTE, TRANSCRIPCION_CONSERVADA, type Observacion } from '../../../../tools/reel/dist/index.js';
 import { cuadroSvg, revisaEscena, tarjetaDeTemporada, TEMPORADAS_FIRMADAS } from '../../../../tools/pymes-marketing/dist/video/index.js';
 import { marcaDeReferencia } from './referencias-visuales.ts';
 import type { Caso, ResultadoDeCaso } from './tipos.ts';
@@ -111,14 +111,78 @@ export const CASOS_PRIVACIDAD: readonly Caso[] = [
   { id: 'priv-8', herramienta: 'privacidad', titulo: 'Ninguna superficie usa service_role', trampa: 'llave que anula RLS', esperado: 'pasa',
     entrada: 'Todo `src/` del proyecto.',
     async corre() {
-      const archivos = (await readdir(join(process.cwd(), 'src'), { recursive: true })).map(String).filter((f) => /\.(ts|tsx)$/.test(f));
+      // La imagen de produccion no lleva la fuente (PRP-010 H-31): ahi no hay que revisar, y se dice.
+      const fuente = join(/*turbopackIgnore: true*/ process.cwd(), 'src');
+      const lista = await readdir(fuente, { recursive: true }).catch(() => null);
+      if (!lista) return { estado: 'no-medido', evidencia: ['esta instalación no lleva la fuente (la imagen de producción no la trae)'], veredicto: 'Sin fuente no se afirma nada: el caso corre en el laboratorio.' };
+      const archivos = lista.map(String).filter((f) => /\.(ts|tsx)$/.test(f));
       // Se busca el USO de la llave, no la palabra (los comentarios que citan C7 no la usan).
       const USO = /process\.env(\.|\[['"])SUPABASE_SERVICE_ROLE_KEY/;
       const usan: string[] = [];
-      for (const f of archivos) if (USO.test(await readFile(join(process.cwd(), 'src', f), 'utf8'))) usan.push(f);
+      for (const f of archivos) if (USO.test(await readFile(join(fuente, f), 'utf8'))) usan.push(f);
       // Armado por partes para que el propio caso no sea un «uso» que el escáner encuentre.
       const sembrado = USO.test(['const k = process.env[', "'SUPABASE_SERVICE", "_ROLE_KEY'];"].join(''));
       return verifica([[usan.length === 0, 'ningún archivo de src/ la usa'], [sembrado, 'control negativo: un uso sembrado sí se detecta']], [`${archivos.length} archivos revisados`, ...usan], 'La app entra con la sesión del dueño; RLS decide (C7).');
+    } },
+  { id: 'priv-9', herramienta: 'privacidad', titulo: 'Un corte que parte lo que dijo otra persona', trampa: 'corte que cambia el sentido', esperado: 'pasa',
+    entrada: 'El dueño habla de 0 a 10 s y la clienta (con consentimiento) de 10 a 14 s; el dueño quita 11–12 s, o quita entera a la clienta.',
+    async corre() {
+      const turnos = [{ inicio: 0, fin: 10, hablante: 'A' }, { inicio: 10, fin: 14, hablante: 'B' }];
+      const base = { medidas: { ancho: 1080, alto: 1920, fps: 30, duracion: 14 }, pistas: [], sujetoId: null, hablantes: 2, consentimientos: [{ alias: 'Clienta', rol: 'cliente' as const, vigenteHasta: '2027-01-01' }], hoy: '2026-10-02', hallazgos: [], musica: { fraccion: 0, segundos: 0 } };
+      const cs = cortesEnVozAjena(turnos, edlDesde([{ inicio: 11, fin: 12, motivo: 'marca' }], 14), 2);
+      const sinRevisar = revisaPrivacidad({ ...base, cortesEnVozAjena: cs }).filter((o) => o.regla === 'corte-en-voz-ajena' && o.nivel === 'bloquea');
+      const revisado = revisaPrivacidad({ ...base, cortesEnVozAjena: cs, revisados: new Set(cs.map((c) => c.clave)) }).filter((o) => o.regla === 'corte-en-voz-ajena');
+      const entera = cortesEnVozAjena(turnos, edlDesde([{ inicio: 10, fin: 14, motivo: 'marca' }], 14), 2);
+      return verifica([[sinRevisar.length === 1, 'partirla bloquea'], [revisado.length === 0, 'el dueño lo revisa en la sala y se libera'], [entera.length === 0, 'quitarla entera no bloquea: no altera lo que dijo']],
+        [sinRevisar[0]?.mensaje ?? '—'], 'Riesgo 5 de la AISIA firmada: lo que dijo otra persona no se recorta a ciegas.');
+    } },
+  { id: 'priv-10', herramienta: 'privacidad', titulo: 'Testimonio: si ninguna voz domina, se revisan todos los cortes', trampa: 'dueño mal identificado', esperado: 'pasa',
+    entrada: 'El dueño habla 5 s y la clienta 6 s; la retoma del dueño corta 2–3 s.',
+    async corre() {
+      const turnos = [{ inicio: 0, fin: 5, hablante: 'A' }, { inicio: 5, fin: 11, hablante: 'B' }];
+      const dueno = vozDelDueno(turnos);
+      const cs = cortesEnVozAjena(turnos, edlDesde([{ inicio: 2, fin: 3, motivo: 'retoma' }], 11), 2);
+      return verifica([[dueno === null, 'no se adivina quién es el dueño'], [cs.length === 1, 'el corte se revisa aunque sea del dueño']], [`dueño: ${dueno ?? 'sin determinar'} · cortes a revisar: ${cs.length}`],
+        'Suponer que el dueño es quien más habla fallaría justo en un testimonio.');
+    } },
+  { id: 'priv-11', herramienta: 'privacidad', titulo: 'Retirar un consentimiento vuelve a desenfocar y a bloquear', trampa: 'consentimiento retirado', esperado: 'pasa',
+    entrada: 'La clienta consintió: su cara marcada y un corte en su voz revisado. Después lo retira.',
+    async corre() {
+      const d = decisionesTrasRetirar({ marcas: [], conConsentimiento: [2], cubiertos: [], revisados: ['11.0-12.0'] });
+      const base = { medidas: { ancho: 1080, alto: 1920, fps: 30, duracion: 14 }, pistas: [], sujetoId: null, hablantes: 2, hoy: '2026-10-02', hallazgos: [], musica: { fraccion: 0, segundos: 0 } };
+      const voz = revisaPrivacidad({ ...base, consentimientos: [{ alias: 'Clienta', rol: 'cliente', vigenteHasta: '2027-01-01', revocado: true }] });
+      return verifica([[d.conConsentimiento.length === 0, 'su cara vuelve a desenfocarse'], [(d.revisados ?? []).length === 0, 'los cortes en su voz se revisan de nuevo'], [voz.some((o) => o.regla === 'otra-voz' && o.nivel === 'bloquea'), 'su voz vuelve a bloquear']],
+        ['caras consentidas: 0 · cortes revisados: 0 · voz: bloquea'], 'Retirarse deshace todo lo que dependía de esa persona; lo publicado no se recupera (se le avisa al dueño).');
+    } },
+  { id: 'priv-12', herramienta: 'privacidad', titulo: 'La transcripción íntegra se queda con el consentimiento', trampa: 'testimonio sin prueba de lo que dijo', esperado: 'pasa',
+    entrada: 'Testimonio de una clienta con consentimiento hasta el 2027-01-01, aprobado el 2026-10-02; y el mismo reel con solo el dueño.',
+    async corre() {
+      const proceso = { hablantes: 2, transcripcion: { texto: 'me encantó el pan', palabras: [P('me', 0, 0.3), P('encantó', 0.3, 0.8), P('el', 0.8, 1), P('pan', 1, 1.4)] }, turnos: [{ inicio: 0, fin: 1.4, hablante: 'B' }], edl: { descartes: [] } };
+      const aprobacion = { version: 1, huella: HUELLA, aprobadoEn: '2026-10-02T18:00:00Z' };
+      const t = transcripcionAConservar(proceso, { ...aprobacion, consentimientos: [{ alias: 'Clienta', vigenteHasta: '2027-01-01' }] });
+      const solo = transcripcionAConservar({ ...proceso, hablantes: 1 }, { ...aprobacion, consentimientos: [{ alias: 'Clienta', vigenteHasta: '2027-01-01' }] });
+      const fuera = !(BRUTO as readonly string[]).some((b) => TRANSCRIPCION_CONSERVADA.startsWith(b));
+      return verifica([[t?.transcripcion.texto === 'me encantó el pan', 'se guarda íntegra'], [solo === null, 'con solo el dueño no se guarda (rige la retención de 30 días)'], [fuera, 'la retención de 30 días no la borra'],
+        [!!t && !transcripcionVencida(t, '2027-01-01') && transcripcionVencida(t, '2027-01-02'), 'vence con el consentimiento']],
+        [`${TRANSCRIPCION_CONSERVADA} · hasta ${t?.conservarHasta ?? '—'}`], 'Si la clienta reclama que un corte le cambió el sentido, está lo que dijo completo; retirarse la borra.');
+    } },
+  { id: 'priv-13', herramienta: 'privacidad', titulo: 'El documento firmado se borra cuando vence el consentimiento', trampa: 'documento de un tercero guardado para siempre', esperado: 'pasa',
+    entrada: 'Consentimiento de un empleado vigente hasta el 2027-01-01; el reloj marca el 1 y el 2 de enero, y después de borrado.',
+    async corre() {
+      const v = { consentimiento: 'c1', vigenteHasta: '2027-01-01', huella: HUELLA };
+      const d1 = documentoVencido(v, '2027-01-01'), d2 = documentoVencido(v, '2027-01-02'), despues = documentoVencido({ ...v, documentoBorradoEn: '2027-01-02T12:00:00Z' }, '2027-03-01');
+      return verifica([[!d1, 'el último día de vigencia se conserva'], [d2, 'al día siguiente se borra'], [!despues, 'queda la constancia y no se cuenta dos veces']], [`1 ene: ${d1 ? 'borra' : 'conserva'} · 2 ene: ${d2 ? 'borra' : 'conserva'}`],
+        'El documento de un tercero vive lo que autorizó, no más (propuesta de respaldo, 27/09).');
+    } },
+  { id: 'priv-14', herramienta: 'privacidad', titulo: 'Restaurar una copia no resucita a quien se retiró', trampa: 'respaldo anterior al retiro', esperado: 'pasa',
+    entrada: 'Copia del 2026-10-03 con el documento de la clienta y la transcripción aprobada el 2; la clienta se retiró el 5.',
+    async corre() {
+      const retiro = { consentimiento: 'c1', proyecto: 'p1', dueno: 'd1', revocadoEn: '2026-10-05T10:00:00+00:00' };
+      const rutas = rutasTrasRestaurar([retiro], { 'd1/p1': '2026-10-02T18:00:00.000Z' });
+      const tras = rutasTrasRestaurar([retiro], { 'd1/p1': '2026-10-06T09:00:00Z' });
+      return verifica([[rutas.some((r) => r.endsWith('c1.bin')), 'su documento se vuelve a borrar'], [rutas.some((r) => r.endsWith('transcripcion-integra.json')), 'y la transcripción aprobada antes del retiro'],
+        [!tras.some((r) => r.endsWith('transcripcion-integra.json')), 'la aprobada después ya no la incluía: se queda']], rutas,
+        'Los retiros viven en Supabase, que no se restaura con el almacén: npm run reel:tras-restaurar los vuelve a aplicar.');
     } },
 ];
 

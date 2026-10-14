@@ -1,0 +1,21 @@
+{
+  "version": "7.1",
+  "screens": [
+    {
+      "id": "CALIFICA",
+      "title": "Cuéntanos qué buscas",
+      "terminal": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "RadioButtonsGroup", "name": "presupuesto", "label": "Presupuesto", "required": true, "data-source": [
+            { "id": "hasta_500", "title": "Hasta $500" }, { "id": "500_1500", "title": "$500 a $1,500" }, { "id": "mas_1500", "title": "Más de $1,500" }, { "id": "no_se", "title": "Aún no sé" } ] },
+          { "type": "RadioButtonsGroup", "name": "cuando", "label": "¿Para cuándo?", "required": true, "data-source": [
+            { "id": "hoy", "title": "Hoy" }, { "id": "esta_semana", "title": "Esta semana" }, { "id": "solo_viendo", "title": "Solo estoy viendo" } ] },
+          { "type": "TextInput", "name": "zona", "label": "Colonia o municipio", "required": false, "input-type": "text" },
+          { "type": "Footer", "label": "Enviar", "on-click-action": { "name": "complete", "payload": { "presupuesto": "${form.presupuesto}", "cuando": "${form.cuando}", "zona": "${form.zona}" } } }
+        ]
+      }
+    }
+  ]
+}

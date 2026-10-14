@@ -8,6 +8,7 @@
  * interior: ni ruta, ni stack, ni nombre de motor (spec 005 RF-6). Y la respuesta lleva el tipo de
  * contenido que el SDK declara, importado, no escrito a mano.
  */
+import { timingSafeEqual } from 'node:crypto'
 import { A2A_CONTENT_TYPE, A2A_VERSION_HEADER } from '@a2a-js/sdk'
 import type { AgentCard } from '@a2a-js/sdk'
 import {
@@ -28,6 +29,20 @@ const LARGO_MAXIMO_DE_VERSION = 32
 
 const baseDelPuente = (): string => process.env.A2A_URL_BASE ?? 'http://app:3000'
 const claveExigida = (): string => process.env.A2A_API_KEY ?? ''
+
+/**
+ * En produccion, SIN clave el puente esta APAGADO. «Solo red interna» no lo hace cumplir nadie mas:
+ * Caddy manda todo el dominio a la app (revision C3 del 2026-10-02, `docs/REVISION-rutas-publicas.md`).
+ * En desarrollo y en las pruebas, sin clave sigue abierto, como siempre.
+ */
+export const puenteApagado = (): boolean => process.env.NODE_ENV === 'production' && claveExigida().length === 0
+
+/** En tiempo constante, como las demas puertas: un `!==` deja medir cuantos caracteres coinciden. */
+function claveValida(dada: string | null, exigida: string): boolean {
+  const a = Buffer.from(dada ?? '')
+  const b = Buffer.from(exigida)
+  return a.length === b.length && timingSafeEqual(a, b)
+}
 
 export function tarjeta(): AgentCard {
   return tarjetaDelExtractor(baseDelPuente(), claveExigida().length > 0)
@@ -87,8 +102,9 @@ const cabecerasComoObjeto = (request: Request): Record<string, string> => {
 export async function atiendeJsonRpc(request: Request): Promise<Response> {
   let cuerpo: Record<string, unknown> = {}
   try {
+    if (puenteApagado()) return errorRpc(null, -32001, 'puente A2A apagado', 503)
     const exigida = claveExigida()
-    if (exigida.length > 0 && request.headers.get(CABECERA_DE_LA_CLAVE) !== exigida) {
+    if (exigida.length > 0 && !claveValida(request.headers.get(CABECERA_DE_LA_CLAVE), exigida)) {
       return errorRpc(null, -32001, 'clave de API ausente o invalida', 401)
     }
     const texto = await request.text()

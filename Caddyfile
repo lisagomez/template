@@ -15,6 +15,11 @@
 	@immutable path /_next/static/* /static/*
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
 
+	# El puente A2A del extractor es SOLO de red interna: el puente de Hermes llega directo a
+	# app:3000, sin pasar por aqui. Desde fuera no existe (revision C3 del 2026-10-02).
+	@a2a path /a2a /a2a/* /.well-known/agent-card.json
+	respond @a2a 404
+
 	reverse_proxy app:3000 {
 		health_uri      /
 		health_interval 30s

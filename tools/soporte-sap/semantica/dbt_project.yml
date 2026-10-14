@@ -1,0 +1,31 @@
+# La capa semántica de Soporte SAP: dbt Core + MetricFlow LOCALES y pineados (requirements.lock),
+# contra un Postgres efímero en el laboratorio. Nada de dbt Cloud: los datos no salen.
+#   staging (tipa y normaliza) → intermedio (hechos por ticket y por cliente) → marts → semántica.
+name: soporte_sap
+version: '0.1.0'
+config-version: 2
+profile: soporte_sap
+
+model-paths: ['modelos']
+seed-paths: ['semillas']
+macro-paths: ['macros']
+test-paths: ['pruebas']
+target-path: 'target'
+clean-targets: ['target', 'logs', 'dbt_packages']
+
+vars:
+  # true: las entradas son las semillas del laboratorio; false: las tablas del producto (fuentes.yml).
+  laboratorio: true
+
+models:
+  soporte_sap:
+    staging:
+      +materialized: view
+    intermedio:
+      +materialized: view
+    marts:
+      +materialized: table
+
+seeds:
+  soporte_sap:
+    +quote_columns: false

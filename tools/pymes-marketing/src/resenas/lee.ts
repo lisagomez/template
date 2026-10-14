@@ -49,11 +49,14 @@ export function resenasDesdeCsv(texto: string, plataformaPorDefecto: Plataforma 
   const rechazadas = t.rechazadas.map((r) => ({ referencia: `línea ${r.linea}`, motivo: r.motivo }));
   for (const f of t.filas) {
     const cuerpo = f.celdas[c.texto] ?? '';
-    if (!cuerpo.trim()) { rechazadas.push({ referencia: `línea ${f.linea}`, motivo: 'reseña sin texto (solo calificación): cuenta para el promedio, no para temas' }); continue; }
+    const estrellas = c.estrellas >= 0 ? estrellasDe(f.celdas[c.estrellas] ?? '') : null;
+    // Una reseña de solo estrellas SÍ cuenta para el promedio (tirarla lo sesga) y queda con texto
+    // vacío: `analizaResenas` la deja fuera de temas y respuestas. Sin texto ni estrellas no hay nada.
+    if (!cuerpo.trim() && estrellas === null) { rechazadas.push({ referencia: `línea ${f.linea}`, motivo: 'fila sin texto ni calificación' }); continue; }
     resenas.push(construye({
       plataforma: c.plataforma >= 0 ? plataformaDe(f.celdas[c.plataforma] ?? '') : plataformaPorDefecto,
-      estrellas: c.estrellas >= 0 ? estrellasDe(f.celdas[c.estrellas] ?? '') : null, dia: c.fecha >= 0 ? f.celdas[c.fecha] ?? null : null,
-      autor: c.autor >= 0 ? f.celdas[c.autor] ?? '' : '', texto: cuerpo, respondida: c.respuesta >= 0 && (f.celdas[c.respuesta] ?? '').trim() !== '',
+      estrellas, dia: c.fecha >= 0 ? f.celdas[c.fecha] ?? null : null,
+      autor: c.autor >= 0 ? f.celdas[c.autor] ?? '' : '', texto: cuerpo.trim() ? cuerpo : '', respondida: c.respuesta >= 0 && (f.celdas[c.respuesta] ?? '').trim() !== '',
     }));
   }
   return { resenas, rechazadas, avisos: [] };
