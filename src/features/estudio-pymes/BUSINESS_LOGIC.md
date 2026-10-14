@@ -206,16 +206,18 @@ de plantillas; el de LLM va por `routing-modelos.json` (clases `redaccion-de-mar
 1. [ ] **Piloto con datos reales** de un negocio, con su permiso: XML, reseñas y exportaciones de
    anuncios. Plan en [`.claude/goals/pymes-marketing/piloto.md`](../../../.claude/goals/pymes-marketing/piloto.md)
    (firma pendiente). De ahí salen la cifra del costo actual (§1), la meta del KPI (§5) y el ajuste
-   de las columnas de Meta. Antes de arrancar, la app tiene que estar desplegada (decidido el 2026-10-02),
-   con la revisión de qué rutas quedan públicas
+   de las columnas de Meta. Antes de arrancar, la app tiene que estar desplegada (decidido el 2026-10-02).
+   La revisión de rutas públicas está hecha ([`docs/REVISION-rutas-publicas.md`](../../../docs/REVISION-rutas-publicas.md), #209)
+   y el puente A2A ya falla cerrado (#210); antes de desplegar faltan dos decisiones del laboratorio:
+   apagar en producción las rutas solo locales y cerrar el registro de cuentas (revisión, §4)
 2. [ ] Leer el sitio por URL con protección SSRF: superficie nueva con su modelo de amenazas (C3)
 3. [ ] Lista guardada de competidores
 4. [ ] Fases bloqueadas del PRP-006, cada una con su firma: 8 (foto de producto, C4), 9 (redactor con
    LLM = CDC con corrida medida; aprobación con cuentas = C4 y C7, y su fila en la tabla de respaldo)
-   y 10 (render en producción, infraestructura)
+   y 10 (render en producción, infraestructura; antes, el video pide cuenta o cupo: revisión de rutas, §4)
 5. [ ] Decidir el cobro (§7, con la investigación de esquemas de precio)
 6. [ ] Las otras familias del plugin (finanzas, ventas, operación), cada una con su goal
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-14
