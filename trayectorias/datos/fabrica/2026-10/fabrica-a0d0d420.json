@@ -1,0 +1,81 @@
+{
+ "version": 1,
+ "id": "fabrica-a0d0d420",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "9c59e23c-d6c3-461b-8fd4-d5abe61d5387",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-02T13:24:42.065Z",
+  "fin": "2026-10-05T12:27:59.076Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 411
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 150,
+   "AskUserQuestion": 2,
+   "Write": 22,
+   "Edit": 11,
+   "ToolSearch": 2,
+   "WebSearch": 3,
+   "Read": 2
+  },
+  "llamadasAlModelo": 178,
+  "turnos": 13,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 50
+ },
+ "uso": {
+  "entrada": 366,
+  "salida": 252601,
+  "cacheCreacion": 1070892,
+  "cacheLectura": 57869451
+ },
+ "costoUsd": 21.9818,
+ "tiempos": {
+  "totalMs": 255797011
+ },
+ "gates": [
+  {
+   "nombre": "prueba",
+   "resultado": "verde",
+   "veces": 4
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 3
+  }
+ ],
+ "resultado": {
+  "errores": 1,
+  "erroresPor": {
+   "Bash": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

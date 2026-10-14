@@ -57,19 +57,28 @@ for (const nombre of herramientas) {
   console.log(`\x1b[1m▸ tools/${nombre}\x1b[0m ${gris('$ npm run prueba')}`);
   const r = spawnSync('npm', ['run', '--silent', 'prueba'], { cwd: dir, encoding: 'utf8', timeout: 900_000 });
   const salida = `${r.stdout ?? ''}${r.stderr ?? ''}`;
-  const pasadas = Number((salida.match(/^ℹ pass (\d+)/m) ?? [])[1] ?? 0);
-  const falladas = Number((salida.match(/^ℹ fail (\d+)/m) ?? [])[1] ?? 0);
+  // `node --test` resume con `ℹ pass N` en una terminal y con `# pass N` (TAP) sin ella, que es como
+  // lo corre spawnSync: buscar solo el primero contaba 0 en todas. Se suman todas las apariciones (una
+  // suite puede encadenar varias corridas) y, sin ninguna, el conteo es null: «sin conteo», no un cero.
+  const cuenta = (clave) => {
+    const valores = [...salida.matchAll(new RegExp(`^(?:ℹ|#) ${clave} (\\d+)$`, 'gm'))].map((m) => Number(m[1]));
+    return valores.length ? valores.reduce((a, b) => a + b, 0) : null;
+  };
+  const pasadas = cuenta('pass');
+  const falladas = cuenta('fail');
   if (r.error || r.status === null) {
     resultados.push({ nombre, estado: 'no_ejecutable', detalle: r.error?.message ?? 'sin codigo de salida' });
     console.log(rojo(`  ✗ no se pudo correr: ${r.error?.code ?? 'sin codigo de salida'}`));
     continue;
   }
   if (r.status === 0) {
-    resultados.push({ nombre, estado: 'paso', detalle: `${pasadas} pruebas` });
-    console.log(verde(`  ✓ ${pasadas} pruebas`));
+    const detalle = pasadas === null ? 'sin conteo' : `${pasadas} pruebas`;
+    resultados.push({ nombre, estado: 'paso', detalle, pasadas });
+    console.log(verde(`  ✓ ${detalle}`));
   } else {
-    resultados.push({ nombre, estado: 'fallo', detalle: `${falladas} falladas de ${pasadas + falladas}` });
-    console.log(rojo(`  ✗ ${falladas} falladas de ${pasadas + falladas}`));
+    const detalle = falladas === null ? 'salida sin conteo' : `${falladas} falladas de ${(pasadas ?? 0) + falladas}`;
+    resultados.push({ nombre, estado: 'fallo', detalle });
+    console.log(rojo(`  ✗ ${detalle}`));
     console.log(salida.split('\n').filter((l) => /^✖|AssertionError|Error:/.test(l)).slice(0, 12).join('\n'));
   }
 }
@@ -80,9 +89,11 @@ const sinPruebas = resultados.filter((r) => r.estado === 'sin_pruebas');
 
 console.log('');
 for (const r of sinPruebas) console.log(gris(`  · tools/${r.nombre}: ${r.detalle}`));
-const total = pasaron.reduce((n, r) => n + Number(r.detalle.split(' ')[0]), 0);
+const total = pasaron.reduce((n, r) => n + (r.pasadas ?? 0), 0);
+const sinConteo = pasaron.filter((r) => r.pasadas === null).length;
 if (rojos.length === 0) {
-  console.log(verde(`Herramientas en verde: ${pasaron.length} suite(s), ${total} pruebas.`));
+  const nota = sinConteo ? ` (${sinConteo} sin conteo legible)` : '';
+  console.log(verde(`Herramientas en verde: ${pasaron.length} suite(s), ${total} pruebas${nota}.`));
   process.exit(0);
 }
 console.log(rojo(`Herramientas EN ROJO: ${rojos.map((r) => `tools/${r.nombre} (${r.detalle})`).join(', ')}`));
