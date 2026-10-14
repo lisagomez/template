@@ -38,13 +38,14 @@
      - Qué guarda: al menos 5 casos por pieza, las 10 trampas con caso, ninguno en falla, L8 sobre 32 archivos y el
        espejo SQL del catálogo sin deriva.
      - Ya está en la rama; entra a `main` solo con esta firma.
-  4. **Propuesto, NO aplicado en el padrón**: `sgi:rls` (`node scripts/sgi/mide-aislamiento.ts`) como gate
-     **inactivo**.
-     - `motivo`: «necesita Docker con la Supabase local y crea 7 cuentas sintéticas por corrida».
-     - `falta`: «un perfil de gate con Docker».
-     - Es el mismo patrón que `reel:rls`. El laboratorio verifica la ÚLTIMA medición (`rls.json`, casos `bas-1…6`)
-       pero no la vuelve a correr: si RLS se rompe después, esos casos siguen en verde hasta que alguien mida otra
-       vez. Declararlo hace visible esa ausencia.
+  4. **`.claude/gates.json`: `sgi:rls` (`node scripts/sgi/mide-aislamiento.ts`) declarado INACTIVO** (decidido por el
+     laboratorio el 2026-10-14).
+     - `motivo`: necesita Docker con la Supabase local y crea 7 cuentas sintéticas por corrida.
+     - `falta`: el mismo perfil con Docker que `inventario:valida-erp`; hasta entonces, a mano al tocar las
+       migraciones `sgi_*` o sus políticas.
+     - El laboratorio verifica la ÚLTIMA medición (`rls.json`, casos `bas-1…6`) pero no la vuelve a correr: si RLS se
+       rompe después, esos casos siguen en verde hasta que alguien mida otra vez. Declararlo hace visible esa ausencia
+       en `npm run gates`.
   5. **Medido con corridas reales (2026-10-01), ya aplicado en la rama** (commits `b837c24` a la fecha):
      - **Tope de razonamiento aparte para `agente-sgi-evaluacion`: 4,000 tokens** (`RAZONAMIENTO` en
        `src/features/sgi/services/llm.ts`, opción `razonamiento` del cliente). Opus 5 razona por omisión dentro de
@@ -88,6 +89,8 @@
      - `681144b`: el PRP pasa de 008 a 013, porque Soporte SAP tomó el 008 y entró antes (#211), como el analista
        pasó a 009. Los registros del goal siguen diciendo PRP-008;
      - la `_nota` del gate nuevo deja de decir «propuesta» y apunta a esta entrada.
+     - el índice de productos (`BUSINESS_LOGIC.md`) gana la fila del SGI en «pendiente»: falta el contrato, antes del
+       estreno con una pyme real (borrador en `propuestas.md`, §20a).
 - **Motivo**: el goal `sistema-integrado-iso` (PRP-013). Sin clase asignada, estos agentes heredarían el default
   caro en silencio (C8). Sin prompts revisados como código, el alcance entero de lo que proponen a una pyme no
   pasaría por ningún gate (C1).
@@ -113,8 +116,9 @@
     prompts no cambiaron desde la medición (sha256 `038b3c2da8c47014…`) y los modelos siguen pineados igual en `main`;
   - aprobación humana ☐;
   - pineo ☑ (sin modelo nuevo);
-  - capa B: **propuesta «no corrida, a propósito y declarado»**. No cambia ningún skill, prompt ni instrucción del
-    arnés (los prompts son del producto, no de Claude Code). El laboratorio decide si la exige.
+  - capa B no corrida por el agente: no cambia ningún skill, prompt ni instrucción del arnés (los prompts son del
+    producto, no de Claude Code), y leer la rama `golden-sets` contamina las corridas en frío; decide el laboratorio
+    («capa A basta» o corrida en sesión limpia) ☐.
 - **Regresión**: `npm run validate` ☑ 32/32 gates activos (8 inactivos declarados, 0 rojos) tras la mezcla y el
   renumerado (`681144b`); se repite tras el último commit antes del PR.
 - **Aprobado por**: pendiente
