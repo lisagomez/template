@@ -294,6 +294,16 @@
         "patron": "CDC \\(C1\\)",
         "porque": "editar el skill, su esquema, el verificador o su gate cambia el comportamiento del rol"
       }
+    ],
+    "goal-compiler": [
+      {
+        "patron": "Credenciales y saldo son HECHOS",
+        "porque": "la llave y el saldo se comprueban antes de lanzar, sin imprimir la llave: el goal del SGI se paro dos veces por eso (2026-10-01)"
+      },
+      {
+        "patron": "O BIEN, BLOQUEADO",
+        "porque": "el bloque /goal deja terminar con el bloqueo pegado; sin esa salida el evaluador relanza turnos vacios cuando falta una llave o el saldo (2026-10-01)"
+      }
     ]
   }
 }

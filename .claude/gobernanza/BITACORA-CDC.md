@@ -4885,3 +4885,34 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras la mezcla, la fila de rutas
   públicas y el gate de Lean (`181e61e`, árbol `ff046295027f`).
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-14
+
+### 2026-10-14 — skill `goal-compiler`: la llave y el saldo se comprueban antes de lanzar, y el bloque `/goal` puede terminar en BLOQUEADO — radio: skill y contratos de capa A
+
+- **Cambio** (rama `cdc/goal-compiler-bloqueado`, commit `12011e0`; 2 archivos, +18):
+  1. **`goal-compiler/SKILL.md`, Fase 2**: una regla nueva, «Credenciales y saldo son HECHOS». Toda llave de la que
+     dependa la definición de hecho se comprueba antes de entregar el bloque, sin imprimirla (presente/ausente,
+     largo). Si el goal gasta en un proveedor, también el saldo de la cuenta y el tope propio de la llave
+     (OpenRouter: `GET /api/v1/key`, `limit_remaining`, y `GET /api/v1/credits`), contra la estimación del spec. Si
+     falta la llave o el saldo no cubre, se dice antes de lanzar.
+  2. **`goal-compiler/SKILL.md`, Plantilla B**: el bloque `/goal` gana una salida, «O BIEN, BLOQUEADO: si falta algo
+     que solo da una persona (llave, saldo, firma, copia licenciada), detente y pega el bloqueo, quién lo destraba y
+     el estado del grafo: eso también cierra el goal». Debajo, una nota con el porqué. El bloque de la plantilla
+     queda en 1,425 caracteres (el margen es 2,000).
+  3. **Contratos de capa A** (`golden-sets/contratos.json`): `goal-compiler` entra con dos contratos, uno por regla.
+     Hasta hoy el skill no tenía ninguno.
+- **Motivo**: propuestas 1, 2 y 6 del post-mortem del goal `sistema-integrado-iso` (2026-10-01). Sin llave, la
+  condición no podía cumplirse y el evaluador relanzó cientos de turnos vacíos; con la llave, el goal se paró otra
+  vez por saldo. La red de seguridad le pide al agente que pare, pero quien decide si el goal terminó es el
+  evaluador, y solo acepta lo que dice la condición.
+- **Fuera de este CDC, a propósito**: la propuesta 3 (cada entrada manual es un nodo del grafo) y las reglas de
+  `aprendizajes-stack.md` (propuestas 4, 5, 7 y 8). Siguen en el post-mortem, sin aplicar.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166, y **las dos siembras caen**: sin las reglas, «2 de 166 fallaron — NO promovible»;
+  - capa B no corrida por el agente: leer la rama `golden-sets` contamina las corridas en frío; decide el
+    laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva; la `description` del skill no cambia).
+- **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `12011e0` (árbol
+  `3cc663e3289e`).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-14
