@@ -77,7 +77,8 @@ respuesta demostrada, contra las que se apoyan en una hipótesis sin experimento
 
 ## 6. Gobernanza (controles C4 y C7)
 
-**AISIA (C4), borrador SIN firmar:**
+**AISIA (C4), que se firma con este contrato**, como hipótesis. La decisión C4 de mandar datos a un LLM real
+sigue pendiente (fila «¿Sale algo del perímetro?»):
 
 | Pregunta | Respuesta |
 |---|---|
@@ -103,9 +104,10 @@ rechaza cualquier sentencia que no sea SELECT.
   - ejecución fuera del LLM;
   - narración restringida;
   - replay comprobado entre procesos.
-- **Sin LLM real** (decisión del laboratorio, 2026-10-02). La activación espera el CDC de la clase
-  de routing (`tools/crecimiento-demostrado/piloto/propuesta-cdc.md`) y la decisión C4.
+- **Sin LLM real** (decisión del laboratorio, 2026-10-02). Los tres prompts entraron apagados con su
+  CDC (2026-10-14). Encenderlos espera el CDC-1, con las clases de routing y su medición
+  (`tools/crecimiento-demostrado/piloto/propuesta-cdc.md`), y la decisión C4.
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis, 2026-10-14.
