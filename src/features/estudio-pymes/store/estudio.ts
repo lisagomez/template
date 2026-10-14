@@ -29,10 +29,15 @@ export interface EstadoDelEstudio {
   readonly brief: EstrategiaDe30Dias | null;
   readonly calendario: readonly FilaDeCalendario[];
   readonly analisis: AnalisisDeResenas | null;
+  /** Lo que la lectura de reseñas no pudo leer o leyó a medias: se enseña, no se tira. */
+  readonly avisosResenas: readonly string[];
   readonly sitio: { readonly url: string; readonly html: string; readonly robots: string; readonly llms: string };
   readonly auditoria: Auditoria | null;
   readonly campanas: readonly Campana[] | null;
   readonly bloques: readonly BloqueDeCambio[];
+  /** La moneda de la exportación (nunca se convierte) y lo que su lectura no pudo leer. */
+  readonly monedaAnuncios: string;
+  readonly avisosAnuncios: readonly string[];
   readonly notasCompetencia: string;
   readonly lunes: BriefDelLunes | null;
   readonly ocupado: boolean;
@@ -79,8 +84,8 @@ interface Acciones {
 
 const INICIAL: EstadoDelEstudio = {
   hoy: new Date().toISOString().slice(0, 10), ejemplo: false, marca: null, muestras: '', voz: VOZ_NEUTRA, contacto: '', ventas: null, origenVentas: '',
-  precios: {}, brief: null, calendario: [], analisis: null, sitio: { url: '', html: '', robots: '', llms: '' }, auditoria: null, campanas: null, bloques: [],
-  notasCompetencia: '', lunes: null, ocupado: false, carruseles: [], video: null, aprobaciones: {},
+  precios: {}, brief: null, calendario: [], analisis: null, avisosResenas: [], sitio: { url: '', html: '', robots: '', llms: '' }, auditoria: null, campanas: null, bloques: [],
+  monedaAnuncios: 'MXN', avisosAnuncios: [], notasCompetencia: '', lunes: null, ocupado: false, carruseles: [], video: null, aprobaciones: {},
 };
 
 export const useEstudio = create<EstadoDelEstudio & Acciones>((set, get) => ({
@@ -106,11 +111,12 @@ export const useEstudio = create<EstadoDelEstudio & Acciones>((set, get) => ({
   decideFila: (id, estado) => set((s) => ({ calendario: s.calendario.map((f) => (f.id === id ? marcaFila(f, estado) : f)) })),
   cargaResenas: async (texto) => {
     const s = get();
-    set({ analisis: await S.resenas(texto, s.voz, s.marca?.nombre ?? 'Mi negocio', s.contacto, s.ventas, s.hoy) });
+    const r = await S.resenas(texto, s.voz, s.marca?.nombre ?? 'Mi negocio', s.contacto, s.ventas, s.hoy);
+    set({ analisis: r.analisis, avisosResenas: r.avisos });
   },
   decideRespuesta: (i, decision, texto) => set((s) => (s.analisis ? { analisis: { ...s.analisis, borradores: s.analisis.borradores.map((b, j) => (j === i ? decideBorrador(b, decision, texto) : b)) } } : {})),
   audita: (sitio) => set({ sitio, auditoria: S.auditoria(sitio.url, sitio.html, sitio.robots, sitio.llms) }),
-  cargaAnuncios: (csv) => { const a = S.anuncios(csv); set({ campanas: a.campanas, bloques: a.bloques }); },
+  cargaAnuncios: (csv) => { const a = S.anuncios(csv); set({ campanas: a.campanas, bloques: a.bloques, monedaAnuncios: a.moneda, avisosAnuncios: a.avisos }); },
   fijaCompetencia: (notas) => set({ notasCompetencia: notas }),
   generaLunes: () => { const s = get(); set({ lunes: S.lunes({ ventas: s.ventas, analisis: s.analisis, auditoria: s.auditoria, campanas: s.campanas, bloques: s.bloques, notasCompetencia: s.notasCompetencia, semana: S.inicioDelBrief(s.ventas, s.hoy) }) }); },
   cargaEjemplo: async () => {

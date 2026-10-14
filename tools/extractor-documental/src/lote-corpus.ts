@@ -21,10 +21,10 @@ import type { LecturaDePagina, Diagnosticador, IdentificadorInvalido, Corregido,
 import type { RegistroDeEsquemas } from './xml/registro.js'
 import { leeCapaCero } from './capa-cero.js'
 import { identidadDe } from './identidad.js'
-import { imagenesDelPdf } from './pdf-flujos.js'
+import { imagenesDelPdf, presupuestoDeInflado } from './pdf-flujos.js'
 import { leeCfdi40, camposParaCotejo } from './xml/cfdi/comprobante-40.js'
 import { registroDeEsquemas } from './xml/registro.js'
-import { tipoMimeDe } from './archivos.js'
+import { tipoMimeDe, esXmlPorBytes } from './archivos.js'
 import { camposPorPatron } from './patrones.js'
 import type { Patron } from './patrones.js'
 import { cotejaContraTranscripcion } from './transcripcion.js'
@@ -158,12 +158,7 @@ const fundeCotejos = (cotejos: readonly (Cotejo | undefined)[]): Cotejo | undefi
   }
 }
 
-const esXml = (bytes: Uint8Array): boolean => {
-  let i = 0
-  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) i = 3
-  while (i < bytes.length && (bytes[i] === 0x20 || bytes[i] === 0x0a || bytes[i] === 0x0d || bytes[i] === 0x09)) i++
-  return bytes[i] === 0x3c
-}
+const esXml = esXmlPorBytes
 
 function leeXml(bytes: Uint8Array, registro: RegistroDeEsquemas, opciones: OpcionesDeCorpus): Parcial {
   const lectura = leeCfdi40(bytes, registro)
@@ -234,7 +229,10 @@ async function leePorMotor(
 }
 
 async function leePdf(bytes: Uint8Array, opciones: OpcionesDeCorpus, reutiliza: Reutiliza): Promise<Parcial> {
-  const capa = await leeCapaCero(bytes)
+  // H-22: un solo presupuesto de inflado para todo el documento, la capa de texto y sus imágenes juntas.
+  const presupuesto = presupuestoDeInflado()
+  const capa = await leeCapaCero(bytes, presupuesto)
+  if (presupuesto.agotado) return nada('ninguna', capa.motivo ?? 'el PDF infla más que su tope (H-22)')
   if (capa.hayTexto) {
     const texto = capa.paginas.join('\n')
     const campos = camposPorPatron(texto, opciones.patrones ?? [])
@@ -245,7 +243,8 @@ async function leePdf(bytes: Uint8Array, opciones: OpcionesDeCorpus, reutiliza: 
     const clasesDePagina = opciones.clases === undefined ? [] : clasificaPaginas(paginas, opciones.clases)
     return { ruta: 'capa-cero', motivo, paginas, ...SIN_PAGINAS, clasesDePagina, ...validaExactos(campos, opciones) }
   }
-  const imagenes = await imagenesDelPdf(bytes)
+  const imagenes = await imagenesDelPdf(bytes, presupuesto)
+  if (presupuesto.agotado) return nada('ninguna', 'el PDF infla más que su tope por documento: sus imágenes no se leen (H-22)')
   if (imagenes.length === 0) return nada('ninguna', `PDF sin capa de texto (${capa.motivo ?? 'sin motivo'}) y sin imagen extraible`)
   return leePorMotor(imagenes.map((i) => i.bytes), opciones, `PDF escaneado: ${imagenes.length} imagen(es) al motor`, reutiliza)
 }

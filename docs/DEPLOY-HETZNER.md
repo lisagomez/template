@@ -1,7 +1,9 @@
-# Deploy en un VPS (Hetzner Cloud u otro)
+# Deploy en un VPS (cualquier proveedor)
 
 Runbook completo para poner esta app en un servidor propio con TLS automatico. De
-servidor vacio a produccion.
+servidor vacio a produccion. **No depende de un proveedor**: el nombre del archivo es
+historico (y lo enlazan `AGENTS.md`, el README y el inventario), pero nada de lo que sigue
+supone uno. El proveedor y la region son un dato de cada instalacion (`.env.production`).
 
 **Stack:** Docker + Next.js standalone + Caddy (reverse proxy y certificados).
 
@@ -32,11 +34,18 @@ ponerte a optimizar codigo.
 
 ## 1. Crear el servidor
 
-En Hetzner Cloud Console:
-- **Tipo:** el que cumpla la tabla de arriba (2 GB de RAM como minimo duro)
+En la consola del proveedor que elegiste (el del laboratorio o el de la consultora):
+- **Tipo:** el que cumpla la tabla de arriba (2 GB de RAM como minimo duro) y, si el
+  producto declara su perfil, el **tamaño contratado** (ver «El perfil del producto» abajo)
+- **Region:** la que fije la decision del producto sobre donde quedan los datos (en
+  Soporte SAP, **D10**: `us-east-1` en el modo gestionado; en despacho, la que decida quien pone la
+  maquina). Mientras una decision siga abierta, `configura:deploy` dira «pendiente», nunca «cumple»
 - **Imagen:** Ubuntu 24.04 LTS
 - **SSH key:** subir la tuya (NO uses password)
 - **Firewall:** permitir solo `22`, `80`, `443`
+
+**Crear el servidor no se automatiza**: es un cobro, pasa por gate humano, y solo se
+automatiza despues de haberlo hecho tres veces a mano.
 
 Apunta tu dominio antes de seguir: registro **A** de `tuapp.com` -> IP del servidor.
 Verifica con `dig +short tuapp.com` que ya responde la IP correcta. Sin DNS
@@ -119,6 +128,36 @@ El configurador **no es cosmetico**: caza tres fallos que de otro modo descubres
 
 De los secretos solo dice **presente/ausente y el largo**: nunca imprime el valor.
 
+### El perfil del producto (PRP-010, fase 3)
+
+Si el `.env.production` dice `PRODUCTO=<slug>`, `configura:deploy` mide la instalacion contra el
+bloque `despliegue` de `productos/<slug>.json` (plantilla v3). El producto declara **requisitos,
+no proveedores**:
+
+| Lo que mide | Contra que | Si no cumple |
+|---|---|---|
+| vCPU, RAM y disco de esta maquina | el `DESPLIEGUE_TAMANO` contratado (S, M o L), con su fuente | no pasa |
+| `DESPLIEGUE_REGION` | la decision del producto sobre la region | abierta: **«pendiente»**, nunca «cumple»; decidida y fuera: no pasa |
+| `RESPALDO_S3_*` (URL https, bucket, llaves y dias de bloqueo) | respaldo inmutable fuera de sitio (FASE0 §9.2, N2) | si falta, aviso; sin https o sin dias de bloqueo, no pasa |
+| los `secretos` del producto | presencia y 32 caracteres o mas | no pasa (nunca imprime el valor) |
+
+Con `--escribir` deja la medicion, **sin un solo secreto**, en `.despliegue/medicion.json`, que
+no entra a git ni a la imagen. Es la que lee la **ficha de servidor** del producto, que no dice
+«apto» sin una restauracion probada en esa maquina (GATE 3).
+
+**El respaldo, por protocolo.** El destino es cualquier almacen compatible con S3 **con bloqueo
+de objetos** (Object Lock). El proveedor se reduce a una URL y unas llaves: no hay codigo por
+proveedor. El bucket se crea con el bloqueo encendido (eso lo hace una persona, en la consola del
+proveedor); `rclone` lo usa sin un remoto con nombre:
+
+```bash
+rclone copyto "$ARCHIVO" ":s3,provider=Other,endpoint=$RESPALDO_S3_URL,access_key_id=$RESPALDO_S3_LLAVE,secret_access_key=$RESPALDO_S3_SECRETO:$RESPALDO_S3_BUCKET/$(date +%Y-%m)/$(basename "$ARCHIVO")"
+```
+
+**Control negativo, a mano y una vez** (como GATE 1): con esas mismas llaves, borrar lo que se
+acaba de subir **tiene que fallar**. Si se borra, no hay bloqueo, y el respaldo se va con la misma
+llave que lo sube.
+
 ---
 
 ## 6. Levantar
@@ -190,8 +229,11 @@ irrecuperable es `.env.production` — guardalo en tu gestor de contrasenas.
 
 > ⚠️ **"Viven en Supabase" no es un plan de respaldo, es una dependencia.** Lo que
 > recuperas es lo que dé **tu plan contratado**, y el PITR es un add-on de pago: en los
-> planes bajos no existe. Sin PITR confirmado en el dashboard, el RPO real de tus datos
-> **es 24h**. Compruebalo mirando, no suponiendo — y si el proyecto necesita mas, el
+> planes bajos no existe. Y en el plan **Free no hay ningun respaldo**: la doc de Supabase
+> pide exportar con `supabase db dump` y guardarlo fuera. Con Pro y sin PITR confirmado en el
+> dashboard, el RPO real de tus datos **es 24h** (respaldo diario, 7 dias). En Free, sin un dump
+> propio, el RPO es **todo lo que haya desde el principio**. Compruebalo mirando, no suponiendo
+> (verificado en la doc el 2026-10-04) — y si el proyecto necesita mas, el
 > contrato de respaldo completo esta en
 > [FASE0-INFRAESTRUCTURA.md §9](FASE0-INFRAESTRUCTURA.md).
 >
@@ -209,3 +251,31 @@ MCP→A2A). `npm run configura:deploy` mide la GPU y escribe `OCR_GPU`, `OCR_CPU
 El puente A2A (`app:3000/a2a`) solo existe en la red `interna`; **Caddy no lo enruta, y exponerlo
 es gate humano** (C3 + C4). Detalle: `tools/extractor-documental/README.md`, sección «Desplegar
 en el VPS del cliente».
+
+## Anexo (2026-10-07) — En la máquina de un despacho contable (spec 015)
+
+El piloto del buzón de CFDI corre **entero en la máquina del despacho**, y ningún documento sale de ella. Usa su
+propio compose, `docker-compose.despacho.yml`, no el de este runbook: aquí la app tiene salida a internet y allí
+no puede tenerla.
+
+- **Supabase autohospedado**, reducido a base, auth, rest y storage, con las imágenes pineadas por digest. No hay
+  proyecto en supabase.com: `configura:deploy` **rechaza** un `NEXT_PUBLIC_SUPABASE_URL` gestionado.
+- **Caddy es la única salida y la pasarela**: `/auth/v1`, `/rest/v1` y `/storage/v1` van al mismo dominio que la
+  app (`despacho/Caddyfile`). Todo lo demás vive en dos redes sin salida, `frente` e `interna`.
+- **Nadie se registra solo**: el operador da de alta las cuentas del despacho. Sin SMTP, porque no hay salida.
+- **La cola de visión va fija en «ninguno».** No hay Mistral ni ninguna otra API externa (RF-7).
+
+```bash
+# en la máquina del despacho, con DOMAIN, TLS_EMAIL y NEXT_PUBLIC_SITE_URL ya en .env.production
+echo "NEXT_PUBLIC_SUPABASE_URL=https://$DOMAIN" >> .env.production   # el mismo origen que la app
+node scripts/despacho/llaves.mjs              # secretos: una sola vez, nunca los reescribe ni los imprime
+npm run configura:deploy -- --escribir        # modo despacho: mide la RAM y comprueba el perímetro
+docker compose -f docker-compose.despacho.yml --env-file .env.production up -d
+```
+
+Medido el 2026-10-07 con datos sintéticos: desde auth, storage, la base y cualquier contenedor de `frente` o de
+`interna` **no se llega a internet**, y desde Caddy sí. A través de Caddy, el operador da de alta una cuenta, el
+autorregistro se niega, el inicio de sesión da un token `authenticated`, y rest y storage responden. En reposo,
+la pila de Supabase gasta unos 230 MB. Los límites declarados suman 2 GB, y el mínimo que exige `configura:deploy`
+sale de ellos.
+

@@ -4,13 +4,13 @@
  * computadora. El redactor es el de plantillas (el único aprobado por el laboratorio: el de LLM
  * sigue «no medido»).
  */
-import { redactorDePlantillas, construyeVoz, decodificaTexto, lunesDe, sumaDias, type PerfilDeVoz } from '../../../../tools/pymes-marketing/dist/index.js';
+import { redactorDePlantillas, construyeVoz, decodificaTexto, leeCsv, lunesDe, sumaDias, type PerfilDeVoz } from '../../../../tools/pymes-marketing/dist/index.js';
 import { type PerfilDeMarca } from '../../../../tools/pymes-marketing/dist/marca/index.js';
 import { ventasDesdeCfdi, ventasDesdeCsv, juntaVentas, resumeVentas, type VentasNormalizadas } from '../../../../tools/pymes-marketing/dist/ventas/index.js';
 import { estrategiaDe30Dias, calendarioDe30Dias, type EstrategiaDe30Dias, type FilaDeCalendario } from '../../../../tools/pymes-marketing/dist/contenido/index.js';
-import { resenasPegadas, resenasDesdeCsv, analizaResenas, type AnalisisDeResenas } from '../../../../tools/pymes-marketing/dist/resenas/index.js';
+import { resenasPegadas, resenasDesdeCsv, analizaResenas, type AnalisisDeResenas, type LecturaDeResenas } from '../../../../tools/pymes-marketing/dist/resenas/index.js';
 import { auditaVisibilidad, type Auditoria } from '../../../../tools/pymes-marketing/dist/visibilidad/index.js';
-import { leeAnuncios, campanas, recomendaciones, pulsoDeCrecimiento, pulsoParaElLunes, briefDelLunes, anunciosParaElLunes, competenciaParaElLunes, resenasParaElLunes, visibilidadParaElLunes, leeNotasDeCompetencia, type Campana, type BloqueDeCambio, type BriefDelLunes } from '../../../../tools/pymes-marketing/dist/pulso/index.js';
+import { leeAnuncios, campanas, recomendaciones, pulsoDeCrecimiento, pulsoParaElLunes, briefDelLunes, anunciosParaElLunes, competenciaParaElLunes, resenasParaElLunes, visibilidadParaElLunes, leeNotasDeCompetencia, type Campana, type BloqueDeCambio, type BriefDelLunes, type LecturaDeAnuncios } from '../../../../tools/pymes-marketing/dist/pulso/index.js';
 import { leeCfdi40, registroDeEsquemas, lectorDeTimbre11 } from '../../../../tools/extractor-documental/dist/xml/index.js';
 
 export const redactor = redactorDePlantillas();
@@ -49,19 +49,52 @@ export async function calendario(e: EstrategiaDe30Dias, marca: PerfilDeMarca, vo
   return calendarioDe30Dias(e, marca, redactor, { voz, precios });
 }
 
-export async function resenas(texto: string, voz: PerfilDeVoz, negocio: string, contacto: string, ventas: VentasNormalizadas | null, hoy: string): Promise<AnalisisDeResenas> {
+/** Cinco motivos a la vista y el resto contado: el dueño necesita saber que hay más, no la lista entera. */
+function enumera(n: number, que: string, detalle: readonly string[]): string {
+  return `No pude leer ${n} ${que}: ${detalle.slice(0, 5).join('; ')}${n > 5 ? ` y ${n - 5} más` : ''}`;
+}
+
+/** Lo que la lectura de reseñas no pudo leer o leyó a medias, dicho al dueño: si no, una columna que
+ *  no se reconoce deja el análisis en cero reseñas sin que nadie lo note. */
+export function avisosDeResenas(l: LecturaDeResenas): string[] {
+  const soloEstrellas = l.resenas.filter((r) => r.texto.trim() === '').length;
+  return [
+    ...l.avisos,
+    ...(l.rechazadas.length ? [enumera(l.rechazadas.length, 'fila(s) de reseñas', l.rechazadas.map((r) => `${r.referencia}: ${r.motivo}`))] : []),
+    ...(soloEstrellas ? [`${soloEstrellas} reseña(s) solo con estrellas: cuentan para tu calificación, pero no tienen tema ni respuesta`] : []),
+  ];
+}
+
+export async function resenas(texto: string, voz: PerfilDeVoz, negocio: string, contacto: string, ventas: VentasNormalizadas | null, hoy: string): Promise<{ analisis: AnalisisDeResenas; avisos: string[] }> {
   const lectura = /^[^\n]*,[^\n]*\n/.test(texto) && /rese|review|coment|texto/i.test(texto.split('\n')[0] ?? '') ? resenasDesdeCsv(texto) : resenasPegadas(texto);
-  return analizaResenas(lectura.resenas, redactor, { voz, negocio, contacto: contacto || undefined, hoy, ventas: ventas?.lineas });
+  const analisis = await analizaResenas(lectura.resenas, redactor, { voz, negocio, contacto: contacto || undefined, hoy, ventas: ventas?.lineas });
+  return { analisis, avisos: avisosDeResenas(lectura) };
 }
 
 export function auditoria(url: string, html: string, robots: string, llms: string): Auditoria {
   return auditaVisibilidad({ url, html: html.trim() || null, robots: robots.trim() || null, llms: llms.trim() || null, sitemap: null, anio: new Date().getFullYear() });
 }
 
-export function anuncios(csv: string): { campanas: Campana[]; bloques: BloqueDeCambio[]; moneda: string; faltan: readonly string[] } {
+const COLUMNAS: Readonly<Record<string, string>> = {
+  campana: 'el nombre de la campaña', gasto: 'el gasto', impresiones: 'las impresiones', clics: 'los clics',
+  resultados: 'los resultados', frecuencia: 'la frecuencia', dia: 'el día',
+};
+
+/** Lo que la lectura de anuncios no pudo leer, dicho al dueño: una columna o una fila perdida cambia el
+ *  veredicto en silencio. Los encabezados del archivo van completos: son lo que se coteja (piloto, §6). */
+export function avisosDeAnuncios(csv: string, l: LecturaDeAnuncios): string[] {
+  const avisos: string[] = [];
+  if (l.faltan.length) avisos.push(`No reconocí la columna de ${l.faltan.map((k) => COLUMNAS[k] ?? k).join(', ')}. Tu archivo trae: ${leeCsv(csv).encabezados.join(' | ')}`);
+  if (l.faltan.includes('campana') || l.faltan.includes('gasto')) avisos.push('Sin el nombre de la campaña y el gasto no puedo juzgar ninguna campaña.');
+  if (l.rechazadas.length) avisos.push(`${enumera(l.rechazadas.length, 'fila(s)', l.rechazadas.map((r) => `línea ${r.linea}: ${r.motivo}`))}. Su gasto no está en las cifras.`);
+  if (l.moneda !== 'MXN') avisos.push(`Tu exportación está en ${l.moneda === 'USD' ? 'dólares' : l.moneda}: los montos van en esa moneda, sin convertir a pesos.`);
+  return avisos;
+}
+
+export function anuncios(csv: string): { campanas: Campana[]; bloques: BloqueDeCambio[]; moneda: string; avisos: string[] } {
   const l = leeAnuncios(csv);
   const cs = campanas(l);
-  return { campanas: cs, bloques: recomendaciones(cs, l.moneda), moneda: l.moneda, faltan: l.faltan };
+  return { campanas: cs, bloques: recomendaciones(cs, l.moneda), moneda: l.moneda, avisos: avisosDeAnuncios(csv, l) };
 }
 
 export interface FuentesDelLunes {

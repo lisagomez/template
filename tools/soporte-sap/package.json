@@ -1,0 +1,27 @@
+{
+  "name": "@tu-scope/soporte-sap",
+  "version": "0.1.0",
+  "description": "Soporte SAP: el dominio del producto (tres niveles, matriz problema-solución, simulador, anonimizador, cadena de eventos, mapeo y limpieza, SLA, pricing, impactos, respaldo por tenant y el agente FDE). Núcleo sin dependencias; el motor de reglas, el lector de documentos y el modelo se inyectan.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "clis"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts"
+  }
+}

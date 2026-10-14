@@ -1,0 +1,13 @@
+{
+  "_comentario": "Los CLIs del producto Soporte SAP. Cada uno es un activo del inventario con su clasificador de producto. Contrato de la imprenta del repo: dry-run por defecto en lo que cambia estado, el CLI llama a la herramienta real o a su almacén local y jamás inventa una respuesta, y sin grado es «no medido» (no se usa en producción). Adoptar uno en producción es CDC (C1).",
+  "producto": "soporte-sap",
+  "clis": [
+    { "nombre": "ss-reuso", "archivo": "ss-reuso.mjs", "que": "cuenta el reuso desde la matriz dominio × capa del SDD; --escribe reescribe el bloque del SDD", "readOnly": false, "dryRunPorDefecto": true, "grado": "no medido" },
+    { "nombre": "ss-triage", "archivo": "ss-triage.mjs", "que": "categoriza una incidencia y consulta la matriz sobre el grafo", "readOnly": true, "dryRunPorDefecto": false, "grado": "no medido" },
+    { "nombre": "ss-simulador", "archivo": "ss-simulador.mjs", "que": "estado, simulación y ejecución contra el SAP simulado; ejecutar exige la aprobación de la sala", "readOnly": false, "dryRunPorDefecto": true, "grado": "no medido" },
+    { "nombre": "ss-mapea", "archivo": "ss-mapea.mjs", "que": "propone el mapeo de un exporte de tickets y muestra la cuenta", "readOnly": true, "dryRunPorDefecto": false, "grado": "no medido" },
+    { "nombre": "ss-cadena", "archivo": "ss-cadena.mjs", "que": "verifica la cadena sha256 de eventos de una incidencia", "readOnly": true, "dryRunPorDefecto": false, "grado": "no medido" },
+    { "nombre": "ss-ingesta", "archivo": "ss-ingesta.mjs", "que": "lee un documento por su vía y muestra sus campos con evidencia", "readOnly": true, "dryRunPorDefecto": false, "grado": "no medido" },
+    { "nombre": "ss-respaldo", "archivo": "ss-respaldo.mjs", "que": "simulacro de restauración por tenant en efímero, cronometrado S/M/L", "readOnly": true, "dryRunPorDefecto": false, "grado": "no medido" }
+  ]
+}

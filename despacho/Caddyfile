@@ -1,0 +1,43 @@
+# Despacho contable (spec 015): Caddy es el ÚNICO servicio con salida a internet y la pasarela
+# de Supabase, en el mismo origen que la app. Sin Kong ni Envoy: enruta por ruta y quita el prefijo,
+# como hacía la pasarela oficial. TLS automático con Let's Encrypt.
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options    "nosniff"
+		X-Frame-Options           "SAMEORIGIN"
+		Referrer-Policy           "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Supabase autohospedado: /auth/v1, /rest/v1 y /storage/v1 llegan a su servicio sin el prefijo.
+	handle_path /auth/v1/* {
+		reverse_proxy auth:9999
+	}
+	handle_path /rest/v1/* {
+		reverse_proxy rest:3000
+	}
+	handle_path /storage/v1/* {
+		reverse_proxy storage:5000 {
+			header_up X-Forwarded-Prefix /storage/v1
+		}
+	}
+
+	handle {
+		@immutable path /_next/static/* /static/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+		reverse_proxy app:3000 {
+			health_uri      /
+			health_interval 30s
+			health_timeout  5s
+		}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

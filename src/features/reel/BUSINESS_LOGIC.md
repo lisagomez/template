@@ -117,7 +117,9 @@ laboratorio. La propuesta firmada promete ≈ 2-3 minutos de cómputo y $0 en se
 Ya medido, con clips sintéticos (2026-09-27): ≈ 45-50 s de CPU por clip de 25 s; marcas por palabra
 con mediana de 51 ms y p90 de 140 ms; misma huella en dos renders; las 6 trampas firmadas (cliente
 al fondo, ticket con teléfono, precio que no coincide, clip horizontal, música ajena, dos
-hablantes) bloquean o avisan lo que deben. La sincronía tiene un sesgo de −80 a −115 ms que se
+hablantes) bloquean o avisan lo que deben. La **sala**, recorrida en un celular emulado el 2026-10-05 con el clip de
+dos voces (`scripts/reel/captura-sala.mjs`): consentimiento, riesgo 5, revisión, aprobar con la transcripción
+conservada, retirar y borrar, 15/15 sin errores de consola. La sincronía tiene un sesgo de −80 a −115 ms que se
 calibra antes de usarla como candado.
 
 ## 6. Gobernanza (controles C4 y C7)
@@ -156,7 +158,8 @@ imagen).
 ```
 src/features/
 ├── reel/      # tus reels, subida, sala de aprobación en el celular, consentimientos (hecho)
-└── auth/      # cuentas por correo y contraseña; el proxy protege solo /reel, /cuenta y /api/reel
+└── auth/      # cuentas por correo y contraseña; el proxy protege /reel, /cuenta y /api/reel, y desde
+               # la spec 015 también las páginas del buzón (la sesión vive en src/lib/supabase/sesion.ts)
 ```
 
 ### Stack confirmado
@@ -180,4 +183,4 @@ pineados con su huella y licencia en `tools/reel/LICENCIAS.md`.
 
 ---
 
-**Firma:** pendiente del laboratorio.
+**Firma:** lisagomez (responsable del proyecto), como hipótesis · Fecha: 2026-10-13 · Firma también la tabla de respaldo · Se vuelve a firmar tras el estreno con clips reales.

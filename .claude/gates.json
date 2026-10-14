@@ -19,7 +19,7 @@
     },
     "predeploy": {
       "descripcion": "Lo que corre EN EL SERVIDOR antes de desplegar. Subconjunto estricto de validate: sin build ni pruebas de feature (el build lo hace la imagen), con las auditorias y la gobernanza completas. El gate vive DENTRO de la ruta de deploy a proposito: sacarlo de ahi fue el hueco del 2026-08-23.",
-      "siempre": ["verifica:privado"],
+      "siempre": ["verifica:privado", "configura:deploy"],
       "atajo": "sello"
     },
     "cdc": {
@@ -171,6 +171,29 @@
       "_nota": "ALTA del 2026-09-27, al mezclar `main` en `pymes-marketing-build`: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo `verifica:gates` (script sin declarar y `src/features/laboratorio-pymes/pruebas/laboratorio.ts` huerfano), igual que en el PR #154"
     },
     {
+      "nombre": "prueba:laboratorio-sgi",
+      "runner": "comando",
+      "comando": "npm run prueba:laboratorio-sgi",
+      "guarda": "el laboratorio del sistema integrado ISO (`/laboratorio-sgi`): >=5 casos por pieza (catalogo, motor, documentos, salvaguardas, orquestador, base y los 9 agentes), las 10 trampas del spec con caso, ningun caso en falla, L8 (ningun texto de la app promete certificacion) y el espejo SQL del catalogo sin deriva. Sin red: los casos con LLM se verifican sobre corridas grabadas y, sin ellas, quedan no-medidos y se dicen",
+      "evidencia": "salida de `node --test`: la tabla de casos (id, pieza, estado, trampa, costo) y el resumen por pieza",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA con el CDC del sistema integrado (goal sistema-integrado-iso, propuesto el 2026-09-30 en la rama app/iso; su entrada esta en BITACORA-CDC.md). La cazo verifica:gates (script sin declarar y su archivo de pruebas huerfano), igual que prueba:laboratorio-pymes"
+    },
+    {
+      "nombre": "sgi:rls",
+      "runner": "comando",
+      "comando": "npm run sgi:rls",
+      "guarda": "el aislamiento entre organizaciones y la matriz de roles del sistema integrado (L3) contra la Supabase LOCAL, con cuentas sinteticas reales y sus sesiones (sin `service_role`). Reescribe public/laboratorio-sgi/rls.json, que los casos bas-1...6 de `prueba:laboratorio-sgi` verifican dentro de `validate`",
+      "evidencia": "public/laboratorio-sgi/rls.json con cada caso medido; exit 1 si una cuenta ve o cambia lo de otra organizacion",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker con la Supabase local y crea 7 cuentas sinteticas por corrida: no cabe en el gate de cada integracion. Mientras tanto, `validate` verifica la ULTIMA medicion grabada, no la repite: si RLS se rompe despues, bas-1...6 siguen en verde hasta que alguien vuelva a medir.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp`. Hasta entonces se corre a mano (`npm run sgi:local:reinicia` y luego `npm run sgi:rls`) al tocar las migraciones `sgi_*` o sus politicas.",
+      "_nota": "Declarado inactivo con el CDC del sistema integrado (2026-10-14), para que la ausencia se vea en `npm run gates`"
+    },
+    {
       "nombre": "prueba:historial",
       "runner": "comando",
       "comando": "npm run prueba:historial",
@@ -253,6 +276,17 @@
       "timeout_s": 600
     },
     {
+      "nombre": "verifica:productos",
+      "runner": "comando",
+      "comando": "npm run verifica:productos",
+      "guarda": "los productos del portafolio (`productos/CONCEPTO.md`): que cada manifiesto de `productos/` tenga su fila en el indice, componga activos que existen sin solaparlos, que sus propios lo tengan de dueno en el inventario y ninguno quede fuera, que respete lo que no se negocia (ningun precio sin plan comercial, RPO y RTO desconocidos hasta GATE 3, canal externo con C3 y C4, tercero con datos personales con AISIA, ningun agente aprueba), que ningun null quede sin decir lo que falta y que lo que no cupo quede escrito con su propuesta; y que cada siembra de defecto tumbe su comprobacion",
+      "evidencia": "manifiesto por manifiesto, cada comprobacion con su pista, y en ambar lo que falta, lo que no aplica y lo que no cupo; los productos del indice sin manifiesto como pendientes; la tabla de siembras cazadas; exit 1 si algo cae o una siembra no muerde",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "ALTA del 2026-10-04 (corrida B de Soporte SAP: el concepto en productos/CONCEPTO.md, la plantilla en productos/PLANTILLA.md). Fuera de predeploy a proposito: un manifiesto no cambia lo que se despliega. Los productos sin manifiesto se listan como pendientes y NO ponen el gate en rojo."
+    },
+    {
       "nombre": "prueba:inventario",
       "runner": "comando",
       "comando": "npm run prueba:inventario",
@@ -316,6 +350,17 @@
       "_nota": "Fuera de `validate` a proposito: necesita red. Corre SIEMPRE en predeploy, incluso con sello vigente, porque la visibilidad del repo puede cambiar sin que cambie el arbol."
     },
     {
+      "nombre": "configura:deploy",
+      "runner": "comando",
+      "comando": "npm run configura:deploy",
+      "guarda": "que la instalacion quepa en lo que declara su producto y que su .env.production este completo (PRP-010 H-26): la maquina contra el tamaño contratado, la region frente a su decision, el destino de respaldo inmutable y los secretos del producto, sin imprimir ninguno; y lo de siempre (placeholders, NEXT_PUBLIC_ secretas, swap, el laboratorio apagado)",
+      "evidencia": "una linea por comprobacion y el perfil medido; exit 1 si hay algo que arreglar, 2 si no pudo medir la maquina",
+      "perfiles": ["predeploy"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "Fuera de `validate` a proposito: mide la maquina y el .env.production del SERVIDOR, que en una maquina de desarrollo no existe. Corre SIEMPRE en predeploy, incluso con sello vigente, porque la maquina y el .env cambian sin que cambie el arbol."
+    },
+    {
       "nombre": "regresion:trampa",
       "runner": "comando",
       "comando": "npm run regresion -- --trampa",
@@ -336,6 +381,26 @@
       "activo": true,
       "timeout_s": 300,
       "_nota": "REACTIVADO el 2026-09-26. Estuvo apagado desde que el padron destapo que era huerfano (ningun script lo corria y llevaba meses en rojo). Lo que se arreglo: la prueba de opacidad enumeraba `src/app` ENTERO —correcto cuando el bridge era lo unico que habia, falso al crecer la app— y ahora enumera las rutas DEL BRIDGE, que es el conjunto que RF-17 acota y el nombre que le puso el SDD (§6, `rutasDelBridge()`). Para no perder lo que la version vieja si cazaba, una segunda prueba enumera el resto y lo exige DECLARADO: una ruta nueva en cualquier sitio sigue cayendo (demostrado sembrando una en `/a2a/` y otra en `/api/`). Se excluyen las dos pruebas `SERVICIO:`, que viven en el gate de al lado: no se apagan en silencio."
+    },
+    {
+      "nombre": "prueba:analista",
+      "runner": "comando",
+      "comando": "npm run prueba:analista",
+      "guarda": "el analista de producto (PRP-009): su contrato A2A con los tipos del SDK, sin nombres del interior y con transiciones de estado coherentes; que NINGUNA ruta lo sirve (enumera `src/app`); que el verificador de evidencia tumba cada siembra (dolor sin cita, ruta inexistente, cita que la fuente no dice, grado inflado, activo omitido, vetado en el ranking...); y que la ULTIMA corrida de `docs/analisis/` sigue en verde contra SU commit (una corrida es una foto: cambiar despues una fuente citada no la rompe, editar el informe y romper una cita si)",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas, con el conteo de siembras cazadas y el resumen de la corrida",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300
+    },
+    {
+      "nombre": "prueba:buzon",
+      "runner": "comando",
+      "comando": "npm run prueba:buzon",
+      "guarda": "el piloto del buzón de CFDI (spec 015), de punta a punta: el PERÍMETRO del despacho (ningún servicio con documentos sale a internet, publica puertos, usa una imagen sin digest ni recibe llaves de fuera; la cola de visión fija en «ninguno») y `configura:deploy` en modo despacho; en PGlite, actuando como miembro, ajena y anónimo, que sin consentimiento no entra ni se lee un documento (RF-1, RF-2), que un consentimiento solo se revoca y revocar borra con constancia (RF-3, RF-4), que no se confirma con campos por revisar, discrepancias abiertas ni receptor ajeno (RF-12, RF-14, RF-17), que el folio entra una vez (RF-13) y que nada registra quién hizo qué (RF-21); el orden de la ingesta (sin consentimiento, el extractor ni se llama); el listado 69-B todo o nada y sin veredicto (RF-18, RF-19); la medición con seudónimo y guardián contra fugas (RF-5, RF-8, RF-20 a RF-22); parar y cerrar (RF-25 a RF-29); y que ninguna migración del buzón haga DELETE o UPDATE sin WHERE (el `pg_safeupdate` del Supabase real). Cada regla con su siembra",
+      "evidencia": "salida de `node --test`: pruebas pasadas y falladas. 26 al darlo de alta (fase 2) y 92 al cerrar la construcción (fase 8), el 2026-10-07",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 120
     },
     {
       "nombre": "prueba:a2a:servicio",

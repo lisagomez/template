@@ -1,0 +1,211 @@
+# Plantilla de contrato de nivel de servicio — Soporte SAP
+
+> **Plantilla de trabajo, no un contrato.** Cada cifra y cada cláusula legal es un hueco
+> `[POR DECIDIR …]` que llena **el laboratorio** (y su asesoría legal), nunca un agente. La parte
+> técnica (cómo se mide) no es un hueco: es la definición del reloj que usa el producto
+> (`tools/soporte-sap/src/sla.ts`) y que ven las dos partes. Los datos de cada contrato viven
+> versionados en `ss_contrato_sla` (`id`, `version`, `vigente_desde`).
+
+Sirve para los dos niveles:
+
+- **N1–N2**: el laboratorio con una consultora. El laboratorio solo compromete lo que controla: la
+  respuesta a lo que la consultora le escala.
+- **N2–N3**: una consultora con su cliente.
+
+## 1. Partes
+
+| | Nombre | Representante |
+|---|---|---|
+| Presta el servicio | [POR DECIDIR: razón social] | [POR DECIDIR: nombre y cargo] |
+| Recibe el servicio | [POR DECIDIR: razón social] | [POR DECIDIR: nombre y cargo] |
+
+## 2. Objeto
+
+- N1–N2: la respuesta del laboratorio a los escalamientos de la consultora (sandbox, sala y núcleo
+  de conocimiento).
+- N2–N3: la atención de la consultora a las incidencias SAP del cliente.
+
+[POR DECIDIR: redacción legal del objeto]
+
+## 3. Prioridades y quién las asigna
+
+La prioridad sale de la matriz ITIL de **impacto × urgencia** (P1 a P4). En N2–N3, **un agente
+categoriza** la prioridad y el cliente puede **impugnarla**; la resuelve su consultora, a su nombre.
+El cliente lo sabe por este contrato.
+
+| Prioridad | Definición operativa |
+|---|---|
+| P1 | La operación crítica está detenida y no hay forma de rodearla. |
+| P2 | Una operación productiva está gravemente afectada. |
+| P3 | Una función falla y hay forma de rodearla. |
+| P4 | Consulta o problema menor. |
+
+[POR DECIDIR: redacción legal de las definiciones]
+
+## 4. Metas por prioridad
+
+| Prioridad | Respuesta | Resolución | Calendario | Referencia pública (no es una promesa) |
+|---|---|---|---|---|
+| P1 | [POR DECIDIR] | [POR DECIDIR] | [POR DECIDIR: 24×7 u hábil] | SAP Enterprise Support Schedule §2.1.1 a: SAP responde a sus licenciatarios en una hora, 24×7 |
+| P2 | [POR DECIDIR] | [POR DECIDIR] | [POR DECIDIR] | §2.1.1 b: en cuatro horas, en horario local de SAP |
+| P3 | [POR DECIDIR] | [POR DECIDIR] | [POR DECIDIR] | sin referencia pública |
+| P4 | [POR DECIDIR] | [POR DECIDIR] | [POR DECIDIR] | sin referencia pública |
+
+El contrato de laboratorio (`contratoDeLaboratorio`) usa las dos referencias de SAP **solo para
+demostrar la medición**. Una meta sin decidir no se mide como incumplida: el reloj corre igual y la
+pantalla dice «sin meta».
+
+## 5. Cómo se mide (el reloj)
+
+1. Arranca al **recibir** la incidencia, en el calendario de su meta: hábil (lunes a viernes,
+   horario y feriados del contrato) o continuo (24×7). Lo recibido fuera de horario empieza a contar
+   al abrir.
+2. La **espera del cliente** pausa la resolución, desde que se le pide algo hasta que contesta. Lo que se le pide
+   queda escrito y el cliente lo ve; su respuesta la registra **él mismo** (o su consultor), y puede impugnar una
+   pausa.
+3. **Resolver** detiene el reloj, también durante una espera.
+4. Una **reapertura** lo reanuda desde la reapertura; el tiempo entre resolver y reabrir no cuenta.
+5. Si la **prioridad cambia**, rige la meta de la nueva prioridad, contada
+   [POR DECIDIR: desde la recepción | desde el cambio]. Un incumplimiento que **ya ocurrió** con la prioridad
+   anterior se queda: cambiar la prioridad después no lo borra.
+6. Sin respuesta y con el plazo vencido, la incidencia **ya incumplió**, aunque siga abierta.
+7. Cada incidencia guarda sus tramos (corre, pausa, detenido) con el evento que abrió cada uno: es
+   la evidencia de un incumplimiento. Fecha y actor de cada evento los da la base.
+8. La **primera respuesta** es un mensaje de una **persona** de quien presta el servicio a quien lo recibe.
+   Una acción automática (categorizar, anonimizar, preparar un plan, mandarlo a aprobación) no cuenta.
+9. Si el servicio corre en un servidor de quien lo presta (**modo despacho**), la medición vive en su base: quien
+   tiene root en ese servidor puede reescribirla. En ese modo, la medición **no es evidencia independiente** frente
+   a quien recibe el servicio.
+
+Calendario: horario [POR DECIDIR: días y horas], zona [POR DECIDIR], feriados
+[POR DECIDIR: lista o referencia legal].
+
+## 6. Escalamiento
+
+| A quién | Cuándo |
+|---|---|
+| Consultor de la consultora | toda incidencia, al recibirla |
+| Laboratorio (experto) | cuando **la consultora** lo escala, a su nombre (sin regla en el grafo, o un plan que pide aprobación en la sala). Un agente no escala |
+| Superadministrador del laboratorio | un escalamiento sin respuesta del experto |
+
+**Lo que compromete el laboratorio (N1–N2)**: solo su **respuesta a lo que la consultora le escala**. Se mide desde
+la escalada hasta la **primera decisión de una persona del laboratorio en la sala** sobre el plan escalado, con las
+fechas que pone la base, y la consultora la ve en cada incidencia. Un caso escalado sin plan en la sala no tiene ese
+reloj: el laboratorio lo atiende por el chat, que no registra una respuesta.
+Plazo de respuesta y su calendario: [POR DECIDIR hasta GATE 3]. Antes de GATE 3 no hay créditos ni se compromete
+disponibilidad (§8, §10).
+
+## 7. Reporte
+
+El cumplimiento se publica con las **mismas métricas** que ven las dos partes (la capa semántica del
+producto): cumplimiento de SLA de respuesta y de resolución, tiempo a la primera respuesta, tiempo
+medio de resolución, backlog. Periodicidad del reporte: [POR DECIDIR].
+
+## 8. Créditos por incumplimiento
+
+[POR DECIDIR: si hay créditos, su cálculo, su tope y cómo se reclaman]
+
+## 9. Exclusiones
+
+[POR DECIDIR: lo que no cuenta como incumplimiento (por ejemplo, causas del lado del cliente) —
+redacción legal]
+
+## 10. Disponibilidad de la plataforma
+
+[POR DECIDIR: el laboratorio **no compromete disponibilidad antes de cerrar GATE 3** (respaldo con
+restauración probada). Hasta entonces RPO y RTO son desconocidos y así se dicen.]
+
+## 11. Datos personales y transparencia
+
+- En N2–N3, un agente categoriza las incidencias y el laboratorio ve **lo que la consultora le
+  escala**; los originales, solo con un acceso motivado que otorga la consultora, por un tiempo
+  máximo. El laboratorio ve además **agregados de operación** (métricas por consultora y por tamaño de
+  cliente), sin textos ni nombres, y solo de grupos de **3 clientes o más**: no ve el de un grupo más chico, ni uno
+  que lo dejaría despejar restando del total. La **cuarentena** no la revisa nadie, tampoco el laboratorio.
+- Antes de que un caso sirva para aprender, se anonimiza. Lo que no se puede anonimizar con certeza, y
+  todo caso de recursos humanos o nómina, **no sirve para aprender**: queda en cuarentena y su atención
+  sigue igual.
+- El texto de sus incidencias, del chat y de sus documentos **no se envía a ningún proveedor externo de modelos de
+  IA**. Si un modelo lo procesa, corre en un servidor de quien opera el servicio. A un proveedor externo solo puede ir
+  lo ya anonimizado o generalizado, con un contrato que le prohíbe conservarlo o entrenar con él.
+- **Dónde viven sus datos.** Cuando el laboratorio opera el servicio (modo gestionado), la base y los archivos viven
+  en un proveedor de base de datos gestionada, **en Estados Unidos** (Virginia), que los guarda por encargo de quien
+  opera el servicio, con respaldo continuo. Las **copias de respaldo** salen **cifradas** a otro proveedor, también en
+  Virginia, que no puede leerlas y donde nadie las borra antes de que venza su bloqueo (§14). Si el cliente necesita
+  que sus datos se queden **en México**, el servicio
+  se opera en una máquina de su consultora (modo despacho), en la región que acuerden: [POR DECIDIR: la región, si
+  aplica].
+- [POR DECIDIR: aviso de privacidad, responsable y encargado, transferencias — redacción legal]
+
+## 12. Conocimiento común
+
+Lo que el laboratorio aprende de los casos de una consultora queda **a medida** de esa consultora. Puede servir a
+otras consultoras (el **núcleo común**) solo si se cumplen las tres condiciones:
+
+- sube **generalizado**: sin nombres de personas ni de organizaciones, sin objetos propios (transacciones Z,
+  programas, campos) y sin la estructura del cliente (sociedades, centros, almacenes);
+- lo sube el superadministrador del laboratorio, a su nombre;
+- lo **consintieron las dos partes**: la consultora en su contrato N1–N2 y su cliente en el suyo N2–N3, cada una
+  por sí y para la versión vigente de su contrato. Un contrato nuevo pide un consentimiento nuevo.
+
+Una entrada del núcleo no dice de qué consultora ni de qué cliente vino.
+
+Cualquiera de las dos partes puede **revocar** su consentimiento. Revocar frena lo que todavía no ha subido; lo que
+ya subió, generalizado, **se queda** en el núcleo.
+
+Lo que ya estaba a medida antes del consentimiento puede subir cuando el consentimiento llegue.
+
+[POR DECIDIR: redacción legal de la cláusula y de quién, en cada organización, puede consentir por ella]
+
+## 13. Soluciones en el SAP del cliente
+
+El producto **no se conecta a ningún SAP** del cliente ni guarda sus credenciales. Una solución que se aprueba en la
+sala se aplica a un **SAP simulado**: el antes y el después que se muestran son los de ese simulador, no los del
+sistema del cliente.
+
+Llevar una solución al SAP del cliente lo hace **una persona**, de la consultora o del propio cliente, con **su
+propio acceso** y bajo el **control de cambios del cliente**, fuera del producto. Quién la aplica y con qué
+autorización lo acuerdan la consultora y su cliente. El laboratorio no aplica soluciones en el SAP de ningún
+cliente.
+
+No se comparten contraseñas ni otras credenciales de SAP por el producto (incidencias, chat o adjuntos): el producto
+no las pide ni las necesita.
+
+[POR DECIDIR: redacción legal de la responsabilidad por lo que se aplica en el SAP del cliente]
+
+## 14. Retención y salida de los datos
+
+**Mientras dura el contrato.** Los documentos originales que el cliente adjunta (capturas, PDF, XML) se borran
+**[POR DECIDIR: N] días después de la última resolución** de su incidencia, sea la de la incidencia o la de una
+impugnación. Mientras haya una impugnación abierta, no se borran. La incidencia, su cadena de eventos y los campos que se
+leyeron y revisaron de esos documentos se guardan lo que dure el contrato. Mientras el contrato no diga N, no se borra
+ningún original.
+
+**Al terminar.** La salida la registra **una persona** del cliente o de su consultora (la de una consultora entera, el
+superadministrador del laboratorio): un agente no la registra. Desde ese momento lo del cliente **no cambia más**: no
+entran incidencias nuevas, y las que tenga ya no se atienden ni se impugnan en el producto. El cliente y su consultora
+reciben un **export firmado** de lo suyo, que es el último, y pueden descargarlo durante una **gracia de [POR DECIDIR:
+días]**. Terminada la gracia se borra todo lo del cliente, el export incluido. Se quedan el caso anonimizado del sandbox,
+lo que haya subido al núcleo generalizado (§12) y las métricas agregadas, que ya no dicen de quién vinieron. Mientras el
+contrato no diga la gracia, no se borra nada.
+
+**En los respaldos.** Una copia de respaldo es inmutable durante su bloqueo: no se puede borrar antes de que venza. Por
+eso el borrado llega a todas las copias **en un máximo de 12 meses** desde que se borra del servicio. Los datos de este
+servicio no entran al archivo legal de varios años de quien lo opera. **Una restauración nunca devuelve lo borrado**: al
+restaurar se aplica la lista de bajas más reciente antes de dar la restauración por buena.
+
+[POR DECIDIR: redacción legal de la cláusula, y si N y la gracia son las mismas para todos los clientes o se pactan en
+cada contrato]
+
+## 15. Vigencia y versiones
+
+Cada cambio es una **versión nueva** con fecha de inicio; la anterior no se edita. Una incidencia se
+mide con la versión que regía al recibirla. Vigencia: [POR DECIDIR]. Terminación: [POR DECIDIR]; la entrega y el
+borrado de los datos al terminar, en el §14.
+
+## 16. Firmas
+
+| Parte | Nombre | Firma | Fecha |
+|---|---|---|---|
+| [POR DECIDIR] | [POR DECIDIR] | | |
+| [POR DECIDIR] | [POR DECIDIR] | | |

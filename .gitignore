@@ -106,3 +106,12 @@ capturas-laboratorio/
 
 # Python
 __pycache__/
+
+# La capa semántica de soporte-sap: las semillas se GENERAN (semantica/semillas.ts) y dbt deja sus artefactos
+tools/soporte-sap/semantica/semillas/*.csv
+tools/soporte-sap/semantica/target/
+tools/soporte-sap/semantica/logs/
+tools/soporte-sap/semantica/dbt_packages/
+tools/soporte-sap/semantica/.user.yml
+# La medición del perfil de despliegue (configura:deploy --escribir): es de la máquina, no del repo
+.despliegue/

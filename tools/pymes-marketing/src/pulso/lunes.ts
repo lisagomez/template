@@ -43,7 +43,7 @@ export function competenciaParaElLunes(notas: readonly NotaDeCompetencia[] | nul
 
 export function anunciosParaElLunes(cs: readonly Campana[] | null, bloques: readonly BloqueDeCambio[]): SeccionDelLunes {
   if (!cs || cs.length === 0) return seccionSinDatos('anuncios', 'Anuncios', 'no se cargó la exportación del Administrador de anuncios');
-  const acciones: AccionSugerida[] = bloques.slice(0, 2).map((b) => ({ titulo: b.cambio, porque: `hoy cuesta ${b.cuestaHoy}; reversible: ${b.reversible.toLowerCase()}`, impacto: b.impactoMensual === null ? null : `${b.impactoMensual < 0 ? 'ahorra' : 'invierte'} ~$${Math.round(Math.abs(b.impactoMensual) / 100).toLocaleString('es-MX')} MXN al mes`, prioridad: b.impactoMensual !== null && b.impactoMensual < 0 ? 1 : 2, fuente: 'anuncios' }));
+  const acciones: AccionSugerida[] = bloques.slice(0, 2).map((b) => ({ titulo: b.cambio, porque: `hoy cuesta ${b.cuestaHoy}; reversible: ${b.reversible.toLowerCase()}`, impacto: b.impactoMensual === null ? null : `${b.impactoMensual < 0 ? 'ahorra' : 'invierte'} ~$${Math.round(Math.abs(b.impactoMensual) / 100).toLocaleString('es-MX')} ${b.moneda} al mes`, prioridad: b.impactoMensual !== null && b.impactoMensual < 0 ? 1 : 2, fuente: 'anuncios' }));
   return { fuente: 'anuncios', titulo: 'Anuncios', estado: 'ok', motivo: null, hallazgos: cs.map((c) => `${c.nombre}: ${c.veredicto} — ${c.porque}`), acciones };
 }
 
