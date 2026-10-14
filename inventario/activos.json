@@ -210,6 +210,22 @@
    "cubre": ["src/features/ventas-whatsapp"]
   },
   {
+   "id": "TPL-crecimiento-demostrado",
+   "nombre": "Analitica de growth revenue con prueba para pymes: Gamma sellado con 12 invariantes, motor determinista (puente y clientes x frecuencia x ticket), kernel de derivaciones sin LLM (11 reglas, 2 teoremas demostrados en Lean), narracion con numeros verificados, agentes inyectables y pasarela A2A; laboratorio con dos pymes sinteticas y la verdad plantada (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/crecimiento-demostrado", "responsable": "dep-sw",
+   "origen": ["docs/goals/crecimiento-demostrado.md"],
+   "cubre": ["tools/crecimiento-demostrado"]
+  },
+  {
+   "id": "TPL-feature-crecimiento-demostrado",
+   "nombre": "Pantalla del dueno (/crecimiento: respuesta con estado, cascada del puente, arbol de la prueba, certificado y replay), laboratorio de trampas (/laboratorio-crecimiento) y agente A2A local (/api/crecimiento/a2a)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/crecimiento-demostrado", "responsable": "dep-sw",
+   "origen": ["docs/goals/crecimiento-demostrado.md"],
+   "cubre": ["src/features/crecimiento-demostrado"]
+  },
+  {
    "id": "TPL-feature-soporte-sap",
    "nombre": "App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio y su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",

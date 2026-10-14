@@ -1,0 +1,31 @@
+{
+  "name": "@tu-scope/crecimiento-demostrado",
+  "version": "0.1.0",
+  "description": "Analitica de growth revenue con prueba para pymes mexicanas: ontologia de conjuntos con particiones verificadas, snapshot sellado por hash (Γ), motor determinista (revenue bridge y clientes × frecuencia × ticket), derivaciones que verifica un kernel pequeño sin LLM, narracion con numeros ⊆ hechos verificados, proponentes inyectables (simulado, adversarial y real «no medido») y pasarela A2A. Laboratorio: dos pymes sinteticas con la verdad plantada.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./sinteticos": { "types": "./dist/sinteticos/index.d.ts", "import": "./dist/sinteticos/index.js" },
+    "./laboratorio": { "types": "./dist/laboratorio/index.d.ts", "import": "./dist/laboratorio/index.js" },
+    "./a2a": { "types": "./dist/a2a/index.d.ts", "import": "./dist/a2a/index.js" }
+  },
+  "files": ["dist", "lean", "README.md"],
+  "sideEffects": false,
+  "engines": { "node": ">=22.18" },
+  "dependencies": {
+    "zod": "4.6.1"
+  },
+  "peerDependencies": {
+    "@a2a-js/sdk": "1.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@a2a-js/sdk": { "optional": true }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts"
+  }
+}

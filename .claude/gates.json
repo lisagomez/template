@@ -460,6 +460,18 @@
       "falta": "El mismo perfil con Docker que `inventario:valida-erp`. Hasta entonces se corre a mano al tocar la propuesta o el adaptador de ventas."
     },
     {
+      "nombre": "prueba:lean-crecimiento",
+      "runner": "comando",
+      "comando": "bash tools/crecimiento-demostrado/lean/comprueba.sh",
+      "guarda": "las demostraciones de Lean del crecimiento demostrado (`tools/crecimiento-demostrado/lean/Puente.lean`): suma_particion, suma_delta, delta_total, puente_clasico y su contraejemplo, con Lean 4.34.1 pineado en `lean-toolchain`. Sin el binario, o con otra version, dice «no medido» y sale con 2: nunca un verde",
+      "evidencia": "la version real de Lean y la linea «Puente.lean comprobado»; exit 1 si una demostracion no cierra, exit 2 si falta el toolchain o la version no coincide",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "El toolchain de Lean (unos 900 MB) no esta en todas las maquinas ni en CI, y sin el el script sale con 2 («no medido»): activo, pondria en rojo el validate de quien no lo tenga.",
+      "falta": "Instalar Lean 4.34.1 donde corra el gate, verificado contra `lean/toolchain.sha256`. Hasta entonces se corre a mano al tocar `Puente.lean` o los teoremas del kernel. Ojo: nada en `prueba:tools` compara el enunciado de Lean con el del kernel; lo que si vigila es que el kernel exija las hipotesis de cada teorema (las siembras de `kernel/teoremas`).",
+      "_nota": "Declarado inactivo con el CDC de los prompts del crecimiento demostrado (2026-10-14), para que la ausencia se vea en `npm run gates`"
+    },
+    {
       "nombre": "vigila:versiones",
       "runner": "comando",
       "comando": "npm run vigila:versiones",

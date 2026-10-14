@@ -1,0 +1,6 @@
+# Lean 4.34.1 (leanprover/lean4, release v4.34.1 del 2026-09-24), descargado el 2026-10-02 de
+# https://github.com/leanprover/lean4/releases/download/v4.34.1/lean-4.34.1-linux.zip
+# El release no publica sumas: esta es la del archivo que se usó (confianza en el primer uso).
+# Con el prefijo `sha256:`, la convención de la casa para un ancla PÚBLICA (audita:secretos no la
+# confunde con una credencial de 64 hex).
+sha256:3013aba02bb8bf31b1cf8c9d956d60fb95bb1c10920dfe91abcaa59cb461ddac  lean-4.34.1-linux.zip

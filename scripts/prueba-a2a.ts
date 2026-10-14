@@ -95,6 +95,14 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/buzon/piloto',
   '/api/buzon/pymes',
   '/api/contenido/video',
+  // Crecimiento demostrado (goal crecimiento-demostrado, laboratorio con pymes sintéticas). RF-20: misma
+  // app y mismo puerto. Es la pasarela del agente `crecimiento-demostrado`, OTRA superficie que no es este
+  // bridge: local, 503 sin CRECIMIENTO_A2A_SECRETO y CRECIMIENTO_A2A_LLAVE (sin secreto por omisión),
+  // token HMAC con la pyme y las skills, «ajeno» = «no existe», ListTasks cerrado. Solo lee: responde
+  // preguntas y verifica derivaciones; no ejecuta nada. Exponerla a un partner o a internet es gate humano
+  // con C3 + C4.
+  '/api/crecimiento/a2a',
+  '/api/crecimiento/a2a/.well-known/agent-card.json',
   '/api/dictado',
   '/api/dictado/movil',
   '/api/etiquetas',

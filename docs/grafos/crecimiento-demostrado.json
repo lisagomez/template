@@ -1,0 +1,52 @@
+{
+  "slug": "crecimiento-demostrado",
+  "titulo": "Crecimiento demostrado: el grafo del producto en ejecución (laboratorio, 2026-10-02). Estados honestos: ámbar = construido y probado en el laboratorio, SIN estreno real (dos pymes sintéticas, agentes simulados); gris = falta o espera una firma; morado = nada, porque nada ha corrido con una pyme real. Invariante de la topología: ninguna arista va de un agente a hechos, veredicto o respuesta publicada sin pasar por un script determinista.",
+  "nodos": [
+    { "id": "fuentes", "label": "A1 · Fuentes crudas: CFDI 4.0 en XML, CSV de caja, catálogo de clientes, lista de cancelados (o filas de erp.cfd_timbre)", "estado": "ambar" },
+    { "id": "spec", "label": "A2 · Spec versionada de la pyme: ontología, supuestos SA-nn, banda, materialidad, n mínimo, α y semilla (con hash)", "estado": "ambar" },
+    { "id": "gamma", "label": "A3 · Γ sellado: transacciones, notas, pagos y segmentos normalizados, con hash y los 12 invariantes comprobados", "estado": "ambar" },
+    { "id": "pregunta", "label": "A4 · Pregunta del dueño, en español", "estado": "ambar" },
+    { "id": "plan", "label": "A5 · Plan en el DSL cerrado (puente, nft, prueba, top, ticket, términos); nunca SQL", "estado": "ambar" },
+    { "id": "hechos", "label": "A6 · Hechos calculados por el motor, cada uno con huella (Γ + spec + término + valor)", "estado": "ambar" },
+    { "id": "derivacion", "label": "A7 · Derivación Γ ⊢ φ propuesta: pasos de 11 reglas, supuestos declarados, nivel", "estado": "ambar" },
+    { "id": "veredicto", "label": "A8 · Veredicto del kernel (aceptada con certificado, rechazada, requiere entrada, evidencia insuficiente, hipótesis)", "estado": "ambar" },
+    { "id": "narracion", "label": "A9 · Narración propuesta", "estado": "ambar" },
+    { "id": "respuesta", "label": "A10 · Respuesta publicada al dueño (texto que pasó la inclusión + certificado)", "estado": "ambar" },
+    { "id": "propuesta", "label": "A11 · Propuesta de acción con la forma de sis_propuesta (origen, modelo, evidencia); nunca se ejecuta", "estado": "ambar" },
+    { "id": "tarea-a2a", "label": "Tarea A2A: estado (COMPLETED, REJECTED, INPUT_REQUIRED) y artefactos (derivación, certificado)", "estado": "ambar" },
+    { "id": "lean", "label": "Demostraciones en Lean 4.34.1: suma_particion, suma_delta, delta_total, puente_clasico (+ contraejemplo)", "estado": "ambar" },
+    { "id": "verdad", "label": "Verdad plantada: el puente calculado del libro del generador por otro camino; solo la leen pruebas y laboratorio", "estado": "ambar" },
+    { "id": "entrada-sa-reales", "label": "ENTRADA MANUAL · Los SA y la ontología de una pyme REAL, declarados por su dueño", "estado": "gris" },
+    { "id": "entrada-aisia", "label": "ENTRADA MANUAL · AISIA (C4) firmada: qué decide el sistema sobre los clientes de la pyme", "estado": "gris" },
+    { "id": "entrada-cdc-routing", "label": "ENTRADA MANUAL · CDC firmado de la clase de routing del proponente (para un LLM real)", "estado": "gris" },
+    { "id": "entrada-exponer-a2a", "label": "ENTRADA MANUAL · El sí (con C3 + C4) para exponer el agente fuera de la red interna", "estado": "gris" },
+    { "id": "sis-propuesta-real", "label": "sis_propuesta del ERP (migración 008): la cola real donde una propuesta entraría", "estado": "gris" }
+  ],
+  "aristas": [
+    { "id": "a-sella", "label": "ingesta + normalización + 12 invariantes; si uno falla, no se sella", "tipo": "script", "from": "fuentes", "to": "gamma" },
+    { "id": "a-spec", "label": "la spec entra a Γ por su hash", "tipo": "script", "from": "spec", "to": "gamma" },
+    { "id": "a-planea", "label": "el proponente planea (simulado hoy; LLM inyectable)", "tipo": "agente", "from": "pregunta", "to": "plan" },
+    { "id": "a-ejecuta", "label": "esquema del plan (Zod, SQL rechazado) + motor determinista + caché por hash", "tipo": "script", "from": "plan", "to": "hechos" },
+    { "id": "a-deriva", "label": "el proponente arma la derivación con los hechos", "tipo": "agente", "from": "hechos", "to": "derivacion" },
+    { "id": "a-verifica", "label": "kernel LCF sin LLM: recalcula cada hecho sobre Γ", "tipo": "script", "from": "derivacion", "to": "veredicto" },
+    { "id": "a-retro", "label": "rechazo → retroalimentación con el motivo → otro intento (tope 3)", "tipo": "script", "from": "veredicto", "to": "derivacion" },
+    { "id": "a-narra", "label": "el narrador redacta SOLO con el veredicto y su certificado", "tipo": "agente", "from": "veredicto", "to": "narracion" },
+    { "id": "a-incluye", "label": "números(texto) ⊆ hechos verificados, sentido del verbo, sin causalidad fuera de hipótesis", "tipo": "script", "from": "narracion", "to": "respuesta" },
+    { "id": "a-propone", "label": "acción como propuesta para un humano (permiso proponer_accion)", "tipo": "script", "from": "veredicto", "to": "propuesta" },
+    { "id": "a-a2a", "label": "pasarela A2A: veredicto → estado de tarea; token con pyme y skills", "tipo": "script", "from": "veredicto", "to": "tarea-a2a" },
+    { "id": "a-coteja", "label": "el puente del motor contra la verdad plantada, al centavo", "tipo": "script", "from": "hechos", "to": "verdad" },
+    { "id": "a-a-erp", "label": "la propuesta entraría a sis_propuesta (no construido en el ERP)", "tipo": "manual", "from": "propuesta", "to": "sis-propuesta-real" },
+    { "id": "a-sa-reales", "label": "el dueño de una pyme real declara su ontología", "tipo": "manual", "from": "entrada-sa-reales", "to": "spec" }
+  ],
+  "lazos": [
+    { "id": "l-invariantes", "label": "12 invariantes de conjuntos", "sobre": "arista:a-sella", "estado": "ambar", "referencia": "INV-01..INV-12; 12/12 snapshots sucios detenidos con su nombre" },
+    { "id": "l-sql", "label": "vocabulario cerrado del plan", "sobre": "arista:a-ejecuta", "estado": "ambar", "referencia": "clave sql/query en cualquier nivel → sql_libre; trampa 11" },
+    { "id": "l-kernel", "label": "11 reglas, 2 teoremas, hechos recalculados", "sobre": "arista:a-verifica", "estado": "ambar", "referencia": "19/19 siembras tumbadas; trampas 2-8, 10, 14, 16, 17" },
+    { "id": "l-hipotesis-teorema", "label": "hipótesis del puente clásico citadas como hechos", "sobre": "arista:a-verifica", "estado": "ambar", "referencia": "R_desde(N)=0, R_hasta(L)=0, ΔR(Z)=0; demostrado en Lean" },
+    { "id": "l-inclusion", "label": "inclusión de números en la narración", "sobre": "arista:a-incluye", "estado": "ambar", "referencia": "trampas 1, 12, 15 y 20 bloqueadas" },
+    { "id": "l-replay", "label": "replay determinista", "sobre": "nodo:respuesta", "estado": "ambar", "referencia": "dos procesos → mismos hashes de Γ, spec, plan, hechos y certificado" },
+    { "id": "l-verdad", "label": "cotejo con la verdad plantada", "sobre": "arista:a-coteja", "estado": "ambar", "referencia": "60/60 filas cierran al centavo" },
+    { "id": "l-aislamiento", "label": "aislamiento por inquilino en A2A", "sobre": "arista:a-a2a", "estado": "ambar", "referencia": "otra pyme, otra skill o tarea ajena → el mismo «no existe»" },
+    { "id": "l-llm-real", "label": "medición con un LLM real", "sobre": "arista:a-planea", "estado": "gris", "referencia": "no medido: espera el CDC de la clase de routing y la decisión C4" }
+  ]
+}
