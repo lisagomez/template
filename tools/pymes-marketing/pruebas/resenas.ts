@@ -94,10 +94,15 @@ test('análisis: calificación por plataforma SIN promediar, temas con citas tex
   assert.ok(a.tresCosas.length <= 3 && a.tresCosas[0]!.titulo.includes('en persona'));
 });
 
-test('CSV exportado: reseña sin texto no entra a temas y se dice por qué', () => {
-  const l = resenasDesdeCsv('Autor,Calificación,Fecha,Reseña,Respuesta del propietario\nAna,5,01/09/2026,Riquísimo,\nLuis,4,02/09/2026,,\n');
-  assert.equal(l.resenas.length, 1);
-  assert.match(l.rechazadas[0]!.motivo, /sin texto/);
+test('CSV exportado: la reseña de solo estrellas cuenta para el promedio, sin tema ni respuesta; la fila vacía se dice', async () => {
+  const l = resenasDesdeCsv('Autor,Calificación,Fecha,Reseña,Respuesta del propietario\nAna,5,01/09/2026,Riquísimo,\nLuis,1,02/09/2026,,\nSol,,03/09/2026,,\n');
+  assert.equal(l.resenas.length, 2);
+  assert.equal(l.rechazadas.length, 1);
+  assert.match(l.rechazadas[0]!.motivo, /sin texto ni calificación/);
+  const a = await analizaResenas(l.resenas, redactorDePlantillas(), opciones);
+  assert.equal(a.calificaciones[0]!.promedio, 3, 'el 1 de Luis entra al promedio: sin él daría 5');
+  assert.equal(a.borradores.length, 1, 'a una reseña sin texto no se le redacta respuesta');
+  assert.ok(a.temas.every((t) => t.citas.every((c) => c.trim() !== '')), 'ninguna cita vacía');
 });
 
 test('clientes callados: por el ritmo propio (>2× callado, >3× perdido) o estimación del negocio; solo alias', () => {

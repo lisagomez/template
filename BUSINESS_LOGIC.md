@@ -32,7 +32,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | Etiquetas GS1 | [`src/features/etiquetas/BUSINESS_LOGIC.md`](src/features/etiquetas/BUSINESS_LOGIC.md) | `TPL-etiquetas-gs1` `TPL-feature-etiquetas` `TPL-feature-laboratorio-etiquetas` | hipótesis del 2026-09-30, sin cadena real; firmado como hipótesis el 2026-10-13, se vuelve a firmar con la primera cadena real |
 | Extractor documental | [`src/features/a2a/BUSINESS_LOGIC.md`](src/features/a2a/BUSINESS_LOGIC.md) | `TPL-extractor-documental` `TPL-feature-a2a` `TPL-piloto-buzon-cfdi` | producto por decisión del laboratorio (2026-09-30); hipótesis sin corpus real; firmado como hipótesis el 2026-10-13, se vuelve a firmar con el corpus real del cliente; la AISIA del piloto del buzón se firma aparte |
 | Reel del celular | [`src/features/reel/BUSINESS_LOGIC.md`](src/features/reel/BUSINESS_LOGIC.md) | `TPL-reel` `TPL-feature-reel` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-27; firmado como hipótesis el 2026-10-13, con su tabla de respaldo; se vuelve a firmar tras el estreno con clips reales |
-| Estudio pymes | pendiente | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | falta: `/new-app` al salir de blueprint (PRP-006) |
+| Estudio pymes | [`src/features/estudio-pymes/BUSINESS_LOGIC.md`](src/features/estudio-pymes/BUSINESS_LOGIC.md) | `TPL-pymes-marketing` `TPL-feature-estudio-pymes` `TPL-feature-laboratorio-pymes` | hipótesis del 2026-10-02 que consolida lo firmado el 2026-09-26 y el 2026-09-27, sin datos reales; firmado como hipótesis el 2026-10-14, con la AISIA de ventas, contenido, anuncios y visibilidad y la tabla de respaldo |
 | Soporte SAP | [`src/features/soporte-sap/BUSINESS_LOGIC.md`](src/features/soporte-sap/BUSINESS_LOGIC.md) | `TPL-soporte-sap` `TPL-sala-a2a` `TPL-feature-soporte-sap` | construida en laboratorio (corrida A, cerrada por el PRP-010); **C3 v4 y AISIA v3 firmados** por lisagomez el 2026-10-10; opera solo en laboratorio (AISIA §5) |
 | Vendedor con IA en WhatsApp | pendiente | `TPL-ventas-whatsapp` `TPL-feature-ventas-whatsapp` | falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar) |
 
@@ -84,7 +84,8 @@ Aquí va lo que es de todo el servidor o de todo el repo; lo de cada producto va
 [asesor de ventas por voz](src/features/dictado/BUSINESS_LOGIC.md) (§4),
 [etiquetas GS1](src/features/etiquetas/BUSINESS_LOGIC.md) (§4),
 [extractor documental](src/features/a2a/BUSINESS_LOGIC.md) (§4),
-[reel del celular](src/features/reel/BUSINESS_LOGIC.md) (§4) y
+[reel del celular](src/features/reel/BUSINESS_LOGIC.md) (§4),
+[estudio pymes](src/features/estudio-pymes/BUSINESS_LOGIC.md) (§4) y
 [Soporte SAP](src/features/soporte-sap/BUSINESS_LOGIC.md) (§4).
 
 | Activo | ¿Reconstruible? | Criticidad | Destino |

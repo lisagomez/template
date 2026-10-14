@@ -19,6 +19,8 @@ export interface BloqueDeCambio {
   readonly vigilar: string;
   /** Centavos por mes: negativo = ahorra. `null` si no hay base para estimarlo. */
   readonly impactoMensual: number | null;
+  /** La de la exportación: el impacto se dice en ella, nunca se convierte. */
+  readonly moneda: string;
 }
 
 const mensual = (c: Campana) => (c.dias > 0 ? Math.round((c.gasto / c.dias) * 30) : c.gasto);
@@ -26,7 +28,7 @@ const dinero = (centavos: number, moneda: string) => `${formatoDinero(centavos, 
 
 export function recomendaciones(cs: readonly Campana[], moneda = 'MXN'): BloqueDeCambio[] {
   const productoras = cs.filter((c) => (c.resultados ?? 0) > 0);
-  const bloques: BloqueDeCambio[] = [];
+  const bloques: Omit<BloqueDeCambio, 'moneda'>[] = [];
   if (cs.some((c) => c.resultados === null)) {
     bloques.push({ cambio: 'Primero, mide los resultados', cuestaHoy: '—', despues: '—', neto: 'sin cambio de gasto', reversible: 'Sí', impactoMensual: null,
       comoHacerlo: ['Administrador de anuncios → Columnas → Personalizar', 'Agrega «Resultados», «Tipo de resultado» y «Costo por resultado»', 'Exporta de nuevo los últimos 90 días por día'], vigilar: 'que la siguiente exportación traiga resultados' });
@@ -50,7 +52,7 @@ export function recomendaciones(cs: readonly Campana[], moneda = 'MXN'): BloqueD
         comoHacerlo: ['Administrador de anuncios → Campañas', `«${c.nombre}» → Editar`, `Presupuesto → ${dinero(Math.round((m + sube) / 30), moneda)} al día`, 'Publicar'], vigilar: 'que el costo por resultado no suba más de 15 %' });
     }
   }
-  return bloques;
+  return bloques.map((b) => ({ ...b, moneda }));
 }
 
 export interface SenalDeCuenta { readonly senal: string; readonly detalle: string }

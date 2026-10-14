@@ -52,6 +52,19 @@ test('anuncios: tipos de resultado mezclados no se suman; campaña nueva espera 
   assert.equal(leeAnuncios('Campaign name,Amount spent (USD),Results\nX,$5,1\n').moneda, 'USD');
 });
 
+test('exportación en dólares: la recomendación y el brief del lunes la dicen en USD, nunca en MXN', () => {
+  const filas = ['Day,Campaign name,Amount spent (USD),Results'];
+  for (let d = 0; d < 20; d++) filas.push(`${new Date(Date.UTC(2026, 8, 1 + d)).toISOString().slice(0, 10)},Promo,$5.00,0`);
+  const l = leeAnuncios(filas.join('\n'));
+  const cs = campanas(l);
+  const bloques = recomendaciones(cs, l.moneda);
+  assert.equal(cs[0]!.veredicto, 'problema');
+  assert.ok(bloques.length > 0 && bloques.every((b) => b.moneda === 'USD'));
+  const impacto = anunciosParaElLunes(cs, bloques).acciones[0]!.impacto ?? '';
+  assert.match(impacto, /USD al mes/);
+  assert.doesNotMatch(impacto, /MXN/);
+});
+
 test('señales de cuenta y variantes de texto: 3 pruebas distintas, sin inventar oferta', async () => {
   const cs = campanas(leeAnuncios(exportacion()));
   assert.ok(senales(cs).some((s) => s.senal === 'cuenta frágil') || senales(cs).length >= 0);

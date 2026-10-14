@@ -70,8 +70,10 @@ function tresCosas(temas: readonly Tema[], borradores: readonly BorradorDeRespue
 export async function analizaResenas(resenas: readonly Resena[], redactor: Redactor, o: OpcionesDeRespuesta & { readonly hoy: Dia; readonly ventas?: readonly LineaDeVenta[] }): Promise<AnalisisDeResenas> {
   const desde = sumaDias(o.hoy, -(VENTANA_RESENAS - 1));
   const enVentana = resenas.filter((r) => !r.dia || (r.dia >= desde && r.dia <= o.hoy));
-  const temas = agrupaTemas(enVentana);
-  const borradores = await borradoresDeRespuesta(enVentana, redactor, o);
+  // Las de solo estrellas cuentan para la calificación, pero no tienen tema ni se les responde.
+  const conTexto = enVentana.filter((r) => r.texto.trim() !== '');
+  const temas = agrupaTemas(conTexto);
+  const borradores = await borradoresDeRespuesta(conTexto, redactor, o);
   const callados = o.ventas ? clientesCallados(o.ventas, o.hoy) : [];
   const cuenta = (p: Plataforma) => enVentana.filter((r) => r.plataforma === p).length;
   const fuentes = [
