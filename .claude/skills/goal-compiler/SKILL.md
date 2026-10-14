@@ -83,6 +83,7 @@ No hagas un cuestionario. Pregunta unicamente lo que cambia el resultado y que n
 
 **Como preguntar las pocas que sobrevivan (mecanica de grilling / Matt Pocock, 22 jul 2026):**
 - **HECHOS vs DECISIONES.** Un HECHO se descubre explorando el entorno (archivos, codigo, BD, herramientas): buscalo TU, no lo preguntes. Solo las DECISIONES —lo que vive en la cabeza de Daniel y el modelo no puede inferir— se le ponen a el.
+- **Credenciales y saldo son HECHOS** (post-mortem del goal del SGI, 2026-10-01: el goal se paró dos veces, primero sin llave y luego sin saldo). Toda llave de la que dependa la DEFINICION DE HECHO se comprueba ANTES de entregar el bloque, sin imprimirla (presente/ausente, largo). Si el goal gasta en un proveedor, tambien el saldo de la cuenta y el tope propio de la llave (OpenRouter: `GET /api/v1/key`, `limit_remaining`, y `GET /api/v1/credits`), contra la estimacion de gasto del spec. Si falta la llave o el saldo no cubre, se dice antes de lanzar: se consigue, o lo que depende de ella sale del HECHO a una fase aparte.
 - **Una a la vez.** Si necesitas 2-4, hazlas de una en una esperando respuesta; varias juntas desconciertan y bajan la calidad de cada respuesta.
 - **Con respuesta recomendada.** Para CADA pregunta propon tu default marcado, para que Daniel confirme o corrija en vez de responder en frio. Rellenas el hueco, no solo lo señalas.
 
@@ -152,9 +153,16 @@ HECHO cuando (el evaluador solo ve esta conversacion, no corre comandos: surfea 
   con antes/despues que demuestre movimiento/interaccion]
 - reporte de decisiones (que stack elegiste y por que)
 - lista las formas en que podria estar mal/incompleto y resuelvelas
+O BIEN, BLOQUEADO: si falta algo que solo da una persona (llave, saldo, firma, copia
+licenciada), detente y pega el bloqueo, quien lo destraba y el estado del grafo: eso
+tambien cierra el goal.
 RESTRICCIONES: [app web que corre con un comando; sin APIs de pago; lo que no se toca].
 RED DE SEGURIDAD: si tras [N] turnos no convergaes, detente y reporta el bloqueo.
 ````
+
+> **Por que el BLOQUEADO va dentro de HECHO** (post-mortem del goal del SGI, 2026-10-01): sin llave, la
+> condicion no podia cumplirse y el evaluador relanzo cientos de turnos vacios. La RED DE SEGURIDAD le pide al
+> agente que pare, pero quien decide si el goal termino es el evaluador, y solo acepta lo que la condicion dice.
 
 > ⛔ **NO metas "Corre con /effort max y Auto mode" (ni similares) DENTRO del bloque `/goal` (Daniel, 4 jul).**
 > El effort y el Auto mode los fija Daniel DESDE FUERA al lanzar; ponerlo en el prompt es redundante y gasta
