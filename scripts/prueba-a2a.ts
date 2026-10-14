@@ -119,6 +119,10 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/reel/[id]/consentimientos',
   '/api/reel/[id]/decision',
   '/api/reel/proyectos',
+  // Sistema integrado ISO (PRP-013): exporta la versión EXACTA de un documento a DOCX o PDF. Solo GET (no escribe),
+  // exige sesión (proxy: 401 sin ella) y lee con la sesión de quien pide (RLS por organización); la huella del archivo
+  // viaja en X-Huella. Misma app y mismo puerto que las demás (RF-20).
+  '/api/sgi/documento/[version]',
   // Soporte SAP en LABORATORIO (PRP-008). RF-20: misma app y mismo puerto. Responde 404 sin
   // SOPORTE_SAP_LABORATORIO=1 (que `configura:deploy` rechaza en producción); estado sintético en memoria,
   // identidades de laboratorio, sin base y sin `service_role`. Exponerla es gate humano con C3 + C4.

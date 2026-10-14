@@ -1,0 +1,298 @@
+{
+ "cuando": "2026-10-01T11:58:46.846Z",
+ "base": "http://localhost:3012",
+ "conLlm": true,
+ "pasos": [
+  {
+   "n": 1,
+   "paso": "Roadmap con puertas y % por cláusula, norma y global (Maquinados)",
+   "ok": true,
+   "evidencia": [
+    "✓ 9 fases con puerta",
+    "✓ avance: {\"Global\":6.7,\"ISO 9001:2015 + A1:2024\":11.6,\"ISO/IEC 42001:2023\":5.9}",
+    "✓ avance por cláusula de las dos normas"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/01-roadmap.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 2,
+   "paso": "Una evidencia (acta de revisión por la dirección) sube las DOS normas",
+   "ok": true,
+   "evidencia": [
+    "✓ 9001 11.6% → 17.4% · 42001 5.9% → 10.6% · global 6.7% → 10.8%"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/02-evidencia-dos-normas.png",
+    ".claude/goals/sistema-integrado-iso/capturas/03-roadmap-tras-acta.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 3,
+   "paso": "El agente documental redacta la Política de IA con la terminología del taller",
+   "ok": true,
+   "evidencia": [
+    "✓ usa términos del taller: Maquinados del Bajío, Cotizador, Inspección visual, CNC",
+    "✓ traza: Agente: documental · Modelo (pineado): anthropic/claude-sonnet-5 · Versión de prompts: sgi-prompts-2026-09-30.1 · IDs citados: SGI-A-2.2-01, SGI-A-2.3-01, SGI-A-9.2-01, SGI-C-5.2-01, SGI-IA-5.2-03 · Costo: US$0.0391 · intentos 1",
+    "✓ enviada a revisión"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/04-politica-ia-borrador.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
+  },
+  {
+   "n": 4,
+   "paso": "El dueño de proceso intenta aprobar la política: rechazado",
+   "ok": true,
+   "evidencia": [
+    "✓ mensaje: «Con el rol «dueno_proceso» no se aprueba esto. Lo aprueba: alta dirección.»"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/05-politica-rechazada-a-dueno.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
+  },
+  {
+   "n": 5,
+   "paso": "La alta dirección aprueba la versión exacta; la puerta 2 ya puede cerrarse y la cierra",
+   "ok": true,
+   "evidencia": [
+    "✓ registro: aprobado Alta dirección · 1/10/2026, 5:31:17 a.m. · v1 · sha256:1b0e5b11c87feccc…",
+    "✓ «Fase 2 cerrada.»"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/06-politica-ia-aprobada.png",
+    ".claude/goals/sistema-integrado-iso/capturas/07-fase-2-cerrada.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
+  },
+  {
+   "n": 6,
+   "paso": "Diagnóstico → informe GAP (agente de diagnóstico)",
+   "ok": true,
+   "evidencia": [
+    "✓ informe con brechas y requisitos citados (7093 caracteres)"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/08a-diagnostico.png",
+    ".claude/goals/sistema-integrado-iso/capturas/08-informe-gap.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 7,
+   "paso": "Matriz de riesgos (calidad e IA) propuesta por el agente",
+   "ok": true,
+   "evidencia": [
+    "✓ «Propuesta lista (9 requisitos citados, US$0.2212).» · 20 filas"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/09-riesgos.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 8,
+   "paso": "Evaluación de impacto de IA propuesta por el agente",
+   "ok": true,
+   "evidencia": [
+    "✓ «Propuesta lista (6 requisitos citados, US$0.2092).» · 9 filas"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/10-impacto-ia.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 9,
+   "paso": "SoA: el agente la propone, se prepara la versión y la aprueba la alta dirección",
+   "ok": true,
+   "evidencia": [
+    "✓ 38 de 38 controles decididos",
+    "✓ SoA aprobada por la alta dirección"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/11-soa.png",
+    ".claude/goals/sistema-integrado-iso/capturas/12-soa-aprobada.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:58:46.846Z"
+  },
+  {
+   "n": 10,
+   "paso": "Hallazgo → NC → CAPA: el auditor verifica la eficacia y la NC se cierra",
+   "ok": true,
+   "evidencia": [
+    "✓ NC en tratamiento con acción «hecha»",
+    "✓ acción eficaz → NC cerrada (lo hizo el disparador de la aprobación)",
+    "✓ el hallazgo que la originó está firmado"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/13a-capa-antes.png",
+    ".claude/goals/sistema-integrado-iso/capturas/13-capa-nc-cerrada.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 11,
+   "paso": "Auditoría: el agente redacta hallazgos desde las notas; solo el auditor los firma",
+   "ok": true,
+   "evidencia": [
+    "✓ hallazgo en borrador propuesto por el agente",
+    "✓ firmado por el auditor interno"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/14-hallazgo-firmado.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
+  },
+  {
+   "n": 12,
+   "paso": "Panel del consultor: 3 clientes, avance, marca blanca y plantillas",
+   "ok": true,
+   "evidencia": [
+    "✓ 3 clientes en el panel",
+    "✓ la clínica ve el color del despacho: rgb(124, 58, 237)"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/15-panel-consultor.png",
+    ".claude/goals/sistema-integrado-iso/capturas/16-marca-blanca-en-el-cliente.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 13,
+   "paso": "Reporte de avance para el cliente (agente portafolio)",
+   "ok": true,
+   "evidencia": [
+    "✓ reporte en borrador en el sistema del cliente"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/17-reporte-de-avance.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 14,
+   "paso": "Modo sin jerga para la pyme",
+   "ok": true,
+   "evidencia": [
+    "✓ fases con nombres de negocio, sin números de cláusula"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/18-modo-pyme.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 15,
+   "paso": "Exportar DOCX y PDF de la política de calidad aprobada, con huella",
+   "ok": true,
+   "evidencia": [
+    "✓ DOCX 3392 bytes · huella del archivo = X-Huella (sha256:143c676091c77f68…)",
+    "✓ PDF 3490 bytes · huella del archivo = X-Huella (sha256:9a5f6f9e8f917f8e…)",
+    "✓ el DOCX abre como zip válido y trae el documento",
+    "✓ PDF 1.4 con tabla xref"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/19-exportar.png",
+    ".claude/goals/sistema-integrado-iso/capturas/politica-de-calidad-v1.docx",
+    ".claude/goals/sistema-integrado-iso/capturas/politica-de-calidad-v1.pdf"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 16,
+   "paso": "La casa: la app como su primer inquilino (inventario de sus agentes)",
+   "ok": true,
+   "evidencia": [
+    "✓ 9 agentes en su inventario de IA"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/20-casa-inventario-ia.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 17,
+   "paso": "La casa: SoA, impacto y política de IA propuestos por sus propios agentes, pendientes del laboratorio",
+   "ok": true,
+   "evidencia": [
+    "✓ soa: Propuesta lista (39 requisitos citados, US$0.2357).",
+    "✓ impacto: Propuesta lista (6 requisitos citados, US$0.2026).",
+    "✓ versión en revisión, pendiente del laboratorio (alta dirección de la casa)"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/21-casa-soa.png",
+    ".claude/goals/sistema-integrado-iso/capturas/21-casa-impacto.png",
+    ".claude/goals/sistema-integrado-iso/capturas/22-casa-soa-pendiente.png"
+   ],
+   "llm": true,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:38:42.007Z"
+  },
+  {
+   "n": 18,
+   "paso": "Migración de edición 9001:2015+A1 → 9001:2026",
+   "ok": true,
+   "evidencia": [
+    "✓ 73 ·  · requisitos siguen igual ·  · 2 ·  · cambian de número ·  · 4 ·  · son nuevos (piden evidencia) ·  · 7 ·  · evidencias aprobadas que siguen valiendo (0 a revisar)"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/23-migracion.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T10:53:36.470Z"
+  },
+  {
+   "n": 19,
+   "paso": "El laboratorio, en vivo",
+   "ok": true,
+   "evidencia": [
+    "✓ 79 casos"
+   ],
+   "capturas": [
+    ".claude/goals/sistema-integrado-iso/capturas/24-laboratorio.png"
+   ],
+   "llm": false,
+   "errores_consola": [],
+   "cuando": "2026-10-01T11:58:46.846Z"
+  }
+ ]
+}

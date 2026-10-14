@@ -1,0 +1,23 @@
+{
+  "name": "@tu-scope/sistema-integrado",
+  "version": "0.1.0",
+  "description": "Un solo sistema de gestion para ISO 9001 e ISO/IEC 42001: catalogo PROPIO versionado (9001:2015+A1, 9001:2026 en borrador, 42001:2023 + Anexo A; sin texto de las normas), motor determinista de avance, puertas por fase y rol y migracion de edicion, capa agentica que propone con traza (el LLM se inyecta) y documentos DOCX/PDF sin dependencias. TypeScript puro, CERO dependencias. No certifica: prepara para la auditoria de un organismo acreditado.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./catalogo": { "types": "./dist/catalogo/index.d.ts", "import": "./dist/catalogo/index.js" },
+    "./motor": { "types": "./dist/motor/index.d.ts", "import": "./dist/motor/index.js" },
+    "./agentes": { "types": "./dist/agentes/index.d.ts", "import": "./dist/agentes/index.js" },
+    "./documentos": { "types": "./dist/documentos/index.d.ts", "import": "./dist/documentos/index.js" },
+    "./openrouter": { "types": "./dist/openrouter.d.ts", "import": "./dist/openrouter.js" }
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prueba": "node --test pruebas/*.ts"
+  }
+}

@@ -171,6 +171,29 @@
       "_nota": "ALTA del 2026-09-27, al mezclar `main` en `pymes-marketing-build`: la rama lo traia en la cadena `&&` de `validate`, y al pasar a este padron quedaba fuera en silencio. Lo cazo `verifica:gates` (script sin declarar y `src/features/laboratorio-pymes/pruebas/laboratorio.ts` huerfano), igual que en el PR #154"
     },
     {
+      "nombre": "prueba:laboratorio-sgi",
+      "runner": "comando",
+      "comando": "npm run prueba:laboratorio-sgi",
+      "guarda": "el laboratorio del sistema integrado ISO (`/laboratorio-sgi`): >=5 casos por pieza (catalogo, motor, documentos, salvaguardas, orquestador, base y los 9 agentes), las 10 trampas del spec con caso, ningun caso en falla, L8 (ningun texto de la app promete certificacion) y el espejo SQL del catalogo sin deriva. Sin red: los casos con LLM se verifican sobre corridas grabadas y, sin ellas, quedan no-medidos y se dicen",
+      "evidencia": "salida de `node --test`: la tabla de casos (id, pieza, estado, trampa, costo) y el resumen por pieza",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "ALTA con el CDC del sistema integrado (goal sistema-integrado-iso, propuesto el 2026-09-30 en la rama app/iso; su entrada esta en BITACORA-CDC.md). La cazo verifica:gates (script sin declarar y su archivo de pruebas huerfano), igual que prueba:laboratorio-pymes"
+    },
+    {
+      "nombre": "sgi:rls",
+      "runner": "comando",
+      "comando": "npm run sgi:rls",
+      "guarda": "el aislamiento entre organizaciones y la matriz de roles del sistema integrado (L3) contra la Supabase LOCAL, con cuentas sinteticas reales y sus sesiones (sin `service_role`). Reescribe public/laboratorio-sgi/rls.json, que los casos bas-1...6 de `prueba:laboratorio-sgi` verifican dentro de `validate`",
+      "evidencia": "public/laboratorio-sgi/rls.json con cada caso medido; exit 1 si una cuenta ve o cambia lo de otra organizacion",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker con la Supabase local y crea 7 cuentas sinteticas por corrida: no cabe en el gate de cada integracion. Mientras tanto, `validate` verifica la ULTIMA medicion grabada, no la repite: si RLS se rompe despues, bas-1...6 siguen en verde hasta que alguien vuelva a medir.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp`. Hasta entonces se corre a mano (`npm run sgi:local:reinicia` y luego `npm run sgi:rls`) al tocar las migraciones `sgi_*` o sus politicas.",
+      "_nota": "Declarado inactivo con el CDC del sistema integrado (2026-10-14), para que la ausencia se vea en `npm run gates`"
+    },
+    {
       "nombre": "prueba:historial",
       "runner": "comando",
       "comando": "npm run prueba:historial",
