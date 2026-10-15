@@ -72,6 +72,89 @@ function mezcla(actual: DatosEvento, cambios: Partial<EntradaEvento>): { datos: 
   return { datos, delta: Object.fromEntries([...claves].filter((k) => CAMPOS.includes(k)).map((k) => [k, datos[k]])) as Partial<DatosEvento> }
 }
 
+function esPrimera(madre: Evento, inicioOriginal: string): boolean {
+  return madre.todoElDia ? madre.inicio === inicioOriginal : Date.parse(madre.inicio) === Date.parse(inicioOriginal)
+}
+
+/** «Todos»: el cambio de hora se aplica a la serie en hora LOCAL (no se corre con el horario de verano). */
+function desplazaSerie(madre: Evento, original: string, cambios: Partial<EntradaEvento>): Partial<EntradaEvento> {
+  const ocurrencia = ocurrenciaDe(madre, original)
+  const fuera: Partial<EntradaEvento> = { ...cambios }
+  if (madre.todoElDia || cambios.todoElDia !== undefined) {
+    if (cambios.inicio && esTextoFecha(cambios.inicio) && madre.todoElDia) {
+      const dias = ordinalFecha(leeFecha(cambios.inicio)) - ordinalFecha(leeFecha(ocurrencia.inicio))
+      const finDias = cambios.fin && esTextoFecha(cambios.fin) ? ordinalFecha(leeFecha(cambios.fin)) - ordinalFecha(leeFecha(ocurrencia.fin)) : dias
+      fuera.inicio = textoFecha(sumaDias(leeFecha(madre.inicio), dias))
+      fuera.fin = textoFecha(sumaDias(leeFecha(madre.fin), finDias))
+    }
+    return fuera
+  }
+  if (cambios.inicio) {
+    const nuevoInicio = desplazaLocal(Date.parse(madre.inicio), Date.parse(ocurrencia.inicio), Date.parse(cambios.inicio), madre.zona)
+    const duracion = Date.parse(cambios.fin ?? ocurrencia.fin) - Date.parse(cambios.inicio)
+    fuera.inicio = new Date(nuevoInicio).toISOString()
+    fuera.fin = new Date(nuevoInicio + duracion).toISOString()
+  } else if (cambios.fin) {
+    fuera.fin = new Date(Date.parse(madre.inicio) + Date.parse(cambios.fin) - Date.parse(ocurrencia.inicio)).toISOString()
+  }
+  return fuera
+}
+
+/** Corta la serie en `inicioOriginal`: la cabeza termina antes y la cola es una serie nueva. */
+function corte(madre: Evento, original: string): { cabeza: string[]; cola: string[] } {
+  const lineas = madre.recurrencia ?? []
+  const serie = { inicio: madre.inicio, todoElDia: madre.todoElDia, zona: madre.zona }
+  const rec = parseaRecurrencia(lineas, madre.zona)
+  const cabeza = filtraExcluidas(terminaAntes(lineas, original), original, true, madre.zona)
+  let cola = filtraExcluidas(lineas, original, false, madre.zona)
+  if (rec.regla.cuenta !== null) cola = conCuenta(cola, Math.max(1, rec.regla.cuenta - cuentaAntes(rec, serie, original)))
+  return { cabeza, cola }
+}
+
+/** Por donde va una actualizacion: el evento suelto, una ocurrencia, la serie entera, o partirla. */
+export type CaminoActualiza = 'suelto' | 'ocurrencia' | 'serie' | 'parte'
+
+type LeeEvento = (ref: RefCalendario, id: string) => Promise<Evento>
+
+/** El camino y el evento que resulta, YA validado completo; lo demas es lo que necesita la escritura. */
+type Preparada =
+  | { camino: 'suelto'; datos: DatosEvento; delta: Partial<DatosEvento> }
+  | { camino: 'ocurrencia'; datos: DatosEvento; delta: Partial<DatosEvento> }
+  | { camino: 'serie'; datos: DatosEvento; delta: Partial<DatosEvento>; madre: Evento }
+  | { camino: 'parte'; datos: DatosEvento; madre: Evento; cabeza: string[] }
+
+/** La mitad de `actualiza` que no escribe: la comparten la escritura y el plan, para que no diverjan. */
+async function preparaActualiza(lee: LeeEvento, almacen: Almacen, inst: RefInstancia, cambios: Partial<EntradaEvento>, alcance: Alcance = 'este'): Promise<Preparada> {
+  if (!inst.serie || !inst.inicioOriginal) return { camino: 'suelto', ...mezcla(soloDatos(await lee(inst, inst.id)), cambios) }
+  const serie = inst.serie
+  const original = inst.inicioOriginal
+  if (alcance === 'este') {
+    const actual = (await almacen.evento(inst, idInstancia(serie, original))) ?? ocurrenciaDe(await lee(inst, serie), original)
+    return { camino: 'ocurrencia', ...mezcla(soloDatos(actual), cambios) }
+  }
+  const madre = await lee(inst, serie)
+  if (alcance === 'todos' || esPrimera(madre, original)) return { camino: 'serie', madre, ...mezcla(soloDatos(madre), desplazaSerie(madre, original, cambios)) }
+  const { cabeza, cola } = corte(madre, original)
+  const { datos } = mezcla({ ...soloDatos(ocurrenciaDe(madre, original)), recurrencia: cola }, { ...cambios, recurrencia: cola })
+  return { camino: 'parte', madre, cabeza, datos }
+}
+
+export interface PlanActualiza { camino: CaminoActualiza; evento: DatosEvento }
+
+/**
+ * Lo que `actualiza` escribiria, por el mismo camino y con la misma validacion, leyendo SOLO del
+ * espejo: no toca el proveedor (es el dry-run). Lo que el espejo no tiene no se puede planear.
+ */
+export async function planeaActualiza(almacen: Almacen, inst: RefInstancia, cambios: Partial<EntradaEvento>, alcance?: Alcance): Promise<PlanActualiza> {
+  const delEspejo: LeeEvento = async (ref, id) => {
+    const e = await almacen.evento(ref, id)
+    if (!e) throw new ErrorCalendario('no-encontrado', `el evento ${id} no esta en el espejo: sincroniza antes de planear`)
+    return e
+  }
+  const p = await preparaActualiza(delEspejo, almacen, inst, cambios, alcance)
+  return { camino: p.camino, evento: p.datos }
+}
+
 export class Pluma {
   private readonly proveedor: Proveedor
   private readonly almacen: Almacen
@@ -97,19 +180,19 @@ export class Pluma {
   }
 
   async actualiza(inst: RefInstancia, cambios: Partial<EntradaEvento>, op: OpEscritura & { alcance?: Alcance }): Promise<ResultadoEscritura> {
-    if (!inst.serie || !inst.inicioOriginal) return this.actualizaSuelto(inst, cambios, op)
-    const alcance = op.alcance ?? 'este'
-    if (alcance === 'este') return this.actualizaOcurrencia(inst, cambios, op)
-    const madre = await this.lee(inst, inst.serie)
-    if (alcance === 'todos' || this.esPrimera(madre, inst.inicioOriginal)) return this.actualizaSerie(inst, madre, cambios, op)
-    return this.parteSerie(inst, madre, cambios, op)
+    const p = await preparaActualiza((ref, id) => this.lee(ref, id), this.almacen, inst, cambios, op.alcance)
+    this.compruebaNotificacion(p.datos.invitados.length, op)
+    if (p.camino === 'suelto') return this.actualizaSuelto(inst, p.delta, op)
+    if (p.camino === 'ocurrencia') return this.actualizaOcurrencia(inst, p.delta, op)
+    if (p.camino === 'serie') return this.actualizaSerie(inst, p.madre, p.delta, op)
+    return this.parteSerie(inst, p.madre, p.datos, p.cabeza, op)
   }
 
   async borra(inst: RefInstancia, op: OpEscritura & { alcance?: Alcance }): Promise<ResultadoEscritura> {
     if (!inst.serie || !inst.inicioOriginal) return this.borraEntero(inst, inst.id, op)
     const alcance = op.alcance ?? 'este'
     const madre = await this.lee(inst, inst.serie)
-    if (alcance === 'todos' || (alcance === 'siguientes' && this.esPrimera(madre, inst.inicioOriginal))) return this.borraEntero(inst, madre.id, op)
+    if (alcance === 'todos' || (alcance === 'siguientes' && esPrimera(madre, inst.inicioOriginal))) return this.borraEntero(inst, madre.id, op)
     if (alcance === 'siguientes') return this.recortaSerie(inst, madre, op)
     this.compruebaNotificacion(madre.invitados.length, op)
     const idExc = idInstancia(madre.id, inst.inicioOriginal)
@@ -138,10 +221,6 @@ export class Pluma {
     throw new ErrorCalendario('requiere-confirmacion', `Esto manda correo a ${invitados} invitado(s): es irreversible y lo confirma una persona.`, {
       destraba: 'quien opera la agenda: confirmarlo de forma explicita (confirmaNotificar)',
     })
-  }
-
-  private esPrimera(madre: Evento, inicioOriginal: string): boolean {
-    return madre.todoElDia ? madre.inicio === inicioOriginal : Date.parse(madre.inicio) === Date.parse(inicioOriginal)
   }
 
   private async lee(ref: RefCalendario, id: string): Promise<Evento> {
@@ -187,10 +266,7 @@ export class Pluma {
     }
   }
 
-  private async actualizaSuelto(inst: RefInstancia, cambios: Partial<EntradaEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
-    const actual = await this.lee(inst, inst.id)
-    const { datos, delta } = mezcla(soloDatos(actual), cambios)
-    this.compruebaNotificacion(datos.invitados.length, op)
+  private async actualizaSuelto(inst: RefInstancia, delta: Partial<DatosEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
     return this.escribe(op.clave, inst, 'actualiza', [inst.id], async () => {
       const ev = await this.conConflicto(inst, inst.id, () => this.llama(() =>
         this.proveedor.actualiza(inst, inst.id, delta, { notificar: op.notificar ?? 'nadie', siEtag: inst.etag ?? null })))
@@ -198,13 +274,10 @@ export class Pluma {
     })
   }
 
-  private async actualizaOcurrencia(inst: RefInstancia, cambios: Partial<EntradaEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
+  private async actualizaOcurrencia(inst: RefInstancia, delta: Partial<DatosEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
     const serie = inst.serie as string
     const original = inst.inicioOriginal as string
     const idExc = idInstancia(serie, original)
-    const actual = (await this.almacen.evento(inst, idExc)) ?? ocurrenciaDe(await this.lee(inst, serie), original)
-    const { datos, delta } = mezcla(soloDatos(actual), cambios)
-    this.compruebaNotificacion(datos.invitados.length, op)
     return this.escribe(op.clave, inst, 'instancia', [idExc], async () => {
       const ev = await this.conConflicto(inst, idExc, () => this.llama(() =>
         this.proveedor.modificaInstancia(inst, serie, original, { ...delta, recurrencia: null }, { notificar: op.notificar ?? 'nadie', siEtag: inst.etag ?? null })))
@@ -212,49 +285,12 @@ export class Pluma {
     })
   }
 
-  /** «Todos»: el cambio de hora se aplica a la serie en hora LOCAL (no se corre con el horario de verano). */
-  private desplazaSerie(madre: Evento, original: string, cambios: Partial<EntradaEvento>): Partial<EntradaEvento> {
-    const ocurrencia = ocurrenciaDe(madre, original)
-    const fuera: Partial<EntradaEvento> = { ...cambios }
-    if (madre.todoElDia || cambios.todoElDia !== undefined) {
-      if (cambios.inicio && esTextoFecha(cambios.inicio) && madre.todoElDia) {
-        const dias = ordinalFecha(leeFecha(cambios.inicio)) - ordinalFecha(leeFecha(ocurrencia.inicio))
-        const finDias = cambios.fin && esTextoFecha(cambios.fin) ? ordinalFecha(leeFecha(cambios.fin)) - ordinalFecha(leeFecha(ocurrencia.fin)) : dias
-        fuera.inicio = textoFecha(sumaDias(leeFecha(madre.inicio), dias))
-        fuera.fin = textoFecha(sumaDias(leeFecha(madre.fin), finDias))
-      }
-      return fuera
-    }
-    if (cambios.inicio) {
-      const nuevoInicio = desplazaLocal(Date.parse(madre.inicio), Date.parse(ocurrencia.inicio), Date.parse(cambios.inicio), madre.zona)
-      const duracion = Date.parse(cambios.fin ?? ocurrencia.fin) - Date.parse(cambios.inicio)
-      fuera.inicio = new Date(nuevoInicio).toISOString()
-      fuera.fin = new Date(nuevoInicio + duracion).toISOString()
-    } else if (cambios.fin) {
-      fuera.fin = new Date(Date.parse(madre.inicio) + Date.parse(cambios.fin) - Date.parse(ocurrencia.inicio)).toISOString()
-    }
-    return fuera
-  }
-
-  private async actualizaSerie(inst: RefInstancia, madre: Evento, cambios: Partial<EntradaEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
-    const { datos, delta } = mezcla(soloDatos(madre), this.desplazaSerie(madre, inst.inicioOriginal as string, cambios))
-    this.compruebaNotificacion(datos.invitados.length, op)
+  private async actualizaSerie(inst: RefInstancia, madre: Evento, delta: Partial<DatosEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
     return this.escribe(op.clave, inst, 'serie', [madre.id], async () => {
       const ev = await this.conConflicto(inst, madre.id, () => this.llama(() =>
         this.proveedor.actualiza(inst, madre.id, delta, { notificar: op.notificar ?? 'nadie', siEtag: madre.etag })))
       return { guardar: [ev], borrar: [] }
     })
-  }
-
-  /** Corta la serie en `inicioOriginal`: la cabeza termina antes y la cola es una serie nueva. */
-  private corte(madre: Evento, original: string): { cabeza: string[]; cola: string[] } {
-    const lineas = madre.recurrencia ?? []
-    const serie = { inicio: madre.inicio, todoElDia: madre.todoElDia, zona: madre.zona }
-    const rec = parseaRecurrencia(lineas, madre.zona)
-    const cabeza = filtraExcluidas(terminaAntes(lineas, original), original, true, madre.zona)
-    let cola = filtraExcluidas(lineas, original, false, madre.zona)
-    if (rec.regla.cuenta !== null) cola = conCuenta(cola, Math.max(1, rec.regla.cuenta - cuentaAntes(rec, serie, original)))
-    return { cabeza, cola }
   }
 
   private async excepcionesDesde(ref: RefCalendario, madre: Evento, original: string): Promise<Evento[]> {
@@ -265,11 +301,8 @@ export class Pluma {
     })
   }
 
-  private async parteSerie(inst: RefInstancia, madre: Evento, cambios: Partial<EntradaEvento>, op: OpEscritura): Promise<ResultadoEscritura> {
+  private async parteSerie(inst: RefInstancia, madre: Evento, nueva: DatosEvento, cabeza: string[], op: OpEscritura): Promise<ResultadoEscritura> {
     const original = inst.inicioOriginal as string
-    const { cabeza, cola } = this.corte(madre, original)
-    const { datos: nueva } = mezcla({ ...soloDatos(ocurrenciaDe(madre, original)), recurrencia: cola }, { ...cambios, recurrencia: cola })
-    this.compruebaNotificacion(nueva.invitados.length, op)
     const cola2 = await this.excepcionesDesde(inst, madre, original)
     const idNueva = this.proveedor.capacidades.idPropio ? idDesdeClave(op.clave) : undefined
     const ids = [madre.id, ...(idNueva ? [idNueva] : []), ...cola2.map((x) => x.id)]
@@ -300,7 +333,7 @@ export class Pluma {
 
   private async recortaSerie(inst: RefInstancia, madre: Evento, op: OpEscritura): Promise<ResultadoEscritura> {
     const original = inst.inicioOriginal as string
-    const { cabeza } = this.corte(madre, original)
+    const { cabeza } = corte(madre, original)
     this.compruebaNotificacion(madre.invitados.length, op)
     const cola = await this.excepcionesDesde(inst, madre, original)
     return this.escribe(op.clave, inst, 'serie', [madre.id, ...cola.map((x) => x.id)], async () => {
