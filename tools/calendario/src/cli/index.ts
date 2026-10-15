@@ -49,18 +49,30 @@ function exige(v: Valores, k: string): string {
   return x
 }
 
+function cuentaDe(v: Valores): string {
+  const cuenta = texto(v, 'cuenta') ?? process.env.CALENDARIO_CUENTA
+  if (cuenta === undefined) throw new ErrorDeUso('falta --cuenta (o CALENDARIO_CUENTA)')
+  return cuenta
+}
+
+const notificarDe = (v: Valores): Notificar => (texto(v, 'notificar') ?? 'nadie') as Notificar
+const alcanceDe = (v: Valores): Alcance | undefined => texto(v, 'alcance') as Alcance | undefined
+
 function proveedorDe(v: Valores): Proveedor {
   const nombre = texto(v, 'proveedor') ?? 'gog'
-  if (nombre === 'simulador') {
-    const sim = new SimuladorGoogle()
-    for (const c of lista(v, 'calendario')) sim.agregaCalendario({ cuenta: cuentaDe(v), id: c, nombre: c, color: null, zona: texto(v, 'zona') ?? 'UTC', rol: 'propietario', principal: false, visible: true })
-    return sim
-  }
+  if (nombre === 'simulador') return simuladorDe(v)
   if (nombre !== 'gog') throw new ErrorDeUso(`proveedor desconocido: ${nombre}`)
   return new ProveedorGog({ ejecuta: ejecutorGog(), zona: texto(v, 'zona') })
 }
 
-const cuentaDe = (v: Valores): string => texto(v, 'cuenta') ?? process.env.CALENDARIO_CUENTA ?? (() => { throw new ErrorDeUso('falta --cuenta (o CALENDARIO_CUENTA)') })()
+/** Un Google vacio con los calendarios pedidos, para probar el propio CLI. */
+function simuladorDe(v: Valores): SimuladorGoogle {
+  const sim = new SimuladorGoogle()
+  const cuenta = cuentaDe(v)
+  const zona = texto(v, 'zona') ?? 'UTC'
+  for (const id of lista(v, 'calendario')) sim.agregaCalendario({ cuenta, id, nombre: id, color: null, zona, rol: 'propietario', principal: false, visible: true })
+  return sim
+}
 
 function entradaEvento(v: Valores): EntradaEvento {
   return {
@@ -80,38 +92,71 @@ function cambios(v: Valores): Partial<EntradaEvento> {
 }
 
 function plan(accion: string, v: Valores, detalle: object, invitados: number): object {
-  const notificar = (texto(v, 'notificar') ?? 'nadie') as Notificar
+  const notificar = notificarDe(v)
   return { accion, aplicado: false, calendario: lista(v, 'calendario')[0], ...detalle, notificar, invitados, irreversible: notificar !== 'nadie' && invitados > 0, como_aplicar: 'repite con --aplica (y --confirmo-notificar si notifica a invitados)' }
 }
 
-async function ejecuta(orden: string, v: Valores): Promise<object> {
+interface Contexto {
+  v: Valores
+  almacen: AlmacenEnArchivo
+  refs: RefCalendario[]
+  /** El primer `--calendario`: toda orden lo exige salvo `sincroniza`. */
+  ref: RefCalendario
+}
+
+/** Una orden que escribe: su plan (lo que imprime el dry-run) y lo que hace con `--aplica`. */
+interface Orden {
+  plan(c: Contexto): object
+  aplica(c: Contexto, proveedor: Proveedor): Promise<object>
+}
+
+const instanciaDe = (c: Contexto) => ({ ...c.ref, id: exige(c.v, 'evento'), serie: texto(c.v, 'serie') ?? null, inicioOriginal: texto(c.v, 'inicio-original') ?? null })
+const escrituraDe = (v: Valores) => ({ clave: texto(v, 'clave') ?? claveNueva('cli'), notificar: notificarDe(v), confirmaNotificar: v['confirmo-notificar'] === true })
+const plumaDe = (c: Contexto, proveedor: Proveedor) => new Pluma({ proveedor, almacen: c.almacen })
+
+const ORDENES: Record<string, Orden> = {
+  crea: {
+    plan: (c) => { const e = entradaEvento(c.v); return plan('crea', c.v, { evento: e }, e.invitados?.length ?? 0) },
+    aplica: (c, p) => plumaDe(c, p).crea(c.ref, entradaEvento(c.v), escrituraDe(c.v)),
+  },
+  actualiza: {
+    plan: (c) => plan('actualiza', c.v, { evento: instanciaDe(c), cambios: cambios(c.v), alcance: alcanceDe(c.v) ?? 'este' }, lista(c.v, 'invitado').length),
+    aplica: (c, p) => plumaDe(c, p).actualiza(instanciaDe(c), cambios(c.v), { ...escrituraDe(c.v), alcance: alcanceDe(c.v) }),
+  },
+  borra: {
+    plan: (c) => plan('borra', c.v, { evento: instanciaDe(c), alcance: alcanceDe(c.v) ?? 'este' }, lista(c.v, 'invitado').length),
+    aplica: (c, p) => plumaDe(c, p).borra(instanciaDe(c), { ...escrituraDe(c.v), alcance: alcanceDe(c.v) }),
+  },
+  sincroniza: {
+    plan: (c) => ({ accion: 'sincroniza', aplicado: false, calendarios: c.refs, como_aplicar: 'repite con --aplica' }),
+    aplica: (c, proveedor) => Promise.all(c.refs.map((r) => sincroniza({ proveedor, almacen: c.almacen }, r))),
+  },
+}
+
+async function ejecuta(nombre: string, v: Valores): Promise<object> {
   const cuenta = cuentaDe(v)
   const almacen = await AlmacenEnArchivo.abre(texto(v, 'espejo') ?? '.calendario-espejo.json')
   const refs: RefCalendario[] = lista(v, 'calendario').map((calendario) => ({ cuenta, calendario }))
-  if (orden === 'consulta') {
-    const lector = new Lector({ almacen })
-    return lector.consulta({ calendarios: refs, desde: Date.parse(exige(v, 'desde')), hasta: Date.parse(exige(v, 'hasta')), zona: texto(v, 'zona') ?? 'UTC' })
+  if (nombre === 'consulta') {
+    return new Lector({ almacen }).consulta({ calendarios: refs, desde: Date.parse(exige(v, 'desde')), hasta: Date.parse(exige(v, 'hasta')), zona: texto(v, 'zona') ?? 'UTC' })
   }
   const ref = refs[0]
-  if (!ref && orden !== 'sincroniza') throw new ErrorDeUso('falta --calendario')
-  const notificar = (texto(v, 'notificar') ?? 'nadie') as Notificar
-  const op = { clave: texto(v, 'clave') ?? claveNueva('cli'), notificar, confirmaNotificar: v['confirmo-notificar'] === true }
-  const alcance = texto(v, 'alcance') as Alcance | undefined
-  const inst = () => ({ ...(ref as RefCalendario), id: exige(v, 'evento'), serie: texto(v, 'serie') ?? null, inicioOriginal: texto(v, 'inicio-original') ?? null })
-  if (!v.aplica) {
-    if (orden === 'crea') { const e = entradaEvento(v); return plan('crea', v, { evento: e }, e.invitados?.length ?? 0) }
-    if (orden === 'actualiza') return plan('actualiza', v, { evento: inst(), cambios: cambios(v), alcance: alcance ?? 'este' }, lista(v, 'invitado').length)
-    if (orden === 'borra') return plan('borra', v, { evento: inst(), alcance: alcance ?? 'este' }, lista(v, 'invitado').length)
-    if (orden === 'sincroniza') return { accion: 'sincroniza', aplicado: false, calendarios: refs, como_aplicar: 'repite con --aplica' }
-    throw new ErrorDeUso(`orden desconocida: ${orden}`)
-  }
-  const proveedor = proveedorDe(v)
-  const pluma = new Pluma({ proveedor, almacen })
-  if (orden === 'crea') return pluma.crea(ref as RefCalendario, entradaEvento(v), op)
-  if (orden === 'actualiza') return pluma.actualiza(inst(), cambios(v), { ...op, alcance })
-  if (orden === 'borra') return pluma.borra(inst(), { ...op, alcance })
-  if (orden === 'sincroniza') return Promise.all(refs.map((r) => sincroniza({ proveedor, almacen }, r)))
-  throw new ErrorDeUso(`orden desconocida: ${orden}`)
+  if (!ref && nombre !== 'sincroniza') throw new ErrorDeUso('falta --calendario')
+  const orden = Object.hasOwn(ORDENES, nombre) ? ORDENES[nombre] : undefined
+  if (!orden) throw new ErrorDeUso(`orden desconocida: ${nombre}`)
+  const c: Contexto = { v, almacen, refs, ref: ref as RefCalendario }
+  return v.aplica ? orden.aplica(c, proveedorDe(v)) : orden.plan(c)
+}
+
+function codigoDeSalida(e: unknown): number {
+  const deUso = e instanceof ErrorDeUso || esErrorCalendario(e, 'validacion') || esErrorCalendario(e, 'requiere-confirmacion')
+    || (e instanceof TypeError && /parseArgs|Unknown option/i.test(e.message))
+  return deUso ? 2 : 1
+}
+
+function salidaDeError(e: unknown): object {
+  if (esErrorCalendario(e)) return { error: e.codigo, mensaje: e.message, destraba: e.destraba }
+  return { error: 'uso', mensaje: e instanceof Error ? e.message : String(e) }
 }
 
 async function principal(argv: string[]): Promise<number> {
@@ -122,10 +167,8 @@ async function principal(argv: string[]): Promise<number> {
     process.stdout.write(`${JSON.stringify(await ejecuta(orden, values as Valores), null, 2)}\n`)
     return 0
   } catch (e) {
-    const codigo = e instanceof ErrorDeUso || esErrorCalendario(e, 'validacion') || esErrorCalendario(e, 'requiere-confirmacion') || (e instanceof TypeError && /parseArgs|Unknown option/i.test(e.message)) ? 2 : 1
-    const salida = esErrorCalendario(e) ? { error: e.codigo, mensaje: e.message, destraba: e.destraba } : { error: 'uso', mensaje: e instanceof Error ? e.message : String(e) }
-    process.stderr.write(`${JSON.stringify(salida)}\n`)
-    return codigo
+    process.stderr.write(`${JSON.stringify(salidaDeError(e))}\n`)
+    return codigoDeSalida(e)
   }
 }
 

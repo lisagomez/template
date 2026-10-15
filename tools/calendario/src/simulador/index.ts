@@ -10,7 +10,10 @@
  *   poder demostrar que por defecto no se manda ninguno.
  */
 import { ErrorCalendario, DESTRABA_CREDENCIAL, type CodigoError } from '../errores.js'
-import { esquemaDatosEvento, claveCalendario, puedeEscribir, type Calendario, type DatosEvento, type EntradaEvento, type Evento, type RefCalendario } from '../tipos.js'
+import {
+  esquemaDatosEvento, claveCalendario, puedeEscribir,
+  type Calendario, type DatosEvento, type EntradaEvento, type Evento, type RefCalendario,
+} from '../tipos.js'
 import type { OpcionesEscritura, PaginaDeEventos, PeticionLista, Proveedor, Reloj } from '../puertos.js'
 import { relojDelSistema } from '../puertos.js'
 import { esOcurrencia, parseaRecurrencia } from '../recurrencia.js'
@@ -18,10 +21,17 @@ import { idInstancia, limites, ocurrenciaDe } from '../instancias.js'
 
 type Op = 'calendarios' | 'lista' | 'obtiene' | 'crea' | 'actualiza' | 'modificaInstancia' | 'borra'
 interface Guardado { evento: Evento; seq: number; version: number }
+interface Falla { op: Op | '*'; codigo: CodigoError; reintentarEnMs: number | null }
+/** Cursor de `siguientePagina`: `corte` congela el listado para que no se mueva entre paginas. */
+interface Cursor { desde: number; corte: number }
 
 export interface Notificacion { para: string; evento: string; tipo: 'invitacion' | 'cambio' | 'cancelacion'; cuando: number }
 export interface Llamada { op: Op; calendario: string | null; id: string | null; cuando: number }
 export interface OpcionesSimulador { reloj?: Reloj; tamanoPagina?: number }
+
+const MENSAJES_FALLA: Partial<Record<CodigoError, string>> = { limite: 'rateLimitExceeded (429)', red: 'la conexion se corto' }
+
+const inexistente = (ref: RefCalendario) => new ErrorCalendario('no-encontrado', `calendario inexistente: ${claveCalendario(ref)}`)
 
 export class SimuladorGoogle implements Proveedor {
   readonly nombre = 'simulador-google'
@@ -37,7 +47,7 @@ export class SimuladorGoogle implements Proveedor {
   private seq = 0
   private minimoValido = 0
   private contador = 0
-  private fallas: Array<{ op: Op | '*'; codigo: CodigoError; reintentarEnMs: number | null }> = []
+  private fallas: Falla[] = []
 
   constructor(opciones: OpcionesSimulador = {}) {
     this.reloj = opciones.reloj ?? relojDelSistema
@@ -45,9 +55,9 @@ export class SimuladorGoogle implements Proveedor {
   }
 
   agregaCalendario(c: Calendario): void {
-    const ref = { cuenta: c.cuenta, calendario: c.id }
-    this.cals.set(claveCalendario(ref), c)
-    if (!this.evs.has(claveCalendario(ref))) this.evs.set(claveCalendario(ref), new Map())
+    const clave = claveCalendario({ cuenta: c.cuenta, calendario: c.id })
+    this.cals.set(clave, c)
+    if (!this.evs.has(clave)) this.evs.set(clave, new Map())
   }
 
   /** Mete un evento como si ya estuviera en Google (sin notificar a nadie). */
@@ -82,6 +92,7 @@ export class SimuladorGoogle implements Proveedor {
     return { id, cuenta: ref.cuenta, calendario: ref.calendario, serie: null, inicioOriginal: null, enlace: `https://calendar.simulado/evento/${id}` }
   }
 
+  /** Cada llamada queda registrada y puede caer por credencial o por una falla programada. */
   private consume(op: Op, ref: RefCalendario | null, id: string | null): void {
     this.llamadas.push({ op, calendario: ref ? claveCalendario(ref) : null, id, cuando: this.reloj.ahora() })
     if (this.credencialCaducada) {
@@ -91,20 +102,21 @@ export class SimuladorGoogle implements Proveedor {
     if (i < 0) return
     const [f] = this.fallas.splice(i, 1)
     if (!f) return
-    const mensajes: Partial<Record<CodigoError, string>> = { limite: 'rateLimitExceeded (429)', red: 'la conexion se corto' }
-    throw new ErrorCalendario(f.codigo, mensajes[f.codigo] ?? `falla programada: ${f.codigo}`, { reintentarEnMs: f.reintentarEnMs })
+    throw new ErrorCalendario(f.codigo, MENSAJES_FALLA[f.codigo] ?? `falla programada: ${f.codigo}`, { reintentarEnMs: f.reintentarEnMs })
+  }
+
+  /** Como `consume`, y ademas el calendario tiene que existir y admitir escritura. */
+  private consumeEscritura(op: Op, ref: RefCalendario, id: string | null): void {
+    this.consume(op, ref, id)
+    const c = this.cals.get(claveCalendario(ref))
+    if (!c) throw inexistente(ref)
+    if (!puedeEscribir(c)) throw new ErrorCalendario('solo-lectura', `el calendario ${c.nombre} es de solo lectura`)
   }
 
   private mapa(ref: RefCalendario): Map<string, Guardado> {
     const m = this.evs.get(claveCalendario(ref))
-    if (!m) throw new ErrorCalendario('no-encontrado', `calendario inexistente: ${claveCalendario(ref)}`)
+    if (!m) throw inexistente(ref)
     return m
-  }
-
-  private escribible(ref: RefCalendario): void {
-    const c = this.cals.get(claveCalendario(ref))
-    if (!c) throw new ErrorCalendario('no-encontrado', `calendario inexistente: ${claveCalendario(ref)}`)
-    if (!puedeEscribir(c)) throw new ErrorCalendario('solo-lectura', `el calendario ${c.nombre} es de solo lectura`)
   }
 
   private guarda(ref: RefCalendario, evento: Omit<Evento, 'etag' | 'actualizado'>, version: number): Guardado {
@@ -112,6 +124,10 @@ export class SimuladorGoogle implements Proveedor {
     const g = { evento: { ...evento, etag: `"${version}"`, actualizado: new Date(this.reloj.ahora()).toISOString() } as Evento, seq: this.seq, version }
     this.mapa(ref).set(evento.id, g)
     return g
+  }
+
+  private cancela(ref: RefCalendario, g: Guardado): void {
+    this.guarda(ref, { ...g.evento, estado: 'cancelado' }, g.version + 1)
   }
 
   private notifica(e: Evento, notificar: OpcionesEscritura['notificar'], tipo: Notificacion['tipo']): void {
@@ -135,6 +151,26 @@ export class SimuladorGoogle implements Proveedor {
     }
   }
 
+  /** Lo que cambio desde el token (borrados incluidos), o el listado completo acotado a la ventana. */
+  private filasDeLista(ref: RefCalendario, p: PeticionLista, corte: number): Guardado[] {
+    const todas = [...this.mapa(ref).values()]
+    if (p.token) {
+      const s = Number(p.token.replace(/^sim:/, ''))
+      if (!Number.isInteger(s) || s < this.minimoValido) {
+        throw new ErrorCalendario('token-invalido', 'fullSyncRequired (410): el token de sincronizacion ya no vale')
+      }
+      return todas.filter((g) => g.seq > s && g.seq <= corte)
+    }
+    const listado = todas.filter((g) => g.seq <= corte && (g.evento.estado !== 'cancelado' || g.evento.serie))
+    const v = p.ventana
+    if (!v) return listado
+    return listado.filter((g) => {
+      if (g.evento.recurrencia || g.evento.serie) return true
+      const l = limites(g.evento, 'UTC')
+      return l.inicioMs < v.hasta && l.finMs > v.desde
+    })
+  }
+
   async calendarios(cuenta: string): Promise<Calendario[]> {
     this.consume('calendarios', null, null)
     return [...this.cals.values()].filter((c) => c.cuenta === cuenta)
@@ -142,34 +178,16 @@ export class SimuladorGoogle implements Proveedor {
 
   async lista(ref: RefCalendario, p: PeticionLista): Promise<PaginaDeEventos> {
     this.consume('lista', ref, null)
-    const pagina = p.pagina ? JSON.parse(p.pagina) as { desde: number; corte: number } : null
-    let desde = pagina?.desde ?? 0
-    const corte = pagina?.corte ?? this.seq
-    let filas: Guardado[]
-    if (p.token) {
-      const s = Number(p.token.replace(/^sim:/, ''))
-      if (!Number.isInteger(s) || s < this.minimoValido) {
-        throw new ErrorCalendario('token-invalido', 'fullSyncRequired (410): el token de sincronizacion ya no vale')
-      }
-      filas = [...this.mapa(ref).values()].filter((g) => g.seq > s && g.seq <= corte)
-    } else {
-      filas = [...this.mapa(ref).values()].filter((g) => g.seq <= corte && (g.evento.estado !== 'cancelado' || g.evento.serie))
-      if (p.ventana) {
-        const v = p.ventana
-        filas = filas.filter((g) => {
-          if (g.evento.recurrencia || g.evento.serie) return true
-          const l = limites(g.evento, 'UTC')
-          return l.inicioMs < v.hasta && l.finMs > v.desde
-        })
-      }
-    }
-    filas.sort((a, b) => a.seq - b.seq)
-    const trozo = filas.slice(desde, desde + this.tamanoPagina)
-    desde += trozo.length
+    const cursor = p.pagina ? JSON.parse(p.pagina) as Cursor : null
+    const corte = cursor?.corte ?? this.seq
+    const filas = this.filasDeLista(ref, p, corte).sort((a, b) => a.seq - b.seq)
+    const inicio = cursor?.desde ?? 0
+    const trozo = filas.slice(inicio, inicio + this.tamanoPagina)
+    const desde = inicio + trozo.length
     const ultima = desde >= filas.length
     return {
       eventos: trozo.map((g) => g.evento),
-      siguientePagina: ultima ? null : JSON.stringify({ desde, corte }),
+      siguientePagina: ultima ? null : JSON.stringify({ desde, corte } satisfies Cursor),
       tokenSync: ultima ? `sim:${corte}` : null,
       completo: true,
     }
@@ -181,8 +199,7 @@ export class SimuladorGoogle implements Proveedor {
   }
 
   async crea(ref: RefCalendario, datos: DatosEvento, op: OpcionesEscritura & { id?: string }): Promise<Evento> {
-    this.consume('crea', ref, op.id ?? null)
-    this.escribible(ref)
+    this.consumeEscritura('crea', ref, op.id ?? null)
     const id = op.id ?? this.nuevoId()
     if (this.mapa(ref).has(id)) throw new ErrorCalendario('duplicado', `duplicate (409): ya existe el evento ${id}`)
     const g = this.guarda(ref, { ...datos, ...this.identidad(ref, id) }, 1)
@@ -191,8 +208,7 @@ export class SimuladorGoogle implements Proveedor {
   }
 
   async actualiza(ref: RefCalendario, id: string, datos: Partial<DatosEvento>, op: OpcionesEscritura): Promise<Evento> {
-    this.consume('actualiza', ref, id)
-    this.escribible(ref)
+    this.consumeEscritura('actualiza', ref, id)
     const g = this.vivo(ref, id)
     this.compruebaEtag(g, op.siEtag)
     const nuevo = { ...g.evento, ...datos }
@@ -203,8 +219,7 @@ export class SimuladorGoogle implements Proveedor {
   }
 
   async modificaInstancia(ref: RefCalendario, serie: string, inicioOriginal: string, datos: Partial<DatosEvento>, op: OpcionesEscritura): Promise<Evento> {
-    this.consume('modificaInstancia', ref, serie)
-    this.escribible(ref)
+    this.consumeEscritura('modificaInstancia', ref, serie)
     const madre = this.vivo(ref, serie)
     const m = madre.evento
     if (!m.recurrencia || !esOcurrencia(parseaRecurrencia(m.recurrencia, m.zona), { inicio: m.inicio, todoElDia: m.todoElDia, zona: m.zona }, inicioOriginal)) {
@@ -220,15 +235,14 @@ export class SimuladorGoogle implements Proveedor {
   }
 
   async borra(ref: RefCalendario, id: string, op: OpcionesEscritura): Promise<void> {
-    this.consume('borra', ref, id)
-    this.escribible(ref)
+    this.consumeEscritura('borra', ref, id)
     const g = this.vivo(ref, id)
     this.compruebaEtag(g, op.siEtag)
-    this.guarda(ref, { ...g.evento, estado: 'cancelado' }, g.version + 1)
+    this.cancela(ref, g)
     this.notifica(g.evento, op.notificar, 'cancelacion')
     if (!g.evento.recurrencia) return
     for (const x of this.mapa(ref).values()) {
-      if (x.evento.serie === id && x.evento.estado !== 'cancelado') this.guarda(ref, { ...x.evento, estado: 'cancelado' }, x.version + 1)
+      if (x.evento.serie === id && x.evento.estado !== 'cancelado') this.cancela(ref, x)
     }
   }
 }
