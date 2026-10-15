@@ -124,7 +124,7 @@ export function Rejilla(p: PropsRejilla) {
         <div className="cal-hora" style={{ height: 'auto', transform: 'none', paddingTop: 6 }}>todo el día</div>
         {p.dias.map((d) => (
           <div key={d} style={{ borderLeft: '1px solid var(--cal-borde)' }}>
-            {p.instancias.filter((i) => cubreDia(i, d)).map((i) => (
+            {(p.soloActividad ? [] : p.instancias.filter((i) => cubreDia(i, d))).map((i) => (
               <span key={i.id} className="cal-chip" data-prueba="evento" data-titulo={i.titulo} role="button" tabIndex={0}
                 style={{ ['--cal-color' as string]: colorDe(p.calendarios, i) }} onClick={() => p.alSeleccionar?.(i)}
                 onKeyDown={(e) => { if (e.key === 'Enter') p.alSeleccionar?.(i) }}>{i.titulo}</span>

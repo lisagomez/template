@@ -103,7 +103,7 @@ await paso(4, 'capa de actividad programada (y la lente «solo actividad»)', p,
   ev.push(`bloques de actividad pintados: ${n}; del trabajo pausado («Limpieza semanal»): ${pausado}`);
   await foto(p, '07-actividad-programada', caps);
   await p.locator('[data-prueba=boton-solo-actividad]').click();
-  await p.waitForFunction(() => document.querySelectorAll('[data-prueba=agenda] .cal-evento').length === 0);
+  await p.waitForFunction(() => document.querySelectorAll('[data-prueba=agenda] [data-prueba=evento]').length === 0);
   ev.push('lente «solo actividad»: la rejilla muestra solo la actividad');
   await foto(p, '08-solo-actividad', caps);
   await p.locator('[data-prueba=boton-actividad]').click();
