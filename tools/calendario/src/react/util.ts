@@ -35,7 +35,8 @@ export function hora(ms: number, zona: string): string {
 }
 
 export function fechaLarga(fecha: string, opciones: Intl.DateTimeFormatOptions): string {
-  return new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', ...opciones }).format(new Date(`${fecha}T12:00:00Z`))
+  const f = leeFecha(fecha)
+  return new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', ...opciones }).format(new Date(Date.UTC(f.anio, f.mes - 1, f.dia, 12)))
 }
 
 export function tituloDeVista(vista: Vista, dias: readonly string[], fecha: string): string {

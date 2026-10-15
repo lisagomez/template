@@ -119,6 +119,18 @@ test('confirmar crea UN evento con una referencia (sin datos de la persona) y si
   assert.equal((await reservas.tentativa({ inicio: '2026-10-19T15:00:00.000Z', referencia: 'otra', clave: 'de-nuevo' })).ok, true)
 })
 
+test('si mientras estaba apartado alguien agenda en ese hueco (fuera de las reservas), confirmar dice `ocupado` y no escribe encima', async () => {
+  const { reservas, sim, almacen, reloj } = conReservas()
+  const t = await reservas.tentativa({ inicio: '2026-10-19T16:00:00.000Z', referencia: 'r', clave: 'apartada' })
+  assert.ok(t.ok)
+  sim.siembra(TRABAJO, { titulo: 'Puesto desde el telefono', inicio: '2026-10-19T16:15:00.000Z', fin: '2026-10-19T16:45:00.000Z', zona: ZONA })
+  await sincroniza({ proveedor: sim, almacen, reloj }, TRABAJO)
+  const c = await reservas.confirma(t.reserva.id, { titulo: 'Cita', clave: 'conf' })
+  assert.deepEqual(c.ok ? 'acepto' : c.motivo, 'ocupado')
+  assert.equal(sim.eventosDe(TRABAJO).filter((e) => e.titulo === 'Cita').length, 0)
+  assert.equal((await reservas.reserva(t.reserva.id))?.estado, 'liberada')
+})
+
 test('tope por dia y fechas bloqueadas', async () => {
   const { reservas } = conReservas({ ...REGLAS, maxPorDia: 1, fechasBloqueadas: ['2026-10-20'] })
   await reservas.tentativa({ inicio: '2026-10-19T15:00:00.000Z', referencia: 'r', clave: 'una' })

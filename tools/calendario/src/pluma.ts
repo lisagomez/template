@@ -19,7 +19,7 @@ import { relojDelSistema, type Almacen, type Intencion, type Proveedor, type Rel
 import { conCuenta, cuentaAntes, filtraExcluidas, parseaRecurrencia, terminaAntes } from './recurrencia.js'
 import { idInstancia, ocurrenciaDe } from './instancias.js'
 import { idDesdeClave } from './ids.js'
-import { desplazaLocal, esTextoFecha, leeFecha, sumaDias, textoFecha } from './tiempo.js'
+import { desplazaLocal, esTextoFecha, leeFecha, ordinalFecha, sumaDias, textoFecha } from './tiempo.js'
 
 export interface OpEscritura {
   /** Clave de idempotencia: la misma clave nunca escribe dos veces. */
@@ -218,8 +218,8 @@ export class Pluma {
     const fuera: Partial<EntradaEvento> = { ...cambios }
     if (madre.todoElDia || cambios.todoElDia !== undefined) {
       if (cambios.inicio && esTextoFecha(cambios.inicio) && madre.todoElDia) {
-        const dias = (Date.parse(`${cambios.inicio}T00:00:00Z`) - Date.parse(`${ocurrencia.inicio}T00:00:00Z`)) / 86_400_000
-        const finDias = cambios.fin ? (Date.parse(`${cambios.fin}T00:00:00Z`) - Date.parse(`${ocurrencia.fin}T00:00:00Z`)) / 86_400_000 : dias
+        const dias = ordinalFecha(leeFecha(cambios.inicio)) - ordinalFecha(leeFecha(ocurrencia.inicio))
+        const finDias = cambios.fin && esTextoFecha(cambios.fin) ? ordinalFecha(leeFecha(cambios.fin)) - ordinalFecha(leeFecha(ocurrencia.fin)) : dias
         fuera.inicio = textoFecha(sumaDias(leeFecha(madre.inicio), dias))
         fuera.fin = textoFecha(sumaDias(leeFecha(madre.fin), finDias))
       }

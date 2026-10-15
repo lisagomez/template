@@ -115,6 +115,13 @@ export class Reservas {
       await this.d.almacen.actualizaReserva({ ...r, estado: 'liberada' })
       return no('expirada', 'El hueco estuvo apartado y expiro sin confirmar.')
     }
+    // La exclusion del almacen cubre a las RESERVAS; un evento que alguien puso en Google mientras el
+    // hueco estaba apartado solo se ve en el espejo: se vuelve a mirar antes de escribir la cita.
+    const c = await this.contexto(r.inicio, r.fin)
+    if (c.ocupados.some((o) => o.desde < r.bloqueHasta && o.hasta > r.bloqueDesde)) {
+      await this.d.almacen.actualizaReserva({ ...r, estado: 'liberada', expira: null })
+      return no('ocupado', 'Mientras estaba apartado, algo se agendo en ese hueco: se libero y hay que elegir otro.')
+    }
     const escrito = await this.d.pluma.crea(this.d.recurso, {
       titulo: p.titulo, descripcion: p.descripcion ?? '', inicio: new Date(r.inicio).toISOString(), fin: new Date(r.fin).toISOString(),
       zona: this.reglas.zona, vinculos: [{ tipo: 'reserva', id: r.id }], invitados: [],

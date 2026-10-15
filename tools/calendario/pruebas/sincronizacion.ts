@@ -8,7 +8,8 @@ import { calculaSalud, sincroniza, type PaginaDeEventos, type Proveedor } from '
 import { banco, TRABAJO, ZONA, HORA } from './_base.ts'
 
 const semana = { calendarios: [TRABAJO], desde: Date.parse('2026-10-19T06:00:00Z'), hasta: Date.parse('2026-10-26T06:00:00Z'), zona: ZONA }
-const ev = (titulo: string, dia: number) => ({ titulo, inicio: `2026-10-${dia}T16:00:00.000Z`, fin: `2026-10-${dia}T17:00:00.000Z`, zona: ZONA })
+const utc = (dia: number, hora: number) => new Date(Date.UTC(2026, 9, dia, hora)).toISOString()
+const ev = (titulo: string, dia: number) => ({ titulo, inicio: utc(dia, 16), fin: utc(dia, 17), zona: ZONA })
 const titulos = async (b: ReturnType<typeof banco>) => (await b.lector.consulta(semana)).instancias.map((i) => i.titulo).sort()
 
 test('primera sincronizacion: completa, guarda el token, y el espejo queda como Google', async () => {

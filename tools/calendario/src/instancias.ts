@@ -3,7 +3,7 @@
  * de cada serie, sustituidas por su excepcion cuando la hay, y sin las canceladas. Es lo que Google
  * hace con `singleEvents=true`, pero aqui: el espejo guarda la serie UNA vez y funciona sin red.
  */
-import { esTextoFecha, inicioDelDia, leeFecha, DIA } from './tiempo.js'
+import { esTextoFecha, inicioDelDia, leeFecha, ordinalFecha, sumaDias, textoFecha, DIA } from './tiempo.js'
 import { expande, parseaRecurrencia } from './recurrencia.js'
 import type { Evento, Instancia, Ventana } from './tipos.js'
 
@@ -27,8 +27,8 @@ const comoInstancia = (e: Evento, zonaVista: string, recurrente: boolean): Insta
 export function ocurrenciaDe(serie: Evento, inicioOriginal: string): Evento {
   const base = { ...serie, id: idInstancia(serie.id, inicioOriginal), serie: serie.id, inicioOriginal, recurrencia: null }
   if (serie.todoElDia) {
-    const dias = Math.round((Date.parse(`${serie.fin}T00:00:00Z`) - Date.parse(`${serie.inicio}T00:00:00Z`)) / DIA)
-    return { ...base, inicio: inicioOriginal, fin: new Date(Date.parse(`${inicioOriginal}T00:00:00Z`) + dias * DIA).toISOString().slice(0, 10) }
+    const dias = ordinalFecha(leeFecha(serie.fin)) - ordinalFecha(leeFecha(serie.inicio))
+    return { ...base, inicio: inicioOriginal, fin: textoFecha(sumaDias(leeFecha(inicioOriginal), dias)) }
   }
   const duracion = Date.parse(serie.fin) - Date.parse(serie.inicio)
   return { ...base, inicio: new Date(Date.parse(inicioOriginal)).toISOString(), fin: new Date(Date.parse(inicioOriginal) + duracion).toISOString() }
