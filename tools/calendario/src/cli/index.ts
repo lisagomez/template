@@ -3,9 +3,9 @@
  * `calendario`: la pluma desde la terminal, para un agente o una persona (sucesor de agent-event.py).
  *
  * Cuatro reglas de los CLIs de esta fabrica:
- * - DRY-RUN POR DEFECTO: sin `--aplica`, imprime el plan (JSON) y no toca nada. El de `crea` y el de
- *   `actualiza` pasan por la misma validacion que la escritura (`actualiza` lee el evento del espejo, no
- *   del proveedor): lo que imprimen es lo que se escribiria, no lo que se tecleo.
+ * - DRY-RUN POR DEFECTO: sin `--aplica`, imprime el plan (JSON) y no toca nada. Los planes van por el
+ *   mismo camino y la misma validacion que la escritura (`actualiza` y `borra` leen el evento del espejo,
+ *   no del proveedor): lo que imprimen es lo que se escribiria, no lo que se tecleo.
  * - Lo que notifica a terceros (invitados con `--notificar`) es IRREVERSIBLE: exige ademas
  *   `--confirmo-notificar`, y el plan lo marca `irreversible: true`.
  * - No reimplementa: lee del espejo o escribe por la pluma contra el proveedor real (gog). El
@@ -25,7 +25,7 @@
 import { parseArgs } from 'node:util'
 import { z } from 'zod'
 import {
-  Lector, Pluma, esErrorCalendario, esquemaAlcance, esquemaNotificar, planeaActualiza, sincroniza, validaEntrada,
+  Lector, Pluma, esErrorCalendario, esquemaAlcance, esquemaNotificar, planeaActualiza, planeaBorra, sincroniza, validaEntrada,
   type Alcance, type EntradaEvento, type Notificar, type Proveedor, type RefCalendario, type Ventana,
 } from '../index.js'
 import { AlmacenEnArchivo } from '../almacenes/archivo.js'
@@ -158,7 +158,12 @@ const ORDENES: Record<string, Orden> = {
     aplica: (c, p) => plumaDe(c, p).actualiza(instanciaDe(c), cambios(c.v), { ...escrituraDe(c.v), alcance: alcanceDe(c.v) }),
   },
   borra: {
-    plan: (c) => plan('borra', c.v, { evento: instanciaDe(c), alcance: alcanceDe(c.v) ?? 'este' }, lista(c.v, 'invitado').length),
+    plan: async (c) => {
+      const inst = instanciaDe(c)
+      const alcance = alcanceDe(c.v)
+      const p = await planeaBorra(c.almacen, inst, alcance)
+      return plan('borra', c.v, { evento: inst, alcance: alcance ?? 'este', camino: p.camino, afectado: p.afectado }, p.afectado.invitados.length)
+    },
     aplica: (c, p) => plumaDe(c, p).borra(instanciaDe(c), { ...escrituraDe(c.v), alcance: alcanceDe(c.v) }),
   },
   sincroniza: {

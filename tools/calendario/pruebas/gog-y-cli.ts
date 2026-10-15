@@ -205,3 +205,34 @@ test('CLI: el dry-run de `actualiza` lee el espejo y valida el evento completo; 
 
   assert.equal(await readFile(espejo, 'utf8'), antes, 'el dry-run no escribio el espejo')
 })
+
+test('CLI: el dry-run de `borra` sigue el camino de la escritura y cuenta como irreversible a los invitados del evento que se borra', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'calendario-cli-'))
+  const espejo = join(dir, 'espejo.json')
+  const creada = await cli(['crea', '--proveedor', 'simulador', '--calendario', 'trabajo', '--titulo', 'Serie', '--inicio', '2026-10-19T15:00:00Z', '--fin', '2026-10-19T15:30:00Z', '--rrule', 'RRULE:FREQ=DAILY;COUNT=5', '--invitado', 'cliente@otra.com', '--espejo', espejo, '--aplica', '--clave', 'bor-1'])
+  assert.equal(creada.codigo, 0, creada.error)
+  const id = JSON.parse(creada.salida).eventos[0].id as string
+  const antes = await readFile(espejo, 'utf8')
+  const ocurrencia = (inicio: string, ...resto: string[]) => cli(['borra', '--calendario', 'trabajo', '--evento', id, '--serie', id, '--inicio-original', inicio, '--notificar', 'todos', '--espejo', espejo, ...resto])
+
+  const caminos: Array<[Promise<{ codigo: number; salida: string; error: string }>, string]> = [
+    [ocurrencia('2026-10-21T15:00:00.000Z'), 'ocurrencia'],
+    [ocurrencia('2026-10-21T15:00:00.000Z', '--alcance', 'siguientes'), 'recorta'],
+    [ocurrencia('2026-10-19T15:00:00.000Z', '--alcance', 'siguientes'), 'entero'],
+    [ocurrencia('2026-10-21T15:00:00.000Z', '--alcance', 'todos'), 'entero'],
+  ]
+  for (const [corrida, camino] of caminos) {
+    const r = await corrida
+    assert.equal(r.codigo, 0, r.error)
+    const p = JSON.parse(r.salida)
+    assert.equal(p.camino, camino)
+    assert.equal(p.afectado.id, id)
+    assert.equal(p.invitados, 1)
+    assert.equal(p.irreversible, true, `${camino}: la serie tiene un invitado y se pidio notificar`)
+  }
+
+  const fuera = await cli(['borra', '--calendario', 'trabajo', '--evento', 'no-existe', '--espejo', espejo])
+  assert.equal(fuera.codigo, 1)
+  assert.equal(JSON.parse(fuera.error).error, 'no-encontrado')
+  assert.equal(await readFile(espejo, 'utf8'), antes, 'el dry-run no escribio el espejo')
+})
