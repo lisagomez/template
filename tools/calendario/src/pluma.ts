@@ -139,20 +139,45 @@ async function preparaActualiza(lee: LeeEvento, almacen: Almacen, inst: RefInsta
   return { camino: 'parte', madre, cabeza, datos }
 }
 
-export interface PlanActualiza { camino: CaminoActualiza; evento: DatosEvento }
+/** Por donde va un borrado: el evento (o la serie) entero, recortar la serie, o cancelar una ocurrencia. */
+export type CaminoBorra = 'entero' | 'recorta' | 'ocurrencia'
 
-/**
- * Lo que `actualiza` escribiria, por el mismo camino y con la misma validacion, leyendo SOLO del
- * espejo: no toca el proveedor (es el dry-run). Lo que el espejo no tiene no se puede planear.
- */
-export async function planeaActualiza(almacen: Almacen, inst: RefInstancia, cambios: Partial<EntradaEvento>, alcance?: Alcance): Promise<PlanActualiza> {
-  const delEspejo: LeeEvento = async (ref, id) => {
+/** `afectado` es el evento que se borra o se corta: sus invitados son los que se notificarian. */
+type PreparadaBorra =
+  | { camino: 'entero'; afectado: Evento }
+  | { camino: 'recorta'; afectado: Evento; cabeza: string[] }
+  | { camino: 'ocurrencia'; afectado: Evento }
+
+async function preparaBorra(lee: LeeEvento, inst: RefInstancia, alcance: Alcance = 'este'): Promise<PreparadaBorra> {
+  if (!inst.serie || !inst.inicioOriginal) return { camino: 'entero', afectado: await lee(inst, inst.id) }
+  const madre = await lee(inst, inst.serie)
+  if (alcance === 'todos' || (alcance === 'siguientes' && esPrimera(madre, inst.inicioOriginal))) return { camino: 'entero', afectado: madre }
+  if (alcance === 'siguientes') return { camino: 'recorta', afectado: madre, cabeza: corte(madre, inst.inicioOriginal).cabeza }
+  return { camino: 'ocurrencia', afectado: madre }
+}
+
+/** Para los planes: lo que el espejo no tiene no se puede planear (y no se le pregunta al proveedor). */
+function leeDelEspejo(almacen: Almacen): LeeEvento {
+  return async (ref, id) => {
     const e = await almacen.evento(ref, id)
     if (!e) throw new ErrorCalendario('no-encontrado', `el evento ${id} no esta en el espejo: sincroniza antes de planear`)
     return e
   }
-  const p = await preparaActualiza(delEspejo, almacen, inst, cambios, alcance)
+}
+
+export interface PlanActualiza { camino: CaminoActualiza; evento: DatosEvento }
+export interface PlanBorra { camino: CaminoBorra; afectado: Evento }
+
+/** Lo que `actualiza` escribiria, por el mismo camino y con la misma validacion, leyendo SOLO del espejo (el dry-run). */
+export async function planeaActualiza(almacen: Almacen, inst: RefInstancia, cambios: Partial<EntradaEvento>, alcance?: Alcance): Promise<PlanActualiza> {
+  const p = await preparaActualiza(leeDelEspejo(almacen), almacen, inst, cambios, alcance)
   return { camino: p.camino, evento: p.datos }
+}
+
+/** Lo que `borra` borraria y a quien notificaria, por el mismo camino, leyendo SOLO del espejo (el dry-run). */
+export async function planeaBorra(almacen: Almacen, inst: RefInstancia, alcance?: Alcance): Promise<PlanBorra> {
+  const p = await preparaBorra(leeDelEspejo(almacen), inst, alcance)
+  return { camino: p.camino, afectado: p.afectado }
 }
 
 export class Pluma {
@@ -189,18 +214,11 @@ export class Pluma {
   }
 
   async borra(inst: RefInstancia, op: OpEscritura & { alcance?: Alcance }): Promise<ResultadoEscritura> {
-    if (!inst.serie || !inst.inicioOriginal) return this.borraEntero(inst, inst.id, op)
-    const alcance = op.alcance ?? 'este'
-    const madre = await this.lee(inst, inst.serie)
-    if (alcance === 'todos' || (alcance === 'siguientes' && esPrimera(madre, inst.inicioOriginal))) return this.borraEntero(inst, madre.id, op)
-    if (alcance === 'siguientes') return this.recortaSerie(inst, madre, op)
-    this.compruebaNotificacion(madre.invitados.length, op)
-    const idExc = idInstancia(madre.id, inst.inicioOriginal)
-    return this.escribe(op.clave, inst, 'instancia', [idExc], async () => {
-      const ev = await this.conConflicto(inst, idExc, () => this.llama(() =>
-        this.proveedor.modificaInstancia(inst, madre.id, inst.inicioOriginal as string, { estado: 'cancelado' }, { notificar: op.notificar ?? 'nadie', siEtag: inst.etag ?? null })))
-      return { guardar: [ev], borrar: [] }
-    })
+    const p = await preparaBorra((ref, id) => this.lee(ref, id), inst, op.alcance)
+    this.compruebaNotificacion(p.afectado.invitados.length, op)
+    if (p.camino === 'entero') return this.borraEntero(inst, p.afectado, op)
+    if (p.camino === 'recorta') return this.recortaSerie(inst, p.afectado, p.cabeza, op)
+    return this.cancelaOcurrencia(inst, p.afectado, op)
   }
 
   /** Relee del proveedor lo que quedo a medias y lo asienta en el espejo. */
@@ -331,10 +349,8 @@ export class Pluma {
     }
   }
 
-  private async recortaSerie(inst: RefInstancia, madre: Evento, op: OpEscritura): Promise<ResultadoEscritura> {
+  private async recortaSerie(inst: RefInstancia, madre: Evento, cabeza: string[], op: OpEscritura): Promise<ResultadoEscritura> {
     const original = inst.inicioOriginal as string
-    const { cabeza } = corte(madre, original)
-    this.compruebaNotificacion(madre.invitados.length, op)
     const cola = await this.excepcionesDesde(inst, madre, original)
     return this.escribe(op.clave, inst, 'serie', [madre.id, ...cola.map((x) => x.id)], async () => {
       const cortada = await this.conConflicto(inst, madre.id, () => this.llama(() =>
@@ -344,9 +360,17 @@ export class Pluma {
     })
   }
 
-  private async borraEntero(ref: RefInstancia, id: string, op: OpEscritura): Promise<ResultadoEscritura> {
-    const actual = await this.lee(ref, id)
-    this.compruebaNotificacion(actual.invitados.length, op)
+  private async cancelaOcurrencia(inst: RefInstancia, madre: Evento, op: OpEscritura): Promise<ResultadoEscritura> {
+    const idExc = idInstancia(madre.id, inst.inicioOriginal as string)
+    return this.escribe(op.clave, inst, 'instancia', [idExc], async () => {
+      const ev = await this.conConflicto(inst, idExc, () => this.llama(() =>
+        this.proveedor.modificaInstancia(inst, madre.id, inst.inicioOriginal as string, { estado: 'cancelado' }, { notificar: op.notificar ?? 'nadie', siEtag: inst.etag ?? null })))
+      return { guardar: [ev], borrar: [] }
+    })
+  }
+
+  private async borraEntero(ref: RefInstancia, actual: Evento, op: OpEscritura): Promise<ResultadoEscritura> {
+    const id = actual.id
     const excepciones = actual.recurrencia ? (await this.almacen.excepciones(ref, id)).map((x) => x.id) : []
     return this.escribe(op.clave, ref, 'borra', [id, ...excepciones], async () => {
       await this.conConflicto(ref, id, () => this.llama(() =>
