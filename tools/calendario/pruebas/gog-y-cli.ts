@@ -177,3 +177,31 @@ test('CLI: el dry-run de `crea` valida como la escritura: un evento que se recha
   assert.equal(JSON.parse(bueno.salida).evento.transparencia, 'libre', 'el plan ya trae lo que resuelve el esquema')
   await assert.rejects(stat(espejo))
 })
+
+test('CLI: el dry-run de `actualiza` lee el espejo y valida el evento completo; lo irreversible se cuenta con los invitados reales', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'calendario-cli-'))
+  const espejo = join(dir, 'espejo.json')
+  const creado = await cli(['crea', '--proveedor', 'simulador', '--calendario', 'trabajo', '--titulo', 'Demo', '--inicio', '2026-10-20T16:00:00Z', '--fin', '2026-10-20T17:00:00Z', '--invitado', 'cliente@otra.com', '--espejo', espejo, '--aplica', '--clave', 'act-1'])
+  assert.equal(creado.codigo, 0, creado.error)
+  const id = JSON.parse(creado.salida).eventos[0].id as string
+  const base = ['actualiza', '--calendario', 'trabajo', '--evento', id, '--espejo', espejo]
+  const antes = await readFile(espejo, 'utf8')
+
+  const bien = await cli([...base, '--titulo', 'Nuevo', '--notificar', 'todos'])
+  assert.equal(bien.codigo, 0, bien.error)
+  const p = JSON.parse(bien.salida)
+  assert.equal(p.camino, 'suelto')
+  assert.equal(p.resultado.titulo, 'Nuevo')
+  assert.equal(p.invitados, 1)
+  assert.equal(p.irreversible, true, 'el evento ya tiene un invitado: notificar es irreversible aunque no se pase --invitado')
+
+  const mal = await cli([...base, '--inicio', '2026-10-20T18:00:00Z'])
+  assert.equal(mal.codigo, 2, mal.salida)
+  assert.match(JSON.parse(mal.error).mensaje, /fin debe ser posterior/)
+
+  const fuera = await cli(['actualiza', '--calendario', 'trabajo', '--evento', 'no-existe', '--titulo', 'x', '--espejo', espejo])
+  assert.equal(fuera.codigo, 1)
+  assert.equal(JSON.parse(fuera.error).error, 'no-encontrado')
+
+  assert.equal(await readFile(espejo, 'utf8'), antes, 'el dry-run no escribio el espejo')
+})
