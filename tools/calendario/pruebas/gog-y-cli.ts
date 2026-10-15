@@ -155,3 +155,25 @@ test('CLI: una cuenta vacia es una cuenta que falta, y una orden desconocida se 
   assert.equal(orden.codigo, 2)
   assert.equal(JSON.parse(orden.error).mensaje, 'orden desconocida: agenda')
 })
+
+test('CLI: el dry-run de `crea` valida como la escritura: un evento que se rechazaria sale con 2, y el plan muestra lo que se escribiria', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'calendario-cli-'))
+  const espejo = join(dir, 'espejo.json')
+  const base = ['crea', '--calendario', 'trabajo', '--titulo', 'Demo', '--espejo', espejo]
+  const malos: Array<[string[], RegExp]> = [
+    [['--inicio', '2026-10-20T16:00:00Z', '--fin', '2026-10-20T17:00:00Z', '--invitado', 'no-es-correo', '--notificar', 'todos'], /invitados\.0\.correo/],
+    [['--inicio', '2026-10-20T17:00:00Z', '--fin', '2026-10-20T16:00:00Z'], /fin debe ser posterior/],
+    [['--inicio', '2026-10-20T16:00:00Z', '--fin', '2026-10-20T17:00:00Z', '--zona', 'Marte/Olimpo'], /zona/],
+  ]
+  for (const [args, motivo] of malos) {
+    const r = await cli([...base, ...args])
+    assert.equal(r.codigo, 2, r.salida)
+    const e = JSON.parse(r.error)
+    assert.equal(e.error, 'validacion')
+    assert.match(e.mensaje, motivo)
+  }
+  const bueno = await cli([...base, '--inicio', '2026-10-20', '--fin', '2026-10-21', '--todo-el-dia'])
+  assert.equal(bueno.codigo, 0, bueno.error)
+  assert.equal(JSON.parse(bueno.salida).evento.transparencia, 'libre', 'el plan ya trae lo que resuelve el esquema')
+  await assert.rejects(stat(espejo))
+})

@@ -81,12 +81,13 @@ if (t.ok) await reservas.confirma(t.reserva.id, { titulo: 'Cita · ref conv-42',
 
 ```bash
 calendario crea --cuenta agenda@negocio.mx --calendario trabajo --titulo "Revisión" \
-  --inicio 2026-10-20T17:00:00Z --fin 2026-10-20T18:00:00Z --zona America/Mexico_City   # imprime el plan
+  --inicio 2026-10-20T17:00:00Z --fin 2026-10-20T18:00:00Z --zona America/Mexico_City   # imprime el plan, ya validado
 calendario consulta --calendario trabajo --desde 2026-10-19T00:00:00Z --hasta 2026-10-26T00:00:00Z
 calendario sincroniza --calendario trabajo --aplica
 ```
 
 Salidas: `0` bien, `2` entrada inválida o gate (p. ej. notificar sin `--confirmo-notificar`), `1` el proveedor falló.
+El plan de `crea` pasa por la misma validación que la escritura: un evento que se rechazaría sale con `2` ya en el dry-run.
 
 ## Cómo está hecho
 
@@ -108,7 +109,7 @@ Lo que se rediseñó respecto a la fuente, y por qué:
 npm run prueba        # en tools/calendario: build + node --test pruebas/*.ts
 ```
 
-Cubren: DST (salto y regreso), RRULE (BYDAY con ordinal, BYSETPOS, BYMONTHDAY negativo, EXDATE, COUNT/UNTIL) y rechazo de lo no soportado; idempotencia, 409, reparación del espejo, etag, 429, `invalid_grant`, gate de notificación y los tres alcances con compensación; sincronización incremental, paginada, 410 y listado incompleto; huecos (márgenes, aviso, horizonte, tope, DST), `sin-hueco` tipado, **25 reservas simultáneas → 1**, caducidad, confirmación sin datos personales y que confirmar vuelve a mirar el espejo (si algo se agendó en el hueco apartado, `ocupado` en vez de escribir encima); cron y vistas; que el núcleo no importe más que `zod`; el adaptador `gog` con un `gog` falso; el CLI (dry-run, gate, y que `--notificar`, `--alcance`, las fechas o una cuenta vacía fuera de lo válido salen con `2` en vez de colarse); y **la migración en Postgres real (PGlite)**: RLS por dueño probado con el caso malo, `anon` sin acceso y reserva atómica por restricción de exclusión.
+Cubren: DST (salto y regreso), RRULE (BYDAY con ordinal, BYSETPOS, BYMONTHDAY negativo, EXDATE, COUNT/UNTIL) y rechazo de lo no soportado; idempotencia, 409, reparación del espejo, etag, 429, `invalid_grant`, gate de notificación y los tres alcances con compensación; sincronización incremental, paginada, 410 y listado incompleto; huecos (márgenes, aviso, horizonte, tope, DST), `sin-hueco` tipado, **25 reservas simultáneas → 1**, caducidad, confirmación sin datos personales y que confirmar vuelve a mirar el espejo (si algo se agendó en el hueco apartado, `ocupado` en vez de escribir encima); cron y vistas; que el núcleo no importe más que `zod`; el adaptador `gog` con un `gog` falso; el CLI (dry-run validado como la escritura, gate, y que `--notificar`, `--alcance`, las fechas o una cuenta vacía fuera de lo válido salen con `2` en vez de colarse); y **la migración en Postgres real (PGlite)**: RLS por dueño probado con el caso malo, `anon` sin acceso y reserva atómica por restricción de exclusión.
 
 El recorrido de la UI en el laboratorio del template: `node scripts/calendario/recorrido.ts --base http://localhost:<puerto>` sobre `/laboratorio-calendario`.
 

@@ -3,7 +3,8 @@
  * `calendario`: la pluma desde la terminal, para un agente o una persona (sucesor de agent-event.py).
  *
  * Cuatro reglas de los CLIs de esta fabrica:
- * - DRY-RUN POR DEFECTO: sin `--aplica`, imprime el plan (JSON) y no toca nada.
+ * - DRY-RUN POR DEFECTO: sin `--aplica`, imprime el plan (JSON) y no toca nada. El plan pasa por la
+ *   misma validacion que la escritura: lo que imprime es lo que se escribiria, no lo que se tecleo.
  * - Lo que notifica a terceros (invitados con `--notificar`) es IRREVERSIBLE: exige ademas
  *   `--confirmo-notificar`, y el plan lo marca `irreversible: true`.
  * - No reimplementa: lee del espejo o escribe por la pluma contra el proveedor real (gog). El
@@ -23,7 +24,7 @@
 import { parseArgs } from 'node:util'
 import { z } from 'zod'
 import {
-  Lector, Pluma, esErrorCalendario, esquemaAlcance, esquemaNotificar, sincroniza,
+  Lector, Pluma, esErrorCalendario, esquemaAlcance, esquemaNotificar, sincroniza, validaEntrada,
   type Alcance, type EntradaEvento, type Notificar, type Proveedor, type RefCalendario, type Ventana,
 } from '../index.js'
 import { AlmacenEnArchivo } from '../almacenes/archivo.js'
@@ -143,7 +144,7 @@ const plumaDe = (c: Contexto, proveedor: Proveedor) => new Pluma({ proveedor, al
 
 const ORDENES: Record<string, Orden> = {
   crea: {
-    plan: (c) => { const e = entradaEvento(c.v); return plan('crea', c.v, { evento: e }, e.invitados?.length ?? 0) },
+    plan: (c) => { const datos = validaEntrada(entradaEvento(c.v)); return plan('crea', c.v, { evento: datos }, datos.invitados.length) },
     aplica: (c, p) => plumaDe(c, p).crea(c.ref, entradaEvento(c.v), escrituraDe(c.v)),
   },
   actualiza: {
