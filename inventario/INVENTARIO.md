@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**56 activos** cubren **280 unidades** del repo.
+**58 activos** cubren **283 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -17,6 +17,7 @@
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
 | TPL-empaquetador | Empaquetador de herramientas y su contrato | FABRICA | software | produccion | 3 | `scripts/empaqueta-herramienta.mjs` |
+| TPL-feature-laboratorio-calendario | Laboratorio de la herramienta de calendario: el paquete contra su simulador de Google (alcances, reservas, actividad, credencial caducada) y su recorrido | FABRICA | software | beta | 2 | `src/features/laboratorio-calendario` |
 | TPL-feature-laboratorio-etiquetas | Laboratorio de la herramienta de etiquetas GS1: casos, estado real, veredictos y referencias visuales; decide que usa /etiquetas | FABRICA | software | beta | 2 | `src/features/laboratorio-etiquetas` |
 | TPL-feature-laboratorio-pymes | Laboratorio de las herramientas pymes: casos, estado real y veredictos | FABRICA | software | beta | 2 | `src/features/laboratorio-pymes` |
 | TPL-feature-laboratorio-sgi | Laboratorio del sistema integrado: casos deterministas, corridas reales de agentes y las 10 trampas | FABRICA | software | beta | 1 | `src/features/laboratorio-sgi` |
@@ -32,6 +33,7 @@
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 12 | `docker-compose.yml` |
 | TPL-app-base | App SaaS base (Next.js + Supabase, PWA) | PRODUCTO | software | produccion | 6 | `src/app` |
 | TPL-asesor-ventas | Asesor de ventas: insights con evidencia desde una reunion diarizada | PRODUCTO | software | blueprint | 1 | `tools/asesor-ventas` |
+| TPL-calendario | Calendario: motor de agenda (un espejo, una pluma), recurrencias RFC 5545, disponibilidad y reserva sin doble reserva, actividad programada, UI React y CLI (0.1.0) | PRODUCTO | software | beta | 1 | `tools/calendario` |
 | TPL-cli-ss-cadena | CLI ss-cadena de Soporte SAP: verifica la cadena sha256 de eventos de una incidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-cadena.mjs` |
 | TPL-cli-ss-ingesta | CLI ss-ingesta de Soporte SAP: lee un documento por su vía y muestra sus campos con evidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-ingesta.mjs` |
 | TPL-cli-ss-mapea | CLI ss-mapea de Soporte SAP: propone el mapeo de un exporte de tickets y muestra la cuenta (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-mapea.mjs` |

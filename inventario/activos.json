@@ -266,6 +266,22 @@
    "cubre": ["src/features/laboratorio-etiquetas", "scripts/laboratorio-etiquetas"]
   },
   {
+   "id": "TPL-calendario",
+   "nombre": "Calendario: motor de agenda (un espejo, una pluma), recurrencias RFC 5545, disponibilidad y reserva sin doble reserva, actividad programada, UI React y CLI (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/calendario", "responsable": "dep-sw",
+   "origen": ["docs/goals/calendario.md"],
+   "cubre": ["tools/calendario"]
+  },
+  {
+   "id": "TPL-feature-laboratorio-calendario",
+   "nombre": "Laboratorio de la herramienta de calendario: el paquete contra su simulador de Google (alcances, reservas, actividad, credencial caducada) y su recorrido",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/laboratorio-calendario", "responsable": "dep-sw",
+   "origen": ["docs/goals/calendario.md"],
+   "cubre": ["src/features/laboratorio-calendario", "scripts/calendario"]
+  },
+  {
    "id": "TPL-app-base",
    "nombre": "App SaaS base (Next.js + Supabase, PWA)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "produccion",

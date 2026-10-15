@@ -1,0 +1,70 @@
+{
+  "name": "@tu-scope/calendario",
+  "version": "0.1.0",
+  "description": "Motor de agenda: un espejo, una pluma. Lee rapido de un espejo, escribe por un solo punto que deja proveedor y espejo consistentes, y reserva tiempo sin doble reserva.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "bin": {
+    "calendario": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./simulador": {
+      "types": "./dist/simulador/index.d.ts",
+      "import": "./dist/simulador/index.js"
+    },
+    "./gog": {
+      "types": "./dist/gog/index.d.ts",
+      "import": "./dist/gog/index.js"
+    },
+    "./gog/proceso": {
+      "types": "./dist/gog/proceso.d.ts",
+      "import": "./dist/gog/proceso.js"
+    },
+    "./almacenes/memoria": {
+      "types": "./dist/almacenes/memoria.d.ts",
+      "import": "./dist/almacenes/memoria.js"
+    },
+    "./almacenes/archivo": {
+      "types": "./dist/almacenes/archivo.d.ts",
+      "import": "./dist/almacenes/archivo.js"
+    },
+    "./almacenes/supabase": {
+      "types": "./dist/almacenes/supabase.d.ts",
+      "import": "./dist/almacenes/supabase.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "migraciones",
+    "LICENSE-FUENTE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.1"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

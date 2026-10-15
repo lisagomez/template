@@ -44,6 +44,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 |---|---|
 | `TPL-app-base` `TPL-feature-auth` `TPL-feature-dashboard` `TPL-feature-project-settings` | base común de la app: la usan todos los productos, y sus datos (las cuentas de usuario) entran en la evaluación de impacto de cada producto que la usa |
 | `TPL-grafo-conocimiento` | motor de reglas: da veredictos a quien lo consulta, y el contrato es el del producto que lo consulta |
+| `TPL-calendario` | motor de agenda: lo usan los productos que agendan (vendedor por WhatsApp, asesor por voz); qué datos de quien reserva salen hacia Google lo decide el contrato y la AISIA del producto que lo consume |
 
 ## 3. Lo que todo producto hereda de la fábrica
 
