@@ -21,7 +21,11 @@
  * --proveedor gog|simulador, --clave K (idempotencia), --aplica, --notificar nadie|externos|todos, --confirmo-notificar.
  */
 import { parseArgs } from 'node:util'
-import { Lector, Pluma, esErrorCalendario, sincroniza, type Alcance, type EntradaEvento, type Notificar, type Proveedor, type RefCalendario } from '../index.js'
+import { z } from 'zod'
+import {
+  Lector, Pluma, esErrorCalendario, esquemaAlcance, esquemaNotificar, sincroniza,
+  type Alcance, type EntradaEvento, type Notificar, type Proveedor, type RefCalendario, type Ventana,
+} from '../index.js'
 import { AlmacenEnArchivo } from '../almacenes/archivo.js'
 import { ProveedorGog } from '../gog/index.js'
 import { ejecutorGog } from '../gog/proceso.js'
@@ -49,14 +53,37 @@ function exige(v: Valores, k: string): string {
   return x
 }
 
+/** Lo que no pasa el esquema es un error de uso (sale con 2), no un valor que se cuela hasta el proveedor. */
+function parsea<T>(k: string, x: string, esquema: z.ZodType<T>): T {
+  const r = esquema.safeParse(x)
+  if (!r.success) throw new ErrorDeUso(`--${k} «${x}»: ${r.error.issues[0]?.message ?? 'valor invalido'}`)
+  return r.data
+}
+
+function opcional<T>(v: Valores, k: string, esquema: z.ZodType<T>): T | undefined {
+  const x = texto(v, k)
+  return x === undefined ? undefined : parsea(k, x, esquema)
+}
+
+/** Una cuenta vacia o en blanco es una cuenta que falta. */
 function cuentaDe(v: Valores): string {
-  const cuenta = texto(v, 'cuenta') ?? process.env.CALENDARIO_CUENTA
-  if (cuenta === undefined) throw new ErrorDeUso('falta --cuenta (o CALENDARIO_CUENTA)')
+  const cuenta = (texto(v, 'cuenta') ?? process.env.CALENDARIO_CUENTA)?.trim()
+  if (!cuenta) throw new ErrorDeUso('falta --cuenta (o CALENDARIO_CUENTA)')
   return cuenta
 }
 
-const notificarDe = (v: Valores): Notificar => (texto(v, 'notificar') ?? 'nadie') as Notificar
-const alcanceDe = (v: Valores): Alcance | undefined => texto(v, 'alcance') as Alcance | undefined
+const notificarDe = (v: Valores): Notificar => opcional(v, 'notificar', esquemaNotificar) ?? 'nadie'
+const alcanceDe = (v: Valores): Alcance | undefined => opcional(v, 'alcance', esquemaAlcance)
+
+const esquemaInstante = z.string().refine((s) => !Number.isNaN(Date.parse(s)), 'no es una fecha ISO').transform((s) => Date.parse(s))
+
+/** Una fecha que no se lee daria una consulta vacia, y vacia se confunde con «no hay nada». */
+function ventanaDe(v: Valores): Ventana {
+  const desde = parsea('desde', exige(v, 'desde'), esquemaInstante)
+  const hasta = parsea('hasta', exige(v, 'hasta'), esquemaInstante)
+  if (hasta <= desde) throw new ErrorDeUso('--hasta debe ser posterior a --desde')
+  return { desde, hasta }
+}
 
 function proveedorDe(v: Valores): Proveedor {
   const nombre = texto(v, 'proveedor') ?? 'gog'
@@ -134,16 +161,15 @@ const ORDENES: Record<string, Orden> = {
 }
 
 async function ejecuta(nombre: string, v: Valores): Promise<object> {
+  // Primero la orden: con una que no existe, lo que le falte no importa.
+  const orden = Object.hasOwn(ORDENES, nombre) ? ORDENES[nombre] : undefined
+  if (!orden && nombre !== 'consulta') throw new ErrorDeUso(`orden desconocida: ${nombre}`)
   const cuenta = cuentaDe(v)
   const almacen = await AlmacenEnArchivo.abre(texto(v, 'espejo') ?? '.calendario-espejo.json')
   const refs: RefCalendario[] = lista(v, 'calendario').map((calendario) => ({ cuenta, calendario }))
-  if (nombre === 'consulta') {
-    return new Lector({ almacen }).consulta({ calendarios: refs, desde: Date.parse(exige(v, 'desde')), hasta: Date.parse(exige(v, 'hasta')), zona: texto(v, 'zona') ?? 'UTC' })
-  }
+  if (!orden) return new Lector({ almacen }).consulta({ calendarios: refs, ...ventanaDe(v), zona: texto(v, 'zona') ?? 'UTC' })
   const ref = refs[0]
   if (!ref && nombre !== 'sincroniza') throw new ErrorDeUso('falta --calendario')
-  const orden = Object.hasOwn(ORDENES, nombre) ? ORDENES[nombre] : undefined
-  if (!orden) throw new ErrorDeUso(`orden desconocida: ${nombre}`)
   const c: Contexto = { v, almacen, refs, ref: ref as RefCalendario }
   return v.aplica ? orden.aplica(c, proveedorDe(v)) : orden.plan(c)
 }

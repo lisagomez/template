@@ -114,8 +114,10 @@ export interface Instancia extends Evento {
   finMs: number
 }
 
-export type Alcance = 'este' | 'siguientes' | 'todos'
-export type Notificar = 'nadie' | 'externos' | 'todos'
+export const esquemaAlcance = z.enum(['este', 'siguientes', 'todos'], { error: 'se espera este, siguientes o todos' })
+export type Alcance = z.output<typeof esquemaAlcance>
+export const esquemaNotificar = z.enum(['nadie', 'externos', 'todos'], { error: 'se espera nadie, externos o todos' })
+export type Notificar = z.output<typeof esquemaNotificar>
 
 export interface Ventana { desde: number; hasta: number }
 

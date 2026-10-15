@@ -90,8 +90,8 @@ test('gog/proceso: sin GOG_KEYRING_PASSWORD falla `credencial` antes de ejecutar
   await assert.rejects(ejecuta(['calendar', 'calendars']), (e) => esErrorCalendario(e, 'credencial') && /GOG_KEYRING_PASSWORD/.test(e.message))
 })
 
-function cli(args: string[]): Promise<{ codigo: number; salida: string; error: string }> {
-  return new Promise((r) => execFile(process.execPath, [CLI, ...args], { env: { ...process.env, CALENDARIO_CUENTA: 'agenda@negocio.mx' } }, (e, salida, error) =>
+function cli(args: string[], env: Record<string, string> = {}): Promise<{ codigo: number; salida: string; error: string }> {
+  return new Promise((r) => execFile(process.execPath, [CLI, ...args], { env: { ...process.env, CALENDARIO_CUENTA: 'agenda@negocio.mx', ...env } }, (e, salida, error) =>
     r({ codigo: e ? (typeof e.code === 'number' ? e.code : 1) : 0, salida, error })))
 }
 
@@ -119,4 +119,39 @@ test('CLI: aplicar algo que notifica a invitados sin --confirmo-notificar sale c
   assert.equal(guardado.eventos.length, 1)
   const consulta = await cli(['consulta', '--calendario', 'trabajo', '--desde', '2026-10-19T00:00:00Z', '--hasta', '2026-10-26T00:00:00Z', '--espejo', espejo])
   assert.equal(JSON.parse(consulta.salida).instancias.length, 1)
+})
+
+test('CLI: un --notificar o --alcance fuera de su lista sale con 2 antes de planear o escribir (no se cuela como `todos`)', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'calendario-cli-'))
+  const espejo = join(dir, 'espejo.json')
+  const crea = ['crea', '--proveedor', 'simulador', '--calendario', 'trabajo', '--titulo', 'Demo', '--inicio', '2026-10-20T16:00:00Z', '--fin', '2026-10-20T17:00:00Z', '--invitado', 'cliente@otra.com', '--espejo', espejo]
+  const casos = [
+    [...crea, '--notificar', 'foo'],
+    [...crea, '--notificar', 'foo', '--confirmo-notificar', '--aplica'],
+    ['actualiza', '--calendario', 'trabajo', '--evento', 'e1', '--alcance', 'casi', '--espejo', espejo],
+  ]
+  for (const args of casos) {
+    const r = await cli(args)
+    assert.equal(r.codigo, 2, r.salida)
+    assert.match(JSON.parse(r.error).mensaje, /^--(notificar|alcance) .*se espera/)
+  }
+  await assert.rejects(stat(espejo), 'nada llego a escribir el espejo')
+})
+
+test('CLI: una consulta con fechas que no se leen, o con la ventana al reves, sale con 2 en vez de contestar «no hay nada»', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'calendario-cli-'))
+  for (const [desde, hasta] of [['basura', '2026-10-26T00:00:00Z'], ['2026-10-26T00:00:00Z', '2026-10-19T00:00:00Z']]) {
+    const r = await cli(['consulta', '--calendario', 'trabajo', '--desde', desde as string, '--hasta', hasta as string, '--espejo', join(dir, 'espejo.json')])
+    assert.equal(r.codigo, 2, r.salida)
+    assert.equal(r.salida, '')
+  }
+})
+
+test('CLI: una cuenta vacia es una cuenta que falta, y una orden desconocida se dice antes que lo que le falta', async () => {
+  const vacia = await cli(['sincroniza', '--calendario', 'trabajo'], { CALENDARIO_CUENTA: '' })
+  assert.equal(vacia.codigo, 2)
+  assert.match(JSON.parse(vacia.error).mensaje, /falta --cuenta/)
+  const orden = await cli(['agenda'], { CALENDARIO_CUENTA: '' })
+  assert.equal(orden.codigo, 2)
+  assert.equal(JSON.parse(orden.error).mensaje, 'orden desconocida: agenda')
 })
