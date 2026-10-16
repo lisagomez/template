@@ -12,6 +12,7 @@ import { useDictadoMovil } from '@/features/dictado/store/movil';
 import { borraRango, borraUno, corrige, estadisticas as pideEstadisticas, leePagina, pegaEnPc } from '../services/cliente.ts';
 import type { Estadisticas } from '../services/estadisticas.ts';
 import type { Dictado, Filtros, Pagina } from '../services/tipos.ts';
+import { tokenDelEnlace } from '@/shared/lib/token-enlace';
 
 const CUANTOS = 100;
 const MS_SONDEO = 2_000;
@@ -41,10 +42,11 @@ export function useHistorial() {
 
   useEffect(() => {
     cargaMovil();
-    const m = /[#?&]t=([^&]+)/.exec(window.location.hash + window.location.search);
-    if (m?.[1]) {
-      void empareja(decodeURIComponent(m[1]));
-      history.replaceState(null, '', window.location.pathname);
+    // Hash y búsqueda por separado: concatenados, `?caso=6#t=…` pegaba la búsqueda al token (shared/lib/token-enlace.ts).
+    const enlace = tokenDelEnlace(window.location);
+    if (enlace) {
+      void empareja(enlace.token);
+      history.replaceState(null, '', enlace.urlLimpia);
     }
   }, [cargaMovil, empareja]);
 

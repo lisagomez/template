@@ -51,15 +51,18 @@ function construye() {
   execFileSync('npm', ['run', 'build'], { cwd: raiz, stdio: 'ignore' });
 }
 construye();
-const { PESOS, RUNTIMES } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'pesos.js')).href);
+const { PESOS, RUNTIMES, verificaHuella } = await import(pathToFileURL(join(raiz, 'dist', 'node', 'pesos.js')).href);
 
 /** LibriSpeech dev-clean: lectura limpia, con `speaker_id` — la verdad que hace falta. */
 const CORPUS = 'openslr/librispeech_asr';
 const HABLANTES = 5;
 const TOMAS = 12;
 
-function baja(url, destino) {
-  execFileSync('curl', ['-sSL', '--fail', '-o', destino, url], { stdio: ['ignore', 'ignore', 'inherit'] });
+/** Baja a un parcial, comprueba la huella pineada y solo entonces lo deja en su sitio. */
+function baja(url, destino, sha256 = null) {
+  execFileSync('curl', ['-sSL', '--fail', '-o', `${destino}.parcial`, url], { stdio: ['ignore', 'ignore', 'inherit'] });
+  verificaHuella(`${destino}.parcial`, sha256);
+  execFileSync('mv', [`${destino}.parcial`, destino]);
 }
 
 async function preparaModelos() {
@@ -71,7 +74,7 @@ async function preparaModelos() {
       continue;
     }
     console.log(gris(`  bajando ${p.archivo} (~${p.mb} MB) — ${p.que}`));
-    baja(p.url, destino);
+    baja(p.url, destino, p.sha256);
   }
 }
 
@@ -142,7 +145,7 @@ function siembraReadme(r) {
   const filasRegistro = r.registro.map((x) => `| ${f(x.umbral, 2)} | ${x.acierta} | ${x.equivoca} | ${x.abstiene} | ${x.impostorConNombre} / ${x.impostorTomas} |`).join('\n');
   const bloque = [
     '<!-- MEDICION -->',
-    `**Ultima medicion en esta maquina** (\`npm run mide\`, ${r.fecha} · ${r.maquina.cpu}, ${r.maquina.nucleos} nucleos, ${r.maquina.ramGb} GB, Node ${r.maquina.node} · ${r.corpus.nombre}, ${r.corpus.hablantes} hablantes × ${r.corpus.tomasPorHablante} tomas). Este bloque lo escribe la medicion; el resto del README lo comenta.`,
+    `**Ultima medicion en esta maquina** (\`npm run mide\`, ${r.fecha} · ${r.maquina.cpu}, ${r.maquina.nucleos} hilos, ${r.maquina.ramGb} GB, Node ${r.maquina.node} · ${r.corpus.nombre}, ${r.corpus.hablantes} hablantes × ${r.corpus.tomasPorHablante} tomas). Este bloque lo escribe la medicion; el resto del README lo comenta.`,
     '',
     '| Que | Medido |',
     '|---|---|',

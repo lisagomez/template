@@ -12,7 +12,7 @@
  */
 import catalogo from '../../../.claude/routing-modelos.json' with { type: 'json' }
 
-export type Nivel = 'ligero' | 'capaz' | 'razonamiento'
+export type Nivel = 'ligero' | 'voz' | 'capaz' | 'razonamiento'
 export type ClaseDeTarea = Exclude<keyof typeof catalogo.tareas, `_${string}`>
 
 export interface Precio {

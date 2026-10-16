@@ -16,7 +16,7 @@ import { escribeArchivoAjustes, rutaAjustes } from './ajustes-archivo.js';
 import { leeConfiguracion, type Configuracion } from './cli-config.js';
 import { ordenDiagnostico } from './cli-diagnostico.js';
 import { copiaIconoAWindows, ordenIcono } from './cli-icono.js';
-import { mbDe, NECESARIOS, rutaDe, RUNTIMES, type Peso } from './pesos.js';
+import { mbDe, NECESARIOS, rutaDe, RUNTIMES, verificaHuella, type Peso } from './pesos.js';
 
 const ESC = String.fromCharCode(27);
 const gris = (s: string) => `${ESC}[2m${s}${ESC}[0m`;
@@ -70,11 +70,13 @@ function descargaPeso(modelos: string, p: Peso): 'ya' | 'bajado' {
   mkdirSync(modelos, { recursive: true });
   if (p.tipo === 'archivo') {
     execFileSync('curl', ['-sSL', '--fail', '-o', `${rutaDe(modelos, p)}.parcial`, p.url], { stdio: ['ignore', 'ignore', 'inherit'] });
+    verificaHuella(`${rutaDe(modelos, p)}.parcial`, p.sha256);
     execFileSync('mv', [`${rutaDe(modelos, p)}.parcial`, rutaDe(modelos, p)]);
     return 'bajado';
   }
   const tar = join(modelos, `${p.carpeta}.tar.bz2`);
   execFileSync('curl', ['-sSL', '--fail', '-o', tar, p.url], { stdio: ['ignore', 'ignore', 'inherit'] });
+  verificaHuella(tar, p.sha256);
   execFileSync('tar', ['-xjf', tar, '-C', modelos]);
   execFileSync('rm', [tar]);
   return 'bajado';

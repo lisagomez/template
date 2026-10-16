@@ -26,7 +26,7 @@ Hablar y que el texto aparezca donde está el cursor. Local, en WSL2, sobre `@tu
 - **Runtime**: Node `>=22.18` (`engines`; `dictado instala` lo comprueba).
 - **Dependencias del sistema**: ffmpeg, el micrófono de WSLg y Windows al alcance (PowerShell pega, suena y pinta el
   icono); los runtimes pineados `sherpa-onnx-node@1.13.8` y `onnxruntime-node@1.30.0`; los pesos pineados (Parakeet
-  int8, Silero, WeSpeaker, voz Piper es_MX: ~750 MB); `@tu-scope/voz` 0.5.0 como peer exacto. Opcionales: Python con
+  int8, Silero, WeSpeaker, voz Piper es_MX: ~750 MB); `@tu-scope/voz` 0.6.0 como peer exacto. Opcionales: Python con
   `faster-whisper` para el respaldo, y Docker para el servicio remoto.
 - **CPU, GPU y memoria**: medido el 2026-09-15 en un AMD Ryzen 7 5700G (16 hilos, 15 GB, sin CUDA): Parakeet int8 p50
   532 ms por toma con 1531 MB de RAM residente y 8 hilos (tabla en «Medición»). GPU: no medido (la imagen
@@ -45,7 +45,7 @@ Hablar y que el texto aparezca donde está el cursor. Local, en WSL2, sobre `@tu
 ## Instalar
 
 ```bash
-npm install <ruta>/tools/voz/tu-scope-voz-0.5.0.tgz <ruta>/tools/dictado/tu-scope-dictado-0.1.0.tgz
+npm install <ruta>/tools/voz/tu-scope-voz-0.6.0.tgz <ruta>/tools/dictado/tu-scope-dictado-0.2.0.tgz
 npx dictado instala [--app <ruta-de-la-app>] [--sin-icono]   # una máquina nueva, en un paso
 npx dictado diagnostico                                       # lo que se pega en un issue: sin secretos ni texto dictado
 ```
@@ -61,7 +61,7 @@ que queda a mano (permitir el micrófono, anclar el icono, abrir la dirección e
 solo por LAN el script de red como administrador). Medido en limpio: ver
 `medicion/corpus-propio/instalacion-<fecha>.md`. No pide administrador.
 
-`@tu-scope/voz` es peer **exacto y obligatorio** (0.5.0): el contrato de este paquete
+`@tu-scope/voz` es peer **exacto y obligatorio** (0.6.0): el contrato de este paquete
 (`Muestras`, `Turno`, `DetectorVoz`, `Transcriptor` con idioma y pista) **es** el de voz —desde
 0.5.0 se importan sus tipos en vez de redeclararlos, y `pruebas/contrato.ts` lo demuestra en
 tipos y en cifras—, el VAD usa su perfil `dictado`, y el nivel en dB, el pico por ventanas y el
@@ -456,7 +456,7 @@ toma; RTF = tiempo de cómputo / duración del audio; RAM residente tras cargar.
 | `faster-whisper-large-v3-turbo-int8-cpu` | **2,5 %** | 2,5 % | **6283 ms** | 6546 ms | 6133 ms (15) | 0,521 | 1089 MB | 9,7 s |
 <!-- /TABLA_MOTORES -->
 
-<!-- LECTURA_MOTORES -->**Lectura.** Parakeet TDT 0.6B v3 (int8, sherpa-onnx) gana en lo que un dictado necesita: 3,3 % de WER a 614 ms por toma de ~12 s (362 ms en las de ≤ 8 s), RTF 0,054. faster-whisper large-v3-turbo es el más preciso (2,5 %) pero tarda 6,4 s por frase: sirve para lotes, no para dictar. El **mismo** Whisper turbo por sherpa-onnx int8 da 11,4 %: mismo modelo, otro runtime y otra cuantización; se mide, no se explica. Whisper base no vale para español (11,8 %). Parakeet y large-v3-turbo se equivocan en lo mismo: «riesgo **del** clima» por «riesgo **de** clima» está en los cinco motores — el corpus también tiene su ruido.<!-- /LECTURA_MOTORES -->
+<!-- LECTURA_MOTORES -->**Lectura.** Parakeet TDT 0.6B v3 (int8, sherpa-onnx) gana en lo que un dictado necesita: 3,3 % de WER a 532 ms por toma de ~12 s (327 ms en las de ≤ 8 s), RTF 0,048. faster-whisper large-v3-turbo es el más preciso (2,5 %) pero tarda 6,4 s por frase: sirve para lotes, no para dictar. El **mismo** Whisper turbo por sherpa-onnx int8 da 11,4 %: mismo modelo, otro runtime y otra cuantización; se mide, no se explica. Whisper base no vale para español (11,8 %). Parakeet y large-v3-turbo se equivocan en lo mismo: «riesgo **del** clima» por «riesgo **de** clima» está en los cinco motores — el corpus también tiene su ruido.<!-- /LECTURA_MOTORES -->
 
 **Cuánto silencio cierra una frase** (VAD Silero sobre las mismas tomas; cada una es UNA frase):
 
@@ -564,14 +564,41 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 | `DICTADO_CARACTERES_MAXIMOS` | tope del texto de `/sintetizar` | 2000 |
 | `DICTADO_CONVERSACION_PUERTO` | puerto del socket por el que `dictado di` le pide al `dictar` en marcha que hable (`--conversacion-puerto` en `dictar`) | 47126 |
 | `DICTADO_CONVERSACION_TRAZA` | `1`: trazas con instante del modo conversación en el log (las lee `mide-conversacion.mjs`) | — |
+| `DICTADO_CONVERSACION_MARGEN_MS` | margen de la puerta del micrófono tras la voz del agente, solo para medir (`mide-conversacion.mjs`) | el de `ajustes.json` |
+| `DICTADO_FLAGS` | banderas de `dictar` para una sesión de `npm run en-vivo` (mandan sobre todo lo demás) | las de `scripts/en-vivo.mjs` |
+| `DICTADO_TRAYECTORIAS` | carpeta donde `dictar` deja `trayectoria.json` (forma, sin contenido) | `corpus/` del paquete |
+| `DICTADO_HISTORIAL_URL` | qué abre «Abrir historial» del icono, si la app no está en el 3000 | `http://localhost:3000/historial` |
+| `DICTADO_ICONO_MEDIR`, `DICTADO_ICONO_TRAZA` | `1`: el icono mide su pintado / traza sus estados (`medicion/mide-pildora.mjs`) | — |
+
+**Del demonio local** (`npm run demonio`, `scripts/demonio.mjs`):
+
+| Variable | Qué | Por defecto |
+|---|---|---|
+| `DICTADO_DEMONIO_PUERTO` | puerto en 127.0.0.1 (lo leen también las rutas de la app) | 47125 |
+| `DICTADO_DEMONIO_MOTOR` | motor del demonio, por encima de `ajustes.json` | el de `ajustes.json` (`parakeet`) |
+| `DICTADO_DEMONIO_RESPALDO` | segundo motor del demonio (`faster-whisper:<modelo>`) | `faster-whisper:small` si el banco tiene venv |
+
+**Del servicio** (`servicio/`, en el demonio o en tu VPS; el demonio las fija por ti):
+
+| Variable | Qué | Por defecto |
+|---|---|---|
+| `DICTADO_TOKEN` | el Bearer del servicio (≥ 32 caracteres; sin él no arranca). En el demonio es `DICTADO_MOVIL_TOKEN` | — (obligatorio) |
+| `DICTADO_PUERTO`, `DICTADO_ESCUCHA` | puerto e interfaz | 8090 en la imagen · `0.0.0.0` (el demonio: 47125 y `127.0.0.1`) |
+| `DICTADO_MOTOR`, `DICTADO_IDIOMA` | motor e idioma del servicio | `parakeet` · `es` |
+| `DICTADO_EN_VUELO` | transcripciones a la vez | 1 (el demonio: 2) |
+| `DICTADO_BYTES_MAXIMOS` | tope del cuerpo de `/transcribir` | 10 MB (~5 min de PCM16 a 16 kHz) |
+| `DICTADO_TLS_CERT`, `DICTADO_TLS_CLAVE` | TLS propio (si no, lo termina el proxy) | — |
+| `DICTADO_VERSION` | etiqueta de la imagen en `compose.yml` | 0.1.0 |
+| `DICTADO_CPUS`, `DICTADO_MEM` | límites del contenedor CPU | 4 · 3G |
+| `DICTADO_GPU_MOTOR`, `DICTADO_GPU_EN_VUELO`, `DICTADO_GPU_COUNT`, `DICTADO_GPU_MEM`, `DICTADO_GPU_SHM` | el perfil GPU de `compose.yml` (sin medir: ver §4) | `faster-whisper:large-v3-turbo` · 2 · 1 · 8G · 2gb |
 
 El token nunca se imprime: `dictado config` dice `presente (largo N)`.
 
 ## Desarrollo
 
 ```bash
-npm run build      # prebuild instala @tu-scope/voz 0.5.0 desde su tarball (nunca npm link)
-npm run prueba     # 121 pruebas contra dist/, sin modelos ni red, ~2 s
+npm run build      # prebuild instala @tu-scope/voz 0.6.0 desde su tarball (nunca npm link)
+npm run prueba     # 150 pruebas contra dist/, sin modelos ni red, ~1 s (2026-10-16)
 npm run mide       # pesos reales; ~2,5 GB la primera vez
 npm run empaqueta dictado   # desde la raíz del repo: contrato + build + tarball + integración
 ```
@@ -584,3 +611,13 @@ npm run empaqueta dictado   # desde la raíz del repo: contrato + build + tarbal
 Modo comando y transformaciones por LLM (piden un modelo de texto: el enchufe `Limpiador`
 existe, el proveedor no), GUI, streaming parcial, y cualquier nube. El porqué de cada uno, en el
 SDD §8.
+
+## Cambios
+
+- **0.2.0** (2026-10-16, sin publicar): lo de la conversación (PRP-003: envío por silencio, `dictar` dueño del
+  altavoz, hook `Stop`), que ya estaba en el código, más: `./remoto` exporta `aPcm16` con la MISMA escala que
+  `voz/node` (×32768 con tope; la asimétrica ×32767 perdía 1 LSB, arreglado en voz el 2026-09-21 y aquí no); los
+  pesos van a referencias inmutables con huella `sha256` comprobada al bajar (`instala` y `npm run mide`, que deja de
+  llevar su propia copia de la lista); peer `@tu-scope/voz` 0.6.0 exacto; README con las 26 variables `DICTADO_*` que
+  faltaban y las cifras de la lectura de motores alineadas con su tabla.
+- **0.1.0** (2026-09-21): primera versión empaquetada.

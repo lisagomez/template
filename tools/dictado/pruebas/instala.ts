@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { comprueba } from '../dist/node/cli-instala.js';
 import { limpiaParaCompartir, lineasUtilesDelLog } from '../dist/node/cli-diagnostico.js';
 import { hayQueRefrescarIcono } from '../dist/node/cli-icono.js';
-import { mbDe, NECESARIOS, RUNTIMES } from '../dist/node/pesos.js';
+import { DE_MEDICION, mbDe, NECESARIOS, RUNTIMES, verificaHuella } from '../dist/node/pesos.js';
 import { almacenEnMemoria, creaHistorial, fechaHaceDias } from '../dist/index.js';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -65,4 +65,20 @@ test('historial: borra todo o solo lo anterior a una fecha; fechaHaceDias resta 
   assert.equal(await h.borraUno(uno.id), 1);
   assert.equal(await h.cuenta(), 0);
   assert.equal(fechaHaceDias(365, new Date('2026-09-20T00:00:00.000Z')).slice(0, 10), '2025-09-20');
+});
+
+test('los pesos van a referencias inmutables y con huella: nada de master/main, y la que no coincide se borra', async () => {
+  const { existsSync } = await import('node:fs');
+  for (const p of [...NECESARIOS, ...DE_MEDICION]) {
+    assert.doesNotMatch(p.url, /\/(raw|resolve)\/(master|main)\//, `${p.url} apunta a una rama que se mueve`);
+    if (p.sha256 !== null) assert.match(p.sha256, /^sha256:[0-9a-f]{64}$/);
+  }
+  assert.ok(NECESARIOS.every((p) => p.sha256 !== null), 'todo lo que instala un dictado lleva huella');
+  const dir = mkdtempSync(join(tmpdir(), 'huella-'));
+  const ruta = join(dir, 'peso.onnx');
+  writeFileSync(ruta, 'hola');
+  verificaHuella(ruta, 'sha256:b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79');
+  assert.ok(existsSync(ruta), 'la huella buena lo deja');
+  assert.throws(() => verificaHuella(ruta, `sha256:${'0'.repeat(64)}`), /no coincide/);
+  assert.ok(!existsSync(ruta), 'la mala lo borra');
 });

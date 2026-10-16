@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useDictadoMovil } from '@/features/dictado/store/movil';
 import { pideEstado, type EstadoServidor } from '../services/cliente.ts';
 import { useVeredictos } from '../store/veredictos.ts';
+import { tokenDelEnlace } from '@/shared/lib/token-enlace';
 
 export function useLaboratorio() {
   const movil = useDictadoMovil();
@@ -20,10 +21,11 @@ export function useLaboratorio() {
   useEffect(() => {
     cargaMovil();
     // Emparejamiento por QR/enlace, igual que /dictar: el token viaja en #t= y se borra de la barra.
-    const m = /[#?&]t=([^&]+)/.exec(window.location.hash + window.location.search);
-    if (m?.[1]) {
-      void empareja(decodeURIComponent(m[1]));
-      history.replaceState(null, '', window.location.pathname);
+    // Hash y búsqueda por separado: concatenados, `?caso=6#t=…` pegaba la búsqueda al token (shared/lib/token-enlace.ts).
+    const enlace = tokenDelEnlace(window.location);
+    if (enlace) {
+      void empareja(enlace.token);
+      history.replaceState(null, '', enlace.urlLimpia);
     }
     pideEstado()
       .then(setServidor)

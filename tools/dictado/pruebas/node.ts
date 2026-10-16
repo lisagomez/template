@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { creaAlmacenJsonl, creaGestosDeTecla, creaMotorPorProceso, creaMotorSherpa, creaVozSintetica, floatAPcm16, habla, leeAudio, type Altavoz } from '../dist/node/index.js';
-import { creaTranscriptorRemoto } from '../dist/remoto/index.js';
+import { aPcm16 as aPcm16Remoto, creaTranscriptorRemoto } from '../dist/remoto/index.js';
 import { parseaArgumentos } from '../dist/node/cli-config.js';
 
 const HIJO_FALSO = `
@@ -143,6 +143,15 @@ test('transcriptor remoto: bearer, PCM16 en el cuerpo, pista en base64, errores 
   await assert.rejects(malo.transcribe(new Float32Array(2), 16_000), /401/);
   assert.throws(() => creaTranscriptorRemoto({ url: '127.0.0.1', token: 'x'.repeat(16) }), /esquema/);
   assert.throws(() => creaTranscriptorRemoto({ url: 'http://a', token: 'corto' }), /corto/);
+});
+
+test('el PCM16 del cliente remoto es el mismo de voz/node: escala simétrica e inversa exacta de ÷32768', () => {
+  const muestras = new Float32Array([0, 0.5, -0.5, 1, -1, 0.25, 32767 / 32768, -0.999]);
+  assert.deepEqual([...aPcm16Remoto(muestras)], [...floatAPcm16(muestras)], 'byte a byte igual que floatAPcm16');
+  const vista = new DataView(aPcm16Remoto(new Float32Array([0.5])).buffer);
+  assert.equal(vista.getInt16(0, true), 16384, '0,5 → 16384 (la asimétrica daba 16384 en negativos y 16383,5 → 16384/16383 en positivos)');
+  const ida = aPcm16Remoto(new Float32Array([0.123456]));
+  assert.equal(new DataView(ida.buffer).getInt16(0, true) / 32768, Math.round(0.123456 * 32768) / 32768, 'ida y vuelta sin perder 1 LSB');
 });
 
 test('motor sherpa: una carpeta sin modelo falla al crear, no al transcribir', () => {

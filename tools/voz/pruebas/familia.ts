@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { creaDetectorVoz, factorDeDb, modeloEnergia, nivelDb, PERFILES_DETECTOR, picoDb, rms, transcribeTurnos, type Muestras, type OpcionesTranscribe, type Transcripcion, type Transcriptor, type Turno } from '../dist/index.js';
-import { codificaWav, floatAPcm16, leeWav, mbDe, pcm16aFloat, PESOS, RUNTIMES } from '../dist/node/index.js';
+import { codificaWav, floatAPcm16, huellaDe, leeWav, mbDe, pcm16aFloat, PESOS, RUNTIMES, verificaHuella } from '../dist/node/index.js';
 
 const seno = (hz: number, ms: number, amplitud = 0.5, fs = 16_000): Muestras => {
   const n = Math.round((fs * ms) / 1000);
@@ -87,8 +87,23 @@ test('pesos: pineados por URL exacta, con tamano, y runtimes con version', () =>
   assert.equal(PESOS.length, 3);
   for (const p of PESOS) {
     assert.match(p.url, /^https:\/\/(github\.com|huggingface\.co)\//);
+    assert.doesNotMatch(p.url, /\/(raw|resolve)\/(master|main)\//, `${p.url}: una rama se mueve sin avisar (el Silero «v5» resultó ser v6.2)`);
+    assert.match(p.sha256, /^sha256:[0-9a-f]{64}$/, 'con huella');
     assert.ok(p.mb > 0 && p.archivo.endsWith('.onnx'));
   }
   assert.ok(mbDe(PESOS) < 60, 'menos de 60 MB en total');
   for (const v of Object.values(RUNTIMES)) assert.match(v, /^\d+\.\d+\.\d+$/, 'pineado exacto, nunca latest ni un rango');
+});
+
+test('verificaHuella: deja el archivo con la huella buena y BORRA el que no coincide', async () => {
+  const { existsSync, mkdtempSync, writeFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { tmpdir } = await import('node:os');
+  const ruta = join(mkdtempSync(join(tmpdir(), 'huella-voz-')), 'p.onnx');
+  writeFileSync(ruta, 'hola');
+  assert.equal(huellaDe(new TextEncoder().encode('hola')), 'sha256:b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79');
+  verificaHuella(ruta, huellaDe(new TextEncoder().encode('hola')));
+  assert.ok(existsSync(ruta));
+  assert.throws(() => verificaHuella(ruta, `sha256:${'f'.repeat(64)}`), /no coincide/);
+  assert.ok(!existsSync(ruta));
 });

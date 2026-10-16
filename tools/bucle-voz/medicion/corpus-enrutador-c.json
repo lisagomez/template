@@ -1,0 +1,25 @@
+{
+  "_comentario": "Corpus C, escrito el 2026-10-16 DESPUÉS de ver los fallos de A y B y ANTES de la versión 0.3 del enrutador (morfología y sinónimos): es la cifra no vista de la 0.3. Mismas etiquetas.",
+  "version": 1,
+  "frases": [
+    ["cállate un momento", "para"], ["deja de hablar ya", "para"], ["para ya", "para"], ["silencio, por favor, silencio", "para"],
+    ["¿mande?", "repite"], ["no escuché, repítelo", "repite"], ["¿qué dijiste al final?", "repite"], ["otra vez, no te oí", "repite"],
+    ["habla más despacito", "mas-despacio"], ["un poco más lento", "mas-despacio"], ["más despacio, que no te sigo", "mas-despacio"],
+    ["un poco más rápido", "mas-rapido"], ["acelera tantito", "mas-rapido"], ["más rapidito", "mas-rapido"],
+    ["listo, es todo por hoy", "duerme"], ["adiós", "duerme"], ["ya puedes descansar", "duerme"],
+    ["sí, hazlo", "confirma"], ["confírmalo, por favor", "confirma"], ["de acuerdo, procede", "confirma"],
+    ["no, olvídalo", "olvida"], ["descarta eso", "olvida"], ["mejor déjalo así", "olvida"],
+    ["¿me das la hora?", "hora"], ["¿qué hora es ahorita?", "hora"], ["oye, ¿qué hora es?", "hora"],
+    ["¿qué fecha tenemos hoy?", "fecha"], ["¿qué día es mañana?", "llm"],
+    ["¿tengo reuniones hoy en la tarde?", "agenda-hoy"], ["¿qué citas hay hoy?", "agenda-hoy"], ["¿qué tengo en la agenda?", "agenda-hoy"], ["mis juntas de hoy", "agenda-hoy"],
+    ["¿tengo algo mañana?", "agenda-manana"], ["¿qué citas tengo mañana?", "agenda-manana"],
+    ["¿cuánto tardas en contestar?", "estado"], ["¿qué latencia tienes?", "estado"],
+    ["¿cuánto has gastado en total?", "gasto"], ["¿cómo va el gasto?", "gasto"],
+    ["¿qué puedes hacer por mí?", "ayuda"], ["¿qué órdenes sabes?", "ayuda"],
+    ["agenda una junta con ventas el miércoles", "escritura"], ["envíale el presupuesto a Carmen", "escritura"], ["borra todos mis pendientes", "escritura"], ["cambia la cita del dentista al viernes", "escritura"],
+    ["¿qué es una factura global?", "llm"], ["¿cómo puedo bajar mis costos fijos?", "llm"], ["¿qué tengo que hacer si un cliente no paga?", "llm"],
+    ["explícame qué es el flujo de caja libre", "llm"], ["¿qué hora es la mejor para abrir la tienda?", "llm"], ["dame una frase para mi letrero", "llm"],
+    ["¿para qué sirve el capital contable?", "llm"], ["¿cuánto cuesta abrir una franquicia?", "llm"],
+    ["mmm, este", "nada"]
+  ]
+}

@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**58 activos** cubren **283 unidades** del repo.
+**60 activos** cubren **286 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -33,6 +33,7 @@
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 12 | `docker-compose.yml` |
 | TPL-app-base | App SaaS base (Next.js + Supabase, PWA) | PRODUCTO | software | produccion | 6 | `src/app` |
 | TPL-asesor-ventas | Asesor de ventas: insights con evidencia desde una reunion diarizada | PRODUCTO | software | blueprint | 1 | `tools/asesor-ventas` |
+| TPL-bucle-voz | Bucle de voz: turnos con identificador y cancelacion, interrupcion con puerta de eco, separador de frases, enrutador sin LLM, palabra de activacion por texto local, corte por sentido, telemetria desde el fin real del habla, cerebro en flujo y reproductor del navegador (0.1.0) | PRODUCTO | software | beta | 1 | `tools/bucle-voz` |
 | TPL-calendario | Calendario: motor de agenda (un espejo, una pluma), recurrencias RFC 5545, disponibilidad y reserva sin doble reserva, actividad programada, UI React y CLI (0.1.0) | PRODUCTO | software | beta | 1 | `tools/calendario` |
 | TPL-cli-ss-cadena | CLI ss-cadena de Soporte SAP: verifica la cadena sha256 de eventos de una incidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-cadena.mjs` |
 | TPL-cli-ss-ingesta | CLI ss-ingesta de Soporte SAP: lee un documento por su vía y muestra sus campos con evidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-ingesta.mjs` |
@@ -48,6 +49,7 @@
 | TPL-extractor-documental | Extractor documental (PDF, imagen, CFDI XML) con revision humana | PRODUCTO | software | beta | 2 | `tools/extractor-documental` |
 | TPL-feature-a2a | Puente A2A del extractor (Agent Card + JSON-RPC + Tasks) | PRODUCTO | software | beta | 2 | `src/features/a2a` |
 | TPL-feature-auth | Autenticacion Supabase (login, registro, perfiles) | PRODUCTO | software | produccion | 1 | `src/features/auth` |
+| TPL-feature-centro-de-mando | Centro de mando por voz local (/centro-de-mando): HUD con orbe, onda, subtitulos karaoke, telemetria por etapa y conversacion; rutas /api/centro-de-mando (transcribir, cerebro, lee, estado) y la medicion de punta a punta con microfono falso | PRODUCTO | software | beta | 2 | `src/features/centro-de-mando` |
 | TPL-feature-crecimiento-demostrado | Pantalla del dueno (/crecimiento: respuesta con estado, cascada del puente, arbol de la prueba, certificado y replay), laboratorio de trampas (/laboratorio-crecimiento) y agente A2A local (/api/crecimiento/a2a) | PRODUCTO | software | blueprint | 1 | `src/features/crecimiento-demostrado` |
 | TPL-feature-dashboard | Dashboard de la app base | PRODUCTO | software | beta | 1 | `src/features/dashboard` |
 | TPL-feature-dictado | Interfaz web del dictado (pildora, ajustes e historial) | PRODUCTO | software | beta | 3 | `src/features/dictado` |

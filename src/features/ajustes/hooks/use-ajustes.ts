@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDictadoMovil } from '@/features/dictado/store/movil';
 import { leeEstado, pon as ponRemoto, quita as quitaRemoto, restablece as restableceRemoto } from '../services/cliente.ts';
 import type { EstadoAjustes, Valor } from '../services/tipos.ts';
+import { tokenDelEnlace } from '@/shared/lib/token-enlace';
 
 export function useAjustes() {
   const movil = useDictadoMovil();
@@ -24,10 +25,11 @@ export function useAjustes() {
 
   useEffect(() => {
     cargaMovil();
-    const m = /[#?&]t=([^&]+)/.exec(window.location.hash + window.location.search);
-    if (m?.[1]) {
-      void empareja(decodeURIComponent(m[1]));
-      history.replaceState(null, '', window.location.pathname);
+    // Hash y búsqueda por separado: concatenados, `?caso=6#t=…` pegaba la búsqueda al token (shared/lib/token-enlace.ts).
+    const enlace = tokenDelEnlace(window.location);
+    if (enlace) {
+      void empareja(enlace.token);
+      history.replaceState(null, '', enlace.urlLimpia);
     }
   }, [cargaMovil, empareja]);
 
