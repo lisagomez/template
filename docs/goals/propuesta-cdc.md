@@ -1,11 +1,13 @@
 # Propuesta de CDC: centro de mando por voz (goal `centro-de-mando-voz`)
 
-> **Propuesta, no entrada de bitácora.** Se redacta fuera de `.claude/gobernanza/BITACORA-CDC.md` (una entrada sin
-> firma tumba `verify:gobernanza`, aprendizaje del 2026-09-20). La firma la escribe el laboratorio; al firmar, el
-> bloque de abajo se anexa a la bitácora y este archivo se borra. **Nada de la rama se mergea sin esa firma.**
+> **Estado (2026-10-16).** Los puntos 1 y 2 (nivel `voz` y prompt del cerebro) los firmó el laboratorio: la versión
+> firmada es la entrada «2026-10-16 — centro de mando por voz: clase `cerebro-de-voz` en un nivel nuevo `voz` y
+> prompt del cerebro» de `.claude/gobernanza/BITACORA-CDC.md`, y entraron en `main` por el #268. Los puntos 3 a 6
+> quedaron fuera de esa firma a propósito y van cada uno en su propia entrada. **Este archivo ya no se borra**: la
+> entrada firmada lo cita para esos cuatro puntos. Abajo sigue la propuesta tal como se redactó.
 >
-> Rama `voz/centro-de-mando`. Lo que ya está EN la rama porque sin ello el gate rechaza la llamada (puntos 1 y 2), y
-> lo que NO se aplicó y queda para firmar (puntos 3 a 6).
+> **Propuesta, no entrada de bitácora.** Se redacta fuera de `.claude/gobernanza/BITACORA-CDC.md` (una entrada sin
+> firma tumba `verify:gobernanza`, aprendizaje del 2026-09-20). La firma la escribe el laboratorio.
 
 ---
 

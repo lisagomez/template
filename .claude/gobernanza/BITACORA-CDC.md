@@ -4968,3 +4968,69 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `7d72e9b` (árbol
   `a7f0f87cdb13`).
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
+
+### 2026-10-16 — skill global `dictado`: la línea que decía que el motor en vivo es faster-whisper — radio: skill global (fuera del repo)
+
+- **Cambio**: `~/.claude/skills/dictado/SKILL.md`, línea 67 (sección «Errores ya vistos»). Decía «Parakeet oía
+  inglés en frases cortas; por eso el motor en vivo es faster-whisper», y la línea 44 del mismo skill dice que desde
+  el 2026-09-21 el defecto es Parakeet con faster-whisper:small de respaldo. Manda la 44, que es lo que resuelve
+  `ajustes.json` hoy. La 67 queda como historia: ese día el motor pasó a faster-whisper, desde el 2026-09-21 vuelve
+  a ser Parakeet con el respaldo **a petición** (`x-motor: respaldo`, no automático, como dice
+  `tools/dictado/README.md` §7), y el centro de mando ancla el idioma con una frase portadora. El archivo vive fuera
+  del repo: **se aplica al firmar**, no antes.
+- **Motivo**: punto 3 de `docs/goals/propuesta-cdc.md`, fuera de la firma del 2026-10-16 a propósito. Un agente que
+  lea la 67 puede cambiar el motor en vivo a faster-whisper creyendo que corrige algo.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A: el skill global no tiene contratos (no está en el repo); el resto del corpus, 166/166 ☑;
+  - capa B no corrida por el agente; decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva; la `description` del skill no cambia).
+- **Regresión**: no aplica al repo (el archivo está fuera); se comprueba que solo cambió esa línea, contra la copia
+  previa, al aplicarlo.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
+
+### 2026-10-16 — spec `012-voz`: tres datos vencidos (TAR-15, «Silero v5», «91 pruebas») — radio: documentación de una spec
+
+- **Cambio** (en la rama `voz/pendientes-cdc`, commit `38b31a9`): en `tareas.md`, TAR-15 pasa a hecha (voz 0.5.0,
+  2026-09-21); en `spec.md` y `plan.md`, Silero es la **v6.2** (misma huella que la etiqueta `v6.2`; la ficha decía
+  v5 hasta el 2026-10-16, misma interfaz) y las pruebas son **98** (voz 0.6.0; las 91 del encabezado retroactivo se
+  quedan, porque eran ciertas el 2026-09-16); el requisito de pesos pasa de «URL exacta» a «referencias inmutables
+  con huella `sha256` comprobada antes de usarlos» (`huellaDe` / `verificaHuella`, voz 0.6.0).
+- **Motivo**: punto 5 de `docs/goals/propuesta-cdc.md`. Una spec que afirma lo que ya no es cierto se contradice con
+  el código que la cita.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - `verifica:specs` ☑ 136/136;
+  - regresión capa A ☑ 166/166;
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés; decide el laboratorio («capa A
+    basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: ver la del CDC siguiente (mismo commit).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
+
+### 2026-10-16 — `AGENTS.md`: la rama «asistente por voz / centro de mando» en el decision tree — radio: sistema (instrucciones del arnés)
+
+- **Cambio** (en la rama `voz/pendientes-cdc`, commit `38b31a9`): una rama nueva tras la del grafo de conocimiento,
+  con el patrón de «Herramienta YA CONSTRUIDA»: «quiero un asistente por voz / que me conteste hablando / centro de
+  mando / hablarle a la app / interrumpirlo mientras habla» → `tools/bucle-voz/` sobre `tools/voz` + `tools/dictado`,
+  app de referencia `/centro-de-mando`. Lleva sus límites: el audio no sale de la máquina, al cerebro solo llega
+  texto y solo lo que el enrutador no resolvió (clase de routing y prompt son CDC), solo lectura (darle pluma es CDC
+  + gate humano), y dictar texto es el skill `dictado`, no esto. `GEMINI.md` se regeneró con
+  `npm run sincroniza:gemini`.
+- **Coste de contexto**: +231 tokens en el prefijo que se paga en cada sesión (`CLAUDE.md` 6,347 → 6,578 de 8,000;
+  `GEMINI.md` 6,071 de 9,000). Invalida el caché de prefijo una vez.
+- **Motivo**: punto 6 de `docs/goals/propuesta-cdc.md`. Sin la rama, una petición de voz no llega a la herramienta
+  construida y se reinventa, o se conecta un servicio de voz de terceros.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `verify:gobernanza` ☑ 169/169; `mide:contexto` ☑ dentro de presupuesto;
+  - capa B no corrida por el agente: el cambio SÍ toca las instrucciones del arnés; decide el laboratorio («capa A
+    basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `38b31a9` (árbol
+  `938400828989`).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
