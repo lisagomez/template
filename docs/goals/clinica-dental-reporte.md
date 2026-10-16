@@ -93,7 +93,7 @@ dbt Core 1.12.5 + dbt-postgres 1.11.0 + MetricFlow 0.213.0 contra un Postgres ef
 ### 3.4 Unit economics y grafo de atención
 
 `unit-economics.json` (captura 10): cada cifra con su origen y su fuente. Maguey: margen por cita $550 [supuesta],
-contribución $549.95, LTV $4,124 y CAC $812.67 [compuestas], **LTV/CAC 5.08**; Colibrí: inasistencia 33 % [simulada],
+contribución $549.93, LTV $4,124 y CAC $812.67 [compuestas], **LTV/CAC 5.08**; Colibrí: inasistencia 33 % [simulada],
 **LTV/CAC 2.13**. Costo del asistente por conversación [medida, lo único medido]: US$0.00046 (Maguey) y US$0.0001
 (Colibrí). CAC por canal con todos los canales por los que llegó alguien. `docs/grafos/clinica-dental-atencion.json`
 (captura 11): 13 nodos, 13 aristas con n y p50 de MetricFlow.
