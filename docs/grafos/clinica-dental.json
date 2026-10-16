@@ -1,0 +1,485 @@
+{
+  "slug": "clinica-dental",
+  "titulo": "Portal del paciente para clínicas dentales (laboratorio, pacientes sintéticos)",
+  "nodos": [
+    {
+      "id": "spec",
+      "label": "Spec del goal (docs/goals/clinica-dental.md)",
+      "estado": "morado"
+    },
+    {
+      "id": "piezas-de-la-casa",
+      "label": "Piezas ya construidas: Reservas de calendario, patrón de canal de ventas-whatsapp, cadena sha256 (JCS + Merkle), voz/dictado/bucle-voz, reel sintético, dbt + MetricFlow de soporte-sap, contabilidad de tokens",
+      "estado": "morado"
+    },
+    {
+      "id": "clinicas-sinteticas",
+      "label": "Dos clínicas sintéticas declaradas: servicios por categoría con duración y precio, horario, sillones, base de conocimiento del asistente, costos supuestos con fuente",
+      "estado": "morado",
+      "evidencia": "tools/clinica-dental/src/clinicas.ts: Maguey (2 sillones) y Colibrí (1), servicios con precio y duración por categoría; prueba «cada supuesto de costo declara su fuente»"
+    },
+    {
+      "id": "pacientes-sinteticos",
+      "label": "Corpus declarado: pacientes sintéticos (incluye menor de edad y convenio de empresa) y preguntas al asistente con conducta esperada",
+      "estado": "morado",
+      "evidencia": "laboratorio/pacientes.json (8 pacientes: convenio, menor con tutor, sin consentimiento de salud, Telegram sin vincular, por voz, correo que rebota, baja, choque) y corpus-asistente.json (58 preguntas con conducta esperada)"
+    },
+    {
+      "id": "contrato-eventos",
+      "label": "Contrato de eventos versionado (Zod): tipos, campos, seudónimos HMAC, sin PII ni datos de salud",
+      "estado": "morado",
+      "evidencia": "src/eventos.ts, contrato v1 con 20 tipos (Zod estricto); los 20 aparecen en el libro de la corrida oficial (corte-semantico.json, convergencia)"
+    },
+    {
+      "id": "esquema-datos",
+      "label": "Migración propuesta (pacientes, consentimientos, citas, notificaciones, eventos) con RLS, validada en Postgres efímero y NO aplicada",
+      "estado": "morado",
+      "evidencia": "migraciones/propuesta-clinica-dental.sql en Postgres efímero (PGlite): 10 pruebas de RLS verdes; PROPUESTA, no aplicada"
+    },
+    {
+      "id": "nucleo-portal",
+      "label": "tools/clinica-dental: cuestionario y consentimientos, disponibilidad sobre Reservas, reglas de recordatorio, plantillas; sin React, Next ni Supabase",
+      "estado": "morado",
+      "evidencia": "node --test: 93/93 (92 pruebas + el banco compartido)"
+    },
+    {
+      "id": "reel-dummy",
+      "label": "Reel dummy por clínica (MP4 vertical sintético de servicios y promociones, sin red)",
+      "estado": "morado",
+      "evidencia": "docs/goals/clinica-dental-medicion/reel.json: render determinista, mismo archivo dos veces; hojas de contacto PNG"
+    },
+    {
+      "id": "canales-simulados",
+      "label": "Puertos de correo (Gmail) y Telegram con simuladores locales: outbox con .eml + .ics, Bot API simulada con deep link y sendVideo; gate C3/C4 para el adaptador real",
+      "estado": "morado",
+      "evidencia": "pruebas/canales.ts (15): adaptador real negado sin gate, idempotencia, baja de un clic, Telegram sin vincular; recorrido: 13 avisos entregados en 10 días, 0 newsletters tras la baja"
+    },
+    {
+      "id": "asistente",
+      "label": "Asistente de la clínica: guía de voz del registro y chatbot (voz o texto), enrutador sin LLM delante, cerebro OpenRouter pineado, barreras de dominio y urgencia, prompts versionados",
+      "estado": "morado",
+      "evidencia": "guía de voz sin LLM (pruebas/guia-voz.ts, 9) y chatbot con barreras (pruebas/asistente.ts, 12); recorrido por texto y por voz en escritorio y celular"
+    },
+    {
+      "id": "datalayer-gtm",
+      "label": "dataLayer para Google Tag Manager con consent mode (denegado por defecto), sin PII; contenedor solo con ID y consentimiento",
+      "estado": "morado",
+      "evidencia": "consent mode v2 denegado por defecto y contenedor solo con ID y consentimiento (pruebas 92-93); dataLayer real de cada pestaña en recorrido.json"
+    },
+    {
+      "id": "app-paciente",
+      "label": "src/features/clinica-dental + rutas: login, registro con cuestionario, agenda con calendario, selector de notificación, vista de próximas citas, botones de voz y chatbot",
+      "estado": "morado",
+      "evidencia": "recorrido final: 557 s, 0 peticiones externas, 0 errores de consola, axe serias/críticas 0 en 8 auditorías; capturas 01-09 en escritorio y celular; la pregunta oída aparece en el chat en los 4 turnos de voz"
+    },
+    {
+      "id": "libro-eventos",
+      "label": "Libro de eventos de las corridas del laboratorio, encadenado con sha256 y verificable",
+      "estado": "morado",
+      "evidencia": "maguey 203 y colibri 112 eventos íntegros, sellados (Ed25519); alterar, quitar, reordenar y reescribir se detectan (pruebas 78-83)"
+    },
+    {
+      "id": "capa-semantica",
+      "label": "dbt (staging → marts) + MetricFlow (modelos semánticos y métricas) sobre Postgres efímero",
+      "estado": "morado",
+      "evidencia": "dbt build PASS=205 (3 semillas, 20 vistas de staging, 8 marts, 174 pruebas); mf validate-configs: 7 pasos con 0 errores y 0 avisos; corte sha256:beac9296a022de02"
+    },
+    {
+      "id": "unit-economics",
+      "label": "Unit economics por clínica y canal: CAC, LTV, margen por cita, costo por notificación y por conversación del asistente; supuestos declarados",
+      "estado": "morado",
+      "evidencia": "docs/goals/clinica-dental-medicion/unit-economics.json: cada cifra con origen (medida/simulada/supuesta/compuesta) y fuente; captura 10"
+    },
+    {
+      "id": "grafo-atencion",
+      "label": "Grafo de atención al cliente: el recorrido del paciente como grafo, con conteos y tiempos por arista salidos de los eventos",
+      "estado": "morado",
+      "evidencia": "docs/grafos/clinica-dental-atencion.json: 13 nodos, 13 aristas con n y p50 de MetricFlow; captura 11"
+    },
+    {
+      "id": "medicion-asistente",
+      "label": "Medición del asistente con el LLM real: corpus de conducta, latencia de voz, interrupción y gasto",
+      "estado": "morado",
+      "evidencia": "asistente.json (corrida final 58/58 recalificada sin volver a llamar al LLM; corridas 1-3 al lado) y voz.json (guía p50 777 ms, orden 762, LLM 2157, interrupción 8/8)"
+    },
+    {
+      "id": "evidencias",
+      "label": "Capturas de Playwright (escritorio y celular), mediciones, reporte de decisiones y post-mortem",
+      "estado": "morado",
+      "evidencia": "docs/goals/clinica-dental-capturas (24 capturas: 12 flujos × escritorio y celular) y docs/goals/clinica-dental-medicion; reporte en clinica-dental-reporte.md"
+    },
+    {
+      "id": "propuestas-firma",
+      "label": "Propuestas para firmar: CDC (clase de routing y prompts), borrador de AISIA (C4), modelo de amenazas (C3), borrador de aviso de privacidad",
+      "estado": "morado",
+      "evidencia": "clinica-dental-propuesta-cdc.md, -aisia.md, -c3.md y -aviso-privacidad.md junto al spec, todas con «Aprobado por: pendiente»"
+    },
+    {
+      "id": "firma-laboratorio",
+      "label": "Firma del laboratorio (fuera del HECHO del goal)",
+      "estado": "gris",
+      "evidencia": "hueco: la firma del CDC, la AISIA, la C3 y el aviso de privacidad la escribe el laboratorio"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a-declara-clinicas",
+      "label": "declarar las dos clínicas y sus supuestos",
+      "tipo": "agente",
+      "from": "spec",
+      "to": "clinicas-sinteticas"
+    },
+    {
+      "id": "a-declara-pacientes",
+      "label": "declarar pacientes y preguntas con conducta esperada",
+      "tipo": "agente",
+      "from": "spec",
+      "to": "pacientes-sinteticos"
+    },
+    {
+      "id": "a-contrato",
+      "label": "escribir el contrato de eventos",
+      "tipo": "agente",
+      "from": "spec",
+      "to": "contrato-eventos"
+    },
+    {
+      "id": "a-nucleo-clinicas",
+      "label": "reglas de servicio, duración y horario",
+      "tipo": "mixta",
+      "from": "clinicas-sinteticas",
+      "to": "nucleo-portal"
+    },
+    {
+      "id": "a-nucleo-piezas",
+      "label": "montar disponibilidad sobre Reservas y reutilizar la cadena",
+      "tipo": "mixta",
+      "from": "piezas-de-la-casa",
+      "to": "nucleo-portal"
+    },
+    {
+      "id": "a-nucleo-contrato",
+      "label": "emitir eventos del contrato desde el núcleo",
+      "tipo": "agente",
+      "from": "contrato-eventos",
+      "to": "nucleo-portal"
+    },
+    {
+      "id": "a-esquema",
+      "label": "tablas, RLS y prueba en efímero",
+      "tipo": "mixta",
+      "from": "contrato-eventos",
+      "to": "esquema-datos"
+    },
+    {
+      "id": "a-reel",
+      "label": "generar el reel sintético de cada clínica",
+      "tipo": "script",
+      "from": "clinicas-sinteticas",
+      "to": "reel-dummy"
+    },
+    {
+      "id": "a-canales-nucleo",
+      "label": "recordatorio, newsletter y aviso salen del núcleo por puertos",
+      "tipo": "mixta",
+      "from": "nucleo-portal",
+      "to": "canales-simulados"
+    },
+    {
+      "id": "a-canales-reel",
+      "label": "adjuntar el reel al aviso de Telegram",
+      "tipo": "script",
+      "from": "reel-dummy",
+      "to": "canales-simulados"
+    },
+    {
+      "id": "a-canales-piezas",
+      "label": "tomar el patrón de puerto, simulador y gate de ventas-whatsapp",
+      "tipo": "agente",
+      "from": "piezas-de-la-casa",
+      "to": "canales-simulados"
+    },
+    {
+      "id": "a-asistente-clinicas",
+      "label": "base de conocimiento de la clínica para el asistente",
+      "tipo": "agente",
+      "from": "clinicas-sinteticas",
+      "to": "asistente"
+    },
+    {
+      "id": "a-asistente-piezas",
+      "label": "bucle de voz, enrutador y cerebro de la casa",
+      "tipo": "mixta",
+      "from": "piezas-de-la-casa",
+      "to": "asistente"
+    },
+    {
+      "id": "a-datalayer",
+      "label": "eventos del contrato → dataLayer sin PII",
+      "tipo": "agente",
+      "from": "contrato-eventos",
+      "to": "datalayer-gtm"
+    },
+    {
+      "id": "a-app-nucleo",
+      "label": "pantallas sobre el núcleo",
+      "tipo": "agente",
+      "from": "nucleo-portal",
+      "to": "app-paciente"
+    },
+    {
+      "id": "a-app-esquema",
+      "label": "persistencia con RLS",
+      "tipo": "agente",
+      "from": "esquema-datos",
+      "to": "app-paciente"
+    },
+    {
+      "id": "a-app-canales",
+      "label": "selector de notificación y vista de próximas citas",
+      "tipo": "agente",
+      "from": "canales-simulados",
+      "to": "app-paciente"
+    },
+    {
+      "id": "a-app-asistente",
+      "label": "botones de voz y chatbot",
+      "tipo": "agente",
+      "from": "asistente",
+      "to": "app-paciente"
+    },
+    {
+      "id": "a-app-datalayer",
+      "label": "consentimiento de cookies y dataLayer en la app",
+      "tipo": "agente",
+      "from": "datalayer-gtm",
+      "to": "app-paciente"
+    },
+    {
+      "id": "a-recorridos",
+      "label": "recorridos de Playwright por la app que emiten eventos",
+      "tipo": "script",
+      "from": "app-paciente",
+      "to": "libro-eventos"
+    },
+    {
+      "id": "a-recorridos-pacientes",
+      "label": "un recorrido por paciente sintético",
+      "tipo": "script",
+      "from": "pacientes-sinteticos",
+      "to": "libro-eventos"
+    },
+    {
+      "id": "a-semantica",
+      "label": "cargar el libro, dbt build y mf query",
+      "tipo": "script",
+      "from": "libro-eventos",
+      "to": "capa-semantica"
+    },
+    {
+      "id": "a-semantica-contrato",
+      "label": "modelos dbt y semánticos desde el contrato",
+      "tipo": "agente",
+      "from": "contrato-eventos",
+      "to": "capa-semantica"
+    },
+    {
+      "id": "a-unit",
+      "label": "métricas → unit economics",
+      "tipo": "mixta",
+      "from": "capa-semantica",
+      "to": "unit-economics"
+    },
+    {
+      "id": "a-unit-clinicas",
+      "label": "costos y precios supuestos de cada clínica",
+      "tipo": "agente",
+      "from": "clinicas-sinteticas",
+      "to": "unit-economics"
+    },
+    {
+      "id": "a-grafo-atencion",
+      "label": "derivar el grafo del recorrido con conteos por arista",
+      "tipo": "script",
+      "from": "capa-semantica",
+      "to": "grafo-atencion"
+    },
+    {
+      "id": "a-mide-asistente",
+      "label": "correr el corpus contra el asistente con el LLM real",
+      "tipo": "script",
+      "from": "asistente",
+      "to": "medicion-asistente"
+    },
+    {
+      "id": "a-mide-pacientes",
+      "label": "preguntas y conducta esperada",
+      "tipo": "script",
+      "from": "pacientes-sinteticos",
+      "to": "medicion-asistente"
+    },
+    {
+      "id": "a-mide-voz",
+      "label": "medir la voz en la página real con micrófono falso",
+      "tipo": "script",
+      "from": "app-paciente",
+      "to": "medicion-asistente"
+    },
+    {
+      "id": "a-evidencias-app",
+      "label": "capturas de cada flujo",
+      "tipo": "script",
+      "from": "app-paciente",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-evidencias-unit",
+      "label": "tablero de unit economics",
+      "tipo": "script",
+      "from": "unit-economics",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-evidencias-grafo",
+      "label": "grafo de atención renderizado",
+      "tipo": "script",
+      "from": "grafo-atencion",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-evidencias-medicion",
+      "label": "cifras del asistente",
+      "tipo": "script",
+      "from": "medicion-asistente",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-propuestas",
+      "label": "redactar CDC, AISIA, C3 y aviso de privacidad con las cifras",
+      "tipo": "agente",
+      "from": "evidencias",
+      "to": "propuestas-firma"
+    },
+    {
+      "id": "a-firma",
+      "label": "revisar el diff y firmar",
+      "tipo": "manual",
+      "from": "propuestas-firma",
+      "to": "firma-laboratorio"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "l-contrato",
+      "label": "todo evento emitido valida contra el contrato, y todo tipo del contrato aparece en algún recorrido",
+      "sobre": "arista:a-recorridos",
+      "estado": "morado",
+      "referencia": "contrato de eventos (Zod), versión vigente",
+      "evidencia": "los 20 tipos del contrato con al menos un evento en la corrida oficial; todo evento pasó Zod al entrar al libro (prueba 84)"
+    },
+    {
+      "id": "l-convergencia",
+      "label": "filas de staging en dbt = eventos del libro, por tipo (el merge que tira una fuente en silencio)",
+      "sobre": "arista:a-semantica",
+      "estado": "morado",
+      "referencia": "conteo directo sobre el libro",
+      "evidencia": "corre.mjs cuenta el staging en Postgres: 20/20 tipos, libro = staging; dbt libro_igual_staging verde"
+    },
+    {
+      "id": "l-cadena",
+      "label": "la cadena re-verifica; alterar, quitar o reordenar un evento falla y dice dónde",
+      "sobre": "nodo:libro-eventos",
+      "estado": "morado",
+      "referencia": "sha256 sobre JCS (RFC 8785) y raíz Merkle",
+      "evidencia": "pruebas 78-83: alterar, quitar, reordenar, renumerar y reescribir se detectan y dicen dónde"
+    },
+    {
+      "id": "l-sin-pii",
+      "label": "ningún nombre, correo, celular ni texto del padecimiento sembrado aparece en el libro, el dataLayer, los logs ni las métricas",
+      "sobre": "nodo:libro-eventos",
+      "estado": "morado",
+      "referencia": "los valores sembrados de los pacientes sintéticos",
+      "evidencia": "sin-pii.ts: 66 valores sembrados, 0 apariciones en libro, dataLayer, log, semillas, corte, unit economics, grafo y gasto; control: 55 en el almacén"
+    },
+    {
+      "id": "l-datalayer",
+      "label": "consent mode denegado por defecto; sin consentimiento no carga contenedor; payload sin PII",
+      "sobre": "nodo:datalayer-gtm",
+      "estado": "morado",
+      "referencia": "consent mode v2 de Google",
+      "evidencia": "pruebas 90-93 y dataLayer real del recorrido: consent default con los cuatro parámetros denegados"
+    },
+    {
+      "id": "l-rls",
+      "label": "el paciente A no lee citas ni avisos del B, y la clínica A no lee a la B",
+      "sobre": "nodo:esquema-datos",
+      "estado": "morado",
+      "referencia": "políticas RLS probadas en efímero",
+      "evidencia": "pruebas 57-66 en PGlite: A no lee a B, clínica A no lee a B, operador sin bypassrls, anon nada"
+    },
+    {
+      "id": "l-consentimiento",
+      "label": "sin consentimiento expreso no se guarda el padecimiento; sin opt-in no hay newsletter ni Telegram; menor de edad pide tutor",
+      "sobre": "nodo:nucleo-portal",
+      "estado": "morado",
+      "referencia": "LFPDPPP vigente, datos sensibles",
+      "evidencia": "pruebas 33-44 y recorrido (sin-consentimiento-salud: «no guardamos la descripción de tu padecimiento»)"
+    },
+    {
+      "id": "l-disponibilidad",
+      "label": "cero dobles reservas bajo concurrencia; el hueco respeta horario, sillón y duración por categoría",
+      "sobre": "nodo:nucleo-portal",
+      "estado": "morado",
+      "referencia": "Reservas de tools/calendario",
+      "evidencia": "pruebas 45-56 y 64 (20 a la vez → 1 gana; 2 sillones → exactamente 2); recorrido: choque {\"a\":\"confirmada\",\"b\":\"ocupado\"}"
+    },
+    {
+      "id": "l-canales",
+      "label": "dry-run por defecto; sin gate C3/C4 el adaptador real se niega; recordatorio idempotente; tras la baja, cero newsletters; List-Unsubscribe de un clic",
+      "sobre": "nodo:canales-simulados",
+      "estado": "morado",
+      "referencia": "RFC 8058 y la regla de canales de chat de AGENTS.md",
+      "evidencia": "prueba 17 (adaptador real negado sin CLINICA_C3_C4_FIRMADOS), 21 (idempotente), 23-26 (RFC 8058, baja de un clic)"
+    },
+    {
+      "id": "l-asistente",
+      "label": "0 diagnósticos, 100 % de urgencias por regla, 0 acciones sin confirmación, fuera de dominio rechazado, inyecciones sin efecto",
+      "sobre": "nodo:medicion-asistente",
+      "estado": "morado",
+      "referencia": "conducta esperada declarada en el corpus",
+      "evidencia": "asistente.json: 0 diagnósticos, urgencias 12/12 por regla, 0 acciones sin confirmar (estado idéntico), inyecciones 8/8"
+    },
+    {
+      "id": "l-gasto",
+      "label": "gasto de OpenRouter del goal ≤ US$1, antes y después medido",
+      "sobre": "nodo:medicion-asistente",
+      "estado": "morado",
+      "referencia": "GET /api/v1/key y /api/v1/credits",
+      "evidencia": "gasto.json: uso de la llave en OpenRouter 11.73098 (13:51Z, antes) → 11.78169 (17:05Z): Δ US$0.05071, con retraso; libro de la app US$0.05511 en 201 llamadas. ≤ US$1"
+    },
+    {
+      "id": "l-voz",
+      "label": "fin real del habla → primer audio audible, p50 y p95; interrupción que calla la salida",
+      "sobre": "nodo:medicion-asistente",
+      "estado": "morado",
+      "referencia": "la medición del centro de mando (644 ms orden local, 1895 ms con cerebro)",
+      "evidencia": "voz.json: guía p50 777 / p95 1032 ms; orden 762 / 875; LLM 2157 / 2783; interrupción 8/8, p50 320 ms, 0 volvió a sonar (una corrida previa dio 7/8: voz-corrida-1.json)"
+    },
+    {
+      "id": "l-metricas",
+      "label": "cada métrica de MetricFlow cuadra con un conteo directo; cada supuesto de costo dice su fuente",
+      "sobre": "nodo:unit-economics",
+      "estado": "morado",
+      "referencia": "conteo directo sobre el libro",
+      "evidencia": "corte-semantico.json: 43 cifras de métricas y 13 aristas iguales al conteo directo (directo.ts); prueba de supuestos con fuente"
+    },
+    {
+      "id": "l-a11y",
+      "label": "sin violaciones serias de accesibilidad, en escritorio y celular",
+      "sobre": "nodo:app-paciente",
+      "estado": "morado",
+      "referencia": "axe-core, WCAG 2.2 AA",
+      "evidencia": "axe-core WCAG 2.2 AA: 0 serias/críticas en registro, agenda, mis citas y chatbot (escritorio y celular) y en tablero y grafo"
+    }
+  ]
+}
