@@ -455,7 +455,7 @@
       "sobre": "nodo:medicion-asistente",
       "estado": "morado",
       "referencia": "GET /api/v1/key y /api/v1/credits",
-      "evidencia": "gasto.json: uso de la llave en OpenRouter 11.73098 (13:51Z, antes) → 11.78169 (17:05Z): Δ US$0.05071, con retraso; libro de la app US$0.05511 en 201 llamadas. ≤ US$1"
+      "evidencia": "gasto.json: uso de la llave en OpenRouter 11.73098 (13:51Z, antes) → 11.790255 (17:47Z, después): Δ US$0.059275, cota superior; libro de la app US$0.05511 en 201 llamadas. ≤ US$1"
     },
     {
       "id": "l-voz",

@@ -73,8 +73,8 @@
   - **voz** (Chromium con micrófono falso; ASR y TTS locales, el audio no sale): guía p50 777 / p95 1032 ms, orden local
     762 / 875 ms, con LLM 2157 / 2783 ms; interrupción 8/8 (p50 320 ms) y 0 volvió a sonar. Una corrida anterior dio
     7/8 sin poder saber por qué: puede ser intermitente;
-  - **gasto del goal**: Δ del uso de la llave en OpenRouter US$0.05071 (con retraso); libro de la app US$0.05511 en 201
-    llamadas desde las 15:22Z. Tope: US$1.
+  - **gasto del goal**: Δ del uso de la llave en OpenRouter US$0.059275 (13:51Z → 17:47Z; cota superior); libro de la
+    app US$0.05511 en 201 llamadas desde las 15:22Z. Tope: US$1.
 - **Gate aplicado**:
   - diff revisado ☐ (completo en el chat antes de pedir la firma);
   - regresión capa A ☐ (dentro del validate);
@@ -83,5 +83,6 @@
   - capa B: no corrida por el agente (no cambia ningún skill ni instrucción del arnés); decide el laboratorio ☐;
   - aprobación humana ☐;
   - pineo ☑ (`anthropic/claude-haiku-5.5-20261007`, con fecha; sin alias flotante).
-- **Regresión**: `npm run validate` ⟨resultado-validate⟩.
+- **Regresión**: `npm run validate -- --sigue` tras el commit `30700d3`: **32/32 gates activos en verde** (10 inactivos declarados, no
+  contados), árbol sellado `b4db624f7c8f`; la suite de `tools/clinica-dental` (93) corre dentro de `prueba:tools`.
 - **Aprobado por**: pendiente

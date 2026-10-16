@@ -47,7 +47,9 @@
 ## 3. Evidencia
 
 Todo sale de UNA cadena final sobre el código definitivo (2026-10-16, 16:12–17:05 UTC): recorrido → asistente → voz →
-capa semántica → unit economics y grafo → sello → barrido de PII → saldo. Los archivos están en
+capa semántica → unit economics y grafo → sello → barrido de PII → saldo. La voz se repitió una vez con la medición del
+corte instrumentada (§3.6) y, tras ella, todo lo que lee el libro (capa semántica en adelante); el saldo final, a las
+17:47 UTC. Los archivos están en
 `docs/goals/clinica-dental-medicion/` y las capturas en `docs/goals/clinica-dental-capturas/`. Las corridas previas
 se conservan (`asistente-corrida-1..3.json`, `voz-corrida-1.json`): lo que falló en ellas está en §4 y en el post-mortem.
 
@@ -133,12 +135,14 @@ corrida instrumentada dio 8/8. **No se puede descartar una falla intermitente** 
 
 ### 3.7 Gasto (`gasto.json`)
 
-- **OpenRouter (autoritativo)**: uso de la llave 11.73098 (13:51Z, antes de la primera llamada del goal) → 11.78169
-  (17:05Z): **Δ US$0.05071**. Su contabilidad va con retraso (una llamada cobrada no movió el saldo en 5 minutos), así
-  que es un piso.
+- **OpenRouter (autoritativo)**: uso de la llave 11.73098 (13:51Z, antes de la primera llamada del goal) → 11.790255
+  (17:47Z, tras la última): **Δ US$0.059275**. Es una cota superior del goal: incluye cualquier otro uso de esta llave en
+  esa ventana. Su contabilidad va con retraso (a las 17:05Z marcaba US$0.0507, y una llamada cobrada no movió el saldo
+  en 5 minutos), por eso la lectura final se tomó al cerrar.
 - **Libro de gasto de la app**: 201 llamadas desde las 15:22Z, **US$0.05511** de costo reportado por el proveedor
   (`usage.cost`, igual al precio de lista; sin caché) y 6 sin costo (abortadas por interrupción: costo desconocido, no
-  cero). Las corridas anteriores a las 15:22Z no están en el libro porque el reinicio lo borraba (arreglado).
+  cero). Las corridas anteriores a las 15:22Z no están en el libro porque el reinicio lo borraba (arreglado); OpenRouter
+  sí las cuenta, y por eso su Δ es mayor.
 - **≤ US$1**: sí, por más de un orden de magnitud con cualquiera de las dos lecturas.
 
 ### 3.8 Cero PII (`sin-pii.json`)
@@ -156,7 +160,11 @@ recordatorio y newsletter (buzón simulado) · 05 Telegram con el reel · 06 ent
 
 ### 3.10 Gate completo
 
-⟨validate⟩
+`npm run validate -- --sigue` **después del commit** `30700d3`: **32/32 gates activos en verde**, 10 inactivos declarados
+con su motivo (no cuentan como pasados), árbol sellado `b4db624f7c8f`. Dentro, `prueba:tools` corrió `tools/clinica-dental`
+con 93 pruebas (17 suites, 2177 pruebas en total). Antes de llegar ahí el gate se puso en rojo tres veces, y las tres
+eran ciertas: `revisa:readmes` (una variable con su valor en el README), `audita:secretos` (hashes sueltos con forma de
+llave en la historia local) y `prueba:a2a` (nueve rutas nuevas sin declarar su decisión de puerto). Post-mortem 30–32.
 
 ## 4. Qué podría estar mal o incompleto (y qué se hizo con cada cosa)
 
