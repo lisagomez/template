@@ -13,5 +13,7 @@ export const config = {
   matcher: [
     '/reel/:path*', '/reel', '/buzon/:path*', '/buzon', '/cuenta/:path*', '/cuenta', '/api/reel/:path*',
     '/sgi/:path*', '/sgi', '/api/sgi/:path*', '/login', '/signup',
+    // El portal del paciente (goal clinica-dental): solo refresca la sesión; cada página decide si la exige.
+    '/clinica/:path*',
   ],
 };

@@ -1,0 +1,1030 @@
+{
+ "cuando": "2026-10-16T16:44:35.336Z",
+ "segundos": 557,
+ "pasos": [
+  {
+   "paciente": "adulto-convenio",
+   "paso": "registro",
+   "resultado": ""
+  },
+  {
+   "paciente": "adulto-convenio",
+   "paso": "cita",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "menor-con-tutor",
+   "paso": "registro",
+   "resultado": ""
+  },
+  {
+   "paciente": "menor-con-tutor",
+   "paso": "cita",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "sin-consentimiento-salud",
+   "paso": "registro",
+   "resultado": "Como no diste el consentimiento de salud, no guardamos la descripción de tu padecimiento."
+  },
+  {
+   "paciente": "sin-consentimiento-salud",
+   "paso": "cita",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "telegram-sin-vincular",
+   "paso": "registro",
+   "resultado": ""
+  },
+  {
+   "paciente": "telegram-sin-vincular",
+   "paso": "cita",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "registro-por-voz",
+   "paso": "registro",
+   "resultado": "registrado por voz"
+  },
+  {
+   "paciente": "registro-por-voz",
+   "paso": "cita",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "correo-que-rebota",
+   "paso": "registro",
+   "resultado": ""
+  },
+  {
+   "paciente": "correo-que-rebota",
+   "paso": "cita",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "visitante-celular",
+   "paso": "guía de voz",
+   "resultado": "demostración sin enviar"
+  },
+  {
+   "paciente": "baja-newsletter",
+   "paso": "registro",
+   "resultado": ""
+  },
+  {
+   "paciente": "choque-de-hueco",
+   "paso": "registro",
+   "resultado": ""
+  },
+  {
+   "paciente": "choque",
+   "paso": "mismo hueco a la vez",
+   "resultado": {
+    "a": "ocupado",
+    "b": "confirmada"
+   }
+  },
+  {
+   "paciente": "baja-newsletter",
+   "paso": "alternativa",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "baja-newsletter",
+   "paso": "baja de un clic (POST)",
+   "resultado": {
+    "status": 200,
+    "token": "tok_69c3e8a35a216518ad3a"
+   }
+  },
+  {
+   "paciente": "baja-newsletter",
+   "paso": "newsletters tras la baja",
+   "resultado": 0
+  },
+  {
+   "paciente": "menor-con-tutor",
+   "paso": "reprograma",
+   "resultado": "confirmada"
+  },
+  {
+   "paciente": "correo-que-rebota",
+   "paso": "cancela",
+   "resultado": "cancelada"
+  },
+  {
+   "paciente": "sin-consentimiento-salud",
+   "paso": "entra → mis citas",
+   "resultado": "/clinica/colibri/mis-citas"
+  },
+  {
+   "paciente": "baja-newsletter",
+   "paso": "entra → mis citas",
+   "resultado": "/clinica/colibri/mis-citas"
+  },
+  {
+   "paciente": "visitante-escritorio",
+   "paso": "chat: precio",
+   "resultado": "Asistente:\nUna limpieza dental (profilaxis) cuesta $800 MXN, con IVA incluido, y dura unos 45 minutos. No necesitas ayuno, aunque te sugerimos evitar café o vino tinto dos horas después."
+  },
+  {
+   "paciente": "visitante-escritorio",
+   "paso": "chat: diagnóstico",
+   "resultado": "Asistente:\nEso solo te lo puede decir un dentista al revisarte; por mensaje no puedo saber qué tienes ni qué medicamento te conviene. Si quieres, te ayudo a agendar una consulta de valoración ($450 MXN). Y si tienes fiebre, sangrado que no para o hinchazón que crece, dímelo para orientarte.Abrir la agenda"
+  },
+  {
+   "paciente": "visitante-escritorio",
+   "paso": "chat: urgencia",
+   "resultado": "Asistente:\nLo que describes puede ser una urgencia: llama ahora al 911 o ve al servicio de urgencias más cercano. No esperes a una cita. Cuando estés a salvo, avísale a Clínica Dental Maguey al +52 55 0000 0101.\nLlamar al 911"
+  },
+  {
+   "paciente": "visitante-celular",
+   "paso": "chat: precio",
+   "resultado": "Asistente:\nLa limpieza dental (profilaxis) cuesta $750 MXN, con IVA incluido, y dura unos 60 minutos. Incluye retiro de sarro, pulido y aplicación de flúor, y no necesitas ayuno para hacerla."
+  },
+  {
+   "paciente": "visitante-celular",
+   "paso": "chat: diagnóstico",
+   "resultado": "Asistente:\nEso solo te lo puede decir un dentista al revisarte; por mensaje no puedo saber qué tienes ni qué medicamento te conviene. Si quieres, te ayudo a agendar una consulta de valoración ($400 MXN). Y si tienes fiebre, sangrado que no para o hinchazón que crece, dímelo para orientarte.Abrir la agenda"
+  },
+  {
+   "paciente": "visitante-celular",
+   "paso": "chat: urgencia",
+   "resultado": "Asistente:\nLo que describes puede ser una urgencia: llama ahora al 911 o ve al servicio de urgencias más cercano. No esperes a una cita. Cuando estés a salvo, avísale a Dental Colibrí al +52 22 0000 0202.\nLlamar al 911"
+  },
+  {
+   "paciente": "voz-escritorio",
+   "paso": "«¿A qué hora abren?»",
+   "resultado": {
+    "ruta": "orden",
+    "oido": "¿A qué hora abren?",
+    "msExterna": 879,
+    "enChat": true
+   }
+  },
+  {
+   "paciente": "voz-escritorio",
+   "paso": "«¿Cuánto cuesta la limpieza dental?»",
+   "resultado": {
+    "ruta": "llm",
+    "oido": "¿Cuánto cuesta la limpieza dental?",
+    "msExterna": 2119,
+    "enChat": true
+   }
+  },
+  {
+   "paciente": "voz-celular",
+   "paso": "«¿A qué hora abren?»",
+   "resultado": {
+    "ruta": "orden",
+    "oido": "¿A qué hora abren?",
+    "msExterna": 825,
+    "enChat": true
+   }
+  },
+  {
+   "paciente": "voz-celular",
+   "paso": "«¿Cuánto cuesta la limpieza dental?»",
+   "resultado": {
+    "ruta": "llm",
+    "oido": "¿Cuánto cuesta la limpieza dental?",
+    "msExterna": 2653,
+    "enChat": true
+   }
+  },
+  {
+   "paciente": "adulto-convenio",
+   "paso": "chat: mis citas",
+   "resultado": "Asistente:\nTu próxima cita: Limpieza dental (profilaxis), Jueves, 22 de octubre, 10:00.Ver mis citas"
+  },
+  {
+   "paciente": "reloj",
+   "paso": "diez días",
+   "resultado": {
+    "avisosEntregados": 13
+   }
+  },
+  {
+   "paciente": "reloj",
+   "paso": "asistencia simulada",
+   "resultado": {
+    "citas": 7
+   }
+  },
+  {
+   "paciente": "laboratorio",
+   "paso": "capturas del buzón y Telegram",
+   "resultado": {
+    "recordatorio": true,
+    "newsletter": true
+   }
+  },
+  {
+   "paciente": "libro",
+   "paso": "sello y verificación",
+   "resultado": [
+    {
+     "clinica": "maguey",
+     "ok": true,
+     "n": 119,
+     "cabeza": "sha256:1ffa2cfba5f477321e2b847007301431edf22f46a793d800a33d092ba152ee3d",
+     "raiz": "sha256:a12056746b29fbcd5b072668af83e8a9159aaaf9328a52e97cea4cf75de4f504",
+     "sellado": 119
+    },
+    {
+     "clinica": "colibri",
+     "ok": true,
+     "n": 79,
+     "cabeza": "sha256:03d4a03ff7acdca5725db6c74b3c4afe7790c1b36b260f12c69df4813802bcf5",
+     "raiz": "sha256:64686615091aa07e88e1344cc2622e7f422fa177ed5bf0657fe733c6b670c8d0",
+     "sellado": 79
+    }
+   ]
+  }
+ ],
+ "guardiaDeRed": {
+  "externas": []
+ },
+ "erroresDeConsola": [],
+ "axe": [
+  {
+   "pagina": "registro",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "agenda",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "registro",
+   "vista": "celular",
+   "serias": []
+  },
+  {
+   "pagina": "agenda",
+   "vista": "celular",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas",
+   "vista": "celular",
+   "serias": []
+  },
+  {
+   "pagina": "chatbot",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "chatbot",
+   "vista": "celular",
+   "serias": []
+  }
+ ],
+ "dataLayer": [
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "maguey",
+    "canales_aviso": 1,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "maguey",
+    "canales_aviso": 1,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "granted"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "granted"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "colibri",
+    "canales_aviso": 2,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "maguey",
+    "canales_aviso": 1,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "granted"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "granted"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "maguey",
+    "canales_aviso": 1,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "maguey",
+    "canales_aviso": 1,
+    "anticipacion": "mas_de_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "granted"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "granted"
+    }
+   ],
+   {
+    "event": "clinica_registro_iniciado",
+    "clinica": "maguey",
+    "via": "voz"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "colibri",
+    "canales_aviso": 1,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   {
+    "event": "clinica_cita_confirmada",
+    "clinica": "colibri",
+    "canales_aviso": 1,
+    "anticipacion": "1_a_7_dias"
+   }
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ]
+  ],
+  [
+   [
+    "consent",
+    "default",
+    {
+     "ad_storage": "denied",
+     "analytics_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "wait_for_update": 500
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ],
+   [
+    "consent",
+    "update",
+    {
+     "ad_storage": "denied",
+     "ad_user_data": "denied",
+     "ad_personalization": "denied",
+     "analytics_storage": "denied"
+    }
+   ]
+  ]
+ ],
+ "latenciasGuia": [
+  {
+   "texto": "Nayeli",
+   "ruta": "guia-local",
+   "oido": "Nadjali.",
+   "estado": "completo",
+   "msExterna": 909,
+   "msHud": 858
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 777,
+   "msHud": 749
+  },
+  {
+   "texto": "Tecuexe",
+   "ruta": "guia-local",
+   "oido": "Te cuicely.",
+   "estado": "completo",
+   "msExterna": 805,
+   "msHud": 751
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 771,
+   "msHud": 689
+  },
+  {
+   "texto": "Huitzilihuitl",
+   "ruta": "guia-local",
+   "oido": "Wait a new Italy.",
+   "estado": "completo",
+   "msExterna": 801,
+   "msHud": 744
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 766,
+   "msHud": 661
+  },
+  {
+   "texto": "Veintinueve años.",
+   "ruta": "guia-local",
+   "oido": "29 años.",
+   "estado": "completo",
+   "msExterna": 920,
+   "msHud": 812
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 814,
+   "msHud": 744
+  },
+  {
+   "texto": "Lo escribo.",
+   "ruta": "guia-local",
+   "oido": "Lo escribo.",
+   "estado": "completo",
+   "msExterna": 918,
+   "msHud": 843
+  },
+  {
+   "texto": "Cinco cinco, cero cero cero cero, uno cero cero siete.",
+   "ruta": "guia-local",
+   "oido": "5500001007",
+   "estado": "completo",
+   "msExterna": 843,
+   "msHud": 770
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 720,
+   "msHud": 642
+  },
+  {
+   "texto": "Ninguna.",
+   "ruta": "guia-local",
+   "oido": "Ninguna.",
+   "estado": "completo",
+   "msExterna": 888,
+   "msHud": 796
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 802,
+   "msHud": 675
+  },
+  {
+   "texto": "General y ortodoncia.",
+   "ruta": "guia-local",
+   "oido": "General y ortodocia.",
+   "estado": "completo",
+   "msExterna": 1032,
+   "msHud": 941
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 731,
+   "msHud": 642
+  },
+  {
+   "texto": "Nada.",
+   "ruta": "guia-local",
+   "oido": "Nada.",
+   "estado": "completo",
+   "msExterna": 751,
+   "msHud": 645
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 798,
+   "msHud": 761
+  },
+  {
+   "texto": "Sí, envíalo.",
+   "msExterna": 834
+  },
+  {
+   "texto": "Nayeli",
+   "ruta": "guia-local",
+   "oido": "Nadia Lee.",
+   "estado": "completo",
+   "msExterna": 747,
+   "msHud": 717
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 713,
+   "msHud": 708
+  },
+  {
+   "texto": "Tecuexe",
+   "ruta": "guia-local",
+   "oido": "Te cuicely.",
+   "estado": "completo",
+   "msExterna": 778,
+   "msHud": 715
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 694,
+   "msHud": 650
+  },
+  {
+   "texto": "Huitzilihuitl",
+   "ruta": "guia-local",
+   "oido": "Witsy Wittel.",
+   "estado": "completo",
+   "msExterna": 720,
+   "msHud": 670
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 755,
+   "msHud": 649
+  },
+  {
+   "texto": "Veintinueve años.",
+   "ruta": "guia-local",
+   "oido": "29 años.",
+   "estado": "completo",
+   "msExterna": 849,
+   "msHud": 716
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 743,
+   "msHud": 646
+  },
+  {
+   "texto": "Lo escribo.",
+   "ruta": "guia-local",
+   "oido": "Lo escribo.",
+   "estado": "completo",
+   "msExterna": 862,
+   "msHud": 774
+  },
+  {
+   "texto": "Cinco cinco, cero cero cero cero, uno cero cero siete.",
+   "ruta": "guia-local",
+   "oido": "550001007",
+   "estado": "completo",
+   "msExterna": 750,
+   "msHud": 641
+  },
+  {
+   "texto": "Cinco cinco, cero cero cero cero, uno cero cero siete.",
+   "ruta": "guia-local",
+   "oido": "550001007",
+   "estado": "completo",
+   "msExterna": 726,
+   "msHud": 642
+  },
+  {
+   "texto": "Lo escribo.",
+   "ruta": "guia-local",
+   "oido": "Lo escribo.",
+   "estado": "completo",
+   "msExterna": 768,
+   "msHud": 650
+  },
+  {
+   "texto": "Ninguna.",
+   "ruta": "guia-local",
+   "oido": "Ninguna.",
+   "estado": "completo",
+   "msExterna": 771,
+   "msHud": 662
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 777,
+   "msHud": 647
+  },
+  {
+   "texto": "General y ortodoncia.",
+   "ruta": "guia-local",
+   "oido": "General y ortodoncia.",
+   "estado": "completo",
+   "msExterna": 1043,
+   "msHud": 926
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 732,
+   "msHud": 641
+  },
+  {
+   "texto": "Nada.",
+   "ruta": "guia-local",
+   "oido": "Nada.",
+   "estado": "completo",
+   "msExterna": 727,
+   "msHud": 641
+  },
+  {
+   "texto": "Sí, correcto.",
+   "ruta": "guia-local",
+   "oido": "Sí, correcto.",
+   "estado": "completo",
+   "msExterna": 953,
+   "msHud": 836
+  }
+ ],
+ "latenciasChat": [
+  {
+   "texto": "¿A qué hora abren?",
+   "ruta": "orden",
+   "oido": "¿A qué hora abren?",
+   "estado": "completo",
+   "msExterna": 879,
+   "msHud": 738
+  },
+  {
+   "texto": "¿Cuánto cuesta la limpieza dental?",
+   "ruta": "llm",
+   "oido": "¿Cuánto cuesta la limpieza dental?",
+   "estado": "completo",
+   "msExterna": 2119,
+   "msHud": 2070
+  },
+  {
+   "texto": "¿A qué hora abren?",
+   "ruta": "orden",
+   "oido": "¿A qué hora abren?",
+   "estado": "completo",
+   "msExterna": 825,
+   "msHud": 670
+  },
+  {
+   "texto": "¿Cuánto cuesta la limpieza dental?",
+   "ruta": "llm",
+   "oido": "¿Cuánto cuesta la limpieza dental?",
+   "estado": "completo",
+   "msExterna": 2653,
+   "msHud": 2611
+  }
+ ]
+}

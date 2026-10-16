@@ -1,0 +1,35 @@
+# Las métricas: UNA definición cada una. `meta.origen` dice si la cifra sale de lo MEDIDO en las corridas del
+# laboratorio o de un supuesto/simulación; `meta.unidad`, en qué se lee. Ninguna finge ser de una clínica real.
+metrics:
+  - {name: pacientes_nuevos, label: Pacientes nuevos, description: "Pacientes que completaron el registro.", type: simple, type_params: {measure: pacientes_registrados}, config: {meta: {unidad: pacientes, origen: medido}}}
+  - {name: citas_confirmadas, label: Citas confirmadas, description: "Citas confirmadas (una reprogramación cuenta como cita nueva).", type: simple, type_params: {measure: citas_confirmadas_n}, config: {meta: {unidad: citas, origen: medido}}}
+  - {name: horas_registro_a_cita_p50, label: Tiempo de registro a primera cita (p50), description: "Mediana de horas entre el registro y la primera cita confirmada.", type: simple, type_params: {measure: horas_registro_a_cita_mediana}, config: {meta: {unidad: horas, origen: medido}}}
+  - {name: visitantes_portal, label: Visitantes, type: simple, type_params: {measure: visitantes}, config: {meta: {unidad: visitantes, origen: medido}}}
+  - {name: registros_embudo, label: Visitantes que se registraron, type: simple, type_params: {measure: visitantes_registrados}, config: {meta: {unidad: visitantes, origen: medido}}}
+  - {name: conversion_visita_registro, label: Conversión visita → registro, type: ratio, type_params: {numerator: registros_embudo, denominator: visitantes_portal}, config: {meta: {unidad: proporcion, origen: medido}}}
+  - {name: conversion_inicio_registro, label: Conversión inicio de registro → registro, type: ratio, type_params: {numerator: registros_embudo, denominator: visitantes_que_iniciaron}, config: {meta: {unidad: proporcion, origen: medido}}}
+  - {name: conversion_registro_cita, label: Conversión registro → cita, type: ratio, type_params: {numerator: visitantes_con_cita, denominator: registros_embudo}, config: {meta: {unidad: proporcion, origen: medido}}}
+  - {name: avisos_entregados_n, label: Avisos entregados, type: simple, type_params: {measure: avisos_entregados}, config: {meta: {unidad: avisos, origen: medido}}}
+  - {name: entregabilidad, label: Entregabilidad, description: "De los avisos que se intentaron entregar, la proporción entregada (en el simulador).", type: ratio, type_params: {numerator: avisos_entregados_n, denominator: avisos_intentados}, config: {meta: {unidad: proporcion, origen: simulado}}}
+  - {name: costo_por_aviso_usd, label: Costo por aviso entregado, type: ratio, type_params: {numerator: costo_avisos_usd, denominator: avisos_entregados_n}, config: {meta: {unidad: usd, origen: supuesto}}}
+  - {name: bajas_newsletter, label: Bajas del newsletter, type: simple, type_params: {measure: bajas_n}, config: {meta: {unidad: bajas, origen: medido}}}
+  - {name: turnos_asistente_n, label: Turnos del asistente, type: simple, type_params: {measure: turnos_asistente}, config: {meta: {unidad: turnos, origen: medido}}}
+  - {name: urgencias_derivadas, label: Urgencias derivadas por regla, type: simple, type_params: {measure: turnos_urgencia}, config: {meta: {unidad: turnos, origen: medido}}}
+  - {name: latencia_asistente_p50_ms, label: Latencia del asistente en el servidor (p50), type: simple, type_params: {measure: latencia_asistente_mediana_ms}, config: {meta: {unidad: ms, origen: medido}}}
+  - {name: conversaciones_asistente_n, label: Conversaciones con el asistente, type: simple, type_params: {measure: conversaciones_asistente}, config: {meta: {unidad: conversaciones, origen: medido}}}
+  - {name: costo_por_conversacion_usd, label: Costo del asistente por conversación, type: ratio, type_params: {numerator: costo_asistente_usd, denominator: conversaciones_asistente_n}, config: {meta: {unidad: usd, origen: medido}}}
+  - {name: tasa_inasistencia, label: Tasa de inasistencia, description: "De las citas con asistencia registrada, las que no asistieron (asistencia SIMULADA en el laboratorio).", type: ratio, type_params: {numerator: citas_inasistencia, denominator: citas_con_asistencia_registrada}, config: {meta: {unidad: proporcion, origen: simulado}}}
+  - {name: citas_atendidas_n, label: Citas atendidas, description: "Citas con asistencia (SIMULADA en el laboratorio).", type: simple, type_params: {measure: citas_atendidas}, config: {meta: {unidad: citas, origen: simulado}}}
+  - {name: citas_canceladas_n, label: Citas canceladas, type: simple, type_params: {measure: citas_canceladas}, config: {meta: {unidad: citas, origen: medido}}}
+  - {name: ingreso_atendido_mxn, label: Ingreso de citas atendidas, type: simple, type_params: {measure: ingreso_atendido_mxn}, config: {meta: {unidad: mxn, origen: supuesto}}}
+  - {name: margen_atendido_mxn, label: Margen de citas atendidas, type: simple, type_params: {measure: margen_atendido_mxn}, config: {meta: {unidad: mxn, origen: supuesto}}}
+  - {name: transiciones, label: Transiciones por arista, type: simple, type_params: {measure: transiciones_n}, config: {meta: {unidad: transiciones, origen: medido}}}
+  - {name: segundos_arista_p50, label: Tiempo por arista (p50), type: simple, type_params: {measure: segundos_arista_mediana}, config: {meta: {unidad: segundos, origen: medido}}}
+  # Auxiliares: en dbt 1.12 una razón divide MÉTRICAS, no medidas; estas existen solo para eso (mismo nombre que su medida).
+  - {name: visitantes_que_iniciaron, label: Visitantes que empezaron el registro, type: simple, type_params: {measure: visitantes_que_iniciaron}, config: {meta: {unidad: visitantes, origen: medido}}}
+  - {name: visitantes_con_cita, label: Visitantes registrados con cita, type: simple, type_params: {measure: visitantes_con_cita}, config: {meta: {unidad: visitantes, origen: medido}}}
+  - {name: avisos_intentados, label: Avisos que se intentaron entregar, type: simple, type_params: {measure: avisos_intentados}, config: {meta: {unidad: avisos, origen: simulado}}}
+  - {name: costo_avisos_usd, label: Costo de los avisos entregados, type: simple, type_params: {measure: costo_avisos_usd}, config: {meta: {unidad: usd, origen: supuesto}}}
+  - {name: costo_asistente_usd, label: Costo del asistente, type: simple, type_params: {measure: costo_asistente_usd}, config: {meta: {unidad: usd, origen: medido}}}
+  - {name: citas_inasistencia, label: Citas sin asistencia, type: simple, type_params: {measure: citas_inasistencia}, config: {meta: {unidad: citas, origen: simulado}}}
+  - {name: citas_con_asistencia_registrada, label: Citas con asistencia registrada, type: simple, type_params: {measure: citas_con_asistencia_registrada}, config: {meta: {unidad: citas, origen: simulado}}}

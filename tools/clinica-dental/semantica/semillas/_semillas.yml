@@ -1,0 +1,15 @@
+# Las semillas las escribe corre.mjs desde el LIBRO (no se versionan): el evento tal cual y el conteo directo.
+version: 2
+seeds:
+  - name: raw_eventos
+    description: Cada eslabón del libro, con el evento (sin la parte común) en `datos` como JSON.
+    config:
+      column_types: {clinica: text, seq: integer, tipo: text, evento_id: text, en: text, sujeto: text, datos: text, hash: text}
+  - name: conteo_libro
+    description: Eventos por tipo contados DIRECTO sobre el libro (la referencia del lazo de convergencia), con los tipos en cero.
+    config:
+      column_types: {tipo: text, eventos: integer}
+  - name: servicios
+    description: Los servicios de cada clínica sintética (precio y costo variable SUPUESTO), de su declaración.
+    config:
+      column_types: {clinica: text, servicio: text, categoria: text, precio_mxn: numeric, costo_variable_mxn: numeric, duracion_min: integer}

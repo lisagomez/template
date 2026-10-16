@@ -1,0 +1,25 @@
+# La capa semántica del portal de clínicas dentales: dbt Core + MetricFlow LOCALES y pineados (requirements.lock,
+# el mismo de soporte-sap), contra un Postgres efímero del laboratorio. Nada de dbt Cloud: los eventos no salen.
+#   semillas (el libro tal cual + conteo directo) → staging GENERADO del contrato → marts → semántica.
+name: clinica_dental
+version: '0.1.0'
+config-version: 2
+profile: clinica_dental
+
+model-paths: ['modelos']
+seed-paths: ['semillas']
+macro-paths: ['macros']
+test-paths: ['pruebas']
+target-path: 'target'
+clean-targets: ['target', 'logs', 'dbt_packages']
+
+models:
+  clinica_dental:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+
+seeds:
+  clinica_dental:
+    +quote_columns: false
