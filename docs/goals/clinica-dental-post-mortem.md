@@ -1,7 +1,7 @@
 # Post-mortem del goal `clinica-dental` (2026-10-16)
 
 > Lo que falló al construir, por qué, cómo quedó y qué se propone para que no vuelva. Las propuestas que tocan
-> `.claude/` (reglas, skills) **no se aplicaron**: son CDC y van a la propuesta de firma (`clinica-dental-propuesta-cdc.md`).
+> `.claude/` (reglas, skills) **no se aplicaron**: son CDC: quedan propuestas, sin aplicar, en el punto 5 del CDC del 2026-10-16 (`.claude/gobernanza/BITACORA-CDC.md`).
 
 | # | Qué pasó | Por qué | Cómo quedó | Propuesta (sin aplicar) |
 |---|---|---|---|---|
