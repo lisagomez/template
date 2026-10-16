@@ -4916,3 +4916,55 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `12011e0` (árbol
   `3cc663e3289e`).
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-14
+
+### 2026-10-16 — centro de mando por voz: clase `cerebro-de-voz` en un nivel nuevo `voz` y prompt del cerebro — radio: routing (C8) y producto (paquete `@tu-scope/bucle-voz`, app `/centro-de-mando`)
+
+- **Cambio** (los dos están en la rama `voz/centro-de-mando` porque sin ellos el gate rechaza la llamada):
+  1. **`.claude/routing-modelos.json`: nivel nuevo `voz` y clase `cerebro-de-voz` → `voz`.** Modelo nuevo en el
+     catálogo: **`anthropic/claude-haiku-5.5-20261007`** (identificador CON fecha: el pineo más estricto que acepta
+     OpenRouter; comprobado con una llamada). Precio consultado el 2026-10-16 en `https://openrouter.ai/api/v1/models`:
+     US$0.10 / 0.50 / 0.01 por millón (entrada / salida / caché). Alternativa abierta declarada (la misma del nivel
+     `ligero`, DeepSeek V4 Flash), **con su primer token sin medir en voz**. `src/lib/ai/routing.ts` gana `'voz'` en
+     el tipo `Nivel`. **Por qué un nivel y no `ligero`**: en voz manda el primer token, no el precio. Medido el
+     2026-10-16 (5 preguntas cortas en español por modelo, razonamiento apagado): haiku-5.5 **752 ms** p50, haiku-4.5
+     (el de `ligero`) **956 ms** y 10 veces más caro; gemini-2.5-flash-lite 410 ms pero 2 de 5 llamadas a ~1 s y una
+     respuesta equivocada. Meter la clase en `ligero` habría pagado 200 ms más por turno y 10 veces el precio; cambiar
+     el modelo de `ligero` habría movido seis clases que nadie midió con él. Gasto de esa medición: US$0.0026.
+  2. **Prompt del cerebro** `src/features/centro-de-mando/services/servidor/prompt-cerebro.ts`, versión
+     `cerebro-voz-3 (2026-10-16)` (sha256 del archivo `7f3d27e404386bd8…`), con `max_tokens` 160. Ocho reglas: es la
+     voz de un centro de mando en México y habla por un altavoz; **40 palabras como máximo, en dos o tres frases**;
+     **la primera frase va sola y es muy corta** (dos a seis palabras, con dos ejemplos); si piden detalle, lo esencial
+     y ofrecer seguir; sin markdown, listas, emojis ni símbolos; **no tiene herramientas ni datos del negocio y no
+     inventa cifras, nombres ni citas**; **no ejecuta acciones** (agendar, enviar, borrar, pagar → «este centro de
+     mando solo lee»); si su turno anterior termina en «[interrumpido]», no lo repite. La versión viaja en
+     `GET /api/centro-de-mando/estado`. Elegida midiendo tres redacciones contra el modelo pineado, 4 preguntas cada
+     una (US$0.00087): la v3 abre con 24 caracteres de mediana (la v2 y la v4, con 60) y primer token p50 783 ms.
+  - **Sin cambios** en `.claude/settings.json`, hooks, `gates.json`, `AGENTS.md` ni el manifiesto de la imprenta. La
+    suite nueva (`tools/bucle-voz`, 77 pruebas) entra sola en `prueba:tools`, que ya recorre `tools/*`.
+- **Fuera de este CDC, a propósito** (propuestos en `docs/goals/propuesta-cdc.md`, sin aplicar; cada uno va en su
+  propia entrada cuando se aplique): 3, la contradicción sobre el motor en vivo del skill GLOBAL de dictado (líneas 44
+  y 67); 4, Silero en el navegador como detector del HUD (fase aparte, con su medición); 5, tres datos vencidos de la
+  spec `012-voz` (TAR-15, «Silero v5», «91 pruebas»); 6, la rama del centro de mando en el decision tree de
+  `AGENTS.md`.
+- **Motivo**: el goal `centro-de-mando-voz` (decidido por el laboratorio el 2026-10-15: cerebro inyectable por
+  OpenRouter, modelo pineado, tope US$1, enrutador delante). Sin clase, el cerebro heredaría el default caro en
+  silencio y `modeloPara` no compilaría (C8). Sin prompt revisado como código, lo que la máquina DICE en voz alta no
+  pasaría por ningún gate (C1).
+- **Qué hace que el prompt no baste solo** (defensa en profundidad, en código y probada): el enrutador decide ANTES
+  del cerebro (las órdenes no le llegan y las escrituras se quedan en dry-run sin tocarlo); el cerebro no tiene
+  herramientas; tope duro de gasto en el servidor (402 al 100 %, libro en JSONL); un error del cerebro se dice en voz
+  y se avisa; solo sale texto, el audio nunca (el servidor habla con el demonio en 127.0.0.1).
+- **Estado del LLM** (2026-10-16): **MEDIDO**. Conversación con el modelo real de punta a punta (n = 12, p50 1895 ms
+  · p95 2644 ms del fin del habla al primer audio); gasto de todo el goal US$0.0266 de un tope de US$1.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166 (2026-10-16, dentro del validate);
+  - `verifica:routing` ☑ coherente (con el nivel `voz`);
+  - medición con el modelo real ☑ (cifras en el reporte del goal);
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés; decide el laboratorio («capa A
+    basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (`anthropic/claude-haiku-5.5-20261007`, con fecha).
+- **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `7d72e9b` (árbol
+  `a7f0f87cdb13`).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16

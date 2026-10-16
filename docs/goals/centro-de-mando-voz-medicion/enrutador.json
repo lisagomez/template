@@ -1,0 +1,702 @@
+{
+  "fecha": "2026-10-16",
+  "enrutador": "local-reglas-0.3",
+  "texto": {
+    "total": 110,
+    "aciertos": 98,
+    "acierto": 89.1,
+    "ordenesEquivocadas": 0,
+    "conversacionComoOrden": 0,
+    "escriturasPerdidas": 0,
+    "alCerebro": 12,
+    "fallos": [
+      {
+        "frase": "¿cómo dijiste?",
+        "esperada": "repite",
+        "salio": "llm"
+      },
+      {
+        "frase": "no te oí bien",
+        "esperada": "repite",
+        "salio": "llm"
+      },
+      {
+        "frase": "dilo de nuevo",
+        "esperada": "repite",
+        "salio": "llm"
+      },
+      {
+        "frase": "¿me lo repites?",
+        "esperada": "repite",
+        "salio": "llm"
+      },
+      {
+        "frase": "ya terminamos por hoy",
+        "esperada": "duerme",
+        "salio": "llm"
+      },
+      {
+        "frase": "ya no, déjalo",
+        "esperada": "olvida",
+        "salio": "llm"
+      },
+      {
+        "frase": "¿a cuánto estamos?",
+        "esperada": "fecha",
+        "salio": "llm"
+      },
+      {
+        "frase": "¿qué día es?",
+        "esperada": "fecha",
+        "salio": "llm"
+      },
+      {
+        "frase": "léeme la agenda de mañana",
+        "esperada": "agenda-manana",
+        "salio": "llm"
+      },
+      {
+        "frase": "¿cuál es tu latencia?",
+        "esperada": "estado",
+        "salio": "llm"
+      },
+      {
+        "frase": "¿cómo va el sistema?",
+        "esperada": "estado",
+        "salio": "llm"
+      },
+      {
+        "frase": "¿cuánto va el presupuesto?",
+        "esperada": "gasto",
+        "salio": "llm"
+      }
+    ]
+  },
+  "textoOtros": {
+    "B": {
+      "total": 65,
+      "aciertos": 49,
+      "acierto": 75.4,
+      "ordenesEquivocadas": 0,
+      "conversacionComoOrden": 0,
+      "escriturasPerdidas": 0,
+      "alCerebro": 16,
+      "fallos": [
+        {
+          "frase": "ya estuvo, cállate",
+          "esperada": "para",
+          "salio": "llm"
+        },
+        {
+          "frase": "no hables",
+          "esperada": "para",
+          "salio": "llm"
+        },
+        {
+          "frase": "vuelve a decirlo",
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "más rápido, que tengo prisa",
+          "esperada": "mas-rapido",
+          "salio": "llm"
+        },
+        {
+          "frase": "ya me voy",
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "hasta mañana",
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "dale",
+          "esperada": "confirma",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué hora traes?",
+          "esperada": "hora",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿en qué fecha estamos?",
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "repasa mi agenda",
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué hay mañana?",
+          "esperada": "agenda-manana",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué tengo agendado para mañana?",
+          "esperada": "agenda-manana",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cómo estás funcionando?",
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué tal tu rapidez?",
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuánto se ha gastado del presupuesto?",
+          "esperada": "gasto",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué cosas haces?",
+          "esperada": "ayuda",
+          "salio": "llm"
+        }
+      ]
+    },
+    "C": {
+      "total": 53,
+      "aciertos": 40,
+      "acierto": 75.5,
+      "ordenesEquivocadas": 0,
+      "conversacionComoOrden": 0,
+      "escriturasPerdidas": 0,
+      "alCerebro": 13,
+      "fallos": [
+        {
+          "frase": "cállate un momento",
+          "esperada": "para",
+          "salio": "llm"
+        },
+        {
+          "frase": "no escuché, repítelo",
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué dijiste al final?",
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "otra vez, no te oí",
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "más despacio, que no te sigo",
+          "esperada": "mas-despacio",
+          "salio": "llm"
+        },
+        {
+          "frase": "listo, es todo por hoy",
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "ya puedes descansar",
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "de acuerdo, procede",
+          "esperada": "confirma",
+          "salio": "llm"
+        },
+        {
+          "frase": "no, olvídalo",
+          "esperada": "olvida",
+          "salio": "llm"
+        },
+        {
+          "frase": "mejor déjalo así",
+          "esperada": "olvida",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿me das la hora?",
+          "esperada": "hora",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué tengo en la agenda?",
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cómo va el gasto?",
+          "esperada": "gasto",
+          "salio": "llm"
+        }
+      ]
+    }
+  },
+  "activacionTexto": {
+    "positivas": 10,
+    "negativas": 1
+  },
+  "audio": {
+    "medido": true,
+    "enrutador": {
+      "total": 220,
+      "aciertos": 179,
+      "acierto": 81.4,
+      "ordenesEquivocadas": 2,
+      "conversacionComoOrden": 0,
+      "escriturasPerdidas": 5,
+      "alCerebro": 39,
+      "fallos": [
+        {
+          "frase": "¿cómo dijiste?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Como dijiste.",
+            "cómo dijiste?"
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "no te oí bien",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "No te oí bien.",
+            "no te oí bien."
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "dilo de nuevo",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Dilo de nuevo.",
+            "dilo de nuevo."
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿me lo repites?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Me lo repites.",
+            "me lo repites."
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "ya terminamos por hoy",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Ya terminamos por hoy.",
+            "ya terminamos por hoy."
+          ],
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "ya no, déjalo",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Ya no déjalo.",
+            "ya no déjalo."
+          ],
+          "esperada": "olvida",
+          "salio": "llm"
+        },
+        {
+          "frase": "la hora por favor",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Laura por favor."
+          ],
+          "esperada": "hora",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿a cuánto estamos?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "¿A cuánto estamos?",
+            "a cuánto estamos?"
+          ],
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué día es?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "¿Qué día es?",
+            "qué día es?"
+          ],
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "dime la fecha de hoy",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Dime la fecha de doy.",
+            "dime la fecha de doy."
+          ],
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué pendientes tengo?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Que pendiente estén con.",
+            "que pendiente esténco."
+          ],
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿tengo algo hoy?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Tengo, algo voy.",
+            "tengo algo voy."
+          ],
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué citas tengo hoy?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "¿Qué citas tengo voy?",
+            "qué citas tengo voy?"
+          ],
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿tengo citas mañana?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Ten cositas mañana.",
+            "ten cositas mañana."
+          ],
+          "esperada": "agenda-manana",
+          "salio": "llm"
+        },
+        {
+          "frase": "léeme la agenda de mañana",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Léeme la agenda de mañana.",
+            "léeme la agenda de mañana."
+          ],
+          "esperada": "agenda-manana",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuál es tu latencia?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "¿Cuál es tu latencia?",
+            "cuál es tu latencia?"
+          ],
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cómo va el sistema?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "¿Cómo va el sistema?",
+            "cómo va el sistema?"
+          ],
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuánto va el presupuesto?",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "¿Cuánto va el presupuesto?",
+            "cuánto va el presupuesto?"
+          ],
+          "esperada": "gasto",
+          "salio": "llm"
+        },
+        {
+          "frase": "borra el evento de mañana",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Bora, el evento de mañana."
+          ],
+          "esperada": "escritura",
+          "salio": "agenda-manana"
+        },
+        {
+          "frase": "agéndame con el contador el jueves",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "Agenda con el contador el jueves."
+          ],
+          "esperada": "escritura",
+          "salio": "llm"
+        },
+        {
+          "frase": "eh",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "eh.",
+            "Yeah."
+          ],
+          "esperada": "nada",
+          "salio": "llm"
+        },
+        {
+          "frase": "mmm",
+          "voz": "es_MX-claude-high",
+          "oido": [
+            "M M.",
+            "NNN."
+          ],
+          "esperada": "nada",
+          "salio": "llm"
+        },
+        {
+          "frase": "calla",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Okay."
+          ],
+          "esperada": "para",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cómo dijiste?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "¿Cómo dijiste?",
+            "Cómo dijiste?"
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "no te oí bien",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "No te voy bien.",
+            "No te oí bien."
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "dilo de nuevo",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Dilo de nuevo."
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿me lo repites?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "¿Me lo repites?",
+            "Me lo repites?"
+          ],
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "ya terminamos por hoy",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Ya terminamos por hoy."
+          ],
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "apágate ya",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Vai dar.",
+            "Bárate ya."
+          ],
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "hazlo ya",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "That's loaded."
+          ],
+          "esperada": "confirma",
+          "salio": "llm"
+        },
+        {
+          "frase": "ya no, déjalo",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Yeah no, défalo.",
+            "Ya no, déjalo."
+          ],
+          "esperada": "olvida",
+          "salio": "llm"
+        },
+        {
+          "frase": "la hora por favor",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Laura, por favor."
+          ],
+          "esperada": "hora",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿a cuánto estamos?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "¿A cuánto estamos?",
+            "A cuánto estamos?"
+          ],
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué día es?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Que 10.",
+            "Qué día es?"
+          ],
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuál es tu latencia?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "¿Cuál es tu latencia?",
+            "Cuál es tu latencia?"
+          ],
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cómo va el sistema?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "¿Cómo va el sistema?",
+            "Cómo va el sistema?"
+          ],
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuánto va el presupuesto?",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "¿Cuánto va el presupuesto?",
+            "Cuán presupuesto?"
+          ],
+          "esperada": "gasto",
+          "salio": "llm"
+        },
+        {
+          "frase": "envía la factura a contabilidad",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Envían la factura a contabilidad.",
+            "Envían la factura con notabilidad."
+          ],
+          "esperada": "escritura",
+          "salio": "llm"
+        },
+        {
+          "frase": "borra el evento de mañana",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Borda el evento de mañana."
+          ],
+          "esperada": "escritura",
+          "salio": "agenda-manana"
+        },
+        {
+          "frase": "paga la factura del proveedor",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "para la factura del proveedor.",
+            "Para la factura del proveedor."
+          ],
+          "esperada": "escritura",
+          "salio": "llm"
+        },
+        {
+          "frase": "eh",
+          "voz": "es_ES-davefx-medium",
+          "oido": [
+            "Yeah."
+          ],
+          "esperada": "nada",
+          "salio": "llm"
+        }
+      ]
+    },
+    "activacion": {
+      "positivas": 26,
+      "nPos": 30,
+      "falsas": 3,
+      "nNeg": 45,
+      "segundosNegativas": 85.56937499999998,
+      "perdidas": [
+        "[es_ES-davefx-medium] Oye mando, ¿qué hora es? → [\"Os te mando qué hora es.\",\"Hoy amando, ¿qué hora es?\"]",
+        "[es_ES-davefx-medium] Oye mando, repite. → [\"O llamando, repite.\"]",
+        "[es_ES-davefx-medium] Oye mando, ayúdame. → [\"Hoy llamando ayúdame.\",\"Hoy amando ayúdame.\"]",
+        "[es_MX-ald-medium] Oye mando, para. → [\"Audio mando para\",\"Ori mando para.\"]"
+      ],
+      "disparos": [
+        "[es_MX-claude-high] Oye, Armando, ¿ya llegaste? → [\"Oye, Armando ya llegaste.\"]",
+        "[es_ES-davefx-medium] Oye, Armando, ¿ya llegaste? → [\"Oye, Armando, ya llegaste.\"]",
+        "[es_MX-ald-medium] Oye, Armando, ¿ya llegaste? → [\"Oye, Armando, ya llegaste.\"]"
+      ],
+      "barrido": [
+        {
+          "umbral": 0.75,
+          "detectadas": 29,
+          "falsas": 11
+        },
+        {
+          "umbral": 0.8,
+          "detectadas": 26,
+          "falsas": 3
+        },
+        {
+          "umbral": 0.85,
+          "detectadas": 26,
+          "falsas": 3
+        },
+        {
+          "umbral": 0.9,
+          "detectadas": 23,
+          "falsas": 0
+        }
+      ]
+    }
+  }
+}

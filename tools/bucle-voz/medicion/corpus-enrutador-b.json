@@ -1,0 +1,27 @@
+{
+  "_comentario": "Corpus B, escrito el 2026-10-16 DESPUÉS de medir el A (79,1 %) y ANTES de ajustar el enrutador: es la cifra que no se pudo ajustar a mano. Mismas etiquetas que el A.",
+  "version": 1,
+  "frases": [
+    ["ya estuvo, cállate", "para"], ["detén eso", "para"], ["suficiente", "para"], ["no hables", "para"], ["silencio ya", "para"],
+    ["¿qué?", "repite"], ["¿perdón?", "repite"], ["repítelo otra vez", "repite"], ["¿lo puedes repetir?", "repite"], ["vuelve a decirlo", "repite"],
+    ["más lentito", "mas-despacio"], ["despacio, por favor", "mas-despacio"], ["habla despacio", "mas-despacio"],
+    ["apúrale", "mas-rapido"], ["más rápido, que tengo prisa", "mas-rapido"], ["habla rápido", "mas-rapido"],
+    ["gracias, eso es todo", "duerme"], ["ya me voy", "duerme"], ["hasta mañana", "duerme"],
+    ["sí, adelante", "confirma"], ["dale", "confirma"], ["sí, confirmo", "confirma"],
+    ["no, mejor no", "olvida"], ["olvida eso", "olvida"], ["ya no lo hagas", "olvida"],
+    ["¿qué horas son ya?", "hora"], ["¿qué hora traes?", "hora"], ["dime la hora porfa", "hora"],
+    ["¿en qué fecha estamos?", "fecha"], ["¿hoy qué día es?", "fecha"],
+    ["¿qué tengo agendado hoy?", "agenda-hoy"], ["¿cuáles son mis pendientes de hoy?", "agenda-hoy"], ["repasa mi agenda", "agenda-hoy"], ["¿hay juntas hoy?", "agenda-hoy"],
+    ["¿qué hay mañana?", "agenda-manana"], ["¿qué tengo agendado para mañana?", "agenda-manana"],
+    ["¿cómo estás funcionando?", "estado"], ["dime tu latencia", "estado"], ["¿qué tal tu rapidez?", "estado"],
+    ["¿cuánto llevamos gastado?", "gasto"], ["dime el gasto", "gasto"], ["¿cuánto se ha gastado del presupuesto?", "gasto"],
+    ["¿en qué me puedes ayudar?", "ayuda"], ["¿qué cosas haces?", "ayuda"],
+    ["programa una llamada con Rosa a las seis", "escritura"], ["manda el reporte a mi socio", "escritura"], ["elimina la cita del martes", "escritura"],
+    ["agrega leche a la lista del súper", "escritura"], ["avísale a Jorge que ya llegó el pedido", "escritura"], ["reserva una mesa para cuatro", "escritura"],
+    ["¿cómo hago un flujo de efectivo?", "llm"], ["dame un consejo para negociar con proveedores", "llm"], ["¿qué es el capital de trabajo?", "llm"],
+    ["explícame la depreciación", "llm"], ["¿qué me recomiendas para la temporada navideña?", "llm"], ["¿cuál es la diferencia entre costo y gasto?", "llm"],
+    ["¿qué hora es buena para llamar a un cliente?", "llm"], ["¿para qué sirve un estado de resultados?", "llm"], ["cuéntame cómo funciona el SAT", "llm"],
+    ["¿qué tengo que saber de la nómina?", "llm"], ["¿por qué es importante el inventario?", "llm"], ["dime algo motivador", "llm"],
+    ["ajá", "nada"], ["este", "nada"], ["eh, mmm", "nada"]
+  ]
+}

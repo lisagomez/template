@@ -1,6 +1,6 @@
 {
   "name": "@tu-scope/dictado",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Dictado local: hablar y que el texto aparezca donde esta el cursor. Nucleo en TypeScript puro; el VAD lo pone @tu-scope/voz y los motores de transcripcion, el pegado y el almacen se inyectan.",
   "type": "module",
   "license": "UNLICENSED",
@@ -32,7 +32,7 @@
     "node": ">=22.18"
   },
   "peerDependencies": {
-    "@tu-scope/voz": "0.5.0",
+    "@tu-scope/voz": "0.6.0",
     "onnxruntime-node": ">=1.17.0",
     "sherpa-onnx-node": ">=1.13.0"
   },

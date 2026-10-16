@@ -94,6 +94,17 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/buzon/pendientes',
   '/api/buzon/piloto',
   '/api/buzon/pymes',
+  // Centro de mando por voz (goal centro-de-mando-voz). RF-20: misma app y mismo puerto. Las cinco exigen el Bearer
+  // del dictado (DICTADO_MOVIL_TOKEN, comparado en tiempo constante) y validan con Zod. `transcribir` manda el audio
+  // al demonio LOCAL (127.0.0.1) sin escribirlo a disco; `cerebro` solo saca TEXTO hacia OpenRouter, con el modelo
+  // pineado por el routing y tope de gasto; `lee` es una lista cerrada de lecturas (agenda en espejo local, gasto);
+  // `estado` da presencias, nunca valores; `voz` sintetiza con Piper local (voz de una lista cerrada). Ninguna
+  // escribe fuera del laboratorio ni notifica a terceros.
+  '/api/centro-de-mando/cerebro',
+  '/api/centro-de-mando/estado',
+  '/api/centro-de-mando/lee',
+  '/api/centro-de-mando/transcribir',
+  '/api/centro-de-mando/voz',
   '/api/contenido/video',
   // Crecimiento demostrado (goal crecimiento-demostrado, laboratorio con pymes sintéticas). RF-20: misma
   // app y mismo puerto. Es la pasarela del agente `crecimiento-demostrado`, OTRA superficie que no es este

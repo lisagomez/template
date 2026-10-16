@@ -1,0 +1,7 @@
+{
+  "_comentario": "Corpus de la palabra de activación «oye mando». Positivas: la frase al inicio, sola o con una orden detrás. Negativas: frases sin ella, con palabras que suenan parecido («Armando», «mandé», «hoy mando») o con «mando» a media frase. Se dicen con voces Piper locales y pasan por el MISMO camino que en el HUD (motor local con anclaje → activación).",
+  "version": 1,
+  "frase": "oye mando",
+  "positivas": ["Oye, mando.", "Oye mando, ¿qué hora es?", "Oye, mando, ¿qué tengo hoy?", "Oye mando, para.", "Oye, mando, ¿qué es un balance general?", "Oye mando, repite.", "Oye, mando, más despacio.", "Oye mando, ¿cuánto llevas gastado?", "Oye, mando, ¿qué tengo mañana?", "Oye mando, ayúdame."],
+  "negativas": ["Oye, Armando, ¿ya llegaste?", "Hoy mando el pedido a Monterrey.", "Ayer mandé la factura.", "Te mando el archivo en un rato.", "¿Quién manda aquí?", "Oye, ¿mandaste el correo?", "El mando de la tele no sirve.", "Oye, María, ven tantito.", "Ya casi es hora de cerrar la tienda.", "¿Me pasas el control remoto?", "Mañana tenemos junta con el contador.", "Vamos a mandar a hacer los uniformes.", "Oye, ¿y mañana qué hacemos?", "Le dije que yo mando en mi casa.", "La comida está lista, vengan a comer."]
+}

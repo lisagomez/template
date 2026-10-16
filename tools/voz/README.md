@@ -32,7 +32,7 @@ Deteccion de voz (VAD) en tiempo real y diarizacion local, en vivo y por lotes.
   para Silero y los modelos de hablante y segmentación. Los pesos no viajan en el paquete: se configuran por ruta y van
   pineados en `src/node/pesos.ts`. Con `modeloEnergia()` no hace falta ninguno.
 - **CPU, GPU y memoria**: consumo no medido. La última medición de calidad corrió en CPU (AMD
-  Ryzen 7 5700, 16 núcleos, 16 GB, 2026-09-21), y las pruebas con modelos falsos corren en 200 ms sin red.
+  Ryzen 7 5700G, 8 núcleos y 16 hilos, 15 GB, 2026-09-21), y las pruebas con modelos falsos corren en ~300 ms sin red.
 - **Servicios externos**: ninguno en ejecución. `npm run mide` baja modelos y audio la primera vez (~35 MB + ~15 MB).
 - **Variables de entorno**: ninguna en el paquete. La demo y el diagnóstico leen `PUERTO` y `WSL_DISTRO_NAME`.
 - **Almacenamiento**: el paquete no escribe nada por su cuenta; lo que queda en disco lo decide quien lo usa (ver «Que
@@ -43,7 +43,7 @@ Deteccion de voz (VAD) en tiempo real y diarizacion local, en vivo y por lotes.
 ## Instalar
 
 ```bash
-npm install <ruta>/tools/voz/tu-scope-voz-0.5.0.tgz
+npm install <ruta>/tools/voz/tu-scope-voz-0.6.0.tgz
 ```
 
 El runtime de ONNX es **peerDependency opcional**: instala `onnxruntime-web` (navegador) u
@@ -447,7 +447,7 @@ conviene saberlo porque una voz es un dato biometrico:
 ## Pruebas
 
 ```bash
-npm run build && npm run prueba   # 97 pruebas, sin red y sin modelos
+npm run build && npm run prueba   # 98 pruebas, sin red y sin modelos (2026-10-16)
 ```
 
 Corren contra `dist/`, no contra `src/`: se prueba el artefacto que se instala.
@@ -464,7 +464,7 @@ los runtimes que usa están pineados en `src/node/pesos.ts` (`PESOS`, `RUNTIMES`
 lista que leen la demo y `npm run diagnostico`.
 
 <!-- MEDICION -->
-**Ultima medicion en esta maquina** (`npm run mide`, 2026-09-21 · AMD Ryzen 7 5700, 16 nucleos, 16 GB, Node v24.14.0 · LibriSpeech dev-clean, 5 hablantes × 12 tomas). Este bloque lo escribe la medicion; el resto del README lo comenta.
+**Ultima medicion en esta maquina** (`npm run mide`, 2026-09-21 · AMD Ryzen 7 5700, 16 hilos, 16 GB, Node v24.14.0 · LibriSpeech dev-clean, 5 hablantes × 12 tomas). Este bloque lo escribe la medicion; el resto del README lo comenta.
 
 | Que | Medido |
 |---|---|
@@ -501,7 +501,7 @@ y trae la verdad al lado: como el nombre de cada archivo lleva el hablante real,
 puntua sola. Es donde se ve lo que un numero no cuenta — un turno entrando provisional, la
 correccion reescribiendolo, y el `firme` que dice que ya no se toca mas.
 
-No son la misma cosa y no se sustituyen. Las 90 pruebas miden la CONTABILIDAD del algoritmo
+No son la misma cosa y no se sustituyen. Las 98 pruebas miden la CONTABILIDAD del algoritmo
 —cuando se abre un hablante, quien se funde con quien, que se puede corregir— y por eso usan
 modelos falsos y corren en 200 ms sin red. `npm run mide` mide lo unico que un modelo falso no
 puede tener: el convenio de llamada del `.onnx` de verdad, y los umbrales sobre voces de
@@ -510,6 +510,11 @@ primer dia. **Lo que no ha pasado por ahi no esta aprobado: esta sin medir.**
 
 ## Cambios
 
+- **0.6.0** (2026-10-16, sin publicar): los pesos de `./node` (`PESOS`) van a referencias INMUTABLES (etiqueta
+  `v6.2` de Silero y commits de Hugging Face) con su huella `sha256`, y `huellaDe` / `verificaHuella` la comprueban al
+  bajar (`npm run mide` ya lo hace: lo que no coincide se borra). Lo que destapó: el Silero del banco, con el que se
+  midió todo, era la **v6.2** y no la «v5» de la ficha; `raw/master` se había movido. Misma interfaz (512 + 64
+  muestras). Ninguna firma de 0.5 cambia.
 - **0.5.0** (2026-09-21, sin publicar): `Transcriptor` con opciones (`idioma`, `pista`) y
   respuesta `{ texto, confianza?, idioma?, ms? }`, compatible con 0.4; `transcribeTurnos` las
   pasa; `PERFILES_DETECTOR` (`bargeIn` = los defectos de siempre, `dictado` = los medidos) y

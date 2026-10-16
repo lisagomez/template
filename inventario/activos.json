@@ -282,6 +282,22 @@
    "cubre": ["src/features/laboratorio-calendario", "scripts/calendario"]
   },
   {
+   "id": "TPL-bucle-voz",
+   "nombre": "Bucle de voz: turnos con identificador y cancelacion, interrupcion con puerta de eco, separador de frases, enrutador sin LLM, palabra de activacion por texto local, corte por sentido, telemetria desde el fin real del habla, cerebro en flujo y reproductor del navegador (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/bucle-voz", "responsable": "dep-sw",
+   "origen": ["docs/goals/centro-de-mando-voz.md"],
+   "cubre": ["tools/bucle-voz"]
+  },
+  {
+   "id": "TPL-feature-centro-de-mando",
+   "nombre": "Centro de mando por voz local (/centro-de-mando): HUD con orbe, onda, subtitulos karaoke, telemetria por etapa y conversacion; rutas /api/centro-de-mando (transcribir, cerebro, lee, estado) y la medicion de punta a punta con microfono falso",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/centro-de-mando", "responsable": "dep-sw",
+   "origen": ["docs/goals/centro-de-mando-voz.md"],
+   "cubre": ["src/features/centro-de-mando", "scripts/centro-de-mando"]
+  },
+  {
    "id": "TPL-app-base",
    "nombre": "App SaaS base (Next.js + Supabase, PWA)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "produccion",

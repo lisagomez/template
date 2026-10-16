@@ -43,6 +43,46 @@
         "intelligence": 29.9
       }
     },
+    "voz": {
+      "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros",
+      "modelo": "anthropic/claude-haiku-5.5-20261007",
+      "precio": {
+        "entrada": 0.1,
+        "salida": 0.5,
+        "lectura_cache": 0.01
+      },
+      "consultado": "2026-10-16",
+      "medicion": {
+        "_comentario": "Primer token por OpenRouter desde esta maquina (WSL2, Mexico), 5 preguntas cortas en espanol por modelo, max_tokens 120, razonamiento apagado. Lo elige el primer token, no el precio: a la par de precio, el mas rapido.",
+        "fecha": "2026-10-16",
+        "primer_token_p50_ms": {
+          "anthropic/claude-haiku-5.5-20261007": 752,
+          "anthropic/claude-haiku-4.5": 956,
+          "google/gemini-2.5-flash-lite": 410
+        },
+        "descartados": "gemini-2.5-flash-lite: 2 de 5 llamadas a ~1 s (irregular) y una respuesta equivocada sobre utilidad; haiku-4.5: 200 ms mas lento y 10 veces mas caro"
+      },
+      "alternativa_abierta": {
+        "modelo": "deepseek/deepseek-v4-flash-0731",
+        "pesos": "deepseek-ai/DeepSeek-V4-Flash-0731",
+        "precio": {
+          "entrada": 0.14,
+          "salida": 0.28,
+          "lectura_cache": 0.028
+        },
+        "indices": {
+          "coding": 69.1,
+          "agentic": 48.4,
+          "intelligence": 51.8
+        },
+        "nota": "la misma del nivel ligero; su primer token NO esta medido en voz. Antes de usarla se mide igual (y por OpenRouter el texto sale igual a un tercero: C4)."
+      },
+      "indices": {
+        "coding": null,
+        "agentic": null,
+        "intelligence": 43.4
+      }
+    },
     "capaz": {
       "para": "el trabajo normal de construir: implementar, revisar, migrar, documentar",
       "modelo": "anthropic/claude-sonnet-5",
@@ -110,6 +150,7 @@
     "triage-de-peticion": "ligero",
     "busqueda-y-exploracion": "ligero",
     "formato-y-lint": "ligero",
+    "cerebro-de-voz": "voz",
     "implementar-feature": "capaz",
     "revision-de-codigo": "capaz",
     "migracion-o-sql": "capaz",

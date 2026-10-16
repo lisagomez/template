@@ -1,0 +1,34 @@
+{
+  "name": "@tu-scope/bucle-voz",
+  "version": "0.1.0",
+  "description": "El bucle de un asistente de voz local: turnos con identificador y cancelacion, interrupcion sin auto-interrupcion, separador de frases, enrutador sin LLM, palabra de activacion, cierre por sentido y telemetria desde el fin real del habla. Nucleo en TypeScript puro: microfono, motores y cerebro se inyectan.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./openrouter": {
+      "types": "./dist/openrouter.d.ts",
+      "import": "./dist/openrouter.js"
+    },
+    "./navegador": {
+      "types": "./dist/navegador/index.d.ts",
+      "import": "./dist/navegador/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE-FUENTE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prueba": "npm run build && node --test pruebas/*.ts"
+  }
+}

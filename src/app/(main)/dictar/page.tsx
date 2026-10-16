@@ -12,6 +12,7 @@ import { QrEmparejar } from '@/features/dictado/components/qr-emparejar';
 import { BotonFlotanteMovil } from '@/features/dictado/components/boton-flotante-movil';
 import { useGrabadora } from '@/features/dictado/hooks/use-grabadora';
 import { useDictadoMovil, type Destino } from '@/features/dictado/store/movil';
+import { tokenDelEnlace } from '@/shared/lib/token-enlace';
 
 const DESTINOS: Array<{ valor: Destino; nombre: string; pista: string }> = [
   { valor: 'pc', nombre: 'A la PC', pista: 'el texto aparece donde este el cursor de Windows' },
@@ -44,10 +45,11 @@ export default function PaginaDictar() {
     // nunca se manda al servidor; se acepta tambien el query (?t=) porque algun escaner de
     // camara no propaga el fragmento. En ambos casos se empareja y se BORRA de la barra al
     // instante. Evita teclear 32 caracteres en el telefono, donde el campo se borra solo (iOS).
-    const m = /[#?&]t=([^&]+)/.exec(window.location.hash + window.location.search);
-    if (m?.[1]) {
-      void movil.empareja(decodeURIComponent(m[1]));
-      history.replaceState(null, '', window.location.pathname);
+    // Hash y búsqueda por separado: concatenados, `?caso=6#t=…` pegaba la búsqueda al token (shared/lib/token-enlace.ts).
+    const enlace = tokenDelEnlace(window.location);
+    if (enlace) {
+      void movil.empareja(enlace.token);
+      history.replaceState(null, '', enlace.urlLimpia);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

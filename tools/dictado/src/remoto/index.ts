@@ -31,15 +31,18 @@ interface RespuestaServicio {
   error?: string;
 }
 
-/** `Uint8Array<ArrayBuffer>` explicito: el `BodyInit` del DOM no admite `ArrayBufferLike`. */
-function aPcm16(muestras: Muestras): Uint8Array<ArrayBuffer> {
+/**
+ * Flotante → PCM16LE con la MISMA escala que `@tu-scope/voz/node` (`floatAPcm16`): ×32768 con tope en
+ * 32767, la inversa exacta de ÷32768. La asimétrica (×32767 los positivos) perdía 1 LSB en cada ida y
+ * vuelta y ya se había corregido una vez en `voz/node` (aprendizaje del 2026-09-21); aquí seguía.
+ * No se importa de `./node` a propósito: este subpath no arrastra nada de Node.
+ * `Uint8Array<ArrayBuffer>` explicito: el `BodyInit` del DOM no admite `ArrayBufferLike`.
+ */
+export function aPcm16(muestras: Muestras): Uint8Array<ArrayBuffer> {
   const buffer = new ArrayBuffer(muestras.length * 2);
   const salida = new Uint8Array(buffer);
   const vista = new DataView(buffer);
-  for (let i = 0; i < muestras.length; i++) {
-    const v = Math.max(-1, Math.min(1, muestras[i] ?? 0));
-    vista.setInt16(i * 2, Math.round(v < 0 ? v * 32768 : v * 32767), true);
-  }
+  for (let i = 0; i < muestras.length; i++) vista.setInt16(i * 2, Math.max(-32768, Math.min(32767, Math.round((muestras[i] ?? 0) * 32768))), true);
   return salida;
 }
 

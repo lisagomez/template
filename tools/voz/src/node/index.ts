@@ -15,7 +15,7 @@ export {
   type OpcionesSegmentacion,
 } from '../onnx/segmentacion.js';
 export type { RuntimeOnnx, SesionOnnx, TensorOnnx } from '../onnx/tipos.js';
-export { mbDe, PESOS, RUNTIMES, SEGMENTACION, SILERO, WESPEAKER, type Peso } from './pesos.js';
+export { huellaDe, mbDe, PESOS, RUNTIMES, SEGMENTACION, SILERO, verificaHuella, WESPEAKER, type Peso } from './pesos.js';
 
 import { aMono, creaRemuestreador } from '../audio/remuestreo.js';
 import type { Muestras } from '../types.js';

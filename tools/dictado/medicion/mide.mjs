@@ -50,22 +50,22 @@ const SIN_HILOS = argv.includes('--sin-hilos');
 const MOTOR_INTERNO = opcion('interno-motor', null);
 const RSS_BASE_MB = Math.round(process.memoryUsage().rss / 1048576);
 
-/** Todo pineado por URL exacta: `latest` es anti-patron aqui igual que en el modelo (C1). */
-const PESOS = [
-  { carpeta: 'sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8', url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8.tar.bz2', que: 'NVIDIA Parakeet TDT 0.6B v3 (25 idiomas, es incluido), int8, ONNX' },
-  { carpeta: 'sherpa-onnx-whisper-turbo', url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-turbo.tar.bz2', que: 'OpenAI Whisper large-v3-turbo, int8, ONNX' },
-  { carpeta: 'sherpa-onnx-whisper-base', url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-base.tar.bz2', que: 'OpenAI Whisper base (multilingue), int8, ONNX' },
-];
-const ARCHIVOS = [
-  { archivo: 'silero_vad.onnx', url: 'https://github.com/snakers4/silero-vad/raw/master/src/silero_vad/data/silero_vad.onnx', que: 'Silero VAD v5' },
-  { archivo: 'embedding.onnx', url: 'https://huggingface.co/Wespeaker/wespeaker-voxceleb-resnet34-LM/resolve/main/voxceleb_resnet34_LM.onnx', que: 'WeSpeaker ResNet34-LM (para `dictado lote`)' },
-];
+/**
+ * Pesos: la MISMA lista pineada que el instalador (`src/node/pesos.ts`), con huella. Hasta el
+ * 2026-10-16 esta medición llevaba su propia copia, apuntando a `raw/master` y `resolve/main`
+ * (referencias que se mueven) y sin comprobar nada.
+ */
+const { NECESARIOS, DE_MEDICION, verificaHuella } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'node', 'pesos.js')).href);
+const PESOS = [...NECESARIOS, ...DE_MEDICION].filter((p) => p.tipo === 'carpeta' && !p.carpeta.startsWith('vits-piper'));
+const ARCHIVOS = NECESARIOS.filter((p) => p.tipo === 'archivo');
 const RUNTIMES = { 'sherpa-onnx-node': '1.13.8', 'onnxruntime-node': '1.30.0' };
 const PYTHON = { version: '3.12', paquetes: ['faster-whisper==1.2.1', 'pyarrow==25.0.1'] };
 const PARQUET = { url: 'https://huggingface.co/datasets/google/fleurs/resolve/refs%2Fconvert%2Fparquet/es_419/test/0000.parquet', archivo: 'fleurs-es_419-test.parquet', que: 'FLEURS es_419 test (Google, CC-BY-4.0), 908 tomas' };
 
-function baja(url, destino) {
-  execFileSync('curl', ['-sSL', '--fail', '-o', destino, url], { stdio: ['ignore', 'ignore', 'inherit'] });
+function baja(url, destino, sha256 = null) {
+  execFileSync('curl', ['-sSL', '--fail', '-o', `${destino}.parcial`, url], { stdio: ['ignore', 'ignore', 'inherit'] });
+  verificaHuella(`${destino}.parcial`, sha256);
+  execFileSync('mv', [`${destino}.parcial`, destino]);
 }
 
 function preparaModelos() {
@@ -77,14 +77,14 @@ function preparaModelos() {
     }
     console.log(gris(`  bajando ${p.carpeta} — ${p.que}`));
     const tar = join(modelos, `${p.carpeta}.tar.bz2`);
-    baja(p.url, tar);
+    baja(p.url, tar, p.sha256);
     execFileSync('tar', ['-xjf', tar, '-C', modelos]);
     execFileSync('rm', [tar]);
   }
   for (const a of ARCHIVOS) {
     if (existsSync(join(modelos, a.archivo))) continue;
     console.log(gris(`  bajando ${a.archivo} — ${a.que}`));
-    baja(a.url, join(modelos, a.archivo));
+    baja(a.url, join(modelos, a.archivo), a.sha256);
   }
 }
 
