@@ -1,0 +1,26 @@
+{
+ "antes": {
+  "cuando": "2026-10-16T13:51:48.338Z",
+  "usoLlaveUsd": 11.73098,
+  "topeLlaveUsd": 15,
+  "restanteLlaveUsd": 3.26902,
+  "creditosCuentaUsd": 24,
+  "usoCuentaUsd": 21.444837
+ },
+ "despues": {
+  "cuando": "2026-10-16T17:47:20.502Z",
+  "usoLlaveUsd": 11.790255,
+  "topeLlaveUsd": 15,
+  "restanteLlaveUsd": 3.209745,
+  "creditosCuentaUsd": 24,
+  "usoCuentaUsd": 21.504112
+ },
+ "libroDeGastoApp": {
+  "llamadas": 201,
+  "costoConocidoUsd": 0.05511,
+  "sinCostoDesconocido": 6,
+  "desde": "2026-10-16T15:22:14.198Z",
+  "hasta": "2026-10-16T17:04:22.871Z"
+ },
+ "deltaUsoLlaveUsd": 0.059275
+}

@@ -1,0 +1,58 @@
+{
+ "cuando": "2026-10-16T17:05:15.965Z",
+ "valoresSembrados": 66,
+ "control": {
+  "que": "almacén del portal (expediente administrativo: AQUÍ sí debe estar)",
+  "apariciones": 55
+ },
+ "resultados": [
+  {
+   "que": "libro de eventos (JSONL, dos clínicas)",
+   "revisado": true,
+   "bytes": 151727,
+   "apariciones": []
+  },
+  {
+   "que": "dataLayer de cada pestaña del recorrido",
+   "revisado": true,
+   "bytes": 5389,
+   "apariciones": []
+  },
+  {
+   "que": "log del servidor de la app",
+   "revisado": true,
+   "bytes": 71466,
+   "apariciones": []
+  },
+  {
+   "que": "semillas de dbt (raw_eventos.csv)",
+   "revisado": true,
+   "bytes": 100782,
+   "apariciones": []
+  },
+  {
+   "que": "corte semántico (métricas)",
+   "revisado": true,
+   "bytes": 12843,
+   "apariciones": []
+  },
+  {
+   "que": "unit economics",
+   "revisado": true,
+   "bytes": 15138,
+   "apariciones": []
+  },
+  {
+   "que": "grafo de atención",
+   "revisado": true,
+   "bytes": 4556,
+   "apariciones": []
+  },
+  {
+   "que": "libro de gasto del asistente",
+   "revisado": true,
+   "bytes": 40877,
+   "apariciones": []
+  }
+ ]
+}

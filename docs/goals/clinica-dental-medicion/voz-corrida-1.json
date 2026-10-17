@@ -1,0 +1,292 @@
+{
+ "cuando": "2026-10-16T16:53:40.057Z",
+ "base": "http://localhost:3011",
+ "maquina": "WSL2, sin GPU; ASR Parakeet y TTS Piper locales (demonio de dictado); Chromium headless con micrófono falso",
+ "guia": {
+  "n": 36,
+  "conMedida": 36,
+  "p50": 777,
+  "p95": 1032,
+  "min": 694,
+  "max": 1043,
+  "segunLaPagina": {
+   "p50": 708,
+   "p95": 926
+  }
+ },
+ "ordenesLocales": {
+  "n": 12,
+  "conMedida": 12,
+  "p50": 775,
+  "p95": 853,
+  "min": 706,
+  "max": 853,
+  "segunLaPagina": {
+   "p50": 644,
+   "p95": 692
+  }
+ },
+ "cerebro": {
+  "n": 12,
+  "conMedida": 12,
+  "p50": 2496,
+  "p95": 2990,
+  "min": 1891,
+  "max": 2990,
+  "segunLaPagina": {
+   "p50": 2359,
+   "p95": 2834
+  }
+ },
+ "desviados": {
+  "ordenesQueFueronAlLlm": 0,
+  "preguntasQueNoFueronAlLlm": 0
+ },
+ "interrupcion": {
+  "n": 8,
+  "callaron": 7,
+  "volvioASonar": 0,
+  "reaccionP50": 291,
+  "reaccionP95": 300
+ },
+ "referencia": "centro de mando (PR #268): orden local p50 644 ms · p95 802 ms; con cerebro p50 1895 ms · p95 2644 ms; interrupción p50 208 ms",
+ "muestras": {
+  "ordenes": [
+   {
+    "texto": "¿A qué hora abren?",
+    "ruta": "orden",
+    "oido": "¿A qué hora abren?",
+    "estado": "completo",
+    "msExterna": 853,
+    "msHud": 685
+   },
+   {
+    "texto": "¿Dónde están?",
+    "ruta": "orden",
+    "oido": "¿Dónde están?",
+    "estado": "completo",
+    "msExterna": 725,
+    "msHud": 689
+   },
+   {
+    "texto": "¿Cuál es su horario?",
+    "ruta": "orden",
+    "oido": "¿Cuál es su horario?",
+    "estado": "completo",
+    "msExterna": 783,
+    "msHud": 678
+   },
+   {
+    "texto": "¿Cómo llego?",
+    "ruta": "orden",
+    "oido": "¿Cómo llegó?",
+    "estado": "completo",
+    "msExterna": 766,
+    "msHud": 639
+   },
+   {
+    "texto": "Quiero agendar.",
+    "ruta": "orden",
+    "oido": "Quiero agendar.",
+    "estado": "completo",
+    "msExterna": 706,
+    "msHud": 628
+   },
+   {
+    "texto": "¿Qué horario tienen?",
+    "ruta": "orden",
+    "oido": "¿Qué horario tienen?",
+    "estado": "completo",
+    "msExterna": 850,
+    "msHud": 692
+   },
+   {
+    "texto": "¿A qué hora abren?",
+    "ruta": "orden",
+    "oido": "¿A qué hora abren?",
+    "estado": "completo",
+    "msExterna": 802,
+    "msHud": 685
+   },
+   {
+    "texto": "¿Dónde están?",
+    "ruta": "orden",
+    "oido": "¿Dónde están?",
+    "estado": "completo",
+    "msExterna": 728,
+    "msHud": 614
+   },
+   {
+    "texto": "¿Cuál es su horario?",
+    "ruta": "orden",
+    "oido": "¿Cuál es su horario?",
+    "estado": "completo",
+    "msExterna": 831,
+    "msHud": 680
+   },
+   {
+    "texto": "¿Cómo llego?",
+    "ruta": "orden",
+    "oido": "¿Cómo llegó?",
+    "estado": "completo",
+    "msExterna": 742,
+    "msHud": 609
+   },
+   {
+    "texto": "Quiero agendar.",
+    "ruta": "orden",
+    "oido": "Quiero agendar.",
+    "estado": "completo",
+    "msExterna": 775,
+    "msHud": 637
+   },
+   {
+    "texto": "¿Qué horario tienen?",
+    "ruta": "orden",
+    "oido": "¿Qué horario tienen?",
+    "estado": "completo",
+    "msExterna": 815,
+    "msHud": 644
+   }
+  ],
+  "cerebro": [
+   {
+    "texto": "¿Cuánto cuesta una limpieza dental?",
+    "ruta": "llm",
+    "oido": "¿Cuánto cuesta una limpieza dental?",
+    "estado": "completo",
+    "msExterna": 2320,
+    "msHud": 2180
+   },
+   {
+    "texto": "¿En qué consiste la valoración de ortodoncia?",
+    "ruta": "llm",
+    "oido": "¿En qué consiste la valoración de ortodoncia?",
+    "estado": "completo",
+    "msExterna": 2546,
+    "msHud": 2393
+   },
+   {
+    "texto": "¿Tengo que ir en ayunas?",
+    "ruta": "llm",
+    "oido": "Tengo que ir en añunas.",
+    "estado": "completo",
+    "msExterna": 2700,
+    "msHud": 2580
+   },
+   {
+    "texto": "¿Qué promociones tienen?",
+    "ruta": "llm",
+    "oido": "¿Qué promociones tienen?",
+    "estado": "completo",
+    "msExterna": 1891,
+    "msHud": 1759
+   },
+   {
+    "texto": "¿Aceptan tarjeta?",
+    "ruta": "llm",
+    "oido": "Aceptan tarjeta.",
+    "estado": "completo",
+    "msExterna": 2471,
+    "msHud": 2327
+   },
+   {
+    "texto": "¿Cuánto dura un tratamiento de conductos?",
+    "ruta": "llm",
+    "oido": "¿Cuánto dura un tratamiento de conductos?",
+    "estado": "completo",
+    "msExterna": 2117,
+    "msHud": 2023
+   },
+   {
+    "texto": "¿Tienen estacionamiento?",
+    "ruta": "llm",
+    "oido": "tienen estacionamiento.",
+    "estado": "completo",
+    "msExterna": 2496,
+    "msHud": 2359
+   },
+   {
+    "texto": "¿Qué llevo a mi primera cita?",
+    "ruta": "llm",
+    "oido": "que llevo a mi primera cita.",
+    "estado": "completo",
+    "msExterna": 2617,
+    "msHud": 2439
+   },
+   {
+    "texto": "¿Atienden a niños?",
+    "ruta": "llm",
+    "oido": "Atienden a niños.",
+    "estado": "completo",
+    "msExterna": 2279,
+    "msHud": 2117
+   },
+   {
+    "texto": "¿Hasta cuándo puedo cancelar?",
+    "ruta": "llm",
+    "oido": "¿Hasta cuándo puedo cancelar?",
+    "estado": "completo",
+    "msExterna": 2560,
+    "msHud": 2388
+   },
+   {
+    "texto": "¿Cuánto cuesta la resina?",
+    "ruta": "llm",
+    "oido": "¿Cuánto cuesta la resina?",
+    "estado": "completo",
+    "msExterna": 2990,
+    "msHud": 2834
+   },
+   {
+    "texto": "¿Qué es la profilaxis?",
+    "ruta": "llm",
+    "oido": "¿Qué es la profilaxis?",
+    "estado": "completo",
+    "msExterna": 2626,
+    "msHud": 2450
+   }
+  ],
+  "cortes": [
+   {
+    "msReaccion": 291,
+    "callo": true,
+    "sonoDespues": false
+   },
+   {
+    "msReaccion": 276,
+    "callo": true,
+    "sonoDespues": false
+   },
+   {
+    "msReaccion": 294,
+    "callo": true,
+    "sonoDespues": false
+   },
+   {
+    "msReaccion": 300,
+    "callo": true,
+    "sonoDespues": false
+   },
+   {
+    "callo": false,
+    "sonoDespues": false
+   },
+   {
+    "msReaccion": 164,
+    "callo": true,
+    "sonoDespues": false
+   },
+   {
+    "msReaccion": 290,
+    "callo": true,
+    "sonoDespues": false
+   },
+   {
+    "msReaccion": 300,
+    "callo": true,
+    "sonoDespues": false
+   }
+  ]
+ }
+}

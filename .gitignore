@@ -116,5 +116,13 @@ tools/soporte-sap/semantica/.user.yml
 # La medición del perfil de despliegue (configura:deploy --escribir): es de la máquina, no del repo
 .despliegue/
 
+# La capa semántica del portal de clínicas: las semillas salen del LIBRO del laboratorio (corre.mjs) y dbt deja sus
+# artefactos; ninguno se versiona (el corte que sí, va a docs/goals/clinica-dental-medicion/).
+tools/clinica-dental/semantica/semillas/*.csv
+tools/clinica-dental/semantica/target/
+tools/clinica-dental/semantica/logs/
+tools/clinica-dental/semantica/dbt_packages/
+tools/clinica-dental/semantica/.user.yml
+
 # Silero para el HUD del centro de mando: lo deja `npm run prepara:silero` (pesos de terceros y el wasm del paquete)
 public/centro-de-mando/

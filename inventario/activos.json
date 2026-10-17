@@ -519,6 +519,22 @@
               "supabase/migrations/20261007120000_buzon_lectura.sql", "src/features/buzon-cfdi",
               "supabase/migrations/20261007140000_buzon_lista_69b.sql", "supabase/migrations/20261007160000_buzon_medicion.sql",
               "supabase/migrations/20261007180000_buzon_cierre.sql"]
+  },
+  {
+   "id": "TPL-clinica-dental",
+   "nombre": "Clínica dental: núcleo del portal del paciente (cuestionario y consentimientos, agenda sin doble reserva sobre Reservas, avisos por correo y Telegram con simuladores y adaptadores reales con gate, asistente con urgencias por regla y guía de voz, contrato de eventos, libro sha256 con Merkle y sello, dataLayer con consent mode, capa semántica dbt + MetricFlow, unit economics y grafo de atención) (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/clinica-dental", "responsable": "dep-sw",
+   "origen": ["docs/goals/clinica-dental.md"],
+   "cubre": ["tools/clinica-dental"]
+  },
+  {
+   "id": "TPL-feature-clinica-dental",
+   "nombre": "Portal del paciente para clínicas dentales (/clinica/[clinica]): entrar, registro con cuestionario y guía de voz, agenda con selector de avisos, mis citas con el estado de cada aviso, chatbot por texto y voz; rutas /api/clinica-dental; laboratorio (buzón, Telegram, tablero, grafo) y los recorridos y mediciones de scripts/clinica-dental",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "src/features/clinica-dental", "responsable": "dep-sw",
+   "origen": ["docs/goals/clinica-dental.md"],
+   "cubre": ["src/features/clinica-dental", "scripts/clinica-dental"]
   }
  ]
 }

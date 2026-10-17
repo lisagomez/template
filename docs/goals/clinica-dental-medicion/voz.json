@@ -1,0 +1,329 @@
+{
+ "cuando": "2026-10-16T17:04:26.101Z",
+ "base": "http://localhost:3011",
+ "maquina": "WSL2, sin GPU; ASR Parakeet y TTS Piper locales (demonio de dictado); Chromium headless con micrófono falso",
+ "guia": {
+  "n": 36,
+  "conMedida": 36,
+  "p50": 777,
+  "p95": 1032,
+  "min": 694,
+  "max": 1043,
+  "segunLaPagina": {
+   "p50": 708,
+   "p95": 926
+  }
+ },
+ "ordenesLocales": {
+  "n": 12,
+  "conMedida": 12,
+  "p50": 762,
+  "p95": 875,
+  "min": 706,
+  "max": 875,
+  "segunLaPagina": {
+   "p50": 651,
+   "p95": 795
+  }
+ },
+ "cerebro": {
+  "n": 12,
+  "conMedida": 12,
+  "p50": 2157,
+  "p95": 2783,
+  "min": 1923,
+  "max": 2783,
+  "segunLaPagina": {
+   "p50": 2050,
+   "p95": 2673
+  }
+ },
+ "desviados": {
+  "ordenesQueFueronAlLlm": 0,
+  "preguntasQueNoFueronAlLlm": 0
+ },
+ "interrupcion": {
+  "n": 8,
+  "sonabanAlDecirPara": 7,
+  "callaron": 8,
+  "siguieronHablando": 0,
+  "enSilencioAlDecirPara": 1,
+  "volvioASonar": 0,
+  "reaccionP50": 320,
+  "reaccionP95": 344
+ },
+ "referencia": "centro de mando (PR #268): orden local p50 644 ms · p95 802 ms; con cerebro p50 1895 ms · p95 2644 ms; interrupción p50 208 ms",
+ "muestras": {
+  "ordenes": [
+   {
+    "texto": "¿A qué hora abren?",
+    "ruta": "orden",
+    "oido": "Aquel hora abren.",
+    "estado": "completo",
+    "msExterna": 848,
+    "msHud": 795
+   },
+   {
+    "texto": "¿Dónde están?",
+    "ruta": "orden",
+    "oido": "¿Dónde están?",
+    "estado": "completo",
+    "msExterna": 720,
+    "msHud": 663
+   },
+   {
+    "texto": "¿Cuál es su horario?",
+    "ruta": "orden",
+    "oido": "¿Cuál es su horario?",
+    "estado": "completo",
+    "msExterna": 747,
+    "msHud": 651
+   },
+   {
+    "texto": "¿Cómo llego?",
+    "ruta": "orden",
+    "oido": "¿Cómo llegó?",
+    "estado": "completo",
+    "msExterna": 706,
+    "msHud": 580
+   },
+   {
+    "texto": "Quiero agendar.",
+    "ruta": "orden",
+    "oido": "Quiero un agendar.",
+    "estado": "completo",
+    "msExterna": 721,
+    "msHud": 594
+   },
+   {
+    "texto": "¿Qué horario tienen?",
+    "ruta": "orden",
+    "oido": "¿Qué horario tienen?",
+    "estado": "completo",
+    "msExterna": 810,
+    "msHud": 686
+   },
+   {
+    "texto": "¿A qué hora abren?",
+    "ruta": "orden",
+    "oido": "Aquel hora abren.",
+    "estado": "completo",
+    "msExterna": 813,
+    "msHud": 683
+   },
+   {
+    "texto": "¿Dónde están?",
+    "ruta": "orden",
+    "oido": "¿Dónde están?",
+    "estado": "completo",
+    "msExterna": 783,
+    "msHud": 615
+   },
+   {
+    "texto": "¿Cuál es su horario?",
+    "ruta": "orden",
+    "oido": "¿Cuál es su horario?",
+    "estado": "completo",
+    "msExterna": 875,
+    "msHud": 694
+   },
+   {
+    "texto": "¿Cómo llego?",
+    "ruta": "orden",
+    "oido": "¿Cómo llegó?",
+    "estado": "completo",
+    "msExterna": 754,
+    "msHud": 601
+   },
+   {
+    "texto": "Quiero agendar.",
+    "ruta": "orden",
+    "oido": "Quiero un agendar.",
+    "estado": "completo",
+    "msExterna": 803,
+    "msHud": 673
+   },
+   {
+    "texto": "¿Qué horario tienen?",
+    "ruta": "orden",
+    "oido": "¿Qué horario tienen?",
+    "estado": "completo",
+    "msExterna": 762,
+    "msHud": 643
+   }
+  ],
+  "cerebro": [
+   {
+    "texto": "¿Cuánto cuesta una limpieza dental?",
+    "ruta": "llm",
+    "oido": "¿Cuánto cuesta una limpieza dental?",
+    "estado": "completo",
+    "msExterna": 2352,
+    "msHud": 2231
+   },
+   {
+    "texto": "¿En qué consiste la valoración de ortodoncia?",
+    "ruta": "llm",
+    "oido": "¿En qué consiste la valoración de ortodoncia?",
+    "estado": "completo",
+    "msExterna": 2157,
+    "msHud": 2027
+   },
+   {
+    "texto": "¿Tengo que ir en ayunas?",
+    "ruta": "llm",
+    "oido": "Tengo que ir en añunas.",
+    "estado": "completo",
+    "msExterna": 2125,
+    "msHud": 2050
+   },
+   {
+    "texto": "¿Qué promociones tienen?",
+    "ruta": "llm",
+    "oido": "¿Qué promociones tienen?",
+    "estado": "completo",
+    "msExterna": 1965,
+    "msHud": 1818
+   },
+   {
+    "texto": "¿Aceptan tarjeta?",
+    "ruta": "llm",
+    "oido": "Aceptan tarjeta.",
+    "estado": "completo",
+    "msExterna": 2366,
+    "msHud": 2218
+   },
+   {
+    "texto": "¿Cuánto dura un tratamiento de conductos?",
+    "ruta": "llm",
+    "oido": "¿Cuánto dura un tratamiento de conductos?",
+    "estado": "completo",
+    "msExterna": 1923,
+    "msHud": 1810
+   },
+   {
+    "texto": "¿Tienen estacionamiento?",
+    "ruta": "llm",
+    "oido": "tienen estacionamiento.",
+    "estado": "completo",
+    "msExterna": 2502,
+    "msHud": 2372
+   },
+   {
+    "texto": "¿Qué llevo a mi primera cita?",
+    "ruta": "llm",
+    "oido": "que llevo a mi primera cita.",
+    "estado": "completo",
+    "msExterna": 2002,
+    "msHud": 1912
+   },
+   {
+    "texto": "¿Atienden a niños?",
+    "ruta": "llm",
+    "oido": "Atienden a niños.",
+    "estado": "completo",
+    "msExterna": 2127,
+    "msHud": 2003
+   },
+   {
+    "texto": "¿Hasta cuándo puedo cancelar?",
+    "ruta": "llm",
+    "oido": "¿Hasta cuándo puedo cancelar?",
+    "estado": "completo",
+    "msExterna": 2745,
+    "msHud": 2673
+   },
+   {
+    "texto": "¿Cuánto cuesta la resina?",
+    "ruta": "llm",
+    "oido": "¿Cuánto cuesta la resina?",
+    "estado": "completo",
+    "msExterna": 2708,
+    "msHud": 2633
+   },
+   {
+    "texto": "¿Qué es la profilaxis?",
+    "ruta": "llm",
+    "oido": "¿Qué es la profilaxis?",
+    "estado": "completo",
+    "msExterna": 2783,
+    "msHud": 2618
+   }
+  ],
+  "cortes": [
+   {
+    "msReaccion": 298,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lara."
+    ]
+   },
+   {
+    "msReaccion": 344,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lada."
+    ]
+   },
+   {
+    "msReaccion": 334,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": false,
+    "oidoTrasPara": [
+     "Lyra."
+    ]
+   },
+   {
+    "msReaccion": 320,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lara."
+    ]
+   },
+   {
+    "msReaccion": 291,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lara."
+    ]
+   },
+   {
+    "msReaccion": 333,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lada."
+    ]
+   },
+   {
+    "msReaccion": 333,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lara."
+    ]
+   },
+   {
+    "msReaccion": 313,
+    "callo": true,
+    "sonoDespues": false,
+    "sonabaAlDecirPara": true,
+    "oidoTrasPara": [
+     "Lara."
+    ]
+   }
+  ]
+ },
+ "notaEtiqueta": "enSilencioAlDecirPara se llamó noHabiaQueInterrumpir al medirse; renombrada sin cambiar el dato (16/10)"
+}

@@ -49,6 +49,11 @@ const nextConfig: NextConfig = {
   async redirects() { return reglasDeLaVitrina(process.env).redirects },
   async rewrites() { return { beforeFiles: reglasDeLaVitrina(process.env).rewrites, afterFiles: [], fallback: [] } },
 
+  // En desarrollo, Next 16 imprime cada server function CON SUS ARGUMENTOS: el registro de un paciente dejaba su
+  // nombre, correo y celular en el log de la terminal (medido el 2026-10-16, goal clinica-dental). Los argumentos de
+  // una acción son datos de usuario: no se imprimen nunca.
+  logging: { serverFunctions: false },
+
   // Activa el MCP server en /_next/mcp (Next.js 16+)
   experimental: {
     mcpServer: true,

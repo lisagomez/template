@@ -1,0 +1,318 @@
+{
+  "_comentario": "Pacientes SINTÉTICOS del laboratorio, declarados. Ninguno es una persona real: nombres poco comunes a propósito (para que la búsqueda de PII sembrada en el libro, el dataLayer, los logs y las métricas no dé falsos positivos), correos en .example / .invalid (RFC 2606) y celulares con 0000. Cada uno cubre un caso del spec §8.",
+  "version": "pacientes-1 (2026-10-16)",
+  "pacientes": [
+    {
+      "id": "adulto-convenio",
+      "caso": "adulto con convenio de empresa, con consentimiento de salud, recordatorios por correo y newsletter",
+      "clinica": "maguey",
+      "contrasena": "Sintetica-Maguey-01",
+      "canal": "convenio",
+      "via": "escrito",
+      "registro": {
+        "empresa": "Constructora Tlalocan Ficticia",
+        "nombre": "Ameyalli",
+        "apellidoPaterno": "Zempoalteca",
+        "apellidoMaterno": "Ocelotl",
+        "edad": 34,
+        "correo": "ameyalli.zempoalteca@pacientes.example",
+        "celular": "55 0000 1001",
+        "padecimiento": "Me duele la muela del lado izquierdo al morder cosas frias desde hace dos semanas",
+        "categorias": [
+          "general"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": true,
+          "recordatorios": true,
+          "newsletter": true,
+          "telegram": false
+        }
+      },
+      "cita": {
+        "servicio": "limpieza",
+        "diasAdelante": 3,
+        "hora": "10:00",
+        "canales": [
+          "correo"
+        ],
+        "newsletter": true
+      },
+      "asiste": true
+    },
+    {
+      "id": "menor-con-tutor",
+      "caso": "menor de edad: pide los datos y el consentimiento de quien ejerce la patria potestad",
+      "clinica": "maguey",
+      "contrasena": "Sintetica-Maguey-02",
+      "canal": "busqueda",
+      "via": "escrito",
+      "registro": {
+        "nombre": "Itzayana",
+        "apellidoPaterno": "Cuauhtlehuanitzin",
+        "apellidoMaterno": "Xicotencatl",
+        "edad": 15,
+        "correo": "itzayana.cuauhtle@pacientes.example",
+        "celular": "55 0000 1002",
+        "categorias": [
+          "ortodoncia"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": false,
+          "telegram": false
+        },
+        "tutor": {
+          "nombre": "Citlalmina",
+          "apellidoPaterno": "Cuauhtlehuanitzin",
+          "parentesco": "madre",
+          "correo": "citlalmina.tutora@pacientes.example",
+          "celular": "55 0000 1012",
+          "consiente": true
+        }
+      },
+      "cita": {
+        "servicio": "valoracion-ortodoncia",
+        "diasAdelante": 4,
+        "hora": "16:30",
+        "canales": [
+          "correo"
+        ],
+        "newsletter": false
+      },
+      "asiste": true
+    },
+    {
+      "id": "sin-consentimiento-salud",
+      "caso": "escribe su padecimiento pero NO da el consentimiento de salud: el texto se descarta y el registro sigue; Telegram vinculado",
+      "clinica": "colibri",
+      "contrasena": "Sintetica-Colibri-03",
+      "canal": "redes",
+      "via": "escrito",
+      "registro": {
+        "nombre": "Tonatiuh",
+        "apellidoPaterno": "Mixcoatl",
+        "apellidoMaterno": "Tezozomoc",
+        "edad": 52,
+        "correo": "tonatiuh.mixcoatl@pacientes.example",
+        "celular": "22 0000 1003",
+        "padecimiento": "Siento punzadas en un colmillo superior cuando tomo cafe caliente por las mananas",
+        "categorias": [
+          "endodoncia"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": false,
+          "telegram": true
+        }
+      },
+      "cita": {
+        "servicio": "valoracion-endodoncia",
+        "diasAdelante": 2,
+        "hora": "11:00",
+        "canales": [
+          "correo",
+          "telegram"
+        ],
+        "newsletter": false
+      },
+      "telegram": {
+        "vincula": true,
+        "chatId": 900001003,
+        "nombre": "Tonatiuh"
+      },
+      "asiste": false
+    },
+    {
+      "id": "baja-newsletter",
+      "caso": "se suscribe al newsletter y se da de baja con el clic único (RFC 8058): después, cero newsletters",
+      "clinica": "colibri",
+      "contrasena": "Sintetica-Colibri-04",
+      "canal": "busqueda",
+      "via": "escrito",
+      "registro": {
+        "nombre": "Yaretzi",
+        "apellidoPaterno": "Atlacatl",
+        "apellidoMaterno": "Nezahualpilli",
+        "edad": 28,
+        "correo": "yaretzi.atlacatl@pacientes.example",
+        "celular": "22 0000 1004",
+        "categorias": [
+          "general"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": true,
+          "telegram": false
+        }
+      },
+      "cita": {
+        "servicio": "limpieza",
+        "diasAdelante": 3,
+        "hora": "12:00",
+        "canales": [
+          "correo"
+        ],
+        "newsletter": true
+      },
+      "bajaNewsletter": true,
+      "asiste": true
+    },
+    {
+      "id": "telegram-sin-vincular",
+      "caso": "elige Telegram y nunca abre el enlace: el bot no puede escribirle primero; la UI lo dice y el aviso queda sin vincular",
+      "clinica": "maguey",
+      "contrasena": "Sintetica-Maguey-05",
+      "canal": "redes",
+      "via": "escrito",
+      "registro": {
+        "nombre": "Huitzilin",
+        "apellidoPaterno": "Tlacaelel",
+        "apellidoMaterno": "Moctezuma",
+        "edad": 41,
+        "correo": "huitzilin.tlacaelel@pacientes.example",
+        "celular": "55 0000 1005",
+        "categorias": [
+          "implantologia"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": false,
+          "telegram": true
+        }
+      },
+      "cita": {
+        "servicio": "valoracion-implantes",
+        "diasAdelante": 3,
+        "hora": "12:00",
+        "canales": [
+          "telegram"
+        ],
+        "newsletter": false
+      },
+      "telegram": {
+        "vincula": false
+      },
+      "asiste": true
+    },
+    {
+      "id": "choque-de-hueco",
+      "caso": "intenta el MISMO hueco que otra paciente al mismo tiempo en la clínica de un solo sillón: recibe «ocupado» y elige otro",
+      "clinica": "colibri",
+      "contrasena": "Sintetica-Colibri-06",
+      "canal": "referido",
+      "via": "escrito",
+      "registro": {
+        "nombre": "Xiuhnel",
+        "apellidoPaterno": "Cuitlahuac",
+        "apellidoMaterno": "Axayacatl",
+        "edad": 39,
+        "correo": "xiuhnel.cuitlahuac@pacientes.example",
+        "celular": "22 0000 1006",
+        "categorias": [
+          "general"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": false,
+          "telegram": false
+        }
+      },
+      "cita": {
+        "servicio": "limpieza",
+        "diasAdelante": 3,
+        "hora": "12:00",
+        "canales": [
+          "correo"
+        ],
+        "newsletter": false,
+        "choqueCon": "baja-newsletter",
+        "alternativa": "14:00"
+      },
+      "asiste": true
+    },
+    {
+      "id": "registro-por-voz",
+      "caso": "se registra con la guía de voz: cada campo propuesto y confirmado, envío solo con «sí, envíalo»",
+      "clinica": "maguey",
+      "contrasena": "Sintetica-Maguey-07",
+      "canal": "directo",
+      "via": "voz",
+      "registro": {
+        "nombre": "Nayeli",
+        "apellidoPaterno": "Tecuexe",
+        "apellidoMaterno": "Huitzilihuitl",
+        "edad": 29,
+        "correo": "nayeli.tecuexe@pacientes.example",
+        "celular": "55 0000 1007",
+        "categorias": [
+          "general",
+          "ortodoncia"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": false,
+          "telegram": false
+        }
+      },
+      "cita": {
+        "servicio": "valoracion",
+        "diasAdelante": 5,
+        "hora": "09:30",
+        "canales": [
+          "correo"
+        ],
+        "newsletter": false
+      },
+      "asiste": true
+    },
+    {
+      "id": "correo-que-rebota",
+      "caso": "su correo rebota (dominio .invalid): el aviso queda fallido y la UI le pide revisar su correo",
+      "clinica": "maguey",
+      "contrasena": "Sintetica-Maguey-08",
+      "canal": "busqueda",
+      "via": "escrito",
+      "registro": {
+        "nombre": "Coaxoch",
+        "apellidoPaterno": "Tepanecatl",
+        "edad": 63,
+        "correo": "coaxoch.tepanecatl@rebote.invalid",
+        "celular": "55 0000 1008",
+        "categorias": [
+          "endodoncia"
+        ],
+        "consentimientos": {
+          "aviso_privacidad": true,
+          "datos_salud": false,
+          "recordatorios": true,
+          "newsletter": false,
+          "telegram": false
+        }
+      },
+      "cita": {
+        "servicio": "valoracion-endodoncia",
+        "diasAdelante": 7,
+        "hora": "17:00",
+        "canales": [
+          "correo"
+        ],
+        "newsletter": false
+      },
+      "asiste": false
+    }
+  ],
+  "_inicio": "El reloj del laboratorio arranca el lunes 2026-10-19 a las 08:00 (America/Mexico_City); `diasAdelante` cuenta desde ahí."
+}
