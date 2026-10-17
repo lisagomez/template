@@ -5106,3 +5106,47 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - pineo ☑ (`onnxruntime-web` 1.29.0 exacta; pesos por la etiqueta `v6.2` con sha256; DEMAND por DOI con md5 y sha256).
 - **Regresión**: `tools/bucle-voz` 78/78 (con la prueba nueva, que falla sin el cambio); `verify:gobernanza` ☑ 169/169; `prueba:tools` ☑ dentro del validate.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-17
+
+### 2026-10-17 — verificador: falla si un worktree con el corpus de la capa B cuelga dentro del repo — radio: sistema (gate de gobernanza: `verify:gobernanza`, `scripts/lib/corpus.mjs` y `GOBERNANZA.md`)
+
+- **Cambio** (rama `gobernanza/corpus-fuera-del-disco`, commit `0314dbb`):
+  1. **Comprobación nueva** en `verify:gobernanza`, «ningun worktree con el corpus cuelga dentro del repo»:
+     `corpusEnDisco()` (en `lib/corpus.mjs`, el módulo que ya comparten los tres scripts del corpus) lista los
+     worktrees con la rama `golden-sets` sacada, o con `casos-trampa.md` en su raíz aunque estén separados, que
+     cuelgan DENTRO de otro worktree. Un worktree fuera del repo pasa: es como se edita el corpus.
+  2. **Sus siembras**, como las de 6b: cinco sobre un repo desechable en el temporal (dentro, separado, la rama sin
+     archivos, y dos controles: fuera del repo, y otro worktree dentro sin el corpus), ~200 ms por corrida. Es la
+     segunda comprobación nueva: 169 → 171, con la cifra al día en `README.md` y `.claude/README.md`.
+  3. **El aviso de rezago** de `lib/corpus.mjs` ya no recomienda `git -C .claude/worktrees/golden-sets merge
+     --ff-only`, que es de donde salió la costumbre: ahora `git branch -f`, o el `merge` en un worktree fuera del repo.
+     La pista del rezago en el verificador dice lo mismo.
+  4. **`GOBERNANZA.md`**: el verificador falla también por un worktree anidado, y el corpus se edita desde un
+     worktree fuera del repo que se borra al terminar.
+- **Por qué**: el corpus vive en su rama para que una sesión fría no lo encuentre leyendo el directorio. Pero el
+  worktree de edición estuvo en `.claude/worktrees/golden-sets` del 2026-08-28 al 2026-10-17: ignorado por git y por
+  la búsqueda del arnés, a un `ls .claude/` de distancia. El chequeo existente mira solo la ruta vieja dentro de
+  `gobernanza/` y salía verde. El worktree se borró el 2026-10-17 (la rama se quedó; local y remota en `66bac32`).
+- **Demostrado** (2026-10-17, sin leer el corpus y sin otra sesión de Claude activa):
+  - con el corpus de vuelta en `.claude/worktrees/golden-sets`, esta rama da **1 de 171 en rojo** y nombra la ruta;
+    el verificador de `main` da **169/169 en verde** y su «el corpus NO esta en el arbol de trabajo» en ✓. Worktree
+    borrado otra vez en el mismo comando;
+  - seis mutantes de `corpusEnDisco` (no mira nada, solo la rama, solo el archivo, olvida si cuelga, cuenta cualquier
+    árbol, ignora el corpus): **seis cazados**, y cada siembra caza al menos uno. La de «la rama sin archivos» se
+    añadió porque el mutante «solo el archivo» escapaba con las cuatro primeras.
+- **Lo que cuesta o queda abierto**:
+  - ~200 ms más por cada `verify:gobernanza` (monta y borra el repo desechable);
+  - un worktree fuera del repo no se ve leyendo archivos, pero `git worktree list` sí da su ruta: por eso se borra al
+    terminar, y el sujeto de una corrida ya va sin `git log` ni `git diff`;
+  - **sin revisar**: si alguna corrida fría entre el 2026-08-28 y el 2026-10-17 llegó al worktree. Su registro está en
+    la rama del corpus (las herramientas de cada corrida), y revisarlo toca leer esa rama: es del laboratorio.
+- **Salida del perímetro (C4)**: sin cambio.
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma: el `--stat` y los cambios completos);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `0314dbb` (árbol `98980492de5d`);
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés, sino un gate y su documento;
+    decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `verify:gobernanza` ☑ 171/171 (con las 5 siembras nuevas y las 17 de 6b); lint sin avisos nuevos.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-17
