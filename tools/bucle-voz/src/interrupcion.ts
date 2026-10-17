@@ -85,7 +85,10 @@ export function creaInterrupcion(opciones: OpcionesInterrupcion = {}): MaquinaIn
   /**
    * Aprende cuánto baja el eco del altavoz al micrófono. Solo de marcos con SONIDO (el detector oye algo) que la
    * puerta no dio por voz: eso es eco. Un marco con el micrófono en el suelo de ruido no dice nada del eco (medido: con
-   * esos marcos la pérdida «aprendida» subió a 34 dB y la puerta dejó pasar el eco). Seguimiento del mínimo: baja
+   * esos marcos la pérdida «aprendida» subió a 34 dB y la puerta dejó pasar el eco). OJO con un detector que SOSTIENE
+   * la probabilidad tras la voz (Silero): marca como «con sonido» marcos en el suelo, y vuelve a pasar lo mismo (28 dB,
+   * 6 de 6 auto-interrupciones, medido el 2026-10-17). Quien lo use debe darle aquí una probabilidad que caiga con el
+   * sonido, p. ej. el mínimo con una puerta de nivel mientras la máquina habla. Seguimiento del mínimo: baja
    * enseguida si el eco se hace más fuerte, sube despacio.
    */
   const aprende = (m: MarcoEscucha) => {
@@ -95,7 +98,11 @@ export function creaInterrupcion(opciones: OpcionesInterrupcion = {}): MaquinaIn
     // Con ataque instantáneo, un «Para.» que no llegó a confirmar bajó la pérdida a ~2 dB y desde ahí ya nadie podía
     // interrumpir (medido: 3 de 8 cortes fallidos). Un eco a menos de 12 dB de lo que suena no es realista con la
     // cancelación del navegador encendida.
-    perdida = Math.max(o.perdidaMinimaDb, Math.min(40, perdida + (observada - perdida) * 0.05));
+    // Y sube a la quinta parte: los valles entre sílabas también llegan aquí (la salida es el máximo de una ventana, el
+    // micrófono el marco) y, subiendo tan rápido como baja, la pérdida iba a la MEDIA de lo observado y no al eco. Con
+    // Silero, 28 dB contra los ~21 reales; así, ~24 (y la energía, de 23 a 22). Medido el 2026-10-17.
+    const ritmo = observada < perdida ? 0.05 : 0.01;
+    perdida = Math.max(o.perdidaMinimaDb, Math.min(40, perdida + (observada - perdida) * ritmo));
   };
 
   const reinicia = () => {

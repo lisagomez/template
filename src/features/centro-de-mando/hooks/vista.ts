@@ -18,6 +18,7 @@ export const VISTA_INICIAL: VistaCentro = {
   turnos: [],
   avisos: [],
   error: undefined,
+  detector: undefined,
 };
 
 const MAX_ENTRADAS = 60;

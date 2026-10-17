@@ -9,6 +9,8 @@
 import { useCallback, useState } from 'react';
 import type { ModoBucle } from '../../../../tools/bucle-voz/dist/index.js';
 import { useCentroDeMando } from '../hooks/use-centro-de-mando.ts';
+import { NOMBRE_DETECTOR } from '../services/detector.ts';
+import type { EstadoDetector } from '../services/detector.ts';
 import { COLOR_ESTADO, NOMBRE_ESTADO, nivelVisual, rgb } from './colores.ts';
 import { Onda } from './onda.tsx';
 import { Orbe } from './orbe.tsx';
@@ -22,6 +24,18 @@ const MODOS: { id: ModoBucle; nombre: string; ayuda: string }[] = [
   { id: 'palabra', nombre: '«Oye, mando»', ayuda: 'En reposo solo despierta con su nombre (transcrito en local).' },
   { id: 'toque', nombre: 'Toque o ESPACIO', ayuda: 'Un turno por toque; mantén ESPACIO para hablar.' },
 ];
+
+/** Qué oye: el detector que corre; en ámbar si no es el pedido, con el porqué. */
+function Detector({ d }: { d: EstadoDetector | undefined }) {
+  if (!d) return null;
+  const cayo = d.activo !== d.pedido;
+  return (
+    <span className={`text-xs ${cayo ? 'text-amber-300' : 'text-white/40'}`} data-prueba="detector" data-activo={d.activo} title={d.motivo}>
+      oído: {NOMBRE_DETECTOR[d.activo]}
+      {cayo ? ` (${NOMBRE_DETECTOR[d.pedido]} no cargó: ${d.motivo ?? 'sin motivo'})` : ''}
+    </span>
+  );
+}
 
 export function CentroDeMando() {
   const { movil, token, sesion, vista, servidor, enciende, apaga, cambiaModo } = useCentroDeMando();
@@ -90,6 +104,7 @@ export function CentroDeMando() {
               </button>
             ))}
             <span className="text-xs text-white/40" data-prueba="velocidad">velocidad ×{vista.velocidad.toFixed(2)}</span>
+            <Detector d={vista.detector} />
           </div>
           <form
             className="flex w-full max-w-md gap-2"

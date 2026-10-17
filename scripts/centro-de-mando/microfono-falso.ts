@@ -8,7 +8,9 @@
  *    anota cuándo SUBE el audio por encima de −45 dBFS y cuándo BAJA. Es «el primer audio que suena»
  *    medido desde fuera del HUD, no lo que el HUD dice de sí mismo;
  *  - **eco residual** (opcional): lo que suena vuelve al micrófono atenuado, como unos altavoces sin
- *    cancelación de eco perfecta. Sirve para probar que la máquina no se interrumpe sola.
+ *    cancelación de eco perfecta. Sirve para probar que la máquina no se interrumpe sola;
+ *  - **ruido de sala** (opcional): un trozo en bucle a un nivel dado, encima del ruido de fondo. Se pone
+ *    ANTES de encender, como en una sala de verdad: el detector de energía calibra con él.
  *
  * Los dos lados usan el MISMO AudioContext: la diferencia entre la verdad y la toma no depende de
  * cómo se mapea el reloj. La toma pasa por `captureStream`, que añade unos ms: la latencia medida
@@ -24,6 +26,8 @@ export interface MicrofonoFalso {
   /** Inyecta PCM16LE (base64) a `hz`; devuelve el instante (reloj de la página) de la primera muestra. */
   dice(base64: string, hz: number): Promise<number>;
   eco(db: number | null): void;
+  /** Ruido de sala en bucle: PCM16LE (base64) a potencia 1, sonando a `db` dBFS. `null` lo quita. */
+  ruido(base64: string | null, hz: number, db: number): Promise<void>;
   eventos: EventoToma[];
   sonando(): boolean;
 }
@@ -36,6 +40,7 @@ export function instalaMicrofonoFalso(): void {
   let mezcla: GainNode | undefined;
   let eco: GainNode | undefined;
   let toma: AudioWorkletNode | undefined;
+  let ruidoSala: AudioBufferSourceNode | undefined;
   let listo: Promise<void> | undefined;
   const eventos: EventoToma[] = [];
   const aReloj = (t: number) => {
@@ -112,6 +117,27 @@ export function instalaMicrofonoFalso(): void {
     },
     eco(db) {
       if (eco) eco.gain.value = db === null ? 0 : 10 ** (db / 20);
+    },
+    async ruido(base64, hz, db) {
+      await asegura();
+      const c = ctx as AudioContext;
+      ruidoSala?.stop();
+      ruidoSala = undefined;
+      if (base64 === null) return;
+      const bytes = Uint8Array.from(atob(base64), (x) => x.charCodeAt(0));
+      const pcm = new Int16Array(bytes.buffer, 0, bytes.length >> 1);
+      const buf = c.createBuffer(1, pcm.length, hz);
+      const canal = buf.getChannelData(0);
+      // El PCM viaja a rms 0,1 (20 dB de margen para los golpes en 16 bits); se devuelve a potencia 1 aquí.
+      for (let i = 0; i < pcm.length; i++) canal[i] = ((pcm[i] ?? 0) / 32768) * 10;
+      const fuente = c.createBufferSource();
+      fuente.buffer = buf;
+      fuente.loop = true;
+      const g = c.createGain();
+      g.gain.value = 10 ** (db / 20);
+      fuente.connect(g).connect(mezcla as GainNode);
+      fuente.start();
+      ruidoSala = fuente;
     },
     sonando: () => eventos.at(-1)?.tipo === 'sube',
   };
