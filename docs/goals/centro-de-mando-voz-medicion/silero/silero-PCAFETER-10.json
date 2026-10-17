@@ -1,0 +1,638 @@
+{
+  "fecha": "2026-10-17T02:00:14.317Z",
+  "maquina": "WSL2, Ryzen 7 5700G, sin GPU; Chromium headless 1243 con micrófono falso",
+  "detector": "silero",
+  "ruido": {
+    "nombre": "PCAFETER",
+    "snrDb": 10,
+    "nivelVozDb": -26
+  },
+  "ordenes": {
+    "resumen": {
+      "n": 16,
+      "p50": 768,
+      "p95": 2073,
+      "min": 628,
+      "max": 2073
+    },
+    "hud": {
+      "n": 16,
+      "p50": 569,
+      "p95": 1819,
+      "min": 499,
+      "max": 1819
+    },
+    "muestras": [
+      {
+        "texto": "¿Qué hora es?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "hora",
+        "oido": "¿Qué hora es?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 768,
+        "msHud": 575,
+        "desvioFinReal": 82,
+        "tramos": {
+          "transcrito": 521,
+          "enrutado": 523,
+          "cierre": 523,
+          "primeraFrase": 523,
+          "vozLista": 524,
+          "suena": 575,
+          "fin": 3374
+        }
+      },
+      {
+        "texto": "¿Qué tengo hoy?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "agenda-hoy",
+        "oido": "¿Qué tengo hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 1200,
+        "msHud": 635,
+        "desvioFinReal": 471,
+        "tramos": {
+          "transcrito": 556,
+          "enrutado": 558,
+          "cierre": 558,
+          "primeraFrase": 587,
+          "vozLista": 588,
+          "suena": 635,
+          "fin": 13517
+        }
+      },
+      {
+        "texto": "Más despacio.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "mas-despacio",
+        "oido": "Más despacio.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 785,
+        "msHud": 582,
+        "desvioFinReal": 54,
+        "tramos": {
+          "transcrito": 529,
+          "enrutado": 530,
+          "cierre": 530,
+          "primeraFrase": 531,
+          "vozLista": 531,
+          "suena": 582,
+          "fin": 2850
+        }
+      },
+      {
+        "texto": "¿Qué día es hoy?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "fecha",
+        "oido": "¿Qué día es hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 1070,
+        "msHud": 572,
+        "desvioFinReal": 318,
+        "tramos": {
+          "transcrito": 526,
+          "enrutado": 528,
+          "cierre": 528,
+          "primeraFrase": 528,
+          "vozLista": 528,
+          "suena": 572,
+          "fin": 3526
+        }
+      },
+      {
+        "texto": "Más rápido.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "mas-rapido",
+        "oido": "Más rápido.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 799,
+        "msHud": 569,
+        "desvioFinReal": 75,
+        "tramos": {
+          "transcrito": 512,
+          "enrutado": 513,
+          "cierre": 513,
+          "primeraFrase": 513,
+          "vozLista": 513,
+          "suena": 569,
+          "fin": 2447
+        }
+      },
+      {
+        "texto": "¿Qué tengo mañana?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "agenda-manana",
+        "oido": "¿Qué tengo mañana?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 691,
+        "msHud": 543,
+        "desvioFinReal": 27,
+        "tramos": {
+          "transcrito": 484,
+          "enrutado": 486,
+          "cierre": 486,
+          "primeraFrase": 518,
+          "vozLista": 519,
+          "suena": 543,
+          "fin": 10497
+        }
+      },
+      {
+        "texto": "¿Cuánto llevas gastado?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "gasto",
+        "oido": "¿Cuánto llevas gastado?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 1198,
+        "msHud": 940,
+        "desvioFinReal": 113,
+        "tramos": {
+          "transcrito": 533,
+          "enrutado": 535,
+          "cierre": 535,
+          "primeraFrase": 566,
+          "vozLista": 901,
+          "suena": 940,
+          "fin": 10235
+        }
+      },
+      {
+        "texto": "Repite.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "repite",
+        "oido": "Petite.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 714,
+        "msHud": 506,
+        "desvioFinReal": 61,
+        "tramos": {
+          "transcrito": 453,
+          "enrutado": 454,
+          "cierre": 454,
+          "suena": 506,
+          "fin": 9811
+        }
+      },
+      {
+        "texto": "¿Qué hora es?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "hora",
+        "oido": "Qué hora es?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 648,
+        "msHud": 525,
+        "desvioFinReal": -38,
+        "tramos": {
+          "transcrito": 475,
+          "enrutado": 476,
+          "cierre": 476,
+          "primeraFrase": 477,
+          "vozLista": 477,
+          "suena": 525,
+          "fin": 3457
+        }
+      },
+      {
+        "texto": "¿Qué tengo hoy?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "agenda-hoy",
+        "oido": "Que tengo hoy.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 643,
+        "msHud": 518,
+        "desvioFinReal": -10,
+        "tramos": {
+          "transcrito": 452,
+          "enrutado": 453,
+          "cierre": 453,
+          "primeraFrase": 477,
+          "vozLista": 477,
+          "suena": 518,
+          "fin": 13178
+        }
+      },
+      {
+        "texto": "Más despacio.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "mas-despacio",
+        "oido": "Más despacio.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 628,
+        "msHud": 518,
+        "desvioFinReal": -11,
+        "tramos": {
+          "transcrito": 466,
+          "enrutado": 467,
+          "cierre": 467,
+          "primeraFrase": 467,
+          "vozLista": 467,
+          "suena": 518,
+          "fin": 2786
+        }
+      },
+      {
+        "texto": "¿Qué día es hoy?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "fecha",
+        "oido": "¿Qué día es hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 1115,
+        "msHud": 581,
+        "desvioFinReal": 374,
+        "tramos": {
+          "transcrito": 532,
+          "enrutado": 534,
+          "cierre": 534,
+          "primeraFrase": 534,
+          "vozLista": 534,
+          "suena": 581,
+          "fin": 3538
+        }
+      },
+      {
+        "texto": "Más rápido.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "Más capito.",
+        "estado": "completo",
+        "especulativo": true,
+        "msExterna": 2073,
+        "msHud": 1819,
+        "desvioFinReal": 142,
+        "tramos": {
+          "transcrito": 494,
+          "enrutado": 496,
+          "cierre": 615,
+          "primerToken": 1440,
+          "primeraFrase": 1686,
+          "vozLista": 1801,
+          "suena": 1819,
+          "fin": 5820
+        }
+      },
+      {
+        "texto": "¿Qué tengo mañana?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "agenda-manana",
+        "oido": "Que tengo mañana.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 628,
+        "msHud": 541,
+        "desvioFinReal": -70,
+        "tramos": {
+          "transcrito": 482,
+          "enrutado": 483,
+          "cierre": 483,
+          "primeraFrase": 514,
+          "vozLista": 514,
+          "suena": 541,
+          "fin": 11920
+        }
+      },
+      {
+        "texto": "¿Cuánto llevas gastado?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "gasto",
+        "oido": "¿Cuánto llevas gastado?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 1006,
+        "msHud": 804,
+        "desvioFinReal": 63,
+        "tramos": {
+          "transcrito": 526,
+          "enrutado": 529,
+          "cierre": 529,
+          "primeraFrase": 539,
+          "vozLista": 763,
+          "suena": 804,
+          "fin": 11427
+        }
+      },
+      {
+        "texto": "Repite.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "repite",
+        "oido": "Papita.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 714,
+        "msHud": 499,
+        "desvioFinReal": 53,
+        "tramos": {
+          "transcrito": 440,
+          "enrutado": 441,
+          "cierre": 441,
+          "suena": 499,
+          "fin": 11139
+        }
+      }
+    ]
+  },
+  "cerebro": {
+    "resumen": {
+      "n": 0
+    },
+    "hud": {
+      "n": 0
+    },
+    "muestras": []
+  },
+  "interrupcion": {
+    "resumen": {
+      "n": 4,
+      "p50": 287,
+      "p95": 1641,
+      "min": 280,
+      "max": 1641
+    },
+    "fallidos": 4,
+    "fugas": 1,
+    "vuelveAHablar": 0,
+    "cortes": [
+      {
+        "ok": false,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "sube-787 baja-230 sube-129 baja511 sube599 baja1154 sube1461 baja2352 sube2445",
+          "suenas": "t23@-965 t23@1305"
+        },
+        "estados": [
+          "21:completo:gasto:¿Cuánto llevas gastado?",
+          "22:completo:repite:Papita.",
+          "23:en-curso:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña."
+        ]
+      },
+      {
+        "ok": true,
+        "msReaccion": 287,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "baja-1003 sube-880 baja287",
+          "suenas": ""
+        },
+        "estados": [
+          "22:completo:repite:Papita.",
+          "23:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "24:completo:para:Lara."
+        ]
+      },
+      {
+        "ok": false,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "sube-784 baja1155 sube1451 baja2008 sube2269 baja2778 sube2880",
+          "suenas": "t25@-921 t25@1293"
+        },
+        "estados": [
+          "23:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "24:completo:para:Lara.",
+          "25:en-curso:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña."
+        ]
+      },
+      {
+        "ok": true,
+        "msReaccion": 280,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "baja-941 sube-843 baja-140 sube-11 baja280",
+          "suenas": ""
+        },
+        "estados": [
+          "24:completo:para:Lara.",
+          "25:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "26:completo:para:Para."
+        ]
+      },
+      {
+        "ok": true,
+        "msReaccion": 1641,
+        "fugas": 1,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "sube-764 baja-265 sube-176 baja490 sube597 baja1015 sube1112 baja1641 sube2143",
+          "suenas": "t27@-917 t27@1962"
+        },
+        "estados": [
+          "25:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "26:completo:para:Para.",
+          "27:en-curso:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña."
+        ]
+      },
+      {
+        "ok": true,
+        "msReaccion": 306,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "baja-997 sube-827 baja306",
+          "suenas": ""
+        },
+        "estados": [
+          "26:completo:para:Para.",
+          "27:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "28:completo:para:Lara."
+        ]
+      },
+      {
+        "ok": false,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "sube-787 baja-403 sube-294 baja-65 sube24 baja1170 sube1439 baja2021 sube2152",
+          "suenas": "t29@-951 t29@1301"
+        },
+        "estados": [
+          "27:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "28:completo:para:Lara.",
+          "29:en-curso:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña."
+        ]
+      },
+      {
+        "ok": false,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "detalle": {
+          "toma": "baja-953 sube-868 baja626 sube813 baja1061 sube1149 baja2474 sube2738",
+          "suenas": "t29@2591"
+        },
+        "estados": [
+          "27:interrumpido:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña.",
+          "28:completo:para:Lara.",
+          "29:en-curso:llm:Explícame paso a paso cómo armar un presupuesto mensual para una cafetería pequeña."
+        ]
+      }
+    ]
+  },
+  "eco": {
+    "db": -20,
+    "autoInterrupciones": 0,
+    "n": 6,
+    "muestras": [
+      {
+        "texto": "Dame una idea para vender más esta semana.",
+        "voz": "es_MX-claude-high",
+        "msExterna": 306
+      },
+      {
+        "texto": "¿Qué diferencia hay entre utilidad y flujo?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Qué diferencia hay entre utilidad y flujo?",
+        "estado": "completo",
+        "especulativo": true,
+        "msExterna": 1926,
+        "msHud": 1791,
+        "desvioFinReal": 51,
+        "tramos": {
+          "transcrito": 395,
+          "enrutado": 398,
+          "cierre": 611,
+          "primerToken": 1414,
+          "primeraFrase": 1556,
+          "vozLista": 1750,
+          "suena": 1791,
+          "fin": 19236
+        }
+      },
+      {
+        "texto": "¿Qué es el capital de trabajo?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Qué es el capital de trabajo?",
+        "estado": "completo",
+        "especulativo": false,
+        "msExterna": 2351,
+        "msHud": 2066,
+        "desvioFinReal": 164,
+        "tramos": {
+          "cierre": 600,
+          "transcrito": 918,
+          "enrutado": 919,
+          "primerToken": 1716,
+          "primeraFrase": 1856,
+          "vozLista": 2017,
+          "suena": 2066,
+          "fin": 20309
+        }
+      },
+      {
+        "texto": "¿Cómo le hago para cobrar a tiempo?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "Más que venga a corto plazo que sirve para pagar suelos mientras cobras las ventas. ¿Cómo lo hago para cobrar a tiempo?",
+        "estado": "completo",
+        "especulativo": false,
+        "msExterna": 3786,
+        "msHud": 2574,
+        "desvioFinReal": 1082,
+        "tramos": {
+          "cierre": 600,
+          "transcrito": 1540,
+          "enrutado": 1543,
+          "primerToken": 2262,
+          "primeraFrase": 2417,
+          "vozLista": 2537,
+          "suena": 2574,
+          "fin": 21587
+        }
+      },
+      {
+        "texto": "¿Qué es un CFDI?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Qué es un CFDI?",
+        "estado": "completo",
+        "especulativo": false,
+        "msExterna": 2529,
+        "msHud": 2178,
+        "desvioFinReal": 183,
+        "tramos": {
+          "cierre": 600,
+          "transcrito": 912,
+          "enrutado": 913,
+          "primerToken": 1723,
+          "primeraFrase": 1861,
+          "vozLista": 2128,
+          "suena": 2178,
+          "fin": 19140
+        }
+      },
+      {
+        "texto": "¿Conviene rentar o comprar el local?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "Conviene rentar o comprar local.",
+        "estado": "completo",
+        "especulativo": true,
+        "msExterna": 1878,
+        "msHud": 1521,
+        "desvioFinReal": 225,
+        "tramos": {
+          "transcrito": 407,
+          "enrutado": 409,
+          "cierre": 613,
+          "primerToken": 1234,
+          "primeraFrase": 1364,
+          "vozLista": 1504,
+          "suena": 1521,
+          "fin": 23863
+        }
+      }
+    ]
+  },
+  "desvioFinReal": {
+    "n": 16,
+    "p50": 61,
+    "p95": 471,
+    "min": -70,
+    "max": 471
+  }
+}

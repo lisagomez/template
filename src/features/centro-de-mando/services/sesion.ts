@@ -2,15 +2,15 @@
 
 /**
  * Una sesión del centro de mando en el navegador, fuera de React: micrófono ABIERTO una sola vez
- * (escuchar es un estado lógico del bucle, no un `getUserMedia` por turno), detector por energía
- * calibrada de `@tu-scope/voz`, el oído, el bucle y el reproductor por `<audio>`.
+ * (escuchar es un estado lógico del bucle, no un `getUserMedia` por turno), el detector de
+ * `services/detector.ts`, el oído, el bucle y el reproductor por `<audio>`.
  *
- * Silero en el navegador sería más robusto en una sala con ruido, pero activarlo es un CDC
- * (`docs/goals/propuesta-cdc.md`): hasta entonces, energía calibrada + cancelación de eco del
- * navegador + la puerta de eco del oído.
+ * El detector se pide por tipo (`?detector=energia|silero|ambos` en la URL, o el de defecto). Si Silero
+ * no carga (sin modelo preparado, sin WebAssembly), la sesión sigue con la energía calibrada y lo DICE
+ * (`detector.motivo`): un HUD que oye peor sin avisar es el fallo que esto existe para evitar.
  */
 import { capturaMicrofono, type CapturaMicrofono } from '../../../../tools/voz/dist/browser/index.js';
-import { creaDetectorVoz, modeloEnergia, type DetectorVoz } from '../../../../tools/voz/dist/index.js';
+import type { DetectorVoz, ModeloVoz } from '../../../../tools/voz/dist/index.js';
 import { creaReproductorNavegador, type ReproductorNavegador } from '../../../../tools/bucle-voz/dist/navegador/index.js';
 import {
   creaActivacion,
@@ -24,11 +24,9 @@ import {
   type ModoBucle,
   type Oido,
 } from '../../../../tools/bucle-voz/dist/index.js';
+import { creaDetector, creaModelo, energiaCalibrada, HZ, MS_CIERRE, type EstadoDetector, type TipoDetector } from './detector.ts';
 import { creaPuertos } from './puertos.ts';
 
-export const HZ = 16_000;
-/** Cierre por silencio del VAD: 600 ms (500 parte el 17 % de las frases, 700 el 6,7 %; README de dictado). Las órdenes seguras cierran antes por sentido. */
-export const MS_CIERRE = 600;
 export const FRASES_ACTIVACION = ['oye mando'];
 
 export interface Sesion {
@@ -41,13 +39,27 @@ export interface Sesion {
   enciende(): Promise<void>;
   apaga(): Promise<void>;
   readonly encendida: boolean;
+  /** El detector que se pidió y el que corre (y por qué, si no es el mismo). `undefined` hasta encender. */
+  readonly detector: EstadoDetector | undefined;
   /** Pulsar para hablar: abre la escucha; soltar cierra el turno YA. */
   pulsa(): void;
   suelta(): void;
   destruye(): void;
 }
 
-export function creaSesion(token: string, modo: ModoBucle): Sesion {
+/** Silero bajo demanda: el runtime y los pesos solo se bajan si se pide. */
+const creaSilero = (): Promise<ModeloVoz> => import('./silero-navegador.ts').then((m) => m.creaSileroNavegador());
+
+async function modeloPara(pedido: TipoDetector, maquinaHabla: () => boolean): Promise<{ modelo: ModeloVoz; estado: EstadoDetector }> {
+  try {
+    return { modelo: await creaModelo(pedido, creaSilero, maquinaHabla), estado: { pedido, activo: pedido } };
+  } catch (e) {
+    const motivo = e instanceof Error ? e.message : 'no cargó';
+    return { modelo: energiaCalibrada(), estado: { pedido, activo: 'energia', motivo } };
+  }
+}
+
+export function creaSesion(token: string, modo: ModoBucle, detectorPedido: TipoDetector): Sesion {
   const reproductor = creaReproductorNavegador();
   const puertos = creaPuertos(token, () => bucle.telemetria);
   const bucle: Bucle = creaBucle({
@@ -61,6 +73,8 @@ export function creaSesion(token: string, modo: ModoBucle): Sesion {
   const niveles = { mic: -120, salida: -120 };
   let captura: CapturaMicrofono | undefined;
   let detector: DetectorVoz | undefined;
+  let estadoDetector: EstadoDetector | undefined;
+  let encendiendo: Promise<void> | undefined;
   let oido: Oido | undefined;
   let cola: Promise<void> = Promise.resolve();
   let pulsando = false;
@@ -87,6 +101,34 @@ export function creaSesion(token: string, modo: ModoBucle): Sesion {
     if (captura) requestAnimationFrame(sigueSalida);
   };
 
+  // «La máquina habla» = el turno está en su fase de hablar, HUECOS ENTRE FRASES INCLUIDOS. Con «hay un `<audio>`
+  // sonando», un «para» dicho en el hueco reiniciaba la interrupción y el tramo se descartaba como eco (medido).
+  const maquinaHabla = () => bucle.estado === 'hablando';
+
+  /** Abre el micrófono con el detector pedido. Una sola vez en vuelo: dos «encender» seguidos no abren dos capturas. */
+  const arranca = async () => {
+    const { modelo, estado } = await modeloPara(detectorPedido, maquinaHabla);
+    estadoDetector = estado;
+    const d = creaDetector(modelo);
+    const o = creaOido({ bucle, hz: HZ, msSilencioCierre: MS_CIERRE, maquinaHabla, atenua: (a) => reproductor.atenua(a), nivelSalidaDb: () => reproductor.nivelReferenciaEcoDb() });
+    detector = d;
+    oido = o;
+    captura = await capturaMicrofono({
+      frecuenciaHz: HZ,
+      // Cancelación de eco ENCENDIDA: con el micrófono abierto mientras la máquina habla, es la primera barrera.
+      restricciones: { echoCancellation: true, noiseSuppression: false, autoGainControl: false },
+      alRecibir: (m) => {
+        o.alimenta(m, performance.now());
+        niveles.mic = nivelDb(m);
+        const nivel = niveles.mic;
+        encola(async () => o.procesa((await d.procesa(m)) as EventoDetector[], nivel));
+      },
+    });
+    document.addEventListener('visibilitychange', alVisibilidad);
+    requestAnimationFrame(sigueSalida);
+    void puertos.sintetizador.calienta().then(calientaCadaMinuto);
+  };
+
   return {
     bucle,
     reproductor,
@@ -97,29 +139,16 @@ export function creaSesion(token: string, modo: ModoBucle): Sesion {
     get encendida() {
       return captura !== undefined;
     },
+    get detector() {
+      return estadoDetector;
+    },
     async enciende() {
       reproductor.desbloquea();
       if (captura) return;
-      const d = creaDetectorVoz({ modelo: modeloEnergia({ frecuenciaHz: HZ, marcosCalibracion: 9 }), msSilencioParaCerrar: MS_CIERRE, msMinimoHabla: 150, msRelleno: 200, conservaAudio: true });
-      // «La máquina habla» = el turno está en su fase de hablar, HUECOS ENTRE FRASES INCLUIDOS. Con «hay un `<audio>`
-      // sonando», un «para» dicho en el hueco reiniciaba la interrupción y el tramo se descartaba como eco (medido).
-      const o = creaOido({ bucle, hz: HZ, msSilencioCierre: MS_CIERRE, maquinaHabla: () => bucle.estado === 'hablando', atenua: (a) => reproductor.atenua(a), nivelSalidaDb: () => reproductor.nivelReferenciaEcoDb() });
-      detector = d;
-      oido = o;
-      captura = await capturaMicrofono({
-        frecuenciaHz: HZ,
-        // Cancelación de eco ENCENDIDA: con el micrófono abierto mientras la máquina habla, es la primera barrera.
-        restricciones: { echoCancellation: true, noiseSuppression: false, autoGainControl: false },
-        alRecibir: (m) => {
-          o.alimenta(m, performance.now());
-          niveles.mic = nivelDb(m);
-          const nivel = niveles.mic;
-          encola(async () => o.procesa((await d.procesa(m)) as EventoDetector[], nivel));
-        },
+      encendiendo ??= arranca().finally(() => {
+        encendiendo = undefined;
       });
-      document.addEventListener('visibilitychange', alVisibilidad);
-      requestAnimationFrame(sigueSalida);
-      void puertos.sintetizador.calienta().then(calientaCadaMinuto);
+      await encendiendo;
     },
     async apaga() {
       cancelaCalor?.();

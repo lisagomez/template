@@ -115,3 +115,6 @@ tools/soporte-sap/semantica/dbt_packages/
 tools/soporte-sap/semantica/.user.yml
 # La medición del perfil de despliegue (configura:deploy --escribir): es de la máquina, no del repo
 .despliegue/
+
+# Silero para el HUD del centro de mando: lo deja `npm run prepara:silero` (pesos de terceros y el wasm del paquete)
+public/centro-de-mando/
