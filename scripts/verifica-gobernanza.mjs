@@ -15,7 +15,7 @@ import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { leeConImports } from './lee-instrucciones.mjs';
 import { geminiSincronizado } from './sincroniza-gemini.mjs';
-import { estadoCorpus } from './lib/corpus.mjs';
+import { estadoCorpus, corpusEnDisco, pruebaCorpusEnDisco, SIEMBRAS_CORPUS } from './lib/corpus.mjs';
 import { cargaManifiesto, gatesDelPerfil, MANIFIESTO } from './lib/gates.mjs';
 import { revisaFirmas, pruebaFirmas, SIEMBRAS, FECHA_CASILLA } from './lib/firmas.mjs';
 
@@ -528,6 +528,23 @@ comprueba(
   !existsSync(ruta(`${GOB}/golden-sets/casos-trampa.md`)),
   'si esta en disco, una sesion fria lo encuentra leyendo el directorio (paso 2 veces)',
 );
+/** La ruta vieja no era el unico sitio: el worktree de edicion del corpus colgo de
+ *  `.claude/worktrees/` del 2026-08-28 al 2026-10-17 y la comprobacion de arriba salia verde.
+ *  Las siembras van al lado, como las de 6b: un chequeo que no se prueba con el caso malo
+ *  puede estar verde por no mirar. */
+const corpusEnWorktree = corpusEnDisco(raiz);
+comprueba(
+  'ningun worktree con el corpus cuelga dentro del repo',
+  corpusEnWorktree.length === 0,
+  `esta en ${corpusEnWorktree.join(', ')}: una sesion fria lo encuentra con un ls. ` +
+    'Quitalo con git worktree remove (la rama se queda) y edita desde un worktree fuera del repo',
+);
+const siembrasCorpus = pruebaCorpusEnDisco();
+comprueba(
+  `la comprobacion de worktrees caza sus ${SIEMBRAS_CORPUS.length} siembras (dentro, separado, sin archivos y dos controles)`,
+  siembrasCorpus.length === 0,
+  `no ve como debe: ${siembrasCorpus.join(' | ')}`,
+);
 /** Un clon normal trae `origin/golden-sets` pero NO crea la rama local: `git show
  *  golden-sets:...` fallaba en todo clon fresco y el gate salia rojo por el entorno, no por
  *  el papel. Se resuelve la ref local y, si no existe, la remota. Sin ninguna de las dos
@@ -543,7 +560,7 @@ comprueba(
   'la rama local golden-sets no esta rezagada respecto a origin',
   CORPUS_DETRAS === 0,
   `va ${CORPUS_DETRAS} commit(s) por detras: el gate mediria un corpus que ya no es el vigente. ` +
-    'Ponla al dia: git branch -f golden-sets origin/golden-sets (o merge --ff-only en su worktree)',
+    'Ponla al dia: git branch -f golden-sets origin/golden-sets (o merge --ff-only en su worktree, fuera del repo)',
 );
 let corpusRama = null;
 if (REF_CORPUS) {
