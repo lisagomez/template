@@ -132,7 +132,11 @@ Por eso el corpus ya **no vive en el árbol de trabajo**. Está en su propia ram
 `golden-sets`, y se lee con `git show golden-sets:casos-trampa.md`. Una sesión fría que
 trabaja en `main` no puede encontrarlo leyendo archivos: tiene que ir a buscarlo a otra
 rama a propósito, que es un acto deliberado y visible. Las expectativas siguen en base64
-como defensa en profundidad. El verificador falla si el archivo reaparece en disco.
+como defensa en profundidad. El verificador falla si el archivo reaparece en disco, y
+también si un worktree con el corpus cuelga dentro del repo: el de edición vivió en
+`.claude/worktrees/` del 2026-08-28 al 2026-10-17, ignorado por git pero a un `ls` de
+distancia, y el primer chequeo no lo veía. El corpus se edita desde un worktree **fuera** del
+repo, que se borra al terminar.
 
 **Y el historial de git también alcanza el corpus** (medido el 2026-09-14): desde cualquier
 worktree del repo, `git log --all -S "<frase de la entrada>"` encuentra el archivo en la rama
