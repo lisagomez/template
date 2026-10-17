@@ -1,12 +1,12 @@
 # AISIA — Portal del paciente para clínicas dentales (asistente, avisos y datos de salud)
 
-> Fecha: 2026-10-16 · Estado: **borrador, sin firmar** · Revisión: antes de cualquier paciente real, al cambiar el modelo
+> Fecha: 2026-10-16 · Estado: **con la firma del laboratorio** · Revisión: antes de cualquier paciente real, al cambiar el modelo
 > o un prompt del asistente, al conectar un canal real (Gmail, Telegram) o tras un incidente.
 >
 > Control **C4**, sobre la plantilla `.claude/gobernanza/plantillas/aisia.md`. Goal `docs/goals/clinica-dental.md`.
 > Lo que hoy existe opera **solo en laboratorio**: dos clínicas y ocho pacientes sintéticos, canales simulados.
 >
-> **aprobación humana ☐** · **Aprobado por**: pendiente
+> **aprobación humana ☑** · **Aprobado por**: lisagomez
 
 ## 1. Partes afectadas
 
@@ -94,4 +94,4 @@ un abogado, la validación clínica de la lista de urgencias y de las barreras p
 C3 + C4 firmados y gate humano, y esta AISIA firmada. **Infirmable** (límite de C5): ninguna firma autoriza tratar datos de
 salud de pacientes reales sin esas piezas; el daño recae en ellos, no en quien firma.
 
-Firmada por: ____________  Rol: ____________  Fecha: ____________
+Firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-16

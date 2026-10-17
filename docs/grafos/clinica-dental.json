@@ -112,13 +112,13 @@
       "id": "propuestas-firma",
       "label": "Propuestas para firmar: CDC (clase de routing y prompts), borrador de AISIA (C4), modelo de amenazas (C3), borrador de aviso de privacidad",
       "estado": "morado",
-      "evidencia": "CDC en .claude/gobernanza/BITACORA-CDC.md (entrada del 2026-10-16; la propuesta se borró al firmar); clinica-dental-aisia.md, -c3.md y -aviso-privacidad.md junto al spec, con «Aprobado por: pendiente»"
+      "evidencia": "CDC en .claude/gobernanza/BITACORA-CDC.md (entrada del 2026-10-16; la propuesta se borró al firmar); clinica-dental-aisia.md, -c3.md y -aviso-privacidad.md junto al spec"
     },
     {
       "id": "firma-laboratorio",
       "label": "Firma del laboratorio (fuera del HECHO del goal)",
-      "estado": "gris",
-      "evidencia": "CDC firmado por el laboratorio el 2026-10-16 (capa A basta); hueco: la AISIA, la C3 y el aviso de privacidad, que firma el laboratorio"
+      "estado": "morado",
+      "evidencia": "el laboratorio firmó el 2026-10-16 el CDC (bitácora, capa A basta), la AISIA y la C3 (solo laboratorio) y el aviso de privacidad (borrador, no vigente)"
     }
   ],
   "aristas": [

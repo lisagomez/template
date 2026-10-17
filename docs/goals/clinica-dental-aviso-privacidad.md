@@ -3,7 +3,7 @@
 > **BORRADOR, NO VIGENTE: lo revisa un abogado.** Redactado por el agente del laboratorio el 2026-10-16 para el goal
 > `docs/goals/clinica-dental.md`, con clínicas y pacientes SINTÉTICOS. No se publica ni se usa con personas reales.
 >
-> **aprobación humana ☐** · **Aprobado por**: pendiente
+> **aprobación humana ☑** · **Aprobado por**: lisagomez
 >
 > **Marco verificado** (consultado el 2026-10-16): Ley Federal de Protección de Datos Personales en Posesión de los
 > Particulares **nueva**, publicada en el DOF el **20 de marzo de 2025** y vigente desde el 21 de marzo de 2025 (abrogó la

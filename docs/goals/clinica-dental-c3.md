@@ -1,9 +1,11 @@
 # Modelo de amenazas (C3) — Portal del paciente para clínicas dentales
 
-> Fecha: 2026-10-16 · Estado: **borrador, sin firmar** · Plantilla `.claude/gobernanza/plantillas/modelo-amenazas.md`.
+> Fecha: 2026-10-16 · Estado: **con la firma del laboratorio** · Plantilla `.claude/gobernanza/plantillas/modelo-amenazas.md`.
 > Goal `docs/goals/clinica-dental.md`. Hoy: solo laboratorio, canales simulados, ningún adaptador real conectado.
+> **Alcance de la firma**: esta versión cubre el laboratorio con canales simulados. Firmarla **no** abre el gate de
+> T-13: conectar Gmail o Telegram reales pide una revisión de este documento y de la AISIA que cubra ese canal.
 >
-> **aprobación humana ☐** · **Aprobado por**: pendiente
+> **aprobación humana ☑** · **Aprobado por**: lisagomez
 
 **Activos que toca** (por daño): (1) datos de salud y de menores de pacientes; (2) datos de contacto (correo, celular);
 (3) la llave de OpenRouter y el presupuesto del asistente (denial-of-wallet); (4) los tokens del bot de Telegram y de
@@ -34,7 +36,7 @@ quema el presupuesto del LLM.
 | T-10 | **PII en analítica** (dataLayer, GTM) | Lista de permitidos sin seudónimo ni categoría; consent mode v2 denegado por defecto; el contenedor solo con ID y consentimiento; guardia de red en los recorridos (cero peticiones a terceros) | Si un día se pone un ID de GTM, las etiquetas que se configuren allá quedan fuera de este control |
 | T-11 | **Libro alterado** (borrar un evento incómodo) | Cadena sha256 sobre JCS + raíz Merkle + sello Ed25519 aparte; alterar, quitar, reordenar o reescribir se detecta y dice dónde (probado) | Quien controla la llave del sello y el almacén puede resellar: la llave va en un lugar que el operador no escribe |
 | T-12 | **Eventos falsos desde el navegador** | Solo tres tipos sin datos personales (visita, inicio de registro, preferencia), Zod estricto, límite por IP | Un bot puede inflar visitas: contamina el embudo, no expone datos |
-| T-13 | **Canal real conectado sin gobierno** | Los adaptadores de Gmail y Telegram se niegan a construirse sin `CLINICA_C3_C4_FIRMADOS=1` (probado) | La variable la pone una persona: el gate humano es la firma de este documento y de la AISIA |
+| T-13 | **Canal real conectado sin gobierno** | Los adaptadores de Gmail y Telegram se niegan a construirse sin `CLINICA_C3_C4_FIRMADOS=1` (probado) | La variable la pone una persona: el gate humano es una revisión firmada de este documento y de la AISIA que cubra el canal real (esta versión no lo cubre; T-6 sigue pendiente) |
 
 **Separaciones que se preservan**: el asistente ve el mundo (texto del paciente) y no mueve nada; el audio no sale de la
 máquina; el LLM solo recibe texto y, si el paciente lo pide, su padecimiento; los estados terminales (cancelar) solo por

@@ -175,7 +175,7 @@ Lo que la evidencia de arriba **no** prueba, y lo que se hizo con cada cosa.
    del tablero dice su origen (medida, simulada, supuesta o compuesta) y solo el costo del LLM es medido.
 2. **Los adaptadores reales de Gmail y Telegram nunca hablaron con Google ni con Telegram**: se niegan sin
    `CLINICA_C3_C4_FIRMADOS=1` (probado) y con el gate arman la llamada contra un `fetch` falso. Conectarlos es gate humano
-   con la C3 y la AISIA firmadas.
+   con una revisión de la C3 y la AISIA que cubra el canal real: las firmadas el 2026-10-16 cubren solo el laboratorio.
 3. **La base de producción no existe todavía.** La migración con RLS está **propuesta** y probada en Postgres efímero;
    el laboratorio guarda en archivo detrás del puerto `AlmacenPortal`. Falta el adaptador de Supabase para ese puerto y
    aplicar el esquema (gate humano: datos de salud).
@@ -204,13 +204,14 @@ Lo que la evidencia de arriba **no** prueba, y lo que se hizo con cada cosa.
     lector de pantalla ni con personas.
 12. **GTM nunca cargó un contenedor real** (no hay ID): se probó la lógica del consent mode y el `dataLayer`, no un
     contenedor publicado.
-13. **Los documentos para firmar son borradores**: la AISIA, la C3 y el aviso de privacidad (LFPDPPP de 2025) no los
-    revisó un abogado ni un dentista; la lista de urgencias necesita validación clínica.
+13. **Lo firmado no lo revisó un especialista**: la AISIA, la C3 y el aviso de privacidad (LFPDPPP de 2025) los firmó el
+    laboratorio el 2026-10-16 para el laboratorio, pero no los revisó un abogado ni un dentista (el aviso sigue siendo
+    borrador no vigente); la lista de urgencias necesita validación clínica.
 14. **Dos impresiones a pantalla que se declaran** (post-mortem 9 y 24): la CLI de Supabase imprimió las llaves demo
     públicas del Supabase local, y yo volqué el `label` enmascarado de la llave de OpenRouter (3 + 3 caracteres). Ninguna
     es una credencial utilizable; la segunda excede la regla de 4 caracteres y decide el laboratorio.
 15. **Lo que no se hizo**: exponer el asistente por A2A, conectar canales reales, aplicar la migración, publicar el
-    paquete y firmar la AISIA, la C3 y el aviso (el CDC ya está firmado). Todo eso es gate humano.
+    paquete. Todo eso es gate humano.
 16. **La interrupción falló 1 de 8 en una corrida** (`voz-corrida-1.json`) y no se pudo saber por qué; la corrida
     instrumentada dio 8/8. Puede ser intermitente: antes de ofrecer la voz, repetir con más muestras.
 17. **Las órdenes de voz que resuelve el navegador no dejan turno en el libro** (post-mortem 29): el embudo del asistente
