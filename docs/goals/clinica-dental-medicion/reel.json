@@ -1,0 +1,78 @@
+{
+  "cuando": "2026-10-16T13:16:35.855Z",
+  "red": "bloqueada (Chromium con route abort, ffmpeg local)",
+  "resultados": [
+    {
+      "clinica": "maguey",
+      "bytes": 348702,
+      "cuadros": 180,
+      "duracion": 6,
+      "ffprobe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1080,
+            "height": 1920,
+            "r_frame_rate": "30/1"
+          },
+          {
+            "codec_name": "aac",
+            "sample_rate": "48000",
+            "channels": 1,
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "duration": "6.000000"
+        }
+      },
+      "huellas": [
+        "sha256:752c99a5cb418344cc57b57e21c953f5891a2c44ff0facbf145ac0d00373e622",
+        "sha256:752c99a5cb418344cc57b57e21c953f5891a2c44ff0facbf145ac0d00373e622"
+      ],
+      "iguales": true,
+      "msRender": [
+        15657,
+        15261
+      ]
+    },
+    {
+      "clinica": "colibri",
+      "bytes": 426776,
+      "cuadros": 180,
+      "duracion": 6,
+      "ffprobe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1080,
+            "height": 1920,
+            "r_frame_rate": "30/1"
+          },
+          {
+            "codec_name": "aac",
+            "sample_rate": "48000",
+            "channels": 1,
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "duration": "6.000000"
+        }
+      },
+      "huellas": [
+        "sha256:4aa4631888244cc82402d9f34483c7cfd45b7c996cdbd61f28a1865418c8e2d6",
+        "sha256:4aa4631888244cc82402d9f34483c7cfd45b7c996cdbd61f28a1865418c8e2d6"
+      ],
+      "iguales": true,
+      "msRender": [
+        16048,
+        16025
+      ]
+    }
+  ]
+}

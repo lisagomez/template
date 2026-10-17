@@ -151,6 +151,7 @@
     "busqueda-y-exploracion": "ligero",
     "formato-y-lint": "ligero",
     "cerebro-de-voz": "voz",
+    "asistente-paciente": "voz",
     "implementar-feature": "capaz",
     "revision-de-codigo": "capaz",
     "migracion-o-sql": "capaz",

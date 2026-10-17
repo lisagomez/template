@@ -1,0 +1,23 @@
+{
+  "name": "@tu-scope/clinica-dental",
+  "version": "0.1.0",
+  "description": "Portal del paciente para clinicas dentales (laboratorio, pacientes sinteticos): cuestionario de registro con consentimientos separados (dato de salud expreso, menor con tutor), agenda sin doble reserva sobre Reservas de @tu-scope/calendario, avisos por correo (.eml + .ics, newsletter con baja de un clic RFC 8058) y Telegram (deep link de un solo uso, sendVideo con el reel) contra simuladores, asistente con urgencias por regla y sin diagnostico, contrato de eventos sin PII, libro sha256 sobre JCS con raiz Merkle, dataLayer con consent mode, unit economics y grafo de atencion. Nucleo TypeScript: el calendario, los canales, el almacen y el cerebro se inyectan.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./servidor": { "types": "./dist/servidor.d.ts", "import": "./dist/servidor.js" }
+  },
+  "files": ["dist", "migraciones", "README.md"],
+  "sideEffects": false,
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "node scripts/prepara.mjs",
+    "prueba": "node --test pruebas/*.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.1"
+  }
+}

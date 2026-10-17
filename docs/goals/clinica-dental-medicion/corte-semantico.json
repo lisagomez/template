@@ -1,0 +1,741 @@
+{
+ "version": "sha256:beac9296a022de02",
+ "generado": "2026-10-16T17:05:07.518Z",
+ "generadoCon": {
+  "dbt-core": "1.12.5",
+  "dbt-metricflow": "0.15.0",
+  "dbt-postgres": "1.11.0",
+  "metricflow": "0.213.0",
+  "postgres": "postgres@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+  "python": "3.12"
+ },
+ "libro": {
+  "maguey": {
+   "eventos": 203,
+   "raiz": "sha256:42015befac4d4205df45680e7c186b7a509e1bc555f0d9fb87c7f0701e7b0bf7"
+  },
+  "colibri": {
+   "eventos": 112,
+   "raiz": "sha256:36667b38cd42239ed5a83fbb68ba5db0e381ead249553c518873a3d5b25de577"
+  }
+ },
+ "dbt": [
+  "Finished running 3 seeds, 8 table models, 174 data tests, 20 view models in 0 hours 0 minutes and 4.00 seconds (4.00s).",
+  "Completed successfully",
+  "Done. PASS=205 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=205"
+ ],
+ "mf": [
+  "✔ 🎉 Successfully parsed manifest from dbt project",
+  "✔ 🎉 Successfully validated the semantics of built manifest (ERRORS: 0, FUTURE_ERRORS: 0, WARNINGS: 0)",
+  "✔ 🎉 Successfully validated semantic models against data warehouse (ERRORS: 0, FUTURE_ERRORS: 0, WARNINGS: 0)",
+  "✔ 🎉 Successfully validated dimensions against data warehouse (ERRORS: 0, FUTURE_ERRORS: 0, WARNINGS: 0)",
+  "✔ 🎉 Successfully validated entities against data warehouse (ERRORS: 0, FUTURE_ERRORS: 0, WARNINGS: 0)",
+  "✔ 🎉 Successfully validated measures against data warehouse (ERRORS: 0, FUTURE_ERRORS: 0, WARNINGS: 0)",
+  "✔ 🎉 Successfully validated metrics against data warehouse (ERRORS: 0, FUTURE_ERRORS: 0, WARNINGS: 0)"
+ ],
+ "conteoLibro": {
+  "portal_visitado": 22,
+  "registro_iniciado": 9,
+  "paciente_registrado": 8,
+  "consentimiento_otorgado": 22,
+  "consentimiento_retirado": 1,
+  "cita_solicitada": 10,
+  "cita_confirmada": 9,
+  "cita_reprogramada": 1,
+  "cita_cancelada": 2,
+  "cita_asistencia": 7,
+  "aviso_programado": 32,
+  "aviso_enviado": 24,
+  "aviso_entregado": 24,
+  "aviso_fallido": 5,
+  "aviso_cancelado": 4,
+  "newsletter_baja": 1,
+  "telegram_vinculado": 1,
+  "asistente_turno": 106,
+  "urgencia_derivada": 14,
+  "preferencia_cambiada": 13
+ },
+ "convergencia": [
+  {
+   "tipo": "portal_visitado",
+   "libro": 22,
+   "staging": 22
+  },
+  {
+   "tipo": "registro_iniciado",
+   "libro": 9,
+   "staging": 9
+  },
+  {
+   "tipo": "paciente_registrado",
+   "libro": 8,
+   "staging": 8
+  },
+  {
+   "tipo": "consentimiento_otorgado",
+   "libro": 22,
+   "staging": 22
+  },
+  {
+   "tipo": "consentimiento_retirado",
+   "libro": 1,
+   "staging": 1
+  },
+  {
+   "tipo": "cita_solicitada",
+   "libro": 10,
+   "staging": 10
+  },
+  {
+   "tipo": "cita_confirmada",
+   "libro": 9,
+   "staging": 9
+  },
+  {
+   "tipo": "cita_reprogramada",
+   "libro": 1,
+   "staging": 1
+  },
+  {
+   "tipo": "cita_cancelada",
+   "libro": 2,
+   "staging": 2
+  },
+  {
+   "tipo": "cita_asistencia",
+   "libro": 7,
+   "staging": 7
+  },
+  {
+   "tipo": "aviso_programado",
+   "libro": 32,
+   "staging": 32
+  },
+  {
+   "tipo": "aviso_enviado",
+   "libro": 24,
+   "staging": 24
+  },
+  {
+   "tipo": "aviso_entregado",
+   "libro": 24,
+   "staging": 24
+  },
+  {
+   "tipo": "aviso_fallido",
+   "libro": 5,
+   "staging": 5
+  },
+  {
+   "tipo": "aviso_cancelado",
+   "libro": 4,
+   "staging": 4
+  },
+  {
+   "tipo": "newsletter_baja",
+   "libro": 1,
+   "staging": 1
+  },
+  {
+   "tipo": "telegram_vinculado",
+   "libro": 1,
+   "staging": 1
+  },
+  {
+   "tipo": "asistente_turno",
+   "libro": 106,
+   "staging": 106
+  },
+  {
+   "tipo": "urgencia_derivada",
+   "libro": 14,
+   "staging": 14
+  },
+  {
+   "tipo": "preferencia_cambiada",
+   "libro": 13,
+   "staging": 13
+  }
+ ],
+ "metricas": {
+  "pacientes_nuevos": {
+   "colibri": {
+    "metricflow": 3,
+    "directo": 3
+   },
+   "maguey": {
+    "metricflow": 5,
+    "directo": 5
+   }
+  },
+  "horas_registro_a_cita_p50": {
+   "colibri": {
+    "metricflow": 0.00083,
+    "directo": 0.0008302777777777778
+   },
+   "maguey": {
+    "metricflow": 0.000679,
+    "directo": 0.0006794444444444444
+   }
+  },
+  "citas_confirmadas": {
+   "colibri": {
+    "metricflow": 3,
+    "directo": 3
+   },
+   "maguey": {
+    "metricflow": 6,
+    "directo": 6
+   }
+  },
+  "citas_atendidas_n": {
+   "colibri": {
+    "metricflow": 2,
+    "directo": 2
+   },
+   "maguey": {
+    "metricflow": 4,
+    "directo": 4
+   }
+  },
+  "tasa_inasistencia": {
+   "colibri": {
+    "metricflow": 0.333333,
+    "directo": 0.3333333333333333
+   },
+   "maguey": {
+    "metricflow": 0,
+    "directo": 0
+   }
+  },
+  "citas_canceladas_n": {
+   "colibri": {
+    "metricflow": 0,
+    "directo": 0
+   },
+   "maguey": {
+    "metricflow": 1,
+    "directo": 1
+   }
+  },
+  "ingreso_atendido_mxn": {
+   "colibri": {
+    "metricflow": 1500,
+    "directo": 1500
+   },
+   "maguey": {
+    "metricflow": 2550,
+    "directo": 2550
+   }
+  },
+  "margen_atendido_mxn": {
+   "colibri": {
+    "metricflow": 1280,
+    "directo": 1280
+   },
+   "maguey": {
+    "metricflow": 2200,
+    "directo": 2200
+   }
+  },
+  "avisos_entregados_n": {
+   "colibri": {
+    "metricflow": 12,
+    "directo": 12
+   },
+   "maguey": {
+    "metricflow": 12,
+    "directo": 12
+   }
+  },
+  "entregabilidad": {
+   "colibri": {
+    "metricflow": 1,
+    "directo": 1
+   },
+   "maguey": {
+    "metricflow": 0.75,
+    "directo": 0.75
+   }
+  },
+  "costo_por_aviso_usd": {
+   "colibri": {
+    "metricflow": 0.000333,
+    "directo": 0.00033333333333333343
+   },
+   "maguey": {
+    "metricflow": 0.0004,
+    "directo": 0.00040000000000000013
+   }
+  },
+  "turnos_asistente_n": {
+   "colibri": {
+    "metricflow": 30,
+    "directo": 30
+   },
+   "maguey": {
+    "metricflow": 76,
+    "directo": 76
+   }
+  },
+  "urgencias_derivadas": {
+   "colibri": {
+    "metricflow": 7,
+    "directo": 7
+   },
+   "maguey": {
+    "metricflow": 7,
+    "directo": 7
+   }
+  },
+  "latencia_asistente_p50_ms": {
+   "colibri": {
+    "metricflow": 1,
+    "directo": 1
+   },
+   "maguey": {
+    "metricflow": 1419,
+    "directo": 1419
+   }
+  },
+  "conversaciones_asistente_n": {
+   "colibri": {
+    "metricflow": 28,
+    "directo": 28
+   },
+   "maguey": {
+    "metricflow": 37,
+    "directo": 37
+   }
+  },
+  "costo_por_conversacion_usd": {
+   "colibri": {
+    "metricflow": 9.8e-05,
+    "directo": 9.809999999999999e-05
+   },
+   "maguey": {
+    "metricflow": 0.000463,
+    "directo": 0.00046253783783783785
+   }
+  },
+  "visitantes_portal": {
+   "colibri": {
+    "metricflow": 8,
+    "directo": 8
+   },
+   "maguey": {
+    "metricflow": 14,
+    "directo": 14
+   }
+  },
+  "registros_embudo": {
+   "colibri": {
+    "metricflow": 3,
+    "directo": 3
+   },
+   "maguey": {
+    "metricflow": 5,
+    "directo": 5
+   }
+  },
+  "conversion_visita_registro": {
+   "colibri": {
+    "metricflow": 0.375,
+    "directo": 0.375
+   },
+   "maguey": {
+    "metricflow": 0.357143,
+    "directo": 0.35714285714285715
+   }
+  },
+  "conversion_inicio_registro": {
+   "colibri": {
+    "metricflow": 1,
+    "directo": 1
+   },
+   "maguey": {
+    "metricflow": 0.833333,
+    "directo": 0.8333333333333334
+   }
+  },
+  "conversion_registro_cita": {
+   "colibri": {
+    "metricflow": 1,
+    "directo": 1
+   },
+   "maguey": {
+    "metricflow": 1,
+    "directo": 1
+   }
+  },
+  "bajas_newsletter": {
+   "colibri": {
+    "metricflow": 1,
+    "directo": 1
+   }
+  }
+ },
+ "porCanal": [
+  {
+   "clinica": "colibri",
+   "canal": "redes",
+   "visitantes": 1,
+   "registrados": 1,
+   "conversion": 1
+  },
+  {
+   "clinica": "colibri",
+   "canal": "directo",
+   "visitantes": 5,
+   "registrados": 0,
+   "conversion": 0
+  },
+  {
+   "clinica": "colibri",
+   "canal": "busqueda",
+   "visitantes": 1,
+   "registrados": 1,
+   "conversion": 1
+  },
+  {
+   "clinica": "maguey",
+   "canal": "busqueda",
+   "visitantes": 4,
+   "registrados": 2,
+   "conversion": 0.5
+  },
+  {
+   "clinica": "maguey",
+   "canal": "directo",
+   "visitantes": 8,
+   "registrados": 1,
+   "conversion": 0.125
+  },
+  {
+   "clinica": "colibri",
+   "canal": "referido",
+   "visitantes": 1,
+   "registrados": 1,
+   "conversion": 1
+  },
+  {
+   "clinica": "maguey",
+   "canal": "redes",
+   "visitantes": 1,
+   "registrados": 1,
+   "conversion": 1
+  },
+  {
+   "clinica": "maguey",
+   "canal": "convenio",
+   "visitantes": 1,
+   "registrados": 1,
+   "conversion": 1
+  }
+ ],
+ "aristas": [
+  {
+   "arista": "agenda→cita",
+   "metricflow": {
+    "n": 8,
+    "p50": 0.013
+   },
+   "directo": {
+    "desde": "agenda",
+    "hacia": "cita",
+    "n": 8,
+    "p50": 0.013000000000000001
+   }
+  },
+  {
+   "arista": "asistente→urgencia",
+   "metricflow": {
+    "n": 14,
+    "p50": 0.001
+   },
+   "directo": {
+    "desde": "asistente",
+    "hacia": "urgencia",
+    "n": 14,
+    "p50": 0.001
+   }
+  },
+  {
+   "arista": "avisos→asistencia",
+   "metricflow": {
+    "n": 5,
+    "p50": 913970.177
+   },
+   "directo": {
+    "desde": "avisos",
+    "hacia": "asistencia",
+    "n": 5,
+    "p50": 913970.177
+   }
+  },
+  {
+   "arista": "avisos→inasistencia",
+   "metricflow": {
+    "n": 1,
+    "p50": 914380.411
+   },
+   "directo": {
+    "desde": "avisos",
+    "hacia": "inasistencia",
+    "n": 1,
+    "p50": 914380.411
+   }
+  },
+  {
+   "arista": "cita→avisos",
+   "metricflow": {
+    "n": 7,
+    "p50": 0.027
+   },
+   "directo": {
+    "desde": "cita",
+    "hacia": "avisos",
+    "n": 7,
+    "p50": 0.027
+   }
+  },
+  {
+   "arista": "cita→cancelada",
+   "metricflow": {
+    "n": 1,
+    "p50": 189.198
+   },
+   "directo": {
+    "desde": "cita",
+    "hacia": "cancelada",
+    "n": 1,
+    "p50": 189.198
+   }
+  },
+  {
+   "arista": "cita→reprogramada",
+   "metricflow": {
+    "n": 1,
+    "p50": 419.64
+   },
+   "directo": {
+    "desde": "cita",
+    "hacia": "reprogramada",
+    "n": 1,
+    "p50": 419.64
+   }
+  },
+  {
+   "arista": "consentimientos→agenda",
+   "metricflow": {
+    "n": 8,
+    "p50": 2.4535
+   },
+   "directo": {
+    "desde": "consentimientos",
+    "hacia": "agenda",
+    "n": 8,
+    "p50": 2.4535
+   }
+  },
+  {
+   "arista": "registro→asistente",
+   "metricflow": {
+    "n": 59,
+    "p50": 914429.057
+   },
+   "directo": {
+    "desde": "registro",
+    "hacia": "asistente",
+    "n": 59,
+    "p50": 914429.057
+   }
+  },
+  {
+   "arista": "registro→baja",
+   "metricflow": {
+    "n": 1,
+    "p50": 5.973
+   },
+   "directo": {
+    "desde": "registro",
+    "hacia": "baja",
+    "n": 1,
+    "p50": 5.973
+   }
+  },
+  {
+   "arista": "registro→consentimientos",
+   "metricflow": {
+    "n": 8,
+    "p50": 0.0015
+   },
+   "directo": {
+    "desde": "registro",
+    "hacia": "consentimientos",
+    "n": 8,
+    "p50": 0.0015
+   }
+  },
+  {
+   "arista": "visita→asistente",
+   "metricflow": {
+    "n": 6,
+    "p50": 21.2115
+   },
+   "directo": {
+    "desde": "visita",
+    "hacia": "asistente",
+    "n": 6,
+    "p50": 21.2115
+   }
+  },
+  {
+   "arista": "visita→registro",
+   "metricflow": {
+    "n": 8,
+    "p50": 2.617
+   },
+   "directo": {
+    "desde": "visita",
+    "hacia": "registro",
+    "n": 8,
+    "p50": 2.617
+   }
+  }
+ ],
+ "aristasPorClinica": [
+  {
+   "clinica": "colibri",
+   "arista": "agenda→cita",
+   "n": 3,
+   "p50": 0.023
+  },
+  {
+   "clinica": "colibri",
+   "arista": "asistente→urgencia",
+   "n": 7,
+   "p50": 0.001
+  },
+  {
+   "clinica": "colibri",
+   "arista": "avisos→asistencia",
+   "n": 2,
+   "p50": 913969.946
+  },
+  {
+   "clinica": "colibri",
+   "arista": "avisos→inasistencia",
+   "n": 1,
+   "p50": 914380.411
+  },
+  {
+   "clinica": "colibri",
+   "arista": "cita→avisos",
+   "n": 3,
+   "p50": 0.027
+  },
+  {
+   "clinica": "colibri",
+   "arista": "consentimientos→agenda",
+   "n": 3,
+   "p50": 2.965
+  },
+  {
+   "clinica": "colibri",
+   "arista": "registro→asistente",
+   "n": 26,
+   "p50": 914425.488
+  },
+  {
+   "clinica": "colibri",
+   "arista": "registro→baja",
+   "n": 1,
+   "p50": 5.973
+  },
+  {
+   "clinica": "colibri",
+   "arista": "registro→consentimientos",
+   "n": 3,
+   "p50": 0.001
+  },
+  {
+   "clinica": "colibri",
+   "arista": "visita→asistente",
+   "n": 2,
+   "p50": 10.491
+  },
+  {
+   "clinica": "colibri",
+   "arista": "visita→registro",
+   "n": 3,
+   "p50": 2.877
+  },
+  {
+   "clinica": "maguey",
+   "arista": "agenda→cita",
+   "n": 5,
+   "p50": 0.012
+  },
+  {
+   "clinica": "maguey",
+   "arista": "asistente→urgencia",
+   "n": 7,
+   "p50": 0.001
+  },
+  {
+   "clinica": "maguey",
+   "arista": "avisos→asistencia",
+   "n": 3,
+   "p50": 914155.818
+  },
+  {
+   "clinica": "maguey",
+   "arista": "cita→avisos",
+   "n": 4,
+   "p50": 0.022
+  },
+  {
+   "clinica": "maguey",
+   "arista": "cita→cancelada",
+   "n": 1,
+   "p50": 189.198
+  },
+  {
+   "clinica": "maguey",
+   "arista": "cita→reprogramada",
+   "n": 1,
+   "p50": 419.64
+  },
+  {
+   "clinica": "maguey",
+   "arista": "consentimientos→agenda",
+   "n": 5,
+   "p50": 2.433
+  },
+  {
+   "clinica": "maguey",
+   "arista": "registro→asistente",
+   "n": 33,
+   "p50": 914436.074
+  },
+  {
+   "clinica": "maguey",
+   "arista": "registro→consentimientos",
+   "n": 5,
+   "p50": 0.002
+  },
+  {
+   "clinica": "maguey",
+   "arista": "visita→asistente",
+   "n": 4,
+   "p50": 113.325
+  },
+  {
+   "clinica": "maguey",
+   "arista": "visita→registro",
+   "n": 5,
+   "p50": 2.597
+  }
+ ]
+}

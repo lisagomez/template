@@ -1,0 +1,13 @@
+# Sin secretos en el archivo: todo llega por variables de entorno que pone corre.mjs (Postgres efímero en Docker).
+clinica_dental:
+  target: laboratorio
+  outputs:
+    laboratorio:
+      type: postgres
+      host: "{{ env_var('CD_PG_HOST', '127.0.0.1') }}"
+      port: "{{ env_var('CD_PG_PORT') | as_number }}"
+      user: "{{ env_var('CD_PG_USER', 'postgres') }}"
+      password: "{{ env_var('CD_PG_PASSWORD') }}"
+      dbname: "{{ env_var('CD_PG_DB', 'semantica') }}"
+      schema: semantica
+      threads: 4

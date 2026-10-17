@@ -1,0 +1,449 @@
+{
+ "generado": "2026-10-16T17:05:08.245Z",
+ "corte": "sha256:beac9296a022de02",
+ "periodoDias": 10.6,
+ "clinicas": [
+  {
+   "clinica": "maguey",
+   "periodoDias": 10.6,
+   "cifras": {
+    "pacientes_nuevos": {
+     "valor": 5,
+     "unidad": "pacientes",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_confirmadas": {
+     "valor": 6,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_atendidas": {
+     "valor": 4,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow); la asistencia es SIMULADA"
+    },
+    "precio_promedio_cita": {
+     "valor": 637.5,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precios DECLARADOS de la clínica sintética, sobre las citas atendidas de la corrida"
+    },
+    "margen_por_cita": {
+     "valor": 550,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precio − costo variable SUPUESTO por servicio (declaración de la clínica)"
+    },
+    "tasa_inasistencia": {
+     "valor": 0,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "asistencia SIMULADA en el laboratorio (cada paciente sintético declara si asiste)"
+    },
+    "entregabilidad": {
+     "valor": 0.75,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram"
+    },
+    "costo_por_aviso": {
+     "valor": 0.0074,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_asistente_por_conversacion": {
+     "valor": 0.0086,
+     "unidad": "MXN",
+     "origen": "medida",
+     "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "contribucion_por_cita": {
+     "valor": 549.93,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "margen por cita − costo de avisos por cita − costo del asistente por cita"
+    },
+    "ltv": {
+     "valor": 4124.49,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "contribución por cita × 2.5 visitas al año × 3 años × (1 − inasistencia). Visitas y retención: supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+    },
+    "cac": {
+     "valor": 812.67,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "gasto de marketing SUPUESTO prorrateado a 10.6 días ÷ pacientes nuevos simulados"
+    },
+    "ltv_sobre_cac": {
+     "valor": 5.08,
+     "unidad": "veces",
+     "origen": "compuesta",
+     "fuente": "LTV ÷ CAC: dos cifras hechas de supuestos; orientan, no deciden"
+    }
+   },
+   "porCanal": [
+    {
+     "canal": "busqueda",
+     "gastoPeriodoMxn": {
+      "valor": 2120,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 2,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 1060,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 0.5,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "redes",
+     "gastoPeriodoMxn": {
+      "valor": 1413.33,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 1413.33,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "convenio",
+     "gastoPeriodoMxn": {
+      "valor": 530,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 530,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "referido",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: el referido no tiene gasto directo de pauta"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "directo",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "sin gasto declarado para este canal: se cuenta en 0 (el tráfico directo no paga pauta)"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 0.125,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    }
+   ]
+  },
+  {
+   "clinica": "colibri",
+   "periodoDias": 10.6,
+   "cifras": {
+    "pacientes_nuevos": {
+     "valor": 3,
+     "unidad": "pacientes",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_confirmadas": {
+     "valor": 3,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_atendidas": {
+     "valor": 2,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow); la asistencia es SIMULADA"
+    },
+    "precio_promedio_cita": {
+     "valor": 750,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precios DECLARADOS de la clínica sintética, sobre las citas atendidas de la corrida"
+    },
+    "margen_por_cita": {
+     "valor": 640,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precio − costo variable SUPUESTO por servicio (declaración de la clínica)"
+    },
+    "tasa_inasistencia": {
+     "valor": 0.333,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "asistencia SIMULADA en el laboratorio (cada paciente sintético declara si asiste)"
+    },
+    "entregabilidad": {
+     "valor": 1,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram"
+    },
+    "costo_por_aviso": {
+     "valor": 0.0062,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_asistente_por_conversacion": {
+     "valor": 0.0018,
+     "unidad": "MXN",
+     "origen": "medida",
+     "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "contribucion_por_cita": {
+     "valor": 639.96,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "margen por cita − costo de avisos por cita − costo del asistente por cita"
+    },
+    "ltv": {
+     "valor": 2133.2,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "contribución por cita × 2 visitas al año × 2.5 años × (1 − inasistencia). Visitas y retención: supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+    },
+    "cac": {
+     "valor": 1001.11,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "gasto de marketing SUPUESTO prorrateado a 10.6 días ÷ pacientes nuevos simulados"
+    },
+    "ltv_sobre_cac": {
+     "valor": 2.13,
+     "unidad": "veces",
+     "origen": "compuesta",
+     "fuente": "LTV ÷ CAC: dos cifras hechas de supuestos; orientan, no deciden"
+    }
+   },
+   "porCanal": [
+    {
+     "canal": "busqueda",
+     "gastoPeriodoMxn": {
+      "valor": 1236.67,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 1236.67,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "redes",
+     "gastoPeriodoMxn": {
+      "valor": 1766.67,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 1766.67,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "convenio",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: Dental Colibrí no tiene convenios de empresa"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "referido",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: el referido no tiene gasto directo de pauta"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "directo",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "sin gasto declarado para este canal: se cuenta en 0 (el tráfico directo no paga pauta)"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 0,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    }
+   ]
+  }
+ ]
+}

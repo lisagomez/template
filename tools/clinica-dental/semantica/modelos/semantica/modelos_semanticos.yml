@@ -1,0 +1,117 @@
+# Los modelos semánticos de MetricFlow sobre los marts. Cada medida es un conteo o una suma sobre filas de UN mart,
+# así cada métrica se puede cuadrar contra un conteo directo sobre el libro (lazo l-metricas).
+semantic_models:
+  - name: pacientes
+    model: ref('fct_paciente')
+    defaults: {agg_time_dimension: registrado_en}
+    entities: [{name: paciente, type: primary, expr: paciente_id}]
+    dimensions:
+      - {name: registrado_en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: canal_adquisicion, type: categorical}
+      - {name: via, type: categorical}
+    measures:
+      - {name: pacientes_registrados, agg: sum, expr: '1'}
+      - {name: pacientes_menores, agg: sum, expr: case when menor then 1 else 0 end}
+      - {name: horas_registro_a_cita_mediana, agg: median, expr: horas_registro_a_cita}
+
+  - name: citas
+    model: ref('fct_cita')
+    defaults: {agg_time_dimension: confirmada_en}
+    entities: [{name: cita, type: primary, expr: cita_id}]
+    dimensions:
+      - {name: confirmada_en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: categoria, type: categorical}
+      - {name: estado_final, type: categorical}
+      - {name: canal_adquisicion, type: categorical}
+    measures:
+      - {name: citas_confirmadas_n, agg: sum, expr: '1'}
+      - {name: citas_atendidas, agg: sum, expr: "case when estado_final = 'asistio' then 1 else 0 end"}
+      - {name: citas_con_asistencia_registrada, agg: sum, expr: "case when estado_final in ('asistio', 'inasistencia') then 1 else 0 end"}
+      - {name: citas_inasistencia, agg: sum, expr: "case when estado_final = 'inasistencia' then 1 else 0 end"}
+      - {name: citas_canceladas, agg: sum, expr: "case when estado_final = 'cancelada' then 1 else 0 end"}
+      - {name: ingreso_atendido_mxn, agg: sum, expr: "case when estado_final = 'asistio' then precio_mxn else 0 end"}
+      - {name: margen_atendido_mxn, agg: sum, expr: "case when estado_final = 'asistio' then precio_mxn - costo_variable_mxn else 0 end"}
+
+  - name: avisos
+    model: ref('fct_aviso')
+    defaults: {agg_time_dimension: programado_en}
+    entities: [{name: aviso, type: primary, expr: aviso_id}]
+    dimensions:
+      - {name: programado_en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: canal, type: categorical}
+      - {name: clase, type: categorical}
+    measures:
+      - {name: avisos_programados, agg: sum, expr: '1'}
+      - {name: avisos_entregados, agg: sum, expr: case when entregado then 1 else 0 end}
+      - {name: avisos_intentados, agg: sum, expr: case when entregado or fallido then 1 else 0 end}
+      - {name: avisos_fallidos, agg: sum, expr: case when fallido then 1 else 0 end}
+      - {name: costo_avisos_usd, agg: sum, expr: "coalesce(costo_usd, 0)"}
+
+  - name: turnos
+    model: ref('fct_turno')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: turno, type: primary, expr: turno_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: ruta, type: categorical}
+      - {name: modo, type: categorical}
+      - {name: intencion, type: categorical}
+    measures:
+      - {name: turnos_asistente, agg: sum, expr: '1'}
+      - {name: turnos_urgencia, agg: sum, expr: "case when ruta = 'urgencia' then 1 else 0 end"}
+      - {name: latencia_asistente_mediana_ms, agg: median, expr: latencia_ms}
+
+  - name: conversaciones
+    model: ref('fct_conversacion')
+    defaults: {agg_time_dimension: inicio}
+    entities: [{name: conversacion, type: primary, expr: conversacion_id}]
+    dimensions:
+      - {name: inicio, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+    measures:
+      - {name: conversaciones_asistente, agg: sum, expr: '1'}
+      - {name: costo_asistente_usd, agg: sum, expr: "coalesce(costo_usd, 0)"}
+
+  - name: embudo
+    model: ref('fct_embudo')
+    defaults: {agg_time_dimension: visita_en}
+    entities: [{name: embudo, type: primary, expr: embudo_id}]
+    dimensions:
+      - {name: visita_en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: canal, type: categorical}
+      - {name: dispositivo, type: categorical}
+    measures:
+      - {name: visitantes, agg: sum, expr: '1'}
+      - {name: visitantes_que_iniciaron, agg: sum, expr: case when inicio_registro then 1 else 0 end}
+      - {name: visitantes_registrados, agg: sum, expr: case when registrado then 1 else 0 end}
+      - {name: visitantes_con_cita, agg: sum, expr: case when con_cita then 1 else 0 end}
+
+  - name: transiciones
+    model: ref('fct_transicion')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: transicion, type: primary, expr: transicion_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: desde, type: categorical}
+      - {name: hacia, type: categorical}
+      - {name: arista, type: categorical}
+    measures:
+      - {name: transiciones_n, agg: sum, expr: '1'}
+      - {name: segundos_arista_mediana, agg: median, expr: segundos}
+
+  - name: bajas
+    model: ref('stg_newsletter_baja')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: baja, type: primary, expr: evento_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: via, type: categorical}
+    measures:
+      - {name: bajas_n, agg: sum, expr: '1'}

@@ -105,6 +105,23 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/centro-de-mando/lee',
   '/api/centro-de-mando/transcribir',
   '/api/centro-de-mando/voz',
+  // Portal del paciente (goal clinica-dental, laboratorio con datos sintéticos). RF-20: misma app y mismo puerto; no
+  // es una superficie A2A y no se expone (gate humano con C3 + C4). Todas responden 503 o 404 sin CLINICA_LABORATORIO
+  // (falla cerrado). `huecos` solo lee disponibilidad; `eventos` es una lista cerrada (Zod estricto), mismo origen y
+  // límite por IP; `asistente`, mismo origen y 60/min por IP: solo sale TEXTO hacia OpenRouter, modelo pineado y tope
+  // de gasto; `voz/*` usan el demonio LOCAL (el audio no sale), mismo origen y límite por IP; `baja/[token]` es la
+  // baja de un clic (RFC 8058: POST con token, GET nunca da de baja); `telegram/[clinica]` es el webhook del bot
+  // SIMULADO con secreto en tiempo constante; `reel/[clinica]` sirve el MP4 sintético; `laboratorio` mueve el reloj,
+  // despacha y sella. Nada escribe fuera del laboratorio: los canales reales se niegan sin C3 + C4 firmados.
+  '/api/clinica-dental/asistente',
+  '/api/clinica-dental/baja/[token]',
+  '/api/clinica-dental/eventos',
+  '/api/clinica-dental/huecos',
+  '/api/clinica-dental/laboratorio',
+  '/api/clinica-dental/reel/[clinica]',
+  '/api/clinica-dental/telegram/[clinica]',
+  '/api/clinica-dental/voz/sintetizar',
+  '/api/clinica-dental/voz/transcribir',
   '/api/contenido/video',
   // Crecimiento demostrado (goal crecimiento-demostrado, laboratorio con pymes sintéticas). RF-20: misma
   // app y mismo puerto. Es la pasarela del agente `crecimiento-demostrado`, OTRA superficie que no es este

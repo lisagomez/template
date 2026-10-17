@@ -1,0 +1,34 @@
+version: 2
+models:
+  - name: fct_paciente
+    columns:
+      - {name: paciente_id, data_tests: [unique, not_null]}
+  - name: fct_cita
+    columns:
+      - {name: cita_id, data_tests: [unique, not_null]}
+      - name: estado_final
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['asistio', 'inasistencia', 'cancelada', 'reprogramada', 'pendiente']}}}]
+      - {name: precio_mxn, data_tests: [not_null]}
+  - name: fct_aviso
+    columns:
+      - {name: aviso_id, data_tests: [unique, not_null]}
+  - name: fct_turno
+    columns:
+      - {name: turno_id, data_tests: [unique, not_null]}
+  - name: fct_conversacion
+    columns:
+      - {name: conversacion_id, data_tests: [unique, not_null]}
+  - name: fct_embudo
+    columns:
+      - {name: embudo_id, data_tests: [unique, not_null]}
+  - name: fct_transicion
+    columns:
+      - {name: transicion_id, data_tests: [unique, not_null]}
+  - name: metricflow_time_spine
+    description: La espina de tiempo diaria de MetricFlow.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+        data_tests: [unique, not_null]
