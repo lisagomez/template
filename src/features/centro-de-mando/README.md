@@ -10,6 +10,7 @@ Le hablas a la computadora y contesta: las órdenes en menos de un segundo sin m
 | Resuelve sin LLM: callar, repetir, más despacio o más rápido, la hora, la fecha, tu agenda de hoy o de mañana (solo lectura), cuánto lleva gastado y cómo va de rapidez | Escribir nada: agendar, enviar o borrar se queda en borrador (dry-run) y pide «confirmo»; aun confirmado, este centro de mando solo lee |
 | Piensa lo demás con el cerebro por OpenRouter (modelo pineado por el routing, tope de US$1 en el laboratorio) y lo dice frase a frase | Conectar tu agenda real: lee el espejo local del calendario; en el laboratorio, con datos sintéticos |
 | Se calla al instante si le hablas encima, sin callarse con su propia voz, y el turno interrumpido muere entero | Funcionar sin el demonio de dictado: sin él dice que la voz local está caída |
+| Oye con Silero v6.2 en el navegador: distingue voz de ruido (teclado, música, el aire de una oficina, una cocina o una cafetería) | Separar a quien le habla de las voces de fondo: con una junta o un murmullo a 10 dB de la voz o más cerca, no cierra el turno. Ahí va el modo «Toque o ESPACIO». Y con una cafetería a 10 dB, un «para» dicho encima de su respuesta la corta la mitad de las veces (4 de 8) |
 | Enseña el orbe, la onda, subtítulos karaoke, la conversación y la telemetría por etapa de cada turno | Publicarse: es una pantalla de laboratorio (C3 y despliegue, fuera de este alcance) |
 
 ## Casos de uso
@@ -25,6 +26,10 @@ Le hablas a la computadora y contesta: las órdenes en menos de un segundo sin m
 - **Dependencias del sistema**: el demonio de `tools/dictado` (`npm run demonio` en `tools/dictado`) con Parakeet y la
   voz Piper es_MX «claude» descargados; medido con 4 hilos por pasada en `DICTADO_HILOS` (dos pasadas en paralelo: 221 ms p50 frente a 237
   con 8). `ffmpeg` solo si el demonio no responde y la voz cae al CLI.
+- **Silero en el navegador**: `npm run prepara:silero` (lo corren `predev` y `prebuild`) deja en
+  `public/centro-de-mando/silero/` el WebAssembly de `onnxruntime-web` (fijado en 1.29.0, ~14 MB) y los pesos de Silero
+  v6.2 (2,3 MB, con su huella). No se versiona. Sin ellos el HUD oye por energía calibrada y lo dice en ámbar junto a
+  la velocidad; `?detector=energia|silero|ambos` en la URL elige otro para comparar.
 - **CPU, GPU y memoria**: medido en un Ryzen 7 5700G sin GPU (WSL2): el demonio ocupa ~1,5 GB con Parakeet cargado
   (medición de `dictado`); la latencia por etapa está en `docs/goals/centro-de-mando-voz-medicion/`.
 - **Servicios externos**: OpenRouter, solo para las preguntas abiertas.
@@ -41,11 +46,16 @@ Le hablas a la computadora y contesta: las órdenes en menos de un segundo sin m
 
 - `components/`: el HUD (`centro-de-mando.tsx`), el orbe y la onda en canvas, los subtítulos karaoke, la telemetría y
   la conversación. La disposición viene del `CommandCenterLive` de business-os (MIT, `LICENSE-FUENTE`).
-- `services/sesion.ts`: micrófono abierto una vez (`@tu-scope/voz`), detector por energía calibrada, el oído y el
-  bucle (`@tu-scope/bucle-voz`), y el reproductor por `<audio>`.
+- `services/sesion.ts`: micrófono abierto una vez (`@tu-scope/voz`), el detector, el oído y el bucle
+  (`@tu-scope/bucle-voz`), y el reproductor por `<audio>`.
+- `services/detector.ts`: los tres detectores (energía calibrada, Silero, Silero con puerta de nivel) y sus opciones,
+  en un solo sitio: lo usan el HUD y la medición. `silero-navegador.ts` carga el runtime y los pesos bajo demanda.
 - `services/puertos.ts` y `cliente.ts`: hora, fecha, telemetría y ayuda se contestan en la página; agenda y gasto en
   el servidor; la voz de las frases fijas se cachea.
 - `services/servidor/`: transcripción con anclaje de idioma (dos pasadas en paralelo para lo corto), el cerebro en
   flujo NDJSON con tope de gasto, la agenda por el `Lector` de `tools/calendario` y el prompt del cerebro (CDC).
 - Rutas: `/api/centro-de-mando/{transcribir,cerebro,lee,estado}`, todas con el Bearer del dictado y Zod.
 - Medición y capturas: `scripts/centro-de-mando/` (micrófono falso con verdad de terreno y toma de lo que suena).
+  El detector con ruido de sala: `mide-detector.ts` (fuera del navegador; banco en `banco-ruido.ts`, fuera del repo) y
+  `mide.ts --detector … --ruido …` (de punta a punta); resultados en
+  `docs/goals/centro-de-mando-voz-medicion/detector.md`.

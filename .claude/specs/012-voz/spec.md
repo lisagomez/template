@@ -109,13 +109,15 @@ el navegador y en Node y se prueba entero sin descargar nada.
 
 ## Requisitos no funcionales
 
-- **Pruebas sin red ni modelos**: 91 pruebas contra `dist/` en menos de un segundo (`npm run
-  prueba`), con modelos falsos que reproducen el convenio de llamada.
+- **Pruebas sin red ni modelos**: 98 pruebas contra `dist/` en menos de un segundo (voz 0.6.0,
+  `npm run prueba`), con modelos falsos que reproducen el convenio de llamada.
 - **Medición contra pesos reales** (`npm run mide`, 2026-09-01, LibriSpeech dev-clean, 5 hablantes
-  × 12 tomas, WeSpeaker ResNet34-LM, Silero v5): umbral de agrupamiento 0,55 da 5 grupos para 5
-  hablantes; registro con umbral 0,45: 35 aciertos de 36, 0 nombres mal y 0 de 12 al impostor.
-  Lo que no se ha medido está escrito como «sin medir» (el margen del registro).
-- **Pesos pineados por URL exacta** en el script de medición; `latest` es anti-patrón (C1).
+  × 12 tomas, WeSpeaker ResNet34-LM, Silero v6.2 —la ficha decía v5 hasta el 2026-10-16; misma
+  interfaz—): umbral de agrupamiento 0,55 da 5 grupos para 5 hablantes; registro con umbral 0,45:
+  35 aciertos de 36, 0 nombres mal y 0 de 12 al impostor. Lo que no se ha medido está escrito como
+  «sin medir» (el margen del registro).
+- **Pesos pineados a referencias inmutables** (etiqueta o commit, nunca una rama) y con su huella `sha256`
+  comprobada antes de usarlos (`huellaDe` / `verificaHuella`, voz 0.6.0); `latest` es anti-patrón (C1).
 - **Plataformas**: navegador (`onnxruntime-web`) y Node ≥ 20 (`onnxruntime-node`).
 - **Nada sale de la máquina**: la herramienta no abre red ni escribe archivos.
 - **Idioma**: documentación y mensajes en español; identificadores en el idioma del código.
@@ -129,7 +131,7 @@ el navegador y en Node y se prueba entero sin descargar nada.
 - Silencio largo en vivo: la ventana de corrección se vacía y los turnos pasan a `firme`.
 - Impostor: una voz no registrada que se parece a una registrada; el umbral y el margen son los
   mandos, y por lotes aguanta umbrales más laxos que en vivo (medido).
-- Modelo con dimensiones dinámicas: Silero v5 acepta 512 muestras y devuelve basura; se le dan 576
+- Modelo con dimensiones dinámicas: Silero (v6.2) acepta 512 muestras y devuelve basura; se le dan 576
   (64 de contexto), medido el 2026-09-01.
 
 ## Impacto sobre terceros (control C4)

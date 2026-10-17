@@ -1,4 +1,5 @@
 import type { EstadoBucle, ModoBucle, RegistroTurno } from '../../../../tools/bucle-voz/dist/index.js';
+import type { EstadoDetector } from '../services/detector.ts';
 
 export interface EstadoServidor {
   demonio: boolean;
@@ -41,4 +42,6 @@ export interface VistaCentro {
   turnos: RegistroTurno[];
   avisos: string[];
   error: string | undefined;
+  /** Qué detector de voz corre (se sabe al encender). */
+  detector: EstadoDetector | undefined;
 }

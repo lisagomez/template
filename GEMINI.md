@@ -118,6 +118,16 @@ Usuario dice algo
     |         no se siembra. Lo que cambia un veredicto va firmado por el laboratorio
     |         Que hace: `.claude/specs/004-grafo-de-conocimiento/` · PRP-005 · `docs/SDD-grafo-hermes-a-template.md`
     |
+    ├── "Quiero un asistente por voz" / "que me conteste hablando" / "centro de mando"
+    |   "hablarle a la app" / "interrumpirlo mientras habla"
+    |       → Herramienta YA CONSTRUIDA: `tools/bucle-voz/` (turnos, interrupcion, enrutador sin LLM,
+    |         cerebro en flujo) sobre `tools/voz` + `tools/dictado`; app de referencia: `/centro-de-mando`
+    |         El audio NO sale de la maquina: ASR y TTS locales. Al cerebro solo llega TEXTO, y solo lo
+    |         que el enrutador no resolvio; su clase de routing y su prompt son CDC (C1, C8)
+    |         Solo lectura: una escritura dicha queda en dry-run. Darle pluma es CDC + gate humano
+    |         Dictar texto (no conversar) es otra cosa: skill DICTADO
+    |         Medido: `docs/goals/centro-de-mando-voz-medicion/resumen.md` · Que hace: `tools/bucle-voz/README.md`
+    |
     ├── "Quiero hacer una herramienta / libreria / paquete reutilizable"
     |   "quiero reusar esto en otros proyectos" / "publicar en npm"
     |       → Ejecutar skill CREAR-HERRAMIENTA

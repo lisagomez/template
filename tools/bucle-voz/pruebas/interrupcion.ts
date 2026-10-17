@@ -53,6 +53,16 @@ test('el micrófono en el suelo de ruido no enseña nada del eco (la pérdida no
   assert.ok(fuerte.perdidaDb < 14 && fuerte.perdidaDb >= 12, `${fuerte.perdidaDb}`);
 });
 
+test('un detector que sostiene la probabilidad en los valles del eco (Silero) no infla la pérdida', () => {
+  const m = creaInterrupcion();
+  // Sílabas de eco a −21 dB de lo que suena y valles a −35 con p alta igual, como los registró la sonda en el HUD
+  // (2026-10-17). Subiendo tan rápido como baja, la pérdida iba a la media (28 dB) y los picos pasaban por voz.
+  const acciones: AccionInterrupcion[] = [];
+  for (let i = 0; i < 600; i++) acciones.push(...m.procesa({ ms: i * 32, prob: 0.95, nivelMicDb: i % 10 < 5 ? -37 : -51, nivelSalidaDb: -16 }, true));
+  assert.deepEqual(acciones, []);
+  assert.ok(m.perdidaDb < 25, `la pérdida sigue cerca del eco, no de la media: ${m.perdidaDb.toFixed(1)} dB`);
+});
+
 test('la voz de la persona que no llegó a confirmar no le quita a nadie la posibilidad de interrumpir', () => {
   const m = creaInterrupcion();
   corre(m, 0, 200, { prob: 0.95, mic: -36, salida: -16 }); // eco a −20: aprende ~20

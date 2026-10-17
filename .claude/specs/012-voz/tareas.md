@@ -29,7 +29,7 @@
       PCM16, remuestreo, Silero/WeSpeaker/PyanNet por `ort` inyectado. `pruebas/onnx.ts`.
       (RF-7, RF-23, RF-24, RF-26)
 - [x] **TAR-10 · Medición con pesos reales.** → `medicion/mide.mjs` — 2026-09-01: el marco de 576
-      de Silero v5, umbral 0,55, tabla del registro con impostor. README §medido.
+      de Silero (v6.2; la ficha decía v5), umbral 0,55, tabla del registro con impostor. README §medido.
 - [x] **TAR-11 · Empaquetado.** → `npm run empaqueta voz` en verde; tarball 0.4.0 consumido por
       `tools/dictado`.
 
@@ -43,5 +43,6 @@
       cambian; cada consumidor pone los suyos encima (dictado: `silencioMs` 1000 para pegar frase a
       frase y `envioMs` medido para enviar el turno).
 - [ ] **TAR-14 · `docs/SDD-voz.md`** si se decide que el README no basta como documento de diseño.
-- [ ] **TAR-15 · Opciones en `Transcriptor`** (idioma, pista de vocabulario) para que
-      `transcribeTurnos` pueda pasarlas: hoy lo cubre `transcribeLote` de `013-dictado`.
+- [x] **TAR-15 · Opciones en `Transcriptor`** (idioma, pista de vocabulario) para que
+      `transcribeTurnos` pueda pasarlas. → **Hecha en voz 0.5.0** (2026-09-21): `src/types.ts`, README
+      «transcriptor con opciones».

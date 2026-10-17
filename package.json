@@ -6,9 +6,11 @@
     "node": ">=22.18"
   },
   "scripts": {
+    "predev": "node scripts/centro-de-mando/prepara-silero.ts",
     "dev": "next dev --turbopack",
+    "prepara:silero": "node scripts/centro-de-mando/prepara-silero.ts",
     "dev:movil": "next dev --turbopack --experimental-https --hostname 0.0.0.0",
-    "prebuild": "node scripts/prepara-gate.mjs",
+    "prebuild": "node scripts/prepara-gate.mjs && node scripts/centro-de-mando/prepara-silero.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -101,6 +103,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^1.38.0",
     "next": "^16.0.0",
+    "onnxruntime-web": "1.29.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "read-excel-file": "9.3.10",

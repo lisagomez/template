@@ -38,7 +38,7 @@ núcleo se prueba con modelos de guion (`modeloGuion` en las pruebas) y no desca
 | El registro **manda** sobre la continuidad de sesión | Al revés, dos registradas parecidas se fundirían en el primer turno |
 | El registro no aprende solo | Un turno mal identificado arrastraría el centroide y la deriva no avisa |
 | Formato de salida de PyanNet deducido con una inferencia de sonda | Un modelo con salida inesperada falla al crear, no en el marco 4000 |
-| Silero v5 con 576 muestras | Con 512 el grafo corre y devuelve 0,0006: el VAD estaba mudo (medido 2026-09-01) |
+| Silero v6.2 con 576 muestras | Con 512 el grafo corre y devuelve 0,0006: el VAD estaba mudo (medido 2026-09-01) |
 
 ## Medición (`medicion/mide.mjs`)
 
@@ -60,9 +60,9 @@ No hay superficie de red: es una librería. Lo que queda:
 
 ## Pruebas
 
-`tools/voz/pruebas/` (`nucleo`, `onnx`, `registro`, `segmentacion`, `solape-vivo`, `streaming`):
-91 pruebas contra `dist/`, sin red ni modelos. La demo del navegador (`npm run demo`) es un banco
-con los pesos reales, no una prueba.
+`tools/voz/pruebas/` (`familia`, `nucleo`, `onnx`, `registro`, `segmentacion`, `solape-vivo`,
+`streaming`): 98 pruebas contra `dist/` en voz 0.6.0 (91 al escribir esta spec), sin red ni modelos.
+La demo del navegador (`npm run demo`) es un banco con los pesos reales, no una prueba.
 
 ## Empaquetado
 

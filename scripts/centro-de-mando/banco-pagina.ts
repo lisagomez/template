@@ -14,19 +14,21 @@ export interface Hud {
   pagina: Page;
 }
 
-export async function abreHud(base: string, token: string, ancho = 1440, alto = 900): Promise<Hud> {
+/** `consulta`: lo que va tras `?medicion=1` (p. ej. `detector=silero`). */
+export async function abreHud(base: string, token: string, ancho = 1440, alto = 900, consulta = ''): Promise<Hud> {
   const navegador = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream'] });
   const contexto = await navegador.newContext({ viewport: { width: ancho, height: alto }, permissions: ['microphone'], reducedMotion: 'no-preference' });
   await contexto.addInitScript(instalaMicrofonoFalso);
   const pagina = await contexto.newPage();
-  await pagina.goto(`${base}/centro-de-mando?medicion=1#t=${encodeURIComponent(token)}`);
+  await pagina.goto(`${base}/centro-de-mando?medicion=1${consulta ? `&${consulta}` : ''}#t=${encodeURIComponent(token)}`);
   await pagina.locator('[data-prueba="estado-servidor"]').waitFor({ timeout: 60_000 });
   return { navegador, pagina };
 }
 
-export async function enciende(p: Page): Promise<void> {
+/** Enciende y devuelve el detector que de verdad corre (el HUD lo dice al encender). */
+export async function enciende(p: Page): Promise<string> {
   await p.locator('[data-prueba="microfono"]').click();
-  await p.waitForFunction(() => document.querySelector('[data-prueba="centro-de-mando"]')?.getAttribute('data-estado') === 'escuchando', undefined, { timeout: 10_000 });
+  await p.waitForFunction(() => document.querySelector('[data-prueba="centro-de-mando"]')?.getAttribute('data-estado') === 'escuchando', undefined, { timeout: 30_000 });
   await p.waitForTimeout(800); // calibración del detector por energía (~300 ms) con margen
   // Registro de eventos del bucle (sin karaoke), para volcarlo si un turno se queda colgado.
   await p.evaluate(() => {
@@ -38,6 +40,9 @@ export async function enciende(p: Page): Promise<void> {
       if (w.__eventos.length > 400) w.__eventos.splice(0, 200);
     });
   });
+  const detector = p.locator('[data-prueba="detector"]');
+  await detector.waitFor({ timeout: 10_000 });
+  return (await detector.getAttribute('data-activo')) ?? '';
 }
 
 export const ultimosEventos = (p: Page, n = 25): Promise<string[]> => p.evaluate((k) => (window as unknown as { __eventos?: string[] }).__eventos?.slice(-k) ?? [], n);

@@ -4969,6 +4969,144 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `a7f0f87cdb13`).
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
 
+### 2026-10-16 — skill global `dictado`: la línea que decía que el motor en vivo es faster-whisper — radio: skill global (fuera del repo)
+
+- **Cambio**: `~/.claude/skills/dictado/SKILL.md`, línea 67 (sección «Errores ya vistos»). Decía «Parakeet oía
+  inglés en frases cortas; por eso el motor en vivo es faster-whisper», y la línea 44 del mismo skill dice que desde
+  el 2026-09-21 el defecto es Parakeet con faster-whisper:small de respaldo. Manda la 44, que es lo que resuelve
+  `ajustes.json` hoy. La 67 queda como historia: ese día el motor pasó a faster-whisper, desde el 2026-09-21 vuelve
+  a ser Parakeet con el respaldo **a petición** (`x-motor: respaldo`, no automático, como dice
+  `tools/dictado/README.md` §7), y el centro de mando ancla el idioma con una frase portadora. El archivo vive fuera
+  del repo: **se aplica al firmar**, no antes.
+- **Motivo**: punto 3 de `docs/goals/propuesta-cdc.md`, fuera de la firma del 2026-10-16 a propósito. Un agente que
+  lea la 67 puede cambiar el motor en vivo a faster-whisper creyendo que corrige algo.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A: el skill global no tiene contratos (no está en el repo); el resto del corpus, 166/166 ☑;
+  - capa B no corrida por el agente; decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva; la `description` del skill no cambia).
+- **Regresión**: no aplica al repo (el archivo está fuera); se comprueba que solo cambió esa línea, contra la copia
+  previa, al aplicarlo.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
+
+### 2026-10-16 — spec `012-voz`: tres datos vencidos (TAR-15, «Silero v5», «91 pruebas») — radio: documentación de una spec
+
+- **Cambio** (en la rama `voz/pendientes-cdc`, commit `38b31a9`): en `tareas.md`, TAR-15 pasa a hecha (voz 0.5.0,
+  2026-09-21); en `spec.md` y `plan.md`, Silero es la **v6.2** (misma huella que la etiqueta `v6.2`; la ficha decía
+  v5 hasta el 2026-10-16, misma interfaz) y las pruebas son **98** (voz 0.6.0; las 91 del encabezado retroactivo se
+  quedan, porque eran ciertas el 2026-09-16); el requisito de pesos pasa de «URL exacta» a «referencias inmutables
+  con huella `sha256` comprobada antes de usarlos» (`huellaDe` / `verificaHuella`, voz 0.6.0).
+- **Motivo**: punto 5 de `docs/goals/propuesta-cdc.md`. Una spec que afirma lo que ya no es cierto se contradice con
+  el código que la cita.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - `verifica:specs` ☑ 136/136;
+  - regresión capa A ☑ 166/166;
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés; decide el laboratorio («capa A
+    basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: ver la del CDC siguiente (mismo commit).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
+
+### 2026-10-16 — `AGENTS.md`: la rama «asistente por voz / centro de mando» en el decision tree — radio: sistema (instrucciones del arnés)
+
+- **Cambio** (en la rama `voz/pendientes-cdc`, commit `38b31a9`): una rama nueva tras la del grafo de conocimiento,
+  con el patrón de «Herramienta YA CONSTRUIDA»: «quiero un asistente por voz / que me conteste hablando / centro de
+  mando / hablarle a la app / interrumpirlo mientras habla» → `tools/bucle-voz/` sobre `tools/voz` + `tools/dictado`,
+  app de referencia `/centro-de-mando`. Lleva sus límites: el audio no sale de la máquina, al cerebro solo llega
+  texto y solo lo que el enrutador no resolvió (clase de routing y prompt son CDC), solo lectura (darle pluma es CDC
+  + gate humano), y dictar texto es el skill `dictado`, no esto. `GEMINI.md` se regeneró con
+  `npm run sincroniza:gemini`.
+- **Coste de contexto**: +231 tokens en el prefijo que se paga en cada sesión (`CLAUDE.md` 6,347 → 6,578 de 8,000;
+  `GEMINI.md` 6,071 de 9,000). Invalida el caché de prefijo una vez.
+- **Motivo**: punto 6 de `docs/goals/propuesta-cdc.md`. Sin la rama, una petición de voz no llega a la herramienta
+  construida y se reinventa, o se conecta un servicio de voz de terceros.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `verify:gobernanza` ☑ 169/169; `mide:contexto` ☑ dentro de presupuesto;
+  - capa B no corrida por el agente: el cambio SÍ toca las instrucciones del arnés; decide el laboratorio («capa A
+    basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `38b31a9` (árbol
+  `938400828989`).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-16
+
+### 2026-10-17 — centro de mando: Silero v6.2 en el navegador como detector de voz del HUD, y la puerta de eco de `bucle-voz` (punto 4 de la propuesta del centro de mando) — radio: producto (app `/centro-de-mando`), herramienta (`tools/bucle-voz`) y dependencia nueva
+
+- **Cambio** (rama `voz/silero-navegador`, commit `fbfc165`):
+  1. **Dependencia nueva, fijada**: `onnxruntime-web` **1.29.0** exacta en `dependencies` de la raíz (la misma con la que
+     `voz` midió, `RUNTIMES`). Se importa bajo demanda: con el detector de energía no se baja.
+  2. **Detector del HUD** en `src/features/centro-de-mando/services/detector.ts`, compartido con la medición: energía
+     calibrada, Silero, y Silero con una puerta de nivel a 3 dB. **El defecto pasa de energía a `silero`**;
+     `?detector=` en la URL elige otro para comparar. Si Silero no carga, el HUD sigue con la energía y lo dice en ámbar
+     junto a la velocidad, con el motivo (probado: sin el modelo, «no está el modelo (404)»).
+  3. **Pesos y runtime** desde la propia app: `npm run prepara:silero` (en `predev` y `prebuild`) deja en
+     `public/centro-de-mando/silero/` los pesos de la etiqueta inmutable `v6.2` con su huella sha256 (la de
+     `tools/voz/src/node/pesos.ts`) y el WebAssembly copiado del paquete fijado. No se versiona (`.gitignore`). Sin red ni
+     pesos, avisa y sale con 0: el HUD cae a la energía y lo dice. La imagen Docker lo corre en su `npm run build`.
+  4. **El eco, en dos partes** (con Silero la máquina se interrumpía sola con su propia voz: 6 de 6):
+     - en la app, `conPuertaAlHablar`: mientras la máquina habla, la probabilidad de Silero se cruza con una puerta de
+       nivel a 0 dB, para que los marcos en el suelo de la sala no cuenten como «con sonido»;
+     - en **`tools/bucle-voz`** (`interrupcion.ts`, cambia el comportamiento de la herramienta, también con la
+       energía): la pérdida de eco aprendida **sube a la quinta parte de lo que baja** (0,01 y 0,05; antes 0,05 las
+       dos). Subiendo igual de rápido iba a la MEDIA de lo observado (los valles entre sílabas también llegan) y no al
+       eco. Es lo que ya decía su comentario («baja enseguida, sube despacio») y el código no hacía. Prueba nueva que
+       falla con el código anterior: «un detector que sostiene la probabilidad en los valles del eco (Silero) no infla
+       la pérdida».
+  5. **Medición** (no cambia comportamiento): `scripts/centro-de-mando/mide-detector.ts` con su banco de ruido fuera del
+     repo (`banco-ruido.ts`: cinco salas de DEMAND con la md5 de Zenodo y la sha256 del canal fijada; FLEURS es_419;
+     Piper), `mide.ts` gana `--detector`, `--ruido`, `--snr` y `--salida`, y `resume-detector.ts` genera la tabla.
+- **Medido** (2026-10-17; tablas completas en `docs/goals/centro-de-mando-voz-medicion/detector.md`):
+  - fuera del navegador, 46 frases (30 leídas reales y 16 órdenes) × 9 ruidos × 4 SNR: frases enteras con ruido,
+    media **73,3 %** con Silero frente a **24,2 %** con la energía (medianas 87 % y 10,9 %); órdenes enteras 80 % frente a
+    42,5 %. En limpio, 87 % frente a 82,6 %. Disparos falsos con teclado: 0 por minuto frente a 10;
+  - de punta a punta en el HUD, con el código final:
+
+    | | Energía, limpio | Silero, limpio | Energía, cafetería 10 dB | Silero, cafetería 10 dB |
+    |---|---|---|---|---|
+    | Órdenes resueltas por orden local | 31 de 32 | 31 de 32 | 1 de 16 | 15 de 16 |
+    | Fin real → suena, p50 · p95 | 617 · 997 ms | 708 · 1011 ms | 1307 ms · 57 s | 768 · 2073 ms |
+    | «Para.»: cortes (reacción p50) | 8 de 8 (227 ms) | 8 de 8 (204 ms) | 3 de 8 (2,3 s) | 4 de 8 (287 ms) |
+    | Auto-interrupciones con eco a −20 dB | 0 de 6 | 0 de 6 | 0 de 6 | 0 de 6 |
+
+    Silero antes del arreglo del eco, en limpio: 6 de 6 auto-interrupciones. Solo con la puerta de la app: 5 de 6; solo
+    con la subida lenta, la pérdida aprendida sigue creciendo (26-27 dB); con las dos, ~24,5 dB y 0 de 6. La energía
+    con la subida lenta aprende ~21 dB (antes ~23): su «para» en limpio sigue 8 de 8;
+  - las órdenes mal oídas sueltas (1 de 32) **no son de Silero**: A/B con el audio que corta cada detector, las 16
+    órdenes × 8 desfases por la misma transcripción y el mismo enrutador del HUD, 127 de 128 con Silero y 126 de 128
+    con la energía (el fallo es el reconocedor con «Repite.» en las dos). Script de un solo uso, fuera del repo.
+- **Lo que cuesta o queda abierto**:
+  - **cierre del turno ~90 ms más tarde** en limpio (p50 708 frente a 617 ms): Silero sostiene la probabilidad tras la
+    voz (cola de 100 ms frente a 2 en el A/B). El cierre de 600 ms se eligió con una tabla medida CON Silero
+    (`tools/dictado`, su `vad.ts`): la energía cerraba antes de lo calibrado;
+  - **«para» con ruido**: con la cafetería a 10 dB corta 4 de 8 (la energía, 3 de 8 y a 2,3 s). Es la puerta de eco
+    por nivel: con ruido, el «para» tiene que pasar 6 dB por encima del eco MÁS el ruido. Para eso está el modo «Toque
+    o ESPACIO»; anotado en el README;
+  - **voces de fondo**: con un murmullo a 10 dB de la voz o más cerca, o la sala de juntas de DEMAND a 10 dB o menos,
+    ningún detector sirve. Silero no cierra el turno (lo oye como voz, porque lo es) y la energía pierde la frase. La
+    puerta de nivel de `ambos` ayuda en la junta y empeora todo lo demás, así que no es el defecto;
+  - el navegador baja ~16 MB la primera vez (14 de WebAssembly, 2,3 de pesos), servidos por la propia app;
+  - **no medido**: una sala real con la voz del laboratorio y un micrófono real (todo es voz inyectada); Silero corre
+    en el hilo principal (0,14 ms por marco en Node; en el navegador, sin medir aparte).
+- **Salida del perímetro (C4)**: sin cambio. Silero corre en el navegador; runtime y pesos los sirve la propia app y en
+  tiempo de ejecución no se pide nada fuera. Los pesos se bajan al preparar, de GitHub por etiqueta y con huella.
+- **Motivo**: punto 4 de `docs/goals/propuesta-cdc.md`, que pedía fase aparte, `onnxruntime-web` fijado, servir el
+  WebAssembly y el `.onnx` desde la app, y medir antes y después con un corpus con ruido de sala (que no existía).
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma: el `--stat` entero y los cambios de comportamiento completos);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `fbfc165` (árbol `96c4fe99a407`);
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés; decide el laboratorio («capa A
+    basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (`onnxruntime-web` 1.29.0 exacta; pesos por la etiqueta `v6.2` con sha256; DEMAND por DOI con md5 y sha256).
+- **Regresión**: `tools/bucle-voz` 78/78 (con la prueba nueva, que falla sin el cambio); `verify:gobernanza` ☑ 169/169; `prueba:tools` ☑ dentro del validate.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-17
+
 ### 2026-10-16 — portal del paciente: clase `asistente-paciente` en el nivel `voz`, prompt del chatbot, guion de la guía de voz y plantillas de avisos — radio: routing (C8) y producto (paquete `@tu-scope/clinica-dental`, app `/clinica/[clinica]`)
 
 - **Cambio**:
