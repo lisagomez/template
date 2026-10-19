@@ -92,7 +92,7 @@ const NIEGA_FIEBRE = /\b(no tengo|no tiene|sin|no hay|nada de) (fiebre|calentura
  */
 const VOZ_ALARMA: readonly (readonly [string, string])[] = [
   ['respirar', 'respirar'], ['hinchada', 'hinchada'], ['hinchado', 'hinchado'], ['hinchando', 'hinchando'],
-  ['sangrar', 'sangrar'], ['sangrando', 'sangrando'], ['desangrar', 'de sangrar'], ['chorros', 'chorros'],
+  ['sangrar', 'sangrar'], ['sangrando', 'sangrando'], ['desangrar', 'de sangrar'], ['chorros', 'chorros'], ['pelotazo', 'pelotazo'],
 ];
 
 /** Lo que el motor de respaldo recibe como pista (Whisper favorece ese vocabulario; Parakeet no la usa). */
@@ -121,29 +121,35 @@ const CONFUSIONES_VOZ: readonly { oido: RegExp; contexto: RegExp; lectura: strin
 export function corrigeVoz(texto: string): string {
   const leido = normaliza(texto).split(' ').map((w) => {
     if (w.length < 5) return w;
-    const t = VOZ_ALARMA.find(([termino]) => w !== termino && distancia(w, termino) <= (termino.length >= 9 ? 2 : 1));
+    // Igual al término también cuenta si su lectura es otra: el ASR escribe «no para desangrar» y la regla pide «de sangrar».
+    const t = VOZ_ALARMA.find(([termino, lectura]) => w !== lectura && distancia(w, termino) <= (termino.length >= 9 ? 2 : 1));
     return t ? t[1] : w;
   }).join(' ');
   return CONFUSIONES_VOZ.reduce((x, c) => (c.contexto.test(x) ? x.replace(c.oido, c.lectura) : x), leido);
 }
 
 /**
- * La RED de una nota de voz que ninguna regla reconoció pero trae una señal de alarma (las mismas familias de palabras
- * de las reglas): el ASR puede torcer justo la palabra que decide («me cuesta traer» por «tragar», «muera» por «muela»;
- * 4 de 120 tomas con una voz de control). No es una derivación: es un aviso fijo después de la respuesta.
+ * U7, solo para NOTAS DE VOZ: una señal de alarma (las familias de palabras de las reglas) que ninguna regla específica
+ * reconoció, porque el ASR puede torcer justo la palabra que decide («me cuesta traer» por «tragar», «muera» por
+ * «muela»; 4 de 120 tomas con una voz de control). Se avisa PRIMERO, por regla y sin LLM, con un aviso condicional (911
+ * o la clínica hoy); después el asistente contesta lo que se preguntó.
  */
-const SENAL_VOZ = /\b(hinch\w*|inflam\w*|sangr\w*|fiebre|calentura|escalofrio\w*|respir\w*|trag\w*|ahog\w*|golpe\w*|cayo|salio)\b/;
-export const traeSenalDeAlarma = (lecturas: readonly string[]): boolean => lecturas.some((x) => SENAL_VOZ.test(normaliza(x)) || SENAL_VOZ.test(corrigeVoz(x)));
+const SENAL_VOZ = /\b(hinch\w*|inflam\w*|sangr\w*|fiebre|calentura|escalofrio\w*|respir\w*|trag\w*|ahog\w*|golpe\w*|pelot\w*|balonazo|caida|cayo|salio|desmay\w*|vomit\w*|veo doble|ve doble|vision doble|perdi el conocimiento)\b/;
+/** «no tengo fiebre» no es una señal (la misma negación que respeta U6). */
+const sinNegaciones = (t: string): string => t.replace(new RegExp(NIEGA_FIEBRE.source, 'g'), ' ');
+export const traeSenalDeAlarma = (lecturas: readonly string[]): boolean => lecturas.some((x) => SENAL_VOZ.test(sinNegaciones(normaliza(x))) || SENAL_VOZ.test(sinNegaciones(corrigeVoz(x))));
 export const avisoDeAlarma = (c: { nombre: string; telefono: string }): string =>
   `Por si acaso: si te cuesta respirar o tragar, la hinchazón te llega al ojo o al cuello, o el sangrado no para, llama ahora al 911. Si tienes fiebre con dolor de muela o se cayó un diente por un golpe, llama hoy a ${c.nombre} al ${c.telefono}.`;
 
-/** Para una nota de voz: la regla sobre lo que oyó cada motor y sobre su lectura corregida. */
+export const REGLA_VOZ: ReglaUrgencia = { id: 'U7', senal: 'Señal de alarma en una nota de voz que ninguna otra regla reconoce', destino: 'emergencias_911', fuente: NHS_URGENCIA, alternativas: [[SENAL_VOZ]] };
+
+/** Para una nota de voz: las reglas sobre lo que oyó cada motor y sobre su lectura corregida; si ninguna, U7. */
 export function detectaUrgenciaEnVoz(lecturas: readonly string[], c: { nombre: string; telefono: string }): Urgencia | null {
   for (const x of lecturas) {
     const u = detectaUrgencia(x, c) ?? detectaUrgencia(corrigeVoz(x), c);
     if (u) return u;
   }
-  return null;
+  return traeSenalDeAlarma(lecturas) ? { regla: REGLA_VOZ, respuesta: avisoDeAlarma(c) } : null;
 }
 
 export interface Urgencia { regla: ReglaUrgencia; respuesta: string }

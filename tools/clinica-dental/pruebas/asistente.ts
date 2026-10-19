@@ -55,16 +55,40 @@ test('URGENCIAS POR VOZ: lo que el ASR torció en la medición (120 tomas) se le
   }
   assert.equal(detectaUrgenciaEnVoz(['No puedo bien y tengo la boca muy hinchada.', 'No puedo respirar bien y tengo la boca muy hinchada.'], c)?.regla.id, 'U1', 'basta una de las lecturas');
   assert.equal(detectaUrgencia('Le dieron un golpe a mi hija jugando fútbol, dice le cayó un diente de adelante.', c)?.regla.id, 'U5', '«le cayó un diente» sin el «se»');
+  assert.equal(detectaUrgenciaEnVoz(['Me sacaron una muela ayer y no para desangrar.'], c)?.regla.id, 'U3', 'la palabra bien escrita también se lee: «desangrar» → «de sangrar»');
+  assert.equal(detectaUrgenciaEnVoz(['Me dieron un pelotaz y ahora veo doble.'], c)?.regla.id, 'U4', '«pelotaz» → «pelotazo»');
+  assert.equal(detectaUrgenciaEnVoz(['Me dieron un pelotazo y ahora veo dónde.'], c)?.regla.id, 'U7', 'si se perdió «doble», queda la señal del golpe');
   assert.equal(detectaUrgencia('Me cayó mal la comida y me duele un diente', c), null, 'contraejemplo: «me cayó mal» no es un diente que se cae');
   assert.equal(detectaUrgenciaEnVoz(['Tengo la cara hinchada y me cuesta pagar.'], c)?.regla.id, 'U1', '«tragar» oído como «pagar», con la cara hinchada');
-  for (const x of ['Tengo la cara hinchada y me cuesta pagar la consulta', 'Me cuesta pagar.', 'No puedo pagar ahora, ¿aceptan tarjeta?']) assert.equal(detectaUrgenciaEnVoz([x], c), null, `contraejemplo: ${x}`);
+  for (const x of ['Me cuesta pagar.', 'No puedo pagar ahora, ¿aceptan tarjeta?']) assert.equal(detectaUrgenciaEnVoz([x], c), null, `contraejemplo: ${x}`);
+  assert.equal(detectaUrgenciaEnVoz(['Tengo la cara hinchada y me cuesta pagar la consulta'], c)?.regla.id, 'U7', 'con objeto no es «tragar» (U1): la hinchazón solo dispara el aviso condicional');
 });
 
 test('URGENCIAS POR VOZ, contraejemplos: la corrección no inventa una urgencia en NINGUNA pregunta no urgente del corpus ni en palabras cortas o comunes', () => {
   const c = clinica('maguey');
   const noUrgentes = CORPUS.preguntas.filter((p) => p.categoria !== 'urgencia');
-  for (const p of noUrgentes) assert.equal(detectaUrgenciaEnVoz([p.texto], c), null, `${p.id}: ${p.texto} → ${corrigeVoz(p.texto)}`);
-  for (const x of ['Tengo la encía hinchada y roja', 'No puedo tratar ese tema ahora', 'Me cuesta pagar la cuenta', 'Me sangran las encías al cepillarme', '¿Me pueden sacar una muela el sábado?']) assert.equal(detectaUrgenciaEnVoz([x], c), null, x);
+  for (const p of noUrgentes) assert.ok(['U7', undefined].includes(detectaUrgenciaEnVoz([p.texto], c)?.regla.id), `${p.id}: ${p.texto} → ${corrigeVoz(p.texto)}`);
+  for (const x of ['No puedo tratar ese tema ahora', 'Me cuesta pagar la cuenta', '¿Me pueden sacar una muela el sábado?']) assert.equal(detectaUrgenciaEnVoz([x], c), null, x);
+  // Con una palabra de alarma pero sin urgencia específica, por voz solo dispara U7 (el aviso condicional), nunca U1-U6.
+  for (const x of ['Tengo la encía hinchada y roja', 'Me sangran las encías al cepillarme']) assert.equal(detectaUrgenciaEnVoz([x], c)?.regla.id, 'U7', x);
+  assert.equal(detectaUrgenciaEnVoz(['Me duele un poco la muela pero no tengo fiebre'], c), null, '«no tengo fiebre» no es una señal');
+});
+
+test('PORTAL POR VOZ: el asistente lee las urgencias como una nota de voz (corrección y U7); por texto, nada cambia', async () => {
+  const voz = (a: ReturnType<typeof asistente>['a'], candidatos: string[]) => a.responde({ candidatos, historial: [], citas: null, padecimiento: null, senal: new AbortController().signal, voz: true });
+  const { a, llamadas } = asistente('maguey');
+  const torcida = await voz(a, ['Me sacaron una muela ayer y no para desancrar.']);
+  assert.equal(torcida.ruta, 'urgencia');
+  assert.equal(torcida.urgencia?.regla, 'U3');
+  assert.equal(llamadas.n, 0, 'por regla, sin cerebro');
+  const frases: string[] = [];
+  const u7 = await a.responde({ candidatos: ['Tengo la cara hinchada y me cuesta traer.'], historial: [], citas: null, padecimiento: null, senal: new AbortController().signal, voz: true, alFrase: (f) => frases.push(f) });
+  assert.equal(u7.urgencia?.regla, 'U7');
+  assert.match(frases[0] ?? '', /^Por si acaso: .*911/, 'el aviso es lo PRIMERO que se dice');
+  assert.match(u7.texto, /^Por si acaso: [\s\S]*La limpieza dental cuesta/, 'y después contesta el asistente');
+  assert.equal(llamadas.n, 1);
+  const texto = await pregunta(a, 'Me sacaron una muela ayer y no para desancrar.');
+  assert.notEqual(texto.ruta, 'urgencia', 'por TEXTO no se corrige: lo escrito es lo que la persona escribió');
 });
 
 test('NO URGENCIAS: sangrado al cepillarse, «no tengo fiebre», preguntas normales → ninguna regla', () => {

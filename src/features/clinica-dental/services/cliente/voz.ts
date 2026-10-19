@@ -18,7 +18,7 @@ import {
   type AudioFrase, type Bucle, type Cerebro, type Decision, type Enrutador, type EventoDetector, type Oido, type PiezaCerebro,
 } from '../../../../../tools/bucle-voz/dist/index.js';
 import {
-  detectaUrgencia, escrituraA, ORDENES_CLINICA, pareceInyeccion, pideDiagnostico, respuestaLocal, TEXTO_ACCION, TEXTO_NO_PERMITIDA, VERBOS_ESCRITURA_CLINICA,
+  detectaUrgenciaEnVoz, escrituraA, ORDENES_CLINICA, pareceInyeccion, pideDiagnostico, respuestaLocal, TEXTO_ACCION, TEXTO_NO_PERMITIDA, VERBOS_ESCRITURA_CLINICA,
   type AccionPropuesta, type Clinica,
 } from '../../../../../tools/clinica-dental/dist/index.js';
 
@@ -56,7 +56,10 @@ export function enrutadorChat(c: Clinica): Enrutador {
     id: `${base.id}+clinica`,
     decide(candidatos): Decision {
       const texto = candidatos[0] ?? '';
-      if (candidatos.some((t) => detectaUrgencia(t, c) || pideDiagnostico(t) || pareceInyeccion(t))) return { tipo: 'llm', motivo: 'conversacion', confianza: 1, texto };
+      // Una urgencia (o una señal de alarma) en CUALQUIER lectura va al servidor con ESA lectura: es la que la regla reconoce.
+      const urgente = candidatos.find((t) => detectaUrgenciaEnVoz([t], c) !== null);
+      if (urgente) return { tipo: 'llm', motivo: 'conversacion', confianza: 1, texto: urgente };
+      if (candidatos.some((t) => pideDiagnostico(t) || pareceInyeccion(t))) return { tipo: 'llm', motivo: 'conversacion', confianza: 1, texto };
       const d = base.decide(candidatos);
       if (d.tipo === 'orden' && d.clase === 'escritura') {
         const w = escrituraA(d.texto);

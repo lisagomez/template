@@ -1,65 +1,65 @@
 {
- "cuando": "2026-10-19T16:22:19.906Z",
+ "cuando": "2026-10-19T17:53:01.631Z",
  "pasos": [
   {
    "paso": "1 · registro con el consentimiento de WhatsApp (escritorio y celular)",
-   "ms": 3626
+   "ms": 3875
   },
   {
    "paso": "agenda con avisos por WhatsApp (queda esperando la vinculación)",
-   "ms": 1507
+   "ms": 1470
   },
   {
    "paso": "2a · «Vincular WhatsApp»: código de un solo uso y enlace wa.me",
-   "ms": 8228
+   "ms": 8222
   },
   {
    "paso": "2b · el código sale por WhatsApp desde el número de la persona",
-   "ms": 4660
+   "ms": 4636
   },
   {
    "paso": "2c · la persona confirma desde su cuenta que el número es suyo",
-   "ms": 8353
+   "ms": 8429
   },
   {
    "paso": "enlace REENVIADO: un tercero manda el código primero y la persona lo rechaza",
-   "ms": 18181
+   "ms": 18125
   },
   {
    "paso": "otra clínica: una paciente de Colibrí vincula su WhatsApp (para la medición)",
-   "ms": 7528
+   "ms": 7472
   },
   {
    "paso": "3 · recordatorio de 24 h como PLANTILLA (ventana cerrada) y «Confirmo»",
-   "ms": 4256
+   "ms": 4236
   },
   {
    "paso": "5 · URGENCIA en la respuesta a un recordatorio (regla, sin LLM)",
-   "ms": 4183
+   "ms": 4198
   },
   {
    "paso": "nota de voz (voz local → ASR local) y foto (nunca se baja)",
-   "ms": 6332
+   "ms": 6301
   },
   {
    "paso": "6 · «Mis citas» con el estado de los avisos de WhatsApp",
-   "ms": 3860
+   "ms": 3872
   },
   {
    "paso": "4 · Flow REPROGRAMANDO (otra paciente, cita a 5 días)",
-   "ms": 19590
+   "ms": 19460
   },
   {
    "paso": "Flow AGENDANDO: «quiero agendar» → servicio → día → hora → «Confirmar cita»",
-   "ms": 12133
+   "ms": 12120
   },
   {
    "paso": "Flow CANCELANDO: «Cancelar cita» → la casilla → «Cancelar cita»",
-   "ms": 8850
+   "ms": 8863
   },
   {
    "paso": "coexistencia: la recepción contesta desde su celular y el asistente calla",
-   "ms": 7015
+   "ms": 6999
   }
  ],
  "navegador": {

@@ -10,10 +10,11 @@ import { generateKeyPairSync, type KeyObject } from 'node:crypto';
 import { aCuerpoGraph, cifraRespuesta, descifraPeticion, leeWebhook, verificaFirmaMeta, type PeticionCifrada } from '../../../../../tools/ventas-whatsapp/dist/index.js';
 import { creaMetaSimulada, type MetaSimulada } from '../../../../../tools/ventas-whatsapp/dist/simulador/index.js';
 import {
-  atiendeEndpointFlows, CLINICAS, colaEnArchivo, creaAsistente, creaPuertoWhatsApp, creaReceptorWhatsApp, FLOWS_WA, PISTA_VOZ_URGENCIAS, registroDePlantillas, type DepsEndpointFlows, type DepsWhatsApp,
+  atiendeEndpointFlows, CLINICAS, colaEnArchivo, creaAsistente, creaPuertoWhatsApp, creaReceptorWhatsApp, FLOWS_WA, registroDePlantillas, type DepsEndpointFlows, type DepsWhatsApp,
   type NumeroClinica, type Portal, type PuertoCerebro, type ReceptorWhatsApp,
 } from '../../../../../tools/clinica-dental/dist/servidor.js';
-import { DemonioCaido, transcribeRespaldo, transcribeTurno } from '@/features/centro-de-mando/services/servidor/transcribe';
+import { DemonioCaido } from '@/features/centro-de-mando/services/servidor/transcribe';
+import { leeNotaDeVoz } from './lecturas-voz';
 import { CANARIO, cerebroPara, enrutador } from './asistente';
 import { RUTAS, SECRETO_APP_WA } from './datos';
 
@@ -52,9 +53,7 @@ async function transcribe(bytes: Uint8Array): Promise<string[] | null> {
   try {
     const pcm = await aPcm16k(bytes);
     if (pcm.length < 3_200 || pcm.length > 60 * 16_000 * 2) return null;
-    const senal = AbortSignal.timeout(30_000);
-    const [turno, respaldo] = await Promise.all([transcribeTurno(pcm, senal), transcribeRespaldo(pcm, senal, PISTA_VOZ_URGENCIAS).catch(() => '')]);
-    return [...new Set([...turno.candidatos, respaldo].filter((x) => x.trim()))];
+    return await leeNotaDeVoz(pcm, AbortSignal.timeout(30_000));
   } catch (e) {
     if (e instanceof DemonioCaido) return null;
     return null;

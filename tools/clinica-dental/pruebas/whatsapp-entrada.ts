@@ -97,19 +97,25 @@ test('nota de voz con DOS lecturas (dos motores de ASR): si una perdió la palab
   assert.ok((await w.libro.eventos('maguey')).some((e) => e.tipo === 'urgencia_derivada' && e.regla === 'U1' && e.canal === 'whatsapp'));
 });
 
-test('nota de voz con una señal de alarma que ninguna regla reconoció («me cuesta traer» por «tragar»): contesta el asistente y DESPUÉS va el aviso fijo del 911; una pregunta normal por voz no lo lleva', async () => {
+test('nota de voz con una señal de alarma que ninguna regla específica reconoció («me cuesta traer» por «tragar»): U7 avisa PRIMERO por regla (911 o la clínica) y DESPUÉS contesta el asistente; una pregunta normal por voz no la dispara', async () => {
   const oido = { texto: ['Tengo la cara hinchada y me cuesta traer.'] };
   const w = await bancoWa({ transcribe: async () => oido.texto });
   const { cl } = await vinculado(w, 'adulto-convenio');
+  const antes = vistos(cl).length;
   cl.mandaAudio(new Uint8Array([1, 2, 3, 4]));
   await w.asienta();
-  assert.equal(w.llamadas(), 1, 'no es una derivación: contesta el asistente');
-  assert.match(vistos(cl).at(-1) ?? '', /^Por si acaso: .*llama ahora al 911/);
+  const nuevos = vistos(cl).slice(antes);
+  assert.match(nuevos.find((x) => /llama ahora al 911/.test(x)) ?? '', /^Por si acaso: /);
+  assert.ok(nuevos.findIndex((x) => /llama ahora al 911/.test(x)) < nuevos.findIndex((x) => /La limpieza dura/.test(x)), 'el aviso va ANTES de la respuesta del asistente');
+  assert.equal(w.llamadas(), 1, 'después contesta el asistente lo que se preguntó');
+  const ev = await w.libro.eventos('maguey');
+  assert.ok(ev.some((e) => e.tipo === 'urgencia_derivada' && e.regla === 'U7' && e.destino === 'emergencias_911'), 'queda en el libro como urgencia por regla');
+  assert.ok(ev.some((e) => e.tipo === 'asistente_turno' && e.ruta === 'cerebro'), 'y el turno del asistente no se pierde');
   oido.texto = ['¿A qué hora abren el sábado?'];
-  const antes = vistos(cl).length;
+  const n = vistos(cl).length;
   cl.mandaAudio(new Uint8Array([5, 6, 7, 8]));
   await w.asienta();
-  assert.ok(!vistos(cl).slice(antes).some((x) => /Por si acaso/.test(x)), 'sin señal de alarma, sin aviso');
+  assert.ok(!vistos(cl).slice(n).some((x) => /Por si acaso/.test(x)), 'sin señal de alarma, sin aviso');
 });
 
 test('FOTO: nunca se baja ni va al LLM; respuesta fija que invita a valorar (aunque el pie pida un diagnóstico)', async () => {

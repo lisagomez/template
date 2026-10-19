@@ -17,7 +17,7 @@ import { respuestaLocal } from './conocimiento.js';
 import { pareceInyeccion, pideDiagnostico, respuestaFueraDeDominio, respuestaInyeccion, respuestaNoDiagnostico, revisaFrase, type MotivoBarrera } from './guardas.js';
 import { escrituraA, TEXTO_ACCION, TEXTO_NO_PERMITIDA, type AccionPropuesta } from './ordenes.js';
 import { MAX_TOKENS_CHATBOT, promptChatbot, versionPrompt, type CanalPrompt } from './prompts.js';
-import { detectaUrgencia, normaliza, type DestinoUrgencia } from './urgencias.js';
+import { detectaUrgencia, detectaUrgenciaEnVoz, normaliza, REGLA_VOZ, type DestinoUrgencia } from './urgencias.js';
 
 export interface MensajeCerebro { rol: 'usuario' | 'asistente'; texto: string }
 export type PiezaCerebro = { tipo: 'token'; texto: string } | { tipo: 'uso'; costoUsd: number | null; tokens?: { entrada: number; salida: number } };
@@ -49,6 +49,8 @@ export interface EntradaAsistente {
   padecimiento: string | null;
   senal: AbortSignal;
   alFrase?: (frase: string) => void;
+  /** Es voz (lecturas de ASR, que pueden torcer la palabra que decide): las urgencias se leen con `detectaUrgenciaEnVoz`. */
+  voz?: boolean;
 }
 
 export interface RespuestaAsistente {
@@ -95,7 +97,18 @@ export function creaAsistente(d: DepsAsistente) {
     return accion ? fija(t0, 'enrutador', orden as Intencion, TEXTO_ACCION[accion.tipo], { accion }) : null;
   }
 
+  /** Con voz, las urgencias se leen como una nota de voz (corrección y U7). U7 avisa PRIMERO y deja contestar al asistente. */
   async function responde(e: EntradaAsistente): Promise<RespuestaAsistente> {
+    const u = e.voz ? detectaUrgenciaEnVoz(e.candidatos, c) : null;
+    if (!u) return respondeTurno(e);
+    const urgencia = { regla: u.regla.id, destino: u.regla.destino };
+    if (u.regla.id !== REGLA_VOZ.id) return fija(d.reloj(), 'urgencia', 'urgencia', u.respuesta, { urgencia });
+    e.alFrase?.(u.respuesta);
+    const r = await respondeTurno(e);
+    return { ...r, texto: `${u.respuesta} ${r.texto}`, urgencia };
+  }
+
+  async function respondeTurno(e: EntradaAsistente): Promise<RespuestaAsistente> {
     const t0 = d.reloj();
     const texto = (e.candidatos[0] ?? '').trim();
     if (!texto) return fija(t0, 'barrera', 'conversacion', 'No te escuché bien. ¿Me lo repites?');

@@ -1,0 +1,122 @@
+{
+ "cuando": "2026-10-19T17:42:32.316Z",
+ "resumen": {
+  "voz": "es_ES-davefx-medium",
+  "velocidad": 1.2,
+  "tomas": 60,
+  "antes": "45/60",
+  "especificas": "58/60",
+  "whatsapp": "60/60",
+  "portal": "60/60"
+ },
+ "filas": [
+  {
+   "id": "urg-01",
+   "antes": 4,
+   "especificas": 4,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-02",
+   "antes": 5,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-03",
+   "antes": 5,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-04",
+   "antes": 5,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-05",
+   "antes": 0,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-06",
+   "antes": 3,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-07",
+   "antes": 5,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-08",
+   "antes": 4,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-09",
+   "antes": 5,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-10",
+   "antes": 5,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-11",
+   "antes": 4,
+   "especificas": 4,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  },
+  {
+   "id": "urg-12",
+   "antes": 0,
+   "especificas": 5,
+   "whatsapp": 5,
+   "portal": 5,
+   "tomas": 5,
+   "perdidas": []
+  }
+ ]
+}

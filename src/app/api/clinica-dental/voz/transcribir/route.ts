@@ -1,10 +1,12 @@
 /**
  * Voz → texto para la guía de registro y el chatbot, contra el demonio LOCAL de `tools/dictado` (el mismo
- * camino que el centro de mando: dos pasadas ancladas para frases cortas). El audio va de la página a este
+ * camino que el centro de mando: dos pasadas ancladas para frases cortas; y, si trae una señal de alarma, la lectura
+ * del motor de respaldo para las urgencias, ver `lecturas-voz.ts`). El audio va de la página a este
  * servidor y de aquí a 127.0.0.1: NO sale de la máquina ni se escribe a disco. Sin APIs de voz de terceros.
  */
 import { NextResponse, type NextRequest } from 'next/server';
-import { DemonioCaido, transcribeTurno } from '@/features/centro-de-mando/services/servidor/transcribe';
+import { DemonioCaido } from '@/features/centro-de-mando/services/servidor/transcribe';
+import { leeTurnoDelPortal } from '@/features/clinica-dental/services/servidor/lecturas-voz';
 import { excedeLimite, ipDe, rechazoDeBorde } from '@/features/clinica-dental/services/servidor/borde';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +21,7 @@ export async function POST(p: NextRequest): Promise<NextResponse> {
   if (pcm.length < 2 || pcm.length % 2 !== 0) return NextResponse.json({ error: 'audio vacío' }, { status: 400 });
   if (pcm.length > MAX_BYTES) return NextResponse.json({ error: 'turno demasiado largo (máximo 30 s)' }, { status: 413 });
   try {
-    return NextResponse.json(await transcribeTurno(pcm, p.signal));
+    return NextResponse.json(await leeTurnoDelPortal(pcm, p.signal));
   } catch (e) {
     if (p.signal.aborted) return NextResponse.json({ error: 'cancelado' }, { status: 499 });
     if (e instanceof DemonioCaido) return NextResponse.json({ error: 'el motor de voz local no responde' }, { status: 503 });

@@ -72,7 +72,7 @@ export async function responde(p: PeticionAsistente, senal: AbortSignal, alFrase
   const c = clinicaDe(p.clinica);
   const ctx = await contexto(p);
   const a = creaAsistente({ clinica: c, enrutador, cerebroPara, reloj: () => performance.now(), canario: CANARIO });
-  const r = await a.responde({ candidatos: p.candidatos, historial: p.historial, citas: ctx.citas, padecimiento: ctx.padecimiento, senal, alFrase });
+  const r = await a.responde({ candidatos: p.candidatos, historial: p.historial, citas: ctx.citas, padecimiento: ctx.padecimiento, senal, alFrase, voz: p.modo === 'voz' });
   if (ctx.sujeto) await registraTurno(p, r, ctx.sujeto, ctx.padecimiento !== null);
   return r;
 }

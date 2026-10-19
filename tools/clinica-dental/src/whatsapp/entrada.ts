@@ -17,7 +17,7 @@
  */
 import type { Paciente } from '../almacen.js';
 import type { RespuestaAsistente, EntradaAsistente, MensajeCerebro } from '../asistente/asistente.js';
-import { avisoDeAlarma, detectaUrgencia, detectaUrgenciaEnVoz, normaliza, traeSenalDeAlarma } from '../asistente/urgencias.js';
+import { detectaUrgencia, detectaUrgenciaEnVoz, normaliza, REGLA_VOZ } from '../asistente/urgencias.js';
 import { servicio as servicioDe } from '../clinicas.js';
 import type { ManejoWa, TipoMensajeWa } from '../eventos.js';
 import { HORA_MS, vigentes, type Contexto } from '../portal/contexto.js';
@@ -147,15 +147,20 @@ async function turnoAsistente(t: Turno, r: Pick<RespuestaAsistente, 'ruta' | 'in
   }, `wa-turno|${t.m.wamid}`);
 }
 
-/** 1. La urgencia por regla: respuesta fija, sin LLM, aunque el chat este en silencio. */
+/**
+ * 1. La urgencia por regla: respuesta fija, sin LLM, aunque el chat este en silencio. `true` = ya se atendio. U7 (la
+ * señal de alarma de una nota de voz) avisa y deja seguir: el asistente contesta despues lo que se pregunto.
+ */
 async function urgencia(t: Turno, candidatos: string[], voz: boolean): Promise<boolean> {
   const c = t.d.ctx.clinica(t.clinica);
   const u = voz ? detectaUrgenciaEnVoz(candidatos, c) : (candidatos.map((x) => detectaUrgencia(x, c)).find((x) => x !== null) ?? null);
   if (!u) return false;
+  const sigue = u.regla.id === REGLA_VOZ.id;
   await envia(t, { tipo: 'texto', texto: u.respuesta });
-  await turnoAsistente(t, { ruta: 'urgencia', intencion: 'urgencia', latenciaMs: 0, costoUsd: null, tokens: null }, voz);
+  // Con U7 el turno del asistente lo escribe el asistente que contesta despues (la clave del evento es por mensaje).
+  if (!sigue) await turnoAsistente(t, { ruta: 'urgencia', intencion: 'urgencia', latenciaMs: 0, costoUsd: null, tokens: null }, voz);
   await t.d.ctx.emite({ clinica: t.clinica, sujeto: t.sujeto, tipo: 'urgencia_derivada', conversacion: t.conversacion, regla: u.regla.id, destino: u.regla.destino, canal: 'whatsapp' }, `wa-urgencia|${t.m.wamid}`);
-  return true;
+  return !sigue;
 }
 
 const FLOW_TEXTOS: Record<FlujoWa, { cuerpo: string; cta: string; pantalla: string }> = {
@@ -347,8 +352,6 @@ async function contenido(t: Turno, txt: { candidatos: string[]; voz: boolean; il
   }
   if (!texto.trim()) return fija('No recibí texto. ¿Me escribes tu pregunta?', 'otro_medio');
   await asistente(t, txt.candidatos, txt.voz, protegido);
-  // La red de una nota de voz: ninguna regla la reconoció (si no, no habría llegado aquí) pero trae una señal de alarma.
-  if (txt.voz && traeSenalDeAlarma(txt.candidatos)) await envia(t, { tipo: 'texto', texto: avisoDeAlarma(c) });
   return 'asistente';
 }
 

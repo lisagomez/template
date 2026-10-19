@@ -1,0 +1,125 @@
+{
+ "cuando": "2026-10-19T17:38:45.259Z",
+ "resumen": {
+  "voz": "es_MX-claude-high",
+  "velocidad": 1,
+  "tomas": 120,
+  "antes": "98/120",
+  "especificas": "120/120",
+  "whatsapp": "120/120",
+  "portal": "118/120"
+ },
+ "filas": [
+  {
+   "id": "urg-01",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-02",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-03",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-04",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-05",
+   "antes": 0,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-06",
+   "antes": 0,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 8,
+   "tomas": 10,
+   "perdidas": [
+    "portal: Estás anquerando a choros después de la extracción.",
+    "portal: Estás ancros después de la extracción."
+   ]
+  },
+  {
+   "id": "urg-07",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-08",
+   "antes": 9,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-09",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-10",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-11",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-12",
+   "antes": 9,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  }
+ ]
+}
