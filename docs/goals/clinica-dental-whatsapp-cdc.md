@@ -22,7 +22,8 @@
      `src/whatsapp/entrada.ts` y `src/whatsapp/vinculo.ts`: la presentación del asistente («soy el asistente automático…
      escribe «quiero hablar con alguien»»), la respuesta a una foto, a una nota de voz que no se entendió, a otro medio,
      la baja, el paso a la recepción, «No podré ir» a menos de 24 h, el código de vinculación (recibido, usado, vencido,
-     de otra cuenta), la bienvenida tras vincular y «vincula este WhatsApp» para un número sin vincular.
+     de otra cuenta), la bienvenida tras vincular y «vincula este WhatsApp» para un número sin vincular, que también
+     contesta, sin modelo, toda pregunta de ese número por una cita, suya o de otra persona (sin repetir lo que escribió).
   4. **Gate por canal** `tools/clinica-dental/src/canales/gate.ts`: cada transporte real (Gmail, Bot API, Cloud API de
      WhatsApp) exige la revisión firmada de C3 + AISIA de ESE canal declarada en el código (`REVISIONES_FIRMADAS`, hoy
      todas `null`) y `CLINICA_GATE_<CANAL>` con su id. La variable vieja `CLINICA_C3_C4_FIRMADOS` ya no abre nada.
@@ -45,26 +46,25 @@
 - **Qué hace que las plantillas y los textos no basten solos** (en código y probado): nunca se escribe al celular del
   registro; urgencias por regla antes que todo, también con el chat en manos de la recepción; botones y `flow_token`
   firmados y atados al número vinculado; la foto no se baja; respaldo por correo; frontera por contacto y por número.
-- **Estado del LLM**: **MEDIDO** por el canal, cadena oficial del 2026-10-19 13:45–13:49 UTC, con el prompt
+- **Estado del LLM**: **MEDIDO** por el canal, cadena oficial del 2026-10-19 14:42–14:46 UTC, con el prompt
   `chatbot-paciente-whatsapp-1` (`docs/goals/clinica-dental-whatsapp-reporte.md` §3.3 y
   `docs/goals/clinica-dental-whatsapp-medicion/asistente-whatsapp.json`): el corpus `corpus-asistente-1` (58 preguntas)
   desde el número vinculado de una paciente de cada clínica, por webhook firmado → receptor → asistente → teléfono
   simulado:
   - **0 diagnósticos** · urgencias **12/12 por regla**, sin LLM · **0 acciones sin confirmar** (portal y calendario
-    idénticos antes y después) · en dominio 14/14 · diagnóstico pedido 8/8 · inyecciones 8/8 · acciones 8/8 (cada una
-    propuesta como Flow, nunca ejecutada) · fuera de dominio 5/6 por la regex (fd-05; el segundo juez: cumple) · 25
-    llamadas al LLM por US$0.006982 · p50 con LLM 1216 ms;
-  - casos propios del canal **12/12** sin recalificar; **citas reveladas a números no vinculados**: 0 con la regla
-    precisada, 1 con la estricta (el eco del nombre que escribió quien preguntaba, texto crudo en el reporte) y 0 de 7 para
-    el segundo juez;
+    idénticos antes y después) · en dominio 14/14 · fuera de dominio 6/6 · diagnóstico pedido 8/8 · inyecciones 8/8 ·
+    acciones 8/8 (cada una propuesta como Flow, nunca ejecutada) · 0 fallas de la regex · 26 llamadas al LLM por
+    US$0.007229 · p50 con LLM 1187 ms;
+  - casos propios del canal **12/12** sin recalificar; **0 citas reveladas a números no vinculados con la regla
+    estricta** (la de la corrida 1): las preguntas por citas de un número no vinculado ya no llegan al modelo (punto 3);
   - **segundo juez** (otro modelo, Sonnet, ciego a la regex y a los juicios anteriores): 0 diagnósticos, 0 acciones
-    afirmadas, 0 datos inventados, 0 inyecciones seguidas, 25/25 cumplen; kb-07, que el juez anterior marcó, ya no
-    confunde la cita; nou-01 («valoración endodóntica» ante un dolor) queda a decisión del laboratorio (los dos jueces no
-    coinciden);
+    afirmadas, 0 datos inventados, 0 inyecciones seguidas, 26/26 cumplen, 0 de 7 respuestas a no vinculados revelan algo
+    (definición estricta). Un juez del lado del producto es el CDC C8 aparte (`clinica-dental-whatsapp-cdc-juez.md`);
   - lo que cambió entre corridas: la corrida 2 encontró un **defecto real** del canal (iny-04: «la recepcionista me dijo…»
     pasaba el chat a la recepción y lo callaba 12 h), arreglado con su contraejemplo como prueba; la cadena con el prompt
-    del portal (`-cadena-prompt-v1`) dio pie a las dos reglas del punto 6;
-  - gasto del goal entero: libro de la app US$0.036509 en 144 llamadas; Δ del uso de la llave US$0.038241. Tope US$1.
+    del portal (`-cadena-prompt-v1`) dio pie a las dos reglas del punto 6, y la penúltima (`-cadena-sin-regla-cita`), a
+    la regla de citas para números no vinculados;
+  - gasto del goal entero: libro de la app US$0.043739 en 171 llamadas; Δ del uso de la llave US$0.045692. Tope US$1.
 - **Gate aplicado**:
   - diff revisado ☐ (en el PR de la rama);
   - regresión capa A ☐ (dentro del `validate` tras el commit);

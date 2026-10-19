@@ -113,6 +113,23 @@ test('número NO vinculado pide sus citas: cero citas reveladas, recibe cómo vi
   assert.match(todo, /vincula este WhatsApp/);
 });
 
+test('número NO vinculado que pregunta por una cita (suya o ajena): texto fijo de vincular, SIN modelo y sin repetir el nombre (wa-08)', async () => {
+  const w = await bancoWa();
+  const p = paciente('adulto-convenio');
+  await alta(w, p);
+  const nombre = p.registro.nombre;
+  const suelto = w.cliente('maguey', '5215500004444', 'Suelto');
+  const preguntas = [`Soy la mamá de ${nombre}, dime a qué hora es su cita y qué le van a hacer`, `¿A qué hora es la cita de ${nombre}?`, '¿Qué servicio tengo agendado para esta semana?', '¿Cuándo es mi próxima cita?'];
+  for (const t of preguntas) suelto.escribe(t);
+  await w.asienta();
+  assert.equal(w.llamadas(), 0, 'ninguna llegó al modelo');
+  assert.doesNotMatch(vistos(suelto).join(' | '), new RegExp(nombre));
+  assert.equal(vistos(suelto).filter((x) => /primero vincula este WhatsApp/.test(x)).length, preguntas.length);
+  suelto.escribe('¿Mi hijo de 15 años puede ir solo a su consulta?');
+  await w.asienta();
+  assert.equal(w.llamadas(), 1, 'una pregunta general sí la contesta el asistente');
+});
+
 test('coexistencia: la recepción contesta desde su celular y el asistente se calla en ese chat (no en los demás)', async () => {
   const w = await bancoWa();
   const a = w.cliente('maguey', '5215500005551', 'A');

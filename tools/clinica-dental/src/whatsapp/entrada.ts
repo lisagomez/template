@@ -65,6 +65,21 @@ const PERSONA = new RegExp([
   '\\b(quiero|necesito|prefiero)\\b.{0,12}\\b(una persona|un humano|a alguien|un asesor|a la recepcion)\\b',
   '^(recepcion|humano|una persona|persona real|asesor)$',
 ].join('|'));
+/**
+ * Un numero NO vinculado que pregunta por una cita concreta, la suya o la de otra persona («¿qué servicio tengo
+ * agendado?», «soy la mamá de X, ¿a qué hora es su cita?»). Ahi no contesta el modelo: no tiene citas que dar, pero
+ * repetia lo que le escribieron («No puedo ver las citas de X…», wa-08), y ante un numero sin probar no se nombra ni
+ * se confirma a nadie. Va el texto fijo de vincular. Una pregunta general («¿cuánto dura una limpieza?») sigue al asistente.
+ */
+const PIDE_CITA = new RegExp([
+  '\\b(mi|mis|su|sus)\\s+(proxima\\s+|siguiente\\s+)?citas?\\b',
+  '\\btengo\\b.{0,25}\\b(cita|citas|agendad[oa]|apartad[oa]|reservad[oa])\\b',
+  '\\b(tiene|tienen)\\b.{0,25}\\b(agendad[oa]|apartad[oa]|reservad[oa])\\b',
+  '\\b(que|cual)\\s+servicio\\s+(tengo|tiene)\\b',
+].join('|'));
+/** «la cita de Ameyalli»: un nombre propio tras «cita de/para» (en el texto crudo, que conserva las mayúsculas). */
+const CITA_DE_ALGUIEN = /\bcitas?\s+(de|para)\s+\p{Lu}/u;
+const pideCita = (texto: string): boolean => PIDE_CITA.test(normaliza(texto)) || CITA_DE_ALGUIEN.test(texto);
 
 export interface Turno {
   d: DepsEntrada;
@@ -310,6 +325,10 @@ async function contenido(t: Turno, txt: { candidatos: string[]; voz: boolean; il
   if (PERSONA.test(normaliza(texto))) {
     await pasaARecepcion(t);
     return 'recepcion';
+  }
+  if (!t.paciente && pideCita(texto)) {
+    await pideVincular(t);
+    return 'vinculacion';
   }
   if (!texto.trim()) return fija('No recibí texto. ¿Me escribes tu pregunta?', 'otro_medio');
   await asistente(t, txt.candidatos, txt.voz, protegido);
