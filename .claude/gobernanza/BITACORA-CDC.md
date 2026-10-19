@@ -5227,3 +5227,28 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - pineo ☑ (sin modelo ni dependencia nueva).
 - **Regresión**: `verify:gobernanza` ☑ 171/171 (con las 5 siembras nuevas y las 17 de 6b); lint sin avisos nuevos.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-17
+
+### 2026-10-17 — skill global `dictado`: «el laboratorio» en vez de «la dueña» y de «ella» — radio: skill global (fuera del repo), con su `description`
+
+- **Cambio**: `~/.claude/skills/dictado/SKILL.md`, siete líneas (3, 9, 12, 37, 54, 57 y 66). Las tres «la dueña»
+  (la `description`, la cabecera de la tabla «La dueña dice» y la elección de la voz de `di`) y las cuatro «ella» que
+  nombran a la misma persona pasan a «el laboratorio». La «ella» de la línea 38 se queda: es la fuente que suena en
+  la sala, no la persona. Ninguna instrucción cambia. La `description` pasa de 710 a 716 caracteres y su lista de
+  disparadores («Activar cuando diga: …») queda idéntica; el frontmatter sigue con `name`, `description` y
+  `allowed-tools`. El archivo vive fuera del repo: **se aplica al firmar**, no antes, desde la versión preparada
+  en el scratchpad de la sesión (copia previa con sha256 `64ed0cf3cf44a4e6…`).
+- **Motivo**: el laboratorio corrigió el 2026-09-24 cómo nombrar a quien dirige y decide («el laboratorio», nunca
+  «la dueña»), y el skill se quedó atrás: su `description` entra en contexto en cada sesión y lo repetía. Quedó
+  anotado como pendiente al firmar los puntos 3, 5 y 6 del centro de mando (2026-10-16), «sería otro CDC».
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A: el skill global no tiene contratos (no está en el repo); el resto del corpus, 166/166 ☑;
+  - `npm run validate` ☑ 32/32 sobre `main` en `f0b99f5` (árbol `7969895a9431`, el mismo que validó el #272); esta
+    rama solo añade la entrada;
+  - capa B no corrida por el agente: cambia la `description` de un skill, aunque solo en cómo nombra a la persona;
+    decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: no aplica al repo (el archivo está fuera); al aplicarlo se comprueba contra la copia previa que
+  solo cambiaron esas siete líneas.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-18
