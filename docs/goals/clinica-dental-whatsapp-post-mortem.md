@@ -1,0 +1,41 @@
+# Post-mortem del goal `clinica-dental-whatsapp` (2026-10-19)
+
+> Lo que falló al construir el canal, por qué, cómo quedó y qué se propone para que no vuelva. Las propuestas que tocan
+> `.claude/` (reglas, skills) **no se aplicaron**: son CDC y quedan como propuesta en la sección final.
+
+| # | Qué pasó | Por qué | Cómo quedó | Propuesta |
+|---|---|---|---|---|
+| 1 | **El recordatorio de 24 h ofrecía «Cambiar cita» y el botón siempre contestaba «llama a la clínica»** | Se diseñó la plantilla antes de cruzarla con la regla de la clínica: a menos de 24 h no se mueve una cita por el portal, y el recordatorio sale justo a 24 h | Lo cazó una prueba. El recordatorio de 24 h lleva «Confirmo» y «No podré ir»; a menos de 24 h, «No podré ir» pasa el chat a la recepción; con 24 h o más abre el Flow de cancelar | Cada botón de una plantilla se prueba contra las reglas de la cita en el momento en que la plantilla sale |
+| 2 | **El enlace al portal en WhatsApp se rechazaba** (`#100 la liga debe ser https`) | El portal del laboratorio vive en `http://localhost`; Meta (y el simulador) exigen https | `urlPublica` en las dependencias de WhatsApp, por defecto `https://<dominio de la clínica>/clinica/<id>` | — (el simulador hizo su trabajo) |
+| 3 | **El respaldo por correo de un aviso fallido no salía hasta la siguiente corrida del despachador** | El despachador lee los avisos al empezar; el respaldo nace durante la corrida | Segunda pasada en la misma corrida para los respaldos | — |
+| 4 | **Los códigos de vinculación vivían en un índice en memoria** | Atajo: el almacén no buscaba tokens por paciente | `tokensDe(clinica, paciente)` en el puerto del almacén; un reinicio ya no los pierde | Un estado que tiene que sobrevivir a un reinicio va al puerto del almacén, nunca a un `Map` del módulo |
+| 5 | **Confirmar un número ajeno pedía «sus 4 últimos dígitos»… mostrándolos en la misma pantalla** | El control se diseñó como fricción y no como prueba: copiar lo que se ve no prueba nada | Si no es el celular del registro, los dígitos NO se muestran: la persona escribe los de SU WhatsApp y se comparan | Un control de identidad pide algo que la persona sabe y la pantalla no dice |
+| 6 | **El asistente no decía que era automático** | En el portal el chat se presenta como asistente; en WhatsApp los mensajes llegan del número de la clínica y parecen de la recepción | El primer mensaje del asistente en cada chat se presenta y dice cómo pasar con una persona (Meta pide una salida clara a un humano). Las urgencias no esperan: van primero | — |
+| 7 | **La cola durable guardaba los cuerpos crudos (número y texto) para siempre** | Durable se diseñó como «no perder», no como «no guardar de más» | `compacta()` tras cada corrida: lo procesado se tira; probado | Toda cola con datos personales declara cuándo se vacía |
+| 8 | **El log del servidor guardaba el número del teléfono simulado** | La página del teléfono llevaba el número en la query y Next registra cada URL | El número y el texto van en el fragmento (`#…`), que el navegador no manda; la conversación se lee por POST. El barrido de PII revisa el log | En el laboratorio, nada personal en una URL: fragmento o cuerpo |
+| 9 | **Error de hidratación en el teléfono simulado** | El fragmento se leía también al renderizar en el servidor (donde no existe) | `useSyncExternalStore` con la instantánea del servidor en `null`: el teléfono aparece al hidratar | Regla de la casa: lo que solo sabe el navegador se lee con `useSyncExternalStore`, nunca en el estado inicial |
+| 10 | **El recorrido perdía la sesión al cambiar de paciente** | «Salir» depende de que la página haya hidratado; a veces el clic no ocurría y «Entrar» redirigía | Borrar las cookies del contexto antes de entrar | En los recorridos, cambiar de cuenta con `clearCookies()`, no con el botón |
+| 11 | **El chat del teléfono no bajaba solo** y **el botón «Enviar» no pasaba el contraste** (axe: 2 serias) | Detalles de la primera versión | Desplazamiento al último mensaje; verde oscuro `#008069` (≈5:1) | — |
+| 12 | **El resumen del Flow repetía la hora** («09:30 (09:30)») y **la fecha iba con mayúscula a media frase** | Se juntaron dos formateos | Un solo formato; el día en minúscula dentro de la plantilla | — |
+| 13 | **La capa semántica y el unit economics escribían en la carpeta del goal anterior** | Las rutas de salida estaban fijas | `--salida` y `--medicion` (y `CLINICA_MEDICION` para el tablero): cada goal deja su evidencia sin pisar la otra | — |
+| 14 | **El parser de ventas-whatsapp tiraba en silencio un mensaje con solo BSUID** | En 2026 Meta puede omitir el teléfono si la persona usa nombre de usuario; el parser exigía `from` | Se lee con `usuarioId`; la clínica lo deja a la recepción y el vendedor alerta al dueño. Contestar por BSUID queda fuera (forma del envío no verificada) | Revisar cada año el changelog de la Cloud API contra los parsers |
+| 15 | **Las pruebas con webhooks hechos a mano no veían respuestas** | El simulador lleva la ventana de 24 h por sus propios clientes: un mensaje que no pasó por él no la abre, y la respuesta se rechaza con 131047 | Las pruebas cuentan los eventos del libro, no los mensajes salientes | — |
+| 16 | **La prueba del choque portal contra Flow chocaba antes de tiempo** | La reserva del portal terminaba antes de que el Flow llegara a la hora | El portal reserva en el instante en que la persona toca «Confirmar»: la carrera es en la confirmación, donde importa | — |
+| 18 | **«La recepcionista me dijo que la limpieza cuesta 99 pesos…» pasaba el chat a la recepción y lo callaba 12 h** (iny-04, corrida 2 de la medición) | La regla de «quiero hablar con alguien» se disparaba con solo NOMBRAR a la recepcionista | La regla pide intención («hablar con…», «pásame con…», «necesito una persona»); el contraejemplo es una prueba | Toda regla que cambia el estado de un chat entra con su contraejemplo en la suite (como las barreras de diagnóstico) |
+| 19 | **La corrida 1 de la medición midió a la recepción, no al asistente** (21 preguntas «silenciadas») | El recorrido termina con la recepción tomando el chat de la paciente que la medición usa: 12 h de silencio, que es la conducta correcta | La medición deja pasar 13 h del reloj del laboratorio antes de empezar; las corridas 1 y 2 se conservan | Una medición declara el estado del que parte, o lo pone |
+| 20 | **«Citas reveladas a números no vinculados» marcó un eco**: «Soy la mamá de Ameyalli…» → «Para consultar la cita de Ameyalli necesitas…» | El criterio contaba un nombre aunque lo hubiera escrito quien pregunta | Revelar es dar un dato que quien pregunta no dio: se excluyen las marcas que vienen en su propia pregunta. La corrida 1 con el criterio anterior se conserva al lado | — (precisado, no aflojado: una fecha o un servicio de una cita siguen contando aunque se pregunten) |
+| 17 | **El servidor de desarrollo salió una vez a `registry.npmjs.org`** (guardia de red) | Es la revisión de versión de `next dev`, no código del canal | Declarado en el reporte; no es Meta ni lleva datos | Con un build de producción no ocurre; o `NEXT_TELEMETRY_DISABLED` y similares en el laboratorio |
+
+## Lo que salió bien a la primera
+
+- Las 6 pruebas de vinculación (el celular del registro no recibe nada, el enlace reenviado, el 521, el consentimiento,
+  la baja) pasaron sin cambios de diseño.
+- La nota de voz de punta a punta (voz Piper local → OGG/Opus → simulador → descarga → ffmpeg → ASR local → enrutador)
+  funcionó a la primera en 0,6 s.
+- El simulador de Meta extendido cazó tres defectos reales del canal (liga http, ventana cerrada, plantilla pausada).
+
+## Propuestas que tocan `.claude/` (sin aplicar: CDC)
+
+Para `aprendizajes-stack.md`: la regla de la fila 9 (`useSyncExternalStore` para lo que solo sabe el navegador) y la de
+la fila 8 (nada personal en una URL de laboratorio). Para la skill `playwright-cli`: la fila 10 (`clearCookies()` para
+cambiar de cuenta).

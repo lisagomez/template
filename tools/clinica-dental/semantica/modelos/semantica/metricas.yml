@@ -25,6 +25,22 @@ metrics:
   - {name: margen_atendido_mxn, label: Margen de citas atendidas, type: simple, type_params: {measure: margen_atendido_mxn}, config: {meta: {unidad: mxn, origen: supuesto}}}
   - {name: transiciones, label: Transiciones por arista, type: simple, type_params: {measure: transiciones_n}, config: {meta: {unidad: transiciones, origen: medido}}}
   - {name: segundos_arista_p50, label: Tiempo por arista (p50), type: simple, type_params: {measure: segundos_arista_mediana}, config: {meta: {unidad: segundos, origen: medido}}}
+  # WhatsApp (contrato v2). Lo que llega por los estados de Meta es SIMULADO en el laboratorio; el costo usa la tarifa de lista.
+  - {name: avisos_leidos_n, label: Avisos leídos, description: "Avisos con acuse de lectura (solo WhatsApp lo da; simulado en el laboratorio).", type: simple, type_params: {measure: avisos_leidos}, config: {meta: {unidad: avisos, origen: simulado}}}
+  - {name: mensajes_whatsapp_n, label: Mensajes de WhatsApp entregados, type: simple, type_params: {measure: mensajes_wa_n}, config: {meta: {unidad: mensajes, origen: simulado}}}
+  - {name: mensajes_whatsapp_cobrados_n, label: Mensajes de WhatsApp cobrables, description: "Plantillas (siempre) y mensajes de servicio pasados los 1,000 gratis del mes.", type: simple, type_params: {measure: mensajes_wa_cobrables}, config: {meta: {unidad: mensajes, origen: simulado}}}
+  - {name: costo_whatsapp_usd, label: Costo de WhatsApp, type: simple, type_params: {measure: costo_wa_usd}, config: {meta: {unidad: usd, origen: supuesto}}}
+  - {name: costo_por_mensaje_whatsapp_usd, label: Costo por mensaje de WhatsApp entregado, type: ratio, type_params: {numerator: costo_whatsapp_usd, denominator: mensajes_whatsapp_n}, config: {meta: {unidad: usd, origen: supuesto}}}
+  - {name: entrantes_whatsapp_n, label: Mensajes que entraron por WhatsApp, type: simple, type_params: {measure: entrantes_wa_n}, config: {meta: {unidad: mensajes, origen: medido}}}
+  - {name: entrantes_whatsapp_vinculados_n, label: Mensajes entrantes de números vinculados, type: simple, type_params: {measure: entrantes_wa_vinculados}, config: {meta: {unidad: mensajes, origen: medido}}}
+  - {name: urgencias_whatsapp_n, label: Urgencias derivadas por WhatsApp, type: simple, type_params: {measure: turnos_urgencia_wa}, config: {meta: {unidad: turnos, origen: medido}}}
+  - {name: codigos_vinculo_n, label: Códigos de vinculación emitidos, type: simple, type_params: {measure: codigos_vinculo}, config: {meta: {unidad: codigos, origen: medido}}}
+  - {name: vinculos_confirmados_n, label: WhatsApp vinculados, type: simple, type_params: {measure: vinculos_confirmados}, config: {meta: {unidad: vinculos, origen: medido}}}
+  - {name: vinculos_rechazados_n, label: Vinculaciones rechazadas, description: "Un número mandó el código y la persona dijo que no era suyo.", type: simple, type_params: {measure: vinculos_rechazados}, config: {meta: {unidad: vinculos, origen: medido}}}
+  - {name: tasa_vinculo, label: Conversión código → vinculado, type: ratio, type_params: {numerator: vinculos_confirmados_n, denominator: codigos_vinculo_n}, config: {meta: {unidad: proporcion, origen: medido}}}
+  - {name: asistencias_confirmadas_n, label: Citas con asistencia confirmada por WhatsApp, type: simple, type_params: {measure: citas_asistencia_confirmada}, config: {meta: {unidad: citas, origen: medido}}}
+  - {name: citas_por_whatsapp_n, label: Citas agendadas o movidas por WhatsApp, type: simple, type_params: {measure: citas_por_whatsapp}, config: {meta: {unidad: citas, origen: medido}}}
+  - {name: recepcion_atiende_n, label: Chats que tomó la recepción, type: simple, type_params: {measure: recepcion_atiende_n}, config: {meta: {unidad: chats, origen: medido}}}
   # Auxiliares: en dbt 1.12 una razón divide MÉTRICAS, no medidas; estas existen solo para eso (mismo nombre que su medida).
   - {name: visitantes_que_iniciaron, label: Visitantes que empezaron el registro, type: simple, type_params: {measure: visitantes_que_iniciaron}, config: {meta: {unidad: visitantes, origen: medido}}}
   - {name: visitantes_con_cita, label: Visitantes registrados con cita, type: simple, type_params: {measure: visitantes_con_cita}, config: {meta: {unidad: visitantes, origen: medido}}}

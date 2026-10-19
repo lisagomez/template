@@ -1,4 +1,4 @@
--- GENERADO desde el contrato de eventos v1 por semantica/genera.ts: no se edita a mano.
+-- GENERADO desde el contrato de eventos v2 por semantica/genera.ts: no se edita a mano.
 select
   clinica,
   seq,
@@ -13,6 +13,7 @@ select
   (datos::jsonb ->> 'costo_usd')::numeric as costo_usd,
   (datos::jsonb ->> 'tokens_entrada')::numeric as tokens_entrada,
   (datos::jsonb ->> 'tokens_salida')::numeric as tokens_salida,
-  (datos::jsonb ->> 'uso_padecimiento')::boolean as uso_padecimiento
+  (datos::jsonb ->> 'uso_padecimiento')::boolean as uso_padecimiento,
+  (datos::jsonb ->> 'canal')::text as canal
 from {{ ref('raw_eventos') }}
 where tipo = 'asistente_turno'

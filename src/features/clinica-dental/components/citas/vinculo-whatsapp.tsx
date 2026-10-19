@@ -45,16 +45,18 @@ export function VinculoWhatsapp({ clinica, estado, telefonoClinica, laboratorio 
       ) : null}
       {estado.estado === 'pendiente' ? (
         <div className="space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-3">
-          <p className="text-sm font-medium">Nos escribió el número que termina en <strong data-ultimos4={estado.ultimos4}>{estado.ultimos4}</strong>. ¿Es tuyo?</p>
-          {estado.coincideCelular ? <p className="text-sm text-slate-700">Coincide con el celular de tu registro.</p> : (
+          {estado.coincideCelular ? (
+            <p className="text-sm font-medium">Nos escribió el número que termina en <strong data-ultimos4={estado.ultimos4 ?? ''}>{estado.ultimos4}</strong>, el celular de tu registro. ¿Eres tú?</p>
+          ) : (
             <label className="block text-sm">
-              <span className="text-red-800">No es el celular de tu registro. Si es tuyo, escribe sus últimos 4 dígitos:</span>
-              <input inputMode="numeric" autoComplete="off" maxLength={4} value={digitos} onChange={(e) => setDigitos(e.target.value.replace(/\D/g, ''))} className="mt-1 block w-28 rounded-lg border border-slate-300 px-3 py-2 font-mono" aria-label="Últimos 4 dígitos del número" />
+              <span className="font-medium text-red-800">Nos escribió un número que NO es el celular de tu registro.</span>
+              <span className="block">Si fuiste tú, escribe los 4 últimos dígitos del WhatsApp desde el que nos escribiste (no te los mostramos: así un enlace reenviado no le sirve a otra persona):</span>
+              <input inputMode="numeric" autoComplete="off" maxLength={4} value={digitos} onChange={(e) => setDigitos(e.target.value.replace(/\D/g, ''))} className="mt-1 block w-28 rounded-lg border border-slate-300 px-3 py-2 font-mono" aria-label="Últimos 4 dígitos de tu WhatsApp" />
             </label>
           )}
           <div className="flex flex-wrap gap-2">
-            <button type="button" className={clasesBoton} onClick={() => void haz(() => confirmaWhatsapp(clinica, estado.coincideCelular ? undefined : digitos), 'WhatsApp vinculado: ahí te llegarán tus avisos.')}>Sí, es mi número</button>
-            <button type="button" className={clasesBotonSecundario} onClick={() => void haz(() => rechazaWhatsapp(clinica), 'Descartado: ese número no recibirá nada. Pide otro código si quieres vincular el tuyo.')}>No es mío</button>
+            <button type="button" className={clasesBoton} onClick={() => void haz(() => confirmaWhatsapp(clinica, estado.coincideCelular ? undefined : digitos), 'WhatsApp vinculado: ahí te llegarán tus avisos.')}>{estado.coincideCelular ? 'Sí, es mi número' : 'Confirmar con los dígitos'}</button>
+            <button type="button" className={clasesBotonSecundario} onClick={() => void haz(() => rechazaWhatsapp(clinica), 'Descartado: ese número no recibirá nada. Pide otro código si quieres vincular el tuyo.')}>{estado.coincideCelular ? 'No soy yo' : 'No fui yo'}</button>
           </div>
         </div>
       ) : null}

@@ -1,0 +1,136 @@
+{
+  "slug": "clinica-dental-atencion",
+  "titulo": "Grafo de atención al cliente: el recorrido del paciente (laboratorio, pacientes sintéticos)",
+  "nodos": [
+    {
+      "id": "visita",
+      "label": "Visita al portal",
+      "estado": "morado"
+    },
+    {
+      "id": "registro",
+      "label": "Registro (cuestionario)",
+      "estado": "morado"
+    },
+    {
+      "id": "consentimientos",
+      "label": "Consentimientos",
+      "estado": "morado"
+    },
+    {
+      "id": "agenda",
+      "label": "Agenda (hueco elegido)",
+      "estado": "morado"
+    },
+    {
+      "id": "cita",
+      "label": "Cita confirmada",
+      "estado": "morado"
+    },
+    {
+      "id": "avisos",
+      "label": "Avisos entregados",
+      "estado": "morado"
+    },
+    {
+      "id": "reprogramada",
+      "label": "Cita reprogramada",
+      "estado": "morado"
+    },
+    {
+      "id": "asistente",
+      "label": "Asistente (chat o voz)",
+      "estado": "morado"
+    },
+    {
+      "id": "urgencia",
+      "label": "Urgencia derivada por regla",
+      "estado": "morado"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a-agenda-cita",
+      "label": "agenda → cita",
+      "tipo": "script",
+      "from": "agenda",
+      "to": "cita",
+      "n": 3,
+      "p50_s": 0,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-asistente-urgencia",
+      "label": "asistente → urgencia",
+      "tipo": "script",
+      "from": "asistente",
+      "to": "urgencia",
+      "n": 2,
+      "p50_s": 6.4,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-cita-avisos",
+      "label": "cita → avisos",
+      "tipo": "script",
+      "from": "cita",
+      "to": "avisos",
+      "n": 4,
+      "p50_s": 3.9,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-cita-reprogramada",
+      "label": "cita → reprogramada",
+      "tipo": "script",
+      "from": "cita",
+      "to": "reprogramada",
+      "n": 1,
+      "p50_s": 12.3,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-consentimientos-agenda",
+      "label": "consentimientos → agenda",
+      "tipo": "script",
+      "from": "consentimientos",
+      "to": "agenda",
+      "n": 3,
+      "p50_s": 1.5,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-registro-asistente",
+      "label": "registro → asistente",
+      "tipo": "script",
+      "from": "registro",
+      "to": "asistente",
+      "n": 2,
+      "p50_s": 205258.1,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-registro-consentimientos",
+      "label": "registro → consentimientos",
+      "tipo": "script",
+      "from": "registro",
+      "to": "consentimientos",
+      "n": 4,
+      "p50_s": 0,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-visita-registro",
+      "label": "visita → registro",
+      "tipo": "script",
+      "from": "visita",
+      "to": "registro",
+      "n": 4,
+      "p50_s": 1,
+      "origen": "simulada"
+    }
+  ],
+  "lazos": [],
+  "fuente": "métricas `transiciones` y `segundos_arista_p50` de MetricFlow sobre fct_transicion (libro de eventos de las corridas del laboratorio)",
+  "corte": "sha256:37348421e0ab04ad"
+}

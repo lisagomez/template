@@ -174,3 +174,24 @@ test('el endpoint: firma mala 432, cuerpo que no descifra 421, ping activo; y tr
   const despues = await cl.llenaFlow(agenda('limpieza'));
   assert.deepEqual(despues.errores, ['HTTP 427']);
 });
+
+test('el Flow pantalla por pantalla (lo que pinta el teléfono del laboratorio): cada paso trae su pantalla del Flow JSON publicado', async () => {
+  const w = await bancoWa();
+  const { cl } = await vinculado(w, 'adulto-convenio');
+  cl.escribe('quiero agendar');
+  await w.asienta();
+  let paso = await cl.abreFlow();
+  assert.equal(paso.pantalla, 'SERVICIO');
+  assert.equal((paso.definicion?.['layout'] as { children: { type: string }[] }).children.some((c) => c.type === 'RadioButtonsGroup'), true);
+  paso = await paso.envia({ servicio: 'limpieza' });
+  assert.equal(paso.pantalla, 'DIA');
+  paso = await paso.envia({ servicio: 'limpieza', cita: '', dia: (paso.datos['dias'] as { id: string }[])[1]!.id });
+  paso = await paso.envia({ servicio: 'limpieza', cita: '', hora: (paso.datos['horas'] as { id: string }[])[0]!.id });
+  assert.equal(paso.pantalla, 'CONFIRMA');
+  assert.match(String(paso.datos['resumen']), /^Vas a agendar: Limpieza dental/);
+  paso = await paso.envia({ servicio: 'limpieza', cita: '', hora: paso.datos['hora'] as string, confirma: true });
+  assert.equal(paso.pantalla, 'SUCCESS');
+  assert.ok(paso.cierre?.['cita']);
+  await w.asienta();
+  assert.equal(cl.enviados.at(-1)?.tipo, 'flow', 'al cerrar llegó el nfm_reply');
+});

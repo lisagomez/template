@@ -3,15 +3,17 @@
 with c as (select * from {{ ref('stg_cita_confirmada') }}),
 cancel as (select clinica, cita, max(motivo) as motivo from {{ ref('stg_cita_cancelada') }} group by 1, 2),
 asis as (select clinica, cita, bool_or(asistio) as asistio from {{ ref('stg_cita_asistencia') }} group by 1, 2),
-pac as (select clinica, sujeto, canal_adquisicion from {{ ref('stg_paciente_registrado') }})
+pac as (select clinica, sujeto, canal_adquisicion from {{ ref('stg_paciente_registrado') }}),
+conf as (select distinct clinica, cita from {{ ref('stg_asistencia_confirmada') }})
 select
   c.clinica || ':' || c.cita as cita_id, c.clinica, c.cita, c.sujeto as paciente, c.en as confirmada_en, c.inicio, c.categoria, c.servicio,
   c.anticipacion_horas, jsonb_array_length(c.canales) as canales_aviso, c.via,
   case when cancel.motivo = 'reprogramada' then 'reprogramada' when cancel.motivo is not null then 'cancelada'
        when asis.asistio is true then 'asistio' when asis.asistio is false then 'inasistencia' else 'pendiente' end as estado_final,
-  s.precio_mxn, s.costo_variable_mxn, pac.canal_adquisicion
+  s.precio_mxn, s.costo_variable_mxn, pac.canal_adquisicion, conf.cita is not null as asistencia_confirmada
 from c
 left join cancel on cancel.clinica = c.clinica and cancel.cita = c.cita
 left join asis on asis.clinica = c.clinica and asis.cita = c.cita
 left join {{ ref('servicios') }} s on s.clinica = c.clinica and s.servicio = c.servicio
 left join pac on pac.clinica = c.clinica and pac.sujeto = c.sujeto
+left join conf on conf.clinica = c.clinica and conf.cita = c.cita

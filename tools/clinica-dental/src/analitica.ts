@@ -16,6 +16,9 @@ export interface CorteSemantico {
   porCanal: { clinica: string; canal: string; visitantes: number | null; registrados: number | null; conversion: number | null }[];
   aristas: { arista: string; metricflow: { n: number | null; p50: number | null } }[];
   aristasPorClinica: { clinica: string; arista: string; n: number | null; p50: number | null }[];
+  /** v2: los avisos por canal y los mensajes de WhatsApp por categoria (opcionales: un corte v1 no los trae). */
+  avisosPorCanal?: { clinica: string; canal: string; entregados: number | null; leidos: number | null; entregabilidad: number | null; costoPorAvisoUsd: number | null }[];
+  mensajesWhatsapp?: { clinica: string; categoria: string; mensaje: string; n: number | null; cobrables: number | null; costoUsd: number | null }[];
 }
 
 const SIM = 'corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)';
@@ -24,11 +27,16 @@ const redondea = (x: number | null, d = 2) => (x === null || !Number.isFinite(x)
 const cifra = (valor: number | null, unidad: string, origen: Origen, fuente: string, d = 2): Cifra => ({ valor: redondea(valor, d), unidad, origen, fuente });
 const div = (a: number | null, b: number | null) => (a === null || b === null || b === 0 ? null : a / b);
 
+export interface AvisosDeCanal { canal: string; entregados: Cifra; leidos: Cifra; entregabilidad: Cifra; costoPorAviso: Cifra }
+
 export interface UnitEconomicsClinica {
   clinica: string;
   periodoDias: number;
   cifras: Record<string, Cifra>;
   porCanal: { canal: string; gastoPeriodoMxn: Cifra; registrados: Cifra; cac: Cifra; conversion: Cifra }[];
+  /** El costo de AVISAR por cada canal: lo que hace que WhatsApp valga o no frente al correo y Telegram. */
+  avisosPorCanal?: AvisosDeCanal[];
+  whatsapp?: Record<string, Cifra>;
 }
 
 function cifrasDeClinica(corte: CorteSemantico, c: Clinica, periodoDias: number): Record<string, Cifra> {
@@ -52,7 +60,7 @@ function cifrasDeClinica(corte: CorteSemantico, c: Clinica, periodoDias: number)
     margen_por_cita: cifra(margenPorCita, 'MXN', 'supuesta', 'precio − costo variable SUPUESTO por servicio (declaración de la clínica)'),
     tasa_inasistencia: cifra(inasistencia, 'proporción', 'simulada', 'asistencia SIMULADA en el laboratorio (cada paciente sintético declara si asiste)', 3),
     entregabilidad: cifra(v('entregabilidad'), 'proporción', 'simulada', 'buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram', 3),
-    costo_por_aviso: cifra(v('costo_por_aviso_usd') === null ? null : v('costo_por_aviso_usd')! * tc, 'MXN', 'supuesta', `${s.costoCorreoUsd.fuente}; ${s.costoTelegramUsd.fuente}; ${s.tipoCambioMxnPorUsd.fuente}`, 4),
+    costo_por_aviso: cifra(v('costo_por_aviso_usd') === null ? null : v('costo_por_aviso_usd')! * tc, 'MXN', 'supuesta', `${s.costoCorreoUsd.fuente}; ${s.costoTelegramUsd.fuente}; WhatsApp: ${s.tarifasWhatsappUsd.utility.fuente}; ${s.tipoCambioMxnPorUsd.fuente}`, 4),
     costo_asistente_por_conversacion: cifra(v('costo_por_conversacion_usd') === null ? null : v('costo_por_conversacion_usd')! * tc, 'MXN', 'medida', `lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; ${s.tipoCambioMxnPorUsd.fuente}`, 4),
     contribucion_por_cita: cifra(contribucion, 'MXN', 'compuesta', 'margen por cita − costo de avisos por cita − costo del asistente por cita'),
     ltv: cifra(ltv, 'MXN', 'compuesta', `contribución por cita × ${s.visitasPorAnio.valor} visitas al año × ${s.aniosRetencion.valor} años × (1 − inasistencia). Visitas y retención: ${s.visitasPorAnio.fuente}`),
@@ -83,9 +91,46 @@ function cacPorCanal(corte: CorteSemantico, c: Clinica, periodoDias: number): Un
   });
 }
 
+const FUENTE_CANAL: Record<string, (c: Clinica) => string> = {
+  correo: (c) => c.supuestos.costoCorreoUsd.fuente,
+  telegram: (c) => c.supuestos.costoTelegramUsd.fuente,
+  whatsapp: (c) => `lo que Meta marcó como cobrable en el estado de cada mensaje (SIMULADO) × ${c.supuestos.tarifasWhatsappUsd.utility.fuente}`,
+};
+
+function avisosPorCanal(corte: CorteSemantico, c: Clinica): AvisosDeCanal[] {
+  const tc = c.supuestos.tipoCambioMxnPorUsd.valor;
+  return (corte.avisosPorCanal ?? []).filter((f) => f.clinica === c.id).map((f) => ({
+    canal: f.canal,
+    entregados: cifra(f.entregados, 'avisos', 'simulada', SIM, 0),
+    leidos: cifra(f.canal === 'whatsapp' ? f.leidos : null, 'avisos', 'simulada', 'solo WhatsApp da acuse de lectura; el del simulador no depende de la persona', 0),
+    entregabilidad: cifra(f.entregabilidad, 'proporción', 'simulada', 'canales SIMULADOS: no dicen nada de la entrega real', 3),
+    costoPorAviso: cifra(f.costoPorAvisoUsd === null ? null : f.costoPorAvisoUsd * tc, 'MXN', 'supuesta', `${(FUENTE_CANAL[f.canal] ?? (() => SIM))(c)}; ${c.supuestos.tipoCambioMxnPorUsd.fuente}`, 4),
+  }));
+}
+
+/** WhatsApp entero (avisos y respuestas): mensajes, cuántos se cobraron y cuánto, plantilla contra servicio. */
+function cifrasWhatsapp(corte: CorteSemantico, c: Clinica): Record<string, Cifra> | undefined {
+  const filas = (corte.mensajesWhatsapp ?? []).filter((f) => f.clinica === c.id);
+  if (!filas.length) return undefined;
+  const tc = c.supuestos.tipoCambioMxnPorUsd.valor;
+  const suma = (k: 'n' | 'cobrables' | 'costoUsd', f: (x: (typeof filas)[number]) => boolean = () => true) => filas.filter(f).reduce((t, x) => t + (x[k] ?? 0), 0);
+  const fuente = `estados de Meta SIMULADOS × ${c.supuestos.tarifasWhatsappUsd.utility.fuente}; ${c.supuestos.tipoCambioMxnPorUsd.fuente}`;
+  const v = (k: string) => m(corte, k, c.id);
+  return {
+    mensajes: cifra(suma('n'), 'mensajes', 'simulada', SIM, 0),
+    cobrables: cifra(suma('cobrables'), 'mensajes', 'simulada', 'plantillas siempre; servicio solo pasados los 1,000 gratis del mes', 0),
+    costo_periodo: cifra(suma('costoUsd') * tc, 'MXN', 'supuesta', fuente, 4),
+    costo_plantillas: cifra(suma('costoUsd', (x) => x.categoria === 'utility') * tc, 'MXN', 'supuesta', fuente, 4),
+    costo_servicio: cifra(suma('costoUsd', (x) => x.categoria === 'service') * tc, 'MXN', 'supuesta', fuente, 4),
+    asistencias_confirmadas: cifra(v('asistencias_confirmadas_n'), 'citas', 'simulada', `${SIM}: el paciente sintético tocó «Confirmo»`, 0),
+    tasa_vinculo: cifra(v('tasa_vinculo'), 'proporción', 'simulada', 'códigos emitidos que terminaron en un número confirmado desde la cuenta', 3),
+  };
+}
+
 /** Las cifras de UNA clínica. `periodoDias`: lo que duró la corrida en el reloj del laboratorio. */
 export function unitEconomics(corte: CorteSemantico, c: Clinica, periodoDias: number): UnitEconomicsClinica {
-  return { clinica: c.id, periodoDias, cifras: cifrasDeClinica(corte, c, periodoDias), porCanal: cacPorCanal(corte, c, periodoDias) };
+  const wa = cifrasWhatsapp(corte, c);
+  return { clinica: c.id, periodoDias, cifras: cifrasDeClinica(corte, c, periodoDias), porCanal: cacPorCanal(corte, c, periodoDias), avisosPorCanal: avisosPorCanal(corte, c), ...(wa ? { whatsapp: wa } : {}) };
 }
 
 export interface NodoGrafo { id: string; label: string; estado: 'morado' | 'gris' }

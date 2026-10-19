@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function PaginaTablero() {
   if (!esLaboratorio()) return <p className="p-8">Solo laboratorio.</p>;
-  const ruta = join(/*turbopackIgnore: true*/ process.cwd(), 'docs/goals/clinica-dental-medicion/unit-economics.json');
+  // CLINICA_MEDICION: la carpeta de medicion de la corrida que se muestra (la del goal de WhatsApp tiene su propia).
+  const ruta = join(/*turbopackIgnore: true*/ process.cwd(), process.env['CLINICA_MEDICION'] ?? 'docs/goals/clinica-dental-medicion', 'unit-economics.json');
   const datos = await readFile(/*turbopackIgnore: true*/ ruta, 'utf8').then((t) => JSON.parse(t) as { periodoDias: number; corte: string; clinicas: UnitEconomicsClinica[] }).catch(() => null);
   return (
     <div lang="es-MX" className="mx-auto max-w-6xl space-y-4 p-4">

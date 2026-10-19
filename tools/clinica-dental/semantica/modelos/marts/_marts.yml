@@ -24,6 +24,19 @@ models:
   - name: fct_transicion
     columns:
       - {name: transicion_id, data_tests: [unique, not_null]}
+  - name: fct_mensaje_wa
+    columns:
+      - {name: mensaje_id, data_tests: [unique, not_null]}
+      - {name: categoria, data_tests: [not_null, {accepted_values: {arguments: {values: ['utility', 'service', 'marketing', 'authentication']}}}]}
+  - name: fct_entrante_wa
+    columns:
+      - {name: entrante_id, data_tests: [unique, not_null]}
+  - name: fct_vinculo_wa
+    columns:
+      - {name: vinculo_evento_id, data_tests: [unique, not_null]}
+  - name: fct_recepcion
+    columns:
+      - {name: recepcion_id, data_tests: [unique, not_null]}
   - name: metricflow_time_spine
     description: La espina de tiempo diaria de MetricFlow.
     time_spine:

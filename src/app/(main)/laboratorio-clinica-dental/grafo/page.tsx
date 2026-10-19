@@ -8,7 +8,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function PaginaGrafo() {
   if (!esLaboratorio()) return <p className="p-8">Solo laboratorio.</p>;
-  const ruta = join(/*turbopackIgnore: true*/ process.cwd(), 'docs/grafos/clinica-dental-atencion.json');
+  // Con CLINICA_MEDICION, el grafo de ESA corrida (`<medicion>/grafo-atencion.json`); si no, el del portal.
+  const medicion = process.env['CLINICA_MEDICION'];
+  const ruta = join(/*turbopackIgnore: true*/ process.cwd(), medicion ? join(medicion, 'grafo-atencion.json') : 'docs/grafos/clinica-dental-atencion.json');
   const grafo = await readFile(/*turbopackIgnore: true*/ ruta, 'utf8').then((t) => JSON.parse(t) as GrafoAtencion).catch(() => null);
   return (
     <div lang="es-MX" className="mx-auto max-w-6xl space-y-4 p-4">

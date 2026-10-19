@@ -1,6 +1,6 @@
 {
   "slug": "clinica-dental",
-  "titulo": "Portal del paciente para clínicas dentales (laboratorio, pacientes sintéticos)",
+  "titulo": "Portal del paciente para clínicas dentales (laboratorio, pacientes sintéticos) · con el canal de WhatsApp (goal clinica-dental-whatsapp, 2026-10-19)",
   "nodos": [
     {
       "id": "spec",
@@ -119,6 +119,36 @@
       "label": "Firma del laboratorio (fuera del HECHO del goal)",
       "estado": "morado",
       "evidencia": "el laboratorio firmó el 2026-10-16 el CDC (bitácora, capa A basta), la AISIA y la C3 (solo laboratorio) y el aviso de privacidad (borrador, no vigente)"
+    },
+    {
+      "id": "spec-whatsapp",
+      "label": "Spec del canal de WhatsApp (docs/goals/clinica-dental-whatsapp.md)",
+      "estado": "morado"
+    },
+    {
+      "id": "simulador-meta",
+      "label": "Simulador de Meta extendido (tools/ventas-whatsapp): plantillas con botones y estado, medios, BSUID, número sin WhatsApp, Flow paso a paso",
+      "estado": "morado"
+    },
+    {
+      "id": "canal-whatsapp",
+      "label": "Canal de WhatsApp del núcleo: vinculación confirmada desde la cuenta, avisos por plantilla o servicio, receptor con cola durable, entrada con urgencias primero, Flows, gate por canal",
+      "estado": "morado"
+    },
+    {
+      "id": "telefono-laboratorio",
+      "label": "Teléfono simulado del laboratorio (/laboratorio-clinica-dental/whatsapp)",
+      "estado": "morado"
+    },
+    {
+      "id": "medicion-whatsapp",
+      "label": "Medición por WhatsApp: corpus con el LLM real, casos del canal, recorrido con capturas, sin PII",
+      "estado": "morado"
+    },
+    {
+      "id": "propuestas-whatsapp",
+      "label": "Propuestas para firmar: revisión de C3 y AISIA, aviso, CDC (docs/goals/clinica-dental-whatsapp-*.md)",
+      "estado": "gris"
     }
   ],
   "aristas": [
@@ -366,6 +396,76 @@
       "tipo": "manual",
       "from": "propuestas-firma",
       "to": "firma-laboratorio"
+    },
+    {
+      "id": "a-wa-extiende-simulador",
+      "label": "extender el simulador y el parser de Meta",
+      "tipo": "agente",
+      "from": "piezas-de-la-casa",
+      "to": "simulador-meta"
+    },
+    {
+      "id": "a-wa-construye-canal",
+      "label": "construir el canal en el núcleo (puertos inyectados)",
+      "tipo": "agente",
+      "from": "spec-whatsapp",
+      "to": "canal-whatsapp"
+    },
+    {
+      "id": "a-wa-contrato-v2",
+      "label": "contrato de eventos v2 (aditivo)",
+      "tipo": "agente",
+      "from": "canal-whatsapp",
+      "to": "contrato-eventos"
+    },
+    {
+      "id": "a-wa-arma-app",
+      "label": "armar el canal en la app sobre el simulador",
+      "tipo": "agente",
+      "from": "canal-whatsapp",
+      "to": "app-paciente"
+    },
+    {
+      "id": "a-wa-telefono",
+      "label": "el teléfono simulado del laboratorio",
+      "tipo": "agente",
+      "from": "simulador-meta",
+      "to": "telefono-laboratorio"
+    },
+    {
+      "id": "a-wa-eventos",
+      "label": "lo que entra y sale por WhatsApp, al libro (sin texto ni número)",
+      "tipo": "script",
+      "from": "canal-whatsapp",
+      "to": "libro-eventos"
+    },
+    {
+      "id": "a-wa-mide",
+      "label": "recorrido y medición por el canal",
+      "tipo": "script",
+      "from": "telefono-laboratorio",
+      "to": "medicion-whatsapp"
+    },
+    {
+      "id": "a-wa-evidencias",
+      "label": "reporte y post-mortem del canal",
+      "tipo": "agente",
+      "from": "medicion-whatsapp",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-wa-propone",
+      "label": "redactar las revisiones para firmar",
+      "tipo": "agente",
+      "from": "medicion-whatsapp",
+      "to": "propuestas-whatsapp"
+    },
+    {
+      "id": "a-wa-firma",
+      "label": "firma del laboratorio (fuera del HECHO)",
+      "tipo": "manual",
+      "from": "propuestas-whatsapp",
+      "to": "firma-laboratorio"
     }
   ],
   "lazos": [
@@ -480,6 +580,62 @@
       "estado": "morado",
       "referencia": "axe-core, WCAG 2.2 AA",
       "evidencia": "axe-core WCAG 2.2 AA: 0 serias/críticas en registro, agenda, mis citas y chatbot (escritorio y celular) y en tablero y grafo"
+    },
+    {
+      "id": "l-wa-vinculo",
+      "label": "nada sale hacia un número que no probó ser del paciente",
+      "sobre": "arista:a-wa-construye-canal",
+      "estado": "morado",
+      "referencia": "código de un solo uso desde el número + confirmación desde la cuenta",
+      "evidencia": "pruebas whatsapp-vinculo (6) y recorrido: 0 mensajes a Meta antes de vincular; enlace reenviado rechazado (capturas 08a/08b)"
+    },
+    {
+      "id": "l-wa-urgencias",
+      "label": "toda urgencia que entra por WhatsApp se deriva por regla, sin LLM, aunque la recepción tenga el chat",
+      "sobre": "arista:a-wa-construye-canal",
+      "estado": "morado",
+      "referencia": "las 6 señales de urgencias.ts",
+      "evidencia": "pruebas whatsapp-entrada (urgencia con chat en silencio, pie de foto) y recorrido (captura 05)"
+    },
+    {
+      "id": "l-wa-idempotencia",
+      "label": "un wamid se atiende una vez; un estado solo avanza; lo acusado no se pierde",
+      "sobre": "arista:a-wa-eventos",
+      "estado": "morado",
+      "referencia": "reintentos de Meta hasta 7 días, sin orden",
+      "evidencia": "pruebas: webhook tres veces → una respuesta; cola durable tras caída; leído antes que entregado"
+    },
+    {
+      "id": "l-wa-identidad",
+      "label": "la identidad sale de la vinculación, nunca del payload de un botón o un Flow",
+      "sobre": "arista:a-wa-construye-canal",
+      "estado": "morado",
+      "referencia": "payload y flow_token firmados + número vinculado vigente",
+      "evidencia": "pruebas whatsapp-flows (botón ajeno, firma alterada, token de otro número → 427, cita ajena)"
+    },
+    {
+      "id": "l-wa-sin-meta",
+      "label": "en el laboratorio nada sale hacia Meta",
+      "sobre": "arista:a-wa-mide",
+      "estado": "morado",
+      "referencia": "0 hosts de Meta en la guardia de red del servidor y 0 peticiones externas del navegador",
+      "evidencia": "recorrido.json de la cadena oficial: servidor.hostsDeMeta = [] (salió a Supabase local, al demonio de voz local, a sí mismo y una vez a registry.npmjs.org: la revisión de versión de next dev) y 0 peticiones externas del navegador"
+    },
+    {
+      "id": "l-wa-gate",
+      "label": "firmar un canal no abre otro",
+      "sobre": "nodo:canal-whatsapp",
+      "estado": "morado",
+      "referencia": "revisión firmada declarada en el código + CLINICA_GATE_<CANAL>",
+      "evidencia": "pruebas whatsapp-avisos (gate por canal) y canales (la variable vieja ya no abre nada)"
+    },
+    {
+      "id": "l-wa-asistente",
+      "label": "el asistente por WhatsApp con el LLM real: 0 diagnósticos, urgencias por regla, 0 acciones sin confirmar, 0 citas a números no vinculados",
+      "sobre": "arista:a-wa-mide",
+      "estado": "morado",
+      "referencia": "corpus-asistente-1 + casos del canal",
+      "evidencia": "asistente-whatsapp.json (cadena oficial 2026-10-19): 58/58 del corpus, 0 diagnósticos, urgencias 12/12 por regla, 0 acciones sin confirmar, casos del canal 12/12 (wa-02 recalificado), 0 citas a números no vinculados; segundo juez independiente en segundo-juez.json"
     }
   ]
 }

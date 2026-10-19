@@ -25,7 +25,7 @@ export default async function PaginaMisCitas({ params }: { params: Promise<{ cli
   const hora = (ms: number) => new Intl.DateTimeFormat('es-MX', { timeZone: c.zona, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms));
   const whatsapp: VinculoWhatsappUI = wa.estado === 'codigo' ? { ...wa, expira: hora(wa.expira) } : wa.estado === 'vinculado' ? { estado: 'vinculado', ultimos4: wa.ultimos4 } : wa;
   // En el laboratorio, el «teléfono» de la persona es el WhatsApp simulado, con su celular del registro ya puesto.
-  const laboratorioWhatsapp = esLaboratorio() && wa.estado === 'codigo' ? `/laboratorio-clinica-dental/whatsapp?clinica=${clinica}&numero=521${paciente.datos.celular.replace(/\D/g, '').slice(-10)}&texto=${encodeURIComponent(`Hola, quiero vincular mi WhatsApp a ${c.nombre}. Mi código es ${wa.codigo}`)}` : null;
+  const laboratorioWhatsapp = esLaboratorio() && wa.estado === 'codigo' ? `/laboratorio-clinica-dental/whatsapp?clinica=${clinica}#numero=521${paciente.datos.celular.replace(/\D/g, '').slice(-10)}&texto=${encodeURIComponent(`Hola, quiero vincular mi WhatsApp a ${c.nombre}. Mi código es ${wa.codigo}`)}` : null;
   const aviso = (a: VistaAviso): VistaAvisoUI => ({ id: a.id, canal: a.canal, clase: a.clase, estado: a.estado, cuando: fechaLarga(a.para, c.zona), motivo: a.motivo, accion: a.accion });
   return (
     <div className="mx-auto max-w-3xl space-y-4">

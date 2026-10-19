@@ -12,7 +12,7 @@
  *   7. el contenedor se tira siempre.
  *
  * Sin telemetría (DBT_SEND_ANONYMOUS_USAGE_STATS=false, DO_NOT_TRACK=1). Uso:
- *   node tools/clinica-dental/semantica/corre.mjs [--libro <dir>]   (por defecto ~/.clinica-dental/libro)
+ *   node tools/clinica-dental/semantica/corre.mjs [--libro <dir>] [--salida <json>]   (por defecto ~/.clinica-dental/libro)
  */
 import { spawnSync } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
@@ -29,7 +29,7 @@ const AQUI = dirname(fileURLToPath(import.meta.url))
 const RAIZ = join(AQUI, '..', '..', '..')
 const arg = (n, d) => process.argv.find((_, i) => process.argv[i - 1] === n) ?? d
 const LIBRO = arg('--libro', join(process.env.CLINICA_DATOS ?? join(homedir(), '.clinica-dental'), 'libro'))
-const SALIDA = join(RAIZ, 'docs/goals/clinica-dental-medicion/corte-semantico.json')
+const SALIDA = arg('--salida', join(RAIZ, 'docs/goals/clinica-dental-medicion/corte-semantico.json'))
 const LOCK = readFileSync(join(AQUI, 'requirements.lock'), 'utf8')
 const HUELLA_LOCK = createHash('sha256').update(LOCK).digest('hex').slice(0, 12)
 /** El mismo lock que soporte-sap: si su entorno ya existe, se reutiliza (mismas versiones, mismos hashes). */
@@ -95,9 +95,13 @@ function escribeSemillas(libro) {
 /** Qué se pregunta a MetricFlow: cada métrica agrupada por la clínica de SU modelo; el embudo por canal; las aristas. */
 const CONSULTAS = [
   { metricas: ['pacientes_nuevos', 'horas_registro_a_cita_p50'], por: 'paciente__clinica' },
-  { metricas: ['citas_confirmadas', 'citas_atendidas_n', 'tasa_inasistencia', 'citas_canceladas_n', 'ingreso_atendido_mxn', 'margen_atendido_mxn'], por: 'cita__clinica' },
-  { metricas: ['avisos_entregados_n', 'entregabilidad', 'costo_por_aviso_usd'], por: 'aviso__clinica' },
-  { metricas: ['turnos_asistente_n', 'urgencias_derivadas', 'latencia_asistente_p50_ms'], por: 'turno__clinica' },
+  { metricas: ['citas_confirmadas', 'citas_atendidas_n', 'tasa_inasistencia', 'citas_canceladas_n', 'ingreso_atendido_mxn', 'margen_atendido_mxn', 'asistencias_confirmadas_n', 'citas_por_whatsapp_n'], por: 'cita__clinica' },
+  { metricas: ['avisos_entregados_n', 'entregabilidad', 'costo_por_aviso_usd', 'avisos_leidos_n'], por: 'aviso__clinica' },
+  { metricas: ['turnos_asistente_n', 'urgencias_derivadas', 'latencia_asistente_p50_ms', 'urgencias_whatsapp_n'], por: 'turno__clinica' },
+  { metricas: ['mensajes_whatsapp_n', 'mensajes_whatsapp_cobrados_n', 'costo_whatsapp_usd', 'costo_por_mensaje_whatsapp_usd'], por: 'mensaje_wa__clinica' },
+  { metricas: ['entrantes_whatsapp_n', 'entrantes_whatsapp_vinculados_n'], por: 'entrante_wa__clinica' },
+  { metricas: ['codigos_vinculo_n', 'vinculos_confirmados_n', 'vinculos_rechazados_n', 'tasa_vinculo'], por: 'vinculo_wa__clinica' },
+  { metricas: ['recepcion_atiende_n'], por: 'recepcion__clinica' },
   { metricas: ['conversaciones_asistente_n', 'costo_por_conversacion_usd'], por: 'conversacion__clinica' },
   { metricas: ['visitantes_portal', 'registros_embudo', 'conversion_visita_registro', 'conversion_inicio_registro', 'conversion_registro_cita'], por: 'embudo__clinica' },
   { metricas: ['bajas_newsletter'], por: 'baja__clinica' },
@@ -106,7 +110,8 @@ const CONSULTAS = [
 function consulta(env, carpeta, metricas, por, nombre) {
   const archivo = join(carpeta, `${nombre}.csv`)
   exige(bin('mf'), ['query', '--metrics', metricas.join(','), '--group-by', por, '--csv', archivo], { cwd: AQUI, env }, `mf query ${nombre}`)
-  return leeCsv(readFileSync(archivo, 'utf8'))
+  // Sin filas (p. ej. nadie se dio de baja en la corrida), MetricFlow no escribe el CSV: es un resultado, no un error.
+  return existsSync(archivo) ? leeCsv(readFileSync(archivo, 'utf8')) : []
 }
 
 async function principal() {
@@ -147,6 +152,9 @@ async function principal() {
       }
     }
     const porCanal = consulta(env, carpeta, ['visitantes_portal', 'registros_embudo', 'conversion_visita_registro'], 'embudo__clinica,embudo__canal', 'canal')
+    const avisosPorCanal = consulta(env, carpeta, ['avisos_entregados_n', 'avisos_leidos_n', 'entregabilidad', 'costo_por_aviso_usd'], 'aviso__clinica,aviso__canal', 'avisos-canal')
+    const mensajesWa = consulta(env, carpeta, ['mensajes_whatsapp_n', 'mensajes_whatsapp_cobrados_n', 'costo_whatsapp_usd'], 'mensaje_wa__clinica,mensaje_wa__categoria,mensaje_wa__mensaje', 'mensajes-wa')
+    const entrantesWa = consulta(env, carpeta, ['entrantes_whatsapp_n'], 'entrante_wa__clinica,entrante_wa__manejo', 'entrantes-wa')
     const aristas = consulta(env, carpeta, ['transiciones', 'segundos_arista_p50'], 'transicion__arista', 'aristas')
     const aristasClinica = consulta(env, carpeta, ['transiciones', 'segundos_arista_p50'], 'transicion__clinica,transicion__arista', 'aristas-clinica')
     const servicios = (c) => new Map(CLINICAS.find((x) => x.id === c).servicios.map((s) => [s.id, { precio: s.precioMxn, costo: s.costoVariableMxn }]))
@@ -160,6 +168,9 @@ async function principal() {
       dbt: resumenDbt, mf: resumenMf, conteoLibro: conteo, convergencia,
       metricas: Object.fromEntries(Object.entries(metricas).map(([m, v]) => [m, Object.fromEntries(Object.entries(v).map(([c, x]) => [c, { metricflow: x, directo: directo[c]?.[m] ?? null }]))])),
       porCanal: porCanal.map((f) => ({ clinica: f.embudo__clinica, canal: f.embudo__canal, visitantes: num(f.visitantes_portal), registrados: num(f.registros_embudo), conversion: num(f.conversion_visita_registro) })),
+      avisosPorCanal: avisosPorCanal.map((f) => ({ clinica: f.aviso__clinica, canal: f.aviso__canal, entregados: num(f.avisos_entregados_n), leidos: num(f.avisos_leidos_n), entregabilidad: num(f.entregabilidad), costoPorAvisoUsd: num(f.costo_por_aviso_usd) })),
+      mensajesWhatsapp: mensajesWa.map((f) => ({ clinica: f.mensaje_wa__clinica, categoria: f.mensaje_wa__categoria, mensaje: f.mensaje_wa__mensaje, n: num(f.mensajes_whatsapp_n), cobrables: num(f.mensajes_whatsapp_cobrados_n), costoUsd: num(f.costo_whatsapp_usd) })),
+      entrantesWhatsapp: entrantesWa.map((f) => ({ clinica: f.entrante_wa__clinica, manejo: f.entrante_wa__manejo, n: num(f.entrantes_whatsapp_n) })),
       aristas: aristas.map((f) => ({ arista: f.transicion__arista, metricflow: { n: num(f.transiciones), p50: num(f.segundos_arista_p50) }, directo: aristasDir.find((a) => `${a.desde}→${a.hacia}` === f.transicion__arista) ?? null })),
       aristasPorClinica: aristasClinica.map((f) => ({ clinica: f.transicion__clinica, arista: f.transicion__arista, n: num(f.transiciones), p50: num(f.segundos_arista_p50) })),
     }

@@ -1,0 +1,112 @@
+{
+ "cuando": "2026-10-19T12:51:56.170Z",
+ "pasos": [
+  {
+   "paso": "1 · registro con el consentimiento de WhatsApp (escritorio y celular)",
+   "ms": 3670
+  },
+  {
+   "paso": "agenda con avisos por WhatsApp (queda esperando la vinculación)",
+   "ms": 1676
+  },
+  {
+   "paso": "2a · «Vincular WhatsApp»: código de un solo uso y enlace wa.me",
+   "ms": 8535
+  },
+  {
+   "paso": "2b · el código sale por WhatsApp desde el número de la persona",
+   "ms": 4676
+  },
+  {
+   "paso": "2c · la persona confirma desde su cuenta que el número es suyo",
+   "ms": 8526
+  },
+  {
+   "paso": "enlace REENVIADO: un tercero manda el código primero y la persona lo rechaza",
+   "ms": 18681
+  },
+  {
+   "paso": "otra clínica: una paciente de Colibrí vincula su WhatsApp (para la medición)",
+   "ms": 7549
+  },
+  {
+   "paso": "3 · recordatorio de 24 h como PLANTILLA (ventana cerrada) y «Confirmo»",
+   "ms": 4234
+  },
+  {
+   "paso": "5 · URGENCIA en la respuesta a un recordatorio (regla, sin LLM)",
+   "ms": 4187
+  },
+  {
+   "paso": "nota de voz (voz local → ASR local) y foto (nunca se baja)",
+   "ms": 4797
+  },
+  {
+   "paso": "6 · «Mis citas» con el estado de los avisos de WhatsApp",
+   "ms": 4004
+  },
+  {
+   "paso": "4 · Flow REPROGRAMANDO (otra paciente, cita a 5 días)",
+   "ms": 19960
+  },
+  {
+   "paso": "coexistencia: la recepción contesta desde su celular y el asistente calla",
+   "ms": 6967
+  }
+ ],
+ "navegador": {
+  "peticionesExternas": [],
+  "erroresConsola": []
+ },
+ "servidor": {
+  "hosts": {
+   "registry.npmjs.org": 1,
+   "127.0.0.1:54531": 161,
+   "localhost:3011": 6,
+   "127.0.0.1:47125": 3
+  },
+  "hostsDeMeta": []
+ },
+ "axe": [
+  {
+   "pagina": "mis-citas-codigo",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas-codigo",
+   "vista": "celular",
+   "serias": []
+  },
+  {
+   "pagina": "telefono",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "telefono",
+   "vista": "celular",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas-pendiente",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas-pendiente",
+   "vista": "celular",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas-vinculado",
+   "vista": "escritorio",
+   "serias": []
+  },
+  {
+   "pagina": "mis-citas-vinculado",
+   "vista": "celular",
+   "serias": []
+  }
+ ]
+}

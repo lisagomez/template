@@ -1,0 +1,64 @@
+{
+ "cuando": "2026-10-19T12:53:42.587Z",
+ "valoresSembrados": 93,
+ "control": {
+  "que": "almacén del portal (expediente administrativo: AQUÍ sí debe estar, incluido el número vinculado)",
+  "apariciones": 34
+ },
+ "resultados": [
+  {
+   "que": "libro de eventos (JSONL, dos clínicas)",
+   "revisado": true,
+   "bytes": 175322,
+   "apariciones": []
+  },
+  {
+   "que": "log del servidor de la app",
+   "revisado": true,
+   "bytes": 49475,
+   "apariciones": []
+  },
+  {
+   "que": "cola durable del webhook (compactada)",
+   "revisado": true,
+   "bytes": 1,
+   "apariciones": []
+  },
+  {
+   "que": "semillas de dbt (raw_eventos.csv)",
+   "revisado": true,
+   "bytes": 115308,
+   "apariciones": []
+  },
+  {
+   "que": "corte semántico (métricas)",
+   "revisado": true,
+   "bytes": 15214,
+   "apariciones": []
+  },
+  {
+   "que": "unit economics",
+   "revisado": true,
+   "bytes": 24699,
+   "apariciones": []
+  },
+  {
+   "que": "grafo de atención",
+   "revisado": true,
+   "bytes": 3058,
+   "apariciones": []
+  },
+  {
+   "que": "libro de gasto del asistente",
+   "revisado": true,
+   "bytes": 19008,
+   "apariciones": []
+  },
+  {
+   "que": "guardia de red del servidor",
+   "revisado": true,
+   "bytes": 120,
+   "apariciones": []
+  }
+ ]
+}

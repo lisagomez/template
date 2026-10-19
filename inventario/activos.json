@@ -522,15 +522,16 @@
   },
   {
    "id": "TPL-clinica-dental",
-   "nombre": "Clínica dental: núcleo del portal del paciente (cuestionario y consentimientos, agenda sin doble reserva sobre Reservas, avisos por correo y Telegram con simuladores y adaptadores reales con gate, asistente con urgencias por regla y guía de voz, contrato de eventos, libro sha256 con Merkle y sello, dataLayer con consent mode, capa semántica dbt + MetricFlow, unit economics y grafo de atención) (0.1.0)",
+   "nombre": "Clínica dental: núcleo del portal del paciente (cuestionario y consentimientos, agenda sin doble reserva sobre Reservas, avisos por correo, Telegram y WhatsApp con simuladores y adaptadores reales con gate por canal, canal de WhatsApp con vinculación confirmada desde la cuenta, receptor del webhook con cola durable, entrada con urgencias por regla primero y Flows para agendar, reprogramar y cancelar, asistente con urgencias por regla y guía de voz, contrato de eventos v2, libro sha256 con Merkle y sello, dataLayer con consent mode, capa semántica dbt + MetricFlow, unit economics y grafo de atención) (0.1.0)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
    "ubicacion": "tools/clinica-dental", "responsable": "dep-sw",
-   "origen": ["docs/goals/clinica-dental.md"],
+   "origen": ["docs/goals/clinica-dental.md",
+    "docs/goals/clinica-dental-whatsapp.md"],
    "cubre": ["tools/clinica-dental"]
   },
   {
    "id": "TPL-feature-clinica-dental",
-   "nombre": "Portal del paciente para clínicas dentales (/clinica/[clinica]): entrar, registro con cuestionario y guía de voz, agenda con selector de avisos, mis citas con el estado de cada aviso, chatbot por texto y voz; rutas /api/clinica-dental; laboratorio (buzón, Telegram, tablero, grafo) y los recorridos y mediciones de scripts/clinica-dental",
+   "nombre": "Portal del paciente para clínicas dentales (/clinica/[clinica]): entrar, registro con cuestionario y guía de voz, agenda con selector de avisos, mis citas con el estado de cada aviso, chatbot por texto y voz; rutas /api/clinica-dental; Mi WhatsApp en mis citas; laboratorio (buzón, Telegram, WhatsApp simulado, tablero con costo por canal, grafo) y los recorridos y mediciones de scripts/clinica-dental",
    "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
    "ubicacion": "src/features/clinica-dental", "responsable": "dep-sw",
    "origen": ["docs/goals/clinica-dental.md"],

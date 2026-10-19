@@ -11,6 +11,13 @@ simulador fiel de Meta, sin un número real.
   crudo, el 200 inmediato con una **cola durable** detrás (lo que se acusó no se pierde si el proceso
   se cae) y la idempotencia por `wamid`. También calcula las ventanas de 24 h y de 72 h de los
   anuncios Click-to-WhatsApp y el precio de cada mensaje según las reglas del 1/oct/2026.
+- **Plantillas, medios y 2026** (lo agregó el canal de la clínica dental, 2026-10-19):
+  - plantillas con botones de respuesta rápida: el `payload` va al mandarla y vuelve en el webhook (`button`);
+  - notas de voz (`audio` con `voice: true`), fotos y otros medios llegan con su id; `descargaMedio` los baja aparte;
+  - un mensaje con solo BSUID (nombre de usuario, 2026) se lee en vez de tirarse; el vendedor lo deja a la app;
+  - `message_template_status_update` y `template_category_update` llegan tipados;
+  - el simulador registra plantillas con su texto y estado (pausada 132015, desactivada 132016, parámetros 132000),
+    hace fallar por webhook a un número sin WhatsApp (131026) y abre un Flow pantalla por pantalla (`abreFlow`).
 - **Coexistencia**: el eco del dueño que contesta desde su celular calla al agente en ese chat.
   Además ingiere el historial y pausa al negocio si se desconecta (`PARTNER_REMOVED`).
 - **Agente (fase 1)**: acotado al negocio.
@@ -185,7 +192,7 @@ await bsp.completa({ inquilinoId, code, recibidoEn, evento: leeEventoSignup(mens
 
 ## Pruebas
 
-`npm run prueba` corre 96 pruebas en unos 20 s. También entran en el `validate` de la raíz por
+`npm run prueba` corre 102 pruebas en unos 20 s. También entran en el `validate` de la raíz por
 `prueba:tools`. Cubren:
 
 - canal, ventanas y costo;
@@ -205,6 +212,7 @@ await bsp.completa({ inquilinoId, code, recibidoEn, evento: leeEventoSignup(mens
 - trazabilidad;
 - roadmaps;
 - números (alta, límites de Meta, cuarentena, cobro);
+- plantillas con botones, medios, BSUID y número sin WhatsApp;
 - BSP (Embedded Signup, crédito, baja, factura y conciliación);
 - alta segura (liga, origen, WABA ajena, persistencia);
 - frontera del número (granja, ráfaga, bloqueo).

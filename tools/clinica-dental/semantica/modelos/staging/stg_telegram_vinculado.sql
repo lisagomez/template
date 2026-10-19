@@ -1,4 +1,4 @@
--- GENERADO desde el contrato de eventos v1 por semantica/genera.ts: no se edita a mano.
+-- GENERADO desde el contrato de eventos v2 por semantica/genera.ts: no se edita a mano.
 select
   clinica,
   seq,

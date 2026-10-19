@@ -10,7 +10,6 @@
  */
 import { createHash } from 'node:crypto';
 import { pesos, servicio as servicioDe } from '../clinicas.js';
-import { horaLocal } from '../agenda.js';
 import type { Paciente } from '../almacen.js';
 import { ErrorPortal, HORA_MS, type Contexto } from '../portal/contexto.js';
 import { cancela, LIMITE_CAMBIO_HORAS, reprograma, reserva } from '../portal/citas.js';
@@ -44,7 +43,7 @@ async function pantallaDias(t: Turno, servicio: string, cita: string, error = ''
   const s = servicioDe(c, servicio);
   const ahora = t.ctx.reloj();
   const dias = (await t.ctx.agenda(c.id).dias(s.id, ahora, ahora + DIAS_VISIBLES * 24 * HORA_MS)).slice(0, 30);
-  const titulo = (f: string) => corta(new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(`${f}T12:00:00Z`)), 30);
+  const titulo = (f: string) => corta(new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(Date.parse(f) + 12 * HORA_MS)), 30);
   const err = dias.length ? error : 'No hay horarios en las próximas dos semanas. Llama a la clínica.';
   return conError('DIA', { servicio: s.id, cita, resumen: `${s.nombre} · ${s.duracionMin} min · ${pesos(s.precioMxn)}`, dias: dias.map((d) => ({ id: d.fecha, title: titulo(d.fecha) })) }, err);
 }
@@ -127,7 +126,7 @@ async function siguiente(t: Turno, screen: string, d: Record<string, unknown>): 
     const s = servicioDe(c, str(d['servicio']));
     if (Number.isNaN(Date.parse(hora))) return pantallaHoras(t, s.id, cita, '', 'Elige una hora de la lista.');
     const verbo = t.tok.flujo === 'reprogramar' ? 'Tu cita cambia a' : 'Vas a agendar';
-    return conError('CONFIRMA', { servicio: s.id, cita, hora, resumen: `${verbo}: ${s.nombre}, ${fechaLarga(Date.parse(hora), c.zona)} (${horaLocal(Date.parse(hora), c.zona)}). ${c.direccion}.` }, '');
+    return conError('CONFIRMA', { servicio: s.id, cita, hora, resumen: `${verbo}: ${s.nombre}, ${fechaLarga(Date.parse(hora), c.zona)}. ${c.direccion}.` }, '');
   }
   if (screen === 'CONFIRMA') return confirmaFlujo(t, d);
   if (screen === 'CANCELA') return cancelaFlujo(t, d);

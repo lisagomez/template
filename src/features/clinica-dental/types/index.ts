@@ -13,7 +13,7 @@ export interface VistaAvisoUI {
 export type VinculoWhatsappUI =
   | { estado: 'sin_vincular' }
   | { estado: 'codigo'; codigo: string; enlace: string; expira: string }
-  | { estado: 'pendiente'; ultimos4: string; coincideCelular: boolean }
+  | { estado: 'pendiente'; ultimos4: string | null; coincideCelular: boolean }
   | { estado: 'vinculado'; ultimos4: string };
 
 export interface VistaCitaUI {

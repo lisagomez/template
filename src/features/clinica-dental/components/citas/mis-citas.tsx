@@ -95,12 +95,12 @@ export function MisCitas({ clinica, citas, newsletter, consentimientos, telefono
       </ul>
       <VinculoWhatsapp clinica={clinica} estado={whatsapp} telefonoClinica={telefono} laboratorio={laboratorioWhatsapp} />
       {newsletter.length ? <section className="rounded-xl bg-white p-4 ring-1 ring-slate-200"><h2 className="font-semibold">Newsletter</h2><ul className="divide-y divide-slate-100">{newsletter.map((a) => <FilaAviso key={a.id} a={a} alVincular={() => void vincula()} />)}</ul></section> : null}
-      <Consentimientos valores={consentimientos} alCambiar={(t, v) => void consiente(t, v)} />
+      <Consentimientos valores={consentimientos} whatsappVinculado={whatsapp.estado === 'vinculado'} alCambiar={(t, v) => void consiente(t, v)} />
     </div>
   );
 }
 
-function Consentimientos({ valores, alCambiar }: { valores: Record<string, boolean>; alCambiar: (tipo: string, valor: boolean) => void }) {
+function Consentimientos({ valores, whatsappVinculado, alCambiar }: { valores: Record<string, boolean>; whatsappVinculado: boolean; alCambiar: (tipo: string, valor: boolean) => void }) {
   const filas: [string, string][] = [['recordatorios', 'Recordatorios de mis citas'], ['whatsapp', 'Avisos por WhatsApp'], ['telegram', 'Avisos por Telegram'], ['newsletter', 'Newsletter con novedades y promociones'], ['datos_salud', 'Tratamiento de la descripción de mi padecimiento (dato de salud)']];
   return (
     <section aria-labelledby="mis-permisos" className="rounded-xl bg-white p-4 ring-1 ring-slate-200 sm:p-5">
@@ -109,7 +109,7 @@ function Consentimientos({ valores, alCambiar }: { valores: Record<string, boole
       <ul className="mt-2 divide-y divide-slate-100">
         {filas.map(([t, texto]) => (
           <li key={t} className="flex items-center justify-between gap-3 py-2 text-sm">
-            <span>{texto}: <strong>{valores[t] ? 'activo' : 'no activo'}</strong></span>
+            <span>{texto}: <strong>{valores[t] ? (t === 'whatsapp' && !whatsappVinculado ? 'activo, falta vincular el número' : 'activo') : 'no activo'}</strong></span>
             {valores[t] ? <button type="button" className={clasesBotonSecundario} onClick={() => alCambiar(t, false)}>Retirar</button> : t === 'datos_salud' ? null : t === 'whatsapp' ? <a className="text-xs underline" href="#mi-whatsapp">Vincular arriba</a> : <button type="button" className={clasesBotonSecundario} onClick={() => alCambiar(t, true)}>Activar</button>}
           </li>
         ))}

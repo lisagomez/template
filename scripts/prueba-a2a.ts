@@ -122,6 +122,14 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/clinica-dental/telegram/[clinica]',
   '/api/clinica-dental/voz/sintetizar',
   '/api/clinica-dental/voz/transcribir',
+  // Canal de WhatsApp del portal (goal clinica-dental-whatsapp, laboratorio). RF-20: misma app y mismo puerto; no es
+  // superficie A2A. `whatsapp/webhook` es el webhook de Meta: firma X-Hub-Signature-256 sobre los bytes crudos (401
+  // sin ella), cola durable y 200; `whatsapp/flows` es el endpoint de datos de los Flows (cifrado; 432/421/427).
+  // `laboratorio/whatsapp` es el teléfono simulado (mismo origen). Las tres responden 404 o 503 sin CLINICA_LABORATORIO
+  // y el transporte real hacia Meta no se construye sin su revisión firmada de C3 + AISIA (gate por canal).
+  '/api/clinica-dental/laboratorio/whatsapp',
+  '/api/clinica-dental/whatsapp/flows',
+  '/api/clinica-dental/whatsapp/webhook',
   '/api/contenido/video',
   // Crecimiento demostrado (goal crecimiento-demostrado, laboratorio con pymes sintéticas). RF-20: misma
   // app y mismo puerto. Es la pasarela del agente `crecimiento-demostrado`, OTRA superficie que no es este

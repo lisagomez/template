@@ -94,5 +94,14 @@ export function colaEnArchivo(dir: string): ColaEntrada {
       await mkdir(dir, { recursive: true });
       await appendFile(hechos, `${JSON.stringify({ id })}\n`, { mode: 0o600 });
     },
+    async compacta() {
+      const listos = new Set(lineas<{ id: string }>(await leeTexto(hechos)).map((h) => h.id));
+      const vivos = lineas<ElementoCola>(await leeTexto(entrada)).filter((e) => !listos.has(e.id));
+      // Primero se reescribe la entrada (solo lo pendiente) y despues se vacian los hechos: si se cae entre las dos,
+      // queda un hecho de mas que no estorba (no hay entrada que lo use).
+      await writeFile(`${entrada}.tmp`, vivos.map((e) => `${JSON.stringify(e)}\n`).join(''), { mode: 0o600 });
+      await rename(`${entrada}.tmp`, entrada);
+      await writeFile(hechos, '', { mode: 0o600 });
+    },
   };
 }

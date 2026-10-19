@@ -6,29 +6,52 @@
  * pinta en el celular). Lo que la persona hace se manda al simulador de Meta; la clínica contesta por el canal real
  * del portal (receptor, asistente, Flows). Debajo de cada mensaje de la clínica, lo que Meta cobró por él.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Burbuja, VistaFlow } from '../../services/servidor/telefono';
 
-interface Props { clinica: string; nombreClinica: string; numero: string; textoInicial: string }
+interface Props { clinica: string; nombreClinica: string }
 interface Estado { burbujas: Burbuja[]; flow: VistaFlow | null; alertas: { texto: string }[] }
 
 const API = '/api/clinica-dental/laboratorio/whatsapp';
 const hora = (ms: number) => new Intl.DateTimeFormat('es-MX', { timeZone: 'America/Mexico_City', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms));
 
-export function WhatsappSimulado({ clinica, nombreClinica, numero, textoInicial }: Props) {
+/**
+ * El número y el texto prellenado van en el FRAGMENTO de la URL (`#numero=…&texto=…`): no llegan al servidor ni a su
+ * log. Solo el navegador los conoce, así que el servidor pinta «cargando» y el teléfono aparece al hidratar.
+ */
+const suscribe = (avisa: () => void) => {
+  window.addEventListener('hashchange', avisa);
+  return () => window.removeEventListener('hashchange', avisa);
+};
+
+export function WhatsappSimulado({ clinica, nombreClinica }: Props) {
+  const fragmento = useSyncExternalStore(suscribe, () => window.location.hash, () => null);
+  if (fragmento === null) return <p role="status" className="text-sm text-slate-700">Abriendo el teléfono…</p>;
+  const h = new URLSearchParams(fragmento.slice(1));
+  const numero = /^\d{10,15}$/.test(h.get('numero') ?? '') ? h.get('numero')! : '5215500001001';
+  return <Telefono key={`${clinica}-${numero}`} clinica={clinica} nombreClinica={nombreClinica} numero={numero} textoInicial={h.get('texto') ?? ''} />;
+}
+
+function Telefono({ clinica, nombreClinica, numero, textoInicial }: Props & { numero: string; textoInicial: string }) {
   const [estado, setEstado] = useState<Estado>({ burbujas: [], flow: null, alertas: [] });
   const [texto, setTexto] = useState(textoInicial);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lista = useRef<HTMLOListElement>(null);
+  // Como en WhatsApp: el chat se queda abajo, en lo último que llegó.
+  useEffect(() => {
+    lista.current?.scrollTo({ top: lista.current.scrollHeight });
+  }, [estado.burbujas.length]);
+  const lee = useCallback(() => fetch(API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ clinica, numero, cambio: { accion: 'lee' } }) }), [clinica, numero]);
   const carga = useCallback(async () => {
-    const r = await fetch(`${API}?clinica=${clinica}&numero=${numero}`);
+    const r = await lee();
     if (r.ok) setEstado((await r.json()) as Estado);
-  }, [clinica, numero]);
+  }, [lee]);
   useEffect(() => {
     let vivo = true;
-    void fetch(`${API}?clinica=${clinica}&numero=${numero}`).then(async (r) => { if (vivo && r.ok) setEstado((await r.json()) as Estado); });
+    void lee().then(async (r) => { if (vivo && r.ok) setEstado((await r.json()) as Estado); });
     return () => { vivo = false; };
-  }, [clinica, numero]);
+  }, [lee]);
   const haz = async (cambio: Record<string, unknown>) => {
     setOcupado(true);
     setError(null);
@@ -46,13 +69,13 @@ export function WhatsappSimulado({ clinica, nombreClinica, numero, textoInicial 
           <p className="font-semibold">{nombreClinica}</p>
           <p className="text-xs opacity-90">Cuenta de empresa · simulado · tu número termina en {numero.slice(-4)}</p>
         </header>
-        <ol aria-live="polite" className="flex h-[62vh] min-h-80 flex-col gap-2 overflow-y-auto p-3" data-burbujas={estado.burbujas.length}>
+        <ol ref={lista} aria-live="polite" className="flex h-[62vh] min-h-80 flex-col gap-2 overflow-y-auto p-3" data-burbujas={estado.burbujas.length}>
           {estado.burbujas.map((b, i) => <Globo key={i} b={b} ocupado={ocupado} alTocar={(id) => void haz({ accion: 'toca', boton: id })} alAbrir={() => void haz({ accion: 'abre-flow' })} />)}
         </ol>
         <form className="flex gap-2 border-t border-slate-300 bg-[#f0f2f5] p-2" onSubmit={(e) => { e.preventDefault(); if (texto.trim()) { void haz({ accion: 'escribe', texto }); setTexto(''); } }}>
           <label className="sr-only" htmlFor="wa-texto">Mensaje</label>
           <input id="wa-texto" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Escribe un mensaje" className="min-h-11 flex-1 rounded-full border border-slate-300 bg-white px-4 text-sm" />
-          <button type="submit" disabled={ocupado} className="min-h-11 rounded-full bg-[#00a884] px-4 text-sm font-semibold text-white disabled:opacity-60">Enviar</button>
+          <button type="submit" disabled={ocupado} className="min-h-11 rounded-full bg-[#008069] px-4 text-sm font-semibold text-white disabled:opacity-60">Enviar</button>
         </form>
         {estado.flow ? <HojaFlow flow={estado.flow} ocupado={ocupado} alEnviar={(datos) => void haz({ accion: 'envia-flow', datos })} /> : null}
       </section>
@@ -128,7 +151,7 @@ function HojaFlow({ flow, ocupado, alEnviar }: { flow: VistaFlow; ocupado: boole
           if (tipo === 'Footer') {
             const accion = (c['on-click-action'] ?? {}) as { payload?: Record<string, unknown> };
             const datos = Object.fromEntries(Object.entries(accion.payload ?? {}).map(([k, v]) => [k, sustituye(v, flow.datos, forma) ?? '']));
-            return <button key={i} type="button" disabled={ocupado} onClick={() => { alEnviar(datos); setForma({}); }} className="min-h-11 w-full rounded-full bg-[#00a884] font-semibold text-white disabled:opacity-60">{String(c['label'])}</button>;
+            return <button key={i} type="button" disabled={ocupado} onClick={() => { alEnviar(datos); setForma({}); }} className="min-h-11 w-full rounded-full bg-[#008069] font-semibold text-white disabled:opacity-60">{String(c['label'])}</button>;
           }
           return null;
         })}

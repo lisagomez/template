@@ -10,7 +10,8 @@ import { chromium, type Browser, type BrowserContext, type Page } from 'playwrig
 import { instalaMicrofonoFalso } from '../centro-de-mando/microfono-falso.ts';
 import { BASE } from './servidor.ts';
 
-export const CAPTURAS = join(process.cwd(), 'docs/goals/clinica-dental-capturas');
+/** `CLINICA_CAPTURAS`: la carpeta de capturas de la corrida (la del goal de WhatsApp tiene la suya). */
+export const CAPTURAS = join(process.cwd(), process.env['CLINICA_CAPTURAS'] ?? 'docs/goals/clinica-dental-capturas');
 mkdirSync(CAPTURAS, { recursive: true });
 
 export type Vista = 'escritorio' | 'celular';

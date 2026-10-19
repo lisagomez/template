@@ -1,8 +1,9 @@
 /**
- * El TELÉFONO del paciente en el laboratorio (solo con CLINICA_LABORATORIO=1 y mismo origen): GET la conversación de
- * un número con una clínica; POST lo que la persona hace en su WhatsApp simulado (escribir, tocar un botón, nota de
- * voz con voz local, foto, abrir y llenar un Flow) o que la recepción conteste desde su celular. Y las palancas de Meta:
- * desconectar el número o pausar una plantilla. Nada de esto existe fuera del laboratorio ni sale hacia Meta.
+ * El TELÉFONO del paciente en el laboratorio (solo con CLINICA_LABORATORIO=1 y mismo origen), todo por POST (el número
+ * nunca va en una URL: los logs del servidor guardan las URL): `lee` la conversación de un número con una clínica; lo que
+ * la persona hace en su WhatsApp simulado (escribir, tocar un botón, nota de voz con voz local, foto, abrir y llenar un
+ * Flow) o que la recepción conteste desde su celular. Y las palancas de Meta: desconectar el número o pausar una
+ * plantilla. Nada de esto existe fuera del laboratorio ni sale hacia Meta.
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -27,18 +28,11 @@ const accion = z.discriminatedUnion('accion', [
   z.object({ accion: z.literal('desconecta') }),
   z.object({ accion: z.literal('reconecta') }),
   z.object({ accion: z.literal('plantilla'), nombre: z.string().regex(/^[a-z0-9_]{3,60}$/), estado: z.enum(['APPROVED', 'PAUSED', 'DISABLED']) }),
+  // Solo para medir: borra la memoria corta del asistente y el conteo de la frontera de ESE número (preguntas independientes).
+  z.object({ accion: z.literal('olvida') }),
+  z.object({ accion: z.literal('lee') }),
 ]);
 const peticion = z.object({ clinica, numero, nombre: z.string().max(40).default('Paciente'), cambio: accion }).strict();
-
-export async function GET(p: NextRequest): Promise<NextResponse> {
-  const rechazo = rechazoDeBorde(p, true);
-  if (rechazo) return rechazo;
-  const c = clinica.safeParse(p.nextUrl.searchParams.get('clinica'));
-  const n = numero.safeParse(p.nextUrl.searchParams.get('numero'));
-  if (!c.success || !n.success) return NextResponse.json({ error: 'clínica o número inválido' }, { status: 400 });
-  const rt = await runtime();
-  return NextResponse.json({ ...(await conversacion(c.data, n.data)), alertas: rt.whatsapp.receptor().alertas.slice(-5) });
-}
 
 export async function POST(p: NextRequest): Promise<NextResponse> {
   const rechazo = rechazoDeBorde(p, true);
@@ -52,6 +46,11 @@ export async function POST(p: NextRequest): Promise<NextResponse> {
     if (cambio.accion === 'desconecta') rt.whatsapp.meta.desconecta(pnid);
     else if (cambio.accion === 'reconecta') rt.whatsapp.meta.reconecta(pnid);
     else if (cambio.accion === 'plantilla') rt.whatsapp.meta.cambiaPlantilla(pnid, cambio.nombre, cambio.estado);
+    else if (cambio.accion === 'lee') return NextResponse.json({ ok: true, ...(await conversacion(c, n)), alertas: rt.whatsapp.receptor().alertas.slice(-5) });
+    else if (cambio.accion === 'olvida') {
+      const m = rt.whatsapp.receptor().memoria;
+      for (const mapa of [m.historial, m.recientes]) for (const k of [...mapa.keys()]) if (k.startsWith(`${c}|`) && k.endsWith(n.replace(/^521/, '52'))) mapa.delete(k);
+    }
     else await actua(c, n, nombre, cambio);
     await despacha();
   } catch (e) {

@@ -91,6 +91,8 @@ export interface ChatWhatsApp {
   conversacion: string;
   ultimoEntrante: number | null;
   silenciadoHasta: number | null;
+  /** Ya se le dijo a esta persona que contesta un asistente automatico (una vez por chat). */
+  presentado?: boolean;
   actualizado: number;
 }
 

@@ -79,7 +79,8 @@ async function enviaWhatsApp(ctx: Contexto, p: Paciente, a: Aviso): Promise<Envi
   const cita = a.cita ? await ctx.almacen.cita(p.clinica, a.cita) : null;
   if (!cita || a.clase === 'newsletter') return { ok: false, motivo: 'otro', definitivo: true };
   const clase: ClasePlantilla = a.clase === 'confirmacion' && cita.anterior ? 'reprogramada' : a.clase;
-  const cuando = fechaLarga(cita.inicio, c.zona);
+  // A media frase («para el jueves, 22 de octubre…»): el día va en minúscula.
+  const cuando = fechaLarga(cita.inicio, c.zona).replace(/^\p{Lu}/u, (l) => l.toLowerCase());
   const parametros = clase === 'recordatorio_2h' ? [p.datos.nombre, c.nombre, cuando.split(', ').pop() ?? cuando, c.direccion] : [p.datos.nombre, c.nombre, cuando];
   const chat = await ctx.almacen.chat(p.clinica, waId);
   const abierta = chat?.ultimoEntrante != null && ctx.reloj() - chat.ultimoEntrante < VENTANA_MS;

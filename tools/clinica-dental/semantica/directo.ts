@@ -54,6 +54,35 @@ function avisos(es: readonly Evento[]) {
   return { entregados, intentados: entregados + fallidos, costo };
 }
 
+/** Lo de WhatsApp (contrato v2), con la MISMA definicion que los marts, recalculado aqui. */
+function whatsapp(es: readonly Evento[]) {
+  const leidos = new Set(de(es, 'aviso_leido').map((e) => e.aviso));
+  const cobros = de(es, 'whatsapp_cobro');
+  const costo = cobros.reduce((s, e) => s + (e.costo_usd ?? 0), 0);
+  const entrantes = de(es, 'whatsapp_entrante');
+  const vinculo = de(es, 'whatsapp_vinculo');
+  const paso = (p: string) => vinculo.filter((e) => e.paso === p).length;
+  const confirmadas = new Set(de(es, 'asistencia_confirmada').map((e) => e.cita));
+  const conf = de(es, 'cita_confirmada');
+  return {
+    avisos_leidos_n: de(es, 'aviso_programado').filter((p) => leidos.has(p.aviso)).length,
+    mensajes_whatsapp_n: cobros.length,
+    mensajes_whatsapp_cobrados_n: cobros.filter((e) => e.billable).length,
+    costo_whatsapp_usd: costo,
+    costo_por_mensaje_whatsapp_usd: ratio(costo, cobros.length),
+    entrantes_whatsapp_n: entrantes.length,
+    entrantes_whatsapp_vinculados_n: entrantes.filter((e) => e.vinculado).length,
+    urgencias_whatsapp_n: de(es, 'asistente_turno').filter((t) => t.ruta === 'urgencia' && t.canal === 'whatsapp').length,
+    codigos_vinculo_n: paso('codigo_emitido'),
+    vinculos_confirmados_n: paso('confirmado'),
+    vinculos_rechazados_n: paso('rechazado'),
+    tasa_vinculo: ratio(paso('confirmado'), paso('codigo_emitido')),
+    asistencias_confirmadas_n: conf.filter((c) => confirmadas.has(c.cita)).length,
+    citas_por_whatsapp_n: conf.filter((c) => c.via === 'whatsapp').length,
+    recepcion_atiende_n: de(es, 'recepcion_atiende').length,
+  };
+}
+
 export interface Cifras { [metrica: string]: number | null }
 
 /** Las métricas por clínica, calculadas recorriendo los eventos de ESA clínica. */
@@ -95,6 +124,7 @@ export function metricasDirectas(es: readonly Evento[], servicios: ReadonlyMap<s
     citas_canceladas_n: citas.filter((x) => x.estado === 'cancelada').length,
     ingreso_atendido_mxn: atendidas.reduce((s, x) => s + precio(x), 0),
     margen_atendido_mxn: atendidas.reduce((s, x) => s + precio(x) - costoVar(x), 0),
+    ...whatsapp(es),
   };
 }
 

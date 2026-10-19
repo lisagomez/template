@@ -27,7 +27,8 @@ const codigoNuevo = (): string => `VINC-${Array.from({ length: 6 }, () => ALFABE
 export type EstadoVinculo =
   | { estado: 'sin_vincular' }
   | { estado: 'codigo'; codigo: string; enlace: string; expira: number }
-  | { estado: 'pendiente'; ultimos4: string; coincideCelular: boolean }
+  /** `ultimos4` solo si coincide con el celular del registro: si no, la persona tiene que SABERLOS (no se le muestran). */
+  | { estado: 'pendiente'; ultimos4: string | null; coincideCelular: boolean }
   | { estado: 'vinculado'; ultimos4: string; vinculadoEn: number };
 
 /** El paciente cuyo WhatsApp vinculado es este numero, si lo hay. */
@@ -97,7 +98,11 @@ export async function estadoVinculo(ctx: Contexto, clinica: string, usuario: str
   const p = await ctx.exigePaciente(clinica, usuario);
   if (p.whatsapp?.waId) return { estado: 'vinculado', ultimos4: ultimos4(p.whatsapp.waId), vinculadoEn: p.whatsapp.vinculadoEn ?? 0 };
   const pend = await pendienteDe(ctx, clinica, p.seudonimo);
-  if (pend?.pendiente) return { estado: 'pendiente', ultimos4: ultimos4(pend.pendiente.waId), coincideCelular: mismoTelefono(pend.pendiente.waId, p.datos.celular) };
+  if (pend?.pendiente) {
+    const coincide = mismoTelefono(pend.pendiente.waId, p.datos.celular);
+    // Si no es su celular, mostrar «termina en 5432» y pedir esos 4 dígitos no prueba nada: se copian de la pantalla.
+    return { estado: 'pendiente', ultimos4: coincide ? ultimos4(pend.pendiente.waId) : null, coincideCelular: coincide };
+  }
   const t = await vigente(ctx, clinica, p.seudonimo);
   if (t && (t.expira ?? 0) > ctx.reloj()) return { estado: 'codigo', codigo: t.id, enlace: enlaceWa(ctx.numeroDe(clinica).telefonoVisible, `Hola, quiero vincular mi WhatsApp a ${ctx.clinica(clinica).nombre}. Mi código es ${t.id}`), expira: t.expira ?? 0 };
   return { estado: 'sin_vincular' };
@@ -112,7 +117,7 @@ export async function confirmaVinculo(ctx: Contexto, clinica: string, usuario: s
   if (!t?.pendiente) return { ok: false, motivo: 'sin_pendiente', mensaje: 'No hay un número esperando confirmación. Pide un código y mándalo por WhatsApp.' };
   const waId = t.pendiente.waId;
   if (!mismoTelefono(waId, p.datos.celular)) {
-    if (!op.ultimos4) return { ok: false, motivo: 'faltan_digitos', mensaje: 'Ese número no es el celular de tu registro: escribe sus últimos 4 dígitos para confirmar que es tuyo.' };
+    if (!op.ultimos4) return { ok: false, motivo: 'faltan_digitos', mensaje: 'Nos escribió un número que no es el celular de tu registro: si fuiste tú, escribe los 4 últimos dígitos del WhatsApp desde el que nos escribiste.' };
     if (op.ultimos4.replace(/\D/g, '') !== ultimos4(waId)) return { ok: false, motivo: 'digitos', mensaje: 'Esos dígitos no coinciden con el número que nos escribió. Si no fuiste tú, rechaza la vinculación.' };
   }
   const ahora = ctx.reloj();

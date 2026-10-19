@@ -1,4 +1,4 @@
-# GENERADO desde el contrato de eventos v1 por semantica/genera.ts: no se edita a mano.
+# GENERADO desde el contrato de eventos v2 por semantica/genera.ts: no se edita a mano.
 version: 2
 models:
   - name: stg_portal_visitado
@@ -46,7 +46,7 @@ models:
       - name: sujeto
         data_tests: [not_null]
       - name: consentimiento
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['aviso_privacidad', 'datos_salud', 'recordatorios', 'newsletter', 'telegram', 'tutor']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['aviso_privacidad', 'datos_salud', 'recordatorios', 'newsletter', 'telegram', 'tutor', 'whatsapp']}}}]
       - name: version_aviso
         data_tests: [not_null]
   - name: stg_consentimiento_retirado
@@ -57,7 +57,7 @@ models:
       - name: sujeto
         data_tests: [not_null]
       - name: consentimiento
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['aviso_privacidad', 'datos_salud', 'recordatorios', 'newsletter', 'telegram', 'tutor']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['aviso_privacidad', 'datos_salud', 'recordatorios', 'newsletter', 'telegram', 'tutor', 'whatsapp']}}}]
       - name: version_aviso
         data_tests: [not_null]
   - name: stg_cita_solicitada
@@ -95,7 +95,7 @@ models:
       - name: canales
         data_tests: [not_null]
       - name: via
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['portal', 'asistente']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['portal', 'asistente', 'whatsapp']}}}]
   - name: stg_cita_reprogramada
     description: Eventos «cita_reprogramada» del libro, tipados.
     columns:
@@ -111,6 +111,8 @@ models:
         data_tests: [not_null]
       - name: inicio_nuevo
         data_tests: [not_null]
+      - name: via
+        data_tests: [{accepted_values: {arguments: {values: ['portal', 'whatsapp']}}}]
   - name: stg_cita_cancelada
     description: Eventos «cita_cancelada» del libro, tipados.
     columns:
@@ -124,6 +126,8 @@ models:
         data_tests: [not_null, {accepted_values: {arguments: {values: ['paciente', 'clinica', 'reprogramada']}}}]
       - name: horas_antes
         data_tests: [not_null]
+      - name: via
+        data_tests: [{accepted_values: {arguments: {values: ['portal', 'whatsapp']}}}]
   - name: stg_cita_asistencia
     description: Eventos «cita_asistencia» del libro, tipados.
     columns:
@@ -147,7 +151,7 @@ models:
       - name: aviso
         data_tests: [not_null]
       - name: canal
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram', 'whatsapp']}}}]
       - name: clase
         data_tests: [not_null, {accepted_values: {arguments: {values: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h', 'cancelacion', 'newsletter']}}}]
       - name: para
@@ -162,7 +166,7 @@ models:
       - name: aviso
         data_tests: [not_null]
       - name: canal
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram', 'whatsapp']}}}]
       - name: clase
         data_tests: [not_null, {accepted_values: {arguments: {values: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h', 'cancelacion', 'newsletter']}}}]
       - name: intento
@@ -177,7 +181,7 @@ models:
       - name: aviso
         data_tests: [not_null]
       - name: canal
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram', 'whatsapp']}}}]
       - name: clase
         data_tests: [not_null, {accepted_values: {arguments: {values: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h', 'cancelacion', 'newsletter']}}}]
   - name: stg_aviso_fallido
@@ -190,11 +194,11 @@ models:
       - name: aviso
         data_tests: [not_null]
       - name: canal
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram', 'whatsapp']}}}]
       - name: clase
         data_tests: [not_null, {accepted_values: {arguments: {values: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h', 'cancelacion', 'newsletter']}}}]
       - name: motivo
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['rebote', 'bot_no_iniciado', 'sin_vincular', 'limite', 'otro']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['rebote', 'bot_no_iniciado', 'sin_vincular', 'limite', 'otro', 'no_whatsapp', 'plantilla', 'fuera_de_ventana', 'canal_desconectado']}}}]
       - name: definitivo
         data_tests: [not_null]
   - name: stg_aviso_cancelado
@@ -207,7 +211,7 @@ models:
       - name: aviso
         data_tests: [not_null]
       - name: canal
-        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram']}}}]
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram', 'whatsapp']}}}]
       - name: clase
         data_tests: [not_null, {accepted_values: {arguments: {values: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h', 'cancelacion', 'newsletter']}}}]
       - name: motivo
@@ -247,6 +251,8 @@ models:
         data_tests: [not_null]
       - name: uso_padecimiento
         data_tests: [not_null]
+      - name: canal
+        data_tests: [{accepted_values: {arguments: {values: ['portal', 'whatsapp']}}}]
   - name: stg_urgencia_derivada
     description: Eventos «urgencia_derivada» del libro, tipados.
     columns:
@@ -260,6 +266,8 @@ models:
         data_tests: [not_null]
       - name: destino
         data_tests: [not_null, {accepted_values: {arguments: {values: ['emergencias_911', 'clinica_hoy']}}}]
+      - name: canal
+        data_tests: [{accepted_values: {arguments: {values: ['portal', 'whatsapp']}}}]
   - name: stg_preferencia_cambiada
     description: Eventos «preferencia_cambiada» del libro, tipados.
     columns:
@@ -271,3 +279,77 @@ models:
         data_tests: [not_null, {accepted_values: {arguments: {values: ['voz', 'chatbot']}}}]
       - name: habilitado
         data_tests: [not_null]
+  - name: stg_whatsapp_vinculo
+    description: Eventos «whatsapp_vinculo» del libro, tipados.
+    columns:
+      - name: evento_id
+        data_tests: [unique, not_null]
+      - name: sujeto
+        data_tests: [not_null]
+      - name: paso
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['codigo_emitido', 'mensaje_recibido', 'confirmado', 'rechazado', 'desvinculado']}}}]
+  - name: stg_aviso_leido
+    description: Eventos «aviso_leido» del libro, tipados.
+    columns:
+      - name: evento_id
+        data_tests: [unique, not_null]
+      - name: sujeto
+        data_tests: [not_null]
+      - name: aviso
+        data_tests: [not_null]
+      - name: canal
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['correo', 'telegram', 'whatsapp']}}}]
+      - name: clase
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h', 'cancelacion', 'newsletter']}}}]
+  - name: stg_asistencia_confirmada
+    description: Eventos «asistencia_confirmada» del libro, tipados.
+    columns:
+      - name: evento_id
+        data_tests: [unique, not_null]
+      - name: sujeto
+        data_tests: [not_null]
+      - name: cita
+        data_tests: [not_null]
+      - name: canal
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['whatsapp']}}}]
+  - name: stg_whatsapp_entrante
+    description: Eventos «whatsapp_entrante» del libro, tipados.
+    columns:
+      - name: evento_id
+        data_tests: [unique, not_null]
+      - name: sujeto
+        data_tests: [not_null]
+      - name: conversacion
+        data_tests: [not_null]
+      - name: tipo_mensaje
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['texto', 'boton', 'interactivo', 'flow', 'audio', 'imagen', 'otro']}}}]
+      - name: manejo
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['asistente', 'vinculacion', 'boton', 'flow', 'foto', 'otro_medio', 'nota_voz_ilegible', 'baja', 'recepcion', 'silenciado', 'frontera']}}}]
+      - name: vinculado
+        data_tests: [not_null]
+  - name: stg_whatsapp_cobro
+    description: Eventos «whatsapp_cobro» del libro, tipados.
+    columns:
+      - name: evento_id
+        data_tests: [unique, not_null]
+      - name: sujeto
+        data_tests: [not_null]
+      - name: categoria
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['utility', 'service', 'marketing', 'authentication']}}}]
+      - name: tipo_precio
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['regular', 'free_customer_service', 'free_entry_point']}}}]
+      - name: billable
+        data_tests: [not_null]
+      - name: mensaje
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['aviso', 'respuesta']}}}]
+  - name: stg_recepcion_atiende
+    description: Eventos «recepcion_atiende» del libro, tipados.
+    columns:
+      - name: evento_id
+        data_tests: [unique, not_null]
+      - name: sujeto
+        data_tests: [not_null]
+      - name: conversacion
+        data_tests: [not_null]
+      - name: motivo
+        data_tests: [not_null, {accepted_values: {arguments: {values: ['eco_de_recepcion', 'pedido_del_paciente']}}}]

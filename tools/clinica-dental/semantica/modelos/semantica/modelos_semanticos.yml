@@ -33,6 +33,8 @@ semantic_models:
       - {name: citas_canceladas, agg: sum, expr: "case when estado_final = 'cancelada' then 1 else 0 end"}
       - {name: ingreso_atendido_mxn, agg: sum, expr: "case when estado_final = 'asistio' then precio_mxn else 0 end"}
       - {name: margen_atendido_mxn, agg: sum, expr: "case when estado_final = 'asistio' then precio_mxn - costo_variable_mxn else 0 end"}
+      - {name: citas_asistencia_confirmada, agg: sum, expr: case when asistencia_confirmada then 1 else 0 end}
+      - {name: citas_por_whatsapp, agg: sum, expr: "case when via = 'whatsapp' then 1 else 0 end"}
 
   - name: avisos
     model: ref('fct_aviso')
@@ -49,6 +51,7 @@ semantic_models:
       - {name: avisos_intentados, agg: sum, expr: case when entregado or fallido then 1 else 0 end}
       - {name: avisos_fallidos, agg: sum, expr: case when fallido then 1 else 0 end}
       - {name: costo_avisos_usd, agg: sum, expr: "coalesce(costo_usd, 0)"}
+      - {name: avisos_leidos, agg: sum, expr: case when leido then 1 else 0 end}
 
   - name: turnos
     model: ref('fct_turno')
@@ -60,8 +63,10 @@ semantic_models:
       - {name: ruta, type: categorical}
       - {name: modo, type: categorical}
       - {name: intencion, type: categorical}
+      - {name: canal, type: categorical}
     measures:
       - {name: turnos_asistente, agg: sum, expr: '1'}
+      - {name: turnos_urgencia_wa, agg: sum, expr: "case when ruta = 'urgencia' and canal = 'whatsapp' then 1 else 0 end"}
       - {name: turnos_urgencia, agg: sum, expr: "case when ruta = 'urgencia' then 1 else 0 end"}
       - {name: latencia_asistente_mediana_ms, agg: median, expr: latencia_ms}
 
@@ -115,3 +120,55 @@ semantic_models:
       - {name: via, type: categorical}
     measures:
       - {name: bajas_n, agg: sum, expr: '1'}
+
+  - name: mensajes_wa
+    model: ref('fct_mensaje_wa')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: mensaje_wa, type: primary, expr: mensaje_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: categoria, type: categorical}
+      - {name: tipo_precio, type: categorical}
+      - {name: mensaje, type: categorical}
+    measures:
+      - {name: mensajes_wa_n, agg: sum, expr: '1'}
+      - {name: mensajes_wa_cobrables, agg: sum, expr: case when billable then 1 else 0 end}
+      - {name: costo_wa_usd, agg: sum, expr: "coalesce(costo_usd, 0)"}
+
+  - name: entrantes_wa
+    model: ref('fct_entrante_wa')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: entrante_wa, type: primary, expr: entrante_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: tipo_mensaje, type: categorical}
+      - {name: manejo, type: categorical}
+    measures:
+      - {name: entrantes_wa_n, agg: sum, expr: '1'}
+      - {name: entrantes_wa_vinculados, agg: sum, expr: case when vinculado then 1 else 0 end}
+
+  - name: vinculos_wa
+    model: ref('fct_vinculo_wa')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: vinculo_wa, type: primary, expr: vinculo_evento_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: paso, type: categorical}
+    measures:
+      - {name: codigos_vinculo, agg: sum, expr: "case when paso = 'codigo_emitido' then 1 else 0 end"}
+      - {name: vinculos_confirmados, agg: sum, expr: "case when paso = 'confirmado' then 1 else 0 end"}
+      - {name: vinculos_rechazados, agg: sum, expr: "case when paso = 'rechazado' then 1 else 0 end"}
+
+  - name: recepcion
+    model: ref('fct_recepcion')
+    defaults: {agg_time_dimension: en}
+    entities: [{name: recepcion, type: primary, expr: recepcion_id}]
+    dimensions:
+      - {name: en, type: time, type_params: {time_granularity: day}}
+      - {name: clinica, type: categorical}
+      - {name: motivo, type: categorical}
+    measures:
+      - {name: recepcion_atiende_n, agg: sum, expr: '1'}

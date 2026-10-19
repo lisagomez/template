@@ -25,6 +25,8 @@ export interface ColaEntrada {
   agrega(cuerpo: string, recibido: number): Promise<string>;
   pendientes(): Promise<ElementoCola[]>;
   hecho(id: string): Promise<void>;
+  /** Tira lo ya procesado: el cuerpo crudo (número y texto) no se queda en disco más de lo necesario. */
+  compacta?(): Promise<void>;
 }
 
 export function colaEnMemoria(): ColaEntrada {
@@ -159,6 +161,7 @@ export function creaReceptorWhatsApp(d: DepsReceptor) {
       await d.cola.hecho(item.id);
       n++;
     }
+    if (n) await d.cola.compacta?.();
     if (n) await d.alProcesar?.().catch(() => undefined);
     return n;
   }

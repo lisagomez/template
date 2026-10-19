@@ -48,9 +48,9 @@ test('enlace REENVIADO: el tercero que manda el código primero queda pendiente,
   tercero.escribe(`Hola, quiero vincular mi WhatsApp. Mi código es ${codigo}`);
   await w.asienta();
   const estado = await w.portal.whatsapp.estado('maguey', `usr-${p.id}`);
-  assert.deepEqual(estado, { estado: 'pendiente', ultimos4: '5432', coincideCelular: false }, 'la persona ve «termina en 5432», que no es su celular');
+  assert.deepEqual(estado, { estado: 'pendiente', ultimos4: null, coincideCelular: false }, 'no es su celular: los dígitos NO se le muestran (copiarlos de la pantalla no probaría nada)');
   const sinDigitos = await w.portal.whatsapp.confirma('maguey', `usr-${p.id}`);
-  assert.ok(!sinDigitos.ok && sinDigitos.motivo === 'faltan_digitos', 'no coincide con su registro: confirmar pide los 4 dígitos');
+  assert.ok(!sinDigitos.ok && sinDigitos.motivo === 'faltan_digitos', 'no coincide con su registro: confirmar pide los 4 dígitos que la persona SABE');
   const malos = await w.portal.whatsapp.confirma('maguey', `usr-${p.id}`, { ultimos4: '1001' });
   assert.ok(!malos.ok && malos.motivo === 'digitos');
   assert.ok(await w.portal.whatsapp.rechaza('maguey', `usr-${p.id}`));
@@ -69,6 +69,7 @@ test('wa_id de México normalizado: llega con el 1 de celular (521…) y coincid
   const w = await bancoWa();
   const { p, cl } = await vinculado(w, 'adulto-convenio', { conUno: true });
   assert.equal((await w.almacen.paciente('maguey', `usr-${p.id}`))?.whatsapp?.waId, waIdDe(p, false), 'se guarda 52 + 10 dígitos');
+  assert.deepEqual((await w.portal.whatsapp.estado('maguey', `usr-${p.id}`)).estado, 'vinculado');
   assert.match(vistos(cl)[1]!, /quedó vinculado/);
   const sinUno = w.cliente('maguey', waIdDe(p, false), 'Ameyalli');
   sinUno.escribe('mis citas');

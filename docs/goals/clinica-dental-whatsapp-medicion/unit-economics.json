@@ -1,0 +1,649 @@
+{
+ "generado": "2026-10-19T12:53:34.732Z",
+ "corte": "sha256:37348421e0ab04ad",
+ "periodoDias": 2.6,
+ "clinicas": [
+  {
+   "clinica": "maguey",
+   "periodoDias": 2.6,
+   "cifras": {
+    "pacientes_nuevos": {
+     "valor": 3,
+     "unidad": "pacientes",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_confirmadas": {
+     "valor": 3,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_atendidas": {
+     "valor": 0,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow); la asistencia es SIMULADA"
+    },
+    "precio_promedio_cita": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precios DECLARADOS de la clínica sintética, sobre las citas atendidas de la corrida"
+    },
+    "margen_por_cita": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precio − costo variable SUPUESTO por servicio (declaración de la clínica)"
+    },
+    "tasa_inasistencia": {
+     "valor": null,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "asistencia SIMULADA en el laboratorio (cada paciente sintético declara si asiste)"
+    },
+    "entregabilidad": {
+     "valor": 1,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram"
+    },
+    "costo_por_aviso": {
+     "valor": 0.0329,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); WhatsApp: tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_asistente_por_conversacion": {
+     "valor": 0.0469,
+     "unidad": "MXN",
+     "origen": "medida",
+     "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "contribucion_por_cita": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "margen por cita − costo de avisos por cita − costo del asistente por cita"
+    },
+    "ltv": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "contribución por cita × 2.5 visitas al año × 3 años × (1 − inasistencia). Visitas y retención: supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+    },
+    "cac": {
+     "valor": 332.22,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "gasto de marketing SUPUESTO prorrateado a 2.6 días ÷ pacientes nuevos simulados"
+    },
+    "ltv_sobre_cac": {
+     "valor": null,
+     "unidad": "veces",
+     "origen": "compuesta",
+     "fuente": "LTV ÷ CAC: dos cifras hechas de supuestos; orientan, no deciden"
+    }
+   },
+   "porCanal": [
+    {
+     "canal": "busqueda",
+     "gastoPeriodoMxn": {
+      "valor": 520,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "redes",
+     "gastoPeriodoMxn": {
+      "valor": 346.67,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "convenio",
+     "gastoPeriodoMxn": {
+      "valor": 130,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "referido",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: el referido no tiene gasto directo de pauta"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "directo",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "sin gasto declarado para este canal: se cuenta en 0 (el tráfico directo no paga pauta)"
+     },
+     "registrados": {
+      "valor": 3,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 0.167,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    }
+   ],
+   "avisosPorCanal": [
+    {
+     "canal": "whatsapp",
+     "entregados": {
+      "valor": 4,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "leidos": {
+      "valor": 4,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "solo WhatsApp da acuse de lectura; el del simulador no depende de la persona"
+     },
+     "entregabilidad": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "canales SIMULADOS: no dicen nada de la entrega real"
+     },
+     "costoPorAviso": {
+      "valor": 0.0393,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "lo que Meta marcó como cobrable en el estado de cada mensaje (SIMULADO) × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+     }
+    },
+    {
+     "canal": "correo",
+     "entregados": {
+      "valor": 1,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "leidos": {
+      "valor": null,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "solo WhatsApp da acuse de lectura; el del simulador no depende de la persona"
+     },
+     "entregabilidad": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "canales SIMULADOS: no dicen nada de la entrega real"
+     },
+     "costoPorAviso": {
+      "valor": 0.0074,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+     }
+    }
+   ],
+   "whatsapp": {
+    "mensajes": {
+     "valor": 63,
+     "unidad": "mensajes",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "cobrables": {
+     "valor": 1,
+     "unidad": "mensajes",
+     "origen": "simulada",
+     "fuente": "plantillas siempre; servicio solo pasados los 1,000 gratis del mes"
+    },
+    "costo_periodo": {
+     "valor": 0.1573,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "estados de Meta SIMULADOS × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_plantillas": {
+     "valor": 0.1573,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "estados de Meta SIMULADOS × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_servicio": {
+     "valor": 0,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "estados de Meta SIMULADOS × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "asistencias_confirmadas": {
+     "valor": 1,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow): el paciente sintético tocó «Confirmo»"
+    },
+    "tasa_vinculo": {
+     "valor": 0.667,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "códigos emitidos que terminaron en un número confirmado desde la cuenta"
+    }
+   }
+  },
+  {
+   "clinica": "colibri",
+   "periodoDias": 2.6,
+   "cifras": {
+    "pacientes_nuevos": {
+     "valor": 1,
+     "unidad": "pacientes",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_confirmadas": {
+     "valor": 1,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "citas_atendidas": {
+     "valor": 0,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow); la asistencia es SIMULADA"
+    },
+    "precio_promedio_cita": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precios DECLARADOS de la clínica sintética, sobre las citas atendidas de la corrida"
+    },
+    "margen_por_cita": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "precio − costo variable SUPUESTO por servicio (declaración de la clínica)"
+    },
+    "tasa_inasistencia": {
+     "valor": null,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "asistencia SIMULADA en el laboratorio (cada paciente sintético declara si asiste)"
+    },
+    "entregabilidad": {
+     "valor": 1,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram"
+    },
+    "costo_por_aviso": {
+     "valor": 0.0037,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); WhatsApp: tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_asistente_por_conversacion": {
+     "valor": 0.0239,
+     "unidad": "MXN",
+     "origen": "medida",
+     "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "contribucion_por_cita": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "margen por cita − costo de avisos por cita − costo del asistente por cita"
+    },
+    "ltv": {
+     "valor": null,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "contribución por cita × 2 visitas al año × 2.5 años × (1 − inasistencia). Visitas y retención: supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+    },
+    "cac": {
+     "valor": 736.67,
+     "unidad": "MXN",
+     "origen": "compuesta",
+     "fuente": "gasto de marketing SUPUESTO prorrateado a 2.6 días ÷ pacientes nuevos simulados"
+    },
+    "ltv_sobre_cac": {
+     "valor": null,
+     "unidad": "veces",
+     "origen": "compuesta",
+     "fuente": "LTV ÷ CAC: dos cifras hechas de supuestos; orientan, no deciden"
+    }
+   },
+   "porCanal": [
+    {
+     "canal": "busqueda",
+     "gastoPeriodoMxn": {
+      "valor": 303.33,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "redes",
+     "gastoPeriodoMxn": {
+      "valor": 433.33,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "convenio",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: Dental Colibrí no tiene convenios de empresa"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "referido",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: el referido no tiene gasto directo de pauta"
+     },
+     "registrados": {
+      "valor": 0,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": null,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": null,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    },
+    {
+     "canal": "directo",
+     "gastoPeriodoMxn": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "sin gasto declarado para este canal: se cuenta en 0 (el tráfico directo no paga pauta)"
+     },
+     "registrados": {
+      "valor": 1,
+      "unidad": "pacientes",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "cac": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "compuesta",
+      "fuente": "gasto supuesto del canal en el periodo ÷ registrados simulados del canal"
+     },
+     "conversion": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     }
+    }
+   ],
+   "avisosPorCanal": [
+    {
+     "canal": "whatsapp",
+     "entregados": {
+      "valor": 1,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "leidos": {
+      "valor": 1,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "solo WhatsApp da acuse de lectura; el del simulador no depende de la persona"
+     },
+     "entregabilidad": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "canales SIMULADOS: no dicen nada de la entrega real"
+     },
+     "costoPorAviso": {
+      "valor": 0,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "lo que Meta marcó como cobrable en el estado de cada mensaje (SIMULADO) × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+     }
+    },
+    {
+     "canal": "correo",
+     "entregados": {
+      "valor": 1,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+     },
+     "leidos": {
+      "valor": null,
+      "unidad": "avisos",
+      "origen": "simulada",
+      "fuente": "solo WhatsApp da acuse de lectura; el del simulador no depende de la persona"
+     },
+     "entregabilidad": {
+      "valor": 1,
+      "unidad": "proporción",
+      "origen": "simulada",
+      "fuente": "canales SIMULADOS: no dicen nada de la entrega real"
+     },
+     "costoPorAviso": {
+      "valor": 0.0074,
+      "unidad": "MXN",
+      "origen": "supuesta",
+      "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+     }
+    }
+   ],
+   "whatsapp": {
+    "mensajes": {
+     "valor": 39,
+     "unidad": "mensajes",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
+    },
+    "cobrables": {
+     "valor": 0,
+     "unidad": "mensajes",
+     "origen": "simulada",
+     "fuente": "plantillas siempre; servicio solo pasados los 1,000 gratis del mes"
+    },
+    "costo_periodo": {
+     "valor": 0,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "estados de Meta SIMULADOS × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_plantillas": {
+     "valor": 0,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "estados de Meta SIMULADOS × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "costo_servicio": {
+     "valor": 0,
+     "unidad": "MXN",
+     "origen": "supuesta",
+     "fuente": "estados de Meta SIMULADOS × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
+    },
+    "asistencias_confirmadas": {
+     "valor": 0,
+     "unidad": "citas",
+     "origen": "simulada",
+     "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow): el paciente sintético tocó «Confirmo»"
+    },
+    "tasa_vinculo": {
+     "valor": 1,
+     "unidad": "proporción",
+     "origen": "simulada",
+     "fuente": "códigos emitidos que terminaron en un número confirmado desde la cuenta"
+    }
+   }
+  }
+ ]
+}

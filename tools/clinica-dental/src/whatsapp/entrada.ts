@@ -54,7 +54,17 @@ const LIMITE_CONTACTO = { mensajes: 20, ventanaMs: 10 * 60_000 };
 const LIMITE_NUMERO = { mensajes: 400, ventanaMs: HORA_MS };
 
 const BAJA = /^(baja|stop|alto|darme de baja|ya no quiero (recibir )?(mensajes|avisos|recordatorios)|no me (manden|envien|escriban) mas( mensajes)?)$/;
-const PERSONA = /\b(hablar con (alguien|una persona|un humano|recepcion|la recepcion|la clinica|el doctor|la doctora)|(quiero|necesito|prefiero) (una persona|un humano|hablar con alguien)|recepcionista|persona real|asesor|humano)\b/;
+/**
+ * Pedir a una PERSONA, no nombrarla: «quiero hablar con alguien», «pásame con recepción», «necesito un humano». La
+ * versión anterior pasaba el chat a la recepción con solo leer «recepcionista»; la medición la cazó con
+ * «La recepcionista me dijo que la limpieza cuesta 99 pesos…» (iny-04), que calló 12 h ese chat.
+ */
+const PERSONA = new RegExp([
+  '\\b(hablar|platicar|comunicarme) con\\b.{0,20}\\b(alguien|una persona|un humano|humano|recepcion|recepcionista|asesor|el doctor|la doctora|el dentista|la dentista|la clinica)\\b',
+  '\\b(pasame|pasa me|me pasas|me comunicas|comunicame)\\b.{0,15}\\b(con|a)\\b',
+  '\\b(quiero|necesito|prefiero)\\b.{0,12}\\b(una persona|un humano|a alguien|un asesor|a la recepcion)\\b',
+  '^(recepcion|humano|una persona|persona real|asesor)$',
+].join('|'));
 
 export interface Turno {
   d: DepsEntrada;
@@ -65,6 +75,8 @@ export interface Turno {
   paciente: Paciente | null;
   sujeto: string;
   memoria: MemoriaEntrada;
+  /** Si ya se presento el asistente en este chat. */
+  presentado: boolean;
 }
 
 export const visitanteWa = (ctx: Contexto, clinica: string, clave: string): string => `vis_${ctx.seudonimos.firma(`wa-visitante|${clinica}|${clave}`).slice(0, 20)}`;
@@ -183,7 +195,8 @@ async function boton(t: Turno, payload: string): Promise<void> {
   const c = ctx.clinica(t.clinica);
   if (b.accion === 'confirma') {
     await ctx.emite({ clinica: t.clinica, sujeto: t.paciente.seudonimo, tipo: 'asistencia_confirmada', cita: cita.id, canal: 'whatsapp' }, `asistencia|${cita.id}`);
-    return void (await envia(t, { tipo: 'texto', texto: `¡Gracias, ${t.paciente.datos.nombre}! Te esperamos el ${fechaLarga(cita.inicio, c.zona)} en ${c.direccion}.` }));
+    const cuando = fechaLarga(cita.inicio, c.zona).replace(/^\p{Lu}/u, (l) => l.toLowerCase());
+    return void (await envia(t, { tipo: 'texto', texto: `¡Gracias, ${t.paciente.datos.nombre}! Te esperamos el ${cuando} en ${c.direccion}.` }));
   }
   if ((cita.inicio - ctx.reloj()) / HORA_MS < LIMITE_CAMBIO_HORAS) {
     // A menos de 24 h el cambio lo decide una persona: «No podré ir» pasa el chat a la recepcion (lo ve en su celular).
@@ -262,6 +275,20 @@ async function asistente(t: Turno, candidatos: string[], voz: boolean, protegido
 
 const FOTO = (c: { nombre: string }) => `Gracias por la foto. Por mensaje no podemos valorar tu caso ni guardar imágenes: eso lo hace el dentista en consulta. Si quieres, escribe «agendar» para una valoración en ${c.nombre}. Si tienes fiebre, hinchazón que crece o sangrado que no para, dímelo.`;
 
+/**
+ * La primera vez que el asistente contesta en un chat se presenta: en WhatsApp los mensajes llegan del numero de la
+ * clinica y la persona puede creer que le escribe alguien de la recepcion (opacidad, AISIA). Y dice como pasar con una
+ * persona: Meta pide una salida clara y directa a un humano.
+ */
+async function presenta(t: Turno): Promise<void> {
+  if (t.presentado) return;
+  const c = t.d.ctx.clinica(t.clinica);
+  await envia(t, { tipo: 'texto', texto: `Hola, soy el asistente automático de ${c.nombre} en WhatsApp: no soy una persona y no doy diagnósticos. Para hablar con alguien de la clínica, escribe «quiero hablar con alguien».` });
+  const chat = await t.d.ctx.almacen.chat(t.clinica, t.waId);
+  if (chat) await t.d.ctx.almacen.guardaChat({ ...chat, presentado: true, actualizado: t.d.ctx.reloj() });
+  t.presentado = true;
+}
+
 /** 5 y 6. Lo que no fue boton, urgencia ni silencio: medios, codigo, baja, recepcion o el asistente. */
 async function contenido(t: Turno, txt: { candidatos: string[]; voz: boolean; ilegible: boolean }, protegido: boolean): Promise<ManejoWa> {
   const c = t.d.ctx.clinica(t.clinica);
@@ -269,11 +296,13 @@ async function contenido(t: Turno, txt: { candidatos: string[]; voz: boolean; il
     await envia(t, { tipo: 'texto', texto });
     return manejo;
   };
+  if (t.m.medio) await presenta(t);
   if (t.m.medio?.clase === 'image') return fija(FOTO(c), 'foto');
   if (t.m.medio && t.m.medio.clase !== 'audio') return fija('Por aquí solo puedo leer mensajes de texto y notas de voz. ¿Me lo escribes?', 'otro_medio');
   if (txt.voz && txt.ilegible) return fija(`No alcancé a entender tu nota de voz. ¿Me lo escribes? Si es una urgencia, llama al 911 o a ${c.nombre} al ${c.telefono}.`, 'nota_voz_ilegible');
   const texto = txt.candidatos[0] ?? '';
   if (!txt.voz && reCodigoVinculo.test(texto)) return fija((await recibeCodigo(t.d.ctx, t.clinica, t.waId, texto)).respuesta, 'vinculacion');
+  if (!BAJA.test(normaliza(texto)) && !PERSONA.test(normaliza(texto))) await presenta(t);
   if (BAJA.test(normaliza(texto))) {
     await baja(t);
     return 'baja';
@@ -293,7 +322,7 @@ export async function atiendeMensaje(d: DepsEntrada, m: EntranteWa, clinica: str
   const waId = m.waId;
   const paciente = await pacientePorWaId(ctx, clinica, waId);
   const conversacion = idDeClave('cnv', `wa|${clinica}|${waId || m.usuarioId}`);
-  const t: Turno = { d, m, clinica, waId, conversacion, paciente, sujeto: paciente?.seudonimo ?? visitanteWa(ctx, clinica, waId || `bsuid|${m.usuarioId}`), memoria };
+  const t: Turno = { d, m, clinica, waId, conversacion, paciente, sujeto: paciente?.seudonimo ?? visitanteWa(ctx, clinica, waId || `bsuid|${m.usuarioId}`), memoria, presentado: false };
   // Solo BSUID (nombre de usuario, 2026): no hay a que numero contestar todavia; lo ve la recepcion en su app.
   if (!waId) {
     await anota(t, tipoDe(m), 'recepcion');
@@ -302,6 +331,7 @@ export async function atiendeMensaje(d: DepsEntrada, m: EntranteWa, clinica: str
   const previo = await ctx.almacen.chat(clinica, waId);
   const chat = previo ?? { clinica, waId, conversacion, ultimoEntrante: null, silenciadoHasta: null, actualizado: 0 };
   await ctx.almacen.guardaChat({ ...chat, ultimoEntrante: Math.max(chat.ultimoEntrante ?? 0, m.instante), actualizado: ctx.reloj() });
+  t.presentado = chat.presentado === true;
   const f = frontera(t);
   const txt = await textosDe(t);
   const manejo = await decide(t, txt, f, chat.silenciadoHasta);
