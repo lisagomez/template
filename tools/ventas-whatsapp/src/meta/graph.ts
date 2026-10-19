@@ -7,6 +7,8 @@
  *  - `POST /{phone_number_id}/messages` → `{ messaging_product, contacts:[{input, wa_id}], messages:[{id}] }`
  *  - `POST /{phone_number_id}/message_qrdls` → `{ code, prefilled_message, deep_link_url, qr_image_url }`
  *  - `POST /{dataset_id}/events` (Conversions API) → `{ events_received, messages, fbtrace_id }`
+ *  - `GET /{media_id}` → `{ url, mime_type, sha256, file_size, id }`, y `GET <url>` con el mismo token → los bytes
+ *    (la URL caduca en minutos; se descarga solo lo que se decide procesar)
  * La versión de la Graph API va FIJA en configuración, nunca «la última».
  */
 import { esObjeto, numero, texto } from '../comun/base.js';
@@ -16,6 +18,7 @@ export const VERSION_GRAPH = 'v24.0';
 export type RespuestaEnvio = { ok: true; wamid: string } | { ok: false; codigo: number; error: string };
 export type RespuestaQr = { ok: true; codigo: string; ligaCorta: string; urlImagen: string; mensaje: string } | { ok: false; error: string };
 export type RespuestaCapi = { ok: true; recibidos: number; traza: string } | { ok: false; codigo: number; error: string };
+export type RespuestaMedio = { ok: true; bytes: Uint8Array; mime: string; sha256?: string } | { ok: false; codigo: number; error: string };
 
 export interface EventoCapi {
   event_name: string;
@@ -33,9 +36,11 @@ export interface ClienteGraph {
   marcaLeido(phoneNumberId: string, wamid: string): Promise<boolean>;
   creaQr(phoneNumberId: string, mensajePrellenado: string, formato: 'SVG' | 'PNG'): Promise<RespuestaQr>;
   enviaEventos(datasetId: string, eventos: EventoCapi[]): Promise<RespuestaCapi>;
+  /** Baja un medio que llegó por webhook (nota de voz, foto). Opcional: quien no procesa medios no lo implementa. */
+  descargaMedio?(phoneNumberId: string, mediaId: string): Promise<RespuestaMedio>;
 }
 
-type Fetch = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ status: number; json(): Promise<unknown> }>;
+type Fetch = (url: string, init: { method: string; headers: Record<string, string>; body?: string }) => Promise<{ status: number; json(): Promise<unknown>; arrayBuffer?(): Promise<ArrayBuffer> }>;
 
 export interface OpcionesGraphHttp {
   /** `https://graph.facebook.com` en producción; la URL del simulador en el laboratorio. */
@@ -87,6 +92,17 @@ export function clienteGraphHttp(o: OpcionesGraphHttp): ClienteGraph {
       if (r.status === 200 && numero(c.events_received) !== undefined) return { ok: true, recibidos: numero(c.events_received) ?? 0, traza: texto(c.fbtrace_id) ?? '' };
       return { ok: false, ...errorDe(r.cuerpo, r.status) };
     },
+    async descargaMedio(_phoneNumberId, mediaId) {
+      const cabeceras = { authorization: `Bearer ${o.token}` };
+      const meta = await o.fetch(`${o.base.replace(/\/$/, '')}/${version}/${encodeURIComponent(mediaId)}`, { method: 'GET', headers: cabeceras });
+      const m = await meta.json().catch(() => null);
+      const url = esObjeto(m) ? texto(m.url) : undefined;
+      if (meta.status !== 200 || !url) return { ok: false, ...errorDe(m, meta.status) };
+      const r = await o.fetch(url, { method: 'GET', headers: cabeceras });
+      if (r.status !== 200 || !r.arrayBuffer) return { ok: false, codigo: r.status, error: `HTTP ${r.status} al bajar el medio` };
+      const sha = esObjeto(m) ? texto(m.sha256) : undefined;
+      return { ok: true, bytes: new Uint8Array(await r.arrayBuffer()), mime: (esObjeto(m) ? texto(m.mime_type) : undefined) ?? '', ...(sha ? { sha256: sha } : {}) };
+    },
   };
 }
 
@@ -106,5 +122,6 @@ export function clienteGraphMultiInquilino(o: Omit<OpcionesGraphHttp, 'token'> &
     marcaLeido: (id, wamid) => para(id).marcaLeido(id, wamid),
     creaQr: (id, mensaje, formato) => para(id).creaQr(id, mensaje, formato),
     enviaEventos: (id, eventos) => para(id).enviaEventos(id, eventos),
+    descargaMedio: (id, mediaId) => para(id).descargaMedio!(id, mediaId),
   };
 }

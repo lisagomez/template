@@ -19,6 +19,7 @@ export default async function LaboratorioClinica() {
         {CLINICAS.map((c) => <li key={c.id}><Link className="block rounded-xl bg-white p-4 ring-1 ring-slate-200 hover:ring-slate-400" href={`/clinica/${c.id}`}>Portal de <strong>{c.nombre}</strong></Link></li>)}
         <li><Link className="block rounded-xl bg-white p-4 ring-1 ring-slate-200" href="/laboratorio-clinica-dental/buzon">Buzón de salida ({rt.buzon.enviados.length} correos)</Link></li>
         <li><Link className="block rounded-xl bg-white p-4 ring-1 ring-slate-200" href="/laboratorio-clinica-dental/telegram">Telegram simulado ({rt.telegram.historial.length} mensajes)</Link></li>
+        <li><Link className="block rounded-xl bg-white p-4 ring-1 ring-slate-200" href="/laboratorio-clinica-dental/whatsapp">WhatsApp simulado ({rt.whatsapp.receptor().alertas.length} alertas del canal)</Link></li>
         <li><Link className="block rounded-xl bg-white p-4 ring-1 ring-slate-200" href="/laboratorio-clinica-dental/tablero">Unit economics</Link></li>
         <li><Link className="block rounded-xl bg-white p-4 ring-1 ring-slate-200" href="/laboratorio-clinica-dental/grafo">Grafo de atención</Link></li>
       </ul>

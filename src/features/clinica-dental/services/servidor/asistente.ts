@@ -15,13 +15,13 @@ import { modeloPara } from '../../../../lib/ai/routing.ts';
 import { anotaGasto, estadoGasto } from './gasto';
 import { runtime } from './runtime';
 
-const CANARIO = `ref-${randomBytes(6).toString('hex')}`;
-const enrutador = creaEnrutadorLocal({ ordenes: ORDENES_CLINICA, vocativos: ['asistente'], verbosEscritura: [...VERBOS_ESCRITURA, ...VERBOS_ESCRITURA_CLINICA] });
+export const CANARIO = `ref-${randomBytes(6).toString('hex')}`;
+export const enrutador = creaEnrutadorLocal({ ordenes: ORDENES_CLINICA, vocativos: ['asistente'], verbosEscritura: [...VERBOS_ESCRITURA, ...VERBOS_ESCRITURA_CLINICA] });
 
 export class SinCerebro extends Error {}
 
 /** El cerebro con tope y libro de gasto: una llamada abortada o fallida tambien se anota (coste null). */
-function cerebroPara(sistema: string, maxTokens: number): PuertoCerebro {
+export function cerebroPara(sistema: string, maxTokens: number): PuertoCerebro {
   const { modelo, precio } = modeloPara('asistente-paciente');
   return {
     async *piensa(mensajes, senal) {

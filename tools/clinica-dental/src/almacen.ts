@@ -19,6 +19,12 @@ export interface Paciente {
   categorias: Categoria[];
   canalAdquisicion: CanalAdquisicion;
   telegram: { chatId: number | null; vinculadoEn: number | null };
+  /**
+   * El WhatsApp VINCULADO: el `wa_id` normalizado de un numero que escribio a la clinica con su codigo Y que la
+   * persona confirmo desde su cuenta. El celular del registro NO sirve para mandar nada: puede estar mal escrito.
+   * Opcional porque los pacientes de antes del canal no lo traen.
+   */
+  whatsapp?: { waId: string | null; vinculadoEn: number | null };
   creado: number;
 }
 
@@ -45,7 +51,8 @@ export interface Cita {
   secuencia: number;
 }
 
-export type EstadoAviso = 'programado' | 'esperando_vinculo' | 'enviando' | 'entregado' | 'fallido' | 'cancelado' | 'incierto';
+/** `enviado` y `leido` son de WhatsApp: Meta acepta el mensaje (enviado) y DESPUES avisa si se entrego o se leyo. */
+export type EstadoAviso = 'programado' | 'esperando_vinculo' | 'enviando' | 'enviado' | 'entregado' | 'leido' | 'fallido' | 'cancelado' | 'incierto';
 export interface Aviso {
   id: string;
   clinica: string;
@@ -60,9 +67,32 @@ export interface Aviso {
   motivo: string | null;
   edicion: string | null;
   actualizado: number;
+  /** El id del mensaje en WhatsApp: los estados que llegan despues se atan al aviso por el. */
+  wamid?: string | null;
 }
 
-export interface Token { id: string; clinica: string; paciente: string; tipo: 'baja' | 'telegram'; creado: number; expira: number | null; usado: number | null }
+/**
+ * Un token de un solo uso. El de WhatsApp es el CODIGO de vinculacion: cuando un numero lo manda, queda
+ * `pendiente` de que la persona confirme ese numero desde su cuenta; nada se le manda a ese numero antes.
+ */
+export interface Token {
+  id: string; clinica: string; paciente: string; tipo: 'baja' | 'telegram' | 'whatsapp'; creado: number; expira: number | null; usado: number | null;
+  pendiente?: { waId: string; recibido: number } | null;
+}
+
+/**
+ * El estado de UNA conversacion de WhatsApp (clinica, numero). Sin el texto de nada: el historial que el asistente
+ * necesita vive en memoria del proceso y caduca (ver el receptor). `silenciadoHasta`: la recepcion escribio desde
+ * su celular (coexistencia) o la persona pidio a alguien, y el asistente calla salvo ante una urgencia.
+ */
+export interface ChatWhatsApp {
+  clinica: string;
+  waId: string;
+  conversacion: string;
+  ultimoEntrante: number | null;
+  silenciadoHasta: number | null;
+  actualizado: number;
+}
 
 export interface AlmacenPortal {
   paciente(clinica: string, usuario: string): Promise<Paciente | null>;
@@ -78,7 +108,13 @@ export interface AlmacenPortal {
   aviso(clinica: string, id: string): Promise<Aviso | null>;
   guardaAviso(a: Aviso): Promise<void>;
   token(id: string): Promise<Token | null>;
+  /** Los tokens de UN paciente en SU clinica (los codigos de vinculacion vivos o pendientes). */
+  tokensDe(clinica: string, paciente: string): Promise<Token[]>;
   guardaToken(t: Token): Promise<void>;
+  chat(clinica: string, waId: string): Promise<ChatWhatsApp | null>;
+  guardaChat(c: ChatWhatsApp): Promise<void>;
+  /** Marca un id (un `wamid`, un estado) como procesado. `false` si YA lo estaba: la idempotencia del receptor. */
+  marcaProcesado(id: string): Promise<boolean>;
 }
 
 export interface InstantaneaPortal {
@@ -87,6 +123,8 @@ export interface InstantaneaPortal {
   citas: Cita[];
   avisos: Aviso[];
   tokens: Token[];
+  chats?: ChatWhatsApp[];
+  procesados?: string[];
 }
 
 const copia = <T>(x: T): T => structuredClone(x);
@@ -145,9 +183,26 @@ export class AlmacenPortalEnMemoria implements AlmacenPortal {
   async token(id: string) {
     return copia(this.s.tokens.find((t) => t.id === id) ?? null);
   }
+  async tokensDe(clinica: string, paciente: string) {
+    return copia(this.s.tokens.filter((t) => t.clinica === clinica && t.paciente === paciente));
+  }
   async guardaToken(t: Token) {
     this.s.tokens = [...this.s.tokens.filter((x) => x.id !== t.id), copia(t)];
     await this.cambio();
+  }
+  async chat(clinica: string, waId: string) {
+    return copia((this.s.chats ?? []).find((c) => c.clinica === clinica && c.waId === waId) ?? null);
+  }
+  async guardaChat(c: ChatWhatsApp) {
+    this.s.chats = [...(this.s.chats ?? []).filter((x) => !(x.clinica === c.clinica && x.waId === c.waId)), copia(c)];
+    await this.cambio();
+  }
+  async marcaProcesado(id: string) {
+    const ya = new Set(this.s.procesados ?? []);
+    if (ya.has(id)) return false;
+    this.s.procesados = [...(this.s.procesados ?? []), id];
+    await this.cambio();
+    return true;
   }
 }
 

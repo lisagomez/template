@@ -7,6 +7,7 @@ import { appendFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises
 import { dirname, join } from 'node:path';
 import { AlmacenPortalEnMemoria, type InstantaneaPortal } from '../almacen.js';
 import type { AlmacenLibro, Eslabon, Sello } from '../libro.js';
+import type { ColaEntrada, ElementoCola } from '../whatsapp/receptor.js';
 
 async function leeTexto(ruta: string): Promise<string | null> {
   try {
@@ -65,6 +66,33 @@ export function libroEnArchivo(dir: string): AlmacenLibro {
     async agregaSello(s) {
       await mkdir(join(dir, 'sellos'), { recursive: true });
       await appendFile(sellos(s.clinica), `${JSON.stringify(s)}\n`, { mode: 0o600 });
+    },
+  };
+}
+
+/**
+ * La cola durable del webhook de WhatsApp en archivo: cada cuerpo se AGREGA a `entrada.jsonl` (y se espera a que
+ * llegue al disco) ANTES de contestar 200; lo procesado se agrega a `hechos.jsonl`. Si el proceso se cae entre las
+ * dos, al arrancar el elemento sigue pendiente y se procesa (una vez: el receptor es idempotente por `wamid`).
+ */
+export function colaEnArchivo(dir: string): ColaEntrada {
+  const entrada = join(dir, 'entrada.jsonl');
+  const hechos = join(dir, 'hechos.jsonl');
+  let n = 0;
+  return {
+    async agrega(cuerpo, recibido) {
+      await mkdir(dir, { recursive: true });
+      const id = `${recibido.toString(36)}-${process.pid}-${++n}`;
+      await appendFile(entrada, `${JSON.stringify({ id, cuerpo, recibido } satisfies ElementoCola)}\n`, { mode: 0o600 });
+      return id;
+    },
+    async pendientes() {
+      const listos = new Set(lineas<{ id: string }>(await leeTexto(hechos)).map((h) => h.id));
+      return lineas<ElementoCola>(await leeTexto(entrada)).filter((e) => !listos.has(e.id));
+    },
+    async hecho(id) {
+      await mkdir(dir, { recursive: true });
+      await appendFile(hechos, `${JSON.stringify({ id })}\n`, { mode: 0o600 });
     },
   };
 }

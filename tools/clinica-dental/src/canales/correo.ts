@@ -8,7 +8,7 @@
  *
  * Idempotencia: el `Message-ID` sale del id del aviso; el buzon no guarda dos veces el mismo.
  */
-import { exigeGate, type Entorno } from './gate.js';
+import { exigeGate, type CanalReal, type Entorno } from './gate.js';
 
 export interface Direccion { nombre: string; direccion: string }
 export interface Adjunto { nombre: string; tipo: string; contenido: string | Uint8Array }
@@ -158,8 +158,8 @@ export class CorreoGmail implements PuertoCorreo {
   private readonly token: () => Promise<string>;
   private readonly fetch: typeof globalThis.fetch;
 
-  constructor(op: { env: Entorno; token: () => Promise<string>; fetch: typeof globalThis.fetch }) {
-    exigeGate('Gmail', op.env);
+  constructor(op: { env: Entorno; token: () => Promise<string>; fetch: typeof globalThis.fetch; revisiones?: Readonly<Record<CanalReal, string | null>> }) {
+    exigeGate('correo', op.env, op.revisiones);
     this.token = op.token;
     this.fetch = op.fetch;
   }

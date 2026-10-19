@@ -21,6 +21,10 @@ export const RUTAS = {
   gasto: resolve(/*turbopackIgnore: true*/ DATOS, 'gasto.jsonl'),
   llaves: resolve(/*turbopackIgnore: true*/ DATOS, 'llaves.json'),
   reloj: resolve(/*turbopackIgnore: true*/ DATOS, 'reloj.json'),
+  /** La cola durable del webhook de WhatsApp (se escribe antes de contestar 200). */
+  colaWhatsapp: resolve(/*turbopackIgnore: true*/ DATOS, 'whatsapp-cola'),
+  /** Los hosts a los que el SERVIDOR salio (guardia de red del laboratorio): ninguno de Meta. */
+  red: resolve(/*turbopackIgnore: true*/ DATOS, 'red-servidor.json'),
 } as const;
 
 export class SoloLaboratorio extends Error {
@@ -41,3 +45,9 @@ export const URL_PORTAL = process.env['CLINICA_URL_PORTAL'] ?? 'http://127.0.0.1
 export const TOPE_USD = Number(process.env['CLINICA_TOPE_USD'] ?? '1');
 /** El secreto del webhook de Telegram (`X-Telegram-Bot-Api-Secret-Token`); en el laboratorio, uno de prueba. */
 export const SECRETO_WEBHOOK = process.env['CLINICA_TELEGRAM_SECRETO'] ?? 'secreto-del-webhook-del-laboratorio';
+/**
+ * El secreto de la app de Meta (firma `X-Hub-Signature-256` del webhook y del endpoint de Flows) y el token de
+ * verificacion de la suscripcion. En el laboratorio, de prueba: el simulador firma con el mismo.
+ */
+export const SECRETO_APP_WA = process.env['CLINICA_WA_SECRETO_APP'] ?? 'secreto-de-la-app-de-meta-del-laboratorio';
+export const VERIFICA_WA = process.env['CLINICA_WA_VERIFICA'] ?? 'verificacion-del-laboratorio';

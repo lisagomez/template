@@ -114,7 +114,7 @@ test('un evento FUERA DE CONTRATO no entra al libro (campo de más con un nombre
   await assert.rejects(libro.registra({ clinica: 'maguey', tipo: 'newsletter_baja', sujeto, via: 'portal', nombre: 'Ameyalli' } as never, 'x'));
   await assert.rejects(libro.registra({ clinica: 'maguey', tipo: 'newsletter_baja', sujeto: 'ameyalli@pacientes.example', via: 'portal' } as never, 'y'));
   const ok = await libro.registra({ clinica: 'maguey', tipo: 'newsletter_baja', sujeto, via: 'portal' }, 'z');
-  assert.equal(ok.v, 1);
+  assert.equal(ok.v, 2, 'contrato v2 (WhatsApp)');
   assert.equal((await libro.eventos('maguey')).length, 1);
 });
 

@@ -9,32 +9,43 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { cambiarConsentimiento, cancelar, enlaceTelegram } from '../../services/servidor/acciones';
 import { Aviso, clasesBoton, clasesBotonSecundario } from '../ui';
-import type { VistaCitaUI, VistaAvisoUI } from '../../types';
+import type { VinculoWhatsappUI, VistaCitaUI, VistaAvisoUI } from '../../types';
+import { VinculoWhatsapp } from './vinculo-whatsapp';
 
 const CLASE: Record<VistaAvisoUI['clase'], string> = { confirmacion: 'Confirmación', recordatorio_24h: 'Recordatorio 24 h antes', recordatorio_2h: 'Recordatorio 2 h antes', cancelacion: 'Aviso de cancelación', newsletter: 'Newsletter' };
 const ESTADO: Record<VistaAvisoUI['estado'], { texto: string; tono: string }> = {
-  programado: { texto: 'Programado', tono: 'bg-slate-100 text-slate-800' }, esperando_vinculo: { texto: 'Esperando que inicies el chat', tono: 'bg-amber-100 text-amber-900' },
-  enviando: { texto: 'Enviando', tono: 'bg-slate-100 text-slate-800' }, entregado: { texto: 'Entregado', tono: 'bg-emerald-100 text-emerald-900' },
+  programado: { texto: 'Programado', tono: 'bg-slate-100 text-slate-800' }, esperando_vinculo: { texto: 'Esperando que vincules el canal', tono: 'bg-amber-100 text-amber-900' },
+  enviando: { texto: 'Enviando', tono: 'bg-slate-100 text-slate-800' }, enviado: { texto: 'Enviado', tono: 'bg-sky-100 text-sky-900' }, entregado: { texto: 'Entregado', tono: 'bg-emerald-100 text-emerald-900' },
+  leido: { texto: 'Leído', tono: 'bg-emerald-100 text-emerald-900' },
   fallido: { texto: 'No se pudo entregar', tono: 'bg-red-100 text-red-900' }, cancelado: { texto: 'Cancelado', tono: 'bg-slate-200 text-slate-700' },
   incierto: { texto: 'No sabemos si llegó', tono: 'bg-amber-100 text-amber-900' },
 };
-const MOTIVO: Record<string, string> = { rebote: 'tu correo rebotó', sin_vincular: 'no iniciaste el chat de Telegram', bot_no_iniciado: 'el bot no puede escribirte primero', baja: 'te diste de baja', cita_cancelada: 'cancelaste la cita', cita_reprogramada: 'cambiaste la cita', consentimiento_retirado: 'retiraste el permiso', limite: 'el proveedor pidió esperar; se reintenta' };
+const MOTIVO: Record<string, string> = {
+  rebote: 'tu correo rebotó', sin_vincular: 'no vinculaste el canal', bot_no_iniciado: 'el bot no puede escribirte primero', baja: 'te diste de baja', cita_cancelada: 'cancelaste la cita',
+  cita_reprogramada: 'cambiaste la cita', consentimiento_retirado: 'retiraste el permiso', limite: 'el proveedor pidió esperar; se reintenta',
+  no_whatsapp: 'ese número no tiene WhatsApp; te lo mandamos por correo', plantilla: 'WhatsApp detuvo el mensaje; te lo mandamos por correo',
+  canal_desconectado: 'el WhatsApp de la clínica está desconectado; te lo mandamos por correo', fuera_de_ventana: 'WhatsApp no dejó mandarlo',
+};
+const NOMBRE_CANAL: Record<VistaAvisoUI['canal'], string> = { correo: 'Correo', telegram: 'Telegram', whatsapp: 'WhatsApp' };
 
 function FilaAviso({ a, alVincular }: { a: VistaAvisoUI; alVincular: () => void }) {
   const e = ESTADO[a.estado];
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-      <span><span className="font-medium">{CLASE[a.clase]}</span> · {a.canal === 'correo' ? 'Correo' : 'Telegram'} · <span className="text-slate-600">{a.cuando}</span></span>
+      <span><span className="font-medium">{CLASE[a.clase]}</span> · {NOMBRE_CANAL[a.canal]} · <span className="text-slate-600">{a.cuando}</span></span>
       <span className="flex items-center gap-2">
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${e.tono}`}>{e.texto}{a.motivo && MOTIVO[a.motivo] ? `: ${MOTIVO[a.motivo]}` : ''}</span>
         {a.accion === 'vincular_telegram' ? <button type="button" className="text-xs font-medium underline" onClick={alVincular}>Iniciar chat</button> : null}
         {a.accion === 'revisar_correo' ? <span className="text-xs">Revisa tu correo con la clínica</span> : null}
+        {a.accion === 'vincular_whatsapp' ? <a className="text-xs font-medium underline" href="#mi-whatsapp">Vincular WhatsApp</a> : null}
       </span>
     </li>
   );
 }
 
-export function MisCitas({ clinica, citas, newsletter, consentimientos, telefono }: { clinica: string; citas: VistaCitaUI[]; newsletter: VistaAvisoUI[]; consentimientos: Record<string, boolean>; telefono: string }) {
+interface PropsMisCitas { clinica: string; citas: VistaCitaUI[]; newsletter: VistaAvisoUI[]; consentimientos: Record<string, boolean>; telefono: string; whatsapp: VinculoWhatsappUI; laboratorioWhatsapp: string | null }
+
+export function MisCitas({ clinica, citas, newsletter, consentimientos, telefono, whatsapp, laboratorioWhatsapp }: PropsMisCitas) {
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState<{ tono: 'ok' | 'error'; texto: string } | null>(null);
   const [enlace, setEnlace] = useState<string | null>(null);
@@ -82,6 +93,7 @@ export function MisCitas({ clinica, citas, newsletter, consentimientos, telefono
           </li>
         ))}
       </ul>
+      <VinculoWhatsapp clinica={clinica} estado={whatsapp} telefonoClinica={telefono} laboratorio={laboratorioWhatsapp} />
       {newsletter.length ? <section className="rounded-xl bg-white p-4 ring-1 ring-slate-200"><h2 className="font-semibold">Newsletter</h2><ul className="divide-y divide-slate-100">{newsletter.map((a) => <FilaAviso key={a.id} a={a} alVincular={() => void vincula()} />)}</ul></section> : null}
       <Consentimientos valores={consentimientos} alCambiar={(t, v) => void consiente(t, v)} />
     </div>
@@ -89,7 +101,7 @@ export function MisCitas({ clinica, citas, newsletter, consentimientos, telefono
 }
 
 function Consentimientos({ valores, alCambiar }: { valores: Record<string, boolean>; alCambiar: (tipo: string, valor: boolean) => void }) {
-  const filas: [string, string][] = [['recordatorios', 'Recordatorios de mis citas'], ['telegram', 'Avisos por Telegram'], ['newsletter', 'Newsletter con novedades y promociones'], ['datos_salud', 'Tratamiento de la descripción de mi padecimiento (dato de salud)']];
+  const filas: [string, string][] = [['recordatorios', 'Recordatorios de mis citas'], ['whatsapp', 'Avisos por WhatsApp'], ['telegram', 'Avisos por Telegram'], ['newsletter', 'Newsletter con novedades y promociones'], ['datos_salud', 'Tratamiento de la descripción de mi padecimiento (dato de salud)']];
   return (
     <section aria-labelledby="mis-permisos" className="rounded-xl bg-white p-4 ring-1 ring-slate-200 sm:p-5">
       <h2 id="mis-permisos" className="font-semibold">Mis permisos</h2>
@@ -98,7 +110,7 @@ function Consentimientos({ valores, alCambiar }: { valores: Record<string, boole
         {filas.map(([t, texto]) => (
           <li key={t} className="flex items-center justify-between gap-3 py-2 text-sm">
             <span>{texto}: <strong>{valores[t] ? 'activo' : 'no activo'}</strong></span>
-            {valores[t] ? <button type="button" className={clasesBotonSecundario} onClick={() => alCambiar(t, false)}>Retirar</button> : t === 'datos_salud' ? null : <button type="button" className={clasesBotonSecundario} onClick={() => alCambiar(t, true)}>Activar</button>}
+            {valores[t] ? <button type="button" className={clasesBotonSecundario} onClick={() => alCambiar(t, false)}>Retirar</button> : t === 'datos_salud' ? null : t === 'whatsapp' ? <a className="text-xs underline" href="#mi-whatsapp">Vincular arriba</a> : <button type="button" className={clasesBotonSecundario} onClick={() => alCambiar(t, true)}>Activar</button>}
           </li>
         ))}
       </ul>

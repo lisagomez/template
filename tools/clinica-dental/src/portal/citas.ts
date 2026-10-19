@@ -13,9 +13,9 @@ import { cancelaAvisos, edicionDelMes, programaAvisosDeCita, programaCancelacion
 import { ErrorPortal, HORA_MS, vigentes, type Contexto } from './contexto.js';
 import { cambiaConsentimiento } from './registro.js';
 
-export interface EntradaReserva { clinica: string; usuario: string; servicio: string; inicio: string; canales: CanalAviso[]; newsletter: boolean; clave: string; via?: 'portal' | 'asistente'; /** La cita que se está reprogramando: no cuenta como empalme consigo misma. */ reprogramaDe?: string }
+export interface EntradaReserva { clinica: string; usuario: string; servicio: string; inicio: string; canales: CanalAviso[]; newsletter: boolean; clave: string; via?: 'portal' | 'asistente' | 'whatsapp'; /** La cita que se está reprogramando: no cuenta como empalme consigo misma. */ reprogramaDe?: string }
 export type ResultadoReserva =
-  | { ok: true; cita: Cita; repetida: boolean; telegramPorVincular: boolean }
+  | { ok: true; cita: Cita; repetida: boolean; telegramPorVincular: boolean; whatsappPorVincular?: boolean }
   | { ok: false; motivo: 'ocupado' | 'fuera-de-regla' | 'empalme' | 'otro'; detalle: string };
 
 export const LIMITE_CAMBIO_HORAS = 24;
@@ -23,6 +23,7 @@ export const LIMITE_CAMBIO_HORAS = 24;
 async function otorgaPorSelector(ctx: Contexto, e: EntradaReserva): Promise<void> {
   if (e.canales.length > 0) await cambiaConsentimiento(ctx, e.clinica, e.usuario, 'recordatorios', true);
   if (e.canales.includes('telegram')) await cambiaConsentimiento(ctx, e.clinica, e.usuario, 'telegram', true);
+  if (e.canales.includes('whatsapp')) await cambiaConsentimiento(ctx, e.clinica, e.usuario, 'whatsapp', true);
   if (e.newsletter) await cambiaConsentimiento(ctx, e.clinica, e.usuario, 'newsletter', true);
 }
 
@@ -54,7 +55,7 @@ export async function reserva(ctx: Contexto, e: EntradaReserva): Promise<Resulta
   const actual = (await ctx.almacen.paciente(e.clinica, e.usuario)) ?? p;
   await programaAvisosDeCita(ctx, actual, cita);
   await programaNewsletter(ctx, actual, (ctx.edicionNewsletter ?? (() => edicionDelMes(ctx.reloj())))());
-  return { ok: true, cita, repetida: false, telegramPorVincular: cita.canales.includes('telegram') && actual.telegram.chatId === null };
+  return { ok: true, cita, repetida: false, telegramPorVincular: cita.canales.includes('telegram') && actual.telegram.chatId === null, whatsappPorVincular: cita.canales.includes('whatsapp') && !actual.whatsapp?.waId };
 }
 
 async function citaPropia(ctx: Contexto, clinica: string, usuario: string, id: string): Promise<Cita> {
@@ -67,37 +68,39 @@ async function citaPropia(ctx: Contexto, clinica: string, usuario: string, id: s
   return cita;
 }
 
-export async function cancela(ctx: Contexto, clinica: string, usuario: string, id: string): Promise<Cita> {
+export async function cancela(ctx: Contexto, clinica: string, usuario: string, id: string, via: 'portal' | 'whatsapp' = 'portal'): Promise<Cita> {
   const cita = await citaPropia(ctx, clinica, usuario, id);
   await ctx.agenda(clinica).libera(cita.sillon, cita.servicio, cita.reservaId, `${id}:cancela`);
   const cancelada: Cita = { ...cita, estado: 'cancelada' };
   await ctx.almacen.guardaCita(cancelada);
   await cancelaAvisos(ctx, clinica, cita.paciente, (a) => a.cita === id, 'cita_cancelada');
-  await ctx.emite({ clinica, sujeto: cita.paciente, tipo: 'cita_cancelada', cita: id, motivo: 'paciente', horas_antes: Math.round(((cita.inicio - ctx.reloj()) / HORA_MS) * 10) / 10 }, `cancelada|${id}`);
+  await ctx.emite({ clinica, sujeto: cita.paciente, tipo: 'cita_cancelada', cita: id, motivo: 'paciente', horas_antes: Math.round(((cita.inicio - ctx.reloj()) / HORA_MS) * 10) / 10, via }, `cancelada|${id}`);
   const p = await ctx.exigePaciente(clinica, usuario);
   if ((await vigentes(ctx, clinica, p.seudonimo)).recordatorios === true) await programaCancelacion(ctx, p, cancelada);
   return cancelada;
 }
 
 /** Aparta el hueco nuevo ANTES de soltar el viejo: si el nuevo no se puede, la cita original sigue intacta. */
-export async function reprograma(ctx: Contexto, clinica: string, usuario: string, id: string, nuevoInicio: string, clave: string): Promise<ResultadoReserva> {
+export async function reprograma(ctx: Contexto, clinica: string, usuario: string, id: string, nuevoInicio: string, clave: string, via: 'portal' | 'whatsapp' = 'portal'): Promise<ResultadoReserva> {
   const vieja = await citaPropia(ctx, clinica, usuario, id);
-  const nueva = await reserva(ctx, { clinica, usuario, servicio: vieja.servicio, inicio: nuevoInicio, canales: vieja.canales, newsletter: false, clave: `${clave}|reprograma|${id}`, reprogramaDe: vieja.id });
+  const nueva = await reserva(ctx, { clinica, usuario, servicio: vieja.servicio, inicio: nuevoInicio, canales: vieja.canales, newsletter: false, clave: `${clave}|reprograma|${id}`, reprogramaDe: vieja.id, via });
   if (!nueva.ok || nueva.repetida) return nueva;
   await ctx.agenda(clinica).libera(vieja.sillon, vieja.servicio, vieja.reservaId, `${id}:reprograma`);
   await ctx.almacen.guardaCita({ ...vieja, estado: 'reprogramada' });
   const actualizada: Cita = { ...nueva.cita, anterior: vieja.id, origen: vieja.origen, secuencia: vieja.secuencia + 1 };
   await ctx.almacen.guardaCita(actualizada);
   await cancelaAvisos(ctx, clinica, vieja.paciente, (a) => a.cita === vieja.id, 'cita_reprogramada');
-  await ctx.emite({ clinica, sujeto: vieja.paciente, tipo: 'cita_reprogramada', cita: actualizada.id, cita_anterior: vieja.id, inicio_anterior: new Date(vieja.inicio).toISOString(), inicio_nuevo: new Date(actualizada.inicio).toISOString() }, `reprogramada|${vieja.id}`);
-  await ctx.emite({ clinica, sujeto: vieja.paciente, tipo: 'cita_cancelada', cita: vieja.id, motivo: 'reprogramada', horas_antes: Math.round(((vieja.inicio - ctx.reloj()) / HORA_MS) * 10) / 10 }, `cancelada|${vieja.id}`);
+  await ctx.emite({ clinica, sujeto: vieja.paciente, tipo: 'cita_reprogramada', cita: actualizada.id, cita_anterior: vieja.id, inicio_anterior: new Date(vieja.inicio).toISOString(), inicio_nuevo: new Date(actualizada.inicio).toISOString(), via }, `reprogramada|${vieja.id}`);
+  await ctx.emite({ clinica, sujeto: vieja.paciente, tipo: 'cita_cancelada', cita: vieja.id, motivo: 'reprogramada', horas_antes: Math.round(((vieja.inicio - ctx.reloj()) / HORA_MS) * 10) / 10, via }, `cancelada|${vieja.id}`);
   return { ...nueva, cita: actualizada };
 }
 
-export interface VistaAviso { id: string; canal: CanalAviso; clase: Aviso['clase']; estado: Aviso['estado']; para: number; motivo: string | null; accion: 'vincular_telegram' | 'resuscribir' | 'revisar_correo' | null }
+export interface VistaAviso { id: string; canal: CanalAviso; clase: Aviso['clase']; estado: Aviso['estado']; para: number; motivo: string | null; accion: 'vincular_telegram' | 'vincular_whatsapp' | 'revisar_whatsapp' | 'resuscribir' | 'revisar_correo' | null }
 export interface VistaCita { cita: Cita; servicio: string; avisos: VistaAviso[]; puedeCambiar: boolean }
 
 function accionDe(a: Aviso): VistaAviso['accion'] {
+  if (a.canal === 'whatsapp' && (a.estado === 'esperando_vinculo' || a.motivo === 'sin_vincular')) return 'vincular_whatsapp';
+  if (a.canal === 'whatsapp' && a.estado === 'fallido') return 'revisar_whatsapp';
   if (a.estado === 'esperando_vinculo' || a.motivo === 'sin_vincular' || a.motivo === 'bot_no_iniciado') return 'vincular_telegram';
   if (a.estado === 'cancelado' && a.motivo === 'baja') return 'resuscribir';
   if (a.motivo === 'rebote') return 'revisar_correo';

@@ -68,6 +68,12 @@ export const esquemaClinica = z.object({
     aniosRetencion: esquemaSupuesto,
     costoCorreoUsd: esquemaSupuesto,
     costoTelegramUsd: esquemaSupuesto,
+    /**
+     * WhatsApp en Mexico: lo que se cobra por mensaje ENTREGADO y cobrable, por categoria. Una plantilla utility se
+     * paga siempre (desde el 1/oct/2026 tambien dentro de la ventana); un mensaje de servicio solo pasados los
+     * 1,000 gratis del mes. El costo REAL de cada mensaje lo marca el estado que manda Meta (`pricing.billable`).
+     */
+    tarifasWhatsappUsd: z.object({ utility: esquemaSupuesto, service: esquemaSupuesto, marketing: esquemaSupuesto }),
     tipoCambioMxnPorUsd: esquemaSupuesto,
   }),
 });
@@ -78,6 +84,12 @@ export type Clinica = z.infer<typeof esquemaClinica>;
 const SIN_FUENTE = 'supuesto del laboratorio, sin fuente externa: se reemplaza con el dato de la clinica antes de decidir nada';
 const FUENTE_CORREO = 'supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo';
 const FUENTE_TELEGRAM = 'supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16)';
+const FUENTE_WA = 'tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos';
+const TARIFAS_WA = {
+  utility: { valor: 0.0085, unidad: 'US$ por plantilla utility entregada', fuente: FUENTE_WA },
+  service: { valor: 0.0085, unidad: 'US$ por mensaje de servicio entregado pasados los 1,000 gratis del mes', fuente: FUENTE_WA },
+  marketing: { valor: 0.0397, unidad: 'US$ por plantilla de marketing entregada (no se usa: los avisos son utility)', fuente: FUENTE_WA },
+};
 const FUENTE_CAMBIO = 'supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir';
 
 const COMUNES = {
@@ -136,6 +148,7 @@ export const CLINICAS_DECLARADAS: readonly Clinica[] = [
       aniosRetencion: { valor: 3, unidad: 'años', fuente: SIN_FUENTE },
       costoCorreoUsd: { valor: 0.0004, unidad: 'US$ por correo', fuente: FUENTE_CORREO },
       costoTelegramUsd: { valor: 0, unidad: 'US$ por mensaje', fuente: FUENTE_TELEGRAM },
+      tarifasWhatsappUsd: TARIFAS_WA,
       tipoCambioMxnPorUsd: { valor: 18.5, unidad: 'MXN por US$', fuente: FUENTE_CAMBIO },
     },
   },
@@ -173,6 +186,7 @@ export const CLINICAS_DECLARADAS: readonly Clinica[] = [
       aniosRetencion: { valor: 2.5, unidad: 'años', fuente: SIN_FUENTE },
       costoCorreoUsd: { valor: 0.0004, unidad: 'US$ por correo', fuente: FUENTE_CORREO },
       costoTelegramUsd: { valor: 0, unidad: 'US$ por mensaje', fuente: FUENTE_TELEGRAM },
+      tarifasWhatsappUsd: TARIFAS_WA,
       tipoCambioMxnPorUsd: { valor: 18.5, unidad: 'MXN por US$', fuente: FUENTE_CAMBIO },
     },
   },

@@ -8,13 +8,14 @@ import type { Aviso, Paciente } from '../almacen.js';
 import { enlaceProfundo, type ActualizacionBot } from '../canales/telegram.js';
 import { idDeClave } from '../seudonimo.js';
 import { vigentes, type Contexto } from './contexto.js';
-import { cancelaAvisos } from './avisos.js';
+import { cancelaAvisos, programaRespaldoCorreo } from './avisos.js';
 import { enviaAviso } from './envio.js';
 import { cambiaConsentimiento } from './registro.js';
 
-export interface ResumenDespacho { revisados: number; entregados: number; fallidos: number; reintentos: number; cancelados: number }
+/** `enviados`: WhatsApp los acepto; si se entregan lo dice despues el webhook (no cuentan como entregados aqui). */
+export interface ResumenDespacho { revisados: number; entregados: number; enviados: number; fallidos: number; reintentos: number; cancelados: number; respaldos: number }
 
-const vacio = (): ResumenDespacho => ({ revisados: 0, entregados: 0, fallidos: 0, reintentos: 0, cancelados: 0 });
+const vacio = (): ResumenDespacho => ({ revisados: 0, entregados: 0, enviados: 0, fallidos: 0, reintentos: 0, cancelados: 0, respaldos: 0 });
 const pendiente = (a: Aviso, ahora: number) => a.estado === 'programado' && a.para <= ahora && a.proximoIntento <= ahora;
 
 /**
@@ -33,6 +34,7 @@ async function sigueValido(ctx: Contexto, p: Paciente, a: Aviso): Promise<boolea
   const c = await vigentes(ctx, p.clinica, p.seudonimo);
   if (a.clase === 'newsletter') return c.newsletter === true;
   if (a.canal === 'telegram' && c.telegram !== true) return false;
+  if (a.canal === 'whatsapp' && (c.whatsapp !== true || !p.whatsapp?.waId)) return false;
   return c.recordatorios === true || a.clase === 'cancelacion';
 }
 
@@ -58,6 +60,12 @@ async function despachaUno(ctx: Contexto, a: Aviso, ahora: number, r: ResumenDes
     r.fallidos++;
     return;
   }
+  if (envio.ok && envio.wamid) {
+    await ctx.almacen.guardaAviso({ ...a, estado: 'enviado', intentos: intento, motivo: null, wamid: envio.wamid, actualizado: ahora });
+    await ctx.emite({ ...base, tipo: 'aviso_enviado', intento }, `enviado|${a.id}`);
+    r.enviados++;
+    return;
+  }
   if (envio.ok) {
     await ctx.almacen.guardaAviso({ ...a, estado: 'entregado', intentos: intento, motivo: null, actualizado: ahora });
     await ctx.emite({ ...base, tipo: 'aviso_enviado', intento }, `enviado|${a.id}`);
@@ -71,6 +79,7 @@ async function despachaUno(ctx: Contexto, a: Aviso, ahora: number, r: ResumenDes
   await ctx.emite({ ...base, tipo: 'aviso_fallido', motivo: envio.motivo, definitivo }, `fallido|${a.id}|${intento}`);
   if (definitivo) r.fallidos++;
   else r.reintentos++;
+  if (definitivo && (await programaRespaldoCorreo(ctx, a))) r.respaldos++;
 }
 
 export function creaDespachador(ctx: Contexto) {
@@ -83,6 +92,9 @@ export function creaDespachador(ctx: Contexto) {
         for (const a of todos) if (await venceSinVinculo(ctx, a, ahora)) await despachaUno(ctx, { ...a, estado: 'programado' }, ahora, r);
         const due = todos.filter((a) => pendiente(a, ahora)).sort((x, y) => x.para - y.para);
         for (const a of due) await despachaUno(ctx, a, ahora, r);
+        // Un respaldo por correo que se programo en esta corrida sale en ESTA corrida: un recordatorio no espera otra vuelta.
+        const nuevos = (await ctx.almacen.avisos(c.id)).filter((a) => a.canal === 'correo' && pendiente(a, ahora) && !due.some((x) => x.id === a.id));
+        for (const a of nuevos) await despachaUno(ctx, a, ahora, r);
       }
       return r;
     });

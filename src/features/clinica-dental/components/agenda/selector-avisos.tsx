@@ -1,14 +1,21 @@
 'use client';
 
 /**
- * El selector de notificación: correo, Telegram, ambos o ninguno, y el newsletter APARTE (sin marcar). Elegir un
- * canal es el momento del opt-in de recordatorios; la restricción de Telegram se dice aquí, no se esconde.
+ * El selector de notificación: correo, WhatsApp, Telegram, combinaciones o ninguno, y el newsletter APARTE (sin
+ * marcar). Elegir un canal es el momento del opt-in de recordatorios; lo que cada canal pide (iniciar el chat de
+ * Telegram, vincular el WhatsApp desde «Mis citas») se dice aquí, no se esconde.
  */
-export type CanalElegido = 'correo' | 'telegram' | 'ambos' | 'ninguno';
+export type CanalElegido = 'correo' | 'whatsapp' | 'correo_whatsapp' | 'telegram' | 'ambos' | 'ninguno';
 export interface EleccionAvisos { canal: CanalElegido | null; newsletter: boolean }
+
+export const CANALES_DE: Record<CanalElegido, ('correo' | 'telegram' | 'whatsapp')[]> = {
+  correo: ['correo'], whatsapp: ['whatsapp'], correo_whatsapp: ['correo', 'whatsapp'], telegram: ['telegram'], ambos: ['correo', 'telegram'], ninguno: [],
+};
 
 const OPCIONES: { valor: CanalElegido; texto: string; detalle: string }[] = [
   { valor: 'correo', texto: 'Correo', detalle: 'Confirmación con archivo para tu calendario, y recordatorios 24 h y 2 h antes.' },
+  { valor: 'whatsapp', texto: 'WhatsApp', detalle: 'Confirmación y recordatorios 24 h y 2 h antes, con botones para confirmar o cambiar. Antes vinculas tu número en «Mis citas».' },
+  { valor: 'correo_whatsapp', texto: 'Correo y WhatsApp', detalle: 'Si WhatsApp falla, el correo llega igual.' },
   { valor: 'telegram', texto: 'Telegram', detalle: 'Confirmación con un video de la clínica y recordatorio 2 h antes. Te daremos un enlace para iniciar el chat.' },
   { valor: 'ambos', texto: 'Correo y Telegram', detalle: 'Lo mejor de los dos.' },
   { valor: 'ninguno', texto: 'Ninguno', detalle: 'Sin recordatorios.' },

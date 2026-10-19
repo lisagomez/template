@@ -247,6 +247,12 @@ export function creaVendedor(o: OpcionesVendedor) {
 
   async function procesa(e: EventoCanal) {
     metricas.eventosProcesados++;
+    if (e.clase === 'mensaje' && !e.waId) {
+      // Solo BSUID (nombre de usuario, 2026): el vendedor indexa por teléfono y no sabe contestar por BSUID todavía.
+      const tenant = await o.almacen.inquilinoPorTelefono(e.phoneNumberId);
+      if (tenant) await alerta(o.almacen.de(tenant), 'aviso', 'Llegó un mensaje sin teléfono (solo BSUID): el agente no lo contesta todavía; contéstalo desde la app.');
+      return;
+    }
     if (e.clase === 'mensaje') { const t0 = performance.now(); await procesaMensaje(e); metricas.procesamientoMs.push(performance.now() - t0); return; }
     if (e.clase === 'estado') return procesaEstado(e);
     if (e.clase === 'eco') return procesaEco(e);

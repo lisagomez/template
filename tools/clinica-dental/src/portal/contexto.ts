@@ -10,6 +10,20 @@ import type { Clinica } from '../clinicas.js';
 import type { Evento, EventoSinSello } from '../eventos.js';
 import type { Libro } from '../libro.js';
 import type { Seudonimos } from '../seudonimo.js';
+import type { NumeroClinica, PuertoWhatsApp } from '../whatsapp/tipos.js';
+
+/** El canal de WhatsApp del portal: el puerto (simulador o Cloud API con gate), los numeros y las tarifas. */
+export interface DepsWhatsApp {
+  puerto: PuertoWhatsApp;
+  numeros: readonly NumeroClinica[];
+  /** US$ por mensaje entregado y COBRABLE de esa categoria de Meta (`utility`, `service`…); `null` si no se sabe. */
+  tarifaUsd: (categoria: string) => number | null;
+  /**
+   * La URL PUBLICA (https) del portal que va en los botones de WhatsApp: Meta rechaza una liga que no sea https.
+   * Por defecto, `https://<dominio de la clinica>/clinica/<id>`.
+   */
+  urlPublica?: (clinica: string) => string;
+}
 
 export interface DepsPortal {
   clinicas: readonly Clinica[];
@@ -29,6 +43,8 @@ export interface DepsPortal {
   reel: (clinica: string) => Promise<VideoSubido | null>;
   /** Edicion vigente del newsletter (una por mes). */
   edicionNewsletter?: () => string;
+  /** Sin esto el portal no tiene WhatsApp: elegirlo como canal falla cerrado. */
+  whatsapp?: DepsWhatsApp;
 }
 
 export interface Contexto extends DepsPortal {
@@ -36,6 +52,8 @@ export interface Contexto extends DepsPortal {
   clinica(id: string): Clinica;
   agenda(id: string): Agenda;
   exigePaciente(clinica: string, usuario: string): Promise<Paciente>;
+  wa(): DepsWhatsApp;
+  numeroDe(clinica: string): NumeroClinica;
 }
 
 export class ErrorPortal extends Error {
@@ -67,6 +85,15 @@ export function creaContexto(d: DepsPortal): Contexto {
       const p = await d.almacen.paciente(clinica, usuario);
       if (!p) throw new ErrorPortal('sin-paciente', 'Primero completa tu registro en esta clínica.');
       return p;
+    },
+    wa() {
+      if (!d.whatsapp) throw new ErrorPortal('politica', 'Este portal no tiene WhatsApp configurado.');
+      return d.whatsapp;
+    },
+    numeroDe(clinica) {
+      const n = d.whatsapp?.numeros.find((x) => x.clinica === clinica);
+      if (!n) throw new ErrorPortal('politica', `La clínica ${clinica} no tiene número de WhatsApp.`);
+      return n;
     },
   };
 }

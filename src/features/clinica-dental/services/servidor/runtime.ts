@@ -14,11 +14,15 @@ import {
   llavesSello, reglasDe, type Clinica, type Enviado, type Portal, type PuertoReservas, type Servicio, type VideoSubido,
 } from '../../../../../tools/clinica-dental/dist/servidor.js';
 import { exigeLaboratorio, RUTAS, URL_PORTAL } from './datos';
+import { armaCanal, type CanalLaboratorio } from './whatsapp';
+import { vigilaRed } from './red';
 
 export interface Runtime {
   portal: Portal;
   buzon: BuzonSimulado;
   telegram: TelegramSimulado;
+  /** WhatsApp contra el simulador de Meta (nada sale): el receptor, el endpoint de Flows y el «teléfono» de cada paciente. */
+  whatsapp: CanalLaboratorio;
   llaves: { seudonimos: string; selloPrivada: string; selloPublica: string };
   reloj: () => number;
   avanzaReloj: (ms: number) => Promise<void>;
@@ -90,6 +94,7 @@ function agendaDe(c: Clinica, deps: { almacen: AlmacenEnArchivo; pluma: Pluma; l
 
 async function arma(): Promise<Runtime> {
   exigeLaboratorio();
+  vigilaRed();
   await mkdir(/*turbopackIgnore: true*/ RUTAS.libro, { recursive: true });
   const k = await llaves();
   const r = await relojDelLaboratorio();
@@ -102,6 +107,7 @@ async function arma(): Promise<Runtime> {
   const correo = await buzon(r.reloj);
   const telegram = new TelegramSimulado({ bots: CLINICAS.map((c) => ({ token: `lab-${c.id}`, usuario: c.botTelegram })), reloj: r.reloj });
   const reels = new Map<string, VideoSubido>();
+  const whatsapp = armaCanal(r.reloj);
   const portal = creaPortal({
     clinicas: CLINICAS, almacen: await AlmacenPortalEnArchivo.abre(RUTAS.portal), libro: creaLibro({ almacen: libroEnArchivo(RUTAS.libro), reloj: r.reloj }),
     agendas, correo, seudonimos: creaSeudonimos(k.seudonimos), reloj: r.reloj,
@@ -116,14 +122,18 @@ async function arma(): Promise<Runtime> {
       }
       return reels.get(id) ?? null;
     },
+    whatsapp: whatsapp.deps,
   });
+  whatsapp.conecta(portal, () => portal.despacha());
+  // Lo que se acuso con 200 y no se alcanzo a procesar antes de un reinicio se procesa al arrancar (cola durable).
+  void whatsapp.receptor().drena();
   const guardaTelegram = () => writeFile(/*turbopackIgnore: true*/ RUTAS.telegram, JSON.stringify(telegram.historial), { mode: 0o600 });
   telegram.alActualizar = async (bot, u) => {
     const c = CLINICAS.find((x) => x.botTelegram === bot);
     if (c) await portal.procesaActualizacion(c.id, u);
     await guardaTelegram();
   };
-  return { portal, buzon: correo, telegram, llaves: k, reloj: r.reloj, avanzaReloj: r.avanza, guardaTelegram };
+  return { portal, buzon: correo, telegram, whatsapp, llaves: k, reloj: r.reloj, avanzaReloj: r.avanza, guardaTelegram };
 }
 
 const g = globalThis as unknown as { __clinicaRuntime?: Promise<Runtime> };
@@ -135,10 +145,17 @@ export function runtime(): Promise<Runtime> {
   return g.__clinicaRuntime;
 }
 
-/** Despacha lo vencido y deja el historial de Telegram en disco (lo llaman las acciones y el laboratorio). */
+/**
+ * Despacha lo vencido, deja que Meta (el simulador) entregue sus webhooks y que el receptor los procese, y guarda el
+ * historial de Telegram (lo llaman las acciones y el laboratorio).
+ */
 export async function despacha() {
   const rt = await runtime();
   const r = await rt.portal.despacha();
+  for (let i = 0; i < 6 && rt.whatsapp.meta.pendientes() > 0; i++) {
+    await rt.whatsapp.meta.drena();
+    await rt.whatsapp.receptor().asienta();
+  }
   await rt.guardaTelegram();
   return r;
 }

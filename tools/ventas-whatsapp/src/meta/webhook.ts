@@ -4,7 +4,9 @@
  *
  * Formas verificadas el 2026-09-30 contra developers.facebook.com/documentation/business-messaging/
  * whatsapp/webhooks/reference/*:
- *  - `messages` (texto con `referral` de anuncio Click-to-WhatsApp y su `ctwa_clid`; `order` con
+ *  - `messages` (texto con `referral` de anuncio Click-to-WhatsApp y su `ctwa_clid`; respuesta a un botón de
+ *    plantilla `button {text, payload}`; medios `audio` (con `voice: true` si es nota de voz), `image`, `video`,
+ *    `document` y `sticker` con su `id` de medio, `mime_type`, `sha256` y, si trae, `caption`; `order` con
  *    `catalog_id` y `product_items[{product_retailer_id, quantity, item_price, currency}]`;
  *    `interactive` `button_reply` / `list_reply` / `nfm_reply`);
  *  - `statuses` con `pricing {billable, pricing_model, type, category}` (el `conversation` solo
@@ -38,11 +40,25 @@ export type Interactivo =
   | { tipo: 'lista'; id: string; titulo: string; descripcion?: string }
   | { tipo: 'flow'; respuesta: Record<string, unknown>; nombre?: string };
 
+/** Un medio adjunto: solo su id en Meta (se descarga aparte, si se decide descargarlo) y lo que lo describe. */
+export interface MedioEntrante {
+  clase: 'audio' | 'image' | 'video' | 'document' | 'sticker';
+  id: string;
+  mime: string;
+  /** `true` en una nota de voz grabada en WhatsApp (`audio.voice`). */
+  voz?: boolean;
+  sha256?: string;
+  caption?: string;
+}
+
 export interface MensajeEntrante {
   clase: 'mensaje';
   wabaId: string;
   phoneNumberId: string;
+  /** El teléfono normalizado. VACÍO si la persona usa nombre de usuario y Meta solo manda su BSUID (2026). */
   waId: string;
+  /** El BSUID (`from_user_id`): el id de la persona dentro de este portafolio de negocio, si Meta lo manda. */
+  usuarioId?: string;
   nombre?: string;
   wamid: string;
   /** Milisegundos. Meta manda segundos en texto. */
@@ -50,6 +66,9 @@ export interface MensajeEntrante {
   tipo: string;
   texto?: string;
   interactivo?: Interactivo;
+  /** La persona tocó un botón de respuesta rápida de una PLANTILLA: el payload que mandamos, y su texto. */
+  boton?: { payload: string; texto: string };
+  medio?: MedioEntrante;
   pedido?: { catalogoId: string; texto?: string; items: ItemPedidoMeta[] };
   referencia?: Referencia;
   respondeA?: string;
@@ -119,13 +138,24 @@ export interface EventoAutomatico {
   valorCentavos?: number;
 }
 
+/** Meta cambió el estado o la categoría de una plantilla (la pausó, la desactivó o la pasó a marketing). */
+export interface CambioDePlantilla {
+  clase: 'plantilla';
+  wabaId: string;
+  nombre: string;
+  /** `message_template_status_update`: APPROVED, PAUSED, DISABLED… */
+  estado?: string;
+  /** `template_category_update`: la categoría nueva. */
+  categoria?: string;
+}
+
 export interface Desconocido {
   clase: 'desconocido';
   wabaId: string;
   campo: string;
 }
 
-export type EventoCanal = MensajeEntrante | EstadoEntrante | EcoDelDueno | FragmentoHistorial | CambioDeCuenta | EventoAutomatico | Desconocido;
+export type EventoCanal = MensajeEntrante | EstadoEntrante | EcoDelDueno | FragmentoHistorial | CambioDeCuenta | EventoAutomatico | CambioDePlantilla | Desconocido;
 
 const aMs = (v: unknown): number => (numero(v) ?? 0) * 1000;
 const lista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
@@ -151,17 +181,37 @@ function leeInteractivo(v: unknown): Interactivo | undefined {
   return undefined;
 }
 
+const CLASES_MEDIO = new Set(['audio', 'image', 'video', 'document', 'sticker']);
+
+function leeMedio(tipo: string, v: unknown): MedioEntrante | undefined {
+  if (!CLASES_MEDIO.has(tipo) || !esObjeto(v)) return undefined;
+  const id = texto(v.id);
+  if (!id) return undefined;
+  const sha256 = texto(v.sha256);
+  const caption = texto(v.caption);
+  return { clase: tipo as MedioEntrante['clase'], id, mime: texto(v.mime_type) ?? '', ...(v.voice === true ? { voz: true } : {}), ...(sha256 ? { sha256 } : {}), ...(caption ? { caption } : {}) };
+}
+
 function leeMensaje(m: Record<string, unknown>, base: { wabaId: string; phoneNumberId: string }, contactos: unknown[]): MensajeEntrante | null {
   const de = texto(m.from);
+  const usuarioId = texto(m.from_user_id);
   const wamid = texto(m.id);
-  if (!de || !wamid) return null;
-  const waId = normalizaWaId(de);
+  // Con nombre de usuario, Meta puede omitir el teléfono y mandar solo el BSUID: el mensaje se lee igual.
+  if ((!de && !usuarioId) || !wamid) return null;
+  const waId = de ? normalizaWaId(de) : '';
   const contacto = contactos.find((c) => esObjeto(c) && normalizaWaId(texto(c.wa_id) ?? '') === waId);
   const nombre = esObjeto(contacto) && esObjeto(contacto.profile) ? texto(contacto.profile.name) : undefined;
   const tipo = texto(m.type) ?? 'unknown';
-  const salida: MensajeEntrante = { clase: 'mensaje', ...base, waId, wamid, instante: aMs(m.timestamp), tipo, ...(nombre ? { nombre } : {}) };
+  const salida: MensajeEntrante = { clase: 'mensaje', ...base, waId, wamid, instante: aMs(m.timestamp), tipo, ...(usuarioId ? { usuarioId } : {}), ...(nombre ? { nombre } : {}) };
   if (esObjeto(m.text)) { const t = texto(m.text.body); if (t !== undefined) salida.texto = t; }
-  if (esObjeto(m.button)) { const t = texto(m.button.text); if (t !== undefined) salida.texto = t; }
+  if (esObjeto(m.button)) {
+    const t = texto(m.button.text);
+    if (t !== undefined) salida.texto = t;
+    const payload = texto(m.button.payload);
+    if (payload !== undefined) salida.boton = { payload, texto: t ?? '' };
+  }
+  const medio = leeMedio(tipo, m[tipo]);
+  if (medio) salida.medio = medio;
   const inter = leeInteractivo(m.interactive);
   if (inter) salida.interactivo = inter;
   if (esObjeto(m.order)) {
@@ -293,6 +343,12 @@ function leeCambio(wabaId: string, campo: string, valor: Record<string, unknown>
       });
     }
     return salida;
+  }
+  if (campo === 'message_template_status_update' || campo === 'template_category_update') {
+    const nombre = texto(valor.message_template_name) ?? '';
+    const estado = texto(valor.event);
+    const categoria = texto(valor.new_category) ?? texto(valor.correct_category);
+    return [{ clase: 'plantilla', wabaId, nombre, ...(estado ? { estado } : {}), ...(categoria ? { categoria } : {}) }];
   }
   return [{ clase: 'desconocido', wabaId, campo }];
 }

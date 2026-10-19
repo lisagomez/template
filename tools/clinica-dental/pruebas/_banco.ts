@@ -12,7 +12,7 @@ import { AlmacenEnMemoria } from '../../calendario/dist/almacenes/memoria.js';
 import { creaEnrutadorLocal, VERBOS_ESCRITURA } from '../../bucle-voz/dist/index.js';
 import {
   AlmacenPortalEnMemoria, BuzonSimulado, CLINICAS, ORDENES_CLINICA, VERBOS_ESCRITURA_CLINICA, TelegramSimulado, creaAgenda, creaCanalTelegram, creaLibro, creaPortal,
-  creaSeudonimos, libroEnMemoria, reglasDe, type Agenda, type Clinica, type PuertoReservas, type Servicio,
+  creaSeudonimos, libroEnMemoria, reglasDe, type Agenda, type Clinica, type DepsWhatsApp, type PuertoReservas, type Servicio,
 } from '../dist/servidor.js';
 
 const aqui = dirname(fileURLToPath(import.meta.url));
@@ -54,7 +54,7 @@ function agendaDe(c: Clinica, almacen: AlmacenEnMemoria, pluma: Pluma, lector: L
   });
 }
 
-export function banco(op: { inicio?: string } = {}) {
+export function banco(op: { inicio?: string; whatsapp?: DepsWhatsApp } = {}) {
   const reloj = relojDePrueba(op.inicio);
   const sim = new SimuladorGoogle({ reloj });
   const almacenCal = new AlmacenEnMemoria();
@@ -72,6 +72,7 @@ export function banco(op: { inicio?: string } = {}) {
     urlPortal: (id) => `http://127.0.0.1:3000/clinica/${id}`,
     urlBaja: (id, token) => `https://${CLINICAS.find((c) => c.id === id)!.dominio}/api/clinica-dental/baja/${token}`,
     reel: async () => REEL,
+    ...(op.whatsapp ? { whatsapp: op.whatsapp } : {}),
   });
   telegram.alActualizar = async (bot, u) => {
     const c = CLINICAS.find((x) => x.botTelegram === bot);

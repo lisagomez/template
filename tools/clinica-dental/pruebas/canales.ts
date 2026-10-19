@@ -23,11 +23,11 @@ async function conCita(id: string, canales: ('correo' | 'telegram')[] = ['correo
   return { b, p, cita: r.cita };
 }
 
-test('el adaptador REAL de Gmail y el de Telegram se niegan a construirse sin CLINICA_C3_C4_FIRMADOS=1', () => {
+test('el adaptador REAL de Gmail y el de Telegram se niegan a construirse sin su revisión firmada (y la variable vieja ya no abre nada)', () => {
   const fetchQueNoDebeLlamarse = (async () => { throw new Error('salió a la red'); }) as typeof fetch;
   assert.throws(() => new CorreoGmail({ env: {}, token: async () => 'x', fetch: fetchQueNoDebeLlamarse }), GateCerrado);
-  assert.throws(() => new CorreoGmail({ env: { CLINICA_C3_C4_FIRMADOS: '0' }, token: async () => 'x', fetch: fetchQueNoDebeLlamarse }), /C3 y C4 firmados/);
-  assert.throws(() => transporteTelegramReal({ env: { CLINICA_C3_C4_FIRMADOS: 'true' }, token: 'x', fetch: fetchQueNoDebeLlamarse }), GateCerrado);
+  assert.throws(() => new CorreoGmail({ env: { CLINICA_C3_C4_FIRMADOS: '1' }, token: async () => 'x', fetch: fetchQueNoDebeLlamarse }), /C3 y AISIA/);
+  assert.throws(() => transporteTelegramReal({ env: { CLINICA_C3_C4_FIRMADOS: '1', CLINICA_GATE_TELEGRAM: 'cualquiera' }, token: 'x', fetch: fetchQueNoDebeLlamarse }), GateCerrado);
 });
 
 test('con el gate, el adaptador de Gmail arma la llamada correcta (contra un fetch falso: no medido contra Google)', async () => {
@@ -36,7 +36,7 @@ test('con el gate, el adaptador de Gmail arma la llamada correcta (contra un fet
     pedido = { url, cuerpo: JSON.parse(String(init.body)) as { raw: string } };
     return new Response(JSON.stringify({ id: 'gm-1' }), { status: 200 });
   }) as unknown as typeof fetch;
-  const g = new CorreoGmail({ env: { CLINICA_C3_C4_FIRMADOS: '1' }, token: async () => 'tok', fetch: falso });
+  const g = new CorreoGmail({ env: { CLINICA_GATE_CORREO: 'rev-prueba' }, token: async () => 'tok', fetch: falso, revisiones: { correo: 'rev-prueba', telegram: null, whatsapp: null } });
   const r = await g.envia({ idMensaje: 'avi_1@x.example', de: { nombre: 'Clínica', direccion: 'a@x.example' }, para: 'p@pacientes.example', asunto: 'Hola', texto: 't', html: '<p>t</p>', fecha: new Date(0) });
   assert.ok(r.ok);
   assert.equal(pedido!.url, 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send');

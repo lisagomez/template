@@ -6,7 +6,9 @@
  *  - La descripcion del padecimiento es un DATO DE SALUD (dato personal sensible). Se pide con consentimiento
  *    EXPRESO, separado de los demas. Sin el, el texto se DESCARTA y el registro sigue: `preparaRegistro`
  *    devuelve el registro sin el campo y lo dice (`descartado.padecimiento`).
- *  - Los opt-ins (recordatorios, newsletter, Telegram) son independientes y ninguno viene marcado.
+ *  - Los opt-ins (recordatorios, newsletter, Telegram, WhatsApp) son independientes y ninguno viene marcado.
+ *    El de WhatsApp es la INTENCION: nada se manda a un numero hasta que la persona lo vincula y lo confirma desde
+ *    su cuenta (el celular escrito aqui puede estar mal: nunca se le escribe a el directo).
  *  - Menor de 18: los datos y el consentimiento de quien ejerce la patria potestad o la tutela son obligatorios.
  *  - Sin campos de mas (`.strict()`): lo que no se pide no se guarda.
  *  - La contraseña va en un esquema APARTE: el borrador que se guarda en el dispositivo nunca la lleva.
@@ -56,6 +58,8 @@ export const esquemaConsentimientos = z.object({
   recordatorios: z.boolean(),
   newsletter: z.boolean(),
   telegram: z.boolean(),
+  /** Opcional (los registros de antes del canal no lo traen): sin el, `false`. */
+  whatsapp: z.boolean().optional().transform((v) => v === true),
 }).strict();
 
 export const esquemaRegistro = z.object({
@@ -77,6 +81,9 @@ export const esquemaRegistro = z.object({
   if (r.edad >= MAYORIA_DE_EDAD && r.tutor) ctx.addIssue({ code: 'custom', path: ['tutor'], message: 'Los datos del tutor solo se piden a menores de 18 años' });
   if (r.consentimientos.telegram && !r.consentimientos.recordatorios) {
     ctx.addIssue({ code: 'custom', path: ['consentimientos', 'telegram'], message: 'Telegram es un canal de recordatorios: activa también los recordatorios de cita' });
+  }
+  if (r.consentimientos.whatsapp && !r.consentimientos.recordatorios) {
+    ctx.addIssue({ code: 'custom', path: ['consentimientos', 'whatsapp'], message: 'WhatsApp es un canal de recordatorios: activa también los recordatorios de cita' });
   }
 });
 
@@ -130,7 +137,7 @@ export function preparaRegistro(entrada: unknown): { ok: true; preparado: Regist
   const { consentimientos: c, padecimiento, ...resto } = v.registro;
   const conSalud = c.datos_salud === true;
   const menor = resto.edad < MAYORIA_DE_EDAD;
-  const lista: Consentimiento[] = (['aviso_privacidad', 'datos_salud', 'recordatorios', 'newsletter', 'telegram'] as const)
+  const lista: Consentimiento[] = (['aviso_privacidad', 'datos_salud', 'recordatorios', 'newsletter', 'telegram', 'whatsapp'] as const)
     .map((tipo) => ({ tipo, otorgado: c[tipo], version: VERSION_AVISO }));
   if (menor) lista.push({ tipo: 'tutor', otorgado: true, version: VERSION_AVISO });
   return {

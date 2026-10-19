@@ -12,12 +12,18 @@ import { HORA_MS, vigentes, type Contexto } from './contexto.js';
 const CLASES_POR_CANAL: Record<CanalAviso, ClaseAviso[]> = {
   correo: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h'],
   telegram: ['confirmacion', 'recordatorio_2h'],
+  // Lo que hace el mercado (Doctoralia, AgendaPro): confirmacion al agendar, recordatorio el dia antes y horas antes.
+  whatsapp: ['confirmacion', 'recordatorio_24h', 'recordatorio_2h'],
 };
+
+/** Sin vincular, el aviso espera (no se pierde): Telegram hasta que se inicie el bot, WhatsApp hasta confirmar el numero. */
+const sinVinculo = (p: Paciente, canal: CanalAviso): boolean =>
+  (canal === 'telegram' && p.telegram.chatId === null) || (canal === 'whatsapp' && !p.whatsapp?.waId);
 const ANTES: Partial<Record<ClaseAviso, number>> = { recordatorio_24h: 24 * HORA_MS, recordatorio_2h: 2 * HORA_MS };
 
 async function programa(ctx: Contexto, p: Paciente, a: Omit<Aviso, 'clinica' | 'paciente' | 'estado' | 'intentos' | 'proximoIntento' | 'motivo' | 'actualizado'>) {
   if (await ctx.almacen.aviso(p.clinica, a.id)) return;
-  const esperaVinculo = a.canal === 'telegram' && p.telegram.chatId === null;
+  const esperaVinculo = sinVinculo(p, a.canal);
   const aviso: Aviso = { ...a, clinica: p.clinica, paciente: p.seudonimo, estado: esperaVinculo ? 'esperando_vinculo' : 'programado', intentos: 0, proximoIntento: a.para, motivo: null, actualizado: ctx.reloj() };
   await ctx.almacen.guardaAviso(aviso);
   await ctx.emite({ clinica: p.clinica, sujeto: p.seudonimo, tipo: 'aviso_programado', aviso: a.id, cita: a.cita, canal: a.canal, clase: a.clase, para: new Date(a.para).toISOString() }, `programado|${a.id}`);
@@ -35,8 +41,25 @@ export async function programaAvisosDeCita(ctx: Contexto, p: Paciente, cita: Cit
 }
 
 export async function programaCancelacion(ctx: Contexto, p: Paciente, cita: Cita): Promise<void> {
-  if (!cita.canales.includes('correo')) return;
-  await programa(ctx, p, { id: idDeClave('avi', `${cita.id}|correo|cancelacion`), cita: cita.id, canal: 'correo', clase: 'cancelacion', para: ctx.reloj(), edicion: null });
+  for (const canal of cita.canales.filter((x): x is 'correo' | 'whatsapp' => x === 'correo' || x === 'whatsapp')) {
+    if (canal === 'whatsapp' && !p.whatsapp?.waId) continue;
+    await programa(ctx, p, { id: idDeClave('avi', `${cita.id}|${canal}|cancelacion`), cita: cita.id, canal, clase: 'cancelacion', para: ctx.reloj(), edicion: null });
+  }
+}
+
+/**
+ * RESPALDO: un aviso de WhatsApp que falla para siempre (numero sin WhatsApp, plantilla pausada, numero de la
+ * clinica desconectado) no deja a la persona sin su recordatorio: si su cita no lo llevaba ya por correo y
+ * tiene los recordatorios activos, sale por correo (a la direccion de su registro, verificada al crear la cuenta).
+ */
+export async function programaRespaldoCorreo(ctx: Contexto, a: Aviso): Promise<boolean> {
+  if (a.canal !== 'whatsapp' || !a.cita || a.clase === 'newsletter') return false;
+  const p = await ctx.almacen.pacientePorSeudonimo(a.clinica, a.paciente);
+  const cita = await ctx.almacen.cita(a.clinica, a.cita);
+  if (!p || !cita || cita.canales.includes('correo') || (await vigentes(ctx, a.clinica, a.paciente)).recordatorios !== true) return false;
+  if (a.clase !== 'cancelacion' && (cita.estado !== 'confirmada' || cita.inicio <= ctx.reloj())) return false;
+  await programa(ctx, p, { id: idDeClave('avi', `${cita.id}|correo|${a.clase}|respaldo`), cita: cita.id, canal: 'correo', clase: a.clase, para: ctx.reloj(), edicion: null });
+  return true;
 }
 
 export const edicionDelMes = (ms: number): string => `newsletter-${new Date(ms).toISOString().slice(0, 7)}`;

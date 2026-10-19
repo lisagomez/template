@@ -14,6 +14,12 @@ import { esObjeto, texto } from '../comun/base.js';
 
 export type CategoriaPlantilla = 'utility' | 'marketing' | 'authentication';
 
+/**
+ * Botón de respuesta rápida de una plantilla: el texto lo fija la plantilla aprobada; lo que viaja al mandarla es
+ * el `payload`, y vuelve tal cual en el webhook (`type: button`, `button.payload`) cuando la persona lo toca.
+ */
+export interface BotonPlantilla { payload: string }
+
 export type MensajeSaliente =
   | { tipo: 'texto'; texto: string }
   | { tipo: 'botones'; cuerpo: string; botones: Array<{ id: string; titulo: string }>; encabezado?: string; pie?: string }
@@ -23,7 +29,7 @@ export type MensajeSaliente =
   | { tipo: 'carrusel'; catalogo: string; cuerpo: string; retailerIds: string[] }
   | { tipo: 'cta_url'; cuerpo: string; textoBoton: string; url: string }
   | { tipo: 'flow'; cuerpo: string; cta: string; flowId: string; flowToken: string; pantalla: string; datos?: Record<string, unknown>; encabezado?: string }
-  | { tipo: 'plantilla'; nombre: string; idioma: string; parametros: string[] };
+  | { tipo: 'plantilla'; nombre: string; idioma: string; parametros: string[]; botones?: BotonPlantilla[] };
 
 const largo = (s: string | undefined, max: number, que: string, fallas: string[]) => {
   if (s !== undefined && [...s].length > max) fallas.push(`${que} excede ${max} caracteres`);
@@ -76,6 +82,8 @@ export function validaMensaje(m: MensajeSaliente): string[] {
       break;
     case 'plantilla':
       if (!m.nombre) f.push('plantilla sin nombre');
+      if ((m.botones?.length ?? 0) > 10) f.push('de 0 a 10 botones de plantilla');
+      for (const b of m.botones ?? []) if (!b.payload || [...b.payload].length > 256) f.push('payload de botón de plantilla vacío o de más de 256 caracteres');
       break;
   }
   return f;
@@ -127,7 +135,10 @@ export function aCuerpoGraph(para: string, m: MensajeSaliente): Record<string, u
       ...base, type: 'template',
       template: {
         name: m.nombre, language: { code: m.idioma },
-        components: m.parametros.length ? [{ type: 'body', parameters: m.parametros.map((p) => ({ type: 'text', text: p })) }] : [],
+        components: [
+          ...(m.parametros.length ? [{ type: 'body', parameters: m.parametros.map((p) => ({ type: 'text', text: p })) }] : []),
+          ...(m.botones ?? []).map((b, i) => ({ type: 'button', sub_type: 'quick_reply', index: String(i), parameters: [{ type: 'payload', payload: b.payload }] })),
+        ],
       },
     };
   }
@@ -146,7 +157,11 @@ export function desdeCuerpoGraph(c: unknown): { ok: true; para: string; mensaje:
     const comps = Array.isArray(tp.components) ? tp.components : [];
     const cuerpo = comps.find((x) => esObjeto(x) && x.type === 'body');
     const parametros = esObjeto(cuerpo) && Array.isArray(cuerpo.parameters) ? cuerpo.parameters.map((p) => (esObjeto(p) ? texto(p.text) ?? '' : '')) : [];
-    return { ok: true, para, mensaje: { tipo: 'plantilla', nombre: texto(tp.name) ?? '', idioma: esObjeto(tp.language) ? texto(tp.language.code) ?? '' : '', parametros } };
+    const botones = comps.filter((x) => esObjeto(x) && x.type === 'button' && x.sub_type === 'quick_reply').map((x) => {
+      const p = esObjeto(x) && Array.isArray(x.parameters) ? x.parameters[0] : undefined;
+      return { payload: esObjeto(p) ? texto(p.payload) ?? '' : '' };
+    });
+    return { ok: true, para, mensaje: { tipo: 'plantilla', nombre: texto(tp.name) ?? '', idioma: esObjeto(tp.language) ? texto(tp.language.code) ?? '' : '', parametros, ...(botones.length ? { botones } : {}) } };
   }
   if (t !== 'interactive' || !esObjeto(c.interactive)) return mal;
   const i = c.interactive;

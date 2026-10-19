@@ -10,6 +10,7 @@ import { cancela, proximas, reprograma, reserva, simulaAsistencia, type EntradaR
 import { bajaPorToken, creaDespachador, enlaceTelegram, procesaActualizacion } from './despacho.js';
 import { programaNewsletter } from './avisos.js';
 import type { ActualizacionBot } from '../canales/telegram.js';
+import { confirmaVinculo, emiteCodigo, estadoVinculo, rechazaVinculo } from '../whatsapp/vinculo.js';
 
 export function creaPortal(d: DepsPortal) {
   const ctx = creaContexto(d);
@@ -29,6 +30,14 @@ export function creaPortal(d: DepsPortal) {
     baja: (token: string, via: 'un_clic' | 'enlace') => bajaPorToken(ctx, token, via),
     enlaceTelegram: (clinica: string, usuario: string) => enlaceTelegram(ctx, clinica, usuario),
     procesaActualizacion: (clinica: string, u: ActualizacionBot) => procesaActualizacion(ctx, clinica, u),
+    /** WhatsApp: el codigo de vinculacion, su estado, confirmar o rechazar el numero pendiente y desvincular. */
+    whatsapp: {
+      codigo: (clinica: string, usuario: string) => emiteCodigo(ctx, clinica, usuario),
+      estado: (clinica: string, usuario: string) => estadoVinculo(ctx, clinica, usuario),
+      confirma: (clinica: string, usuario: string, op: { ultimos4?: string } = {}) => confirmaVinculo(ctx, clinica, usuario, op),
+      rechaza: (clinica: string, usuario: string) => rechazaVinculo(ctx, clinica, usuario),
+      desvincula: (clinica: string, usuario: string) => cambiaConsentimiento(ctx, clinica, usuario, 'whatsapp', false),
+    },
     /** Una edicion del newsletter a todos los suscritos de la clinica (los dados de baja no reciben nada). */
     async enviaNewsletter(clinica: string, edicion: string): Promise<number> {
       let n = 0;
@@ -45,6 +54,8 @@ export { ErrorPortal, type DepsPortal } from './contexto.js';
 export type { EntradaAlta, ResultadoAlta } from './registro.js';
 export type { EntradaReserva, ResultadoReserva, VistaCita, VistaAviso } from './citas.js';
 export type { ResumenDespacho, Vinculacion } from './despacho.js';
+export type { DepsWhatsApp } from './contexto.js';
+export { HORA_MS } from './contexto.js';
 export { LIMITE_CAMBIO_HORAS } from './citas.js';
 export { edicionDelMes } from './avisos.js';
 export { VERSION_PLANTILLAS, mensajeCorreo, mensajeTelegram, fechaLarga } from './plantillas.js';

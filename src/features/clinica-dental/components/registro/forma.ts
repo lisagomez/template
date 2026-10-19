@@ -9,13 +9,13 @@ export interface FormaTutor { nombre: string; apellidoPaterno: string; apellidoM
 export interface FormaRegistro {
   empresa: string; nombre: string; apellidoPaterno: string; apellidoMaterno: string; edad: string; correo: string; celular: string; padecimiento: string;
   categorias: Categoria[];
-  consentimientos: { aviso_privacidad: boolean; datos_salud: boolean; recordatorios: boolean; newsletter: boolean; telegram: boolean };
+  consentimientos: { aviso_privacidad: boolean; datos_salud: boolean; recordatorios: boolean; newsletter: boolean; telegram: boolean; whatsapp: boolean };
   tutor: FormaTutor;
 }
 
 export const FORMA_VACIA: FormaRegistro = {
   empresa: '', nombre: '', apellidoPaterno: '', apellidoMaterno: '', edad: '', correo: '', celular: '', padecimiento: '', categorias: [],
-  consentimientos: { aviso_privacidad: false, datos_salud: false, recordatorios: false, newsletter: false, telegram: false },
+  consentimientos: { aviso_privacidad: false, datos_salud: false, recordatorios: false, newsletter: false, telegram: false, whatsapp: false },
   tutor: { nombre: '', apellidoPaterno: '', apellidoMaterno: '', parentesco: '', correo: '', celular: '', consiente: false },
 };
 

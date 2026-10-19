@@ -106,7 +106,8 @@ export function Avisos({ f, e, cambia, clinica }: { f: FormaRegistro; e: Errores
   const k = (t: keyof FormaRegistro['consentimientos']) => ({ checked: f.consentimientos[t], onChange: (v: boolean) => cambia((x) => ({ ...x, consentimientos: { ...x.consentimientos, [t]: v } })), error: e[`consentimientos.${t}`] });
   return (
     <Seccion titulo="Avisos y privacidad" descripcion="Cada uno por separado. Ninguno viene marcado.">
-      <Casilla id="consentimientos-recordatorios" {...k('recordatorios')}>Quiero <strong>recordatorios de mis citas</strong> (correo o Telegram, lo eliges al agendar).</Casilla>
+      <Casilla id="consentimientos-recordatorios" {...k('recordatorios')}>Quiero <strong>recordatorios de mis citas</strong> (correo, WhatsApp o Telegram, lo eliges al agendar).</Casilla>
+      <Casilla id="consentimientos-whatsapp" {...k('whatsapp')}>También por <strong>WhatsApp</strong>. No te escribimos al celular de este formulario: primero vinculas tu número desde «Mis citas» (nos mandas un código y confirmas que es tuyo). WhatsApp es de Meta, que procesa esos mensajes; no llevan tu tratamiento.</Casilla>
       <Casilla id="consentimientos-telegram" {...k('telegram')}>También por <strong>Telegram</strong>. El bot no puede escribirte primero: al agendar te daremos un enlace para iniciar el chat.</Casilla>
       <Casilla id="consentimientos-newsletter" {...k('newsletter')}>Quiero el <strong>newsletter</strong> con novedades y promociones (aparte de los recordatorios; te das de baja con un clic).</Casilla>
       <Casilla id="consentimientos-aviso_privacidad" {...k('aviso_privacidad')}>

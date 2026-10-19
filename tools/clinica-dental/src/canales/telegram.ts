@@ -16,7 +16,7 @@
  * Lo que NO reproduce esta en el README (divergencias): la Bot API no tiene clave de idempotencia; aqui el
  * aviso no se reintenta si el resultado es desconocido (queda «incierto»), para no mandar dos veces.
  */
-import { exigeGate, type Entorno } from './gate.js';
+import { exigeGate, type CanalReal, type Entorno } from './gate.js';
 
 export type RespuestaBot<T = unknown> =
   | { ok: true; result: T }
@@ -157,8 +157,8 @@ export class TelegramSimulado {
 }
 
 /** El transporte REAL contra api.telegram.org: se niega sin el gate. No medido contra Telegram. */
-export function transporteTelegramReal(op: { env: Entorno; token: string; fetch: typeof globalThis.fetch }): Transporte {
-  exigeGate('Telegram', op.env);
+export function transporteTelegramReal(op: { env: Entorno; token: string; fetch: typeof globalThis.fetch; revisiones?: Readonly<Record<CanalReal, string | null>> }): Transporte {
+  exigeGate('telegram', op.env, op.revisiones);
   return async (metodo, params) => {
     const url = `https://api.telegram.org/bot${op.token}/${metodo}`;
     const v = params['video'] as VideoSubido | undefined;

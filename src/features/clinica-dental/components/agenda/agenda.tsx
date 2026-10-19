@@ -12,7 +12,7 @@ import { enlaceTelegram, reprogramar, reservar } from '../../services/servidor/a
 import { empuja } from '../../services/cliente/datalayer';
 import { Aviso, clasesBoton, clasesBotonSecundario } from '../ui';
 import { CalendarioMes, fechaLarga } from './calendario-mes';
-import { SelectorAvisos, type EleccionAvisos } from './selector-avisos';
+import { CANALES_DE, SelectorAvisos, type EleccionAvisos } from './selector-avisos';
 
 interface Props { clinica: string; conSesion: boolean; esPaciente: boolean; servicioInicial: string | null; reprograma: { cita: string; servicio: string } | null }
 
@@ -74,7 +74,7 @@ export function Agenda({ clinica, conSesion, esPaciente, servicioInicial, reprog
   const [hora, setHora] = useState<{ hora: string; inicio: string } | null>(null);
   const [avisos, setAvisos] = useState<EleccionAvisos>({ canal: null, newsletter: false });
   const [mes, setMes] = useState<{ anio: number; mes: number } | null>(null);
-  const [estado, setEstado] = useState<{ enviando: boolean; error: string | null; hecho: { cita: string; telegram: boolean } | null; sinSesion: boolean }>({ enviando: false, error: null, hecho: null, sinSesion: false });
+  const [estado, setEstado] = useState<{ enviando: boolean; error: string | null; hecho: { cita: string; telegram: boolean; whatsapp: boolean } | null; sinSesion: boolean }>({ enviando: false, error: null, hecho: null, sinSesion: false });
   const [enlace, setEnlace] = useState<string | null>(null);
   const meses = useMemo(() => [...new Set((dias ?? []).map((d) => d.fecha.slice(0, 7)))], [dias]);
   const mesVisible = mes ?? (meses[0] ? { anio: Number(meses[0].slice(0, 4)), mes: Number(meses[0].slice(5)) } : null);
@@ -91,7 +91,7 @@ export function Agenda({ clinica, conSesion, esPaciente, servicioInicial, reprog
     if (!s || !hora) return;
     if (!reprograma && avisos.canal === null) return setEstado({ enviando: false, error: 'Elige cómo quieres tus avisos (o «Ninguno»).', hecho: null, sinSesion: false });
     setEstado({ enviando: true, error: null, hecho: null, sinSesion: false });
-    const canales: ('correo' | 'telegram')[] = avisos.canal === 'ambos' ? ['correo', 'telegram'] : avisos.canal === 'correo' || avisos.canal === 'telegram' ? [avisos.canal] : [];
+    const canales = avisos.canal ? CANALES_DE[avisos.canal] : [];
     const r = reprograma ? await reprogramar(clinica, reprograma.cita, hora.inicio) : await reservar(clinica, { servicio: s.id, inicio: hora.inicio, canales, newsletter: avisos.newsletter, clave: clave() });
     if (!r.ok) {
       setEstado({ enviando: false, error: r.error, hecho: null, sinSesion: Boolean(r.sinSesion) });
@@ -101,14 +101,15 @@ export function Agenda({ clinica, conSesion, esPaciente, servicioInicial, reprog
     }
     empuja(r.dataLayer ?? []);
     const telegram = 'telegramPorVincular' in r.valor ? Boolean(r.valor.telegramPorVincular) : false;
-    setEstado({ enviando: false, error: null, hecho: { cita: r.valor.cita, telegram }, sinSesion: false });
+    const whatsapp = 'whatsappPorVincular' in r.valor ? Boolean(r.valor.whatsappPorVincular) : false;
+    setEstado({ enviando: false, error: null, hecho: { cita: r.valor.cita, telegram, whatsapp }, sinSesion: false });
     if (telegram) {
       const e = await enlaceTelegram(clinica);
       if (e.ok) setEnlace(e.valor.enlace);
     }
   }
 
-  if (estado.hecho) return <Confirmada clinica={clinica} enlace={enlace} telegram={estado.hecho.telegram} />;
+  if (estado.hecho) return <Confirmada clinica={clinica} enlace={enlace} telegram={estado.hecho.telegram} whatsapp={estado.hecho.whatsapp} />;
   return (
     <div className="space-y-6">
       {!reprograma ? <Servicios clinica={clinica} elegido={servicio} alElegir={eligeServicio} /> : <Aviso>Elige el nuevo día y hora para tu cita. La de ahora sigue apartada hasta que confirmes.</Aviso>}
@@ -156,7 +157,7 @@ export function Agenda({ clinica, conSesion, esPaciente, servicioInicial, reprog
   );
 }
 
-function Confirmada({ clinica, telegram, enlace }: { clinica: string; telegram: boolean; enlace: string | null }) {
+function Confirmada({ clinica, telegram, whatsapp, enlace }: { clinica: string; telegram: boolean; whatsapp: boolean; enlace: string | null }) {
   return (
     <div className="space-y-4 rounded-2xl bg-white p-6 ring-1 ring-slate-200" role="status">
       <h2 className="text-2xl font-bold">¡Cita confirmada!</h2>
@@ -167,7 +168,12 @@ function Confirmada({ clinica, telegram, enlace }: { clinica: string; telegram: 
           {enlace ? <a className={`${clasesBotonSecundario} mt-2 flex`} href={enlace} target="_blank" rel="noopener noreferrer" data-enlace-telegram={enlace}>Abrir Telegram e iniciar el chat</a> : null}
         </Aviso>
       ) : null}
-      <Link href={`/clinica/${clinica}/mis-citas`} className={clasesBoton}>Ver mis citas</Link>
+      {whatsapp ? (
+        <Aviso>
+          <strong>Falta un paso para WhatsApp:</strong> vincula tu número en «Mis citas». Te damos un código, nos lo mandas por WhatsApp y confirmas que el número es tuyo. Hasta entonces no te escribimos ahí: tus avisos esperan.
+        </Aviso>
+      ) : null}
+      <Link href={`/clinica/${clinica}/mis-citas`} className={clasesBoton}>{whatsapp ? 'Ir a «Mis citas» y vincular WhatsApp' : 'Ver mis citas'}</Link>
     </div>
   );
 }

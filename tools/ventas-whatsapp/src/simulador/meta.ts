@@ -10,13 +10,37 @@
  * La app no sabe que habla con esto: el transporte se inyecta (`graph`) y los webhooks llegan por
  * la función `entrega` (en proceso) o por HTTP (`servidorHttp`).
  */
-import { randomBytes, type KeyLike } from 'node:crypto';
+import { createHash, randomBytes, type KeyLike } from 'node:crypto';
 import { normalizaWaId, paisDeWaId, relojDelSistema, type Reloj } from '../comun/base.js';
 import { firmaMeta, CABECERA_FIRMA } from '../meta/firma.js';
 import { desdeCuerpoGraph, validaMensaje, resumeMensaje, type CategoriaPlantilla, type MensajeSaliente } from '../meta/mensajes.js';
 import { decidePrecio, mesDeFacturacion, registraEntrante, registraSaliente, TARJETA_LABORATORIO, DIAS_CAPI_MAXIMO, type TarjetaDeTarifas, type Ventanas } from '../meta/tarifas.js';
-import type { ClienteGraph, EventoCapi, RespuestaCapi, RespuestaEnvio, RespuestaQr } from '../meta/graph.js';
+import type { ClienteGraph, EventoCapi, RespuestaCapi, RespuestaEnvio, RespuestaMedio, RespuestaQr } from '../meta/graph.js';
 import { creaCliente, type ClienteSimulado } from './cliente.js';
+
+/** Estado de una plantilla en el Administrador de WhatsApp: solo APPROVED se puede mandar. */
+export type EstadoPlantilla = 'APPROVED' | 'PAUSED' | 'DISABLED' | 'REJECTED';
+
+/**
+ * Una plantilla registrada con su texto: el cuerpo con `{{1}}`, `{{2}}`… y los textos de sus botones de respuesta
+ * rápida. Sin texto basta la categoría (la forma de antes, que sigue valiendo).
+ */
+export interface DefinicionPlantilla {
+  categoria: CategoriaPlantilla;
+  estado?: EstadoPlantilla;
+  idioma?: string;
+  cuerpo?: string;
+  botones?: string[];
+}
+
+const categoriaDe = (p: CategoriaPlantilla | DefinicionPlantilla): CategoriaPlantilla => (typeof p === 'string' ? p : p.categoria);
+const marcadores = (cuerpo: string): number => new Set([...cuerpo.matchAll(/\{\{(\d+)\}\}/g)].map((m) => m[1])).size;
+
+/** El texto que ve la persona: el cuerpo con sus parámetros y los botones de la plantilla. */
+export function renderizaPlantilla(def: DefinicionPlantilla, parametros: readonly string[], payloads: readonly string[] = []): { texto: string; botones: Array<{ texto: string; payload: string }> } {
+  const texto = (def.cuerpo ?? '').replace(/\{\{(\d+)\}\}/g, (_, n: string) => parametros[Number(n) - 1] ?? '');
+  return { texto, botones: (def.botones ?? []).map((t, i) => ({ texto: t, payload: payloads[i] ?? t })) };
+}
 
 export interface NumeroSimulado {
   wabaId: string;
@@ -27,7 +51,7 @@ export interface NumeroSimulado {
   /** Token de usuario de sistema que el servidor HTTP exige (Bearer). */
   token: string;
   llavePublicaFlows: KeyLike;
-  plantillas: Record<string, CategoriaPlantilla>;
+  plantillas: Record<string, CategoriaPlantilla | DefinicionPlantilla>;
   flows: Record<string, { id: string; definicion: Record<string, unknown> }>;
   conectado: boolean;
 }
@@ -38,6 +62,8 @@ export interface RecibidoPorCliente {
   mensaje: MensajeSaliente;
   resumen: string;
   precio?: { billable: boolean; tipo: string; categoria: string; costoMicros: number };
+  /** Una plantilla con texto registrado, como la ve la persona. */
+  plantilla?: { texto: string; botones: Array<{ texto: string; payload: string }> };
 }
 
 export interface Campana { id: string; nombre: string; gastoCentavos: number; anuncios: string[] }
@@ -54,6 +80,11 @@ export interface OpcionesMetaSimulada {
   duplicaSi?: (n: number) => boolean;
   /** Invierte el orden de entrega en ráfagas (Meta no garantiza orden). */
   desordena?: boolean;
+  /**
+   * El número no tiene WhatsApp. Meta acepta la llamada (200 con `wamid`) y el fallo llega DESPUÉS, por webhook:
+   * `failed` con 131026 «Message undeliverable». No se sabe al enviar.
+   */
+  sinWhatsApp?: (waId: string) => boolean;
 }
 
 const EVENTOS_CAPI = new Set(['Purchase', 'LeadSubmitted', 'InitiateCheckout', 'AddToCart', 'ViewContent', 'OrderCreated', 'OrderShipped', 'OrderDelivered', 'OrderCanceled', 'OrderReturned', 'CartAbandoned', 'QualifiedLead', 'RatingProvided', 'ReviewProvided']);
@@ -72,6 +103,7 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
   const capi = { aceptados: [] as Array<EventoCapi & { datasetId: string }>, rechazados: [] as Array<{ evento: unknown; error: string }>, duplicados: 0 };
   const qrs = new Map<string, { code: string; prefilled_message: string; deep_link_url: string; qr_image_url: string; phoneNumberId: string }>();
   const cola: Array<{ cuerpo: string; intentos: number }> = [];
+  const medios = new Map<string, { bytes: Uint8Array; mime: string; sha256: string; phoneNumberId: string }>();
   const registro: Array<{ instante: number; tipo: string; detalle: string }> = [];
   let secuencia = 0;
   let entregas = 0;
@@ -124,10 +156,16 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
         if (falta) return error(131009, `(#131009) producto ${falta} no está en el catálogo`);
       }
       if (m.tipo === 'flow' && !Object.values(n.flows).some((f) => f.id === m.flowId)) return error(131009, '(#131009) flow_id no publicado para este número');
-      if (m.tipo === 'plantilla' && !n.plantillas[m.nombre]) return error(132001, '(#132001) la plantilla no existe');
+      if (m.tipo === 'plantilla') {
+        const def = n.plantillas[m.nombre];
+        if (!def) return error(132001, '(#132001) la plantilla no existe');
+        const falla = typeof def === 'string' ? null : fallaDePlantilla(def, m);
+        if (falla) return error(falla.codigo, falla.mensaje);
+      }
       const para = normalizaWaId(p.para);
       const llave = `${n.phoneNumberId}|${para}`;
-      const categoria = m.tipo === 'plantilla' ? n.plantillas[m.nombre]! : 'service';
+      const defPlantilla = m.tipo === 'plantilla' ? n.plantillas[m.nombre]! : undefined;
+      const categoria = defPlantilla ? categoriaDe(defPlantilla) : 'service';
       const mes = `${n.phoneNumberId}|${mesDeFacturacion(reloj(), tarjeta)}`;
       const d = decidePrecio({ categoria, ventanas: ventanas.get(llave) ?? {}, ahora: reloj(), pais: paisDeWaId(para), servicioEnElMes: servicioMes.get(mes) ?? 0, tarjeta });
       if (!d.permitido) return error(d.errorMeta?.codigo ?? 131047, d.errorMeta?.titulo ?? 'fuera de ventana');
@@ -136,10 +174,22 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
       const id = wamid();
       const precio = { billable: d.billable, tipo: d.tipo, categoria: d.categoria, costoMicros: d.costoMicros };
       precios.set(id, precio);
-      clientes.get(llave)?.recibe({ wamid: id, instante: reloj(), mensaje: m, resumen: resumeMensaje(m), precio });
+      if (o.sinWhatsApp?.(para)) {
+        emite(n.wabaId, 'messages', { metadata: metadata(n), statuses: [{ id, status: 'failed', timestamp: seg(), recipient_id: para, errors: [{ code: 131026, title: 'Message undeliverable' }] }] });
+        registro.push({ instante: reloj(), tipo: 'graph', detalle: `${n.phoneNumberId} → ${para}: ${m.tipo} (sin WhatsApp: 131026 por webhook)` });
+        return { ok: true, wamid: id };
+      }
+      const plantilla = m.tipo === 'plantilla' && defPlantilla && typeof defPlantilla !== 'string' && defPlantilla.cuerpo ? renderizaPlantilla(defPlantilla, m.parametros, (m.botones ?? []).map((b) => b.payload)) : undefined;
+      clientes.get(llave)?.recibe({ wamid: id, instante: reloj(), mensaje: m, resumen: plantilla ? `${plantilla.texto}${plantilla.botones.length ? ` [${plantilla.botones.map((b) => b.texto).join(' | ')}]` : ''}` : resumeMensaje(m), precio, ...(plantilla ? { plantilla } : {}) });
       estados(n, id, para, precio);
       registro.push({ instante: reloj(), tipo: 'graph', detalle: `${n.phoneNumberId} → ${para}: ${m.tipo}` });
       return { ok: true, wamid: id };
+    },
+    async descargaMedio(phoneNumberId, mediaId): Promise<RespuestaMedio> {
+      const md = medios.get(mediaId);
+      if (!md || md.phoneNumberId !== phoneNumberId) return { ok: false, codigo: 100, error: '(#100) el medio no existe o no es de este número' };
+      registro.push({ instante: reloj(), tipo: 'medio', detalle: `${phoneNumberId}: ${mediaId}` });
+      return { ok: true, bytes: md.bytes, mime: md.mime, sha256: md.sha256 };
     },
     async marcaLeido(phoneNumberId, wamid) { registro.push({ instante: reloj(), tipo: 'leido', detalle: `${phoneNumberId}: ${wamid}` }); return numeros.has(phoneNumberId); },
     async creaQr(phoneNumberId, mensajePrellenado, formato): Promise<RespuestaQr> {
@@ -193,6 +243,11 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
       const c = creaCliente({
         numero: n, waId, nombre, reloj, secretoApp: o.secretoApp,
         entrante: (m) => entrante(n, waId, nombre, m),
+        subeMedio: (bytes, mime) => {
+          const id = `${randomBytes(8).toString('hex')}${(++secuencia).toString().padStart(6, '0')}`;
+          medios.set(id, { bytes, mime, sha256: createHash('sha256').update(bytes).digest('hex'), phoneNumberId: n.phoneNumberId });
+          return { id, sha256: medios.get(id)!.sha256 };
+        },
         catalogo: () => catalogos.get(n.catalogoId),
         clic: (adId, conClid) => {
           const campana = [...campanas.values()].find((x) => x.anuncios.includes(adId));
@@ -223,6 +278,23 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
         emite(n.wabaId, 'history', { metadata: metadata(n), history: [{ metadata: { phase: fase, chunk_order: 1, progress: Math.round(((fase + 1) / 3) * 100) }, threads: enFase }] });
       });
     },
+    /** Meta cambia el estado de una plantilla (la pausa por calidad, la desactiva o la reactiva). */
+    cambiaPlantilla(phoneNumberId: string, nombre: string, estado: EstadoPlantilla) {
+      const n = numeros.get(phoneNumberId)!;
+      const def = n.plantillas[nombre];
+      if (!def) throw new Error(`la plantilla ${nombre} no está registrada`);
+      n.plantillas[nombre] = typeof def === 'string' ? { categoria: def, estado } : { ...def, estado };
+      emite(n.wabaId, 'message_template_status_update', { event: estado, message_template_name: nombre });
+    },
+    /** Meta recategoriza una plantilla (p. ej. una «utility» con tono promocional pasa a marketing). */
+    recategoriza(phoneNumberId: string, nombre: string, categoria: CategoriaPlantilla) {
+      const n = numeros.get(phoneNumberId)!;
+      const def = n.plantillas[nombre];
+      if (!def) throw new Error(`la plantilla ${nombre} no está registrada`);
+      n.plantillas[nombre] = typeof def === 'string' ? categoria : { ...def, categoria };
+      emite(n.wabaId, 'template_category_update', { message_template_name: nombre, new_category: categoria.toUpperCase() });
+    },
+    plantillasDe: (phoneNumberId: string) => ({ ...(numeros.get(phoneNumberId)?.plantillas ?? {}) }),
     desconecta(phoneNumberId: string) {
       const n = numeros.get(phoneNumberId)!;
       n.conectado = false;
@@ -268,6 +340,21 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
     pendientes: () => cola.length,
     precioDe: (id: string) => precios.get(id),
   };
+}
+
+/**
+ * Por qué Meta rechazaría mandar ESTA plantilla (o `null`). Códigos de la tabla de errores de la Cloud API:
+ * 132015 pausada, 132016 desactivada, 132000 parámetros que no cuadran con el cuerpo, 132001 sin el idioma.
+ */
+function fallaDePlantilla(def: DefinicionPlantilla, m: Extract<MensajeSaliente, { tipo: 'plantilla' }>): { codigo: number; mensaje: string } | null {
+  const estado = def.estado ?? 'APPROVED';
+  if (estado === 'PAUSED') return { codigo: 132015, mensaje: '(#132015) la plantilla está pausada por su calidad' };
+  if (estado === 'DISABLED') return { codigo: 132016, mensaje: '(#132016) la plantilla está desactivada' };
+  if (estado !== 'APPROVED') return { codigo: 132001, mensaje: '(#132001) la plantilla no está aprobada' };
+  if (def.idioma && def.idioma !== m.idioma) return { codigo: 132001, mensaje: `(#132001) la plantilla no existe en ${m.idioma}` };
+  if (def.cuerpo !== undefined && marcadores(def.cuerpo) !== m.parametros.length) return { codigo: 132000, mensaje: `(#132000) el cuerpo pide ${marcadores(def.cuerpo)} parámetros y llegaron ${m.parametros.length}` };
+  if ((m.botones?.length ?? 0) > (def.botones?.length ?? 0)) return { codigo: 132000, mensaje: '(#132000) más payloads que botones en la plantilla' };
+  return null;
 }
 
 /** Lo que Meta rechazaría de un evento de Conversions API for Business Messaging. */

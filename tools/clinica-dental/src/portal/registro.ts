@@ -33,7 +33,7 @@ export async function registra(ctx: Contexto, a: EntradaAlta): Promise<Resultado
   const p = prep.preparado;
   const paciente: Paciente = {
     seudonimo: ctx.seudonimos.paciente(a.clinica, a.usuario), clinica: a.clinica, usuario: a.usuario, datos: p.datos, categorias: p.categorias,
-    canalAdquisicion: p.convenio ? 'convenio' : a.canal, telegram: { chatId: null, vinculadoEn: null }, creado: ahora,
+    canalAdquisicion: p.convenio ? 'convenio' : a.canal, telegram: { chatId: null, vinculadoEn: null }, whatsapp: { waId: null, vinculadoEn: null }, creado: ahora,
   };
   await ctx.almacen.guardaPaciente(paciente);
   for (const c of p.consentimientos) {
@@ -75,5 +75,12 @@ async function efectosDelRetiro(ctx: Contexto, p: Paciente, tipo: TipoConsentimi
   if (tipo === 'telegram') {
     await ctx.almacen.guardaPaciente({ ...p, telegram: { chatId: null, vinculadoEn: null } });
     await cancelaAvisos(ctx, p.clinica, p.seudonimo, (a) => a.canal === 'telegram', 'consentimiento_retirado');
+  }
+  if (tipo === 'whatsapp') {
+    // Retirar el consentimiento DESVINCULA: el numero deja de estar atado a la cuenta y nada mas sale hacia el.
+    const tenia = Boolean(p.whatsapp?.waId);
+    await ctx.almacen.guardaPaciente({ ...p, whatsapp: { waId: null, vinculadoEn: null } });
+    await cancelaAvisos(ctx, p.clinica, p.seudonimo, (a) => a.canal === 'whatsapp', 'consentimiento_retirado');
+    if (tenia) await ctx.emite({ clinica: p.clinica, sujeto: p.seudonimo, tipo: 'whatsapp_vinculo', paso: 'desvinculado', coincide_celular: null }, `wa-vinculo|${p.seudonimo}|desvinculado|${ctx.reloj()}`);
   }
 }

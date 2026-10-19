@@ -95,7 +95,7 @@ export async function salir(clinica: string): Promise<void> {
 const reservaEntrada = z.object({
   servicio: z.string().regex(/^[a-z][a-z0-9-]{1,40}$/),
   inicio: z.string().datetime(),
-  canales: z.array(z.enum(['correo', 'telegram'])).max(2),
+  canales: z.array(z.enum(['correo', 'telegram', 'whatsapp'])).max(3),
   newsletter: z.boolean(),
   clave: z.string().regex(/^[a-z0-9-]{8,64}$/),
 }).strict();
@@ -107,7 +107,7 @@ async function exigeUsuario(): Promise<string | null> {
   return usuarioActual();
 }
 
-export async function reservar(clinica: string, entrada: unknown): Promise<ResultadoAccion<{ cita: string; telegramPorVincular: boolean }>> {
+export async function reservar(clinica: string, entrada: unknown): Promise<ResultadoAccion<{ cita: string; telegramPorVincular: boolean; whatsappPorVincular: boolean }>> {
   const c = idClinica.parse(clinica);
   const usuario = await exigeUsuario();
   if (!usuario) return { ok: false, error: 'Entra con tu cuenta para confirmar la cita.', sinSesion: true };
@@ -120,7 +120,7 @@ export async function reservar(clinica: string, entrada: unknown): Promise<Resul
   await despacha();
   const evento = (await rt.portal.ctx.libro.eventos(c)).find((x) => x.tipo === 'cita_confirmada' && x.cita === r.cita.id);
   revalidatePath(`/clinica/${c}/mis-citas`);
-  return { ok: true, valor: { cita: r.cita.id, telegramPorVincular: r.telegramPorVincular }, dataLayer: evento ? [aDataLayer(evento)].filter((x): x is EventoDataLayer => x !== null) : [] };
+  return { ok: true, valor: { cita: r.cita.id, telegramPorVincular: r.telegramPorVincular, whatsappPorVincular: r.whatsappPorVincular === true }, dataLayer: evento ? [aDataLayer(evento)].filter((x): x is EventoDataLayer => x !== null) : [] };
 }
 
 const idCita = z.string().regex(/^cit_[0-9a-f]{20}$/);
@@ -159,7 +159,7 @@ export async function reprogramar(clinica: string, cita: unknown, inicio: unknow
   }
 }
 
-const tipoConsentimiento = z.enum(['datos_salud', 'recordatorios', 'newsletter', 'telegram']);
+const tipoConsentimiento = z.enum(['datos_salud', 'recordatorios', 'newsletter', 'telegram', 'whatsapp']);
 
 export async function cambiarConsentimiento(clinica: string, tipo: unknown, otorgado: unknown): Promise<ResultadoAccion> {
   const c = idClinica.parse(clinica);
