@@ -16,7 +16,7 @@ import type { CitaParaAsistente } from './conocimiento.js';
 import { respuestaLocal } from './conocimiento.js';
 import { pareceInyeccion, pideDiagnostico, respuestaFueraDeDominio, respuestaInyeccion, respuestaNoDiagnostico, revisaFrase, type MotivoBarrera } from './guardas.js';
 import { escrituraA, TEXTO_ACCION, TEXTO_NO_PERMITIDA, type AccionPropuesta } from './ordenes.js';
-import { MAX_TOKENS_CHATBOT, promptChatbot, VERSION_PROMPT_CHATBOT } from './prompts.js';
+import { MAX_TOKENS_CHATBOT, promptChatbot, versionPrompt, type CanalPrompt } from './prompts.js';
 import { detectaUrgencia, normaliza, type DestinoUrgencia } from './urgencias.js';
 
 export interface MensajeCerebro { rol: 'usuario' | 'asistente'; texto: string }
@@ -36,6 +36,8 @@ export interface DepsAsistente {
   reloj: () => number;
   /** Etiqueta secreta del prompt: si aparece en la salida, el prompt se filtro. */
   canario: string;
+  /** Por donde contesta (cambia dos reglas del prompt; el portal usa el prompt firmado sin cambios). */
+  canal?: CanalPrompt;
 }
 
 export interface EntradaAsistente {
@@ -79,7 +81,7 @@ export const intencionDe = (texto: string): Intencion => INTENCIONES_KB.find(([,
 export function creaAsistente(d: DepsAsistente) {
   const c = d.clinica;
   const fija = (t0: number, ruta: RutaAsistente, intencion: Intencion, texto: string, extra: Partial<RespuestaAsistente> = {}): RespuestaAsistente => ({
-    ruta, intencion, texto, accion: null, urgencia: null, barrera: null, costoUsd: null, tokens: null, latenciaMs: Math.round(d.reloj() - t0), primeraFraseMs: Math.round(d.reloj() - t0), versionPrompt: VERSION_PROMPT_CHATBOT, ...extra,
+    ruta, intencion, texto, accion: null, urgencia: null, barrera: null, costoUsd: null, tokens: null, latenciaMs: Math.round(d.reloj() - t0), primeraFraseMs: Math.round(d.reloj() - t0), versionPrompt: versionPrompt(d.canal ?? 'portal'), ...extra,
   });
 
   function local(t0: number, orden: string, citas: readonly CitaParaAsistente[] | null): RespuestaAsistente | null {
@@ -115,7 +117,7 @@ export function creaAsistente(d: DepsAsistente) {
   }
 
   async function conCerebro(t0: number, texto: string, e: EntradaAsistente): Promise<RespuestaAsistente> {
-    const cerebro = d.cerebroPara(promptChatbot(c, e.citas, d.canario, e.padecimiento), MAX_TOKENS_CHATBOT);
+    const cerebro = d.cerebroPara(promptChatbot(c, e.citas, d.canario, e.padecimiento, d.canal ?? 'portal'), MAX_TOKENS_CHATBOT);
     const mensajes = [...e.historial.slice(-6), { rol: 'usuario' as const, texto }];
     let r: LecturaCerebro;
     try {

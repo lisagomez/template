@@ -6,7 +6,7 @@ import type { Aviso, Paciente } from '../almacen.js';
 import { servicio as servicioDe } from '../clinicas.js';
 import { construyeIcs } from '../canales/ics.js';
 import { idDeClave } from '../seudonimo.js';
-import { fechaLarga, mensajeCorreo, mensajeTelegram, type DatosAviso } from './plantillas.js';
+import { fechaEnFrase, mensajeCorreo, mensajeTelegram, type DatosAviso } from './plantillas.js';
 import type { Contexto } from './contexto.js';
 import type { MotivoFallo } from '../eventos.js';
 import { mensajeAviso, type ClasePlantilla } from '../whatsapp/plantillas.js';
@@ -80,7 +80,7 @@ async function enviaWhatsApp(ctx: Contexto, p: Paciente, a: Aviso): Promise<Envi
   if (!cita || a.clase === 'newsletter') return { ok: false, motivo: 'otro', definitivo: true };
   const clase: ClasePlantilla = a.clase === 'confirmacion' && cita.anterior ? 'reprogramada' : a.clase;
   // A media frase («para el jueves, 22 de octubre…»): el día va en minúscula.
-  const cuando = fechaLarga(cita.inicio, c.zona).replace(/^\p{Lu}/u, (l) => l.toLowerCase());
+  const cuando = fechaEnFrase(cita.inicio, c.zona);
   const parametros = clase === 'recordatorio_2h' ? [p.datos.nombre, c.nombre, cuando.split(', ').pop() ?? cuando, c.direccion] : [p.datos.nombre, c.nombre, cuando];
   const chat = await ctx.almacen.chat(p.clinica, waId);
   const abierta = chat?.ultimoEntrante != null && ctx.reloj() - chat.ultimoEntrante < VENTANA_MS;

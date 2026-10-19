@@ -83,7 +83,7 @@ export function armaCanal(reloj: () => number): CanalLaboratorio {
       ref.flows = { ctx: portal.ctx, verificaFirma: (c, f) => verificaFirmaMeta(SECRETO_APP_WA, c, f), cifrado: { abre: (c) => abre(c, privateKey) } };
       ref.receptor = creaReceptorWhatsApp({
         ctx: portal.ctx, verificaFirma: (c, f) => verificaFirmaMeta(SECRETO_APP_WA, c, f), lee: (c) => leeWebhook(c), cola: colaEnArchivo(RUTAS.colaWhatsapp), alProcesar,
-        asistente: (clinica, { protegido }) => creaAsistente({ clinica: CLINICAS.find((c) => c.id === clinica)!, enrutador, cerebroPara: protegido ? sinCerebro : cerebroPara, reloj: () => performance.now(), canario: CANARIO }),
+        asistente: (clinica, { protegido }) => creaAsistente({ clinica: CLINICAS.find((c) => c.id === clinica)!, enrutador, cerebroPara: protegido ? sinCerebro : cerebroPara, reloj: () => performance.now(), canario: CANARIO, canal: 'whatsapp' }),
         transcribe: (bytes) => transcribe(bytes),
       });
     },

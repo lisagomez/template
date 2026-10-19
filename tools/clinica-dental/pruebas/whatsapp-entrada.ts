@@ -195,3 +195,19 @@ test('pedir a una persona pasa a la recepción; NOMBRARLA no (iny-04: «La recep
     assert.match(vistos(cl).at(-1)!, /Le aviso a la recepción/, t);
   }
 });
+
+test('el cerebro por WhatsApp recibe el prompt del canal (formulario en vez de botones; las citas son de quien escribe) y el del portal no cambia', async () => {
+  const { promptChatbot, CLINICAS: cs } = await import('../dist/servidor.js');
+  const c = cs[0]!;
+  const portal = promptChatbot(c, null, 'X', null);
+  assert.equal(portal, promptChatbot(c, null, 'X', null, 'portal'), 'el portal sigue con su prompt firmado');
+  assert.doesNotMatch(portal, /WhatsApp/);
+  const w = await bancoWa();
+  const { cl } = await vinculado(w, 'adulto-convenio');
+  cl.escribe('¿Mi hijo de 15 años puede ir solo a su consulta?');
+  await w.asienta();
+  const sistema = w.sistemas.at(-1) ?? '';
+  assert.match(sistema, /Estás contestando por WhatsApp, no en el portal/);
+  assert.match(sistema, /Las PRÓXIMAS CITAS de abajo son de la persona que te escribe/);
+  assert.ok(sistema.startsWith(portal.split('\n')[0]!), 'las reglas del portal siguen ahí');
+});

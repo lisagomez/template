@@ -67,13 +67,15 @@ export async function bancoWa(op: OpcionesBancoWa = {}) {
   };
   let llamadas = 0;
   const transcritos: number[] = [];
+  const sistemas: string[] = [];
   deps.receptor = creaReceptorWhatsApp({
     ctx, verificaFirma: (c, f) => verificaFirmaMeta(SECRETO_APP, c, f), lee: (c) => leeWebhook(c), cola: op.cola ?? colaEnMemoria(),
     asistente: (clinica, { protegido }) => creaAsistente({
-      clinica: CLINICAS.find((c) => c.id === clinica)!, enrutador: enrutador(), reloj: b.reloj.ahora, canario: 'CANARIO-wa-7',
-      cerebroPara: () => ({
+      clinica: CLINICAS.find((c) => c.id === clinica)!, enrutador: enrutador(), reloj: b.reloj.ahora, canario: 'CANARIO-wa-7', canal: 'whatsapp',
+      cerebroPara: (sistema) => ({
         async *piensa() {
           llamadas++;
+          sistemas.push(sistema);
           if (protegido) throw new Error('rafaga: sin cerebro');
           yield { tipo: 'token' as const, texto: op.respuestaCerebro ?? 'La limpieza dura 45 minutos y te dejamos los dientes muy limpios. ' };
           yield { tipo: 'uso' as const, costoUsd: 0.0001 };
@@ -94,7 +96,7 @@ export async function bancoWa(op: OpcionesBancoWa = {}) {
   }
   const numero = (clinica: string) => NUMEROS.find((n) => n.clinica === clinica)!;
   const cliente = (clinica: string, waId: string, nombre = 'Paciente') => meta.cliente(numero(clinica).phoneNumberId, waId, nombre);
-  return { ...b, meta, receptor, puerto, asienta, cliente, numero, llamadas: () => llamadas, transcritos };
+  return { ...b, meta, receptor, puerto, asienta, cliente, numero, llamadas: () => llamadas, transcritos, sistemas };
 }
 
 export type BancoWa = Awaited<ReturnType<typeof bancoWa>>;

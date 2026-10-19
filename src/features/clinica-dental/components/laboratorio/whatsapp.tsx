@@ -37,6 +37,7 @@ function Telefono({ clinica, nombreClinica, numero, textoInicial }: Props & { nu
   const [texto, setTexto] = useState(textoInicial);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [enviado, setEnviado] = useState(false);
   const lista = useRef<HTMLOListElement>(null);
   // Como en WhatsApp: el chat se queda abajo, en lo último que llegó.
   useEffect(() => {
@@ -57,8 +58,14 @@ function Telefono({ clinica, nombreClinica, numero, textoInicial }: Props & { nu
     setError(null);
     const r = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ clinica, numero, nombre: 'Paciente', cambio }) });
     const j = (await r.json().catch(() => ({}))) as Partial<Estado> & { error?: string };
-    if (r.ok) setEstado((e) => ({ ...e, burbujas: j.burbujas ?? e.burbujas, flow: j.flow ?? null }));
-    else setError(j.error ?? 'no se pudo');
+    if (r.ok) {
+      // Un Flow que se acaba de cerrar se avisa 2 s arriba del chat (como WhatsApp) y no tapa nada.
+      if (j.flow?.cerrado) {
+        setEnviado(true);
+        setTimeout(() => setEnviado(false), 2_000);
+      }
+      setEstado((e) => ({ ...e, burbujas: j.burbujas ?? e.burbujas, flow: j.flow?.cerrado ? null : j.flow ?? null }));
+    } else setError(j.error ?? 'no se pudo');
     setOcupado(false);
     await carga();
   };
@@ -77,7 +84,8 @@ function Telefono({ clinica, nombreClinica, numero, textoInicial }: Props & { nu
           <input id="wa-texto" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Escribe un mensaje" className="min-h-11 flex-1 rounded-full border border-slate-300 bg-white px-4 text-sm" />
           <button type="submit" disabled={ocupado} className="min-h-11 rounded-full bg-[#008069] px-4 text-sm font-semibold text-white disabled:opacity-60">Enviar</button>
         </form>
-        {estado.flow ? <HojaFlow flow={estado.flow} ocupado={ocupado} alEnviar={(datos) => void haz({ accion: 'envia-flow', datos })} /> : null}
+        {enviado ? <div role="status" className="absolute inset-x-6 top-20 rounded-xl bg-white p-3 text-center text-sm shadow-lg">✓ Formulario enviado</div> : null}
+        {estado.flow && !estado.flow.cerrado ? <HojaFlow flow={estado.flow} ocupado={ocupado} alEnviar={(datos) => void haz({ accion: 'envia-flow', datos })} /> : null}
       </section>
       <Palancas ocupado={ocupado} error={error} alertas={estado.alertas} alHacer={(c) => void haz(c)} />
     </div>
@@ -117,7 +125,6 @@ type Opcion = { id: string; title: string; description?: string };
 
 function HojaFlow({ flow, ocupado, alEnviar }: { flow: VistaFlow; ocupado: boolean; alEnviar: (d: Record<string, unknown>) => void }) {
   const [forma, setForma] = useState<Record<string, unknown>>({});
-  if (flow.cerrado) return <div role="status" className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white p-4 text-center text-sm shadow-2xl">✓ Formulario enviado</div>;
   return (
     <div role="dialog" aria-label={flow.titulo} className="absolute inset-x-0 bottom-0 top-16 overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl" data-pantalla={flow.pantalla}>
       <h3 className="mb-3 text-center font-semibold">{flow.titulo}</h3>

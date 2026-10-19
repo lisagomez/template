@@ -8,20 +8,20 @@
   "usoCuentaUsd": 21.52082
  },
  "despues": {
-  "cuando": "2026-10-19T12:54:40.565Z",
-  "usoLlaveUsd": 11.831298,
+  "cuando": "2026-10-19T13:49:51.537Z",
+  "usoLlaveUsd": 11.845204,
   "topeLlaveUsd": 15,
-  "restanteLlaveUsd": 3.168702,
+  "restanteLlaveUsd": 3.154796,
   "creditosCuentaUsd": 24,
-  "usoCuentaUsd": 21.545155
+  "usoCuentaUsd": 21.559061
  },
- "deltaUsoLlaveUsd": 0.024335,
+ "deltaUsoLlaveUsd": 0.038241,
  "libroDeGastoApp": {
-  "llamadas": 94,
-  "usd": 0.023293,
-  "sinCostoDesconocido": 5,
+  "llamadas": 144,
+  "usd": 0.036509,
+  "sinCostoDesconocido": 8,
   "desde": "2026-10-19T12:42:42.266Z",
-  "hasta": "2026-10-19T12:52:36.999Z"
+  "hasta": "2026-10-19T13:48:47.166Z"
  },
  "tope": 1,
  "dentroDelTope": true

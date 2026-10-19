@@ -34,7 +34,7 @@ El núcleo de un portal del paciente para clínicas dentales: registro con conse
   (cripto, disco).
 - **Dependencias del sistema**: ninguna para el núcleo. La capa semántica pide Docker (Postgres efímero), `uv` y Python
   3.12 (dbt Core 1.12.5, dbt-postgres 1.11.0, dbt-metricflow 0.15.0, por `semantica/requirements.lock` con hashes).
-- **CPU, GPU y memoria**: el núcleo no calcula nada pesado: la suite completa (129 pruebas, con Postgres en proceso por
+- **CPU, GPU y memoria**: el núcleo no calcula nada pesado: la suite completa (130 pruebas, con Postgres en proceso por
   PGlite y el simulador de Meta) corre en ~55 s en un Ryzen 7 5700G sin GPU (medido el 2026-10-19); la capa semántica,
   en ~40 s con el entorno ya creado. Memoria no medida aparte.
 - **Servicios externos**: ninguno en el núcleo. Lo que habla con el mundo se inyecta: el calendario (`@tu-scope/calendario`),

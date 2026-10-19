@@ -1,6 +1,6 @@
 {
- "version": "sha256:37348421e0ab04ad",
- "generado": "2026-10-19T12:53:34.067Z",
+ "version": "sha256:89512678e305ee6c",
+ "generado": "2026-10-19T13:49:42.722Z",
  "generadoCon": {
   "dbt-core": "1.12.5",
   "dbt-metricflow": "0.15.0",
@@ -11,16 +11,16 @@
  },
  "libro": {
   "maguey": {
-   "eventos": 243,
-   "raiz": "sha256:3ad8e3d5b641018b6536b4d7bdece61af1f8532ae90638cd8c1947b318bab11f"
+   "eventos": 257,
+   "raiz": "sha256:202dd6ccef204a2416e2c429c344bf7e4b5c9efe15023812ddcb4b3d9411c407"
   },
   "colibri": {
-   "eventos": 127,
-   "raiz": "sha256:ac31edc93b52165363edae3f7b44e01ee5529a00dd37090145d02b311c3757ac"
+   "eventos": 138,
+   "raiz": "sha256:c08b0710b41098d982eeecc36efa15c1888ec431816cd45be0ae303be13fabb9"
   }
  },
  "dbt": [
-  "Finished running 3 seeds, 12 table models, 232 data tests, 26 view models in 0 hours 0 minutes and 4.49 seconds (4.49s).",
+  "Finished running 3 seeds, 12 table models, 232 data tests, 26 view models in 0 hours 0 minutes and 4.70 seconds (4.70s).",
   "Completed successfully",
   "Done. PASS=273 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=273"
  ],
@@ -39,26 +39,26 @@
   "paciente_registrado": 4,
   "consentimiento_otorgado": 15,
   "consentimiento_retirado": 0,
-  "cita_solicitada": 4,
-  "cita_confirmada": 4,
+  "cita_solicitada": 5,
+  "cita_confirmada": 5,
   "cita_reprogramada": 1,
-  "cita_cancelada": 1,
+  "cita_cancelada": 2,
   "cita_asistencia": 0,
-  "aviso_programado": 14,
-  "aviso_enviado": 7,
-  "aviso_entregado": 7,
+  "aviso_programado": 18,
+  "aviso_enviado": 9,
+  "aviso_entregado": 9,
   "aviso_fallido": 0,
-  "aviso_cancelado": 2,
+  "aviso_cancelado": 4,
   "newsletter_baja": 0,
   "telegram_vinculado": 0,
-  "asistente_turno": 68,
+  "asistente_turno": 69,
   "urgencia_derivada": 15,
   "preferencia_cambiada": 0,
   "whatsapp_vinculo": 12,
-  "aviso_leido": 5,
+  "aviso_leido": 7,
   "asistencia_confirmada": 1,
-  "whatsapp_entrante": 82,
-  "whatsapp_cobro": 102,
+  "whatsapp_entrante": 86,
+  "whatsapp_cobro": 107,
   "recepcion_atiende": 2
  },
  "convergencia": [
@@ -89,13 +89,13 @@
   },
   {
    "tipo": "cita_solicitada",
-   "libro": 4,
-   "staging": 4
+   "libro": 5,
+   "staging": 5
   },
   {
    "tipo": "cita_confirmada",
-   "libro": 4,
-   "staging": 4
+   "libro": 5,
+   "staging": 5
   },
   {
    "tipo": "cita_reprogramada",
@@ -104,8 +104,8 @@
   },
   {
    "tipo": "cita_cancelada",
-   "libro": 1,
-   "staging": 1
+   "libro": 2,
+   "staging": 2
   },
   {
    "tipo": "cita_asistencia",
@@ -114,18 +114,18 @@
   },
   {
    "tipo": "aviso_programado",
-   "libro": 14,
-   "staging": 14
+   "libro": 18,
+   "staging": 18
   },
   {
    "tipo": "aviso_enviado",
-   "libro": 7,
-   "staging": 7
+   "libro": 9,
+   "staging": 9
   },
   {
    "tipo": "aviso_entregado",
-   "libro": 7,
-   "staging": 7
+   "libro": 9,
+   "staging": 9
   },
   {
    "tipo": "aviso_fallido",
@@ -134,8 +134,8 @@
   },
   {
    "tipo": "aviso_cancelado",
-   "libro": 2,
-   "staging": 2
+   "libro": 4,
+   "staging": 4
   },
   {
    "tipo": "newsletter_baja",
@@ -149,8 +149,8 @@
   },
   {
    "tipo": "asistente_turno",
-   "libro": 68,
-   "staging": 68
+   "libro": 69,
+   "staging": 69
   },
   {
    "tipo": "urgencia_derivada",
@@ -169,8 +169,8 @@
   },
   {
    "tipo": "aviso_leido",
-   "libro": 5,
-   "staging": 5
+   "libro": 7,
+   "staging": 7
   },
   {
    "tipo": "asistencia_confirmada",
@@ -179,13 +179,13 @@
   },
   {
    "tipo": "whatsapp_entrante",
-   "libro": 82,
-   "staging": 82
+   "libro": 86,
+   "staging": 86
   },
   {
    "tipo": "whatsapp_cobro",
-   "libro": 102,
-   "staging": 102
+   "libro": 107,
+   "staging": 107
   },
   {
    "tipo": "recepcion_atiende",
@@ -206,12 +206,12 @@
   },
   "horas_registro_a_cita_p50": {
    "colibri": {
-    "metricflow": 0.000423,
-    "directo": 0.0004225
+    "metricflow": 0.000421,
+    "directo": 0.00042083333333333333
    },
    "maguey": {
-    "metricflow": 0.000433,
-    "directo": 0.00043305555555555556
+    "metricflow": 0.000426,
+    "directo": 0.00042583333333333335
    }
   },
   "citas_confirmadas": {
@@ -220,8 +220,8 @@
     "directo": 1
    },
    "maguey": {
-    "metricflow": 3,
-    "directo": 3
+    "metricflow": 4,
+    "directo": 4
    }
   },
   "citas_atendidas_n": {
@@ -246,8 +246,8 @@
   },
   "citas_canceladas_n": {
    "colibri": {
-    "metricflow": 0,
-    "directo": 0
+    "metricflow": 1,
+    "directo": 1
    },
    "maguey": {
     "metricflow": 0,
@@ -290,18 +290,18 @@
     "directo": 0
    },
    "maguey": {
-    "metricflow": 1,
-    "directo": 1
+    "metricflow": 2,
+    "directo": 2
    }
   },
   "avisos_entregados_n": {
    "colibri": {
-    "metricflow": 2,
-    "directo": 2
+    "metricflow": 3,
+    "directo": 3
    },
    "maguey": {
-    "metricflow": 5,
-    "directo": 5
+    "metricflow": 6,
+    "directo": 6
    }
   },
   "entregabilidad": {
@@ -316,22 +316,22 @@
   },
   "costo_por_aviso_usd": {
    "colibri": {
-    "metricflow": 0.0002,
-    "directo": 0.0002
+    "metricflow": 0.000133,
+    "directo": 0.00013333333333333334
    },
    "maguey": {
-    "metricflow": 0.00178,
-    "directo": 0.00178
+    "metricflow": 0.001483,
+    "directo": 0.0014833333333333332
    }
   },
   "avisos_leidos_n": {
    "colibri": {
-    "metricflow": 1,
-    "directo": 1
+    "metricflow": 2,
+    "directo": 2
    },
    "maguey": {
-    "metricflow": 4,
-    "directo": 4
+    "metricflow": 5,
+    "directo": 5
    }
   },
   "turnos_asistente_n": {
@@ -340,8 +340,8 @@
     "directo": 28
    },
    "maguey": {
-    "metricflow": 40,
-    "directo": 40
+    "metricflow": 41,
+    "directo": 41
    }
   },
   "urgencias_derivadas": {
@@ -376,12 +376,12 @@
   },
   "mensajes_whatsapp_n": {
    "colibri": {
-    "metricflow": 39,
-    "directo": 39
+    "metricflow": 41,
+    "directo": 41
    },
    "maguey": {
-    "metricflow": 63,
-    "directo": 63
+    "metricflow": 66,
+    "directo": 66
    }
   },
   "mensajes_whatsapp_cobrados_n": {
@@ -410,28 +410,28 @@
     "directo": 0
    },
    "maguey": {
-    "metricflow": 0.000135,
-    "directo": 0.00013492063492063494
+    "metricflow": 0.000129,
+    "directo": 0.0001287878787878788
    }
   },
   "entrantes_whatsapp_n": {
    "colibri": {
-    "metricflow": 31,
-    "directo": 31
+    "metricflow": 33,
+    "directo": 33
    },
    "maguey": {
-    "metricflow": 51,
-    "directo": 51
+    "metricflow": 53,
+    "directo": 53
    }
   },
   "entrantes_whatsapp_vinculados_n": {
    "colibri": {
-    "metricflow": 27,
-    "directo": 27
+    "metricflow": 29,
+    "directo": 29
    },
    "maguey": {
-    "metricflow": 43,
-    "directo": 43
+    "metricflow": 45,
+    "directo": 45
    }
   },
   "codigos_vinculo_n": {
@@ -496,12 +496,12 @@
   },
   "costo_por_conversacion_usd": {
    "colibri": {
-    "metricflow": 0.001294,
-    "directo": 0.00129355
+    "metricflow": 0.001252,
+    "directo": 0.00125225
    },
    "maguey": {
-    "metricflow": 0.002533,
-    "directo": 0.0025327
+    "metricflow": 0.002535,
+    "directo": 0.0025348
    }
   },
   "visitantes_portal": {
@@ -575,16 +575,16 @@
   {
    "clinica": "maguey",
    "canal": "whatsapp",
-   "entregados": 4,
-   "leidos": 4,
+   "entregados": 5,
+   "leidos": 5,
    "entregabilidad": 1,
-   "costoPorAvisoUsd": 0.002125
+   "costoPorAvisoUsd": 0.0017
   },
   {
    "clinica": "colibri",
    "canal": "whatsapp",
-   "entregados": 1,
-   "leidos": 1,
+   "entregados": 2,
+   "leidos": 2,
    "entregabilidad": 1,
    "costoPorAvisoUsd": 0
   },
@@ -610,7 +610,7 @@
    "clinica": "colibri",
    "categoria": "service",
    "mensaje": "aviso",
-   "n": 1,
+   "n": 2,
    "cobrables": 0,
    "costoUsd": 0
   },
@@ -618,7 +618,7 @@
    "clinica": "colibri",
    "categoria": "service",
    "mensaje": "respuesta",
-   "n": 38,
+   "n": 39,
    "cobrables": 0,
    "costoUsd": 0
   },
@@ -626,7 +626,7 @@
    "clinica": "maguey",
    "categoria": "service",
    "mensaje": "respuesta",
-   "n": 59,
+   "n": 61,
    "cobrables": 0,
    "costoUsd": 0
   },
@@ -642,32 +642,12 @@
    "clinica": "maguey",
    "categoria": "service",
    "mensaje": "aviso",
-   "n": 3,
+   "n": 4,
    "cobrables": 0,
    "costoUsd": 0
   }
  ],
  "entrantesWhatsapp": [
-  {
-   "clinica": "maguey",
-   "manejo": "flow",
-   "n": 1
-  },
-  {
-   "clinica": "maguey",
-   "manejo": "silenciado",
-   "n": 1
-  },
-  {
-   "clinica": "colibri",
-   "manejo": "baja",
-   "n": 1
-  },
-  {
-   "clinica": "colibri",
-   "manejo": "asistente",
-   "n": 28
-  },
   {
    "clinica": "maguey",
    "manejo": "boton",
@@ -696,7 +676,37 @@
   {
    "clinica": "maguey",
    "manejo": "asistente",
-   "n": 40
+   "n": 41
+  },
+  {
+   "clinica": "colibri",
+   "manejo": "flow",
+   "n": 1
+  },
+  {
+   "clinica": "maguey",
+   "manejo": "flow",
+   "n": 2
+  },
+  {
+   "clinica": "colibri",
+   "manejo": "boton",
+   "n": 1
+  },
+  {
+   "clinica": "maguey",
+   "manejo": "silenciado",
+   "n": 1
+  },
+  {
+   "clinica": "colibri",
+   "manejo": "baja",
+   "n": 1
+  },
+  {
+   "clinica": "colibri",
+   "manejo": "asistente",
+   "n": 28
   }
  ],
  "aristas": [
@@ -704,78 +714,91 @@
    "arista": "agenda→cita",
    "metricflow": {
     "n": 3,
-    "p50": 0.008
+    "p50": 0.01
    },
    "directo": {
     "desde": "agenda",
     "hacia": "cita",
     "n": 3,
-    "p50": 0.008
+    "p50": 0.01
    }
   },
   {
    "arista": "asistente→urgencia",
    "metricflow": {
     "n": 2,
-    "p50": 6.3535
+    "p50": 6.3465
    },
    "directo": {
     "desde": "asistente",
     "hacia": "urgencia",
     "n": 2,
-    "p50": 6.3535
+    "p50": 6.3465
    }
   },
   {
    "arista": "cita→avisos",
    "metricflow": {
-    "n": 4,
-    "p50": 3.9455
+    "n": 5,
+    "p50": 3.926
    },
    "directo": {
     "desde": "cita",
     "hacia": "avisos",
-    "n": 4,
-    "p50": 3.9455
+    "n": 5,
+    "p50": 3.926
+   }
+  },
+  {
+   "arista": "cita→cancelada",
+   "metricflow": {
+    "n": 1,
+    "p50": 181857.624
+   },
+   "directo": {
+    "desde": "cita",
+    "hacia": "cancelada",
+    "n": 1,
+    "p50": 181857.624
    }
   },
   {
    "arista": "cita→reprogramada",
    "metricflow": {
     "n": 1,
-    "p50": 12.299
+    "p50": 12.034
    },
    "directo": {
     "desde": "cita",
     "hacia": "reprogramada",
     "n": 1,
-    "p50": 12.299
+    "p50": 12.034
    }
   },
   {
    "arista": "consentimientos→agenda",
    "metricflow": {
     "n": 3,
-    "p50": 1.517
+    "p50": 1.505
    },
    "directo": {
     "desde": "consentimientos",
     "hacia": "agenda",
     "n": 3,
-    "p50": 1.517
+    "p50": 1.505
    }
   },
   {
    "arista": "registro→asistente",
    "metricflow": {
     "n": 2,
-    "p50": 205258.0705
+    "p50": 205267.9305
    },
    "directo": {
     "desde": "registro",
     "hacia": "asistente",
     "n": 2,
-    "p50": 205258.07049999997
+    "p50": 205267.93050000002
    }
   },
   {
@@ -795,13 +818,13 @@
    "arista": "visita→registro",
    "metricflow": {
     "n": 4,
-    "p50": 1.0275
+    "p50": 0.9995
    },
    "directo": {
     "desde": "visita",
     "hacia": "registro",
     "n": 4,
-    "p50": 1.0274999999999999
+    "p50": 0.9995
    }
   }
  ],
@@ -810,49 +833,55 @@
    "clinica": "colibri",
    "arista": "agenda→cita",
    "n": 1,
-   "p50": 0.008
+   "p50": 0.01
   },
   {
    "clinica": "colibri",
    "arista": "asistente→urgencia",
    "n": 1,
-   "p50": 12.704
+   "p50": 12.69
   },
   {
    "clinica": "colibri",
    "arista": "cita→avisos",
    "n": 1,
-   "p50": 3.932
+   "p50": 3.926
+  },
+  {
+   "clinica": "colibri",
+   "arista": "cita→cancelada",
+   "n": 1,
+   "p50": 181857.624
   },
   {
    "clinica": "colibri",
    "arista": "consentimientos→agenda",
    "n": 1,
-   "p50": 1.512
+   "p50": 1.505
   },
   {
    "clinica": "colibri",
    "arista": "registro→asistente",
    "n": 1,
-   "p50": 228661.197
+   "p50": 228682.192
   },
   {
    "clinica": "colibri",
    "arista": "registro→consentimientos",
    "n": 1,
-   "p50": 0.001
+   "p50": 0
   },
   {
    "clinica": "colibri",
    "arista": "visita→registro",
    "n": 1,
-   "p50": 1.026
+   "p50": 0.995
   },
   {
    "clinica": "maguey",
    "arista": "agenda→cita",
    "n": 2,
-   "p50": 0.0105
+   "p50": 0.01
   },
   {
    "clinica": "maguey",
@@ -863,26 +892,26 @@
   {
    "clinica": "maguey",
    "arista": "cita→avisos",
-   "n": 3,
-   "p50": 3.959
+   "n": 4,
+   "p50": 1.9875
   },
   {
    "clinica": "maguey",
    "arista": "cita→reprogramada",
    "n": 1,
-   "p50": 12.299
+   "p50": 12.034
   },
   {
    "clinica": "maguey",
    "arista": "consentimientos→agenda",
    "n": 2,
-   "p50": 1.547
+   "p50": 1.5215
   },
   {
    "clinica": "maguey",
    "arista": "registro→asistente",
    "n": 1,
-   "p50": 181854.944
+   "p50": 181853.669
   },
   {
    "clinica": "maguey",
@@ -894,7 +923,7 @@
    "clinica": "maguey",
    "arista": "visita→registro",
    "n": 3,
-   "p50": 1.029
+   "p50": 1.004
   }
  ]
 }

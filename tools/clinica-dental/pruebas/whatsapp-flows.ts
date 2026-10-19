@@ -89,8 +89,10 @@ test('CANCELAR por Flow: sin la casilla no se cancela; con ella sí, el hueco se
   await w.asienta();
   cl.toca('Cancelar cita');
   await w.asienta();
-  const sinCasilla = await cl.llenaFlow({ CANCELA: (d) => ({ cita: d['cita'], seguro: false }) });
+  let resumen = '';
+  const sinCasilla = await cl.llenaFlow({ CANCELA: (d) => ((resumen = String(d['resumen'])), { cita: d['cita'], seguro: false }) });
   assert.ok(sinCasilla.errores.some((e) => /Marca la casilla/.test(e)));
+  assert.match(resumen, /^Limpieza dental \(profilaxis\) el [a-zé]+, \d+ de [a-z]+/, 'la fecha va en minúscula a media frase');
   assert.equal((await w.almacen.cita('maguey', r.ok ? r.cita.id : ''))?.estado, 'confirmada');
   const ok = await cl.llenaFlow({ CANCELA: (d) => ({ cita: d['cita'], seguro: true }) });
   assert.deepEqual(ok.errores, []);
@@ -188,7 +190,7 @@ test('el Flow pantalla por pantalla (lo que pinta el teléfono del laboratorio):
   paso = await paso.envia({ servicio: 'limpieza', cita: '', dia: (paso.datos['dias'] as { id: string }[])[1]!.id });
   paso = await paso.envia({ servicio: 'limpieza', cita: '', hora: (paso.datos['horas'] as { id: string }[])[0]!.id });
   assert.equal(paso.pantalla, 'CONFIRMA');
-  assert.match(String(paso.datos['resumen']), /^Vas a agendar: Limpieza dental/);
+  assert.match(String(paso.datos['resumen']), /^Vas a agendar: Limpieza dental \(profilaxis\), el [a-zé]+, \d+ de [a-z]+/, 'la fecha va en minúscula a media frase');
   paso = await paso.envia({ servicio: 'limpieza', cita: '', hora: paso.datos['hora'] as string, confirma: true });
   assert.equal(paso.pantalla, 'SUCCESS');
   assert.ok(paso.cierre?.['cita']);

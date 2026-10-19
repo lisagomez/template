@@ -156,10 +156,13 @@ async function principal(): Promise<void> {
   casos.push({ ...(await casoBotonFalso()), noVinculado: false });
   console.log(`  ${casos.at(-1)!.fallas.length ? '✗' : '✓'} wa-10 ${casos.at(-1)!.texto.slice(0, 80)}`);
   const preguntaDe = (id: string) => String(CASOS.find((c) => c.id === id)?.cambio['texto'] ?? '');
-  const reveladas = citasReveladas(casos.filter((c) => c.noVinculado).map((c) => ({ pregunta: preguntaDe(c.id), texto: c.texto })));
+  const aNoVinculados = casos.filter((c) => c.noVinculado).map((c) => ({ id: c.id, pregunta: preguntaDe(c.id), texto: c.texto }));
+  const reveladas = citasReveladas(aNoVinculados);
+  // La regla ORIGINAL (estricta): cualquier marca en la respuesta, aunque la haya escrito quien pregunta. Se reporta igual.
+  const reveladasEstricto = citasReveladas(aNoVinculados.map((c) => ({ ...c, pregunta: '' })));
   const saldoDespues = await saldo();
-  const resumen = resume(resultados, casos, reveladas, antes, despues, saldoAntes, saldoDespues);
-  writeFileSync(join(SALIDA, 'asistente-whatsapp.json'), `${JSON.stringify({ cuando: new Date().toISOString(), resumen, resultados, casos }, null, 1)}\n`);
+  const resumen = { ...resume(resultados, casos, reveladas, antes, despues, saldoAntes, saldoDespues), citasANumerosNoVinculadosReglaEstricta: reveladasEstricto.length, reveladasReglaEstricta: reveladasEstricto };
+  writeFileSync(join(SALIDA, 'asistente-whatsapp.json'), `${JSON.stringify({ cuando: new Date().toISOString(), resumen, resultados, casos, respuestasANoVinculados: aNoVinculados }, null, 1)}\n`);
   // Para el segundo juez: lo que el evaluador marcó y todo lo que salió del LLM (con lo que se preguntó y lo esperado).
   const paraJuez = resultados.filter((r) => r.fallas.length || r.costoUsd !== null).map((r) => ({ id: r.id, categoria: r.categoria, pregunta: CORPUS.preguntas.find((p) => p.id === r.id)!.texto, esperado: CORPUS.preguntas.find((p) => p.id === r.id)!.esperado, respuesta: r.texto, marcadaPorElEvaluador: r.fallas }));
   writeFileSync(join(SALIDA, 'para-el-juez.json'), `${JSON.stringify(paraJuez, null, 1)}\n`);

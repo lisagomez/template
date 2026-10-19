@@ -15,6 +15,9 @@ export function fechaLarga(ms: number, zona: string): string {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
+/** La misma fecha para ir a media frase («tu cita del viernes, 23 de octubre…»): sin la mayúscula inicial. */
+export const fechaEnFrase = (ms: number, zona: string): string => fechaLarga(ms, zona).replace(/^\p{Lu}/u, (l) => l.toLowerCase());
+
 export interface DatosAviso {
   clinica: Clinica;
   servicio: Servicio | null;

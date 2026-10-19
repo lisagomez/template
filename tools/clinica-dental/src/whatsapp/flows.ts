@@ -13,7 +13,7 @@ import { pesos, servicio as servicioDe } from '../clinicas.js';
 import type { Paciente } from '../almacen.js';
 import { ErrorPortal, HORA_MS, type Contexto } from '../portal/contexto.js';
 import { cancela, LIMITE_CAMBIO_HORAS, reprograma, reserva } from '../portal/citas.js';
-import { fechaLarga } from '../portal/plantillas.js';
+import { fechaEnFrase, fechaLarga } from '../portal/plantillas.js';
 import { leeTokenFlow, type DatosFlow } from './firma.js';
 import { mismoTelefono } from './numero.js';
 
@@ -66,7 +66,7 @@ async function resumenCita(t: Turno, id: string): Promise<string | null> {
   const cita = (await citasCambiables(t)).find((x) => x.id === id);
   if (!cita) return null;
   const c = t.ctx.clinica(t.tok.clinica);
-  return `${servicioDe(c, cita.servicio).nombre} el ${fechaLarga(cita.inicio, c.zona)}`;
+  return `${servicioDe(c, cita.servicio).nombre} el ${fechaEnFrase(cita.inicio, c.zona)}`;
 }
 
 async function inicial(t: Turno): Promise<Pantalla> {
@@ -98,7 +98,7 @@ async function confirmaFlujo(t: Turno, d: Record<string, unknown>): Promise<Pant
     return pantallaHoras(t, servicio, cita, dia, r.motivo === 'ocupado' ? 'Alguien acaba de tomar ese horario. Elige otro.' : r.detalle);
   }
   const c = t.ctx.clinica(t.tok.clinica);
-  return exito({ cita: r.cita.id, resumen: `${servicioDe(c, r.cita.servicio).nombre} el ${fechaLarga(r.cita.inicio, c.zona)}` });
+  return exito({ cita: r.cita.id, resumen: `${servicioDe(c, r.cita.servicio).nombre} el ${fechaEnFrase(r.cita.inicio, c.zona)}` });
 }
 
 async function cancelaFlujo(t: Turno, d: Record<string, unknown>): Promise<Pantalla> {
@@ -126,7 +126,7 @@ async function siguiente(t: Turno, screen: string, d: Record<string, unknown>): 
     const s = servicioDe(c, str(d['servicio']));
     if (Number.isNaN(Date.parse(hora))) return pantallaHoras(t, s.id, cita, '', 'Elige una hora de la lista.');
     const verbo = t.tok.flujo === 'reprogramar' ? 'Tu cita cambia a' : 'Vas a agendar';
-    return conError('CONFIRMA', { servicio: s.id, cita, hora, resumen: `${verbo}: ${s.nombre}, ${fechaLarga(Date.parse(hora), c.zona)}. ${c.direccion}.` }, '');
+    return conError('CONFIRMA', { servicio: s.id, cita, hora, resumen: `${verbo}: ${s.nombre}, el ${fechaEnFrase(Date.parse(hora), c.zona)}. ${c.direccion}.` }, '');
   }
   if (screen === 'CONFIRMA') return confirmaFlujo(t, d);
   if (screen === 'CANCELA') return cancelaFlujo(t, d);

@@ -95,7 +95,7 @@ export async function toca(p: Page, boton: string): Promise<void> {
 /** Espera la pantalla del Flow (o que se cierre). */
 export async function pantallaFlow(p: Page, pantalla: string | null): Promise<void> {
   if (pantalla) await p.locator(`[role="dialog"][data-pantalla="${pantalla}"]`).waitFor({ timeout: 30_000 });
-  else await p.getByRole('status').filter({ hasText: 'Formulario enviado' }).waitFor({ timeout: 30_000 });
+  else await p.locator('[role="dialog"][data-pantalla]').waitFor({ state: 'detached', timeout: 30_000 });
 }
 
 /** En el Flow: elige la opción `n` (o la que diga `texto`) y toca el botón del pie. */

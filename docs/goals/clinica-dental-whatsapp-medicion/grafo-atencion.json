@@ -33,6 +33,11 @@
       "estado": "morado"
     },
     {
+      "id": "cancelada",
+      "label": "Cita cancelada",
+      "estado": "morado"
+    },
+    {
       "id": "reprogramada",
       "label": "Cita reprogramada",
       "estado": "morado"
@@ -66,7 +71,7 @@
       "from": "asistente",
       "to": "urgencia",
       "n": 2,
-      "p50_s": 6.4,
+      "p50_s": 6.3,
       "origen": "simulada"
     },
     {
@@ -75,8 +80,18 @@
       "tipo": "script",
       "from": "cita",
       "to": "avisos",
-      "n": 4,
+      "n": 5,
       "p50_s": 3.9,
+      "origen": "simulada"
+    },
+    {
+      "id": "a-cita-cancelada",
+      "label": "cita → cancelada",
+      "tipo": "script",
+      "from": "cita",
+      "to": "cancelada",
+      "n": 1,
+      "p50_s": 181857.6,
       "origen": "simulada"
     },
     {
@@ -86,7 +101,7 @@
       "from": "cita",
       "to": "reprogramada",
       "n": 1,
-      "p50_s": 12.3,
+      "p50_s": 12,
       "origen": "simulada"
     },
     {
@@ -106,7 +121,7 @@
       "from": "registro",
       "to": "asistente",
       "n": 2,
-      "p50_s": 205258.1,
+      "p50_s": 205267.9,
       "origen": "simulada"
     },
     {
@@ -132,5 +147,5 @@
   ],
   "lazos": [],
   "fuente": "métricas `transiciones` y `segundos_arista_p50` de MetricFlow sobre fct_transicion (libro de eventos de las corridas del laboratorio)",
-  "corte": "sha256:37348421e0ab04ad"
+  "corte": "sha256:89512678e305ee6c"
 }

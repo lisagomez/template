@@ -52,7 +52,11 @@ export async function conversacion(clinica: string, numero: string): Promise<{ b
   const cl = await cliente(clinica, numero);
   const propios: Burbuja[] = cl.enviados.map((e) => ({ lado: 'paciente', instante: e.instante, tipo: e.tipo, texto: e.tipo === 'audio' ? '🎤 Nota de voz' : e.tipo === 'imagen' ? `📷 Foto${e.texto ? `: ${e.texto}` : ''}` : e.texto ?? '' }));
   const burbujas = [...propios, ...cl.recibidos.map(deClinica)].sort((a, b) => a.instante - b.instante);
-  return { burbujas, flow: vistaFlow(flows.get(llave(clinica, numero)) ?? null) };
+  const k = llave(clinica, numero);
+  const flow = vistaFlow(flows.get(k) ?? null);
+  // Un Flow cerrado se devuelve UNA vez (para el aviso «enviado») y se olvida: si no, tapaba el chat para siempre.
+  if (flow?.cerrado) flows.delete(k);
+  return { burbujas, flow };
 }
 
 function vistaFlow(p: PasoFlow | null): VistaFlow | null {

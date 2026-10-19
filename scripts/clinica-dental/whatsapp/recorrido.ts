@@ -124,6 +124,8 @@ async function principal(): Promise<void> {
   });
   await t('6 · «Mis citas» con el estado de los avisos de WhatsApp', () => enAmbas(vistas, `${BASE}/clinica/${p1.clinica}/mis-citas`, '06-mis-citas-whatsapp', { completa: true, axe: 'mis-citas-vinculado' }));
   await t('4 · Flow REPROGRAMANDO (otra paciente, cita a 5 días)', () => reprogramaPorFlow(vistas));
+  await t('Flow AGENDANDO: «quiero agendar» → servicio → día → hora → «Confirmar cita»', () => agendaPorFlow(vistas));
+  await t('Flow CANCELANDO: «Cancelar cita» → la casilla → «Cancelar cita»', () => cancelaPorFlow(vistas));
   await t('coexistencia: la recepción contesta desde su celular y el asistente calla', async () => {
     const tel = await ctx.newPage();
     await tel.goto(tel1, { waitUntil: 'networkidle' });
@@ -184,6 +186,44 @@ async function reprogramaPorFlow(vistas: Awaited<ReturnType<typeof dos>>): Promi
   await p.waitForTimeout(1_500);
   await ctx.close();
   await enAmbas(vistas, tel, '04c-flow-reprogramada');
+}
+
+async function agendaPorFlow(vistas: Awaited<ReturnType<typeof dos>>): Promise<void> {
+  const s = paciente('adulto-convenio');
+  const tel = telefonoUrl(s.clinica, numeroDe(s));
+  const ctx = await contexto('escritorio');
+  const p = await ctx.newPage();
+  await p.goto(tel, { waitUntil: 'networkidle' });
+  await escribe(p, 'Quiero agendar otra cita');
+  await p.locator('li[data-lado] button', { hasText: 'Agendar cita' }).last().click();
+  await pantallaFlow(p, 'SERVICIO');
+  await enAmbas(vistas, tel, '13a-flow-agenda-servicio');
+  await avanzaFlow(p, { texto: 'Limpieza dental' }, 'Continuar', 'DIA');
+  // El cuarto día de la lista: el segundo es el de la cita que ya tiene (el portal no deja empalmar dos de la misma persona).
+  await avanzaFlow(p, { n: 3 }, 'Ver horarios', 'HORA');
+  await avanzaFlow(p, { n: 0 }, 'Continuar', 'CONFIRMA');
+  await enAmbas(vistas, tel, '13b-flow-agenda-confirma');
+  await avanzaFlow(p, null, 'Confirmar cita', null);
+  await p.waitForTimeout(1_500);
+  await ctx.close();
+  await enAmbas(vistas, tel, '13c-flow-agendada');
+}
+
+async function cancelaPorFlow(vistas: Awaited<ReturnType<typeof dos>>): Promise<void> {
+  const s = paciente('baja-newsletter');
+  const tel = telefonoUrl(s.clinica, numeroDe(s));
+  const ctx = await contexto('celular');
+  const p = await ctx.newPage();
+  await p.goto(tel, { waitUntil: 'networkidle' });
+  await toca(p, 'Cancelar cita');
+  await p.locator('li[data-lado] button', { hasText: 'Cancelar mi cita' }).last().click();
+  await pantallaFlow(p, 'CANCELA');
+  await enAmbas(vistas, tel, '14a-flow-cancela-casilla');
+  await p.locator('[role="dialog"] input[type="checkbox"]').check();
+  await avanzaFlow(p, null, 'Cancelar cita', null);
+  await p.waitForTimeout(1_500);
+  await ctx.close();
+  await enAmbas(vistas, tel, '14b-flow-cancelada');
 }
 
 function escribeResultado(): void {

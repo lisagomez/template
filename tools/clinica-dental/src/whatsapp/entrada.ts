@@ -21,7 +21,7 @@ import { detectaUrgencia, normaliza } from '../asistente/urgencias.js';
 import { servicio as servicioDe } from '../clinicas.js';
 import type { ManejoWa, TipoMensajeWa } from '../eventos.js';
 import { HORA_MS, vigentes, type Contexto } from '../portal/contexto.js';
-import { fechaLarga } from '../portal/plantillas.js';
+import { fechaEnFrase, fechaLarga } from '../portal/plantillas.js';
 import { cambiaConsentimiento } from '../portal/registro.js';
 import { LIMITE_CAMBIO_HORAS } from '../portal/citas.js';
 import { idDeClave } from '../seudonimo.js';
@@ -195,7 +195,7 @@ async function boton(t: Turno, payload: string): Promise<void> {
   const c = ctx.clinica(t.clinica);
   if (b.accion === 'confirma') {
     await ctx.emite({ clinica: t.clinica, sujeto: t.paciente.seudonimo, tipo: 'asistencia_confirmada', cita: cita.id, canal: 'whatsapp' }, `asistencia|${cita.id}`);
-    const cuando = fechaLarga(cita.inicio, c.zona).replace(/^\p{Lu}/u, (l) => l.toLowerCase());
+    const cuando = fechaEnFrase(cita.inicio, c.zona);
     return void (await envia(t, { tipo: 'texto', texto: `¡Gracias, ${t.paciente.datos.nombre}! Te esperamos el ${cuando} en ${c.direccion}.` }));
   }
   if ((cita.inicio - ctx.reloj()) / HORA_MS < LIMITE_CAMBIO_HORAS) {

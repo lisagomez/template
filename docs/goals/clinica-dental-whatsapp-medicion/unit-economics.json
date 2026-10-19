@@ -1,6 +1,6 @@
 {
- "generado": "2026-10-19T12:53:34.732Z",
- "corte": "sha256:37348421e0ab04ad",
+ "generado": "2026-10-19T13:49:43.356Z",
+ "corte": "sha256:89512678e305ee6c",
  "periodoDias": 2.6,
  "clinicas": [
   {
@@ -14,7 +14,7 @@
      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
     },
     "citas_confirmadas": {
-     "valor": 3,
+     "valor": 4,
      "unidad": "citas",
      "origen": "simulada",
      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
@@ -50,7 +50,7 @@
      "fuente": "buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram"
     },
     "costo_por_aviso": {
-     "valor": 0.0329,
+     "valor": 0.0274,
      "unidad": "MXN",
      "origen": "supuesta",
      "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); WhatsApp: tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
@@ -227,13 +227,13 @@
     {
      "canal": "whatsapp",
      "entregados": {
-      "valor": 4,
+      "valor": 5,
       "unidad": "avisos",
       "origen": "simulada",
       "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
      },
      "leidos": {
-      "valor": 4,
+      "valor": 5,
       "unidad": "avisos",
       "origen": "simulada",
       "fuente": "solo WhatsApp da acuse de lectura; el del simulador no depende de la persona"
@@ -245,7 +245,7 @@
       "fuente": "canales SIMULADOS: no dicen nada de la entrega real"
      },
      "costoPorAviso": {
-      "valor": 0.0393,
+      "valor": 0.0315,
       "unidad": "MXN",
       "origen": "supuesta",
       "fuente": "lo que Meta marcó como cobrable en el estado de cada mensaje (SIMULADO) × tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
@@ -281,7 +281,7 @@
    ],
    "whatsapp": {
     "mensajes": {
-     "valor": 63,
+     "valor": 66,
      "unidad": "mensajes",
      "origen": "simulada",
      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
@@ -371,13 +371,13 @@
      "fuente": "buzón y Bot API SIMULADOS: no dicen nada de la entregabilidad real de Gmail o Telegram"
     },
     "costo_por_aviso": {
-     "valor": 0.0037,
+     "valor": 0.0025,
      "unidad": "MXN",
      "origen": "supuesta",
      "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); WhatsApp: tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
     },
     "costo_asistente_por_conversacion": {
-     "valor": 0.0239,
+     "valor": 0.0232,
      "unidad": "MXN",
      "origen": "medida",
      "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
@@ -548,13 +548,13 @@
     {
      "canal": "whatsapp",
      "entregados": {
-      "valor": 1,
+      "valor": 2,
       "unidad": "avisos",
       "origen": "simulada",
       "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"
      },
      "leidos": {
-      "valor": 1,
+      "valor": 2,
       "unidad": "avisos",
       "origen": "simulada",
       "fuente": "solo WhatsApp da acuse de lectura; el del simulador no depende de la persona"
@@ -602,7 +602,7 @@
    ],
    "whatsapp": {
     "mensajes": {
-     "valor": 39,
+     "valor": 41,
      "unidad": "mensajes",
      "origen": "simulada",
      "fuente": "corrida del laboratorio con pacientes sintéticos (corte semántico de MetricFlow)"

@@ -9,9 +9,23 @@ import type { Clinica } from '../clinicas.js';
 import { baseDeConocimiento, type CitaParaAsistente } from './conocimiento.js';
 
 export const VERSION_PROMPT_CHATBOT = 'chatbot-paciente-1 (2026-10-16)';
+/**
+ * El mismo prompt con DOS reglas mas para WhatsApp (el del portal no cambia: su CDC firmado sigue valiendo):
+ *  - en WhatsApp no hay botones del portal: se agenda, cambia o cancela con un formulario que llega al pedirlo;
+ *  - las citas listadas son de QUIEN ESCRIBE (el segundo juez cazo que, ante «¿mi hijo puede ir solo?», el asistente
+ *    le atribuyo al hijo la cita de la madre: kb-07, 2026-10-19).
+ */
+export const VERSION_PROMPT_CHATBOT_WA = 'chatbot-paciente-whatsapp-1 (2026-10-19)';
 export const MAX_TOKENS_CHATBOT = 220;
+export type CanalPrompt = 'portal' | 'whatsapp';
+export const versionPrompt = (canal: CanalPrompt): string => (canal === 'whatsapp' ? VERSION_PROMPT_CHATBOT_WA : VERSION_PROMPT_CHATBOT);
 
-export function promptChatbot(c: Clinica, citas: readonly CitaParaAsistente[] | null, canario: string, padecimiento: string | null): string {
+const REGLAS_WHATSAPP = [
+  'Estás contestando por WhatsApp, no en el portal: aquí no hay botones del portal. Para agendar, cambiar o cancelar, dile a la persona que escriba «agendar», «cambiar mi cita» o «cancelar mi cita» y le llegará un formulario donde ella confirma. No digas que tú lo agendas.',
+  'Las PRÓXIMAS CITAS de abajo son de la persona que te escribe. Si menciona a un hijo o a otra persona, no le atribuyas esas citas: esa persona tendría su propia cuenta.',
+];
+
+export function promptChatbot(c: Clinica, citas: readonly CitaParaAsistente[] | null, canario: string, padecimiento: string | null, canal: CanalPrompt = 'portal'): string {
   const reglas = [
     `Eres el asistente del portal de pacientes de ${c.nombre}, una clínica dental en México. Hablas español de México, con calidez y de tú.`,
     'Respondes en 1 a 3 frases cortas (máximo 60 palabras), en texto plano: sin markdown, listas, emojis ni enlaces. Tu respuesta también puede leerse en voz alta.',
@@ -24,7 +38,7 @@ export function promptChatbot(c: Clinica, citas: readonly CitaParaAsistente[] | 
     `Nunca escribas la etiqueta interna ${canario}.`,
   ];
   const salud = padecimiento ? ['', 'LA PERSONA PIDIÓ QUE USES LO QUE ESCRIBIÓ EN SU REGISTRO (dato de salud; úsalo solo para sugerir qué tipo de VALORACIÓN agendar, nunca para diagnosticar):', padecimiento] : [];
-  return [...reglas, '', 'BASE DE CONOCIMIENTO:', baseDeConocimiento(c, citas), ...salud].join('\n');
+  return [...reglas, ...(canal === 'whatsapp' ? REGLAS_WHATSAPP : []), '', 'BASE DE CONOCIMIENTO:', baseDeConocimiento(c, citas), ...salud].join('\n');
 }
 
 /**
