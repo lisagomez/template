@@ -7,7 +7,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clinica, cortaFrases, creaAsistente, detectaUrgencia, montosEn, REGLAS_URGENCIA, type PuertoCerebro, type RespuestaAsistente } from '../dist/index.js';
+import { clinica, corrigeVoz, cortaFrases, creaAsistente, detectaUrgencia, detectaUrgenciaEnVoz, montosEn, REGLAS_URGENCIA, type PuertoCerebro, type RespuestaAsistente } from '../dist/index.js';
 import { CORPUS, enrutador } from './_banco.ts';
 
 const CANARIO = 'CANARIO-7f3a';
@@ -45,6 +45,26 @@ test('URGENCIAS: las 12 preguntas de urgencia del corpus disparan su regla y su 
 test('URGENCIAS: cada regla declara su fuente y hay respuesta fija para cada destino', () => {
   for (const r of REGLAS_URGENCIA) assert.match(r.fuente, /^https:\/\//, r.id);
   assert.deepEqual(REGLAS_URGENCIA.map((r) => r.id), ['U1', 'U2', 'U3', 'U4', 'U5', 'U6']);
+});
+
+test('URGENCIAS POR VOZ: lo que el ASR torció en la medición (120 tomas) se lee como la palabra de alarma y la regla dispara', () => {
+  const c = clinica('maguey');
+  for (const oido of ['Me sacaron una muela ayer y no para desancrar.', 'Me sacaron una muela a Jedi no para desancrar.', 'Está sancrando a choros después de la extracción.', 'Estás ancrando a choros después de la extracción.', 'está sancando a choros después de la extracción.']) {
+    assert.equal(detectaUrgencia(oido, c), null, `sin corregir no dispara: ${oido}`);
+    assert.equal(detectaUrgenciaEnVoz([oido], c)?.regla.id, 'U3', oido);
+  }
+  assert.equal(detectaUrgenciaEnVoz(['No puedo bien y tengo la boca muy hinchada.', 'No puedo respirar bien y tengo la boca muy hinchada.'], c)?.regla.id, 'U1', 'basta una de las lecturas');
+  assert.equal(detectaUrgencia('Le dieron un golpe a mi hija jugando fútbol, dice le cayó un diente de adelante.', c)?.regla.id, 'U5', '«le cayó un diente» sin el «se»');
+  assert.equal(detectaUrgencia('Me cayó mal la comida y me duele un diente', c), null, 'contraejemplo: «me cayó mal» no es un diente que se cae');
+  assert.equal(detectaUrgenciaEnVoz(['Tengo la cara hinchada y me cuesta pagar.'], c)?.regla.id, 'U1', '«tragar» oído como «pagar», con la cara hinchada');
+  for (const x of ['Tengo la cara hinchada y me cuesta pagar la consulta', 'Me cuesta pagar.', 'No puedo pagar ahora, ¿aceptan tarjeta?']) assert.equal(detectaUrgenciaEnVoz([x], c), null, `contraejemplo: ${x}`);
+});
+
+test('URGENCIAS POR VOZ, contraejemplos: la corrección no inventa una urgencia en NINGUNA pregunta no urgente del corpus ni en palabras cortas o comunes', () => {
+  const c = clinica('maguey');
+  const noUrgentes = CORPUS.preguntas.filter((p) => p.categoria !== 'urgencia');
+  for (const p of noUrgentes) assert.equal(detectaUrgenciaEnVoz([p.texto], c), null, `${p.id}: ${p.texto} → ${corrigeVoz(p.texto)}`);
+  for (const x of ['Tengo la encía hinchada y roja', 'No puedo tratar ese tema ahora', 'Me cuesta pagar la cuenta', 'Me sangran las encías al cepillarme', '¿Me pueden sacar una muela el sábado?']) assert.equal(detectaUrgenciaEnVoz([x], c), null, x);
 });
 
 test('NO URGENCIAS: sangrado al cepillarse, «no tengo fiebre», preguntas normales → ninguna regla', () => {

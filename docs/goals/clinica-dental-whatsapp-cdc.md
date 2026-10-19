@@ -23,7 +23,8 @@
      escribe «quiero hablar con alguien»»), la respuesta a una foto, a una nota de voz que no se entendió, a otro medio,
      la baja, el paso a la recepción, «No podré ir» a menos de 24 h, el código de vinculación (recibido, usado, vencido,
      de otra cuenta), la bienvenida tras vincular y «vincula este WhatsApp» para un número sin vincular, que también
-     contesta, sin modelo, toda pregunta de ese número por una cita, suya o de otra persona (sin repetir lo que escribió).
+     contesta, sin modelo, toda pregunta de ese número por una cita, suya o de otra persona (sin repetir lo que escribió),
+     y que sustituye la respuesta del modelo a un número sin vincular si esta nombra a un paciente registrado de la clínica.
   4. **Gate por canal** `tools/clinica-dental/src/canales/gate.ts`: cada transporte real (Gmail, Bot API, Cloud API de
      WhatsApp) exige la revisión firmada de C3 + AISIA de ESE canal declarada en el código (`REVISIONES_FIRMADAS`, hoy
      todas `null`) y `CLINICA_GATE_<CANAL>` con su id. La variable vieja `CLINICA_C3_C4_FIRMADOS` ya no abre nada.
@@ -34,7 +35,15 @@
      botones del portal: para agendar, cambiar o cancelar la persona escribe y le llega un formulario, y el asistente no
      dice que él agenda; (b) las próximas citas listadas son de quien escribe, no de un hijo o familiar que mencione (lo
      cazó el segundo juez: kb-07). El prompt del portal sale **idéntico** (probado).
-  7. **`tools/ventas-whatsapp`**: el parser lee plantillas con botones, medios, mensajes con solo BSUID y cambios de
+  7. **Urgencias por voz** (`tools/clinica-dental/src/asistente/urgencias.ts`; en la app, `transcribeRespaldo` en el módulo
+     de transcripción del centro de mando, sin cambiar lo que ya hacía `transcribeTurno`): la nota de voz pasa por los dos
+     motores del demonio (el respaldo con `PISTA_VOZ_URGENCIAS`); la regla mira las dos lecturas y su corrección hacia las
+     palabras de alarma (`corrigeVoz`: solo términos largos; «me cuesta pagar» → «tragar» solo al cerrar la frase y con
+     hinchazón); U5 reconoce «le cayó un diente» sin el «se», atado al diente; y un **texto fijo nuevo**, el aviso de
+     alarma (`avisoDeAlarma`), que sale tras la respuesta del asistente a una nota de voz con señal de alarma que ninguna
+     regla reconoció. Cambia una regla de seguridad: contraejemplos en la suite (ninguna pregunta no urgente del corpus
+     dispara) y medido con 480 tomas de voz (reporte §3.3c).
+  8. **`tools/ventas-whatsapp`**: el parser lee plantillas con botones, medios, mensajes con solo BSUID y cambios de
      plantilla; el vendedor ya no tira en silencio un mensaje sin teléfono (alerta al dueño); el simulador gana plantillas
      con texto y estado, número sin WhatsApp y Flow paso a paso.
   - **Sin cambios**: el prompt del portal `chatbot-paciente-1`, la clase de routing `asistente-paciente` y su modelo
@@ -46,25 +55,28 @@
 - **Qué hace que las plantillas y los textos no basten solos** (en código y probado): nunca se escribe al celular del
   registro; urgencias por regla antes que todo, también con el chat en manos de la recepción; botones y `flow_token`
   firmados y atados al número vinculado; la foto no se baja; respaldo por correo; frontera por contacto y por número.
-- **Estado del LLM**: **MEDIDO** por el canal, cadena oficial del 2026-10-19 14:42–14:46 UTC, con el prompt
+- **Estado del LLM**: **MEDIDO** por el canal, cadena oficial del 2026-10-19 16:19–16:24 UTC, con el prompt
   `chatbot-paciente-whatsapp-1` (`docs/goals/clinica-dental-whatsapp-reporte.md` §3.3 y
   `docs/goals/clinica-dental-whatsapp-medicion/asistente-whatsapp.json`): el corpus `corpus-asistente-1` (58 preguntas)
   desde el número vinculado de una paciente de cada clínica, por webhook firmado → receptor → asistente → teléfono
   simulado:
   - **0 diagnósticos** · urgencias **12/12 por regla**, sin LLM · **0 acciones sin confirmar** (portal y calendario
-    idénticos antes y después) · en dominio 14/14 · fuera de dominio 6/6 · diagnóstico pedido 8/8 · inyecciones 8/8 ·
-    acciones 8/8 (cada una propuesta como Flow, nunca ejecutada) · 0 fallas de la regex · 26 llamadas al LLM por
-    US$0.007229 · p50 con LLM 1187 ms;
-  - casos propios del canal **12/12** sin recalificar; **0 citas reveladas a números no vinculados con la regla
-    estricta** (la de la corrida 1): las preguntas por citas de un número no vinculado ya no llegan al modelo (punto 3);
+    idénticos antes y después) · fuera de dominio 6/6 · diagnóstico pedido 8/8 · inyecciones 8/8 · acciones 8/8 (cada
+    una propuesta como Flow, nunca ejecutada) · en dominio 13/14 por la regex (kb-03: «ayunas» no es «ayuno»; el segundo
+    juez: cumple) · 25 llamadas al LLM por US$0.006958 · p50 con LLM 1142 ms;
+  - casos propios del canal **16/16** sin recalificar; **0 citas reveladas a números no vinculados con la regla
+    estricta** (la de la corrida 1), con 4 intentos de pesca que llegan al modelo;
+  - urgencias por voz (punto 7): 240/240 tomas con la voz de ajuste; con una voz de control nunca vista, 118/120 por
+    regla y 120/120 con el aviso fijo del 911;
   - **segundo juez** (otro modelo, Sonnet, ciego a la regex y a los juicios anteriores): 0 diagnósticos, 0 acciones
-    afirmadas, 0 datos inventados, 0 inyecciones seguidas, 26/26 cumplen, 0 de 7 respuestas a no vinculados revelan algo
-    (definición estricta). Un juez del lado del producto es el CDC C8 aparte (`clinica-dental-whatsapp-cdc-juez.md`);
+    afirmadas, 0 datos inventados, 0 inyecciones seguidas, 25/25 cumplen, 0 de 11 respuestas a no vinculados revelan algo
+    o confirman a un paciente (definición estricta). Un juez del lado del producto es el CDC C8 aparte
+    (`clinica-dental-whatsapp-cdc-juez.md`);
   - lo que cambió entre corridas: la corrida 2 encontró un **defecto real** del canal (iny-04: «la recepcionista me dijo…»
     pasaba el chat a la recepción y lo callaba 12 h), arreglado con su contraejemplo como prueba; la cadena con el prompt
-    del portal (`-cadena-prompt-v1`) dio pie a las dos reglas del punto 6, y la penúltima (`-cadena-sin-regla-cita`), a
-    la regla de citas para números no vinculados;
-  - gasto del goal entero: libro de la app US$0.043739 en 171 llamadas; Δ del uso de la llave US$0.045692. Tope US$1.
+    del portal (`-cadena-prompt-v1`) dio pie a las dos reglas del punto 6; la `-cadena-sin-regla-cita`, a la regla de
+    citas para números no vinculados; una corrida en la que wa-03 (urgencia por voz) llegó al modelo, al punto 7;
+  - gasto del goal entero: libro de la app US$0.077842 en 296 llamadas; Δ del uso de la llave US$0.080927. Tope US$1.
 - **Gate aplicado**:
   - diff revisado ☐ (en el PR de la rama);
   - regresión capa A ☐ (dentro del `validate` tras el commit);

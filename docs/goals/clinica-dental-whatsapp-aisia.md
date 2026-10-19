@@ -41,7 +41,7 @@
 |---|---|---|---|
 | Recordatorio a quien no es | Alta (dato de salud de un tercero) | **Nula por construcción**: nunca se escribe al celular del registro; solo a un número que probó serlo (probado) | No |
 | Urgencia por WhatsApp que se pierde | **Muy alta** | Baja: la regla contesta SIEMPRE, aunque el chat lo tenga la recepción (probado y en el recorrido) | No |
-| Nota de voz mal entendida | Media-alta | Media (voz sintética medida; voces reales, no) | Parcial |
+| Nota de voz mal entendida | Media-alta | Media-baja: con una voz de control nunca vista, la regla detecta 118/120 tomas de las 12 urgencias y el aviso fijo del 911 cubre las 120 (voces sintéticas; reales, no medidas) | Parcial |
 | Diagnóstico por foto | Alta | **Nula por construcción**: la foto no se baja ni va al LLM; respuesta fija | Sí |
 | Cita movida sin querer | Media | Baja: solo con un Flow que la persona llena y confirma (cancelar pide la casilla); el asistente no tiene manos | Parcial (el hueco se puede perder) |
 | Recordatorio que no llega | Media | Media | No para esa cita |
@@ -57,6 +57,9 @@
   Hasta entonces no sale nada hacia ese número salvo «confirma en el portal».
 - **Urgencias por regla antes que todo** en todo lo que entra: texto, pie de foto y nota de voz transcrita; se contesta
   aunque la recepción tenga el chat. Una nota de voz que no se entiende recibe «escríbelo; si es urgente, llama al 911».
+  La nota de voz pasa por **dos motores de ASR** y la regla mira las dos lecturas y su corrección hacia las palabras de
+  alarma; si trae una señal de alarma que ninguna regla reconoció, después de la respuesta va un **aviso fijo con el 911**
+  (reporte §3.3c).
 - **Foto**: respuesta fija, sin bajarla ni guardarla, que invita a una valoración.
 - **Sin manos**: el asistente manda un Flow; la persona elige y confirma. Cancelar pide la casilla «Sí, quiero cancelar
   esta cita». A menos de 24 h, nada se mueve por chat: «No podré ir» pasa a la recepción.

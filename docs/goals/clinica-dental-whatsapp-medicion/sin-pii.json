@@ -1,5 +1,5 @@
 {
- "cuando": "2026-10-19T14:46:45.916Z",
+ "cuando": "2026-10-19T16:24:10.245Z",
  "valoresSembrados": 93,
  "control": {
   "que": "almacén del portal (expediente administrativo: AQUÍ sí debe estar, incluido el número vinculado)",
@@ -9,13 +9,13 @@
   {
    "que": "libro de eventos (JSONL, dos clínicas)",
    "revisado": true,
-   "bytes": 184649,
+   "bytes": 190626,
    "apariciones": []
   },
   {
    "que": "log del servidor de la app",
    "revisado": true,
-   "bytes": 57000,
+   "bytes": 57798,
    "apariciones": []
   },
   {
@@ -27,7 +27,7 @@
   {
    "que": "semillas de dbt (raw_eventos.csv)",
    "revisado": true,
-   "bytes": 121157,
+   "bytes": 125226,
    "apariciones": []
   },
   {
@@ -39,25 +39,25 @@
   {
    "que": "unit economics",
    "revisado": true,
-   "bytes": 24698,
+   "bytes": 24699,
    "apariciones": []
   },
   {
    "que": "grafo de atención",
    "revisado": true,
-   "bytes": 3367,
+   "bytes": 3369,
    "apariciones": []
   },
   {
    "que": "libro de gasto del asistente",
    "revisado": true,
-   "bytes": 34592,
+   "bytes": 59976,
    "apariciones": []
   },
   {
    "que": "guardia de red del servidor",
    "revisado": true,
-   "bytes": 120,
+   "bytes": 121,
    "apariciones": []
   }
  ]

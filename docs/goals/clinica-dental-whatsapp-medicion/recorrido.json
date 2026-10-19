@@ -1,65 +1,65 @@
 {
- "cuando": "2026-10-19T14:45:03.733Z",
+ "cuando": "2026-10-19T16:22:19.906Z",
  "pasos": [
   {
    "paso": "1 · registro con el consentimiento de WhatsApp (escritorio y celular)",
-   "ms": 3794
+   "ms": 3626
   },
   {
    "paso": "agenda con avisos por WhatsApp (queda esperando la vinculación)",
-   "ms": 1470
+   "ms": 1507
   },
   {
    "paso": "2a · «Vincular WhatsApp»: código de un solo uso y enlace wa.me",
-   "ms": 8162
+   "ms": 8228
   },
   {
    "paso": "2b · el código sale por WhatsApp desde el número de la persona",
-   "ms": 4632
+   "ms": 4660
   },
   {
    "paso": "2c · la persona confirma desde su cuenta que el número es suyo",
-   "ms": 8380
+   "ms": 8353
   },
   {
    "paso": "enlace REENVIADO: un tercero manda el código primero y la persona lo rechaza",
-   "ms": 18061
+   "ms": 18181
   },
   {
    "paso": "otra clínica: una paciente de Colibrí vincula su WhatsApp (para la medición)",
-   "ms": 7532
+   "ms": 7528
   },
   {
    "paso": "3 · recordatorio de 24 h como PLANTILLA (ventana cerrada) y «Confirmo»",
-   "ms": 4219
+   "ms": 4256
   },
   {
    "paso": "5 · URGENCIA en la respuesta a un recordatorio (regla, sin LLM)",
-   "ms": 4184
+   "ms": 4183
   },
   {
    "paso": "nota de voz (voz local → ASR local) y foto (nunca se baja)",
-   "ms": 5250
+   "ms": 6332
   },
   {
    "paso": "6 · «Mis citas» con el estado de los avisos de WhatsApp",
-   "ms": 3820
+   "ms": 3860
   },
   {
    "paso": "4 · Flow REPROGRAMANDO (otra paciente, cita a 5 días)",
-   "ms": 19562
+   "ms": 19590
   },
   {
    "paso": "Flow AGENDANDO: «quiero agendar» → servicio → día → hora → «Confirmar cita»",
-   "ms": 12233
+   "ms": 12133
   },
   {
    "paso": "Flow CANCELANDO: «Cancelar cita» → la casilla → «Cancelar cita»",
-   "ms": 8799
+   "ms": 8850
   },
   {
    "paso": "coexistencia: la recepción contesta desde su celular y el asistente calla",
-   "ms": 6966
+   "ms": 7015
   }
  ],
  "navegador": {
@@ -71,7 +71,7 @@
    "registry.npmjs.org": 1,
    "127.0.0.1:54531": 161,
    "localhost:3011": 6,
-   "127.0.0.1:47125": 3
+   "127.0.0.1:47125": 4
   },
   "hostsDeMeta": []
  },

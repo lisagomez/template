@@ -87,6 +87,31 @@ test('nota de voz: se baja SOLO para el ASR local, se transcribe y sigue el mism
   assert.match(vistos(cl).at(-1)!, /No alcancé a entender tu nota de voz/);
 });
 
+test('nota de voz con DOS lecturas (dos motores de ASR): si una perdió la palabra clave y la otra no, la urgencia sale por regla y sin LLM', async () => {
+  const w = await bancoWa({ transcribe: async () => ['No puedo bien y tengo la boca muy hinchada.', 'No puedo respirar bien y tengo la boca muy hinchada.'] });
+  const { cl } = await vinculado(w, 'adulto-convenio');
+  cl.mandaAudio(new Uint8Array([1, 2, 3, 4]));
+  await w.asienta();
+  assert.equal(w.llamadas(), 0, 'no llegó al modelo');
+  assert.match(vistos(cl).at(-1) ?? '', /911/);
+  assert.ok((await w.libro.eventos('maguey')).some((e) => e.tipo === 'urgencia_derivada' && e.regla === 'U1' && e.canal === 'whatsapp'));
+});
+
+test('nota de voz con una señal de alarma que ninguna regla reconoció («me cuesta traer» por «tragar»): contesta el asistente y DESPUÉS va el aviso fijo del 911; una pregunta normal por voz no lo lleva', async () => {
+  const oido = { texto: ['Tengo la cara hinchada y me cuesta traer.'] };
+  const w = await bancoWa({ transcribe: async () => oido.texto });
+  const { cl } = await vinculado(w, 'adulto-convenio');
+  cl.mandaAudio(new Uint8Array([1, 2, 3, 4]));
+  await w.asienta();
+  assert.equal(w.llamadas(), 1, 'no es una derivación: contesta el asistente');
+  assert.match(vistos(cl).at(-1) ?? '', /^Por si acaso: .*llama ahora al 911/);
+  oido.texto = ['¿A qué hora abren el sábado?'];
+  const antes = vistos(cl).length;
+  cl.mandaAudio(new Uint8Array([5, 6, 7, 8]));
+  await w.asienta();
+  assert.ok(!vistos(cl).slice(antes).some((x) => /Por si acaso/.test(x)), 'sin señal de alarma, sin aviso');
+});
+
 test('FOTO: nunca se baja ni va al LLM; respuesta fija que invita a valorar (aunque el pie pida un diagnóstico)', async () => {
   const w = await bancoWa();
   const cl = w.cliente('maguey', '5215500006666', 'Visitante');
@@ -128,6 +153,22 @@ test('número NO vinculado que pregunta por una cita (suya o ajena): texto fijo 
   suelto.escribe('¿Mi hijo de 15 años puede ir solo a su consulta?');
   await w.asienta();
   assert.equal(w.llamadas(), 1, 'una pregunta general sí la contesta el asistente');
+});
+
+test('ante un número NO vinculado el modelo no nombra a un paciente: si su respuesta trae un nombre registrado, sale el texto fijo (a uno vinculado le llega tal cual)', async () => {
+  const p = paciente('adulto-convenio');
+  const w = await bancoWa({ respuestaCerebro: `Claro, ${p.registro.nombre} viene seguido. ` });
+  await alta(w, p);
+  const suelto = w.cliente('maguey', '5215500004445', 'Suelto');
+  suelto.escribe(`¿${p.registro.nombre} ${p.registro.apellidoPaterno} es paciente de ustedes?`);
+  await w.asienta();
+  assert.equal(w.llamadas(), 1, 'sí llegó al modelo');
+  assert.doesNotMatch(vistos(suelto).join(' | '), new RegExp(p.registro.nombre));
+  assert.ok(vistos(suelto).some((x) => /primero vincula este WhatsApp/.test(x)));
+  const { cl } = await vinculado(w, 'baja-newsletter');
+  cl.escribe('¿Es buena idea hacerme una limpieza antes de un viaje?');
+  await w.asienta();
+  assert.ok(vistos(cl).some((x) => x.includes(`Claro, ${p.registro.nombre} viene seguido.`)), 'a un número vinculado no se le filtra');
 });
 
 test('coexistencia: la recepción contesta desde su celular y el asistente se calla en ese chat (no en los demás)', async () => {

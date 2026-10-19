@@ -25,10 +25,11 @@ export class DemonioCaido extends Error {}
 
 const cabeceras = (extra: Record<string, string>) => ({ authorization: `Bearer ${process.env['DICTADO_MOVIL_TOKEN'] ?? ''}`, ...extra });
 
-async function pasada(pcm: Uint8Array, senal: AbortSignal): Promise<string> {
+async function pasada(pcm: Uint8Array, senal: AbortSignal, motor: 'principal' | 'respaldo' = 'principal', pista?: string): Promise<string> {
+  const extra = { ...(motor === 'respaldo' ? { 'x-motor': 'respaldo' } : {}), ...(pista ? { 'x-pista-base64': Buffer.from(pista).toString('base64') } : {}) };
   let r: Response;
   try {
-    r = await fetch(`${DEMONIO}/transcribir`, { method: 'POST', headers: cabeceras({ 'content-type': 'application/octet-stream', 'x-frecuencia-hz': String(HZ), 'x-idioma': 'es' }), body: new Uint8Array(pcm), signal: senal });
+    r = await fetch(`${DEMONIO}/transcribir`, { method: 'POST', headers: cabeceras({ 'content-type': 'application/octet-stream', 'x-frecuencia-hz': String(HZ), 'x-idioma': 'es', ...extra }), body: new Uint8Array(pcm), signal: senal });
   } catch (e) {
     if (senal.aborted) throw e;
     throw new DemonioCaido('el motor local no responde: arranca «npm run demonio» en tools/dictado');
@@ -102,6 +103,13 @@ export async function transcribeTurno(pcm: Uint8Array, senal: AbortSignal): Prom
   const orden = pareceOtroIdioma(directa, 'es') || directa.length === 0 ? [conPortadora, directa] : [directa, conPortadora];
   return { candidatos: [...new Set(orden.filter((t) => t.length > 0))], anclada: true, ms: Math.round(performance.now() - t0) };
 }
+
+/**
+ * Una segunda lectura con el motor de RESPALDO del demonio (otro modelo), con una `pista` de vocabulario opcional (el
+ * respaldo es Whisper y la honra). Para cuando perder una palabra cuesta caro: en 40 tomas de «No puedo respirar bien…»
+ * el principal se comio «respirar» una vez y el respaldo ninguna.
+ */
+export const transcribeRespaldo = (pcm: Uint8Array, senal: AbortSignal, pista?: string): Promise<string> => pasada(pcm, senal, 'respaldo', pista);
 
 export async function demonioResponde(): Promise<boolean> {
   try {

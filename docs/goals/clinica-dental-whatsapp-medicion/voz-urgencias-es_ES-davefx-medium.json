@@ -1,0 +1,126 @@
+{
+ "cuando": "2026-10-19T16:19:42.244Z",
+ "voz": "es_ES-davefx-medium (Piper local)",
+ "papel": "prueba de control: voz que no se usó para ajustar nada",
+ "resumen": {
+  "tomas": 120,
+  "principal": "95/120",
+  "respaldo": "104/120",
+  "canal": "118/120",
+  "red": "120/120"
+ },
+ "filas": [
+  {
+   "id": "urg-01",
+   "principal": 8,
+   "respaldo": 5,
+   "canal": 9,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": [
+    "principal: Tengo la cara hinchada y me cuesta tagar. · respaldo: Tengo la cara hinchada y me cuesta atagar."
+   ]
+  },
+  {
+   "id": "urg-02",
+   "principal": 10,
+   "respaldo": 9,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-03",
+   "principal": 10,
+   "respaldo": 10,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-04",
+   "principal": 10,
+   "respaldo": 10,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-05",
+   "principal": 0,
+   "respaldo": 9,
+   "canal": 9,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": [
+    "principal: Me sacaron una muela a Jedi no para desangrar. · respaldo: Me sacaron una muela y eddino para de sangrar."
+   ]
+  },
+  {
+   "id": "urg-06",
+   "principal": 8,
+   "respaldo": 9,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-07",
+   "principal": 10,
+   "respaldo": 6,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-08",
+   "principal": 7,
+   "respaldo": 10,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-09",
+   "principal": 10,
+   "respaldo": 10,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-10",
+   "principal": 10,
+   "respaldo": 9,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-11",
+   "principal": 10,
+   "respaldo": 7,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-12",
+   "principal": 2,
+   "respaldo": 10,
+   "canal": 10,
+   "red": 10,
+   "tomas": 10,
+   "perdidas": []
+  }
+ ]
+}

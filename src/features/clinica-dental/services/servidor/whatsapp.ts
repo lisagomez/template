@@ -10,10 +10,10 @@ import { generateKeyPairSync, type KeyObject } from 'node:crypto';
 import { aCuerpoGraph, cifraRespuesta, descifraPeticion, leeWebhook, verificaFirmaMeta, type PeticionCifrada } from '../../../../../tools/ventas-whatsapp/dist/index.js';
 import { creaMetaSimulada, type MetaSimulada } from '../../../../../tools/ventas-whatsapp/dist/simulador/index.js';
 import {
-  atiendeEndpointFlows, CLINICAS, colaEnArchivo, creaAsistente, creaPuertoWhatsApp, creaReceptorWhatsApp, FLOWS_WA, registroDePlantillas, type DepsEndpointFlows, type DepsWhatsApp,
+  atiendeEndpointFlows, CLINICAS, colaEnArchivo, creaAsistente, creaPuertoWhatsApp, creaReceptorWhatsApp, FLOWS_WA, PISTA_VOZ_URGENCIAS, registroDePlantillas, type DepsEndpointFlows, type DepsWhatsApp,
   type NumeroClinica, type Portal, type PuertoCerebro, type ReceptorWhatsApp,
 } from '../../../../../tools/clinica-dental/dist/servidor.js';
-import { DemonioCaido, transcribeTurno } from '@/features/centro-de-mando/services/servidor/transcribe';
+import { DemonioCaido, transcribeRespaldo, transcribeTurno } from '@/features/centro-de-mando/services/servidor/transcribe';
 import { CANARIO, cerebroPara, enrutador } from './asistente';
 import { RUTAS, SECRETO_APP_WA } from './datos';
 
@@ -41,12 +41,20 @@ function aPcm16k(bytes: Uint8Array): Promise<Uint8Array> {
   });
 }
 
-/** El ASR local para las notas de voz: ffmpeg + el demonio de `tools/dictado` en 127.0.0.1. `null` si no se entiende. */
+/**
+ * El ASR local para las notas de voz: ffmpeg + el demonio de `tools/dictado` en 127.0.0.1. `null` si no se entiende.
+ * Dos motores (el de respaldo con el vocabulario de alarma como pista), y la regla de urgencias mira las dos lecturas
+ * y su corrección (`detectaUrgenciaEnVoz`): una urgencia no puede depender de que UN motor oiga cada palabra. Medido en
+ * `scripts/clinica-dental/whatsapp/mide-voz-urgencias.ts`. Cuesta ~1.5 s más por nota de voz; por WhatsApp nadie
+ * espera la respuesta en vivo.
+ */
 async function transcribe(bytes: Uint8Array): Promise<string[] | null> {
   try {
     const pcm = await aPcm16k(bytes);
     if (pcm.length < 3_200 || pcm.length > 60 * 16_000 * 2) return null;
-    return (await transcribeTurno(pcm, AbortSignal.timeout(30_000))).candidatos;
+    const senal = AbortSignal.timeout(30_000);
+    const [turno, respaldo] = await Promise.all([transcribeTurno(pcm, senal), transcribeRespaldo(pcm, senal, PISTA_VOZ_URGENCIAS).catch(() => '')]);
+    return [...new Set([...turno.candidatos, respaldo].filter((x) => x.trim()))];
   } catch (e) {
     if (e instanceof DemonioCaido) return null;
     return null;

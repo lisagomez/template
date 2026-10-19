@@ -1,0 +1,116 @@
+{
+ "cuando": "2026-10-19T16:12:49.303Z",
+ "voz": "es_MX-ald-medium (Piper local)",
+ "papel": "prueba de control: voz que no se usó para ajustar nada",
+ "resumen": {
+  "tomas": 120,
+  "principal": "87/120",
+  "respaldo": "109/120",
+  "canal": "116/120"
+ },
+ "filas": [
+  {
+   "id": "urg-01",
+   "principal": 9,
+   "respaldo": 9,
+   "canal": 9,
+   "tomas": 10,
+   "perdidas": [
+    "principal: Tengo la cara hinchada y me cuesta traer. · respaldo: Tengo la cara hinchada y me cuesta traer."
+   ]
+  },
+  {
+   "id": "urg-02",
+   "principal": 8,
+   "respaldo": 9,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-03",
+   "principal": 8,
+   "respaldo": 9,
+   "canal": 9,
+   "tomas": 10,
+   "perdidas": [
+    "principal: Se me está hinchando el cachete y ya me llega loco. · respaldo: se me está hinchando el cachete y ya me llega loco."
+   ]
+  },
+  {
+   "id": "urg-04",
+   "principal": 10,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-05",
+   "principal": 0,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-06",
+   "principal": 4,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-07",
+   "principal": 10,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-08",
+   "principal": 8,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-09",
+   "principal": 9,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-10",
+   "principal": 10,
+   "respaldo": 9,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
+   "id": "urg-11",
+   "principal": 8,
+   "respaldo": 3,
+   "canal": 8,
+   "tomas": 10,
+   "perdidas": [
+    "principal: Tengo fiebre y me duele mucho más buena. · respaldo: Ten los fiebre y me doelen mucho una muera.",
+    "principal: Tengo fiebre y me duele mucho una muera. · respaldo: Tengo fiebre y me duele mucho una muera."
+   ]
+  },
+  {
+   "id": "urg-12",
+   "principal": 3,
+   "respaldo": 10,
+   "canal": 10,
+   "tomas": 10,
+   "perdidas": []
+  }
+ ]
+}

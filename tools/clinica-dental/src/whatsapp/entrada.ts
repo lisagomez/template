@@ -17,7 +17,7 @@
  */
 import type { Paciente } from '../almacen.js';
 import type { RespuestaAsistente, EntradaAsistente, MensajeCerebro } from '../asistente/asistente.js';
-import { detectaUrgencia, normaliza } from '../asistente/urgencias.js';
+import { avisoDeAlarma, detectaUrgencia, detectaUrgenciaEnVoz, normaliza, traeSenalDeAlarma } from '../asistente/urgencias.js';
 import { servicio as servicioDe } from '../clinicas.js';
 import type { ManejoWa, TipoMensajeWa } from '../eventos.js';
 import { HORA_MS, vigentes, type Contexto } from '../portal/contexto.js';
@@ -150,7 +150,7 @@ async function turnoAsistente(t: Turno, r: Pick<RespuestaAsistente, 'ruta' | 'in
 /** 1. La urgencia por regla: respuesta fija, sin LLM, aunque el chat este en silencio. */
 async function urgencia(t: Turno, candidatos: string[], voz: boolean): Promise<boolean> {
   const c = t.d.ctx.clinica(t.clinica);
-  const u = candidatos.map((x) => detectaUrgencia(x, c)).find((x) => x !== null);
+  const u = voz ? detectaUrgenciaEnVoz(candidatos, c) : (candidatos.map((x) => detectaUrgencia(x, c)).find((x) => x !== null) ?? null);
   if (!u) return false;
   await envia(t, { tipo: 'texto', texto: u.respuesta });
   await turnoAsistente(t, { ruta: 'urgencia', intencion: 'urgencia', latenciaMs: 0, costoUsd: null, tokens: null }, voz);
@@ -271,6 +271,20 @@ function recuerda(t: Turno, pregunta: string, respuesta: string): void {
   t.memoria.historial.set(`${t.clinica}|${t.waId}`, { hasta: t.d.ctx.reloj() + MEMORIA_MS, turnos });
 }
 
+const palabras = (s: string): string[] => s.match(/\p{L}+/gu) ?? [];
+
+/**
+ * Ante un numero NO vinculado el modelo no nombra a ningun paciente. No tiene sus citas, pero puede repetir un nombre
+ * que le escribieron («¿X es paciente de ustedes?») o que le inyectaron, y eso ya insinua algo ante un numero sin
+ * probar. Si su respuesta trae el nombre o un apellido de un paciente registrado de la clinica (con mayuscula, como
+ * palabra entera, de 3 letras o mas), la respuesta no sale: sale el texto fijo de vincular.
+ */
+async function nombraPaciente(t: Turno, texto: string): Promise<boolean> {
+  const enTexto = new Set(palabras(texto));
+  const pacientes = await t.d.ctx.almacen.pacientes(t.clinica);
+  return pacientes.some((p) => [p.datos.nombre, p.datos.apellidoPaterno, p.datos.apellidoMaterno].flatMap((x) => palabras(x ?? '')).some((w) => w.length > 2 && enTexto.has(w)));
+}
+
 /** 6. El asistente del portal, con las citas solo si el numero esta vinculado. */
 async function asistente(t: Turno, candidatos: string[], voz: boolean, protegido: boolean): Promise<void> {
   const c = t.d.ctx.clinica(t.clinica);
@@ -278,7 +292,8 @@ async function asistente(t: Turno, candidatos: string[], voz: boolean, protegido
   const senal = AbortSignal.timeout(20_000);
   const r = await t.d.asistente(t.clinica, { protegido }).responde({ candidatos, historial: historial(t), citas: t.paciente ? citas : null, padecimiento: null, senal });
   const f = (a: AccionWa) => payloadDe(t.d.ctx.seudonimos.firma, t.clinica, a, null);
-  if (r.accion) await conAccion(t, r);
+  if (!t.paciente && r.ruta === 'cerebro' && (await nombraPaciente(t, r.texto))) await pideVincular(t);
+  else if (r.accion) await conAccion(t, r);
   // El horario dice «usa el botón Agendar cita»: en WhatsApp el boton viaja en el mismo mensaje.
   else if (r.ruta === 'enrutador' && r.intencion === 'horario') await envia(t, { tipo: 'botones', cuerpo: r.texto, botones: [{ id: f('agendar'), titulo: 'Agendar cita' }] });
   // Lo que no se entendio o no se pudo contestar lleva SIEMPRE la salida a una persona (politica de Meta: escalado claro).
@@ -332,6 +347,8 @@ async function contenido(t: Turno, txt: { candidatos: string[]; voz: boolean; il
   }
   if (!texto.trim()) return fija('No recibí texto. ¿Me escribes tu pregunta?', 'otro_medio');
   await asistente(t, txt.candidatos, txt.voz, protegido);
+  // La red de una nota de voz: ninguna regla la reconoció (si no, no habría llegado aquí) pero trae una señal de alarma.
+  if (txt.voz && traeSenalDeAlarma(txt.candidatos)) await envia(t, { tipo: 'texto', texto: avisoDeAlarma(c) });
   return 'asistente';
 }
 

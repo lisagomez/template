@@ -38,7 +38,9 @@ const NHS_MUELA = 'https://www.nhs.uk/conditions/toothache/';
 const NHS_URGENCIA = 'https://www.nhs.uk/nhs-services/dentists/how-can-i-access-an-nhs-dentist-in-an-emergency-or-out-of-hours/';
 const DIENTE = /\b(diente|dientes|muela|muelas|colmillo|incisivo|encia|encias|boca|quijada|mandibula|cachete|mejilla)\b/;
 const TRAUMA = /\b(golpe|golpee|golpeo|pegue|pego|pegaron|caida|cai|cayo|choque|choco|accidente|pelotazo|pelota|balonazo|madrazo|trancazo|tropece|tropezo)\b/;
-const SALIO = /\b(se me cayo|se le cayo|se cayo|se salio|se me salio|se le salio|tumbo|tumbe|tumbaron|arranco|desprendio|quedo afuera|completo)\b/;
+// «le cayó un diente» sin el «se»: el ASR lo pierde a menudo («…jugando futbol, dice le cayó un diente», 4 de 20 tomas).
+// Atado al diente: «me cayó mal la comida» no es un diente que se cae.
+const SALIO = /\b(se me cayo|se le cayo|se cayo|se salio|se me salio|se le salio|tumbo|tumbe|tumbaron|arranco|desprendio|quedo afuera|completo|(me|le) (cayo|salio) (un |el |una |la |los |las |su |mi )?(diente|dientes|muela|muelas|colmillo|incisivo))\b/;
 
 export const REGLAS_URGENCIA: readonly ReglaUrgencia[] = [
   {
@@ -80,6 +82,69 @@ export const REGLAS_URGENCIA: readonly ReglaUrgencia[] = [
 ];
 
 const NIEGA_FIEBRE = /\b(no tengo|no tiene|sin|no hay|nada de) (fiebre|calentura|temperatura)\b/;
+
+/**
+ * Las palabras de alarma que el ASR tuerce en una NOTA DE VOZ (medido con la voz Piper local, 120 tomas de las 12
+ * urgencias del corpus: «no para de sangrar» → «no para desancrar», «sangrando a chorros» → «sancrando a choros»,
+ * «hinchada» → «linchada»). Cada término con la lectura que necesita la regla. Solo términos LARGOS: una palabra corta
+ * a una letra de otra es otra palabra («rojo» no es «ojo», «tratar» no es «tragar»), y una urgencia inventada manda al
+ * 911 a quien no lo necesita.
+ */
+const VOZ_ALARMA: readonly (readonly [string, string])[] = [
+  ['respirar', 'respirar'], ['hinchada', 'hinchada'], ['hinchado', 'hinchado'], ['hinchando', 'hinchando'],
+  ['sangrar', 'sangrar'], ['sangrando', 'sangrando'], ['desangrar', 'de sangrar'], ['chorros', 'chorros'],
+];
+
+/** Lo que el motor de respaldo recibe como pista (Whisper favorece ese vocabulario; Parakeet no la usa). */
+export const PISTA_VOZ_URGENCIAS = 'Urgencia dental: no puedo respirar, no puedo tragar, tengo la cara hinchada, se me hincha hasta el ojo, no para de sangrar, está sangrando a chorros, la extracción, tengo fiebre o calentura, la encía inflamada.';
+
+function distancia(a: string, b: string): number {
+  let previa = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const fila = [i];
+    for (let j = 1; j <= b.length; j++) fila[j] = Math.min(previa[j]! + 1, fila[j - 1]! + 1, previa[j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1));
+    previa = fila;
+  }
+  return previa[b.length]!;
+}
+
+/**
+ * Confusiones que una palabra COMUN no permite corregir sola y el contexto sí: con la cara hinchada, «me cuesta pagar»
+ * al cerrar la frase es «me cuesta tragar» (los dos motores lo oyeron así en 1 de 240 tomas). Con objeto («me cuesta
+ * pagar la consulta») o sin hinchazón, se queda como está.
+ */
+const CONFUSIONES_VOZ: readonly { oido: RegExp; contexto: RegExp; lectura: string }[] = [
+  { oido: /\b(me cuesta|le cuesta|no puedo|no puede) pagar((?: (?:y|ni|bien|nada)\b.*)?)$/, contexto: /\b(hinch|inflam)\w*/, lectura: '$1 tragar$2' },
+];
+
+/** La lectura de una nota de voz para la regla: cada palabra de 5+ letras a 1 letra de un término (2 si tiene 9+) es ese término. */
+export function corrigeVoz(texto: string): string {
+  const leido = normaliza(texto).split(' ').map((w) => {
+    if (w.length < 5) return w;
+    const t = VOZ_ALARMA.find(([termino]) => w !== termino && distancia(w, termino) <= (termino.length >= 9 ? 2 : 1));
+    return t ? t[1] : w;
+  }).join(' ');
+  return CONFUSIONES_VOZ.reduce((x, c) => (c.contexto.test(x) ? x.replace(c.oido, c.lectura) : x), leido);
+}
+
+/**
+ * La RED de una nota de voz que ninguna regla reconoció pero trae una señal de alarma (las mismas familias de palabras
+ * de las reglas): el ASR puede torcer justo la palabra que decide («me cuesta traer» por «tragar», «muera» por «muela»;
+ * 4 de 120 tomas con una voz de control). No es una derivación: es un aviso fijo después de la respuesta.
+ */
+const SENAL_VOZ = /\b(hinch\w*|inflam\w*|sangr\w*|fiebre|calentura|escalofrio\w*|respir\w*|trag\w*|ahog\w*|golpe\w*|cayo|salio)\b/;
+export const traeSenalDeAlarma = (lecturas: readonly string[]): boolean => lecturas.some((x) => SENAL_VOZ.test(normaliza(x)) || SENAL_VOZ.test(corrigeVoz(x)));
+export const avisoDeAlarma = (c: { nombre: string; telefono: string }): string =>
+  `Por si acaso: si te cuesta respirar o tragar, la hinchazón te llega al ojo o al cuello, o el sangrado no para, llama ahora al 911. Si tienes fiebre con dolor de muela o se cayó un diente por un golpe, llama hoy a ${c.nombre} al ${c.telefono}.`;
+
+/** Para una nota de voz: la regla sobre lo que oyó cada motor y sobre su lectura corregida. */
+export function detectaUrgenciaEnVoz(lecturas: readonly string[], c: { nombre: string; telefono: string }): Urgencia | null {
+  for (const x of lecturas) {
+    const u = detectaUrgencia(x, c) ?? detectaUrgencia(corrigeVoz(x), c);
+    if (u) return u;
+  }
+  return null;
+}
 
 export interface Urgencia { regla: ReglaUrgencia; respuesta: string }
 
