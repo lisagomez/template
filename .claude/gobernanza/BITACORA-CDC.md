@@ -5252,3 +5252,36 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: no aplica al repo (el archivo está fuera); al aplicarlo se comprueba contra la copia previa que
   solo cambiaron esas siete líneas.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-18
+
+### 2026-10-18 — revisión: ninguna corrida fría del 2026-08-28 al 2026-10-17 llegó al worktree del corpus — radio: ninguno (revisión, sin cambio de código ni de comportamiento)
+
+- **Qué se revisa**: lo que la entrada «2026-10-17 — verificador: falla si un worktree con el corpus de la capa B
+  cuelga dentro del repo» dejó **sin revisar**: si alguna corrida fría llegó al worktree de edición del corpus
+  mientras colgaba dentro del repo, del 2026-08-28 al 2026-10-17. No cambia código, skill, prompt ni gate.
+- **Método**, sin que el texto del corpus entrara en la sesión: los scripts imprimieron solo números de línea,
+  fechas y banderas sí/no. La única lectura de texto fue una ventana de seis palabras, enmascarada, en cuatro
+  líneas, y la autorizó el laboratorio.
+  - **Qué corridas hubo**: el registro de corridas se escribió por última vez el 2026-09-14. Desde el
+    2026-09-15, todas las entradas de esta bitácora declaran «capa A basta» o el corpus listado, no corrido.
+    Las corridas frías del periodo son las tandas del 2026-08-30, del 2026-09-12/13 y del 2026-09-14.
+  - **Qué herramientas usaron**: de las 610 líneas del registro escritas desde el 2026-08-28 (fecha por
+    `git blame`), ninguna lleva la ruta `worktrees/`, `git worktree`, un `ls` sobre `.claude`, `find` ni `Glob`.
+    Las cuatro que dicen «worktree» o «ls» como palabra suelta hablan del árbol propio de cada sujeto, o citan
+    un mensaje de `ls` sin ruta.
+  - **Contraste con las transcripciones** del 2026-09-20 al 2026-10-17 (las anteriores ya no están en disco):
+    de 101, ninguna con forma de sujeto (sesión corta, sin `git log`) recibió la ruta. Las que la vieron son
+    sesiones y subagentes de trabajo.
+- **Resultado**: **ninguna corrida fría del periodo llegó al worktree del corpus**. La única exposición que el
+  periodo registra es la ya conocida del 2026-09-14, por el historial de git (`git log -S`): esa medición se
+  invalidó entonces, y desde ese día el sujeto va sin `git log` ni `git diff`.
+- **Límites**: la revisión lee lo que el registro anotó de cada corrida, no una traza de cada llamada; del
+  2026-08-28 al 2026-09-19 no quedan transcripciones con que contrastarlo. Desde el 2026-10-17, el verificador
+  pone rojo si el corpus vuelve a colgar dentro del repo, así que el periodo no puede repetirse sin que el gate
+  lo vea.
+- **Salida del perímetro (C4)**: sin cambio.
+- **Gate aplicado**:
+  - sin diff que revisar: esta rama solo añade la entrada;
+  - `npm run validate` ☑ 32/32 sobre `main` en `c62dad2` (árbol `fad509361033`);
+  - capa B: no aplica, porque no cambia skill, prompt ni instrucción del arnés ☑;
+  - aprobación humana ☑.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-18
