@@ -191,7 +191,12 @@ US$11.806963 (antes de la primera llamada) a US$11.831298: **Δ US$0.024335** (c
 
 ## 5. Gate completo
 
-(se completa después del commit)
+`npm run validate -- --sigue` **después del commit** `9a9eafa`: **32/32 gates activos en verde**, 10 inactivos declarados
+con su motivo (no cuentan como pasados), 0 rojos; árbol sellado `317faf110e7c` (2026-10-19T13:08Z). Dentro: `typecheck`,
+`lint`, `build` (con las rutas nuevas), `verify:gobernanza`, `revisa:readmes` (los tres README tocados), `audita:secretos`,
+`prueba:tools` (las suites de `tools/clinica-dental` y `tools/ventas-whatsapp`, entre las demás), `prueba:a2a` (las tres
+rutas nuevas declaradas con su decisión de puerto), `verifica:inventario` y `verifica:productos`. Este reporte se completó
+después y se volvió a validar sobre el commit final (§8).
 
 ## 6. Propuestas para firmar (junto al spec, sin firmar)
 
@@ -209,3 +214,9 @@ cifrado, 421/427/432, 10 s), coexistencia, privacidad y retención de la Cloud A
 (whatsappbusiness.com/policy, 23/09/2026). Referencias: Doctoralia México (recordatorios y confirmación por WhatsApp),
 AgendaPro (confirmaciones automáticas), Dentalink/Medilink (envío desde WhatsApp Web). LFPDPPP (DOF 20/03/2025) y su
 Reglamento de 2011.
+
+## 8. Cierre
+
+El commit que agrega este §5 y este §8 solo toca este reporte; el `validate` se corrió otra vez sobre él (resultado en la
+conversación del goal). La rama es `clinica/whatsapp`, en el worktree `.claude/worktrees/clinica-whatsapp`, sin push: el
+push y el PR los hace el laboratorio. Nada se mergea sin firmar el CDC (`clinica-dental-whatsapp-cdc.md`).
