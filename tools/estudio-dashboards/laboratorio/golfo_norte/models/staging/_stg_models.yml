@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: stg_tiendas
+    description: "Tiendas limpias y tipadas."
+    columns:
+      - name: tienda_id
+        data_tests: [unique, not_null]
+      - name: region
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Golfo', 'Centro', 'Norte', 'Occidente', 'Sureste']
+  - name: stg_productos
+    columns:
+      - name: producto_id
+        data_tests: [unique, not_null]
+  - name: stg_clientes
+    columns:
+      - name: cliente_id
+        data_tests: [unique, not_null]
+  - name: stg_campanas
+    columns:
+      - name: campana_id
+        data_tests: [unique, not_null]
+  - name: stg_pedidos
+    columns:
+      - name: pedido_id
+        data_tests: [unique, not_null]
+      - name: canal
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Tienda', 'E-commerce', 'Mayoreo']
+      - name: tienda_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_tiendas')
+                field: tienda_id
+  - name: stg_lineas_pedido
+    columns:
+      - name: linea_id
+        data_tests: [unique, not_null]
+      - name: pedido_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_pedidos')
+                field: pedido_id
+  - name: stg_inventario

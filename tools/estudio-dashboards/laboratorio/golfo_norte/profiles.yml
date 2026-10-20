@@ -1,0 +1,10 @@
+# Perfil del laboratorio: DuckDB local (opción C de la propuesta). Frente al zip cambia solo la ruta del archivo,
+# que llega por entorno para que la base viva fuera de git (la pone laboratorio/corre.mjs en ~/.cache).
+# Para producción se cambia solo este archivo (BigQuery, Snowflake, Databricks o Postgres); los modelos no cambian.
+golfo_norte:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('GN_DUCKDB') }}"
+      threads: 4

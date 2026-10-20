@@ -1,0 +1,37 @@
+{
+  "_comentario": "Los 7 CSV del zip golfo_norte_dbt.zip, fijados por sha256. Viven fuera de git en .datos/estudio-dashboards/golfo_norte/data/raw (27 MB, empresa ficticia). laboratorio/corre.mjs los verifica antes de cargar nada: un hash distinto para la corrida. Nunca se reemplazan por los regenerados.",
+  "zip": {
+    "nombre": "golfo_norte_dbt.zip",
+    "sha256": "sha256:273f07d93ff6c414eb670e2c67d34280277a7031d36a412d65b1a486a5d6d1fb"
+  },
+  "csv": {
+    "campanas.csv": {
+      "sha256": "sha256:c48b6741d8b345aa50bafd4065a754f017638c0db6e0be0962bb981d1d3286dc",
+      "filas": 6
+    },
+    "clientes.csv": {
+      "sha256": "sha256:6daf0305ff9b03b0c50cde5dda297cdd310b7a9bd57ab1f29cb12dd3935d75be",
+      "filas": 21938
+    },
+    "inventario.csv": {
+      "sha256": "sha256:fced659b5d6797e89c548cee39d29363f3e5dc4272d17f04343104262b5a01c8",
+      "filas": 735
+    },
+    "lineas_pedido.csv": {
+      "sha256": "sha256:ade7b3f3b3eddf7053b62518f8a45b6ab2ecd06094174d0f852769af7285ccb2",
+      "filas": 520825
+    },
+    "pedidos.csv": {
+      "sha256": "sha256:bec80bfed9356efdac3e5c265791cdf4d2b8d0e61c12d87f3f8dbd00bcab0085",
+      "filas": 165515
+    },
+    "productos.csv": {
+      "sha256": "sha256:d6f3245a12866f4adb5ec1774450d745d302a44b198347a1c6c85ab84bb47fd3",
+      "filas": 35
+    },
+    "tiendas.csv": {
+      "sha256": "sha256:c7d74e698996e1f911128b6f772e8e1c313054a6471343716ebf2cf841b41fa2",
+      "filas": 21
+    }
+  }
+}

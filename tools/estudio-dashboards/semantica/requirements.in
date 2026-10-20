@@ -1,0 +1,9 @@
+# La capa semántica del laboratorio corre LOCAL: dbt Core + MetricFlow (Apache 2.0) sobre DuckDB, nada de dbt Cloud.
+# Mismas versiones que la casa (tools/clinica-dental/semantica) más el adaptador DuckDB, porque el SQL de
+# golfo_norte está en dialecto DuckDB. dbt-postgres entra para servir también el segundo catálogo del repo.
+# Se compila a requirements.lock con hashes: `uv pip compile --generate-hashes --python-version 3.12`.
+dbt-core==1.12.5
+dbt-duckdb==1.11.0
+duckdb==1.5.5
+dbt-postgres==1.11.0
+dbt-metricflow[dbt-duckdb,dbt-postgres]==0.15.0

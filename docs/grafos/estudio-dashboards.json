@@ -1,0 +1,416 @@
+{
+  "slug": "estudio-dashboards",
+  "titulo": "Estudio de dashboards con agente sobre capa semántica (laboratorio Golfo Norte, datos ficticios)",
+  "nodos": [
+    {
+      "id": "spec",
+      "label": "Spec del goal (docs/goals/estudio-dashboards.md)",
+      "estado": "morado",
+      "evidencia": "compilado el 2026-10-20 con /goal-compiler; decisiones del laboratorio en su cabecera"
+    },
+    {
+      "id": "propuesta",
+      "label": "Insumos: propuesta, prototipo publicado y proyecto dbt golfo_norte (zip)",
+      "estado": "morado",
+      "evidencia": "leídos el 2026-10-20; filas de los 7 CSV = las de la propuesta"
+    },
+    {
+      "id": "casa",
+      "label": "Piezas de la casa: dbt + MetricFlow con lock y hashes (soporte-sap, clinica-dental), routing pineado, contabilidad de tokens, reglas de CLI, empaqueta",
+      "estado": "morado"
+    },
+    {
+      "id": "datos-crudos",
+      "label": "7 CSV crudos fuera de git, fijados por sha256 y regenerables con semilla",
+      "estado": "morado",
+      "evidencia": "2026-10-20: los 7 sha256 = zip (laboratorio/datos.json, verificados en cada corrida); regenerados con semilla (numpy 2.5.4, pandas 3.0.6) dan los mismos 7: docs/goals/estudio-dashboards-medicion/regeneracion.json"
+    },
+    {
+      "id": "proyecto-dbt",
+      "label": "Proyecto dbt en el repo con entorno pineado (lock con hashes) y dbt build verde",
+      "estado": "morado",
+      "evidencia": "2026-10-20: tools/estudio-dashboards/laboratorio/golfo_norte (igual al zip salvo la ruta de los CSV y del .duckdb por entorno); lock con hashes semantica/requirements.lock (dbt-core 1.12.5, dbt-duckdb 1.11.0, duckdb 1.5.5, dbt-metricflow 0.15.0 → metricflow 0.213.0)"
+    },
+    {
+      "id": "catalogo-semantico",
+      "label": "Catálogo semántico validado (10 modelos, 31 métricas) y cifras de la propuesta reproducidas",
+      "estado": "morado",
+      "evidencia": "2026-10-20: 10 modelos semánticos y 31 métricas; mf validate-configs sin errores ni avisos; 62 filas en docs/goals/estudio-dashboards-medicion/cifras.md: 53 MF = directo, 8 sin métrica, 1 trampa documentada (YoY a grano año), 4 divergencias con la propuesta explicadas"
+    },
+    {
+      "id": "esquema-spec",
+      "label": "Esquema versionado de la especificación del dashboard y de sus parches",
+      "estado": "gris"
+    },
+    {
+      "id": "set-referencia",
+      "label": "Set de 100 preguntas con respuesta esperada, congelado por hash ANTES del prompt del agente",
+      "estado": "gris"
+    },
+    {
+      "id": "nucleo",
+      "label": "Núcleo tools/estudio-dashboards (nombre sugerido): puerto semántico, parches validados, versiones, intérprete determinista; sin React, Next ni Supabase",
+      "estado": "gris"
+    },
+    {
+      "id": "senales",
+      "label": "Motor de señales: detectar y diagnosticar con consultas semánticas, backlog ICE",
+      "estado": "gris"
+    },
+    {
+      "id": "agente",
+      "label": "Agente LLM: herramientas tipadas del núcleo, prompts versionados, modelo pineado",
+      "estado": "gris"
+    },
+    {
+      "id": "medicion-agente",
+      "label": "Medición del agente contra el set: precisión por nivel y por tipo, gasto y latencia",
+      "estado": "gris"
+    },
+    {
+      "id": "lienzo",
+      "label": "Lienzo de laboratorio: instrucciones, rejilla, mapa de matriz de puntos con lazo, panel de contexto, señales",
+      "estado": "gris"
+    },
+    {
+      "id": "cli",
+      "label": "CLI del Estudio: las mismas herramientas, escrituras en dry-run, lee la capa real",
+      "estado": "gris"
+    },
+    {
+      "id": "segundo-catalogo",
+      "label": "El Estudio sobre un segundo catálogo semántico del repo, sin tocar el núcleo",
+      "estado": "gris"
+    },
+    {
+      "id": "evidencias",
+      "label": "Evidencias: capturas, mediciones, reporte de decisiones, post-mortem",
+      "estado": "gris"
+    },
+    {
+      "id": "propuestas-firma",
+      "label": "Propuestas para firmar: CDC (clase de routing, prompts, superficie CLI), README, inventario",
+      "estado": "gris"
+    },
+    {
+      "id": "firma-laboratorio",
+      "label": "Firma del laboratorio (fuera del HECHO del goal)",
+      "estado": "gris"
+    }
+  ],
+  "aristas": [
+    {
+      "id": "a-fija-datos",
+      "label": "copiar los CSV fuera de git y fijar sus hashes",
+      "tipo": "script",
+      "from": "propuesta",
+      "to": "datos-crudos"
+    },
+    {
+      "id": "a-monta-dbt",
+      "label": "traer el proyecto dbt y su dialecto",
+      "tipo": "mixta",
+      "from": "datos-crudos",
+      "to": "proyecto-dbt"
+    },
+    {
+      "id": "a-entorno-dbt",
+      "label": "entorno Python pineado con lock y hashes, como la casa",
+      "tipo": "mixta",
+      "from": "casa",
+      "to": "proyecto-dbt"
+    },
+    {
+      "id": "a-semantica",
+      "label": "dbt build, mf validate-configs y mf query de cada cifra",
+      "tipo": "script",
+      "from": "proyecto-dbt",
+      "to": "catalogo-semantico"
+    },
+    {
+      "id": "a-esquema",
+      "label": "diseñar la especificación y sus operaciones de parche",
+      "tipo": "agente",
+      "from": "spec",
+      "to": "esquema-spec"
+    },
+    {
+      "id": "a-esquema-prototipo",
+      "label": "derivar los tipos de componente del prototipo",
+      "tipo": "agente",
+      "from": "propuesta",
+      "to": "esquema-spec"
+    },
+    {
+      "id": "a-set",
+      "label": "revisor dedicado escribe las 100 preguntas y su respuesta esperada",
+      "tipo": "agente",
+      "from": "catalogo-semantico",
+      "to": "set-referencia"
+    },
+    {
+      "id": "a-set-esquema",
+      "label": "la respuesta esperada se expresa en el esquema",
+      "tipo": "agente",
+      "from": "esquema-spec",
+      "to": "set-referencia"
+    },
+    {
+      "id": "a-nucleo-catalogo",
+      "label": "puerto semántico: listar, describir, consultar con límites",
+      "tipo": "mixta",
+      "from": "catalogo-semantico",
+      "to": "nucleo"
+    },
+    {
+      "id": "a-nucleo-esquema",
+      "label": "validar parches, versionar, deshacer y comparar",
+      "tipo": "agente",
+      "from": "esquema-spec",
+      "to": "nucleo"
+    },
+    {
+      "id": "a-senales",
+      "label": "detectar y diagnosticar por tienda, cohorte y origen",
+      "tipo": "mixta",
+      "from": "nucleo",
+      "to": "senales"
+    },
+    {
+      "id": "a-agente",
+      "label": "bucle de regeneración sobre las herramientas del núcleo",
+      "tipo": "agente",
+      "from": "nucleo",
+      "to": "agente"
+    },
+    {
+      "id": "a-agente-casa",
+      "label": "modelo pineado, contabilidad de tokens y clase de routing propuesta",
+      "tipo": "mixta",
+      "from": "casa",
+      "to": "agente"
+    },
+    {
+      "id": "a-mide",
+      "label": "correr el set por nivel, el barato primero, con tope",
+      "tipo": "script",
+      "from": "agente",
+      "to": "medicion-agente"
+    },
+    {
+      "id": "a-mide-set",
+      "label": "puntuar contra la respuesta esperada",
+      "tipo": "script",
+      "from": "set-referencia",
+      "to": "medicion-agente"
+    },
+    {
+      "id": "a-lienzo",
+      "label": "renderizar la especificación",
+      "tipo": "agente",
+      "from": "nucleo",
+      "to": "lienzo"
+    },
+    {
+      "id": "a-lienzo-senales",
+      "label": "tarjetas en el mapa y tablero detectar-aprender",
+      "tipo": "agente",
+      "from": "senales",
+      "to": "lienzo"
+    },
+    {
+      "id": "a-lienzo-agente",
+      "label": "barra de instrucciones y lo que entendió",
+      "tipo": "agente",
+      "from": "agente",
+      "to": "lienzo"
+    },
+    {
+      "id": "a-cli",
+      "label": "exponer las herramientas como CLI",
+      "tipo": "mixta",
+      "from": "nucleo",
+      "to": "cli"
+    },
+    {
+      "id": "a-cli-agente",
+      "label": "subcomando que corre el agente sobre una instrucción",
+      "tipo": "mixta",
+      "from": "agente",
+      "to": "cli"
+    },
+    {
+      "id": "a-cli-senales",
+      "label": "subcomando de señales",
+      "tipo": "mixta",
+      "from": "senales",
+      "to": "cli"
+    },
+    {
+      "id": "a-portabilidad",
+      "label": "cargar otro manifiesto semántico del repo",
+      "tipo": "mixta",
+      "from": "nucleo",
+      "to": "segundo-catalogo"
+    },
+    {
+      "id": "a-portabilidad-casa",
+      "label": "usar la capa de soporte-sap o clinica-dental tal cual",
+      "tipo": "mixta",
+      "from": "casa",
+      "to": "segundo-catalogo"
+    },
+    {
+      "id": "a-ev-lienzo",
+      "label": "recorridos con Playwright, escritorio y celular",
+      "tipo": "mixta",
+      "from": "lienzo",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-ev-medicion",
+      "label": "tablas de precisión, gasto y latencia",
+      "tipo": "script",
+      "from": "medicion-agente",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-ev-cli",
+      "label": "recorrido del CLI",
+      "tipo": "script",
+      "from": "cli",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-ev-portabilidad",
+      "label": "tablero válido sobre el segundo catálogo",
+      "tipo": "script",
+      "from": "segundo-catalogo",
+      "to": "evidencias"
+    },
+    {
+      "id": "a-propuestas",
+      "label": "redactar CDC, README product first e inventario, sin firmar",
+      "tipo": "agente",
+      "from": "evidencias",
+      "to": "propuestas-firma"
+    },
+    {
+      "id": "a-firma",
+      "label": "revisar el diff y firmar",
+      "tipo": "manual",
+      "from": "propuestas-firma",
+      "to": "firma-laboratorio"
+    }
+  ],
+  "lazos": [
+    {
+      "id": "l-hash-datos",
+      "label": "sha256 de los 7 CSV igual al del zip; regenerar con semilla da lo mismo, o se declara no reproducible con sus versiones",
+      "sobre": "nodo:datos-crudos",
+      "estado": "morado",
+      "referencia": "zip golfo_norte_dbt.zip (sha256 273f07d93ff6c414…) y sus 7 hashes en el spec",
+      "evidencia": "7/7 iguales al zip y 7/7 iguales al regenerar con semilla"
+    },
+    {
+      "id": "l-dbt-build",
+      "label": "dbt build verde: 22 modelos y 45 pruebas, o el conteo real explicado",
+      "sobre": "arista:a-semantica",
+      "estado": "morado",
+      "referencia": "propuesta §Modelado con dbt",
+      "evidencia": "Finished running 12 table models, 45 data tests, 10 view models · PASS=67 WARN=0 ERROR=0"
+    },
+    {
+      "id": "l-cifras",
+      "label": "cada cifra de la propuesta reproducida por mf query y por un conteo directo independiente; una divergencia se explica, nunca se ajusta",
+      "sobre": "nodo:catalogo-semantico",
+      "estado": "morado",
+      "referencia": "tablas de la propuesta (foto ene-sep, catálogo, hallazgos, growth por área)",
+      "evidencia": "cifras.json: MetricFlow = conteo directo en todas las filas con métrica salvo la trampa del desfase a grano año, explicada; ninguna definición ajustada"
+    },
+    {
+      "id": "l-set-congelado",
+      "label": "el set queda en un commit anterior a cualquier prompt del agente, con su hash",
+      "sobre": "nodo:set-referencia",
+      "estado": "gris",
+      "referencia": "orden de commits en la rama"
+    },
+    {
+      "id": "l-esquema",
+      "label": "todo parche valida; se rechazan métrica inventada, dimensión inválida, SQL libre y un parche que borra lo que no se pidió",
+      "sobre": "arista:a-nucleo-esquema",
+      "estado": "gris",
+      "referencia": "esquema versionado y catálogo semántico"
+    },
+    {
+      "id": "l-empaqueta",
+      "label": "npm run empaqueta verde: tarball instalado en un proyecto limpio",
+      "sobre": "nodo:nucleo",
+      "estado": "gris",
+      "referencia": "docs/EMPAQUETAR-HERRAMIENTA.md"
+    },
+    {
+      "id": "l-senales",
+      "label": "reencuentra las 3 señales sembradas sin que se le nombren, y ninguna inventada",
+      "sobre": "nodo:senales",
+      "estado": "gris",
+      "referencia": "README del proyecto dbt y scripts/lifecycle.py"
+    },
+    {
+      "id": "l-no-inventa",
+      "label": "toda cifra del texto sale de una consulta; sin métrica, lo dice y ofrece proponerla",
+      "sobre": "nodo:agente",
+      "estado": "gris",
+      "referencia": "resultados de consultar_metricas de esa misma vuelta"
+    },
+    {
+      "id": "l-precision",
+      "label": "precisión de al menos 90 % sobre el set, por nivel y por tipo de instrucción",
+      "sobre": "nodo:medicion-agente",
+      "estado": "gris",
+      "referencia": "KPI de la propuesta"
+    },
+    {
+      "id": "l-gasto",
+      "label": "gasto de OpenRouter medido antes y después, de US$2 o menos, modelo pineado",
+      "sobre": "arista:a-mide",
+      "estado": "gris",
+      "referencia": "tope del laboratorio (20/10)"
+    },
+    {
+      "id": "l-latencia",
+      "label": "regeneración menor a 5 s p95 con caché caliente; consulta semántica menor a 3 s",
+      "sobre": "nodo:lienzo",
+      "estado": "gris",
+      "referencia": "objetivos de servicio de la propuesta"
+    },
+    {
+      "id": "l-a11y",
+      "label": "sin violaciones serias de accesibilidad, en escritorio y celular",
+      "sobre": "nodo:lienzo",
+      "estado": "gris",
+      "referencia": "axe-core, WCAG 2.2 AA"
+    },
+    {
+      "id": "l-cli",
+      "label": "escrituras en dry-run por defecto, misma salida que el núcleo, códigos de salida, nunca inventa; grado no medido hasta puntuarlo",
+      "sobre": "nodo:cli",
+      "estado": "gris",
+      "referencia": "AGENTS.md, CLIs: cuatro reglas"
+    },
+    {
+      "id": "l-portabilidad",
+      "label": "diff vacío en el núcleo al cambiar de catálogo",
+      "sobre": "nodo:segundo-catalogo",
+      "estado": "gris",
+      "referencia": "git diff del núcleo"
+    },
+    {
+      "id": "l-validate",
+      "label": "npm run validate completo verde tras el último commit",
+      "sobre": "nodo:propuestas-firma",
+      "estado": "gris",
+      "referencia": ".claude/gates.json, perfil validate"
+    }
+  ]
+}
