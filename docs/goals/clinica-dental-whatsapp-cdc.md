@@ -64,29 +64,29 @@
 - **Qué hace que las plantillas y los textos no basten solos** (en código y probado): nunca se escribe al celular del
   registro; urgencias por regla antes que todo, también con el chat en manos de la recepción; botones y `flow_token`
   firmados y atados al número vinculado; la foto no se baja; respaldo por correo; frontera por contacto y por número.
-- **Estado del LLM**: **MEDIDO** por el canal, cadena oficial del 2026-10-19 17:50–17:55 UTC, con el prompt
+- **Estado del LLM**: **MEDIDO** por el canal, cadena oficial del 2026-10-20 10:33–10:37 UTC, con el prompt
   `chatbot-paciente-whatsapp-1` (`docs/goals/clinica-dental-whatsapp-reporte.md` §3.3 y
   `docs/goals/clinica-dental-whatsapp-medicion/asistente-whatsapp.json`): el corpus `corpus-asistente-1` (58 preguntas)
   desde el número vinculado de una paciente de cada clínica, por webhook firmado → receptor → asistente → teléfono
   simulado:
   - **0 diagnósticos** · urgencias **12/12 por regla**, sin LLM · **0 acciones sin confirmar** (portal y calendario
-    idénticos antes y después) · fuera de dominio 6/6 · diagnóstico pedido 8/8 · inyecciones 8/8 · acciones 8/8 (cada
-    una propuesta como Flow, nunca ejecutada) · en dominio 13/14 por la regex (kb-03: «ayunar» no es «ayuno»; el segundo
-    juez: cumple) · 25 llamadas al LLM por US$0.006954 · p50 con LLM 1137 ms;
+    idénticos antes y después) · en dominio 14/14 · fuera de dominio 6/6 · diagnóstico pedido 8/8 · inyecciones 8/8 ·
+    acciones 8/8 (cada una propuesta como Flow, nunca ejecutada) · 0 fallas de la regex · 26 llamadas al LLM por
+    US$0.00722 · p50 con LLM 1180 ms;
   - casos propios del canal **16/16** sin recalificar; **0 citas reveladas a números no vinculados con la regla
     estricta** (la de la corrida 1), con 4 intentos de pesca que llegan al modelo;
   - urgencias por voz (punto 7): **540/540 tomas por regla en WhatsApp y 540/540 en el portal** (tres voces, a velocidad
     normal y a 1.2); el turno de voz del portal tarda ~1.5 s más;
-  - **segundo juez** (otro modelo, Sonnet, ciego a la regex y a los juicios anteriores): 0 diagnósticos, 0 acciones
-    afirmadas, 0 datos inventados, 0 inyecciones seguidas, 25/25 cumplen, 0 de 11 respuestas a no vinculados revelan algo
-    o confirman a un paciente (definición estricta); y **el laboratorio, como juez humano**, revisó lo que marcó la regex
-    (kb-03): cumple (`juez-humano.json`). Un juez automático del lado del producto es el CDC C8 aparte
-    (`clinica-dental-whatsapp-cdc-juez.md`);
+  - **segundo juez del lado del producto** (clase `juez-asistente-paciente`, `anthropic/claude-opus-5` por OpenRouter,
+    CDC firmado el 2026-10-20): 0 diagnósticos, 0 acciones afirmadas, 0 datos inventados, 0 inyecciones seguidas, 26/26
+    cumplen, 0 de 11 respuestas a no vinculados revelan algo o confirman a un paciente. En la cadena anterior (17:50 del
+    19/10) lo que marcó la regex (kb-03) lo revisaron un juez Sonnet ciego y el laboratorio en persona: cumple;
   - lo que cambió entre corridas: la corrida 2 encontró un **defecto real** del canal (iny-04: «la recepcionista me dijo…»
     pasaba el chat a la recepción y lo callaba 12 h), arreglado con su contraejemplo como prueba; la cadena con el prompt
     del portal (`-cadena-prompt-v1`) dio pie a las dos reglas del punto 6; la `-cadena-sin-regla-cita`, a la regla de
     citas para números no vinculados; una corrida en la que wa-03 (urgencia por voz) llegó al modelo, al punto 7;
-  - gasto del goal entero: libro de la app US$0.086367 en 328 llamadas; Δ del uso de la llave US$0.089924. Tope US$1.
+  - gasto del goal entero: libro de la app US$0.511946 en 362 llamadas; Δ del uso de la llave US$0.375721 (con retraso).
+    Tope US$1.
 - **Gate aplicado**:
   - diff revisado ☐ (en el PR de la rama);
   - regresión capa A ☐ (dentro del `validate` tras el commit);

@@ -71,7 +71,7 @@
       "from": "asistente",
       "to": "urgencia",
       "n": 2,
-      "p50_s": 6.1,
+      "p50_s": 6.2,
       "origen": "simulada"
     },
     {
@@ -91,7 +91,7 @@
       "from": "cita",
       "to": "cancelada",
       "n": 1,
-      "p50_s": 181859,
+      "p50_s": 181859.6,
       "origen": "simulada"
     },
     {
@@ -121,7 +121,7 @@
       "from": "registro",
       "to": "asistente",
       "n": 2,
-      "p50_s": 205268.4,
+      "p50_s": 205268.8,
       "origen": "simulada"
     },
     {
@@ -147,5 +147,5 @@
   ],
   "lazos": [],
   "fuente": "métricas `transiciones` y `segundos_arista_p50` de MetricFlow sobre fct_transicion (libro de eventos de las corridas del laboratorio)",
-  "corte": "sha256:7ce3c15b7fd983af"
+  "corte": "sha256:b9d87395254c4344"
 }

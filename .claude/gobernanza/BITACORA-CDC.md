@@ -5285,3 +5285,21 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - capa B: no aplica, porque no cambia skill, prompt ni instrucción del arnés ☑;
   - aprobación humana ☑.
 - **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-18
+
+### 2026-10-20 — routing: clase `juez-asistente-paciente` (el segundo juez del asistente de la clínica, del lado del producto) — radio: control de gobierno (routing de modelos, C8)
+
+- **Cambio** en `.claude/routing-modelos.json`: la clase `juez-asistente-paciente`, en el nivel `razonamiento`
+  (`anthropic/claude-opus-5`, pineado) y en «no se abaratan». Dos líneas, sin tocar ninguna otra clase ni nivel.
+- **Para qué**: el spec del goal `clinica-dental-whatsapp` pide que lo que marque la regex lo revise «un segundo juez
+  independiente». Con la clase, un guion del producto (`scripts/clinica-dental/whatsapp/juez.ts`) le pasa a un modelo por
+  OpenRouter lo que la medición marcó, con su gasto en el libro y su modelo pineado: ya no es un subagente de la sesión
+  del agente que mide.
+- **Por qué razonamiento y «no se abaratan»**: un juez más débil da un verde que no significa nada (la misma regla que
+  los casos-trampa).
+- **Sin cambios**: el asistente, su clase `asistente-paciente` y su modelo.
+- **Gate aplicado**:
+  - diff revisado ☑;
+  - `verifica:routing` y `verify:gobernanza` en verde ☑;
+  - capa B: no aplica, porque no cambia skill, prompt ni instrucción del arnés ☑;
+  - aprobación humana ☑.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-20

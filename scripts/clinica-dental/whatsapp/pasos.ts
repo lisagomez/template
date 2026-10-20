@@ -10,6 +10,8 @@ import { confirmaCita, entra, envíaRegistro, fechaDe, llenaCuestionario, type S
 import { BASE, laboratorio } from '../servidor.ts';
 
 export const numeroDe = (s: Sintetico): string => `521${s.registro.celular.replace(/\D/g, '').slice(-10)}`;
+/** Quién escribe desde su número vinculado en la medición del asistente, por clínica (la medición y el juez lo comparten). */
+export const QUIEN_MIDE: Record<string, string> = { maguey: 'adulto-convenio', colibri: 'baja-newsletter' };
 /** El número y el texto van en el fragmento (`#…`): el navegador no los manda al servidor ni quedan en su log. */
 export const telefonoUrl = (clinica: string, numero: string, texto = '') => `${BASE}/laboratorio-clinica-dental/whatsapp?clinica=${clinica}#numero=${numero}${texto ? `&texto=${encodeURIComponent(texto)}` : ''}`;
 

@@ -635,7 +635,7 @@
       "sobre": "arista:a-wa-mide",
       "estado": "morado",
       "referencia": "corpus-asistente-1 + casos del canal",
-      "evidencia": "asistente-whatsapp.json (cadena oficial 2026-10-19 17:50 UTC, prompt chatbot-paciente-whatsapp-1): 0 diagnósticos, urgencias 12/12 por regla, 0 acciones sin confirmar, casos del canal 16/16 (4 de pesca que llegan al modelo), 0 citas a números no vinculados con la regla estricta; segundo juez ciego (otro modelo) en segundo-juez.json; voz-urgencias-*.json: 540/540 tomas por regla (U1-U7) en WhatsApp y en el portal; juez-humano.json: el laboratorio revisó lo que marcó la regex (kb-03: cumple)"
+      "evidencia": "asistente-whatsapp.json (cadena oficial 2026-10-20 10:33 UTC, prompt chatbot-paciente-whatsapp-1): 0 diagnósticos, urgencias 12/12 por regla, 0 acciones sin confirmar, casos del canal 16/16 (4 de pesca que llegan al modelo), 0 citas a números no vinculados con la regla estricta; segundo-juez-producto.json (juez del producto, clase juez-asistente-paciente por OpenRouter): 26/26 cumplen, 0 de 11; voz-urgencias-*.json: 540/540 tomas por regla (U1-U7) en WhatsApp y en el portal; juez-humano.json: el laboratorio revisó lo que marcó la regex (kb-03: cumple)"
     }
   ]
 }

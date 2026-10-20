@@ -21,10 +21,10 @@ import { paciente } from '../flujos.ts';
 import { DATOS, DIR_LIBRO } from '../rutas.ts';
 import { saldo } from '../saldo.ts';
 import { BASE, laboratorio } from '../servidor.ts';
-import { numeroDe } from './pasos.ts';
+import { numeroDe, QUIEN_MIDE } from './pasos.ts';
 
 const SALIDA = join(process.cwd(), 'docs/goals/clinica-dental-whatsapp-medicion');
-const VINCULADO: Record<string, string> = { maguey: numeroDe(paciente('adulto-convenio')), colibri: numeroDe(paciente('baja-newsletter')) };
+const VINCULADO: Record<string, string> = Object.fromEntries(Object.entries(QUIEN_MIDE).map(([c, id]) => [c, numeroDe(paciente(id))]));
 const PNID: Record<string, string> = { maguey: '1090000000101', colibri: '1090000000102' };
 
 interface Burbuja { lado: string; texto: string; tipo: string; flow?: { cta: string }; cta?: { texto: string }; botones?: { titulo: string }[] }

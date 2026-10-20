@@ -1,6 +1,6 @@
 {
- "version": "sha256:7ce3c15b7fd983af",
- "generado": "2026-10-19T17:54:55.703Z",
+ "version": "sha256:b9d87395254c4344",
+ "generado": "2026-10-20T10:37:40.146Z",
  "generadoCon": {
   "dbt-core": "1.12.5",
   "dbt-metricflow": "0.15.0",
@@ -12,15 +12,15 @@
  "libro": {
   "maguey": {
    "eventos": 265,
-   "raiz": "sha256:b73579352aad4e812ae9098fe50278bd273db263a5c0a3035c4d5af493be3c4b"
+   "raiz": "sha256:00cf1a80f2b2a8ab05f7b026c66d8f1d8b078e922b39be7b883944d109d101a5"
   },
   "colibri": {
    "eventos": 138,
-   "raiz": "sha256:741c1fed8fb698107e0b1bfa84cb4eb7a00e09c3553e6097ffad9b9e066484fa"
+   "raiz": "sha256:5321f4d53d176f0e94ef3f0cb0f1c7068088cbaf7fc7494f0aa54e6dafb445ca"
   }
  },
  "dbt": [
-  "Finished running 3 seeds, 12 table models, 232 data tests, 26 view models in 0 hours 0 minutes and 5.11 seconds (5.11s).",
+  "Finished running 3 seeds, 12 table models, 232 data tests, 26 view models in 0 hours 0 minutes and 4.37 seconds (4.37s).",
   "Completed successfully",
   "Done. PASS=273 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=273"
  ],
@@ -206,12 +206,12 @@
   },
   "horas_registro_a_cita_p50": {
    "colibri": {
-    "metricflow": 0.00042,
-    "directo": 0.00042027777777777777
+    "metricflow": 0.000419,
+    "directo": 0.0004188888888888889
    },
    "maguey": {
-    "metricflow": 0.000418,
-    "directo": 0.00041833333333333333
+    "metricflow": 0.000429,
+    "directo": 0.0004294444444444444
    }
   },
   "citas_confirmadas": {
@@ -360,8 +360,8 @@
     "directo": 1
    },
    "maguey": {
-    "metricflow": 7,
-    "directo": 7
+    "metricflow": 4,
+    "directo": 4
    }
   },
   "urgencias_whatsapp_n": {
@@ -496,12 +496,12 @@
   },
   "costo_por_conversacion_usd": {
    "colibri": {
-    "metricflow": 0.00125,
-    "directo": 0.0012502499999999998
+    "metricflow": 0.001374,
+    "directo": 0.0013736500000000001
    },
    "maguey": {
-    "metricflow": 0.003012,
-    "directo": 0.0030122500000000006
+    "metricflow": 0.002883,
+    "directo": 0.0028832500000000004
    }
   },
   "visitantes_portal": {
@@ -727,78 +727,78 @@
    "arista": "asistente→urgencia",
    "metricflow": {
     "n": 2,
-    "p50": 6.141
+    "p50": 6.24
    },
    "directo": {
     "desde": "asistente",
     "hacia": "urgencia",
     "n": 2,
-    "p50": 6.140999999999999
+    "p50": 6.239999999999999
    }
   },
   {
    "arista": "cita→avisos",
    "metricflow": {
     "n": 5,
-    "p50": 3.888
+    "p50": 3.938
    },
    "directo": {
     "desde": "cita",
     "hacia": "avisos",
     "n": 5,
-    "p50": 3.888
+    "p50": 3.938
    }
   },
   {
    "arista": "cita→cancelada",
    "metricflow": {
     "n": 1,
-    "p50": 181859.015
+    "p50": 181859.644
    },
    "directo": {
     "desde": "cita",
     "hacia": "cancelada",
     "n": 1,
-    "p50": 181859.015
+    "p50": 181859.644
    }
   },
   {
    "arista": "cita→reprogramada",
    "metricflow": {
     "n": 1,
-    "p50": 12.035
+    "p50": 12.027
    },
    "directo": {
     "desde": "cita",
     "hacia": "reprogramada",
     "n": 1,
-    "p50": 12.035
+    "p50": 12.027
    }
   },
   {
    "arista": "consentimientos→agenda",
    "metricflow": {
     "n": 3,
-    "p50": 1.492
+    "p50": 1.532
    },
    "directo": {
     "desde": "consentimientos",
     "hacia": "agenda",
     "n": 3,
-    "p50": 1.492
+    "p50": 1.532
    }
   },
   {
    "arista": "registro→asistente",
    "metricflow": {
     "n": 2,
-    "p50": 205268.367
+    "p50": 205268.8045
    },
    "directo": {
     "desde": "registro",
     "hacia": "asistente",
     "n": 2,
-    "p50": 205268.36700000003
+    "p50": 205268.8045
    }
   },
   {
@@ -818,13 +818,13 @@
    "arista": "visita→registro",
    "metricflow": {
     "n": 4,
-    "p50": 1.003
+    "p50": 1.0015
    },
    "directo": {
     "desde": "visita",
     "hacia": "registro",
     "n": 4,
-    "p50": 1.0030000000000001
+    "p50": 1.0015
    }
   }
  ],
@@ -839,31 +839,31 @@
    "clinica": "colibri",
    "arista": "asistente→urgencia",
    "n": 1,
-   "p50": 12.28
+   "p50": 12.478
   },
   {
    "clinica": "colibri",
    "arista": "cita→avisos",
    "n": 1,
-   "p50": 3.888
+   "p50": 3.938
   },
   {
    "clinica": "colibri",
    "arista": "cita→cancelada",
    "n": 1,
-   "p50": 181859.015
+   "p50": 181859.644
   },
   {
    "clinica": "colibri",
    "arista": "consentimientos→agenda",
    "n": 1,
-   "p50": 1.503
+   "p50": 1.498
   },
   {
    "clinica": "colibri",
    "arista": "registro→asistente",
    "n": 1,
-   "p50": 228683.056
+   "p50": 228683.798
   },
   {
    "clinica": "colibri",
@@ -875,13 +875,13 @@
    "clinica": "colibri",
    "arista": "visita→registro",
    "n": 1,
-   "p50": 1
+   "p50": 0.991
   },
   {
    "clinica": "maguey",
    "arista": "agenda→cita",
    "n": 2,
-   "p50": 0.0105
+   "p50": 0.011
   },
   {
    "clinica": "maguey",
@@ -893,25 +893,25 @@
    "clinica": "maguey",
    "arista": "cita→avisos",
    "n": 4,
-   "p50": 1.985
+   "p50": 2.011
   },
   {
    "clinica": "maguey",
    "arista": "cita→reprogramada",
    "n": 1,
-   "p50": 12.035
+   "p50": 12.027
   },
   {
    "clinica": "maguey",
    "arista": "consentimientos→agenda",
    "n": 2,
-   "p50": 1.4915
+   "p50": 1.534
   },
   {
    "clinica": "maguey",
    "arista": "registro→asistente",
    "n": 1,
-   "p50": 181853.678
+   "p50": 181853.811
   },
   {
    "clinica": "maguey",
@@ -923,7 +923,7 @@
    "clinica": "maguey",
    "arista": "visita→registro",
    "n": 3,
-   "p50": 1.006
+   "p50": 1.012
   }
  ]
 }

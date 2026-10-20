@@ -1,6 +1,6 @@
 {
- "generado": "2026-10-19T17:54:58.296Z",
- "corte": "sha256:7ce3c15b7fd983af",
+ "generado": "2026-10-20T10:37:40.825Z",
+ "corte": "sha256:b9d87395254c4344",
  "periodoDias": 2.6,
  "clinicas": [
   {
@@ -56,7 +56,7 @@
      "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); WhatsApp: tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
     },
     "costo_asistente_por_conversacion": {
-     "valor": 0.0557,
+     "valor": 0.0533,
      "unidad": "MXN",
      "origen": "medida",
      "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
@@ -377,7 +377,7 @@
      "fuente": "supuesto: plan Pro de Resend, US$20 al mes por 50 000 correos = US$0.0004 por correo (https://resend.com/pricing, consultado 2026-10-16); Gmail personal no es proveedor de envio masivo; supuesto: la Bot API de Telegram no cobra por mensaje (https://core.telegram.org/bots/api, consultado 2026-10-16); WhatsApp: tarifa de lista de Meta para Mexico vigente desde el 2026-10-01 (archivo «Cost per message» enlazado en https://developers.facebook.com/docs/whatsapp/pricing, consultado 2026-10-19); sin volumen: una clinica no llega a los descuentos; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
     },
     "costo_asistente_por_conversacion": {
-     "valor": 0.0231,
+     "valor": 0.0254,
      "unidad": "MXN",
      "origen": "medida",
      "fuente": "lo que reportó OpenRouter (usage.cost) por los turnos con LLM de la corrida; supuesto: 18.50 MXN por US$, redondeado; verificar contra el tipo de cambio FIX de Banxico del dia antes de decidir"
