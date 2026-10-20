@@ -330,3 +330,9 @@ laboratorio. Nada se mergea sin firmar el CDC del canal (`clinica-dental-whatsap
 laboratorio en este goal: el alcance (avisos + asistente + agendar), juzgar en persona kb-03 (cumple), pedir siempre dos
 lecturas de voz en el portal, y firmar la clase de routing del juez del producto (2026-10-20). Lo que le queda: firmar (o
 no) las cuatro propuestas de §6.
+
+**Cierre del goal (2026-10-20, decisión del laboratorio)**: da por cumplido «100 % urgencias por regla» con lo medido
+(12/12 por texto en la cadena oficial; 540/540 tomas de voz por regla en WhatsApp y en el portal, con tres voces
+sintéticas a dos velocidades; y U7 por regla para toda nota de voz con una señal de alarma), sabiendo que no es una
+garantía sobre cualquier voz y que medir con voces reales queda fuera de un goal de «solo sintéticos». Las cuatro
+propuestas quedan sin firmar, como pide el HECHO, para que el laboratorio las revise.
