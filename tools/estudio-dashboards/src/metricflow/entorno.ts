@@ -15,12 +15,13 @@ export const DIR_SEMANTICA = join(dirname(fileURLToPath(import.meta.url)), '..',
 export const LOCK = join(DIR_SEMANTICA, 'requirements.lock')
 export const SERVIDOR = join(DIR_SEMANTICA, 'servidor_mf.py')
 
-export function huellaLock(): string {
-  return createHash('sha256').update(readFileSync(LOCK)).digest('hex').slice(0, 12)
+export function huellaLock(lock: string = LOCK): string {
+  return createHash('sha256').update(readFileSync(lock)).digest('hex').slice(0, 12)
 }
 
-export function dirEntorno(): string {
-  return process.env['ESTUDIO_MF_VENV'] ?? join(homedir(), '.cache', 'estudio-dashboards-semantica', `venv-${huellaLock()}`)
+/** El entorno del lock. `lock` explícito cuando este módulo corre empaquetado (Next) y `import.meta.url` no es el paquete. */
+export function dirEntorno(lock: string = LOCK): string {
+  return process.env['ESTUDIO_MF_VENV'] ?? join(homedir(), '.cache', 'estudio-dashboards-semantica', `venv-${huellaLock(lock)}`)
 }
 
 /** Variables para dbt y MetricFlow: sin telemetría, siempre. */

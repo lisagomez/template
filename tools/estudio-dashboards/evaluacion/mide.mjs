@@ -33,6 +33,9 @@ const solo = arg('--solo', null)
 const ids = arg('--ids', null)?.split(',')
 /** `--nombre corrida3` separa el archivo de salida de las corridas anteriores. */
 const nombre = arg('--nombre', null)
+/** `--razonamiento apagado|<tokens>`: el razonamiento del modelo, explícito (si no, decide el proveedor). */
+const razonamientoArg = arg('--razonamiento', null)
+const razonamiento = razonamientoArg === null ? undefined : razonamientoArg === 'apagado' ? 'apagado' : { maxTokens: Number(razonamientoArg) }
 
 function llave() {
   if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY
@@ -77,7 +80,7 @@ async function principal() {
     const consultasFrio = []
     for (const t of Object.values(tableros)) for (const c of Object.values((await resuelve(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push(r.totalMs)
     for (const t of Object.values(tableros)) await resuelve(x, t, MAPA_GN)
-    const modelo = modeloOpenRouter({ llave: k, modelo: cfg.modelo, fetch, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } })
+    const modelo = modeloOpenRouter({ llave: k, modelo: cfg.modelo, fetch, razonamiento, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } })
     const preguntas = set.preguntas.filter((q) => (!solo || q.particion === solo) && (!ids || ids.includes(q.id)))
     mkdirSync(SALIDA, { recursive: true })
     for (const [i, q] of preguntas.entries()) {
@@ -109,7 +112,7 @@ function resumen(rs, consultasFrio, cfg, antes, despues, sha) {
   const grupo = (f) => Object.fromEntries([...new Set(rs.map(f))].sort().map((k) => { const g = rs.filter((r) => f(r) === k); return [k, { n: g.length, correctas: g.filter((r) => r.correcta).length, precision: g.length ? g.filter((r) => r.correcta).length / g.length : null }] }))
   const costos = rs.map((r) => r.costoUsd).filter((c) => c !== null)
   return {
-    nivel, modelo: cfg.modelo, set: sha, fecha: new Date().toISOString(), n: rs.length,
+    nivel, modelo: cfg.modelo, razonamiento: razonamiento ?? 'del proveedor', set: sha, fecha: new Date().toISOString(), n: rs.length,
     precision: rs.length ? rs.filter((r) => r.correcta).length / rs.length : null,
     porTipo: grupo((r) => r.tipo), porParticion: grupo((r) => r.particion),
     costo: { totalUsd: costos.reduce((s, c) => s + c, 0), sinCosto: rs.length - costos.length, porInstruccionUsd: costos.length ? costos.reduce((s, c) => s + c, 0) / costos.length : null, libroAcumuladoUsd: gastado() },

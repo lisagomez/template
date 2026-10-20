@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**63 activos** cubren **290 unidades** del repo.
+**64 activos** cubren **292 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -56,6 +56,7 @@
 | TPL-feature-crecimiento-demostrado | Pantalla del dueno (/crecimiento: respuesta con estado, cascada del puente, arbol de la prueba, certificado y replay), laboratorio de trampas (/laboratorio-crecimiento) y agente A2A local (/api/crecimiento/a2a) | PRODUCTO | software | blueprint | 1 | `src/features/crecimiento-demostrado` |
 | TPL-feature-dashboard | Dashboard de la app base | PRODUCTO | software | beta | 1 | `src/features/dashboard` |
 | TPL-feature-dictado | Interfaz web del dictado (pildora, ajustes e historial) | PRODUCTO | software | beta | 3 | `src/features/dictado` |
+| TPL-feature-estudio-dashboards | Lienzo de laboratorio del Estudio (/laboratorio-estudio-dashboards): barra de instrucciones con lo que entendio antes de aplicar, rejilla de componentes con procedencia a un clic, mapa de matriz de puntos con lazo y senales enlazadas, ciclo detectar-aprender, versiones y comparacion; ruta /api/estudio-dashboards (503 fuera del laboratorio) y el recorrido Playwright de scripts/estudio-dashboards | PRODUCTO | software | blueprint | 2 | `src/features/estudio-dashboards` |
 | TPL-feature-estudio-pymes | Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo) | PRODUCTO | software | blueprint | 2 | `src/features/estudio-pymes` |
 | TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |

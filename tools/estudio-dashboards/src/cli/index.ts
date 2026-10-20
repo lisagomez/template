@@ -30,6 +30,8 @@ interface Config {
   readonly corte: string
   readonly contexto?: string
   readonly modelo?: string
+  /** Tokens de razonamiento aparte de la respuesta, o "apagado". Sin él decide el proveedor. */
+  readonly razonamiento?: number | 'apagado'
 }
 
 const AYUDA = `estudio-dashboards <subcomando> --config <archivo.json> [--entrada '<json>' | --entrada-archivo <ruta>] [--aplicar] [--confirmada-por <nombre>]
@@ -100,7 +102,7 @@ async function agente(ctx: ContextoEstudio, c: Config, pos: string[], op: Record
   const modelo = typeof op['modelo'] === 'string' ? op['modelo'] : c.modelo
   if (!llave || !modelo) return Promise.reject(Object.assign(new Error(`modelo no disponible: ${llave ? '' : 'falta OPENROUTER_API_KEY en el entorno; '}${modelo ? '' : 'falta "modelo" (pineado) en la config'}`), { modeloNoDisponible: true }))
   const h = (await ctx.versiones.lee(tablero)) ?? nuevoHistorial(tablero, ctx.tablerosBase?.[tablero] ?? (() => { throw new ErrorDeUso(`no existe el tablero «${tablero}»`) })())
-  const v = await interpreta({ consultor: ctx.consultor, modelo: modeloOpenRouter({ llave, modelo, fetch }), corte: c.corte, contexto: c.contexto }, versionActual(h).dashboard, h.actual, instruccion)
+  const v = await interpreta({ consultor: ctx.consultor, modelo: modeloOpenRouter({ llave, modelo, fetch, ...(c.razonamiento === undefined ? {} : { razonamiento: c.razonamiento === 'apagado' ? 'apagado' : { maxTokens: c.razonamiento } }) }), corte: c.corte, contexto: c.contexto }, versionActual(h).dashboard, h.actual, instruccion)
   const aplicado = v.resultado?.aplicado
   if (op['aplicar'] === true && aplicado && !v.error) {
     const previo = await ctx.versiones.lee(tablero)

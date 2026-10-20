@@ -10,7 +10,7 @@
 import { tiemposDe, unidadDe, type Catalogo } from '../catalogo.js'
 import type { Dashboard } from '../esquema.js'
 
-export const VERSION_PROMPT = 'estudio-agente/3'
+export const VERSION_PROMPT = 'estudio-agente/4'
 
 const mes = (a: number, m: number) => { const n = a * 12 + (m - 1); return `${Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, '0')}` }
 
@@ -88,7 +88,16 @@ ${catalogoCompacto(cat)}`
 
 const compacto = (d: Dashboard) => JSON.stringify({ titulo: d.titulo, filtros: d.filtros, seleccion: d.seleccion ?? null, componentes: d.componentes.map((c) => (c.tipo === 'hallazgo' ? { id: c.id, tipo: c.tipo, titulo: c.titulo } : c)) })
 
-export function mensajeUsuario(d: Dashboard, version: number, instruccion: string, seleccion?: { dimension: string; valores: readonly string[] } | null): string {
+/** El cambio anterior de la conversación, para que «ahora…», «esa gráfica» o «compáralo» sepan a qué se refieren. */
+export interface UltimoCambio { readonly instruccion: string; readonly componentes: readonly string[] }
+
+/**
+ * El mensaje de cada vuelta. Sin cambio anterior (una instrucción suelta, como las del set de referencia) es
+ * byte a byte el mensaje que se midió con `estudio-agente/3`; la línea de ÚLTIMO CAMBIO solo aparece en una
+ * conversación (estudio-agente/4).
+ */
+export function mensajeUsuario(d: Dashboard, version: number, instruccion: string, seleccion?: { dimension: string; valores: readonly string[] } | null, ultimo?: UltimoCambio | null): string {
   const sel = seleccion ? `\nSELECCIÓN DEL MAPA: ${seleccion.dimension} = ${seleccion.valores.join(' · ')}` : '\nSELECCIÓN DEL MAPA: ninguna'
-  return `TABLERO ACTUAL (versión ${version}):\n${compacto(d)}${sel}\n\nINSTRUCCIÓN: ${instruccion}`
+  const previo = ultimo ? `\nÚLTIMO CAMBIO: «${ultimo.instruccion}»${ultimo.componentes.length ? ` (tocó ${ultimo.componentes.join(', ')})` : ''}. «Ahora…», «esa gráfica» o «compáralo» se refieren a eso.` : ''
+  return `TABLERO ACTUAL (versión ${version}):\n${compacto(d)}${sel}${previo}\n\nINSTRUCCIÓN: ${instruccion}`
 }

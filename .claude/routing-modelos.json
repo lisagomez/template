@@ -152,6 +152,7 @@
     "formato-y-lint": "ligero",
     "cerebro-de-voz": "voz",
     "asistente-paciente": "voz",
+    "agente-estudio-dashboards": "voz",
     "implementar-feature": "capaz",
     "revision-de-codigo": "capaz",
     "migracion-o-sql": "capaz",

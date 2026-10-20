@@ -26,14 +26,17 @@ export interface OpcionesMetricFlow {
   readonly python?: string
   /** Tope por petición. */
   readonly tiempoMs?: number
+  /** Ruta de `servidor_mf.py`; por defecto la del paquete (explícita si este módulo corre empaquetado). */
+  readonly servidor?: string
 }
 
 interface Pendiente { ok: (v: Record<string, unknown>) => void; mal: (e: Error) => void; reloj: NodeJS.Timeout }
 
 export function puertoMetricFlow(o: OpcionesMetricFlow): PuertoSemantico & { listo: Promise<number> } {
   const python = o.python ?? join(dirEntorno(), 'bin', 'python')
-  const hijo: ChildProcessWithoutNullStreams = spawn(python, ['-I', SERVIDOR, o.proyecto, o.perfiles], {
-    env: { PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '', ...SIN_TELEMETRIA, ...o.entorno },
+  const hijo: ChildProcessWithoutNullStreams = spawn(python, ['-I', o.servidor ?? SERVIDOR, o.proyecto, o.perfiles], {
+    // Entorno MÍNIMO a propósito (sin heredar secretos del proceso): ruta, home, sin telemetría y lo que pide el perfil.
+    env: { NODE_ENV: process.env['NODE_ENV'] ?? 'production', PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '', ...SIN_TELEMETRIA, ...o.entorno },
     stdio: ['pipe', 'pipe', 'pipe'],
   })
   const pendientes = new Map<number, Pendiente>()

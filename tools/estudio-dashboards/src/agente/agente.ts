@@ -14,7 +14,7 @@ import type { Dashboard, FiltroDashboard } from '../esquema.js'
 import { cifrasRespaldadas, numerosDe } from '../texto.js'
 import { nombraPeriodo } from '../analisis.js'
 import { ejecutaPlan, planEsquema, type Plan, type Resultado } from './plan.js'
-import { mensajeUsuario, promptSistema, VERSION_PROMPT } from './prompt.js'
+import { mensajeUsuario, promptSistema, VERSION_PROMPT, type UltimoCambio } from './prompt.js'
 import type { LlamadaModelo, Mensaje, ModeloEstudio, Registrador } from './tipos.js'
 
 export interface ContextoAgente {
@@ -101,10 +101,10 @@ function verificaTexto(cat: Catalogo, instruccion: string, r: Resultado, texto: 
 const sumaCostos = (ls: readonly LlamadaModelo[]) => (ls.some((l) => l.costoUsd === null) ? null : ls.reduce((s, l) => s + (l.costoUsd ?? 0), 0))
 
 /** Interpreta una instrucción sobre un tablero, EN SECO. No guarda nada: eso es `aplicaVuelta`. */
-export async function interpreta(c: ContextoAgente, d: Dashboard, version: number, instruccion: string, seleccion?: Dashboard['seleccion']): Promise<Vuelta> {
+export async function interpreta(c: ContextoAgente, d: Dashboard, version: number, instruccion: string, seleccion?: Dashboard['seleccion'], ultimo?: UltimoCambio | null): Promise<Vuelta> {
   const t0 = performance.now()
   const cat = c.consultor.catalogo
-  const mensajes: Mensaje[] = [{ role: 'user', content: mensajeUsuario(d, version, instruccion, seleccion ?? d.seleccion ?? null) }]
+  const mensajes: Mensaje[] = [{ role: 'user', content: mensajeUsuario(d, version, instruccion, seleccion ?? d.seleccion ?? null, ultimo) }]
   const llamadas: LlamadaModelo[] = []
   let plan: Plan | null = null
   let resultado: Resultado | null = null

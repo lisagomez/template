@@ -112,3 +112,11 @@ test('analizar una métrica con desfase vuelve al modelo con el porqué, y el mo
   assert.equal(v.error, null)
   assert.equal(v.plan?.entendi.metricas[0], 'ventas_netas')
 })
+
+test('sin cambio anterior, el mensaje es el MISMO que se midió (estudio-agente/3); con él, nombra lo que tocó', () => {
+  const d = tablero('growth')
+  const medido = `TABLERO ACTUAL (versión 0):\n${JSON.stringify({ titulo: d.titulo, filtros: d.filtros, seleccion: null, componentes: d.componentes })}\nSELECCIÓN DEL MAPA: ninguna\n\nINSTRUCCIÓN: hola`
+  assert.equal(mensajeUsuario(d, 0, 'hola'), medido)
+  assert.equal(mensajeUsuario(d, 0, 'hola', null, null), medido)
+  assert.match(mensajeUsuario(d, 1, 'ahora por mes', null, { instruccion: 'margen por región', componentes: ['margen_region'] }), /ÚLTIMO CAMBIO: «margen por región» \(tocó margen_region\)/)
+})

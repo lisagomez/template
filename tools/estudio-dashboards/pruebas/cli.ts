@@ -17,7 +17,7 @@ const CLI = join(RAIZ, 'dist', 'cli', 'index.js')
 const dir = mkdtempSync(join(tmpdir(), 'estudio-cli-'))
 const config = join(dir, 'config.json')
 writeFileSync(config, JSON.stringify({ foto: join(RAIZ, 'evaluacion', 'catalogo-golfo-norte.json'), tableros: { ejecutivo: join(RAIZ, 'laboratorio', 'tableros', 'ejecutivo.json') }, almacen: join(dir, 'almacen'), corte: '2026-09' }))
-const cli = (...a: string[]) => { const r = spawnSync('node', [CLI, ...a, '--config', config], { encoding: 'utf8', env: { PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '' } }); return { codigo: r.status, out: r.stdout, err: r.stderr } }
+const cli = (...a: string[]) => { const r = spawnSync('node', [CLI, ...a, '--config', config], { encoding: 'utf8', env: { NODE_ENV: process.env['NODE_ENV'] ?? 'test', PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '' } }); return { codigo: r.status, out: r.stdout, err: r.stderr } }
 const cat = construyeCatalogo(FOTO, FOTO.dominios)
 const nucleo = (): ContextoEstudio => ({ consultor: consultor({ catalogo: async () => FOTO, valores: async () => [], consulta: async () => { throw new Error('sin capa') } }, cat), versiones: memoriaVersiones(), alertas: memoriaAlertas(), tablerosBase: { ejecutivo: tablero('ejecutivo') }, fechaCorte: '2026-09' })
 const parche = { esquema: 'estudio.parche/1', base: 0, alcance: { tipo: 'modificar', componentes: ['por_region'] }, operaciones: [{ op: 'cambiar', id: 'por_region', cambios: { tipo: 'linea' } }] }

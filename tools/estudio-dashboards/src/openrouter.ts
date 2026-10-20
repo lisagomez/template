@@ -17,6 +17,12 @@ export interface OpcionesOpenRouter {
   readonly cabeceras?: Readonly<Record<string, string>>
   /** Tope de pared por llamada. */
   readonly tiempoMs?: number
+  /**
+   * Razonamiento: hay modelos que razonan por omisión y ese razonamiento cuenta dentro de `max_tokens` (medido el
+   * 2026-10-20 con Haiku 5.5: 1,182 de 1,200 tokens razonando, el JSON truncado). `{ maxTokens }` le da un tope PROPIO,
+   * aparte de la respuesta; `'apagado'` lo desactiva. Sin esto, decide el proveedor.
+   */
+  readonly razonamiento?: { readonly maxTokens: number } | 'apagado'
 }
 
 interface Cuerpo {
@@ -41,7 +47,9 @@ export function modeloOpenRouter(o: OpcionesOpenRouter): ModeloEstudio {
           signal: control.signal,
           headers: { 'content-type': 'application/json', authorization: `Bearer ${o.llave}`, ...(o.cabeceras ?? {}) },
           body: JSON.stringify({
-            model: o.modelo, max_tokens: maxTokens, temperature: o.temperatura ?? 0,
+            model: o.modelo, temperature: o.temperatura ?? 0,
+            max_tokens: maxTokens + (typeof o.razonamiento === 'object' ? o.razonamiento.maxTokens : 0),
+            ...(o.razonamiento === 'apagado' ? { reasoning: { enabled: false } } : o.razonamiento ? { reasoning: { max_tokens: o.razonamiento.maxTokens } } : {}),
             usage: { include: true },
             messages: [{ role: 'system', content: [{ type: 'text', text: sistema, cache_control: { type: 'ephemeral' } }] }, ...mensajes],
           }),
