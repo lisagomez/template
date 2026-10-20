@@ -1,0 +1,15 @@
+{
+ "_comentario": "Config del CLI y del lienzo para el laboratorio Golfo Norte (datos ficticios). Rutas relativas a este archivo; ~ es el home. El almacén de versiones y alertas vive fuera del repo.",
+ "metricflow": {
+  "proyecto": "./golfo_norte",
+  "perfiles": "./golfo_norte",
+  "entorno": { "GN_DATOS": "../../../.datos/estudio-dashboards/golfo_norte/data/raw", "GN_DUCKDB": "~/.cache/estudio-dashboards-semantica/golfo_norte/golfo_norte.duckdb", "GN_DBT_TARGET": "lectura" }
+ },
+ "tableros": { "growth": "./tableros/growth.json", "ejecutivo": "./tableros/ejecutivo.json", "vacio": "./tableros/vacio.json" },
+ "perfil": "./perfil.json",
+ "mapa": { "dimensionMapa": "tienda__tienda_nombre", "capasMapa": { "reorden": "combinaciones_bajo_reorden" } },
+ "almacen": "~/.estudio-dashboards/golfo-norte",
+ "corte": "2026-09",
+ "contexto": "Distribuidora Golfo Norte, empresa ficticia",
+ "modelo": "anthropic/claude-haiku-5.5-20261007"
+}

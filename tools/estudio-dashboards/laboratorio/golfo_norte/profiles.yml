@@ -1,10 +1,19 @@
-# Perfil del laboratorio: DuckDB local (opción C de la propuesta). Frente al zip cambia solo la ruta del archivo,
-# que llega por entorno para que la base viva fuera de git (la pone laboratorio/corre.mjs en ~/.cache).
+# Perfil del laboratorio: DuckDB local (opción C de la propuesta). Frente al zip cambian la ruta del archivo, que llega
+# por entorno para que la base viva fuera de git (la pone laboratorio/corre.mjs en ~/.cache), y un segundo target:
+#   dev      lectura-escritura, para `dbt build` (un solo escritor);
+#   lectura  solo lectura, para los que CONSULTAN (MetricFlow del Estudio, CLI, lienzo, pruebas): DuckDB admite varios
+#            lectores a la vez y un solo escritor, así que nadie que consulta bloquea a otro (GN_DBT_TARGET=lectura).
 # Para producción se cambia solo este archivo (BigQuery, Snowflake, Databricks o Postgres); los modelos no cambian.
 golfo_norte:
-  target: dev
+  target: "{{ env_var('GN_DBT_TARGET', 'dev') }}"
   outputs:
     dev:
       type: duckdb
       path: "{{ env_var('GN_DUCKDB') }}"
       threads: 4
+    lectura:
+      type: duckdb
+      path: "{{ env_var('GN_DUCKDB') }}"
+      threads: 4
+      config_options:
+        access_mode: READ_ONLY

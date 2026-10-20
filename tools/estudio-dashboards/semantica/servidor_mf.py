@@ -128,6 +128,11 @@ def _consulta(mf, p):
     ms = (time.perf_counter() - t) * 1000
     tabla = r.result_df
     filas = [[_valor(v) for v in fila] for fila in tabla.rows]
+    if not p.get("orden"):
+        # Sin ORDER BY el motor no garantiza orden: se ordena por las columnas de agrupación para que la misma
+        # consulta dé siempre las mismas filas en el mismo orden (caché, versiones y paridad del CLI).
+        n = len(p.get("agrupar") or [])
+        filas.sort(key=lambda f: [("" if x is None else str(x)) for x in f[:n]])
     sql = mf.explain(req).sql_statement.sql if p.get("explicar", True) else None
     return {
         "columnas": list(tabla.column_names),

@@ -67,7 +67,7 @@ function compara(c, mf, directo) {
 }
 
 async function cifras(env) {
-  const puerto = puertoMetricFlow({ proyecto: PROYECTO, perfiles: PROYECTO, entorno: env })
+  const puerto = puertoMetricFlow({ proyecto: PROYECTO, perfiles: PROYECTO, entorno: { ...env, GN_DBT_TARGET: 'lectura' } })
   try {
     console.log(`▸ MetricFlow caliente en ${await puerto.listo} ms`)
     const q = {}

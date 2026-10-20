@@ -11,5 +11,5 @@ export const DATOS_GN = process.env.ESTUDIO_GN_DATOS ?? join(import.meta.dirname
 export const DUCKDB_GN = join(homedir(), '.cache', 'estudio-dashboards-semantica', 'golfo_norte', 'golfo_norte.duckdb')
 
 export function puertoGolfoNorte(opciones = {}) {
-  return puertoMetricFlow({ proyecto: PROYECTO_GN, perfiles: PROYECTO_GN, entorno: { GN_DATOS: DATOS_GN, GN_DUCKDB: DUCKDB_GN }, ...opciones })
+  return puertoMetricFlow({ proyecto: PROYECTO_GN, perfiles: PROYECTO_GN, entorno: { GN_DATOS: DATOS_GN, GN_DUCKDB: DUCKDB_GN, GN_DBT_TARGET: 'lectura' }, ...opciones })
 }

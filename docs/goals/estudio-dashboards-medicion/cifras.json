@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-20T13:53:34.234Z",
+ "generado": "2026-10-20T15:10:18.097Z",
  "versiones": {
   "dbt-core": "1.12.5",
   "dbt-duckdb": "1.11.0",
@@ -53,7 +53,7 @@
   }
  ],
  "dbt": [
-  "Finished running 12 table models, 45 data tests, 10 view models in 0 hours 0 minutes and 2.90 seconds (2.90s).",
+  "Finished running 12 table models, 45 data tests, 10 view models in 0 hours 0 minutes and 2.18 seconds (2.18s).",
   "Completed successfully",
   "Done. PASS=67 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=67"
  ],
@@ -69,137 +69,137 @@
  "tiempos": [
   {
    "consulta": "foto_2025",
-   "capaMs": 70,
-   "totalMs": 95
+   "capaMs": 62.8,
+   "totalMs": 88
   },
   {
    "consulta": "clientes_2025",
-   "capaMs": 40.5,
-   "totalMs": 59
+   "capaMs": 38.5,
+   "totalMs": 55
   },
   {
    "consulta": "comparables_2025",
-   "capaMs": 22.6,
-   "totalMs": 35
+   "capaMs": 19.8,
+   "totalMs": 32
   },
   {
    "consulta": "tienda_2025",
+   "capaMs": 22.3,
+   "totalMs": 32
+  },
+  {
+   "consulta": "region_2025",
+   "capaMs": 21.1,
+   "totalMs": 31
+  },
+  {
+   "consulta": "canal_2025",
+   "capaMs": 26.8,
+   "totalMs": 36
+  },
+  {
+   "consulta": "foto_2026",
+   "capaMs": 39.4,
+   "totalMs": 63
+  },
+  {
+   "consulta": "clientes_2026",
+   "capaMs": 28,
+   "totalMs": 45
+  },
+  {
+   "consulta": "comparables_2026",
+   "capaMs": 17.7,
+   "totalMs": 29
+  },
+  {
+   "consulta": "tienda_2026",
+   "capaMs": 19.3,
+   "totalMs": 29
+  },
+  {
+   "consulta": "region_2026",
+   "capaMs": 19.6,
+   "totalMs": 29
+  },
+  {
+   "consulta": "canal_2026",
+   "capaMs": 23.1,
+   "totalMs": 32
+  },
+  {
+   "consulta": "yoy_jul26",
+   "capaMs": 29.6,
+   "totalMs": 43
+  },
+  {
+   "consulta": "retencion_2026",
+   "capaMs": 19.2,
+   "totalMs": 30
+  },
+  {
+   "consulta": "yoy_2026",
+   "capaMs": 29.1,
+   "totalMs": 45
+  },
+  {
+   "consulta": "comparables_n",
    "capaMs": 24.5,
    "totalMs": 36
   },
   {
-   "consulta": "region_2025",
-   "capaMs": 25.4,
-   "totalMs": 37
-  },
-  {
-   "consulta": "canal_2025",
-   "capaMs": 28.4,
-   "totalMs": 39
-  },
-  {
-   "consulta": "foto_2026",
-   "capaMs": 47.3,
-   "totalMs": 73
-  },
-  {
-   "consulta": "clientes_2026",
-   "capaMs": 32,
-   "totalMs": 49
-  },
-  {
-   "consulta": "comparables_2026",
-   "capaMs": 19.4,
-   "totalMs": 31
-  },
-  {
-   "consulta": "tienda_2026",
-   "capaMs": 23.9,
-   "totalMs": 35
-  },
-  {
-   "consulta": "region_2026",
-   "capaMs": 24,
-   "totalMs": 35
-  },
-  {
-   "consulta": "canal_2026",
-   "capaMs": 25,
-   "totalMs": 34
-  },
-  {
-   "consulta": "yoy_jul26",
-   "capaMs": 29.7,
-   "totalMs": 44
-  },
-  {
-   "consulta": "retencion_2026",
-   "capaMs": 24.1,
-   "totalMs": 35
-  },
-  {
-   "consulta": "yoy_2026",
-   "capaMs": 39.4,
-   "totalMs": 65
-  },
-  {
-   "consulta": "comparables_n",
-   "capaMs": 33.7,
-   "totalMs": 51
-  },
-  {
    "consulta": "reorden",
-   "capaMs": 19,
-   "totalMs": 24
+   "capaMs": 10.7,
+   "totalMs": 15
   },
   {
    "consulta": "reorden_tienda",
-   "capaMs": 22.9,
-   "totalMs": 31
-  },
-  {
-   "consulta": "roas",
-   "capaMs": 17.8,
-   "totalMs": 24
-  },
-  {
-   "consulta": "base_inicial",
-   "capaMs": 13.4,
-   "totalMs": 19
-  },
-  {
-   "consulta": "retencion",
-   "capaMs": 14.5,
+   "capaMs": 15.5,
    "totalMs": 22
   },
   {
-   "consulta": "retencion_origen",
-   "capaMs": 15.2,
-   "totalMs": 23
+   "consulta": "roas",
+   "capaMs": 14.7,
+   "totalMs": 20
   },
   {
-   "consulta": "nuevos_origen",
+   "consulta": "base_inicial",
    "capaMs": 11.3,
    "totalMs": 16
   },
   {
+   "consulta": "retencion",
+   "capaMs": 12.5,
+   "totalMs": 20
+  },
+  {
+   "consulta": "retencion_origen",
+   "capaMs": 13.4,
+   "totalMs": 20
+  },
+  {
+   "consulta": "nuevos_origen",
+   "capaMs": 9.2,
+   "totalMs": 13
+  },
+  {
    "consulta": "margen_categoria",
-   "capaMs": 20.1,
-   "totalMs": 29
+   "capaMs": 16.6,
+   "totalMs": 26
   },
   {
    "consulta": "margen_jun26",
-   "capaMs": 13.5,
-   "totalMs": 23
+   "capaMs": 12.3,
+   "totalMs": 21
   },
   {
    "consulta": "margen_jul26",
-   "capaMs": 14,
-   "totalMs": 23
+   "capaMs": 13.3,
+   "totalMs": 22
   },
   {
    "consulta": "margen_jul25",
-   "capaMs": 13.2,
+   "capaMs": 13.1,
    "totalMs": 22
   }
  ],
@@ -731,8 +731,8 @@
    "propuesta": 4636,
    "trampa": false,
    "metricflow": null,
-   "directo": 4635.609200976474,
-   "escalado": 4635.609200976474,
+   "directo": 4635.609200976475,
+   "escalado": 4635.609200976475,
    "contraPropuesta": true,
    "mfIgualDirecto": null,
    "explicacion": "Sin métrica: las ventas por cliente no se cortan por meses desde el alta (meses_desde_alta solo vive en el modelo de cohortes, sin ventas). Conteo directo, dos intentos: (1) mes de alta + 5, cohortes con 6 meses observados = 4,635.4; (2) solo altas hasta marzo de 2026 = 4,635.6, que es la ventana con que cuadra. La propuesta no declara la ventana."
@@ -1040,10 +1040,10 @@
   "devolucion_total": 2.4861795003474003,
   "roas_CMP-01": 1.33129428789115,
   "roas_CMP-02": 5.7105320299995235,
-  "roas_CMP-03": 5.11002363765306,
+  "roas_CMP-03": 5.1100236376530574,
   "roas_CMP-04": -0.17413221670517157,
   "roas_CMP-05": 15.588722260718047,
-  "roas_CMP-06": 0.8308670894195588,
+  "roas_CMP-06": 0.8308670894195617,
   "base_inicial": 3395,
   "nuevos_2026": 7418,
   "recurrentes_2026": 6816,
@@ -1051,10 +1051,10 @@
   "perdidos_2026": 20134,
   "retencion_m3": 72.50054061846753,
   "retencion_m3_campana": 66.29994209612045,
-  "valor_6m_campana": 4635.3542764645,
-  "valor_6m_campana_v2": 4635.609200976474,
+  "valor_6m_campana": 4635.354276464496,
+  "valor_6m_campana_v2": 4635.609200976475,
   "retencion_m3_organico": 82.72241313478428,
-  "valor_6m_organico": 6718.280108061127,
+  "valor_6m_organico": 6718.280108061125,
   "valor_6m_organico_v2": 6730.2416950555,
   "retencion_m3_cohortes_2026": 69.9682763482552,
   "nuevos_campana_pct_2026": 83.85009436505797,
