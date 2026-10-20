@@ -16,7 +16,8 @@ export WRANGLER_SEND_METRICS=false
 CONFIG_LOCAL="$HOME/.soporte-sap-mesa.env"
 [ -f "$CONFIG_LOCAL" ] || { echo "✗ falta $CONFIG_LOCAL (ver docs/MESA-DEL-EXPERTO.md, «Una vez»)" >&2; exit 1; }
 ACCESS_EQUIPO="$(grep -E '^ACCESS_EQUIPO=' "$CONFIG_LOCAL" | head -1 | cut -d= -f2- || true)"
-RAIZ="$(git rev-parse --show-toplevel)"
+# La raíz sale de dónde está este guion, no de dónde se corre: un `!` puede correr en otra copia del repo.
+RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$RAIZ"
 AQUI=scripts/laboratorio-alojado
 git diff --quiet HEAD -- || { echo "✗ hay cambios sin commit: lo que sube tiene que ser un commit" >&2; exit 1; }
