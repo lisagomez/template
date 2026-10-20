@@ -40,32 +40,38 @@
     {
       "id": "esquema-spec",
       "label": "Esquema versionado de la especificación del dashboard y de sus parches",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "src/esquema.ts: estudio.dashboard/1 y estudio.parche/1, 15 tipos de componente (los 14 del prototipo + hallazgo); los 3 tableros base validan"
     },
     {
       "id": "set-referencia",
       "label": "Set de 100 preguntas con respuesta esperada, congelado por hash ANTES del prompt del agente",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "evaluacion/set-referencia.json sha256 647b0b27ce23a447…, escrito por un revisor dedicado y congelado en f6e42aa, antes del primer prompt (ed2ec09)"
     },
     {
       "id": "nucleo",
       "label": "Núcleo tools/estudio-dashboards (nombre sugerido): puerto semántico, parches validados, versiones, intérprete determinista; sin React, Next ni Supabase",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "tools/estudio-dashboards/src, sin React/Next/Supabase/Node (prueba de grafo de imports); 41 pruebas verdes con casos malos; empaqueta verde"
     },
     {
       "id": "senales",
       "label": "Motor de señales: detectar y diagnosticar con consultas semánticas, backlog ICE",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "src/senales.ts con umbrales estadísticos declarados; contra la capa real reencuentra las 3 señales sembradas (pruebas/integracion-metricflow.ts)"
     },
     {
       "id": "agente",
       "label": "Agente LLM: herramientas tipadas del núcleo, prompts versionados, modelo pineado",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "src/agente/*: plan validado, prompt estudio-agente/3 (CDC), reparación una vez, contabilidad por llamada; 41 pruebas con modelo doble"
     },
     {
       "id": "medicion-agente",
       "label": "Medición del agente contra el set: precisión por nivel y por tipo, gasto y latencia",
-      "estado": "gris"
+      "estado": "ambar",
+      "evidencia": "Haiku 5.5: 95/94/95 de 100 (media 94.7 %); por tipo crear 89.6 % y analizar 87.5 % (bajo 90); Haiku 4.5 79 %; Sonnet 5 93/100; gasto US$1.108 de 2; ver medicion-*.json"
     },
     {
       "id": "lienzo",
@@ -80,7 +86,8 @@
     {
       "id": "segundo-catalogo",
       "label": "El Estudio sobre un segundo catálogo semántico del repo, sin tocar el núcleo",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "laboratorio/segundo-catalogo.mjs sobre tools/soporte-sap/semantica tal cual: 38 métricas, tablero armado del catálogo válido y resuelto; git diff del núcleo vacío (segundo-catalogo.json)"
     },
     {
       "id": "evidencias",
@@ -332,15 +339,17 @@
       "id": "l-set-congelado",
       "label": "el set queda en un commit anterior a cualquier prompt del agente, con su hash",
       "sobre": "nodo:set-referencia",
-      "estado": "gris",
-      "referencia": "orden de commits en la rama"
+      "estado": "morado",
+      "referencia": "orden de commits en la rama",
+      "evidencia": "f6e42aa (set) → ed2ec09 (primer prompt): el set es anterior; prueba canario sin coincidencias en el texto redactado"
     },
     {
       "id": "l-esquema",
       "label": "todo parche valida; se rechazan métrica inventada, dimensión inválida, SQL libre y un parche que borra lo que no se pidió",
       "sobre": "arista:a-nucleo-esquema",
-      "estado": "gris",
-      "referencia": "esquema versionado y catálogo semántico"
+      "estado": "morado",
+      "referencia": "esquema versionado y catálogo semántico",
+      "evidencia": "pruebas/validacion-y-parches.ts: métrica inventada, dimensión inválida, SQL libre (campo, texto, filtro), fuera de dominio, parche que borra o cambia de más, todos rechazados"
     },
     {
       "id": "l-empaqueta",
@@ -353,29 +362,33 @@
       "id": "l-senales",
       "label": "reencuentra las 3 señales sembradas sin que se le nombren, y ninguna inventada",
       "sobre": "nodo:senales",
-      "estado": "gris",
-      "referencia": "README del proyecto dbt y scripts/lifecycle.py"
+      "estado": "morado",
+      "referencia": "README del proyecto dbt y scripts/lifecycle.py",
+      "evidencia": "3 de 3 con la capa real; ni src/senales.ts ni laboratorio/perfil.mjs nombran tiendas, regiones ni segmentos sembrados (comprobado por la prueba)"
     },
     {
       "id": "l-no-inventa",
       "label": "toda cifra del texto sale de una consulta; sin métrica, lo dice y ofrece proponerla",
       "sobre": "nodo:agente",
-      "estado": "gris",
-      "referencia": "resultados de consultar_metricas de esa misma vuelta"
+      "estado": "morado",
+      "referencia": "resultados de consultar_metricas de esa misma vuelta",
+      "evidencia": "texto.ts cifrasRespaldadas en análisis, señales y respuestas; sin métrica → lo dice y ofrece proponer (pruebas/agente.ts)"
     },
     {
       "id": "l-precision",
       "label": "precisión de al menos 90 % sobre el set, por nivel y por tipo de instrucción",
       "sobre": "nodo:medicion-agente",
-      "estado": "gris",
-      "referencia": "KPI de la propuesta"
+      "estado": "ambar",
+      "referencia": "KPI de la propuesta",
+      "evidencia": "≥ 90 % en total con Haiku 5.5 (94.7 % media de 3); por tipo no: crear 89.6 % y analizar 87.5 %. Ningún nivel medido pasa los 6 tipos; Opus no cabe en el tope"
     },
     {
       "id": "l-gasto",
       "label": "gasto de OpenRouter medido antes y después, de US$2 o menos, modelo pineado",
       "sobre": "arista:a-mide",
-      "estado": "gris",
-      "referencia": "tope del laboratorio (20/10)"
+      "estado": "morado",
+      "referencia": "tope del laboratorio (20/10)",
+      "evidencia": "US$1.108 por llamada (llamadas.jsonl), saldo de la cuenta 1.963 → 0.860 medido antes y después; modelos pineados del routing"
     },
     {
       "id": "l-latencia",
@@ -402,8 +415,9 @@
       "id": "l-portabilidad",
       "label": "diff vacío en el núcleo al cambiar de catálogo",
       "sobre": "nodo:segundo-catalogo",
-      "estado": "gris",
-      "referencia": "git diff del núcleo"
+      "estado": "morado",
+      "referencia": "git diff del núcleo",
+      "evidencia": "diff vacío en tools/estudio-dashboards/src con soporte-sap como segundo catálogo"
     },
     {
       "id": "l-validate",

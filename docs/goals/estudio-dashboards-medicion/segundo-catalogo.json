@@ -1,0 +1,184 @@
+{
+ "catalogo": "tools/soporte-sap/semantica",
+ "version": "594675a76890f6ac",
+ "metricas": [
+  "backlog [derived, incidencias]",
+  "clientes_dados_de_alta [simple]",
+  "clientes_en_cartera [simple, clientes]",
+  "cobertura_mapeo [ratio, proporcion]",
+  "cumplimiento_sla_resolucion [ratio, proporcion]",
+  "cumplimiento_sla_respuesta [ratio, proporcion]",
+  "filas_en_revision [simple]",
+  "filas_importadas [simple]",
+  "filas_limpias [simple]",
+  "horas_consultor [simple, horas]",
+  "horas_por_ticket [derived, horas]",
+  "incidencias_complejas [simple]",
+  "incidencias_criticas [simple]",
+  "incidencias_recibidas [simple]",
+  "incidencias_resueltas [simple]",
+  "mttr_horas [simple, horas]",
+  "primera_respuesta_horas [simple, horas]",
+  "proporcion_compleja [ratio, proporcion]",
+  "proporcion_critica [ratio, proporcion]",
+  "recibidas_acumuladas [cumulative, incidencias]",
+  "resolucion_primer_contacto [ratio, proporcion]",
+  "respuestas_tardias_p1 [simple, incidencias]",
+  "respuestas_tardias_p2 [simple, incidencias]",
+  "resueltas [simple, incidencias]",
+  "resueltas_acumuladas [cumulative, incidencias]",
+  "resueltas_por_regla [simple]",
+  "resueltas_primer_contacto [simple]",
+  "resueltas_reabiertas [simple]",
+  "reuso_conocimiento [ratio, proporcion]",
+  "riesgo_de_baja [derived, bandera]",
+  "salud_cuenta [derived, proporcion]",
+  "sla_resolucion_cumplidas [simple]",
+  "sla_resolucion_medidas [simple]",
+  "sla_respuesta_cumplidas [simple]",
+  "sla_respuesta_medidas [simple]",
+  "tasa_reapertura [ratio, proporcion]",
+  "tiempo_al_primer_valor_dias [simple, dias]",
+  "volumen [simple, incidencias]"
+ ],
+ "dominios": {
+  "cliente__tamano": 3,
+  "incidencia__complejidad": 3,
+  "incidencia__estado": 5,
+  "incidencia__modulo": 7,
+  "incidencia__prioridad": 4,
+  "incidencia__sistema": 2,
+  "cliente_mes__etapa": 3,
+  "fila__herramienta": 2,
+  "fila__resultado": 3
+ },
+ "tablero": {
+  "esquema": "estudio.dashboard/1",
+  "titulo": "Segundo catálogo (armado desde el catálogo)",
+  "filtros": {
+   "periodo": {
+    "desde": "2026-04",
+    "hasta": "2026-09"
+   },
+   "dimensiones": []
+  },
+  "componentes": [
+   {
+    "id": "kpis",
+    "tipo": "kpis",
+    "metricas": [
+     "clientes_dados_de_alta",
+     "cumplimiento_sla_resolucion"
+    ]
+   },
+   {
+    "id": "tendencia",
+    "tipo": "linea",
+    "metrica": "clientes_dados_de_alta",
+    "grano": "month"
+   },
+   {
+    "id": "desglose",
+    "tipo": "barras",
+    "metrica": "clientes_dados_de_alta",
+    "dimension": "cliente__tamano"
+   }
+  ]
+ },
+ "valido": true,
+ "errores": [],
+ "datos": {
+  "kpis": {
+   "forma": {
+    "tipo": "valores",
+    "valores": [
+     {
+      "metrica": "clientes_dados_de_alta",
+      "valor": 5,
+      "anterior": null,
+      "variacion": null,
+      "tipoVariacion": null,
+      "unidad": ""
+     },
+     {
+      "metrica": "cumplimiento_sla_resolucion",
+      "valor": null,
+      "anterior": null,
+      "variacion": null,
+      "tipoVariacion": null,
+      "unidad": "proporcion"
+     }
+    ]
+   },
+   "error": null,
+   "advertencias": [],
+   "sql": "-- Constrain Output with WHERE\n-- Select: ['__clientes_dados_de_alta']\n-- Aggregate Inputs for Simple Metrics\n-- Compute Metrics via Expressions\n-- Order By [] Limit 5001\n-- Write to DataTable\nSELECT\n  SUM(clientes_dados_de_alta) AS clientes_dados_de_alta\nFROM (\n  -- Read Elements From Semantic Mode"
+  },
+  "tendencia": {
+   "forma": {
+    "tipo": "series",
+    "series": [
+     {
+      "nombre": "clientes_dados_de_alta",
+      "metrica": "clientes_dados_de_alta",
+      "puntos": [
+       {
+        "x": "2026-04",
+        "y": 2
+       },
+       {
+        "x": "2026-05",
+        "y": 1
+       },
+       {
+        "x": "2026-06",
+        "y": 2
+       }
+      ],
+      "anterior": []
+     }
+    ]
+   },
+   "error": null,
+   "advertencias": [],
+   "sql": "-- Constrain Output with WHERE\n-- Select: ['__clientes_dados_de_alta', 'metric_time__month']\n-- Aggregate Inputs for Simple Metrics\n-- Compute Metrics via Expressions\n-- Order By [] Limit 5001\n-- Write to DataTable\nSELECT\n  metric_time__month\n  , SUM(clientes_dados_de_alta) AS clientes_dados_de_alta"
+  },
+  "desglose": {
+   "forma": {
+    "tipo": "filas",
+    "dimension": "cliente__tamano",
+    "metricas": [
+     "clientes_dados_de_alta"
+    ],
+    "filas": [
+     {
+      "clave": "M",
+      "valores": {
+       "clientes_dados_de_alta": 2
+      },
+      "anteriores": {}
+     },
+     {
+      "clave": "S",
+      "valores": {
+       "clientes_dados_de_alta": 2
+      },
+      "anteriores": {}
+     },
+     {
+      "clave": "L",
+      "valores": {
+       "clientes_dados_de_alta": 1
+      },
+      "anteriores": {}
+     }
+    ]
+   },
+   "error": null,
+   "advertencias": [],
+   "sql": "-- Constrain Output with WHERE\n-- Select: ['__clientes_dados_de_alta', 'cliente__tamano']\n-- Aggregate Inputs for Simple Metrics\n-- Compute Metrics via Expressions\n-- Order By [] Limit 5001\n-- Write to DataTable\nSELECT\n  cliente__tamano\n  , SUM(clientes_dados_de_alta) AS clientes_dados_de_alta\nFROM "
+  }
+ },
+ "diffNucleo": "(vacío)",
+ "commitNucleo": "b4787c6"
+}
