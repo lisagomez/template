@@ -31,11 +31,13 @@
      **Lo que el agente NO decide** (y por eso cabe en un nivel barato): no escribe cifras ni SQL; el núcleo valida
      el plan contra el esquema y el catálogo, rechaza el parche que toca de más, redacta con resultados de la capa y
      no registra nada sin una persona (aplicar, alertas).
-  2. **Configuración del modelo**: temperatura 0, respuesta hasta 1,200 tokens y **razonamiento con espacio propio
-     de 512 tokens** (`razonamiento: { maxTokens: 512 }` en `tools/estudio-dashboards/src/openrouter.ts`). Sin él,
-     Haiku 5.5 razona dentro del tope y trunca el plan en las instrucciones largas: medido el 2026-10-20, 1,182 de
-     1,200 tokens razonando y el JSON cortado. Con el razonamiento apagado da 86/100 (regeneración p95 2.8 s). Es
-     una decisión del laboratorio entre precisión y latencia.
+  2. **Configuración del modelo** (la medida): temperatura 0, respuesta hasta 1,200 tokens con el razonamiento del
+     proveedor y una **reserva**: solo si la respuesta sale truncada, una segunda llamada con 512 tokens de
+     razonamiento propio (`conReserva` en `tools/estudio-dashboards/src/agente/tipos.ts`). Más **preferencia de
+     proveedor por latencia** en OpenRouter (`provider.sort`). Hace falta la reserva porque Haiku 5.5 razona dentro
+     del tope y trunca el plan en las instrucciones largas: medido el 2026-10-20, 1,182 de 1,200 tokens razonando.
+     Las alternativas medidas: razonamiento propio sin reserva (95/100, regeneración p95 8.0 s) y apagado (86/100,
+     2.8 s).
   3. **Prompt del agente** `tools/estudio-dashboards/src/agente/prompt.ts`, versión **`estudio-agente/4`**
      (sha256 del archivo `5ba2c0180b0880f4`, primeros 16 hex). Historia:
      - `/1` (commit `bc9b066`) se escribió **después** de congelar el set (`734f32f`) y sin leerlo.
@@ -57,10 +59,13 @@
   tope de US$2 y el nivel más barato primero; «luego lo pasas a CLI»).
 - **Gate aplicado**: diff revisado ☐ · regresión verde ☑ (capa A 166/166 el 2026-10-20; la capa B no la corre el
   agente: decide el laboratorio) · aprobación humana ☐ · pineo ☑ (modelo pineado, lock de Python con hashes, npm exacto).
-- **Regresión**: además de la capa A, la medición del agente contra el set congelado
-  (`docs/goals/estudio-dashboards-medicion/medicion-*.json`). En la configuración propuesta: 95/100, con crear,
-  filtrar, explicar y alertar al 100 %, modificar al 85 % y analizar al 87.5 %. **No llega al 90 % en esos dos
-  tipos**. El set no se relajó; las fallas están explicadas en el reporte §Medición.
+- **Regresión**: además de la capa A, la medición del agente con la configuración propuesta
+  (`medicion-voz-reserva-latencia*.json`):
+  - **set v1 congelado: 95/100**, con analizar en 87.5 % (bajo el 90);
+  - **set v2 adjudicado** por un revisor independiente y ciego, congelado antes de medir: **98/100, con los seis
+    tipos ≥ 90 %**;
+  - regeneración p95 4.93–5.02 s (en el umbral de 5 s), consulta p95 33 ms;
+  - gasto total del goal, por la diferencia de saldo de la cuenta: US$1.3943.
 - **Salida del perímetro (C4)**: el prompt (catálogo de Golfo Norte, datos ficticios), la especificación y la
   instrucción van a OpenRouter. Datos ficticios: no hay decisión C4 de por medio (spec). Con datos reales, C4 antes.
 - **Aprobado por**: ☐ (lo escribe el laboratorio)
@@ -88,9 +93,11 @@ cuenta, y antes de exponerla hace falta sesión y C3.
 ## 5. Lo que queda para otra firma (no se hizo)
 
 - **Adoptar el CLI en el arnés** (skill, `settings.json` o manifiesto de la imprenta): CDC aparte.
-- **Set de referencia v2**: cuatro respuestas esperadas chocan con el contrato o con la capa (q021 y q027 cuentan
-  como dimensión el eje de tiempo de una línea que la instrucción no pide; q059 espera analizar una métrica con
-  desfase, que la capa no puede totalizar; q058 es ambigua entre eje y filtro). Adjudicarlas es del laboratorio y
-  de un revisor; esta rama no tocó el set.
+- **Adoptar el set v2** (`evaluacion/set-referencia-v2.json`, `ADJUDICACION.md`) como set de regresión del CDC: lo
+  produjo un adjudicador independiente y ciego, y está congelado en `cdf43d6`. El v1 sigue siendo el oficial hasta
+  que el laboratorio firme. El adjudicador dejó además tres tensiones del contrato para resolver en el contrato:
+  - la tabla por tipo contra la regla general de la Puntuación;
+  - `comparar` en analizar;
+  - la unidad de un umbral de nivel sobre una métrica en %.
 - **Reglas de auto-blindaje** del post-mortem (reporte §Post-mortem) en `.claude/rules/aprendizajes-stack.md`:
   propuestas, sin aplicar.

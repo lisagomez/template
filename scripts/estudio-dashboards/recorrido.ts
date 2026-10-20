@@ -90,6 +90,10 @@ async function flujos(b: Browser, vista: Vista) {
     return e;
   });
   await paso(vista, '3 · mapa: arrastrar, acercar, lazo y «¿por qué estas bajaron?»', async () => {
+    // El flujo 3 es independiente: parte del tablero growth (si el flujo 1 se leyó como CREAR, el tablero nuevo no
+    // trae mapa; las dos lecturas son válidas y el agente las alterna entre corridas).
+    await p.getByRole('button', { name: 'Reiniciar laboratorio' }).click();
+    await p.getByText(/versión 0\b/).first().waitFor({ timeout: 60_000 });
     const mapa = p.getByRole('group', { name: /Mapa de tiendas/ });
     await mapa.scrollIntoViewIfNeeded();
     await mapa.getByRole('button', { name: 'Acercar' }).click();
@@ -111,7 +115,7 @@ async function flujos(b: Browser, vista: Vista) {
     await captura(p, vista, '3b-seleccion-por-lazo-filtra', { completa: vista === 'escritorio' });
     const e = await instruye(p, '¿por qué estas bajaron?');
     await captura(p, vista, '3c-por-que-estas-bajaron');
-    await aplica(p, 5);
+    await aplica(p, 3);
     await captura(p, vista, '3d-hallazgo', { selector: '[data-componente^="hallazgo"]' });
     return e;
   });
@@ -124,9 +128,9 @@ async function flujos(b: Browser, vista: Vista) {
   await paso(vista, '5 · volver a una versión y comparar dos', async () => {
     await p.getByRole('tab', { name: 'Versiones' }).click();
     await p.locator('aside li', { hasText: 'v1 ·' }).getByRole('button', { name: 'Volver a esta' }).click();
-    await p.getByText(/versión 6\b/).first().waitFor({ timeout: 60_000 });
+    await p.getByText(/versión 4\b/).first().waitFor({ timeout: 60_000 });
     await p.locator('aside li', { hasText: 'v1 ·' }).getByRole('checkbox').check();
-    await p.locator('aside li', { hasText: 'v5 ·' }).getByRole('checkbox').check();
+    await p.locator('aside li', { hasText: 'v3 ·' }).getByRole('checkbox').check();
     await p.getByRole('button', { name: 'Comparar las dos elegidas' }).click();
     const comparacion = p.getByRole('region', { name: 'Comparación de versiones' });
     await comparacion.waitFor({ timeout: 60_000 });

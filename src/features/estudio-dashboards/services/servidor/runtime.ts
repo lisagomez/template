@@ -16,7 +16,7 @@ import {
 import { archivoAlertas, archivoVersiones } from '../../../../../tools/estudio-dashboards/dist/almacenes/archivo.js';
 import { dirEntorno, puertoMetricFlow } from '../../../../../tools/estudio-dashboards/dist/metricflow/index.js';
 import { modeloOpenRouter } from '../../../../../tools/estudio-dashboards/dist/openrouter.js';
-import type { ModeloEstudio } from '../../../../../tools/estudio-dashboards/dist/agente/tipos.js';
+import { conReserva, type ModeloEstudio } from '../../../../../tools/estudio-dashboards/dist/agente/tipos.js';
 import { modeloPara } from '../../../../lib/ai/routing';
 
 const RAIZ = resolve(/*turbopackIgnore: true*/ process.cwd());
@@ -51,9 +51,11 @@ const json = <T,>(r: string): T => JSON.parse(readFileSync(/*turbopackIgnore: tr
 function modelo(): ModeloEstudio | null {
   const llave = process.env['OPENROUTER_API_KEY'] ?? '';
   if (!llave) return null;
-  // Razonamiento con espacio propio: sin él, Haiku 5.5 razona dentro del tope y trunca el plan en instrucciones largas
-  // (medido el 2026-10-20). Es la configuración medida que se propone en el CDC (95/100, medicion-voz-razonamiento-512).
-  return modeloOpenRouter({ llave, modelo: modeloPara('agente-estudio-dashboards').modelo, fetch, razonamiento: { maxTokens: 512 }, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } });
+  // La configuración MEDIDA que se propone en el CDC: el razonamiento del proveedor, con una reserva de 512 tokens de
+  // razonamiento propio solo si la respuesta sale truncada, y preferencia de proveedor por latencia (95/100 en el set
+  // v1 y 98/100 en el v2 adjudicado; regeneración p95 ≈ 5.0 s: medicion-voz-reserva-latencia*.json, 2026-10-20).
+  const base = { llave, modelo: modeloPara('agente-estudio-dashboards').modelo, fetch, proveedor: 'latencia' as const, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } };
+  return conReserva(modeloOpenRouter(base), modeloOpenRouter({ ...base, razonamiento: { maxTokens: 512 } }));
 }
 
 async function arma(): Promise<Runtime> {

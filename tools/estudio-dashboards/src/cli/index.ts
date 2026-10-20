@@ -12,7 +12,7 @@
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
-import { cargaCatalogo, ConsultaInvalida, consultor, construyeCatalogo, ejecutaHerramienta, FallaDeCapa, HERRAMIENTAS, interpreta, RechazoEsquema, versionActual, nuevoHistorial, registra, type CatalogoCrudo, type ContextoEstudio, type LlamadaModelo, type PuertoSemantico } from '../index.js'
+import { cargaCatalogo, ConsultaInvalida, consultor, construyeCatalogo, ejecutaHerramienta, FallaDeCapa, HERRAMIENTAS, interpreta, RechazoEsquema, versionActual, nuevoHistorial, registra, conReserva, type CatalogoCrudo, type ContextoEstudio, type LlamadaModelo, type PuertoSemantico } from '../index.js'
 import { archivoAlertas, archivoVersiones } from '../almacenes/archivo.js'
 import { puertoMetricFlow } from '../metricflow/index.js'
 import { modeloOpenRouter } from '../openrouter.js'
@@ -30,8 +30,10 @@ interface Config {
   readonly corte: string
   readonly contexto?: string
   readonly modelo?: string
-  /** Tokens de razonamiento aparte de la respuesta, o "apagado". Sin él decide el proveedor. */
-  readonly razonamiento?: number | 'apagado'
+  /** Tokens de razonamiento aparte de la respuesta, "apagado", o "reserva" (el del proveedor y, si trunca, 512 propios). */
+  readonly razonamiento?: number | 'apagado' | 'reserva'
+  /** Preferencia de proveedor de OpenRouter para el mismo modelo pineado. */
+  readonly proveedor?: 'latencia' | 'throughput'
 }
 
 const AYUDA = `estudio-dashboards <subcomando> --config <archivo.json> [--entrada '<json>' | --entrada-archivo <ruta>] [--aplicar] [--confirmada-por <nombre>]
@@ -102,13 +104,20 @@ async function agente(ctx: ContextoEstudio & { almacen: string }, c: Config, pos
   const modelo = typeof op['modelo'] === 'string' ? op['modelo'] : c.modelo
   if (!llave || !modelo) return Promise.reject(Object.assign(new Error(`modelo no disponible: ${llave ? '' : 'falta OPENROUTER_API_KEY en el entorno; '}${modelo ? '' : 'falta "modelo" (pineado) en la config'}`), { modeloNoDisponible: true }))
   const h = (await ctx.versiones.lee(tablero)) ?? nuevoHistorial(tablero, ctx.tablerosBase?.[tablero] ?? (() => { throw new ErrorDeUso(`no existe el tablero «${tablero}»`) })())
-  const v = await interpreta({ consultor: ctx.consultor, modelo: modeloOpenRouter({ llave, modelo, fetch, ...(c.razonamiento === undefined ? {} : { razonamiento: c.razonamiento === 'apagado' ? 'apagado' : { maxTokens: c.razonamiento } }) }), corte: c.corte, contexto: c.contexto, registrador: anotaGasto(ctx.almacen) }, versionActual(h).dashboard, h.actual, instruccion)
+  const v = await interpreta({ consultor: ctx.consultor, modelo: modeloDe(llave, modelo, c), corte: c.corte, contexto: c.contexto, registrador: anotaGasto(ctx.almacen) }, versionActual(h).dashboard, h.actual, instruccion)
   const aplicado = v.resultado?.aplicado
   if (op['aplicar'] === true && aplicado && !v.error) {
     const previo = await ctx.versiones.lee(tablero)
     await ctx.versiones.guarda(registra(h, { dashboard: aplicado.dashboard, autor: 'agente', instruccion, parche: v.resultado!.parche, resumen: v.texto.slice(0, 300), cuando: new Date().toISOString() }), previo ? previo.actual : null)
   }
   return { aplicado: op['aplicar'] === true && !!aplicado && !v.error, entendi: v.entendi, texto: v.texto, plan: v.plan, tocados: aplicado?.tocados ?? [], error: v.error, modelo: v.modelo, versionPrompt: v.versionPrompt, costoUsd: v.costoUsd, intentos: v.intentos }
+}
+
+/** El modelo pineado con la configuración de razonamiento y proveedor de la config (la medida, en el laboratorio). */
+function modeloDe(llave: string, modelo: string, c: Config) {
+  const base = { llave, modelo, fetch, ...(c.proveedor ? { proveedor: c.proveedor } : {}) }
+  if (c.razonamiento === 'reserva') return conReserva(modeloOpenRouter(base), modeloOpenRouter({ ...base, razonamiento: { maxTokens: 512 } }))
+  return modeloOpenRouter({ ...base, ...(c.razonamiento === undefined ? {} : { razonamiento: c.razonamiento === 'apagado' ? 'apagado' : { maxTokens: c.razonamiento } }) })
 }
 
 /** Contabilidad del CLI: cada llamada al modelo, una línea en `<almacén>/gasto.jsonl`; sin uso, costo `null`. */

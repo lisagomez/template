@@ -71,13 +71,13 @@
       "id": "medicion-agente",
       "label": "Medición del agente contra el set: precisión por nivel y por tipo, gasto y latencia",
       "estado": "ambar",
-      "evidencia": "2026-10-20: Haiku 5.5 (nivel voz) 95/100 con razonamiento de 512 (95, 94, 95 con el del proveedor; 86 apagado); Haiku 4.5 79; Sonnet 5 93. Por tipo, en la propuesta: crear/filtrar/explicar/alertar 100 %, modificar 85 %, analizar 87.5 %: el gate por tipo NO se cumple. US$1.2087 en 984 llamadas; saldo 1.9635 → 0.7534. Ver estudio-dashboards-reporte.md §Medición"
+      "evidencia": "Configuración propuesta (Haiku 5.5, reserva si trunca, proveedor por latencia): set v1 congelado 95/100 con analizar 87.5 %; set v2 (adjudicado a ciegas, congelado en cdf43d6 antes de medir) 98/100 con los seis tipos ≥ 90 %. Gasto total US$1.3943 por saldo de la cuenta. Falta la firma del laboratorio sobre el v2"
     },
     {
       "id": "lienzo",
       "label": "Lienzo de laboratorio: instrucciones, rejilla, mapa de matriz de puntos con lazo, panel de contexto, señales",
       "estado": "morado",
-      "evidencia": "src/features/estudio-dashboards + /laboratorio-estudio-dashboards; recorrido 14/14 (7 flujos × escritorio y celular), 0 peticiones externas, 0 errores de consola, axe 0 serias (docs/goals/estudio-dashboards-capturas/recorrido.json)"
+      "evidencia": "recorrido 14/14 con la configuración final (7 flujos × escritorio y celular), 0 externas, 0 errores, axe 0 serias"
     },
     {
       "id": "cli",
@@ -385,7 +385,7 @@
       "sobre": "nodo:medicion-agente",
       "estado": "ambar",
       "referencia": "KPI de la propuesta",
-      "evidencia": "≥ 90 % en total con Haiku 5.5 (94.7 % media de 3); por tipo no: crear 89.6 % y analizar 87.5 %. Ningún nivel medido pasa los 6 tipos; Opus no cabe en el tope"
+      "evidencia": "≥ 90 % por tipo en el set v2 adjudicado (98/100; analizar 93.8, modificar 95); en el v1 congelado, analizar 87.5 %. El v2 espera la firma"
     },
     {
       "id": "l-gasto",
@@ -393,7 +393,7 @@
       "sobre": "arista:a-mide",
       "estado": "morado",
       "referencia": "tope del laboratorio (20/10)",
-      "evidencia": "US$1.108 por llamada (llamadas.jsonl), saldo de la cuenta 1.963 → 0.860 medido antes y después; modelos pineados del routing"
+      "evidencia": "US$1.3943 por la diferencia de saldo de la cuenta (1.9635 → 0.5692); medición US$1.3225 en 1,297 llamadas, ninguna sin costo; lienzo US$0.0698; modelo pineado"
     },
     {
       "id": "l-latencia",
@@ -401,7 +401,7 @@
       "sobre": "nodo:lienzo",
       "estado": "ambar",
       "referencia": "objetivos de servicio de la propuesta",
-      "evidencia": "consulta en frío p95 31–81 ms (< 3 s: cumple); regeneración p95 8.0 s con la configuración propuesta (95 %), 4.7–5.6 s con el razonamiento del proveedor, 2.8 s apagado (86 %): el objetivo de 5 s no se cumple con la configuración precisa"
+      "evidencia": "consulta p95 33 ms (cumple); regeneración p95 4.93 s (v2) y 5.02 s (v1), 5.02 s juntas: en el umbral de 5 s"
     },
     {
       "id": "l-a11y",

@@ -84,7 +84,7 @@ $ estudio-dashboards ver_senales
 ```
 $ estudio-dashboards crear_alerta --entrada '{"regla":{"metrica":"ventas_netas","filtros":[{"dimension":"tienda__tienda_nombre","operador":"en","valores":["Mérida"]}],"condicion":"cae_mas_de","valor":5,"unidad":"%","ventana":"semanal"}}'
 # código de salida: 0
-{"alerta":{"metrica":"ventas_netas","filtros":[{"dimension":"tienda__tienda_nombre","operador":"en","valores":["Mérida"]}],"condicion":"cae_mas_de","valor":5,"unidad":"%","ventana":"semanal","id":"alerta_ventas_netas_semanal_2ssn3d","estado":"propuesta","creada":"2026-10-20T16:03:22.857Z","confirmadaPor":null,"canal":"ninguno"},"evaluacion":{"ventana":"semanal","actual":128921.1846,"anterior":90386.1832,"cambio":42.6337301075459,"dispararia":false,"periodos":["2026-09-14","2026-09-21"]}}
+{"alerta":{"metrica":"ventas_netas","filtros":[{"dimension":"tienda__tienda_nombre","operador":"en","valores":["Mérida"]}],"condicion":"cae_mas_de","valor":5,"unidad":"%","ventana":"semanal","id":"alerta_ventas_netas_semanal_2ssn3d","estado":"propuesta","creada":"2026-10-20T16:40:56.946Z","confirmadaPor":null,"canal":"ninguno"},"evaluacion":{"ventana":"semanal","actual":128921.1846,"anterior":90386.1832,"cambio":42.6337301075459,"dispararia":false,"periodos":["2026-09-14","2026-09-21"]}}
 ```
 
 ## crear_alerta --aplicar SIN quien confirme → rechazo (3)

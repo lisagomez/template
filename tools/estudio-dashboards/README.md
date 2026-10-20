@@ -49,7 +49,7 @@ const ctx = { consultor: consultor(puerto, await cargaCatalogo(puerto)), version
 await ejecutaHerramienta(ctx, 'consultar_metricas', { metricas: ['ventas_netas'], agrupar: ['tienda__region'], periodo: { desde: '2026-01', hasta: '2026-09' } })
 ```
 
-Subpaths: `.` (núcleo: esquema, validación, parches, versiones, consultor, resolver, análisis, señales, alertas, propuestas, herramientas, agente), `./metricflow` (adaptador de proceso), `./openrouter` (modelo pineado, razonamiento explícito), `./almacenes/archivo`.
+Subpaths: `.` (núcleo: esquema, validación, parches, versiones, consultor, resolver, análisis, señales, alertas, propuestas, herramientas, agente), `./metricflow` (adaptador de proceso), `./openrouter` (modelo pineado, razonamiento y proveedor explícitos; `conReserva` repite con razonamiento propio si la respuesta trunca), `./almacenes/archivo`.
 
 ### CLI
 
@@ -63,11 +63,11 @@ Subpaths: `.` (núcleo: esquema, validación, parches, versiones, consultor, res
 - `catalogo.mjs`: la foto del catálogo que usan las pruebas y el set de referencia.
 - `segundo-catalogo.mjs`: el Estudio sobre la capa de soporte-sap, sin tocar el núcleo.
 
-`evaluacion/` tiene el contrato del set de referencia, el set congelado (100 preguntas, sha256 en `set-referencia.sha256`), su validador y `mide.mjs` (medición con el LLM real, con tope de gasto).
+`evaluacion/` tiene el contrato del set de referencia, el set congelado (100 preguntas, huella en `set-referencia.sha256`), el set v2 adjudicado por un revisor independiente y ciego (`set-referencia-v2.json`, `ADJUDICACION.md`), su validador y `mide.mjs` (medición con el LLM real, con tope de gasto).
 
 ## Pruebas
 
-`npm --prefix tools/estudio-dashboards run prueba`: 46 pruebas (2026-10-20). Cubren los casos malos (métrica inventada, dimensión inválida, SQL libre, filtro fuera de dominio, parche que toca de más), versiones, consultor, resolver, narración con cifras respaldadas, alertas, propuestas, agente con modelo doble (incluido el canario de contaminación del set), CLI (paridad y códigos) y, si están el entorno y los datos, la capa real (tablero, las 3 señales sembradas y el análisis de julio).
+`npm --prefix tools/estudio-dashboards run prueba`: 47 pruebas (2026-10-20). Cubren los casos malos (métrica inventada, dimensión inválida, SQL libre, filtro fuera de dominio, parche que toca de más), versiones, consultor, resolver, narración con cifras respaldadas, alertas, propuestas, agente con modelo doble (incluido el canario de contaminación del set), CLI (paridad y códigos) y, si están el entorno y los datos, la capa real (tablero, las 3 señales sembradas y el análisis de julio).
 
 ## Mediciones
 

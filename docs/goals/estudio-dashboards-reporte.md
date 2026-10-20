@@ -51,7 +51,7 @@ Nada se ajustó. Las divergencias:
 | Días entre compras en Mérida | 23 → 42 | 23.77 → 42.51 (directo) | La propuesta trunca; redondeado serían 24 y 43. Sin métrica en el catálogo |
 | Valor en 6 meses, campaña y orgánico | 4,636 y 6,730 | 4,635.6 y 6,730.2 (directo, segundo intento) | Ventana no declarada: el primer intento (cohortes observadas 6 meses) dio 4,635.4 y 6,718.3; el segundo (altas hasta marzo de 2026) cuadra. Sin métrica |
 
-**Suites del núcleo.** `npm --prefix tools/estudio-dashboards run prueba`: 46 pruebas, 46 en verde. Incluyen los casos malos que pide el HECHO:
+**Suites del núcleo.** `npm --prefix tools/estudio-dashboards run prueba`: 47 pruebas, 47 en verde. Incluyen los casos malos que pide el HECHO:
 - métrica inventada, dimensión inválida, SQL libre (campo, texto y filtro), fuera de dominio;
 - parche que borra o cambia de más;
 - deshacer y comparar;
@@ -66,37 +66,39 @@ Nada se ajustó. Las divergencias:
 La prueba comprueba que ni `src/senales.ts` ni `laboratorio/perfil.json` nombran tiendas, regiones ni segmentos sembrados. Ninguna tarjeta sin evidencia; la cuarta es el aprendizaje del ROAS, real y con la advertencia del baseline.
 
 **Medición con el LLM real.**
-- Set `evaluacion/set-referencia.json`, huella `sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676`. Lo congela el commit `734f32f`, anterior al primer prompt (`bc9b066`).
-- Gasto medido por llamada: **US$1.2087 en 984 llamadas, ninguna sin costo** (`llamadas.jsonl`).
-- Saldo de la cuenta: **1.9635 antes de la primera llamada → 0.7534 después de la última medición**.
-- Aparte, el lienzo gastó US$0.0409 en 55 llamadas (`~/.estudio-dashboards/golfo-norte/gasto.jsonl`).
 
-| corrida | modelo | razonamiento | total | crear | modificar | filtrar | analizar | explicar | alertar | US$ | modelo p50 ms | regeneración p50 / p95 ms | consulta p95 ms |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| voz-corrida1 (`4025151`) | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 14/16 | 19/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0370 | 2549 | 2624 / 4959 | 35 |
-| voz (tras el arreglo de q059) | claude-haiku-5.5-20261007 | del proveedor | 94/100 | 14/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0362 | 2446 | 2663 / 4685 | 33 |
-| voz-corrida3 | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 15/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0384 | 2683 | 3011 / 5637 | 81 |
-| ligero | claude-haiku-4.5 | del proveedor | 79/100 | 12/16 | 11/20 | 14/16 | 12/16 | 15/16 | 15/16 | 0.3026 | 2900 | 3077 / 7610 | 43 |
-| capaz | claude-sonnet-5 | del proveedor | 89/100 (+4/4 reintento por 429 = 93) | 16/16 | 17/20 | 12/16 (+4) | 14/16 | 16/16 | 14/16 | 0.6138 | 4130 | 4408 / 9157 | 32 |
-| voz-sin-razonamiento | claude-haiku-5.5-20261007 | apagado | 86/100 | 13/16 | 15/20 | 16/16 | 13/16 | 14/16 | 15/16 | 0.0236 | 1594 | 1723 / 2840 | 31 |
-| voz-razonamiento-1024 | claude-haiku-5.5-20261007 | 1024 | 95/100 | 16/16 | 17/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0385 | 4507 | 4670 / 8073 | 33 |
-| **voz-razonamiento-512 (propuesta)** | claude-haiku-5.5-20261007 | 512 | **95/100** | 16/16 | 17/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0388 | 4503 | 4698 / 8045 | 32 |
+Los dos sets:
+- **Set v1, el congelado y oficial**: huella `sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676`, commit `734f32f`, anterior al primer prompt (`bc9b066`).
+- **Set v2, adjudicado**: un adjudicador INDEPENDIENTE y CIEGO (subagente aparte, sin ver mediciones, código ni respuestas del agente) auditó las 100 preguntas del v1 contra el contrato congelado. Resultado: 94 conformes y 6 corregidas, todas en `alternativas`. Endureció dos (q008, q012) y abrió cuatro ambigüedades reales (q029, q058, q085, q094). El detalle, cláusula por cláusula, está en `evaluacion/ADJUDICACION.md`. Huella `sha256:bafee42d0c520bf391dd7ff8c50a6359a7597abf43372226111a537ed46d22ed`, congelado en `cdf43d6` ANTES de medir sobre él. El v1 no cambió.
 
-- **≥ 90 % en total: sí**, con Haiku 5.5 (el nivel más barato). **Por tipo: no.** En la configuración propuesta,
-  modificar queda en 85 % y analizar en 87.5 %. **Ningún nivel medido pasa los seis tipos.** Opus 5 no cabía en el tope
-  (estimado ~US$1.5 con el acumulado en 1.07) ni en el saldo de la cuenta. El set no se relajó.
-- **Fallas persistentes** (leídas después de congelar el prompt; no se iteró contra la partición retenida):
-  - q021 y q027 (modificar): el esperado cuenta el eje de tiempo implícito de una línea como dimensión. El
-    contrato dice «si la instrucción lo pide», y ninguna de las dos lo pide.
-  - q020 (modificar): pide «por mes» y el agente no lo declaró. **Falla real del agente.**
-  - q059 (analizar): el set espera analizar `crecimiento_ventas_yoy_pct`. El motor rechaza descomponer una métrica
-    con desfase y el agente corrige a `ventas_netas`: choque entre el set y la semántica de la capa.
-  - q058 (analizar): «campaña frente a orgánicos» es eje de comparación o filtro; ambigua.
-  - Las demás fallas varían entre corridas (q004, q006, q012…): el modelo no es determinista ni a temperatura 0.
-- **Latencia**: la consulta a la capa en frío, p95 31–81 ms: **< 3 s, cumple**. La regeneración (modelo,
-  validación y datos con caché caliente) p95: 4.7–5.6 s con el razonamiento del proveedor, 8.0 s con el
-  propuesto y 2.8 s apagado. **El objetivo de < 5 s p95 no se cumple con la configuración que da 95 %**;
-  apagado sí se cumple, pero baja a 86 %. Es una decisión del laboratorio.
+Gasto:
+- **Total, por la diferencia de saldo de la cuenta: US$1.3943** (1.9635 antes de la primera llamada → 0.5692 al final). Incluye todo: la medición (US$1.3225 en 1,297 llamadas, ninguna sin costo), el lienzo (US$0.0698 en 86) y ~US$0.002 del CLI y del diagnóstico.
+
+| corrida (set) | modelo | razonamiento / proveedor | total | crear | modificar | filtrar | analizar | explicar | alertar | US$ | regeneración p50 / p95 ms | consulta p95 ms |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| voz-corrida1 (v1, `4025151`) | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 14/16 | 19/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0370 | 2624 / 4959 | 35 |
+| voz (v1, tras el arreglo de q059) | claude-haiku-5.5-20261007 | del proveedor | 94/100 | 14/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0362 | 2663 / 4685 | 33 |
+| voz-corrida3 (v1) | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 15/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0384 | 3011 / 5637 | 81 |
+| ligero (v1) | claude-haiku-4.5 | del proveedor | 79/100 | 12/16 | 11/20 | 14/16 | 12/16 | 15/16 | 15/16 | 0.3026 | 3077 / 7610 | 43 |
+| capaz (v1) | claude-sonnet-5 | del proveedor | 89/100 (+4/4 reintento por 429 = 93) | 16/16 | 17/20 | 12/16 (+4) | 14/16 | 16/16 | 14/16 | 0.6138 | 4408 / 9157 | 32 |
+| voz-sin-razonamiento (v1) | claude-haiku-5.5-20261007 | apagado | 86/100 | 13/16 | 15/20 | 16/16 | 13/16 | 14/16 | 15/16 | 0.0236 | 1723 / 2840 | 31 |
+| voz-razonamiento-1024 (v1) | claude-haiku-5.5-20261007 | 1024 propios | 95/100 | 16/16 | 17/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0385 | 4670 / 8073 | 33 |
+| voz-razonamiento-512 (v1) | claude-haiku-5.5-20261007 | 512 propios | 95/100 | 16/16 | 17/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0388 | 4698 / 8045 | 32 |
+| voz-reserva (v1) | claude-haiku-5.5-20261007 | del proveedor + reserva de 512 si trunca | 95/100 | 15/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0391 | 2872 / 5066 | 35 |
+| **voz-reserva-latencia (v1)** | claude-haiku-5.5-20261007 | reserva + proveedor por latencia | **95/100** | 15/16 | 18/20 | 16/16 | **14/16** | 16/16 | 16/16 | 0.0371 | 2935 / 5018 | 33 |
+| **voz-reserva-latencia (v2)** | claude-haiku-5.5-20261007 | reserva + proveedor por latencia | **98/100** | 16/16 | 19/20 | 16/16 | 15/16 | 16/16 | 16/16 | 0.0376 | 2773 / 4927 | 33 |
+
+- **La configuración propuesta** (las dos últimas filas) es Haiku 5.5, el nivel más barato, con el razonamiento del proveedor, una reserva de 512 tokens de razonamiento propio solo si la respuesta sale truncada y preferencia de proveedor por latencia.
+- **Sobre el set v2: 98/100, con los seis tipos ≥ 90 %** (crear, filtrar, explicar y alertar 100 %; modificar 95 %; analizar 93.8 %).
+- **Sobre el set v1, el congelado y oficial: 95/100, y analizar queda en 87.5 %.** El gate por tipo se cumple contra el v2 y no contra el v1. Adoptar el v2 es decisión del laboratorio: se firma o no. El v1 no se relajó.
+- **Fallas que quedan en el v2**: q027 y q059.
+  - q027 (modificar): el esperado cuenta el eje de tiempo de una línea como dimensión. El adjudicador lo tuvo por conforme.
+  - q059 (analizar): el set espera analizar `crecimiento_ventas_yoy_pct`. El motor rechaza descomponer una métrica con desfase sobre un periodo y el agente corrige a `ventas_netas`.
+- **Latencia**:
+  - Consulta a la capa en frío: p95 31–81 ms, **< 3 s: cumple**.
+  - Regeneración con la configuración propuesta: p95 **4.93 s** en el v2 y **5.02 s** en el v1, **5.02 s juntando las 200** (11 de 200 arriba de 5 s): está **en el umbral**, no holgada.
+  - Con el razonamiento apagado: 2.8 s, al costo de bajar a 86 %.
+  - Juntando las 400 regeneraciones de Haiku con razonamiento del proveedor (cuatro corridas), la p95 es 5.13 s.
 
 **Capturas con Playwright** (`docs/goals/estudio-dashboards-capturas/`, `recorrido.json`): los 7 flujos en
 escritorio (1440×900) y celular (390×844), con el agente real.
@@ -161,8 +163,18 @@ Las que siguen abiertas:
   tienda. No se probó el motor contra un catálogo con señales distintas.
 - **El set** tiene al menos cuatro esperados discutibles (§Medición). Con un set v2 adjudicado, modificar y
   analizar podrían pasar el 90 %, o no: no se sabe y no se supuso.
-- **Variación entre corridas**: 94–95/100 con la misma configuración. Tres corridas no son una distribución.
-- **Latencia**: la configuración precisa no cumple los 5 s p95.
+- **Variación entre corridas**: 94–95/100 en el v1 con configuraciones equivalentes. Seis corridas no son una
+  distribución.
+- **El set v2 se pidió después de ver resultados.** El adjudicador fue ciego (no vio mediciones ni respuestas) y
+  auditó las 100 preguntas, no solo las fallas; endureció dos y abrió cuatro. Aun así, el disparo vino de mirar las
+  fallas: por eso el v1 sigue siendo el oficial y el v2 es una propuesta para firmar.
+- **Latencia en el umbral**: p95 de 4.93 y 5.02 s en las dos corridas de la configuración propuesta (5.02 s juntas).
+  Un día de red peor la pasa.
+- **Preferencia de proveedor por latencia**: OpenRouter elige entre Anthropic, Bedrock, Vertex y Azure para el mismo
+  modelo pineado. Con datos ficticios no importa; con datos reales, a qué nube va el dato es una decisión C4.
+- **CREAR frente a MODIFICAR es ambiguo** en «Muéstrame margen por región…»: el agente lo lee de una forma u otra
+  entre corridas. Las dos son válidas; el recorrido de Playwright arranca el flujo 3 de un tablero reiniciado para no
+  depender de cuál eligió.
 - **«Lo que entendí» para MODIFICAR** declara métricas y dimensiones del componente tocado. Es una convención del
   prompt que el contrato no fija con precisión, y es el origen de las fallas de dimensiones.
 - **Mezcla y tasa en el análisis**: un segmento que no existía antes se compara contra la tasa global anterior. Es
@@ -199,7 +211,10 @@ Las que siguen abiertas:
    primera corrida.
 8. **Los tipos de Next exigen `NODE_ENV`** en todo `env` de `spawn` dentro de `tools/` (el typecheck raíz los
    incluye): se pasa explícito.
-9. **Un sha256 suelto parece un token.** `audita:secretos` recorre TODA la historia y marca cualquier hex de 64 sin
+9. **El validate lo detuvo el sistema por falta de memoria** a la mitad de `prueba:tools` (con el servidor de
+   desarrollo apagado, por presión de memoria de la máquina). Se volvió a correr completo en primer plano tras el
+   último commit.
+10. **Un sha256 suelto parece un token.** `audita:secretos` recorre TODA la historia y marca cualquier hex de 64 sin
    el ancla `sha256:` (estilo de los tokens de Hetzner). El primer `validate` completo quedó en rojo por las huellas
    de los CSV, del zip y del set. Arreglo: la convención de la casa (`sha256:<hex>`) en datos, código y evidencias, y
    la historia de esta rama local (sin push) reescrita con `git filter-branch`, con un filtro de árbol que solo

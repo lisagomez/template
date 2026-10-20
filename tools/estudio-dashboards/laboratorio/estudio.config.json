@@ -12,5 +12,6 @@
  "corte": "2026-09",
  "contexto": "Distribuidora Golfo Norte, empresa ficticia",
  "modelo": "anthropic/claude-haiku-5.5-20261007",
- "razonamiento": 512
+ "razonamiento": "reserva",
+ "proveedor": "latencia"
 }
