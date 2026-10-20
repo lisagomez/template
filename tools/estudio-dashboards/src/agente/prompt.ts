@@ -10,7 +10,7 @@
 import { tiemposDe, unidadDe, type Catalogo } from '../catalogo.js'
 import type { Dashboard } from '../esquema.js'
 
-export const VERSION_PROMPT = 'estudio-agente/1'
+export const VERSION_PROMPT = 'estudio-agente/3'
 
 const mes = (a: number, m: number) => { const n = a * 12 + (m - 1); return `${Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, '0')}` }
 
@@ -40,7 +40,8 @@ export function catalogoCompacto(cat: Catalogo): string {
     grupos.set(clave, [...(grupos.get(clave) ?? []), `  - ${m.nombre}: ${m.etiqueta ?? m.nombre} [${m.tipo}${unidadDe(m) ? `, ${unidadDe(m)}` : ''}${dueno}]${m.descripcion ? ` — ${m.descripcion}` : ''}`])
   }
   const bloques = [...grupos].map(([dims, ms], i) => `Grupo ${i + 1}. Dimensiones que alcanza: ${dims}\n${ms.join('\n')}`)
-  const dominios = [...cat.dominios].map(([d, v]) => `- ${d}: ${v.join(' · ')}`)
+  // Del dominio más fino al más grueso: un valor que existe en dos dimensiones aparece primero en la más específica.
+  const dominios = [...cat.dominios].sort((a, b) => b[1].length - a[1].length).map(([d, v]) => `- ${d}: ${v.join(' · ')}`)
   return `${bloques.join('\n\n')}\n\nVALORES DE CADA DIMENSIÓN (dominios, exactos):\n${dominios.join('\n')}`
 }
 
@@ -68,9 +69,10 @@ REGLAS
 4. Periodos:
 ${convencionesPeriodo(o.corte)}
 5. comparar = "anio_anterior" solo si pide comparar contra el año anterior («vs 2025», «contra el año pasado», «compáralo con el año pasado»); si no, null.
-6. dimensiones = los cortes o desgloses que pide («por región», «por tienda», «por mes» → metric_time__month). En analizar, explicar y alertar normalmente [].
-7. Una SELECCIÓN del mapa llega en el mensaje. Si la instrucción se refiere a ella («estas», «las seleccionadas», «esas tiendas»), ponla como filtro "en" sobre su dimensión con esos valores.
-8. "modificar" — operaciones (JSON exacto):
+6. dimensiones = los cortes o desgloses que pide («por región», «por tienda», «por mes» → metric_time__month). Una dimensión que solo FILTRA (estas tiendas, solo Golfo) va en filtros, no en dimensiones, salvo que además pida verlas una por una («por tienda», «compáralas entre sí»). En analizar, explicar y alertar normalmente [].
+7. Si una palabra coincide con dos métricas, una en % y otra en monto («margen»), sin pista de unidad elige la de %; con «en pesos», «cuánto dinero», «monto», la de monto. Si un valor existe en varias dimensiones (una tienda y un estado con el mismo nombre), usa la más específica (la tienda) salvo que diga «el estado de…» o «la región…».
+8. Una SELECCIÓN del mapa llega en el mensaje. Si la instrucción se refiere a ella («estas», «las seleccionadas», «esas tiendas»), ponla como filtro "en" sobre su dimensión con esos valores.
+9. "modificar" — operaciones (JSON exacto):
    {"op":"cambiar","id":"<id>","cambios":{"<campo>": <valor o null para quitarlo>}}
    {"op":"agregar","componente":{<componente completo con "id" nuevo>},"despues_de":"<id>"|null}
    {"op":"quitar","id":"<id>"}
@@ -78,7 +80,7 @@ ${convencionesPeriodo(o.corte)}
    Campos de componente: tipo, titulo, metrica, metricas, dimension, serie, grano (day|week|month|quarter|year), top, orden (desc|asc), comparar ("anio_anterior"), filtros (lista, solo de ese componente), periodo, resaltar ({"operador":"menor|mayor","valor":n}), meta, ancho (completo|ancho|medio|tercio).
    Tipos de componente: hero {metrica} · kpis {metricas} · metas {metas:[{metrica,meta}]} · medidor {metrica, meta} · progreso {metrica, dimension} · actividad {metrica, dimension, top} · barras {metrica, dimension} · linea {metrica, grano, serie?} · tabla {metricas, dimension} · mapa {metrica} · cohortes {metrica, serie?} · contabilidad {entradas, salidas} · senales {} · nota {texto}.
    Cambiar el tipo de una gráfica: {"op":"cambiar","id":"x","cambios":{"tipo":"linea"}} (el sistema conserva métrica y dimensión). Para quitar una categoría de UNA gráfica, cambia sus "filtros". No regeneres el tablero ni toques otros ids.
-9. "resumen": una línea en español con lo que harás, SIN números.
+10. "resumen": una línea en español con lo que harás, SIN números.
 
 CATÁLOGO
 ${catalogoCompacto(cat)}`
