@@ -357,3 +357,43 @@ el laboratorio local. Después de cada cambio de la imagen o del Worker, corre t
   y espera. No lo simules ni lo esquives.
 - Detente y reporta el bloqueo si en 40 turnos no convergiste. Detente también si, para pasar, hay que tocar una guarda,
   una fila de la matriz o el núcleo de forma que cambie un veredicto, o si Cloudflare resulta no servir.
+
+## Lo que se decidió al construirlo (2026-10-20)
+
+| Decisión | Por qué |
+|---|---|
+| La mesa corre el caso por el **runtime de laboratorio de siempre**: lo levanta el cliente (N3) y lo escala la consultora (N2), **en nombre del experto** y marcado así en la cadena (`<seudónimo>·en-nombre-del-N3`/`N2`) | Lo que el experto ve es el producto, no una maqueta; DP-3 (el laboratorio solo ve lo escalado) se respeta, y nadie lee lo hecho en su nombre como si fuera de un N3 real |
+| La línea de tiempo es **una función pura de la cadena** (`mesa/services/linea.ts`): un paso por evento real, con su `seq:tipo` como clave de la retro y los milisegundos entre fechas | Si el producto cambia lo que hace, la línea cambia sola; la retro se ata a un evento, no a un dibujo |
+| Diseño: **traza con anotación por paso y veredicto por caso** (LangSmith, Langfuse), formulario guiado con **resumen de errores antes de enviar** (GOV.UK), mapa de etapas arriba, bento-grid de la vitrina | Un experto de dominio da su opinión donde está mirando, en un gesto; la regla «no lo envíes» se ve junto al campo |
+| La enseñanza va por `ensenaCaso` (núcleo): el caso viene de la pantalla, no del texto | Un «aplica el cambio» dentro de una enseñanza se leía como pedir una aprobación; el experto ya no escribe `inc-00X` |
+| La redacción que la mesa compone se **midió contra el anonimizador**: «Módulo: X», «Ya intenté lo siguiente.» | «Módulo Fiori» o «Probé» tras dos puntos salían como `[NOMBRE]` |
+| **Identidad**: el JWT de Access (RS256, emisor, audiencia, vigencia), verificado en la puerta **y** en el contenedor con el mismo módulo (`acceso.ts`, Web Crypto); el rol, de listas del laboratorio; los tokens de servicio entran «de prueba» | Neutraliza el primer motivo de `configura:deploy` (identidades elegibles) sin tocarla; la imagen sola no abre nada |
+| **Almacén**: una interfaz de objetos con disco y S3 (SigV4 propio, comparado con el ejemplo publicado por AWS); en Cloudflare, R2 con jurisdicción `us` | El disco del contenedor es efímero; S3 deja la imagen portable (R2, B2, MinIO, AWS) |
+| **Imagen**: `scripts/laboratorio-alojado/Dockerfile`, las guardas del de la app, la base del OCR por el mismo digest, `LABORATORIO_ALOJADO=1` horneado (solo la mesa) | «Cambiar la base es CDC»; la ruta de las identidades elegibles no existe en lo alojado |
+| **Instancia `basic`**, medida con `docker run --cpus 0.25 --memory 1g`: OCR en 2,5–3,1 s, pico de 130 MiB | Cabe en lo incluido de Workers Paid con unas 30 h despierta al mes |
+| **Despliegue**: `despliega.sh` construye la imagen del commit, la revisa por dentro (candado), la sube con `wrangler containers push` y despliega una config generada que apunta a ESA imagen | wrangler con `image: ./Dockerfile` construye otra imagen (y exige buildx, que aquí no está); así sube exactamente lo revisado |
+| La salida a internet del contenedor queda **abierta** y declarada | `allowedHosts` solo no está documentado para HTTPS; cerrarla pide interceptar el TLS, y si fallara nadie entraría (las llaves de Access van por HTTPS) |
+| **Ubicación**: el contenedor en `ENAM`; R2 con jurisdicción `us` | Containers no ofrece `jurisdiction: "us"` (solo `eu` y `fedramp`, medido en el esquema de wrangler 4.143.1) |
+| **La vitrina de Vercel no cambia**: su en vivo sigue yendo al túnel local (apagado) | El experto entra por Access; la vitrina conserva su contrato firmado (revisión 10) |
+| Telemetría de wrangler apagada (`WRANGLER_SEND_METRICS=false`) y registros de las peticiones apagados (`observability.enabled: false`) | El texto del experto no va a los logs de un tercero |
+
+## Lo que podría estar mal
+
+- **Access no se prueba desde el código**: la política se configura en el panel. `despliega.sh` comprueba después de
+  subir que sin sesión no abre; sin Access, sin JWT no entra nadie (falla cerrada). Brecha en el C3.
+- **El contenedor tiene salida a internet** (ver arriba). Brecha en el C3.
+- **Un dato sin forma pasa el filtro** (el nombre de una empresa) y el experto cuenta casos propios: daño nuevo de la
+  AISIA, reducido, no cerrado.
+- **El anonimizador marca como nombre una palabra capitalizada tras dos puntos** que escriba el experto («Probé…»): es su
+  conducta real y se ve en el paso «Lo protege»; el experto puede marcarla «mal».
+- **Fechas ISO como «secuencia larga de dígitos»**: por eso el segundo cerrojo mira solo lo que escribió el experto; un
+  número de documento SAP de 10 cifras escrito por el experto se rechaza (el mensaje pide abreviarlo). Es conservador.
+- **El estado del laboratorio se pierde al dormirse el contenedor** (30 min sin uso): el caso queda «guardado» y no se
+  puede decidir sobre él; se vuelve a correr. Declarado en la pantalla.
+- **Varios expertos a la vez** comparten un laboratorio en memoria (un contenedor, `max_instances: 1`); la retro de cada
+  caso se escribe entera (gana la última escritura del mismo caso, que solo edita su autor).
+- **`wrangler deploy` a mano se salta el candado.** Brecha en el C3.
+- **El contenedor puede correr en Canadá** (ENAM). Declarado en la AISIA.
+- **La matriz entera tarda ~1 h**: se corrió en una copia aparte del commit, para no sabotear el árbol de trabajo.
+- **`audita:secretos` mira todos los objetos del repositorio**: un hex de 64 de otra rama (hoy, `estudio/dashboards`)
+  pone en rojo el validate de esta. No es de esta rama; se reporta.
