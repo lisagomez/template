@@ -51,12 +51,14 @@ Nada se ajustó. Las divergencias:
 | Días entre compras en Mérida | 23 → 42 | 23.77 → 42.51 (directo) | La propuesta trunca; redondeado serían 24 y 43. Sin métrica en el catálogo |
 | Valor en 6 meses, campaña y orgánico | 4,636 y 6,730 | 4,635.6 y 6,730.2 (directo, segundo intento) | Ventana no declarada: el primer intento (cohortes observadas 6 meses) dio 4,635.4 y 6,718.3; el segundo (altas hasta marzo de 2026) cuadra. Sin métrica |
 
-**Suites del núcleo.** `npm --prefix tools/estudio-dashboards run prueba`: 47 pruebas, 47 en verde. Incluyen los casos malos que pide el HECHO:
+**Suites del núcleo.** `npm --prefix tools/estudio-dashboards run prueba`: 50 pruebas, 50 en verde. Incluyen los casos malos que pide el HECHO:
 - métrica inventada, dimensión inválida, SQL libre (campo, texto y filtro), fuera de dominio;
 - parche que borra o cambia de más;
 - deshacer y comparar;
 - sin métrica, que lo dice y ofrece proponerla;
-- números del texto ⊆ resultados.
+- números del texto ⊆ resultados;
+- respuestas que llegan desordenadas sin cambiar cifras, avisos ni orden de consultas; dos procesos reales contra uno,
+  con el mismo SQL (las tres de `6c6aac4`).
 
 **Señales: 3 de 3 contra la capa real,** sin nombrarlas:
 - Oaxaca −44.6 % y Mérida −43.3 % en frecuencia, contra −17.0 % de mediana;
@@ -72,7 +74,7 @@ Los dos sets:
 - **Set v2, adjudicado**: un adjudicador INDEPENDIENTE y CIEGO (subagente aparte, sin ver mediciones, código ni respuestas del agente) auditó las 100 preguntas del v1 contra el contrato congelado. Resultado: 94 conformes y 6 corregidas, todas en `alternativas`. Endureció dos (q008, q012) y abrió cuatro ambigüedades reales (q029, q058, q085, q094). El detalle, cláusula por cláusula, está en `evaluacion/ADJUDICACION.md`. Huella `sha256:bafee42d0c520bf391dd7ff8c50a6359a7597abf43372226111a537ed46d22ed`, congelado en `cdf43d6` ANTES de medir sobre él. El v1 no cambió.
 
 Gasto:
-- **Total, por la diferencia de saldo de la cuenta: US$1.3943** (1.9635 antes de la primera llamada → 0.5692 al final). Incluye todo: la medición (US$1.3225 en 1,297 llamadas, ninguna sin costo), el lienzo (US$0.0698 en 86) y ~US$0.002 del CLI y del diagnóstico.
+- **Total, por la diferencia de saldo de la cuenta: US$1.4797** (1.9635 antes de la primera llamada → 0.4838 al final). Incluye todo: la medición (US$1.3985 en el libro, ninguna llamada sin costo), el lienzo y el CLI (US$0.0802 en 96, ninguna sin costo) y ~US$0.001 de diagnóstico.
 
 | corrida (set) | modelo | razonamiento / proveedor | total | crear | modificar | filtrar | analizar | explicar | alertar | US$ | regeneración p50 / p95 ms | consulta p95 ms |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -87,21 +89,25 @@ Gasto:
 | voz-reserva (v1) | claude-haiku-5.5-20261007 | del proveedor + reserva de 512 si trunca | 95/100 | 15/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0391 | 2872 / 5066 | 35 |
 | **voz-reserva-latencia (v1)** | claude-haiku-5.5-20261007 | reserva + proveedor por latencia | **95/100** | 15/16 | 18/20 | 16/16 | **14/16** | 16/16 | 16/16 | 0.0371 | 2935 / 5018 | 33 |
 | **voz-reserva-latencia (v2)** | claude-haiku-5.5-20261007 | reserva + proveedor por latencia | **98/100** | 16/16 | 19/20 | 16/16 | 15/16 | 16/16 | 16/16 | 0.0376 | 2773 / 4927 | 33 |
+| **voz-reserva-latencia-3procesos (v1, `6c6aac4`)** | claude-haiku-5.5-20261007 | reserva + proveedor por latencia; datos con 3 lectores | **97/100** | 15/16 | 19/20 | 16/16 | **15/16** | 16/16 | 16/16 | 0.0379 | 2806 / **4631** | 33 |
+| **voz-reserva-latencia-3procesos (v2, `6c6aac4`)** | claude-haiku-5.5-20261007 | reserva + proveedor por latencia; datos con 3 lectores | **97/100** | 16/16 | 18/20 | 16/16 | 15/16 | 16/16 | 16/16 | 0.0380 | 2750 / **4794** | 32 |
 
-- **La configuración propuesta** (las dos últimas filas) es Haiku 5.5, el nivel más barato, con el razonamiento del proveedor, una reserva de 512 tokens de razonamiento propio solo si la respuesta sale truncada y preferencia de proveedor por latencia.
-- **Sobre el set v2: 98/100, con los seis tipos ≥ 90 %** (crear, filtrar, explicar y alertar 100 %; modificar 95 %; analizar 93.8 %).
-- **Sobre el set v1, el congelado y oficial: 95/100, y analizar queda en 87.5 %.** El gate por tipo se cumple contra el v2 y no contra el v1. Adoptar el v2 es decisión del laboratorio: se firma o no. El v1 no se relajó.
+- **La configuración propuesta** (las cuatro últimas filas) es Haiku 5.5, el nivel más barato, con el razonamiento del proveedor, una reserva de 512 tokens de razonamiento propio solo si la respuesta sale truncada y preferencia de proveedor por latencia.
+- **Sobre el set v2: 98/100 y 97/100, con los seis tipos ≥ 90 % en las dos corridas** (en la segunda, modificar queda justo en 90.0 %).
+- **Sobre el set v1, el congelado y oficial: 95/100 y 97/100.** En la corrida de `6c6aac4` los seis tipos quedan ≥ 90 % (analizar 15/16), pero **no lo atribuyo a ninguna mejora**. El agente (prompt, modelo, configuración y entrada) es idéntico byte a byte; `6c6aac4` solo cambió el camino de datos. Y analizar dio **14/16 en 7 de las 8 corridas de 100 con Haiku 5.5 sobre el v1**, y 15/16 en una. La diferencia es q058, la ambigüedad que abrió el adjudicador: unas veces el modelo filtra Campaña y otras no. Lectura honesta: **sobre el v1, analizar está entre 87.5 y 93.8 % según la corrida; el gate por tipo pasa a veces, no siempre.** Contra el v2 pasa en las dos corridas. Adoptar el v2 es decisión del laboratorio: se firma o no. El v1 no se relajó, y el agente no se tocó para pasarlo (ver «Dos mejoras vistas en la retenida, a propósito SIN aplicar»).
 - **Fallas que quedan en el v2**: q027 y q059.
   - q027 (modificar): el esperado cuenta el eje de tiempo de una línea como dimensión. El adjudicador lo tuvo por conforme.
   - q059 (analizar): el set espera analizar `crecimiento_ventas_yoy_pct`. El motor rechaza descomponer una métrica con desfase sobre un periodo y el agente corrige a `ventas_netas`.
 - **Latencia**:
   - Consulta a la capa en frío: p95 31–81 ms, **< 3 s: cumple**.
-  - Regeneración con la configuración propuesta: p95 **4.93 s** en el v2 y **5.02 s** en el v1, **5.02 s juntando las 200** (11 de 200 arriba de 5 s): está **en el umbral**, no holgada.
+  - Regeneración con la configuración propuesta y un solo proceso de MetricFlow: p95 4.93 s (v2) y 5.02 s (v1), **5.02 s juntando las 200** (11 de 200 arriba de 5 s), en el umbral.
+  - **Con tres lectores (`6c6aac4`): p95 4.63 s (v1) y 4.79 s (v2), 4.67 s juntando las 200 (6 de 200 arriba de 5 s): < 5 s, cumple.** Lo que bajó es el lado de datos y se puede atribuir: al filtrar, datos p50 530 → 208 ms; en analizar, lo que no es modelo p50 735 → 243 ms; las cifras, avisos y SQL son idénticos (banco en §Decisiones). Las que siguen arriba de 5 s son puro modelo (q049: 6.1 s de modelo), y la cola del modelo es la que manda: un día de red peor la puede subir.
   - Con el razonamiento apagado: 2.8 s, al costo de bajar a 86 %.
   - Juntando las 400 regeneraciones de Haiku con razonamiento del proveedor (cuatro corridas), la p95 es 5.13 s.
 
 **Capturas con Playwright** (`docs/goals/estudio-dashboards-capturas/`, `recorrido.json`): los 7 flujos en
-escritorio (1440×900) y celular (390×844), con el agente real.
+escritorio (1440×900) y celular (390×844), con el agente real. Se repitieron sobre `6c6aac4`, con el lienzo ya en
+tres lectores: 14 de 14 pasos en 120 s.
 - Flujo 1: antes, «lo que entendí» y después.
 - Flujo 2: por mes y comparado con 2025, sobre la gráfica recién creada.
 - Flujo 3: mapa arrastrado y acercado, lazo en Mérida más clic en Oaxaca, el tablero filtrado y «¿por qué estas
@@ -145,6 +151,14 @@ vistas (WCAG 2.2 AA).
 - **Versiones en archivo** (`~/.estudio-dashboards/`): Supabase está pausado y el núcleo no lo conoce.
 - **Iteración del prompt solo contra la partición de desarrollo**. Se reporta la retenida aparte: 92.9–94.3 % según
   la corrida.
+- **Tres lectores de MetricFlow y el tablero pide en paralelo** (`6c6aac4`): el resolver consultaba componente por
+  componente contra un solo proceso, y al filtrar un tablero se iban ~0.5 s en datos. Ahora las consultas salen juntas
+  y se registran en el orden en que se piden; el adaptador reparte entre N procesos sobre el destino de solo lectura
+  (DuckDB admite varios lectores) y el consultor junta la misma consulta pedida a la vez. Banco sin LLM (los tres
+  tableros, cuatro filtros, caché caliente): datos p50/máx **354/500 ms con 1 proceso → 141/193 ms con 3 → 112/145 ms
+  con 4**, con la **misma huella de cifras, avisos y SQL** (`0c4054f74621eed7`) en las tres. Elegí 3: cada proceso
+  ocupa 178–212 MB de RSS (~570 MB los tres, `ps`), y el cuarto ya rinde poco. El CLI se queda en 1 (arranca por cada orden). No toca al agente: su entrada y
+  su prompt son los mismos byte a byte.
 
 ## Formas en que esto podría estar mal o incompleto
 
@@ -168,8 +182,10 @@ Las que siguen abiertas:
 - **El set v2 se pidió después de ver resultados.** El adjudicador fue ciego (no vio mediciones ni respuestas) y
   auditó las 100 preguntas, no solo las fallas; endureció dos y abrió cuatro. Aun así, el disparo vino de mirar las
   fallas: por eso el v1 sigue siendo el oficial y el v2 es una propuesta para firmar.
-- **Latencia en el umbral**: p95 de 4.93 y 5.02 s en las dos corridas de la configuración propuesta (5.02 s juntas).
-  Un día de red peor la pasa.
+- **Latencia**: con tres lectores, p95 4.63 y 4.79 s (4.67 s juntas), ~0.33 s bajo el umbral. El margen lo dio el lado
+  de datos; la cola la pone el modelo (las 6 de 200 arriba de 5 s son modelo puro), y un día de red peor la sube.
+- **El gate por tipo sobre el v1 depende de la corrida**: analizar 14/16 en 7 de 8 corridas y 15/16 en una, con el
+  agente idéntico. Ocho corridas no son una distribución, pero bastan para no presentar la que pasa como la regla.
 - **Preferencia de proveedor por latencia**: OpenRouter elige entre Anthropic, Bedrock, Vertex y Azure para el mismo
   modelo pineado. Con datos ficticios no importa; con datos reales, a qué nube va el dato es una decisión C4.
 - **CREAR frente a MODIFICAR es ambiguo** en «Muéstrame margen por región…»: el agente lo lee de una forma u otra
@@ -177,6 +193,16 @@ Las que siguen abiertas:
   depender de cuál eligió.
 - **«Lo que entendí» para MODIFICAR** declara métricas y dimensiones del componente tocado. Es una convención del
   prompt que el contrato no fija con precisión, y es el origen de las fallas de dimensiones.
+- **Dos mejoras vistas en la retenida, a propósito SIN aplicar.** Mirando las fallas del v1 aparecen dos arreglos de
+  sistema razonables: que el núcleo complete «lo que entendí» con el eje de tiempo de la línea que toca (q020, q027), y
+  que «¿por qué cayó el crecimiento…?» se responda descomponiendo la métrica base contra el año anterior en vez de
+  rechazar la métrica con desfase (q059). No los hice: los motivan preguntas de la partición RETENIDA, y aplicarlos
+  para volver a medir sobre ella convierte la muestra retenida en una de ajuste. El 90 % saldría, pero ya no
+  significaría lo que el spec quiere que signifique. Se aplican cuando haya una muestra que no los motivó (un set
+  nuevo que encargue el laboratorio, escrito a ciegas y congelado antes), y se miden ahí.
+  Una vez SÍ toqué el sistema por una pregunta retenida, y lo digo: `07140f2` (q059). Era un error de cifra, no de
+  precisión. Totalizar la métrica con desfase sobre un periodo compara contra el año anterior completo, y ahora se
+  rechaza con la métrica base como sugerencia. La precisión no subió con ese cambio (95 → 94 en la corrida siguiente).
 - **Mezcla y tasa en el análisis**: un segmento que no existía antes se compara contra la tasa global anterior. Es
   shift-share estándar, pero el texto puede decir «efecto mezcla 0.0» en un cambio de composición total, como
   julio. Es correcto y poco intuitivo.
@@ -223,3 +249,13 @@ Las que siguen abiertas:
    `ed2ec09→bc9b066` (primer prompt) · `4ce44ac→4025151` (prompt /3) · `b368064→07140f2` · `b4787c6→13471a3`
    (medición) · `db1c473→1b4a2a1` · `abfa14d→e0e350a` · `77781fc→6c39579` · `50c4676→45d4420` · `f15778d→bdbe18d`.
    *Regla propuesta*: toda huella que entra al repo lleva el ancla `sha256:` desde el primer commit.
+11. **Medí la latencia del modelo seis veces antes de mirar la de los datos.** Probé razonamiento, reserva y
+   proveedor para bajar la regeneración, y el lado de datos llevaba medio segundo al filtrar porque el tablero
+   consultaba componente por componente contra un solo proceso. Partir `regeneración = modelo + datos` por tipo lo
+   enseñó en un minuto (`datosMs` ya estaba en la medición). *Regla propuesta*: antes de optimizar una latencia,
+   repartirla por tramo y por tipo, y atacar primero el tramo determinista (no cuesta llamadas ni mueve la precisión).
+12. **La tentación de arreglar lo que falló en la retenida.** Con el gate del v1 en 87.5 % aparecieron dos arreglos
+   razonables, los dos sacados de preguntas retenidas. Aplicarlos y volver a medir sobre la misma partición habría
+   dado el 90 % y vaciado su significado. Quedan sin aplicar y dichos (§Formas en que esto podría estar mal).
+   *Regla propuesta*: un arreglo motivado por la partición retenida se mide en una muestra nueva, nunca en la que lo
+   motivó.

@@ -71,7 +71,7 @@
       "id": "medicion-agente",
       "label": "Medición del agente contra el set: precisión por nivel y por tipo, gasto y latencia",
       "estado": "ambar",
-      "evidencia": "Configuración propuesta (Haiku 5.5, reserva si trunca, proveedor por latencia): set v1 congelado 95/100 con analizar 87.5 %; set v2 (adjudicado a ciegas, congelado en cdf43d6 antes de medir) 98/100 con los seis tipos ≥ 90 %. Gasto total US$1.3943 por saldo de la cuenta. Falta la firma del laboratorio sobre el v2"
+      "evidencia": "Configuración propuesta (Haiku 5.5, reserva si trunca, proveedor por latencia). Set v1 congelado: 95/100 y 97/100; analizar 14/16 en 7 de 8 corridas de 100 y 15/16 en una (la de 6c6aac4), con el agente idéntico. Set v2 (adjudicado a ciegas, congelado en cdf43d6 antes de medir): 98/100 y 97/100, los seis tipos ≥ 90 % en las dos. Gasto total US$1.4797 por saldo de la cuenta. Falta la firma del laboratorio sobre el v2"
     },
     {
       "id": "lienzo",
@@ -385,7 +385,7 @@
       "sobre": "nodo:medicion-agente",
       "estado": "ambar",
       "referencia": "KPI de la propuesta",
-      "evidencia": "≥ 90 % por tipo en el set v2 adjudicado (98/100; analizar 93.8, modificar 95); en el v1 congelado, analizar 87.5 %. El v2 espera la firma"
+      "evidencia": "≥ 90 % por tipo en el set v2 adjudicado en las dos corridas (98/100 y 97/100). En el v1 congelado, analizar pasa en 1 de 8 corridas (15/16) y queda en 14/16 en las otras 7, sin tocar el agente: el gate por tipo sobre el v1 depende de la corrida. El v2 espera la firma"
     },
     {
       "id": "l-gasto",
@@ -393,15 +393,15 @@
       "sobre": "arista:a-mide",
       "estado": "morado",
       "referencia": "tope del laboratorio (20/10)",
-      "evidencia": "US$1.3943 por la diferencia de saldo de la cuenta (1.9635 → 0.5692); medición US$1.3225 en 1,297 llamadas, ninguna sin costo; lienzo US$0.0698; modelo pineado"
+      "evidencia": "US$1.4797 por la diferencia de saldo de la cuenta (1.9635 → 0.4838); medición US$1.3985 en el libro, ninguna llamada sin costo; lienzo y CLI US$0.0802; modelo pineado"
     },
     {
       "id": "l-latencia",
       "label": "regeneración menor a 5 s p95 con caché caliente; consulta semántica menor a 3 s",
       "sobre": "nodo:lienzo",
-      "estado": "ambar",
+      "estado": "morado",
       "referencia": "objetivos de servicio de la propuesta",
-      "evidencia": "consulta p95 33 ms (cumple); regeneración p95 4.93 s (v2) y 5.02 s (v1), 5.02 s juntas: en el umbral de 5 s"
+      "evidencia": "consulta p95 33 ms (cumple). Regeneración con tres lectores de MetricFlow (6c6aac4): p95 4.63 s (v1) y 4.79 s (v2), 4.67 s juntas, 6 de 200 arriba de 5 s (cumple; antes, con un proceso, 5.02 s). Lo que queda arriba de 5 s es la cola del modelo"
     },
     {
       "id": "l-a11y",

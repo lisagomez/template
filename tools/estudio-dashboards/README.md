@@ -31,7 +31,7 @@ Pides la vista que necesitas en una frase y la ves en segundos, con cada cifra s
 
 - **Runtime**: Node `>=22.18` (`engines.node`).
 - **Dependencias del sistema**: para el adaptador de MetricFlow, Python 3.12 por `uv` con el lock con hashes `semantica/requirements.lock` (dbt-core 1.12.5, dbt-duckdb 1.11.0, duckdb 1.5.5, dbt-postgres 1.11.0, dbt-metricflow 0.15.0 → metricflow 0.213.0). El núcleo no necesita ninguna (solo `zod` 4.6.1).
-- **CPU, GPU y memoria**: sin GPU. El proceso de MetricFlow sobre golfo_norte ocupa 216–227 MB de RSS (observado con `ps` el 2026-10-20); arranca en ~0.45 s y una consulta en frío tarda p95 33 ms (medición del 2026-10-20, `docs/goals/estudio-dashboards-medicion/`). CPU: no medido.
+- **CPU, GPU y memoria**: sin GPU. El proceso de MetricFlow sobre golfo_norte ocupa 216–227 MB de RSS (observado con `ps` el 2026-10-20); arranca en ~0.45 s y una consulta en frío tarda p95 33 ms (medición del 2026-10-20, `docs/goals/estudio-dashboards-medicion/`). Con `procesos: 3` (el lienzo y la medición) son tres: 212, 182 y 178 MB de RSS, ~570 MB juntos (`ps`, 2026-10-20), y regenerar un tablero con un filtro nuevo baja de p50 354 a 141 ms. CPU: no medido.
 - **Servicios externos**: OpenRouter, solo para el agente (`./openrouter`); el núcleo, el CLI sin `agente` y el adaptador de MetricFlow no llaman a ninguno.
 - **Variables de entorno**: `OPENROUTER_API_KEY` (subcomando `agente` del CLI), `ESTUDIO_MF_VENV` (entorno de Python alterno, opcional); el laboratorio: `ESTUDIO_GN_DATOS`, `GN_DATOS`, `GN_DUCKDB`, `GN_DBT_TARGET`.
 - **Almacenamiento**: el entorno de Python en `~/.cache/estudio-dashboards-semantica/venv-<huella del lock>` (362 MB el 2026-10-20); la base DuckDB del laboratorio en `~/.cache/estudio-dashboards-semantica/golfo_norte/` (29 MB); versiones, alertas y gasto en el almacén que se configure (`~/.estudio-dashboards/<nombre>` en el CLI); `target/` y `logs/` del proyecto dbt, ignorados por git. Se borra quitando esas carpetas.
@@ -44,7 +44,8 @@ import { cargaCatalogo, consultor, ejecutaHerramienta, interpreta, memoriaVersio
 import { puertoMetricFlow } from '@tu-scope/estudio-dashboards/metricflow'
 import { modeloOpenRouter } from '@tu-scope/estudio-dashboards/openrouter'
 
-const puerto = puertoMetricFlow({ proyecto: 'ruta/al/proyecto-dbt', perfiles: 'ruta/al/proyecto-dbt' })
+// `procesos` (por defecto 1): varios lectores en paralelo, solo sobre un perfil de solo lectura.
+const puerto = puertoMetricFlow({ proyecto: 'ruta/al/proyecto-dbt', perfiles: 'ruta/al/proyecto-dbt', procesos: 3 })
 const ctx = { consultor: consultor(puerto, await cargaCatalogo(puerto)), versiones: memoriaVersiones(), alertas: memoriaAlertas(), fechaCorte: '2026-09' }
 await ejecutaHerramienta(ctx, 'consultar_metricas', { metricas: ['ventas_netas'], agrupar: ['tienda__region'], periodo: { desde: '2026-01', hasta: '2026-09' } })
 ```
@@ -67,7 +68,7 @@ Subpaths: `.` (núcleo: esquema, validación, parches, versiones, consultor, res
 
 ## Pruebas
 
-`npm --prefix tools/estudio-dashboards run prueba`: 47 pruebas (2026-10-20). Cubren los casos malos (métrica inventada, dimensión inválida, SQL libre, filtro fuera de dominio, parche que toca de más), versiones, consultor, resolver, narración con cifras respaldadas, alertas, propuestas, agente con modelo doble (incluido el canario de contaminación del set), CLI (paridad y códigos) y, si están el entorno y los datos, la capa real (tablero, las 3 señales sembradas y el análisis de julio).
+`npm --prefix tools/estudio-dashboards run prueba`: 50 pruebas (2026-10-20). Cubren los casos malos (métrica inventada, dimensión inválida, SQL libre, filtro fuera de dominio, parche que toca de más), versiones, consultor, resolver (también con respuestas desordenadas y con dos procesos reales), narración con cifras respaldadas, alertas, propuestas, agente con modelo doble (incluido el canario de contaminación del set), CLI (paridad y códigos) y, si están el entorno y los datos, la capa real (tablero, las 3 señales sembradas y el análisis de julio).
 
 ## Mediciones
 

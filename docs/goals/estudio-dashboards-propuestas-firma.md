@@ -54,18 +54,21 @@
      0 · 2 uso · 3 esquema · 4 capa · 5 modelo. Lee la capa real o la foto del catálogo; jamás inventa. **Grado: no
      medido** (no se puntuó con la imprenta).
   - **Sin cambios** en `.claude/settings.json`, hooks, `gates.json`, `AGENTS.md`, skills ni el manifiesto de la
-    imprenta. La suite nueva (`tools/estudio-dashboards`, 46 pruebas) entra sola en `prueba:tools`.
+    imprenta. La suite nueva (`tools/estudio-dashboards`, 50 pruebas) entra sola en `prueba:tools`.
 - **Motivo**: el spec `docs/goals/estudio-dashboards.md` (decisiones del laboratorio del 2026-10-20: LLM real con
   tope de US$2 y el nivel más barato primero; «luego lo pasas a CLI»).
 - **Gate aplicado**: diff revisado ☐ · regresión verde ☑ (capa A 166/166 el 2026-10-20; la capa B no la corre el
   agente: decide el laboratorio) · aprobación humana ☐ · pineo ☑ (modelo pineado, lock de Python con hashes, npm exacto).
 - **Regresión**: además de la capa A, la medición del agente con la configuración propuesta
   (`medicion-voz-reserva-latencia*.json`):
-  - **set v1 congelado: 95/100**, con analizar en 87.5 % (bajo el 90);
-  - **set v2 adjudicado** por un revisor independiente y ciego, congelado antes de medir: **98/100, con los seis
-    tipos ≥ 90 %**;
-  - regeneración p95 4.93–5.02 s (en el umbral de 5 s), consulta p95 33 ms;
-  - gasto total del goal, por la diferencia de saldo de la cuenta: US$1.3943.
+  - **set v1 congelado: 95/100 y 97/100.** Analizar queda en 87.5 % en una corrida y en 93.8 % en la otra, con el
+    agente idéntico. En las 8 corridas de 100 con Haiku 5.5 sobre el v1, analizar dio 14/16 siete veces y 15/16 una:
+    **el gate por tipo sobre el v1 pasa a veces, no siempre**;
+  - **set v2 adjudicado** por un revisor independiente y ciego, congelado antes de medir: **98/100 y 97/100, con los
+    seis tipos ≥ 90 % en las dos**;
+  - regeneración p95 con tres lectores de MetricFlow (`6c6aac4`): **4.63 s (v1) y 4.79 s (v2), 4.67 s juntas**; con
+    uno, 4.93–5.02 s. Consulta p95 33 ms;
+  - gasto total del goal, por la diferencia de saldo de la cuenta: **US$1.4797**.
 - **Salida del perímetro (C4)**: el prompt (catálogo de Golfo Norte, datos ficticios), la especificación y la
   instrucción van a OpenRouter. Datos ficticios: no hay decisión C4 de por medio (spec). Con datos reales, C4 antes.
 - **Aprobado por**: ☐ (lo escribe el laboratorio)

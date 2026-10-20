@@ -1,6 +1,6 @@
 {
- "cuando": "2026-10-20T16:47:55.210Z",
- "segundos": 101,
+ "cuando": "2026-10-20T17:32:14.477Z",
+ "segundos": 120,
  "externas": [],
  "errores": [],
  "axe": [
@@ -59,85 +59,85 @@
   {
    "vista": "escritorio",
    "paso": "1 · margen por región sin mayoreo",
-   "ms": 29054,
+   "ms": 25127,
    "detalle": "tipo: modificarmétrica: margen_bruto_pctdimensión: tienda__region, tienda__tienda_nombrefiltros: linea__canal sin Mayoreoperiodo: 2026-01..2026-09toca: margen_region, margen_tiendas · tipo: modificar · métrica: margen_bruto_pct · dimensión: tienda__region, tienda__tienda_nombre · filtros: linea__canal sin Mayoreo · periodo: 2026-01..2026-09 · toca: margen_region, margen_tiendas"
   },
   {
    "vista": "escritorio",
    "paso": "2 · ahora por mes y compáralo con 2025",
-   "ms": 17750,
-   "detalle": "tipo: modificarmétrica: margen_bruto_pctdimensión: metric_time__month, tienda__region, tienda__tienda_nombrefiltros: linea__canal sin Mayoreoperiodo: 2026-01..2026-09comparar: año anteriortoca: margen_region, margen_tiendas · tipo: modificar · métrica: margen_bruto_pct · dimensión: metric_time__month, tienda__region, tienda__tienda_nombre · filtros: linea__canal sin Mayoreo · periodo: 2026-01..2026-09 · comparar: año anterior · toca: margen_region, margen_tiendas"
+   "ms": 14688,
+   "detalle": "tipo: modificarmétrica: margen_bruto_pctdimensión: metric_time__month, tienda__regionfiltros: linea__canal sin Mayoreoperiodo: 2026-01..2026-09comparar: año anteriortoca: margen_region · tipo: modificar · métrica: margen_bruto_pct · dimensión: metric_time__month, tienda__region · filtros: linea__canal sin Mayoreo · periodo: 2026-01..2026-09 · comparar: año anterior · toca: margen_region"
   },
   {
    "vista": "escritorio",
    "paso": "3 · mapa: arrastrar, acercar, lazo y «¿por qué estas bajaron?»",
-   "ms": 6261,
+   "ms": 7103,
    "detalle": "tipo: analizarmétrica: ventas_netasfiltros: tienda__tienda_nombre en Mérida, Oaxaca · tipo: analizar · métrica: ventas_netas · filtros: tienda__tienda_nombre en Mérida, Oaxaca"
   },
   {
    "vista": "escritorio",
    "paso": "4 · procedencia abierta",
-   "ms": 973,
+   "ms": 992,
    "detalle": ""
   },
   {
    "vista": "escritorio",
    "paso": "5 · volver a una versión y comparar dos",
-   "ms": 1302,
+   "ms": 1353,
    "detalle": ""
   },
   {
    "vista": "escritorio",
    "paso": "6 · detectar → aprender con tarjetas en el mapa",
-   "ms": 1551,
+   "ms": 1566,
    "detalle": "7 tarjetas"
   },
   {
    "vista": "escritorio",
    "paso": "7 · pregunta sin métrica",
-   "ms": 3829,
+   "ms": 3842,
    "detalle": "sin métrica para «NPS por tienda» · sin métrica para «NPS por tienda» · No hay una métrica en el catálogo para «NPS por tienda». No la aproximo con otra parecida. Puedo proponerla como métrica nueva (un diff del modelo semántico que revisa su dueño)."
   },
   {
    "vista": "celular",
    "paso": "1 · margen por región sin mayoreo",
-   "ms": 17501,
-   "detalle": "tipo: modificarmétrica: margen_bruto_pctdimensión: tienda__regionfiltros: linea__canal sin Mayoreoperiodo: 2026-01..2026-09toca: margen_region · tipo: modificar · métrica: margen_bruto_pct · dimensión: tienda__region · filtros: linea__canal sin Mayoreo · periodo: 2026-01..2026-09 · toca: margen_region"
+   "ms": 29691,
+   "detalle": "tipo: modificarmétrica: margen_bruto_pctdimensión: tienda__region, tienda__tienda_nombrefiltros: linea__canal sin Mayoreoperiodo: 2026-01..2026-09toca: margen_region, margen_tiendas · tipo: modificar · métrica: margen_bruto_pct · dimensión: tienda__region, tienda__tienda_nombre · filtros: linea__canal sin Mayoreo · periodo: 2026-01..2026-09 · toca: margen_region, margen_tiendas"
   },
   {
    "vista": "celular",
    "paso": "2 · ahora por mes y compáralo con 2025",
-   "ms": 6401,
+   "ms": 15114,
    "detalle": "tipo: modificarmétrica: margen_bruto_pctdimensión: metric_time__monthfiltros: linea__canal sin Mayoreoperiodo: 2026-01..2026-09comparar: año anteriortoca: margen_region · tipo: modificar · métrica: margen_bruto_pct · dimensión: metric_time__month · filtros: linea__canal sin Mayoreo · periodo: 2026-01..2026-09 · comparar: año anterior · toca: margen_region"
   },
   {
    "vista": "celular",
    "paso": "3 · mapa: arrastrar, acercar, lazo y «¿por qué estas bajaron?»",
-   "ms": 6359,
+   "ms": 5961,
    "detalle": "tipo: analizarmétrica: ventas_netasfiltros: tienda__tienda_nombre en Mérida, Oaxaca · tipo: analizar · métrica: ventas_netas · filtros: tienda__tienda_nombre en Mérida, Oaxaca"
   },
   {
    "vista": "celular",
    "paso": "4 · procedencia abierta",
-   "ms": 996,
+   "ms": 949,
    "detalle": ""
   },
   {
    "vista": "celular",
    "paso": "5 · volver a una versión y comparar dos",
-   "ms": 1348,
+   "ms": 1337,
    "detalle": ""
   },
   {
    "vista": "celular",
    "paso": "6 · detectar → aprender con tarjetas en el mapa",
-   "ms": 1501,
+   "ms": 1508,
    "detalle": "7 tarjetas"
   },
   {
    "vista": "celular",
    "paso": "7 · pregunta sin métrica",
-   "ms": 3824,
+   "ms": 3841,
    "detalle": "sin métrica para «NPS por tienda» · sin métrica para «NPS por tienda» · No hay una métrica en el catálogo para «NPS por tienda». No la aproximo con otra parecida. Puedo proponerla como métrica nueva (un diff del modelo semántico que revisa su dueño)."
   }
  ]
