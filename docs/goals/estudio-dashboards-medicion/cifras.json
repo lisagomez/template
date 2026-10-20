@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-20T15:10:18.097Z",
+ "generado": "2026-10-20T16:12:54.047Z",
  "versiones": {
   "dbt-core": "1.12.5",
   "dbt-duckdb": "1.11.0",
@@ -53,7 +53,7 @@
   }
  ],
  "dbt": [
-  "Finished running 12 table models, 45 data tests, 10 view models in 0 hours 0 minutes and 2.18 seconds (2.18s).",
+  "Finished running 12 table models, 45 data tests, 10 view models in 0 hours 0 minutes and 2.23 seconds (2.23s).",
   "Completed successfully",
   "Done. PASS=67 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=67"
  ],
@@ -69,57 +69,57 @@
  "tiempos": [
   {
    "consulta": "foto_2025",
-   "capaMs": 62.8,
-   "totalMs": 88
+   "capaMs": 60.2,
+   "totalMs": 85
   },
   {
    "consulta": "clientes_2025",
-   "capaMs": 38.5,
-   "totalMs": 55
+   "capaMs": 38.1,
+   "totalMs": 54
   },
   {
    "consulta": "comparables_2025",
-   "capaMs": 19.8,
+   "capaMs": 20.1,
    "totalMs": 32
   },
   {
    "consulta": "tienda_2025",
-   "capaMs": 22.3,
+   "capaMs": 22,
    "totalMs": 32
   },
   {
    "consulta": "region_2025",
-   "capaMs": 21.1,
+   "capaMs": 21.2,
    "totalMs": 31
   },
   {
    "consulta": "canal_2025",
-   "capaMs": 26.8,
-   "totalMs": 36
+   "capaMs": 28.6,
+   "totalMs": 37
   },
   {
    "consulta": "foto_2026",
-   "capaMs": 39.4,
+   "capaMs": 40.3,
    "totalMs": 63
   },
   {
    "consulta": "clientes_2026",
-   "capaMs": 28,
+   "capaMs": 28.7,
    "totalMs": 45
   },
   {
    "consulta": "comparables_2026",
-   "capaMs": 17.7,
-   "totalMs": 29
+   "capaMs": 17.5,
+   "totalMs": 28
   },
   {
    "consulta": "tienda_2026",
-   "capaMs": 19.3,
+   "capaMs": 18.8,
    "totalMs": 29
   },
   {
    "consulta": "region_2026",
-   "capaMs": 19.6,
+   "capaMs": 19.5,
    "totalMs": 29
   },
   {
@@ -129,78 +129,78 @@
   },
   {
    "consulta": "yoy_jul26",
-   "capaMs": 29.6,
-   "totalMs": 43
+   "capaMs": 25.3,
+   "totalMs": 38
   },
   {
    "consulta": "retencion_2026",
-   "capaMs": 19.2,
-   "totalMs": 30
+   "capaMs": 18.7,
+   "totalMs": 29
   },
   {
    "consulta": "yoy_2026",
-   "capaMs": 29.1,
-   "totalMs": 45
+   "capaMs": 25.5,
+   "totalMs": 39
   },
   {
    "consulta": "comparables_n",
-   "capaMs": 24.5,
-   "totalMs": 36
+   "capaMs": 22.9,
+   "totalMs": 34
   },
   {
    "consulta": "reorden",
-   "capaMs": 10.7,
+   "capaMs": 10.9,
    "totalMs": 15
   },
   {
    "consulta": "reorden_tienda",
-   "capaMs": 15.5,
+   "capaMs": 15.8,
    "totalMs": 22
   },
   {
    "consulta": "roas",
-   "capaMs": 14.7,
-   "totalMs": 20
+   "capaMs": 14.3,
+   "totalMs": 19
   },
   {
    "consulta": "base_inicial",
-   "capaMs": 11.3,
+   "capaMs": 11.1,
    "totalMs": 16
   },
   {
    "consulta": "retencion",
-   "capaMs": 12.5,
-   "totalMs": 20
+   "capaMs": 12.2,
+   "totalMs": 19
   },
   {
    "consulta": "retencion_origen",
-   "capaMs": 13.4,
-   "totalMs": 20
+   "capaMs": 13.5,
+   "totalMs": 21
   },
   {
    "consulta": "nuevos_origen",
-   "capaMs": 9.2,
+   "capaMs": 9.4,
    "totalMs": 13
   },
   {
    "consulta": "margen_categoria",
-   "capaMs": 16.6,
-   "totalMs": 26
+   "capaMs": 18.1,
+   "totalMs": 27
   },
   {
    "consulta": "margen_jun26",
-   "capaMs": 12.3,
+   "capaMs": 12.4,
    "totalMs": 21
   },
   {
    "consulta": "margen_jul26",
-   "capaMs": 13.3,
-   "totalMs": 22
+   "capaMs": 12.2,
+   "totalMs": 20
   },
   {
    "consulta": "margen_jul25",
-   "capaMs": 13.1,
-   "totalMs": 22
+   "capaMs": 12,
+   "totalMs": 20
   }
  ],
  "cifras": [
@@ -1039,8 +1039,8 @@
   "devolucion_2026": 2.4706957737391115,
   "devolucion_total": 2.4861795003474003,
   "roas_CMP-01": 1.33129428789115,
-  "roas_CMP-02": 5.7105320299995235,
-  "roas_CMP-03": 5.1100236376530574,
+  "roas_CMP-02": 5.710532029999529,
+  "roas_CMP-03": 5.110023637653055,
   "roas_CMP-04": -0.17413221670517157,
   "roas_CMP-05": 15.588722260718047,
   "roas_CMP-06": 0.8308670894195617,
@@ -1051,10 +1051,10 @@
   "perdidos_2026": 20134,
   "retencion_m3": 72.50054061846753,
   "retencion_m3_campana": 66.29994209612045,
-  "valor_6m_campana": 4635.354276464496,
+  "valor_6m_campana": 4635.354276464494,
   "valor_6m_campana_v2": 4635.609200976475,
   "retencion_m3_organico": 82.72241313478428,
-  "valor_6m_organico": 6718.280108061125,
+  "valor_6m_organico": 6718.280108061127,
   "valor_6m_organico_v2": 6730.2416950555,
   "retencion_m3_cohortes_2026": 69.9682763482552,
   "nuevos_campana_pct_2026": 83.85009436505797,

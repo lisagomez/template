@@ -1,6 +1,6 @@
 /**
  * El prompt del agente del Estudio. Es CÓDIGO REVISABLE (C1): cambiarlo exige diff, regresión (el set de
- * referencia) y firma. Se escribió DESPUÉS de congelar el set (commit f6e42aa) y sin leerlo; `pruebas/agente.ts`
+ * referencia) y firma. Se escribió DESPUÉS de congelar el set (commit 734f32f) y sin leerlo; `pruebas/agente.ts`
  * comprueba que ninguna pregunta del set aparece aquí.
  *
  * Es genérico: el catálogo y los dominios se insertan desde la capa (sirve igual para otro catálogo) y las

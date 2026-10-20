@@ -63,10 +63,10 @@ async function principal() {
   console.log(`▸ llave OPENROUTER_API_KEY: ${k ? `presente (${k.length} caracteres)` : 'AUSENTE'}`)
   if (!k) process.exit(2)
   const set = JSON.parse(readFileSync(join(AQUI, 'set-referencia.json'), 'utf8'))
-  const sha = createHash('sha256').update(readFileSync(join(AQUI, 'set-referencia.json'))).digest('hex')
+  const sha = `sha256:${createHash('sha256').update(readFileSync(join(AQUI, 'set-referencia.json'))).digest('hex')}`
   const congelado = readFileSync(join(AQUI, 'set-referencia.sha256'), 'utf8').split(/\s/)[0]
   if (sha !== congelado) throw new Error('el set no coincide con su hash congelado: no se mide')
-  console.log(`▸ set ${sha.slice(0, 16)}… (= congelado) · nivel ${nivel} → ${cfg.modelo} (${cfg.precio.entrada}/${cfg.precio.salida} USD por M)`)
+  console.log(`▸ set ${sha.slice(0, 23)}… (= congelado) · nivel ${nivel} → ${cfg.modelo} (${cfg.precio.entrada}/${cfg.precio.salida} USD por M)`)
   const antes = await saldo(k)
   console.log(`▸ saldo antes: ${JSON.stringify(antes)}`)
   const puerto = puertoGolfoNorte()

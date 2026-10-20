@@ -48,7 +48,7 @@ function tocadosDe(v: Vuelta, base: readonly string[]): string[] {
 }
 
 /**
- * Qué se compara en cada tipo: la tabla «Los seis tipos» del contrato (congelado con el set, f6e42aa). La primera
+ * Qué se compara en cada tipo: la tabla «Los seis tipos» del contrato (congelado con el set, 734f32f). La primera
  * versión de este puntuador comparaba métricas y dimensiones en TODOS los tipos (la regla general del contrato leída
  * sin su tabla); se corrigió al contrato el 2026-10-20, tras la primera corrida de la partición de desarrollo, y el
  * set no se tocó. Queda en el reporte de decisiones.

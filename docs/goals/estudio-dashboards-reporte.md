@@ -66,14 +66,14 @@ Nada se ajustó. Las divergencias:
 La prueba comprueba que ni `src/senales.ts` ni `laboratorio/perfil.json` nombran tiendas, regiones ni segmentos sembrados. Ninguna tarjeta sin evidencia; la cuarta es el aprendizaje del ROAS, real y con la advertencia del baseline.
 
 **Medición con el LLM real.**
-- Set `evaluacion/set-referencia.json`, sha256 `sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676`. Lo congela el commit `f6e42aa`, anterior al primer prompt (`ed2ec09`).
+- Set `evaluacion/set-referencia.json`, huella `sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676`. Lo congela el commit `734f32f`, anterior al primer prompt (`bc9b066`).
 - Gasto medido por llamada: **US$1.2087 en 984 llamadas, ninguna sin costo** (`llamadas.jsonl`).
 - Saldo de la cuenta: **1.9635 antes de la primera llamada → 0.7534 después de la última medición**.
 - Aparte, el lienzo gastó US$0.0409 en 55 llamadas (`~/.estudio-dashboards/golfo-norte/gasto.jsonl`).
 
 | corrida | modelo | razonamiento | total | crear | modificar | filtrar | analizar | explicar | alertar | US$ | modelo p50 ms | regeneración p50 / p95 ms | consulta p95 ms |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| voz-corrida1 (`4ce44ac`) | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 14/16 | 19/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0370 | 2549 | 2624 / 4959 | 35 |
+| voz-corrida1 (`4025151`) | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 14/16 | 19/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0370 | 2549 | 2624 / 4959 | 35 |
 | voz (tras el arreglo de q059) | claude-haiku-5.5-20261007 | del proveedor | 94/100 | 14/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0362 | 2446 | 2663 / 4685 | 33 |
 | voz-corrida3 | claude-haiku-5.5-20261007 | del proveedor | 95/100 | 15/16 | 18/20 | 16/16 | 14/16 | 16/16 | 16/16 | 0.0384 | 2683 | 3011 / 5637 | 81 |
 | ligero | claude-haiku-4.5 | del proveedor | 79/100 | 12/16 | 11/20 | 14/16 | 12/16 | 15/16 | 15/16 | 0.3026 | 2900 | 3077 / 7610 | 43 |
@@ -199,3 +199,12 @@ Las que siguen abiertas:
    primera corrida.
 8. **Los tipos de Next exigen `NODE_ENV`** en todo `env` de `spawn` dentro de `tools/` (el typecheck raíz los
    incluye): se pasa explícito.
+9. **Un sha256 suelto parece un token.** `audita:secretos` recorre TODA la historia y marca cualquier hex de 64 sin
+   el ancla `sha256:` (estilo de los tokens de Hetzner). El primer `validate` completo quedó en rojo por las huellas
+   de los CSV, del zip y del set. Arreglo: la convención de la casa (`sha256:<hex>`) en datos, código y evidencias, y
+   la historia de esta rama local (sin push) reescrita con `git filter-branch`, con un filtro de árbol que solo
+   antepone el ancla. Se conservó el orden de los commits, y el set sigue antes del primer prompt. Hashes de commit,
+   viejo → nuevo: `87b773c→4e2f520` (datos) · `f6e42aa→734f32f` (set congelado) · `fe50e03→a2ce3f9` (núcleo) ·
+   `ed2ec09→bc9b066` (primer prompt) · `4ce44ac→4025151` (prompt /3) · `b368064→07140f2` · `b4787c6→13471a3`
+   (medición) · `db1c473→1b4a2a1` · `abfa14d→e0e350a` · `77781fc→6c39579` · `50c4676→45d4420` · `f15778d→bdbe18d`.
+   *Regla propuesta*: toda huella que entra al repo lleva el ancla `sha256:` desde el primer commit.

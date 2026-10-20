@@ -38,7 +38,9 @@ function verificaDatos() {
   const filas = Object.entries(manifiesto.csv).map(([archivo, esperado]) => {
     const ruta = join(DATOS, archivo)
     if (!existsSync(ruta)) throw new Error(`falta ${archivo} en ${casa(DATOS)}`)
-    const sha256 = createHash('sha256').update(readFileSync(ruta)).digest('hex')
+    // Con el ancla `sha256:` (convención de la casa): un hex de 64 suelto es indistinguible de un token sin prefijo
+    // para la auditoría de secretos, que recorre toda la historia.
+    const sha256 = `sha256:${createHash('sha256').update(readFileSync(ruta)).digest('hex')}`
     return { archivo, sha256, esperado: esperado.sha256, igual: sha256 === esperado.sha256 }
   })
   for (const f of filas) console.log(`  ${f.igual ? '✓' : '✗'} ${f.archivo.padEnd(18)} ${f.sha256}`)

@@ -47,7 +47,7 @@
       "id": "set-referencia",
       "label": "Set de 100 preguntas con respuesta esperada, congelado por hash ANTES del prompt del agente",
       "estado": "morado",
-      "evidencia": "evaluacion/set-referencia.json sha256 647b0b27ce23a447…, escrito por un revisor dedicado y congelado en f6e42aa, antes del primer prompt (ed2ec09)"
+      "evidencia": "evaluacion/set-referencia.json sha256 647b0b27ce23a447…, escrito por un revisor dedicado y congelado en 734f32f, antes del primer prompt (bc9b066)"
     },
     {
       "id": "nucleo",
@@ -345,7 +345,7 @@
       "sobre": "nodo:set-referencia",
       "estado": "morado",
       "referencia": "orden de commits en la rama",
-      "evidencia": "f6e42aa (set) → ed2ec09 (primer prompt): el set es anterior; prueba canario sin coincidencias en el texto redactado"
+      "evidencia": "734f32f (set) → bc9b066 (primer prompt): el set es anterior; prueba canario sin coincidencias en el texto redactado"
     },
     {
       "id": "l-esquema",

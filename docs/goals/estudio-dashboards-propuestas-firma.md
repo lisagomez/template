@@ -37,8 +37,8 @@
      1,200 tokens razonando y el JSON cortado. Con el razonamiento apagado da 86/100 (regeneración p95 2.8 s). Es
      una decisión del laboratorio entre precisión y latencia.
   3. **Prompt del agente** `tools/estudio-dashboards/src/agente/prompt.ts`, versión **`estudio-agente/4`**
-     (sha256 del archivo `ea73b47a9b2c8d5e`, primeros 16 hex). Historia:
-     - `/1` (commit `ed2ec09`) se escribió **después** de congelar el set (`f6e42aa`) y sin leerlo.
+     (sha256 del archivo `5ba2c0180b0880f4`, primeros 16 hex). Historia:
+     - `/1` (commit `bc9b066`) se escribió **después** de congelar el set (`734f32f`) y sin leerlo.
      - `/2` y `/3` iteraron SOLO contra la partición de desarrollo (30 preguntas), nunca contra la retenida (70). Agregaron dos reglas genéricas: «margen» a secas es el %, y un valor que existe en dos dimensiones toma la más específica. También una dimensión que solo filtra no es desglose, y los dominios se ordenan del más fino al más grueso.
      - `/4` agrega la línea «ÚLTIMO CAMBIO» solo en una conversación, para que «ahora…» sepa a qué se refiere. Para una instrucción suelta, como las del set, el mensaje es **byte a byte** el que se midió con `/3`; lo prueba `pruebas/agente.ts`.
      El sistema es genérico: el catálogo y los dominios se insertan desde la capa; las convenciones de periodo se
