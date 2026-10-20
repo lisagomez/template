@@ -113,6 +113,7 @@ export const HERRAMIENTAS = [
     async ejecuta(c, e): Promise<{ alerta: Alerta; evaluacion: Evaluacion }> {
       const p = proponeAlerta(c.consultor.catalogo, e.regla, ahora(c))
       if (!p.ok) throw new RechazoEsquema(p.errores)
+      if (e.aplicar && !e.confirmada_por?.trim()) throw new RechazoEsquema([{ codigo: 'esquema', ruta: 'confirmada_por', mensaje: 'una alerta se registra solo con la confirmación de una persona (confirmada_por)' }])
       const evaluacion = await evaluaAlerta(c.consultor, p.valor, c.fechaCorte)
       const alerta = e.aplicar ? await registraAlerta(c.alertas, p.valor, e.confirmada_por ?? null) : p.valor
       return { alerta, evaluacion }
