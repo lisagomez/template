@@ -43,11 +43,33 @@ export function reglasDeLaVitrina(env: Entorno) {
   }
 }
 
+/**
+ * El laboratorio ALOJADO: la mesa del experto en Cloudflare (`docs/goals/soporte-sap-experto.md`). Con
+ * `LABORATORIO_ALOJADO=1` en el build, la imagen sirve SOLO la mesa: cualquier otra página lleva a ella y cualquier otra
+ * API no existe (404), también `/api/soporte-sap`, la de las identidades elegibles. Se hornea en el build, como la vitrina.
+ */
+export const INICIO_DE_LA_MESA = '/mesa/soporte-sap'
+export const esAlojado = (env: Entorno): boolean => env['LABORATORIO_ALOJADO'] === '1'
+
+export function reglasDelAlojado(env: Entorno) {
+  if (!esAlojado(env)) return { redirects: [], rewrites: [] }
+  return {
+    redirects: [{ source: '/:ruta((?!mesa(?:/|$)|api/|_next/|manifest\\.json$|sw\\.js$|icons/|favicon\\.ico$).*)', destination: INICIO_DE_LA_MESA, permanent: false }],
+    rewrites: [{ source: '/api/:ruta((?!mesa/).*)', destination: '/mesa/no-existe' }],
+  }
+}
+
+/** El laboratorio alojado no es la vitrina ni va a Vercel: son dos despliegues con reglas distintas. */
+export function compruebaAlojado(env: Entorno): void {
+  if (esAlojado(env) && (esVitrina(env) || env['VERCEL'] === '1')) throw new Error('LABORATORIO_ALOJADO no va con la vitrina ni a Vercel: la mesa se construye en su imagen (scripts/laboratorio-alojado).')
+}
+
 compruebaDespliegue(process.env)
+compruebaAlojado(process.env)
 
 const nextConfig: NextConfig = {
-  async redirects() { return reglasDeLaVitrina(process.env).redirects },
-  async rewrites() { return { beforeFiles: reglasDeLaVitrina(process.env).rewrites, afterFiles: [], fallback: [] } },
+  async redirects() { return [...reglasDeLaVitrina(process.env).redirects, ...reglasDelAlojado(process.env).redirects] },
+  async rewrites() { return { beforeFiles: [...reglasDeLaVitrina(process.env).rewrites, ...reglasDelAlojado(process.env).rewrites], afterFiles: [], fallback: [] } },
 
   // En desarrollo, Next 16 imprime cada server function CON SUS ARGUMENTOS: el registro de un paciente dejaba su
   // nombre, correo y celular en el log de la terminal (medido el 2026-10-16, goal clinica-dental). Los argumentos de

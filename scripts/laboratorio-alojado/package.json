@@ -1,0 +1,10 @@
+{
+  "name": "soporte-sap-laboratorio-alojado",
+  "private": true,
+  "type": "module",
+  "description": "La puerta del laboratorio alojado de Soporte SAP en Cloudflare (Worker + Containers). Solo se instala para desplegar: npm ci aquí.",
+  "devDependencies": {
+    "@cloudflare/containers": "0.3.7",
+    "wrangler": "4.143.1"
+  }
+}

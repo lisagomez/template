@@ -17,7 +17,7 @@ import { evaluaSeguro } from '../../../../tools/grafo-conocimiento/dist/index.js
 import { salaVacia, creaCanal, agregaParticipante, publica, registraAprobacion, aprobado, delimitaDato, type EstadoSala } from '../../../../tools/sala-a2a/dist/index.js'
 import {
   ingiereTodos, categoriza, consultaMatriz, conocimientoDeMatriz, MATRIZ_LABORATORIO, CLIENTES, CONSULTORAS, sapDeLaboratorio, alNucleo, preparaPlan, supervisa, mensajeDePlan,
-  corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, relojSla, contratoDeLaboratorio, generaCorpus,
+  corrige, ejecuta, reproduce, anonimiza, agrega, respondeHil, ensenaCaso, type ContextoChat, type RespuestaHil, relojSla, contratoDeLaboratorio, generaCorpus,
   accionAnteElPresupuesto, veredictoDelMes, ocrDelMes, usoDelMes, mesDe, NoAplica, delimitaDocumento, PREGUNTAS_SNAPSHOT,
   type PuertosIngesta, type ResultadoSla, type ResultadoIngesta, type Clasificacion, type ConsultaMatriz, type EventoIncidencia, type EventoSla, type Plan,
   type VeredictoSupervisor, type SapSimulado, type Anonimizado, type MotorReglas, type Corte, type EntradaMatriz, type PropuestaDeEnsenanza,
@@ -286,16 +286,35 @@ function revisa(i: IncidenciaLab, lab: PlanLab, mensaje: string, motivo: string,
   })
 }
 
-/** El chat del HIL: contesta con fuente, propone o promueve a la sala. Nunca aprueba. */
-function conversa(s: Sesion, texto: string): void {
-  if (s.rol !== 'superadmin' && s.rol !== 'experto') throw new Rechazo('el chat del HIL es del superadministrador y del experto')
+/** Lo que el chat sabe del laboratorio: los planes que esperan en la sala y los casos del sandbox. */
+function contextoChat(): ContextoChat {
   const e = estado()
   const planes = e.sala.mensajes.filter((m) => m.bloques.length && !e.sala.aprobaciones.some((a) => a.mensaje === m.id))
     // La promoción va a la RAÍZ del hilo: una versión corregida ya es respuesta, y los hilos son de un nivel.
     .map((m) => ({ taskId: m.bloques[0]!.taskId, mensaje: m.hilo ?? m.id, canal: m.canal, resumen: m.cuerpo.split('\n')[0]! }))
   const casos = e.incidencias.filter((i) => i.sandbox).map((i) => ({ incidencia: i.id, consultora: i.consultora }))
-  const r = respondeHil({ corte: CORTE, entidades: { andina: { tipo: 'consultora', nombre: 'Consultora Andina' }, boreal: { tipo: 'consultora', nombre: 'Consultora Boreal' } },
-    motor, matriz: MATRIZ_LABORATORIO, planes, casos, validadores: VALIDADORES, delimitaDato, agente: AGENTE, ahora: ahora(), nuevoId: () => `chat-${e.n++}` }, { usuario: s.usuario, rol: s.rol }, texto)
+  return { corte: CORTE, entidades: { andina: { tipo: 'consultora', nombre: 'Consultora Andina' }, boreal: { tipo: 'consultora', nombre: 'Consultora Boreal' } },
+    motor, matriz: MATRIZ_LABORATORIO, planes, casos, validadores: VALIDADORES, delimitaDato, agente: AGENTE, ahora: ahora(), nuevoId: () => `chat-${e.n++}` }
+}
+
+/** El chat del HIL: contesta con fuente, propone o promueve a la sala. Nunca aprueba. */
+function conversa(s: Sesion, texto: string): void {
+  if (s.rol !== 'superadmin' && s.rol !== 'experto') throw new Rechazo('el chat del HIL es del superadministrador y del experto')
+  registraRespuesta(s, texto, respondeHil(contextoChat(), { usuario: s.usuario, rol: s.rol }, texto))
+}
+
+/**
+ * La mesa del experto: enseña EN un caso del sandbox que ya eligió en la pantalla (`ensenaCaso`). Queda igual que una
+ * enseñanza del chat: propuesta, a medida de la consultora del caso y con su origen. Devuelve la respuesta y la propuesta.
+ */
+export function ensenaEnElCaso(s: Sesion, incidencia: string, texto: string): { respuesta: RespuestaHil; propuesta: string | null } {
+  if (s.rol !== 'experto') throw new Rechazo('enseñar en el sandbox es del experto')
+  const r = ensenaCaso(contextoChat(), { usuario: s.usuario, rol: s.rol }, incidencia, texto)
+  return { respuesta: r, propuesta: registraRespuesta(s, texto, r) }
+}
+
+function registraRespuesta(s: Sesion, texto: string, r: RespuestaHil): string | null {
+  const e = estado()
   const hilo = (e.chat[s.usuario] ??= [])
   hilo.push({ autor: 'humano', texto, tipo: null, fuentes: [] })
   hilo.push({ autor: 'agente', texto: r.texto, tipo: r.tipo, fuentes: 'fuentes' in r ? r.fuentes.map((f) => f.cita) : [] })
@@ -308,7 +327,9 @@ function conversa(s: Sesion, texto: string): void {
     if (inc) e.origenes[id] = { consultora: inc.consultora, cliente: inc.cliente }
     e.propuestas.unshift({ id, alcance: alcanceDe(r.propuesta), tipo: 'regla', titulo: 'Caso nuevo para la matriz y regla para el grafo (propuesta de siembra)', detalle: r.propuesta.contenido, estado: r.propuesta.estado, por: r.propuesta.propuestaPor })
     if (r.cli) e.propuestas.unshift({ id: null, alcance: null, tipo: 'cli', titulo: r.cli.nombre, detalle: `${r.cli.operacion} · dry-run por defecto · readOnly: ${String(r.cli.readOnly)} · ${r.cli.nota}`, estado: r.cli.estado, por: r.propuesta.propuestaPor })
+    return id
   }
+  return null
 }
 
 const alcanceDe = (p: PropuestaDeEnsenanza) => (p.alcance === 'nucleo' ? 'núcleo' : `a medida de ${p.consultora}`)
