@@ -163,6 +163,10 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   // SOPORTE_SAP_LABORATORIO=1 (que `configura:deploy` rechaza en producción); estado sintético en memoria,
   // identidades de laboratorio, sin base y sin `service_role`. Exponerla es gate humano con C3 + C4.
   '/api/soporte-sap',
+  // La mesa del experto de Soporte SAP (docs/goals/soporte-sap-experto.md). RF-20: misma app y mismo puerto. No existe
+  // sin SOPORTE_SAP_LABORATORIO=1, sin la configuración de Access ni sin un JWT de Access válido (404); en lo alojado,
+  // la imagen solo sirve la mesa y la ruta de arriba no existe. Sin base y sin `service_role`; C3 + AISIA revisión 11.
+  '/api/mesa/soporte-sap',
   // Vendedor con IA en WhatsApp (goal ventas-ia-waba, fases 0-3 en laboratorio). RF-20: misma app y mismo
   // puerto. `webhook`, `flows` y `pagos` son las únicas que un tercero (Meta, el procesador) tendría que
   // alcanzar, y solo con el canal REAL: la app no lo arranca sin C3 + C4 firmados; en el laboratorio las
