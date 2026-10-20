@@ -355,7 +355,9 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     dentro (sin `.env*`, sin el código del repo, sin secretos horneados). La ubicación va fijada, no hay SSH ni URLs de
     vista previa, los secretos no van en `vars` y los registros de las peticiones van apagados. Después de subir, el
     guion comprueba que sin sesión de Access la mesa no abre.
-  - El contenedor solo sale a internet hacia las llaves de Access del equipo y el almacén S3 (`allowedHosts`).
+  - *Brecha*: el contenedor tiene salida a internet. Cerrarla a las llaves de Access y al almacén pide interceptar el TLS
+    con el CA de Cloudflare, y `allowedHosts` solo no está documentado para HTTPS: no se dio por bueno sin probarlo. No
+    hay modelo, y el runtime pasa por la política de D7 (el barrido de imports lo exige).
   - *Brecha*: Access se configura en el panel de Cloudflare, y el código no lo prueba. Lo comprueba el guion después de
     cada despliegue, y sin Access, sin un JWT no entra nadie.
   - *Brecha*: un `wrangler deploy` a mano se salta el candado, igual que un `vercel deploy` a mano.

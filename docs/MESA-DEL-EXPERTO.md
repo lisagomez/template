@@ -29,7 +29,7 @@ navegador del experto ──▶ Cloudflare Access (su correo + un PIN de un solo
                               ▼
                     Contenedor (scripts/laboratorio-alojado/Dockerfile, este de Norteamérica)
                       vuelve a verificar el JWT · el laboratorio sintético en memoria · OCR con Tesseract
-                      solo sale a internet hacia las llaves de Access y el almacén
+                      con salida a internet (sin modelo; ver «Lo que la mesa no hace»)
                               ▼
                     R2 «mesa-del-experto» (jurisdicción de Estados Unidos): los casos del experto, sus pasos y
                     su retroalimentación, filtrados, durante 180 días
@@ -182,3 +182,5 @@ se conecta a la mesa.** El experto entra por Access, no por Vercel, y la vitrina
 - **El contenedor se fija en el este de Norteamérica**, que puede incluir Canadá: Containers no ofrece una jurisdicción
   «us». R2 sí la ofrece.
 - **Un `wrangler deploy` a mano se salta el candado.**
+- **El contenedor tiene salida a internet.** Cerrarla a las llaves de Access y al almacén pide interceptar el TLS con el
+  CA de Cloudflare. No se dio por bueno sin probarlo: queda como brecha en el C3.

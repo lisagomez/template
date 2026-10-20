@@ -417,7 +417,8 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     pasos, su retroalimentación y su correo) va a R2, en la jurisdicción de Estados Unidos, y solo lo lee la identidad
     del laboratorio. Vence a los 180 días (lo decide el laboratorio al firmar) o cuando el laboratorio lo borra. No tiene
     respaldo: su RPO y su RTO son desconocidos, y un borrado es definitivo.
-  - El contenedor solo sale a internet hacia las llaves de Access del equipo y el almacén. No hay modelo.
+  - No hay modelo, y el runtime pasa por la política de D7. El contenedor tiene salida a internet: cerrarla pide
+    interceptar el TLS, y no se dio por bueno sin probarlo (brecha del C3).
   - El despliegue lleva su candado: sube la imagen del commit, revisada por dentro; la ubicación va fijada; no hay SSH,
     secretos en la configuración ni registros de las peticiones.
   - *Brecha*: un dato sin forma pasa el filtro, y el experto puede contar el caso de un cliente suyo. Cloudflare ve el

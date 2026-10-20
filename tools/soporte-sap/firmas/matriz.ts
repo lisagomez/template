@@ -2593,6 +2593,12 @@ export const FILAS: readonly Fila[] = [
     nota: 'lo dice la documentación de Cloudflare; se comprueba contra la URL alojada, no desde el código. Si un día se alcanzara, sin JWT tampoco abre',
   },
   {
+    id: 'c3-mesa-salida-abierta', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'brecha',
+    afirmacion: 'el contenedor tiene salida a internet',
+    control: 'no hay modelo; el runtime pasa por la política de D7 y el barrido de imports la exige',
+    nota: 'cerrarla a las llaves de Access y al almacén pide interceptar el TLS (interceptHttps con el CA de Cloudflare); allowedHosts solo no está documentado para HTTPS, y no se dio por bueno sin probarlo',
+  },
+  {
     id: 'c3-mesa-cloudflare-ve', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'brecha',
     afirmacion: 'Cloudflare ve todo lo que pasa por la mesa, porque termina el TLS',
     control: 'va en la AISIA (revisión 11): lo que escribe el experto, filtrado',
