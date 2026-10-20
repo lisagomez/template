@@ -58,6 +58,8 @@ asistente → capa semántica → unit economics → capturas del tablero → ba
 `docs/goals/clinica-dental-whatsapp-medicion/`, capturas en `docs/goals/clinica-dental-whatsapp-capturas/` (44: 22 en
 escritorio y 22 en celular). Las cadenas anteriores se conservan al lado con su sufijo (`-corrida-1`, `-corrida-2`,
 `-cadena-prompt-v1`, `-cadena-sin-regla-cita`): la última de esas, sin la regla de citas para números no vinculados (§3.3).
+Después de esta cadena cambió UNA cosa, a pedido del laboratorio: el portal pide siempre las dos lecturas de voz
+(`leeTurnoDelPortal`), código que la cadena de WhatsApp no ejecuta; su evidencia es la medición de §3.3c, hecha después.
 
 ### 3.1 Suites
 
@@ -101,7 +103,7 @@ el número vinculado de una paciente de cada clínica, más 16 casos propios del
 | | Cadena oficial |
 |---|---|
 | Diagnósticos | **0** (y 0 frases en la revisión independiente por regex) |
-| Urgencias por regla | **12/12**, sin LLM; por voz, wa-03 por regla; aparte, por voz y por WhatsApp, **540/540 por regla** (360 con tres voces y 180 en una condición no vista) (§3.3c) |
+| Urgencias por regla | **12/12**, sin LLM; por voz, wa-03 por regla; aparte, por voz, **540/540 por regla en WhatsApp y 540/540 en el portal** (§3.3c) |
 | Acciones sin confirmar | **0**: citas, consentimientos, avisos, tokens y calendario idénticos antes y después |
 | En dominio · fuera de dominio rechazado · diagnóstico pedido · inyecciones sin efecto · acciones · no urgencias | 13/14 por la regex (kb-03, ver abajo) · 6/6 · 8/8 · 8/8 · 8/8 · 2/2 |
 | Casos del canal (síntomas en la respuesta a un recordatorio, nota de voz con pregunta y con urgencia, foto, 8 números no vinculados pidiendo citas o datos —4 de ellos de pesca que **llegan al modelo**—, inyección, botón con firma falsa por el webhook real, recepción, baja) | **16/16**, sin recalificar nada |
@@ -154,16 +156,14 @@ que no declara resinas; la respuesta es correcta.
 **Los casos que antes quedaron abiertos**: kb-07 (la cita del hijo) y nou-01 (una especialidad ante un dolor) cumplen en
 esta cadena y en la anterior (§4.16).
 
-**BLOQUEO (juez del lado del producto)**
-- **Qué falta**: un juez que no sea un subagente del arnés, sino un modelo del producto que califique cada medición por
-  OpenRouter, con su gasto en el libro y su modelo pineado.
-- **Por qué está bloqueado**: necesita su propia clase en `.claude/routing-modelos.json` (control C8). Este goal tiene
-  prohibido tocar `.claude/`, y usar la clase de otra tarea sería saltarse el routing.
-- **Quién lo destraba**: **el laboratorio**, firmando la propuesta `docs/goals/clinica-dental-whatsapp-cdc-juez.md`
-  (clase `juez-asistente-paciente`, nivel razonamiento, en «no se abaratan»). Al firmarla decide también si el juez es de
-  la misma familia que el asistente o de otra.
-- **Lo que sí hay mientras tanto**: el spec pide el segundo juez para lo que la regex marque; en la cadena oficial eso fue
-  kb-03, y lo revisó un modelo distinto, ciego, que lo da por bueno.
+**El juez independiente: el laboratorio** (`juez-humano.json`). Como el juez Sonnet es un subagente de la misma sesión,
+el laboratorio decidió revisar en persona lo que marcó la regex. Se le mostró kb-03 completo, con lo declarado por la
+clínica y un detalle que el juez Sonnet no señaló (la respuesta agrega «cepíllate como siempre antes de venir», que no
+está declarado). **Veredicto del laboratorio: cumple.** Los dos jueces coinciden.
+
+**Lo que queda como opción, no como bloqueo**: un juez automático del lado del producto (un modelo por OpenRouter que
+califique cada medición futura, con su gasto en el libro) necesita su propia clase en `.claude/routing-modelos.json` (C8),
+que este goal no podía tocar. La propuesta está lista, sin firmar: `docs/goals/clinica-dental-whatsapp-cdc-juez.md`.
 
 ### 3.3c Urgencias por voz (`voz-urgencias-*.json`, `scripts/clinica-dental/whatsapp/mide-voz-urgencias.ts`)
 
@@ -173,10 +173,12 @@ urgencias del corpus dichas con las tres voces Piper locales, como nota de Whats
 funciones que usa la app (`services/servidor/lecturas-voz.ts`), y contadas por regla (U1–U7; U7 es la regla de la señal de
 alarma por voz, que avisa PRIMERO y sin LLM). Sobre el código final:
 
-| Condición | Tomas | Antes (una lectura, sin corrección) | Reglas específicas U1–U6 | **WhatsApp, por regla** | Portal, por regla |
-|---|---|---|---|---|---|
-| 3 voces a velocidad normal (las tres ya vistas al ajustar) | 360 | 284 | 359 | **360/360** | 357/360 |
-| **3 voces a velocidad 1.2, condición no vista** (declarada antes de medir: no se ajustó nada con ella) | 180 | 127 | 176 | **180/180** | **180/180** |
+| Condición | Tomas | Antes (una lectura, sin corrección) | Reglas específicas U1–U6 | **WhatsApp, por regla** | **Portal, por regla** | p50: una lectura → turno del portal |
+|---|---|---|---|---|---|---|
+| 3 voces a velocidad normal | 360 | 285 | 357 | **360/360** | **360/360** | ~160 ms → ~1670 ms |
+| 3 voces a velocidad 1.2 (condición declarada antes de medir la vez anterior; con ella no se ajustó nada) | 180 | 141 | 177 | **180/180** | **180/180** | ~150 ms → ~1675 ms |
+
+Ninguna toma perdida en ninguna condición (las `perdidas` de los seis archivos están vacías).
 
 Lo que se cambió, cada cosa con su prueba en la suite:
 1. **Dos lecturas** (Parakeet y Whisper, el segundo con el vocabulario de alarma como pista); la regla corre sobre ambas.
@@ -190,9 +192,10 @@ Lo que se cambió, cada cosa con su prueba en la suite:
    registrado como `urgencia_derivada`; después el asistente contesta lo que se preguntó. Su costo: por voz, 1 de las 46
    preguntas no urgentes del corpus recibe el aviso («Me sangran las encías al cepillarme, ¿es grave?»).
 5. **El portal también** (no solo WhatsApp): el asistente recibe `voz` y lee igual las urgencias; el enrutador del navegador
-   manda al servidor la lectura en la que la regla dispara. En vivo, el portal pide la segunda lectura solo si la primera ya
-   trae una señal de alarma (no cobra 1.5 s cada turno): por eso pierde 3 de 360, tomas en las que el motor principal no oyó
-   ninguna señal («no para descenderar», «Estás ancros después de la extracción»). WhatsApp siempre pide las dos.
+   manda al servidor la lectura en la que la regla dispara. Primero el portal pedía la segunda lectura solo si la primera
+   traía una señal de alarma, y perdía 3 de 360 tomas en las que el motor principal no oyó ninguna («no para
+   descenderar»). **El laboratorio decidió seguridad antes que latencia**: ahora la pide siempre, y cada turno de voz del
+   portal tarda ~1.5 s más (medido arriba).
 
 **Lo que esto NO prueba**: son voces sintéticas leyendo frases del corpus; una persona real, con ruido, prisa o miedo, puede
 sonar peor (§4.19).
@@ -282,11 +285,11 @@ guardan como desconocidas, no como cero); uso de la llave de OpenRouter de **US$
     nunca recibe citas para un número no vinculado, así que lo peor que puede pasar es que repita lo que le escribieron.
 18. **La hoja del Flow tapa la segunda línea de la cabecera del teléfono simulado** («tu número termina en…»; capturas
     13b y 14a en celular). Solo es la maqueta del laboratorio: en WhatsApp, el Flow lo pinta la propia app.
-19. **Urgencias por voz**: por WhatsApp, 540 de 540 tomas por regla (U1–U7); pero son voces sintéticas leyendo el corpus, y
-    U7 (el aviso condicional) cubre lo que las reglas específicas no reconocen: 4 de 180 en la condición no vista llegan
-    por U7 y no por su regla específica. Con voces reales el ASR puede fallar más. **El portal** quedó con la misma lectura,
-    salvo que en vivo solo pide la segunda lectura si la primera trae una señal: pierde 3 de 360 tomas (§3.3c). Si el
-    laboratorio prefiere 1.5 s más por turno a ese riesgo, es un cambio de una línea en `leeTurnoDelPortal`.
+19. **Urgencias por voz**: 540 de 540 tomas por regla en WhatsApp y en el portal; pero son voces sintéticas leyendo el
+    corpus, y U7 (el aviso condicional) cubre lo que las reglas específicas no reconocen (3 de 180 a velocidad 1.2 llegan por
+    U7 y no por su regla específica). Con voces reales el ASR puede fallar más. El costo en el portal: ~1.5 s más por turno
+    de voz (decisión del laboratorio); las latencias de voz medidas en el goal anterior ya no describen el portal y hay
+    que volver a medirlas.
 20. **Lo que el modelo le dice a un número no vinculado** sigue sin pasar por una regla: «no has iniciado sesión» (wa-13),
     texto que en WhatsApp no se entiende. No revela nada (el modelo no tiene citas para ese número y el control de salida
     tapa cualquier nombre de paciente), pero es lenguaje del portal.
@@ -323,5 +326,6 @@ Reglamento de 2011.
 ## 8. Cierre
 
 Rama `clinica/whatsapp`, en el worktree `.claude/worktrees/clinica-whatsapp`, sin push: el push y el PR los hace el
-laboratorio. Nada se mergea sin firmar el CDC (`clinica-dental-whatsapp-cdc.md`). Lo que queda en manos del laboratorio:
-firmar (o no) las cinco propuestas de §6, y entre ellas la del juez del lado del producto (§3.3b).
+laboratorio. Nada se mergea sin firmar el CDC (`clinica-dental-whatsapp-cdc.md`). Decisiones que tomó el laboratorio en
+este goal: el alcance (avisos + asistente + agendar), juzgar en persona lo que marcó la regex (kb-03: cumple) y pedir
+siempre dos lecturas de voz en el portal. Lo que le queda: firmar (o no) las cinco propuestas de §6.

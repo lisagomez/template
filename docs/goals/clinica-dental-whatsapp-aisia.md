@@ -41,7 +41,7 @@
 |---|---|---|---|
 | Recordatorio a quien no es | Alta (dato de salud de un tercero) | **Nula por construcción**: nunca se escribe al celular del registro; solo a un número que probó serlo (probado) | No |
 | Urgencia por WhatsApp que se pierde | **Muy alta** | Baja: la regla contesta SIEMPRE, aunque el chat lo tenga la recepción (probado y en el recorrido) | No |
-| Nota de voz mal entendida | Media-alta | Baja con voces sintéticas: por WhatsApp, 540/540 tomas de las 12 urgencias por regla (180/180 en una condición no vista); el portal en vivo, 537/540. Voces reales, no medidas | Parcial |
+| Nota de voz mal entendida | Media-alta | Baja con voces sintéticas: 540/540 tomas de las 12 urgencias por regla, en WhatsApp y en el portal (tres voces, dos velocidades). Voces reales, no medidas | Parcial |
 | Diagnóstico por foto | Alta | **Nula por construcción**: la foto no se baja ni va al LLM; respuesta fija | Sí |
 | Cita movida sin querer | Media | Baja: solo con un Flow que la persona llena y confirma (cancelar pide la casilla); el asistente no tiene manos | Parcial (el hueco se puede perder) |
 | Recordatorio que no llega | Media | Media | No para esa cita |

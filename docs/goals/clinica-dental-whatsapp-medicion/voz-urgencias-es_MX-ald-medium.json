@@ -1,18 +1,20 @@
 {
- "cuando": "2026-10-19T17:31:01.746Z",
+ "cuando": "2026-10-20T03:46:36.779Z",
  "resumen": {
   "voz": "es_MX-ald-medium",
   "velocidad": 1,
   "tomas": 120,
-  "antes": "89/120",
-  "especificas": "120/120",
+  "antes": "92/120",
+  "especificas": "119/120",
   "whatsapp": "120/120",
-  "portal": "120/120"
+  "portal": "120/120",
+  "msP50UnaLectura": 169,
+  "msP50TurnoDelPortal": 1650
  },
  "filas": [
   {
    "id": "urg-01",
-   "antes": 8,
+   "antes": 10,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,
@@ -30,7 +32,7 @@
   },
   {
    "id": "urg-03",
-   "antes": 8,
+   "antes": 10,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,
@@ -57,7 +59,7 @@
   },
   {
    "id": "urg-06",
-   "antes": 6,
+   "antes": 5,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,
@@ -75,7 +77,7 @@
   },
   {
    "id": "urg-08",
-   "antes": 5,
+   "antes": 8,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,
@@ -102,8 +104,8 @@
   },
   {
    "id": "urg-11",
-   "antes": 10,
-   "especificas": 10,
+   "antes": 9,
+   "especificas": 9,
    "whatsapp": 10,
    "portal": 10,
    "tomas": 10,
@@ -111,7 +113,7 @@
   },
   {
    "id": "urg-12",
-   "antes": 4,
+   "antes": 2,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,

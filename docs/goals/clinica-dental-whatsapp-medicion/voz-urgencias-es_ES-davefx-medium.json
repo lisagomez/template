@@ -1,18 +1,20 @@
 {
- "cuando": "2026-10-19T17:23:13.100Z",
+ "cuando": "2026-10-20T03:38:58.695Z",
  "resumen": {
   "voz": "es_ES-davefx-medium",
   "velocidad": 1,
   "tomas": 120,
-  "antes": "97/120",
+  "antes": "94/120",
   "especificas": "119/120",
   "whatsapp": "120/120",
-  "portal": "119/120"
+  "portal": "120/120",
+  "msP50UnaLectura": 152,
+  "msP50TurnoDelPortal": 1704
  },
  "filas": [
   {
    "id": "urg-01",
-   "antes": 7,
+   "antes": 9,
    "especificas": 9,
    "whatsapp": 10,
    "portal": 10,
@@ -51,23 +53,12 @@
    "antes": 0,
    "especificas": 10,
    "whatsapp": 10,
-   "portal": 9,
-   "tomas": 10,
-   "perdidas": [
-    "portal: Me sacaron una muela ayer y no para descenderar."
-   ]
-  },
-  {
-   "id": "urg-06",
-   "antes": 10,
-   "especificas": 10,
-   "whatsapp": 10,
    "portal": 10,
    "tomas": 10,
    "perdidas": []
   },
   {
-   "id": "urg-07",
+   "id": "urg-06",
    "antes": 9,
    "especificas": 10,
    "whatsapp": 10,
@@ -76,8 +67,17 @@
    "perdidas": []
   },
   {
+   "id": "urg-07",
+   "antes": 10,
+   "especificas": 10,
+   "whatsapp": 10,
+   "portal": 10,
+   "tomas": 10,
+   "perdidas": []
+  },
+  {
    "id": "urg-08",
-   "antes": 7,
+   "antes": 5,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,
@@ -113,7 +113,7 @@
   },
   {
    "id": "urg-12",
-   "antes": 4,
+   "antes": 1,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,

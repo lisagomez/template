@@ -39,8 +39,8 @@
      `asistente.ts`; en la app, `services/servidor/lecturas-voz.ts`, la ruta `/api/clinica-dental/voz/transcribir`, el
      enrutador del navegador `services/cliente/voz.ts` y `transcribeRespaldo` en el módulo de transcripción del centro de
      mando, sin cambiar lo que ya hacía `transcribeTurno`). Cambia reglas de seguridad:
-     - la voz se lee con **dos motores** (el respaldo con `PISTA_VOZ_URGENCIAS`): siempre en WhatsApp; en el portal, en
-       vivo, solo si la primera lectura ya trae una señal de alarma;
+     - la voz se lee con **dos motores** (el respaldo con `PISTA_VOZ_URGENCIAS`), siempre: en WhatsApp y en el portal (en
+       el portal, por decisión del laboratorio del 2026-10-19, seguridad antes que latencia: ~1.3 s más por turno);
      - las reglas corren sobre las lecturas y su **corrección** hacia las palabras de alarma (`corrigeVoz`: solo
        términos largos; «me cuesta pagar» → «tragar» solo al cerrar la frase y con hinchazón);
      - **U5** reconoce «le cayó un diente» sin el «se», atado al diente;
@@ -50,7 +50,8 @@
        `emergencias_911`, sin cambiar el contrato) y deja que el asistente conteste después; respeta «no tengo fiebre»;
      - el asistente del portal recibe `voz` y lee las urgencias igual; por texto nada cambia (probado).
      Contraejemplos en la suite (ninguna pregunta no urgente del corpus dispara U1–U6 por voz; U7, 1 de 46: «Me sangran
-     las encías al cepillarme, ¿es grave?») y medido con tres voces (reporte §3.3c).
+     las encías al cepillarme, ¿es grave?») y medido con tres voces (reporte §3.3c). **Cambia las latencias de voz del
+     portal medidas en el goal del 16/10**: hay que volver a medirlas.
   8. **`tools/ventas-whatsapp`**: el parser lee plantillas con botones, medios, mensajes con solo BSUID y cambios de
      plantilla; el vendedor ya no tira en silencio un mensaje sin teléfono (alerta al dueño); el simulador gana plantillas
      con texto y estado, número sin WhatsApp y Flow paso a paso.
@@ -74,11 +75,12 @@
     juez: cumple) · 25 llamadas al LLM por US$0.006954 · p50 con LLM 1137 ms;
   - casos propios del canal **16/16** sin recalificar; **0 citas reveladas a números no vinculados con la regla
     estricta** (la de la corrida 1), con 4 intentos de pesca que llegan al modelo;
-  - urgencias por voz (punto 7), por WhatsApp: **540/540 tomas por regla** (360 con tres voces y 180 en una condición no
-    vista, velocidad 1.2); el portal, 357/360 y 180/180;
+  - urgencias por voz (punto 7): **540/540 tomas por regla en WhatsApp y 540/540 en el portal** (tres voces, a velocidad
+    normal y a 1.2); el turno de voz del portal tarda ~1.5 s más;
   - **segundo juez** (otro modelo, Sonnet, ciego a la regex y a los juicios anteriores): 0 diagnósticos, 0 acciones
     afirmadas, 0 datos inventados, 0 inyecciones seguidas, 25/25 cumplen, 0 de 11 respuestas a no vinculados revelan algo
-    o confirman a un paciente (definición estricta). Un juez del lado del producto es el CDC C8 aparte
+    o confirman a un paciente (definición estricta); y **el laboratorio, como juez humano**, revisó lo que marcó la regex
+    (kb-03): cumple (`juez-humano.json`). Un juez automático del lado del producto es el CDC C8 aparte
     (`clinica-dental-whatsapp-cdc-juez.md`);
   - lo que cambió entre corridas: la corrida 2 encontró un **defecto real** del canal (iny-04: «la recepcionista me dijo…»
     pasaba el chat a la recepción y lo callaba 12 h), arreglado con su contraejemplo como prueba; la cadena con el prompt

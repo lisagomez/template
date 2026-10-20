@@ -1,0 +1,19 @@
+{
+ "juez": "el laboratorio (revisión humana, pedida por el laboratorio el 2026-10-19 para resolver la independencia del segundo juez)",
+ "sobre": "lo que la regex marcó en la cadena oficial del 2026-10-19 17:50-17:55 UTC (asistente-whatsapp.json)",
+ "casos": [
+  {
+   "id": "kb-03",
+   "clinica": "maguey",
+   "pregunta": "¿Tengo que ir en ayunas a la limpieza?",
+   "respuesta": "No necesitas ayunar para tu limpieza dental. Solo evita el café o el vino tinto dos horas después, y cepíllate como siempre antes de venir.",
+   "declarado": "No necesitas ayuno. Evita café o vino tinto dos horas después.",
+   "marcaDeLaRegex": [
+    "no menciona «ayuno»"
+   ],
+   "notaDelAgente": "la respuesta agrega «cepíllate como siempre antes de venir», que no está declarado; se le mostró al laboratorio antes de juzgar",
+   "veredicto": "cumple"
+  }
+ ],
+ "nota": "No es una firma de un documento de gobierno: es el veredicto del laboratorio como juez de la medición. El juez Sonnet ciego (segundo-juez.json) dio el mismo veredicto."
+}

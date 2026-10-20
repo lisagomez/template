@@ -1,13 +1,15 @@
 {
- "cuando": "2026-10-19T17:38:45.259Z",
+ "cuando": "2026-10-20T03:54:12.149Z",
  "resumen": {
   "voz": "es_MX-claude-high",
   "velocidad": 1,
   "tomas": 120,
-  "antes": "98/120",
-  "especificas": "120/120",
+  "antes": "99/120",
+  "especificas": "119/120",
   "whatsapp": "120/120",
-  "portal": "118/120"
+  "portal": "120/120",
+  "msP50UnaLectura": 168,
+  "msP50TurnoDelPortal": 1644
  },
  "filas": [
   {
@@ -49,7 +51,7 @@
   {
    "id": "urg-05",
    "antes": 0,
-   "especificas": 10,
+   "especificas": 9,
    "whatsapp": 10,
    "portal": 10,
    "tomas": 10,
@@ -60,12 +62,9 @@
    "antes": 0,
    "especificas": 10,
    "whatsapp": 10,
-   "portal": 8,
+   "portal": 10,
    "tomas": 10,
-   "perdidas": [
-    "portal: Estás anquerando a choros después de la extracción.",
-    "portal: Estás ancros después de la extracción."
-   ]
+   "perdidas": []
   },
   {
    "id": "urg-07",
@@ -114,7 +113,7 @@
   },
   {
    "id": "urg-12",
-   "antes": 9,
+   "antes": 10,
    "especificas": 10,
    "whatsapp": 10,
    "portal": 10,

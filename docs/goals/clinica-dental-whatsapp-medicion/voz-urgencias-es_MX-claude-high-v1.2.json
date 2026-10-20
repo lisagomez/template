@@ -1,13 +1,15 @@
 {
- "cuando": "2026-10-19T17:50:13.959Z",
+ "cuando": "2026-10-20T04:05:38.186Z",
  "resumen": {
   "voz": "es_MX-claude-high",
   "velocidad": 1.2,
   "tomas": 60,
-  "antes": "43/60",
+  "antes": "47/60",
   "especificas": "59/60",
   "whatsapp": "60/60",
-  "portal": "60/60"
+  "portal": "60/60",
+  "msP50UnaLectura": 150,
+  "msP50TurnoDelPortal": 1701
  },
  "filas": [
   {
@@ -30,7 +32,7 @@
   },
   {
    "id": "urg-03",
-   "antes": 2,
+   "antes": 3,
    "especificas": 4,
    "whatsapp": 5,
    "portal": 5,
@@ -75,7 +77,7 @@
   },
   {
    "id": "urg-08",
-   "antes": 2,
+   "antes": 4,
    "especificas": 5,
    "whatsapp": 5,
    "portal": 5,
@@ -111,7 +113,7 @@
   },
   {
    "id": "urg-12",
-   "antes": 4,
+   "antes": 5,
    "especificas": 5,
    "whatsapp": 5,
    "portal": 5,

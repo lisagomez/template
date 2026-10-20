@@ -1,8 +1,8 @@
 /**
  * LAS URGENCIAS POR VOZ, por regla: ¿la regla las detecta aunque el ASR tuerza una palabra? Cada urgencia del corpus se
  * dice N veces con una voz Piper local (cada toma suena un poco distinta), pasa por OGG/Opus como una nota de WhatsApp y
- * se lee con LAS MISMAS funciones que usa la app (`lecturas-voz.ts`): la nota de WhatsApp (dos motores siempre) y el
- * turno del portal (el segundo motor solo si el primero ya trae una señal de alarma). Por cada toma se cuenta:
+ * se lee con LAS MISMAS funciones que usa la app (`lecturas-voz.ts`): la nota de WhatsApp y el turno del portal (los dos
+ * con dos motores). Por cada toma se cuenta, y se toma el tiempo de una lectura contra el del turno del portal:
  *  - `antes`: una sola lectura y la regla tal cual (como estaba el canal al empezar este goal);
  *  - `especificas`: alguna de U1–U6 (con las lecturas y su corrección);
  *  - `whatsapp` y `portal`: alguna regla, U7 incluida (el aviso condicional que sale PRIMERO, sin LLM).
@@ -41,14 +41,20 @@ async function notaDeVoz(texto: string): Promise<Uint8Array> {
 }
 
 interface Fila { id: string; antes: number; especificas: number; whatsapp: number; portal: number; tomas: number; perdidas: string[] }
+const ms = { una: [] as number[], portal: [] as number[] };
+const p50 = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] ?? null;
 
 async function mideToma(p: { texto: string; clinica: string }, r: Fila): Promise<void> {
   const c = CLINICAS.find((x) => x.id === p.clinica)!;
   const pcm = await notaDeVoz(p.texto);
   const senal = AbortSignal.timeout(60_000);
+  let t0 = performance.now();
   const una = (await transcribeTurno(pcm, senal)).candidatos;
+  ms.una.push(performance.now() - t0);
   const nota = await leeNotaDeVoz(pcm, senal);
+  t0 = performance.now();
   const turno = (await leeTurnoDelPortal(pcm, senal)).candidatos;
+  ms.portal.push(performance.now() - t0);
   const wa = detectaUrgenciaEnVoz(nota, c);
   // El portal: el navegador manda al servidor la lectura en la que alguna regla dispara, y el servidor la vuelve a leer igual.
   const portal = turno.map((x) => detectaUrgenciaEnVoz([x], c)).find((u) => u !== null) ?? null;
@@ -68,7 +74,7 @@ async function principal(): Promise<void> {
     console.log(`  ${r.whatsapp === TOMAS && r.portal === TOMAS ? '✓' : '✗'} ${p.id.padEnd(7)} antes ${r.antes}/${TOMAS} · U1-U6 ${r.especificas}/${TOMAS} · whatsapp ${r.whatsapp}/${TOMAS} · portal ${r.portal}/${TOMAS}`);
   }
   const suma = (k: 'antes' | 'especificas' | 'whatsapp' | 'portal') => `${filas.reduce((s, f) => s + f[k], 0)}/${filas.length * TOMAS}`;
-  const resumen = { voz: VOZ, velocidad: VELOCIDAD, tomas: filas.length * TOMAS, antes: suma('antes'), especificas: suma('especificas'), whatsapp: suma('whatsapp'), portal: suma('portal') };
+  const resumen = { voz: VOZ, velocidad: VELOCIDAD, tomas: filas.length * TOMAS, antes: suma('antes'), especificas: suma('especificas'), whatsapp: suma('whatsapp'), portal: suma('portal'), msP50UnaLectura: Math.round(p50(ms.una) ?? 0), msP50TurnoDelPortal: Math.round(p50(ms.portal) ?? 0) };
   writeFileSync(join(process.cwd(), 'docs/goals/clinica-dental-whatsapp-medicion', `voz-urgencias-${VOZ}${VELOCIDAD === 1 ? '' : `-v${VELOCIDAD}`}.json`), `${JSON.stringify({ cuando: new Date().toISOString(), resumen, filas }, null, 1)}\n`);
   console.log(JSON.stringify(resumen));
 }
