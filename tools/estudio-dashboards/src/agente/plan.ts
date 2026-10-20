@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { analizaVariacion, type AnalisisVariacion } from '../analisis.js'
 import { proponeAlerta, type Alerta } from '../alertas.js'
 import { alcanza, define, esSumable, metrica, tieneDesfase, type Catalogo, type Definicion } from '../catalogo.js'
-import type { Consultor } from '../consulta.js'
+import { ConsultaInvalida, type Consultor } from '../consulta.js'
 import { ESQUEMA_DASHBOARD, ESQUEMA_PARCHE, TIPOS_INSTRUCCION, filtroEsquema, periodoEsquema, type Componente, type Dashboard, type Parche } from '../esquema.js'
 import { aplicaParche, type Aplicado } from '../parche.js'
 import { proponeMetrica, type Propuesta } from '../proponer.js'
@@ -109,7 +109,13 @@ async function analiza(x: Consultor, p: Plan, actual: Dashboard, version: number
   const usados = new Set(actual.componentes.map((c) => c.id))
   let k = 1
   while (usados.has(`hallazgo_${k}`)) k++
-  const analisis = await analizaVariacion(x, { metrica: n, periodo: p.entendi.periodo ?? actual.filtros.periodo, filtros: p.entendi.filtros, id: `hallazgo_${k}` })
+  let analisis: AnalisisVariacion
+  try {
+    analisis = await analizaVariacion(x, { metrica: n, periodo: p.entendi.periodo ?? actual.filtros.periodo, filtros: p.entendi.filtros, id: `hallazgo_${k}` })
+  } catch (error) {
+    if (error instanceof ConsultaInvalida) return vacio(p, [...error.errores])
+    throw error
+  }
   const parche: Parche = { esquema: ESQUEMA_PARCHE, base: version, alcance: { tipo: 'analizar', componentes: [analisis.hallazgo.id] }, operaciones: [{ op: 'agregar', componente: analisis.hallazgo, despues_de: actual.componentes[0]?.id ?? null }] }
   const r = aplicaParche(x.catalogo, actual, version, parche)
   return { ...vacio(p, r.ok ? [] : [...r.errores]), parche, aplicado: r.ok ? r.valor : null, analisis }

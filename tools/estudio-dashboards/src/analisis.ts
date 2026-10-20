@@ -9,8 +9,8 @@
  * Los ejes por defecto son las dimensiones categóricas de dominio chico que la métrica alcanza (canal, categoría,
  * región, campaña, origen…): el núcleo no sabe cuáles son en esta empresa; las descubre en el catálogo.
  */
-import { alcanza, define, esSumable, metrica, unidadDe, type Catalogo } from './catalogo.js'
-import type { Consultor } from './consulta.js'
+import { alcanza, define, esSumable, metrica, tieneDesfase, unidadDe, type Catalogo } from './catalogo.js'
+import { ConsultaInvalida, type Consultor } from './consulta.js'
 import type { Componente, PeriodoDashboard } from './esquema.js'
 import type { Filtro } from './puerto.js'
 import { corre } from './resolver.js'
@@ -160,7 +160,13 @@ function redacta(cat: Catalogo, a: PedidoAnalisis, contra: PeriodoDashboard, r: 
 export async function analizaVariacion(x: Consultor, a: PedidoAnalisis): Promise<AnalisisVariacion> {
   const cat = x.catalogo
   const m = metrica(cat, a.metrica)
-  if (!m) throw new Error(`la métrica «${a.metrica}» no existe en el catálogo`)
+  if (!m) throw new ConsultaInvalida([{ codigo: 'metrica_inexistente', ruta: 'metrica', mensaje: `la métrica «${a.metrica}» no existe en el catálogo` }])
+  // Una métrica con desfase no se totaliza sobre un periodo (compara contra el año anterior completo, y MetricFlow
+  // la rechaza sin agrupar por tiempo): se analiza su métrica base. Hallado por la medición del 2026-10-20 (q059).
+  if (tieneDesfase(cat, a.metrica)) {
+    const base = m.entradas.find((e) => e.desfase === null)?.nombre
+    throw new ConsultaInvalida([{ codigo: 'desfase_en_periodo', ruta: 'metrica', mensaje: `«${a.metrica}» lleva desfase de un año y no se descompone sobre un periodo; analiza ${base ? `«${base}»` : 'su métrica base'} (el análisis ya compara contra el año anterior)` }])
+  }
   const contra = a.contra ?? corre(a.periodo, 'anio_anterior')
   const f = a.filtros ?? []
   const [antes, despues] = await Promise.all([total(x, a.metrica, contra, f), total(x, a.metrica, a.periodo, f)])

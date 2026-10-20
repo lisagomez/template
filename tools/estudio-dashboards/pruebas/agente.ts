@@ -103,3 +103,12 @@ test('analizar: el hallazgo entra como componente nuevo y su texto solo lleva ci
   assert.equal(v.resultado?.aplicado?.dashboard.componentes[1]?.tipo, 'hallazgo')
   assert.match(v.texto, /Ventas netas pasó de/)
 })
+
+test('analizar una métrica con desfase vuelve al modelo con el porqué, y el modelo puede corregir a la base', async () => {
+  const yoy = plan({ tipo: 'analizar', entendi: { metricas: ['crecimiento_ventas_yoy_pct'], dimensiones: [], filtros: [], periodo: { desde: '2026-01', hasta: '2026-09' }, comparar: null } })
+  const base = plan({ tipo: 'analizar', entendi: { metricas: ['ventas_netas'], dimensiones: [], filtros: [], periodo: { desde: '2026-01', hasta: '2026-09' }, comparar: null } })
+  const v = await interpreta(contexto(modelo([yoy, base])), tablero('ejecutivo'), 0, '¿por qué crecimos tanto este año?')
+  assert.equal(v.intentos, 2)
+  assert.equal(v.error, null)
+  assert.equal(v.plan?.entendi.metricas[0], 'ventas_netas')
+})
