@@ -23,6 +23,7 @@ function Caso({ c, borra }: { c: CasoMesa; borra: (id: string) => void }) {
         <Chip className="bg-neutral-900 text-white">{c.entrada.sistema}</Chip><Chip>{c.entrada.modulo}</Chip>
         {c.entrada.transaccion ? <Chip className="font-mono">{c.entrada.transaccion}</Chip> : null}
         <Chip className={c.retro.veredicto ? 'bg-violet-100 text-violet-900' : 'bg-neutral-100 text-neutral-500'}>{VEREDICTO[c.retro.veredicto?.valor ?? 'sin_veredicto']}</Chip>
+        {c.sandbox?.veredicto === 'cuarentena' ? <Chip className="bg-amber-100 text-amber-900">cuarentena</Chip> : null}
         {c.por.prueba ? <Chip className="bg-amber-100 text-amber-900">de prueba</Chip> : null}
         <span className="ml-auto text-xs text-neutral-500">{c.por.correo} · {fechaCorta(c.creado)}</span>
       </div>

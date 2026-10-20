@@ -137,6 +137,8 @@ const ed = (archivo: string, buscar: string, poner: string): Edicion => ({ archi
 const dist = (f: string) => `${SS}/dist/${f}`
 /** La vitrina de Soporte SAP (revisión 10 de la AISIA): sus piezas viven en la app. */
 const VI = 'src/features/soporte-sap/vitrina'
+const ME = 'src/features/soporte-sap/mesa'
+const LA = 'scripts/laboratorio-alojado'
 
 export const FILAS: readonly Fila[] = [
   // ─────────────────────────────── AISIA ───────────────────────────────
@@ -2485,5 +2487,160 @@ export const FILAS: readonly Fila[] = [
     control: 'SQL · ss_propuesta_agente',
     comprobacion: prueba('nucleo.ts', 'D1 · el agente no propone directo al núcleo: al núcleo se llega promoviendo, y una propuesta nace de una incidencia de su consultora'),
     sabotaje: { que: 'el agente vuelve a proponer al núcleo', ediciones: [ed(SQL, "and alcance = 'a_medida' and consultora_id = ss_priv.consultora_de_tarea());", 'and (consultora_id is null or consultora_id = ss_priv.consultora_de_tarea()));')] },
+  },
+  // ── La mesa del experto alojada (docs/goals/soporte-sap-experto.md): el C3 «La mesa del experto alojada» y el daño
+  //    «Lo que escribe el experto, en un tercero» de la revisión 11 de la AISIA.
+  {
+    id: 'c3-mesa-identidad', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la identidad de la mesa es el JWT de Access verificado (firma RS256 con las llaves del equipo, emisor, audiencia y vigencia): un JWT de otra llave, cambiado o vencido no entra',
+    control: `${ME}/services/acceso.ts · verificaJwt`,
+    comprobacion: prueba('mesa-experto.ts', 'mesa · la identidad sale del JWT de Access verificado: firma, emisor, audiencia y vigencia; nadie la elige'),
+    sabotaje: { que: 'la mesa no mira la firma', ediciones: [ed(`${ME}/services/acceso.ts`, "return { ok: false, motivo: 'firma inválida' }", 'void 0')] },
+  },
+  {
+    id: 'c3-mesa-roles', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'el rol sale de las listas del laboratorio: un correo fuera de ellas no entra aunque Access lo deje pasar, y en la mesa no hay superadministrador',
+    control: `${ME}/services/acceso.ts · identidadDe`,
+    comprobacion: prueba('mesa-experto.ts', 'mesa · la identidad sale del JWT de Access verificado: firma, emisor, audiencia y vigencia; nadie la elige'),
+    sabotaje: { que: 'cualquier correo verificado entra como experto', ediciones: [ed(`${ME}/services/acceso.ts`, "c.expertos.includes(correo) ? 'experto' : null", "'experto'")] },
+  },
+  {
+    id: 'c3-mesa-sin-jwt', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'sin un JWT válido (o sin Access configurado, o sin el laboratorio encendido) la mesa no existe: 404 en la API y en las páginas',
+    control: 'src/app/api/mesa/soporte-sap/route.ts · contexto, y services/pagina.ts · identidadDeLaPagina',
+    comprobacion: prueba('mesa-experto.ts', 'mesa · sin un JWT válido la mesa no existe: 404 en GET y en POST, aunque el laboratorio esté encendido'),
+    sabotaje: { que: 'la ruta no responde 404 sin identidad', ediciones: [ed('src/app/api/mesa/soporte-sap/route.ts', '  if (c === NO_EXISTE) return nada()', '  if (c === NO_EXISTE && false) return nada()')] },
+  },
+  {
+    id: 'c3-mesa-laboratorio', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'lo del laboratorio (lo que dijo el experto, su export y borrar) solo existe para la identidad del laboratorio; un experto no ve ni califica casos ajenos',
+    control: 'src/app/api/mesa/soporte-sap/route.ts · ?vista=laboratorio, y mesa.ts · delExperto',
+    comprobacion: prueba('mesa-experto.ts', 'mesa · lo del laboratorio solo existe para su identidad: el experto recibe 404 y no ve casos ajenos'),
+    sabotaje: { que: 'cualquier identidad lee lo del laboratorio', ediciones: [ed('src/app/api/mesa/soporte-sap/route.ts', "  if (vista !== 'laboratorio' || c.id.rol !== 'laboratorio') return nada()", "  if (vista !== 'laboratorio') return nada()")] },
+  },
+  {
+    id: 'c3-mesa-sin-subidas', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la mesa no acepta archivos: solo las muestras del catálogo, por su nombre exacto; nada que venga de fuera se lee del disco',
+    control: `${ME}/services/mesa.ts · esMuestraDeLaMesa, y la ruta (415 a un multipart)`,
+    comprobacion: prueba('mesa-experto.ts', 'mesa · no acepta archivos: solo las muestras del catálogo, por su nombre exacto'),
+    sabotaje: { que: 'cualquier nombre cuenta como muestra', ediciones: [ed(`${ME}/services/mesa.ts`, 'const esMuestraDeLaMesa = (x: string): boolean => MUESTRAS.some((m) => m.archivo === x)', 'const esMuestraDeLaMesa = (x: string): boolean => x.length > 0')] },
+  },
+  {
+    id: 'c3-mesa-puerta', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la puerta (el Worker) verifica el JWT por su cuenta: sin uno válido no pasa nada al contenedor',
+    control: `${LA}/puerta.ts · atiende`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'puerta · sin un JWT válido el Worker no pasa nada al contenedor: todo responde como si no existiera'),
+    sabotaje: { que: 'la puerta deja pasar sin identidad', ediciones: [ed(`${LA}/puerta.ts`, '  if (!id) return nada()', '  if (false) return nada()')] },
+  },
+  {
+    id: 'c3-mesa-puerta-rutas', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la puerta solo deja pasar las rutas de la mesa y sus estáticos: /api/soporte-sap y lo demás no llegan al contenedor',
+    control: `${LA}/puerta.ts · RUTAS_DE_LA_MESA`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'puerta · solo pasan las rutas de la mesa, sin archivos ni credenciales de Access hacia el contenedor'),
+    sabotaje: { que: 'la puerta no mira la ruta', ediciones: [ed(`${LA}/puerta.ts`, '  if (!RUTAS_DE_LA_MESA.test(url.pathname)) return nada()\n', '')] },
+  },
+  {
+    id: 'c3-mesa-puerta-credenciales', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'al contenedor no le llegan las cookies ni el secreto de un token de servicio de Access',
+    control: `${LA}/puerta.ts · cabecerasParaElLaboratorio`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'puerta · solo pasan las rutas de la mesa, sin archivos ni credenciales de Access hacia el contenedor'),
+    sabotaje: { que: 'el secreto del token llega al contenedor', ediciones: [ed(`${LA}/puerta.ts`, "const NO_PASAN = ['cookie', 'authorization', 'cf-access-client-id', 'cf-access-client-secret',", "const NO_PASAN = ['cookie', 'authorization', 'cf-access-client-id',")] },
+  },
+  {
+    id: 'c3-mesa-solo-mesa', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la imagen alojada sirve solo la mesa: otra página lleva a ella y otra API, /api/soporte-sap (las identidades elegibles) incluida, da 404',
+    control: 'next.config.ts · reglasDelAlojado (LABORATORIO_ALOJADO=1, horneado en el build de la imagen)',
+    comprobacion: prueba('laboratorio-alojado.ts', 'alojado · la imagen sirve solo la mesa: otra página lleva a ella y otra API, también /api/soporte-sap, da 404'),
+    sabotaje: { que: 'la regla de las APIs deja pasar /api/soporte-sap', ediciones: [ed('next.config.ts', "    rewrites: [{ source: '/api/:ruta((?!mesa/).*)', destination: '/mesa/no-existe' }],", "    rewrites: [{ source: '/api/:ruta((?!mesa/|soporte-sap).*)', destination: '/mesa/no-existe' }],")] },
+  },
+  {
+    id: 'c3-mesa-candado-imagen', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'el candado no sube una imagen con un .env, con el código del repo o con secretos horneados, ni con una etiqueta que no sea la del commit',
+    control: `${LA}/candado.mjs · revisaImagenConstruida, en despliega.sh antes de subir`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'candado · la imagen construida no lleva .env, código del repo ni secretos horneados'),
+    sabotaje: { que: 'el candado no busca .env en la imagen', ediciones: [ed(`${LA}/candado.mjs`, '    if (/(^|\\/)\\.env[^/]*$/.test(a)) fallas.push(`la imagen lleva ${a}`)\n', '')] },
+  },
+  {
+    id: 'c3-mesa-candado-base', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la imagen se construye sobre la base del OCR pineada por digest, con la guarda de .env: otra base no sube',
+    control: `${LA}/candado.mjs · revisaDockerfile (con revisaImagen y revisaConstruible de scripts/despacho/reglas.mjs)`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'candado · no sube con otra base, sin la guarda de .env, con secretos en vars, sin ubicación fijada, con SSH o con la etiqueta latest'),
+    sabotaje: { que: 'el candado acepta cualquier base', ediciones: [ed(`${LA}/candado.mjs`, '  for (const f of froms) if (f !== base) fallas.push', '  for (const f of froms) if (false) fallas.push')] },
+  },
+  {
+    id: 'c3-mesa-candado-access', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'después de subir, el guion comprueba que sin sesión de Access la mesa no abre; si contesta, lo dice en rojo',
+    control: `${LA}/candado.mjs · accessPuesto, al final de despliega.sh`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'candado · después de subir, sin sesión de Access la mesa no abre'),
+    sabotaje: { que: 'cualquier respuesta cuenta como Access puesto', ediciones: [ed(`${LA}/candado.mjs`, '    const puesto = r.status === 401 ||', '    const puesto = r.status < 500 || r.status === 401 ||')] },
+  },
+  {
+    id: 'c3-mesa-access-panel', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'brecha',
+    afirmacion: 'Access (quién entra, con qué correo) se configura en el panel de Cloudflare',
+    control: 'despliega.sh lo comprueba después de cada despliegue; sin Access no hay JWT y nadie entra',
+    nota: 'el código no prueba la política de Access: la comprueba el guion contra la URL alojada, y sin Access la mesa falla cerrada',
+  },
+  {
+    id: 'c3-mesa-wrangler-a-mano', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'brecha',
+    afirmacion: 'un wrangler deploy a mano se salta el candado',
+    control: 'despliega.sh es la vía documentada',
+    nota: 'la misma brecha que un vercel deploy a mano en la vitrina: el candado vive en el guion, y quien tiene la cuenta puede saltárselo',
+  },
+  {
+    id: 'c3-mesa-sin-url-propia', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'brecha',
+    afirmacion: 'el contenedor no tiene URL propia: todo pasa por el Worker',
+    control: 'la plataforma (Cloudflare Containers); y el contenedor verifica el JWT por su cuenta',
+    nota: 'lo dice la documentación de Cloudflare; se comprueba contra la URL alojada, no desde el código. Si un día se alcanzara, sin JWT tampoco abre',
+  },
+  {
+    id: 'c3-mesa-cloudflare-ve', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'brecha',
+    afirmacion: 'Cloudflare ve todo lo que pasa por la mesa, porque termina el TLS',
+    control: 'va en la AISIA (revisión 11): lo que escribe el experto, filtrado',
+    nota: 'a diferencia de Tailscale Funnel en la vitrina, aquí el proveedor termina el TLS; es un tercero declarado en el manifiesto',
+  },
+  {
+    id: 'aisia-mesa-filtro-todo', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'el filtro mira todo texto de la acción, a cualquier profundidad: un campo nuevo o anidado no se escapa por no estar en una lista',
+    control: `${ME}/services/filtro.ts · textosDe (en la ruta, antes del laboratorio, y en mesa.ts antes de guardar)`,
+    comprobacion: prueba('mesa-experto.ts', 'mesa · el filtro recorre todo texto de la acción: un campo nuevo o anidado tampoco se escapa'),
+    sabotaje: { que: 'el filtro solo mira una lista de campos', ediciones: [ed(`${ME}/services/filtro.ts`, '  return Object.values(x).flatMap((v) => textosDe(v, profundidad + 1))', "  return ['titulo', 'descripcion', 'texto', 'pide', 'motivo'].flatMap((k) => textosDe((x as Record<string, unknown>)[k], profundidad + 1))")] },
+  },
+  {
+    id: 'aisia-mesa-retro-filtrada', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'la retroalimentación se guarda solo después del filtro: un texto con forma de dato no llega al almacén',
+    control: 'route.ts (primer cerrojo, toda la acción) y mesa.ts · guarda (segundo, lo que escribió el experto)',
+    comprobacion: prueba('mesa-experto.ts', 'mesa · la retro solo se guarda filtrada y en su almacén: un texto con forma de dato no llega al disco'),
+    sabotaje: { que: 'la retro se guarda sin filtro', ediciones: [
+      ed('src/app/api/mesa/soporte-sap/route.ts', '  const dato = datoPersonalEn(a)\n  if (dato) throw new Rechazo(dato)\n', ''),
+      ed(`${ME}/services/mesa.ts`, "  filtra(esperaba ?? '')\n", ''),
+      ed(`${ME}/services/mesa.ts`, '  filtra({ solucion, nota })\n', ''),
+      ed(`${ME}/services/mesa.ts`, '  if (datoPersonalEn(loQueEscribio(c))) throw', '  if (false) throw'),
+    ] },
+  },
+  {
+    id: 'aisia-mesa-retencion', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'lo guardado vence: con la retención, un caso más viejo se borra del almacén al listar',
+    control: `${ME}/services/mesa.ts · todosLosCasos (MESA_RETENCION_DIAS)`,
+    comprobacion: prueba('mesa-experto.ts', 'mesa · lo guardado vence: con la retención, el caso viejo se borra al listar y el reciente se queda'),
+    sabotaje: { que: 'nada vence', ediciones: [ed(`${ME}/services/mesa.ts`, '  for (const c of casos.filter((x) => Date.parse(x.actualizado) < limite)) await a.borra(claveDe(c.id))\n  return casos.filter((x) => Date.parse(x.actualizado) >= limite)', '  return casos')] },
+  },
+  {
+    id: 'aisia-mesa-ubicacion', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'el contenedor va fijado en Norteamérica: el candado no sube una configuración sin ubicación o fuera de ENAM/WNAM',
+    control: `${LA}/candado.mjs · revisaWrangler (constraints.regions)`,
+    comprobacion: prueba('laboratorio-alojado.ts', 'candado · no sube con otra base, sin la guarda de .env, con secretos en vars, sin ubicación fijada, con SSH o con la etiqueta latest'),
+    sabotaje: { que: 'el candado no mira la ubicación', ediciones: [ed(`${LA}/candado.mjs`, '  if (!regiones.length || !regiones.every((r) => REGIONES_DE_EEUU.has(r))) fallas.push', '  if (false) fallas.push')] },
+  },
+  {
+    id: 'aisia-mesa-sin-forma', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'brecha',
+    afirmacion: 'un dato sin forma de dato (el nombre de una empresa, cómo opera) pasa el filtro',
+    control: 'el filtro, lo que se le pide en pantalla y que solo entren los correos de la lista',
+    nota: 'no es «cero datos reales»: el experto cuenta casos de su experiencia a propósito; lo acotan el filtro, la retención y que solo lo lea el laboratorio',
+  },
+  {
+    id: 'aisia-mesa-tercero', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'brecha',
+    afirmacion: 'Cloudflare ve lo que pasa por la mesa y guarda lo que el experto escribe; el contenedor puede correr en Canadá',
+    control: 'R2 con jurisdicción de Estados Unidos; el contenedor en ENAM (Containers no ofrece una jurisdicción «us», medido en wrangler 4.143.1)',
+    nota: 'un tercero nuevo, declarado en el manifiesto; Cloudflare termina el TLS y opera la infraestructura donde vive lo guardado',
   },
 ]

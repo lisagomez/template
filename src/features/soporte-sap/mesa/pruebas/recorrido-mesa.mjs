@@ -65,8 +65,10 @@ async function ejemplo(p, cual) {
 const e = await pagina(id.experto)
 if (TRAS_REINICIO) {
   await e.goto(`${base}/mesa/soporte-sap`); await e.waitForSelector(sel('casos'))
-  await e.locator(`${sel('casos')} li button`).first().click()
-  await captura(e, 20, 'tras dormir o redesplegar, el caso sigue con su retro', async () => (await e.locator(sel('no-vive')).count()) === 1 && (await e.locator(`${sel('retro-guardada')}`).count()) > 0 && (await texto(e, sel('casos'))).includes('lo resolvió'))
+  // El caso del paso 5: el que tiene veredicto «lo resolvió» y retro en sus pasos.
+  await e.locator(`${sel('casos')} li button`, { hasText: 'lo resolvió' }).first().click()
+  await e.waitForSelector(sel('linea-de-tiempo'))
+  await captura(e, 20, 'tras dormir o redesplegar, el caso sigue con su retro', async () => (await e.locator(sel('no-vive')).count()) === 1 && (await e.locator(sel('retro-guardada')).count()) >= 2 && (await e.locator(sel('aprobar')).count()) === 0)
 } else {
   await e.goto(`${base}/mesa/soporte-sap`); await e.waitForSelector(sel('compositor'))
   await captura(e, 1, 'la mesa abre con el compositor y el aviso', async () => (await texto(e, sel('aviso-sintetico'))).includes('datos sintéticos') && (await texto(e, sel('identidad'))).includes('Experto'))

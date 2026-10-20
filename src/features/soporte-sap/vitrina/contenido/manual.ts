@@ -80,6 +80,9 @@ export const MANUAL: readonly ManualDeRol[] = [
       { id: 'operacion', titulo: 'Presupuesto, fichas de servidor y salidas', para: 'Operar sin prometer lo que no está probado.', captura: '09.1',
         pasos: ['Fija el tope de tokens y de páginas de OCR de cada consultora por mes.', 'Revisa la ficha de servidor de cada consultora: ninguna dice «apto» sin una restauración probada (GATE 3).', 'Ves las salidas registradas, pero no descargas el export de un cliente.'],
         ojo: 'El experto no ve las horas de los consultores ni la salud de la cuenta: eso es del superadministrador.' },
+      { id: 'mesa', titulo: 'La mesa del experto (alojada)', para: 'Probar al agente con tus casos, sin la máquina del laboratorio.',
+        pasos: ['Entra a la mesa con tu correo: Cloudflare Access te manda un código de un solo uso.', 'Cuéntale un caso tuyo en los campos guiados, sin nombres de clientes ni de personas, y córrelo: lo levanta y lo escala un cliente y una consultora sintéticos, en tu nombre.', 'Mira la línea de tiempo y di en cada paso si estuvo bien o mal; decide en la sala o enséñale si dice «no lo sé».', 'Da tu veredicto del caso. El laboratorio lee lo que dijiste en «Lo que dijo el experto», y lo exporta.'],
+        ojo: 'En la mesa nadie elige su identidad: entras con tu correo y eres experto. Lo que escribes pasa por el filtro de datos y se guarda en Cloudflare, en Estados Unidos.' },
     ],
   },
 ]

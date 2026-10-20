@@ -8,7 +8,7 @@ import assert from 'node:assert/strict'
 import { register } from 'node:module'
 import { createServer } from 'node:http'
 import { generateKeyPairSync, createSign, createHmac } from 'node:crypto'
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -209,4 +209,16 @@ test('mesa · la retro sobrevive a que se reinicie el laboratorio: el caso ya no
   assert.equal(despues.pasos.length, c.pasos.length, 'su línea se guardó')
   assert.equal(despues.retro.pasos[c.pasos[1]!.clave]?.gesto, 'bien'); assert.equal(despues.retro.veredicto?.valor, 'parcial')
   assert.match((await accion(EXPERTO, { tipo: 'decide', caso: c.id, accion: 'aprobar' })).error ?? '', /ya no vive/, 'y no se decide sobre otra incidencia con el mismo número')
+})
+
+test('mesa · lo guardado vence: con la retención, el caso viejo se borra al listar y el reciente se queda', async () => {
+  const nuevo = (await ingresa(FIORI)).caso
+  const viejo = { ...JSON.parse(guardado(nuevo.id)), id: 'c-viejo00-abcdef', actualizado: new Date(Date.now() - 200 * 86_400_000).toISOString() }
+  writeFileSync(join(DIR, 'mesa', 'casos', 'c-viejo00-abcdef.json'), JSON.stringify(viejo))
+  process.env['MESA_RETENCION_DIAS'] = '180'
+  const v = (await (await GET(pide('GET', '', EXPERTO))).json()) as { casos: Caso[] }
+  delete process.env['MESA_RETENCION_DIAS']
+  assert.ok(!v.casos.some((c) => c.id === 'c-viejo00-abcdef'), 'el de hace 200 días ya no está')
+  assert.ok(!guardados().includes('c-viejo00-abcdef.json'), 'y se borró del almacén')
+  assert.ok(v.casos.some((c) => c.id === nuevo.id), 'el reciente se queda')
 })
