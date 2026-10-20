@@ -2,9 +2,9 @@
  "nivel": "voz",
  "modelo": "anthropic/claude-haiku-5.5-20261007",
  "set": "sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676",
- "fecha": "2026-10-20T14:30:55.914Z",
+ "fecha": "2026-10-20T14:36:35.340Z",
  "n": 100,
- "precision": 0.95,
+ "precision": 0.94,
  "porTipo": {
   "alertar": {
    "n": 16,
@@ -33,8 +33,8 @@
   },
   "modificar": {
    "n": 20,
-   "correctas": 19,
-   "precision": 0.95
+   "correctas": 18,
+   "precision": 0.9
   }
  },
  "porParticion": {
@@ -45,48 +45,48 @@
   },
   "retenida": {
    "n": 70,
-   "correctas": 66,
-   "precision": 0.9428571428571428
+   "correctas": 65,
+   "precision": 0.9285714285714286
   }
  },
  "costo": {
-  "totalUsd": 0.03695975999999999,
+  "totalUsd": 0.03624270000000002,
   "sinCosto": 0,
-  "porInstruccionUsd": 0.00036959759999999987,
-  "libroAcumuladoUsd": 0.07316516000000002
+  "porInstruccionUsd": 0.0003624270000000002,
+  "libroAcumuladoUsd": 0.10940786000000002
  },
  "latencia": {
-  "modeloP50": 2549,
-  "modeloP95": 4268,
-  "regeneracionP50": 2624,
-  "regeneracionP95": 4959,
-  "consultaFrioP50": 28.790186000000176,
-  "consultaFrioP95": 35.46365900000001,
+  "modeloP50": 2446,
+  "modeloP95": 4489,
+  "regeneracionP50": 2663,
+  "regeneracionP95": 4685,
+  "consultaFrioP50": 26.357948999999735,
+  "consultaFrioP95": 32.69059100000004,
   "consultas": 35
  },
  "saldo": {
   "antes": {
    "cuenta": {
     "creditos": 24,
-    "uso": 22.071798459,
-    "saldo": 1.928201541
+    "uso": 22.107576059,
+    "saldo": 1.8924239410000006
    },
    "llave": {
-    "uso": 12.35794142,
+    "uso": 12.39371902,
     "limite": 15,
-    "restante": 2.6420585800000005
+    "restante": 2.6062809799999993
    }
   },
   "despues": {
    "cuenta": {
     "creditos": 24,
-    "uso": 22.105811299,
-    "saldo": 1.894188701000001
+    "uso": 22.138676399,
+    "saldo": 1.8613236009999987
    },
    "llave": {
-    "uso": 12.39195426,
+    "uso": 12.42650706,
     "limite": 15,
-    "restante": 2.6080457399999997
+    "restante": 2.5734929399999995
    }
   }
  },
@@ -105,10 +105,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3088,
+   "modeloMs": 2659,
    "datosMs": 0,
-   "regeneracionMs": 3099,
-   "costoUsd": 0.00036814,
+   "regeneracionMs": 2670,
+   "costoUsd": 0.00032964,
    "error": null
   },
   {
@@ -126,10 +126,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2649,
-   "datosMs": 33,
-   "regeneracionMs": 2683,
-   "costoUsd": 0.00031404,
+   "modeloMs": 2068,
+   "datosMs": 32,
+   "regeneracionMs": 2101,
+   "costoUsd": 0.00025904,
    "error": null
   },
   {
@@ -147,10 +147,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2690,
-   "datosMs": 21,
-   "regeneracionMs": 2712,
-   "costoUsd": 0.00032414,
+   "modeloMs": 2645,
+   "datosMs": 20,
+   "regeneracionMs": 2666,
+   "costoUsd": 0.00028164,
    "error": null
   },
   {
@@ -167,10 +167,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3258,
-   "datosMs": 109,
-   "regeneracionMs": 3368,
-   "costoUsd": 0.00039534,
+   "modeloMs": 2718,
+   "datosMs": 145,
+   "regeneracionMs": 2865,
+   "costoUsd": 0.00032884,
    "error": null
   },
   {
@@ -188,10 +188,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2599,
-   "datosMs": 159,
-   "regeneracionMs": 2758,
-   "costoUsd": 0.00031644,
+   "modeloMs": 2521,
+   "datosMs": 161,
+   "regeneracionMs": 2683,
+   "costoUsd": 0.00032044,
    "error": null
   },
   {
@@ -208,10 +208,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3015,
-   "datosMs": 154,
-   "regeneracionMs": 3170,
-   "costoUsd": 0.00039034,
+   "modeloMs": 2632,
+   "datosMs": 147,
+   "regeneracionMs": 2779,
+   "costoUsd": 0.00033134,
    "error": null,
    "instruccion": "Un tablero de campañas: cuanto invertimos y cuanto nos devolvio cada una",
    "entendi": "tipo: crear · métrica: inversion_marketing, ventas_incrementales_m, roas_incremental · dimensión: campana__campana_nombre",
@@ -237,7 +237,7 @@
     "titulo": "Campañas: inversión y retorno",
     "alerta": null,
     "sin_metrica": null,
-    "resumen": "Crearé un tablero con la inversión en marketing, las ventas incrementales y el ROAS de cada campaña."
+    "resumen": "Armaré un tablero con la inversión en marketing y las ventas incrementales por campaña, con su ROAS incremental."
    }
   },
   {
@@ -256,10 +256,10 @@
     "comparar": true
    },
    "intentos": 1,
-   "modeloMs": 2146,
-   "datosMs": 163,
-   "regeneracionMs": 2310,
-   "costoUsd": 0.00033024,
+   "modeloMs": 2511,
+   "datosMs": 174,
+   "regeneracionMs": 2686,
+   "costoUsd": 0.00037824,
    "error": null
   },
   {
@@ -276,10 +276,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3060,
-   "datosMs": 71,
-   "regeneracionMs": 3131,
-   "costoUsd": 0.00034194,
+   "modeloMs": 2795,
+   "datosMs": 79,
+   "regeneracionMs": 2875,
+   "costoUsd": 0.00032294,
    "error": null
   },
   {
@@ -296,10 +296,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3742,
-   "datosMs": 74,
-   "regeneracionMs": 3818,
-   "costoUsd": 0.00044064,
+   "modeloMs": 4615,
+   "datosMs": 68,
+   "regeneracionMs": 4685,
+   "costoUsd": 0.00054414,
    "error": null
   },
   {
@@ -317,10 +317,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2200,
-   "datosMs": 89,
-   "regeneracionMs": 2290,
-   "costoUsd": 0.00030174,
+   "modeloMs": 2116,
+   "datosMs": 87,
+   "regeneracionMs": 2204,
+   "costoUsd": 0.00028124,
    "error": null
   },
   {
@@ -338,10 +338,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2541,
-   "datosMs": 83,
-   "regeneracionMs": 2624,
-   "costoUsd": 0.00029024,
+   "modeloMs": 2411,
+   "datosMs": 91,
+   "regeneracionMs": 2502,
+   "costoUsd": 0.00029374,
    "error": null
   },
   {
@@ -358,10 +358,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 2330,
-   "datosMs": 99,
-   "regeneracionMs": 2430,
-   "costoUsd": 0.00030424,
+   "modeloMs": 2289,
+   "datosMs": 112,
+   "regeneracionMs": 2401,
+   "costoUsd": 0.00027524,
    "error": null
   },
   {
@@ -379,10 +379,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 1271,
-   "datosMs": 103,
-   "regeneracionMs": 1375,
-   "costoUsd": 0.00017054,
+   "modeloMs": 1757,
+   "datosMs": 94,
+   "regeneracionMs": 1851,
+   "costoUsd": 0.00023404,
    "error": null
   },
   {
@@ -400,10 +400,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2789,
-   "datosMs": 93,
-   "regeneracionMs": 2883,
-   "costoUsd": 0.00039714,
+   "modeloMs": 2254,
+   "datosMs": 78,
+   "regeneracionMs": 2333,
+   "costoUsd": 0.00032114,
    "error": null
   },
   {
@@ -417,10 +417,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2041,
+   "modeloMs": 2215,
    "datosMs": null,
-   "regeneracionMs": 2041,
-   "costoUsd": 0.00026624,
+   "regeneracionMs": 2216,
+   "costoUsd": 0.00027124,
    "error": null
   },
   {
@@ -433,11 +433,11 @@
     "responde": true,
     "valido": true
    },
-   "intentos": 2,
-   "modeloMs": 4222,
+   "intentos": 1,
+   "modeloMs": 2040,
    "datosMs": null,
-   "regeneracionMs": 4223,
-   "costoUsd": 0.00055228,
+   "regeneracionMs": 2040,
+   "costoUsd": 0.00026164,
    "error": null
   },
   {
@@ -455,10 +455,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2201,
-   "datosMs": 76,
-   "regeneracionMs": 2279,
-   "costoUsd": 0.00030954,
+   "modeloMs": 1946,
+   "datosMs": 84,
+   "regeneracionMs": 2031,
+   "costoUsd": 0.00028404,
    "error": null
   },
   {
@@ -476,10 +476,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2302,
-   "datosMs": 55,
-   "regeneracionMs": 2357,
-   "costoUsd": 0.00033084,
+   "modeloMs": 2243,
+   "datosMs": 51,
+   "regeneracionMs": 2295,
+   "costoUsd": 0.00032384,
    "error": null
   },
   {
@@ -497,31 +497,31 @@
     "tocados": true
    },
    "intentos": 2,
-   "modeloMs": 4207,
+   "modeloMs": 4274,
    "datosMs": 0,
-   "regeneracionMs": 4208,
-   "costoUsd": 0.00060578,
+   "regeneracionMs": 4276,
+   "costoUsd": 0.00057318,
    "error": null
   },
   {
    "id": "q020",
    "tipo": "modificar",
    "particion": "retenida",
-   "correcta": true,
+   "correcta": false,
    "campos": {
     "tipo": true,
     "responde": true,
     "valido": true,
     "metricas": true,
-    "dimensiones": true,
+    "dimensiones": false,
     "filtros": true,
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 3451,
+   "modeloMs": 2603,
    "datosMs": 61,
-   "regeneracionMs": 3513,
-   "costoUsd": 0.00040314,
+   "regeneracionMs": 2665,
+   "costoUsd": 0.00033864,
    "error": null
   },
   {
@@ -539,10 +539,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2757,
-   "datosMs": 69,
-   "regeneracionMs": 2827,
-   "costoUsd": 0.00033674,
+   "modeloMs": 2157,
+   "datosMs": 71,
+   "regeneracionMs": 2229,
+   "costoUsd": 0.00027924,
    "error": null
   },
   {
@@ -560,10 +560,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2553,
-   "datosMs": 50,
-   "regeneracionMs": 2604,
-   "costoUsd": 0.00032934,
+   "modeloMs": 2627,
+   "datosMs": 46,
+   "regeneracionMs": 2673,
+   "costoUsd": 0.00036234,
    "error": null
   },
   {
@@ -581,10 +581,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2182,
-   "datosMs": 53,
-   "regeneracionMs": 2236,
-   "costoUsd": 0.00032474,
+   "modeloMs": 2287,
+   "datosMs": 55,
+   "regeneracionMs": 2343,
+   "costoUsd": 0.00031174,
    "error": null
   },
   {
@@ -602,10 +602,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2527,
-   "datosMs": 72,
-   "regeneracionMs": 2599,
-   "costoUsd": 0.00034414,
+   "modeloMs": 2966,
+   "datosMs": 68,
+   "regeneracionMs": 3035,
+   "costoUsd": 0.00037564,
    "error": null
   },
   {
@@ -622,11 +622,11 @@
     "filtros": true,
     "tocados": true
    },
-   "intentos": 1,
-   "modeloMs": 1726,
+   "intentos": 2,
+   "modeloMs": 3976,
    "datosMs": 0,
-   "regeneracionMs": 1730,
-   "costoUsd": 0.00025834,
+   "regeneracionMs": 3981,
+   "costoUsd": 0.00061898,
    "error": null
   },
   {
@@ -644,10 +644,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2341,
-   "datosMs": 93,
-   "regeneracionMs": 2436,
-   "costoUsd": 0.00036774,
+   "modeloMs": 2747,
+   "datosMs": 99,
+   "regeneracionMs": 2848,
+   "costoUsd": 0.00039374,
    "error": null
   },
   {
@@ -665,10 +665,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2288,
+   "modeloMs": 2459,
    "datosMs": 77,
-   "regeneracionMs": 2365,
-   "costoUsd": 0.00032824,
+   "regeneracionMs": 2537,
+   "costoUsd": 0.00035474,
    "error": null
   },
   {
@@ -686,10 +686,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 1981,
+   "modeloMs": 1235,
    "datosMs": 0,
-   "regeneracionMs": 1982,
-   "costoUsd": 0.00030394,
+   "regeneracionMs": 1236,
+   "costoUsd": 0.00022844,
    "error": null
   },
   {
@@ -707,10 +707,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 3342,
+   "modeloMs": 3573,
    "datosMs": 0,
-   "regeneracionMs": 3343,
-   "costoUsd": 0.00044054,
+   "regeneracionMs": 3575,
+   "costoUsd": 0.00048254,
    "error": null
   },
   {
@@ -728,10 +728,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2298,
+   "modeloMs": 2104,
    "datosMs": 0,
-   "regeneracionMs": 2300,
-   "costoUsd": 0.00035344,
+   "regeneracionMs": 2106,
+   "costoUsd": 0.00032744,
    "error": null
   },
   {
@@ -749,10 +749,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2302,
+   "modeloMs": 2902,
    "datosMs": 1,
-   "regeneracionMs": 2304,
-   "costoUsd": 0.00031934,
+   "regeneracionMs": 2904,
+   "costoUsd": 0.00040534,
    "error": null
   },
   {
@@ -770,10 +770,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2310,
-   "datosMs": 25,
-   "regeneracionMs": 2335,
-   "costoUsd": 0.00033494,
+   "modeloMs": 2300,
+   "datosMs": 27,
+   "regeneracionMs": 2327,
+   "costoUsd": 0.00033194,
    "error": null
   },
   {
@@ -791,10 +791,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 2640,
-   "datosMs": 1,
-   "regeneracionMs": 2642,
-   "costoUsd": 0.00037874,
+   "modeloMs": 2773,
+   "datosMs": 0,
+   "regeneracionMs": 2775,
+   "costoUsd": 0.00040124,
    "error": null
   },
   {
@@ -812,10 +812,10 @@
     "tocados": true
    },
    "intentos": 1,
-   "modeloMs": 3505,
+   "modeloMs": 4492,
    "datosMs": 0,
-   "regeneracionMs": 3505,
-   "costoUsd": 0.00040574,
+   "regeneracionMs": 4493,
+   "costoUsd": 0.00050824,
    "error": null
   },
   {
@@ -829,10 +829,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 3170,
+   "modeloMs": 2113,
    "datosMs": null,
-   "regeneracionMs": 3170,
-   "costoUsd": 0.00034864,
+   "regeneracionMs": 2113,
+   "costoUsd": 0.00025014,
    "error": null
   },
   {
@@ -846,10 +846,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2334,
+   "modeloMs": 2404,
    "datosMs": null,
-   "regeneracionMs": 2334,
-   "costoUsd": 0.00031714,
+   "regeneracionMs": 2405,
+   "costoUsd": 0.00031164,
    "error": null
   },
   {
@@ -865,10 +865,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 3448,
-   "datosMs": 626,
-   "regeneracionMs": 4075,
-   "costoUsd": 0.00044414,
+   "modeloMs": 2827,
+   "datosMs": 563,
+   "regeneracionMs": 3391,
+   "costoUsd": 0.00035914,
    "error": null
   },
   {
@@ -883,10 +883,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3825,
-   "datosMs": 293,
-   "regeneracionMs": 4119,
-   "costoUsd": 0.00049884,
+   "modeloMs": 3763,
+   "datosMs": 306,
+   "regeneracionMs": 4070,
+   "costoUsd": 0.00050634,
    "error": null
   },
   {
@@ -901,11 +901,11 @@
     "filtros": true,
     "periodo": true
    },
-   "intentos": 1,
-   "modeloMs": 2508,
-   "datosMs": 464,
-   "regeneracionMs": 2972,
-   "costoUsd": 0.00035194,
+   "intentos": 2,
+   "modeloMs": 4595,
+   "datosMs": 447,
+   "regeneracionMs": 5043,
+   "costoUsd": 0.00065078,
    "error": null
   },
   {
@@ -921,10 +921,10 @@
     "comparar": true
    },
    "intentos": 1,
-   "modeloMs": 2802,
-   "datosMs": 1,
-   "regeneracionMs": 2803,
-   "costoUsd": 0.00035794,
+   "modeloMs": 2963,
+   "datosMs": 0,
+   "regeneracionMs": 2964,
+   "costoUsd": 0.00038194,
    "error": null
   },
   {
@@ -940,10 +940,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 4268,
-   "datosMs": 386,
-   "regeneracionMs": 4655,
-   "costoUsd": 0.00057164,
+   "modeloMs": 4362,
+   "datosMs": 347,
+   "regeneracionMs": 4709,
+   "costoUsd": 0.00056864,
    "error": null
   },
   {
@@ -959,10 +959,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 4193,
-   "datosMs": 531,
-   "regeneracionMs": 4724,
-   "costoUsd": 0.00047794,
+   "modeloMs": 3513,
+   "datosMs": 639,
+   "regeneracionMs": 4152,
+   "costoUsd": 0.00044544,
    "error": null
   },
   {
@@ -977,10 +977,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3450,
-   "datosMs": 536,
-   "regeneracionMs": 3987,
-   "costoUsd": 0.00046764,
+   "modeloMs": 3814,
+   "datosMs": 522,
+   "regeneracionMs": 4336,
+   "costoUsd": 0.00054364,
    "error": null
   },
   {
@@ -997,10 +997,10 @@
     "comparar": true
    },
    "intentos": 1,
-   "modeloMs": 2769,
-   "datosMs": 533,
-   "regeneracionMs": 3302,
-   "costoUsd": 0.00037374,
+   "modeloMs": 2871,
+   "datosMs": 596,
+   "regeneracionMs": 3468,
+   "costoUsd": 0.00039174,
    "error": null
   },
   {
@@ -1015,10 +1015,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 4485,
-   "datosMs": 473,
-   "regeneracionMs": 4959,
-   "costoUsd": 0.00061204,
+   "modeloMs": 2936,
+   "datosMs": 573,
+   "regeneracionMs": 3509,
+   "costoUsd": 0.00043854,
    "error": null
   },
   {
@@ -1033,10 +1033,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 4906,
-   "datosMs": 646,
-   "regeneracionMs": 5552,
-   "costoUsd": 0.00049894,
+   "modeloMs": 2794,
+   "datosMs": 655,
+   "regeneracionMs": 3450,
+   "costoUsd": 0.00039194,
    "error": null
   },
   {
@@ -1051,10 +1051,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3669,
-   "datosMs": 583,
-   "regeneracionMs": 4253,
-   "costoUsd": 0.00045344,
+   "modeloMs": 3342,
+   "datosMs": 607,
+   "regeneracionMs": 3950,
+   "costoUsd": 0.00041894,
    "error": null
   },
   {
@@ -1069,10 +1069,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 2785,
-   "datosMs": 577,
-   "regeneracionMs": 3363,
-   "costoUsd": 0.00039854,
+   "modeloMs": 3458,
+   "datosMs": 527,
+   "regeneracionMs": 3986,
+   "costoUsd": 0.00047104,
    "error": null
   },
   {
@@ -1088,10 +1088,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2560,
-   "datosMs": 476,
-   "regeneracionMs": 3036,
-   "costoUsd": 0.00036114,
+   "modeloMs": 2660,
+   "datosMs": 493,
+   "regeneracionMs": 3153,
+   "costoUsd": 0.00035914,
    "error": null
   },
   {
@@ -1107,10 +1107,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 4297,
-   "datosMs": 681,
-   "regeneracionMs": 4979,
-   "costoUsd": 0.00060754,
+   "modeloMs": 4493,
+   "datosMs": 633,
+   "regeneracionMs": 5127,
+   "costoUsd": 0.00061404,
    "error": null
   },
   {
@@ -1124,10 +1124,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 1955,
+   "modeloMs": 2538,
    "datosMs": null,
-   "regeneracionMs": 1956,
-   "costoUsd": 0.00030844,
+   "regeneracionMs": 2538,
+   "costoUsd": 0.00037844,
    "error": null
   },
   {
@@ -1141,10 +1141,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2551,
+   "modeloMs": 2715,
    "datosMs": null,
-   "regeneracionMs": 2552,
-   "costoUsd": 0.00035074,
+   "regeneracionMs": 2715,
+   "costoUsd": 0.00033574,
    "error": null
   },
   {
@@ -1161,10 +1161,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2097,
-   "datosMs": 0,
-   "regeneracionMs": 2990,
-   "costoUsd": 0.00027554,
+   "modeloMs": 1786,
+   "datosMs": 1,
+   "regeneracionMs": 2663,
+   "costoUsd": 0.00024604,
    "error": null
   },
   {
@@ -1181,9 +1181,9 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 1331,
-   "datosMs": 1,
-   "regeneracionMs": 2330,
+   "modeloMs": 1268,
+   "datosMs": 0,
+   "regeneracionMs": 2289,
    "costoUsd": 0.00022394,
    "error": null
   },
@@ -1200,10 +1200,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 2926,
+   "modeloMs": 2934,
    "datosMs": 0,
-   "regeneracionMs": 3877,
-   "costoUsd": 0.00035034,
+   "regeneracionMs": 3665,
+   "costoUsd": 0.00040084,
    "error": null
   },
   {
@@ -1220,10 +1220,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 3490,
+   "modeloMs": 2188,
    "datosMs": 0,
-   "regeneracionMs": 4212,
-   "costoUsd": 0.00048384,
+   "regeneracionMs": 2953,
+   "costoUsd": 0.00033634,
    "error": null
   },
   {
@@ -1240,10 +1240,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2201,
+   "modeloMs": 2151,
    "datosMs": 0,
-   "regeneracionMs": 3382,
-   "costoUsd": 0.00030434,
+   "regeneracionMs": 3323,
+   "costoUsd": 0.00031534,
    "error": null
   },
   {
@@ -1259,10 +1259,10 @@
     "filtros": false
    },
    "intentos": 1,
-   "modeloMs": 3036,
+   "modeloMs": 2411,
    "datosMs": 0,
-   "regeneracionMs": 3107,
-   "costoUsd": 0.00041954,
+   "regeneracionMs": 2481,
+   "costoUsd": 0.00035204,
    "error": null
   },
   {
@@ -1273,16 +1273,16 @@
    "campos": {
     "tipo": true,
     "responde": true,
-    "valido": false,
-    "metricas": true,
+    "valido": true,
+    "metricas": false,
     "filtros": true
    },
    "intentos": 2,
-   "modeloMs": 5020,
-   "datosMs": null,
-   "regeneracionMs": 5033,
-   "costoUsd": 0.00072258,
-   "error": "InvalidQueryException: Got error(s) during query resolution.\n\nError #1:\n  Message:\n\n    The query includes a metric 'crecimiento_ventas_yoy_pct' that specifies a time offset in input metrics: (PydanticMetricInput(name='ventas_netas', filter=None, alias=None, offset_window=None, offset_to_grain=None), PydanticMetricInput(name='ventas_netas', filter=None, alias='ventas_netas_aa', offset_window=PydanticMetricTimeWindow(count=1, granularity='year'), offset_to_grain=None)). However, group-by-items do not include 'metric_time'.\n\n  Issue Location:\n\n    [Resolve Query(['crecimiento_ventas_yoy_pct'])]\n      -> [Resolve ComplexMetric('crecimiento_ventas_yoy_pct')]"
+   "modeloMs": 4489,
+   "datosMs": 0,
+   "regeneracionMs": 5268,
+   "costoUsd": 0.0005792799999999999,
+   "error": null
   },
   {
    "id": "q060",
@@ -1298,10 +1298,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 1999,
-   "datosMs": 1,
-   "regeneracionMs": 2186,
-   "costoUsd": 0.00032124,
+   "modeloMs": 2180,
+   "datosMs": 0,
+   "regeneracionMs": 2498,
+   "costoUsd": 0.00031424,
    "error": null
   },
   {
@@ -1317,10 +1317,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 4061,
-   "datosMs": 0,
-   "regeneracionMs": 5298,
-   "costoUsd": 0.00053854,
+   "modeloMs": 3363,
+   "datosMs": 1,
+   "regeneracionMs": 4633,
+   "costoUsd": 0.00045854,
    "error": null
   },
   {
@@ -1336,10 +1336,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 3003,
-   "datosMs": 0,
-   "regeneracionMs": 3383,
-   "costoUsd": 0.00041614,
+   "modeloMs": 2446,
+   "datosMs": 1,
+   "regeneracionMs": 2799,
+   "costoUsd": 0.00033164,
    "error": null
   },
   {
@@ -1356,10 +1356,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2329,
+   "modeloMs": 1821,
    "datosMs": 0,
-   "regeneracionMs": 2504,
-   "costoUsd": 0.00031624,
+   "regeneracionMs": 1991,
+   "costoUsd": 0.00024724,
    "error": null
   },
   {
@@ -1375,10 +1375,10 @@
     "filtros": true
    },
    "intentos": 1,
-   "modeloMs": 2549,
+   "modeloMs": 2328,
    "datosMs": 0,
-   "regeneracionMs": 3806,
-   "costoUsd": 0.00035964,
+   "regeneracionMs": 3959,
+   "costoUsd": 0.00034714,
    "error": null
   },
   {
@@ -1395,10 +1395,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 3043,
+   "modeloMs": 2152,
    "datosMs": 0,
-   "regeneracionMs": 3723,
-   "costoUsd": 0.00028254,
+   "regeneracionMs": 2753,
+   "costoUsd": 0.00030004,
    "error": null
   },
   {
@@ -1415,10 +1415,10 @@
     "periodo": true
    },
    "intentos": 1,
-   "modeloMs": 2970,
-   "datosMs": 1,
-   "regeneracionMs": 3697,
-   "costoUsd": 0.00044114,
+   "modeloMs": 3094,
+   "datosMs": 0,
+   "regeneracionMs": 3750,
+   "costoUsd": 0.00046314,
    "error": null
   },
   {
@@ -1432,10 +1432,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2444,
+   "modeloMs": 2347,
    "datosMs": null,
-   "regeneracionMs": 2444,
-   "costoUsd": 0.00034024,
+   "regeneracionMs": 2347,
+   "costoUsd": 0.00032024,
    "error": null
   },
   {
@@ -1449,10 +1449,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2618,
+   "modeloMs": 2470,
    "datosMs": null,
-   "regeneracionMs": 2619,
-   "costoUsd": 0.00036784,
+   "regeneracionMs": 2470,
+   "costoUsd": 0.00036534,
    "error": null
   },
   {
@@ -1467,10 +1467,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2024,
+   "modeloMs": 1460,
    "datosMs": null,
-   "regeneracionMs": 2024,
-   "costoUsd": 0.00024944,
+   "regeneracionMs": 1460,
+   "costoUsd": 0.00021494,
    "error": null
   },
   {
@@ -1485,10 +1485,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1141,
+   "modeloMs": 1215,
    "datosMs": null,
-   "regeneracionMs": 1141,
-   "costoUsd": 0.00020944,
+   "regeneracionMs": 1215,
+   "costoUsd": 0.00020994,
    "error": null
   },
   {
@@ -1503,10 +1503,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1920,
+   "modeloMs": 2238,
    "datosMs": null,
-   "regeneracionMs": 1920,
-   "costoUsd": 0.00027174,
+   "regeneracionMs": 2238,
+   "costoUsd": 0.00029924,
    "error": null
   },
   {
@@ -1521,10 +1521,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1820,
+   "modeloMs": 1763,
    "datosMs": null,
-   "regeneracionMs": 1821,
-   "costoUsd": 0.00031434,
+   "regeneracionMs": 1763,
+   "costoUsd": 0.00029184,
    "error": null
   },
   {
@@ -1539,10 +1539,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1592,
+   "modeloMs": 1745,
    "datosMs": null,
-   "regeneracionMs": 1592,
-   "costoUsd": 0.00020614,
+   "regeneracionMs": 1746,
+   "costoUsd": 0.00028314,
    "error": null
   },
   {
@@ -1557,10 +1557,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1804,
+   "modeloMs": 1735,
    "datosMs": null,
-   "regeneracionMs": 1804,
-   "costoUsd": 0.00028114,
+   "regeneracionMs": 1735,
+   "costoUsd": 0.00028964,
    "error": null
   },
   {
@@ -1575,10 +1575,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2266,
+   "modeloMs": 2177,
    "datosMs": null,
-   "regeneracionMs": 2267,
-   "costoUsd": 0.00031034,
+   "regeneracionMs": 2177,
+   "costoUsd": 0.00032384,
    "error": null
   },
   {
@@ -1593,10 +1593,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1190,
+   "modeloMs": 1491,
    "datosMs": null,
-   "regeneracionMs": 1190,
-   "costoUsd": 0.00017864,
+   "regeneracionMs": 1492,
+   "costoUsd": 0.00021514,
    "error": null
   },
   {
@@ -1611,10 +1611,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 1575,
+   "modeloMs": 1565,
    "datosMs": null,
-   "regeneracionMs": 1575,
-   "costoUsd": 0.00023264,
+   "regeneracionMs": 1565,
+   "costoUsd": 0.00023114,
    "error": null
   },
   {
@@ -1629,10 +1629,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2602,
+   "modeloMs": 2074,
    "datosMs": null,
-   "regeneracionMs": 2602,
-   "costoUsd": 0.00038624,
+   "regeneracionMs": 2074,
+   "costoUsd": 0.00031424,
    "error": null
   },
   {
@@ -1647,10 +1647,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2343,
+   "modeloMs": 2494,
    "datosMs": null,
-   "regeneracionMs": 2343,
-   "costoUsd": 0.00030724,
+   "regeneracionMs": 2495,
+   "costoUsd": 0.00034924,
    "error": null
   },
   {
@@ -1665,10 +1665,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2067,
+   "modeloMs": 1837,
    "datosMs": null,
-   "regeneracionMs": 2068,
-   "costoUsd": 0.00033174,
+   "regeneracionMs": 1838,
+   "costoUsd": 0.00030074,
    "error": null
   },
   {
@@ -1683,10 +1683,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2211,
+   "modeloMs": 2114,
    "datosMs": null,
-   "regeneracionMs": 2211,
-   "costoUsd": 0.00031734,
+   "regeneracionMs": 2114,
+   "costoUsd": 0.00029234,
    "error": null
   },
   {
@@ -1701,10 +1701,10 @@
     "metricas": true
    },
    "intentos": 1,
-   "modeloMs": 2260,
+   "modeloMs": 2585,
    "datosMs": null,
-   "regeneracionMs": 2261,
-   "costoUsd": 0.00036834,
+   "regeneracionMs": 2585,
+   "costoUsd": 0.00031284,
    "error": null
   },
   {
@@ -1718,10 +1718,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 1950,
+   "modeloMs": 2015,
    "datosMs": null,
-   "regeneracionMs": 1950,
-   "costoUsd": 0.00028584,
+   "regeneracionMs": 2016,
+   "costoUsd": 0.00027084,
    "error": null
   },
   {
@@ -1735,10 +1735,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2400,
+   "modeloMs": 2123,
    "datosMs": null,
-   "regeneracionMs": 2400,
-   "costoUsd": 0.00034374,
+   "regeneracionMs": 2123,
+   "costoUsd": 0.00031124,
    "error": null
   },
   {
@@ -1755,10 +1755,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 3194,
+   "modeloMs": 3750,
    "datosMs": null,
-   "regeneracionMs": 3195,
-   "costoUsd": 0.00044494,
+   "regeneracionMs": 3751,
+   "costoUsd": 0.00048344,
    "error": null
   },
   {
@@ -1775,10 +1775,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 2094,
+   "modeloMs": 2239,
    "datosMs": null,
-   "regeneracionMs": 2095,
-   "costoUsd": 0.00028734,
+   "regeneracionMs": 2240,
+   "costoUsd": 0.00030934,
    "error": null
   },
   {
@@ -1794,11 +1794,11 @@
     "filtros": true,
     "alerta": true
    },
-   "intentos": 2,
-   "modeloMs": 5171,
+   "intentos": 1,
+   "modeloMs": 1491,
    "datosMs": null,
-   "regeneracionMs": 5172,
-   "costoUsd": 0.0007909799999999999,
+   "regeneracionMs": 1492,
+   "costoUsd": 0.00025714,
    "error": null
   },
   {
@@ -1815,10 +1815,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 3136,
+   "modeloMs": 2677,
    "datosMs": null,
-   "regeneracionMs": 3136,
-   "costoUsd": 0.00032914,
+   "regeneracionMs": 2678,
+   "costoUsd": 0.00035164,
    "error": null
   },
   {
@@ -1835,10 +1835,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 2121,
+   "modeloMs": 2354,
    "datosMs": null,
-   "regeneracionMs": 2122,
-   "costoUsd": 0.00028744,
+   "regeneracionMs": 2354,
+   "costoUsd": 0.00031494,
    "error": null
   },
   {
@@ -1855,10 +1855,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 2484,
+   "modeloMs": 2332,
    "datosMs": null,
-   "regeneracionMs": 2484,
-   "costoUsd": 0.00038734,
+   "regeneracionMs": 2332,
+   "costoUsd": 0.00036284,
    "error": null
   },
   {
@@ -1875,10 +1875,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 3397,
+   "modeloMs": 3467,
    "datosMs": null,
-   "regeneracionMs": 3397,
-   "costoUsd": 0.00051084,
+   "regeneracionMs": 3468,
+   "costoUsd": 0.00049984,
    "error": null
   },
   {
@@ -1895,10 +1895,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 3388,
+   "modeloMs": 3359,
    "datosMs": null,
-   "regeneracionMs": 3389,
-   "costoUsd": 0.00048644,
+   "regeneracionMs": 3359,
+   "costoUsd": 0.00045944,
    "error": null
   },
   {
@@ -1915,10 +1915,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 3338,
+   "modeloMs": 2854,
    "datosMs": null,
-   "regeneracionMs": 3338,
-   "costoUsd": 0.00042424,
+   "regeneracionMs": 2854,
+   "costoUsd": 0.00038574,
    "error": null
   },
   {
@@ -1935,10 +1935,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 2446,
+   "modeloMs": 3034,
    "datosMs": null,
-   "regeneracionMs": 2447,
-   "costoUsd": 0.00034324,
+   "regeneracionMs": 3034,
+   "costoUsd": 0.00041424,
    "error": null
   },
   {
@@ -1955,10 +1955,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 2013,
+   "modeloMs": 1898,
    "datosMs": null,
-   "regeneracionMs": 2013,
-   "costoUsd": 0.00030894,
+   "regeneracionMs": 1899,
+   "costoUsd": 0.00031644,
    "error": null
   },
   {
@@ -1975,10 +1975,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 3454,
+   "modeloMs": 4257,
    "datosMs": null,
-   "regeneracionMs": 3454,
-   "costoUsd": 0.00044924,
+   "regeneracionMs": 4257,
+   "costoUsd": 0.00052924,
    "error": null
   },
   {
@@ -1995,10 +1995,10 @@
     "alerta": true
    },
    "intentos": 1,
-   "modeloMs": 2508,
+   "modeloMs": 2279,
    "datosMs": null,
-   "regeneracionMs": 2508,
-   "costoUsd": 0.00036824,
+   "regeneracionMs": 2280,
+   "costoUsd": 0.00035424,
    "error": null
   },
   {
@@ -2014,11 +2014,11 @@
     "filtros": true,
     "alerta": true
    },
-   "intentos": 1,
-   "modeloMs": 2710,
+   "intentos": 2,
+   "modeloMs": 5026,
    "datosMs": null,
-   "regeneracionMs": 2711,
-   "costoUsd": 0.00035764,
+   "regeneracionMs": 5027,
+   "costoUsd": 0.00074048,
    "error": null
   },
   {
@@ -2032,10 +2032,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2446,
+   "modeloMs": 2278,
    "datosMs": null,
-   "regeneracionMs": 2447,
-   "costoUsd": 0.00031844,
+   "regeneracionMs": 2278,
+   "costoUsd": 0.00028594,
    "error": null
   },
   {
@@ -2049,10 +2049,10 @@
     "valido": true
    },
    "intentos": 1,
-   "modeloMs": 2231,
+   "modeloMs": 2222,
    "datosMs": null,
-   "regeneracionMs": 2232,
-   "costoUsd": 0.00032794,
+   "regeneracionMs": 2223,
+   "costoUsd": 0.00031294,
    "error": null
   }
  ]

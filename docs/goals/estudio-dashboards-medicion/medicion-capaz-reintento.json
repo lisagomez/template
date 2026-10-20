@@ -1,0 +1,139 @@
+{
+ "nivel": "capaz",
+ "modelo": "anthropic/claude-sonnet-5",
+ "set": "sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676",
+ "fecha": "2026-10-20T14:53:15.379Z",
+ "n": 4,
+ "precision": 1,
+ "porTipo": {
+  "filtrar": {
+   "n": 4,
+   "correctas": 4,
+   "precision": 1
+  }
+ },
+ "porParticion": {
+  "retenida": {
+   "n": 4,
+   "correctas": 4,
+   "precision": 1
+  }
+ },
+ "costo": {
+  "totalUsd": 0.035266000000000006,
+  "sinCosto": 0,
+  "porInstruccionUsd": 0.008816500000000001,
+  "libroAcumuladoUsd": 1.0694735100000001
+ },
+ "latencia": {
+  "modeloP50": 7131,
+  "modeloP95": 10273,
+  "regeneracionP50": 7711,
+  "regeneracionP95": 10801,
+  "consultaFrioP50": 28.512212999999974,
+  "consultaFrioP95": 37.697299000000385,
+  "consultas": 35
+ },
+ "saldo": {
+  "antes": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 23.070748849,
+    "saldo": 0.929251150999999
+   },
+   "llave": {
+    "uso": 13.35689181,
+    "limite": 15,
+    "restante": 1.6431081899999995
+   }
+  },
+  "despues": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 23.070748849,
+    "saldo": 0.929251150999999
+   },
+   "llave": {
+    "uso": 13.35689181,
+    "limite": 15,
+    "restante": 1.6431081899999995
+   }
+  }
+ },
+ "resultados": [
+  {
+   "id": "q047",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 10273,
+   "datosMs": 513,
+   "regeneracionMs": 10801,
+   "costoUsd": 0.0119536,
+   "error": null
+  },
+  {
+   "id": "q048",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 6575,
+   "datosMs": 497,
+   "regeneracionMs": 7077,
+   "costoUsd": 0.0073068,
+   "error": null
+  },
+  {
+   "id": "q049",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 9055,
+   "datosMs": 442,
+   "regeneracionMs": 9498,
+   "costoUsd": 0.0077288,
+   "error": null
+  },
+  {
+   "id": "q050",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 7131,
+   "datosMs": 579,
+   "regeneracionMs": 7711,
+   "costoUsd": 0.0082768,
+   "error": null
+  }
+ ]
+}

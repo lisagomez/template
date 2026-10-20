@@ -11,7 +11,7 @@
  *   - Detalle de los fallos SOLO de la partición `desarrollo`; de la `retenida`, ids y campos (para no iterar el
  *     prompt contra ella).
  *
- * Uso: node tools/estudio-dashboards/evaluacion/mide.mjs --nivel voz [--env ../../.env.local] [--solo desarrollo|retenida]
+ * Uso: node tools/estudio-dashboards/evaluacion/mide.mjs --nivel voz [--env ../../.env.local] [--solo desarrollo|retenida] [--ids q1,q2] [--nombre x]
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
@@ -29,6 +29,10 @@ const TOPE = 2.0
 const arg = (n, d) => process.argv.find((_, i) => process.argv[i - 1] === n) ?? d
 const nivel = arg('--nivel', 'voz')
 const solo = arg('--solo', null)
+/** `--ids q047,q048` repite solo esas preguntas (p. ej. las que murieron por un error del proveedor). */
+const ids = arg('--ids', null)?.split(',')
+/** `--nombre corrida3` separa el archivo de salida de las corridas anteriores. */
+const nombre = arg('--nombre', null)
 
 function llave() {
   if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY
@@ -74,7 +78,7 @@ async function principal() {
     for (const t of Object.values(tableros)) for (const c of Object.values((await resuelve(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push(r.totalMs)
     for (const t of Object.values(tableros)) await resuelve(x, t, MAPA_GN)
     const modelo = modeloOpenRouter({ llave: k, modelo: cfg.modelo, fetch, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } })
-    const preguntas = set.preguntas.filter((q) => !solo || q.particion === solo)
+    const preguntas = set.preguntas.filter((q) => (!solo || q.particion === solo) && (!ids || ids.includes(q.id)))
     mkdirSync(SALIDA, { recursive: true })
     for (const [i, q] of preguntas.entries()) {
       const llevamos = gastado()
@@ -96,7 +100,7 @@ async function principal() {
     console.log('')
     const despues = await saldo(k)
     const r = resumen(resultados, consultasFrio, cfg, antes, despues, sha)
-    writeFileSync(join(SALIDA, `medicion-${nivel}${solo ? `-${solo}` : ''}.json`), `${JSON.stringify({ ...r, resultados }, null, 1)}\n`)
+    writeFileSync(join(SALIDA, `medicion-${nivel}${solo ? `-${solo}` : ''}${ids ? '-reintento' : ''}${nombre ? `-${nombre}` : ''}.json`), `${JSON.stringify({ ...r, resultados }, null, 1)}\n`)
     imprime(r, resultados)
   } finally { await puerto.cierra() }
 }
