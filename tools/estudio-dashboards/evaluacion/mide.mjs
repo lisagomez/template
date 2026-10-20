@@ -16,7 +16,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
-import { cargaCatalogo, consultor, interpreta, puntua, resuelve, construyeCatalogo } from '../dist/index.js'
+import { cargaCatalogo, conReserva, consultor, interpreta, puntua, resuelve, construyeCatalogo } from '../dist/index.js'
 import { modeloOpenRouter, saldoOpenRouter } from '../dist/openrouter.js'
 import { puertoGolfoNorte } from '../laboratorio/puerto.mjs'
 import { MAPA_GN } from '../laboratorio/perfil.mjs'
@@ -35,7 +35,13 @@ const ids = arg('--ids', null)?.split(',')
 const nombre = arg('--nombre', null)
 /** `--razonamiento apagado|<tokens>`: el razonamiento del modelo, explícito (si no, decide el proveedor). */
 const razonamientoArg = arg('--razonamiento', null)
-const razonamiento = razonamientoArg === null ? undefined : razonamientoArg === 'apagado' ? 'apagado' : { maxTokens: Number(razonamientoArg) }
+/** `--set set-referencia-v2.json`: otro set, que también tiene que estar congelado (su `.sha256` al lado). */
+const ARCHIVO_SET = arg('--set', 'set-referencia.json')
+const razonamiento = razonamientoArg === null || razonamientoArg === 'reserva' ? undefined : razonamientoArg === 'apagado' ? 'apagado' : { maxTokens: Number(razonamientoArg) }
+/** `--razonamiento reserva`: el del proveedor y, solo si trunca, una segunda llamada con 512 de razonamiento propio. */
+const conReservaSiTrunca = razonamientoArg === 'reserva'
+/** `--proveedor latencia|throughput`: preferencia de ruteo de OpenRouter entre proveedores del mismo modelo. */
+const proveedor = arg('--proveedor', null) ?? undefined
 
 function llave() {
   if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY
@@ -62,9 +68,9 @@ async function principal() {
   const k = llave()
   console.log(`▸ llave OPENROUTER_API_KEY: ${k ? `presente (${k.length} caracteres)` : 'AUSENTE'}`)
   if (!k) process.exit(2)
-  const set = JSON.parse(readFileSync(join(AQUI, 'set-referencia.json'), 'utf8'))
-  const sha = `sha256:${createHash('sha256').update(readFileSync(join(AQUI, 'set-referencia.json'))).digest('hex')}`
-  const congelado = readFileSync(join(AQUI, 'set-referencia.sha256'), 'utf8').split(/\s/)[0]
+  const set = JSON.parse(readFileSync(join(AQUI, ARCHIVO_SET), 'utf8'))
+  const sha = `sha256:${createHash('sha256').update(readFileSync(join(AQUI, ARCHIVO_SET))).digest('hex')}`
+  const congelado = readFileSync(join(AQUI, ARCHIVO_SET.replace(/\.json$/, '.sha256')), 'utf8').split(/\s/)[0]
   if (sha !== congelado) throw new Error('el set no coincide con su hash congelado: no se mide')
   console.log(`▸ set ${sha.slice(0, 23)}… (= congelado) · nivel ${nivel} → ${cfg.modelo} (${cfg.precio.entrada}/${cfg.precio.salida} USD por M)`)
   const antes = await saldo(k)
@@ -80,7 +86,8 @@ async function principal() {
     const consultasFrio = []
     for (const t of Object.values(tableros)) for (const c of Object.values((await resuelve(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push(r.totalMs)
     for (const t of Object.values(tableros)) await resuelve(x, t, MAPA_GN)
-    const modelo = modeloOpenRouter({ llave: k, modelo: cfg.modelo, fetch, razonamiento, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } })
+    const base = { llave: k, modelo: cfg.modelo, fetch, proveedor, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } }
+    const modelo = conReservaSiTrunca ? conReserva(modeloOpenRouter(base), modeloOpenRouter({ ...base, razonamiento: { maxTokens: 512 } })) : modeloOpenRouter({ ...base, razonamiento })
     const preguntas = set.preguntas.filter((q) => (!solo || q.particion === solo) && (!ids || ids.includes(q.id)))
     mkdirSync(SALIDA, { recursive: true })
     for (const [i, q] of preguntas.entries()) {
@@ -103,7 +110,7 @@ async function principal() {
     console.log('')
     const despues = await saldo(k)
     const r = resumen(resultados, consultasFrio, cfg, antes, despues, sha)
-    writeFileSync(join(SALIDA, `medicion-${nivel}${solo ? `-${solo}` : ''}${ids ? '-reintento' : ''}${nombre ? `-${nombre}` : ''}.json`), `${JSON.stringify({ ...r, resultados }, null, 1)}\n`)
+    writeFileSync(join(SALIDA, `medicion-${nivel}${solo ? `-${solo}` : ''}${ids ? '-reintento' : ''}${nombre ? `-${nombre}` : ''}${ARCHIVO_SET === 'set-referencia.json' ? '' : `-${ARCHIVO_SET.replace(/^set-referencia-?|\.json$/g, '') || 'otro'}`}.json`), `${JSON.stringify({ ...r, resultados }, null, 1)}\n`)
     imprime(r, resultados)
   } finally { await puerto.cierra() }
 }
@@ -112,7 +119,7 @@ function resumen(rs, consultasFrio, cfg, antes, despues, sha) {
   const grupo = (f) => Object.fromEntries([...new Set(rs.map(f))].sort().map((k) => { const g = rs.filter((r) => f(r) === k); return [k, { n: g.length, correctas: g.filter((r) => r.correcta).length, precision: g.length ? g.filter((r) => r.correcta).length / g.length : null }] }))
   const costos = rs.map((r) => r.costoUsd).filter((c) => c !== null)
   return {
-    nivel, modelo: cfg.modelo, razonamiento: razonamiento ?? 'del proveedor', set: sha, fecha: new Date().toISOString(), n: rs.length,
+    nivel, modelo: cfg.modelo, razonamiento: conReservaSiTrunca ? 'del proveedor, con reserva de 512 si trunca' : razonamiento ?? 'del proveedor', proveedor: proveedor ?? 'reparto de OpenRouter', set: sha, fecha: new Date().toISOString(), n: rs.length,
     precision: rs.length ? rs.filter((r) => r.correcta).length / rs.length : null,
     porTipo: grupo((r) => r.tipo), porParticion: grupo((r) => r.particion),
     costo: { totalUsd: costos.reduce((s, c) => s + c, 0), sinCosto: rs.length - costos.length, porInstruccionUsd: costos.length ? costos.reduce((s, c) => s + c, 0) / costos.length : null, libroAcumuladoUsd: gastado() },

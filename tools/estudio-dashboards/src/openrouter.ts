@@ -23,6 +23,11 @@ export interface OpcionesOpenRouter {
    * aparte de la respuesta; `'apagado'` lo desactiva. Sin esto, decide el proveedor.
    */
   readonly razonamiento?: { readonly maxTokens: number } | 'apagado'
+  /**
+   * Preferencia de ruteo de OpenRouter entre los proveedores que sirven el mismo modelo pineado (Anthropic, Bedrock,
+   * Vertex, Azure): `'latencia'` pide el de menor latencia. Con datos reales, a qué nube va el dato es decisión C4.
+   */
+  readonly proveedor?: 'latencia' | 'throughput'
 }
 
 interface Cuerpo {
@@ -50,6 +55,7 @@ export function modeloOpenRouter(o: OpcionesOpenRouter): ModeloEstudio {
             model: o.modelo, temperature: o.temperatura ?? 0,
             max_tokens: maxTokens + (typeof o.razonamiento === 'object' ? o.razonamiento.maxTokens : 0),
             ...(o.razonamiento === 'apagado' ? { reasoning: { enabled: false } } : o.razonamiento ? { reasoning: { max_tokens: o.razonamiento.maxTokens } } : {}),
+            ...(o.proveedor ? { provider: { sort: o.proveedor === 'latencia' ? 'latency' : 'throughput' } } : {}),
             usage: { include: true },
             messages: [{ role: 'system', content: [{ type: 'text', text: sistema, cache_control: { type: 'ephemeral' } }] }, ...mensajes],
           }),

@@ -9,10 +9,10 @@
  * La salida es el JSON del núcleo tal cual (paridad probada en `pruebas/cli.ts`). Códigos: 0 bien · 2 error de uso ·
  * 3 rechazo del esquema o del catálogo · 4 falla de la capa · 5 modelo no disponible.
  */
-import { readFileSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
-import { cargaCatalogo, ConsultaInvalida, consultor, construyeCatalogo, ejecutaHerramienta, FallaDeCapa, HERRAMIENTAS, interpreta, RechazoEsquema, versionActual, nuevoHistorial, registra, type CatalogoCrudo, type ContextoEstudio, type PuertoSemantico } from '../index.js'
+import { cargaCatalogo, ConsultaInvalida, consultor, construyeCatalogo, ejecutaHerramienta, FallaDeCapa, HERRAMIENTAS, interpreta, RechazoEsquema, versionActual, nuevoHistorial, registra, type CatalogoCrudo, type ContextoEstudio, type LlamadaModelo, type PuertoSemantico } from '../index.js'
 import { archivoAlertas, archivoVersiones } from '../almacenes/archivo.js'
 import { puertoMetricFlow } from '../metricflow/index.js'
 import { modeloOpenRouter } from '../openrouter.js'
@@ -71,7 +71,7 @@ function puertoFoto(crudo: CatalogoCrudo & { dominios?: Record<string, string[]>
   }
 }
 
-async function contexto(c: Config, base: string): Promise<ContextoEstudio & { puerto: PuertoSemantico }> {
+async function contexto(c: Config, base: string): Promise<ContextoEstudio & { puerto: PuertoSemantico; almacen: string }> {
   let puerto: PuertoSemantico
   if (c.metricflow) {
     const entorno = Object.fromEntries(Object.entries(c.metricflow.entorno ?? {}).map(([k, v]) => [k, /^(\.{1,2}\/|~\/)/.test(v) ? ruta(base, v) : v]))
@@ -81,7 +81,7 @@ async function contexto(c: Config, base: string): Promise<ContextoEstudio & { pu
   const cat = c.foto && !c.metricflow ? (() => { const f = JSON.parse(readFileSync(ruta(base, c.foto!), 'utf8')); return construyeCatalogo(f, f.dominios ?? {}) })() : await cargaCatalogo(puerto)
   const almacen = ruta(base, c.almacen ?? '~/.estudio-dashboards/sin-nombre')
   return {
-    puerto, consultor: consultor(puerto, cat), versiones: archivoVersiones(almacen), alertas: archivoAlertas(almacen), fechaCorte: c.corte,
+    puerto, almacen, consultor: consultor(puerto, cat), versiones: archivoVersiones(almacen), alertas: archivoAlertas(almacen), fechaCorte: c.corte,
     tablerosBase: Object.fromEntries(Object.entries(c.tableros ?? {}).map(([k, r]) => [k, JSON.parse(readFileSync(ruta(base, r), 'utf8'))])),
     ...(c.perfil ? { perfil: JSON.parse(readFileSync(ruta(base, c.perfil), 'utf8')) } : {}),
     ...(c.mapa ? { resolver: c.mapa } : {}),
@@ -94,7 +94,7 @@ function entrada(op: Record<string, string | true>): Record<string, unknown> {
   return {}
 }
 
-async function agente(ctx: ContextoEstudio, c: Config, pos: string[], op: Record<string, string | true>): Promise<unknown> {
+async function agente(ctx: ContextoEstudio & { almacen: string }, c: Config, pos: string[], op: Record<string, string | true>): Promise<unknown> {
   const instruccion = pos.join(' ').trim()
   const tablero = op['tablero']
   if (!instruccion || typeof tablero !== 'string') throw new ErrorDeUso('uso: agente "<instrucción>" --tablero <nombre>')
@@ -102,7 +102,7 @@ async function agente(ctx: ContextoEstudio, c: Config, pos: string[], op: Record
   const modelo = typeof op['modelo'] === 'string' ? op['modelo'] : c.modelo
   if (!llave || !modelo) return Promise.reject(Object.assign(new Error(`modelo no disponible: ${llave ? '' : 'falta OPENROUTER_API_KEY en el entorno; '}${modelo ? '' : 'falta "modelo" (pineado) en la config'}`), { modeloNoDisponible: true }))
   const h = (await ctx.versiones.lee(tablero)) ?? nuevoHistorial(tablero, ctx.tablerosBase?.[tablero] ?? (() => { throw new ErrorDeUso(`no existe el tablero «${tablero}»`) })())
-  const v = await interpreta({ consultor: ctx.consultor, modelo: modeloOpenRouter({ llave, modelo, fetch, ...(c.razonamiento === undefined ? {} : { razonamiento: c.razonamiento === 'apagado' ? 'apagado' : { maxTokens: c.razonamiento } }) }), corte: c.corte, contexto: c.contexto }, versionActual(h).dashboard, h.actual, instruccion)
+  const v = await interpreta({ consultor: ctx.consultor, modelo: modeloOpenRouter({ llave, modelo, fetch, ...(c.razonamiento === undefined ? {} : { razonamiento: c.razonamiento === 'apagado' ? 'apagado' : { maxTokens: c.razonamiento } }) }), corte: c.corte, contexto: c.contexto, registrador: anotaGasto(ctx.almacen) }, versionActual(h).dashboard, h.actual, instruccion)
   const aplicado = v.resultado?.aplicado
   if (op['aplicar'] === true && aplicado && !v.error) {
     const previo = await ctx.versiones.lee(tablero)
@@ -111,10 +111,16 @@ async function agente(ctx: ContextoEstudio, c: Config, pos: string[], op: Record
   return { aplicado: op['aplicar'] === true && !!aplicado && !v.error, entendi: v.entendi, texto: v.texto, plan: v.plan, tocados: aplicado?.tocados ?? [], error: v.error, modelo: v.modelo, versionPrompt: v.versionPrompt, costoUsd: v.costoUsd, intentos: v.intentos }
 }
 
+/** Contabilidad del CLI: cada llamada al modelo, una línea en `<almacén>/gasto.jsonl`; sin uso, costo `null`. */
+const anotaGasto = (almacen: string) => (l: LlamadaModelo) => {
+  mkdirSync(almacen, { recursive: true })
+  appendFileSync(join(almacen, 'gasto.jsonl'), `${JSON.stringify({ tarea: 'agente-estudio-dashboards', origen: 'cli', ...l })}\n`, { mode: 0o600 })
+}
+
 export async function principal(argv: string[]): Promise<{ codigo: number; salida: string }> {
   const { sub, pos, op } = args(argv)
   if (!sub || sub === 'ayuda' || op['ayuda']) return { codigo: sub ? SALIDA.bien : SALIDA.uso, salida: AYUDA }
-  let ctx: (ContextoEstudio & { puerto: PuertoSemantico }) | undefined
+  let ctx: (ContextoEstudio & { puerto: PuertoSemantico; almacen: string }) | undefined
   try {
     const { c, base } = leeConfig(op)
     if (sub !== 'agente' && !HERRAMIENTAS.some((h) => h.nombre === sub)) throw new ErrorDeUso(`subcomando desconocido: ${sub}\n${AYUDA}`)

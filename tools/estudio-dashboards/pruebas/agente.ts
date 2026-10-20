@@ -120,3 +120,15 @@ test('sin cambio anterior, el mensaje es el MISMO que se midió (estudio-agente/
   assert.equal(mensajeUsuario(d, 0, 'hola', null, null), medido)
   assert.match(mensajeUsuario(d, 1, 'ahora por mes', null, { instruccion: 'margen por región', componentes: ['margen_region'] }), /ÚLTIMO CAMBIO: «margen por región» \(tocó margen_region\)/)
 })
+
+test('con reserva: si el primario trunca, contesta la reserva y se suman costo y tiempo; si no, la reserva no se llama', async () => {
+  const { conReserva } = await import('../dist/index.js')
+  let llamadasReserva = 0
+  const truncador = { id: 'p', async completa() { return { texto: '{"tipo": "crea', uso: { entrada: 100, salida: 1200, cacheados: 0 }, costoUsd: 0.001, truncada: true, ms: 3000 } } }
+  const reserva = { id: 'r', async completa() { llamadasReserva++; return { texto: '{}', uso: { entrada: 100, salida: 300, cacheados: 0 }, costoUsd: 0.002, truncada: false, ms: 4000 } } }
+  const r = await conReserva(truncador, reserva).completa({ sistema: '', mensajes: [], maxTokens: 10 })
+  assert.deepEqual([r.texto, r.costoUsd, r.ms, r.uso?.salida, llamadasReserva], ['{}', 0.003, 7000, 1500, 1])
+  const sano = { ...truncador, async completa() { return { texto: '{}', uso: null, costoUsd: null, truncada: false, ms: 10 } } }
+  await conReserva(sano, reserva).completa({ sistema: '', mensajes: [], maxTokens: 10 })
+  assert.equal(llamadasReserva, 1)
+})
