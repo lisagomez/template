@@ -22,17 +22,22 @@ function meses(p: { desde: string; hasta: string }): string[] {
   return salida
 }
 
-export interface Doble extends PuertoSemantico { readonly pedidas: ConsultaSemantica[] }
+export interface Doble extends PuertoSemantico { readonly pedidas: ConsultaSemantica[]; readonly simultaneas: { ahora: number; max: number } }
 
-export function doble(opciones: { falla?: boolean } = {}): Doble {
+/** `desordena`: cada respuesta tarda 0–6 ms según la consulta, así llegan en otro orden que el de las peticiones. */
+export function doble(opciones: { falla?: boolean; desordena?: boolean } = {}): Doble {
   const pedidas: ConsultaSemantica[] = []
+  const simultaneas = { ahora: 0, max: 0 }
   return {
     pedidas,
+    simultaneas,
     async catalogo() { return { version: FOTO.version, metricas: FOTO.metricas } },
     async valores(_m, d) { return FOTO.dominios[d] ?? [] },
     async consulta(c): Promise<ResultadoSemantico> {
       if (opciones.falla) throw new Error('la capa no responde')
       pedidas.push(c)
+      simultaneas.max = Math.max(simultaneas.max, ++simultaneas.ahora)
+      try { if (opciones.desordena) await new Promise((ok) => setTimeout(ok, Math.abs(hash(JSON.stringify(c))) % 7)) } finally { simultaneas.ahora-- }
       const periodo = c.periodo ?? { desde: '2025-01', hasta: '2026-09' }
       const ejes = (c.agrupar ?? []).map((d) => (d.startsWith('metric_time__') ? meses(periodo) : FOTO.dominios[d] ?? ['∅']))
       const combinaciones = ejes.reduce<string[][]>((acc, vals) => acc.flatMap((fila) => vals.map((v) => [...fila, v])), [[]])

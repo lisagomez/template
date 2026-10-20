@@ -69,6 +69,8 @@ export function claveConsulta(c: ConsultaSemantica, version: string): string {
 
 export function consultor(puerto: PuertoSemantico, cat: Catalogo, o: OpcionesConsultor = {}): Consultor {
   const cache = new Map<string, ResultadoSemantico>()
+  // La misma consulta pedida dos veces A LA VEZ (dos componentes en paralelo) va una sola vez a la capa.
+  const enVuelo = new Map<string, Promise<ResultadoSemantico>>()
   const capacidad = o.cache ?? 500
   const est = { consultas: 0, aciertosCache: 0, msCapa: 0 }
   return {
@@ -87,13 +89,22 @@ export function consultor(puerto: PuertoSemantico, cat: Catalogo, o: OpcionesCon
         cache.delete(clave); cache.set(clave, guardada)
         return { ...guardada, consulta: c, desdeCache: true, totalMs: performance.now() - t }
       }
-      const r = await puerto.consulta({ ...c, limite: c.limite ?? o.maxFilas ?? 5000 })
-      est.msCapa += r.ms
-      if (capacidad > 0) {
-        cache.set(clave, r)
-        if (cache.size > capacidad) cache.delete(cache.keys().next().value as string)
+      const compartida = enVuelo.get(clave)
+      if (compartida) {
+        est.aciertosCache++
+        return { ...(await compartida), consulta: c, desdeCache: true, totalMs: performance.now() - t }
       }
-      return { ...r, consulta: c, desdeCache: false, totalMs: performance.now() - t }
+      const pedida = puerto.consulta({ ...c, limite: c.limite ?? o.maxFilas ?? 5000 })
+      if (capacidad > 0) enVuelo.set(clave, pedida)
+      try {
+        const r = await pedida
+        est.msCapa += r.ms
+        if (capacidad > 0) {
+          cache.set(clave, r)
+          if (cache.size > capacidad) cache.delete(cache.keys().next().value as string)
+        }
+        return { ...r, consulta: c, desdeCache: false, totalMs: performance.now() - t }
+      } finally { enVuelo.delete(clave) }
     },
   }
 }

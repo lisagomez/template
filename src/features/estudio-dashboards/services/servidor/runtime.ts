@@ -69,6 +69,8 @@ async function arma(): Promise<Runtime> {
       GN_DUCKDB: join(homedir(), '.cache', 'estudio-dashboards-semantica', 'golfo_norte', 'golfo_norte.duckdb'),
       GN_DBT_TARGET: 'lectura',
     },
+    // Tres lectores de solo lectura: regenerar con un filtro nuevo baja de ~354 a ~141 ms p50 (medido el 2026-10-20).
+    procesos: 3,
   });
   const cat = await cargaCatalogo(puerto);
   const perfil = json<PerfilSenales>('perfil.json');

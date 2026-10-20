@@ -75,7 +75,8 @@ async function principal() {
   console.log(`▸ set ${sha.slice(0, 23)}… (= congelado) · nivel ${nivel} → ${cfg.modelo} (${cfg.precio.entrada}/${cfg.precio.salida} USD por M)`)
   const antes = await saldo(k)
   console.log(`▸ saldo antes: ${JSON.stringify(antes)}`)
-  const puerto = puertoGolfoNorte()
+  // La misma configuración que el lienzo: tres procesos de solo lectura.
+  const puerto = puertoGolfoNorte({ procesos: 3 })
   const resultados = []
   try {
     const cat = await cargaCatalogo(puerto)
@@ -84,7 +85,8 @@ async function principal() {
     // Consulta en FRÍO (sin caché) y caché caliente para la regeneración.
     const frio = consultor(puerto, cat, { cache: 0 })
     const consultasFrio = []
-    for (const t of Object.values(tableros)) for (const c of Object.values((await resuelve(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push(r.totalMs)
+    // Una por una: el tiempo de cada consulta, no el de su espera mientras el tablero pide las demás en paralelo.
+    for (const t of Object.values(tableros)) for (const c of Object.values((await resuelve(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push((await frio.consulta(r.consulta)).totalMs)
     for (const t of Object.values(tableros)) await resuelve(x, t, MAPA_GN)
     const base = { llave: k, modelo: cfg.modelo, fetch, proveedor, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } }
     const modelo = conReservaSiTrunca ? conReserva(modeloOpenRouter(base), modeloOpenRouter({ ...base, razonamiento: { maxTokens: 512 } })) : modeloOpenRouter({ ...base, razonamiento })

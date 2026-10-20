@@ -34,6 +34,14 @@ test('capa real: tablero, señales y análisis', { skip: omitir }, async (t) => 
       assert.ok(Math.abs(hero.valores[0]!.variacion! - mf('ventas_var')) < 1e-6)
       assert.deepEqual(Object.values(d.componentes).filter((c) => c.error).map((c) => `${c.id}: ${c.error}`), [])
     })
+    await t.test('con dos procesos en paralelo, el mismo tablero da las mismas cifras y el mismo SQL', async () => {
+      const dos = puertoGolfoNorte({ procesos: 2 })
+      try {
+        const huella = (r: Awaited<ReturnType<typeof resuelve>>) => JSON.stringify(Object.values(r.componentes).map((c) => [c.id, c.forma, c.error, c.consultas.map((q) => q.sql)]))
+        const y = consultor(dos, await cargaCatalogo(dos), { cache: 0 })
+        assert.equal(huella(await resuelve(y, tablero('growth'), MAPA_GN)), huella(await resuelve(x, tablero('growth'), MAPA_GN)))
+      } finally { await dos.cierra() }
+    })
     await t.test('3 de 3 señales sembradas, reencontradas sin nombrarlas', async () => {
       const ss = await detectaSenales(x, PERFIL_GN)
       const frecuencia = ss.find((s) => s.palancas.includes('frecuencia'))

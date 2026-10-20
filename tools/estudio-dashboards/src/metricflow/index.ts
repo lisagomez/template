@@ -28,11 +28,35 @@ export interface OpcionesMetricFlow {
   readonly tiempoMs?: number
   /** Ruta de `servidor_mf.py`; por defecto la del paquete (explícita si este módulo corre empaquetado). */
   readonly servidor?: string
+  /**
+   * Procesos en paralelo (por defecto 1). Cada uno atiende una petición a la vez; con varios, las consultas de un
+   * tablero salen juntas. Solo con un perfil de SOLO LECTURA: DuckDB admite varios lectores, no varios escritores.
+   */
+  readonly procesos?: number
 }
 
 interface Pendiente { ok: (v: Record<string, unknown>) => void; mal: (e: Error) => void; reloj: NodeJS.Timeout }
 
+type Pide = (cuerpo: Record<string, unknown>) => Promise<Record<string, unknown>>
+interface Proceso { readonly listo: Promise<number>; readonly pide: Pide; readonly enCurso: () => number; readonly cierra: () => void }
+
 export function puertoMetricFlow(o: OpcionesMetricFlow): PuertoSemantico & { listo: Promise<number> } {
+  const procesos = Array.from({ length: Math.max(1, Math.floor(o.procesos ?? 1)) }, () => proceso(o))
+  // Cada petición al proceso con menos trabajo en curso (el primero si empatan).
+  const pide: Pide = (cuerpo) => procesos.reduce((a, b) => (b.enCurso() < a.enCurso() ? b : a)).pide(cuerpo)
+  return {
+    listo: Promise.all(procesos.map((p) => p.listo)).then((ms) => Math.max(...ms)),
+    async catalogo() { return (await pide({ op: 'catalogo' })) as unknown as CatalogoCrudo },
+    async valores(metrica, dimension) { return (await pide({ op: 'valores', metricas: [metrica], dimension }))['valores'] as string[] },
+    async consulta(c: ConsultaSemantica) {
+      const r = await pide({ op: 'consulta', metricas: c.metricas, agrupar: c.agrupar ?? [], donde: dondeMetricFlow(c), orden: ordenMetricFlow(c), limite: c.limite })
+      return { columnas: r['columnas'], filas: r['filas'], sql: r['sql'] ?? null, truncada: Boolean(r['truncada']), ms: Number(r['ms']) } as ResultadoSemantico
+    },
+    async cierra() { for (const p of procesos) p.cierra() },
+  }
+}
+
+function proceso(o: OpcionesMetricFlow): Proceso {
   const python = o.python ?? join(dirEntorno(), 'bin', 'python')
   const hijo: ChildProcessWithoutNullStreams = spawn(python, ['-I', o.servidor ?? SERVIDOR, o.proyecto, o.perfiles], {
     // Entorno MÍNIMO a propósito (sin heredar secretos del proceso): ruta, home, sin telemetría y lo que pide el perfil.
@@ -58,23 +82,19 @@ export function puertoMetricFlow(o: OpcionesMetricFlow): PuertoSemantico & { lis
     pendientes.delete(Number(m['id'])); clearTimeout(p.reloj)
     if (m['ok']) p.ok(m); else p.mal(new FallaDeCapa(String(m['error'] ?? 'error sin mensaje')))
   })
-  const pide = async (cuerpo: Record<string, unknown>): Promise<Record<string, unknown>> => {
-    await listo
-    const id = siguiente++
-    return new Promise((ok, mal) => {
-      const reloj = setTimeout(() => { pendientes.delete(id); mal(new FallaDeCapa(`MetricFlow no respondió en ${o.tiempoMs ?? 60_000} ms`)) }, o.tiempoMs ?? 60_000)
-      pendientes.set(id, { ok, mal, reloj })
-      hijo.stdin.write(`${JSON.stringify({ id, ...cuerpo })}\n`)
-    })
+  // Asignadas cuenta también las que esperan a que el proceso arranque: así el reparto no las amontona en uno.
+  let asignadas = 0
+  const pide: Pide = async (cuerpo) => {
+    asignadas++
+    try {
+      await listo
+      const id = siguiente++
+      return await new Promise((ok, mal) => {
+        const reloj = setTimeout(() => { pendientes.delete(id); mal(new FallaDeCapa(`MetricFlow no respondió en ${o.tiempoMs ?? 60_000} ms`)) }, o.tiempoMs ?? 60_000)
+        pendientes.set(id, { ok, mal, reloj })
+        hijo.stdin.write(`${JSON.stringify({ id, ...cuerpo })}\n`)
+      })
+    } finally { asignadas-- }
   }
-  return {
-    listo,
-    async catalogo() { return (await pide({ op: 'catalogo' })) as unknown as CatalogoCrudo },
-    async valores(metrica, dimension) { return (await pide({ op: 'valores', metricas: [metrica], dimension }))['valores'] as string[] },
-    async consulta(c: ConsultaSemantica) {
-      const r = await pide({ op: 'consulta', metricas: c.metricas, agrupar: c.agrupar ?? [], donde: dondeMetricFlow(c), orden: ordenMetricFlow(c), limite: c.limite })
-      return { columnas: r['columnas'], filas: r['filas'], sql: r['sql'] ?? null, truncada: Boolean(r['truncada']), ms: Number(r['ms']) } as ResultadoSemantico
-    },
-    async cierra() { hijo.stdin.end(); hijo.kill() },
-  }
+  return { listo, pide, enCurso: () => asignadas, cierra: () => { hijo.stdin.end(); hijo.kill() } }
 }

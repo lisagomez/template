@@ -58,32 +58,38 @@ export function filtrosPara(cat: Catalogo, c: Componente, d: Dashboard, nombre: 
   return { filtros, omitidos: todos.filter((f) => !filtros.includes(f)).map((f) => f.dimension) }
 }
 
-interface Ctx { readonly consultor: Consultor; readonly c: Componente; readonly d: Dashboard; readonly periodo: PeriodoDashboard; readonly comparar: Comparar | null; readonly consultas: Respuesta[]; readonly advertencias: string[] }
+interface Ctx { readonly consultor: Consultor; readonly c: Componente; readonly d: Dashboard; readonly periodo: PeriodoDashboard; readonly comparar: Comparar | null; readonly pedidas: Promise<Respuesta>[]; readonly advertencias: string[] }
 
-async function pide(x: Ctx, nombre: string, agrupar: string[], periodo: PeriodoDashboard): Promise<Respuesta> {
+/**
+ * Las consultas salen EN PARALELO (el puerto puede tener varios procesos), pero se registran en el orden en que se
+ * PIDEN, no en el que llegan: la lista de consultas, los avisos y las cifras quedan deterministas.
+ */
+function pide(x: Ctx, nombre: string, agrupar: string[], periodo: PeriodoDashboard): Promise<Respuesta> {
   const { filtros, omitidos } = filtrosPara(x.consultor.catalogo, x.c, x.d, nombre)
   for (const o of omitidos) {
     const aviso = `el filtro «${o}» no aplica a «${nombre}» (la métrica no alcanza esa dimensión): se omite`
     if (!x.advertencias.includes(aviso)) x.advertencias.push(aviso)
   }
   const q: ConsultaSemantica = { metricas: [nombre], agrupar, filtros, periodo }
-  const r = await x.consultor.consulta(q)
-  x.consultas.push(r)
+  const r = x.consultor.consulta(q)
+  x.pedidas.push(r)
   return r
 }
+
+const comparada = (x: Ctx, n: string, agrupar: string[]) =>
+  Promise.all([pide(x, n, agrupar, x.periodo), x.comparar ? pide(x, n, agrupar, corre(x.periodo, x.comparar)) : null])
 
 const columna = (r: Respuesta, nombre: string) => r.columnas.indexOf(nombre)
 
 async function valores(x: Ctx, nombres: readonly string[]): Promise<Forma> {
-  const salida: ValorKpi[] = []
-  for (const n of nombres) {
+  const salida = await Promise.all(nombres.map(async (n): Promise<ValorKpi> => {
     const unidad = unidadDe(metrica(x.consultor.catalogo, n)!)
-    const r = await pide(x, n, [], x.periodo)
+    const [r, previa] = await comparada(x, n, [])
     const valor = num(r.filas[0]?.[columna(r, n)])
-    const anterior = x.comparar ? num((await pide(x, n, [], corre(x.periodo, x.comparar))).filas[0]?.[0]) : null
+    const anterior = previa ? num(previa.filas[0]?.[0]) : null
     const v = variacion(valor, anterior, unidad)
-    salida.push({ metrica: n, valor, anterior, variacion: v.variacion, tipoVariacion: v.tipo, unidad })
-  }
+    return { metrica: n, valor, anterior, variacion: v.variacion, tipoVariacion: v.tipo, unidad }
+  }))
   return { tipo: 'valores', valores: salida }
 }
 
@@ -97,10 +103,11 @@ async function filas(x: Ctx, nombres: readonly string[], dimension: string, top?
       porClave.set(clave, e)
     }
   }
-  for (const n of nombres) {
-    toma(await pide(x, n, [dimension], x.periodo), n, 'valores')
-    if (x.comparar) toma(await pide(x, n, [dimension], corre(x.periodo, x.comparar)), n, 'anteriores')
-  }
+  const respuestas = await Promise.all(nombres.map((n) => comparada(x, n, [dimension])))
+  respuestas.forEach(([r, previa], i) => {
+    toma(r, nombres[i]!, 'valores')
+    if (previa) toma(previa, nombres[i]!, 'anteriores')
+  })
   const primera = nombres[0] ?? ''
   const ordenadas = [...porClave.entries()].map(([clave, e]) => ({ clave, ...e }))
     .sort((a, b) => ((b.valores[primera] ?? -Infinity) - (a.valores[primera] ?? -Infinity)) * (ascendente ? -1 : 1))
@@ -119,13 +126,15 @@ function aSeries(r: Respuesta, n: string, eje: string, serie: string | undefined
 
 async function series(x: Ctx, nombres: readonly string[], grano: string, serie?: string): Promise<Forma> {
   const eje = `metric_time__${grano}`
+  const agrupar = serie ? [eje, serie] : [eje]
+  const respuestas = await Promise.all(nombres.map((n) => comparada(x, n, agrupar)))
   const salida: Serie[] = []
-  for (const n of nombres) {
-    const agrupar = serie ? [eje, serie] : [eje]
-    const actual = aSeries(await pide(x, n, agrupar, x.periodo), n, eje, serie)
-    const previo = x.comparar ? aSeries(await pide(x, n, agrupar, corre(x.periodo, x.comparar)), n, eje, serie) : new Map<string, Punto[]>()
+  respuestas.forEach(([r, previa], i) => {
+    const n = nombres[i]!
+    const actual = aSeries(r, n, eje, serie)
+    const previo = previa ? aSeries(previa, n, eje, serie) : new Map<string, Punto[]>()
     for (const [nombre, puntos] of actual) salida.push({ nombre, metrica: n, puntos, anterior: previo.get(nombre) ?? [] })
-  }
+  })
   return { tipo: 'series', series: salida }
 }
 
@@ -154,18 +163,21 @@ function forma(x: Ctx, o: OpcionesResolver): Promise<Forma> {
 
 export async function resuelveComponente(consultor: Consultor, d: Dashboard, c: Componente, o: OpcionesResolver = {}): Promise<DatosComponente> {
   const comparar = ('comparar' in c ? c.comparar : undefined) ?? d.filtros.comparar ?? null
-  const x: Ctx = { consultor, c, d, periodo: c.periodo ?? d.filtros.periodo, comparar, consultas: [], advertencias: [] }
+  const x: Ctx = { consultor, c, d, periodo: c.periodo ?? d.filtros.periodo, comparar, pedidas: [], advertencias: [] }
+  // Las que llegaron, en el orden en que se pidieron (si una falla, las demás igual se registran).
+  const hechas = async () => (await Promise.allSettled(x.pedidas)).flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
   try {
-    return { id: c.id, forma: await forma(x, o), consultas: x.consultas, advertencias: x.advertencias, error: null }
+    const f = await forma(x, o)
+    return { id: c.id, forma: f, consultas: await hechas(), advertencias: x.advertencias, error: null }
   } catch (e) {
-    return { id: c.id, forma: { tipo: 'vacio' }, consultas: x.consultas, advertencias: x.advertencias, error: e instanceof Error ? e.message : String(e) }
+    return { id: c.id, forma: { tipo: 'vacio' }, consultas: await hechas(), advertencias: x.advertencias, error: e instanceof Error ? e.message : String(e) }
   }
 }
 
 export async function resuelve(consultor: Consultor, d: Dashboard, o: OpcionesResolver = {}): Promise<DatosTablero> {
   const t = performance.now()
-  const componentes: Record<string, DatosComponente> = {}
-  for (const c of d.componentes) componentes[c.id] = await resuelveComponente(consultor, d, c, o)
+  const resueltos = await Promise.all(d.componentes.map((c) => resuelveComponente(consultor, d, c, o)))
+  const componentes: Record<string, DatosComponente> = Object.fromEntries(resueltos.map((r) => [r.id, r]))
   const todas = Object.values(componentes).flatMap((x) => x.consultas)
   return { componentes, ms: performance.now() - t, consultas: todas.length, desdeCache: todas.filter((r) => r.desdeCache).length }
 }

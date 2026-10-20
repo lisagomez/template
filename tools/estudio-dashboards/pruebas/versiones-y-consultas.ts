@@ -106,6 +106,29 @@ test('resolver: un filtro global se aplica donde la métrica lo alcanza, se omit
   assert.equal(r.componentes['ciclo']!.forma.tipo, 'vacio')
 })
 
+test('consultor: la misma consulta pedida A LA VEZ va una sola vez a la capa', async () => {
+  const p = doble({ desordena: true })
+  const x = consultor(p, cat)
+  const q = { metricas: ['ventas_netas'], agrupar: ['tienda__region'] }
+  const [a, b] = await Promise.all([x.consulta(q), x.consulta(q)])
+  assert.equal(p.pedidas.length, 1)
+  assert.deepEqual([a.desdeCache, b.desdeCache], [false, true])
+  assert.deepEqual(b.filas, a.filas)
+})
+
+test('resolver en paralelo: con respuestas que llegan desordenadas, las cifras, los avisos y el orden de las consultas no cambian', async () => {
+  const huella = (r: Awaited<ReturnType<typeof resuelve>>) => JSON.stringify(Object.values(r.componentes).map((c) => [c.id, c.forma, c.error, c.advertencias, c.consultas.map((q) => q.consulta)]))
+  const g = tablero('growth') as Dashboard
+  const d: Dashboard = { ...g, filtros: { ...g.filtros, dimensiones: [{ dimension: 'linea__canal', operador: 'no_en', valores: ['Mayoreo'] }] } }
+  const o = { dimensionMapa: 'tienda__tienda_nombre' }
+  const enOrden = doble()
+  const desordenado = doble({ desordena: true })
+  const [a, b] = [await resuelve(consultor(enOrden, cat), d, o), await resuelve(consultor(desordenado, cat), d, o)]
+  assert.equal(huella(b), huella(a))
+  assert.deepEqual(Object.keys(b.componentes), d.componentes.map((c) => c.id), 'los componentes, en el orden del tablero')
+  assert.ok(desordenado.simultaneas.max > 1, `las consultas salieron juntas (máximo ${desordenado.simultaneas.max} a la vez)`)
+})
+
 test('una capa que no responde no tira el tablero: el componente lo dice', async () => {
   const r = await resuelve(consultor(doble({ falla: true }), cat), tablero('ejecutivo'))
   assert.match(r.componentes['kpis']!.error ?? '', /no responde/)
