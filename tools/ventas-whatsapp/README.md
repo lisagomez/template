@@ -210,7 +210,7 @@ La app la sirve en `/api/ventas-whatsapp/openwa` (solo laboratorio, con `VENTAS_
 
 ## Pruebas
 
-`npm run prueba` compila y corre 117 pruebas en unos 20 s. También entran en el `validate` de la raíz por
+`npm run prueba` compila y corre 118 pruebas en unos 20 s. También entran en el `validate` de la raíz por
 `prueba:tools`. Cubren:
 
 - canal, ventanas y costo;

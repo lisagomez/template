@@ -15,8 +15,8 @@ oficial contesta 501 con la alternativa oficial y su fuente; lo que cambia, 422/
 
 | Conjunto cerrado | Resultado | Dónde |
 |---|---|---|
-| Operaciones del contrato pineado (`sha256:fdb4bd3c…`) | **203/203** clasificadas, cada fila con fuente: igual 25 · diferencia 32 · imposible 66 · pendiente 18 · fuera 62 | `pruebas/openwa-matriz.ts` |
-| De ellas, GET/POST/PUT/PATCH/DELETE (la cifra del goal) | **201/201** (las 2 restantes son OPTIONS y HEAD del ingress de plugins: fuera) | idem |
+| **Criterio fijado**: las 201 operaciones GET/POST/PUT/PATCH/DELETE del contrato pineado (`sha256:fdb4bd3c…`), sacadas del openapi | **201/201** clasificadas, cada una con su fuente: igual 25 · diferencia 32 · imposible 66 · pendiente 18 · fuera 60 | `pruebas/openwa-matriz.ts` |
+| Hallazgo aparte (no reemplaza el criterio): el contrato declara además OPTIONS y HEAD del ingress de plugins | las 2 tienen fila: fuera, 501 + alternativa | idem |
 | Operaciones servidas (igual + diferencia) | **57/57** cumplen el openapi en petición y respuesta (ajv), con control negativo | `pruebas/openwa-contrato.ts` |
 | Operaciones no servidas | **146/146** contestan 501 + alternativa + fuente + código por estado; 0 llamadas a Meta | `pruebas/openwa-no-disponibles.ts` |
 | Flujos del spec con el SDK `@rmyndharis/openwa@0.6.0` sin modificar (huella de los 114 archivos) | **6/6**: sesión con liga de alta en vez de QR · texto en ventana · texto fuera → 422 con plantilla sugerida · plantilla fuera de ventana · imagen y documento · webhook con firma verificada por el SDK | `pruebas/openwa-sdk.ts` y `e2e/openwa.mjs` |
@@ -36,8 +36,10 @@ oficial contesta 501 con la alternativa oficial y su fuente; lo que cambia, 422/
    (la vía oficial no lo permite), `pendiente` (la vía oficial lo permite, la fachada todavía no) y `fuera`
    (administración propia de OpenWA). Cada fila dice si su fuente es una página que lo dice (`documentado`) o una
    **ausencia** en la documentación vigente (`sin_documentar`, 67 filas).
-4. **201 contra 203**: el goal dijo 201 porque mi primer conteo omitía `options` y `head`. El conjunto cerrado son los
-   203 `operationId` del contrato; no se escondieron dos para cuadrar la cifra. Las dos cuentas están arriba.
+4. **El criterio se mide como se fijó: 201/201.** Las 201 se contaron al fijarlo como los `operationId` de
+   GET/POST/PUT/PATCH/DELETE del openapi; la prueba saca ese conjunto del contrato (no de la matriz) y lo mide entero.
+   Al generar la matriz apareció que el contrato declara además OPTIONS y HEAD del ingress de plugins: es un hallazgo
+   aparte, no un criterio nuevo; también tienen fila (fuera, 501 + alternativa) para no dejar una ruta sin contestar.
 5. **Bloquear un contacto pasó de `igual` a `diferencia` ANTES de medir**: la Block Users API solo bloquea a quien
    escribió en las últimas 24 h. Lo encontré al investigar, no al ver un resultado.
 6. **Sesión = número del BSP**. `start` da `signupUrl` (la liga firmada del BSP, de un uso y con vencimiento) y deja la
@@ -106,8 +108,9 @@ npm run build && node tools/ventas-whatsapp/e2e/openwa.mjs           # el SDK co
 
 ## Validación (después del commit)
 
-- `npm --prefix tools/ventas-whatsapp run prueba` → **117/117** (contrato 57/57 · matriz 203/203 · no disponibles
-  146/146 · lockfiles 2 revisados, 0 dependencias no oficiales); `npm run typecheck` → exit 0.
+- `npm --prefix tools/ventas-whatsapp run prueba` → **118/118** (contrato 57/57 · matriz, criterio fijado, 201/201 con
+  fuente, y aparte las 2 OPTIONS/HEAD · no disponibles 146/146 · lockfiles 2 revisados, 0 dependencias no oficiales);
+  `npm run typecheck` → exit 0.
 - `node tools/ventas-whatsapp/e2e/openwa.mjs` con la app construida → exit 0: 13/13 webhooks con firma válida,
   0 conexiones fuera de la máquina (app, guion y navegador), panel sin errores de consola ni desborde.
 - `npm run validate -- --sigue` tras `d21c474` → **32/32 gates activos**, 10 inactivos declarados, 0 rojos

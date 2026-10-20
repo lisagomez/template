@@ -42,8 +42,8 @@
   y de datos de terceros, no firmable) migra a la Cloud API cambiando URL y llave; lo imposible por la vía oficial se
   contesta con error y alternativa, nunca se simula.
 - **Demostrado** (2026-10-20, todo sintético, sin red fuera de 127.0.0.1):
-  - matriz 203/203 clasificadas con su fuente (201 GET/POST/PUT/PATCH/DELETE + OPTIONS y HEAD del ingress de plugins):
-    igual 25 · diferencia 32 · imposible 66 · pendiente 18 · fuera 62;
+  - matriz, criterio fijado: 201/201 operaciones GET/POST/PUT/PATCH/DELETE del contrato clasificadas con su fuente;
+    aparte, las 2 OPTIONS/HEAD del ingress de plugins también tienen fila (fuera, 501 + alternativa);
   - contrato: 57/57 operaciones servidas cumplen el openapi pineado en petición y respuesta (ajv), con un control
     negativo que prueba que el validador rechaza;
   - no servidas: 146/146 contestan 501 + alternativa + fuente; ninguna llama a Meta;
@@ -62,5 +62,5 @@
   - capa B: no cambia ningún skill ni instrucción del arnés; decide el laboratorio ☐;
   - aprobación humana ☐;
   - pineo ☑ (dos dependencias de desarrollo exactas, sin modelo).
-- **Regresión**: la suite de `tools/ventas-whatsapp` (117 pruebas) y `prueba:a2a` con las tres rutas declaradas.
+- **Regresión**: la suite de `tools/ventas-whatsapp` (118 pruebas) y `prueba:a2a` con las tres rutas declaradas.
 - **Aprobado por**: pendiente
