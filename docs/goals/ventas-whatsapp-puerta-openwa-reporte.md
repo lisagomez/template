@@ -103,3 +103,12 @@ npm --prefix tools/ventas-whatsapp run prueba && npm run typecheck   # la valida
 npm --prefix tools/ventas-whatsapp run matriz                        # regenera la matriz (una prueba falla si difiere)
 npm run build && node tools/ventas-whatsapp/e2e/openwa.mjs           # el SDK contra la app construida + capturas
 ```
+
+## Validación (después del commit)
+
+- `npm --prefix tools/ventas-whatsapp run prueba` → **117/117** (contrato 57/57 · matriz 203/203 · no disponibles
+  146/146 · lockfiles 2 revisados, 0 dependencias no oficiales); `npm run typecheck` → exit 0.
+- `node tools/ventas-whatsapp/e2e/openwa.mjs` con la app construida → exit 0: 13/13 webhooks con firma válida,
+  0 conexiones fuera de la máquina (app, guion y navegador), panel sin errores de consola ni desborde.
+- `npm run validate -- --sigue` tras `d21c474` → **32/32 gates activos**, 10 inactivos declarados, 0 rojos
+  (árbol `a4ddfdb69894`). Tras este commit del reporte se repite y el resultado va en el mensaje de cierre.
