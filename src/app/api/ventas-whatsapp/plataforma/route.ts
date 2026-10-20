@@ -52,9 +52,10 @@ export async function POST(peticion: Request): Promise<Response> {
       case 'liga': return NextResponse.json({ liga: pl.bsp.ligaDeAlta(a.inquilinoId) });
       case 'simulaAlta': {
         const id = randomBytes(4).toString('hex');
-        const s = pl.metaBsp.signup({ wabaId: `waba_${id}`, businessId: `bm_${id}`, ...(a.numero === 'propio' ? { phoneNumberId: `pn_${id}` } : {}), ...(a.numero === 'abandona' ? { abandonaEn: 'PHONE_NUMBER_SETUP' } : {}) });
+        const pn = a.simulado?.phoneNumberId ?? `pn_${id}`;
+        const s = pl.metaBsp.signup({ wabaId: a.simulado?.wabaId ?? `waba_${id}`, businessId: `bm_${id}`, ...(a.numero === 'propio' ? { phoneNumberId: pn } : {}), ...(a.numero === 'abandona' ? { abandonaEn: 'PHONE_NUMBER_SETUP' } : {}) });
         const r = await pl.bsp.recibe({
-          liga: a.liga, code: s.code, origen: ORIGEN_SIMULADO, mensaje: s.mensaje, perfil: perfilDe(a.perfil, id), telefonoVisible: a.numero === 'propio' ? `52229${randomInt(1_000_000, 9_999_999)}` : '',
+          liga: a.liga, code: s.code, origen: ORIGEN_SIMULADO, mensaje: s.mensaje, perfil: perfilDe(a.perfil, id), telefonoVisible: a.numero === 'propio' ? a.simulado?.telefonoVisible ?? `52229${randomInt(1_000_000, 9_999_999)}` : '',
           ...(a.numero === 'venta' || a.numero === 'renta' ? { delPool: { modalidad: a.numero, nombreVisible: `${a.perfil === 'restaurante' ? 'Cocina' : 'Tienda'} de laboratorio` } } : {}),
         });
         if (!('rechazo' in r) && r.inquilinoId && r.estado !== 'fallida') await v.vendedor.panel.sincronizaCatalogo(r.inquilinoId, a.perfil === 'restaurante' ? CSV_RESTAURANTE : CSV_TIENDA);

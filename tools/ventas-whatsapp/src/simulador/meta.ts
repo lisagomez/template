@@ -17,6 +17,7 @@ import { desdeCuerpoGraph, validaMensaje, resumeMensaje, type CategoriaPlantilla
 import { decidePrecio, mesDeFacturacion, registraEntrante, registraSaliente, TARJETA_LABORATORIO, DIAS_CAPI_MAXIMO, type TarjetaDeTarifas, type Ventanas } from '../meta/tarifas.js';
 import type { ClienteGraph, EventoCapi, RespuestaCapi, RespuestaEnvio, RespuestaQr } from '../meta/graph.js';
 import { creaCliente, type ClienteSimulado } from './cliente.js';
+import { creaAdministracionSimulada } from './administracion.js';
 
 export interface NumeroSimulado {
   wabaId: string;
@@ -64,6 +65,7 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
   const numeros = new Map<string, NumeroSimulado>();
   const catalogos = new Map<string, Map<string, { nombre: string; precioCentavos: number }>>();
   const ventanas = new Map<string, Ventanas>();
+  const bloqueos = new Set<string>();
   const servicioMes = new Map<string, number>();
   const clientes = new Map<string, ClienteSimulado>();
   const precios = new Map<string, RecibidoPorCliente['precio']>();
@@ -90,6 +92,7 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
   function entrante(n: NumeroSimulado, waId: string, nombre: string, mensaje: Record<string, unknown>) {
     const id = wamid();
     const llave = `${n.phoneNumberId}|${normalizaWaId(waId)}`;
+    if (bloqueos.has(llave)) { registro.push({ instante: reloj(), tipo: 'bloqueado', detalle: `${waId} → ${n.phoneNumberId}` }); return id; }
     ventanas.set(llave, registraEntrante(ventanas.get(llave) ?? {}, reloj(), !!(mensaje.referral as Record<string, unknown> | undefined)?.ctwa_clid || (mensaje.referral as Record<string, unknown> | undefined)?.source_type === 'ad'));
     emite(n.wabaId, 'messages', { metadata: metadata(n), contacts: [{ profile: { name: nombre }, wa_id: waId }], messages: [{ from: waId, id, timestamp: seg(), ...mensaje }] });
     registro.push({ instante: reloj(), tipo: 'webhook', detalle: `${waId} → ${n.phoneNumberId}: ${String(mensaje.type)}` });
@@ -127,6 +130,8 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
       if (m.tipo === 'plantilla' && !n.plantillas[m.nombre]) return error(132001, '(#132001) la plantilla no existe');
       const para = normalizaWaId(p.para);
       const llave = `${n.phoneNumberId}|${para}`;
+      // SUPUESTO: Meta dice que escribir a un bloqueado da error, sin fijar el código en la página consultada.
+      if (bloqueos.has(llave)) return error(131026, '(#131026) el destinatario está bloqueado por el negocio');
       const categoria = m.tipo === 'plantilla' ? n.plantillas[m.nombre]! : 'service';
       const mes = `${n.phoneNumberId}|${mesDeFacturacion(reloj(), tarjeta)}`;
       const d = decidePrecio({ categoria, ventanas: ventanas.get(llave) ?? {}, ahora: reloj(), pais: paisDeWaId(para), servicioEnElMes: servicioMes.get(mes) ?? 0, tarjeta });
@@ -167,8 +172,11 @@ export function creaMetaSimulada(o: OpcionesMetaSimulada) {
     },
   };
 
+  const administracion = creaAdministracionSimulada({ reloj, numeros, ventanas, bloqueos, emite });
+
   return {
     graph,
+    administracion,
     capi,
     registro,
     tarjeta,

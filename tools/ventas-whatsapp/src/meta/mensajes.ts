@@ -11,11 +11,12 @@
  * texto libre ≤ 4096. Lista de productos ≤ 30 productos y ≤ 10 secciones.
  */
 import { esObjeto, texto } from '../comun/base.js';
+import { aCuerpoMultimedia, desdeCuerpoMultimedia, resumeMultimedia, validaMultimedia, type MensajeMultimedia } from './multimedia.js';
 
 export type CategoriaPlantilla = 'utility' | 'marketing' | 'authentication';
 
 export type MensajeSaliente =
-  | { tipo: 'texto'; texto: string }
+  | { tipo: 'texto'; texto: string; vistaPrevia?: boolean }
   | { tipo: 'botones'; cuerpo: string; botones: Array<{ id: string; titulo: string }>; encabezado?: string; pie?: string }
   | { tipo: 'lista'; cuerpo: string; boton: string; secciones: Array<{ titulo: string; filas: Array<{ id: string; titulo: string; descripcion?: string }> }>; encabezado?: string; pie?: string }
   | { tipo: 'producto'; catalogo: string; retailerId: string; cuerpo?: string }
@@ -23,7 +24,8 @@ export type MensajeSaliente =
   | { tipo: 'carrusel'; catalogo: string; cuerpo: string; retailerIds: string[] }
   | { tipo: 'cta_url'; cuerpo: string; textoBoton: string; url: string }
   | { tipo: 'flow'; cuerpo: string; cta: string; flowId: string; flowToken: string; pantalla: string; datos?: Record<string, unknown>; encabezado?: string }
-  | { tipo: 'plantilla'; nombre: string; idioma: string; parametros: string[] };
+  | { tipo: 'plantilla'; nombre: string; idioma: string; parametros: string[] }
+  | MensajeMultimedia;
 
 const largo = (s: string | undefined, max: number, que: string, fallas: string[]) => {
   if (s !== undefined && [...s].length > max) fallas.push(`${que} excede ${max} caracteres`);
@@ -77,18 +79,20 @@ export function validaMensaje(m: MensajeSaliente): string[] {
     case 'plantilla':
       if (!m.nombre) f.push('plantilla sin nombre');
       break;
+    default:
+      f.push(...validaMultimedia(m));
   }
   return f;
 }
 
-/** Forma interna → cuerpo JSON de `POST /{phone_number_id}/messages`. */
-export function aCuerpoGraph(para: string, m: MensajeSaliente): Record<string, unknown> {
-  const base = { messaging_product: 'whatsapp', recipient_type: 'individual', to: para };
+/** Forma interna → cuerpo JSON de `POST /{phone_number_id}/messages` (`responde`: el wamid que cita, `context`). */
+export function aCuerpoGraph(para: string, m: MensajeSaliente, responde?: string): Record<string, unknown> {
+  const base = { messaging_product: 'whatsapp', recipient_type: 'individual', to: para, ...(responde ? { context: { message_id: responde } } : {}) };
   const envoltura = (inter: Record<string, unknown>) => ({ ...base, type: 'interactive', interactive: inter });
   const cabeza = (t?: string) => (t ? { header: { type: 'text', text: t } } : {});
   const pie = (t?: string) => (t ? { footer: { text: t } } : {});
   switch (m.tipo) {
-    case 'texto': return { ...base, type: 'text', text: { body: m.texto, preview_url: false } };
+    case 'texto': return { ...base, type: 'text', text: { body: m.texto, preview_url: m.vistaPrevia ?? false } };
     case 'botones': return envoltura({
       type: 'button', ...cabeza(m.encabezado), body: { text: m.cuerpo }, ...pie(m.pie),
       action: { buttons: m.botones.map((b) => ({ type: 'reply', reply: { id: b.id, title: b.titulo } })) },
@@ -130,17 +134,20 @@ export function aCuerpoGraph(para: string, m: MensajeSaliente): Record<string, u
         components: m.parametros.length ? [{ type: 'body', parameters: m.parametros.map((p) => ({ type: 'text', text: p })) }] : [],
       },
     };
+    default: return { ...base, ...aCuerpoMultimedia(m) };
   }
 }
 
 /** Lo que hace el lado de Meta (el simulador): cuerpo Graph → forma interna, o por qué no. */
-export function desdeCuerpoGraph(c: unknown): { ok: true; para: string; mensaje: MensajeSaliente } | { ok: false; error: string } {
+export function desdeCuerpoGraph(c: unknown): { ok: true; para: string; mensaje: MensajeSaliente; responde?: string } | { ok: false; error: string } {
   if (!esObjeto(c) || c.messaging_product !== 'whatsapp') return { ok: false, error: '(#100) messaging_product debe ser whatsapp' };
   const para = texto(c.to);
   if (!para) return { ok: false, error: '(#100) falta el destinatario' };
   const t = texto(c.type);
   const mal = { ok: false as const, error: `(#100) mensaje ${t ?? '?'} mal formado` };
-  if (t === 'text' && esObjeto(c.text)) return { ok: true, para, mensaje: { tipo: 'texto', texto: texto(c.text.body) ?? '' } };
+  const responde = esObjeto(c.context) ? texto(c.context.message_id) : undefined;
+  const cita = responde ? { responde } : {};
+  if (t === 'text' && esObjeto(c.text)) return { ok: true, para, mensaje: { tipo: 'texto', texto: texto(c.text.body) ?? '' }, ...cita };
   if (t === 'template' && esObjeto(c.template)) {
     const tp = c.template;
     const comps = Array.isArray(tp.components) ? tp.components : [];
@@ -148,6 +155,9 @@ export function desdeCuerpoGraph(c: unknown): { ok: true; para: string; mensaje:
     const parametros = esObjeto(cuerpo) && Array.isArray(cuerpo.parameters) ? cuerpo.parameters.map((p) => (esObjeto(p) ? texto(p.text) ?? '' : '')) : [];
     return { ok: true, para, mensaje: { tipo: 'plantilla', nombre: texto(tp.name) ?? '', idioma: esObjeto(tp.language) ? texto(tp.language.code) ?? '' : '', parametros } };
   }
+  const multimedia = desdeCuerpoMultimedia(c);
+  if (multimedia === 'mal') return mal;
+  if (multimedia) return { ok: true, para, mensaje: multimedia, ...cita };
   if (t !== 'interactive' || !esObjeto(c.interactive)) return mal;
   const i = c.interactive;
   const cuerpo = esObjeto(i.body) ? texto(i.body.text) ?? '' : '';
@@ -221,5 +231,6 @@ export function resumeMensaje(m: MensajeSaliente): string {
     case 'cta_url': return `${m.cuerpo} [${m.textoBoton} → ${m.url}]`;
     case 'flow': return `${m.cuerpo} [Flow «${m.cta}» → ${m.pantalla}]`;
     case 'plantilla': return `[plantilla ${m.nombre}: ${m.parametros.join(' · ')}]`;
+    default: return resumeMultimedia(m);
   }
 }

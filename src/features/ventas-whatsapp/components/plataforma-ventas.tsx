@@ -47,7 +47,9 @@ export function PlataformaVentas() {
 
   useEffect(() => {
     const t = leeToken();
-    queueMicrotask(() => { setToken(t); carga(t); });
+    // La liga de alta llega en la URL cuando la abre quien migra de OpenWA (`signupUrl` de la sesión).
+    const enUrl = new URLSearchParams(window.location.search).get('liga') ?? '';
+    queueMicrotask(() => { setToken(t); carga(t); if (enUrl) setLiga(enUrl); });
   }, [carga]);
 
   const accion = async (cuerpo: Record<string, unknown>): Promise<Record<string, unknown>> => {

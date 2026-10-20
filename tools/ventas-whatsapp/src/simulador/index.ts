@@ -5,3 +5,4 @@ export * from './procesador.js';
 export * from './http.js';
 export * from './numeros.js';
 export * from './bsp.js';
+export * from './administracion.js';

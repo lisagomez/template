@@ -18,6 +18,8 @@ export interface ClienteSimulado {
   recibidos: RecibidoPorCliente[];
   recibe(r: RecibidoPorCliente): void;
   escribe(texto: string): string;
+  /** Reacciona a un mensaje que recibió (emoji vacío quita la reacción). */
+  reacciona(wamid: string, emoji: string): string;
   /** Llega por un anuncio Click-to-WhatsApp. `conClid: false` = anuncio en Estados (sin `ctwa_clid`). */
   llegaPorAnuncio(adId: string, texto: string, conClid?: boolean): { wamid: string; ctwaClid?: string };
   toca(idOTitulo: string): string;
@@ -57,6 +59,7 @@ export function creaCliente(d: DepsCliente): ClienteSimulado {
     recibidos,
     recibe(r) { recibidos.push(r); },
     escribe(texto) { return d.entrante({ type: 'text', text: { body: texto } }); },
+    reacciona(wamid, emoji) { return d.entrante({ type: 'reaction', reaction: { message_id: wamid, emoji } }); },
     llegaPorAnuncio(adId, texto, conClid = true) {
       const ctwaClid = d.clic(adId, conClid);
       const wamid = d.entrante({

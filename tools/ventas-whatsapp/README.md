@@ -79,6 +79,18 @@ simulador fiel de Meta, sin un número real.
     Partner: nosotros, con margen y tipo de cambio) y concilia contra la factura de Meta.
   - Al tope de crédito frena solo el marketing y deja la decisión a una persona. La baja revoca el
     acceso y le deja a la pyme su WABA y su número.
+- **Puerta de salida de OpenWA** (`./openwa`): la API de OpenWA 0.25.0 servida sobre este BSP, para que quien hoy
+  usa OpenWA (WhatsApp Web o Baileys, no oficiales) pase a la Cloud API cambiando solo la URL y la llave. Es
+  compatible con la API de OpenWA; no es OpenWA.
+  - Las 203 operaciones del contrato pineado (`openwa/openapi-0.25.0.json`, licencia MIT en `openwa/LICENSE-OpenWA`)
+    están clasificadas en una matriz que se GENERA de los criterios (`openwa/MATRIZ.md`), cada fila con su fuente:
+    igual 25, diferencia 32, imposible 66, pendiente 18, fuera 62.
+  - Las 57 que se sirven cumplen el openapi en petición y respuesta; las otras 146 contestan 501 con la alternativa
+    oficial y nunca se simulan.
+  - Iniciar una sesión da la liga de alta (Embedded Signup) en lugar del QR; fuera de la ventana de 24 h, el texto
+    contesta 422 con las plantillas aprobadas; las plantillas pasan por la revisión de Meta.
+  - Mismas llaves y alcances (sesión, chat, IP), mismos webhooks con la misma firma HMAC, la misma idempotencia y una
+    frontera de contactos nuevos por hora.
 - **Laboratorio de negocio**: roadmap de costos (ficticio, con presupuesto del piloto) y roadmap de
   conversaciones-plantilla. Los dos se generan del código y una prueba impide que el papel diverja.
 
@@ -119,6 +131,9 @@ simulador fiel de Meta, sin un número real.
   un año después se va, el número entra a cuarentena (renta) o se lo lleva (venta).
 - **El laboratorio cierra el mes como BSP**: factura a cada pyme la cuota, lo que cobró Meta con su
   margen (Solution Partner) y sus números, y ve qué WABA no cuadra con la factura de Meta.
+- **Una agencia que tiene su CRM conectado a OpenWA** cambia `baseUrl` y `apiKey` en el SDK de OpenWA y sigue
+  mandando y recibiendo; antes pega sus llamadas en `/migracion-openwa` y ve cuáles cambian, cuáles no existen por la
+  vía oficial y qué usar en su lugar.
 - **Cambiar de BSP o de procesador**: el transporte (`ClienteGraph`), el alta (`GraphBsp`) y el cobro
   (`ConectorPagos`) se inyectan. Con el BSP propio o con uno ajeno (Kapso), se cambia el adaptador y
   no la app.
@@ -183,9 +198,19 @@ const bsp = creaBsp({ graph: graphBsp, boveda, almacen, reloj, modalidad: 'tech_
 await bsp.completa({ inquilinoId, code, recibidoEn, evento: leeEventoSignup(mensaje)!, perfil, telefonoVisible });
 ```
 
+```ts
+import { altasDelBsp, creaFachada } from '@tu-scope/ventas-whatsapp/openwa';
+
+const fachada = creaFachada({ graph, administracion, altas: altasDelBsp(bsp, almacen, urlAlta), llaveMaestra, secretoApp, entregaWebhook });
+await fachada.atiende({ metodo: 'POST', ruta: '/api/sessions/s1/messages/send-text', consulta, cabeceras, cuerpo }); // → { status, cuerpo }
+```
+
+La app la sirve en `/api/ventas-whatsapp/openwa` (solo laboratorio, con `VENTAS_WA_OPENWA_LLAVE`) y el panel en
+`/migracion-openwa`. La matriz se regenera con `npm run matriz` (y una prueba falla si alguien la edita a mano).
+
 ## Pruebas
 
-`npm run prueba` corre 96 pruebas en unos 20 s. También entran en el `validate` de la raíz por
+`npm run prueba` compila y corre 117 pruebas en unos 20 s. También entran en el `validate` de la raíz por
 `prueba:tools`. Cubren:
 
 - canal, ventanas y costo;
@@ -207,10 +232,13 @@ await bsp.completa({ inquilinoId, code, recibidoEn, evento: leeEventoSignup(mens
 - números (alta, límites de Meta, cuarentena, cobro);
 - BSP (Embedded Signup, crédito, baja, factura y conciliación);
 - alta segura (liga, origen, WABA ajena, persistencia);
-- frontera del número (granja, ráfaga, bloqueo).
+- frontera del número (granja, ráfaga, bloqueo);
+- puerta de salida de OpenWA: la matriz contra el contrato pineado, el contrato con ajv (57/57), los 146 501 con
+  alternativa, el SDK oficial 0.6.0 sin modificar, y la seguridad (llaves, firmas, idempotencia, frontera, lockfiles).
 
 La evidencia por HTTP con la app construida y las capturas salen de
-`npm run build && node tools/ventas-whatsapp/e2e/capturas.mjs`.
+`npm run build && node tools/ventas-whatsapp/e2e/capturas.mjs`; las de la puerta de salida (el SDK contra la app
+construida, con guardia de red, y el panel en escritorio y celular), de `node tools/ventas-whatsapp/e2e/openwa.mjs`.
 
 ## Del documento fuente
 

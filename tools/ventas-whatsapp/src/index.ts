@@ -13,6 +13,8 @@ export * from './meta/webhook.js';
 export * from './meta/mensajes.js';
 export * from './meta/tarifas.js';
 export * from './meta/graph.js';
+export * from './meta/administracion.js';
+export * from './meta/multimedia.js';
 export * from './meta/cronometro.js';
 export * from './almacen/almacen.js';
 export * from './agente/a2a-modelo.js';

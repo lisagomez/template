@@ -36,6 +36,8 @@ const esquema = z.object({
   VENTAS_WA_ANCLA_LLAVE: z.string().min(40).optional(),
   /** Token de quien opera la plataforma (altas por BSP, números, factura). Sin él, la página no abre. */
   VENTAS_WA_PLATAFORMA_TOKEN: opcional,
+  /** Llave ADMIN de la puerta de salida de OpenWA (solo laboratorio). Sin ella, la fachada contesta 503. */
+  VENTAS_WA_OPENWA_LLAVE: z.string().min(32).optional(),
 });
 
 export type Configuracion = z.infer<typeof esquema> & { tokens: Record<string, string>; panel: Map<string, string> };

@@ -32,7 +32,11 @@ export const esquemaPlataforma = z.discriminatedUnion('accion', [
   /** La liga privada de alta para UNA pyme. */
   z.object({ accion: z.literal('liga'), inquilinoId: z.string().regex(/^pyme_[a-z0-9_]{2,40}$/) }),
   /** Solo en el laboratorio: la pyme recorre una ventana de Embedded Signup simulada con esa liga. */
-  z.object({ accion: z.literal('simulaAlta'), liga: z.string().min(20).max(400), perfil: z.enum(['restaurante', 'tienda']), numero: z.enum(['propio', 'venta', 'renta', 'abandona']) }),
+  z.object({
+    accion: z.literal('simulaAlta'), liga: z.string().min(20).max(400), perfil: z.enum(['restaurante', 'tienda']), numero: z.enum(['propio', 'venta', 'renta', 'abandona']),
+    /** Solo laboratorio: el número que la ventana simulada devuelve (uno que el simulador de Meta ya conoce). */
+    simulado: z.object({ wabaId: z.string().regex(/^[\w-]{1,64}$/), phoneNumberId: z.string().regex(/^[\w-]{1,64}$/), telefonoVisible: z.string().regex(/^\+?[\d ]{8,20}$/) }).optional(),
+  }),
   z.object({ accion: z.literal('confirmaPago'), wabaId: z.string().min(1).max(64) }),
   z.object({ accion: z.literal('baja'), wabaId: z.string().min(1).max(64), motivo: z.string().trim().min(3).max(200) }),
   /** Solo en el laboratorio: un número ficticio al pool. */

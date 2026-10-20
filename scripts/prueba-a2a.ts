@@ -174,6 +174,15 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/ventas-whatsapp/a2a/[dominio]',
   '/api/ventas-whatsapp/a2a/[dominio]/.well-known/agent-card.json',
   '/api/ventas-whatsapp/flows',
+  // Puerta de salida de OpenWA (goal ventas-whatsapp-puerta-openwa). RF-20: misma app y mismo puerto, SOLO laboratorio
+  // (503 sin VENTAS_WA_LABORATORIO=1 ni la llave ADMIN de la fachada). `openwa/[...ruta]`: la API compatible con la de
+  // OpenWA 0.25.0; X-API-Key con rol y alcance por sesión, chat e IP, comparada por hash en tiempo constante; lo que la
+  // vía oficial no hace contesta 501. `openwa-webhook`: el de Meta para esos números, firma X-Hub-Signature-256 sobre
+  // el cuerpo crudo antes de leerlo. `openwa-informe`: la matriz pública contra lo que se pega; no lee ni guarda nada.
+  // Exponerla a quien migra (fuera de la máquina) es gate humano con el C3 y el CDC propuestos junto al spec.
+  '/api/ventas-whatsapp/openwa-informe',
+  '/api/ventas-whatsapp/openwa-webhook',
+  '/api/ventas-whatsapp/openwa/[...ruta]',
   '/api/ventas-whatsapp/pagos',
   '/api/ventas-whatsapp/panel',
   '/api/ventas-whatsapp/plataforma',
