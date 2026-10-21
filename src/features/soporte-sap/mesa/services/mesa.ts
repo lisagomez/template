@@ -120,6 +120,20 @@ async function delExperto(a: Almacen, id: IdentidadMesa, caso: string): Promise<
 
 const filtra = (x: unknown): void => { const d = datoPersonalEn(x); if (d) throw new Rechazo(d) }
 
+/**
+ * Las acciones sobre un caso van en fila. Cada una lee el caso, lo cambia y lo escribe: dos a la vez se pisaban y la última
+ * borraba a la otra (medido el 2026-10-21: en R2, el veredicto se llevaba las retros por paso; en disco, un 500). El
+ * laboratorio es UNA instancia (`max_instances: 1`), así que la fila en memoria basta.
+ */
+const filas = new Map<string, Promise<unknown>>()
+function enFila<T>(caso: string, hace: () => Promise<T>): Promise<T> {
+  const turno = (filas.get(caso) ?? Promise.resolve()).then(hace)
+  const fin = turno.catch(() => undefined)
+  filas.set(caso, fin)
+  void fin.then(() => { if (filas.get(caso) === fin) filas.delete(caso) })
+  return turno
+}
+
 export async function ingresa(a: Almacen, id: IdentidadMesa, cruda: unknown, version: string): Promise<CasoMesa> {
   const entrada = ENTRADA.parse(cruda)
   filtra(entrada)
@@ -153,57 +167,65 @@ const vivaOFalla = (c: CasoMesa): IncidenciaLab => {
 
 /** El experto decide en la sala, con su sesión, sobre el plan que espera en su caso. */
 export async function decide(a: Almacen, id: IdentidadMesa, caso: string, accion: 'aprobar' | 'rechazar' | 'a_revision', motivo: string): Promise<CasoMesa> {
-  const c = await delExperto(a, id, caso)
-  const i = vivaOFalla(c)
-  filtra(motivo)
-  const plan = [...i.planes].reverse().find((p) => p.mensaje && !p.decision)
-  if (!plan) throw new Rechazo('no hay un plan esperando tu decisión en la sala')
-  if (accion === 'a_revision' && motivo.trim().length < 3) throw new Rechazo('para mandarlo a revisión, dile al agente qué corregir')
-  const e = estado()
-  e.sala = agregaParticipante(e.sala, CONSULTORA, id.usuario)
-  actua(sesionExperto(id), { tipo: 'decide', mensaje: plan.mensaje!, accion, motivo })
-  alDia(c, i)
-  await guarda(a, c)
-  return c
+  return enFila(caso, async () => {
+    const c = await delExperto(a, id, caso)
+    const i = vivaOFalla(c)
+    filtra(motivo)
+    const plan = [...i.planes].reverse().find((p) => p.mensaje && !p.decision)
+    if (!plan) throw new Rechazo('no hay un plan esperando tu decisión en la sala')
+    if (accion === 'a_revision' && motivo.trim().length < 3) throw new Rechazo('para mandarlo a revisión, dile al agente qué corregir')
+    const e = estado()
+    e.sala = agregaParticipante(e.sala, CONSULTORA, id.usuario)
+    actua(sesionExperto(id), { tipo: 'decide', mensaje: plan.mensaje!, accion, motivo })
+    alDia(c, i)
+    await guarda(a, c)
+    return c
+  })
 }
 
 /** El experto le enseña al agente en SU caso del sandbox. En cuarentena no se enseña: ese caso nadie lo aprende (D14). */
 export async function ensena(a: Almacen, id: IdentidadMesa, caso: string, texto: string): Promise<CasoMesa> {
-  const c = await delExperto(a, id, caso)
-  const i = vivaOFalla(c)
-  filtra(texto)
-  if (!i.sandbox) throw new Rechazo('este caso tiene regla: no está en el sandbox. Si la regla está mal, dilo en tu veredicto')
-  if (i.sandbox.veredicto !== 'entra') throw new Rechazo('este caso está en cuarentena (RR. HH. o nómina, o con un dato personal): no entra al sandbox y nadie lo aprende. Tu veredicto sí se guarda')
-  const r = ensenaEnElCaso(sesionExperto(id), i.id, texto)
-  const ahora = new Date().toISOString()
-  c.ensenanza.push({ autor: 'tu', texto, tipo: null, fecha: ahora }, { autor: 'agente', texto: r.respuesta.texto, tipo: r.respuesta.tipo, fecha: ahora })
-  if (r.respuesta.tipo === 'propuesta') {
-    c.propuestas.push({ tipo: 'regla', titulo: 'Caso nuevo para la matriz y regla para el grafo', detalle: sinDelimitador(r.respuesta.propuesta.contenido), estado: 'propuesta: la firma el laboratorio' })
-    if (r.respuesta.cli) c.propuestas.push({ tipo: 'cli', titulo: r.respuesta.cli.nombre, detalle: `${r.respuesta.cli.operacion} · dry-run por defecto · ${r.respuesta.cli.nota}`, estado: 'propuesta: imprimirlo es CDC' })
-  }
-  alDia(c, i)
-  await guarda(a, c)
-  return c
+  return enFila(caso, async () => {
+    const c = await delExperto(a, id, caso)
+    const i = vivaOFalla(c)
+    filtra(texto)
+    if (!i.sandbox) throw new Rechazo('este caso tiene regla: no está en el sandbox. Si la regla está mal, dilo en tu veredicto')
+    if (i.sandbox.veredicto !== 'entra') throw new Rechazo('este caso está en cuarentena (RR. HH. o nómina, o con un dato personal): no entra al sandbox y nadie lo aprende. Tu veredicto sí se guarda')
+    const r = ensenaEnElCaso(sesionExperto(id), i.id, texto)
+    const ahora = new Date().toISOString()
+    c.ensenanza.push({ autor: 'tu', texto, tipo: null, fecha: ahora }, { autor: 'agente', texto: r.respuesta.texto, tipo: r.respuesta.tipo, fecha: ahora })
+    if (r.respuesta.tipo === 'propuesta') {
+      c.propuestas.push({ tipo: 'regla', titulo: 'Caso nuevo para la matriz y regla para el grafo', detalle: sinDelimitador(r.respuesta.propuesta.contenido), estado: 'propuesta: la firma el laboratorio' })
+      if (r.respuesta.cli) c.propuestas.push({ tipo: 'cli', titulo: r.respuesta.cli.nombre, detalle: `${r.respuesta.cli.operacion} · dry-run por defecto · ${r.respuesta.cli.nota}`, estado: 'propuesta: imprimirlo es CDC' })
+    }
+    alDia(c, i)
+    await guarda(a, c)
+    return c
+  })
 }
 
 export async function retroPaso(a: Almacen, id: IdentidadMesa, caso: string, clave: string, gesto: 'bien' | 'mal', esperaba: string | undefined): Promise<CasoMesa> {
-  const c = await delExperto(a, id, caso)
-  if (!c.pasos.some((p) => p.clave === clave)) throw new Rechazo('ese paso no está en tu caso')
-  filtra(esperaba ?? '')
-  c.retro.pasos[clave] = { gesto, esperaba: esperaba?.trim() || null, fecha: new Date().toISOString() }
-  c.actualizado = new Date().toISOString()
-  await guarda(a, c)
-  return c
+  return enFila(caso, async () => {
+    const c = await delExperto(a, id, caso)
+    if (!c.pasos.some((p) => p.clave === clave)) throw new Rechazo('ese paso no está en tu caso')
+    filtra(esperaba ?? '')
+    c.retro.pasos[clave] = { gesto, esperaba: esperaba?.trim() || null, fecha: new Date().toISOString() }
+    c.actualizado = new Date().toISOString()
+    await guarda(a, c)
+    return c
+  })
 }
 
 export async function veredicto(a: Almacen, id: IdentidadMesa, caso: string, valor: Veredicto, solucion: string | undefined, nota: string | undefined): Promise<CasoMesa> {
-  const c = await delExperto(a, id, caso)
-  filtra({ solucion, nota })
-  if ((valor === 'incorrecto' || valor === 'parcial') && !(solucion ?? '').trim()) throw new Rechazo('si el agente se equivocó, cuéntale cuál es la solución correcta')
-  c.retro.veredicto = { valor, solucion: solucion?.trim() || null, nota: nota?.trim() || null, fecha: new Date().toISOString() }
-  c.actualizado = new Date().toISOString()
-  await guarda(a, c)
-  return c
+  return enFila(caso, async () => {
+    const c = await delExperto(a, id, caso)
+    filtra({ solucion, nota })
+    if ((valor === 'incorrecto' || valor === 'parcial') && !(solucion ?? '').trim()) throw new Rechazo('si el agente se equivocó, cuéntale cuál es la solución correcta')
+    c.retro.veredicto = { valor, solucion: solucion?.trim() || null, nota: nota?.trim() || null, fecha: new Date().toISOString() }
+    c.actualizado = new Date().toISOString()
+    await guarda(a, c)
+    return c
+  })
 }
 
 /** Todos los casos guardados. Con retención, los que pasan de ella se borran al listar. */
@@ -228,7 +250,9 @@ export async function vistaMesa(a: Almacen, id: IdentidadMesa, retencionDias: nu
 }
 
 export async function borraCaso(a: Almacen, id: IdentidadMesa, caso: string): Promise<void> {
-  if (id.rol !== 'laboratorio') throw new Rechazo('borrar es del laboratorio')
-  if (!(await carga(a, caso))) throw new Rechazo('ese caso no existe')
-  await a.borra(claveDe(caso))
+  return enFila(caso, async () => {
+    if (id.rol !== 'laboratorio') throw new Rechazo('borrar es del laboratorio')
+    if (!(await carga(a, caso))) throw new Rechazo('ese caso no existe')
+    await a.borra(claveDe(caso))
+  })
 }

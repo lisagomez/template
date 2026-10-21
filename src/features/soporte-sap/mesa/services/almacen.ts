@@ -83,7 +83,8 @@ export function almacenS3(c: ConfigS3, consulta: typeof fetch = fetch, reloj: ()
   }
   const exige = async (r: Response, que: string) => { if (!r.ok) throw new Error(`el almacén S3 respondió ${r.status} al ${que}`) }
   return {
-    tipo: 's3', donde: `un bucket S3 (${new URL(c.endpoint).host}/${c.bucket})`,
+    // En R2, el host empieza por el id de la cuenta: la pantalla (también la del experto) no lo necesita.
+    tipo: 's3', donde: `un bucket S3 (${new URL(c.endpoint).host.replace(/^[0-9a-f]{32}\./, '…')}/${c.bucket})`,
     async lee(clave) { const r = await pide('GET', valida(clave)); if (r.status === 404) return null; await exige(r, 'leer'); return r.text() },
     async escribe(clave, contenido) { await exige(await pide('PUT', valida(clave), contenido), 'escribir') },
     async borra(clave) { const r = await pide('DELETE', valida(clave)); if (r.status !== 404) await exige(r, 'borrar') },

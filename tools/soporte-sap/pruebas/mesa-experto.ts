@@ -211,6 +211,22 @@ test('mesa · la retro sobrevive a que se reinicie el laboratorio: el caso ya no
   assert.match((await accion(EXPERTO, { tipo: 'decide', caso: c.id, accion: 'aprobar' })).error ?? '', /ya no vive/, 'y no se decide sobre otra incidencia con el mismo número')
 })
 
+test('mesa · las acciones que llegan juntas no se pisan: cada retro por paso y el veredicto quedan guardados', async () => {
+  // Medido en la mesa alojada el 2026-10-21: con la latencia de R2, el veredicto borraba las retros que llegaron con él.
+  const c = (await ingresa(MIGO)).caso
+  const [a, b, d] = c.pasos
+  const r = await Promise.all([
+    accion(EXPERTO, { tipo: 'retro_paso', caso: c.id, clave: a!.clave, gesto: 'bien' }),
+    accion(EXPERTO, { tipo: 'retro_paso', caso: c.id, clave: b!.clave, gesto: 'mal', esperaba: 'que me preguntara el tipo de movimiento' }),
+    accion(EXPERTO, { tipo: 'retro_paso', caso: c.id, clave: d!.clave, gesto: 'bien' }),
+    accion(EXPERTO, { tipo: 'veredicto', caso: c.id, valor: 'resuelto' }),
+  ])
+  assert.deepEqual(r.map((x) => x.status), [200, 200, 200, 200])
+  const g = JSON.parse(guardado(c.id)) as Caso
+  assert.deepEqual(Object.keys(g.retro.pasos).sort(), [a!.clave, b!.clave, d!.clave].sort(), 'las tres retros, no solo la última en escribir')
+  assert.equal(g.retro.veredicto?.valor, 'resuelto')
+})
+
 test('mesa · lo guardado vence: con la retención, el caso viejo se borra al listar y el reciente se queda', async () => {
   const nuevo = (await ingresa(FIORI)).caso
   const viejo = { ...JSON.parse(guardado(nuevo.id)), id: 'c-viejo00-abcdef', actualizado: new Date(Date.now() - 200 * 86_400_000).toISOString() }
