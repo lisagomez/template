@@ -51,84 +51,100 @@ compose y VPS. Esta vía tiene su propio candado: `scripts/laboratorio-alojado/c
 Son precios publicados, no una cotización (fuente: `developers.cloudflare.com/containers/platform/pricing/`). Lo que pase
 de lo incluido se cobra por uso: con un experto, céntimos.
 
-## Una vez (lo corre el laboratorio, con `!`)
+## Una vez (lo corre el laboratorio)
 
-Cada paso es un comando corto, con ruta relativa desde la raíz del worktree. Los que piden un secreto lo leen sin que
-pase por el chat.
+Los pasos del panel se hacen en el navegador. Los comandos van en una **terminal WSL aparte**, no con `!`: el login abre
+una URL que hay que ver a tiempo, el despliegue tarda minutos y los secretos se escriben en un aviso que no los muestra
+(con `!` pasan a segundo plano a los 120 s). Desde `~/mesa-wt/scripts/laboratorio-alojado`, con
+`export WRANGLER_SEND_METRICS=false`. Probado de punta a punta el 2026-10-21.
 
-1. **La cuenta**: crea una cuenta de Cloudflare y activa **Workers Paid** (Workers & Pages → Plans). Es el único pago.
-2. **Entra con wrangler**:
-
-   ```
-   ! npx wrangler@4.143.1 login
-   ```
-
-3. **El equipo de Zero Trust**: en el panel, Zero Trust → crea tu equipo (por ejemplo, `laboratorio-sap`). Guarda su
-   nombre fuera del repo:
-
-   ```
-   ! printf 'ACCESS_EQUIPO=%s\n' TU-EQUIPO > ~/.soporte-sap-mesa.env && chmod 600 ~/.soporte-sap-mesa.env
-   ```
-
-4. **El almacén**:
+1. **La cuenta**: crea una cuenta de Cloudflare y activa **Workers Paid**. En el panel nuevo, los planes están en
+   `https://dash.cloudflare.com/?to=/:account/workers/plans`; lo activo se ve en Billing → Subscriptions. Activa también
+   **R2** (R2 Object Storage; el nivel gratuito basta). Es el único pago.
+2. **Entra con wrangler**: `npx wrangler@4.143.1 login --browser=false`, y abre la URL que imprime en el navegador donde
+   tienes la sesión de Cloudflare. La respuesta vuelve sola a la terminal.
+3. **El equipo de Zero Trust**: entra a `https://one.dash.cloudflare.com/`. Cloudflare crea un equipo con un nombre al
+   azar: cámbialo en Settings → Team domain → Edit (por ejemplo, `laboratorio-sap`), con el plan **Free**. Es la
+   dirección que ve el experto al entrar. Guarda el nombre fuera del repo:
 
    ```
-   ! npx wrangler@4.143.1 r2 bucket create mesa-del-experto -J us
+   printf 'ACCESS_EQUIPO=%s\n' TU-EQUIPO > ~/.soporte-sap-mesa.env && chmod 600 ~/.soporte-sap-mesa.env
    ```
 
-   Luego, en R2 → Manage API tokens, crea un token **Object Read & Write** solo para `mesa-del-experto`. Te da una llave
-   de acceso, su secreto y el endpoint S3 de la jurisdicción. Los pones en el paso 7.
-5. **El primer despliegue**, con Docker encendido y todo en un commit:
+   La lista de recomendaciones de Zero Trust (dispositivos, DNS, túnel) no hace falta.
+4. **El almacén**: `npx wrangler@4.143.1 r2 bucket create mesa-del-experto -J us`.
+5. **El subdominio** de Workers sale de tu correo: si no quieres que el experto lo vea en la URL, cámbialo antes de
+   desplegar (Workers & Pages → Account details → Subdomain).
+6. **El primer despliegue**, con Docker encendido y todo en un commit:
 
    ```
-   ! bash scripts/laboratorio-alojado/despliega.sh
+   bash ~/mesa-wt/scripts/laboratorio-alojado/despliega.sh 2>&1 | tee ~/mesa-despliegue.log
    ```
 
    Esto pasa:
    - construye la imagen del commit, la revisa por dentro, la sube al registro de Cloudflare y despliega el Worker;
    - termina en rojo si Access no está puesto, y la primera vez es lo esperado;
    - sin los secretos, la mesa no abre: falla cerrada.
-6. **Access**: en Workers & Pages → `soporte-sap-laboratorio` → Settings → Domains & Routes → `workers.dev` → **Enable
-   Cloudflare Access**.
-   - En Zero Trust → Access → Applications, abre la aplicación que se creó y copia su **Application Audience (AUD)
-     Tag**.
-   - Añade una política **Allow** con los correos del experto y el tuyo, y método de inicio de sesión **One-time PIN**.
-   - Para las pruebas automáticas, crea dos **Service Tokens** (experto-de-prueba y laboratorio-de-prueba) y una política
-     **Service Auth** que los incluya.
-7. **Los secretos** del Worker. Cada uno te pide el valor sin mostrarlo:
+7. **Access**: en Workers & Pages → `soporte-sap-laboratorio` → Domains → fila **Production** → **Enable Access** →
+   **Protect this Worker behind Access**.
+   - **Scope: All traffic** (viene marcado «Previews only», que deja sin puerta la dirección del experto).
+   - **Política: Cloudflare account** (solo tú). **Nunca «Email domain»**: con Gmail, deja pasar a cualquier cuenta de
+     Gmail.
+   - **Sesión: 24 horas.**
+   - El **AUD** está en Zero Trust → Access controls → Applications → la aplicación del Worker. No es un secreto (Access
+     lo manda en una cabecera), pero va como secreto en el paso 9.
+8. **Los tokens de prueba**, para que el recorrido entre a la mesa alojada. En Zero Trust → Access controls → Service
+   credentials → Service Tokens, crea `experto-de-prueba` y `laboratorio-de-prueba`, con la duración más corta que
+   ofrezca. **El secreto se muestra una vez**: guárdalo en el momento, un valor por línea (pega solo el valor, sin
+   `CF-Access-Client-Id:` delante):
 
    ```
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put ACCESS_AUD
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put MESA_EXPERTOS
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put MESA_LABORATORIO
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put MESA_TOKENS
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put MESA_S3_ENDPOINT
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put MESA_S3_LLAVE
-   ! npx wrangler@4.143.1 --cwd scripts/laboratorio-alojado secret put MESA_S3_SECRETO
+   read -rsp 'experto, client id: ' V && printf 'CF_ACCESS_EXPERTO_ID=%s\n' "$V" >> ~/.soporte-sap-mesa.env && unset V; echo
    ```
 
-   Qué va en cada uno:
-   - `MESA_EXPERTOS` y `MESA_LABORATORIO`: correos separados por comas.
-   - `MESA_TOKENS`: `<client-id-1>=experto,<client-id-2>=laboratorio`.
-8. **Los tokens de prueba**, en tu archivo local, para que el recorrido entre a la mesa alojada (una línea por valor):
+   Repite con `CF_ACCESS_EXPERTO_SECRETO`, `CF_ACCESS_LABORATORIO_ID` y `CF_ACCESS_LABORATORIO_SECRETO`. Luego, en Access
+   controls → Policies, crea `mesa-pruebas` (**Service Auth**, Include → **Service Token** → los dos; nunca «Any Access
+   Service Token») y añádela en la pestaña Access del Worker.
+9. **Los secretos** del Worker. Cada `secret put` pide el valor sin mostrarlo:
 
    ```
-   ! read -rsp 'experto, client id: ' V && printf 'CF_ACCESS_EXPERTO_ID=%s\n' "$V" >> ~/.soporte-sap-mesa.env && unset V
+   npx wrangler@4.143.1 secret put ACCESS_AUD
+   npx wrangler@4.143.1 secret put MESA_LABORATORIO
+   npx wrangler@4.143.1 secret put MESA_S3_ENDPOINT
+   npx wrangler@4.143.1 secret put MESA_S3_LLAVE
+   npx wrangler@4.143.1 secret put MESA_S3_SECRETO
    ```
 
-   Repite con `CF_ACCESS_EXPERTO_SECRETO`, `CF_ACCESS_LABORATORIO_ID` y `CF_ACCESS_LABORATORIO_SECRETO`.
-9. **Comprueba** que sin sesión no abre:
+   - `MESA_LABORATORIO`: tu correo. `MESA_EXPERTOS` va al invitar (abajo), no antes.
+   - Los tres de R2 salen de R2 → Manage API tokens → **Create Account API token**: **Object Read & Write**, solo para
+     `mesa-del-experto`. `MESA_S3_ENDPOINT` es la URL «S3 API» del bucket (Settings), con `.us.`.
+   - `MESA_TOKENS` se arma con los dos Client ID de tu archivo, sin que pasen por la pantalla (tres líneas cortas: una
+     línea larga se parte al copiarla):
 
    ```
-   ! node scripts/laboratorio-alojado/candado.mjs access https://soporte-sap-laboratorio.<tu-subdominio>.workers.dev
+   E=$(grep '^CF_ACCESS_EXPERTO_ID=' ~/.soporte-sap-mesa.env | cut -d= -f2-)
+   L=$(grep '^CF_ACCESS_LABORATORIO_ID=' ~/.soporte-sap-mesa.env | cut -d= -f2-)
+   printf '%s=experto,%s=laboratorio' "$E" "$L" | npx wrangler@4.143.1 secret put MESA_TOKENS
    ```
+
+10. **Redespliega** (el paso 6 otra vez): **un contenedor encendido no ve los secretos nuevos**, y hasta que arranca de
+    nuevo la mesa responde «no tiene dónde guardar». Esta vez termina en verde. El contenedor anterior atiende unos
+    minutos más mientras Cloudflare lo reemplaza.
+11. **Comprueba** con el recorrido (lo corre Claude): `MESA_IDENTIDAD=servicio node --env-file=$HOME/.soporte-sap-mesa.env
+    src/features/soporte-sap/mesa/pruebas/recorrido-mesa.mjs <url> docs/goals/soporte-sap-capturas/mesa-alojada`.
 
 ## Invitar al experto, y quitarle el acceso
 
-- **Invitar**: su correo, en la política de Access y en `MESA_EXPERTOS` (paso 7). Mándale la URL y dile que empiece por
-  «Cómo se usa». Entra con su correo y un código: no hay contraseña.
-- **Quitar**: sácalo de la política de Access y de `MESA_EXPERTOS`. Lo que ya dijo se queda en R2 hasta que lo borres o
-  venza.
+Solo después de firmar la revisión 11 de la AISIA.
+
+- **Invitar**:
+  - en Zero Trust → Access controls → Policies, crea `mesa-personas` (**Allow**, Include → **Emails** → su correo y el
+    tuyo, inicio de sesión **One-time PIN**) y añádela en la pestaña Access del Worker;
+  - `npx wrangler@4.143.1 secret put MESA_EXPERTOS` con su correo (varios, separados por comas);
+  - redespliega o espera 30 minutos sin uso: el contenedor ve la lista nueva al arrancar;
+  - mándale la URL y dile que empiece por «Cómo se usa». Entra con su correo y un código: no hay contraseña.
+- **Quitar**: sácalo de la política y de `MESA_EXPERTOS`. La puerta del Worker lo deja fuera al momento; lo que ya dijo
+  se queda en R2 hasta que lo borres o venza.
 
 ## Leer lo que dijo el experto
 

@@ -390,10 +390,35 @@ el laboratorio local. Después de cada cambio de la imagen o del Worker, corre t
   número de documento SAP de 10 cifras escrito por el experto se rechaza (el mensaje pide abreviarlo). Es conservador.
 - **El estado del laboratorio se pierde al dormirse el contenedor** (30 min sin uso): el caso queda «guardado» y no se
   puede decidir sobre él; se vuelve a correr. Declarado en la pantalla.
-- **Varios expertos a la vez** comparten un laboratorio en memoria (un contenedor, `max_instances: 1`); la retro de cada
-  caso se escribe entera (gana la última escritura del mismo caso, que solo edita su autor).
+- **Varios expertos a la vez** comparten un laboratorio en memoria (un contenedor, `max_instances: 1`). Las acciones
+  sobre un mismo caso van en fila (`enFila` en `mesa.ts`): «gana la última escritura» resultó falso con un solo autor,
+  ver «En Cloudflare». Con más de una instancia, la fila en memoria ya no bastaría.
 - **`wrangler deploy` a mano se salta el candado.** Brecha en el C3.
 - **El contenedor puede correr en Canadá** (ENAM). Declarado en la AISIA.
 - **La matriz entera tarda ~1 h**: se corrió en una copia aparte del commit, para no sabotear el árbol de trabajo.
 - **`audita:secretos` mira todos los objetos del repositorio**: un hex de 64 de otra rama (hoy, `estudio/dashboards`)
   pone en rojo el validate de esta. No es de esta rama; se reporta.
+
+## En Cloudflare (2026-10-21)
+
+Desplegada por el laboratorio con `despliega.sh` (imagen `42b2b618c8f0`), equipo de Access `laboratorio-sap`, R2
+`mesa-del-experto` con jurisdicción `us`. Evidencia en `docs/goals/soporte-sap-capturas/mesa-alojada/`.
+
+- **Recorrido alojado 10/10** con los tokens de servicio; negativas: sin sesión y con un JWT vencido, Access redirige
+  (302); el experto recibe 404 en la vista del laboratorio y en la ruta de las identidades elegibles.
+- **Tras dormir**: el arranque cambió (`2b7749f9` → `4ac46955`) y el caso siguió con su retro y su veredicto.
+- **Lo que encontró la nube y no la máquina**: con la latencia de R2, el veredicto borraba las retros por paso que
+  llegaron con él (leer, cambiar y escribir sin fila). En disco, lo mismo daba un 500. Arreglado con una fila por caso y
+  una prueba de cuatro acciones a la vez, roja antes y verde después.
+- **La pantalla mostraba el id de la cuenta** dentro del endpoint de R2, también al experto: ya no.
+- **Al terminar `despliega.sh`, el contenedor anterior atiende unos minutos más** (el rollout sigue): un recorrido justo
+  después corrió contra él. La primera petición tras un despliegue puede dar 500 («container is not running»).
+- **Un contenedor encendido no ve los secretos nuevos**: hasta redesplegar (o que se duerma) la mesa responde 503 «no
+  tiene dónde guardar». Falla cerrada, como debe.
+- **Los 3 errores de consola del recorrido son de la prueba**: Playwright no pone las cabeceras del token de servicio en
+  la descarga de `sw.js`, y Access la redirige. Con el token, `sw.js` responde 200; el navegador del experto lleva la
+  cookie de Access.
+- **Al probar con Python**, Cloudflare responde 403 «error code: 1010» (control de bots) y parece un rechazo de Access:
+  se prueba con curl o con el navegador.
+- **`containers push` dejaba la credencial del registro sin cifrar** en `~/.docker/config.json`: el guion hace
+  `docker logout` al salir.
