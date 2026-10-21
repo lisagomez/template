@@ -26,6 +26,17 @@ Spec: `docs/goals/estudio-dashboards.md` · grafo: `docs/grafos/estudio-dashboar
 
 ## Evidencia por punto del HECHO
 
+> **Decisión del laboratorio (2026-10-21), sobre el único punto que no cierra.** Contra el set v1 congelado, analizar
+> da 14/16 (87.5 %) en 7 de 8 corridas y 15/16 en una, así que «≥ 90 % por nivel y tipo» no se cumple de forma
+> estable. El laboratorio eligió **cerrar con el fallo reportado**, lo que el spec prescribe para este caso: el v1 no
+> se relaja, el fallo se reporta por tipo y el punto queda en ámbar. Se descartaron tres alternativas:
+> - adoptar el set v2 como set del gate;
+> - un set nuevo escrito a ciegas para medir los dos arreglos;
+> - arreglar el agente y medir sobre el v1.
+>
+> El v2, el set nuevo y los arreglos quedan como propuestas (`estudio-dashboards-propuestas-firma.md` §5). Esto es la
+> decisión tomada en la conversación, no una firma.
+
 **Datos fijados.**
 - Los 7 sha256 (`laboratorio/datos.json`) son iguales a los del spec y a los del zip.
 - Regenerar con semilla (numpy 2.5.4, pandas 3.0.6; `gen_data.py` y luego `lifecycle.py`, en una carpeta temporal) da los mismos 7 hashes: reproducible (`regeneracion.json`).

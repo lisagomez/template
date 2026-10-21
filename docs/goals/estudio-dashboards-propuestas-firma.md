@@ -96,9 +96,14 @@ cuenta, y antes de exponerla hace falta sesión y C3.
 ## 5. Lo que queda para otra firma (no se hizo)
 
 - **Adoptar el CLI en el arnés** (skill, `settings.json` o manifiesto de la imprenta): CDC aparte.
+- **El gate por tipo sobre el v1 se cerró con el fallo reportado** (decisión del laboratorio en la conversación,
+  2026-10-21): analizar 14/16 en 7 de 8 corridas. No es una firma.
 - **Adoptar el set v2** (`evaluacion/set-referencia-v2.json`, `ADJUDICACION.md`) como set de regresión del CDC: lo
   produjo un adjudicador independiente y ciego, y está congelado en `cdf43d6`. El v1 sigue siendo el oficial hasta
-  que el laboratorio firme. El adjudicador dejó además tres tensiones del contrato para resolver en el contrato:
+  que el laboratorio firme.
+- **Los dos arreglos vistos en la retenida** (las dimensiones de la línea en «lo que entendí»; «¿por qué cayó el
+  crecimiento?» por la métrica base): se aplican y se miden en un set nuevo, escrito a ciegas y congelado antes de
+  medir. Ninguno está aplicado. El adjudicador dejó además tres tensiones del contrato para resolver en el contrato:
   - la tabla por tipo contra la regla general de la Puntuación;
   - `comparar` en analizar;
   - la unidad de un umbral de nivel sobre una métrica en %.
