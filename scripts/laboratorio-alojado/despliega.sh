@@ -33,12 +33,15 @@ WR="$RAIZ/$AQUI/node_modules/.bin/wrangler"
 CUENTA="$("$WR" whoami 2>/dev/null | grep -oE '\b[a-f0-9]{32}\b' | head -1 || true)"
 [ -n "$CUENTA" ] || { echo "✗ no sé tu cuenta de Cloudflare: corre antes, en una terminal aparte, npx wrangler@4.143.1 login" >&2; exit 1; }
 REMOTA="registry.cloudflare.com/${CUENTA}/${TAG}"
+# `containers push` deja la credencial del registro en ~/.docker/config.json, sin cifrar (medido el 2026-10-21): se
+# quita al salir, pase lo que pase.
+trap 'docker logout registry.cloudflare.com >/dev/null 2>&1 || true' EXIT
 (cd "$AQUI" && "$WR" containers push "$TAG")
 
 # La config que se despliega es la del repo con la imagen del commit: se genera aquí, se revisa y se borra al salir.
 mkdir -p "$AQUI/.wrangler"
 DESPLEGADA="$AQUI/.wrangler/desplegada.jsonc"
-trap 'rm -f "$DESPLEGADA"' EXIT
+trap 'rm -f "$DESPLEGADA"; docker logout registry.cloudflare.com >/dev/null 2>&1 || true' EXIT
 node -e "
 const { jsonc } = await import('./$AQUI/candado.mjs');
 const fs = await import('node:fs');
