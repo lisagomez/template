@@ -24,17 +24,19 @@ const contexto = (m: ModeloEstudio, registro: LlamadaModelo[] = []) => ({ consul
  * catálogo: las etiquetas y descripciones de la capa son insumo compartido por diseño con el revisor (medido el
  * 2026-10-20: la única coincidencia fue la etiqueta «Crecimiento de ventas vs año anterior %» del YAML).
  */
-test('canario: ninguna pregunta del set de referencia aparece en el prompt', () => {
-  const set = JSON.parse(readFileSync(join(RAIZ, 'evaluacion', 'set-referencia.json'), 'utf8')) as { preguntas: { instruccion: string }[] }
+test('canario: ninguna pregunta de los sets de referencia (v1, v2 y v3) aparece en el prompt', () => {
   const sinCatalogo = construyeCatalogo({ version: 'vacio', metricas: [] }, {})
   const prompt = `${promptSistema(sinCatalogo, { corte: '2026-09', contexto: 'laboratorio' })}\n${mensajeUsuario(tablero('growth'), 0, '')}`.toLowerCase()
   const palabras = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z0-9ñ]+/g) ?? []
   const p = palabras(prompt).join(' ')
-  for (const q of set.preguntas) {
-    const w = palabras(q.instruccion)
-    for (let i = 0; i + 6 <= w.length; i++) assert.ok(!p.includes(w.slice(i, i + 6).join(' ')), 'una pregunta del set (6 palabras seguidas) aparece en el prompt')
+  for (const archivo of ['set-referencia.json', 'set-referencia-v2.json', 'set-referencia-v3.json']) {
+    const set = JSON.parse(readFileSync(join(RAIZ, 'evaluacion', archivo), 'utf8')) as { preguntas: { instruccion: string }[] }
+    for (const q of set.preguntas) {
+      const w = palabras(q.instruccion)
+      for (let i = 0; i + 6 <= w.length; i++) assert.ok(!p.includes(w.slice(i, i + 6).join(' ')), `una pregunta de ${archivo} (6 palabras seguidas) aparece en el prompt`)
+    }
+    assert.equal(set.preguntas.length, 100)
   }
-  assert.equal(set.preguntas.length, 100)
 })
 
 test('modificar: el plan del modelo se convierte en un parche que toca solo lo pedido', async () => {
