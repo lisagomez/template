@@ -9,7 +9,7 @@ import { createHmac } from 'node:crypto'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { lee } from './_ayuda.ts'
-import { DIR, b64, jwt, ajena, EXPERTO, OTRO, LAB, acceso, filtro, rt, SESIONES, GET, POST, NextRequest, importa, pide } from './_mesa.ts'
+import { DIR, b64, jwt, ajena, EXPERTO, OTRO, LAB, acceso, filtro, rt, SESIONES, GET, POST, NextRequest, importa, pide } from './_mesa.mts'
 
 type Paso = { clave: string; etapa: string; quien: string; titulo: string; tono: string }
 type Caso = { id: string; incidencia: string; vivo: boolean; pasos: Paso[]; resultado: { tipo: string; regla: string | null }; planes: Array<{ aplicado: { errorDespues: boolean } | null; decision: unknown }>; sandbox: { veredicto: string } | null; propuestas: Array<{ tipo: string }>; ensenanza: Array<{ tipo: string | null }>; retro: { pasos: Record<string, { gesto: string }>; veredicto: { valor: string } | null } }

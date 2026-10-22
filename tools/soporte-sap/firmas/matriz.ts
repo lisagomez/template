@@ -2687,4 +2687,24 @@ export const FILAS: readonly Fila[] = [
       ed(`${ME}/services/candidatos.ts`, '  const forma = datoPersonalEn(escrito)\n  if (forma) throw new Rechazo(forma)\n', ''),
     ] },
   },
+  {
+    id: 'aisia-hipotesis-propuesta', doc: 'AISIA', ref: 'Una hipótesis de un tercero que se vuelve regla', infirmable: true, estado: 'probado',
+    afirmacion: 'lo que el experto dice de un candidato de sapstack se guarda como propuesta: la mesa no firma, no registra ni escribe fuera de su almacén',
+    control: `${ME}/services/candidatos.ts · validaCandidato`,
+    comprobacion: prueba('mesa-candidatos.ts', 'mesa · una validación del experto es una propuesta: no la firma ni la registra, y no escribe fuera de su almacén'),
+    sabotaje: { que: 'validar como «correcto» la firma', ediciones: [ed(`${ME}/services/candidatos.ts`, "valoracion: x.valoracion, ...escrito, estado: 'propuesta',", "valoracion: x.valoracion, ...escrito, estado: x.valoracion === 'correcto' ? 'firmada' : 'propuesta',")] },
+  },
+  {
+    id: 'aisia-hipotesis-solo-registrado', doc: 'AISIA', ref: 'Una hipótesis de un tercero que se vuelve regla', infirmable: true, estado: 'probado',
+    afirmacion: 'con conocimiento de producción, solo da veredicto lo registrado con su huella: un candidato que no pasó por la firma y el registro no entra, aunque diga una versión registrada',
+    control: 'src/conocimiento-produccion.ts · conocimientoDeProduccion()',
+    comprobacion: prueba('conocimiento-produccion.ts', 'H-20 · el conocimiento de producción va en su versión exacta y registrada, y con la huella registrada de cada regla'),
+    sabotaje: { que: 'se acepta una regla con otra huella', ediciones: [ed(dist('conocimiento-produccion.js'), 'registrada.huellas.reglas[clave]?.huella !== h.huella', 'false')] },
+  },
+  {
+    id: 'aisia-hipotesis-fuente-citable', doc: 'AISIA', ref: 'Una hipótesis de un tercero que se vuelve regla', infirmable: true, estado: 'depende',
+    afirmacion: 'la regla que nace de un candidato cita una fuente primaria (una SAP Note verificada por el experto, o su experiencia documentada), nunca a sapstack por sí solo',
+    control: 'D-SS-2 (docs/goals/soporte-sap-sapstack-propuesta.md §10.2) y la firma en CAMBIOS.md',
+    nota: 'la calidad de la cita la decide el laboratorio al firmar: el gate exige fuente_cita y fuente_url, no que la fuente sea buena',
+  },
 ]

@@ -263,7 +263,7 @@ abierta escrita y su recomendación, y repórtalo.
 - **La propuesta**: `docs/goals/soporte-sap-sapstack-propuesta.md` (+ anexos). Evidencia: `docs/goals/soporte-sap-sapstack-evidencia/mide.mjs`.
 - **La mesa**: `?pestana=candidatos` (validar conocimiento) y el mapa en `/mesa/soporte-sap/laboratorio`; el catálogo y
   la foto de la base, generados por `src/features/soporte-sap/mesa/fuentes/extrae.mjs`, con `_ALTO` y huella.
-- **Cinco filas nuevas** en la matriz y el borrador de la **revisión 12** de la AISIA
+- **Ocho filas nuevas** en la matriz (siete probadas y una que depende de D-SS-2) y el borrador de la **revisión 12** de la AISIA
   (`docs/goals/soporte-sap-AISIA-revision-sapstack.md`), que el laboratorio firma antes de desplegar.
 - **Encontrado al construir**:
   - el filtro de la mesa mira toda la acción, id incluido: un id con cifras (`nota-2269324`) tenía forma de documento.

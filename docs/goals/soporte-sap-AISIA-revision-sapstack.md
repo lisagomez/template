@@ -86,7 +86,8 @@
 > el laboratorio las ve todas, en un mapa. Ningún candidato da veredicto: una regla nace en `tools/conocimiento`, con
 > fuente citable y la firma del laboratorio. sapstack no recibe nada (se lee una copia fijada), así que no entra un
 > tercero que reciba datos. Entra un daño nuevo, «Una hipótesis de un tercero que se vuelve regla». Cambian la §2, la
-> §3, la §4 y la §5, y el control «La mesa del experto alojada» del C3 gana cinco filas en la matriz. Va firmada al pie.
+> §3, la §4 y la §5, y el C3 gana cuatro filas en la matriz («La mesa del experto alojada») y la AISIA, cuatro. Va
+> firmada al pie.
 
 ## 1. Partes afectadas
 

@@ -9,7 +9,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { RAIZ, lee } from './_ayuda.ts'
-import { DIR, EXPERTO, OTRO, LAB, GET, POST, importa, pide } from './_mesa.ts'
+import { DIR, EXPERTO, OTRO, LAB, GET, POST, importa, pide } from './_mesa.mts'
 
 const candidatos = await importa('src/features/soporte-sap/mesa/services/candidatos.ts')
 const { almacenEnDisco } = await importa('src/features/soporte-sap/mesa/services/almacen.ts')

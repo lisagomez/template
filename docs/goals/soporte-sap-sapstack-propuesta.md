@@ -77,18 +77,18 @@ afirma cosas del repo. Contra el código (salida completa y evidencia `archivo:l
 
 | # | Afirmación | Veredicto | Lo que hay |
 |---|---|---|---|
-| T1 | `sapstack-ci-reusable.yml` se invoca desde repos corporativos | a medias | es `workflow_call`, pero apunta a un repo 404, usa `main` por defecto y actions por tag |
-| T2 | Hay guía para Jenkins o GitLab CI | falsa | no aparecen en el repo |
-| T3 | «Unos 279 T-codes confirmados» | a medias | 289 únicos, MRBR repetida; «confirmado» no tiene fuente por entrada |
-| T4 | Jerarquía bien documentada, por módulos | cierta | secciones por módulo, `modules` y `release` |
-| T5 | En Corea busca primero en la carpeta de excepciones locales y si no, la global | falsa | no hay carpeta ni respaldo; lo coreano es un perfil que nadie carga |
-| T6 | `resolve-note.sh` interactúa con las actualizaciones generales | falsa | busca palabras en `data/sap-notes.yaml`; no toca reglas |
-| T7 | Al actualizar lo global, el sistema aísla las dependencias | falsa | no hay dependencias declaradas entre reglas |
-| T8 | `data/tcodes.yaml` es el archivo maestro | a medias | es la lista contra la que se valida; nada se genera de él |
-| T9 | `build-multi-ai.sh` traduce el YAML a todas las plataformas | falsa | no lee el YAML; inyecta bloques que ningún archivo de destino tiene |
-| T10 | Los generados llevan banner «ALTO» | falsa | ninguno de los 7 archivos de destino lo lleva |
-| T11 | `CONTRIBUTING.md` es el lugar del diagrama | cierta | existe, sin diagrama |
-| T12 | Hay validaciones locales que mapear a CI | cierta | 8 guiones de validación y un `ci.yml` |
+| A1 | `sapstack-ci-reusable.yml` se invoca desde repos corporativos | a medias | es `workflow_call`, pero apunta a un repo 404, usa `main` por defecto y actions por tag |
+| A2 | Hay guía para Jenkins o GitLab CI | falsa | no aparecen en el repo |
+| A3 | «Unos 279 T-codes confirmados» | a medias | 289 únicos, MRBR repetida; «confirmado» no tiene fuente por entrada |
+| A4 | Jerarquía bien documentada, por módulos | cierta | secciones por módulo, `modules` y `release` |
+| A5 | En Corea busca primero en la carpeta de excepciones locales y si no, la global | falsa | no hay carpeta ni respaldo; lo coreano es un perfil que nadie carga |
+| A6 | `resolve-note.sh` interactúa con las actualizaciones generales | falsa | busca palabras en `data/sap-notes.yaml`; no toca reglas |
+| A7 | Al actualizar lo global, el sistema aísla las dependencias | falsa | no hay dependencias declaradas entre reglas |
+| A8 | `data/tcodes.yaml` es el archivo maestro | a medias | es la lista contra la que se valida; nada se genera de él |
+| A9 | `build-multi-ai.sh` traduce el YAML a todas las plataformas | falsa | no lee el YAML; inyecta bloques que ningún archivo de destino tiene |
+| A10 | Los generados llevan banner «ALTO» | falsa | ninguno de los 7 archivos de destino lo lleva |
+| A11 | `CONTRIBUTING.md` es el lugar del diagrama | cierta | existe, sin diagrama |
+| A12 | Hay validaciones locales que mapear a CI | cierta | 8 guiones de validación y un `ci.yml` |
 
 Las tres sugerencias son buenas ideas sobre un mecanismo que **en sapstack no existe**. Por eso no se le escriben a
 sapstack (es de un tercero: solo se consume): se traducen a mecanismos del template que sí existen (sección 7).
@@ -267,9 +267,11 @@ enlace** (el contenido es de SAP; sus términos de uso no permiten copiarlo).
   conteo, nodos que se despliegan y abren su detalle, siete métricas con su serie de 14 días («sin datos» cuando no hay),
   las propuestas de los expertos, las versiones de la base y los pins. Cada número sale de lo guardado, del catálogo, de
   `base.json` o del código de Soporte SAP corrido sobre el catálogo.
-- **Seguridad**: cinco filas nuevas en la matriz, cada una verde sin su sabotaje y roja con él
+- **Seguridad**: ocho filas nuevas en la matriz. Siete probadas, cada una verde sin su sabotaje y roja con él
   (`c3-mesa-candidato-propuesta`, `c3-mesa-candidatos-propios`, `c3-mesa-mapa-laboratorio`, `c3-mesa-candidatos-fijados`,
-  `aisia-mesa-candidato-filtrado`). Sin rutas nuevas: todo va por `?pestana=` y `?vista=`.
+  `aisia-mesa-candidato-filtrado` y, para el daño nuevo de la revisión 12, `aisia-hipotesis-propuesta` y
+  `aisia-hipotesis-solo-registrado`), y una que depende de D-SS-2 (`aisia-hipotesis-fuente-citable`: que la fuente sea
+  buena lo decide quien firma). Sin rutas nuevas: todo va por `?pestana=` y `?vista=`.
 - **Un fallo de la mesa, arreglado de paso**: el id de un caso podía tener forma de número de documento
   (`c-mvjjiz61-023329`) y el filtro rechazaba toda acción sobre él; 68 de 3000 ids (prueba roja → verde).
 
