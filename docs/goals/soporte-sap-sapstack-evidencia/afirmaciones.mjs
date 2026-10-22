@@ -41,7 +41,7 @@ function herencia(clon) {
       evidencia: en('data/tcodes.yaml', linea(clon, 'data/tcodes.yaml', /^# BASIS/)) },
     { id: 'T5', dice: 'En un entorno coreano, la herramienta busca primero en la carpeta de excepciones locales y si no, aplica la regla global',
       veredicto: excepciones.length ? 'a medias' : 'falsa',
-      porque: `No hay carpeta de excepciones ni lógica de respaldo. Lo coreano es un perfil de entorno que el asistente lee (\`korea:\`); nada resuelve un choque entre reglas.${fallback.length ? ` Las menciones a «fallback/override» son: ${donde(fallback, 2)}.` : ''}`,
+      porque: `No hay carpeta de excepciones ni lógica de respaldo. Lo coreano es un perfil de entorno que el asistente lee (\`korea:\`); nada resuelve un choque entre reglas.${fallback.length ? ` Las palabras «fallback/override» solo salen con otro sentido (${donde(fallback, 2)}).` : ''}`,
       evidencia: [en('.sapstack/config.schema.yaml', corea), `carpetas de excepciones: ${donde(excepciones)}`].join(' · ') },
     { id: 'T6', dice: '`resolve-note.sh` interactúa con las actualizaciones generales, y la guía debe explicar cómo no rompe lo local',
       veredicto: 'falsa',
@@ -56,7 +56,9 @@ function herencia(clon) {
 function fuenteUnica(clon) {
   const leeTcodes = linea(clon, 'scripts/build-multi-ai.sh', /tcodes\.yaml/)
   const conMarcador = buscaEnRepo(clon, /BEGIN sapstack-auto/, (a) => !/^(scripts|docs)\/|CHANGELOG/.test(a))
-  const banners = buscaEnRepo(clon, /DO NOT EDIT|AUTO-?GENERATED|자동 생성된 파일/i)
+  // Los 7 archivos de destino de la capa multi-IA (docs/build-multi-ai.md): ahí debería ir el banner, si existiera.
+  const DESTINOS = new Set(['AGENTS.md', '.github/copilot-instructions.md', '.cursor/rules/sapstack.mdc', '.continue/config.yaml', 'CONVENTIONS.md', 'README.md', 'docs/multi-ai-compatibility.md'])
+  const banners = buscaEnRepo(clon, /DO NOT EDIT|AUTO-?GENERATED|자동 생성|직접 편집 금지/i, (a) => DESTINOS.has(a))
   const checkTcodes = linea(clon, 'scripts/check-tcodes.sh', /tcodes\.yaml/)
   return [
     { id: 'T8', dice: '`data/tcodes.yaml` es el archivo maestro de datos', veredicto: 'a medias',
@@ -67,7 +69,7 @@ function fuenteUnica(clon) {
       porque: `No lee \`tcodes.yaml\`: solo inyecta bloques de lista de plugins y estadísticas entre marcadores. Y ningún archivo de las plataformas tiene esos marcadores (${conMarcador.length}).`,
       evidencia: [en('scripts/build-multi-ai.sh', linea(clon, 'scripts/build-multi-ai.sh', /BEGIN sapstack-auto: plugin-list/)), `marcadores fuera de scripts/docs: ${donde(conMarcador)}`].join(' · ') },
     { id: 'T10', dice: 'Los archivos generados llevan (o deben llevar) un banner «ALTO: autogenerado»', veredicto: banners.length ? 'a medias' : 'falsa',
-      porque: banners.length ? 'Hay algún aviso.' : 'No hay ningún banner: hoy nada distingue un archivo generado de uno escrito a mano.',
+      porque: banners.length ? 'Algún archivo de destino lo avisa.' : 'Ninguno de los 7 archivos de destino de la capa multi-IA lleva banner: hoy nada distingue lo generado de lo escrito a mano.',
       evidencia: donde(banners) },
     { id: 'T11', dice: '`CONTRIBUTING.md` es el lugar para el diagrama de mantenimiento', veredicto: 'cierta',
       porque: 'Existe, pero sin diagrama de fuente única.',

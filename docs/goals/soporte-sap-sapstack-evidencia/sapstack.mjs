@@ -94,3 +94,24 @@ export function inventario(clon) {
     origen: linea(clon, 'README.md', /BoxLogoDev\/sapstack/),
   }
 }
+
+/**
+ * Cuánto de cada SKILL.md revisa de verdad `scripts/check-tcodes.sh`. Su filtro de frontmatter es
+ * `awk '/^---$/{fm=!fm; next} !fm{print}'`: cada `---` posterior (una línea horizontal de Markdown) lo vuelve a encender
+ * y se salta lo que sigue. Se reproduce esa lógica leyendo el texto; el guion no se ejecuta.
+ */
+export function revisadoPorCheckTcodes(clon) {
+  const skills = archivos(clon).filter((a) => /^plugins\/[^/]+\/skills\/[^/]+\/SKILL\.md$/.test(a))
+  let total = 0, cuerpo = 0, revisadas = 0
+  for (const a of skills) {
+    const ls = lineas(clon, a)
+    let fm = false, vistos = 0, cierre = -1
+    ls.forEach((l, i) => {
+      if (l === '---') { fm = !fm; vistos++; if (vistos === 2) cierre = i; return }
+      if (!fm) revisadas++
+    })
+    total += ls.length
+    cuerpo += cierre >= 0 ? ls.length - cierre - 1 : ls.length
+  }
+  return { skills: skills.length, lineas: total, cuerpo, revisadas }
+}
