@@ -5,7 +5,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**62 activos** cubren **289 unidades** del repo.
+**64 activos** cubren **292 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -46,6 +46,7 @@
 | TPL-crecimiento-demostrado | Analitica de growth revenue con prueba para pymes: Gamma sellado con 12 invariantes, motor determinista (puente y clientes x frecuencia x ticket), kernel de derivaciones sin LLM (11 reglas, 2 teoremas demostrados en Lean), narracion con numeros verificados, agentes inyectables y pasarela A2A; laboratorio con dos pymes sinteticas y la verdad plantada (0.1.0) | PRODUCTO | software | blueprint | 1 | `tools/crecimiento-demostrado` |
 | TPL-dictado | Dictado local: hablar y que el texto aparezca donde esta el cursor | PRODUCTO | software | beta | 2 | `tools/dictado` |
 | TPL-erp | ERP agentico: maestro, reglas, migraciones y modulo act (externo: lo cataloga su fuente) | PRODUCTO | software | beta | 10 | `erp` |
+| TPL-estudio-dashboards | Estudio de dashboards: un agente regenera tableros desde una frase editando una especificacion validada (esquema, parches con alcance, versiones) y toda cifra sale de una capa semantica MetricFlow con procedencia; motor de senales (detectar, diagnosticar, actuar, aprender), analisis de variacion, alertas y metricas propuestas sin enviar nada, y CLI con las mismas herramientas en seco; laboratorio Golfo Norte (datos ficticios, dbt + DuckDB) (0.1.0) | PRODUCTO | software | blueprint | 1 | `tools/estudio-dashboards` |
 | TPL-etiquetas-gs1 | Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo, inventario fisico, recepcion con foto, escaneo por zona y codigos anteriores (0.2.0) | PRODUCTO | software | beta | 1 | `tools/etiquetas-gs1` |
 | TPL-extractor-documental | Extractor documental (PDF, imagen, CFDI XML) con revision humana | PRODUCTO | software | beta | 2 | `tools/extractor-documental` |
 | TPL-feature-a2a | Puente A2A del extractor (Agent Card + JSON-RPC + Tasks) | PRODUCTO | software | beta | 2 | `src/features/a2a` |
@@ -55,6 +56,7 @@
 | TPL-feature-crecimiento-demostrado | Pantalla del dueno (/crecimiento: respuesta con estado, cascada del puente, arbol de la prueba, certificado y replay), laboratorio de trampas (/laboratorio-crecimiento) y agente A2A local (/api/crecimiento/a2a) | PRODUCTO | software | blueprint | 1 | `src/features/crecimiento-demostrado` |
 | TPL-feature-dashboard | Dashboard de la app base | PRODUCTO | software | beta | 1 | `src/features/dashboard` |
 | TPL-feature-dictado | Interfaz web del dictado (pildora, ajustes e historial) | PRODUCTO | software | beta | 3 | `src/features/dictado` |
+| TPL-feature-estudio-dashboards | Lienzo de laboratorio del Estudio (/laboratorio-estudio-dashboards): barra de instrucciones con lo que entendio antes de aplicar, rejilla de componentes con procedencia a un clic, mapa de matriz de puntos con lazo y senales enlazadas, ciclo detectar-aprender, versiones y comparacion; ruta /api/estudio-dashboards (503 fuera del laboratorio) y el recorrido Playwright de scripts/estudio-dashboards | PRODUCTO | software | blueprint | 2 | `src/features/estudio-dashboards` |
 | TPL-feature-estudio-pymes | Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo) | PRODUCTO | software | blueprint | 2 | `src/features/estudio-pymes` |
 | TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
