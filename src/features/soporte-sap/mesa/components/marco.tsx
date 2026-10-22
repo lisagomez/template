@@ -1,6 +1,7 @@
 /**
  * El marco de la mesa: quién eres (lo que verificó Access), el aviso permanente de lo que es y lo que no es, y la
- * navegación entre la mesa, el kit y, solo para el laboratorio, lo que dijo el experto.
+ * navegación entre la mesa, la validación de candidatos, el kit y, solo para el laboratorio, el mapa y lo que dijo el
+ * experto. Las pestañas van por `?pestana=`: la puerta solo deja pasar las rutas que ya conoce.
  */
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -8,11 +9,17 @@ import type { IdentidadMesa } from '../services/acceso'
 
 export const RAIZ_DE_LA_MESA = '/mesa/soporte-sap'
 
-export function MarcoDeLaMesa({ identidad, activa, children }: { identidad: Pick<IdentidadMesa, 'correo' | 'rol' | 'prueba'>; activa: 'mesa' | 'kit' | 'laboratorio'; children: ReactNode }) {
+export type SeccionDeLaMesa = 'mesa' | 'candidatos' | 'kit' | 'mapa' | 'laboratorio'
+
+export function MarcoDeLaMesa({ identidad, activa, children }: { identidad: Pick<IdentidadMesa, 'correo' | 'rol' | 'prueba'>; activa: SeccionDeLaMesa; children: ReactNode }) {
   const secciones = [
     { href: RAIZ_DE_LA_MESA, nombre: 'Mesa de pruebas', clave: 'mesa' },
+    { href: `${RAIZ_DE_LA_MESA}?pestana=candidatos`, nombre: 'Validar conocimiento', clave: 'candidatos' },
     { href: `${RAIZ_DE_LA_MESA}/kit`, nombre: 'Cómo se usa', clave: 'kit' },
-    ...(identidad.rol === 'laboratorio' ? [{ href: `${RAIZ_DE_LA_MESA}/laboratorio`, nombre: 'Lo que dijo el experto', clave: 'laboratorio' }] : []),
+    ...(identidad.rol === 'laboratorio' ? [
+      { href: `${RAIZ_DE_LA_MESA}/laboratorio`, nombre: 'Mapa', clave: 'mapa' },
+      { href: `${RAIZ_DE_LA_MESA}/laboratorio?pestana=casos`, nombre: 'Lo que dijo el experto', clave: 'laboratorio' },
+    ] : []),
   ]
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">

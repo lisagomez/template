@@ -3,59 +3,16 @@
  * reales (generadas aquí), la ruta de Next, el runtime del laboratorio y el almacén en disco. Cada afirmación de
  * seguridad de la mesa tiene aquí su prueba, y su sabotaje en la matriz.
  */
-import { test, after } from 'node:test'
+import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { register } from 'node:module'
-import { createServer } from 'node:http'
-import { generateKeyPairSync, createSign, createHmac } from 'node:crypto'
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { createHmac } from 'node:crypto'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
-import type { AddressInfo } from 'node:net'
-import { RAIZ, lee } from './_ayuda.ts'
-
-register('./_app.mjs', import.meta.url)
-// La app corre desde la raíz del repo (las muestras y el lector de OCR se leen de ahí).
-process.chdir(RAIZ)
-const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
-const ajena = generateKeyPairSync('rsa', { modulusLength: 2048 })
-const JWK = { ...publicKey.export({ format: 'jwk' }), kid: 'llave-1', alg: 'RS256', use: 'sig' }
-const servidor = createServer((_q, r) => { r.writeHead(200, { 'content-type': 'application/json' }); r.end(JSON.stringify({ keys: [JWK] })) })
-await new Promise<void>((ok) => servidor.listen(0, '127.0.0.1', ok))
-const DIR = mkdtempSync(join(tmpdir(), 'mesa-experto-'))
-const AUD = `aud-de-prueba-${'a'.repeat(24)}`
-Object.assign(process.env, {
-  SOPORTE_SAP_LABORATORIO: '1', ACCESS_EQUIPO: 'equipo-prueba', ACCESS_AUD: AUD, ACCESS_CERTS_URL: `http://127.0.0.1:${(servidor.address() as AddressInfo).port}/certs`,
-  MESA_EXPERTOS: 'experto@prueba.local,otro@prueba.local', MESA_LABORATORIO: 'lab@prueba.local', MESA_TOKENS: 'automatizacion.access=experto', MESA_ALMACEN: 'disco', MESA_ALMACEN_DIR: DIR,
-})
-delete process.env['TESSERACT_CMD']
-after(() => { servidor.close(); rmSync(DIR, { recursive: true, force: true }) })
-
-const b64 = (x: unknown) => Buffer.from(typeof x === 'string' ? x : JSON.stringify(x)).toString('base64url')
-function jwt(claims: Record<string, unknown>, o: { llave?: typeof privateKey; kid?: string } = {}): string {
-  const s = Math.floor(Date.now() / 1000)
-  const h = b64({ alg: 'RS256', kid: o.kid ?? 'llave-1', typ: 'JWT' })
-  const p = b64({ iss: 'https://equipo-prueba.cloudflareaccess.com', aud: [AUD], iat: s, nbf: s, exp: s + 600, type: 'app', ...claims })
-  return `${h}.${p}.${createSign('RSA-SHA256').update(`${h}.${p}`).sign(o.llave ?? privateKey).toString('base64url')}`
-}
-const EXPERTO = jwt({ email: 'experto@prueba.local' }), OTRO = jwt({ email: 'otro@prueba.local' }), LAB = jwt({ email: 'lab@prueba.local' })
-
-const importa = (r: string) => import(pathToFileURL(join(RAIZ, r)).href)
-const acceso = await importa('src/features/soporte-sap/mesa/services/acceso.ts')
-const filtro = await importa('src/features/soporte-sap/mesa/services/filtro.ts')
-const rt = await importa('src/features/soporte-sap/services/runtime.ts')
-const { SESIONES } = await importa('src/features/soporte-sap/services/tipos.ts')
-const { GET, POST } = await importa('src/app/api/mesa/soporte-sap/route.ts')
-const { NextRequest } = await import('next/server')
+import { lee } from './_ayuda.ts'
+import { DIR, b64, jwt, ajena, EXPERTO, OTRO, LAB, acceso, filtro, rt, SESIONES, GET, POST, NextRequest, importa, pide } from './_mesa.ts'
 
 type Paso = { clave: string; etapa: string; quien: string; titulo: string; tono: string }
 type Caso = { id: string; incidencia: string; vivo: boolean; pasos: Paso[]; resultado: { tipo: string; regla: string | null }; planes: Array<{ aplicado: { errorDespues: boolean } | null; decision: unknown }>; sandbox: { veredicto: string } | null; propuestas: Array<{ tipo: string }>; ensenanza: Array<{ tipo: string | null }>; retro: { pasos: Record<string, { gesto: string }>; veredicto: { valor: string } | null } }
-function pide(metodo: 'GET' | 'POST', consulta: string, token: string | null, cuerpo?: unknown, tipo = 'application/json') {
-  const headers: Record<string, string> = token ? { 'cf-access-jwt-assertion': token } : {}
-  if (cuerpo !== undefined) headers['content-type'] = tipo
-  return new NextRequest(`http://mesa/api/mesa/soporte-sap${consulta}`, { method: metodo, headers, body: cuerpo === undefined ? undefined : typeof cuerpo === 'string' ? cuerpo : JSON.stringify(cuerpo) })
-}
 async function accion(token: string, cuerpo: unknown): Promise<{ status: number; caso: Caso; error?: string }> {
   const r = await POST(pide('POST', '', token, cuerpo))
   const d = (await r.json()) as { caso: Caso; error?: string }
@@ -237,4 +194,13 @@ test('mesa · lo guardado vence: con la retención, el caso viejo se borra al li
   assert.ok(!v.casos.some((c) => c.id === 'c-viejo00-abcdef'), 'el de hace 200 días ya no está')
   assert.ok(!guardados().includes('c-viejo00-abcdef.json'), 'y se borró del almacén')
   assert.ok(v.casos.some((c) => c.id === nuevo.id), 'el reciente se queda')
+})
+
+test('mesa · el id de un caso no tiene forma de dato: el filtro, que mira toda la acción, nunca rechaza un caso por su id', async () => {
+  const { nuevoIdDeCaso } = await importa('src/features/soporte-sap/mesa/services/mesa.ts')
+  assert.ok(filtro.datoPersonalEn({ tipo: 'veredicto', caso: 'c-mvjjiz61-023329', valor: 'resuelto' }), 'el id de 2026-10-22 que dejaba un caso sin poder calificarse')
+  const ids = Array.from({ length: 3000 }, (_, i) => nuevoIdDeCaso(Date.parse('2026-10-22T00:00:00Z') + i * 7_919_113) as string)
+  assert.ok(ids.every((id) => /^c-[a-z0-9]{6,12}-[a-f0-9]{6}$/.test(id)), 'cumplen la forma de siempre')
+  const rechazados = ids.filter((id) => filtro.datoPersonalEn({ tipo: 'decide', caso: id, accion: 'aprobar' }))
+  assert.deepEqual(rechazados.slice(0, 3), [], `${rechazados.length} de 3000 ids tienen forma de dato`)
 })

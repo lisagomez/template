@@ -1,0 +1,27 @@
+{
+  "_ALTO": "ALTO: ARTEFACTO AUTOGENERADO. Si lo editas, tus cambios se pierden en la próxima extracción y la mesa lo rechaza por su huella. La fuente es src/features/soporte-sap/mesa/fuentes/ (extrae.mjs).",
+  "paquete": "@tu-scope/conocimiento@0.2.0",
+  "dominio": "sap-soporte",
+  "versiones": [
+    {
+      "version": "0.2.0",
+      "fecha": "2026-09-27",
+      "firmo": "el laboratorio",
+      "firmadas": 1,
+      "reglas": 99,
+      "dominios": 17,
+      "categoriasSapSoporte": null,
+      "huella": "sha256:a53b31699570"
+    },
+    {
+      "version": "0.1.0",
+      "fecha": "2026-09-27",
+      "firmo": null,
+      "firmadas": 0,
+      "reglas": 98,
+      "dominios": 17,
+      "categoriasSapSoporte": null,
+      "huella": "sha256:a1e6422431ff"
+    }
+  ]
+}

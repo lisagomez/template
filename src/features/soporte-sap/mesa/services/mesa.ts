@@ -16,6 +16,7 @@ import { MUESTRAS } from '../../vitrina/en-vivo/muestras'
 import type { IdentidadMesa } from './acceso'
 import type { Almacen } from './almacen'
 import { datoPersonalEn } from './filtro'
+import { enFila } from './fila'
 import { lineaDeTiempo } from './linea'
 import { ENTRADA, type CasoMesa, type CasoVista, type EntradaCaso, type MesaVista, type PlanMesa, type Quien, type Veredicto } from './modelo'
 
@@ -26,6 +27,14 @@ const CONSULTORA = 'andina'
 const PREFIJO = 'mesa/casos'
 const claveDe = (caso: string) => `${PREFIJO}/${caso}.json`
 const ID_CASO = /^c-[a-z0-9]{6,12}-[a-f0-9]{6}$/
+/**
+ * El id de un caso NO lleva cifras. El filtro mira toda la acción, id incluido, y un id como `c-mvjjiz61-023329`
+ * («61-023329») tenía forma de número de documento: el caso se quedaba sin poder decidirse ni calificarse (medido el
+ * 2026-10-22: 68 de 3000 ids). El instante va en base 26 con letras y el sufijo, con letras a-f: cumple `ID_CASO`.
+ */
+const LETRAS = 'abcdefghijklmnopqrstuvwxyz'
+const enLetras = (n: number): string => (n < 26 ? LETRAS[n]! : enLetras(Math.floor(n / 26)) + LETRAS[n % 26]!)
+export const nuevoIdDeCaso = (ms = Date.now()): string => `c-${enLetras(ms)}-${(randomUUID().replace(/[^a-f]/g, '') + 'abcdef').slice(0, 6)}`
 const DOCUMENTOS = () => join(/*turbopackIgnore: true*/ process.cwd(), 'tools', 'soporte-sap', 'documentos')
 /** Una muestra es un archivo del catálogo, por su nombre exacto: nada que venga de fuera se lee del disco. */
 const esMuestraDeLaMesa = (x: string): boolean => MUESTRAS.some((m) => m.archivo === x)
@@ -120,19 +129,6 @@ async function delExperto(a: Almacen, id: IdentidadMesa, caso: string): Promise<
 
 const filtra = (x: unknown): void => { const d = datoPersonalEn(x); if (d) throw new Rechazo(d) }
 
-/**
- * Las acciones sobre un caso van en fila. Cada una lee el caso, lo cambia y lo escribe: dos a la vez se pisaban y la última
- * borraba a la otra (medido el 2026-10-21: en R2, el veredicto se llevaba las retros por paso; en disco, un 500). El
- * laboratorio es UNA instancia (`max_instances: 1`), así que la fila en memoria basta.
- */
-const filas = new Map<string, Promise<unknown>>()
-function enFila<T>(caso: string, hace: () => Promise<T>): Promise<T> {
-  const turno = (filas.get(caso) ?? Promise.resolve()).then(hace)
-  const fin = turno.catch(() => undefined)
-  filas.set(caso, fin)
-  void fin.then(() => { if (filas.get(caso) === fin) filas.delete(caso) })
-  return turno
-}
 
 export async function ingresa(a: Almacen, id: IdentidadMesa, cruda: unknown, version: string): Promise<CasoMesa> {
   const entrada = ENTRADA.parse(cruda)
@@ -146,7 +142,7 @@ export async function ingresa(a: Almacen, id: IdentidadMesa, cruda: unknown, ver
   if (i.planes.some((p) => p.veredicto.resultado === 'a_la_sala' && !p.mensaje)) actua(enNombreDelN2(id), { tipo: 'escala', incidencia })
   const ahora = new Date().toISOString()
   const c: CasoMesa = {
-    version: 1, id: `c-${Date.now().toString(36)}-${randomUUID().slice(0, 6)}`, creado: ahora, actualizado: ahora,
+    version: 1, id: nuevoIdDeCaso(), creado: ahora, actualizado: ahora,
     por: { usuario: id.usuario, correo: id.correo, prueba: id.prueba }, entrada, incidencia, arranque: arranque(), laboratorio: version,
     cliente, pasos: [], resultado: { tipo: 'sin_solucion', regla: null, titulo: null, resumen: null, cita: null, url: null, grado: null, razon: '' },
     prioridad: '', planes: [], sandbox: null, ensenanza: [], propuestas: [], reloj: null, retro: { pasos: {}, veredicto: null },

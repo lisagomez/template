@@ -1,7 +1,8 @@
 /**
- * La mesa del experto por HTTP. GET devuelve SUS casos (o, para el laboratorio, `?vista=laboratorio` y su export); POST
- * ejecuta una acción en JSON. Sin `SOPORTE_SAP_LABORATORIO=1`, sin Access configurado o sin un JWT válido, no existe
- * (404). No acepta archivos: la evidencia son las muestras sintéticas del catálogo.
+ * La mesa del experto por HTTP. GET devuelve SUS casos, los candidatos con SUS validaciones (`?vista=candidatos`) o, para
+ * el laboratorio, el mapa (`?vista=mapa`) y `?vista=laboratorio` con su export; POST ejecuta una acción en JSON. Sin
+ * `SOPORTE_SAP_LABORATORIO=1`, sin Access configurado o sin un JWT válido, no existe (404). No acepta archivos: la
+ * evidencia son las muestras sintéticas del catálogo.
  */
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
@@ -10,6 +11,8 @@ import { ingresa, decide, ensena, retroPaso, veredicto, vistaMesa, todosLosCasos
 import { agrega, exportMarkdown } from '@/features/soporte-sap/mesa/services/laboratorio'
 import { datoPersonalEn, revisaCampos } from '@/features/soporte-sap/mesa/services/filtro'
 import { ACCION_MESA, ACCION_LABORATORIO } from '@/features/soporte-sap/mesa/services/modelo'
+import { validaCandidato, vistaCandidatos } from '@/features/soporte-sap/mesa/services/candidatos'
+import { mapaDe, propuestasEnMarkdown } from '@/features/soporte-sap/mesa/services/mapa'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -30,12 +33,16 @@ export async function GET(req: NextRequest) {
   if (c instanceof Response) return c
   const vista = req.nextUrl.searchParams.get('vista')
   if (vista === null) return NextResponse.json(await vistaMesa(c.almacen, c.id, c.retencionDias), { headers: SIN_CACHE })
+  // Los candidatos los ve cualquiera de la mesa, con SOLO sus validaciones. El mapa es del laboratorio: para el experto no existe.
+  if (vista === 'candidatos') return NextResponse.json(await vistaCandidatos(c.almacen, c.id, c.retencionDias), { headers: SIN_CACHE })
+  if (vista === 'mapa' && c.id.rol !== 'laboratorio') return nada()
+  if (vista === 'mapa') return NextResponse.json(await mapaDe(c.almacen, c.retencionDias), { headers: SIN_CACHE })
   // Lo del laboratorio solo existe para su identidad: para el experto, ni siquiera se dice que hay algo ahí.
   if (vista !== 'laboratorio' || c.id.rol !== 'laboratorio') return nada()
   const casos = await todosLosCasos(c.almacen, c.retencionDias)
   const formato = req.nextUrl.searchParams.get('export')
   const ahora = new Date().toISOString()
-  if (formato === 'md') return new NextResponse(exportMarkdown(casos, ahora), { headers: { ...SIN_CACHE, 'content-type': 'text/markdown; charset=utf-8', 'content-disposition': `attachment; filename="mesa-del-experto-${ahora.slice(0, 10)}.md"` } })
+  if (formato === 'md') return new NextResponse(exportMarkdown(casos, ahora) + propuestasEnMarkdown((await mapaDe(c.almacen, c.retencionDias)).propuestas), { headers: { ...SIN_CACHE, 'content-type': 'text/markdown; charset=utf-8', 'content-disposition': `attachment; filename="mesa-del-experto-${ahora.slice(0, 10)}.md"` } })
   if (formato === 'json') return new NextResponse(JSON.stringify({ exportado: ahora, casos }, null, 2), { headers: { ...SIN_CACHE, 'content-type': 'application/json; charset=utf-8', 'content-disposition': `attachment; filename="mesa-del-experto-${ahora.slice(0, 10)}.json"` } })
   return NextResponse.json({ agregado: agrega(casos), casos, almacen: c.almacen.donde }, { headers: SIN_CACHE })
 }
@@ -55,6 +62,7 @@ async function accion(c: Contexto, cuerpo: unknown, laboratorio: boolean): Promi
   // Primer cerrojo: TODO texto de la acción, antes de que llegue al laboratorio (el segundo, antes de guardarse).
   const dato = datoPersonalEn(a)
   if (dato) throw new Rechazo(dato)
+  if (a.tipo === 'valida_candidato') return { validacion: await validaCandidato(c.almacen, c.id, a) }
   if (a.tipo === 'ingresa') return { caso: comoVista(await ingresa(c.almacen, c.id, a.entrada, c.version)) }
   if (a.tipo === 'decide') return { caso: comoVista(await decide(c.almacen, c.id, a.caso, a.accion, a.motivo ?? '')) }
   if (a.tipo === 'ensena') return { caso: comoVista(await ensena(c.almacen, c.id, a.caso, a.texto)) }

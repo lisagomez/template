@@ -2649,4 +2649,42 @@ export const FILAS: readonly Fila[] = [
     control: 'R2 con jurisdicción de Estados Unidos; el contenedor en ENAM (Containers no ofrece una jurisdicción «us», medido en wrangler 4.143.1)',
     nota: 'un tercero nuevo, declarado en el manifiesto; Cloudflare termina el TLS y opera la infraestructura donde vive lo guardado',
   },
+  {
+    id: 'c3-mesa-candidato-propuesta', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'una validación de un candidato (sapstack) es una propuesta: la mesa la guarda como «propuesta» en su almacén y no firma ni registra nada; una regla nace fuera, en tools/conocimiento, con la firma del laboratorio',
+    control: `${ME}/services/candidatos.ts · validaCandidato`,
+    comprobacion: prueba('mesa-candidatos.ts', 'mesa · una validación del experto es una propuesta: no la firma ni la registra, y no escribe fuera de su almacén'),
+    sabotaje: { que: 'validar como «correcto» la firma', ediciones: [ed(`${ME}/services/candidatos.ts`, "valoracion: x.valoracion, ...escrito, estado: 'propuesta',", "valoracion: x.valoracion, ...escrito, estado: x.valoracion === 'correcto' ? 'firmada' : 'propuesta',")] },
+  },
+  {
+    id: 'c3-mesa-candidatos-propios', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'en la mesa, cada identidad ve solo sus validaciones de candidatos; las de todos solo las lee el laboratorio, en su mapa',
+    control: `${ME}/services/candidatos.ts · vistaCandidatos`,
+    comprobacion: prueba('mesa-candidatos.ts', 'mesa · cada identidad ve solo sus validaciones de candidatos'),
+    sabotaje: { que: 'cualquiera ve las validaciones de todos', ediciones: [ed(`${ME}/services/candidatos.ts`, '.filter((v) => v.por.usuario === id.usuario)', '')] },
+  },
+  {
+    id: 'c3-mesa-mapa-laboratorio', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'el mapa (y con él las validaciones de todos) solo existe para la identidad del laboratorio: el experto y quien no tiene identidad reciben 404',
+    control: 'src/app/api/mesa/soporte-sap/route.ts · ?vista=mapa, y laboratorio/page.tsx · identidadDeLaPagina',
+    comprobacion: prueba('mesa-candidatos.ts', 'mesa · el mapa solo existe para el laboratorio: el experto recibe 404'),
+    sabotaje: { que: 'cualquier identidad lee el mapa', ediciones: [ed('src/app/api/mesa/soporte-sap/route.ts', "  if (vista === 'mapa' && c.id.rol !== 'laboratorio') return nada()\n", '')] },
+  },
+  {
+    id: 'c3-mesa-candidatos-fijados', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'los candidatos salen solo del catálogo generado para el SHA fijado de sapstack: uno editado a mano o de otro SHA no da candidatos, y una validación de un id que no está en él se rechaza',
+    control: `${ME}/services/candidatos.ts · catalogoValido y validaCandidato; ${ME}/fuentes/extrae.mjs se niega fuera del pin`,
+    comprobacion: prueba('mesa-candidatos.ts', 'mesa · los candidatos salen solo del catálogo fijado: uno editado o de otro SHA no se carga, y un id de fuera se rechaza'),
+    sabotaje: { que: 'la mesa carga un catálogo editado a mano', ediciones: [ed(`${ME}/services/candidatos.ts`, '  if (huella !== c.huella) return', '  if (false) return')] },
+  },
+  {
+    id: 'aisia-mesa-candidato-filtrado', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'lo que escribe el experto al validar un candidato (comentario y corrección) pasa el filtro antes de llegar al laboratorio y otra vez antes de guardarse',
+    control: 'route.ts (primer cerrojo, toda la acción) y candidatos.ts · validaCandidato (segundo, lo que escribió)',
+    comprobacion: prueba('mesa-candidatos.ts', 'mesa · lo que escribe el experto al validar pasa el filtro: con forma de dato personal no llega al almacén'),
+    sabotaje: { que: 'la validación se guarda sin filtro', ediciones: [
+      ed('src/app/api/mesa/soporte-sap/route.ts', '  const dato = datoPersonalEn(a)\n  if (dato) throw new Rechazo(dato)\n', ''),
+      ed(`${ME}/services/candidatos.ts`, '  const forma = datoPersonalEn(escrito)\n  if (forma) throw new Rechazo(forma)\n', ''),
+    ] },
+  },
 ]
