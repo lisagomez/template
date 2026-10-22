@@ -162,10 +162,15 @@ export async function analizaVariacion(x: Consultor, a: PedidoAnalisis): Promise
   const m = metrica(cat, a.metrica)
   if (!m) throw new ConsultaInvalida([{ codigo: 'metrica_inexistente', ruta: 'metrica', mensaje: `la métrica «${a.metrica}» no existe en el catálogo` }])
   // Una métrica con desfase no se totaliza sobre un periodo (compara contra el año anterior completo, y MetricFlow
-  // la rechaza sin agrupar por tiempo): se analiza su métrica base. Hallado por la medición del 2026-10-20 (q059).
+  // la rechaza sin agrupar por tiempo). Su variación contra el año anterior ES el cambio de su métrica base: se
+  // descompone esa y el hallazgo lo dice. Visto en la medición del 2026-10-20 (q059); se mide en un set nuevo.
   if (tieneDesfase(cat, a.metrica)) {
     const base = m.entradas.find((e) => e.desfase === null)?.nombre
-    throw new ConsultaInvalida([{ codigo: 'desfase_en_periodo', ruta: 'metrica', mensaje: `«${a.metrica}» lleva desfase de un año y no se descompone sobre un periodo; analiza ${base ? `«${base}»` : 'su métrica base'} (el análisis ya compara contra el año anterior)` }])
+    if (!base || tieneDesfase(cat, base)) throw new ConsultaInvalida([{ codigo: 'desfase_en_periodo', ruta: 'metrica', mensaje: `«${a.metrica}» lleva desfase de un año y no se descompone sobre un periodo, y no tiene una métrica base sin desfase que analizar` }])
+    const r = await analizaVariacion(x, { ...a, metrica: base })
+    const etiqueta = m.etiqueta ?? a.metrica
+    const texto = `${etiqueta} compara ${metrica(cat, base)?.etiqueta ?? base} contra el año anterior; descompongo ese cambio. ${r.texto}`
+    return { ...r, texto, hallazgo: { ...r.hallazgo, titulo: `¿Por qué cambió ${etiqueta}?`.slice(0, 100), texto: texto.slice(0, 800) } }
   }
   const contra = a.contra ?? corre(a.periodo, 'anio_anterior')
   const f = a.filtros ?? []

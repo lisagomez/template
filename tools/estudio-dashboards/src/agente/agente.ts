@@ -120,8 +120,9 @@ export async function interpreta(c: ContextoAgente, d: Dashboard, version: numbe
       const p = planEsquema.safeParse(extraeJson(r.texto))
       if (!p.success) problemas = p.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`)
       else {
-        plan = p.data
-        resultado = await ejecutaPlan(c.consultor, plan, d, version)
+        resultado = await ejecutaPlan(c.consultor, p.data, d, version)
+        // El plan que queda es el del resultado: el núcleo puede completar «lo que entendí» (el eje de tiempo).
+        plan = resultado.plan
         problemas = resultado.errores.map((e) => `${e.codigo} · ${e.ruta}: ${e.mensaje}`)
       }
     } catch (e) {

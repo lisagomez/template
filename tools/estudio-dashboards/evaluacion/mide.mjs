@@ -3,21 +3,20 @@
  * Mide el agente con el LLM REAL contra el set de referencia congelado (sha256 en set-referencia.sha256).
  *
  *   - Un nivel de `.claude/routing-modelos.json` por corrida, con su modelo PINEADO tal cual está ahí.
- *   - Tope duro: el gasto acumulado de TODAS las corridas (libro `llamadas.jsonl`) no pasa de US$2; si la siguiente
- *     pregunta lo rebasaría, se para y se reporta lo medido hasta ahí.
+ *   - Tope duro: el gasto acumulado de TODAS las corridas (libro `llamadas.jsonl`) no pasa de US$2 (o de `--tope`); si
+ *     la siguiente pregunta lo rebasaría, se para y se reporta lo medido hasta ahí.
  *   - Saldo de OpenRouter antes y después (uso de la llave y de la cuenta).
  *   - La llave se lee de OPENROUTER_API_KEY o de `--env <archivo>`; jamás se imprime (presente, largo).
  *   - Latencias: regeneración (modelo + validación + datos con caché caliente) y consulta a la capa (en frío).
  *   - Detalle de los fallos SOLO de la partición `desarrollo`; de la `retenida`, ids y campos (para no iterar el
  *     prompt contra ella).
  *
- * Uso: node tools/estudio-dashboards/evaluacion/mide.mjs --nivel voz [--env ../../.env.local] [--solo desarrollo|retenida] [--ids q1,q2] [--nombre x]
+ * Uso: node tools/estudio-dashboards/evaluacion/mide.mjs --nivel voz [--env ../../.env.local] [--solo desarrollo|retenida] [--ids q1,q2] [--nombre x] [--set <archivo>] [--nucleo <dir>] [--tope <usd>]
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { join } from 'node:path'
-import { cargaCatalogo, conReserva, consultor, interpreta, puntua, resuelve, construyeCatalogo } from '../dist/index.js'
-import { modeloOpenRouter, saldoOpenRouter } from '../dist/openrouter.js'
+import { join, resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { puertoGolfoNorte } from '../laboratorio/puerto.mjs'
 import { MAPA_GN } from '../laboratorio/perfil.mjs'
 
@@ -25,8 +24,18 @@ const AQUI = import.meta.dirname
 const RAIZ = join(AQUI, '..', '..', '..')
 const SALIDA = join(RAIZ, 'docs', 'goals', 'estudio-dashboards-medicion')
 const LIBRO = join(SALIDA, 'llamadas.jsonl')
-const TOPE = 2.0
 const arg = (n, d) => process.argv.find((_, i) => process.argv[i - 1] === n) ?? d
+/** `--tope <usd>`: tope del libro acumulado (US$2 el del goal; una fase nueva declara el suyo, más bajo). */
+const TOPE = Number(arg('--tope', '2'))
+/**
+ * `--nucleo <dir>`: otro build del núcleo (p. ej. el de antes de un arreglo, copiado de `dist/`), para medir los dos
+ * sobre el mismo set. La capa de datos es la misma. La huella del build queda en el resultado.
+ */
+const NUCLEO = resolve(arg('--nucleo', join(import.meta.dirname, '..', 'dist')))
+const { cargaCatalogo, conReserva, consultor, interpreta, puntua, resuelve: resuelveTablero } = await import(pathToFileURL(join(NUCLEO, 'index.js')).href)
+const { modeloOpenRouter, saldoOpenRouter } = await import(pathToFileURL(join(NUCLEO, 'openrouter.js')).href)
+const archivos = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? archivos(join(d, e.name)) : e.name.endsWith('.js') ? [join(d, e.name)] : [])).sort()
+const huellaNucleo = createHash('sha256').update(archivos(NUCLEO).map((f) => `${f.slice(NUCLEO.length)}\n${readFileSync(f, 'utf8')}`).join('\n')).digest('hex').slice(0, 16)
 const nivel = arg('--nivel', 'voz')
 const solo = arg('--solo', null)
 /** `--ids q047,q048` repite solo esas preguntas (p. ej. las que murieron por un error del proveedor). */
@@ -72,7 +81,7 @@ async function principal() {
   const sha = `sha256:${createHash('sha256').update(readFileSync(join(AQUI, ARCHIVO_SET))).digest('hex')}`
   const congelado = readFileSync(join(AQUI, ARCHIVO_SET.replace(/\.json$/, '.sha256')), 'utf8').split(/\s/)[0]
   if (sha !== congelado) throw new Error('el set no coincide con su hash congelado: no se mide')
-  console.log(`▸ set ${sha.slice(0, 23)}… (= congelado) · nivel ${nivel} → ${cfg.modelo} (${cfg.precio.entrada}/${cfg.precio.salida} USD por M)`)
+  console.log(`▸ set ${sha.slice(0, 23)}… (= congelado) · nivel ${nivel} → ${cfg.modelo} (${cfg.precio.entrada}/${cfg.precio.salida} USD por M) · núcleo ${huellaNucleo} · tope del libro US$${TOPE}`)
   const antes = await saldo(k)
   console.log(`▸ saldo antes: ${JSON.stringify(antes)}`)
   // La misma configuración que el lienzo: tres procesos de solo lectura.
@@ -86,8 +95,8 @@ async function principal() {
     const frio = consultor(puerto, cat, { cache: 0 })
     const consultasFrio = []
     // Una por una: el tiempo de cada consulta, no el de su espera mientras el tablero pide las demás en paralelo.
-    for (const t of Object.values(tableros)) for (const c of Object.values((await resuelve(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push((await frio.consulta(r.consulta)).totalMs)
-    for (const t of Object.values(tableros)) await resuelve(x, t, MAPA_GN)
+    for (const t of Object.values(tableros)) for (const c of Object.values((await resuelveTablero(frio, t, MAPA_GN)).componentes)) for (const r of c.consultas) consultasFrio.push((await frio.consulta(r.consulta)).totalMs)
+    for (const t of Object.values(tableros)) await resuelveTablero(x, t, MAPA_GN)
     const base = { llave: k, modelo: cfg.modelo, fetch, proveedor, cabeceras: { 'X-Title': 'estudio-dashboards (laboratorio)' } }
     const modelo = conReservaSiTrunca ? conReserva(modeloOpenRouter(base), modeloOpenRouter({ ...base, razonamiento: { maxTokens: 512 } })) : modeloOpenRouter({ ...base, razonamiento })
     const preguntas = set.preguntas.filter((q) => (!solo || q.particion === solo) && (!ids || ids.includes(q.id)))
@@ -103,7 +112,7 @@ async function principal() {
       catch (e) { v = { plan: null, resultado: null, error: e.message, llamadas: [], ms: { modelo: 0, total: 0 }, costoUsd: null, intentos: 0 } }
       const d = v.resultado?.aplicado?.dashboard
       const tDatos = performance.now()
-      if (d) await resuelve(x, d, MAPA_GN)
+      if (d) await resuelveTablero(x, d, MAPA_GN)
       const regeneracion = performance.now() - t0
       const s = puntua(q, v, base.componentes.map((c) => c.id))
       resultados.push({ id: q.id, tipo: q.tipo, particion: q.particion, correcta: s.correcta, campos: s.campos, intentos: v.intentos, modeloMs: Math.round(v.ms.modelo), datosMs: d ? Math.round(performance.now() - tDatos) : null, regeneracionMs: Math.round(regeneracion), costoUsd: v.costoUsd, error: v.error, ...(q.particion === 'desarrollo' && !s.correcta ? { instruccion: q.instruccion, entendi: v.entendi, plan: v.plan } : {}) })
@@ -121,7 +130,7 @@ function resumen(rs, consultasFrio, cfg, antes, despues, sha) {
   const grupo = (f) => Object.fromEntries([...new Set(rs.map(f))].sort().map((k) => { const g = rs.filter((r) => f(r) === k); return [k, { n: g.length, correctas: g.filter((r) => r.correcta).length, precision: g.length ? g.filter((r) => r.correcta).length / g.length : null }] }))
   const costos = rs.map((r) => r.costoUsd).filter((c) => c !== null)
   return {
-    nivel, modelo: cfg.modelo, razonamiento: conReservaSiTrunca ? 'del proveedor, con reserva de 512 si trunca' : razonamiento ?? 'del proveedor', proveedor: proveedor ?? 'reparto de OpenRouter', set: sha, fecha: new Date().toISOString(), n: rs.length,
+    nivel, modelo: cfg.modelo, razonamiento: conReservaSiTrunca ? 'del proveedor, con reserva de 512 si trunca' : razonamiento ?? 'del proveedor', proveedor: proveedor ?? 'reparto de OpenRouter', set: sha, nucleo: huellaNucleo, fecha: new Date().toISOString(), n: rs.length,
     precision: rs.length ? rs.filter((r) => r.correcta).length / rs.length : null,
     porTipo: grupo((r) => r.tipo), porParticion: grupo((r) => r.particion),
     costo: { totalUsd: costos.reduce((s, c) => s + c, 0), sinCosto: rs.length - costos.length, porInstruccionUsd: costos.length ? costos.reduce((s, c) => s + c, 0) / costos.length : null, libroAcumuladoUsd: gastado() },
