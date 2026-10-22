@@ -29,11 +29,17 @@ test('canario: ninguna pregunta de los sets de referencia (v1, v2 y v3) aparece 
   const prompt = `${promptSistema(sinCatalogo, { corte: '2026-09', contexto: 'laboratorio' })}\n${mensajeUsuario(tablero('growth'), 0, '')}`.toLowerCase()
   const palabras = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z0-9ñ]+/g) ?? []
   const p = palabras(prompt).join(' ')
+  // El contrato es lo único que comparten por diseño quien escribe el set y quien escribe el prompt (sus convenciones
+  // de periodo, «en lo que va del año»): una frase suya no es contaminación. Medido el 2026-10-22 con el v3.
+  const contrato = palabras(readFileSync(join(RAIZ, 'evaluacion', 'CONTRATO.md'), 'utf8')).join(' ')
   for (const archivo of ['set-referencia.json', 'set-referencia-v2.json', 'set-referencia-v3.json']) {
     const set = JSON.parse(readFileSync(join(RAIZ, 'evaluacion', archivo), 'utf8')) as { preguntas: { instruccion: string }[] }
     for (const q of set.preguntas) {
       const w = palabras(q.instruccion)
-      for (let i = 0; i + 6 <= w.length; i++) assert.ok(!p.includes(w.slice(i, i + 6).join(' ')), `una pregunta de ${archivo} (6 palabras seguidas) aparece en el prompt`)
+      for (let i = 0; i + 6 <= w.length; i++) {
+        const g = w.slice(i, i + 6).join(' ')
+        assert.ok(!p.includes(g) || contrato.includes(g), `una pregunta de ${archivo} (6 palabras seguidas, fuera del contrato) aparece en el prompt`)
+      }
     }
     assert.equal(set.preguntas.length, 100)
   }
