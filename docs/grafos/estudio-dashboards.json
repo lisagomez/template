@@ -100,13 +100,14 @@
     {
       "id": "propuestas-firma",
       "label": "Propuestas para firmar: CDC (clase de routing, prompts, superficie CLI), README, inventario",
-      "estado": "ambar",
-      "evidencia": "docs/goals/estudio-dashboards-propuestas-firma.md: CDC (clase de routing, prompt estudio-agente/4, CLI), README conforme, filas de inventario y de rutas; sin firmar; validate tras el último commit (ver l-validate)"
+      "estado": "morado",
+      "evidencia": "CDC en .claude/gobernanza/BITACORA-CDC.md (entrada del 2026-10-22: clase agente-estudio-dashboards en voz con su «para» ampliado, prompt estudio-agente/4, configuración del modelo y CLI; la propuesta se borró al firmar); README conforme, filas de inventario y de rutas en estudio-dashboards-propuestas-firma.md; el set v2, el set nuevo, los dos arreglos y las tensiones del contrato siguen propuestos (§5)"
     },
     {
       "id": "firma-laboratorio",
       "label": "Firma del laboratorio (fuera del HECHO del goal)",
-      "estado": "gris"
+      "estado": "morado",
+      "evidencia": "el laboratorio firmó el CDC el 2026-10-22 en la bitácora (capa A basta), tras ver el diff completo en la conversación; lo de §5 de las propuestas queda para otra firma"
     }
   ],
   "aristas": [
@@ -431,8 +432,9 @@
       "id": "l-validate",
       "label": "npm run validate completo verde tras el último commit",
       "sobre": "nodo:propuestas-firma",
-      "estado": "gris",
-      "referencia": ".claude/gates.json, perfil validate"
+      "estado": "morado",
+      "referencia": ".claude/gates.json, perfil validate",
+      "evidencia": "npm run validate -- --sigue: 32/32 gates activos (10 inactivos declarados, 0 rojos) tras 7fd111c, el commit del «para» ampliado; se repite tras el commit de la firma"
     }
   ]
 }

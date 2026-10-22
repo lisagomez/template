@@ -2,7 +2,9 @@
 
 Spec: `docs/goals/estudio-dashboards.md` · grafo: `docs/grafos/estudio-dashboards.json` · propuestas para firmar:
 `docs/goals/estudio-dashboards-propuestas-firma.md` · evidencia: `docs/goals/estudio-dashboards-medicion/` y
-`docs/goals/estudio-dashboards-capturas/`. Datos ficticios (Distribuidora Golfo Norte). Sin push, PR ni firmas.
+`docs/goals/estudio-dashboards-capturas/`. Datos ficticios (Distribuidora Golfo Norte). Sin push ni PR. El CDC (clase
+de routing, prompt `estudio-agente/4`, configuración del modelo y CLI) lo firmó el laboratorio el 2026-10-22, capa A
+basta, en la bitácora; lo demás de las propuestas sigue sin firmar.
 
 ## Qué existe
 
@@ -141,6 +143,10 @@ vistas (WCAG 2.2 AA).
 
 ## Decisiones (qué y por qué)
 
+- **El nivel `voz` con su «para» ampliado, y no un nivel nuevo** (decisión del laboratorio, 2026-10-22, firmada con
+  el CDC): el «para» describía conversación por voz de una a tres frases y esta clase devuelve un plan en JSON. Un
+  nivel `estructurar` con el mismo modelo exigía tocar el tipo `Nivel` y duplicar precio, medición y alternativa
+  abierta. El modelo, su precio y su medición no cambiaron.
 - **DuckDB y no Postgres**: el SQL del zip es DuckDB. Portarlo era riesgo puro (cada `strftime`, `date_diff` e
   `interval`). Lock nuevo con dbt-duckdb 1.11.0 y duckdb 1.5.5 y las mismas versiones de la casa, más dbt-postgres
   para servir también al segundo catálogo.
