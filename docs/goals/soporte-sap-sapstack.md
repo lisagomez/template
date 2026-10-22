@@ -1,9 +1,10 @@
 # Soporte SAP × sapstack: propuesta para mantener viva la base de conocimiento SAP
 
 Goal compilado el 2026-10-22 (skill goal-compiler). Worktree `.claude/worktrees/soporte-sapstack`, rama
-`soporte/sapstack`, desde `main` (417bc57). **Forma: loop.** Lo hace un agente de punta a punta; repartir por módulo
-de sapstack es paralelismo opcional, no un grafo. La propuesta sí describe un flujo de actualización (un grafo de
-artefactos), pero como contenido, no como forma de este goal.
+`soporte/sapstack`, **apilada sobre `soporte/vista-experto`** (`d632e0f`, la mesa del experto, todavía sin PR). Su PR
+va después del de la mesa. **Forma: loop**, en dos tramos: primero la propuesta y después la vista que la hace visible.
+Lo hace un agente de punta a punta; repartir por módulo de sapstack es paralelismo opcional, no un grafo. La propuesta
+sí describe un flujo de actualización (un grafo de artefactos), pero como contenido, no como forma de este goal.
 
 ## MISIÓN
 
@@ -66,7 +67,7 @@ saber no le va a dar un veredicto inventado a su cliente. Lleva:
    - el aviso de commit nuevo, que no mueve nada (como `vigila:versiones`);
    - el diff;
    - los candidatos;
-   - la validación del experto en la mesa (`/mesa/soporte-sap`, rama `soporte/vista-experto`);
+   - la validación del experto en la mesa (`/mesa/soporte-sap`, ya en esta rama);
    - la firma del laboratorio;
    - `npm run registra`;
    - la versión;
@@ -78,6 +79,27 @@ saber no le va a dar un veredicto inventado a su cliente. Lleva:
 6. **El plan por fases** con su gate cada una. Las **decisiones del laboratorio** numeradas (D-SS-1…), cada una con su
    recomendación. Lo que pide CDC (C1), AISIA o revisión (C4) o el registro de riesgo (C5). El costo. Y **«Lo que
    podría estar mal»**, con lo que ya se resolvió y lo que no.
+7. **La vista, actualizada con este requerimiento**: la mesa deja de ser solo «el experto prueba casos» y muestra
+   también cómo crece la base. Dos piezas:
+   - **El mapa (overview), para el laboratorio.** Una pantalla tan clara como el Overview de un Worker en Cloudflare:
+     - un mapa de nodos con flechas, de izquierda a derecha:
+       - **las fuentes** a la izquierda, cada una una tarjeta que se despliega con su conteo: sapstack fijado por SHA
+         (con aviso si hay un commit nuevo), el experto en la mesa y los punteros a SAP Notes;
+       - **la base `sap-soporte`** en el centro: versión fijada, reglas firmadas y estado, con su punto de color;
+       - **lo que la usa** a la derecha: triage y categorización, el motor y sus veredictos, el léxico del anonimizador
+         y los CLIs `ss-*`.
+     - Debajo, **tarjetas de métricas**: candidatos pendientes, validados por el experto, firmados y rechazados, y la
+       tasa «al experto» de los escenarios, cada una con su serie.
+     - Una **lista de versiones** de la base, como la de Deployments: versión, fecha, quién firmó y huella.
+     - Un **panel lateral** con las fuentes y sus pins: SHA, último commit del origen, licencia y última revisión.
+     - Cada nodo lleva a su detalle: los candidatos, la versión o la tabla de CLIs.
+   - **La validación de candidatos, para el experto.** Cada candidato se presenta como **hipótesis**, nunca como
+     solución, con su fuente a la vista (archivo y línea de sapstack, SHA y licencia). El experto dice si es correcto,
+     si está mal, lo corrige o dice «no sé», con un comentario, y sale una **propuesta** que el laboratorio ve en su
+     vista y firma, o no. La mesa no siembra nada, igual que hoy.
+
+   Todo número sale de datos reales: si no hay, dice «sin datos», como Cloudflare con «No data». Nunca hay una métrica
+   decorativa: cada número tiene una sola versión. Visual e intuitiva como el resto de la mesa, legible en el teléfono.
 
 ## LIBERTAD TÉCNICA
 
@@ -95,7 +117,10 @@ con Soporte SAP, o la evidencia dice que no conviene tomar algo, la propuesta lo
   - `tools/soporte-sap/src/conocimiento-produccion.ts` (H-20);
   - `.claude/specs/004-grafo-de-conocimiento/`;
   - `docs/goals/soporte-sap.md`;
-  - la mesa del experto, en el worktree `soporte-experto`: `docs/MESA-DEL-EXPERTO.md`.
+  - la mesa del experto, ya en esta rama: `docs/MESA-DEL-EXPERTO.md`, `docs/goals/soporte-sap-experto.md` (sus
+    decisiones y «lo que podría estar mal»), `src/features/soporte-sap/mesa/` y `scripts/laboratorio-alojado/`;
+  - para el mapa: el Overview de un Worker en Cloudflare (la captura del laboratorio del 22/10: `/tmp/claude-1000/-home-gsore-code-template/6f6be038-77e6-4b53-9f05-997378bd0d3b/images/26.png`, si sigue ahí; no se sube al repo, porque lleva el usuario de la cuenta), y 1 o 2 referencias
+    más de mapas de dependencias legibles.
 - Reafirma el objetivo en una línea antes de cada edición grande.
 
 ## HECHOS YA MEDIDOS (2026-10-22, vuélvelos a comprobar)
@@ -153,14 +178,40 @@ con Soporte SAP, o la evidencia dice que no conviene tomar algo, la propuesta lo
 5. **Los fragmentos de CI**, pegados: GitHub Actions, GitLab CI y Jenkins, con refs por SHA. Son ejemplos de la
    propuesta, no se conectan a nada.
 6. **Las decisiones del laboratorio**, pegadas, cada una con su recomendación.
-7. **«Lo que podría estar mal»**, pegado y resuelto donde se pueda.
-8. **La validación en verde**, pegada (abajo), y `git status` limpio tras el commit en `soporte/sapstack`, sin push.
+7. **La vista, con Playwright** contra el laboratorio local (la misma imagen con `docker run`, si cambia la imagen).
+   Capturas pegadas de:
+   - el mapa con sus conteos reales;
+   - el detalle de un nodo al hacer clic;
+   - el experto validando un candidato, antes y después;
+   - el laboratorio viendo esa validación como propuesta;
+   - el experto recibiendo 404 en el mapa.
+
+   Además: el recorrido de la mesa sigue en verde con los pasos nuevos, y no hay errores de consola propios.
+8. **Una fila nueva en la matriz por cada afirmación nueva de seguridad**, verde sin su sabotaje y roja con él
+   (`--fila <id>`). Por ejemplo:
+   - una validación del experto no entra al grafo sin firma;
+   - el experto no ve el mapa;
+   - los candidatos salen solo del SHA fijado.
+
+   Y la matriz entera en verde, con su conteo.
+9. **«Lo que podría estar mal»**, pegado y resuelto donde se pueda.
+10. **La validación en verde**, pegada (abajo), y `git status` limpio tras el commit en `soporte/sapstack`, sin push.
 
 ## COMANDO DE VALIDACIÓN
 
-`npm run verify:gobernanza`, más el guion de evidencia que declares en el primer checkpoint (por ejemplo
-`node docs/goals/soporte-sap-sapstack-evidencia/mide.mjs`). Córrelos tras cada cambio grande y pega su salida. Antes
-del commit final, `npm ci` real en el worktree (no `node_modules` enlazado) si vas a correr algo más que la gobernanza.
+```
+npm run verify:gobernanza
+npx tsc --noEmit -p . && npm --prefix tools/soporte-sap run -s build && npm --prefix tools/soporte-sap run -s prueba
+```
+
+Además, el guion de evidencia que declares en el primer checkpoint (por ejemplo
+`node docs/goals/soporte-sap-sapstack-evidencia/mide.mjs`). Córrelos tras cada cambio grande y pega su salida:
+
+- tras cada cambio de UI, el recorrido de la mesa contra el laboratorio local;
+- tras cada fila nueva, la matriz (`node tools/soporte-sap/evidencia/firmas.ts`).
+
+Antes de empezar, `npm ci` real en el worktree (no `node_modules` enlazado). Al final, `npm run validate` **en primer
+plano**: en segundo plano, Claude Code lo mató una vez por memoria.
 
 ## RESTRICCIONES REALES
 
@@ -169,11 +220,26 @@ del commit final, `npm ci` real en el worktree (no `node_modules` enlazado) si v
   - **nunca** se instalan sus plugins, skills, agentes ni su MCP. Traer skills de fuera es un CDC (C1);
   - no se le abren PR ni issues;
   - nada sale de esta máquina hacia ese repo.
-- **Este goal propone, no construye ni siembra**:
+- **Este goal propone y construye la vista; no siembra**:
   - nada entra a `tools/conocimiento`; no se corre `npm run registra`;
-  - no se toca el código de `tools/soporte-sap` ni de la mesa;
+  - se cambia **la mesa**: `src/features/soporte-sap/mesa/`, `src/app/mesa/soporte-sap/`, su API y, si hace falta, lo
+    que la imagen empaqueta. No se cambian el motor, el grafo ni el léxico del anonimizador: lo que propongas para el
+    léxico se mide y se propone, porque decide qué se tapa;
   - no se tocan `.claude/gobernanza/`, `.claude/gates.json`, los skills ni `AGENTS.md`;
   - los borradores van en `docs/goals/`; la matriz sintética no se siembra (H-20).
+- **Las guardas de la mesa no se tocan** y ninguna fila de la matriz se cae:
+  - el 404 sin `SOPORTE_SAP_LABORATORIO`;
+  - `configura:deploy`;
+  - el build de la vitrina;
+  - el candado de `.env*` en `despliega.sh`;
+  - la verificación del JWT en la puerta y en el contenedor;
+  - lo del laboratorio, solo para su identidad.
+
+  Mejor dentro de las rutas que ya pasan por la puerta (por ejemplo, una pestaña de `/mesa/soporte-sap/laboratorio`).
+  Una ruta nueva en `RUTAS_DE_LA_MESA` va con su fila y su sabotaje.
+- **AISIA**: si la validación de candidatos de un tercero cambia lo que declara la revisión 11, va un borrador de
+  revisión 12 en `docs/goals/` y el laboratorio lo firma **antes de desplegar**. **Desplegar es del laboratorio**
+  (`despliega.sh`, con `!`): el goal termina con la vista probada en local, no en Cloudflare.
 - **Ningún CLI se imprime ni se instala**, ni de la librería pública: aquí se proponen, y adoptar uno es CDC. El motor y
   la validación del grafo se usan como librería, sobre candidatos que nunca se registran.
 - **Lo que cambia un veredicto lo firma el laboratorio.** Sin una fuente citable, un candidato de sapstack es una
@@ -188,6 +254,6 @@ del commit final, `npm ci` real en el worktree (no `node_modules` enlazado) si v
 
 ## RED DE SEGURIDAD
 
-Si tras 30 turnos no converge, o una decisión del laboratorio bloquea la propuesta (por ejemplo, si la matriz de
+Si tras 60 turnos no converge, o una decisión del laboratorio bloquea la propuesta (por ejemplo, si la matriz de
 herencia choca con la regla «en conflicto, sin veredicto»), detente: deja la propuesta con lo que hay, la decisión
 abierta escrita y su recomendación, y repórtalo.
