@@ -65,6 +65,7 @@ test('mesa · una validación del experto es una propuesta: no la firma ni la re
 })
 
 test('mesa · cada identidad ve solo sus validaciones de candidatos', async () => {
+  assert.equal((await valida(EXPERTO, { candidato: id('MIRO'), valoracion: 'correcto' })).status, 200)
   assert.equal((await valida(OTRO, { candidato: id('F110'), valoracion: 'mal', comentario: 'F110 también es de TR' })).status, 200)
   const mias = (await vista(EXPERTO, 'candidatos')).cuerpo.mias as Record<string, Validacion>
   assert.ok(mias[id('MIRO')], 've las suyas')
@@ -75,6 +76,7 @@ test('mesa · cada identidad ve solo sus validaciones de candidatos', async () =
 })
 
 test('mesa · el mapa solo existe para el laboratorio: el experto recibe 404', async () => {
+  assert.equal((await valida(OTRO, { candidato: id('F110'), valoracion: 'mal', comentario: 'F110 también es de TR' })).status, 200)
   const delExperto = await vista(EXPERTO, 'mapa')
   assert.equal(delExperto.status, 404)
   assert.equal(delExperto.cuerpo, 'Not Found')
