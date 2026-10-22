@@ -422,3 +422,5 @@ Desplegada por el laboratorio con `despliega.sh` (imagen `42b2b618c8f0`), equipo
   se prueba con curl o con el navegador.
 - **`containers push` dejaba la credencial del registro sin cifrar** en `~/.docker/config.json`: el guion hace
   `docker logout` al salir.
+- **La revisión 11 de la AISIA (con la nota del C3) la firmó el laboratorio el 2026-10-22** y está en
+  `.claude/gobernanza/AISIA-soporte-sap.md`. Desde ahí se puede invitar al experto (`docs/MESA-DEL-EXPERTO.md`, «Invitar»).
