@@ -257,3 +257,20 @@ plano**: en segundo plano, Claude Code lo mató una vez por memoria.
 Si tras 60 turnos no converge, o una decisión del laboratorio bloquea la propuesta (por ejemplo, si la matriz de
 herencia choca con la regla «en conflicto, sin veredicto»), detente: deja la propuesta con lo que hay, la decisión
 abierta escrita y su recomendación, y repórtalo.
+
+## Lo que se hizo (2026-10-22)
+
+- **La propuesta**: `docs/goals/soporte-sap-sapstack-propuesta.md` (+ anexos). Evidencia: `docs/goals/soporte-sap-sapstack-evidencia/mide.mjs`.
+- **La mesa**: `?pestana=candidatos` (validar conocimiento) y el mapa en `/mesa/soporte-sap/laboratorio`; el catálogo y
+  la foto de la base, generados por `src/features/soporte-sap/mesa/fuentes/extrae.mjs`, con `_ALTO` y huella.
+- **Cinco filas nuevas** en la matriz y el borrador de la **revisión 12** de la AISIA
+  (`docs/goals/soporte-sap-AISIA-revision-sapstack.md`), que el laboratorio firma antes de desplegar.
+- **Encontrado al construir**:
+  - el filtro de la mesa mira toda la acción, id incluido: un id con cifras (`nota-2269324`) tenía forma de documento.
+    Los ids de candidato van sin cifras;
+  - lo mismo le pasaba a los casos: `c-mvjjiz61-023329` dejaba el caso sin poder calificarse (68 de 3000 ids) y la suite
+    fallaba al azar. Arreglado con prueba roja → verde;
+  - con el filtro «por validar», la tarjeta validada desaparecía y el experto no veía su confirmación: se queda;
+  - Next en dev bloquea sus recursos a `127.0.0.1`: el recorrido contra dev va por `localhost`;
+  - el runtime del laboratorio vive en memoria: un segundo recorrido contra el mismo proceso encuentra el escenario de
+    MIGO ya arreglado. Cada recorrido, contra un proceso nuevo.
