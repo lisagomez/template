@@ -7,13 +7,20 @@
 
 ## 1. CDC — borrador de la entrada para la bitácora
 
-### 2026-10-20 — Estudio de dashboards: clase `agente-estudio-dashboards` en el nivel `voz`, prompt `estudio-agente/4` y superficie CLI — radio: routing (C8) y producto (paquete `@tu-scope/estudio-dashboards`, app `/laboratorio-estudio-dashboards`)
+Lista para firmar el 2026-10-22, con las dos decisiones del laboratorio de ese día ya tomadas: ampliar el «para» del
+nivel `voz` (no un nivel nuevo) y «capa A basta». Las casillas ☐ y la firma las cambia el laboratorio.
+
+### 2026-10-22 — Estudio de dashboards: clase `agente-estudio-dashboards` en el nivel `voz` (con su «para» ampliado), prompt `estudio-agente/4`, configuración del modelo y superficie CLI — radio: routing (C8) y producto (paquete `@tu-scope/estudio-dashboards`, app `/laboratorio-estudio-dashboards`)
 
 - **Cambio**:
-  1. **`.claude/routing-modelos.json`: clase nueva `agente-estudio-dashboards` → `voz`** (una línea; el nivel `voz` y
-     su modelo pineado `anthropic/claude-haiku-5.5-20261007` ya existen).
+  1. **`.claude/routing-modelos.json`: clase nueva `agente-estudio-dashboards` → `voz`, y el «para» del nivel `voz`
+     ampliado para que la cubra.** El modelo pineado del nivel (`anthropic/claude-haiku-5.5-20261007`), su precio, su
+     medición y su alternativa abierta no cambian.
 
      ```diff
+     @@ "niveles" › "voz"
+     -  "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros",
+     +  "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros; o estructurar una instruccion corta en un plan que valida el codigo (estudio de dashboards), donde se espera la regeneracion en segundos y el modelo no escribe cifras ni SQL",
      @@ "tareas"
           "asistente-paciente": "voz",
      +    "agente-estudio-dashboards": "voz",
@@ -24,10 +31,10 @@
      (100 preguntas), Haiku 5.5 dio 95, 94 y 95 de 100 con el razonamiento del proveedor, y 95/100 con espacio de
      razonamiento propio. Haiku 4.5 (`ligero`) dio 79/100. Sonnet 5 (`capaz`) dio 93/100 (89 más 4 reintentos por 429
      del proveedor), a 17 veces el costo y con regeneración p95 de 9.2 s. Eficiencia por reparto: no se paga Sonnet.
-     **Pero** el «para» del nivel `voz` describe conversación por voz sin herramientas; esta clase **estructura** una
-     instrucción en un plan validado. Dos salidas para que decida el laboratorio: (a) ampliar el «para» de `voz` a
-     «o estructurar una instrucción corta en un plan que valida el código»; (b) un nivel nuevo `estructurar` con el
-     mismo modelo, que exige tocar el tipo `Nivel` de `src/lib/ai/routing.ts`. Esta rama no hace ninguna de las dos.
+     **Por qué ampliar el «para» y no un nivel nuevo** (decisión del laboratorio, 2026-10-22): el «para» describía
+     conversación por voz de una a tres frases, y esta clase devuelve un plan en JSON; dejarlo así era una descripción
+     que no cubre a una de sus clases. Un nivel `estructurar` con el mismo modelo exigía tocar el tipo `Nivel` de
+     `src/lib/ai/routing.ts` y duplicar precio, medición y alternativa abierta.
      **Lo que el agente NO decide** (y por eso cabe en un nivel barato): no escribe cifras ni SQL; el núcleo valida
      el plan contra el esquema y el catálogo, rechaza el parche que toca de más, redacta con resultados de la capa y
      no registra nada sin una persona (aplicar, alertas).
@@ -57,21 +64,30 @@
     imprenta. La suite nueva (`tools/estudio-dashboards`, 50 pruebas) entra sola en `prueba:tools`.
 - **Motivo**: el spec `docs/goals/estudio-dashboards.md` (decisiones del laboratorio del 2026-10-20: LLM real con
   tope de US$2 y el nivel más barato primero; «luego lo pasas a CLI»).
-- **Gate aplicado**: diff revisado ☐ · regresión verde ☑ (capa A 166/166 el 2026-10-20; la capa B no la corre el
-  agente: decide el laboratorio) · aprobación humana ☐ · pineo ☑ (modelo pineado, lock de Python con hashes, npm exacto).
-- **Regresión**: además de la capa A, la medición del agente con la configuración propuesta
-  (`medicion-voz-reserva-latencia*.json`):
+- **Salida del perímetro (C4)**: el prompt (catálogo de Golfo Norte, datos ficticios), la especificación y la
+  instrucción van a OpenRouter. Datos ficticios: no hay decisión C4 de por medio (spec). Con datos reales, C4 antes.
+- **Gate aplicado**:
+  - diff revisado ☐ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166 (2026-10-22, tras ampliar el «para»);
+  - `verifica:routing` ☑ coherente con la clase nueva y el «para» ampliado;
+  - medición con el modelo real ☑ (`docs/goals/estudio-dashboards-medicion/medicion-voz-reserva-latencia*.json`);
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés; decide el laboratorio
+    («capa A basta» o corrida en sesión limpia) ☐;
+  - aprobación humana ☐;
+  - pineo ☑ (modelo con fecha, sin alias flotante; lock de Python con hashes; npm exacto).
+- **Regresión**:
+  - `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `35f6e7d`; se repite tras el
+    commit de este «para» y otra vez tras el de la firma;
   - **set v1 congelado: 95/100 y 97/100.** Analizar queda en 87.5 % en una corrida y en 93.8 % en la otra, con el
     agente idéntico. En las 8 corridas de 100 con Haiku 5.5 sobre el v1, analizar dio 14/16 siete veces y 15/16 una:
-    **el gate por tipo sobre el v1 pasa a veces, no siempre**;
+    **el gate por tipo sobre el v1 no se cumple**, y el laboratorio decidió el 2026-10-21 cerrarlo con el fallo
+    reportado, sin relajar el set ni ajustar el agente sobre la partición retenida;
   - **set v2 adjudicado** por un revisor independiente y ciego, congelado antes de medir: **98/100 y 97/100, con los
     seis tipos ≥ 90 % en las dos**;
   - regeneración p95 con tres lectores de MetricFlow (`6c6aac4`): **4.63 s (v1) y 4.79 s (v2), 4.67 s juntas**; con
     uno, 4.93–5.02 s. Consulta p95 33 ms;
-  - gasto total del goal, por la diferencia de saldo de la cuenta: **US$1.4797**.
-- **Salida del perímetro (C4)**: el prompt (catálogo de Golfo Norte, datos ficticios), la especificación y la
-  instrucción van a OpenRouter. Datos ficticios: no hay decisión C4 de por medio (spec). Con datos reales, C4 antes.
-- **Aprobado por**: ☐ (lo escribe el laboratorio)
+  - gasto total del goal, por la diferencia de saldo de la cuenta: **US$1.4797** (tope US$2).
+- **Aprobado por**: pendiente
 
 ## 2. README product first
 
