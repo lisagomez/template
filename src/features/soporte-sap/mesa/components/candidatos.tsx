@@ -13,9 +13,10 @@ const API = '/api/mesa/soporte-sap'
 const POR_PAGINA = 12
 type Filtro = { modulo: string; tipo: 'todos' | 'tcode' | 'nota'; estado: 'pendientes' | 'validados' | 'todos'; busca: string; alcance: boolean }
 
-const pasa = (f: Filtro, mias: Readonly<Record<string, ValidacionCandidato>>) => (c: Candidato) =>
+/** Lo validado en esta visita se queda a la vista aunque el filtro sea «por validar»: el experto ve su confirmación. */
+const pasa = (f: Filtro, mias: Readonly<Record<string, ValidacionCandidato>>, recientes: ReadonlySet<string>) => (c: Candidato) =>
   (f.modulo === 'todos' || c.modulos.includes(f.modulo)) && (f.tipo === 'todos' || c.tipo === f.tipo) && (!f.alcance || c.enAlcance)
-  && (f.estado === 'todos' || (f.estado === 'validados') === Boolean(mias[c.id]))
+  && (f.estado === 'todos' || recientes.has(c.id) || (f.estado === 'validados') === Boolean(mias[c.id]))
   && (!f.busca || `${c.clave} ${c.titulo}`.toLowerCase().includes(f.busca.toLowerCase()))
 
 function Encabezado({ v, hechas }: { v: CandidatosVista; hechas: number }) {
@@ -53,6 +54,7 @@ export function Candidatos() {
   const [error, setError] = useState<string | null>(null)
   const [f, setF] = useState<Filtro>({ modulo: 'todos', tipo: 'todos', estado: 'pendientes', busca: '', alcance: true })
   const [paginas, setPaginas] = useState(1)
+  const [recientes, setRecientes] = useState<ReadonlySet<string>>(new Set())
   const carga = useCallback(() => {
     fetch(`${API}?vista=candidatos`, { cache: 'no-store' })
       .then(async (r) => { if (r.ok) setV((await r.json()) as CandidatosVista); else setError(`la mesa respondió ${r.status}`) })
@@ -66,16 +68,17 @@ export function Candidatos() {
     if (!r.ok || !d.validacion) return d.error ?? `la mesa respondió ${r.status}`
     const val = d.validacion
     setV((x0) => (x0 ? { ...x0, mias: { ...x0.mias, [val.candidato]: val } } : x0))
+    setRecientes((r) => new Set([...r, val.candidato]))
     return null
   }
   if (error) return <Celda><p className="text-sm text-neutral-700">{error}</p></Celda>
   if (!v) return <p className="text-sm text-neutral-500">Leyendo los candidatos…</p>
   if (!v.fuente.integro) return <Celda prueba="catalogo-roto" titulo="Los candidatos no se cargaron"><p className="text-sm text-rose-800">{v.fuente.motivo}</p></Celda>
-  const visibles = v.candidatos.filter(pasa(f, v.mias))
+  const visibles = v.candidatos.filter(pasa(f, v.mias, recientes))
   return (
     <div className="space-y-4" data-prueba="candidatos">
       <Encabezado v={v} hechas={v.candidatos.filter((c) => c.enAlcance && v.mias[c.id]).length} />
-      <Filtros f={f} set={(x) => { setF(x); setPaginas(1) }} modulos={modulos} />
+      <Filtros f={f} set={(x) => { setF(x); setPaginas(1); setRecientes(new Set()) }} modulos={modulos} />
       <p className="px-1 text-xs text-neutral-500" data-prueba="conteo-candidatos">{visibles.length} candidato(s) con estos filtros</p>
       <ul className="grid gap-4 lg:grid-cols-2">
         {visibles.slice(0, paginas * POR_PAGINA).map((c) => <TarjetaCandidato key={c.id} c={c} fuente={v.fuente} previa={v.mias[c.id] ?? null} envia={envia} />)}

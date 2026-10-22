@@ -49,11 +49,11 @@ const usuariosDe = (xs: ReadonlyArray<{ readonly por: { readonly usuario: string
 /** Por módulo (el primero de cada candidato): cuántos hay y cuántos validó algún experto. */
 function porModuloDe(cands: readonly Candidato[], reales: readonly ValidacionCandidato[]): MapaVista['fuentes']['sapstack']['porModulo'] {
   const validados = new Set(reales.map((v) => v.candidato))
-  const filas = new Map<string, { modulo: string; candidatos: number; validados: number; enAlcance: boolean }>()
+  const filas = new Map<string, { modulo: string; candidatos: number; validados: number; enAlcance: number }>()
   for (const c of cands) {
     const m = c.modulos[0] ?? '(sin módulo)'
-    const f = filas.get(m) ?? { modulo: m, candidatos: 0, validados: 0, enAlcance: c.enAlcance }
-    filas.set(m, { ...f, candidatos: f.candidatos + 1, validados: f.validados + (validados.has(c.id) ? 1 : 0), enAlcance: f.enAlcance || c.enAlcance })
+    const f = filas.get(m) ?? { modulo: m, candidatos: 0, validados: 0, enAlcance: 0 }
+    filas.set(m, { ...f, candidatos: f.candidatos + 1, validados: f.validados + (validados.has(c.id) ? 1 : 0), enAlcance: f.enAlcance + (c.enAlcance ? 1 : 0) })
   }
   return [...filas.values()].sort((a, b) => b.candidatos - a.candidatos || (a.modulo < b.modulo ? -1 : 1))
 }

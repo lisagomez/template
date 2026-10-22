@@ -12,6 +12,7 @@ import { Celda, Chip, fechaCorta } from './ui'
 
 export type Nodo = 'sapstack' | 'experto' | 'notas' | 'base' | 'triage' | 'motor' | 'lexico' | 'clis'
 const si = (b: boolean) => (b ? 'sí' : 'no')
+const n = (k: number, una: string, varias = `${una}s`) => `${k} ${k === 1 ? una : varias}`
 
 export function Versiones({ vs }: { vs: readonly VersionBase[] }) {
   return (
@@ -81,7 +82,7 @@ function DetalleDe({ nodo, m }: { nodo: Nodo; m: MapaVista }) {
   const u = m.usos, s = m.fuentes.sapstack
   if (nodo === 'sapstack') return (
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      {s.porModulo.map((x) => <div key={x.modulo} className={`rounded-xl border p-3 text-sm ${x.enAlcance ? 'border-neutral-200 bg-white' : 'border-dashed border-neutral-200 bg-neutral-50 text-neutral-500'}`}><b>{x.modulo}</b> · {x.candidatos} candidatos · {x.validados} validados{x.enAlcance ? '' : ' · fuera del alcance de hoy'}</div>)}
+      {s.porModulo.map((x) => <div key={x.modulo} className={`rounded-xl border p-3 text-sm ${x.enAlcance ? 'border-neutral-200 bg-white' : 'border-dashed border-neutral-200 bg-neutral-50 text-neutral-500'}`}><b>{x.modulo}</b> · {n(x.candidatos, 'candidato')} · {n(x.validados, 'validado')}<br /><span className="text-xs text-neutral-500">{x.enAlcance === x.candidatos ? 'todos en el alcance de hoy' : x.enAlcance ? `${x.enAlcance} en el alcance de hoy` : 'fuera del alcance de hoy'}</span></div>)}
       <a href={`${RAIZ_DE_LA_MESA}?pestana=candidatos`} className="rounded-xl bg-violet-700 p-3 text-center text-sm font-semibold text-white">Validar candidatos →</a>
     </div>
   )

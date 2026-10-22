@@ -39,7 +39,8 @@ function lineasDeTcodes(texto) {
 function candidatoTcode(f, clave, v, lineas) {
   const modulos = (v?.modules ?? []).map(String)
   const titulo = String(v?.name ?? '').trim()
-  const nota = v?.note ? ` sapstack añade: «${String(v.note).trim()}».` : ''
+  const extra = String(v?.note ?? '').trim()
+  const nota = extra ? ` sapstack añade${/[\u3131-\uD79D]/.test(extra) ? ', en coreano' : ''}: «${extra}».` : ''
   const ls = lineas.get(clave) ?? [0]
   const linea = ls.at(-1)
   return {

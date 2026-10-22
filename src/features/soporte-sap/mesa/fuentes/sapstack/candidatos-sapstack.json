@@ -4,7 +4,7 @@
     "repo": "Fioriuser2021/sapstack",
     "sha": "5be80773025a3ace996f02a5b0a8557779eaa334"
   },
-  "huella": "sha256:3a150616f0cd4052bf01172b26b447347d4d7f773d2c3a3b90e73318eaa1a774",
+  "huella": "sha256:30cb15b7ac1afb24bc45b4f6d3b21949dd735e9c2d2f159bd6ea87a320125215",
   "candidatos": [
     {
       "id": "tcode-nececepdnicl",
@@ -227,7 +227,7 @@
       ],
       "release": "both",
       "enAlcance": true,
-      "hipotesis": "«AFAB» es una transacción de FI y AA: «Post Depreciation». Existe en ECC y en S/4HANA. sapstack añade: «Test Run 필수».",
+      "hipotesis": "«AFAB» es una transacción de FI y AA: «Post Depreciation». Existe en ECC y en S/4HANA. sapstack añade, en coreano: «Test Run 필수».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -1068,7 +1068,7 @@
       ],
       "release": "both",
       "enAlcance": true,
-      "hipotesis": "«F.13» es una transacción de FI: «Automatic Clearing». Existe en ECC y en S/4HANA. sapstack añade: «Test Run 필수».",
+      "hipotesis": "«F.13» es una transacción de FI: «Automatic Clearing». Existe en ECC y en S/4HANA. sapstack añade, en coreano: «Test Run 필수».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -1221,7 +1221,7 @@
       ],
       "release": "both",
       "enAlcance": true,
-      "hipotesis": "«FAGL_FC_VAL» es una transacción de FI: «Foreign Currency Valuation». Existe en ECC y en S/4HANA. sapstack añade: «Test Run 필수».",
+      "hipotesis": "«FAGL_FC_VAL» es una transacción de FI: «Foreign Currency Valuation». Existe en ECC y en S/4HANA. sapstack añade, en coreano: «Test Run 필수».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -1528,7 +1528,7 @@
       ],
       "release": "ecc_only",
       "enAlcance": true,
-      "hipotesis": "«FD32» es una transacción de FI y SD: «Credit Management (ECC)». Solo existe en ECC. sapstack añade: «S/4HANA FSCM에서는 UKM_BP».",
+      "hipotesis": "«FD32» es una transacción de FI y SD: «Credit Management (ECC)». Solo existe en ECC. sapstack añade, en coreano: «S/4HANA FSCM에서는 UKM_BP».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -2101,7 +2101,7 @@
       ],
       "release": "ecc_only",
       "enAlcance": true,
-      "hipotesis": "«MB5S» es una transacción de MM: «GR/IR Balance Analysis». Solo existe en ECC. sapstack añade: «S/4HANA에서는 GRIR Fiori 앱».",
+      "hipotesis": "«MB5S» es una transacción de MM: «GR/IR Balance Analysis». Solo existe en ECC. sapstack añade, en coreano: «S/4HANA에서는 GRIR Fiori 앱».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -2883,7 +2883,7 @@
       ],
       "release": "both",
       "enAlcance": true,
-      "hipotesis": "«MR11» es una transacción de MM: «GR/IR Account Maintenance». Existe en ECC y en S/4HANA. sapstack añade: «Test Run 필수».",
+      "hipotesis": "«MR11» es una transacción de MM: «GR/IR Account Maintenance». Existe en ECC y en S/4HANA. sapstack añade, en coreano: «Test Run 필수».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -3857,7 +3857,7 @@
       ],
       "release": "both",
       "enAlcance": true,
-      "hipotesis": "«SE16N» es una transacción de ABAP: «General Table Display». Existe en ECC y en S/4HANA. sapstack añade: «운영 환경에서 데이터 직접 편집 금지».",
+      "hipotesis": "«SE16N» es una transacción de ABAP: «General Table Display». Existe en ECC y en S/4HANA. sapstack añade, en coreano: «운영 환경에서 데이터 직접 편집 금지».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",
@@ -5541,7 +5541,7 @@
       ],
       "release": "ecc_only",
       "enAlcance": true,
-      "hipotesis": "«XK01» es una transacción de MM y FI: «Create Vendor (Central)». Solo existe en ECC. sapstack añade: «S/4에서는 BP로 통합».",
+      "hipotesis": "«XK01» es una transacción de MM y FI: «Create Vendor (Central)». Solo existe en ECC. sapstack añade, en coreano: «S/4에서는 BP로 통합».",
       "destino": "el triage (módulo del ticket) y el léxico del anonimizador",
       "fuente": {
         "archivo": "data/tcodes.yaml",

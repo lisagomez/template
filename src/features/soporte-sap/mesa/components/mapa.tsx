@@ -59,7 +59,7 @@ function Usos({ m, abre }: { m: MapaVista; abre: (n: Nodo) => void }) {
       <div className="px-3 py-2">
         <Fila clave="Triage" valor={<span className="text-xs tabular-nums">{u.triage.reconocidos}/{u.triage.total} T-codes</span>} onClick={() => abre('triage')} prueba="uso-triage" />
         <Fila clave="Motor" valor={<span className="text-xs">{u.motor.casos ? `${u.motor.alExperto}/${u.motor.casos} al experto` : 'sin datos'}</span>} onClick={() => abre('motor')} prueba="uso-motor" />
-        <Fila clave="Léxico del anonimizador" valor={<span className="text-xs tabular-nums">{u.lexico.nombresTapados} tapados</span>} onClick={() => abre('lexico')} prueba="uso-lexico" />
+        <Fila clave="Léxico del anonimizador" valor={<span className="text-xs tabular-nums">{u.lexico.nombresTapados}/{u.lexico.total} nombres tapados</span>} onClick={() => abre('lexico')} prueba="uso-lexico" />
         <Fila clave="CLIs ss-*" valor={<span className="text-xs">{u.clis.length} · {medidos ? `${medidos} medidos` : 'no medidos'}</span>} onClick={() => abre('clis')} prueba="uso-clis" />
       </div>
     </div>
@@ -69,7 +69,7 @@ function Usos({ m, abre }: { m: MapaVista; abre: (n: Nodo) => void }) {
 function Lienzo({ m, abre }: { m: MapaVista; abre: (n: Nodo) => void }) {
   return (
     <section className="rounded-3xl border border-neutral-200 bg-neutral-50 p-4 md:p-8" style={{ backgroundImage: 'radial-gradient(#d4d4d4 1px, transparent 1px)', backgroundSize: '18px 18px' }} data-prueba="mapa-lienzo" aria-label="Mapa: fuentes, base y lo que la usa">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_4rem_minmax(0,1fr)_4rem_minmax(0,1fr)] lg:gap-0">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_4rem_minmax(0,1fr)_4rem_minmax(0,1fr)] lg:gap-0">
         <Fuentes m={m} abre={abre} />
         <Conector salidas={[16, 50, 84]} />
         <p className="text-center text-neutral-400 lg:hidden" aria-hidden>↓</p>
@@ -120,8 +120,8 @@ export function Mapa() {
       <Lienzo m={m} abre={(n) => setNodo(n)} />
       {nodo ? <Detalle nodo={nodo} m={m} cierra={() => setNodo(null)} /> : null}
       <Metricas m={m} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="space-y-5"><Propuestas m={m} /><Celda titulo="Versiones de la base" nota="Del registro de @tu-scope/conocimiento: solo avanza, y lo que cambia un veredicto lo firma el laboratorio."><Versiones vs={m.base.versiones} /></Celda></div>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-5"><Propuestas m={m} /><Celda titulo="Versiones de la base" nota="Del registro de @tu-scope/conocimiento: solo avanza, y lo que cambia un veredicto lo firma el laboratorio."><Versiones vs={m.base.versiones} /></Celda></div>
         <Pins m={m} />
       </div>
     </div>

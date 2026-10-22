@@ -94,7 +94,7 @@ export interface PropuestaCandidato {
 export interface MapaVista {
   readonly generado: string
   readonly fuentes: {
-    readonly sapstack: { readonly candidatos: number; readonly tcodes: number; readonly notas: number; readonly enAlcance: number; readonly commitNuevo: boolean; readonly porModulo: ReadonlyArray<{ readonly modulo: string; readonly candidatos: number; readonly validados: number; readonly enAlcance: boolean }> }
+    readonly sapstack: { readonly candidatos: number; readonly tcodes: number; readonly notas: number; readonly enAlcance: number; readonly commitNuevo: boolean; readonly porModulo: ReadonlyArray<{ readonly modulo: string; readonly candidatos: number; readonly validados: number; readonly enAlcance: number }> }
     readonly experto: { readonly casos: number; readonly validaciones: number; readonly expertos: number; readonly dePrueba: number }
     readonly notas: { readonly punteros: number; readonly validadas: number }
   }
