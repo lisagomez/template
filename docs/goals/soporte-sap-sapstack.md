@@ -32,6 +32,24 @@ saber no le va a dar un veredicto inventado a su cliente. Lleva:
    Cada activo con su riesgo, quién lo valida, quién lo firma y **una medida**. Por ejemplo: cuántos T-codes de
    sapstack ya conoce Soporte SAP, y cuántos términos SAP de sus escenarios el anonimizador de hoy toma por nombre de
    persona. Esa medida, corrida y pegada.
+3b. **El grafo para ampliar la base**, que es la primera línea de la transcripción. Los candidatos de sapstack se
+   escriben **con el contrato del grafo** (`tools/grafo-conocimiento/src/contrato.ts`) y se validan con
+   `validaConocimiento`, en un paquete de prueba fuera de `tools/conocimiento` y sin registrarlos. Luego se corre el
+   motor sobre los 5 escenarios de sapstack (`docs/scenarios/`), para mostrar cuáles tendrían veredicto y cuáles irían
+   «al experto», y por qué: sin fuente citable, en conflicto o con la categoría en duda. Además, qué relaciones del
+   grafo enriquecerían el triage (T-code ↔ módulo ↔ síntoma o dump ↔ puntero a Note ↔ release ECC/S4) y qué cambiaría
+   en `categoriza` y `mapeo` si entraran.
+3c. **La imprenta de CLIs**: los 10 comandos y los 9 agentes de sapstack, cada uno por la escalera CLI-first de
+   `AGENTS.md`:
+   1. ¿Ya lo cubre un `ss-*` de `tools/soporte-sap/clis/manifiesto.json`?
+   2. ¿Está **publicado** en la librería de la imprenta?
+   3. ¿Conviene **imprimir** uno? Solo si la tarea ya se repitió 3 o más veces **y** existe la API real.
+   4. Si no, el modelo, por routing.
+
+   Cada candidato lleva su clasificación del contrato: `readOnly`, dry-run por defecto, si es **destructivo** (lo que
+   mueve dinero, como F110, es destructivo y su daño a terceros no es firmable) y su grado. Sin grado, es «no medido».
+   La vía que ya existe: el experto enseña una operación repetible en la mesa, el chat propone el CLI sin imprimirlo
+   (`tools/soporte-sap/src/chat.ts:76`) y el laboratorio lo aprueba por CDC.
 4. **Las tres sugerencias traducidas a los mecanismos que el template ya tiene**, sin copiar los de sapstack:
    - **CI empresarial**: el padrón de gates (`.claude/gates.json`, `npm run gates`, `proyecta:gates`) proyectado a
      GitHub Actions, GitLab CI y Jenkins, con fragmentos YAML y Groovy de ejemplo y las refs fijadas por SHA. Nunca
@@ -102,6 +120,18 @@ con Soporte SAP, o la evidencia dice que no conviene tomar algo, la propuesta lo
   - `tools/conocimiento` tiene 17 dominios `mx-*`/`co-*` y 4 `generales/`. Ninguno es SAP.
   - `sap-soporte` es el dominio previsto (`DOMINIO_SOPORTE_SAP`).
   - Los T-codes de `lexico.ts` no aparecen con el patrón simple: mídelo bien.
+- **El grafo**: los tipos están en `tools/grafo-conocimiento/src/contrato.ts`, la validación en `valida.ts`
+  (`validaConocimiento`), el gate de siembra en `gate-entrada.ts` y la selección en `selecciona.ts`. Se usan como
+  librería, en solo lectura.
+- **La imprenta**:
+  - `.claude/imprenta/manifiesto.json` declara servicio → CLI y no imprime. Imprimir pasa en un proyecto derivado,
+    con Go: aquí no hay librería de binarios, ni debe haberla. Imprimir o adoptar un CLI es CDC (C1).
+  - La librería pública (`mvanhorn/printing-press-library`, `cli-skills/`) tiene 595 CLIs. Lo único SAP es `pp-concur`
+    (viajes y gastos, no ERP). No hay nada de S/4, ABAP ni OData de SAP.
+  - Soporte SAP tiene 7 CLIs `ss-*`, todos «no medido».
+  - **Imprimir contra un SAP real choca con D6**: sigue abierto quién ejecuta en el SAP de un cliente.
+- Los comandos de sapstack son prompts en Markdown (`commands/*.md`), no programas: un «CLI» que salga de ellos hay que
+  diseñarlo, no se traduce tal cual.
 
 ## DEFINICIÓN DE HECHO (evidencia visible en la conversación)
 
@@ -116,6 +146,10 @@ con Soporte SAP, o la evidencia dice que no conviene tomar algo, la propuesta lo
    - el conteo por módulo de lo que entraría como candidato y de lo que no.
    Si se corre dos veces, da lo mismo.
 4. **La matriz de herencia y el diagrama de fuente única**, pegados como texto (Mermaid o tabla).
+4b. **El grafo, corrido**: la salida de `validaConocimiento` sobre los candidatos y la del motor sobre los 5
+   escenarios (veredicto o «al experto», y por qué), pegadas.
+4c. **La tabla de CLIs**: cada comando y agente de sapstack, el peldaño de la escalera donde se resuelve y su
+   clasificación (`readOnly`, dry-run, destructivo, grado), pegada.
 5. **Los fragmentos de CI**, pegados: GitHub Actions, GitLab CI y Jenkins, con refs por SHA. Son ejemplos de la
    propuesta, no se conectan a nada.
 6. **Las decisiones del laboratorio**, pegadas, cada una con su recomendación.
@@ -140,6 +174,8 @@ del commit final, `npm ci` real en el worktree (no `node_modules` enlazado) si v
   - no se toca el código de `tools/soporte-sap` ni de la mesa;
   - no se tocan `.claude/gobernanza/`, `.claude/gates.json`, los skills ni `AGENTS.md`;
   - los borradores van en `docs/goals/`; la matriz sintética no se siembra (H-20).
+- **Ningún CLI se imprime ni se instala**, ni de la librería pública: aquí se proponen, y adoptar uno es CDC. El motor y
+  la validación del grafo se usan como librería, sobre candidatos que nunca se registran.
 - **Lo que cambia un veredicto lo firma el laboratorio.** Sin una fuente citable, un candidato de sapstack es una
   hipótesis para el experto, no una regla. Del contenido de las SAP Notes, solo el número y el enlace.
 - **Sin modelo y sin datos reales**: no se manda el contenido a ningún LLM ni API. No se generan entradas de estrés para
