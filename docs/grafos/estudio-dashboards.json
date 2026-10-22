@@ -71,7 +71,7 @@
       "id": "medicion-agente",
       "label": "Medición del agente contra el set: precisión por nivel y por tipo, gasto y latencia",
       "estado": "ambar",
-      "evidencia": "Configuración propuesta (Haiku 5.5, reserva si trunca, proveedor por latencia). Set v1 congelado: 95/100 y 97/100; analizar 14/16 en 7 de 8 corridas de 100 y 15/16 en una (la de 6c6aac4), con el agente idéntico. Set v2 (adjudicado a ciegas, congelado en cdf43d6 antes de medir): 98/100 y 97/100, los seis tipos ≥ 90 % en las dos. Gasto total US$1.4797 por saldo de la cuenta. El laboratorio cerró el gate por tipo del v1 con el fallo reportado (2026-10-21); el v2 queda propuesto"
+      "evidencia": "Configuración propuesta (Haiku 5.5, reserva si trunca, proveedor por latencia). Set v1 congelado: 95/100 y 97/100; analizar 14/16 en 7 de 8 corridas de 100 y 15/16 en una (la de 6c6aac4), con el agente idéntico. Set v2 (adjudicado a ciegas, congelado en cdf43d6 antes de medir): 98/100 y 97/100, los seis tipos ≥ 90 % en las dos. Gasto total US$1.4797 por saldo de la cuenta. El laboratorio cerró el gate por tipo del v1 con el fallo reportado (2026-10-21); el v2 queda propuesto · 2026-10-22 (estudio/set-ciego): set v3 a ciegas y adjudicado, congelado en 2788f91 (sha256:ed0ad158…); sin arreglos 96 y 96, con arreglos 95 y 95; crear y filtrar bajo 90 % con los dos núcleos; regeneración p95 5.56–6.31 s (docs/goals/estudio-dashboards-set-v3.md)"
     },
     {
       "id": "lienzo",
@@ -386,7 +386,7 @@
       "sobre": "nodo:medicion-agente",
       "estado": "ambar",
       "referencia": "KPI de la propuesta",
-      "evidencia": "≥ 90 % por tipo en el set v2 adjudicado en las dos corridas (98/100 y 97/100). En el v1 congelado, analizar pasa en 1 de 8 corridas (15/16) y queda en 14/16 en las otras 7, sin tocar el agente: el gate por tipo sobre el v1 depende de la corrida. Decisión del laboratorio (2026-10-21): se cierra con el fallo reportado, sin relajar el v1; el v2 y el set nuevo quedan propuestos"
+      "evidencia": "≥ 90 % por tipo en el set v2 adjudicado en las dos corridas (98/100 y 97/100). En el v1 congelado, analizar pasa en 1 de 8 corridas (15/16) y queda en 14/16 en las otras 7, sin tocar el agente: el gate por tipo sobre el v1 depende de la corrida. Decisión del laboratorio (2026-10-21): se cierra con el fallo reportado, sin relajar el v1; el v2 y el set nuevo quedan propuestos · en el v3 a ciegas tampoco: crear 13–15/16 y filtrar 14–16/16; analizar 16/16 en las cuatro"
     },
     {
       "id": "l-gasto",

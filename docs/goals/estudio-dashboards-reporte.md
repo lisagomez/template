@@ -38,6 +38,11 @@ basta, en la bitácora; lo demás de las propuestas sigue sin firmar.
 >
 > El v2, el set nuevo y los arreglos quedan como propuestas (`estudio-dashboards-propuestas-firma.md` §5). Esto es la
 > decisión tomada en la conversación, no una firma.
+>
+> **Después (2026-10-22, rama `estudio/set-ciego`)**: el set nuevo se escribió a ciegas, se adjudicó y se congeló
+> antes de medir, y los dos arreglos se midieron sobre él (`estudio-dashboards-set-v3.md`). No se pudieron medir como
+> mejora; la precisión no cambió (96/96 contra 95/95); y el umbral por tipo tampoco se cumple en el v3, ahora en
+> `crear` y `filtrar`. La regeneración p95 en el v3 pasa de 5 s (5.56–6.31 s).
 
 **Datos fijados.**
 - Los 7 sha256 (`laboratorio/datos.json`) son iguales a los del spec y a los del zip.
