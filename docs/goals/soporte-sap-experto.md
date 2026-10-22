@@ -424,3 +424,8 @@ Desplegada por el laboratorio con `despliega.sh` (imagen `42b2b618c8f0`), equipo
   `docker logout` al salir.
 - **La revisión 11 de la AISIA (con la nota del C3) la firmó el laboratorio el 2026-10-22** y está en
   `.claude/gobernanza/AISIA-soporte-sap.md`. Desde ahí se puede invitar al experto (`docs/MESA-DEL-EXPERTO.md`, «Invitar»).
+- **El primer inicio de sesión con un correo, en el navegador (2026-10-22), dio «Not Found»**: el recorrido alojado entra
+  con tokens de servicio y nunca había pasado por la comparación del correo. Access lo dejó pasar y la puerta no lo
+  encontró en `MESA_LABORATORIO`: el valor guardado no era el correo con el que se entró. Se reemplazó y se redesplegó, y
+  la mesa abrió. La guía dice ahora cómo verlo (`/cdn-cgi/access/get-identity`) y que One-time PIN hay que añadirlo a
+  mano cuando ya existe el proveedor «Cloudflare».

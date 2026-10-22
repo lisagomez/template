@@ -115,7 +115,8 @@ una URL que hay que ver a tiempo, el despliegue tarda minutos y los secretos se 
    npx wrangler@4.143.1 secret put MESA_S3_SECRETO
    ```
 
-   - `MESA_LABORATORIO`: tu correo. `MESA_EXPERTOS` va al invitar (abajo), no antes.
+   - `MESA_LABORATORIO`: tu correo, **el mismo con el que entras a Access**, sin comillas. `MESA_EXPERTOS` va al invitar
+     (abajo), no antes.
    - Los tres de R2 salen de R2 → Manage API tokens → **Create Account API token**: **Object Read & Write**, solo para
      `mesa-del-experto`. `MESA_S3_ENDPOINT` es la URL «S3 API» del bucket (Settings), con `.us.`.
    - `MESA_TOKENS` se arma con los dos Client ID de tu archivo, sin que pasen por la pantalla (tres líneas cortas: una
@@ -137,12 +138,20 @@ una URL que hay que ver a tiempo, el despliegue tarda minutos y los secretos se 
 
 Solo después de firmar la revisión 11 de la AISIA.
 
+- **Para probarla tú como experto** no hace falta nada de esto: con tu correo usas la misma mesa y ves solo tus casos. Un
+  correo en las dos listas cuenta como laboratorio.
 - **Invitar**:
+  - en Zero Trust → Integrations → Identity providers, añade **One-time PIN** si no está: el panel solo lo da por
+    defecto cuando no hay ningún proveedor, y «Cloudflare» (tu entrada) ya cuenta como uno;
   - en Zero Trust → Access controls → Policies, crea `mesa-personas` (**Allow**, Include → **Emails** → su correo y el
-    tuyo, inicio de sesión **One-time PIN**) y añádela en la pestaña Access del Worker;
+    tuyo; nunca «Emails ending in») y añádela al Worker: Domains → «An Access policy applies to this URL» → **Manage**.
+    Es reutilizable: lo que cambies en ella después llega solo;
   - `npx wrangler@4.143.1 secret put MESA_EXPERTOS` con su correo (varios, separados por comas);
   - redespliega o espera 30 minutos sin uso: el contenedor ve la lista nueva al arrancar;
   - mándale la URL y dile que empiece por «Cómo se usa». Entra con su correo y un código: no hay contraseña.
+- **Si con sesión ve «Not Found» en texto plano**, Access lo dejó pasar y el Worker no encontró su correo en las listas.
+  En `<url>/cdn-cgi/access/get-identity` se ve con qué correo entró: reemplaza el secreto con ese correo exacto (el
+  valor no se puede leer, ni hace falta) y redespliega. Le pasó al laboratorio el 2026-10-22 con `MESA_LABORATORIO`.
 - **Quitar**: sácalo de la política y de `MESA_EXPERTOS`. La puerta del Worker lo deja fuera al momento; lo que ya dijo
   se queda en R2 hasta que lo borres o venza.
 
