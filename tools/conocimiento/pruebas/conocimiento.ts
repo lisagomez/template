@@ -10,6 +10,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import conocimiento, { version } from '../dist/index.js'
 import { CORTE_HERMES, seleccionaDominios, validaConocimiento } from '../../grafo-conocimiento/dist/index.js'
+import { problemasDeCita } from '../politica-cita.mjs'
 
 const lee = <T>(ruta: string): T => JSON.parse(readFileSync(new URL(ruta, import.meta.url), 'utf8')) as T
 const paquete = lee<{ version: string }>('../package.json')
@@ -59,11 +60,9 @@ test('cada archivo de dominio trae reglas de sus categorías (con sus requisitos
 })
 
 test('cada dominio declara si cita, su fecha de corte y su propia procedencia', () => {
-  for (const d of c.dominios) {
-    assert.equal(d.cita, 'publica', `${d.clave}: todas las fuentes migradas son leyes publicadas`)
-    assert.ok(d.corte >= '2026-07-01' && d.corte <= CORTE_HERMES.fecha, `${d.clave}: corte ${d.corte}`)
-    assert.ok(d.procedencia.length > 100, `${d.clave}: procedencia`)
-  }
+  // Los migrados citan `publica` con el corte de Hermes; uno que nace aquí, lo que declare `politica-cita.mjs`.
+  assert.deepEqual(problemasDeCita(c, readFileSync(new URL('../CAMBIOS.md', import.meta.url), 'utf8')), [])
+  for (const d of c.dominios) assert.ok(d.procedencia.length > 100, `${d.clave}: procedencia`)
 })
 
 test('RF-15: registrar drones de reparto y agentes de seguros da solo esos dos dominios, y es válido', () => {
