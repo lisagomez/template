@@ -306,8 +306,8 @@ enlace** (el contenido es de SAP; sus términos de uso no permiten copiarlo).
 ### 10.3 Controles y costo
 
 - **CDC (C1)**: D-SS-3, D-SS-8, D-SS-9 y adoptar `@abaplint/cli`. Ningún skill, agente ni MCP de sapstack se instala.
-- **AISIA (C4)**: la **revisión 12** (borrador `docs/goals/soporte-sap-AISIA-revision-sapstack.md`): una fuente externa
-  de candidatos entra a la mesa y las validaciones del experto se guardan como propuestas. F4 y F5 piden otra revisión.
+- **AISIA (C4)**: la **revisión 12**, firmada el 2026-10-22 (`.claude/gobernanza/AISIA-soporte-sap.md`): una fuente
+  externa de candidatos entra a la mesa y las validaciones del experto se guardan como propuestas. F4 y F5 piden otra revisión.
 - **C5**: ninguno. Los candidatos son datos públicos de un tercero (MIT); nada aquí es un riesgo que se firme por otros.
 - **Costo**: sin APIs de pago ni modelo. La mesa ya corre en Workers Paid (US$5/mes) y R2; lo nuevo pesa ~230 KB. El
   costo real es el tiempo del experto: ~2 h para los 222 T-codes a 30 s cada uno.

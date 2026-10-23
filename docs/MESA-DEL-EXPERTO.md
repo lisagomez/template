@@ -172,7 +172,7 @@ Lo de prueba (los tokens de servicio) se cuenta aparte. **Borrar este caso** lo 
 
 ## Validar conocimiento y el mapa (revisión 12 de la AISIA)
 
-Se despliega solo después de firmar la revisión 12 (borrador: `docs/goals/soporte-sap-AISIA-revision-sapstack.md`).
+Va con la revisión 12 de la AISIA, firmada el 2026-10-22.
 
 - **Validar conocimiento** (`/mesa/soporte-sap?pestana=candidatos`, para el experto y para ti): hipótesis que salen de
   sapstack (T-codes y punteros a SAP Notes), cada una con su archivo y su línea en el SHA fijado. El experto dice si es
