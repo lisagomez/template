@@ -1,0 +1,45 @@
+# ALTO: ARTEFACTO AUTOGENERADO desde .claude/gates.json y package.json. No lo edites a mano.
+# Se regenera con: npm run proyecta:gates -- --ci github --salida .github/workflows/gates.yml
+# `verifica:gates` lo compara con la proyeccion y se pone rojo si divergen. Cambiar las actions,
+# el runner o la proyeccion (scripts/lib/ci.mjs) es un CDC (C1).
+#
+# Corre el perfil `validate` (32 gates activos) con el mismo runner que `npm run validate`.
+# Inactivos declarados en el padron: NO se corren y NO cuentan como pasados.
+#   sgi:rls: Necesita Docker con la Supabase local y crea 7 cuentas sinteticas por corrida: no cabe en el gate de cada integracion.
+#   prueba:a2a:servicio: Exigen el servicio del extractor corriendo en `EXTRACTOR_SERVICIO_URL`, y ese servicio no arranca sin el binario de Tesseract: `tools/extractor-documental/servicio/configuracion.mjs` lanza «no se pudo leer la version de Tesseract: el motor principal no arranca sin binario».
+#   inventario:valida-erp: Necesita Docker, y el gate corre en maquinas sin Docker (su propia cabecera ya lo declara: «Vive fuera de validate: necesita Docker»).
+#   erp:prueba: Necesita Docker y levanta un Postgres desechable: no cabe en el gate de cada integracion.
+#   erp:control: Necesita Docker, igual que `erp:prueba`.
+#   prueba:etiquetas:efimera: Necesita Docker y levanta un Postgres desechable, igual que `erp:prueba`.
+#   prueba:lean-crecimiento: El toolchain de Lean (unos 900 MB) no esta en todas las maquinas ni en CI, y sin el el script sale con 2 («no medido»): activo, pondria en rojo el validate de quien no lo tenga.
+#   vigila:versiones: Necesita red, y PROPONE: mover un pineo es un CDC (C1), nunca una consecuencia automatica de un gate.
+#   vigila:hermes: Necesita red.
+#   mide:mcp: Es una medicion, no un criterio: no tiene umbral binario que pueda ponerse rojo.
+name: gates
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    # La suma de los timeouts del perfil: cada gate ya se corta en el suyo.
+    timeout-minutes: 238
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        # Historial y ramas completos: `prueba:analista` busca el commit que analizo, y
+        # `verify:gobernanza` lee el corpus de `origin/golden-sets` (medido en un clon limpio).
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.18.0
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/corre-gates.mjs validate --sigue

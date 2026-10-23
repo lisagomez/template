@@ -23,12 +23,15 @@
  * Uso:  node scripts/proyecta-gates.mjs                 (el TOML por stdout)
  *       node scripts/proyecta-gates.mjs --salida <ruta>  (lo escribe)
  *       node scripts/proyecta-gates.mjs --diff <ruta-al-software.toml>  (compara con el suyo)
+ *       node scripts/proyecta-gates.mjs --ci github [--salida .github/workflows/gates.yml]
+ *         (el CI de GitHub Actions, D-SS-8: ver `lib/ci.mjs`; `verifica:gates` lo compara)
  * Exit: 0 siempre que el manifiesto cargue; con `--diff`, 1 si hay divergencia.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cargaManifiesto, gatesDelPerfil, inactivos, ManifiestoInvalido, MANIFIESTO } from './lib/gates.mjs';
+import { proyectaGithub } from './lib/ci.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const rojo = (s) => `\x1b[31m${s}\x1b[0m`;
@@ -112,6 +115,20 @@ const toml = proyecta(manifiesto);
 const argv = process.argv.slice(2);
 const salida = argv[argv.indexOf('--salida') + 1];
 const suyo = argv[argv.indexOf('--diff') + 1];
+
+if (argv.includes('--ci')) {
+  // GitLab y Jenkins se proyectan cuando una consultora lo pida (D-SS-8): hoy solo GitHub.
+  if (argv[argv.indexOf('--ci') + 1] !== 'github') {
+    console.error(rojo('--ci: solo `github` por ahora (GitLab y Jenkins, cuando una consultora lo pida)'));
+    process.exit(1);
+  }
+  const yml = proyectaGithub(manifiesto, JSON.parse(readFileSync(resolve(raiz, 'package.json'), 'utf8')));
+  if (argv.includes('--salida') && salida) {
+    writeFileSync(resolve(salida), yml);
+    console.log(verde(`✓ CI escrito en ${salida}`));
+  } else process.stdout.write(yml);
+  process.exit(0);
+}
 
 if (argv.includes('--salida') && salida) {
   writeFileSync(resolve(salida), toml);
