@@ -5285,3 +5285,72 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - capa B: no aplica, porque no cambia skill, prompt ni instrucción del arnés ☑;
   - aprobación humana ☑.
 - **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-18
+
+### 2026-10-22 — el CI de GitHub Actions como proyección del padrón de gates (D-SS-8) — radio: padrón de gates (su verificador y su proyección), CI nuevo y sistema (dos líneas de `AGENTS.md`, con `GEMINI.md` regenerado)
+
+- **Cambio** (rama `gobernanza/ci-proyectado`, desde `main` en `417bc57`, commit `bde4408`):
+  1. **`scripts/lib/ci.mjs`** (nuevo, 81 líneas): `proyectaGithub()` genera `.github/workflows/gates.yml`. El workflow
+     no lleva la lista de gates: llama a `node scripts/corre-gates.mjs validate --sigue`, el mismo runner de
+     `npm run validate`, que la deriva del padrón al correr. Proyecta:
+     - el perfil `validate`;
+     - Node en el mínimo de `engines` (22.18.0);
+     - el tope del job, que es la suma de los timeouts del perfil (238 min; cada gate ya se corta en el suyo);
+     - los 10 inactivos, como comentario con su motivo.
+     Lo fijo:
+     - las actions, por SHA de commit, comprobado con `git ls-remote` el 2026-10-22: `actions/checkout` v7.0.1
+       (`3d3c42e5…`, del 2026-07-17) y `actions/setup-node` v7.1.0 (`949feb24…`, del 2026-10-08);
+     - el runner, `ubuntu-24.04`: es una etiqueta de versión, no `latest`, pero GitHub no deja fijarlo por digest.
+     El resto:
+     - corre en cada PR a `main` y a mano (`workflow_dispatch`); una corrida nueva cancela la vieja del mismo PR;
+     - `contents: read`, sin credenciales persistidas y sin secretos;
+     - historial completo (`fetch-depth: 0`).
+  2. **`proyecta:gates`** gana `--ci github [--salida <ruta>]`. GitLab y Jenkins, cuando una consultora lo pida
+     (D-SS-8).
+  3. **`verifica:gates`**, que ya corre en el `validate`, gana una comprobación: el CI es la proyección del padrón.
+     Editado a mano, borrado o con el padrón cambiado sin regenerarlo, se pone rojo, como `GEMINI.md`. Gana también
+     tres siembras (CI editado, CI borrado, padrón cambiado), y `--prueba` pasa de 6 a 9.
+  4. **La cifra de siembras** («6» → «9») y el `--ci github`, al día en `AGENTS.md` (dos comentarios de «Comandos npm»;
+     `GEMINI.md` regenerado con `sincroniza:gemini`), `README.md` y `.claude/README.md`.
+- **Por qué**: lo decidió el laboratorio el 2026-10-22 (D-SS-8, propuesta sapstack §10.2). El repo no tenía CI. El
+  gate corría solo en la máquina de quien lo corría, que casi siempre es el agente que hizo el cambio. Y la regla
+  de la casa dice que quien verifica re-ejecuta los gates de cero.
+- **Demostrado** (2026-10-22), en un clon limpio dentro de `node:22.18.0-bookworm` (fijado por digest
+  `sha256:3266bc9e…`), con 2 CPU y 7 GB como un runner de repo privado, sin `.env`, sin `~/.claude` y sin
+  `node_modules`:
+  - **con clon superficial, 30/32**:
+    - `prueba:analista` en rojo: el commit que analizó no está en la historia;
+    - `verify:gobernanza` en rojo: sin `origin/golden-sets` no hay corpus ni `corridas.md`, y el verificador
+      cuenta 169 comprobaciones en vez de 171, así que las cifras de los README fallan;
+  - **con historial completo, la rama del CDC en `ee2e21e` (el mismo árbol que `bde4408`) da 32/32**: `npm ci` en
+    65 s y `validate` en 993 s. `verify:gobernanza` da 171/171, y `verifica:gates` da 12/12 con la comprobación nueva;
+  - `verifica:gates --prueba`: **9/9 siembras cazadas**;
+  - el `validate` local no se repitió: el del clon limpio corrió sobre el mismo árbol (`499bf555`), y el local se
+    cortó por falta de memoria de la máquina, no por un rojo.
+- **Lo que cuesta o queda abierto**:
+  - **minutos de Actions**: unos 18 por corrida (medido con 2 CPU; el runner real puede variar).
+    - Según la tabla de precios que conozco, el plan Free da 2 000 min/mes a los repos privados y Pro, 3 000: unas
+      100 o 160 corridas al mes. Esa cifra no pude comprobarla.
+    - No pude ver tu plan: el token de `gh` no tiene el permiso `user`. Míralo en Settings → Billing.
+    - Una corrida en rojo sigue hasta el final (`--sigue`): enseña todos los rojos de una vez, a cambio de gastar
+      la corrida entera;
+  - **lo que sale del perímetro (C4)**: el código ya vive en GitHub. El CI lo ejecuta en sus runners (Estados
+    Unidos), corpus de capa B incluido, que ya está en `origin`. Va sin secretos y sin datos reales: las pruebas usan
+    datos sintéticos;
+  - **cuatro ajustes que puede hacer el laboratorio** en GitHub, fuera del repo:
+    - en Settings → Actions, exigir actions fijadas por SHA (hoy `sha_pinning_required: false`);
+    - en el mismo sitio, permitir solo `actions/checkout` y `actions/setup-node`;
+    - hacer el check `gates / validate` obligatorio para mergear a `main`;
+    - una regla de rama que lo haga cumplir;
+  - **dónde manda el CI**: no sustituye al `validate` local antes del PR; lo repite de cero, en otra máquina.
+- **Salida del perímetro (C4)**: la de arriba: el código ya está en GitHub y el CI no lleva secretos ni datos reales.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 32/32 en clon limpio, sobre el mismo árbol que `bde4408` (`499bf555`);
+  - capa B no corrida por el agente: cambian dos comentarios de «Comandos npm» de `AGENTS.md`, no una instrucción;
+    decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (actions por SHA de commit, Node exacto, imagen de la medición por digest; sin modelo).
+- **Regresión**: `verifica:gates` ☑ 12/12 y `--prueba` 9/9; `verify:gobernanza` ☑ 171/171; `mide:contexto` ☑ dentro de
+  presupuesto.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-23
