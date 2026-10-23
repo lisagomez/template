@@ -1,0 +1,3025 @@
+{
+ "version": 1,
+ "autor": "revisor dedicado",
+ "fecha": "2026-10-20",
+ "preguntas": [
+  {
+   "id": "q001",
+   "particion": "desarrollo",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Armame un tablero con lo que vendemos en cada canal, con su tendencia mensual",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [
+     "linea__canal",
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q002",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Quiero un tablero de margen porcentual por categoria de producto, nomas de este año",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [
+     "linea__categoria"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q003",
+   "particion": "desarrollo",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Dashboard de clientes nuevos contra clientes que se nos fueron, mes por mes en 2026",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_nuevos",
+     "clientes_perdidos"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q004",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Hazme un tablero de retencion de clientes segun como llegaron: por campaña o organicos",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "retencion_m3_pct"
+    ],
+    "dimensiones": [
+     "cohorte__origen"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "retencion_m3_pct solo alcanza cohorte__origen (no cliente__origen)."
+  },
+  {
+   "id": "q005",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Necesito ver el ticket por region y por canal, de los ultimos 6 meses",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ticket_promedio"
+    ],
+    "dimensiones": [
+     "tienda__region",
+     "linea__canal"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-04",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q006",
+   "particion": "desarrollo",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Un tablero de campañas: cuanto invertimos y cuanto nos devolvio cada una",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "inversion_marketing",
+     "roas_incremental"
+    ],
+    "dimensiones": [
+     "campana__campana_nombre"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "inversion_marketing",
+      "ventas_incrementales_m"
+     ],
+     "dimensiones": [
+      "campana__campana_nombre"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": "\"cuanto nos devolvio\" admite ROAS o ventas incrementales."
+  },
+  {
+   "id": "q007",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Mejor empieza de cero: un tablero con las ventas por tienda del ultimo trimestre contra el año pasado",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [
+     "tienda__tienda_nombre"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-07",
+     "hasta": "2026-09"
+    },
+    "comparar": "anio_anterior",
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q008",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Crea un reporte de devoluciones: que porcentaje de los pedidos regresan, por mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "tasa_devolucion"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "pedidos_devueltos_m"
+     ],
+     "dimensiones": [
+      "metric_time__month"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": "\"porcentaje\" apunta a la tasa; el conteo de devueltos es lectura tolerada."
+  },
+  {
+   "id": "q009",
+   "particion": "desarrollo",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Mérida",
+     "Oaxaca"
+    ]
+   },
+   "instruccion": "arma un tablero de la frecuencia de compra de estas dos tiendas, mes a mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "frecuencia_compra"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Mérida",
+       "Oaxaca"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q010",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Tablero de e-commerce: cuanto vendemos online y que parte del total representa, mensual en 2026",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_ecommerce",
+     "participacion_ecommerce_pct"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q011",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Quiero ver que productos salen mas, unidades por producto del mes pasado",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "unidades"
+    ],
+    "dimensiones": [
+     "producto__producto_nombre"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-09",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q012",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Tablero de inventario: que tiendas tienen mas productos por reordenar",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "combinaciones_bajo_reorden"
+    ],
+    "dimensiones": [
+     "tienda__tienda_nombre"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "combinaciones_bajo_reorden"
+     ],
+     "dimensiones": [
+      "tienda__region"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q013",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Dame un tablero de clientes activos por segmento en el último trimestre",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_activos"
+    ],
+    "dimensiones": [
+     "cliente__segmento"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-07",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q014",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Reharía todo: cuánto descuento damos por canal durante 2025",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "descuentos"
+    ],
+    "dimensiones": [
+     "linea__canal"
+    ],
+    "filtros": [],
+    "periodo": {
+     "desde": "2025-01",
+     "hasta": "2025-12"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q015",
+   "particion": "retenida",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Hazme un tablero de NPS por tienda",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "nps"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "NPS no existe en el catálogo."
+  },
+  {
+   "id": "q016",
+   "particion": "desarrollo",
+   "tipo": "crear",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Quiero un tablero con las visitas a la web y la conversión del carrito",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "visitas_web",
+     "conversion_carrito"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No hay datos de tráfico web."
+  },
+  {
+   "id": "q017",
+   "particion": "desarrollo",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "En la gráfica de regiones mejor muéstrame el margen porcentual en vez de las ventas",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [
+     "tienda__region"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "por_region"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q018",
+   "particion": "desarrollo",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "La tabla de tiendas quiérela también con ticket promedio",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas",
+     "margen_bruto_pct",
+     "ticket_promedio"
+    ],
+    "dimensiones": [
+     "tienda__tienda_nombre"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "tiendas"
+    ],
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "ticket_promedio"
+     ],
+     "dimensiones": [
+      "tienda__tienda_nombre"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": [
+      "tiendas"
+     ],
+     "alerta": null
+    }
+   ],
+   "nota": "Solo se toca la tabla; las métricas son las resultantes o solo la agregada."
+  },
+  {
+   "id": "q019",
+   "particion": "desarrollo",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Quita la gráfica de categorías, no la uso",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [
+     "linea__categoria"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "por_categoria"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q020",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Agrégame una gráfica de clientes activos por mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_activos"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "+nuevo"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q021",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "La tendencia cámbiala a pedidos",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "pedidos"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "tendencia"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "La línea tiene eje de tiempo; se cuenta metric_time__month."
+  },
+  {
+   "id": "q022",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "En los KPIs cambia pedidos por unidades vendidas",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas",
+     "margen_bruto_pct",
+     "unidades",
+     "ticket_promedio"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "kpis"
+    ],
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "unidades"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": [
+      "kpis"
+     ],
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q023",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Las barras de categoría que sean por canal, no por categoría",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [
+     "linea__canal"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "por_categoria"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "Parecen tocar \"por_region\" pero solo habla de la gráfica de categoría."
+  },
+  {
+   "id": "q024",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Súmame una tabla de productos con ventas y unidades",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas",
+     "unidades"
+    ],
+    "dimensiones": [
+     "producto__producto_nombre"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "+nuevo"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q025",
+   "particion": "desarrollo",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Quita el mapa del tablero",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "mapa"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q026",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "En la gráfica de barras de crecimiento por región usa ticket promedio",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ticket_promedio"
+    ],
+    "dimensiones": [
+     "tienda__region"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "crec_region"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "Hay varios componentes con ventas_netas; solo crec_region es de barras por región."
+  },
+  {
+   "id": "q027",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "La línea de tendencia ahora por region, ya no por canal",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [
+     "metric_time__month",
+     "tienda__region"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "tendencia"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q028",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "El medidor de retención ponlo con meta de 85",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "retencion_m3_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "retencion_meta"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "La meta no se valida; lo que cuenta es tocar solo el medidor, no el componente de cohortes."
+  },
+  {
+   "id": "q029",
+   "particion": "desarrollo",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Agrega una grafica de barras de margen por categoria",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [
+     "linea__categoria"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "+nuevo"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q030",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "En el flujo de clientes saca a los reactivados",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_nuevos",
+     "clientes_perdidos"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "flujo"
+    ],
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "clientes_reactivados"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": [
+      "flujo"
+     ],
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q031",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "La lista de actividad que sea por región en lugar de por tienda",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [
+     "tienda__region"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "actividad"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q032",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "El numero grande de arriba ponlo en ventas e-commerce",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_ecommerce"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "principal"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "\"El número grande\" es el hero (principal)."
+  },
+  {
+   "id": "q033",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Agrega un medidor de margen bruto con meta de 23",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "+nuevo"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q034",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Ponme una línea de ventas netas por mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [
+     "metric_time__month"
+    ],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": [
+     "+nuevo"
+    ],
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q035",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "vacio",
+   "seleccion": null,
+   "instruccion": "Agrega una gráfica de rotación de personal por tienda",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "rotacion_personal"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "Métrica inexistente; no se sustituye."
+  },
+  {
+   "id": "q036",
+   "particion": "retenida",
+   "tipo": "modificar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "En la tabla de tiendas pon los dias de inventario",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "dias_inventario"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "combinaciones_bajo_reorden no equivale a días de inventario."
+  },
+  {
+   "id": "q037",
+   "particion": "desarrollo",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Dejame solo la zona Golfo en el trimestre mas reciente",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__region",
+      "operador": "en",
+      "valores": [
+       "Golfo"
+      ]
+     }
+    ],
+    "periodo": {
+     "desde": "2026-07",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q038",
+   "particion": "desarrollo",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Sin mayoreo por favor",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "linea__canal",
+      "operador": "no_en",
+      "valores": [
+       "Mayoreo"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "ventas_netas"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "linea__canal",
+       "operador": "en",
+       "valores": [
+        "Tienda",
+        "E-commerce"
+       ]
+      }
+     ],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q039",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "quita el periodo actual y ponme todo 2025",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2025-01",
+     "hasta": "2025-12"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q040",
+   "particion": "desarrollo",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Compáralo contra el año pasado",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": "anio_anterior",
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q041",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "solo Tienda y E-commerce, lo que va del año",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "linea__canal",
+      "operador": "en",
+      "valores": [
+       "Tienda",
+       "E-commerce"
+      ]
+     }
+    ],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "ventas_netas"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "linea__canal",
+       "operador": "no_en",
+       "valores": [
+        "Mayoreo"
+       ]
+      }
+     ],
+     "periodo": {
+      "desde": "2026-01",
+      "hasta": "2026-09"
+     },
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q042",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "solo Bebidas y Lácteos, de junio",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "linea__categoria",
+      "operador": "en",
+      "valores": [
+       "Bebidas",
+       "Lácteos"
+      ]
+     }
+    ],
+    "periodo": {
+     "desde": "2026-06",
+     "hasta": "2026-06"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q043",
+   "particion": "desarrollo",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Excluye Cancún y Querétaro, son tiendas nuevas",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "no_en",
+      "valores": [
+       "Cancún",
+       "Querétaro"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "ventas_netas"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "tienda__es_comparable",
+       "operador": "igual",
+       "valores": [
+        "True"
+       ]
+      }
+     ],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q044",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "los ultimos 12 meses y comparado con el año anterior",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2025-10",
+     "hasta": "2026-09"
+    },
+    "comparar": "anio_anterior",
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q045",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Tampico",
+     "Poza Rica",
+     "Boca del Río"
+    ]
+   },
+   "instruccion": "Filtra todo el tablero a estas tiendas",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Tampico",
+       "Poza Rica",
+       "Boca del Río"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q046",
+   "particion": "desarrollo",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Polanco",
+     "Coyoacán"
+    ]
+   },
+   "instruccion": "Quítame estas del tablero, que me distorsionan",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "no_en",
+      "valores": [
+       "Polanco",
+       "Coyoacán"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q047",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Muestra solo lo que se vendió en campaña",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "linea__en_campana",
+      "operador": "igual",
+      "valores": [
+       "True"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q048",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Solo Nuevo León y Jalisco por favor",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__estado",
+      "operador": "en",
+      "valores": [
+       "Nuevo León",
+       "Jalisco"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q049",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Solo el mes pasado",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-09",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q050",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Solo tiendas comparables y el año pasado completo",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__es_comparable",
+      "operador": "igual",
+      "valores": [
+       "True"
+      ]
+     }
+    ],
+    "periodo": {
+     "desde": "2025-01",
+     "hasta": "2025-12"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q051",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Filtra por clima lluvioso",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "clima"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No hay dimensión de clima."
+  },
+  {
+   "id": "q052",
+   "particion": "retenida",
+   "tipo": "filtrar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Solo clientes que tienen tarjeta de lealtad",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "tarjeta_lealtad"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No existe esa dimensión."
+  },
+  {
+   "id": "q053",
+   "particion": "desarrollo",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "oye, que paso con el margen en julio, se nos fue para abajo",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-07",
+     "hasta": "2026-07"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "margen_bruto"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": {
+      "desde": "2026-07",
+      "hasta": "2026-07"
+     },
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q054",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Por qué bajó la frecuencia de compra este año?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "frecuencia_compra"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q055",
+   "particion": "desarrollo",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Mérida",
+     "Oaxaca"
+    ]
+   },
+   "instruccion": "Por que estas dos estan vendiendo menos?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Mérida",
+       "Oaxaca"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q056",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Tampico"
+    ]
+   },
+   "instruccion": "Qué explica que esta tienda haya crecido tanto en los últimos 6 meses",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Tampico"
+      ]
+     }
+    ],
+    "periodo": {
+     "desde": "2026-04",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q057",
+   "particion": "desarrollo",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "¿Por qué subió el ticket en el último trimestre?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ticket_promedio"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-07",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q058",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Por qué los clientes que llegan por campaña retienen menos que los orgánicos",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "retencion_m3_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "cohorte__origen",
+      "operador": "en",
+      "valores": [
+       "Campaña"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q059",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "porque cayo el crecimiento de ventas en el sureste",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "crecimiento_ventas_yoy_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__region",
+      "operador": "en",
+      "valores": [
+       "Sureste"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q060",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Que pasó con los clientes perdidos en septiembre?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_perdidos"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-09",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q061",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "San Pedro",
+     "Monterrey Centro",
+     "Saltillo"
+    ]
+   },
+   "instruccion": "Por qué estas bajaron en margen frente al año pasado",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "San Pedro",
+       "Monterrey Centro",
+       "Saltillo"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "margen_bruto"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "tienda__tienda_nombre",
+       "operador": "en",
+       "valores": [
+        "San Pedro",
+        "Monterrey Centro",
+        "Saltillo"
+       ]
+      }
+     ],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q062",
+   "particion": "desarrollo",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Por qué el ROAS de Hot Sale 2026 salió negativo?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "roas_incremental"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "campana__campana_nombre",
+      "operador": "en",
+      "valores": [
+       "Hot Sale 2026"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q063",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "por que se estan devolviendo mas pedidos en 2026",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "tasa_devolucion"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "pedidos_devueltos_m"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": {
+      "desde": "2026-01",
+      "hasta": "2026-09"
+     },
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q064",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Mérida",
+     "Oaxaca",
+     "Villahermosa"
+    ]
+   },
+   "instruccion": "¿Por qué en estas compran menos seguido?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "frecuencia_compra"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Mérida",
+       "Oaxaca",
+       "Villahermosa"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q065",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "¿Por qué creció tanto el e-commerce en el último año?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_ecommerce"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": {
+     "desde": "2025-10",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "participacion_ecommerce_pct"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": {
+      "desde": "2025-10",
+      "hasta": "2026-09"
+     },
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q066",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Cancún"
+    ]
+   },
+   "instruccion": "Qué hay detrás de los clientes nuevos de esta tienda en 2026",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_nuevos"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Cancún"
+      ]
+     }
+    ],
+    "periodo": {
+     "desde": "2026-01",
+     "hasta": "2026-09"
+    },
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q067",
+   "particion": "desarrollo",
+   "tipo": "analizar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "¿Por qué bajó el NPS en Mérida?",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "nps"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "NPS no existe."
+  },
+  {
+   "id": "q068",
+   "particion": "retenida",
+   "tipo": "analizar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Por qué subió el costo por cliente nuevo?",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "costo_por_cliente_nuevo"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No hay métrica de costo por cliente nuevo (se podría proponer: inversión / clientes nuevos)."
+  },
+  {
+   "id": "q069",
+   "particion": "desarrollo",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "como sacan el ticket promedio?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ticket_promedio"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q070",
+   "particion": "desarrollo",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Qué significa retención a 3 meses?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "retencion_m3_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q071",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "¿Cuál es la diferencia entre ventas brutas y netas?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_brutas",
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q072",
+   "particion": "desarrollo",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "que es la frecuencia de compra",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "frecuencia_compra"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q073",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Cómo se mide el ROAS incremental?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "roas_incremental"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q074",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Qué cuenta como cliente reactivado?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_reactivados"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q075",
+   "particion": "desarrollo",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "que es un cliente perdido, cuando lo dan por perdido",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_perdidos"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q076",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "¿Cómo se calcula el margen bruto en porcentaje?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q077",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "de donde sale la tasa de devolucion",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "tasa_devolucion"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q078",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Qué es una cohorte madura y cómo entra en la retención?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "retencion_m3_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "tamano_cohorte"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": null
+    }
+   ],
+   "nota": "La definición de retención menciona cohortes maduras."
+  },
+  {
+   "id": "q079",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Explícame el crecimiento de ventas vs año anterior",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "crecimiento_ventas_yoy_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q080",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Cuándo una tienda-producto cuenta como bajo punto de reorden?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "combinaciones_bajo_reorden"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q081",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "la participacion de ecommerce, sobre que total se calcula?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "participacion_ecommerce_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q082",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Qué son las ventas por cliente?",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_por_cliente"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q083",
+   "particion": "desarrollo",
+   "tipo": "explicar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "¿Cómo se calcula el LTV?",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "ltv"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No hay LTV en el catálogo."
+  },
+  {
+   "id": "q084",
+   "particion": "retenida",
+   "tipo": "explicar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "¿Qué significan los días de inventario?",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "dias_inventario"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "Solo existe combinaciones bajo reorden."
+  },
+  {
+   "id": "q085",
+   "particion": "desarrollo",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Mándame una alerta cuando las ventas de Oaxaca bajen más de 8% de una semana a otra",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Oaxaca"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "cae_mas_de",
+     "valor": 8,
+     "unidad": "%",
+     "ventana": "semanal"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q086",
+   "particion": "desarrollo",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Avísame si el margen porcentual se va debajo de 23 %, revísalo cada mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "margen_bruto_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "debajo_de",
+     "valor": 23,
+     "unidad": "%",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "margen_bruto_pct"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": {
+      "condicion": "debajo_de",
+      "valor": 23,
+      "unidad": "valor",
+      "ventana": "mensual"
+     }
+    },
+    {
+     "responde": true,
+     "metricas": [
+      "margen_bruto_pct"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": {
+      "condicion": "debajo_de",
+      "valor": 23,
+      "unidad": "pp",
+      "ventana": "mensual"
+     }
+    }
+   ],
+   "nota": "Umbral absoluto sobre un %: la unidad es ambigua."
+  },
+  {
+   "id": "q087",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "alerta mensual si los clientes nuevos caen mas de 10 %",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_nuevos"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "cae_mas_de",
+     "valor": 10,
+     "unidad": "%",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q088",
+   "particion": "desarrollo",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Avísame cada día si la tasa de devolución pasa de 3 %",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "tasa_devolucion"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "encima_de",
+     "valor": 3,
+     "unidad": "%",
+     "ventana": "diaria"
+    }
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "tasa_devolucion"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": {
+      "condicion": "encima_de",
+      "valor": 0.03,
+      "unidad": "valor",
+      "ventana": "diaria"
+     }
+    }
+   ],
+   "nota": "La tasa es proporción 0-1 en el catálogo."
+  },
+  {
+   "id": "q089",
+   "particion": "desarrollo",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Avisame cada semana si el ticket promedio sube mas de 50 pesos",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ticket_promedio"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "sube_mas_de",
+     "valor": 50,
+     "unidad": "valor",
+     "ventana": "semanal"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q090",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Alerta si las combinaciones bajo reorden pasan de 120, revisa todos los días",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "combinaciones_bajo_reorden"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "encima_de",
+     "valor": 120,
+     "unidad": "valor",
+     "ventana": "diaria"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q091",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": {
+    "dimension": "tienda__tienda_nombre",
+    "valores": [
+     "Tampico",
+     "Polanco"
+    ]
+   },
+   "instruccion": "Avísame si estas dos se quedan con más de 8 productos bajo reorden, revisa a diario",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "combinaciones_bajo_reorden"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "tienda__tienda_nombre",
+      "operador": "en",
+      "valores": [
+       "Tampico",
+       "Polanco"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "encima_de",
+     "valor": 8,
+     "unidad": "valor",
+     "ventana": "diaria"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q092",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Dime al cierre de cada mes si la retención de los clientes de campaña baja de 60 %",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "retencion_m3_pct"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "cohorte__origen",
+      "operador": "en",
+      "valores": [
+       "Campaña"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "debajo_de",
+     "valor": 60,
+     "unidad": "%",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [
+    {
+     "responde": true,
+     "metricas": [
+      "retencion_m3_pct"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "cohorte__origen",
+       "operador": "en",
+       "valores": [
+        "Campaña"
+       ]
+      }
+     ],
+     "periodo": null,
+     "comparar": null,
+     "componentes_tocados": null,
+     "alerta": {
+      "condicion": "debajo_de",
+      "valor": 60,
+      "unidad": "valor",
+      "ventana": "mensual"
+     }
+    }
+   ],
+   "nota": ""
+  },
+  {
+   "id": "q093",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "si las ventas del ecommerce bajan más de 15 % de un día para otro, avísame",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_ecommerce"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "cae_mas_de",
+     "valor": 15,
+     "unidad": "%",
+     "ventana": "diaria"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q094",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Que me avise cada mes si el ROAS incremental de una campaña sale menor a 1",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "roas_incremental"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "debajo_de",
+     "valor": 1,
+     "unidad": "valor",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q095",
+   "particion": "desarrollo",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Dime cuando la frecuencia de compra caiga más de medio pedido, mes contra mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "frecuencia_compra"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "cae_mas_de",
+     "valor": 0.5,
+     "unidad": "valor",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q096",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Avisa si el mayoreo cae más del 12 % semana contra semana",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "ventas_netas"
+    ],
+    "dimensiones": [],
+    "filtros": [
+     {
+      "dimension": "linea__canal",
+      "operador": "en",
+      "valores": [
+       "Mayoreo"
+      ]
+     }
+    ],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "cae_mas_de",
+     "valor": 12,
+     "unidad": "%",
+     "ventana": "semanal"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q097",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "alerta si los clientes perdidos suben mas de 5 % cada mes",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "clientes_perdidos"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "sube_mas_de",
+     "valor": 5,
+     "unidad": "%",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q098",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Avísame cuando los descuentos del mes pasen de 1 millón",
+   "esperado": {
+    "responde": true,
+    "metricas": [
+     "descuentos"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": {
+     "condicion": "encima_de",
+     "valor": 1000000,
+     "unidad": "valor",
+     "ventana": "mensual"
+    }
+   },
+   "alternativas": [],
+   "nota": ""
+  },
+  {
+   "id": "q099",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "ejecutivo",
+   "seleccion": null,
+   "instruccion": "Avísame si cae el tráfico peatonal de las tiendas",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "trafico_peatonal"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No hay tráfico peatonal."
+  },
+  {
+   "id": "q100",
+   "particion": "retenida",
+   "tipo": "alertar",
+   "tablero": "growth",
+   "seleccion": null,
+   "instruccion": "Alerta semanal si sube la rotación de personal",
+   "esperado": {
+    "responde": false,
+    "metricas": [
+     "rotacion_personal"
+    ],
+    "dimensiones": [],
+    "filtros": [],
+    "periodo": null,
+    "comparar": null,
+    "componentes_tocados": null,
+    "alerta": null
+   },
+   "alternativas": [],
+   "nota": "No hay datos de personal."
+  }
+ ]
+}

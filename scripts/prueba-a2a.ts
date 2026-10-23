@@ -133,6 +133,11 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/crecimiento/a2a/.well-known/agent-card.json',
   '/api/dictado',
   '/api/dictado/movil',
+  // Estudio de dashboards (goal estudio-dashboards, laboratorio Golfo Norte con datos ficticios). RF-20: misma app
+  // y mismo puerto. No es una superficie A2A ni va detrás de este bridge: es la ruta del lienzo, 503 sin
+  // ESTUDIO_LABORATORIO=1, y su acción que llama al modelo, 503 también sin OPENROUTER_API_KEY. Fila en
+  // docs/REVISION-rutas-publicas.md; exponerla fuera del laboratorio exige sesión y C3.
+  '/api/estudio-dashboards',
   '/api/etiquetas',
   // Fotos de etiquetas (recepción con foto y pieza suelta): misma puerta Bearer y mismo puerto que
   // `/api/etiquetas`; no van detrás del bridge ni se publican aparte (RF-20).

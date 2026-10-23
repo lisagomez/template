@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: fct_campanas_desempeno
+    description: "Desempeño por campaña con ROAS incremental contra un baseline simple de 14 días. Método ingenuo: no controla estacionalidad."
+    columns:
+      - name: campana_id
+        data_tests: [unique, not_null]
