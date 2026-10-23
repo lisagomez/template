@@ -9,7 +9,8 @@ import baseJson from '../fuentes/base.json'
 import clisJson from '../../../../../tools/soporte-sap/clis/manifiesto.json'
 import { anonimiza, transaccionDe } from '../../../../../tools/soporte-sap/dist/index.js'
 import type { Almacen } from './almacen'
-import { catalogo, fuente, todasLasValidaciones } from './candidatos'
+import { catalogo, catalogoSapstack, fuente, todasLasValidaciones } from './candidatos'
+import { catalogoWeb, fuenteWeb } from './web'
 import { todosLosCasos } from './mesa'
 import type { CasoMesa } from './modelo'
 import type { Candidato, MapaVista, Metrica, PropuestaCandidato, PuntoSerie, ValidacionCandidato, VersionBase } from './modelo-candidatos'
@@ -58,11 +59,27 @@ function porModuloDe(cands: readonly Candidato[], reales: readonly ValidacionCan
   return [...filas.values()].sort((a, b) => b.candidatos - a.candidatos || (a.modulo < b.modulo ? -1 : 1))
 }
 
+/** La fuente web, contada: candidatos por tipo y por fuente, cuántos validó un experto y el cruce con sapstack. */
+function webDe(reales: readonly ValidacionCandidato[]): MapaVista['fuentes']['web'] {
+  const cs = catalogoWeb()
+  const validados = new Set(reales.map((v) => v.candidato))
+  const porFuente = new Map<string, number>()
+  for (const c of cs) porFuente.set(c.captura?.fuente ?? '?', (porFuente.get(c.captura?.fuente ?? '?') ?? 0) + 1)
+  const r = fuenteWeb().resumen
+  return {
+    candidatos: cs.length, seguridad: cs.filter((c) => c.seguridad).length, hotNews: cs.filter((c) => c.seguridad?.prioridad === 'Hot News').length,
+    explotadas: cs.filter((c) => c.seguridad?.explotada).length, punteros: cs.filter((c) => c.tipo === 'nota' && !c.seguridad).length, tcodes: cs.filter((c) => c.tipo === 'tcode').length,
+    validados: cs.filter((c) => validados.has(c.id)).length, cruce: r?.cruce ?? { total: 0, corroborados: 0, contradichos: 0, noEncontrados: 0 },
+    porFuente: [...porFuente.entries()].map(([f, n]) => ({ fuente: f, candidatos: n })).sort((a, b) => b.candidatos - a.candidatos),
+  }
+}
+
 function fuentesDe(cands: readonly Candidato[], casos: readonly CasoMesa[], vals: readonly ValidacionCandidato[]): MapaVista['fuentes'] {
   const f = fuente()
   const reales = vals.filter((v) => !v.por.prueba)
   const notasValidadas = new Set(reales.filter((v) => v.candidato.startsWith('nota-') && (v.valoracion === 'correcto' || v.valoracion === 'corrige')).map((v) => v.candidato))
   return {
+    web: webDe(reales),
     sapstack: { candidatos: cands.length, tcodes: cands.filter((c) => c.tipo === 'tcode').length, notas: cands.filter((c) => c.tipo === 'nota').length, enAlcance: cands.filter((c) => c.enAlcance).length, commitNuevo: f.revision.head !== f.sha, porModulo: porModuloDe(cands, reales) },
     experto: { casos: casos.filter((c) => !c.por.prueba).length, validaciones: reales.length, expertos: new Set([...usuariosDe(casos), ...usuariosDe(vals)]).size, dePrueba: casos.filter((c) => c.por.prueba).length + vals.filter((v) => v.por.prueba).length },
     notas: { punteros: cands.filter((c) => c.tipo === 'nota').length, validadas: notasValidadas.size },
@@ -112,7 +129,7 @@ export async function mapaDe(a: Almacen, retencionDias: number | null, hoy = new
   const deExpertos = casos.filter((c) => !c.por.prueba)
   return {
     generado: hoy.toISOString(),
-    fuentes: fuentesDe(cands, casos, vals),
+    fuentes: fuentesDe(catalogoSapstack(), casos, vals),
     base,
     usos: {
       triage: { reconocidos: u.reconocidos, total: u.total, faltan: u.faltan },
@@ -123,6 +140,7 @@ export async function mapaDe(a: Almacen, retencionDias: number | null, hoy = new
     metricas: metricasDe(cands, casos, vals, base, hoy),
     propuestas: propuestasDe(cands, vals),
     fuente: fuente(),
+    web: fuenteWeb(),
   }
 }
 

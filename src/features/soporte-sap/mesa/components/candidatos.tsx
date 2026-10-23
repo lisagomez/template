@@ -1,8 +1,9 @@
 'use client'
 
 /**
- * Validar conocimiento: los candidatos que salen de sapstack, para que el experto diga si son ciertos. Arriba, de dónde
- * salen y qué pasa con lo que diga; luego filtros (módulo, tipo, pendientes) y las tarjetas, de 12 en 12.
+ * Validar conocimiento: los candidatos que salen de sapstack y de la web de BASIS, para que el experto diga si son
+ * ciertos. Arriba, de dónde salen y qué pasa con lo que diga; luego filtros (fuente, módulo, tipo, pendientes) y las
+ * tarjetas, de 12 en 12.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Candidato, CandidatosVista, ValidacionCandidato } from '../services/modelo-candidatos'
@@ -11,11 +12,13 @@ import { Celda, Chip, ENTRADA_CLASE } from './ui'
 
 const API = '/api/mesa/soporte-sap'
 const POR_PAGINA = 12
-type Filtro = { modulo: string; tipo: 'todos' | 'tcode' | 'nota'; estado: 'pendientes' | 'validados' | 'todos'; busca: string; alcance: boolean }
+type Origen = 'todas' | 'sapstack' | 'web'
+type Filtro = { origen: Origen; modulo: string; tipo: 'todos' | 'tcode' | 'nota'; estado: 'pendientes' | 'validados' | 'todos'; busca: string; alcance: boolean }
+const ORIGENES: ReadonlyArray<readonly [Origen, string]> = [['todas', 'Todas las fuentes'], ['sapstack', 'sapstack'], ['web', 'La web (BASIS)']]
 
 /** Lo validado en esta visita se queda a la vista aunque el filtro sea «por validar»: el experto ve su confirmación. */
 const pasa = (f: Filtro, mias: Readonly<Record<string, ValidacionCandidato>>, recientes: ReadonlySet<string>) => (c: Candidato) =>
-  (f.modulo === 'todos' || c.modulos.includes(f.modulo)) && (f.tipo === 'todos' || c.tipo === f.tipo) && (!f.alcance || c.enAlcance)
+  (f.origen === 'todas' || (f.origen === 'web') === (c.origen === 'web')) && (f.modulo === 'todos' || c.modulos.includes(f.modulo)) && (f.tipo === 'todos' || c.tipo === f.tipo) && (!f.alcance || c.enAlcance)
   && (f.estado === 'todos' || recientes.has(c.id) || (f.estado === 'validados') === Boolean(mias[c.id]))
   && (!f.busca || `${c.clave} ${c.titulo}`.toLowerCase().includes(f.busca.toLowerCase()))
 
@@ -26,6 +29,8 @@ function Encabezado({ v, hechas }: { v: CandidatosVista; hechas: number }) {
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <Chip className="bg-neutral-900 text-white">{v.fuente.repo}@{v.fuente.sha.slice(0, 7)}</Chip>
         <Chip>{v.fuente.version} · {v.fuente.commitFecha}</Chip><Chip>{v.fuente.licencia} · {v.fuente.copyright}</Chip>
+        <Chip className="bg-sky-100 text-sky-900">la web de BASIS · capturada el {v.web.capturadoEl} · Patch Day {v.web.ultimoPatchDay}</Chip>
+        {!v.web.integro ? <Chip className="bg-rose-100 text-rose-900">la web no cargó: {v.web.motivo}</Chip> : null}
         <span className="ml-auto font-semibold text-violet-900" data-prueba="progreso">Validaste {hechas} de {total} en alcance</span>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100" aria-hidden><div className="h-full rounded-full bg-violet-600" style={{ width: `${total ? (100 * hechas) / total : 0}%` }} /></div>
@@ -37,6 +42,7 @@ function Filtros({ f, set, modulos }: { f: Filtro; set: (f: Filtro) => void; mod
   const pastilla = (activa: boolean) => `rounded-full px-3 py-1 text-xs font-semibold ${activa ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50'}`
   return (
     <div className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-white p-4" data-prueba="filtros">
+      <div className="flex flex-wrap gap-1.5">{ORIGENES.map(([o, nombre]) => <button key={o} type="button" className={pastilla(f.origen === o)} onClick={() => set({ ...f, origen: o })} data-prueba={`origen-${o}`}>{nombre}</button>)}</div>
       <div className="flex flex-wrap gap-1.5">{['todos', ...modulos].map((m) => <button key={m} type="button" className={pastilla(f.modulo === m)} onClick={() => set({ ...f, modulo: m })} data-prueba={`modulo-${m}`}>{m === 'todos' ? 'Todos los módulos' : m}</button>)}</div>
       <div className="flex flex-wrap items-center gap-1.5">
         {(['pendientes', 'validados', 'todos'] as const).map((e) => <button key={e} type="button" className={pastilla(f.estado === e)} onClick={() => set({ ...f, estado: e })}>{e === 'pendientes' ? 'Por validar' : e === 'validados' ? 'Ya validados' : 'Todos'}</button>)}
@@ -52,7 +58,7 @@ function Filtros({ f, set, modulos }: { f: Filtro; set: (f: Filtro) => void; mod
 export function Candidatos() {
   const [v, setV] = useState<CandidatosVista | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [f, setF] = useState<Filtro>({ modulo: 'todos', tipo: 'todos', estado: 'pendientes', busca: '', alcance: true })
+  const [f, setF] = useState<Filtro>({ origen: 'todas', modulo: 'todos', tipo: 'todos', estado: 'pendientes', busca: '', alcance: true })
   const [paginas, setPaginas] = useState(1)
   const [recientes, setRecientes] = useState<ReadonlySet<string>>(new Set())
   const carga = useCallback(() => {
@@ -81,7 +87,7 @@ export function Candidatos() {
       <Filtros f={f} set={(x) => { setF(x); setPaginas(1); setRecientes(new Set()) }} modulos={modulos} />
       <p className="px-1 text-xs text-neutral-500" data-prueba="conteo-candidatos">{visibles.length} candidato(s) con estos filtros</p>
       <ul className="grid gap-4 lg:grid-cols-2">
-        {visibles.slice(0, paginas * POR_PAGINA).map((c) => <TarjetaCandidato key={c.id} c={c} fuente={v.fuente} previa={v.mias[c.id] ?? null} envia={envia} />)}
+        {visibles.slice(0, paginas * POR_PAGINA).map((c) => <TarjetaCandidato key={c.id} c={c} fuente={v.fuente} web={v.web} previa={v.mias[c.id] ?? null} envia={envia} />)}
       </ul>
       {visibles.length > paginas * POR_PAGINA ? <div className="text-center"><button type="button" className="rounded-full bg-white px-4 py-2 text-sm font-semibold ring-1 ring-neutral-200 hover:bg-neutral-50" onClick={() => setPaginas(paginas + 1)}>Ver {Math.min(POR_PAGINA, visibles.length - paginas * POR_PAGINA)} más</button></div> : null}
     </div>

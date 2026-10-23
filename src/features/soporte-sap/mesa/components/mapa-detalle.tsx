@@ -10,7 +10,7 @@ import { RAIZ_DE_LA_MESA } from './marco'
 import { VALORACION } from './candidato'
 import { Celda, Chip, fechaCorta } from './ui'
 
-export type Nodo = 'sapstack' | 'experto' | 'notas' | 'base' | 'triage' | 'motor' | 'lexico' | 'clis'
+export type Nodo = 'sapstack' | 'web' | 'experto' | 'notas' | 'base' | 'triage' | 'motor' | 'lexico' | 'clis'
 const si = (b: boolean) => (b ? 'sí' : 'no')
 const n = (k: number, una: string, varias = `${una}s`) => `${k} ${k === 1 ? una : varias}`
 
@@ -36,6 +36,24 @@ function Pin({ clave, children }: { clave: string; children: ReactNode }) {
   return <div className="border-b border-neutral-100 py-3 last:border-0"><p className="text-xs font-medium text-neutral-500">{clave}</p><div className="mt-0.5 break-words text-sm text-neutral-900">{children}</div></div>
 }
 
+/** La web de BASIS: cada fuente con su SHA, lo que dio, la captura y la última revisión (que avisa y no mueve). */
+function DetalleWeb({ m }: { m: MapaVista }) {
+  const w = m.web, x = m.fuentes.web
+  const cuantos = new Map(x.porFuente.map((p) => [p.fuente, p.candidatos]))
+  return (
+    <div className="space-y-3 text-sm" data-prueba="detalle-web-cuerpo">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {w.pins.map((p) => <div key={p.id} className="rounded-xl border border-neutral-200 bg-white p-3"><b>{p.nombre}</b><br /><a href={`${p.web}/tree/${p.sha}`} target="_blank" rel="noreferrer noopener" className="font-mono text-xs text-violet-800 underline">@{p.sha.slice(0, 12)}</a> · <span className="text-xs text-neutral-500">{p.licencia}</span><br /><span className="text-xs">{n(cuantos.get(p.id) ?? 0, 'candidato')}{p.id === 'kev' ? ` · versión ${w.kevVersion} (marca las explotadas)` : ''}</span></div>)}
+      </div>
+      <p>Capturada el <b>{w.capturadoEl}</b> (CVE de SAP del {w.ventana.desde} al {w.ventana.hasta}; último Patch Day fijado: {w.ultimoPatchDay}). {x.validados} validados por un experto.</p>
+      <p>Cruce con los {x.cruce.total} candidatos de BASIS/BC de sapstack: <b>{x.cruce.corroborados}</b> corroborados por una fuente que politica-cita admite, <b>{x.cruce.contradichos}</b> contradichos y <b>{x.cruce.noEncontrados}</b> no encontrados.</p>
+      <p data-prueba="revision-web">{w.revision ? (w.revision.estado === 'al_dia' ? <span className="text-emerald-700">Al día: revisada el {w.revision.fecha}; el próximo Patch Day es el {w.revision.proximoPatchDay}.</span> : <span className="font-semibold text-amber-800">Hay versión nueva (revisada el {w.revision.fecha}): {w.revision.avisos.join(' · ')}. El pin no se mueve solo.</span>) : 'Sin revisar todavía.'}</p>
+      <p className="text-xs text-neutral-500">SAP Help, el Patch Day de support.sap.com y la estrategia de mantenimiento no se capturan: su robots.txt y los términos de SAP no dejan extraerlos en automático. Los lee una persona.</p>
+      <a href={`${RAIZ_DE_LA_MESA}?pestana=candidatos`} className="inline-block rounded-xl bg-violet-700 px-3 py-2 text-center text-sm font-semibold text-white">Validar candidatos →</a>
+    </div>
+  )
+}
+
 export function Pins({ m }: { m: MapaVista }) {
   const f = m.fuente
   return (
@@ -45,6 +63,7 @@ export function Pins({ m }: { m: MapaVista }) {
       <Pin clave="Origen">{f.origen.repo}: {f.origen.estado}</Pin>
       <Pin clave="Última revisión del origen">{f.revision.fecha} · {f.revision.head === f.sha ? <span className="text-emerald-700">sin commits nuevos</span> : <span className="font-semibold text-amber-800">commit nuevo {f.revision.head.slice(0, 12)}: el pin no se mueve solo</span>}</Pin>
       <Pin clave="Catálogo">{f.integro ? <span className="text-emerald-700">íntegro (huella y SHA del pin)</span> : <span className="text-rose-700">{f.motivo}</span>}</Pin>
+      <Pin clave="La web de BASIS (fijada)">{m.web.pins.map((p) => <span key={p.id} className="block font-mono text-xs">{p.id}@{p.sha.slice(0, 12)}</span>)}capturada el {m.web.capturadoEl} · {m.web.integro ? <span className="text-emerald-700">íntegra</span> : <span className="text-rose-700">{m.web.motivo}</span>}</Pin>
       <Pin clave="Base de conocimiento">{m.base.paquete}<br /><span className="text-neutral-500">Soporte SAP todavía no fija una versión: no hay conocimiento de producción.</span></Pin>
     </Celda>
   )
@@ -80,6 +99,7 @@ export function Propuestas({ m }: { m: MapaVista }) {
 
 function DetalleDe({ nodo, m }: { nodo: Nodo; m: MapaVista }) {
   const u = m.usos, s = m.fuentes.sapstack
+  if (nodo === 'web') return <DetalleWeb m={m} />
   if (nodo === 'sapstack') return (
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {s.porModulo.map((x) => <div key={x.modulo} className={`rounded-xl border p-3 text-sm ${x.enAlcance ? 'border-neutral-200 bg-white' : 'border-dashed border-neutral-200 bg-neutral-50 text-neutral-500'}`}><b>{x.modulo}</b> · {n(x.candidatos, 'candidato')} · {n(x.validados, 'validado')}<br /><span className="text-xs text-neutral-500">{x.enAlcance === x.candidatos ? 'todos en el alcance de hoy' : x.enAlcance ? `${x.enAlcance} en el alcance de hoy` : 'fuera del alcance de hoy'}</span></div>)}
@@ -99,7 +119,7 @@ function DetalleDe({ nodo, m }: { nodo: Nodo; m: MapaVista }) {
   )
 }
 
-const TITULO: Readonly<Record<Nodo, string>> = { sapstack: 'sapstack: candidatos por módulo', experto: 'El experto en la mesa', notas: 'Punteros a SAP Notes', base: 'La base sap-soporte', triage: 'Triage y categorización', motor: 'El motor y sus veredictos', lexico: 'El léxico del anonimizador', clis: 'Los CLIs de Soporte SAP' }
+const TITULO: Readonly<Record<Nodo, string>> = { sapstack: 'sapstack: candidatos por módulo', web: 'La web de BASIS: fuentes fijadas, cruce y vigencia', experto: 'El experto en la mesa', notas: 'Punteros a SAP Notes', base: 'La base sap-soporte', triage: 'Triage y categorización', motor: 'El motor y sus veredictos', lexico: 'El léxico del anonimizador', clis: 'Los CLIs de Soporte SAP' }
 
 export function Detalle({ nodo, m, cierra }: { nodo: Nodo; m: MapaVista; cierra: () => void }) {
   return (

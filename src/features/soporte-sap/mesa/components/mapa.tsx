@@ -2,7 +2,8 @@
 
 /**
  * El mapa del laboratorio: cómo crece la base de conocimiento de Soporte SAP, de un vistazo. De izquierda a derecha, de
- * dónde sale (sapstack fijado, el experto, los punteros a SAP Notes), dónde vive (la base sap-soporte) y quién la usa
+ * dónde sale (sapstack fijado, la web de BASIS fijada, el experto, los punteros a SAP Notes), dónde vive (la base
+ * sap-soporte) y quién la usa
  * (triage, motor, léxico, CLIs). Debajo, las métricas con su serie, el detalle del nodo elegido, las propuestas por
  * firmar, las versiones y los pins. Cada número lo cuenta el servidor; sin datos, lo dice.
  */
@@ -15,11 +16,15 @@ import { Celda } from './ui'
 const API = '/api/mesa/soporte-sap?vista=mapa'
 
 function Fuentes({ m, abre }: { m: MapaVista; abre: (n: Nodo) => void }) {
-  const s = m.fuentes.sapstack, e = m.fuentes.experto, n = m.fuentes.notas
+  const s = m.fuentes.sapstack, e = m.fuentes.experto, n = m.fuentes.notas, w = m.fuentes.web
+  const nueva = m.web.revision?.estado === 'version_nueva'
   return (
     <div className="flex flex-col justify-between gap-4">
       <NodoFuente nombre={`sapstack @${m.fuente.sha.slice(0, 7)}`} cuenta={s.candidatos} aviso={s.commitNuevo ? 'commit nuevo' : null} abre={() => abre('sapstack')} prueba="nodo-sapstack">
         {s.tcodes} T-codes y {s.notas} SAP Notes; {s.enAlcance} en los módulos que atiende Soporte SAP. Fuente secundaria: cada uno es una hipótesis.
+      </NodoFuente>
+      <NodoFuente nombre={`La web (BASIS) · ${m.web.capturadoEl}`} cuenta={w.candidatos} aviso={nueva ? 'hay versión nueva' : null} bien={m.web.revision ? `al día · ${m.web.revision.fecha}` : null} abre={() => abre('web')} prueba="nodo-web">
+        {w.seguridad} notas de seguridad ({w.hotNews} Hot News, {w.explotadas} explotadas según KEV), {w.punteros} punteros a SAP Notes y {w.tcodes} T-codes, capturados el {m.web.capturadoEl} (Patch Day {m.web.ultimoPatchDay}). Cruce con sapstack: {w.cruce.corroborados} corroborados, {w.cruce.contradichos} contradichos, {w.cruce.noEncontrados} no encontrados.
       </NodoFuente>
       <NodoFuente nombre="El experto" cuenta={e.casos + e.validaciones} abre={() => abre('experto')} prueba="nodo-experto">
         {e.casos} casos y {e.validaciones} validaciones de {e.expertos} experto(s). De prueba, aparte: {e.dePrueba}.
@@ -71,7 +76,7 @@ function Lienzo({ m, abre }: { m: MapaVista; abre: (n: Nodo) => void }) {
     <section className="rounded-3xl border border-neutral-200 bg-neutral-50 p-4 md:p-8" style={{ backgroundImage: 'radial-gradient(#d4d4d4 1px, transparent 1px)', backgroundSize: '18px 18px' }} data-prueba="mapa-lienzo" aria-label="Mapa: fuentes, base y lo que la usa">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_4rem_minmax(0,1fr)_4rem_minmax(0,1fr)] lg:gap-0">
         <Fuentes m={m} abre={abre} />
-        <Conector salidas={[16, 50, 84]} />
+        <Conector salidas={[12, 37, 63, 88]} />
         <p className="text-center text-neutral-400 lg:hidden" aria-hidden>↓</p>
         <Base m={m} abre={abre} />
         <Conector salidas={[50]} />
@@ -115,6 +120,8 @@ export function Mapa() {
         <span className={`h-2.5 w-2.5 rounded-full ${m.fuente.integro ? 'bg-emerald-500' : 'bg-rose-500'}`} aria-hidden />
         <a href={`${m.fuente.web}/tree/${m.fuente.sha}`} target="_blank" rel="noreferrer noopener" className="font-medium underline">{m.fuente.repo}@{m.fuente.sha.slice(0, 7)}</a>
         <span className="text-neutral-500">Fuente externa fijada · {m.fuente.licencia} · revisada el {m.fuente.revision.fecha}</span>
+        <span className={`h-2.5 w-2.5 rounded-full ${m.web.integro ? 'bg-emerald-500' : 'bg-rose-500'}`} aria-hidden />
+        <span className="text-neutral-500">La web de BASIS: {m.web.pins.length} fuentes fijadas por SHA, capturadas el {m.web.capturadoEl}</span>
         <span className="ml-auto text-xs text-neutral-400">contado el {new Date(m.generado).toLocaleString('es-MX')}</span>
       </div>
       <Lienzo m={m} abre={(n) => setNodo(n)} />

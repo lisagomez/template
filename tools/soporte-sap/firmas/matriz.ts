@@ -2709,4 +2709,96 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'la suite acepta cualquier fuente en sap-soporte', ediciones: [ed('tools/conocimiento/politica-cita.mjs', 'function fuenteSapSoporte(r) {\n', 'function fuenteSapSoporte(r) {\n  return null\n')] },
     nota: 'la suite exige la forma de la fuente (la SAP Note con su número, SAP Help o la experiencia anotada en CAMBIOS.md), no que sea buena: eso lo decide el laboratorio al firmar',
   },
+  // ── La web de BASIS (docs/goals/soporte-sap-basis-web.md, revisión 13 de la AISIA): candidatos de fuentes web fijadas
+  // por SHA y fecha de captura (el CVE List de SAP, KEV y SAP-docs), el cruce con sapstack y la revisión de vigencia.
+  {
+    id: 'c3-mesa-web-fijada', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'los candidatos de la web salen solo del catálogo generado para el pin (el SHA de cada fuente y la fecha de captura), con su huella: uno editado a mano o de otra captura no da candidatos',
+    control: `${ME}/services/web.ts · catalogoWebValido`,
+    comprobacion: prueba('mesa-web.ts', 'web · solo entran candidatos de capturas fijadas con su huella: uno editado o de otra captura no se carga'),
+    sabotaje: { que: 'la mesa carga un catálogo web editado a mano', ediciones: [ed(`${ME}/services/web.ts`, '  if (huella !== c.huella) return nada(', '  if (false) return nada(')] },
+  },
+  {
+    id: 'c3-mesa-web-sin-salida', doc: 'C3', ref: 'La mesa del experto alojada', estado: 'probado',
+    afirmacion: 'la mesa alojada no sale a la web: lee el catálogo y el pin que están en el repo; capturar y revisar las fuentes lo hace el laboratorio en su máquina',
+    control: `${ME}/services/web.ts (solo importa JSON) y ${ME}/fuentes/extrae.mjs, que la mesa no carga`,
+    comprobacion: prueba('mesa-web.ts', 'web · la mesa no sale a internet: leer candidatos y mapa no pide nada fuera de la llave de Access'),
+    sabotaje: { que: 'la mesa pregunta a NVD al enseñar la fuente', ediciones: [ed(`${ME}/services/web.ts`, 'revision: PIN.revision ?? null,', "revision: (void fetch('https://services.nvd.nist.gov/rest/json/cves/2.0').catch(() => null), PIN.revision ?? null),")] },
+  },
+  {
+    id: 'aisia-web-captura-alterada', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', estado: 'probado',
+    afirmacion: 'la extracción se niega ante una copia que no está en el SHA de su pin o que fue alterada; con la misma captura, dos corridas dan la misma huella',
+    control: `${ME}/fuentes/web/generador.mjs · verificaCaptura`,
+    comprobacion: prueba('mesa-web.ts', 'web · la extracción se niega ante una captura alterada o en otro SHA, y dos corridas dan la misma huella'),
+    sabotaje: { que: 'se extrae de una copia alterada', ediciones: [ed(`${ME}/fuentes/web/generador.mjs`, '    if (sucio) throw new Error(', '    if (false) throw new Error(')] },
+  },
+  {
+    id: 'aisia-web-corrobora-admitida', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', infirmable: true, estado: 'probado',
+    afirmacion: 'un candidato de sapstack solo queda corroborado por una fuente que politica-cita admite (SAP Help o el número de una SAP Note); una mención en otra fuente no cuenta, y una fuente citable que dice otra cosa lo contradice',
+    control: `${ME}/fuentes/web/generador.mjs · cruceDeTransaccion y cruceDeNota, con admitida() de tools/conocimiento/politica-cita.mjs`,
+    comprobacion: prueba('mesa-web.ts', 'web · una corroboración solo cuenta de una fuente que politica-cita admite; una que dice otra cosa contradice'),
+    sabotaje: { que: 'cualquier fuente corrobora', ediciones: [ed(`${ME}/fuentes/web/generador.mjs`, '  const admitidas = ev.filter((e) => e.admitida)', '  const admitidas = ev')] },
+  },
+  {
+    id: 'aisia-web-revisa-no-mueve', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', estado: 'probado',
+    afirmacion: 'la revisión de vigencia avisa de una versión nueva (el Patch Day siguiente, un CVE de SAP después de la captura, KEV con entradas de SAP, un commit de SAP-docs) y no mueve el pin: mover lo decide el laboratorio',
+    control: `${ME}/fuentes/web/revisa.mjs · revisaWeb (FIJADO)`,
+    comprobacion: prueba('mesa-web.ts', 'web · la revisión de vigencia avisa de una versión nueva y no mueve el pin'),
+    sabotaje: { que: 'la revisión mueve el último Patch Day del pin', ediciones: [
+      ed(`${ME}/fuentes/web/revisa.mjs`, '  const nuevo = { ...pin, revision }', '  const nuevo = { ...pin, revision, ultimoPatchDay: r.proximo }'),
+      ed(`${ME}/fuentes/web/revisa.mjs`, '  for (const k of FIJADO) if', '  for (const k of []) if'),
+    ] },
+  },
+  {
+    id: 'aisia-web-propuesta', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', infirmable: true, estado: 'probado',
+    afirmacion: 'validar un candidato de la web es una propuesta, con su cita y su captura a la vista del laboratorio: la mesa no firma ni registra',
+    control: `${ME}/services/candidatos.ts · validaCandidato`,
+    comprobacion: prueba('mesa-web.ts', 'web · validar un candidato de la web es una propuesta, y el laboratorio la ve con su cita y su captura'),
+    sabotaje: { que: 'toda validación queda firmada', ediciones: [ed(`${ME}/services/candidatos.ts`, "valoracion: x.valoracion, ...escrito, estado: 'propuesta',", "valoracion: x.valoracion, ...escrito, estado: 'firmada' as 'propuesta',")] },
+  },
+  {
+    id: 'aisia-web-sin-pasajes', doc: 'AISIA', ref: 'La redacción de SAP o sus términos, pasados por alto', estado: 'probado',
+    afirmacion: 'ningún pasaje de una captura (ocho palabras seguidas) aparece en lo que se extrae: el conocimiento va con palabras propias, y el generador se niega a escribir si lo encuentra',
+    control: `${ME}/fuentes/web/reglas.mjs · pasajesCopiados, y generador.mjs · catalogoWebDe`,
+    comprobacion: prueba('mesa-web.ts', 'web · ningún pasaje de una captura aparece literal en lo extraído: el conocimiento va con palabras propias'),
+    sabotaje: { que: 'la hipótesis lleva la descripción del registro y la guarda se apaga', ediciones: [
+      ed(`${ME}/fuentes/web/generador.mjs`, '  if (copiados.length) throw new Error(', '  if (false) throw new Error('),
+      ed(`${ME}/fuentes/web/generador.mjs`, '    hipotesis: hipotesisDeSeguridad(g.n, s), destino:', "    hipotesis: `${hipotesisDeSeguridad(g.n, s)} ${r.prosa.join(' ')}`, destino:"),
+    ] },
+  },
+  {
+    id: 'aisia-web-nota-solo-numero', doc: 'AISIA', ref: 'La redacción de SAP o sus términos, pasados por alto', estado: 'probado',
+    afirmacion: 'de una SAP Note solo entran su número, su título y su enlace a SAP for Me; nunca su contenido ni la descripción del registro',
+    control: `${ME}/fuentes/web/generador.mjs · candidatoDeSeguridad y candidatoDePuntero`,
+    comprobacion: prueba('mesa-web.ts', 'web · de una SAP Note solo entran su número, su título y su enlace; nunca su contenido'),
+    sabotaje: { que: 'la nota lleva la descripción del registro', ediciones: [ed(`${ME}/fuentes/web/generador.mjs`, "origen: 'web', cita: citaDeNota(g.n), captura: { fuente: 'cvelist'", "origen: 'web', descripcion: r.prosa[0], cita: citaDeNota(g.n), captura: { fuente: 'cvelist'")] },
+  },
+  {
+    id: 'aisia-web-sin-s-user', doc: 'AISIA', ref: 'La redacción de SAP o sus términos, pasados por alto', estado: 'probado',
+    afirmacion: 'una fuente que pide S-user o registro, o cuyo robots.txt o términos no dejan capturar en automático (help.sap.com, support.sap.com, me.sap.com), no se captura; y la captura va fuera del repo',
+    control: `${ME}/fuentes/web/captura.mjs · permitida y carpetaFuera, según ${ME}/fuentes/web/catalogo.json`,
+    comprobacion: prueba('mesa-web.ts', 'web · una fuente que pide S-user o que no deja capturar en automático no se captura, y la captura va fuera del repo'),
+    sabotaje: { que: 'se captura cualquier fuente del catálogo', ediciones: [
+      ed(`${ME}/fuentes/web/captura.mjs`, "  if (f.acceso !== 'publica') throw new Error(", '  if (false) throw new Error('),
+      ed(`${ME}/fuentes/web/captura.mjs`, "  if (f.captura !== 'automatica') throw new Error(", '  if (false) throw new Error('),
+    ] },
+  },
+  {
+    id: 'aisia-web-lectura-humana', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', estado: 'brecha',
+    afirmacion: 'SAP Help, el Patch Day de support.sap.com y la estrategia de mantenimiento no se capturan, así que la base no trae el procedimiento de cada tarea, las notas de seguridad sin CVE ni las fechas de fin de mantenimiento',
+    control: 'el catálogo de fuentes (captura «lectura-humana») y la matriz de cobertura de la propuesta, con sus huecos',
+    nota: 'su robots.txt («User-agent: *» / «Disallow: /») y los términos de SAP no dejan extraerlos en automático: los lee una persona, y el hueco queda declarado por área',
+  },
+  {
+    id: 'aisia-web-url-ayuda', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', estado: 'brecha',
+    afirmacion: 'la URL de SAP Help de una página de SAP-docs se deriva de su loio y ninguna herramienta la abre',
+    control: 'reglas.mjs · ayudaDe; la forma «<guía>/<loio>.html» es la que usa SAP en sus enlaces',
+    nota: 'abrirla en automático iría contra el robots.txt de help.sap.com: el experto la abre al validar, y si no resuelve, su corrección lo dice',
+  },
+  {
+    id: 'aisia-web-prioridad-derivada', doc: 'AISIA', ref: 'Una fuente de la web vieja o secundaria tomada por buena', estado: 'brecha',
+    afirmacion: 'la prioridad de una nota de seguridad (Hot News, Alta, Media, Baja) se deriva de su CVSS con la escala de SAP; la que publica SAP en su página del Patch Day no se lee',
+    control: 'reglas.mjs · prioridadDe, y la pantalla dice «en la escala de SAP»',
+    nota: 'SAP puede dar a una nota una prioridad distinta de la que da su CVSS; la del Patch Day solo la ve una persona',
+  },
 ]
