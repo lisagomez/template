@@ -37,13 +37,13 @@ export function rutaDeCve(id) {
 /** Cada copia está en su SHA y sin cambios; si no, se niega con el motivo. Mover un pin lo decide el laboratorio. */
 export function verificaCaptura(carpeta, pin) {
   const d = carpetas(carpeta)
-  const copias = [['el CVE List', d.cvelist, pin.cvelist.sha], ['KEV', d.kev, pin.kev.sha], ...pin.sapDocs.map((s) => [s.repo, d.sapDocs(s.id), s.sha])]
+  const copias = [['CVE List', d.cvelist, pin.cvelist.sha], ['KEV', d.kev, pin.kev.sha], ...pin.sapDocs.map((s) => [s.repo, d.sapDocs(s.id), s.sha])]
   for (const [nombre, dir, sha] of copias) {
-    if (!existsSync(join(dir, '.git'))) throw new Error(`falta la captura de ${nombre} en ${dir}: córrela con extrae.mjs web captura`)
+    if (!existsSync(join(dir, '.git'))) throw new Error(`falta la captura «${nombre}» en ${dir}: córrela con extrae.mjs web captura`)
     const head = git(dir, 'rev-parse', 'HEAD')
-    if (head !== sha) throw new Error(`la captura de ${nombre} está en ${head.slice(0, 12)} y el pin es ${sha.slice(0, 12)}: mover el pin lo decide el laboratorio, en pin.json`)
+    if (head !== sha) throw new Error(`la captura «${nombre}» está en ${head.slice(0, 12)} y el pin es ${sha.slice(0, 12)}: mover el pin lo decide el laboratorio, en pin.json`)
     const sucio = git(dir, 'status', '--porcelain')
-    if (sucio) throw new Error(`la captura de ${nombre} fue alterada (${sucio.split('\n').length} archivo(s) distinto(s) de su SHA): no se extrae de ella`)
+    if (sucio) throw new Error(`la captura «${nombre}» fue alterada (${sucio.split('\n').length} archivo(s) distinto(s) de su SHA): no se extrae de ella`)
   }
   for (const id of pin.cvelist.cves) if (!existsSync(join(d.cvelist, rutaDeCve(id)))) throw new Error(`falta ${id} en la captura del CVE List`)
 }

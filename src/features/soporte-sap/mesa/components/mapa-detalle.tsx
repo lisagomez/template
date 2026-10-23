@@ -78,6 +78,8 @@ export function Propuestas({ m }: { m: MapaVista }) {
             <li key={c.id} className="rounded-2xl border border-neutral-200 p-3" data-prueba={`propuesta-${c.id}`}>
               <p className="flex flex-wrap items-center gap-2 text-sm"><Chip className="bg-neutral-900 text-white">{c.tipo === 'nota' ? 'SAP Note' : 'T-code'}</Chip><b className="font-mono">{c.clave}</b><span className="text-neutral-600">{c.titulo}</span></p>
               <p className="mt-1 text-xs text-neutral-600">{c.hipotesis} <a href={c.fuente.url} target="_blank" rel="noreferrer noopener" className="text-violet-800 underline">{c.fuente.archivo}:{c.fuente.linea}</a></p>
+              {c.origen === 'web' ? <p className="mt-1 text-xs text-neutral-600">De la web, capturada el {c.captura?.fecha} · cita: {c.cita ? <a href={c.cita.url} target="_blank" rel="noreferrer noopener" className="text-violet-800 underline">{c.cita.texto}</a> : 'ninguna admitida'}</p> : null}
+              {c.corroboracion ? <p className="mt-1 text-xs text-neutral-600">Cruce con la web: {c.corroboracion.estado.replace('_', ' ')}</p> : null}
               <ul className="mt-2 space-y-1">
                 {validaciones.map((v) => (
                   <li key={v.por.usuario} className="flex flex-wrap items-center gap-2 text-xs">

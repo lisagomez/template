@@ -10,7 +10,7 @@
       "sapdocs-abap-trial": "a4677a4addc8a5b562cfe251dc11504e221e2847"
     }
   },
-  "huella": "sha256:ae2e0bb3d312c5ee41a5644c029fc025e9e5ddea5b729886e20d3d546322896f",
+  "huella": "sha256:688035c495b205fc152f1409b2ed014c0cf4f176efbb1230ff925f453e87bad5",
   "resumen": {
     "registros": 238,
     "deSap": 232,
@@ -5783,7 +5783,7 @@
       "id": "nota-jkoehbbhdofb",
       "tipo": "nota",
       "clave": "1018839",
-      "titulo": "citada en «Configure Solution Management Integration»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Solution Management Integration)",
       "modulos": [
         "BASIS"
       ],
@@ -5818,7 +5818,7 @@
       "id": "nota-ihijjnlhbdpl",
       "tipo": "nota",
       "clave": "1275351",
-      "titulo": "citada en «Connectivity Support»",
+      "titulo": "(sin título en la fuente; SAP la cita en Connectivity Support)",
       "modulos": [
         "BASIS"
       ],
@@ -5853,7 +5853,7 @@
       "id": "nota-kbpbnkglkkdp",
       "tipo": "nota",
       "clave": "1405466",
-      "titulo": "citada en «Repository Configuration»",
+      "titulo": "(sin título en la fuente; SAP la cita en Repository Configuration)",
       "modulos": [
         "BASIS"
       ],
@@ -5888,7 +5888,7 @@
       "id": "nota-bkdpfkpnajib",
       "tipo": "nota",
       "clave": "1413011",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -5923,7 +5923,7 @@
       "id": "nota-cehflcgdgokh",
       "tipo": "nota",
       "clave": "1525059",
-      "titulo": "citada en «Initial Configuration (RFC)»",
+      "titulo": "(sin título en la fuente; SAP la cita en Initial Configuration (RFC))",
       "modulos": [
         "BASIS"
       ],
@@ -5958,7 +5958,7 @@
       "id": "nota-efcfbildemfg",
       "tipo": "nota",
       "clave": "1688610",
-      "titulo": "citada en «Issues and Solutions»",
+      "titulo": "(sin título en la fuente; SAP la cita en Issues and Solutions)",
       "modulos": [
         "BASIS"
       ],
@@ -5993,7 +5993,7 @@
       "id": "nota-ldmihjjbcgif",
       "tipo": "nota",
       "clave": "2015966",
-      "titulo": "citada en «Configure Identity Propagation for RFC»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Identity Propagation for RFC)",
       "modulos": [
         "BASIS"
       ],
@@ -6028,7 +6028,7 @@
       "id": "nota-ncjpnimaenof",
       "tipo": "nota",
       "clave": "2023587",
-      "titulo": "citada en «Additional Setup for SAP HANA Database»",
+      "titulo": "(sin título en la fuente; SAP la cita en Additional Setup for SAP HANA Database)",
       "modulos": [
         "BASIS"
       ],
@@ -6063,7 +6063,7 @@
       "id": "nota-ifnlbfncadmd",
       "tipo": "nota",
       "clave": "2052899",
-      "titulo": "citada en «Configure Identity Propagation for HTTPS»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Identity Propagation for HTTPS)",
       "modulos": [
         "BASIS"
       ],
@@ -6134,7 +6134,7 @@
       "id": "nota-hnndcelkipej",
       "tipo": "nota",
       "clave": "2164980",
-      "titulo": "citada en «ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->»",
+      "titulo": "(sin título en la fuente; SAP la cita en ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->)",
       "modulos": [
         "BASIS"
       ],
@@ -6169,7 +6169,7 @@
       "id": "nota-gpgnaoohgblb",
       "tipo": "nota",
       "clave": "2241080",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6204,7 +6204,7 @@
       "id": "nota-mlkilhddhimi",
       "tipo": "nota",
       "clave": "2283880",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6239,7 +6239,7 @@
       "id": "nota-plhhmnjhkohp",
       "tipo": "nota",
       "clave": "2372888",
-      "titulo": "citada en «2018 Connectivity (Archive)»",
+      "titulo": "(sin título en la fuente; SAP la cita en 2018 Connectivity (Archive))",
       "modulos": [
         "BASIS"
       ],
@@ -6274,7 +6274,7 @@
       "id": "nota-onijblbaelfl",
       "tipo": "nota",
       "clave": "2396214",
-      "titulo": "citada en «ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->»",
+      "titulo": "(sin título en la fuente; SAP la cita en ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->)",
       "modulos": [
         "BASIS"
       ],
@@ -6309,7 +6309,7 @@
       "id": "nota-camfnpiddnff",
       "tipo": "nota",
       "clave": "2459283",
-      "titulo": "citada en «Services»",
+      "titulo": "(sin título en la fuente; SAP la cita en Services)",
       "modulos": [
         "BASIS"
       ],
@@ -6344,7 +6344,7 @@
       "id": "nota-hkblgmofkcck",
       "tipo": "nota",
       "clave": "2475591",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6379,7 +6379,7 @@
       "id": "nota-eehondkkbpah",
       "tipo": "nota",
       "clave": "2551889",
-      "titulo": "citada en «ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->»",
+      "titulo": "(sin título en la fuente; SAP la cita en ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->)",
       "modulos": [
         "BASIS"
       ],
@@ -6414,7 +6414,7 @@
       "id": "nota-boabbhddjihj",
       "tipo": "nota",
       "clave": "2578665",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6449,7 +6449,7 @@
       "id": "nota-clfcmncgpnim",
       "tipo": "nota",
       "clave": "2607632",
-      "titulo": "citada en «Configure Solution Management Integration»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Solution Management Integration)",
       "modulos": [
         "BASIS"
       ],
@@ -6484,7 +6484,7 @@
       "id": "nota-idgochiclkoe",
       "tipo": "nota",
       "clave": "2642538",
-      "titulo": "citada en «Configure Identity Propagation for RFC»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Identity Propagation for RFC)",
       "modulos": [
         "BASIS"
       ],
@@ -6519,7 +6519,7 @@
       "id": "nota-lnojambjgfkc",
       "tipo": "nota",
       "clave": "2696233",
-      "titulo": "citada en «2019 Connectivity (Archive)»",
+      "titulo": "(sin título en la fuente; SAP la cita en 2019 Connectivity (Archive))",
       "modulos": [
         "BASIS"
       ],
@@ -6554,7 +6554,7 @@
       "id": "nota-jimkmojkgpio",
       "tipo": "nota",
       "clave": "2728600",
-      "titulo": "citada en «Troubleshooting for ABAP Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6589,7 +6589,7 @@
       "id": "nota-pjoaomocijpn",
       "tipo": "nota",
       "clave": "2900069",
-      "titulo": "citada en «Step 2: Assign Roles to Users in SAP Cloud ALM»",
+      "titulo": "(sin título en la fuente; SAP la cita en Step 2: Assign Roles to Users in SAP Cloud ALM)",
       "modulos": [
         "BASIS"
       ],
@@ -6624,7 +6624,7 @@
       "id": "nota-jehcblbmgmhk",
       "tipo": "nota",
       "clave": "2915578",
-      "titulo": "citada en «2021 Connectivity (Archive)»",
+      "titulo": "(sin título en la fuente; SAP la cita en 2021 Connectivity (Archive))",
       "modulos": [
         "BASIS"
       ],
@@ -6659,7 +6659,7 @@
       "id": "nota-kaokieopinca",
       "tipo": "nota",
       "clave": "2991636",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -6694,7 +6694,7 @@
       "id": "nota-ffdbllgpcbjd",
       "tipo": "nota",
       "clave": "3020352",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -6729,7 +6729,7 @@
       "id": "nota-pefgmjmdipmb",
       "tipo": "nota",
       "clave": "3032960",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -6764,7 +6764,7 @@
       "id": "nota-cijgjfenjidf",
       "tipo": "nota",
       "clave": "3046343",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -6799,7 +6799,7 @@
       "id": "nota-fccpibhcahib",
       "tipo": "nota",
       "clave": "3054258",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6834,7 +6834,7 @@
       "id": "nota-olpnpppfbapm",
       "tipo": "nota",
       "clave": "3058553",
-      "titulo": "citada en «2021 Connectivity (Archive)»",
+      "titulo": "(sin título en la fuente; SAP la cita en 2021 Connectivity (Archive))",
       "modulos": [
         "BASIS"
       ],
@@ -6869,7 +6869,7 @@
       "id": "nota-pjohibcjecej",
       "tipo": "nota",
       "clave": "3064888",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -6904,7 +6904,7 @@
       "id": "nota-kdgifogfmokd",
       "tipo": "nota",
       "clave": "3066901",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -6939,7 +6939,7 @@
       "id": "nota-epgifgpknion",
       "tipo": "nota",
       "clave": "3085908",
-      "titulo": "citada en «Adding and Managing Subaccounts»",
+      "titulo": "(sin título en la fuente; SAP la cita en Adding and Managing Subaccounts)",
       "modulos": [
         "BASIS"
       ],
@@ -6974,7 +6974,7 @@
       "id": "nota-lmmpanmcbddg",
       "tipo": "nota",
       "clave": "3086201",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7009,7 +7009,7 @@
       "id": "nota-iljbbfmmpbjl",
       "tipo": "nota",
       "clave": "3090756",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7044,7 +7044,7 @@
       "id": "nota-kffbagolamig",
       "tipo": "nota",
       "clave": "3106170",
-      "titulo": "citada en «Troubleshooting for ABAP Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7079,7 +7079,7 @@
       "id": "nota-fgebikdccgik",
       "tipo": "nota",
       "clave": "3115889",
-      "titulo": "citada en «Configure Identity Propagation via SAP Web Dispatcher»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Identity Propagation via SAP Web Dispatcher)",
       "modulos": [
         "BASIS"
       ],
@@ -7114,7 +7114,7 @@
       "id": "nota-jfniilobdmak",
       "tipo": "nota",
       "clave": "3123560",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7149,7 +7149,7 @@
       "id": "nota-bggaeeaihlna",
       "tipo": "nota",
       "clave": "3152095",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7184,7 +7184,7 @@
       "id": "nota-cagkdnbkmlbd",
       "tipo": "nota",
       "clave": "3240966",
-      "titulo": "citada en «Troubleshooting for ABAP Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7219,7 +7219,7 @@
       "id": "nota-lbckoioilnho",
       "tipo": "nota",
       "clave": "3247776",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7254,7 +7254,7 @@
       "id": "nota-afgalmgaeood",
       "tipo": "nota",
       "clave": "3248116",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7289,7 +7289,7 @@
       "id": "nota-eofaedlpkknj",
       "tipo": "nota",
       "clave": "3257720",
-      "titulo": "citada en «Supported Data Centers»",
+      "titulo": "(sin título en la fuente; SAP la cita en Supported Data Centers)",
       "modulos": [
         "BASIS"
       ],
@@ -7360,7 +7360,7 @@
       "id": "nota-nlikcplbgkgi",
       "tipo": "nota",
       "clave": "3281767",
-      "titulo": "citada en «Requesting SAP Cloud ALM»",
+      "titulo": "(sin título en la fuente; SAP la cita en Requesting SAP Cloud ALM)",
       "modulos": [
         "BASIS"
       ],
@@ -7395,7 +7395,7 @@
       "id": "nota-ekcpickgilhh",
       "tipo": "nota",
       "clave": "3281776",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7430,7 +7430,7 @@
       "id": "nota-jnmnlnmjmdag",
       "tipo": "nota",
       "clave": "3282741",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7465,7 +7465,7 @@
       "id": "nota-hkaicpocmgfm",
       "tipo": "nota",
       "clave": "3290787",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7500,7 +7500,7 @@
       "id": "nota-fonnglfegind",
       "tipo": "nota",
       "clave": "3302250",
-      "titulo": "citada en «Frequently Asked Questions»",
+      "titulo": "(sin título en la fuente; SAP la cita en Frequently Asked Questions)",
       "modulos": [
         "BASIS"
       ],
@@ -7535,7 +7535,7 @@
       "id": "nota-nnpkbjjmbkck",
       "tipo": "nota",
       "clave": "3310406",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7570,7 +7570,7 @@
       "id": "nota-anblmfimdjml",
       "tipo": "nota",
       "clave": "3312428",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7605,7 +7605,7 @@
       "id": "nota-pegfoobjhobm",
       "tipo": "nota",
       "clave": "3322679",
-      "titulo": "citada en «Solutions for Errors in the Managed System Setup Check»",
+      "titulo": "(sin título en la fuente; SAP la cita en Solutions for Errors in the Managed System Setup Check)",
       "modulos": [
         "BASIS"
       ],
@@ -7640,7 +7640,7 @@
       "id": "nota-fafpfbjijlnk",
       "tipo": "nota",
       "clave": "3335949",
-      "titulo": "citada en «Configure Identity Propagation for HTTPS»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Identity Propagation for HTTPS)",
       "modulos": [
         "BASIS"
       ],
@@ -7675,7 +7675,7 @@
       "id": "nota-fefldffljcei",
       "tipo": "nota",
       "clave": "3342350",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7710,7 +7710,7 @@
       "id": "nota-pdolhndepdfk",
       "tipo": "nota",
       "clave": "3352417",
-      "titulo": "citada en «General Concepts»",
+      "titulo": "(sin título en la fuente; SAP la cita en General Concepts)",
       "modulos": [
         "BASIS"
       ],
@@ -7781,7 +7781,7 @@
       "id": "nota-lfpjkjfjkjlo",
       "tipo": "nota",
       "clave": "3365171",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -7816,7 +7816,7 @@
       "id": "nota-ceigmnbgkjmi",
       "tipo": "nota",
       "clave": "3372078",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7851,7 +7851,7 @@
       "id": "nota-kbknianmgpbl",
       "tipo": "nota",
       "clave": "3374186",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7886,7 +7886,7 @@
       "id": "nota-fagoocobdlip",
       "tipo": "nota",
       "clave": "3401303",
-      "titulo": "citada en «Enabling Service Delivery»",
+      "titulo": "(sin título en la fuente; SAP la cita en Enabling Service Delivery)",
       "modulos": [
         "BTP"
       ],
@@ -7921,7 +7921,7 @@
       "id": "nota-ndfdcmohlgio",
       "tipo": "nota",
       "clave": "3421256",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -7956,7 +7956,7 @@
       "id": "nota-gacjlimoppap",
       "tipo": "nota",
       "clave": "3424610",
-      "titulo": "citada en «2022-2024 Connectivity (Archive)»",
+      "titulo": "(sin título en la fuente; SAP la cita en 2022-2024 Connectivity (Archive))",
       "modulos": [
         "BASIS"
       ],
@@ -7991,7 +7991,7 @@
       "id": "nota-olbgodjgnkja",
       "tipo": "nota",
       "clave": "3425282",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8026,7 +8026,7 @@
       "id": "nota-jmjafhkobcga",
       "tipo": "nota",
       "clave": "3429058",
-      "titulo": "citada en «SAP S/4HANA Cloud Private Edition and On-Premise Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en SAP S/4HANA Cloud Private Edition and On-Premise Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8061,7 +8061,7 @@
       "id": "nota-abhblcfpipgb",
       "tipo": "nota",
       "clave": "3469976",
-      "titulo": "citada en «Troubleshooting for ABAP Cloud-Based Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Cloud-Based Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8096,7 +8096,7 @@
       "id": "nota-jaaigjbnpnbd",
       "tipo": "nota",
       "clave": "3472730",
-      "titulo": "citada en «Step 2: Assign Roles to Users in SAP Cloud ALM»",
+      "titulo": "(sin título en la fuente; SAP la cita en Step 2: Assign Roles to Users in SAP Cloud ALM)",
       "modulos": [
         "BTP"
       ],
@@ -8131,7 +8131,7 @@
       "id": "nota-ffohcjgjlpba",
       "tipo": "nota",
       "clave": "3497168",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8166,7 +8166,7 @@
       "id": "nota-daaeolgjblac",
       "tipo": "nota",
       "clave": "3497169",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8201,7 +8201,7 @@
       "id": "nota-iinpladdjhgf",
       "tipo": "nota",
       "clave": "3501074",
-      "titulo": "citada en «SAP NetWeaver Application Server for ABAP (7.40 and higher), including SAP BW/4HANA»",
+      "titulo": "(sin título en la fuente; SAP la cita en SAP NetWeaver Application Server for ABAP (7.40 and higher), including SAP BW/4HANA)",
       "modulos": [
         "BASIS"
       ],
@@ -8236,7 +8236,7 @@
       "id": "nota-onehlcbipjeb",
       "tipo": "nota",
       "clave": "3502641",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8271,7 +8271,7 @@
       "id": "nota-imgcmmddhfha",
       "tipo": "nota",
       "clave": "3532762",
-      "titulo": "citada en «SAP S/4HANA Cloud Private Edition and On-Premise Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en SAP S/4HANA Cloud Private Edition and On-Premise Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8306,7 +8306,7 @@
       "id": "nota-elihlfkimcdl",
       "tipo": "nota",
       "clave": "3551681",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -8341,7 +8341,7 @@
       "id": "nota-fbmhcjnggklm",
       "tipo": "nota",
       "clave": "3569187",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8376,7 +8376,7 @@
       "id": "nota-iilcmnmehbdg",
       "tipo": "nota",
       "clave": "3569295",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8411,7 +8411,7 @@
       "id": "nota-ahbgaboplnoi",
       "tipo": "nota",
       "clave": "3575903",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8446,7 +8446,7 @@
       "id": "nota-edmlbopedbli",
       "tipo": "nota",
       "clave": "3621761",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8481,7 +8481,7 @@
       "id": "nota-kcpihcbfhalb",
       "tipo": "nota",
       "clave": "3623614",
-      "titulo": "citada en «Issues and Solutions»",
+      "titulo": "(sin título en la fuente; SAP la cita en Issues and Solutions)",
       "modulos": [
         "BASIS"
       ],
@@ -8516,7 +8516,7 @@
       "id": "nota-kimialpmakii",
       "tipo": "nota",
       "clave": "3639096",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8551,7 +8551,7 @@
       "id": "nota-afmnickhaldd",
       "tipo": "nota",
       "clave": "3639977",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8586,7 +8586,7 @@
       "id": "nota-hkhghkagcoam",
       "tipo": "nota",
       "clave": "3688071",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8621,7 +8621,7 @@
       "id": "nota-dockcmckaolm",
       "tipo": "nota",
       "clave": "3690700",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8656,7 +8656,7 @@
       "id": "nota-kohgobohidee",
       "tipo": "nota",
       "clave": "3706830",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8691,7 +8691,7 @@
       "id": "nota-omejoogcfcbn",
       "tipo": "nota",
       "clave": "3724989",
-      "titulo": "citada en «Troubleshooting for ABAP Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8726,7 +8726,7 @@
       "id": "nota-lnhjkjghhalb",
       "tipo": "nota",
       "clave": "3734702",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8761,7 +8761,7 @@
       "id": "nota-lkidoifghohj",
       "tipo": "nota",
       "clave": "3747311",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8796,7 +8796,7 @@
       "id": "nota-kakedljenjbo",
       "tipo": "nota",
       "clave": "3750110",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8831,7 +8831,7 @@
       "id": "nota-ajlbkkaompfd",
       "tipo": "nota",
       "clave": "3754861",
-      "titulo": "citada en «Troubleshooting and FAQ»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting and FAQ)",
       "modulos": [
         "BASIS"
       ],
@@ -8866,7 +8866,7 @@
       "id": "nota-ekihlgcllhpg",
       "tipo": "nota",
       "clave": "3754982",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8901,7 +8901,7 @@
       "id": "nota-mhmeljapmbhm",
       "tipo": "nota",
       "clave": "3760887",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8936,7 +8936,7 @@
       "id": "nota-kgfidhkkpdke",
       "tipo": "nota",
       "clave": "3791730",
-      "titulo": "citada en «SAP S/4HANA Cloud Private Edition and On-Premise Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en SAP S/4HANA Cloud Private Edition and On-Premise Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -8971,7 +8971,7 @@
       "id": "nota-ogbjchjbbpie",
       "tipo": "nota",
       "clave": "3795818",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -9006,7 +9006,7 @@
       "id": "nota-alkjkjlkjndh",
       "tipo": "nota",
       "clave": "3806018",
-      "titulo": "citada en «SAP S/4HANA Cloud Public Edition»",
+      "titulo": "(sin título en la fuente; SAP la cita en SAP S/4HANA Cloud Public Edition)",
       "modulos": [
         "BASIS"
       ],
@@ -9041,7 +9041,7 @@
       "id": "nota-chhkejkdpoim",
       "tipo": "nota",
       "clave": "39412",
-      "titulo": "citada en «Solutions for Errors in the Managed System Setup Check»",
+      "titulo": "(sin título en la fuente; SAP la cita en Solutions for Errors in the Managed System Setup Check)",
       "modulos": [
         "BASIS"
       ],
@@ -9076,7 +9076,7 @@
       "id": "nota-aoknadopfmem",
       "tipo": "nota",
       "clave": "43614",
-      "titulo": "citada en «Solutions for Errors in the Managed System Setup Check»",
+      "titulo": "(sin título en la fuente; SAP la cita en Solutions for Errors in the Managed System Setup Check)",
       "modulos": [
         "BASIS"
       ],
@@ -9111,7 +9111,7 @@
       "id": "nota-lhbnjmppalaj",
       "tipo": "nota",
       "clave": "460089",
-      "titulo": "citada en «Repository Configuration»",
+      "titulo": "(sin título en la fuente; SAP la cita en Repository Configuration)",
       "modulos": [
         "BASIS"
       ],
@@ -9146,7 +9146,7 @@
       "id": "nota-lakaglehkmcn",
       "tipo": "nota",
       "clave": "481835",
-      "titulo": "citada en «Solutions for Errors in the Managed System Setup Check»",
+      "titulo": "(sin título en la fuente; SAP la cita en Solutions for Errors in the Managed System Setup Check)",
       "modulos": [
         "BASIS"
       ],
@@ -9181,7 +9181,7 @@
       "id": "nota-mdngbndhpond",
       "tipo": "nota",
       "clave": "510007",
-      "titulo": "citada en «Setting Up the Managed Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Setting Up the Managed Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -9216,7 +9216,7 @@
       "id": "nota-iaenaieodlcd",
       "tipo": "nota",
       "clave": "51007",
-      "titulo": "citada en «Troubleshooting for ABAP Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -9251,7 +9251,7 @@
       "id": "nota-ioigbmmbcnfh",
       "tipo": "nota",
       "clave": "539977",
-      "titulo": "citada en «Solutions for Errors in the Managed System Setup Check»",
+      "titulo": "(sin título en la fuente; SAP la cita en Solutions for Errors in the Managed System Setup Check)",
       "modulos": [
         "BASIS"
       ],
@@ -9286,7 +9286,7 @@
       "id": "nota-gdlgdnfkcdpa",
       "tipo": "nota",
       "clave": "592085",
-      "titulo": "citada en «Connectivity Support»",
+      "titulo": "(sin título en la fuente; SAP la cita en Connectivity Support)",
       "modulos": [
         "BASIS"
       ],
@@ -9321,7 +9321,7 @@
       "id": "nota-gcaidhfllmpi",
       "tipo": "nota",
       "clave": "799639",
-      "titulo": "citada en «ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->»",
+      "titulo": "(sin título en la fuente; SAP la cita en ABAP Trial Platform on Docker: Frequently Asked Questions (FAQs) <!-- omit from toc -->)",
       "modulos": [
         "BASIS"
       ],
@@ -9356,7 +9356,7 @@
       "id": "nota-ijhbeclfbioe",
       "tipo": "nota",
       "clave": "908097",
-      "titulo": "citada en «Configure Identity Propagation via SAP Web Dispatcher»",
+      "titulo": "(sin título en la fuente; SAP la cita en Configure Identity Propagation via SAP Web Dispatcher)",
       "modulos": [
         "BASIS"
       ],
@@ -9391,7 +9391,7 @@
       "id": "nota-nbekfgekehal",
       "tipo": "nota",
       "clave": "909503",
-      "titulo": "citada en «Troubleshooting for ABAP Systems»",
+      "titulo": "(sin título en la fuente; SAP la cita en Troubleshooting for ABAP Systems)",
       "modulos": [
         "BASIS"
       ],
@@ -9426,7 +9426,7 @@
       "id": "tcode-jiileihjaeih",
       "tipo": "tcode",
       "clave": "CERTRULE",
-      "titulo": "usada en «Assign Authorization Objects for Rule-based Mapping»",
+      "titulo": "(sin nombre en la fuente; SAP la usa en Assign Authorization Objects for Rule-based Mapping)",
       "modulos": [
         "BASIS"
       ],
@@ -9461,7 +9461,7 @@
       "id": "tcode-fachpcdlcpak",
       "tipo": "tcode",
       "clave": "SAML2",
-      "titulo": "usada en «Token Retrieval Using IAS-Signed SAML2.0 Assertions»",
+      "titulo": "(sin nombre en la fuente; SAP la usa en Token Retrieval Using IAS-Signed SAML2.0 Assertions)",
       "modulos": [
         "BASIS"
       ],
@@ -9496,7 +9496,7 @@
       "id": "tcode-blghldmjdjfm",
       "tipo": "tcode",
       "clave": "SICF",
-      "titulo": "usada en «Configure Identity Propagation for HTTPS»",
+      "titulo": "(sin nombre en la fuente; SAP la usa en Configure Identity Propagation for HTTPS)",
       "modulos": [
         "BASIS"
       ],

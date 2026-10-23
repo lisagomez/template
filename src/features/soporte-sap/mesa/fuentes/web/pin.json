@@ -291,5 +291,11 @@
       "ayuda": null,
       "licencia": "CC BY 4.0"
     }
-  ]
+  ],
+  "revision": {
+    "fecha": "2026-10-23",
+    "estado": "al_dia",
+    "proximoPatchDay": "2026-11-10",
+    "avisos": []
+  }
 }

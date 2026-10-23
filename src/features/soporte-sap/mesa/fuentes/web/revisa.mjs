@@ -30,6 +30,7 @@ export const sinRed = (pin) => ({
 export const conRed = (pin) => ({
   cabeza: (web) => execFileSync('git', ['ls-remote', `${web}.git`, 'HEAD'], { encoding: 'utf8', timeout: 60_000 }).split(/\s+/)[0],
   cvesDeSapDesde: async (fecha) => {
+    if (Date.parse(`${fecha}T00:00:00Z`) > Date.now()) return []
     const fin = new Date(Math.min(Date.parse(`${fecha}T00:00:00Z`) + 119 * 86_400_000, Date.now())).toISOString().slice(0, 23)
     const r = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?sourceIdentifier=cna@sap.com&pubStartDate=${fecha}T00:00:00.000&pubEndDate=${fin}&resultsPerPage=2000`, { headers: { 'user-agent': 'soporte-sap-laboratorio/0.1 (revision)' } })
     if (!r.ok) throw new Error(`NVD respondió ${r.status}`)

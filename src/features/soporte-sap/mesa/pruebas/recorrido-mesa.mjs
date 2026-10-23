@@ -9,7 +9,7 @@
  *             (los tokens de servicio de Access: CF_ACCESS_EXPERTO_ID/_SECRETO y CF_ACCESS_LABORATORIO_ID/_SECRETO)
  *   --tras-reinicio   solo comprueba que el último caso sigue, con su retro, después de dormir o redesplegar.
  */
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
 import { identidadLocal, sirveLlaves } from '../../../../../scripts/laboratorio-alojado/identidad-local.mjs'
@@ -48,7 +48,7 @@ async function pagina(cabeceras, viewport = { width: 1440, height: 1000 }) {
 }
 async function captura(p, n, que, comprueba, foco = null, completa = false) {
   const archivo = join(carpeta, `mesa-${String(n).padStart(2, '0')}-${que.replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 44)}.jpg`)
-  if (foco) await p.locator(foco).first().screenshot({ path: archivo, type: 'jpeg', quality: 62 })
+  if (foco) await (typeof foco === 'string' ? p.locator(foco).first() : foco).screenshot({ path: archivo, type: 'jpeg', quality: 62 })
   else await p.screenshot({ path: archivo, type: 'jpeg', quality: 62, fullPage: completa })
   let ok = true
   try { ok = comprueba ? Boolean(await comprueba()) : true } catch { ok = false }
@@ -147,6 +147,36 @@ if (TRAS_REINICIO) {
   const lm = await pagina(id.laboratorio, { width: 390, height: 844 })
   await lm.goto(`${base}/mesa/soporte-sap/laboratorio`); await lm.waitForSelector(sel('mapa'))
   await captura(lm, 18, 'el mapa a ancho de teléfono', async () => (await lm.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)), null, true)
+
+  // 10. La web de BASIS: el nodo con sus conteos reales, un candidato web con su cita y su fecha, uno de sapstack con su
+  // corroboración, y la validación del experto, de la mesa al mapa del laboratorio.
+  const WEB = JSON.parse(readFileSync('src/features/soporte-sap/mesa/fuentes/web/candidatos-web.json', 'utf8'))
+  await l.goto(`${base}/mesa/soporte-sap/laboratorio`); await l.waitForSelector(sel('mapa'))
+  await l.click(sel('nodo-web-abre')); await l.waitForSelector(sel('detalle-web'))
+  await captura(l, 19, 'el nodo de la web en el mapa, con sus conteos reales', async () => (await texto(l, sel('nodo-web'))).includes(String(WEB.candidatos.length)) && /al día|hay versión nueva/.test(await texto(l, sel('nodo-web'))), sel('mapa-lienzo'))
+  await captura(l, 20, 'el detalle de la web: pins, cruce y vigencia', async () => /corroborados/.test(await texto(l, sel('detalle-web'))) && (await texto(l, sel('detalle-web'))).includes(`${WEB.resumen.cruce.corroborados} corroborados`) && /@[0-9a-f]{12}/.test(await texto(l, sel('detalle-web'))), sel('detalle-web'))
+  await e.goto(`${base}/mesa/soporte-sap?pestana=candidatos`); await e.waitForSelector(sel('candidatos'))
+  await e.click(sel('origen-web')); await e.fill(sel('busca'), '3797111')
+  const nota = e.locator('[data-prueba^="candidato-nota-"]', { hasText: '3797111' }).first()
+  await nota.waitFor()
+  await captura(e, 21, 'un candidato de la web con su cita y su fecha', async () => { const t = await nota.innerText(); return /SAP Note 3797111/.test(t) && t.includes(`Capturada el ${WEB.pin.capturadoEl}`) && /Hot News/.test(t) && (await nota.locator(sel('formulario-validacion')).count()) === 1 }, nota)
+  await e.click(sel('origen-sapstack')); await e.fill(sel('busca'), 'STRUST')
+  const strust = e.locator('[data-prueba^="candidato-tcode-"]', { hasText: 'STRUST' }).first()
+  await strust.waitFor()
+  await captura(e, 22, 'un candidato de sapstack con su corroboración', async () => (await strust.locator(sel('cruce-corroborado')).count()) === 1 && /help\.sap\.com/.test(await strust.locator(`${sel('cruce-corroborado')} a`).first().getAttribute('href') ?? ''), strust)
+  await e.click(sel('origen-web')); await e.fill(sel('busca'), '3797111'); await nota.waitFor()
+  await captura(e, 23, 'antes: el experto ante la nota de seguridad, sin validar', async () => (await nota.locator(sel('validacion-hecha')).count()) === 0, nota)
+  await nota.locator(sel('valora-correcto')).click()
+  await nota.locator(sel('comentario')).fill('aplica a los sistemas con el componente encendido; si está apagado, baja la urgencia')
+  await nota.locator(sel('enviar-validacion')).click(); await nota.locator(sel('validacion-hecha')).waitFor()
+  await captura(e, 24, 'después: su validación queda como propuesta', async () => /Propuesta para el laboratorio/.test(await nota.innerText()) && /Es correcto/.test(await nota.innerText()), nota)
+  await l.goto(`${base}/mesa/soporte-sap/laboratorio`); await l.waitForSelector(sel('propuestas'))
+  const prop = l.locator('[data-prueba^="propuesta-nota-"]', { hasText: '3797111' }).first()
+  await captura(l, 25, 'el laboratorio ve la validación de la web como propuesta', async () => { const t = await prop.innerText(); return /propuesta/.test(t) && /Es correcto/.test(t) && /SAP Note 3797111/.test(t) && /capturada el/.test(t) }, prop)
+  const ctxWeb = await navegador.newContext({ viewport: { width: 1440, height: 700 }, extraHTTPHeaders: id.experto })
+  const p404w = await ctxWeb.newPage()
+  const r404w = await p404w.goto(`${base}/mesa/soporte-sap/laboratorio`)
+  await captura(p404w, 26, 'con la web dentro, el experto sigue recibiendo 404 en el mapa', async () => r404w?.status() === 404 && !/3797111|La web/.test(await p404w.content()))
 
   // 7. Las negativas, por la API.
   const negativas = []
