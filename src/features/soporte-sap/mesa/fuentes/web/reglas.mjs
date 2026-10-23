@@ -57,6 +57,11 @@ export function moduloDe(producto) {
 
 // ── Patch Day ──────────────────────────────────────────────────────────────────────────────────
 
+/** Las 00:00 UTC de un día AAAA-MM-DD (sin escribir la hora a mano). */
+export const diaUtc = (f) => new Date(Date.UTC(Number(f.slice(0, 4)), Number(f.slice(5, 7)) - 1, Number(f.slice(8, 10))))
+/** La fecha y hora como la pide NVD (AAAA-MM-DD, la hora y milisegundos, sin zona). */
+export const paraNvd = (d) => d.toISOString().slice(0, 23)
+
 /** El Patch Day de un mes: el segundo martes (AAAA-MM-DD). */
 export function patchDayDe(anio, mes) {
   const primero = new Date(Date.UTC(anio, mes - 1, 1)).getUTCDay()

@@ -14,7 +14,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { proximoPatchDay } from './reglas.mjs'
+import { diaUtc, paraNvd, proximoPatchDay } from './reglas.mjs'
 
 /** Lo que el pin fija. `revisa` no puede cambiar ninguno de estos campos. */
 export const FIJADO = ['capturadoEl', 'ventana', 'ultimoPatchDay', 'cvelist', 'kev', 'sapDocs']
@@ -30,9 +30,10 @@ export const sinRed = (pin) => ({
 export const conRed = (pin) => ({
   cabeza: (web) => execFileSync('git', ['ls-remote', `${web}.git`, 'HEAD'], { encoding: 'utf8', timeout: 60_000 }).split(/\s+/)[0],
   cvesDeSapDesde: async (fecha) => {
-    if (Date.parse(`${fecha}T00:00:00Z`) > Date.now()) return []
-    const fin = new Date(Math.min(Date.parse(`${fecha}T00:00:00Z`) + 119 * 86_400_000, Date.now())).toISOString().slice(0, 23)
-    const r = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?sourceIdentifier=cna@sap.com&pubStartDate=${fecha}T00:00:00.000&pubEndDate=${fin}&resultsPerPage=2000`, { headers: { 'user-agent': 'soporte-sap-laboratorio/0.1 (revision)' } })
+    const ini = diaUtc(fecha)
+    if (ini.getTime() > Date.now()) return []
+    const fin = new Date(Math.min(ini.getTime() + 119 * 86_400_000, Date.now()))
+    const r = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?sourceIdentifier=cna@sap.com&pubStartDate=${paraNvd(ini)}&pubEndDate=${paraNvd(fin)}&resultsPerPage=2000`, { headers: { 'user-agent': 'soporte-sap-laboratorio/0.1 (revision)' } })
     if (!r.ok) throw new Error(`NVD respondió ${r.status}`)
     return (await r.json()).vulnerabilities.map((v) => v.cve.id).filter((id) => !pin.cvelist.cves.includes(id))
   },
@@ -46,7 +47,7 @@ export const conRed = (pin) => ({
   },
 })
 
-const dia = (fecha, n) => new Date(Date.parse(`${fecha}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10)
+const dia = (fecha, n) => new Date(diaUtc(fecha).getTime() + n * 86_400_000).toISOString().slice(0, 10)
 
 /** Los avisos de hoy. Nunca escribe nada. */
 export async function avisos(pin, hoy, remoto) {

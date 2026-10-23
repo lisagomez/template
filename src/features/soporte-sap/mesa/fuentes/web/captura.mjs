@@ -13,7 +13,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { isAbsolute, join, relative } from 'node:path'
 import { carpetas, rutaDeCve } from './generador.mjs'
-import { patchDayDe } from './reglas.mjs'
+import { diaUtc, paraNvd, patchDayDe } from './reglas.mjs'
 
 const AGENTE = 'soporte-sap-laboratorio/0.1 (captura puntual de fuentes publicas)'
 const ESPERA_NVD_MS = 7000
@@ -80,9 +80,9 @@ const espera = (ms) => new Promise((ok) => setTimeout(ok, ms))
 /** Los CVE cuyo CNA es SAP publicados entre dos fechas, en ventanas de 120 días como pide NVD. */
 async function cvesDeSap(desde, hasta, catalogo) {
   const ids = []
-  for (let ini = new Date(`${desde}T00:00:00Z`); ini <= new Date(`${hasta}T00:00:00Z`);) {
-    const fin = new Date(Math.min(ini.getTime() + 119 * 86_400_000, new Date(`${hasta}T23:59:59Z`).getTime()))
-    const url = `https://services.nvd.nist.gov/rest/json/cves/2.0?sourceIdentifier=cna@sap.com&pubStartDate=${ini.toISOString().slice(0, 23)}&pubEndDate=${fin.toISOString().slice(0, 23)}&resultsPerPage=2000`
+  for (let ini = diaUtc(desde); ini <= diaUtc(hasta);) {
+    const fin = new Date(Math.min(ini.getTime() + 119 * 86_400_000, diaUtc(hasta).getTime() + 86_399_999))
+    const url = `https://services.nvd.nist.gov/rest/json/cves/2.0?sourceIdentifier=cna@sap.com&pubStartDate=${paraNvd(ini)}&pubEndDate=${paraNvd(fin)}&resultsPerPage=2000`
     permitida(url, catalogo)
     const r = await fetch(url, { headers: { 'user-agent': AGENTE } })
     if (!r.ok) throw new Error(`NVD respondió ${r.status}`)
