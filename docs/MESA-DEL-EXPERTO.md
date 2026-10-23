@@ -195,6 +195,36 @@ node src/features/soporte-sap/mesa/fuentes/extrae.mjs base                # la f
 Mover el pin es tu decisión: se cambia `sha` en `fuentes/sapstack/fuente.json`, se regeneran los candidatos y el diff va
 a la mesa. Los archivos generados llevan `_ALTO` y huella: editados a mano, la mesa no los carga y una prueba lo dice.
 
+## La web de BASIS (revisión 13 de la AISIA, en borrador)
+
+Va con la revisión 13 (`docs/goals/soporte-sap-AISIA-revision-basis-web.md`): **no la despliegues sin firmarla**.
+
+- **Qué entra**: notas de seguridad de los registros que SAP publica como CNA en el CVE List (con CVSS, versiones y, si
+  CISA la tiene en KEV, «explotada»), y las transacciones y SAP Notes que cita la documentación de SAP en SAP-docs. Cada
+  candidato lleva su cita, el día de su captura y su huella. A cada candidato de BASIS/BC de sapstack, la mesa le enseña
+  si una fuente citable lo corrobora, lo contradice o no lo encuentra.
+- **Qué no entra**: nada que se baje de help.sap.com, support.sap.com, me.sap.com ni de la PAM. Su robots.txt y los
+  términos de SAP no dejan extraerlos en automático, o piden S-user. De una SAP Note solo van el número, el título y el
+  enlace.
+- **La mesa alojada no sale a la web**: lee el catálogo y el pin que van en la imagen. Capturar y revisar lo haces tú, en
+  tu máquina, y la captura vive fuera del repo.
+
+El ciclo de cada mes, el miércoles después del Patch Day (el segundo martes):
+
+```
+C=~/.soporte-sap/captura-web                                          # fuera del repo
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs revisa          # ¿hay versión nueva? Avisa, no mueve
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs web descubre $C # propuesta de pin en $C/pin-propuesto.json
+#   revisas el diff contra fuentes/web/pin.json y, si lo apruebas, lo copias encima (mover el pin es tu decisión)
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs web captura $C  # baja cada fuente por su SHA (unos 15 s)
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs web $C          # regenera candidatos-web.json; se niega si algo no cuadra
+node docs/goals/soporte-sap-basis-web-evidencia/mide.mjs $C           # cobertura, cruce y grafo, para revisar el diff
+```
+
+El diff de `candidatos-web.json` es lo que llega a la mesa. Lo que no esté en las fuentes automáticas (el procedimiento
+de una tarea en SAP Help, una nota sin CVE del Patch Day, una fecha de fin de mantenimiento) lo trae una persona: el
+experto, en la mesa, como su experiencia.
+
 ## Apagar
 
 - Sin sesiones, el contenedor **se duerme solo** a los 30 minutos: no corre ni cobra memoria. Al despertar, el
