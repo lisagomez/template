@@ -125,7 +125,7 @@ técnica (huella, captura, `revisa`) es una sugerencia que puedes descartar. Sol
    - la mesa alojada no sale a la web.
 
    Y la matriz entera en verde, con su conteo.
-9. El borrador de la revisión 13 en `docs/goals/soporte-sap-AISIA-revision-basis-web.md`, sin firmar.
+9. El borrador de la revisión 13, sin firmar (el laboratorio la firmó el 2026-10-24: `.claude/gobernanza/AISIA-soporte-sap.md`).
 10. «Lo que podría estar mal», pegado y resuelto donde se pueda.
 11. La validación en verde, pegada, y `git status` limpio tras el commit en `soporte/basis-web`, sin push.
 

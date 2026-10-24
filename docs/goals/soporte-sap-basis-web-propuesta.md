@@ -50,8 +50,8 @@ experto» (sección 8). Validar es una propuesta. Una regla se firma en `tools/c
 cita la rechaza mientras no esté anotada y firmada en CAMBIOS.md: los 262 candidatos del paquete de prueba la rechazan
 por eso, y los 44 de sapstack sin corroborar, además, por citar a sapstack.
 
-**Qué pide al laboratorio.** Firmar la revisión 13 de la AISIA (borrador en
-`docs/goals/soporte-sap-AISIA-revision-basis-web.md`), decidir D-BW-1 a D-BW-8 (sección 13) y desplegar con
+**Qué pide al laboratorio.** Firmar la revisión 13 de la AISIA (firmada el 2026-10-24:
+`.claude/gobernanza/AISIA-soporte-sap.md`), decidir D-BW-1 a D-BW-8 (sección 13) y desplegar con
 `despliega.sh`. El ciclo mensual (descubrir, capturar, extraer y revisar) lo corre el laboratorio en su máquina.
 
 ## 2. Lo que se investigó: la web de hoy y tres bases curadas con procedencia
@@ -317,7 +317,7 @@ solo lo puede enseñar el experto.
 | D-BW-7 | ¿Se despliega la mesa con la web? | **Sí**, después de firmar la revisión 13, con `despliega.sh` |
 | D-BW-8 | ¿La prioridad derivada del CVSS basta? | **Sí, etiquetada** («en la escala de SAP»). Si la del Patch Day difiere, el experto la corrige en la mesa |
 
-**Controles que pide.** AISIA: la revisión 13 (borrador). C3: dos filas nuevas en «La mesa del experto alojada»,
+**Controles que pide.** AISIA: la revisión 13, firmada el 2026-10-24. C3: dos filas nuevas en «La mesa del experto alojada»,
 sin control nuevo. CDC: ninguno (no se toca politica-cita, ni skills, ni gates). Lo serían D-BW-3 y D-BW-4.
 **C5**: ninguno, porque los dos daños nuevos son infirmables y se evitan con controles (revisión 13, §5). **Costo**: sin
 APIs de pago ni modelo. NVD sin llave (de 2 a 4 peticiones al mes), unos 220 MB de captura en la máquina del

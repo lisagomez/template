@@ -195,9 +195,9 @@ node src/features/soporte-sap/mesa/fuentes/extrae.mjs base                # la f
 Mover el pin es tu decisión: se cambia `sha` en `fuentes/sapstack/fuente.json`, se regeneran los candidatos y el diff va
 a la mesa. Los archivos generados llevan `_ALTO` y huella: editados a mano, la mesa no los carga y una prueba lo dice.
 
-## La web de BASIS (revisión 13 de la AISIA, en borrador)
+## La web de BASIS (revisión 13 de la AISIA)
 
-Va con la revisión 13 (`docs/goals/soporte-sap-AISIA-revision-basis-web.md`): **no la despliegues sin firmarla**.
+Va con la revisión 13 de la AISIA, firmada el 2026-10-24.
 
 - **Qué entra**: notas de seguridad de los registros que SAP publica como CNA en el CVE List (con CVSS, versiones y, si
   CISA la tiene en KEV, «explotada»), y las transacciones y SAP Notes que cita la documentación de SAP en SAP-docs. Cada
