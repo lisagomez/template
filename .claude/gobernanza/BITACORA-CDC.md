@@ -5433,3 +5433,68 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `verifica:gates` ☑ 12/12 y `--prueba` 9/9; `verify:gobernanza` ☑ 171/171; `mide:contexto` ☑ dentro de
   presupuesto.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-23
+
+### 2026-10-24 — banner y gate para todo artefacto generado (D-SS-9) — radio: padrón de gates (registro `generados` y gate nuevo `verifica:generados`), nueve generadores con lo que regeneran, y sistema (una línea de `AGENTS.md` y la cabecera de `GEMINI.md`, regenerado)
+
+- **Cambio** (rama `gobernanza/artefactos-generados`, desde `main` en `2d4606d`, commit `37068a2`):
+  1. **El registro `generados` en `.claude/gates.json`**. Va dentro del padrón para que sacar un artefacto sea un CDC,
+     como apagar un gate.
+     - **11 artefactos**, cada uno con su fuente, el comando que lo regenera y quién lo compara: `GEMINI.md`, el CI de
+       GitHub, la vista del inventario, la migración del catálogo SGI, el diccionario GS1, el staging de dbt de la
+       clínica (22 archivos), los dos roadmaps de ventas por WhatsApp, el manual de Soporte SAP, el bloque de reúso
+       del SDD de Soporte SAP, el resumen del detector de voz y los identificadores sintéticos del extractor.
+     - **6 grupos `fuera`**, cada uno con clase, motivo y falta, como un gate inactivo: medición, capturas, locks,
+       referencias aprobadas, no herméticos y registros. Lo que no se compara no cuenta como comprobado.
+  2. **Gate nuevo `verifica:generados`** (`scripts/verifica-generados.mjs`, lógica en `scripts/lib/generados.mjs`),
+     solo en el perfil `validate`: necesita los `dist/` de `tools/`, y lo generado no cambia en el servidor.
+     - Por artefacto: sus rutas están versionadas, lleva el banner «ALTO: ARTEFACTO AUTOGENERADO» en la cabeza (o
+       tras el marcador de su bloque), y coincide con su fuente, por su `--comprueba` o por un gate de `validate`
+       que ya lo comparaba y tiene que seguir activo.
+     - Por el repo: ningún archivo versionado con banner queda sin registrar, nada `fuera` lleva banner, cada ruta
+       `fuera` tiene archivos, y ningún archivo tiene dos dueños.
+     - Corre sus 8 siembras en cada pasada.
+  3. **Los generadores**: nueve emiten el banner común y cuatro ganan `--comprueba`: el diccionario GS1, el staging
+     de la clínica (que además caza un `stg_*.sql` de un tipo que el contrato ya no tiene), el resumen del detector
+     y los identificadores sintéticos. La migración del catálogo SGI conserva su banner de antes, declarado en el
+     registro: no se reescribe una migración aplicada. Lo regenerado solo cambia en su cabecera.
+  4. **Documentación**: una línea en «Comandos npm» de `AGENTS.md` (`GEMINI.md` regenerado, con la cabecera
+     nueva), `README.md`, `.claude/README.md` y el asiento del script nuevo en el inventario.
+- **Por qué**: lo decidió el laboratorio el 2026-10-22 (D-SS-9, propuesta sapstack §10.2). En el repo había 11
+  artefactos que se regeneran desde sus fuentes: 6 tenían banner y comparación, 4 no tenían comparación, y nada
+  impedía que uno nuevo entrara sin ninguna de las dos.
+- **Demostrado** (2026-10-24):
+  - inventario de `main`: 45 grupos de archivos generados, de los que 11 se regeneran desde el repo de forma
+    determinista. Antes de tocar nada se regeneraron todos: ninguno tenía deriva;
+  - `verifica:generados`: 49 comprobaciones y 8 de 8 siembras cazadas, en unos 2 s;
+  - 7 sabotajes en disco, uno cada vez: el diccionario GS1 editado, un modelo de staging retocado, un staging de un
+    tipo que el contrato no tiene, el banner borrado del manual, el resumen del detector retocado, un identificador
+    cambiado y un generado nuevo sin registrar. Los 7 en rojo, cada uno en su comprobación; restaurados, verde;
+  - el JSON de identificadores sale idéntico con Python 3.14 (local) y 3.11 (contenedor): con la semilla 9 es
+    determinista;
+  - en un clon limpio dentro de `node:22.18.0-bookworm` (fijado por digest), con 2 CPU y 7 GB, sin `.env` ni
+    `node_modules`: **`validate` 33/33** sobre `37068a2` (árbol `0d774e27a44b`), en 978 s; gobernanza 171/171.
+- **Lo que cuesta o queda abierto**:
+  - `validate` pasa de 32 a 33 gates activos, y el tope del CI de 238 a 243 min;
+  - **choque previsible con las ramas de soporte**: `soporte/sapstack` trae `candidatos-sapstack.json` y `base.json`
+    con `_ALTO`. Al juntarse con esta rama, el gate los verá huérfanos hasta que se registren con su comparación (la
+    huella de la mesa y la prueba que regenera `base.json`). Es lo que el gate tiene que hacer;
+  - el gate caza los generados que llevan banner; uno nuevo sin banner y sin registrar no lo ve. `fuera` declara las
+    clases conocidas, no es una lista exhaustiva;
+  - los `plan.md` de goals (de `grafo2plan.py`) quedan fuera: darles banner y `--comprueba` es un CDC del skill
+    goal-compiler;
+  - hallazgos del inventario, fuera de este cambio: el `requirements.lock` de la clínica es una copia del de Soporte
+    SAP, con la cabecera apuntando al `.in` de Soporte SAP; hay un `.pyc` versionado por error en
+    `tools/dictado/motores-locales/`; y el README de dictado tiene marcadores de tabla que ningún script escribe.
+- **Salida del perímetro (C4)**: ninguna: no cambia qué datos salen ni adónde.
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 33/33 en clon limpio sobre `37068a2` (árbol `0d774e27a44b`);
+  - capa B no corrida por el agente: en `AGENTS.md` cambia una línea de «Comandos npm» y en `GEMINI.md` la cabecera,
+    no una instrucción; decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni imagen nueva; el validate de la medición, en la imagen fijada por digest).
+- **Regresión**: `verifica:generados` ☑ 49 y 8/8 siembras; `verifica:gates` ☑ 12/12 y `--prueba` 9/9;
+  `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 293 unidades; `mide:contexto` ☑ dentro de presupuesto;
+  `revisa:readmes` ☑.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-24
