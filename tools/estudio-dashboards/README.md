@@ -15,7 +15,7 @@ Pides la vista que necesitas en una frase y la ves en segundos, con cada cifra s
 
 - No dibuja HTML ni escribe SQL: el agente edita la especificación y pide métricas por nombre. Un parche que toca un componente que la instrucción no pidió se rechaza entero.
 - No inventa cálculos: si lo pedido no existe en el catálogo, lo dice y ofrece proponer la métrica como diff del YAML semántico; no sustituye por una parecida.
-- No suma en el cliente lo que no suma (clientes distintos, razones, fotos de inventario) ni usa una métrica con desfase sobre un periodo de varios meses.
+- No suma en el cliente lo que no suma (clientes distintos, razones, fotos de inventario) ni usa una métrica con desfase sobre un periodo de varios meses: al analizarla, descompone su métrica base contra el año anterior y lo dice.
 - No envía nada: una alerta registrada no tiene canal; `proponer_metrica` no abre ningún PR ni toca el proyecto dbt.
 - No guarda en Supabase: las versiones y alertas van por un puerto (memoria o archivo).
 
@@ -68,7 +68,7 @@ Subpaths: `.` (núcleo: esquema, validación, parches, versiones, consultor, res
 
 ## Pruebas
 
-`npm --prefix tools/estudio-dashboards run prueba`: 50 pruebas (2026-10-20). Cubren los casos malos (métrica inventada, dimensión inválida, SQL libre, filtro fuera de dominio, parche que toca de más), versiones, consultor, resolver (también con respuestas desordenadas y con dos procesos reales), narración con cifras respaldadas, alertas, propuestas, agente con modelo doble (incluido el canario de contaminación del set), CLI (paridad y códigos) y, si están el entorno y los datos, la capa real (tablero, las 3 señales sembradas y el análisis de julio).
+`npm --prefix tools/estudio-dashboards run prueba`: 51 pruebas (2026-10-22). Cubren los casos malos (métrica inventada, dimensión inválida, SQL libre, filtro fuera de dominio, parche que toca de más), versiones, consultor, resolver (también con respuestas desordenadas y con dos procesos reales), narración con cifras respaldadas, alertas, propuestas, agente con modelo doble (incluido el canario de contaminación del set), CLI (paridad y códigos) y, si están el entorno y los datos, la capa real (tablero, las 3 señales sembradas y el análisis de julio).
 
 ## Mediciones
 

@@ -40,8 +40,12 @@ cuenta, y antes de exponerla hace falta sesión y C3.
   produjo un adjudicador independiente y ciego, y está congelado en `cdf43d6`. El v1 sigue siendo el oficial hasta
   que el laboratorio firme.
 - **Los dos arreglos vistos en la retenida** (las dimensiones de la línea en «lo que entendí»; «¿por qué cayó el
-  crecimiento?» por la métrica base): se aplican y se miden en un set nuevo, escrito a ciegas y congelado antes de
-  medir. Ninguno está aplicado. El adjudicador dejó además tres tensiones del contrato para resolver en el contrato:
+  crecimiento?» por la métrica base): **aplicados y medidos el 2026-10-22** en la rama `estudio/set-ciego`, sobre un set
+  v3 escrito a ciegas, adjudicado y congelado antes de medir (`docs/goals/estudio-dashboards-set-v3.md`). Resultado:
+  no medibles como mejora (el de la métrica con desfase no tiene preguntas en el v3; el del eje de tiempo es neutro)
+  y sin cambio de precisión (96/96 sin ellos, 95/95 con ellos). El umbral por tipo tampoco se cumple en el v3
+  (`crear` y `filtrar`, con los dos núcleos). Adoptarlos es decisión del laboratorio. El adjudicador del v2 dejó además
+  tres tensiones del contrato para resolver en el contrato (el del v3, dieciséis):
   - la tabla por tipo contra la regla general de la Puntuación;
   - `comparar` en analizar;
   - la unidad de un umbral de nivel sobre una métrica en %.

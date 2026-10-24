@@ -24,17 +24,25 @@ const contexto = (m: ModeloEstudio, registro: LlamadaModelo[] = []) => ({ consul
  * catálogo: las etiquetas y descripciones de la capa son insumo compartido por diseño con el revisor (medido el
  * 2026-10-20: la única coincidencia fue la etiqueta «Crecimiento de ventas vs año anterior %» del YAML).
  */
-test('canario: ninguna pregunta del set de referencia aparece en el prompt', () => {
-  const set = JSON.parse(readFileSync(join(RAIZ, 'evaluacion', 'set-referencia.json'), 'utf8')) as { preguntas: { instruccion: string }[] }
+test('canario: ninguna pregunta de los sets de referencia (v1, v2 y v3) aparece en el prompt', () => {
   const sinCatalogo = construyeCatalogo({ version: 'vacio', metricas: [] }, {})
   const prompt = `${promptSistema(sinCatalogo, { corte: '2026-09', contexto: 'laboratorio' })}\n${mensajeUsuario(tablero('growth'), 0, '')}`.toLowerCase()
   const palabras = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z0-9ñ]+/g) ?? []
   const p = palabras(prompt).join(' ')
-  for (const q of set.preguntas) {
-    const w = palabras(q.instruccion)
-    for (let i = 0; i + 6 <= w.length; i++) assert.ok(!p.includes(w.slice(i, i + 6).join(' ')), 'una pregunta del set (6 palabras seguidas) aparece en el prompt')
+  // El contrato es lo único que comparten por diseño quien escribe el set y quien escribe el prompt (sus convenciones
+  // de periodo, «en lo que va del año»): una frase suya no es contaminación. Medido el 2026-10-22 con el v3.
+  const contrato = palabras(readFileSync(join(RAIZ, 'evaluacion', 'CONTRATO.md'), 'utf8')).join(' ')
+  for (const archivo of ['set-referencia.json', 'set-referencia-v2.json', 'set-referencia-v3.json']) {
+    const set = JSON.parse(readFileSync(join(RAIZ, 'evaluacion', archivo), 'utf8')) as { preguntas: { instruccion: string }[] }
+    for (const q of set.preguntas) {
+      const w = palabras(q.instruccion)
+      for (let i = 0; i + 6 <= w.length; i++) {
+        const g = w.slice(i, i + 6).join(' ')
+        assert.ok(!p.includes(g) || contrato.includes(g), `una pregunta de ${archivo} (6 palabras seguidas, fuera del contrato) aparece en el prompt`)
+      }
+    }
+    assert.equal(set.preguntas.length, 100)
   }
-  assert.equal(set.preguntas.length, 100)
 })
 
 test('modificar: el plan del modelo se convierte en un parche que toca solo lo pedido', async () => {
@@ -42,7 +50,8 @@ test('modificar: el plan del modelo se convierte en un parche que toca solo lo p
   const v = await interpreta(contexto(m), tablero('ejecutivo'), 0, 'esa gráfica de regiones mejor como línea')
   assert.equal(v.error, null)
   assert.deepEqual(v.resultado?.aplicado?.tocados, ['por_region'])
-  assert.match(v.entendi, /métrica: ventas_netas · dimensión: tienda__region · toca: por_region/)
+  // Hecha línea, la gráfica también agrupa por mes: el núcleo lo agrega a «lo que entendí».
+  assert.match(v.entendi, /métrica: ventas_netas · dimensión: tienda__region, metric_time__month · toca: por_region/)
   assert.equal(v.intentos, 1)
 })
 
@@ -104,13 +113,33 @@ test('analizar: el hallazgo entra como componente nuevo y su texto solo lleva ci
   assert.match(v.texto, /Ventas netas pasó de/)
 })
 
-test('analizar una métrica con desfase vuelve al modelo con el porqué, y el modelo puede corregir a la base', async () => {
+test('analizar una métrica con desfase descompone su base contra el año anterior, sin volver al modelo, y lo dice', async () => {
   const yoy = plan({ tipo: 'analizar', entendi: { metricas: ['crecimiento_ventas_yoy_pct'], dimensiones: [], filtros: [], periodo: { desde: '2026-01', hasta: '2026-09' }, comparar: null } })
-  const base = plan({ tipo: 'analizar', entendi: { metricas: ['ventas_netas'], dimensiones: [], filtros: [], periodo: { desde: '2026-01', hasta: '2026-09' }, comparar: null } })
-  const v = await interpreta(contexto(modelo([yoy, base])), tablero('ejecutivo'), 0, '¿por qué crecimos tanto este año?')
-  assert.equal(v.intentos, 2)
-  assert.equal(v.error, null)
-  assert.equal(v.plan?.entendi.metricas[0], 'ventas_netas')
+  const m = modelo([yoy])
+  const v = await interpreta(contexto(m), tablero('ejecutivo'), 0, '¿de dónde salió el crecimiento de este año?')
+  assert.deepEqual([v.intentos, m.pedidos, v.error], [1, 1, null], v.error ?? '')
+  assert.equal(v.plan?.entendi.metricas[0], 'crecimiento_ventas_yoy_pct', '«lo que entendí» sigue siendo lo que se pidió')
+  assert.equal(v.resultado?.analisis?.metrica, 'ventas_netas', 'lo que se descompone es la base')
+  assert.match(v.texto, /compara Ventas netas contra el año anterior; descompongo ese cambio\. Ventas netas pasó de/)
+  const h = v.resultado?.aplicado?.dashboard.componentes.find((c) => c.tipo === 'hallazgo')
+  assert.match(h && 'titulo' in h ? String(h.titulo) : '', /^¿Por qué cambió Crecimiento/)
+})
+
+test('modificar: «lo que entendí» lleva el eje de tiempo de la línea que toca, sacado del tablero ya parchado', async () => {
+  const entendi = (dimensiones: string[]) => ({ metricas: ['ventas_netas'], dimensiones, filtros: [], periodo: null, comparar: null })
+  const casos: [Record<string, unknown>, string[]][] = [
+    [{ entendi: entendi([]), componentes: [], operaciones: [{ op: 'agregar', componente: { id: 'ventas_semana', tipo: 'linea', metrica: 'ventas_netas', grano: 'week' }, despues_de: null }] }, ['metric_time__week']],
+    [{ entendi: entendi(['tienda__region']), componentes: ['crec_region'], operaciones: [{ op: 'cambiar', id: 'crec_region', cambios: { orden: 'asc' } }] }, ['tienda__region']],
+    [{ entendi: entendi([]), componentes: ['tendencia'], operaciones: [{ op: 'quitar', id: 'tendencia' }] }, []],
+    [{ entendi: entendi(['metric_time__month']), componentes: ['tendencia'], operaciones: [{ op: 'cambiar', id: 'tendencia', cambios: { titulo: 'Ventas' } }] }, ['metric_time__month']],
+  ]
+  for (const [p, esperado] of casos) {
+    const v = await interpreta(contexto(modelo([plan({ tipo: 'modificar', ...p })])), tablero('growth'), 0, 'un cambio')
+    assert.equal(v.error, null, v.error ?? '')
+    assert.deepEqual([...(v.plan?.entendi.dimensiones ?? [])].sort(), esperado)
+  }
+  const v = await interpreta(contexto(modelo([plan({ tipo: 'modificar', ...casos[0]![0] })])), tablero('growth'), 0, 'un cambio')
+  assert.match(v.entendi, /dimensión: metric_time__week/, 'la persona lo ve en «lo que entendí»')
 })
 
 test('sin cambio anterior, el mensaje es el MISMO que se midió (estudio-agente/3); con él, nombra lo que tocó', () => {

@@ -102,6 +102,20 @@ function operacionesDe(cat: Catalogo, p: Plan, actual: Dashboard): { operaciones
   return { operaciones: p.operaciones, componentes: [...new Set([...p.componentes, ...nuevos])] }
 }
 
+/**
+ * MODIFICAR: «lo que entendí» lleva el eje de tiempo de cada línea que el cambio deja tocada (las dimensiones son las
+ * de lo que queda en los componentes tocados, y el modelo suele omitir el tiempo). Lo completa el núcleo desde el
+ * tablero ya parchado, no el modelo. Visto en la medición del 2026-10-20 (q020, q027); se mide en un set nuevo.
+ */
+export function conEjeDeTiempo(p: Plan, a: Aplicado): Plan {
+  const tiempos = a.tocados.flatMap((id) => {
+    const c = a.dashboard.componentes.find((x) => x.id === id)
+    return c?.tipo === 'linea' ? [`metric_time__${c.grano ?? 'month'}`] : []
+  })
+  const dimensiones = [...new Set([...p.entendi.dimensiones, ...tiempos])].slice(0, 4)
+  return dimensiones.length === p.entendi.dimensiones.length ? p : { ...p, entendi: { ...p.entendi, dimensiones } }
+}
+
 const vacio = (plan: Plan, errores: ErrorValidacion[] = []): Resultado => ({ plan, parche: null, aplicado: null, explicacion: null, analisis: null, alerta: null, propuesta: null, errores })
 
 async function analiza(x: Consultor, p: Plan, actual: Dashboard, version: number): Promise<Resultado> {
@@ -140,7 +154,8 @@ export async function ejecutaPlan(x: Consultor, p: Plan, actual: Dashboard, vers
   if (!operaciones.length) return vacio(p, [e('esquema', 'operaciones', `una instrucción de tipo ${p.tipo} necesita cambiar algo`)])
   const parche = { esquema: ESQUEMA_PARCHE, base: version, alcance: { tipo: p.tipo, componentes }, operaciones } as Parche
   const r = aplicaParche(cat, actual, version, parche)
-  return { ...vacio(p, r.ok ? [] : [...r.errores]), parche, aplicado: r.ok ? r.valor : null }
+  if (!r.ok) return { ...vacio(p, [...r.errores]), parche }
+  return { ...vacio(p.tipo === 'modificar' ? conEjeDeTiempo(p, r.valor) : p), parche, aplicado: r.valor }
 }
 
 export { esSumable }
