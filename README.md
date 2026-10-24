@@ -241,8 +241,9 @@ npm run validate     # el gate completo: typecheck + lint + build + gobernanza +
 npm run gates        # el padron entero: los gates de cada perfil, y los inactivos con su motivo (que nunca cuentan como pasados)
 npm run prueba:trayectorias   # el formato de trayectoria y la captura (spec 011), dentro del gate
 npm run verifica:trayectorias # el almacen de trayectorias capturadas (spec 011 RF-4), dentro del gate
-npm run verifica:gates     # que el padron y el codigo no divergan (`--prueba` tumba 6 siembras)
+npm run verifica:gates     # que el padron y el codigo no divergan (`--prueba` tumba 9 siembras)
 npm run proyecta:gates     # emite reglas/software.toml para hermes-os-a2a (`--diff` compara con su copia)
+                           # y el CI de GitHub Actions (`--ci github --salida .github/workflows/gates.yml`)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de .claude/specs/: secciones, EARS, numeracion
 npm run prepara:gate       # lo dispara pretypecheck: engines.node + build de tools/
@@ -434,7 +435,12 @@ Tres reglas lo sostienen, y las tres son fail-closed:
 divergan —y que **ningun archivo de pruebas quede huerfano**, la comprobacion que destapo que
 `scripts/prueba-a2a.ts` existia sin que ningun script lo corriera, y que las suites de `tools/`
 (87 archivos, 776 pruebas solo en `extractor-documental`) se construian pero no se ejecutaban.
-`npm run verifica:gates -- --prueba` siembra seis violaciones y exige que caigan las seis.
+`npm run verifica:gates -- --prueba` siembra nueve violaciones y exige que caigan las nueve.
+
+El **CI de GitHub Actions** (`.github/workflows/gates.yml`) no se escribe a mano: es una proyeccion del padron
+(`scripts/lib/ci.mjs`) que corre el mismo `corre-gates.mjs validate` en cada PR a `main`, con las actions fijadas
+por SHA y Node en el minimo de `engines`. `verifica:gates` lo compara con la proyeccion: editado a mano, borrado o
+con el padron cambiado sin regenerarlo, se pone rojo.
 
 El diseno viene del motor del Supervisor de `hermes-os-a2a` (`supervisor-a2a/gates.py`); el
 `motivo` obligatorio se anadio aqui. Y va en el sentido inverso tambien: `npm run proyecta:gates`
