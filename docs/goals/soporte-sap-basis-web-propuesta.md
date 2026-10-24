@@ -51,7 +51,7 @@ cita la rechaza mientras no esté anotada y firmada en CAMBIOS.md: los 262 candi
 por eso, y los 44 de sapstack sin corroborar, además, por citar a sapstack.
 
 **Qué pide al laboratorio.** Firmar la revisión 13 de la AISIA (firmada el 2026-10-24:
-`.claude/gobernanza/AISIA-soporte-sap.md`), decidir D-BW-1 a D-BW-8 (sección 13) y desplegar con
+`.claude/gobernanza/AISIA-soporte-sap.md`), decidir D-BW-1 a D-BW-8 (aceptadas el 2026-10-24, sección 13) y desplegar con
 `despliega.sh`. El ciclo mensual (descubrir, capturar, extraer y revisar) lo corre el laboratorio en su máquina.
 
 ## 2. Lo que se investigó: la web de hoy y tres bases curadas con procedencia
@@ -306,7 +306,12 @@ solo lo puede enseñar el experto.
 
 ## 13. Decisiones del laboratorio
 
-| # | Decisión | Recomendación |
+**Decididas el 2026-10-24**: el laboratorio aceptó las ocho recomendaciones. D-BW-1, D-BW-5 y D-BW-8 ya son como se
+construyó, y D-BW-3 y D-BW-4 dicen que no: politica-cita no cambia, así que no piden CDC. D-BW-2 es el ciclo mensual
+de `docs/MESA-DEL-EXPERTO.md`. D-BW-6 se hace en la mesa, con el experto, y la ficha de fin de mantenimiento la
+escribe el laboratorio a mano. D-BW-7 es el despliegue, ya con la revisión 13 firmada.
+
+| # | Decisión | Recomendación (aceptada) |
 |---|---|---|
 | D-BW-1 | ¿Lo de SAP entra solo por los canales que lo permiten (CVE List, SAP-docs), y SAP Help y support.sap.com quedan a lectura humana? | **Sí.** Si un día se quiere cubrir los huecos con SAP Help, se pide permiso por escrito a SAP; no se rodea el robots.txt |
 | D-BW-2 | ¿Cada cuánto se mueve el pin? | **Cada mes, a mano, el día después del Patch Day** (miércoles): `descubre` → mirar el diff de `pin-propuesto.json` → mover el pin → `captura` → `web` → revisar el diff de candidatos. Nunca en automático |
