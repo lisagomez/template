@@ -31,8 +31,8 @@ export const SECCIONES_QUE_OBLIGAN = [
   'Gobernanza (leer antes de tocar skills, datos o produccion)',
 ];
 
-const CABECERA = `<!-- GENERADO por scripts/sincroniza-gemini.mjs desde AGENTS.md el ultimo CDC que lo toco.
-     NO editar a mano: el verificador de gobernanza falla si diverge. Regenerar con
+const CABECERA = `<!-- ALTO: ARTEFACTO AUTOGENERADO por scripts/sincroniza-gemini.mjs desde AGENTS.md.
+     NO lo edites a mano: el verificador de gobernanza falla si diverge. Regenerar con
      \`npm run sincroniza:gemini\`. Solo lleva las secciones que OBLIGAN; lo informativo vive
      en .claude/rules/*.md (Gemini no las carga: leelas al tocar esos archivos). -->
 `;

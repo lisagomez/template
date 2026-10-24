@@ -79,6 +79,17 @@
       "_nota": "Se vigila a si mismo a proposito: un padron que nada obliga a mantener se pudre en silencio, y este padron decide que corre el gate."
     },
     {
+      "nombre": "verifica:generados",
+      "runner": "comando",
+      "comando": "npm run verifica:generados",
+      "guarda": "los artefactos generados del registro `generados` de este padron (D-SS-9): que lleven el banner ALTO, que coincidan con su fuente, que ningun generado con banner quede sin registrar y que lo que se deja fuera diga por que",
+      "evidencia": "una linea por comprobacion y las siembras cazadas; exit 1 si un generado diverge de su fuente o el registro miente",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 300,
+      "_nota": "Solo en validate: necesita los dist/ de tools/, que construye pretypecheck antes, y lo generado no cambia en el servidor."
+    },
+    {
       "nombre": "verifica:specs",
       "runner": "comando",
       "comando": "npm run verifica:specs",
@@ -504,5 +515,177 @@
       "motivo": "Es una medicion, no un criterio: no tiene umbral binario que pueda ponerse rojo. Meterlo en `validate` daria un gate que nunca falla, que es peor que no tenerlo (se lee como cobertura y no cubre).",
       "falta": "Un umbral declarado de coste de contexto por MCP para que pueda ser un gate de verdad. Mientras no exista, se corre a mano al evaluar un MCP."
     }
-  ]
+  ],
+  "generados": {
+    "_comentario": "Registro de artefactos generados (D-SS-9, decidida el 2026-10-22). Lo lee `verifica:generados` (scripts/verifica-generados.mjs). Cambiarlo es un CDC del padron (C1): sacar un artefacto de aqui es apagar su comprobacion.",
+    "_doctrina": "Lo generado no se edita: se regenera. Cada artefacto lleva en su cabeza el banner «ALTO: ARTEFACTO AUTOGENERADO» (en un comentario, o en la clave `_ALTO` de un JSON) y algo lo compara con su fuente: su propio `--comprueba`, o un gate de validate que ya lo hacia. Lo que no se puede regenerar desde el repo se declara en `fuera` con clase, motivo y falta, como un gate inactivo, y no lleva el banner.",
+    "artefactos": [
+      {
+        "nombre": "gemini",
+        "rutas": ["GEMINI.md"],
+        "fuentes": ["AGENTS.md", "scripts/sincroniza-gemini.mjs"],
+        "genera": "npm run sincroniza:gemini",
+        "comprueba": { "gate": "verify:gobernanza" }
+      },
+      {
+        "nombre": "ci-github",
+        "rutas": [".github/workflows/gates.yml"],
+        "fuentes": [".claude/gates.json", "package.json", "scripts/lib/ci.mjs"],
+        "genera": "npm run proyecta:gates -- --ci github --salida .github/workflows/gates.yml",
+        "comprueba": { "gate": "verifica:gates" }
+      },
+      {
+        "nombre": "inventario-vista",
+        "rutas": ["inventario/INVENTARIO.md"],
+        "fuentes": ["inventario/activos.json", "scripts/inventario/vista.mjs"],
+        "genera": "npm run inventario:vista",
+        "comprueba": { "gate": "verifica:inventario" }
+      },
+      {
+        "nombre": "sgi-catalogo-sql",
+        "rutas": ["supabase/migrations/20260930100200_sgi_catalogo.sql"],
+        "fuentes": ["tools/sistema-integrado/src/catalogo/datos.ts", "scripts/sgi/catalogo-sql.ts"],
+        "genera": "node scripts/sgi/catalogo-sql.ts",
+        "comprueba": { "gate": "prueba:laboratorio-sgi" },
+        "banner": "GENERADO por scripts/sgi/catalogo-sql.ts",
+        "_nota": "Conserva su banner de antes: es una migracion ya aplicada, y su texto no se reescribe para cambiarle la cabecera."
+      },
+      {
+        "nombre": "gs1-diccionario",
+        "rutas": ["tools/etiquetas-gs1/src/diccionario/datos.ts"],
+        "fuentes": ["tools/etiquetas-gs1/fuentes/gs1-syntax-dictionary.txt", "tools/etiquetas-gs1/generador/genera-diccionario.mjs"],
+        "genera": "node tools/etiquetas-gs1/generador/genera-diccionario.mjs",
+        "comprueba": { "comando": "node tools/etiquetas-gs1/generador/genera-diccionario.mjs --comprueba" }
+      },
+      {
+        "nombre": "clinica-dental-staging",
+        "rutas": ["tools/clinica-dental/semantica/modelos/staging/*", "tools/clinica-dental/semantica/pruebas/libro_igual_staging.sql"],
+        "fuentes": ["tools/clinica-dental/src/**", "tools/clinica-dental/semantica/genera.ts"],
+        "genera": "node tools/clinica-dental/semantica/genera.ts",
+        "comprueba": { "comando": "node tools/clinica-dental/semantica/genera.ts --comprueba" }
+      },
+      {
+        "nombre": "ventas-whatsapp-roadmaps",
+        "rutas": ["tools/ventas-whatsapp/piloto/ROADMAP-COSTOS.md", "tools/ventas-whatsapp/piloto/ROADMAP-CONVERSACIONES.md"],
+        "fuentes": ["tools/ventas-whatsapp/src/laboratorio/documentos.ts"],
+        "genera": "node tools/ventas-whatsapp/e2e/genera-roadmaps.mjs",
+        "comprueba": { "gate": "prueba:tools" }
+      },
+      {
+        "nombre": "soporte-sap-manual",
+        "rutas": ["src/features/soporte-sap/MANUAL.md"],
+        "fuentes": ["src/features/soporte-sap/vitrina/contenido/manual.ts", "src/features/soporte-sap/vitrina/contenido/capturas.ts"],
+        "genera": "node src/features/soporte-sap/vitrina/genera-manual.ts",
+        "comprueba": { "gate": "prueba:tools" }
+      },
+      {
+        "nombre": "soporte-sap-reuso",
+        "rutas": ["docs/SDD-soporte-sap.md"],
+        "bloque": "<!-- reuso:inicio -->",
+        "fuentes": ["docs/SDD-soporte-sap.md", "tools/soporte-sap/src/arquitectura.ts"],
+        "genera": "node tools/soporte-sap/clis/ss-reuso.mjs --escribe",
+        "comprueba": { "gate": "prueba:tools" },
+        "_nota": "Solo el bloque entre reuso:inicio y reuso:fin es generado; el resto del SDD se escribe a mano."
+      },
+      {
+        "nombre": "detector-voz",
+        "rutas": ["docs/goals/centro-de-mando-voz-medicion/detector.md"],
+        "fuentes": ["docs/goals/centro-de-mando-voz-medicion/detector.json", "docs/goals/centro-de-mando-voz-medicion/silero/*.json"],
+        "genera": "node scripts/centro-de-mando/resume-detector.ts",
+        "comprueba": { "comando": "node scripts/centro-de-mando/resume-detector.ts --comprueba" }
+      },
+      {
+        "nombre": "identificadores-sinteticos",
+        "rutas": ["tools/extractor-documental/pruebas/fixtures/identificadores-sinteticos.json"],
+        "fuentes": ["tools/extractor-documental/medicion/genera-identificadores.py"],
+        "genera": "python3 tools/extractor-documental/medicion/genera-identificadores.py",
+        "comprueba": { "comando": "python3 tools/extractor-documental/medicion/genera-identificadores.py --comprueba" }
+      }
+    ],
+    "fuera": [
+      {
+        "clase": "medicion",
+        "rutas": [
+          "docs/goals/centro-de-mando-voz-medicion/*.json",
+          "docs/goals/centro-de-mando-voz-medicion/silero/**",
+          "docs/goals/centro-de-mando-voz-medicion/resumen.md",
+          "docs/goals/clinica-dental-medicion/**",
+          "docs/goals/estudio-dashboards-medicion/**",
+          "docs/goals/soporte-sap-firmas-matriz.md",
+          "docs/analisis/*/mediciones/**",
+          "trayectorias/datos/**", "trayectorias/evaluaciones/**", "trayectorias/informes/**",
+          "erp/instalacion/referencia/**",
+          ".claude/imprenta/medicion-mcp.json",
+          "tools/dictado/medicion/corpus-propio/**",
+          "tools/dictado/medicion/ultima-medicion-cpu.json",
+          "tools/voz/medicion/ultima-medicion.json",
+          "public/laboratorio-pymes/reel/**",
+          "public/laboratorio-pymes/video/**",
+          "public/laboratorio-sgi/*.json",
+          "public/vitrina/soporte-sap/momentos/**",
+          "public/vitrina/soporte-sap/soporte-sap-deck.pdf"
+        ],
+        "motivo": "Evidencia fechada de una corrida (audio, modelos, LLM, Docker, la app viva o la base de produccion): no se regenera, se vuelve a medir, y medir otra vez da otro numero.",
+        "falta": "Nada: una medicion no se compara con su fuente. Lo que se deriva de ella sin azar entra como artefacto (asi entro detector.md)."
+      },
+      {
+        "clase": "capturas",
+        "rutas": ["docs/goals/*-capturas/**", "public/vitrina/soporte-sap/capturas/**", ".claude/goals/*/capturas/**"],
+        "motivo": "Pantallas de la app corriendo, tomadas por un recorrido: dependen del navegador, las fuentes y los datos del momento.",
+        "falta": "Un recorrido con navegador y fuentes fijados por digest; hasta entonces son evidencia, no artefactos."
+      },
+      {
+        "clase": "lock",
+        "rutas": [
+          "package-lock.json",
+          "tools/extractor-documental/servicio/package-lock.json",
+          "tools/*/semantica/requirements.lock",
+          "tools/etiquetas-gs1/motores/requirements-rapidocr.txt",
+          "tools/estudio-dashboards/evaluacion/*.sha256"
+        ],
+        "motivo": "Los reescribe su herramienta (npm, uv) o fijan un set congelado: un banner no sobrevive a la herramienta, y `npm ci` ya falla si el lock no casa con package.json.",
+        "falta": "Comparar el lock de uv con `uv pip compile` necesita red y el indice de PyPI; los .sha256 los comprueba mide.mjs antes de medir."
+      },
+      {
+        "clase": "referencia aprobada",
+        "rutas": [
+          "src/features/laboratorio-etiquetas/datos/referencias.json",
+          "public/laboratorio-etiquetas/referencias/**",
+          "src/features/laboratorio-pymes/datos/referencias.json",
+          "public/laboratorio-pymes/referencias/**"
+        ],
+        "motivo": "Son el resultado aprobado contra el que se compara el codigo: regenerarlas es aprobar un cambio, no sincronizar. Las pruebas comparan sus huellas.",
+        "falta": "Nada: la deriva la caza prueba:etiquetas y prueba:laboratorio-pymes por huella."
+      },
+      {
+        "clase": "no hermetico",
+        "rutas": [
+          "tools/soporte-sap/semantica/corte.json",
+          "docs/grafos/clinica-dental-atencion.json",
+          "tools/etiquetas-gs1/fixtures/catalogo-v1.xlsx",
+          "tools/extractor-documental/pruebas/fixtures/qr/**",
+          "tools/soporte-sap/documentos/*.png",
+          "tools/soporte-sap/documentos/*.pdf",
+          "tools/soporte-sap/documentos/*.xml",
+          "tools/grafo-conocimiento/pruebas/paridad/corpus.json",
+          "tools/grafo-conocimiento/pruebas/paridad/validacion-seed.json",
+          "tools/conocimiento/pruebas/paridad-migracion.json",
+          "tools/estudio-dashboards/evaluacion/catalogo-golfo-norte.json"
+        ],
+        "motivo": "Se derivan, pero no desde el repo solo: piden Docker, un clon de Hermes, datos fuera del repo o librerias que el gate no tiene (qrcode, Pillow, sharp con fuentes), o su formato no es determinista (xlsx). Varios son fixtures de entrada, donde un banner cambiaria lo que prueban.",
+        "falta": "Un entorno hermetico para cada generador (imagen fijada por digest con sus dependencias y sus datos); hasta entonces, sus pruebas comprueban lo que pueden (corte.json por huella de semillas, el xlsx por equivalencia con el CSV)."
+      },
+      {
+        "clase": "registro",
+        "rutas": [
+          "tools/conocimiento/versiones.json",
+          ".claude/goals/*/plan.md",
+          "docs/goals/clinica-dental-plan.md",
+          "docs/goals/estudio-dashboards-plan.md"
+        ],
+        "motivo": "versiones.json es un libro append-only con su propio gate (lo pasado no se regenera desde HEAD); los plan.md son el plan derivado de un goal ya cerrado por el script de un skill (grafo2plan.py), y quedan como registro.",
+        "falta": "Para los plan.md: que grafo2plan.py emita el banner y un --comprueba, que es un CDC del skill goal-compiler."
+      }
+    ]
+  }
 }

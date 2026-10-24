@@ -103,6 +103,7 @@ const pct = (x: number): string => `${(x * 100).toFixed(1)} %`
 export function bloqueReuso(c: CuentaReuso): string {
   const activos = Object.entries(c.porActivo).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]))
   return [
+    '<!-- ALTO: ARTEFACTO AUTOGENERADO desde la matriz de arriba. No edites este bloque a mano: node tools/soporte-sap/clis/ss-reuso.mjs --escribe -->',
     `**Cuenta de reuso** (la calcula \`ss-reuso\` desde la matriz; la prueba la vuelve a contar):`,
     '',
     `- reusadas (R): ${c.reusadas} · compuestas (C): ${c.compuestas} · a fabricar (F): ${c.fabricadas} · no aplica (N): ${c.noAplica}`,

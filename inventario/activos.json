@@ -363,8 +363,8 @@
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",
    "ubicacion": ".claude/gates.json", "responsable": "dep-sw",
    "origen": [".claude/goals/manifiesto-de-gates/spec.md", "docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md"],
-   "descripcion": "Los gates de validate, predeploy y cdc como dato declarado (runner, que guarda, que evidencia deja, activo/inactivo con motivo y falta), con invariante fail-closed al cargar. `validate` y `predeploy` DERIVAN de aqui en vez de llevar la lista a mano en package.json. Emite tambien la proyeccion que consume reglas/software.toml de hermes-os-a2a, que hoy la transcribe a mano. Cambiarlo es un CDC (C1).",
-   "cubre": [".claude/gates.json", "scripts/corre-gates.mjs", "scripts/verifica-gates.mjs", "scripts/proyecta-gates.mjs", "scripts/prueba-tools.mjs", "scripts/prueba-migraciones.mjs"]
+   "descripcion": "Los gates de validate, predeploy y cdc como dato declarado (runner, que guarda, que evidencia deja, activo/inactivo con motivo y falta), con invariante fail-closed al cargar. `validate` y `predeploy` DERIVAN de aqui en vez de llevar la lista a mano en package.json. Emite tambien la proyeccion que consume reglas/software.toml de hermes-os-a2a, que hoy la transcribe a mano, y el CI de GitHub (D-SS-8). Lleva el registro de artefactos generados que vigila verifica:generados (D-SS-9). Cambiarlo es un CDC (C1).",
+   "cubre": [".claude/gates.json", "scripts/corre-gates.mjs", "scripts/verifica-gates.mjs", "scripts/verifica-generados.mjs", "scripts/proyecta-gates.mjs", "scripts/prueba-tools.mjs", "scripts/prueba-migraciones.mjs"]
   },
   {
    "id": "TPL-imprenta",
