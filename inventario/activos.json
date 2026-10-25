@@ -226,6 +226,22 @@
    "cubre": ["src/features/crecimiento-demostrado"]
   },
   {
+   "id": "TPL-estudio-dashboards",
+   "nombre": "Estudio de dashboards: un agente regenera tableros desde una frase editando una especificacion validada (esquema, parches con alcance, versiones) y toda cifra sale de una capa semantica MetricFlow con procedencia; motor de senales (detectar, diagnosticar, actuar, aprender), analisis de variacion, alertas y metricas propuestas sin enviar nada, y CLI con las mismas herramientas en seco; laboratorio Golfo Norte (datos ficticios, dbt + DuckDB) (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/estudio-dashboards", "responsable": "dep-sw",
+   "origen": ["docs/goals/estudio-dashboards.md"],
+   "cubre": ["tools/estudio-dashboards"]
+  },
+  {
+   "id": "TPL-feature-estudio-dashboards",
+   "nombre": "Lienzo de laboratorio del Estudio (/laboratorio-estudio-dashboards): barra de instrucciones con lo que entendio antes de aplicar, rejilla de componentes con procedencia a un clic, mapa de matriz de puntos con lazo y senales enlazadas, ciclo detectar-aprender, versiones y comparacion; ruta /api/estudio-dashboards (503 fuera del laboratorio) y el recorrido Playwright de scripts/estudio-dashboards",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/estudio-dashboards", "responsable": "dep-sw",
+   "origen": ["docs/goals/estudio-dashboards.md"],
+   "cubre": ["src/features/estudio-dashboards", "scripts/estudio-dashboards"]
+  },
+  {
    "id": "TPL-feature-soporte-sap",
    "nombre": "App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio, su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada) y la mesa del experto alojada en Cloudflare (/mesa/soporte-sap: casos propios, línea de tiempo, retro durable)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
@@ -347,8 +363,8 @@
    "tipo": "software", "clase": "FABRICA", "estado": "produccion",
    "ubicacion": ".claude/gates.json", "responsable": "dep-sw",
    "origen": [".claude/goals/manifiesto-de-gates/spec.md", "docs/SDD-fase6-trio-hermes-ejecutor-supervisor.md"],
-   "descripcion": "Los gates de validate, predeploy y cdc como dato declarado (runner, que guarda, que evidencia deja, activo/inactivo con motivo y falta), con invariante fail-closed al cargar. `validate` y `predeploy` DERIVAN de aqui en vez de llevar la lista a mano en package.json. Emite tambien la proyeccion que consume reglas/software.toml de hermes-os-a2a, que hoy la transcribe a mano. Cambiarlo es un CDC (C1).",
-   "cubre": [".claude/gates.json", "scripts/corre-gates.mjs", "scripts/verifica-gates.mjs", "scripts/proyecta-gates.mjs", "scripts/prueba-tools.mjs", "scripts/prueba-migraciones.mjs"]
+   "descripcion": "Los gates de validate, predeploy y cdc como dato declarado (runner, que guarda, que evidencia deja, activo/inactivo con motivo y falta), con invariante fail-closed al cargar. `validate` y `predeploy` DERIVAN de aqui en vez de llevar la lista a mano en package.json. Emite tambien la proyeccion que consume reglas/software.toml de hermes-os-a2a, que hoy la transcribe a mano, y el CI de GitHub (D-SS-8). Lleva el registro de artefactos generados que vigila verifica:generados (D-SS-9). Cambiarlo es un CDC (C1).",
+   "cubre": [".claude/gates.json", "scripts/corre-gates.mjs", "scripts/verifica-gates.mjs", "scripts/verifica-generados.mjs", "scripts/proyecta-gates.mjs", "scripts/prueba-tools.mjs", "scripts/prueba-migraciones.mjs"]
   },
   {
    "id": "TPL-imprenta",

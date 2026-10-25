@@ -1,3 +1,4 @@
+<!-- ALTO: ARTEFACTO AUTOGENERADO desde detector.json y silero/*.json. No lo edites a mano: node scripts/centro-de-mando/resume-detector.ts -->
 # Detector de voz del centro de mando: energía contra Silero, con ruido de sala
 
 **Medido el 2026-10-17** (WSL2, Ryzen 7 5700G, sin GPU). Generado por `scripts/centro-de-mando/resume-detector.ts`; el método está en la cabecera de `mide-detector.ts` y de `mide.ts`.

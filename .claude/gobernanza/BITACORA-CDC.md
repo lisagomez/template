@@ -5286,6 +5286,265 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - aprobación humana ☑.
 - **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-18
 
+### 2026-10-22 — Estudio de dashboards: clase `agente-estudio-dashboards` en el nivel `voz` (con su «para» ampliado), prompt `estudio-agente/4`, configuración del modelo y superficie CLI — radio: routing (C8) y producto (paquete `@tu-scope/estudio-dashboards`, app `/laboratorio-estudio-dashboards`)
+
+- **Cambio**:
+  1. **`.claude/routing-modelos.json`: clase nueva `agente-estudio-dashboards` → `voz`, y el «para» del nivel `voz`
+     ampliado para que la cubra.** El modelo pineado del nivel (`anthropic/claude-haiku-5.5-20261007`), su precio, su
+     medición y su alternativa abierta no cambian.
+
+     ```diff
+     @@ "niveles" › "voz"
+     -  "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros",
+     +  "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros; o estructurar una instruccion corta en un plan que valida el codigo (estudio de dashboards), donde se espera la regeneracion en segundos y el modelo no escribe cifras ni SQL",
+     @@ "tareas"
+          "asistente-paciente": "voz",
+     +    "agente-estudio-dashboards": "voz",
+          "implementar-feature": "capaz",
+     ```
+
+     **Por qué `voz`**: es el nivel más barato del routing y el que mejor midió. Sobre el set de referencia congelado
+     (100 preguntas), Haiku 5.5 dio 95, 94 y 95 de 100 con el razonamiento del proveedor, y 95/100 con espacio de
+     razonamiento propio. Haiku 4.5 (`ligero`) dio 79/100. Sonnet 5 (`capaz`) dio 93/100 (89 más 4 reintentos por 429
+     del proveedor), a 17 veces el costo y con regeneración p95 de 9.2 s. Eficiencia por reparto: no se paga Sonnet.
+     **Por qué ampliar el «para» y no un nivel nuevo** (decisión del laboratorio, 2026-10-22): el «para» describía
+     conversación por voz de una a tres frases, y esta clase devuelve un plan en JSON; dejarlo así era una descripción
+     que no cubre a una de sus clases. Un nivel `estructurar` con el mismo modelo exigía tocar el tipo `Nivel` de
+     `src/lib/ai/routing.ts` y duplicar precio, medición y alternativa abierta.
+     **Lo que el agente NO decide** (y por eso cabe en un nivel barato): no escribe cifras ni SQL; el núcleo valida
+     el plan contra el esquema y el catálogo, rechaza el parche que toca de más, redacta con resultados de la capa y
+     no registra nada sin una persona (aplicar, alertas).
+  2. **Configuración del modelo** (la medida): temperatura 0, respuesta hasta 1,200 tokens con el razonamiento del
+     proveedor y una **reserva**: solo si la respuesta sale truncada, una segunda llamada con 512 tokens de
+     razonamiento propio (`conReserva` en `tools/estudio-dashboards/src/agente/tipos.ts`). Más **preferencia de
+     proveedor por latencia** en OpenRouter (`provider.sort`). Hace falta la reserva porque Haiku 5.5 razona dentro
+     del tope y trunca el plan en las instrucciones largas: medido el 2026-10-20, 1,182 de 1,200 tokens razonando.
+     Las alternativas medidas: razonamiento propio sin reserva (95/100, regeneración p95 8.0 s) y apagado (86/100,
+     2.8 s).
+  3. **Prompt del agente** `tools/estudio-dashboards/src/agente/prompt.ts`, versión **`estudio-agente/4`**
+     (sha256 del archivo `5ba2c0180b0880f4`, primeros 16 hex). Historia:
+     - `/1` (commit `bc9b066`) se escribió **después** de congelar el set (`734f32f`) y sin leerlo.
+     - `/2` y `/3` iteraron SOLO contra la partición de desarrollo (30 preguntas), nunca contra la retenida (70). Agregaron dos reglas genéricas: «margen» a secas es el %, y un valor que existe en dos dimensiones toma la más específica. También una dimensión que solo filtra no es desglose, y los dominios se ordenan del más fino al más grueso.
+     - `/4` agrega la línea «ÚLTIMO CAMBIO» solo en una conversación, para que «ahora…» sepa a qué se refiere. Para una instrucción suelta, como las del set, el mensaje es **byte a byte** el que se midió con `/3`; lo prueba `pruebas/agente.ts`.
+     El sistema es genérico: el catálogo y los dominios se insertan desde la capa; las convenciones de periodo se
+     calculan de la fecha de corte. Una prueba canario comprueba que ninguna pregunta del set (6 palabras seguidas)
+     aparece en el texto redactado del prompt.
+  4. **Superficie CLI** `estudio-dashboards` (`tools/estudio-dashboards/src/cli/index.ts`): las nueve herramientas de
+     la propuesta (`listar_metricas`, `describir_metrica`, `consultar_metricas`, `leer_dashboard`, `editar_dashboard`,
+     `analizar_variacion`, `ver_senales`, `crear_alerta`, `proponer_metrica`), tres de versiones (`comparar_versiones`,
+     `volver_version`, `fijar_oficial`) y `agente`. Lo que escribe va **en seco** salvo `--aplicar`; una alerta exige
+     además `--confirmada-por` y no tiene canal; `proponer_metrica` devuelve un diff y no abre PR. Códigos de salida:
+     0 · 2 uso · 3 esquema · 4 capa · 5 modelo. Lee la capa real o la foto del catálogo; jamás inventa. **Grado: no
+     medido** (no se puntuó con la imprenta).
+  - **Sin cambios** en `.claude/settings.json`, hooks, `gates.json`, `AGENTS.md`, skills ni el manifiesto de la
+    imprenta. La suite nueva (`tools/estudio-dashboards`, 50 pruebas) entra sola en `prueba:tools`.
+- **Motivo**: el spec `docs/goals/estudio-dashboards.md` (decisiones del laboratorio del 2026-10-20: LLM real con
+  tope de US$2 y el nivel más barato primero; «luego lo pasas a CLI»).
+- **Salida del perímetro (C4)**: el prompt (catálogo de Golfo Norte, datos ficticios), la especificación y la
+  instrucción van a OpenRouter. Datos ficticios: no hay decisión C4 de por medio (spec). Con datos reales, C4 antes.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166 (2026-10-22, tras ampliar el «para»);
+  - `verifica:routing` ☑ coherente con la clase nueva y el «para» ampliado;
+  - medición con el modelo real ☑ (`docs/goals/estudio-dashboards-medicion/medicion-voz-reserva-latencia*.json`);
+  - capa B no corrida por el agente: no cambia ningún skill ni instrucción del arnés; decide el laboratorio
+    («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (modelo con fecha, sin alias flotante; lock de Python con hashes; npm exacto).
+- **Regresión**:
+  - `npm run validate -- --sigue` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `7fd111c`, el commit
+    del «para» ampliado; se repite tras el de la firma;
+  - **set v1 congelado: 95/100 y 97/100.** Analizar queda en 87.5 % en una corrida y en 93.8 % en la otra, con el
+    agente idéntico. En las 8 corridas de 100 con Haiku 5.5 sobre el v1, analizar dio 14/16 siete veces y 15/16 una:
+    **el gate por tipo sobre el v1 no se cumple**, y el laboratorio decidió el 2026-10-21 cerrarlo con el fallo
+    reportado, sin relajar el set ni ajustar el agente sobre la partición retenida;
+  - **set v2 adjudicado** por un revisor independiente y ciego, congelado antes de medir: **98/100 y 97/100, con los
+    seis tipos ≥ 90 % en las dos**;
+  - regeneración p95 con tres lectores de MetricFlow (`6c6aac4`): **4.63 s (v1) y 4.79 s (v2), 4.67 s juntas**; con
+    uno, 4.93–5.02 s. Consulta p95 33 ms;
+  - gasto total del goal, por la diferencia de saldo de la cuenta: **US$1.4797** (tope US$2).
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-22
+
+### 2026-10-22 — el CI de GitHub Actions como proyección del padrón de gates (D-SS-8) — radio: padrón de gates (su verificador y su proyección), CI nuevo y sistema (dos líneas de `AGENTS.md`, con `GEMINI.md` regenerado)
+
+- **Cambio** (rama `gobernanza/ci-proyectado`, desde `main` en `417bc57`, commit `bde4408`):
+  1. **`scripts/lib/ci.mjs`** (nuevo, 81 líneas): `proyectaGithub()` genera `.github/workflows/gates.yml`. El workflow
+     no lleva la lista de gates: llama a `node scripts/corre-gates.mjs validate --sigue`, el mismo runner de
+     `npm run validate`, que la deriva del padrón al correr. Proyecta:
+     - el perfil `validate`;
+     - Node en el mínimo de `engines` (22.18.0);
+     - el tope del job, que es la suma de los timeouts del perfil (238 min; cada gate ya se corta en el suyo);
+     - los 10 inactivos, como comentario con su motivo.
+     Lo fijo:
+     - las actions, por SHA de commit, comprobado con `git ls-remote` el 2026-10-22: `actions/checkout` v7.0.1
+       (`3d3c42e5…`, del 2026-07-17) y `actions/setup-node` v7.1.0 (`949feb24…`, del 2026-10-08);
+     - el runner, `ubuntu-24.04`: es una etiqueta de versión, no `latest`, pero GitHub no deja fijarlo por digest.
+     El resto:
+     - corre en cada PR a `main` y a mano (`workflow_dispatch`); una corrida nueva cancela la vieja del mismo PR;
+     - `contents: read`, sin credenciales persistidas y sin secretos;
+     - historial completo (`fetch-depth: 0`).
+  2. **`proyecta:gates`** gana `--ci github [--salida <ruta>]`. GitLab y Jenkins, cuando una consultora lo pida
+     (D-SS-8).
+  3. **`verifica:gates`**, que ya corre en el `validate`, gana una comprobación: el CI es la proyección del padrón.
+     Editado a mano, borrado o con el padrón cambiado sin regenerarlo, se pone rojo, como `GEMINI.md`. Gana también
+     tres siembras (CI editado, CI borrado, padrón cambiado), y `--prueba` pasa de 6 a 9.
+  4. **La cifra de siembras** («6» → «9») y el `--ci github`, al día en `AGENTS.md` (dos comentarios de «Comandos npm»;
+     `GEMINI.md` regenerado con `sincroniza:gemini`), `README.md` y `.claude/README.md`.
+- **Por qué**: lo decidió el laboratorio el 2026-10-22 (D-SS-8, propuesta sapstack §10.2). El repo no tenía CI. El
+  gate corría solo en la máquina de quien lo corría, que casi siempre es el agente que hizo el cambio. Y la regla
+  de la casa dice que quien verifica re-ejecuta los gates de cero.
+- **Demostrado** (2026-10-22), en un clon limpio dentro de `node:22.18.0-bookworm` (fijado por digest
+  `sha256:3266bc9e…`), con 2 CPU y 7 GB como un runner de repo privado, sin `.env`, sin `~/.claude` y sin
+  `node_modules`:
+  - **con clon superficial, 30/32**:
+    - `prueba:analista` en rojo: el commit que analizó no está en la historia;
+    - `verify:gobernanza` en rojo: sin `origin/golden-sets` no hay corpus ni `corridas.md`, y el verificador
+      cuenta 169 comprobaciones en vez de 171, así que las cifras de los README fallan;
+  - **con historial completo, la rama del CDC en `ee2e21e` (el mismo árbol que `bde4408`) da 32/32**: `npm ci` en
+    65 s y `validate` en 993 s. `verify:gobernanza` da 171/171, y `verifica:gates` da 12/12 con la comprobación nueva;
+  - `verifica:gates --prueba`: **9/9 siembras cazadas**;
+  - el `validate` local no se repitió: el del clon limpio corrió sobre el mismo árbol (`499bf555`), y el local se
+    cortó por falta de memoria de la máquina, no por un rojo.
+- **Lo que cuesta o queda abierto**:
+  - **minutos de Actions**: unos 18 por corrida (medido con 2 CPU; el runner real puede variar).
+    - Según la tabla de precios que conozco, el plan Free da 2 000 min/mes a los repos privados y Pro, 3 000: unas
+      100 o 160 corridas al mes. Esa cifra no pude comprobarla.
+    - No pude ver tu plan: el token de `gh` no tiene el permiso `user`. Míralo en Settings → Billing.
+    - Una corrida en rojo sigue hasta el final (`--sigue`): enseña todos los rojos de una vez, a cambio de gastar
+      la corrida entera;
+  - **lo que sale del perímetro (C4)**: el código ya vive en GitHub. El CI lo ejecuta en sus runners (Estados
+    Unidos), corpus de capa B incluido, que ya está en `origin`. Va sin secretos y sin datos reales: las pruebas usan
+    datos sintéticos;
+  - **cuatro ajustes que puede hacer el laboratorio** en GitHub, fuera del repo:
+    - en Settings → Actions, exigir actions fijadas por SHA (hoy `sha_pinning_required: false`);
+    - en el mismo sitio, permitir solo `actions/checkout` y `actions/setup-node`;
+    - hacer el check `gates / validate` obligatorio para mergear a `main`;
+    - una regla de rama que lo haga cumplir;
+  - **dónde manda el CI**: no sustituye al `validate` local antes del PR; lo repite de cero, en otra máquina.
+- **Salida del perímetro (C4)**: la de arriba: el código ya está en GitHub y el CI no lleva secretos ni datos reales.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 32/32 en clon limpio, sobre el mismo árbol que `bde4408` (`499bf555`);
+  - capa B no corrida por el agente: cambian dos comentarios de «Comandos npm» de `AGENTS.md`, no una instrucción;
+    decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (actions por SHA de commit, Node exacto, imagen de la medición por digest; sin modelo).
+- **Regresión**: `verifica:gates` ☑ 12/12 y `--prueba` 9/9; `verify:gobernanza` ☑ 171/171; `mide:contexto` ☑ dentro de
+  presupuesto.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-23
+
+### 2026-10-24 — banner y gate para todo artefacto generado (D-SS-9) — radio: padrón de gates (registro `generados` y gate nuevo `verifica:generados`), nueve generadores con lo que regeneran, y sistema (una línea de `AGENTS.md` y la cabecera de `GEMINI.md`, regenerado)
+
+- **Cambio** (rama `gobernanza/artefactos-generados`, desde `main` en `2d4606d`, commit `37068a2`):
+  1. **El registro `generados` en `.claude/gates.json`**. Va dentro del padrón para que sacar un artefacto sea un CDC,
+     como apagar un gate.
+     - **11 artefactos**, cada uno con su fuente, el comando que lo regenera y quién lo compara: `GEMINI.md`, el CI de
+       GitHub, la vista del inventario, la migración del catálogo SGI, el diccionario GS1, el staging de dbt de la
+       clínica (22 archivos), los dos roadmaps de ventas por WhatsApp, el manual de Soporte SAP, el bloque de reúso
+       del SDD de Soporte SAP, el resumen del detector de voz y los identificadores sintéticos del extractor.
+     - **6 grupos `fuera`**, cada uno con clase, motivo y falta, como un gate inactivo: medición, capturas, locks,
+       referencias aprobadas, no herméticos y registros. Lo que no se compara no cuenta como comprobado.
+  2. **Gate nuevo `verifica:generados`** (`scripts/verifica-generados.mjs`, lógica en `scripts/lib/generados.mjs`),
+     solo en el perfil `validate`: necesita los `dist/` de `tools/`, y lo generado no cambia en el servidor.
+     - Por artefacto: sus rutas están versionadas, lleva el banner «ALTO: ARTEFACTO AUTOGENERADO» en la cabeza (o
+       tras el marcador de su bloque), y coincide con su fuente, por su `--comprueba` o por un gate de `validate`
+       que ya lo comparaba y tiene que seguir activo.
+     - Por el repo: ningún archivo versionado con banner queda sin registrar, nada `fuera` lleva banner, cada ruta
+       `fuera` tiene archivos, y ningún archivo tiene dos dueños.
+     - Corre sus 8 siembras en cada pasada.
+  3. **Los generadores**: nueve emiten el banner común y cuatro ganan `--comprueba`: el diccionario GS1, el staging
+     de la clínica (que además caza un `stg_*.sql` de un tipo que el contrato ya no tiene), el resumen del detector
+     y los identificadores sintéticos. La migración del catálogo SGI conserva su banner de antes, declarado en el
+     registro: no se reescribe una migración aplicada. Lo regenerado solo cambia en su cabecera.
+  4. **Documentación**: una línea en «Comandos npm» de `AGENTS.md` (`GEMINI.md` regenerado, con la cabecera
+     nueva), `README.md`, `.claude/README.md` y el asiento del script nuevo en el inventario.
+- **Por qué**: lo decidió el laboratorio el 2026-10-22 (D-SS-9, propuesta sapstack §10.2). En el repo había 11
+  artefactos que se regeneran desde sus fuentes: 6 tenían banner y comparación, 4 no tenían comparación, y nada
+  impedía que uno nuevo entrara sin ninguna de las dos.
+- **Demostrado** (2026-10-24):
+  - inventario de `main`: 45 grupos de archivos generados, de los que 11 se regeneran desde el repo de forma
+    determinista. Antes de tocar nada se regeneraron todos: ninguno tenía deriva;
+  - `verifica:generados`: 49 comprobaciones y 8 de 8 siembras cazadas, en unos 2 s;
+  - 7 sabotajes en disco, uno cada vez: el diccionario GS1 editado, un modelo de staging retocado, un staging de un
+    tipo que el contrato no tiene, el banner borrado del manual, el resumen del detector retocado, un identificador
+    cambiado y un generado nuevo sin registrar. Los 7 en rojo, cada uno en su comprobación; restaurados, verde;
+  - el JSON de identificadores sale idéntico con Python 3.14 (local) y 3.11 (contenedor): con la semilla 9 es
+    determinista;
+  - en un clon limpio dentro de `node:22.18.0-bookworm` (fijado por digest), con 2 CPU y 7 GB, sin `.env` ni
+    `node_modules`: **`validate` 33/33** sobre `37068a2` (árbol `0d774e27a44b`), en 978 s; gobernanza 171/171.
+- **Lo que cuesta o queda abierto**:
+  - `validate` pasa de 32 a 33 gates activos, y el tope del CI de 238 a 243 min;
+  - **choque previsible con las ramas de soporte**: `soporte/sapstack` trae `candidatos-sapstack.json` y `base.json`
+    con `_ALTO`. Al juntarse con esta rama, el gate los verá huérfanos hasta que se registren con su comparación (la
+    huella de la mesa y la prueba que regenera `base.json`). Es lo que el gate tiene que hacer;
+  - el gate caza los generados que llevan banner; uno nuevo sin banner y sin registrar no lo ve. `fuera` declara las
+    clases conocidas, no es una lista exhaustiva;
+  - los `plan.md` de goals (de `grafo2plan.py`) quedan fuera: darles banner y `--comprueba` es un CDC del skill
+    goal-compiler;
+  - hallazgos del inventario, fuera de este cambio: el `requirements.lock` de la clínica es una copia del de Soporte
+    SAP, con la cabecera apuntando al `.in` de Soporte SAP; hay un `.pyc` versionado por error en
+    `tools/dictado/motores-locales/`; y el README de dictado tiene marcadores de tabla que ningún script escribe.
+- **Salida del perímetro (C4)**: ninguna: no cambia qué datos salen ni adónde.
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 33/33 en clon limpio sobre `37068a2` (árbol `0d774e27a44b`);
+  - capa B no corrida por el agente: en `AGENTS.md` cambia una línea de «Comandos npm» y en `GEMINI.md` la cabecera,
+    no una instrucción; decide el laboratorio («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni imagen nueva; el validate de la medición, en la imagen fijada por digest).
+- **Regresión**: `verifica:generados` ☑ 49 y 8/8 siembras; `verifica:gates` ☑ 12/12 y `--prueba` 9/9;
+  `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 293 unidades; `mide:contexto` ☑ dentro de presupuesto;
+  `revisa:readmes` ☑.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-24
+
+### 2026-10-25 — `base.json` y `candidatos-sapstack.json` entran al registro de generados — radio: padrón de gates (dos artefactos nuevos en `generados`, ningún gate ni generador tocado)
+
+- **Cambio** (rama `soporte/sapstack`, tras juntar `main` hasta #279 en `1f106e2`; commit `daf1fc6`): dos entradas
+  nuevas en `generados.artefactos` de `.claude/gates.json`.
+  - **`soporte-sap-mesa-base`**: `src/features/soporte-sap/mesa/fuentes/base.json`, la foto de `tools/conocimiento` que
+    pinta el nodo central del mapa del laboratorio. Sus fuentes son `versiones.json`, `CAMBIOS.md` y `package.json` de
+    `tools/conocimiento`, más `generadores.mjs`. Lo regenera `extrae.mjs base` y lo compara la prueba `mesa-candidatos`
+    de `tools/soporte-sap` (dentro de `prueba:tools`), campo por campo con `baseDe`.
+  - **`soporte-sap-candidatos-sapstack`**: `candidatos-sapstack.json`, los candidatos de sapstack fijados por SHA. Sus
+    fuentes son `fuente.json` (el pin) y `generadores.mjs`. Lo compara la misma prueba: su huella, que su SHA sea el de
+    `fuente.json` y que cada candidato cite su línea en ese SHA. Su `_nota` dice que no es hermético.
+  - No cambia ningún gate, ningún generador ni ningún archivo generado.
+- **Por qué**: desde D-SS-9 (firmada el 2026-10-24, en `main` por #278), todo archivo versionado con el banner tiene que
+  estar en el registro. Estos dos llevan `_ALTO` desde que se construyó la rama de sapstack (2026-10-22), y la entrada de
+  D-SS-9 ya lo dejó previsto: al juntar la rama con `main`, `verifica:generados` los vio huérfanos.
+- **Lo que decide el laboratorio al firmar**: `candidatos-sapstack.json` entra como artefacto aunque no se regenera
+  desde el repo. Su fuente es sapstack en el SHA de `fuente.json`, fuera del repo, y volver a extraerlo lo hace el
+  laboratorio con esa copia. Lo que el gate comprueba caza la edición a mano, no un cambio en sapstack: eso es mover el
+  pin, que ya es decisión del laboratorio y lo avisa `extrae.mjs revisa` en el mapa. La alternativa era quitarle el
+  banner y declararlo `fuera` como «no hermético»: quien lo abriera no vería el aviso, y la regla de huérfanos dejaría de
+  cubrirlo.
+- **Demostrado** (2026-10-25):
+  - sobre el merge y antes del cambio: `verifica:generados` en rojo, con esos dos archivos como únicos huérfanos;
+  - con el cambio: 57 comprobaciones y 8 de 8 siembras (13 artefactos y 6 grupos `fuera`);
+  - 2 sabotajes en disco, uno cada vez: `base.json` editado a mano (un contador de firmas cambiado) deja en rojo la
+    comparación con `baseDe` (7 de 8 pruebas); un candidato editado rompe la huella, la mesa rechaza el catálogo entero y
+    caen 7 de 8. Restaurados, 8 de 8;
+  - en un clon limpio dentro de `node:22.18.0-bookworm` (fijado por digest), con 2 CPU y 7 GB, sin `.env` ni
+    `node_modules`: **`validate` 33/33** sobre `daf1fc6` (árbol `a8c98ad6309d`), en 934 s; gobernanza 171/171.
+- **Lo que cuesta o queda abierto**:
+  - el registro pasa de 11 a 13 artefactos; `validate` no gana ningún gate ni tiempo: la prueba ya corría;
+  - `soporte/sapstack-cita` va después, y su entrada (D-SS-3, firmada el 2026-10-22) chocará al final de esta bitácora:
+    se resuelve con un merge de `main`, sin editar ninguna entrada.
+- **Salida del perímetro (C4)**: ninguna: no cambia qué datos salen ni adónde.
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 33/33 en clon limpio sobre `daf1fc6` (árbol `a8c98ad6309d`);
+  - capa B no corrida por el agente: no cambia `AGENTS.md`, ningún skill ni ningún prompt; decide el laboratorio
+    («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni imagen nueva; el validate, en la imagen fijada por digest).
+- **Regresión**: `verifica:generados` ☑ 57 y 8/8 siembras; `verifica:gates` ☑ 12/12 y `--prueba` 9/9;
+  `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 295 unidades.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-25
+
 ### 2026-10-22 — suite del conocimiento: `sap-soporte` entra con cita `interna` y fuentes declaradas, y sapstack no basta (D-SS-3, con D-SS-2) — radio: herramienta (`tools/conocimiento`, la suite que deja sembrar) y la matriz de Soporte SAP
 
 - **Cambio** (rama `soporte/sapstack-cita`, apilada sobre `soporte/sapstack`, commit `6baad5b`):

@@ -15,12 +15,16 @@
  *      Esta es la comprobacion que habria cazado `scripts/prueba-a2a.ts`: existia, probaba la
  *      opacidad del puente A2A, y NINGUN script lo corria — asi que se podrio sin testigos.
  *      Un archivo de pruebas que nada ejecuta no es cobertura: es decoracion.
+ *   5. El CI de GitHub (`.github/workflows/gates.yml`) es la proyeccion del padron (D-SS-8,
+ *      `lib/ci.mjs`). Editado a mano, borrado, o con el padron cambiado sin regenerarlo: rojo.
+ *      Es el patron de `GEMINI.md`: lo generado no se toca, se regenera.
  *
  * Uso:  node scripts/verifica-gates.mjs             (el gate)
- *       node scripts/verifica-gates.mjs --prueba    (la prueba de la prueba: siembra seis
+ *       node scripts/verifica-gates.mjs --prueba    (la prueba de la prueba: siembra nueve
  *         violaciones —runner sin implementacion activo, typo de runner en un gate APAGADO,
  *         gate activo que no se puede ejecutar, `validate` con la cadena a mano de vuelta,
- *         inactivo sin motivo, y un archivo de pruebas huerfano— y exige que las seis caigan)
+ *         inactivo sin motivo, un archivo de pruebas huerfano, el CI editado a mano, el CI
+ *         borrado y el padron cambiado sin regenerar el CI— y exige que las nueve caigan)
  *       node scripts/verifica-gates.mjs --lista     (el padron entero, legible)
  * Exit: 0 en verde · 1 en rojo.
  */
@@ -28,6 +32,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cargaManifiesto, gatesDelPerfil, inactivos, ManifiestoInvalido, MANIFIESTO } from './lib/gates.mjs';
+import { proyectaGithub, RUTA_GITHUB } from './lib/ci.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const rojo = (s) => `\x1b[31m${s}\x1b[0m`;
@@ -86,7 +91,7 @@ function cubierto(archivo, manifiesto, scripts) {
 }
 
 /** Las comprobaciones, puras sobre sus entradas: `--prueba` las llama con entradas mutadas. */
-function comprobaciones({ manifiestoTexto, scripts, pruebas }) {
+function comprobaciones({ manifiestoTexto, scripts, pruebas, paquete, ci }) {
   const fallos = [];
   const ok = [];
   const mete = (d, cond, pista) => (cond ? ok.push(d) : fallos.push({ descripcion: d, pista }));
@@ -150,6 +155,16 @@ function comprobaciones({ manifiestoTexto, scripts, pruebas }) {
     'sin cierre, `predeploy` no puede atajar y el gate se paga dos veces',
   );
 
+  // 7. El CI de GitHub es la proyeccion del padron (D-SS-8): editado a mano o borrado, rojo.
+  const regenera = `npm run proyecta:gates -- --ci github --salida ${RUTA_GITHUB}`;
+  mete(
+    `el CI de GitHub (\`${RUTA_GITHUB}\`) es la proyeccion del padron`,
+    ci === proyectaGithub(manifiesto, paquete),
+    ci === null
+      ? `no existe: sin el, nadie re-ejecuta los gates fuera de la maquina de quien los corrio. ${regenera}`
+      : `difiere de la proyeccion: se edito a mano, o el padron cambio sin regenerarlo. ${regenera}`,
+  );
+
   return { ok, fallos, manifiesto };
 }
 
@@ -161,10 +176,10 @@ function siembra(crudo, f) {
   return JSON.stringify(copia);
 }
 
-function prueba(crudo, scripts, pruebas) {
+function prueba(crudo, scripts, pruebas, paquete, ci) {
   // Linea base: si el manifiesto real ya estuviera en rojo, cada siembra "caeria" por el
   // error de base y la prueba no probaria nada (leccion del 2026-09-25, marca-blanca).
-  const base = comprobaciones({ manifiestoTexto: crudo, scripts, pruebas });
+  const base = comprobaciones({ manifiestoTexto: crudo, scripts, pruebas, paquete, ci });
   if (base.fallos.length) {
     console.log(rojo(`la linea base ya tiene ${base.fallos.length} fallo(s): la prueba no probaria nada`));
     for (const f of base.fallos) console.log(gris(`    ${f.descripcion} — ${f.pista}`));
@@ -189,10 +204,17 @@ function prueba(crudo, scripts, pruebas) {
     ['archivo de pruebas huerfano', {
       pruebas: [...pruebas, 'scripts/prueba-inventada-que-nadie-corre.ts'],
     }],
+    ['el CI editado a mano (solo lint)', {
+      ci: (ci ?? '').replace('node scripts/corre-gates.mjs validate --sigue', 'npm run lint'),
+    }],
+    ['el CI borrado', { ci: null }],
+    ['el padron cambia y el CI no se regenera', {
+      manifiestoTexto: siembra(crudo, (m) => { m.gates.find((g) => g.activo && g.perfiles.includes('validate')).timeout_s += 600; }),
+    }],
   ];
   let cazadas = 0;
   for (const [nombre, override] of casos) {
-    const r = comprobaciones({ manifiestoTexto: crudo, scripts, pruebas, ...override });
+    const r = comprobaciones({ manifiestoTexto: crudo, scripts, pruebas, paquete, ci, ...override });
     if (r.fallos.length > 0) {
       cazadas += 1;
       console.log(`${verde('CAZADA')} ${nombre}`);
@@ -206,13 +228,15 @@ function prueba(crudo, scripts, pruebas) {
 }
 
 // --- Entrada -----------------------------------------------------------------
-const scripts = JSON.parse(readFileSync(join(raiz, 'package.json'), 'utf8')).scripts ?? {};
+const paquete = JSON.parse(readFileSync(join(raiz, 'package.json'), 'utf8'));
+const scripts = paquete.scripts ?? {};
 const crudo = existsSync(join(raiz, MANIFIESTO)) ? readFileSync(join(raiz, MANIFIESTO), 'utf8') : '{}';
 const pruebas = pruebasEnDisco();
+const ci = existsSync(join(raiz, RUTA_GITHUB)) ? readFileSync(join(raiz, RUTA_GITHUB), 'utf8') : null;
 
-if (process.argv.includes('--prueba')) prueba(crudo, scripts, pruebas);
+if (process.argv.includes('--prueba')) prueba(crudo, scripts, pruebas, paquete, ci);
 
-const { ok, fallos, manifiesto } = comprobaciones({ manifiestoTexto: crudo, scripts, pruebas });
+const { ok, fallos, manifiesto } = comprobaciones({ manifiestoTexto: crudo, scripts, pruebas, paquete, ci });
 
 if (process.argv.includes('--lista') && manifiesto) {
   for (const perfil of Object.keys(manifiesto.perfiles)) {

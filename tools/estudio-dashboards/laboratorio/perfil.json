@@ -1,0 +1,43 @@
+{
+ "entidad": "tienda__tienda_nombre",
+ "comparables": [
+  {
+   "dimension": "tienda__es_comparable",
+   "operador": "igual",
+   "valores": [
+    true
+   ]
+  }
+ ],
+ "periodo": {
+  "desde": "2026-01",
+  "hasta": "2026-09"
+ },
+ "palancas": {
+  "crecimiento": "ventas_netas",
+  "frecuencia": [
+   "frecuencia_compra"
+  ],
+  "valor": [
+   "ventas_por_cliente"
+  ],
+  "retencion": [
+   "retencion_m3_pct"
+  ],
+  "riesgo": [
+   "combinaciones_bajo_reorden"
+  ],
+  "eficiencia": [
+   "roas_incremental"
+  ],
+  "adquisicion": "clientes_nuevos"
+ },
+ "segmentos": [
+  "cohorte__origen",
+  "cliente__origen"
+ ],
+ "guardarrail": {
+  "metrica": "margen_bruto_pct",
+  "minimo": 23
+ }
+}

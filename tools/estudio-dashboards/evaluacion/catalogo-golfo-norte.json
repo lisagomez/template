@@ -1,0 +1,2502 @@
+{
+ "version": "0068eb3f272bdabe",
+ "metricas": [
+  {
+   "nombre": "clientes_activos",
+   "etiqueta": "Clientes activos",
+   "descripcion": "Clientes distintos con al menos un pedido completado en el periodo.",
+   "tipo": "simple",
+   "expr": "cliente_id",
+   "medida": "clientes_activos_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Growth",
+    "unidad": "clientes"
+   },
+   "agregacion": "count_distinct",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "clientes_nuevos",
+   "etiqueta": "Clientes nuevos",
+   "descripcion": "Clientes cuya primera compra cae en el periodo.",
+   "tipo": "simple",
+   "expr": "es_nuevo",
+   "medida": "clientes_nuevos_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Marketing",
+    "unidad": "clientes"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "clientes_perdidos",
+   "etiqueta": "Clientes perdidos",
+   "descripcion": "Activos el mes anterior que no compraron este mes.",
+   "tipo": "simple",
+   "expr": "perdidos",
+   "medida": "clientes_perdidos_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Lifecycle",
+    "unidad": "clientes"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "clientes_reactivados",
+   "etiqueta": "Clientes reactivados",
+   "descripcion": "Compraron este mes sin haber comprado el mes anterior (y no son nuevos).",
+   "tipo": "simple",
+   "expr": "es_reactivado",
+   "medida": "clientes_reactivados_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Lifecycle",
+    "unidad": "clientes"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "clientes_recurrentes",
+   "etiqueta": "Clientes recurrentes",
+   "descripcion": "",
+   "tipo": "derived",
+   "expr": "clientes_activos - clientes_nuevos",
+   "medida": null,
+   "numerador": null,
+   "denominador": null,
+   "entradas": [
+    {
+     "nombre": "clientes_activos",
+     "alias": null,
+     "desfase": null
+    },
+    {
+     "nombre": "clientes_nuevos",
+     "alias": null,
+     "desfase": null
+    }
+   ],
+   "filtro": [],
+   "meta": {
+    "dueno": "Growth",
+    "unidad": "clientes"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "combinaciones_bajo_reorden",
+   "etiqueta": "Tienda-SKU bajo punto de reorden",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "bajo_reorden_flag",
+   "medida": "combinaciones_bajo_reorden_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Operaciones",
+    "unidad": "combinaciones"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": "fecha_corte",
+   "dimensiones": [
+    {
+     "nombre": "inventario__fecha_corte",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "costo_ventas",
+   "etiqueta": "Costo de ventas",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "costo",
+   "medida": "costo",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Finanzas",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "crecimiento_ventas_yoy_pct",
+   "etiqueta": "Crecimiento de ventas vs año anterior %",
+   "descripcion": "",
+   "tipo": "derived",
+   "expr": "(ventas_netas - ventas_netas_aa) * 100.0 / nullif(ventas_netas_aa, 0)",
+   "medida": null,
+   "numerador": null,
+   "denominador": null,
+   "entradas": [
+    {
+     "nombre": "ventas_netas",
+     "alias": null,
+     "desfase": null
+    },
+    {
+     "nombre": "ventas_netas",
+     "alias": "ventas_netas_aa",
+     "desfase": "count=1 granularity='year'"
+    }
+   ],
+   "filtro": [],
+   "meta": {
+    "dueno": "Finanzas",
+    "unidad": "%"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "descuentos",
+   "etiqueta": "Descuentos",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "descuento",
+   "medida": "descuento",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Comercial",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "frecuencia_compra",
+   "etiqueta": "Frecuencia de compra",
+   "descripcion": "Pedidos por cliente activo en el periodo.",
+   "tipo": "ratio",
+   "expr": null,
+   "medida": null,
+   "numerador": "pedidos_clientes",
+   "denominador": "clientes_activos",
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Growth",
+    "unidad": "pedidos"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "inversion_marketing",
+   "etiqueta": "Inversión en marketing",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "inversion_mxn",
+   "medida": "inversion_mxn",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Marketing",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "campana__campana_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "campana__fecha_inicio",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "campana__plataforma",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "margen_bruto",
+   "etiqueta": "Margen bruto",
+   "descripcion": "",
+   "tipo": "derived",
+   "expr": "ventas_netas - costo_ventas",
+   "medida": null,
+   "numerador": null,
+   "denominador": null,
+   "entradas": [
+    {
+     "nombre": "ventas_netas",
+     "alias": null,
+     "desfase": null
+    },
+    {
+     "nombre": "costo_ventas",
+     "alias": null,
+     "desfase": null
+    }
+   ],
+   "filtro": [],
+   "meta": {
+    "dueno": "Finanzas",
+    "unidad": "MXN"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "margen_bruto_pct",
+   "etiqueta": "Margen bruto %",
+   "descripcion": "",
+   "tipo": "derived",
+   "expr": "(ventas_netas - costo_ventas) * 100.0 / nullif(ventas_netas, 0)",
+   "medida": null,
+   "numerador": null,
+   "denominador": null,
+   "entradas": [
+    {
+     "nombre": "ventas_netas",
+     "alias": null,
+     "desfase": null
+    },
+    {
+     "nombre": "costo_ventas",
+     "alias": null,
+     "desfase": null
+    }
+   ],
+   "filtro": [],
+   "meta": {
+    "dueno": "Finanzas",
+    "unidad": "%"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "participacion_ecommerce_pct",
+   "etiqueta": "Participación e-commerce %",
+   "descripcion": "",
+   "tipo": "derived",
+   "expr": "ventas_ecommerce * 100.0 / nullif(ventas_netas, 0)",
+   "medida": null,
+   "numerador": null,
+   "denominador": null,
+   "entradas": [
+    {
+     "nombre": "ventas_ecommerce",
+     "alias": null,
+     "desfase": null
+    },
+    {
+     "nombre": "ventas_netas",
+     "alias": null,
+     "desfase": null
+    }
+   ],
+   "filtro": [],
+   "meta": {
+    "dueno": "Digital",
+    "unidad": "%"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "pedidos",
+   "etiqueta": "Pedidos completados",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "pedido_id",
+   "medida": "pedidos_distintos",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Comercial",
+    "unidad": "pedidos"
+   },
+   "agregacion": "count_distinct",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "pedidos_clientes",
+   "etiqueta": "Pedidos (vista clientes)",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "pedidos",
+   "medida": "pedidos_clientes_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Growth",
+    "unidad": "pedidos"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "pedidos_devueltos_m",
+   "etiqueta": "Pedidos devueltos",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "es_devuelto_flag",
+   "medida": "pedidos_devueltos",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Operaciones",
+    "unidad": "pedidos"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "pedidos_totales",
+   "etiqueta": "Pedidos totales (incluye devueltos)",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "CASE WHEN pedido_id IS NOT NULL THEN 1 ELSE 0 END",
+   "medida": "pedidos_totales",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Operaciones",
+    "unidad": "pedidos"
+   },
+   "agregacion": "count",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "retencion_m3_pct",
+   "etiqueta": "Retención a 3 meses",
+   "descripcion": "% de la cohorte que vuelve a comprar en los 3 meses siguientes a su alta. Solo cohortes maduras.",
+   "tipo": "derived",
+   "expr": "retenidos_m3 * 100.0 / nullif(tamano_cohorte, 0)",
+   "medida": null,
+   "numerador": null,
+   "denominador": null,
+   "entradas": [
+    {
+     "nombre": "retenidos_m3",
+     "alias": null,
+     "desfase": null
+    },
+    {
+     "nombre": "tamano_cohorte",
+     "alias": null,
+     "desfase": null
+    }
+   ],
+   "filtro": [],
+   "meta": {
+    "dueno": "Lifecycle",
+    "unidad": "%"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cohorte__cohorte_madura",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__cohorte_mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__meses_desde_alta",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "retenidos_m3",
+   "etiqueta": "Clientes retenidos a 3 meses",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "retenidos_m3",
+   "medida": "retenidos_m3_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [
+    "{{ Dimension('cohorte__cohorte_madura') }} = true\n"
+   ],
+   "meta": {
+    "dueno": "Lifecycle",
+    "unidad": "clientes"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cohorte__cohorte_madura",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__cohorte_mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__meses_desde_alta",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "roas_incremental",
+   "etiqueta": "ROAS incremental",
+   "descripcion": "Ventas incrementales sobre baseline / inversión. Baseline ingenuo de 14 días.",
+   "tipo": "ratio",
+   "expr": null,
+   "medida": null,
+   "numerador": "ventas_incrementales_m",
+   "denominador": "inversion_marketing",
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Marketing",
+    "unidad": "x"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "campana__campana_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "campana__fecha_inicio",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "campana__plataforma",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "tamano_cohorte",
+   "etiqueta": "Tamaño de cohorte",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "tamano_base",
+   "medida": "tamano_cohorte_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [
+    "{{ Dimension('cohorte__cohorte_madura') }} = true\n"
+   ],
+   "meta": {
+    "dueno": "Lifecycle",
+    "unidad": "clientes"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cohorte__cohorte_madura",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__cohorte_mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__meses_desde_alta",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cohorte__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "tasa_devolucion",
+   "etiqueta": "Tasa de devolución",
+   "descripcion": "Pedidos devueltos / pedidos totales (proporción 0–1).",
+   "tipo": "ratio",
+   "expr": null,
+   "medida": null,
+   "numerador": "pedidos_devueltos_m",
+   "denominador": "pedidos_totales",
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Operaciones",
+    "unidad": "proporción"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ticket_promedio",
+   "etiqueta": "Ticket promedio",
+   "descripcion": "",
+   "tipo": "ratio",
+   "expr": null,
+   "medida": null,
+   "numerador": "ventas_netas",
+   "denominador": "pedidos",
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Comercial",
+    "unidad": "MXN"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "unidades",
+   "etiqueta": "Unidades vendidas",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "cantidad",
+   "medida": "unidades",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Operaciones",
+    "unidad": "piezas"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ventas_brutas",
+   "etiqueta": "Ventas brutas",
+   "descripcion": "Precio de lista × cantidad, antes de descuentos. Solo pedidos completados.",
+   "tipo": "simple",
+   "expr": "venta_bruta",
+   "medida": "venta_bruta",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Finanzas",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ventas_clientes",
+   "etiqueta": "Ventas (vista clientes)",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "venta_neta",
+   "medida": "ventas_clientes_m",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Growth",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ventas_ecommerce",
+   "etiqueta": "Ventas e-commerce",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "venta_neta",
+   "medida": "venta_neta",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [
+    "{{ Dimension('linea__canal') }} = 'E-commerce'\n"
+   ],
+   "meta": {
+    "dueno": "Digital",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ventas_incrementales_m",
+   "etiqueta": "Ventas incrementales de campaña",
+   "descripcion": "",
+   "tipo": "simple",
+   "expr": "ventas_incrementales",
+   "medida": "ventas_incrementales",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Marketing",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "campana__campana_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "campana__fecha_inicio",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "campana__plataforma",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ventas_netas",
+   "etiqueta": "Ventas netas",
+   "descripcion": "Ventas después de descuentos, sin IVA, solo pedidos completados.",
+   "tipo": "simple",
+   "expr": "venta_neta",
+   "medida": "venta_neta",
+   "numerador": null,
+   "denominador": null,
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Finanzas",
+    "unidad": "MXN"
+   },
+   "agregacion": "sum",
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__canal",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__categoria",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__en_campana",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "linea__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__day",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__estatus",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "pedido__fecha_pedido",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "producto__producto_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  },
+  {
+   "nombre": "ventas_por_cliente",
+   "etiqueta": "Ventas por cliente activo",
+   "descripcion": "",
+   "tipo": "ratio",
+   "expr": null,
+   "medida": null,
+   "numerador": "ventas_clientes",
+   "denominador": "clientes_activos",
+   "entradas": [],
+   "filtro": [],
+   "meta": {
+    "dueno": "Growth",
+    "unidad": "MXN"
+   },
+   "agregacion": null,
+   "noAditivaEn": null,
+   "dimensiones": [
+    {
+     "nombre": "cliente__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente__segmento",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__canal_adquisicion",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__mes",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "cliente_mes__origen",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "metric_time__month",
+     "tipo": "tiempo",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__es_comparable",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__estado",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__region",
+     "tipo": "categorica",
+     "etiqueta": null
+    },
+    {
+     "nombre": "tienda__tienda_nombre",
+     "tipo": "categorica",
+     "etiqueta": null
+    }
+   ]
+  }
+ ],
+ "dominios": {
+  "cliente__canal_adquisicion": [
+   "E-commerce",
+   "Mayoreo",
+   "Tienda"
+  ],
+  "cliente__origen": [
+   "Campaña",
+   "Orgánico"
+  ],
+  "cliente__segmento": [
+   "Hogar",
+   "Mayorista",
+   "Negocio"
+  ],
+  "cliente_mes__canal_adquisicion": [
+   "E-commerce",
+   "Mayoreo",
+   "Tienda"
+  ],
+  "cliente_mes__estado": [
+   "base_inicial",
+   "nuevo",
+   "reactivado",
+   "retenido"
+  ],
+  "cliente_mes__origen": [
+   "Campaña",
+   "Orgánico"
+  ],
+  "tienda__es_comparable": [
+   "False",
+   "True"
+  ],
+  "tienda__estado": [
+   "Chihuahua",
+   "Ciudad de México",
+   "Coahuila",
+   "Jalisco",
+   "Michoacán",
+   "Nuevo León",
+   "Oaxaca",
+   "Puebla",
+   "Querétaro",
+   "Quintana Roo",
+   "Tabasco",
+   "Tamaulipas",
+   "Veracruz",
+   "Yucatán"
+  ],
+  "tienda__region": [
+   "Centro",
+   "Golfo",
+   "Norte",
+   "Occidente",
+   "Sureste"
+  ],
+  "tienda__tienda_nombre": [
+   "Boca del Río",
+   "Cancún",
+   "Chihuahua",
+   "Coatzacoalcos",
+   "Coyoacán",
+   "Guadalajara Providencia",
+   "Monterrey Centro",
+   "Morelia",
+   "Mérida",
+   "Oaxaca",
+   "Polanco",
+   "Poza Rica",
+   "Puebla Angelópolis",
+   "Querétaro",
+   "Saltillo",
+   "San Pedro",
+   "Tampico",
+   "Veracruz Centro",
+   "Villahermosa",
+   "Xalapa",
+   "Zapopan"
+  ],
+  "producto__producto_nombre": [
+   "Aceite 1L",
+   "Agua 6L",
+   "Agua mineral 2L",
+   "Aguacate kg",
+   "Arroz 1kg",
+   "Atún lata",
+   "Azúcar 2kg",
+   "Bebida isotónica",
+   "Café molido 400g",
+   "Cerveza 6-pack",
+   "Cloro 2L",
+   "Crema 450ml",
+   "Crema corporal",
+   "Desodorante",
+   "Detergente 3kg",
+   "Frijol negro 1kg",
+   "Harina maíz 1kg",
+   "Huevo 30",
+   "Jabón tocador 3",
+   "Jabón trastes",
+   "Jitomate kg",
+   "Jugo naranja 1L",
+   "Leche entera 1L",
+   "Mantequilla 90g",
+   "Papel higiénico 12",
+   "Pasta 500g",
+   "Pasta dental",
+   "Plátano kg",
+   "Pollo kg",
+   "Queso fresco 400g",
+   "Refresco cola 3L",
+   "Shampoo 750ml",
+   "Suavizante 3L",
+   "Tortilla kg",
+   "Yogur natural"
+  ],
+  "linea__canal": [
+   "E-commerce",
+   "Mayoreo",
+   "Tienda"
+  ],
+  "linea__categoria": [
+   "Abarrotes",
+   "Bebidas",
+   "Cuidado personal",
+   "Frescos",
+   "Limpieza",
+   "Lácteos"
+  ],
+  "linea__en_campana": [
+   "False",
+   "True"
+  ],
+  "pedido__estatus": [
+   "completado"
+  ],
+  "campana__campana_nombre": [
+   "Buen Fin 2025",
+   "Fiestas Patrias",
+   "Hot Sale 2026",
+   "Navidad 2025",
+   "Regreso a clases",
+   "Verano Bebidas"
+  ],
+  "campana__plataforma": [
+   "Google Ads",
+   "Meta Ads",
+   "TikTok Ads"
+  ],
+  "cohorte__cohorte_madura": [
+   "True"
+  ],
+  "cohorte__meses_desde_alta": [
+   "0",
+   "1",
+   "10",
+   "11",
+   "12",
+   "13",
+   "14",
+   "15",
+   "16",
+   "17",
+   "18",
+   "19",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9"
+  ],
+  "cohorte__origen": [
+   "Campaña",
+   "Orgánico"
+  ]
+ }
+}

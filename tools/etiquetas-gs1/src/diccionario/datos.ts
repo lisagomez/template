@@ -1,4 +1,4 @@
-// GENERADO por generador/genera-diccionario.mjs — no se edita a mano.
+// ALTO: ARTEFACTO AUTOGENERADO por generador/genera-diccionario.mjs. No lo edites a mano: se regenera.
 // Fuente: GS1 Barcode Syntax Dictionary, github.com/gs1/gs1-syntax-dictionary @ c63d8a12210dd0cfaceac4aae45ccf57b48eb15b
 // Copyright (c) 2020-2021 BWIPP project · (c) 2020-2021 Zint Project · (c) 2021-2025 GS1 AISBL
 // Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0

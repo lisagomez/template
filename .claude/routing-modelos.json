@@ -44,7 +44,7 @@
       }
     },
     "voz": {
-      "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros",
+      "para": "conversacion por voz en tiempo real (centro de mando): lo que la persona espera es el PRIMER token; respuestas de una a tres frases, sin herramientas y sin decidir sobre riesgo, dinero ni datos de terceros; o estructurar una instruccion corta en un plan que valida el codigo (estudio de dashboards), donde se espera la regeneracion en segundos y el modelo no escribe cifras ni SQL",
       "modelo": "anthropic/claude-haiku-5.5-20261007",
       "precio": {
         "entrada": 0.1,
@@ -152,6 +152,7 @@
     "formato-y-lint": "ligero",
     "cerebro-de-voz": "voz",
     "asistente-paciente": "voz",
+    "agente-estudio-dashboards": "voz",
     "implementar-feature": "capaz",
     "revision-de-codigo": "capaz",
     "migracion-o-sql": "capaz",

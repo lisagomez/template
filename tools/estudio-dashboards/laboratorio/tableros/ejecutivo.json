@@ -1,0 +1,13 @@
+{
+ "esquema": "estudio.dashboard/1",
+ "titulo": "Ventas ejecutivo",
+ "palanca": "ticket",
+ "filtros": { "periodo": { "desde": "2026-01", "hasta": "2026-09" }, "comparar": "anio_anterior", "dimensiones": [] },
+ "componentes": [
+  { "id": "kpis", "tipo": "kpis", "metricas": ["ventas_netas", "margen_bruto_pct", "pedidos", "ticket_promedio"], "comparar": "anio_anterior" },
+  { "id": "tendencia", "tipo": "linea", "metrica": "ventas_netas", "grano": "month" },
+  { "id": "por_region", "tipo": "barras", "metrica": "ventas_netas", "dimension": "tienda__region" },
+  { "id": "por_categoria", "tipo": "barras", "metrica": "margen_bruto_pct", "dimension": "linea__categoria" },
+  { "id": "tiendas", "tipo": "tabla", "metricas": ["ventas_netas", "margen_bruto_pct"], "dimension": "tienda__tienda_nombre", "top": 21 }
+ ]
+}
