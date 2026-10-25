@@ -4,10 +4,14 @@ implementacion TypeScript contra una independiente. Todo es inventado: nombres, 
 
 Escribe pruebas/fixtures/identificadores-sinteticos.json con 200 validos y 200 invalidos de cada
 clase (la mutacion cambia SOLO el digito de control).
+
+Uso:  python3 medicion/genera-identificadores.py [--comprueba]   (--comprueba: exit 1 si el JSON diverge;
+      lo corre `verifica:generados` del template)
 """
 import json
 import random
 import string
+import sys
 from pathlib import Path
 
 AZAR = random.Random(9)
@@ -75,5 +79,11 @@ for nombre, gen, tabla in [('rfc', rfc, TABLA_RFC), ('curp', curp, string.digits
     salida[nombre] = {'validos': validos, 'invalidos': [muta(v, tabla) for v in validos]}
 
 destino = Path(__file__).resolve().parent.parent / 'pruebas' / 'fixtures' / 'identificadores-sinteticos.json'
-destino.write_text(json.dumps({'_aviso': 'TODO INVENTADO: generado por medicion/genera-identificadores.py, semilla 9', **salida}, indent=1), encoding='utf-8')
+ALTO = 'ALTO: ARTEFACTO AUTOGENERADO por medicion/genera-identificadores.py (semilla 9). No lo edites a mano.'
+texto = json.dumps({'_ALTO': ALTO, '_aviso': 'TODO INVENTADO: nombres, fechas y entidades', **salida}, indent=1)
+if '--comprueba' in sys.argv:
+    igual = destino.exists() and destino.read_text(encoding='utf-8') == texto
+    print(f'✓ {destino.name} coincide con su generador' if igual else f'✗ {destino.name} diverge de su generador: regeneralo')
+    sys.exit(0 if igual else 1)
+destino.write_text(texto, encoding='utf-8')
 print(f'{destino}: 200 validos y 200 invalidos por clase')

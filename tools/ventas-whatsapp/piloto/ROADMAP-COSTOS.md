@@ -1,3 +1,4 @@
+<!-- ALTO: ARTEFACTO AUTOGENERADO por roadmapCostosMarkdown(). No lo edites a mano: node tools/ventas-whatsapp/e2e/genera-roadmaps.mjs -->
 # Roadmap de costos y presupuesto del laboratorio — FICTICIO
 
 > Generado por `roadmapCostosMarkdown()` (`src/laboratorio/documentos.ts`); no se edita a mano. **Todo es ficticio

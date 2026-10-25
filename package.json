@@ -20,6 +20,7 @@
     "verify:gobernanza": "node scripts/verifica-gobernanza.mjs",
     "verifica:specs": "node scripts/verifica-specs.mjs",
     "verifica:gates": "node scripts/verifica-gates.mjs",
+    "verifica:generados": "node scripts/verifica-generados.mjs",
     "prueba:tools": "node scripts/prueba-tools.mjs",
     "prueba:a2a": "node --test --test-skip-pattern=^SERVICIO: scripts/prueba-a2a.ts",
     "prueba:a2a:servicio": "node --test --test-name-pattern=^SERVICIO: scripts/prueba-a2a.ts",

@@ -1,0 +1,55 @@
+{
+ "fecha": "2026-10-20",
+ "comando": "python gen_data.py && python lifecycle.py data/raw (en una carpeta temporal; los CSV del zip no se tocan)",
+ "versiones": {
+  "python": "3.12",
+  "numpy": "2.5.4",
+  "pandas": "3.0.6"
+ },
+ "segundos": 129.3,
+ "resultado": "reproducible",
+ "csv": [
+  {
+   "archivo": "campanas.csv",
+   "zip": "sha256:c48b6741d8b345aa50bafd4065a754f017638c0db6e0be0962bb981d1d3286dc",
+   "regenerado": "sha256:c48b6741d8b345aa50bafd4065a754f017638c0db6e0be0962bb981d1d3286dc",
+   "igual": true
+  },
+  {
+   "archivo": "clientes.csv",
+   "zip": "sha256:6daf0305ff9b03b0c50cde5dda297cdd310b7a9bd57ab1f29cb12dd3935d75be",
+   "regenerado": "sha256:6daf0305ff9b03b0c50cde5dda297cdd310b7a9bd57ab1f29cb12dd3935d75be",
+   "igual": true
+  },
+  {
+   "archivo": "inventario.csv",
+   "zip": "sha256:fced659b5d6797e89c548cee39d29363f3e5dc4272d17f04343104262b5a01c8",
+   "regenerado": "sha256:fced659b5d6797e89c548cee39d29363f3e5dc4272d17f04343104262b5a01c8",
+   "igual": true
+  },
+  {
+   "archivo": "lineas_pedido.csv",
+   "zip": "sha256:ade7b3f3b3eddf7053b62518f8a45b6ab2ecd06094174d0f852769af7285ccb2",
+   "regenerado": "sha256:ade7b3f3b3eddf7053b62518f8a45b6ab2ecd06094174d0f852769af7285ccb2",
+   "igual": true
+  },
+  {
+   "archivo": "pedidos.csv",
+   "zip": "sha256:bec80bfed9356efdac3e5c265791cdf4d2b8d0e61c12d87f3f8dbd00bcab0085",
+   "regenerado": "sha256:bec80bfed9356efdac3e5c265791cdf4d2b8d0e61c12d87f3f8dbd00bcab0085",
+   "igual": true
+  },
+  {
+   "archivo": "productos.csv",
+   "zip": "sha256:d6f3245a12866f4adb5ec1774450d745d302a44b198347a1c6c85ab84bb47fd3",
+   "regenerado": "sha256:d6f3245a12866f4adb5ec1774450d745d302a44b198347a1c6c85ab84bb47fd3",
+   "igual": true
+  },
+  {
+   "archivo": "tiendas.csv",
+   "zip": "sha256:c7d74e698996e1f911128b6f772e8e1c313054a6471343716ebf2cf841b41fa2",
+   "regenerado": "sha256:c7d74e698996e1f911128b6f772e8e1c313054a6471343716ebf2cf841b41fa2",
+   "igual": true
+  }
+ ]
+}

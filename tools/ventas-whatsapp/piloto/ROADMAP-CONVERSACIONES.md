@@ -1,3 +1,4 @@
+<!-- ALTO: ARTEFACTO AUTOGENERADO por roadmapConversacionesMarkdown(). No lo edites a mano: node tools/ventas-whatsapp/e2e/genera-roadmaps.mjs -->
 # Roadmap de conversaciones-plantilla
 
 > Generado por `roadmapConversacionesMarkdown()` (`src/laboratorio/documentos.ts`); no se edita a mano. Cada guion
