@@ -8,7 +8,7 @@
 
 ### 2026-10-25 — la capa común (`tools/capa`, Arbrain v0.2.10 pineado) y sus enchufes, Recepción, la conversación de la mesa y la voz alineada — radio: padrón de gates (`verifica:enchufes` nuevo en `validate`, `prueba:instancias` inactivo, un artefacto nuevo en `generados`), herramienta y producto (paquete `@tu-scope/capa`, 23 enchufes, el producto Recepción, `tools/{dictado,bucle-voz}`, la mesa de Soporte SAP) e infraestructura de laboratorio (`infra/cerebro-personal`, solo contenedores)
 
-- **Cambio** (rama `capa/arbrain` desde `origin/main` `4b446fb`; commit `<sha>`):
+- **Cambio** (rama `capa/arbrain` desde `origin/main` `4b446fb`; commit `1f2c84b`, árbol `a877ff863d53`):
   - **`tools/capa`** (`@tu-scope/capa` 0.1.0, activo base `TPL-capa`): una ventana (conversación, lienzo, explorador
     y panel), ranuras con dueño, intención sin LLM, el freno (cita textual y clic humano), memoria por inquilino con
     almacén inyectado, primer arranque, la ranura de voz con el botón Modo conversación y el resumen de solo conteos.
@@ -24,7 +24,9 @@
     - `verifica:enchufes`, **activo en `validate`** (menos de un segundo, sin red);
     - `prueba:instancias`, **inactivo**, con motivo (Docker y ~350 MB) y lo que falta (el perfil con Docker);
     - `capa-registro-de-enchufes` entra a `generados` (banner y comparación por `verifica:enchufes`);
-    - el CI (`.github/workflows/gates.yml`), regenerado como proyección del padrón.
+    - el CI (`.github/workflows/gates.yml`), regenerado como proyección del padrón;
+    - `/api/recepcion/resumen` declarada en `RUTAS_FUERA_DEL_BRIDGE` (`scripts/prueba-a2a.ts`, RF-20: misma app y mismo
+      puerto, solo lee conteos).
   - **Recepción** (`productos/recepcion.json`, composición, `src/features/recepcion`, `/recepcion` y
     `/api/recepcion/resumen`): producto sintético que compone la capa, `tools/calendario`, la voz local y
     `estudio-pymes`; fila en el índice del portafolio y activos en el inventario.
@@ -57,14 +59,18 @@
   - encender el VPS, Tailscale o Cloudflare, desplegar la mesa con la conversación y un modelo real en la capa.
 - **Demostrado** (2026-10-25; las salidas están en `docs/goals/capa-arbrain-evidencia/`):
   - `FIRMA_OK v0.2.10 829a9e9 (lock vigente)`;
-  - capa: `prueba:tools -- capa` `<N>` pruebas y `empaqueta capa` en verde (instala el tarball en un proyecto limpio);
+  - capa: `prueba:tools -- capa` 33 pruebas y `empaqueta capa` en verde (3 subpaths en un proyecto limpio; `./react` sin
+    probar ahí por falta del peer opcional);
   - enchufes `23/23` y `10/10` siembras;
-  - recorrido de la app: `<N>/62` rutas dentro de la capa y `<N>` errores de consola (brecha `/buzon/[pyme]`);
+  - recorrido de la app: 62/63 rutas dentro de la capa y 0 errores de consola (brecha `/buzon/[pyme]`, decidida); en
+    una corrida anterior apareció un aviso de hidratación intermitente que no se reprodujo (R13);
   - Recepción: 11 pasos de capturas en verde y la recomposición con `git diff --stat -- tools/capa` vacío;
   - mesa: la conversación 12/12, su recorrido 26/26 y la prueba de que nada sale (red sin salida, 51 peticiones al
     origen local, almacén con 9 archivos y ninguno de la conversación);
-  - instancias `PRUEBA_OK: (a)-(h)`, repetida tras reiniciar la máquina;
-  - voz: suites en verde y la medición con `mide.ts` contra la base del 16/10 (`voz.md`);
+  - instancias `PRUEBA_OK: (a)-(h)`, 69 comprobaciones, sobre el código final;
+  - voz: bucle-voz 95, dictado 169 y voz 98 pruebas en verde; acuse p50 630 ms en la corrida comparable (646 en la
+    cargada); «para» 16/16 sin tardías y eco 0/6 en las cuatro corridas; órdenes y reacción del «para» más lentas que
+    la base y **no atribuidas** (`voz.md`, «Control del coordinador»); enrutador 71,6 % en el corpus D (caída declarada);
   - skill: simulacro v0.2.9 → v0.2.10 parado en el CDC y etiqueta sin firma o llave ajena → `FALLA` sin escribir nada.
 - **Lo que cuesta o queda abierto**: `validate` gana un gate de menos de un segundo; las brechas declaradas en
   `docs/goals/capa-arbrain-evidencia/decisiones.md` §2.
@@ -72,11 +78,13 @@
   quedan apagados (su C4 es aparte); el resumen hacia el cerebro personal solo existe en contenedores.
 - **Gate aplicado**:
   - diff revisado ☐ (el laboratorio, en el chat, antes de firmar);
-  - regresión capa A ☐ `<N>/<N>`;
-  - `npm run validate` ☐ `<N>/<N>` sobre `<sha>`;
+  - regresión capa A ☑ 166/166 (dentro del `validate`);
+  - `npm run validate` ☑ 34/34 gates activos (11 inactivos declarados) sobre `1f2c84b` (árbol `a877ff863d53`), en
+    16 min, en la máquina del laboratorio; gobernanza 171/171;
   - capa B: no corrida por el agente: no cambia `AGENTS.md`, ningún skill ni ningún prompt; decide el laboratorio ☐;
   - aprobación humana ☐;
   - pineo ☑ (Arbrain por etiqueta firmada y commit; `zod` 4.6.1 exacto; sin modelo).
-- **Regresión**: `verifica:enchufes` `23/23`, `10/10`; `verifica:gates`; `verifica:generados`; `verify:gobernanza`;
-  `verifica:productos` (`<N>` siembras); `verifica:inventario`.
+- **Regresión**: `verifica:enchufes` 23/23 y 10/10 siembras; `verifica:gates` 12/12; `verifica:generados` 65 y 8/8
+  siembras; `verify:gobernanza` 171/171; `verifica:productos` 43/43 siembras; `verifica:inventario` 301 unidades;
+  `prueba:tools` 19 suites y 2350 pruebas; `audita:secretos` limpio en toda la historia.
 - **Aprobado por**: (lo escribe el laboratorio al firmar)
