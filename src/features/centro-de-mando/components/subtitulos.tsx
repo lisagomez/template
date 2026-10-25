@@ -35,7 +35,7 @@ export function Subtitulos({ frases, oyendo, interrumpida }: { frases: FraseKara
         {ventana(frases).map((f) => {
           const [dicho, falta] = parte(f.texto, f.fraccion);
           return (
-            <span key={f.indice} data-prueba="frase" data-fraccion={f.fraccion.toFixed(2)}>
+            <span key={f.indice} data-prueba="frase" data-fraccion={f.fraccion.toFixed(2)} data-acuse={f.acuse ? '1' : undefined} className={f.acuse ? 'italic' : undefined}>
               <span className="text-white [text-shadow:0_0_18px_rgba(255,255,255,0.35)]">{dicho}</span>
               <span className="text-white/25">{falta}</span>{' '}
             </span>

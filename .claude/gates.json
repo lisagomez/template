@@ -298,6 +298,18 @@
       "_nota": "ALTA del 2026-10-04 (corrida B de Soporte SAP: el concepto en productos/CONCEPTO.md, la plantilla en productos/PLANTILLA.md). Fuera de predeploy a proposito: un manifiesto no cambia lo que se despliega. Los productos sin manifiesto se listan como pendientes y NO ponen el gate en rojo."
     },
     {
+      "nombre": "verifica:enchufes",
+      "runner": "comando",
+      "comando": "npm run verifica:enchufes",
+      "guarda": "el contrato de modulo de la capa comun (`tools/capa`, goal capa-arbrain): que todo activo del inventario con pantalla tenga su `enchufe.json` y que este pase el esquema de la capa; que toda pagina de la app este dentro de la capa o fuera con su motivo, y que cada ruta de dentro la declare exactamente un enchufe, dueno de una feature que la pagina importa; que ninguna accion irreversible se salte el freno ni un modulo reclame la ranura del freno; que el nucleo de una herramienta no importe la capa; que ningun modulo ni intencion se repita; y que la app registre todos los enchufes (el registro generado `src/shared/capa/enchufes.ts` al dia); y que cada siembra de defecto tumbe su comprobacion",
+      "evidencia": "cada comprobacion con su pista (N/N activos con pantalla, paginas dentro y fuera con su motivo), la tabla de siembras cazadas; exit 1 si algo cae o una siembra no muerde",
+      "cubre": ["scripts/capa/verifica-enchufes.mjs", "scripts/capa/registra-enchufes.mjs", "src/features/*/enchufe.json", "tools/*/enchufe.json", "src/shared/capa/enchufes.ts"],
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 60,
+      "_nota": "ALTA del 2026-10-25 (goal capa-arbrain, nodo enchufe), propuesta en el CDC de la capa. Fuera de predeploy, como verifica:productos: un enchufe no cambia lo que se despliega. Corre en menos de un segundo y sin red."
+    },
+    {
       "nombre": "prueba:inventario",
       "runner": "comando",
       "comando": "npm run prueba:inventario",
@@ -514,6 +526,19 @@
       "activo": false,
       "motivo": "Es una medicion, no un criterio: no tiene umbral binario que pueda ponerse rojo. Meterlo en `validate` daria un gate que nunca falla, que es peor que no tenerlo (se lee como cobertura y no cubre).",
       "falta": "Un umbral declarado de coste de contexto por MCP para que pueda ser un gate de verdad. Mientras no exista, se corre a mano al evaluar un MCP."
+    },
+    {
+      "nombre": "prueba:instancias",
+      "runner": "comando",
+      "comando": "npm run prueba:instancias",
+      "guarda": "el job que sincroniza SOLO el cerebro del Arbrain personal entre dos instancias (local y VPS) en contenedores: ida y vuelta, choque que se detiene sin elegir lado y con las dos versiones intactas, versiones de Arbrain distintas que no sincronizan, la carpeta de datos de la app intacta, solo 127.0.0.1 y ningun puerto publicado, y la puerta de Cloudflare con Access obligatorio validada sin conexion (con su sabotaje)",
+      "evidencia": "PRUEBA_OK y sus comprobaciones; la corrida real en docs/goals/capa-arbrain-evidencia/instancias.md; exit distinto de 0 si un punto cae",
+      "cubre": ["infra/cerebro-personal/prueba*.mjs", "infra/cerebro-personal/job/*.test.mjs"],
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker y, la primera vez, baja ~350 MB (el programa de la etiqueta firmada) y la imagen pineada de cloudflared: no cabe en el gate de cada integracion. Las 9 pruebas del driver de merge y de la lista permitida (job/*.test.mjs) corren sin Docker, pero meterlas en `validate` cambia lo que corre el padron: va en el CDC de la capa como propuesta, no aqui.",
+      "falta": "El perfil con Docker que esperan `inventario:valida-erp` y `sgi:rls`. Hasta entonces se corre a mano (`npm run prueba:instancias`) al tocar `infra/cerebro-personal/` y antes de encender las instancias reales.",
+      "_nota": "Declarado inactivo con la propuesta de CDC de la capa (2026-10-25, goal capa-arbrain), para que la ausencia se vea en `npm run gates`"
     }
   ],
   "generados": {
@@ -634,6 +659,14 @@
         "genera": "node src/features/soporte-sap/mesa/fuentes/extrae.mjs web <captura del CVE List, KEV y SAP-docs en los SHA de pin.json>",
         "comprueba": { "gate": "prueba:tools" },
         "_nota": "No es hermetico: su fuente es la captura del CVE List, KEV y SAP-docs en los SHA de pin.json, fuera del repo, y re-extraerlo lo hace el laboratorio con esa captura. Lo que compara el gate (prueba mesa-web) es su huella, que su pin sea el de pin.json y la captura y la cita de cada candidato: caza la edicion a mano, no un cambio en la web. Mover el pin lo decide el laboratorio, y extrae.mjs revisa web avisa cuando hay version nueva."
+      },
+      {
+        "nombre": "capa-registro-de-enchufes",
+        "rutas": ["src/shared/capa/enchufes.ts"],
+        "fuentes": ["scripts/capa/registra-enchufes.mjs", "scripts/capa/verifica-enchufes.mjs", "src/features/*/enchufe.json", "tools/*/enchufe.json"],
+        "genera": "node scripts/capa/registra-enchufes.mjs",
+        "comprueba": { "gate": "verifica:enchufes" },
+        "_nota": "ALTA del 2026-10-25 (goal capa-arbrain), en el CDC de la capa. Lo compara verifica:enchufes (la comprobacion «la app registra todos los enchufes» y su siembra); el generador tiene ademas su --comprueba."
       }
     ],
     "fuera": [

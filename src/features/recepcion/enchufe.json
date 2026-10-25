@@ -1,0 +1,49 @@
+{
+  "enchufe": 1,
+  "modulo": "recepcion",
+  "activo": "TPL-feature-recepcion",
+  "nombre": "Recepción (el mostrador de un negocio de servicios)",
+  "pantallas": ["/recepcion"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "recepcion.servicios",
+      "queHace": "Decirte qué servicios hay y cuánto cuestan.",
+      "ejemplos": ["qué servicios tienen", "cuánto cuesta un corte", "dame la lista de precios", "cuánto sale arreglar la barba"],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "recepcion.horario",
+      "queHace": "Decirte a qué hora abre y cierra el negocio.",
+      "ejemplos": ["a qué hora abren", "cuál es el horario", "abren los domingos", "a qué hora cierran hoy"],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "recepcion.huecos",
+      "queHace": "Decirte qué horas quedan libres para una cita.",
+      "ejemplos": ["qué horas quedan libres mañana", "hay lugar el viernes", "a qué hora hay espacio para un corte"],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "recepcion.abre",
+      "queHace": "Abrir el mostrador de la recepción.",
+      "ejemplos": ["abre la recepción", "llévame al mostrador", "muéstrame el mostrador de la recepción"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/recepcion"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el mostrador (/recepcion) y la lectura de conteos (/api/recepcion/resumen) no importan la capa: la agenda es el motor de tools/calendario con datos sintéticos y los datos del negocio son un archivo; la capa solo le pone la ventana, la intención, el freno, la memoria y la voz",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "el cerebro personal del laboratorio (el job de su VPS, fase aparte)",
+      "cuando": "solo si el job lee /api/recepcion/resumen: cuántas citas hay hoy y mañana y el enlace al mostrador; nunca nombres, horas ni texto"
+    }
+  ]
+}

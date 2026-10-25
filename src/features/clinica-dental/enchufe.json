@@ -1,0 +1,87 @@
+{
+  "enchufe": 1,
+  "modulo": "clinica-dental",
+  "activo": "TPL-feature-clinica-dental",
+  "nombre": "Clínica dental (laboratorio del portal del paciente)",
+  "pantallas": [
+    "/laboratorio-clinica-dental",
+    "/laboratorio-clinica-dental/buzon",
+    "/laboratorio-clinica-dental/telegram",
+    "/laboratorio-clinica-dental/tablero",
+    "/laboratorio-clinica-dental/grafo"
+  ],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "clinica-dental.abre",
+      "queHace": "Abrir el laboratorio del portal de clínicas dentales.",
+      "ejemplos": [
+        "abre el laboratorio de la clínica dental",
+        "quiero ver el portal de pacientes del laboratorio",
+        "llévame a las clínicas dentales de prueba"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-clinica-dental"
+    },
+    {
+      "id": "clinica-dental.abre-buzon",
+      "queHace": "Mostrarte los correos simulados del portal dental.",
+      "ejemplos": [
+        "correos simulados de la clínica",
+        "correos de confirmación del portal dental",
+        "abre el buzón de salida de la clínica",
+        "revisa las confirmaciones de citas en formato eml"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-clinica-dental/buzon"
+    },
+    {
+      "id": "clinica-dental.abre-telegram",
+      "queHace": "Abrir el Telegram simulado de la clínica.",
+      "ejemplos": [
+        "abre el Telegram simulado de la clínica",
+        "ver los avisos de Telegram de los pacientes",
+        "la vinculación del bot de Telegram con deep link"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-clinica-dental/telegram"
+    },
+    {
+      "id": "clinica-dental.abre-tablero",
+      "queHace": "Mostrarte el unit economics de las clínicas.",
+      "ejemplos": [
+        "cuánto deja cada paciente de la clínica",
+        "el unit economics de las clínicas dentales",
+        "abre el tablero económico de la clínica"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-clinica-dental/tablero"
+    },
+    {
+      "id": "clinica-dental.abre-grafo",
+      "queHace": "Mostrarte el grafo de atención al paciente.",
+      "ejemplos": [
+        "muéstrame el grafo de atención de la clínica",
+        "el recorrido de los pacientes por el portal",
+        "abre el grafo de atención al cliente"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-clinica-dental/grafo"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las cinco pantallas del laboratorio leen el estado del portal sin la capa; el portal de pacientes (fuera de la capa) y su núcleo tools/clinica-dental no la usan",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "OpenRouter (modelo pineado de la clase asistente-paciente)",
+      "cuando": "cuando un paciente escribe al chatbot del portal (el portal queda fuera de la capa): su pregunta y, solo si él lo pide, su padecimiento; el correo y Telegram del laboratorio son simulados y no salen"
+    }
+  ]
+}

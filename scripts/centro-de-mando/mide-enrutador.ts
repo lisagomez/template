@@ -6,9 +6,15 @@
  *     (motor local con anclaje) → enrutador / activación. Es lo que de verdad decide en el HUD.
  *
  *   node scripts/centro-de-mando/mide-enrutador.ts [--base http://localhost:3011] [--solo-texto]
+ *   node scripts/centro-de-mando/mide-enrutador.ts --corpus <corpus.json> --congelado <evidencia.json> [--sin-activacion]
  *
  * Escribe `docs/goals/centro-de-mando-voz-medicion/enrutador.json`. No gasta un centavo: ni cerebro ni red.
+ *
+ * Con `--congelado`, el corpus es uno NUNCA VISTO cuya huella se guardó antes de medir: si el corpus, el enrutador o
+ * su catálogo no tienen la huella congelada, la medición se niega (medir un corpus retocado después de ver los fallos
+ * ya no es medir uno nunca visto). El resultado se escribe en la propia evidencia congelada (`medicion`).
  */
+import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { aPcm16, creaActivacion, creaEnrutadorLocal, ORDENES_ES, type Decision } from '../../tools/bucle-voz/dist/index.js';
 import { dice, tokenDictado, VOCES } from './voz-sintetica.ts';
@@ -55,6 +61,16 @@ const linea = (nombre: string, r: ReturnType<typeof resumen>) =>
   `${nombre}: ${r.aciertos}/${r.total} (${r.acierto} %) · órdenes equivocadas ${r.ordenesEquivocadas} · conversación tomada por orden ${r.conversacionComoOrden} · escrituras perdidas ${r.escriturasPerdidas} · al cerebro por duda ${r.alCerebro}`;
 
 const CORPUS = arg('--corpus') ?? 'tools/bucle-voz/medicion/corpus-enrutador.json';
+const CONGELADO = arg('--congelado');
+const huella = async (r: string) => createHash('sha256').update(await readFile(r)).digest('hex');
+interface Congelado { corpus: { ruta: string; sha256: string }; enrutador: Record<string, string>; medicion: unknown }
+const congelado = CONGELADO ? (JSON.parse(await readFile(CONGELADO, 'utf8')) as Congelado) : undefined;
+if (congelado) {
+  const ahora = { corpus: await huella(CORPUS), enrutador: await huella('tools/bucle-voz/src/enrutador.ts'), catalogo: await huella('tools/bucle-voz/src/catalogo.ts') };
+  const antes = { corpus: congelado.corpus.sha256, enrutador: congelado.enrutador['enrutador.ts'], catalogo: congelado.enrutador['catalogo.ts'] };
+  if (congelado.corpus.ruta !== CORPUS || JSON.stringify(ahora) !== JSON.stringify(antes)) throw new Error(`la huella no es la congelada: ${JSON.stringify({ ahora, antes })}`);
+  console.log(`huellas congeladas: corpus ${ahora.corpus.slice(0, 12)}…, enrutador ${ahora.enrutador.slice(0, 12)}…, catálogo ${ahora.catalogo.slice(0, 12)}… (iguales)`);
+}
 const corpus = JSON.parse(await readFile(CORPUS, 'utf8')) as { frases: [string, string][] };
 const leeCorpus = async (r: string) => (JSON.parse(await readFile(r, 'utf8')) as { frases: [string, string][] }).frases;
 const otros = { B: await leeCorpus('tools/bucle-voz/medicion/corpus-enrutador-b.json'), C: await leeCorpus('tools/bucle-voz/medicion/corpus-enrutador-c.json') };
@@ -66,7 +82,7 @@ const fallosTexto: Fallo[] = corpus.frases.flatMap(([frase, esperada]) => {
   return salio === esperada ? [] : [{ frase, esperada, salio }];
 });
 const texto = resumen(corpus.frases.length, fallosTexto);
-console.log(linea('enrutador por TEXTO, corpus A', texto));
+console.log(linea(`enrutador por TEXTO, ${CONGELADO ? CORPUS : 'corpus A'}`, texto));
 for (const f of fallosTexto) console.log(`  ✗ «${f.frase}» esperaba ${f.esperada}, salió ${f.salio}`);
 const textoOtros = Object.fromEntries(
   Object.entries(otros).map(([nombre, frases]) => {
@@ -97,10 +113,14 @@ if (!process.argv.includes('--solo-texto')) {
     }
   }
   const r = resumen(n, fallos);
-  console.log(linea(`enrutador por AUDIO, corpus A (${voces.join(', ')})`, r));
+  console.log(linea(`enrutador por AUDIO, ${CONGELADO ? CORPUS : 'corpus A'} (${voces.join(', ')})`, r));
   for (const f of fallos) console.log(`  ✗ [${f.voz}] «${f.frase}» oyó ${JSON.stringify(f.oido)} → ${f.salio} (esperaba ${f.esperada})`);
+  audio = { medido: true, enrutador: r };
+}
+if (!process.argv.includes('--solo-texto') && !process.argv.includes('--sin-activacion')) {
   const act = { positivas: 0, nPos: 0, falsas: 0, nNeg: 0, segundosNegativas: 0, perdidas: [] as string[], disparos: [] as string[], barrido: [] as { umbral: number; detectadas: number; falsas: number }[] };
   const oidos: { positiva: boolean; oido: string[] }[] = [];
+  const r = (audio as { enrutador?: unknown }).enrutador;
   for (const voz of VOCES) {
     for (const p of activ.positivas) {
       const d = await dice(p, voz, token);
@@ -135,5 +155,11 @@ if (!process.argv.includes('--solo-texto')) {
   audio = { medido: true, enrutador: r, activacion: act };
 }
 
-await mkdir(SALIDA, { recursive: true });
-await writeFile(`${SALIDA}/enrutador.json`, `${JSON.stringify({ fecha: new Date().toISOString().slice(0, 10), enrutador: enrutador.id, texto, textoOtros, activacionTexto: activTexto, audio }, null, 2)}\n`);
+const resultado = { fecha: new Date().toISOString().slice(0, 10), enrutador: enrutador.id, texto, textoOtros, activacionTexto: activTexto, audio };
+if (CONGELADO && congelado) {
+  await writeFile(CONGELADO, `${JSON.stringify({ ...congelado, medicion: { ...resultado, medido: new Date().toISOString() } }, null, 2)}\n`);
+  console.log(`escrito en ${CONGELADO}`);
+} else {
+  await mkdir(SALIDA, { recursive: true });
+  await writeFile(`${SALIDA}/enrutador.json`, `${JSON.stringify(resultado, null, 2)}\n`);
+}

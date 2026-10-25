@@ -1,0 +1,672 @@
+{
+  "base": "http://localhost:3011",
+  "fecha": "2026-10-25T18:57:04.821Z",
+  "n": 62,
+  "total": 63,
+  "siembra": {
+    "org": "fa132255-20ab-4661-8f25-3f3c10e5cd2a",
+    "version": "3823c1b8-4231-470d-85f6-9d5477d01a97",
+    "reel": "c073d1df-d582-4bf1-bb4b-e0a75933fb3b",
+    "pyme": null,
+    "filas": {
+      "sgi_organizacion": 1,
+      "sgi_proyecto": 1,
+      "sgi_sistema_ia": 1,
+      "sgi_asunto": 2,
+      "sgi_parte_interesada": 1,
+      "sgi_tarea": 2,
+      "sgi_documento": 2,
+      "sgi_documento_version": 2,
+      "sgi_aprobacion": 1,
+      "sgi_evidencia": 1,
+      "sgi_evidencia_requisito": 2,
+      "sgi_riesgo": 2,
+      "sgi_evaluacion_impacto": 1,
+      "sgi_control_soa": 2,
+      "sgi_objetivo": 1,
+      "sgi_indicador": 1,
+      "sgi_medicion": 3,
+      "sgi_proveedor": 1,
+      "sgi_auditoria": 1,
+      "sgi_hallazgo": 1,
+      "sgi_no_conformidad": 1,
+      "sgi_accion_correctiva": 1,
+      "reel_proyectos": 1
+    },
+    "sinSembrar": {
+      "/buzon/[pyme]": "la Supabase local no tiene el buzón: sus 5 migraciones (20261007…) no están aplicadas, y esta siembra no aplica migraciones ni reinicia la base"
+    }
+  },
+  "resultados": [
+    {
+      "ruta": "/ajustes",
+      "visitada": "/ajustes",
+      "modulo": "dictado",
+      "visto": "dictado",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/01-ajustes.png",
+      "nota": "HTTP 200 · lienzo 486 caracteres"
+    },
+    {
+      "ruta": "/buzon",
+      "visitada": "/buzon",
+      "modulo": "buzon-cfdi",
+      "visto": "buzon-cfdi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/02-buzon.png",
+      "nota": "HTTP 200 · lienzo 73 caracteres"
+    },
+    {
+      "ruta": "/buzon/[pyme]",
+      "visitada": "",
+      "modulo": "buzon-cfdi",
+      "visto": "",
+      "ok": false,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/03-buzon_pyme.png",
+      "nota": "la Supabase local no tiene el buzón: sus 5 migraciones (20261007…) no están aplicadas, y esta siembra no aplica migraciones ni reinicia la base"
+    },
+    {
+      "ruta": "/buzon/cierre",
+      "visitada": "/buzon/cierre",
+      "modulo": "buzon-cfdi",
+      "visto": "buzon-cfdi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/04-buzon_cierre.png",
+      "nota": "HTTP 200 · lienzo 73 caracteres"
+    },
+    {
+      "ruta": "/centro-de-mando",
+      "visitada": "/centro-de-mando",
+      "modulo": "centro-de-mando",
+      "visto": "centro-de-mando",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/05-centro-de-mando.png",
+      "nota": "HTTP 200 · lienzo 927 caracteres"
+    },
+    {
+      "ruta": "/configuracion",
+      "visitada": "/configuracion",
+      "modulo": "project-settings",
+      "visto": "project-settings",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/06-configuracion.png",
+      "nota": "HTTP 200 · lienzo 443 caracteres"
+    },
+    {
+      "ruta": "/crecimiento",
+      "visitada": "/crecimiento",
+      "modulo": "crecimiento-demostrado",
+      "visto": "crecimiento-demostrado",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/07-crecimiento.png",
+      "nota": "HTTP 200 · lienzo 993 caracteres"
+    },
+    {
+      "ruta": "/dashboard",
+      "visitada": "/dashboard",
+      "modulo": "dashboard",
+      "visto": "dashboard",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/08-dashboard.png",
+      "nota": "HTTP 200 · lienzo 70 caracteres"
+    },
+    {
+      "ruta": "/dictar",
+      "visitada": "/dictar",
+      "modulo": "dictado",
+      "visto": "dictado",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/09-dictar.png",
+      "nota": "HTTP 200 · lienzo 207 caracteres"
+    },
+    {
+      "ruta": "/estudio",
+      "visitada": "/estudio",
+      "modulo": "estudio-pymes",
+      "visto": "estudio-pymes",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/10-estudio.png",
+      "nota": "HTTP 200 · lienzo 2431 caracteres"
+    },
+    {
+      "ruta": "/estudio/aprobar",
+      "visitada": "/estudio/aprobar",
+      "modulo": "estudio-pymes",
+      "visto": "estudio-pymes",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/11-estudio_aprobar.png",
+      "nota": "HTTP 200 · lienzo 256 caracteres"
+    },
+    {
+      "ruta": "/etiquetas",
+      "visitada": "/etiquetas",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/12-etiquetas.png",
+      "nota": "HTTP 200 · lienzo 611 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/ajustes",
+      "visitada": "/etiquetas/ajustes",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/13-etiquetas_ajustes.png",
+      "nota": "HTTP 200 · lienzo 598 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/caducidades",
+      "visitada": "/etiquetas/caducidades",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/14-etiquetas_caducidades.png",
+      "nota": "HTTP 200 · lienzo 624 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/catalogo",
+      "visitada": "/etiquetas/catalogo",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/15-etiquetas_catalogo.png",
+      "nota": "HTTP 200 · lienzo 635 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/conteo",
+      "visitada": "/etiquetas/conteo",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/16-etiquetas_conteo.png",
+      "nota": "HTTP 200 · lienzo 705 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/dia",
+      "visitada": "/etiquetas/dia",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/17-etiquetas_dia.png",
+      "nota": "HTTP 200 · lienzo 710 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/escanear",
+      "visitada": "/etiquetas/escanear",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/18-etiquetas_escanear.png",
+      "nota": "HTTP 200 · lienzo 675 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/expediente",
+      "visitada": "/etiquetas/expediente",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/19-etiquetas_expediente.png",
+      "nota": "HTTP 200 · lienzo 692 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/impresoras",
+      "visitada": "/etiquetas/impresoras",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/20-etiquetas_impresoras.png",
+      "nota": "HTTP 200 · lienzo 610 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/integridad",
+      "visitada": "/etiquetas/integridad",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/21-etiquetas_integridad.png",
+      "nota": "HTTP 200 · lienzo 669 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/leer",
+      "visitada": "/etiquetas/leer",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/22-etiquetas_leer.png",
+      "nota": "HTTP 200 · lienzo 607 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/mover",
+      "visitada": "/etiquetas/mover",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/23-etiquetas_mover.png",
+      "nota": "HTTP 200 · lienzo 668 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/recibir",
+      "visitada": "/etiquetas/recibir",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/24-etiquetas_recibir.png",
+      "nota": "HTTP 200 · lienzo 659 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/riesgo",
+      "visitada": "/etiquetas/riesgo",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/25-etiquetas_riesgo.png",
+      "nota": "HTTP 200 · lienzo 704 caracteres"
+    },
+    {
+      "ruta": "/etiquetas/rollos",
+      "visitada": "/etiquetas/rollos",
+      "modulo": "etiquetas",
+      "visto": "etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/26-etiquetas_rollos.png",
+      "nota": "HTTP 200 · lienzo 657 caracteres"
+    },
+    {
+      "ruta": "/historial",
+      "visitada": "/historial",
+      "modulo": "dictado",
+      "visto": "dictado",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/27-historial.png",
+      "nota": "HTTP 200 · lienzo 419 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-calendario",
+      "visitada": "/laboratorio-calendario",
+      "modulo": "laboratorio-calendario",
+      "visto": "laboratorio-calendario",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/28-laboratorio-calendario.png",
+      "nota": "HTTP 200 · lienzo 1654 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-clinica-dental",
+      "visitada": "/laboratorio-clinica-dental",
+      "modulo": "clinica-dental",
+      "visto": "clinica-dental",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/29-laboratorio-clinica-dental.png",
+      "nota": "HTTP 200 · lienzo 552 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-clinica-dental/buzon",
+      "visitada": "/laboratorio-clinica-dental/buzon",
+      "modulo": "clinica-dental",
+      "visto": "clinica-dental",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/30-laboratorio-clinica-dental_buzon.png",
+      "nota": "HTTP 200 · lienzo 3045 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-clinica-dental/grafo",
+      "visitada": "/laboratorio-clinica-dental/grafo",
+      "modulo": "clinica-dental",
+      "visto": "clinica-dental",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/31-laboratorio-clinica-dental_grafo.png",
+      "nota": "HTTP 200 · lienzo 1477 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-clinica-dental/tablero",
+      "visitada": "/laboratorio-clinica-dental/tablero",
+      "modulo": "clinica-dental",
+      "visto": "clinica-dental",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/32-laboratorio-clinica-dental_tablero.png",
+      "nota": "HTTP 200 · lienzo 2188 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-clinica-dental/telegram",
+      "visitada": "/laboratorio-clinica-dental/telegram",
+      "modulo": "clinica-dental",
+      "visto": "clinica-dental",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/33-laboratorio-clinica-dental_telegram.png",
+      "nota": "HTTP 200 · lienzo 250 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-crecimiento",
+      "visitada": "/laboratorio-crecimiento",
+      "modulo": "crecimiento-demostrado",
+      "visto": "crecimiento-demostrado",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/34-laboratorio-crecimiento.png",
+      "nota": "HTTP 200 · lienzo 7139 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-estudio-dashboards",
+      "visitada": "/laboratorio-estudio-dashboards",
+      "modulo": "estudio-dashboards",
+      "visto": "estudio-dashboards",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/35-laboratorio-estudio-dashboards.png",
+      "nota": "HTTP 200 · lienzo 6923 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-etiquetas",
+      "visitada": "/laboratorio-etiquetas",
+      "modulo": "laboratorio-etiquetas",
+      "visto": "laboratorio-etiquetas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/36-laboratorio-etiquetas.png",
+      "nota": "HTTP 200 · lienzo 25272 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-pymes",
+      "visitada": "/laboratorio-pymes",
+      "modulo": "laboratorio-pymes",
+      "visto": "laboratorio-pymes",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/37-laboratorio-pymes.png",
+      "nota": "HTTP 200 · lienzo 40368 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-sgi",
+      "visitada": "/laboratorio-sgi",
+      "modulo": "laboratorio-sgi",
+      "visto": "laboratorio-sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/38-laboratorio-sgi.png",
+      "nota": "HTTP 200 · lienzo 25630 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-ventas-whatsapp",
+      "visitada": "/laboratorio-ventas-whatsapp",
+      "modulo": "ventas-whatsapp",
+      "visto": "ventas-whatsapp",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/39-laboratorio-ventas-whatsapp.png",
+      "nota": "HTTP 200 · lienzo 15106 caracteres"
+    },
+    {
+      "ruta": "/laboratorio-voz",
+      "visitada": "/laboratorio-voz",
+      "modulo": "laboratorio-voz",
+      "visto": "laboratorio-voz",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/40-laboratorio-voz.png",
+      "nota": "HTTP 200 · lienzo 5540 caracteres"
+    },
+    {
+      "ruta": "/mesa/soporte-sap",
+      "visitada": "/mesa/soporte-sap",
+      "modulo": "soporte-sap",
+      "visto": "soporte-sap",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/41-mesa_soporte-sap.png",
+      "nota": "HTTP 200 · lienzo 1310 caracteres"
+    },
+    {
+      "ruta": "/mesa/soporte-sap/kit",
+      "visitada": "/mesa/soporte-sap/kit",
+      "modulo": "soporte-sap",
+      "visto": "soporte-sap",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/42-mesa_soporte-sap_kit.png",
+      "nota": "HTTP 200 · lienzo 2978 caracteres"
+    },
+    {
+      "ruta": "/mesa/soporte-sap/laboratorio",
+      "visitada": "/mesa/soporte-sap/laboratorio",
+      "modulo": "soporte-sap",
+      "visto": "soporte-sap",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/43-mesa_soporte-sap_laboratorio.png",
+      "nota": "HTTP 200 · lienzo 2729 caracteres"
+    },
+    {
+      "ruta": "/plataforma-ventas-whatsapp",
+      "visitada": "/plataforma-ventas-whatsapp",
+      "modulo": "ventas-whatsapp",
+      "visto": "ventas-whatsapp",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/44-plataforma-ventas-whatsapp.png",
+      "nota": "HTTP 200 · lienzo 115 caracteres"
+    },
+    {
+      "ruta": "/recepcion",
+      "visitada": "/recepcion",
+      "modulo": "recepcion",
+      "visto": "recepcion",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/45-recepcion.png",
+      "nota": "HTTP 200 · lienzo 1105 caracteres"
+    },
+    {
+      "ruta": "/reel",
+      "visitada": "/reel",
+      "modulo": "reel",
+      "visto": "reel",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/46-reel.png",
+      "nota": "HTTP 200 · lienzo 408 caracteres"
+    },
+    {
+      "ruta": "/reel/[id]",
+      "visitada": "/reel/c073d1df-d582-4bf1-bb4b-e0a75933fb3b",
+      "modulo": "reel",
+      "visto": "reel",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/47-reel_id.png",
+      "nota": "HTTP 200 · lienzo 485 caracteres"
+    },
+    {
+      "ruta": "/sgi",
+      "visitada": "/sgi",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/48-sgi.png",
+      "nota": "HTTP 200 · lienzo 344 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/49-sgi_org.png",
+      "nota": "HTTP 200 · lienzo 1825 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/auditoria",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/auditoria",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/50-sgi_org_auditoria.png",
+      "nota": "HTTP 200 · lienzo 1547 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/calendario",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/calendario",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/51-sgi_org_calendario.png",
+      "nota": "HTTP 200 · lienzo 1135 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/contexto",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/contexto",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/52-sgi_org_contexto.png",
+      "nota": "HTTP 200 · lienzo 1555 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/diagnostico",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/diagnostico",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/53-sgi_org_diagnostico.png",
+      "nota": "HTTP 200 · lienzo 20170 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/documentos",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/documentos",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/54-sgi_org_documentos.png",
+      "nota": "HTTP 200 · lienzo 1457 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/documentos/[version]",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/documentos/e9f04a85-9e46-444a-91b9-98ae2468d822",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/55-sgi_org_documentos_version.png",
+      "nota": "HTTP 200 · lienzo 1256 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/evidencias",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/evidencias",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/56-sgi_org_evidencias.png",
+      "nota": "HTTP 200 · lienzo 6565 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/kpis",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/kpis",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/57-sgi_org_kpis.png",
+      "nota": "HTTP 200 · lienzo 875 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/migracion",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/migracion",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/58-sgi_org_migracion.png",
+      "nota": "HTTP 200 · lienzo 1638 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/riesgos",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/riesgos",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/59-sgi_org_riesgos.png",
+      "nota": "HTTP 200 · lienzo 1531 caracteres"
+    },
+    {
+      "ruta": "/sgi/[org]/soa",
+      "visitada": "/sgi/fa132255-20ab-4661-8f25-3f3c10e5cd2a/soa",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/60-sgi_org_soa.png",
+      "nota": "HTTP 200 · lienzo 2803 caracteres"
+    },
+    {
+      "ruta": "/sgi/consultor",
+      "visitada": "/sgi/consultor",
+      "modulo": "sgi",
+      "visto": "sgi",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/61-sgi_consultor.png",
+      "nota": "HTTP 200 · lienzo 541 caracteres"
+    },
+    {
+      "ruta": "/soporte-sap",
+      "visitada": "/soporte-sap",
+      "modulo": "soporte-sap",
+      "visto": "soporte-sap",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/62-soporte-sap.png",
+      "nota": "HTTP 200 · lienzo 7754 caracteres"
+    },
+    {
+      "ruta": "/ventas-whatsapp",
+      "visitada": "/ventas-whatsapp",
+      "modulo": "ventas-whatsapp",
+      "visto": "ventas-whatsapp",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/capa-arbrain-capturas/recorrido/63-ventas-whatsapp.png",
+      "nota": "HTTP 200 · lienzo 102 caracteres"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "composicion": 1,
+  "producto": "recepcion",
+  "marca": {
+    "nombre": "Recepción",
+    "asistente": "Nora",
+    "acento": "#b45309",
+    "saludo": "Te ayudo en el mostrador con la agenda, las citas y lo que me pidas recordar. No uso un modelo de IA: si no lo sé, te lo digo."
+  },
+  "funciones": [
+    "conversacion",
+    "intencion",
+    "memoria",
+    "plan",
+    "voz",
+    "lienzo",
+    "explorador",
+    "panel",
+    "primer-arranque",
+    "ajustes"
+  ],
+  "modulos": [
+    "calendario",
+    "recepcion",
+    "dictado",
+    "estudio-pymes"
+  ],
+  "ranuras": {
+    "plan": "calendario",
+    "voz": "dictado",
+    "panel": "capa"
+  },
+  "memoria": {
+    "duena": "inquilino",
+    "almacen": "navegador"
+  },
+  "modelo": {
+    "clase": null,
+    "estado": "sin-llm"
+  },
+  "voz": {
+    "stt": "parakeet",
+    "tts": "piper",
+    "vad": "silero",
+    "nube": []
+  },
+  "datosSensibles": true,
+  "resumen": {
+    "conteos": [
+      "citas-hoy",
+      "citas-manana"
+    ],
+    "enlaces": [
+      "mostrador"
+    ]
+  }
+}

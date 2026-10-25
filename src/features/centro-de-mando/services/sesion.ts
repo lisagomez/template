@@ -8,15 +8,22 @@
  * El detector se pide por tipo (`?detector=energia|silero|ambos` en la URL, o el de defecto). Si Silero
  * no carga (sin modelo preparado, sin WebAssembly), la sesión sigue con la energía calibrada y lo DICE
  * (`detector.motivo`): un HUD que oye peor sin avisar es el fallo que esto existe para evitar.
+ *
+ * El ACUSE inmediato (importado de Arbrain, `bucle-voz/src/acuse.ts`): cuando el turno va al cerebro suena primero una
+ * frase fija, ya sintetizada al encender. El CIERRE de una pregunta completa por sentido (`?cierre=pregunta|vad`, para
+ * comparar en la medición) es lo que deja sonar ese acuse sin esperar el silencio entero del VAD.
  */
 import { capturaMicrofono, type CapturaMicrofono } from '../../../../tools/voz/dist/browser/index.js';
 import type { DetectorVoz, ModeloVoz } from '../../../../tools/voz/dist/index.js';
 import { creaReproductorNavegador, type ReproductorNavegador } from '../../../../tools/bucle-voz/dist/navegador/index.js';
 import {
+  creaAcuse,
   creaActivacion,
   creaBucle,
   creaEnrutadorLocal,
   creaOido,
+  juezConPregunta,
+  juezPorTexto,
   nivelDb,
   ORDENES_ES,
   type Bucle,
@@ -28,6 +35,11 @@ import { creaDetector, creaModelo, energiaCalibrada, HZ, MS_CIERRE, type EstadoD
 import { creaPuertos } from './puertos.ts';
 
 export const FRASES_ACTIVACION = ['oye mando'];
+
+/** Cómo cierra el turno una conversación: `pregunta` = una pregunta completa cierra por sentido; `vad` = el silencio entero. */
+export type TipoCierre = 'pregunta' | 'vad';
+export const CIERRE_POR_DEFECTO: TipoCierre = 'pregunta';
+export const esTipoCierre = (v: unknown): v is TipoCierre => v === 'pregunta' || v === 'vad';
 
 export interface Sesion {
   bucle: Bucle;
@@ -59,9 +71,10 @@ async function modeloPara(pedido: TipoDetector, maquinaHabla: () => boolean): Pr
   }
 }
 
-export function creaSesion(token: string, modo: ModoBucle, detectorPedido: TipoDetector): Sesion {
+export function creaSesion(token: string, modo: ModoBucle, detectorPedido: TipoDetector, cierre: TipoCierre = CIERRE_POR_DEFECTO, conAcuse = true): Sesion {
   const reproductor = creaReproductorNavegador();
-  const puertos = creaPuertos(token, () => bucle.telemetria);
+  const acuse = conAcuse ? creaAcuse() : undefined;
+  const puertos = creaPuertos(token, () => bucle.telemetria, undefined, acuse?.frases ?? []);
   const bucle: Bucle = creaBucle({
     modo,
     ...puertos,
@@ -69,6 +82,8 @@ export function creaSesion(token: string, modo: ModoBucle, detectorPedido: TipoD
     enrutador: creaEnrutadorLocal({ ordenes: ORDENES_ES }),
     activacion: creaActivacion({ frases: FRASES_ACTIVACION }),
     reloj: () => performance.now(),
+    juezCierre: cierre === 'pregunta' ? juezConPregunta : juezPorTexto,
+    ...(acuse ? { acuse } : {}),
   });
   const niveles = { mic: -120, salida: -120 };
   let captura: CapturaMicrofono | undefined;

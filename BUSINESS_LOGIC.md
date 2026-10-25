@@ -39,6 +39,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | Centro de mando por voz | pendiente | `TPL-feature-centro-de-mando` `TPL-bucle-voz` | falta: que el laboratorio decida si es producto propio o solo la referencia del HUD de business-os (`docs/goals/propuesta-business-os.md`); hasta entonces, solo en laboratorio, solo lectura y con agenda sintética (goal `docs/goals/centro-de-mando-voz.md`) |
 | Portal del paciente para clínicas dentales | pendiente | `TPL-clinica-dental` `TPL-feature-clinica-dental` | falta: `/new-app` con el laboratorio (clínica real, precio, canal) antes de cualquier paciente real; hasta entonces, solo laboratorio con dos clínicas y pacientes sintéticos (goal `docs/goals/clinica-dental.md`; AISIA, C3 y aviso de privacidad en borrador, sin firmar) |
 | Vendedor con IA en WhatsApp | pendiente | `TPL-ventas-whatsapp` `TPL-feature-ventas-whatsapp` | falta: `/new-app` al salir de blueprint (goal `docs/goals/ventas-ia-waba.md`; C3 y C4 en borrador, sin firmar) |
+| Recepción | pendiente | `TPL-feature-recepcion` | falta: `/new-app` con el laboratorio (negocio real, precio, dónde vive la máquina del mostrador) antes de cualquier cliente real; hasta entonces, solo laboratorio con un negocio ficticio y datos sintéticos, compuesto en la capa (goal `docs/goals/capa-arbrain.md`, punto 6; composición `productos/composiciones/recepcion.json`) |
 
 ## 2. Lo que no es producto
 
@@ -47,6 +48,7 @@ verificador lo lista aparte, igual que un gate inactivo.
 | `TPL-app-base` `TPL-feature-auth` `TPL-feature-dashboard` `TPL-feature-project-settings` | base común de la app: la usan todos los productos, y sus datos (las cuentas de usuario) entran en la evaluación de impacto de cada producto que la usa |
 | `TPL-grafo-conocimiento` | motor de reglas: da veredictos a quien lo consulta, y el contrato es el del producto que lo consulta |
 | `TPL-calendario` | motor de agenda: lo usan los productos que agendan (vendedor por WhatsApp, asesor por voz); qué datos de quien reserva salen hacia Google lo decide el contrato y la AISIA del producto que lo consume |
+| `TPL-capa` | capa común: la componen todos los productos (la ventana, la intención, el freno, la memoria y la voz); qué guarda su memoria y qué sale por su voz lo decide la composición, el contrato y la AISIA de cada producto. Su memoria nunca es el cerebro personal |
 
 ## 3. Lo que todo producto hereda de la fábrica
 

@@ -41,7 +41,7 @@ export async function sintetiza(token: string, frase: string, senal: AbortSignal
   return { muestras: dePcm16(new Uint8Array(await r.arrayBuffer())), hz };
 }
 
-/** El cerebro en flujo: una línea NDJSON por token, y el uso al final. */
+/** El cerebro en flujo: una línea NDJSON por token, y el uso al final (y, si es el simulado, lo dice al principio). */
 export async function* piensa(token: string, mensajes: readonly Mensaje[], senal: AbortSignal): AsyncGenerator<PiezaCerebro> {
   const r = await fetch('/api/centro-de-mando/cerebro', { method: 'POST', headers: cabeceras(token, { 'content-type': 'application/json' }), body: JSON.stringify({ mensajes }), signal: senal });
   if (!r.ok || !r.body) throw await error(r, 'el cerebro no respondió');
@@ -56,9 +56,10 @@ export async function* piensa(token: string, mensajes: readonly Mensaje[], senal
       const linea = resto.slice(0, i).trim();
       resto = resto.slice(i + 1);
       if (!linea) continue;
-      const pieza = JSON.parse(linea) as { t: 'token'; x: string } | { t: 'uso'; costoUsd: number | null } | { t: 'error'; mensaje: string };
+      const pieza = JSON.parse(linea) as { t: 'token'; x: string } | { t: 'uso'; costoUsd: number | null } | { t: 'cerebro'; simulado: boolean } | { t: 'error'; mensaje: string };
       if (pieza.t === 'token') yield { tipo: 'token', texto: pieza.x };
       else if (pieza.t === 'uso') yield { tipo: 'uso', costoUsd: pieza.costoUsd };
+      else if (pieza.t === 'cerebro') yield { tipo: 'meta', simulado: pieza.simulado === true };
       else throw new Error(pieza.mensaje);
     }
   }

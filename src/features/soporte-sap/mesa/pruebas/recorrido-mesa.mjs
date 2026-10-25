@@ -39,8 +39,12 @@ const navegador = await chromium.launch()
 const errores = []
 const pasos = []
 const sel = (p) => `[data-prueba="${p}"]`
+/** La mesa vive dentro de la capa: su guía de primer arranque se recorre aparte (`recorrido-conversacion.mjs`); aquí ya se
+ *  vio. Es la única clave que la mesa deja en el navegador, sin texto del experto (`services/almacen-capa.ts`). */
+const GUIA_VISTA = ['capa:soporte-sap:capa/soporte-sap/mesa/capa/primer-arranque', JSON.stringify({ version: 1, terminado: true, paso: 4, nivel: 'lo-importante', voz: false })]
 async function pagina(cabeceras, viewport = { width: 1440, height: 1000 }) {
   const ctx = await navegador.newContext({ viewport, extraHTTPHeaders: cabeceras, acceptDownloads: true })
+  await ctx.addInitScript(([k, v]) => { try { localStorage.setItem(k, v) } catch { /* sin almacenamiento: la guía taparía la mesa */ } }, GUIA_VISTA)
   const p = await ctx.newPage()
   p.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()) })
   p.on('pageerror', (e) => errores.push(e.message))

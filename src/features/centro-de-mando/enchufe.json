@@ -1,0 +1,33 @@
+{
+  "enchufe": 1,
+  "modulo": "centro-de-mando",
+  "activo": "TPL-feature-centro-de-mando",
+  "nombre": "Centro de mando por voz",
+  "pantallas": ["/centro-de-mando"],
+  "ranuras": ["lienzo", "intencion", "voz"],
+  "intenciones": [
+    {
+      "id": "centro-de-mando.abre",
+      "queHace": "Abrir el centro de mando para hablarle a la computadora.",
+      "ejemplos": [
+        "abre el centro de mando",
+        "quiero hablarle a la computadora y que me conteste",
+        "conversar por voz con la computadora",
+        "llévame al asistente por voz"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/centro-de-mando"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el HUD, su detector y su bucle de voz funcionan solos con el motor local de tools/dictado; la capa solo le pone la ventana alrededor",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "OpenRouter (modelo pineado de la clase cerebro-de-voz; Anthropic detrás)",
+      "cuando": "solo con una pregunta abierta, para que el cerebro conteste; las órdenes se resuelven en la máquina y el audio nunca sale (ASR y TTS locales)"
+    }
+  ]
+}

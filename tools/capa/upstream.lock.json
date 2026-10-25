@@ -1,0 +1,23 @@
+{
+  "_porque": "Arbrain pineado para la capa: lo que la capa adopta se lee SOLO de esta etiqueta firmada. Subir de versión es un CDC (skill de actualización, propuesta). El ancla no se edita para que algo pase: si su sha256 cambia, `pinea.mjs --comprueba` falla.",
+  "fuente": "https://github.com/arbrain-ai/arbrain.git",
+  "espejo": "~/.cache/capa-arbrain/fuente",
+  "etiqueta": "v0.2.10",
+  "commit": "829a9e99f0f6805325e24bd851eb5d1e88c3c67c",
+  "objetoEtiqueta": "7ea726871fc4d35236ee945e1036688525d5063e",
+  "firma": {
+    "formato": "ssh",
+    "principal": "arbrain-publicacion",
+    "llave": "SHA256:4P8nBVDwu6QSpWvwbNtSqauB2uznLzx7ubE0tR6lNbg"
+  },
+  "ancla": {
+    "ruta": "~/.config/arbrain/firmas-permitidas",
+    "sha256": "sha256:1d5ac9ce5342a1507bdec81da91b798998024779718d66fc6089abda944ad85a",
+    "principales": [
+      "arbrain-publicacion",
+      "arbrain-reserva"
+    ]
+  },
+  "verificado": "2026-10-25",
+  "git": "2.53.0"
+}

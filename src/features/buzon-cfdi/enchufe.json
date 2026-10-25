@@ -1,0 +1,46 @@
+{
+  "enchufe": 1,
+  "modulo": "buzon-cfdi",
+  "activo": "TPL-piloto-buzon-cfdi",
+  "nombre": "Buzón de CFDI recibidos (piloto del despacho)",
+  "pantallas": ["/buzon", "/buzon/[pyme]", "/buzon/cierre"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "buzon-cfdi.abre",
+      "queHace": "Abrir el buzón de CFDI recibidos del despacho.",
+      "ejemplos": [
+        "buzón de CFDI recibidos",
+        "abre el buzón de facturas recibidas",
+        "quiero ver las pymes del despacho y sus CFDI",
+        "llévame al buzón del despacho"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/buzon"
+    },
+    {
+      "id": "buzon-cfdi.abre-pyme",
+      "queHace": "Abrir el buzón de una pyme para revisar sus CFDI.",
+      "ejemplos": [
+        "revisar los CFDI de una pyme",
+        "revisar los comprobantes de un cliente del despacho",
+        "qué facturas faltan por confirmar de un cliente",
+        "abre el buzón de una pyme"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/buzon/[pyme]"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el buzón del despacho (alta de pymes, consentimiento, ingesta, revisión CFDI por CFDI y cierre del piloto) corre sobre su Supabase autohospedado sin la capa; la capa solo le pone la ventana alrededor",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "el laboratorio (cifras agregadas del piloto)",
+      "cuando": "solo si el despacho descarga el CSV de cifras: seudónimo de cada pyme, horas de captura, CFDI recibidos y proporción pendiente; ningún CFDI ni dato leído de uno sale del despacho"
+    }
+  ]
+}

@@ -29,7 +29,7 @@ RUN npm install --no-save --no-audit --no-fund typescript@5.9.3 @types/node@22.2
  && rm -rf src tsconfig.json \
  && npm install --no-save --no-package-lock --omit=dev --no-audit --no-fund sherpa-onnx-node@1.13.8 onnxruntime-node@1.30.0
 COPY motores-locales ./motores-locales
-COPY servicio/servidor.mjs servicio/configuracion.mjs ./servicio/
+COPY servicio/servidor.mjs servicio/configuracion.mjs servicio/rutas.mjs servicio/openai.mjs ./servicio/
 RUN python3 -m venv /venv && /venv/bin/pip install --no-cache-dir faster-whisper==1.2.1
 
 RUN groupadd --system --gid 1002 dictado && useradd --system --uid 1002 --gid dictado --home /dictado dictado \

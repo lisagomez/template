@@ -1,0 +1,3 @@
+#!/bin/sh
+# Hook del centro: toda la lógica vive en centro-pre-receive.mjs (la misma política que el job).
+exec node /opt/cerebro-sync/centro-pre-receive.mjs

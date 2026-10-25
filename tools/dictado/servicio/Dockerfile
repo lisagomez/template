@@ -31,7 +31,7 @@ WORKDIR /dictado
 COPY --from=builder /paquete/dist ./dist
 COPY --from=builder /paquete/node_modules/@tu-scope ./node_modules/@tu-scope
 COPY motores-locales ./motores-locales
-COPY servicio/servidor.mjs servicio/configuracion.mjs ./servicio/
+COPY servicio/servidor.mjs servicio/configuracion.mjs servicio/rutas.mjs servicio/openai.mjs ./servicio/
 COPY package.json ./package.json
 # Runtimes pineados (los peers opcionales del paquete). faster-whisper en su venv, tambien pineado.
 RUN npm install --no-save --no-package-lock --omit=dev --no-audit --no-fund sherpa-onnx-node@1.13.8 onnxruntime-node@1.30.0 \

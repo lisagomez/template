@@ -22,7 +22,25 @@ export async function abreHud(base: string, token: string, ancho = 1440, alto = 
   const pagina = await contexto.newPage();
   await pagina.goto(`${base}/centro-de-mando?medicion=1${consulta ? `&${consulta}` : ''}#t=${encodeURIComponent(token)}`);
   await pagina.locator('[data-prueba="estado-servidor"]').waitFor({ timeout: 60_000 });
+  await pasaPrimerArranque(pagina);
   return { navegador, pagina };
+}
+
+/**
+ * Desde el 25/10 el HUD vive dentro de la capa (`(main)` la compone), y en un navegador nuevo la capa abre su primer
+ * arranque encima: se recorre con su botón principal (lo seguro), como lo haría una persona. Devuelve los pasos.
+ */
+export async function pasaPrimerArranque(p: Page, msEspera = 3_000): Promise<number> {
+  const velo = p.locator('[data-capa-ranura="primer-arranque"]');
+  const sigue = velo.locator('[data-capa-boton="primer-arranque-sigue"]');
+  await velo.waitFor({ state: 'visible', timeout: msEspera }).catch(() => undefined);
+  let pasos = 0;
+  while (pasos < 10 && (await sigue.isVisible().catch(() => false))) {
+    await sigue.click();
+    pasos++;
+    await p.waitForTimeout(60);
+  }
+  return pasos;
 }
 
 /** Enciende y devuelve el detector que de verdad corre (el HUD lo dice al encender). */

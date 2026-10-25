@@ -1,0 +1,68 @@
+{
+  "enchufe": 1,
+  "modulo": "ventas-whatsapp",
+  "activo": "TPL-feature-ventas-whatsapp",
+  "nombre": "Vendedor en WhatsApp",
+  "pantallas": ["/ventas-whatsapp", "/laboratorio-ventas-whatsapp", "/plataforma-ventas-whatsapp"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "ventas-whatsapp.abre",
+      "queHace": "Abrir el panel del vendedor en WhatsApp.",
+      "ejemplos": [
+        "qué conversaciones me pasó el agente de WhatsApp",
+        "cuánto vendió cada anuncio y cuál es su ROAS",
+        "abre el panel del vendedor de WhatsApp",
+        "la bandeja y el tablero del vendedor de WhatsApp"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/ventas-whatsapp"
+    },
+    {
+      "id": "ventas-whatsapp.abre-laboratorio",
+      "queHace": "Abrir el laboratorio del vendedor en WhatsApp.",
+      "ejemplos": [
+        "abre el laboratorio del vendedor de WhatsApp",
+        "las compuertas del simulador de Meta",
+        "compuertas de las fases 0 a 3 del vendedor"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-ventas-whatsapp"
+    },
+    {
+      "id": "ventas-whatsapp.abre-plataforma",
+      "queHace": "Abrir la plataforma del vendedor en WhatsApp.",
+      "ejemplos": [
+        "plataforma del vendedor",
+        "las altas de pymes por el BSP propio",
+        "el pool de números de WhatsApp en venta y renta",
+        "la factura del mes como Tech Provider"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/plataforma-ventas-whatsapp"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el panel del dueño, la plataforma, el laboratorio y las rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a) funcionan sin la capa; el núcleo tools/ventas-whatsapp no la importa",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "Meta (WhatsApp Cloud API y Conversions API)",
+      "cuando": "solo con un número real y VENTAS_WA_C3_C4_FIRMADOS declarado: mensajes, catálogo y eventos de conversión con ctwa_clid, sin datos personales en el evento; hoy el canal habla con el simulador de Meta y no sale nada"
+    },
+    {
+      "que": "datos",
+      "aQuien": "el procesador de pagos",
+      "cuando": "solo con un procesador real conectado: monto y referencia de cada liga de pago; hoy es un simulador y no sale nada"
+    },
+    {
+      "que": "texto",
+      "aQuien": "el proveedor de LLM (modelo compatible con OpenAI)",
+      "cuando": "solo si se enciende el modelo real: el texto del cliente; hoy el agente usa un modelo simulado, y encenderlo es una decisión abierta (P-04: seudonimizar antes y firmar la AISIA)"
+    }
+  ]
+}

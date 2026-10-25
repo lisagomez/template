@@ -1,0 +1,71 @@
+# Arbrain personal en dos lugares, demostrado en contenedores (no se despliega). Lo levanta y lo baja prueba.mjs,
+# que antes construye las imágenes (Dockerfile) y fija estas variables a partir del lock verificado.
+#
+# Red privada simulada: «privada» es interna (sin salida a internet) y NINGÚN servicio publica puertos.
+# Solo «red» (el relevo, como un DERP de Tailscale) escucha en la red interna; «local» y «vps» escuchan solo en
+# 127.0.0.1 y salen hacia el relevo. «antigua» (Arbrain v0.2.9, también verificada) existe solo para la prueba de
+# versiones distintas y va bajo el perfil «versiones».
+name: cerebro-personal
+
+x-instancia: &instancia
+  init: true
+  pull_policy: never
+  networks: [privada]
+  secrets: [red_token]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  mem_limit: 2g
+  depends_on: [red]
+
+x-entorno: &entorno
+  TZ: America/Mexico_City
+
+services:
+  red:
+    image: cerebro-personal-red:capa-1
+    pull_policy: never
+    init: true
+    networks: [privada]
+    secrets: [red_token]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      <<: *entorno
+      CEREBRO_LADO: red
+
+  vps:
+    <<: *instancia
+    image: cerebro-personal-instancia:${ARBRAIN_ETIQUETA:?lo fija prueba.mjs}
+    hostname: vps
+    environment:
+      <<: *entorno
+      CEREBRO_LADO: vps
+      CEREBRO_CENTRO_URL: /srv/cerebro/centro.git
+      CEREBRO_CENTRO_DIR: /srv/cerebro/centro.git
+
+  local:
+    <<: *instancia
+    image: cerebro-personal-instancia:${ARBRAIN_ETIQUETA:?}
+    hostname: local
+    environment:
+      <<: *entorno
+      CEREBRO_LADO: local
+      CEREBRO_CENTRO_URL: "ext::node /opt/cerebro-sync/tunel.mjs conecta vps %S"
+
+  antigua:
+    <<: *instancia
+    profiles: [versiones]
+    image: cerebro-personal-fuente:${ARBRAIN_ETIQUETA_ANTIGUA:?lo fija prueba.mjs}
+    hostname: antigua
+    environment:
+      <<: *entorno
+      CEREBRO_LADO: antigua
+      CEREBRO_CENTRO_URL: "ext::node /opt/cerebro-sync/tunel.mjs conecta vps %S"
+
+networks:
+  privada:
+    internal: true
+
+secrets:
+  red_token:
+    file: ${CEREBRO_RED_TOKEN_ARCHIVO:?lo genera prueba.mjs}

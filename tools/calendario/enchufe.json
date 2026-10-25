@@ -1,0 +1,59 @@
+{
+  "enchufe": 1,
+  "modulo": "calendario",
+  "activo": "TPL-calendario",
+  "nombre": "Calendario",
+  "pantallas": [],
+  "ranuras": ["plan", "intencion"],
+  "intenciones": [
+    {
+      "id": "calendario.consulta-hoy",
+      "queHace": "Decirte qué tienes hoy en la agenda.",
+      "ejemplos": ["qué tengo hoy en la agenda", "mis citas de hoy", "qué tengo agendado para hoy"],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "calendario.reserva",
+      "queHace": "Apartar un hueco en la agenda para una cita.",
+      "ejemplos": [
+        "aparta una cita mañana a las diez",
+        "agéndame un hueco el lunes",
+        "reserva una cita con el cliente"
+      ],
+      "efecto": "escribe",
+      "irreversible": false
+    },
+    {
+      "id": "calendario.cancela",
+      "queHace": "Cancelar una cita de la agenda y avisar a quien la tenía.",
+      "ejemplos": [
+        "cancela la cita de mañana",
+        "anula la cita y avísale al cliente",
+        "quita la cita del lunes y avísale al cliente"
+      ],
+      "efecto": "escribe",
+      "irreversible": true
+    }
+  ],
+  "freno": [
+    {
+      "accion": "calendario.cancela",
+      "porque": "avisa a quien tenía la cita y no se puede desdecir"
+    }
+  ],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el núcleo (Pluma, Lector, Reservas) solo importa zod y no conoce la capa; sin ella se usa por código o por su CLI, y su UI ./react recibe todo por props",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "Google Calendar (por el CLI gog)",
+      "cuando": "solo si el producto usa el adaptador ./gog, que no está medido contra Google real: título, descripción, lugar e invitados de cada evento que escribe; con el simulador y los almacenes locales no sale nada"
+    },
+    {
+      "que": "datos",
+      "aQuien": "Supabase del proyecto (tablas calendario_*)",
+      "cuando": "solo si el producto usa el almacén ./almacenes/supabase: el espejo de los eventos, una fila por dueño"
+    }
+  ]
+}

@@ -8,7 +8,7 @@
  *  - inyecta `fetch` y la llave (nunca se leen del entorno aquí, nunca salen en un error);
  *  - recibe el costo de cada llamada (`uso`); si el proveedor no lo da, llega `null`, nunca cero.
  */
-import type { Cerebro, Mensaje, PiezaCerebro, TokensUso } from './tipos.js';
+import type { CerebroModelo, Mensaje, PiezaModelo, TokensUso } from './tipos.js';
 
 export interface OpcionesCerebroCompat {
   llave: string;
@@ -71,14 +71,14 @@ function costoDe(uso: NonNullable<Trozo['usage']>, precio: OpcionesCerebroCompat
   return null;
 }
 
-export function creaCerebroCompat(o: OpcionesCerebroCompat): Cerebro {
+export function creaCerebroCompat(o: OpcionesCerebroCompat): CerebroModelo {
   if (!o.llave) throw new Error('falta la llave del proveedor (se inyecta, no se lee del entorno)');
   if (!o.modelo || ALIAS_FLOTANTE.test(o.modelo)) throw new Error('el modelo va pineado: nada de alias que cambian solos (C1)');
   const url = o.url ?? 'https://openrouter.ai/api/v1/chat/completions';
   const limpia = (s: string) => s.replaceAll(o.llave, '‹llave›');
 
   return {
-    async *piensa(mensajes: readonly Mensaje[], senal: AbortSignal): AsyncGenerator<PiezaCerebro> {
+    async *piensa(mensajes: readonly Mensaje[], senal: AbortSignal): AsyncGenerator<PiezaModelo> {
       const r = await o.fetch(url, {
         method: 'POST',
         signal: senal,

@@ -1,0 +1,33 @@
+{
+  "enchufe": 1,
+  "modulo": "laboratorio-sgi",
+  "activo": "TPL-feature-laboratorio-sgi",
+  "nombre": "Laboratorio del sistema integrado ISO",
+  "pantallas": ["/laboratorio-sgi"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "laboratorio-sgi.abre",
+      "queHace": "Abrir el laboratorio del sistema integrado ISO.",
+      "ejemplos": [
+        "abre el laboratorio del sistema integrado",
+        "laboratorio del SGI",
+        "las trampas y corridas de los agentes ISO",
+        "qué piezas del sistema de gestión están aprobadas"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-sgi"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el laboratorio corre sus casos deterministas al abrirse y lee las corridas ya grabadas sin la capa",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "OpenRouter (proveedor de modelos, modelo pineado por routing)",
+      "cuando": "solo al correr npm run sgi:agentes: perfiles sintéticos de organizaciones (datos/perfiles.ts); abrir la página lee corridas ya grabadas y no saca nada"
+    }
+  ]
+}

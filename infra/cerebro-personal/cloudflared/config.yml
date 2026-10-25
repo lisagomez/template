@@ -1,0 +1,25 @@
+# Puerta de Cloudflare del VPS (túnel nombrado + Access): SOLO configuración de ejemplo. Nada aquí contacta a
+# Cloudflare: no hay credenciales, no se corrió `tunnel login` ni `tunnel create`. Encenderla es una fase aparte
+# (dominio, túnel real, Access por correo y PIN) con su C3 firmado antes.
+#
+# Reglas que exige valida-access.mjs (y que `cloudflared tunnel ingress validate` no revisa por sí solo):
+#   - cada regla que lleva a un servicio tiene Access obligatorio: originRequest.access.required: true, con
+#     teamName y al menos un audTag;
+#   - los servicios son solo de 127.0.0.1 (lo que la instancia escucha);
+#   - la última regla es `http_status:404`: lo que no casa con nada no llega a ningún lado;
+#   - sin warp-routing (no se abre la red privada por el túnel).
+tunnel: cerebro-vps-ejemplo
+credentials-file: /etc/cloudflared/cerebro-vps-ejemplo.json
+
+ingress:
+  # La web de Arbrain del VPS (modo servidor). Además de Access, pide su propia contraseña.
+  - hostname: cerebro.example.com
+    service: http://127.0.0.1:4310
+    originRequest:
+      access:
+        required: true
+        teamName: equipo-ejemplo
+        audTag:
+          - aud-ejemplo-cerebro-web
+  # Ninguna otra ruta: lo demás responde 404 sin tocar la instancia.
+  - service: http_status:404

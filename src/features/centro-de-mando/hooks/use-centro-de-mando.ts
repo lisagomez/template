@@ -12,7 +12,7 @@ import { tokenDelEnlace } from '@/shared/lib/token-enlace';
 import type { EventoBucle, ModoBucle } from '../../../../tools/bucle-voz/dist/index.js';
 import { pideEstado } from '../services/cliente.ts';
 import { DETECTOR_POR_DEFECTO, esTipoDetector, type TipoDetector } from '../services/detector.ts';
-import { creaSesion, type Sesion } from '../services/sesion.ts';
+import { CIERRE_POR_DEFECTO, creaSesion, esTipoCierre, type Sesion, type TipoCierre } from '../services/sesion.ts';
 import type { EstadoServidor, VistaCentro } from '../types/index.ts';
 import { aplicaEvento, VISTA_INICIAL } from './vista.ts';
 
@@ -21,6 +21,13 @@ function detectorDeLaUrl(): TipoDetector {
   const pedido = new URLSearchParams(window.location.search).get('detector');
   return esTipoDetector(pedido) ? pedido : DETECTOR_POR_DEFECTO;
 }
+
+/** `?cierre=pregunta|vad` y `?acuse=0`: para comparar en la medición; sin ellos, los de defecto. */
+function cierreDeLaUrl(): TipoCierre {
+  const pedido = new URLSearchParams(window.location.search).get('cierre');
+  return esTipoCierre(pedido) ? pedido : CIERRE_POR_DEFECTO;
+}
+const acuseDeLaUrl = () => new URLSearchParams(window.location.search).get('acuse') !== '0';
 
 const esCampo = (e: EventTarget | null) => e instanceof HTMLElement && (e.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.tagName));
 
@@ -69,7 +76,7 @@ export function useCentroDeMando(modoInicial: ModoBucle = 'manos-libres') {
 
   useEffect(() => {
     if (!token) return undefined;
-    const s = creaSesion(token, modoInicial, detectorDeLaUrl());
+    const s = creaSesion(token, modoInicial, detectorDeLaUrl(), cierreDeLaUrl(), acuseDeLaUrl());
     const quita = s.bucle.suscribe((e: EventoBucle) => setVista((v) => aplicaEvento(v, e)));
     const quitaTel = s.bucle.telemetria.suscribe(() => {
       if (turnosPendientes.current) return;

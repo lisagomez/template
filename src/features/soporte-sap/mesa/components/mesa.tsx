@@ -6,6 +6,7 @@
  * calcula nada, solo se pinta y se manda lo que el experto hace.
  */
 import { useCallback, useEffect, useState } from 'react'
+import { EVENTO_CASO_CORRIDO } from '../services/conversacion'
 import type { CasoVista, EntradaCaso, MesaVista, Veredicto } from '../services/modelo'
 import { Compositor } from './compositor'
 import { LineaDeTiempo } from './linea'
@@ -92,6 +93,16 @@ export function Mesa() {
       .catch(() => setAviso('no hay conexión con la mesa'))
   }, [])
   useEffect(() => { carga() }, [carga])
+  // Un caso que corrió la conversación de la capa se abre aquí, en su línea de tiempo: es el mismo caso, guardado igual.
+  useEffect(() => {
+    const alCorrer = (e: Event) => {
+      const id = (e as CustomEvent<{ caso?: string }>).detail?.caso
+      carga()
+      if (id) { setAbierto(id); setRecien(id) }
+    }
+    window.addEventListener(EVENTO_CASO_CORRIDO, alCorrer)
+    return () => window.removeEventListener(EVENTO_CASO_CORRIDO, alCorrer)
+  }, [carga])
 
   const pon = (c: CasoVista) => setVista((v) => (v ? { ...v, casos: v.casos.some((x) => x.id === c.id) ? v.casos.map((x) => (x.id === c.id ? c : x)) : [c, ...v.casos] } : v))
   const actua = async (cuerpo: unknown): Promise<string | null> => {

@@ -1,0 +1,1768 @@
+{
+  "fecha": "2026-10-25T16:13:32.699Z",
+  "maquina": "WSL2, AMD Ryzen 7 5700G with Radeon Graphics (16 hilos), 16 GB, sin GPU; Chromium headless 1243 con micrófono falso",
+  "configuracion": {
+    "detector": "energia",
+    "cierre": "pregunta",
+    "acuse": "encendido",
+    "cerebro": "simulado/sin-llm-1500ms"
+  },
+  "ruido": null,
+  "ordenes": {
+    "resumen": {
+      "n": 32,
+      "p50": 666,
+      "p95": 770,
+      "min": 606,
+      "max": 1073
+    },
+    "hud": {
+      "n": 32,
+      "p50": 567,
+      "p95": 657,
+      "min": 507,
+      "max": 952
+    },
+    "muestras": [
+      {
+        "texto": "¿Qué hora es?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "hora",
+        "oido": "¿Qué hora es?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 634,
+        "msRespuestaExterna": 634,
+        "msHud": 576,
+        "msRespuestaHud": 576,
+        "desvioFinReal": -53,
+        "tramos": {
+          "transcrito": 530,
+          "enrutado": 532,
+          "cierre": 532,
+          "primeraFrase": 532,
+          "vozLista": 532,
+          "suena": 576,
+          "suenaRespuesta": 576,
+          "fin": 2929
+        }
+      },
+      {
+        "texto": "¿Qué tengo hoy?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "agenda-hoy",
+        "oido": "¿Qué tengo hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 656,
+        "msRespuestaExterna": 656,
+        "msHud": 613,
+        "msRespuestaHud": 613,
+        "desvioFinReal": -62,
+        "tramos": {
+          "transcrito": 552,
+          "enrutado": 554,
+          "cierre": 554,
+          "primeraFrase": 587,
+          "vozLista": 587,
+          "suena": 613,
+          "suenaRespuesta": 613,
+          "fin": 5075
+        }
+      },
+      {
+        "texto": "Más despacio.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "mas-despacio",
+        "oido": "Más despacio.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 645,
+        "msRespuestaExterna": 645,
+        "msHud": 548,
+        "msRespuestaHud": 548,
+        "desvioFinReal": -49,
+        "tramos": {
+          "transcrito": 493,
+          "enrutado": 494,
+          "cierre": 494,
+          "primeraFrase": 495,
+          "vozLista": 495,
+          "suena": 548,
+          "suenaRespuesta": 548,
+          "fin": 2768
+        }
+      },
+      {
+        "texto": "¿Qué día es hoy?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "fecha",
+        "oido": "¿Qué día es hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 678,
+        "msRespuestaExterna": 678,
+        "msHud": 571,
+        "msRespuestaHud": 571,
+        "desvioFinReal": -24,
+        "tramos": {
+          "transcrito": 530,
+          "enrutado": 532,
+          "cierre": 532,
+          "primeraFrase": 532,
+          "vozLista": 532,
+          "suena": 571,
+          "suenaRespuesta": 571,
+          "fin": 3642
+        }
+      },
+      {
+        "texto": "Más rápido.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "mas-rapido",
+        "oido": "Más rápido.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 686,
+        "msRespuestaExterna": 686,
+        "msHud": 563,
+        "msRespuestaHud": 563,
+        "desvioFinReal": -48,
+        "tramos": {
+          "transcrito": 516,
+          "enrutado": 517,
+          "cierre": 517,
+          "primeraFrase": 518,
+          "vozLista": 518,
+          "suena": 563,
+          "suenaRespuesta": 563,
+          "fin": 2577
+        }
+      },
+      {
+        "texto": "¿Qué tengo mañana?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "agenda-manana",
+        "oido": "Que tengo mañana.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 698,
+        "msRespuestaExterna": 698,
+        "msHud": 628,
+        "msRespuestaHud": 628,
+        "desvioFinReal": -50,
+        "tramos": {
+          "transcrito": 562,
+          "enrutado": 564,
+          "cierre": 565,
+          "primeraFrase": 588,
+          "vozLista": 589,
+          "suena": 628,
+          "suenaRespuesta": 628,
+          "fin": 6427
+        }
+      },
+      {
+        "texto": "¿Cuánto llevas gastado?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "gasto",
+        "oido": "¿Cuánto llevas gastado?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 1073,
+        "msRespuestaExterna": 1073,
+        "msHud": 952,
+        "msRespuestaHud": 952,
+        "desvioFinReal": -22,
+        "tramos": {
+          "transcrito": 537,
+          "enrutado": 539,
+          "cierre": 540,
+          "primeraFrase": 556,
+          "vozLista": 912,
+          "suena": 952,
+          "suenaRespuesta": 952,
+          "fin": 10511
+        }
+      },
+      {
+        "texto": "Repite.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "repite",
+        "oido": "Papita.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 675,
+        "msRespuestaExterna": 675,
+        "msHud": 565,
+        "msRespuestaHud": 565,
+        "desvioFinReal": -30,
+        "tramos": {
+          "transcrito": 504,
+          "enrutado": 506,
+          "cierre": 506,
+          "suena": 565,
+          "suenaRespuesta": 565,
+          "fin": 10048
+        }
+      },
+      {
+        "texto": "¿Qué hora es?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "hora",
+        "oido": "¿Qué hora es?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 622,
+        "msRespuestaExterna": 622,
+        "msHud": 535,
+        "msRespuestaHud": 535,
+        "desvioFinReal": -46,
+        "tramos": {
+          "transcrito": 480,
+          "enrutado": 482,
+          "cierre": 483,
+          "primeraFrase": 484,
+          "vozLista": 484,
+          "suena": 535,
+          "suenaRespuesta": 535,
+          "fin": 3008
+        }
+      },
+      {
+        "texto": "¿Qué tengo hoy?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "Que tengo ahí.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, déjame pensarlo.",
+        "cerebro": "simulado",
+        "msExterna": 730,
+        "msRespuestaExterna": 2706,
+        "msHud": 657,
+        "msRespuestaHud": 2585,
+        "desvioFinReal": -53,
+        "tramos": {
+          "transcrito": 462,
+          "enrutado": 464,
+          "acuse": 464,
+          "vozLista": 464,
+          "cierre": 611,
+          "suena": 657,
+          "primerToken": 1974,
+          "primeraFrase": 2053,
+          "suenaRespuesta": 2585,
+          "fin": 9710
+        }
+      },
+      {
+        "texto": "Más despacio.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "mas-despacio",
+        "oido": "Más despacio.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 666,
+        "msRespuestaExterna": 666,
+        "msHud": 571,
+        "msRespuestaHud": 571,
+        "desvioFinReal": -45,
+        "tramos": {
+          "transcrito": 508,
+          "enrutado": 510,
+          "cierre": 510,
+          "primeraFrase": 510,
+          "vozLista": 510,
+          "suena": 571,
+          "suenaRespuesta": 571,
+          "fin": 2975
+        }
+      },
+      {
+        "texto": "¿Qué día es hoy?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "fecha",
+        "oido": "¿Qué día es hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 613,
+        "msRespuestaExterna": 613,
+        "msHud": 542,
+        "msRespuestaHud": 542,
+        "desvioFinReal": -43,
+        "tramos": {
+          "transcrito": 500,
+          "enrutado": 502,
+          "cierre": 502,
+          "primeraFrase": 503,
+          "vozLista": 503,
+          "suena": 542,
+          "suenaRespuesta": 542,
+          "fin": 3782
+        }
+      },
+      {
+        "texto": "Más rápido.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "mas-rapido",
+        "oido": "Más rápido.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 638,
+        "msRespuestaExterna": 638,
+        "msHud": 582,
+        "msRespuestaHud": 582,
+        "desvioFinReal": -38,
+        "tramos": {
+          "transcrito": 511,
+          "enrutado": 512,
+          "cierre": 512,
+          "primeraFrase": 512,
+          "vozLista": 513,
+          "suena": 582,
+          "suenaRespuesta": 582,
+          "fin": 2618
+        }
+      },
+      {
+        "texto": "¿Qué tengo mañana?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "agenda-manana",
+        "oido": "Que tengo mañana.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 648,
+        "msRespuestaExterna": 648,
+        "msHud": 560,
+        "msRespuestaHud": 560,
+        "desvioFinReal": -53,
+        "tramos": {
+          "transcrito": 494,
+          "enrutado": 496,
+          "cierre": 496,
+          "primeraFrase": 521,
+          "vozLista": 521,
+          "suena": 560,
+          "suenaRespuesta": 560,
+          "fin": 6448
+        }
+      },
+      {
+        "texto": "¿Cuánto llevas gastado?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "gasto",
+        "oido": "¿Cuánto llevas gastado?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 717,
+        "msRespuestaExterna": 717,
+        "msHud": 627,
+        "msRespuestaHud": 627,
+        "desvioFinReal": -34,
+        "tramos": {
+          "transcrito": 539,
+          "enrutado": 542,
+          "cierre": 542,
+          "primeraFrase": 574,
+          "vozLista": 574,
+          "suena": 627,
+          "suenaRespuesta": 627,
+          "fin": 10330
+        }
+      },
+      {
+        "texto": "Repite.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "repite",
+        "oido": "Repeat.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 654,
+        "msRespuestaExterna": 654,
+        "msHud": 557,
+        "msRespuestaHud": 557,
+        "desvioFinReal": -55,
+        "tramos": {
+          "transcrito": 497,
+          "enrutado": 498,
+          "cierre": 498,
+          "suena": 557,
+          "suenaRespuesta": 557,
+          "fin": 10145
+        }
+      },
+      {
+        "texto": "¿Qué hora es?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "hora",
+        "oido": "¿Qué hora es?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 606,
+        "msRespuestaExterna": 606,
+        "msHud": 529,
+        "msRespuestaHud": 529,
+        "desvioFinReal": -56,
+        "tramos": {
+          "transcrito": 486,
+          "enrutado": 487,
+          "cierre": 487,
+          "primeraFrase": 488,
+          "vozLista": 488,
+          "suena": 529,
+          "suenaRespuesta": 529,
+          "fin": 2928
+        }
+      },
+      {
+        "texto": "¿Qué tengo hoy?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "agenda-hoy",
+        "oido": "¿Qué tengo hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 764,
+        "msRespuestaExterna": 764,
+        "msHud": 637,
+        "msRespuestaHud": 637,
+        "desvioFinReal": -29,
+        "tramos": {
+          "transcrito": 562,
+          "enrutado": 564,
+          "cierre": 564,
+          "primeraFrase": 592,
+          "vozLista": 592,
+          "suena": 637,
+          "suenaRespuesta": 637,
+          "fin": 5522
+        }
+      },
+      {
+        "texto": "Más despacio.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "mas-despacio",
+        "oido": "Más despacio.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 611,
+        "msRespuestaExterna": 611,
+        "msHud": 542,
+        "msRespuestaHud": 542,
+        "desvioFinReal": -36,
+        "tramos": {
+          "transcrito": 484,
+          "enrutado": 485,
+          "cierre": 485,
+          "primeraFrase": 485,
+          "vozLista": 486,
+          "suena": 542,
+          "suenaRespuesta": 542,
+          "fin": 2980
+        }
+      },
+      {
+        "texto": "¿Qué día es hoy?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "fecha",
+        "oido": "¿Qué día es hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 770,
+        "msRespuestaExterna": 770,
+        "msHud": 631,
+        "msRespuestaHud": 631,
+        "desvioFinReal": -32,
+        "tramos": {
+          "transcrito": 578,
+          "enrutado": 580,
+          "cierre": 580,
+          "primeraFrase": 580,
+          "vozLista": 580,
+          "suena": 631,
+          "suenaRespuesta": 631,
+          "fin": 3944
+        }
+      },
+      {
+        "texto": "Más rápido.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "mas-rapido",
+        "oido": "Más rápido.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 732,
+        "msRespuestaExterna": 732,
+        "msHud": 612,
+        "msRespuestaHud": 612,
+        "desvioFinReal": -27,
+        "tramos": {
+          "transcrito": 544,
+          "enrutado": 546,
+          "cierre": 546,
+          "primeraFrase": 546,
+          "vozLista": 546,
+          "suena": 612,
+          "suenaRespuesta": 612,
+          "fin": 2698
+        }
+      },
+      {
+        "texto": "¿Qué tengo mañana?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "agenda-manana",
+        "oido": "que tengo mañana.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 734,
+        "msRespuestaExterna": 734,
+        "msHud": 653,
+        "msRespuestaHud": 653,
+        "desvioFinReal": -31,
+        "tramos": {
+          "transcrito": 572,
+          "enrutado": 574,
+          "cierre": 574,
+          "primeraFrase": 615,
+          "vozLista": 616,
+          "suena": 653,
+          "suenaRespuesta": 653,
+          "fin": 6702
+        }
+      },
+      {
+        "texto": "¿Cuánto llevas gastado?",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "gasto",
+        "oido": "¿Cuánto llevas gastado?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 726,
+        "msRespuestaExterna": 726,
+        "msHud": 657,
+        "msRespuestaHud": 657,
+        "desvioFinReal": -24,
+        "tramos": {
+          "transcrito": 540,
+          "enrutado": 542,
+          "cierre": 542,
+          "primeraFrase": 578,
+          "vozLista": 579,
+          "suena": 657,
+          "suenaRespuesta": 657,
+          "fin": 10400
+        }
+      },
+      {
+        "texto": "Repite.",
+        "voz": "es_MX-claude-high",
+        "ruta": "orden",
+        "orden": "repite",
+        "oido": "Papita.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 661,
+        "msRespuestaExterna": 661,
+        "msHud": 541,
+        "msRespuestaHud": 541,
+        "desvioFinReal": -25,
+        "tramos": {
+          "transcrito": 480,
+          "enrutado": 481,
+          "cierre": 481,
+          "suena": 541,
+          "suenaRespuesta": 541,
+          "fin": 10172
+        }
+      },
+      {
+        "texto": "¿Qué hora es?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "hora",
+        "oido": "¿Qué hora es?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 632,
+        "msRespuestaExterna": 632,
+        "msHud": 507,
+        "msRespuestaHud": 507,
+        "desvioFinReal": -29,
+        "tramos": {
+          "transcrito": 457,
+          "enrutado": 458,
+          "cierre": 458,
+          "primeraFrase": 459,
+          "vozLista": 459,
+          "suena": 507,
+          "suenaRespuesta": 507,
+          "fin": 2973
+        }
+      },
+      {
+        "texto": "¿Qué tengo hoy?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "Que tengo ahí.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Un momento, lo veo.",
+        "cerebro": "simulado",
+        "msExterna": 722,
+        "msRespuestaExterna": 2602,
+        "msHud": 643,
+        "msRespuestaHud": 2472,
+        "desvioFinReal": -41,
+        "tramos": {
+          "transcrito": 454,
+          "enrutado": 456,
+          "acuse": 456,
+          "vozLista": 457,
+          "cierre": 609,
+          "suena": 643,
+          "primerToken": 1965,
+          "primeraFrase": 2042,
+          "suenaRespuesta": 2472,
+          "fin": 9785
+        }
+      },
+      {
+        "texto": "Más despacio.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "mas-despacio",
+        "oido": "Más despacio.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 618,
+        "msRespuestaExterna": 618,
+        "msHud": 550,
+        "msRespuestaHud": 550,
+        "desvioFinReal": -47,
+        "tramos": {
+          "transcrito": 490,
+          "enrutado": 491,
+          "cierre": 491,
+          "primeraFrase": 491,
+          "vozLista": 492,
+          "suena": 550,
+          "suenaRespuesta": 550,
+          "fin": 2996
+        }
+      },
+      {
+        "texto": "¿Qué día es hoy?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "fecha",
+        "oido": "¿Qué día es hoy?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 637,
+        "msRespuestaExterna": 637,
+        "msHud": 552,
+        "msRespuestaHud": 552,
+        "desvioFinReal": -8,
+        "tramos": {
+          "transcrito": 508,
+          "enrutado": 510,
+          "cierre": 510,
+          "primeraFrase": 510,
+          "vozLista": 510,
+          "suena": 552,
+          "suenaRespuesta": 552,
+          "fin": 3842
+        }
+      },
+      {
+        "texto": "Más rápido.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "mas-rapido",
+        "oido": "Más rápido.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 713,
+        "msRespuestaExterna": 713,
+        "msHud": 567,
+        "msRespuestaHud": 567,
+        "desvioFinReal": -27,
+        "tramos": {
+          "transcrito": 506,
+          "enrutado": 507,
+          "cierre": 507,
+          "primeraFrase": 507,
+          "vozLista": 507,
+          "suena": 567,
+          "suenaRespuesta": 567,
+          "fin": 2678
+        }
+      },
+      {
+        "texto": "¿Qué tengo mañana?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "agenda-manana",
+        "oido": "Que tengo mañana.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 683,
+        "msRespuestaExterna": 683,
+        "msHud": 559,
+        "msRespuestaHud": 559,
+        "desvioFinReal": -38,
+        "tramos": {
+          "transcrito": 487,
+          "enrutado": 489,
+          "cierre": 489,
+          "primeraFrase": 519,
+          "vozLista": 519,
+          "suena": 559,
+          "suenaRespuesta": 559,
+          "fin": 6612
+        }
+      },
+      {
+        "texto": "¿Cuánto llevas gastado?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "gasto",
+        "oido": "¿Cuánto llevas gastado?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 700,
+        "msRespuestaExterna": 700,
+        "msHud": 606,
+        "msRespuestaHud": 606,
+        "desvioFinReal": -36,
+        "tramos": {
+          "transcrito": 513,
+          "enrutado": 516,
+          "cierre": 516,
+          "primeraFrase": 551,
+          "vozLista": 551,
+          "suena": 606,
+          "suenaRespuesta": 606,
+          "fin": 10366
+        }
+      },
+      {
+        "texto": "Repite.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "orden",
+        "orden": "repite",
+        "oido": "Repeat it.",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "msExterna": 640,
+        "msRespuestaExterna": 640,
+        "msHud": 533,
+        "msRespuestaHud": 533,
+        "desvioFinReal": -34,
+        "tramos": {
+          "transcrito": 462,
+          "enrutado": 464,
+          "cierre": 464,
+          "suena": 533,
+          "suenaRespuesta": 533,
+          "fin": 10162
+        }
+      }
+    ]
+  },
+  "conversacion": {
+    "primerSonido": {
+      "n": 12,
+      "p50": 646,
+      "p95": 803,
+      "min": 560,
+      "max": 803
+    },
+    "respuesta": {
+      "n": 12,
+      "p50": 2921,
+      "p95": 3404,
+      "min": 2436,
+      "max": 3404
+    },
+    "hud": {
+      "primerSonido": {
+        "n": 12,
+        "p50": 577,
+        "p95": 679,
+        "min": 436,
+        "max": 679
+      },
+      "respuesta": {
+        "n": 12,
+        "p50": 2811,
+        "p95": 3294,
+        "min": 2345,
+        "max": 3294
+      }
+    },
+    "conAcuse": 12,
+    "cierrePorSentido": 8,
+    "muestras": [
+      {
+        "texto": "¿Qué es un balance general?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "G es un balance general.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, lo preparo.",
+        "cerebro": "simulado",
+        "msExterna": 748,
+        "msRespuestaExterna": 2436,
+        "msHud": 649,
+        "msRespuestaHud": 2345,
+        "desvioFinReal": -31,
+        "tramos": {
+          "transcrito": 373,
+          "enrutado": 374,
+          "acuse": 374,
+          "vozLista": 374,
+          "cierre": 613,
+          "suena": 649,
+          "primerToken": 1883,
+          "primeraFrase": 1965,
+          "suenaRespuesta": 2345,
+          "fin": 9613
+        }
+      },
+      {
+        "texto": "¿Para qué sirve el flujo de caja?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Para qué sirve el flujo de caja?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Buena pregunta, déjame pensarlo.",
+        "cerebro": "simulado",
+        "msExterna": 564,
+        "msRespuestaExterna": 3145,
+        "msHud": 436,
+        "msRespuestaHud": 3025,
+        "desvioFinReal": -28,
+        "tramos": {
+          "transcrito": 386,
+          "enrutado": 387,
+          "cierre": 387,
+          "acuse": 388,
+          "vozLista": 388,
+          "suena": 436,
+          "primerToken": 1898,
+          "primeraFrase": 1978,
+          "suenaRespuesta": 3025,
+          "fin": 10338
+        }
+      },
+      {
+        "texto": "¿Cómo calculo el margen bruto?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Cómo calculo el margen bruto?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Déjame darle una vuelta.",
+        "cerebro": "simulado",
+        "msExterna": 560,
+        "msRespuestaExterna": 2853,
+        "msHud": 441,
+        "msRespuestaHud": 2744,
+        "desvioFinReal": -36,
+        "tramos": {
+          "transcrito": 392,
+          "enrutado": 394,
+          "cierre": 394,
+          "acuse": 394,
+          "vozLista": 395,
+          "suena": 441,
+          "primerToken": 1903,
+          "primeraFrase": 1982,
+          "suenaRespuesta": 2744,
+          "fin": 10056
+        }
+      },
+      {
+        "texto": "Dame una idea para vender más esta semana.",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "Dame una idea para vender más esta semana.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, lo preparo.",
+        "cerebro": "simulado",
+        "msExterna": 774,
+        "msRespuestaExterna": 2494,
+        "msHud": 640,
+        "msRespuestaHud": 2373,
+        "desvioFinReal": -24,
+        "tramos": {
+          "transcrito": 402,
+          "enrutado": 405,
+          "acuse": 405,
+          "vozLista": 405,
+          "cierre": 617,
+          "suena": 640,
+          "primerToken": 1913,
+          "primeraFrase": 1989,
+          "suenaRespuesta": 2373,
+          "fin": 9684
+        }
+      },
+      {
+        "texto": "¿Qué diferencia hay entre utilidad y flujo?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Qué diferencia hay entre utilidad y flujo?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Va, lo pienso un momento.",
+        "cerebro": "simulado",
+        "msExterna": 603,
+        "msRespuestaExterna": 2897,
+        "msHud": 495,
+        "msRespuestaHud": 2811,
+        "desvioFinReal": -40,
+        "tramos": {
+          "transcrito": 431,
+          "enrutado": 433,
+          "cierre": 433,
+          "acuse": 433,
+          "vozLista": 434,
+          "suena": 495,
+          "primerToken": 1946,
+          "primeraFrase": 2022,
+          "suenaRespuesta": 2811,
+          "fin": 10123
+        }
+      },
+      {
+        "texto": "¿Qué es el capital de trabajo?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "que es el capital de trabajo",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Buena pregunta, déjame pensarlo.",
+        "cerebro": "simulado",
+        "msExterna": 778,
+        "msRespuestaExterna": 3404,
+        "msHud": 662,
+        "msRespuestaHud": 3294,
+        "desvioFinReal": -36,
+        "tramos": {
+          "transcrito": 554,
+          "enrutado": 557,
+          "acuse": 557,
+          "vozLista": 557,
+          "cierre": 624,
+          "suena": 662,
+          "primerToken": 2070,
+          "primeraFrase": 2147,
+          "suenaRespuesta": 3294,
+          "fin": 10608
+        }
+      },
+      {
+        "texto": "¿Cómo le hago para cobrar a tiempo?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Cómo le hago para cobrar a tiempo?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Va, lo pienso un momento.",
+        "cerebro": "simulado",
+        "msExterna": 562,
+        "msRespuestaExterna": 2885,
+        "msHud": 458,
+        "msRespuestaHud": 2778,
+        "desvioFinReal": -46,
+        "tramos": {
+          "transcrito": 396,
+          "enrutado": 398,
+          "cierre": 398,
+          "acuse": 398,
+          "vozLista": 398,
+          "suena": 458,
+          "primerToken": 1908,
+          "primeraFrase": 1993,
+          "suenaRespuesta": 2778,
+          "fin": 10090
+        }
+      },
+      {
+        "texto": "¿Qué es un CFDI?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Qué es un C Fey?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Déjame darle una vuelta.",
+        "cerebro": "simulado",
+        "msExterna": 646,
+        "msRespuestaExterna": 2990,
+        "msHud": 591,
+        "msRespuestaHud": 2888,
+        "desvioFinReal": -43,
+        "tramos": {
+          "transcrito": 531,
+          "enrutado": 533,
+          "cierre": 533,
+          "acuse": 533,
+          "vozLista": 534,
+          "suena": 591,
+          "primerToken": 2043,
+          "primeraFrase": 2123,
+          "suenaRespuesta": 2888,
+          "fin": 10199
+        }
+      },
+      {
+        "texto": "¿Conviene rentar o comprar el local?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "Conviene rentar o comprar el local.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, lo pienso un momento.",
+        "cerebro": "simulado",
+        "msExterna": 803,
+        "msRespuestaExterna": 3126,
+        "msHud": 679,
+        "msRespuestaHud": 2987,
+        "desvioFinReal": -11,
+        "tramos": {
+          "transcrito": 488,
+          "enrutado": 490,
+          "acuse": 490,
+          "vozLista": 491,
+          "cierre": 616,
+          "suena": 679,
+          "primerToken": 2007,
+          "primeraFrase": 2085,
+          "suenaRespuesta": 2987,
+          "fin": 10296
+        }
+      },
+      {
+        "texto": "¿Cómo motivo a mi equipo?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Cómo motivó a mi equipo?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Déjame darle una vuelta.",
+        "cerebro": "simulado",
+        "msExterna": 764,
+        "msRespuestaExterna": 3090,
+        "msHud": 676,
+        "msRespuestaHud": 2970,
+        "desvioFinReal": -26,
+        "tramos": {
+          "transcrito": 615,
+          "enrutado": 618,
+          "cierre": 618,
+          "acuse": 618,
+          "vozLista": 619,
+          "suena": 676,
+          "primerToken": 2131,
+          "primeraFrase": 2211,
+          "suenaRespuesta": 2970,
+          "fin": 10282
+        }
+      },
+      {
+        "texto": "¿Qué significa punto de equilibrio?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Qué significa punto de equilibrio?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Va, lo pienso un momento.",
+        "cerebro": "simulado",
+        "msExterna": 620,
+        "msRespuestaExterna": 2921,
+        "msHud": 464,
+        "msRespuestaHud": 2796,
+        "desvioFinReal": -18,
+        "tramos": {
+          "transcrito": 393,
+          "enrutado": 395,
+          "cierre": 395,
+          "acuse": 395,
+          "vozLista": 396,
+          "suena": 464,
+          "primerToken": 1906,
+          "primeraFrase": 1984,
+          "suenaRespuesta": 2796,
+          "fin": 10101
+        }
+      },
+      {
+        "texto": "¿Qué es la depreciación?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Qué es la depreciación?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Buena pregunta, déjame pensarlo.",
+        "cerebro": "simulado",
+        "msExterna": 731,
+        "msRespuestaExterna": 3348,
+        "msHud": 577,
+        "msRespuestaHud": 3241,
+        "desvioFinReal": -35,
+        "tramos": {
+          "transcrito": 522,
+          "enrutado": 523,
+          "cierre": 523,
+          "acuse": 524,
+          "vozLista": 524,
+          "suena": 577,
+          "primerToken": 2033,
+          "primeraFrase": 2110,
+          "suenaRespuesta": 3241,
+          "fin": 10552
+        }
+      }
+    ]
+  },
+  "interrupcion": {
+    "resumen": {
+      "n": 16,
+      "p50": 240,
+      "p95": 295,
+      "min": 208,
+      "max": 295
+    },
+    "callaron": 16,
+    "n": 16,
+    "fugas": 0,
+    "vuelveAHablar": 0,
+    "cortes": [
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 240,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo preparo."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 221,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, déjame ver."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 212,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo preparo."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 222,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Dame un momento."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 261,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo preparo."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 245,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, déjame ver."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 271,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo preparo."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 250,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, déjame ver."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 216,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Dame un momento."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 208,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, déjame ver."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 218,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Dame un momento."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 240,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, déjame ver."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 271,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo preparo."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 267,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, déjame ver."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 295,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Dame un momento."
+      },
+      {
+        "ok": true,
+        "donde": "respuesta",
+        "msReaccion": 280,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo preparo."
+      }
+    ]
+  },
+  "interrupcionAcuse": {
+    "resumen": {
+      "n": 8,
+      "p50": 306,
+      "p95": 371,
+      "min": 291,
+      "max": 371
+    },
+    "callaron": 8,
+    "n": 8,
+    "fugas": 0,
+    "vuelveAHablar": 0,
+    "cortes": [
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 317,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Déjame darle una vuelta."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 302,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo pienso un momento."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 317,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Déjame darle una vuelta."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 291,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo pienso un momento."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 371,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Déjame darle una vuelta."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 306,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Va, lo pienso un momento."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 292,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Déjame darle una vuelta."
+      },
+      {
+        "ok": true,
+        "donde": "acuse",
+        "msReaccion": 336,
+        "fugas": 0,
+        "vuelveAHablar": 0,
+        "estadoViejo": "interrumpido",
+        "acuse": "Buena pregunta, déjame pensarlo."
+      }
+    ]
+  },
+  "eco": {
+    "db": -20,
+    "autoInterrupciones": 0,
+    "n": 6,
+    "muestras": [
+      {
+        "texto": "Dame una idea para vender más esta semana.",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "Dame una idea para vender más esta semana.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, lo preparo.",
+        "cerebro": "simulado",
+        "msExterna": 788,
+        "msRespuestaExterna": 2348,
+        "msHud": 661,
+        "msRespuestaHud": 2181,
+        "desvioFinReal": 31,
+        "tramos": {
+          "transcrito": 540,
+          "enrutado": 543,
+          "acuse": 543,
+          "vozLista": 544,
+          "cierre": 617,
+          "suena": 661,
+          "primerToken": 2061,
+          "primeraFrase": 2141,
+          "suenaRespuesta": 2181,
+          "fin": 9342
+        }
+      },
+      {
+        "texto": "¿Qué diferencia hay entre utilidad y flujo?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Qué diferencia hay entre utilidad y flujo?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Buena pregunta, déjame pensarlo.",
+        "cerebro": "simulado",
+        "msExterna": 688,
+        "msRespuestaExterna": 3079,
+        "msHud": 475,
+        "msRespuestaHud": 2892,
+        "desvioFinReal": 37,
+        "tramos": {
+          "transcrito": 420,
+          "enrutado": 423,
+          "cierre": 423,
+          "acuse": 423,
+          "vozLista": 424,
+          "suena": 475,
+          "primerToken": 1943,
+          "primeraFrase": 2019,
+          "suenaRespuesta": 2892,
+          "fin": 9601
+        }
+      },
+      {
+        "texto": "¿Qué es el capital de trabajo?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "¿Qué es el capital de trabajo?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Va, lo pienso un momento.",
+        "cerebro": "simulado",
+        "msExterna": 619,
+        "msRespuestaExterna": 2803,
+        "msHud": 483,
+        "msRespuestaHud": 2591,
+        "desvioFinReal": 46,
+        "tramos": {
+          "transcrito": 401,
+          "enrutado": 402,
+          "cierre": 402,
+          "acuse": 403,
+          "vozLista": 403,
+          "suena": 483,
+          "primerToken": 1916,
+          "primeraFrase": 1992,
+          "suenaRespuesta": 2591,
+          "fin": 9204
+        }
+      },
+      {
+        "texto": "¿Cómo le hago para cobrar a tiempo?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "¿Cómo lo hago para cobrar a tiempo?",
+        "estado": "completo",
+        "especulativo": true,
+        "cierreAnticipado": true,
+        "acuse": "Buena pregunta, déjame pensarlo.",
+        "cerebro": "simulado",
+        "msExterna": 603,
+        "msRespuestaExterna": 3040,
+        "msHud": 443,
+        "msRespuestaHud": 2852,
+        "desvioFinReal": 20,
+        "tramos": {
+          "transcrito": 382,
+          "enrutado": 384,
+          "cierre": 385,
+          "acuse": 385,
+          "vozLista": 386,
+          "suena": 443,
+          "primerToken": 1893,
+          "primeraFrase": 1971,
+          "suenaRespuesta": 2852,
+          "fin": 9557
+        }
+      },
+      {
+        "texto": "¿Qué es un CFDI?",
+        "voz": "es_MX-claude-high",
+        "ruta": "llm",
+        "oido": "Gel es un CFDI.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, lo preparo.",
+        "cerebro": "simulado",
+        "msExterna": 799,
+        "msRespuestaExterna": 2303,
+        "msHud": 656,
+        "msRespuestaHud": 2148,
+        "desvioFinReal": 23,
+        "tramos": {
+          "transcrito": 529,
+          "enrutado": 530,
+          "acuse": 530,
+          "vozLista": 530,
+          "cierre": 617,
+          "suena": 656,
+          "primerToken": 2041,
+          "primeraFrase": 2119,
+          "suenaRespuesta": 2148,
+          "fin": 8727
+        }
+      },
+      {
+        "texto": "¿Conviene rentar o comprar el local?",
+        "voz": "es_ES-davefx-medium",
+        "ruta": "llm",
+        "oido": "conviene rentar o comprar el local.",
+        "estado": "completo",
+        "especulativo": true,
+        "acuse": "Va, lo pienso un momento.",
+        "cerebro": "simulado",
+        "msExterna": 800,
+        "msRespuestaExterna": 2914,
+        "msHud": 668,
+        "msRespuestaHud": 2733,
+        "desvioFinReal": 39,
+        "tramos": {
+          "transcrito": 420,
+          "enrutado": 421,
+          "acuse": 421,
+          "vozLista": 422,
+          "cierre": 620,
+          "suena": 668,
+          "primerToken": 1932,
+          "primeraFrase": 2013,
+          "suenaRespuesta": 2733,
+          "fin": 9393
+        }
+      }
+    ]
+  },
+  "pausas": {
+    "pausaMs": 400,
+    "partidas": 1,
+    "n": 8,
+    "muestras": [
+      {
+        "a": "¿Qué es un balance general?",
+        "b": "Lo pregunto por mi negocio.",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          "¿Qué es un balance general? Lo pregunto por mi negocio."
+        ],
+        "estados": [
+          "completo"
+        ]
+      },
+      {
+        "a": "¿Cómo calculo el margen bruto?",
+        "b": "Y también el neto.",
+        "pausaMs": 400,
+        "turnos": 2,
+        "partida": true,
+        "oido": [
+          "¿Cómo calculo el margen bruto?",
+          ""
+        ],
+        "estados": [
+          "interrumpido",
+          "en-curso"
+        ]
+      },
+      {
+        "a": "¿Conviene rentar el local?",
+        "b": "O mejor lo compro.",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          "Conviene rentar el local. O mejor lo compro."
+        ],
+        "estados": [
+          "completo"
+        ]
+      },
+      {
+        "a": "¿Qué es la depreciación?",
+        "b": "Mi contador la mencionó ayer.",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          "¿Qué es la depreciación? Mi contador la mencionó ayer."
+        ],
+        "estados": [
+          "completo"
+        ]
+      },
+      {
+        "a": "¿Qué diferencia hay entre la utilidad",
+        "b": "y el flujo de caja?",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          ""
+        ],
+        "estados": [
+          "completo"
+        ]
+      },
+      {
+        "a": "¿Para qué sirve",
+        "b": "el capital de trabajo?",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          "¿Para qué sirve el capital de trabajo?"
+        ],
+        "estados": [
+          "completo"
+        ]
+      },
+      {
+        "a": "Explícame cómo armar",
+        "b": "un presupuesto mensual.",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          "Explícame cómo armar un presupuesto mensual."
+        ],
+        "estados": [
+          "completo"
+        ]
+      },
+      {
+        "a": "¿Cuánto debo cobrar",
+        "b": "por una consulta?",
+        "pausaMs": 400,
+        "turnos": 1,
+        "partida": false,
+        "oido": [
+          "¿Cuánto debo cobrar por una consulta?"
+        ],
+        "estados": [
+          "completo"
+        ]
+      }
+    ]
+  },
+  "carga": {
+    "inicio": {
+      "loadavg1": 2.19,
+      "loadavg5": 2.61,
+      "libreMb": 7877
+    },
+    "ordenes": {
+      "loadavg1": 2,
+      "loadavg5": 2.54,
+      "libreMb": 7618
+    },
+    "conversacion": {
+      "loadavg1": 3.18,
+      "loadavg5": 2.56,
+      "libreMb": 6672
+    },
+    "interrupcion": {
+      "loadavg1": 1.52,
+      "loadavg5": 2.15,
+      "libreMb": 6701
+    },
+    "eco": {
+      "loadavg1": 8.89,
+      "loadavg5": 4.51,
+      "libreMb": 5076
+    },
+    "pausas": {
+      "loadavg1": 4.11,
+      "loadavg5": 3.99,
+      "libreMb": 7218
+    },
+    "fin": {
+      "loadavg1": 5.7,
+      "loadavg5": 4.53,
+      "libreMb": 6861
+    }
+  },
+  "desvioFinReal": {
+    "n": 44,
+    "p50": -36,
+    "p95": -18,
+    "min": -62,
+    "max": -8
+  }
+}

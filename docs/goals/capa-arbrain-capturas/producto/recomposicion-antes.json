@@ -1,0 +1,19 @@
+{
+  "base": "http://localhost:3011",
+  "fecha": "2026-10-25T18:59:04.892Z",
+  "lado": "antes",
+  "modulo": "crecimiento-demostrado",
+  "pasos": [
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/20-recomposicion-antes.png",
+      "que": "Recepción antes del intercambio: lleva crecimiento-demostrado",
+      "comprobado": "explorador: recepcion, dictado, crecimiento-demostrado · «¿qué pongo en mis redes este mes?» → «Eso todavía no lo sé hacer…» (estudio-pymes no está)"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/21-recomposicion-antes-modulo.png",
+      "que": "«¿de dónde salió el crecimiento del trimestre?» abre crecimiento-demostrado por intención",
+      "comprobado": "¿de dónde salió el crecimiento del trimestre? → /crecimiento (pantalla de crecimiento-demostrado, en la ventana de (main))"
+    }
+  ],
+  "erroresDeConsola": []
+}

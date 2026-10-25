@@ -1,0 +1,39 @@
+{
+  "enchufe": 1,
+  "modulo": "crecimiento-demostrado",
+  "activo": "TPL-feature-crecimiento-demostrado",
+  "nombre": "Crecimiento demostrado",
+  "pantallas": ["/crecimiento", "/laboratorio-crecimiento"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "crecimiento-demostrado.abre",
+      "queHace": "Abrir el crecimiento demostrado de tu pyme.",
+      "ejemplos": [
+        "pregunta por el crecimiento de mi negocio y su prueba",
+        "de dónde salió el crecimiento del trimestre",
+        "abre crecimiento demostrado",
+        "cómo creció mi tienda"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/crecimiento"
+    },
+    {
+      "id": "crecimiento-demostrado.abre-laboratorio",
+      "queHace": "Abrir el laboratorio de crecimiento demostrado.",
+      "ejemplos": [
+        "abre el laboratorio de crecimiento",
+        "laboratorio de crecimiento demostrado",
+        "las trampas y el replay del crecimiento demostrado"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-crecimiento"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las pantallas /crecimiento y /laboratorio-crecimiento corren su pipeline completo en el servidor con datos sintéticos sin la capa; la capa solo les pone la ventana alrededor",
+  "sale": []
+}

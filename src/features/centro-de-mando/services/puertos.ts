@@ -4,7 +4,8 @@
  * Los puertos del bucle en el navegador. Lo que se puede contestar aquí se contesta aquí (la hora,
  * la fecha, la telemetría, la ayuda): ni red ni servidor. La agenda y el gasto van al servidor
  * local. La voz de las frases fijas se cachea y se calienta al empezar: «Dime.» o «De acuerdo,
- * más despacio.» suenan sin esperar al sintetizador.
+ * más despacio.» suenan sin esperar al sintetizador. Las del ACUSE van primero: son las que suenan
+ * en cuanto una pregunta va al cerebro.
  */
 import {
   creaSeparador,
@@ -43,8 +44,12 @@ const primeraFrase = (texto: string): string | undefined => {
 
 const MAX_CACHE = 96;
 
-export function creaPuertos(token: string, telemetria: () => Telemetria | undefined, zona = 'America/Mexico_City'): Puertos {
+/** Las frases que nunca salen de la caché (el acuse y las fijas): una respuesta larga no las empuja fuera. */
+const fijas = (frasesAcuse: readonly string[]) => new Set([...frasesAcuse, ...FRASES_FIJAS]);
+
+export function creaPuertos(token: string, telemetria: () => Telemetria | undefined, zona = 'America/Mexico_City', frasesAcuse: readonly string[] = []): Puertos {
   const cache = new Map<string, AudioFrase>();
+  const protegidas = fijas(frasesAcuse);
   const sintetizador = {
     async sintetiza(frase: string, senal: AbortSignal): Promise<AudioFrase> {
       const guardada = cache.get(frase);
@@ -52,13 +57,16 @@ export function creaPuertos(token: string, telemetria: () => Telemetria | undefi
       const audio = await cliente.sintetiza(token, frase, senal);
       if (frase.length <= 120) {
         cache.set(frase, audio);
-        if (cache.size > MAX_CACHE) cache.delete(cache.keys().next().value ?? frase);
+        if (cache.size > MAX_CACHE) {
+          const vieja = [...cache.keys()].find((k) => !protegidas.has(k));
+          if (vieja !== undefined) cache.delete(vieja);
+        }
       }
       return audio;
     },
     async calienta() {
       const senal = new AbortController().signal;
-      for (const f of FRASES_FIJAS) await sintetizador.sintetiza(f, senal).catch(() => undefined);
+      for (const f of [...frasesAcuse, ...FRASES_FIJAS]) await sintetizador.sintetiza(f, senal).catch(() => undefined);
     },
   };
   const lector: Lector = {

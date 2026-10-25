@@ -1,0 +1,33 @@
+{
+  "enchufe": 1,
+  "modulo": "laboratorio-pymes",
+  "activo": "TPL-feature-laboratorio-pymes",
+  "nombre": "Laboratorio pymes",
+  "pantallas": ["/laboratorio-pymes"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "laboratorio-pymes.abre",
+      "queHace": "Abrir el laboratorio de marketing para pymes.",
+      "ejemplos": [
+        "abre el laboratorio pymes",
+        "qué herramientas de marketing están aprobadas",
+        "el estado real de las herramientas de contenido",
+        "laboratorio de herramientas de marketing para pymes"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-pymes"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el laboratorio corre sus casos en el servidor al abrirse y se vale por sí solo; /estudio sigue usando su veredicto sin la capa",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "Supabase del proyecto",
+      "cuando": "solo al correr npm run reel:rls (medición del aislamiento con dos cuentas sintéticas @example.com); abrir la página no saca nada"
+    }
+  ]
+}

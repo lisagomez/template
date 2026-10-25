@@ -1,0 +1,219 @@
+{
+  "enchufe": 1,
+  "modulo": "etiquetas",
+  "activo": "TPL-feature-etiquetas",
+  "nombre": "Etiquetas GS1 y caducidades",
+  "pantallas": [
+    "/etiquetas",
+    "/etiquetas/leer",
+    "/etiquetas/recibir",
+    "/etiquetas/escanear",
+    "/etiquetas/dia",
+    "/etiquetas/mover",
+    "/etiquetas/caducidades",
+    "/etiquetas/conteo",
+    "/etiquetas/expediente",
+    "/etiquetas/riesgo",
+    "/etiquetas/integridad",
+    "/etiquetas/catalogo",
+    "/etiquetas/impresoras",
+    "/etiquetas/rollos",
+    "/etiquetas/ajustes"
+  ],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "etiquetas.abre",
+      "queHace": "Abrir el editor de etiquetas GS1-128.",
+      "ejemplos": ["llévame a las etiquetas", "abre las etiquetas", "quiero armar e imprimir una etiqueta GS1"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas"
+    },
+    {
+      "id": "etiquetas.abre-leer",
+      "queHace": "Abrir el lector de etiquetas.",
+      "ejemplos": [
+        "leer una etiqueta con la cámara",
+        "qué producto y qué lote es esta caja",
+        "cuántos días de vida le quedan a este producto",
+        "consultar una etiqueta con la pistola"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/leer"
+    },
+    {
+      "id": "etiquetas.abre-recibir",
+      "queHace": "Abrir la recepción de mercancía.",
+      "ejemplos": [
+        "recibir mercancía que no trae GS1",
+        "registrar una entrada con foto de la caducidad",
+        "llegó mercancía sin código de barras GS1"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/recibir"
+    },
+    {
+      "id": "etiquetas.abre-escanear",
+      "queHace": "Abrir el escaneo por zona.",
+      "ejemplos": [
+        "escanear en la zona del rack",
+        "empezar la ronda de escaneo de hoy",
+        "escanear según mi rol en el piso de venta"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/escanear"
+    },
+    {
+      "id": "etiquetas.abre-dia",
+      "queHace": "Mostrarte el día del sitio.",
+      "ejemplos": [
+        "el día de la sucursal",
+        "cómo va el día en el sitio",
+        "avisos y tareas pendientes de la ronda de hoy",
+        "ver lo atrasado del día"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/dia"
+    },
+    {
+      "id": "etiquetas.abre-mover",
+      "queHace": "Abrir el movimiento de cajas entre zonas.",
+      "ejemplos": [
+        "mover entre zonas",
+        "mover cajas del almacén al piso de venta",
+        "subir una tarima al piso",
+        "llevar producto dañado a merma"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/mover"
+    },
+    {
+      "id": "etiquetas.abre-caducidades",
+      "queHace": "Mostrarte las caducidades por sitio.",
+      "ejemplos": [
+        "qué caduca esta semana",
+        "caducidades por sitio",
+        "productos vencidos y por vencer este mes",
+        "qué debo retirar y qué surtir primero por caducidad"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/caducidades"
+    },
+    {
+      "id": "etiquetas.abre-conteo",
+      "queHace": "Abrir el inventario físico con conteo ciego.",
+      "ejemplos": [
+        "inventario físico",
+        "conteo ciego por ubicación",
+        "contar el almacén sin ver cantidades",
+        "conciliar lo que no cuadra del conteo"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/conteo"
+    },
+    {
+      "id": "etiquetas.abre-expediente",
+      "queHace": "Abrir el expediente de un lote.",
+      "ejemplos": [
+        "expediente del lote",
+        "la historia y la prueba de un lote",
+        "trazabilidad completa de un lote",
+        "revisar la cadena de eventos de una tarima"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/expediente"
+    },
+    {
+      "id": "etiquetas.abre-riesgo",
+      "queHace": "Abrir el agente de riesgo de caducidad.",
+      "ejemplos": [
+        "qué producto no se va a vender a tiempo",
+        "dónde hay riesgo de que se eche a perder el inventario",
+        "abre el agente de riesgo de caducidad"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/riesgo"
+    },
+    {
+      "id": "etiquetas.abre-integridad",
+      "queHace": "Abrir la integridad por sucursal.",
+      "ejemplos": [
+        "integridad por sucursal",
+        "verificar la integridad de un sitio",
+        "las raíces ancladas por sucursal"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/integridad"
+    },
+    {
+      "id": "etiquetas.abre-catalogo",
+      "queHace": "Abrir el catálogo y los códigos GTIN.",
+      "ejemplos": [
+        "subir el catálogo de productos en Excel",
+        "asignar códigos GTIN a lo que no tiene",
+        "validar los GTIN de mi catálogo"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/catalogo"
+    },
+    {
+      "id": "etiquetas.abre-impresoras",
+      "queHace": "Abrir las impresoras y su calibración.",
+      "ejemplos": [
+        "impresoras",
+        "configurar y ajustar una impresora Zebra",
+        "calibrar la impresora de etiquetas",
+        "perfil de impresora por sitio"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/impresoras"
+    },
+    {
+      "id": "etiquetas.abre-rollos",
+      "queHace": "Mostrarte el gasto en rollos de etiquetas.",
+      "ejemplos": [
+        "cuánto gasto en rollos de etiquetas",
+        "el presupuesto de rollos por sitio",
+        "cuánto costaría comprar más rollos"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/rollos"
+    },
+    {
+      "id": "etiquetas.abre-ajustes",
+      "queHace": "Abrir los ajustes de etiquetas.",
+      "ejemplos": [
+        "ajustes de las etiquetas",
+        "cambiar el prefijo de empresa GS1",
+        "los umbrales del semáforo de caducidad"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/etiquetas/ajustes"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las quince pantallas de /etiquetas y su API local (archivos, sin Supabase) funcionan solas; el núcleo, tools/etiquetas-gs1, no importa la capa",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "Labelary (api.labelary.com, servicio de un tercero)",
+      "cuando": "solo si se activa en Ajustes y además por cada uso, con aviso rojo: el ZPL de la etiqueta, que lleva nombre de producto, GTIN y lote; apagado por defecto (la vista previa local no sale)"
+    }
+  ]
+}

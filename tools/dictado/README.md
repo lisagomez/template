@@ -8,8 +8,9 @@ Hablar y que el texto aparezca donde está el cursor. Local, en WSL2, sobre `@tu
 |---|---|
 | Dictar a **Windows** desde WSL2: Claude Code en Windows Terminal, VS Code, el navegador | Detectar voz: eso es `voz` (VAD Silero), y se consume tal cual |
 | Elegir el motor **por medición** (tabla abajo), no por fama | Traer los pesos: se descargan pineados por URL con `npm run mide` |
-| Transcribir archivos y **reuniones con hablantes** (turnos por `voz`, texto por aquí) | Mandar audio a ninguna nube: «remoto» es **tu** VPS, con token, y es opcional |
-| Servir el mismo motor por HTTP con autenticación (`servicio/`) | Interfaz gráfica: la terminal pinta estado, nivel y latencia |
+| Transcribir archivos y **reuniones con hablantes** (turnos por `voz`, texto por aquí) | Mandar audio a ninguna nube **por defecto**: «remoto» es **tu** VPS, con token; Groq, LemonFox y ElevenLabs son adaptadores APAGADOS que solo enciende `DICTADO_NUBE`, cada uno con su C4 |
+| Servir el mismo motor por HTTP con autenticación (`servicio/`), también por el **enchufe compatible con OpenAI** (`/v1/audio/transcriptions`, `/v1/audio/speech`, `/v1/models`) | Interfaz gráfica: la terminal pinta estado, nivel y latencia |
+| Una transcripción que **no se apaga** porque falte un proveedor opcional: el motor local primero y, si se encendió nube, la que tenga llave | Codificar mp3, opus, aac o flac: el servicio da WAV y PCM, y lo dice con un 400 |
 
 ## Casos de uso
 
@@ -31,16 +32,21 @@ Hablar y que el texto aparezca donde está el cursor. Local, en WSL2, sobre `@tu
 - **CPU, GPU y memoria**: medido el 2026-09-15 en un AMD Ryzen 7 5700G (16 hilos, 15 GB, sin CUDA): Parakeet int8 p50
   532 ms por toma con 1531 MB de RAM residente y 8 hilos (tabla en «Medición»). GPU: no medido (la imagen
   `Dockerfile.gpu` no ha corrido en ninguna GPU).
-- **Servicios externos**: ninguno. «Remoto» es tu VPS, opcional y con token.
+- **Servicios externos**: ninguno por defecto. «Remoto» es tu VPS, opcional y con token. Con `DICTADO_NUBE`, los
+  adaptadores que se nombren (Groq, LemonFox, ElevenLabs), con su llave: **no medidos** aquí (§7b).
 - **Variables de entorno**: `DICTADO_DATOS`, `DICTADO_MODELOS`, `DICTADO_RUNTIME`, `DICTADO_PYTHON`, `DICTADO_HILOS`,
   `DICTADO_RETENCION_DIAS`, `DICTADO_REMOTO_URL`, `DICTADO_REMOTO_TOKEN`, `DICTADO_MOVIL_TOKEN`, `DICTADO_VOCES`,
-  `DICTADO_RESPALDO`, `DICTADO_CARACTERES_MAXIMOS`, `DICTADO_CONVERSACION_PUERTO` y `DICTADO_CONVERSACION_TRAZA`
-  (qué es cada una, en «Variables de entorno»). El token nunca se imprime.
+  `DICTADO_RESPALDO`, `DICTADO_CARACTERES_MAXIMOS`, `DICTADO_CONVERSACION_PUERTO`, `DICTADO_CONVERSACION_TRAZA` y
+  `DICTADO_NUBE` con las llaves de lo que encienda (qué es cada una, en «Variables de entorno»). Ni el token ni una
+  llave se imprimen nunca.
 - **Almacenamiento**: `~/.dictado` (`DICTADO_DATOS`): historial con el texto dictado (365 días por defecto),
   diccionario, snippets, ajustes y token; modelos y runtimes aparte. `npm run mide` baja ~2,5 GB la primera vez. Qué
   se guarda, dónde y cómo se borra: §10.
 - **Salida del perímetro (C4)**: nada sale de la máquina. El servicio remoto es opcional, propio y no escribe audio ni
-  texto; su modelo de amenazas (C3) y su decisión de flujo de datos (C4) están en el SDD §7.
+  texto; su modelo de amenazas (C3) y su decisión de flujo de datos (C4) están en el SDD §7. Encender un adaptador de
+  nube (`DICTADO_NUBE`) SÍ saca cosas, y cada uno lo declara: Groq y LemonFox STT, el **audio** de cada toma; LemonFox
+  TTS y ElevenLabs, el **texto** de lo que se lee. Es una decisión de flujo de datos con su propio C4, y nunca en un
+  producto con datos sensibles de terceros.
 
 ## Instalar
 
@@ -308,6 +314,46 @@ encuentra una cantidad) sí. Medido el 2026-09-20: Parakeet oye «sí» y «seis
 o «Six»; el segundo pase (~1,3 s) baja los rechazos falsos de 22 % a 13 %, y las cantidades con
 unidad («tres unidades») fallan 0 %.
 
+### 7b. El enchufe compatible con OpenAI (2026-10-25)
+
+El mismo servicio (y el demonio) contesta además en la forma de la industria, la que usan Groq, LemonFox y Kokoro:
+cualquier cliente de OpenAI, el `creaClienteAudio` de la capa o la voz de Arbrain apuntada aquí le hablan igual.
+
+| Ruta | Pide | Da |
+|---|---|---|
+| `POST /v1/audio/transcriptions` | multipart: `file` (WAV PCM16; otro formato → 415 con la razón), `model`, `language` (`es`, `es-MX` o `spanish`), `prompt`, `response_format` (`json` o `text`) | `{ "text": … }` o el texto a secas; quién contestó, en cabeceras (`x-motor`, `x-ms`, `x-local`, `x-saltados`) |
+| `POST /v1/audio/speech` | JSON `{ model, input, voice, response_format, speed }`; `voice` exacta o por prefijo (`es_MX`); `response_format` `wav` (por defecto) o `pcm`; mp3/opus/aac/flac → 400 | `audio/wav` entero con sus tamaños exactos, o `audio/pcm` en flujo con `x-frecuencia-hz` |
+| `GET /v1/models` | solo el Bearer | los motores y las voces: **probar la llave sin gastar cuota** (200 o 401, y ningún motor se mueve); con `?probar=1`, cada adaptador de nube encendido prueba la suya por su ruta gratuita, si la tiene |
+
+`model: respaldo` pide el segundo motor; el id de un adaptador de nube encendido lo pide a él; lo demás
+(`whisper-1`, `parakeet`…) es la **cadena**: el motor local primero y, si falla, la nube encendida con llave. Los
+errores van en la forma de OpenAI (`{ error: { message, type, code } }`), sin texto dictado ni detalles internos.
+Las rutas viven en `servicio/rutas.mjs` y `servicio/openai.mjs`; `servidor.mjs` solo configura y escucha. Contrato
+probado en `pruebas/openai.ts` contra el manejador real con motores falsos, también con el cliente de la capa.
+
+### 7c. Adaptadores de nube: apagados, no medidos (2026-10-25)
+
+`@tu-scope/dictado/nube` trae Groq (STT), LemonFox (STT y TTS) y ElevenLabs (TTS, Flash v2.5), detrás de la misma
+interfaz, y la cadena `transcribeEnCadena` que adopta de Arbrain v0.2.10 (`server/src/live/transcribe.ts`) lo que
+hace que la transcripción **no se apague**: un proveedor sin llave se salta, uno ocupado o caído se reintenta una vez
+y se pasa al siguiente, uno con la llave rechazada pasa al siguiente, y un audio que el proveedor no puede leer
+detiene la cadena (ningún otro lo leerá). El cuerpo de un proveedor nunca llega al cliente.
+
+```bash
+DICTADO_NUBE=groq GROQ_API_KEY=… npm run servicio      # la nube que se nombra, y solo esa
+```
+
+| Adaptador | Qué sale de la máquina | A quién | Llave | Medido |
+|---|---|---|---|---|
+| `groq` | el **audio** de cada toma | Groq (whisper-large-v3-turbo) | `GROQ_API_KEY` | no |
+| `lemonfox-stt` | el **audio** de cada toma | LemonFox | `LEMONFOX_API_KEY` | no |
+| `lemonfox-tts` | el **texto** de lo que se lee | LemonFox | `LEMONFOX_API_KEY` (`LEMONFOX_VOZ`) | no |
+| `elevenlabs` | el **texto** de cada frase (sin `previous_text`) | ElevenLabs | `ELEVENLABS_API_KEY` y `ELEVENLABS_VOZ` | no |
+
+Probados contra un proveedor SIMULADO (`pruebas/nube.ts`, un servidor local que anota lo que le llega: así se ve
+que el STT manda audio y el TTS texto, y nada más). Medirlos con llaves reales sobre el mismo corpus es una fase
+aparte. Sin `DICTADO_NUBE` no se lee ninguna de esas llaves (también probado).
+
 ### 8. Ganancia automática y micrófono cerrado en espera
 
 ```bash
@@ -561,7 +607,8 @@ La misma prueba con el cursor en el **Bloc de notas** también apareció ahí (c
 | `DICTADO_REMOTO_URL`, `DICTADO_REMOTO_TOKEN` | el servicio | — |
 | `DICTADO_VOCES` | voces Piper que carga el servicio/demonio para `/sintetizar` (separadas por comas) | todas las `vits-piper-*` de `DICTADO_MODELOS` |
 | `DICTADO_RESPALDO` | segundo motor del servicio/demonio (`faster-whisper:<modelo>`), pedido con `x-motor: respaldo` | ninguno (`npm run demonio`: `faster-whisper:small` si hay venv) |
-| `DICTADO_CARACTERES_MAXIMOS` | tope del texto de `/sintetizar` | 2000 |
+| `DICTADO_CARACTERES_MAXIMOS` | tope del texto de `/sintetizar` y `/v1/audio/speech` | 2000 |
+| `DICTADO_NUBE` | adaptadores de nube que el servicio enciende (`groq`, `lemonfox-stt`, `lemonfox-tts`, `elevenlabs`, separados por comas); cada uno con su llave (`GROQ_API_KEY`, `LEMONFOX_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOZ`, `LEMONFOX_VOZ`), que solo se lee si se nombra | ninguno: apagada |
 | `DICTADO_CONVERSACION_PUERTO` | puerto del socket por el que `dictado di` le pide al `dictar` en marcha que hable (`--conversacion-puerto` en `dictar`) | 47126 |
 | `DICTADO_CONVERSACION_TRAZA` | `1`: trazas con instante del modo conversación en el log (las lee `mide-conversacion.mjs`) | — |
 | `DICTADO_CONVERSACION_MARGEN_MS` | margen de la puerta del micrófono tras la voz del agente, solo para medir (`mide-conversacion.mjs`) | el de `ajustes.json` |
@@ -609,11 +656,15 @@ npm run empaqueta dictado   # desde la raíz del repo: contrato + build + tarbal
 ## Lo que no está (todavía)
 
 Modo comando y transformaciones por LLM (piden un modelo de texto: el enchufe `Limpiador`
-existe, el proveedor no), GUI, streaming parcial, y cualquier nube. El porqué de cada uno, en el
+existe, el proveedor no), GUI, streaming parcial, un codificador de mp3/opus para `/v1/audio/speech`, y la nube
+MEDIDA (los adaptadores existen apagados; medirlos con llaves reales es fase aparte). El porqué de cada uno, en el
 SDD §8.
 
 ## Cambios
 
+- **sin versión** (2026-10-25, capa Arbrain): el enchufe compatible con OpenAI (§7b), las rutas del servicio en
+  `servicio/rutas.mjs` (se prueban con motores falsos), y los adaptadores de nube apagados con su cadena (§7c,
+  subpath `./nube`).
 - **0.2.0** (2026-10-16, sin publicar): lo de la conversación (PRP-003: envío por silencio, `dictar` dueño del
   altavoz, hook `Stop`), que ya estaba en el código, más: `./remoto` exporta `aPcm16` con la MISMA escala que
   `voz/node` (×32768 con tope; la asimétrica ×32767 perdía 1 LSB, arreglado en voz el 2026-09-21 y aquí no); los

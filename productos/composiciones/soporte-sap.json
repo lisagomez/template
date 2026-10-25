@@ -1,0 +1,46 @@
+{
+  "composicion": 1,
+  "producto": "soporte-sap",
+  "marca": {
+    "nombre": "Soporte SAP · mesa del experto",
+    "asistente": "el asistente de Soporte SAP",
+    "acento": "#0284c7",
+    "saludo": "Te ayudo a probar casos: dime «prueba este caso:» y el caso en pocas palabras (qué pasa, la transacción y el mensaje). También te explico por qué dije «no lo sé» en un paso y te muestro lo que me enseñaste. No uso un modelo de IA: si no lo sé, te lo digo."
+  },
+  "funciones": [
+    "conversacion",
+    "intencion",
+    "voz",
+    "lienzo",
+    "explorador",
+    "panel",
+    "primer-arranque",
+    "ajustes"
+  ],
+  "modulos": [
+    "soporte-sap"
+  ],
+  "ranuras": {},
+  "memoria": {
+    "duena": "inquilino",
+    "almacen": "servidor"
+  },
+  "modelo": {
+    "clase": null,
+    "estado": "sin-llm"
+  },
+  "voz": {
+    "no": "en la mesa alojada no cabe un motor local: Parakeet pide ~1,5 GB y la instancia tiene 1 GiB; la voz del navegador manda el audio fuera"
+  },
+  "datosSensibles": true,
+  "resumen": {
+    "conteos": [
+      "casos-nuevos",
+      "ensenanzas-por-firmar"
+    ],
+    "enlaces": [
+      "mesa",
+      "laboratorio"
+    ]
+  }
+}

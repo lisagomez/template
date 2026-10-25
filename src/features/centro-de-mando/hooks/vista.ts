@@ -60,7 +60,7 @@ export function aplicaEvento(v: VistaCentro, e: EventoBucle): VistaCentro {
       return agrega(v, { id: `m${e.turno}`, turno: e.turno, quien: 'maquina', texto: e.texto, ruta: pendientes.get(e.turno)?.ruta });
     case 'frase': {
       const frases = v.turnoFrases === e.turno ? v.frases : [];
-      return { ...v, turnoFrases: e.turno, frases: [...frases, { indice: e.indice, texto: e.texto, fraccion: 0 }] };
+      return { ...v, turnoFrases: e.turno, frases: [...frases, { indice: e.indice, texto: e.texto, fraccion: 0, ...(e.acuse ? { acuse: true } : {}) }] };
     }
     case 'karaoke':
       if (v.turnoFrases !== e.turno) return v;
