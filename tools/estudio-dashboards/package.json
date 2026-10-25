@@ -1,0 +1,28 @@
+{
+  "name": "@tu-scope/estudio-dashboards",
+  "version": "0.1.0",
+  "description": "El Estudio: un agente regenera dashboards desde una frase editando una especificacion declarativa validada (esquema, parches minimos, versiones), y toda cifra sale de una capa semantica MetricFlow por nombre de metrica, con procedencia (definicion, dueno, filtros, SQL compilado). Nucleo TypeScript sin React, Next ni Supabase: el catalogo, el puerto de consulta, el almacen de versiones y el modelo se inyectan. Incluye motor de senales (detectar, diagnosticar, backlog ICE), analisis de variacion y un CLI con las mismas herramientas (escrituras en dry-run).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "bin": {
+    "estudio-dashboards": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./metricflow": { "types": "./dist/metricflow/index.d.ts", "import": "./dist/metricflow/index.js" },
+    "./openrouter": { "types": "./dist/openrouter.d.ts", "import": "./dist/openrouter.js" },
+    "./almacenes/archivo": { "types": "./dist/almacenes/archivo.d.ts", "import": "./dist/almacenes/archivo.js" }
+  },
+  "files": ["dist", "semantica/servidor_mf.py", "semantica/requirements.in", "semantica/requirements.lock", "README.md"],
+  "sideEffects": false,
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.1"
+  }
+}

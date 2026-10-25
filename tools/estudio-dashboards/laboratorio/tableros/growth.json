@@ -1,0 +1,19 @@
+{
+ "esquema": "estudio.dashboard/1",
+ "titulo": "Growth Golfo Norte 2026",
+ "palanca": "frecuencia",
+ "filtros": { "periodo": { "desde": "2026-01", "hasta": "2026-09" }, "comparar": "anio_anterior", "dimensiones": [] },
+ "componentes": [
+  { "id": "principal", "tipo": "hero", "metrica": "ventas_netas", "comparar": "anio_anterior" },
+  { "id": "metas", "tipo": "metas", "metas": [{ "metrica": "clientes_nuevos", "meta": 9000 }, { "metrica": "frecuencia_compra", "meta": 6 }] },
+  { "id": "canales", "tipo": "progreso", "metrica": "ventas_netas", "dimension": "linea__canal", "titulo": "Participación de ventas por canal" },
+  { "id": "retencion_meta", "tipo": "medidor", "metrica": "retencion_m3_pct", "meta": 80 },
+  { "id": "actividad", "tipo": "actividad", "metrica": "ventas_netas", "dimension": "tienda__tienda_nombre", "top": 10, "comparar": "anio_anterior" },
+  { "id": "mapa", "tipo": "mapa", "metrica": "ventas_netas", "color": "variacion", "capas": ["senales"] },
+  { "id": "ciclo", "tipo": "senales" },
+  { "id": "flujo", "tipo": "contabilidad", "entradas": ["clientes_nuevos", "clientes_reactivados"], "salidas": ["clientes_perdidos"] },
+  { "id": "crec_region", "tipo": "barras", "metrica": "ventas_netas", "dimension": "tienda__region", "comparar": "anio_anterior" },
+  { "id": "retencion", "tipo": "cohortes", "metrica": "retencion_m3_pct", "serie": "cohorte__origen", "periodo": { "desde": "2025-02", "hasta": "2026-06" } },
+  { "id": "tendencia", "tipo": "linea", "metrica": "ventas_netas", "grano": "month", "serie": "linea__canal" }
+ ]
+}

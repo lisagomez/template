@@ -6,8 +6,11 @@
  *
  * La fuente va FIJADA en `fuentes/gs1-syntax-dictionary.txt` (commit anotado abajo). Cambiarla
  * cambia lo que el nucleo acepta: se regenera, se corren las pruebas y se revisa el diff.
+ *
+ * Uso:  node generador/genera-diccionario.mjs [--comprueba]   (--comprueba: exit 1 si datos.ts diverge;
+ *       lo corre `verifica:generados` del template)
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -17,7 +20,7 @@ const texto = readFileSync(join(raiz, 'fuentes/gs1-syntax-dictionary.txt'), 'utf
 const lineas = texto.split('\n').filter((l) => l.trim() !== '' && !l.startsWith('#'))
 const entradas = lineas.map((l) => l.replace(/\s+/g, ' ').trim())
 const cuerpo = entradas.map((e) => `  ${JSON.stringify(e)},`).join('\n')
-const salida = `// GENERADO por generador/genera-diccionario.mjs — no se edita a mano.
+const salida = `// ALTO: ARTEFACTO AUTOGENERADO por generador/genera-diccionario.mjs. No lo edites a mano: se regenera.
 // Fuente: GS1 Barcode Syntax Dictionary, github.com/gs1/gs1-syntax-dictionary @ ${COMMIT}
 // Copyright (c) 2020-2021 BWIPP project · (c) 2020-2021 Zint Project · (c) 2021-2025 GS1 AISBL
 // Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
@@ -29,5 +32,11 @@ export const LINEAS_DICCIONARIO: readonly string[] = [
 ${cuerpo}
 ]
 `
-writeFileSync(join(raiz, 'src/diccionario/datos.ts'), salida)
+const destino = join(raiz, 'src/diccionario/datos.ts')
+if (process.argv.includes('--comprueba')) {
+  const igual = existsSync(destino) && readFileSync(destino, 'utf8') === salida
+  console.log(igual ? '✓ src/diccionario/datos.ts coincide con la fuente' : '✗ src/diccionario/datos.ts diverge de la fuente: regeneralo')
+  process.exit(igual ? 0 : 1)
+}
+writeFileSync(destino, salida)
 console.log(`diccionario: ${entradas.length} entradas -> src/diccionario/datos.ts`)

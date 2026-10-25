@@ -3,16 +3,19 @@
  * prueba de convergencia «filas de staging = eventos del libro, por tipo» para TODOS los tipos. Así un tipo nuevo
  * del contrato no puede quedarse sin staging (el merge que tira una fuente en silencio). No se edita a mano.
  *
- *   node tools/clinica-dental/semantica/genera.ts
+ *   node tools/clinica-dental/semantica/genera.ts [--comprueba]
+ *
+ * `--comprueba` no escribe: exit 1 si un archivo generado diverge, falta, o sobra un `stg_*.sql` de un tipo que
+ * el contrato ya no tiene. Lo corre `verifica:generados` del template.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { esquemaEvento, TIPOS_EVENTO, VERSION_CONTRATO } from '../dist/index.js';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const BASE = new Set(['v', 'id', 'en', 'clinica', 'tipo', 'sujeto']);
-const CABECERA = `-- GENERADO desde el contrato de eventos v${VERSION_CONTRATO} por semantica/genera.ts: no se edita a mano.`;
+const CABECERA = `-- ALTO: ARTEFACTO AUTOGENERADO desde el contrato de eventos v${VERSION_CONTRATO} por semantica/genera.ts. No lo edites a mano.`;
 
 interface Def { type: string; innerType?: { def: Def }; values?: unknown[]; entries?: Record<string, string>; checks?: { _zod?: { def?: { format?: string } } }[] }
 const defDe = (z: unknown): Def => (z as { def: Def }).def;
@@ -44,10 +47,11 @@ for (const opcion of esquemaEvento.options) {
 }
 
 const dirStg = join(AQUI, 'modelos', 'staging');
-mkdirSync(dirStg, { recursive: true });
+/** Ruta → contenido de todo lo que se genera: se escribe, o con `--comprueba` se compara. */
+const archivos = new Map<string, string>();
 for (const m of modelos) {
   const cols = m.columnas.map((c) => columna(c.k, c.sql));
-  writeFileSync(join(dirStg, `${m.nombre}.sql`), `${CABECERA}\nselect\n  clinica,\n  seq,\n  evento_id,\n  en::timestamptz as en,\n  sujeto${cols.length ? `,\n${cols.join(',\n')}` : ''}\nfrom {{ ref('raw_eventos') }}\nwhere tipo = '${m.tipo}'\n`);
+  archivos.set(join(dirStg, `${m.nombre}.sql`), `${CABECERA}\nselect\n  clinica,\n  seq,\n  evento_id,\n  en::timestamptz as en,\n  sujeto${cols.length ? `,\n${cols.join(',\n')}` : ''}\nfrom {{ ref('raw_eventos') }}\nwhere tipo = '${m.tipo}'\n`);
 }
 
 const yml = [
@@ -68,10 +72,10 @@ const yml = [
     ]),
   ]),
 ];
-writeFileSync(join(dirStg, '_staging.yml'), `${yml.join('\n')}\n`);
+archivos.set(join(dirStg, '_staging.yml'), `${yml.join('\n')}\n`);
 
 const union = modelos.map((m) => `select '${m.tipo}' as tipo, count(*) as filas from {{ ref('${m.nombre}') }}`).join('\nunion all\n');
-writeFileSync(join(AQUI, 'pruebas', 'libro_igual_staging.sql'), `${CABECERA}
+archivos.set(join(AQUI, 'pruebas', 'libro_igual_staging.sql'), `${CABECERA}
 -- Convergencia: por cada tipo del contrato, las filas de su staging = los eventos que el libro tiene de ese tipo
 -- (contados DIRECTO sobre el libro por corre.mjs, en la semilla conteo_libro). Cualquier fila aquí es una pérdida.
 with staging as (
@@ -81,4 +85,13 @@ select coalesce(s.tipo, c.tipo) as tipo, s.filas as en_staging, c.eventos as en_
 from staging s full outer join {{ ref('conteo_libro') }} c on c.tipo = s.tipo
 where coalesce(s.filas, 0) <> coalesce(c.eventos, 0)
 `);
+if (process.argv.includes('--comprueba')) {
+  const difieren = [...archivos].filter(([ruta, texto]) => !existsSync(ruta) || readFileSync(ruta, 'utf8') !== texto).map(([ruta]) => ruta);
+  const sobran = readdirSync(dirStg).filter((n) => /^stg_.*\.sql$/.test(n) && !archivos.has(join(dirStg, n)));
+  const mal = [...difieren, ...sobran.map((n) => `${join(dirStg, n)} (ningún tipo del contrato lo genera)`)];
+  console.log(mal.length ? `✗ staging divergente: ${mal.map((r) => r.replace(`${AQUI}/`, '')).join(', ')}` : `✓ staging al día con el contrato v${VERSION_CONTRATO}`);
+  process.exit(mal.length ? 1 : 0);
+}
+mkdirSync(dirStg, { recursive: true });
+for (const [ruta, texto] of archivos) writeFileSync(ruta, texto);
 console.log(`staging generado: ${modelos.length} modelos (contrato v${VERSION_CONTRATO}, ${TIPOS_EVENTO.length} tipos) y la prueba de convergencia`);

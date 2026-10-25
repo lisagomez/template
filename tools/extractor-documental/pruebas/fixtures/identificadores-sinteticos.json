@@ -1,5 +1,6 @@
 {
- "_aviso": "TODO INVENTADO: generado por medicion/genera-identificadores.py, semilla 9",
+ "_ALTO": "ALTO: ARTEFACTO AUTOGENERADO por medicion/genera-identificadores.py (semilla 9). No lo edites a mano.",
+ "_aviso": "TODO INVENTADO: nombres, fechas y entidades",
  "rfc": {
   "validos": [
    "TLIE231101V68",

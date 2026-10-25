@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Datos crudos dummy de Distribuidora Golfo Norte (empresa ficticia). En producción llegan por ELT (Fivetran/Airbyte)."
+    meta:
+      # Único cambio frente al zip: los CSV viven fuera de git (.datos/, fijados por sha256) y la ruta llega por
+      # entorno. El runner (laboratorio/corre.mjs) verifica los hashes antes de exportarla.
+      external_location: "read_csv_auto('{{ env_var('GN_DATOS') }}/{name}.csv', header = true)"
+    tables:
+      - name: tiendas
+        description: "Catálogo de tiendas con coordenadas."
+      - name: productos
+        description: "Catálogo de SKUs con precio de lista y costo."
+      - name: clientes
+        description: "Clientes con tarjeta de lealtad."
+      - name: campanas
+        description: "Campañas de marketing pagadas."
+      - name: pedidos
+        description: "Encabezado de pedido (un renglón por pedido)."
+        loaded_at_field: fecha
+      - name: lineas_pedido
+        description: "Detalle de pedido (un renglón por producto en el pedido)."
+      - name: inventario
+        description: "Foto de existencias por tienda y SKU."

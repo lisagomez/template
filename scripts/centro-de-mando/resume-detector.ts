@@ -4,11 +4,11 @@
  *  - fuera del navegador: `detector.json` de `mide-detector.ts` (frases por ruido y SNR);
  *  - de punta a punta en el HUD: `silero/<detector>-<condición>.json` de `mide.ts --detector … [--ruido …]`.
  *
- *   node scripts/centro-de-mando/resume-detector.ts
+ *   node scripts/centro-de-mando/resume-detector.ts [--comprueba]   (--comprueba: exit 1 si detector.md diverge)
  *
  * No toca `resumen.md` (la medición del 2026-10-16, con su propio generador `resume.ts`).
  */
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIR = 'docs/goals/centro-de-mando-voz-medicion';
@@ -77,6 +77,7 @@ function tablaHud(): string[] {
 
 const silero = d.resultados.filter((r) => r.detector === 'silero').map((r) => r.msPorMarco);
 const texto = [
+  '<!-- ALTO: ARTEFACTO AUTOGENERADO desde detector.json y silero/*.json. No lo edites a mano: node scripts/centro-de-mando/resume-detector.ts -->',
   '# Detector de voz del centro de mando: energía contra Silero, con ruido de sala',
   '',
   `**Medido el ${d.fecha}** (WSL2, Ryzen 7 5700G, sin GPU). Generado por \`scripts/centro-de-mando/resume-detector.ts\`; el método está en la cabecera de \`mide-detector.ts\` y de \`mide.ts\`.`,
@@ -96,5 +97,12 @@ const texto = [
   ...tablaHud(),
   '',
 ];
-writeFileSync(join(DIR, 'detector.md'), `${texto.join('\n')}\n`);
-console.log(`escrito ${join(DIR, 'detector.md')}`);
+const destino = join(DIR, 'detector.md');
+const salida = `${texto.join('\n')}\n`;
+if (process.argv.includes('--comprueba')) {
+  const igual = existsSync(destino) && readFileSync(destino, 'utf8') === salida;
+  console.log(igual ? `✓ ${destino} coincide con sus mediciones` : `✗ ${destino} diverge de sus mediciones: regeneralo`);
+  process.exit(igual ? 0 : 1);
+}
+writeFileSync(destino, salida);
+console.log(`escrito ${destino}`);

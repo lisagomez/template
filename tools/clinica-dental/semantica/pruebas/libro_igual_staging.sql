@@ -1,4 +1,4 @@
--- GENERADO desde el contrato de eventos v1 por semantica/genera.ts: no se edita a mano.
+-- ALTO: ARTEFACTO AUTOGENERADO desde el contrato de eventos v1 por semantica/genera.ts. No lo edites a mano.
 -- Convergencia: por cada tipo del contrato, las filas de su staging = los eventos que el libro tiene de ese tipo
 -- (contados DIRECTO sobre el libro por corre.mjs, en la semilla conteo_libro). Cualquier fila aquí es una pérdida.
 with staging as (
