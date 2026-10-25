@@ -74,6 +74,7 @@ A2A y enjambre acotado) y les suman presentación e infraestructura:
 <!-- matriz:fin -->
 
 <!-- reuso:inicio -->
+<!-- ALTO: ARTEFACTO AUTOGENERADO desde la matriz de arriba. No edites este bloque a mano: node tools/soporte-sap/clis/ss-reuso.mjs --escribe -->
 **Cuenta de reuso** (la calcula `ss-reuso` desde la matriz; la prueba la vuelve a contar):
 
 - reusadas (R): 12 · compuestas (C): 21 · a fabricar (F): 48 · no aplica (N): 15

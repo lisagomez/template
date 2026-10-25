@@ -1,0 +1,2452 @@
+{
+ "nivel": "ligero",
+ "modelo": "anthropic/claude-haiku-4.5",
+ "set": "sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676",
+ "fecha": "2026-10-20T14:43:31.424Z",
+ "n": 100,
+ "precision": 0.79,
+ "porTipo": {
+  "alertar": {
+   "n": 16,
+   "correctas": 15,
+   "precision": 0.9375
+  },
+  "analizar": {
+   "n": 16,
+   "correctas": 12,
+   "precision": 0.75
+  },
+  "crear": {
+   "n": 16,
+   "correctas": 12,
+   "precision": 0.75
+  },
+  "explicar": {
+   "n": 16,
+   "correctas": 15,
+   "precision": 0.9375
+  },
+  "filtrar": {
+   "n": 16,
+   "correctas": 14,
+   "precision": 0.875
+  },
+  "modificar": {
+   "n": 20,
+   "correctas": 11,
+   "precision": 0.55
+  }
+ },
+ "porParticion": {
+  "desarrollo": {
+   "n": 30,
+   "correctas": 22,
+   "precision": 0.7333333333333333
+  },
+  "retenida": {
+   "n": 70,
+   "correctas": 57,
+   "precision": 0.8142857142857143
+  }
+ },
+ "costo": {
+  "totalUsd": 0.30258425,
+  "sinCosto": 0,
+  "porInstruccionUsd": 0.0030258425,
+  "libroAcumuladoUsd": 0.41199211
+ },
+ "latencia": {
+  "modeloP50": 2900,
+  "modeloP95": 7597,
+  "regeneracionP50": 3077,
+  "regeneracionP95": 7610,
+  "consultaFrioP50": 31.213263000000097,
+  "consultaFrioP95": 43.44790799999964,
+  "consultas": 35
+ },
+ "saldo": {
+  "antes": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 22.143409919,
+    "saldo": 1.8565900810000002
+   },
+   "llave": {
+    "uso": 12.42955288,
+    "limite": 15,
+    "restante": 2.5704471200000008
+   }
+  },
+  "despues": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 22.433684049,
+    "saldo": 1.566315951
+   },
+   "llave": {
+    "uso": 12.71982701,
+    "limite": 15,
+    "restante": 2.2801729900000005
+   }
+  }
+ },
+ "resultados": [
+  {
+   "id": "q001",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 7597,
+   "datosMs": 1,
+   "regeneracionMs": 7610,
+   "costoUsd": 0.01165155,
+   "error": null
+  },
+  {
+   "id": "q002",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4732,
+   "datosMs": 34,
+   "regeneracionMs": 4767,
+   "costoUsd": 0.0032416,
+   "error": null
+  },
+  {
+   "id": "q003",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 7971,
+   "datosMs": 19,
+   "regeneracionMs": 7992,
+   "costoUsd": 0.0071465999999999995,
+   "error": null
+  },
+  {
+   "id": "q004",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": false,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 7809,
+   "datosMs": 142,
+   "regeneracionMs": 7953,
+   "costoUsd": 0.0057636,
+   "error": null
+  },
+  {
+   "id": "q005",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 5885,
+   "datosMs": 161,
+   "regeneracionMs": 6046,
+   "costoUsd": 0.0048186,
+   "error": null
+  },
+  {
+   "id": "q006",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3388,
+   "datosMs": 178,
+   "regeneracionMs": 3567,
+   "costoUsd": 0.0015073,
+   "error": null,
+   "instruccion": "Un tablero de campañas: cuanto invertimos y cuanto nos devolvio cada una",
+   "entendi": "tipo: crear · métrica: inversion_marketing, ventas_incrementales_m, roas_incremental · dimensión: campana__campana_nombre",
+   "plan": {
+    "tipo": "crear",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "inversion_marketing",
+      "ventas_incrementales_m",
+      "roas_incremental"
+     ],
+     "dimensiones": [
+      "campana__campana_nombre"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null
+    },
+    "componentes": [],
+    "operaciones": [],
+    "quitar_filtros": [],
+    "titulo": "Campañas: inversión y retorno",
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Creo un tablero con inversión en marketing, ventas incrementales y ROAS por campaña."
+   }
+  },
+  {
+   "id": "q007",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true,
+    "comparar": true
+   },
+   "intentos": 2,
+   "modeloMs": 6360,
+   "datosMs": 169,
+   "regeneracionMs": 6530,
+   "costoUsd": 0.0050346,
+   "error": null
+  },
+  {
+   "id": "q008",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 5056,
+   "datosMs": 70,
+   "regeneracionMs": 5127,
+   "costoUsd": 0.0033486,
+   "error": null
+  },
+  {
+   "id": "q009",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": false,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 7790,
+   "datosMs": 106,
+   "regeneracionMs": 7898,
+   "costoUsd": 0.007664600000000001,
+   "error": null,
+   "instruccion": "arma un tablero de la frecuencia de compra de estas dos tiendas, mes a mes",
+   "entendi": "tipo: crear · métrica: frecuencia_compra · dimensión: metric_time__month, tienda__tienda_nombre · filtros: tienda__tienda_nombre en Mérida, Oaxaca · periodo: 2026-01..2026-09 · toca: kpi_frecuencia, linea_frecuencia",
+   "plan": {
+    "tipo": "crear",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "frecuencia_compra"
+     ],
+     "dimensiones": [
+      "metric_time__month",
+      "tienda__tienda_nombre"
+     ],
+     "filtros": [
+      {
+       "dimension": "tienda__tienda_nombre",
+       "operador": "en",
+       "valores": [
+        "Mérida",
+        "Oaxaca"
+       ]
+      }
+     ],
+     "periodo": {
+      "desde": "2026-01",
+      "hasta": "2026-09"
+     },
+     "comparar": null
+    },
+    "componentes": [
+     "kpi_frecuencia",
+     "linea_frecuencia"
+    ],
+    "operaciones": [
+     {
+      "op": "agregar",
+      "componente": {
+       "id": "kpi_frecuencia",
+       "tipo": "kpis",
+       "titulo": "Frecuencia de compra",
+       "metricas": [
+        "frecuencia_compra"
+       ],
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "en",
+         "valores": [
+          "Mérida",
+          "Oaxaca"
+         ]
+        }
+       ],
+       "periodo": {
+        "desde": "2026-01",
+        "hasta": "2026-09"
+       },
+       "ancho": "tercio"
+      },
+      "despues_de": null
+     },
+     {
+      "op": "agregar",
+      "componente": {
+       "id": "linea_frecuencia",
+       "tipo": "linea",
+       "titulo": "Frecuencia de compra mes a mes",
+       "metrica": "frecuencia_compra",
+       "grano": "month",
+       "serie": "tienda__tienda_nombre",
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "en",
+         "valores": [
+          "Mérida",
+          "Oaxaca"
+         ]
+        }
+       ],
+       "periodo": {
+        "desde": "2026-01",
+        "hasta": "2026-09"
+       },
+       "ancho": "completo"
+      },
+      "despues_de": "kpi_frecuencia"
+     }
+    ],
+    "quitar_filtros": [],
+    "titulo": "Frecuencia de compra: Mérida vs Oaxaca",
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Creo un tablero con la frecuencia de compra de Mérida y Oaxaca mes a mes, con un KPI resumen y una línea de tendencia por tienda."
+   }
+  },
+  {
+   "id": "q010",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 6973,
+   "datosMs": 109,
+   "regeneracionMs": 7083,
+   "costoUsd": 0.0057776,
+   "error": null
+  },
+  {
+   "id": "q011",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 5462,
+   "datosMs": 87,
+   "regeneracionMs": 5550,
+   "costoUsd": 0.0041546,
+   "error": null
+  },
+  {
+   "id": "q012",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 6109,
+   "datosMs": 101,
+   "regeneracionMs": 6211,
+   "costoUsd": 0.0047836,
+   "error": null
+  },
+  {
+   "id": "q013",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": false,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 6116,
+   "datosMs": 95,
+   "regeneracionMs": 6213,
+   "costoUsd": 0.0050156,
+   "error": null
+  },
+  {
+   "id": "q014",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 6003,
+   "datosMs": 86,
+   "regeneracionMs": 6090,
+   "costoUsd": 0.0064376,
+   "error": null
+  },
+  {
+   "id": "q015",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2842,
+   "datosMs": null,
+   "regeneracionMs": 2843,
+   "costoUsd": 0.0015033,
+   "error": null
+  },
+  {
+   "id": "q016",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2642,
+   "datosMs": null,
+   "regeneracionMs": 2643,
+   "costoUsd": 0.0014413,
+   "error": null
+  },
+  {
+   "id": "q017",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2597,
+   "datosMs": 80,
+   "regeneracionMs": 2678,
+   "costoUsd": 0.0018903,
+   "error": null
+  },
+  {
+   "id": "q018",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 9053,
+   "datosMs": 48,
+   "regeneracionMs": 9102,
+   "costoUsd": 0.0019603,
+   "error": null
+  },
+  {
+   "id": "q019",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": false,
+    "metricas": false,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": false
+   },
+   "intentos": 2,
+   "modeloMs": 4408,
+   "datosMs": null,
+   "regeneracionMs": 4409,
+   "costoUsd": 0.0041576,
+   "error": "alcance · componentes(por_categoria): el parche toca «por_categoria», que la instrucción no pidió tocar",
+   "instruccion": "Quita la gráfica de categorías, no la uso",
+   "entendi": "tipo: modificar · métrica: ventas_netas, margen_bruto_pct, pedidos, ticket_promedio · dimensión: tienda__region, tienda__tienda_nombre · comparar: año anterior · toca: kpis, tendencia, por_region, tiendas",
+   "plan": {
+    "tipo": "modificar",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "ventas_netas",
+      "margen_bruto_pct",
+      "pedidos",
+      "ticket_promedio"
+     ],
+     "dimensiones": [
+      "tienda__region",
+      "tienda__tienda_nombre"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": "anio_anterior"
+    },
+    "componentes": [
+     "kpis",
+     "tendencia",
+     "por_region",
+     "tiendas"
+    ],
+    "operaciones": [
+     {
+      "op": "quitar",
+      "id": "por_categoria"
+     }
+    ],
+    "quitar_filtros": [],
+    "titulo": null,
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Elimino la gráfica de margen bruto por categoría del tablero."
+   }
+  },
+  {
+   "id": "q020",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 2,
+   "modeloMs": 6133,
+   "datosMs": 61,
+   "regeneracionMs": 6195,
+   "costoUsd": 0.0052886,
+   "error": null
+  },
+  {
+   "id": "q021",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2617,
+   "datosMs": 71,
+   "regeneracionMs": 2688,
+   "costoUsd": 0.0019503,
+   "error": null
+  },
+  {
+   "id": "q022",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2667,
+   "datosMs": 41,
+   "regeneracionMs": 2709,
+   "costoUsd": 0.0019793,
+   "error": null
+  },
+  {
+   "id": "q023",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2900,
+   "datosMs": 55,
+   "regeneracionMs": 2955,
+   "costoUsd": 0.0018653,
+   "error": null
+  },
+  {
+   "id": "q024",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2977,
+   "datosMs": 74,
+   "regeneracionMs": 3051,
+   "costoUsd": 0.0020743,
+   "error": null
+  },
+  {
+   "id": "q025",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": false,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": false
+   },
+   "intentos": 2,
+   "modeloMs": 4344,
+   "datosMs": null,
+   "regeneracionMs": 4345,
+   "costoUsd": 0.0039266,
+   "error": "alcance · componentes(mapa): el parche toca «mapa», que la instrucción no pidió tocar",
+   "instruccion": "Quita el mapa del tablero",
+   "entendi": "tipo: modificar · métrica: ventas_netas",
+   "plan": {
+    "tipo": "modificar",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "ventas_netas"
+     ],
+     "dimensiones": [],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null
+    },
+    "componentes": [],
+    "operaciones": [
+     {
+      "op": "quitar",
+      "id": "mapa"
+     }
+    ],
+    "quitar_filtros": [],
+    "titulo": null,
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Quito el mapa del tablero."
+   }
+  },
+  {
+   "id": "q026",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2688,
+   "datosMs": 101,
+   "regeneracionMs": 2794,
+   "costoUsd": 0.0021563,
+   "error": null
+  },
+  {
+   "id": "q027",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2699,
+   "datosMs": 87,
+   "regeneracionMs": 2787,
+   "costoUsd": 0.0019883,
+   "error": null
+  },
+  {
+   "id": "q028",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2583,
+   "datosMs": 0,
+   "regeneracionMs": 2585,
+   "costoUsd": 0.0020313,
+   "error": null
+  },
+  {
+   "id": "q029",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3110,
+   "datosMs": 56,
+   "regeneracionMs": 3167,
+   "costoUsd": 0.0023473,
+   "error": null,
+   "instruccion": "Agrega una grafica de barras de margen por categoria",
+   "entendi": "tipo: modificar · métrica: margen_bruto · dimensión: linea__categoria · toca: barras_margen",
+   "plan": {
+    "tipo": "modificar",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "margen_bruto"
+     ],
+     "dimensiones": [
+      "linea__categoria"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null
+    },
+    "componentes": [
+     "barras_margen"
+    ],
+    "operaciones": [
+     {
+      "op": "agregar",
+      "componente": {
+       "id": "barras_margen",
+       "tipo": "barras",
+       "metrica": "margen_bruto",
+       "dimension": "linea__categoria",
+       "titulo": "Margen por categoría",
+       "orden": "desc"
+      },
+      "despues_de": "crec_region"
+     }
+    ],
+    "quitar_filtros": [],
+    "titulo": null,
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Agrego una gráfica de barras con margen bruto desglosado por categoría de línea."
+   }
+  },
+  {
+   "id": "q030",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2804,
+   "datosMs": 0,
+   "regeneracionMs": 2805,
+   "costoUsd": 0.0020873,
+   "error": null
+  },
+  {
+   "id": "q031",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 5606,
+   "datosMs": 0,
+   "regeneracionMs": 5607,
+   "costoUsd": 0.0020183,
+   "error": null
+  },
+  {
+   "id": "q032",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2567,
+   "datosMs": 27,
+   "regeneracionMs": 2595,
+   "costoUsd": 0.0019823,
+   "error": null
+  },
+  {
+   "id": "q033",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3154,
+   "datosMs": 48,
+   "regeneracionMs": 3204,
+   "costoUsd": 0.0025343,
+   "error": null
+  },
+  {
+   "id": "q034",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": false,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": false
+   },
+   "intentos": 2,
+   "modeloMs": 5723,
+   "datosMs": 0,
+   "regeneracionMs": 5724,
+   "costoUsd": 0.0046765999999999995,
+   "error": null
+  },
+  {
+   "id": "q035",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": false,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2740,
+   "datosMs": null,
+   "regeneracionMs": 2741,
+   "costoUsd": 0.0015213,
+   "error": null
+  },
+  {
+   "id": "q036",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2389,
+   "datosMs": null,
+   "regeneracionMs": 2389,
+   "costoUsd": 0.0015743,
+   "error": null
+  },
+  {
+   "id": "q037",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4775,
+   "datosMs": 547,
+   "regeneracionMs": 5323,
+   "costoUsd": 0.0040586,
+   "error": null
+  },
+  {
+   "id": "q038",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2795,
+   "datosMs": 333,
+   "regeneracionMs": 3129,
+   "costoUsd": 0.0018583,
+   "error": null
+  },
+  {
+   "id": "q039",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4700,
+   "datosMs": 436,
+   "regeneracionMs": 5137,
+   "costoUsd": 0.0036106000000000003,
+   "error": null
+  },
+  {
+   "id": "q040",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "comparar": true
+   },
+   "intentos": 1,
+   "modeloMs": 2514,
+   "datosMs": 0,
+   "regeneracionMs": 2515,
+   "costoUsd": 0.0016093,
+   "error": null
+  },
+  {
+   "id": "q041",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4515,
+   "datosMs": 391,
+   "regeneracionMs": 4906,
+   "costoUsd": 0.0043376000000000005,
+   "error": null
+  },
+  {
+   "id": "q042",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4468,
+   "datosMs": 556,
+   "regeneracionMs": 5025,
+   "costoUsd": 0.0040636,
+   "error": null
+  },
+  {
+   "id": "q043",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2517,
+   "datosMs": 530,
+   "regeneracionMs": 3048,
+   "costoUsd": 0.0020023,
+   "error": null
+  },
+  {
+   "id": "q044",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true,
+    "comparar": true
+   },
+   "intentos": 2,
+   "modeloMs": 4341,
+   "datosMs": 597,
+   "regeneracionMs": 4938,
+   "costoUsd": 0.0038256,
+   "error": null
+  },
+  {
+   "id": "q045",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2629,
+   "datosMs": 470,
+   "regeneracionMs": 3100,
+   "costoUsd": 0.0023113,
+   "error": null
+  },
+  {
+   "id": "q046",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": false,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 8191,
+   "datosMs": 700,
+   "regeneracionMs": 8893,
+   "costoUsd": 0.0090806,
+   "error": null,
+   "instruccion": "Quítame estas del tablero, que me distorsionan",
+   "entendi": "tipo: modificar · métrica: ventas_netas, margen_bruto_pct, pedidos, ticket_promedio · dimensión: tienda__region, linea__categoria, tienda__tienda_nombre · filtros: tienda__tienda_nombre sin Polanco, Coyoacán · periodo: 2026-01..2026-09 · comparar: año anterior · toca: kpis, tendencia, por_region, por_categoria, tiendas",
+   "plan": {
+    "tipo": "modificar",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "ventas_netas",
+      "margen_bruto_pct",
+      "pedidos",
+      "ticket_promedio"
+     ],
+     "dimensiones": [
+      "tienda__region",
+      "linea__categoria",
+      "tienda__tienda_nombre"
+     ],
+     "filtros": [
+      {
+       "dimension": "tienda__tienda_nombre",
+       "operador": "no_en",
+       "valores": [
+        "Polanco",
+        "Coyoacán"
+       ]
+      }
+     ],
+     "periodo": {
+      "desde": "2026-01",
+      "hasta": "2026-09"
+     },
+     "comparar": "anio_anterior"
+    },
+    "componentes": [
+     "kpis",
+     "tendencia",
+     "por_region",
+     "por_categoria",
+     "tiendas"
+    ],
+    "operaciones": [
+     {
+      "op": "cambiar",
+      "id": "kpis",
+      "cambios": {
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "no_en",
+         "valores": [
+          "Polanco",
+          "Coyoacán"
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "op": "cambiar",
+      "id": "tendencia",
+      "cambios": {
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "no_en",
+         "valores": [
+          "Polanco",
+          "Coyoacán"
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "op": "cambiar",
+      "id": "por_region",
+      "cambios": {
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "no_en",
+         "valores": [
+          "Polanco",
+          "Coyoacán"
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "op": "cambiar",
+      "id": "por_categoria",
+      "cambios": {
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "no_en",
+         "valores": [
+          "Polanco",
+          "Coyoacán"
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "op": "cambiar",
+      "id": "tiendas",
+      "cambios": {
+       "filtros": [
+        {
+         "dimension": "tienda__tienda_nombre",
+         "operador": "no_en",
+         "valores": [
+          "Polanco",
+          "Coyoacán"
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    "quitar_filtros": [],
+    "titulo": null,
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Excluyo Polanco y Coyoacán de todas las gráficas para que no distorsionen los análisis."
+   }
+  },
+  {
+   "id": "q047",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": false
+   },
+   "intentos": 1,
+   "modeloMs": 2815,
+   "datosMs": 764,
+   "regeneracionMs": 3580,
+   "costoUsd": 0.0017423,
+   "error": null
+  },
+  {
+   "id": "q048",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2401,
+   "datosMs": 503,
+   "regeneracionMs": 2904,
+   "costoUsd": 0.0018533,
+   "error": null
+  },
+  {
+   "id": "q049",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4366,
+   "datosMs": 458,
+   "regeneracionMs": 4824,
+   "costoUsd": 0.0035856,
+   "error": null
+  },
+  {
+   "id": "q050",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4844,
+   "datosMs": 587,
+   "regeneracionMs": 5432,
+   "costoUsd": 0.0045996000000000006,
+   "error": null
+  },
+  {
+   "id": "q051",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2420,
+   "datosMs": null,
+   "regeneracionMs": 2421,
+   "costoUsd": 0.0018263,
+   "error": null
+  },
+  {
+   "id": "q052",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2728,
+   "datosMs": null,
+   "regeneracionMs": 2728,
+   "costoUsd": 0.0017523,
+   "error": null
+  },
+  {
+   "id": "q053",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 3993,
+   "datosMs": 0,
+   "regeneracionMs": 5018,
+   "costoUsd": 0.0034026,
+   "error": null
+  },
+  {
+   "id": "q054",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 5869,
+   "datosMs": 1,
+   "regeneracionMs": 6890,
+   "costoUsd": 0.0040266,
+   "error": null
+  },
+  {
+   "id": "q055",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 5079,
+   "datosMs": 0,
+   "regeneracionMs": 5902,
+   "costoUsd": 0.0039666,
+   "error": null
+  },
+  {
+   "id": "q056",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4508,
+   "datosMs": 0,
+   "regeneracionMs": 5222,
+   "costoUsd": 0.0044266,
+   "error": null
+  },
+  {
+   "id": "q057",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4557,
+   "datosMs": 0,
+   "regeneracionMs": 5688,
+   "costoUsd": 0.0034425999999999997,
+   "error": null
+  },
+  {
+   "id": "q058",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": false
+   },
+   "intentos": 1,
+   "modeloMs": 2799,
+   "datosMs": 0,
+   "regeneracionMs": 3048,
+   "costoUsd": 0.0019683,
+   "error": null
+  },
+  {
+   "id": "q059",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": false,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 4488,
+   "datosMs": null,
+   "regeneracionMs": 4489,
+   "costoUsd": 0.0038236,
+   "error": "desfase_en_periodo · metrica: «crecimiento_ventas_yoy_pct» lleva desfase de un año y no se descompone sobre un periodo; analiza «ventas_netas» (el análisis ya compara contra el año anterior)"
+  },
+  {
+   "id": "q060",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4078,
+   "datosMs": 0,
+   "regeneracionMs": 4285,
+   "costoUsd": 0.0037576,
+   "error": null
+  },
+  {
+   "id": "q061",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 4683,
+   "datosMs": 0,
+   "regeneracionMs": 6138,
+   "costoUsd": 0.0042626,
+   "error": null
+  },
+  {
+   "id": "q062",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": false,
+    "valido": true
+   },
+   "intentos": 2,
+   "modeloMs": 5467,
+   "datosMs": null,
+   "regeneracionMs": 5468,
+   "costoUsd": 0.0048766,
+   "error": null,
+   "instruccion": "¿Por qué el ROAS de Hot Sale 2026 salió negativo?",
+   "entendi": "sin métrica para «ROAS negativo de Hot Sale 2026»",
+   "plan": {
+    "tipo": "analizar",
+    "responde": false,
+    "entendi": {
+     "metricas": [
+      "roas_incremental"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "campana__campana_nombre",
+       "operador": "igual",
+       "valores": [
+        "Hot Sale 2026"
+       ]
+      }
+     ],
+     "periodo": null,
+     "comparar": null
+    },
+    "componentes": [],
+    "operaciones": [],
+    "quitar_filtros": [],
+    "titulo": null,
+    "alerta": null,
+    "sin_metrica": {
+     "pedido": "ROAS negativo de Hot Sale 2026",
+     "propuesta": null
+    },
+    "resumen": "No puedo analizar por qué el ROAS salió negativo porque el tablero actual no tiene un componente que muestre esa métrica. Necesitarías agregar una gráfica con ROAS incremental filtrada por la campaña Hot Sale 2026 para que pueda investigar."
+   }
+  },
+  {
+   "id": "q063",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 4333,
+   "datosMs": 0,
+   "regeneracionMs": 4444,
+   "costoUsd": 0.0034846,
+   "error": null
+  },
+  {
+   "id": "q064",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 4837,
+   "datosMs": 0,
+   "regeneracionMs": 6097,
+   "costoUsd": 0.0047716,
+   "error": null
+  },
+  {
+   "id": "q065",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": false,
+    "periodo": false
+   },
+   "intentos": 2,
+   "modeloMs": 4652,
+   "datosMs": 0,
+   "regeneracionMs": 5269,
+   "costoUsd": 0.0039646,
+   "error": null
+  },
+  {
+   "id": "q066",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 2,
+   "modeloMs": 5647,
+   "datosMs": 1,
+   "regeneracionMs": 6309,
+   "costoUsd": 0.0045636,
+   "error": null
+  },
+  {
+   "id": "q067",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 2,
+   "modeloMs": 4762,
+   "datosMs": null,
+   "regeneracionMs": 4763,
+   "costoUsd": 0.0037256,
+   "error": null
+  },
+  {
+   "id": "q068",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 2,
+   "modeloMs": 4270,
+   "datosMs": null,
+   "regeneracionMs": 4271,
+   "costoUsd": 0.0038795999999999995,
+   "error": null
+  },
+  {
+   "id": "q069",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2294,
+   "datosMs": null,
+   "regeneracionMs": 2294,
+   "costoUsd": 0.0014683,
+   "error": null
+  },
+  {
+   "id": "q070",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2277,
+   "datosMs": null,
+   "regeneracionMs": 2277,
+   "costoUsd": 0.0017643,
+   "error": null
+  },
+  {
+   "id": "q071",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2065,
+   "datosMs": null,
+   "regeneracionMs": 2065,
+   "costoUsd": 0.0015393,
+   "error": null
+  },
+  {
+   "id": "q072",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2139,
+   "datosMs": null,
+   "regeneracionMs": 2140,
+   "costoUsd": 0.0017323,
+   "error": null
+  },
+  {
+   "id": "q073",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2130,
+   "datosMs": null,
+   "regeneracionMs": 2130,
+   "costoUsd": 0.0017053,
+   "error": null
+  },
+  {
+   "id": "q074",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2263,
+   "datosMs": null,
+   "regeneracionMs": 2263,
+   "costoUsd": 0.0016913,
+   "error": null
+  },
+  {
+   "id": "q075",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2168,
+   "datosMs": null,
+   "regeneracionMs": 2168,
+   "costoUsd": 0.0017213,
+   "error": null
+  },
+  {
+   "id": "q076",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2300,
+   "datosMs": null,
+   "regeneracionMs": 2300,
+   "costoUsd": 0.0015303,
+   "error": null
+  },
+  {
+   "id": "q077",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2440,
+   "datosMs": null,
+   "regeneracionMs": 2441,
+   "costoUsd": 0.0014953,
+   "error": null
+  },
+  {
+   "id": "q078",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2238,
+   "datosMs": null,
+   "regeneracionMs": 2238,
+   "costoUsd": 0.0018023,
+   "error": null
+  },
+  {
+   "id": "q079",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": false,
+    "responde": true,
+    "valido": false,
+    "metricas": true
+   },
+   "intentos": 2,
+   "modeloMs": 4961,
+   "datosMs": null,
+   "regeneracionMs": 4961,
+   "costoUsd": 0.0035156,
+   "error": "desfase_en_periodo · metrica: «crecimiento_ventas_yoy_pct» lleva desfase de un año y no se descompone sobre un periodo; analiza «ventas_netas» (el análisis ya compara contra el año anterior)"
+  },
+  {
+   "id": "q080",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2540,
+   "datosMs": null,
+   "regeneracionMs": 2540,
+   "costoUsd": 0.0017833,
+   "error": null
+  },
+  {
+   "id": "q081",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2343,
+   "datosMs": null,
+   "regeneracionMs": 2343,
+   "costoUsd": 0.0015203,
+   "error": null
+  },
+  {
+   "id": "q082",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2295,
+   "datosMs": null,
+   "regeneracionMs": 2295,
+   "costoUsd": 0.0017113,
+   "error": null
+  },
+  {
+   "id": "q083",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2735,
+   "datosMs": null,
+   "regeneracionMs": 2735,
+   "costoUsd": 0.0015743,
+   "error": null
+  },
+  {
+   "id": "q084",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2376,
+   "datosMs": null,
+   "regeneracionMs": 2376,
+   "costoUsd": 0.0018123,
+   "error": null
+  },
+  {
+   "id": "q085",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": false,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2731,
+   "datosMs": null,
+   "regeneracionMs": 2733,
+   "costoUsd": 0.0019393,
+   "error": null,
+   "instruccion": "Mándame una alerta cuando las ventas de Oaxaca bajen más de 8% de una semana a otra",
+   "entendi": "tipo: alertar · métrica: ventas_netas · filtros: tienda__estado en Oaxaca",
+   "plan": {
+    "tipo": "alertar",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "ventas_netas"
+     ],
+     "dimensiones": [],
+     "filtros": [
+      {
+       "dimension": "tienda__estado",
+       "operador": "en",
+       "valores": [
+        "Oaxaca"
+       ]
+      }
+     ],
+     "periodo": null,
+     "comparar": null
+    },
+    "componentes": [],
+    "operaciones": [],
+    "quitar_filtros": [],
+    "titulo": null,
+    "alerta": {
+     "condicion": "cae_mas_de",
+     "valor": 8,
+     "unidad": "%",
+     "ventana": "semanal"
+    },
+    "sin_metrica": null,
+    "resumen": "Configurar alerta para ventas netas en Oaxaca: notificar si caen más de 8% semana a semana."
+   }
+  },
+  {
+   "id": "q086",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2688,
+   "datosMs": null,
+   "regeneracionMs": 2688,
+   "costoUsd": 0.0018013,
+   "error": null
+  },
+  {
+   "id": "q087",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2430,
+   "datosMs": null,
+   "regeneracionMs": 2430,
+   "costoUsd": 0.0019463,
+   "error": null
+  },
+  {
+   "id": "q088",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2706,
+   "datosMs": null,
+   "regeneracionMs": 2706,
+   "costoUsd": 0.0017313,
+   "error": null
+  },
+  {
+   "id": "q089",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2577,
+   "datosMs": null,
+   "regeneracionMs": 2577,
+   "costoUsd": 0.0017663,
+   "error": null
+  },
+  {
+   "id": "q090",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 3077,
+   "datosMs": null,
+   "regeneracionMs": 3077,
+   "costoUsd": 0.0019893,
+   "error": null
+  },
+  {
+   "id": "q091",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2941,
+   "datosMs": null,
+   "regeneracionMs": 2942,
+   "costoUsd": 0.0022573,
+   "error": null
+  },
+  {
+   "id": "q092",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2897,
+   "datosMs": null,
+   "regeneracionMs": 2897,
+   "costoUsd": 0.0021753,
+   "error": null
+  },
+  {
+   "id": "q093",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 3476,
+   "datosMs": null,
+   "regeneracionMs": 3476,
+   "costoUsd": 0.0017803,
+   "error": null
+  },
+  {
+   "id": "q094",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2870,
+   "datosMs": null,
+   "regeneracionMs": 2871,
+   "costoUsd": 0.0019913,
+   "error": null
+  },
+  {
+   "id": "q095",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2667,
+   "datosMs": null,
+   "regeneracionMs": 2667,
+   "costoUsd": 0.0020053,
+   "error": null
+  },
+  {
+   "id": "q096",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2798,
+   "datosMs": null,
+   "regeneracionMs": 2799,
+   "costoUsd": 0.0019253,
+   "error": null
+  },
+  {
+   "id": "q097",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2616,
+   "datosMs": null,
+   "regeneracionMs": 2616,
+   "costoUsd": 0.0019463,
+   "error": null
+  },
+  {
+   "id": "q098",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2798,
+   "datosMs": null,
+   "regeneracionMs": 2798,
+   "costoUsd": 0.0017543,
+   "error": null
+  },
+  {
+   "id": "q099",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2522,
+   "datosMs": null,
+   "regeneracionMs": 2522,
+   "costoUsd": 0.0016243,
+   "error": null
+  },
+  {
+   "id": "q100",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2749,
+   "datosMs": null,
+   "regeneracionMs": 2749,
+   "costoUsd": 0.0018223,
+   "error": null
+  }
+ ]
+}

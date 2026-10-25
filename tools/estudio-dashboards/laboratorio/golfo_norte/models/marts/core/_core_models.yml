@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: dim_tiendas
+    description: "Una fila por tienda. es_comparable = abierta antes del inicio del año anterior al corte."
+    columns:
+      - name: tienda_id
+        data_tests: [unique, not_null]
+  - name: dim_productos
+    columns:
+      - name: producto_id
+        data_tests: [unique, not_null]
+  - name: dim_clientes
+    columns:
+      - name: cliente_id
+        data_tests: [unique, not_null]
+  - name: dim_campanas
+    columns:
+      - name: campana_id
+        data_tests: [unique, not_null]
+  - name: fct_ventas_lineas
+    description: "Grano: línea de producto de un pedido completado. Fuente de las métricas de ventas y margen."
+    columns:
+      - name: linea_id
+        data_tests: [unique, not_null]
+      - name: venta_neta
+        data_tests: [not_null]
+      - name: tienda_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_tiendas')
+                field: tienda_id
+      - name: producto_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_productos')
+                field: producto_id
+  - name: fct_pedidos
+    description: "Grano: pedido, incluye devueltos."
+    columns:
+      - name: pedido_id
+        data_tests: [unique, not_null]
+  - name: fct_inventario
+    columns:
+      - name: inventario_id
+        data_tests: [unique, not_null]
+  - name: metricflow_time_spine
+    description: "Calendario diario para MetricFlow."
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day

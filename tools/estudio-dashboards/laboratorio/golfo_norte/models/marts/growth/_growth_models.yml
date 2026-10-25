@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: fct_clientes_mes
+    description: "Grano: cliente × mes con compra. estado = base_inicial (ya compraba en el primer mes de datos), nuevo (primer mes), retenido (compró el mes anterior) o reactivado."
+    columns:
+      - name: cliente_mes_id
+        data_tests: [unique, not_null]
+      - name: estado
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['base_inicial', 'nuevo', 'retenido', 'reactivado']
+  - name: fct_contabilidad_crecimiento
+    description: "Por tienda y mes: activos = nuevos + retenidos + reactivados; perdidos = activos del mes anterior que no regresaron."
+    columns:
+      - name: tienda_mes_id
+        data_tests: [unique, not_null]
+  - name: fct_cohortes
+    description: "Curvas de retención por cohorte mensual y origen de adquisición (Campaña u Orgánico)."
+    columns:
+      - name: cohorte_id
+        data_tests: [unique, not_null]

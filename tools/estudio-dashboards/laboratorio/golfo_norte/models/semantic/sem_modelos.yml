@@ -1,0 +1,170 @@
+version: 2
+
+# Modelos semánticos: describen entidades, dimensiones y medidas sobre los marts.
+# El agente del Estudio solo consulta métricas por nombre; MetricFlow compila el SQL.
+
+semantic_models:
+  - name: ventas_lineas
+    description: "Líneas de pedidos completados."
+    model: ref('fct_ventas_lineas')
+    defaults:
+      agg_time_dimension: fecha_pedido
+    entities:
+      - name: linea
+        type: primary
+        expr: linea_id
+      - name: pedido
+        type: foreign
+        expr: pedido_id
+      - name: tienda
+        type: foreign
+        expr: tienda_id
+      - name: cliente
+        type: foreign
+        expr: cliente_id
+      - name: producto
+        type: foreign
+        expr: producto_id
+    dimensions:
+      - name: fecha_pedido
+        type: time
+        type_params:
+          time_granularity: day
+      - name: canal
+        type: categorical
+      - name: categoria
+        type: categorical
+      - name: en_campana
+        type: categorical
+    measures:
+      - name: venta_bruta
+        agg: sum
+      - name: descuento
+        agg: sum
+      - name: venta_neta
+        agg: sum
+      - name: costo
+        agg: sum
+      - name: unidades
+        agg: sum
+        expr: cantidad
+      - name: pedidos_distintos
+        agg: count_distinct
+        expr: pedido_id
+
+  - name: pedidos
+    description: "Pedidos, incluidos los devueltos."
+    model: ref('fct_pedidos')
+    defaults:
+      agg_time_dimension: fecha_pedido
+    entities:
+      - name: pedido
+        type: primary
+        expr: pedido_id
+    dimensions:
+      - name: fecha_pedido
+        type: time
+        type_params:
+          time_granularity: day
+      - name: estatus
+        type: categorical
+    measures:
+      - name: pedidos_totales
+        agg: count
+        expr: pedido_id
+      - name: pedidos_devueltos
+        agg: sum
+        expr: es_devuelto_flag
+
+  - name: tiendas
+    description: "Dimensión de tiendas para cortar cualquier métrica por región, estado o tienda."
+    model: ref('dim_tiendas')
+    entities:
+      - name: tienda
+        type: primary
+        expr: tienda_id
+    dimensions:
+      - name: tienda_nombre
+        type: categorical
+      - name: region
+        type: categorical
+      - name: estado
+        type: categorical
+      - name: es_comparable
+        type: categorical
+
+  - name: productos
+    model: ref('dim_productos')
+    entities:
+      - name: producto
+        type: primary
+        expr: producto_id
+    dimensions:
+      - name: producto_nombre
+        type: categorical
+
+  - name: clientes
+    model: ref('dim_clientes')
+    entities:
+      - name: cliente
+        type: primary
+        expr: cliente_id
+    dimensions:
+      - name: segmento
+        type: categorical
+      - name: origen
+        type: categorical
+      - name: canal_adquisicion
+        type: categorical
+
+  - name: inventario
+    description: "Foto de inventario por tienda y SKU."
+    model: ref('fct_inventario')
+    defaults:
+      agg_time_dimension: fecha_corte
+    entities:
+      - name: inventario
+        type: primary
+        expr: inventario_id
+      - name: tienda
+        type: foreign
+        expr: tienda_id
+      - name: producto
+        type: foreign
+        expr: producto_id
+    dimensions:
+      - name: fecha_corte
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: combinaciones_bajo_reorden_m
+        agg: sum
+        expr: bajo_reorden_flag
+        non_additive_dimension:
+          name: fecha_corte
+          window_choice: max
+
+  - name: campanas
+    description: "Campañas con inversión y ventas incrementales."
+    model: ref('fct_campanas_desempeno')
+    defaults:
+      agg_time_dimension: fecha_inicio
+    entities:
+      - name: campana
+        type: primary
+        expr: campana_id
+    dimensions:
+      - name: fecha_inicio
+        type: time
+        type_params:
+          time_granularity: day
+      - name: plataforma
+        type: categorical
+      - name: campana_nombre
+        type: categorical
+    measures:
+      - name: inversion_mxn
+        agg: sum
+      - name: ventas_incrementales
+        agg: sum

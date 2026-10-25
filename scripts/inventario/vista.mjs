@@ -21,6 +21,7 @@ export function renderVista(indice, porActivo) {
     || a.id.localeCompare(b.id));
   const total = [...porActivo.values()].reduce((n, u) => n + u.length, 0);
   const lineas = [
+    '<!-- ALTO: ARTEFACTO AUTOGENERADO desde inventario/activos.json. No lo edites a mano: npm run inventario:vista -->',
     '# Inventario de activos del template',
     '',
     '> Generado por `npm run inventario:vista` desde `inventario/activos.json`. No se edita a mano:',

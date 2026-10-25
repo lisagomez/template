@@ -1,0 +1,2036 @@
+{
+ "nivel": "voz",
+ "modelo": "anthropic/claude-haiku-5.5-20261007",
+ "razonamiento": {
+  "maxTokens": 1024
+ },
+ "set": "sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676",
+ "fecha": "2026-10-20T15:34:14.295Z",
+ "n": 100,
+ "precision": 0.95,
+ "porTipo": {
+  "alertar": {
+   "n": 16,
+   "correctas": 16,
+   "precision": 1
+  },
+  "analizar": {
+   "n": 16,
+   "correctas": 14,
+   "precision": 0.875
+  },
+  "crear": {
+   "n": 16,
+   "correctas": 16,
+   "precision": 1
+  },
+  "explicar": {
+   "n": 16,
+   "correctas": 16,
+   "precision": 1
+  },
+  "filtrar": {
+   "n": 16,
+   "correctas": 16,
+   "precision": 1
+  },
+  "modificar": {
+   "n": 20,
+   "correctas": 17,
+   "precision": 0.85
+  }
+ },
+ "porParticion": {
+  "desarrollo": {
+   "n": 30,
+   "correctas": 30,
+   "precision": 1
+  },
+  "retenida": {
+   "n": 70,
+   "correctas": 65,
+   "precision": 0.9285714285714286
+  }
+ },
+ "costo": {
+  "totalUsd": 0.03847927999999999,
+  "sinCosto": 0,
+  "porInstruccionUsd": 0.0003847927999999999,
+  "libroAcumuladoUsd": 1.1699671849999986
+ },
+ "latencia": {
+  "modeloP50": 4507,
+  "modeloP95": 7734,
+  "regeneracionP50": 4670,
+  "regeneracionP95": 8073,
+  "consultaFrioP50": 27.53501899999992,
+  "consultaFrioP95": 33.356636999999864,
+  "consultas": 35
+ },
+ "saldo": {
+  "antes": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 23.168175364,
+    "saldo": 0.8318246360000003
+   },
+   "llave": {
+    "uso": 13.454318325,
+    "limite": 15,
+    "restante": 1.5456816750000009
+   }
+  },
+  "despues": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 23.208828654,
+    "saldo": 0.7911713459999987
+   },
+   "llave": {
+    "uso": 13.494971615,
+    "limite": 15,
+    "restante": 1.5050283849999992
+   }
+  }
+ },
+ "resultados": [
+  {
+   "id": "q001",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5126,
+   "datosMs": 0,
+   "regeneracionMs": 5137,
+   "costoUsd": 0.00037864,
+   "error": null
+  },
+  {
+   "id": "q002",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 4079,
+   "datosMs": 33,
+   "regeneracionMs": 4113,
+   "costoUsd": 0.00025704,
+   "error": null
+  },
+  {
+   "id": "q003",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3870,
+   "datosMs": 18,
+   "regeneracionMs": 3890,
+   "costoUsd": 0.00030464,
+   "error": null
+  },
+  {
+   "id": "q004",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4902,
+   "datosMs": 55,
+   "regeneracionMs": 4958,
+   "costoUsd": 0.00041384,
+   "error": null
+  },
+  {
+   "id": "q005",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3743,
+   "datosMs": 164,
+   "regeneracionMs": 3908,
+   "costoUsd": 0.00033944,
+   "error": null
+  },
+  {
+   "id": "q006",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4261,
+   "datosMs": 104,
+   "regeneracionMs": 4366,
+   "costoUsd": 0.00033934,
+   "error": null
+  },
+  {
+   "id": "q007",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true,
+    "comparar": true
+   },
+   "intentos": 1,
+   "modeloMs": 4256,
+   "datosMs": 178,
+   "regeneracionMs": 4436,
+   "costoUsd": 0.00032874,
+   "error": null
+  },
+  {
+   "id": "q008",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3613,
+   "datosMs": 63,
+   "regeneracionMs": 3676,
+   "costoUsd": 0.00032544,
+   "error": null
+  },
+  {
+   "id": "q009",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 6360,
+   "datosMs": 72,
+   "regeneracionMs": 6434,
+   "costoUsd": 0.00056814,
+   "error": null
+  },
+  {
+   "id": "q010",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 4507,
+   "datosMs": 85,
+   "regeneracionMs": 4592,
+   "costoUsd": 0.00035324,
+   "error": null
+  },
+  {
+   "id": "q011",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 4304,
+   "datosMs": 83,
+   "regeneracionMs": 4388,
+   "costoUsd": 0.00027524,
+   "error": null
+  },
+  {
+   "id": "q012",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3707,
+   "datosMs": 88,
+   "regeneracionMs": 3795,
+   "costoUsd": 0.00035924,
+   "error": null
+  },
+  {
+   "id": "q013",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 1709,
+   "datosMs": 93,
+   "regeneracionMs": 1803,
+   "costoUsd": 0.00017554,
+   "error": null
+  },
+  {
+   "id": "q014",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3781,
+   "datosMs": 78,
+   "regeneracionMs": 3859,
+   "costoUsd": 0.00032364,
+   "error": null
+  },
+  {
+   "id": "q015",
+   "tipo": "crear",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 3391,
+   "datosMs": null,
+   "regeneracionMs": 3392,
+   "costoUsd": 0.00023974,
+   "error": null
+  },
+  {
+   "id": "q016",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4554,
+   "datosMs": null,
+   "regeneracionMs": 4554,
+   "costoUsd": 0.00030114,
+   "error": null
+  },
+  {
+   "id": "q017",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2892,
+   "datosMs": 72,
+   "regeneracionMs": 2965,
+   "costoUsd": 0.00027504,
+   "error": null
+  },
+  {
+   "id": "q018",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 4338,
+   "datosMs": 53,
+   "regeneracionMs": 4392,
+   "costoUsd": 0.00032634,
+   "error": null
+  },
+  {
+   "id": "q019",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 2,
+   "modeloMs": 8472,
+   "datosMs": 0,
+   "regeneracionMs": 8473,
+   "costoUsd": 0.00063558,
+   "error": null
+  },
+  {
+   "id": "q020",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3902,
+   "datosMs": 60,
+   "regeneracionMs": 3963,
+   "costoUsd": 0.00034714,
+   "error": null
+  },
+  {
+   "id": "q021",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3962,
+   "datosMs": 69,
+   "regeneracionMs": 4032,
+   "costoUsd": 0.00037174,
+   "error": null
+  },
+  {
+   "id": "q022",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 4237,
+   "datosMs": 41,
+   "regeneracionMs": 4278,
+   "costoUsd": 0.00032234,
+   "error": null
+  },
+  {
+   "id": "q023",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3839,
+   "datosMs": 54,
+   "regeneracionMs": 3893,
+   "costoUsd": 0.00032174,
+   "error": null
+  },
+  {
+   "id": "q024",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 4000,
+   "datosMs": 67,
+   "regeneracionMs": 4068,
+   "costoUsd": 0.00033314,
+   "error": null
+  },
+  {
+   "id": "q025",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 2,
+   "modeloMs": 4976,
+   "datosMs": 0,
+   "regeneracionMs": 4980,
+   "costoUsd": 0.00051648,
+   "error": null
+  },
+  {
+   "id": "q026",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 4018,
+   "datosMs": 95,
+   "regeneracionMs": 4114,
+   "costoUsd": 0.00039524,
+   "error": null
+  },
+  {
+   "id": "q027",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": false,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 4926,
+   "datosMs": 78,
+   "regeneracionMs": 5005,
+   "costoUsd": 0.00035874,
+   "error": null
+  },
+  {
+   "id": "q028",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 1557,
+   "datosMs": 0,
+   "regeneracionMs": 1558,
+   "costoUsd": 0.00022844,
+   "error": null
+  },
+  {
+   "id": "q029",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 5757,
+   "datosMs": 0,
+   "regeneracionMs": 5758,
+   "costoUsd": 0.00046804,
+   "error": null
+  },
+  {
+   "id": "q030",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3515,
+   "datosMs": 0,
+   "regeneracionMs": 3516,
+   "costoUsd": 0.00035094,
+   "error": null
+  },
+  {
+   "id": "q031",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3977,
+   "datosMs": 0,
+   "regeneracionMs": 3978,
+   "costoUsd": 0.00040584,
+   "error": null
+  },
+  {
+   "id": "q032",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 4264,
+   "datosMs": 27,
+   "regeneracionMs": 4292,
+   "costoUsd": 0.00034994,
+   "error": null
+  },
+  {
+   "id": "q033",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 5293,
+   "datosMs": 0,
+   "regeneracionMs": 5295,
+   "costoUsd": 0.00048174,
+   "error": null
+  },
+  {
+   "id": "q034",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 7045,
+   "datosMs": 0,
+   "regeneracionMs": 7046,
+   "costoUsd": 0.00044524,
+   "error": null
+  },
+  {
+   "id": "q035",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4734,
+   "datosMs": null,
+   "regeneracionMs": 4734,
+   "costoUsd": 0.00025864,
+   "error": null
+  },
+  {
+   "id": "q036",
+   "tipo": "modificar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4720,
+   "datosMs": null,
+   "regeneracionMs": 4721,
+   "costoUsd": 0.00032864,
+   "error": null
+  },
+  {
+   "id": "q037",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 5448,
+   "datosMs": 545,
+   "regeneracionMs": 5995,
+   "costoUsd": 0.00045164,
+   "error": null
+  },
+  {
+   "id": "q038",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4890,
+   "datosMs": 286,
+   "regeneracionMs": 5177,
+   "costoUsd": 0.00040484,
+   "error": null
+  },
+  {
+   "id": "q039",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 4441,
+   "datosMs": 432,
+   "regeneracionMs": 4873,
+   "costoUsd": 0.00033044,
+   "error": null
+  },
+  {
+   "id": "q040",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "comparar": true
+   },
+   "intentos": 1,
+   "modeloMs": 4925,
+   "datosMs": 0,
+   "regeneracionMs": 4926,
+   "costoUsd": 0.00041144,
+   "error": null
+  },
+  {
+   "id": "q041",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 7734,
+   "datosMs": 338,
+   "regeneracionMs": 8073,
+   "costoUsd": 0.00063764,
+   "error": null
+  },
+  {
+   "id": "q042",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 5314,
+   "datosMs": 538,
+   "regeneracionMs": 5852,
+   "costoUsd": 0.00043594,
+   "error": null
+  },
+  {
+   "id": "q043",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4088,
+   "datosMs": 518,
+   "regeneracionMs": 4607,
+   "costoUsd": 0.00045864,
+   "error": null
+  },
+  {
+   "id": "q044",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true,
+    "comparar": true
+   },
+   "intentos": 1,
+   "modeloMs": 4424,
+   "datosMs": 495,
+   "regeneracionMs": 4919,
+   "costoUsd": 0.00034574,
+   "error": null
+  },
+  {
+   "id": "q045",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4202,
+   "datosMs": 479,
+   "regeneracionMs": 4682,
+   "costoUsd": 0.00043204,
+   "error": null
+  },
+  {
+   "id": "q046",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5407,
+   "datosMs": 655,
+   "regeneracionMs": 6062,
+   "costoUsd": 0.00040844,
+   "error": null
+  },
+  {
+   "id": "q047",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5960,
+   "datosMs": 522,
+   "regeneracionMs": 6483,
+   "costoUsd": 0.00044594,
+   "error": null
+  },
+  {
+   "id": "q048",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5816,
+   "datosMs": 576,
+   "regeneracionMs": 6392,
+   "costoUsd": 0.00050854,
+   "error": null
+  },
+  {
+   "id": "q049",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 5486,
+   "datosMs": 450,
+   "regeneracionMs": 5936,
+   "costoUsd": 0.00033064,
+   "error": null
+  },
+  {
+   "id": "q050",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 6844,
+   "datosMs": 612,
+   "regeneracionMs": 7457,
+   "costoUsd": 0.00056704,
+   "error": null
+  },
+  {
+   "id": "q051",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 3796,
+   "datosMs": null,
+   "regeneracionMs": 3796,
+   "costoUsd": 0.00030894,
+   "error": null
+  },
+  {
+   "id": "q052",
+   "tipo": "filtrar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4312,
+   "datosMs": null,
+   "regeneracionMs": 4312,
+   "costoUsd": 0.00034124,
+   "error": null
+  },
+  {
+   "id": "q053",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3436,
+   "datosMs": 0,
+   "regeneracionMs": 4299,
+   "costoUsd": 0.00024954,
+   "error": null
+  },
+  {
+   "id": "q054",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 1736,
+   "datosMs": 0,
+   "regeneracionMs": 2766,
+   "costoUsd": 0.00022394,
+   "error": null
+  },
+  {
+   "id": "q055",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5153,
+   "datosMs": 0,
+   "regeneracionMs": 5900,
+   "costoUsd": 0.00045134,
+   "error": null
+  },
+  {
+   "id": "q056",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3564,
+   "datosMs": 1,
+   "regeneracionMs": 4272,
+   "costoUsd": 0.00037384,
+   "error": null
+  },
+  {
+   "id": "q057",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 6860,
+   "datosMs": 0,
+   "regeneracionMs": 8027,
+   "costoUsd": 0.00032234,
+   "error": null
+  },
+  {
+   "id": "q058",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": false
+   },
+   "intentos": 1,
+   "modeloMs": 6037,
+   "datosMs": 1,
+   "regeneracionMs": 6139,
+   "costoUsd": 0.00037754,
+   "error": null
+  },
+  {
+   "id": "q059",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "filtros": true
+   },
+   "intentos": 2,
+   "modeloMs": 6983,
+   "datosMs": 0,
+   "regeneracionMs": 7776,
+   "costoUsd": 0.00056208,
+   "error": null
+  },
+  {
+   "id": "q060",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 2871,
+   "datosMs": 1,
+   "regeneracionMs": 3053,
+   "costoUsd": 0.00027824,
+   "error": null
+  },
+  {
+   "id": "q061",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5295,
+   "datosMs": 0,
+   "regeneracionMs": 6561,
+   "costoUsd": 0.00050104,
+   "error": null
+  },
+  {
+   "id": "q062",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 5315,
+   "datosMs": 1,
+   "regeneracionMs": 5746,
+   "costoUsd": 0.00038864,
+   "error": null
+  },
+  {
+   "id": "q063",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3100,
+   "datosMs": 0,
+   "regeneracionMs": 3304,
+   "costoUsd": 0.00025774,
+   "error": null
+  },
+  {
+   "id": "q064",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4565,
+   "datosMs": 1,
+   "regeneracionMs": 5863,
+   "costoUsd": 0.00045114,
+   "error": null
+  },
+  {
+   "id": "q065",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3729,
+   "datosMs": 0,
+   "regeneracionMs": 4422,
+   "costoUsd": 0.00035204,
+   "error": null
+  },
+  {
+   "id": "q066",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 5125,
+   "datosMs": 0,
+   "regeneracionMs": 5791,
+   "costoUsd": 0.00051614,
+   "error": null
+  },
+  {
+   "id": "q067",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4213,
+   "datosMs": null,
+   "regeneracionMs": 4214,
+   "costoUsd": 0.00031574,
+   "error": null
+  },
+  {
+   "id": "q068",
+   "tipo": "analizar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4227,
+   "datosMs": null,
+   "regeneracionMs": 4227,
+   "costoUsd": 0.00042084,
+   "error": null
+  },
+  {
+   "id": "q069",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 2863,
+   "datosMs": null,
+   "regeneracionMs": 2863,
+   "costoUsd": 0.00020544,
+   "error": null
+  },
+  {
+   "id": "q070",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1511,
+   "datosMs": null,
+   "regeneracionMs": 1512,
+   "costoUsd": 0.00021044,
+   "error": null
+  },
+  {
+   "id": "q071",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4030,
+   "datosMs": null,
+   "regeneracionMs": 4030,
+   "costoUsd": 0.00033174,
+   "error": null
+  },
+  {
+   "id": "q072",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 3757,
+   "datosMs": null,
+   "regeneracionMs": 3758,
+   "costoUsd": 0.00031484,
+   "error": null
+  },
+  {
+   "id": "q073",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1586,
+   "datosMs": null,
+   "regeneracionMs": 1586,
+   "costoUsd": 0.00020614,
+   "error": null
+  },
+  {
+   "id": "q074",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4127,
+   "datosMs": null,
+   "regeneracionMs": 4127,
+   "costoUsd": 0.00030264,
+   "error": null
+  },
+  {
+   "id": "q075",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4035,
+   "datosMs": null,
+   "regeneracionMs": 4035,
+   "costoUsd": 0.00034184,
+   "error": null
+  },
+  {
+   "id": "q076",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1643,
+   "datosMs": null,
+   "regeneracionMs": 1644,
+   "costoUsd": 0.00017864,
+   "error": null
+  },
+  {
+   "id": "q077",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4670,
+   "datosMs": null,
+   "regeneracionMs": 4670,
+   "costoUsd": 0.00030614,
+   "error": null
+  },
+  {
+   "id": "q078",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4477,
+   "datosMs": null,
+   "regeneracionMs": 4477,
+   "costoUsd": 0.00031674,
+   "error": null
+  },
+  {
+   "id": "q079",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4650,
+   "datosMs": null,
+   "regeneracionMs": 4650,
+   "costoUsd": 0.00029074,
+   "error": null
+  },
+  {
+   "id": "q080",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4036,
+   "datosMs": null,
+   "regeneracionMs": 4036,
+   "costoUsd": 0.00032024,
+   "error": null
+  },
+  {
+   "id": "q081",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 5108,
+   "datosMs": null,
+   "regeneracionMs": 5108,
+   "costoUsd": 0.00027334,
+   "error": null
+  },
+  {
+   "id": "q082",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 4797,
+   "datosMs": null,
+   "regeneracionMs": 4797,
+   "costoUsd": 0.00032684,
+   "error": null
+  },
+  {
+   "id": "q083",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 5588,
+   "datosMs": null,
+   "regeneracionMs": 5588,
+   "costoUsd": 0.00029484,
+   "error": null
+  },
+  {
+   "id": "q084",
+   "tipo": "explicar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 5162,
+   "datosMs": null,
+   "regeneracionMs": 5162,
+   "costoUsd": 0.00033624,
+   "error": null
+  },
+  {
+   "id": "q085",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 7280,
+   "datosMs": null,
+   "regeneracionMs": 7282,
+   "costoUsd": 0.00057194,
+   "error": null
+  },
+  {
+   "id": "q086",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 3321,
+   "datosMs": null,
+   "regeneracionMs": 3322,
+   "costoUsd": 0.00026884,
+   "error": null
+  },
+  {
+   "id": "q087",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 3300,
+   "datosMs": null,
+   "regeneracionMs": 3300,
+   "costoUsd": 0.00028864,
+   "error": null
+  },
+  {
+   "id": "q088",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 4755,
+   "datosMs": null,
+   "regeneracionMs": 4755,
+   "costoUsd": 0.00037614,
+   "error": null
+  },
+  {
+   "id": "q089",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 2,
+   "modeloMs": 11341,
+   "datosMs": null,
+   "regeneracionMs": 11342,
+   "costoUsd": 0.0008229800000000001,
+   "error": null
+  },
+  {
+   "id": "q090",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 2,
+   "modeloMs": 10862,
+   "datosMs": null,
+   "regeneracionMs": 10862,
+   "costoUsd": 0.00099258,
+   "error": null
+  },
+  {
+   "id": "q091",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 5116,
+   "datosMs": null,
+   "regeneracionMs": 5116,
+   "costoUsd": 0.00050084,
+   "error": null
+  },
+  {
+   "id": "q092",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 5760,
+   "datosMs": null,
+   "regeneracionMs": 5760,
+   "costoUsd": 0.00046994,
+   "error": null
+  },
+  {
+   "id": "q093",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 5344,
+   "datosMs": null,
+   "regeneracionMs": 5344,
+   "costoUsd": 0.00031324,
+   "error": null
+  },
+  {
+   "id": "q094",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 4826,
+   "datosMs": null,
+   "regeneracionMs": 4826,
+   "costoUsd": 0.00041274,
+   "error": null
+  },
+  {
+   "id": "q095",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 2,
+   "modeloMs": 11105,
+   "datosMs": null,
+   "regeneracionMs": 11105,
+   "costoUsd": 0.00083908,
+   "error": null
+  },
+  {
+   "id": "q096",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 6359,
+   "datosMs": null,
+   "regeneracionMs": 6359,
+   "costoUsd": 0.00056674,
+   "error": null
+  },
+  {
+   "id": "q097",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 2,
+   "modeloMs": 10547,
+   "datosMs": null,
+   "regeneracionMs": 10548,
+   "costoUsd": 0.00082938,
+   "error": null
+  },
+  {
+   "id": "q098",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 5282,
+   "datosMs": null,
+   "regeneracionMs": 5282,
+   "costoUsd": 0.00036264,
+   "error": null
+  },
+  {
+   "id": "q099",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 4815,
+   "datosMs": null,
+   "regeneracionMs": 4816,
+   "costoUsd": 0.00027894,
+   "error": null
+  },
+  {
+   "id": "q100",
+   "tipo": "alertar",
+   "particion": "retenida",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 5100,
+   "datosMs": null,
+   "regeneracionMs": 5100,
+   "costoUsd": 0.00036244,
+   "error": null
+  }
+ ]
+}

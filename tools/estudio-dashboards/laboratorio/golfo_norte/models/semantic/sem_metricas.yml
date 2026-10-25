@@ -1,0 +1,166 @@
+version: 2
+
+# Catálogo de métricas certificadas. Cada métrica tiene dueño y definición única.
+
+metrics:
+  # ---------- Ventas ----------
+  - name: ventas_brutas
+    label: "Ventas brutas"
+    description: "Precio de lista × cantidad, antes de descuentos. Solo pedidos completados."
+    type: simple
+    type_params:
+      measure: venta_bruta
+    meta: {dueno: "Finanzas", unidad: "MXN"}
+
+  - name: descuentos
+    label: "Descuentos"
+    type: simple
+    type_params:
+      measure: descuento
+    meta: {dueno: "Comercial", unidad: "MXN"}
+
+  - name: ventas_netas
+    label: "Ventas netas"
+    description: "Ventas después de descuentos, sin IVA, solo pedidos completados."
+    type: simple
+    type_params:
+      measure: venta_neta
+    meta: {dueno: "Finanzas", unidad: "MXN"}
+
+  - name: costo_ventas
+    label: "Costo de ventas"
+    type: simple
+    type_params:
+      measure: costo
+    meta: {dueno: "Finanzas", unidad: "MXN"}
+
+  - name: margen_bruto
+    label: "Margen bruto"
+    type: derived
+    type_params:
+      expr: ventas_netas - costo_ventas
+      metrics:
+        - name: ventas_netas
+        - name: costo_ventas
+    meta: {dueno: "Finanzas", unidad: "MXN"}
+
+  - name: margen_bruto_pct
+    label: "Margen bruto %"
+    type: derived
+    type_params:
+      expr: (ventas_netas - costo_ventas) * 100.0 / nullif(ventas_netas, 0)
+      metrics:
+        - name: ventas_netas
+        - name: costo_ventas
+    meta: {dueno: "Finanzas", unidad: "%"}
+
+  - name: unidades
+    label: "Unidades vendidas"
+    type: simple
+    type_params:
+      measure: unidades
+    meta: {dueno: "Operaciones", unidad: "piezas"}
+
+  - name: pedidos
+    label: "Pedidos completados"
+    type: simple
+    type_params:
+      measure: pedidos_distintos
+    meta: {dueno: "Comercial", unidad: "pedidos"}
+
+  - name: ticket_promedio
+    label: "Ticket promedio"
+    type: ratio
+    type_params:
+      numerator: ventas_netas
+      denominator: pedidos
+    meta: {dueno: "Comercial", unidad: "MXN"}
+
+  - name: ventas_ecommerce
+    label: "Ventas e-commerce"
+    type: simple
+    type_params:
+      measure: venta_neta
+    filter: |
+      {{ Dimension('linea__canal') }} = 'E-commerce'
+    meta: {dueno: "Digital", unidad: "MXN"}
+
+  - name: participacion_ecommerce_pct
+    label: "Participación e-commerce %"
+    type: derived
+    type_params:
+      expr: ventas_ecommerce * 100.0 / nullif(ventas_netas, 0)
+      metrics:
+        - name: ventas_ecommerce
+        - name: ventas_netas
+    meta: {dueno: "Digital", unidad: "%"}
+
+  - name: crecimiento_ventas_yoy_pct
+    label: "Crecimiento de ventas vs año anterior %"
+    type: derived
+    type_params:
+      expr: (ventas_netas - ventas_netas_aa) * 100.0 / nullif(ventas_netas_aa, 0)
+      metrics:
+        - name: ventas_netas
+        - name: ventas_netas
+          offset_window: 1 year
+          alias: ventas_netas_aa
+    meta: {dueno: "Finanzas", unidad: "%"}
+
+  # ---------- Calidad de pedido ----------
+  - name: pedidos_totales
+    label: "Pedidos totales (incluye devueltos)"
+    type: simple
+    type_params:
+      measure: pedidos_totales
+    meta: {dueno: "Operaciones", unidad: "pedidos"}
+
+  - name: tasa_devolucion
+    label: "Tasa de devolución"
+    description: "Pedidos devueltos / pedidos totales (proporción 0–1)."
+    type: ratio
+    type_params:
+      numerator:
+        name: pedidos_devueltos_m
+      denominator: pedidos_totales
+    meta: {dueno: "Operaciones", unidad: "proporción"}
+
+  - name: pedidos_devueltos_m
+    label: "Pedidos devueltos"
+    type: simple
+    type_params:
+      measure: pedidos_devueltos
+    meta: {dueno: "Operaciones", unidad: "pedidos"}
+
+  # ---------- Inventario ----------
+  - name: combinaciones_bajo_reorden
+    label: "Tienda-SKU bajo punto de reorden"
+    type: simple
+    type_params:
+      measure: combinaciones_bajo_reorden_m
+    meta: {dueno: "Operaciones", unidad: "combinaciones"}
+
+  # ---------- Marketing ----------
+  - name: inversion_marketing
+    label: "Inversión en marketing"
+    type: simple
+    type_params:
+      measure: inversion_mxn
+    meta: {dueno: "Marketing", unidad: "MXN"}
+
+  - name: roas_incremental
+    label: "ROAS incremental"
+    description: "Ventas incrementales sobre baseline / inversión. Baseline ingenuo de 14 días."
+    type: ratio
+    type_params:
+      numerator:
+        name: ventas_incrementales_m
+      denominator: inversion_marketing
+    meta: {dueno: "Marketing", unidad: "x"}
+
+  - name: ventas_incrementales_m
+    label: "Ventas incrementales de campaña"
+    type: simple
+    type_params:
+      measure: ventas_incrementales
+    meta: {dueno: "Marketing", unidad: "MXN"}

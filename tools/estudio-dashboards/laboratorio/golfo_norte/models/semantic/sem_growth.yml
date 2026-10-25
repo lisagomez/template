@@ -1,0 +1,203 @@
+version: 2
+
+# Capa semántica de growth: clientes activos, nuevos, recurrentes, frecuencia, retención y contabilidad de crecimiento.
+
+semantic_models:
+  - name: clientes_mes
+    description: "Cliente × mes con compra."
+    model: ref('fct_clientes_mes')
+    defaults:
+      agg_time_dimension: mes
+    entities:
+      - name: cliente_mes
+        type: primary
+        expr: cliente_mes_id
+      - name: cliente
+        type: foreign
+        expr: cliente_id
+      - name: tienda
+        type: foreign
+        expr: tienda_id
+    dimensions:
+      - name: mes
+        type: time
+        type_params:
+          time_granularity: month
+      - name: estado
+        type: categorical
+      - name: origen
+        type: categorical
+      - name: canal_adquisicion
+        type: categorical
+    measures:
+      - name: clientes_activos_m
+        agg: count_distinct
+        expr: cliente_id
+      - name: clientes_nuevos_m
+        agg: sum
+        expr: es_nuevo
+      - name: clientes_reactivados_m
+        agg: sum
+        expr: es_reactivado
+      - name: pedidos_clientes_m
+        agg: sum
+        expr: pedidos
+      - name: ventas_clientes_m
+        agg: sum
+        expr: venta_neta
+
+  - name: contabilidad_crecimiento
+    description: "Flujos de clientes por tienda y mes."
+    model: ref('fct_contabilidad_crecimiento')
+    defaults:
+      agg_time_dimension: mes
+    entities:
+      - name: tienda_mes
+        type: primary
+        expr: tienda_mes_id
+      - name: tienda
+        type: foreign
+        expr: tienda_id
+    dimensions:
+      - name: mes
+        type: time
+        type_params:
+          time_granularity: month
+    measures:
+      - name: clientes_perdidos_m
+        agg: sum
+        expr: perdidos
+      - name: clientes_retenidos_m
+        agg: sum
+        expr: retenidos
+
+  - name: cohortes
+    description: "Retención por cohorte y origen."
+    model: ref('fct_cohortes')
+    defaults:
+      agg_time_dimension: cohorte_mes
+    entities:
+      - name: cohorte
+        type: primary
+        expr: cohorte_id
+    dimensions:
+      - name: cohorte_mes
+        type: time
+        type_params:
+          time_granularity: month
+      - name: origen
+        type: categorical
+      - name: meses_desde_alta
+        type: categorical
+      - name: cohorte_madura
+        type: categorical
+    measures:
+      - name: retenidos_m3_m
+        agg: sum
+        expr: retenidos_m3
+      - name: tamano_cohorte_m
+        agg: sum
+        expr: tamano_base
+
+metrics:
+  - name: clientes_activos
+    label: "Clientes activos"
+    description: "Clientes distintos con al menos un pedido completado en el periodo."
+    type: simple
+    type_params:
+      measure: clientes_activos_m
+    meta: {dueno: "Growth", unidad: "clientes"}
+
+  - name: clientes_nuevos
+    label: "Clientes nuevos"
+    description: "Clientes cuya primera compra cae en el periodo."
+    type: simple
+    type_params:
+      measure: clientes_nuevos_m
+    meta: {dueno: "Marketing", unidad: "clientes"}
+
+  - name: clientes_recurrentes
+    label: "Clientes recurrentes"
+    type: derived
+    type_params:
+      expr: clientes_activos - clientes_nuevos
+      metrics:
+        - name: clientes_activos
+        - name: clientes_nuevos
+    meta: {dueno: "Growth", unidad: "clientes"}
+
+  - name: clientes_reactivados
+    label: "Clientes reactivados"
+    description: "Compraron este mes sin haber comprado el mes anterior (y no son nuevos)."
+    type: simple
+    type_params:
+      measure: clientes_reactivados_m
+    meta: {dueno: "Lifecycle", unidad: "clientes"}
+
+  - name: clientes_perdidos
+    label: "Clientes perdidos"
+    description: "Activos el mes anterior que no compraron este mes."
+    type: simple
+    type_params:
+      measure: clientes_perdidos_m
+    meta: {dueno: "Lifecycle", unidad: "clientes"}
+
+  - name: frecuencia_compra
+    label: "Frecuencia de compra"
+    description: "Pedidos por cliente activo en el periodo."
+    type: ratio
+    type_params:
+      numerator: pedidos_clientes
+      denominator: clientes_activos
+    meta: {dueno: "Growth", unidad: "pedidos"}
+
+  - name: pedidos_clientes
+    label: "Pedidos (vista clientes)"
+    type: simple
+    type_params:
+      measure: pedidos_clientes_m
+    meta: {dueno: "Growth", unidad: "pedidos"}
+
+  - name: ventas_por_cliente
+    label: "Ventas por cliente activo"
+    type: ratio
+    type_params:
+      numerator: ventas_clientes
+      denominator: clientes_activos
+    meta: {dueno: "Growth", unidad: "MXN"}
+
+  - name: ventas_clientes
+    label: "Ventas (vista clientes)"
+    type: simple
+    type_params:
+      measure: ventas_clientes_m
+    meta: {dueno: "Growth", unidad: "MXN"}
+
+  - name: retencion_m3_pct
+    label: "Retención a 3 meses"
+    description: "% de la cohorte que vuelve a comprar en los 3 meses siguientes a su alta. Solo cohortes maduras."
+    type: derived
+    type_params:
+      expr: retenidos_m3 * 100.0 / nullif(tamano_cohorte, 0)
+      metrics:
+        - name: retenidos_m3
+        - name: tamano_cohorte
+    meta: {dueno: "Lifecycle", unidad: "%"}
+
+  - name: retenidos_m3
+    label: "Clientes retenidos a 3 meses"
+    type: simple
+    type_params:
+      measure: retenidos_m3_m
+    filter: |
+      {{ Dimension('cohorte__cohorte_madura') }} = true
+    meta: {dueno: "Lifecycle", unidad: "clientes"}
+
+  - name: tamano_cohorte
+    label: "Tamaño de cohorte"
+    type: simple
+    type_params:
+      measure: tamano_cohorte_m
+    filter: |
+      {{ Dimension('cohorte__cohorte_madura') }} = true
+    meta: {dueno: "Lifecycle", unidad: "clientes"}

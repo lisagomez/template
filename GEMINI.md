@@ -1,5 +1,5 @@
-<!-- GENERADO por scripts/sincroniza-gemini.mjs desde AGENTS.md el ultimo CDC que lo toco.
-     NO editar a mano: el verificador de gobernanza falla si diverge. Regenerar con
+<!-- ALTO: ARTEFACTO AUTOGENERADO por scripts/sincroniza-gemini.mjs desde AGENTS.md.
+     NO lo edites a mano: el verificador de gobernanza falla si diverge. Regenerar con
      `npm run sincroniza:gemini`. Solo lleva las secciones que OBLIGAN; lo informativo vive
      en .claude/rules/*.md (Gemini no las carga: leelas al tocar esos archivos). -->
 
@@ -336,11 +336,12 @@ npm run lint         # ESLint
 npm run validate     # typecheck + lint + build + gobernanza + regresion + contabilidad + fugas (el gate completo)
                      # ya no es una cadena: DERIVA del perfil `validate` de .claude/gates.json
 npm run gates        # el padron entero: gates por perfil, y los inactivos con su motivo
-npm run verifica:gates     # que el padron y el codigo no divergan (--prueba tumba 6 siembras)
+npm run verifica:gates     # que el padron y el codigo no divergan (--prueba tumba 9 siembras)
+npm run verifica:generados  # lo generado lleva banner ALTO y coincide con su fuente (registro en gates.json)
 npm run prueba:tools       # las suites propias de tools/ (alta 2026-09-26: nadie las corria)
 npm run prueba:a2a         # el puente A2A: opacidad del bridge, protocolo, Card, fail-safe
                            # las dos `SERVICIO:` van aparte (prueba:a2a:servicio): exigen Tesseract
-npm run proyecta:gates     # emite reglas/software.toml para hermes-os-a2a (--diff compara)
+npm run proyecta:gates     # emite reglas/software.toml para hermes-os-a2a (--diff compara) y el CI (--ci github)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
 npm run verifica:specs     # integridad de `.claude/specs/`: secciones, EARS, numeracion
 npm run prepara:gate       # lo corre `pretypecheck` solo: engines.node + build de tools/

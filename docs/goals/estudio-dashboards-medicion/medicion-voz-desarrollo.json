@@ -1,0 +1,695 @@
+{
+ "nivel": "voz",
+ "modelo": "anthropic/claude-haiku-5.5-20261007",
+ "set": "sha256:647b0b27ce23a447b2e99d2b697919e6cf3b393ea4785fe31cce9373e2897676",
+ "fecha": "2026-10-20T14:25:52.691Z",
+ "n": 30,
+ "precision": 0.9666666666666667,
+ "porTipo": {
+  "alertar": {
+   "n": 5,
+   "correctas": 5,
+   "precision": 1
+  },
+  "analizar": {
+   "n": 5,
+   "correctas": 5,
+   "precision": 1
+  },
+  "crear": {
+   "n": 5,
+   "correctas": 4,
+   "precision": 0.8
+  },
+  "explicar": {
+   "n": 5,
+   "correctas": 5,
+   "precision": 1
+  },
+  "filtrar": {
+   "n": 5,
+   "correctas": 5,
+   "precision": 1
+  },
+  "modificar": {
+   "n": 5,
+   "correctas": 5,
+   "precision": 1
+  }
+ },
+ "porParticion": {
+  "desarrollo": {
+   "n": 30,
+   "correctas": 29,
+   "precision": 0.9666666666666667
+  }
+ },
+ "costo": {
+  "totalUsd": 0.012066589999999999,
+  "sinCosto": 0,
+  "porInstruccionUsd": 0.00040221966666666663,
+  "libroAcumuladoUsd": 0.0362054
+ },
+ "latencia": {
+  "modeloP50": 2889,
+  "modeloP95": 4344,
+  "regeneracionP50": 3094,
+  "regeneracionP95": 4419,
+  "consultaFrioP50": 27.537824999999884,
+  "consultaFrioP95": 32.462297000000035,
+  "consultas": 35
+ },
+ "saldo": {
+  "antes": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 22.058201479,
+    "saldo": 1.941798520999999
+   },
+   "llave": {
+    "uso": 12.34434444,
+    "limite": 15,
+    "restante": 2.6556555599999996
+   }
+  },
+  "despues": {
+   "cuenta": {
+    "creditos": 24,
+    "uso": 22.068660959,
+    "saldo": 1.931339041000001
+   },
+   "llave": {
+    "uso": 12.35480392,
+    "limite": 15,
+    "restante": 2.64519608
+   }
+  }
+ },
+ "resultados": [
+  {
+   "id": "q001",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3081,
+   "datosMs": 0,
+   "regeneracionMs": 3092,
+   "costoUsd": 0.00101745,
+   "error": null
+  },
+  {
+   "id": "q003",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 3408,
+   "datosMs": 19,
+   "regeneracionMs": 3429,
+   "costoUsd": 0.00041414,
+   "error": null
+  },
+  {
+   "id": "q006",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": false,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": false,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2937,
+   "datosMs": 156,
+   "regeneracionMs": 3094,
+   "costoUsd": 0.00036484,
+   "error": null,
+   "instruccion": "Un tablero de campañas: cuanto invertimos y cuanto nos devolvio cada una",
+   "entendi": "tipo: crear · métrica: inversion_marketing, ventas_incrementales_m, roas_incremental · dimensión: campana__campana_nombre",
+   "plan": {
+    "tipo": "crear",
+    "responde": true,
+    "entendi": {
+     "metricas": [
+      "inversion_marketing",
+      "ventas_incrementales_m",
+      "roas_incremental"
+     ],
+     "dimensiones": [
+      "campana__campana_nombre"
+     ],
+     "filtros": [],
+     "periodo": null,
+     "comparar": null
+    },
+    "componentes": [],
+    "operaciones": [],
+    "quitar_filtros": [],
+    "titulo": "Campañas: inversión y retorno",
+    "alerta": null,
+    "sin_metrica": null,
+    "resumen": "Crearé un tablero con la inversión en marketing y lo que devolvió cada campaña, con su ROAS incremental."
+   }
+  },
+  {
+   "id": "q009",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 4344,
+   "datosMs": 74,
+   "regeneracionMs": 4419,
+   "costoUsd": 0.00050564,
+   "error": null
+  },
+  {
+   "id": "q016",
+   "tipo": "crear",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2898,
+   "datosMs": null,
+   "regeneracionMs": 2899,
+   "costoUsd": 0.00033764,
+   "error": null
+  },
+  {
+   "id": "q017",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2821,
+   "datosMs": 72,
+   "regeneracionMs": 2894,
+   "costoUsd": 0.00029554,
+   "error": null
+  },
+  {
+   "id": "q018",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2621,
+   "datosMs": 49,
+   "regeneracionMs": 2671,
+   "costoUsd": 0.00034534,
+   "error": null
+  },
+  {
+   "id": "q019",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 2362,
+   "datosMs": 0,
+   "regeneracionMs": 2363,
+   "costoUsd": 0.00029944,
+   "error": null
+  },
+  {
+   "id": "q025",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 2,
+   "modeloMs": 3666,
+   "datosMs": 1,
+   "regeneracionMs": 3673,
+   "costoUsd": 0.00053788,
+   "error": null
+  },
+  {
+   "id": "q029",
+   "tipo": "modificar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "dimensiones": true,
+    "filtros": true,
+    "tocados": true
+   },
+   "intentos": 1,
+   "modeloMs": 3687,
+   "datosMs": 0,
+   "regeneracionMs": 3690,
+   "costoUsd": 0.00043404,
+   "error": null
+  },
+  {
+   "id": "q037",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 2889,
+   "datosMs": 531,
+   "regeneracionMs": 3421,
+   "costoUsd": 0.00036264,
+   "error": null
+  },
+  {
+   "id": "q038",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3603,
+   "datosMs": 358,
+   "regeneracionMs": 3962,
+   "costoUsd": 0.00049284,
+   "error": null
+  },
+  {
+   "id": "q040",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true,
+    "comparar": true
+   },
+   "intentos": 1,
+   "modeloMs": 2637,
+   "datosMs": 0,
+   "regeneracionMs": 2638,
+   "costoUsd": 0.00035244,
+   "error": null
+  },
+  {
+   "id": "q043",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3198,
+   "datosMs": 490,
+   "regeneracionMs": 3688,
+   "costoUsd": 0.00044464,
+   "error": null
+  },
+  {
+   "id": "q046",
+   "tipo": "filtrar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2965,
+   "datosMs": 645,
+   "regeneracionMs": 3610,
+   "costoUsd": 0.00040244,
+   "error": null
+  },
+  {
+   "id": "q053",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 2350,
+   "datosMs": 0,
+   "regeneracionMs": 3130,
+   "costoUsd": 0.00032404,
+   "error": null
+  },
+  {
+   "id": "q055",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 2517,
+   "datosMs": 0,
+   "regeneracionMs": 3170,
+   "costoUsd": 0.00030534,
+   "error": null
+  },
+  {
+   "id": "q057",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "periodo": true
+   },
+   "intentos": 1,
+   "modeloMs": 2213,
+   "datosMs": 1,
+   "regeneracionMs": 3239,
+   "costoUsd": 0.00028084,
+   "error": null
+  },
+  {
+   "id": "q062",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true
+   },
+   "intentos": 1,
+   "modeloMs": 3194,
+   "datosMs": 1,
+   "regeneracionMs": 3502,
+   "costoUsd": 0.00046364,
+   "error": null
+  },
+  {
+   "id": "q067",
+   "tipo": "analizar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 3388,
+   "datosMs": null,
+   "regeneracionMs": 3388,
+   "costoUsd": 0.00043324,
+   "error": null
+  },
+  {
+   "id": "q069",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1745,
+   "datosMs": null,
+   "regeneracionMs": 1745,
+   "costoUsd": 0.00024794,
+   "error": null
+  },
+  {
+   "id": "q070",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1197,
+   "datosMs": null,
+   "regeneracionMs": 1197,
+   "costoUsd": 0.00020994,
+   "error": null
+  },
+  {
+   "id": "q072",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1853,
+   "datosMs": null,
+   "regeneracionMs": 1853,
+   "costoUsd": 0.00029484,
+   "error": null
+  },
+  {
+   "id": "q075",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true
+   },
+   "intentos": 1,
+   "modeloMs": 1803,
+   "datosMs": null,
+   "regeneracionMs": 1804,
+   "costoUsd": 0.00029384,
+   "error": null
+  },
+  {
+   "id": "q083",
+   "tipo": "explicar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true
+   },
+   "intentos": 1,
+   "modeloMs": 2008,
+   "datosMs": null,
+   "regeneracionMs": 2008,
+   "costoUsd": 0.00026284,
+   "error": null
+  },
+  {
+   "id": "q085",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 3662,
+   "datosMs": null,
+   "regeneracionMs": 3664,
+   "costoUsd": 0.00046744,
+   "error": null
+  },
+  {
+   "id": "q086",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 1770,
+   "datosMs": null,
+   "regeneracionMs": 1770,
+   "costoUsd": 0.00023734,
+   "error": null
+  },
+  {
+   "id": "q088",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 3047,
+   "datosMs": null,
+   "regeneracionMs": 3048,
+   "costoUsd": 0.00039414,
+   "error": null
+  },
+  {
+   "id": "q089",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 1,
+   "modeloMs": 2170,
+   "datosMs": null,
+   "regeneracionMs": 2170,
+   "costoUsd": 0.00029594,
+   "error": null
+  },
+  {
+   "id": "q095",
+   "tipo": "alertar",
+   "particion": "desarrollo",
+   "correcta": true,
+   "campos": {
+    "tipo": true,
+    "responde": true,
+    "valido": true,
+    "metricas": true,
+    "filtros": true,
+    "alerta": true
+   },
+   "intentos": 2,
+   "modeloMs": 6450,
+   "datosMs": null,
+   "regeneracionMs": 6451,
+   "costoUsd": 0.0009482799999999999,
+   "error": null
+  }
+ ]
+}
