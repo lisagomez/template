@@ -1,3 +1,4 @@
+<!-- ALTO: ARTEFACTO AUTOGENERADO desde vitrina/contenido/manual.ts. No lo edites a mano: node src/features/soporte-sap/vitrina/genera-manual.ts -->
 # Manual de usuario — Soporte SAP
 
 > Se genera desde `src/features/soporte-sap/vitrina/contenido/manual.ts` con `node src/features/soporte-sap/vitrina/genera-manual.ts`:

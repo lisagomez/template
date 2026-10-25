@@ -242,6 +242,7 @@ npm run gates        # el padron entero: los gates de cada perfil, y los inactiv
 npm run prueba:trayectorias   # el formato de trayectoria y la captura (spec 011), dentro del gate
 npm run verifica:trayectorias # el almacen de trayectorias capturadas (spec 011 RF-4), dentro del gate
 npm run verifica:gates     # que el padron y el codigo no divergan (`--prueba` tumba 9 siembras)
+npm run verifica:generados  # lo generado lleva banner ALTO y coincide con su fuente (8 siembras en cada pasada)
 npm run proyecta:gates     # emite reglas/software.toml para hermes-os-a2a (`--diff` compara con su copia)
                            # y el CI de GitHub Actions (`--ci github --salida .github/workflows/gates.yml`)
 npm run verify:gobernanza  # solo el cableado de la capa de gobernanza
@@ -441,6 +442,13 @@ El **CI de GitHub Actions** (`.github/workflows/gates.yml`) no se escribe a mano
 (`scripts/lib/ci.mjs`) que corre el mismo `corre-gates.mjs validate` en cada PR a `main`, con las actions fijadas
 por SHA y Node en el minimo de `engines`. `verifica:gates` lo compara con la proyeccion: editado a mano, borrado o
 con el padron cambiado sin regenerarlo, se pone rojo.
+
+Y vale para **todo lo generado**, no solo el CI (D-SS-9): el registro `generados` del padron declara cada
+artefacto que el repo puede regenerar por si solo (`GEMINI.md`, el CI, la vista del inventario, el staging de
+dbt de la clinica, el diccionario GS1...), con su fuente y su comando. `npm run verifica:generados` exige que
+lleve el banner «ALTO: ARTEFACTO AUTOGENERADO» y que coincida con su fuente, y pone en rojo un archivo con banner
+que nadie registro. Lo que no se puede regenerar desde el repo (mediciones, capturas, locks, referencias
+aprobadas) va en `fuera` con su motivo, como un gate inactivo: no cuenta como comprobado.
 
 El diseno viene del motor del Supervisor de `hermes-os-a2a` (`supervisor-a2a/gates.py`); el
 `motivo` obligatorio se anadio aqui. Y va en el sentido inverso tambien: `npm run proyecta:gates`

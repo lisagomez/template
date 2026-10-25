@@ -350,6 +350,7 @@ npm run validate     # typecheck + lint + build + gobernanza + regresion + conta
                      # ya no es una cadena: DERIVA del perfil `validate` de .claude/gates.json
 npm run gates        # el padron entero: gates por perfil, y los inactivos con su motivo
 npm run verifica:gates     # que el padron y el codigo no divergan (--prueba tumba 9 siembras)
+npm run verifica:generados  # lo generado lleva banner ALTO y coincide con su fuente (registro en gates.json)
 npm run prueba:tools       # las suites propias de tools/ (alta 2026-09-26: nadie las corria)
 npm run prueba:a2a         # el puente A2A: opacidad del bridge, protocolo, Card, fail-safe
                            # las dos `SERVICIO:` van aparte (prueba:a2a:servicio): exigen Tesseract

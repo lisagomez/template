@@ -132,6 +132,7 @@ npm run validate     # typecheck + lint + build + gobernanza + regresion (el gat
                      # DERIVA de `.claude/gates.json`, no de una cadena en package.json
 npm run gates        # el padron: gates por perfil, e inactivos con su motivo
 npm run verifica:gates     # el padron y el codigo no divergen, y el CI es su proyeccion (`--prueba`: 9 siembras)
+npm run verifica:generados  # lo generado lleva banner ALTO y coincide con su fuente (registro en gates.json)
 ```
 
 ---

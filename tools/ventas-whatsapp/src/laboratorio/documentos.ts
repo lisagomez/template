@@ -14,6 +14,7 @@ export function roadmapCostosMarkdown(s: Supuestos = SUPUESTOS_LABORATORIO): str
   const meses = roadmapDeCostos(s);
   const partidas = presupuestoLaboratorio(s);
   const l: string[] = [];
+  l.push('<!-- ALTO: ARTEFACTO AUTOGENERADO por roadmapCostosMarkdown(). No lo edites a mano: node tools/ventas-whatsapp/e2e/genera-roadmaps.mjs -->');
   l.push('# Roadmap de costos y presupuesto del laboratorio — FICTICIO');
   l.push('');
   l.push('> Generado por `roadmapCostosMarkdown()` (`src/laboratorio/documentos.ts`); no se edita a mano. **Todo es ficticio');
@@ -70,6 +71,7 @@ export function roadmapCostosMarkdown(s: Supuestos = SUPUESTOS_LABORATORIO): str
 
 export function roadmapConversacionesMarkdown(): string {
   const l: string[] = [];
+  l.push('<!-- ALTO: ARTEFACTO AUTOGENERADO por roadmapConversacionesMarkdown(). No lo edites a mano: node tools/ventas-whatsapp/e2e/genera-roadmaps.mjs -->');
   l.push('# Roadmap de conversaciones-plantilla');
   l.push('');
   l.push('> Generado por `roadmapConversacionesMarkdown()` (`src/laboratorio/documentos.ts`); no se edita a mano. Cada guion');
