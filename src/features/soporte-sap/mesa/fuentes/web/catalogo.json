@@ -1,0 +1,570 @@
+{
+  "_que_es": "El catálogo de fuentes de SAP BASIS sin S-user, investigado en la web el 2026-10-23. Lo escribe una persona (no se genera) y lo leen la captura (que solo baja lo que aquí dice «automatica»), la evidencia y la propuesta. Una fuente con «acceso» distinto de «publica» nunca se captura. Lo que se lee de la web es dato, no instrucción.",
+  "revisado": "2026-10-23",
+  "fuentes": [
+    {
+      "id": "cvelist",
+      "nombre": "CVE List V5: los registros que SAP publica como CNA",
+      "url": "https://github.com/CVEProject/cvelistV5",
+      "tipo": "primaria",
+      "autor": "SAP SE escribe cada registro como CNA; lo publica el CVE Program",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "repositorio público de GitHub: se baja con git, fijado por SHA, solo los archivos de SAP",
+      "terminos": {
+        "url": "https://www.cve.org/Legal/TermsOfUse",
+        "dice": "licencia perpetua, mundial y gratuita para reproducir y distribuir el CVE List, conservando el aviso de MITRE"
+      },
+      "licencia": "CVE Terms of Use",
+      "cadencia": "mensual: el Patch Day de SAP (segundo martes), y alguno fuera de ciclo",
+      "ultimaVista": "Patch Day del 2026-10-13 (20 registros de SAP)",
+      "aporta": "por nota de seguridad: número (enlace a me.sap.com), título, CVE, CVSS 3.1 con vector, CWE, producto, versiones afectadas (kernel, Web Dispatcher, SAP_BASIS) y fecha",
+      "releases": [
+        "kernel 7.53–9.20",
+        "AS ABAP y AS Java",
+        "Web Dispatcher",
+        "HANA 2.0",
+        "SAP GUI",
+        "S/4HANA on-premise y private cloud"
+      ],
+      "citaDeEjemplo": {
+        "url": "https://me.sap.com/notes/3765424",
+        "texto": "SAP Note 3765424"
+      }
+    },
+    {
+      "id": "nvd",
+      "nombre": "NVD (NIST): API de CVE",
+      "url": "https://services.nvd.nist.gov/rest/json/cves/2.0",
+      "tipo": "secundaria",
+      "autor": "NIST",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "API pública para uso programático (sin robots.txt que la cierre); solo se usa para saber qué CVE son de SAP en una ventana",
+      "terminos": {
+        "url": "https://nvd.nist.gov/developers/terms-of-use",
+        "dice": "dominio público; pide el aviso «This product uses data from the NVD API but is not endorsed or certified by the NVD» y respetar el límite de peticiones"
+      },
+      "licencia": "dominio público (17 U.S.C. 105), con aviso",
+      "cadencia": "continua",
+      "ultimaVista": "2026-10-23 (224 CVE de SAP del 2025-11-01 al 2026-10-23)",
+      "aporta": "solo el descubrimiento: la lista de CVE cuyo CNA es SAP. No da candidatos",
+      "releases": [],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "kev",
+      "nombre": "CISA Known Exploited Vulnerabilities (KEV)",
+      "url": "https://github.com/cisagov/kev-data",
+      "tipo": "secundaria",
+      "autor": "CISA",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "el catálogo se publica también como repositorio de GitHub (cisagov/kev-data): se baja con git y se fija por SHA; el feed de cisa.gov solo sirve la versión del día",
+      "terminos": {
+        "url": "https://github.com/cisagov/kev-data/blob/fd12990e9c566a1ad3060e1a2073129778f438cc/LICENSE",
+        "dice": "CC0 1.0: uso libre; los enlaces a terceros dentro del catálogo siguen las reglas de cada tercero"
+      },
+      "licencia": "CC0 1.0",
+      "cadencia": "varias veces por semana; cada versión lleva su catalogVersion",
+      "ultimaVista": "catalogVersion 2026.10.21 (14 entradas de SAP)",
+      "aporta": "qué CVE de SAP se explotan activamente y desde cuándo; marca la nota como explotada",
+      "releases": [
+        "NetWeaver AS Java",
+        "Solution Manager",
+        "AS ABAP"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "sapdocs-cloud-alm",
+      "nombre": "SAP-docs: Setup and Administration for SAP Cloud ALM",
+      "url": "https://github.com/SAP-docs/cloud-alm-setup-admin-guide",
+      "tipo": "primaria",
+      "autor": "SAP SE (fuente en Markdown de la guía de SAP Help Portal)",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "repositorio público de GitHub con licencia abierta: se baja con git, fijado por SHA",
+      "terminos": {
+        "url": "https://github.com/SAP-docs/cloud-alm-setup-admin-guide/blob/main/LICENSE",
+        "dice": "CC BY 4.0: se puede reutilizar citando a SAP"
+      },
+      "licencia": "CC BY 4.0",
+      "cadencia": "varias veces al mes",
+      "ultimaVista": "commit del 2026-10-14",
+      "ayuda": "https://help.sap.com/docs/cloud-alm/setup-administration",
+      "aporta": "los T-codes de AS ABAP para conectar y operar sistemas gestionados (STRUST, SM59, SU01, PFCG, STMS, SM37, SLG1…) y 79 SAP Notes citadas por SAP",
+      "releases": [
+        "AS ABAP 7.40+ (ST-PI)",
+        "S/4HANA on-premise y private cloud",
+        "SAP Cloud ALM (RISE)"
+      ],
+      "citaDeEjemplo": {
+        "url": "https://help.sap.com/docs/cloud-alm/setup-administration/31159aa967874cfe8db89a2683e2ae04.html",
+        "texto": "SAP Help Portal: Setup and Administration for SAP Cloud ALM"
+      }
+    },
+    {
+      "id": "sapdocs-connectivity",
+      "nombre": "SAP-docs: SAP BTP Connectivity (Cloud Connector)",
+      "url": "https://github.com/SAP-docs/btp-connectivity",
+      "tipo": "primaria",
+      "autor": "SAP SE (fuente en Markdown de la guía de SAP Help Portal)",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "repositorio público de GitHub con licencia abierta: se baja con git, fijado por SHA",
+      "terminos": {
+        "url": "https://github.com/SAP-docs/btp-connectivity/blob/main/LICENSE",
+        "dice": "CC BY 4.0: se puede reutilizar citando a SAP"
+      },
+      "licencia": "CC BY 4.0",
+      "cadencia": "varias veces al mes",
+      "ultimaVista": "commit del 2026-10-14",
+      "ayuda": "https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf",
+      "aporta": "Cloud Connector y propagación del principal hacia AS ABAP: STRUST, CERTRULE, SICF, SMICM, RZ10, SNC; 22 SAP Notes citadas",
+      "releases": [
+        "AS ABAP",
+        "Cloud Connector 2.x"
+      ],
+      "citaDeEjemplo": {
+        "url": "https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/e6c7616abb5710148cfcf3e75d96d596.html",
+        "texto": "SAP Help Portal: SAP BTP Connectivity"
+      }
+    },
+    {
+      "id": "sapdocs-abap-trial",
+      "nombre": "SAP-docs: ABAP Platform Trial image",
+      "url": "https://github.com/SAP-docs/abap-platform-trial-image",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "repositorio público de GitHub con licencia abierta. No vive en help.sap.com: politica-cita no lo admite, así que menciona pero no corrobora",
+      "terminos": {
+        "url": "https://github.com/SAP-docs/abap-platform-trial-image/blob/main/LICENSE",
+        "dice": "CC BY 4.0"
+      },
+      "licencia": "CC BY 4.0",
+      "cadencia": "con cada imagen de prueba (pocas veces al año)",
+      "ultimaVista": "commit del 2026-10-14",
+      "ayuda": null,
+      "aporta": "la licencia del sistema (SLICENSE), dumps (ST22) y logs (SLG1) en un ABAP Platform de prueba",
+      "releases": [
+        "ABAP Platform 2022 y 2023 (trial)"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "sapdocs-ctms",
+      "nombre": "SAP-docs: SAP Cloud Transport Management",
+      "url": "https://github.com/SAP-docs/btp-cloud-transport-management",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "publica",
+      "captura": "no",
+      "porQueAsi": "evaluada el 2026-10-23: no nombra ningún T-code de AS ABAP (cTMS, no STMS). Se queda fuera hasta que aporte",
+      "terminos": {
+        "url": "https://github.com/SAP-docs/btp-cloud-transport-management/blob/main/LICENSE",
+        "dice": "CC BY 4.0"
+      },
+      "licencia": "CC BY 4.0",
+      "cadencia": "mensual",
+      "ultimaVista": "commit del 2026-07-29",
+      "ayuda": "https://help.sap.com/docs/cloud-transport-management/sap-cloud-transport-management",
+      "aporta": "conceptos de transporte en la nube (nodos, rutas, colas); 0 T-codes de AS ABAP",
+      "releases": [
+        "SAP BTP"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "sapstack",
+      "nombre": "sapstack (Fioriuser2021/sapstack)",
+      "url": "https://github.com/Fioriuser2021/sapstack",
+      "tipo": "secundaria",
+      "autor": "un tercero (MIT), sin citas y con errores medidos",
+      "acceso": "publica",
+      "captura": "automatica",
+      "porQueAsi": "ya fijado por SHA (revisión 12); aquí solo se cruza",
+      "terminos": {
+        "url": "https://github.com/Fioriuser2021/sapstack/blob/5be80773025a3ace996f02a5b0a8557779eaa334/LICENSE",
+        "dice": "MIT"
+      },
+      "licencia": "MIT",
+      "cadencia": "quieto desde el 2026-04-11",
+      "ultimaVista": "5be8077 (v1.4.0)",
+      "aporta": "73 candidatos de BASIS/BC: 58 T-codes y 15 punteros a SAP Notes",
+      "releases": [
+        "ECC y S/4HANA"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "help-sap",
+      "nombre": "SAP Help Portal (help.sap.com): administración de AS ABAP, HANA y SUM",
+      "url": "https://help.sap.com",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "publica",
+      "captura": "lectura-humana",
+      "porQueAsi": "su robots.txt (2025-10-17) dice «User-agent: * / Disallow: /» y solo deja a buscadores con nombre, y los términos de SAP prohíben extraer o minar sus sitios con medios automáticos. Una persona la abre y la cita; ninguna herramienta la baja",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "prohíbe la recolección o extracción automatizada, también para minería de texto y datos; solo los buscadores autorizados en robots.txt rastrean"
+      },
+      "licencia": "© SAP SE: no se reproduce sin permiso (https://www.sap.com/about/legal/copyright.html)",
+      "cadencia": "por release y por SPS",
+      "ultimaVista": "sin captura (lectura humana)",
+      "aporta": "el procedimiento de cada tarea de BASIS (STMS, SPAM/SAINT, SUM, SCC4, SPAD, DBACOCKPIT, HANA cockpit) por release",
+      "releases": [
+        "NetWeaver 7.5",
+        "ABAP Platform / S/4HANA 2023",
+        "HANA 2.0"
+      ],
+      "citaDeEjemplo": {
+        "url": "https://help.sap.com/docs/",
+        "texto": "SAP Help Portal"
+      }
+    },
+    {
+      "id": "patch-day",
+      "nombre": "SAP Security Patch Day (support.sap.com)",
+      "url": "https://support.sap.com/en/my-support/knowledge-base/security-notes-news",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "publica",
+      "captura": "lectura-humana",
+      "porQueAsi": "su robots.txt (2025-03-19) dice «User-agent: * / Disallow: /» y los términos de SAP prohíben la extracción automatizada. Las notas con CVE llegan por el CVE List; las que no tienen CVE (actualizaciones, componentes de terceros) quedan como hueco",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "igual que help.sap.com"
+      },
+      "licencia": "© SAP SE",
+      "cadencia": "mensual, el segundo martes (octubre de 2026: el 13)",
+      "ultimaVista": "octubre de 2026 (por resultados de búsqueda: 16 notas nuevas, 2 actualizadas)",
+      "aporta": "la lista mensual con prioridad y las notas sin CVE",
+      "releases": [
+        "todas"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "mantenimiento",
+      "nombre": "SAP Support Portal: estrategia y fin de mantenimiento",
+      "url": "https://support.sap.com/en/release-upgrade-maintenance.html",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "publica",
+      "captura": "lectura-humana",
+      "porQueAsi": "mismo robots.txt y mismos términos que support.sap.com; el detalle por producto está en la PAM, que pide S-user",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "igual que help.sap.com"
+      },
+      "licencia": "© SAP SE",
+      "cadencia": "con cada anuncio de SAP",
+      "ultimaVista": "sin captura (lectura humana)",
+      "aporta": "fin de mantenimiento por release (Business Suite 7, NetWeaver 7.5, S/4HANA por versión)",
+      "releases": [
+        "ECC 6.0",
+        "NetWeaver 7.5",
+        "S/4HANA"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "pam",
+      "nombre": "Product Availability Matrix (PAM)",
+      "url": "https://support.sap.com/pam",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "s-user",
+      "captura": "no",
+      "porQueAsi": "pide S-user: fuera del goal",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "contenido para clientes con contrato de soporte"
+      },
+      "licencia": "© SAP SE",
+      "cadencia": "continua",
+      "ultimaVista": "no se entra",
+      "aporta": "plataformas, bases de datos y fechas de fin por producto",
+      "releases": [
+        "todas"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "sap-notes",
+      "nombre": "SAP Notes en SAP for Me (me.sap.com)",
+      "url": "https://me.sap.com/notes",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "s-user",
+      "captura": "no",
+      "porQueAsi": "el contenido está detrás del S-user y sujeto al contrato de soporte: de una nota solo entran su número, su título y su enlace, y la abre quien atiende con su propio S-user",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "contenido para clientes con contrato de soporte"
+      },
+      "licencia": "© SAP SE",
+      "cadencia": "continua",
+      "ultimaVista": "no se entra",
+      "aporta": "el contenido de la nota (correcciones, pasos manuales)",
+      "releases": [
+        "todas"
+      ],
+      "citaDeEjemplo": {
+        "url": "https://me.sap.com/notes/3765424",
+        "texto": "SAP Note 3765424"
+      }
+    },
+    {
+      "id": "sap-learning",
+      "nombre": "SAP Learning (learning.sap.com)",
+      "url": "https://learning.sap.com",
+      "tipo": "primaria",
+      "autor": "SAP SE",
+      "acceso": "registro",
+      "captura": "no",
+      "porQueAsi": "robots.txt «User-agent: * / Disallow: /» y no se confirmó un learning journey gratuito de BASIS (búsqueda del 2026-10-23)",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "igual que help.sap.com"
+      },
+      "licencia": "© SAP SE",
+      "cadencia": "trimestral",
+      "ultimaVista": "no se entra",
+      "aporta": "cursos de administración",
+      "releases": [
+        "S/4HANA"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "sap-community",
+      "nombre": "SAP Community (community.sap.com)",
+      "url": "https://community.sap.com",
+      "tipo": "secundaria",
+      "autor": "usuarios de la comunidad",
+      "acceso": "publica",
+      "captura": "no",
+      "porQueAsi": "su robots.txt deja rastrear con espera de 5 s, pero es un sitio de SAP (mismos términos contra la extracción) y politica-cita no la admite: daría candidatos, nunca reglas",
+      "terminos": {
+        "url": "https://www.sap.com/about/legal/terms-of-use.html",
+        "dice": "prohíbe la extracción automatizada"
+      },
+      "licencia": "de cada autor",
+      "cadencia": "diaria",
+      "ultimaVista": "no se entra",
+      "aporta": "experiencias de administradores, sin revisar",
+      "releases": [
+        "todas"
+      ],
+      "citaDeEjemplo": null
+    },
+    {
+      "id": "blogs-seguridad",
+      "nombre": "Resúmenes del Patch Day de terceros (SecurityBridge, Onapsis, Pathlock)",
+      "url": "https://securitybridge.com/blog/sap-security-patch-day-october-2026/",
+      "tipo": "secundaria",
+      "autor": "proveedores de seguridad SAP",
+      "acceso": "publica",
+      "captura": "no",
+      "porQueAsi": "repiten lo que el CVE List ya trae de primera mano, con conteos que no cuadran entre sí (octubre: 21 o 22 según quién); no son fuente admitida",
+      "terminos": {
+        "url": "https://securitybridge.com/",
+        "dice": "términos propios de cada sitio"
+      },
+      "licencia": "de cada autor",
+      "cadencia": "mensual",
+      "ultimaVista": "octubre de 2026, por búsqueda",
+      "aporta": "contexto y conteos del Patch Day",
+      "releases": [
+        "todas"
+      ],
+      "citaDeEjemplo": null
+    }
+  ],
+  "areas": [
+    {
+      "id": "copia",
+      "nombre": "Copia de sistemas e instalación",
+      "tcodes": [
+        "SE06",
+        "BDLS",
+        "SICK",
+        "SM28",
+        "RZ70",
+        "SLDCHECK",
+        "SGEN"
+      ],
+      "productos": "Software Provisioning|SWPM|Landscape Management"
+    },
+    {
+      "id": "kernel",
+      "nombre": "Kernel, SPAM/SAINT y SUM",
+      "tcodes": [
+        "SPAM",
+        "SAINT",
+        "SNOTE",
+        "SPAU",
+        "SPDD",
+        "SM51"
+      ],
+      "productos": "Kernel|KRNL|Update Manager|Software Update|Host Agent"
+    },
+    {
+      "id": "transportes",
+      "nombre": "Transportes (STMS/CTS, tp, R3trans)",
+      "tcodes": [
+        "STMS",
+        "STMS_IMPORT",
+        "SE09",
+        "SE10",
+        "SE01",
+        "SE03"
+      ],
+      "productos": "Change and Transport|Transport Management|CTS"
+    },
+    {
+      "id": "usuarios",
+      "nombre": "Usuarios y roles (SU01, PFCG, SUIM)",
+      "tcodes": [
+        "SU01",
+        "SU10",
+        "PFCG",
+        "SUIM",
+        "SU53",
+        "SU24",
+        "SU25",
+        "SU56",
+        "RSUSR002"
+      ],
+      "productos": "User Management|Authorization|Central User Administration"
+    },
+    {
+      "id": "seguridad",
+      "nombre": "Seguridad (Patch Day, SNC, STRUST, gateway, SM59, UCON)",
+      "tcodes": [
+        "STRUST",
+        "STRUSTSSO2",
+        "SNC0",
+        "SNCWIZARD",
+        "SMGW",
+        "SM59",
+        "UCON",
+        "CERTRULE",
+        "SAML2",
+        "SECSTORE",
+        "RSAU_CONFIG",
+        "SM19",
+        "SM20",
+        "SICF"
+      ],
+      "productos": "NetWeaver|ABAP|Web Dispatcher|Internet Communication Manager|Message Server|Gateway|SAProuter|Extended Passport|Cloud Connector"
+    },
+    {
+      "id": "jobs",
+      "nombre": "Jobs (SM36/SM37)",
+      "tcodes": [
+        "SM36",
+        "SM37",
+        "SM62",
+        "SM64",
+        "SM69"
+      ],
+      "productos": "Background|Job Scheduling"
+    },
+    {
+      "id": "monitoreo",
+      "nombre": "Monitoreo y diagnóstico (ST22, SM21, SM50/SM66, ST03N, ST06, SM12, SM13, DBACOCKPIT)",
+      "tcodes": [
+        "ST22",
+        "SM21",
+        "SM50",
+        "SM66",
+        "ST03N",
+        "ST06",
+        "SM12",
+        "SM13",
+        "DBACOCKPIT",
+        "ST02",
+        "ST04",
+        "ST05",
+        "ST12",
+        "SM04",
+        "AL08",
+        "SMICM",
+        "SLG1",
+        "RZ20"
+      ],
+      "productos": "Solution Manager|Introscope|Diagnostics|Focused Run|Health Monitoring|Job Monitoring"
+    },
+    {
+      "id": "hana",
+      "nombre": "HANA (respaldo, revisiones, cockpit)",
+      "tcodes": [
+        "DB02",
+        "DB13",
+        "DBACOCKPIT"
+      ],
+      "productos": "HANA|HDB"
+    },
+    {
+      "id": "clientes",
+      "nombre": "Clientes (SCC4, SCCL)",
+      "tcodes": [
+        "SCC4",
+        "SCCL",
+        "SCC1",
+        "SCC3",
+        "SCC5",
+        "SCC7",
+        "SCC8",
+        "SCC9"
+      ],
+      "productos": "Client Copy"
+    },
+    {
+      "id": "impresion",
+      "nombre": "Impresión (SPAD, SP01)",
+      "tcodes": [
+        "SPAD",
+        "SP01",
+        "SP02",
+        "SOST",
+        "SCOT"
+      ],
+      "productos": "Spool|Print|Output Management"
+    },
+    {
+      "id": "licencias",
+      "nombre": "Licencias",
+      "tcodes": [
+        "SLICENSE",
+        "USMM",
+        "SLAW"
+      ],
+      "productos": "License"
+    },
+    {
+      "id": "java",
+      "nombre": "AS Java (Visual Composer, Portal, NWA)",
+      "tcodes": [],
+      "productos": "Java|Visual Composer|Enterprise Portal|JMS|Web Dynpro Java"
+    },
+    {
+      "id": "ciclos",
+      "nombre": "Ciclos de mantenimiento y fin de soporte",
+      "tcodes": [],
+      "productos": "^$"
+    },
+    {
+      "id": "rise",
+      "nombre": "RISE y Cloud ALM",
+      "tcodes": [],
+      "productos": "Cloud ALM|RISE|private cloud|Private Cloud"
+    }
+  ]
+}

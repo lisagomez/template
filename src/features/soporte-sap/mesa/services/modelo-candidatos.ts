@@ -1,14 +1,55 @@
 /**
  * El contrato de los candidatos y del mapa. Un candidato es una HIPÓTESIS que sale de una fuente externa fijada
- * (sapstack, por SHA): el experto la valida y su validación es una PROPUESTA para el laboratorio. Nada de aquí es una
- * regla: las reglas se firman en `tools/conocimiento`, fuera de la mesa.
+ * (sapstack, por SHA; o la web de BASIS, cada fuente por su SHA, con la fecha de captura y la huella de lo leído): el
+ * experto la valida y su validación es una PROPUESTA para el laboratorio. Nada de aquí es una regla: las reglas se firman
+ * en `tools/conocimiento`, fuera de la mesa.
  */
 import { z } from 'zod'
 
 export const VALORACIONES = ['correcto', 'mal', 'corrige', 'no_se'] as const
 export type Valoracion = (typeof VALORACIONES)[number]
 
-/** Un candidato como lo genera `fuentes/generadores.mjs`. */
+/** Una cita en la forma que admite `politica-cita.mjs`: una SAP Note (me.sap.com, «SAP Note N») o SAP Help. */
+export interface CitaCandidato { readonly url: string; readonly texto: string }
+/** De qué captura sale un candidato web: la fuente, su SHA, el día que se capturó y la huella de lo leído. */
+export interface CapturaCandidato { readonly fuente: string; readonly ref: string; readonly fecha: string; readonly huella: string }
+/** Los hechos de una nota de seguridad, tal como los publica SAP como CNA en el CVE List (y KEV, si está explotada). */
+export interface SeguridadCandidato {
+  readonly cves: readonly string[]
+  readonly cvss: number | null
+  readonly vector: string | null
+  readonly prioridad: 'Hot News' | 'Alta' | 'Media' | 'Baja' | null
+  readonly publicada: string
+  readonly patchDay: boolean
+  readonly actualizada: string
+  readonly cwe: readonly string[]
+  readonly producto: string
+  readonly versiones: readonly string[]
+  /** El día en que CISA la dio por explotada activamente (KEV), o null. */
+  readonly explotada: string | null
+}
+/** Lo que una fuente web dice de un candidato de sapstack. Corrobora solo una fuente que `politica-cita.mjs` admite. */
+export interface EvidenciaWeb {
+  readonly fuente: string
+  readonly guia: string
+  readonly pagina: string
+  readonly seccion: string | null
+  readonly archivo: string
+  readonly linea: number
+  readonly url: string
+  readonly cita: CitaCandidato | null
+  readonly admitida: boolean
+  readonly detalle: string
+}
+export interface Corroboracion {
+  readonly clave: string
+  readonly tipo: 'tcode' | 'nota'
+  readonly basis: boolean
+  readonly estado: 'corroborado' | 'contradicho' | 'no_encontrado'
+  readonly evidencias: readonly EvidenciaWeb[]
+}
+
+/** Un candidato como lo genera `fuentes/generadores.mjs` (sapstack) o `fuentes/web/generador.mjs` (la web). */
 export interface Candidato {
   readonly id: string
   readonly tipo: 'tcode' | 'nota'
@@ -21,6 +62,42 @@ export interface Candidato {
   readonly destino: string
   readonly fuente: { readonly archivo: string; readonly linea: number; readonly url: string }
   readonly aviso: string | null
+  /** Solo los de la web: de dónde salen, la cita admitida (si la hay), la captura y, si es nota de seguridad, sus hechos. */
+  readonly origen?: 'web'
+  readonly cita?: CitaCandidato | null
+  readonly captura?: CapturaCandidato
+  readonly seguridad?: SeguridadCandidato
+  readonly contexto?: readonly string[]
+  /** Solo los de sapstack, en la mesa: lo que dicen de él las fuentes web fijadas. */
+  readonly corroboracion?: Corroboracion
+}
+
+/** Los conteos de la extracción web, como los deja el generador. */
+export interface ResumenWeb {
+  readonly registros: number
+  readonly deSap: number
+  readonly sinNota: number
+  readonly notasDeSeguridad: number
+  readonly fueraDeAlcance: number
+  readonly explotadas: number
+  readonly kev: string
+  readonly paginas: number
+  readonly candidatos: { readonly total: number; readonly seguridad: number; readonly punteros: number; readonly tcodes: number; readonly enAlcance: number }
+  readonly cruce: { readonly total: number; readonly corroborados: number; readonly contradichos: number; readonly noEncontrados: number }
+}
+/** La revisión de vigencia: avisa y no mueve. */
+export interface RevisionWeb { readonly fecha: string; readonly estado: 'al_dia' | 'version_nueva'; readonly proximoPatchDay: string; readonly avisos: readonly string[] }
+/** La fuente web de la mesa: sus pins, su captura, su revisión y si el catálogo pasó su huella y su pin. */
+export interface FuenteWebVista {
+  readonly capturadoEl: string
+  readonly ventana: { readonly desde: string; readonly hasta: string }
+  readonly ultimoPatchDay: string
+  readonly pins: ReadonlyArray<{ readonly id: string; readonly nombre: string; readonly web: string; readonly sha: string; readonly licencia: string }>
+  readonly kevVersion: string
+  readonly revision: RevisionWeb | null
+  readonly resumen: ResumenWeb | null
+  readonly integro: boolean
+  readonly motivo: string | null
 }
 
 /** De dónde salen los candidatos: el pin, la licencia y la última revisión del origen. */
@@ -55,6 +132,7 @@ export interface ValidacionCandidato {
 /** Lo que ve una identidad: el catálogo y SUS validaciones. */
 export interface CandidatosVista {
   readonly fuente: FuenteVista
+  readonly web: FuenteWebVista
   readonly candidatos: readonly Candidato[]
   readonly mias: Readonly<Record<string, ValidacionCandidato>>
 }
@@ -95,6 +173,7 @@ export interface MapaVista {
   readonly generado: string
   readonly fuentes: {
     readonly sapstack: { readonly candidatos: number; readonly tcodes: number; readonly notas: number; readonly enAlcance: number; readonly commitNuevo: boolean; readonly porModulo: ReadonlyArray<{ readonly modulo: string; readonly candidatos: number; readonly validados: number; readonly enAlcance: number }> }
+    readonly web: { readonly candidatos: number; readonly seguridad: number; readonly hotNews: number; readonly explotadas: number; readonly punteros: number; readonly tcodes: number; readonly validados: number; readonly cruce: ResumenWeb['cruce']; readonly porFuente: ReadonlyArray<{ readonly fuente: string; readonly candidatos: number }> }
     readonly experto: { readonly casos: number; readonly validaciones: number; readonly expertos: number; readonly dePrueba: number }
     readonly notas: { readonly punteros: number; readonly validadas: number }
   }
@@ -116,4 +195,5 @@ export interface MapaVista {
   }
   readonly propuestas: readonly PropuestaCandidato[]
   readonly fuente: FuenteVista
+  readonly web: FuenteWebVista
 }

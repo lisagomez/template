@@ -621,6 +621,19 @@
         "genera": "node src/features/soporte-sap/mesa/fuentes/extrae.mjs sapstack <copia de sapstack en el SHA de fuente.json>",
         "comprueba": { "gate": "prueba:tools" },
         "_nota": "No es hermetico: su fuente es sapstack en el SHA de fuente.json, fuera del repo, y re-extraerlo lo hace el laboratorio con esa copia. Lo que compara el gate (prueba mesa-candidatos) es su huella, el pin y la linea de cada candidato: caza la edicion a mano, no un cambio de sapstack."
+      },
+      {
+        "nombre": "soporte-sap-candidatos-web",
+        "rutas": ["src/features/soporte-sap/mesa/fuentes/web/candidatos-web.json"],
+        "fuentes": [
+          "src/features/soporte-sap/mesa/fuentes/web/pin.json", "src/features/soporte-sap/mesa/fuentes/web/catalogo.json",
+          "src/features/soporte-sap/mesa/fuentes/web/generador.mjs", "src/features/soporte-sap/mesa/fuentes/web/reglas.mjs",
+          "src/features/soporte-sap/mesa/fuentes/sapstack/candidatos-sapstack.json",
+          "src/features/soporte-sap/mesa/fuentes/generadores.mjs", "tools/conocimiento/politica-cita.mjs"
+        ],
+        "genera": "node src/features/soporte-sap/mesa/fuentes/extrae.mjs web <captura del CVE List, KEV y SAP-docs en los SHA de pin.json>",
+        "comprueba": { "gate": "prueba:tools" },
+        "_nota": "No es hermetico: su fuente es la captura del CVE List, KEV y SAP-docs en los SHA de pin.json, fuera del repo, y re-extraerlo lo hace el laboratorio con esa captura. Lo que compara el gate (prueba mesa-web) es su huella, que su pin sea el de pin.json y la captura y la cita de cada candidato: caza la edicion a mano, no un cambio en la web. Mover el pin lo decide el laboratorio, y extrae.mjs revisa web avisa cuando hay version nueva."
       }
     ],
     "fuera": [

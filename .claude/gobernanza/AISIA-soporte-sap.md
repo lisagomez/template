@@ -88,6 +88,19 @@
 > tercero que reciba datos. Entra un daño nuevo, «Una hipótesis de un tercero que se vuelve regla». Cambian la §2, la
 > §3, la §4 y la §5, y el C3 gana cuatro filas en la matriz («La mesa del experto alojada») y la AISIA, cuatro. Va
 > firmada al pie.
+>
+> **Revisión 13** (2026-10-23): **SAP BASIS desde la web, como candidatos de la mesa**. La mesa enseña al experto, junto a
+> los de sapstack, hipótesis de BASIS que salen de fuentes públicas fijadas por SHA y fecha de captura: las notas de
+> seguridad que SAP publica como CNA en el CVE List (número, título, CVSS, CVE, producto y versiones), marcadas como
+> explotadas si CISA las tiene en KEV, y las transacciones y SAP Notes que cita la documentación de SAP publicada en
+> SAP-docs (CC BY 4.0). A cada candidato de sapstack de BASIS se le enseña si una fuente que `politica-cita.mjs` admite
+> lo corrobora, lo contradice o no lo encuentra. La captura la corre el laboratorio en su máquina, fuera del repo, y la
+> mesa alojada solo lee el catálogo fijado: no sale a internet. SAP Help y las páginas de support.sap.com no se capturan:
+> su robots.txt y los términos de SAP no lo dejan en automático. De una SAP Note solo entran el número, el título y el
+> enlace, y lo demás va con palabras propias. Ninguna fuente nueva recibe datos. Entran dos daños, «Una fuente de la web
+> vieja o secundaria tomada por buena» y «La redacción de SAP o sus términos, pasados por alto». Cambian la §1, la §2,
+> la §3, la §4 y la §5, y la matriz gana doce filas: dos del C3 («La mesa del experto alojada») y diez de la AISIA
+> (siete probadas y tres brechas). Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -116,6 +129,10 @@
   Cloudflare verifica al experto por su correo (Access), corre el laboratorio sintético en un contenedor suyo (en el
   este de Norteamérica), ve todo lo que pasa por la mesa, y guarda lo que el experto escribe y su retroalimentación en
   R2, en la jurisdicción de Estados Unidos. Al proveedor de modelo, por D7, nunca le llega lo crudo.
+- **Las fuentes públicas de BASIS** (revisión 13): SAP, como autora de sus registros en el CVE List y de su
+  documentación en SAP-docs; el CVE Program, CISA (KEV), NIST (NVD) y GitHub, que las sirve. No reciben nada del
+  laboratorio salvo las peticiones de la captura: GitHub y NVD ven la IP de la máquina que la corre. SAP es además
+  titular de la redacción de lo que publica, y sus términos cierran sus sitios a la extracción automatizada.
 - **Quien tiene root en el servidor**: en modo despacho, alguien de la consultora. Lee todo, la base
   entera incluida, y la RLS no lo impide (C3, «Root ajeno»).
 
@@ -149,6 +166,8 @@
 | **Dato fuera de México** | En el modo gestionado, la base y los archivos de los N3 viven en un proveedor de Estados Unidos. Los datos de sus empleados y de sus contrapartes quedan bajo otra jurisdicción, y el N3 puede no saberlo, o estar obligado a guardarlos en México. |
 | **Lo que escribe el experto, en un tercero** | El experto cuenta en la mesa un caso real de su experiencia, con el nombre de la empresa o un dato de una persona que no tiene forma de dato. Pasa el filtro, llega al contenedor de Cloudflare y se guarda en su almacén, junto con el correo del experto y su retroalimentación. Ahí lo lee el laboratorio, y Cloudflare, que opera la infraestructura, puede verlo. |
 | **Una hipótesis de un tercero que se vuelve regla** | Un candidato de sapstack (fuente secundaria, sin citas y con errores medidos) llega a ser regla sin que nadie lo verifique, y el agente le da al cliente de una consultora una «solución conocida» falsa. |
+| **Una fuente de la web vieja o secundaria tomada por buena** | Una nota de seguridad capturada se reemplaza o sube de prioridad, llega el Patch Day siguiente, o una página que no es de SAP «corrobora» un candidato de sapstack, y el experto o el laboratorio firman con un dato que ya no es el de SAP: el agente le da al cliente de una consultora una solución vieja, o una nota crítica se queda sin aplicar en su sistema. |
+| **La redacción de SAP o sus términos, pasados por alto** | Para tener la base al día, una herramienta baja y mina páginas que el robots.txt y los términos de SAP cierran, o lo extraído repite párrafos de SAP o el contenido de una SAP Note (que está detrás del S-user y del contrato de soporte): el laboratorio pasa por encima de los derechos de SAP y de los términos que aceptan las consultoras, y la base se tiene que retirar. |
 | **Dato real en la sección en vivo** | La vitrina tiene una sección en vivo para invitados, con datos sintéticos. Un invitado, una consultora que lo evalúa, escribe ahí el ticket real de un cliente suyo, con nombres o identificadores de sus empleados: llega a la máquina del laboratorio, lo ven los demás invitados, y pasa por Vercel. |
 | **Dato que vive de más o que vuelve** | Las capturas y los CFDI de un N3, con datos de sus empleados y de sus contrapartes, se guardan para siempre; el N3 se va y lo suyo se queda; se borra del servicio y sigue en una copia de respaldo; o una restauración devuelve lo que ya se había borrado. Y al revés: el borrado automático se lleva algo antes de tiempo, con una impugnación abierta o antes de que quien se va tenga su export. |
 
@@ -183,6 +202,8 @@
 | Dato que vive de más o que vuelve | **Alta** (datos de terceros) | Baja con D8: la base decide qué vence, y sin plazos en el contrato no se borra nada | Lo que vive de más, sí: se borra. Lo borrado antes de tiempo, **no** |
 | Lo que escribe el experto, en un tercero | Media (datos de terceros: el cliente o la persona del caso que cuenta) | Media: el experto escribe casos propios a propósito; la bajan el filtro, lo que se le pide en pantalla y que solo entren los correos de la lista | Parcial: el laboratorio borra el caso y la retención lo borra sola; lo que ya pasó por Cloudflare no se des-ve |
 | Una hipótesis de un tercero que se vuelve regla | **Alta** (un veredicto falso para terceros) | Baja: ningún candidato da veredicto (grado «hipótesis», medido en el motor) y una regla exige fuente citable y firma | Parcial: la regla se cierra y la versión sube, pero lo ya respondido se queda |
+| Una fuente de la web vieja o secundaria tomada por buena | **Alta** (una nota crítica sin aplicar o un veredicto viejo para terceros) | Baja: ningún candidato da veredicto, corroborar exige una fuente que politica-cita admite y la revisión avisa del Patch Day siguiente | Parcial: el pin se mueve y la regla se cierra, pero lo ya respondido se queda |
+| La redacción de SAP o sus términos, pasados por alto | Media (derechos de un tercero; retirar la base) | Baja: no se captura lo que SAP cierra y el generador se niega ante ocho palabras seguidas de una captura | Sí: lo extraído se regenera; lo que ya se publicó ya se vio |
 | Dato real en la sección en vivo | Media-alta (datos de terceros) | Baja: solo invitados, aviso permanente, sin adjuntos y el filtro de forma de dato | Parcial: vive en memoria y se pierde al apagar; lo que ya vio otro invitado no se des-ve |
 
 ## 4. Mitigaciones
@@ -437,6 +458,19 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     experto pasa los dos filtros y se guarda como propuesta, en el mismo almacén y con la misma retención; cada identidad
     ve solo lo suyo, y el mapa, con todas, solo existe para el laboratorio. Un número de nota (7 cifras) en un comentario
     lo rechaza el filtro: el candidato ya lleva el suyo.
+  - **La web de BASIS** (revisión 13): el laboratorio captura en su máquina, fuera del repo, solo fuentes públicas que
+    sus términos y su robots.txt dejan bajar en automático (el CVE List, KEV y SAP-docs, cada una por su SHA; NVD solo
+    para saber qué CVE son de SAP); me.sap.com, la PAM, help.sap.com y support.sap.com se niegan siempre. La extracción
+    se niega ante una copia que no está en su SHA o que fue alterada, y el generador, si una hipótesis repite ocho
+    palabras seguidas de una captura. De una SAP Note solo entran el número, el título y el enlace. Un candidato de
+    sapstack solo queda corroborado por una fuente que politica-cita admite (SAP Help o el número de una SAP Note). La
+    mesa carga el catálogo web solo si su huella y su pin cuadran, y no sale a internet. La revisión de vigencia avisa
+    del Patch Day siguiente, de un CVE de SAP posterior a la captura, de KEV con entradas de SAP y de un commit de
+    SAP-docs, y no mueve el pin. Validar un candidato de la web es una propuesta, como uno de sapstack.
+  - *Brecha* (revisión 13): SAP Help, el Patch Day de support.sap.com y la estrategia de mantenimiento no se capturan,
+    así que la base no trae el procedimiento de cada tarea, las notas de seguridad sin CVE ni las fechas de fin de
+    mantenimiento: los huecos están declarados por área. La URL de SAP Help de una página de SAP-docs se deriva de su
+    loio y nadie la abre en automático. La prioridad de una nota se deriva de su CVSS con la escala de SAP.
   - *Brecha*: un dato sin forma pasa el filtro, y el experto puede contar el caso de un cliente suyo. Cloudflare ve el
     contenido, porque termina el TLS. El contenedor se fija en el este de Norteamérica, que puede incluir Canadá:
     Containers no ofrece una jurisdicción «us» (medido en wrangler 4.143.1). Un `wrangler deploy` a mano se salta el
@@ -469,6 +503,8 @@ quedan hoy:
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
 | Lo que escribe el experto, en un tercero | Lo **reducen** el filtro antes de llegar y antes de guardarse, lo que se le pide en pantalla, que no haya archivos y la identidad de Access: solo entran los correos de la lista, y lo guardado solo lo lee el laboratorio y vence. No es cero: un dato sin forma pasa, y queda declarado. |
 | Una hipótesis de un tercero que se vuelve regla | **Se evita**: el candidato va «al experto» siempre, la validación es una propuesta y la regla se firma en `tools/conocimiento` con una fuente citable, que sapstack no es. |
+| Una fuente de la web vieja o secundaria tomada por buena | **Se evita** como la anterior: el candidato va «al experto», validar es una propuesta y una regla se firma con su cita. Además, solo corrobora una fuente que politica-cita admite, y la revisión avisa del Patch Day siguiente sin mover el pin. Que la base lo cubra todo **no** se promete: los huecos quedan declarados por área. |
+| La redacción de SAP o sus términos, pasados por alto | **Se evita**: no se captura lo que el robots.txt o los términos de SAP cierran ni lo que pide S-user; de una SAP Note solo entran el número, el título y el enlace; y el generador se niega si una hipótesis repite ocho palabras de una captura. Lo protegido es la redacción, no los hechos (LFDA, art. 14, fr. I); esto no es asesoría legal. |
 | Un dato real en la sección en vivo | Lo **reducen** el filtro del anonimizador antes del túnel y al llegar, que no haya adjuntos, el aviso permanente y el estado en memoria. No es cero: un dato sin forma pasa, y queda declarado. Solo entra quien el laboratorio invita. |
 
 Para salir del laboratorio hacen falta:
@@ -515,3 +551,5 @@ Revisión 10 (la vitrina en Vercel y su sección en vivo, con el C3), lisagomez 
 Revisión 11 (la mesa del experto alojada en Cloudflare, con el C3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-22
 
 Revisión 12 (una fuente externa de candidatos en la mesa: sapstack, con el C3), firmada por: lisagomez Rol: responsable del proyecto Fecha: 2026-10-22
+
+Revisión 13 (SAP BASIS desde la web como candidatos de la mesa, con el C3), firmada por: lisagomez Rol: responsable del proyecto Fecha: 2026-10-24

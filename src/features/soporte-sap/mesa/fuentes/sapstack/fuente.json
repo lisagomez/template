@@ -7,6 +7,12 @@
   "commitFecha": "2026-04-11",
   "licencia": "MIT",
   "copyright": "Copyright (c) 2026 BoxLogoDev",
-  "origen": { "repo": "BoxLogoDev/sapstack", "estado": "no existe (404) al 2026-10-22: la copia de Fioriuser2021 no está marcada como fork" },
-  "revision": { "fecha": "2026-10-22", "head": "5be80773025a3ace996f02a5b0a8557779eaa334" }
+  "origen": {
+    "repo": "BoxLogoDev/sapstack",
+    "estado": "no existe (404) al 2026-10-22: la copia de Fioriuser2021 no está marcada como fork"
+  },
+  "revision": {
+    "fecha": "2026-10-23",
+    "head": "5be80773025a3ace996f02a5b0a8557779eaa334"
+  }
 }

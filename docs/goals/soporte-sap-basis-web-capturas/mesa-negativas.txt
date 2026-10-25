@@ -1,0 +1,7 @@
+sin identidad, la mesa: 404
+sin identidad, la API: 404
+un JWT vencido: 404
+el experto, la vista del laboratorio: 404
+el experto, la página del laboratorio: 404
+el experto, el mapa por la API: 404
+el experto, la ruta de las identidades elegibles (superadmin): 404

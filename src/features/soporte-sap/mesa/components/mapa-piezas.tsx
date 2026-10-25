@@ -13,14 +13,15 @@ export function Cuenta({ n, tono = 'bg-neutral-600 text-white' }: { n: number | 
 }
 
 /** Un nodo de fuente: se despliega para ver de qué está hecho su conteo; el nombre abre su detalle abajo. */
-export function NodoFuente({ nombre, cuenta, aviso, abre, prueba, children }: { nombre: string; cuenta: number; aviso?: string | null; abre: () => void; prueba: string; children: ReactNode }) {
+export function NodoFuente({ nombre, cuenta, aviso, bien, abre, prueba, children }: { nombre: string; cuenta: number; aviso?: string | null; bien?: string | null; abre: () => void; prueba: string; children: ReactNode }) {
   const [abierto, setAbierto] = useState(false)
   return (
     <div className="rounded-2xl border border-neutral-300 bg-white shadow-sm ring-4 ring-neutral-100" data-prueba={prueba}>
       <div className="flex items-center gap-2 px-4 py-3">
         <button type="button" onClick={abre} className="font-semibold text-neutral-900 hover:underline" data-prueba={`${prueba}-abre`}>{nombre}</button>
         <Cuenta n={cuenta} />
-        {aviso ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">{aviso}</span> : null}
+        {aviso ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900" data-prueba={`${prueba}-aviso`}>{aviso}</span> : null}
+        {!aviso && bien ? <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-900" data-prueba={`${prueba}-bien`}>{bien}</span> : null}
         <button type="button" onClick={() => setAbierto(!abierto)} aria-expanded={abierto} aria-label={`${abierto ? 'Cerrar' : 'Desplegar'} ${nombre}`} className="ml-auto rounded-full p-1 text-neutral-500 hover:bg-neutral-100">
           <svg viewBox="0 0 20 20" className={`h-4 w-4 transition ${abierto ? 'rotate-180' : ''}`} aria-hidden><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
         </button>

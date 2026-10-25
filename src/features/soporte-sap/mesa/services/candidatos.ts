@@ -1,5 +1,7 @@
 /**
- * Los candidatos de la mesa: hipótesis que salen de sapstack, fijado por SHA, para que el experto diga si son ciertas.
+ * Los candidatos de la mesa: hipótesis que salen de sapstack, fijado por SHA, y de la web de BASIS (`web.ts`), cada fuente
+ * fijada por SHA y fecha de captura, para que el experto diga si son ciertas. A cada candidato de sapstack se le pega lo
+ * que dicen de él las fuentes web fijadas (corroborado, contradicho o no encontrado): el experto sigue decidiendo.
  * Lo que dice se guarda como PROPUESTA en el almacén de la mesa, filtrado, y lo lee el laboratorio. La mesa no siembra:
  * una regla nace en `tools/conocimiento`, con su fuente citada y la firma del laboratorio, nunca aquí.
  *
@@ -15,6 +17,7 @@ import type { Almacen } from './almacen'
 import { datoPersonalEn } from './filtro'
 import { enFila } from './fila'
 import type { AccionValida, Candidato, CandidatosVista, FuenteVista, ValidacionCandidato } from './modelo-candidatos'
+import { catalogoWeb, corroboracionDe, fuenteWeb } from './web'
 
 const PREFIJO = 'mesa/validaciones'
 const claveDe = (usuario: string, candidato: string) => `${PREFIJO}/${usuario}--${candidato}.json`
@@ -35,8 +38,16 @@ export function catalogoValido(c: CatalogoGenerado, pin: Pin): { readonly candid
 }
 
 const CATALOGO = catalogoValido(catalogoJson as unknown as CatalogoGenerado, fuenteJson)
-const POR_ID = new Map(CATALOGO.candidatos.map((c) => [c.id, c]))
-export const catalogo = (): readonly Candidato[] => CATALOGO.candidatos
+const conCruce = (c: Candidato): Candidato => { const x = corroboracionDe(c.id); return x ? { ...c, corroboracion: x } : c }
+/** Primero sapstack (con su cruce), después la web. Un id de la web que choque con uno de sapstack no entra. */
+const TODOS: readonly Candidato[] = (() => {
+  const deSapstack = CATALOGO.candidatos.map(conCruce)
+  const ids = new Set(deSapstack.map((c) => c.id))
+  return [...deSapstack, ...catalogoWeb().filter((c) => !ids.has(c.id))]
+})()
+const POR_ID = new Map(TODOS.map((c) => [c.id, c]))
+export const catalogo = (): readonly Candidato[] => TODOS
+export const catalogoSapstack = (): readonly Candidato[] => CATALOGO.candidatos
 export const fuente = (): FuenteVista => ({ ...fuenteJson, integro: CATALOGO.motivo === null, motivo: CATALOGO.motivo })
 
 async function lee(a: Almacen, clave: string): Promise<ValidacionCandidato | null> {
@@ -79,5 +90,5 @@ export async function todasLasValidaciones(a: Almacen, retencionDias: number | n
 /** Lo que ve una identidad: el catálogo y SOLO sus validaciones (las de otros, ni el laboratorio las ve aquí). */
 export async function vistaCandidatos(a: Almacen, id: IdentidadMesa, retencionDias: number | null): Promise<CandidatosVista> {
   const suyas = (await todasLasValidaciones(a, retencionDias)).filter((v) => v.por.usuario === id.usuario)
-  return { fuente: fuente(), candidatos: catalogo(), mias: Object.fromEntries(suyas.map((v) => [v.candidato, v])) }
+  return { fuente: fuente(), web: fuenteWeb(), candidatos: catalogo(), mias: Object.fromEntries(suyas.map((v) => [v.candidato, v])) }
 }
