@@ -5498,3 +5498,49 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 293 unidades; `mide:contexto` ☑ dentro de presupuesto;
   `revisa:readmes` ☑.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-24
+
+### 2026-10-25 — `base.json` y `candidatos-sapstack.json` entran al registro de generados — radio: padrón de gates (dos artefactos nuevos en `generados`, ningún gate ni generador tocado)
+
+- **Cambio** (rama `soporte/sapstack`, tras juntar `main` hasta #279 en `1f106e2`; commit `daf1fc6`): dos entradas
+  nuevas en `generados.artefactos` de `.claude/gates.json`.
+  - **`soporte-sap-mesa-base`**: `src/features/soporte-sap/mesa/fuentes/base.json`, la foto de `tools/conocimiento` que
+    pinta el nodo central del mapa del laboratorio. Sus fuentes son `versiones.json`, `CAMBIOS.md` y `package.json` de
+    `tools/conocimiento`, más `generadores.mjs`. Lo regenera `extrae.mjs base` y lo compara la prueba `mesa-candidatos`
+    de `tools/soporte-sap` (dentro de `prueba:tools`), campo por campo con `baseDe`.
+  - **`soporte-sap-candidatos-sapstack`**: `candidatos-sapstack.json`, los candidatos de sapstack fijados por SHA. Sus
+    fuentes son `fuente.json` (el pin) y `generadores.mjs`. Lo compara la misma prueba: su huella, que su SHA sea el de
+    `fuente.json` y que cada candidato cite su línea en ese SHA. Su `_nota` dice que no es hermético.
+  - No cambia ningún gate, ningún generador ni ningún archivo generado.
+- **Por qué**: desde D-SS-9 (firmada el 2026-10-24, en `main` por #278), todo archivo versionado con el banner tiene que
+  estar en el registro. Estos dos llevan `_ALTO` desde que se construyó la rama de sapstack (2026-10-22), y la entrada de
+  D-SS-9 ya lo dejó previsto: al juntar la rama con `main`, `verifica:generados` los vio huérfanos.
+- **Lo que decide el laboratorio al firmar**: `candidatos-sapstack.json` entra como artefacto aunque no se regenera
+  desde el repo. Su fuente es sapstack en el SHA de `fuente.json`, fuera del repo, y volver a extraerlo lo hace el
+  laboratorio con esa copia. Lo que el gate comprueba caza la edición a mano, no un cambio en sapstack: eso es mover el
+  pin, que ya es decisión del laboratorio y lo avisa `extrae.mjs revisa` en el mapa. La alternativa era quitarle el
+  banner y declararlo `fuera` como «no hermético»: quien lo abriera no vería el aviso, y la regla de huérfanos dejaría de
+  cubrirlo.
+- **Demostrado** (2026-10-25):
+  - sobre el merge y antes del cambio: `verifica:generados` en rojo, con esos dos archivos como únicos huérfanos;
+  - con el cambio: 57 comprobaciones y 8 de 8 siembras (13 artefactos y 6 grupos `fuera`);
+  - 2 sabotajes en disco, uno cada vez: `base.json` editado a mano (un contador de firmas cambiado) deja en rojo la
+    comparación con `baseDe` (7 de 8 pruebas); un candidato editado rompe la huella, la mesa rechaza el catálogo entero y
+    caen 7 de 8. Restaurados, 8 de 8;
+  - en un clon limpio dentro de `node:22.18.0-bookworm` (fijado por digest), con 2 CPU y 7 GB, sin `.env` ni
+    `node_modules`: **`validate` 33/33** sobre `daf1fc6` (árbol `a8c98ad6309d`), en 934 s; gobernanza 171/171.
+- **Lo que cuesta o queda abierto**:
+  - el registro pasa de 11 a 13 artefactos; `validate` no gana ningún gate ni tiempo: la prueba ya corría;
+  - `soporte/sapstack-cita` va después, y su entrada (D-SS-3, firmada el 2026-10-22) chocará al final de esta bitácora:
+    se resuelve con un merge de `main`, sin editar ninguna entrada.
+- **Salida del perímetro (C4)**: ninguna: no cambia qué datos salen ni adónde.
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 33/33 en clon limpio sobre `daf1fc6` (árbol `a8c98ad6309d`);
+  - capa B no corrida por el agente: no cambia `AGENTS.md`, ningún skill ni ningún prompt; decide el laboratorio
+    («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni imagen nueva; el validate, en la imagen fijada por digest).
+- **Regresión**: `verifica:generados` ☑ 57 y 8/8 siembras; `verifica:gates` ☑ 12/12 y `--prueba` 9/9;
+  `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 295 unidades.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-25
