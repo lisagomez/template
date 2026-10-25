@@ -5600,3 +5600,47 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
   - pineo ☑ (sin modelo ni dependencia nueva).
 - **Regresión**: `verify:gobernanza` ☑ 171/171, y la suite del conocimiento con la política nueva ☑ 37/37.
 - **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-22
+
+### 2026-10-25 — `candidatos-web.json` entra al registro de generados — radio: padrón de gates (un artefacto nuevo en `generados`, ningún gate ni generador tocado)
+
+- **Cambio** (rama `soporte/basis-web`, tras juntar `main` hasta #281 en `951d36e`; commit `a13da01`): una entrada
+  nueva en `generados.artefactos` de `.claude/gates.json`.
+  - **`soporte-sap-candidatos-web`**: `src/features/soporte-sap/mesa/fuentes/web/candidatos-web.json`, los candidatos
+    de BASIS que salen de la web, fijados por SHA (revisión 13 de la AISIA). Sus fuentes son `pin.json` y
+    `catalogo.json` de la web, el generador y sus reglas, `candidatos-sapstack.json` (para el cruce), `generadores.mjs`
+    y `politica-cita.mjs`. Lo compara la prueba `mesa-web` de `tools/soporte-sap` (dentro de `prueba:tools`): su
+    huella, que su pin sea el de `pin.json`, y la captura y la cita admitida de cada candidato. Su `_nota` dice que no
+    es hermético.
+  - No cambia ningún gate, ningún generador ni ningún archivo generado.
+- **Por qué**: desde D-SS-9 (firmada el 2026-10-24, en `main` por #278), todo archivo versionado con el banner tiene que
+  estar en el registro. Este lleva `_ALTO` desde que se construyó la rama de la web (2026-10-23), y al juntarla con
+  `main` `verifica:generados` lo vio huérfano, como a los dos de sapstack en la entrada anterior del 2026-10-25.
+- **Lo que decide el laboratorio al firmar**: como `candidatos-sapstack.json`, entra como artefacto aunque no se
+  regenera desde el repo. Su fuente es la captura del CVE List, KEV y SAP-docs en los SHA de `pin.json`, que vive fuera
+  del repo, y volver a extraerlo lo hace el laboratorio con esa captura. Lo que el gate comprueba caza la edición a
+  mano, no un cambio en la web: eso es mover el pin, que es decisión del laboratorio (D-BW-2, cada mes y a mano) y lo
+  avisa `extrae.mjs revisa web` en el mapa.
+- **Demostrado** (2026-10-25):
+  - sobre el merge y antes del cambio: `verifica:generados` en rojo, con `candidatos-web.json` como único huérfano;
+  - con el cambio: 61 comprobaciones y 8 de 8 siembras (14 artefactos y 6 grupos `fuera`);
+  - 2 sabotajes en disco, uno cada vez: el título de un candidato editado a mano rompe la huella, la mesa rechaza el
+    catálogo entero y caen 3 de las 10 pruebas de `mesa-web`; sin el banner, `verifica:generados` queda en rojo (1 de
+    61). Restaurados, 10 de 10 y 61 en verde;
+  - **`validate` 33/33** sobre `a13da01` (árbol `41e4d8b1e8a9`), en 592 s, en la máquina del laboratorio;
+    gobernanza 171/171.
+- **Lo que cuesta o queda abierto**:
+  - el registro pasa de 13 a 14 artefactos; `validate` no gana ningún gate ni tiempo: la prueba ya corría;
+  - `pin.json` y `catalogo.json` no llevan banner, y está bien: el pin lo mueve el laboratorio a mano y el catálogo de
+    fuentes se escribe a mano.
+- **Salida del perímetro (C4)**: ninguna: no cambia qué datos salen ni adónde.
+- **Gate aplicado**:
+  - diff revisado ☑ (en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 33/33 sobre `a13da01` (árbol `41e4d8b1e8a9`);
+  - capa B no corrida por el agente: no cambia `AGENTS.md`, ningún skill ni ningún prompt; decide el laboratorio
+    («capa A basta» o corrida en sesión limpia) ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni imagen nueva).
+- **Regresión**: `verifica:generados` ☑ 61 y 8/8 siembras; `verifica:gates` ☑ 12/12 y `--prueba` 9/9;
+  `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 295 unidades.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-25
