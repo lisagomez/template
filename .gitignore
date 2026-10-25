@@ -126,3 +126,8 @@ tools/clinica-dental/semantica/.user.yml
 
 # Silero para el HUD del centro de mando: lo deja `npm run prepara:silero` (pesos de terceros y el wasm del paquete)
 public/centro-de-mando/
+
+# Cloudflare: la caché de wrangler, la config que genera el guion del laboratorio alojado y sus dependencias
+.wrangler
+.dev.vars*
+scripts/laboratorio-alojado/node_modules

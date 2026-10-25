@@ -26,7 +26,7 @@ export type { Corte, FilaDelCorte, MetricaDelCatalogo, Lector, Consulta as Consu
 export { tableroN1, tableroN2, tableroN3, estadoSla, insumosPricing, respondeMetrica, METRICAS_OPERACION, METRICAS_INTERNAS, ETAPAS } from './superficies.js'
 export type { Tarjeta, RespuestaChat } from './superficies.js'
 export type { MetaSla, ContratoSla, EventoSla, TipoEventoSla, ResultadoSla, PorDecidir, Tramo, Alerta } from './sla.js'
-export { respondeHil, propuestaDeCli, alNucleo } from './chat.js'
+export { respondeHil, ensenaCaso, propuestaDeCli, alNucleo } from './chat.js'
 export type { RolHil, SesionHil, FuenteChat, PlanEnSala, PublicacionChat, CasoDelSandbox, PropuestaDeEnsenanza, PropuestaDeCli, RespuestaHil, ContextoChat } from './chat.js'
 export { MATRIZ_LABORATORIO } from './laboratorio/matriz.js'
 export { azar } from './laboratorio/aleatorio.js'

@@ -84,7 +84,8 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 > (2026-10-10, PRP-011): D1 decidida «con consentimiento»; se firma con la revisión de la AISIA. **Revisión de la
 > vitrina** (2026-10-11): la vitrina de laboratorio en Vercel y su sección en vivo, que pasa al laboratorio de la máquina
 > del laboratorio por un túnel firmado; se firma con la revisión 10 de la AISIA; el incidente del 2026-10-12 le suma
-> el candado de `.env`. **Cada frase de esta sección
+> el candado de `.env`. **Revisión de la mesa del experto** (2026-10-20): el laboratorio sintético alojado en Cloudflare,
+> detrás de Access, para que el experto lo pruebe con sus casos; se firma con la revisión 11 de la AISIA. **Cada frase de esta sección
 > tiene su fila** en la matriz ([`docs/goals/soporte-sap-firmas-matriz.md`](../../docs/goals/soporte-sap-firmas-matriz.md)),
 > en uno de tres estados: **probado** (una prueba pasa sin su sabotaje y cae con él), **brecha** (abierta y declarada)
 > o **depende** (espera una decisión del laboratorio). Donde una frase la sostiene una fila de la AISIA, se dice.
@@ -337,6 +338,32 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
     prueba. Cada despliegue comprueba que sin sesión no abre, y el portero también.
   - *Brecha*: Vercel ve el tráfico de lo en vivo, que es sintético. El túnel recomendado (Tailscale Funnel) termina el
     TLS en la máquina del laboratorio y su relevo no lo descifra; otro túnel puede verlo.
+- **La mesa del experto alojada.** El experto prueba al agente con sus casos en la mesa (`/mesa/soporte-sap`), que corre
+  el laboratorio sintético en Cloudflare: un Worker delante de un contenedor, detrás de Cloudflare Access. Se despliega
+  el laboratorio, no el producto, y la guarda de `configura:deploy` le sigue cerrando la vía de compose y VPS.
+  - La identidad la da Access (el correo y un PIN de un solo uso), y la verifican el Worker y el contenedor, cada uno por
+    su cuenta: la firma RS256 con las llaves del equipo, el emisor, la audiencia y la vigencia. El rol sale de las listas
+    del laboratorio: un correo fuera de ellas no entra, y en la mesa no hay superadministrador.
+  - Sin un JWT válido, la puerta y la mesa responden como si no existieran (404), y nada llega al contenedor.
+  - La puerta solo deja pasar las rutas de la mesa y sus estáticos. Al contenedor no le llegan las cookies ni el secreto
+    de un token de servicio, y no le llegan archivos.
+  - La imagen sirve solo la mesa (`LABORATORIO_ALOJADO=1`, horneado en el build): otra página lleva a ella y otra API,
+    `/api/soporte-sap` incluida, da 404. Así la ruta de las identidades elegibles no existe en lo alojado.
+  - Lo del laboratorio (lo que dijo el experto y su export) solo existe para la identidad del laboratorio.
+  - No se suben archivos: la evidencia son tres muestras del catálogo, que se leen por su nombre exacto.
+  - El despliegue lleva su candado: sube la imagen del commit, sobre la base del OCR pineada por digest y revisada por
+    dentro (sin `.env*`, sin el código del repo, sin secretos horneados). La ubicación va fijada, no hay SSH ni URLs de
+    vista previa, los secretos no van en `vars` y los registros de las peticiones van apagados. Después de subir, el
+    guion comprueba que sin sesión de Access la mesa no abre.
+  - *Brecha*: el contenedor tiene salida a internet. Cerrarla a las llaves de Access y al almacén pide interceptar el TLS
+    con el CA de Cloudflare, y `allowedHosts` solo no está documentado para HTTPS: no se dio por bueno sin probarlo. No
+    hay modelo, y el runtime pasa por la política de D7 (el barrido de imports lo exige).
+  - *Brecha*: Access se configura en el panel de Cloudflare, y el código no lo prueba. Lo comprueba el guion después de
+    cada despliegue, y sin Access, sin un JWT no entra nadie.
+  - *Brecha*: un `wrangler deploy` a mano se salta el candado, igual que un `vercel deploy` a mano.
+  - *Brecha*: que el contenedor no tenga URL propia lo dice la plataforma. Se comprueba contra la URL alojada, no desde
+    el código.
+  - *Brecha*: Cloudflare ve todo lo que pasa por la mesa, porque termina el TLS. Va en la AISIA (revisión 11).
 - **Superficie.** Nada del producto expuesto: la vitrina expone el laboratorio sintético a invitados, con su control.
   Exponer la sala o el canal N1–N2 del producto es gate humano con este C3 y la AISIA firmados. *Brecha*: Realtime y el
   JWT de Supabase no se prueban sin un Supabase real.
@@ -346,7 +373,7 @@ Las fases las deriva `grafo2plan.py` del grafo (la tabla está en el spec del go
 | # | Brecha | Muerde | Qué la cierra |
 |---|---|---|---|
 | 1 | Un PDF tumba la app de todos los tenants (H-22) | cerrado: tope de inflado por documento (32 MiB), por memoria | recalibrarlo con el corpus real del extractor |
-| 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza y el build de Vercel también; lo en vivo de la vitrina pasa firmado a la máquina del laboratorio, solo para invitados |
+| 2 | La ruta del laboratorio sin autenticar | si la variable se enciende en un servidor expuesto | `configura:deploy` la rechaza y el build de Vercel también; lo en vivo de la vitrina pasa firmado a la máquina del laboratorio, solo para invitados; en la mesa alojada, esa ruta no existe y la identidad la da Access |
 | 3 | Root ajeno en modo despacho | el día que una consultora opere su propio servidor | el contrato (D3 decidida: mixto); el SLA de ese modo no se ofrece como evidencia |
 | 4 | Veredictos fuera de `tools/conocimiento` (H-20) | al resolver la primera incidencia real (el candado ya impide arrancar sin ellas) | sembrar las reglas reales del dominio `sap-soporte` en `tools/conocimiento`, con su firma |
 | 5 | Parámetros del plan que salen de un documento | con un modelo real que extraiga parámetros | marcar el origen de cada parámetro (D7) |

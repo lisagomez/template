@@ -1,0 +1,42 @@
+// La puerta del laboratorio alojado de Soporte SAP (docs/goals/soporte-sap-experto.md): un Worker delante de un
+// contenedor. NO se despliega a mano: `bash scripts/laboratorio-alojado/despliega.sh` corre antes el candado.
+//
+// Los secretos no van aquí: se ponen con `npx wrangler@4.143.1 secret put <NOMBRE>` desde esta carpeta
+// (ACCESS_AUD, MESA_EXPERTOS, MESA_LABORATORIO, MESA_TOKENS, MESA_S3_LLAVE, MESA_S3_SECRETO, MESA_S3_ENDPOINT).
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "soporte-sap-laboratorio",
+  "main": "entrada.mjs",
+  "compatibility_date": "2026-09-15",
+  "workers_dev": true,
+  "preview_urls": false,
+  "containers": [
+    {
+      "class_name": "Laboratorio",
+      // La imagen se construye con el Docker de esta máquina desde la raíz del repo, sobre la base pineada por digest.
+      "image": "./Dockerfile",
+      "image_build_context": "../..",
+      // Medido el 2026-10-20 con `docker run --cpus 0.25 --memory 1g` (lo que da `basic`): un caso con OCR tarda
+      // 2,5–3,1 s y el pico de memoria es de 130 MiB; la imagen ocupa 824 MB de los 4 GB de disco. Un solo contenedor:
+      // el laboratorio vive en memoria y es uno.
+      "instance_type": "basic",
+      "max_instances": 1,
+      // Este de Norteamérica. Containers no ofrece una jurisdicción «us» (solo eu y fedramp, medido en el esquema de
+      // wrangler 4.143.1): ENAM es lo más cercano a fijarlo en Estados Unidos, y puede incluir Canadá. Se declara.
+      "constraints": { "regions": ["ENAM"] }
+    }
+  ],
+  "durable_objects": { "bindings": [{ "name": "LABORATORIO", "class_name": "Laboratorio" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Laboratorio"] }],
+  "vars": {
+    // Lo que no es secreto. ACCESS_EQUIPO es el nombre del equipo de Zero Trust (<equipo>.cloudflareaccess.com).
+    "ACCESS_EQUIPO": "",
+    "MESA_ALMACEN": "s3",
+    "MESA_S3_BUCKET": "mesa-del-experto",
+    "MESA_S3_REGION": "auto",
+    // Lo decide el laboratorio al firmar la revisión 11 de la AISIA; sin decidir, la propuesta.
+    "MESA_RETENCION_DIAS": "180"
+  },
+  // Sin registros de las peticiones en Cloudflare: el texto del experto no va a los logs.
+  "observability": { "enabled": false }
+}

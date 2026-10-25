@@ -87,6 +87,7 @@ Sin pérdida → no se respalda · Con trabajo → respaldo normal · **No** →
 | Sala A2A (`sala_*`, aprobaciones) | **No**: la fila de aprobación es la prueba de quién decidió | Crítica | Con la BD y en el export por tenant de la consultora |
 | Secreto que firma los tokens de tarea | No: es un secreto | Crítica | En `.env.production`, ya cubierto por la fila del servidor |
 | Conocimiento sintético de la matriz | Sí: se genera desde `tools/soporte-sap` | Baja | git |
+| **Lo que dijo el experto en la mesa** (sus casos, sus pasos y su retroalimentación, en R2; revisión 11 de la AISIA) | **No**: es la opinión del experto sobre el agente, y no se repite igual | Normal | **Sin respaldo hoy**: vive solo en el bucket de R2 (jurisdicción de EE. UU.) y vence a los 180 días. Lo que el laboratorio quiera conservar lo **exporta** (Markdown o JSON) desde la vista del laboratorio. RPO/RTO desconocidos; un borrado es definitivo |
 
 **RPO / RTO:** **desconocidos hasta GATE 3.** El simulacro de restauración por tenant da tiempos de
 laboratorio (SDD §13): no son el RTO de producción.

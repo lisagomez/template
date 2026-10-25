@@ -6,7 +6,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**64 activos** cubren **293 unidades** del repo.
+**64 activos** cubren **295 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -63,7 +63,7 @@
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
 | TPL-feature-reel | App del reel: cuentas, subida del clip y sala de aprobacion en el celular | PRODUCTO | software | blueprint | 6 | `src/features/reel` |
 | TPL-feature-sgi | App del sistema integrado ISO: roadmap con puertas, documentos con huella, evidencias, riesgos, SoA, auditoria y CAPA, panel del consultor con marca blanca | PRODUCTO | software | blueprint | 8 | `src/features/sgi` |
-| TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio y su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada) | PRODUCTO | software | blueprint | 3 | `src/features/soporte-sap` |
+| TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio, su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada) y la mesa del experto alojada en Cloudflare (/mesa/soporte-sap: casos propios, línea de tiempo, retro durable) | PRODUCTO | software | blueprint | 5 | `src/features/soporte-sap` |
 | TPL-feature-ventas-whatsapp | Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a) | PRODUCTO | software | blueprint | 1 | `src/features/ventas-whatsapp` |
 | TPL-grafo-conocimiento | Grafo de conocimiento: motor de reglas con veredicto acotado y fail-safe tipado, en paridad con el de Hermes | PRODUCTO | software | beta | 1 | `tools/grafo-conocimiento` |
 | TPL-piloto-buzon-cfdi | Piloto del buzón de CFDI en la máquina del despacho: perímetro sin salida, Supabase autohospedado y su gate | PRODUCTO | software | blueprint | 8 | `scripts/buzon` |
@@ -88,7 +88,7 @@ El dueño de cada pieza (`producto`), con su estado y, si es un CLI, su grado. L
 | soporte-sap | TPL-cli-ss-reuso | CLI ss-reuso de Soporte SAP: cuenta el reuso desde la matriz dominio × capa del SDD; --escribe reescribe el bloque del SDD (cambia estado, dry-run por defecto) | blueprint | no medido |
 | soporte-sap | TPL-cli-ss-simulador | CLI ss-simulador de Soporte SAP: estado, simulación y ejecución contra el SAP simulado; ejecutar exige la aprobación de la sala (cambia estado, dry-run por defecto) | blueprint | no medido |
 | soporte-sap | TPL-cli-ss-triage | CLI ss-triage de Soporte SAP: categoriza una incidencia y consulta la matriz sobre el grafo (solo lectura) | blueprint | no medido |
-| soporte-sap | TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio y su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada) | blueprint | — |
+| soporte-sap | TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio, su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada) y la mesa del experto alojada en Cloudflare (/mesa/soporte-sap: casos propios, línea de tiempo, retro durable) | blueprint | — |
 | soporte-sap | TPL-sala-a2a | Sala A2A: canales, hilos de un nivel y aprobaciones como fila que ningun componente que ejecuta un modelo puede fabricar; esquema propuesto con su suite de sabotajes S1-S7 (0.1.0) | blueprint | — |
 | soporte-sap | TPL-soporte-sap | Soporte SAP en laboratorio: dominio de tres niveles (laboratorio, consultora, cliente), matriz problema-solucion sobre el grafo, simulador SAP y de tickets, anonimizador, cadena de eventos, mapeo y limpieza, SLA, pricing, impactos en MXN, respaldo por tenant y el agente FDE (0.1.0) | blueprint | — |
 | ventas-whatsapp | TPL-feature-ventas-whatsapp | Panel del dueno (/ventas-whatsapp: bandeja con traspaso y tablero de ROAS), laboratorio del agente (/laboratorio-ventas-whatsapp) y rutas /api/ventas-whatsapp (webhook, flows, pagos, panel, a2a) | blueprint | — |

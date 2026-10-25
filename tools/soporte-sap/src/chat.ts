@@ -130,8 +130,21 @@ const escapa = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** El experto enseña: a medida de la consultora del caso que nombra, y anonimizado; con dudas, no se guarda. */
 function ensena(ctx: ContextoChat, sesion: SesionHil, texto: string): RespuestaHil {
-  if (sesion.rol !== 'experto') return { tipo: 'no_permitido', texto: 'Enseñar en el sandbox es del experto. Como superadministrador puedes preguntar por la operación.' }
   const caso = ctx.casos.find((c) => new RegExp(`(?<![\\w-])${escapa(c.incidencia)}(?![\\w-])`).test(texto))
+  return ensenaEn(ctx, sesion, caso, texto)
+}
+
+/**
+ * Enseñar EN un caso ya elegido (la mesa del experto): el caso viene de la pantalla, no del texto, así que el experto no
+ * escribe un identificador interno, y lo que escribe no se lee como otra intención (un «aplica el cambio» dentro de una
+ * enseñanza no es pedir una aprobación). Las mismas reglas que `ensena`: a medida, anonimizada, y con dudas no se guarda.
+ */
+export function ensenaCaso(ctx: ContextoChat, sesion: SesionHil, incidencia: string, texto: string): RespuestaHil {
+  return ensenaEn(ctx, sesion, ctx.casos.find((c) => c.incidencia === incidencia), texto)
+}
+
+function ensenaEn(ctx: ContextoChat, sesion: SesionHil, caso: CasoDelSandbox | undefined, texto: string): RespuestaHil {
+  if (sesion.rol !== 'experto') return { tipo: 'no_permitido', texto: 'Enseñar en el sandbox es del experto. Como superadministrador puedes preguntar por la operación.' }
   if (!caso) return { tipo: 'no_lo_se', texto: 'No sé de qué caso es: nombra su incidencia. La propuesta queda a medida de la consultora del caso; al núcleo solo la sube el superadministrador, generalizada.' }
   const a = anonimiza(texto, ctx.validadores)
   if (a.veredicto === 'cuarentena') return { tipo: 'no_permitido', texto: `No la guardo como propuesta: ${a.senales.join('; ')}. Escríbela sin el dato.` }

@@ -207,3 +207,14 @@ Para qué: Operar sin prometer lo que no está probado.
 > **Ojo:** El experto no ve las horas de los consultores ni la salud de la cuenta: eso es del superadministrador.
 
 ![Presupuesto, fichas de servidor y salidas](../../../public/vitrina/soporte-sap/capturas/paso-09-1-la-ficha-de-servidor-no-dice-apto-sin-la.jpg)
+
+### La mesa del experto (alojada)
+
+Para qué: Probar al agente con tus casos, sin la máquina del laboratorio.
+
+1. Entra a la mesa con tu correo: Cloudflare Access te manda un código de un solo uso.
+2. Cuéntale un caso tuyo en los campos guiados, sin nombres de clientes ni de personas, y córrelo: lo levanta y lo escala un cliente y una consultora sintéticos, en tu nombre.
+3. Mira la línea de tiempo y di en cada paso si estuvo bien o mal; decide en la sala o enséñale si dice «no lo sé».
+4. Da tu veredicto del caso. El laboratorio lee lo que dijiste en «Lo que dijo el experto», y lo exporta.
+
+> **Ojo:** En la mesa nadie elige su identidad: entras con tu correo y eres experto. Lo que escribes pasa por el filtro de datos y se guarda en Cloudflare, en Estados Unidos.

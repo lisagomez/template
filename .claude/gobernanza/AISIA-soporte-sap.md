@@ -71,6 +71,14 @@
 > en la máquina del laboratorio, por un túnel en el que cada petición va firmada; el laboratorio no se despliega. Entra
 > un daño nuevo, «Dato real en la sección en vivo»: un invitado podría escribir ahí datos reales. Cambian la §1, la §2,
 > la §3, la §4 y la §5, y el C3 gana el control «La vitrina y la sección en vivo». Va firmada al pie, con el C3.
+>
+> **Revisión 11** (2026-10-20): **la mesa del experto, alojada en Cloudflare**. El experto del laboratorio prueba al
+> agente con SUS casos en una mesa que ya no vive en la máquina del laboratorio: el mismo laboratorio sintético corre en
+> un contenedor de Cloudflare, detrás de Cloudflare Access (su correo y un PIN de un solo uso) y de un Worker que
+> verifica su identidad, como la verifica también el contenedor. Lo que escribe el experto y su retroalimentación se
+> guardan, filtrados, en un almacén de Cloudflare en Estados Unidos. Se despliega el laboratorio, no el producto. Entra un
+> daño nuevo, «Lo que escribe el experto, en un tercero». Cambian la §1, la §2, la §3, la §4 y la §5, y el C3 gana el
+> control «La mesa del experto alojada». Va firmada al pie, con el C3.
 
 ## 1. Partes afectadas
 
@@ -87,13 +95,18 @@
   quien los juzga.
 - **El laboratorio (N1)**: aprueba sobre la operación de terceros y acumula conocimiento que nace
   de sus datos.
+- **El experto del laboratorio (el HIL, N1)**: prueba al agente con casos de su experiencia. Su correo, sus casos y lo
+  que dice de cada paso se guardan, y los lee el laboratorio. Los casos que cuenta pueden ser de clientes suyos, que no
+  firmaron nada (revisión 11).
 - **Los terceros del despliegue**: reciben los datos de todos los anteriores, según se decida. Son
   el proveedor de modelo (D7), la base de datos gestionada (D10: Supabase, en Virginia, Estados Unidos), el
   proveedor del servidor (D12: AWS, en la misma región) y el del respaldo fuera de sitio (D12: Backblaze B2, US East,
   que recibe las copias cifradas). Hoy ninguno recibe datos de los N3: no hay modelo, y el producto no se despliega. La
   vitrina de laboratorio sí: Vercel la sirve con datos sintéticos y ve el tráfico de su sección en vivo, que también
-  es sintético; el túnel recomendado no lo descifra (revisión 10). Al
-  proveedor de modelo, por D7, nunca le llega lo crudo.
+  es sintético; el túnel recomendado no lo descifra (revisión 10). Y la mesa del experto también (revisión 11):
+  Cloudflare verifica al experto por su correo (Access), corre el laboratorio sintético en un contenedor suyo (en el
+  este de Norteamérica), ve todo lo que pasa por la mesa, y guarda lo que el experto escribe y su retroalimentación en
+  R2, en la jurisdicción de Estados Unidos. Al proveedor de modelo, por D7, nunca le llega lo crudo.
 - **Quien tiene root en el servidor**: en modo despacho, alguien de la consultora. Lee todo, la base
   entera incluida, y la RLS no lo impide (C3, «Root ajeno»).
 
@@ -125,6 +138,7 @@
 | **Riesgo de baja como etiqueta** | La capa semántica marca «riesgo de baja» con una fórmula y un umbral supuestos (salud < 0.85); la consultora trata distinto a ese N3 (menos atención, otro precio) por un número que el N3 no ve ni puede discutir. |
 | **Dato del cliente en un proveedor de modelo** | Para categorizar, resumir o extraer parámetros, el texto de un ticket, del chat o de un documento (con datos de empleados del N3 o secretos de su negocio) se manda a un proveedor de modelos, que lo conserva o entrena con él. Pesos abiertos en un proveedor ajeno no cambian nada: el dato sale igual. |
 | **Dato fuera de México** | En el modo gestionado, la base y los archivos de los N3 viven en un proveedor de Estados Unidos. Los datos de sus empleados y de sus contrapartes quedan bajo otra jurisdicción, y el N3 puede no saberlo, o estar obligado a guardarlos en México. |
+| **Lo que escribe el experto, en un tercero** | El experto cuenta en la mesa un caso real de su experiencia, con el nombre de la empresa o un dato de una persona que no tiene forma de dato. Pasa el filtro, llega al contenedor de Cloudflare y se guarda en su almacén, junto con el correo del experto y su retroalimentación. Ahí lo lee el laboratorio, y Cloudflare, que opera la infraestructura, puede verlo. |
 | **Dato real en la sección en vivo** | La vitrina tiene una sección en vivo para invitados, con datos sintéticos. Un invitado, una consultora que lo evalúa, escribe ahí el ticket real de un cliente suyo, con nombres o identificadores de sus empleados: llega a la máquina del laboratorio, lo ven los demás invitados, y pasa por Vercel. |
 | **Dato que vive de más o que vuelve** | Las capturas y los CFDI de un N3, con datos de sus empleados y de sus contrapartes, se guardan para siempre; el N3 se va y lo suyo se queda; se borra del servicio y sigue en una copia de respaldo; o una restauración devuelve lo que ya se había borrado. Y al revés: el borrado automático se lleva algo antes de tiempo, con una impugnación abierta o antes de que quien se va tenga su export. |
 
@@ -157,6 +171,7 @@
 | Dato del cliente en un proveedor de modelo | **Alta** | Baja: hoy no hay modelo, y para lo crudo la política lo prohíbe | **No**: lo que sale no se recupera |
 | Dato fuera de México | Media-alta (datos de terceros, otra jurisdicción) | **Alta** en el modo gestionado: es el diseño | Parcial: el N3 puede pasar al modo despacho y borrarse del proveedor (D8), pero lo que ya estuvo fuera estuvo |
 | Dato que vive de más o que vuelve | **Alta** (datos de terceros) | Baja con D8: la base decide qué vence, y sin plazos en el contrato no se borra nada | Lo que vive de más, sí: se borra. Lo borrado antes de tiempo, **no** |
+| Lo que escribe el experto, en un tercero | Media (datos de terceros: el cliente o la persona del caso que cuenta) | Media: el experto escribe casos propios a propósito; la bajan el filtro, lo que se le pide en pantalla y que solo entren los correos de la lista | Parcial: el laboratorio borra el caso y la retención lo borra sola; lo que ya pasó por Cloudflare no se des-ve |
 | Dato real en la sección en vivo | Media-alta (datos de terceros) | Baja: solo invitados, aviso permanente, sin adjuntos y el filtro de forma de dato | Parcial: vive en memoria y se pierde al apagar; lo que ya vio otro invitado no se des-ve |
 
 ## 4. Mitigaciones
@@ -389,6 +404,27 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     se pierde al apagar el laboratorio.
   - *Brecha*: un dato real sin forma de dato (el nombre de una empresa, cómo opera) pasa el filtro. No es «cero datos
     reales»: lo acota que solo entra quien el laboratorio invita.
+- **La mesa del experto alojada** (revisión 11):
+  - Lo que sube es el laboratorio sintético, no el producto. `configura:deploy` le sigue cerrando al laboratorio la vía
+    de compose y VPS; la vía de Cloudflare neutraliza sus dos motivos, las identidades elegibles y el estado en memoria.
+  - Nadie elige su identidad: la da Access (el correo y un PIN de un solo uso), y la verifican el Worker y el contenedor
+    (firma, emisor, audiencia y vigencia). El rol sale de las listas del laboratorio; en la mesa no hay
+    superadministrador, y lo que se hace en nombre del cliente (N3) y de la consultora (N2) lo dice la cadena.
+  - El filtro del anonimizador mira TODO texto de cada acción antes de que llegue al laboratorio, y lo que escribió el
+    experto otra vez antes de guardarse. La pantalla le pide que no escriba nombres de clientes ni de personas.
+  - No se suben archivos: la evidencia son tres muestras sintéticas del catálogo.
+  - El laboratorio vive en memoria y se pierde al dormirse el contenedor. Lo que se guarda (los casos del experto, sus
+    pasos, su retroalimentación y su correo) va a R2, en la jurisdicción de Estados Unidos, y solo lo lee la identidad
+    del laboratorio. Vence a los 180 días (lo decide el laboratorio al firmar) o cuando el laboratorio lo borra. No tiene
+    respaldo: su RPO y su RTO son desconocidos, y un borrado es definitivo.
+  - No hay modelo, y el runtime pasa por la política de D7. El contenedor tiene salida a internet: cerrarla pide
+    interceptar el TLS, y no se dio por bueno sin probarlo (brecha del C3).
+  - El despliegue lleva su candado: sube la imagen del commit, revisada por dentro; la ubicación va fijada; no hay SSH,
+    secretos en la configuración ni registros de las peticiones.
+  - *Brecha*: un dato sin forma pasa el filtro, y el experto puede contar el caso de un cliente suyo. Cloudflare ve el
+    contenido, porque termina el TLS. El contenedor se fija en el este de Norteamérica, que puede incluir Canadá:
+    Containers no ofrece una jurisdicción «us» (medido en wrangler 4.143.1). Un `wrangler deploy` a mano se salta el
+    candado.
 
 ## 5. Decisión
 
@@ -415,6 +451,7 @@ quedan hoy:
 | El dato de terceros que vive de más, o que vuelve | Los originales vencen por contrato y la base decide qué venció; al salir, lo del cliente se congela y se borra tras la gracia, con su export en la mano; el borrado llega a las copias en 12 meses como máximo. Sin N ni gracia en el contrato **no se borra nada**: el producto no ofrece un borrado que nadie fijó. |
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece** (D6, decidida): el producto no se conecta a ningún SAP ni guarda sus credenciales. La aplica una persona, fuera del producto, con el control de cambios del N3, y la pantalla y el contrato dicen que el antes y el después son del simulador. |
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
+| Lo que escribe el experto, en un tercero | Lo **reducen** el filtro antes de llegar y antes de guardarse, lo que se le pide en pantalla, que no haya archivos y la identidad de Access: solo entran los correos de la lista, y lo guardado solo lo lee el laboratorio y vence. No es cero: un dato sin forma pasa, y queda declarado. |
 | Un dato real en la sección en vivo | Lo **reducen** el filtro del anonimizador antes del túnel y al llegar, que no haya adjuntos, el aviso permanente y el estado en memoria. No es cero: un dato sin forma pasa, y queda declarado. Solo entra quien el laboratorio invita. |
 
 Para salir del laboratorio hacen falta:
@@ -457,3 +494,5 @@ Revisión 8 (D13 y D14), firmada por: lisagomez  Rol: responsable del proyecto  
 Revisión 9 (H-20 y H-22), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-11
 
 Revisión 10 (la vitrina en Vercel y su sección en vivo, con el C3), lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-12
+
+Revisión 11 (la mesa del experto alojada en Cloudflare, con el C3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-22
