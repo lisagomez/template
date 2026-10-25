@@ -5544,3 +5544,59 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
 - **Regresión**: `verifica:generados` ☑ 57 y 8/8 siembras; `verifica:gates` ☑ 12/12 y `--prueba` 9/9;
   `verify:gobernanza` ☑ 171/171; `verifica:inventario` ☑ 295 unidades.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-25
+
+### 2026-10-22 — suite del conocimiento: `sap-soporte` entra con cita `interna` y fuentes declaradas, y sapstack no basta (D-SS-3, con D-SS-2) — radio: herramienta (`tools/conocimiento`, la suite que deja sembrar) y la matriz de Soporte SAP
+
+- **Cambio** (rama `soporte/sapstack-cita`, apilada sobre `soporte/sapstack`, commit `6baad5b`):
+  1. **`tools/conocimiento/politica-cita.mjs`** (nuevo, 68 líneas). Los 17 dominios migrados de Hermes siguen como
+     estaban: `publica`, con un corte entre 2026-07-01 y 2026-09-06. Un dominio que nace aquí se declara en
+     `DOMINIOS_PROPIOS`, y declararlo es un CDC. Uno sin declarar se mide como migrado, y no pasa. El único declarado
+     es `sap-soporte`:
+     - cita `interna`, y su corte va desde el 2026-10-22;
+     - cada regla sale de una SAP Note (`me.sap.com/notes/N`, con el número en la cita), de SAP Help
+       (`help.sap.com`) o de la «Experiencia documentada del experto» anotada en `CAMBIOS.md`;
+     - **una fuente con «sapstack» se rechaza** (D-SS-2), y toda regla del dominio aparece en `CAMBIOS.md`.
+  2. **`pruebas/conocimiento.ts`**: la prueba «cada dominio declara si cita, su fecha de corte y su propia
+     procedencia» pasa por `problemasDeCita`. Exige lo mismo de antes a los migrados, y lo declarado a los propios.
+  3. **`pruebas/cita.ts`** (nuevo): cinco pruebas sobre el conocimiento real, con un `sap-soporte` de prueba encima:
+     - lo aceptado: el contrato no reporta nada nuevo y la política no pone objeciones;
+     - sapstack rechazado;
+     - un dominio sin declarar no pasa;
+     - `sap-soporte` con cita `publica` o con un corte anterior no pasa;
+     - nota con otro número, experiencia mal citada, otra fuente o una regla fuera de `CAMBIOS.md`: no pasan.
+  4. **La fila `aisia-hipotesis-fuente-citable`** pasa de «depende» a probada, con su sabotaje. También se
+     actualizan el README del paquete, la propuesta (§10.2, con las nueve decisiones del 2026-10-22) y la matriz.
+- **Por qué**: lo decidió el laboratorio el 2026-10-22, al aceptar las recomendaciones D-SS-1 a D-SS-9.
+  - La suite pedía `publica` y el corte de Hermes a todo dominio, así que la primera regla `sap-soporte` (F3) no
+    podía sembrarse.
+  - Abrir la suite sin D-SS-2 dejaba sembrar una regla que cite a sapstack. Es el daño «Una hipótesis de un tercero
+    que se vuelve regla» de la revisión 12 de la AISIA, que es infirmable.
+- **Lo que no cambia**:
+  - el contrato del grafo (ya admitía `interna`, RF-5), el motor y el gate de siembra (`pruebas/gate.ts`);
+  - `versiones.json` y la versión del paquete (0.2.0);
+  - los veredictos: no se siembra ninguna regla;
+  - el paquete publicado: `files` lleva solo `dist` y `CAMBIOS.md`.
+- **Demostrado** (2026-10-22):
+  - suites: la del conocimiento 37/37 (32 de antes y 5 nuevas), la de soporte-sap 406/406 y tsc sin errores;
+  - siete mutantes de la política, **siete cazados**: sin la línea de sapstack, cualquier fuente aceptada, un migrado
+    con `interna`, sin la ventana de Hermes, cualquier número de nota, sin `CAMBIOS.md`, y `sap-soporte` con cita
+    `publica`;
+  - la fila de la matriz: verde sin sabotaje y roja con él («la suite acepta cualquier fuente en sap-soporte»).
+- **Lo que cuesta o queda abierto**:
+  - **la suite mira la forma de la fuente, no su calidad**: que la nota diga lo que dice la regla lo decide quien
+    firma;
+  - **«experiencia documentada»**: la leí como una entrada de `CAMBIOS.md` que nombra la regla y que el laboratorio
+    firma, enlazada desde `fuente_url`. No puede ser un caso de la mesa, porque la retención lo borra a los 180 días;
+  - **con `interna`, el redactor del grafo no pone la fuente en la frase** (RF-5). El motor sí la devuelve, y Soporte
+    SAP se la puede enseñar al experto. Si un día el consultor tiene que ver el número de la nota en la respuesta,
+    sería un dominio aparte con cita `publica`: otra decisión.
+- **Salida del perímetro (C4)**: sin cambio. No se siembra nada, y la política no lee nada de fuera.
+- **Gate aplicado**:
+  - diff revisado ☑ (completo en el chat, antes de pedir la firma);
+  - regresión capa A ☑ 166/166;
+  - `npm run validate` ☑ 32/32 gates activos (10 inactivos declarados, 0 rojos) tras `6baad5b` (árbol `48ef993ddf73`);
+  - capa B: no aplica, porque no cambia skill, prompt ni instrucción del arnés ☑;
+  - aprobación humana ☑;
+  - pineo ☑ (sin modelo ni dependencia nueva).
+- **Regresión**: `verify:gobernanza` ☑ 171/171, y la suite del conocimiento con la política nueva ☑ 37/37.
+- **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-22

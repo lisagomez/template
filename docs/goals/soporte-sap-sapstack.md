@@ -265,6 +265,9 @@ abierta escrita y su recomendación, y repórtalo.
   la foto de la base, generados por `src/features/soporte-sap/mesa/fuentes/extrae.mjs`, con `_ALTO` y huella.
 - **Ocho filas nuevas** en la matriz (siete probadas y una que depende de D-SS-2) y la **revisión 12** de la AISIA,
   firmada por el laboratorio el 2026-10-22 (`.claude/gobernanza/AISIA-soporte-sap.md`).
+- **Después (2026-10-22)**: el laboratorio aceptó D-SS-1 a D-SS-9. El CDC de D-SS-3 (con D-SS-2) abre la suite del
+  conocimiento a `sap-soporte` con cita `interna`, rechaza una regla que cite a sapstack, y la octava fila pasa a
+  probada.
 - **Encontrado al construir**:
   - el filtro de la mesa mira toda la acción, id incluido: un id con cifras (`nota-2269324`) tenía forma de documento.
     Los ids de candidato van sin cifras;

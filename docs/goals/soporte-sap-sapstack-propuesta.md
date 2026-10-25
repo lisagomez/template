@@ -270,8 +270,9 @@ enlace** (el contenido es de SAP; sus términos de uso no permiten copiarlo).
 - **Seguridad**: ocho filas nuevas en la matriz. Siete probadas, cada una verde sin su sabotaje y roja con él
   (`c3-mesa-candidato-propuesta`, `c3-mesa-candidatos-propios`, `c3-mesa-mapa-laboratorio`, `c3-mesa-candidatos-fijados`,
   `aisia-mesa-candidato-filtrado` y, para el daño nuevo de la revisión 12, `aisia-hipotesis-propuesta` y
-  `aisia-hipotesis-solo-registrado`), y una que depende de D-SS-2 (`aisia-hipotesis-fuente-citable`: que la fuente sea
-  buena lo decide quien firma). Sin rutas nuevas: todo va por `?pestana=` y `?vista=`.
+  `aisia-hipotesis-solo-registrado`), y una que dependía de D-SS-2 (`aisia-hipotesis-fuente-citable`). Con el CDC de D-SS-3 pasa a
+  probada: la suite del conocimiento rechaza una regla `sap-soporte` que cite a sapstack. Que la fuente sea buena lo
+  decide quien firma. Sin rutas nuevas: todo va por `?pestana=` y `?vista=`.
 - **Un fallo de la mesa, arreglado de paso**: el id de un caso podía tener forma de número de documento
   (`c-mvjjiz61-023329`) y el filtro rechazaba toda acción sobre él; 68 de 3000 ids (prueba roja → verde).
 
@@ -282,7 +283,7 @@ enlace** (el contenido es de SAP; sus términos de uso no permiten copiarlo).
 | Fase | Qué | Gate |
 |---|---|---|
 | F0 (hecha) | catálogo fijado, validación en la mesa, mapa, filas, evidencia | validate en verde, matriz entera |
-| F1 | firmar la revisión 12 de la AISIA y desplegar la mesa | firma + `despliega.sh` (laboratorio) |
+| F1 | firmar la revisión 12 de la AISIA (firmada el 2026-10-22) y desplegar la mesa | firma + `despliega.sh` (laboratorio) |
 | F2 | el experto valida los 222 T-codes en alcance, primero los 206 que el triage no reconoce | ≥ 1 validación por candidato antes de proponer reglas |
 | F3 | primera regla `sap-soporte` firmada (una relación síntoma ↔ T-code ↔ nota) | D-SS-2/3; nueva versión con `npm run registra`; CAMBIOS con firma |
 | F4 | el triage lee la tabla generada de las categorías firmadas | revisión AISIA (la prioridad afecta al cliente) + matriz |
@@ -291,7 +292,11 @@ enlace** (el contenido es de SAP; sus términos de uso no permiten copiarlo).
 
 ### 10.2 Decisiones del laboratorio
 
-| # | Decisión | Recomendación |
+**Decididas el 2026-10-22**: el laboratorio aceptó las nueve recomendaciones. D-SS-4 y D-SS-5 ya son como se
+construyó. D-SS-1 es el despliegue (F1). D-SS-2 y D-SS-3 van en un CDC de la suite del conocimiento
+(`tools/conocimiento/politica-cita.mjs`). D-SS-8 y D-SS-9 son CDC aparte (F6). D-SS-6 y D-SS-7 esperan a F4 y F5.
+
+| # | Decisión | Recomendación (aceptada) |
 |---|---|---|
 | D-SS-1 | ¿Se despliega la mesa con la validación de candidatos? | **Sí**, después de firmar la revisión 12 |
 | D-SS-2 | ¿Qué es una fuente citable para una regla `sap-soporte`? | **Una SAP Note o SAP Help verificada por el experto (número y enlace), o la experiencia documentada del experto; sapstack nunca por sí solo** |

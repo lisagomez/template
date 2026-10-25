@@ -2702,9 +2702,11 @@ export const FILAS: readonly Fila[] = [
     sabotaje: { que: 'se acepta una regla con otra huella', ediciones: [ed(dist('conocimiento-produccion.js'), 'registrada.huellas.reglas[clave]?.huella !== h.huella', 'false')] },
   },
   {
-    id: 'aisia-hipotesis-fuente-citable', doc: 'AISIA', ref: 'Una hipótesis de un tercero que se vuelve regla', infirmable: true, estado: 'depende',
-    afirmacion: 'la regla que nace de un candidato cita una fuente primaria (una SAP Note verificada por el experto, o su experiencia documentada), nunca a sapstack por sí solo',
-    control: 'D-SS-2 (docs/goals/soporte-sap-sapstack-propuesta.md §10.2) y la firma en CAMBIOS.md',
-    nota: 'la calidad de la cita la decide el laboratorio al firmar: el gate exige fuente_cita y fuente_url, no que la fuente sea buena',
+    id: 'aisia-hipotesis-fuente-citable', doc: 'AISIA', ref: 'Una hipótesis de un tercero que se vuelve regla', infirmable: true, estado: 'probado',
+    afirmacion: 'la regla que nace de un candidato cita una fuente primaria (una SAP Note o SAP Help verificada por el experto, o su experiencia documentada), nunca a sapstack por sí solo',
+    control: 'tools/conocimiento/politica-cita.mjs · problemasDeCita (D-SS-2 y D-SS-3, decididas el 2026-10-22), en la suite del conocimiento',
+    comprobacion: { tipo: 'prueba', carpeta: 'tools/conocimiento', archivo: 'pruebas/cita.ts', nombre: 'D-SS-2: una regla de sap-soporte que cita a sapstack no se siembra' },
+    sabotaje: { que: 'la suite acepta cualquier fuente en sap-soporte', ediciones: [ed('tools/conocimiento/politica-cita.mjs', 'function fuenteSapSoporte(r) {\n', 'function fuenteSapSoporte(r) {\n  return null\n')] },
+    nota: 'la suite exige la forma de la fuente (la SAP Note con su número, SAP Help o la experiencia anotada en CAMBIOS.md), no que sea buena: eso lo decide el laboratorio al firmar',
   },
 ]

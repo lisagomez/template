@@ -62,6 +62,7 @@ const mio = seleccionaDominios(v.conocimiento!, ['mx-drones-de-reparto', 'mx-age
 | `dominios/<dominio>.json` | un dominio (cita, fecha de corte, procedencia, categorías) y las reglas que dictan sobre sus categorías |
 | `generales/<ámbito>.json` | reglas que aportan requisitos a todo su ámbito, sin categoría |
 | `CAMBIOS.md` | qué cambió en cada versión y quién firmó lo que cambia un veredicto |
+| `politica-cita.mjs` | qué cita cada dominio y con qué corte, y de qué fuentes salen las reglas de un dominio que nace aquí (`DOMINIOS_PROPIOS`) |
 | `investigacion/` | el método de investigación → regla, y el dictamen de la frontera financiera |
 | `origen/` | la migración única desde Hermes, conservada para auditoría |
 
@@ -135,6 +136,15 @@ El **gate de siembra** (`pruebas/gate.ts`, spec 004 RF-12 y RF-14) se pone rojo 
 - una firma no corresponde a ningún cambio (firma en blanco);
 - aparece una **contención** de keywords entre categorías del mismo ámbito que ni una exclusión cubre
   ni `contenciones-aceptadas.json` acepta con su porqué.
+
+La **política de citas** (`politica-cita.mjs`, en la misma suite: `pruebas/conocimiento.ts` y `pruebas/cita.ts`) se
+pone roja si un dominio migrado de Hermes no cita `publica` con el corte de Hermes, o si aparece un dominio nuevo sin
+declarar en `DOMINIOS_PROPIOS`. Declarar uno abre la suite, así que es un **CDC**. El único declarado es `sap-soporte`
+(D-SS-3, 2026-10-22): cita `interna`, corta desde el 2026-10-22, y cada regla suya sale de una SAP Note (solo el
+número y el enlace a `me.sap.com/notes/N`, con el número en la cita), de SAP Help (`help.sap.com`) o de la
+«Experiencia documentada del experto» anotada en `CAMBIOS.md`. **sapstack nunca basta por sí solo** (D-SS-2), y toda
+regla del dominio aparece en `CAMBIOS.md`, donde firma el laboratorio. La suite mira la forma de la fuente, no que
+sea buena: eso lo decide quien firma.
 
 Los conflictos de veredicto, el vocabulario por dimensión, las referencias y las cifras sin
 verificar los caza `validaConocimiento`, en la misma suite.
