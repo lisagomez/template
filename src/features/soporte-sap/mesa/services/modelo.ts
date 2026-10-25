@@ -3,6 +3,7 @@
  * PINTA esto: los pasos salen de la cadena de eventos del runtime, y los números del laboratorio, de lo guardado.
  */
 import { z } from 'zod'
+import { ACCION_VALIDA } from './modelo-candidatos'
 
 export const SISTEMAS = ['ECC', 'S4HANA'] as const
 export const MODULOS = ['MM', 'SD', 'FI', 'CO', 'PP', 'PM', 'QM', 'WM/EWM', 'HCM', 'BC/Basis', 'Fiori', 'Integración (IDoc/PI)', 'Otro'] as const
@@ -120,6 +121,7 @@ export const ACCION_MESA = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('ensena'), caso: z.string().max(60), texto: z.string().trim().min(10, 'cuéntale al agente cómo se resuelve, en una o dos frases').max(2000) }),
   z.object({ tipo: z.literal('retro_paso'), caso: z.string().max(60), clave: z.string().max(60), gesto: z.enum(['bien', 'mal']), esperaba: TEXTO_CORTO.optional() }),
   z.object({ tipo: z.literal('veredicto'), caso: z.string().max(60), valor: z.enum(VEREDICTOS), solucion: TEXTO_CORTO.optional(), nota: TEXTO_CORTO.optional() }),
+  ACCION_VALIDA,
 ])
 export type AccionMesa = z.infer<typeof ACCION_MESA>
 export const ACCION_LABORATORIO = z.object({ tipo: z.literal('borra'), caso: z.string().max(60) })

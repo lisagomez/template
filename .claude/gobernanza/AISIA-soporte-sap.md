@@ -79,6 +79,15 @@
 > guardan, filtrados, en un almacén de Cloudflare en Estados Unidos. Se despliega el laboratorio, no el producto. Entra un
 > daño nuevo, «Lo que escribe el experto, en un tercero». Cambian la §1, la §2, la §3, la §4 y la §5, y el C3 gana el
 > control «La mesa del experto alojada». Va firmada al pie, con el C3.
+>
+> **Revisión 12** (2026-10-22): **una fuente externa de candidatos en la mesa**. La mesa enseña al experto hipótesis que
+> salen de sapstack (Fioriuser2021/sapstack, MIT, fijado por SHA): T-codes y punteros a SAP Notes. El experto dice si
+> son ciertas, y lo que dice se guarda, filtrado, como **propuesta**, en el mismo almacén y con la misma retención; solo
+> el laboratorio las ve todas, en un mapa. Ningún candidato da veredicto: una regla nace en `tools/conocimiento`, con
+> fuente citable y la firma del laboratorio. sapstack no recibe nada (se lee una copia fijada), así que no entra un
+> tercero que reciba datos. Entra un daño nuevo, «Una hipótesis de un tercero que se vuelve regla». Cambian la §2, la
+> §3, la §4 y la §5, y el C3 gana cuatro filas en la matriz («La mesa del experto alojada») y la AISIA, cuatro. Va
+> firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -139,6 +148,7 @@
 | **Dato del cliente en un proveedor de modelo** | Para categorizar, resumir o extraer parámetros, el texto de un ticket, del chat o de un documento (con datos de empleados del N3 o secretos de su negocio) se manda a un proveedor de modelos, que lo conserva o entrena con él. Pesos abiertos en un proveedor ajeno no cambian nada: el dato sale igual. |
 | **Dato fuera de México** | En el modo gestionado, la base y los archivos de los N3 viven en un proveedor de Estados Unidos. Los datos de sus empleados y de sus contrapartes quedan bajo otra jurisdicción, y el N3 puede no saberlo, o estar obligado a guardarlos en México. |
 | **Lo que escribe el experto, en un tercero** | El experto cuenta en la mesa un caso real de su experiencia, con el nombre de la empresa o un dato de una persona que no tiene forma de dato. Pasa el filtro, llega al contenedor de Cloudflare y se guarda en su almacén, junto con el correo del experto y su retroalimentación. Ahí lo lee el laboratorio, y Cloudflare, que opera la infraestructura, puede verlo. |
+| **Una hipótesis de un tercero que se vuelve regla** | Un candidato de sapstack (fuente secundaria, sin citas y con errores medidos) llega a ser regla sin que nadie lo verifique, y el agente le da al cliente de una consultora una «solución conocida» falsa. |
 | **Dato real en la sección en vivo** | La vitrina tiene una sección en vivo para invitados, con datos sintéticos. Un invitado, una consultora que lo evalúa, escribe ahí el ticket real de un cliente suyo, con nombres o identificadores de sus empleados: llega a la máquina del laboratorio, lo ven los demás invitados, y pasa por Vercel. |
 | **Dato que vive de más o que vuelve** | Las capturas y los CFDI de un N3, con datos de sus empleados y de sus contrapartes, se guardan para siempre; el N3 se va y lo suyo se queda; se borra del servicio y sigue en una copia de respaldo; o una restauración devuelve lo que ya se había borrado. Y al revés: el borrado automático se lleva algo antes de tiempo, con una impugnación abierta o antes de que quien se va tenga su export. |
 
@@ -172,6 +182,7 @@
 | Dato fuera de México | Media-alta (datos de terceros, otra jurisdicción) | **Alta** en el modo gestionado: es el diseño | Parcial: el N3 puede pasar al modo despacho y borrarse del proveedor (D8), pero lo que ya estuvo fuera estuvo |
 | Dato que vive de más o que vuelve | **Alta** (datos de terceros) | Baja con D8: la base decide qué vence, y sin plazos en el contrato no se borra nada | Lo que vive de más, sí: se borra. Lo borrado antes de tiempo, **no** |
 | Lo que escribe el experto, en un tercero | Media (datos de terceros: el cliente o la persona del caso que cuenta) | Media: el experto escribe casos propios a propósito; la bajan el filtro, lo que se le pide en pantalla y que solo entren los correos de la lista | Parcial: el laboratorio borra el caso y la retención lo borra sola; lo que ya pasó por Cloudflare no se des-ve |
+| Una hipótesis de un tercero que se vuelve regla | **Alta** (un veredicto falso para terceros) | Baja: ningún candidato da veredicto (grado «hipótesis», medido en el motor) y una regla exige fuente citable y firma | Parcial: la regla se cierra y la versión sube, pero lo ya respondido se queda |
 | Dato real en la sección en vivo | Media-alta (datos de terceros) | Baja: solo invitados, aviso permanente, sin adjuntos y el filtro de forma de dato | Parcial: vive en memoria y se pierde al apagar; lo que ya vio otro invitado no se des-ve |
 
 ## 4. Mitigaciones
@@ -421,6 +432,11 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     interceptar el TLS, y no se dio por bueno sin probarlo (brecha del C3).
   - El despliegue lleva su candado: sube la imagen del commit, revisada por dentro; la ubicación va fijada; no hay SSH,
     secretos en la configuración ni registros de las peticiones.
+  - **Candidatos de una fuente externa** (revisión 12): la mesa enseña hipótesis de sapstack y el experto dice si son
+    ciertas. El catálogo lleva su huella y el SHA del pin, y la mesa rechaza uno editado o de otro SHA. Lo que escribe el
+    experto pasa los dos filtros y se guarda como propuesta, en el mismo almacén y con la misma retención; cada identidad
+    ve solo lo suyo, y el mapa, con todas, solo existe para el laboratorio. Un número de nota (7 cifras) en un comentario
+    lo rechaza el filtro: el candidato ya lleva el suyo.
   - *Brecha*: un dato sin forma pasa el filtro, y el experto puede contar el caso de un cliente suyo. Cloudflare ve el
     contenido, porque termina el TLS. El contenedor se fija en el este de Norteamérica, que puede incluir Canadá:
     Containers no ofrece una jurisdicción «us» (medido en wrangler 4.143.1). Un `wrangler deploy` a mano se salta el
@@ -452,6 +468,7 @@ quedan hoy:
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece** (D6, decidida): el producto no se conecta a ningún SAP ni guarda sus credenciales. La aplica una persona, fuera del producto, con el control de cambios del N3, y la pantalla y el contrato dicen que el antes y el después son del simulador. |
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
 | Lo que escribe el experto, en un tercero | Lo **reducen** el filtro antes de llegar y antes de guardarse, lo que se le pide en pantalla, que no haya archivos y la identidad de Access: solo entran los correos de la lista, y lo guardado solo lo lee el laboratorio y vence. No es cero: un dato sin forma pasa, y queda declarado. |
+| Una hipótesis de un tercero que se vuelve regla | **Se evita**: el candidato va «al experto» siempre, la validación es una propuesta y la regla se firma en `tools/conocimiento` con una fuente citable, que sapstack no es. |
 | Un dato real en la sección en vivo | Lo **reducen** el filtro del anonimizador antes del túnel y al llegar, que no haya adjuntos, el aviso permanente y el estado en memoria. No es cero: un dato sin forma pasa, y queda declarado. Solo entra quien el laboratorio invita. |
 
 Para salir del laboratorio hacen falta:
@@ -496,3 +513,5 @@ Revisión 9 (H-20 y H-22), firmada por: lisagomez  Rol: responsable del proyecto
 Revisión 10 (la vitrina en Vercel y su sección en vivo, con el C3), lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-12
 
 Revisión 11 (la mesa del experto alojada en Cloudflare, con el C3), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-22
+
+Revisión 12 (una fuente externa de candidatos en la mesa: sapstack, con el C3), firmada por: lisagomez Rol: responsable del proyecto Fecha: 2026-10-22

@@ -600,6 +600,27 @@
         "fuentes": ["tools/extractor-documental/medicion/genera-identificadores.py"],
         "genera": "python3 tools/extractor-documental/medicion/genera-identificadores.py",
         "comprueba": { "comando": "python3 tools/extractor-documental/medicion/genera-identificadores.py --comprueba" }
+      },
+      {
+        "nombre": "soporte-sap-mesa-base",
+        "rutas": ["src/features/soporte-sap/mesa/fuentes/base.json"],
+        "fuentes": [
+          "tools/conocimiento/versiones.json", "tools/conocimiento/CAMBIOS.md", "tools/conocimiento/package.json",
+          "src/features/soporte-sap/mesa/fuentes/generadores.mjs"
+        ],
+        "genera": "node src/features/soporte-sap/mesa/fuentes/extrae.mjs base",
+        "comprueba": { "gate": "prueba:tools" },
+        "_nota": "La prueba mesa-candidatos de tools/soporte-sap lo compara campo por campo con baseDe sobre tools/conocimiento: tras cada `npm run registra`, se regenera."
+      },
+      {
+        "nombre": "soporte-sap-candidatos-sapstack",
+        "rutas": ["src/features/soporte-sap/mesa/fuentes/sapstack/candidatos-sapstack.json"],
+        "fuentes": [
+          "src/features/soporte-sap/mesa/fuentes/sapstack/fuente.json", "src/features/soporte-sap/mesa/fuentes/generadores.mjs"
+        ],
+        "genera": "node src/features/soporte-sap/mesa/fuentes/extrae.mjs sapstack <copia de sapstack en el SHA de fuente.json>",
+        "comprueba": { "gate": "prueba:tools" },
+        "_nota": "No es hermetico: su fuente es sapstack en el SHA de fuente.json, fuera del repo, y re-extraerlo lo hace el laboratorio con esa copia. Lo que compara el gate (prueba mesa-candidatos) es su huella, el pin y la linea de cada candidato: caza la edicion a mano, no un cambio de sapstack."
       }
     ],
     "fuera": [

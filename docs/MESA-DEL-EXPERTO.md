@@ -157,7 +157,8 @@ Solo después de firmar la revisión 11 de la AISIA.
 
 ## Leer lo que dijo el experto
 
-Entra con tu correo a `/mesa/soporte-sap/laboratorio`. Ahí verás:
+Entra con tu correo a `/mesa/soporte-sap/laboratorio`: abre en **el mapa** (abajo). Lo que dijo el experto caso por caso
+está en «Lo que dijo el experto» (`?pestana=casos`). Ahí verás:
 
 - en qué paso falla más el agente;
 - cuántas veces dijo «no lo sé»;
@@ -168,6 +169,31 @@ Entra con tu correo a `/mesa/soporte-sap/laboratorio`. Ahí verás:
 `tools/conocimiento` (D2, H-20). La mesa no siembra nada.
 
 Lo de prueba (los tokens de servicio) se cuenta aparte. **Borrar este caso** lo quita del almacén, y no se puede deshacer.
+
+## Validar conocimiento y el mapa (revisión 12 de la AISIA)
+
+Va con la revisión 12 de la AISIA, firmada el 2026-10-22.
+
+- **Validar conocimiento** (`/mesa/soporte-sap?pestana=candidatos`, para el experto y para ti): hipótesis que salen de
+  sapstack (T-codes y punteros a SAP Notes), cada una con su archivo y su línea en el SHA fijado. El experto dice si es
+  correcta, si está mal, la corrige o dice «no lo sé». Lo que dice es una **propuesta**: pasa el filtro, se guarda en el
+  mismo almacén y vence igual que los casos. Cada identidad ve solo sus validaciones.
+- **El mapa** (`/mesa/soporte-sap/laboratorio`, solo tú): de dónde sale el conocimiento (sapstack, el experto, las SAP
+  Notes), dónde vive (la base `sap-soporte`) y quién lo usa (triage, motor, léxico, CLIs). Debajo, las métricas, las
+  propuestas por firmar, las versiones de la base y los pins. Cada número sale de algo que existe; si no, dice «sin
+  datos». El export en Markdown lleva las validaciones, como propuestas.
+- **Una regla nueva** se firma fuera de la mesa, en `tools/conocimiento`, con una fuente citable. sapstack no lo es.
+
+Mantenerlo al día (lo corre el laboratorio, en `~/mesa-wt` o el worktree que toque):
+
+```
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs revisa              # ¿commit nuevo en sapstack? Avisa, no mueve
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs sapstack <copia>    # regenera los candidatos (copia en el SHA del pin)
+node src/features/soporte-sap/mesa/fuentes/extrae.mjs base                # la foto de la base, después de cada npm run registra
+```
+
+Mover el pin es tu decisión: se cambia `sha` en `fuentes/sapstack/fuente.json`, se regeneran los candidatos y el diff va
+a la mesa. Los archivos generados llevan `_ALTO` y huella: editados a mano, la mesa no los carga y una prueba lo dice.
 
 ## Apagar
 

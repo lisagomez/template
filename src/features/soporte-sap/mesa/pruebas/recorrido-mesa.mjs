@@ -112,12 +112,41 @@ if (TRAS_REINICIO) {
 
   // 6. Lo que ve el laboratorio, y su export.
   const l = await pagina(id.laboratorio)
-  await l.goto(`${base}/mesa/soporte-sap/laboratorio`); await l.waitForSelector(sel('laboratorio'))
+  await l.goto(`${base}/mesa/soporte-sap/laboratorio?pestana=casos`); await l.waitForSelector(sel('laboratorio'))
   await captura(l, 10, 'lo que dijo el experto, para el laboratorio', async () => Number(await texto(l, `${sel('lab-casos')} p`).then((t) => t.split('\n')[0])) + 0 >= 0 && /Lo resolvió/.test(await texto(l, sel('laboratorio'))) && /👎/.test(await texto(l, sel('pasos-mal'))), null, true)
   const [descarga] = await Promise.all([l.waitForEvent('download'), l.click(sel('export-md'))])
   const md = join(carpeta, 'mesa-export-del-laboratorio.md')
   await descarga.saveAs(md)
   console.log(`✓ export del laboratorio → ${md}`)
+
+  // 7. Validar conocimiento: el experto ve hipótesis de sapstack con su fuente y corrige una (antes y después).
+  await e.goto(`${base}/mesa/soporte-sap?pestana=candidatos`); await e.waitForSelector(sel('candidatos'))
+  await captura(e, 11, 'el experto ve los candidatos como hipótesis, con su fuente', async () => (await e.locator('[data-prueba^="candidato-"]').count()) > 0 && /Hipótesis/.test(await texto(e, sel('candidatos'))) && /data\/tcodes\.yaml:\d+/.test(await texto(e, sel('candidatos'))))
+  await e.fill(sel('busca'), 'MIRO')
+  const miro = e.locator('[data-prueba^="candidato-"]', { hasText: 'Invoice Verification' }).first()
+  await miro.waitFor()
+  await captura(e, 12, 'antes: la hipótesis de MIRO, sin validar', async () => (await miro.locator(sel('formulario-validacion')).count()) === 1 && (await miro.locator(sel('validacion-hecha')).count()) === 0, '[data-prueba^="candidato-"]')
+  await miro.locator(sel('valora-corrige')).click()
+  await miro.locator(sel('correccion')).fill('MIRO es de MM: la verificación de facturas (LIV) vive en MM y contabiliza en FI')
+  await miro.locator(sel('comentario')).fill('en S/4 también está la app de Fiori para lo mismo')
+  await miro.locator(sel('enviar-validacion')).click(); await miro.locator(sel('validacion-hecha')).waitFor()
+  await captura(e, 13, 'después: su corrección queda como propuesta', async () => /Propuesta para el laboratorio/.test(await miro.innerText()) && /Lo corrijo/.test(await miro.innerText()), '[data-prueba^="candidato-"]')
+
+  // 8. El mapa del laboratorio: conteos reales, el detalle de un nodo y la propuesta del experto.
+  await l.goto(`${base}/mesa/soporte-sap/laboratorio`); await l.waitForSelector(sel('mapa'))
+  await captura(l, 14, 'el mapa del laboratorio, con sus conteos reales', async () => /335/.test(await texto(l, sel('nodo-sapstack'))) && Number(await texto(l, `${sel('metrica-corregidos')} p:nth-child(2)`)) >= 1 && /sin datos|%/.test(await texto(l, sel('metrica-al-experto'))), null, true)
+  await l.click(sel('nodo-sapstack-abre')); await l.waitForSelector(sel('detalle-sapstack'))
+  await captura(l, 15, 'el detalle de un nodo: candidatos por módulo', async () => /FI · \d+ candidatos/.test(await texto(l, sel('detalle-sapstack'))), sel('detalle-sapstack'))
+  await captura(l, 16, 'el laboratorio ve la corrección del experto como propuesta', async () => { const t = await texto(l, sel('propuestas')); return /MIRO/.test(t) && /propuesta/.test(t) && /Lo corrijo/.test(t) }, sel('propuestas'))
+
+  // 9. Para el experto, el mapa no existe. (Se abre sin escuchar la consola: el 404 es lo esperado, y Chromium lo anota.)
+  const ctx404 = await navegador.newContext({ viewport: { width: 1440, height: 700 }, extraHTTPHeaders: id.experto })
+  const p404 = await ctx404.newPage()
+  const r404 = await p404.goto(`${base}/mesa/soporte-sap/laboratorio`)
+  await captura(p404, 17, 'el experto recibe 404 en el mapa', async () => r404?.status() === 404)
+  const lm = await pagina(id.laboratorio, { width: 390, height: 844 })
+  await lm.goto(`${base}/mesa/soporte-sap/laboratorio`); await lm.waitForSelector(sel('mapa'))
+  await captura(lm, 18, 'el mapa a ancho de teléfono', async () => (await lm.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)), null, true)
 
   // 7. Las negativas, por la API.
   const negativas = []
@@ -127,6 +156,7 @@ if (TRAS_REINICIO) {
   await pide('un JWT vencido', `${base}/api/mesa/soporte-sap`, id.falso)
   await pide('el experto, la vista del laboratorio', `${base}/api/mesa/soporte-sap?vista=laboratorio`, id.experto)
   await pide('el experto, la página del laboratorio', `${base}/mesa/soporte-sap/laboratorio`, id.experto)
+  await pide('el experto, el mapa por la API', `${base}/api/mesa/soporte-sap?vista=mapa`, id.experto)
   await pide('el experto, la ruta de las identidades elegibles (superadmin)', `${base}/api/soporte-sap?rol=superadmin`, id.experto)
   writeFileSync(join(carpeta, 'mesa-negativas.txt'), negativas.join('\n') + '\n')
   for (const n of negativas) console.log(`  negativa · ${n}`)

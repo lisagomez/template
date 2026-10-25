@@ -1,0 +1,12 @@
+{
+  "_que_es": "El pin de sapstack, la fuente externa de candidatos de la mesa. Es de un tercero (MIT): se lee fijado por SHA y nunca se ejecuta. Mover el SHA es una decisión del laboratorio: se cambia aquí, se vuelve a extraer y la diferencia de candidatos va a la mesa. «revision» la escribe `extrae.mjs revisa` (git ls-remote): avisa, no mueve.",
+  "repo": "Fioriuser2021/sapstack",
+  "web": "https://github.com/Fioriuser2021/sapstack",
+  "sha": "5be80773025a3ace996f02a5b0a8557779eaa334",
+  "version": "v1.4.0",
+  "commitFecha": "2026-04-11",
+  "licencia": "MIT",
+  "copyright": "Copyright (c) 2026 BoxLogoDev",
+  "origen": { "repo": "BoxLogoDev/sapstack", "estado": "no existe (404) al 2026-10-22: la copia de Fioriuser2021 no está marcada como fork" },
+  "revision": { "fecha": "2026-10-22", "head": "5be80773025a3ace996f02a5b0a8557779eaa334" }
+}
