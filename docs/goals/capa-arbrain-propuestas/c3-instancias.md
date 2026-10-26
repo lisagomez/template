@@ -1,11 +1,14 @@
-# Modelo de amenazas (C3), BORRADOR — el Arbrain personal en dos lugares y las rutas nuevas de la capa
+# Modelo de amenazas (C3) — el Arbrain personal en dos lugares y las rutas nuevas de la capa
 
-> Fecha: 2026-10-25 · Estado: **borrador, sin firma** · Plantilla `.claude/gobernanza/plantillas/modelo-amenazas.md`.
+> Fecha: 2026-10-25 · Estado: **con la firma del laboratorio** · Plantilla `.claude/gobernanza/plantillas/modelo-amenazas.md`.
 > Goal `docs/goals/capa-arbrain.md` (nodos `instancias` y `resumen`). Hoy todo es demostración en contenedores:
-> nada está encendido, no hay VPS, ni Tailscale, ni túnel de Cloudflare. **Este borrador se firma ANTES de encender
-> lo real** (FUERA DEL HECHO §1 del spec), no antes de mergear la capa.
+> nada está encendido, no hay VPS, ni Tailscale, ni túnel de Cloudflare.
+> **Alcance de la firma**: esta versión cubre lo probado en contenedores (las dos instancias, la red simulada, el centro
+> con su hook, la puerta de Cloudflare validada sin conexión y el resumen de solo conteos) y las rutas nuevas de la
+> capa. Firmarla **no** enciende nada: encender el VPS, Tailscale, el túnel o Arbrain en Windows pide una revisión de
+> este documento que cubra lo real (ver «Lo que firmar este documento NO abre»).
 >
-> **Propuesta, no registro.** La firma la escribe el laboratorio; aquí no va «pendiente» en ningún registro.
+> **aprobación humana ☑** · **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-26
 
 **Activos que toca** (por daño): (1) el **cerebro personal** del laboratorio: memoria, metas, plan, diario,
 conocimiento y skills propias, que son datos personales suyos; (2) los **datos de la app** de Arbrain en cada
