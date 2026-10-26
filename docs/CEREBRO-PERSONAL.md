@@ -174,7 +174,7 @@ conexión al relevo lleva un token de la red, generado por la prueba y montado c
 instancias, `ss -ltn` muestra solo `127.0.0.1` (la web de Arbrain, su daemon y su control) y el DNS interno de Docker en
 `127.0.0.11`, que en la realidad no existe.
 
-## Superficies (para el borrador del C3)
+## Superficies (las del C3)
 
 | Superficie | Dónde escucha | Quién llega | Qué la protege |
 |---|---|---|---|
@@ -211,7 +211,8 @@ instancias, `ss -ltn` muestra solo `127.0.0.1` (la web de Arbrain, su daemon y s
   login` hecho por el laboratorio, el centro creado con `crea-centro` y su respaldo (GitHub privado o R2) en el
   inventario §4, con RPO y RTO «desconocidos» hasta el GATE 3.
 - **Cloudflare real**: dominio, `cloudflared tunnel create`, DNS, la aplicación de Access con su política (correo y PIN)
-  y su `audTag` real en `config.yml`. Antes, el C3 firmado.
+  y su `audTag` real en `config.yml`. Antes, una revisión del C3 que cubra lo real: la versión firmada el 2026-10-26
+  (`docs/goals/capa-arbrain-propuestas/c3-instancias.md`) cubre solo los contenedores.
 - **Actualizar Arbrain** con el procedimiento oficial en las dos máquinas y `declara-version` en el VPS (CDC).
 
 ## Brechas declaradas
