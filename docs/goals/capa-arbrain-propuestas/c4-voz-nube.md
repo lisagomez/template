@@ -1,12 +1,14 @@
-# C4 de la voz en la nube, BORRADOR — los adaptadores opcionales de la ranura de voz
+# C4 de la voz en la nube — los adaptadores opcionales de la ranura de voz
 
-> Fecha: 2026-10-25 · Estado: **borrador, sin firma** · Goal `docs/goals/capa-arbrain.md` (nodo `voz`, arista
-> `e-gob-voz`). **Propuesta, no registro**: la firma la escribe el laboratorio.
+> Fecha: 2026-10-25 · Estado: **con la firma del laboratorio** · Goal `docs/goals/capa-arbrain.md` (nodo `voz`, arista
+> `e-gob-voz`).
 >
 > **Qué decide este documento.** Los adaptadores de voz en la nube (los proveedores que usa Arbrain) existen en el código
 > detrás de la misma interfaz que nuestros motores locales, **apagados por defecto**. Este C4 dice qué sale de la máquina
 > con cada uno, a quién y bajo qué condiciones un producto podría encenderlo. Firmarlo **no enciende nada**: encender un
 > adaptador es una decisión por producto, con la revisión de la AISIA de ese producto.
+>
+> **aprobación humana ☑** · **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-26
 
 ## Lo que ya garantiza el código (probado)
 
@@ -15,6 +17,9 @@
   motor local la ranura de voz no pinta el botón»).
 - **Un adaptador de nube solo cuenta si el producto lo enciende** en su composición (`voz.nube`), y **nunca** si el
   producto declara `datosSensibles: true` (pacientes, lo que escribe el experto de Soporte SAP, clientes de una pyme).
+- **En el servicio de dictado, el motor local va primero.** Un adaptador de STT encendido y con llave recibe la toma
+  solo si el local falla o si se le pide por su id (`model: groq`); uno apagado responde 400 y no sale nada
+  (`tools/dictado/servicio/openai.mjs`).
 - **El reconocimiento de voz del navegador cuenta como nube**: en Chrome manda el audio a Google. No es un motor local.
 - **La mejor voz del dispositivo** (respaldo donde no hay Piper) se usa solo si es local (`localService === true`): las
   voces de red del navegador (por ejemplo, las «Natural» de Edge) mandan el TEXTO fuera y no cuentan como locales.
@@ -27,7 +32,7 @@
 | Groq (`whisper-large-v3-turbo`) | dictar y transcribir el turno | **el audio de cada toma** (voz de la persona, con todo lo que se oiga alrededor) | Groq (EE. UU.) | no | producto sin datos sensibles + revisión de su AISIA + llave propia; retención y uso del proveedor revisados por escrito |
 | LemonFox (STT) | lo mismo, de pago | **el audio de cada toma** | LemonFox | no | igual que Groq |
 | LemonFox (TTS) | leer respuestas en voz alta | **el texto de cada respuesta** que se lee | LemonFox | no | producto sin datos sensibles + revisión de su AISIA; ~1,6 s por oración según Arbrain (cifra del autor, no medida) |
-| ElevenLabs (Flash v2.5) | leer respuestas con poca latencia | **el texto de cada respuesta**, más el contexto previo que pida su API (Arbrain manda los últimos ~300 caracteres) | ElevenLabs | no | igual que LemonFox TTS; ~400–700 ms según Arbrain (no medido) |
+| ElevenLabs (Flash v2.5) | leer respuestas con poca latencia | **el texto de cada frase** que se lee; sin el contexto previo (`previous_text`, los ~300 caracteres anteriores) que Arbrain sí manda | ElevenLabs | no | igual que LemonFox TTS; ~400–700 ms según Arbrain (no medido) |
 | Reconocimiento del navegador | dictar sin servicio local | **el audio** | el proveedor del navegador (en Chrome, Google) | no | no se ofrece: no hay forma de que el producto controle a dónde va |
 
 **Lo que no entra**: «Jev» (la capa rápida de Arbrain por OpenRouter, que clasifica lo hablado). Nuestro acuse se elige con
@@ -40,10 +45,12 @@ el enrutador local sin LLM: ningún texto hablado sale para clasificarlo.
    sensibles, y la persona ve en Ajustes › Voz qué motor la escucha y qué sale.
 2. **El texto de una respuesta en un tercero** (TTS en la nube): la respuesta puede citar datos del producto (una cita, un
    caso). Por eso el mismo límite.
-3. **Una llave con gasto** (Groq gratis con límite; LemonFox y ElevenLabs de pago): «probar una llave sin gastar cuota»
-   (`GET /v1/models`) y la contabilidad del template (C8) cuando se encienda.
-4. **Dependencia**: si el proveedor cae, el STT no se apaga (sigue el local) y el TTS cae a Piper o a la voz local del
-   dispositivo.
+3. **Una llave con gasto** (Groq gratis con límite; LemonFox y ElevenLabs de pago): la llave se prueba por la ruta que
+   no gasta cuota (`GET /models` de Groq y de ElevenLabs; LemonFox no tiene una conocida y el servicio lo dice en vez de
+   gastar), y la contabilidad del template (C8) cuando se encienda.
+4. **Dependencia**: si el proveedor cae, el STT no se apaga (el local va primero). En el TTS, el servicio devuelve el
+   error sin cambiar de proveedor solo, y la app lee con la mejor voz local del dispositivo
+   (`src/shared/capa/modulos/voz.ts`).
 
 ## Lo que firmar este documento NO abre
 

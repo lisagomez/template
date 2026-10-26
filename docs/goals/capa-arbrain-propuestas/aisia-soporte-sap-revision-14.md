@@ -67,4 +67,4 @@ suyo; el filtro caza lo que tiene forma de dato (correos, teléfonos, RFC), no u
 
 - Desplegar la mesa con la ranura de conversación: es el candado de despliegue de siempre (`docs/MESA-DEL-EXPERTO.md`).
 - Un modelo real en la conversación del experto (FUERA DEL HECHO §3).
-- Voz en la mesa: no cabe el motor local y la nube no se enciende con datos sensibles (C4 de voz, propuesta aparte).
+- Voz en la mesa: no cabe el motor local y la nube no se enciende con datos sensibles (C4 de voz, firmado el 2026-10-26).
