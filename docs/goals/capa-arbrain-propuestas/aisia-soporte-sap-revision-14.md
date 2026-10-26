@@ -1,5 +1,11 @@
 # Nota para la revisión 14 de la AISIA de Soporte SAP — PROPUESTA, sin firma
 
+> **Al día (2026-10-26):** la **parte 1** (la conversación de la mesa, sin modelo) ya está redactada dentro de la AISIA,
+> en el borrador `docs/goals/soporte-sap-AISIA-revision-14.md`, con cinco filas nuevas en la matriz, todas probadas. Al
+> firmarse, ese borrador reemplaza a `.claude/gobernanza/AISIA-soporte-sap.md`. Lo que sigue en esta nota como
+> propuesta es la **parte 2** (la lectura de solo conteos hacia el cerebro personal): se firma antes de encenderla, con
+> el VPS decidido.
+
 > Fecha: 2026-10-25 · Goal `docs/goals/capa-arbrain.md` (nodo `mesa`, arista `e-gob-mesa`) · Registro al que iría:
 > `.claude/gobernanza/AISIA-soporte-sap.md`. **Propuesta, no registro**: la firma la escribe el laboratorio, y al
 > firmarse se pega allá como «Revisión 14» y se borra esta nota.

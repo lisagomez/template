@@ -225,6 +225,20 @@ El diff de `candidatos-web.json` es lo que llega a la mesa. Lo que no esté en l
 de una tarea en SAP Help, una nota sin CVE del Patch Day, una fecha de fin de mantenimiento) lo trae una persona: el
 experto, en la mesa, como su experiencia.
 
+## La conversación (revisión 14 de la AISIA, parte 1)
+
+Va con la revisión 14 de la AISIA, parte 1, en borrador (`docs/goals/soporte-sap-AISIA-revision-14.md`). El código ya está
+en `main`, así que el próximo despliegue la sube: despliega después de firmarla.
+
+- **Qué hace**: la mesa se ve dentro de la capa común, con una ranura de conversación que resuelve sin modelo, con el
+  enrutador de intención de la capa: «prueba este caso: …», «¿por qué dijiste no lo sé en el paso 3?» y «muéstrame lo que
+  te enseñé». Corre los casos con el mismo agente sin modelo y los guarda en el almacén de la mesa, con la misma
+  retención.
+- **Qué no hace**: no habla con ningún modelo ni con otra API que la de la mesa, no guarda en el navegador del experto lo
+  que escribe (solo el estado de la guía), no borra (eso es tuyo) y no lleva voz.
+- **Lo que sigue abierto**: lo que el experto cuente con palabras, sin forma de dato, pasa el filtro igual que en el
+  formulario.
+
 ## Apagar
 
 - Sin sesiones, el contenedor **se duerme solo** a los 30 minutos: no corre ni cobra memoria. Al despertar, el
