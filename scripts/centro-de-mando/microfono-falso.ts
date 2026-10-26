@@ -94,9 +94,11 @@ export function instalaMicrofonoFalso(): void {
     }
     return reproduce.call(this);
   };
+  // Cada `getUserMedia` da pistas NUEVAS (clones), como un micrófono de verdad: detenerlas al apagar no mata las del
+  // siguiente encendido, y su `readyState` dice si quien las pidió las cerró (la prueba del botón de la capa).
   navigator.mediaDevices.getUserMedia = async () => {
     await asegura();
-    return (destino as MediaStreamAudioDestinationNode).stream;
+    return new MediaStream((destino as MediaStreamAudioDestinationNode).stream.getTracks().map((p) => p.clone()));
   };
   const microfono: MicrofonoFalso = {
     eventos,

@@ -65,7 +65,7 @@ function Etapas({ pasos }: { pasos: readonly PasoMesa[] }) {
   )
 }
 
-function Paso({ paso, retro, guarda, ultimo }: { paso: PasoMesa; retro: RetroPaso | undefined; guarda: (clave: string, gesto: 'bien' | 'mal', esperaba?: string) => Promise<void>; ultimo: boolean }) {
+function Paso({ paso, numero, retro, guarda, ultimo }: { paso: PasoMesa; numero: number; retro: RetroPaso | undefined; guarda: (clave: string, gesto: 'bien' | 'mal', esperaba?: string) => Promise<void>; ultimo: boolean }) {
   const q = TONO_QUIEN[paso.quien]
   return (
     <li className="relative scroll-mt-24 pl-10" data-prueba={`paso-${paso.etapa}`} id={`paso-${paso.etapa}`}>
@@ -73,7 +73,8 @@ function Paso({ paso, retro, guarda, ultimo }: { paso: PasoMesa; retro: RetroPas
       <span className={`absolute left-1.5 top-4 h-4 w-4 rounded-full ring-4 ${q.punto}`} aria-hidden />
       <article className={`rounded-2xl border p-4 ${TONO[paso.tono]}`}>
         <header className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-bold text-neutral-900">{paso.titulo}</h3>
+          {/* El número es el que usa la conversación de la mesa («¿por qué dijiste no lo sé en el paso 3?»). */}
+          <h3 className="text-sm font-bold text-neutral-900"><span className="mr-1.5 font-semibold tabular-nums text-neutral-500" data-prueba="numero-de-paso">Paso {numero} ·</span>{paso.titulo}</h3>
           <Chip className={q.chip}>{paso.quienDice}</Chip>
           <span className="ml-auto text-xs tabular-nums text-neutral-500" title="desde el paso anterior, con las fechas de la cadena">+{milisegundos(paso.ms)}</span>
         </header>
@@ -105,7 +106,7 @@ export function LineaDeTiempo({ pasos, retro, guarda, revela }: { pasos: readonl
     <div data-prueba="linea-de-tiempo">
       <Etapas pasos={pasos.slice(0, vistos)} />
       <ol className="space-y-3" aria-live="polite">
-        {pasos.slice(0, vistos).map((p, k) => <Paso key={p.clave} paso={p} retro={retro[p.clave]} guarda={guarda} ultimo={k === pasos.length - 1} />)}
+        {pasos.slice(0, vistos).map((p, k) => <Paso key={p.clave} paso={p} numero={k + 1} retro={retro[p.clave]} guarda={guarda} ultimo={k === pasos.length - 1} />)}
       </ol>
       {trabajando ? <p className="mt-3 pl-10 text-sm text-amber-700" data-prueba="trabajando">El agente está trabajando… ({vistos} de {pasos.length} pasos)</p> : null}
     </div>

@@ -9,7 +9,11 @@
  *  - abrir un turno con `finReal` posterior al cierre es un error de quien mide y se rechaza.
  */
 
-export const ETAPAS = ['finReal', 'cierre', 'transcrito', 'enrutado', 'primerToken', 'primeraFrase', 'vozLista', 'suena', 'fin'] as const;
+/**
+ * `acuse`: se encoló el acuse inmediato. `suena`: el primer audio que suena (el acuse, si lo hubo). `suenaRespuesta`:
+ * el primer audio de la RESPUESTA (sin acuse, el mismo instante que `suena`).
+ */
+export const ETAPAS = ['finReal', 'cierre', 'transcrito', 'enrutado', 'acuse', 'primerToken', 'primeraFrase', 'vozLista', 'suena', 'suenaRespuesta', 'fin'] as const;
 export type Etapa = (typeof ETAPAS)[number] | 'interrumpido';
 
 export type EstadoRegistro = 'en-curso' | 'completo' | 'interrumpido' | 'descartado';
@@ -26,6 +30,10 @@ export interface RegistroTurno {
   cierreAnticipado?: boolean;
   costoUsd?: number | null;
   texto?: string;
+  /** El acuse que sonó (o se encoló) antes de la respuesta. */
+  acuse?: string;
+  /** `simulado`: la respuesta la dio un cerebro de medición, sin modelo. */
+  cerebro?: 'simulado' | 'real';
 }
 
 export interface Tramo {
@@ -92,6 +100,13 @@ export function creaTelemetria(maxTurnos = 200): Telemetria {
 export function latencia(r: RegistroTurno): number | undefined {
   const { finReal, suena } = r.marcas;
   return finReal !== undefined && suena !== undefined ? suena - finReal : undefined;
+}
+
+/** Fin real del habla → primer audio de la RESPUESTA (sin contar el acuse); `undefined` si no sonó. */
+export function latenciaRespuesta(r: RegistroTurno): number | undefined {
+  const { finReal, suenaRespuesta, suena } = r.marcas;
+  const t = suenaRespuesta ?? (r.acuse ? undefined : suena);
+  return finReal !== undefined && t !== undefined ? t - finReal : undefined;
 }
 
 /** La cascada del turno: cada etapa con su inicio relativo al fin real y su duración. */

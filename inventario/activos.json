@@ -33,6 +33,7 @@
   { "patron": "inventario/" },
   { "patron": "erp/*/" },
   { "patron": "erp/*.md" },
+  { "patron": "infra/*/" },
   { "patron": "AGENTS.md" },
   { "patron": "CLAUDE.md" },
   { "patron": "GEMINI.md" },
@@ -210,6 +211,14 @@
    "cubre": ["src/features/ventas-whatsapp"]
   },
   {
+   "id": "TPL-feature-recepcion",
+   "nombre": "Recepcion: el mostrador de un negocio de servicios ficticio (/recepcion) compuesto en la capa con tools/calendario (agenda, reservas sin doble reserva y cancelar por el freno), sus datos sinteticos, sus intenciones (servicios, horario, horas libres) y la lectura de solo conteos (/api/recepcion/resumen)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/recepcion", "responsable": "dep-sw", "producto": "recepcion",
+   "origen": ["docs/goals/capa-arbrain.md"],
+   "cubre": ["src/features/recepcion", "scripts/recepcion"]
+  },
+  {
    "id": "TPL-crecimiento-demostrado",
    "nombre": "Analitica de growth revenue con prueba para pymes: Gamma sellado con 12 invariantes, motor determinista (puente y clientes x frecuencia x ticket), kernel de derivaciones sin LLM (11 reglas, 2 teoremas demostrados en Lean), narracion con numeros verificados, agentes inyectables y pasarela A2A; laboratorio con dos pymes sinteticas y la verdad plantada (0.1.0)",
    "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
@@ -288,6 +297,14 @@
    "ubicacion": "tools/calendario", "responsable": "dep-sw",
    "origen": ["docs/goals/calendario.md"],
    "cubre": ["tools/calendario"]
+  },
+  {
+   "id": "TPL-capa",
+   "nombre": "Capa comun: una ventana (conversacion, lienzo, explorador y panel), operacion por intencion sin LLM, memoria del producto por inquilino, plan, voz con motores locales, el freno (cita textual y clic) y primer arranque; ranuras donde se enchufa cada modulo, con su verificador y la procedencia de lo adoptado de Arbrain (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "beta",
+   "ubicacion": "tools/capa", "responsable": "dep-sw",
+   "origen": ["docs/goals/capa-arbrain.md"],
+   "cubre": ["tools/capa", "scripts/capa"]
   },
   {
    "id": "TPL-feature-laboratorio-calendario",
@@ -420,6 +437,14 @@
    "tipo": "infraestructura", "clase": "INFRA", "estado": "produccion",
    "ubicacion": "docker-compose.yml", "responsable": "dep-sw",
    "cubre": ["Dockerfile", "docker-compose.yml", "Caddyfile", ".hermes-baseline.json", "hermes/.env.ejemplo", "scripts/configura-deploy.mjs", "scripts/despliegue", "scripts/verifica-hermes.mjs", "docs/DEPLOY-HETZNER.md", "docs/FASE0-INFRAESTRUCTURA.md", "docs/DICTADO-CELULAR-RED.md", "docs/REVISION-rutas-publicas.md"]
+  },
+  {
+   "id": "TPL-cerebro-personal",
+   "nombre": "Arbrain personal en dos lugares (demostracion en contenedores): Arbrain v0.2.10 de la etiqueta firmada, job que sincroniza solo el cerebro con union por registro y alto ante choque, red privada simulada, puerta de Cloudflare con Access validada sin conexion",
+   "tipo": "infraestructura", "clase": "INFRA", "estado": "blueprint",
+   "ubicacion": "infra/cerebro-personal", "responsable": "dep-sw",
+   "origen": ["docs/goals/capa-arbrain.md"],
+   "cubre": ["infra/cerebro-personal", "docs/CEREBRO-PERSONAL.md"]
   },
   {
    "id": "TPL-erp",

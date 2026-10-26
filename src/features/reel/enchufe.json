@@ -1,0 +1,41 @@
+{
+  "enchufe": 1,
+  "modulo": "reel",
+  "activo": "TPL-feature-reel",
+  "nombre": "Reel del celular",
+  "pantallas": ["/reel", "/reel/[id]"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "reel.abre",
+      "queHace": "Abrir tus reels.",
+      "ejemplos": [
+        "quiero ver el reel",
+        "abre mis reels",
+        "subir el clip que grabé con el celular",
+        "ver los videos que subí"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/reel"
+    },
+    {
+      "id": "reel.abre-sala",
+      "queHace": "Abrir la sala de un reel.",
+      "ejemplos": ["abre la sala de un reel", "ver los consentimientos de un reel", "revisar los cortes de un reel"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/reel/[id]"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las cuentas, la lista y la sala funcionan con Supabase y los motores locales de tools/reel sin la capa; el núcleo no la importa",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "Supabase del proyecto (Auth y base de datos con RLS)",
+      "cuando": "al entrar, subir un clip, aprobar o registrar un consentimiento: cuenta, proyectos, versiones, aprobaciones con su huella y estado de los consentimientos; el video y la transcripción nunca salen del servidor"
+    }
+  ]
+}

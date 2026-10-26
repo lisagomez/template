@@ -6,7 +6,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**64 activos** cubren **295 unidades** del repo.
+**67 activos** cubren **301 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -31,11 +31,13 @@
 | TPL-productos | El concepto de producto, su plantilla y sus manifiestos (productos/), con el gate que los cruza con el indice del portafolio y el inventario (verifica:productos) | FABRICA | software | blueprint | 2 | `productos` |
 | TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 31 | `.claude/skills` |
 | TPL-trayectorias | Trayectorias: trazas de ejecucion, evaluador, informe y propuestas | FABRICA | software | produccion | 4 | `scripts/trayectorias` |
+| TPL-cerebro-personal | Arbrain personal en dos lugares (demostracion en contenedores): Arbrain v0.2.10 de la etiqueta firmada, job que sincroniza solo el cerebro con union por registro y alto ante choque, red privada simulada, puerta de Cloudflare con Access validada sin conexion | INFRA | infraestructura | blueprint | 2 | `infra/cerebro-personal` |
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 12 | `docker-compose.yml` |
 | TPL-app-base | App SaaS base (Next.js + Supabase, PWA) | PRODUCTO | software | produccion | 6 | `src/app` |
 | TPL-asesor-ventas | Asesor de ventas: insights con evidencia desde una reunion diarizada | PRODUCTO | software | blueprint | 1 | `tools/asesor-ventas` |
 | TPL-bucle-voz | Bucle de voz: turnos con identificador y cancelacion, interrupcion con puerta de eco, separador de frases, enrutador sin LLM, palabra de activacion por texto local, corte por sentido, telemetria desde el fin real del habla, cerebro en flujo y reproductor del navegador (0.1.0) | PRODUCTO | software | beta | 1 | `tools/bucle-voz` |
 | TPL-calendario | Calendario: motor de agenda (un espejo, una pluma), recurrencias RFC 5545, disponibilidad y reserva sin doble reserva, actividad programada, UI React y CLI (0.1.0) | PRODUCTO | software | beta | 1 | `tools/calendario` |
+| TPL-capa | Capa comun: una ventana (conversacion, lienzo, explorador y panel), operacion por intencion sin LLM, memoria del producto por inquilino, plan, voz con motores locales, el freno (cita textual y clic) y primer arranque; ranuras donde se enchufa cada modulo, con su verificador y la procedencia de lo adoptado de Arbrain (0.1.0) | PRODUCTO | software | beta | 2 | `tools/capa` |
 | TPL-cli-ss-cadena | CLI ss-cadena de Soporte SAP: verifica la cadena sha256 de eventos de una incidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-cadena.mjs` |
 | TPL-cli-ss-ingesta | CLI ss-ingesta de Soporte SAP: lee un documento por su vía y muestra sus campos con evidencia (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-ingesta.mjs` |
 | TPL-cli-ss-mapea | CLI ss-mapea de Soporte SAP: propone el mapeo de un exporte de tickets y muestra la cuenta (solo lectura) | PRODUCTO | software | blueprint | 1 | `tools/soporte-sap/clis/ss-mapea.mjs` |
@@ -61,6 +63,7 @@
 | TPL-feature-estudio-pymes | Estudio de marketing para el cliente pyme (usa solo lo que el laboratorio aprobo) | PRODUCTO | software | blueprint | 2 | `src/features/estudio-pymes` |
 | TPL-feature-etiquetas | Interfaz web de etiquetas y expediente (/etiquetas: etiqueta, leer, recibir, escanear, dia, mover, caducidades, conteo, expediente, riesgo, integridad); usa solo lo que aprueba su laboratorio | PRODUCTO | software | beta | 1 | `src/features/etiquetas` |
 | TPL-feature-project-settings | Parametrizacion por tipo de proyecto (Supabase) | PRODUCTO | software | beta | 2 | `src/features/project-settings` |
+| TPL-feature-recepcion | Recepcion: el mostrador de un negocio de servicios ficticio (/recepcion) compuesto en la capa con tools/calendario (agenda, reservas sin doble reserva y cancelar por el freno), sus datos sinteticos, sus intenciones (servicios, horario, horas libres) y la lectura de solo conteos (/api/recepcion/resumen) | PRODUCTO | software | blueprint | 2 | `src/features/recepcion` |
 | TPL-feature-reel | App del reel: cuentas, subida del clip y sala de aprobacion en el celular | PRODUCTO | software | blueprint | 6 | `src/features/reel` |
 | TPL-feature-sgi | App del sistema integrado ISO: roadmap con puertas, documentos con huella, evidencias, riesgos, SoA, auditoria y CAPA, panel del consultor con marca blanca | PRODUCTO | software | blueprint | 8 | `src/features/sgi` |
 | TPL-feature-soporte-sap | App de Soporte SAP (/soporte-sap: laboratorio, experto, sala y chat del HIL, workspace del consultor y tablero del cliente), su contrato de negocio, su vitrina en Vercel (/vitrina/soporte-sap: los tres niveles, journey, deck, manual y la sección en vivo firmada) y la mesa del experto alojada en Cloudflare (/mesa/soporte-sap: casos propios, línea de tiempo, retro durable) | PRODUCTO | software | blueprint | 5 | `src/features/soporte-sap` |
@@ -81,6 +84,7 @@ El dueño de cada pieza (`producto`), con su estado y, si es un CLI, su grado. L
 
 | Producto | ID | Activo | Estado | Grado |
 | --- | --- | --- | --- | --- |
+| recepcion | TPL-feature-recepcion | Recepcion: el mostrador de un negocio de servicios ficticio (/recepcion) compuesto en la capa con tools/calendario (agenda, reservas sin doble reserva y cancelar por el freno), sus datos sinteticos, sus intenciones (servicios, horario, horas libres) y la lectura de solo conteos (/api/recepcion/resumen) | blueprint | — |
 | soporte-sap | TPL-cli-ss-cadena | CLI ss-cadena de Soporte SAP: verifica la cadena sha256 de eventos de una incidencia (solo lectura) | blueprint | no medido |
 | soporte-sap | TPL-cli-ss-ingesta | CLI ss-ingesta de Soporte SAP: lee un documento por su vía y muestra sus campos con evidencia (solo lectura) | blueprint | no medido |
 | soporte-sap | TPL-cli-ss-mapea | CLI ss-mapea de Soporte SAP: propone el mapeo de un exporte de tickets y muestra la cuenta (solo lectura) | blueprint | no medido |
@@ -127,6 +131,7 @@ El dueño de cada pieza (`producto`), con su estado y, si es un CLI, su grado. L
 - `inventario/`
 - `erp/*/`
 - `erp/*.md`
+- `infra/*/`
 - `AGENTS.md`
 - `CLAUDE.md`
 - `GEMINI.md`

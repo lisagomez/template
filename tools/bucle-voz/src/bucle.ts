@@ -12,12 +12,15 @@
  *    (retenida); si la voz sigue, se aborta; si el VAD cierra, ya está lista. Una orden segura
  *    cierra antes (`msCierreYa`); una frase abierta («…y») espera un poco más.
  *  - **Telemetría desde el fin real del habla** hasta la primera muestra que suena.
+ *  - **Acuse inmediato** (opcional, `acuse.ts`): si el turno va al cerebro, una frase fija suena primero, como
+ *    frase 0 del mismo canal (retenida hasta confirmar, cortada por la interrupción como cualquier otra).
  */
 import { concatena } from './audio.js';
 import { creaCanalVoz, type AudioFrase, type CanalVoz } from './canal-voz.js';
 import { juezPorTexto, type VeredictoCierre } from './cierre.js';
 import { planControl, type PlanControl } from './control.js';
 import type { Decision } from './enrutador.js';
+import type { EleccionAcuse } from './acuse.js';
 import { pareceEco } from './activacion.js';
 import { palabras } from './texto.js';
 import { creaSeparador } from './separador.js';
@@ -73,6 +76,9 @@ interface Vuelo {
   audios: Map<number, AudioFrase>;
   cancelaCierre?: () => void;
   cierreAnticipado: boolean;
+  /** El acuse que se encoló como frase 0 (no es parte de la respuesta). */
+  acuse?: string;
+  cancelaAcuse?: () => void;
 }
 
 const TOLERANCIA_MS = 40;
@@ -124,6 +130,7 @@ export function creaBucle(o: OpcionesBucle): Bucle {
 
   const descarta = (v: Vuelo, motivo: string) => {
     v.cancelaCierre?.();
+    v.cancelaAcuse?.();
     v.turno.aborta(motivo);
     tel.cierra(v.turno.id, 'descartado');
     emite({ tipo: 'descartado', turno: v.turno.id, motivo });
@@ -137,6 +144,7 @@ export function creaBucle(o: OpcionesBucle): Bucle {
     const anterior = vuelo;
     if (anterior && tel.turno(anterior.turno.id)?.estado === 'en-curso') tel.cierra(anterior.turno.id, anterior.confirmado ? 'interrumpido' : 'descartado');
     anterior?.cancelaCierre?.();
+    anterior?.cancelaAcuse?.();
     cancelaSeguimiento?.();
     const turno = gestor.nuevo();
     const v: Vuelo = {
@@ -203,8 +211,9 @@ export function creaBucle(o: OpcionesBucle): Bucle {
       emite({ tipo: 'aviso', turno: v.turno.id, mensaje: e instanceof Error ? e.message : 'el turno falló' });
       if (!v.confirmado) return descarta(v, 'falló la especulación');
       if (!v.canal) v.canal = nuevoCanal(v);
-      // Un error no se queda mudo: si aún no se dijo nada, se dice que no se pudo.
-      if (v.canal.frases.length === 0) hablaTexto(v, v.canal, 'Perdón, no pude contestar ahora.');
+      v.cancelaAcuse?.();
+      // Un error no se queda mudo: si aún no se dijo nada de la respuesta (el acuse no cuenta), se dice que no se pudo.
+      if (v.canal.frases.length === (v.acuse ? 1 : 0)) hablaTexto(v, v.canal, 'Perdón, no pude contestar ahora.');
       v.produccionTerminada = true;
       v.canal.termina();
       compruebaFin(v);
@@ -243,7 +252,7 @@ export function creaBucle(o: OpcionesBucle): Bucle {
   const responde = async (v: Vuelo, d: Exclude<Decision, { tipo: 'nada' }>) => {
     const canal = nuevoCanal(v);
     v.canal = canal;
-    if (d.tipo === 'llm') await piensa(v, canal, d.texto);
+    if (d.tipo === 'llm') await piensa(v, canal, d);
     else if (d.clase === 'lectura') hablaTexto(v, canal, await conSenal(o.lector.lee(d.orden, v.turno.senal), v.turno.senal));
     else {
       v.plan = planControl(d.orden, d.texto, { velocidad, pendiente, hayUltima: ultima !== undefined });
@@ -257,10 +266,30 @@ export function creaBucle(o: OpcionesBucle): Bucle {
     compruebaFin(v);
   };
 
-  const piensa = async (v: Vuelo, canal: CanalVoz, texto: string) => {
+  /** El acuse va como frase 0 del canal, solo si la respuesta aún no dijo nada (si no, sobra). */
+  const ponAcuse = (v: Vuelo, canal: CanalVoz, a: EleccionAcuse) => {
+    v.cancelaAcuse = undefined;
+    if (!vivo(v) || canal.frases.length > 0) return;
+    v.acuse = a.texto;
+    marca(v, 'acuse');
+    tel.anota(v.turno.id, { acuse: a.texto });
+    emite({ tipo: 'frase', turno: v.turno.id, indice: 0, texto: a.texto, acuse: true });
+    canal.agrega(a.texto);
+  };
+
+  const programaAcuse = (v: Vuelo, canal: CanalVoz, d: Extract<Decision, { tipo: 'llm' }>) => {
+    const a = o.acuse?.elige(d);
+    if (!a || !o.acuse) return;
+    if (o.acuse.msGracia <= 0) return ponAcuse(v, canal, a);
+    v.cancelaAcuse = programa(() => ponAcuse(v, canal, a), o.acuse.msGracia);
+  };
+
+  const piensa = async (v: Vuelo, canal: CanalVoz, d: Extract<Decision, { tipo: 'llm' }>) => {
+    const texto = d.texto;
     // Con la frase abierta («…y») el cerebro preventivo sería gasto casi seguro: espera al cierre.
     if (!v.confirmado && (o.cerebroPreventivo === false || v.veredicto === 'espera')) await esperaConfirmacion(v);
     if (!vivo(v)) return;
+    programaAcuse(v, canal, d);
     const sep = creaSeparador();
     const mensajes = [...historial.slice(-(o.maxHistorial ?? 8)), { rol: 'usuario' as const, texto }];
     for await (const p of o.cerebro.piensa(mensajes, v.turno.senal)) {
@@ -269,12 +298,17 @@ export function creaBucle(o: OpcionesBucle): Bucle {
         tel.anota(v.turno.id, { costoUsd: p.costoUsd });
         continue;
       }
+      if (p.tipo === 'meta') {
+        tel.anota(v.turno.id, { cerebro: p.simulado ? 'simulado' : 'real' });
+        continue;
+      }
       marca(v, 'primerToken');
       v.respuesta += p.texto;
       emite({ tipo: 'respuesta', turno: v.turno.id, texto: v.respuesta });
       for (const f of sep.empuja(p.texto)) agregaFrase(v, canal, f);
     }
     if (vivo(v)) for (const f of sep.cierra()) agregaFrase(v, canal, f);
+    v.cancelaAcuse?.();
   };
 
   const esperaConfirmacion = (v: Vuelo) =>
@@ -331,8 +365,9 @@ export function creaBucle(o: OpcionesBucle): Bucle {
     emite({ tipo: 'fin', turno: v.turno.id });
     if (v.ruta === 'llm' && v.respuesta) historial.push({ rol: 'usuario', texto: v.textoUsuario }, { rol: 'asistente', texto: v.respuesta });
     if (v.canal && v.canal.entregadas > 0) {
-      const frases = v.canal.frases.filter((_, i) => v.audios.has(i));
-      ultima = { frases, audios: [...v.audios.keys()].sort((a, b) => a - b).map((i) => v.audios.get(i) as AudioFrase) };
+      // «Repite» repite la respuesta, no el acuse.
+      const indices = [...v.audios.keys()].filter((i) => !(v.acuse && i === 0)).sort((a, b) => a - b);
+      if (indices.length > 0) ultima = { frases: indices.map((i) => v.canal?.frases[i] ?? ''), audios: indices.map((i) => v.audios.get(i) as AudioFrase) };
     }
     vuelo = undefined;
     if (!activo || modo === 'toque') {
@@ -348,6 +383,7 @@ export function creaBucle(o: OpcionesBucle): Bucle {
     if (!v || e.turno !== v.turno.id || !v.turno.vivo) return;
     if (e.tipo === 'suena') {
       if (!v.sonando) tel.marca(v.turno.id, 'suena', e.t);
+      if (!(v.acuse && e.indice === 0)) tel.marca(v.turno.id, 'suenaRespuesta', e.t);
       v.sonando = true;
       ultimoDicho = v.canal?.frases[e.indice] ?? '';
       if (v.confirmado) pasaA('hablando');
@@ -365,10 +401,11 @@ export function creaBucle(o: OpcionesBucle): Bucle {
   const quitaReproductor = o.reproductor.alEvento(alReproductor);
 
   /** Lo que la persona alcanzó a oír: frases enteras más la parte proporcional de la que sonaba. */
-  const dichoHastaAhora = (v: Vuelo): string => {
+  const dichoHastaAhora = (v: Vuelo, sinAcuse = false): string => {
     const frases = v.canal?.frases ?? [];
     return frases
       .map((f, i) => {
+        if (sinAcuse && v.acuse && i === 0) return '';
         const fr = v.fracciones.get(i) ?? 0;
         if (fr >= 1) return f;
         const corte = Math.round(f.length * fr);
@@ -465,7 +502,9 @@ export function creaBucle(o: OpcionesBucle): Bucle {
       const dicho = dichoHastaAhora(v);
       tel.marca(v.turno.id, 'interrumpido', ms);
       tel.cierra(v.turno.id, 'interrumpido');
-      if (v.ruta === 'llm') historial.push({ rol: 'usuario', texto: v.textoUsuario }, { rol: 'asistente', texto: `${dicho} [interrumpido]`.trim() });
+      // Al cerebro le llega lo que se oyó de SU respuesta: el acuse no es suyo.
+      if (v.ruta === 'llm') historial.push({ rol: 'usuario', texto: v.textoUsuario }, { rol: 'asistente', texto: `${dichoHastaAhora(v, true)} [interrumpido]`.trim() });
+      v.cancelaAcuse?.();
       emite({ tipo: 'interrumpido', turno: v.turno.id, dicho });
       v.turno.aborta('interrumpido');
       vuelo = undefined;

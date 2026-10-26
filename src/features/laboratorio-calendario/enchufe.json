@@ -1,0 +1,26 @@
+{
+  "enchufe": 1,
+  "modulo": "laboratorio-calendario",
+  "activo": "TPL-feature-laboratorio-calendario",
+  "nombre": "Laboratorio del calendario",
+  "pantallas": ["/laboratorio-calendario"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "laboratorio-calendario.abre",
+      "queHace": "Abrir el laboratorio del calendario.",
+      "ejemplos": [
+        "abre el laboratorio del calendario",
+        "probar el calendario con su simulador de Google",
+        "quiero ver reservas simuladas y la credencial caducada"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-calendario"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el laboratorio corre la herramienta empaquetada contra su simulador de Google dentro del navegador sin la capa; tools/calendario no la importa",
+  "sale": []
+}

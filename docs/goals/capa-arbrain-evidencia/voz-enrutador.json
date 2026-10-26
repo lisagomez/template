@@ -1,0 +1,320 @@
+{
+  "congelado": "2026-10-25T16:11:07+00:00",
+  "nota": "Corpus D congelado ANTES de medir y sin tocar el enrutador: su huella, y la del enrutador y su catálogo en ese instante (los mismos de main, 4b446fb). La medición se agrega abajo después; si el corpus o el enrutador cambian, las huellas lo delatan.",
+  "corpus": {
+    "ruta": "tools/bucle-voz/medicion/corpus-enrutador-d.json",
+    "sha256": "sha256:3c8d55c01ee1bfed9ea7a54eed43e9c7434d25e944be916b83267b123aebb461",
+    "frases": 67,
+    "etiquetas": {
+      "para": 6,
+      "repite": 5,
+      "mas-despacio": 3,
+      "mas-rapido": 3,
+      "duerme": 3,
+      "confirma": 3,
+      "olvida": 3,
+      "hora": 2,
+      "llm": 15,
+      "fecha": 3,
+      "agenda-hoy": 4,
+      "agenda-manana": 3,
+      "estado": 2,
+      "gasto": 2,
+      "ayuda": 2,
+      "escritura": 6,
+      "nada": 2
+    }
+  },
+  "enrutador": {
+    "id": "local-reglas-0.3",
+    "enrutador.ts": "sha256:a4d856bf9e004b6d8624a75b5a6d4e7f7a6c60369ccc3b5d4af96daad059501e",
+    "catalogo.ts": "sha256:605cf6cd7dbf8a77cd9106d5b07b8b8b1e887c867ef55d94e34e3253176f349c"
+  },
+  "medicion": {
+    "fecha": "2026-10-25",
+    "enrutador": "local-reglas-0.3",
+    "texto": {
+      "total": 67,
+      "aciertos": 48,
+      "acierto": 71.6,
+      "ordenesEquivocadas": 0,
+      "conversacionComoOrden": 0,
+      "escriturasPerdidas": 0,
+      "alCerebro": 19,
+      "fallos": [
+        {
+          "frase": "oye, detente un segundo",
+          "esperada": "para",
+          "salio": "llm"
+        },
+        {
+          "frase": "shh, silencio",
+          "esperada": "para",
+          "salio": "llm"
+        },
+        {
+          "frase": "no entendí lo que dijiste",
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "no alcancé a oír, repite",
+          "esperada": "repite",
+          "salio": "llm"
+        },
+        {
+          "frase": "acelérale un poco",
+          "esperada": "mas-rapido",
+          "salio": "llm"
+        },
+        {
+          "frase": "hasta la próxima",
+          "esperada": "duerme",
+          "salio": "llm"
+        },
+        {
+          "frase": "sí, dale",
+          "esperada": "confirma",
+          "salio": "llm"
+        },
+        {
+          "frase": "confirmo, hazlo",
+          "esperada": "confirma",
+          "salio": "llm"
+        },
+        {
+          "frase": "no, déjalo",
+          "esperada": "olvida",
+          "salio": "llm"
+        },
+        {
+          "frase": "olvídalo, ya no",
+          "esperada": "olvida",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿a cuántos estamos?",
+          "esperada": "fecha",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿hay algo en mi calendario hoy?",
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿con quién me reúno hoy?",
+          "esperada": "agenda-hoy",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué me toca mañana?",
+          "esperada": "agenda-manana",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué tan rápido estás contestando?",
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuánto te tardas en contestar?",
+          "esperada": "estado",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿cuánto se ha gastado en el cerebro?",
+          "esperada": "gasto",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué cosas sabes hacer?",
+          "esperada": "ayuda",
+          "salio": "llm"
+        },
+        {
+          "frase": "¿qué te puedo pedir?",
+          "esperada": "ayuda",
+          "salio": "llm"
+        }
+      ]
+    },
+    "textoOtros": {
+      "B": {
+        "total": 65,
+        "aciertos": 49,
+        "acierto": 75.4,
+        "ordenesEquivocadas": 0,
+        "conversacionComoOrden": 0,
+        "escriturasPerdidas": 0,
+        "alCerebro": 16,
+        "fallos": [
+          {
+            "frase": "ya estuvo, cállate",
+            "esperada": "para",
+            "salio": "llm"
+          },
+          {
+            "frase": "no hables",
+            "esperada": "para",
+            "salio": "llm"
+          },
+          {
+            "frase": "vuelve a decirlo",
+            "esperada": "repite",
+            "salio": "llm"
+          },
+          {
+            "frase": "más rápido, que tengo prisa",
+            "esperada": "mas-rapido",
+            "salio": "llm"
+          },
+          {
+            "frase": "ya me voy",
+            "esperada": "duerme",
+            "salio": "llm"
+          },
+          {
+            "frase": "hasta mañana",
+            "esperada": "duerme",
+            "salio": "llm"
+          },
+          {
+            "frase": "dale",
+            "esperada": "confirma",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué hora traes?",
+            "esperada": "hora",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿en qué fecha estamos?",
+            "esperada": "fecha",
+            "salio": "llm"
+          },
+          {
+            "frase": "repasa mi agenda",
+            "esperada": "agenda-hoy",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué hay mañana?",
+            "esperada": "agenda-manana",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué tengo agendado para mañana?",
+            "esperada": "agenda-manana",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿cómo estás funcionando?",
+            "esperada": "estado",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué tal tu rapidez?",
+            "esperada": "estado",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿cuánto se ha gastado del presupuesto?",
+            "esperada": "gasto",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué cosas haces?",
+            "esperada": "ayuda",
+            "salio": "llm"
+          }
+        ]
+      },
+      "C": {
+        "total": 53,
+        "aciertos": 40,
+        "acierto": 75.5,
+        "ordenesEquivocadas": 0,
+        "conversacionComoOrden": 0,
+        "escriturasPerdidas": 0,
+        "alCerebro": 13,
+        "fallos": [
+          {
+            "frase": "cállate un momento",
+            "esperada": "para",
+            "salio": "llm"
+          },
+          {
+            "frase": "no escuché, repítelo",
+            "esperada": "repite",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué dijiste al final?",
+            "esperada": "repite",
+            "salio": "llm"
+          },
+          {
+            "frase": "otra vez, no te oí",
+            "esperada": "repite",
+            "salio": "llm"
+          },
+          {
+            "frase": "más despacio, que no te sigo",
+            "esperada": "mas-despacio",
+            "salio": "llm"
+          },
+          {
+            "frase": "listo, es todo por hoy",
+            "esperada": "duerme",
+            "salio": "llm"
+          },
+          {
+            "frase": "ya puedes descansar",
+            "esperada": "duerme",
+            "salio": "llm"
+          },
+          {
+            "frase": "de acuerdo, procede",
+            "esperada": "confirma",
+            "salio": "llm"
+          },
+          {
+            "frase": "no, olvídalo",
+            "esperada": "olvida",
+            "salio": "llm"
+          },
+          {
+            "frase": "mejor déjalo así",
+            "esperada": "olvida",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿me das la hora?",
+            "esperada": "hora",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿qué tengo en la agenda?",
+            "esperada": "agenda-hoy",
+            "salio": "llm"
+          },
+          {
+            "frase": "¿cómo va el gasto?",
+            "esperada": "gasto",
+            "salio": "llm"
+          }
+        ]
+      }
+    },
+    "activacionTexto": {
+      "positivas": 10,
+      "negativas": 1
+    },
+    "audio": {
+      "medido": false
+    },
+    "medido": "2026-10-25T16:11:37.332Z"
+  }
+}

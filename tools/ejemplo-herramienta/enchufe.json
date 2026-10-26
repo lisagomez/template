@@ -1,0 +1,13 @@
+{
+  "enchufe": 1,
+  "modulo": "ejemplo-herramienta",
+  "activo": "TPL-ejemplo-herramienta",
+  "nombre": "Ejemplo de herramienta (andamio a copiar)",
+  "pantallas": [],
+  "ranuras": ["panel"],
+  "intenciones": [],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "es una función pura (aSlug) con una vista previa en ./react; no sabe que la capa existe",
+  "sale": []
+}

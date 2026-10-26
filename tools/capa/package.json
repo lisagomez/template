@@ -1,0 +1,49 @@
+{
+  "name": "@tu-scope/capa",
+  "version": "0.1.0",
+  "description": "La capa común de la fábrica: una ventana con conversación, lienzo, explorador y panel; operación por intención; memoria del producto; plan; voz; el freno; primer arranque. Cada módulo se enchufa en sus ranuras y se intercambia sin tocarla.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./almacenes/archivo": {
+      "types": "./dist/almacenes/archivo.d.ts",
+      "import": "./dist/almacenes/archivo.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "mapa.json",
+    "upstream.lock.json",
+    "NOTICE",
+    "LICENSE-FUENTE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.1"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

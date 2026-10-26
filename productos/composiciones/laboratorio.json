@@ -1,0 +1,66 @@
+{
+  "composicion": 1,
+  "producto": "laboratorio",
+  "marca": {
+    "nombre": "Laboratorio de la fábrica",
+    "asistente": "Brújula",
+    "acento": "#0f766e",
+    "saludo": "Te llevo a lo que necesites de la fábrica: dime qué quieres hacer."
+  },
+  "funciones": [
+    "conversacion",
+    "intencion",
+    "memoria",
+    "plan",
+    "voz",
+    "lienzo",
+    "explorador",
+    "panel",
+    "primer-arranque",
+    "ajustes"
+  ],
+  "modulos": [
+    "dashboard",
+    "dictado",
+    "centro-de-mando",
+    "calendario",
+    "laboratorio-calendario",
+    "etiquetas",
+    "laboratorio-etiquetas",
+    "buzon-cfdi",
+    "reel",
+    "sgi",
+    "laboratorio-sgi",
+    "soporte-sap",
+    "ventas-whatsapp",
+    "clinica-dental",
+    "crecimiento-demostrado",
+    "estudio-pymes",
+    "laboratorio-pymes",
+    "estudio-dashboards",
+    "laboratorio-voz",
+    "project-settings",
+    "extractor-documental",
+    "ejemplo-herramienta"
+  ],
+  "ranuras": {
+    "plan": "calendario",
+    "panel": "capa"
+  },
+  "memoria": {
+    "duena": "producto",
+    "almacen": "navegador"
+  },
+  "modelo": {
+    "clase": null,
+    "estado": "sin-llm"
+  },
+  "voz": {
+    "stt": "parakeet",
+    "tts": "piper",
+    "vad": "silero",
+    "nube": []
+  },
+  "datosSensibles": false,
+  "resumen": null
+}

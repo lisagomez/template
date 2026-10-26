@@ -1,0 +1,26 @@
+{
+  "enchufe": 1,
+  "modulo": "laboratorio-etiquetas",
+  "activo": "TPL-feature-laboratorio-etiquetas",
+  "nombre": "Laboratorio de etiquetas",
+  "pantallas": ["/laboratorio-etiquetas"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "laboratorio-etiquetas.abre",
+      "queHace": "Abrir el laboratorio de etiquetas GS1.",
+      "ejemplos": [
+        "abre el laboratorio de etiquetas",
+        "qué pantallas de etiquetas están aprobadas",
+        "el veredicto del laboratorio sobre las etiquetas GS1"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-etiquetas"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el laboratorio corre sus casos en el servidor al abrirse y se vale por sí solo; /etiquetas sigue usando su veredicto sin la capa",
+  "sale": []
+}

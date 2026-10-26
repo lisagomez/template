@@ -27,6 +27,8 @@ export interface FraseKaraoke {
   indice: number;
   texto: string;
   fraccion: number;
+  /** El acuse inmediato (la frase fija mientras piensa), no parte de la respuesta. */
+  acuse?: boolean;
 }
 
 export interface VistaCentro {

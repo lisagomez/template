@@ -1,0 +1,24 @@
+{
+  "enchufe": 1,
+  "modulo": "extractor-documental",
+  "activo": "TPL-extractor-documental",
+  "nombre": "Extractor documental",
+  "pantallas": [],
+  "ranuras": ["lienzo"],
+  "intenciones": [],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el núcleo, sus lectores y el servicio de OCR funcionan solos; sus componentes ./react (ingesta, revisión y lienzo de modelado) reciben todo por props y no importan la capa",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "Mistral (motor de OCR en la nube)",
+      "cuando": "solo si el proyecto lo enciende con una decisión C4 firmada: viene apagado, y con datos de terceros ninguna firma lo autoriza"
+    },
+    {
+      "que": "datos",
+      "aQuien": "Supabase del proyecto (tablas de la cola y bucket privado de originales)",
+      "cuando": "solo si el proyecto inyecta los almacenes ./almacenes/supabase o ./almacenes/supabase-storage; autohospedado en la infraestructura del cliente no sale"
+    }
+  ]
+}

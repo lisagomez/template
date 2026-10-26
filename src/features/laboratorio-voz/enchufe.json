@@ -1,0 +1,26 @@
+{
+  "enchufe": 1,
+  "modulo": "laboratorio-voz",
+  "activo": "TPL-feature-laboratorio-voz",
+  "nombre": "Laboratorio de voz",
+  "pantallas": ["/laboratorio-voz"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "laboratorio-voz.abre",
+      "queHace": "Abrir el laboratorio de voz.",
+      "ejemplos": [
+        "abre el laboratorio de voz",
+        "probar los veinte casos de uso de la voz",
+        "qué tan rápido y qué tan bien transcribe el motor de voz"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-voz"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el laboratorio y sus veinte casos corren contra el motor local de tools/dictado sin la capa",
+  "sale": []
+}

@@ -17,6 +17,10 @@
     "./remoto": {
       "types": "./dist/remoto/index.d.ts",
       "import": "./dist/remoto/index.js"
+    },
+    "./nube": {
+      "types": "./dist/nube.d.ts",
+      "import": "./dist/nube.js"
     }
   },
   "bin": {

@@ -1,0 +1,33 @@
+{
+  "enchufe": 1,
+  "modulo": "project-settings",
+  "activo": "TPL-feature-project-settings",
+  "nombre": "Configuración del proyecto",
+  "pantallas": ["/configuracion"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "project-settings.abre",
+      "queHace": "Abrir la configuración del proyecto.",
+      "ejemplos": [
+        "abre la configuración del proyecto",
+        "quiero elegir si esto es una aplicación o una herramienta",
+        "nombre del proyecto y proveedor de despliegue",
+        "dónde pongo el dominio y el nombre del paquete"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/configuracion"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el formulario de /configuracion guarda en Supabase por sí solo, con la sesión de la persona y RLS; la capa solo le pone la ventana alrededor",
+  "sale": [
+    {
+      "que": "datos",
+      "aQuien": "Supabase del proyecto (tabla project_settings)",
+      "cuando": "al guardar la configuración, y solo si el proyecto tiene Supabase configurado: tipo de proyecto, nombre, proveedor y dominio de despliegue, scope y nombre del paquete"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "base": "http://127.0.0.1:8090",
+  "fecha": "2026-10-25T17:47:35.685Z",
+  "pasos": [
+    {
+      "paso": 1,
+      "que": "primer arranque con la marca de soporte sap",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-01-primer-arranque-con-la-marca-de-soporte-sap.jpg"
+    },
+    {
+      "paso": 2,
+      "que": "la mesa con su ranura de conversacion",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-02-la-mesa-con-su-ranura-de-conversacion.jpg"
+    },
+    {
+      "paso": 3,
+      "que": "prueba este caso pregunta antes de correrlo",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-03-prueba-este-caso-pregunta-antes-de-correrlo.jpg"
+    },
+    {
+      "paso": 4,
+      "que": "prueba este caso resuelto sin llm",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-04-prueba-este-caso-resuelto-sin-llm.jpg"
+    },
+    {
+      "paso": 5,
+      "que": "por que dijiste no lo se en el paso 3",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-05-por-que-dijiste-no-lo-se-en-el-paso-3.jpg"
+    },
+    {
+      "paso": 6,
+      "que": "muestrame lo que te ense",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-06-muestrame-lo-que-te-ense.jpg"
+    },
+    {
+      "paso": 7,
+      "que": "prueba este caso con regla",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-07-prueba-este-caso-con-regla.jpg"
+    },
+    {
+      "paso": 8,
+      "que": "caso largo escrito antes del pedido",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-08-caso-largo-escrito-antes-del-pedido.jpg"
+    },
+    {
+      "paso": 9,
+      "que": "vuelve a correr el ultimo caso",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-09-vuelve-a-correr-el-ultimo-caso.jpg"
+    },
+    {
+      "paso": 10,
+      "que": "un dato personal no se corre",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-10-un-dato-personal-no-se-corre.jpg"
+    },
+    {
+      "paso": 11,
+      "que": "borra mi ultimo caso no corre nada",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-11-borra-mi-ultimo-caso-no-corre-nada.jpg"
+    },
+    {
+      "paso": 12,
+      "que": "tras recargar la conversacion se fue y los casos siguen",
+      "ok": true,
+      "archivo": "/home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-12-tras-recargar-la-conversacion-se-fue-y-los-casos.jpg"
+    }
+  ],
+  "errores": [],
+  "erroresEsperados": [
+    "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  ],
+  "respuestasConError": [
+    {
+      "status": 400,
+      "metodo": "POST",
+      "ruta": "/api/mesa/soporte-sap"
+    }
+  ],
+  "guia": [
+    {
+      "paso": "bienvenida",
+      "texto": "SOPORTE SAP · MESA DEL EXPERTO · PASO 1 DE 4 Hola, soy el asistente de Soporte SAP Te ayudo a probar casos: dime «prueba este caso:» y el caso en pocas palabras (qué pasa, la transacción y el mensaje). También te explico por qué dije «no lo sé» en un paso y te muestro lo que me enseñaste. No uso un modelo de IA: si no lo sé, te lo digo. Puedo probar un caso con el agente de la mesa, sin modelo, y decirte qué resultó, explicarte qué faltaba cuando dije «no lo sé» en un paso, mostrarte lo que me enseñaste en la mesa y abrir soporte sap en laboratorio. Pídemelo como lo dirías. Empezar"
+    },
+    {
+      "paso": "privacidad",
+      "texto": "SOPORTE SAP · MESA DEL EXPERTO · PASO 2 DE 4 Lo tuyo se queda aquí Lo que recuerdo es de tu cuenta y no sale de aquí. Entendido"
+    },
+    {
+      "paso": "pregunta",
+      "texto": "SOPORTE SAP · MESA DEL EXPERTO · PASO 3 DE 4 ¿Cuánto te pregunto? Consulto sin preguntar; antes de cambiar algo, te pregunto. Lo que no tiene vuelta atrás siempre pide tu clic. CUÁNTO TE PREGUNTO Pregúntame antes de todo Antes de abrir o cambiar algo, te pregunto. Pregúntame lo importante Consulto sin preguntar; antes de cambiar algo, te pregunto. Solo lo irreversible Hago lo que me pides; lo que no tiene vuelta atrás sigue pidiendo tu clic. Pregúntame lo importante"
+    },
+    {
+      "paso": "listo",
+      "texto": "SOPORTE SAP · MESA DEL EXPERTO · PASO 4 DE 4 Listo Todo esto se cambia después en Ajustes. Ir al producto"
+    }
+  ],
+  "peticiones": {
+    "total": 51,
+    "origenes": [
+      "http://127.0.0.1:8090"
+    ],
+    "ajenas": [],
+    "api": [
+      "GET /api/mesa/soporte-sap",
+      "POST /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "POST /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "POST /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "POST /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "POST /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap",
+      "POST /api/mesa/soporte-sap",
+      "GET /api/mesa/soporte-sap"
+    ]
+  },
+  "navegador": {
+    "localStorage": {
+      "capa:soporte-sap:capa/soporte-sap/mesa/capa/primer-arranque": "{\"version\":1,\"terminado\":true,\"paso\":4,\"nivel\":\"lo-importante\",\"voz\":false}"
+    },
+    "sessionStorage": {},
+    "indexedDB": [],
+    "cacheStorage": [],
+    "serviceWorkers": [
+      "http://127.0.0.1:8090/sw.js"
+    ],
+    "cookies": []
+  },
+  "delExpertoEnElNavegador": [],
+  "casosTrasRecargar": 7
+}

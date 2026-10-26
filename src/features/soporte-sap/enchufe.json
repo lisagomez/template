@@ -1,0 +1,96 @@
+{
+  "enchufe": 1,
+  "modulo": "soporte-sap",
+  "activo": "TPL-feature-soporte-sap",
+  "nombre": "Soporte SAP (laboratorio y mesa del experto)",
+  "pantallas": ["/soporte-sap", "/mesa/soporte-sap", "/mesa/soporte-sap/kit", "/mesa/soporte-sap/laboratorio"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "soporte-sap.prueba-caso",
+      "queHace": "Probar un caso con el agente de la mesa, sin modelo, y decirte qué resultó.",
+      "ejemplos": [
+        "prueba este caso",
+        "pruébalo con el agente",
+        "corre este caso",
+        "quiero probar este caso",
+        "vuelve a correr el último caso",
+        "corre otra vez mi último caso",
+        "a ver qué dice el agente de este caso"
+      ],
+      "efecto": "escribe",
+      "irreversible": false,
+      "pantalla": "/mesa/soporte-sap"
+    },
+    {
+      "id": "soporte-sap.explica-paso",
+      "queHace": "Explicarte qué faltaba cuando dije «no lo sé» en un paso.",
+      "ejemplos": [
+        "por qué dijiste no lo sé en el paso 3",
+        "por qué no lo supiste",
+        "qué te faltó en ese paso",
+        "explícame el paso 3 de la última corrida",
+        "por qué dijiste que no sabías",
+        "qué faltaba para que lo resolvieras"
+      ],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "soporte-sap.ensenado",
+      "queHace": "Mostrarte lo que me enseñaste en la mesa.",
+      "ejemplos": [
+        "muéstrame lo que te enseñé",
+        "qué te he enseñado",
+        "qué aprendiste de mí",
+        "mis enseñanzas",
+        "qué te enseñé la última vez",
+        "lo que validé de los candidatos"
+      ],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "soporte-sap.abre",
+      "queHace": "Abrir Soporte SAP en laboratorio.",
+      "ejemplos": [
+        "abre soporte SAP",
+        "quiero ver el servicio de soporte SAP por niveles",
+        "dónde se levanta una incidencia de SAP"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/soporte-sap"
+    },
+    {
+      "id": "soporte-sap.abre-mesa",
+      "queHace": "Abrir la mesa del experto SAP.",
+      "ejemplos": ["abre la mesa del experto", "quiero probar al agente con mis casos de SAP"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/mesa/soporte-sap"
+    },
+    {
+      "id": "soporte-sap.abre-kit",
+      "queHace": "Mostrarte cómo se usa la mesa del experto.",
+      "ejemplos": [
+        "kit del experto",
+        "cómo se usa la mesa del experto",
+        "qué se puede probar en la mesa y qué no hace"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/mesa/soporte-sap/kit"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el laboratorio de /soporte-sap y la mesa del experto corren con su propio servidor y su propio almacén sin la capa; el núcleo tools/soporte-sap no la importa",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "Cloudflare (Worker y almacén R2 «mesa-del-experto», jurisdicción de Estados Unidos)",
+      "cuando": "solo en la mesa alojada: lo que escribe el experto (casos, pasos y retroalimentación) pasa por Cloudflare, que termina el TLS y lo ve, y se guarda filtrado en R2 durante 180 días. La conversación de la mesa no añade salidas: su hilo vive en la pestaña, y el caso que corre o lo que lee va por la misma API de la mesa"
+    }
+  ]
+}

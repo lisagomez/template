@@ -1,0 +1,143 @@
+{
+  "imagen": "soporte-sap-laboratorio:capa-mesa-conversacion",
+  "red": "mesa-sin-salida-afcbfd",
+  "fecha": "2026-10-25T17:47:07.186Z",
+  "entorno": {
+    "appEnv": [
+      "ACCESS_EQUIPO",
+      "ACCESS_AUD",
+      "ACCESS_CERTS_URL",
+      "MESA_EXPERTOS",
+      "MESA_LABORATORIO",
+      "SOPORTE_SAP_LABORATORIO",
+      "MESA_ALMACEN",
+      "MESA_ALMACEN_DIR"
+    ]
+  },
+  "redes": {
+    "mesa": {
+      "mesa-sin-salida-afcbfd": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": null,
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "06ad4fe3cfb8",
+        "EndpointID": "db48a28c2b81",
+        "Gateway": "",
+        "IPAddress": "172.21.0.2",
+        "MacAddress": "26:40:2c:39:5b:33",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "mesa-conversacion-afcbfd",
+          "201a92a27b01"
+        ]
+      }
+    },
+    "red": true
+  },
+  "puertosPublicados": {
+    "mesa": "ninguno",
+    "puerta": "8090/tcp -> 127.0.0.1:8090"
+  },
+  "salida": {
+    "rutas": [
+      {
+        "interfaz": "eth0",
+        "destino": "000015AC",
+        "puerta": "00000000"
+      }
+    ],
+    "rutaPorDefecto": false,
+    "ipPublica": "ENETUNREACH",
+    "httpsPorIp": "ENETUNREACH",
+    "fueraDeSuRed": "ENETUNREACH",
+    "nombreExterno": "EAI_AGAIN",
+    "llavesEnSu127": "RESPONDIÓ 200",
+    "fueraEs": "172.17.0.2:8090 (la puerta, en la red por defecto)"
+  },
+  "antes": {
+    "diff": "A /datos",
+    "almacen": {}
+  },
+  "recorrido_mesa": {
+    "salida": 0,
+    "resumen": [
+      "✓ 24. después: su validación queda como propuesta → /tmp/claude-1000/-home-gsore-code-template/45f931c2-b187-473e-b362-578f15840067/scratchpad/mesa/trabajo/capturas-recorrido-mesa/mesa-24-despu-s-su-validaci-n-queda-como-propuesta.jpg",
+      "✓ 25. el laboratorio ve la validación de la web como propuesta → /tmp/claude-1000/-home-gsore-code-template/45f931c2-b187-473e-b362-578f15840067/scratchpad/mesa/trabajo/capturas-recorrido-mesa/mesa-25-el-laboratorio-ve-la-validaci-n-de-la-web-co.jpg",
+      "✓ 26. con la web dentro, el experto sigue recibiendo 404 en el mapa → /tmp/claude-1000/-home-gsore-code-template/45f931c2-b187-473e-b362-578f15840067/scratchpad/mesa/trabajo/capturas-recorrido-mesa/mesa-26-con-la-web-dentro-el-experto-sigue-recibiend.jpg",
+      "  negativa · sin identidad, la mesa: 404",
+      "  negativa · sin identidad, la API: 404",
+      "  negativa · un JWT vencido: 404",
+      "  negativa · el experto, la vista del laboratorio: 404",
+      "  negativa · el experto, la página del laboratorio: 404",
+      "  negativa · el experto, el mapa por la API: 404",
+      "  negativa · el experto, la ruta de las identidades elegibles (superadmin): 404",
+      "",
+      "26/26 pasos en verde · 0 errores de consola"
+    ]
+  },
+  "recorrido_conversacion": {
+    "salida": 0,
+    "resumen": [
+      "✓ 10. un dato personal no se corre → /home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-10-un-dato-personal-no-se-corre.jpg",
+      "✓ 11. borra mi ultimo caso no corre nada → /home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-11-borra-mi-ultimo-caso-no-corre-nada.jpg",
+      "✓ 12. tras recargar la conversacion se fue y los casos siguen → /home/gsore/code/template/.claude/worktrees/capa-arbrain/docs/goals/capa-arbrain-capturas/mesa/conversacion-12-tras-recargar-la-conversacion-se-fue-y-los-casos.jpg",
+      "",
+      "Peticiones del navegador: 51, a 1 origen(es): http://127.0.0.1:8090 · ajenas: 0",
+      "APIs que tocó: GET /api/mesa/soporte-sap · POST /api/mesa/soporte-sap",
+      "localStorage: {\"capa:soporte-sap:capa/soporte-sap/mesa/capa/primer-arranque\":\"{\\\"version\\\":1,\\\"terminado\\\":true,\\\"paso\\\":4,\\\"nivel\\\":\\\"lo-importante\\\",\\\"voz\\\":false}\"}",
+      "sessionStorage: 0 claves · IndexedDB: [] · Cache Storage: [] · cookies: 0",
+      "Texto del experto en su navegador: ninguno",
+      "Respuestas con error: [{\"status\":400,\"metodo\":\"POST\",\"ruta\":\"/api/mesa/soporte-sap\"}] (esperada: el 400 del caso con forma de dato personal) · en la consola, apartados por eso: 1",
+      "",
+      "12/12 pasos en verde · 0 errores de consola"
+    ]
+  },
+  "despues": {
+    "diff": "A /datos",
+    "almacen": {
+      "mesa/casos/c-ipgahdycs-cefeed.json": "7df49561c82417d3",
+      "mesa/casos/c-ipgahedcq-febdbb.json": "1cb8f79a5e9b518d",
+      "mesa/casos/c-ipgahegrm-bebafa.json": "09e996c4d79711fb",
+      "mesa/casos/c-ipgahersv-abfada.json": "ede1fb66041bba10",
+      "mesa/casos/c-ipgahewbr-daebab.json": "1bbd77728a4681b8",
+      "mesa/casos/c-ipgaheziy-cdefed.json": "cb457f13b50c6804",
+      "mesa/casos/c-ipgahfcpj-babaad.json": "1c334ae117015643",
+      "mesa/validaciones/n1-32a231692a--nota-hdadpgkhbkai.json": "be83083b45b6c4e5",
+      "mesa/validaciones/n1-32a231692a--tcode-mgnkcfkleckn.json": "fedf5c41ae36556f"
+    }
+  },
+  "almacen": {
+    "nuevos": [
+      "mesa/casos/c-ipgahdycs-cefeed.json",
+      "mesa/casos/c-ipgahedcq-febdbb.json",
+      "mesa/casos/c-ipgahegrm-bebafa.json",
+      "mesa/casos/c-ipgahersv-abfada.json",
+      "mesa/casos/c-ipgahewbr-daebab.json",
+      "mesa/casos/c-ipgaheziy-cdefed.json",
+      "mesa/casos/c-ipgahfcpj-babaad.json",
+      "mesa/validaciones/n1-32a231692a--nota-hdadpgkhbkai.json",
+      "mesa/validaciones/n1-32a231692a--tcode-mgnkcfkleckn.json"
+    ],
+    "todosSonCasosOValidaciones": true,
+    "conversacionEnElAlmacen": [],
+    "casosEnElAlmacen": [
+      "la app de Fiori abre en blanco tras el transporte",
+      "MIGO da M7 053",
+      "Una app del launchpad de Fiori abre en blanco después del transporte"
+    ],
+    "datoPersonalEnElAlmacen": false
+  },
+  "logs": {
+    "lineas": 5,
+    "textoDelExperto": []
+  },
+  "tmp": {
+    "archivos": [],
+    "textoDelExperto": ""
+  }
+}

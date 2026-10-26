@@ -1,0 +1,59 @@
+{
+  "_porque": "Lista permitida EXPLÍCITA de lo que el job del cerebro sincroniza entre instancias. Sale de CAPAS.json de Arbrain («alumno» + skills propias) y cada ruta de «alumno» está clasificada aquí: si una versión nueva de CAPAS.json trae una ruta sin clasificar o cambia las skills del autor, el job se niega a sincronizar hasta que alguien decida (CDC). Todo lo que no está en «viaja» no viaja; lo «negado» no viaja aunque esté dentro de una ruta que viaja.",
+  "capas": {
+    "version": "0.2.10",
+    "alumno_skills": "toda carpeta de .claude/skills/ que no esté en skills_del_autor"
+  },
+  "viaja": {
+    ".claude/memory/": "La memoria: esencia (MEMORY.md), índice, user/, project/, feedback/ y reference/.",
+    ".claude/plan/": "Objetivos (objetivos.md), calendario.json y habitos.json. Los dos JSON se unen por registro (ver «registros»).",
+    ".claude/diario/": "El diario del dueño, ya procesado.",
+    ".claude/knowledge/": "El destilado de las conversaciones (no las conversaciones).",
+    "CLAUDE.local.md": "Las instrucciones propias del dueño."
+  },
+  "skills_propias": ".claude/skills/<carpeta>/ para toda carpeta que no esté en skills_del_autor",
+  "skills_del_autor": [
+    "actualizar-arbrain",
+    "artificial-brain",
+    "autoresearch",
+    "bajar-a-tierra",
+    "canvas",
+    "edicion-por-voz",
+    "goal-compiler",
+    "habit-system",
+    "image-generation",
+    "knowledge-search",
+    "libro-os",
+    "memory-manager",
+    "os-audit",
+    "sistema-viable"
+  ],
+  "no_viaja": {
+    ".claude/now.md": "Es una proyección (hitos, hoy, semana) de las fuentes que sí viajan: cada lado la regenera; sincronizarla solo produciría choques.",
+    ".claude/daily/": "Son extractos de conversaciones (capture-conversation: el texto del usuario y la respuesta). Las conversaciones no viajan; viaja su destilado en knowledge/.",
+    ".claude/settings.local.json": "Permisos de Claude Code de ESA máquina (rutas y herramientas locales); el .gitignore del autor ya lo trata como archivo de llaves y entorno.",
+    ".arbrain-sembrado.json": "Marca de siembra de ESA instalación: la escriben sembrar.py y el daemon al arrancar (agregados). Cada lado siembra lo suyo.",
+    "mi-negocio/": "Documentos de trabajo del dueño: pueden traer datos de terceros (clientes) y archivos de hasta 50 MB. Llevarlos al VPS es otra decisión de flujo de datos (C4); fuera por defecto, el laboratorio puede cambiarlo."
+  },
+  "registros": {
+    ".claude/plan/calendario.json": {
+      "colecciones": { "eventos": "id", "tareas": "id" },
+      "mapas": { "recibos": 1 }
+    },
+    ".claude/plan/habitos.json": {
+      "colecciones": { "habitos": "clave", "catalogo": "clave" },
+      "mapas": { "registro": 2, "registros": 2, "reflexion": 1, "receipts": 1 }
+    }
+  },
+  "negados": [
+    ".env", ".env.*", "*.env", "*.pem", "*.key", "*.p12", "*.pfx",
+    "llaves.json", "acceso.json", "servidor.json",
+    "*.db", "*.db-wal", "*.db-shm", "*.sqlite", "*.sqlite3",
+    "*.tmp", "*.lock", ".DS_Store", "Thumbs.db", "desktop.ini"
+  ],
+  "nunca": {
+    "carpeta de datos de la app": "<datos>/web/base/*.json (conversaciones, lienzos), la SQLite del daemon, adjuntos, programa y configuración: vive fuera de la copia de Arbrain y ninguna ruta de «viaja» la alcanza.",
+    "llaves y contraseña": "<datos>/daemon/config/{llaves.json,acceso.json,servidor.json} y el llavero del sistema: fuera de la copia y además negados por nombre.",
+    "sesiones": "La sesión de Claude Code de cada máquina (~/.claude, CLAUDE_CONFIG_DIR del daemon): fuera de la copia; el job no la lee."
+  }
+}

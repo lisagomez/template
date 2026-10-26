@@ -3,7 +3,7 @@
 # `verifica:gates` lo compara con la proyeccion y se pone rojo si divergen. Cambiar las actions,
 # el runner o la proyeccion (scripts/lib/ci.mjs) es un CDC (C1).
 #
-# Corre el perfil `validate` (33 gates activos) con el mismo runner que `npm run validate`.
+# Corre el perfil `validate` (34 gates activos) con el mismo runner que `npm run validate`.
 # Inactivos declarados en el padron: NO se corren y NO cuentan como pasados.
 #   sgi:rls: Necesita Docker con la Supabase local y crea 7 cuentas sinteticas por corrida: no cabe en el gate de cada integracion.
 #   prueba:a2a:servicio: Exigen el servicio del extractor corriendo en `EXTRACTOR_SERVICIO_URL`, y ese servicio no arranca sin el binario de Tesseract: `tools/extractor-documental/servicio/configuracion.mjs` lanza «no se pudo leer la version de Tesseract: el motor principal no arranca sin binario».
@@ -15,6 +15,7 @@
 #   vigila:versiones: Necesita red, y PROPONE: mover un pineo es un CDC (C1), nunca una consecuencia automatica de un gate.
 #   vigila:hermes: Necesita red.
 #   mide:mcp: Es una medicion, no un criterio: no tiene umbral binario que pueda ponerse rojo.
+#   prueba:instancias: Necesita Docker y, la primera vez, baja ~350 MB (el programa de la etiqueta firmada) y la imagen pineada de cloudflared: no cabe en el gate de cada integracion.
 name: gates
 on:
   pull_request:
@@ -29,7 +30,7 @@ jobs:
   validate:
     runs-on: ubuntu-24.04
     # La suma de los timeouts del perfil: cada gate ya se corta en el suyo.
-    timeout-minutes: 243
+    timeout-minutes: 244
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         # Historial y ramas completos: `prueba:analista` busca el commit que analizo, y

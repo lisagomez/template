@@ -1,0 +1,85 @@
+{
+  "base": "http://localhost:3011",
+  "fecha": "2026-10-25T17:47:19.453Z",
+  "pasos": [
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/01-primer-arranque.png",
+      "que": "el primer arranque en un navegador limpio",
+      "comprobado": "la guía abre en la bienvenida con el asistente del producto (Nora) y su marca"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/02-primer-arranque-cuanto-pregunta.png",
+      "que": "el paso de cuánto pregunta",
+      "comprobado": "un paso, una decisión: lo irreversible pide el clic en los tres niveles"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/03-intencion-calendario.png",
+      "que": "«¿qué tengo hoy?» resuelta por el módulo calendario (tools/calendario)",
+      "comprobado": "calendario.consulta-hoy → «Hoy tienes 3 citas: 10:30 Corte · Mario R.; 12:00 Arreglo de barba · Luis P.; 13:30 Corte y barba · Andrés G.»"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/04-intencion-mostrador.png",
+      "que": "«¿cuánto cuesta un corte?» resuelta por el módulo del mostrador",
+      "comprobado": "recepcion.servicios → «Corte: $180, unos 45 minutos. Son precios de ejemplo de un negocio ficticio.»"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/05-ranura-plan-calendario.png",
+      "que": "la ranura de plan llenada por tools/calendario",
+      "comprobado": "data-capa-llena=\"calendario\": las citas de hoy y de mañana leídas del espejo del calendario"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/06-memoria-recuerda.png",
+      "que": "«recuerda que…» guardado en la memoria del producto (inquilino alameda)",
+      "comprobado": "Lo recuerdo: «los martes llega el proveedor de navajas»."
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/07-memoria-tras-recargar.png",
+      "que": "tras recargar la página, «¿qué recuerdas?»",
+      "comprobado": "Me pediste recordar: «los martes llega el proveedor de navajas». · claves: conversacion, primer-arranque, recuerdos"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/08-freno-pide.png",
+      "que": "el freno: cancelar es irreversible, pide la cita textual y un clic",
+      "comprobado": "tarjeta con la cita «cancela la cita de mañana» y el botón Confirmar"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/09-freno-bloquea.png",
+      "que": "ni escribirlo ni el Enter confirman: la cita sigue",
+      "comprobado": "«sí, confírmalo» no confirma; el Enter sobre Confirmar → «Sigue en pausa»; la ranura de plan aún tiene Corte · Daniela M."
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/10-freno-avanza.png",
+      "que": "con el clic humano el freno avanza",
+      "comprobado": "Cancelada «Corte · Daniela M.» de mañana a las 12:00. Le avisé a Daniela M.; es el simulador de tools/calendario: no salió ningún correo de verdad."
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/11-reserva.png",
+      "que": "«aparta una cita mañana a las 10»: pregunta antes (lo importante) y la aparta sin doble reserva",
+      "comprobado": "Listo: apartada una cita mañana (lunes, 26 de octubre) de 10:00 a 10:45."
+    }
+  ],
+  "intenciones": [
+    "calendario.consulta-hoy",
+    "recepcion.servicios",
+    "capa.recuerda",
+    "capa.recuerdos",
+    "calendario.cancela",
+    "calendario.cancela",
+    "calendario.cancela",
+    "calendario.reserva",
+    "calendario.reserva"
+  ],
+  "lecturaDeConteos": {
+    "resumen": 1,
+    "producto": "recepcion",
+    "generado": "2026-10-25T17:47:19.444Z",
+    "conteos": {
+      "citas-hoy": 3,
+      "citas-manana": 1
+    },
+    "enlaces": {
+      "mostrador": "/recepcion"
+    }
+  },
+  "erroresDeConsola": []
+}

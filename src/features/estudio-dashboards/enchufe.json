@@ -1,0 +1,33 @@
+{
+  "enchufe": 1,
+  "modulo": "estudio-dashboards",
+  "activo": "TPL-feature-estudio-dashboards",
+  "nombre": "Estudio de dashboards (lienzo de laboratorio)",
+  "pantallas": ["/laboratorio-estudio-dashboards"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "estudio-dashboards.abre",
+      "queHace": "Abrir el estudio donde un agente arma tableros.",
+      "ejemplos": [
+        "estudio de dashboards",
+        "abre el estudio de tableros",
+        "pídele a un agente un tablero con una frase",
+        "quiero ver el margen por región en un tablero nuevo"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-estudio-dashboards"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el lienzo pide todo a /api/estudio-dashboards (503 fuera del laboratorio) y funciona sin la capa; el núcleo tools/estudio-dashboards no la importa",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "OpenRouter (modelo pineado de la clase agente-estudio-dashboards)",
+      "cuando": "cada vez que se le da una instrucción al agente: el catálogo de métricas con sus dominios, la especificación del tablero y la frase; las cifras y las tablas no salen; en el laboratorio los datos son ficticios"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "enchufe": 1,
+  "modulo": "sgi",
+  "activo": "TPL-feature-sgi",
+  "nombre": "Sistema integrado ISO 9001 + ISO/IEC 42001",
+  "pantallas": [
+    "/sgi",
+    "/sgi/consultor",
+    "/sgi/[org]",
+    "/sgi/[org]/diagnostico",
+    "/sgi/[org]/documentos",
+    "/sgi/[org]/documentos/[version]",
+    "/sgi/[org]/contexto",
+    "/sgi/[org]/evidencias",
+    "/sgi/[org]/riesgos",
+    "/sgi/[org]/soa",
+    "/sgi/[org]/kpis",
+    "/sgi/[org]/auditoria",
+    "/sgi/[org]/calendario",
+    "/sgi/[org]/migracion"
+  ],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "sgi.abre",
+      "queHace": "Abrir tus organizaciones del sistema integrado ISO.",
+      "ejemplos": [
+        "abre el sistema integrado ISO",
+        "abre el SGI",
+        "llévame a mis organizaciones del sistema de gestión",
+        "sistema integrado de gestión ISO 9001 y 42001"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi"
+    },
+    {
+      "id": "sgi.abre-consultor",
+      "queHace": "Abrir el panel del consultor.",
+      "ejemplos": ["abre el panel del consultor", "mis clientes de consultoría ISO", "el avance de mis clientes"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/consultor"
+    },
+    {
+      "id": "sgi.abre-roadmap",
+      "queHace": "Abrir el roadmap de nueve fases de una organización.",
+      "ejemplos": [
+        "en qué fase de ISO voy",
+        "cuánto llevamos del roadmap",
+        "qué le falta a la puerta de la fase actual"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]"
+    },
+    {
+      "id": "sgi.abre-diagnostico",
+      "queHace": "Abrir el diagnóstico de madurez y brechas.",
+      "ejemplos": ["quiero ver el diagnóstico de madurez", "dónde está el informe de brechas del sistema de gestión"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/diagnostico"
+    },
+    {
+      "id": "sgi.abre-documentos",
+      "queHace": "Abrir los documentos del sistema y sus versiones.",
+      "ejemplos": [
+        "los documentos del sistema de gestión",
+        "borradores y documentos del SGI",
+        "qué borradores están en revisión",
+        "la política de IA y sus versiones"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/documentos"
+    },
+    {
+      "id": "sgi.abre-contexto",
+      "queHace": "Abrir el contexto de la empresa y su inventario de IA.",
+      "ejemplos": [
+        "el contexto de la organización",
+        "las partes interesadas de la empresa",
+        "el inventario de sistemas de IA",
+        "el perfil de la empresa y los asuntos internos y externos"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/contexto"
+    },
+    {
+      "id": "sgi.abre-evidencias",
+      "queHace": "Abrir las evidencias de los requisitos.",
+      "ejemplos": ["las evidencias de los requisitos", "qué evidencia cubre las dos normas"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/evidencias"
+    },
+    {
+      "id": "sgi.abre-riesgos",
+      "queHace": "Abrir el mapa de riesgos y el impacto de la IA.",
+      "ejemplos": [
+        "el mapa de calor de riesgos",
+        "riesgos y oportunidades del sistema de gestión",
+        "la evaluación de impacto de los sistemas de IA"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/riesgos"
+    },
+    {
+      "id": "sgi.abre-soa",
+      "queHace": "Abrir la declaración de aplicabilidad del Anexo A.",
+      "ejemplos": ["la declaración de aplicabilidad", "la SoA del Anexo A de ISO 42001"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/soa"
+    },
+    {
+      "id": "sgi.abre-kpis",
+      "queHace": "Abrir los objetivos e indicadores.",
+      "ejemplos": [
+        "los objetivos e indicadores de calidad",
+        "cómo van los KPIs del sistema de gestión",
+        "KPIs de calidad"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/kpis"
+    },
+    {
+      "id": "sgi.abre-auditoria",
+      "queHace": "Abrir la auditoría interna y las acciones correctivas.",
+      "ejemplos": ["la auditoría interna y el simulacro", "no conformidades y acciones correctivas"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/auditoria"
+    },
+    {
+      "id": "sgi.abre-calendario",
+      "queHace": "Abrir el calendario de auditorías y vencimientos.",
+      "ejemplos": [
+        "el calendario de auditorías y revisiones de calidad",
+        "qué vence pronto en el sistema de gestión",
+        "vencimientos y fechas del SGI"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/calendario"
+    },
+    {
+      "id": "sgi.abre-migracion",
+      "queHace": "Abrir la migración de edición de ISO 9001.",
+      "ejemplos": ["migrar de ISO 9001:2015 a la edición nueva", "qué cambia con la nueva edición de 9001"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/sgi/[org]/migracion"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las pantallas del sistema integrado y sus agentes funcionan con Supabase y el motor de tools/sistema-integrado sin la capa; la capa solo les pone la ventana alrededor",
+  "sale": [
+    {
+      "que": "texto",
+      "aQuien": "OpenRouter (proveedor de modelos)",
+      "cuando": "solo cuando alguien pide una propuesta a un agente: el perfil de la organización (procesos, productos y puestos, nunca nombres) y el texto de las evidencias, minimizado; en este goal solo con datos sintéticos"
+    }
+  ]
+}

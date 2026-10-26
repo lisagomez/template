@@ -3,6 +3,7 @@
  * es el demonio local, si el cerebro es OpenRouter o un modelo de prueba, ni si el reproductor
  * es un `<audio>` o un reloj falso. Por eso se prueba entero sin audio, sin red y sin modelos.
  */
+import type { Acuse } from './acuse.js';
 import type { Activacion } from './activacion.js';
 import type { AudioFrase, PiezaReproducir, Sintetizador } from './canal-voz.js';
 import type { JuezCierre } from './cierre.js';
@@ -29,11 +30,22 @@ export interface TokensUso {
   cacheados?: number;
 }
 
-/** `costoUsd: null` = el proveedor no lo dijo y no hay con qué estimarlo (se declara, no se inventa). */
-export type PiezaCerebro = { tipo: 'token'; texto: string } | { tipo: 'uso'; costoUsd: number | null; tokens?: TokensUso };
+/**
+ * `costoUsd: null` = el proveedor no lo dijo y no hay con qué estimarlo (se declara, no se inventa).
+ * `meta`: de dónde sale la respuesta; `simulado` = un cerebro de medición que contesta un texto fijo sin modelo (la
+ * telemetría lo marca para que una cifra medida así nunca pase por la de un modelo real).
+ */
+export type PiezaCerebro = { tipo: 'token'; texto: string } | { tipo: 'uso'; costoUsd: number | null; tokens?: TokensUso } | { tipo: 'meta'; simulado: boolean };
+
+/** Lo que da un modelo de verdad: nunca `meta` (así quien re-emite sus piezas con su propio tipo no se rompe). */
+export type PiezaModelo = Exclude<PiezaCerebro, { tipo: 'meta' }>;
 
 export interface Cerebro {
   piensa(mensajes: readonly Mensaje[], senal: AbortSignal): AsyncIterable<PiezaCerebro>;
+}
+
+export interface CerebroModelo extends Cerebro {
+  piensa(mensajes: readonly Mensaje[], senal: AbortSignal): AsyncIterable<PiezaModelo>;
 }
 
 export interface Transcriptor {
@@ -86,6 +98,8 @@ export interface OpcionesBucle {
   maxHistorial?: number;
   /** Arrancar el cerebro durante la pausa, antes de que el VAD cierre (se aborta si la voz sigue). */
   cerebroPreventivo?: boolean;
+  /** El acuse inmediato (`creaAcuse`): una frase fija que suena al mandar un turno al cerebro. Sin él, no hay acuse. */
+  acuse?: Acuse;
 }
 
 export type EventoBucle =
@@ -96,7 +110,8 @@ export type EventoBucle =
   | { tipo: 'activado'; turno: number; texto: string }
   | { tipo: 'decision'; turno: number; decision: Decision }
   | { tipo: 'respuesta'; turno: number; texto: string }
-  | { tipo: 'frase'; turno: number; indice: number; texto: string }
+  /** `acuse`: la frase fija que suena mientras piensa el cerebro (no es parte de la respuesta). */
+  | { tipo: 'frase'; turno: number; indice: number; texto: string; acuse?: true }
   | { tipo: 'karaoke'; turno: number; indice: number; fraccion: number }
   | { tipo: 'interrumpido'; turno: number; dicho: string }
   | { tipo: 'descartado'; turno: number; motivo: string }

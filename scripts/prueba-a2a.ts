@@ -151,6 +151,11 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   '/api/laboratorio/sintetizar-flujo',
   '/api/laboratorio/transcribir',
   '/api/laboratorio/veredictos',
+  // Recepción (goal capa-arbrain, producto sintético). RF-20: misma app y mismo puerto. Solo LEE: devuelve la lectura
+  // de solo conteos que declara la composición (enteros por clave y enlaces sin consulta), validada con `validaResumen`
+  // de la capa antes de salir; ningún texto. Sin sesión en el laboratorio; en la realidad la lee el job del VPS con un
+  // token de servicio de solo lectura (FUERA DEL HECHO §2 del spec). Declarada en el C3 de la capa (T-8, T-11).
+  '/api/recepcion/resumen',
   // Reel del celular (PRP-007). RF-20: misma app y mismo puerto que las demás; todas exigen la sesión del
   // dueño (proxy + getUser) y las que escriben, `Origin` del mismo sitio; RLS por dueño; el video no sale
   // del servidor. Sin sesión: 401. No se publican fuera de la red del compose más que el resto de la app.

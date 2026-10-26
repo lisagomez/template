@@ -1,0 +1,19 @@
+{
+  "base": "http://localhost:3011",
+  "fecha": "2026-10-25T18:58:43.812Z",
+  "lado": "despues",
+  "modulo": "estudio-pymes",
+  "pasos": [
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/22-recomposicion-despues.png",
+      "que": "Recepción despues del intercambio: lleva estudio-pymes",
+      "comprobado": "explorador: recepcion, dictado, estudio-pymes · «¿de dónde salió el crecimiento del trimestre?» → «Eso todavía no lo sé hacer…» (crecimiento-demostrado no está)"
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/23-recomposicion-despues-modulo.png",
+      "que": "«¿qué pongo en mis redes este mes?» abre estudio-pymes por intención",
+      "comprobado": "¿qué pongo en mis redes este mes? → /estudio (pantalla de estudio-pymes, en la ventana de (main))"
+    }
+  ],
+  "erroresDeConsola": []
+}

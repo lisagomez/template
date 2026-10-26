@@ -1,0 +1,47 @@
+{
+  "enchufe": 1,
+  "modulo": "dictado",
+  "activo": "TPL-feature-dictado",
+  "nombre": "Dictado por voz (píldora, ajustes e historial)",
+  "pantallas": ["/dictar", "/historial", "/ajustes"],
+  "ranuras": ["lienzo", "intencion", "voz"],
+  "intenciones": [
+    {
+      "id": "dictado.abre",
+      "queHace": "Abrir el dictado desde el celular.",
+      "ejemplos": ["quiero dictar desde el celular", "abre el dictado en el teléfono", "llévame a dictar"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/dictar"
+    },
+    {
+      "id": "dictado.abre-historial",
+      "queHace": "Mostrarte todo lo que has dictado.",
+      "ejemplos": [
+        "historial de dictado",
+        "muéstrame lo que he dictado",
+        "mis dictados anteriores",
+        "busca algo que dicté ayer"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/historial"
+    },
+    {
+      "id": "dictado.abre-ajustes",
+      "queHace": "Abrir los ajustes del dictado.",
+      "ejemplos": [
+        "abre los ajustes del dictado",
+        "cambiar la tecla del dictado",
+        "configurar el motor y el micrófono del dictado"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/ajustes"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "la píldora del dictado y las pantallas /dictar, /historial y /ajustes funcionan solas con el motor local de tools/dictado; la capa solo les pone la ventana alrededor",
+  "sale": []
+}

@@ -1,0 +1,22 @@
+{
+  "enchufe": 1,
+  "modulo": "dashboard",
+  "activo": "TPL-feature-dashboard",
+  "nombre": "Dashboard base del template",
+  "pantallas": ["/dashboard"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "dashboard.abre",
+      "queHace": "Abrir el dashboard de la aplicación.",
+      "ejemplos": ["llévame al dashboard", "abre el dashboard de la aplicación", "ir al dashboard principal"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/dashboard"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "la página /dashboard es una base vacía del template (sin datos ni servicios) y no depende de la capa",
+  "sale": []
+}

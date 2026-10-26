@@ -13,6 +13,10 @@
  *  - **Las voces ya descargadas, nunca bajadas**: `DICTADO_VOCES` (lista separada por comas, p. ej.
  *    `es_MX-claude-high,es_ES-davefx-medium`) o, sin ella, toda carpeta `vits-piper-*` de
  *    `DICTADO_MODELOS`. Si no hay ninguna, el servicio arranca sin `/sintetizar` y lo dice.
+ *  - **La nube, APAGADA por defecto (C4)**: `DICTADO_NUBE` (p. ej. `groq,elevenlabs`) enciende adaptadores de
+ *    `src/nube.ts`, cada uno con su llave del entorno (`GROQ_API_KEY`, `LEMONFOX_API_KEY`, `ELEVENLABS_API_KEY` y
+ *    `ELEVENLABS_VOZ`). Sin la variable no se lee ninguna llave ni sale nada. Encender uno es decisión de flujo de
+ *    datos con su C4 (el audio o el texto sale a un tercero), y nunca en un producto con datos sensibles de terceros.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -87,6 +91,11 @@ export async function configura() {
     voces.set(carpeta.replace('vits-piper-', ''), voz)
   }
 
+  const { adaptadoresPedidos, describeNube } = await import(pathToFileURL(join(DIST, 'nube.js')).href)
+  const pedidosNube = String(env('DICTADO_NUBE', '')).split(',').map((v) => v.trim()).filter(Boolean)
+  const nube = adaptadoresPedidos(pedidosNube, process.env)
+  for (const d of nube.desconocidos) console.error(`dictado-servicio: el adaptador de nube ${d} no existe; se omite`)
+
   const tls = env('DICTADO_TLS_CERT', null) && env('DICTADO_TLS_CLAVE', null)
     ? { cert: readFileSync(env('DICTADO_TLS_CERT')), key: readFileSync(env('DICTADO_TLS_CLAVE')) }
     : null
@@ -96,6 +105,8 @@ export async function configura() {
     motor,
     respaldo,
     voces,
+    nube,
+    idioma: env('DICTADO_IDIOMA', 'es'),
     tls,
     puerto: Number(env('DICTADO_PUERTO', '8090')),
     escucha: env('DICTADO_ESCUCHA', '0.0.0.0'),
@@ -103,7 +114,7 @@ export async function configura() {
     enVuelo: Number(env('DICTADO_EN_VUELO', '1')),
     caracteresMaximos: Number(env('DICTADO_CARACTERES_MAXIMOS', '2000')),
     describe() {
-      return { motor: motor.id, respaldo: respaldo?.id ?? 'ninguno', dispositivo, hilos, voces: [...voces.keys()], tls: tls !== null ? 'propio' : 'no (termina en el proxy)', token: `presente (largo ${token.length})`, bytesMaximos: this.bytesMaximos, enVuelo: this.enVuelo, caracteresMaximos: this.caracteresMaximos }
+      return { motor: motor.id, respaldo: respaldo?.id ?? 'ninguno', dispositivo, hilos, voces: [...voces.keys()], nube: pedidosNube.length ? describeNube([...nube.stt, ...nube.tts.values()]) : 'apagada', tls: tls !== null ? 'propio' : 'no (termina en el proxy)', token: `presente (largo ${token.length})`, bytesMaximos: this.bytesMaximos, enVuelo: this.enVuelo, caracteresMaximos: this.caracteresMaximos }
     },
   }
 }

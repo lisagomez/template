@@ -1,0 +1,311 @@
+{
+  "fecha": "2026-10-25T17:46:24.883Z",
+  "base": "http://localhost:3011",
+  "ruta": "/laboratorio-calendario",
+  "pasos": [
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/01-apagado.png",
+      "nota": "apagado: el botón a la vista, aria-pressed=false y el micrófono sin pedir",
+      "estado": "apagado",
+      "ariaPressed": "false",
+      "microfono": "cerrado",
+      "pistas": [],
+      "pedidosMicro": 0,
+      "mensajes": 1,
+      "anotacion": [
+        "getUserMedia pedido 0 veces al cargar · aria-pressed=false · micrófono cerrado"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/02-escuchando.png",
+      "nota": "encendido con un clic: pidió el micrófono (una vez) y escucha; el indicador dice «abierto»",
+      "estado": "escuchando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 1,
+      "anotacion": [
+        "getUserMedia pedido 1 vez (al clic) · pistas del micrófono: live · aria-pressed=true"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/03-turno-respondido-en-voz.png",
+      "nota": "calló, el turno se envió solo y la respuesta suena (la capa resolvió por intención: calendario.consulta-hoy)",
+      "estado": "hablando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 2,
+      "hablo": true,
+      "turno": {
+        "id": 1,
+        "estado": "en-curso",
+        "oyo": "¿Qué tengo hoy en la agenda?",
+        "ruta": "llm"
+      },
+      "anotacion": [
+        "oyó (Parakeet, local): «¿Qué tengo hoy en la agenda?» · el turno se cerró solo al callar",
+        "suena (Piper, local): «Hoy tienes 2: 10:00 Revisión de inventario; 16:00 Llamada con proveedor.»"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/04a-hablando.png",
+      "nota": "contesta en voz una respuesta larga",
+      "estado": "hablando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 4,
+      "turno": {
+        "id": 2,
+        "estado": "en-curso",
+        "oyo": "Cuéntame todo lo que puede hacer esta fábrica por mí.",
+        "ruta": "llm"
+      },
+      "anotacion": [
+        "suena: «Eso todavía no lo sé hacer, y prefiero decírtelo a inventarlo. Lo que sí puedo: abrir el dashboard de la aplic…»",
+        "ahora le hablo encima: «Para.» (otra voz)"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/04b-interrupcion.png",
+      "nota": "le hablé encima («Para.») mientras hablaba: se calló y volvió a escuchar",
+      "estado": "escuchando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 4,
+      "callo": true,
+      "msHastaEscuchar": 257,
+      "turno": {
+        "id": 2,
+        "estado": "interrumpido",
+        "oyo": "Cuéntame todo lo que puede hacer esta fábrica por mí.",
+        "ruta": "llm"
+      },
+      "anotacion": [
+        "«Para.» dicho encima → calló y volvió a escuchar (257 ms desde que empezó a sonar «Para.» en el micrófono, frase incluida)",
+        "el turno quedó «interrumpido»: el resto de la respuesta no sonó"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/05a-freno-pide-su-clic.png",
+      "nota": "lo irreversible, en modo conversación: la tarjeta del freno con su cita, y dicho en voz que el clic es de la persona",
+      "estado": "escuchando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 6,
+      "tarjeta": true,
+      "citas": [
+        "Revisión de inventario",
+        "Llamada con proveedor",
+        "Cita de seguimiento",
+        "Entrega de pedido"
+      ],
+      "turno": {
+        "id": 4,
+        "estado": "completo",
+        "oyo": "Cancela la cita de mañana.",
+        "ruta": "llm"
+      },
+      "anotacion": [
+        "dicho en voz: «Esto no tiene vuelta atrás: cancelar una cita de la agenda y avisar a quien la tenía. Para hacerlo, revisa la cita y dale clic a «Confirmar». Por voz no lo confirmo: el clic en «Confirmar» es tuyo.»"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/05b-decirlo-no-basta.png",
+      "nota": "«Sí, confírmalo» en voz: la tarjeta sigue ahí y nada se canceló",
+      "estado": "hablando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 6,
+      "tarjetasPendientes": 1,
+      "citas": [
+        "Revisión de inventario",
+        "Llamada con proveedor",
+        "Cita de seguimiento",
+        "Entrega de pedido"
+      ],
+      "turno": {
+        "id": 5,
+        "estado": "en-curso",
+        "oyo": "Sí, confírmalo.",
+        "ruta": "llm"
+      },
+      "anotacion": [
+        "oyó: «Sí, confírmalo.» → contesta en voz, sin mandarlo a la conversación: «Eso no lo confirmo por voz. Si lo quieres, dale clic a «Confirmar» en la tarjeta; si no, a «Descartar».»",
+        "tarjetas del freno pendientes: 1 · citas: Revisión de inventario, Llamada con proveedor, Cita de seguimiento, Entrega de pedido"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/05c-el-clic-si.png",
+      "nota": "el clic de la persona: ahora sí se canceló",
+      "estado": "escuchando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 7,
+      "tarjetasPendientes": 0,
+      "citas": [
+        "Revisión de inventario",
+        "Llamada con proveedor",
+        "Entrega de pedido"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/06-apagado-otra-vez.png",
+      "nota": "apagado otra vez: el micrófono se cerró al instante (pistas en «ended»)",
+      "estado": "apagado",
+      "ariaPressed": "false",
+      "microfono": "cerrado",
+      "pistas": [
+        "ended"
+      ],
+      "pedidosMicro": 1,
+      "mensajes": 7,
+      "pistasAlVolverDelClic": [
+        "ended"
+      ],
+      "anotacion": [
+        "pistas del micrófono justo al volver del clic: ended · aria-pressed=false"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/07-teclado-enter.png",
+      "nota": "con teclado: Tab hasta el botón y Enter lo enciende (aria-pressed=true)",
+      "estado": "escuchando",
+      "ariaPressed": "true",
+      "microfono": "abierto",
+      "pistas": [
+        "live"
+      ],
+      "pedidosMicro": 2,
+      "mensajes": 7,
+      "enfocado": true,
+      "tabs": 2,
+      "anotacion": [
+        "2 Tab desde el principio de la página → foco en el botón (anillo visible)",
+        "Enter → aria-pressed=true · escuchando · pistas: live"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/08-teclado-espacio-y-alt-c.png",
+      "nota": "Espacio lo apaga; Alt+C lo enciende y lo apaga desde cualquier parte",
+      "estado": "apagado",
+      "ariaPressed": "false",
+      "microfono": "cerrado",
+      "pistas": [
+        "ended"
+      ],
+      "pedidosMicro": 3,
+      "mensajes": 7,
+      "enfocado": true,
+      "tabs": 2,
+      "anotacion": [
+        "Enter → aria-pressed=true · escuchando · pistas: live",
+        "Space → aria-pressed=false · apagado · pistas: ended",
+        "Alt+C → aria-pressed=true · escuchando · pistas: live",
+        "Alt+C → aria-pressed=false · apagado · pistas: ended"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/voz/09-recepcion-grabando.png",
+      "nota": "Recepción: la ranura de voz grabando una toma desde el compositor («■ Parar»)",
+      "estado": "apagado",
+      "ariaPressed": "false",
+      "microfono": "cerrado",
+      "pistas": [],
+      "pedidosMicro": 1,
+      "mensajes": 1,
+      "grabando": "true",
+      "anotacion": [
+        "se dice al micrófono: «Apunta que la señora Pérez llega diez minutos tarde.»"
+      ]
+    },
+    {
+      "captura": "docs/goals/capa-arbrain-capturas/producto/12-voz-dictando.png",
+      "nota": "Recepción: lo dictado, transcrito en local, queda en el compositor para revisarlo y enviarlo",
+      "estado": "apagado",
+      "ariaPressed": "false",
+      "microfono": "cerrado",
+      "pistas": [],
+      "pedidosMicro": 1,
+      "mensajes": 1,
+      "llego": true,
+      "texto": "Apunta que la señora Pérez llega 10 minutos tarde.",
+      "grabando": "false",
+      "anotacion": [
+        "dicho: «Apunta que la señora Pérez llega diez minutos tarde.»",
+        "transcrito (Parakeet, local, por el demonio de tools/dictado): «Apunta que la señora Pérez llega 10 minutos tarde.»",
+        "nada se envía solo: el texto espera en el compositor"
+      ]
+    }
+  ],
+  "teclado": {
+    "enfocado": true,
+    "tabs": 2,
+    "pasosTeclado": [
+      {
+        "tecla": "Enter",
+        "ariaPressed": "true",
+        "estado": "escuchando",
+        "pistas": [
+          "live"
+        ]
+      },
+      {
+        "tecla": "Space",
+        "ariaPressed": "false",
+        "estado": "apagado",
+        "pistas": [
+          "ended"
+        ]
+      },
+      {
+        "tecla": "Alt+C",
+        "ariaPressed": "true",
+        "estado": "escuchando",
+        "pistas": [
+          "live"
+        ]
+      },
+      {
+        "tecla": "Alt+C",
+        "ariaPressed": "false",
+        "estado": "apagado",
+        "pistas": [
+          "ended"
+        ]
+      }
+    ]
+  },
+  "recepcion": {
+    "dicho": "Apunta que la señora Pérez llega diez minutos tarde.",
+    "texto": "Apunta que la señora Pérez llega 10 minutos tarde.",
+    "llego": true
+  },
+  "erroresDeConsola": []
+}

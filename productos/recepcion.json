@@ -1,0 +1,130 @@
+{
+ "plantilla": 4,
+ "slug": "recepcion",
+ "nombre": "Recepción",
+ "version": 1,
+ "estado": "blueprint",
+ "indice": "Recepción",
+ "contrato": {
+  "ruta": null,
+  "falta": "/new-app con el laboratorio (negocio real, precio, dónde vive la máquina del mostrador) antes de cualquier cliente real; hasta entonces, solo laboratorio con un negocio ficticio y datos sintéticos (goal docs/goals/capa-arbrain.md, punto 6)",
+  "c3": null,
+  "aisia": null,
+  "firma": "pendiente del laboratorio: sin contrato, sin C3 y sin AISIA"
+ },
+ "modeloDeNegocio": {
+  "quienPaga": "el negocio de servicios (N2): una barbería, un taller o un consultorio que atiende con citas",
+  "aQuienSirve": ["quien atiende el mostrador del negocio (dueño o recepcionista)", "los clientes del negocio, que tienen citas en su agenda (N3)"],
+  "forma": "B2B con terceros en la agenda",
+  "propuesta": "un asistente de mostrador que se pide en lenguaje simple: qué hay hoy, apartar una cita sin doble reserva, cancelar con la cita textual y un clic, el horario, los servicios y lo que el negocio le pide recordar; sin modelo de IA y con la voz en la máquina"
+ },
+ "niveles": [
+  { "id": "N1", "quien": "el laboratorio", "que": "compone y mantiene el producto en la capa; no ve la agenda del negocio, solo los conteos que el negocio acepte mandarle" },
+  { "id": "N2", "quien": "el negocio de servicios", "que": "atiende su mostrador con el asistente; confirma lo irreversible con su clic; paga el producto" },
+  { "id": "N3", "quien": "el cliente del negocio", "que": "tiene su cita en la agenda y recibe el aviso si se la cancelan" }
+ ],
+ "tenencia": {
+  "arbol": ["laboratorio", "negocio", "cliente"],
+  "aislamiento": {
+   "control": "la memoria de la capa va por inquilino (prefijo capa/recepcion/<negocio>/) y cada módulo toca solo las claves de su enchufe; la agenda es una por negocio (su calendario en tools/calendario)",
+   "prueba": "tools/capa/pruebas/conversacion-y-memoria.ts"
+  }
+ },
+ "roles": [
+  { "id": "mostrador", "tipo": "persona", "nivel": "N2", "aprueba": true, "que": "el dueño o quien atiende: pide por intención y confirma con su clic lo que no tiene vuelta atrás (cancelar una cita)" },
+  { "id": "cliente", "tipo": "persona", "nivel": "N3", "aprueba": false },
+  { "id": "nora", "tipo": "agente", "nivel": "N2", "aprueba": false, "que": "el asistente del producto: resuelve por intención sin LLM, y lo irreversible lo frena y espera la cita textual y el clic" }
+ ],
+ "activos": {
+  "propios": ["TPL-feature-recepcion"],
+  "componentes": [
+   { "id": "TPL-feature-estudio-pymes", "para": "el crecimiento del negocio: qué publicar este mes en sus redes, abierto por intención desde el mostrador (sus pantallas, sin LLM y sin que nada salga de la máquina); reemplazó a crecimiento-demostrado en la recomposición" },
+   { "id": "TPL-feature-dictado", "para": "llena la ranura de voz: dictar en el chat, «Escuchar» cada respuesta y el botón Modo conversación, por las rutas locales del servidor" },
+   { "id": "TPL-dictado", "para": "el reconocimiento (Parakeet) y la síntesis (Piper es_MX) locales detrás de la ranura de voz: el audio no sale de la máquina" },
+   { "id": "TPL-bucle-voz", "para": "los turnos, la interrupción con puerta de eco, el enrutador sin LLM y el acuse inmediato del modo conversación" },
+   { "id": "TPL-voz", "para": "el detector de voz (Silero) que abre y cierra el turno en el navegador" }
+  ],
+  "base": [
+   { "id": "TPL-capa", "para": "la ventana, la intención sin LLM, el freno, la memoria por inquilino, el primer arranque y la lectura de solo conteos" },
+   { "id": "TPL-calendario", "para": "la agenda: el simulador de Google, el espejo, la pluma, el lector y Reservas (sin doble reserva, con horario); llena la ranura de plan y atiende consultar, apartar y cancelar" },
+   { "id": "TPL-app-base", "para": "la app Next.js que monta /recepcion y /api/recepcion/resumen" }
+  ]
+ },
+ "canales": [
+  { "id": "mostrador", "tipo": "interno", "que": "/recepcion: la ventana de la capa en la computadora del mostrador (conversación escrita y por voz con motores locales)" },
+  { "id": "resumen", "tipo": "interno", "que": "/api/recepcion/resumen: solo conteos (citas de hoy y de mañana) y el enlace al mostrador, para el cerebro personal del laboratorio; con un negocio real va en su contrato y con su consentimiento (C4)" }
+ ],
+ "terceros": [],
+ "pricing": {
+  "variables": ["citas al mes por negocio", "puestos de atención del mostrador", "si lleva voz local (una máquina con ~2,5 GB para los pesos)"],
+  "tiers": [],
+  "precio": null,
+  "modeloDeCobro": null,
+  "planComercial": null,
+  "quienDecide": "el laboratorio: el plan comercial (ERP-7); los precios de la página son del negocio ficticio, no del producto",
+  "fuente": null,
+  "falta": "no hay plan comercial ni presupuesto del producto: las variables salen de la composición y se miden con el primer negocio"
+ },
+ "metricas": {
+  "fuente": "src/features/recepcion/services/agenda.ts",
+  "catalogo": null,
+  "definicionUnica": true,
+  "nota": "«citas de hoy» y «citas de mañana» se definen una vez (citasDelDia) y las usan la ranura de plan, las intenciones y la lectura de conteos"
+ },
+ "sla": {
+  "aplica": false,
+  "motivo": "el negocio no contrata un tiempo de respuesta: el asistente contesta en el mostrador al momento y lo irreversible espera el clic de una persona; la disponibilidad no se promete sin GATE 3"
+ },
+ "entrega": {
+  "modelo": "por decidir",
+  "decision": "sin decisión propia: la composición supone que el negocio lo corre en la máquina de su mostrador (despacho)"
+ },
+ "respaldo": {
+  "inventario": null,
+  "falta": "el inventario de respaldo va en el §4 del contrato, que se escribe con /new-app",
+  "procedimiento": "ninguno: la memoria vive en el navegador del mostrador y la agenda es el simulador en memoria (vuelve a su semilla al recargar)",
+  "rpoRto": "desconocidos",
+  "gate3": false
+ },
+ "retencion": {
+  "decision": "abierta, sin decisión propia: cuánto se guardan las citas y lo que el asistente recuerda lo decide el laboratorio con el contrato (/new-app)",
+  "plazos": null,
+  "falta": "sin contrato no hay plazos, ni salida de un negocio, ni tope del bloqueo de respaldo; hoy «Olvidar la conversación» (Ajustes de la capa) borra la conversación del navegador",
+  "salida": null,
+  "restauracion": null,
+  "bloqueoMaximoDias": null,
+  "archivoLegal": null
+ },
+ "despliegue": {
+  "modos": ["despacho"],
+  "tamanos": null,
+  "falta": "sin medir: el producto corre hoy en la máquina de desarrollo con datos sintéticos; la voz local pide ~2,5 GB de pesos (Parakeet y Piper) y su latencia se midió en la máquina de desarrollo, no en la del mostrador",
+  "exige": { "region": { "decision": "sin decisión propia: en despacho los datos viven en la máquina del negocio", "estado": "abierta", "regiones": [] }, "respaldo": "inmutable-fuera-de-sitio", "puertos": [80, 443], "docker": true },
+  "opera": { "quien": "por decidir", "decision": "sin decisión propia: la composición supone que el negocio opera su mostrador y el laboratorio el producto" },
+  "secretos": ["RECEPCION_TOKEN_RESUMEN"]
+ },
+ "reuso": {
+  "matriz": null,
+  "falta": "no hay matriz dominio × capa: el reuso que se mide es el de composición, que calcula el gate"
+ },
+ "fde": {
+  "aMedida": ["el horario, los servicios y los precios de cada negocio", "la marca y el nombre del asistente (la composición)", "cuánto pregunta el asistente (Ajustes)"],
+  "nucleo": ["la capa (ventana, intención, freno, memoria y voz)", "el motor de agenda de tools/calendario", "las intenciones del mostrador y sus manejadores"],
+  "vuelta": "lo que se repite entre negocios vuelve como intención o ejemplo del enchufe, por CDC de la composición; lo firma el laboratorio",
+  "registro": null,
+  "falta": "no hay registro de lo hecho a medida por negocio: hoy hay un solo negocio ficticio"
+ },
+ "fuera": [
+  "no usa un modelo de IA: el enrutador de la capa resuelve por reglas y, si no sabe, lo dice",
+  "no cancela una cita sin la cita textual de quien lo pidió y su clic (el freno), y si lo pedido no señala una sola cita, no cancela ninguna",
+  "no avisa a ningún cliente de verdad: la agenda es el simulador de tools/calendario con datos sintéticos",
+  "no saca nada de la máquina salvo los conteos y el enlace de /api/recepcion/resumen; nunca nombres, horas ni texto",
+  "no manda el audio a la nube: con datos de terceros en la agenda y la memoria (datosSensibles), su voz solo puede ser local",
+  "no pone precio al producto ni cobra"
+ ],
+ "noCupo": [
+  { "que": "la composición en la capa: qué funciones usa, de quién es la memoria (por inquilino, en el navegador del mostrador), con qué modelo se resuelve (routing C8: sin LLM, sin clase asignada), qué motores de voz lleva (Parakeet, Piper y Silero, locales; nunca nube), su marca (Recepción, con su asistente Nora y su acento) y qué expone como lectura de solo conteos",
+    "donde": "productos/composiciones/recepcion.json",
+    "propuesta": "composicion (la ruta de la composición en la capa, o sus campos funciones, memoria, modelo, voz, marca y resumen) en la plantilla v5, por CDC; entra por la regla B-3 porque Soporte SAP también la tiene (productos/composiciones/soporte-sap.json)" }
+ ]
+}

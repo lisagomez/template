@@ -1,0 +1,6 @@
+{
+  "_porque": "Los productos que el laboratorio deja informar al cerebro personal con su resumen de SOLO conteos y enlaces. Un producto no se autoriza solo: lo que declara su composicion (`resumen` en productos/composiciones/<slug>.json) dice QUE claves puede mandar, y esta lista dice SI puede mandarlas. Anadir uno es una decision del laboratorio; la mesa real de Soporte SAP entra solo con la revision 14 de su AISIA.",
+  "productos": [
+    "recepcion"
+  ]
+}

@@ -15,7 +15,7 @@
  * `pretypecheck`, antes del primer gate del perfil). Una herramienta sin script `prueba` se
  * reporta y no cuenta como pasada: no correr no es pasar.
  *
- * Uso:  node scripts/prueba-tools.mjs          (npm run prueba:tools)
+ * Uso:  node scripts/prueba-tools.mjs [nombre…]  (npm run prueba:tools -- capa voz: solo esas; sin nombres, todas)
  * Exit: 0 si todas las suites pasan · 1 si alguna falla o no se pudo correr.
  */
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
@@ -34,10 +34,19 @@ if (!existsSync(dirTools)) {
   process.exit(0);
 }
 
-const herramientas = readdirSync(dirTools, { withFileTypes: true })
+const todas = readdirSync(dirTools, { withFileTypes: true })
   .filter((e) => e.isDirectory() && existsSync(join(dirTools, e.name, 'package.json')))
   .map((e) => e.name)
   .sort();
+// `npm run prueba:tools -- capa voz`: solo esas. Sin nombres, todas (así lo corre `validate`). Un nombre que no
+// existe es rojo: pedir una suite que no está y salir en verde sería no correr y decir que pasó.
+const pedidas = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const desconocidas = pedidas.filter((n) => !todas.includes(n));
+if (desconocidas.length) {
+  console.log(rojo(`No existen en tools/: ${desconocidas.join(', ')} (hay: ${todas.join(', ')})`));
+  process.exit(1);
+}
+const herramientas = pedidas.length ? todas.filter((n) => pedidas.includes(n)) : todas;
 
 const resultados = [];
 for (const nombre of herramientas) {

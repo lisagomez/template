@@ -1,0 +1,42 @@
+@tu-scope/capa
+Copyright 2026 el laboratorio (template).
+
+Esta capa incluye piezas ADAPTADAS de Arbrain (https://github.com/arbrain-ai/arbrain), versión v0.2.10, commit
+829a9e99f0f6805325e24bd851eb5d1e88c3c67c, etiqueta firmada y verificada (ver upstream.lock.json).
+Arbrain se distribuye bajo la Licencia Apache, versión 2.0; su texto está en LICENSE-FUENTE.
+
+El NOTICE de Arbrain v0.2.10 dice, y se conserva:
+
+  Arbrain
+  Copyright 2026 Daniel Carreón
+
+  Este producto incluye software desarrollado para Arbrain (https://arbrain.ai).
+  Se distribuye bajo la Licencia Apache, versión 2.0 (ver LICENSE).
+
+  This product includes software developed for Arbrain (https://arbrain.ai).
+  Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+  Arbrain incluye componentes de terceros con sus propias licencias; consulta las
+  dependencias declaradas en arbrain/package.json y arbrain/server/package.json.
+  "Arbrain" y el logo de Arbrain son marcas de su autor; la licencia no concede
+  permiso para usarlas salvo para describir el origen del software (sección 6).
+
+Lo que se adaptó (cada archivo lo dice en su cabecera, con lo que se cambió; el detalle está en mapa.json):
+
+  src/freno.ts            de .claude/hooks/candado-freno.py (la cita textual cotejada contra los mensajes de la
+                          persona, 15 minutos de vigencia, falla cerrado) y de
+                          arbrain/src/features/permisos/lib/confirmacion.ts (esClicHumano, literalVisible,
+                          las categorías enviar/pagar/borrar/publicar)
+  src/primer-arranque.ts  de arbrain/src/features/primer-arranque/lib/pasos.ts (una decisión por paso, lo seguro
+                          como botón principal, todo se cambia en Ajustes)
+  src/intencion.ts        reimplementa el contrato de .claude/references/operacion-por-intencion.md
+  src/ranuras.ts y        reimplementan la forma de la Cabina (arbrain/src/features/cabina): una ventana con
+  src/react/ventana.tsx   conversación, panel, lienzo y explorador
+  src/react/estilos.ts    tokens de arbrain/src/app/globals.css (elevación, tiempos, estados, gramática de
+                          página), con paleta neutra y el acento de cada producto
+  src/voz.ts              el enchufe de motor compatible con OpenAI que usan arbrain/server/src/live/transcribe.ts
+                          (Groq y LemonFox) y arbrain/server/src/voice.ts (Kokoro); la lista de adaptadores de
+                          nube describe los proveedores de Arbrain
+
+No se usan las marcas «Arbrain» ni «Levy», ni public/levy-face ni public/retratos. Nada de la persona de Arbrain
+(su CLAUDE.md, sus hooks, su captura de conversaciones) entra en esta capa.

@@ -1,0 +1,38 @@
+{
+  "enchufe": 1,
+  "modulo": "estudio-pymes",
+  "activo": "TPL-feature-estudio-pymes",
+  "nombre": "Estudio de marketing para pymes",
+  "pantallas": ["/estudio", "/estudio/aprobar"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "estudio-pymes.abre",
+      "queHace": "Abrir el estudio de marketing de tu negocio.",
+      "ejemplos": [
+        "qué pongo en mis redes este mes",
+        "abre el estudio de marketing",
+        "quiero el contenido del mes para mi negocio"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/estudio"
+    },
+    {
+      "id": "estudio-pymes.abre-aprobar",
+      "queHace": "Abrir la lista para aprobar el contenido del mes.",
+      "ejemplos": [
+        "aprobar el contenido desde el celular",
+        "abre la lista de piezas por aprobar",
+        "revisar los carruseles y videos del mes"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/estudio/aprobar"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el estudio y la lista de aprobación leen lo que sube la persona en su propio navegador (solo el MP4 de la promo se renderiza en el servidor local) y funcionan sin la capa; la capa solo les pone la ventana alrededor",
+  "sale": []
+}

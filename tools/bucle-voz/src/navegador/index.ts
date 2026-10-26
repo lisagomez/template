@@ -4,3 +4,4 @@
  * dos es `creaOido`, del núcleo.
  */
 export { creaReproductorNavegador, type OpcionesReproductorNavegador, type ReproductorNavegador } from './reproductor.js';
+export { hablaConDispositivo, mejorVozLocal, SinVozLocal, type VozDispositivo } from './voz-dispositivo.js';

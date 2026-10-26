@@ -39,3 +39,18 @@ export function juzgaCierre(texto: string, contexto: { esOrdenSegura: boolean })
 }
 
 export const juezPorTexto: JuezCierre = { juzga: juzgaCierre };
+
+/**
+ * Una pregunta que el motor ya cerró con «?» y que no queda abierta también está completa: cierra como una orden
+ * segura (`msCierreYa`) en vez de esperar el silencio entero del VAD. Es lo que deja sonar el acuse de la
+ * conversación tan pronto como una orden. El riesgo es partir una pregunta que seguía tras una pausa de más de
+ * `msCierreYa`: la persona que sigue hablando interrumpe y lo dicho entra como turno nuevo (se mide en la medición
+ * del centro de mando, «preguntas con pausa»). Mínimo tres palabras: «¿Qué?» o «¿Cómo?» solos piden repetir.
+ */
+export function juzgaCierreConPregunta(texto: string, contexto: { esOrdenSegura: boolean }): VeredictoCierre {
+  const base = juzgaCierre(texto, contexto);
+  if (base !== 'normal') return base;
+  return /\?\s*$/u.test(texto) && palabras(texto).length >= 3 ? 'ya' : 'normal';
+}
+
+export const juezConPregunta: JuezCierre = { juzga: juzgaCierreConPregunta };
