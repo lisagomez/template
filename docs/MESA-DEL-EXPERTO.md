@@ -227,8 +227,8 @@ experto, en la mesa, como su experiencia.
 
 ## La conversación (revisión 14 de la AISIA, parte 1)
 
-Va con la revisión 14 de la AISIA, parte 1, en borrador (`docs/goals/soporte-sap-AISIA-revision-14.md`). El código ya está
-en `main`, así que el próximo despliegue la sube: despliega después de firmarla.
+Va con la revisión 14 de la AISIA, parte 1, firmada el 2026-10-26. El código ya está en `main`, así que el próximo
+despliegue la sube.
 
 - **Qué hace**: la mesa se ve dentro de la capa común, con una ranura de conversación que resuelve sin modelo, con el
   enrutador de intención de la capa: «prueba este caso: …», «¿por qué dijiste no lo sé en el paso 3?» y «muéstrame lo que
