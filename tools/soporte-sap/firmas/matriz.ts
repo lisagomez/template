@@ -2801,4 +2801,45 @@ export const FILAS: readonly Fila[] = [
     control: 'reglas.mjs · prioridadDe, y la pantalla dice «en la escala de SAP»',
     nota: 'SAP puede dar a una nota una prioridad distinta de la que da su CVSS; la del Patch Day solo la ve una persona',
   },
+  // ── La mesa dentro de la capa común y su conversación (docs/goals/capa-arbrain.md, revisión 14 de la AISIA, parte 1):
+  //    la ranura de conversación sin modelo, con los controles del daño «Lo que escribe el experto, en un tercero».
+  {
+    id: 'aisia-mesa-conversacion-filtrada', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'lo que escribe el experto en la conversación pasa los mismos dos cerrojos que el formulario: un caso con forma de dato personal no se corre ni se guarda, y la respuesta no repite el dato',
+    control: `la conversación solo habla con la API de la mesa: route.ts (primer cerrojo) y ${ME}/services/mesa.ts · ingresa y guarda (segundo)`,
+    comprobacion: prueba('mesa-conversacion.ts', 'mesa · un caso con forma de dato personal no se corre ni se guarda, y la respuesta no repite el dato'),
+    sabotaje: { que: 'el caso de la conversación se corre y se guarda sin filtro', ediciones: [
+      ed('src/app/api/mesa/soporte-sap/route.ts', '  const dato = datoPersonalEn(a)\n  if (dato) throw new Rechazo(dato)\n', ''),
+      ed(`${ME}/services/mesa.ts`, '  filtra(entrada)\n', ''),
+      ed(`${ME}/services/mesa.ts`, '  if (datoPersonalEn(loQueEscribio(c))) throw', '  if (false) throw'),
+    ] },
+  },
+  {
+    id: 'aisia-mesa-conversacion-navegador', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'lo que escribe el experto en la conversación no se guarda en su navegador: vive en la pestaña y se va al recargar; en el navegador solo queda el estado de la guía, sin texto',
+    control: `${ME}/services/almacen-capa.ts · AlmacenCapaDeLaMesa (la pestaña para todo, el navegador solo para la guía, reescrita con sus campos)`,
+    comprobacion: prueba('mesa-conversacion.ts', 'mesa · lo que escribe el experto no se guarda en su navegador: solo el estado de la guía, sin texto'),
+    sabotaje: { que: 'la conversación se guarda en el navegador', ediciones: [ed(`${ME}/services/almacen-capa.ts`, 'return this.pestana.escribe(clave, valor)', 'return this.navegador.escribe(clave, valor)')] },
+  },
+  {
+    id: 'aisia-mesa-conversacion-sin-salida', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'la conversación resuelve sin modelo y no abre una salida: solo pide a la API de la mesa, por las rutas que la puerta del Worker ya deja pasar; ningún texto del experto va a un proveedor',
+    control: `${ME}/services/conversacion-mesa.ts · canalHttp (la API de la mesa y nada más) y el enrutador de la capa, sin LLM`,
+    comprobacion: prueba('mesa-conversacion.ts', 'mesa · la conversación no abre superficie: solo pide a la API de la mesa, por las rutas que la puerta del Worker ya deja pasar'),
+    sabotaje: { que: 'el caso que corre la conversación también sale a un proveedor de modelo', ediciones: [ed(`${ME}/services/conversacion-mesa.ts`, '    async ingresa(entrada) {\n', "    async ingresa(entrada) {\n      await consulta('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', body: JSON.stringify({ entrada }) })\n")] },
+  },
+  {
+    id: 'aisia-mesa-conversacion-su-mesa', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'en la conversación, cada quien ve SU mesa: otro experto no ve lo que enseñó el primero ni sus corridas, y no puede correr un caso ajeno',
+    control: `${ME}/services/mesa.ts · los casos de la vista se filtran por la identidad de Access que pone el servidor`,
+    comprobacion: prueba('mesa-conversacion.ts', 'mesa · cada quien ve SU mesa: otro experto no ve lo que enseñó ni las corridas del primero'),
+    sabotaje: { que: 'la vista de la mesa trae los casos de todos', ediciones: [ed(`${ME}/services/mesa.ts`, '.filter((c) => c.por.usuario === id.usuario)', '')] },
+  },
+  {
+    id: 'aisia-mesa-sin-voz', doc: 'AISIA', ref: 'Lo que escribe el experto, en un tercero', estado: 'probado',
+    afirmacion: 'la mesa no lleva voz: su composición no declara motor (en 1 GiB no cabe el reconocimiento local) y guarda datos sensibles, así que la ranura de voz no se llena, tampoco con la nube',
+    control: 'productos/composiciones/soporte-sap.json (voz «no» y datosSensibles) y tools/capa/src/voz.ts · decideRanuraVoz',
+    comprobacion: prueba('mesa-conversacion.ts', 'mesa · la mesa no lleva voz: no declara motor y guarda datos sensibles, así que la ranura no se llena, tampoco con la nube'),
+    sabotaje: { que: 'la composición le da voz a la mesa (el reconocimiento del navegador y la voz del dispositivo)', ediciones: [ed('productos/composiciones/soporte-sap.json', '"no": "en la mesa alojada no cabe un motor local: Parakeet pide ~1,5 GB y la instancia tiene 1 GiB; la voz del navegador manda el audio fuera"', '"stt": "navegador-stt", "tts": "dispositivo", "vad": "silero", "nube": ["navegador-stt"]')] },
+  },
 ]

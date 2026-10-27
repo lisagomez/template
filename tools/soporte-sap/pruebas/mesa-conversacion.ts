@@ -180,6 +180,7 @@ test('mesa · «borra mi último caso» no corre nada: el enrutador lo acerca a 
 })
 
 test('mesa · cada quien ve SU mesa: otro experto no ve lo que enseñó ni las corridas del primero', async () => {
+  await dice(conversacionDe(EXPERTO).c, FIORI) // el primero corre un caso aquí mismo: la prueba no depende de las de antes
   const { c } = conversacionDe(OTRO)
   assert.match((await dice(c, 'muéstrame lo que te enseñé')).texto, /^Todavía no me has enseñado nada en la mesa/)
   assert.match((await dice(c, '¿por qué dijiste no lo sé en el paso 3?')).texto, /^Todavía no has corrido ningún caso/)
@@ -216,6 +217,15 @@ test('mesa · la conversación no abre superficie: solo pide a la API de la mesa
   }
   assert.deepEqual([...new Set(pedidas)].sort(), ['GET /api/mesa/soporte-sap', 'GET /api/mesa/soporte-sap?vista=candidatos', 'POST /api/mesa/soporte-sap'])
   for (const p of pedidas) assert.ok(puerta.RUTAS_DE_LA_MESA.test(new URL(p.split(' ')[1]!, 'http://mesa').pathname), `${p}: la puerta del Worker la deja pasar`)
+})
+
+test('mesa · la mesa no lleva voz: no declara motor y guarda datos sensibles, así que la ranura no se llena, tampoco con la nube', () => {
+  assert.equal(PRODUCTO.voz.visible, false, PRODUCTO.voz.motivo)
+  assert.deepEqual(PRODUCTO.voz.sale, [], 'nada de la voz sale de la máquina')
+  assert.equal(COMPOSICION.datosSensibles, true, 'la mesa guarda lo que escribe el experto: datos sensibles de terceros')
+  const conNube = capa.decideRanuraVoz({ stt: 'groq', tts: 'elevenlabs', vad: 'silero', nube: ['groq', 'elevenlabs'] }, { datosSensibles: COMPOSICION.datosSensibles })
+  assert.equal(conNube.visible, false, 'aunque alguien le encendiera la nube, con datos sensibles no cuenta')
+  assert.deepEqual(conNube.sale, [])
 })
 
 test('mesa · conversación, unidades: qué caso trae el pedido, de qué paso pregunta y qué faltaba', () => {

@@ -101,6 +101,19 @@
 > vieja o secundaria tomada por buena» y «La redacción de SAP o sus términos, pasados por alto». Cambian la §1, la §2,
 > la §3, la §4 y la §5, y la matriz gana doce filas: dos del C3 («La mesa del experto alojada») y diez de la AISIA
 > (siete probadas y tres brechas). Va firmada al pie.
+>
+> **Revisión 14, parte 1** (2026-10-26): **la mesa dentro de la capa común y su conversación**. La mesa del experto se
+> monta en la capa común de la fábrica (la misma ventana que los demás productos), con la marca y el asistente de Soporte
+> SAP, y gana una ranura de conversación que resuelve SIN modelo, con el enrutador de intención de la capa: «prueba este
+> caso», «¿por qué dijiste no lo sé en el paso N?» y «muéstrame lo que te enseñé». La conversación solo habla con la API
+> de la mesa, con la identidad que pone el servidor: el caso que corre pasa los mismos dos filtros que el formulario y se
+> guarda en el almacén de la mesa, con la misma retención, y lo que dice el experto vive en la pestaña, no en su
+> navegador. No da veredictos nuevos (el veredicto sigue saliendo del motor de reglas) y no borra: borrar es del
+> laboratorio. El experto no habla con ningún asistente personal del laboratorio. La mesa no lleva voz: en su contenedor
+> (1 GiB) no cabe el reconocimiento local, y el del navegador cuenta como nube (C4 de la voz, firmado el 2026-10-26). No
+> entra ningún tercero ni ningún daño nuevo. Cambian la §1, la §4 y la §5, y la matriz gana cinco filas de la AISIA,
+> todas probadas. La parte 2, la lectura de solo conteos de la mesa hacia el cerebro personal del laboratorio, no entra
+> aquí: se firma antes de encenderla, con el VPS decidido. Va firmada al pie.
 
 ## 1. Partes afectadas
 
@@ -119,7 +132,8 @@
   de sus datos.
 - **El experto del laboratorio (el HIL, N1)**: prueba al agente con casos de su experiencia. Su correo, sus casos y lo
   que dice de cada paso se guardan, y los lee el laboratorio. Los casos que cuenta pueden ser de clientes suyos, que no
-  firmaron nada (revisión 11).
+  firmaron nada (revisión 11). En la conversación de la mesa habla solo con la mesa, sin modelo: no con un asistente
+  personal del laboratorio (revisión 14, parte 1).
 - **Los terceros del despliegue**: reciben los datos de todos los anteriores, según se decida. Son
   el proveedor de modelo (D7), la base de datos gestionada (D10: Supabase, en Virginia, Estados Unidos), el
   proveedor del servidor (D12: AWS, en la misma región) y el del respaldo fuera de sitio (D12: Backblaze B2, US East,
@@ -471,8 +485,16 @@ Lo que hace el código hoy. Cada punto tiene sus filas en la matriz.
     así que la base no trae el procedimiento de cada tarea, las notas de seguridad sin CVE ni las fechas de fin de
     mantenimiento: los huecos están declarados por área. La URL de SAP Help de una página de SAP-docs se deriva de su
     loio y nadie la abre en automático. La prioridad de una nota se deriva de su CVSS con la escala de SAP.
-  - *Brecha*: un dato sin forma pasa el filtro, y el experto puede contar el caso de un cliente suyo. Cloudflare ve el
-    contenido, porque termina el TLS. El contenedor se fija en el este de Norteamérica, que puede incluir Canadá:
+  - **La conversación de la mesa** (revisión 14, parte 1): la mesa se monta en la capa común y gana una ranura de
+    conversación que resuelve sin modelo, con el enrutador de intención de la capa. Solo pide a la API de la mesa, por
+    las rutas que la puerta del Worker ya deja pasar, y con la identidad que pone el servidor: el caso que corre pasa los
+    mismos dos filtros que el formulario, se guarda en el almacén de la mesa con la misma retención, y cada quien ve su
+    mesa. Lo que escribe el experto en la conversación vive en la memoria de la pestaña y se va al recargar; en su
+    navegador solo queda el estado de la guía, sin texto. Ningún texto del experto va a un proveedor de modelo: con uno,
+    sería otra revisión (D7, con su asignación en C8). La mesa no lleva voz.
+  - *Brecha*: un dato sin forma pasa el filtro, también en la conversación, y el experto puede contar el caso de un
+    cliente suyo. Cloudflare ve el contenido, porque termina el TLS. El contenedor se fija en el este de Norteamérica,
+    que puede incluir Canadá:
     Containers no ofrece una jurisdicción «us» (medido en wrangler 4.143.1). Un `wrangler deploy` a mano se salta el
     candado.
 
@@ -501,7 +523,7 @@ quedan hoy:
 | El dato de terceros que vive de más, o que vuelve | Los originales vencen por contrato y la base decide qué venció; al salir, lo del cliente se congela y se borra tras la gracia, con su export en la mano; el borrado llega a las copias en 12 meses como máximo. Sin N ni gracia en el contrato **no se borra nada**: el producto no ofrece un borrado que nadie fijó. |
 | Una solución mal aplicada en el SAP de un N3 | **No se ofrece** (D6, decidida): el producto no se conecta a ningún SAP ni guarda sus credenciales. La aplica una persona, fuera del producto, con el control de cambios del N3, y la pantalla y el contrato dicen que el antes y el después son del simulador. |
 | El conocimiento de una consultora usado para otra | A medida por defecto. Al núcleo común, solo generalizado y con el consentimiento vigente de la consultora y del cliente de origen (D1): la base lo exige. |
-| Lo que escribe el experto, en un tercero | Lo **reducen** el filtro antes de llegar y antes de guardarse, lo que se le pide en pantalla, que no haya archivos y la identidad de Access: solo entran los correos de la lista, y lo guardado solo lo lee el laboratorio y vence. No es cero: un dato sin forma pasa, y queda declarado. |
+| Lo que escribe el experto, en un tercero | Lo **reducen** el filtro antes de llegar y antes de guardarse, lo que se le pide en pantalla, que no haya archivos y la identidad de Access: solo entran los correos de la lista, y lo guardado solo lo lee el laboratorio y vence. La conversación de la mesa no cambia nada de eso: no tiene modelo, solo habla con la API de la mesa y no guarda nada en el navegador (revisión 14, parte 1). No es cero: un dato sin forma pasa, y queda declarado. |
 | Una hipótesis de un tercero que se vuelve regla | **Se evita**: el candidato va «al experto» siempre, la validación es una propuesta y la regla se firma en `tools/conocimiento` con una fuente citable, que sapstack no es. |
 | Una fuente de la web vieja o secundaria tomada por buena | **Se evita** como la anterior: el candidato va «al experto», validar es una propuesta y una regla se firma con su cita. Además, solo corrobora una fuente que politica-cita admite, y la revisión avisa del Patch Day siguiente sin mover el pin. Que la base lo cubra todo **no** se promete: los huecos quedan declarados por área. |
 | La redacción de SAP o sus términos, pasados por alto | **Se evita**: no se captura lo que el robots.txt o los términos de SAP cierran ni lo que pide S-user; de una SAP Note solo entran el número, el título y el enlace; y el generador se niega si una hipótesis repite ocho palabras de una captura. Lo protegido es la redacción, no los hechos (LFDA, art. 14, fr. I); esto no es asesoría legal. |
@@ -553,3 +575,5 @@ Revisión 11 (la mesa del experto alojada en Cloudflare, con el C3), firmada por
 Revisión 12 (una fuente externa de candidatos en la mesa: sapstack, con el C3), firmada por: lisagomez Rol: responsable del proyecto Fecha: 2026-10-22
 
 Revisión 13 (SAP BASIS desde la web como candidatos de la mesa, con el C3), firmada por: lisagomez Rol: responsable del proyecto Fecha: 2026-10-24
+
+Revisión 14, parte 1 (la mesa dentro de la capa común y su conversación, sin modelo), firmada por: lisagomez  Rol: responsable del proyecto  Fecha: 2026-10-26
