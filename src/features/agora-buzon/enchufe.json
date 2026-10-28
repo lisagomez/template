@@ -1,0 +1,47 @@
+{
+  "enchufe": 1,
+  "modulo": "agora-buzon",
+  "activo": "TPL-feature-agora-buzon",
+  "nombre": "Buzón de Ágora (el canal de cada categoría)",
+  "pantallas": [
+    "/agora/buzon"
+  ],
+  "ranuras": [
+    "lienzo",
+    "conversacion",
+    "intencion"
+  ],
+  "intenciones": [
+    {
+      "id": "agora-buzon.abre",
+      "queHace": "Abrir el buzón de una categoría.",
+      "ejemplos": [
+        "abre el buzón de campañas",
+        "llévame al hilo de logística",
+        "muéstrame los mensajes de la categoría"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/buzon"
+    },
+    {
+      "id": "agora-buzon.escribe",
+      "queHace": "Escribirle a un agente o al equipo en el hilo de la categoría abierta.",
+      "ejemplos": [
+        "dile al coordinador que despliegue el plan de visitas",
+        "pregúntale a medios norte por el reporte",
+        "escribe en el hilo que la entrega se retrasa",
+        "coordinador, propón las fechas"
+      ],
+      "efecto": "escribe",
+      "irreversible": false
+    }
+  ],
+  "freno": [],
+  "memoria": {
+    "lee": [],
+    "escribe": []
+  },
+  "sinCapa": "el buzón es el canal interno único de la base de Ágora: sin la capa, sus hilos, propuestas y aprobaciones siguen ahí",
+  "sale": []
+}

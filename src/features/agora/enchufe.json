@@ -1,0 +1,94 @@
+{
+  "enchufe": 1,
+  "modulo": "agora",
+  "activo": "TPL-feature-agora",
+  "nombre": "Ágora (la organización: su jerarquía, «Espera tu clic» y el alta)",
+  "pantallas": [
+    "/agora",
+    "/agora/alta"
+  ],
+  "ranuras": [
+    "lienzo",
+    "explorador",
+    "panel",
+    "intencion",
+    "memoria"
+  ],
+  "intenciones": [
+    {
+      "id": "agora.espera",
+      "queHace": "Decirte qué espera tu clic.",
+      "ejemplos": [
+        "qué espera mi clic",
+        "qué me toca aprobar",
+        "qué tengo pendiente de decidir",
+        "mis pendientes de hoy"
+      ],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "agora.aprobar",
+      "queHace": "Explicarte cómo se aprueba: con tu clic sobre la huella, nunca hablando.",
+      "ejemplos": [
+        "apruébalo",
+        "aprueba la propuesta",
+        "sí, apruébala",
+        "dale el visto bueno"
+      ],
+      "efecto": "lee",
+      "irreversible": false
+    },
+    {
+      "id": "agora.abre-inicio",
+      "queHace": "Abrir el inicio de la organización.",
+      "ejemplos": [
+        "llévame al inicio",
+        "abre la organización",
+        "muéstrame mis workspaces"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora"
+    },
+    {
+      "id": "agora.alta",
+      "queHace": "Dar de alta la organización paso por paso.",
+      "ejemplos": [
+        "dar de alta la organización",
+        "configurar la organización desde cero",
+        "el alta paso por paso"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/alta"
+    },
+    {
+      "id": "agora.quita-segregacion",
+      "queHace": "Quitar la segregación de funciones de la organización (quien pide también podría aprobar).",
+      "ejemplos": [
+        "quita la segregación de funciones",
+        "desactiva la segregación de funciones",
+        "que quien pide también pueda aprobar"
+      ],
+      "efecto": "escribe",
+      "irreversible": true
+    }
+  ],
+  "freno": [
+    {
+      "accion": "agora.quita-segregacion",
+      "porque": "cambia una garantía de toda la organización: queda como decisión registrada con tu cita"
+    }
+  ],
+  "memoria": {
+    "lee": [],
+    "escribe": [
+      "workspace-abierto",
+      "categoria-abierta",
+      "vista-tablero"
+    ]
+  },
+  "sinCapa": "el núcleo de Ágora (tools/agora) es una librería con su base: sin la capa, sus funciones y la base siguen funcionando y se prueban solas; la capa solo pone la ventana, la intención, el freno, la memoria y la voz",
+  "sale": []
+}

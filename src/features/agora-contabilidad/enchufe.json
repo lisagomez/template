@@ -1,0 +1,31 @@
+{
+  "enchufe": 1,
+  "modulo": "agora-contabilidad",
+  "activo": "TPL-feature-agora-contabilidad",
+  "nombre": "Contabilidad de Ágora (cierre del periodo y póliza propuesta)",
+  "pantallas": ["/agora/contabilidad"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "agora-contabilidad.abre",
+      "queHace": "Abrir el paquete para Contabilidad.",
+      "ejemplos": ["abre contabilidad", "muéstrame la póliza propuesta", "llévame al paquete contable"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/contabilidad"
+    },
+    {
+      "id": "agora-contabilidad.cierra-periodo",
+      "queHace": "Cerrar los costos de un periodo y dejar la póliza propuesta para Contabilidad.",
+      "ejemplos": ["cierra el periodo de septiembre", "cerrar los costos del mes", "haz el cierre de costos de septiembre de 2026"],
+      "efecto": "escribe",
+      "irreversible": true
+    }
+  ],
+  "freno": [
+    { "accion": "agora-contabilidad.cierra-periodo", "porque": "congela los costos del periodo: después solo cabe reclasificar en el periodo abierto" }
+  ],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el cierre y la póliza son funciones de la base (cierra_periodo, exporta_poliza): sin la capa se llaman igual, con la cita textual de quien cierra",
+  "sale": []
+}

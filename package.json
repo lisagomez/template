@@ -92,7 +92,10 @@
     "trayectorias:propuestas": "node scripts/trayectorias/propuestas.mjs",
     "prueba:ajustes": "node --test src/features/ajustes/pruebas/*.ts",
     "prueba:etiquetas": "npm --prefix tools/etiquetas-gs1 run prueba && node --test src/features/etiquetas/pruebas/*.ts && node --test src/features/laboratorio-etiquetas/pruebas/*.ts",
-    "capturas:etiquetas": "node src/features/etiquetas/e2e/capturas.mjs"
+    "capturas:etiquetas": "node src/features/etiquetas/e2e/capturas.mjs",
+    "agora:laboratorio": "node scripts/agora/laboratorio.ts",
+    "agora:dev": "node scripts/agora/dev.mjs",
+    "agora:pg": "node scripts/agora/pg.ts"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.1.0",
@@ -107,6 +110,7 @@
     "lucide-react": "^1.38.0",
     "next": "^16.0.0",
     "onnxruntime-web": "1.29.0",
+    "pg": "8.16.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "read-excel-file": "9.3.10",
@@ -121,6 +125,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
     "@types/node": "^22.0.0",
+    "@types/pg": "8.15.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.0",

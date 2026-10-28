@@ -1,0 +1,46 @@
+{
+  "enchufe": 1,
+  "modulo": "agora-agentes",
+  "activo": "TPL-feature-agora-agentes",
+  "nombre": "Agentes y la Puerta A2A de Ágora (idCard, topes, suspender y revocar)",
+  "pantallas": ["/agora/agentes"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "agora-agentes.abre",
+      "queHace": "Abrir los agentes y la Puerta.",
+      "ejemplos": ["abre los agentes", "muéstrame la puerta", "quién entra por la puerta a2a", "llévame a los socios"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/agentes"
+    },
+    {
+      "id": "agora-agentes.suspende",
+      "queHace": "Suspender a un agente (se reactiva después).",
+      "ejemplos": ["suspende a medios norte", "congela al agente de fletes", "pausa a empaques regio"],
+      "efecto": "escribe",
+      "irreversible": false
+    },
+    {
+      "id": "agora-agentes.revoca",
+      "queHace": "Revocar a un agente: corta en su siguiente llamada y no tiene vuelta atrás.",
+      "ejemplos": ["revoca a fletes del golfo", "revoca al socio de medios", "da de baja definitiva al agente"],
+      "efecto": "escribe",
+      "irreversible": true
+    },
+    {
+      "id": "agora-agentes.avisa-tercero",
+      "queHace": "Avisar a un socio externo (sale de la organización).",
+      "ejemplos": ["avisa a medios norte que se cancela la pauta", "manda un aviso al socio de fletes", "envía el aviso al despacho fiscal"],
+      "efecto": "escribe",
+      "irreversible": true
+    }
+  ],
+  "freno": [
+    { "accion": "agora-agentes.revoca", "porque": "retira sus propuestas, cancela sus tareas y deja sus ítems sin responsable: no se deshace" },
+    { "accion": "agora-agentes.avisa-tercero", "porque": "sale de la organización a un tercero: no se puede desdecir" }
+  ],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el ciclo del idCard y la Puerta son funciones de la base y del núcleo de Ágora; sin la capa, la Puerta sigue cerrada y probada contra el socio simulado",
+  "sale": []
+}

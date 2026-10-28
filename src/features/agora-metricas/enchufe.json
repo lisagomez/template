@@ -1,0 +1,29 @@
+{
+  "enchufe": 1,
+  "modulo": "agora-metricas",
+  "activo": "TPL-feature-agora-metricas",
+  "nombre": "Métricas de Ágora (capa semántica y tablero regenerable)",
+  "pantallas": ["/agora/metricas"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "agora-metricas.abre",
+      "queHace": "Abrir el tablero de métricas.",
+      "ejemplos": ["abre las métricas", "cómo vamos con el plan", "muéstrame el tablero de indicadores"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/metricas"
+    },
+    {
+      "id": "agora-metricas.cifra",
+      "queHace": "Leerte una cifra de la capa semántica (aceptación, vencidas, costo por propuesta).",
+      "ejemplos": ["cuál es la aceptación por agente", "cuántas tareas vencidas hay", "cuánto cuesta cada propuesta aceptada", "qué porcentaje va a tiempo"],
+      "efecto": "lee",
+      "irreversible": false
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las métricas son consultas a la capa semántica de la base: ninguna cifra se escribe a mano ni la redacta un modelo",
+  "sale": []
+}
