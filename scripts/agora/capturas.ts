@@ -61,7 +61,8 @@ async function dile(p: Page, texto: string): Promise<string> {
 
 // 2. El Editor no puede aprobar un monto sobre el umbral; Finanzas sí, y el comprometido sube por el monto.
 {
-  const pr = await uno<{ id: string; cat: string; monto: string }>(`select id, categoria_id cat, monto_mxn::text monto from agora.propuesta where clave = 'siembra:p-radio'`)
+  // Cambia el monto de la pauta (de «antes» a «después»): el comprometido sube la DIFERENCIA, no el monto entero.
+  const pr = await uno<{ id: string; cat: string; monto: string; antes: string }>(`select id, categoria_id cat, monto_mxn::text monto, (payload -> 'cambios' -> 0 ->> 'antes') antes from agora.propuesta where clave = 'siembra:p-radio'`)
   const comp = async () => Number((await uno<{ c: string }>(`select coalesce(sum(comprometido_mxn), 0)::text c from agora.v_centro_periodo where categoria_id = $1`, [pr.cat])).c)
   const antes = await comp()
   const ed = await como('daniel')
@@ -81,7 +82,8 @@ async function dile(p: Page, texto: string): Promise<string> {
   await fi.waitForFunction((id) => document.querySelector(`[data-propuesta="${id}"]`)?.getAttribute('data-estado') === 'aplicada', pr.id, { timeout: 20_000 }).catch(() => {})
   await captura(fi, '06-finanzas-aprueba')
   const despues = await comp()
-  comprueba('Finanzas aprueba con su clic y el comprometido sube exactamente el monto', Math.round((despues - antes) * 100) === Math.round(Number(pr.monto) * 100), `${antes} → ${despues} (+${pr.monto})`)
+  const delta = Number(pr.monto) - Number(pr.antes)
+  comprueba('Finanzas aprueba con su clic y el comprometido sube exactamente lo que cambió el monto', delta > 0 && Math.round((despues - antes) * 100) === Math.round(delta * 100), `${antes} → ${despues} (${pr.antes} → ${pr.monto}: +${delta})`)
   await ve(fi, `/agora/costos`)
   await captura(fi, '07-comprometido-despues')
 }
