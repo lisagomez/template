@@ -5,7 +5,7 @@
  * por el supervisor, nunca solo por la pantalla.
  */
 import { assert, cuenta, rechaza, agente, persona, nodo, item, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
-import { decide, propone, aplica, registraCosto, supervisa, cierraPeriodo } from '../dist/index.js'
+import { decide, propone, aplica, registraCosto, supervisa, cierraPeriodo, atestigua } from '../dist/index.js'
 import { uid } from '../dist/laboratorio/index.js'
 
 const e = (c: Ctx) => ({ base: c.base, secreto: SECRETO })
@@ -14,6 +14,7 @@ const centro = async (c: Ctx, cat: string, per: string) => (await c.base.consult
 async function cierraSeptiembre(c: Ctx): Promise<{ poliza: string | null }> {
   const [ya] = await c.base.consulta<{ id: string }>(`select id from agora.poliza where periodo = '2026-09' and org_id = $1 and folio like 'POL-%-D-%'`, [GOLFO])
   if (ya) return { poliza: ya.id }
+  await atestigua(e(c), persona('mariana'), ['cierra los costos de septiembre de 2026']) // lo dijo Mariana en la conversación
   return cierraPeriodo(e(c), persona('mariana'), { org: GOLFO, periodo: '2026-09', cita: 'cierra los costos de septiembre de 2026' })
 }
 

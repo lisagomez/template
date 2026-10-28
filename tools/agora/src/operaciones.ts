@@ -161,5 +161,12 @@ export const liberaCompromiso = (e: Entorno, personaId: string, compromiso: stri
   persona(e, personaId)(async (s) => (await s.consulta<{ r: unknown }>('select agora.libera_compromiso($1, $2) r', [compromiso, motivo]))[0]!.r)
 export const deshaz = (e: Entorno, personaId: string, historial: number) =>
   persona(e, personaId)(async (s) => (await s.consulta<{ r: unknown }>('select agora.deshaz($1) r', [historial]))[0]!.r)
+/** La conversación atestigua lo que dijo la persona (la base guarda la huella y la hora, no el texto): sin ese testigo,
+ *  cerrar, revocar, quitar la segregación o avisar a un tercero no pasan aunque la cita sea larga. */
+export const atestigua = (e: Entorno, personaId: string, textos: readonly string[]) =>
+  persona(e, personaId)(async (s) => Number((await s.consulta<{ n: number }>('select agora.atestigua($1::text[]) n', [textos]))[0]!.n))
+/** Avisar a un tercero: no toca una tabla irreversible, pero lo es; gasta su testigo igual que cerrar o revocar. */
+export const usaTestigo = (e: Entorno, personaId: string, cita: string, accion: 'avisa_tercero') =>
+  persona(e, personaId)(async (s) => (await s.consulta<{ ok: boolean }>('select agora.usa_testigo($1, $2) ok', [cita, accion]))[0]!.ok)
 export const cambiaSegregacion = (e: Entorno, personaId: string, org: string, activa: boolean, cita: string) =>
   persona(e, personaId)(async (s) => (await s.consulta<{ r: unknown }>('select agora.cambia_segregacion($1, $2, $3) r', [org, activa, cita]))[0]!.r)

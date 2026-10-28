@@ -9,6 +9,7 @@ import { COORDINADOR, SABOTAJES_COORDINADOR } from './_suite-coordinador.ts'
 import { PUERTA, SABOTAJES_PUERTA } from './_suite-puerta.ts'
 import { VIGIA, SABOTAJES_VIGIA } from './_suite-vigia.ts'
 import { METRICAS, SABOTAJES_METRICAS } from './_suite-metricas.ts'
+import { CAPA, SABOTAJES_CAPA } from './_suite-capa.ts'
 
 export const FASES: Record<string, { titulo: string; comprobaciones: Comprobacion[]; sabotajes: Sabotaje[] }> = {
   nucleo: { titulo: 'Fase 1 · núcleo de datos: aislamiento entre organizaciones y RLS forzada', comprobaciones: NUCLEO, sabotajes: SABOTAJES_NUCLEO },
@@ -20,4 +21,5 @@ export const FASES: Record<string, { titulo: string; comprobaciones: Comprobacio
   puerta: { titulo: 'Fase 5 · la Puerta A2A (cerrada): sus comprobaciones y llamadas_tras_revocar = 0', comprobaciones: PUERTA, sabotajes: SABOTAJES_PUERTA },
   vigia: { titulo: 'Fase 6 · calendario y vigía: un reintento no duplica eventos', comprobaciones: VIGIA, sabotajes: SABOTAJES_VIGIA },
   metricas: { titulo: 'Fase 6 · métricas: cada cifra sale de una métrica y cuadra con el libro', comprobaciones: METRICAS, sabotajes: SABOTAJES_METRICAS },
+  capa: { titulo: 'Fase 7 · el testigo del freno: la cita de lo irreversible la dijo esta persona, una vez y hace ≤ 15 min', comprobaciones: CAPA, sabotajes: SABOTAJES_CAPA },
 }

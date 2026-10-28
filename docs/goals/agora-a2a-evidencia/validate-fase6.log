@@ -1,0 +1,40 @@
+  ✓ prueba:laboratorio-sgi exit 0
+  ✓ prueba:historial exit 0
+  ✓ prueba:ajustes exit 0
+  ✓ prueba:etiquetas exit 0
+  ✓ prueba:migraciones exit 0
+  ✓ prueba:trayectorias exit 0
+  ✓ verifica:trayectorias exit 0
+  ✓ verifica:inventario exit 0
+  ✓ verifica:marca-blanca exit 0
+  ✓ verifica:productos exit 0
+  ✓ verifica:enchufes exit 0
+  ✓ prueba:inventario exit 0
+  ✓ prueba:tools exit 0
+  ✓ prueba:imprenta exit 0
+  ✓ audita:imprenta exit 0
+  ✓ audita:fugas exit 0
+  ✓ prueba:a2a exit 0
+  ✓ prueba:analista exit 0
+  ✓ prueba:buzon exit 0
+
+  pasaron: 34   inactivos declarados: 11   rojos: 0
+
+  Los 11 inactivos NO cuentan como pasados. Estan declarados con motivo:
+    · sgi:rls — Necesita Docker con la Supabase local y crea 7 cuentas sinteticas por corrida: no cabe en el gate de cada integracion.
+    · prueba:a2a:servicio — Exigen el servicio del extractor corriendo en `EXTRACTOR_SERVICIO_URL`, y ese servicio no arranca sin el binario de Tesseract: `tools/extractor-documental/servicio/configuracion.
+    · inventario:valida-erp — Necesita Docker, y el gate corre en maquinas sin Docker (su propia cabecera ya lo declara: «Vive fuera de validate: necesita Docker»).
+    · erp:prueba — Necesita Docker y levanta un Postgres desechable: no cabe en el gate de cada integracion.
+    · erp:control — Necesita Docker, igual que `erp:prueba`.
+    · prueba:etiquetas:efimera — Necesita Docker y levanta un Postgres desechable, igual que `erp:prueba`.
+    · prueba:lean-crecimiento — El toolchain de Lean (unos 900 MB) no esta en todas las maquinas ni en CI, y sin el el script sale con 2 («no medido»): activo, pondria en rojo el validate de quien no lo tenga.
+    · vigila:versiones — Necesita red, y PROPONE: mover un pineo es un CDC (C1), nunca una consecuencia automatica de un gate.
+    · vigila:hermes — Necesita red.
+    · mide:mcp — Es una medicion, no un criterio: no tiene umbral binario que pueda ponerse rojo.
+    · prueba:instancias — Necesita Docker y, la primera vez, baja ~350 MB (el programa de la etiqueta firmada) y la imagen pineada de cloudflared: no cabe en el gate de cada integracion.
+
+✓ validate sellado: arbol 28f7a041a364 (2026-10-28T14:37:24.372Z)
+  predeploy pasara sin repetir el gate mientras el arbol no cambie.
+
+Gate validate en VERDE: 34/34 gates activos pasaron.
+exit 0

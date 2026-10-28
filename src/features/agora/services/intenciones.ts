@@ -176,6 +176,7 @@ export async function intencionAgente(texto: string, accion: 'suspende' | 'revoc
       refresh()
       return { texto: `Revoqué a ${a.nombre}: su siguiente llamada ya falla. Retiré ${x.propuestas} propuesta(s), cancelé ${x.tareas} tarea(s), dejé ${x.items} ítem(s) sin responsable y cancelé ${x.recordatorios} recordatorio(s).`, ir: '/agora/agentes' }
     }
+    await agora.usaTestigo(e, persona, texto, 'avisa_tercero') // irreversible: la cita la dijo esta persona, una vez
     const cat = (await e.base.consulta<{ nodo_id: string }>(`select x.nodo_id from agora.agente_alcance x join agora.nodo n on n.id = x.nodo_id where x.agente_id = $1 and n.tipo = 'categoria' limit 1`, [a.id]))[0]
     if (cat) await agora.publica(e, persona, { categoria: cat.nodo_id, cuerpo: `Aviso a ${a.nombre} (tercero), confirmado por el freno: «${texto}». En el laboratorio no sale nada de la máquina: el aviso queda aquí.` })
     refresh()

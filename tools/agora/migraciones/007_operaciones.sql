@@ -378,6 +378,7 @@ begin
   if not agora_priv.tiene_rol(a.org_id, null, array['propietario', 'administrador']) then raise exception 'revocar es de la Propietaria o el Administrador' using errcode = 'AG403'; end if;
   if a.estado = 'revocado' then raise exception 'el agente ya está revocado' using errcode = 'AG409'; end if;
   if length(coalesce(btrim(cita), '')) < 8 then raise exception 'revocar va por el freno: falta la cita textual' using errcode = 'AG400'; end if;
+  perform agora_priv.consume_testigo(cita, 'revoca_agente'); -- la cita la dijo ESTA persona, una vez y hace ≤ 15 min (014)
   update agora.agente set estado = 'revocado' where id = a.id;
   if a.kid is not null then insert into agora.llave_revocada (org_id, kid) values (a.org_id, a.kid) on conflict do nothing; end if;
   update agora.propuesta set estado = 'retirada' where autor_agente = a.id and estado in ('pendiente', 'congelada', 'a_revision');
@@ -440,6 +441,7 @@ create or replace function agora.cambia_segregacion(o uuid, activa boolean, cita
 begin
   if not agora_priv.tiene_rol(o, null, array['propietario']) then raise exception 'la segregación la decide la Propietaria' using errcode = 'AG403'; end if;
   if length(coalesce(btrim(cita), '')) < 8 then raise exception 'esto va por el freno: falta la cita textual' using errcode = 'AG400'; end if;
+  if not activa then perform agora_priv.consume_testigo(cita, 'quita_segregacion'); end if; -- quitarla va por el freno; ponerla no
   update agora.org_config set segregacion = activa where org_id = o;
   insert into agora.decision_org (org_id, tipo, quien, cita) values (o, case when activa then 'segregacion_on' else 'segregacion_off' end, auth.uid(), cita);
   perform agora_priv.anota(o, 'humano', auth.uid()::text, 'org.segregacion', o::text, jsonb_build_object('activa', activa));
@@ -494,6 +496,7 @@ begin
   end if;
   select count(*) into pendientes from agora.costo where org_id = o and periodo = per and estado = 'pendiente';
   if pendientes > 0 then raise exception 'hay % costo(s) del periodo sin evidencia: nada queda pendiente al cierre', pendientes using errcode = 'AG409'; end if;
+  perform agora_priv.consume_testigo(cita, 'cierra_periodo'); -- después de validar: un cierre imposible no gasta la cita
   select count(*) into sin_costo from agora.gasto_modelo where org_id = o and periodo = per and costo_mxn is null;
   if not exists (select 1 from agora.costo where org_id = o and periodo = per and estado = 'ejercido')
      and not exists (select 1 from agora.gasto_modelo where org_id = o and periodo = per and costo_mxn is not null) then

@@ -15,7 +15,7 @@ const MODULOS = [
   { ruta: '/agora/metricas', nombre: 'Métricas', que: 'Capa semántica: cada cifra cuadra con el libro' },
 ];
 
-export function Inicio({ yo, arbol, espera }: { yo: Yo; arbol: NodoArbol[]; espera: Pendiente[] }) {
+export function Inicio({ yo, arbol, espera, resumen }: { yo: Yo; arbol: NodoArbol[]; espera: Pendiente[]; resumen: string }) {
   const workspaces = arbol.filter((n) => n.tipo === 'workspace');
   const de = (ws: string) => {
     const doms = arbol.filter((n) => n.padre === ws);
@@ -72,6 +72,9 @@ export function Inicio({ yo, arbol, espera }: { yo: Yo; arbol: NodoArbol[]; espe
           ))}
         </div>
       </section>
+      <p className="text-[11.5px] text-slate-500" data-resumen-agenda>
+        Lo que Ágora le cuenta a tu agenda (solo conteos y enlaces, validado por la capa; no sale de la máquina): {resumen}
+      </p>
     </div>
   );
 }

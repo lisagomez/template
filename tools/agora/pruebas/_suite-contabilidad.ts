@@ -6,7 +6,7 @@
  */
 import { z } from 'zod'
 import { assert, rechaza, persona, nodo, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
-import { cierraPeriodo } from '../dist/index.js'
+import { cierraPeriodo, atestigua } from '../dist/index.js'
 
 /** El contrato de ERP-5B §5B.3 (ctb_poliza + ctb_movimiento), tal como lo exporta Ágora. */
 export const ContratoPoliza = z.strictObject({
@@ -23,6 +23,7 @@ export const ContratoPoliza = z.strictObject({
 const cierra = async (c: Ctx) => {
   const [ya] = await c.base.consulta<{ id: string }>(`select id from agora.poliza where periodo = '2026-09' and org_id = $1`, [GOLFO])
   if (ya) return ya.id
+  await atestigua({ base: c.base, secreto: SECRETO }, persona('mariana'), ['cierra los costos de septiembre de 2026']) // lo dijo en la conversación
   return (await cierraPeriodo({ base: c.base, secreto: SECRETO }, persona('mariana'), { org: GOLFO, periodo: '2026-09', cita: 'cierra los costos de septiembre de 2026' })).poliza!
 }
 const exporta = async (c: Ctx, pid: string) => (await c.comoPersona('sofia', (s) => s.consulta<{ e: unknown; h: string }>('select agora.exporta_poliza($1) e, agora.huella_poliza($1) h', [pid])))[0]!

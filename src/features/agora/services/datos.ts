@@ -24,7 +24,10 @@ export const datosDeAgora = cache(async (): Promise<DatosDeAgora> => {
     const fechas = await s.consulta<{ id: string; nombre: string; fin: string; categoria: string; version: number }>(
       `select i.id, i.nombre, i.fin::text fin, n.nombre categoria, i.version_fecha version from agora.item i join agora.nodo n on n.id = i.categoria_id
         where i.fin is not null and i.estado <> 'done' and i.fin between current_date - 7 and current_date + 45 order by i.fin limit 40`);
-    const cierres = (await s.consulta<{ periodo: string }>(`select periodo from agora.periodo where estado = 'abierto' or periodo >= to_char(current_date - 62, 'YYYY-MM') order by periodo`)).map((x) => x.periodo);
+    // Por cerrar: un mes ya vencido, con movimiento en el libro y sin cerrar (el mismo criterio que el vigía).
+    const cierres = (await s.consulta<{ periodo: string }>(`select distinct v.periodo from agora.v_centro_periodo v
+        where v.periodo < to_char(now() at time zone 'America/Mexico_City', 'YYYY-MM')
+          and not exists (select 1 from agora.periodo p where p.org_id = v.org_id and p.periodo = v.periodo and p.estado = 'cerrado') order by 1`)).map((x) => x.periodo);
     return { yo: quien, arbol: await arbol(s), espera: await esperaTuClic(s), periodo: hoy!.periodo, hoy: hoy!.hoy, fechas, cierres };
   });
   if (!r.ok) return { apagada: true, motivo: r.motivo };

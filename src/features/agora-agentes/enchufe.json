@@ -17,21 +17,21 @@
     {
       "id": "agora-agentes.suspende",
       "queHace": "Suspender a un agente (se reactiva después).",
-      "ejemplos": ["suspende a medios norte", "congela al agente de fletes", "pausa a empaques regio"],
+      "ejemplos": ["suspende al agente", "congela a un socio externo", "pausa al agente mientras lo revisamos"],
       "efecto": "escribe",
       "irreversible": false
     },
     {
       "id": "agora-agentes.revoca",
       "queHace": "Revocar a un agente: corta en su siguiente llamada y no tiene vuelta atrás.",
-      "ejemplos": ["revoca a fletes del golfo", "revoca al socio de medios", "da de baja definitiva al agente"],
+      "ejemplos": ["revoca al socio", "revoca el acceso del agente", "da de baja definitiva al agente"],
       "efecto": "escribe",
       "irreversible": true
     },
     {
       "id": "agora-agentes.avisa-tercero",
       "queHace": "Avisar a un socio externo (sale de la organización).",
-      "ejemplos": ["avisa a medios norte que se cancela la pauta", "manda un aviso al socio de fletes", "envía el aviso al despacho fiscal"],
+      "ejemplos": ["avisa al socio que se cancela la pauta", "manda un aviso al tercero", "envía el aviso al despacho"],
       "efecto": "escribe",
       "irreversible": true
     }

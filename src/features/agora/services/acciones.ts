@@ -84,12 +84,14 @@ export async function registraEjercido(entrada: agora.CostoNuevo) {
   return corre((e, p) => agora.registraCosto(e, p, d));
 }
 
-export async function cierraPeriodoConCita(entrada: { periodo: string; cita: string }) {
-  const d = z.object({ periodo: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/), cita: z.string().min(8).max(500) }).parse(entrada);
-  return corre(async (e, p) => {
-    const org = (await e.base.consulta<{ org_id: string }>('select org_id from agora.persona where id = $1', [p]))[0]!.org_id;
-    return agora.cierraPeriodo(e, p, { org, periodo: d.periodo, cita: d.cita });
-  });
+/**
+ * Lo que la persona dijo en la conversación de la capa, atestiguado en la base (solo su huella y la hora de la base):
+ * cerrar, revocar, quitar la segregación o avisar a un tercero exigen después una cita que coincida, de un solo uso y
+ * de hace 15 minutos o menos. Lo irreversible NO tiene acción propia aquí: solo llega por el freno de la conversación.
+ */
+export async function atestiguaLoDicho(entrada: { textos: string[] }) {
+  const d = z.object({ textos: z.array(z.string().max(2000)).min(1).max(10) }).parse(entrada);
+  return corre((e, p) => agora.atestigua(e, p, d.textos), false);
 }
 
 export async function decideLaPoliza(entrada: { poliza: string; sha256: string; decision: 'acepta' | 'devuelve'; motivo?: string }) {
@@ -107,11 +109,6 @@ export async function reactivaAgente(entrada: { agente: string; motivo: string }
   return corre((e, p) => agora.reactiva(e, p, d.agente, d.motivo));
 }
 
-export async function revocaAgenteConCita(entrada: { agente: string; motivo: string; cita: string }) {
-  const d = z.object({ agente: Uuid, motivo: z.string().min(3).max(300), cita: z.string().min(8).max(500) }).parse(entrada);
-  return corre((e, p) => agora.revoca(e, p, d.agente, d.motivo, d.cita));
-}
-
 export async function bajaTopeDe(entrada: { agente: string; tope: 'gasto' | 'mensajes' | 'propuestas'; valor: number }) {
   const d = z.object({ agente: Uuid, tope: z.enum(['gasto', 'mensajes', 'propuestas']), valor: z.number().nonnegative() }).parse(entrada);
   return corre((e, p) => agora.bajaTope(e, p, d.agente, d.tope, d.valor));
@@ -120,14 +117,6 @@ export async function bajaTopeDe(entrada: { agente: string; tope: 'gasto' | 'men
 export async function deshazCambio(historial: number) {
   const id = z.number().int().positive().parse(historial);
   return corre((e, p) => agora.deshaz(e, p, id));
-}
-
-export async function quitaSegregacionConCita(cita: string) {
-  const c = z.string().min(8).max(500).parse(cita);
-  return corre(async (e, p) => {
-    const org = (await e.base.consulta<{ org_id: string }>('select org_id from agora.persona where id = $1', [p]))[0]!.org_id;
-    return agora.cambiaSegregacion(e, p, org, false, c);
-  });
 }
 
 /** Lee el disponible de una categoría este mes (lo calcula el libro, no la pantalla). */

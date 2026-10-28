@@ -89,7 +89,10 @@ export const PUERTA: Comprobacion[] = [
       const s = socio('fletes-golfo')
       ok(await llamaComoSocio(c.base, SECRETO, 'fletes-golfo'))
       const token = tokenDeSocio(s, 'golfo-norte', { vidaS: 300 })
-      await c.comoPersona('paula', (x) => x.consulta(`select agora.revoca_agente($1, 'prueba de revocación', 'revoca a fletes del golfo')`, [agente('fletes-golfo')]))
+      await c.comoPersona('paula', async (x) => {
+        await x.consulta('select agora.atestigua($1::text[])', [['revoca a fletes del golfo']]) // lo dijo Paula en la conversación
+        await x.consulta(`select agora.revoca_agente($1, 'prueba de revocación', 'revoca a fletes del golfo')`, [agente('fletes-golfo')])
+      })
       noExiste(await llamaComoSocio(c.base, SECRETO, 'fletes-golfo', { token }), 'revocad')
       noExiste(await llamaComoSocio(c.base, SECRETO, 'fletes-golfo'))
       const [v] = await c.base.consulta<{ llamadas: number }>(`select llamadas from agora.v_llamadas_tras_revocar where agente_id = $1`, [agente('fletes-golfo')])
