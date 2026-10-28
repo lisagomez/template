@@ -129,9 +129,32 @@ export const COORDINADOR: Comprobacion[] = [
       assert.equal(a.propuesta, b.propuesta)
     },
   },
+  {
+    fase: 'coordinador', nombre: 'el estado del grafo es de su agente: otro agente (interno o de otra organización) no ocupa el hilo del coordinador', tipo: 'conducta',
+    async corre(c) {
+      const m = contado()
+      const msg = await escribe(c, 'daniel', 'pipeline', 'Coordinador, mueve las visitas a 12 cadenas 5 días: el mapeo va lento.')
+      const thread = `categoria:${nodo('pipeline')}:hilo:${msg}:mensaje:${msg}`
+      // El analista (interno) y el coordinador de Bajío escriben primero los pasos del hilo del coordinador de Golfo…
+      for (const quien of ['analista', 'bj-coordinador']) {
+        await c.comoAgente(quien, (s) => s.consulta(`insert into agora.grafo_punto (org_id, thread_id, paso, nodo, estado, agente_id) select agora_priv.org_de_agente(), $1, p, 'aprobacion', '{}', $2 from generate_series(1, 7) p`,
+          [thread, agente(quien)]))
+      }
+      // …y el coordinador igual atiende el pedido de Daniel con SU propuesta, una sola llamada al modelo.
+      const r = await atiende(opciones(c, m), msg)
+      assert.equal(r.estado, 'esperando', JSON.stringify(r))
+      assert.equal(m.llamadas, 1)
+      const [p] = await c.base.consulta<{ autor_agente: string }>('select autor_agente from agora.propuesta where id = $1', [(r as { propuesta: string }).propuesta])
+      assert.equal(p!.autor_agente, agente('coordinador'), 'el coordinador quedó esperando la propuesta de otro agente')
+      const r2 = await atiende(opciones(c, m), msg)
+      assert.equal(m.llamadas, 1, 'un reintento volvió a cobrar el modelo')
+      assert.equal((r2 as { propuesta?: string }).propuesta, (r as { propuesta: string }).propuesta)
+    },
+  },
 ]
 
 export const SABOTAJES_COORDINADOR: Sabotaje[] = [
+  { fase: 'coordinador', nombre: 'C5 · el estado del grafo vuelve a ser de cualquiera (hilo y paso, sin agente ni organización)', sql: `drop index agora.grafo_punto_dueno; create unique index grafo_punto_cualquiera on agora.grafo_punto (thread_id, paso);`, caza: /estado del grafo es de su agente/ },
   { fase: 'coordinador', nombre: 'C1 · la propuesta del agente nace aprobada', sql: `create or replace function agora_priv.propuesta_coherente() returns trigger language plpgsql set search_path = '' as $$ begin new.estado := 'aprobada'; return new; end $$;
       create or replace function agora_priv.firmas_completas(pid uuid) returns boolean language sql stable as $$ select true $$;`, caza: /resume falsificado|se detiene/ },
   { fase: 'coordinador', nombre: 'C2 · la guardia de gasto siempre deja pasar', sql: `create or replace function agora.puede_llamar_modelo(aid uuid) returns jsonb language sql stable as $$ select '{"ok": true}'::jsonb $$;`, caza: /sin presupuesto no se llama/ },

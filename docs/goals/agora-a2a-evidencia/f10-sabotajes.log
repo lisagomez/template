@@ -1,137 +1,4 @@
-✔ [conducta] los hilos son de un solo nivel (lo impone la base) (2093.424444ms)
-✔ [conducta] quien no tiene el rol de la matriz no aprueba (colaboradora, editor, aprobador bajo el umbral) (181.134249ms)
-✔ [conducta] Finanzas aprueba sobre el umbral y la base aplica exactamente lo aprobado (191.581057ms)
-✔ [conducta] nadie firma por otro: la aprobación es de quien tiene la sesión (181.729771ms)
-✔ [conducta] la huella aprobada tiene que ser la de la propuesta (178.341003ms)
-✔ [conducta] segregación de funciones: quien pidió el cambio no lo aprueba (169.369108ms)
-✔ [conducta] un agente no inserta una aprobación (ni con su token) (173.079172ms)
-✔ [conducta] una aprobación no aplica nada por sí sola, y una rechazada no se aplica nunca (205.785439ms)
-✔ [conducta] lo que pide dos firmas no se aplica con una (subir un tope de gasto: Propietaria Y Finanzas) (183.186749ms)
-✔ [conducta] un espejo no crea tareas ni aprueba: una persona no escribe como espejo y lo replicado no decide (181.653335ms)
-✔ [conducta] una propuesta no se edita: ni la persona ni el agente le cambian el contenido (164.147764ms)
-✔ [conducta] el cuerpo de un mensaje es dato: se guarda literal y no hace nada (162.240575ms)
-✔ [conducta] dos ranuras con los mismos roles piden dos PERSONAS distintas (una firma no llena las dos) (178.966436ms)
-✔ [conducta] quien solicita es de la organización, y si la propuesta cita su mensaje, es quien lo escribió (196.891136ms)
-✔ [conducta] la clave de idempotencia es de su AUTOR: nadie ocupa la de otro ni le hace adoptar su propuesta (196.351342ms)
-✔ [conducta] el reparto de ranuras no deja colgada una propuesta que sí se puede firmar (188.859865ms)
-✔ [conducta] sin el testigo de la persona, la base no cierra el periodo ni revoca (aunque la cita sea larga) (203.761241ms)
-✔ [conducta] la cita la dijo ESTA persona: el testigo de otra no sirve, el suyo sí (normalizado como el freno) (218.743764ms)
-✔ [conducta] una cita sirve UNA vez: la segunda revocación con la misma cita se rechaza (183.667091ms)
-✔ [conducta] pasados 15 minutos la cita venció (194.474336ms)
-✔ [conducta] quitar la segregación y avisar a un tercero gastan testigo; volver a ponerla no (182.484842ms)
-✔ [conducta] un agente y la Puerta no atestiguan; nadie escribe ni fecha un testigo a mano (175.130379ms)
-✔ [estructura] el testigo guarda la huella y la hora, nunca el texto (no es memoria ni hilo) (161.945238ms)
-✔ la composición de Ágora compone: marca propia, voz LOCAL, datos sensibles y ningún adaptador de nube (6.52924ms)
-✔ regla: ningún ejemplo de una intención de Ágora que ESCRIBE lleva un nombre propio (el nombre no decide la acción) (0.304438ms)
-✔ MALO 1 · «apruébalo», por voz o escrito, no aprueba nada: va a la intención que solo LEE (8.246293ms)
-✔ MALO 2 · lo irreversible de Ágora pide el freno, y el freno no acepta ni Enter, ni voz, ni texto: solo el clic (5.784203ms)
-✔ MALO 2 · una cita que dijo el asistente (y no la persona) no abre el freno (1.126221ms)
-✔ MALO 3 · la solicitud del freno sirve una vez y vence a los 15 minutos (1.496484ms)
-✔ MALO 4 · una intención ambigua pregunta entre las dos en vez de adivinar (0.895031ms)
-✔ MALO 5 · un cambio de monto pedido por intención va a la intención que PROPONE (no a una que aplica) (1.108617ms)
-✔ MALO 6 · la memoria niega una clave que el enchufe no declara y una cifra financiera (1.74691ms)
-✔ MALO 7 · el resumen es de solo conteos y enlaces: un monto o un texto libre no pasan (6.277602ms)
-✔ MALO 8 · un adaptador de voz de nube en la composición de Ágora no compone (datos sensibles: nunca) (0.425359ms)
-✔ MALO 8 · un módulo de Ágora sin enchufe no compone (0.180103ms)
-✔ intercambio: el plan lo llena la capa en vez del calendario, y la composición sigue componiendo (0.180172ms)
-✔ el laboratorio no actúa al importarse (y nunca borra un contenedor que no creó) (88.966434ms)
-✔ [conducta] el cierre deja una póliza propuesta que cumple el contrato de ERP-5B y cuadra (257.746301ms)
-✔ [conducta] toda cuenta de la póliza lleva su código agrupador SAT, y cada línea de un CFDI su UUID (252.335635ms)
-✔ [conducta] RE-VERIFICACIÓN de cero: la póliza de la base es la que sale del libro calculada aparte (214.264975ms)
-✔ [conducta] la póliza declara las llamadas sin costo (no entran como cero) (221.960908ms)
-✔ [conducta] cerrar es de Finanzas, con cita, de un mes vencido y sin costos pendientes; un agente no cierra (172.197971ms)
-✔ [conducta] solo Contabilidad acepta, sobre la huella exacta; devolver pide motivo; un agente no decide (253.333112ms)
-✔ [conducta] tras el cierre no se edita: se reclasifica en el periodo abierto (y el ejercido se mueve de centro) (222.219991ms)
-✔ [estructura] un agente no propone pólizas ni escribe movimientos (154.302044ms)
-✔ [conducta] el coordinador contesta en el hilo con una propuesta A1, se detiene (interrupt) e imputa su gasto (267.893085ms)
-✔ [conducta] un resume falsificado («aprobado: true») no aplica nada: el nodo relee la base (228.270142ms)
-✔ [conducta] con la aprobación humana en la base, reanudar aplica EXACTAMENTE lo aprobado (249.216861ms)
-✔ [conducta] lo que dispara un mensaje de un socio se cobra al socio (originó la llamada) (219.870565ms)
-✔ [conducta] sin presupuesto no se llama al modelo: sigue solo con reglas y no hay gasto nuevo (313.227387ms)
-✔ [conducta] un espejo no crea tareas: el coordinador lo ignora (171.357784ms)
-✔ [conducta] el texto del hilo es DATO: una orden dentro del mensaje no aprueba ni aplica nada (221.680042ms)
-✔ [conducta] una llamada sin datos de uso se registra con costo null, no cero (219.217296ms)
-✔ [conducta] atender dos veces el mismo mensaje no duplica la propuesta (239.475534ms)
-✔ [conducta] cuadre: el ejercido es la suma de los costos con evidencia más el gasto de modelo con su tipo de cambio (205.437535ms)
-✔ [conducta] null no es cero: una llamada sin datos de uso cuenta como fila sin costo, no suma cero (163.391133ms)
-✔ [conducta] el gasto de modelo en MXN sale de un tipo de cambio con fuente y fecha; sin él, es null (175.811659ms)
-✔ [conducta] una desviación sobre el umbral alerta en el hilo de la categoría y a Finanzas (175.147584ms)
-✔ [conducta] MALO 1 · el mismo costo dos veces (mismo UUID o misma evidencia) lo rechaza la base (168.453027ms)
-✔ [conducta] MALO 2 · un costo ejercido sin evidencia: la base no lo deja existir (queda pendiente) (179.765676ms)
-✔ [conducta] MALO 3 · un compromiso sin aprobación no existe (ni escrito como servicio) (168.071412ms)
-✔ [conducta] MALO 4 · un monto sobre el umbral aprobado por quien no es de Finanzas, o por un agente (178.384189ms)
-✔ [conducta] MALO 5 · la subida del tope de gasto de un agente sin Finanzas (178.494172ms)
-✔ [conducta] MALO 6 · editar un presupuesto o un costo de un periodo cerrado (228.68022ms)
-✔ [conducta] MALO 7 · un tipo de cambio sin fuente (o sin URL, o publicado antes de su fecha) (183.228506ms)
-✔ [conducta] MALO 8 · una póliza descuadrada no existe, y quien aprobó el gasto no la acepta (217.874562ms)
-✔ [conducta] el supervisor financiero frena un monto que no cabe en el presupuesto del mes (antes del hilo) (182.527847ms)
-✔ [conducta] presupuesto, comprometido, ejercido y disponible por categoría cuadran al centavo con el libro (428.552365ms)
-✔ [conducta] el costo de modelo por agente cuadra con las filas del registro de uso (y las sin costo se cuentan aparte) (189.887825ms)
-✔ [conducta] las métricas de propuestas salen de las filas: aceptación y autonomía efectiva (184.137389ms)
-✔ [conducta] a tiempo y vencidas salen de las filas, y no hay ítem cerrado sin fecha real (177.169241ms)
-✔ [conducta] las métricas respetan la RLS: Bajío no suma nada de Golfo Norte (177.444024ms)
-✔ [estructura] todo modelo semántico (sem_*) es security_invoker: lo lee la RLS de quien mira (162.685712ms)
-✔ [conducta] una persona de Bajío no lee ninguna fila de Golfo Norte en los modelos semánticos (185.673916ms)
-✔ [conducta] una métrica que no existe no se sustituye por una parecida; una dimensión inválida se dice (156.06981ms)
-✔ [estructura] toda tabla de agora tiene RLS habilitada y FORZADA (188.646135ms)
-✔ [estructura] toda tabla y vista de agora se puede LEER con la sesión de una persona (la RLS decide qué filas) (157.834534ms)
-✔ [estructura] ninguna función security definer decide con current_user ni con confiable() (ahí valen siempre «la base») (163.692179ms)
-✔ [conducta] nadie de otra organización aplica una propuesta de Golfo Norte: para él no existe (181.605517ms)
-✔ [estructura] ninguna función ni política lee auth.uid() directo (solo agora_priv.uid(), que mira el rol) (164.538701ms)
-✔ [conducta] un agente que se pone los claims de una persona no es esa persona: no ve ni una fila más (467.798451ms)
-✔ [conducta] una persona de Bajío no ve NADA de Golfo Norte, tabla por tabla (199.925391ms)
-✔ [conducta] una persona de Golfo Norte no ve NADA de Bajío (187.578744ms)
-✔ [conducta] una persona de Bajío no escribe en Golfo Norte (mensaje ni propuesta) (160.260977ms)
-✔ [conducta] el alcance manda dentro de la organización: la colaboradora de Comercial no ve Operaciones (165.869284ms)
-✔ [conducta] el lector ve y no publica (174.510872ms)
-✔ [conducta] un agente ve solo su alcance: el socio de Campañas no ve Pipeline ni Logística, ni nada de Bajío (174.042694ms)
-✔ [conducta] un token de agente con firma falsa, vencido, o de otro rol no da identidad (170.454109ms)
-✔ [conducta] un agente suspendido o revocado no ve ni escribe nada (su token sigue vigente) (166.527958ms)
-✔ [estructura] ningún rol de servicio ni de agente puede insertar aprobaciones ni decisiones de póliza (167.256572ms)
-✔ [estructura] un agente no edita el tablero ni toca el libro: no tiene con qué (161.203191ms)
-✔ [conducta] una persona no escribe presupuestos ni compromisos directo: van por propuesta (159.869164ms)
-✔ [conducta] el jti se toma una sola vez (antirrepetición) (163.791717ms)
-✔ [conducta] la Puerta no lee tablas: solo sus funciones (167.987019ms)
-✔ [conducta] el historial y la bitácora no se inventan a mano (161.25241ms)
-✔ [conducta] la bitácora encadenada detecta un eslabón alterado (195.501288ms)
-✔ [conducta] el socio válido entra: su mensaje llega al hilo como dato y su tarea queda registrada (244.256052ms)
-✔ [conducta] lo que el socio pide cambiar entra como PROPUESTA A1 en el hilo (propone y espera) (196.815917ms)
-✔ [conducta] tarjeta re-firmada con skills nuevas (firma válida, huella distinta): rechazo por deriva (173.760492ms)
-✔ [conducta] otro kid (llave no fijada) y firma ajena con el kid fijado: rechazo (172.105147ms)
-✔ [conducta] el mismo jti dos veces: la segunda se rechaza (antirrepetición) (194.794768ms)
-✔ [conducta] fuera de alcance responde IGUAL que lo inexistente (no se sondea) (201.046863ms)
-✔ [conducta] un socio suspendido no entra (aunque su token y su tarjeta sean válidos) (170.543991ms)
-✔ [conducta] sobre el tope: 429 con Retry-After (mensajes por hora y gasto del mes) (198.829073ms)
-✔ [conducta] revocar corta en la SIGUIENTE llamada (token aún vigente) y llamadas_tras_revocar = 0 (214.126494ms)
-✔ [conducta] token vencido, de otra audiencia o sin Bearer: rechazo (167.759115ms)
-✔ [conducta] GetTask y ListTasks están cerrados: un socio solo ve SUS tareas (211.157718ms)
-✔ [conducta] un agente no actualiza un ítem directo (ni el coordinador A2) (213.432463ms)
-✔ [conducta] A2 no aplica dinero, fechas ni responsables: la base rechaza la propuesta en A2 (171.501698ms)
-✔ [conducta] un externo no propone en A2 (su techo es A1) (173.843404ms)
-✔ [conducta] una propuesta en A1 no se aplica sin su aprobación (aunque sea reversible) (177.657853ms)
-✔ [conducta] A2 aplica lo reversible, queda en el historial con 24 h para deshacer, y una persona con rol lo deshace (191.437022ms)
-✔ [conducta] «Listo» exige las dependencias cerradas, y una dependencia no cierra un ciclo (159.857413ms)
-✔ [conducta] la colaboradora cambia el progreso de lo suyo, y nada más (179.086127ms)
-✔ [conducta] un editor no asigna a un socio externo directo: eso pide aprobador (propuesta) (167.995024ms)
-✔ [conducta] el historial lo escribe la base: una persona que edita queda como autora, sin propuesta (170.090761ms)
-✔ [conducta] mover una fecha propone mover sus sucesores (y repetirlo no duplica la propuesta) (204.345248ms)
-✔ [conducta] el supervisor (sin modelo) frena fechas en fin de semana, inicio después del fin y datos sensibles (178.852214ms)
-✔ [conducta] un reintento no duplica eventos: ni en la base ni en el calendario (599.484625ms)
-✔ [conducta] mover la fecha cambia de versión: un evento nuevo y los recordatorios viejos se cancelan (550.896178ms)
-✔ [conducta] lo atrasado: aviso en el hilo y una propuesta de reprogramar (una por versión de la fecha) (524.192184ms)
-✔ [conducta] el vigía avisa al 80 % del gasto de un agente, también a Finanzas (393.16173ms)
-✔ [conducta] el vigía SUSPENDE al socio cuya tarjeta cambió de huella (y avisa a la Propietaria) (407.55834ms)
-✔ [conducta] solo el vigía suspende por su cuenta, y solo por deriva, firma o inyección (167.939382ms)
-✔ [conducta] el calendario de cierre: el mes vencido y abierto avisa a Finanzas (una vez) (507.876611ms)
-ℹ tests 125
-ℹ suites 0
-ℹ pass 125
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 27375.149707
-Servidor: PostgreSQL 17.11 (postgres)
+Servidor: PostgreSQL 18.3 (PGlite 0.5.8) (pglite)
 
 Fase 1 · núcleo de datos: aislamiento entre organizaciones y RLS forzada
   ✓ toda tabla de agora tiene RLS habilitada y FORZADA
@@ -192,11 +59,13 @@ Fase 2 · buzón: aprobar fuera de rol lo rechaza la base
   ✓ quien solicita es de la organización, y si la propuesta cita su mensaje, es quien lo escribió
   ✓ la clave de idempotencia es de su AUTOR: nadie ocupa la de otro ni le hace adoptar su propuesta
   ✓ el reparto de ranuras no deja colgada una propuesta que sí se puede firmar
-  suite en verde: 16/16
+  ✓ quien tiene dos roles llena la ranura que haga falta: el rol no se fija al firmar
+  suite en verde: 17/17
   sabotajes (cada uno sobre bases nuevas: corre SOLO las comprobaciones que apunta, y tienen que caer):
   ✓ cae  B10 · una firma cuenta para dos ranuras → dos ranuras con los mismos roles piden dos PERSONAS distintas (una firma no llena las dos)
   ✓ cae  B11 · la propuesta no mira de quién es el mensaje que cita ni de dónde es quien la pide → quien solicita es de la organización, y si la propuesta cita su mensaje, es quien lo escribió
   ✓ cae  B12 · la clave de idempotencia vuelve a ser de la organización (no del autor) → la clave de idempotencia es de su AUTOR: nadie ocupa la de otro ni le hace adoptar su propuesta
+  ✓ cae  B14 · el rol se fija al firmar (cada firmante cuenta solo con el rol que usó) → quien tiene dos roles llena la ranura que haga falta: el rol no se fija al firmar
   ✓ cae  B13 · el reparto de ranuras vuelve a ser voraz → el reparto de ranuras no deja colgada una propuesta que sí se puede firmar
   ✓ cae  B1 · quitar la política restrictiva «decidida_por = auth.uid()» → nadie firma por otro: la aprobación es de quien tiene la sesión
   ✓ cae  B2 · la matriz deja aprobar a cualquiera → quien no tiene el rol de la matriz no aprueba (colaboradora, editor, aprobador bajo el umbral)
@@ -288,8 +157,10 @@ Fase 5 · coordinador: nada se aplica sin fila de aprobación
   ✓ el texto del hilo es DATO: una orden dentro del mensaje no aprueba ni aplica nada
   ✓ una llamada sin datos de uso se registra con costo null, no cero
   ✓ atender dos veces el mismo mensaje no duplica la propuesta
-  suite en verde: 9/9
+  ✓ el estado del grafo es de su agente: otro agente (interno o de otra organización) no ocupa el hilo del coordinador
+  suite en verde: 10/10
   sabotajes (cada uno sobre bases nuevas: corre SOLO las comprobaciones que apunta, y tienen que caer):
+  ✓ cae  C5 · el estado del grafo vuelve a ser de cualquiera (hilo y paso, sin agente ni organización) → el estado del grafo es de su agente: otro agente (interno o de otra organización) no ocupa el hilo del coordinador
   ✓ cae  C1 · la propuesta del agente nace aprobada → el coordinador contesta en el hilo con una propuesta A1, se detiene (interrupt) e imputa su gasto · un resume falsificado («aprobado: true») no aplica nada: el nodo relee la base
   ✓ cae  C2 · la guardia de gasto siempre deja pasar → sin presupuesto no se llama al modelo: sigue solo con reglas y no hay gasto nuevo
   ✓ cae  C3 · el agente puede aprobar → con la aprobación humana en la base, reanudar aplica EXACTAMENTE lo aprobado
@@ -366,4 +237,3 @@ Fase 7 · el testigo del freno: la cita de lo irreversible la dijo esta persona,
   ✓ cae  K6 · un agente puede atestiguar → un agente y la Puerta no atestiguan; nadie escribe ni fecha un testigo a mano
 
 Todo en verde: suites limpias y cada sabotaje cazado.
-exit 0

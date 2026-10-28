@@ -88,6 +88,38 @@ Las pruebas nuevas, cada una con su sabotaje: «el mensaje de origen es el de un
 categoría» (dentro de la prueba del solicitante, B11), «la clave de idempotencia es de su AUTOR» (B12) y «el reparto de
 ranuras no deja colgada una propuesta que sí se puede firmar» (B13).
 
+## Tercera pasada (sobre `2179687`)
+
+| Paso | Resultado del verificador |
+| --- | --- |
+| `npm ci` + `npm run validate` sin construir nada | `✓ tools/agora · ✓ tools/calendario · ✓ tools/capa construidas · Gobernanza cableada: 171/171 · ▸ tools/agora ✓ 125 pruebas · pasaron: 34 · inactivos declarados: 11 · rojos: 0 · Gate validate en VERDE: 34/34` |
+| La suite de Ágora sola, en OTRO clon limpio (sin ningún `dist/`) | `# tests 125 # pass 125 # fail 0` (antes 110/111) |
+| `sabotajes` | 81 caen, 0 «NO cae» (B10 a B13 incluidos) |
+
+| Ataque | Resultado | Control |
+| --- | --- | --- |
+| A1, A1b, A2 | sin una fila más | aguantan |
+| C3 (saludo de otra categoría), C4 (mensaje propio) | `el mensaje de origen es el de una persona en el hilo de la misma categoría` | aguantan |
+| E (un socio ocupa la clave del coordinador) | el coordinador liga SU propuesta | aguanta |
+| D'' (`[[administrador,propietario],[propietario]]`) | `aprobada` con dos firmas | aguanta |
+| C1'-a (sin citar) y **C5 (cita a otra persona del mismo hilo)** | Mariana aprobó lo que pidió | **cae** (declarado: el agente elige qué cita) |
+| **E2: el analista (interno) escribe los pasos del hilo del coordinador** | el coordinador quedó esperando la propuesta del analista; el pedido de Daniel no se atendió | **cayó** |
+| **E3: el coordinador de Bajío escribe los pasos con el hilo de Golfo** | Golfo perdió su estado y un reintento **cobró el modelo dos veces** | **cayó** |
+| **D''': `[[finanzas],[aprobador]]`, firma primero quien tiene los dos roles** | eligió «aprobador» (orden alfabético) y la otra persona ya no pudo firmar | **cayó** (falla cerrado) |
+| `--apaga` | la guarda nueva solo exige *alguna* clave en el entorno, no la del contenedor | informativo |
+
+Qué se hizo:
+- **E2 y E3 — arreglado:** el estado del grafo es único por organización, agente, hilo y paso, y el coordinador solo
+  lee sus propios puntos. Prueba en el coordinador: «el estado del grafo es de su agente…» (sabotaje C5); el reintento
+  no vuelve a cobrar el modelo.
+- **D''' — arreglado:** cada firmante entra a la asignación con TODOS sus roles (`agora_priv.firmantes_de`); el rol se
+  elige para que la asignación completa siga siendo posible. Prueba «quien tiene dos roles llena la ranura que haga
+  falta» (sabotaje B14).
+- **`--apaga` — arreglado:** la clave del entorno tiene que ABRIR el contenedor; si no, no lo borra (salvo `--huerfano`).
+- **C5 — declarado** con C1'-a (`lo-que-podria-estar-mal.md`, punto 28): la base no puede saber si el mensaje citado
+  es el que de verdad pidió el cambio. Cierra solo si la propuesta del agente nace del mensaje en la base, no en el
+  código del agente: es la propuesta abierta.
+
 ## La re-corrida después de los arreglos
 
 (Se agrega abajo al terminar: las suites, los sabotajes en PGlite y en PostgreSQL 17.11 y el `validate` tras el último

@@ -204,6 +204,20 @@ export const BUZON: Comprobacion[] = [
       assert.equal(e!.estado, 'aprobada', 'Paula ocupó la ranura que Luis podía llenar y la propuesta quedó colgada')
     },
   },
+  {
+    fase: 'buzon', nombre: 'quien tiene dos roles llena la ranura que haga falta: el rol no se fija al firmar', tipo: 'conducta',
+    async corre(c) {
+      // Mariana es Finanzas y aprobadora en Finanzas; Jorge, solo aprobador. Firma primero Mariana.
+      await c.base.consulta(`update agora.matriz_regla set firmas = '[["finanzas"],["aprobador"]]' where org_id = $1 and clase = 'tope_gasto'`, [GOLFO])
+      await c.base.consulta(`insert into agora.membresia (persona_id, org_id, rol, nodo_id) values ($1, $2, 'aprobador', $3)`, [persona('jorge'), GOLFO, nodo('fin')])
+      const p = await c.comoPersona('paula', (s) => propone(s, { org: GOLFO, autorPersona: persona('paula'), resumen: 'subir el tope del analista',
+        payload: { version: 1, clase: 'tope_gasto', categoria: nodo('presupuesto'), agente: agente('analista'), tope: 'gasto', antes: 800, despues: 1200 } }))
+      await c.comoPersona('mariana', (s) => decide(s, { org: GOLFO, propuesta: p.id, sha256: p.sha256, persona: persona('mariana'), decision: 'aprobar' }))
+      await c.comoPersona('jorge', (s) => decide(s, { org: GOLFO, propuesta: p.id, sha256: p.sha256, persona: persona('jorge'), decision: 'aprobar' }))
+      const [e] = await c.base.consulta<{ estado: string }>('select estado from agora.propuesta where id = $1', [p.id])
+      assert.equal(e!.estado, 'aprobada', 'el rol de Mariana se fijó al firmar y la ranura de Finanzas quedó sin quien la llene')
+    },
+  },
 ]
 
 const reemplazaFn = (sql: string) => sql
@@ -216,6 +230,8 @@ export const SABOTAJES_BUZON: Sabotaje[] = [
       end loop; return true; end $$;`, caza: /dos PERSONAS distintas/ },
   { fase: 'buzon', nombre: 'B11 · la propuesta no mira de quién es el mensaje que cita ni de dónde es quien la pide', sql: `alter table agora.propuesta disable trigger tg_propuesta_coherente;`, caza: /quien solicita es de la organización/ },
   { fase: 'buzon', nombre: 'B12 · la clave de idempotencia vuelve a ser de la organización (no del autor)', sql: `drop index agora.propuesta_autor_clave; create unique index propuesta_org_clave on agora.propuesta (org_id, clave);`, caza: /clave de idempotencia es de su AUTOR/ },
+  { fase: 'buzon', nombre: 'B14 · el rol se fija al firmar (cada firmante cuenta solo con el rol que usó)', sql: `create or replace function agora_priv.firmantes_de(p agora.propuesta) returns jsonb language sql stable security definer set search_path = '' as $$
+      select coalesce(jsonb_agg(jsonb_build_array(a.rol_usado) order by a.decidida_en), '[]'::jsonb) from agora.aprobacion a where a.propuesta_id = p.id and a.decision = 'aprobar' and a.sha256 = p.sha256 $$;`, caza: /dos roles llena la ranura/ },
   { fase: 'buzon', nombre: 'B13 · el reparto de ranuras vuelve a ser voraz', sql: `create or replace function agora_priv.ranura_para(p agora.propuesta, persona uuid) returns text language plpgsql stable security definer set search_path = '' as $$
       declare r agora.matriz_regla := agora_priv.regla_de(p); roles text[] := agora_priv.roles_de(persona, p.org_id, p.categoria_id); ranura jsonb; rol text; usadas text[]; begin
       if r.id is null then return null; end if;

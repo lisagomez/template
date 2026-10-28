@@ -18,6 +18,11 @@ create table if not exists agora.grafo_punto (
   creado_en    timestamptz not null default now(),
   unique (thread_id, paso)
 );
+-- El estado del grafo es de SU agente y de su organización: otro agente (interno, o de otra organización con los mismos
+-- ids) no ocupa los pasos del coordinador (2026-10-28, tercera pasada del verificador: secuestraba el hilo, o hacía
+-- que el coordinador perdiera su estado y cobrara el modelo dos veces).
+alter table agora.grafo_punto drop constraint if exists grafo_punto_thread_id_paso_key;
+create unique index if not exists grafo_punto_dueno on agora.grafo_punto (org_id, agente_id, thread_id, paso);
 alter table agora.grafo_punto enable row level security;
 alter table agora.grafo_punto force row level security;
 drop policy if exists p_grafo on agora.grafo_punto;

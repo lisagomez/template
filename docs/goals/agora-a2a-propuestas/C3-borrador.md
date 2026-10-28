@@ -114,7 +114,8 @@ Cada sabotaje debe salir en rojo (bloqueado) con la suite en verde; se nombra el
 | D-5 | Un agente «lava» al solicitante para que quien pidió el gasto lo apruebe (sin citar, citando un saludo de otra categoría o su propio mensaje) | El mensaje de origen citado tiene que ser de una persona y del hilo de la misma categoría; de ahí la base deriva al solicitante, que es de la organización. **Abierto:** exigir el mensaje de origen a todo agente salvo el vigía | B11 |
 | D-6 | Una firma llena dos ranuras con los mismos roles | Cada ranura la llena una persona distinta | B10 |
 | D-7 | Otro autor (de otra organización o de la propia) ocupa por adelantado la clave de idempotencia y hace que el coordinador adopte SU propuesta, o silencia su respuesta | Clave única por autor en propuestas y mensajes; solo se adopta una previa propia con la misma huella | B12 |
-| D-8 | El reparto de ranuras deja colgada una propuesta que sí se puede firmar (disponibilidad) | Asignación exhaustiva (`agora_priv.caben`) | B13 |
+| D-8 | El reparto de ranuras deja colgada una propuesta que sí se puede firmar (disponibilidad), también por fijar el rol al firmar | Asignación exhaustiva con todos los roles de cada firmante (`agora_priv.caben`, `firmantes_de`) | B13, B14 |
+| D-9 | Otro agente (interno o de otra organización) ocupa el estado del grafo del coordinador: secuestra el hilo o le hace cobrar dos veces | Estado único por organización, agente, hilo y paso; el coordinador solo lee el suyo | C5 (coordinador) |
 
 ## 5. Lo que queda abierto
 

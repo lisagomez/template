@@ -36,7 +36,7 @@ async function coordinadorDe(base: Base, org: string): Promise<string | null> {
 }
 
 async function punto(s: Sesion, d: { org: string; thread: string; paso: number; nodo: string; estado: Record<string, unknown>; propuesta?: string | null; agente: string }) {
-  await s.consulta(`insert into agora.grafo_punto (org_id, thread_id, paso, nodo, estado, propuesta_id, agente_id) values ($1, $2, $3, $4, $5, $6, $7) on conflict (thread_id, paso) do nothing`,
+  await s.consulta(`insert into agora.grafo_punto (org_id, thread_id, paso, nodo, estado, propuesta_id, agente_id) values ($1, $2, $3, $4, $5, $6, $7) on conflict do nothing`,
     [d.org, d.thread, d.paso, d.nodo, JSON.stringify(d.estado), d.propuesta ?? null, d.agente])
 }
 
@@ -59,7 +59,7 @@ export async function atiende(o: OpcionesCoordinador, mensajeId: string): Promis
   if (m.origen.startsWith('espejo')) return { estado: 'ignorado', motivo: 'un espejo replica en lectura: no crea tareas' }
   if (m.autor_tipo === 'sistema' || m.autor_agente === coord) return { estado: 'ignorado', motivo: 'no se contesta a sí mismo ni a los avisos' }
   const thread = `categoria:${m.categoria_id}:hilo:${m.hilo_id ?? m.id}:mensaje:${m.id}`
-  const ya = await como_((s) => s.consulta<{ nodo: string; propuesta_id: string | null }>('select nodo, propuesta_id from agora.grafo_punto where thread_id = $1 order by paso desc limit 1', [thread]))
+  const ya = await como_((s) => s.consulta<{ nodo: string; propuesta_id: string | null }>('select nodo, propuesta_id from agora.grafo_punto where org_id = $1 and agente_id = $2 and thread_id = $3 order by paso desc limit 1', [m.org_id, coord, thread]))
   if (ya[0]?.nodo === 'aprobacion' && ya[0].propuesta_id) {
     const [p] = await como_((s) => s.consulta<{ sha256: string }>('select sha256 from agora.propuesta where id = $1', [ya[0]!.propuesta_id]))
     return { estado: 'esperando', thread, propuesta: ya[0].propuesta_id, sha256: p!.sha256 }
@@ -117,7 +117,7 @@ export async function reanuda(o: OpcionesCoordinador, org: string, thread: strin
   const coord = await coordinadorDe(o.base, org)
   if (!coord) return { estado: 'rechazado', thread, motivo: 'no hay coordinador vivo' }
   const como_ = sesion(o, org, coord)
-  const [ultimo] = await como_((s) => s.consulta<{ nodo: string; paso: number; propuesta_id: string | null }>('select nodo, paso, propuesta_id from agora.grafo_punto where thread_id = $1 order by paso desc limit 1', [thread]))
+  const [ultimo] = await como_((s) => s.consulta<{ nodo: string; paso: number; propuesta_id: string | null }>('select nodo, paso, propuesta_id from agora.grafo_punto where org_id = $1 and agente_id = $2 and thread_id = $3 order by paso desc limit 1', [org, coord, thread]))
   if (!ultimo) return { estado: 'rechazado', thread, motivo: 'ese hilo no existe para el coordinador' }
   if (ultimo.nodo === 'fin' || ultimo.nodo === 'aplicar') return { estado: 'aplicado', thread, propuesta: ultimo.propuesta_id ?? '' }
   if (ultimo.nodo !== 'aprobacion' || !ultimo.propuesta_id) return { estado: 'rechazado', thread, motivo: `el hilo no espera una aprobación (está en ${ultimo.nodo})` }

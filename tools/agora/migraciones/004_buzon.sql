@@ -240,26 +240,27 @@ end $$;
  * ¿Qué ranura de firma llenaría esta persona? Devuelve el rol con el que firma, o null si no le toca. Una
  * persona llena UNA ranura; una ranura ya llenada por otra firma no se llena dos veces.
  */
-/** ¿Caben estas firmas (sus roles, una por persona) en ranuras DISTINTAS de la matriz? Búsqueda exhaustiva: la matriz
- *  tiene de 1 a 3 ranuras, así que son a lo sumo 6 asignaciones. */
-create or replace function agora_priv.caben(firmas jsonb, roles text[]) returns boolean language plpgsql immutable set search_path = '' as $$
+/** ¿Caben estos firmantes en ranuras DISTINTAS de la matriz? Cada firmante trae TODOS sus roles (jsonb: un arreglo de
+ *  arreglos), así que una persona con dos roles llena la ranura que haga falta. Búsqueda exhaustiva: la matriz tiene de
+ *  1 a 3 ranuras. (Tercera pasada del verificador: fijar el rol al firmar, en orden alfabético, dejaba colgada una
+ *  propuesta firmable.) */
+drop function if exists agora_priv.caben(jsonb, text[]);
+create or replace function agora_priv.caben(firmas jsonb, firmantes jsonb) returns boolean language plpgsql immutable set search_path = '' as $$
 declare
   n int := jsonb_array_length(firmas);
-  k int := coalesce(array_length(roles, 1), 0);
+  k int := jsonb_array_length(firmantes);
   a int; b int; c int;
-  en text[];
 begin
   if k > n then return false; end if;
   if k = 0 then return true; end if;
   for a in 0 .. n - 1 loop
-    en := array(select jsonb_array_elements_text(firmas -> a));
-    continue when not roles[1] = any (en);
+    continue when not exists (select 1 from jsonb_array_elements_text(firmas -> a) x where (firmantes -> 0) ? x);
     if k = 1 then return true; end if;
     for b in 0 .. n - 1 loop
-      continue when b = a or not roles[2] = any (array(select jsonb_array_elements_text(firmas -> b)));
+      continue when b = a or not exists (select 1 from jsonb_array_elements_text(firmas -> b) x where (firmantes -> 1) ? x);
       if k = 2 then return true; end if;
       for c in 0 .. n - 1 loop
-        continue when c in (a, b) or not roles[3] = any (array(select jsonb_array_elements_text(firmas -> c)));
+        continue when c in (a, b) or not exists (select 1 from jsonb_array_elements_text(firmas -> c) x where (firmantes -> 2) ? x);
         return true;
       end loop;
     end loop;
@@ -267,19 +268,25 @@ begin
   return false;
 end $$;
 
-/** El rol con el que esta persona firma: uno suyo que, junto con las firmas previas, todavía cabe en ranuras distintas.
- *  (Antes era voraz y podía dejar colgada una propuesta que sí se podía firmar: segunda pasada del verificador.) */
+/** Los firmantes que ya aprobaron, cada uno con todos sus roles en esa categoría. */
+create or replace function agora_priv.firmantes_de(p agora.propuesta) returns jsonb language sql stable security definer set search_path = '' as $$
+  select coalesce(jsonb_agg(to_jsonb(agora_priv.roles_de(a.decidida_por, p.org_id, p.categoria_id)) order by a.decidida_en), '[]'::jsonb)
+    from agora.aprobacion a where a.propuesta_id = p.id and a.decision = 'aprobar' and a.sha256 = p.sha256
+$$;
+
+/** El rol con el que esta persona firma: uno suyo con el que todos (los de antes, con todos sus roles, y ella) todavía
+ *  caben en ranuras distintas. */
 create or replace function agora_priv.ranura_para(p agora.propuesta, persona uuid) returns text language plpgsql stable security definer set search_path = '' as $$
 declare
   r agora.matriz_regla := agora_priv.regla_de(p);
   roles text[] := agora_priv.roles_de(persona, p.org_id, p.categoria_id);
-  usadas text[];
+  previos jsonb;
   rol text;
 begin
   if r.id is null then return null; end if;
-  select coalesce(array_agg(a.rol_usado order by a.decidida_en), '{}') into usadas from agora.aprobacion a where a.propuesta_id = p.id and a.decision = 'aprobar';
+  previos := agora_priv.firmantes_de(p);
   for rol in select distinct x from jsonb_array_elements(r.firmas) f, jsonb_array_elements_text(f) x order by 1 loop
-    if rol = any (roles) and agora_priv.caben(r.firmas, usadas || rol) then return rol; end if;
+    if rol = any (roles) and agora_priv.caben(r.firmas, previos || jsonb_build_array(jsonb_build_array(rol))) then return rol; end if;
   end loop;
   return null;
 end $$;
@@ -288,23 +295,15 @@ create or replace function agora_priv.firmas_completas(pid uuid) returns boolean
 declare
   p agora.propuesta;
   r agora.matriz_regla;
-  n int;
+  f jsonb;
 begin
   select * into p from agora.propuesta where id = pid;
   r := agora_priv.regla_de(p);
   if r.id is null then return false; end if;
-  n := jsonb_array_length(r.firmas);
-  -- Cada ranura la llena una PERSONA distinta: dos ranuras con los mismos roles piden dos firmas, no una contada dos
-  -- veces (2026-10-28, lo cazó el verificador independiente). La matriz tiene de 1 a 3 ranuras.
-  return exists (
-    with f as (select a.decidida_por quien, a.rol_usado rol from agora.aprobacion a
-                where a.propuesta_id = pid and a.decision = 'aprobar' and a.sha256 = p.sha256)
-    select 1 from f f1
-      left join f f2 on n >= 2 and f2.quien <> f1.quien
-      left join f f3 on n >= 3 and f3.quien <> f1.quien and f3.quien <> f2.quien
-     where f1.rol in (select jsonb_array_elements_text(r.firmas -> 0))
-       and (n < 2 or (f2.quien is not null and f2.rol in (select jsonb_array_elements_text(r.firmas -> 1))))
-       and (n < 3 or (f3.quien is not null and f3.rol in (select jsonb_array_elements_text(r.firmas -> 2)))));
+  -- Una ranura por PERSONA distinta (dos ranuras con los mismos roles piden dos firmas), y cada persona con todos sus
+  -- roles: la asignación que haga falta, no la que eligió al firmar.
+  f := agora_priv.firmantes_de(p);
+  return jsonb_array_length(f) = jsonb_array_length(r.firmas) and agora_priv.caben(r.firmas, f);
 end $$;
 
 /**
