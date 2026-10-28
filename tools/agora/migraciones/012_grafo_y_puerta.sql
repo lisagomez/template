@@ -36,7 +36,7 @@ create trigger tg_grafo_solo_agregar before update or delete on agora.grafo_punt
 create or replace function agora.puerta_gasto(aid uuid) returns jsonb language plpgsql stable security definer set search_path = '' as $$
 declare a agora.agente;
 begin
-  if current_user not in ('agora_puerta') and not agora_priv.confiable() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'agora_puerta' and not agora_priv.llama_la_base() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
   select * into a from agora.agente where id = aid;
   if not found then return null; end if;
   return jsonb_build_object('uso', agora_priv.uso_gasto_mes(a.id), 'tope', a.tope_gasto_mes_mxn, 'reintenta', agora_priv.reintenta_en(a.id, 'gasto'),
@@ -56,7 +56,7 @@ drop function if exists agora.puerta_registra_tarea(uuid, text, text, text);
 create or replace function agora.puerta_registra_tarea(aid uuid, contexto text, mensaje text, nuevo_estado text) returns uuid language plpgsql security definer set search_path = '' as $$
 declare t uuid;
 begin
-  if current_user not in ('agora_puerta') and not agora_priv.confiable() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'agora_puerta' and not agora_priv.llama_la_base() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
   insert into agora.a2a_tarea (org_id, agente_id, context_id, message_id, estado)
   select a.org_id, a.id, contexto, mensaje, nuevo_estado from agora.agente a where a.id = aid
   on conflict (agente_id, message_id) do nothing returning id into t;

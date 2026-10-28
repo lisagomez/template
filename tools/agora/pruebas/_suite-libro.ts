@@ -102,7 +102,9 @@ export const LIBRO: Comprobacion[] = [
       await rechaza(c.comoPersona('paula', (s) => decide(s, { org: GOLFO, propuesta: p!.id, sha256: p!.sha256, persona: persona('paula'), decision: 'aprobar' })), 'matriz no te deja')
       await rechaza(c.comoPersona('daniel', (s) => decide(s, { org: GOLFO, propuesta: p!.id, sha256: p!.sha256, persona: persona('daniel'), decision: 'aprobar' })), 'matriz no te deja')
       await rechaza(c.comoAgente('coordinador', (s) => s.consulta(`insert into agora.aprobacion (org_id, propuesta_id, decision, sha256, decidida_por) values ($1, $2, 'aprobar', $3, $4)`, [GOLFO, p!.id, p!.sha256, persona('mariana')])), /prohibido|permission/)
-      await rechaza(c.comoAgente('coordinador', (s) => aplica(s, p!.id)), 'sin su fila de aprobación')
+      // Aplicarla: un agente que no la propuso ni la ve («no existe»); su autor, sin la fila humana de Finanzas.
+      await rechaza(c.comoAgente('coordinador', (s) => aplica(s, p!.id)), 'no existe')
+      await rechaza(c.comoAgente('medios-norte', (s) => aplica(s, p!.id)), 'sin su fila de aprobación')
     },
   },
   {

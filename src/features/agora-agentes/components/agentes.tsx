@@ -9,7 +9,7 @@ import { useState, useTransition } from 'react';
 import { bajaTopeDe, proponeCambio, reactivaAgente, suspendeAgente } from '@/features/agora/services/acciones';
 import { corta, mxn, pct } from '@/features/agora/services/formato';
 import { Avatar, Etiqueta } from '@/features/agora/components/insignia';
-import { simulaSocio, type Escenario, type ResultadoSimulado } from '../services/acciones';
+import { correElVigia, simulaSocio, type Escenario, type ResultadoSimulado } from '../services/acciones';
 import type { AgenteVisible, DatosDeAgentes, Tope } from '../services/lecturas';
 
 const ESTADO: Record<string, string> = { aprobado: 'bg-emerald-100 text-emerald-800', prueba: 'bg-blue-100 text-blue-800', en_revision: 'bg-amber-100 text-amber-800', solicitado: 'bg-amber-100 text-amber-800',
@@ -97,6 +97,29 @@ function SocioSimulado({ avisa }: { avisa: (t: string) => void }) {
   );
 }
 
+function Vigia({ avisa }: { avisa: (t: string) => void }) {
+  const [r, setR] = useState<Array<{ cuando: string; texto: string }>>([]);
+  const [ocupado, empieza] = useTransition();
+  const corre = () => empieza(async () => {
+    const x = await correElVigia();
+    if (!x.ok) return avisa(x.motivo);
+    const v = x.valor;
+    const texto = `eventos nuevos ${v.eventos.nuevos} (ya estaban ${v.eventos.ya}; en el calendario: ${v.enCalendario}) · recordatorios ${v.recordatorios} · avisos ${v.avisos} · propuestas ${v.propuestas}`
+      + (v.suspendidos.length ? ` · SUSPENDIDOS: ${v.suspendidos.map((s) => `${s.agente} (${s.motivo.replace('_', ' ')})`).join(', ')}` : ' · nadie suspendido');
+    setR((a) => [{ cuando: new Date().toLocaleTimeString('es-MX'), texto }, ...a].slice(0, 5));
+  });
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-4" data-vigia>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-slate-900">El vigía (sin modelo)</h2>
+        <button type="button" disabled={ocupado} onClick={corre} className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50" data-corre-vigia>Correr el vigía ahora</button>
+      </div>
+      <p className="text-[11.5px] text-slate-600">Calendariza las fechas, programa recordatorios, avisa al 80 % del gasto y del cierre, propone reprogramar lo atrasado y suspende al socio cuya tarjeta cambió. Correrlo dos veces no duplica nada.</p>
+      <ul className="mt-2 space-y-1 text-[12px]" data-informes-vigia>{r.map((x, k) => <li key={k} className="rounded bg-slate-50 px-2 py-1 text-slate-800"><span className="tabular-nums text-slate-500">{x.cuando}</span> · {x.texto}</li>)}</ul>
+    </section>
+  );
+}
+
 export function Agentes({ d }: { d: DatosDeAgentes }) {
   const [aviso, setAviso] = useState<string | null>(null);
   const internos = d.agentes.filter((a) => a.origen === 'interno');
@@ -118,6 +141,7 @@ export function Agentes({ d }: { d: DatosDeAgentes }) {
         </div>
         <div className="space-y-4">
           <SocioSimulado avisa={setAviso} />
+          <Vigia avisa={setAviso} />
           <section className="rounded-xl border border-slate-200 bg-white p-4" data-tras-revocar>
             <h2 className="text-sm font-semibold text-slate-900">Llamadas admitidas después de revocar (meta: 0)</h2>
             {d.trasRevocar.length ? <ul className="mt-1 text-[12.5px]">{d.trasRevocar.map((x) => <li key={x.agente} data-llamadas-tras-revocar={x.llamadas}><b>{x.agente}</b>: <span className={x.llamadas ? 'font-semibold text-rose-700' : 'font-semibold text-emerald-700'}>llamadas_tras_revocar = {x.llamadas}</span> (revocado {x.revocado.slice(0, 16)})</li>)}</ul> : <p className="text-[12px] text-slate-500">Ningún agente revocado todavía.</p>}

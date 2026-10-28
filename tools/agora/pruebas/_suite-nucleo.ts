@@ -25,6 +25,23 @@ export const NUCLEO: Comprobacion[] = [
     },
   },
   {
+    fase: 'nucleo', nombre: 'ninguna función security definer decide con current_user ni con confiable() (ahí valen siempre «la base»)', tipo: 'estructura',
+    async corre({ base }) {
+      const malas = await base.consulta<{ f: string }>(`select n.nspname || '.' || p.proname f from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname in ('agora', 'agora_priv') and p.prosecdef and regexp_replace(p.prosrc, '--[^\n]*', '', 'g') ~ '(confiable\\(\\)|current_user)' order by 1`)
+      assert.deepEqual(malas.map((x) => x.f), [], `deciden con el rol del dueño: ${malas.map((x) => x.f).join(', ')}`)
+    },
+  },
+  {
+    fase: 'nucleo', nombre: 'nadie de otra organización aplica una propuesta de Golfo Norte: para él no existe', tipo: 'conducta',
+    async corre(c) {
+      const [p] = await c.base.consulta<{ id: string }>(`select id from agora.propuesta where org_id = $1 and estado = 'aplicada' order by creada_en limit 1`, [GOLFO])
+      assert.ok(p, 'la siembra no tiene propuestas aplicadas')
+      await rechaza(c.comoPersona('carla', (s) => s.consulta('select agora.aplica_propuesta($1)', [p.id])), 'no existe')
+      await rechaza(c.comoAgente('bj-coordinador', (s) => s.consulta('select agora.aplica_propuesta($1)', [p.id])), 'no existe')
+    },
+  },
+  {
     fase: 'nucleo', nombre: 'una persona de Bajío no ve NADA de Golfo Norte, tabla por tabla', tipo: 'conducta',
     async corre(c) {
       await c.comoPersona('carla', async (s) => {
@@ -205,6 +222,8 @@ export const SABOTAJES_NUCLEO: Sabotaje[] = [
       if not agora_priv.firma_valida(cuerpo, split_part(token, '.', 2)) then return null; end if;
       return convert_from(decode(rpad(translate(cuerpo, '-_', '+/'), (length(cuerpo) + 3) / 4 * 4, '='), 'base64'), 'utf8')::jsonb; end $$;`, caza: /de otro rol no da identidad/ },
   { fase: 'nucleo', nombre: 'S11 · la Puerta puede leer las tablas', sql: 'grant select on agora.agente, agora.mensaje to agora_puerta; create policy x on agora.agente for select to agora_puerta using (true); create policy y on agora.mensaje for select to agora_puerta using (true);', caza: /la Puerta no lee tablas/ },
+  { fase: 'nucleo', nombre: 'S14 · las funciones definer creen que siempre llama la base', sql: `create or replace function agora_priv.llama_la_base() returns boolean language sql stable set search_path = '' as $$ select true $$;`, caza: /otra organización aplica/ },
+  { fase: 'nucleo', nombre: 'S15 · una función definer nueva que decide con confiable()', sql: `create or replace function agora.nueva_puerta_trasera() returns boolean language sql stable security definer set search_path = '' as $$ select agora_priv.confiable() $$;`, caza: /ninguna función security definer/ },
   { fase: 'nucleo', nombre: 'S13 · una vista nueva sin permiso de lectura', sql: 'revoke select on agora.v_llamadas_tras_revocar from authenticated;', caza: /se puede LEER/ },
   { fase: 'nucleo', nombre: 'S12 · el historial se puede anotar a mano', sql: `create or replace function agora_priv.anota_historial(o uuid, it uuid, campo text, antes jsonb, despues jsonb, actor_tipo text, persona uuid, agente uuid, prop uuid, deshacer timestamptz) returns void language plpgsql security definer set search_path = '' as $$ begin insert into agora.item_historial (org_id, item_id, campo, antes, despues, actor_tipo, actor_persona) values (o, it, campo, antes, despues, actor_tipo, persona); end $$;`, caza: /no se inventan a mano/ },
 ]

@@ -378,7 +378,7 @@ declare
   org numeric;
 begin
   -- Lo pregunta el agente que va a ejecutar la llamada: interno y con su idCard vivo (o una función de la base).
-  if current_user = 'agora_agente' and agora_priv.agente_de_tarea() is null then
+  if agora_priv.rol_que_llama() = 'agora_agente' and agora_priv.agente_de_tarea() is null then
     return jsonb_build_object('ok', false, 'motivo', 'quien pregunta no tiene idCard vivo');
   end if;
   select * into a from agora.agente x where x.id = aid;

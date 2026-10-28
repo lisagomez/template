@@ -75,8 +75,8 @@ export const AGENTES: Agente[] = [
   { clave: 'analista', org: GOLFO, nombre: 'Analista de métricas', ini: 'AB', origen: 'interno', responsable: 'Golfo Norte (casa)', rol: 'analista', autonomia: 'A1',
     estado: 'aprobado', version: 1, vence: '2027-03-31', alcance: [['mty', ['reporte', 'escenarios']], ['q4', ['reporte', 'escenarios']]], topes: [120, 20, 800],
     descripcion: 'Propone análisis y escenarios con las cifras ya calculadas, nunca las cifras.', firmas: ['paula', 'mariana'] },
-  { clave: 'vigia', org: GOLFO, nombre: 'Vigía', ini: 'VG', origen: 'interno', responsable: 'Golfo Norte (casa)', rol: 'vigia', autonomia: 'A0',
-    estado: 'aprobado', version: 1, vence: '2027-03-31', alcance: [['mty', ['vigilar']], ['q4', ['vigilar']]], topes: [2000, 0, 0], sinModelo: true,
+  { clave: 'vigia', org: GOLFO, nombre: 'Vigía', ini: 'VG', origen: 'interno', responsable: 'Golfo Norte (casa)', rol: 'vigia', autonomia: 'A1',
+    estado: 'aprobado', version: 1, vence: '2027-03-31', alcance: [['mty', ['vigilar']], ['q4', ['vigilar']]], topes: [2000, 10, 0], sinModelo: true,
     descripcion: 'Sigue fechas, recordatorios y topes; avisa al 80 %; suspende al agente cuya tarjeta cambió de huella.', firmas: ['paula', 'luis'] },
   { clave: 'medios-norte', org: GOLFO, nombre: 'Medios Norte', ini: 'MN', origen: 'externo', responsable: 'Medios Norte, S.A. de C.V. (ficticia)', rol: 'especialista', autonomia: 'A1',
     estado: 'aprobado', version: 3, vence: '2027-01-31', alcance: [['campanas', ['proponer_campana', 'reporte_roas']]], topes: [60, 10, 300],
@@ -97,16 +97,18 @@ export const agente = (clave: string): string => uid(`agente:${clave}`)
 
 /** Ítems: los del prototipo (octubre en adelante) más los de septiembre, que tienen costos y entran al cierre. */
 export interface Item { clave: string; cat: string; nombre: string; estado: 'todo' | 'doing' | 'review' | 'block' | 'done'; resp: string | null; prio: 'alta' | 'media' | 'baja'
-  ini: string; fin: string; monto: number | null; prog: number; dep?: string; tags: string[]; grupo?: string }
+  ini: string; fin: string; monto: number | null; prog: number; dep?: string; tags: string[]; grupo?: string
+  /** Lo cerrado: el día en que de verdad se terminó (ficticio), para medir «a tiempo» contra la fecha comprometida. */
+  real?: string }
 
 export const ITEMS: Item[] = [
-  { clave: 'it-0a', cat: 'pipeline', nombre: 'Estudio de mercado de abarrotes en Monterrey', estado: 'done', resp: 'ana', prio: 'alta', ini: '2026-09-01', fin: '2026-09-25', monto: 15000, prog: 100, tags: ['prospección'], grupo: 'Arranque' },
-  { clave: 'it-0b', cat: 'campanas', nombre: 'Estudio de audiencia en radio local', estado: 'done', resp: 'medios-norte', prio: 'media', ini: '2026-09-08', fin: '2026-09-26', monto: 48000, prog: 100, tags: ['medios'], grupo: 'Arranque' },
-  { clave: 'it-0c', cat: 'logistica', nombre: 'Cotización de bodegas en Apodaca', estado: 'done', resp: 'jorge', prio: 'media', ini: '2026-09-10', fin: '2026-09-30', monto: 9000, prog: 100, tags: ['bodega'], grupo: 'Arranque' },
+  { clave: 'it-0a', cat: 'pipeline', nombre: 'Estudio de mercado de abarrotes en Monterrey', estado: 'done', real: '2026-09-24', resp: 'ana', prio: 'alta', ini: '2026-09-01', fin: '2026-09-25', monto: 15000, prog: 100, tags: ['prospección'], grupo: 'Arranque' },
+  { clave: 'it-0b', cat: 'campanas', nombre: 'Estudio de audiencia en radio local', estado: 'done', real: '2026-09-29', resp: 'medios-norte', prio: 'media', ini: '2026-09-08', fin: '2026-09-26', monto: 48000, prog: 100, tags: ['medios'], grupo: 'Arranque' },
+  { clave: 'it-0c', cat: 'logistica', nombre: 'Cotización de bodegas en Apodaca', estado: 'done', real: '2026-09-30', resp: 'jorge', prio: 'media', ini: '2026-09-10', fin: '2026-09-30', monto: 9000, prog: 100, tags: ['bodega'], grupo: 'Arranque' },
   { clave: 'it-1', cat: 'pipeline', nombre: 'Mapear 40 cuentas de abarrotes en San Nicolás', estado: 'doing', resp: 'ana', prio: 'alta', ini: '2026-10-12', fin: '2026-10-30', monto: 18000, prog: 55, tags: ['prospección'] },
   { clave: 'it-2', cat: 'pipeline', nombre: 'Visitas a 12 cadenas regionales', estado: 'todo', resp: 'daniel', prio: 'media', ini: '2026-11-02', fin: '2026-11-20', monto: 35000, prog: 0, dep: 'it-1', tags: ['visitas'] },
   { clave: 'it-3', cat: 'pipeline', nombre: 'Propuesta para Súper Cumbres', estado: 'todo', resp: 'daniel', prio: 'alta', ini: '2026-11-23', fin: '2026-11-27', monto: 8000, prog: 0, dep: 'it-2', tags: ['visitas'] },
-  { clave: 'it-4', cat: 'pipeline', nombre: 'Lista de precios zona norte', estado: 'done', resp: 'ana', prio: 'media', ini: '2026-10-01', fin: '2026-10-15', monto: 5000, prog: 100, tags: ['prospección'] },
+  { clave: 'it-4', cat: 'pipeline', nombre: 'Lista de precios zona norte', estado: 'done', real: '2026-10-14', resp: 'ana', prio: 'media', ini: '2026-10-01', fin: '2026-10-15', monto: 5000, prog: 100, tags: ['prospección'] },
   { clave: 'it-5', cat: 'campanas', nombre: 'Campaña de lanzamiento en radio local', estado: 'doing', resp: 'medios-norte', prio: 'alta', ini: '2026-10-20', fin: '2026-11-10', monto: 120000, prog: 30, tags: ['medios'] },
   { clave: 'it-6', cat: 'campanas', nombre: 'Material POP para 25 tiendas', estado: 'block', resp: 'ana', prio: 'media', ini: '2026-10-29', fin: '2026-11-06', monto: 45000, prog: 10, dep: 'it-10', tags: ['tiendas'] },
   { clave: 'it-7', cat: 'logistica', nombre: 'Ruta de reparto Apodaca–Escobedo', estado: 'doing', resp: 'fletes-golfo', prio: 'alta', ini: '2026-10-19', fin: '2026-11-03', monto: 60000, prog: 40, tags: ['ruta'] },

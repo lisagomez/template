@@ -106,7 +106,7 @@ declare
   o uuid;
   a agora.agente;
 begin
-  if current_user not in ('agora_puerta') and not agora_priv.confiable() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'agora_puerta' and not agora_priv.llama_la_base() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
   select x.id into o from agora.org x where x.slug = org_slug;
   if o is null then return null; end if;
   if exists (select 1 from agora.llave_revocada r where r.org_id = o and r.kid = puerta_lee.kid) then
@@ -126,7 +126,7 @@ end $$;
 create or replace function agora.puerta_toma_jti(aid uuid, jti text, vence timestamptz) returns boolean language plpgsql security definer set search_path = '' as $$
 declare o uuid;
 begin
-  if current_user not in ('agora_puerta') and not agora_priv.confiable() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'agora_puerta' and not agora_priv.llama_la_base() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
   select a.org_id into o from agora.agente a where a.id = aid;
   if o is null then return false; end if;
   delete from agora.jti_visto where agente_id = aid and jti_visto.vence < now() - interval '1 day';
@@ -139,7 +139,7 @@ create or replace function agora.puerta_anota(org_id uuid, aid uuid, kid text, j
 returns bigint language plpgsql security definer set search_path = '' as $$
 declare id bigint;
 begin
-  if current_user not in ('agora_puerta') and not agora_priv.confiable() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'agora_puerta' and not agora_priv.llama_la_base() then raise exception 'solo la Puerta' using errcode = 'AG403'; end if;
   insert into agora.a2a_llamada (org_id, agente_id, kid, jti, metodo, resultado, motivo, http, retry_after)
   values (puerta_anota.org_id, aid, kid, jti, metodo, resultado, motivo, http, retry) returning a2a_llamada.id into id;
   if resultado = 'admitida' and aid is not null then

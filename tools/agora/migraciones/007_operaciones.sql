@@ -152,7 +152,8 @@ begin
   select * into p from agora.propuesta where id = pid for update;
   if not found then raise exception 'no existe' using errcode = 'AG404'; end if;
   -- Quien la aplica tiene que poder verla: una persona de su organización o el agente que la propuso.
-  if not agora_priv.confiable() and not (agora_priv.es_de_org(p.org_id) or agora_priv.agente_de_tarea() = p.autor_agente) then
+  -- coalesce: con autor humano (autor_agente nulo) la comparación da null y un «if null» no rechaza.
+  if not agora_priv.llama_la_base() and not (agora_priv.es_de_org(p.org_id) or coalesce(agora_priv.agente_de_tarea() = p.autor_agente, false)) then
     raise exception 'no existe' using errcode = 'AG404';
   end if;
   if p.estado = 'aplicada' then return jsonb_build_object('ok', true, 'ya', true, 'propuesta', p.id); end if;

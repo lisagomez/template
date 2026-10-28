@@ -6,8 +6,9 @@
  */
 import { refresh } from 'next/cache';
 import { z } from 'zod';
-import { llamaComoSocio, nodo, item, socio, tokenDeSocio, tokenConFirmaAjena, tokenConOtraLlave, tokenConTarjetaRefirmada } from '../../../../tools/agora/dist/laboratorio/index.js';
-import { laboratorio } from '@/features/agora/services/laboratorio';
+import { calendarioDeLaboratorio, descargaDeLaboratorio, llamaComoSocio, nodo, item, socio, tokenDeSocio, tokenConFirmaAjena, tokenConOtraLlave, tokenConTarjetaRefirmada } from '../../../../tools/agora/dist/laboratorio/index.js';
+import { como, correVigia, yo, type InformeVigia } from '../../../../tools/agora/dist/index.js';
+import { laboratorio, personaActual } from '@/features/agora/services/laboratorio';
 
 export type Escenario = 'valida' | 'propuesta' | 'refirmada' | 'otra-llave' | 'firma-ajena' | 'jti-repetido' | 'fuera-de-alcance';
 export interface ResultadoSimulado { escenario: Escenario; http: number; admitida: boolean; motivo: string; retryAfter: number | null; respuesta: unknown }
@@ -44,4 +45,28 @@ export async function simulaSocio(entrada: { socio: string; escenario: Escenario
   }
   refresh();
   return { ok: true, valor: { escenario: d.escenario, http: r.http, admitida: r.admitida, motivo: r.motivo, retryAfter: r.reintentaEn ?? null, respuesta: r.cuerpo } };
+}
+
+/** El calendario del laboratorio vive mientras viva el servidor: así, correr el vigía dos veces muestra que no duplica. */
+const conCalendario = globalThis as unknown as { __agoraCalendario?: ReturnType<typeof calendarioDeLaboratorio> };
+
+/**
+ * Corre el vigía AHORA (en producción es un trabajo programado). Lo pide la Propietaria o el Administrador; corre
+ * con la identidad del vigía (su token de tarea), sin modelo, y todo lo que escribe es idempotente por clave.
+ */
+export async function correElVigia(): Promise<{ ok: true; valor: InformeVigia & { enCalendario: number } } | { ok: false; motivo: string }> {
+  const lab = laboratorio();
+  if (!lab.activo) return { ok: false, motivo: lab.motivo };
+  const p = await personaActual();
+  const quien = await como(lab.entorno.base, { tipo: 'persona', id: p.id }, (s) => yo(s, p.id));
+  if (!quien || !quien.roles.some((r) => r.rol === 'propietario' || r.rol === 'administrador')) return { ok: false, motivo: 'correr el vigía a mano: Propietaria o Administrador' };
+  conCalendario.__agoraCalendario ??= calendarioDeLaboratorio();
+  const cal = conCalendario.__agoraCalendario;
+  try {
+    const informe = await correVigia({ base: lab.entorno.base, secreto: lab.entorno.secreto, org: quien.org.id, calendario: cal.puerto, descarga: descargaDeLaboratorio() });
+    refresh();
+    return { ok: true, valor: { ...informe, enCalendario: await cal.eventos() } };
+  } catch (e) {
+    return { ok: false, motivo: e instanceof Error ? e.message : String(e) };
+  }
 }

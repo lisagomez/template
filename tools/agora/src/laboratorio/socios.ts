@@ -36,6 +36,16 @@ export function socio(clave: string, semilla = `socio:${clave}`): Socio {
   return { agente, par, tarjeta, huella: huellaDeTarjeta(tarjeta) }
 }
 
+/** Lo que cada socio «publica» en la URL de su tarjeta, para el vigía: la aprobada, salvo las que se pasen cambiadas.
+ *  Una URL que no es de ningún socio del laboratorio no responde (null): nada sale a la red. */
+export function descargaDeLaboratorio(cambiadas: Record<string, Record<string, unknown>> = {}): (url: string) => Promise<Record<string, unknown> | null> {
+  const socios = AGENTES.filter((a) => a.origen === 'externo' && a.kid).map((a) => socio(a.clave))
+  return async (url) => {
+    const s = socios.find((x) => x.agente.url === url)
+    return s ? (cambiadas[s.agente.clave] ?? s.tarjeta) : null
+  }
+}
+
 /** Un token del socio para llamar a la Puerta: iss = su agente, aud = la organización, card_sha256 de su tarjeta, jti único. */
 export function tokenDeSocio(s: Socio, org: string, o: { jti?: string; vidaS?: number; cardSha256?: string; ahora?: number; skill?: string } = {}): string {
   const ahora = Math.floor((o.ahora ?? Date.now()) / 1000)

@@ -137,7 +137,10 @@ begin
   if tg_op = 'UPDATE' then
     if new.fin is distinct from old.fin or new.inicio is distinct from old.inicio then new.version_fecha := old.version_fecha + 1; end if;
     if new.estado = 'done' and old.estado <> 'done' then new.fecha_real := current_date; new.progreso := 100; end if;
+    if new.estado <> 'done' and old.estado = 'done' then new.fecha_real := null; end if; -- reabierto: ya no está cerrado
     new.actualizado_en := now();
+  elsif new.estado = 'done' and new.fecha_real is null then
+    new.fecha_real := current_date; new.progreso := 100;
   end if;
   return new;
 end $$;

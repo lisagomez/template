@@ -64,6 +64,16 @@ create or replace function agora_priv.confiable() returns boolean language sql s
   select current_user not in ('authenticated', 'anon', 'agora_agente', 'agora_puerta')
 $$;
 
+/** ¿QUIÉN LLAMA? Dentro de una función `security definer`, `current_user` es su dueño y `confiable()` daría siempre
+ *  verdadero: ahí se pregunta el rol con que entró la sesión (el ajuste `role` de `set role`, que el definer no cambia).
+ *  Regla: los triggers deciden con `confiable()`; las funciones definer, con `rol_que_llama()` / `llama_la_base()`. */
+create or replace function agora_priv.rol_que_llama() returns text language sql stable set search_path = '' as $$
+  select coalesce(nullif(current_setting('role', true), 'none'), session_user::text)
+$$;
+create or replace function agora_priv.llama_la_base() returns boolean language sql stable set search_path = '' as $$
+  select agora_priv.rol_que_llama() not in ('authenticated', 'anon', 'agora_agente', 'agora_puerta')
+$$;
+
 -- --- La jerarquía: organización › workspace › dominio › categoría (› ítem, en 004) ---------------------
 create table if not exists agora.org (
   id        uuid primary key default gen_random_uuid(),

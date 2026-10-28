@@ -129,6 +129,8 @@ async function montos(base: Base, o: OpcionesSiembra) {
   // Los ítems de septiembre se cierran ahora que su monto está comprometido (y «Listo» exige dependencias cerradas).
   for (const it of ITEMS.filter((x) => x.estado === 'done')) {
     await base.consulta(`update agora.item set estado = 'done' where id = $1 and estado <> 'done'`, [item(it.clave)])
+    // Al cerrar, la base pone la fecha real de HOY; lo sembrado se cerró antes: su día real ficticio.
+    if (it.real) await base.consulta('update agora.item set fecha_real = $2 where id = $1', [item(it.clave), it.real])
   }
 }
 

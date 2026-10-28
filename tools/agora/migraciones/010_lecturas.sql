@@ -4,12 +4,14 @@
 -- =============================================================================
 set check_function_bodies = off;
 
-/** El uso de los tres topes de un agente, para quien es de su organización (o para el propio agente). */
+/** El uso de los tres topes de un agente, para quien es de su organización, para el propio agente, o para el vigía
+ *  de su organización (que avisa al 80 %). coalesce: sin agente en la sesión la comparación da null, y «not null» no rechaza. */
 create or replace function agora.topes_de(aid uuid) returns jsonb language plpgsql stable security definer set search_path = '' as $$
 declare a agora.agente;
 begin
   select * into a from agora.agente where id = aid;
-  if not found or not (agora_priv.es_de_org(a.org_id) or agora_priv.agente_de_tarea() = a.id) then return null; end if;
+  if not found or not (agora_priv.es_de_org(a.org_id) or coalesce(agora_priv.agente_de_tarea() = a.id, false)
+      or coalesce(agora_priv.soy_vigia() and agora_priv.org_de_agente() = a.org_id, false)) then return null; end if;
   return jsonb_build_object(
     'mensajes', jsonb_build_object('uso', agora_priv.uso_mensajes_hora(a.id), 'tope', a.tope_mensajes_hora, 'reintenta_en', agora_priv.reintenta_en(a.id, 'mensajes')),
     'propuestas', jsonb_build_object('uso', agora_priv.uso_propuestas_dia(a.id), 'tope', a.tope_propuestas_dia, 'reintenta_en', agora_priv.reintenta_en(a.id, 'propuestas')),
