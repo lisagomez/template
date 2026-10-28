@@ -52,3 +52,34 @@ test('la ruta encuentra a su módulo (la pantalla declarada más larga; [segment
   assert.equal(moduloDeRuta('/agenda', pantallas), 'agenda')
   assert.equal(moduloDeRuta('/otra', pantallas), null)
 })
+
+test('el módulo que llena el explorador pinta lo suyo arriba y las pantallas siguen debajo', () => {
+  const producto = resuelveComposicion({ ...copia(COMPOSICION), ranuras: { plan: 'agenda', explorador: 'buzon' } }, ENCHUFES)
+  assert.equal(producto.ranuras.explorador.quien, 'buzon')
+  const html = renderToString(h(CapaProveedor, { producto, inquilino: 'demo', manejadores: {}, almacen: new AlmacenEnMemoria(), voz, ruta: '/agenda',
+    componentes: { buzon: { explorador: () => h('ul', { 'data-arbol': 'buzon' }, h('li', null, 'Carpeta del buzón')) } },
+    children: h(Ventana, null, h('p', null, 'pantalla')) }))
+  const nav = html.slice(html.indexOf('class="capa-explorador"'), html.indexOf('</nav>'))
+  assert.match(nav, /data-capa-ranura="explorador" data-capa-llena="buzon"/)
+  assert.ok(nav.indexOf('Carpeta del buzón') < nav.indexOf('href="/agenda"'), 'lo del módulo va antes que la lista de pantallas')
+  assert.match(nav, /href="\/buzon"/, 'las pantallas siguen ahí')
+})
+
+test('sin componente del módulo, el explorador es el de la capa (nada cambia para quien no lo llena)', () => {
+  const html = pinta()
+  const nav = html.slice(html.indexOf('class="capa-explorador"'), html.indexOf('</nav>'))
+  assert.doesNotMatch(nav, /data-capa-llena=/)
+  assert.match(nav, /href="\/agenda"/)
+})
+
+test('lo que pinta el módulo de la conversación va junto al hilo de la capa, nunca en su lugar', () => {
+  const conChat = { ...copia(BUZON), ranuras: [...BUZON.ranuras, 'conversacion' as const] }
+  const producto = resuelveComposicion({ ...copia(COMPOSICION), ranuras: { plan: 'agenda', conversacion: 'buzon' } }, [AGENDA, conChat, ENCHUFES[2]!])
+  const html = renderToString(h(CapaProveedor, { producto, inquilino: 'demo', manejadores: {}, almacen: new AlmacenEnMemoria(), voz, ruta: '/agenda',
+    componentes: { buzon: { conversacion: () => h('div', { 'data-hilo-del-modulo': '1' }, 'Hilo del canal') } },
+    children: h(Ventana, null, h('p', null, 'pantalla')) }))
+  const aside = html.slice(html.indexOf('class="capa-conversacion"'))
+  assert.match(aside, /data-hilo-del-modulo/)
+  assert.ok(aside.indexOf('Hilo del canal') < aside.indexOf('role="log"'), 'va antes del hilo de la capa')
+  assert.match(aside, /data-capa-entrada/, 'el compositor de la capa sigue ahí')
+})
