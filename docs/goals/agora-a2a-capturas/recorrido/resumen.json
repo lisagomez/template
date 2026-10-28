@@ -1,6 +1,6 @@
 {
   "base": "http://localhost:3021",
-  "fecha": "2026-10-28T14:44:32.162Z",
+  "fecha": "2026-10-28T15:33:26.781Z",
   "n": 8,
   "total": 8,
   "siembra": null,
@@ -23,7 +23,7 @@
       "ok": true,
       "errores": [],
       "captura": "docs/goals/agora-a2a-capturas/recorrido/02-agora_agentes.png",
-      "nota": "HTTP 200 · lienzo 6185 caracteres"
+      "nota": "HTTP 200 · lienzo 6170 caracteres"
     },
     {
       "ruta": "/agora/alta",
@@ -53,7 +53,7 @@
       "ok": true,
       "errores": [],
       "captura": "docs/goals/agora-a2a-capturas/recorrido/05-agora_contabilidad.png",
-      "nota": "HTTP 200 · lienzo 3099 caracteres"
+      "nota": "HTTP 200 · lienzo 3027 caracteres"
     },
     {
       "ruta": "/agora/costos",
@@ -73,7 +73,7 @@
       "ok": true,
       "errores": [],
       "captura": "docs/goals/agora-a2a-capturas/recorrido/07-agora_metricas.png",
-      "nota": "HTTP 200 · lienzo 4253 caracteres"
+      "nota": "HTTP 200 · lienzo 4232 caracteres"
     },
     {
       "ruta": "/agora/tablero",
@@ -83,7 +83,7 @@
       "ok": true,
       "errores": [],
       "captura": "docs/goals/agora-a2a-capturas/recorrido/08-agora_tablero.png",
-      "nota": "HTTP 200 · lienzo 3514 caracteres"
+      "nota": "HTTP 200 · lienzo 3502 caracteres"
     }
   ]
 }

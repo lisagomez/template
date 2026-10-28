@@ -1,0 +1,41 @@
+# Los recorridos en el navegador (Playwright contra el laboratorio en 127.0.0.1:3021), sobre 51a42ab, 2026-10-28.
+# Cada comprobación mira también la BASE, no solo la pantalla. Capturas en docs/goals/agora-a2a-capturas/.
+
+$ node scripts/agora/e2e-capa.ts          # los malos de la capa en la ventana real
+✓ una intención sin LLM lleva a su pantalla (el Gantt) — http://localhost:3021/agora/tablero?vista=gantt
+✓ una intención ambigua pregunta en vez de adivinar — Hay dos que se llaman así: «Operaciones» de Expansión Monterrey 2027 y «Operaciones» de Operación Q4 2026. ¿Cuál abro? No lo adivino.
+✓ «apruébalo» no aprueba: la base tiene las mismas aprobaciones — 16 → 16: No apruebo nada, ni por voz ni por escrito: aprobar es TU clic sobre la huella de la propuesta…
+✓ un cambio de monto por intención queda como PROPUESTA (el ítem no cambia) — 120000.00 → 120000.00; pendientes 4 → 5
+✓ sin errores de consola (Paula)
+✓ un click() sintético no cierra el periodo
+✓ un Enter no cierra el periodo
+✓ el clic humano cierra, y la base gastó el testigo de Mariana
+✓ sin errores de consola (Mariana)
+Todo en verde: 9/9
+
+$ node scripts/agora/capturas.ts          # las capturas del DoD
+✓ tablero en tabla: la propuesta de un agente se ve como fantasma, sin aplicarse — 1 fantasma(s)
+✓ tablero en kanban: la propuesta de un agente se ve como fantasma, sin aplicarse — 1 fantasma(s)
+✓ tablero en gantt: la propuesta de un agente se ve como fantasma, sin aplicarse — 2 fantasma(s)
+✓ el Editor intenta aprobar 132 000 MXN y la BASE lo rechaza — La base no lo permitió: la matriz no te deja aprobar esto (clase cambiar_monto, monto 132000)
+✓ Finanzas aprueba con su clic y el comprometido sube exactamente lo que cambió el monto — 166600 → 178600 (120000 → 132000: +12000)
+✓ costos: las filas sin costo de la pantalla son las de la base (null, no cero) — 2 = 2
+✓ Finanzas cerró septiembre por el freno
+✓ Contabilidad acepta la póliza CUADRADA (cargos = abonos) — 69688.50 = 69688.50
+✓ Paula revocó a Fletes del Golfo por el freno
+✓ la siguiente llamada del socio revocado se rechaza y llamadas_tras_revocar = 0 — rechazada; tras revocar: 0
+✓ cada cifra sumable de las métricas cuadra al centavo con el libro — si,si,si,si,si,si
+✓ sin errores de consola en ninguna pantalla
+Todo en verde: 12/12
+
+$ node scripts/capa/recorrido.ts --solo /agora --base http://localhost:3021 --capturas docs/goals/agora-a2a-capturas/recorrido
+✓  1 /agora                                     agora · HTTP 200 · lienzo 1013 caracteres
+✓  2 /agora/agentes                             agora-agentes · HTTP 200 · lienzo 6170 caracteres
+✓  3 /agora/alta                                agora · HTTP 200 · lienzo 372 caracteres
+✓  4 /agora/buzon                               agora-buzon · HTTP 200 · lienzo 1400 caracteres
+✓  5 /agora/contabilidad                        agora-contabilidad · HTTP 200 · lienzo 3027 caracteres
+✓  6 /agora/costos                              agora-costos · HTTP 200 · lienzo 5713 caracteres
+✓  7 /agora/metricas                            agora-metricas · HTTP 200 · lienzo 4232 caracteres
+✓  8 /agora/tablero                             agora-tablero · HTTP 200 · lienzo 3502 caracteres
+
+Recorrido de la capa: 8/8 rutas dentro de la capa · 0 error(es) de consola · docs/goals/agora-a2a-capturas/recorrido/resumen.json
