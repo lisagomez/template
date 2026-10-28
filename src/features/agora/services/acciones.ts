@@ -46,9 +46,14 @@ export async function decidePropuesta(entrada: { propuesta: string; sha256: stri
 }
 
 export async function editaCampo(entrada: { item: string; campo: string; valor: unknown }) {
-  const Campo = z.enum(['nombre', 'estado', 'prioridad', 'inicio', 'fin', 'progreso', 'etiquetas', 'vinculo', 'responsable_persona', 'archivo']);
+  const Campo = z.enum(['nombre', 'estado', 'prioridad', 'inicio', 'fin', 'progreso', 'etiquetas', 'vinculo', 'responsable_persona', 'responsable_agente', 'archivo']);
   const d = z.object({ item: Uuid, campo: Campo, valor: z.unknown() }).parse(entrada);
   return corre((e, p) => agora.editaItem(e, p, d));
+}
+
+export async function cambiaDependencia(entrada: { item: string; dependeDe: string; quita?: boolean }) {
+  const d = z.object({ item: Uuid, dependeDe: Uuid, quita: z.boolean().optional() }).parse(entrada);
+  return corre(async (e, p) => { await agora.cambiaDependencia(e, p, d); return true; });
 }
 
 export async function proponeCambio(entrada: { payload: unknown; resumen: string }) {

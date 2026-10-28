@@ -7,6 +7,7 @@ import type { Base, Sesion } from './base/tipos.js'
 import { aplica, decide, propone, type Payload } from './propuesta.js'
 import { supervisa, type Veredicto } from './supervisor.js'
 import { firmaTarea } from './tarea.js'
+import { diasEntre, siguienteHabil, sumaDias } from './fechas.js'
 
 export interface Entorno { base: Base; secreto: string }
 
@@ -46,7 +47,7 @@ export async function proponeComoPersona(e: Entorno, personaId: string, d: { pay
   })
 }
 
-const CAMPOS_DIRECTOS = ['nombre', 'estado', 'prioridad', 'inicio', 'fin', 'progreso', 'etiquetas', 'vinculo', 'responsable_persona', 'archivo'] as const
+const CAMPOS_DIRECTOS = ['nombre', 'estado', 'prioridad', 'inicio', 'fin', 'progreso', 'etiquetas', 'vinculo', 'responsable_persona', 'responsable_agente', 'archivo'] as const
 type CampoDirecto = (typeof CAMPOS_DIRECTOS)[number]
 
 /**
@@ -56,7 +57,9 @@ type CampoDirecto = (typeof CAMPOS_DIRECTOS)[number]
 export async function editaItem(e: Entorno, personaId: string, d: { item: string; campo: CampoDirecto; valor: unknown }) {
   if (!(CAMPOS_DIRECTOS as readonly string[]).includes(d.campo)) throw new Error(`el campo ${d.campo} no se edita directo`)
   const valor = d.campo === 'etiquetas' ? (Array.isArray(d.valor) ? d.valor.map(String) : []) : d.campo === 'archivo' ? JSON.stringify(d.valor) : d.valor
-  await persona(e, personaId)((s) => s.consulta(`update agora.item set ${d.campo} = $1 where id = $2`, [valor, d.item]))
+  // Un responsable a la vez: asignar a una persona quita al agente y al revés.
+  const otro = d.campo === 'responsable_persona' ? ', responsable_agente = null' : d.campo === 'responsable_agente' ? ', responsable_persona = null' : ''
+  await persona(e, personaId)((s) => s.consulta(`update agora.item set ${d.campo} = $1${otro} where id = $2`, [valor, d.item]))
   if (d.campo !== 'fin') return { sucesores: null }
   return { sucesores: await proponSucesores(e, personaId, d.item) }
 }
@@ -74,7 +77,7 @@ export async function proponSucesores(e: Entorno, personaId: string, itemId: str
   const creadas: string[] = []
   for (const suc of sucesores) {
     const nuevoInicio = siguienteHabil(sumaDias(it.fin, 1))
-    const dur = suc.fin ? Math.max(0, Math.round((Date.parse(suc.fin) - Date.parse(suc.inicio!)) / 864e5)) : 0
+    const dur = suc.fin ? Math.max(0, diasEntre(suc.inicio!, suc.fin)) : 0
     const nuevoFin = siguienteHabil(sumaDias(nuevoInicio, dur))
     const payload: Payload = { version: 1, clase: 'reprogramar', categoria: suc.categoria_id, cambios: [
       { item: suc.id, campo: 'inicio', antes: suc.inicio, despues: nuevoInicio }, ...(suc.fin ? [{ item: suc.id, campo: 'fin', antes: suc.fin, despues: nuevoFin }] : []),
@@ -94,8 +97,6 @@ export async function proponSucesores(e: Entorno, personaId: string, itemId: str
   return creadas
 }
 
-const sumaDias = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * 864e5).toISOString().slice(0, 10)
-const siguienteHabil = (d: string) => { let x = d; while ([0, 6].includes(new Date(Date.parse(`${x}T12:00:00Z`)).getUTCDay())) x = sumaDias(x, 1); return x }
 
 export interface CostoNuevo {
   categoria: string; item?: string | null; compromiso?: string | null; periodo: string; importe: number; concepto: string
@@ -103,6 +104,16 @@ export interface CostoNuevo {
 }
 
 /** Finanzas registra un ejercido con su evidencia (sin evidencia, queda pendiente). La base rechaza el duplicado. */
+/** Dependencias: la base niega el ciclo y lo que el rol no edita. */
+export async function cambiaDependencia(e: Entorno, personaId: string, d: { item: string; dependeDe: string; quita?: boolean }) {
+  return persona(e, personaId)(async (s) => {
+    if (d.quita) return s.consulta('delete from agora.dependencia where item_id = $1 and depende_de = $2', [d.item, d.dependeDe])
+    const [o] = await s.consulta<{ org_id: string }>('select org_id from agora.item where id = $1', [d.item])
+    if (!o) throw new Error('no existe')
+    return s.consulta('insert into agora.dependencia (org_id, item_id, depende_de) values ($1, $2, $3) on conflict do nothing', [o.org_id, d.item, d.dependeDe])
+  })
+}
+
 export async function registraCosto(e: Entorno, personaId: string, c: CostoNuevo) {
   return persona(e, personaId)(async (s) => {
     const [o] = await s.consulta<{ org_id: string }>('select org_id from agora.nodo where id = $1', [c.categoria])

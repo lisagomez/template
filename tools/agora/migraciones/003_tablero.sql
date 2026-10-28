@@ -115,7 +115,7 @@ create table if not exists agora.aviso (
 );
 
 -- --- Coherencia del ítem -------------------------------------------------------------------------------
-create or replace function agora_priv.item_coherente() returns trigger language plpgsql set search_path = '' as $$
+create or replace function agora_priv.item_coherente() returns trigger language plpgsql security definer set search_path = '' as $$
 declare c agora.nodo;
 begin
   select * into c from agora.nodo where id = new.categoria_id;

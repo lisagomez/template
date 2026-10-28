@@ -9,6 +9,7 @@
  */
 import { refresh } from 'next/cache';
 import * as agora from '../../../../tools/agora/dist/index.js';
+import { diaSemana, sumaDias } from '../../../../tools/agora/dist/fechas.js';
 import { corta } from '../../../../tools/agora/dist/index.js';
 import { laboratorio, personaActual } from './laboratorio';
 import { palabras, resuelve } from './resuelve';
@@ -64,9 +65,7 @@ export async function fechaDe(texto: string): Promise<string | null> {
   }
   const dia = DIAS.findIndex((d) => new RegExp(`\\b${d}\\b`).test(t));
   if (dia < 0) return null;
-  const base = Date.parse(`${hoy}T12:00:00Z`);
-  const hoyDia = new Date(base).getUTCDay();
-  return iso(base + (((dia - hoyDia + 7) % 7) || 7) * 864e5);
+  return sumaDias(hoy, ((dia - diaSemana(hoy) + 7) % 7) || 7);
 }
 
 function periodoDe(texto: string): string {

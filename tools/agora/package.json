@@ -21,6 +21,10 @@
     "./laboratorio": {
       "types": "./dist/laboratorio/index.d.ts",
       "import": "./dist/laboratorio/index.js"
+    },
+    "./fechas": {
+      "types": "./dist/fechas.d.ts",
+      "import": "./dist/fechas.js"
     }
   },
   "files": [

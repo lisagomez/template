@@ -6,13 +6,11 @@
  */
 import type { Sesion } from './base/tipos.js'
 import { CAMPOS_DE, REVERSIBLES_A2, arma, type Payload } from './propuesta.js'
+import { esFecha, esHabil as habil } from './fechas.js'
 
 export interface Regla { regla: string; ok: boolean; detalle: string }
 export interface Veredicto { ok: boolean; reglas: Regla[]; motivo: string | null }
 
-const esFecha = (x: unknown): x is string => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) && !Number.isNaN(Date.parse(`${x}T12:00:00Z`))
-const diaSemana = (d: string) => new Date(Date.parse(`${d}T12:00:00Z`)).getUTCDay()
-const habil = (d: string) => ![0, 6].includes(diaSemana(d))
 const mes = (d: string) => d.slice(0, 7)
 
 /** Lo que no debe viajar en una propuesta: datos personales que no hacen falta para planear. */
@@ -88,7 +86,9 @@ export async function supervisa(s: Sesion, p: Payload, c: ContextoSupervisor): P
     r('dependencias sin ciclos', !ciclo, ciclo ? 'las dependencias de lo nuevo cierran un ciclo' : 'sin ciclos')
   }
   // Datos sensibles: lo que se planea no necesita CURP, correos ni teléfonos.
-  const texto = JSON.stringify(p)
+  // Solo el texto que alguien escribió (nombres, motivo, valores de texto): los ids y las fechas no son datos personales.
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const texto = [...nuevos.map((n) => n.nombre), p.motivo ?? '', ...cambios.map((x) => x.despues).filter((v): v is string => typeof v === 'string' && !UUID.test(v) && !esFecha(v))].join(' \n ')
   const hallados = SENSIBLE.filter((x) => x.re.test(texto)).map((x) => x.nombre)
   r('sin datos sensibles', hallados.length === 0, hallados.length ? `trae ${hallados.join(', ')}: no hace falta para planear` : 'nada personal')
   // El supervisor financiero: el monto contra el presupuesto de la categoría del mes en que se ejercerá.
