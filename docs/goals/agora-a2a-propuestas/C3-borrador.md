@@ -109,6 +109,11 @@ Cada sabotaje debe salir en rojo (bloqueado) con la suite en verde; se nombra el
 | F5-3 | Un `click()` sintético o un Enter confirman lo irreversible | El freno de la capa exige `isTrusted` y `detail > 0`; el servidor no ve el gesto, por eso lo demás lo exige la base (F5-1, F5-2) y no hay acciones del servidor que cierren o revoquen con una cita libre | `e2e-capa.ts` en la ventana real: `click()` sintético y Enter no cierran; el clic humano sí (9/9) |
 | F5-4 | El nombre de un socio decide la acción («paga la factura de fletes» → revocar) | Regla: ningún ejemplo de una intención que escribe lleva nombre propio; medición a ciegas en un corpus nuevo | Prueba estructural de la regla (cae con los ejemplos viejos); corpus 2: 0 irreversibles no pedidas |
 | P-12 | La tarjeta de un socio cambia sin aviso | El vigía la re-descarga y compara con la huella fijada; si cambió, **suspende** y avisa (falla cerrado) | V3 (el vigía no puede suspender) y V4 (cualquier agente suspende) |
+| D-3 | Una sesión de agente se pone los claims de una persona (`request.jwt.claim.sub`) y la RLS la trata como esa persona (lo encontró el verificador independiente) | `agora_priv.uid()`: la persona solo si la sesión ES de persona (rol `authenticated`); ninguna función ni política lee `auth.uid()` directo | S16 (`uid()` sin mirar el rol) y S17 (una política que lee `auth.uid()`) |
+| D-4 | Con SQL libre sobre una conexión que puede hacer `SET ROLE`, un agente se vuelve persona | Ningún agente tiene SQL (la sesión la arma el servidor). **Abierto para producción:** un rol de conexión por tipo de principal, sin superusuario | — (declarado; en el laboratorio la conexión es `postgres`) |
+| D-5 | Un agente «lava» al solicitante para que quien pidió el gasto lo apruebe | Si la propuesta cita su mensaje de origen, la base deriva al solicitante; el solicitante es de la organización. **Abierto:** exigir el mensaje de origen a todo agente salvo el vigía | B11 |
+| D-6 | Una firma llena dos ranuras con los mismos roles | Cada ranura la llena una persona distinta | B10 |
+| D-7 | Otra organización ocupa por adelantado la clave de idempotencia | Clave única por organización | B12 |
 
 ## 5. Lo que queda abierto
 

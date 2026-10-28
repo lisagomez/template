@@ -67,7 +67,7 @@ export async function correVigia(o: OpcionesVigia): Promise<InformeVigia> {
       await avisa(`atrasado:${i.id}:v${i.version_fecha}`, 'atrasado', null, i.categoria_id, i.id, null, `«${i.nombre}» venció el ${i.fin} y no está listo: propongo reprogramarlo.`, true)
       const nueva = siguienteHabil(sumaDias(hoy, 5))
       const p = await comoVigia(async (s) => {
-        const [prev] = await s.consulta<{ id: string }>('select id from agora.propuesta where clave = $1', [`vigia:atrasado:${i.id}:v${i.version_fecha}`])
+        const [prev] = await s.consulta<{ id: string }>('select id from agora.propuesta where org_id = $1 and clave = $2', [o.org, `vigia:atrasado:${i.id}:v${i.version_fecha}`])
         if (prev) return null
         return propone(s, { org: o.org, autorAgente: v.id, clave: `vigia:atrasado:${i.id}:v${i.version_fecha}`, resumen: `Reprogramar «${i.nombre}» (atrasado) al ${nueva}`,
           payload: { version: 1, clase: 'reprogramar', categoria: i.categoria_id, cambios: [{ item: i.id, campo: 'fin', antes: i.fin, despues: nueva }] } }).catch(() => null)

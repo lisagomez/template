@@ -9,7 +9,7 @@
 -- que las políticas usan, `security definer` y con `search_path` vacío para que nadie las secuestre).
 --
 -- Los principales:
---   · authenticated     una persona; su identidad es `auth.uid()` (la sesión).
+--   · authenticated     una persona; su identidad es `agora_priv.uid()` (la sesión).
 --   · agora_agente      un agente (interno o externo, ya admitido); su identidad sale de un token de
 --                       tarea firmado que la BASE verifica (`agora_priv.agente_de_tarea`). Sin bypassrls.
 --                       Solo inserta mensajes, propuestas, su gasto de modelo y avisos; nunca aprueba.
@@ -43,7 +43,7 @@ end $$;
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
 
--- Supabase trae `auth.uid()`. Fuera de Supabase (PGlite, postgres:17) se pone uno equivalente.
+-- Supabase trae `agora_priv.uid()`. Fuera de Supabase (PGlite, postgres:17) se pone uno equivalente.
 create schema if not exists auth;
 do $do$ begin
   if not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'auth' and p.proname = 'uid') then
@@ -72,6 +72,13 @@ create or replace function agora_priv.rol_que_llama() returns text language sql 
 $$;
 create or replace function agora_priv.llama_la_base() returns boolean language sql stable set search_path = '' as $$
   select agora_priv.rol_que_llama() not in ('authenticated', 'anon', 'agora_agente', 'agora_puerta')
+$$;
+
+/** La PERSONA de la sesión, solo si la sesión es de persona (rol `authenticated`). `agora_priv.uid()` lee un ajuste que
+ *  cualquier sesión puede fijar: un agente que se pusiera los claims de Paula no es Paula (2026-10-28, lo cazó el
+ *  verificador independiente: veía aprobaciones ajenas). Todo lo de Ágora pregunta esto, nunca `agora_priv.uid()` directo. */
+create or replace function agora_priv.uid() returns uuid language sql stable set search_path = '' as $$
+  select case when agora_priv.rol_que_llama() = 'authenticated' then auth.uid() end
 $$;
 
 -- --- La jerarquía: organización › workspace › dominio › categoría (› ítem, en 004) ---------------------
@@ -132,7 +139,7 @@ create trigger tg_nodo_coherente before insert or update of padre_id, tipo, org_
   for each row execute function agora_priv.nodo_coherente();
 
 -- --- Personas y membresías ------------------------------------------------------------------------
--- El id de una persona ES su `auth.uid()`. En el laboratorio son ficticias.
+-- El id de una persona ES su `agora_priv.uid()`. En el laboratorio son ficticias.
 create table if not exists agora.persona (
   id        uuid primary key,
   org_id    uuid not null references agora.org (id) on delete cascade,
@@ -173,11 +180,11 @@ create trigger tg_membresia_coherente before insert or update on agora.membresia
 
 -- --- Las funciones que leen las políticas (definer: leen sin pasar por RLS, devuelven solo un sí/no) --
 create or replace function agora_priv.persona() returns uuid language sql stable security definer set search_path = '' as $$
-  select auth.uid()
+  select agora_priv.uid()
 $$;
 
 create or replace function agora_priv.org_de_persona() returns uuid language sql stable security definer set search_path = '' as $$
-  select p.org_id from agora.persona p where p.id = auth.uid()
+  select p.org_id from agora.persona p where p.id = agora_priv.uid()
 $$;
 
 create or replace function agora_priv.linaje(n uuid) returns uuid[] language sql stable security definer set search_path = '' as $$
@@ -188,7 +195,7 @@ $$;
 create or replace function agora_priv.tiene_rol(o uuid, n uuid, roles text[]) returns boolean language sql stable security definer set search_path = '' as $$
   select exists (
     select 1 from agora.membresia m
-     where m.persona_id = auth.uid() and m.org_id = o and m.rol = any (roles)
+     where m.persona_id = agora_priv.uid() and m.org_id = o and m.rol = any (roles)
        and (m.nodo_id is null or (n is not null and m.nodo_id = any (agora_priv.linaje(n)))))
 $$;
 
@@ -196,13 +203,13 @@ $$;
 create or replace function agora_priv.ve_nodo(o uuid, n uuid) returns boolean language sql stable security definer set search_path = '' as $$
   select exists (
     select 1 from agora.membresia m
-     where m.persona_id = auth.uid() and m.org_id = o
+     where m.persona_id = agora_priv.uid() and m.org_id = o
        and (m.nodo_id is null or n is null or m.nodo_id = any (agora_priv.linaje(n))
             or n = any (agora_priv.linaje(m.nodo_id))))
 $$;
 
 create or replace function agora_priv.es_de_org(o uuid) returns boolean language sql stable security definer set search_path = '' as $$
-  select exists (select 1 from agora.membresia m where m.persona_id = auth.uid() and m.org_id = o)
+  select exists (select 1 from agora.membresia m where m.persona_id = agora_priv.uid() and m.org_id = o)
 $$;
 
 /** Los roles efectivos de una persona CUALQUIERA en un nodo (lo usa el disparador de aprobaciones). */

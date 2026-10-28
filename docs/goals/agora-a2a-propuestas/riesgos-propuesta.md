@@ -40,11 +40,11 @@
 - **Decisión**: el hueco del CDC quedó lleno: `agora:pg` se propone **inactivo** (`motivo`: necesita Docker; `falta`: un
   perfil con Docker o un servicio Postgres en el CI). Se acepta que el `validate` no corra en cada build la variante en
   Postgres real de las suites de aislamiento entre organizaciones, RLS forzada, los malos financieros y el testigo del
-  freno. La variante en PGlite (las mismas 118 pruebas y los mismos 75 sabotajes) sí corre, dentro de `prueba:tools`.
+  freno. La variante en PGlite (las mismas 124 pruebas y los mismos 80 sabotajes) sí corre, dentro de `prueba:tools`.
 - **Riesgo aceptado**: una regresión de RLS o de un disparador puede pasar el `validate` en verde; solo la caza la
   corrida a mano o el perfil con Docker. Es «un control conocido pendiente».
-- **Mitigaciones vigentes**: la variante en PGlite corre en `prueba:tools` (118/118, 75/75 sabotajes); la corrida en
-  Postgres real 17.11 está en la evidencia del goal (`docs/goals/agora-a2a-evidencia/f7-pg.log`: 118/118 y 75/75); el
+- **Mitigaciones vigentes**: la variante en PGlite corre en `prueba:tools` (124/124, 80/80 sabotajes); la corrida en
+  Postgres real 17.11 está en la evidencia del goal (`docs/goals/agora-a2a-evidencia/f8-pg.log`: 124/124 y 80/80); el
   padrón cuenta los inactivos aparte y nunca como pasados. Diferencia conocida entre motores: en el laboratorio el dueño
   de las funciones definer es superusuario; en Supabase no está medido (ver «lo que podría estar mal», punto 10).
 - **Firmado por** (nombre y rol): pendiente

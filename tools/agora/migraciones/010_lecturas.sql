@@ -33,13 +33,13 @@ begin
   r := agora_priv.regla_de(p);
   select c.segregacion into seg from agora.org_config c where c.org_id = p.org_id;
   if p.estado <> 'pendiente' then return jsonb_build_object('puede', false, 'motivo', 'la propuesta está ' || p.estado, 'firmas', r.firmas); end if;
-  if coalesce(seg, true) and auth.uid() in (p.solicitada_por, p.autor_persona) then
+  if coalesce(seg, true) and agora_priv.uid() in (p.solicitada_por, p.autor_persona) then
     return jsonb_build_object('puede', false, 'motivo', 'la pediste tú: la aprueba otra persona (segregación de funciones)', 'firmas', r.firmas);
   end if;
-  if exists (select 1 from agora.aprobacion a where a.propuesta_id = p.id and a.decidida_por = auth.uid()) then
+  if exists (select 1 from agora.aprobacion a where a.propuesta_id = p.id and a.decidida_por = agora_priv.uid()) then
     return jsonb_build_object('puede', false, 'motivo', 'ya la firmaste; falta otra firma', 'firmas', r.firmas);
   end if;
-  rol := agora_priv.ranura_para(p, auth.uid());
+  rol := agora_priv.ranura_para(p, agora_priv.uid());
   if rol is null then
     return jsonb_build_object('puede', false, 'motivo', case when r.id is null then 'la matriz no tiene regla para esto: nadie la aprueba'
       else 'la matriz pide ' || (select string_agg(x, ' o ') from jsonb_array_elements_text(r.firmas -> 0) x) || ' para esto' end, 'firmas', r.firmas);

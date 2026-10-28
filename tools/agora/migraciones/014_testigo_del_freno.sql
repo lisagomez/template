@@ -28,7 +28,7 @@ create index if not exists freno_testigo_busca on agora.freno_testigo (persona_i
 alter table agora.freno_testigo enable row level security;
 alter table agora.freno_testigo force row level security;
 drop policy if exists p_testigo on agora.freno_testigo;
-create policy p_testigo on agora.freno_testigo for select to authenticated using (persona_id = auth.uid());
+create policy p_testigo on agora.freno_testigo for select to authenticated using (persona_id = agora_priv.uid());
 revoke all on agora.freno_testigo from authenticated, agora_agente, agora_puerta, service_role;
 grant select on agora.freno_testigo to authenticated;
 
@@ -39,14 +39,14 @@ declare
   o uuid;
   n int := 0;
 begin
-  if agora_priv.rol_que_llama() <> 'authenticated' or auth.uid() is null then raise exception 'solo una persona atestigua lo que dijo' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'authenticated' or agora_priv.uid() is null then raise exception 'solo una persona atestigua lo que dijo' using errcode = 'AG403'; end if;
   if coalesce(array_length(textos, 1), 0) > 10 then raise exception 'a lo sumo 10 frases por vez' using errcode = 'AG400'; end if;
-  select p.org_id into o from agora.persona p where p.id = auth.uid();
+  select p.org_id into o from agora.persona p where p.id = agora_priv.uid();
   if o is null then raise exception 'no existe' using errcode = 'AG404'; end if;
-  delete from agora.freno_testigo where persona_id = auth.uid() and dicho_en < now() - interval '1 day';
+  delete from agora.freno_testigo where persona_id = agora_priv.uid() and dicho_en < now() - interval '1 day';
   foreach t in array coalesce(textos, '{}') loop
     if length(agora_priv.normaliza_cita(t)) between 1 and 2000 then
-      insert into agora.freno_testigo (org_id, persona_id, sha256) values (o, auth.uid(), agora_priv.huella_cita(t));
+      insert into agora.freno_testigo (org_id, persona_id, sha256) values (o, agora_priv.uid(), agora_priv.huella_cita(t));
       n := n + 1;
     end if;
   end loop;
@@ -61,18 +61,18 @@ declare
   t bigint;
 begin
   if agora_priv.llama_la_base() then return; end if;
-  if agora_priv.rol_que_llama() <> 'authenticated' or auth.uid() is null then raise exception 'lo irreversible lo pide una persona' using errcode = 'AG403'; end if;
+  if agora_priv.rol_que_llama() <> 'authenticated' or agora_priv.uid() is null then raise exception 'lo irreversible lo pide una persona' using errcode = 'AG403'; end if;
   select x.id into t from agora.freno_testigo x
-   where x.persona_id = auth.uid() and x.sha256 = h and x.usado_en is null and x.dicho_en > now() - interval '15 minutes'
+   where x.persona_id = agora_priv.uid() and x.sha256 = h and x.usado_en is null and x.dicho_en > now() - interval '15 minutes'
    order by x.dicho_en desc limit 1 for update;
   if t is not null then
     update agora.freno_testigo set usado_en = now(), accion = p_accion where id = t;
     return;
   end if;
-  if exists (select 1 from agora.freno_testigo x where x.persona_id = auth.uid() and x.sha256 = h and x.usado_en is not null) then
+  if exists (select 1 from agora.freno_testigo x where x.persona_id = agora_priv.uid() and x.sha256 = h and x.usado_en is not null) then
     raise exception 'esa cita ya se usó: lo irreversible pide que lo vuelvas a decir' using errcode = 'AG409';
   end if;
-  if exists (select 1 from agora.freno_testigo x where x.persona_id = auth.uid() and x.sha256 = h) then
+  if exists (select 1 from agora.freno_testigo x where x.persona_id = agora_priv.uid() and x.sha256 = h) then
     raise exception 'la cita venció: pasaron más de 15 minutos desde que lo dijiste' using errcode = 'AG403';
   end if;
   raise exception 'la cita no es tuya: no la dijiste tú en la conversación (un asistente, un agente o una página no la dictan)' using errcode = 'AG403';

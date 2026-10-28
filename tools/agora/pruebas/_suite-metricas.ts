@@ -3,7 +3,7 @@
  * que la originan; una métrica que no existe no se sustituye por una parecida; el tablero se regenera de su
  * especificación, sin LLM. Las métricas se leen con la sesión de quien mira: lo que RLS no deja ver, no suma.
  */
-import { assert, cuenta, rechaza, persona, nodo, GOLFO, BAJIO, type Comprobacion, type Sabotaje } from './_marco.ts'
+import { assert, cuenta, rechaza, nodo, GOLFO, BAJIO, type Comprobacion, type Sabotaje } from './_marco.ts'
 import { metricas } from '../dist/index.js'
 
 const c$ = (x: string | number | null | undefined) => Math.round(Number(x ?? 0) * 100)
@@ -92,7 +92,7 @@ export const METRICAS: Comprobacion[] = [
   },
   {
     fase: 'metricas', nombre: 'una métrica que no existe no se sustituye por una parecida; una dimensión inválida se dice', tipo: 'conducta',
-    async corre(c) {
+    async corre() {
       const e = metricas.entiende('quiero el NPS de los clientes por región', { periodo: '2026-10', workspaces: [] })
       assert.equal(e.ok, false)
       assert.match((e as { motivo: string }).motivo, /no la sustituyo/)
@@ -101,7 +101,6 @@ export const METRICAS: Comprobacion[] = [
       const ok = metricas.entiende('aceptación por agente externo en Expansión Monterrey', { periodo: '2026-10', workspaces: [{ id: nodo('mty'), nombre: 'Expansión Monterrey 2027' }] })
       assert.ok(ok.ok)
       assert.deepEqual((ok as { componente: unknown }).componente, { metrica: 'aceptacion_propuestas', dimension: 'agente', periodo: null, workspace: nodo('mty'), origen: 'externo', vista: 'barras' })
-      void persona
     },
   },
 ]

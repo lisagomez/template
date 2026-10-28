@@ -49,20 +49,22 @@ export function arma(p: Payload): PropuestaArmada {
 export interface DatosDePropuesta {
   org: string; resumen: string; payload: Payload; nivel?: 'A0' | 'A1' | 'A2' | 'A3'
   autorAgente?: string; autorPersona?: string; solicitadaPor?: string | null; clave?: string; taskId?: string; threadId?: string
+  /** El mensaje del hilo que la originó: si lo escribió una persona, la base la toma como quien la solicitó. */
+  mensajeOrigen?: string | null
 }
 
 /** Inserta la propuesta con la sesión de quien la hace (un agente o una persona): la base decide si cabe. */
 export async function propone(s: Sesion, d: DatosDePropuesta): Promise<{ id: string; sha256: string }> {
   const a = arma(d.payload)
   const [fila] = await s.consulta<{ id: string; sha256: string }>(
-    `insert into agora.propuesta (org_id, categoria_id, clase, autor_agente, autor_persona, solicitada_por, resumen, payload_canon, sha256, nivel, clave, task_id, thread_id)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-     on conflict (clave) do nothing returning id, sha256`,
+    `insert into agora.propuesta (org_id, categoria_id, clase, autor_agente, autor_persona, solicitada_por, resumen, payload_canon, sha256, nivel, clave, task_id, thread_id, mensaje_origen)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+     on conflict (org_id, clave) do nothing returning id, sha256`,
     [d.org, a.payload.categoria, a.payload.clase, d.autorAgente ?? null, d.autorPersona ?? null, d.solicitadaPor ?? null, d.resumen, a.canon, a.sha256,
-      d.nivel ?? 'A1', d.clave ?? null, d.taskId ?? null, d.threadId ?? null])
+      d.nivel ?? 'A1', d.clave ?? null, d.taskId ?? null, d.threadId ?? null, d.mensajeOrigen ?? null])
   if (fila) return fila
   // Ya existía con esa clave (un reintento): se devuelve la misma, no se crea otra.
-  const [previa] = await s.consulta<{ id: string; sha256: string }>('select id, sha256 from agora.propuesta where clave = $1', [d.clave])
+  const [previa] = await s.consulta<{ id: string; sha256: string }>('select id, sha256 from agora.propuesta where org_id = $1 and clave = $2', [d.org, d.clave])
   if (!previa) throw new Error('la propuesta no se creó y no hay una previa con esa clave')
   return previa
 }

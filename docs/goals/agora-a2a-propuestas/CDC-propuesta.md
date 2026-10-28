@@ -9,8 +9,8 @@
 
 ### 2026-10-28 — Ágora: sus gates en el padrón, la ventana de la capa pinta el módulo dueño de `explorador` y `conversacion`, y el coordinador sin clase de routing — radio: padrón de gates, herramienta (`tools/capa`, cambio genérico que ven todos los productos compuestos) y routing (C8, no asignación)
 
-- **Cambio** (lo construido, no un boceto; rama `worktree-agora`, sin push):
-  1. **Padrón de gates (`.claude/gates.json`): no cambia.** La suite de `tools/agora` (118 pruebas, fases 1 a 7, en
+- **Cambio** (lo construido, no un boceto; rama `agora/a2a`, sin push):
+  1. **Padrón de gates (`.claude/gates.json`): no cambia.** La suite de `tools/agora` (124 pruebas, fases 1 a 7, en
      PGlite) entra sola por `prueba:tools`, que ya está en `validate`. **No toqué `gates.json`.** Lo que propongo
      agregar, y solo con esta firma:
 
@@ -18,11 +18,11 @@
 
      | Nombre | Runner | Comando | Perfiles | Activo | Si inactivo: `motivo` y `falta` | Siembras que lo tumban |
      | --- | --- | --- | --- | --- | --- | --- |
-     | `agora:pg` | npm | `npm run agora:pg` | ninguno (inactivo) | `false` | **motivo**: necesita Docker y levanta un PostgreSQL 17 desechable (`agora-pg-lab`), igual que `erp:prueba`. **falta**: un perfil con Docker o un servicio Postgres en el CI | Los 75 sabotajes de `tools/agora/evidencia/sabotajes.ts` (los mismos que en PGlite), contra el motor real |
+     | `agora:pg` | npm | `npm run agora:pg` | ninguno (inactivo) | `false` | **motivo**: necesita Docker y levanta un PostgreSQL 17 desechable (`agora-pg-lab`), igual que `erp:prueba`. **falta**: un perfil con Docker o un servicio Postgres en el CI | Los 80 sabotajes de `tools/agora/evidencia/sabotajes.ts` (los mismos que en PGlite), contra el motor real |
 
      Un inactivo **nunca** se cuenta como uno que pasó: aplica la entrada «las suites en Postgres real fuera del
      `validate`» de `riesgos-propuesta.md`. Mientras tanto, la corrida contra Postgres real es evidencia pegada en el
-     goal (`docs/goals/agora-a2a-evidencia/f7-pg.log`: 118/118 y 75/75), no un gate.
+     goal (`docs/goals/agora-a2a-evidencia/f8-pg.log`: 124/124 y 80/80), no un gate.
      - No entra ningún artefacto nuevo a `generados`: `src/shared/capa/enchufes.ts` ya estaba y solo se regeneró.
      - La Puerta vive como ruta de la app (`src/app/api/agora/a2a/[org]/route.ts`), declarada en
        `RUTAS_FUERA_DEL_BRIDGE` de `scripts/prueba-a2a.ts` con su motivo (`prueba:a2a` en verde).
@@ -88,7 +88,7 @@
 - **Salida del perímetro (C4)**: ninguna. Ningún enchufe de Ágora declara `sale`; la voz es solo local; el modelo es
   determinista.
 - **Gate aplicado** (lo que el agente pudo correr; lo marcado ☐ es del laboratorio):
-  - diff revisado ☐ — se enseña completo en el chat **antes** de pedir la firma (`git diff main..worktree-agora`);
+  - diff revisado ☐ — se enseña completo en el chat **antes** de pedir la firma (`git diff main..agora/a2a`);
   - regresión capa A ☑ — `C2 capa A (contratos): 166/166 en verde` (dentro del `validate` de `eb062f7`);
   - `npm run validate` ☑ tras el commit de la fase 7 (`eb062f7`): **34/34 gates activos, 11 inactivos declarados, 0
     rojos** (`docs/goals/agora-a2a-evidencia/validate-fase7.log`); se repite tras el último commit del goal;

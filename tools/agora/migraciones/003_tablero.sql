@@ -179,7 +179,7 @@ begin
              and exists (select 1 from agora.agente a where a.id = new.responsable_agente and a.origen = 'externo');
   if externo then raise exception 'asignar a un externo pide aprobador: va por propuesta' using errcode = 'AG403'; end if;
   if editor then return new; end if;
-  suyo := old.responsable_persona = auth.uid() and agora_priv.tiene_rol(new.org_id, new.categoria_id, array['colaborador']);
+  suyo := old.responsable_persona = agora_priv.uid() and agora_priv.tiene_rol(new.org_id, new.categoria_id, array['colaborador']);
   if suyo and (new.nombre, new.estado, new.prioridad, new.inicio, new.fin, new.responsable_persona, new.responsable_agente, new.vinculo, new.archivo)
               is not distinct from (old.nombre, old.estado, old.prioridad, old.inicio, old.fin, old.responsable_persona, old.responsable_agente, old.vinculo, old.archivo) then
     return new;
@@ -210,7 +210,7 @@ declare
   prop uuid := case when aplicando then nullif(current_setting('agora.propuesta', true), '')::uuid end;
   nivel text := case when aplicando then nullif(current_setting('agora.nivel', true), '') end;
   autor_agente uuid := case when aplicando then nullif(current_setting('agora.autor_agente', true), '')::uuid end;
-  quien uuid := case when aplicando then nullif(current_setting('agora.autor_persona', true), '')::uuid else auth.uid() end;
+  quien uuid := case when aplicando then nullif(current_setting('agora.autor_persona', true), '')::uuid else agora_priv.uid() end;
 begin
   foreach campo in array array['nombre', 'estado', 'responsable_persona', 'responsable_agente', 'prioridad', 'inicio', 'fin', 'monto_mxn', 'progreso', 'etiquetas', 'vinculo', 'archivo'] loop
     if (a -> campo) is distinct from (d -> campo) then

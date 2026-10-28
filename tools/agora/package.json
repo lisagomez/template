@@ -38,6 +38,7 @@
     "node": ">=22.18"
   },
   "scripts": {
+    "prebuild": "npm --prefix ../calendario run build",
     "build": "tsc -p tsconfig.json",
     "preprueba": "npm run build",
     "prueba": "node --test --test-concurrency=1 pruebas/[a-z]*.ts",

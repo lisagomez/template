@@ -3,7 +3,7 @@
 -- su sha256 y aprobaciones que solo firma una persona con el rol que dice la matriz. Idempotente.
 --
 -- Adaptado de `tools/sala-a2a/migraciones/propuesta-sala-a2a.sql` (canales, hilos de un nivel, aprobación
--- restrictiva `decidida_por = auth.uid()`, ningún rol de servicio ni de agente inserta aprobaciones).
+-- restrictiva `decidida_por = agora_priv.uid()`, ningún rol de servicio ni de agente inserta aprobaciones).
 -- Lo nuevo: el canal es de una CATEGORÍA, la aprobación exige el ROL de la matriz y la segregación de
 -- funciones, y la huella la recalcula la BASE sobre el texto canónico que se guarda y que se aplica.
 -- =============================================================================
@@ -29,7 +29,7 @@ create table if not exists agora.mensaje (
   origen        text not null default 'sala' check (origen in ('sala', 'puerta', 'espejo_slack', 'espejo_telegram', 'espejo_correo')),
   item_id       uuid references agora.item (id) on delete set null,
   propuesta_id  uuid,
-  clave         text unique,
+  clave         text,
   creado_en     timestamptz not null default now(),
   constraint autor_coherente check (
     (autor_tipo = 'humano' and autor_persona is not null and autor_agente is null) or
@@ -101,7 +101,7 @@ create table if not exists agora.propuesta (
   vence_en               timestamptz not null default now() + interval '7 days',
   task_id                text,
   thread_id              text,
-  clave                  text unique,
+  clave                  text,
   creada_en              timestamptz not null default now(),
   decidida_en            timestamptz,
   aplicada_en            timestamptz,
@@ -116,6 +116,30 @@ do $$ begin
 exception when duplicate_object then null;
 end $$;
 
+/** Quien solicitó una propuesta, comprobado (definer: el agente que propone no lee personas ni mensajes ajenos).
+ *  Parámetros con prefijo: `mensaje` tiene una columna `origen` y la sombrearía. */
+drop function if exists agora_priv.solicitante_de(uuid, uuid, uuid);
+create or replace function agora_priv.solicitante_de(p_org uuid, p_declarado uuid, p_origen uuid) returns uuid language plpgsql stable security definer set search_path = '' as $$
+declare
+  mo agora.mensaje;
+  quien uuid := p_declarado;
+begin
+  if p_origen is not null then
+    select * into mo from agora.mensaje where id = p_origen;
+    if not found or mo.org_id <> p_org then raise exception 'el mensaje de origen no es de esa organización' using errcode = 'AG400'; end if;
+    if mo.autor_tipo = 'humano' then
+      if p_declarado is not null and p_declarado <> mo.autor_persona then
+        raise exception 'quien la solicitó no es quien escribió el mensaje de origen' using errcode = 'AG400';
+      end if;
+      quien := mo.autor_persona;
+    end if;
+  end if;
+  if quien is not null and not exists (select 1 from agora.persona x where x.id = quien and x.org_id = p_org) then
+    raise exception 'quien la solicitó no es de esa organización' using errcode = 'AG400';
+  end if;
+  return quien;
+end $$;
+
 create or replace function agora_priv.propuesta_coherente() returns trigger language plpgsql set search_path = '' as $$
 declare
   a agora.agente;
@@ -128,6 +152,9 @@ begin
   if not found or c.tipo <> 'categoria' or c.org_id <> new.org_id then raise exception 'una propuesta es de una categoría de su organización' using errcode = 'AG400'; end if;
   if pl ->> 'categoria' is distinct from new.categoria_id::text then raise exception 'el payload no es de esa categoría' using errcode = 'AG400'; end if;
   if pl ->> 'clase' is distinct from new.clase then raise exception 'el payload no es de esa clase' using errcode = 'AG400'; end if;
+  -- Quien la pidió es de la organización; si la propuesta cita su mensaje de origen, quien lo pidió es QUIEN LO
+  -- ESCRIBIÓ (un agente no declara a otro, ni lo esconde): la segregación de funciones depende de esto.
+  new.solicitada_por := agora_priv.solicitante_de(new.org_id, new.solicitada_por, new.mensaje_origen);
   if new.autor_agente is not null then
     select * into a from agora.agente where id = new.autor_agente;
     if a.org_id <> new.org_id then raise exception 'el agente no es de esa organización' using errcode = 'AG400'; end if;
@@ -143,6 +170,18 @@ begin
   if current_user in ('agora_agente', 'authenticated') then new.creada_en := now(); new.estado := 'pendiente'; end if;
   return new;
 end $$;
+alter table agora.propuesta add column if not exists mensaje_origen uuid references agora.mensaje (id);
+-- La clave de idempotencia es por ORGANIZACIÓN: un agente de otra no ocupa por adelantado la clave ajena.
+do $do$ begin
+  alter table agora.propuesta drop constraint if exists propuesta_clave_key;
+  alter table agora.mensaje drop constraint if exists mensaje_clave_key;
+  if not exists (select 1 from pg_constraint where conname = 'propuesta_org_clave') then
+    alter table agora.propuesta add constraint propuesta_org_clave unique (org_id, clave);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'mensaje_org_clave') then
+    alter table agora.mensaje add constraint mensaje_org_clave unique (org_id, clave);
+  end if;
+end $do$;
 drop trigger if exists tg_propuesta_coherente on agora.propuesta;
 create trigger tg_propuesta_coherente before insert on agora.propuesta for each row execute function agora_priv.propuesta_coherente();
 
@@ -152,8 +191,8 @@ begin
   if not agora_priv.confiable() then
     raise exception 'una propuesta no se edita: se decide' using errcode = 'AG403';
   end if;
-  if (new.payload_canon, new.sha256, new.clase, new.categoria_id, new.autor_agente, new.autor_persona, new.solicitada_por)
-     is distinct from (old.payload_canon, old.sha256, old.clase, old.categoria_id, old.autor_agente, old.autor_persona, old.solicitada_por) then
+  if (new.payload_canon, new.sha256, new.clase, new.categoria_id, new.autor_agente, new.autor_persona, new.solicitada_por, new.mensaje_origen)
+     is distinct from (old.payload_canon, old.sha256, old.clase, old.categoria_id, old.autor_agente, old.autor_persona, old.solicitada_por, old.mensaje_origen) then
     raise exception 'el contenido de una propuesta no cambia: se propone otra' using errcode = 'AG403';
   end if;
   return new;
@@ -204,14 +243,20 @@ declare
   ranura jsonb;
   k int := 0;
   usadas text[];
+  usada int;
   rol text;
 begin
   if r.id is null then return null; end if;
-  select coalesce(array_agg(a.rol_usado), '{}') into usadas from agora.aprobacion a where a.propuesta_id = p.id and a.decision = 'aprobar';
+  select coalesce(array_agg(a.rol_usado order by a.decidida_en), '{}') into usadas from agora.aprobacion a where a.propuesta_id = p.id and a.decision = 'aprobar';
   for ranura in select * from jsonb_array_elements(r.firmas) loop
     k := k + 1;
-    -- La ranura ya está llena si alguna firma previa usó uno de sus roles.
-    if exists (select 1 from jsonb_array_elements_text(ranura) x where x = any (usadas)) then continue; end if;
+    -- Cada firma previa llena UNA ranura (la primera que le toca): con dos ranuras iguales, una firma deja la otra libre.
+    select i into usada from generate_subscripts(usadas, 1) i where usadas[i] in (select jsonb_array_elements_text(ranura)) order by i limit 1;
+    if usada is not null then
+      usadas := usadas[1:usada - 1] || usadas[usada + 1:];
+      usada := null;
+      continue;
+    end if;
     for rol in select * from jsonb_array_elements_text(ranura) loop
       if rol = any (roles) then return rol; end if;
     end loop;
@@ -223,18 +268,23 @@ create or replace function agora_priv.firmas_completas(pid uuid) returns boolean
 declare
   p agora.propuesta;
   r agora.matriz_regla;
-  ranura jsonb;
+  n int;
 begin
   select * into p from agora.propuesta where id = pid;
   r := agora_priv.regla_de(p);
   if r.id is null then return false; end if;
-  for ranura in select * from jsonb_array_elements(r.firmas) loop
-    if not exists (select 1 from agora.aprobacion a where a.propuesta_id = pid and a.decision = 'aprobar' and a.sha256 = p.sha256
-                     and a.rol_usado in (select jsonb_array_elements_text(ranura))) then
-      return false;
-    end if;
-  end loop;
-  return true;
+  n := jsonb_array_length(r.firmas);
+  -- Cada ranura la llena una PERSONA distinta: dos ranuras con los mismos roles piden dos firmas, no una contada dos
+  -- veces (2026-10-28, lo cazó el verificador independiente). La matriz tiene de 1 a 3 ranuras.
+  return exists (
+    with f as (select a.decidida_por quien, a.rol_usado rol from agora.aprobacion a
+                where a.propuesta_id = pid and a.decision = 'aprobar' and a.sha256 = p.sha256)
+    select 1 from f f1
+      left join f f2 on n >= 2 and f2.quien <> f1.quien
+      left join f f3 on n >= 3 and f3.quien <> f1.quien and f3.quien <> f2.quien
+     where f1.rol in (select jsonb_array_elements_text(r.firmas -> 0))
+       and (n < 2 or (f2.quien is not null and f2.rol in (select jsonb_array_elements_text(r.firmas -> 1))))
+       and (n < 3 or (f3.quien is not null and f3.rol in (select jsonb_array_elements_text(r.firmas -> 2)))));
 end $$;
 
 /**

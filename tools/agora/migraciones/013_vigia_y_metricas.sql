@@ -61,7 +61,7 @@ begin
     select c.id into canal from agora.canal c where c.categoria_id = p_nodo;
     if canal is not null then
       insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_agente, cuerpo, item_id, clave) values (o, canal, 'agente', agora_priv.agente_de_tarea(), p_texto, p_item, 'vigia:' || p_clave)
-      on conflict (clave) do nothing;
+      on conflict (org_id, clave) do nothing;
     end if;
   end if;
   return n = 1;
@@ -127,7 +127,7 @@ create table if not exists agora.metricas_tablero (
   org_id  uuid not null references agora.org (id) on delete cascade,
   version int not null,
   spec    jsonb not null,
-  quien   uuid not null default auth.uid(),
+  quien   uuid not null default agora_priv.uid(),
   motivo  text not null,
   cuando  timestamptz not null default now(),
   unique (org_id, version)
@@ -137,7 +137,7 @@ alter table agora.metricas_tablero force row level security;
 drop policy if exists p_metricas on agora.metricas_tablero;
 create policy p_metricas on agora.metricas_tablero for select to authenticated using (agora_priv.es_de_org(org_id));
 drop policy if exists p_metricas_guarda on agora.metricas_tablero;
-create policy p_metricas_guarda on agora.metricas_tablero for insert to authenticated with check (agora_priv.es_de_org(org_id) and quien = auth.uid());
+create policy p_metricas_guarda on agora.metricas_tablero for insert to authenticated with check (agora_priv.es_de_org(org_id) and quien = agora_priv.uid());
 grant select, insert on agora.metricas_tablero to authenticated;
 grant usage on sequence agora.metricas_tablero_id_seq to authenticated;
 drop trigger if exists tg_metricas_solo_agregar on agora.metricas_tablero;

@@ -60,8 +60,8 @@ begin
 end $$;
 
 create or replace function agora_priv.actor() returns table (tipo text, ref text) language sql stable security definer set search_path = '' as $$
-  select case when auth.uid() is not null then 'humano' when agora_priv.agente_de_tarea() is not null then 'agente' else 'sistema' end,
-         coalesce(auth.uid()::text, agora_priv.agente_de_tarea()::text)
+  select case when agora_priv.uid() is not null then 'humano' when agora_priv.agente_de_tarea() is not null then 'agente' else 'sistema' end,
+         coalesce(agora_priv.uid()::text, agora_priv.agente_de_tarea()::text)
 $$;
 
 -- Lo que la bitácora registra sola, para que no dependa de la app: propuestas, decisiones y decisiones de póliza.
@@ -248,7 +248,7 @@ begin
   if h.deshacer_hasta is null or h.deshacer_hasta <= now() then raise exception 'eso ya no se deshace con un clic (solo A2, 24 h)' using errcode = 'AG409'; end if;
   if exists (select 1 from agora.item_historial x where x.deshace = h.id) then raise exception 'ya se deshizo' using errcode = 'AG409'; end if;
   if (to_jsonb(it) -> h.campo) is distinct from h.despues then raise exception 'el campo volvió a cambiar después: se edita a mano' using errcode = 'AG409'; end if;
-  perform set_config('agora.autor_persona', auth.uid()::text, true);
+  perform set_config('agora.autor_persona', agora_priv.uid()::text, true);
   case h.campo
     when 'nombre' then update agora.item set nombre = h.antes #>> '{}' where id = it.id;
     when 'prioridad' then update agora.item set prioridad = h.antes #>> '{}' where id = it.id;
@@ -256,7 +256,7 @@ begin
     when 'etiquetas' then update agora.item set etiquetas = array(select jsonb_array_elements_text(h.antes)) where id = it.id;
     else raise exception 'ese campo no se deshace con un clic' using errcode = 'AG400';
   end case;
-  perform agora_priv.anota(it.org_id, 'humano', auth.uid()::text, 'item.deshaz', hid::text, jsonb_build_object('campo', h.campo));
+  perform agora_priv.anota(it.org_id, 'humano', agora_priv.uid()::text, 'item.deshaz', hid::text, jsonb_build_object('campo', h.campo));
   return jsonb_build_object('ok', true);
 end $$;
 
@@ -274,13 +274,13 @@ begin
   elsif exists (select 1 from agora.agente_alcance x where x.agente_id = a.id and agora_priv.tiene_rol(a.org_id, x.nodo_id, array['aprobador'])) then rol := 'aprobador';
   else raise exception 'el alta la firman la Propietaria y el Aprobador del dominio' using errcode = 'AG403';
   end if;
-  insert into agora.agente_firma (agente_id, org_id, version, persona_id, rol_usado) values (a.id, a.org_id, a.version, auth.uid(), rol)
+  insert into agora.agente_firma (agente_id, org_id, version, persona_id, rol_usado) values (a.id, a.org_id, a.version, agora_priv.uid(), rol)
   on conflict do nothing;
   update agora.agente set estado = 'en_revision' where id = a.id and estado = 'solicitado';
   if (select count(distinct f.rol_usado) from agora.agente_firma f where f.agente_id = a.id and f.version = a.version) = 2 then
     update agora.agente set estado = 'prueba' where id = a.id;
   end if;
-  perform agora_priv.anota(a.org_id, 'humano', auth.uid()::text, 'agente.firma_alta', a.id::text, jsonb_build_object('rol', rol, 'version', a.version));
+  perform agora_priv.anota(a.org_id, 'humano', agora_priv.uid()::text, 'agente.firma_alta', a.id::text, jsonb_build_object('rol', rol, 'version', a.version));
   return jsonb_build_object('ok', true, 'estado', (select x.estado from agora.agente x where x.id = a.id));
 end $$;
 
@@ -293,7 +293,7 @@ begin
   if not agora_priv.tiene_rol(a.org_id, null, array['propietario']) then raise exception 'activar a un agente es de la Propietaria' using errcode = 'AG403'; end if;
   if a.estado <> 'prueba' then raise exception 'solo se activa un agente en prueba (%)', a.estado using errcode = 'AG409'; end if;
   update agora.agente set estado = 'aprobado' where id = a.id;
-  perform agora_priv.anota(a.org_id, 'humano', auth.uid()::text, 'agente.activa', a.id::text, '{}');
+  perform agora_priv.anota(a.org_id, 'humano', agora_priv.uid()::text, 'agente.activa', a.id::text, '{}');
   return jsonb_build_object('ok', true);
 end $$;
 
@@ -321,7 +321,7 @@ begin
     raise exception 'suspender: Propietaria, Administrador o el Aprobador de su dominio' using errcode = 'AG403';
   end if;
   if a.estado not in ('aprobado', 'prueba') then raise exception 'el agente no está activo (%)', a.estado using errcode = 'AG409'; end if;
-  return agora_priv.suspende(a, motivo, auth.uid(), null);
+  return agora_priv.suspende(a, motivo, agora_priv.uid(), null);
 end $$;
 
 /** El vigía suspende solo: deriva de la tarjeta, firma inválida o inyección repetida. */
@@ -356,8 +356,8 @@ begin
   update agora.agente set estado = 'aprobado' where id = a.id;
   update agora.propuesta set estado = 'pendiente' where autor_agente = a.id and estado = 'congelada' and vence_en > now();
   get diagnostics n = row_count;
-  insert into agora.revocacion (org_id, agente_id, accion, quien, motivo, retirado) values (a.org_id, a.id, 'reactivar', auth.uid(), motivo, jsonb_build_object('descongeladas', n));
-  perform agora_priv.anota(a.org_id, 'humano', auth.uid()::text, 'agente.reactiva', a.id::text, jsonb_build_object('motivo', motivo));
+  insert into agora.revocacion (org_id, agente_id, accion, quien, motivo, retirado) values (a.org_id, a.id, 'reactivar', agora_priv.uid(), motivo, jsonb_build_object('descongeladas', n));
+  perform agora_priv.anota(a.org_id, 'humano', agora_priv.uid()::text, 'agente.reactiva', a.id::text, jsonb_build_object('motivo', motivo));
   return jsonb_build_object('ok', true, 'descongeladas', n);
 end $$;
 
@@ -396,8 +396,8 @@ begin
   update agora.recordatorio set estado = 'cancelado' where agente_id = a.id and estado = 'programado';
   get diagnostics recs = row_count;
   insert into agora.revocacion (org_id, agente_id, accion, quien, motivo, cita, retirado)
-  values (a.org_id, a.id, 'revocar', auth.uid(), motivo, cita, jsonb_build_object('propuestas', props, 'tareas', tareas, 'items', items, 'recordatorios', recs));
-  perform agora_priv.anota(a.org_id, 'humano', auth.uid()::text, 'agente.revoca', a.id::text,
+  values (a.org_id, a.id, 'revocar', agora_priv.uid(), motivo, cita, jsonb_build_object('propuestas', props, 'tareas', tareas, 'items', items, 'recordatorios', recs));
+  perform agora_priv.anota(a.org_id, 'humano', agora_priv.uid()::text, 'agente.revoca', a.id::text,
                            jsonb_build_object('motivo', motivo, 'kid', a.kid, 'propuestas', props, 'tareas', tareas, 'items', items, 'recordatorios', recs));
   return jsonb_build_object('ok', true, 'propuestas', props, 'tareas', tareas, 'items', items, 'recordatorios', recs);
 end $$;
@@ -432,7 +432,7 @@ begin
   actual := case tope when 'gasto' then a.tope_gasto_mes_mxn when 'mensajes' then a.tope_mensajes_hora when 'propuestas' then a.tope_propuestas_dia end;
   if actual is null then raise exception 'tope desconocido: %', tope using errcode = 'AG400'; end if;
   if valor >= actual then raise exception 'subir un tope es una propuesta (la Propietaria; el de gasto, también Finanzas)' using errcode = 'AG403'; end if;
-  perform agora_priv.cambia_tope(a.id, tope, valor, 'baja directa', auth.uid());
+  perform agora_priv.cambia_tope(a.id, tope, valor, 'baja directa', agora_priv.uid());
   return jsonb_build_object('ok', true, 'antes', actual, 'despues', valor);
 end $$;
 
@@ -443,8 +443,8 @@ begin
   if length(coalesce(btrim(cita), '')) < 8 then raise exception 'esto va por el freno: falta la cita textual' using errcode = 'AG400'; end if;
   if not activa then perform agora_priv.consume_testigo(cita, 'quita_segregacion'); end if; -- quitarla va por el freno; ponerla no
   update agora.org_config set segregacion = activa where org_id = o;
-  insert into agora.decision_org (org_id, tipo, quien, cita) values (o, case when activa then 'segregacion_on' else 'segregacion_off' end, auth.uid(), cita);
-  perform agora_priv.anota(o, 'humano', auth.uid()::text, 'org.segregacion', o::text, jsonb_build_object('activa', activa));
+  insert into agora.decision_org (org_id, tipo, quien, cita) values (o, case when activa then 'segregacion_on' else 'segregacion_off' end, agora_priv.uid(), cita);
+  perform agora_priv.anota(o, 'humano', agora_priv.uid()::text, 'org.segregacion', o::text, jsonb_build_object('activa', activa));
   return jsonb_build_object('ok', true, 'segregacion', activa);
 end $$;
 
@@ -456,7 +456,7 @@ begin
   if not found or not agora_priv.es_de_org(k.org_id) then raise exception 'no existe' using errcode = 'AG404'; end if;
   if not agora_priv.tiene_rol(k.org_id, null, array['finanzas']) then raise exception 'liberar un compromiso es de Finanzas' using errcode = 'AG403'; end if;
   update agora.compromiso set liberado_mxn = k.importe_mxn - k.ejercido_mxn, estado = 'liberado' where id = cid;
-  perform agora_priv.anota(k.org_id, 'humano', auth.uid()::text, 'compromiso.libera', cid::text, jsonb_build_object('liberado', k.vigente_mxn, 'motivo', motivo));
+  perform agora_priv.anota(k.org_id, 'humano', agora_priv.uid()::text, 'compromiso.libera', cid::text, jsonb_build_object('liberado', k.vigente_mxn, 'motivo', motivo));
   return jsonb_build_object('ok', true, 'liberado', k.vigente_mxn);
 end $$;
 
@@ -500,9 +500,9 @@ begin
   select count(*) into sin_costo from agora.gasto_modelo where org_id = o and periodo = per and costo_mxn is null;
   if not exists (select 1 from agora.costo where org_id = o and periodo = per and estado = 'ejercido')
      and not exists (select 1 from agora.gasto_modelo where org_id = o and periodo = per and costo_mxn is not null) then
-    insert into agora.periodo (org_id, periodo, estado, cerrado_por, cerrado_en, cita) values (o, per, 'cerrado', auth.uid(), now(), cita)
+    insert into agora.periodo (org_id, periodo, estado, cerrado_por, cerrado_en, cita) values (o, per, 'cerrado', agora_priv.uid(), now(), cita)
     on conflict (org_id, periodo) do update set estado = 'cerrado', cerrado_por = excluded.cerrado_por, cerrado_en = excluded.cerrado_en, cita = excluded.cita;
-    perform agora_priv.anota(o, 'humano', auth.uid()::text, 'periodo.cierra', per, jsonb_build_object('poliza', null, 'lineas', 0, 'sin_costear', sin_costo));
+    perform agora_priv.anota(o, 'humano', agora_priv.uid()::text, 'periodo.cierra', per, jsonb_build_object('poliza', null, 'lineas', 0, 'sin_costear', sin_costo));
     return jsonb_build_object('ok', true, 'poliza', null, 'lineas', 0, 'sin_costear', sin_costo);
   end if;
   folio := 'POL-' || per || '-D-' || lpad((coalesce((select count(*) from agora.poliza p where p.org_id = o and p.periodo = per), 0) + 1)::text, 3, '0');
@@ -546,8 +546,8 @@ begin
     lineas := lineas + 1;
   end loop;
   update agora.poliza set sha256 = agora.huella_poliza(pid) where id = pid;
-  insert into agora.periodo (org_id, periodo, estado, cerrado_por, cerrado_en, cita) values (o, per, 'cerrado', auth.uid(), now(), cita)
+  insert into agora.periodo (org_id, periodo, estado, cerrado_por, cerrado_en, cita) values (o, per, 'cerrado', agora_priv.uid(), now(), cita)
   on conflict (org_id, periodo) do update set estado = 'cerrado', cerrado_por = excluded.cerrado_por, cerrado_en = excluded.cerrado_en, cita = excluded.cita;
-  perform agora_priv.anota(o, 'humano', auth.uid()::text, 'periodo.cierra', per, jsonb_build_object('poliza', pid, 'lineas', lineas, 'sin_costear', sin_costo));
+  perform agora_priv.anota(o, 'humano', agora_priv.uid()::text, 'periodo.cierra', per, jsonb_build_object('poliza', pid, 'lineas', lineas, 'sin_costear', sin_costo));
   return jsonb_build_object('ok', true, 'poliza', pid, 'folio', folio, 'lineas', lineas, 'sin_costear', sin_costo);
 end $$;

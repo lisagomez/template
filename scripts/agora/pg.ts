@@ -6,7 +6,7 @@
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { leeEntorno } from './laboratorio.ts';
+import { leeEntorno } from './entorno.ts';
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const e = leeEntorno();

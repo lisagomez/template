@@ -3,7 +3,7 @@
  * calendario); los recordatorios se programan una vez por versión de la fecha y se cancelan al cerrar; el vigía
  * propone reprogramar lo atrasado, avisa al 80 % del gasto (también a Finanzas) y SUSPENDE por deriva de tarjeta.
  */
-import { assert, cuenta, rechaza, agente, nodo, item, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
+import { assert, cuenta, rechaza, agente, item, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
 import { correVigia, huellaDeTarjeta, firmaTarjeta } from '../dist/index.js'
 import { calendarioDeLaboratorio, descargaDeLaboratorio, socio, tarjetaDe } from '../dist/laboratorio/index.js'
 

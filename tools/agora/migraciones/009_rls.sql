@@ -7,7 +7,7 @@
 --   · Agentes: leen y escriben SOLO dentro de su alcance, con su token de tarea verificado por la base.
 --     Insertan mensajes, propuestas, su gasto de modelo y avisos. No actualizan ni borran nada. No aprueban.
 --   · La Puerta: ninguna tabla; solo sus tres funciones.
---   · Aprobaciones y decisiones de póliza: dos cierres — la política restrictiva `decidida_por = auth.uid()` y
+--   · Aprobaciones y decisiones de póliza: dos cierres — la política restrictiva `decidida_por = agora_priv.uid()` y
 --     ningún rol de servicio ni de agente con INSERT (se revoca explícito a `service_role`).
 -- =============================================================================
 set check_function_bodies = off;
@@ -106,18 +106,18 @@ create policy p_columna on agora.columna for select to authenticated using (agor
 create policy p_recordatorio on agora.recordatorio for select to authenticated using (agora_priv.es_de_org(org_id));
 create policy p_item_evento on agora.item_evento for select to authenticated using (agora_priv.es_de_org(org_id));
 create policy p_aviso on agora.aviso for select to authenticated using (agora_priv.es_de_org(org_id)
-  and (para_persona = auth.uid() or para_rol is null or agora_priv.tiene_rol(org_id, nodo_id, array[para_rol])));
+  and (para_persona = agora_priv.uid() or para_rol is null or agora_priv.tiene_rol(org_id, nodo_id, array[para_rol])));
 create policy p_canal on agora.canal for select to authenticated using (agora_priv.ve_nodo(org_id, categoria_id));
 create policy p_mensaje on agora.mensaje for select to authenticated using (agora_priv.ve_canal(canal_id));
 create policy p_mensaje_publica on agora.mensaje for insert to authenticated
-  with check (autor_tipo = 'humano' and autor_persona = auth.uid() and origen = 'sala' and agora_priv.publica_en(canal_id));
+  with check (autor_tipo = 'humano' and autor_persona = agora_priv.uid() and origen = 'sala' and agora_priv.publica_en(canal_id));
 create policy p_propuesta on agora.propuesta for select to authenticated using (agora_priv.ve_nodo(org_id, categoria_id));
 create policy p_propuesta_humana on agora.propuesta for insert to authenticated
-  with check (autor_persona = auth.uid() and autor_agente is null
+  with check (autor_persona = agora_priv.uid() and autor_agente is null
               and agora_priv.tiene_rol(org_id, categoria_id, array['propietario', 'administrador', 'aprobador', 'editor', 'colaborador', 'finanzas']));
 create policy p_aprobacion on agora.aprobacion for select to authenticated using (agora_priv.ve_propuesta(propuesta_id));
 create policy p_aprobacion_en_org on agora.aprobacion for insert to authenticated with check (agora_priv.es_de_org(org_id));
-create policy p_aprobacion_solo_humana on agora.aprobacion as restrictive for insert to authenticated with check (decidida_por = auth.uid());
+create policy p_aprobacion_solo_humana on agora.aprobacion as restrictive for insert to authenticated with check (decidida_por = agora_priv.uid());
 create policy p_tipo_cambio on agora.tipo_cambio for select to authenticated using (true);
 create policy p_periodo on agora.periodo for select to authenticated using (agora_priv.es_de_org(org_id));
 create policy p_presupuesto on agora.presupuesto for select to authenticated using (agora_priv.ve_nodo(org_id, categoria_id));
@@ -133,7 +133,7 @@ create policy p_poliza on agora.poliza for select to authenticated using (agora_
 create policy p_movimiento on agora.poliza_movimiento for select to authenticated using (agora_priv.ve_dinero(org_id));
 create policy p_decision on agora.poliza_decision for select to authenticated using (agora_priv.ve_dinero(org_id));
 create policy p_decision_en_org on agora.poliza_decision for insert to authenticated with check (agora_priv.es_de_org(org_id));
-create policy p_decision_solo_humana on agora.poliza_decision as restrictive for insert to authenticated with check (decidida_por = auth.uid());
+create policy p_decision_solo_humana on agora.poliza_decision as restrictive for insert to authenticated with check (decidida_por = agora_priv.uid());
 create policy p_bitacora on agora.bitacora for select to authenticated using (agora_priv.tiene_rol(org_id, null, array['propietario', 'administrador', 'finanzas', 'contabilidad']));
 
 -- --- Agentes (agora_agente): solo dentro de su alcance, con su token verificado ------------------------------------

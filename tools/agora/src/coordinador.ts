@@ -41,7 +41,7 @@ async function punto(s: Sesion, d: { org: string; thread: string; paso: number; 
 }
 
 async function responde(s: Sesion, m: Leido, coord: string, cuerpo: string, propuesta: string | null = null, clave: string | null = null) {
-  await s.consulta(`insert into agora.mensaje (org_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo, propuesta_id, clave) values ($1, $2, $3, 'agente', $4, $5, $6, $7) on conflict (clave) do nothing`,
+  await s.consulta(`insert into agora.mensaje (org_id, canal_id, hilo_id, autor_tipo, autor_agente, cuerpo, propuesta_id, clave) values ($1, $2, $3, 'agente', $4, $5, $6, $7) on conflict (org_id, clave) do nothing`,
     [m.org_id, m.canal_id, m.hilo_id ?? m.id, coord, cuerpo, propuesta, clave])
 }
 
@@ -98,7 +98,8 @@ export async function atiende(o: OpcionesCoordinador, mensajeId: string): Promis
   }
   // 6. aprobación: la propuesta llega al hilo con su huella y el grafo se DETIENE (interrupt)
   const p = await como_(async (s) => {
-    const pr = await propone(s, { org: m.org_id, autorAgente: coord, solicitadaPor: m.autor_persona, resumen: salida.plan!.resumen, payload: salida.plan!.payload, nivel, clave: `grafo:${thread}`, threadId: thread })
+    // Cita el mensaje que la originó: la base toma como solicitante a quien lo escribió (segregación de funciones).
+    const pr = await propone(s, { org: m.org_id, autorAgente: coord, mensajeOrigen: m.id, resumen: salida.plan!.resumen, payload: salida.plan!.payload, nivel, clave: `grafo:${thread}`, threadId: thread })
     await responde(s, m, coord, salida.texto, pr.id, `grafo:${thread}:propuesta`)
     await punto(s, { org: m.org_id, thread, paso: 5, nodo: 'politica', estado: { nivel }, agente: coord })
     await punto(s, { org: m.org_id, thread, paso: 6, nodo: 'aprobacion', estado: { esperando: pr.id, sha256: pr.sha256 }, propuesta: pr.id, agente: coord })

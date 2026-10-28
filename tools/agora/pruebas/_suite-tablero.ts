@@ -4,7 +4,7 @@
  * reglas del tipo de campo (Listo con dependencias cerradas, sin ciclos, el colaborador solo lo suyo) son de la base.
  */
 import { assert, cuenta, rechaza, agente, persona, nodo, item, GOLFO, SECRETO, type Comprobacion, type Sabotaje } from './_marco.ts'
-import { aplica, propone, supervisa, editaItem, deshaz } from '../dist/index.js'
+import { aplica, propone, supervisa, editaItem } from '../dist/index.js'
 
 const A2 = (campo: string, antes: unknown, despues: unknown, it = 'it-1', cat = 'pipeline') =>
   ({ version: 1 as const, clase: 'editar' as const, categoria: nodo(cat), cambios: [{ item: item(it), campo, antes: antes as never, despues: despues as never }] })

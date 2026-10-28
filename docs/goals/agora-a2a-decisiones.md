@@ -2,7 +2,7 @@
 
 > Lo que decidí construyendo Ágora y por qué. Todo es **corregible por el laboratorio**; nada de esto firma un CDC, un
 > C3 ni una AISIA (esos borradores están en `agora-a2a-propuestas/`, sin firmar). Solo laboratorio y datos ficticios.
-> Rama `worktree-agora`, sin push ni PR: los dos son del laboratorio.
+> Rama `agora/a2a`, sin push ni PR: los dos son del laboratorio.
 
 ## 1. Stack y dónde vive
 
@@ -102,6 +102,18 @@
 3. **Parámetros que sombrean columnas** (`origen`, `clave`, `estado`): la plantilla abonaba a la cuenta equivocada
    (lo cazó la re-verificación independiente de la póliza). Ahora los parámetros llevan prefijo.
 
+4. **`auth.uid()` lee un ajuste que cualquier sesión puede fijar.** Un agente que se ponía los claims de Paula era Paula
+   para la RLS (lo encontró el **verificador independiente**). Todo pasa ahora por `agora_priv.uid()`, que solo devuelve
+   la persona si la sesión es de persona, y una comprobación estructural impide volver a leer `auth.uid()` directo.
+5. **La segregación y la matriz se apoyaban en lo que declaraba el agente** y en contar una firma para dos ranuras. La
+   base deriva al solicitante del mensaje de origen citado, exige que sea de la organización y pide una persona
+   distinta por ranura. La clave de idempotencia pasó a ser por organización.
+6. **Un script del laboratorio actuaba al importarse** y borró un contenedor (el del laboratorio de Ágora, con datos
+   ficticios) al correrlo el verificador en otro árbol. Ahora leer el entorno no tiene efectos, el script solo actúa
+   si se ejecuta y nunca borra un contenedor cuya clave no tiene. La prueba de regresión cae con la versión vieja.
+
+Detalle de cada hallazgo y su estado: `agora-a2a-evidencia/verificacion-independiente.md`.
+
 ## 6. Lo que no se hizo (y es del laboratorio)
 
 - Firmar el CDC, el C3, el C4/AISIA y las entradas del registro de riesgo (borradores en `agora-a2a-propuestas/`).
@@ -109,3 +121,5 @@
   coordinador (C8).
 - Meter `agora:pg` (las suites contra Postgres real, con Docker) al padrón de gates: es un CDC. Se propone como inactivo
   con su motivo, como los demás que necesitan Docker.
+- Exigir el mensaje de origen a TODA propuesta de agente (salvo el vigía) y un rol de conexión por tipo de principal
+  sin superusuario: los dos endurecimientos que quedan del verificador (`lo-que-podria-estar-mal.md`, puntos 27 y 28).

@@ -42,6 +42,38 @@ export const NUCLEO: Comprobacion[] = [
     },
   },
   {
+    fase: 'nucleo', nombre: 'ninguna función ni política lee auth.uid() directo (solo agora_priv.uid(), que mira el rol)', tipo: 'estructura',
+    async corre({ base }) {
+      const f = await base.consulta<{ f: string }>(`select n.nspname || '.' || p.proname f from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname in ('agora', 'agora_priv') and p.proname <> 'uid' and p.prosrc ~ 'auth\\.uid\\(\\)' order by 1`)
+      const q = await base.consulta<{ f: string }>(`select tablename || '.' || policyname f from pg_policies where schemaname = 'agora'
+        and (coalesce(qual, '') ~ 'auth\\.uid\\(\\)' or coalesce(with_check, '') ~ 'auth\\.uid\\(\\)') order by 1`)
+      assert.deepEqual([...f, ...q].map((x) => x.f), [], 'leen auth.uid() directo')
+    },
+  },
+  {
+    fase: 'nucleo', nombre: 'un agente que se pone los claims de una persona no es esa persona: no ve ni una fila más', tipo: 'conducta',
+    async corre(c) {
+      // Todas las tablas que el rol de agente puede leer (la RLS decide qué filas): ninguna gana una fila al fingir.
+      const TABLAS = (await c.base.consulta<{ t: string }>(`select c.relname t from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'agora' and c.relkind in ('r', 'v') and has_table_privilege('agora_agente', c.oid, 'select') order by 1`)).map((x) => x.t)
+      assert.ok(TABLAS.includes('aprobacion') && TABLAS.includes('dependencia'), 'el agente ya no lee aprobaciones ni dependencias: la prueba no probaría nada')
+      const cuenta_ = (s: Parameters<Parameters<typeof c.comoAgente>[1]>[0]) => Promise.all(TABLAS.map(async (t) => [t, await cuenta(s, `select 1 from agora.${t}`)] as const))
+      const finge = (s: Parameters<Parameters<typeof c.comoAgente>[1]>[0], quien: string) =>
+        s.consulta(`select set_config('request.jwt.claim.sub', $1, true), set_config('request.jwt.claims', $2, true)`, [persona(quien), JSON.stringify({ sub: persona(quien), role: 'authenticated' })])
+      for (const [agt, quien] of [['medios-norte', 'paula'], ['medios-norte', 'carla'], ['empaques-regio', 'paula']] as const) {
+        await c.comoAgente(agt, async (s) => {
+          const antes = await cuenta_(s)
+          await finge(s, quien)
+          const despues = await cuenta_(s)
+          assert.deepEqual(despues, antes, `${agt} fingiendo ser ${quien} ve más filas`)
+          const [t] = await s.consulta<{ t: unknown }>('select agora.topes_de($1) t', [agente('coordinador')])
+          assert.equal(t!.t, null, `${agt} fingiendo ser ${quien} lee los topes de otro agente`)
+        })
+      }
+    },
+  },
+  {
     fase: 'nucleo', nombre: 'una persona de Bajío no ve NADA de Golfo Norte, tabla por tabla', tipo: 'conducta',
     async corre(c) {
       await c.comoPersona('carla', async (s) => {
@@ -137,8 +169,8 @@ export const NUCLEO: Comprobacion[] = [
         has_table_privilege('agora_agente', 'agora.poliza_decision', 'insert') a2, has_table_privilege('authenticated', 'agora.aprobacion', 'update') u1,
         has_table_privilege('authenticated', 'agora.aprobacion', 'delete') d1`)
       assert.deepEqual(Object.entries(r!).filter(([, v]) => v).map(([k]) => k), [])
-      const [pol] = await base.consulta<{ n: string }>(`select count(*) n from pg_policies where schemaname = 'agora' and tablename = 'aprobacion' and permissive = 'RESTRICTIVE' and with_check like '%auth.uid()%'`)
-      assert.equal(Number(pol!.n), 1, 'falta la política restrictiva decidida_por = auth.uid()')
+      const [pol] = await base.consulta<{ n: string }>(`select count(*) n from pg_policies where schemaname = 'agora' and tablename = 'aprobacion' and permissive = 'RESTRICTIVE' and with_check like '%agora_priv.uid()%'`)
+      assert.equal(Number(pol!.n), 1, 'falta la política restrictiva decidida_por = agora_priv.uid()')
     },
   },
   {
@@ -224,6 +256,8 @@ export const SABOTAJES_NUCLEO: Sabotaje[] = [
   { fase: 'nucleo', nombre: 'S11 · la Puerta puede leer las tablas', sql: 'grant select on agora.agente, agora.mensaje to agora_puerta; create policy x on agora.agente for select to agora_puerta using (true); create policy y on agora.mensaje for select to agora_puerta using (true);', caza: /la Puerta no lee tablas/ },
   { fase: 'nucleo', nombre: 'S14 · las funciones definer creen que siempre llama la base', sql: `create or replace function agora_priv.llama_la_base() returns boolean language sql stable set search_path = '' as $$ select true $$;`, caza: /otra organización aplica/ },
   { fase: 'nucleo', nombre: 'S15 · una función definer nueva que decide con confiable()', sql: `create or replace function agora.nueva_puerta_trasera() returns boolean language sql stable security definer set search_path = '' as $$ select agora_priv.confiable() $$;`, caza: /ninguna función security definer/ },
+  { fase: 'nucleo', nombre: 'S16 · la persona de la sesión no mira el rol (un agente con claims ajenos es esa persona)', sql: `create or replace function agora_priv.uid() returns uuid language sql stable set search_path = '' as $$ select auth.uid() $$;`, caza: /claims de una persona/ },
+  { fase: 'nucleo', nombre: 'S17 · una política nueva que lee auth.uid() directo', sql: `create policy s17 on agora.aviso for select to agora_agente using (auth.uid() is not null);`, caza: /auth.uid\(\) directo/ },
   { fase: 'nucleo', nombre: 'S13 · una vista nueva sin permiso de lectura', sql: 'revoke select on agora.v_llamadas_tras_revocar from authenticated;', caza: /se puede LEER/ },
   { fase: 'nucleo', nombre: 'S12 · el historial se puede anotar a mano', sql: `create or replace function agora_priv.anota_historial(o uuid, it uuid, campo text, antes jsonb, despues jsonb, actor_tipo text, persona uuid, agente uuid, prop uuid, deshacer timestamptz) returns void language plpgsql security definer set search_path = '' as $$ begin insert into agora.item_historial (org_id, item_id, campo, antes, despues, actor_tipo, actor_persona) values (o, it, campo, antes, despues, actor_tipo, persona); end $$;`, caza: /no se inventan a mano/ },
 ]

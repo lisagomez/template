@@ -3,21 +3,21 @@
   "slug": "agora-a2a",
   "_comentario": "Nodos = ARTEFACTOS; aristas = transformaciones tipadas; lazos = comparadores con referencia. Estados: morado = validado, ambar = existe sin estreno, gris = falta. Spec: docs/goals/agora-a2a.md. Plan: python3 ~/.claude/skills/goal-compiler/scripts/grafo2plan.py docs/goals/agora-a2a-grafo.json",
   "nodos": [
-    { "id": "contexto", "label": "Diseño, prototipo y análisis de Ágora (insumo)", "estado": "ambar" },
-    { "id": "gobernanza", "label": "Borradores de C3, C4/AISIA, CDC y registro de riesgo (sin firmar)", "estado": "gris" },
-    { "id": "nucleo", "label": "Núcleo de datos en Postgres real (jerarquía, membresías, idCard, matriz, propuesta, bitácora, topes, revocación, jti)", "estado": "gris" },
-    { "id": "capa", "label": "Ágora montada en la capa común (composición, marca propia, un enchufe por módulo, la ventana desde la primera pantalla)", "estado": "gris" },
-    { "id": "buzon", "label": "Buzón de Ágora (canales por categoría, hilos, aprobación por rol, espejos de solo lectura)", "estado": "gris" },
-    { "id": "tablero", "label": "Tablero (tabla, kanban, Gantt, editores por tipo de campo; los agentes solo proponen)", "estado": "gris" },
-    { "id": "finanzas", "label": "Libro de costos (presupuesto, comprometido y ejercido por centro de costo, gasto de agentes en MXN)", "estado": "gris" },
-    { "id": "poliza", "label": "Paquete para Contabilidad (cierre de costos del periodo y póliza propuesta con el contrato del ERP)", "estado": "gris" },
-    { "id": "coordinador", "label": "Coordinador con interrupt() (solo agentes internos, gasto imputado)", "estado": "gris" },
-    { "id": "calendario", "label": "Calendario y vigía (ciclo de fecha, recordatorios, suspensión por deriva o tope)", "estado": "gris" },
-    { "id": "puerta", "label": "Puerta A2A externa, construida y CERRADA (probada contra un socio simulado)", "estado": "gris" },
-    { "id": "metricas", "label": "Capa semántica y tablero regenerable, con las métricas financieras", "estado": "gris" },
-    { "id": "ventana", "label": "Ágora se siente como Arbrain (intención sin LLM, «Espera tu clic» en el panel, freno, memoria, voz local, primer arranque, resumen de conteos)", "estado": "gris" },
-    { "id": "evidencia", "label": "Evidencia (validate, sabotajes, capturas, reporte, verificación independiente)", "estado": "gris" },
-    { "id": "apertura", "label": "Apertura a un socio real (C3 y C4 firmados, doble firma): fuera de este goal", "estado": "gris" }
+    { "id": "contexto", "label": "Diseño, prototipo y análisis de Ágora (insumo)", "estado": "morado", "evidencia": "insumo leído entero (spec, grafo, prototipo)" },
+    { "id": "gobernanza", "label": "Borradores de C3, C4/AISIA, CDC y registro de riesgo (sin firmar)", "estado": "ambar", "evidencia": "borradores de C3, C4/AISIA, CDC y riesgos al día con lo construido; SIN firmar (la firma es del laboratorio)" },
+    { "id": "nucleo", "label": "Núcleo de datos en Postgres real (jerarquía, membresías, idCard, matriz, propuesta, bitácora, topes, revocación, jti)", "estado": "morado", "evidencia": "19 comprobaciones y 15 sabotajes, en PGlite y PostgreSQL 17.11" },
+    { "id": "capa", "label": "Ágora montada en la capa común (composición, marca propia, un enchufe por módulo, la ventana desde la primera pantalla)", "estado": "morado", "evidencia": "composición propia, 7 enchufes, ventana desde la primera pantalla; único cambio a tools/capa en 2561724" },
+    { "id": "buzon", "label": "Buzón de Ágora (canales por categoría, hilos, aprobación por rol, espejos de solo lectura)", "estado": "morado", "evidencia": "12 comprobaciones y 9 sabotajes" },
+    { "id": "tablero", "label": "Tablero (tabla, kanban, Gantt, editores por tipo de campo; los agentes solo proponen)", "estado": "morado", "evidencia": "11 comprobaciones y 8 sabotajes" },
+    { "id": "finanzas", "label": "Libro de costos (presupuesto, comprometido y ejercido por centro de costo, gasto de agentes en MXN)", "estado": "morado", "evidencia": "13 comprobaciones (los 8 malos financieros) y 12 sabotajes" },
+    { "id": "poliza", "label": "Paquete para Contabilidad (cierre de costos del periodo y póliza propuesta con el contrato del ERP)", "estado": "morado", "evidencia": "8 comprobaciones y 6 sabotajes; re-verificación independiente de la póliza" },
+    { "id": "coordinador", "label": "Coordinador con interrupt() (solo agentes internos, gasto imputado)", "estado": "morado", "evidencia": "9 comprobaciones y 4 sabotajes" },
+    { "id": "calendario", "label": "Calendario y vigía (ciclo de fecha, recordatorios, suspensión por deriva o tope)", "estado": "morado", "evidencia": "vigía: 7 comprobaciones y 5 sabotajes" },
+    { "id": "puerta", "label": "Puerta A2A externa, construida y CERRADA (probada contra un socio simulado)", "estado": "morado", "evidencia": "11 comprobaciones y 5 sabotajes; CERRADA (laboratorio y loopback)" },
+    { "id": "metricas", "label": "Capa semántica y tablero regenerable, con las métricas financieras", "estado": "morado", "evidencia": "8 comprobaciones y 5 sabotajes; la pantalla prueba cada cifra sumable contra el libro" },
+    { "id": "ventana", "label": "Ágora se siente como Arbrain (intención sin LLM, «Espera tu clic» en el panel, freno, memoria, voz local, primer arranque, resumen de conteos)", "estado": "morado", "evidencia": "testigo del freno (7 y 6 sabotajes), 13 pruebas de composición, e2e 9/9, recorrido 8/8, intercambio" },
+    { "id": "evidencia", "label": "Evidencia (validate, sabotajes, capturas, reporte, verificación independiente)", "estado": "morado", "evidencia": "validate tras el último commit, logs por fase, capturas, verificación independiente" },
+    { "id": "apertura", "label": "Apertura a un socio real (C3 y C4 firmados, doble firma): fuera de este goal", "estado": "gris", "evidencia": "fuera de este goal: C3 y C4 firmados, doble firma" }
   ],
   "aristas": [
     { "id": "e01", "from": "contexto", "to": "gobernanza", "tipo": "agente", "label": "Redactar C3 (Puerta, buzón, espejos), C4/AISIA (datos financieros que salen, topes con víctima), CDC y riesgos" },
@@ -63,18 +63,36 @@
     { "id": "e41", "from": "ventana", "to": "evidencia", "tipo": "agente", "label": "Re-verificar de cero los enchufes, el recorrido, el freno y que la voz no aprueba" }
   ],
   "lazos": [
-    { "id": "l01", "sobre": "nodo:nucleo", "label": "Aislamiento entre organizaciones y RLS forzada", "estado": "gris", "referencia": "cada sabotaje en rojo y la suite en verde, en Postgres real y no solo en PGlite" },
-    { "id": "l02", "sobre": "nodo:buzon", "label": "Aprobar fuera de rol lo rechaza la base", "estado": "gris", "referencia": "ningún agente ni rol de servicio inserta una aprobación; un espejo no crea tareas ni aprueba" },
-    { "id": "l03", "sobre": "nodo:tablero", "label": "Ningún agente edita directo", "estado": "gris", "referencia": "todo cambio de un agente es propuesta con sha256; A2 solo en campos sin dinero ni terceros" },
-    { "id": "l04", "sobre": "nodo:finanzas", "label": "Cuadre del libro de costos", "estado": "gris", "referencia": "ejercido = suma de costos con evidencia; gasto de modelo = registro de uso; filas sin costo declaradas (null no es cero); tipo de cambio con fuente y fecha; desviación sobre umbral alerta" },
-    { "id": "l05", "sobre": "nodo:finanzas", "label": "Siembra de malos financieros", "estado": "gris", "referencia": "los 8 malos del spec bloqueados por la base o el supervisor, ninguno solo por la UI" },
-    { "id": "l06", "sobre": "nodo:poliza", "label": "Partida doble y contrato contable", "estado": "gris", "referencia": "una póliza descuadrada no puede existir; toda cuenta con código agrupador SAT; solo un humano de Contabilidad la acepta; periodo cerrado no se edita, se reclasifica" },
-    { "id": "l07", "sobre": "nodo:coordinador", "label": "Nada se aplica sin fila de aprobación", "estado": "gris", "referencia": "el nodo relee la aprobación en la base; un resume falsificado se rechaza; sin presupuesto no se llama al modelo" },
-    { "id": "l08", "sobre": "nodo:calendario", "label": "Un reintento no duplica eventos", "estado": "gris", "referencia": "idempotencia por clave; el vigía suspende por deriva y avisa al 80 %" },
-    { "id": "l09", "sobre": "nodo:puerta", "label": "Las comprobaciones de la Puerta", "estado": "gris", "referencia": "tarjeta re-firmada, kid distinto, jti repetido, revocado, fuera de alcance y sobre tope: rechazo; llamadas_tras_revocar = 0" },
-    { "id": "l10", "sobre": "nodo:metricas", "label": "Cada cifra sale de una métrica", "estado": "gris", "referencia": "cifra del tablero = consulta semántica = libro de costos, al centavo" },
-    { "id": "l11", "sobre": "nodo:evidencia", "label": "Validate y verificación independiente", "estado": "gris", "referencia": "npm run validate en verde tras el último commit; un verificador que no construyó re-corre los gates de cero" },
-    { "id": "l12", "sobre": "nodo:capa", "label": "La capa se consume, no se bifurca", "estado": "gris", "referencia": "npm run verifica:enchufes en verde con los enchufes de Ágora y sus siembras en rojo; git diff --stat -- tools/capa vacío; ninguna marca de Arbrain ni Levy" },
-    { "id": "l13", "sobre": "nodo:ventana", "label": "Se siente como Arbrain sin saltarse un control", "estado": "gris", "referencia": "toda pantalla de Ágora dentro de la ventana con 0 errores de consola; los 8 malos de la capa bloqueados; el enrutador dice «no lo sé» o pregunta entre dos en vez de adivinar; intercambiar el calendario o la voz deja tools/capa sin diff; corpus de intenciones con su tasa medida" }
-  ]
+    { "id": "l01", "sobre": "nodo:nucleo", "label": "Aislamiento entre organizaciones y RLS forzada", "estado": "morado", "referencia": "cada sabotaje en rojo y la suite en verde, en Postgres real y no solo en PGlite", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (núcleo: S1–S15 cazados en PostgreSQL 17.11)" },
+    { "id": "l02", "sobre": "nodo:buzon", "label": "Aprobar fuera de rol lo rechaza la base", "estado": "morado", "referencia": "ningún agente ni rol de servicio inserta una aprobación; un espejo no crea tareas ni aprueba", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (buzón: B1–B9) + captura 04-editor-rechazado" },
+    { "id": "l03", "sobre": "nodo:tablero", "label": "Ningún agente edita directo", "estado": "morado", "referencia": "todo cambio de un agente es propuesta con sha256; A2 solo en campos sin dinero ni terceros", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (tablero: TB1–TB8) + capturas 01–03 (fantasmas sin aplicar)" },
+    { "id": "l04", "sobre": "nodo:finanzas", "label": "Cuadre del libro de costos", "estado": "morado", "referencia": "ejercido = suma de costos con evidencia; gasto de modelo = registro de uso; filas sin costo declaradas (null no es cero); tipo de cambio con fuente y fecha; desviación sobre umbral alerta", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (libro) + capturas 05–07 (comprometido sube exactamente la diferencia)" },
+    { "id": "l05", "sobre": "nodo:finanzas", "label": "Siembra de malos financieros", "estado": "morado", "referencia": "los 8 malos del spec bloqueados por la base o el supervisor, ninguno solo por la UI", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (MALO 1–8 y F1–F12)" },
+    { "id": "l06", "sobre": "nodo:poliza", "label": "Partida doble y contrato contable", "estado": "morado", "referencia": "una póliza descuadrada no puede existir; toda cuenta con código agrupador SAT; solo un humano de Contabilidad la acepta; periodo cerrado no se edita, se reclasifica", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (contabilidad: K1–K6) + captura 11 (cargos = abonos)" },
+    { "id": "l07", "sobre": "nodo:coordinador", "label": "Nada se aplica sin fila de aprobación", "estado": "morado", "referencia": "el nodo relee la aprobación en la base; un resume falsificado se rechaza; sin presupuesto no se llama al modelo", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (coordinador: C1–C4)" },
+    { "id": "l08", "sobre": "nodo:calendario", "label": "Un reintento no duplica eventos", "estado": "morado", "referencia": "idempotencia por clave; el vigía suspende por deriva y avisa al 80 %", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (vigía: V1–V5; dos vigías a la vez no duplican)" },
+    { "id": "l09", "sobre": "nodo:puerta", "label": "Las comprobaciones de la Puerta", "estado": "morado", "referencia": "tarjeta re-firmada, kid distinto, jti repetido, revocado, fuera de alcance y sobre tope: rechazo; llamadas_tras_revocar = 0", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (Puerta: PU1–PU5) + captura 12 (llamadas_tras_revocar = 0)" },
+    { "id": "l10", "sobre": "nodo:metricas", "label": "Cada cifra sale de una métrica", "estado": "morado", "referencia": "cifra del tablero = consulta semántica = libro de costos, al centavo", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (métricas: M1–M5) + captura 13" },
+    { "id": "l11", "sobre": "nodo:evidencia", "label": "Validate y verificación independiente", "estado": "morado", "referencia": "npm run validate en verde tras el último commit; un verificador que no construyó re-corre los gates de cero", "evidencia": "docs/goals/agora-a2a-evidencia/validate-final.log + verificacion-independiente.md" },
+    { "id": "l12", "sobre": "nodo:capa", "label": "La capa se consume, no se bifurca", "estado": "morado", "referencia": "npm run verifica:enchufes en verde con los enchufes de Ágora y sus siembras en rojo; git diff --stat -- tools/capa vacío; ninguna marca de Arbrain ni Levy", "evidencia": "docs/goals/agora-a2a-evidencia/intercambio.txt (git diff --stat -- tools/capa vacío; verifica:enchufes 30/30, 10/10 siembras)" },
+    { "id": "l13", "sobre": "nodo:ventana", "label": "Se siente como Arbrain sin saltarse un control", "estado": "morado", "referencia": "toda pantalla de Ágora dentro de la ventana con 0 errores de consola; los 8 malos de la capa bloqueados; el enrutador dice «no lo sé» o pregunta entre dos en vez de adivinar; intercambiar el calendario o la voz deja tools/capa sin diff; corpus de intenciones con su tasa medida", "evidencia": "docs/goals/agora-a2a-evidencia/f7-pg.log (testigo: K1–K6) + pruebas de composición + e2e-capa 9/9 + intenciones-*.json" }
+  ],
+  "postmortem": {
+    "fecha": "2026-10-28",
+    "resultado": "Fases 1 a 8 cerradas con sus gates; nada firmado, sin push ni PR (del laboratorio).",
+    "lo_que_salio_mal_y_se_arreglo": [
+      "Dentro de una función security definer, confiable() valía siempre «la base»: varias funciones dejaban pasar a cualquiera. Lo destapó la suite del vigía; ahora una comprobación estructural recorre pg_proc.",
+      "Un if con una comparación nula no rechazaba (otra organización aplicaba propuestas ajenas). La MALO 4 pasaba por el hueco con otro motivo: una prueba que acepta cualquier rechazo esconde por qué rechaza.",
+      "Parámetros con el nombre de una columna la sombreaban (la plantilla abonaba a la cuenta equivocada).",
+      "El nombre de un socio decidía la intención (paga la factura de fletes → revocar). Medido a ciegas, corregido con una regla y re-medido con un corpus nuevo.",
+      "El verificador de enchufes no veía quitar el enchufe de un submódulo; el validate de la fase 5 quedó en rojo por la siembra que dejó de caer.",
+      "El recorrido de la capa escribe por defecto en la evidencia de otro goal: se restauró y se corre con --capturas."
+    ],
+    "aprendizajes": [
+      "Una suite de sabotajes encuentra lo que la suite verde no: tres de los defectos de seguridad aparecieron al sembrar o al exigir el motivo exacto del rechazo.",
+      "Lo que el navegador no garantiza (el clic) se complementa con lo que la base sí puede (el testigo: de quién, una vez, cuándo).",
+      "Medir el enrutador a ciegas antes de tocar los ejemplos, y con un corpus nuevo después, evita afinarlo a la prueba."
+    ],
+    "abierto_para_el_laboratorio": "Ver docs/goals/agora-a2a-lo-que-podria-estar-mal.md y los borradores en docs/goals/agora-a2a-propuestas/."
+  }
 }

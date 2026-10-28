@@ -88,7 +88,7 @@ export async function proponSucesores(e: Entorno, personaId: string, itemId: str
       const prop = await propone(s, { org: it.org_id, autorAgente: coord.id, solicitadaPor: personaId, payload,
         resumen: `Mover «${suc.nombre}» al ${nuevoInicio}: su predecesor «${it.nombre}» ahora termina el ${it.fin}`, clave: `sucesor:${suc.id}:${it.fin}` })
       const [c] = await s.consulta<{ id: string }>('select id from agora.canal where categoria_id = $1', [suc.categoria_id])
-      await s.consulta(`insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_agente, cuerpo, propuesta_id, item_id, clave) values ($1, $2, 'agente', $3, $4, $5, $6, $7) on conflict (clave) do nothing`,
+      await s.consulta(`insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_agente, cuerpo, propuesta_id, item_id, clave) values ($1, $2, 'agente', $3, $4, $5, $6, $7) on conflict (org_id, clave) do nothing`,
         [it.org_id, c!.id, coord.id, `«${it.nombre}» se movió al ${it.fin}. Propongo mover su sucesor «${suc.nombre}» para que no empiece antes.`, prop.id, suc.id, `sucesor:${suc.id}:${it.fin}`])
       return prop.id
     })

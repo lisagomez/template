@@ -1,7 +1,8 @@
 # Ágora — lo que podría estar mal, y cómo quedó
 
 > Cada punto con su estado: **arreglado** (con la prueba que lo vigila), **declarado** (es un límite conocido, dicho
-> donde se ve) o **del laboratorio** (decidirlo no me toca). Fecha: 2026-10-28.
+> donde se ve) o **del laboratorio** (decidirlo no me toca). Fecha: 2026-10-28. Los puntos 24 a 33 los encontró el
+> **verificador independiente** (`agora-a2a-evidencia/verificacion-independiente.md`) sobre `eb062f7`.
 
 | # | Lo que podría estar mal | Estado | Cómo quedó |
 | --- | --- | --- | --- |
@@ -28,3 +29,14 @@
 | 21 | El testigo del freno se poda a las 24 h solo cuando la persona vuelve a atestiguar | **declarado** | Solo guarda huellas; una poda programada es una línea cuando haya uso real |
 | 22 | La persona del laboratorio sale de una cookie («Ver como») | **declarado** | Solo con `AGORA_LABORATORIO=1`; en producción sería la sesión de Supabase |
 | 23 | El recorrido de la capa escribe por defecto en la carpeta de evidencia de otro goal | **arreglado aquí** | Se corre con `--capturas docs/goals/agora-a2a-capturas/recorrido`; lo que escribió en la otra carpeta se restauró |
+| 24 | Desde un clon limpio, `validate` salía ROJO: `tools/agora` se compila antes que `tools/calendario`, del que importa el `dist` | **arreglado** | `prebuild` de `tools/agora` construye primero el calendario; probado borrando los dos `dist` y corriendo `prepara-gate` |
+| 25 | `scripts/agora/laboratorio.ts` actuaba **al importarse**: `agora:pg` lo importaba y, en un árbol sin entorno, **borró y recreó** el contenedor `agora-pg-lab` (datos ficticios; mi laboratorio quedó con una clave inválida) | **arreglado** | El entorno se lee de `scripts/agora/entorno.ts` (sin efectos); el script solo actúa si se ejecuta; un contenedor sin su clave en este árbol nunca se borra solo (lo dice y se detiene). Prueba de regresión con mutación. El laboratorio se reparó con `--apaga` y siembra nueva; los contenedores de otros proyectos no se tocaron |
+| 26 | Un agente que fija los claims de una persona (`request.jwt.claim.sub`) era esa persona para `auth.uid()`: veía aprobaciones y dependencias ajenas, también de otra organización y estando suspendido | **arreglado** | `agora_priv.uid()` devuelve la persona solo si la sesión ES de persona (rol `authenticated`); 54 usos de `auth.uid()` pasan por ella. Conducta (los tres ataques, tabla por tabla) y estructura (ninguna función ni política lee `auth.uid()` directo), con los sabotajes S16 y S17 |
+| 27 | Con SQL libre sobre una conexión cuyo `session_user` puede hacer `SET ROLE`, un agente se vuelve `authenticated` y aprueba | **declarado** | Ningún agente tiene SQL: entra por la Puerta o por el código del coordinador, y la sesión la arma el servidor. La defensa en profundidad es un rol de conexión por tipo de principal (uno de login que solo pueda ser `agora_agente`, otro que solo pueda ser `authenticated`), sin superusuario. En el laboratorio la conexión es `postgres`: queda para el CDC de producción |
+| 28 | La segregación dependía de que el agente declarara a quien se la pidió | **arreglado en parte** | Si la propuesta cita su mensaje de origen, la base toma como solicitante a quien lo escribió (el agente no declara a otro, ni lo esconde); el coordinador lo cita. Queda: un agente que NO cita el mensaje esconde al solicitante. Exigirlo a todo agente (salvo el vigía) obliga a reordenar la Puerta y la siembra: propuesto |
+| 29 | Un agente declaraba como solicitante a una persona de OTRA organización | **arreglado** | La base lo rechaza («quien la solicitó no es de esa organización»); sabotaje B11 |
+| 30 | Dos ranuras de la matriz con los mismos roles se llenaban con UNA sola firma | **arreglado** | `firmas_completas` asigna una persona distinta a cada ranura y `ranura_para` deja libre la otra; sabotaje B10. La matriz sembrada no tenía solapes (defecto latente) |
+| 31 | La clave de idempotencia de propuestas y mensajes era global: otra organización podía ocuparla por adelantado | **arreglado** | Única por organización (`unique (org_id, clave)`), también en los `on conflict`; sabotaje B12 |
+| 32 | El servidor de desarrollo del laboratorio escuchaba en todas las interfaces; la Puerta confía en un Host local, que se falsifica desde la red | **arreglado** | `npm run agora:dev` escucha solo en `127.0.0.1` |
+| 33 | `validate` corre las 124 pruebas de Ágora pero no sus sabotajes ni la variante en Postgres real | **del laboratorio** | Los sabotajes y `agora:pg` son evidencia pegada en el goal; meterlos al padrón es un CDC (propuesto `agora:pg`, inactivo por Docker) |
+

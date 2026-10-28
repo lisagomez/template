@@ -8,6 +8,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { join, resolve } from 'node:path'
 import { compone, creaConversacion, creaMemoria, validaResumen, AlmacenEnMemoria, MemoriaNegada, type Enchufe, type Manejadores } from '../../capa/dist/index.js'
 import { recuerdaPreferencia } from '../../../src/features/agora/services/preferencias.ts'
@@ -170,4 +171,14 @@ test('intercambio: el plan lo llena la capa en vez del calendario, y la composic
   const r = compone({ ...COMPOSICION, modulos: COMPOSICION.modulos.filter((m: string) => m !== 'calendario'), ranuras: { ...COMPOSICION.ranuras, plan: 'capa' } }, ENCHUFES)
   assert.ok(r.ok, r.ok ? '' : r.problemas.join('; '))
   assert.equal(r.producto.ranuras.plan.quien, 'capa')
+})
+
+test('el laboratorio no actúa al importarse (y nunca borra un contenedor que no creó)', () => {
+  // 2026-10-28: `pg.ts` importaba `laboratorio.ts`, que al importarse levantaba el contenedor y, en un árbol sin
+  // entorno, lo BORRABA y lo recreaba. Sin Docker en el PATH, importar no debe intentar nada.
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(join(RAIZ, 'scripts/agora/laboratorio.ts'))}); console.log('importado sin efectos')`],
+    { encoding: 'utf8', env: { ...process.env, PATH: '/sin-docker' } })
+  assert.equal(r.status, 0, r.stderr)
+  assert.match(r.stdout, /importado sin efectos/)
+  assert.doesNotMatch(lee('scripts/agora/laboratorio.ts'), /if \(existe\(\) && !clave\) \{ docker\(\['rm'/)
 })

@@ -188,7 +188,7 @@ begin
       raise exception 'una reclasificación mueve un ejercido existente, por no más de su importe' using errcode = 'AG409';
     end if;
   end if;
-  if not agora_priv.confiable() then new.registrado_por := auth.uid(); new.cuando := now(); end if;
+  if not agora_priv.confiable() then new.registrado_por := agora_priv.uid(); new.cuando := now(); end if;
   return new;
 end $$;
 drop trigger if exists tg_costo_coherente on agora.costo;

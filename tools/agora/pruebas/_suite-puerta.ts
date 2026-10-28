@@ -3,7 +3,7 @@
  * firma ajena, jti repetido, suspendido, revocado, fuera de alcance y sobre el tope: rechazo. Lo ajeno y lo
  * inexistente responden igual. Revocar corta en la siguiente llamada: llamadas_tras_revocar = 0.
  */
-import { assert, cuenta, persona, nodo, agente, GOLFO, SECRETO, type Comprobacion, type Sabotaje } from './_marco.ts'
+import { assert, cuenta, nodo, agente, SECRETO, type Comprobacion, type Sabotaje } from './_marco.ts'
 import { puerta } from '../dist/index.js'
 import { llamaComoSocio, tokenConTarjetaRefirmada, tokenConOtraLlave, tokenConFirmaAjena, socio, tokenDeSocio } from '../dist/laboratorio/index.js'
 

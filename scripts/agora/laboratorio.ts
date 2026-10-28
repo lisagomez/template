@@ -10,22 +10,14 @@
  */
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import { ARCHIVO, CONTENEDOR, DIR, leeEntorno } from './entorno.ts';
 
-const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '../..');
-const DIR = join(RAIZ, 'tools/agora/.laboratorio');
-const ARCHIVO = join(DIR, 'entorno');
-const CONTENEDOR = 'agora-pg-lab';
 const PUERTO = 55439;
 const IMAGEN = 'public.ecr.aws/supabase/postgres:17.11.0.002';
-
-export function leeEntorno(): Record<string, string> {
-  if (!existsSync(ARCHIVO)) return {};
-  return Object.fromEntries(readFileSync(ARCHIVO, 'utf8').split('\n').filter((l) => /^[A-Z_]+=/.test(l)).map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]));
-}
 
 const docker = (args: string[]) => execFileSync('docker', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const existe = () => docker(['ps', '-a', '--filter', `name=^${CONTENEDOR}$`, '--format', '{{.Names}}']) === CONTENEDOR;
@@ -41,7 +33,11 @@ async function espera(url: string) {
 async function levanta() {
   const previo = leeEntorno();
   let clave = previo.AGORA_PG_CLAVE ?? '';
-  if (existe() && !clave) { docker(['rm', '-f', CONTENEDOR]); }
+  if (existe() && !clave) {
+    // Un contenedor sin su clave en ESTE árbol es de otro árbol (u otra sesión): nunca se borra solo.
+    console.error(`✗ el contenedor ${CONTENEDOR} existe y este árbol no tiene su clave: no lo borro. Si es tuyo, bórralo con --apaga desde aquí y vuelve a correr esto.`);
+    process.exit(2);
+  }
   if (!existe()) {
     clave = randomBytes(18).toString('base64url');
     docker(['run', '-d', '--name', CONTENEDOR, '-e', `POSTGRES_PASSWORD=${clave}`, '-p', `127.0.0.1:${PUERTO}:5432`, IMAGEN]);
@@ -72,7 +68,11 @@ async function levanta() {
   console.log(`· entorno en tools/agora/.laboratorio/entorno (AGORA_PG_URL presente, AGORA_SECRETO presente, ${secreto.length} caracteres)`);
 }
 
-if (process.argv.includes('--apaga')) {
+// Solo actúa si se EJECUTA (node scripts/agora/laboratorio.ts); importarlo no hace nada.
+const ejecutado = process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (!ejecutado) {
+  // importado: sin efectos
+} else if (process.argv.includes('--apaga')) {
   if (existe()) docker(['rm', '-f', CONTENEDOR]);
   rmSync(DIR, { recursive: true, force: true });
   console.log(`· ${CONTENEDOR} borrado y entorno quitado`);

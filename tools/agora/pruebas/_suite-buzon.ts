@@ -136,10 +136,56 @@ export const BUZON: Comprobacion[] = [
       assert.ok(await cuenta(c.base, 'select 1 from agora.item') > 0)
     },
   },
+  {
+    fase: 'buzon', nombre: 'dos ranuras con los mismos roles piden dos PERSONAS distintas (una firma no llena las dos)', tipo: 'conducta',
+    async corre(c) {
+      await c.base.consulta(`update agora.matriz_regla set firmas = '[["propietario","administrador"],["propietario","administrador"]]' where org_id = $1 and clase = 'tope_gasto'`, [GOLFO])
+      const p = await c.comoPersona('mariana', (s) => propone(s, { org: GOLFO, autorPersona: persona('mariana'), resumen: 'subir el tope del coordinador',
+        payload: { version: 1, clase: 'tope_gasto', categoria: nodo('pipeline'), agente: agente('coordinador'), tope: 'gasto', antes: 3000, despues: 3400 } }))
+      await c.comoPersona('paula', (s) => decide(s, { org: GOLFO, propuesta: p.id, sha256: p.sha256, persona: persona('paula'), decision: 'aprobar' }))
+      const [e1] = await c.base.consulta<{ estado: string }>('select estado from agora.propuesta where id = $1', [p.id])
+      assert.equal(e1!.estado, 'pendiente', 'una sola firma llenó las dos ranuras')
+      await c.comoPersona('luis', (s) => decide(s, { org: GOLFO, propuesta: p.id, sha256: p.sha256, persona: persona('luis'), decision: 'aprobar' }))
+      const [e2] = await c.base.consulta<{ estado: string }>('select estado from agora.propuesta where id = $1', [p.id])
+      assert.equal(e2!.estado, 'aprobada')
+    },
+  },
+  {
+    fase: 'buzon', nombre: 'quien solicita es de la organización, y si la propuesta cita su mensaje, es quien lo escribió', tipo: 'conducta',
+    async corre(c) {
+      const [it] = await c.base.consulta<{ prioridad: string }>('select prioridad from agora.item where id = $1', [item('it-12')])
+      const payload = { version: 1 as const, clase: 'editar' as const, categoria: nodo('presupuesto'), cambios: [{ item: item('it-12'), campo: 'prioridad', antes: it!.prioridad, despues: it!.prioridad === 'alta' ? 'media' : 'alta' }] }
+      await rechaza(c.comoAgente('coordinador', (s) => propone(s, { org: GOLFO, autorAgente: agente('coordinador'), solicitadaPor: persona('carla'), resumen: 'x', payload })), 'no es de esa organización')
+      const k = await canal(c, 'presupuesto')
+      const [m] = await c.comoPersona('mariana', (s) => s.consulta<{ id: string }>(`insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_persona, cuerpo) values ($1, $2, 'humano', $3, 'coordinador, súbele la prioridad al presupuesto Q1') returning id`,
+        [GOLFO, k, persona('mariana')]))
+      await rechaza(c.comoAgente('coordinador', (s) => propone(s, { org: GOLFO, autorAgente: agente('coordinador'), mensajeOrigen: m!.id, solicitadaPor: persona('daniel'), resumen: 'x', payload })), 'no es quien escribió')
+      const p = await c.comoAgente('coordinador', (s) => propone(s, { org: GOLFO, autorAgente: agente('coordinador'), mensajeOrigen: m!.id, resumen: 'subir la prioridad', payload }))
+      const [r] = await c.base.consulta<{ solicitada_por: string }>('select solicitada_por from agora.propuesta where id = $1', [p.id])
+      assert.equal(r!.solicitada_por, persona('mariana'), 'el agente escondió a quien lo pidió')
+      await rechaza(c.comoPersona('mariana', (s) => decide(s, { org: GOLFO, propuesta: p.id, sha256: p.sha256, persona: persona('mariana'), decision: 'aprobar' })), 'segregación')
+    },
+  },
+  {
+    fase: 'buzon', nombre: 'la clave de idempotencia es por organización: otra no la ocupa por adelantado', tipo: 'estructura',
+    async corre({ base }) {
+      const r = await base.consulta<{ t: string; def: string }>(`select conrelid::regclass::text t, pg_get_constraintdef(oid) def from pg_constraint
+        where conrelid in ('agora.propuesta'::regclass, 'agora.mensaje'::regclass) and contype = 'u' and pg_get_constraintdef(oid) like '%clave%' order by 1`)
+      assert.deepEqual(r.map((x) => `${x.t}: ${x.def}`), ['agora.mensaje: UNIQUE (org_id, clave)', 'agora.propuesta: UNIQUE (org_id, clave)'])
+    },
+  },
 ]
 
 const reemplazaFn = (sql: string) => sql
 export const SABOTAJES_BUZON: Sabotaje[] = [
+  { fase: 'buzon', nombre: 'B10 · una firma cuenta para dos ranuras', sql: `create or replace function agora_priv.firmas_completas(pid uuid) returns boolean language plpgsql stable security definer set search_path = '' as $$
+      declare p agora.propuesta; r agora.matriz_regla; ranura jsonb; begin
+      select * into p from agora.propuesta where id = pid; r := agora_priv.regla_de(p); if r.id is null then return false; end if;
+      for ranura in select * from jsonb_array_elements(r.firmas) loop
+        if not exists (select 1 from agora.aprobacion a where a.propuesta_id = pid and a.decision = 'aprobar' and a.sha256 = p.sha256 and a.rol_usado in (select jsonb_array_elements_text(ranura))) then return false; end if;
+      end loop; return true; end $$;`, caza: /dos PERSONAS distintas/ },
+  { fase: 'buzon', nombre: 'B11 · la propuesta no mira de quién es el mensaje que cita ni de dónde es quien la pide', sql: `alter table agora.propuesta disable trigger tg_propuesta_coherente;`, caza: /quien solicita es de la organización/ },
+  { fase: 'buzon', nombre: 'B12 · la clave de idempotencia vuelve a ser global', sql: `alter table agora.propuesta drop constraint propuesta_org_clave; alter table agora.propuesta add constraint propuesta_clave_key unique (clave);`, caza: /clave de idempotencia es por organización/ },
   { fase: 'buzon', nombre: 'B1 · quitar la política restrictiva «decidida_por = auth.uid()»', sql: 'drop policy p_aprobacion_solo_humana on agora.aprobacion;', caza: /nadie firma por otro/ },
   { fase: 'buzon', nombre: 'B2 · la matriz deja aprobar a cualquiera', sql: reemplazaFn(`create or replace function agora_priv.ranura_para(p agora.propuesta, persona uuid) returns text language sql stable security definer set search_path = '' as $$ select 'propietario'::text $$;`), caza: /no tiene el rol de la matriz/ },
   { fase: 'buzon', nombre: 'B3 · sin segregación de funciones', sql: `update agora.org_config set segregacion = false;`, caza: /segregación de funciones/ },
