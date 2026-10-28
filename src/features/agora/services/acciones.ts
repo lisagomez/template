@@ -35,14 +35,28 @@ export async function cambiaPersona(clave: string): Promise<Resultado<string>> {
   return { ok: true, valor: p.nombre };
 }
 
+/** Lo que se le dice al coordinador en el hilo lo atiende él (sin LLM real: el modelo determinista del laboratorio). */
+const LE_HABLA_AL_COORDINADOR = /\bcoordinador\b|@coord/i;
+const MODELO = agora.modeloDeterminista();
+
 export async function publicaEnHilo(entrada: { categoria: string; cuerpo: string; hilo?: string | null }) {
   const d = z.object({ categoria: Uuid, cuerpo: z.string().trim().min(1).max(4000), hilo: Uuid.nullish() }).parse(entrada);
-  return corre((e, p) => agora.publica(e, p, d));
+  return corre(async (e, p) => {
+    const id = await agora.publica(e, p, d);
+    const grafo = LE_HABLA_AL_COORDINADOR.test(d.cuerpo) ? await agora.atiende({ ...e, modelo: MODELO }, id) : null;
+    return { id, grafo: grafo?.estado ?? null };
+  });
 }
 
 export async function decidePropuesta(entrada: { propuesta: string; sha256: string; decision: 'aprobar' | 'rechazar' | 'a_revision'; motivo?: string }) {
   const d = z.object({ propuesta: Uuid, sha256: Sha, decision: z.enum(['aprobar', 'rechazar', 'a_revision']), motivo: z.string().max(400).optional() }).parse(entrada);
-  return corre((e, p) => agora.decideYAplica(e, p, d));
+  return corre(async (e, p) => {
+    const r = await agora.decideYAplica(e, p, d);
+    // Si la propuesta salió del grafo del coordinador, su hilo se reanuda: el nodo relee la base y lo anota.
+    const [x] = await e.base.consulta<{ thread_id: string | null; org_id: string }>('select thread_id, org_id from agora.propuesta where id = $1', [d.propuesta]);
+    if (x?.thread_id) await agora.reanuda({ ...e, modelo: MODELO }, x.org_id, x.thread_id);
+    return r;
+  });
 }
 
 export async function editaCampo(entrada: { item: string; campo: string; valor: unknown }) {

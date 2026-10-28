@@ -79,6 +79,12 @@ const rutasDelBridge = (): string[] => [
  * mismo puerto que el bridge (RF-20: el puente no se publica fuera de la red interna del compose).
  */
 const RUTAS_FUERA_DEL_BRIDGE = [
+  // La Puerta A2A de Ágora (goal agora-a2a, laboratorio con datos ficticios). RF-20: misma app y mismo puerto; es OTRA
+  // superficie A2A, no este bridge, y está CERRADA: 404 «no existe» sin AGORA_LABORATORIO=1 o si la petición no es
+  // de esta máquina (Host localhost/127.0.0.1, sin X-Forwarded-For). Dentro: token ES256 por agente con kid y
+  // card_sha256 fijados en su idCard (leído sin caché), jti de un solo uso, alcance por categoría y skill, topes con
+  // 429 y Retry-After; lo ajeno responde igual que lo inexistente. Abrirla exige C3 + C4 firmados y doble firma.
+  '/api/agora/a2a/[org]',
   '/api/ajustes',
   // Buzón de CFDI del despacho (spec 015). RF-20: misma app y mismo puerto; en el despacho la app no tiene salida
   // a internet (docker-compose.despacho.yml). Todas exigen sesión y ser miembro del despacho (`entra()`), las que

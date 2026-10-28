@@ -459,9 +459,12 @@ end $$;
 
 -- --- El cierre del periodo y su póliza propuesta -------------------------------------------------------------
 /** La plantilla que aplica a un origen en una categoría (la de la categoría o la de toda la organización). */
-create or replace function agora_priv.plantilla(o uuid, origen text, categoria uuid) returns agora.plantilla_asiento language sql stable security definer set search_path = '' as $$
+-- Ojo: en una función SQL un parámetro con el nombre de una columna PIERDE contra la columna («pl.origen = origen» era
+-- siempre verdadero). Lo cazó la re-verificación independiente de la póliza: los parámetros no se llaman como columnas.
+drop function if exists agora_priv.plantilla(uuid, text, uuid);
+create or replace function agora_priv.plantilla(p_org uuid, p_origen text, p_categoria uuid) returns agora.plantilla_asiento language sql stable security definer set search_path = '' as $$
   select pl.* from agora.plantilla_asiento pl
-   where pl.org_id = o and pl.origen = origen and (pl.categoria_slug = (select n.slug from agora.nodo n where n.id = categoria) or pl.categoria_slug is null)
+   where pl.org_id = p_org and pl.origen = p_origen and (pl.categoria_slug = (select n.slug from agora.nodo n where n.id = p_categoria) or pl.categoria_slug is null)
    order by pl.categoria_slug nulls last limit 1
 $$;
 

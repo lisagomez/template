@@ -198,9 +198,11 @@ export async function intencionEscribe(texto: string, categoria: string | null):
     if (!categoria) return { texto: '¿En qué categoría? Abre su buzón (o su tablero) y vuelve a decírmelo: lo dejo en su hilo.' }
     const [c] = await leer(e, persona, (s) => s.consulta<{ nombre: string }>('select nombre from agora.nodo where id = $1', [categoria]))
     if (!c) return { texto: 'Esa categoría no existe para ti.' }
-    await agora.publica(e, persona, { categoria, cuerpo: texto })
+    const id = await agora.publica(e, persona, { categoria, cuerpo: texto })
+    const grafo = /\bcoordinador\b/i.test(texto) ? await agora.atiende({ ...e, modelo: agora.modeloDeterminista() }, id) : null
     refresh()
-    return { texto: `Lo dejé en el hilo de ${c.nombre}. Lo que conteste un agente llega ahí, como propuesta cuando cambia algo.`, ir: `/agora/buzon?cat=${categoria}` }
+    const respuesta = grafo?.estado === 'esperando' ? ' El coordinador ya contestó con una propuesta: la decide quien dice la matriz.' : grafo?.estado === 'sin-modelo' ? ' El coordinador no tiene cupo de modelo: sigue solo con reglas.' : ''
+    return { texto: `Lo dejé en el hilo de ${c.nombre}.${respuesta} Lo que conteste un agente llega ahí, como propuesta cuando cambia algo.`, ir: `/agora/buzon?cat=${categoria}` }
   })
 }
 

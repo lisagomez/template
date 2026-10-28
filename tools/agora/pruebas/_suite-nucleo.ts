@@ -17,6 +17,14 @@ export const NUCLEO: Comprobacion[] = [
     },
   },
   {
+    fase: 'nucleo', nombre: 'toda tabla y vista de agora se puede LEER con la sesión de una persona (la RLS decide qué filas)', tipo: 'estructura',
+    async corre({ base }) {
+      const sin = await base.consulta<{ t: string }>(`select c.relname t from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'agora' and c.relkind in ('r', 'v') and not has_table_privilege('authenticated', c.oid, 'select')`)
+      assert.deepEqual(sin.map((x) => x.t), [], `sin permiso de lectura: ${sin.map((x) => x.t).join(', ')}`)
+    },
+  },
+  {
     fase: 'nucleo', nombre: 'una persona de Bajío no ve NADA de Golfo Norte, tabla por tabla', tipo: 'conducta',
     async corre(c) {
       await c.comoPersona('carla', async (s) => {
@@ -197,6 +205,7 @@ export const SABOTAJES_NUCLEO: Sabotaje[] = [
       if not agora_priv.firma_valida(cuerpo, split_part(token, '.', 2)) then return null; end if;
       return convert_from(decode(rpad(translate(cuerpo, '-_', '+/'), (length(cuerpo) + 3) / 4 * 4, '='), 'base64'), 'utf8')::jsonb; end $$;`, caza: /de otro rol no da identidad/ },
   { fase: 'nucleo', nombre: 'S11 · la Puerta puede leer las tablas', sql: 'grant select on agora.agente, agora.mensaje to agora_puerta; create policy x on agora.agente for select to agora_puerta using (true); create policy y on agora.mensaje for select to agora_puerta using (true);', caza: /la Puerta no lee tablas/ },
+  { fase: 'nucleo', nombre: 'S13 · una vista nueva sin permiso de lectura', sql: 'revoke select on agora.v_llamadas_tras_revocar from authenticated;', caza: /se puede LEER/ },
   { fase: 'nucleo', nombre: 'S12 · el historial se puede anotar a mano', sql: `create or replace function agora_priv.anota_historial(o uuid, it uuid, campo text, antes jsonb, despues jsonb, actor_tipo text, persona uuid, agente uuid, prop uuid, deshacer timestamptz) returns void language plpgsql security definer set search_path = '' as $$ begin insert into agora.item_historial (org_id, item_id, campo, antes, despues, actor_tipo, actor_persona) values (o, it, campo, antes, despues, actor_tipo, persona); end $$;`, caza: /no se inventan a mano/ },
 ]
 

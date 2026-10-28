@@ -194,7 +194,9 @@ end $$;
 drop trigger if exists tg_costo_coherente on agora.costo;
 create trigger tg_costo_coherente before insert or update on agora.costo for each row execute function agora_priv.costo_coherente();
 drop trigger if exists tg_costo_periodo on agora.costo;
-create trigger tg_costo_periodo before insert or update or delete on agora.costo for each row execute function agora_priv.periodo_no_cerrado();
+-- «tg_a…»: los disparadores corren por nombre; el del periodo cerrado va primero para que su motivo sea el que se lee.
+drop trigger if exists tg_a_costo_periodo on agora.costo;
+create trigger tg_a_costo_periodo before insert or update or delete on agora.costo for each row execute function agora_priv.periodo_no_cerrado();
 
 -- --- El gasto de modelo de los agentes: USD por llamada, MXN con tipo de cambio con fuente --------------------
 create table if not exists agora.gasto_modelo (
@@ -367,7 +369,8 @@ begin
 end $$;
 
 /** La guardia de gasto ANTES de llamar a un modelo: sin cupo del agente o de la organización, no se llama (fail-closed). */
-create or replace function agora.puede_llamar_modelo(agente uuid) returns jsonb language plpgsql stable security definer set search_path = '' as $$
+drop function if exists agora.puede_llamar_modelo(uuid);
+create or replace function agora.puede_llamar_modelo(aid uuid) returns jsonb language plpgsql stable security definer set search_path = '' as $$
 declare
   a agora.agente;
   c agora.org_config;
@@ -378,7 +381,7 @@ begin
   if current_user = 'agora_agente' and agora_priv.agente_de_tarea() is null then
     return jsonb_build_object('ok', false, 'motivo', 'quien pregunta no tiene idCard vivo');
   end if;
-  select * into a from agora.agente where id = agente;
+  select * into a from agora.agente x where x.id = aid;
   if not found or a.estado not in ('aprobado', 'prueba') then return jsonb_build_object('ok', false, 'motivo', 'el agente no tiene idCard vivo'); end if;
   if a.sin_modelo then return jsonb_build_object('ok', false, 'motivo', 'este agente no usa modelo: solo reglas'); end if;
   select * into c from agora.org_config where org_id = a.org_id;
