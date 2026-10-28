@@ -117,22 +117,28 @@ exception when duplicate_object then null;
 end $$;
 
 /** Quien solicitó una propuesta, comprobado (definer: el agente que propone no lee personas ni mensajes ajenos).
- *  Parámetros con prefijo: `mensaje` tiene una columna `origen` y la sombrearía. */
+ *  El mensaje de origen tiene que ser de UNA PERSONA y del hilo de la MISMA categoría: citar un saludo de otra
+ *  categoría o un mensaje propio del agente no sirve para lavar al solicitante (2026-10-28, segunda pasada del
+ *  verificador independiente). Parámetros con prefijo: `mensaje` tiene una columna `origen` y la sombrearía. */
 drop function if exists agora_priv.solicitante_de(uuid, uuid, uuid);
-create or replace function agora_priv.solicitante_de(p_org uuid, p_declarado uuid, p_origen uuid) returns uuid language plpgsql stable security definer set search_path = '' as $$
+drop function if exists agora_priv.solicitante_de(uuid, uuid, uuid, uuid);
+create or replace function agora_priv.solicitante_de(p_org uuid, p_categoria uuid, p_declarado uuid, p_origen uuid) returns uuid language plpgsql stable security definer set search_path = '' as $$
 declare
   mo agora.mensaje;
+  cat uuid;
   quien uuid := p_declarado;
 begin
   if p_origen is not null then
     select * into mo from agora.mensaje where id = p_origen;
     if not found or mo.org_id <> p_org then raise exception 'el mensaje de origen no es de esa organización' using errcode = 'AG400'; end if;
-    if mo.autor_tipo = 'humano' then
-      if p_declarado is not null and p_declarado <> mo.autor_persona then
-        raise exception 'quien la solicitó no es quien escribió el mensaje de origen' using errcode = 'AG400';
-      end if;
-      quien := mo.autor_persona;
+    select k.categoria_id into cat from agora.canal k where k.id = mo.canal_id;
+    if mo.autor_tipo <> 'humano' or cat is distinct from p_categoria then
+      raise exception 'el mensaje de origen es el de una persona en el hilo de la misma categoría' using errcode = 'AG400';
     end if;
+    if p_declarado is not null and p_declarado <> mo.autor_persona then
+      raise exception 'quien la solicitó no es quien escribió el mensaje de origen' using errcode = 'AG400';
+    end if;
+    quien := mo.autor_persona;
   end if;
   if quien is not null and not exists (select 1 from agora.persona x where x.id = quien and x.org_id = p_org) then
     raise exception 'quien la solicitó no es de esa organización' using errcode = 'AG400';
@@ -154,7 +160,7 @@ begin
   if pl ->> 'clase' is distinct from new.clase then raise exception 'el payload no es de esa clase' using errcode = 'AG400'; end if;
   -- Quien la pidió es de la organización; si la propuesta cita su mensaje de origen, quien lo pidió es QUIEN LO
   -- ESCRIBIÓ (un agente no declara a otro, ni lo esconde): la segregación de funciones depende de esto.
-  new.solicitada_por := agora_priv.solicitante_de(new.org_id, new.solicitada_por, new.mensaje_origen);
+  new.solicitada_por := agora_priv.solicitante_de(new.org_id, new.categoria_id, new.solicitada_por, new.mensaje_origen);
   if new.autor_agente is not null then
     select * into a from agora.agente where id = new.autor_agente;
     if a.org_id <> new.org_id then raise exception 'el agente no es de esa organización' using errcode = 'AG400'; end if;
@@ -171,17 +177,15 @@ begin
   return new;
 end $$;
 alter table agora.propuesta add column if not exists mensaje_origen uuid references agora.mensaje (id);
--- La clave de idempotencia es por ORGANIZACIÓN: un agente de otra no ocupa por adelantado la clave ajena.
-do $do$ begin
-  alter table agora.propuesta drop constraint if exists propuesta_clave_key;
-  alter table agora.mensaje drop constraint if exists mensaje_clave_key;
-  if not exists (select 1 from pg_constraint where conname = 'propuesta_org_clave') then
-    alter table agora.propuesta add constraint propuesta_org_clave unique (org_id, clave);
-  end if;
-  if not exists (select 1 from pg_constraint where conname = 'mensaje_org_clave') then
-    alter table agora.mensaje add constraint mensaje_org_clave unique (org_id, clave);
-  end if;
-end $do$;
+-- La clave de idempotencia es de su AUTOR (y de su organización): nadie ocupa por adelantado la clave de otro, ni
+-- de otra organización ni de la propia (un externo calculaba la del coordinador y lo hacía ligar SU propuesta). Los
+-- mensajes del sistema (sin autor) comparten un autor nulo fijo, para que sus avisos sigan siendo idempotentes.
+alter table agora.propuesta drop constraint if exists propuesta_clave_key;
+alter table agora.mensaje drop constraint if exists mensaje_clave_key;
+alter table agora.propuesta drop constraint if exists propuesta_org_clave;
+alter table agora.mensaje drop constraint if exists mensaje_org_clave;
+create unique index if not exists propuesta_autor_clave on agora.propuesta (org_id, (coalesce(autor_agente, autor_persona)), clave);
+create unique index if not exists mensaje_autor_clave on agora.mensaje (org_id, (coalesce(autor_agente, autor_persona, '00000000-0000-0000-0000-000000000000'::uuid)), clave);
 drop trigger if exists tg_propuesta_coherente on agora.propuesta;
 create trigger tg_propuesta_coherente before insert on agora.propuesta for each row execute function agora_priv.propuesta_coherente();
 
@@ -236,30 +240,46 @@ end $$;
  * ¿Qué ranura de firma llenaría esta persona? Devuelve el rol con el que firma, o null si no le toca. Una
  * persona llena UNA ranura; una ranura ya llenada por otra firma no se llena dos veces.
  */
+/** ¿Caben estas firmas (sus roles, una por persona) en ranuras DISTINTAS de la matriz? Búsqueda exhaustiva: la matriz
+ *  tiene de 1 a 3 ranuras, así que son a lo sumo 6 asignaciones. */
+create or replace function agora_priv.caben(firmas jsonb, roles text[]) returns boolean language plpgsql immutable set search_path = '' as $$
+declare
+  n int := jsonb_array_length(firmas);
+  k int := coalesce(array_length(roles, 1), 0);
+  a int; b int; c int;
+  en text[];
+begin
+  if k > n then return false; end if;
+  if k = 0 then return true; end if;
+  for a in 0 .. n - 1 loop
+    en := array(select jsonb_array_elements_text(firmas -> a));
+    continue when not roles[1] = any (en);
+    if k = 1 then return true; end if;
+    for b in 0 .. n - 1 loop
+      continue when b = a or not roles[2] = any (array(select jsonb_array_elements_text(firmas -> b)));
+      if k = 2 then return true; end if;
+      for c in 0 .. n - 1 loop
+        continue when c in (a, b) or not roles[3] = any (array(select jsonb_array_elements_text(firmas -> c)));
+        return true;
+      end loop;
+    end loop;
+  end loop;
+  return false;
+end $$;
+
+/** El rol con el que esta persona firma: uno suyo que, junto con las firmas previas, todavía cabe en ranuras distintas.
+ *  (Antes era voraz y podía dejar colgada una propuesta que sí se podía firmar: segunda pasada del verificador.) */
 create or replace function agora_priv.ranura_para(p agora.propuesta, persona uuid) returns text language plpgsql stable security definer set search_path = '' as $$
 declare
   r agora.matriz_regla := agora_priv.regla_de(p);
   roles text[] := agora_priv.roles_de(persona, p.org_id, p.categoria_id);
-  ranura jsonb;
-  k int := 0;
   usadas text[];
-  usada int;
   rol text;
 begin
   if r.id is null then return null; end if;
   select coalesce(array_agg(a.rol_usado order by a.decidida_en), '{}') into usadas from agora.aprobacion a where a.propuesta_id = p.id and a.decision = 'aprobar';
-  for ranura in select * from jsonb_array_elements(r.firmas) loop
-    k := k + 1;
-    -- Cada firma previa llena UNA ranura (la primera que le toca): con dos ranuras iguales, una firma deja la otra libre.
-    select i into usada from generate_subscripts(usadas, 1) i where usadas[i] in (select jsonb_array_elements_text(ranura)) order by i limit 1;
-    if usada is not null then
-      usadas := usadas[1:usada - 1] || usadas[usada + 1:];
-      usada := null;
-      continue;
-    end if;
-    for rol in select * from jsonb_array_elements_text(ranura) loop
-      if rol = any (roles) then return rol; end if;
-    end loop;
+  for rol in select distinct x from jsonb_array_elements(r.firmas) f, jsonb_array_elements_text(f) x order by 1 loop
+    if rol = any (roles) and agora_priv.caben(r.firmas, usadas || rol) then return rol; end if;
   end loop;
   return null;
 end $$;

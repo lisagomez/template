@@ -33,7 +33,7 @@ El núcleo de Ágora: el espacio de trabajo donde el equipo, sus agentes interno
 
 - **Runtime**: Node `>=22.18` (corre los `.ts` de las pruebas sin transpilar).
 - **Dependencias del sistema**: PostgreSQL con `pgcrypto`, probado en **PostgreSQL 17.11** (Docker, `npm run agora:laboratorio`) y en **PGlite 0.5.8** (las pruebas de `validate`, sin Docker). Paquetes: `pg` 8.16.3 y `zod` 4.6.1, con versión exacta; PGlite es peer opcional (solo pruebas).
-- **CPU, GPU y memoria**: no medido. Las 124 pruebas de las fases 1 a 7 corren en minutos en una laptop (PGlite, una base nueva por comprobación).
+- **CPU, GPU y memoria**: no medido. Las 125 pruebas de las fases 1 a 7 corren en minutos en una laptop (PGlite, una base nueva por comprobación).
 - **Servicios externos**: ninguno. El calendario del laboratorio es el simulador de `tools/calendario`; el modelo es determinista.
 - **Variables de entorno** (solo el laboratorio de la app): `AGORA_LABORATORIO` (encendido o apagado), `AGORA_PG_URL` (la base del laboratorio) y `AGORA_SECRETO` (firma los tokens de tarea; ≥ 32 caracteres). `npm run agora:laboratorio` las escribe en `tools/agora/.laboratorio/entorno` (ignorado por git) y solo dice si están presentes.
 - **Almacenamiento**: dos esquemas, `agora` (datos, RLS forzada) y `agora_priv` (funciones). La bitácora es encadenada y solo crece. El testigo del freno guarda huellas, no texto, y se poda a las 24 h.

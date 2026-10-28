@@ -189,7 +189,7 @@ async function conversacion(base: Base) {
   for (const [cat, clave, tipo, quien, cuerpo, origen, padre] of hilo) {
     const c = await canal(cat)
     const padreId = padre ? (await base.consulta<{ id: string }>('select id from agora.mensaje where clave = $1', [`siembra:${padre}`]))[0]?.id ?? null : null
-    await base.consulta(`insert into agora.mensaje (org_id, canal_id, hilo_id, autor_tipo, autor_persona, autor_agente, cuerpo, origen, clave) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) on conflict (org_id, clave) do nothing`,
+    await base.consulta(`insert into agora.mensaje (org_id, canal_id, hilo_id, autor_tipo, autor_persona, autor_agente, cuerpo, origen, clave) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) on conflict do nothing`,
       [GOLFO, c, padreId, tipo, tipo === 'humano' ? persona(quien!) : null, tipo === 'agente' ? agente(quien!) : null, cuerpo, origen ?? 'sala', `siembra:${clave}`])
   }
 }
@@ -219,7 +219,7 @@ async function pendientes(base: Base, o: OpcionesSiembra) {
     const idCanal = await canal(c.cat) // fuera de la transacción: PGlite tiene una sola conexión
     const p = await como(base, { tipo: 'agente', token }, async (s) => {
       const prop = await propone(s, { org: GOLFO, autorAgente: agente(c.agente), solicitadaPor: c.solicita ? persona(c.solicita) : null, clave: `siembra:${c.clave}`, resumen: c.resumen, payload: c.payload, nivel: c.nivel ?? 'A1' })
-      await s.consulta(`insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_agente, cuerpo, origen, propuesta_id, clave) values ($1, $2, 'agente', $3, $4, $5, $6, $7) on conflict (org_id, clave) do nothing`,
+      await s.consulta(`insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_agente, cuerpo, origen, propuesta_id, clave) values ($1, $2, 'agente', $3, $4, $5, $6, $7) on conflict do nothing`,
         [GOLFO, idCanal, agente(c.agente), c.cuerpo, c.origen, prop.id, `siembra:msg:${c.clave}`])
       return prop
     })

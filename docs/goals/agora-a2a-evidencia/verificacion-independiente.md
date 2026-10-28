@@ -48,6 +48,46 @@ otra clave. Datos ficticios del laboratorio de Ágora; ningún otro contenedor s
 | La Puerta cerrada fuera del laboratorio | **confirmado y endurecido**: además de `AGORA_LABORATORIO=1` y Host local, el servidor del laboratorio escucha solo en `127.0.0.1` | `scripts/agora/dev.mjs` |
 | `validate` no corre los sabotajes ni `agora:pg` | **del laboratorio** (CDC: `agora:pg` propuesto inactivo) | `riesgos-propuesta.md` |
 
+## Segunda pasada (sobre `51a42ab`, clon limpio sin `--single-branch`, sin construir nada a mano)
+
+| Paso | Resultado del verificador |
+| --- | --- |
+| `npm ci` + `npm run validate` | `✓ tools/agora construida · ✓ tools/calendario construida · Gobernanza cableada: 171/171 · ▸ tools/agora ✓ 124 pruebas · pasaron: 34 · inactivos declarados: 11 · rojos: 0 · Gate validate en VERDE: 34/34` |
+| `prueba` / `sabotajes` | `# tests 124 # pass 124 # fail 0`; 80 sabotajes caen, 0 «NO cae» (S16, S17, B10, B11 y B12 incluidos) |
+| Importar `laboratorio.ts` sin Docker | `sin efectos`, exit 0, sin crear `.laboratorio/` |
+| `git diff --stat 2561724..HEAD -- tools/capa` / `verifica:enchufes` | vacío / 30/30 y 10/10 |
+
+| Ataque | Resultado | Control |
+| --- | --- | --- |
+| A1, A1b, A2 (claims de persona en sesión de agente) | `agora_priv.uid()`=null; aprobaciones 3 → 3, ocultas 0; Bajío 0; suspendido 0 | aguantan |
+| C1'-b / C1'-c (cita el mensaje de Mariana / lo cita y declara a Daniel) | `segregación de funciones…` / `quien la solicitó no es quien escribió…` | aguantan |
+| C2 / C2b (solicitante o mensaje de otra organización) | rechazados | aguantan |
+| D' (dos ranuras iguales) | pendiente con una firma; aprobada con dos | aguanta |
+| C1'-a: sin citar el mensaje | Mariana aprobó lo que pidió | **cae** (declarado) |
+| **C3: cita un saludo de Daniel en OTRA categoría** | Mariana aprobó lo que pidió | **cayó** |
+| **C4: cita un mensaje del propio coordinador** | Mariana aprobó lo que pidió | **cayó** |
+| **E: un socio ocupa la clave del coordinador** (`grafo:…:mensaje:<id>`, predecible) | el coordinador ligó en el hilo la propuesta del socio; Paula la aprobó y se aplicó la fecha del socio | **cayó** |
+| D'': `[[administrador,propietario],[propietario]]`, firma primero Paula | Luis ya no puede firmar: la propuesta queda colgada (falla cerrado) | informativo |
+| La suite de Ágora sola en un clon limpio | 110/111: `composicion.ts` no encuentra `tools/capa/dist` | informativo |
+| `--apaga` | borra el contenedor desde cualquier árbol | informativo |
+
+Qué se hizo:
+- **C3 y C4 — arreglado:** el mensaje de origen tiene que ser **de una persona y del hilo de la MISMA categoría**
+  (`agora_priv.solicitante_de`). Lo que queda (declarado, punto 28): un agente que no cita el mensaje, o que cita otro
+  mensaje humano de la misma categoría.
+- **E — arreglado:** la clave de idempotencia es **del autor** (índice único `org_id, autor, clave`); `propone` solo
+  adopta una previa suya con la misma huella. Lo mismo para los mensajes, así que nadie silencia la respuesta del
+  coordinador ocupando su clave.
+- **D'' — arreglado:** `ranura_para` busca una asignación válida entre todas (`agora_priv.caben`) en vez de repartir a
+  la primera.
+- **La suite sola en un clon limpio — arreglado:** el `prebuild` de `tools/agora` construye `calendario` y `capa`.
+- **`--apaga` — arreglado:** solo borra un contenedor que este árbol creó; un huérfano, solo con `--huerfano`.
+- **B — sigue declarado** (punto 27).
+
+Las pruebas nuevas, cada una con su sabotaje: «el mensaje de origen es el de una persona en el hilo de la misma
+categoría» (dentro de la prueba del solicitante, B11), «la clave de idempotencia es de su AUTOR» (B12) y «el reparto de
+ranuras no deja colgada una propuesta que sí se puede firmar» (B13).
+
 ## La re-corrida después de los arreglos
 
 (Se agrega abajo al terminar: las suites, los sabotajes en PGlite y en PostgreSQL 17.11 y el `validate` tras el último

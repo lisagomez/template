@@ -106,8 +106,9 @@
    para la RLS (lo encontró el **verificador independiente**). Todo pasa ahora por `agora_priv.uid()`, que solo devuelve
    la persona si la sesión es de persona, y una comprobación estructural impide volver a leer `auth.uid()` directo.
 5. **La segregación y la matriz se apoyaban en lo que declaraba el agente** y en contar una firma para dos ranuras. La
-   base deriva al solicitante del mensaje de origen citado, exige que sea de la organización y pide una persona
-   distinta por ranura. La clave de idempotencia pasó a ser por organización.
+   base deriva al solicitante del mensaje de origen citado (de una persona y del hilo de la misma categoría), exige que
+   sea de la organización y busca una asignación de firmas a ranuras con personas distintas, sin dejar colgada una
+   propuesta firmable. La clave de idempotencia es del autor: nadie hace que el coordinador adopte una propuesta ajena.
 6. **Un script del laboratorio actuaba al importarse** y borró un contenedor (el del laboratorio de Ágora, con datos
    ficticios) al correrlo el verificador en otro árbol. Ahora leer el entorno no tiene efectos, el script solo actúa
    si se ejecuta y nunca borra un contenedor cuya clave no tiene. La prueba de regresión cae con la versión vieja.

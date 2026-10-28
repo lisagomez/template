@@ -1,4 +1,4 @@
-# Los recorridos en el navegador (Playwright contra el laboratorio en 127.0.0.1:3021), sobre 51a42ab, 2026-10-28.
+# Los recorridos en el navegador (Playwright contra el laboratorio en 127.0.0.1:3021), repetidos sobre el código final del goal (125 pruebas, 81 sabotajes), 2026-10-28.
 # Cada comprobación mira también la BASE, no solo la pantalla. Capturas en docs/goals/agora-a2a-capturas/.
 
 $ node scripts/agora/e2e-capa.ts          # los malos de la capa en la ventana real

@@ -111,9 +111,10 @@ Cada sabotaje debe salir en rojo (bloqueado) con la suite en verde; se nombra el
 | P-12 | La tarjeta de un socio cambia sin aviso | El vigía la re-descarga y compara con la huella fijada; si cambió, **suspende** y avisa (falla cerrado) | V3 (el vigía no puede suspender) y V4 (cualquier agente suspende) |
 | D-3 | Una sesión de agente se pone los claims de una persona (`request.jwt.claim.sub`) y la RLS la trata como esa persona (lo encontró el verificador independiente) | `agora_priv.uid()`: la persona solo si la sesión ES de persona (rol `authenticated`); ninguna función ni política lee `auth.uid()` directo | S16 (`uid()` sin mirar el rol) y S17 (una política que lee `auth.uid()`) |
 | D-4 | Con SQL libre sobre una conexión que puede hacer `SET ROLE`, un agente se vuelve persona | Ningún agente tiene SQL (la sesión la arma el servidor). **Abierto para producción:** un rol de conexión por tipo de principal, sin superusuario | — (declarado; en el laboratorio la conexión es `postgres`) |
-| D-5 | Un agente «lava» al solicitante para que quien pidió el gasto lo apruebe | Si la propuesta cita su mensaje de origen, la base deriva al solicitante; el solicitante es de la organización. **Abierto:** exigir el mensaje de origen a todo agente salvo el vigía | B11 |
+| D-5 | Un agente «lava» al solicitante para que quien pidió el gasto lo apruebe (sin citar, citando un saludo de otra categoría o su propio mensaje) | El mensaje de origen citado tiene que ser de una persona y del hilo de la misma categoría; de ahí la base deriva al solicitante, que es de la organización. **Abierto:** exigir el mensaje de origen a todo agente salvo el vigía | B11 |
 | D-6 | Una firma llena dos ranuras con los mismos roles | Cada ranura la llena una persona distinta | B10 |
-| D-7 | Otra organización ocupa por adelantado la clave de idempotencia | Clave única por organización | B12 |
+| D-7 | Otro autor (de otra organización o de la propia) ocupa por adelantado la clave de idempotencia y hace que el coordinador adopte SU propuesta, o silencia su respuesta | Clave única por autor en propuestas y mensajes; solo se adopta una previa propia con la misma huella | B12 |
+| D-8 | El reparto de ranuras deja colgada una propuesta que sí se puede firmar (disponibilidad) | Asignación exhaustiva (`agora_priv.caben`) | B13 |
 
 ## 5. Lo que queda abierto
 

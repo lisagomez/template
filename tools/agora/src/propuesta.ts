@@ -59,13 +59,17 @@ export async function propone(s: Sesion, d: DatosDePropuesta): Promise<{ id: str
   const [fila] = await s.consulta<{ id: string; sha256: string }>(
     `insert into agora.propuesta (org_id, categoria_id, clase, autor_agente, autor_persona, solicitada_por, resumen, payload_canon, sha256, nivel, clave, task_id, thread_id, mensaje_origen)
      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-     on conflict (org_id, clave) do nothing returning id, sha256`,
+     on conflict do nothing returning id, sha256`,
     [d.org, a.payload.categoria, a.payload.clase, d.autorAgente ?? null, d.autorPersona ?? null, d.solicitadaPor ?? null, d.resumen, a.canon, a.sha256,
       d.nivel ?? 'A1', d.clave ?? null, d.taskId ?? null, d.threadId ?? null, d.mensajeOrigen ?? null])
   if (fila) return fila
-  // Ya existía con esa clave (un reintento): se devuelve la misma, no se crea otra.
-  const [previa] = await s.consulta<{ id: string; sha256: string }>('select id, sha256 from agora.propuesta where org_id = $1 and clave = $2', [d.org, d.clave])
-  if (!previa) throw new Error('la propuesta no se creó y no hay una previa con esa clave')
+  // Ya existía con esa clave (un reintento): se devuelve la misma, no se crea otra. Pero solo si es DEL MISMO AUTOR y
+  // con la misma huella: una propuesta ajena, o distinta, con esa clave no se adopta (2026-10-28, verificador).
+  const autor = d.autorAgente ?? d.autorPersona ?? null
+  const [previa] = await s.consulta<{ id: string; sha256: string }>(
+    'select id, sha256 from agora.propuesta where org_id = $1 and clave = $2 and coalesce(autor_agente, autor_persona) = $3', [d.org, d.clave, autor])
+  if (!previa) throw new Error('la propuesta no se creó y no hay una previa tuya con esa clave')
+  if (previa.sha256 !== a.sha256) throw new Error('esa clave ya la usaste con otra propuesta: no la reutilizo')
   return previa
 }
 

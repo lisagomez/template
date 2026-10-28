@@ -61,7 +61,7 @@ begin
     select c.id into canal from agora.canal c where c.categoria_id = p_nodo;
     if canal is not null then
       insert into agora.mensaje (org_id, canal_id, autor_tipo, autor_agente, cuerpo, item_id, clave) values (o, canal, 'agente', agora_priv.agente_de_tarea(), p_texto, p_item, 'vigia:' || p_clave)
-      on conflict (org_id, clave) do nothing;
+      on conflict do nothing;
     end if;
   end if;
   return n = 1;

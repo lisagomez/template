@@ -5,7 +5,8 @@
  * No toca los contenedores de otros proyectos.
  *
  * Uso: node scripts/agora/laboratorio.ts            (levanta o reusa, y vuelve a sembrar una base nueva)
- *      node scripts/agora/laboratorio.ts --apaga    (borra el contenedor y el entorno)
+ *      node scripts/agora/laboratorio.ts --apaga    (borra el contenedor y el entorno, si ESTE árbol lo creó)
+ *      node scripts/agora/laboratorio.ts --apaga --huerfano   (borra un contenedor que no creó este árbol, a propósito)
  *      node scripts/agora/laboratorio.ts --url      (solo comprueba que hay entorno: presente/ausente)
  */
 import { execFileSync } from 'node:child_process';
@@ -35,7 +36,7 @@ async function levanta() {
   let clave = previo.AGORA_PG_CLAVE ?? '';
   if (existe() && !clave) {
     // Un contenedor sin su clave en ESTE árbol es de otro árbol (u otra sesión): nunca se borra solo.
-    console.error(`✗ el contenedor ${CONTENEDOR} existe y este árbol no tiene su clave: no lo borro. Si es tuyo, bórralo con --apaga desde aquí y vuelve a correr esto.`);
+    console.error(`✗ el contenedor ${CONTENEDOR} existe y este árbol no tiene su clave: no lo borro. Si lo creó otro árbol, trabaja desde ese; si sabes que quedó huérfano, --apaga --huerfano.`);
     process.exit(2);
   }
   if (!existe()) {
@@ -73,6 +74,11 @@ const ejecutado = process.argv[1] !== undefined && resolve(process.argv[1]) === 
 if (!ejecutado) {
   // importado: sin efectos
 } else if (process.argv.includes('--apaga')) {
+  // Solo borra lo que ESTE árbol creó (tiene su clave), o un huérfano declarado a propósito.
+  if (existe() && !leeEntorno().AGORA_PG_CLAVE && !process.argv.includes('--huerfano')) {
+    console.error(`✗ este árbol no creó ${CONTENEDOR} (no tiene su clave): no lo borro. Si sabes que quedó huérfano: --apaga --huerfano`);
+    process.exit(2);
+  }
   if (existe()) docker(['rm', '-f', CONTENEDOR]);
   rmSync(DIR, { recursive: true, force: true });
   console.log(`· ${CONTENEDOR} borrado y entorno quitado`);
