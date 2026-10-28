@@ -88,11 +88,15 @@ create trigger tg_movimiento_inmutable before update or delete on agora.poliza_m
 /** D-17: al terminar la transacción, cada póliza tocada cuadra (cargos = abonos) y tiene al menos dos movimientos. */
 create or replace function agora_priv.partida_doble() returns trigger language plpgsql set search_path = '' as $$
 declare
-  pid uuid := case when tg_table_name = 'poliza' then new.id else coalesce(new.poliza_id, old.poliza_id) end;
+  pid uuid;
   cargos numeric;
   abonos numeric;
   n int;
 begin
+  if tg_table_name = 'poliza' then pid := new.id;
+  elsif tg_op = 'DELETE' then pid := old.poliza_id;
+  else pid := new.poliza_id;
+  end if;
   if not exists (select 1 from agora.poliza where id = pid) then return null; end if;
   select coalesce(sum(importe) filter (where naturaleza = 'cargo'), 0), coalesce(sum(importe) filter (where naturaleza = 'abono'), 0), count(*)
     into cargos, abonos, n from agora.poliza_movimiento where poliza_id = pid;

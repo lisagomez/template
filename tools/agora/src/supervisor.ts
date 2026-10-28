@@ -99,10 +99,9 @@ export async function supervisa(s: Sesion, p: Payload, c: ContextoSupervisor): P
   for (const m of montos) {
     const fin = m.item ? (fechas.get(m.item)?.fin ?? null) : ('fin' in m ? (m.fin ?? null) : null)
     const periodo = fin ? mes(fin) : (await s.consulta<{ p: string }>(`select to_char(now() at time zone 'America/Mexico_City', 'YYYY-MM') p`))[0]!.p
-    const [d] = await s.consulta<{ disponible: string | null; presupuesto: string | null; vigente_item: string | null }>(
-      `select v.disponible_mxn::text disponible, v.presupuesto_mxn::text presupuesto,
-              (select sum(k.vigente_mxn)::text from agora.v_compromiso_saldo k where k.item_id = $3 and k.estado = 'vigente' and k.periodo = $2) vigente_item
-         from agora.v_centro_periodo v where v.categoria_id = $1 and v.periodo = $2`, [p.categoria, periodo, m.item])
+    const [fila] = await s.consulta<{ c: { disponible: string | number | null; presupuesto: string | number | null; vigente_item: string | number | null } | null }>(
+      'select agora.cupo_de_categoria($1, $2, $3) c', [p.categoria, periodo, m.item])
+    const d = fila?.c ?? null
     const disponible = Number(d?.disponible ?? 0) + Number(d?.vigente_item ?? 0) // lo que el ítem ya tenía comprometido se libera al cambiarlo
     const cabe = d?.presupuesto !== undefined && d.presupuesto !== null && m.monto <= disponible
     r('cabe en el presupuesto de la categoría', cabe, cabe ? `${m.monto.toLocaleString('es-MX')} MXN ≤ disponible ${disponible.toLocaleString('es-MX')} MXN en ${periodo}`

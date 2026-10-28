@@ -121,19 +121,19 @@ export const TABLERO: Comprobacion[] = [
 ]
 
 export const SABOTAJES_TABLERO: Sabotaje[] = [
-  { fase: 'tablero', nombre: 'T1 · el agente puede actualizar ítems', sql: `grant update on agora.item to agora_agente; create policy x on agora.item for update to agora_agente using (true);
+  { fase: 'tablero', nombre: 'TB1 · el agente puede actualizar ítems', sql: `grant update on agora.item to agora_agente; create policy x on agora.item for update to agora_agente using (true);
       create or replace function agora_priv.item_guarda() returns trigger language plpgsql set search_path = '' as $$ begin return new; end $$;`, caza: /un agente no actualiza/ },
-  { fase: 'tablero', nombre: 'T2 · A2 con dinero o fechas', sql: `create or replace function agora_priv.propuesta_coherente() returns trigger language plpgsql set search_path = '' as $$ begin return new; end $$;`, caza: /A2 no aplica dinero|techo es A1/ },
-  { fase: 'tablero', nombre: 'T3 · cualquier propuesta pasa por A2', sql: `create or replace function agora_priv.es_a2_valida(p agora.propuesta) returns boolean language sql stable as $$ select true $$;`, caza: /A1 no se aplica sin su aprobación/ },
-  { fase: 'tablero', nombre: 'T4 · dependencias con ciclos', sql: `alter table agora.dependencia disable trigger tg_dependencia_sin_ciclo;`, caza: /no cierra un ciclo/ },
-  { fase: 'tablero', nombre: 'T5 · «Listo» sin mirar dependencias', sql: `create or replace function agora_priv.item_coherente() returns trigger language plpgsql set search_path = '' as $$ begin return new; end $$;`, caza: /dependencias cerradas/ },
-  { fase: 'tablero', nombre: 'T6 · el colaborador cambia cualquier campo', sql: `create or replace function agora_priv.item_guarda() returns trigger language plpgsql set search_path = '' as $$ begin
+  { fase: 'tablero', nombre: 'TB2 · A2 con dinero o fechas', sql: `create or replace function agora_priv.propuesta_coherente() returns trigger language plpgsql set search_path = '' as $$ begin return new; end $$;`, caza: /A2 no aplica dinero|techo es A1/ },
+  { fase: 'tablero', nombre: 'TB3 · cualquier propuesta pasa por A2', sql: `create or replace function agora_priv.es_a2_valida(p agora.propuesta) returns boolean language sql stable as $$ select true $$;`, caza: /A1 no se aplica sin su aprobación/ },
+  { fase: 'tablero', nombre: 'TB4 · dependencias con ciclos', sql: `alter table agora.dependencia disable trigger tg_dependencia_sin_ciclo;`, caza: /no cierra un ciclo/ },
+  { fase: 'tablero', nombre: 'TB5 · «Listo» sin mirar dependencias', sql: `create or replace function agora_priv.item_coherente() returns trigger language plpgsql set search_path = '' as $$ begin return new; end $$;`, caza: /dependencias cerradas/ },
+  { fase: 'tablero', nombre: 'TB6 · el colaborador cambia cualquier campo', sql: `create or replace function agora_priv.item_guarda() returns trigger language plpgsql set search_path = '' as $$ begin
       if current_user in ('agora_agente') then raise exception 'un agente no edita el tablero: propone' using errcode = 'AG403'; end if; return new; end $$;`, caza: /colaboradora cambia el progreso|asignar a un socio externo/ },
-  { fase: 'tablero', nombre: 'T7 · la persona puede atribuir su cambio a una propuesta', sql: `create or replace function agora_priv.item_historia() returns trigger language plpgsql set search_path = '' as $$
+  { fase: 'tablero', nombre: 'TB7 · la persona puede atribuir su cambio a una propuesta', sql: `create or replace function agora_priv.item_historia() returns trigger language plpgsql set search_path = '' as $$
       declare campo text; a jsonb := to_jsonb(old); d jsonb := to_jsonb(new); begin
       foreach campo in array array['prioridad', 'progreso', 'fin', 'estado'] loop
         if (a -> campo) is distinct from (d -> campo) then perform agora_priv.anota_historial(new.org_id, new.id, campo, a -> campo, d -> campo, 'humano', auth.uid(), null,
           nullif(current_setting('agora.propuesta', true), '')::uuid, null); end if; end loop; return new; end $$;`, caza: /el historial lo escribe la base|A2 aplica lo reversible/ },
-  { fase: 'tablero', nombre: 'T8 · deshacer sin pedir rol de edición', sql: `create or replace function agora_priv.tiene_rol(o uuid, n uuid, roles text[]) returns boolean language sql stable security definer set search_path = '' as $$
+  { fase: 'tablero', nombre: 'TB8 · deshacer sin pedir rol de edición', sql: `create or replace function agora_priv.tiene_rol(o uuid, n uuid, roles text[]) returns boolean language sql stable security definer set search_path = '' as $$
       select exists (select 1 from agora.membresia m where m.persona_id = auth.uid() and m.org_id = o) $$;`, caza: /deshace|colaboradora|Listo/ },
 ]
