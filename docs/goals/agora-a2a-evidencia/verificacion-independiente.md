@@ -120,7 +120,35 @@ Qué se hizo:
   es el que de verdad pidió el cambio. Cierra solo si la propuesta del agente nace del mensaje en la base, no en el
   código del agente: es la propuesta abierta.
 
-## La re-corrida después de los arreglos
+## Cuarta pasada (sobre `34bd39c`): ningún control se rompe
 
-(Se agrega abajo al terminar: las suites, los sabotajes en PGlite y en PostgreSQL 17.11 y el `validate` tras el último
-commit.)
+| Paso | Resultado del verificador |
+| --- | --- |
+| `npm ci` + `npm run validate` sin construir nada | `✓ tools/agora · ✓ tools/calendario · ✓ tools/capa construidas · Gobernanza cableada: 171/171 · ▸ tools/agora ✓ 127 pruebas · pasaron: 34 · inactivos declarados: 11 · rojos: 0 · Gate validate en VERDE: 34/34` |
+| `sabotajes` | `suites: 21/21 17/17 11/11 13/13 8/8 10/10 11/11 7/7 8/8 7/7` · caen 83, 0 «NO cae», 0 «no se pudo sembrar», 0 «apunta a nada» |
+
+| Ataque | Resultado | Control |
+| --- | --- | --- |
+| E2 (el analista escribe los pasos del coordinador) | el coordinador queda esperando SU propuesta | aguanta |
+| E3 (Bajío ocupa los pasos con el hilo de Golfo) | Golfo guarda sus puntos; el modelo se cobra 1 vez | aguanta |
+| D''' (`[[finanzas],[aprobador]]`, firma primero quien tiene los dos roles) | `aprobada` con 2 firmas | aguanta |
+| A1, A1b, A2, C3, C4, E, D'' | sin cambios | aguantan |
+| G2 (nuevo): el analista inserta un paso con `agente_id` = el coordinador | `new row violates row-level security policy for table "grafo_punto"` | aguanta |
+| G3 (nuevo): el mismo mensaje atendido dos veces | la misma propuesta, 1 llamada cobrada | aguanta |
+| R1 (nuevo): a quien firmó le quitan el rol antes de aplicar | ya no se puede aplicar («sin su fila de aprobación») | informativo (falla cerrado) |
+| C1'-a y C5 (declarados) | el agente elige qué mensaje cita, o no cita | caen (declarado) |
+
+Lo que dejó como observación, y su estado:
+- `esMio()` dejaba pasar una clave vieja con el contenedor **parado**: **arreglado** (lo que no se puede comprobar no
+  se borra).
+- `rol_usado` no dice qué ranura llenó cada firma; las firmas se juzgan con los roles **actuales**; una propuesta
+  puede quedar `aprobada` sin poder aplicarse si a quien firmó le quitan el rol: **declarados** (puntos 39 a 41 de
+  `lo-que-podria-estar-mal.md`). Todos fallan cerrado: nada se aplica sin las firmas que la matriz pide hoy.
+
+## La re-corrida después de los arreglos (mía, sobre `34bd39c`)
+
+- PGlite y PostgreSQL 17.11: `tests 127 · pass 127 · fail 0` y 83 sabotajes cazados en los dos
+  (`f10-pg.log`, `f10-sabotajes.log`).
+- En el navegador, sobre el código final: capturas 12/12, e2e de la capa 9/9, recorrido de la capa 8/8
+  (`recorridos.txt`).
+- `npm run validate` tras el último commit: pegado en el reporte final del goal (el log queda fuera del árbol: guardarlo movería el commit que valida).

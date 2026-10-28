@@ -31,9 +31,10 @@ async function espera(url: string) {
   throw new Error('el Postgres del laboratorio no contestó en 90 s');
 }
 
-/** ¿La clave de este árbol abre el contenedor que está ahí? Si no, el contenedor es de otro árbol. */
+/** ¿La clave de este árbol abre el contenedor que está ahí? Si no, el contenedor es de otro árbol. Si está parado no se
+ *  puede comprobar, y lo que no se comprueba no se borra (cuarta pasada del verificador: una clave vieja pasaba). */
 async function esMio(clave: string): Promise<boolean> {
-  if (!clave || !corriendo()) return Boolean(clave);
+  if (!clave || !corriendo()) return false;
   const c = new pg.Client({ connectionString: `postgresql://postgres:${encodeURIComponent(clave)}@127.0.0.1:${PUERTO}/postgres`, connectionTimeoutMillis: 5000 });
   try { await c.connect(); await c.end(); return true; } catch { return false; }
 }
@@ -84,7 +85,7 @@ if (!ejecutado) {
   // Solo borra lo que ESTE árbol creó: su clave tiene que ABRIR el contenedor (una clave vieja de otro contenedor no
   // basta). Un huérfano, solo declarado a propósito.
   if (existe() && !process.argv.includes('--huerfano') && !(await esMio(leeEntorno().AGORA_PG_CLAVE ?? ''))) {
-    console.error(`✗ este árbol no creó ${CONTENEDOR} (su clave no lo abre): no lo borro. Si sabes que quedó huérfano: --apaga --huerfano`);
+    console.error(`✗ no compruebo que ${CONTENEDOR} sea de este árbol (su clave no lo abre, o está parado): no lo borro. Si sabes que quedó huérfano: --apaga --huerfano`);
     process.exit(2);
   }
   if (existe()) docker(['rm', '-f', CONTENEDOR]);
