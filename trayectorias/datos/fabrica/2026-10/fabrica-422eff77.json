@@ -1,0 +1,74 @@
+{
+ "version": 1,
+ "id": "fabrica-422eff77",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "ef1fcd9e-c7ef-4ef3-84e0-5d8cce40f53a",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-25T13:44:44.819Z",
+  "fin": "2026-10-25T14:29:54.915Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 144
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 52,
+   "AskUserQuestion": 2,
+   "Write": 5,
+   "Edit": 7
+  },
+  "llamadasAlModelo": 62,
+  "turnos": 11,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 21
+ },
+ "uso": {
+  "entrada": 124,
+  "salida": 127545,
+  "cacheCreacion": 264305,
+  "cacheLectura": 12479208
+ },
+ "costoUsd": 6.3688,
+ "tiempos": {
+  "totalMs": 2710096
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 2
+  },
+  {
+   "nombre": "prueba",
+   "resultado": "desconocido",
+   "veces": 2
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "desconocido",
+   "veces": 2
+  }
+ ],
+ "resultado": {
+  "errores": 4,
+  "erroresPor": {
+   "AskUserQuestion": 2,
+   "Bash": 2
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}
