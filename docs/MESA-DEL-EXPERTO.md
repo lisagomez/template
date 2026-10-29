@@ -136,8 +136,8 @@ una URL que hay que ver a tiempo, el despliegue tarda minutos y los secretos se 
     **Una corrida por contenedor despierto.** El simulador vive en la memoria del contenedor. Cuando el paso 4 aprueba el
     plan, el periodo 2026/10 de MM queda abierto, y una segunda corrida antes de que el contenedor duerma (30 min sin
     peticiones) ya no reproduce el error del caso conocido: el supervisor frena el plan y no hay «aprobar» (medido el
-    2026-10-29). Lo guardado en el almacén sí persiste entre corridas: por eso el recorrido valida MIRO con «Todos» y
-    «Cambiar», y en el paso 14 cuenta la corrección de los tokens como «de prueba, aparte», no en «Corregidos».
+    2026-10-29). Lo guardado en el almacén sí persiste entre corridas: por eso el recorrido valida MIRO y la nota 3797111
+    con «Todos» y «Cambiar», y en el paso 14 cuenta la corrección de los tokens como «de prueba, aparte», no en «Corregidos».
 
 ## Invitar al experto, y quitarle el acceso
 
