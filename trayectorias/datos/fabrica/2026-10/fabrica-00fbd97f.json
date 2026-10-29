@@ -1,0 +1,61 @@
+{
+ "version": 1,
+ "id": "fabrica-00fbd97f",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "ca9f7fd6-9209-49c6-88ec-f7fd7daa04f8",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-27T13:24:34.958Z",
+  "fin": "2026-10-27T14:34:09.064Z"
+ },
+ "actor": {
+  "skills": [
+   "anthropic-skills:docs",
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 69
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 19,
+   "Read": 2,
+   "Artifact": 2,
+   "Skill": 1,
+   "ToolSearch": 1,
+   "mcp__claude_ai_Claude_Docs__guide": 1,
+   "mcp__claude_ai_Claude_Docs__read": 12,
+   "AskUserQuestion": 1,
+   "Write": 3
+  },
+  "llamadasAlModelo": 21,
+  "turnos": 3,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 3
+ },
+ "uso": {
+  "entrada": 48,
+  "salida": 62278,
+  "cacheCreacion": 245888,
+  "cacheLectura": 3534937
+ },
+ "costoUsd": 3.1822,
+ "tiempos": {
+  "totalMs": 4174106
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0,
+  "erroresPor": {}
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

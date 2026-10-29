@@ -1,0 +1,62 @@
+{
+ "version": 1,
+ "id": "fabrica-f7cab350",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "3dee10ed-6a4c-4fde-a97e-7a873e3e19f8",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-19T01:33:42.470Z",
+  "fin": "2026-10-19T03:11:01.119Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 197
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 68,
+   "Write": 7,
+   "Read": 2,
+   "AskUserQuestion": 1,
+   "Edit": 2
+  },
+  "llamadasAlModelo": 102,
+  "turnos": 42,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 16
+ },
+ "uso": {
+  "entrada": 240,
+  "salida": 84951,
+  "cacheCreacion": 179493,
+  "cacheLectura": 15615901
+ },
+ "costoUsd": 5.7206,
+ "tiempos": {
+  "totalMs": 5838649
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "verde",
+   "veces": 4
+  }
+ ],
+ "resultado": {
+  "errores": 1,
+  "erroresPor": {
+   "Bash": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

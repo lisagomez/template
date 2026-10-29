@@ -9,7 +9,7 @@
  },
  "cuando": {
   "inicio": "2026-10-13T12:07:22.398Z",
-  "fin": "2026-10-13T14:19:09.966Z"
+  "fin": "2026-10-14T13:24:03.765Z"
  },
  "actor": {
   "skills": [
@@ -18,43 +18,57 @@
   "tarea": "implementacion"
  },
  "modelos": {
-  "claude-opus-5-5": 238
+  "claude-opus-5-5": 798
  },
  "acciones": {
   "herramientas": {
-   "Bash": 90,
+   "Bash": 321,
    "ToolSearch": 1,
    "mcp__supabase__list_tables": 2,
-   "Read": 1
+   "Read": 4,
+   "Agent": 1,
+   "Edit": 6,
+   "AskUserQuestion": 2,
+   "Write": 4
   },
-  "llamadasAlModelo": 119,
-  "turnos": 54,
-  "subagentes": 0,
-  "comandos": 0,
-  "ediciones": 18
+  "llamadasAlModelo": 406,
+  "turnos": 120,
+  "subagentes": 1,
+  "comandos": 1,
+  "ediciones": 91
  },
  "uso": {
-  "entrada": 278,
-  "salida": 61222,
-  "cacheCreacion": 190320,
-  "cacheLectura": 17774854
+  "entrada": 886,
+  "salida": 247791,
+  "cacheCreacion": 548550,
+  "cacheLectura": 87702411
  },
- "costoUsd": 5.7321,
+ "costoUsd": 25.2426,
  "tiempos": {
-  "totalMs": 7907568
+  "totalMs": 91001367
  },
  "gates": [
   {
    "nombre": "validate",
-   "resultado": "rojo",
-   "veces": 8
+   "resultado": "verde",
+   "veces": 24
+  },
+  {
+   "nombre": "regresion",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "prueba",
+   "resultado": "desconocido",
+   "veces": 1
   }
  ],
  "resultado": {
-  "errores": 4,
+  "errores": 7,
   "erroresPor": {
    "mcp__supabase__list_tables": 2,
-   "Bash": 2
+   "Bash": 5
   }
  },
  "cobertura": {

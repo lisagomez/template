@@ -1,0 +1,73 @@
+{
+ "version": 1,
+ "id": "fabrica-08cf2a5e",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "751bf44b-bda0-43d2-91e4-5a5cb566c7e3",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-23T12:28:16.168Z",
+  "fin": "2026-10-23T12:48:56.103Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 56
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 22,
+   "ToolSearch": 1,
+   "WebSearch": 3,
+   "AskUserQuestion": 1,
+   "Write": 2,
+   "Edit": 3
+  },
+  "llamadasAlModelo": 23,
+  "turnos": 2,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 8
+ },
+ "uso": {
+  "entrada": 46,
+  "salida": 34986,
+  "cacheCreacion": 126191,
+  "cacheLectura": 2747733
+ },
+ "costoUsd": 1.8804,
+ "tiempos": {
+  "totalMs": 1239935
+ },
+ "gates": [
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "verify:gobernanza",
+   "resultado": "desconocido",
+   "veces": 1
+  },
+  {
+   "nombre": "typecheck",
+   "resultado": "desconocido",
+   "veces": 1
+  }
+ ],
+ "resultado": {
+  "errores": 0,
+  "erroresPor": {}
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

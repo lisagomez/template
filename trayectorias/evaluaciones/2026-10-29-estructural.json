@@ -1,0 +1,555 @@
+{
+ "fecha": "2026-10-29",
+ "evaluador": "scripts/trayectorias/evalua.mjs (estructural, sin modelo)",
+ "trayectorias": 79,
+ "evals": {
+  "fabrica-1e943fb0": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-ec81ad29": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-0f06fe24": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-e99635ac": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-30db46dc": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-502a90f7": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-3c2abc60": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-f0bec979": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-29065ee8": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-12e8950e": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": false,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-a9ab6b58": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-0828c365": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-2f605ddb": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-71923418": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-64f42afe": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-2a59c3f1": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-0873b25e": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": false,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-faf93e53": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-06d34ab6": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-c2fe3422": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "aplicacion-19c5ed3d": {
+   "coste_declarado": true,
+   "modelo_del_catalogo": true,
+   "sin_fallo": true,
+   "latencia_medida": true
+  },
+  "aplicacion-84938f8a": {
+   "coste_declarado": true,
+   "modelo_del_catalogo": true,
+   "sin_fallo": false,
+   "latencia_medida": false
+  },
+  "aplicacion-5e8795f7": {
+   "coste_declarado": true,
+   "modelo_del_catalogo": true,
+   "sin_fallo": true,
+   "latencia_medida": true
+  },
+  "fabrica-2de0f155": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "herramientas-2b5c6198": {
+   "sin_documentos_perdidos": true,
+   "concluyente_o_declarado": true,
+   "rendimiento_sobre_base": true,
+   "revision_acotada": true
+  },
+  "fabrica-cfae124e": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-49ba9e65": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-67aae9b5": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-70d74f86": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": false,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-e0d997d5": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-f4d5a7bd": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-d3b8ba3c": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "herramientas-44bb4690": {
+   "sin_documentos_perdidos": true,
+   "concluyente_o_declarado": false,
+   "rendimiento_sobre_base": false,
+   "revision_acotada": true
+  },
+  "fabrica-fdcd3674": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-64be8a0d": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-d1fb5fde": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": false,
+   "uso_declarado": true
+  },
+  "fabrica-278ddefa": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-4e2f4768": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-a547ce33": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": false,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-b9eec3a3": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-ff900c65": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-bc38fd8a": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-ad299c06": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-f75391ce": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-1ef8ce2b": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-bc85468c": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-a7887130": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-ae5d6ddf": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-f47f1fc2": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-2aaf215d": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-7234f887": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": false,
+   "uso_declarado": true
+  },
+  "fabrica-23865200": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-a0d0d420": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-ca224987": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-0c29581d": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-f404b668": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-b9ec8338": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-48c769e4": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-c86bac70": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": false,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-16c3771d": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-e7d8734a": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-8d58714d": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-3811a1b9": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-c8a4437f": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-0f786cd0": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": false,
+   "uso_declarado": true
+  },
+  "fabrica-f7cab350": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-175a360f": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-8f7d6a47": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-19f76138": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-be9506e0": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-d481f804": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-9f7cd685": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-08cf2a5e": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-2296fb8a": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": false,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-422eff77": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": false,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-6a38374b": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-00fbd97f": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-6a124a5f": {
+   "gate_corrido": false,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  },
+  "fabrica-2e3ccc1f": {
+   "gate_corrido": true,
+   "sin_gate_rojo_final": true,
+   "errores_acotados": true,
+   "cache_aprovechado": true,
+   "uso_declarado": true
+  }
+ }
+}

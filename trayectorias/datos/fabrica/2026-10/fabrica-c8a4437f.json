@@ -1,0 +1,48 @@
+{
+ "version": 1,
+ "id": "fabrica-c8a4437f",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "17c1b5bd-cdbb-4848-82fd-08653efe18eb",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-16T12:30:18.019Z",
+  "fin": "2026-10-16T12:44:31.912Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "conversacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 2
+ },
+ "acciones": {
+  "herramientas": {},
+  "llamadasAlModelo": 1,
+  "turnos": 3,
+  "subagentes": 0,
+  "comandos": 1,
+  "ediciones": 0
+ },
+ "uso": {
+  "entrada": 2,
+  "salida": 1139,
+  "cacheCreacion": 44312,
+  "cacheLectura": 26800
+ },
+ "costoUsd": 0.2497,
+ "tiempos": {
+  "totalMs": 853893
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0,
+  "erroresPor": {}
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}

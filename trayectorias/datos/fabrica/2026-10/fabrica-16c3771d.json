@@ -1,0 +1,96 @@
+{
+ "version": 1,
+ "id": "fabrica-16c3771d",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "88ca25a2-405c-47ce-a1b7-e7412660fc08",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-15T07:14:22.969Z",
+  "fin": "2026-10-15T10:00:09.752Z"
+ },
+ "actor": {
+  "skills": [
+   "goal-compiler",
+   "primer",
+   "readme"
+  ],
+  "tarea": "implementacion"
+ },
+ "modelos": {
+  "claude-opus-5-5": 499
+ },
+ "acciones": {
+  "herramientas": {
+   "Bash": 119,
+   "Read": 25,
+   "AskUserQuestion": 2,
+   "Write": 56,
+   "ToolSearch": 5,
+   "EnterWorktree": 1,
+   "Edit": 47,
+   "WebFetch": 3,
+   "WebSearch": 1,
+   "mcp__playwright__browser_resize": 1,
+   "mcp__playwright__browser_navigate": 1,
+   "Skill": 1,
+   "TaskStop": 2
+  },
+  "llamadasAlModelo": 173,
+  "turnos": 7,
+  "subagentes": 0,
+  "comandos": 2,
+  "ediciones": 112
+ },
+ "uso": {
+  "entrada": 348,
+  "salida": 342143,
+  "cacheCreacion": 559105,
+  "cacheLectura": 61682605
+ },
+ "costoUsd": 21.9763,
+ "tiempos": {
+  "totalMs": 9946783
+ },
+ "gates": [
+  {
+   "nombre": "typecheck",
+   "resultado": "rojo",
+   "veces": 7
+  },
+  {
+   "nombre": "prueba",
+   "resultado": "rojo",
+   "veces": 17
+  },
+  {
+   "nombre": "build",
+   "resultado": "verde",
+   "veces": 8
+  },
+  {
+   "nombre": "lint",
+   "resultado": "verde",
+   "veces": 1
+  },
+  {
+   "nombre": "validate",
+   "resultado": "desconocido",
+   "veces": 3
+  }
+ ],
+ "resultado": {
+  "errores": 8,
+  "erroresPor": {
+   "Bash": 6,
+   "mcp__playwright__browser_resize": 1,
+   "mcp__playwright__browser_navigate": 1
+  }
+ },
+ "cobertura": {
+  "completa": true,
+  "faltan": []
+ }
+}
