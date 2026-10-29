@@ -1,0 +1,66 @@
+{
+  "composicion": 1,
+  "producto": "agora",
+  "marca": {
+    "nombre": "Ágora",
+    "asistente": "Atenea",
+    "acento": "#2a5db0",
+    "saludo": "Te llevo por la organización: el tablero, el buzón, los costos y lo que espera tu clic. No uso un modelo de IA y no apruebo nada por ti: si no lo sé, te lo digo."
+  },
+  "funciones": [
+    "conversacion",
+    "intencion",
+    "memoria",
+    "plan",
+    "voz",
+    "lienzo",
+    "explorador",
+    "panel",
+    "primer-arranque",
+    "ajustes"
+  ],
+  "modulos": [
+    "agora",
+    "agora-tablero",
+    "agora-buzon",
+    "agora-costos",
+    "agora-contabilidad",
+    "agora-agentes",
+    "agora-metricas",
+    "calendario",
+    "dictado"
+  ],
+  "ranuras": {
+    "explorador": "agora",
+    "panel": "agora",
+    "conversacion": "agora-buzon",
+    "plan": "calendario",
+    "voz": "dictado"
+  },
+  "memoria": {
+    "duena": "inquilino",
+    "almacen": "navegador"
+  },
+  "modelo": {
+    "clase": null,
+    "estado": "sin-llm"
+  },
+  "voz": {
+    "stt": "parakeet",
+    "tts": "piper",
+    "vad": "silero",
+    "nube": []
+  },
+  "datosSensibles": true,
+  "resumen": {
+    "conteos": [
+      "pendientes-de-clic",
+      "alertas-de-presupuesto",
+      "agentes-suspendidos",
+      "polizas-por-aceptar"
+    ],
+    "enlaces": [
+      "agora"
+    ]
+  }
+}

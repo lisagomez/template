@@ -1,0 +1,72 @@
+{
+  "enchufe": 1,
+  "modulo": "agora-tablero",
+  "activo": "TPL-feature-agora-tablero",
+  "nombre": "Tablero de Ágora (tabla, kanban y Gantt)",
+  "pantallas": [
+    "/agora/tablero"
+  ],
+  "ranuras": [
+    "lienzo",
+    "intencion",
+    "memoria"
+  ],
+  "intenciones": [
+    {
+      "id": "agora-tablero.abre-gantt",
+      "queHace": "Abrir el Gantt de un workspace.",
+      "ejemplos": [
+        "abre el gantt de expansión",
+        "muéstrame el cronograma",
+        "quiero ver el gantt",
+        "abre el diagrama de gantt del workspace"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/tablero"
+    },
+    {
+      "id": "agora-tablero.abre-kanban",
+      "queHace": "Abrir el kanban de un workspace.",
+      "ejemplos": [
+        "abre el kanban",
+        "muéstrame el tablero por estado",
+        "quiero ver las tarjetas por columna"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/tablero"
+    },
+    {
+      "id": "agora-tablero.abre",
+      "queHace": "Abrir la tabla del tablero de un workspace.",
+      "ejemplos": [
+        "abre el tablero",
+        "muéstrame los ítems del plan",
+        "llévame a la tabla del workspace"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/tablero"
+    },
+    {
+      "id": "agora-tablero.cambia",
+      "queHace": "Pedir un cambio de fecha, monto o responsable de un ítem: queda como propuesta en su hilo, nunca se aplica directo.",
+      "ejemplos": [
+        "mueve la fecha de la campaña al viernes",
+        "cambia el monto de la ruta a setenta mil",
+        "sube el monto del material pop",
+        "pasa las visitas al lunes"
+      ],
+      "efecto": "escribe",
+      "irreversible": false
+    }
+  ],
+  "freno": [],
+  "memoria": {
+    "lee": [],
+    "escribe": []
+  },
+  "sinCapa": "el tablero lee y escribe por el núcleo de Ágora con la sesión de quien mira; sin la capa, sus ítems, propuestas e historial siguen en la base",
+  "sale": []
+}

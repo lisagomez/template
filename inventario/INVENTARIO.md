@@ -6,7 +6,7 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**67 activos** cubren **301 unidades** del repo.
+**75 activos** cubren **310 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
@@ -33,6 +33,7 @@
 | TPL-trayectorias | Trayectorias: trazas de ejecucion, evaluador, informe y propuestas | FABRICA | software | produccion | 4 | `scripts/trayectorias` |
 | TPL-cerebro-personal | Arbrain personal en dos lugares (demostracion en contenedores): Arbrain v0.2.10 de la etiqueta firmada, job que sincroniza solo el cerebro con union por registro y alto ante choque, red privada simulada, puerta de Cloudflare con Access validada sin conexion | INFRA | infraestructura | blueprint | 2 | `infra/cerebro-personal` |
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 12 | `docker-compose.yml` |
+| TPL-agora | Ágora: núcleo del espacio de trabajo (equipo, agentes internos y socios) con buzón, tablero, libro de costos por compromisos, aprobación de Finanzas, póliza propuesta para Contabilidad (contrato ERP-5B) y Puerta A2A cerrada; Postgres con RLS forzada, suites y sabotajes en PGlite y en Postgres real (0.1.0) | PRODUCTO | software | blueprint | 2 | `tools/agora` |
 | TPL-app-base | App SaaS base (Next.js + Supabase, PWA) | PRODUCTO | software | produccion | 6 | `src/app` |
 | TPL-asesor-ventas | Asesor de ventas: insights con evidencia desde una reunion diarizada | PRODUCTO | software | blueprint | 1 | `tools/asesor-ventas` |
 | TPL-bucle-voz | Bucle de voz: turnos con identificador y cancelacion, interrupcion con puerta de eco, separador de frases, enrutador sin LLM, palabra de activacion por texto local, corte por sentido, telemetria desde el fin real del habla, cerebro en flujo y reproductor del navegador (0.1.0) | PRODUCTO | software | beta | 1 | `tools/bucle-voz` |
@@ -53,6 +54,13 @@
 | TPL-etiquetas-gs1 | Etiquetas GS1-128 y expediente de lote: caducidades, cadena de hashes, anclaje, agente de riesgo, inventario fisico, recepcion con foto, escaneo por zona y codigos anteriores (0.2.0) | PRODUCTO | software | beta | 1 | `tools/etiquetas-gs1` |
 | TPL-extractor-documental | Extractor documental (PDF, imagen, CFDI XML) con revision humana | PRODUCTO | software | beta | 2 | `tools/extractor-documental` |
 | TPL-feature-a2a | Puente A2A del extractor (Agent Card + JSON-RPC + Tasks) | PRODUCTO | software | beta | 2 | `src/features/a2a` |
+| TPL-feature-agora | Ágora en la capa: la ventana del producto (jerarquía en el explorador, «Espera tu clic» en el panel, «Ver como» del laboratorio), el inicio y el alta de la organización | PRODUCTO | software | blueprint | 1 | `src/features/agora` |
+| TPL-feature-agora-agentes | Ágora: agentes (idCard, topes, suspender y revocar) y la Puerta A2A cerrada contra un socio simulado | PRODUCTO | software | blueprint | 1 | `src/features/agora-agentes` |
+| TPL-feature-agora-buzon | Ágora: el buzón (canal interno único por categoría, hilos de un nivel, propuestas con su huella y aprobación por rol) y la ranura de conversación | PRODUCTO | software | blueprint | 1 | `src/features/agora-buzon` |
+| TPL-feature-agora-contabilidad | Ágora: cierre de costos del periodo por el freno y póliza propuesta para Contabilidad | PRODUCTO | software | blueprint | 1 | `src/features/agora-contabilidad` |
+| TPL-feature-agora-costos | Ágora: costos por centro (presupuesto, comprometido, ejercido y disponible; gasto de los agentes en MXN con tipo de cambio con fuente) | PRODUCTO | software | blueprint | 1 | `src/features/agora-costos` |
+| TPL-feature-agora-metricas | Ágora: métricas desde la capa semántica y tablero regenerable, cada cifra cuadrada con el libro | PRODUCTO | software | blueprint | 1 | `src/features/agora-metricas` |
+| TPL-feature-agora-tablero | Ágora: el tablero (tabla, kanban y Gantt con editores por tipo de campo; los agentes solo proponen) | PRODUCTO | software | blueprint | 1 | `src/features/agora-tablero` |
 | TPL-feature-auth | Autenticacion Supabase (login, registro, perfiles) | PRODUCTO | software | produccion | 1 | `src/features/auth` |
 | TPL-feature-centro-de-mando | Centro de mando por voz local (/centro-de-mando): HUD con orbe, onda, subtitulos karaoke, telemetria por etapa y conversacion; rutas /api/centro-de-mando (transcribir, cerebro, lee, estado) y la medicion de punta a punta con microfono falso | PRODUCTO | software | beta | 2 | `src/features/centro-de-mando` |
 | TPL-feature-clinica-dental | Portal del paciente para clínicas dentales (/clinica/[clinica]): entrar, registro con cuestionario y guía de voz, agenda con selector de avisos, mis citas con el estado de cada aviso, chatbot por texto y voz; rutas /api/clinica-dental; laboratorio (buzón, Telegram, tablero, grafo) y los recorridos y mediciones de scripts/clinica-dental | PRODUCTO | software | beta | 2 | `src/features/clinica-dental` |

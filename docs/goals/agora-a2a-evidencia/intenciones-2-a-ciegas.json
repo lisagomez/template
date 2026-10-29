@@ -1,0 +1,103 @@
+{
+  "fecha": "2026-10-28T14:42:10.820Z",
+  "corpus": {
+    "ruta": "tools/agora/medicion/corpus-intenciones-2.json",
+    "sha256": "sha256:c4d523924068ef5fbd6d88a3379e9d7cd28f7c29d8a99d8b8cd2ca4ff046a4c9",
+    "frases": 62
+  },
+  "enrutador": {
+    "de": "@tu-scope/capa (la conversación con su enrutador, sin LLM)",
+    "umbral": 0.5,
+    "margen": 0.92,
+    "intenciones": 29
+  },
+  "medicion": {
+    "total": 62,
+    "aciertos": 46,
+    "acierto": 74.2,
+    "escrituraNoPedida": 1,
+    "irreversibleNoPedida": 0,
+    "fallos": [
+      {
+        "frase": "muéstrame lo que tengo que aprobar",
+        "esperada": "agora.espera",
+        "salio": "no-se"
+      },
+      {
+        "frase": "cuántas decisiones me tocan",
+        "esperada": "agora.espera",
+        "salio": "no-se"
+      },
+      {
+        "frase": "llévame a la portada",
+        "esperada": "agora.abre-inicio",
+        "salio": "ambigua"
+      },
+      {
+        "frase": "quiero configurar la empresa desde el principio",
+        "esperada": "agora.alta",
+        "salio": "no-se"
+      },
+      {
+        "frase": "llévame al tablero de expansión",
+        "esperada": "agora-tablero.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "abre la tabla de ítems de compras",
+        "esperada": "agora-tablero.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "cambia el responsable del pedido inicial a jorge",
+        "esperada": "agora-tablero.cambia",
+        "salio": "no-se"
+      },
+      {
+        "frase": "pasa la entrega de los camiones al 30 de noviembre",
+        "esperada": "agora-tablero.cambia",
+        "salio": "no-se"
+      },
+      {
+        "frase": "dile al analista que prepare los escenarios",
+        "esperada": "agora-buzon.escribe",
+        "salio": "no-se"
+      },
+      {
+        "frase": "abre el presupuesto",
+        "esperada": "agora-costos.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "muéstrame los socios que entran",
+        "esperada": "agora-agentes.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "congela al coordinador un rato",
+        "esperada": "agora-agentes.suspende",
+        "salio": "no-se"
+      },
+      {
+        "frase": "llévame a los indicadores del plan",
+        "esperada": "agora-metricas.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "abre el dictado",
+        "esperada": "dictado.abre",
+        "salio": "ambigua"
+      },
+      {
+        "frase": "reserva un vuelo a monterrey",
+        "esperada": "no-se",
+        "salio": "calendario.reserva"
+      },
+      {
+        "frase": "asienta la póliza en el erp",
+        "esperada": "no-se",
+        "salio": "agora-contabilidad.abre"
+      }
+    ]
+  }
+}

@@ -40,7 +40,8 @@ const rutas: Ruta[] = ctx.paginas.filter((p: { archivo: string }) => DENTRO.some
 const CON_CUENTA = /^\/(buzon|reel|sgi)(\/|$)/;
 const DE_LA_MESA = /^\/mesa\//;
 /** Lo que el recorrido marca como «primer arranque visto» para no tapar la pantalla (se prueba aparte). */
-const PRIMER_ARRANQUE = ['laboratorio', 'soporte-sap'].map((producto) => [`capa:${producto}:capa/${producto}/${producto === 'laboratorio' ? 'laboratorio' : 'mesa'}/capa/primer-arranque`, JSON.stringify({ version: 1, terminado: true, paso: 5, nivel: 'lo-importante', voz: false })]);
+const INQUILINO: Record<string, string> = { laboratorio: 'laboratorio', 'soporte-sap': 'mesa', agora: 'golfo-norte' };
+const PRIMER_ARRANQUE = Object.entries(INQUILINO).map(([producto, inquilino]) => [`capa:${producto}:capa/${producto}/${inquilino}/capa/primer-arranque`, JSON.stringify({ version: 1, terminado: true, paso: 5, nivel: 'lo-importante', voz: false })]);
 
 const navegador = await chromium.launch();
 const nuevo = async (cabeceras?: Record<string, string>): Promise<BrowserContext> => {

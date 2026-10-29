@@ -95,12 +95,16 @@ export function verifica(ctx, valida) {
   comprueba('cada pantalla declarada existe dentro de la capa', inexistentes.length === 0, inexistentes.join(', '));
   const conEnchufe = new Set(validos.map(({ e }) => e.activo));
   /** El dueño de una ruta: quien la declara; si nadie, la feature importada cuyo nombre está en la ruta (la
-   *  sesión de `auth` no hace dueño a nadie), y si no, la única que importa. */
+   *  sesión de `auth` no hace dueño a nadie), y si no, la única que importa. Entre varias, la MÁS específica: en
+   *  `/agora/agentes`, `agora-agentes` (dos segmentos) y no `agora` (uno), o quitarle el enchufe pasaría sin verse. */
   const duenoDe = (p) => {
     const d = declarantes(p.ruta);
     if (d.length === 1) return d[0].e.activo;
     const segmentos = p.ruta.split('/').filter(Boolean);
-    const feature = p.features.find((f) => segmentos.some((s) => s === f || f.startsWith(s) || s.startsWith(f))) ?? (p.features.length === 1 ? p.features[0] : null);
+    const casa = (f) => segmentos.some((s) => s === f || f.startsWith(s) || s.startsWith(f));
+    const especificidad = (f) => segmentos.filter((s) => f === s || f.split('-').includes(s)).length;
+    const candidatas = p.features.filter(casa).sort((a, b) => especificidad(b) - especificidad(a) || a.length - b.length);
+    const feature = candidatas[0] ?? (p.features.length === 1 ? p.features[0] : null);
     return feature ? ctx.inventario.find((a) => lista(a.cubre).includes(`src/features/${feature}`))?.id ?? `src/features/${feature} (sin asiento)` : `${p.ruta} (sin dueño)`;
   };
   const duenos = new Set(dentro.map(duenoDe));

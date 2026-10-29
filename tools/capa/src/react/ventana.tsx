@@ -50,6 +50,8 @@ function Explorador() {
   const modulos = [...new Set(enlazables.map((p) => p.modulo))]
   return (
     <nav className="capa-explorador" aria-label="Explorador" data-capa-ranura="explorador">
+      {/* Si un módulo llena el explorador (p. ej. su jerarquía), lo suyo va arriba; las pantallas siguen debajo. */}
+      <Ranura ranura="explorador" />
       {modulos.map((m) => {
         const nombre = producto.nombres[m] ?? m.replace(/-/g, ' ')
         const delModulo = enlazables.filter((p) => p.modulo === m)
@@ -133,6 +135,9 @@ export function Ventana({ children, extra }: PropsVentana) {
       <main className="capa-lienzo" data-capa-ranura="lienzo" data-capa-llena={modulo ?? ''}>{children}</main>
       <aside className="capa-conversacion" aria-label="Conversación">
         <Panel />
+        {/* Lo que pinta el módulo que llena la conversación (p. ej. el hilo de su canal) va junto al hilo de la capa,
+            nunca en su lugar: el freno, la intención y el compositor siguen siendo de la capa. */}
+        <Ranura ranura="conversacion" />
         <Hilo />
         <Compositor />
       </aside>

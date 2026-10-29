@@ -1,0 +1,29 @@
+{
+  "enchufe": 1,
+  "modulo": "agora-costos",
+  "activo": "TPL-feature-agora-costos",
+  "nombre": "Costos de Ágora (presupuesto, comprometido, ejercido y disponible por centro)",
+  "pantallas": ["/agora/costos"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "agora-costos.abre",
+      "queHace": "Abrir los costos por centro de costo.",
+      "ejemplos": ["abre los costos", "cuánto llevamos gastado", "muéstrame el presupuesto por centro", "llévame al libro de costos"],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/agora/costos"
+    },
+    {
+      "id": "agora-costos.disponible",
+      "queHace": "Decirte el disponible de una categoría este mes (lo calcula el libro).",
+      "ejemplos": ["cuánto queda en campañas", "cuál es el disponible de logística", "cuánto presupuesto nos queda en compras"],
+      "efecto": "lee",
+      "irreversible": false
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "las cifras salen de las vistas del libro en la base (v_centro_periodo, v_arbol_periodo); la pantalla no calcula ninguna",
+  "sale": []
+}

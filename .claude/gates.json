@@ -460,6 +460,17 @@
       "falta": "El mismo perfil con Docker que `inventario:valida-erp`."
     },
     {
+      "nombre": "agora:pg",
+      "runner": "comando",
+      "comando": "npm run agora:pg",
+      "guarda": "las suites y los sabotajes de `tools/agora` en PostgreSQL 17 REAL (el contenedor propio `agora-pg-lab`, solo en 127.0.0.1): aislamiento entre organizaciones, RLS forzada, los malos financieros, el testigo del freno y la segregacion, cada prueba en una base nueva; la variante en PGlite ya corre dentro de `prueba:tools`",
+      "evidencia": "la version del servidor, cada prueba y cada sabotaje cazado; exit 1 si una prueba falla o un sabotaje no cae",
+      "perfiles": [],
+      "activo": false,
+      "motivo": "Necesita Docker y el laboratorio de Agora levantado (`npm run agora:laboratorio`), como `erp:prueba`: no cabe en el gate de cada integracion.",
+      "falta": "El mismo perfil con Docker que `inventario:valida-erp` y los de `erp:`, o un servicio Postgres en el CI. Hasta entonces se corre a mano al tocar `tools/agora/migraciones/` y su salida se pega en la evidencia."
+    },
+    {
       "nombre": "erp:control",
       "runner": "comando",
       "comando": "npm run erp:control",

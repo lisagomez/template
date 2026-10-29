@@ -1,0 +1,153 @@
+{
+  "fecha": "2026-10-28T14:41:05.000Z",
+  "corpus": {
+    "ruta": "tools/agora/medicion/corpus-intenciones.json",
+    "sha256": "sha256:737c0ec3c9dc413f55d9edaa3fe08a7cf04ae45d8fb19f4c09a4eacb9cd569f2",
+    "frases": 63
+  },
+  "enrutador": {
+    "de": "@tu-scope/capa (la conversación con su enrutador, sin LLM)",
+    "umbral": 0.5,
+    "margen": 0.92,
+    "intenciones": 29
+  },
+  "medicion": {
+    "total": 63,
+    "aciertos": 37,
+    "acierto": 58.7,
+    "escrituraNoPedida": 3,
+    "irreversibleNoPedida": 1,
+    "fallos": [
+      {
+        "frase": "¿hay algo que tenga que firmar?",
+        "esperada": "agora.espera",
+        "salio": "no-se"
+      },
+      {
+        "frase": "tengo algo por decidir hoy",
+        "esperada": "agora.espera",
+        "salio": "ambigua"
+      },
+      {
+        "frase": "dale luz verde a la pauta",
+        "esperada": "agora.aprobar",
+        "salio": "no-se"
+      },
+      {
+        "frase": "acepta la propuesta de medios norte",
+        "esperada": "agora.aprobar",
+        "salio": "agora-agentes.suspende"
+      },
+      {
+        "frase": "autoriza el gasto de la ruta",
+        "esperada": "agora.aprobar",
+        "salio": "no-se"
+      },
+      {
+        "frase": "regrésame al principio",
+        "esperada": "agora.abre-inicio",
+        "salio": "no-se"
+      },
+      {
+        "frase": "permite que quien solicita también apruebe",
+        "esperada": "agora.quita-segregacion",
+        "salio": "no-se"
+      },
+      {
+        "frase": "abre el plan en tabla",
+        "esperada": "agora-tablero.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "cambia la fecha del contrato de bodega al 10 de noviembre",
+        "esperada": "agora-tablero.cambia",
+        "salio": "no-se"
+      },
+      {
+        "frase": "baja el monto de las visitas a cuarenta mil",
+        "esperada": "agora-tablero.cambia",
+        "salio": "no-se"
+      },
+      {
+        "frase": "mueve el pedido inicial a la semana que entra",
+        "esperada": "agora-tablero.cambia",
+        "salio": "no-se"
+      },
+      {
+        "frase": "sube el monto de la pauta de radio a 150 mil",
+        "esperada": "agora-tablero.cambia",
+        "salio": "no-se"
+      },
+      {
+        "frase": "enséñame la conversación de logística",
+        "esperada": "agora-buzon.abre",
+        "salio": "ambigua"
+      },
+      {
+        "frase": "dile a fletes del golfo que confirme la ruta",
+        "esperada": "agora-buzon.escribe",
+        "salio": "no-se"
+      },
+      {
+        "frase": "qué disponible tiene campañas",
+        "esperada": "agora-costos.disponible",
+        "salio": "no-se"
+      },
+      {
+        "frase": "enséñame la póliza de septiembre",
+        "esperada": "agora-contabilidad.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "haz el cierre del mes pasado",
+        "esperada": "agora-contabilidad.cierra-periodo",
+        "salio": "no-se"
+      },
+      {
+        "frase": "enséñame los agentes externos",
+        "esperada": "agora-agentes.abre",
+        "salio": "no-se"
+      },
+      {
+        "frase": "pausa al coordinador de planeación",
+        "esperada": "agora-agentes.suspende",
+        "salio": "no-se"
+      },
+      {
+        "frase": "quítale el acceso definitivo a fletes",
+        "esperada": "agora-agentes.revoca",
+        "salio": "no-se"
+      },
+      {
+        "frase": "qué porcentaje de propuestas se acepta",
+        "esperada": "agora-metricas.cifra",
+        "salio": "no-se"
+      },
+      {
+        "frase": "quiero dictar un mensaje",
+        "esperada": "dictado.abre",
+        "salio": "agora-buzon.abre"
+      },
+      {
+        "frase": "cuánto vale el dólar hoy",
+        "esperada": "no-se",
+        "salio": "calendario.consulta-hoy"
+      },
+      {
+        "frase": "paga la factura de fletes del golfo",
+        "esperada": "no-se",
+        "salio": "agora-agentes.revoca"
+      },
+      {
+        "frase": "transfiere 50 mil pesos a medios norte",
+        "esperada": "no-se",
+        "salio": "agora-agentes.suspende"
+      },
+      {
+        "frase": "muéstrame eso",
+        "esperada": "ambigua",
+        "salio": "agora.abre-inicio"
+      }
+    ]
+  }
+}

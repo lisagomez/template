@@ -576,6 +576,70 @@
    "ubicacion": "src/features/clinica-dental", "responsable": "dep-sw",
    "origen": ["docs/goals/clinica-dental.md"],
    "cubre": ["src/features/clinica-dental", "scripts/clinica-dental"]
+  },
+  {
+   "id": "TPL-agora",
+   "nombre": "Ágora: núcleo del espacio de trabajo (equipo, agentes internos y socios) con buzón, tablero, libro de costos por compromisos, aprobación de Finanzas, póliza propuesta para Contabilidad (contrato ERP-5B) y Puerta A2A cerrada; Postgres con RLS forzada, suites y sabotajes en PGlite y en Postgres real (0.1.0)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "tools/agora", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["tools/agora", "scripts/agora"]
+  },
+  {
+   "id": "TPL-feature-agora",
+   "nombre": "Ágora en la capa: la ventana del producto (jerarquía en el explorador, «Espera tu clic» en el panel, «Ver como» del laboratorio), el inicio y el alta de la organización",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora"]
+  },
+  {
+   "id": "TPL-feature-agora-buzon",
+   "nombre": "Ágora: el buzón (canal interno único por categoría, hilos de un nivel, propuestas con su huella y aprobación por rol) y la ranura de conversación",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora-buzon", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora-buzon"]
+  },
+  {
+   "id": "TPL-feature-agora-tablero",
+   "nombre": "Ágora: el tablero (tabla, kanban y Gantt con editores por tipo de campo; los agentes solo proponen)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora-tablero", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora-tablero"]
+  },
+  {
+   "id": "TPL-feature-agora-costos",
+   "nombre": "Ágora: costos por centro (presupuesto, comprometido, ejercido y disponible; gasto de los agentes en MXN con tipo de cambio con fuente)",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora-costos", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora-costos"]
+  },
+  {
+   "id": "TPL-feature-agora-contabilidad",
+   "nombre": "Ágora: cierre de costos del periodo por el freno y póliza propuesta para Contabilidad",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora-contabilidad", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora-contabilidad"]
+  },
+  {
+   "id": "TPL-feature-agora-agentes",
+   "nombre": "Ágora: agentes (idCard, topes, suspender y revocar) y la Puerta A2A cerrada contra un socio simulado",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora-agentes", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora-agentes"]
+  },
+  {
+   "id": "TPL-feature-agora-metricas",
+   "nombre": "Ágora: métricas desde la capa semántica y tablero regenerable, cada cifra cuadrada con el libro",
+   "tipo": "software", "clase": "PRODUCTO", "estado": "blueprint",
+   "ubicacion": "src/features/agora-metricas", "responsable": "dep-sw",
+   "origen": ["docs/goals/agora-a2a.md"],
+   "cubre": ["src/features/agora-metricas"]
   }
  ]
 }

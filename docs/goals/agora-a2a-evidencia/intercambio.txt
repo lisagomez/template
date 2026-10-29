@@ -1,0 +1,58 @@
+# Intercambio de un módulo: la ranura «plan» pasa de calendario a la capa, solo en la composición (9a5581f agora: fase 7 — Ágora se siente como Arbrain sin saltarse un control)
+
+$ git diff -- productos/composiciones/agora.json
+diff --git a/productos/composiciones/agora.json b/productos/composiciones/agora.json
+index df2b56c..d3cea54 100644
+--- a/productos/composiciones/agora.json
++++ b/productos/composiciones/agora.json
+@@ -34,7 +34,7 @@
+     "explorador": "agora",
+     "panel": "agora",
+     "conversacion": "agora-buzon",
+-    "plan": "calendario",
++    "plan": "capa",
+     "voz": "dictado"
+   },
+   "memoria": {
+
+$ git diff --stat
+ productos/composiciones/agora.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat -- tools/capa
+(vacío: 0 líneas)
+
+$ npm run verifica:enchufes
+  · fuera: src/app/page.tsx — la portada del template: no es de ningún módulo
+
+Siembras (cada defecto debe tumbar su comprobación):
+  ✓ cae  un activo con pantalla sin enchufe
+  ✓ cae  una acción irreversible que no pasa por el freno
+  ✓ cae  un módulo que reclama la ranura del freno
+  ✓ cae  una ruta del módulo sin declarar
+  ✓ cae  una pantalla que no existe
+  ✓ cae  el núcleo de una herramienta que importa la capa
+  ✓ cae  dos enchufes con el mismo módulo
+  ✓ cae  una página nueva sin decidir
+  ✓ cae  un enchufe con un activo que no es el suyo
+  ✓ cae  un enchufe que la app no registra
+10/10 siembras cazadas
+
+Enchufes en verde: 30/30 activos con pantalla.
+
+$ compone(productos/composiciones/agora.json) con los enchufes del árbol
+compone: sí · plan lo llena «capa» (la agenda mínima de la capa (en la memoria del producto)) · voz sale: []
+
+$ node scripts/capa/recorrido.ts --solo /agora --base http://localhost:3021 --capturas docs/goals/agora-a2a-capturas/intercambio
+✓  1 /agora                                     agora · HTTP 200 · lienzo 1013 caracteres
+✓  2 /agora/agentes                             agora-agentes · HTTP 200 · lienzo 6185 caracteres
+✓  3 /agora/alta                                agora · HTTP 200 · lienzo 372 caracteres
+✓  4 /agora/buzon                               agora-buzon · HTTP 200 · lienzo 1400 caracteres
+✓  5 /agora/contabilidad                        agora-contabilidad · HTTP 200 · lienzo 783 caracteres
+✓  6 /agora/costos                              agora-costos · HTTP 200 · lienzo 5713 caracteres
+✓  7 /agora/metricas                            agora-metricas · HTTP 200 · lienzo 4236 caracteres
+✓  8 /agora/tablero                             agora-tablero · HTTP 200 · lienzo 3514 caracteres
+
+Recorrido de la capa: 8/8 rutas dentro de la capa · 0 error(es) de consola · docs/goals/agora-a2a-capturas/intercambio/resumen.json
+
+$ git checkout productos/composiciones/agora.json   # vuelve el calendario; la prueba no deja nada cambiado

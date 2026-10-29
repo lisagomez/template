@@ -1,0 +1,89 @@
+{
+  "base": "http://localhost:3021",
+  "fecha": "2026-10-28T17:12:00.370Z",
+  "n": 8,
+  "total": 8,
+  "siembra": null,
+  "resultados": [
+    {
+      "ruta": "/agora",
+      "visitada": "/agora",
+      "modulo": "agora",
+      "visto": "agora",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/01-agora.png",
+      "nota": "HTTP 200 · lienzo 1013 caracteres"
+    },
+    {
+      "ruta": "/agora/agentes",
+      "visitada": "/agora/agentes",
+      "modulo": "agora-agentes",
+      "visto": "agora-agentes",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/02-agora_agentes.png",
+      "nota": "HTTP 200 · lienzo 6185 caracteres"
+    },
+    {
+      "ruta": "/agora/alta",
+      "visitada": "/agora/alta",
+      "modulo": "agora",
+      "visto": "agora",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/03-agora_alta.png",
+      "nota": "HTTP 200 · lienzo 372 caracteres"
+    },
+    {
+      "ruta": "/agora/buzon",
+      "visitada": "/agora/buzon",
+      "modulo": "agora-buzon",
+      "visto": "agora-buzon",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/04-agora_buzon.png",
+      "nota": "HTTP 200 · lienzo 1400 caracteres"
+    },
+    {
+      "ruta": "/agora/contabilidad",
+      "visitada": "/agora/contabilidad",
+      "modulo": "agora-contabilidad",
+      "visto": "agora-contabilidad",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/05-agora_contabilidad.png",
+      "nota": "HTTP 200 · lienzo 3099 caracteres"
+    },
+    {
+      "ruta": "/agora/costos",
+      "visitada": "/agora/costos",
+      "modulo": "agora-costos",
+      "visto": "agora-costos",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/06-agora_costos.png",
+      "nota": "HTTP 200 · lienzo 5713 caracteres"
+    },
+    {
+      "ruta": "/agora/metricas",
+      "visitada": "/agora/metricas",
+      "modulo": "agora-metricas",
+      "visto": "agora-metricas",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/07-agora_metricas.png",
+      "nota": "HTTP 200 · lienzo 4253 caracteres"
+    },
+    {
+      "ruta": "/agora/tablero",
+      "visitada": "/agora/tablero",
+      "modulo": "agora-tablero",
+      "visto": "agora-tablero",
+      "ok": true,
+      "errores": [],
+      "captura": "docs/goals/agora-a2a-capturas/recorrido/08-agora_tablero.png",
+      "nota": "HTTP 200 · lienzo 3514 caracteres"
+    }
+  ]
+}
