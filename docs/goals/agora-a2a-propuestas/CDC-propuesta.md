@@ -110,11 +110,12 @@
   - Ningún enchufe de Ágora declara `sale`.
   - La voz es solo local.
   - El modelo es determinista.
-- **Gate aplicado** (lo marcado ☐ es del laboratorio):
+- **Gate aplicado** (las casillas vacías son del laboratorio):
   - diff revisado ☐ — el diff de lo que toca este CDC se enseña completo en el chat antes de pedir la firma:
     `git diff main -- .claude/gates.json .github/workflows/gates.yml tools/capa scripts/capa/verifica-enchufes.mjs`;
-  - regresión capa A ☑ — C2 capa A: VALIDATE_CAPA_A;
-  - `npm run validate` ☑ — VALIDATE_RESULTADO;
+  - regresión capa A ☑ — `C2 capa A (contratos): 166/166 en verde`, dentro del `validate` de `7a89016`;
+  - `npm run validate` ☑ — sobre `7a89016` (árbol `54480cc2cc70`): **34/34 gates activos, 12 inactivos declarados, 0
+    rojos**, con las 133 pruebas de Ágora dentro de `prueba:tools`. Se repite tras el commit de la firma;
   - `verifica:gates` ☑ — 12/12 comprobaciones en verde, con 37 activos y 12 inactivos declarados;
   - `verifica:enchufes` ☑ — 30/30 activos con pantalla y 10/10 siembras cazadas; quitar cualquiera de los 30 enchufes,
     uno por uno, se ve;
@@ -133,5 +134,5 @@
     entre las herramientas del sujeto;
   - primero `npm ci` real en el worktree, porque el `node_modules` enlazado rompe Turbopack. Después `npm run validate`,
     **después del commit**, porque la gobernanza lee `git ls-files`.
-  - Resultado: capa A VALIDATE_CAPA_A; capa B no corrida (decide el laboratorio).
+  - Resultado: capa A 166/166 (`validate` de `7a89016`); capa B no corrida (decide el laboratorio).
 - **Aprobado por**: pendiente
