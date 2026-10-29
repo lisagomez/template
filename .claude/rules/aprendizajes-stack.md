@@ -61,8 +61,8 @@ los `paths:`; en opencode, siempre. Un error crítico que aplique a TODO va a `A
 - `Projects (classic) is being deprecated` y no edita. `gh api -X PATCH repos/<dueña>/<repo>/pulls/N -F
   body=@archivo`; `gh pr create` y `gh pr merge` sí funcionan.
 
-### 2026-09-20: Turbopack rastrea como assets el disco que el bundle toca con `fs` (reincidió el 29/09)
-- `existsSync` o `resolve(process.env.X ?? …)` en un route handler hace que el build siga carpetas de fuera de
+### 2026-09-20: Turbopack rastrea como assets el disco que el bundle toca con `fs` (reincidió el 29/09 y el 29/10)
+- `existsSync`, `spawn` o `resolve(process.env.X ?? …)` en un route handler (o en el `dist` de una herramienta) hace que el build siga carpetas de fuera de
   `src/` (el venv del banco revienta; un clon limpio no lo ve). Sondeos por `execFile` a un script (como `scripts/laboratorio-voz/maquina.mjs`), `fs` solo
   sobre temporales de `mkdtemp`, o `/*turbopackIgnore: true*/` en el primer argumento.
 

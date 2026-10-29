@@ -57,8 +57,8 @@ export function puertoMetricFlow(o: OpcionesMetricFlow): PuertoSemantico & { lis
 }
 
 function proceso(o: OpcionesMetricFlow): Proceso {
-  const python = o.python ?? join(dirEntorno(), 'bin', 'python')
-  const hijo: ChildProcessWithoutNullStreams = spawn(python, ['-I', o.servidor ?? SERVIDOR, o.proyecto, o.perfiles], {
+  const python = o.python ?? join(/*turbopackIgnore: true*/ dirEntorno(), 'bin', 'python')
+  const hijo: ChildProcessWithoutNullStreams = spawn(/*turbopackIgnore: true*/ python, ['-I', o.servidor ?? SERVIDOR, o.proyecto, o.perfiles], {
     // Entorno MÍNIMO a propósito (sin heredar secretos del proceso): ruta, home, sin telemetría y lo que pide el perfil.
     env: { NODE_ENV: process.env['NODE_ENV'] ?? 'production', PATH: process.env['PATH'] ?? '', HOME: process.env['HOME'] ?? '', ...SIN_TELEMETRIA, ...o.entorno },
     stdio: ['pipe', 'pipe', 'pipe'],
