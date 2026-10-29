@@ -5,7 +5,7 @@
  * se RE-VERIFICA de cero desde el libro, con un cálculo independiente del de la base.
  */
 import { z } from 'zod'
-import { assert, rechaza, persona, nodo, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
+import { assert, cuenta, rechaza, persona, nodo, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
 import { cierraPeriodo, atestigua } from '../dist/index.js'
 
 /** El contrato de ERP-5B §5B.3 (ctb_poliza + ctb_movimiento), tal como lo exporta Ágora. */
@@ -137,6 +137,51 @@ export const CONTABILIDAD: Comprobacion[] = [
       assert.deepEqual(malos.map((x) => `${x.p} ${x.t}`), [])
     },
   },
+  {
+    fase: 'contabilidad', nombre: 'segregación QUITADA: la aceptación queda marcada en el paquete (la pone la base) y la marca no se borra', tipo: 'conducta',
+    async corre(c) {
+      const pid = await cierra(c)
+      const { h } = await exporta(c, pid)
+      await atestigua({ base: c.base, secreto: SECRETO }, persona('paula'), ['quita la segregación de funciones'])
+      await c.comoPersona('paula', (s) => s.consulta('select agora.cambia_segregacion($1, false, $2)', [GOLFO, 'quita la segregación de funciones']))
+      // Quien acepta no se declara «con segregación»: la marca la pone la base.
+      await c.comoPersona('sofia', (s) => s.consulta(`insert into agora.poliza_decision (org_id, poliza_id, decision, sha256, decidida_por, sin_segregacion) values ($1, $2, 'acepta', $3, $4, false)`, [GOLFO, pid, h, persona('sofia')]))
+      const [d] = await c.base.consulta<{ m: boolean }>('select sin_segregacion m from agora.poliza_decision where poliza_id = $1', [pid])
+      assert.equal(d!.m, true, 'la aceptación sin segregación no quedó marcada')
+      await rechaza(c.comoPersona('sofia', (s) => s.consulta('update agora.poliza_decision set sin_segregacion = false where poliza_id = $1', [pid])), /solo se agrega|prohibido|permission/)
+      const [d2] = await c.base.consulta<{ m: boolean }>('select sin_segregacion m from agora.poliza_decision where poliza_id = $1', [pid])
+      assert.equal(d2!.m, true, 'la marca se borró')
+    },
+  },
+  {
+    fase: 'contabilidad', nombre: 'segregación puesta: la aceptación NO lleva la marca (aunque quien acepta la pida)', tipo: 'conducta',
+    async corre(c) {
+      const pid = await cierra(c)
+      const { h } = await exporta(c, pid)
+      await c.comoPersona('sofia', (s) => s.consulta(`insert into agora.poliza_decision (org_id, poliza_id, decision, sha256, decidida_por, sin_segregacion) values ($1, $2, 'acepta', $3, $4, true)`, [GOLFO, pid, h, persona('sofia')]))
+      const [d] = await c.base.consulta<{ m: boolean }>('select sin_segregacion m from agora.poliza_decision where poliza_id = $1', [pid])
+      assert.equal(d!.m, false)
+    },
+  },
+  {
+    fase: 'contabilidad', nombre: 'segregación QUITADA: Finanzas tiene un aviso fijo en su panel que nadie atiende a mano; ponerla lo atiende', tipo: 'conducta',
+    async corre(c) {
+      const fijos = () => c.comoPersona('mariana', (s) => cuenta(s, `select 1 from agora.aviso where tipo = 'segregacion_off' and para_rol = 'finanzas' and not atendido`))
+      const quita = async (cita: string) => {
+        await atestigua({ base: c.base, secreto: SECRETO }, persona('paula'), [cita])
+        await c.comoPersona('paula', (s) => s.consulta('select agora.cambia_segregacion($1, false, $2)', [GOLFO, cita]))
+      }
+      assert.equal(await fijos(), 0)
+      await quita('quita la segregación de funciones')
+      assert.equal(await fijos(), 1, 'quitar la segregación no avisó a Finanzas')
+      await rechaza(c.comoPersona('mariana', (s) => s.consulta(`update agora.aviso set atendido = true where tipo = 'segregacion_off'`)), /prohibido|permission/)
+      assert.equal(await fijos(), 1, 'el aviso se atendió con la segregación quitada')
+      await c.comoPersona('paula', (s) => s.consulta('select agora.cambia_segregacion($1, true, $2)', [GOLFO, 'vuelve a poner la segregación']))
+      assert.equal(await fijos(), 0, 'ponerla no atendió el aviso')
+      await quita('quita otra vez la segregación')
+      assert.equal(await fijos(), 1, 'al quitarla de nuevo el aviso no volvió')
+    },
+  },
 ]
 
 export const SABOTAJES_CONTABILIDAD: Sabotaje[] = [
@@ -152,4 +197,21 @@ export const SABOTAJES_CONTABILIDAD: Sabotaje[] = [
         'movimientos', (select jsonb_agg(jsonb_build_object('orden', m.orden, 'cuenta', m.cuenta, 'codigo_agrupador', m.codigo_agrupador, 'naturaleza', m.naturaleza, 'importe', m.importe, 'uuid_cfdi', null, 'rfc', m.rfc_tercero, 'documento', m.documento, 'concepto', m.concepto) order by m.orden) from agora.poliza_movimiento m where m.poliza_id = p.id),
         'cuadre', (select jsonb_build_object('cargos', sum(m.importe) filter (where m.naturaleza = 'cargo'), 'abonos', sum(m.importe) filter (where m.naturaleza = 'abono')) from agora.poliza_movimiento m where m.poliza_id = p.id),
         'sin_costear', p.sin_costear, 'anexo', 'Anexo 24 RMF 2024') from agora.poliza p where p.id = pid $$;`, caza: /UUID/ },
+  // La segregación quitada deja huella: la marca de la aceptación y el aviso fijo de Finanzas (registro de riesgo, C5).
+  { fase: 'contabilidad', nombre: 'K7 · la aceptación sin segregación no queda marcada', sql: `create function agora_priv.k7() returns trigger language plpgsql as $$ begin new.sin_segregacion := false; return new; end $$;
+    create trigger tg_zz_k7 before insert on agora.poliza_decision for each row execute function agora_priv.k7();`, caza: /la aceptación queda marcada/ },
+  { fase: 'contabilidad', nombre: 'K8 · la marca se borra después', sql: `drop trigger tg_decision_poliza_solo_agregar on agora.poliza_decision; grant update on agora.poliza_decision to authenticated;
+    create policy k8 on agora.poliza_decision for update to authenticated using (true) with check (true);`, caza: /la aceptación queda marcada/ },
+  { fase: 'contabilidad', nombre: 'K9 · toda aceptación sale marcada (la marca ya no dice nada)', sql: `create function agora_priv.k9() returns trigger language plpgsql as $$ begin new.sin_segregacion := true; return new; end $$;
+    create trigger tg_zz_k9 before insert on agora.poliza_decision for each row execute function agora_priv.k9();`, caza: /NO lleva la marca/ },
+  { fase: 'contabilidad', nombre: 'K10 · quitar la segregación no avisa a Finanzas', sql: `create or replace function agora.cambia_segregacion(o uuid, activa boolean, cita text) returns jsonb language plpgsql security definer set search_path = '' as $$
+    begin
+      if not agora_priv.tiene_rol(o, null, array['propietario']) then raise exception 'la segregación la decide la Propietaria' using errcode = 'AG403'; end if;
+      if not activa then perform agora_priv.consume_testigo(cita, 'quita_segregacion'); end if;
+      update agora.org_config set segregacion = activa where org_id = o;
+      insert into agora.decision_org (org_id, tipo, quien, cita) values (o, case when activa then 'segregacion_on' else 'segregacion_off' end, agora_priv.uid(), cita);
+      return jsonb_build_object('ok', true, 'segregacion', activa);
+    end $$;`, caza: /aviso fijo/ },
+  { fase: 'contabilidad', nombre: 'K11 · Finanzas atiende el aviso a mano y la segregación sigue quitada', sql: `grant update on agora.aviso to authenticated;
+    create policy k11 on agora.aviso for update to authenticated using (true) with check (true);`, caza: /aviso fijo/ },
 ]

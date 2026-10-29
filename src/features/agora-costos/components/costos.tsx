@@ -105,7 +105,7 @@ export function Costos({ d }: { d: DatosDeCostos }) {
         <section className="space-y-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4" data-alertas>
             <h2 className="text-sm font-semibold text-slate-900">Alertas</h2>
-            <ul className="mt-2 space-y-1.5 text-[12.5px]">{d.avisos.length ? d.avisos.map((a) => <li key={a.id} className={`rounded-md px-2 py-1 ${a.tipo === 'tope_100' ? 'bg-rose-50 text-rose-800' : 'bg-amber-50 text-amber-900'}`}>{a.texto}</li>) : <li className="text-slate-500">Sin alertas.</li>}</ul>
+            <ul className="mt-2 space-y-1.5 text-[12.5px]">{d.avisos.length ? d.avisos.map((a) => <li key={a.id} data-aviso={a.tipo} className={`rounded-md px-2 py-1 ${a.tipo === 'tope_100' || a.tipo === 'segregacion_off' ? 'bg-rose-50 text-rose-800' : 'bg-amber-50 text-amber-900'}`}>{a.texto}</li>) : <li className="text-slate-500">Sin alertas.</li>}</ul>
           </div>
           {d.cerrado ? <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-[12.5px] text-slate-600">Este periodo está cerrado: no se edita, se reclasifica en el periodo abierto.</p> : d.soyFinanzas ? <RegistraEjercido d={d} avisa={setAviso} /> : null}
           {d.cerrado ? null : <AmpliaPresupuesto d={d} avisa={setAviso} />}

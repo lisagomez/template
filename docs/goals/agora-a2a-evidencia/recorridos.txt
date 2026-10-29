@@ -49,3 +49,11 @@ $ node scripts/capa/recorrido.ts --solo /agora --base http://localhost:3021 --ca
 ✓  8 /agora/tablero                             agora-tablero · HTTP 200 · lienzo 3514 caracteres
 
 Recorrido de la capa: 8/8 rutas dentro de la capa · 0 error(es) de consola · docs/goals/agora-a2a-capturas/recorrido/resumen.json
+
+== 2026-10-29 · node scripts/agora/segregacion-quitada.ts http://127.0.0.1:3001 (capturas 40 y 41)
+✓ la base marcó la aceptación de la póliza: sin_segregacion = true
+✓ Mariana (Finanzas) ve el aviso fijo en Costos: «La segregación de funciones está QUITADA (decisión registrada de la Propietaria): quien pide un gasto puede aprobarlo y quien lo aprobó pued»
+✓ Sofía (Contabilidad) ve la aceptación marcada en el paquete: «SIN SEGREGACIÓN DE FUNCIONES»
+✓ puesta otra vez, el aviso queda atendido (avisos fijos: 0)
+✓ errores de página: 0
+Todo en verde: la segregación quitada se ve en Costos y en el paquete

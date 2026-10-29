@@ -1,14 +1,15 @@
-# AISIA — Ágora: agentes que proponen sobre dinero, y socios externos por la Puerta — BORRADOR
+# AISIA — Ágora: agentes que proponen sobre dinero, y socios externos por la Puerta
 
-> **Estado: borrador sin firmar; la firma es del laboratorio.** Fecha: 2026-10-28 · Control **C4**, sobre
+> **Estado: lo firma el laboratorio, en la línea «Aprobado por» de abajo; sin esa firma es un borrador.** Fecha:
+> 2026-10-28, al día el 2026-10-29 · Control **C4**, sobre
 > `.claude/gobernanza/plantillas/aisia.md`. Goal `docs/goals/agora-a2a.md`. Lo redactó un agente; ningún agente
 > fabrica la firma.
 >
 > Lo que existe opera **solo en laboratorio**: una organización ficticia (Distribuidora Golfo Norte), socios ficticios,
 > un socio **simulado** en la Puerta, un modelo determinista inyectado, voz solo local, y nada que salga de la máquina.
 >
-> Revisión: antes de una organización o un socio reales, al encender un modelo real, al decidir qué recibe el
-> Despacho Fiscal Sierra, al conectar un espejo o el correo, al cambiar un tope por defecto, o tras un incidente.
+> Revisión: antes de una organización o un socio reales, al encender un modelo real, al cambiar lo que recibe el
+> Despacho Fiscal Sierra o lo que ve un socio, al conectar un espejo o el correo, al cambiar un tope por defecto, o tras un incidente.
 >
 > **aprobación humana ☐** · **Aprobado por**: pendiente
 
@@ -27,7 +28,8 @@
 
 ## 2. Qué ve cada agente y cada tercero
 
-Propuesta por defecto, con minimización. Lo marcado **decide el laboratorio** no tiene default aceptado.
+Propuesta por defecto, con minimización. Las dos filas que el borrador dejaba al laboratorio quedaron **decididas** el
+2026-10-29, en la sesión del goal.
 
 | Quién | Datos financieros | Datos de personas | Datos de socios | Cómo se hace cumplir |
 | --- | --- | --- | --- | --- |
@@ -36,8 +38,8 @@ Propuesta por defecto, con minimización. Lo marcado **decide el laboratorio** n
 | Analista financiero (interno) | Cifras ya calculadas del dominio Finanzas; propone escenarios, nunca cifras | Ninguno | Agregados, sin nombre de socio | Alcance del dominio Finanzas |
 | Vigía | Consumo de topes; fechas de cierre | Dueño de cada ítem (para avisarle) | Huella de la tarjeta, estado del idCard | Lee contadores y huellas, no cuerpos de mensajes |
 | Especialista interno | Montos de los ítems de su dominio | Los del hilo de su dominio | Los del hilo de su dominio | Alcance del idCard |
-| **Socio externo por la Puerta** | Solo los montos de **sus** ítems y cotizaciones; **nunca** presupuesto, comprometido, ejercido, disponible, pólizas ni el libro | Solo quienes escriben en el hilo de su categoría (nombre y rol) | Solo lo suyo; nada de otro socio | Alcance por categoría y skill; respuesta de inexistente a lo demás. **Decide el laboratorio**: si ve el monto de sus ítems o ni eso |
-| **Despacho Fiscal Sierra** | **Nada por defecto.** Opciones: (a) nada; (b) conteos y enlaces; (c) la póliza **aceptada** de un periodo **cerrado**; (d) la balanza de costos | Ninguno | Ninguno | **Decide el laboratorio** (es la decisión de C4 que pide el spec, no un default) |
+| **Socio externo por la Puerta** | Solo los montos de **sus** ítems y cotizaciones; **nunca** presupuesto, comprometido, ejercido, disponible, pólizas ni el libro | Solo quienes escriben en el hilo de su categoría (nombre y rol) | Solo lo suyo; nada de otro socio | Alcance por categoría y skill; respuesta de inexistente a lo demás. **Decidido (2026-10-29)**: como máximo, los montos de sus propios ítems y cotizaciones. Lo construido es más estricto: la Puerta solo atiende `SendMessage`, `GetTask` y `ListTasks`, y no devuelve ningún monto |
+| **Despacho Fiscal Sierra** | **Nada.** Decidido el 2026-10-29: la opción (a). Las otras eran (b) conteos y enlaces, (c) la póliza **aceptada** de un periodo **cerrado** y (d) la balanza de costos | Ninguno | Ninguno | **Decidido**: observador A0, 0 propuestas al día y ningún enchufe que declare `sale`. Darle algo es una revisión de esta AISIA |
 | Espejos (no conectados) | Nada; si se conectan, propuesta: solo conteos y enlaces | Nada | Nada | Requiere su C3 y su C4 |
 | Resumen hacia fuera | Solo conteos y enlaces, **ningún monto** | Ninguno | Ninguno | Esquema cerrado de la capa (`validaResumen`); en este goal no sale |
 | Memoria de la capa | Nunca cifras | Preferencias de la persona (vista, workspace abierto, cuánto pregunta) | Nunca | El enchufe declara cada clave; mal de la capa número 6 |
@@ -55,7 +57,7 @@ Propuesta por defecto, con minimización. Lo marcado **decide el laboratorio** n
 | Avisos a terceros | Socio o invitado por correo | Ninguno; pasa por el freno | Freno + C4 del canal de correo |
 | Calendario externo | Google (adaptador `gog`, no medido) | No conectado | Prueba en vivo con cuenta de prueba |
 | Póliza propuesta | Sistema contable del departamento | Archivo local en el contrato de ERP-5B | Lo asienta una persona de Contabilidad; Ágora no asienta ni presenta nada ante el SAT |
-| Despacho Fiscal Sierra | Tercero | Nada | La decisión de §2 |
+| Despacho Fiscal Sierra | Tercero | Nada (decidido, §2) | Una revisión de esta AISIA |
 
 Prueba de que nada sale (propuesta para la fase 8): `sale: []` en cada enchufe de Ágora (`verifica:enchufes`) y un
 recorrido con la red sin salida que cuente cero peticiones fuera del origen local, como se hizo con la mesa.
@@ -63,7 +65,7 @@ recorrido con la red sin salida que cuente cero peticiones fuera del origen loca
 ### 3.1 Lo construido que toca datos de personas o de socios (estado al 2026-10-28, laboratorio)
 
 - **El Despacho Fiscal Sierra no recibe nada**: quedó en «en revisión», con techo A0, rol observador y `0` propuestas al
-  día. Ningún enchufe de Ágora declara `sale`. La opción de §2 sigue siendo del laboratorio.
+  día. Ningún enchufe de Ágora declara `sale`. El laboratorio eligió la opción (a), nada, el 2026-10-29.
 - **El testigo del freno** guarda la huella sha256 de lo que la persona escribe o dicta en la conversación, la hora de
   la base y, al usarse, la acción. **Nunca el texto.** Solo la persona lo ve (RLS), se poda a las 24 h y no es memoria
   ni hilo. No sale de la base.
@@ -155,7 +157,6 @@ Recaen sobre quien no firmó; ninguna firma del laboratorio ni de la organizaci�
 ## 7. Decisión
 
 **Mitigar, y solo laboratorio con datos ficticios.** No se ofrece a una organización ni a un socio reales hasta: este
-documento y el C3 firmados en una revisión que nombre al socio; la decisión sobre el Despacho (§2); la decisión sobre qué
-ve un socio por la Puerta (§2); la prueba de que nada sale (§3); y, con un modelo real, su revisión aparte.
+documento y el C3 firmados en una revisión que nombre al socio; la prueba de que nada sale (§3); y, con un modelo real,
+su revisión aparte. Lo que recibe el Despacho y lo que ve un socio quedaron decididos el 2026-10-29 (§2).
 
-Firmada por: pendiente  Rol: pendiente  Fecha: pendiente

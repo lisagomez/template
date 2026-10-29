@@ -2,7 +2,8 @@
 
 > Cada punto con su estado: **arreglado** (con la prueba que lo vigila), **declarado** (es un límite conocido, dicho
 > donde se ve) o **del laboratorio** (decidirlo no me toca). Fecha: 2026-10-28. Los puntos 24 a 33 los encontró el
-> **verificador independiente** (`agora-a2a-evidencia/verificacion-independiente.md`) sobre `eb062f7`.
+> **verificador independiente** (`agora-a2a-evidencia/verificacion-independiente.md`) sobre `eb062f7`. Los puntos 42 y
+> 43 salieron el 2026-10-29, al confirmar una por una las mitigaciones del registro de riesgo antes de pedir la firma.
 
 | # | Lo que podría estar mal | Estado | Cómo quedó |
 | --- | --- | --- | --- |
@@ -38,7 +39,7 @@
 | 30 | Dos ranuras de la matriz con los mismos roles se llenaban con UNA sola firma | **arreglado** | `firmas_completas` asigna una persona distinta a cada ranura y `ranura_para` deja libre la otra; sabotaje B10. La matriz sembrada no tenía solapes (defecto latente) |
 | 31 | La clave de idempotencia era global y después por organización: un socio de la MISMA organización ocupaba la clave predecible del coordinador y lo hacía ligar SU propuesta en el hilo | **arreglado** | Clave única por AUTOR (`org_id, autor, clave`) en propuestas y mensajes; `propone` solo adopta una previa propia con la misma huella. Sabotaje B12 |
 | 32 | El servidor de desarrollo del laboratorio escuchaba en todas las interfaces; la Puerta confía en un Host local, que se falsifica desde la red | **arreglado** | `npm run agora:dev` escucha solo en `127.0.0.1` |
-| 33 | `validate` corre las 127 pruebas de Ágora pero no sus sabotajes ni la variante en Postgres real | **del laboratorio** | Los sabotajes y `agora:pg` son evidencia pegada en el goal; meterlos al padrón es un CDC (propuesto `agora:pg`, inactivo por Docker) |
+| 33 | `validate` corre las 133 pruebas de Ágora pero no sus sabotajes ni la variante en Postgres real | **del laboratorio** | Los sabotajes y `agora:pg` son evidencia pegada en el goal. `agora:pg` entra al padrón inactivo, por Docker (aplicado en la rama; lo firma el laboratorio con el CDC) |
 | 34 | El reparto de ranuras era voraz: una firma podía ocupar la ranura que otra persona podía llenar y la propuesta quedaba colgada | **arreglado** | `agora_priv.caben` busca una asignación válida entre todas; sabotaje B13 |
 | 35 | La suite de `tools/agora` sola, en un clon limpio, no encontraba `tools/capa/dist` | **arreglado** | El `prebuild` construye `calendario` y `capa` |
 | 36 | `--apaga` borraba el contenedor desde cualquier árbol (después, desde cualquiera con alguna clave vieja, o con el contenedor parado) | **arreglado** | Solo borra si la clave de este árbol ABRE el contenedor en marcha; lo que no se comprueba no se borra; un huérfano, con `--huerfano` |
@@ -47,4 +48,5 @@
 | 39 | `rol_usado` registra el rol con que la persona firmó, no la ranura que terminó llenando (con dos roles, la asignación puede ser otra) | **declarado** | La validación usa todos los roles; el registro es informativo. Guardar la asignación completa al aplicar es una mejora del registro |
 | 40 | Las firmas se juzgan con los roles ACTUALES de quien firmó: si se los quitan antes de aplicar, la firma deja de contar | **declarado (falla cerrado)** | Nada se aplica sin las firmas que la matriz pide hoy; si se prefiere juzgar con los roles del momento de firmar, es una decisión del laboratorio |
 | 41 | En ese caso la propuesta sigue diciendo `aprobada` aunque no se puede aplicar | **declarado** | `aplica_propuesta` relee las firmas y responde «sin su fila de aprobación»; devolverla a `pendiente` es la mejora natural |
-
+| 42 | El borrador del registro de riesgo prometía mitigaciones que no existían: la siembra «corría con `service_role`» (corre con la conexión dueña), «arrancaba solo con `AGORA_LABORATORIO=1`» y «se negaba ante una organización no ficticia» (ninguna de las dos); y con la segregación quitada, ni el aviso a Finanzas ni la marca en el paquete existían | **arreglado** (el laboratorio pidió construirlas antes de firmar) | La guarda de la variable (prueba; saboteada a mano, cae); `agora.org.ficticia` + `agora_priv.guarda_siembra()` (S18, S19); el aviso fijo `segregacion_off` (K10, K11); `poliza_decision.sin_segregacion` (K7, K8, K9). El registro dice ahora lo que existe y nombra su prueba |
+| 43 | La suma de los topes de gasto de los agentes que no pasa el de la organización era un disparador sin prueba propia | **arreglado** | «la suma de los topes de gasto de los agentes no pasa el de la organización (ni siquiera con la conexión dueña)»; sabotaje F12 |

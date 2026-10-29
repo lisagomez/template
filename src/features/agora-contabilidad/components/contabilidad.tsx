@@ -104,7 +104,7 @@ export function Contabilidad({ d }: { d: DatosContables }) {
             </table>
           </div>
           <div className="border-t border-slate-100 px-4 py-3">
-            {p.decisiones.map((x, k) => <p key={k} className="text-[12.5px] text-slate-700">{x.decision === 'acepta' ? 'Aceptada' : 'Devuelta'} por <b>{x.persona}</b>{x.motivo ? `: «${x.motivo}»` : ''}.</p>)}
+            {p.decisiones.map((x, k) => <p key={k} className="text-[12.5px] text-slate-700">{x.decision === 'acepta' ? 'Aceptada' : 'Devuelta'} por <b>{x.persona}</b>{x.motivo ? `: «${x.motivo}»` : ''}.{x.sinSegregacion ? <span className="ml-2 rounded bg-rose-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase text-rose-700" data-sin-segregacion>sin segregación de funciones</span> : null}</p>)}
             {p.estado === 'propuesta' ? (d.yo.puedeAceptar.puede ? (
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" disabled={ocupado} onClick={decide('acepta')} data-acepta className="rounded-md bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white">Aceptar la póliza (sha256 {corta(p.sha256)})</button>

@@ -86,8 +86,19 @@ create table if not exists agora.org (
   id        uuid primary key default gen_random_uuid(),
   slug      text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   nombre    text not null check (length(nombre) between 2 and 120),
+  -- Solo la siembra del laboratorio la pone en true. Una organización dada de alta por cualquier otra vía es REAL.
+  ficticia  boolean not null default false,
   creada_en timestamptz not null default now()
 );
+alter table agora.org add column if not exists ficticia boolean not null default false;
+
+/** La siembra ficticia (C7: escribe con la conexión dueña, salta RLS) solo corre sobre una base donde toda organización es del laboratorio. */
+create or replace function agora_priv.guarda_siembra() returns void language plpgsql set search_path = '' as $$
+begin
+  if exists (select 1 from agora.org where not ficticia) then
+    raise exception 'la base tiene organizaciones que no son del laboratorio: la siembra ficticia no escribe aquí' using errcode = 'AG403';
+  end if;
+end $$;
 
 -- La configuración de la organización. Los valores del prototipo son EJEMPLO, no decisiones: umbral de
 -- aprobación por monto 100 000 MXN, tope de gasto de modelo 8 000 MXN al mes, segregación de funciones.

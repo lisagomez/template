@@ -68,6 +68,8 @@ async function levanta() {
   const base = basePostgres(url);
   const secreto = randomBytes(32).toString('base64url');
   const hechas = await migra(base);
+  // Este script ES el laboratorio: la base es `agora_lab` del contenedor propio que acaba de crear o reusar.
+  process.env.AGORA_LABORATORIO = '1';
   await siembra(base, { secreto });
   const version = ((await base.consulta<{ v: string }>('select version() v'))[0]!.v).split(' on ')[0];
   await base.cierra();

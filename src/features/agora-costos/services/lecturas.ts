@@ -35,7 +35,7 @@ export async function leeCostos(periodo: string | null) {
         presupuesto_version "presupuestoVersion", pendientes from agora.v_centro_periodo where periodo = $1`, [per]);
     const compromisos = await s.consulta<Compromiso>(`select k.id, k.categoria_id categoria, k.item_id item, k.concepto, k.periodo, k.importe_mxn::text importe, k.vigente_mxn::text vigente, k.ejercido_mxn::text ejercido
         from agora.v_compromiso_saldo k where k.estado = 'vigente' and k.vigente_mxn > 0 order by k.periodo, k.concepto`);
-    const avisos = await s.consulta<Aviso>(`select id, tipo, texto, creado_en::text cuando from agora.aviso where tipo in ('tope_80', 'tope_100', 'presupuesto_desviacion') and not atendido order by creado_en desc limit 12`);
+    const avisos = await s.consulta<Aviso>(`select id, tipo, texto, creado_en::text cuando from agora.aviso where tipo in ('segregacion_off', 'tope_80', 'tope_100', 'presupuesto_desviacion') and not atendido order by tipo = 'segregacion_off' desc, creado_en desc limit 12`);
     const [org] = await s.consulta<{ tope: string; gasto: string; finanzas: boolean; cerrado: boolean }>(`select c.tope_gasto_org_mxn::text tope,
         (select coalesce(sum(g.costo_mxn), 0) from agora.gasto_modelo g where g.org_id = c.org_id and g.periodo = $1)::text gasto,
         agora_priv.tiene_rol(c.org_id, null, array['finanzas']) finanzas,

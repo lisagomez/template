@@ -4,7 +4,7 @@ import { conSesion } from '@/features/agora/services/datos';
 export interface Periodo { periodo: string; estado: 'abierto' | 'cerrado'; cerradoPor: string | null; cerradoEn: string | null; cita: string | null; vencido: boolean }
 export interface Movimiento { orden: number; cuenta: string; nombre: string; codigo_agrupador: string; naturaleza: 'cargo' | 'abono'; importe: string; uuid_cfdi: string | null; rfc: string | null; documento: string; concepto: string; categoria: string | null }
 export interface Poliza { id: string; folio: string; tipo: string; periodo: string; estado: string; sha256: string; sinCostear: number; generada: string; concepto: string
-  decisiones: Array<{ decision: string; persona: string; motivo: string | null; cuando: string }> }
+  decisiones: Array<{ decision: string; persona: string; motivo: string | null; cuando: string; sinSegregacion: boolean }> }
 
 export interface DatosContables {
   periodos: Periodo[]; periodo: string
@@ -23,7 +23,7 @@ export async function leeContabilidad(periodo: string | null) {
         from ps left join agora.periodo p on p.periodo = ps.periodo left join agora.persona q on q.id = p.cerrado_por order by ps.periodo`);
     const per = periodo && periodos.some((p) => p.periodo === periodo) ? periodo : (periodos.find((p) => p.estado === 'cerrado')?.periodo ?? periodos.find((p) => p.vencido)?.periodo ?? periodos[0]?.periodo ?? '');
     const [pol] = await s.consulta<Omit<Poliza, 'decisiones'>>(`select id, folio, tipo, periodo, estado, sha256, sin_costear "sinCostear", generada_en::text generada, concepto from agora.poliza where periodo = $1 order by generada_en desc limit 1`, [per]);
-    const poliza = pol ? { ...pol, decisiones: await s.consulta<Poliza['decisiones'][number]>(`select d.decision, p.nombre persona, d.motivo, d.decidida_en::text cuando from agora.poliza_decision d join agora.persona p on p.id = d.decidida_por where d.poliza_id = $1`, [pol.id]) } : null;
+    const poliza = pol ? { ...pol, decisiones: await s.consulta<Poliza['decisiones'][number]>(`select d.decision, p.nombre persona, d.motivo, d.decidida_en::text cuando, d.sin_segregacion "sinSegregacion" from agora.poliza_decision d join agora.persona p on p.id = d.decidida_por where d.poliza_id = $1`, [pol.id]) } : null;
     const movimientos = pol ? await s.consulta<Movimiento>(`select m.orden, m.cuenta, k.nombre, m.codigo_agrupador, m.naturaleza, m.importe::text importe, m.uuid_cfdi::text uuid_cfdi, m.rfc_tercero rfc, m.documento, m.concepto, n.nombre categoria
         from agora.poliza_movimiento m join agora.cuenta k on k.org_id = m.org_id and k.codigo = m.cuenta left join agora.nodo n on n.id = m.categoria_id where m.poliza_id = $1 order by m.orden`, [pol.id]) : [];
     const exp = pol ? (await s.consulta<{ e: unknown }>('select agora.exporta_poliza($1) e', [pol.id]))[0]!.e : null;

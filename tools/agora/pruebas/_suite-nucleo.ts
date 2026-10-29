@@ -3,6 +3,7 @@
  * por la base, la antirrepetición y la bitácora encadenada. Cada sabotaje de abajo tumba al menos una de estas.
  */
 import { assert, cuenta, rechaza, agente, persona, nodo, item, GOLFO, BAJIO, SECRETO, type Comprobacion, type Sabotaje } from './_marco.ts'
+import { siembra } from '../dist/laboratorio/siembra.js'
 
 const TABLAS_CON_ORG = ['nodo', 'persona', 'membresia', 'agente', 'agente_alcance', 'canal', 'mensaje', 'item', 'propuesta', 'aprobacion', 'presupuesto',
   'compromiso', 'costo', 'gasto_modelo', 'bitacora', 'matriz_regla', 'cuenta', 'item_historial', 'a2a_llamada']
@@ -229,6 +230,28 @@ export const NUCLEO: Comprobacion[] = [
       }).catch((e) => { if (!(e as { deshacer?: boolean }).deshacer) throw e })
     },
   },
+  {
+    fase: 'nucleo', nombre: 'la siembra ficticia se niega en una base con una organización REAL (sin la marca de ficticia)', tipo: 'conducta',
+    async corre({ base }) {
+      await base.consulta('select agora_priv.guarda_siembra()') // la sembrada: solo organizaciones ficticias
+      await base.consulta(`insert into agora.org (slug, nombre) values ('organizacion-real', 'Una organización dada de alta por la app')`)
+      await rechaza(base.consulta('select agora_priv.guarda_siembra()'), 'no son del laboratorio')
+      await rechaza(siembra(base, { secreto: SECRETO }), 'no son del laboratorio')
+    },
+  },
+  {
+    fase: 'nucleo', nombre: 'la siembra ficticia se niega sin AGORA_LABORATORIO=1', tipo: 'conducta',
+    async corre({ base }) {
+      const antes = process.env.AGORA_LABORATORIO
+      delete process.env.AGORA_LABORATORIO
+      try {
+        await rechaza(siembra(base, { secreto: SECRETO }), 'solo en el laboratorio')
+      } finally {
+        if (antes === undefined) delete process.env.AGORA_LABORATORIO
+        else process.env.AGORA_LABORATORIO = antes
+      }
+    },
+  },
 ]
 
 const reemplaza = (firma: string, cuerpo: string) => `create or replace function ${firma} language sql stable security definer set search_path = '' as $$ ${cuerpo} $$;`
@@ -260,6 +283,8 @@ export const SABOTAJES_NUCLEO: Sabotaje[] = [
   { fase: 'nucleo', nombre: 'S17 · una política nueva que lee auth.uid() directo', sql: `create policy s17 on agora.aviso for select to agora_agente using (auth.uid() is not null);`, caza: /auth.uid\(\) directo/ },
   { fase: 'nucleo', nombre: 'S13 · una vista nueva sin permiso de lectura', sql: 'revoke select on agora.v_llamadas_tras_revocar from authenticated;', caza: /se puede LEER/ },
   { fase: 'nucleo', nombre: 'S12 · el historial se puede anotar a mano', sql: `create or replace function agora_priv.anota_historial(o uuid, it uuid, campo text, antes jsonb, despues jsonb, actor_tipo text, persona uuid, agente uuid, prop uuid, deshacer timestamptz) returns void language plpgsql security definer set search_path = '' as $$ begin insert into agora.item_historial (org_id, item_id, campo, antes, despues, actor_tipo, actor_persona) values (o, it, campo, antes, despues, actor_tipo, persona); end $$;`, caza: /no se inventan a mano/ },
+  { fase: 'nucleo', nombre: 'S18 · la siembra escribe sobre una base con organizaciones reales', sql: `create or replace function agora_priv.guarda_siembra() returns void language plpgsql set search_path = '' as $$ begin end $$;`, caza: /organización REAL/ },
+  { fase: 'nucleo', nombre: 'S19 · toda organización nace ficticia', sql: 'alter table agora.org alter column ficticia set default true;', caza: /organización REAL/ },
 ]
 
 export { SECRETO }

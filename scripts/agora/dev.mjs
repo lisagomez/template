@@ -8,8 +8,9 @@ import { fileURLToPath } from 'node:url';
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const ARCHIVO = join(RAIZ, 'tools/agora/.laboratorio/entorno');
 const env = { ...process.env };
-if (existsSync(ARCHIVO)) for (const l of readFileSync(ARCHIVO, 'utf8').split('\n')) if (/^[A-Z_]+=/.test(l)) env[l.slice(0, l.indexOf('='))] = l.slice(l.indexOf('=') + 1);
-else console.log('sin entorno del laboratorio: corre primero npm run agora:laboratorio (Ágora saldrá apagada)');
+if (existsSync(ARCHIVO)) {
+  for (const l of readFileSync(ARCHIVO, 'utf8').split('\n')) if (/^[A-Z_]+=/.test(l)) env[l.slice(0, l.indexOf('='))] = l.slice(l.indexOf('=') + 1);
+} else console.log('sin entorno del laboratorio: corre primero npm run agora:laboratorio (Ágora saldrá apagada)');
 // Solo en esta máquina: la Puerta responde a un Host local, y un Host se falsifica desde la red si el servidor escucha
 // en todas las interfaces (lo que hace `next dev` por defecto).
 const argumentos = process.argv.slice(2);

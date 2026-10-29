@@ -445,6 +445,14 @@ begin
   update agora.org_config set segregacion = activa where org_id = o;
   insert into agora.decision_org (org_id, tipo, quien, cita) values (o, case when activa then 'segregacion_on' else 'segregacion_off' end, agora_priv.uid(), cita);
   perform agora_priv.anota(o, 'humano', agora_priv.uid()::text, 'org.segregacion', o::text, jsonb_build_object('activa', activa));
+  -- Quitada, Finanzas lo ve en su panel hasta que se vuelva a poner: nadie atiende ese aviso a mano.
+  if activa then
+    update agora.aviso set atendido = true where org_id = o and clave = 'segregacion';
+  else
+    insert into agora.aviso (org_id, clave, tipo, para_rol, texto)
+    values (o, 'segregacion', 'segregacion_off', 'finanzas', 'La segregación de funciones está QUITADA (decisión registrada de la Propietaria): quien pide un gasto puede aprobarlo y quien lo aprobó puede aceptar su póliza.')
+    on conflict (org_id, clave) do update set atendido = false, texto = excluded.texto, creado_en = now();
+  end if;
   return jsonb_build_object('ok', true, 'segregacion', activa);
 end $$;
 

@@ -102,7 +102,7 @@ create table if not exists agora.aviso (
   org_id       uuid not null references agora.org (id) on delete cascade,
   clave        text not null,
   tipo         text not null check (tipo in ('tope_80', 'tope_100', 'presupuesto_desviacion', 'fecha_3d', 'fecha_1d', 'atrasado',
-                                             'deriva_tarjeta', 'cierre_proximo', 'sin_responsable', 'sin_avance', 'suspension')),
+                                             'deriva_tarjeta', 'cierre_proximo', 'sin_responsable', 'sin_avance', 'suspension', 'segregacion_off')),
   para_rol     text,
   para_persona uuid,
   nodo_id      uuid references agora.nodo (id) on delete cascade,

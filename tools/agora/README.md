@@ -12,7 +12,7 @@ El núcleo de Ágora: el espacio de trabajo donde el equipo, sus agentes interno
 - **La Puerta A2A, cerrada.** JSON-RPC (A2A 1.0) con nueve comprobaciones —idCard vivo sin caché, huella de tarjeta y llave fijadas, jti de un solo uso, alcance, cuotas con `Retry-After`— y un «no existe» uniforme. Solo laboratorio y loopback.
 - **El vigía (sin modelo).** Calendariza cada fecha con clave por versión (un reintento no duplica), programa recordatorios, avisa al 80 % del gasto también a Finanzas, propone reprogramar lo atrasado, avisa del cierre y **suspende** al socio cuya tarjeta cambió de huella.
 - **Métricas desde una capa semántica.** Un catálogo declarado (definición, la decisión que apoya, su modelo y sus dimensiones) que se compila a SQL sobre vistas `security_invoker`; una métrica que no existe no se sustituye por una parecida.
-- **El testigo del freno.** Cerrar, revocar, quitar la segregación o avisar a un tercero exigen una cita que **esta persona** dijo en la conversación, de un solo uso y de hace 15 minutos o menos. La base solo guarda la huella, nunca el texto.
+- **El testigo del freno.** Cerrar, revocar, quitar la segregación o avisar a un tercero exigen una cita que **esta persona** dijo en la conversación, de un solo uso y de hace 15 minutos o menos. Quitada la segregación, Finanzas tiene un aviso fijo y cada póliza aceptada sale marcada. La base solo guarda la huella, nunca el texto.
 
 ### Qué no hace
 
@@ -33,9 +33,9 @@ El núcleo de Ágora: el espacio de trabajo donde el equipo, sus agentes interno
 
 - **Runtime**: Node `>=22.18` (corre los `.ts` de las pruebas sin transpilar).
 - **Dependencias del sistema**: PostgreSQL con `pgcrypto`, probado en **PostgreSQL 17.11** (Docker, `npm run agora:laboratorio`) y en **PGlite 0.5.8** (las pruebas de `validate`, sin Docker). Paquetes: `pg` 8.16.3 y `zod` 4.6.1, con versión exacta; PGlite es peer opcional (solo pruebas).
-- **CPU, GPU y memoria**: no medido. Las 127 pruebas de las fases 1 a 7 corren en minutos en una laptop (PGlite, una base nueva por comprobación).
+- **CPU, GPU y memoria**: no medido. Las 133 pruebas de las fases 1 a 7 corren en minutos en una laptop (PGlite, una base nueva por comprobación).
 - **Servicios externos**: ninguno. El calendario del laboratorio es el simulador de `tools/calendario`; el modelo es determinista.
-- **Variables de entorno** (solo el laboratorio de la app): `AGORA_LABORATORIO` (encendido o apagado), `AGORA_PG_URL` (la base del laboratorio) y `AGORA_SECRETO` (firma los tokens de tarea; ≥ 32 caracteres). `npm run agora:laboratorio` las escribe en `tools/agora/.laboratorio/entorno` (ignorado por git) y solo dice si están presentes.
+- **Variables de entorno** (solo el laboratorio de la app): `AGORA_LABORATORIO` (encendido o apagado; sin él, la siembra ficticia tampoco corre), `AGORA_PG_URL` (la base del laboratorio) y `AGORA_SECRETO` (firma los tokens de tarea; ≥ 32 caracteres). `npm run agora:laboratorio` las escribe en `tools/agora/.laboratorio/entorno` (ignorado por git) y solo dice si están presentes.
 - **Almacenamiento**: dos esquemas, `agora` (datos, RLS forzada) y `agora_priv` (funciones). La bitácora es encadenada y solo crece. El testigo del freno guarda huellas, no texto, y se poda a las 24 h.
 - **Salida del perímetro (C4)**: ninguna. La Puerta está cerrada, la voz es local y el modelo es determinista.
 

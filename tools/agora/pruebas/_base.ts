@@ -15,6 +15,8 @@ import { basePostgres } from '../dist/base/pg.js'
 import { siembra } from '../dist/laboratorio/siembra.js'
 
 export const SECRETO = 'secreto-de-tareas-del-laboratorio-0123456789abcdef'
+// Las pruebas SON el laboratorio: siembran bases desechables propias (la siembra se niega sin esta variable).
+process.env.AGORA_LABORATORIO = '1'
 export const URL_PG = process.env.AGORA_PG_URL ?? ''
 
 export interface BaseDePrueba { base: Base & { version(): Promise<string> }; cierra(): Promise<void> }

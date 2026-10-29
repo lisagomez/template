@@ -9,6 +9,7 @@
 #   prueba:a2a:servicio: Exigen el servicio del extractor corriendo en `EXTRACTOR_SERVICIO_URL`, y ese servicio no arranca sin el binario de Tesseract: `tools/extractor-documental/servicio/configuracion.mjs` lanza «no se pudo leer la version de Tesseract: el motor principal no arranca sin binario».
 #   inventario:valida-erp: Necesita Docker, y el gate corre en maquinas sin Docker (su propia cabecera ya lo declara: «Vive fuera de validate: necesita Docker»).
 #   erp:prueba: Necesita Docker y levanta un Postgres desechable: no cabe en el gate de cada integracion.
+#   agora:pg: Necesita Docker y el laboratorio de Agora levantado (`npm run agora:laboratorio`), como `erp:prueba`: no cabe en el gate de cada integracion.
 #   erp:control: Necesita Docker, igual que `erp:prueba`.
 #   prueba:etiquetas:efimera: Necesita Docker y levanta un Postgres desechable, igual que `erp:prueba`.
 #   prueba:lean-crecimiento: El toolchain de Lean (unos 900 MB) no esta en todas las maquinas ni en CI, y sin el el script sale con 2 («no medido»): activo, pondria en rojo el validate de quien no lo tenga.

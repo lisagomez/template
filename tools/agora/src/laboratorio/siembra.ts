@@ -27,7 +27,7 @@ const responsableDe = (r: string | null) => {
 async function estructura(s: Sesion, o: OpcionesSiembra) {
   await s.consulta(`insert into agora_priv.secreto (id, secreto) values (1, $1) on conflict (id) do update set secreto = excluded.secreto`, [o.secreto])
   for (const org of ORGS) {
-    await s.consulta(`insert into agora.org (id, slug, nombre) values ($1, $2, $3) on conflict do nothing`, [org.id, org.slug, org.nombre])
+    await s.consulta(`insert into agora.org (id, slug, nombre, ficticia) values ($1, $2, $3, true) on conflict do nothing`, [org.id, org.slug, org.nombre])
     await s.consulta(`insert into agora.org_config (org_id, umbral_monto_mxn, tope_gasto_org_mxn) values ($1, $2, $3) on conflict do nothing`, [org.id, org.umbral, org.topeOrg])
   }
   for (const n of NODOS) {
@@ -227,8 +227,10 @@ async function pendientes(base: Base, o: OpcionesSiembra) {
   }
 }
 
+/** Siembra SOLO con `AGORA_LABORATORIO=1` y sobre una base sin organizaciones reales (la guarda es de la base). */
 export async function siembra(base: Base, o: OpcionesSiembra): Promise<void> {
-  await base.transaccion((s) => estructura(s, o))
+  if (process.env.AGORA_LABORATORIO !== '1') throw new Error('la siembra ficticia corre solo en el laboratorio (AGORA_LABORATORIO=1)')
+  await base.transaccion(async (s) => { await s.consulta('select agora_priv.guarda_siembra()'); await estructura(s, o) })
   await montos(base, o)
   await ejercidoDeSeptiembre(base)
   await gastoDeModelo(base)

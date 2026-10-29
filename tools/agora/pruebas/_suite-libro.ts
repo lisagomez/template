@@ -165,6 +165,15 @@ export const LIBRO: Comprobacion[] = [
       assert.match(v.motivo ?? '', /primero se amplía el presupuesto/)
     },
   },
+  {
+    fase: 'libro', nombre: 'la suma de los topes de gasto de los agentes no pasa el de la organización (ni siquiera con la conexión dueña)', tipo: 'conducta',
+    async corre(c) {
+      const [o] = await c.base.consulta<{ t: string }>('select tope_gasto_org_mxn::text t from agora.org_config where org_id = $1', [GOLFO])
+      await rechaza(c.base.consulta('update agora.agente set tope_gasto_mes_mxn = $1 where id = $2', [Number(o!.t) + 1, agente('coordinador')]), 'pasa el de la organización')
+      const [a] = await c.base.consulta<{ t: string }>('select tope_gasto_mes_mxn::text t from agora.agente where id = $1', [agente('coordinador')])
+      assert.equal(Number(a!.t), 3000)
+    },
+  },
 ]
 
 export const SABOTAJES_LIBRO: Sabotaje[] = [
@@ -180,4 +189,5 @@ export const SABOTAJES_LIBRO: Sabotaje[] = [
   { fase: 'libro', nombre: 'F9 · null se vuelve cero', sql: `create or replace function agora_priv.gasto_coherente() returns trigger language plpgsql set search_path = '' as $$ begin new.periodo := agora_priv.periodo_de_registro(new.org_id, new.cuando); new.costo_mxn := coalesce(round(new.costo_usd * 19, 2), 0); return new; end $$;`, caza: /null no es cero|tipo de cambio con fuente/ },
   { fase: 'libro', nombre: 'F10 · el gasto de modelo en MXN ya no es el uso por su tipo de cambio', sql: `update agora.gasto_modelo set costo_mxn = costo_mxn + 1 where costo_mxn is not null;`, caza: /cuadre/ },
   { fase: 'libro', nombre: 'F11 · sin alerta de desviación', sql: `drop trigger tg_desviacion_costo on agora.costo;`, caza: /desviación sobre el umbral/ },
+  { fase: 'libro', nombre: 'F12 · los topes de los agentes pasan el de la organización', sql: 'drop trigger tg_topes_dentro_de_la_org on agora.agente;', caza: /suma de los topes/ },
 ]

@@ -158,9 +158,12 @@ create table if not exists agora.poliza_decision (
   sha256       text not null check (sha256 ~ '^[0-9a-f]{64}$'),
   decidida_por uuid not null,
   decidida_en  timestamptz not null default now(),
+  -- La pone la base, no quien decide: aceptada con la segregación QUITADA. Solo de agregar, como la decisión.
+  sin_segregacion boolean not null default false,
   unique (poliza_id, decidida_por),
   constraint motivo_al_devolver check (decision = 'acepta' or length(coalesce(motivo, '')) >= 5)
 );
+alter table agora.poliza_decision add column if not exists sin_segregacion boolean not null default false;
 
 /**
  * Solo una persona con rol de Contabilidad decide, sobre la huella exacta de la póliza y mientras está propuesta.
@@ -186,6 +189,7 @@ begin
     or exists (select 1 from agora.periodo x where x.org_id = p.org_id and x.periodo = p.periodo and x.cerrado_por = new.decidida_por)) then
     raise exception 'segregación de funciones: quien aprobó un gasto del periodo o lo cerró no acepta su póliza' using errcode = 'AG403';
   end if;
+  new.sin_segregacion := new.decision = 'acepta' and not coalesce(seg, true);
   new.decidida_en := now();
   return new;
 end $$;

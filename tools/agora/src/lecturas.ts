@@ -109,7 +109,7 @@ export async function esperaTuClic(s: Sesion): Promise<Pendiente[]> {
       where p.estado = 'pendiente' and coalesce((agora.puedo_decidir(p.id) ->> 'puede')::boolean, false) order by p.creada_en desc`)
   const avisos = await s.consulta<Pendiente>(
     `select 'aviso' tipo, v.id, v.texto titulo, replace(v.tipo, '_', ' ') detalle, v.nodo_id nodo,
-            case when v.tipo like 'tope%' or v.tipo in ('deriva_tarjeta', 'suspension') then '/agora/agentes' when v.tipo = 'presupuesto_desviacion' then '/agora/costos'
+            case when v.tipo like 'tope%' or v.tipo in ('deriva_tarjeta', 'suspension') then '/agora/agentes' when v.tipo in ('presupuesto_desviacion', 'segregacion_off') then '/agora/costos'
                  else '/agora/tablero' end ir, v.creado_en::text cuando
        from agora.aviso v where not v.atendido order by v.creado_en desc limit 30`)
   const polizas = await s.consulta<Pendiente>(
