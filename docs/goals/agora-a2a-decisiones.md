@@ -1,7 +1,8 @@
 # Ágora — reporte de decisiones del goal `agora-a2a`
 
 > Lo que decidí construyendo Ágora y por qué. Todo es **corregible por el laboratorio**; nada de esto firma un CDC, un
-> C3 ni una AISIA (esos borradores están en `agora-a2a-propuestas/`, sin firmar). Solo laboratorio y datos ficticios.
+> C3 ni una AISIA. Esas firmas las puso el laboratorio el 2026-10-29: el CDC en la bitácora, las entradas en el registro
+> de riesgo, y el C3 y la AISIA en `agora-a2a-propuestas/`. Solo laboratorio y datos ficticios.
 > Rama `agora/a2a`, sin push ni PR: los dos son del laboratorio.
 
 ## 1. Stack y dónde vive
@@ -117,7 +118,8 @@ Detalle de cada hallazgo y su estado: `agora-a2a-evidencia/verificacion-independ
 
 ## 6. Lo que no se hizo (y es del laboratorio)
 
-- Firmar el CDC, el C3, el C4/AISIA y las entradas del registro de riesgo (borradores en `agora-a2a-propuestas/`).
+- Firmar el CDC, el C3, el C4/AISIA y las entradas del registro de riesgo: **hecho por el laboratorio el 2026-10-29**,
+  después de construir las dos mitigaciones que faltaban (puntos 42 y 43 de «lo que podría estar mal»).
 - Push, PR y merge; abrir la Puerta; conectar un espejo, el correo o un modelo real; asignar la clase de routing del
   coordinador (C8).
 - Meter `agora:pg` (las suites contra Postgres real, con Docker) al padrón de gates: es un CDC. Se propone como inactivo

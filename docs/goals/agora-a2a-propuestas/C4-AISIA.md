@@ -11,7 +11,7 @@
 > Revisión: antes de una organización o un socio reales, al encender un modelo real, al cambiar lo que recibe el
 > Despacho Fiscal Sierra o lo que ve un socio, al conectar un espejo o el correo, al cambiar un tope por defecto, o tras un incidente.
 >
-> **aprobación humana ☐** · **Aprobado por**: pendiente
+> **aprobación humana ☑** · **Aprobado por**: **lisagomez** (el laboratorio), 2026-10-29
 
 ## 1. Partes afectadas
 
