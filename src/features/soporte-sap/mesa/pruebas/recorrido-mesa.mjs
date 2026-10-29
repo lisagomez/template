@@ -126,9 +126,13 @@ if (TRAS_REINICIO) {
   // 7. Validar conocimiento: el experto ve hipótesis de sapstack con su fuente y corrige una (antes y después).
   await e.goto(`${base}/mesa/soporte-sap?pestana=candidatos`); await e.waitForSelector(sel('candidatos'))
   await captura(e, 11, 'el experto ve los candidatos como hipótesis, con su fuente', async () => (await e.locator('[data-prueba^="candidato-"]').count()) > 0 && /Hipótesis/.test(await texto(e, sel('candidatos'))) && /data\/tcodes\.yaml:\d+/.test(await texto(e, sel('candidatos'))))
+  // La mesa alojada guarda lo de corridas anteriores: este token pudo validar MIRO ya. «Todos» lo muestra y «Cambiar»
+  // reabre el formulario (validar otra vez reemplaza la anterior); así el «antes» es el mismo en la primera corrida y después.
+  await e.getByRole('button', { name: 'Todos', exact: true }).click()
   await e.fill(sel('busca'), 'MIRO')
   const miro = e.locator('[data-prueba^="candidato-"]', { hasText: 'Invoice Verification' }).first()
   await miro.waitFor()
+  if (await miro.locator(sel('validacion-hecha')).count()) await miro.locator(sel('cambiar-validacion')).click()
   await captura(e, 12, 'antes: la hipótesis de MIRO, sin validar', async () => (await miro.locator(sel('formulario-validacion')).count()) === 1 && (await miro.locator(sel('validacion-hecha')).count()) === 0, '[data-prueba^="candidato-"]')
   await miro.locator(sel('valora-corrige')).click()
   await miro.locator(sel('correccion')).fill('MIRO es de MM: la verificación de facturas (LIV) vive en MM y contabiliza en FI')
@@ -138,7 +142,12 @@ if (TRAS_REINICIO) {
 
   // 8. El mapa del laboratorio: conteos reales, el detalle de un nodo y la propuesta del experto.
   await l.goto(`${base}/mesa/soporte-sap/laboratorio`); await l.waitForSelector(sel('mapa'))
-  await captura(l, 14, 'el mapa del laboratorio, con sus conteos reales', async () => /335/.test(await texto(l, sel('nodo-sapstack'))) && Number(await texto(l, `${sel('metrica-corregidos')} p:nth-child(2)`)) >= 1 && /sin datos|%/.test(await texto(l, sel('metrica-al-experto'))), null, true)
+  // «Corregidos» solo cuenta expertos reales (22/10). Con los tokens de servicio, la corrección del paso 13 es de PRUEBA y el
+  // mapa la cuenta aparte, en el nodo del experto; con la identidad local, el experto cuenta y la métrica sube.
+  const corregidoDondeToca = async () => modo === 'servicio'
+    ? Number((await texto(l, sel('nodo-experto'))).match(/De prueba, aparte: (\d+)/)?.[1] ?? 0) >= 1
+    : Number(await texto(l, `${sel('metrica-corregidos')} p:nth-child(2)`)) >= 1
+  await captura(l, 14, 'el mapa del laboratorio, con sus conteos reales', async () => /335/.test(await texto(l, sel('nodo-sapstack'))) && await corregidoDondeToca() && /sin datos|%/.test(await texto(l, sel('metrica-al-experto'))), null, true)
   await l.click(sel('nodo-sapstack-abre')); await l.waitForSelector(sel('detalle-sapstack'))
   await captura(l, 15, 'el detalle de un nodo: candidatos por módulo', async () => /FI · \d+ candidatos/.test(await texto(l, sel('detalle-sapstack'))), sel('detalle-sapstack'))
   await captura(l, 16, 'el laboratorio ve la corrección del experto como propuesta', async () => { const t = await texto(l, sel('propuestas')); return /MIRO/.test(t) && /propuesta/.test(t) && /Lo corrijo/.test(t) }, sel('propuestas'))

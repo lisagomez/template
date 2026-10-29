@@ -133,6 +133,11 @@ una URL que hay que ver a tiempo, el despliegue tarda minutos y los secretos se 
     minutos más mientras Cloudflare lo reemplaza.
 11. **Comprueba** con el recorrido (lo corre Claude): `MESA_IDENTIDAD=servicio node --env-file=$HOME/.soporte-sap-mesa.env
     src/features/soporte-sap/mesa/pruebas/recorrido-mesa.mjs <url> docs/goals/soporte-sap-capturas/mesa-alojada`.
+    **Una corrida por contenedor despierto.** El simulador vive en la memoria del contenedor. Cuando el paso 4 aprueba el
+    plan, el periodo 2026/10 de MM queda abierto, y una segunda corrida antes de que el contenedor duerma (30 min sin
+    peticiones) ya no reproduce el error del caso conocido: el supervisor frena el plan y no hay «aprobar» (medido el
+    2026-10-29). Lo guardado en el almacén sí persiste entre corridas: por eso el recorrido valida MIRO con «Todos» y
+    «Cambiar», y en el paso 14 cuenta la corrección de los tokens como «de prueba, aparte», no en «Corregidos».
 
 ## Invitar al experto, y quitarle el acceso
 
