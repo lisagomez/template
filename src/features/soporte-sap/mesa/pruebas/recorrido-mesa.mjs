@@ -39,6 +39,8 @@ const navegador = await chromium.launch()
 const errores = []
 const pasos = []
 const sel = (p) => `[data-prueba="${p}"]`
+/** La mesa alojada guarda lo de corridas anteriores: si este token ya validó el candidato, «Cambiar» reabre el formulario. */
+const reabre = async (c) => { if (await c.locator(sel('validacion-hecha')).count()) await c.locator(sel('cambiar-validacion')).click() }
 /** La mesa vive dentro de la capa: su guía de primer arranque se recorre aparte (`recorrido-conversacion.mjs`); aquí ya se
  *  vio. Es la única clave que la mesa deja en el navegador, sin texto del experto (`services/almacen-capa.ts`). */
 const GUIA_VISTA = ['capa:soporte-sap:capa/soporte-sap/mesa/capa/primer-arranque', JSON.stringify({ version: 1, terminado: true, paso: 4, nivel: 'lo-importante', voz: false })]
@@ -126,9 +128,13 @@ if (TRAS_REINICIO) {
   // 7. Validar conocimiento: el experto ve hipótesis de sapstack con su fuente y corrige una (antes y después).
   await e.goto(`${base}/mesa/soporte-sap?pestana=candidatos`); await e.waitForSelector(sel('candidatos'))
   await captura(e, 11, 'el experto ve los candidatos como hipótesis, con su fuente', async () => (await e.locator('[data-prueba^="candidato-"]').count()) > 0 && /Hipótesis/.test(await texto(e, sel('candidatos'))) && /data\/tcodes\.yaml:\d+/.test(await texto(e, sel('candidatos'))))
+  // La mesa alojada guarda lo de corridas anteriores: este token pudo validar MIRO ya. «Todos» lo muestra y «Cambiar»
+  // reabre el formulario (validar otra vez reemplaza la anterior); así el «antes» es el mismo en la primera corrida y después.
+  await e.getByRole('button', { name: 'Todos', exact: true }).click()
   await e.fill(sel('busca'), 'MIRO')
   const miro = e.locator('[data-prueba^="candidato-"]', { hasText: 'Invoice Verification' }).first()
   await miro.waitFor()
+  await reabre(miro)
   await captura(e, 12, 'antes: la hipótesis de MIRO, sin validar', async () => (await miro.locator(sel('formulario-validacion')).count()) === 1 && (await miro.locator(sel('validacion-hecha')).count()) === 0, '[data-prueba^="candidato-"]')
   await miro.locator(sel('valora-corrige')).click()
   await miro.locator(sel('correccion')).fill('MIRO es de MM: la verificación de facturas (LIV) vive en MM y contabiliza en FI')
@@ -138,7 +144,18 @@ if (TRAS_REINICIO) {
 
   // 8. El mapa del laboratorio: conteos reales, el detalle de un nodo y la propuesta del experto.
   await l.goto(`${base}/mesa/soporte-sap/laboratorio`); await l.waitForSelector(sel('mapa'))
-  await captura(l, 14, 'el mapa del laboratorio, con sus conteos reales', async () => /335/.test(await texto(l, sel('nodo-sapstack'))) && Number(await texto(l, `${sel('metrica-corregidos')} p:nth-child(2)`)) >= 1 && /sin datos|%/.test(await texto(l, sel('metrica-al-experto'))), null, true)
+  // «Corregidos» solo cuenta expertos reales (22/10). Con los tokens de servicio, la corrección del paso 13 es de PRUEBA y el
+  // mapa la cuenta aparte, en el nodo del experto; con la identidad local, el experto cuenta y la métrica sube.
+  // El nodo solo pinta su texto desplegado: se despliega para leerlo y se pliega otra vez (los pasos que siguen lo ven igual).
+  const corregidoDondeToca = async () => {
+    if (modo !== 'servicio') return Number(await texto(l, `${sel('metrica-corregidos')} p:nth-child(2)`)) >= 1
+    const nodo = l.locator(sel('nodo-experto')), pliega = nodo.locator('button[aria-expanded]')
+    await pliega.click()
+    const n = Number((await nodo.innerText()).match(/De prueba, aparte: (\d+)/)?.[1] ?? 0)
+    await pliega.click()
+    return n >= 1
+  }
+  await captura(l, 14, 'el mapa del laboratorio, con sus conteos reales', async () => /335/.test(await texto(l, sel('nodo-sapstack'))) && await corregidoDondeToca() && /sin datos|%/.test(await texto(l, sel('metrica-al-experto'))), null, true)
   await l.click(sel('nodo-sapstack-abre')); await l.waitForSelector(sel('detalle-sapstack'))
   await captura(l, 15, 'el detalle de un nodo: candidatos por módulo', async () => /FI · \d+ candidatos/.test(await texto(l, sel('detalle-sapstack'))), sel('detalle-sapstack'))
   await captura(l, 16, 'el laboratorio ve la corrección del experto como propuesta', async () => { const t = await texto(l, sel('propuestas')); return /MIRO/.test(t) && /propuesta/.test(t) && /Lo corrijo/.test(t) }, sel('propuestas'))
@@ -160,15 +177,16 @@ if (TRAS_REINICIO) {
   await captura(l, 19, 'el nodo de la web en el mapa, con sus conteos reales', async () => (await texto(l, sel('nodo-web'))).includes(String(WEB.candidatos.length)) && /al día|hay versión nueva/.test(await texto(l, sel('nodo-web'))), sel('mapa-lienzo'))
   await captura(l, 20, 'el detalle de la web: pins, cruce y vigencia', async () => /corroborados/.test(await texto(l, sel('detalle-web'))) && (await texto(l, sel('detalle-web'))).includes(`${WEB.resumen.cruce.corroborados} corroborados`) && /@[0-9a-f]{12}/.test(await texto(l, sel('detalle-web'))), sel('detalle-web'))
   await e.goto(`${base}/mesa/soporte-sap?pestana=candidatos`); await e.waitForSelector(sel('candidatos'))
+  await e.getByRole('button', { name: 'Todos', exact: true }).click()
   await e.click(sel('origen-web')); await e.fill(sel('busca'), '3797111')
   const nota = e.locator('[data-prueba^="candidato-nota-"]', { hasText: '3797111' }).first()
-  await nota.waitFor()
+  await nota.waitFor(); await reabre(nota)
   await captura(e, 21, 'un candidato de la web con su cita y su fecha', async () => { const t = await nota.innerText(); return /SAP Note 3797111/.test(t) && t.includes(`Capturada el ${WEB.pin.capturadoEl}`) && /Hot News/.test(t) && (await nota.locator(sel('formulario-validacion')).count()) === 1 }, nota)
   await e.click(sel('origen-sapstack')); await e.fill(sel('busca'), 'STRUST')
   const strust = e.locator('[data-prueba^="candidato-tcode-"]', { hasText: 'STRUST' }).first()
   await strust.waitFor()
   await captura(e, 22, 'un candidato de sapstack con su corroboración', async () => (await strust.locator(sel('cruce-corroborado')).count()) === 1 && /help\.sap\.com/.test(await strust.locator(`${sel('cruce-corroborado')} a`).first().getAttribute('href') ?? ''), strust)
-  await e.click(sel('origen-web')); await e.fill(sel('busca'), '3797111'); await nota.waitFor()
+  await e.click(sel('origen-web')); await e.fill(sel('busca'), '3797111'); await nota.waitFor(); await reabre(nota)
   await captura(e, 23, 'antes: el experto ante la nota de seguridad, sin validar', async () => (await nota.locator(sel('validacion-hecha')).count()) === 0, nota)
   await nota.locator(sel('valora-correcto')).click()
   await nota.locator(sel('comentario')).fill('aplica a los sistemas con el componente encendido; si está apagado, baja la urgencia')
