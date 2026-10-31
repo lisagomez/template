@@ -44,8 +44,12 @@ const reabre = async (c) => { if (await c.locator(sel('validacion-hecha')).count
 /** La mesa vive dentro de la capa: su guía de primer arranque se recorre aparte (`recorrido-conversacion.mjs`); aquí ya se
  *  vio. Es la única clave que la mesa deja en el navegador, sin texto del experto (`services/almacen-capa.ts`). */
 const GUIA_VISTA = ['capa:soporte-sap:capa/soporte-sap/mesa/capa/primer-arranque', JSON.stringify({ version: 1, terminado: true, paso: 4, nivel: 'lo-importante', voz: false })]
+/** Con los tokens de servicio, la descarga de `sw.js` sale sin las cabeceras del token, Access la redirige y la consola
+ *  anota «The script resource is behind a redirect»: un error de la prueba, no de la mesa. Ahí el service worker se bloquea
+ *  (Playwright deja un aviso, no un error); en local se sigue registrando. */
+const SERVICE_WORKERS = modo === 'servicio' ? 'block' : 'allow'
 async function pagina(cabeceras, viewport = { width: 1440, height: 1000 }) {
-  const ctx = await navegador.newContext({ viewport, extraHTTPHeaders: cabeceras, acceptDownloads: true })
+  const ctx = await navegador.newContext({ viewport, extraHTTPHeaders: cabeceras, acceptDownloads: true, serviceWorkers: SERVICE_WORKERS })
   await ctx.addInitScript(([k, v]) => { try { localStorage.setItem(k, v) } catch { /* sin almacenamiento: la guía taparía la mesa */ } }, GUIA_VISTA)
   const p = await ctx.newPage()
   p.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()) })
