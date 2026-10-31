@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "id": "fabrica-9bc3ce2a",
+ "linea": "fabrica",
+ "origen": {
+  "tipo": "sesion",
+  "referencia": "e2204907-2ebe-44db-a41a-49ac822ccccf",
+  "subagente": false
+ },
+ "cuando": {
+  "inicio": "2026-10-30T11:14:12.918Z",
+  "fin": "2026-10-30T11:18:44.394Z"
+ },
+ "actor": {
+  "skills": [],
+  "tarea": "conversacion"
+ },
+ "modelos": {},
+ "acciones": {
+  "herramientas": {},
+  "llamadasAlModelo": 0,
+  "turnos": 1,
+  "subagentes": 0,
+  "comandos": 0,
+  "ediciones": 0
+ },
+ "uso": null,
+ "costoUsd": null,
+ "tiempos": {
+  "totalMs": 271476
+ },
+ "gates": [],
+ "resultado": {
+  "errores": 0,
+  "erroresPor": {}
+ },
+ "cobertura": {
+  "completa": false,
+  "faltan": [
+   "uso"
+  ]
+ }
+}
