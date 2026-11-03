@@ -1,0 +1,33 @@
+{
+  "name": "@tu-scope/banco-motores",
+  "version": "0.1.0",
+  "description": "Declaras una función con su esquema Zod y salen solas su pantalla de bloques etiquetados y su ruta API. La idea de Gradio, sin Gradio.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "peor-caso": "./dist/cli/peor-caso.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "zod": "4.6.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "preprueba": "npm run build",
+    "prueba": "node --test pruebas/*.ts",
+    "peor-caso": "node dist/cli/peor-caso.js"
+  }
+}

@@ -13,7 +13,7 @@ Template **production-ready** para crear aplicaciones SaaS modernas con desarrol
 - Next.js 16 (App Router) + TypeScript
 - Supabase (Database + Auth)
 - Tailwind CSS + shadcn/ui
-- 28 Skills de Claude Code (V4 Skills 2.0)
+- 30 Skills de Claude Code (V4 Skills 2.0)
 - Arquitectura Feature-First optimizada para IA
 - Auto port detection (3000-3006)
 - Capa de gobernanza agentica: 7 controles cableados y auto-verificados
@@ -142,7 +142,7 @@ npm run verifica:generados  # lo generado lleva banner ALTO y coincide con su fu
 > V4 migra TODO a Skills 2.0. Hot reload, auto-discovery, zero config.
 > Cada skill es una carpeta con `SKILL.md` (frontmatter YAML + instrucciones).
 
-Los 28 skills son invocables con `/nombre` y activables por Claude segun
+Los 30 skills son invocables con `/nombre` y activables por Claude segun
 el `description` de su frontmatter.
 
 | Skill | Comando | Descripcion |
@@ -345,7 +345,7 @@ Sistemas de diseno visuales en `.claude/design-systems/`.
 
 ```
 .claude/
-├── skills/                    # Skills 2.0 (V4) - 28 skills
+├── skills/                    # Skills 2.0 (V4) - 30 skills
 │   ├── new-app/                 # Entrevista de negocio → BUSINESS_LOGIC.md
 │   ├── add-login/               # Auth completo Supabase: login, signup, password reset, profiles, RLS
 │   ├── add-payments/            # Pagos con Polar (MoR): checkout, webhooks, suscripciones

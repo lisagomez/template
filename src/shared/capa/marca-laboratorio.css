@@ -1,0 +1,46 @@
+/*
+ * La capa del LABORATORIO habla Turno 25 (la marca de la casa). Solo el laboratorio: Ágora, Soporte SAP y
+ * Recepción conservan su acento propio (marca blanca); adoptar Turno 25 en cada uno lo decide el laboratorio.
+ *
+ * Por qué aquí y no en `tools/capa`: la capa es una herramienta compartida (la mesa de Soporte SAP desplegada la
+ * usa) y su CSS dice que el acento lo pone cada producto. Lo que el producto no puede poner por composición —el
+ * color del texto sobre el acento, los neutros y la tipografía— se mapea a los tokens de la app.
+ *
+ * Especificidad `html .capa-tema[data-capa-ventana=…]` (0,2,1): gana a `.capa-tema` y a `.dark .capa-tema` de
+ * la capa sin `!important`. Los valores apuntan a los tokens generados, que ya cambian con `.dark`, así que la
+ * capa sigue el tema de la app (antes seguía `prefers-color-scheme` y podía contradecirlo).
+ */
+html .capa-tema[data-capa-ventana='laboratorio'] {
+  --capa-fondo: hsl(var(--background));
+  --capa-superficie: hsl(var(--card));
+  --capa-tarjeta: hsl(var(--card));
+  --capa-borde: hsl(var(--border));
+  --capa-texto: hsl(var(--foreground));
+  --capa-tenue: hsl(var(--muted-foreground));
+  --capa-ok: hsl(var(--exito));
+  --capa-error: hsl(var(--peligro));
+  --capa-aviso: hsl(var(--aviso));
+  --capa-serif: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --capa-curva: var(--t25-ease-salida);
+  --capa-rapido: var(--t25-dur-rapida);
+  --capa-normal: var(--t25-dur-base);
+  --capa-sombra-xs: var(--t25-sombra-xs);
+  --capa-sombra-md: var(--t25-sombra-md);
+  --capa-sombra-lg: var(--t25-sombra-lg);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Texto sobre el naranja: SIEMPRE tinta (guía v1.0). Blanco sobre el naranja 500 da 3.18:1 y no pasa AA. */
+html .capa-tema[data-capa-ventana='laboratorio'] .capa-boton-primario {
+  color: hsl(var(--marca-fg));
+}
+
+/* Títulos en Source Sans 3 Bold con tracking negativo, no en serif (guía: tipografía). */
+html .capa-tema[data-capa-ventana='laboratorio'] .capa-dialogo h2 {
+  font-weight: 700;
+  letter-spacing: var(--t25-tracking-tight);
+}
+
+html .capa-tema[data-capa-ventana='laboratorio'] .capa-dato b {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}

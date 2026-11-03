@@ -5859,3 +5859,95 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
     **después del commit**, porque la gobernanza lee `git ls-files`.
   - Resultado: capa A 166/166 (`validate` de `7a89016`); capa B no corrida (decide el laboratorio).
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-10-29
+
+### 2026-11-03 — la marca Turno 25 como fuente única, el banco de motores, dos revisores en `validate` y doce skills de terceros vendorizados — radio: padrón de gates (dos gates nuevos en `validate`, un artefacto nuevo en `generados`, un grupo `fuera` ampliado), dos skills que se cargan (CDC estándar), un estante de diez skills sin coste por sesión, design system (re-auditoría), herramienta nueva (`tools/banco-motores`) y la capa del laboratorio
+
+- **Cambio** (lo construido, rama `turno25/marca-banco`, PR #294, punta `0b83fc6`):
+  1. **Design system `turno-25`** en `.claude/design-systems/turno-25/`: `tokens.json` (fuente única, transcrita de la
+     guía v1.0), `turno-25.md`, capturas e `inventario-interfaz.json`. Fila nueva en su README.
+  2. **Generador** `scripts/marca/genera.mjs` → `src/app/marca.generada.css` y `src/shared/marca/tokens.generado.ts`,
+     con banner `ALTO` y `--comprueba`.
+  3. **La app**:
+     - `globals.css` sin tokens a mano (los importa `layout.tsx`), fuentes autoalojadas (OFL), `lang="es"`;
+     - `tailwind.config.ts` con familias, curvas, duraciones, colores de marca y estados, y `hoverOnlyWhenSupported`;
+     - migrados a tokens: acceso (login, alta y su layout, que arregla el título invisible en oscuro), la capa del
+       laboratorio (`marca-laboratorio.css`, acotada a `data-capa-ventana="laboratorio"`; el acento de
+       `productos/composiciones/laboratorio.json` pasa de `#0f766e` a `#F26419`), las tarjetas de caso y las cifras de
+       `Metrica` (laboratorio-voz) en mono;
+     - Ágora, Soporte SAP, Recepción y clínicas conservan su acento (marca blanca con su override).
+  4. **`tools/banco-motores`** (0.1.0, sin empaquetar) y **`src/features/banco`** (`/laboratorio-banco`, `/api/banco`):
+     - 404 sin `BANCO_LABORATORIO=1`, en producción aunque la variable esté, y a toda petición que no venga de esta
+       máquina (Host local y `x-forwarded-for` loopback);
+     - cancelar mata a Tesseract entero: un `ejecuta` propio, inyectado por el punto que el extractor documenta, mata el
+       grupo de procesos;
+     - las dos rutas declaradas en `RUTAS_FUERA_DEL_BRIDGE` de `scripts/prueba-a2a.ts`, con su nota RF-20;
+     - enchufe nuevo (`banco`) en la composición del laboratorio y tres activos nuevos en `inventario/activos.json`.
+  5. **Padrón de gates (`.claude/gates.json`)**, aplicado en la rama; esta firma lo aprueba:
+
+     | Nombre | Comando | Perfiles | Lo que lo tumba |
+     | --- | --- | --- | --- |
+     | `revisa:interfaz` | `npm run revisa:interfaz` | `validate` | un hallazgo nuevo o que sube contra `inventario-interfaz.json`. Son 11 reglas de movimiento, móvil y color, incluida `sutil-chico` (`fg-3` solo en texto grande). Con `--prueba`, cada regla cae con su siembra: 11 de 11 |
+     | `revisa:voz` | `npm run revisa:voz` | `validate` | un patrón de voz en las 10 superficies de la marca (8 reglas). Con `--prueba`, cada familia cae con su siembra |
+
+     - El padrón pasa de 37 activos y 12 inactivos a **39 activos y 12 inactivos**; `validate`, de 34 a 36.
+     - Artefacto nuevo en `generados`: `marca-turno25`, con banner explícito porque el CSS lo lleva en `/* */`.
+     - Grupo `fuera` ampliado con `public/banco/ejemplos/**` (render de Chromium, no reproducible byte a byte).
+     - La proyección del CI (`.github/workflows/gates.yml`) se regeneró con `npm run proyecta:gates -- --ci github`.
+  6. **Skills**: `humanizer` (`blader/humanizer@225a6f39`) y `emil-design-eng` (`emilkowalski/skills@f1090bec`) en
+     `.claude/skills/`; diez de Emil en `.claude/estante/emil-kowalski/`. El texto del upstream va sin tocar, con
+     `LICENSE` y `ORIGEN.md` (sha256). El conteo de skills sube a 30 en `CLAUDE.md`, `AGENTS.md`, `README.md` y
+     `.claude/README.md`; `GEMINI.md` se regeneró.
+- **Motivo**: el goal `docs/goals/gradio-marca-turno25.md`, compilado y lanzado por el laboratorio el 2026-11-02
+  (Gradio estudiado y no instalado; humanizer y skills de Emil pedidos por el laboratorio).
+- **Lo que decide el laboratorio al firmar**:
+  1. si el **banco** se queda con esta forma (núcleo en `tools/`, pantalla en la app y no en un entry `./react`);
+  2. si las **dos skills cargadas** compensan su coste (169 tokens por sesión; el total queda en 11 477 de 12 000);
+  3. si los **dos gates** entran a `validate` con su alcance actual (voz: diez superficies; interfaz: trinquete sobre
+     230 archivos heredados).
+- **Lo que esta entrada NO aprueba** (cada uno es su propia decisión):
+  - subir el techo de 12 000 tokens de `presupuesto-contexto.json`;
+  - mover un skill del estante a `.claude/skills/`;
+  - la v1.1 de la marca (subir `fg-3`, adoptar los estados oscuros derivados, las curvas de Emil);
+  - migrar Ágora, Soporte SAP, Recepción o el portal de clínicas a Turno 25;
+  - redesplegar cualquier superficie, elegir logo, o exponer el banco fuera de esta máquina.
+- **Salida del perímetro (C4)**: ninguna. Fuentes autoalojadas, sin CDN y sin analítica. El banco corre los motores en
+  local; medido con Playwright: 37 peticiones en un recorrido completo, todas a `localhost`.
+- **Nota C3 (la superficie del banco)**:
+  - **Qué expone**: `GET /api/banco`, `POST /api/banco/<id>` y `/laboratorio-banco`.
+  - **Quién llega**: solo una petición hecha en esta máquina a la app con `BANCO_LABORATORIO=1`. Medido con curl:
+    `localhost` y `127.0.0.1` dan 200; la IP de eth0, `10.255.255.254` y un `X-Forwarded-For` ajeno dan 404.
+  - **Qué entra**: JSON validado por Zod; imágenes en data URL con MIME en lista cerrada (PNG, JPEG, WebP) y tope de
+    4 MB; cuerpo con tope de 8 MB.
+  - **Qué ejecuta**: Tesseract por `motorPorProceso` (temporal 0700 borrado siempre, errores sin stdout), el parser GS1
+    y el generador de peor caso. Ningún comando lo elige quien llama.
+  - **Riesgos que quedan**: quien falsea a propósito el Host y `x-forwarded-for` desde la red pasa (medido: 200); la
+    barrera es la red (WSL2 en NAT no expone el puerto a la LAN). Sin límite de peticiones por minuto.
+  - **Lo que haría falta para exponerlo**: auth de la app, límite de peticiones, revisión C3 completa y C4.
+- **Gate aplicado**: las casillas vacías son del laboratorio.
+  - diff revisado ☑ — el del padrón (`git diff origin/main...turno25/marca-banco -- .claude/gates.json`) se enseña
+    completo en el chat antes de pedir la firma; el resto, en el PR #294;
+  - regresión capa A ☑ — `C2 capa A (contratos): 172/172 en verde`, con los 30 skills;
+  - `npm run validate` ☑ — sobre `0b83fc6` (árbol `e0426af52fd8`), en worktree con `npm ci` real: **36/36 gates
+    activos, 12 inactivos declarados, 0 rojos**, con 2498 pruebas de `tools/`. El CI del PR #294 también en verde. Se
+    repite tras el commit de la firma;
+  - `verifica:gates` ☑ — 12 comprobaciones en verde, con 39 activos y 12 inactivos declarados;
+  - siembras de los revisores ☑ — `revisa:interfaz --prueba` 11 de 11 reglas y `revisa:voz --prueba` todas sus
+    familias; en disco, cada uno sale con 1 con su siembra y vuelve a 0 sin ella;
+  - sha256 de los doce skills vendorizados iguales al upstream ☑ — en el `ORIGEN.md` de cada uno;
+  - `mide:contexto` ☑ — 11 477 de 12 000; el techo no sube;
+  - lectura de los doce `SKILL.md` vendorizados por el laboratorio ☑;
+  - capa B: no la corre el agente. Cambian los skills cargados, y es la primera vez que entra texto de terceros a
+    `.claude/skills/`. `npm run regresion -- --trampa` solo comprueba que el corpus esté completo (22 casos, `golden-sets`
+    en `66bac32`); ejecutar los casos es una sesión fría por caso. Decide el laboratorio: «capa A basta» o corrida en
+    sesión limpia, con su resultado en la línea de la firma ☑;
+  - aprobación humana ☑;
+  - pineo ☑ — sin modelo. Dependencia nueva con versión exacta: `zod` 4.6.1 en `tools/banco-motores`. Los skills van
+    pineados por commit (`225a6f39`, `f1090bec`).
+- **Regresión** (cómo se corre):
+  - `npm run validate`, después del commit y en worktree con `npm ci` real (con poca memoria, `taskset -c 0-5`);
+  - `node scripts/marca/revisa-interfaz.mjs --prueba` y `node scripts/marca/revisa-voz.mjs --prueba`;
+  - `npm run marca:comprueba` y `npm run prueba:tools -- banco-motores`;
+  - `npm run regresion -- --trampa`: capa B, en sesión fría y sin `git log` ni `git diff` entre las herramientas del
+    sujeto.
+  - Resultado: capa A 172/172 (`validate` de `0b83fc6`); la capa B la anota el laboratorio en la firma.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-11-03

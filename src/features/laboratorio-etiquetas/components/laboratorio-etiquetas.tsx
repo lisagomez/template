@@ -10,7 +10,10 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Aviso, Metrica } from '@/features/laboratorio-voz/components/ui';
 import type { CasoCorrido, Herramienta, IdHerramienta } from '../services/tipos.ts';
-import { TarjetaCaso } from './tarjeta-caso.tsx';
+import { TarjetaCaso } from '@/features/banco/components/tarjeta-caso';
+import { PiezaEtiqueta } from './pieza.tsx';
+
+const REQUIERE = { motor: 'requiere el motor local', 'corpus-real': 'requiere el corpus real' } as const;
 
 interface Props {
   readonly corridos: readonly CasoCorrido[];
@@ -105,7 +108,7 @@ export function LaboratorioEtiquetas({ corridos, herramientas, aprobadas, cuando
         ))}
         <label className="ml-2 inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-300"><input type="checkbox" checked={soloTrampas} onChange={(e) => setSoloTrampas(e.target.checked)} /> solo trampas</label>
       </nav>
-      <section className="grid gap-3">{visibles.map((c) => <TarjetaCaso key={c.caso.id} corrido={c} />)}</section>
+      <section className="grid gap-3">{visibles.map((c) => <TarjetaCaso key={c.caso.id} corrido={c} requisitos={REQUIERE} pieza={c.resultado.pieza ? <PiezaEtiqueta svg={c.resultado.pieza} {...(c.resultado.referencia ? { referencia: c.resultado.referencia } : {})} /> : null} />)}</section>
     </main>
   );
 }

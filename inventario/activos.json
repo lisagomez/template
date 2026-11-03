@@ -640,6 +640,30 @@
    "ubicacion": "src/features/agora-metricas", "responsable": "dep-sw",
    "origen": ["docs/goals/agora-a2a.md"],
    "cubre": ["src/features/agora-metricas"]
+  },
+  {
+   "id": "TPL-banco-motores",
+   "nombre": "Banco de motores: la idea de Gradio sin Gradio. Una funcion con esquema Zod da su pantalla de bloques y su ruta API; ejecuta con validacion de entrada y salida; generador de datos de peor caso (0.1.0)",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "tools/banco-motores", "responsable": "dep-sw",
+   "origen": ["docs/goals/gradio-marca-turno25.md"],
+   "cubre": ["tools/banco-motores"]
+  },
+  {
+   "id": "TPL-feature-banco",
+   "nombre": "Pantalla del banco de motores (/laboratorio-banco) y su API: OCR Tesseract, codigo GS1 y peor caso por los adaptadores del repo; tarjeta de caso compartida por los laboratorios; cerrada fuera del laboratorio",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "src/features/banco", "responsable": "dep-sw",
+   "origen": ["docs/goals/gradio-marca-turno25.md"],
+   "cubre": ["src/features/banco", "scripts/banco"]
+  },
+  {
+   "id": "TPL-marca-turno25",
+   "nombre": "Marca Turno 25: design system, tokens como fuente unica y su generador (CSS de shadcn y TS de Tailwind), fuentes autoalojadas, bloque etiquetado y capturas medidas",
+   "tipo": "software", "clase": "FABRICA", "estado": "beta",
+   "ubicacion": "scripts/marca", "responsable": "dep-sw",
+   "origen": ["docs/goals/gradio-marca-turno25.md", ".claude/design-systems/turno-25/turno-25.md"],
+   "cubre": ["scripts/marca", "src/shared/marca"]
   }
  ]
 }
