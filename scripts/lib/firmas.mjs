@@ -22,7 +22,9 @@ const CIERRA = /^\s*[-*]\s+\*\*Cierra\*\*\s*\(\s*(?:no\s+)?ratificada\b[^)]*\):\
 // Un prefijo corto («2026-08-30») cerraria de golpe todas las entradas de ese dia.
 const PREFIJO_MINIMO = 30;
 // Solo cuenta la linea «Gate aplicado» (con sus continuaciones): citar la regla en prosa no es marcarla.
-const LINEA_GATE = /^[-*]\s+\*\*Gate aplicado\*\*:([^\n]*(?:\n[ \t]+[^\n]*)*)/m;
+// Admite un parentesis antes de los dos puntos, como LINEA_FIRMA: sin el, `**Gate aplicado** (las casillas
+// vacias son del laboratorio):` no se leia y una firma con «aprobacion humana ☐» pasaba (2026-11-03).
+const LINEA_GATE = /^[-*]\s+\*\*Gate aplicado\*\*(?:\s*\([^)]*\))?:([^\n]*(?:\n[ \t]+[^\n]*)*)/m;
 const CASILLA_VACIA = /aprobaci[oó]n humana\s*☐/i;
 const casillaVacia = (texto) => CASILLA_VACIA.test(texto.match(LINEA_GATE)?.[1] ?? '');
 
@@ -83,6 +85,8 @@ export const SIEMBRAS = [
   ['un prefijo corto no cierra', registro(entrada(TITULO, '- **Aprobado por**: — **sin firma**.'), posterior(cierra('ratificada', '2026-08-30'))), 1, 0],
   ['firmada con ☐ desde la fecha', registro(posterior('- **Gate aplicado**: diff ☑ · aprobación humana ☐\n')), 0, 1],
   ['firmada con ☐ en la continuacion de la linea', registro(posterior('- **Gate aplicado**: diff ☑ ·\n  aprobación humana ☐ · pineo ☑\n')), 0, 1],
+  ['firmada con ☐ y un parentesis antes de los dos puntos', registro(posterior('- **Gate aplicado** (las casillas vacias son del laboratorio):\n  - diff revisado ☑;\n  - aprobación humana ☐;\n')), 0, 1],
+  ['control: con parentesis y todo marcado pasa', registro(posterior('- **Gate aplicado** (las casillas vacias son del laboratorio):\n  - diff revisado ☑;\n  - aprobación humana ☑;\n')), 0, 0],
   ['control: citar la regla en prosa no cuenta', registro(posterior('- **Motivo**: ninguna lleva «aprobación humana ☐».\n- **Gate aplicado**: aprobación humana ☑\n')), 0, 0],
   ['control: firmada con ☐ antes de la fecha', registro(entrada(TITULO, FIRMADA, '- **Gate aplicado**: aprobación humana ☐\n')), 0, 0],
 ];

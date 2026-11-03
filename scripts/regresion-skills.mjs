@@ -8,15 +8,17 @@
  *
  * Capa B (--trampa): corpus de entradas adversariales que DEBEN escalar o negarse.
  *   Requiere invocar al modelo, asi que no es determinista ni gratuita: se corre en cada
- *   CDC, no en cada build. Aqui solo se verifica que el corpus este completo y se lista.
+ *   CDC, no en cada build. Aqui solo se verifica que el corpus este completo y se lista: los
+ *   casos se ejecutan en sesiones frias, y por eso su verde nunca dice «promovible».
  *
- * Verde = promovible. Rojo = el cambio de modelo/skill NO se promueve.
+ * Capa A en verde = promovible. Rojo en cualquiera = el cambio de modelo/skill NO se promueve.
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RAMA_CORPUS, estadoCorpus, avisoRezago } from './lib/corpus.mjs';
+import { veredicto } from './lib/veredicto-regresion.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR_SKILLS = join(raiz, '.claude/skills');
@@ -134,18 +136,17 @@ if (!modoTrampa) {
 }
 
 // ---------------------------------------------------------------- reporte
-const total = ok.length + fallos.length;
 for (const l of ok) console.log(`  \x1b[32m✓\x1b[0m ${l}`);
 for (const f of fallos) {
   console.log(`  \x1b[31m✗\x1b[0m ${f.desc}`);
   console.log(`      \x1b[2m↳ ${f.pista}\x1b[0m`);
 }
 console.log('');
-const capa = modoTrampa ? 'C2 capa B (casos-trampa)' : 'C2 capa A (contratos)';
-if (fallos.length === 0) {
-  console.log(`\x1b[32m${capa}: ${ok.length}/${total} en verde — promovible.\x1b[0m`);
-  process.exit(0);
-}
-console.log(`\x1b[31m${capa}: ${fallos.length} de ${total} fallaron — NO promovible.\x1b[0m`);
-console.log('\x1b[2mUn skill perdio una regla que no se negocia. Sin excepciones ni "se ve bien".\x1b[0m');
-process.exit(1);
+// Lo que cada capa puede afirmar vive en `lib/veredicto-regresion.mjs`, con sus siembras: la capa B
+// no ejecuta casos aquí y su verde nunca dice «promovible».
+const v = veredicto({ trampa: modoTrampa, ok: ok.length, fallos: fallos.length });
+const COLOR = { verde: '\x1b[32m', aviso: '\x1b[33m', rojo: '\x1b[31m' };
+const [primera, ...resto] = v.lineas;
+console.log(`${COLOR[v.tono]}${primera}\x1b[0m`);
+for (const l of resto) console.log(`\x1b[2m${l}\x1b[0m`);
+process.exit(v.codigo);

@@ -18,6 +18,7 @@ import { geminiSincronizado } from './sincroniza-gemini.mjs';
 import { estadoCorpus, corpusEnDisco, pruebaCorpusEnDisco, SIEMBRAS_CORPUS } from './lib/corpus.mjs';
 import { cargaManifiesto, gatesDelPerfil, MANIFIESTO } from './lib/gates.mjs';
 import { revisaFirmas, pruebaFirmas, SIEMBRAS, FECHA_CASILLA } from './lib/firmas.mjs';
+import { pruebaVeredicto, SIEMBRAS_VEREDICTO } from './lib/veredicto-regresion.mjs';
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const GOB = '.claude/gobernanza';
@@ -1075,6 +1076,17 @@ comprueba(
   `6b caza sus ${SIEMBRAS.length} siembras (firma, cierre y casilla)`,
   siembrasFallidas.length === 0,
   `no ve como debe: ${siembrasFallidas.join(' | ')} — un patron de firma que no caza un hueco lo deja pasar`,
+);
+
+// --- 6b'. El cierre de la regresion no promete lo que no corrio ----------------------------
+// `regresion -- --trampa` no ejecuta casos (van en sesiones frias) y cerraba con el mismo «en verde —
+// promovible» que la capa A: al firmar un CDC se leyo como la capa B corrida (2026-11-03), y la frase ya
+// habia enganado el 2026-08-31. Lo que puede decir cada capa vive en `lib/veredicto-regresion.mjs`.
+const cierresFallidos = pruebaVeredicto();
+comprueba(
+  `el cierre de la regresion caza sus ${SIEMBRAS_VEREDICTO.length} siembras (la capa B nunca dice «promovible»)`,
+  cierresFallidos.length === 0,
+  `no dice como debe: ${cierresFallidos.join(' | ')} — un verde que no corrio nada se firma como si hubiera corrido`,
 );
 
 // --- 6k. La escalera CLI-first y las cuatro reglas, INLINE ------------------

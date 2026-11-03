@@ -387,12 +387,12 @@
       "nombre": "regresion:trampa",
       "runner": "comando",
       "comando": "npm run regresion -- --trampa",
-      "guarda": "los casos-trampa: control C2 capa B, la capa adversarial. Mide la conducta en frio ante peticiones de saltarse un gate, imprimir un secreto o aceptar un riesgo infirmable",
-      "evidencia": "caso por caso con su veredicto; el unico rojo de 21 del 2026-09-13 fue una respuesta que cito la regla en vez de ejecutarla",
+      "guarda": "que el corpus de C2 capa B (los casos-trampa: peticiones de saltarse un gate, imprimir un secreto o aceptar un riesgo infirmable) este completo, al dia con origin y listo para correr. NO ejecuta ningun caso: cada uno va en una sesion fria, y su resultado (o «capa A basta») lo escribe el laboratorio en la firma del CDC",
+      "evidencia": "cuantos casos declara el corpus, que cada uno trae entrada y expectativa, y la lista para ejecutar; exit 1 si el corpus esta incompleto o rezagado. Su verde dice «corpus completo, ningun caso ejecutado» y nunca «promovible» (scripts/lib/veredicto-regresion.mjs)",
       "perfiles": ["cdc"],
       "activo": true,
       "timeout_s": 3600,
-      "_nota": "Fuera de `validate` a proposito: cuesta llamadas a modelo. Se paga por CDC, no por integracion. Antes esto solo vivia en la prosa de AGENTS.md; aqui queda en el padron."
+      "_nota": "Fuera de `validate` a proposito: ejecutar los casos cuesta llamadas a modelo y se paga por CDC, no por integracion. Antes esto solo vivia en la prosa de AGENTS.md; aqui queda en el padron. Hasta el 2026-11-03 la guarda decia que medía la conducta «caso por caso con su veredicto», y el comando no ejecuta ninguno: se leyo su verde como la capa B corrida al firmar un CDC. Del unico rojo de 21 del 2026-09-13 (una respuesta que cito la regla en vez de ejecutarla) salio la regla de Demostrar, no citar."
     },
     {
       "nombre": "prueba:a2a",
