@@ -1,7 +1,8 @@
 # Reporte: Turno 25 × la idea de Gradio (goal del 2026-11-02)
 
 Spec: `docs/goals/gradio-marca-turno25.md`. Rama `turno25/marca-banco` (worktree propio), sin push ni merge.
-Propuesta de CDC sin firmar: `docs/goals/gradio-marca-turno25-propuesta-cdc.md`.
+CDC firmado por el laboratorio el 2026-11-03 (capa A basta): entrada «la marca Turno 25 como fuente única…» en
+`.claude/gobernanza/BITACORA-CDC.md`, con la nota C3 del banco dentro.
 
 ## Decisiones
 
