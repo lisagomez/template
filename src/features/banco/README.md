@@ -12,8 +12,9 @@ Eliges una función, cargas un ejemplo sintético y la corres: la pantalla y su 
 - Expone `GET /api/banco` y `POST /api/banco/<id>`.
 - Trae la **tarjeta de caso** que comparten `/laboratorio-etiquetas` y `/laboratorio-pymes`.
 
-No hace: servirse en un despliegue (fuera del laboratorio la página y la API dan 404), aceptar datos
-reales, guardar lo que corre ni sacar nada de la máquina. Si esta máquina no declara `TESSERACT_CMD`, el
+No hace: servirse en un despliegue ni a otra máquina (fuera del laboratorio, o con un Host que no es local, la
+página y la API dan 404), aceptar datos reales, guardar lo que corre ni sacar nada de la máquina. Si cancelas,
+el proceso de Tesseract muere entero, no sigue hasta su tope. Si esta máquina no declara `TESSERACT_CMD`, el
 OCR dice «no medido» en vez de fingir.
 
 ## Casos de uso

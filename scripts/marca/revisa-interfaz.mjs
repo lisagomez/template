@@ -43,6 +43,7 @@ export const REGLAS = [
   { id: 'cien-vh', familia: 'movil', patron: /\b100vh\b|\b(?:min-|max-)?h-screen\b/g, origen: `${EMIL} mobile-native fix 3: 100vh miente en el móvil, usa dvh` },
   { id: 'input-chico', familia: 'movil', patron: /<(?:input|textarea|select)\b[^>]*className=["'{`][^>]*\btext-(?:xs|sm)\b/g, origen: `${EMIL} mobile-native fix 4: un input de menos de 16 px hace zoom en iOS` },
   { id: 'paleta', familia: 'color', patron: new RegExp(`\\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|divide|placeholder|accent|caret|shadow)-(?:${PALETA})-\\d{2,3}\\b|\\b(?:bg|text|border)-(?:white|black)\\b`, 'g'), origen: 'marca Turno 25 §03: el color sale de tokens (primary, marca, exito, aviso, peligro, info, muted…)' },
+  { id: 'sutil-chico', familia: 'color', patron: /className=["'`{][^"'`}]*\btext-sutil\b[^"'`}]*/g, filtra: (m) => /\btext-(?:[2-9]xl)\b/.test(m[0]), origen: 'marca Turno 25 §03: fg-3 (text-sutil) da 4,04:1 en claro; pasa AA solo en texto grande (text-2xl o más), no en texto normal' },
   { id: 'hex', familia: 'color', patron: /(?<![\w&-])#[0-9a-fA-F]{6}\b|(?<![\w&-])#[0-9a-fA-F]{3}\b(?![0-9a-fA-F])/g, origen: 'marca Turno 25 §03: un hex suelto no sigue al tema claro ni al oscuro' },
 ];
 
@@ -104,9 +105,9 @@ function prueba() {
   const SIEMBRAS = {
     movimiento: ['<div className="transition-all duration-500 ease-in scale-0" />', 'a { transition: width 300ms cubic-bezier(.1,.2,.3,.4) }'],
     movil: ['<main className="min-h-screen" />', '<input className="text-sm px-2" />'],
-    color: ['<p className="text-emerald-700 bg-white">x</p>', 'const c = "#0f766e";'],
+    color: ['<p className="text-emerald-700 bg-white">x</p>', 'const c = "#0f766e";', '<p className="text-sutil text-sm">x</p>'],
   };
-  const limpio = '<button className="bg-primary text-primary-foreground transition-colors duration-rapida ease-out hover:bg-marca-hover" />';
+  const limpio = '<button className="bg-primary text-primary-foreground transition-colors duration-rapida ease-out hover:bg-marca-hover" /><p className="text-sutil text-2xl">25</p>';
   let mal = 0;
   for (const [familia, textos] of Object.entries(SIEMBRAS)) {
     const reglas = new Set(textos.flatMap((t) => Object.keys(hallazgosDe(t))));
@@ -115,6 +116,11 @@ function prueba() {
     if (!ok) mal++;
     console.log(`${ok ? '✓' : '✗'} siembra «${familia}» cazada por: ${cazadas.join(', ') || 'NADIE'}`);
   }
+  // Cada regla, no solo cada familia: una regla nueva cuya familia ya caía por otra quedaría sin probar.
+  const todas = new Set(Object.values(SIEMBRAS).flat().flatMap((t) => Object.keys(hallazgosDe(t))));
+  const sinSiembra = REGLAS.map((r) => r.id).filter((id) => !todas.has(id));
+  if (sinSiembra.length) mal++;
+  console.log(`${sinSiembra.length ? '✗' : '✓'} cada regla cae con alguna siembra${sinSiembra.length ? `; sin siembra: ${sinSiembra.join(', ')}` : ` (${REGLAS.length} de ${REGLAS.length})`}`);
   const falsos = Object.keys(hallazgosDe(limpio));
   if (falsos.length) mal++;
   console.log(`${falsos.length ? '✗' : '✓'} un botón con tokens no da falsos positivos${falsos.length ? `: ${falsos.join(', ')}` : ''}`);

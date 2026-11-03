@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { describeFuncion } from '../../../../tools/banco-motores/dist/index.js';
 import { Banco } from '@/features/banco/components/banco';
@@ -12,8 +13,8 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-/** Fail-closed: fuera del laboratorio (sin BANCO_LABORATORIO=1, o en producción) esta página no existe. */
-export default function PaginaBanco() {
-  if (!bancoHabilitado()) notFound();
+/** Fail-closed: fuera del laboratorio (sin BANCO_LABORATORIO=1, en producción o desde otra máquina) esta página no existe. */
+export default async function PaginaBanco() {
+  if (!bancoHabilitado(await headers())) notFound();
   return <Banco funciones={FUNCIONES.map(describeFuncion)} maquina={maquinaDelBanco()} />;
 }

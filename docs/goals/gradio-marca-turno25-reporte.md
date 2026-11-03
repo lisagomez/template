@@ -62,18 +62,18 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | El revisor de interfaz encontró dos inputs con `text-sm` y dos hex en mi propio código | **Resuelto** antes de escribir la línea base |
 | El primer `--inventario` se negaba con la línea base vacía | **Resuelto**: la creación inicial escribe; después se niega si algo sube |
 | Reescribir `inventario/activos.json` con `json.dump` cambiaba el formato de todo el archivo | **Resuelto**: revertido e insertado respetando el formato (24 líneas) |
-| Cancelar en el banco deja de esperar, pero Tesseract sigue hasta su tope de 120 s | **Abierto**, dicho en la nota C3: `motorPorProceso` no recibe `AbortSignal`. Arreglarlo toca el extractor |
-| `fg-3` en claro da 4,04:1 y no pasa AA en texto normal | **Abierto**: es de la guía; uso acotado y decisión del laboratorio |
-| Los estados en oscuro son derivados, no de la guía | **Abierto**: marcados como propuesta v1.1 |
+| Cancelar en el banco dejaba de esperar, pero Tesseract seguía hasta su tope de 120 s | **Resuelto**: el banco inyecta su propio `ejecuta` (el punto que el extractor documenta) que lanza el proceso en su grupo y lo mata entero al cancelar. Medido en vivo: sin cancelar, Python vive hasta ~450 ms; cortando a los 223 y a los 445 ms, a los 50 ms siguientes no queda Python, ni Tesseract, ni temporal. Llevar la señal al extractor mismo toca una herramienta empaquetada y va aparte |
+| `fg-3` en claro da 4,04:1 y no pasa AA en texto normal | **Resuelto en lo comprobable**: regla `sutil-chico` en el revisor de interfaz (`text-sutil` sin `text-2xl` o mayor). Hoy hay 0 usos; sembrada en disco tumba el gate (exit 1) y sin ella vuelve a 0. La prueba de la prueba ahora exige que cada regla, no solo cada familia, caiga con su siembra: 11 de 11. Subir el valor es de la guía, v1.1 del laboratorio |
+| Los estados en oscuro son derivados, no de la guía | **Resuelto en lo medible**: los cuatro pasan AA en oscuro, de 6,80:1 a 8,33:1 (`npm run marca:contraste`). Adoptarlos en la guía es la v1.1 del laboratorio |
 | El naranja se mide por tono y cuenta también el ámbar de los avisos | Aceptado: cuenta de más, nunca de menos |
 | Fuera del laboratorio la marca solo llegó a lo migrado; 230 archivos siguen con color literal | Aceptado: es el inventario, con motivo por módulo |
-| Las cifras de los laboratorios (componente `Metrica` de laboratorio-voz) siguen en sans | **Abierto**: está en el inventario; migrarlo cambia otra feature |
+| Las cifras de los laboratorios (componente `Metrica` de laboratorio-voz) seguían en sans | **Resuelto**: `font-mono tabular-nums`, como `Cifra` |
 | El revisor de voz cubre diez superficies, no todo el repo | Aceptado: el alcance crece cuando un archivo se pasa por el humanizer |
 | `public/banco/ejemplos/factura-sintetica.png` no es reproducible byte a byte | Declarado `fuera` en el registro de generados, con su motivo |
 | `audita:secretos` tomó las sha256 de los `ORIGEN.md` (64 hex sueltos) por tokens estilo HCLOUD | **Resuelto**: escritas como `sha256:<hex>`, el ancla pública que el auditor reconoce; commit local enmendado antes de empujar nada |
 | `verifica:inventario`: `.claude/design-systems/turno-25` tenía dos dueños (`TPL-design-systems` y `TPL-marca-turno25`) | **Resuelto**: el design system sigue en su activo; `TPL-marca-turno25` cubre el generador y lo generado |
 | `prueba:a2a`: `/api/banco` y `/api/banco/[id]` no estaban declaradas en `RUTAS_FUERA_DEL_BRIDGE` | **Resuelto**: declaradas con su nota RF-20; 15 de 15 |
-| El banco no comprueba el Host (la Puerta de Ágora sí): con `dev:movil` lo alcanza la red local | **Abierto**, dicho en la nota C3 y junto a la ruta. Añadir el chequeo es poco código; no lo hice sin que lo pidas |
+| El banco no comprobaba de qué máquina venía la petición, y `next dev` escucha en la red aunque no uses `dev:movil` | **Resuelto en lo que se puede desde la app**: 404 si el Host no es local o `x-forwarded-for` no es loopback. Medido con curl: localhost y 127.0.0.1 dan 200; la IP de eth0, 10.255.255.254 y un `X-Forwarded-For` ajeno dan 404, en la API y en la página. Queda dicho lo que no cierra: quien falsea las dos cabeceras a propósito pasa (200); esa barrera es la red |
 | `prueba:tools` en rojo por `tools/agora` (2 de 133): el gasto sembrado tiene fechas fijas de octubre y el «gasto del mes» mira noviembre desde el 1/11 | **Resuelto en rama aparte**: `agora/gasto-del-mes` (280995f), desde `main` y apilada aquí. Ver «Validate» abajo |
 
 ## Validate
@@ -84,7 +84,8 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | 2 | `2b77e81` | Rojo en `verifica:inventario` (design system con dos dueños). Resuelto |
 | 3 | `2b77e81` | El sistema la mató por memoria dentro de `prueba:tools` |
 | 4 | `462d9be` | 29 pasaron y 1 en rojo: `prueba:tools`, por `tools/agora` (2 de 133). Los 6 gates que quedaron sin correr, sueltos: 5 en verde; `prueba:a2a` en rojo por las rutas del banco, ya declaradas |
-| 5 | la punta de la rama, con Ágora apilado | Corre después de este commit: el resultado va en la conversación y en el PR, no en un commit posterior que lo dejaría viejo |
+| 5 | `112f13b`, con Ágora apilado | **Verde: 36 de 36** activos, 12 inactivos declarados, 2497 pruebas de `tools/` |
+| 6 | la punta, tras cerrar la lista de riesgos y con `npm ci` real | Corre después de este commit: el resultado va en la conversación y en el PR |
 
 Las dos pruebas de Ágora que fallan (`sobre el tope: 429…` y `el vigía avisa al 80 %…`) cuentan el gasto del
 periodo abierto. La siembra del laboratorio de Ágora lo registra con fechas fijas de octubre

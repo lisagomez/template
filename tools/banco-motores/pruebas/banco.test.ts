@@ -111,7 +111,8 @@ test('cancelar antes de que termine el motor da la etapa «cancelada»', async (
 test('API: GET lista, POST ejecuta con el MISMO esquema, 422/404/413/400, y fail-closed', async () => {
   let abierta = true;
   const api = creaApi([eco, basura], { habilitado: () => abierta, maxBytes: 2000 });
-  const lista = await api.lista().json() as { funciones: { id: string; entrada: { campo: string }[] }[] };
+  const get = new Request('http://localhost/api/banco');
+  const lista = await api.lista(get).json() as { funciones: { id: string; entrada: { campo: string }[] }[] };
   assert.deepEqual(lista.funciones.map((f) => f.id), ['eco', 'basura']);
   const post = (cuerpo: string) => new Request('http://localhost/api/banco/eco', { method: 'POST', body: cuerpo });
   assert.equal((await api.ejecuta(post(JSON.stringify({ entrada: { texto: 'hola' } })), 'eco')).status, 200);
@@ -120,8 +121,18 @@ test('API: GET lista, POST ejecuta con el MISMO esquema, 422/404/413/400, y fail
   assert.equal((await api.ejecuta(post(JSON.stringify({ entrada: { texto: 'x'.repeat(5000) } })), 'eco')).status, 413);
   assert.equal((await api.ejecuta(post('{}'), 'no-existe')).status, 404);
   abierta = false;
-  assert.equal(api.lista().status, 404);
+  assert.equal(api.lista(get).status, 404);
   assert.equal((await api.ejecuta(post(JSON.stringify({ entrada: { texto: 'hola' } })), 'eco')).status, 404);
+});
+
+test('API: habilitado decide con la petición (de qué máquina viene); lo ajeno da 404 igual que lo inexistente', async () => {
+  const api = creaApi([eco], { habilitado: (r) => r.headers.get('host') === 'localhost:3000' });
+  const pide = (host: string) => new Request('http://x/api/banco/eco', { method: 'POST', headers: { host }, body: JSON.stringify({ entrada: { texto: 'hola' } }) });
+  assert.equal((await api.ejecuta(pide('localhost:3000'), 'eco')).status, 200);
+  const ajena = await api.ejecuta(pide('192.168.1.20:3000'), 'eco');
+  assert.equal(ajena.status, 404);
+  assert.deepEqual(await ajena.json(), { ok: false, mensaje: 'No existe.' });
+  assert.equal(api.lista(new Request('http://x/api/banco', { headers: { host: '192.168.1.20:3000' } })).status, 404);
 });
 
 test('un ejemplo que no se declara sintético no entra al banco', () => {

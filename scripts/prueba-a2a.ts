@@ -90,8 +90,9 @@ const RUTAS_FUERA_DEL_BRIDGE = [
   // superficie A2A y no se expone. Las dos dan 404 sin BANCO_LABORATORIO=1 y en producción aunque la variable esté
   // (falla cerrado, como /a2a en #210). `GET` lista las funciones y su esquema; `POST /<id>` valida con Zod (MIME en
   // lista cerrada, 4 MB por imagen, 8 MB por cuerpo) y corre un motor LOCAL: Tesseract por `motorPorProceso`, el
-  // parser GS1 o el generador de peor caso. Nada sale de la máquina ni se guarda. NO comprueba el Host: con
-  // `dev:movil` (0.0.0.0) la red local llega. Exponerlo exige auth, límite de peticiones y C3 + C4.
+  // parser GS1 o el generador de peor caso. Nada sale de la máquina ni se guarda. Además, 404 si la petición no es
+  // de esta máquina (Host local y x-forwarded-for loopback); quien falsea ambas cabeceras pasa: esa barrera es la
+  // red. Exponerlo exige auth, límite de peticiones y C3 + C4.
   '/api/banco',
   '/api/banco/[id]',
   // Buzón de CFDI del despacho (spec 015). RF-20: misma app y mismo puerto; en el despacho la app no tiene salida

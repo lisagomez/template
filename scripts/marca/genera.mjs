@@ -150,7 +150,7 @@ export const contraste = (a, b) => {
 const PARES = [
   ['fg-1', 'bg-page', 'texto principal sobre papel'], ['fg-1', 'bg-surface', 'texto en tarjeta'],
   ['fg-2', 'bg-page', 'texto secundario'], ['fg-2', 'bg-surface', 'texto secundario en tarjeta'],
-  ['fg-3', 'bg-page', 'texto sutil (solo ≥ 18 px o no esencial)'], ['fg-1', 'bg-subtle', 'texto sobre fondo apagado'],
+  ['fg-3', 'bg-page', 'texto sutil (solo texto grande: 24 px, o 19 px en negrita)'], ['fg-1', 'bg-subtle', 'texto sobre fondo apagado'],
   ['accent-fg', 'accent', 'botón primario (tinta sobre naranja)'], ['accent-fg', 'accent-hover', 'botón primario en hover'],
   ['accent-subtle-fg', 'accent-subtle', 'bloque de resultado'], ['gris.0', 'accent', 'blanco sobre naranja (PROHIBIDO por la guía)'],
 ];

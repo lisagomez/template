@@ -3,8 +3,9 @@
  * Gradio). Web estándar: recibe un `Request` y devuelve un `Response`, así que corre en un route handler
  * de Next, en un Worker o en una prueba, sin importar Node.
  *
- * FAIL-CLOSED: si `habilitado()` dice que no, todo responde 404, como si no existiera. El banco es de
- * laboratorio; en un despliegue no se sirve (mismo criterio que el puente A2A del #210).
+ * FAIL-CLOSED: si `habilitado(peticion)` dice que no, todo responde 404, como si no existiera. El banco es de
+ * laboratorio; en un despliegue no se sirve (mismo criterio que el puente A2A del #210). Recibe la petición
+ * para que quien lo monta decida también por sus cabeceras (de qué máquina viene).
  *
  *   GET            → la lista de funciones con su descriptor: bloques, ejemplos y JSON Schema
  *   POST  /<id>    → { entrada } → 200 { ok, salida, ms } · 422 entrada inválida · 502 motor ·
@@ -15,7 +16,7 @@ import { ejecuta } from './ejecuta.js';
 import type { Descriptor, EtapaDeFallo, FuncionDeBanco } from './tipos.js';
 
 export interface OpcionesDeApi {
-  readonly habilitado: () => boolean;
+  readonly habilitado: (peticion: Request) => boolean;
   /** Tope del cuerpo en bytes (una imagen en data URL pesa ~1,37 veces el archivo). Por defecto 8 MB. */
   readonly maxBytes?: number;
 }
@@ -57,12 +58,12 @@ export function creaApi(funciones: readonly FuncionDeBanco[], o: OpcionesDeApi) 
   if (porId.size !== funciones.length) throw new Error('dos funciones del banco comparten id');
   const maxBytes = o.maxBytes ?? 8 * 1024 * 1024;
   return {
-    lista(): Response {
-      if (!o.habilitado()) return noExiste();
+    lista(req: Request): Response {
+      if (!o.habilitado(req)) return noExiste();
       return json(200, { funciones: funciones.map(describeFuncion) });
     },
     async ejecuta(req: Request, id: string): Promise<Response> {
-      if (!o.habilitado()) return noExiste();
+      if (!o.habilitado(req)) return noExiste();
       const f = porId.get(id);
       if (!f) return noExiste();
       const cuerpo = await leeCuerpo(req, maxBytes);

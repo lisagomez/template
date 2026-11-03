@@ -15,21 +15,34 @@ import { z } from 'zod';
 import { bytesDeDataUrl, campoImagen, defineFuncion, FAMILIAS, peorCaso, type FuncionDeBanco } from '../../../../../tools/banco-motores/dist/index.js';
 import { motorPorProceso } from '../../../../../tools/extractor-documental/dist/motores/proceso-local.js';
 import type { MotorOcr } from '../../../../../tools/extractor-documental/dist/puertos.js';
+import { ejecutorConSenal } from './proceso';
 import { leeCodigoDeProducto } from '../../../../../tools/etiquetas-gs1/dist/index.js';
 
-let motorCache: MotorOcr | null | undefined;
+interface ConfigOcr {
+  readonly script: string;
+  readonly modelo: string;
+  readonly entorno: Readonly<Record<string, string>>;
+}
 
-/** El motor de OCR de esta máquina, o `null` si no lo declara (TESSERACT_CMD). Mismo cableado que la mesa de Soporte SAP. */
-function motorTesseract(): MotorOcr | null {
-  if (motorCache !== undefined) return motorCache;
+let configCache: ConfigOcr | null | undefined;
+
+/** Cómo se lanza el OCR en esta máquina, o `null` si no lo declara (TESSERACT_CMD). Mismo cableado que la mesa de Soporte SAP. */
+function configOcr(): ConfigOcr | null {
+  if (configCache !== undefined) return configCache;
   const cmd = process.env['TESSERACT_CMD'];
-  if (!cmd) return (motorCache = null);
+  if (!cmd) return (configCache = null);
   const entorno: Record<string, string> = { EXTRACTOR_IDIOMA: 'spa' };
   for (const k of ['LD_LIBRARY_PATH', 'TESSDATA_PREFIX', 'TESSERACT_CMD']) if (process.env[k]) entorno[k] = process.env[k]!;
   const version = execFileSync(cmd, ['--version'], { encoding: 'utf8', env: { ...process.env, ...entorno } }).split('\n')[0]!.replace(/^tesseract\s+/, '').trim();
   const script = join(/*turbopackIgnore: true*/ process.cwd(), 'tools', 'extractor-documental', 'motores-locales', 'tesseract.py');
-  motorCache = motorPorProceso({ comando: 'python3', argumentos: [script], modelo: `tesseract-${version}-spa-zonal-1`, entorno, milisegundosDeEspera: 120_000 });
-  return motorCache;
+  return (configCache = { script, modelo: `tesseract-${version}-spa-zonal-1`, entorno });
+}
+
+/** El motor de UNA ejecución: el adaptador del extractor, con un ejecutor que mata a Tesseract si cancelas. */
+function motorTesseract(signal: AbortSignal): MotorOcr | null {
+  const c = configOcr();
+  if (!c) return null;
+  return motorPorProceso({ comando: 'python3', argumentos: [c.script], modelo: c.modelo, entorno: c.entorno, milisegundosDeEspera: 120_000, ejecuta: ejecutorConSenal(signal) });
 }
 
 const ocr = defineFuncion({
@@ -47,8 +60,8 @@ const ocr = defineFuncion({
   ejemplos: [
     { id: 'factura-sintetica', titulo: 'Factura sintética', entrada: {}, archivos: { imagen: '/banco/ejemplos/factura-sintetica.png' }, trampa: null, sintetico: true },
   ],
-  async ejecuta({ imagen }) {
-    const motor = motorTesseract();
+  async ejecuta({ imagen }, { signal }) {
+    const motor = motorTesseract(signal);
     if (!motor) throw new Error('no medido: esta máquina no declara TESSERACT_CMD (el motor de OCR local)');
     const paginas = await motor.extrae(bytesDeDataUrl(imagen));
     const confianzas = paginas.map((p) => p.confianza).filter((c): c is number => typeof c === 'number');

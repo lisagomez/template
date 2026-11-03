@@ -45,7 +45,7 @@
 - **Gate aplicado** (las casillas vacías son del laboratorio):
   - [x] diff completo en la rama (`git diff main...turno25/marca-banco`)
   - [x] `npm run regresion` (capa A) en verde, con los 30 skills
-  - [ ] `npm run validate` completo en verde tras el commit, en worktree con `npm ci` real (corrida 5 sobre la punta, con `agora/gasto-del-mes` apilada: el resultado va en el PR)
+  - [x] `npm run validate` completo en verde tras el commit, en worktree con `npm ci` real: corrida 5 sobre `112f13b`, 36 de 36 (la corrida 6, sobre la punta con la lista de riesgos cerrada, va en el PR)
   - [ ] `npm run regresion -- --trampa` (capa B, en sesión fría)
   - [ ] lectura de los doce `SKILL.md` vendorizados por el laboratorio
   - [ ] firma
@@ -58,9 +58,9 @@
 | | |
 |---|---|
 | **Qué expone** | `GET /api/banco`, `POST /api/banco/<id>` y `/laboratorio-banco` |
-| **Quién llega** | Solo quien corre la app en local con `BANCO_LABORATORIO=1`. En producción (`NODE_ENV=production`) no existe aunque la variable esté puesta: 404 |
+| **Quién llega** | Solo una petición hecha en esta máquina (Host local y `x-forwarded-for` loopback) a la app corriendo con `BANCO_LABORATORIO=1`. Desde otra máquina, 404 aunque `next dev` escuche en la red. En producción (`NODE_ENV=production`) no existe aunque la variable esté puesta: 404 |
 | **Qué entra** | JSON validado por Zod; imágenes en data URL con MIME en lista cerrada (PNG, JPEG, WebP) y tope de 4 MB; cuerpo con tope de 8 MB |
 | **Qué ejecuta** | Tesseract por `motorPorProceso` (temporal solo del usuario, borrado siempre; errores sin stdout), el parser GS1 (TS puro) y el generador de peor caso. Ningún comando lo elige quien llama |
 | **Qué devuelve** | Solo la salida que cumple su esquema; un error del motor, recortado a su primera línea |
-| **Riesgos que quedan** | Cancelar deja de esperar, pero el proceso de Tesseract sigue hasta su tope de 120 s. Sin límite de peticiones por minuto (aceptable en local; no lo sería expuesto). No comprueba el Host como la Puerta de Ágora: con `npm run dev:movil` (escucha en 0.0.0.0) llega cualquiera de la red local |
+| **Riesgos que quedan** | Quien falsea a propósito el Host y `x-forwarded-for` desde la red pasa: la barrera es la red (WSL2 en NAT no expone el puerto a la LAN). Sin límite de peticiones por minuto (aceptable en local; no lo sería expuesto). Cancelar ya mata el proceso de Tesseract entero (medido) |
 | **Lo que haría falta para exponerlo** | Auth de la app, límite de peticiones, revisión C3 completa y C4: por eso está cerrado |

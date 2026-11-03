@@ -60,8 +60,9 @@ Reglas de la guía, ya medidas:
 
 Contraste medido (`npm run marca:contraste`): pasan AA todos los pares que emiten los tokens, en claro y
 en oscuro, salvo dos. El blanco sobre naranja es justo el que la guía prohíbe. El otro es `fg-3` sobre papel
-en claro (4,04:1), un hallazgo de la guía misma: `sutil` se usa solo en texto de 18 px o más, o no esencial.
-Subirlo es decisión del laboratorio para la v1.1.
+en claro (4,04:1), un hallazgo de la guía misma: `sutil` se usa solo en texto grande de WCAG (24 px, o
+19 px en negrita), donde basta 3:1. El revisor de interfaz lo hace cumplir: `text-sutil` sin `text-2xl` o
+mayor es un hallazgo (`sutil-chico`). Subir el valor es decisión del laboratorio para la v1.1.
 
 Los estados (`exito`, `aviso`, `peligro`, `info`) traen `DEFAULT`, `suave` y `texto`. La guía solo define
 su versión clara; la oscura se **deriva** en `tokens.json` con `mezcla(a, b, t)` y queda marcada como

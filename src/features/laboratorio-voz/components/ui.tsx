@@ -23,7 +23,7 @@ export function Metrica({ nombre, valor, pista }: { nombre: string; valor: strin
   return (
     <div className="rounded-lg border border-neutral-200 px-3 py-2 dark:border-neutral-800" title={pista}>
       <p className="text-[11px] uppercase tracking-wide text-neutral-500">{nombre}</p>
-      <p className="text-base font-semibold tabular-nums">{valor}</p>
+      <p className="font-mono text-base font-semibold tabular-nums">{valor}</p>
       {pista ? <p className="text-[11px] text-neutral-400">{pista}</p> : null}
     </div>
   );
