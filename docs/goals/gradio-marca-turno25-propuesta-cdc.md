@@ -45,7 +45,7 @@
 - **Gate aplicado** (las casillas vacías son del laboratorio):
   - [x] diff completo en la rama (`git diff main...turno25/marca-banco`)
   - [x] `npm run regresion` (capa A) en verde, con los 30 skills
-  - [ ] `npm run validate` completo en verde tras el commit, en worktree con `npm ci` real (rojo por `tools/agora`, ajeno a la rama: ver el reporte)
+  - [ ] `npm run validate` completo en verde tras el commit, en worktree con `npm ci` real (corrida 5 sobre la punta, con `agora/gasto-del-mes` apilada: el resultado va en el PR)
   - [ ] `npm run regresion -- --trampa` (capa B, en sesión fría)
   - [ ] lectura de los doce `SKILL.md` vendorizados por el laboratorio
   - [ ] firma

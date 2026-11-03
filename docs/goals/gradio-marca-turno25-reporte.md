@@ -74,7 +74,7 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | `verifica:inventario`: `.claude/design-systems/turno-25` tenía dos dueños (`TPL-design-systems` y `TPL-marca-turno25`) | **Resuelto**: el design system sigue en su activo; `TPL-marca-turno25` cubre el generador y lo generado |
 | `prueba:a2a`: `/api/banco` y `/api/banco/[id]` no estaban declaradas en `RUTAS_FUERA_DEL_BRIDGE` | **Resuelto**: declaradas con su nota RF-20; 15 de 15 |
 | El banco no comprueba el Host (la Puerta de Ágora sí): con `dev:movil` lo alcanza la red local | **Abierto**, dicho en la nota C3 y junto a la ruta. Añadir el chequeo es poco código; no lo hice sin que lo pidas |
-| `prueba:tools` en rojo por `tools/agora` (2 de 133): el gasto sembrado tiene fechas fijas de octubre y el «gasto del mes» mira noviembre desde el 1/11 | **Abierto y ajeno a la rama**: falla igual en `main` (2181fcc). Ver «Validate» abajo |
+| `prueba:tools` en rojo por `tools/agora` (2 de 133): el gasto sembrado tiene fechas fijas de octubre y el «gasto del mes» mira noviembre desde el 1/11 | **Resuelto en rama aparte**: `agora/gasto-del-mes` (280995f), desde `main` y apilada aquí. Ver «Validate» abajo |
 
 ## Validate
 
@@ -84,10 +84,15 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | 2 | `2b77e81` | Rojo en `verifica:inventario` (design system con dos dueños). Resuelto |
 | 3 | `2b77e81` | El sistema la mató por memoria dentro de `prueba:tools` |
 | 4 | `462d9be` | 29 pasaron y 1 en rojo: `prueba:tools`, por `tools/agora` (2 de 133). Los 6 gates que quedaron sin correr, sueltos: 5 en verde; `prueba:a2a` en rojo por las rutas del banco, ya declaradas |
+| 5 | la punta de la rama, con Ágora apilado | Corre después de este commit: el resultado va en la conversación y en el PR, no en un commit posterior que lo dejaría viejo |
 
 Las dos pruebas de Ágora que fallan (`sobre el tope: 429…` y `el vigía avisa al 80 %…`) cuentan el gasto del
 periodo abierto. La siembra del laboratorio de Ágora lo registra con fechas fijas de octubre
 (`HOY_DEL_PROTOTIPO = '2026-10-26'`), así que desde el 2026-11-01 el gasto del mes de Medios Norte es 0 y ningún
 tope de gasto dispara. En `main` (2181fcc) fallan las mismas dos. Arreglarlo toca Ágora, un producto firmado, y
 cabe hacerlo de dos formas: que esas pruebas siembren su propio gasto en el periodo abierto o que la siembra use
-fechas relativas a hoy. Esa elección es del laboratorio.
+fechas relativas a hoy. El laboratorio eligió la primera, en rama aparte: `agora/gasto-del-mes` (280995f) agrega
+`gastaHoy` al marco de pruebas (gasto de hoy con el tipo de cambio de hoy; sin él costaría `null` MXN pasados
+cinco días del último publicado) y no toca la siembra. Suite de Ágora 133 de 133; los sabotajes de puerta (PU1–PU5)
+y vigía (V1–V5) siguen cayendo. Esta rama la apila con un merge para que los SHA de arriba sigan existiendo.
+Queda abierto lo que ve quien abre el laboratorio de Ágora en noviembre: el gasto del mes en 0.
