@@ -1,0 +1,743 @@
+{
+ "_comentario": "Línea base del revisor de interfaz (scripts/marca/revisa-interfaz.mjs): lo que YA existía el 2026-11-02 antes de Turno 25 y no cumple, archivo → regla → cuántos. Es la AGENDA, no un permiso: el gate falla si un archivo sube o si aparece uno nuevo con hallazgos. Bajar es libre (`node scripts/marca/revisa-interfaz.mjs --inventario` reescribe la línea base y se niega si algo sube). No es un artefacto generado: no se regenera desde una fuente, se baja a mano migrando.",
+ "motivos": {
+  "src/features/soporte-sap": "Producto con identidad propia y desplegado (vitrina en Vercel, mesa en Cloudflare): migrarlo a Turno 25 es decisión del laboratorio y exige redesplegar, que este goal no hace.",
+  "src/features/agora": "Ágora y sus módulos (agora-*) llevan acento propio (#2a5db0 en su composición): marca blanca; adoptar Turno 25 lo decide el laboratorio por producto.",
+  "src/features/clinica-dental": "Portal del paciente por clínica: cada clínica es un inquilino con su marca (marca blanca).",
+  "src/features/recepcion": "Producto con acento propio (#b45309 en su composición): marca blanca.",
+  "src/features/etiquetas": "App de etiquetas con su semáforo de estados (verde, ámbar, rojo) ligado a la operación del almacén: se migra a los tokens de estado con capturas propias, módulo por módulo.",
+  "*": "Heredado del template antes de Turno 25 (2026-11-02). Agenda de migración por módulo, con capturas antes/después: este goal migró la capa del laboratorio, el acceso (login y alta), el banco y las tarjetas de caso de los laboratorios de etiquetas y pymes."
+ },
+ "archivos": {
+  "src/app/(main)/buzon/[pyme]/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/(main)/buzon/cierre/page.tsx": {
+   "paleta": 3
+  },
+  "src/app/(main)/buzon/page.tsx": {
+   "paleta": 5
+  },
+  "src/app/(main)/configuracion/page.tsx": {
+   "cien-vh": 1,
+   "paleta": 1
+  },
+  "src/app/(main)/dashboard/page.tsx": {
+   "cien-vh": 1,
+   "paleta": 1
+  },
+  "src/app/(main)/dictar/page.tsx": {
+   "cien-vh": 2,
+   "paleta": 40
+  },
+  "src/app/(main)/laboratorio-clinica-dental/buzon/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/(main)/laboratorio-clinica-dental/grafo/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/(main)/laboratorio-clinica-dental/page.tsx": {
+   "paleta": 16
+  },
+  "src/app/(main)/laboratorio-clinica-dental/telegram/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/(main)/laboratorio-sgi/page.tsx": {
+   "paleta": 20
+  },
+  "src/app/(main)/reel/[id]/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/(main)/reel/page.tsx": {
+   "paleta": 5
+  },
+  "src/app/(main)/sgi/[org]/auditoria/page.tsx": {
+   "input-chico": 1,
+   "paleta": 17
+  },
+  "src/app/(main)/sgi/[org]/calendario/page.tsx": {
+   "paleta": 3
+  },
+  "src/app/(main)/sgi/[org]/contexto/page.tsx": {
+   "paleta": 6
+  },
+  "src/app/(main)/sgi/[org]/diagnostico/page.tsx": {
+   "paleta": 7
+  },
+  "src/app/(main)/sgi/[org]/documentos/[version]/page.tsx": {
+   "paleta": 10
+  },
+  "src/app/(main)/sgi/[org]/documentos/page.tsx": {
+   "paleta": 5
+  },
+  "src/app/(main)/sgi/[org]/evidencias/page.tsx": {
+   "input-chico": 1,
+   "paleta": 7
+  },
+  "src/app/(main)/sgi/[org]/kpis/page.tsx": {
+   "paleta": 3
+  },
+  "src/app/(main)/sgi/[org]/layout.tsx": {
+   "cien-vh": 1,
+   "paleta": 20,
+   "hex": 2
+  },
+  "src/app/(main)/sgi/[org]/migracion/page.tsx": {
+   "paleta": 7
+  },
+  "src/app/(main)/sgi/[org]/page.tsx": {
+   "paleta": 15
+  },
+  "src/app/(main)/sgi/[org]/riesgos/page.tsx": {
+   "paleta": 11
+  },
+  "src/app/(main)/sgi/[org]/soa/page.tsx": {
+   "paleta": 4
+  },
+  "src/app/(main)/sgi/consultor/page.tsx": {
+   "cien-vh": 1,
+   "paleta": 13,
+   "hex": 4
+  },
+  "src/app/(main)/sgi/page.tsx": {
+   "paleta": 9
+  },
+  "src/app/(main)/soporte-sap/page.tsx": {
+   "paleta": 2
+  },
+  "src/app/(paciente)/clinica/[clinica]/agenda/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/(paciente)/clinica/[clinica]/entrar/page.tsx": {
+   "paleta": 3
+  },
+  "src/app/(paciente)/clinica/[clinica]/layout.tsx": {
+   "paleta": 1
+  },
+  "src/app/(paciente)/clinica/[clinica]/mis-citas/page.tsx": {
+   "paleta": 2
+  },
+  "src/app/(paciente)/clinica/[clinica]/page.tsx": {
+   "paleta": 17
+  },
+  "src/app/(paciente)/clinica/[clinica]/privacidad/page.tsx": {
+   "paleta": 6
+  },
+  "src/app/(paciente)/clinica/[clinica]/recuperar/page.tsx": {
+   "paleta": 3
+  },
+  "src/app/(paciente)/clinica/[clinica]/registro/page.tsx": {
+   "paleta": 1
+  },
+  "src/app/api/clinica-dental/baja/[token]/route.ts": {
+   "hex": 3
+  },
+  "src/app/api/reel/proyectos/route.ts": {
+   "hex": 1
+  },
+  "src/app/page.tsx": {
+   "cien-vh": 1,
+   "paleta": 5
+  },
+  "src/app/vitrina/soporte-sap/page.tsx": {
+   "paleta": 12
+  },
+  "src/features/agora-agentes/components/agentes.tsx": {
+   "paleta": 83
+  },
+  "src/features/agora-buzon/components/buzon.tsx": {
+   "paleta": 29
+  },
+  "src/features/agora-buzon/components/hilo-de-la-categoria.tsx": {
+   "paleta": 4
+  },
+  "src/features/agora-contabilidad/components/contabilidad.tsx": {
+   "paleta": 69
+  },
+  "src/features/agora-costos/components/costos.tsx": {
+   "paleta": 85
+  },
+  "src/features/agora-metricas/components/metricas.tsx": {
+   "paleta": 64,
+   "hex": 3
+  },
+  "src/features/agora-tablero/components/celdas.tsx": {
+   "paleta": 13
+  },
+  "src/features/agora-tablero/components/editor.tsx": {
+   "input-chico": 1,
+   "paleta": 28
+  },
+  "src/features/agora-tablero/components/tablero.tsx": {
+   "paleta": 30
+  },
+  "src/features/agora-tablero/components/vistas.tsx": {
+   "paleta": 65,
+   "hex": 2
+  },
+  "src/features/agora/components/alta.tsx": {
+   "paleta": 17,
+   "hex": 3
+  },
+  "src/features/agora/components/apagada.tsx": {
+   "paleta": 3
+  },
+  "src/features/agora/components/arbol.tsx": {
+   "paleta": 17
+  },
+  "src/features/agora/components/espera-tu-clic.tsx": {
+   "paleta": 12
+  },
+  "src/features/agora/components/inicio.tsx": {
+   "paleta": 30
+  },
+  "src/features/agora/components/insignia.tsx": {
+   "paleta": 21
+  },
+  "src/features/agora/components/plan-de-agora.tsx": {
+   "hex": 1
+  },
+  "src/features/agora/components/propuesta.tsx": {
+   "paleta": 47
+  },
+  "src/features/agora/components/ver-como.tsx": {
+   "input-chico": 1,
+   "paleta": 5
+  },
+  "src/features/agora/services/formato.ts": {
+   "paleta": 8
+  },
+  "src/features/ajustes/components/ajustes.tsx": {
+   "paleta": 35
+  },
+  "src/features/ajustes/components/campo-ajuste.tsx": {
+   "paleta": 19
+  },
+  "src/features/ajustes/components/catalogo.tsx": {
+   "paleta": 16
+  },
+  "src/features/banco/services/servidor/api.ts": {
+   "hex": 1
+  },
+  "src/features/buzon-cfdi/components/alta-pyme.tsx": {
+   "paleta": 4
+  },
+  "src/features/buzon-cfdi/components/cierre-piloto.tsx": {
+   "paleta": 6
+  },
+  "src/features/buzon-cfdi/components/consentimiento-pyme.tsx": {
+   "paleta": 7
+  },
+  "src/features/buzon-cfdi/components/importa-lista-69b.tsx": {
+   "paleta": 5
+  },
+  "src/features/buzon-cfdi/components/ingesta-documentos.tsx": {
+   "input-chico": 1,
+   "paleta": 8
+  },
+  "src/features/buzon-cfdi/components/registro-horas.tsx": {
+   "paleta": 5
+  },
+  "src/features/buzon-cfdi/components/revision-documento.tsx": {
+   "paleta": 17
+  },
+  "src/features/centro-de-mando/components/centro-de-mando.tsx": {
+   "cien-vh": 1,
+   "paleta": 23,
+   "hex": 2
+  },
+  "src/features/centro-de-mando/components/registro.tsx": {
+   "paleta": 10
+  },
+  "src/features/centro-de-mando/components/subtitulos.tsx": {
+   "paleta": 5
+  },
+  "src/features/centro-de-mando/components/telemetria.tsx": {
+   "paleta": 33
+  },
+  "src/features/centro-de-mando/components/ui.tsx": {
+   "paleta": 15
+  },
+  "src/features/clinica-dental/components/agenda/agenda.tsx": {
+   "paleta": 20
+  },
+  "src/features/clinica-dental/components/agenda/calendario-mes.tsx": {
+   "paleta": 8
+  },
+  "src/features/clinica-dental/components/agenda/selector-avisos.tsx": {
+   "paleta": 3
+  },
+  "src/features/clinica-dental/components/asistente/asistentes.tsx": {
+   "paleta": 4
+  },
+  "src/features/clinica-dental/components/asistente/chat.tsx": {
+   "paleta": 12
+  },
+  "src/features/clinica-dental/components/citas/mis-citas.tsx": {
+   "paleta": 31
+  },
+  "src/features/clinica-dental/components/cookies.tsx": {
+   "paleta": 7
+  },
+  "src/features/clinica-dental/components/laboratorio/buzon.tsx": {
+   "paleta": 19
+  },
+  "src/features/clinica-dental/components/laboratorio/grafo.tsx": {
+   "paleta": 10,
+   "hex": 5
+  },
+  "src/features/clinica-dental/components/laboratorio/tablero.tsx": {
+   "paleta": 23
+  },
+  "src/features/clinica-dental/components/laboratorio/telegram.tsx": {
+   "paleta": 10,
+   "hex": 3
+  },
+  "src/features/clinica-dental/components/marco.tsx": {
+   "cien-vh": 1,
+   "paleta": 13
+  },
+  "src/features/clinica-dental/components/registro/formulario.tsx": {
+   "paleta": 5
+  },
+  "src/features/clinica-dental/components/registro/guia-voz.tsx": {
+   "paleta": 5
+  },
+  "src/features/clinica-dental/components/registro/secciones.tsx": {
+   "paleta": 10
+  },
+  "src/features/clinica-dental/components/ui.tsx": {
+   "paleta": 20
+  },
+  "src/features/crecimiento-demostrado/components/arbol.tsx": {
+   "paleta": 9
+  },
+  "src/features/crecimiento-demostrado/components/cascada.tsx": {
+   "paleta": 27,
+   "hex": 8
+  },
+  "src/features/crecimiento-demostrado/components/laboratorio.tsx": {
+   "paleta": 25
+  },
+  "src/features/crecimiento-demostrado/components/pagina-pregunta.tsx": {
+   "paleta": 24
+  },
+  "src/features/crecimiento-demostrado/components/respuesta.tsx": {
+   "paleta": 57
+  },
+  "src/features/dictado/components/boton-dictado.tsx": {
+   "paleta": 11
+  },
+  "src/features/dictado/components/boton-flotante-movil.tsx": {
+   "paleta": 6
+  },
+  "src/features/dictado/components/qr-emparejar.tsx": {
+   "paleta": 9
+  },
+  "src/features/estudio-dashboards/components/estudio.module.css": {
+   "cien-vh": 2,
+   "hex": 86
+  },
+  "src/features/estudio-dashboards/components/mapa.tsx": {
+   "hex": 7
+  },
+  "src/features/estudio-pymes/components/aprobar-en-celular.tsx": {
+   "paleta": 25
+  },
+  "src/features/estudio-pymes/components/estudio.tsx": {
+   "paleta": 16
+  },
+  "src/features/estudio-pymes/components/seccion-anuncios-lunes.tsx": {
+   "paleta": 18
+  },
+  "src/features/estudio-pymes/components/seccion-calendario.tsx": {
+   "paleta": 18
+  },
+  "src/features/estudio-pymes/components/seccion-carruseles-video.tsx": {
+   "input-chico": 1,
+   "paleta": 20
+  },
+  "src/features/estudio-pymes/components/seccion-marca.tsx": {
+   "input-chico": 4,
+   "paleta": 16
+  },
+  "src/features/estudio-pymes/components/seccion-resenas.tsx": {
+   "paleta": 8
+  },
+  "src/features/estudio-pymes/components/seccion-ventas.tsx": {
+   "paleta": 16
+  },
+  "src/features/estudio-pymes/components/seccion-visibilidad.tsx": {
+   "input-chico": 1,
+   "paleta": 9
+  },
+  "src/features/estudio-pymes/components/ui-estudio.tsx": {
+   "paleta": 39
+  },
+  "src/features/estudio-pymes/services/servidor/render-video.ts": {
+   "hex": 1
+  },
+  "src/features/etiquetas/components/acciones-lote.tsx": {
+   "input-chico": 1,
+   "paleta": 3
+  },
+  "src/features/etiquetas/components/bandeja-revisiones.tsx": {
+   "paleta": 10
+  },
+  "src/features/etiquetas/components/camara-foto.tsx": {
+   "paleta": 5
+  },
+  "src/features/etiquetas/components/entrada-pistola.tsx": {
+   "paleta": 1
+  },
+  "src/features/etiquetas/components/estimador-rollos.tsx": {
+   "paleta": 8
+  },
+  "src/features/etiquetas/components/ficha-articulo.tsx": {
+   "input-chico": 1,
+   "paleta": 8
+  },
+  "src/features/etiquetas/components/foto.tsx": {
+   "paleta": 12,
+   "hex": 1
+  },
+  "src/features/etiquetas/components/lector-camara.tsx": {
+   "paleta": 6
+  },
+  "src/features/etiquetas/components/marco.tsx": {
+   "cien-vh": 1,
+   "paleta": 50
+  },
+  "src/features/etiquetas/components/panel-impresion.tsx": {
+   "paleta": 18
+  },
+  "src/features/etiquetas/components/panel-revision.tsx": {
+   "paleta": 9
+  },
+  "src/features/etiquetas/components/pantalla-ajustes.tsx": {
+   "paleta": 9
+  },
+  "src/features/etiquetas/components/pantalla-catalogo.tsx": {
+   "paleta": 29
+  },
+  "src/features/etiquetas/components/pantalla-conteo.tsx": {
+   "paleta": 60
+  },
+  "src/features/etiquetas/components/pantalla-dia.tsx": {
+   "paleta": 20
+  },
+  "src/features/etiquetas/components/pantalla-editor.tsx": {
+   "input-chico": 1,
+   "paleta": 6
+  },
+  "src/features/etiquetas/components/pantalla-escanear.tsx": {
+   "paleta": 17
+  },
+  "src/features/etiquetas/components/pantalla-expediente.tsx": {
+   "paleta": 41
+  },
+  "src/features/etiquetas/components/pantalla-impresoras.tsx": {
+   "paleta": 4
+  },
+  "src/features/etiquetas/components/pantalla-integridad.tsx": {
+   "paleta": 34
+  },
+  "src/features/etiquetas/components/pantalla-lector.tsx": {
+   "paleta": 18
+  },
+  "src/features/etiquetas/components/pantalla-mover.tsx": {
+   "paleta": 37
+  },
+  "src/features/etiquetas/components/pantalla-recibir.tsx": {
+   "paleta": 29
+  },
+  "src/features/etiquetas/components/pantalla-riesgo.tsx": {
+   "paleta": 27
+  },
+  "src/features/etiquetas/components/pantalla-rollos.tsx": {
+   "paleta": 37
+  },
+  "src/features/etiquetas/components/pantalla-tablero.tsx": {
+   "paleta": 23
+  },
+  "src/features/etiquetas/components/pieza-suelta.tsx": {
+   "paleta": 4
+  },
+  "src/features/etiquetas/components/resultado-escaneo.tsx": {
+   "paleta": 13
+  },
+  "src/features/etiquetas/components/revision-caducidad.tsx": {
+   "paleta": 29
+  },
+  "src/features/etiquetas/components/ronda-panel.tsx": {
+   "paleta": 22
+  },
+  "src/features/etiquetas/components/vincular-gtin.tsx": {
+   "paleta": 8
+  },
+  "src/features/etiquetas/components/vista-etiqueta.tsx": {
+   "paleta": 33
+  },
+  "src/features/etiquetas/services/presenta.ts": {
+   "paleta": 92
+  },
+  "src/features/historial/components/buscador.tsx": {
+   "paleta": 20
+  },
+  "src/features/historial/components/cifras.tsx": {
+   "paleta": 10
+  },
+  "src/features/historial/components/dictado-item.tsx": {
+   "paleta": 32
+  },
+  "src/features/historial/components/herramientas.tsx": {
+   "paleta": 26
+  },
+  "src/features/historial/components/historial.tsx": {
+   "paleta": 30
+  },
+  "src/features/laboratorio-calendario/components/laboratorio-calendario.tsx": {
+   "paleta": 32
+  },
+  "src/features/laboratorio-calendario/components/panel-consumidor.tsx": {
+   "paleta": 20
+  },
+  "src/features/laboratorio-calendario/services/semilla.ts": {
+   "hex": 2
+  },
+  "src/features/laboratorio-etiquetas/components/laboratorio-etiquetas.tsx": {
+   "paleta": 46
+  },
+  "src/features/laboratorio-etiquetas/services/casos-recepcion.ts": {
+   "hex": 2
+  },
+  "src/features/laboratorio-pymes/components/compara-visual.tsx": {
+   "paleta": 10
+  },
+  "src/features/laboratorio-pymes/components/laboratorio-pymes.tsx": {
+   "paleta": 34
+  },
+  "src/features/laboratorio-pymes/datos/demo.ts": {
+   "hex": 5
+  },
+  "src/features/laboratorio-pymes/services/casos-contenido-visual.ts": {
+   "hex": 4
+  },
+  "src/features/laboratorio-pymes/services/casos-marca-ventas.ts": {
+   "hex": 3
+  },
+  "src/features/laboratorio-pymes/services/casos-reel.ts": {
+   "hex": 2
+  },
+  "src/features/laboratorio-voz/components/conversacion-voz.tsx": {
+   "paleta": 6
+  },
+  "src/features/laboratorio-voz/components/datos-personales.tsx": {
+   "paleta": 22
+  },
+  "src/features/laboratorio-voz/components/emparejar.tsx": {
+   "paleta": 6
+  },
+  "src/features/laboratorio-voz/components/entrada-audio.tsx": {
+   "paleta": 2
+  },
+  "src/features/laboratorio-voz/components/laboratorio.tsx": {
+   "paleta": 14
+  },
+  "src/features/laboratorio-voz/components/mapa-salas.tsx": {
+   "paleta": 9
+  },
+  "src/features/laboratorio-voz/components/panel-veredicto.tsx": {
+   "paleta": 13
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-celular.tsx": {
+   "hex": 1
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-comandos.tsx": {
+   "paleta": 22
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-competencias.tsx": {
+   "paleta": 28
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-faq.tsx": {
+   "paleta": 7
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-locucion.tsx": {
+   "paleta": 3
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-picking.tsx": {
+   "paleta": 16
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-podcast.tsx": {
+   "paleta": 3
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-puerta.tsx": {
+   "paleta": 3
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-reunion.tsx": {
+   "paleta": 19
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-sentimiento.tsx": {
+   "paleta": 14
+  },
+  "src/features/laboratorio-voz/components/paneles/panel-transcribir.tsx": {
+   "paleta": 8
+  },
+  "src/features/laboratorio-voz/components/paneles/resultado-asesor.tsx": {
+   "paleta": 24
+  },
+  "src/features/laboratorio-voz/components/paneles/segmentos-ui.tsx": {
+   "paleta": 18
+  },
+  "src/features/laboratorio-voz/components/semaforo.tsx": {
+   "paleta": 23
+  },
+  "src/features/laboratorio-voz/components/tarjeta-caso.tsx": {
+   "paleta": 17
+  },
+  "src/features/laboratorio-voz/components/ui.tsx": {
+   "paleta": 53
+  },
+  "src/features/project-settings/components/ProjectSettingsForm.tsx": {
+   "paleta": 16
+  },
+  "src/features/recepcion/components/mostrador.tsx": {
+   "paleta": 30
+  },
+  "src/features/recepcion/services/agenda.ts": {
+   "hex": 1
+  },
+  "src/features/reel/components/consentimientos.tsx": {
+   "paleta": 14
+  },
+  "src/features/reel/components/sala.tsx": {
+   "paleta": 22
+  },
+  "src/features/reel/components/subir-clip.tsx": {
+   "input-chico": 1,
+   "paleta": 7,
+   "hex": 1
+  },
+  "src/features/sgi/components/aprobar.tsx": {
+   "input-chico": 2,
+   "paleta": 4
+  },
+  "src/features/sgi/components/boton.tsx": {
+   "paleta": 9
+  },
+  "src/features/sgi/components/piezas.tsx": {
+   "paleta": 20
+  },
+  "src/features/soporte-sap/components/ficha-servidor.tsx": {
+   "paleta": 4
+  },
+  "src/features/soporte-sap/components/impugnaciones.tsx": {
+   "paleta": 3
+  },
+  "src/features/soporte-sap/components/incidencias.tsx": {
+   "input-chico": 3,
+   "paleta": 50
+  },
+  "src/features/soporte-sap/components/negocio.tsx": {
+   "paleta": 26
+  },
+  "src/features/soporte-sap/components/presupuesto.tsx": {
+   "paleta": 1
+  },
+  "src/features/soporte-sap/components/sala-chat.tsx": {
+   "paleta": 19
+  },
+  "src/features/soporte-sap/components/salida.tsx": {
+   "paleta": 2
+  },
+  "src/features/soporte-sap/components/soporte-sap.tsx": {
+   "paleta": 8
+  },
+  "src/features/soporte-sap/components/ui.tsx": {
+   "paleta": 32
+  },
+  "src/features/soporte-sap/mesa/components/candidato.tsx": {
+   "paleta": 57
+  },
+  "src/features/soporte-sap/mesa/components/candidatos.tsx": {
+   "paleta": 26
+  },
+  "src/features/soporte-sap/mesa/components/compositor.tsx": {
+   "paleta": 26
+  },
+  "src/features/soporte-sap/mesa/components/kit.tsx": {
+   "paleta": 8
+  },
+  "src/features/soporte-sap/mesa/components/laboratorio.tsx": {
+   "paleta": 34
+  },
+  "src/features/soporte-sap/mesa/components/linea.tsx": {
+   "paleta": 38
+  },
+  "src/features/soporte-sap/mesa/components/mapa-detalle.tsx": {
+   "paleta": 56
+  },
+  "src/features/soporte-sap/mesa/components/mapa-piezas.tsx": {
+   "paleta": 25,
+   "hex": 3
+  },
+  "src/features/soporte-sap/mesa/components/mapa.tsx": {
+   "paleta": 31,
+   "hex": 1
+  },
+  "src/features/soporte-sap/mesa/components/marco.tsx": {
+   "cien-vh": 1,
+   "paleta": 17
+  },
+  "src/features/soporte-sap/mesa/components/mesa.tsx": {
+   "paleta": 43
+  },
+  "src/features/soporte-sap/mesa/components/solucion.tsx": {
+   "paleta": 64
+  },
+  "src/features/soporte-sap/mesa/components/ui.tsx": {
+   "paleta": 69
+  },
+  "src/features/soporte-sap/mesa/components/veredicto.tsx": {
+   "paleta": 9
+  },
+  "src/features/soporte-sap/vitrina/componentes/bento.tsx": {
+   "paleta": 38
+  },
+  "src/features/soporte-sap/vitrina/componentes/deck.tsx": {
+   "paleta": 48
+  },
+  "src/features/soporte-sap/vitrina/componentes/en-vivo.tsx": {
+   "paleta": 13
+  },
+  "src/features/soporte-sap/vitrina/componentes/journey.tsx": {
+   "paleta": 23
+  },
+  "src/features/soporte-sap/vitrina/componentes/manual.tsx": {
+   "paleta": 14
+  },
+  "src/features/soporte-sap/vitrina/componentes/marco.tsx": {
+   "cien-vh": 1,
+   "paleta": 15
+  },
+  "src/features/soporte-sap/vitrina/componentes/niveles.tsx": {
+   "paleta": 13
+  },
+  "src/features/ventas-whatsapp/components/laboratorio-ventas.tsx": {
+   "paleta": 61
+  },
+  "src/features/ventas-whatsapp/components/panel-dueno.tsx": {
+   "input-chico": 1,
+   "paleta": 91
+  },
+  "src/features/ventas-whatsapp/components/plataforma-ventas.tsx": {
+   "paleta": 40
+  },
+  "src/shared/capa/capa-app.tsx": {
+   "hex": 2
+  },
+  "src/shared/capa/modulos/calendario.tsx": {
+   "hex": 1
+  }
+ }
+}

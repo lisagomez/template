@@ -1,0 +1,29 @@
+Turno 1
+Logotipo Turno 25 — tres direcciones
+Marcas originales construidas con el sistema (bloque etiquetado, entrada → salida, cifra en mono). La referencia de Gradio orienta el tono, no la forma.
+1a Bloque el panel con etiqueta, convertido en marca
+25
+Turno 25
+25
+Turno 25
+25
+Turno 25
+25
+25
+25
+64 · 32 · 16 px. Lectura clara hasta favicon; la pestaña negra es el "turno".
+1b Entrada → Salida un proceso que avanza un paso
+Turno 25
+Turno 25
+Turno 25
+La más simple y escalable. Sin número: el nombre carga el "25".
+1c Contador wordmark tipo marcador, sin símbolo aparte
+turno
+25
+turno 25
+turno 25
+25
+25
+25
+El "25" como placa de marcador; el favicon es solo la placa.
+Made with Claude Design

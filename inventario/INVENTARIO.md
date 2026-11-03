@@ -6,18 +6,20 @@
 > Costo y clasificacion (D+I, defensibilidad) no viven aqui: se calculan con
 > `npm run inventario:exporta` y viajan al ERP (spec 014, repo publico).
 
-**75 activos** cubren **310 unidades** del repo.
+**78 activos** cubren **317 unidades** del repo.
 
 | ID | Activo | Clase | Tipo | Estado | Unidades | Ubicacion |
 | --- | --- | --- | --- | --- | ---: | --- |
 | TPL-conocimiento | Conocimiento del grafo: fuente unica de reglas con fuente citada, por dominio y versionada (migrado de Hermes) | CONOCIMIENTO | datos | beta | 1 | `tools/conocimiento` |
 | TPL-doctrina | Doctrina de la fabrica: instrucciones del agente, reglas y memoria de proyecto | CONOCIMIENTO | config_agentica | produccion | 17 | `AGENTS.md` |
 | TPL-especificaciones | Especificaciones y disenos: specs, PRPs, goals, SDD e investigaciones | CONOCIMIENTO | documento | produccion | 78 | `.claude/specs` |
-| TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 5 | `.claude/design-systems` |
+| TPL-design-systems | Design systems de referencia (bento, glass, neobrutalismo...) | DISEÑO | documento | produccion | 6 | `.claude/design-systems` |
 | TPL-analista-producto | Analista de producto: dolores con evidencia citada, verificador, contrato A2A no servido y corridas | FABRICA | software | beta | 2 | `scripts/analista-producto` |
+| TPL-banco-motores | Banco de motores: la idea de Gradio sin Gradio. Una funcion con esquema Zod da su pantalla de bloques y su ruta API; ejecuta con validacion de entrada y salida; generador de datos de peor caso (0.1.0) | FABRICA | software | beta | 1 | `tools/banco-motores` |
 | TPL-clis-impresos | CLIs impresos del manifiesto (externo: lo cataloga su fuente) | FABRICA | software | produccion | 5 | `cli:*` |
 | TPL-ejemplo-herramienta | Andamio de herramienta empaquetable (el ejemplo a copiar) | FABRICA | software | produccion | 1 | `tools/ejemplo-herramienta` |
 | TPL-empaquetador | Empaquetador de herramientas y su contrato | FABRICA | software | produccion | 3 | `scripts/empaqueta-herramienta.mjs` |
+| TPL-feature-banco | Pantalla del banco de motores (/laboratorio-banco) y su API: OCR Tesseract, codigo GS1 y peor caso por los adaptadores del repo; tarjeta de caso compartida por los laboratorios; cerrada fuera del laboratorio | FABRICA | software | beta | 2 | `src/features/banco` |
 | TPL-feature-laboratorio-calendario | Laboratorio de la herramienta de calendario: el paquete contra su simulador de Google (alcances, reservas, actividad, credencial caducada) y su recorrido | FABRICA | software | beta | 2 | `src/features/laboratorio-calendario` |
 | TPL-feature-laboratorio-etiquetas | Laboratorio de la herramienta de etiquetas GS1: casos, estado real, veredictos y referencias visuales; decide que usa /etiquetas | FABRICA | software | beta | 2 | `src/features/laboratorio-etiquetas` |
 | TPL-feature-laboratorio-pymes | Laboratorio de las herramientas pymes: casos, estado real y veredictos | FABRICA | software | beta | 2 | `src/features/laboratorio-pymes` |
@@ -27,9 +29,10 @@
 | TPL-imprenta | Imprenta de CLIs: manifiesto servicio a CLI y su auditoria | FABRICA | software | produccion | 4 | `.claude/imprenta` |
 | TPL-inventario | Inventario de activos: indice, detector, costeo y export al ERP | FABRICA | software | beta | 3 | `inventario` |
 | TPL-manifiesto-gates | Manifiesto de gates: el padron de lo que el gate corre | FABRICA | software | produccion | 7 | `.claude/gates.json` |
+| TPL-marca-turno25 | Marca Turno 25: design system, tokens como fuente unica y su generador (CSS de shadcn y TS de Tailwind), fuentes autoalojadas, bloque etiquetado y capturas medidas | FABRICA | software | beta | 1 | `scripts/marca` |
 | TPL-motor-ia | Motor de IA: routing por nivel, contabilidad de tokens y trayectorias de la app | FABRICA | software | produccion | 4 | `src/lib/ai` |
 | TPL-productos | El concepto de producto, su plantilla y sus manifiestos (productos/), con el gate que los cruza con el indice del portafolio y el inventario (verifica:productos) | FABRICA | software | blueprint | 2 | `productos` |
-| TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 31 | `.claude/skills` |
+| TPL-skills | Catalogo de skills de la fabrica | FABRICA | config_agentica | produccion | 33 | `.claude/skills` |
 | TPL-trayectorias | Trayectorias: trazas de ejecucion, evaluador, informe y propuestas | FABRICA | software | produccion | 4 | `scripts/trayectorias` |
 | TPL-cerebro-personal | Arbrain personal en dos lugares (demostracion en contenedores): Arbrain v0.2.10 de la etiqueta firmada, job que sincroniza solo el cerebro con union por registro y alto ante choque, red privada simulada, puerta de Cloudflare con Access validada sin conexion | INFRA | infraestructura | blueprint | 2 | `infra/cerebro-personal` |
 | TPL-despliegue | Blueprint de despliegue self-hosted (Docker, Caddy, Hetzner, Hermes) | INFRA | infraestructura | produccion | 12 | `docker-compose.yml` |

@@ -4,7 +4,7 @@
   "marca": {
     "nombre": "Laboratorio de la fábrica",
     "asistente": "Brújula",
-    "acento": "#0f766e",
+    "acento": "#F26419",
     "saludo": "Te llevo a lo que necesites de la fábrica: dime qué quieres hacer."
   },
   "funciones": [
@@ -27,6 +27,7 @@
     "laboratorio-calendario",
     "etiquetas",
     "laboratorio-etiquetas",
+    "banco",
     "buzon-cfdi",
     "reel",
     "sgi",

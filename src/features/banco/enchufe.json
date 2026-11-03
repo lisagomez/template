@@ -1,0 +1,26 @@
+{
+  "enchufe": 1,
+  "modulo": "banco",
+  "activo": "TPL-feature-banco",
+  "nombre": "Banco de motores",
+  "pantallas": ["/laboratorio-banco"],
+  "ranuras": ["lienzo", "intencion"],
+  "intenciones": [
+    {
+      "id": "banco.abre",
+      "queHace": "Abrir el banco de motores para probar una función con datos sintéticos.",
+      "ejemplos": [
+        "abre el banco de motores",
+        "quiero probar el OCR con una factura sintética",
+        "interpreta un código GS1 en el banco"
+      ],
+      "efecto": "lee",
+      "irreversible": false,
+      "pantalla": "/laboratorio-banco"
+    }
+  ],
+  "freno": [],
+  "memoria": { "lee": [], "escribe": [] },
+  "sinCapa": "el banco corre sus funciones por su propia ruta API y se vale por sí solo; fuera del laboratorio (sin BANCO_LABORATORIO=1 o en producción) no existe",
+  "sale": []
+}
