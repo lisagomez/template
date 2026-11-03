@@ -75,6 +75,7 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | `prueba:a2a`: `/api/banco` y `/api/banco/[id]` no estaban declaradas en `RUTAS_FUERA_DEL_BRIDGE` | **Resuelto**: declaradas con su nota RF-20; 15 de 15 |
 | El banco no comprobaba de qué máquina venía la petición, y `next dev` escucha en la red aunque no uses `dev:movil` | **Resuelto en lo que se puede desde la app**: 404 si el Host no es local o `x-forwarded-for` no es loopback. Medido con curl: localhost y 127.0.0.1 dan 200; la IP de eth0, 10.255.255.254 y un `X-Forwarded-For` ajeno dan 404, en la API y en la página. Queda dicho lo que no cierra: quien falsea las dos cabeceras a propósito pasa (200); esa barrera es la red |
 | `prueba:tools` en rojo por `tools/agora` (2 de 133): el gasto sembrado tiene fechas fijas de octubre y el «gasto del mes» mira noviembre desde el 1/11 | **Resuelto en rama aparte**: `agora/gasto-del-mes` (280995f), desde `main` y apilada aquí. Ver «Validate» abajo |
+| La siembra de Ágora tiene fechas fijas de octubre: pueden quedar más pruebas que dependan del reloj | **Abierto, decisión del laboratorio**: dos ya dispararon (1/11 y 3/11) y las arreglé una por una. El arreglo de fondo es un reloj fijo en la base de pruebas o una siembra relativa a hoy; los dos cambian Ágora más allá de sus pruebas |
 
 ## Validate
 
@@ -85,7 +86,8 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | 3 | `2b77e81` | El sistema la mató por memoria dentro de `prueba:tools` |
 | 4 | `462d9be` | 29 pasaron y 1 en rojo: `prueba:tools`, por `tools/agora` (2 de 133). Los 6 gates que quedaron sin correr, sueltos: 5 en verde; `prueba:a2a` en rojo por las rutas del banco, ya declaradas |
 | 5 | `112f13b`, con Ágora apilado | **Verde: 36 de 36** activos, 12 inactivos declarados, 2497 pruebas de `tools/` |
-| 6 | la punta, tras cerrar la lista de riesgos y con `npm ci` real | Corre después de este commit: el resultado va en la conversación y en el PR |
+| 6 | `b58f019`, tras `npm ci` real | El sistema la detuvo por memoria dentro de `tools/soporte-sap`. Antes: 29 gates en verde y Ágora 1 de 133 en rojo, una segunda trampa de fechas (abajo), arreglada en `a191ee1` |
+| 7 | la punta, con las dos trampas de Ágora apiladas | Corre después de este commit: el resultado va en la conversación y en el PR |
 
 Las dos pruebas de Ágora que fallan (`sobre el tope: 429…` y `el vigía avisa al 80 %…`) cuentan el gasto del
 periodo abierto. La siembra del laboratorio de Ágora lo registra con fechas fijas de octubre
@@ -97,3 +99,8 @@ fechas relativas a hoy. El laboratorio eligió la primera, en rama aparte: `agor
 cinco días del último publicado) y no toca la siembra. Suite de Ágora 133 de 133; los sabotajes de puerta (PU1–PU5)
 y vigía (V1–V5) siguen cayendo. Esta rama la apila con un merge para que los SHA de arriba sigan existiendo.
 Queda abierto lo que ve quien abre el laboratorio de Ágora en noviembre: el gasto del mes en 0.
+
+La segunda trampa disparó el 2026-11-03 a medianoche de Ciudad de México: el coordinador imputa su gasto «ahora» y
+el trigger toma el tipo de cambio publicado en los cinco días previos; la serie de la siembra termina el 28 de
+octubre, así que costaba `null` MXN. `a191ee1` separa `tipoDeCambioDeHoy` y la usa también ahí: 133 de 133, y los
+sabotajes de coordinador, puerta y vigía siguen cayendo.
