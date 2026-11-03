@@ -37,8 +37,8 @@ OCR dice «no medido» en vez de fingir.
   `TESSERACT_CMD`, `TESSDATA_PREFIX` y `LD_LIBRARY_PATH` (los del motor de OCR; solo se comprueba si están).
 - **Almacenamiento**: ninguno. El adaptador de OCR escribe la imagen en un temporal solo del usuario y lo
   borra siempre.
-- **Salida del perímetro (C4)**: nada sale de la máquina. Medido con Playwright: 38 peticiones en un
-  recorrido completo, todas a `localhost`.
+- **Salida del perímetro (C4)**: nada sale de la máquina. Medido con Playwright: entre 37 y 38
+  peticiones por recorrido completo (varía entre corridas), todas a `localhost`.
 
 ## Cómo se abre
 

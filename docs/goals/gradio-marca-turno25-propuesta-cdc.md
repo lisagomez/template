@@ -41,7 +41,7 @@
   - redesplegar cualquier superficie;
   - elegir logo.
 - **Salida del perímetro (C4)**: ninguna. Fuentes autoalojadas, sin CDN y sin analítica. El banco corre los
-  motores en local; medido con Playwright: 37 peticiones en un recorrido completo, todas a `localhost`.
+  motores en local; medido con Playwright: entre 37 y 38 peticiones por recorrido completo, todas a `localhost`.
 - **Gate aplicado** (las casillas vacías son del laboratorio):
   - [x] diff completo en la rama (`git diff main...turno25/marca-banco`)
   - [x] `npm run regresion` (capa A) en verde, con los 30 skills

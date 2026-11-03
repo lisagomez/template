@@ -25,7 +25,7 @@ Propuesta de CDC sin firmar: `docs/goals/gradio-marca-turno25-propuesta-cdc.md`.
 |---|---|---|
 | Colores literales en `src/` (regla del revisor) | 4368 en 236 archivos | 4276 en 230 archivos |
 | Naranja por pantalla (8 capturas, claro y oscuro) | 0,03 a 0,68 % | 0,79 a 1,73 % (todas bajo 10 %) |
-| Peticiones fuera de `localhost` | 0 | 0 (también en el recorrido del banco: 37 de 37 locales) |
+| Peticiones fuera de `localhost` | 0 | 0 (también en el recorrido del banco: 37 o 38 por corrida, todas locales) |
 | Errores de consola en las superficies capturadas | 0 | 0 (hubo 6 en el banco; arreglados, ver abajo) |
 | Contexto por sesión | 11 308 de 12 000 | 11 477 de 12 000 |
 | Título del login en oscuro | invisible (texto claro sobre `bg-white`) | legible (tokens) |
