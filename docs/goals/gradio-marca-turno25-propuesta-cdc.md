@@ -45,7 +45,7 @@
 - **Gate aplicado** (las casillas vacías son del laboratorio):
   - [x] diff completo en la rama (`git diff main...turno25/marca-banco`)
   - [x] `npm run regresion` (capa A) en verde, con los 30 skills
-  - [x] `npm run validate` completo en verde tras el commit, en worktree con `npm ci` real
+  - [ ] `npm run validate` completo en verde tras el commit, en worktree con `npm ci` real (rojo por `tools/agora`, ajeno a la rama: ver el reporte)
   - [ ] `npm run regresion -- --trampa` (capa B, en sesión fría)
   - [ ] lectura de los doce `SKILL.md` vendorizados por el laboratorio
   - [ ] firma
@@ -62,5 +62,5 @@
 | **Qué entra** | JSON validado por Zod; imágenes en data URL con MIME en lista cerrada (PNG, JPEG, WebP) y tope de 4 MB; cuerpo con tope de 8 MB |
 | **Qué ejecuta** | Tesseract por `motorPorProceso` (temporal solo del usuario, borrado siempre; errores sin stdout), el parser GS1 (TS puro) y el generador de peor caso. Ningún comando lo elige quien llama |
 | **Qué devuelve** | Solo la salida que cumple su esquema; un error del motor, recortado a su primera línea |
-| **Riesgos que quedan** | Cancelar deja de esperar, pero el proceso de Tesseract sigue hasta su tope de 120 s. Sin límite de peticiones por minuto (aceptable en local; no lo sería expuesto) |
+| **Riesgos que quedan** | Cancelar deja de esperar, pero el proceso de Tesseract sigue hasta su tope de 120 s. Sin límite de peticiones por minuto (aceptable en local; no lo sería expuesto). No comprueba el Host como la Puerta de Ágora: con `npm run dev:movil` (escucha en 0.0.0.0) llega cualquiera de la red local |
 | **Lo que haría falta para exponerlo** | Auth de la app, límite de peticiones, revisión C3 completa y C4: por eso está cerrado |

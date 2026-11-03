@@ -72,3 +72,22 @@ patrones son juicio, por eso el skill se carga y el gate solo cubre lo mecánico
 | `public/banco/ejemplos/factura-sintetica.png` no es reproducible byte a byte | Declarado `fuera` en el registro de generados, con su motivo |
 | `audita:secretos` tomó las sha256 de los `ORIGEN.md` (64 hex sueltos) por tokens estilo HCLOUD | **Resuelto**: escritas como `sha256:<hex>`, el ancla pública que el auditor reconoce; commit local enmendado antes de empujar nada |
 | `verifica:inventario`: `.claude/design-systems/turno-25` tenía dos dueños (`TPL-design-systems` y `TPL-marca-turno25`) | **Resuelto**: el design system sigue en su activo; `TPL-marca-turno25` cubre el generador y lo generado |
+| `prueba:a2a`: `/api/banco` y `/api/banco/[id]` no estaban declaradas en `RUTAS_FUERA_DEL_BRIDGE` | **Resuelto**: declaradas con su nota RF-20; 15 de 15 |
+| El banco no comprueba el Host (la Puerta de Ágora sí): con `dev:movil` lo alcanza la red local | **Abierto**, dicho en la nota C3 y junto a la ruta. Añadir el chequeo es poco código; no lo hice sin que lo pidas |
+| `prueba:tools` en rojo por `tools/agora` (2 de 133): el gasto sembrado tiene fechas fijas de octubre y el «gasto del mes» mira noviembre desde el 1/11 | **Abierto y ajeno a la rama**: falla igual en `main` (2181fcc). Ver «Validate» abajo |
+
+## Validate
+
+| Corrida | Commit | Resultado |
+|---|---|---|
+| 1 | antes de enmendar | Rojo en `audita:secretos` (sha256 sin prefijo). Resuelto |
+| 2 | `2b77e81` | Rojo en `verifica:inventario` (design system con dos dueños). Resuelto |
+| 3 | `2b77e81` | El sistema la mató por memoria dentro de `prueba:tools` |
+| 4 | `462d9be` | 29 pasaron y 1 en rojo: `prueba:tools`, por `tools/agora` (2 de 133). Los 6 gates que quedaron sin correr, sueltos: 5 en verde; `prueba:a2a` en rojo por las rutas del banco, ya declaradas |
+
+Las dos pruebas de Ágora que fallan (`sobre el tope: 429…` y `el vigía avisa al 80 %…`) cuentan el gasto del
+periodo abierto. La siembra del laboratorio de Ágora lo registra con fechas fijas de octubre
+(`HOY_DEL_PROTOTIPO = '2026-10-26'`), así que desde el 2026-11-01 el gasto del mes de Medios Norte es 0 y ningún
+tope de gasto dispara. En `main` (2181fcc) fallan las mismas dos. Arreglarlo toca Ágora, un producto firmado, y
+cabe hacerlo de dos formas: que esas pruebas siembren su propio gasto en el periodo abierto o que la siembra use
+fechas relativas a hoy. Esa elección es del laboratorio.
