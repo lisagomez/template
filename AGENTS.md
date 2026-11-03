@@ -178,7 +178,7 @@ Usuario dice algo
 
 ---
 
-## Skills: 28 Herramientas Especializadas
+## Skills: 30 Herramientas Especializadas
 
 Viven en `.claude/skills/<nombre>/SKILL.md`. Su `description` ya entra en contexto en cada
 sesion (el arnes la carga sola), asi que la tabla que antes vivia aqui pagaba dos veces lo

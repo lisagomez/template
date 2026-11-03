@@ -23,6 +23,7 @@ design-systems/
 | [Neobrutalism](./neobrutalism/) | Bordes duros, sombras sólidas, colores vibrantes | ✅ Completo |
 | [Bento Grid](./bento-grid/) | Layout modular estilo Apple/bento box | ✅ Completo |
 | [Gradient Mesh](./gradient-mesh/) | Fondos fluidos estilo Stripe/Linear/Vercel | ✅ Completo |
+| [Turno 25](./turno-25/) | La marca de la casa: tokens como fuente única (generados a shadcn y Tailwind), bloque etiquetado, voz y revisores en `validate` | ✅ Completo, medido |
 
 ## Cómo Usar
 

@@ -1,0 +1,56 @@
+[
+  {
+    "ruta": "/laboratorio-etiquetas",
+    "tema": "claro",
+    "estado": 200,
+    "naranja": 0.0068349609375,
+    "externas": [],
+    "errores": [],
+    "archivo": "laboratorio-etiquetas-claro.png"
+  },
+  {
+    "ruta": "/laboratorio-etiquetas",
+    "tema": "oscuro",
+    "estado": 200,
+    "naranja": 0.0057431640625,
+    "externas": [],
+    "errores": [],
+    "archivo": "laboratorio-etiquetas-oscuro.png"
+  },
+  {
+    "ruta": "/laboratorio-pymes",
+    "tema": "claro",
+    "estado": 200,
+    "naranja": 0.006548828125,
+    "externas": [],
+    "errores": [],
+    "archivo": "laboratorio-pymes-claro.png"
+  },
+  {
+    "ruta": "/laboratorio-pymes",
+    "tema": "oscuro",
+    "estado": 200,
+    "naranja": 0.0053662109375,
+    "externas": [],
+    "errores": [],
+    "archivo": "laboratorio-pymes-oscuro.png"
+  },
+  {
+    "ruta": "/login",
+    "tema": "claro",
+    "estado": 200,
+    "naranja": 0.0005478515625,
+    "externas": [],
+    "errores": [],
+    "archivo": "login-claro.png"
+  },
+  {
+    "ruta": "/login",
+    "tema": "oscuro",
+    "estado": 200,
+    "naranja": 0.0002646484375,
+    "externas": [],
+    "errores": [],
+    "archivo": "login-oscuro.png"
+  }
+]

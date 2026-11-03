@@ -111,6 +111,28 @@
       "_nota": "ALTA del 2026-09-30. El skill `readme` se firmó el 2026-09-29 (PR #181) sin su gate: el contrato product first dependía de que alguien corriera el auditor. Fuera de `predeploy` a propósito: un README no cambia lo que se despliega. Las carpetas de producto sin README se listan como pendientes y NO ponen el gate en rojo; lo rojo es un README no conforme o sin clasificar."
     },
     {
+      "nombre": "revisa:interfaz",
+      "runner": "comando",
+      "comando": "npm run revisa:interfaz",
+      "guarda": "la parte comprobable de los skills de Emil Kowalski (emilkowalski/skills f1090bec: review-animations, animation-performance, mobile-native) y del color de la marca Turno 25 en src/: sin transition-all, sin ease-in, sin scale(0), sin animar el layout, curvas y duraciones solo de los tokens, 100dvh en vez de 100vh, inputs de 16 px o más, hover solo con puntero, sin destello al tocar, viewport-fit y movimiento reducido; y un trinquete de color literal: lo heredado vive en .claude/design-systems/turno-25/inventario-interfaz.json con su motivo y no puede subir",
+      "evidencia": "cada hallazgo con su familia, archivo, cuenta contra su tope y su regla de origen; el total heredado por familia; exit 1 si algo sube o un archivo nuevo no cumple",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 120,
+      "_nota": "ALTA del 2026-11-02 (goal gradio-marca-turno25), pendiente del CDC del padron. `--prueba` siembra una falla por familia y exige que caiga. Fuera de predeploy: no cambia lo que se despliega."
+    },
+    {
+      "nombre": "revisa:voz",
+      "runner": "comando",
+      "comando": "npm run revisa:voz",
+      "guarda": "la parte comprobable del humanizer (blader/humanizer 225a6f39) y de la voz de Turno 25 en las superficies de la marca: sin «no es X, es Y», sin palabras de catalogo, sin restos de chat, sin emoji, de tu (sin usted), sin exclamacion doble, sin errores crudos y sin guiones en cadena",
+      "evidencia": "cada hallazgo con su cita y su regla de origen; exit 1 si hay alguno o si una superficie del alcance no existe",
+      "perfiles": ["validate"],
+      "activo": true,
+      "timeout_s": 60,
+      "_nota": "ALTA del 2026-11-02 (goal gradio-marca-turno25), pendiente del CDC del padron. Reescribir con la voz es juicio y se queda en el skill humanizer; el alcance crece cuando un archivo se pasa por el."
+    },
+    {
       "nombre": "regresion",
       "runner": "comando",
       "comando": "npm run regresion",
@@ -678,6 +700,15 @@
         "genera": "node scripts/capa/registra-enchufes.mjs",
         "comprueba": { "gate": "verifica:enchufes" },
         "_nota": "ALTA del 2026-10-25 (goal capa-arbrain), en el CDC de la capa. Lo compara verifica:enchufes (la comprobacion «la app registra todos los enchufes» y su siembra); el generador tiene ademas su --comprueba."
+      },
+      {
+        "nombre": "marca-turno25",
+        "rutas": ["src/app/marca.generada.css", "src/shared/marca/tokens.generado.ts"],
+        "fuentes": [".claude/design-systems/turno-25/tokens.json", "scripts/marca/genera.mjs"],
+        "genera": "npm run marca:genera",
+        "comprueba": { "comando": "node scripts/marca/genera.mjs --comprueba" },
+        "banner": "ALTO: ARTEFACTO AUTOGENERADO",
+        "_nota": "ALTA del 2026-11-02 (goal gradio-marca-turno25), pendiente del CDC del padron. La marca Turno 25: una fuente de tokens y sus proyecciones a CSS (shadcn + marca, claro y .dark) y a TS (Tailwind). El banner va explicito porque el CSS lo lleva en un comentario /* */, que el patron por defecto no reconoce."
       }
     ],
     "fuera": [
@@ -701,7 +732,7 @@
           "public/laboratorio-pymes/video/**",
           "public/laboratorio-sgi/*.json",
           "public/vitrina/soporte-sap/momentos/**",
-          "public/vitrina/soporte-sap/soporte-sap-deck.pdf"
+          "public/vitrina/soporte-sap/soporte-sap-deck.pdf", "public/banco/ejemplos/**"
         ],
         "motivo": "Evidencia fechada de una corrida (audio, modelos, LLM, Docker, la app viva o la base de produccion): no se regenera, se vuelve a medir, y medir otra vez da otro numero.",
         "falta": "Nada: una medicion no se compara con su fuente. Lo que se deriva de ella sin azar entra como artefacto (asi entro detector.md)."

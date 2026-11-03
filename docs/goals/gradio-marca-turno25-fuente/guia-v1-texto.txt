@@ -1,0 +1,58 @@
+Turno 25
+Esencia
+Color
+Tipografía
+Bloques
+Voz
+Sistema
+v1.0 · 2026
+Guía de marca y design system · Brand guide
+Procesos que trabajan solos.
+Turno 25 transforma y optimiza los procesos de pymes e industria pequeña y mediana. Esta guía define cómo se ve, cómo suena y con qué piezas se construye.
+Horas recuperadas · ejemplo
+3,740
+01
+Esencia
+Essence
+Medible Todo empieza y termina en una cifra: horas, errores, retorno. Si no se mide, no se promete.
+Práctico Soluciones que se configuran en la operación real del cliente, no demos ni proyectos eternos.
+Técnico y claro Precisión de ingeniería contada en palabras de negocio. Entrada, salida, resultado.
+02
+Nombre
+Aún no hay logo. Mientras tanto el nombre se escribe en Source Sans 3 Bold, tracking −0.03em, siempre "Turno 25" con espacio.
+Turno 25
+Turno 25
+03 Color
+Naranja Turno #F26419 · --orange-500
+Acción, resultado, estado activo
+Tinta #141312 · --gray-950
+Papel #F7F7F5 · --gray-50
+Regla: el naranja ocupa menos del 10% de una pantalla. Texto sobre naranja siempre en tinta oscura, nunca blanco. Los neutros son cálidos — evita grises azulados.
+04 Tipografía
+Source Sans 3 · UI y textos
+Aa Bb 25
+Títulos Bold con tracking negativo; cuerpo Regular 16/1.5; etiquetas Semibold 12 en mayúsculas.
+IBM Plex Mono · cifras y código
+0123 4.2×
+Métricas, IDs de proceso, tiempos y código. Siempre tabular; la cifra es el héroe.
+05
+Bloque etiquetado
+El motivo de la marca. Paneles con una etiqueta en la esquina que muestran entrada → salida, antes → después. La variante naranja es solo para el resultado.
+Antes · Before
+Captura manual de 140 facturas al mes
+38 h/mes
+Después · After
+Extractor documental + revisión de excepciones
+2 h/mes
+06
+Voz
+Cercana, concreta, en tú. Español por defecto, inglés como traducción completa. Sin emoji.
+Sí {{ v.yes }}
+No {{ v.no }}
+07 Design system
+{{ k.path }}
+{{ k.name }}
+{{ k.desc }}
+Componentes: Button, IconButton, Input, Textarea, Select, Checkbox, Radio, Switch, Slider, Block, Card, Badge, Tag, Metric, Tabs, Dialog, Toast, Tooltip, Progress, Icon (Lucide).
+Turno 25 · Guía de marca © 2026
+Made with Claude Design
