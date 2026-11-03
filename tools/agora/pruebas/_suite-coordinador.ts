@@ -3,7 +3,7 @@
  * falsificado se rechaza; sin presupuesto no se llama al modelo; cada llamada se imputa al agente que la originó y al
  * centro de costo de la tarea; un espejo no crea tareas y el texto ajeno es dato.
  */
-import { assert, cuenta, agente, persona, nodo, item, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
+import { assert, cuenta, agente, persona, nodo, item, tipoDeCambioDeHoy, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
 import { atiende, reanuda, decide, modeloDeterminista, type Modelo } from '../dist/index.js'
 
 /** El modelo determinista, contado: así se prueba que sin cupo NO se llamó. */
@@ -23,6 +23,7 @@ export const COORDINADOR: Comprobacion[] = [
   {
     fase: 'coordinador', nombre: 'el coordinador contesta en el hilo con una propuesta A1, se detiene (interrupt) e imputa su gasto', tipo: 'conducta',
     async corre(c) {
+      await tipoDeCambioDeHoy(c.base) // el coordinador cobra «ahora»: sin el de hoy, su gasto costaría null MXN
       const m = contado()
       const msg = await escribe(c, 'daniel', 'pipeline', 'Coordinador, mueve las visitas a 12 cadenas 5 días: el mapeo va lento.')
       const r = await atiende(opciones(c, m), msg)
