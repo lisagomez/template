@@ -5951,3 +5951,58 @@ cambia entre periodos; la trayectoria lleva errores por herramienta; y **dos apr
     sujeto.
   - Resultado: capa A 172/172 (`validate` de `0b83fc6`); la capa B la anota el laboratorio en la firma.
 - **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-11-03
+
+### 2026-11-03 — el cierre de `regresion -- --trampa` deja de decir «promovible», la guarda de `regresion:trampa` dice lo que hace y la 6b lee «Gate aplicado» con paréntesis — radio: padrón de gates (la guarda y la evidencia de un gate, sin tocar su comando ni sus perfiles), dos verificadores (`verify:gobernanza` suma una comprobación; la 6b cambia lo que mide) y una regla de contexto (`aprendizajes-gobernanza.md`)
+
+- **Cambio** (rama `gobernanza/hallazgos-firma-trampa`, punta `015ff05`, con `main` en `741abd9`, tras el #294):
+  1. **El cierre de `npm run regresion`** pasa a `scripts/lib/veredicto-regresion.mjs`:
+     - la capa A dice lo mismo que antes;
+     - la capa B (`--trampa`) con el corpus completo sale en amarillo, con el mismo código (0): «corpus completo, N/N
+       comprobaciones de forma en verde. Ningún caso se ejecutó: esto NO es la capa B corrida ni hace promovible el
+       cambio»; con el corpus incompleto sale con 1;
+     - 5 siembras (`SIEMBRAS_VEREDICTO`) que corre `verify:gobernanza` en una comprobación nueva; con el cierre viejo
+       caen 2.
+  2. **`regresion:trampa` en el padrón** (`.claude/gates.json`): cambian `guarda`, `evidencia` y `_nota`; no cambian el
+     comando, el perfil `cdc`, `activo` ni `timeout_s`. La guarda decía medir la conducta «caso por caso con su
+     veredicto», y el comando no ejecuta ninguno.
+     - `.github/workflows/gates.yml` no cambia: la proyección del CI no incluye el perfil `cdc`.
+     - El `software.toml` de `hermes-os-a2a` sí lleva la guarda; se regenera allá con `npm run proyecta:gates`.
+  3. **La 6b** (`scripts/lib/firmas.mjs`): `LINEA_GATE` admite un paréntesis antes de los dos puntos, como
+     `LINEA_FIRMA`. Dos siembras nuevas (19 en total): la que lo caza y su control. Con la regex vieja, la nueva cae.
+     - Afecta a 3 entradas de la bitácora, todas desde el 2026-10-06. Ninguna firmada tiene la casilla de aprobación
+       vacía: el arreglo no pone nada en rojo.
+  4. **Auto-blindaje**: dos entradas en `.claude/rules/aprendizajes-gobernanza.md` (2455 de 4000 tokens). `README.md` y
+     `.claude/README.md` declaran 172 comprobaciones.
+- **Motivo**: dos hallazgos del 2026-11-03, al firmar el CDC de la marca Turno 25. El verde de `--trampa`, que solo
+  comprobó el corpus, se leyó como la capa B corrida; la frase ya había engañado el 2026-08-31 (`scripts/lib/corpus.mjs`).
+  Y el simulacro de esa firma mostró que una entrada con `**Gate aplicado** (…):` se podía firmar con la casilla de
+  aprobación vacía.
+- **Lo que decide el laboratorio al firmar**:
+  1. el texto del cierre de la capa B, y que siga saliendo con 0 cuando el corpus está completo (salir con un código
+     propio cambiaría lo que el perfil `cdc` cuenta como pasado);
+  2. la guarda nueva de `regresion:trampa`;
+  3. que la 6b lea también el formato con paréntesis.
+- **Lo que esta entrada NO aprueba**: cambiar el comando o los perfiles de `regresion:trampa`, automatizar la ejecución de
+  los casos en sesiones frías, ni editar las tres entradas viejas con paréntesis (no hace falta: están marcadas).
+- **Salida del perímetro (C4)**: ninguna.
+- **Gate aplicado**: las casillas vacías son del laboratorio.
+  - diff revisado ☑ — `git diff origin/main...gobernanza/hallazgos-firma-trampa` (8 archivos, 112 líneas más y 17
+    menos), enseñado completo en el chat antes de pedir la firma;
+  - regresión capa A ☑ — `C2 capa A (contratos): 172/172 en verde`, con los 30 skills;
+  - `npm run validate` ☑ — sobre `015ff05` (árbol `f981f4697a41`), con `main` dentro y en worktree con `npm ci` real:
+    **36/36 gates activos, 12 inactivos declarados, 0 rojos** (antes de traer `main`, 34/34 sobre `6416386`). Se
+    repite tras el commit de la firma;
+  - `verify:gobernanza` ☑ — 172/172, con la 6b cazando sus 19 siembras y el cierre de la regresión sus 5;
+  - `verifica:gates` ☑ — 12 comprobaciones en verde, con 39 activos y 12 inactivos declarados;
+  - el cierre nuevo, en vivo ☑ — `npm run regresion -- --trampa`, leyendo solo sus tres últimas líneas (las
+    expectativas no llegaron al agente): «corpus completo, 23/23 comprobaciones de forma en verde. Ningún caso se
+    ejecutó…», exit 0;
+  - capa B: no la corre el agente. Cambian una regla de contexto y lo que dice un gate, no un skill ni un prompt de
+    producto. Decide el laboratorio: «capa A basta» o corrida en sesión limpia ☑;
+  - aprobación humana ☑;
+  - pineo ☑ — sin modelo ni dependencias nuevas.
+- **Regresión** (cómo se corre):
+  - `npm run verify:gobernanza`: la 6b y el cierre, con sus siembras;
+  - `npm run regresion`; y `npm run regresion -- --trampa`, que solo comprueba y lista (no lo corre el agente);
+  - `npm run validate`, después del commit y en worktree con `npm ci` real.
+- **Aprobado por**: **lisagomez** (el laboratorio), capa A basta, 2026-11-03

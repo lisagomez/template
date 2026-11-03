@@ -116,3 +116,17 @@ opencode cargan siempre (`opencode.json`).
   nunca); una `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` real pasaba en verde.
 - **Fix**: falla toda `NEXT_PUBLIC_*` secreta por nombre o por valor (JWT `service_role`, `sb_secret_`).
 - **Aplicar en**: todo chequeo de secretos: se prueba con el caso malo antes de darlo por bueno.
+
+### 2026-11-03: un verde que no corrió nada se leyó como la capa B corrida
+- **Error**: `regresion -- --trampa` solo comprueba que el corpus esté completo, pero cerraba con el mismo
+  «N/N en verde — promovible» que la capa A, y su guarda en el padrón decía medir la conducta «caso por
+  caso». Al firmar un CDC se leyó como la capa B corrida. La frase ya había engañado el 2026-08-31.
+- **Fix**: el cierre vive en `scripts/lib/veredicto-regresion.mjs`, con siembras que corre `verify:gobernanza`:
+  la capa B dice «corpus completo, ningún caso ejecutado» y nunca «promovible». La guarda dice lo que hace.
+- **Aplicar en**: todo gate que prepara una medición en vez de hacerla: su verde dice qué comprobó.
+
+### 2026-11-03: la 6b no leía «Gate aplicado» con paréntesis
+- **Error**: `LINEA_GATE` exigía `**Gate aplicado**:`. Con `**Gate aplicado** (…):`, el formato de tres entradas
+  desde el 06/10, no veía «aprobación humana ☐»: una firma con la casilla vacía pasaba. Ninguna lo aprovechó.
+- **Fix**: el paréntesis es opcional, como en `LINEA_FIRMA`, con una siembra que lo caza y su control.
+- **Aplicar en**: todo patrón sobre texto que escribe una persona: siembra también el formato vecino.
