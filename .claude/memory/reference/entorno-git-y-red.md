@@ -94,3 +94,11 @@ aplicada**.
 Playwright **no está instalado en el árbol** (solo `@playwright/mcp` como servidor en
 `.mcp.json`), así que no se comprobó si Chromium arranca ni la receta de capturas por
 contenedor que describía la nota anterior. Se mide el día que haga falta, no antes.
+
+## Memoria y validate (medido el 2026-11-03)
+
+- 16 núcleos y unos 15 GB: con todos los núcleos, `tools/soporte-sap` lanza 15 procesos de `node --test` de ~1,3 GB, y
+  Claude Code mató dos veces el `validate` en segundo plano por falta de memoria. **`taskset -c 0-5 npm run validate`**
+  lo deja en 6 procesos sin tocar el padrón (Node toma la concurrencia de la afinidad de CPU; `--test-concurrency` no se
+  admite en `NODE_OPTIONS`) y terminó en verde cuatro veces seguidas.
+- Node y npm vienen de `~/.hermes/node` (v22.23.0), no de nvm: lo de arriba sobre Node 20 ya no describe esta máquina.
