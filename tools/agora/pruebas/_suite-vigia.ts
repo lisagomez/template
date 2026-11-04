@@ -3,7 +3,7 @@
  * calendario); los recordatorios se programan una vez por versión de la fecha y se cancelan al cerrar; el vigía
  * propone reprogramar lo atrasado, avisa al 80 % del gasto (también a Finanzas) y SUSPENDE por deriva de tarjeta.
  */
-import { assert, cuenta, rechaza, agente, item, gastaHoy, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
+import { assert, cuenta, rechaza, agente, item, GOLFO, SECRETO, type Comprobacion, type Ctx, type Sabotaje } from './_marco.ts'
 import { correVigia, huellaDeTarjeta, firmaTarjeta } from '../dist/index.js'
 import { calendarioDeLaboratorio, descargaDeLaboratorio, socio, tarjetaDe } from '../dist/laboratorio/index.js'
 
@@ -66,7 +66,6 @@ export const VIGIA: Comprobacion[] = [
   {
     fase: 'vigia', nombre: 'el vigía avisa al 80 % del gasto de un agente, también a Finanzas', tipo: 'conducta',
     async corre(c) {
-      await gastaHoy(c.base, 'medios-norte', 'campanas', 10.80) // lo de octubre en la siembra: 204,80 MXN, el 82 % de 250
       await c.comoPersona('paula', (s) => s.consulta(`select agora.baja_tope($1, 'gasto', 250)`, [agente('medios-norte')]))
       await vigia(c).corre()
       assert.equal(await cuenta(c.base, `select 1 from agora.aviso where agente_id = $1 and tipo in ('tope_80', 'tope_100') and para_rol = 'finanzas'`, [agente('medios-norte')]), 1)
