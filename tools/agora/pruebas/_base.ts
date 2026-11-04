@@ -5,6 +5,9 @@
  * siembra cada vez. La plantilla lleva en el nombre la huella de las migraciones y del código que siembra: si
  * cambian, es otra.
  */
+// El reloj va PRIMERO: lo que se importe después ya lee la hora de las pruebas (ver _reloj.ts). Se reexporta para
+// que `reloj.ts` lo tome por aquí, como las demás suites: si esta línea falta, esa prueba no carga.
+export { AHORA_DE_PRUEBAS, relojDeLaCorrida } from './_reloj.ts'
 import { createHash, randomBytes } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'

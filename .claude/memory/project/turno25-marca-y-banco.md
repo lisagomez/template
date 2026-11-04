@@ -18,10 +18,10 @@ bitácora; aquí vive lo que el código no dice.
 
 - **La v1.1 de la marca:** subir `fg-3` (4,04:1 en claro; hoy la regla `sutil-chico` lo limita a texto grande),
   adoptar los estados oscuros derivados (pasan AA, de 6,80:1 a 8,33:1) y las curvas de Emil. El logo, sin elegir.
-- **Las fechas de Ágora:** la siembra de su laboratorio tiene el gasto fijo en octubre (`HOY_DEL_PROTOTIPO`) y los
-  tipos de cambio acaban el 2026-10-28. Por eso tres pruebas cayeron el 1/11 y el 3/11, y `main` estuvo en rojo hasta
-  el #293, que lo arregló solo en las pruebas. **Pueden quedar más.** El arreglo de fondo es un reloj fijo en la base de
-  pruebas o una siembra relativa a hoy, y los dos cambian Ágora más allá de sus pruebas. Su laboratorio muestra el
-  gasto del mes en 0 desde noviembre.
+- **Las fechas de Ágora:** la siembra de su laboratorio vive en octubre de 2026, y con el reloj real tres pruebas se
+  cayeron solas (1/11 y 3/11; parche en #293). **Arreglo de fondo, 2026-11-04:** las pruebas corren con un reloj fijo
+  (`tools/agora/pruebas/_reloj.ts`, desde el 2026-10-29) que mueve juntos PGlite y el código; los parches se quitaron.
+  Sigue abierto: contra PostgreSQL real (`agora:pg`) el reloj es el del servidor, y el laboratorio de la app, también
+  sobre PostgreSQL real, muestra en 0 el gasto del mes desde noviembre.
 - **El banco:** llevar la señal de cancelar al propio extractor (hoy el banco la inyecta por `ejecuta`). Y no cierra a
   quien falsea Host y `x-forwarded-for` desde la red: esa barrera es la red (nota C3, en la entrada de la bitácora).

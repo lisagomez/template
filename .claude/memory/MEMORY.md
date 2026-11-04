@@ -19,7 +19,7 @@
 - [Protocolo de specs (SDD)](project/protocolo-de-specs.md) — `/spec-generator` + `.claude/specs/NNN/{spec,plan,tareas}` + gate `verifica:specs`; C4 en la spec, C3 en el plan; spec o PRP segun se sepa el QUE.
 - [Soporte SAP y el concepto «producto»](project/soporte-sap-y-concepto-producto.md) — en main; CDC A y B firmados; B-3 abierta.
 - [Analista de producto](project/analista-de-producto.md) — en main (#214); PRP-009 (era 008).
-- [Turno 25 y el banco de motores](project/turno25-marca-y-banco.md) — en main (#293-#295); abierto: marca v1.1, fechas de Ágora.
+- [Turno 25 y el banco de motores](project/turno25-marca-y-banco.md) — en main (#293-#295); abierto: marca v1.1; Ágora con reloj fijo.
 
 ## feedback/ — Correcciones y preferencias
 - [Firmar un CDC](feedback/firmar-un-cdc.md) — el agente no corre la capa B; simular la firma antes de pedirla.

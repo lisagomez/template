@@ -33,7 +33,7 @@ El núcleo de Ágora: el espacio de trabajo donde el equipo, sus agentes interno
 
 - **Runtime**: Node `>=22.18` (corre los `.ts` de las pruebas sin transpilar).
 - **Dependencias del sistema**: PostgreSQL con `pgcrypto`, probado en **PostgreSQL 17.11** (Docker, `npm run agora:laboratorio`) y en **PGlite 0.5.8** (las pruebas de `validate`, sin Docker). Paquetes: `pg` 8.16.3 y `zod` 4.6.1, con versión exacta; PGlite es peer opcional (solo pruebas).
-- **CPU, GPU y memoria**: no medido. Las 133 pruebas de las fases 1 a 7 corren en minutos en una laptop (PGlite, una base nueva por comprobación).
+- **CPU, GPU y memoria**: no medido. Las 135 pruebas (133 de las fases 1 a 7 y 2 del reloj) corren en minutos en una laptop (PGlite, una base nueva por comprobación).
 - **Servicios externos**: ninguno. El calendario del laboratorio es el simulador de `tools/calendario`; el modelo es determinista.
 - **Variables de entorno** (solo el laboratorio de la app): `AGORA_LABORATORIO` (encendido o apagado; sin él, la siembra ficticia tampoco corre), `AGORA_PG_URL` (la base del laboratorio) y `AGORA_SECRETO` (firma los tokens de tarea; ≥ 32 caracteres). `npm run agora:laboratorio` las escribe en `tools/agora/.laboratorio/entorno` (ignorado por git) y solo dice si están presentes.
 - **Almacenamiento**: dos esquemas, `agora` (datos, RLS forzada) y `agora_priv` (funciones). La bitácora es encadenada y solo crece. El testigo del freno guarda huellas, no texto, y se poda a las 24 h.
@@ -48,6 +48,8 @@ npm run agora:pg                          # lo mismo contra PostgreSQL real (Doc
 ```
 
 Cada fase tiene su suite (`pruebas/_suite-*.ts`) y sus **sabotajes**: un defecto en SQL sembrado sobre una base nueva, que debe tumbar la comprobación que apunta. Una suite que no se pone roja cuando debe no cuenta.
+
+**Las pruebas corren con un reloj fijo** (`pruebas/_reloj.ts`): en PGlite empiezan el 2026-10-29 a mediodía de Ciudad de México y avanzan desde ahí, porque la siembra vive en octubre. Sin él, se caían solas al cambiar de mes (2026-11-01) y al quedarse sin tipo de cambio reciente (2026-11-03). Contra PostgreSQL real (`agora:pg`) el reloj es el del servidor y esas corridas siguen atadas a la fecha. El laboratorio de la app también usa PostgreSQL real: desde noviembre muestra en 0 el gasto del mes.
 
 ## Lo que la base nos enseñó
 
